@@ -1,12 +1,13 @@
 # 
 # Translators:
+# SkyHiRider <marek.andreansky@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-07 08:30+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
+"PO-Revision-Date: 2014-02-13 16:21+0000\n"
+"Last-Translator: SkyHiRider <marek.andreansky@gmail.com>\n"
 "Language-Team: Slovak (Slovakia) (http://www.transifex.com/projects/p/woocommerce-core/language/sk_SK/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -54,7 +55,7 @@ msgstr "Správy obchodu"
 msgid "Order tracking"
 msgstr "Sledovanie objednávky"
 
-#: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:230
+#: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
 #: includes/shortcodes/class-wc-shortcode-view-order.php:49
@@ -3045,15 +3046,15 @@ msgstr "Ste si istý, že chcete vymazať tento súbor zo šablóny?"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:207
 msgid "Card Number"
-msgstr ""
+msgstr "Číslo Karty"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:211
 msgid "Expiry (MM/YY)"
-msgstr ""
+msgstr "Expirácia (MM/RR)"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
-msgstr ""
+msgstr "CV2 / CVV2"
 
 #: includes/abstracts/abstract-wc-product.php:456
 #: includes/class-wc-product-simple.php:48
@@ -3063,7 +3064,7 @@ msgstr "Kúpiť"
 
 #: includes/abstracts/abstract-wc-product.php:466
 msgid "Read more"
-msgstr ""
+msgstr "Prečítať viac"
 
 #: includes/abstracts/abstract-wc-product.php:574
 #: includes/abstracts/abstract-wc-product.php:579
@@ -3096,7 +3097,7 @@ msgstr "Nie je na sklade"
 
 #: includes/abstracts/abstract-wc-product.php:909
 #: includes/abstracts/abstract-wc-product.php:915
-#: includes/class-wc-cart.php:1403 includes/class-wc-order.php:839
+#: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Zadarmo!"
@@ -3135,7 +3136,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-authentication.php:112
 msgid "%s parameter is missing"
-msgstr ""
+msgstr "%s parameter chýba"
 
 #: includes/api/class-wc-api-authentication.php:151
 msgid "Consumer Key is invalid"
@@ -3171,7 +3172,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:107
 msgid "Invalid coupon ID"
-msgstr ""
+msgstr "Nesprávne ID kupónu"
 
 #: includes/api/class-wc-api-coupons.php:152
 msgid "You do not have permission to read the coupons count"
@@ -3179,7 +3180,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
-msgstr ""
+msgstr "Nesprávny kód kupónu"
 
 #: includes/api/class-wc-api-customers.php:192
 msgid "You do not have permission to read the customers count"
@@ -3191,23 +3192,23 @@ msgstr ""
 
 #: includes/api/class-wc-api-customers.php:455
 msgid "Invalid customer ID"
-msgstr ""
+msgstr "Nesprávne ID zákazníka"
 
 #: includes/api/class-wc-api-customers.php:461
 msgid "Invalid customer"
-msgstr ""
+msgstr "Nesprávny zákazník"
 
 #: includes/api/class-wc-api-customers.php:468
 msgid "You do not have permission to read this customer"
-msgstr ""
+msgstr "Nemáte právo prezerať tohto zákazníka"
 
 #: includes/api/class-wc-api-customers.php:473
 msgid "You do not have permission to edit this customer"
-msgstr ""
+msgstr "Nemáte právo upravovať tohto zákazníka"
 
 #: includes/api/class-wc-api-customers.php:478
 msgid "You do not have permission to delete this customer"
-msgstr ""
+msgstr "Nemáte právo zmazať tohto zákazníka"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
@@ -3256,11 +3257,11 @@ msgstr ""
 
 #: includes/api/class-wc-api-resource.php:302
 msgid "Permanently deleted customer"
-msgstr ""
+msgstr "Natrvalo vymazaný zákazník"
 
 #: includes/api/class-wc-api-resource.php:304
 msgid "The customer cannot be deleted"
-msgstr ""
+msgstr "Zákazník nemôže byť vymazaný"
 
 #: includes/api/class-wc-api-resource.php:313
 msgid "This %s cannot be deleted"
@@ -3300,7 +3301,7 @@ msgstr "Ľutujeme, ale Vaša relácia vypršala."
 
 #: includes/class-wc-ajax.php:158
 msgid "Return to homepage"
-msgstr ""
+msgstr "Vrátiť sa na úvodnú stránku"
 
 #: includes/class-wc-ajax.php:269 includes/class-wc-ajax.php:298
 #: includes/class-wc-ajax.php:315
@@ -3326,7 +3327,7 @@ msgid "File %d"
 msgstr "Súbor %d"
 
 #: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
-#: includes/class-wc-order.php:1538
+#: includes/class-wc-order.php:1537
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Zásoby položky č. %s klesly z  %s na %s."
 
@@ -3379,7 +3380,7 @@ msgstr ""
 
 #: includes/class-wc-cart.php:358
 msgid "An item which is no longer available was removed from your cart."
-msgstr ""
+msgstr "Produkt ktorý už nieje dostupný bol odobraný z vášho košíka"
 
 #: includes/class-wc-cart.php:392 includes/class-wc-cart.php:411
 #: includes/class-wc-cart.php:420
@@ -3394,7 +3395,7 @@ msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order right "
 "now. Please try again in %d minutes or edit your cart and try again. We "
 "apologise for any inconvenience caused."
-msgstr ""
+msgstr "Prepáčte, nemáme dosť \"%s\" na sklade aby sme okamžite vyhoveli vašej objednávke. Prosím skúste to o %d minút neskôr alebo upravte váš košík a vyskúšajte to znova. Ospravedlňujeme sa za nepríjemnosti ktoré to mohlo spôsobiť."
 
 #: includes/class-wc-cart.php:465
 msgid ""
@@ -3402,37 +3403,37 @@ msgid ""
 "apologise for any inconvenience caused."
 msgstr "Ľutujeme, \"%s\" nie je skladom.  Upravte, prosím, Váš košík a vyskúšajte to znova. Ospravedlňujeme sa za spôsobené nepríjemnosti."
 
-#: includes/class-wc-cart.php:782
+#: includes/class-wc-cart.php:787
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
 msgstr "Ľutujeme, &quot;%s&quot; sa nedá kúpiť."
 
-#: includes/class-wc-cart.php:789
+#: includes/class-wc-cart.php:794
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr "Nemôžete pridať&quot;%s&quot; do košíka pretože produkt nie je skladom."
 
-#: includes/class-wc-cart.php:794
+#: includes/class-wc-cart.php:799
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr "Počet &quot;%s&quot; nie je možné pridať do košíka, pretože nie je dostatočné množstvo skladom (na sklade zostáva %s)."
 
-#: includes/class-wc-cart.php:808 includes/class-wc-cart.php:827
-#: includes/class-wc-cart.php:840 includes/class-wc-frontend-scripts.php:151
-#: includes/wc-cart-functions.php:102 templates/cart/mini-cart.php:64
+#: includes/class-wc-cart.php:813 includes/class-wc-cart.php:832
+#: includes/class-wc-cart.php:845 includes/class-wc-frontend-scripts.php:151
+#: includes/wc-cart-functions.php:98 templates/cart/mini-cart.php:64
 msgid "View Cart"
-msgstr ""
+msgstr "Zobraziť Košík"
 
-#: includes/class-wc-cart.php:809
+#: includes/class-wc-cart.php:814
 msgid "You cannot add another &quot;%s&quot; to your cart."
-msgstr ""
+msgstr "Nemôžete pridať ďalší &quot;%s&quot; do vášho košíka."
 
-#: includes/class-wc-cart.php:828 includes/class-wc-cart.php:841
+#: includes/class-wc-cart.php:833 includes/class-wc-cart.php:846
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr ""
+msgstr "Nemôžete pridať také množstvo do košíka &mdash; máme %s na sklade a vy už máte %s vo vašom košíku."
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -3486,7 +3487,7 @@ msgstr "Vrátené"
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
-msgstr ""
+msgstr "Ospravedlňujeme sa ale vaše pripojenie vypršalo. <a href=\"%s\" class=\"wc-backward\">Naspäť na úvodnú stránku</a>"
 
 #: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
 msgid "is a required field."
@@ -3499,7 +3500,7 @@ msgstr "Zadajte, prosím, platné PSČ."
 
 #: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
-msgstr ""
+msgstr "nieje správny formát telefónneho čísla."
 
 #: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
@@ -3517,7 +3518,7 @@ msgstr "Pro pokračovanie je nutné súhlasiť s našimi obchodnými podmienkami
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
-msgstr ""
+msgstr "Naneštastie <strong>nedoručujeme do  %s</strong>.  Prosím zadajte inú adresu doručenia."
 
 #: includes/class-wc-checkout.php:584
 msgid "Invalid shipping method."
@@ -4640,7 +4641,7 @@ msgstr "Kód kupónu bol úspešne použitý."
 
 #: includes/class-wc-coupon.php:571
 msgid "Coupon code removed successfully."
-msgstr ""
+msgstr "Kúpón bol úspešne odstránený."
 
 #: includes/class-wc-coupon.php:592
 msgid "Coupon is not valid."
@@ -4709,7 +4710,7 @@ msgstr "Neplatná emailová adresa."
 #: includes/class-wc-download-handler.php:137
 #: includes/class-wc-download-handler.php:280
 msgid "Go to homepage"
-msgstr ""
+msgstr "Ísť na úvodnú stránku"
 
 #: includes/class-wc-download-handler.php:61
 msgid "Invalid download."
@@ -4727,7 +4728,7 @@ msgstr "Prihlásenie"
 
 #: includes/class-wc-download-handler.php:73
 msgid "Log in to Download Files"
-msgstr ""
+msgstr "Prihláste sa aby ste mohli Stiahnuť Súbory."
 
 #: includes/class-wc-download-handler.php:76
 msgid "This is not your download link."
@@ -4798,7 +4799,7 @@ msgstr "Nevybavená objednávka"
 
 #: includes/class-wc-emails.php:411
 msgid "%s units of %s have been backordered in order %s."
-msgstr ""
+msgstr "%s jednotiek %s bolo spätne objednaných v objednávke %s."
 
 #: includes/class-wc-form-handler.php:129
 msgid "Address changed successfully."
@@ -4806,20 +4807,20 @@ msgstr "Adresa úspešne zmenená."
 
 #: includes/class-wc-form-handler.php:180
 msgid "Please enter your name."
-msgstr ""
+msgstr "Prosím zadajte vaše meno."
 
 #: includes/class-wc-form-handler.php:184
-#: includes/wc-customer-functions.php:46
+#: includes/wc-customer-functions.php:48
 msgid "Please provide a valid email address."
-msgstr ""
+msgstr "Prosím zadajte platnú emailovú adresu."
 
 #: includes/class-wc-form-handler.php:186
 msgid "This email address is already registered."
-msgstr ""
+msgstr "Táto emailová adresa už je zaregistrovaná."
 
 #: includes/class-wc-form-handler.php:190
 msgid "Please re-enter your password."
-msgstr ""
+msgstr "Zadajte znova vaše heslo."
 
 #: includes/class-wc-form-handler.php:192
 #: includes/class-wc-form-handler.php:809
@@ -4828,7 +4829,7 @@ msgstr "Heslá sa nezhodujú."
 
 #: includes/class-wc-form-handler.php:208
 msgid "Account details changed successfully."
-msgstr ""
+msgstr "Váš profil bol úspešne aktualizovaný."
 
 #: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
@@ -4859,7 +4860,7 @@ msgstr "Vaša objednávka bola zrušená."
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
-msgstr ""
+msgstr "Vaša objednávka sa už nedá zrušiť. Prosím kontaktujte náš ak potrebujete pomoc."
 
 #: includes/class-wc-form-handler.php:557
 #: includes/class-wc-form-handler.php:617
@@ -4881,7 +4882,7 @@ msgstr "Prosím zvoľte produkt ktorý chcete pridať do košíka&hellip;"
 #: includes/class-wc-form-handler.php:735
 #: includes/class-wc-form-handler.php:857
 msgid "Error"
-msgstr ""
+msgstr "Chyba"
 
 #: includes/class-wc-form-handler.php:722
 msgid "Username is required."
@@ -4893,11 +4894,11 @@ msgstr "Heslo je povinné."
 
 #: includes/class-wc-form-handler.php:735
 msgid "A user could not be found with this email address."
-msgstr ""
+msgstr "Užívaťeľ s týmto emailom nebol nájdený."
 
 #: includes/class-wc-form-handler.php:760
 msgid "You are now logged in as <strong>%s</strong>"
-msgstr ""
+msgstr "Teraz ste prihlásený ako <strong>%s</strong>"
 
 #: includes/class-wc-form-handler.php:804
 msgid "Please enter your password."
@@ -4912,7 +4913,7 @@ msgid "Log in"
 msgstr "Prihlásiť"
 
 #: includes/class-wc-form-handler.php:873
-#: includes/wc-customer-functions.php:107
+#: includes/wc-customer-functions.php:110
 msgid "ERROR"
 msgstr "CHYBA"
 
@@ -4938,100 +4939,100 @@ msgstr "Ľutujeme, žiadne produkty sa nezhodujú s vašim výberom. Prosím zvo
 #: includes/class-wc-frontend-scripts.php:159
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
-msgstr ""
+msgstr "Ospravedlňujeme sa, tento produkt nieje dostupný. Prosím vyberte si inú kombináciu."
 
 #: includes/class-wc-frontend-scripts.php:164
 msgid "Select an option&hellip;"
 msgstr "Vyberte jednu z možností&hellip;"
 
-#: includes/class-wc-install.php:214
+#: includes/class-wc-install.php:217
 msgctxt "page_slug"
 msgid "shop"
-msgstr ""
+msgstr "obchod"
 
-#: includes/class-wc-install.php:215
+#: includes/class-wc-install.php:218
 msgid "Shop"
-msgstr ""
+msgstr "Obchod"
 
-#: includes/class-wc-install.php:219
+#: includes/class-wc-install.php:222
 msgctxt "page_slug"
 msgid "cart"
-msgstr ""
+msgstr "košík"
 
-#: includes/class-wc-install.php:220
+#: includes/class-wc-install.php:223
 #: includes/widgets/class-wc-widget-cart.php:29
 #: includes/widgets/class-wc-widget-cart.php:56
 msgid "Cart"
 msgstr "Košík"
 
-#: includes/class-wc-install.php:224
+#: includes/class-wc-install.php:227
 msgctxt "page_slug"
 msgid "checkout"
-msgstr ""
+msgstr "kontrola objednávky"
 
-#: includes/class-wc-install.php:225 templates/cart/mini-cart.php:65
+#: includes/class-wc-install.php:228 templates/cart/mini-cart.php:65
 msgid "Checkout"
 msgstr "Pokladňa"
 
-#: includes/class-wc-install.php:229
+#: includes/class-wc-install.php:232
 msgctxt "page_slug"
 msgid "my-account"
-msgstr ""
+msgstr "moj-ucet"
 
-#: includes/class-wc-install.php:441
+#: includes/class-wc-install.php:444
 msgid "Customer"
 msgstr "Zákazník"
 
-#: includes/class-wc-install.php:448
+#: includes/class-wc-install.php:451
 msgid "Shop Manager"
 msgstr "Správca obchodu"
 
-#: includes/class-wc-install.php:689
+#: includes/class-wc-install.php:692
 msgid "What's new:"
-msgstr ""
+msgstr "Čo je nové:"
 
 #: includes/class-wc-order.php:137
 msgctxt "hash before order number"
 msgid "#"
 msgstr "#"
 
-#: includes/class-wc-order.php:834
+#: includes/class-wc-order.php:833
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr "&nbsp;<small>%svia %s</small>"
 
-#: includes/class-wc-order.php:897
+#: includes/class-wc-order.php:896
 msgid "Cart Subtotal:"
 msgstr "Medzisúčet:"
 
-#: includes/class-wc-order.php:904
+#: includes/class-wc-order.php:903
 msgid "Cart Discount:"
 msgstr "Zľava:"
 
-#: includes/class-wc-order.php:911
+#: includes/class-wc-order.php:910
 msgid "Shipping:"
 msgstr "Doručenie:"
 
-#: includes/class-wc-order.php:958
+#: includes/class-wc-order.php:957
 msgid "Order Discount:"
 msgstr "Zľava k objednávke:"
 
-#: includes/class-wc-order.php:964
+#: includes/class-wc-order.php:963
 msgid "Order Total:"
 msgstr "Cena spolu:"
 
-#: includes/class-wc-order.php:982 includes/wc-cart-functions.php:226
+#: includes/class-wc-order.php:981 includes/wc-cart-functions.php:222
 msgid "(Includes %s)"
 msgstr "(vrátane %s)"
 
-#: includes/class-wc-order.php:1225 includes/class-wc-order.php:1226
+#: includes/class-wc-order.php:1224 includes/class-wc-order.php:1225
 msgid "WooCommerce"
 msgstr "E-shop"
 
-#: includes/class-wc-order.php:1281
+#: includes/class-wc-order.php:1280
 msgid "Order status changed from %s to %s."
 msgstr "Zmena stavu objednávky z %s na %s."
 
-#: includes/class-wc-order.php:1550
+#: includes/class-wc-order.php:1549
 msgid "Order item stock reduced successfully."
 msgstr "Objednaný tovar bol úspešne odpísaný zo skladu."
 
@@ -5187,35 +5188,35 @@ msgstr "Názov prepravnej triedy"
 
 #: includes/class-wc-post-types.php:184
 msgid "Search %s"
-msgstr ""
+msgstr "Hľadať %s"
 
 #: includes/class-wc-post-types.php:185
 msgid "All %s"
-msgstr ""
+msgstr "Všetky %s"
 
 #: includes/class-wc-post-types.php:186
 msgid "Parent %s"
-msgstr ""
+msgstr "Rodič %s"
 
 #: includes/class-wc-post-types.php:187
 msgid "Parent %s:"
-msgstr ""
+msgstr "Rodič %s:"
 
 #: includes/class-wc-post-types.php:188
 msgid "Edit %s"
-msgstr ""
+msgstr "Upraviť %s"
 
 #: includes/class-wc-post-types.php:189
 msgid "Update %s"
-msgstr ""
+msgstr "Aktualizovať %s"
 
 #: includes/class-wc-post-types.php:190
 msgid "Add New %s"
-msgstr ""
+msgstr "Pridať nový %s"
 
 #: includes/class-wc-post-types.php:191
 msgid "New %s"
-msgstr ""
+msgstr "Nový %s"
 
 #: includes/class-wc-post-types.php:226
 #: includes/updates/woocommerce-update-2.0.php:58
@@ -5411,7 +5412,7 @@ msgstr "Kúpiť produkt"
 
 #: includes/class-wc-product-grouped.php:42
 msgid "View products"
-msgstr ""
+msgstr "Zobraziť produkty"
 
 #: includes/class-wc-product-grouped.php:194
 #: includes/class-wc-product-variable.php:251
@@ -5439,11 +5440,11 @@ msgstr ""
 msgid "%s &ndash; %s%s"
 msgstr "%s &ndash; %s%s"
 
-#: includes/class-wc-shortcodes.php:965
+#: includes/class-wc-shortcodes.php:973
 msgid ""
 "Use $args[\"posts_per_page\"] instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr ""
+msgstr "Použite radšej $args[\"posts_per_page\"] Zastaralý argument bude odstránený vo WC 2.2."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
 msgid "Completed order"
@@ -5461,7 +5462,7 @@ msgstr "Vaša objednávka je vybavená"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:30
 msgid "Your {site_title} order from {order_date} is complete"
-msgstr ""
+msgstr "Vaša {site_title} objednávka z {order_date} je dokončená"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:39
 msgid "Your order is complete - download your files"
@@ -5470,7 +5471,7 @@ msgstr "Vaša objednávka je vybavená - stiahnite si súbory"
 #: includes/emails/class-wc-email-customer-completed-order.php:40
 msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
-msgstr ""
+msgstr "Vaša {site_title} objednávka z {order_date} je dokončená - stiahnite si vaše súbory"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:146
 #: includes/emails/class-wc-email-new-order.php:133
@@ -5510,7 +5511,7 @@ msgstr "Faktúra objednávky číslo {order_number}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:38
 msgid "Your {site_title} order from {order_date}"
-msgstr ""
+msgstr "Vaša {site_title} objednávka z {order_date}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:39
 msgid "Order {order_number} details"
@@ -5536,11 +5537,11 @@ msgstr "Emaily novým zákazníkom sa zasielajú pri registrácií po platbe ale
 
 #: includes/emails/class-wc-email-customer-new-account.php:39
 msgid "Your account on {site_title}"
-msgstr ""
+msgstr "Váš účet na {site_title}"
 
 #: includes/emails/class-wc-email-customer-new-account.php:40
 msgid "Welcome to {site_title}"
-msgstr ""
+msgstr "Vitajte na {site_title}"
 
 #: includes/emails/class-wc-email-customer-note.php:31
 msgid "Customer note"
@@ -5552,7 +5553,7 @@ msgstr "Email s poznámkou sa pošle keď pridáte poznámku k objednávke."
 
 #: includes/emails/class-wc-email-customer-note.php:37
 msgid "Note added to your {site_title} order from {order_date}"
-msgstr ""
+msgstr "Poznámka pridaná k vašej {site_title} objednávke z {order_date}"
 
 #: includes/emails/class-wc-email-customer-note.php:38
 msgid "A note has been added to your order"
@@ -5574,7 +5575,7 @@ msgstr "Ďakujeme za vašu objednávku"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {site_title} order receipt from {order_date}"
-msgstr ""
+msgstr "Vaša {site_title} účtenka z {order_date}"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:38
 msgid "Reset password"
@@ -5588,7 +5589,7 @@ msgstr "Email s obnovou hesla zákazníka je odoslaný ked zákaznik obnoví svo
 
 #: includes/emails/class-wc-email-customer-reset-password.php:44
 msgid "Password Reset for {site_title}"
-msgstr ""
+msgstr "Obnova Hesla na {site_title}"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:45
 msgid "Password Reset Instructions"
@@ -5600,7 +5601,7 @@ msgstr "Nová objednávka"
 
 #: includes/emails/class-wc-email-new-order.php:27
 msgid "New order emails are sent when an order is received."
-msgstr ""
+msgstr "Nové objednávkové emaily sú odoslané keď je objednávka prijatá."
 
 #: includes/emails/class-wc-email-new-order.php:29
 msgid "New customer order"
@@ -5608,7 +5609,7 @@ msgstr "Nová zákaznícka objednávka"
 
 #: includes/emails/class-wc-email-new-order.php:30
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
-msgstr ""
+msgstr "[{site_title}] Nová objednávka ({order_number}) - {order_date}"
 
 #: includes/emails/class-wc-email-new-order.php:126
 msgid "Recipient(s)"
@@ -5639,7 +5640,7 @@ msgstr ""
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:26
 msgid ""
 "Allows payments by BACS, more commonly known as direct bank/wire transfer."
-msgstr ""
+msgstr "Povoliť platby pomocou priamej platby na bankový účet."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:68
 msgid "Enable Bank Transfer"
@@ -5696,14 +5697,14 @@ msgstr "Popis"
 #: includes/gateways/cod/class-wc-gateway-cod.php:66
 msgid ""
 "Payment method description that the customer will see on your checkout."
-msgstr ""
+msgstr "Popis možnosti platby ktorú zákazník uvidí pri kontrole objednávky."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:82
 msgid ""
 "Make your payment directly into our bank account. Please use your Order ID "
 "as the payment reference. Your order won't be shipped until the funds have "
 "cleared in our account."
-msgstr ""
+msgstr "Odošlite vašu platbu priamo na náš bankový účet. Prosím použite vaše ID Objednávky na identifikáciu platby. Vaša objednávka nebude odoslaná pokiaľ peniaze nedorazia na náš účet."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:86
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:72
@@ -5714,7 +5715,7 @@ msgstr "Pokyny"
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:88
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:74
 msgid "Instructions that will be added to the thank you page and emails."
-msgstr ""
+msgstr "Inštrukcie ktoré budú pridané na ďakovnú stránku a emaily."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:105
 msgid "Account Details"
@@ -5745,19 +5746,19 @@ msgstr "IBAN"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:116
 msgid "BIC / Swift"
-msgstr ""
+msgstr "BIC / Swift"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "+ Add Account"
-msgstr ""
+msgstr "+ Pridať Účet"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "Remove selected account(s)"
-msgstr ""
+msgstr "Odstrániť vybraný účet(účty)"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:240
 msgid "Our Bank Details"
-msgstr ""
+msgstr "Informácie o našej banke"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:265
 msgid "BIC"
@@ -5838,7 +5839,7 @@ msgstr "Ak si želáte nastaviť COD dostupné len pri určitých spôsoboch, na
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:94
 msgid "Select shipping methods"
-msgstr ""
+msgstr "Vyberte si spôsob doručenia"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:157
 msgid "Payment to be made upon delivery."
@@ -5965,7 +5966,7 @@ msgstr "Ak sa líši od zadaného emailu, zadajte email vašeho PayPal účtu. T
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:161
 msgid "PayPal Identity Token"
-msgstr ""
+msgstr "Identifikačný Token PayPal"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:163
 msgid ""
@@ -5992,7 +5993,7 @@ msgstr "Prosím zadajte predčíslie faktúry. Ak používate PayPal účet pre 
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:176
 msgid "Payment Action"
-msgstr ""
+msgstr "Platobná Akcia"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:178
 msgid ""
@@ -6006,7 +6007,7 @@ msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:183
 msgid "Authorize"
-msgstr ""
+msgstr "Autorizovať"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:187
 msgid "Submission method"
@@ -6146,7 +6147,7 @@ msgstr "IPN platba dokončená"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:737
 msgid "Payment pending: %s"
-msgstr ""
+msgstr "Čaká sa na platbu: %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:750
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:758
@@ -6168,30 +6169,30 @@ msgstr "Platba objednávky %s refundovaná/zrušená"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:780
 msgid "Order reversed"
-msgstr ""
+msgstr "Objednávka stornovaná"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:781
 msgid ""
 "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
-msgstr ""
+msgstr "Objednávka %s bola označená ako pozastavená z dôvodu stornovania - kód odôvodnenia PayPal: %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:784
 msgid "Payment for order %s reversed"
-msgstr ""
+msgstr "Platba za objednávku %s stornovaná"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:792
 msgid "Reversal Cancelled"
-msgstr ""
+msgstr "Storno Zrušené"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:793
 msgid ""
 "Order %s has had a reversal cancelled. Please check the status of payment "
 "and update the order status accordingly."
-msgstr ""
+msgstr "Objednávka %s mala storno zrušené. Prosím overte stav platby a podľa toho aktualizujte stav objednávky."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:796
 msgid "Reversal cancelled for order %s"
-msgstr ""
+msgstr "Storno zrušené pre objednávku %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:868
 msgid "Validation error: PayPal amounts do not match (amt %s)."
@@ -6250,7 +6251,7 @@ msgstr "Špecifické krajiny"
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:154
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:113
 msgid "Select some countries"
-msgstr ""
+msgstr "Vyberte nejaké krajiny"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:109
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:83
@@ -6560,7 +6561,7 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-checkout.php:112
 #: includes/shortcodes/class-wc-shortcode-checkout.php:163
 msgid "Sorry, this order is invalid and cannot be paid for."
-msgstr ""
+msgstr "Ospravedlňujeme sa ale táto objednávka je neplatná a preto nemôže byť zaplatená."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:129
 #: templates/checkout/thankyou.php:40
@@ -6654,181 +6655,185 @@ msgstr "Prepáčte, nemôžeme nájsť ID objednávky v našej databáze"
 
 #: includes/wc-cart-functions.php:25
 msgid "This product is protected and cannot be purchased."
-msgstr ""
+msgstr "Tento produkt je chránený a nemôže byť kúpený."
 
-#: includes/wc-cart-functions.php:87
+#: includes/wc-cart-functions.php:83
 msgid "Added &quot;%s&quot; to your cart."
 msgstr "Pridané &quot;%s&quot; do košíka."
 
-#: includes/wc-cart-functions.php:87
+#: includes/wc-cart-functions.php:83
 msgid "&quot; and &quot;"
 msgstr "&quot; a &quot;"
 
-#: includes/wc-cart-functions.php:90
+#: includes/wc-cart-functions.php:86
 msgid "&quot;%s&quot; was successfully added to your cart."
 msgstr "Produkt &quot;%s&quot; bol pridaný do košíka."
 
-#: includes/wc-cart-functions.php:98
+#: includes/wc-cart-functions.php:94
 msgid "Continue Shopping"
-msgstr ""
+msgstr "Pokračovať v Nakupovaní"
 
-#: includes/wc-cart-functions.php:198
+#: includes/wc-cart-functions.php:194
 msgid "Free shipping coupon"
-msgstr ""
+msgstr "Kupón na dopravu zdarma"
 
-#: includes/wc-cart-functions.php:200
+#: includes/wc-cart-functions.php:196
 msgid "[Remove]"
 msgstr "[Odstrániť]"
 
-#: includes/wc-cart-functions.php:261
+#: includes/wc-cart-functions.php:257
 msgid "Free"
 msgstr "Zadarmo"
 
-#: includes/wc-core-functions.php:162
+#: includes/wc-core-functions.php:167
 msgid "Australian Dollars"
 msgstr "Australian Dollars"
 
-#: includes/wc-core-functions.php:163
+#: includes/wc-core-functions.php:168
 msgid "Brazilian Real"
 msgstr "Brazilian Real"
 
-#: includes/wc-core-functions.php:164
+#: includes/wc-core-functions.php:169
 msgid "Bulgarian Lev"
 msgstr ""
 
-#: includes/wc-core-functions.php:165
+#: includes/wc-core-functions.php:170
 msgid "Canadian Dollars"
 msgstr "Canadian Dollars"
 
-#: includes/wc-core-functions.php:166
+#: includes/wc-core-functions.php:171
 msgid "Chilean Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:167
+#: includes/wc-core-functions.php:172
 msgid "Chinese Yuan"
 msgstr "Chinese Yuan"
 
-#: includes/wc-core-functions.php:168
+#: includes/wc-core-functions.php:173
 msgid "Colombian Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:169
+#: includes/wc-core-functions.php:174
 msgid "Czech Koruna"
 msgstr "Česká koruna"
 
-#: includes/wc-core-functions.php:170
+#: includes/wc-core-functions.php:175
 msgid "Danish Krone"
 msgstr "Dánska koruna"
 
-#: includes/wc-core-functions.php:171
+#: includes/wc-core-functions.php:176
 msgid "Euros"
 msgstr "Eurá"
 
-#: includes/wc-core-functions.php:172
+#: includes/wc-core-functions.php:177
 msgid "Hong Kong Dollar"
 msgstr "Hong Kong Dollar"
 
-#: includes/wc-core-functions.php:173
+#: includes/wc-core-functions.php:178
+msgid "Croatia kuna"
+msgstr ""
+
+#: includes/wc-core-functions.php:179
 msgid "Hungarian Forint"
 msgstr "Maďarský forint"
 
-#: includes/wc-core-functions.php:174
+#: includes/wc-core-functions.php:180
 msgid "Icelandic krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:175
+#: includes/wc-core-functions.php:181
 msgid "Indonesia Rupiah"
 msgstr "Indonesia Rupiah"
 
-#: includes/wc-core-functions.php:176
+#: includes/wc-core-functions.php:182
 msgid "Indian Rupee"
 msgstr "Indian Rupee"
 
-#: includes/wc-core-functions.php:177
+#: includes/wc-core-functions.php:183
 msgid "Israeli Shekel"
 msgstr "Izraelský šekel"
 
-#: includes/wc-core-functions.php:178
+#: includes/wc-core-functions.php:184
 msgid "Japanese Yen"
 msgstr "Japanese Yen"
 
-#: includes/wc-core-functions.php:179
+#: includes/wc-core-functions.php:185
 msgid "South Korean Won"
 msgstr "South Korean Won"
 
-#: includes/wc-core-functions.php:180
+#: includes/wc-core-functions.php:186
 msgid "Malaysian Ringgits"
 msgstr "Malaysian Ringgits"
 
-#: includes/wc-core-functions.php:181
+#: includes/wc-core-functions.php:187
 msgid "Mexican Peso"
 msgstr "Mexican Peso"
 
-#: includes/wc-core-functions.php:182
+#: includes/wc-core-functions.php:188
 msgid "Nigerian Naira"
 msgstr ""
 
-#: includes/wc-core-functions.php:183
+#: includes/wc-core-functions.php:189
 msgid "Norwegian Krone"
 msgstr "Nórska koruna"
 
-#: includes/wc-core-functions.php:184
+#: includes/wc-core-functions.php:190
 msgid "New Zealand Dollar"
 msgstr "New Zealand Dollar"
 
-#: includes/wc-core-functions.php:185
+#: includes/wc-core-functions.php:191
 msgid "Philippine Pesos"
 msgstr "Filipínske pesos"
 
-#: includes/wc-core-functions.php:186
+#: includes/wc-core-functions.php:192
 msgid "Polish Zloty"
 msgstr "Poľský zlotý"
 
-#: includes/wc-core-functions.php:187
+#: includes/wc-core-functions.php:193
 msgid "Pounds Sterling"
 msgstr "Pounds Sterling"
 
-#: includes/wc-core-functions.php:188
+#: includes/wc-core-functions.php:194
 msgid "Romanian Leu"
 msgstr "Romanian Leu"
 
-#: includes/wc-core-functions.php:189
+#: includes/wc-core-functions.php:195
 msgid "Russian Ruble"
 msgstr ""
 
-#: includes/wc-core-functions.php:190
+#: includes/wc-core-functions.php:196
 msgid "Singapore Dollar"
 msgstr "Singapore Dollar"
 
-#: includes/wc-core-functions.php:191
+#: includes/wc-core-functions.php:197
 msgid "South African rand"
 msgstr "South African rand"
 
-#: includes/wc-core-functions.php:192
+#: includes/wc-core-functions.php:198
 msgid "Swedish Krona"
 msgstr "Švédska koruna"
 
-#: includes/wc-core-functions.php:193
+#: includes/wc-core-functions.php:199
 msgid "Swiss Franc"
 msgstr "Švajčiarsky frank"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:200
 msgid "Taiwan New Dollars"
 msgstr "Tchaj-wanské nové doláre"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:201
 msgid "Thai Baht"
 msgstr "Thajský baht"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:202
 msgid "Turkish Lira"
 msgstr "Turkish Lira"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:203
 msgid "US Dollars"
 msgstr "US Dollars"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:204
 msgid "Vietnamese Dong"
 msgstr ""
 
@@ -6848,25 +6853,25 @@ msgstr "Zľava na produkt"
 msgid "Product % Discount"
 msgstr "Percentuálna zľava na produkt (%)"
 
-#: includes/wc-customer-functions.php:49
+#: includes/wc-customer-functions.php:52
 msgid ""
 "An account is already registered with your email address. Please login."
 msgstr "Účet s touto e-mailovou adresou je už zaregistrovaný. Prosím prihláste sa."
 
-#: includes/wc-customer-functions.php:59
+#: includes/wc-customer-functions.php:61
 msgid "Please enter a valid account username."
-msgstr ""
+msgstr "Prosím zadajte platné prihlasovacie meno."
 
-#: includes/wc-customer-functions.php:62
+#: includes/wc-customer-functions.php:65
 msgid ""
 "An account is already registered with that username. Please choose another."
 msgstr "Účet s týmto uživateľským menom už je zaregistrovaný. Zvoľte si, prosím, iné."
 
-#: includes/wc-customer-functions.php:82
+#: includes/wc-customer-functions.php:85
 msgid "Please enter an account password."
 msgstr "Zadajte, prosím, heslo k účtu."
 
-#: includes/wc-customer-functions.php:107
+#: includes/wc-customer-functions.php:110
 msgid ""
 "Couldn&#8217;t register you&hellip; please contact us if you continue to "
 "have problems."
@@ -6958,11 +6963,11 @@ msgstr "Hľadať produkty"
 msgid "Search"
 msgstr "Hľadanie"
 
-#: includes/wc-term-functions.php:118
+#: includes/wc-term-functions.php:121
 msgid "Select a category"
 msgstr "Vyberte kategóriu"
 
-#: includes/wc-term-functions.php:122
+#: includes/wc-term-functions.php:125
 msgid "Uncategorized"
 msgstr "Nezaradené"
 
@@ -6988,7 +6993,7 @@ msgstr "WooCommerce Layered Nav Filters"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:27
 msgid "Active Filters"
-msgstr ""
+msgstr "Aktívne filtre"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:84
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:91
@@ -7016,11 +7021,11 @@ msgstr "E-shop - vrstvená navigácia"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:69
 msgid "Filter by"
-msgstr ""
+msgstr "Filtrovať podľa"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:75
 msgid "Attribute"
-msgstr ""
+msgstr "Atribút"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:81
 msgid "Display type"
@@ -7036,7 +7041,7 @@ msgstr "rozbaľovaciu ponuku"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:90
 msgid "Query type"
-msgstr ""
+msgstr "Typ dotazu"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:92
 msgid "AND"
@@ -7091,7 +7096,7 @@ msgstr "E-shop - kategórie produktov"
 #: includes/widgets/class-wc-widget-product-categories.php:36
 #: includes/widgets/class-wc-widget-products.php:51
 msgid "Order by"
-msgstr ""
+msgstr "Zoradiť podľa"
 
 #: includes/widgets/class-wc-widget-product-categories.php:38
 msgid "Category Order"
@@ -7135,25 +7140,25 @@ msgstr "E-shop - značky produktu"
 
 #: includes/widgets/class-wc-widget-products.php:21
 msgid "Display a list of your products on your site."
-msgstr ""
+msgstr "Zobraziť zoznam produktov na vašej stránke."
 
 #: includes/widgets/class-wc-widget-products.php:23
 msgid "WooCommerce Products"
-msgstr ""
+msgstr "WooCommerce Produkty"
 
 #: includes/widgets/class-wc-widget-products.php:36
 #: includes/widgets/class-wc-widget-recently-viewed.php:36
 #: includes/widgets/class-wc-widget-top-rated-products.php:38
 msgid "Number of products to show"
-msgstr ""
+msgstr "Počet produktov na zobrazenie"
 
 #: includes/widgets/class-wc-widget-products.php:41
 msgid "Show"
-msgstr ""
+msgstr "Zobraziť"
 
 #: includes/widgets/class-wc-widget-products.php:43
 msgid "All Products"
-msgstr ""
+msgstr "Všetky produkty"
 
 #: includes/widgets/class-wc-widget-products.php:44
 msgid "Featured Products"
@@ -7161,7 +7166,7 @@ msgstr "Špeciálna ponuka"
 
 #: includes/widgets/class-wc-widget-products.php:45
 msgid "On-sale Products"
-msgstr ""
+msgstr "Akciové produkty"
 
 #: includes/widgets/class-wc-widget-products.php:53
 #: templates/myaccount/my-orders.php:33
@@ -7179,11 +7184,11 @@ msgstr "Cena"
 
 #: includes/widgets/class-wc-widget-products.php:55
 msgid "Random"
-msgstr ""
+msgstr "Náhodne"
 
 #: includes/widgets/class-wc-widget-products.php:56
 msgid "Sales"
-msgstr ""
+msgstr "Predaj"
 
 #: includes/widgets/class-wc-widget-products.php:62
 msgctxt "Sorting order"
@@ -7192,11 +7197,11 @@ msgstr "Objednávka"
 
 #: includes/widgets/class-wc-widget-products.php:64
 msgid "ASC"
-msgstr ""
+msgstr "RAST"
 
 #: includes/widgets/class-wc-widget-products.php:65
 msgid "DESC"
-msgstr ""
+msgstr "KLES"
 
 #: includes/widgets/class-wc-widget-products.php:71
 msgid "Hide free products"
@@ -7204,7 +7209,7 @@ msgstr "Schovať produkty zdarma"
 
 #: includes/widgets/class-wc-widget-products.php:76
 msgid "Show hidden products"
-msgstr ""
+msgstr "Zobraziť skryté produkty"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:21
 msgid "Display a list of your most recent reviews on your site."
@@ -7220,7 +7225,7 @@ msgstr "Nedávne recenzie"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:36
 msgid "Number of reviews to show"
-msgstr ""
+msgstr "Počet recenzií na zobrazenie."
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:85
 msgctxt "by comment author"
@@ -7233,15 +7238,15 @@ msgstr "Zobraziť zoznam naposledy prezeraných produktov."
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:23
 msgid "WooCommerce Recently Viewed"
-msgstr ""
+msgstr "WooCommerce Nedávno Zobrazené"
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:27
 msgid "Recently Viewed Products"
-msgstr ""
+msgstr "Naposledy Zobrazené Produkty"
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:23
 msgid "Display a list of your top rated products on your site."
-msgstr ""
+msgstr "Zobraziť zoznam produktov s najlepším hodnotením na vašej stránke"
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:25
 msgid "WooCommerce Top Rated Products"
@@ -7257,22 +7262,22 @@ msgstr "Váš košík je prázdny."
 
 #: templates/cart/cart-empty.php:20
 msgid "Return To Shop"
-msgstr ""
+msgstr "Vrátiť sa Do Obchodu"
 
 #: templates/cart/cart-shipping.php:16
 msgid "Shipping #%d"
-msgstr ""
+msgstr "Poštovné #%d"
 
 #: templates/cart/cart-shipping.php:18
 msgid "Shipping and Handling"
-msgstr ""
+msgstr "Poštovné a Manupulácia"
 
 #: templates/cart/cart-shipping.php:55
 msgid ""
 "No shipping methods were found; please recalculate your shipping or continue"
 " to checkout and enter your full address to see if there is shipping "
 "available to your location."
-msgstr ""
+msgstr "Neboli nájdené žiadne spôsoby dopravy; prosím preopočitajte vašu dopravu alebo pokračujte v objednávke a zadajte vašu plnú adresu aby ste zistili či je doprava možná na vašu adresu."
 
 #: templates/cart/cart-shipping.php:59
 msgid "Please fill in your details to see available shipping methods."
@@ -7280,7 +7285,7 @@ msgstr "Prosím, vyplňte vaše údaje pre zobrazenie dostupných spôsobov prep
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid "Sorry, shipping is unavailable %s."
-msgstr ""
+msgstr "Ospravedlňujeme sa, doprava je nedostupná %s."
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid ""
@@ -7304,7 +7309,7 @@ msgstr "Medzisúčet"
 #: templates/checkout/review-order.php:31
 #: templates/checkout/review-order.php:71
 msgid "Coupon:"
-msgstr ""
+msgstr "Kupón:"
 
 #: templates/cart/cart-totals.php:75 templates/checkout/review-order.php:79
 msgid "Order Total"
@@ -7351,7 +7356,7 @@ msgstr "Aktualizovať"
 
 #: templates/cart/cart.php:125
 msgid "Proceed to Checkout"
-msgstr ""
+msgstr "Skontrolovať a Objednať"
 
 #: templates/cart/cross-sells.php:38
 msgid "You may be interested in&hellip;"
@@ -7391,7 +7396,7 @@ msgstr "Existujú niektoré problémy s položkami v vašom košíku (pozri vyš
 
 #: templates/checkout/cart-errors.php:20
 msgid "Return To Cart"
-msgstr ""
+msgstr "Vrátiť sa do košíka"
 
 #: templates/checkout/form-billing.php:17
 msgid "Billing &amp; Shipping"
@@ -7455,7 +7460,7 @@ msgstr "Spolu"
 
 #: templates/checkout/form-pay.php:54
 msgid "Payment"
-msgstr ""
+msgstr "Platba"
 
 #: templates/checkout/form-pay.php:79
 msgid ""
@@ -7470,7 +7475,7 @@ msgstr "Zaplatiť za objednávku"
 
 #: templates/checkout/form-shipping.php:31
 msgid "Ship to a different address?"
-msgstr ""
+msgstr "Odoslať na inú adresu?"
 
 #: templates/checkout/review-order.php:150
 msgid "Please fill in your details above to see available payment methods."
@@ -7596,14 +7601,14 @@ msgstr "Vitajte na %s. Ďakujeme, že ste si u nás vytvorili účet. Vaše pou�
 
 #: templates/emails/customer-new-account.php:18
 msgid "Your password has been automatically generated: <strong>%s</strong>"
-msgstr ""
+msgstr "Vaše heslo bolo automaticky vytvorené: <strong>%s</strong>"
 
 #: templates/emails/customer-new-account.php:22
 #: templates/emails/plain/customer-new-account.php:18
 msgid ""
 "You can access your account area to view your orders and change your "
 "password here: %s."
-msgstr ""
+msgstr "Prezerať váš profil, vaše objednávky a zmeniť vaše heslo môžete tu: %s."
 
 #: templates/emails/customer-note.php:14
 #: templates/emails/plain/customer-note.php:13
@@ -7660,12 +7665,12 @@ msgstr "Dodacia adresa"
 #: templates/emails/email-order-items.php:42
 #: templates/emails/plain/email-order-items.php:43
 msgid "Download %d"
-msgstr ""
+msgstr "Stiahnuť %d"
 
 #: templates/emails/email-order-items.php:44
 #: templates/emails/plain/email-order-items.php:45
 msgid "Download"
-msgstr ""
+msgstr "Stiahnuť"
 
 #: templates/emails/plain/admin-new-order.php:19
 #: templates/emails/plain/customer-completed-order.php:19
@@ -7677,7 +7682,7 @@ msgstr "Číslo objednávky: %s"
 
 #: templates/emails/plain/admin-new-order.php:20
 msgid "Order link: %s"
-msgstr ""
+msgstr "Odkaz na objednávku %s"
 
 #: templates/emails/plain/admin-new-order.php:21
 #: templates/emails/plain/customer-completed-order.php:20
@@ -7699,7 +7704,7 @@ msgstr "Vaše podrobnosti"
 
 #: templates/emails/plain/customer-new-account.php:16
 msgid "Your password is <strong>%s</strong>."
-msgstr ""
+msgstr "Vaše heslo je <strong>%s</strong>."
 
 #: templates/emails/plain/email-order-items.php:29
 msgid "Quantity: %s"
@@ -7745,11 +7750,11 @@ msgstr "Heslo"
 
 #: templates/global/form-login.php:38 templates/myaccount/form-login.php:46
 msgid "Remember me"
-msgstr ""
+msgstr "Zapamätať si ma"
 
 #: templates/global/form-login.php:42 templates/myaccount/form-login.php:50
 msgid "Lost your password?"
-msgstr ""
+msgstr "Stratili ste heslo?"
 
 #: templates/global/quantity-input.php:12
 msgctxt "Product quantity input tooltip"
@@ -7758,7 +7763,7 @@ msgstr "Počet"
 
 #: templates/loop/no-products-found.php:14
 msgid "No products were found matching your selection."
-msgstr ""
+msgstr "Neboli nájdené žiadne produkty vyhovujúce vašemu výberu."
 
 #: templates/loop/orderby.php:21
 msgid "Default sorting"
@@ -7810,43 +7815,28 @@ msgstr ""
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
-msgstr ""
-
-#: templates/myaccount/form-change-password.php:20
-#: templates/myaccount/form-lost-password.php:31
-msgid "New password"
-msgstr "Nové heslo"
-
-#: templates/myaccount/form-change-password.php:24
-#: templates/myaccount/form-lost-password.php:35
-msgid "Re-enter new password"
-msgstr "Znovu zadajte nové heslo"
-
-#: templates/myaccount/form-change-password.php:29
-#: templates/myaccount/form-lost-password.php:46
-msgid "Save"
-msgstr "Uložiť"
+msgstr "Pridať Možnosť Platby"
 
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
-msgstr ""
+msgstr "Krstné meno"
 
 #: templates/myaccount/form-edit-account.php:24
 msgid "Last name"
-msgstr ""
+msgstr "Priezvisko"
 
 #: templates/myaccount/form-edit-account.php:28
 #: templates/myaccount/form-login.php:79
 msgid "Email address"
-msgstr ""
+msgstr "E-mailová adresa"
 
 #: templates/myaccount/form-edit-account.php:32
 msgid "Password (leave blank to leave unchanged)"
-msgstr ""
+msgstr "Heslo (nevyplňujte ak ho nechcete zmeniť)"
 
 #: templates/myaccount/form-edit-account.php:36
 msgid "Confirm new password"
-msgstr ""
+msgstr "Potvrďte nové heslo"
 
 #: templates/myaccount/form-edit-account.php:41
 msgid "Save changes"
@@ -7863,7 +7853,7 @@ msgstr "Uložiť"
 
 #: templates/myaccount/form-login.php:32
 msgid "Username or email address"
-msgstr ""
+msgstr "Používateľské meno alebo emailová adresa"
 
 #: templates/myaccount/form-login.php:63 templates/myaccount/form-login.php:96
 msgid "Register"
@@ -7875,7 +7865,7 @@ msgstr "Meno užívateľa"
 
 #: templates/myaccount/form-login.php:89
 msgid "Anti-spam"
-msgstr ""
+msgstr "Anti-spam"
 
 #: templates/myaccount/form-lost-password.php:22
 msgid ""
@@ -7887,9 +7877,21 @@ msgstr "Stratili ste heslo? Prosím zadajte používateľské meno alebo emailov
 msgid "Enter a new password below."
 msgstr "Zadajte nové heslo"
 
+#: templates/myaccount/form-lost-password.php:31
+msgid "New password"
+msgstr "Nové heslo"
+
+#: templates/myaccount/form-lost-password.php:35
+msgid "Re-enter new password"
+msgstr "Znovu zadajte nové heslo"
+
 #: templates/myaccount/form-lost-password.php:46
 msgid "Reset Password"
 msgstr "Obnoviť heslo"
+
+#: templates/myaccount/form-lost-password.php:46
+msgid "Save"
+msgstr "Uložiť"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
@@ -8017,7 +8019,7 @@ msgstr "Zrušiť výber"
 
 #: templates/single-product/add-to-cart/variable.php:103
 msgid "This product is currently out of stock and unavailable."
-msgstr ""
+msgstr "Tento produkt nieje momentálne na sklade a je preto nedostupný."
 
 #: templates/single-product/meta.php:20
 msgid "SKU:"
@@ -8085,7 +8087,7 @@ msgid "%s review for %s"
 msgid_plural "%s reviews for %s"
 msgstr[0] "%s recenzia na %s"
 msgstr[1] "%s recenzií na %s"
-msgstr[2] ""
+msgstr[2] "%s hodnotenia pre %s"
 
 #: templates/single-product-reviews.php:23
 msgid "Reviews"
@@ -8093,7 +8095,7 @@ msgstr "Recenzie"
 
 #: templates/single-product-reviews.php:44
 msgid "There are no reviews yet."
-msgstr ""
+msgstr "Zatiaľ niesú žiadne hodnotenia."
 
 #: templates/single-product-reviews.php:57
 msgid "Add a review"
@@ -8105,7 +8107,7 @@ msgstr "Buďte prvý, kto napíše recenziu"
 
 #: templates/single-product-reviews.php:58
 msgid "Leave a Reply to %s"
-msgstr ""
+msgstr "Zanechajte Odpoveď na %s"
 
 #: templates/single-product-reviews.php:64
 msgid "Email"
@@ -8113,11 +8115,11 @@ msgstr "E-mail"
 
 #: templates/single-product-reviews.php:67
 msgid "Submit"
-msgstr ""
+msgstr "Odovzdať"
 
 #: templates/single-product-reviews.php:73
 msgid "Your Rating"
-msgstr ""
+msgstr "Vaše hodnotenie"
 
 #: templates/single-product-reviews.php:74
 msgid "Rate&hellip;"
@@ -8150,7 +8152,7 @@ msgstr "Vaša recenzia"
 #: templates/single-product-reviews.php:92
 msgid ""
 "Only logged in customers who have purchased this product may leave a review."
-msgstr ""
+msgstr "Iba prihlásení zákazníci ktorý tento produkt kúpili môžu produkt ohodnotiť."
 
 #: woocommerce.php:182
 msgid "Docs"

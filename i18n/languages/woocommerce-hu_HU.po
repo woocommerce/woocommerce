@@ -1,14 +1,15 @@
 # 
 # Translators:
+# aroland.hu <info@aroland.hu>, 2014
 # joesalty <joesalty77@gmail.com>, 2014
 # SzLegradi <szabolcs.legradi@gmail.com>, 2013-2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-09 16:03+0000\n"
-"Last-Translator: SzLegradi <szabolcs.legradi@gmail.com>\n"
+"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
+"PO-Revision-Date: 2014-02-13 14:00+0000\n"
+"Last-Translator: aroland.hu <info@aroland.hu>\n"
 "Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce-core/language/hu_HU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -56,7 +57,7 @@ msgstr "Üzlet üzenetek"
 msgid "Order tracking"
 msgstr "Rendelés követése"
 
-#: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:230
+#: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
 #: includes/shortcodes/class-wc-shortcode-view-order.php:49
@@ -502,7 +503,7 @@ msgstr "A Coru&ntilde;a"
 
 #: i18n/states/ES.php:14
 msgid "Araba/&Aacute;lava"
-msgstr ""
+msgstr "Araba/&Aacute;lava"
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
@@ -586,7 +587,7 @@ msgstr "Guadalajara"
 
 #: i18n/states/ES.php:35
 msgid "Gipuzkoa"
-msgstr ""
+msgstr "Gipuzkoa"
 
 #: i18n/states/ES.php:36
 msgid "Huelva"
@@ -694,7 +695,7 @@ msgstr "Valladolid"
 
 #: i18n/states/ES.php:62
 msgid "Bizkaia"
-msgstr ""
+msgstr "Bizkaia"
 
 #: i18n/states/ES.php:63
 msgid "Zamora"
@@ -2283,327 +2284,327 @@ msgstr "Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)"
 
 #: i18n/states/TR.php:13
 msgid "Adana"
-msgstr ""
+msgstr "Adana"
 
 #: i18n/states/TR.php:14
 msgid "Ad&#305;yaman"
-msgstr ""
+msgstr "Ad&#305;yaman"
 
 #: i18n/states/TR.php:15
 msgid "Afyon"
-msgstr ""
+msgstr "Afyon"
 
 #: i18n/states/TR.php:16
 msgid "A&#287;r&#305;"
-msgstr ""
+msgstr "A&#287;r&#305;"
 
 #: i18n/states/TR.php:17
 msgid "Amasya"
-msgstr ""
+msgstr "Amasya"
 
 #: i18n/states/TR.php:18
 msgid "Ankara"
-msgstr ""
+msgstr "Ankara"
 
 #: i18n/states/TR.php:19
 msgid "Antalya"
-msgstr ""
+msgstr "Antalya"
 
 #: i18n/states/TR.php:20
 msgid "Artvin"
-msgstr ""
+msgstr "Artvin"
 
 #: i18n/states/TR.php:21
 msgid "Ayd&#305;n"
-msgstr ""
+msgstr "Ayd&#305;n"
 
 #: i18n/states/TR.php:22
 msgid "Bal&#305;kesir"
-msgstr ""
+msgstr "Bal&#305;kesir"
 
 #: i18n/states/TR.php:23
 msgid "Bilecik"
-msgstr ""
+msgstr "Bilecik"
 
 #: i18n/states/TR.php:24
 msgid "Bing&#246;l"
-msgstr ""
+msgstr "Bing&#246;l"
 
 #: i18n/states/TR.php:25
 msgid "Bitlis"
-msgstr ""
+msgstr "Bitlis"
 
 #: i18n/states/TR.php:26
 msgid "Bolu"
-msgstr ""
+msgstr "Bolu"
 
 #: i18n/states/TR.php:27
 msgid "Burdur"
-msgstr ""
+msgstr "Burdur"
 
 #: i18n/states/TR.php:28
 msgid "Bursa"
-msgstr ""
+msgstr "Bursa"
 
 #: i18n/states/TR.php:29
 msgid "&#199;anakkale"
-msgstr ""
+msgstr "&#199;anakkale"
 
 #: i18n/states/TR.php:30
 msgid "&#199;ank&#305;r&#305;"
-msgstr ""
+msgstr "&#199;ank&#305;r&#305;"
 
 #: i18n/states/TR.php:31
 msgid "&#199;orum"
-msgstr ""
+msgstr "&#199;orum"
 
 #: i18n/states/TR.php:32
 msgid "Denizli"
-msgstr ""
+msgstr "Denizli"
 
 #: i18n/states/TR.php:33
 msgid "Diyarbak&#305;r"
-msgstr ""
+msgstr "Diyarbak&#305;r"
 
 #: i18n/states/TR.php:34
 msgid "Edirne"
-msgstr ""
+msgstr "Edirne"
 
 #: i18n/states/TR.php:35
 msgid "Elaz&#305;&#287;"
-msgstr ""
+msgstr "Elaz&#305;&#287;"
 
 #: i18n/states/TR.php:36
 msgid "Erzincan"
-msgstr ""
+msgstr "Erzincan"
 
 #: i18n/states/TR.php:37
 msgid "Erzurum"
-msgstr ""
+msgstr "Erzurum"
 
 #: i18n/states/TR.php:38
 msgid "Eski&#351;ehir"
-msgstr ""
+msgstr "Eski&#351;ehir"
 
 #: i18n/states/TR.php:39
 msgid "Gaziantep"
-msgstr ""
+msgstr "Gaziantep"
 
 #: i18n/states/TR.php:40
 msgid "Giresun"
-msgstr ""
+msgstr "Giresun"
 
 #: i18n/states/TR.php:41
 msgid "G&#252;m&#252;&#351;hane"
-msgstr ""
+msgstr "G&#252;m&#252;&#351;hane"
 
 #: i18n/states/TR.php:42
 msgid "Hakkari"
-msgstr ""
+msgstr "Hakkari"
 
 #: i18n/states/TR.php:43
 msgid "Hatay"
-msgstr ""
+msgstr "Hatay"
 
 #: i18n/states/TR.php:44
 msgid "Isparta"
-msgstr ""
+msgstr "Isparta"
 
 #: i18n/states/TR.php:45
 msgid "&#304;&#231;el"
-msgstr ""
+msgstr "&#304;&#231;el"
 
 #: i18n/states/TR.php:46
 msgid "&#304;stanbul"
-msgstr ""
+msgstr "Isztambul"
 
 #: i18n/states/TR.php:47
 msgid "&#304;zmir"
-msgstr ""
+msgstr "&#304;zmir"
 
 #: i18n/states/TR.php:48
 msgid "Kars"
-msgstr ""
+msgstr "Kars"
 
 #: i18n/states/TR.php:49
 msgid "Kastamonu"
-msgstr ""
+msgstr "Kastamonu"
 
 #: i18n/states/TR.php:50
 msgid "Kayseri"
-msgstr ""
+msgstr "Kayseri"
 
 #: i18n/states/TR.php:51
 msgid "K&#305;rklareli"
-msgstr ""
+msgstr "K&#305;rklareli"
 
 #: i18n/states/TR.php:52
 msgid "K&#305;r&#351;ehir"
-msgstr ""
+msgstr "K&#305;r&#351;ehir"
 
 #: i18n/states/TR.php:53
 msgid "Kocaeli"
-msgstr ""
+msgstr "Kocaeli"
 
 #: i18n/states/TR.php:54
 msgid "Konya"
-msgstr ""
+msgstr "Konya"
 
 #: i18n/states/TR.php:55
 msgid "K&#252;tahya"
-msgstr ""
+msgstr "K&#252;tahya"
 
 #: i18n/states/TR.php:56
 msgid "Malatya"
-msgstr ""
+msgstr "Malatya"
 
 #: i18n/states/TR.php:57
 msgid "Manisa"
-msgstr ""
+msgstr "Manisa"
 
 #: i18n/states/TR.php:58
 msgid "Kahramanmara&#351;"
-msgstr ""
+msgstr "Kahramanmara&#351;"
 
 #: i18n/states/TR.php:59
 msgid "Mardin"
-msgstr ""
+msgstr "Mardin"
 
 #: i18n/states/TR.php:60
 msgid "Mu&#287;la"
-msgstr ""
+msgstr "Mu&#287;la"
 
 #: i18n/states/TR.php:61
 msgid "Mu&#351;"
-msgstr ""
+msgstr "Mu&#351;"
 
 #: i18n/states/TR.php:62
 msgid "Nev&#351;ehir"
-msgstr ""
+msgstr "Nev&#351;ehir"
 
 #: i18n/states/TR.php:63
 msgid "Ni&#287;de"
-msgstr ""
+msgstr "Ni&#287;de"
 
 #: i18n/states/TR.php:64
 msgid "Ordu"
-msgstr ""
+msgstr "Ordu"
 
 #: i18n/states/TR.php:65
 msgid "Rize"
-msgstr ""
+msgstr "Rize"
 
 #: i18n/states/TR.php:66
 msgid "Sakarya"
-msgstr ""
+msgstr "Sakarya"
 
 #: i18n/states/TR.php:67
 msgid "Samsun"
-msgstr ""
+msgstr "Samsun"
 
 #: i18n/states/TR.php:68
 msgid "Siirt"
-msgstr ""
+msgstr "Siirt"
 
 #: i18n/states/TR.php:69
 msgid "Sinop"
-msgstr ""
+msgstr "Sinop"
 
 #: i18n/states/TR.php:70
 msgid "Sivas"
-msgstr ""
+msgstr "Sivas"
 
 #: i18n/states/TR.php:71
 msgid "Tekirda&#287;"
-msgstr ""
+msgstr "Tekirda&#287;"
 
 #: i18n/states/TR.php:72
 msgid "Tokat"
-msgstr ""
+msgstr "Tokat"
 
 #: i18n/states/TR.php:73
 msgid "Trabzon"
-msgstr ""
+msgstr "Trabzon"
 
 #: i18n/states/TR.php:74
 msgid "Tunceli"
-msgstr ""
+msgstr "Tunceli"
 
 #: i18n/states/TR.php:75
 msgid "&#350;anl&#305;urfa"
-msgstr ""
+msgstr "&#350;anl&#305;urfa"
 
 #: i18n/states/TR.php:76
 msgid "U&#351;ak"
-msgstr ""
+msgstr "U&#351;ak"
 
 #: i18n/states/TR.php:77
 msgid "Van"
-msgstr ""
+msgstr "Van"
 
 #: i18n/states/TR.php:78
 msgid "Yozgat"
-msgstr ""
+msgstr "Yozgat"
 
 #: i18n/states/TR.php:79
 msgid "Zonguldak"
-msgstr ""
+msgstr "Zonguldak"
 
 #: i18n/states/TR.php:80
 msgid "Aksaray"
-msgstr ""
+msgstr "Aksaray"
 
 #: i18n/states/TR.php:81
 msgid "Bayburt"
-msgstr ""
+msgstr "Bayburt"
 
 #: i18n/states/TR.php:82
 msgid "Karaman"
-msgstr ""
+msgstr "Karaman"
 
 #: i18n/states/TR.php:83
 msgid "K&#305;r&#305;kkale"
-msgstr ""
+msgstr "K&#305;r&#305;kkale"
 
 #: i18n/states/TR.php:84
 msgid "Batman"
-msgstr ""
+msgstr "Batman"
 
 #: i18n/states/TR.php:85
 msgid "&#350;&#305;rnak"
-msgstr ""
+msgstr "&#350;&#305;rnak"
 
 #: i18n/states/TR.php:86
 msgid "Bart&#305;n"
-msgstr ""
+msgstr "Bart&#305;n"
 
 #: i18n/states/TR.php:87
 msgid "Ardahan"
-msgstr ""
+msgstr "Ardahan"
 
 #: i18n/states/TR.php:88
 msgid "I&#287;d&#305;r"
-msgstr ""
+msgstr "I&#287;d&#305;r"
 
 #: i18n/states/TR.php:89
 msgid "Yalova"
-msgstr ""
+msgstr "Yalova"
 
 #: i18n/states/TR.php:90
 msgid "Karab&#252;k"
-msgstr ""
+msgstr "Karab&#252;k"
 
 #: i18n/states/TR.php:91
 msgid "Kilis"
-msgstr ""
+msgstr "Kilis"
 
 #: i18n/states/TR.php:92
 msgid "Osmaniye"
-msgstr ""
+msgstr "Osmaniye"
 
 #: i18n/states/TR.php:93
 msgid "D&#252;zce"
-msgstr ""
+msgstr "D&#252;zce"
 
 #: i18n/states/US.php:13
 msgid "Alabama"
@@ -3098,7 +3099,7 @@ msgstr "Elfogyott"
 
 #: includes/abstracts/abstract-wc-product.php:909
 #: includes/abstracts/abstract-wc-product.php:915
-#: includes/class-wc-cart.php:1403 includes/class-wc-order.php:839
+#: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Ingyenes!"
@@ -3328,7 +3329,7 @@ msgid "File %d"
 msgstr "Fájl %d"
 
 #: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
-#: includes/class-wc-order.php:1538
+#: includes/class-wc-order.php:1537
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "#%s termék készlete csökkentve: %s volt, majd %s lett."
 
@@ -3404,33 +3405,33 @@ msgid ""
 "apologise for any inconvenience caused."
 msgstr "Sajnáljuk, \"%s\" elfogyott. Kérjük szerkeszd a kosaradat és próbálkozz újra. Elnézést kérünk az okozott kellemetlenségért."
 
-#: includes/class-wc-cart.php:782
+#: includes/class-wc-cart.php:787
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
 msgstr "&quot;%s&quot; nem megvásárolható, sajnáljuk."
 
-#: includes/class-wc-cart.php:789
+#: includes/class-wc-cart.php:794
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr "&quot;%s&quot; nem adható a kosárhoz, mert a termék elfogyott."
 
-#: includes/class-wc-cart.php:794
+#: includes/class-wc-cart.php:799
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr "Ekkora mennyiségű &quot;%s&quot; nem rakható a kosárba, mivel nincs elég készleten (%s maradt)."
 
-#: includes/class-wc-cart.php:808 includes/class-wc-cart.php:827
-#: includes/class-wc-cart.php:840 includes/class-wc-frontend-scripts.php:151
-#: includes/wc-cart-functions.php:102 templates/cart/mini-cart.php:64
+#: includes/class-wc-cart.php:813 includes/class-wc-cart.php:832
+#: includes/class-wc-cart.php:845 includes/class-wc-frontend-scripts.php:151
+#: includes/wc-cart-functions.php:98 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "Kosár megtekintése"
 
-#: includes/class-wc-cart.php:809
+#: includes/class-wc-cart.php:814
 msgid "You cannot add another &quot;%s&quot; to your cart."
 msgstr "Nem adhatsz hozzá még egy &quot;%s&quot; a kosaradhoz."
 
-#: includes/class-wc-cart.php:828 includes/class-wc-cart.php:841
+#: includes/class-wc-cart.php:833 includes/class-wc-cart.php:846
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
@@ -3519,7 +3520,7 @@ msgstr "A felhasználási feltételek elfogadása kötelező."
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
-msgstr ""
+msgstr "Sajnos <strong>nem szállítunk ide: %s</strong>. Kérünk, válassz egy másik szállítási címet."
 
 #: includes/class-wc-checkout.php:584
 msgid "Invalid shipping method."
@@ -4811,7 +4812,7 @@ msgid "Please enter your name."
 msgstr "Kérlek írd be a nevedet."
 
 #: includes/class-wc-form-handler.php:184
-#: includes/wc-customer-functions.php:46
+#: includes/wc-customer-functions.php:48
 msgid "Please provide a valid email address."
 msgstr "Kérlek írj be egy érvényes e-mail címet."
 
@@ -4914,7 +4915,7 @@ msgid "Log in"
 msgstr "Bejelentkezés"
 
 #: includes/class-wc-form-handler.php:873
-#: includes/wc-customer-functions.php:107
+#: includes/wc-customer-functions.php:110
 msgid "ERROR"
 msgstr "HIBA"
 
@@ -4946,49 +4947,49 @@ msgstr "Sajnáljuk, ez a termék nem elérhető. Kérjük válassz egy másik ko
 msgid "Select an option&hellip;"
 msgstr "Válassz egy opciót&hellip;"
 
-#: includes/class-wc-install.php:214
+#: includes/class-wc-install.php:217
 msgctxt "page_slug"
 msgid "shop"
 msgstr "uzlet"
 
-#: includes/class-wc-install.php:215
+#: includes/class-wc-install.php:218
 msgid "Shop"
 msgstr "Üzlet"
 
-#: includes/class-wc-install.php:219
+#: includes/class-wc-install.php:222
 msgctxt "page_slug"
 msgid "cart"
 msgstr "kosar"
 
-#: includes/class-wc-install.php:220
+#: includes/class-wc-install.php:223
 #: includes/widgets/class-wc-widget-cart.php:29
 #: includes/widgets/class-wc-widget-cart.php:56
 msgid "Cart"
 msgstr "Kosár"
 
-#: includes/class-wc-install.php:224
+#: includes/class-wc-install.php:227
 msgctxt "page_slug"
 msgid "checkout"
 msgstr "penztar"
 
-#: includes/class-wc-install.php:225 templates/cart/mini-cart.php:65
+#: includes/class-wc-install.php:228 templates/cart/mini-cart.php:65
 msgid "Checkout"
 msgstr "Pénztár"
 
-#: includes/class-wc-install.php:229
+#: includes/class-wc-install.php:232
 msgctxt "page_slug"
 msgid "my-account"
 msgstr "fiokom"
 
-#: includes/class-wc-install.php:441
+#: includes/class-wc-install.php:444
 msgid "Customer"
 msgstr "Vásárló"
 
-#: includes/class-wc-install.php:448
+#: includes/class-wc-install.php:451
 msgid "Shop Manager"
 msgstr "Üzlet kezelő"
 
-#: includes/class-wc-install.php:689
+#: includes/class-wc-install.php:692
 msgid "What's new:"
 msgstr "Újdonságok:"
 
@@ -4997,43 +4998,43 @@ msgctxt "hash before order number"
 msgid "#"
 msgstr "#"
 
-#: includes/class-wc-order.php:834
+#: includes/class-wc-order.php:833
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr "&nbsp;<small>%s %s</small>"
 
-#: includes/class-wc-order.php:897
+#: includes/class-wc-order.php:896
 msgid "Cart Subtotal:"
 msgstr "Kosár részösszeg:"
 
-#: includes/class-wc-order.php:904
+#: includes/class-wc-order.php:903
 msgid "Cart Discount:"
 msgstr "Kosár kedvezmény:"
 
-#: includes/class-wc-order.php:911
+#: includes/class-wc-order.php:910
 msgid "Shipping:"
 msgstr "Szállítás:"
 
-#: includes/class-wc-order.php:958
+#: includes/class-wc-order.php:957
 msgid "Order Discount:"
 msgstr "Rendelési kedvezmény:"
 
-#: includes/class-wc-order.php:964
+#: includes/class-wc-order.php:963
 msgid "Order Total:"
 msgstr "Rendelés végösszeg:"
 
-#: includes/class-wc-order.php:982 includes/wc-cart-functions.php:226
+#: includes/class-wc-order.php:981 includes/wc-cart-functions.php:222
 msgid "(Includes %s)"
 msgstr "(tartalmazza %s)"
 
-#: includes/class-wc-order.php:1225 includes/class-wc-order.php:1226
+#: includes/class-wc-order.php:1224 includes/class-wc-order.php:1225
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: includes/class-wc-order.php:1281
+#: includes/class-wc-order.php:1280
 msgid "Order status changed from %s to %s."
 msgstr "Rendelés állapota %s volt, majd %s lett."
 
-#: includes/class-wc-order.php:1550
+#: includes/class-wc-order.php:1549
 msgid "Order item stock reduced successfully."
 msgstr "Termék készletmennyiség sikeresen csökkentve."
 
@@ -5441,7 +5442,7 @@ msgstr "Ennek a variálható terméknek nincsenek aktív variációi és nem pub
 msgid "%s &ndash; %s%s"
 msgstr "%s &ndash; %s%s"
 
-#: includes/class-wc-shortcodes.php:965
+#: includes/class-wc-shortcodes.php:973
 msgid ""
 "Use $args[\"posts_per_page\"] instead. Deprecated argument will be removed "
 "in WC 2.2."
@@ -6127,7 +6128,7 @@ msgstr "Rendelés visszavonása és kosár helyreállítása"
 msgid ""
 "Thank you - your order is now pending payment. You should be automatically "
 "redirected to PayPal to make payment."
-msgstr "Köszönjük - rendelés jelenleg fizetésre vár. A fizetéshez automatikusan átirányítunk a PayPal oldalára."
+msgstr "Köszönjük - rendelésed jelenleg fizetésre vár. A fizetéshez automatikusan átirányítunk a PayPal oldalára."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:689
 msgid "Validation error: PayPal currencies do not match (code %s)."
@@ -6658,179 +6659,183 @@ msgstr "Sajnáljuk, nem találtunk ilyen rendelési azonosítót az adatbázisba
 msgid "This product is protected and cannot be purchased."
 msgstr "Ez a termék védett és nem megvásárolható."
 
-#: includes/wc-cart-functions.php:87
+#: includes/wc-cart-functions.php:83
 msgid "Added &quot;%s&quot; to your cart."
 msgstr "&quot;%s&quot; hozzáadva a kosaradhoz."
 
-#: includes/wc-cart-functions.php:87
+#: includes/wc-cart-functions.php:83
 msgid "&quot; and &quot;"
 msgstr "&quot; és &quot;"
 
-#: includes/wc-cart-functions.php:90
+#: includes/wc-cart-functions.php:86
 msgid "&quot;%s&quot; was successfully added to your cart."
 msgstr "&quot;%s&quot; sikeresen hozzáadva a kosaradhoz."
 
-#: includes/wc-cart-functions.php:98
+#: includes/wc-cart-functions.php:94
 msgid "Continue Shopping"
 msgstr "Vásárlás folytatása"
 
-#: includes/wc-cart-functions.php:198
+#: includes/wc-cart-functions.php:194
 msgid "Free shipping coupon"
 msgstr "Ingyenes szállítás kupon"
 
-#: includes/wc-cart-functions.php:200
+#: includes/wc-cart-functions.php:196
 msgid "[Remove]"
 msgstr "[Eltávolítás]"
 
-#: includes/wc-cart-functions.php:261
+#: includes/wc-cart-functions.php:257
 msgid "Free"
 msgstr "Ingyenes"
 
-#: includes/wc-core-functions.php:162
+#: includes/wc-core-functions.php:167
 msgid "Australian Dollars"
 msgstr "ausztrál dollár"
 
-#: includes/wc-core-functions.php:163
+#: includes/wc-core-functions.php:168
 msgid "Brazilian Real"
 msgstr "brazíliai real"
 
-#: includes/wc-core-functions.php:164
+#: includes/wc-core-functions.php:169
 msgid "Bulgarian Lev"
 msgstr "bolgár leva"
 
-#: includes/wc-core-functions.php:165
+#: includes/wc-core-functions.php:170
 msgid "Canadian Dollars"
 msgstr "kanadai dollár"
 
-#: includes/wc-core-functions.php:166
+#: includes/wc-core-functions.php:171
 msgid "Chilean Peso"
 msgstr "chilei peso"
 
-#: includes/wc-core-functions.php:167
+#: includes/wc-core-functions.php:172
 msgid "Chinese Yuan"
 msgstr "kínai jüan"
 
-#: includes/wc-core-functions.php:168
+#: includes/wc-core-functions.php:173
 msgid "Colombian Peso"
-msgstr ""
+msgstr "Kolumbiai peso"
 
-#: includes/wc-core-functions.php:169
+#: includes/wc-core-functions.php:174
 msgid "Czech Koruna"
 msgstr "cseh korona"
 
-#: includes/wc-core-functions.php:170
+#: includes/wc-core-functions.php:175
 msgid "Danish Krone"
 msgstr "dán korona"
 
-#: includes/wc-core-functions.php:171
+#: includes/wc-core-functions.php:176
 msgid "Euros"
 msgstr "euró"
 
-#: includes/wc-core-functions.php:172
+#: includes/wc-core-functions.php:177
 msgid "Hong Kong Dollar"
 msgstr "hongkongi dollár"
 
-#: includes/wc-core-functions.php:173
+#: includes/wc-core-functions.php:178
+msgid "Croatia kuna"
+msgstr "Horvát kuna"
+
+#: includes/wc-core-functions.php:179
 msgid "Hungarian Forint"
 msgstr "magyar forint"
 
-#: includes/wc-core-functions.php:174
+#: includes/wc-core-functions.php:180
 msgid "Icelandic krona"
 msgstr "izlandi korona"
 
-#: includes/wc-core-functions.php:175
+#: includes/wc-core-functions.php:181
 msgid "Indonesia Rupiah"
 msgstr "indonéz rúpia"
 
-#: includes/wc-core-functions.php:176
+#: includes/wc-core-functions.php:182
 msgid "Indian Rupee"
 msgstr "indiai rúpia"
 
-#: includes/wc-core-functions.php:177
+#: includes/wc-core-functions.php:183
 msgid "Israeli Shekel"
 msgstr "izraeli sékel"
 
-#: includes/wc-core-functions.php:178
+#: includes/wc-core-functions.php:184
 msgid "Japanese Yen"
 msgstr "japán yen"
 
-#: includes/wc-core-functions.php:179
+#: includes/wc-core-functions.php:185
 msgid "South Korean Won"
 msgstr "dél-koreai von"
 
-#: includes/wc-core-functions.php:180
+#: includes/wc-core-functions.php:186
 msgid "Malaysian Ringgits"
 msgstr "maláj ringgit"
 
-#: includes/wc-core-functions.php:181
+#: includes/wc-core-functions.php:187
 msgid "Mexican Peso"
 msgstr "mexikói peso"
 
-#: includes/wc-core-functions.php:182
+#: includes/wc-core-functions.php:188
 msgid "Nigerian Naira"
-msgstr ""
+msgstr "Nigériai naira"
 
-#: includes/wc-core-functions.php:183
+#: includes/wc-core-functions.php:189
 msgid "Norwegian Krone"
 msgstr "norvég korona"
 
-#: includes/wc-core-functions.php:184
+#: includes/wc-core-functions.php:190
 msgid "New Zealand Dollar"
 msgstr "új-zélandi dollár"
 
-#: includes/wc-core-functions.php:185
+#: includes/wc-core-functions.php:191
 msgid "Philippine Pesos"
 msgstr "fülöp-szigeteki peso"
 
-#: includes/wc-core-functions.php:186
+#: includes/wc-core-functions.php:192
 msgid "Polish Zloty"
 msgstr "lengyel zloty"
 
-#: includes/wc-core-functions.php:187
+#: includes/wc-core-functions.php:193
 msgid "Pounds Sterling"
 msgstr "font sterling"
 
-#: includes/wc-core-functions.php:188
+#: includes/wc-core-functions.php:194
 msgid "Romanian Leu"
 msgstr "román lej"
 
-#: includes/wc-core-functions.php:189
+#: includes/wc-core-functions.php:195
 msgid "Russian Ruble"
 msgstr "orosz rubel"
 
-#: includes/wc-core-functions.php:190
+#: includes/wc-core-functions.php:196
 msgid "Singapore Dollar"
 msgstr "szingapúri dollár"
 
-#: includes/wc-core-functions.php:191
+#: includes/wc-core-functions.php:197
 msgid "South African rand"
 msgstr "dél-afrikai rand"
 
-#: includes/wc-core-functions.php:192
+#: includes/wc-core-functions.php:198
 msgid "Swedish Krona"
 msgstr "svéd korona"
 
-#: includes/wc-core-functions.php:193
+#: includes/wc-core-functions.php:199
 msgid "Swiss Franc"
 msgstr "svájci frank"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:200
 msgid "Taiwan New Dollars"
 msgstr "tajvani új dollár"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:201
 msgid "Thai Baht"
 msgstr "thai bát"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:202
 msgid "Turkish Lira"
 msgstr "török líra"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:203
 msgid "US Dollars"
 msgstr "USA-dollár"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:204
 msgid "Vietnamese Dong"
 msgstr "vietnám dong"
 
@@ -6850,25 +6855,25 @@ msgstr "Termék kedvezmény"
 msgid "Product % Discount"
 msgstr "Termék % kedvezmény"
 
-#: includes/wc-customer-functions.php:49
+#: includes/wc-customer-functions.php:52
 msgid ""
 "An account is already registered with your email address. Please login."
 msgstr "Már regisztráltak egy azonosítót ezzel az e-mail címmel. Kérjük válassz másikat."
 
-#: includes/wc-customer-functions.php:59
+#: includes/wc-customer-functions.php:61
 msgid "Please enter a valid account username."
 msgstr "Kérlek írj be egy érvényes felhasználónevet."
 
-#: includes/wc-customer-functions.php:62
+#: includes/wc-customer-functions.php:65
 msgid ""
 "An account is already registered with that username. Please choose another."
 msgstr "Már regisztráltak egy azonosítót ezzel a felhasználónévvel. Kérjük válassz másikat."
 
-#: includes/wc-customer-functions.php:82
+#: includes/wc-customer-functions.php:85
 msgid "Please enter an account password."
 msgstr "Kérjük válassz egy jelszót az azonosítódhoz."
 
-#: includes/wc-customer-functions.php:107
+#: includes/wc-customer-functions.php:110
 msgid ""
 "Couldn&#8217;t register you&hellip; please contact us if you continue to "
 "have problems."
@@ -6960,11 +6965,11 @@ msgstr "Termékek keresése"
 msgid "Search"
 msgstr "Keresés"
 
-#: includes/wc-term-functions.php:118
+#: includes/wc-term-functions.php:121
 msgid "Select a category"
 msgstr "Válassz egy kategóriát"
 
-#: includes/wc-term-functions.php:122
+#: includes/wc-term-functions.php:125
 msgid "Uncategorized"
 msgstr "Nem kategorizált"
 
@@ -7814,21 +7819,6 @@ msgstr "Sajnáljuk, úgy tűnik nincsenek fizetési módok, melyek támogatnák 
 msgid "Add Payment Method"
 msgstr "Fizetési mód hozzáadása"
 
-#: templates/myaccount/form-change-password.php:20
-#: templates/myaccount/form-lost-password.php:31
-msgid "New password"
-msgstr "Új jelszó"
-
-#: templates/myaccount/form-change-password.php:24
-#: templates/myaccount/form-lost-password.php:35
-msgid "Re-enter new password"
-msgstr "Új jelszó megismétlése"
-
-#: templates/myaccount/form-change-password.php:29
-#: templates/myaccount/form-lost-password.php:46
-msgid "Save"
-msgstr "Mentés"
-
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
 msgstr "Vezetéknév"
@@ -7889,9 +7879,21 @@ msgstr "Elfelejtetted a jelszavadat? Kérjük írd be a felhasználónevedet vag
 msgid "Enter a new password below."
 msgstr "Írd be az új jelszavadat."
 
+#: templates/myaccount/form-lost-password.php:31
+msgid "New password"
+msgstr "Új jelszó"
+
+#: templates/myaccount/form-lost-password.php:35
+msgid "Re-enter new password"
+msgstr "Új jelszó megismétlése"
+
 #: templates/myaccount/form-lost-password.php:46
 msgid "Reset Password"
 msgstr "Új jelszó igénylése"
+
+#: templates/myaccount/form-lost-password.php:46
+msgid "Save"
+msgstr "Mentés"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."

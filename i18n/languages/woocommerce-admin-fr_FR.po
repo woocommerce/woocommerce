@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-11 17:51+0000\n"
+"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
+"PO-Revision-Date: 2014-02-13 10:01+0000\n"
 "Last-Translator: ABSOLUTE_Web <woocommerce@absoluteweb.net>\n"
 "Language-Team: French (France) (http://www.transifex.com/projects/p/woocommerce-core/language/fr_FR/)\n"
 "MIME-Version: 1.0\n"
@@ -480,6 +480,7 @@ msgstr "Avant de demander de l'aide, nous vous recommandons de vérifier la page
 #: includes/admin/class-wc-admin-help.php:67
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/views/html-admin-page-status.php:5
+#: includes/admin/views/html-notice-template-check.php:6
 msgid "System Status"
 msgstr "État du système"
 
@@ -1645,7 +1646,7 @@ msgid "Price"
 msgstr "Prix"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:256
-#: includes/admin/reports/class-wc-report-sales-by-category.php:141
+#: includes/admin/reports/class-wc-report-sales-by-category.php:142
 msgid "Categories"
 msgstr "Catégories"
 
@@ -1655,11 +1656,11 @@ msgstr "Mots-Clés"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:315
-#: includes/admin/reports/class-wc-report-customers.php:199
-#: includes/admin/reports/class-wc-report-sales-by-category.php:213
-#: includes/admin/reports/class-wc-report-sales-by-date.php:158
-#: includes/admin/reports/class-wc-report-sales-by-product.php:323
+#: includes/admin/reports/class-wc-report-coupon-usage.php:316
+#: includes/admin/reports/class-wc-report-customers.php:201
+#: includes/admin/reports/class-wc-report-sales-by-category.php:214
+#: includes/admin/reports/class-wc-report-sales-by-date.php:160
+#: includes/admin/reports/class-wc-report-sales-by-product.php:324
 msgid "Date"
 msgstr "Date"
 
@@ -1835,7 +1836,7 @@ msgstr "Type de Code Promo"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:79
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
-#: includes/admin/reports/class-wc-report-sales-by-date.php:320
+#: includes/admin/reports/class-wc-report-sales-by-date.php:322
 msgid "Coupon amount"
 msgstr "Montant du code"
 
@@ -2159,7 +2160,7 @@ msgstr "Cochez cette case si le code promo ne doit pas être appliqué aux artic
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:586
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:603
-#: includes/admin/reports/class-wc-report-sales-by-product.php:177
+#: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Search for a product&hellip;"
 msgstr "Recherche d'un produit&hellip;"
 
@@ -2747,7 +2748,7 @@ msgid "Shipping only"
 msgstr "Expédition seulement"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:252
-#: includes/admin/reports/class-wc-report-sales-by-category.php:170
+#: includes/admin/reports/class-wc-report-sales-by-category.php:171
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
@@ -3285,113 +3286,113 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Activer cette option si un produit n'est pas expédié ou s'il n'y a pas de frais de port"
 
-#: includes/admin/reports/class-wc-admin-report.php:390
+#: includes/admin/reports/class-wc-admin-report.php:395
 msgid "Sold %s worth in the last %d days"
 msgstr "Vendu une valeur de %s sur les %d derniers jours"
 
-#: includes/admin/reports/class-wc-admin-report.php:392
+#: includes/admin/reports/class-wc-admin-report.php:397
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "Vendu 1 article sur les %d derniers jours"
 msgstr[1] "Vendu %d articles sur les %d derniers jours"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:70
+#: includes/admin/reports/class-wc-report-coupon-usage.php:71
 msgid "%s discounts in total"
 msgstr "%s remises au total"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:76
+#: includes/admin/reports/class-wc-report-coupon-usage.php:77
 msgid "%s coupons used in total"
 msgstr "%s codes promo utilisés au total"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:89
-#: includes/admin/reports/class-wc-report-customers.php:138
-#: includes/admin/reports/class-wc-report-sales-by-category.php:67
-#: includes/admin/reports/class-wc-report-sales-by-date.php:122
-#: includes/admin/reports/class-wc-report-sales-by-product.php:107
+#: includes/admin/reports/class-wc-report-coupon-usage.php:90
+#: includes/admin/reports/class-wc-report-customers.php:140
+#: includes/admin/reports/class-wc-report-sales-by-category.php:68
+#: includes/admin/reports/class-wc-report-sales-by-date.php:124
+#: includes/admin/reports/class-wc-report-sales-by-product.php:108
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:41
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:41
 msgid "Year"
 msgstr "Année"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:90
-#: includes/admin/reports/class-wc-report-customers.php:139
-#: includes/admin/reports/class-wc-report-sales-by-category.php:68
-#: includes/admin/reports/class-wc-report-sales-by-date.php:123
-#: includes/admin/reports/class-wc-report-sales-by-product.php:108
+#: includes/admin/reports/class-wc-report-coupon-usage.php:91
+#: includes/admin/reports/class-wc-report-customers.php:141
+#: includes/admin/reports/class-wc-report-sales-by-category.php:69
+#: includes/admin/reports/class-wc-report-sales-by-date.php:125
+#: includes/admin/reports/class-wc-report-sales-by-product.php:109
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:42
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:42
 msgid "Last Month"
 msgstr "Mois dernier"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
-#: includes/admin/reports/class-wc-report-customers.php:140
-#: includes/admin/reports/class-wc-report-sales-by-category.php:69
-#: includes/admin/reports/class-wc-report-sales-by-date.php:124
-#: includes/admin/reports/class-wc-report-sales-by-product.php:109
+#: includes/admin/reports/class-wc-report-coupon-usage.php:92
+#: includes/admin/reports/class-wc-report-customers.php:142
+#: includes/admin/reports/class-wc-report-sales-by-category.php:70
+#: includes/admin/reports/class-wc-report-sales-by-date.php:126
+#: includes/admin/reports/class-wc-report-sales-by-product.php:110
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:43
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:43
 msgid "This Month"
 msgstr "Ce mois"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
-#: includes/admin/reports/class-wc-report-customers.php:141
-#: includes/admin/reports/class-wc-report-sales-by-category.php:70
-#: includes/admin/reports/class-wc-report-sales-by-date.php:125
-#: includes/admin/reports/class-wc-report-sales-by-product.php:110
+#: includes/admin/reports/class-wc-report-coupon-usage.php:93
+#: includes/admin/reports/class-wc-report-customers.php:143
+#: includes/admin/reports/class-wc-report-sales-by-category.php:71
+#: includes/admin/reports/class-wc-report-sales-by-date.php:127
+#: includes/admin/reports/class-wc-report-sales-by-product.php:111
 msgid "Last 7 Days"
 msgstr "7 derniers jours"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:132
+#: includes/admin/reports/class-wc-report-coupon-usage.php:133
 msgid "Filter by coupon"
 msgstr "Filtrer par code promo"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:160
+#: includes/admin/reports/class-wc-report-coupon-usage.php:161
 msgid "Choose coupons&hellip;"
 msgstr "Choisir les codes promo&hellip;"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:161
+#: includes/admin/reports/class-wc-report-coupon-usage.php:162
 msgid "All coupons"
 msgstr "Tous les codes promo"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:168
-#: includes/admin/reports/class-wc-report-sales-by-category.php:172
-#: includes/admin/reports/class-wc-report-sales-by-product.php:178
+#: includes/admin/reports/class-wc-report-coupon-usage.php:169
+#: includes/admin/reports/class-wc-report-sales-by-category.php:173
+#: includes/admin/reports/class-wc-report-sales-by-product.php:179
 msgid "Show"
 msgstr "Afficher"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:181
+#: includes/admin/reports/class-wc-report-coupon-usage.php:182
 msgid "No used coupons found"
 msgstr "Aucun code promo utilisé"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:186
+#: includes/admin/reports/class-wc-report-coupon-usage.php:187
 msgid "Most Popular"
 msgstr "Plus populaire"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:228
-#: includes/admin/reports/class-wc-report-coupon-usage.php:275
+#: includes/admin/reports/class-wc-report-coupon-usage.php:229
+#: includes/admin/reports/class-wc-report-coupon-usage.php:276
 msgid "No coupons found in range"
 msgstr "Aucun code promo trouvé dans cet interval"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:233
+#: includes/admin/reports/class-wc-report-coupon-usage.php:234
 msgid "Most Discount"
 msgstr "Plus forte remise"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:318
-#: includes/admin/reports/class-wc-report-customers.php:202
-#: includes/admin/reports/class-wc-report-sales-by-category.php:216
-#: includes/admin/reports/class-wc-report-sales-by-date.php:162
-#: includes/admin/reports/class-wc-report-sales-by-product.php:326
+#: includes/admin/reports/class-wc-report-coupon-usage.php:319
+#: includes/admin/reports/class-wc-report-customers.php:204
+#: includes/admin/reports/class-wc-report-sales-by-category.php:217
+#: includes/admin/reports/class-wc-report-sales-by-date.php:164
+#: includes/admin/reports/class-wc-report-sales-by-product.php:327
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
 #: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "Export CSV"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:409
+#: includes/admin/reports/class-wc-report-coupon-usage.php:410
 msgid "Number of coupons used"
 msgstr "Nombre de codes promo utilisés"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:417
+#: includes/admin/reports/class-wc-report-coupon-usage.php:418
 msgid "Discount amount"
 msgstr "Montant de remise"
 
@@ -3441,45 +3442,45 @@ msgstr "Dépensé"
 msgid "Last order"
 msgstr "Dernière commande"
 
-#: includes/admin/reports/class-wc-report-customers.php:15
+#: includes/admin/reports/class-wc-report-customers.php:17
 msgid "%s signups in this period"
 msgstr "%s inscriptions sur cette période"
 
-#: includes/admin/reports/class-wc-report-customers.php:83
+#: includes/admin/reports/class-wc-report-customers.php:85
 msgid "Customer Sales"
 msgstr "Ventes clients"
 
-#: includes/admin/reports/class-wc-report-customers.php:84
+#: includes/admin/reports/class-wc-report-customers.php:86
 msgid "Guest Sales"
 msgstr "Ventes invités"
 
-#: includes/admin/reports/class-wc-report-customers.php:93
-#: includes/admin/reports/class-wc-report-customers.php:289
+#: includes/admin/reports/class-wc-report-customers.php:95
+#: includes/admin/reports/class-wc-report-customers.php:291
 msgid "Customer Orders"
 msgstr "Commandes client"
 
-#: includes/admin/reports/class-wc-report-customers.php:98
-#: includes/admin/reports/class-wc-report-customers.php:299
+#: includes/admin/reports/class-wc-report-customers.php:100
+#: includes/admin/reports/class-wc-report-customers.php:301
 msgid "Guest Orders"
 msgstr "Commandes invités"
 
-#: includes/admin/reports/class-wc-report-customers.php:117
+#: includes/admin/reports/class-wc-report-customers.php:119
 msgid "orders"
 msgstr "commande"
 
-#: includes/admin/reports/class-wc-report-customers.php:295
+#: includes/admin/reports/class-wc-report-customers.php:297
 msgid "customer orders"
 msgstr "commandes clients"
 
-#: includes/admin/reports/class-wc-report-customers.php:305
+#: includes/admin/reports/class-wc-report-customers.php:307
 msgid "guest orders"
 msgstr "commandes invités"
 
-#: includes/admin/reports/class-wc-report-customers.php:309
+#: includes/admin/reports/class-wc-report-customers.php:311
 msgid "Signups"
 msgstr "Inscriptions"
 
-#: includes/admin/reports/class-wc-report-customers.php:316
+#: includes/admin/reports/class-wc-report-customers.php:318
 msgid "new users"
 msgstr "nouveaux utilisateurs"
 
@@ -3491,108 +3492,108 @@ msgstr "Aucun stock faible."
 msgid "No out of stock products found."
 msgstr "Aucun produit en rupture."
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:49
+#: includes/admin/reports/class-wc-report-sales-by-category.php:50
 msgid "%s sales in %s"
 msgstr "%s ventes en %s"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:156
+#: includes/admin/reports/class-wc-report-sales-by-category.php:157
 msgid "Select categories&hellip;"
 msgstr "Sélectionner catégories&hellip;"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:171
+#: includes/admin/reports/class-wc-report-sales-by-category.php:172
 msgid "All"
 msgstr "Tout"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:231
+#: includes/admin/reports/class-wc-report-sales-by-category.php:232
 msgid "&larr; Choose a category to view stats"
 msgstr "&larr; Choisissez une catégorie pour voir les statistiques"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:74
+#: includes/admin/reports/class-wc-report-sales-by-date.php:76
 msgid "%s average daily sales"
 msgstr "%s de ventes journalières moyennes"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:77
+#: includes/admin/reports/class-wc-report-sales-by-date.php:79
 msgid "%s average monthly sales"
 msgstr "%s de ventes mensuelles moyennes"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:82
+#: includes/admin/reports/class-wc-report-sales-by-date.php:84
 msgid "%s sales in this period"
 msgstr "%s de ventes sur cette période"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:92
+#: includes/admin/reports/class-wc-report-sales-by-date.php:94
 msgid "%s orders placed"
 msgstr "%s commandes passées"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:97
+#: includes/admin/reports/class-wc-report-sales-by-date.php:99
 msgid "%s items purchased"
 msgstr "%s articles achetés"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:102
+#: includes/admin/reports/class-wc-report-sales-by-date.php:104
 msgid "%s charged for shipping"
 msgstr "%s facturés pour la livraison"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:107
+#: includes/admin/reports/class-wc-report-sales-by-date.php:109
 msgid "%s worth of coupons used"
 msgstr "%s de codes promo utilisés"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:294
-#: includes/admin/reports/class-wc-report-sales-by-product.php:440
+#: includes/admin/reports/class-wc-report-sales-by-date.php:296
+#: includes/admin/reports/class-wc-report-sales-by-product.php:441
 msgid "Number of items sold"
 msgstr "Nombre d'articles vendus"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:302
+#: includes/admin/reports/class-wc-report-sales-by-date.php:304
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:113
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:109
 msgid "Number of orders"
 msgstr "Nombre de commandes"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:310
+#: includes/admin/reports/class-wc-report-sales-by-date.php:312
 msgid "Average sales amount"
 msgstr "Montant moyen des ventes"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:330
+#: includes/admin/reports/class-wc-report-sales-by-date.php:332
 msgid "Shipping amount"
 msgstr "Montant de livraison"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:340
-#: includes/admin/reports/class-wc-report-sales-by-product.php:448
+#: includes/admin/reports/class-wc-report-sales-by-date.php:342
+#: includes/admin/reports/class-wc-report-sales-by-product.php:449
 msgid "Sales amount"
 msgstr "Montant des ventes"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:87
+#: includes/admin/reports/class-wc-report-sales-by-product.php:88
 msgid "%s sales for the selected items"
 msgstr "%s ventes pour les articles sélectionnés"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:92
+#: includes/admin/reports/class-wc-report-sales-by-product.php:93
 msgid "%s purchases for the selected items"
 msgstr "%s achats pour les articles sélectionnés"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:138
+#: includes/admin/reports/class-wc-report-sales-by-product.php:139
 msgid "Showing reports for:"
 msgstr "Afficher les rapports pour :"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:164
+#: includes/admin/reports/class-wc-report-sales-by-product.php:165
 msgid "Reset"
 msgstr "Réinitialiser"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:173
+#: includes/admin/reports/class-wc-report-sales-by-product.php:174
 msgid "Product Search"
 msgstr "Recherche produit"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:210
+#: includes/admin/reports/class-wc-report-sales-by-product.php:211
 msgid "Top Sellers"
 msgstr "Meilleures ventes"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:245
-#: includes/admin/reports/class-wc-report-sales-by-product.php:285
+#: includes/admin/reports/class-wc-report-sales-by-product.php:246
+#: includes/admin/reports/class-wc-report-sales-by-product.php:286
 msgid "No products found in range"
 msgstr "Aucun produit trouvé dans l'interval"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:250
+#: includes/admin/reports/class-wc-report-sales-by-product.php:251
 msgid "Top Earners"
 msgstr "Meilleurs revenus"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:341
+#: includes/admin/reports/class-wc-report-sales-by-product.php:342
 msgid "&larr; Choose a product to view stats"
 msgstr "&larr; Choisir un produit pour voir les statistiques"
 
@@ -5200,11 +5201,18 @@ msgstr "URL de l'auteur"
 msgid "Templates"
 msgstr "Modèles HTML"
 
-#: includes/admin/views/html-admin-page-status-report.php:451
+#: includes/admin/views/html-admin-page-status-report.php:478
+msgid ""
+"<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
+"date. The core version is %s"
+msgstr "<code>%s</code> version <strong style=\"color:red\">%s</strong> est obsolète. La version du core est %s"
+
+#: includes/admin/views/html-admin-page-status-report.php:489
+#: includes/admin/views/html-admin-page-status-report.php:495
 msgid "Template Overrides"
 msgstr "Modifications du modèle html"
 
-#: includes/admin/views/html-admin-page-status-report.php:483
+#: includes/admin/views/html-admin-page-status-report.php:496
 msgid "No overrides present in theme."
 msgstr "Aucun remplacement présent dans le thème."
 
@@ -5323,6 +5331,20 @@ msgstr "<strong>Bienvenue sur WooCommerce</strong> &#8211; Vous êtes presque pr
 msgid "Skip setup"
 msgstr "Ignorer la configuration"
 
+#: includes/admin/views/html-notice-template-check.php:5
+msgid ""
+"<strong>Your theme has bundled outdated copies of WooCommerce template "
+"files</strong> &#8211; if you encounter functionality issues on the frontend"
+" this could the reason. Ensure you update or remove them (in general we "
+"recommend only bundling the template files you actually need to customize). "
+"See the system report for full details."
+msgstr "<strong>Votre thème regroupe des fichiers de modèle WooCommerce obsolètes</strong> &#8211; si vous rencontrez des problèmes de fonctionnalités sur le site, cela peut en être la cause. Assurez-vous de les mettre à jour ou de les supprimer (en général nous recommandons de regrouper uniquement les fichiers de modèle dont vous avez réellement besoin pour la personnalisation). Voir le report système pour plus de détails."
+
+#: includes/admin/views/html-notice-template-check.php:6
+#: includes/admin/views/html-notice-theme-support.php:6
+msgid "Hide this notice"
+msgstr "Masquer cet avertissement"
+
 #: includes/admin/views/html-notice-theme-support.php:5
 msgid ""
 "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if "
@@ -5333,10 +5355,6 @@ msgstr "<strong>Votre thème ne déclare pas le support WooCommerce</strong> &#8
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Theme Integration Guide"
 msgstr "Guide d'intégration des thèmes"
-
-#: includes/admin/views/html-notice-theme-support.php:6
-msgid "Hide this notice"
-msgstr "Masquer cet avertissement"
 
 #: includes/admin/views/html-notice-update.php:5
 msgid ""
