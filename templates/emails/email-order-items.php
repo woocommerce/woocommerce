@@ -58,7 +58,7 @@ foreach ( $items as $item ) :
 
 	<?php if ( $show_purchase_note && $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) : ?>
 		<tr>
-			<td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo apply_filters( 'the_content', $purchase_note ); ?></td>
+			<td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo wpautop( do_shortcode( $purchase_note ) ); ?></td>
 		</tr>
 	<?php endif; ?>
 
