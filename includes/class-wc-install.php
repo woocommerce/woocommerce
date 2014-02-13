@@ -342,6 +342,17 @@ class WC_Install {
 
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
+		/**
+		 * Update schemas before DBDELTA
+		 *
+		 * Before updating, remove any primary keys which could be modified due to schema updates
+		 */
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
+			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions DROP PRIMARY KEY, ADD `permission_id` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT;" );
+			}
+		}
+
 		// WooCommerce Tables
 		$woocommerce_tables = "
 	CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
