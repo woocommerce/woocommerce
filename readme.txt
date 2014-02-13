@@ -138,6 +138,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Wrap billing and shipping fields with a div/class to prevent field order issues
 * Fix - Fix line total display for order fees in admin panel order view page
 * Fix - Restored multiple image selection for product gallery
+* Fix - Update schemas before DBDELTA to fix mysql errors on update
+* Fix - Italian address formatting fix
+* Fix - Set countries as an array by default in the shipping abstract
+* Tweak - Tweak the order of checks in bulk_and_quick_edit_save_post to make it more efficient on autosave
+* Refactor - Removed obsolete view order shortcode class
 
 = 2.1.1 - 12/02/2014 =
 * Feature - Show notice if template files are out of date for themes including WooCommerce template files
