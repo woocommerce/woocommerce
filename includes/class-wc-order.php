@@ -657,13 +657,13 @@ class WC_Order {
 		// Backwards compat < 2.1 - get shipping title stored in meta
 		if ( $this->shipping_method_title ) {
 			$labels[] = $this->shipping_method_title;
-		}
+		} else {
+			// 2.1+ get line items for shipping
+			$shipping_methods = $this->get_shipping_methods();
 
-		// 2.1+ get line items for shipping
-		$shipping_methods = $this->get_shipping_methods();
-
-		foreach ( $shipping_methods as $shipping ) {
-			$labels[] = $shipping['name'];
+			foreach ( $shipping_methods as $shipping ) {
+				$labels[] = $shipping['name'];
+			}
 		}
 
 		return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', $labels ), $this );

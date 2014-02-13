@@ -412,7 +412,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
 			if ( $order->get_total_shipping() > 0 ) {
 				$item_loop++;
-				$paypal_args[ 'item_name_' . $item_loop ] 	= __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->shipping_method_title );
+				$paypal_args[ 'item_name_' . $item_loop ] 	= sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() );
 				$paypal_args[ 'quantity_' . $item_loop ] 	= '1';
 				$paypal_args[ 'amount_' . $item_loop ] 		= number_format( $order->get_total_shipping(), 2, '.', '' );
 			}
