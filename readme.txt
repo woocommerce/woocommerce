@@ -141,6 +141,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Update schemas before DBDELTA to fix mysql errors on update
 * Fix - Italian address formatting fix
 * Fix - Set countries as an array by default in the shipping abstract
+* Fix - Fixed term counts when terms span taxonomies
 * Tweak - Tweak the order of checks in bulk_and_quick_edit_save_post to make it more efficient on autosave
 * Refactor - Removed obsolete view order shortcode class
 
