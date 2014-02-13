@@ -4,10 +4,12 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
- * @version     2.1.0
+ * @version     2.1.2
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 global $woocommerce;
 
@@ -19,8 +21,9 @@ foreach ( $items as $item ) :
 	echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item );
 
 	// SKU
-	if ( $show_sku && $_product->get_sku() )
+	if ( $show_sku && $_product->get_sku() ) {
 		echo ' (#' . $_product->get_sku() . ')';
+	}
 
 	// Variation
 	echo $item_meta->meta ? "\n" . $item_meta->display( true, true ) : '';
@@ -41,16 +44,18 @@ foreach ( $items as $item ) :
 
 			if ( count( $download_files ) > 1 ) {
 				$prefix = sprintf( __( 'Download %d', 'woocommerce' ), $i );
-			} elseif ( $i == 1 )
+			} elseif ( $i == 1 ) {
 				$prefix = __( 'Download', 'woocommerce' );
+			}
 
 			echo "\n" . $prefix . '(' . esc_html( $file['name'] ) . '): ' . esc_url( $file['download_url'] );
 		}
 	}
 
 	// Note
-	if ( $show_purchase_note && $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) )
+	if ( $show_purchase_note && $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) {
 		echo "\n" . $purchase_note;
+	}
 
 	echo "\n\n";
 
