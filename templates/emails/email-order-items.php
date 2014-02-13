@@ -4,10 +4,12 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
- * @version     2.1.0
+ * @version     2.1.2
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 global $woocommerce;
 
@@ -19,15 +21,17 @@ foreach ( $items as $item ) :
 		<td style="text-align:left; vertical-align:middle; border: 1px solid #eee; word-wrap:break-word;"><?php
 
 			// Show title/image etc
-			if ( $show_image )
+			if ( $show_image ) {
 				echo apply_filters( 'woocommerce_order_item_thumbnail', '<img src="' . current( wp_get_attachment_image_src( get_post_thumbnail_id( $_product->id ), 'thumbnail') ) .'" alt="' . __( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" />', $item );
+			}
 
 			// Product name
 			echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item );
 
 			// SKU
-			if ( $show_sku && $_product->get_sku() )
+			if ( $show_sku && $_product->get_sku() ) {
 				echo ' (#' . $_product->get_sku() . ')';
+			}
 
 			// File URLs
 			if ( $show_download_links && $_product->exists() && $_product->is_downloadable() ) {
@@ -40,16 +44,18 @@ foreach ( $items as $item ) :
 
 					if ( count( $download_files ) > 1 ) {
 						$prefix = sprintf( __( 'Download %d', 'woocommerce' ), $i );
-					} elseif ( $i == 1 )
+					} elseif ( $i == 1 ) {
 						$prefix = __( 'Download', 'woocommerce' );
+					}
 
 					echo '<br/><small>' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>';
 				}
 			}
 
 			// Variation
-			if ( $item_meta->meta )
+			if ( $item_meta->meta ) {
 				echo '<br/><small>' . nl2br( $item_meta->display( true, true ) ) . '</small>';
+			}
 
 		?></td>
 		<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo $item['qty'] ;?></td>
