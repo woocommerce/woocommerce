@@ -363,6 +363,10 @@ class WC_Checkout {
 			update_post_meta( $order_id, '_payment_method', 		$this->payment_method->id );
 			update_post_meta( $order_id, '_payment_method_title', 	$this->payment_method->get_title() );
 		}
+		if ( empty( $this->posted['billing_email'] ) && is_user_logged_in() ) {
+			$current_user = wp_get_current_user();
+			update_post_meta( $order_id, '_billing_email', $current_user->user_email );
+		}
 		update_post_meta( $order_id, '_order_shipping', 		wc_format_decimal( WC()->cart->shipping_total ) );
 		update_post_meta( $order_id, '_order_discount', 		wc_format_decimal( WC()->cart->get_order_discount_total() ) );
 		update_post_meta( $order_id, '_cart_discount', 			wc_format_decimal( WC()->cart->get_cart_discount_total() ) );
