@@ -135,6 +135,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Removed manual checks for AJAX requests, relying on DOING_AJAX constant now
 * Fix - Checkout get_value now returns null if no value is set, default can be used as fallback
 * Fix - Variation download url now cleaned via wc_clean instead of esc_url_raw
+* Fix - Wrap billing and shipping fields with a div/class to prevent field order issues
+* Fix - Fix line total display for order fees in admin panel order view page
 
 = 2.1.1 - 12/02/2014 =
 * Feature - Show notice if template files are out of date for themes including WooCommerce template files
