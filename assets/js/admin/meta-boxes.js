@@ -1507,17 +1507,17 @@ jQuery( function($){
 		}
 
 		// Create the media frame.
-		product_gallery_frame = wp.media.frames.downloadable_file = wp.media({
+		product_gallery_frame = wp.media.frames.product_gallery = wp.media({
 			// Set the title of the modal.
 			title: $el.data('choose'),
 			button: {
 				text: $el.data('update'),
 			},
-			multiple: true,
 			states : [
 				new wp.media.controller.Library({
 					title: $el.data('choose'),
-					filterable :	'all'
+					filterable :	'all',
+					multiple: true,
 				})
 			]
 		});
