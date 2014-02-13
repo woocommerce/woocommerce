@@ -132,6 +132,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Added missing third parameter to _doing_it_wrong call
 * Fix - Sidebar in reports screen does now fit big numbers (long strings)
 * Fix - Report stock icon properly set up
+* Fix - Removed manual checks for AJAX requests, relying on DOING_AJAX constant now
 
 = 2.1.1 - 12/02/2014 =
 * Feature - Show notice if template files are out of date for themes including WooCommerce template files
