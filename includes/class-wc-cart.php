@@ -1835,8 +1835,8 @@ class WC_Cart {
 			do_action( 'woocommerce_cart_calculate_fees', $this );
 
 			// If fees were added, total them and calculate tax
-			if ( $fees = $this->get_fees() ) {
-				foreach ( $fees as $fee ) {
+			if ( ! empty( $this->fees ) ) {
+				foreach ( $this->fees as $fee_key => $fee ) {
 					$this->fee_total += $fee->amount;
 
 					if ( $fee->taxable ) {
@@ -1845,6 +1845,8 @@ class WC_Cart {
 						$fee_taxes = $this->tax->calc_tax( $fee->amount, $tax_rates, false );
 						
 						if ( ! empty( $fee_taxes ) ) {
+							// Set the tax total for this fee
+							$this->fees[ $fee_key ]->tax = array_sum( $fee_taxes );
 
 							// Tax rows - merge the totals we just got
 							foreach ( array_keys( $this->taxes ) as $key ) {
