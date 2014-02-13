@@ -274,37 +274,37 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		// PayPal Args
 		$paypal_args = array_merge(
 			array(
-				'cmd' 					=> '_cart',
-				'business' 				=> $this->email,
-				'no_note' 				=> 1,
-				'currency_code' 		=> get_woocommerce_currency(),
-				'charset' 				=> 'UTF-8',
-				'rm' 					=> is_ssl() ? 2 : 1,
-				'upload' 				=> 1,
-				'return' 				=> esc_url( add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ) ),
-				'cancel_return'			=> esc_url( $order->get_cancel_order_url() ),
-				'page_style'			=> $this->page_style,
-				'paymentaction'         => $this->paymentaction,
-				'BUTTONSOURCE'          => 'WooThemes_Cart',
-
+				'cmd'           => '_cart',
+				'business'      => $this->email,
+				'no_note'       => 1,
+				'currency_code' => get_woocommerce_currency(),
+				'charset'       => 'UTF-8',
+				'rm'            => is_ssl() ? 2 : 1,
+				'upload'        => 1,
+				'return'        => esc_url( add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ) ),
+				'cancel_return' => esc_url( $order->get_cancel_order_url() ),
+				'page_style'    => $this->page_style,
+				'paymentaction' => $this->paymentaction,
+				'bn'            => 'WooThemes_Cart',
+				
 				// Order key + ID
-				'invoice'				=> $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
-				'custom' 				=> serialize( array( $order_id, $order->order_key ) ),
-
+				'invoice'       => $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
+				'custom'        => serialize( array( $order_id, $order->order_key ) ),
+				
 				// IPN
-				'notify_url'			=> $this->notify_url,
-
+				'notify_url'    => $this->notify_url,
+				
 				// Billing Address info
-				'first_name'			=> $order->billing_first_name,
-				'last_name'				=> $order->billing_last_name,
-				'company'				=> $order->billing_company,
-				'address1'				=> $order->billing_address_1,
-				'address2'				=> $order->billing_address_2,
-				'city'					=> $order->billing_city,
-				'state'					=> $order->billing_state,
-				'zip'					=> $order->billing_postcode,
-				'country'				=> $order->billing_country,
-				'email'					=> $order->billing_email
+				'first_name'    => $order->billing_first_name,
+				'last_name'     => $order->billing_last_name,
+				'company'       => $order->billing_company,
+				'address1'      => $order->billing_address_1,
+				'address2'      => $order->billing_address_2,
+				'city'          => $order->billing_city,
+				'state'         => $order->billing_state,
+				'zip'           => $order->billing_postcode,
+				'country'       => $order->billing_country,
+				'email'         => $order->billing_email
 			),
 			$phone_args
 		);
