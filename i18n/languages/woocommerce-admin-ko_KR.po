@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-10 10:14:36+00:00\n"
-"PO-Revision-Date: 2014-02-08 12:54+0000\n"
+"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
+"PO-Revision-Date: 2014-02-13 10:01+0000\n"
 "Last-Translator: martian36 <martian36@naver.com>\n"
 "Language-Team: Korean (Korea) (http://www.transifex.com/projects/p/woocommerce-core/language/ko_KR/)\n"
 "MIME-Version: 1.0\n"
@@ -475,6 +475,7 @@ msgstr "도움을 위한 질문을 하기 전에 환경 설정에 있는 문제�
 #: includes/admin/class-wc-admin-help.php:67
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/views/html-admin-page-status.php:5
+#: includes/admin/views/html-notice-template-check.php:6
 msgid "System Status"
 msgstr "시스템 상태"
 
@@ -1640,7 +1641,7 @@ msgid "Price"
 msgstr "가격"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:256
-#: includes/admin/reports/class-wc-report-sales-by-category.php:141
+#: includes/admin/reports/class-wc-report-sales-by-category.php:142
 msgid "Categories"
 msgstr "카테고리"
 
@@ -1650,11 +1651,11 @@ msgstr "태그"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:315
-#: includes/admin/reports/class-wc-report-customers.php:199
-#: includes/admin/reports/class-wc-report-sales-by-category.php:213
-#: includes/admin/reports/class-wc-report-sales-by-date.php:158
-#: includes/admin/reports/class-wc-report-sales-by-product.php:323
+#: includes/admin/reports/class-wc-report-coupon-usage.php:316
+#: includes/admin/reports/class-wc-report-customers.php:201
+#: includes/admin/reports/class-wc-report-sales-by-category.php:214
+#: includes/admin/reports/class-wc-report-sales-by-date.php:160
+#: includes/admin/reports/class-wc-report-sales-by-product.php:324
 msgid "Date"
 msgstr "날짜"
 
@@ -1830,7 +1831,7 @@ msgstr "쿠폰 형식"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:79
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
-#: includes/admin/reports/class-wc-report-sales-by-date.php:320
+#: includes/admin/reports/class-wc-report-sales-by-date.php:322
 msgid "Coupon amount"
 msgstr "쿠폰 금액 또는 퍼센트"
 
@@ -2150,7 +2151,7 @@ msgstr "쿠폰이 세일 아이템에 적용되지 않도록 하려면 이 박�
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:586
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:603
-#: includes/admin/reports/class-wc-report-sales-by-product.php:177
+#: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Search for a product&hellip;"
 msgstr "상품 검색&hellip;"
 
@@ -2738,7 +2739,7 @@ msgid "Shipping only"
 msgstr "배송만"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:252
-#: includes/admin/reports/class-wc-report-sales-by-category.php:170
+#: includes/admin/reports/class-wc-report-sales-by-category.php:171
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
@@ -3275,112 +3276,112 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "상품이 배송되지 않거나 배송 비용이 없는 경우 이 옵션을 활성화하세요."
 
-#: includes/admin/reports/class-wc-admin-report.php:390
+#: includes/admin/reports/class-wc-admin-report.php:395
 msgid "Sold %s worth in the last %d days"
 msgstr "최근 %d 일 %s 만큼 판매됨"
 
-#: includes/admin/reports/class-wc-admin-report.php:392
+#: includes/admin/reports/class-wc-admin-report.php:397
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "최근 %d 일 %s 아이템 판매됨"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:70
+#: includes/admin/reports/class-wc-report-coupon-usage.php:71
 msgid "%s discounts in total"
 msgstr "총 %s 할인"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:76
+#: includes/admin/reports/class-wc-report-coupon-usage.php:77
 msgid "%s coupons used in total"
 msgstr "총 %s 쿠폰 사용됨"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:89
-#: includes/admin/reports/class-wc-report-customers.php:138
-#: includes/admin/reports/class-wc-report-sales-by-category.php:67
-#: includes/admin/reports/class-wc-report-sales-by-date.php:122
-#: includes/admin/reports/class-wc-report-sales-by-product.php:107
+#: includes/admin/reports/class-wc-report-coupon-usage.php:90
+#: includes/admin/reports/class-wc-report-customers.php:140
+#: includes/admin/reports/class-wc-report-sales-by-category.php:68
+#: includes/admin/reports/class-wc-report-sales-by-date.php:124
+#: includes/admin/reports/class-wc-report-sales-by-product.php:108
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:41
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:41
 msgid "Year"
 msgstr "년"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:90
-#: includes/admin/reports/class-wc-report-customers.php:139
-#: includes/admin/reports/class-wc-report-sales-by-category.php:68
-#: includes/admin/reports/class-wc-report-sales-by-date.php:123
-#: includes/admin/reports/class-wc-report-sales-by-product.php:108
+#: includes/admin/reports/class-wc-report-coupon-usage.php:91
+#: includes/admin/reports/class-wc-report-customers.php:141
+#: includes/admin/reports/class-wc-report-sales-by-category.php:69
+#: includes/admin/reports/class-wc-report-sales-by-date.php:125
+#: includes/admin/reports/class-wc-report-sales-by-product.php:109
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:42
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:42
 msgid "Last Month"
 msgstr "지난 달"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
-#: includes/admin/reports/class-wc-report-customers.php:140
-#: includes/admin/reports/class-wc-report-sales-by-category.php:69
-#: includes/admin/reports/class-wc-report-sales-by-date.php:124
-#: includes/admin/reports/class-wc-report-sales-by-product.php:109
+#: includes/admin/reports/class-wc-report-coupon-usage.php:92
+#: includes/admin/reports/class-wc-report-customers.php:142
+#: includes/admin/reports/class-wc-report-sales-by-category.php:70
+#: includes/admin/reports/class-wc-report-sales-by-date.php:126
+#: includes/admin/reports/class-wc-report-sales-by-product.php:110
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:43
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:43
 msgid "This Month"
 msgstr "이번 달"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
-#: includes/admin/reports/class-wc-report-customers.php:141
-#: includes/admin/reports/class-wc-report-sales-by-category.php:70
-#: includes/admin/reports/class-wc-report-sales-by-date.php:125
-#: includes/admin/reports/class-wc-report-sales-by-product.php:110
+#: includes/admin/reports/class-wc-report-coupon-usage.php:93
+#: includes/admin/reports/class-wc-report-customers.php:143
+#: includes/admin/reports/class-wc-report-sales-by-category.php:71
+#: includes/admin/reports/class-wc-report-sales-by-date.php:127
+#: includes/admin/reports/class-wc-report-sales-by-product.php:111
 msgid "Last 7 Days"
 msgstr "지난 7일간"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:132
+#: includes/admin/reports/class-wc-report-coupon-usage.php:133
 msgid "Filter by coupon"
 msgstr "쿠폰별 필터"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:160
+#: includes/admin/reports/class-wc-report-coupon-usage.php:161
 msgid "Choose coupons&hellip;"
 msgstr "쿠폰 선택&hellip;"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:161
+#: includes/admin/reports/class-wc-report-coupon-usage.php:162
 msgid "All coupons"
 msgstr "모든 쿠폰"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:168
-#: includes/admin/reports/class-wc-report-sales-by-category.php:172
-#: includes/admin/reports/class-wc-report-sales-by-product.php:178
+#: includes/admin/reports/class-wc-report-coupon-usage.php:169
+#: includes/admin/reports/class-wc-report-sales-by-category.php:173
+#: includes/admin/reports/class-wc-report-sales-by-product.php:179
 msgid "Show"
 msgstr "보이기"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:181
+#: includes/admin/reports/class-wc-report-coupon-usage.php:182
 msgid "No used coupons found"
 msgstr "사용된 쿠폰을 찾을 수 없습니다"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:186
+#: includes/admin/reports/class-wc-report-coupon-usage.php:187
 msgid "Most Popular"
 msgstr "가장 인기 있는"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:228
-#: includes/admin/reports/class-wc-report-coupon-usage.php:275
+#: includes/admin/reports/class-wc-report-coupon-usage.php:229
+#: includes/admin/reports/class-wc-report-coupon-usage.php:276
 msgid "No coupons found in range"
 msgstr "범위에서 쿠폰을 찾을 수 없습니다"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:233
+#: includes/admin/reports/class-wc-report-coupon-usage.php:234
 msgid "Most Discount"
 msgstr "가장 많은 할인"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:318
-#: includes/admin/reports/class-wc-report-customers.php:202
-#: includes/admin/reports/class-wc-report-sales-by-category.php:216
-#: includes/admin/reports/class-wc-report-sales-by-date.php:162
-#: includes/admin/reports/class-wc-report-sales-by-product.php:326
+#: includes/admin/reports/class-wc-report-coupon-usage.php:319
+#: includes/admin/reports/class-wc-report-customers.php:204
+#: includes/admin/reports/class-wc-report-sales-by-category.php:217
+#: includes/admin/reports/class-wc-report-sales-by-date.php:164
+#: includes/admin/reports/class-wc-report-sales-by-product.php:327
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
 #: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "CSV 내보내기"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:409
+#: includes/admin/reports/class-wc-report-coupon-usage.php:410
 msgid "Number of coupons used"
 msgstr "사용된 쿠폰 수"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:417
+#: includes/admin/reports/class-wc-report-coupon-usage.php:418
 msgid "Discount amount"
 msgstr "할인 금액"
 
@@ -3429,45 +3430,45 @@ msgstr "사용"
 msgid "Last order"
 msgstr "지난 주문"
 
-#: includes/admin/reports/class-wc-report-customers.php:15
+#: includes/admin/reports/class-wc-report-customers.php:17
 msgid "%s signups in this period"
 msgstr "이 기간 %s 회원 등록"
 
-#: includes/admin/reports/class-wc-report-customers.php:83
+#: includes/admin/reports/class-wc-report-customers.php:85
 msgid "Customer Sales"
 msgstr "회원 판매"
 
-#: includes/admin/reports/class-wc-report-customers.php:84
+#: includes/admin/reports/class-wc-report-customers.php:86
 msgid "Guest Sales"
 msgstr "비회원 판매"
 
-#: includes/admin/reports/class-wc-report-customers.php:93
-#: includes/admin/reports/class-wc-report-customers.php:289
+#: includes/admin/reports/class-wc-report-customers.php:95
+#: includes/admin/reports/class-wc-report-customers.php:291
 msgid "Customer Orders"
 msgstr "회원 주문"
 
-#: includes/admin/reports/class-wc-report-customers.php:98
-#: includes/admin/reports/class-wc-report-customers.php:299
+#: includes/admin/reports/class-wc-report-customers.php:100
+#: includes/admin/reports/class-wc-report-customers.php:301
 msgid "Guest Orders"
 msgstr "비회원 주문"
 
-#: includes/admin/reports/class-wc-report-customers.php:117
+#: includes/admin/reports/class-wc-report-customers.php:119
 msgid "orders"
 msgstr "주문"
 
-#: includes/admin/reports/class-wc-report-customers.php:295
+#: includes/admin/reports/class-wc-report-customers.php:297
 msgid "customer orders"
 msgstr "회원 주문"
 
-#: includes/admin/reports/class-wc-report-customers.php:305
+#: includes/admin/reports/class-wc-report-customers.php:307
 msgid "guest orders"
 msgstr "비회원 주문"
 
-#: includes/admin/reports/class-wc-report-customers.php:309
+#: includes/admin/reports/class-wc-report-customers.php:311
 msgid "Signups"
 msgstr "회원 가입"
 
-#: includes/admin/reports/class-wc-report-customers.php:316
+#: includes/admin/reports/class-wc-report-customers.php:318
 msgid "new users"
 msgstr "새 사용자"
 
@@ -3479,108 +3480,108 @@ msgstr "상품 재고 부족을 찾을 수 없습니다. "
 msgid "No out of stock products found."
 msgstr "상품 품절을 찾을 수 없습니다."
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:49
+#: includes/admin/reports/class-wc-report-sales-by-category.php:50
 msgid "%s sales in %s"
 msgstr "%s 판매 %s에서"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:156
+#: includes/admin/reports/class-wc-report-sales-by-category.php:157
 msgid "Select categories&hellip;"
 msgstr "카테고리 선택&hellip;"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:171
+#: includes/admin/reports/class-wc-report-sales-by-category.php:172
 msgid "All"
 msgstr "모두"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:231
+#: includes/admin/reports/class-wc-report-sales-by-category.php:232
 msgid "&larr; Choose a category to view stats"
 msgstr "&larr; 통계를 보려면 카테고리를 선택하세요"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:74
+#: includes/admin/reports/class-wc-report-sales-by-date.php:76
 msgid "%s average daily sales"
 msgstr "%s 평균 일일 판매"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:77
+#: includes/admin/reports/class-wc-report-sales-by-date.php:79
 msgid "%s average monthly sales"
 msgstr "%s 평균 월별 판매"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:82
+#: includes/admin/reports/class-wc-report-sales-by-date.php:84
 msgid "%s sales in this period"
 msgstr "이 기간 %s 판매 "
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:92
+#: includes/admin/reports/class-wc-report-sales-by-date.php:94
 msgid "%s orders placed"
 msgstr "%s 주문 확정됨"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:97
+#: includes/admin/reports/class-wc-report-sales-by-date.php:99
 msgid "%s items purchased"
 msgstr "%s 아이템 구매됨"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:102
+#: includes/admin/reports/class-wc-report-sales-by-date.php:104
 msgid "%s charged for shipping"
 msgstr "%s 배송 부과됨"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:107
+#: includes/admin/reports/class-wc-report-sales-by-date.php:109
 msgid "%s worth of coupons used"
 msgstr "%s 만큼 쿠폰 사용됨"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:294
-#: includes/admin/reports/class-wc-report-sales-by-product.php:440
+#: includes/admin/reports/class-wc-report-sales-by-date.php:296
+#: includes/admin/reports/class-wc-report-sales-by-product.php:441
 msgid "Number of items sold"
 msgstr "판매된 아이템 수"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:302
+#: includes/admin/reports/class-wc-report-sales-by-date.php:304
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:113
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:109
 msgid "Number of orders"
 msgstr "주문 수"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:310
+#: includes/admin/reports/class-wc-report-sales-by-date.php:312
 msgid "Average sales amount"
 msgstr "평균 판매량"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:330
+#: includes/admin/reports/class-wc-report-sales-by-date.php:332
 msgid "Shipping amount"
 msgstr "배송 금액"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:340
-#: includes/admin/reports/class-wc-report-sales-by-product.php:448
+#: includes/admin/reports/class-wc-report-sales-by-date.php:342
+#: includes/admin/reports/class-wc-report-sales-by-product.php:449
 msgid "Sales amount"
 msgstr "판매 금액"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:87
+#: includes/admin/reports/class-wc-report-sales-by-product.php:88
 msgid "%s sales for the selected items"
 msgstr "선택된 아이템의 %s 판매 "
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:92
+#: includes/admin/reports/class-wc-report-sales-by-product.php:93
 msgid "%s purchases for the selected items"
 msgstr "선택된 아이템의 %s 구매"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:138
+#: includes/admin/reports/class-wc-report-sales-by-product.php:139
 msgid "Showing reports for:"
 msgstr "보고서 보이기:"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:164
+#: includes/admin/reports/class-wc-report-sales-by-product.php:165
 msgid "Reset"
 msgstr "리셋"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:173
+#: includes/admin/reports/class-wc-report-sales-by-product.php:174
 msgid "Product Search"
 msgstr "상품 검색"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:210
+#: includes/admin/reports/class-wc-report-sales-by-product.php:211
 msgid "Top Sellers"
 msgstr "최상위 판매 상품"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:245
-#: includes/admin/reports/class-wc-report-sales-by-product.php:285
+#: includes/admin/reports/class-wc-report-sales-by-product.php:246
+#: includes/admin/reports/class-wc-report-sales-by-product.php:286
 msgid "No products found in range"
 msgstr "범위에 상품을 찾을 수 없습니다"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:250
+#: includes/admin/reports/class-wc-report-sales-by-product.php:251
 msgid "Top Earners"
 msgstr "최상위 수익 상품"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:341
+#: includes/admin/reports/class-wc-report-sales-by-product.php:342
 msgid "&larr; Choose a product to view stats"
 msgstr "&larr; 통계를 보려면 상품을 선택하세요"
 
@@ -4451,7 +4452,7 @@ msgstr "평가는 리뷰 남기기에 필수입니다."
 
 #: includes/admin/settings/class-wc-settings-products.php:342
 msgid "Show \"verified owner\" label for customer reviews"
-msgstr "고객 리뷰에 \"관리자 인증\" 레이블 보이기"
+msgstr "고객 리뷰에 \"인증된 소유자\" 레이블 보이기"
 
 #: includes/admin/settings/class-wc-settings-products.php:352
 msgid "Only allow reviews from \"verified owners\""
@@ -5188,11 +5189,18 @@ msgstr "제작자 URL"
 msgid "Templates"
 msgstr "템플릿"
 
-#: includes/admin/views/html-admin-page-status-report.php:451
+#: includes/admin/views/html-admin-page-status-report.php:478
+msgid ""
+"<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
+"date. The core version is %s"
+msgstr "<code>%s</code> 버전 <strong style=\"color:red\">%s</strong>는 이전 버전입니다. 코어 버전은 %s입니다"
+
+#: includes/admin/views/html-admin-page-status-report.php:489
+#: includes/admin/views/html-admin-page-status-report.php:495
 msgid "Template Overrides"
 msgstr "템플릿 덮어쓰기"
 
-#: includes/admin/views/html-admin-page-status-report.php:483
+#: includes/admin/views/html-admin-page-status-report.php:496
 msgid "No overrides present in theme."
 msgstr "테마에 덮어쓰기가 없습니다."
 
@@ -5311,6 +5319,20 @@ msgstr "<strong>우커머스에 오신 것을 환영합니다</strong> &#8211; �
 msgid "Skip setup"
 msgstr "설정 생략하기"
 
+#: includes/admin/views/html-notice-template-check.php:5
+msgid ""
+"<strong>Your theme has bundled outdated copies of WooCommerce template "
+"files</strong> &#8211; if you encounter functionality issues on the frontend"
+" this could the reason. Ensure you update or remove them (in general we "
+"recommend only bundling the template files you actually need to customize). "
+"See the system report for full details."
+msgstr "<strong>테마가 이전 버전의 우커머스 템플릿 파일을 번들로 사용하고 있습니다 </strong>&#8211;  사이트 전면에서 기능상의 문제가 발생하면 업데이트 하거나 제거하세요(일반적으로 우리는 사용자 정의에 필요한 템플릿 파일만을 번들하도록 추천하고 있습니다). 상세한 내용은 시스템 보고서를 참고하세요."
+
+#: includes/admin/views/html-notice-template-check.php:6
+#: includes/admin/views/html-notice-theme-support.php:6
+msgid "Hide this notice"
+msgstr "이 공지 감추기"
+
 #: includes/admin/views/html-notice-theme-support.php:5
 msgid ""
 "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if "
@@ -5321,10 +5343,6 @@ msgstr "<strong>테마가 우커머스 지원을 선언하지 않고 있습니�
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Theme Integration Guide"
 msgstr "테마 결합 가이드"
-
-#: includes/admin/views/html-notice-theme-support.php:6
-msgid "Hide this notice"
-msgstr "이 공지 감추기"
 
 #: includes/admin/views/html-notice-update.php:5
 msgid ""
