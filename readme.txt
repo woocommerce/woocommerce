@@ -147,6 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Tweak the order of checks in bulk_and_quick_edit_save_post to make it more efficient on autosave
 * Tweak - Always set order billing email address when user is logged in, if no email is provided
 * Refactor - Removed obsolete view order shortcode class
+* Localization - Multiple localization updates
 
 = 2.1.1 - 12/02/2014 =
 * Feature - Show notice if template files are out of date for themes including WooCommerce template files
