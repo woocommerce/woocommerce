@@ -206,10 +206,7 @@ if ( ! function_exists( 'is_ajax' ) ) {
 	 * @return bool
 	 */
 	function is_ajax() {
-		if ( defined('DOING_AJAX') )
-			return true;
-
-		return ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' ) ? true : false;
+		return defined( 'DOING_AJAX' );
 	}
 }
 
