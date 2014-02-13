@@ -742,7 +742,7 @@ class WC_Checkout {
 	 *
 	 * @access public
 	 * @param string $input
-	 * @return string
+	 * @return string|null
 	 */
 	public function get_value( $input ) {
 		if ( ! empty( $_POST[ $input ] ) ) {
@@ -781,7 +781,7 @@ class WC_Checkout {
 				case "shipping_postcode" :
 					return apply_filters( 'default_checkout_postcode', WC()->customer->get_shipping_postcode() ? WC()->customer->get_shipping_postcode() : '', 'shipping' );
 				default :
-					return apply_filters( 'default_checkout_' . $input, '', $input );
+					return apply_filters( 'default_checkout_' . $input, null, $input );
 			}
 		}
 	}
