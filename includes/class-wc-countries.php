@@ -615,7 +615,7 @@ class WC_Countries {
 				'HK' => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}",
 				'HU' => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
 				'IS' => $postcode_before_city,
-				'IT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city} {state_upper}\n{country}",
+				'IT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode}\n{city}\n{state_upper}\n{country}",
 				'JP' => "{postcode}\n{state}{city}{address_2}\n{address_1}\n{company}\n{last_name} {first_name}\n {country}",
 				'LI' => $postcode_before_city,
 				'NL' => $postcode_before_city,
