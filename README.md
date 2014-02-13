@@ -1,7 +1,7 @@
 # WooCommerce - excelling eCommerce
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
-Welcome to the WooCommerce repository on GitHub. Here you can browse the source, look at open issues and keep track of development. We recommend all developers to follow the [WooCommerce development blog](http://develop.woothemes.com/woocommerce/) to stay up to date about everything happening in the project.
+Welcome to the WooCommerce repository on GitHub. Here you can browse the source, look at open issues and keep track of development. We recommend all developers to follow the [WooCommerce development blog](http://develop.woothemes.com/woocommerce/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
 If you are not a developer, please use the [WooCommerce plugin page](http://wordpress.org/plugins/woocommerce/) on WordPress.org.
 
