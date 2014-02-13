@@ -142,6 +142,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Italian address formatting fix
 * Fix - Set countries as an array by default in the shipping abstract
 * Fix - Fixed term counts when terms span taxonomies
+* Fix - Fixed saving of fee tax total
 * Tweak - Tweak the order of checks in bulk_and_quick_edit_save_post to make it more efficient on autosave
 * Tweak - Always set order billing email address when user is logged in, if no email is provided
 * Refactor - Removed obsolete view order shortcode class
