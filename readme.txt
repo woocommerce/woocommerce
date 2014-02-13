@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.8.1
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -127,6 +127,29 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.2.0 =
+
+= 2.1.2 - 13/02/2014 =
+* Fix - Removed nl2br function from plain text email-order-items email template
+* Fix - Made static string translatable in email-order-items email template
+* Fix - Added missing third parameter to _doing_it_wrong call
+* Fix - Sidebar in reports screen does now fit big numbers (long strings)
+* Fix - Report stock icon properly set up
+* Fix - Removed manual checks for AJAX requests, relying on DOING_AJAX constant now
+* Fix - Checkout get_value now returns null if no value is set, default can be used as fallback
+* Fix - Variation download url now cleaned via wc_clean instead of esc_url_raw
+* Fix - Wrap billing and shipping fields with a div/class to prevent field order issues
+* Fix - Fix line total display for order fees in admin panel order view page
+* Fix - Restored multiple image selection for product gallery
+* Fix - Update schemas before DBDELTA to fix mysql errors on update
+* Fix - Italian address formatting fix
+* Fix - Set countries as an array by default in the shipping abstract
+* Fix - Fixed term counts when terms span taxonomies
+* Fix - Fixed saving of fee tax total
+* Fix - Fixed "Shipping via" label in PayPal
+* Tweak - Tweak the order of checks in bulk_and_quick_edit_save_post to make it more efficient on autosave
+* Tweak - Always set order billing email address when user is logged in, if no email is provided
+* Refactor - Removed obsolete view order shortcode class
+* Localization - Multiple localization updates
 
 = 2.1.1 - 12/02/2014 =
 * Feature - Show notice if template files are out of date for themes including WooCommerce template files
