@@ -38,12 +38,12 @@ jQuery( function($){
 			jQuery('.woocommerce_variations').append( response );
 
 			jQuery(".tips").tipTip({
-		    	'attribute' : 'data-tip',
-		    	'fadeIn' : 50,
-		    	'fadeOut' : 50
-		    });
+				'attribute' : 'data-tip',
+				'fadeIn' : 50,
+				'fadeOut' : 50
+			});
 
-		    jQuery('input.variable_is_downloadable, input.variable_is_virtual').change();
+			jQuery('input.variable_is_downloadable, input.variable_is_virtual').change();
 
 			jQuery('.woocommerce_variations').unblock();
 			jQuery('#variable_product_options').trigger('woocommerce_variations_added');
@@ -89,10 +89,10 @@ jQuery( function($){
 						jQuery('#variable_product_options').trigger('woocommerce_variations_added');
 
 						jQuery(".tips").tipTip({
-					    	'attribute' : 'data-tip',
-					    	'fadeIn' : 50,
-					    	'fadeOut' : 50
-					    });
+							'attribute' : 'data-tip',
+							'fadeIn' : 50,
+							'fadeOut' : 50
+						});
 					} );
 				} else {
 					$('#variable_product_options').unblock();
@@ -144,17 +144,17 @@ jQuery( function($){
 		switch( bulk_edit ) {
 			case 'toggle_enabled':
 				var checkbox = jQuery('input[name^="variable_enabled"]');
-	       		checkbox.attr('checked', !checkbox.attr('checked'));
+				checkbox.attr('checked', !checkbox.attr('checked'));
 			break;
 			case 'toggle_downloadable':
 				var checkbox = jQuery('input[name^="variable_is_downloadable"]');
-	       		checkbox.attr('checked', !checkbox.attr('checked'));
-	       		jQuery('input.variable_is_downloadable').change();
+				checkbox.attr('checked', !checkbox.attr('checked'));
+				jQuery('input.variable_is_downloadable').change();
 			break;
 			case 'toggle_virtual':
 				var checkbox = jQuery('input[name^="variable_is_virtual"]');
-	       		checkbox.attr('checked', !checkbox.attr('checked'));
-	       		jQuery('input.variable_is_virtual').change();
+				checkbox.attr('checked', !checkbox.attr('checked'));
+				jQuery('input.variable_is_virtual').change();
 			break;
 			case 'delete_all':
 				var answer = confirm( woocommerce_admin_meta_boxes_variations.i18n_delete_all_variations );
