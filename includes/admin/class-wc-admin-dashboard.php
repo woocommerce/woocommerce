@@ -116,7 +116,7 @@ class WC_Admin_Dashboard {
 				AND posts.post_type IN ('product', 'product_variation')
 				AND posts.post_status = 'publish'
 				AND (
-					postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}' AND postmeta.meta_value != ''
+					postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$nostock}' AND postmeta.meta_value != ''
 				)
 				AND (
 					( postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes' ) OR ( posts.post_type = 'product_variation' )
