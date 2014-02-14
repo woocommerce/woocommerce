@@ -1,6 +1,11 @@
 <?php
 /**
- * WC_Report_Sales_By_Product class
+ * WC_Report_Sales_By_Product
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Sales_By_Product extends WC_Admin_Report {
 

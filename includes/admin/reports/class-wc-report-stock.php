@@ -6,7 +6,12 @@ if ( ! class_exists( 'WP_List_Table' ) )
 	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 
 /**
- * WC_Report_Stock class
+ * WC_Report_Stock
+ *
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Stock extends WP_List_Table {
 

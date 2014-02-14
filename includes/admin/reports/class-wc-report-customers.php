@@ -1,6 +1,11 @@
 <?php
 /**
- * WC_Report_Customers class
+ * WC_Report_Customers
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Customers extends WC_Admin_Report {
 
