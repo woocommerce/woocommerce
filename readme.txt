@@ -129,8 +129,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.1.3 =
 * Fix - Use correct thresholds to calculate out of stock number in dashboard widget 
 * Fix - Admin screen strings sanitised to work with Chinese characters
+* Fix - REST API OAuth signature fixed when using filter params
+* Fix - Ensure shipping address data for customers is updated if only shipping to billing address
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
+* Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
+* Tweak - Trash pages swapped for endpoints instead of force delete
 
 = 2.1.2 - 13/02/2014 =
 * Fix - Removed nl2br function from plain text email-order-items email template
