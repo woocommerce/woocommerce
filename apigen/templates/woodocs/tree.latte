@@ -1,0 +1,73 @@
+{*
+ApiGen 2.8.0 - API documentation generator for PHP 5.3+
+
+Copyright (c) 2010-2011 David Grudl (http://davidgrudl.com)
+Copyright (c) 2011-2012 Jaroslav Hanslík (https://github.com/kukulich)
+Copyright (c) 2011-2012 Ondřej Nešpor (https://github.com/Andrewsville)
+Copyright (c) 2012 Olivier Laviale (https://github.com/olvlvl)
+
+For the full copyright and license information, please view
+the file LICENSE.md that was distributed with this source code.
+*}
+{layout '@layout.latte'}
+{var $active = 'tree'}
+
+{block #title}Tree{/block}
+
+{define #tree}
+<div class="tree">
+	<ul>
+		{var $level = -1}
+		{? foreach ($tree as $reflectionName => $reflection): }
+			{if $level === $tree->getDepth()}
+				</li>
+			{elseif $level > $tree->getDepth()}
+				{!'</ul></li>'|repeat:$level - $tree->getDepth()}
+			{elseif -1 !== $level}
+				<ul>
+			{/if}
+
+			<li n:class="!$tree->hasSibling() ? last"><div class="{if $tree->hasSibling()}not{/if}last"><a href="{$reflectionName|classUrl}" n:tag-if="$reflection->documented"><span n:class="$reflection->deprecated ? deprecated, !$reflection->valid ? invalid">{$reflectionName}</span></a>
+			{var $interfaces = $reflection->ownInterfaces}
+			{if $interfaces} implements {foreach $interfaces as $interface}
+				<a href="{$interface|classUrl}" n:tag-if="$interface->documented"><span n:class="$interface->deprecated ? deprecated, !$interface->valid ? invalid">{$interface->name}</span></a>{sep}, {/sep}
+			{/foreach}{/if}
+			{var $traits = $reflection->ownTraits}
+			{if $traits}{if $interfaces}<br><span class="padding"></span>{/if} uses {foreach $traits as $trait}
+				<a href="{$trait|classUrl}" n:tag-if="$trait->documented"><span n:class="$trait->deprecated ? deprecated, !$trait->valid ? invalid">{$trait->name}</span></a>{sep}, {/sep}
+			{/foreach}{/if}
+			</div>
+
+			{var $level = $tree->getDepth()}
+		{? endforeach; }
+		</li>
+		{!'</ul></li>'|repeat:$level}
+	</ul>
+</div>
+{/define}
+
+{block #content}
+<div id="content">
+	<h1>{include #title}</h1>
+
+	{if $classTree->valid()}
+		<h2>Classes</h2>
+		{include #tree, tree => $classTree}
+	{/if}
+
+	{if $interfaceTree->valid()}
+		<h2>Interfaces</h2>
+		{include #tree, tree => $interfaceTree}
+	{/if}
+
+	{if $traitTree->valid()}
+		<h2>Traits</h2>
+		{include #tree, tree => $traitTree}
+	{/if}
+
+	{if $exceptionTree->valid()}
+		<h2>Exceptions</h2>
+		{include #tree, tree => $exceptionTree}
+	{/if}
+</div>
+{/block}
