@@ -126,6 +126,12 @@ module.exports = function( grunt ){
 					'php index.php generate',
 					'sed -i "" "s/\\/\\/exit( \'Locked\' );/exit( \'Locked\' );/g" index.php',
 				].join( '&&' )
+			},
+			apigen: {
+				command: [
+					'cd apigen/',
+					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*"',
+				].join( '&&' )
 			}
 		},
 
@@ -139,7 +145,8 @@ module.exports = function( grunt ){
 					'!Gruntfile.js',
 					'!sftp-config.json',
 					'!package.json',
-					'!node_modules/**'
+					'!node_modules/**',
+					'!wc-apidocs/**'
 				],
 				dest: 'deploy',
 				expand: true,
@@ -173,6 +180,10 @@ module.exports = function( grunt ){
 	// Just an alias for pot file generation
 	grunt.registerTask( 'pot', [
 		'shell:generatepot'
+	]);
+
+	grunt.registerTask( 'docs', [
+		'shell:apigen'
 	]);
 
 	grunt.registerTask( 'dev', [

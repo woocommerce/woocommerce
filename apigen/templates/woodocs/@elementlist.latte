@@ -1,0 +1,59 @@
+{*
+ApiGen 2.8.0 - API documentation generator for PHP 5.3+
+
+Copyright (c) 2010-2011 David Grudl (http://davidgrudl.com)
+Copyright (c) 2011-2012 Jaroslav Hanslík (https://github.com/kukulich)
+Copyright (c) 2011-2012 Ondřej Nešpor (https://github.com/Andrewsville)
+Copyright (c) 2012 Olivier Laviale (https://github.com/olvlvl)
+
+For the full copyright and license information, please view
+the file LICENSE.md that was distributed with this source code.
+*}
+{define #elements}
+<tr n:foreach="$elements as $element">
+	<td class="name"><a href="{$element|elementUrl}" n:class="$element->deprecated ? deprecated, !$element->valid ? invalid">{if $namespace}{$element->shortName}{else}{$element->name}{/if}</a></td>
+	<td>{!$element|shortDescription}</td>
+</tr>
+{/define}
+
+{if $classes}
+<h2>Classes summary</h2>
+<table class="summary table table-bordered table-striped" id="classes">
+{include #elements, elements => $classes}
+</table>
+{/if}
+
+{if $interfaces}
+<h2>Interfaces summary</h2>
+<table class="summary table table-bordered table-striped" id="interfaces">
+{include #elements, elements => $interfaces}
+</table>
+{/if}
+
+{if $traits}
+<h2>Traits summary</h2>
+<table class="summary table table-bordered table-striped" id="traits">
+{include #elements, elements => $traits}
+</table>
+{/if}
+
+{if $exceptions}
+<h2>Exceptions summary</h2>
+<table class="summary table table-bordered table-striped" id="exceptions">
+{include #elements, elements => $exceptions}
+</table>
+{/if}
+
+{if $constants}
+<h2>Constants summary</h2>
+<table class="summary table table-bordered table-striped" id="constants">
+{include #elements, elements => $constants}
+</table>
+{/if}
+
+{if $functions}
+<h2>Functions summary</h2>
+<table class="summary table table-bordered table-striped" id="functions">
+{include #elements, elements => $functions}
+</table>
+{/if}
