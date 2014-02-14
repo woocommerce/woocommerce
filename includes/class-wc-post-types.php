@@ -20,8 +20,8 @@ class WC_Post_types {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 5 );
-		add_action( 'init', array( __CLASS__, 'register_post_types' ), 5 );
+		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 0 );
+		add_action( 'init', array( __CLASS__, 'register_post_types' ), 0 );
 	}
 
 	/**
