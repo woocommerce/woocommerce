@@ -1,6 +1,12 @@
 <?php
 /**
- * WC_Frontend_Scripts
+ * Handle frontend forms
+ *
+ * @class 		WC_Frontend_Scripts
+ * @version		2.1.0
+ * @package		WooCommerce/Classes/
+ * @category	Class
+ * @author 		WooThemes
  */
 class WC_Frontend_Scripts {
 

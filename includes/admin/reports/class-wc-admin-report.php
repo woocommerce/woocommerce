@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Admin Report
  *
@@ -8,12 +10,6 @@
  * @category 	Admin
  * @package 	WooCommerce/Admin/Reports
  * @version     2.1.0
- */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-/**
- * WC_Admin_Report Class
  */
 class WC_Admin_Report {
 
