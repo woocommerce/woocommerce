@@ -164,6 +164,7 @@ function get_woocommerce_currencies() {
 	return array_unique(
 		apply_filters( 'woocommerce_currencies',
 			array(
+				'AED' => __( 'United Arab Emirates Dirham' ),
 				'AUD' => __( 'Australian Dollars', 'woocommerce' ),
 				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
 				'BGN' => __( 'Bulgarian Lev', 'woocommerce' ),
@@ -218,6 +219,9 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 	}
 
 	switch ( $currency ) {
+		case 'AED' :
+			$currency_symbol = '(د.إ';
+			break;
 		case 'BRL' :
 			$currency_symbol = '&#82;&#36;';
 			break;
