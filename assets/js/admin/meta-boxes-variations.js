@@ -232,7 +232,7 @@ jQuery( function ( $ ) {
 
 				value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent );
 
-				$( ':input[name^="' + edit_field + '["]' ).each( function () {
+				$( ':input[name^="' + edit_field + '"]' ).each( function () {
 					var current_value = Number( $( this ).val() ),
 						new_value;
 
@@ -262,7 +262,7 @@ jQuery( function ( $ ) {
 			case 'variable_download_expiry' :
 				value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value );
 
-				$( ':input[name^="' + bulk_edit + '["]').val( value ).change();
+				$( ':input[name^="' + bulk_edit + '"]').val( value ).change();
 			break;
 			default:
 				$( 'select#field_to_edit' ).trigger( bulk_edit );
