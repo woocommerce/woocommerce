@@ -130,7 +130,7 @@ module.exports = function( grunt ){
 			apigen: {
 				command: [
 					'cd apigen/',
-					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*"',
+					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"',
 				].join( '&&' )
 			}
 		},
@@ -146,7 +146,8 @@ module.exports = function( grunt ){
 					'!sftp-config.json',
 					'!package.json',
 					'!node_modules/**',
-					'!wc-apidocs/**'
+					'!wc-apidocs/**',
+					'!apigen/**'
 				],
 				dest: 'deploy',
 				expand: true,
@@ -155,6 +156,9 @@ module.exports = function( grunt ){
 		},
 
 		clean: {
+			apigen: {
+				src: [ 'wc-apidocs' ]
+			},
 			deploy: {
 				src: [ 'deploy' ]
 			},
@@ -183,6 +187,7 @@ module.exports = function( grunt ){
 	]);
 
 	grunt.registerTask( 'docs', [
+		'clean:apigen', 
 		'shell:apigen'
 	]);
 
