@@ -726,17 +726,17 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Password is required.', 'woocommerce' ) );
 				}
 
-				if ( is_email( $_POST['username'] ) ) {
-					$user = get_user_by( 'email', $_POST['username'] );
+				$creds['user_login'] 	= apply_filters( 'woocommerce_get_user_login', $_POST['username'] );
+				if (get_option('woocommerce_get_username_from_email', true)){
+					if ( is_email( $_POST['username'] ) ) {
+						$user = get_user_by( 'email', $_POST['username'] );
 
-					if ( isset( $user->user_login ) ) {
-						$creds['user_login'] 	= $user->user_login;
-					} else {
-						throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
+						if ( isset( $user->user_login ) ) {
+							$creds['user_login'] 	= $user->user_login;
+						} else {
+							throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
+						}
 					}
-
-				} else {
-					$creds['user_login'] 	= $_POST['username'];
 				}
 
 				$creds['user_password'] = $_POST['password'];
