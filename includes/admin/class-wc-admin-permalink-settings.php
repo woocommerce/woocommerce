@@ -176,7 +176,16 @@ class WC_Admin_Permalink_Settings {
 			$product_permalink = wc_clean( $_POST['product_permalink'] );
 
 			if ( $product_permalink == 'custom' ) {
-				$product_permalink = wc_clean( $_POST['product_permalink_structure'] );
+				// Get permalink without slashes
+				$product_permalink = trim( wc_clean( $_POST['product_permalink_structure'] ), '/' );
+
+				// This is an invalid base structure and breaks pages
+				if ( '%product_cat%' == $product_permalink ) {
+					$product_permalink = _x( 'product', 'slug', 'woocommerce' ) . '/' . $product_permalink;
+				}
+
+				// Prepending slash
+				$product_permalink = '/' . $product_permalink;
 			} elseif ( empty( $product_permalink ) ) {
 				$product_permalink = false;
 			}
