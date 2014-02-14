@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @return array
  */
 function wc_get_screen_ids() {
-	$wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
+	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 
     return apply_filters( 'woocommerce_screen_ids', array(
     	'toplevel_page_' . $wc_screen_id,
