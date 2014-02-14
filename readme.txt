@@ -129,6 +129,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.1.3 =
 * Fix - Use correct thresholds to calculate out of stock number in dashboard widget 
 * Tweak - Added United Arab Emirates Dirham currency
+* Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 
 = 2.1.2 - 13/02/2014 =
 * Fix - Removed nl2br function from plain text email-order-items email template
