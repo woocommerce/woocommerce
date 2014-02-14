@@ -87,7 +87,7 @@ jQuery( function($){
 					$('#variable_product_options').load( this_page + ' #variable_product_options_inner', function() {
 						$('#variable_product_options').unblock();
 						jQuery('#variable_product_options').trigger('woocommerce_variations_added');
-						
+
 						jQuery(".tips").tipTip({
 					    	'attribute' : 'data-tip',
 					    	'fadeIn' : 50,
@@ -205,7 +205,7 @@ jQuery( function($){
 				jQuery( ':input[name^="' + edit_field + '["]').each(function() {
 					var current_value = Number( jQuery(this).val() );
 
-					if ( value.indexOf("%") >= 0 )
+					if ( value.toString().indexOf("%") >= 0 )
 						value = Number( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, "" ) ) );
 					else
 						value = Number( value );
