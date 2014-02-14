@@ -81,7 +81,9 @@ abstract class WC_Email extends WC_Settings_API {
         '/&(apos|rsquo|lsquo|#8216|#8217);/i',   // Single quotes
         '/&gt;/i',                               // Greater-than
         '/&lt;/i',                               // Less-than
-        '/&(amp|#38);/i',                        // Ampersand
+        '/&#38;/i',                              // Ampersand
+        '/&#038;/i',                             // Ampersand
+        '/&amp;/i',                              // Ampersand
         '/&(copy|#169);/i',                      // Copyright
         '/&(trade|#8482|#153);/i',               // Trademark
         '/&(reg|#174);/i',                       // Registered
@@ -109,6 +111,8 @@ abstract class WC_Email extends WC_Settings_API {
         "'",                                    // Single quotes
         '>',
         '<',
+        '&',
+        '&',
         '&',
         '(c)',
         '(tm)',
