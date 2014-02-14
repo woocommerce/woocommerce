@@ -188,23 +188,45 @@ class WC_AJAX {
 		if ( isset( $_POST['address_2'] ) )
 			WC()->customer->set_address_2( $_POST['address_2'] );
 
-		if ( isset( $_POST['s_country'] ) )
-			WC()->customer->set_shipping_country( $_POST['s_country'] );
+		if ( "yes" == get_option( 'woocommerce_ship_to_billing_address_only' ) ) {
 
-		if ( isset( $_POST['s_state'] ) )
-			WC()->customer->set_shipping_state( $_POST['s_state'] );
+			if ( isset( $_POST['country'] ) )
+				WC()->customer->set_shipping_country( $_POST['country'] );
 
-		if ( isset( $_POST['s_postcode'] ) )
-			WC()->customer->set_shipping_postcode( $_POST['s_postcode'] );
+			if ( isset( $_POST['state'] ) )
+				WC()->customer->set_shipping_state( $_POST['state'] );
 
-		if ( isset( $_POST['s_city'] ) )
-			WC()->customer->set_shipping_city( $_POST['s_city'] );
+			if ( isset( $_POST['postcode'] ) )
+				WC()->customer->set_shipping_postcode( $_POST['postcode'] );
 
-		if ( isset( $_POST['s_address'] ) )
-			WC()->customer->set_shipping_address( $_POST['s_address'] );
+			if ( isset( $_POST['city'] ) )
+				WC()->customer->set_shipping_city( $_POST['city'] );
 
-		if ( isset( $_POST['s_address_2'] ) )
-			WC()->customer->set_shipping_address_2( $_POST['s_address_2'] );
+			if ( isset( $_POST['address'] ) )
+				WC()->customer->set_shipping_address( $_POST['address'] );
+
+			if ( isset( $_POST['address_2'] ) )
+				WC()->customer->set_shipping_address_2( $_POST['address_2'] );
+		} else {
+
+			if ( isset( $_POST['s_country'] ) )
+				WC()->customer->set_shipping_country( $_POST['s_country'] );
+
+			if ( isset( $_POST['s_state'] ) )
+				WC()->customer->set_shipping_state( $_POST['s_state'] );
+
+			if ( isset( $_POST['s_postcode'] ) )
+				WC()->customer->set_shipping_postcode( $_POST['s_postcode'] );
+
+			if ( isset( $_POST['s_city'] ) )
+				WC()->customer->set_shipping_city( $_POST['s_city'] );
+
+			if ( isset( $_POST['s_address'] ) )
+				WC()->customer->set_shipping_address( $_POST['s_address'] );
+
+			if ( isset( $_POST['s_address_2'] ) )
+				WC()->customer->set_shipping_address_2( $_POST['s_address_2'] );
+		}
 
 		WC()->cart->calculate_totals();
 
