@@ -374,7 +374,7 @@ class WC_Coupon {
 					$product_ids_on_sale = wc_get_product_ids_on_sale();
 					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-							if ( in_array( $cart_item['product_id'], $product_ids_on_sale, true ) || in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) || in_array( $cart_item['data']->get_parent(), $product_ids_on_sale, true ) ) {
+							if ( in_array( $cart_item['product_id'], $product_ids_on_sale ) || in_array( $cart_item['variation_id'], $product_ids_on_sale ) || in_array( $cart_item['data']->get_parent(), $product_ids_on_sale ) ) {
 								$valid_for_cart = false;
 							}
 						}
