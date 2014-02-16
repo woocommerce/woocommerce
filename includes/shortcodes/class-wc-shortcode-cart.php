@@ -29,8 +29,7 @@ class WC_Shortcode_Cart {
 				WC()->shipping->reset_shipping();
 
 				$country 	= wc_clean( $_POST['calc_shipping_country'] );
-				$state = '';
-				if ( isset($_POST['calc_shipping_state']) ) $state = wc_clean( $_POST['calc_shipping_state'] );
+				$state = isset( $_POST['calc_shipping_state'] ) ? wc_clean( $_POST['calc_shipping_state'] ) : '';
 				$postcode   = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? wc_clean( $_POST['calc_shipping_postcode'] ) : '';
 				$city       = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? wc_clean( $_POST['calc_shipping_city'] ) : '';
 
