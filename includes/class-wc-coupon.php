@@ -391,7 +391,7 @@ class WC_Coupon {
 					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 
-							$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
+							$product_cats = wp_get_post_terms( $cart_item['product_id'], apply_filters( 'woocommerce_coupon_exclude_categories', array( 'product_cat' ) ), array( "fields" => "ids" ) );
 
 							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 )
 								$valid_for_cart = false;

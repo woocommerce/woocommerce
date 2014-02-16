@@ -154,7 +154,7 @@ class WC_Meta_Box_Coupon_Data {
 					<?php
 						$category_ids = (array) get_post_meta( $post->ID, 'exclude_product_categories', true );
 
-						$categories = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
+						$categories = get_terms( apply_filters( 'woocommerce_coupon_exclude_categories_admin', array( 'product_cat' ) ), 'orderby=name&hide_empty=0' );
 						if ( $categories ) foreach ( $categories as $cat ) {
 							echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
 						}
