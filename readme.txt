@@ -127,6 +127,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.2.0 =
+* Feature - Added used payment gateway to view orders screens
 
 = 2.1.2 - 13/02/2014 =
 * Fix - Removed nl2br function from plain text email-order-items email template
