@@ -320,7 +320,7 @@ function wc_price( $price, $args = array() ) {
 	$price           = apply_filters( 'raw_woocommerce_price', floatval( $price ) );
 	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $price, $num_decimals, $decimal_sep, $thousands_sep ), $price, $num_decimals, $decimal_sep, $thousands_sep );
 
-	if ( apply_filters( 'woocommerce_price_trim_zeros', true ) && $num_decimals > 0 ) {
+	if ( apply_filters( 'woocommerce_price_trim_zeros', false ) && $num_decimals > 0 ) {
 		$price = wc_trim_zeros( $price );
 	}
 
