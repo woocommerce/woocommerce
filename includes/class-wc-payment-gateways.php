@@ -43,7 +43,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -52,7 +52,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**

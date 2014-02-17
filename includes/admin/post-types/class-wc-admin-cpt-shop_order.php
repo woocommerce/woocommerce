@@ -756,7 +756,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
 
 			if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
-				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number ), number_format_i18n( $number ) );
+				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . $message . '</p></div>';
 			}
 		}

@@ -246,7 +246,7 @@ class WC_Shortcode_My_Account {
 
 		if ( ! $allow ) {
 
-			wc_add_notice( __( 'Password reset is not allowed for this user' ), 'error' );
+			wc_add_notice( __( 'Password reset is not allowed for this user', 'woocommerce' ), 'error' );
 
 			return false;
 
@@ -274,7 +274,7 @@ class WC_Shortcode_My_Account {
 		$mailer = WC()->mailer();
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
-		wc_add_notice( __( 'Check your e-mail for the confirmation link.' ) );
+		wc_add_notice( __( 'Check your e-mail for the confirmation link.', 'woocommerce' ) );
 		return true;
 	}
 
