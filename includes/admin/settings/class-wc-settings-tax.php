@@ -633,7 +633,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				// Sanitize + format
 				$country  = strtoupper( wc_clean( $tax_rate_country[ $key ] ) );
 				$state    = strtoupper( wc_clean( $tax_rate_state[ $key ] ) );
-				$rate     = number_format( wc_clean( $tax_rate[ $key ] ), 4, '.', '' );
+				$rate     = number_format( (double) wc_clean( $tax_rate[ $key ] ), 4, '.', '' );
 				$name     = wc_clean( $tax_rate_name[ $key ] );
 				$priority = absint( wc_clean( $tax_rate_priority[ $key ] ) );
 				$compound = isset( $tax_rate_compound[ $key ] ) ? 1 : 0;
