@@ -73,6 +73,9 @@ class WC_Cart {
 	/** @var WC_Tax */
 	public $tax;
 
+	/** @var array cart_session_data */
+	public $cart_session_data = array();
+
 	/** @var array An array of fees. */
 	public $fees = array();
 
@@ -90,6 +93,25 @@ class WC_Cart {
 		$this->dp                    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl';
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl';
+		
+		// Array of data the cart calculates and stores in the session with defaults
+		$this->cart_session_data = array(
+			'cart_contents_total'     => 0,
+			'cart_contents_weight'    => 0,
+			'cart_contents_count'     => 0,
+			'cart_contents_tax'       => 0,
+			'total'                   => 0,
+			'subtotal'                => 0,
+			'subtotal_ex_tax'         => 0,
+			'tax_total'               => 0,
+			'taxes'                   => array(),
+			'shipping_taxes'          => array(),
+			'discount_cart'           => 0,
+			'discount_total'          => 0,
+			'shipping_total'          => 0,
+			'shipping_tax_total'      => 0,
+			'coupon_discount_amounts' => array(),
+		);
 
 		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
 	}
@@ -120,27 +142,10 @@ class WC_Cart {
 		 */
 		public function get_cart_from_session() {
 
-			// Array of data the cart calculates and stores in the session and defaults
-			$this->cart_session_data = array(
-				'cart_contents_total'     => 0,
-				'cart_contents_weight'    => 0,
-				'cart_contents_count'     => 0,
-				'cart_contents_tax'       => 0,
-				'total'                   => 0,
-				'subtotal'                => 0,
-				'subtotal_ex_tax'         => 0,
-				'tax_total'               => 0,
-				'taxes'                   => array(),
-				'shipping_taxes'          => array(),
-				'discount_cart'           => 0,
-				'discount_total'          => 0,
-				'shipping_total'          => 0,
-				'shipping_tax_total'      => 0,
-				'coupon_discount_amounts' => array(),
-			);
-
-			foreach ( $this->cart_session_data as $key => $default )
+			// Load cart session data from session
+			foreach ( $this->cart_session_data as $key => $default ) {
 				$this->$key = WC()->session->get( $key, $default );
+			}
 
 			// Load coupons
 			$this->applied_coupons = array_filter( WC()->session->get( 'applied_coupons', array() ) );
