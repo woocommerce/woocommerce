@@ -102,13 +102,15 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order ) {
  * @return void
  */
 function wc_downloadable_product_permissions( $order_id ) {
-	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 )
+	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 ) {
 		return; // Only do this once
+	}
 
 	$order = new WC_Order( $order_id );
 
-	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' )
+	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
+	}
 
 	if ( sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
@@ -128,6 +130,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 
 	do_action( 'woocommerce_grant_product_download_permissions', $order_id );
 }
+
 add_action( 'woocommerce_order_status_completed', 'wc_downloadable_product_permissions' );
 add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_permissions' );
 
