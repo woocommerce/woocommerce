@@ -185,7 +185,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get the customer for the given email
 	 *
-	 * @since 2.1.3
+	 * @since 2.2
 	 * @param string $email the customer email
 	 * @param string $fields
 	 * @return array
