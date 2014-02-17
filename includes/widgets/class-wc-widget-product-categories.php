@@ -88,7 +88,8 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 		if ( $title )
 			echo $before_title . $title . $after_title;
-
+		
+		$dropdown_args = array();
 		$cat_args = array( 'show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat' );
 
 		// Menu Order
@@ -120,7 +121,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		}
 		
 		// Show Siblings and Children Only
-		if ( $s ) {
+		if ( $s && $this->current_cat ) {
 		
 			if ( $this->current_cat->parent == 0 ) {
 				$category_children = $this->current_cat->term_id;
