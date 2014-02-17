@@ -51,7 +51,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			$sections[ strtolower( get_class( $gateway ) ) ] = esc_html( $title );
 		}
 
-		return $sections;
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**

@@ -48,7 +48,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			foreach ( $tax_classes as $class )
 				$sections[ sanitize_title( $class ) ] = sprintf( __( '%s Rates', 'woocommerce' ), $class );
 
-		return $sections;
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**

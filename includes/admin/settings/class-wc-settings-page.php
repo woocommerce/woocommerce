@@ -44,7 +44,7 @@ class WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_sections() {
-		return array();
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, array() );
 	}
 
 	/**
