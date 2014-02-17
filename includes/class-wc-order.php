@@ -959,6 +959,13 @@ class WC_Order {
 			);
 		}
 
+		if ( $this->get_total() > 0 ) {
+			$total_rows['payment_method'] = array(
+				'label' => __( 'Payment Method:', 'woocommerce' ),
+				'value' => $this->payment_method_title
+			);
+		}
+
 		$total_rows['order_total'] = array(
 			'label' => __( 'Order Total:', 'woocommerce' ),
 			'value'	=> $this->get_formatted_order_total()
