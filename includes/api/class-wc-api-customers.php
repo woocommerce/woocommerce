@@ -71,7 +71,7 @@ class WC_API_Customers extends WC_API_Resource {
 		);
 
 		# GET /customers/<email>
-		$routes[ $this->base . '/(?P<email>.+)' ] = array(
+		$routes[ $this->base . '/email/(?P<email>.+)' ] = array(
 			array( array( $this, 'get_customer_by_email' ),  WC_API_SERVER::READABLE ),
 		);
 
@@ -190,7 +190,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @param string $fields
 	 * @return array
 	 */
-	function get_customer_by_email( $email, $field = null ) {
+	function get_customer_by_email( $email, $fields = null ) {
 
 		if ( is_email( $email ) ) {
 			$customer = get_user_by( 'email', $email );
@@ -201,7 +201,7 @@ class WC_API_Customers extends WC_API_Resource {
 			return new WP_Error( 'woocommerce_api_invalid_customer_email', __( 'Invalid customer Email', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		return $this->get_customer( $customer->ID, $field );
+		return $this->get_customer( $customer->ID, $fields );
 	}
 
 	/**
