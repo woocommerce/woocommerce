@@ -475,6 +475,8 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	protected function validate_request( $id, $type, $context ) {
 
+		$id = absint( $id );
+
 		// validate ID
 		if ( empty( $id ) )
 			return new WP_Error( 'woocommerce_api_invalid_customer_id', __( 'Invalid customer ID', 'woocommerce' ), array( 'status' => 404 ) );
