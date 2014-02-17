@@ -11,8 +11,7 @@
 
 echo '<p class="order-info">' . sprintf( __( 'Order <mark class="order-number">%s</mark> was placed on <mark class="order-date">%s</mark> and is currently <mark class="order-status">%s</mark>.', 'woocommerce' ), $order->get_order_number(), date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ), __( $status->name, 'woocommerce' ) ) . '</p>';
 
-$notes = $order->get_customer_order_notes();
-if ( $notes ) :
+if ( $notes = $order->get_customer_order_notes() ) :
 	?>
 	<h2><?php _e( 'Order Updates', 'woocommerce' ); ?></h2>
 	<ol class="commentlist notes">
@@ -24,8 +23,8 @@ if ( $notes ) :
 					<div class="description">
 						<?php echo wpautop( wptexturize( $note->comment_content ) ); ?>
 					</div>
-					<div class="clear"></div>
-				</div>
+	  				<div class="clear"></div>
+	  			</div>
 				<div class="clear"></div>
 			</div>
 		</li>
