@@ -144,6 +144,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Ensure wc_get_product_ids_on_sale returns array of ints, not strings
 * Fix - Prevent rating stars from wrapping in IE
 * Fix - Rating stars properly aligned in small screens
+* Fix - Handle get_rate_code when no matching rate is found
+* Fix - Cleaned noticed that might show when tax rates left empty
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
