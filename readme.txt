@@ -143,6 +143,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Prevent IE cursor from being stuck in loading animation
 * Fix - Ensure wc_get_product_ids_on_sale returns array of ints, not strings
 * Fix - Prevent rating stars from wrapping in IE
+* Fix - Rating stars properly aligned in small screens
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
