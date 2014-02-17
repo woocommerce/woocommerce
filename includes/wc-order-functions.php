@@ -40,9 +40,6 @@ function wc_get_order_id_by_order_key( $order_key ) {
 function wc_downloadable_file_permission( $download_id, $product_id, $order ) {
 	global $wpdb;
 
-	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' )
-		return false;
-
 	$user_email = sanitize_email( $order->billing_email );
 	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );
 	$expiry     = trim( get_post_meta( $product_id, '_download_expiry', true ) );
@@ -97,10 +94,6 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order ) {
 	return $result ? $wpdb->insert_id : false;
 }
 
-add_action('woocommerce_order_status_completed', 'wc_downloadable_product_permissions');
-add_action('woocommerce_order_status_processing', 'wc_downloadable_product_permissions');
-
-
 /**
  * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER
  *
@@ -113,6 +106,9 @@ function wc_downloadable_product_permissions( $order_id ) {
 		return; // Only do this once
 
 	$order = new WC_Order( $order_id );
+
+	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' )
+		return;
 
 	if ( sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
@@ -131,8 +127,10 @@ function wc_downloadable_product_permissions( $order_id ) {
 	update_post_meta( $order_id, '_download_permissions_granted', 1 );
 
 	do_action( 'woocommerce_grant_product_download_permissions', $order_id );
-
 }
+add_action( 'woocommerce_order_status_completed', 'wc_downloadable_product_permissions' );
+add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_permissions' );
+
 
 /**
  * Add a item to an order (for example a line item).
