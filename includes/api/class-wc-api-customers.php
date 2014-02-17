@@ -70,6 +70,11 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'get_customer' ),  WC_API_SERVER::READABLE ),
 		);
 
+		# GET /customers/<email>
+		$routes[ $this->base . '/(?P<id>.+)' ] = array(
+			array( array( $this, 'get_customer' ),  WC_API_SERVER::READABLE ),
+		);
+
 		# GET /customers/<id>/orders
 		$routes[ $this->base . '/(?P<id>\d+)/orders' ] = array(
 			array( array( $this, 'get_customer_orders' ), WC_API_SERVER::READABLE ),
@@ -124,7 +129,11 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		$customer = new WP_User( $id );
+		if ( is_email( $id ) ) {
+			$customer = get_user_by( 'email', $id );
+		} else {
+			$customer = new WP_User( $id );
+		}
 
 		// get info about user's last order
 		$last_order = $wpdb->get_row( "SELECT id, post_date_gmt
@@ -448,14 +457,19 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	protected function validate_request( $id, $type, $context ) {
 
-		$id = absint( $id );
+		// Only set to absint if not email
+		if ( ! is_email( $id ) )
+			$id = absint( $id );
 
 		// validate ID
 		if ( empty( $id ) )
 			return new WP_Error( 'woocommerce_api_invalid_customer_id', __( 'Invalid customer ID', 'woocommerce' ), array( 'status' => 404 ) );
 
 		// non-existent IDs return a valid WP_User object with the user ID = 0
-		$customer = new WP_User( $id );
+		if ( is_email( $id ) )
+			$customer = get_user_by( 'email', $id );
+		else
+			$customer = new WP_User( $id );
 
 		if ( 0 === $customer->ID )
 			return new WP_Error( 'woocommerce_api_invalid_customer', __( 'Invalid customer', 'woocommerce' ), array( 'status' => 404 ) );
