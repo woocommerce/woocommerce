@@ -374,7 +374,7 @@ class WC_Coupon {
 					$product_ids_on_sale = wc_get_product_ids_on_sale();
 					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-							if ( in_array( $cart_item['product_id'], $product_ids_on_sale, true ) || in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) || in_array( $cart_item['data']->get_parent(), $product_ids_on_sale, true ) ) {
+							if ( in_array( $cart_item['product_id'], $product_ids_on_sale ) || in_array( $cart_item['variation_id'], $product_ids_on_sale ) || in_array( $cart_item['data']->get_parent(), $product_ids_on_sale ) ) {
 								$valid_for_cart = false;
 							}
 						}
@@ -391,7 +391,7 @@ class WC_Coupon {
 					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 
-							$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
+							$product_cats = wp_get_post_terms( $cart_item['product_id'], apply_filters( 'woocommerce_coupon_exclude_categories', array( 'product_cat' ) ), array( "fields" => "ids" ) );
 
 							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 )
 								$valid_for_cart = false;
