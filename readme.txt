@@ -134,6 +134,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fixed sprintf missing parameter in customer-new-account.php template
 * Fix - Ampersand character properly outputted in plain text emails
 * Fix - Stack the password reset fields on smaller screens
+* Fix - Bulk edit options now reflect on all variations
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
