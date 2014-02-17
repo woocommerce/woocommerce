@@ -955,7 +955,7 @@ p.demo_store {
 					position: absolute;
 					top: 0;
 					left: 0;
-					padding-right: 1em;
+					//padding-right: 1em;
 				}
 
 			}
@@ -1809,8 +1809,14 @@ p.demo_store {
 -------------------------------------------------------------- */
 .single-product {
 	.twentythirteen {
-		.entry-summary {
+		.entry-summary,
+		#reply-title,
+		#respond #commentform {
 			padding: 0;
+		}
+
+		p.stars {
+			clear: both;
 		}
 	}
 }
