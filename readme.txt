@@ -142,6 +142,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Resolved issue where download permissions where not granted in some cases upon order complete
 * Fix - Prevent IE cursor from being stuck in loading animation
 * Fix - Ensure wc_get_product_ids_on_sale returns array of ints, not strings
+* Fix - Prevent rating stars from wrapping in IE
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
@@ -150,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Performance improvements for My Account view with a lot of available downloads
 * Refactor - Multiple docblock updates
 * Refactor - Multiple code standards improvements
+* Refactor - Changed all text strings without explicit domain, to use the 'woocommerce' text domain
 
 = 2.1.2 - 13/02/2014 =
 * Fix - Removed nl2br function from plain text email-order-items email template
