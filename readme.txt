@@ -131,10 +131,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Admin screen strings sanitised to work with Chinese characters
 * Fix - REST API OAuth signature fixed when using filter params
 * Fix - Ensure shipping address data for customers is updated if only shipping to billing address
+* Fix - Fixed sprintf missing parameter in customer-new-account.php template
+* Fix - Ampersand character properly outputted in plain text emails
+* Fix - Stack the password reset fields on smaller screens
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
 * Tweak - Trash pages swapped for endpoints instead of force delete
+* Refactor - Multiple docblock updates
 
 = 2.1.2 - 13/02/2014 =
 * Fix - Removed nl2br function from plain text email-order-items email template
