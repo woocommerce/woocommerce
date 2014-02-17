@@ -1,5 +1,7 @@
 jQuery(function($) {
 
+	$.blockUI.defaults.overlayCSS.cursor = 'default'; 
+	
 	// wc_checkout_params is required to continue, ensure the object exists
 	if (typeof wc_checkout_params === "undefined")
 		return false;
