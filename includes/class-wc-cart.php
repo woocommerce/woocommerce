@@ -674,16 +674,18 @@ class WC_Cart {
 
 				$code = $this->tax->get_rate_code( $key );
 
-				if ( ! isset( $tax_totals[ $code ] ) ) {
-					$tax_totals[ $code ] = new stdClass();
-					$tax_totals[ $code ]->amount = 0;
-				}
+				if ( $code ) {
+					if ( ! isset( $tax_totals[ $code ] ) ) {
+						$tax_totals[ $code ] = new stdClass();
+						$tax_totals[ $code ]->amount = 0;
+					}
 
-                $tax_totals[ $code ]->tax_rate_id       = $key;
-				$tax_totals[ $code ]->is_compound       = $this->tax->is_compound( $key );
-				$tax_totals[ $code ]->label             = $this->tax->get_rate_label( $key );
-				$tax_totals[ $code ]->amount           += wc_round_tax_total( $tax );
-				$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
+	                $tax_totals[ $code ]->tax_rate_id       = $key;
+					$tax_totals[ $code ]->is_compound       = $this->tax->is_compound( $key );
+					$tax_totals[ $code ]->label             = $this->tax->get_rate_label( $key );
+					$tax_totals[ $code ]->amount           += wc_round_tax_total( $tax );
+					$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
+				}
 			}
 
 			return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );

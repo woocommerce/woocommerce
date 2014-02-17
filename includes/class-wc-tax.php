@@ -557,6 +557,10 @@ class WC_Tax {
 
 		$rate = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
 
+		if ( ! $rate ) {
+			return '';
+		}
+
 		$code = array();
 
 		$code[] = $rate->tax_rate_country;
