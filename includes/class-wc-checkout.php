@@ -327,19 +327,22 @@ class WC_Checkout {
 
 		// Store tax rows
 		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $key ) {
+			$code = WC()->cart->tax->get_rate_code( $key );
+			
+			if ( $code ) {
+				$item_id = wc_add_order_item( $order_id, array(
+			 		'order_item_name' 		=> $code,
+			 		'order_item_type' 		=> 'tax'
+			 	) );
 
-			$item_id = wc_add_order_item( $order_id, array(
-		 		'order_item_name' 		=> WC()->cart->tax->get_rate_code( $key ),
-		 		'order_item_type' 		=> 'tax'
-		 	) );
-
-		 	// Add line item meta
-		 	if ( $item_id ) {
-		 		wc_add_order_item_meta( $item_id, 'rate_id', $key );
-		 		wc_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
-			 	wc_add_order_item_meta( $item_id, 'compound', absint( WC()->cart->tax->is_compound( $key ) ? 1 : 0 ) );
-			 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( isset( WC()->cart->taxes[ $key ] ) ? WC()->cart->taxes[ $key ] : 0 ) );
-			 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( isset( WC()->cart->shipping_taxes[ $key ] ) ? WC()->cart->shipping_taxes[ $key ] : 0 ) );
+			 	// Add line item meta
+			 	if ( $item_id ) {
+			 		wc_add_order_item_meta( $item_id, 'rate_id', $key );
+			 		wc_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
+				 	wc_add_order_item_meta( $item_id, 'compound', absint( WC()->cart->tax->is_compound( $key ) ? 1 : 0 ) );
+				 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( isset( WC()->cart->taxes[ $key ] ) ? WC()->cart->taxes[ $key ] : 0 ) );
+				 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( isset( WC()->cart->shipping_taxes[ $key ] ) ? WC()->cart->shipping_taxes[ $key ] : 0 ) );
+				}
 			}
 		}
 
