@@ -1485,8 +1485,13 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 			$image = wc_placeholder_img_src();
 		}
 
-		if ( $image )
-			echo '<img src="' . esc_attr( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';
+		if ( $image ) {
+			// Prevent esc_url from breaking spaces in urls for image embeds
+			// Ref: http://core.trac.wordpress.org/ticket/23605
+			$image = str_replace( ' ', '%20', $image );
+
+			echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';
+		}
 	}
 }
 

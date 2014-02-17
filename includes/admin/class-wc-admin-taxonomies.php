@@ -318,7 +318,11 @@ class WC_Admin_Taxonomies {
 			else
 				$image = wc_placeholder_img_src();
 
-			$columns .= '<img src="' . esc_attr( $image ) . '" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
+			// Prevent esc_url from breaking spaces in urls for image embeds
+			// Ref: http://core.trac.wordpress.org/ticket/23605
+			$image = str_replace( ' ', '%20', $image );
+
+			$columns .= '<img src="' . esc_url( $image ) . '" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
 
 		}
 
