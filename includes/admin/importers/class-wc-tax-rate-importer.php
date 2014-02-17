@@ -292,7 +292,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 			$size = size_format( $bytes );
 			$upload_dir = wp_upload_dir();
 			if ( ! empty( $upload_dir['error'] ) ) :
-				?><div class="error"><p><?php _e('Before you can upload your import file, you will need to fix the following error:'); ?></p>
+				?><div class="error"><p><?php _e( 'Before you can upload your import file, you will need to fix the following error:', 'woocommerce' ); ?></p>
 				<p><strong><?php echo $upload_dir['error']; ?></strong></p></div><?php
 			else :
 				?>
@@ -301,13 +301,13 @@ if ( class_exists( 'WP_Importer' ) ) {
 						<tbody>
 							<tr>
 								<th>
-									<label for="upload"><?php _e( 'Choose a file from your computer:' ); ?></label>
+									<label for="upload"><?php _e( 'Choose a file from your computer:', 'woocommerce' ); ?></label>
 								</th>
 								<td>
 									<input type="file" id="upload" name="import" size="25" />
 									<input type="hidden" name="action" value="save" />
 									<input type="hidden" name="max_file_size" value="<?php echo $bytes; ?>" />
-									<small><?php printf( __('Maximum size: %s' ), $size ); ?></small>
+									<small><?php printf( __('Maximum size: %s', 'woocommerce' ), $size ); ?></small>
 								</td>
 							</tr>
 							<tr>
@@ -325,7 +325,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 						</tbody>
 					</table>
 					<p class="submit">
-						<input type="submit" class="button" value="<?php esc_attr_e( 'Upload file and import' ); ?>" />
+						<input type="submit" class="button" value="<?php esc_attr_e( 'Upload file and import', 'woocommerce' ); ?>" />
 					</p>
 				</form>
 				<?php

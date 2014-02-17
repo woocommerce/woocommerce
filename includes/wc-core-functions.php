@@ -164,7 +164,7 @@ function get_woocommerce_currencies() {
 	return array_unique(
 		apply_filters( 'woocommerce_currencies',
 			array(
-				'AED' => __( 'United Arab Emirates Dirham' ),
+				'AED' => __( 'United Arab Emirates Dirham', 'woocommerce' ),
 				'AUD' => __( 'Australian Dollars', 'woocommerce' ),
 				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
 				'BGN' => __( 'Bulgarian Lev', 'woocommerce' ),
