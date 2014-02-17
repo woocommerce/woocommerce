@@ -136,11 +136,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Stack the password reset fields on smaller screens
 * Fix - Bulk edit options now reflect on all variations
 * Fix - Prevent notices when country has states but no states are specified in cart
+* Fix - Make my-account/view-order use the correct template file
+* Fix - Prevent session warnings when WordPress logs out
+* Fix - Prevent spaces in file names from breaking product thumbnails
+* Fix - Resolved issue where download permissions where not granted in some cases upon order complete
+* Fix - Prevent IE cursor from being stuck in loading animation
+* Fix - Ensure wc_get_product_ids_on_sale returns array of ints, not strings
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
 * Tweak - Trash pages swapped for endpoints instead of force delete
+* Tweak - Flip default status of price_trim_zeros (defaults to true now)
+* Tweak - Performance improvements for My Account view with a lot of available downloads
 * Refactor - Multiple docblock updates
+* Refactor - Multiple code standards improvements
 
 = 2.1.2 - 13/02/2014 =
 * Fix - Removed nl2br function from plain text email-order-items email template
