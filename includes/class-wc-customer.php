@@ -582,41 +582,56 @@ class WC_Customer {
 	 * @return array Array of downloadable products
 	 */
 	public function get_downloadable_products() {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
-		$downloads = array();
+		$downloads   = array();
+		$_product    = null;
+		$order       = null;
+		$file_number = 0;
 
-		if ( is_user_logged_in() ) :
+		if ( is_user_logged_in() ) {
 
-			$user_info = get_userdata( get_current_user_id() );
+			// Get results from valid orders only
+			$results = $wpdb->get_results( $wpdb->prepare( "
+				SELECT permissions.* 
+				FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
+				LEFT JOIN {$wpdb->posts} as posts ON permissions.order_id = posts.ID
+				WHERE user_id = %s 
+				AND permissions.order_id > 0
+				AND posts.post_status = 'publish'
+				AND 
+					(
+						permissions.downloads_remaining > 0
+						OR 
+						permissions.downloads_remaining = ''
+					)
+				GROUP BY permissions.download_id
+				ORDER BY permissions.order_id, permissions.product_id, permissions.download_id;
+				", get_current_user_id() ) );
 
-			$results = $wpdb->get_results( $wpdb->prepare("SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE user_id = '%s' ORDER BY order_id, product_id, download_id", get_current_user_id()) );
-
-			$_product = null;
-			$order = null;
-			$file_number = 0;
-			if ($results) foreach ($results as $result) :
-
-				if ($result->order_id>0) :
-
+			if ( $results ) {
+				foreach ( $results as $result ) {
 					if ( ! $order || $order->id != $result->order_id ) {
 						// new order
-						$order = new WC_Order( $result->order_id );
+						$order    = new WC_Order( $result->order_id );
 						$_product = null;
 					}
 
-					// order exists and downloads permitted?
-					if ( ! $order->id || ! $order->is_download_permitted() || $order->post_status != 'publish' ) continue;
+					// Downloads permitted?
+					if ( ! $order->is_download_permitted() ) {
+						continue;
+					}
 
-					if ( ! $_product || $_product->id != $result->product_id ) :
+					if ( ! $_product || $_product->id != $result->product_id ) {
 						// new product
 						$file_number = 0;
-						$_product = get_product( $result->product_id );
-					endif;
+						$_product    = get_product( $result->product_id );
+					}
 
-					if ( ! $_product || ! $_product->exists() ) continue;
-
-					if ( ! $_product->has_file( $result->download_id ) ) continue;
+					// Check product exists and has the file
+					if ( ! $_product || ! $_product->exists() || ! $_product->has_file( $result->download_id ) ) {
+						continue;
+					}
 
 					// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
 					$download_name = apply_filters(
@@ -629,35 +644,31 @@ class WC_Customer {
 
 					// Rename previous download with file number if there are multiple files only
 					if ( $file_number == 1 ) {
-						$previous_result = &$downloads[count($downloads)-1];
-						$previous_product = get_product($previous_result['product_id']);
+						$previous_result  = $downloads[ count( $downloads ) - 1 ];
 						$previous_result['download_name'] = apply_filters(
 							'woocommerce_downloadable_product_name',
-							$previous_result['download_name']. ' &mdash; ' . sprintf( __('File %d', 'woocommerce' ), $file_number ),
-							$previous_product,
+							$previous_result['download_name'] . ' &mdash; ' . sprintf( __('File %d', 'woocommerce' ), $file_number ),
+							$_product,
 							$previous_result['download_id'],
 							0
 						);
 					}
 
 					$downloads[] = array(
-						'download_url' => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), trailingslashit( home_url( '', 'http' ) ) ),
-						'download_id' => $result->download_id,
-						'product_id' => $result->product_id,
-						'download_name' => $download_name,
-						'order_id' => $order->id,
-						'order_key' => $order->order_key,
+						'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/', 'http' ) ),
+						'download_id'         => $result->download_id,
+						'product_id'          => $result->product_id,
+						'download_name'       => $download_name,
+						'order_id'            => $order->id,
+						'order_key'           => $order->order_key,
 						'downloads_remaining' => $result->downloads_remaining
 					);
 
 					$file_number++;
+				}
+			}
+		}
 
-				endif;
-
-			endforeach;
-
-		endif;
-
-		return apply_filters('woocommerce_customer_get_downloadable_products', $downloads);
+		return apply_filters( 'woocommerce_customer_get_downloadable_products', $downloads );
 	}
 }
