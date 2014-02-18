@@ -239,7 +239,7 @@
 											$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 											$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
 											$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
-											set_transient( $plugin . '_version_data', $version_data , 60*60*12 );
+											set_transient( substr( $plugin . '_version_data', 0, 45 ), $version_data , 60*60*12 );
 											break;
 										}
 									}
