@@ -146,6 +146,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Rating stars properly aligned in small screens
 * Fix - Handle get_rate_code when no matching rate is found
 * Fix - Cleaned noticed that might show when tax rates left empty
+* Fix - Prevented warning when you have hide shipping methods until address entered selected in CoD
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
