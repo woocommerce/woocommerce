@@ -578,7 +578,8 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			$wpdb->get_col(
 				$wpdb->prepare( "
 					SELECT p1.post_id
-					FROM {$wpdb->postmeta} p1, {$wpdb->postmeta} p2
+					FROM {$wpdb->postmeta} p1
+					INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
 					WHERE
 						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
 					OR
