@@ -54,9 +54,16 @@ class WC_Admin_Settings {
 	    		die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 
 	    // Trigger actions
-	   	do_action( 'woocommerce_settings_save_' . $current_tab );
-	    do_action( 'woocommerce_update_options_' . $current_tab );
-	    do_action( 'woocommerce_update_options' );
+            if($current_section == ''){
+                do_action('woocommerce_settings_save_' . $current_tab);
+                do_action('woocommerce_update_options_' . $current_tab);
+                do_action('woocommerce_update_options');
+            }
+            else{
+                do_action('woocommerce_settings_save_' . $current_tab . '_' . $current_section);
+                do_action('woocommerce_update_options_' . $current_tab . '_' . $current_section);
+                do_action('woocommerce_update_options');
+            }
 
     	// Clear any unwanted data
 		wc_delete_product_transients();
