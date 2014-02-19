@@ -117,45 +117,42 @@ class WC_Product_Cat_List_Walker extends Walker {
 		if ( !$element )
 			return;
 
-		if ( ! $args[0]['show_children_only'] || ( $args[0]['show_children_only'] && ( $element->parent == 0 || $args[0]['current_category'] == $element->parent || in_array( $element->parent, $args[0]['current_category_ancestors'] ) ) ) ) {
+		$id_field = $this->db_fields['id'];
 
-			$id_field = $this->db_fields['id'];
+		//display this element
+		if ( is_array( $args[0] ) )
+			$args[0]['has_children'] = ! empty( $children_elements[$element->$id_field] );
+		$cb_args = array_merge( array(&$output, $element, $depth), $args);
+		call_user_func_array(array(&$this, 'start_el'), $cb_args);
 
-			//display this element
-			if ( is_array( $args[0] ) )
-				$args[0]['has_children'] = ! empty( $children_elements[$element->$id_field] );
-			$cb_args = array_merge( array(&$output, $element, $depth), $args);
-			call_user_func_array(array(&$this, 'start_el'), $cb_args);
+		$id = $element->$id_field;
 
-			$id = $element->$id_field;
+		// descend only when the depth is right and there are children for this element
+		if ( ($max_depth == 0 || $max_depth > $depth+1 ) && isset( $children_elements[$id]) ) {
 
-			// descend only when the depth is right and there are children for this element
-			if ( ($max_depth == 0 || $max_depth > $depth+1 ) && isset( $children_elements[$id]) ) {
+			foreach( $children_elements[ $id ] as $child ){
 
-				foreach( $children_elements[ $id ] as $child ){
-
-					if ( !isset($newlevel) ) {
-						$newlevel = true;
-						//start the child delimiter
-						$cb_args = array_merge( array(&$output, $depth), $args);
-						call_user_func_array(array(&$this, 'start_lvl'), $cb_args);
-					}
-					$this->display_element( $child, $children_elements, $max_depth, $depth + 1, $args, $output );
+				if ( !isset($newlevel) ) {
+					$newlevel = true;
+					//start the child delimiter
+					$cb_args = array_merge( array(&$output, $depth), $args);
+					call_user_func_array(array(&$this, 'start_lvl'), $cb_args);
 				}
-				unset( $children_elements[ $id ] );
+				$this->display_element( $child, $children_elements, $max_depth, $depth + 1, $args, $output );
 			}
-
-			if ( isset($newlevel) && $newlevel ){
-				//end the child delimiter
-				$cb_args = array_merge( array(&$output, $depth), $args);
-				call_user_func_array(array(&$this, 'end_lvl'), $cb_args);
-			}
-
-			//end this element
-			$cb_args = array_merge( array(&$output, $element, $depth), $args);
-			call_user_func_array(array(&$this, 'end_el'), $cb_args);
-
+			unset( $children_elements[ $id ] );
 		}
+
+		if ( isset($newlevel) && $newlevel ){
+			//end the child delimiter
+			$cb_args = array_merge( array(&$output, $depth), $args);
+			call_user_func_array(array(&$this, 'end_lvl'), $cb_args);
+		}
+
+		//end this element
+		$cb_args = array_merge( array(&$output, $element, $depth), $args);
+		call_user_func_array(array(&$this, 'end_el'), $cb_args);
+			
 	}
 
 }
