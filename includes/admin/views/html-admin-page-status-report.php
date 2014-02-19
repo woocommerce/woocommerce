@@ -228,7 +228,7 @@
 
 						if ( strstr( $dirname, 'woocommerce' ) ) {
 
-							if ( false === ( $version_data = get_transient( $plugin . '_version_data' ) ) ) {
+							if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
 								$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
 								$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
 								if ( ! empty( $cl_lines ) ) {
@@ -239,7 +239,7 @@
 											$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 											$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
 											$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
-											set_transient( $plugin . '_version_data', $version_data , 60*60*12 );
+											set_transient( md5( $plugin ) . '_version_data', $version_data, 60*60*12 );
 											break;
 										}
 									}
@@ -389,7 +389,7 @@
         $active_theme = wp_get_theme();
         if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
 
-			$theme_dir = strtolower( str_replace( ' ','', $active_theme->Name ) );
+			$theme_dir = substr( strtolower( str_replace( ' ','', $active_theme->Name ) ), 0, 45 );
 
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) :
 
