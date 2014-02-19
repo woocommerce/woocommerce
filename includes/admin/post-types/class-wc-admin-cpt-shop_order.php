@@ -565,7 +565,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		}
 
 		// Search orders
-		$post_ids = array_merge(
+		$post_ids = array_unique( array_merge(
 			$wpdb->get_col(
 				$wpdb->prepare( "
 					SELECT post_id
@@ -597,7 +597,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				)
 			),
 			array( $search_order_id )
-		);
+		) );
 
 		// Remove s - we don't want to search order name
 		unset( $wp->query_vars['s'] );
