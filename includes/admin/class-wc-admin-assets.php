@@ -62,7 +62,7 @@ class WC_Admin_Assets {
 		global $wp_query, $post;
 
 		$screen       = get_current_screen();
-		$wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
+		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 		$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		// Register scripts
