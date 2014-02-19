@@ -95,7 +95,7 @@ module.exports = function( grunt ){
 				files: [
 					'<%= dirs.js %>/admin/*js',
 					'<%= dirs.js %>/frontend/*js',
-					'!<%= dirs.js %>/frontend/*.min.js',
+					'!<%= dirs.js %>/admin/*.min.js',
 					'!<%= dirs.js %>/frontend/*.min.js',
 				],
 				tasks: ['uglify']
