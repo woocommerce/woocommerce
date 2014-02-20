@@ -357,7 +357,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( ( $order->get_total_shipping() + $order->get_shipping_tax() ) > 0 ) {
 				$paypal_args['item_name_2'] = __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->get_shipping_method() );
 				$paypal_args['quantity_2'] 	= '1';
-				$paypal_args['amount_2'] 	= number_format( $order->get_total_shipping() + $order->get_shipping_tax() , 2, '.', '' );
+				$paypal_args['amount_2'] 	= number_format( $order->get_total_shipping() + $order->get_shipping_tax(), 2, '.', '' );
 			}
 
 		} else {
