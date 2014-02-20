@@ -237,9 +237,13 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 						   		echo '-';
 
 				    		echo '</td>
-				    			<td class="settings">
-				    				<a class="button" href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
-				    			</td>
+				    			<td class="settings">';
+
+				    		if ( $method->has_settings ) {
+				    			echo '<a class="button" href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>';
+				    		}
+
+				    		echo '</td>
 				    		</tr>';
 				    	}
 				    	?>
