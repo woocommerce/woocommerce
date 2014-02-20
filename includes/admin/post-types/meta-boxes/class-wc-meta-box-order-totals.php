@@ -269,8 +269,8 @@ class WC_Meta_Box_Order_Totals {
 		}
 
 		// Update totals
-		update_post_meta( $post_id, '_order_tax', wc_round_tax_total( $total_tax ) );
-		update_post_meta( $post_id, '_order_shipping_tax', wc_round_tax_total( $total_shipping_tax ) );
+		update_post_meta( $post_id, '_order_tax', wc_format_decimal( $total_tax ) );
+		update_post_meta( $post_id, '_order_shipping_tax', wc_format_decimal( $total_shipping_tax ) );
 		update_post_meta( $post_id, '_order_discount', wc_format_decimal( $_POST['_order_discount'] ) );
 		update_post_meta( $post_id, '_order_total', wc_format_decimal( $_POST['_order_total'] ) );
 
