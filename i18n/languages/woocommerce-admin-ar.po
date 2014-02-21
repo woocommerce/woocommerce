@@ -1,15 +1,15 @@
 # 
 # Translators:
 # Ahmad Karama <ahmad.karama@hotmail.com>, 2014
-# alaa13212 <alaa13212@gmail.com>, 2013
+# alaa13212 <alaa13212@gmail.com>, 2013-2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Arabic (http://www.transifex.com/projects/p/woocommerce-core/language/ar/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-16 19:00+0000\n"
+"Last-Translator: alaa13212 <alaa13212@gmail.com>\n"
+"Language-Team: Arabic (http://www.transifex.com/projects/p/woocommerce/language/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -46,7 +46,7 @@ msgstr "رجاءً حدد بعض العناصر."
 
 #: includes/admin/class-wc-admin-assets.php:138
 msgid "Remove this item meta?"
-msgstr "إزالة هذه البيانات؟"
+msgstr "إزالة هذه المعلومات؟"
 
 #: includes/admin/class-wc-admin-assets.php:139
 msgid "Remove this attribute?"
@@ -637,7 +637,7 @@ msgid "Default"
 msgstr "الافتراضي"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "المنتج"
 
@@ -1240,15 +1240,15 @@ msgstr "شكر وتقدير"
 
 #: includes/admin/class-wc-admin-welcome.php:225
 msgid "Translators"
-msgstr ""
+msgstr "المترجمين"
 
 #: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
-msgstr ""
+msgstr "دوال مريحة جديدة \"RESTful\" سـ&#10084;ـها المطورين"
 
 #: includes/admin/class-wc-admin-welcome.php:246
 msgid "Access your data from 3rd party applications"
-msgstr ""
+msgstr "المصول للبيانات من تطبيقات أخرة"
 
 #: includes/admin/class-wc-admin-welcome.php:247
 msgid ""
@@ -1257,11 +1257,11 @@ msgid ""
 "<strong>Coupons</strong>, <strong>Customers</strong>, "
 "<strong>Products</strong> and <strong>Reports</strong> in both "
 "<code>XML</code> and <code>JSON</code> formats."
-msgstr ""
+msgstr "المبنية على دوال WooCommerce، والتي تحص المطورين بالذات، دوال REST الجديدة تمكنك من الحصول على بيانات <strong>الطلبات</strong>، <strong>القسائم</strong>، <strong>الزبائن</strong>، <strong>المنتجات</strong> و<strong>التقارير</strong> في كل من صيغتي <code>XML</code> و<code>JSON</code>."
 
 #: includes/admin/class-wc-admin-welcome.php:251
 msgid "Authentication to keep data secure"
-msgstr ""
+msgstr "زامن لتبقي البياتات آمنة"
 
 #: includes/admin/class-wc-admin-welcome.php:252
 msgid ""
@@ -1269,11 +1269,11 @@ msgid ""
 "have SSL enabled, or signed according to the <a "
 "href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> specification if "
 "you don't have SSL. Data is only available to authenticated users."
-msgstr ""
+msgstr "المصادقة في دوال \"REST\" تتم عبر مزامة HTTP الأساسية إذا كنت تملك شهادة SSL مفعلة، أو موقعة وفقاً لمواصفات <a href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a>، إذا لم تكن تملك SSL. البيانات ستكون متوفرة فقط للمستخدمين المصدقين."
 
 #: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"
-msgstr ""
+msgstr "تحزينات على الواجهة والتقارير"
 
 #: includes/admin/class-wc-admin-welcome.php:260
 msgid "WordPress 3.8 admin UI compatibility"
@@ -1289,58 +1289,58 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:264
 msgid "Simplified order UI"
-msgstr ""
+msgstr "واجهة طلب مبسطة"
 
 #: includes/admin/class-wc-admin-welcome.php:265
 msgid ""
 "The orders panel has seen significant improvement to both the totals panel, "
 "and line item display making editing new and existing orders a breeze."
-msgstr ""
+msgstr "واجهة الطلبات حصلت على تحسينات بكبيرة لكل من لوحة المجموع و أدوات العنصر الواحد جعلت تعديل، إضافت وإلغاء الطلبات بسيط."
 
 #: includes/admin/class-wc-admin-welcome.php:266
 msgid ""
 "Item meta has also been optimised and can now be viewed as HTML rather than "
 "stuck in a text input."
-msgstr ""
+msgstr "معلومات العناصر ممكن أنتكون الآن منسقة ب HTML بدل أن تكون مجرد نص بلا تنسيق."
 
 #: includes/admin/class-wc-admin-welcome.php:269
 msgid "Improved Reporting"
-msgstr ""
+msgstr "تقارير محسنة"
 
 #: includes/admin/class-wc-admin-welcome.php:270
 msgid ""
 "Reports have been redesigned with new <strong>filtering</strong> "
 "capabilities, a new <strong>customer report</strong> showing "
 "orders/spending, and the ability to <strong>export CSVs</strong>."
-msgstr ""
+msgstr "التقارير تمت إعادة تصميمها مع خيارات <strong>ترشيح</strong> جديدة، خيار <strong>تقرير الزبون</strong> الجديد الذي يعرض طلباته وصرفياته، والقابلية للتصدير بصيغة <strong>CSV</strong>."
 
 #: includes/admin/class-wc-admin-welcome.php:271
 msgid ""
 "The dashboard also has a new widget showing you an overview of current "
 "orders complete with sparklines for quick at-a-glance stats."
-msgstr ""
+msgstr "الرئيسية أيضا بها مربع جديد للإحصائيات السريعة."
 
 #: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
-msgstr ""
+msgstr "مكونات منفصلة"
 
 #: includes/admin/class-wc-admin-welcome.php:279
 msgid "New separate plugins"
-msgstr ""
+msgstr "إضافات منفصلة جديدة"
 
 #: includes/admin/class-wc-admin-welcome.php:280
 msgid ""
 "To make core more lean, some integrations have been removed and turned into "
 "dedicated plugins which you can install as and when you need them."
-msgstr ""
+msgstr "لجعل الأساس أخف، بعض المكونات أزيلت وحولت إلى إضافات مخصصة تستطيع تثبيتها متى ما تحتاجها."
 
 #: includes/admin/class-wc-admin-welcome.php:283
 msgid "Google Analytics"
-msgstr ""
+msgstr "تحليلات  قوقل"
 
 #: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
-msgstr ""
+msgstr "أضف متتبع السوق الإلكتروني من تحليلات قوقل إلى سوق WooCommerce  الخاص بك."
 
 #: includes/admin/class-wc-admin-welcome.php:285
 #: includes/admin/class-wc-admin-welcome.php:290
@@ -1352,36 +1352,36 @@ msgstr "تحميل"
 
 #: includes/admin/class-wc-admin-welcome.php:288
 msgid "Piwik"
-msgstr ""
+msgstr "Piwik"
 
 #: includes/admin/class-wc-admin-welcome.php:289
 msgid "Integrate WooCommerce with Piwik and the WP-Piwik plugin."
-msgstr ""
+msgstr "إدعم WooCommerce بPiwik وإضافة WP-Piwik."
 
 #: includes/admin/class-wc-admin-welcome.php:293
 msgid "ShareThis"
-msgstr ""
+msgstr "انشر هذا ShareThis"
 
 #: includes/admin/class-wc-admin-welcome.php:294
 msgid "Add social network sharing buttons to products using ShareThis."
-msgstr ""
+msgstr "أضف أزرار مواقع التواصل الإجتامعية لمنتجاتك عبر ShareThis."
 
 #: includes/admin/class-wc-admin-welcome.php:298
 msgid "Sharedaddy"
-msgstr ""
+msgstr "انشر دادي Sharedaddy"
 
 #: includes/admin/class-wc-admin-welcome.php:299
 msgid "Add social network sharing buttons to products using Sharedaddy."
-msgstr ""
+msgstr "أضف أزرار مواقع التواصل الإجتامعية لمنتجاتك عبر Sharedaddy."
 
 #: includes/admin/class-wc-admin-welcome.php:303
 msgid "ShareYourCart"
-msgstr ""
+msgstr "انشر عربتك ShareYourCart"
 
 #: includes/admin/class-wc-admin-welcome.php:304
 msgid ""
 "Let users share their carts for a discount using the ShareYourCart service."
-msgstr ""
+msgstr "دع الزبائن ينشرون محتويات عربتهم مقابل خصم عبر خدمة ShareYourCart."
 
 #: includes/admin/class-wc-admin-welcome.php:310
 msgid "Under the Hood"
@@ -1389,7 +1389,7 @@ msgstr "من وراء الكواليس"
 
 #: includes/admin/class-wc-admin-welcome.php:314
 msgid "PayPal PDT support"
-msgstr ""
+msgstr "دعم PayPal PDT"
 
 #: includes/admin/class-wc-admin-welcome.php:315
 msgid ""
@@ -1399,17 +1399,17 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
-msgstr ""
+msgstr "فصل ملفات التصميم"
 
 #: includes/admin/class-wc-admin-welcome.php:320
 msgid ""
 "Frontend styles have been split into separate appearance/layout/smallscreen "
 "stylesheets to help with selective customisation."
-msgstr ""
+msgstr "ملفات تصميم الواجعة فصلت إلى appearance/layout/smallscreen لتسهيل التخصيص."
 
 #: includes/admin/class-wc-admin-welcome.php:324
 msgid "New endpoints"
-msgstr ""
+msgstr "نهايات جديدة"
 
 #: includes/admin/class-wc-admin-welcome.php:325
 msgid ""
@@ -1419,63 +1419,63 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:331
 msgid "Default credit card form for gateways"
-msgstr ""
+msgstr "نموذج للبطاقة الإتمانية"
 
 #: includes/admin/class-wc-admin-welcome.php:332
 msgid ""
 "We've added a standardized, default credit card form for gateways to use if "
 "they support <code>default_credit_card_form</code>."
-msgstr ""
+msgstr "أضفنا نموذج افتراضي جديد للبطاقات الإئتمانية للاستخدام إذا كانت البطاقات مدعومة <code>default_credit_card_form</code>."
 
 #: includes/admin/class-wc-admin-welcome.php:336
 msgid "Coupon limits per customer"
-msgstr ""
+msgstr "حد القسائم لكل زبون"
 
 #: includes/admin/class-wc-admin-welcome.php:337
 msgid ""
 "Coupon usage limits can now be set per user (using email + ID) rather than "
 "global."
-msgstr ""
+msgstr "حد استخدام القسائم الأن يمكن أن يكون للمستخدم (عبر البريد او المعرف) بدل الحد العام لعدد القسائم."
 
 #: includes/admin/class-wc-admin-welcome.php:341
 msgid "Streamlined new-account process"
-msgstr ""
+msgstr "عملية حساب جديد مبسطة"
 
 #: includes/admin/class-wc-admin-welcome.php:342
 msgid ""
 "During checkout, username and passwords are optional and can be "
 "automatically generated by WooCommerce."
-msgstr ""
+msgstr "خلال المحاسبة، اسم المستخدم وكلمة المرور اختيارية ويمكن أن تنشأ تلقائيا بواسطة WooCommerce."
 
 #: includes/admin/class-wc-admin-welcome.php:349
 msgid "Additional price display options"
-msgstr ""
+msgstr "خيارات جديدة لعرض السعر"
 
 #: includes/admin/class-wc-admin-welcome.php:350
 msgid ""
 "Define whether prices should be shown incl. or excl. of tax on the frontend,"
 " and add an optional suffix."
-msgstr ""
+msgstr "تحديد ما اذا كان السعر يعرض بِ أو بدون الضريبة للمستخدم، وإضافة لاحقة اختيارية."
 
 #: includes/admin/class-wc-admin-welcome.php:354
 msgid "Past order linking"
-msgstr ""
+msgstr "ربط الطلبات القديمة"
 
 #: includes/admin/class-wc-admin-welcome.php:355
 msgid ""
 "Admins now have the ability to link past orders to a customer (before they "
 "registered) by email address."
-msgstr ""
+msgstr "يمكن للمدراء الآن ربط الطلبات القديمة بزبون (قبل التسجيل) عبر البريد الالكتروني."
 
 #: includes/admin/class-wc-admin-welcome.php:359
 msgid "Review improvements"
-msgstr ""
+msgstr "تحسين المراجعات"
 
 #: includes/admin/class-wc-admin-welcome.php:360
 msgid ""
 "We've added a new option to restrict reviews to logged in purchasers, and "
 "made ratings editable from the backend."
-msgstr ""
+msgstr "أضفنا خيار جديد لمنع الغير مسجلين والغير مشترين من إضافة مراجعات، كذالك التقسم يمكن أن يعدل من قبل الإدارة."
 
 #: includes/admin/class-wc-admin-welcome.php:367
 msgid "Go to WooCommerce Settings"
@@ -1496,7 +1496,7 @@ msgid ""
 "to our translation team. Want to see your name? <a "
 "href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
 "WooCommerce</a>."
-msgstr ""
+msgstr "WooCommerce ترجمت لبعض اللغات والفضل يعود لفريق ترجمتنا. هل تريد أن ترى اسمك هنا؟ <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">ترجمWooCommerce</a>."
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1924,7 +1924,7 @@ msgstr "المجموع"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "الاجراءات"
 
@@ -2829,7 +2829,7 @@ msgid ""
 msgstr "الكمية. إذا كان منتج متغير ستكون هذه كمية عامة بجميع اﻷنواع التي لا تحدد كميتها"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "حالة المخزون"
 
@@ -3642,11 +3642,15 @@ msgstr ""
 msgid "No products found."
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "منتوج"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr ""
 

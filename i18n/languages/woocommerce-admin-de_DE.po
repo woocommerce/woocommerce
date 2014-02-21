@@ -2,15 +2,16 @@
 # Translators:
 # Henryk Ibe-Meinhardt <henryk.ibemeinhardt@googlemail.com>, 2014
 # inpsyde <info@inpsyde.com>, 2014
+# Stefan Klose <long.run.international@googlemail.com>, 2014
 # zodiac1978 <mail@torstenlandsiedel.de>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: German (Germany) (http://www.transifex.com/projects/p/woocommerce-core/language/de_DE/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-16 12:00+0000\n"
+"Last-Translator: Stefan Klose <long.run.international@googlemail.com>\n"
+"Language-Team: German (Germany) (http://www.transifex.com/projects/p/woocommerce/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -622,7 +623,7 @@ msgid "Default"
 msgstr "Standard"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Produkt"
 
@@ -1225,7 +1226,7 @@ msgstr "Danksagungen"
 
 #: includes/admin/class-wc-admin-welcome.php:225
 msgid "Translators"
-msgstr ""
+msgstr "Übersetzer"
 
 #: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
@@ -1481,7 +1482,7 @@ msgid ""
 "to our translation team. Want to see your name? <a "
 "href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
 "WooCommerce</a>."
-msgstr ""
+msgstr "WooCommerce wurde mit der Unterstützung unseres Übersetzer-Teams in eine Vielzahl anderer Sprachen übersetzt. Möchtest du dazu gehören? <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Übersetze WooCommerce</a>."
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1909,7 +1910,7 @@ msgstr "Gesamtsumme"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Aktionen"
 
@@ -2798,7 +2799,7 @@ msgid ""
 msgstr "Lagerbestand. Wenn dies ein variables Produkt ist, wird dieser Wert verwendet, um den Bestand für alle Variationen zu verwenden, ungeachtet dessen, ob Sie einen Bestand für die Variationen angelegt haben."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "Lagerstatus"
 
@@ -3599,11 +3600,15 @@ msgstr "&larr; Wählen Sie ein Produkt, um Statistiken anzuzeigen"
 msgid "No products found."
 msgstr "Keine Produkte gefunden"
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "produkt"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Übergeordnet"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr "Vorrätige Einheiten"
 
@@ -5203,7 +5208,7 @@ msgstr "Templates"
 msgid ""
 "<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
 "date. The core version is %s"
-msgstr ""
+msgstr "<code>%s</code> Version <strong style=\"color:red\">%s</strong> ist veraltet. Die Hauptversion ist %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:489
 #: includes/admin/views/html-admin-page-status-report.php:495
@@ -5336,7 +5341,7 @@ msgid ""
 " this could the reason. Ensure you update or remove them (in general we "
 "recommend only bundling the template files you actually need to customize). "
 "See the system report for full details."
-msgstr ""
+msgstr "<strong>Dein Design umfasst veraltete Fassungen der WooCommerce-Designvorlagen</strong> &#8211; dies könnte eine Ursache für mögliche Fehlfunktionen der Frontend-Oberfläche sein. Bitte aktualisiere oder entferne diese Vorlagen (generell empfehlen wir nur benötigte Designvorlage einzubinden). Siehe den Systembericht für weitere Details."
 
 #: includes/admin/views/html-notice-template-check.php:6
 #: includes/admin/views/html-notice-theme-support.php:6

@@ -7,10 +7,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 09:44+0000\n"
-"Last-Translator: Shohei Tanaka <shohei.tanaka@artisanworkshop.biz>\n"
-"Language-Team: Japanese (http://www.transifex.com/projects/p/woocommerce-core/language/ja/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-14 08:50+0000\n"
+"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"Language-Team: Japanese (http://www.transifex.com/projects/p/woocommerce/language/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -618,7 +618,7 @@ msgid "Default"
 msgstr "デフォルト"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "商品"
 
@@ -1905,7 +1905,7 @@ msgstr "合計"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "アクション"
 
@@ -2790,7 +2790,7 @@ msgid ""
 msgstr "在庫数：これが変数商品ならば、在庫数を定義しない限り、この値が全バリエーションの在庫制御に使用されます"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "在庫状況"
 
@@ -3588,11 +3588,15 @@ msgstr "&larr; 商品を選んでレポートを表示ください"
 msgid "No products found."
 msgstr "該当商品がありません。"
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "商品"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Parent"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr "在庫単位"
 

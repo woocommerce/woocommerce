@@ -18,10 +18,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 14:20+0000\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-18 18:30+0000\n"
 "Last-Translator: claudiosmweb <contato@claudiosmweb.com>\n"
-"Language-Team: Portuguese (Brazil) (http://www.transifex.com/projects/p/woocommerce-core/language/pt_BR/)\n"
+"Language-Team: Portuguese (Brazil) (http://www.transifex.com/projects/p/woocommerce/language/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -633,7 +633,7 @@ msgid "Default"
 msgstr "Padrão"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Produto"
 
@@ -1920,7 +1920,7 @@ msgstr "Total"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Ações"
 
@@ -2152,7 +2152,7 @@ msgstr "Uso individual apenas"
 msgid ""
 "Check this box if the coupon cannot be used in conjunction with other "
 "coupons."
-msgstr "Selecione essa caixa se o cupom não poderá ser usado em conjunto com outros cupons."
+msgstr "Selecione esta caixa se o cupom não poderá ser usado em conjunto com outros cupons."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:91
 msgid "Exclude sale items"
@@ -2809,7 +2809,7 @@ msgid ""
 msgstr "Estoque disponível. Se este produto contiver variações, o valor será usado para controlar o estoque de todas as variações, a menos que você defina o estoque no nível da variação."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "Status do estoque"
 
@@ -3610,11 +3610,15 @@ msgstr "&larr; Escolha um produto para ver as estatísticas"
 msgid "No products found."
 msgstr "Nenhuma produto foi encontrado."
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "produto"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Pai"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr "Unidades em estoque"
 

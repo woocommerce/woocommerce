@@ -5,10 +5,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Bengali (Bangladesh) (http://www.transifex.com/projects/p/woocommerce-core/language/bn_BD/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-18 12:51+0000\n"
+"Last-Translator: smartdatasoft\n"
+"Language-Team: Bengali (Bangladesh) (http://www.transifex.com/projects/p/woocommerce/language/bn_BD/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -620,7 +620,7 @@ msgid "Default"
 msgstr "ডিফলট"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "পণ্য"
 
@@ -650,136 +650,136 @@ msgstr "পণ্য হালনাগাদ হয়েছে। <a href=\"%s\">
 #: includes/admin/class-wc-admin-post-types.php:74
 #: includes/admin/class-wc-admin-post-types.php:89
 msgid "Custom field updated."
-msgstr ""
+msgstr "কাস্টম ফিল্ড আপডেট হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:60
 #: includes/admin/class-wc-admin-post-types.php:75
 #: includes/admin/class-wc-admin-post-types.php:90
 msgid "Custom field deleted."
-msgstr ""
+msgstr "কাস্টম ফিল্ড মুছে ফেলা হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:61
 msgid "Product updated."
-msgstr ""
+msgstr "পণ্য আপডেট হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:62
 msgid "Product restored to revision from %s"
-msgstr ""
+msgstr "%s হতে পুনঃ নিরীক্ষার জন্য পণ্য পুনঃ আমদানি করা হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:63
 msgid "Product published. <a href=\"%s\">View Product</a>"
-msgstr ""
+msgstr "পণ্য মুদ্রিত হয়েছে <a href=\"%s\">পণ্য দেখুন</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:64
 msgid "Product saved."
-msgstr ""
+msgstr "পণ্য সংরক্ষন করা হয়েছে। "
 
 #: includes/admin/class-wc-admin-post-types.php:65
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
-msgstr ""
+msgstr "পণ্য জমা করা হয়েছে <a target=\"_blank\" href=\"%s\">পণ্যটি দেখে নিন</a> "
 
 #: includes/admin/class-wc-admin-post-types.php:66
 msgid ""
 "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" "
 "href=\"%2$s\">Preview Product</a>"
-msgstr ""
+msgstr "পণ্যটি নির্ধারিত হএচেঃ <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\"> পণ্যটি দেখে নিন"
 
 #: includes/admin/class-wc-admin-post-types.php:67
 #: includes/admin/class-wc-admin-post-types.php:82
 #: includes/admin/class-wc-admin-post-types.php:97
 msgid "M j, Y @ G:i"
-msgstr ""
+msgstr "এম যে, য় @ জিঃ আই "
 
 #: includes/admin/class-wc-admin-post-types.php:68
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
-msgstr ""
+msgstr "পণ্য খসড়া আপডেট হয়েছে। <a target=\"_blank\" href=\"%s\">পণ্যটি দেখে নিন</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:73
 #: includes/admin/class-wc-admin-post-types.php:76
 #: includes/admin/class-wc-admin-post-types.php:78
 msgid "Order updated."
-msgstr ""
+msgstr "ফরমায়েস হালনাগাদ হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:77
 msgid "Order restored to revision from %s"
-msgstr ""
+msgstr "%s থেকে পুনঃ নিরীক্ষার জন্য ফরমায়েশ পুনঃ আমদানি করা হয়েছে"
 
 #: includes/admin/class-wc-admin-post-types.php:79
 msgid "Order saved."
-msgstr ""
+msgstr "ফরমায়েশ সংরক্ষণ করা হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:80
 msgid "Order submitted."
-msgstr ""
+msgstr "অর্ডার জমা দেয়া হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:81
 msgid "Order scheduled for: <strong>%1$s</strong>."
-msgstr ""
+msgstr "অর্ডার নির্ধারিত হয়েছেঃ <strong>%1$s</strong>."
 
 #: includes/admin/class-wc-admin-post-types.php:83
 msgid "Order draft updated."
-msgstr ""
+msgstr "অর্ডার খসড়া আপডেট করা হয়েছে। "
 
 #: includes/admin/class-wc-admin-post-types.php:88
 #: includes/admin/class-wc-admin-post-types.php:91
 #: includes/admin/class-wc-admin-post-types.php:93
 msgid "Coupon updated."
-msgstr ""
+msgstr "কুপন আপডেট করা হয়েছে।  "
 
 #: includes/admin/class-wc-admin-post-types.php:92
 msgid "Coupon restored to revision from %s"
-msgstr ""
+msgstr "%s হতে পুনঃনিরীক্ষার জন্য কুপন পুনআমদানি করা হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:94
 msgid "Coupon saved."
-msgstr ""
+msgstr "কুপন সংরক্ষণ করা হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:95
 msgid "Coupon submitted."
-msgstr ""
+msgstr "কুপন পেশ করা হয়েছে "
 
 #: includes/admin/class-wc-admin-post-types.php:96
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
-msgstr ""
+msgstr "কুপন নির্ধারিত হয়েছেঃ <strong>%1$s</strong>."
 
 #: includes/admin/class-wc-admin-post-types.php:98
 msgid "Coupon draft updated."
-msgstr ""
+msgstr "কুপনের খসড়া হালনাগাত হয়েছে। "
 
 #: includes/admin/class-wc-admin-profile.php:45
 msgid "Customer Billing Address"
-msgstr ""
+msgstr "ক্রেতার বিলিং ঠিকানা"
 
 #: includes/admin/class-wc-admin-profile.php:48
 #: includes/admin/class-wc-admin-profile.php:97
 msgid "First name"
-msgstr ""
+msgstr "নামের প্রথম ভাগ "
 
 #: includes/admin/class-wc-admin-profile.php:52
 #: includes/admin/class-wc-admin-profile.php:101
 msgid "Last name"
-msgstr ""
+msgstr "নামের শেষ ভাগ "
 
 #: includes/admin/class-wc-admin-profile.php:56
 #: includes/admin/class-wc-admin-profile.php:105
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:37
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:84
 msgid "Company"
-msgstr ""
+msgstr "কোম্পানি "
 
 #: includes/admin/class-wc-admin-profile.php:60
 #: includes/admin/class-wc-admin-profile.php:109
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:41
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:88
 msgid "Address 1"
-msgstr ""
+msgstr "ঠিকানা 1"
 
 #: includes/admin/class-wc-admin-profile.php:64
 #: includes/admin/class-wc-admin-profile.php:113
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:45
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:92
 msgid "Address 2"
-msgstr ""
+msgstr "ঠিকানা  2"
 
 #: includes/admin/class-wc-admin-profile.php:68
 #: includes/admin/class-wc-admin-profile.php:117
@@ -795,19 +795,19 @@ msgstr "শহর"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:53
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:100
 msgid "Postcode"
-msgstr ""
+msgstr "পোস্ট কোড "
 
 #: includes/admin/class-wc-admin-profile.php:76
 #: includes/admin/class-wc-admin-profile.php:125
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:63
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:110
 msgid "State/County"
-msgstr ""
+msgstr "স্টেট/দেশ  "
 
 #: includes/admin/class-wc-admin-profile.php:77
 #: includes/admin/class-wc-admin-profile.php:126
 msgid "State/County or state code"
-msgstr ""
+msgstr "স্টেট/দেশ অথবা স্টেট কোড  "
 
 #: includes/admin/class-wc-admin-profile.php:80
 #: includes/admin/class-wc-admin-profile.php:129
@@ -819,21 +819,21 @@ msgstr "দেশ"
 #: includes/admin/class-wc-admin-profile.php:81
 #: includes/admin/class-wc-admin-profile.php:130
 msgid "2 letter Country code"
-msgstr ""
+msgstr "2 অক্ষর এর দেশ কোড "
 
 #: includes/admin/class-wc-admin-profile.php:84
 msgid "Telephone"
-msgstr ""
+msgstr "টেলিফোন "
 
 #: includes/admin/class-wc-admin-profile.php:88
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:67
 #: includes/admin/reports/class-wc-report-customer-list.php:244
 msgid "Email"
-msgstr ""
+msgstr "ই মেইল "
 
 #: includes/admin/class-wc-admin-profile.php:94
 msgid "Customer Shipping Address"
-msgstr ""
+msgstr "কাস্টমারের শিপিং ঠিকানা "
 
 #: includes/admin/class-wc-admin-profile.php:197
 msgid "Read"
@@ -878,32 +878,32 @@ msgstr "ফরমায়েশ "
 
 #: includes/admin/class-wc-admin-reports.php:49
 msgid "Sales by date"
-msgstr ""
+msgstr "তারিখ অনুযায়ী বিক্রয় "
 
 #: includes/admin/class-wc-admin-reports.php:55
 msgid "Sales by product"
-msgstr ""
+msgstr "পণ্য অনুযায়ী বিক্রয় "
 
 #: includes/admin/class-wc-admin-reports.php:61
 msgid "Sales by category"
-msgstr ""
+msgstr "প্রকরণ অনুযায়ী বিক্রয় "
 
 #: includes/admin/class-wc-admin-reports.php:67
 msgid "Coupons by date"
-msgstr ""
+msgstr "তারিখ অনুযায়ী কুপন "
 
 #: includes/admin/class-wc-admin-reports.php:75
 #: includes/admin/reports/class-wc-report-customer-list.php:25
 msgid "Customers"
-msgstr ""
+msgstr "ক্রেতা "
 
 #: includes/admin/class-wc-admin-reports.php:78
 msgid "Customers vs. Guests"
-msgstr ""
+msgstr "ক্রেতা বনাম অতিথি "
 
 #: includes/admin/class-wc-admin-reports.php:84
 msgid "Customer List"
-msgstr ""
+msgstr "ক্রেতা তালিকা "
 
 #: includes/admin/class-wc-admin-reports.php:92
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
@@ -911,11 +911,11 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-stock.php:20
 #: includes/admin/reports/class-wc-report-stock.php:21
 msgid "Stock"
-msgstr ""
+msgstr "মজুদ "
 
 #: includes/admin/class-wc-admin-reports.php:95
 msgid "Low in stock"
-msgstr ""
+msgstr "মজুদ কম "
 
 #: includes/admin/class-wc-admin-reports.php:101
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
@@ -928,74 +928,74 @@ msgstr "স্টক নেই"
 
 #: includes/admin/class-wc-admin-reports.php:107
 msgid "Most Stocked"
-msgstr ""
+msgstr "সর্বচ্চ মজুদ  "
 
 #: includes/admin/class-wc-admin-reports.php:118
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
-msgstr ""
+msgstr "ট্যাক্স"
 
 #: includes/admin/class-wc-admin-reports.php:121
 msgid "Taxes by code"
-msgstr ""
+msgstr "কোড অনুযায়ী ট্যাক্স "
 
 #: includes/admin/class-wc-admin-reports.php:127
 msgid "Taxes by date"
-msgstr ""
+msgstr "তারিখ অনুযায়ী ট্যাক্স "
 
 #: includes/admin/class-wc-admin-settings.php:54
 msgid "Action failed. Please refresh the page and retry."
-msgstr ""
+msgstr "চেষ্টা ব্যর্থ হয়েছে।দয়া করে পেইজটি রিফ্রেস করুন এবং আবার চেষ্টা করুন।   "
 
 #: includes/admin/class-wc-admin-settings.php:65
 msgid "Your settings have been saved."
-msgstr ""
+msgstr "আপনার সেটিংস সংরক্ষণ করা হয়েছে।   "
 
 #: includes/admin/class-wc-admin-settings.php:121
 msgid "The changes you made will be lost if you navigate away from this page."
-msgstr ""
+msgstr "এই পেইজ থেকে ছলে গেলে আপনার করা পরিবর্তনগুলো হারিয়ে যাবে । "
 
 #: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
-msgstr ""
+msgstr "হার্ড ক্রপ? "
 
 #: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
-msgstr ""
+msgstr "পেইজ চয়ন করুন "
 
 #: includes/admin/class-wc-admin-settings.php:538
 msgid "Choose a country&hellip;"
-msgstr ""
+msgstr "দেশ চয়ন করুন "
 
 #: includes/admin/class-wc-admin-settings.php:562
 msgid "Choose countries&hellip;"
-msgstr ""
+msgstr "দেশসমূহ চয়ন করুন "
 
 #: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:461
 msgid "Select all"
-msgstr ""
+msgstr "সবকিছু নির্বাচন করুন "
 
 #: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:461
 msgid "Select none"
-msgstr ""
+msgstr "কোনো কিছু নির্বাচন না করুন "
 
 #: includes/admin/class-wc-admin-status.php:52
 msgid "Product Transients Cleared"
-msgstr ""
+msgstr "খসড়া পণ্য পরিস্কার করা হয়েছে "
 
 #: includes/admin/class-wc-admin-status.php:93
 msgid "%d Transients Rows Cleared"
-msgstr ""
+msgstr "%d খসড়া সারি পরিস্কার করা হয়েছে "
 
 #: includes/admin/class-wc-admin-status.php:102
 msgid "Roles successfully reset"
-msgstr ""
+msgstr "ভুমিকা সফলভাবে পুনঃস্থাপন হয়েছে "
 
 #: includes/admin/class-wc-admin-status.php:114
 msgid "Terms successfully recounted"
-msgstr ""
+msgstr "শর্ত সমূহ সফলভাবে পুনঃ গণনা করা হয়েছে "
 
 #: includes/admin/class-wc-admin-status.php:125
 msgid "Sessions successfully cleared"
@@ -1011,11 +1011,11 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
-msgstr ""
+msgstr "%s::%s কল করার সময় একটি ত্রুটি ঘটেছে "
 
 #: includes/admin/class-wc-admin-status.php:149
 msgid "There was an error calling %s"
-msgstr ""
+msgstr "%s কল করার সময় একটি ত্রুটি ঘটেছে "
 
 #: includes/admin/class-wc-admin-status.php:159
 msgid "Your changes have been saved."
@@ -1023,63 +1023,63 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:173
 msgid "WC Transients"
-msgstr ""
+msgstr "WC খসড়া "
 
 #: includes/admin/class-wc-admin-status.php:174
 msgid "Clear transients"
-msgstr ""
+msgstr "খসড়া পরিস্কার করুন "
 
 #: includes/admin/class-wc-admin-status.php:175
 msgid "This tool will clear the product/shop transients cache."
-msgstr ""
+msgstr "এই টুলটি পণ্য/দোকানের খসড়া ক্যাশ পরিস্কার করবে।  "
 
 #: includes/admin/class-wc-admin-status.php:178
 msgid "Expired Transients"
-msgstr ""
+msgstr "মেয়াদ উত্তীর্ণ খসড়া "
 
 #: includes/admin/class-wc-admin-status.php:179
 msgid "Clear expired transients"
-msgstr ""
+msgstr "মেয়াদ উত্তীর্ণ খসড়া পরিস্কার করুন "
 
 #: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from Wordpress."
-msgstr ""
+msgstr "এই টুলটি Wordpressএর সকল মেয়াদ উত্তীর্ণ  খসড়া পরিস্কার করবে।  "
 
 #: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
-msgstr ""
+msgstr "টার্ম গণনা চলছে "
 
 #: includes/admin/class-wc-admin-status.php:184
 msgid "Recount terms"
-msgstr ""
+msgstr "টার্ম পুনঃ গননা চলছে "
 
 #: includes/admin/class-wc-admin-status.php:185
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
-msgstr ""
+msgstr "এই টুলটি পণ্য টার্ম পুনঃ গণনা করবে- যখন ক্যাটালগ থেকে লুকায়িত অবস্থায় আপনি আপনার সেটিংস পরিবর্তন করবেন তখন এটি উপযোগী।   "
 
 #: includes/admin/class-wc-admin-status.php:188
 msgid "Capabilities"
-msgstr ""
+msgstr "সক্ষমতা "
 
 #: includes/admin/class-wc-admin-status.php:189
 msgid "Reset capabilities"
-msgstr ""
+msgstr "সক্ষমতা রিসেট করুন "
 
 #: includes/admin/class-wc-admin-status.php:190
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
-msgstr ""
+msgstr "এই টুলটি এডমিনকে, ক্রেতাকে এবং দকান_ম্যানেজার ভুমিকা কে ডিফল্ট এ রিসেট করবে। যদি আপনার ব্যাবহারকারিরা WooCommerce এডমিন পেইজ আক্সেস করতে না পারে তাহলে এটি ব্যবহার করুন    "
 
 #: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
-msgstr ""
+msgstr "ক্রেতা সেশনস  "
 
 #: includes/admin/class-wc-admin-status.php:194
 msgid "Clear all sessions"
-msgstr ""
+msgstr "সব সেশনস পরিস্কার করুন  "
 
 #: includes/admin/class-wc-admin-status.php:195
 msgid ""
@@ -1119,7 +1119,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
-msgstr ""
+msgstr "প্রদর্শনের ধরন "
 
 #: includes/admin/class-wc-admin-taxonomies.php:89
 #: includes/admin/class-wc-admin-taxonomies.php:178
@@ -1132,32 +1132,32 @@ msgstr "পণ্যসমূহ"
 #: includes/admin/class-wc-admin-taxonomies.php:90
 #: includes/admin/class-wc-admin-taxonomies.php:179
 msgid "Subcategories"
-msgstr ""
+msgstr "উপশ্রেণী "
 
 #: includes/admin/class-wc-admin-taxonomies.php:91
 #: includes/admin/class-wc-admin-taxonomies.php:180
 msgid "Both"
-msgstr ""
+msgstr "উভয় "
 
 #: includes/admin/class-wc-admin-taxonomies.php:95
 #: includes/admin/class-wc-admin-taxonomies.php:185
 msgid "Thumbnail"
-msgstr ""
+msgstr "থাম্বনেইল "
 
 #: includes/admin/class-wc-admin-taxonomies.php:99
 #: includes/admin/class-wc-admin-taxonomies.php:190
 msgid "Upload/Add image"
-msgstr ""
+msgstr "আপলোড/ছবি যোগ করুন "
 
 #: includes/admin/class-wc-admin-taxonomies.php:100
 #: includes/admin/class-wc-admin-taxonomies.php:191
 msgid "Remove image"
-msgstr ""
+msgstr "ছবি মুছে ফেলুন "
 
 #: includes/admin/class-wc-admin-taxonomies.php:125
 #: includes/admin/class-wc-admin-taxonomies.php:212
 msgid "Use image"
-msgstr ""
+msgstr "ছবি ব্যবহার করুন "
 
 #: includes/admin/class-wc-admin-taxonomies.php:270
 msgid ""
@@ -1165,39 +1165,39 @@ msgid ""
 "of categories on the front-end you can drag and drop to sort them. To see "
 "more categories listed click the \"screen options\" link at the top of the "
 "page."
-msgstr ""
+msgstr "আপনার দোকানের পণ্য শ্রেণী গুলো এখানে ম্যানেজ করতে পারেন।সামনের অংশে শ্রেণীগুলোর ক্রম বদলাতে আপনি ড্রাগ- ড্রপ করে তাদের সাজাতে পারেন। অন্যান্য শ্রেণীর তালিকা দেখতে পৃষ্ঠার উপরের \"screen options\" লিঙ্কে ক্লিক করুন। "
 
 #: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
-msgstr ""
+msgstr "একই শ্রেণীর পণ্যগুলো একত্রে রাখতে পরিবহন শ্রেণী ব্যবহার করতে পারেন। এই দলগুলোকে কোন পরিবহন পদ্ধতি ব্যবহারের মাধ্যমে ভিন্ন ভিন্ন পণ্যের জন্য ভিন্ন ভিন্ন হার দেওয়া যায়। "
 
 #: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
 msgid "Image"
-msgstr ""
+msgstr "চিত্র "
 
 #: includes/admin/class-wc-admin-welcome.php:46
 msgid "Welcome to WooCommerce"
-msgstr ""
+msgstr " WooCommerce এ স্বাগতম "
 
 #: includes/admin/class-wc-admin-welcome.php:195
 msgid "Welcome to WooCommerce %s"
-msgstr ""
+msgstr "%sWooCommerce এ স্বাগতম "
 
 #: includes/admin/class-wc-admin-welcome.php:200
 msgid "Thanks, all done!"
-msgstr ""
+msgstr "ধন্যবাদ! সকল কাজ সম্পন্ন!  "
 
 #: includes/admin/class-wc-admin-welcome.php:202
 msgid "Thank you for updating to the latest version!"
-msgstr ""
+msgstr "সাম্প্রতিক ভার্শন এ হালনাগাদ করার জন্য ধন্যবাদ! "
 
 #: includes/admin/class-wc-admin-welcome.php:204
 msgid "Thanks for installing!"
-msgstr ""
+msgstr "ইন্সটল করার জন্য ধন্যবাদ! "
 
 #: includes/admin/class-wc-admin-welcome.php:206
 msgid ""
@@ -1907,7 +1907,7 @@ msgstr "মোট"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr ""
 
@@ -2796,7 +2796,7 @@ msgid ""
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr ""
 
@@ -3597,11 +3597,15 @@ msgstr ""
 msgid "No products found."
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "পণ্য"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr ""
 

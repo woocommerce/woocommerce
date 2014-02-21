@@ -7,10 +7,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Estonian (http://www.transifex.com/projects/p/woocommerce-core/language/et/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-19 09:20+0000\n"
+"Last-Translator: ragulka <illimar.tambek@gmail.com>\n"
+"Language-Team: Estonian (http://www.transifex.com/projects/p/woocommerce/language/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -409,7 +409,7 @@ msgstr "5-st"
 
 #: includes/admin/class-wc-admin-dashboard.php:195
 msgid "reviewed by"
-msgstr ""
+msgstr "kirjutas"
 
 #: includes/admin/class-wc-admin-dashboard.php:201
 msgid "There are no product reviews yet."
@@ -622,7 +622,7 @@ msgid "Default"
 msgstr "Vaikimisi"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Toode"
 
@@ -1009,7 +1009,7 @@ msgstr "Kõik puuduolevad WooCommerce'i lehed paigaldati edukalt."
 
 #: includes/admin/class-wc-admin-status.php:137
 msgid "Tax rates successfully deleted"
-msgstr ""
+msgstr "Maksumäärad kustutati edukalt"
 
 #: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
@@ -1087,7 +1087,7 @@ msgstr "Kustuta kõik sessioonid"
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr ""
+msgstr "<strong class=\"red\">Hoiatus</strong> See tööriist kustutab kõikide kasutajate sessiooniandmed andmebaasist, sealhulgas need, kes praegu lehel viibida võivad."
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
@@ -1102,21 +1102,21 @@ msgstr "Paigalda lehed"
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
-msgstr ""
+msgstr "<strong class=\"red\">Tähelepanu</strong> See tööriist paigaldab puuduolevad WooCommerce'i lehed. Lehed, mis on juba olemas, jäetakse puutumata."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
-msgstr ""
+msgstr "Kustuta kõik WooCommerce'i maksumäärad"
 
 #: includes/admin/class-wc-admin-status.php:204
 msgid "Delete ALL tax rates"
-msgstr ""
+msgstr "Kustuta KÕIK maksumäärad"
 
 #: includes/admin/class-wc-admin-status.php:205
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
-msgstr ""
+msgstr "<strong class=\"red\">Tähelepanu:</strong> See valik kustutab KÕIK sinu maksumäärad, ole ettevaatlik."
 
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
@@ -1225,7 +1225,7 @@ msgstr "Tänud"
 
 #: includes/admin/class-wc-admin-welcome.php:225
 msgid "Translators"
-msgstr ""
+msgstr "Tõlkijad"
 
 #: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
@@ -1380,7 +1380,7 @@ msgstr "PayPal'i PDT tugi"
 msgid ""
 "PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
 " the status of an order when a customer returns from PayPal."
-msgstr ""
+msgstr "PayPali Data Transfer (PDT) on alternatiiv PayPal IPNile, mis saadab hetkel kui klient PayPalist tagasi tuleb kaasa tellimuse staatuse."
 
 #: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
@@ -1481,7 +1481,7 @@ msgid ""
 "to our translation team. Want to see your name? <a "
 "href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
 "WooCommerce</a>."
-msgstr ""
+msgstr "WooCommerce on lahkesti tõlgitud mitmesse keelde tänu meie tõlkemeeskonnale. Tahaksid siin näha enda nime? <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Tõlgi WooCommerce'i</a>."
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1565,17 +1565,17 @@ msgstr "Laadi fail üles ja impordi"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:103
 msgid "Product Image"
-msgstr ""
+msgstr "Toote pilt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:105
 msgid "Remove product image"
-msgstr ""
+msgstr "Eemalda toote pilt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:107
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:121
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:122
 msgid "Set product image"
-msgstr ""
+msgstr "Seadista toote pilt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:136
 msgid "Product name"
@@ -1909,7 +1909,7 @@ msgstr "Kokku"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Toimingud"
 
@@ -1946,8 +1946,8 @@ msgstr[1] "ning %d märkust veel"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
 msgid "%d note"
 msgid_plural "%d notes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d märkus"
+msgstr[1] "%d märkust"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:228
 msgid "Billing:"
@@ -2798,7 +2798,7 @@ msgid ""
 msgstr "Kogus laos. Kui see on varieeruv toode, siis kasutatakse seda väärtust kõikide variatsioonide laoseisuna, välja arvatud juhul, kui sa määrad laoseisud variatsioonipõhiselt."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "Laoseis"
 
@@ -3599,11 +3599,15 @@ msgstr "&larr; Vali toode, et näha statistikat"
 msgid "No products found."
 msgstr "Tooteid ei leitud."
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "toode"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Ülem"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr "Ühikuid laos"
 
@@ -5203,7 +5207,7 @@ msgstr "Mallid"
 msgid ""
 "<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
 "date. The core version is %s"
-msgstr ""
+msgstr "<code>%s</code> versioon <strong style=\"color:red\">%s</strong> on aegunud. Plugina versioon on %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:489
 #: includes/admin/views/html-admin-page-status-report.php:495
@@ -5336,7 +5340,7 @@ msgid ""
 " this could the reason. Ensure you update or remove them (in general we "
 "recommend only bundling the template files you actually need to customize). "
 "See the system report for full details."
-msgstr ""
+msgstr "<strong>Sinu teema kasutab aegunud WooCommerce'i malle</strong> &#8211; kui sul esineb poes probleeme funktsionaalsusega, siis see võib olla põhjuseks. Veendu, et sa uuendad või eemaldad need failid (üldiselt soovitame teemaga kaasa panna ainult neid malle, mida sul on tarvis kohandada). Täpsemate detailide jaoks vaat süsteemiraportit."
 
 #: includes/admin/views/html-notice-template-check.php:6
 #: includes/admin/views/html-notice-theme-support.php:6
@@ -5348,7 +5352,7 @@ msgid ""
 "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if "
 "you encounter layout issues please read our integration guide or choose a "
 "WooCommerce theme :)"
-msgstr "<strong>Sinu teema ei toetama metlikult WooCommerce'i</strong> &#8211; kui sul esineb probleeme, loe palun meie liidestamise juhendit või vali mõni WooCommerce'iga ühilduv teema :)"
+msgstr "<strong>Sinu teema ei toeta ametlikult WooCommerce'i</strong> &#8211; kui sul esineb probleeme, loe palun meie liidestamise juhendit või vali mõni WooCommerce'iga ühilduv teema :)"
 
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Theme Integration Guide"

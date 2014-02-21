@@ -6,10 +6,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Estonian (http://www.transifex.com/projects/p/woocommerce-core/language/et/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:46+00:00\n"
+"PO-Revision-Date: 2014-02-18 08:40+0000\n"
+"Last-Translator: ragulka <illimar.tambek@gmail.com>\n"
+"Language-Team: Estonian (http://www.transifex.com/projects/p/woocommerce/language/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -59,7 +59,6 @@ msgstr "Tellimuse jälgimine"
 #: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
 msgstr "Minu konto"
@@ -502,7 +501,7 @@ msgstr "A Coruña"
 
 #: i18n/states/ES.php:14
 msgid "Araba/&Aacute;lava"
-msgstr ""
+msgstr "Araba/&Aacute;lava"
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
@@ -586,7 +585,7 @@ msgstr "Guadalajara"
 
 #: i18n/states/ES.php:35
 msgid "Gipuzkoa"
-msgstr ""
+msgstr "Gipuzkoa"
 
 #: i18n/states/ES.php:36
 msgid "Huelva"
@@ -694,7 +693,7 @@ msgstr "Valladolid"
 
 #: i18n/states/ES.php:62
 msgid "Bizkaia"
-msgstr ""
+msgstr "Bizkaia"
 
 #: i18n/states/ES.php:63
 msgid "Zamora"
@@ -3057,69 +3056,69 @@ msgstr "Aegumiskuupäev (KK/AA)"
 msgid "Card Code"
 msgstr "Kaardi kood"
 
-#: includes/abstracts/abstract-wc-product.php:456
+#: includes/abstracts/abstract-wc-product.php:454
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
 msgstr "Lisa korvi"
 
-#: includes/abstracts/abstract-wc-product.php:466
+#: includes/abstracts/abstract-wc-product.php:464
 msgid "Read more"
 msgstr "Loe edasi"
 
-#: includes/abstracts/abstract-wc-product.php:574
-#: includes/abstracts/abstract-wc-product.php:579
-#: includes/abstracts/abstract-wc-product.php:599
+#: includes/abstracts/abstract-wc-product.php:572
+#: includes/abstracts/abstract-wc-product.php:577
+#: includes/abstracts/abstract-wc-product.php:597
 msgid "In stock"
 msgstr "Laos"
 
-#: includes/abstracts/abstract-wc-product.php:579
+#: includes/abstracts/abstract-wc-product.php:577
 msgid "Only %s left in stock"
 msgstr "Ainult %s laos"
 
-#: includes/abstracts/abstract-wc-product.php:582
+#: includes/abstracts/abstract-wc-product.php:580
 msgid "%s in stock"
 msgstr "%s laos"
 
-#: includes/abstracts/abstract-wc-product.php:589
+#: includes/abstracts/abstract-wc-product.php:587
 msgid "(backorders allowed)"
 msgstr "(järeltellimused on lubatud)"
 
-#: includes/abstracts/abstract-wc-product.php:596
-#: includes/abstracts/abstract-wc-product.php:609 templates/cart/cart.php:74
+#: includes/abstracts/abstract-wc-product.php:594
+#: includes/abstracts/abstract-wc-product.php:607 templates/cart/cart.php:74
 msgid "Available on backorder"
 msgstr "Saadaval järeltellimisel"
 
-#: includes/abstracts/abstract-wc-product.php:602
-#: includes/abstracts/abstract-wc-product.php:612
-#: includes/abstracts/abstract-wc-product.php:616
+#: includes/abstracts/abstract-wc-product.php:600
+#: includes/abstracts/abstract-wc-product.php:610
+#: includes/abstracts/abstract-wc-product.php:614
 msgid "Out of stock"
 msgstr "Otsas"
 
-#: includes/abstracts/abstract-wc-product.php:909
-#: includes/abstracts/abstract-wc-product.php:915
+#: includes/abstracts/abstract-wc-product.php:907
+#: includes/abstracts/abstract-wc-product.php:913
 #: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Tasuta!"
 
-#: includes/abstracts/abstract-wc-product.php:931
+#: includes/abstracts/abstract-wc-product.php:929
 msgctxt "min_price"
 msgid "From:"
 msgstr "Alates:"
 
-#: includes/abstracts/abstract-wc-product.php:1041
+#: includes/abstracts/abstract-wc-product.php:1039
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr "Hinnanguga %s / 5"
 
-#: includes/abstracts/abstract-wc-product.php:1043
+#: includes/abstracts/abstract-wc-product.php:1041
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr "5-st"
 
-#: includes/abstracts/abstract-wc-product.php:1385
+#: includes/abstracts/abstract-wc-product.php:1383
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -3434,7 +3433,7 @@ msgstr "Sa ei saa lisada veel ühte toodet &quot;%s&quot; ostukorvi."
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr ""
+msgstr "Sa ei saa seda kogust korvi lisada &mdash; meil on laos %s ja sul on juba %s korvis."
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -3484,48 +3483,48 @@ msgstr "%d %b %Y @ %k:%M"
 msgid "Backordered"
 msgstr "Järeltellimusel"
 
-#: includes/class-wc-checkout.php:409
+#: includes/class-wc-checkout.php:413
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr "Vabandame, sinu sessioon on aegunud. <a href=\"%s\" class=\"wc-backward\">Mine avalehele</a>"
 
-#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:488 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "on nõutud väli."
 
-#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Palun sisesta korrektne postiindeks."
 
-#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:509 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "ei ole korrektne telefoninumber."
 
-#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:515 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "ei ole korrektne e-posti aadress."
 
-#: includes/class-wc-checkout.php:526
+#: includes/class-wc-checkout.php:530
 msgid "is not valid. Please enter one of the following:"
 msgstr "ei ole kehtiv. Palun sisesta üks neist:"
 
-#: includes/class-wc-checkout.php:571
+#: includes/class-wc-checkout.php:575
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Pead nõustuma meie tingimusega. "
 
-#: includes/class-wc-checkout.php:576
+#: includes/class-wc-checkout.php:580
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr "Kahjuks <strong>me ei tarni piirkonda %s</strong>. Palun sisesta teistsugune tarneaadress."
 
-#: includes/class-wc-checkout.php:584
+#: includes/class-wc-checkout.php:588
 msgid "Invalid shipping method."
 msgstr "Vigane tarneviis."
 
-#: includes/class-wc-checkout.php:597
+#: includes/class-wc-checkout.php:601
 msgid "Invalid payment method."
 msgstr "Vigane makseviis."
 
@@ -4744,7 +4743,6 @@ msgstr "Toodet enam ei eksisteeri."
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:167
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 msgid "Invalid order."
 msgstr "Vigane tellimus."
 
@@ -4784,7 +4782,7 @@ msgstr "Toode #%s - %s"
 
 #: includes/class-wc-emails.php:334
 msgid "is low in stock."
-msgstr "on laus vähe järgi."
+msgstr "on laos vähe järgi."
 
 #: includes/class-wc-emails.php:357
 msgid "Product out of stock"
@@ -4980,15 +4978,15 @@ msgctxt "page_slug"
 msgid "my-account"
 msgstr "minu-konto"
 
-#: includes/class-wc-install.php:444
+#: includes/class-wc-install.php:455
 msgid "Customer"
 msgstr "Klient"
 
-#: includes/class-wc-install.php:451
+#: includes/class-wc-install.php:462
 msgid "Shop Manager"
 msgstr "Poe haldur"
 
-#: includes/class-wc-install.php:692
+#: includes/class-wc-install.php:703
 msgid "What's new:"
 msgstr "Mida on uut:"
 
@@ -5084,7 +5082,7 @@ msgid "New Product Category Name"
 msgstr "Uue tootekategooria nimi"
 
 #: includes/class-wc-post-types.php:78
-#: includes/updates/woocommerce-update-2.0.php:49
+#: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "tootekategooria"
@@ -5136,7 +5134,7 @@ msgid "New Product Tag Name"
 msgstr "Uue tootesildi nimi"
 
 #: includes/class-wc-post-types.php:113
-#: includes/updates/woocommerce-update-2.0.php:50
+#: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "tootesilt"
@@ -5220,7 +5218,7 @@ msgid "New %s"
 msgstr "Uus %s"
 
 #: includes/class-wc-post-types.php:226
-#: includes/updates/woocommerce-update-2.0.php:58
+#: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "toode"
@@ -5910,7 +5908,7 @@ msgstr "võimaldab täielikult PCI nõuetele vastavat, turvalist viisi krediitka
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:31
 msgid "Proceed to PayPal"
-msgstr ""
+msgstr "Mine edasi PayPali"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:34
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:135
@@ -6105,9 +6103,12 @@ msgid "Order %s"
 msgstr "Tellimus %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
 msgid "Shipping via"
 msgstr "Tarneviis"
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
+msgid "Shipping via %s"
+msgstr "Transport: %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid ""
@@ -6131,7 +6132,7 @@ msgstr "Aitäh - sinu tellimus ootab nüüd maksmist. Sind peaks brauser nüüd 
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:689
 msgid "Validation error: PayPal currencies do not match (code %s)."
-msgstr ""
+msgstr "Valideerimise viga: PayPali valuutad ei kattu (kood %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:700
 msgid "Validation error: PayPal amounts do not match (gross %s)."
@@ -6525,7 +6526,7 @@ msgstr "Millistele postiindeksitele soovid transporti pakkuda? Eralda indeksid k
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:169
 msgid ""
 "Local delivery is a simple shipping method for delivering orders locally."
-msgstr "Kohalik transport in lihtne tarneviis tellimuste kohalikuks kohaletoimetamiseks."
+msgstr "Kohalik transport on lihtne tarneviis tellimuste kohalikuks kohaletoimetamiseks."
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:25
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:84
@@ -6704,7 +6705,7 @@ msgstr "Kanada dollarit"
 
 #: includes/wc-core-functions.php:171
 msgid "Chilean Peso"
-msgstr ""
+msgstr "Tšiili peeso"
 
 #: includes/wc-core-functions.php:172
 msgid "Chinese Yuan"
@@ -6712,7 +6713,7 @@ msgstr "Hiina jüaani"
 
 #: includes/wc-core-functions.php:173
 msgid "Colombian Peso"
-msgstr ""
+msgstr "Kolumbia peeso"
 
 #: includes/wc-core-functions.php:174
 msgid "Czech Koruna"
@@ -6732,7 +6733,7 @@ msgstr "Hongkongi dollar"
 
 #: includes/wc-core-functions.php:178
 msgid "Croatia kuna"
-msgstr ""
+msgstr "Horvaatia kuna"
 
 #: includes/wc-core-functions.php:179
 msgid "Hungarian Forint"
@@ -6772,7 +6773,7 @@ msgstr "Mehhiko peeso"
 
 #: includes/wc-core-functions.php:188
 msgid "Nigerian Naira"
-msgstr ""
+msgstr "Nigeeria naira"
 
 #: includes/wc-core-functions.php:189
 msgid "Norwegian Krone"
@@ -6914,7 +6915,7 @@ msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; Leht %s"
 
 #: includes/wc-template-functions.php:974
-#: templates/checkout/form-shipping.php:57
+#: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "Lisainfo"
@@ -7310,7 +7311,7 @@ msgstr "Ostukorvi vahesumma"
 #: templates/checkout/review-order.php:31
 #: templates/checkout/review-order.php:71
 msgid "Coupon:"
-msgstr ""
+msgstr "Kupong:"
 
 #: templates/cart/cart-totals.php:75 templates/checkout/review-order.php:79
 msgid "Order Total"
@@ -7399,22 +7400,22 @@ msgstr "Sinu korvis olevate toodetega on mõningad probleemid (näidatud allpool
 msgid "Return To Cart"
 msgstr "Tagasi ostukorvi"
 
-#: templates/checkout/form-billing.php:17
+#: templates/checkout/form-billing.php:15
 msgid "Billing &amp; Shipping"
 msgstr "Arveldus &amp; transport"
 
-#: templates/checkout/form-billing.php:21
+#: templates/checkout/form-billing.php:19
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
 msgstr "Arveaadress"
 
-#: templates/checkout/form-billing.php:40
+#: templates/checkout/form-billing.php:38
 msgid "Create an account?"
 msgstr "Loo konto?"
 
-#: templates/checkout/form-billing.php:51
+#: templates/checkout/form-billing.php:49
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
@@ -7474,7 +7475,7 @@ msgstr "Vabandame - tundub, et sinu asukoha jaoks ei ole sobivaid makseviise. Ku
 msgid "Pay for order"
 msgstr "Maksa tellimuse eest"
 
-#: templates/checkout/form-shipping.php:31
+#: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
 msgstr "Saada teisele aadressile?"
 
@@ -7663,13 +7664,17 @@ msgstr "Arveaadress"
 msgid "Shipping address"
 msgstr "Tarneaadress"
 
-#: templates/emails/email-order-items.php:42
-#: templates/emails/plain/email-order-items.php:43
+#: templates/emails/email-order-items.php:25
+msgid "Product Image"
+msgstr "Toote pilt"
+
+#: templates/emails/email-order-items.php:46
+#: templates/emails/plain/email-order-items.php:46
 msgid "Download %d"
 msgstr "Laadi alla %d"
 
-#: templates/emails/email-order-items.php:44
-#: templates/emails/plain/email-order-items.php:45
+#: templates/emails/email-order-items.php:48
+#: templates/emails/plain/email-order-items.php:48
 msgid "Download"
 msgstr "Laadi alla"
 
@@ -7707,11 +7712,11 @@ msgstr "Sinu andmed"
 msgid "Your password is <strong>%s</strong>."
 msgstr "Sinu parool on <strong>%s</strong>."
 
-#: templates/emails/plain/email-order-items.php:29
+#: templates/emails/plain/email-order-items.php:32
 msgid "Quantity: %s"
 msgstr "Kogus: %s"
 
-#: templates/emails/plain/email-order-items.php:32
+#: templates/emails/plain/email-order-items.php:35
 msgid "Cost: %s"
 msgstr "Kulu: %s"
 
@@ -7896,7 +7901,7 @@ msgstr "Salvesta"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
-msgstr ""
+msgstr "Tere <strong>%1$s</strong> (ei ole %1$s? <a href=\"%2$s\">Logi välja</a>)."
 
 #: templates/myaccount/my-account.php:24
 msgid ""
