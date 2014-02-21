@@ -9,14 +9,15 @@
 # Luis <zreedee@gmail.com>, 2013
 # Oscar Gonzalez <inactive+eldragon87@transifex.com>, 2013
 # rcovarru <rnt@rnt.cl>, 2013
+# zanguanga <zanguanga@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 16:01+0000\n"
-"Last-Translator: Emilio José Calvo Carrasco <info@artprojectgroup.com>\n"
-"Language-Team: Spanish (Spain) (http://www.transifex.com/projects/p/woocommerce-core/language/es_ES/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-20 05:10+0000\n"
+"Last-Translator: Gabriel Gil <gabriel@gabrielgil.es>\n"
+"Language-Team: Spanish (Spain) (http://www.transifex.com/projects/p/woocommerce/language/es_ES/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -628,7 +629,7 @@ msgid "Default"
 msgstr "Predeterminado"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Producto"
 
@@ -1915,7 +1916,7 @@ msgstr "Total"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Acciones"
 
@@ -2804,7 +2805,7 @@ msgid ""
 msgstr "Cantidad de stock. Si es un producto variable este valor será usado para el control de stock sobre todas las variaciones a menos que se defina el stock a nivel de variación."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "Estado del stock"
 
@@ -3518,7 +3519,7 @@ msgstr "%s venta diaria promedio"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:79
 msgid "%s average monthly sales"
-msgstr "%s promedio de ventas mensual"
+msgstr "%s promedio mensual de ventas"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:84
 msgid "%s sales in this period"
@@ -3557,7 +3558,7 @@ msgstr "Monto promedio de ventas"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:332
 msgid "Shipping amount"
-msgstr "Monto de envío"
+msgstr "Importe del envío"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:342
 #: includes/admin/reports/class-wc-report-sales-by-product.php:449
@@ -3586,7 +3587,7 @@ msgstr "Búsqueda de producto"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:211
 msgid "Top Sellers"
-msgstr "Mejores Vendedores"
+msgstr "Los más vendidos"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:246
 #: includes/admin/reports/class-wc-report-sales-by-product.php:286
@@ -3605,11 +3606,15 @@ msgstr "&larr; Seleccione un producto para ver estadísticas"
 msgid "No products found."
 msgstr "No se encontraron productos."
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "producto"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Padre"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr "Unidades en stock"
 
@@ -3623,7 +3628,7 @@ msgstr "Cantidad de impuestos"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:114
 msgid "This is the sum of the \"Tax Rows\" tax amount within your orders."
-msgstr "Esta es la suma de la 'Fila de Impuestos' de todas sus órdenes."
+msgstr "Esta es la suma de la \"Fila de Impuestos\" de todos los pedidos."
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:115
 msgid "Shipping Tax Amount"
@@ -4333,7 +4338,7 @@ msgstr "Esto establece la página base para su tienda - aquí se encontrará el 
 
 #: includes/admin/settings/class-wc-settings-products.php:214
 msgid "Shop Page Display"
-msgstr "Mostrar Página de Tienda"
+msgstr "La página de tienda"
 
 #: includes/admin/settings/class-wc-settings-products.php:215
 msgid "This controls what is shown on the product archive."
@@ -4342,21 +4347,21 @@ msgstr "Esto controla cómo se muestra en la página del producto."
 #: includes/admin/settings/class-wc-settings-products.php:222
 #: includes/admin/settings/class-wc-settings-products.php:238
 msgid "Show products"
-msgstr "Mostrar productos"
+msgstr "Muestran productos"
 
 #: includes/admin/settings/class-wc-settings-products.php:223
 #: includes/admin/settings/class-wc-settings-products.php:239
 msgid "Show subcategories"
-msgstr "Mostrar subcategorías"
+msgstr "Muestran subcategorías"
 
 #: includes/admin/settings/class-wc-settings-products.php:224
 #: includes/admin/settings/class-wc-settings-products.php:240
 msgid "Show both"
-msgstr "Mostrar ambos"
+msgstr "Muestran las dos"
 
 #: includes/admin/settings/class-wc-settings-products.php:230
 msgid "Default Category Display"
-msgstr "Categoría a mostrar por defecto"
+msgstr "Cada categoría por defecto"
 
 #: includes/admin/settings/class-wc-settings-products.php:231
 msgid "This controls what is shown on category archives."

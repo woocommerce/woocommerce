@@ -1,19 +1,22 @@
 # 
 # Translators:
+# Emilio José Calvo Carrasco <info@artprojectgroup.com>, 2014
 # Closemarketing <david@closemarketing.es>, 2013
 # Gabriel Gil <gabriel@gabrielgil.es>, 2014
 # Gonzalo Zúñiga De-Spirito <gonzunigad@gmail.com>, 2014
 # Gonzalo Zúñiga De-Spirito <gonzunigad@gmail.com>, 2014
 # Jaime Martin <mrtnprjct@gmail.com>, 2014
+# mruizoea <mruizo@gmail.com>, 2014
 # Vaclad <hello@anderburdain.com>, 2014
+# zanguanga <zanguanga@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:50+0000\n"
-"Last-Translator: Gonzalo Zúñiga De-Spirito <gonzunigad@gmail.com>\n"
-"Language-Team: Spanish (Spain) (http://www.transifex.com/projects/p/woocommerce-core/language/es_ES/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:46+00:00\n"
+"PO-Revision-Date: 2014-02-19 09:02+0000\n"
+"Last-Translator: mruizoea <mruizo@gmail.com>\n"
+"Language-Team: Spanish (Spain) (http://www.transifex.com/projects/p/woocommerce/language/es_ES/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -63,7 +66,6 @@ msgstr "Seguimiento de pedido"
 #: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
 msgstr "Mi cuenta"
@@ -3061,69 +3063,69 @@ msgstr "Expiración (MM/AA)"
 msgid "Card Code"
 msgstr "Código de Tarjeta"
 
-#: includes/abstracts/abstract-wc-product.php:456
+#: includes/abstracts/abstract-wc-product.php:454
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
 msgstr "Añadir al carro"
 
-#: includes/abstracts/abstract-wc-product.php:466
+#: includes/abstracts/abstract-wc-product.php:464
 msgid "Read more"
 msgstr "Leer más"
 
-#: includes/abstracts/abstract-wc-product.php:574
-#: includes/abstracts/abstract-wc-product.php:579
-#: includes/abstracts/abstract-wc-product.php:599
+#: includes/abstracts/abstract-wc-product.php:572
+#: includes/abstracts/abstract-wc-product.php:577
+#: includes/abstracts/abstract-wc-product.php:597
 msgid "In stock"
-msgstr "En existencia"
+msgstr "En stock"
 
-#: includes/abstracts/abstract-wc-product.php:579
+#: includes/abstracts/abstract-wc-product.php:577
 msgid "Only %s left in stock"
 msgstr "Sólo %s en stock"
 
-#: includes/abstracts/abstract-wc-product.php:582
+#: includes/abstracts/abstract-wc-product.php:580
 msgid "%s in stock"
 msgstr "%s en stock"
 
-#: includes/abstracts/abstract-wc-product.php:589
+#: includes/abstracts/abstract-wc-product.php:587
 msgid "(backorders allowed)"
 msgstr "(pedidos pendientes permitidos)"
 
-#: includes/abstracts/abstract-wc-product.php:596
-#: includes/abstracts/abstract-wc-product.php:609 templates/cart/cart.php:74
+#: includes/abstracts/abstract-wc-product.php:594
+#: includes/abstracts/abstract-wc-product.php:607 templates/cart/cart.php:74
 msgid "Available on backorder"
 msgstr "Disponible para reservar"
 
-#: includes/abstracts/abstract-wc-product.php:602
-#: includes/abstracts/abstract-wc-product.php:612
-#: includes/abstracts/abstract-wc-product.php:616
+#: includes/abstracts/abstract-wc-product.php:600
+#: includes/abstracts/abstract-wc-product.php:610
+#: includes/abstracts/abstract-wc-product.php:614
 msgid "Out of stock"
 msgstr "Agotado"
 
-#: includes/abstracts/abstract-wc-product.php:909
-#: includes/abstracts/abstract-wc-product.php:915
+#: includes/abstracts/abstract-wc-product.php:907
+#: includes/abstracts/abstract-wc-product.php:913
 #: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "¡Gratis!"
 
-#: includes/abstracts/abstract-wc-product.php:931
+#: includes/abstracts/abstract-wc-product.php:929
 msgctxt "min_price"
 msgid "From:"
 msgstr "De:"
 
-#: includes/abstracts/abstract-wc-product.php:1041
+#: includes/abstracts/abstract-wc-product.php:1039
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr "Calificación de %s de 5"
 
-#: includes/abstracts/abstract-wc-product.php:1043
+#: includes/abstracts/abstract-wc-product.php:1041
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr "de 5"
 
-#: includes/abstracts/abstract-wc-product.php:1385
+#: includes/abstracts/abstract-wc-product.php:1383
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -3488,48 +3490,48 @@ msgstr "%b %d, %Y @ %I:%M %p"
 msgid "Backordered"
 msgstr "Pedido pendiente"
 
-#: includes/class-wc-checkout.php:409
+#: includes/class-wc-checkout.php:413
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr "Lo sentimos, su sesión ha expirado. <a href=\"%s\" class=\"wc-backward\">Volver a la página de inicio</a>"
 
-#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:488 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "es un campo requerido."
 
-#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Por favor, introduce un código postal válido."
 
-#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:509 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "no es un número telefónico válido."
 
-#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:515 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "no es una dirección de email válida."
 
-#: includes/class-wc-checkout.php:526
+#: includes/class-wc-checkout.php:530
 msgid "is not valid. Please enter one of the following:"
 msgstr "no es valido. Por favor ingresa uno de los siguientes:"
 
-#: includes/class-wc-checkout.php:571
+#: includes/class-wc-checkout.php:575
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Debes aceptar nuestros Términos &amp; Condiciones."
 
-#: includes/class-wc-checkout.php:576
+#: includes/class-wc-checkout.php:580
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr "Lamentablemente <strong> no enviamos a %s</strong>. Por favor ingrese una dirección de entrega alternativa."
 
-#: includes/class-wc-checkout.php:584
+#: includes/class-wc-checkout.php:588
 msgid "Invalid shipping method."
 msgstr "Método de envío no válido."
 
-#: includes/class-wc-checkout.php:597
+#: includes/class-wc-checkout.php:601
 msgid "Invalid payment method."
 msgstr "Método de pago no válido."
 
@@ -4748,7 +4750,6 @@ msgstr "El producto ya no existe."
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:167
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 msgid "Invalid order."
 msgstr "Pedido no válido."
 
@@ -4859,7 +4860,7 @@ msgstr "Pedido cancelado por el cliente."
 
 #: includes/class-wc-form-handler.php:512
 msgid "Your order was cancelled."
-msgstr "Su pedido fue cancelado."
+msgstr "Se ha cancelado tu pedido"
 
 #: includes/class-wc-form-handler.php:517
 msgid ""
@@ -4984,15 +4985,15 @@ msgctxt "page_slug"
 msgid "my-account"
 msgstr "mi-cuenta"
 
-#: includes/class-wc-install.php:444
+#: includes/class-wc-install.php:455
 msgid "Customer"
 msgstr "Cliente"
 
-#: includes/class-wc-install.php:451
+#: includes/class-wc-install.php:462
 msgid "Shop Manager"
 msgstr "Manager de la Tienda"
 
-#: includes/class-wc-install.php:692
+#: includes/class-wc-install.php:703
 msgid "What's new:"
 msgstr "¿Qué hay de nuevo?"
 
@@ -5088,7 +5089,7 @@ msgid "New Product Category Name"
 msgstr "Nuevo Nombre de Categoría de Producto"
 
 #: includes/class-wc-post-types.php:78
-#: includes/updates/woocommerce-update-2.0.php:49
+#: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "categoria-producto"
@@ -5140,7 +5141,7 @@ msgid "New Product Tag Name"
 msgstr "Nuevo Nombre de Etiqueta de Producto"
 
 #: includes/class-wc-post-types.php:113
-#: includes/updates/woocommerce-update-2.0.php:50
+#: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "etiqueta-producto"
@@ -5224,7 +5225,7 @@ msgid "New %s"
 msgstr "Nuevo %s"
 
 #: includes/class-wc-post-types.php:226
-#: includes/updates/woocommerce-update-2.0.php:58
+#: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "producto"
@@ -5453,7 +5454,7 @@ msgstr "Use $args[\"posts_per_page\"]. Argumento deprecado será eliminado en WC
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
 msgid "Completed order"
-msgstr "Pedido completo"
+msgstr "Pedido completado"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:27
 msgid ""
@@ -5463,7 +5464,7 @@ msgstr "Las notificaciones de pedido completado se envían al cliente cuando el 
 
 #: includes/emails/class-wc-email-customer-completed-order.php:29
 msgid "Your order is complete"
-msgstr "Su orden está completada"
+msgstr "El pedido se ha completado"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:30
 msgid "Your {site_title} order from {order_date} is complete"
@@ -5508,11 +5509,11 @@ msgstr "Las facturas que contienen los detalles del pedido y enlaces para realiz
 
 #: includes/emails/class-wc-email-customer-invoice.php:35
 msgid "Invoice for order {order_number} from {order_date}"
-msgstr "Factura para la orden # {order_number} de {order_date}"
+msgstr "Factura del pedido # {order_number} de {order_date}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:36
 msgid "Invoice for order {order_number}"
-msgstr "Factura para la orden # {order_number}"
+msgstr "Factura para el pedido # {order_number}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:38
 msgid "Your {site_title} order from {order_date}"
@@ -5520,7 +5521,7 @@ msgstr "Su pedido de {site_title} del {order_date}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:39
 msgid "Order {order_number} details"
-msgstr "Detalles de la orden # {order_number}"
+msgstr "Información del pedido {order_number} "
 
 #: includes/emails/class-wc-email-customer-invoice.php:160
 msgid "Email subject (paid)"
@@ -5572,7 +5573,7 @@ msgstr "Procesando tu pedido"
 msgid ""
 "This is an order notification sent to the customer after payment containing "
 "order details."
-msgstr "Esto es una notificación de pedido que se envía al cliente después del pago del pedido."
+msgstr "Esto es una notificación de pedido que se envía al cliente después del pago con información sobre el pedido."
 
 #: includes/emails/class-wc-email-customer-processing-order.php:29
 msgid "Thank you for your order"
@@ -5594,7 +5595,7 @@ msgstr "Los mensajes para restablecer contraseña se envían cuando un cliente r
 
 #: includes/emails/class-wc-email-customer-reset-password.php:44
 msgid "Password Reset for {site_title}"
-msgstr "Restaurando la contraseña de {site_title}"
+msgstr "Restablecer contraseña en {site_title}"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:45
 msgid "Password Reset Instructions"
@@ -5957,7 +5958,7 @@ msgstr "Dirección de PayPal"
 msgid ""
 "Please enter your PayPal email address; this is needed in order to take "
 "payment."
-msgstr "Por favor, introduzca su dirección de correo electrónico de PayPal, esto es necesario con el fin de recibir el pago."
+msgstr "Por favor, escribe tu dirección de correo electrónico de PayPal, se necesita para recibir el pago."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:153
 msgid "Receiver Email"
@@ -6109,15 +6110,18 @@ msgid "Order %s"
 msgstr "Pedido %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
 msgid "Shipping via"
 msgstr "Envío mediante"
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
+msgid "Shipping via %s"
+msgstr "Enviar por %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid ""
 "Thank you for your order. We are now redirecting you to PayPal to make "
 "payment."
-msgstr "Gracias por su pedido. Ahora le estamos redirigiendo a PayPal para efectuar el pago."
+msgstr "Gracias por tu pedido. Ahora te estamos redirigiendo a PayPal para efectuar el pago."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:479
 msgid "Pay via PayPal"
@@ -6162,11 +6166,11 @@ msgstr "Pago a través de %s IPN."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:763
 msgid "Order refunded/reversed"
-msgstr "Pedido devuelto/regresado"
+msgstr "Pedido devuelto/reembolsado"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:764
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
-msgstr "La orden %s ha sido marcada como reembolsada - codigo de razón de PayPal: %s"
+msgstr "El pedido %s se ha marcado como reembolsado - código de razón de PayPal: %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:767
 msgid "Payment for order %s refunded/reversed"
@@ -6918,7 +6922,7 @@ msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; Página %s"
 
 #: includes/wc-template-functions.php:974
-#: templates/checkout/form-shipping.php:57
+#: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "Información adicional"
@@ -7403,22 +7407,22 @@ msgstr "Hay algunos inconvenientes con los artículos en su carrito (mostrados a
 msgid "Return To Cart"
 msgstr "Volver al carrito"
 
-#: templates/checkout/form-billing.php:17
+#: templates/checkout/form-billing.php:15
 msgid "Billing &amp; Shipping"
 msgstr "Facturación &amp; Envíos"
 
-#: templates/checkout/form-billing.php:21
+#: templates/checkout/form-billing.php:19
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
 msgstr "Dirección de Facturación"
 
-#: templates/checkout/form-billing.php:40
+#: templates/checkout/form-billing.php:38
 msgid "Create an account?"
 msgstr "Crear una cuenta?"
 
-#: templates/checkout/form-billing.php:51
+#: templates/checkout/form-billing.php:49
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
@@ -7478,7 +7482,7 @@ msgstr "Lo sentimos, parece que no existen métodos de pago disponibles para su 
 msgid "Pay for order"
 msgstr "Pagar por el pedido"
 
-#: templates/checkout/form-shipping.php:31
+#: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
 msgstr "¿Enviar a una dirección diferente?"
 
@@ -7592,7 +7596,7 @@ msgstr "Hola. Tu orden reciente del %s ha sido completado. Los detalles de tu pe
 msgid ""
 "An order has been created for you on %s. To pay for this order please use "
 "the following link: %s"
-msgstr "Un pedido ha sido creado para usted en &ldquo;%s&rdquo;. Para pagar este pedido por favor usa el siguiente enlace: <a href=\"%s\">Pagar</a>"
+msgstr "Un pedido ha sido creado por usted en %s. Para pagar este pedido por favor usa el siguiente enlace: %s"
 
 #: templates/emails/customer-invoice.php:16
 msgid "pay"
@@ -7667,13 +7671,17 @@ msgstr "Dirección de facturación"
 msgid "Shipping address"
 msgstr "Dirección de envío"
 
-#: templates/emails/email-order-items.php:42
-#: templates/emails/plain/email-order-items.php:43
+#: templates/emails/email-order-items.php:25
+msgid "Product Image"
+msgstr "Imagen del Producto"
+
+#: templates/emails/email-order-items.php:46
+#: templates/emails/plain/email-order-items.php:46
 msgid "Download %d"
 msgstr "Descarga %d"
 
-#: templates/emails/email-order-items.php:44
-#: templates/emails/plain/email-order-items.php:45
+#: templates/emails/email-order-items.php:48
+#: templates/emails/plain/email-order-items.php:48
 msgid "Download"
 msgstr "Descarga"
 
@@ -7711,11 +7719,11 @@ msgstr "Tus Detalles"
 msgid "Your password is <strong>%s</strong>."
 msgstr "Su contraseña es <strong>%s</strong>."
 
-#: templates/emails/plain/email-order-items.php:29
+#: templates/emails/plain/email-order-items.php:32
 msgid "Quantity: %s"
 msgstr "Cantidad: %s"
 
-#: templates/emails/plain/email-order-items.php:32
+#: templates/emails/plain/email-order-items.php:35
 msgid "Cost: %s"
 msgstr "Costo: %s"
 

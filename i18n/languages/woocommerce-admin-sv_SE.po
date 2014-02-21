@@ -1,14 +1,16 @@
 # 
 # Translators:
 # sennbrink <konsult@sennbrink.se>, 2014
+# bobosbodega <henrik.boo@gmail.com>, 2014
+# sennbrink <konsult@sennbrink.se>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 11:20+0000\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-20 20:40+0000\n"
 "Last-Translator: sennbrink <konsult@sennbrink.se>\n"
-"Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce-core/language/sv_SE/)\n"
+"Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce/language/sv_SE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -620,7 +622,7 @@ msgid "Default"
 msgstr "Standard"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Product"
 
@@ -1907,7 +1909,7 @@ msgstr "Total"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Händelser"
 
@@ -2796,7 +2798,7 @@ msgid ""
 msgstr "Lagersaldo. Om denna produkt är en variabel produkt kontrollerar detta värde lagersaldot för samtliga variationer om du inte definierar lagersaldo för varje variation."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "Lagerstatus"
 
@@ -3597,11 +3599,15 @@ msgstr "&larr; Välj en produkt för att visa statistik"
 msgid "No products found."
 msgstr "Inga produkter hittades."
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "produkt"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Förälder"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr "Antal i lager"
 
@@ -3675,7 +3681,7 @@ msgstr "Totalt"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:25
 msgid "Accounts"
-msgstr "Konton"
+msgstr "Kundkonton"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid "Account Pages"
@@ -3784,7 +3790,7 @@ msgstr "Generera ett kundlösenord automatiskt"
 #: includes/admin/settings/class-wc-settings-checkout.php:25
 msgctxt "Settings tab label"
 msgid "Checkout"
-msgstr "Till kassan"
+msgstr "Kassan"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
 msgid "Checkout Options"
@@ -4667,7 +4673,7 @@ msgstr "Priser anges med moms/skatt"
 msgid ""
 "This option is important as it will affect how you input prices. Changing it"
 " will not update existing products."
-msgstr "Denna inställning är viktig då den styr hur du matas in priser. Ändringar påverkar inte existerande produkter."
+msgstr "Denna inställning är viktig då den påverkar hur du matar in priser. Ändringar påverkar inte existerande produkter."
 
 #: includes/admin/settings/class-wc-settings-tax.php:85
 msgid "Yes, I will enter prices inclusive of tax"
@@ -4679,11 +4685,11 @@ msgstr "Nej, jag vill ange priser exklusive moms/skatt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:91
 msgid "Calculate Tax Based On:"
-msgstr "Beräkna skatt baserat på:"
+msgstr "Beräkna moms baserat på:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:93
 msgid "This option determines which address is used to calculate tax."
-msgstr "Denna inställningar styr vilken adress som används för att beräkna skatt."
+msgstr "Denna inställningar styr vilken adress som används för att beräkna moms."
 
 #: includes/admin/settings/class-wc-settings-tax.php:97
 msgid "Customer shipping address"
@@ -4798,7 +4804,7 @@ msgstr "Momssats för klassen \"%s\""
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See here</a>"
 " for available alpha-2 country codes."
-msgstr "Bestäm momssatser för länder och stater nedan. <a href=\"%s\">Se här</a> för tillgängliga alpha-2 landskoder"
+msgstr "Bestäm momssatser för länder och stater nedan. <a href=\"%s\">Se här</a> för tillgängliga alpha-2 landskoder."
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "Country&nbsp;Code"
@@ -4907,7 +4913,7 @@ msgstr "Taxa"
 
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Tax Name"
-msgstr "Namn på taxa"
+msgstr "Benämning"
 
 #: includes/admin/views/html-admin-page-addons.php:5
 msgid "Browse all extensions"

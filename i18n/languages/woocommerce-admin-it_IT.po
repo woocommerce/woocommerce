@@ -5,10 +5,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 18:10+0000\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-14 23:30+0000\n"
 "Last-Translator: Gabriele Polidori <webmaster@onenet.it>\n"
-"Language-Team: Italian (Italy) (http://www.transifex.com/projects/p/woocommerce-core/language/it_IT/)\n"
+"Language-Team: Italian (Italy) (http://www.transifex.com/projects/p/woocommerce/language/it_IT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -371,17 +371,17 @@ msgstr "WooCommerce Stato"
 
 #: includes/admin/class-wc-admin-dashboard.php:132
 msgid "<strong>%s</strong> sales this month"
-msgstr ""
+msgstr "<strong>%s</strong> vendite questo mese"
 
 #: includes/admin/class-wc-admin-dashboard.php:139
 msgid "%s top seller this month (sold %d)"
-msgstr ""
+msgstr "%s miglior venditore questo mese (venduti %d)"
 
 #: includes/admin/class-wc-admin-dashboard.php:145
 msgid "<strong>%s order</strong> awaiting processing"
 msgid_plural "<strong>%s orders</strong> awaiting processing"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "<strong>%s ordine</strong> in attesa di elaborazione"
+msgstr[1] "<strong>%s ordini</strong> in attesa di elaborazione"
 
 #: includes/admin/class-wc-admin-dashboard.php:150
 msgid "<strong>%s order</strong> on-hold"
@@ -392,14 +392,14 @@ msgstr[1] ""
 #: includes/admin/class-wc-admin-dashboard.php:155
 msgid "<strong>%s product</strong> low in stock"
 msgid_plural "<strong>%s products</strong> low in stock"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "<strong>%s prodotto</strong> in esaurimento"
+msgstr[1] "<strong>%s prodotti</strong> in esaurimento"
 
 #: includes/admin/class-wc-admin-dashboard.php:160
 msgid "<strong>%s product</strong> out of stock"
 msgid_plural "<strong>%s products</strong> out of stock"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "<strong>%s prodotto</strong> esaurito"
+msgstr[1] "<strong>%s prodotti</strong> esauriti"
 
 #: includes/admin/class-wc-admin-dashboard.php:193
 msgid "out of 5"
@@ -449,28 +449,28 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "WooCommerce Documentation"
-msgstr ""
+msgstr "Documentazione su WooCommerce"
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "Developer API Docs"
-msgstr ""
+msgstr "Documentazione delle API per sviluppatori"
 
 #: includes/admin/class-wc-admin-help.php:49
 msgid "Support"
-msgstr ""
+msgstr "Supporto"
 
 #: includes/admin/class-wc-admin-help.php:52
 msgid ""
 "After <a href=\"%s\">reading the documentation</a>, for further assistance "
 "you can use the <a href=\"%s\">community forum</a>, or if you have access as"
 " a WooThemes customer, <a href=\"%s\">our support desk</a>."
-msgstr ""
+msgstr "Dopo <a href=\"%s\">aver letto la documentazione</a>, per ulteriore assistenza puoi usare i <a href=\"%s\">forum pubblici</a>, oppure se hai accesso come cliente WooThemes, <a href=\"%s\">il nostro supporto dedicato</a>."
 
 #: includes/admin/class-wc-admin-help.php:54
 msgid ""
 "Before asking for help we recommend checking the status page to identify any"
 " problems with your configuration."
-msgstr ""
+msgstr "Prima di chiedere assistenza, raccomandiamo di controllare la pagina sullo stato del sistema per identificare qualsiasi problema nella tua configurazione."
 
 #: includes/admin/class-wc-admin-help.php:56
 #: includes/admin/class-wc-admin-help.php:67
@@ -482,15 +482,15 @@ msgstr "Stato del sistema"
 
 #: includes/admin/class-wc-admin-help.php:56
 msgid "Community Support"
-msgstr ""
+msgstr "Supporto della comunità"
 
 #: includes/admin/class-wc-admin-help.php:56
 msgid "Customer Support"
-msgstr ""
+msgstr "Supporto Clienti"
 
 #: includes/admin/class-wc-admin-help.php:62
 msgid "Found a bug?"
-msgstr ""
+msgstr "Hai trovato un bug?"
 
 #: includes/admin/class-wc-admin-help.php:65
 msgid ""
@@ -511,7 +511,7 @@ msgstr "Per maggiori informazioni:"
 
 #: includes/admin/class-wc-admin-help.php:74
 msgid "About WooCommerce"
-msgstr ""
+msgstr "Info su WooCommerce"
 
 #: includes/admin/class-wc-admin-help.php:75
 msgid "Project on WordPress.org"
@@ -620,7 +620,7 @@ msgid "Default"
 msgstr "Default"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Prodotto"
 
@@ -878,11 +878,11 @@ msgstr "Ordini"
 
 #: includes/admin/class-wc-admin-reports.php:49
 msgid "Sales by date"
-msgstr ""
+msgstr "Vendite per data"
 
 #: includes/admin/class-wc-admin-reports.php:55
 msgid "Sales by product"
-msgstr ""
+msgstr "Vendite per prodotto"
 
 #: includes/admin/class-wc-admin-reports.php:61
 msgid "Sales by category"
@@ -890,7 +890,7 @@ msgstr "Vendite per categoria"
 
 #: includes/admin/class-wc-admin-reports.php:67
 msgid "Coupons by date"
-msgstr ""
+msgstr "Buoni sconto per data"
 
 #: includes/admin/class-wc-admin-reports.php:75
 #: includes/admin/reports/class-wc-report-customer-list.php:25
@@ -899,11 +899,11 @@ msgstr "Clienti"
 
 #: includes/admin/class-wc-admin-reports.php:78
 msgid "Customers vs. Guests"
-msgstr ""
+msgstr "Clienti vs. Ospiti"
 
 #: includes/admin/class-wc-admin-reports.php:84
 msgid "Customer List"
-msgstr ""
+msgstr "Elenco clienti"
 
 #: includes/admin/class-wc-admin-reports.php:92
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
@@ -915,7 +915,7 @@ msgstr "Magazzino"
 
 #: includes/admin/class-wc-admin-reports.php:95
 msgid "Low in stock"
-msgstr ""
+msgstr "In esaurimento"
 
 #: includes/admin/class-wc-admin-reports.php:101
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
@@ -928,7 +928,7 @@ msgstr "Esaurito"
 
 #: includes/admin/class-wc-admin-reports.php:107
 msgid "Most Stocked"
-msgstr ""
+msgstr "Il più disponibile"
 
 #: includes/admin/class-wc-admin-reports.php:118
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
@@ -1907,7 +1907,7 @@ msgstr "Totale"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Azioni"
 
@@ -2259,7 +2259,7 @@ msgstr ""
 msgid ""
 "How many times this coupon can be used by an invidual user. Uses billing "
 "email for guests, and user ID for logged in users."
-msgstr ""
+msgstr "Quante volte questo buono sconto può essere usato da un singolo utente. Utilizza la email di fatturazione per gli ospiti e l'ID utente per quelli registrati."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:230
 msgid ""
@@ -2796,7 +2796,7 @@ msgid ""
 msgstr "Quantità Stock Articolo. Se questo è un prodotto variabile questo valore verrà utilizzato per controllare lo stock a magazzino per tutti i tipi, a meno di definire il magazzino per ogni variante."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "Status magazzino"
 
@@ -3448,7 +3448,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customers.php:86
 msgid "Guest Sales"
-msgstr ""
+msgstr "Vendite da ospiti"
 
 #: includes/admin/reports/class-wc-report-customers.php:95
 #: includes/admin/reports/class-wc-report-customers.php:291
@@ -3458,7 +3458,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-customers.php:100
 #: includes/admin/reports/class-wc-report-customers.php:301
 msgid "Guest Orders"
-msgstr ""
+msgstr "Ordini da ospiti"
 
 #: includes/admin/reports/class-wc-report-customers.php:119
 msgid "orders"
@@ -3470,7 +3470,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customers.php:307
 msgid "guest orders"
-msgstr ""
+msgstr "ordini degli ospiti"
 
 #: includes/admin/reports/class-wc-report-customers.php:311
 msgid "Signups"
@@ -3597,11 +3597,15 @@ msgstr ""
 msgid "No products found."
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "prodotto"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Genitore"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr ""
 
@@ -3813,7 +3817,7 @@ msgstr "Cassa"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
-msgstr ""
+msgstr "Abilita il checkout per gli ospiti"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:80
 msgid "Allows customers to checkout without creating an account."
@@ -4541,7 +4545,7 @@ msgstr "Download richiedono login"
 
 #: includes/admin/settings/class-wc-settings-products.php:434
 msgid "This setting does not apply to guest purchases."
-msgstr "Questa impostazione non si apllica agli acquisti degli ospiti."
+msgstr "Questa impostazione non si applica agli acquisti degli ospiti."
 
 #: includes/admin/settings/class-wc-settings-products.php:440
 msgid "Grant access to downloadable products after payment"

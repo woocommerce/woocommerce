@@ -1,15 +1,17 @@
 # 
 # Translators:
+# disaada <bafridas121296@gmail.com>, 2014
 # didikpri <didik.priyanto@gmail.com>, 2014
+# globalaperta <globalaperta@gmail.com>, 2014
 # globalaperta <globalaperta@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Indonesian (Indonesia) (http://www.transifex.com/projects/p/woocommerce-core/language/id_ID/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:46+00:00\n"
+"PO-Revision-Date: 2014-02-20 19:10+0000\n"
+"Last-Translator: didikpri <didik.priyanto@gmail.com>\n"
+"Language-Team: Indonesian (Indonesia) (http://www.transifex.com/projects/p/woocommerce/language/id_ID/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -59,7 +61,6 @@ msgstr "Lacak Pesanan"
 #: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
 msgstr "Akun Saya"
@@ -506,11 +507,11 @@ msgstr ""
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
-msgstr ""
+msgstr "Albacete"
 
 #: i18n/states/ES.php:16
 msgid "Alicante"
-msgstr ""
+msgstr "Alicante"
 
 #: i18n/states/ES.php:17
 msgid "Almer&iacute;a"
@@ -534,7 +535,7 @@ msgstr ""
 
 #: i18n/states/ES.php:22
 msgid "Barcelona"
-msgstr ""
+msgstr "Barcelona"
 
 #: i18n/states/ES.php:23
 msgid "Burgos"
@@ -622,7 +623,7 @@ msgstr ""
 
 #: i18n/states/ES.php:44
 msgid "Madrid"
-msgstr ""
+msgstr "Madrid"
 
 #: i18n/states/ES.php:45
 msgid "M&aacute;laga"
@@ -666,7 +667,7 @@ msgstr ""
 
 #: i18n/states/ES.php:55
 msgid "Sevilla"
-msgstr ""
+msgstr "Sevilla"
 
 #: i18n/states/ES.php:56
 msgid "Soria"
@@ -858,11 +859,11 @@ msgstr "West Coast"
 
 #: i18n/states/ID.php:13
 msgid "Daerah Istimewa Aceh"
-msgstr ""
+msgstr "Daerah Istimewa Aceh"
 
 #: i18n/states/ID.php:14
 msgid "Sumatera Utara"
-msgstr ""
+msgstr "Sumatera Utara"
 
 #: i18n/states/ID.php:15
 msgid "Sumatera Barat"
@@ -3051,75 +3052,75 @@ msgstr ""
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:211
 msgid "Expiry (MM/YY)"
-msgstr ""
+msgstr "Kadaluarsa (MM/YY)"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:456
+#: includes/abstracts/abstract-wc-product.php:454
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
 msgstr "Masukkan Troli"
 
-#: includes/abstracts/abstract-wc-product.php:466
+#: includes/abstracts/abstract-wc-product.php:464
 msgid "Read more"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:574
-#: includes/abstracts/abstract-wc-product.php:579
-#: includes/abstracts/abstract-wc-product.php:599
+#: includes/abstracts/abstract-wc-product.php:572
+#: includes/abstracts/abstract-wc-product.php:577
+#: includes/abstracts/abstract-wc-product.php:597
 msgid "In stock"
 msgstr "Tersedia"
 
-#: includes/abstracts/abstract-wc-product.php:579
+#: includes/abstracts/abstract-wc-product.php:577
 msgid "Only %s left in stock"
 msgstr "Stok tinggal %s"
 
-#: includes/abstracts/abstract-wc-product.php:582
+#: includes/abstracts/abstract-wc-product.php:580
 msgid "%s in stock"
 msgstr "Stok %s"
 
-#: includes/abstracts/abstract-wc-product.php:589
+#: includes/abstracts/abstract-wc-product.php:587
 msgid "(backorders allowed)"
 msgstr "(backorder diperbolehkan)"
 
-#: includes/abstracts/abstract-wc-product.php:596
-#: includes/abstracts/abstract-wc-product.php:609 templates/cart/cart.php:74
+#: includes/abstracts/abstract-wc-product.php:594
+#: includes/abstracts/abstract-wc-product.php:607 templates/cart/cart.php:74
 msgid "Available on backorder"
 msgstr "Tersedia di backorder"
 
-#: includes/abstracts/abstract-wc-product.php:602
-#: includes/abstracts/abstract-wc-product.php:612
-#: includes/abstracts/abstract-wc-product.php:616
+#: includes/abstracts/abstract-wc-product.php:600
+#: includes/abstracts/abstract-wc-product.php:610
+#: includes/abstracts/abstract-wc-product.php:614
 msgid "Out of stock"
 msgstr "Stok habis"
 
-#: includes/abstracts/abstract-wc-product.php:909
-#: includes/abstracts/abstract-wc-product.php:915
+#: includes/abstracts/abstract-wc-product.php:907
+#: includes/abstracts/abstract-wc-product.php:913
 #: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Gratis!"
 
-#: includes/abstracts/abstract-wc-product.php:931
+#: includes/abstracts/abstract-wc-product.php:929
 msgctxt "min_price"
 msgid "From:"
 msgstr "Dari:"
 
-#: includes/abstracts/abstract-wc-product.php:1041
+#: includes/abstracts/abstract-wc-product.php:1039
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr "Nilai %s dari 5"
 
-#: includes/abstracts/abstract-wc-product.php:1043
+#: includes/abstracts/abstract-wc-product.php:1041
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr "dari 5"
 
-#: includes/abstracts/abstract-wc-product.php:1385
+#: includes/abstracts/abstract-wc-product.php:1383
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -3389,7 +3390,7 @@ msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in "
 "stock). Please edit your cart and try again. We apologise for any "
 "inconvenience caused."
-msgstr ""
+msgstr "Maaf, kami tidak memiliki \"%s\" pada stok untuk memenuhi pesanan Anda (stok %s). Mohon edit troli Anda dan coba lagi. Mohon maaf atas ketidaknyamanannya."
 
 #: includes/class-wc-cart.php:455
 msgid ""
@@ -3402,7 +3403,7 @@ msgstr ""
 msgid ""
 "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
 "apologise for any inconvenience caused."
-msgstr ""
+msgstr "Maaf, \"%s\" idak ada di stok. Mohon edit troli Anda dan coba lagi. Mohon maf atas ketidaknyamanannya."
 
 #: includes/class-wc-cart.php:787
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
@@ -3418,13 +3419,13 @@ msgstr "Anda tidak bisa menambahkan &quot;%s&quot; ke keranjang belanja karena s
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
-msgstr ""
+msgstr "Anda tidak dapat menambahkan &quot;%s&quot; ke dalam troli karena stok tidak cukup tersedia (sisa %s). "
 
 #: includes/class-wc-cart.php:813 includes/class-wc-cart.php:832
 #: includes/class-wc-cart.php:845 includes/class-wc-frontend-scripts.php:151
 #: includes/wc-cart-functions.php:98 templates/cart/mini-cart.php:64
 msgid "View Cart"
-msgstr ""
+msgstr "Lihat Troli"
 
 #: includes/class-wc-cart.php:814
 msgid "You cannot add another &quot;%s&quot; to your cart."
@@ -3469,11 +3470,11 @@ msgstr "Catatan Pesanan"
 #: includes/class-wc-checkout.php:117
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr ""
+msgstr "Catatan pesanan Anda, misal: catatan khusus untuk pengiriman."
 
 #: includes/class-wc-checkout.php:176
 msgid "Order &ndash; %s"
-msgstr ""
+msgstr "Pesanan &ndash; %s"
 
 #: includes/class-wc-checkout.php:176
 msgctxt "Order date parsed by strftime"
@@ -3484,48 +3485,48 @@ msgstr ""
 msgid "Backordered"
 msgstr ""
 
-#: includes/class-wc-checkout.php:409
+#: includes/class-wc-checkout.php:413
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr ""
 
-#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:488 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "harus diisi."
 
-#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Silahkan masukkan kodepos yang valid."
 
-#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:509 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
-msgstr ""
+msgstr "bukan nomor telepon yang valid"
 
-#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:515 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "Alamat email tidak valid."
 
-#: includes/class-wc-checkout.php:526
+#: includes/class-wc-checkout.php:530
 msgid "is not valid. Please enter one of the following:"
-msgstr ""
+msgstr "tidak valid. Mohon isi salah satu dari yang berikut:"
 
-#: includes/class-wc-checkout.php:571
+#: includes/class-wc-checkout.php:575
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Anda harus menerima Persyaratan kami."
 
-#: includes/class-wc-checkout.php:576
+#: includes/class-wc-checkout.php:580
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
-msgstr ""
+msgstr "Maaf, <strong>kami tidak melakukan pengiriman ke %s</strong>. Mohon masukkan alamat pengiriman alternatif."
 
-#: includes/class-wc-checkout.php:584
+#: includes/class-wc-checkout.php:588
 msgid "Invalid shipping method."
 msgstr "Metode pengiriman tidak valid."
 
-#: includes/class-wc-checkout.php:597
+#: includes/class-wc-checkout.php:601
 msgid "Invalid payment method."
 msgstr "Metode pembayaran tidak valid."
 
@@ -3623,7 +3624,7 @@ msgstr "Belgium"
 
 #: includes/class-wc-countries.php:58
 msgid "Belau"
-msgstr ""
+msgstr "Belau"
 
 #: includes/class-wc-countries.php:59
 msgid "Belize"
@@ -4255,7 +4256,7 @@ msgstr "Rwanda"
 
 #: includes/class-wc-countries.php:217
 msgid "Saint Barth&eacute;lemy"
-msgstr ""
+msgstr "Saint Barth&eacute;lemy"
 
 #: includes/class-wc-countries.php:218
 msgid "Saint Helena"
@@ -4495,7 +4496,7 @@ msgstr "Western Sahara"
 
 #: includes/class-wc-countries.php:277
 msgid "Western Samoa"
-msgstr ""
+msgstr "Samoa Barat"
 
 #: includes/class-wc-countries.php:278
 msgid "Yemen"
@@ -4531,7 +4532,7 @@ msgstr "Pajak"
 
 #: includes/class-wc-countries.php:523
 msgid "(incl. VAT)"
-msgstr ""
+msgstr "(termasuk pajak)"
 
 #: includes/class-wc-countries.php:523
 msgid "(incl. tax)"
@@ -4573,7 +4574,7 @@ msgstr "Alamat"
 #: includes/class-wc-countries.php:744
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
-msgstr ""
+msgstr "Nama apartemen, kantor, dll. (opsional)"
 
 #: includes/class-wc-countries.php:749 includes/class-wc-countries.php:750
 msgid "Town / City"
@@ -4656,13 +4657,13 @@ msgstr "Kupon tidak ada!"
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
-msgstr ""
+msgstr "Maaf, sepertinya kupon \"%s\" invalid - sekarang sudah tidak digunakan lagi pada pesanan Anda."
 
 #: includes/class-wc-coupon.php:601
 msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
-msgstr ""
+msgstr "Maaf, sepertinya kupon \"%s\" bukan milik Anda- sekarang sudah tidak digunakan lagi pada pesanan  Anda."
 
 #: includes/class-wc-coupon.php:604
 msgid "Coupon code already applied!"
@@ -4672,7 +4673,7 @@ msgstr "Kode kupon sudah digunakan sebelumnya!"
 msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
-msgstr ""
+msgstr "Maaf, kupon \"%s\" sudah digunakan dan tidak dapat digunakan bersama kupon lain."
 
 #: includes/class-wc-coupon.php:610
 msgid "Coupon usage limit has been reached."
@@ -4725,7 +4726,7 @@ msgstr "Anda harus masuk sebelum mengunduh berkas."
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:25
 #: templates/myaccount/form-login.php:44
 msgid "Login"
-msgstr ""
+msgstr "Login"
 
 #: includes/class-wc-download-handler.php:73
 msgid "Log in to Download Files"
@@ -4744,7 +4745,6 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:167
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 msgid "Invalid order."
 msgstr "Pesanan tidak valid."
 
@@ -4808,20 +4808,20 @@ msgstr "Alamat berhasil diubah."
 
 #: includes/class-wc-form-handler.php:180
 msgid "Please enter your name."
-msgstr ""
+msgstr "Masukkan nama Anda."
 
 #: includes/class-wc-form-handler.php:184
 #: includes/wc-customer-functions.php:48
 msgid "Please provide a valid email address."
-msgstr ""
+msgstr "Silakan masukkan alamat email valid."
 
 #: includes/class-wc-form-handler.php:186
 msgid "This email address is already registered."
-msgstr ""
+msgstr "Alamat email ini sudah terdaftar sebelumnya."
 
 #: includes/class-wc-form-handler.php:190
 msgid "Please re-enter your password."
-msgstr ""
+msgstr "Masukkan kembali password Anda."
 
 #: includes/class-wc-form-handler.php:192
 #: includes/class-wc-form-handler.php:809
@@ -4830,7 +4830,7 @@ msgstr "Kata sandi tidak sama."
 
 #: includes/class-wc-form-handler.php:208
 msgid "Account details changed successfully."
-msgstr ""
+msgstr "Detail akun berhasil diubah"
 
 #: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
@@ -4839,11 +4839,11 @@ msgstr ""
 #: includes/class-wc-form-handler.php:367
 #: includes/class-wc-form-handler.php:420
 msgid "Cart updated."
-msgstr ""
+msgstr "Troli ter-update."
 
 #: includes/class-wc-form-handler.php:402
 msgid "You can only have 1 %s in your cart."
-msgstr ""
+msgstr "Anda hanya boleh memiliki 1 %s di dalam troli."
 
 #: includes/class-wc-form-handler.php:488
 msgid "The cart has been filled with the items from your previous order."
@@ -4851,11 +4851,11 @@ msgstr ""
 
 #: includes/class-wc-form-handler.php:509
 msgid "Order cancelled by customer."
-msgstr ""
+msgstr "Order dibatalkan oleh pelanggan."
 
 #: includes/class-wc-form-handler.php:512
 msgid "Your order was cancelled."
-msgstr ""
+msgstr "Order Anda dibatalkan."
 
 #: includes/class-wc-form-handler.php:517
 msgid ""
@@ -4866,16 +4866,16 @@ msgstr ""
 #: includes/class-wc-form-handler.php:557
 #: includes/class-wc-form-handler.php:617
 msgid "Please choose product options&hellip;"
-msgstr ""
+msgstr "Mohon tentukan pilihan produk&hellip;"
 
 #: includes/class-wc-form-handler.php:651
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
-msgstr ""
+msgstr "Silakan pilih jumlah item untuk dimasukkan troli&hellip;"
 
 #: includes/class-wc-form-handler.php:658
 msgid "Please choose a product to add to your cart&hellip;"
-msgstr ""
+msgstr "Mohon pilih produk untuk dimasukkan troli&hellip;"
 
 #: includes/class-wc-form-handler.php:718
 #: includes/class-wc-form-handler.php:722
@@ -4883,15 +4883,15 @@ msgstr ""
 #: includes/class-wc-form-handler.php:735
 #: includes/class-wc-form-handler.php:857
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #: includes/class-wc-form-handler.php:722
 msgid "Username is required."
-msgstr ""
+msgstr "Username harus diisi."
 
 #: includes/class-wc-form-handler.php:726
 msgid "Password is required."
-msgstr ""
+msgstr "Password harus diisi."
 
 #: includes/class-wc-form-handler.php:735
 msgid "A user could not be found with this email address."
@@ -4899,7 +4899,7 @@ msgstr ""
 
 #: includes/class-wc-form-handler.php:760
 msgid "You are now logged in as <strong>%s</strong>"
-msgstr ""
+msgstr "Anda login sebagai <strong>%s</strong>"
 
 #: includes/class-wc-form-handler.php:804
 msgid "Please enter your password."
@@ -4907,11 +4907,11 @@ msgstr "Masukkan sandi anda."
 
 #: includes/class-wc-form-handler.php:827
 msgid "Your password has been reset."
-msgstr ""
+msgstr "Password Anda sudah direset."
 
 #: includes/class-wc-form-handler.php:827
 msgid "Log in"
-msgstr ""
+msgstr "Login"
 
 #: includes/class-wc-form-handler.php:873
 #: includes/wc-customer-functions.php:110
@@ -4935,7 +4935,7 @@ msgstr "dibutuhkan"
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
-msgstr ""
+msgstr "Maaf, tidak ada produk yang sesuai. Pilih kombinasi lain."
 
 #: includes/class-wc-frontend-scripts.php:159
 msgid ""
@@ -4980,15 +4980,15 @@ msgctxt "page_slug"
 msgid "my-account"
 msgstr "akun-saya"
 
-#: includes/class-wc-install.php:444
+#: includes/class-wc-install.php:455
 msgid "Customer"
 msgstr "Pelanggan"
 
-#: includes/class-wc-install.php:451
+#: includes/class-wc-install.php:462
 msgid "Shop Manager"
-msgstr ""
+msgstr "Manager Toko"
 
-#: includes/class-wc-install.php:692
+#: includes/class-wc-install.php:703
 msgid "What's new:"
 msgstr "Yang baru:"
 
@@ -5003,7 +5003,7 @@ msgstr "&nbsp;<small>%smelalui%s</small>"
 
 #: includes/class-wc-order.php:896
 msgid "Cart Subtotal:"
-msgstr ""
+msgstr "Subtotal Troli:"
 
 #: includes/class-wc-order.php:903
 msgid "Cart Discount:"
@@ -5061,30 +5061,30 @@ msgstr "Semua Kategori Produk"
 
 #: includes/class-wc-post-types.php:62
 msgid "Parent Product Category"
-msgstr ""
+msgstr "Induk Kategori Produk"
 
 #: includes/class-wc-post-types.php:63
 msgid "Parent Product Category:"
-msgstr ""
+msgstr "Induk Kategori Produk:"
 
 #: includes/class-wc-post-types.php:64
 msgid "Edit Product Category"
-msgstr ""
+msgstr "Ubah Kategori Produk"
 
 #: includes/class-wc-post-types.php:65
 msgid "Update Product Category"
-msgstr ""
+msgstr "Perbarui Kategori Produk"
 
 #: includes/class-wc-post-types.php:66
 msgid "Add New Product Category"
-msgstr ""
+msgstr "Tambah Kategori Produk"
 
 #: includes/class-wc-post-types.php:67
 msgid "New Product Category Name"
-msgstr ""
+msgstr "Nama Kategori Produk Baru"
 
 #: includes/class-wc-post-types.php:78
-#: includes/updates/woocommerce-update-2.0.php:49
+#: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "kategori-produk"
@@ -5105,7 +5105,7 @@ msgstr "Tag"
 
 #: includes/class-wc-post-types.php:95
 msgid "Search Product Tags"
-msgstr ""
+msgstr "Cari Tag Produk"
 
 #: includes/class-wc-post-types.php:96
 msgid "All Product Tags"
@@ -5117,110 +5117,110 @@ msgstr "Tag Produk Parent"
 
 #: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag:"
-msgstr ""
+msgstr "Induk Tag Produk:"
 
 #: includes/class-wc-post-types.php:99
 msgid "Edit Product Tag"
-msgstr ""
+msgstr "Ubah Tag Produk"
 
 #: includes/class-wc-post-types.php:100
 msgid "Update Product Tag"
-msgstr ""
+msgstr "Perbarui Tag Produk"
 
 #: includes/class-wc-post-types.php:101
 msgid "Add New Product Tag"
-msgstr ""
+msgstr "Tambah Tag Produk"
 
 #: includes/class-wc-post-types.php:102
 msgid "New Product Tag Name"
-msgstr ""
+msgstr "Nama Tag Produk Baru"
 
 #: includes/class-wc-post-types.php:113
-#: includes/updates/woocommerce-update-2.0.php:50
+#: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "tag-produk"
 
 #: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
 msgid "Shipping Classes"
-msgstr ""
+msgstr "Kkelas Pengiriman"
 
 #: includes/class-wc-post-types.php:127
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:521
 msgid "Shipping Class"
-msgstr ""
+msgstr "Kelas Pengiriman"
 
 #: includes/class-wc-post-types.php:128
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
-msgstr ""
+msgstr "Kelas Pengiriman"
 
 #: includes/class-wc-post-types.php:129
 msgid "Search Shipping Classes"
-msgstr ""
+msgstr "Cari Kelas Pengiriman"
 
 #: includes/class-wc-post-types.php:130
 msgid "All Shipping Classes"
-msgstr ""
+msgstr "Semua Kelas Pengiriman"
 
 #: includes/class-wc-post-types.php:131
 msgid "Parent Shipping Class"
-msgstr ""
+msgstr "Induk Kelas Pengiriman"
 
 #: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class:"
-msgstr ""
+msgstr "Induk Kelas Pengiriman"
 
 #: includes/class-wc-post-types.php:133
 msgid "Edit Shipping Class"
-msgstr ""
+msgstr "Edit Kelas Pengiriman"
 
 #: includes/class-wc-post-types.php:134
 msgid "Update Shipping Class"
-msgstr ""
+msgstr "Update Kelas Pengiriman"
 
 #: includes/class-wc-post-types.php:135
 msgid "Add New Shipping Class"
-msgstr ""
+msgstr "Tambah Kelas Pengiriman Baru"
 
 #: includes/class-wc-post-types.php:136
 msgid "New Shipping Class Name"
-msgstr ""
+msgstr "Nama Kelas Pengiriman Baru"
 
 #: includes/class-wc-post-types.php:184
 msgid "Search %s"
-msgstr ""
+msgstr "Cari %s"
 
 #: includes/class-wc-post-types.php:185
 msgid "All %s"
-msgstr ""
+msgstr "Semua %s"
 
 #: includes/class-wc-post-types.php:186
 msgid "Parent %s"
-msgstr ""
+msgstr "%s Parent"
 
 #: includes/class-wc-post-types.php:187
 msgid "Parent %s:"
-msgstr ""
+msgstr "%s Parent:"
 
 #: includes/class-wc-post-types.php:188
 msgid "Edit %s"
-msgstr ""
+msgstr "Edit %s"
 
 #: includes/class-wc-post-types.php:189
 msgid "Update %s"
-msgstr ""
+msgstr "Update %s"
 
 #: includes/class-wc-post-types.php:190
 msgid "Add New %s"
-msgstr ""
+msgstr "Tambah %s Baru"
 
 #: includes/class-wc-post-types.php:191
 msgid "New %s"
-msgstr ""
+msgstr "%s Baru"
 
 #: includes/class-wc-post-types.php:226
-#: includes/updates/woocommerce-update-2.0.php:58
+#: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "produk"
@@ -5413,7 +5413,7 @@ msgstr "Beli produk"
 
 #: includes/class-wc-product-grouped.php:42
 msgid "View products"
-msgstr ""
+msgstr "Lihat produk"
 
 #: includes/class-wc-product-grouped.php:194
 #: includes/class-wc-product-variable.php:251
@@ -5467,7 +5467,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-completed-order.php:39
 msgid "Your order is complete - download your files"
-msgstr ""
+msgstr "Pemesanan Anda berhasil - download file Anda"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:40
 msgid ""
@@ -5504,11 +5504,11 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-invoice.php:35
 msgid "Invoice for order {order_number} from {order_date}"
-msgstr ""
+msgstr "Invoice untuk pesanan {order_number} pada {order_date}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:36
 msgid "Invoice for order {order_number}"
-msgstr ""
+msgstr "Invoice untuk pesanan {order_number}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:38
 msgid "Your {site_title} order from {order_date}"
@@ -5516,15 +5516,15 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-invoice.php:39
 msgid "Order {order_number} details"
-msgstr ""
+msgstr "Detail pesanan {order_number}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:160
 msgid "Email subject (paid)"
-msgstr ""
+msgstr "Judul email (terbayar)"
 
 #: includes/emails/class-wc-email-customer-invoice.php:167
 msgid "Email heading (paid)"
-msgstr ""
+msgstr "Heading email (terbayar)"
 
 #: includes/emails/class-wc-email-customer-new-account.php:33
 msgid "New account"
@@ -5542,7 +5542,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-new-account.php:40
 msgid "Welcome to {site_title}"
-msgstr ""
+msgstr "Selamat datang di {site_title}"
 
 #: includes/emails/class-wc-email-customer-note.php:31
 msgid "Customer note"
@@ -5572,7 +5572,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-processing-order.php:29
 msgid "Thank you for your order"
-msgstr ""
+msgstr "Terimakasih atas pesanan Anda"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {site_title} order receipt from {order_date}"
@@ -5580,7 +5580,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-reset-password.php:38
 msgid "Reset password"
-msgstr ""
+msgstr "Reset password"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:39
 msgid ""
@@ -5594,7 +5594,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-reset-password.php:45
 msgid "Password Reset Instructions"
-msgstr ""
+msgstr "Instructions Reset Password"
 
 #: includes/emails/class-wc-email-new-order.php:26
 msgid "New order"
@@ -5606,7 +5606,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-new-order.php:29
 msgid "New customer order"
-msgstr ""
+msgstr "Pesanan baru pelanggan"
 
 #: includes/emails/class-wc-email-new-order.php:30
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
@@ -5862,7 +5862,7 @@ msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:135
 msgid "Access Key"
-msgstr ""
+msgstr "Kunci Akses"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:137
 msgid "The Mijireh access key for your store."
@@ -5933,7 +5933,7 @@ msgstr "Gateway dinonaktifkan"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:111
 msgid "PayPal does not support your store currency."
-msgstr ""
+msgstr "Paypal tidak mendukung mata uang toko Anda"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:128
 msgid "Enable PayPal standard"
@@ -5979,11 +5979,11 @@ msgstr ""
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:166
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:199
 msgid "Optional"
-msgstr ""
+msgstr "Opsional"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:169
 msgid "Invoice Prefix"
-msgstr ""
+msgstr "Prefix Invoice"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:171
 msgid ""
@@ -6036,7 +6036,7 @@ msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:202
 msgid "Shipping options"
-msgstr ""
+msgstr "Pilihan pengiriman"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:207
 msgid "Shipping details"
@@ -6105,9 +6105,12 @@ msgid "Order %s"
 msgstr "Pesanan %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
 msgid "Shipping via"
 msgstr "Pengiriman via"
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
+msgid "Shipping via %s"
+msgstr "Pengiriman via %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid ""
@@ -6158,7 +6161,7 @@ msgstr "Pembayaran %s via IPN."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:763
 msgid "Order refunded/reversed"
-msgstr ""
+msgstr "Pesanan dikembalikan"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:764
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
@@ -6368,7 +6371,7 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:534
 msgid "Any class"
-msgstr ""
+msgstr "Semua kelas"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:535
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:536
@@ -6576,7 +6579,7 @@ msgstr "Pesanan:"
 #: includes/shortcodes/class-wc-shortcode-checkout.php:133
 #: templates/checkout/thankyou.php:44
 msgid "Date:"
-msgstr ""
+msgstr "Tanggal:"
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:137
 #: templates/checkout/thankyou.php:48
@@ -6586,7 +6589,7 @@ msgstr "Total:"
 #: includes/shortcodes/class-wc-shortcode-checkout.php:142
 #: templates/checkout/thankyou.php:53
 msgid "Payment method:"
-msgstr ""
+msgstr "Metode pembayaran:"
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:230
 msgid ""
@@ -6614,7 +6617,7 @@ msgstr ""
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:235
 msgid "Enter a username or e-mail address."
-msgstr ""
+msgstr "Masukkan username atau e-mail."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:242
 msgid "There is no user registered with that email address."
@@ -6622,11 +6625,11 @@ msgstr ""
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:257
 msgid "Invalid username or e-mail."
-msgstr ""
+msgstr "Username atau e-mail invalid."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:271
 msgid "Password reset is not allowed for this user"
-msgstr ""
+msgstr "Reset password tidak diperkenankan untuk user ini."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:299
 msgid "Check your e-mail for the confirmation link."
@@ -6636,7 +6639,7 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-my-account.php:324
 #: includes/shortcodes/class-wc-shortcode-my-account.php:331
 msgid "Invalid key"
-msgstr ""
+msgstr "Kunci invalid"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:368
 msgid "Add a new payment method."
@@ -6844,7 +6847,7 @@ msgstr "Diskon Troli"
 
 #: includes/wc-coupon-functions.php:23
 msgid "Cart % Discount"
-msgstr ""
+msgstr "Diskon Troli"
 
 #: includes/wc-coupon-functions.php:24
 msgid "Product Discount"
@@ -6876,7 +6879,7 @@ msgstr "Masukkan sandi akun."
 msgid ""
 "Couldn&#8217;t register you&hellip; please contact us if you continue to "
 "have problems."
-msgstr ""
+msgstr "Tidak dapat mendaftarkan Anda&hellip; hubungi kami jika Anda menemukan masalah lagi."
 
 #: includes/wc-order-functions.php:294
 msgid "Unpaid order cancelled - time limit reached."
@@ -6914,7 +6917,7 @@ msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; Halaman %s"
 
 #: includes/wc-template-functions.php:974
-#: templates/checkout/form-shipping.php:57
+#: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "Informasi Tambahan"
@@ -7004,11 +7007,11 @@ msgstr ""
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:91
 msgid "Min"
-msgstr ""
+msgstr "Min"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:96
 msgid "Max"
-msgstr ""
+msgstr "Maks"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:21
 msgid ""
@@ -7145,7 +7148,7 @@ msgstr ""
 
 #: includes/widgets/class-wc-widget-products.php:23
 msgid "WooCommerce Products"
-msgstr ""
+msgstr "Produk Woocommerce"
 
 #: includes/widgets/class-wc-widget-products.php:36
 #: includes/widgets/class-wc-widget-recently-viewed.php:36
@@ -7159,7 +7162,7 @@ msgstr "Tampilkan"
 
 #: includes/widgets/class-wc-widget-products.php:43
 msgid "All Products"
-msgstr ""
+msgstr "Semua Produk"
 
 #: includes/widgets/class-wc-widget-products.php:44
 msgid "Featured Products"
@@ -7399,22 +7402,22 @@ msgstr ""
 msgid "Return To Cart"
 msgstr ""
 
-#: templates/checkout/form-billing.php:17
+#: templates/checkout/form-billing.php:15
 msgid "Billing &amp; Shipping"
 msgstr "Tagihan &amp; Pengiriman"
 
-#: templates/checkout/form-billing.php:21
+#: templates/checkout/form-billing.php:19
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
 msgstr "Alamat Tagihan"
 
-#: templates/checkout/form-billing.php:40
+#: templates/checkout/form-billing.php:38
 msgid "Create an account?"
 msgstr "Buat akun"
 
-#: templates/checkout/form-billing.php:51
+#: templates/checkout/form-billing.php:49
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
@@ -7474,7 +7477,7 @@ msgstr ""
 msgid "Pay for order"
 msgstr ""
 
-#: templates/checkout/form-shipping.php:31
+#: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
 msgstr ""
 
@@ -7663,13 +7666,17 @@ msgstr "Alamat penagihan"
 msgid "Shipping address"
 msgstr "Alamat pengiriman"
 
-#: templates/emails/email-order-items.php:42
-#: templates/emails/plain/email-order-items.php:43
+#: templates/emails/email-order-items.php:25
+msgid "Product Image"
+msgstr "Gambar Produk"
+
+#: templates/emails/email-order-items.php:46
+#: templates/emails/plain/email-order-items.php:46
 msgid "Download %d"
 msgstr ""
 
-#: templates/emails/email-order-items.php:44
-#: templates/emails/plain/email-order-items.php:45
+#: templates/emails/email-order-items.php:48
+#: templates/emails/plain/email-order-items.php:48
 msgid "Download"
 msgstr ""
 
@@ -7707,11 +7714,11 @@ msgstr ""
 msgid "Your password is <strong>%s</strong>."
 msgstr ""
 
-#: templates/emails/plain/email-order-items.php:29
+#: templates/emails/plain/email-order-items.php:32
 msgid "Quantity: %s"
 msgstr ""
 
-#: templates/emails/plain/email-order-items.php:32
+#: templates/emails/plain/email-order-items.php:35
 msgid "Cost: %s"
 msgstr ""
 
@@ -8149,4 +8156,4 @@ msgstr "Dokumen"
 
 #: woocommerce.php:183
 msgid "Premium Support"
-msgstr ""
+msgstr "Dukungan Premium"

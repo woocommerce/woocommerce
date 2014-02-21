@@ -7,10 +7,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 14:00+0000\n"
-"Last-Translator: aroland.hu <info@aroland.hu>\n"
-"Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce-core/language/hu_HU/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:46+00:00\n"
+"PO-Revision-Date: 2014-02-15 08:30+0000\n"
+"Last-Translator: SzLegradi <szabolcs.legradi@gmail.com>\n"
+"Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce/language/hu_HU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -60,7 +60,6 @@ msgstr "Rendelés követése"
 #: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
 msgstr "Fiókom"
@@ -3058,69 +3057,69 @@ msgstr "Lejárat (HH/ÉÉ)"
 msgid "Card Code"
 msgstr "Kártyakód"
 
-#: includes/abstracts/abstract-wc-product.php:456
+#: includes/abstracts/abstract-wc-product.php:454
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
 msgstr "Kosárba rakom"
 
-#: includes/abstracts/abstract-wc-product.php:466
+#: includes/abstracts/abstract-wc-product.php:464
 msgid "Read more"
 msgstr "Tovább"
 
-#: includes/abstracts/abstract-wc-product.php:574
-#: includes/abstracts/abstract-wc-product.php:579
-#: includes/abstracts/abstract-wc-product.php:599
+#: includes/abstracts/abstract-wc-product.php:572
+#: includes/abstracts/abstract-wc-product.php:577
+#: includes/abstracts/abstract-wc-product.php:597
 msgid "In stock"
 msgstr "Készleten"
 
-#: includes/abstracts/abstract-wc-product.php:579
+#: includes/abstracts/abstract-wc-product.php:577
 msgid "Only %s left in stock"
 msgstr "Csak %s maradt készleten"
 
-#: includes/abstracts/abstract-wc-product.php:582
+#: includes/abstracts/abstract-wc-product.php:580
 msgid "%s in stock"
 msgstr "%s készleten"
 
-#: includes/abstracts/abstract-wc-product.php:589
+#: includes/abstracts/abstract-wc-product.php:587
 msgid "(backorders allowed)"
 msgstr "(visszarendelések engedélyezve)"
 
-#: includes/abstracts/abstract-wc-product.php:596
-#: includes/abstracts/abstract-wc-product.php:609 templates/cart/cart.php:74
+#: includes/abstracts/abstract-wc-product.php:594
+#: includes/abstracts/abstract-wc-product.php:607 templates/cart/cart.php:74
 msgid "Available on backorder"
 msgstr "Engedélyezett visszarendelésre"
 
-#: includes/abstracts/abstract-wc-product.php:602
-#: includes/abstracts/abstract-wc-product.php:612
-#: includes/abstracts/abstract-wc-product.php:616
+#: includes/abstracts/abstract-wc-product.php:600
+#: includes/abstracts/abstract-wc-product.php:610
+#: includes/abstracts/abstract-wc-product.php:614
 msgid "Out of stock"
 msgstr "Elfogyott"
 
-#: includes/abstracts/abstract-wc-product.php:909
-#: includes/abstracts/abstract-wc-product.php:915
+#: includes/abstracts/abstract-wc-product.php:907
+#: includes/abstracts/abstract-wc-product.php:913
 #: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Ingyenes!"
 
-#: includes/abstracts/abstract-wc-product.php:931
+#: includes/abstracts/abstract-wc-product.php:929
 msgctxt "min_price"
 msgid "From:"
 msgstr "Legolcsóbb:"
 
-#: includes/abstracts/abstract-wc-product.php:1041
+#: includes/abstracts/abstract-wc-product.php:1039
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr "Értékelés: %s / 5"
 
-#: includes/abstracts/abstract-wc-product.php:1043
+#: includes/abstracts/abstract-wc-product.php:1041
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr "/ 5"
 
-#: includes/abstracts/abstract-wc-product.php:1385
+#: includes/abstracts/abstract-wc-product.php:1383
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -3372,7 +3371,7 @@ msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
 "in W3 Total Cache settings <a href=\"%s\">here</a>."
-msgstr "Ahhoz hogy az <strong>adatbázis gyorsítótárazás</strong> működjön a WooCommerce-el, fel kell venned a <code>_wc_session_</code> sort az \"Mellőzött query stringek\" közé a W3 Total Cache <a href=\"%s\">beállításaiban</a>."
+msgstr "Ahhoz hogy az <strong>adatbázis gyorsítótárazás</strong> működjön a WooCommerce-el, fel kell venned a <code>_wc_session_</code> sort a \"Mellőzött query stringek\" közé a W3 Total Cache <a href=\"%s\">beállításaiban</a>."
 
 #: includes/class-wc-cart.php:163
 msgid ""
@@ -3485,48 +3484,48 @@ msgstr "%b %d, %Y @ %I:%M %p"
 msgid "Backordered"
 msgstr "Visszarendelt"
 
-#: includes/class-wc-checkout.php:409
+#: includes/class-wc-checkout.php:413
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr "Sajnáljuk, lejárt a munkameneted. <a href=\"%s\" class=\"wc-backward\">Vissza a főoldalra</a>"
 
-#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:488 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "mező kitöltése kötelező."
 
-#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Kérjük valós irányítószámot írj be."
 
-#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:509 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "nem érvényes telefonszám."
 
-#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:515 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
-msgstr "nem érvényes e-mail cím."
+msgstr "érvénytelen e-mail cím."
 
-#: includes/class-wc-checkout.php:526
+#: includes/class-wc-checkout.php:530
 msgid "is not valid. Please enter one of the following:"
-msgstr "nem érvényes. Kérjük a következők valamelyikét írd be:"
+msgstr "érvénytelen. Kérjük a következők valamelyikét írd be:"
 
-#: includes/class-wc-checkout.php:571
+#: includes/class-wc-checkout.php:575
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "A felhasználási feltételek elfogadása kötelező."
 
-#: includes/class-wc-checkout.php:576
+#: includes/class-wc-checkout.php:580
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr "Sajnos <strong>nem szállítunk ide: %s</strong>. Kérünk, válassz egy másik szállítási címet."
 
-#: includes/class-wc-checkout.php:584
+#: includes/class-wc-checkout.php:588
 msgid "Invalid shipping method."
 msgstr "Érvénytelen szállítási mód."
 
-#: includes/class-wc-checkout.php:597
+#: includes/class-wc-checkout.php:601
 msgid "Invalid payment method."
 msgstr "Érvénytelen fizetési mód."
 
@@ -4745,7 +4744,6 @@ msgstr "A termék már nem létezik."
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:167
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 msgid "Invalid order."
 msgstr "Érvénytelen rendelés."
 
@@ -4981,15 +4979,15 @@ msgctxt "page_slug"
 msgid "my-account"
 msgstr "fiokom"
 
-#: includes/class-wc-install.php:444
+#: includes/class-wc-install.php:455
 msgid "Customer"
 msgstr "Vásárló"
 
-#: includes/class-wc-install.php:451
+#: includes/class-wc-install.php:462
 msgid "Shop Manager"
 msgstr "Üzlet kezelő"
 
-#: includes/class-wc-install.php:692
+#: includes/class-wc-install.php:703
 msgid "What's new:"
 msgstr "Újdonságok:"
 
@@ -5085,7 +5083,7 @@ msgid "New Product Category Name"
 msgstr "Új termékkategória neve"
 
 #: includes/class-wc-post-types.php:78
-#: includes/updates/woocommerce-update-2.0.php:49
+#: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "termekkategoria"
@@ -5137,7 +5135,7 @@ msgid "New Product Tag Name"
 msgstr "Új termékcímke neve"
 
 #: includes/class-wc-post-types.php:113
-#: includes/updates/woocommerce-update-2.0.php:50
+#: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "termekcimke"
@@ -5221,7 +5219,7 @@ msgid "New %s"
 msgstr "Új %s"
 
 #: includes/class-wc-post-types.php:226
-#: includes/updates/woocommerce-update-2.0.php:58
+#: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "termek"
@@ -6106,9 +6104,12 @@ msgid "Order %s"
 msgstr "%s rendelés"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
 msgid "Shipping via"
 msgstr "Szállítás módja"
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
+msgid "Shipping via %s"
+msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid ""
@@ -6705,7 +6706,7 @@ msgstr "kanadai dollár"
 
 #: includes/wc-core-functions.php:171
 msgid "Chilean Peso"
-msgstr "chilei peso"
+msgstr "Chilei peso"
 
 #: includes/wc-core-functions.php:172
 msgid "Chinese Yuan"
@@ -6858,7 +6859,7 @@ msgstr "Termék % kedvezmény"
 #: includes/wc-customer-functions.php:52
 msgid ""
 "An account is already registered with your email address. Please login."
-msgstr "Már regisztráltak egy azonosítót ezzel az e-mail címmel. Kérjük válassz másikat."
+msgstr "Már regisztráltak egy azonosítót ezzel az e-mail címmel. Kérjük jelentkezz be."
 
 #: includes/wc-customer-functions.php:61
 msgid "Please enter a valid account username."
@@ -6915,7 +6916,7 @@ msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; %s. oldal"
 
 #: includes/wc-template-functions.php:974
-#: templates/checkout/form-shipping.php:57
+#: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "További információk"
@@ -7370,7 +7371,7 @@ msgstr "Nincsenek termékek a kosárban."
 
 #: templates/cart/mini-cart.php:59
 msgid "Subtotal"
-msgstr "Részösszeg:"
+msgstr "Részösszeg"
 
 #: templates/cart/shipping-calculator.php:22
 msgid "Calculate Shipping"
@@ -7400,22 +7401,22 @@ msgstr "Problémák merültek fel a kosaraddal kapcsolatban (fentebb látható).
 msgid "Return To Cart"
 msgstr "Vissza a kosárhoz"
 
-#: templates/checkout/form-billing.php:17
+#: templates/checkout/form-billing.php:15
 msgid "Billing &amp; Shipping"
 msgstr "Számlázás és szállítás"
 
-#: templates/checkout/form-billing.php:21
+#: templates/checkout/form-billing.php:19
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
 msgstr "Számlázási cím"
 
-#: templates/checkout/form-billing.php:40
+#: templates/checkout/form-billing.php:38
 msgid "Create an account?"
 msgstr "Fiók létrehozása?"
 
-#: templates/checkout/form-billing.php:51
+#: templates/checkout/form-billing.php:49
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
@@ -7475,7 +7476,7 @@ msgstr "Sajnáljuk, úgy tűnik nincs elérhető fizetési mód a címedhez. Ké
 msgid "Pay for order"
 msgstr "Rendelés kifizetése"
 
-#: templates/checkout/form-shipping.php:31
+#: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
 msgstr "Szállítás másik címre?"
 
@@ -7662,15 +7663,19 @@ msgstr "Számlázási cím"
 #: templates/emails/email-addresses.php:28
 #: templates/emails/plain/email-addresses.php:17
 msgid "Shipping address"
-msgstr "Szállítási ícm"
+msgstr "Szállítási cím"
 
-#: templates/emails/email-order-items.php:42
-#: templates/emails/plain/email-order-items.php:43
+#: templates/emails/email-order-items.php:25
+msgid "Product Image"
+msgstr "Termék kép"
+
+#: templates/emails/email-order-items.php:46
+#: templates/emails/plain/email-order-items.php:46
 msgid "Download %d"
 msgstr "%d letöltése"
 
-#: templates/emails/email-order-items.php:44
-#: templates/emails/plain/email-order-items.php:45
+#: templates/emails/email-order-items.php:48
+#: templates/emails/plain/email-order-items.php:48
 msgid "Download"
 msgstr "Letöltés"
 
@@ -7708,11 +7713,11 @@ msgstr "Adataid"
 msgid "Your password is <strong>%s</strong>."
 msgstr "A jelszavad <strong>%s</strong>."
 
-#: templates/emails/plain/email-order-items.php:29
+#: templates/emails/plain/email-order-items.php:32
 msgid "Quantity: %s"
 msgstr "Mennyiség: %s"
 
-#: templates/emails/plain/email-order-items.php:32
+#: templates/emails/plain/email-order-items.php:35
 msgid "Cost: %s"
 msgstr "Összeg: %s"
 

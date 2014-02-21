@@ -1,15 +1,16 @@
 # 
 # Translators:
 # deepinsource <deepinsource@gmail.com>, 2014
+# tetsu <waruii@msn.com>, 2014
 # xepin <xepinchan@qq.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Chinese (China) (http://www.transifex.com/projects/p/woocommerce-core/language/zh_CN/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:46+00:00\n"
+"PO-Revision-Date: 2014-02-14 19:50+0000\n"
+"Last-Translator: tetsu <waruii@msn.com>\n"
+"Language-Team: Chinese (China) (http://www.transifex.com/projects/p/woocommerce/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -18,7 +19,7 @@ msgstr ""
 
 #: assets/js/admin/editor_plugin_lang.php:5
 msgid "Insert Shortcode"
-msgstr "插入图像"
+msgstr "插入短代码"
 
 #: assets/js/admin/editor_plugin_lang.php:6
 msgid "Product price/cart button"
@@ -42,7 +43,7 @@ msgstr "商品分类小工具"
 
 #: assets/js/admin/editor_plugin_lang.php:11
 msgid "Recent products"
-msgstr "WooCommerce最新产品"
+msgstr "WooCommerce 最新商品"
 
 #: assets/js/admin/editor_plugin_lang.php:12
 msgid "Featured products"
@@ -59,7 +60,6 @@ msgstr "订单跟踪"
 #: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
 msgstr "我的帐户"
@@ -1830,7 +1830,7 @@ msgstr ""
 
 #: i18n/states/PE.php:14
 msgid "Municipalidad Metropolitana de Lima"
-msgstr ""
+msgstr "首都利马市"
 
 #: i18n/states/PE.php:16
 msgid "Ancash"
@@ -3057,69 +3057,69 @@ msgstr "有效期(月/年)"
 msgid "Card Code"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:456
+#: includes/abstracts/abstract-wc-product.php:454
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
-msgstr "添加到购物车"
+msgstr "加入购物车"
 
-#: includes/abstracts/abstract-wc-product.php:466
+#: includes/abstracts/abstract-wc-product.php:464
 msgid "Read more"
 msgstr "阅读更多"
 
-#: includes/abstracts/abstract-wc-product.php:574
-#: includes/abstracts/abstract-wc-product.php:579
-#: includes/abstracts/abstract-wc-product.php:599
+#: includes/abstracts/abstract-wc-product.php:572
+#: includes/abstracts/abstract-wc-product.php:577
+#: includes/abstracts/abstract-wc-product.php:597
 msgid "In stock"
 msgstr "有货"
 
-#: includes/abstracts/abstract-wc-product.php:579
+#: includes/abstracts/abstract-wc-product.php:577
 msgid "Only %s left in stock"
 msgstr "库存仅剩 %s"
 
-#: includes/abstracts/abstract-wc-product.php:582
+#: includes/abstracts/abstract-wc-product.php:580
 msgid "%s in stock"
-msgstr "库存%s件"
+msgstr "库存 %s 件"
 
-#: includes/abstracts/abstract-wc-product.php:589
+#: includes/abstracts/abstract-wc-product.php:587
 msgid "(backorders allowed)"
 msgstr "（延期发货获准）"
 
-#: includes/abstracts/abstract-wc-product.php:596
-#: includes/abstracts/abstract-wc-product.php:609 templates/cart/cart.php:74
+#: includes/abstracts/abstract-wc-product.php:594
+#: includes/abstracts/abstract-wc-product.php:607 templates/cart/cart.php:74
 msgid "Available on backorder"
 msgstr "可用的延迟发货"
 
-#: includes/abstracts/abstract-wc-product.php:602
-#: includes/abstracts/abstract-wc-product.php:612
-#: includes/abstracts/abstract-wc-product.php:616
+#: includes/abstracts/abstract-wc-product.php:600
+#: includes/abstracts/abstract-wc-product.php:610
+#: includes/abstracts/abstract-wc-product.php:614
 msgid "Out of stock"
 msgstr "无货"
 
-#: includes/abstracts/abstract-wc-product.php:909
-#: includes/abstracts/abstract-wc-product.php:915
+#: includes/abstracts/abstract-wc-product.php:907
+#: includes/abstracts/abstract-wc-product.php:913
 #: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
-msgstr "免费！"
+msgstr "免费"
 
-#: includes/abstracts/abstract-wc-product.php:931
+#: includes/abstracts/abstract-wc-product.php:929
 msgctxt "min_price"
 msgid "From:"
 msgstr "来自："
 
-#: includes/abstracts/abstract-wc-product.php:1041
+#: includes/abstracts/abstract-wc-product.php:1039
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr "评分 %s 超出5"
 
-#: includes/abstracts/abstract-wc-product.php:1043
+#: includes/abstracts/abstract-wc-product.php:1041
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr "超出5"
 
-#: includes/abstracts/abstract-wc-product.php:1385
+#: includes/abstracts/abstract-wc-product.php:1383
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -3325,7 +3325,7 @@ msgstr "标准"
 #: includes/class-wc-ajax.php:788 includes/class-wc-customer.php:624
 #: includes/class-wc-customer.php:636
 msgid "File %d"
-msgstr "文件已取消。"
+msgstr "文件 %d"
 
 #: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
 #: includes/class-wc-order.php:1537
@@ -3352,7 +3352,7 @@ msgstr "没有产品库存增加 - 他们可能没有启用库存管理。"
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
-msgstr "姓名"
+msgstr "名称"
 
 #: includes/class-wc-ajax.php:1050
 msgid "Value"
@@ -3406,13 +3406,13 @@ msgstr "对不起,\"%s\"缺货了,请修改购物车内所购商品,然后再试
 
 #: includes/class-wc-cart.php:787
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
-msgstr "抱歉，不能更新此用户的信息。"
+msgstr "对不起, &quot;%s&quot; 不能下单。"
 
 #: includes/class-wc-cart.php:794
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
-msgstr "你不能添加此产品到购物车，因为产品已脱销。"
+msgstr "你不能添加 &quot;%s&quot; 到购物车，因为产品已脱销。"
 
 #: includes/class-wc-cart.php:799
 msgid ""
@@ -3473,7 +3473,7 @@ msgstr "为您的订单添加备注，例如：送货特别注意事项。"
 
 #: includes/class-wc-checkout.php:176
 msgid "Order &ndash; %s"
-msgstr "添加订单"
+msgstr "订单 &ndash; %s"
 
 #: includes/class-wc-checkout.php:176
 msgctxt "Order date parsed by strftime"
@@ -3484,48 +3484,48 @@ msgstr "%b %d, %Y @ %I:%M %p"
 msgid "Backordered"
 msgstr "延时交货"
 
-#: includes/class-wc-checkout.php:409
+#: includes/class-wc-checkout.php:413
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr ""
 
-#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:488 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "为必填项"
 
-#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "请输入一个有效的邮政编码。"
 
-#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:509 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr ""
 
-#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:515 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "无效email 地址。"
 
-#: includes/class-wc-checkout.php:526
+#: includes/class-wc-checkout.php:530
 msgid "is not valid. Please enter one of the following:"
 msgstr "无效。请按以下方法输入："
 
-#: includes/class-wc-checkout.php:571
+#: includes/class-wc-checkout.php:575
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "你必须接受我们的条款及条件。"
 
-#: includes/class-wc-checkout.php:576
+#: includes/class-wc-checkout.php:580
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:584
+#: includes/class-wc-checkout.php:588
 msgid "Invalid shipping method."
 msgstr "无效的送货方式。"
 
-#: includes/class-wc-checkout.php:597
+#: includes/class-wc-checkout.php:601
 msgid "Invalid payment method."
 msgstr "无效的支付方式。"
 
@@ -4744,7 +4744,6 @@ msgstr "产品不再存在"
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:167
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 msgid "Invalid order."
 msgstr "无效订单。"
 
@@ -4775,7 +4774,7 @@ msgstr "产品库存不足"
 #: includes/class-wc-emails.php:330 includes/class-wc-emails.php:362
 #: includes/class-wc-emails.php:406
 msgid "Variation #%s of %s"
-msgstr "#%s 变更为 %s"
+msgstr "变量 #%s @ %s"
 
 #: includes/class-wc-emails.php:332 includes/class-wc-emails.php:364
 #: includes/class-wc-emails.php:408
@@ -4804,7 +4803,7 @@ msgstr ""
 
 #: includes/class-wc-form-handler.php:129
 msgid "Address changed successfully."
-msgstr "插件激活成功。"
+msgstr "地址变更成功。"
 
 #: includes/class-wc-form-handler.php:180
 msgid "Please enter your name."
@@ -4949,7 +4948,7 @@ msgstr "选择一个选项&hellip;"
 #: includes/class-wc-install.php:217
 msgctxt "page_slug"
 msgid "shop"
-msgstr "shop"
+msgstr "商店"
 
 #: includes/class-wc-install.php:218
 msgid "Shop"
@@ -4980,15 +4979,15 @@ msgctxt "page_slug"
 msgid "my-account"
 msgstr "我的帐户"
 
-#: includes/class-wc-install.php:444
+#: includes/class-wc-install.php:455
 msgid "Customer"
 msgstr "顾客"
 
-#: includes/class-wc-install.php:451
+#: includes/class-wc-install.php:462
 msgid "Shop Manager"
 msgstr "商店管理"
 
-#: includes/class-wc-install.php:692
+#: includes/class-wc-install.php:703
 msgid "What's new:"
 msgstr "更新内容"
 
@@ -4999,7 +4998,7 @@ msgstr "#"
 
 #: includes/class-wc-order.php:833
 msgid "&nbsp;<small>%svia %s</small>"
-msgstr "电子邮件地址："
+msgstr "&nbsp;<small>%s 通过 %s</small>"
 
 #: includes/class-wc-order.php:896
 msgid "Cart Subtotal:"
@@ -5027,7 +5026,7 @@ msgstr "(包含 %s)"
 
 #: includes/class-wc-order.php:1224 includes/class-wc-order.php:1225
 msgid "WooCommerce"
-msgstr "WooCommerce<br>商店设置"
+msgstr "WooCommerce"
 
 #: includes/class-wc-order.php:1280
 msgid "Order status changed from %s to %s."
@@ -5084,7 +5083,7 @@ msgid "New Product Category Name"
 msgstr "新商品分类名称"
 
 #: includes/class-wc-post-types.php:78
-#: includes/updates/woocommerce-update-2.0.php:49
+#: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "商品分类"
@@ -5136,7 +5135,7 @@ msgid "New Product Tag Name"
 msgstr "新商品标签"
 
 #: includes/class-wc-post-types.php:113
-#: includes/updates/woocommerce-update-2.0.php:50
+#: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "商品标签"
@@ -5220,7 +5219,7 @@ msgid "New %s"
 msgstr "新的 %s"
 
 #: includes/class-wc-post-types.php:226
-#: includes/updates/woocommerce-update-2.0.php:58
+#: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "商品"
@@ -5294,7 +5293,7 @@ msgstr "在这里为你的商店添加新商品"
 
 #: includes/class-wc-post-types.php:267
 msgid "Variations"
-msgstr "Variations"
+msgstr "变量"
 
 #: includes/class-wc-post-types.php:275
 msgctxt "Admin menu name"
@@ -5439,7 +5438,7 @@ msgstr ""
 
 #: includes/class-wc-product-variation.php:494
 msgid "%s &ndash; %s%s"
-msgstr "&nbsp;&ndash;页 %s"
+msgstr "%s &ndash; %s%s"
 
 #: includes/class-wc-shortcodes.php:973
 msgid ""
@@ -5500,7 +5499,7 @@ msgstr "Email账单"
 msgid ""
 "Customer invoice emails can be sent to the user containing order info and "
 "payment links."
-msgstr "顾客的单证可以通过电子邮件发送,包含订单信息和支付信息。"
+msgstr "顾客的收据可以通过电子邮件发送,包含订单信息和支付信息。"
 
 #: includes/emails/class-wc-email-customer-invoice.php:35
 msgid "Invoice for order {order_number} from {order_date}"
@@ -5546,7 +5545,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-note.php:31
 msgid "Customer note"
-msgstr "客户注意"
+msgstr "客户备注"
 
 #: includes/emails/class-wc-email-customer-note.php:32
 msgid "Customer note emails are sent when you add a note to an order."
@@ -5594,7 +5593,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-reset-password.php:45
 msgid "Password Reset Instructions"
-msgstr "您的密码已被重置。"
+msgstr "密码重置教程"
 
 #: includes/emails/class-wc-email-new-order.php:26
 msgid "New order"
@@ -5720,7 +5719,7 @@ msgstr ""
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:105
 msgid "Account Details"
-msgstr "查看详情"
+msgstr "账户详情"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:111
 msgid "Account Name"
@@ -6098,22 +6097,25 @@ msgstr "启用日志记录"
 msgid ""
 "Log PayPal events, such as IPN requests, inside "
 "<code>woocommerce/logs/paypal-%s.txt</code>"
-msgstr "登录贝宝的活动，例如IPN请求，内部 <code>woocommerce/logs/paypal.txt</code>"
+msgstr "记录贝宝事件，例如IPN请求，在 <code>woocommerce/logs/paypal-%s.txt</code>中。"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:349
 msgid "Order %s"
 msgstr "订单 %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
 msgid "Shipping via"
 msgstr "配送渠道"
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
+msgid "Shipping via %s"
+msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid ""
 "Thank you for your order. We are now redirecting you to PayPal to make "
 "payment."
-msgstr "感谢您的订单。我们现在正在重定向到贝宝付款。"
+msgstr "感谢您下单。我们现在正在重定向到贝宝付款。"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:479
 msgid "Pay via PayPal"
@@ -6530,7 +6532,7 @@ msgstr "本地送货是为本地提供订单提供的一个超简单的配送方
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:25
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:84
 msgid "Local Pickup"
-msgstr "当地取件"
+msgstr "自提"
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:77
 msgid "Enable local pickup"
@@ -6660,7 +6662,7 @@ msgstr ""
 
 #: includes/wc-cart-functions.php:83
 msgid "Added &quot;%s&quot; to your cart."
-msgstr "产品成功添加到你的购物车。"
+msgstr "添加 &quot;%s&quot; 至您的购物车"
 
 #: includes/wc-cart-functions.php:83
 msgid "&quot; and &quot;"
@@ -6684,7 +6686,7 @@ msgstr "[Remove]"
 
 #: includes/wc-cart-functions.php:257
 msgid "Free"
-msgstr "免费！"
+msgstr "免费"
 
 #: includes/wc-core-functions.php:167
 msgid "Australian Dollars"
@@ -6903,25 +6905,25 @@ msgstr "新产品标签 %s"
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
-msgstr "这是一个用于测试的演示商店 - 应该没有订单能完成。"
+msgstr "这是一个用于测试的演示商店 - 订单无法完成。"
 
 #: includes/wc-template-functions.php:369
 msgid "Search Results: &ldquo;%s&rdquo;"
-msgstr "搜索结果 &ldquo;"
+msgstr "搜索结果: &ldquo;%s&rdquo;"
 
 #: includes/wc-template-functions.php:372
 msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash;页 %s"
 
 #: includes/wc-template-functions.php:974
-#: templates/checkout/form-shipping.php:57
+#: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "其他信息"
 
 #: includes/wc-template-functions.php:983
 msgid "Reviews (%d)"
-msgstr "评论"
+msgstr "用户评论  (%d)"
 
 #: includes/wc-template-functions.php:1074
 msgid ""
@@ -7218,7 +7220,7 @@ msgstr "显示最新评论列表在你网站"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:23
 msgid "WooCommerce Recent Reviews"
-msgstr "WooCommerce最近评论"
+msgstr "WooCommerce 最近评论"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:27
 msgid "Recent Reviews"
@@ -7251,7 +7253,7 @@ msgstr "在您的网站显示您最受好评的产品列表。"
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:25
 msgid "WooCommerce Top Rated Products"
-msgstr "WooCommerce热门评分产品"
+msgstr "WooCommerce 热门评分产品"
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:29
 msgid "Top Rated Products"
@@ -7399,22 +7401,22 @@ msgstr "您购物车中的项目有一些问题（如上所示）。请回到购
 msgid "Return To Cart"
 msgstr "返回到购物车"
 
-#: templates/checkout/form-billing.php:17
+#: templates/checkout/form-billing.php:15
 msgid "Billing &amp; Shipping"
 msgstr "搜索配送类型"
 
-#: templates/checkout/form-billing.php:21
+#: templates/checkout/form-billing.php:19
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
 msgstr "账单地址"
 
-#: templates/checkout/form-billing.php:40
+#: templates/checkout/form-billing.php:38
 msgid "Create an account?"
 msgstr "创建一个帐户？"
 
-#: templates/checkout/form-billing.php:51
+#: templates/checkout/form-billing.php:49
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
@@ -7474,7 +7476,7 @@ msgstr "很抱歉，似乎你所在的位置没有可用的付款方式。如果
 msgid "Pay for order"
 msgstr "为订单付款"
 
-#: templates/checkout/form-shipping.php:31
+#: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
 msgstr ""
 
@@ -7542,7 +7544,7 @@ msgstr "您在%s 有新订单,订单信息为:"
 
 #: templates/emails/admin-new-order.php:17
 msgid "Order: %s"
-msgstr "订单"
+msgstr "订单: %s"
 
 #: templates/emails/admin-new-order.php:50
 #: templates/emails/customer-completed-order.php:51
@@ -7581,7 +7583,7 @@ msgstr "电话："
 msgid ""
 "Hi there. Your recent order on %s has been completed. Your order details are"
 " shown below for your reference:"
-msgstr "您好。您在％s最新的订单已经完成。您的订单详情如下，供您参考："
+msgstr "您好。您在%s最新的订单已经完成。您的订单详情如下，供您参考："
 
 #: templates/emails/customer-invoice.php:16
 #: templates/emails/plain/customer-invoice.php:14
@@ -7663,13 +7665,17 @@ msgstr "账单地址"
 msgid "Shipping address"
 msgstr "送货地址"
 
-#: templates/emails/email-order-items.php:42
-#: templates/emails/plain/email-order-items.php:43
+#: templates/emails/email-order-items.php:25
+msgid "Product Image"
+msgstr ""
+
+#: templates/emails/email-order-items.php:46
+#: templates/emails/plain/email-order-items.php:46
 msgid "Download %d"
 msgstr ""
 
-#: templates/emails/email-order-items.php:44
-#: templates/emails/plain/email-order-items.php:45
+#: templates/emails/email-order-items.php:48
+#: templates/emails/plain/email-order-items.php:48
 msgid "Download"
 msgstr "下载"
 
@@ -7701,19 +7707,19 @@ msgstr "jS F Y"
 #: templates/emails/plain/customer-note.php:46
 #: templates/emails/plain/customer-processing-order.php:38
 msgid "Your details"
-msgstr "查看详情"
+msgstr "您的详情"
 
 #: templates/emails/plain/customer-new-account.php:16
 msgid "Your password is <strong>%s</strong>."
 msgstr "您的密码是 <strong>%s</strong>。"
 
-#: templates/emails/plain/email-order-items.php:29
-msgid "Quantity: %s"
-msgstr "数量"
-
 #: templates/emails/plain/email-order-items.php:32
+msgid "Quantity: %s"
+msgstr "数量: %s"
+
+#: templates/emails/plain/email-order-items.php:35
 msgid "Cost: %s"
-msgstr "成本"
+msgstr "消费: %s"
 
 #: templates/global/breadcrumb.php:63
 msgid "Products tagged &ldquo;"
@@ -7805,7 +7811,7 @@ msgstr "显示%1$d–%2$d of %3$d搜索结果: "
 
 #: templates/loop/sale-flash.php:16 templates/single-product/sale-flash.php:16
 msgid "Sale!"
-msgstr "促销！"
+msgstr "促销中"
 
 #: templates/myaccount/form-add-payment-method.php:40
 msgid ""
@@ -7816,7 +7822,7 @@ msgstr ""
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
-msgstr ""
+msgstr "添加付款方法"
 
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
@@ -7928,7 +7934,7 @@ msgstr "可用的下载"
 #: templates/myaccount/my-downloads.php:27
 msgid "%s download remaining"
 msgid_plural "%s downloads remaining"
-msgstr[0] ""
+msgstr[0] "%s 下载剩余"
 
 #: templates/myaccount/my-orders.php:26
 msgid "Recent Orders"
@@ -7941,7 +7947,7 @@ msgstr "状态"
 #: templates/myaccount/my-orders.php:62
 msgid "%s for %s item"
 msgid_plural "%s for %s items"
-msgstr[0] ""
+msgstr[0] "%s 为 %s 物品"
 
 #: templates/myaccount/my-orders.php:78
 msgid "Cancel"
@@ -7984,7 +7990,7 @@ msgstr "订单详情"
 
 #: templates/order/order-details.php:66
 msgid "Download file%s"
-msgstr "文件下载方式"
+msgstr "下载文件 %s"
 
 #: templates/order/order-details.php:102
 msgid "Telephone:"
@@ -8029,12 +8035,12 @@ msgstr "n/a"
 #: templates/single-product/meta.php:24
 msgid "Category:"
 msgid_plural "Categories:"
-msgstr[0] ""
+msgstr[0] "分类："
 
 #: templates/single-product/meta.php:26
 msgid "Tag:"
 msgid_plural "Tags:"
-msgstr[0] ""
+msgstr[0] "标签："
 
 #: templates/single-product/product-attributes.php:28
 msgid "Weight"
@@ -8055,7 +8061,7 @@ msgstr "相关产品"
 
 #: templates/single-product/review.php:26
 msgid "Rated %d out of 5"
-msgstr "评分 %s 超出5"
+msgstr "评分 %d 不足 5 "
 
 #: templates/single-product/review.php:34
 msgid "Your comment is awaiting approval"
@@ -8076,11 +8082,11 @@ msgstr "你可能还会喜欢&hellip;"
 #: templates/single-product-reviews.php:21
 msgid "%s review for %s"
 msgid_plural "%s reviews for %s"
-msgstr[0] ""
+msgstr[0] "%s 评论 @ %s"
 
 #: templates/single-product-reviews.php:23
 msgid "Reviews"
-msgstr "评论"
+msgstr "用户评论"
 
 #: templates/single-product-reviews.php:44
 msgid "There are no reviews yet."
@@ -8136,7 +8142,7 @@ msgstr "极差"
 
 #: templates/single-product-reviews.php:83
 msgid "Your Review"
-msgstr "你的评价"
+msgstr "你的评论"
 
 #: templates/single-product-reviews.php:92
 msgid ""
@@ -8145,7 +8151,7 @@ msgstr ""
 
 #: woocommerce.php:182
 msgid "Docs"
-msgstr "文档"
+msgstr "Docs"
 
 #: woocommerce.php:183
 msgid "Premium Support"

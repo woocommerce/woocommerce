@@ -9,10 +9,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 10:01+0000\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-14 08:50+0000\n"
 "Last-Translator: ABSOLUTE_Web <woocommerce@absoluteweb.net>\n"
-"Language-Team: French (France) (http://www.transifex.com/projects/p/woocommerce-core/language/fr_FR/)\n"
+"Language-Team: French (France) (http://www.transifex.com/projects/p/woocommerce/language/fr_FR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -624,7 +624,7 @@ msgid "Default"
 msgstr "Valeur par défaut"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Produit"
 
@@ -1911,7 +1911,7 @@ msgstr "Total"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Actions"
 
@@ -2800,7 +2800,7 @@ msgid ""
 msgstr "Quantité du stock. Si c'est un produit variable cette valeur sera utilisée pour contrôler le stock pour toutes les variations, à moins que vous définissiez le stock au niveau de la variation."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "État du stock"
 
@@ -3601,11 +3601,15 @@ msgstr "&larr; Choisir un produit pour voir les statistiques"
 msgid "No products found."
 msgstr "Aucun produit trouvé."
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "produit"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Parent"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr "Quantités en stock"
 

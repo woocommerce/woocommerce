@@ -6,10 +6,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 12:11+0000\n"
+"POT-Creation-Date: 2014-02-13 21:18:46+00:00\n"
+"PO-Revision-Date: 2014-02-19 18:12+0000\n"
 "Last-Translator: TRFlavourart <vaporsbazar@gmail.com>\n"
-"Language-Team: Turkish (Turkey) (http://www.transifex.com/projects/p/woocommerce-core/language/tr_TR/)\n"
+"Language-Team: Turkish (Turkey) (http://www.transifex.com/projects/p/woocommerce/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -59,7 +59,6 @@ msgstr "Sipariş Takip"
 #: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
 msgstr "Hesabım"
@@ -3017,7 +3016,7 @@ msgstr "Şablonu Sil"
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
-msgstr "Kullandığınız tema tarafından bu şablonun üzerine yazışmış: <code>%s</code>"
+msgstr "Bu şablon, kullandığınız tema tarafından geçersiz kılınmış: <code>%s</code>"
 
 #: includes/abstracts/abstract-wc-email.php:749
 msgid "Copy file to theme"
@@ -3057,69 +3056,69 @@ msgstr "Vade (MM / YY)"
 msgid "Card Code"
 msgstr "Kart Kodu"
 
-#: includes/abstracts/abstract-wc-product.php:456
+#: includes/abstracts/abstract-wc-product.php:454
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
 msgstr "Sepete Ekle"
 
-#: includes/abstracts/abstract-wc-product.php:466
+#: includes/abstracts/abstract-wc-product.php:464
 msgid "Read more"
 msgstr "Devamını Oku"
 
-#: includes/abstracts/abstract-wc-product.php:574
-#: includes/abstracts/abstract-wc-product.php:579
-#: includes/abstracts/abstract-wc-product.php:599
+#: includes/abstracts/abstract-wc-product.php:572
+#: includes/abstracts/abstract-wc-product.php:577
+#: includes/abstracts/abstract-wc-product.php:597
 msgid "In stock"
 msgstr "Stokta"
 
-#: includes/abstracts/abstract-wc-product.php:579
+#: includes/abstracts/abstract-wc-product.php:577
 msgid "Only %s left in stock"
 msgstr "Sadece %s adet kaldı"
 
-#: includes/abstracts/abstract-wc-product.php:582
+#: includes/abstracts/abstract-wc-product.php:580
 msgid "%s in stock"
 msgstr "%s adet stokta"
 
-#: includes/abstracts/abstract-wc-product.php:589
+#: includes/abstracts/abstract-wc-product.php:587
 msgid "(backorders allowed)"
 msgstr "(bakiye siparişlerine izin verildi)"
 
-#: includes/abstracts/abstract-wc-product.php:596
-#: includes/abstracts/abstract-wc-product.php:609 templates/cart/cart.php:74
+#: includes/abstracts/abstract-wc-product.php:594
+#: includes/abstracts/abstract-wc-product.php:607 templates/cart/cart.php:74
 msgid "Available on backorder"
 msgstr "Bakiye siparişine uygun"
 
-#: includes/abstracts/abstract-wc-product.php:602
-#: includes/abstracts/abstract-wc-product.php:612
-#: includes/abstracts/abstract-wc-product.php:616
+#: includes/abstracts/abstract-wc-product.php:600
+#: includes/abstracts/abstract-wc-product.php:610
+#: includes/abstracts/abstract-wc-product.php:614
 msgid "Out of stock"
 msgstr "Stokta Yok"
 
-#: includes/abstracts/abstract-wc-product.php:909
-#: includes/abstracts/abstract-wc-product.php:915
+#: includes/abstracts/abstract-wc-product.php:907
+#: includes/abstracts/abstract-wc-product.php:913
 #: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Ücretsiz!"
 
-#: includes/abstracts/abstract-wc-product.php:931
+#: includes/abstracts/abstract-wc-product.php:929
 msgctxt "min_price"
 msgid "From:"
 msgstr "En Düşük:"
 
-#: includes/abstracts/abstract-wc-product.php:1041
+#: includes/abstracts/abstract-wc-product.php:1039
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr "5 üzerinden %s değerlendirilmiş"
 
-#: includes/abstracts/abstract-wc-product.php:1043
+#: includes/abstracts/abstract-wc-product.php:1041
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr "5 üzerinden"
 
-#: includes/abstracts/abstract-wc-product.php:1385
+#: includes/abstracts/abstract-wc-product.php:1383
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -3484,48 +3483,48 @@ msgstr "%b %d, %Y @ %I:%M %p"
 msgid "Backordered"
 msgstr "Bakiye Siparişi verildi"
 
-#: includes/class-wc-checkout.php:409
+#: includes/class-wc-checkout.php:413
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr "Üzgünüz, oturum süreniz doldu. <a href=\"%s\" class=\"wc-backward\">Anasayfaya dön</a>"
 
-#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:488 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "gerekli bir alandır."
 
-#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Lütfen geçerli bir Posta Kodu girin."
 
-#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:509 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "geçerli bir telefon numarası değil."
 
-#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:515 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "geçerli bir e-posta değil."
 
-#: includes/class-wc-checkout.php:526
+#: includes/class-wc-checkout.php:530
 msgid "is not valid. Please enter one of the following:"
 msgstr "geçerli değil. Lütfen şunlardan birini girin:"
 
-#: includes/class-wc-checkout.php:571
+#: includes/class-wc-checkout.php:575
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Şartları &amp; Koşulları kabul etmeniz gerekir."
 
-#: includes/class-wc-checkout.php:576
+#: includes/class-wc-checkout.php:580
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr "Maalesef <strong>%s konumuna kargo gönderemiyoruz</strong>. Lütfen alternatif bir kargo adresi girin."
 
-#: includes/class-wc-checkout.php:584
+#: includes/class-wc-checkout.php:588
 msgid "Invalid shipping method."
 msgstr "Geçersiz Kargo Yöntemi"
 
-#: includes/class-wc-checkout.php:597
+#: includes/class-wc-checkout.php:601
 msgid "Invalid payment method."
 msgstr "Geçersiz Ödeme Yöntemi."
 
@@ -4744,7 +4743,6 @@ msgstr "Ürün artık bulunmuyor."
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:167
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 msgid "Invalid order."
 msgstr "Geçersiz sipariş."
 
@@ -4980,15 +4978,15 @@ msgctxt "page_slug"
 msgid "my-account"
 msgstr "hesabım"
 
-#: includes/class-wc-install.php:444
+#: includes/class-wc-install.php:455
 msgid "Customer"
 msgstr "Müşteri"
 
-#: includes/class-wc-install.php:451
+#: includes/class-wc-install.php:462
 msgid "Shop Manager"
 msgstr "Mağaza Yöneticisi"
 
-#: includes/class-wc-install.php:692
+#: includes/class-wc-install.php:703
 msgid "What's new:"
 msgstr "Neler Yeni:"
 
@@ -5003,7 +5001,7 @@ msgstr "&nbsp;<small>%s -- %s</small>"
 
 #: includes/class-wc-order.php:896
 msgid "Cart Subtotal:"
-msgstr "Sepet Ara-Toplamı:"
+msgstr "Sepet Ara Toplamı:"
 
 #: includes/class-wc-order.php:903
 msgid "Cart Discount:"
@@ -5084,7 +5082,7 @@ msgid "New Product Category Name"
 msgstr "Yeni Ürün Kategorisi Adı"
 
 #: includes/class-wc-post-types.php:78
-#: includes/updates/woocommerce-update-2.0.php:49
+#: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "urun-kategori"
@@ -5136,7 +5134,7 @@ msgid "New Product Tag Name"
 msgstr "Yeni Ürün Etiketi Adı"
 
 #: includes/class-wc-post-types.php:113
-#: includes/updates/woocommerce-update-2.0.php:50
+#: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "urun-etiketi"
@@ -5220,7 +5218,7 @@ msgid "New %s"
 msgstr "Yeni %s"
 
 #: includes/class-wc-post-types.php:226
-#: includes/updates/woocommerce-update-2.0.php:58
+#: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "urun"
@@ -5767,7 +5765,7 @@ msgstr "BIC"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:295
 msgid "Awaiting BACS payment"
-msgstr "Havale-Eft ödemesi bekleniyor"
+msgstr "Havale-Eft ödemesi bekleniyor."
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:25
 msgid "Cheque"
@@ -5796,7 +5794,7 @@ msgstr "Lütfen Çeklerinizi Firmamızın İsim, Ünvan, Adres, Şehir, Posta Ko
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:115
 msgid "Awaiting cheque payment"
-msgstr "Çekin Ödenmesi bekleniyor"
+msgstr "Çekin ödenmesi bekleniyor."
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:24
 #: includes/gateways/cod/class-wc-gateway-cod.php:67
@@ -6105,9 +6103,12 @@ msgid "Order %s"
 msgstr "Sipariş %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
 msgid "Shipping via"
 msgstr "Kargo"
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
+msgid "Shipping via %s"
+msgstr "Kargo: %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid ""
@@ -6286,7 +6287,7 @@ msgid ""
 "Optional extra shipping options with additional costs (one per line): Option"
 " Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or "
 "item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
-msgstr "(Satır başına bir tane) ek maliyetlerle birlikte isteğe bağlı ekstra kargo seçenekleri: Seçenek Adı | Ek Maliyet [+ - Yüzdeler%] | (Sipariş, Sınıf veya Öğe) Başına Maliyet Türü. Örneğin; <code>Öncelikli Kargo | 6.95 [+ 0.2%] | </code>."
+msgstr "(Satır başına bir tane) ek maliyetlerle birlikte isteğe bağlı ekstra kargo seçenekleri: Seçenek Adı | Ek Maliyet [+ - Yüzdeler%] | (sipariş, sınıf veya öğe başına) Maliyet Türü. Örneğin; <code>Öncelikli Kargo | 6.95 [+ 0.2%] | </code>."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:131
 msgid ""
@@ -6592,7 +6593,7 @@ msgstr "Ödeme Yöntemi:"
 msgid ""
 "The order totals have been updated. Please confirm your order by pressing "
 "the Place Order button at the bottom of the page."
-msgstr "Sipariş Toplamları güncellendi. Lütfen, \" Siparişi Onayla \" düğmesine tıklayarak siparişinizi tamamlayın."
+msgstr "Sipariş Toplamları güncellendi. Lütfen, Siparişi Onayla butonuna tıklayarak siparişinizi tamamlayın."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:112
 #: templates/myaccount/view-order.php:12
@@ -6914,7 +6915,7 @@ msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; Sayfa %s"
 
 #: includes/wc-template-functions.php:974
-#: templates/checkout/form-shipping.php:57
+#: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "Ek Bilgi"
@@ -7194,7 +7195,7 @@ msgstr "Satışlar"
 #: includes/widgets/class-wc-widget-products.php:62
 msgctxt "Sorting order"
 msgid "Order"
-msgstr "Sipariş"
+msgstr "Sıralama"
 
 #: includes/widgets/class-wc-widget-products.php:64
 msgid "ASC"
@@ -7206,7 +7207,7 @@ msgstr "Azalan"
 
 #: includes/widgets/class-wc-widget-products.php:71
 msgid "Hide free products"
-msgstr "Ücretsiz Ürünleri Gizle"
+msgstr "Ücretsiz ürünleri gizle"
 
 #: includes/widgets/class-wc-widget-products.php:76
 msgid "Show hidden products"
@@ -7304,7 +7305,7 @@ msgstr "Sepet Toplamı"
 
 #: templates/cart/cart-totals.php:21 templates/checkout/review-order.php:25
 msgid "Cart Subtotal"
-msgstr "Sepet Ara-Toplamı"
+msgstr "Sepet Ara Toplamı"
 
 #: templates/cart/cart-totals.php:27 templates/cart/cart-totals.php:67
 #: templates/checkout/review-order.php:31
@@ -7369,7 +7370,7 @@ msgstr "Sepetinizde ürün yok!"
 
 #: templates/cart/mini-cart.php:59
 msgid "Subtotal"
-msgstr "Ara-Toplam"
+msgstr "Ara toplam"
 
 #: templates/cart/shipping-calculator.php:22
 msgid "Calculate Shipping"
@@ -7399,22 +7400,22 @@ msgstr "Sepetinizdeki ürünlere dair (yukarıda belirtilen) hatalar söz konusu
 msgid "Return To Cart"
 msgstr "Sepete Geri Dön"
 
-#: templates/checkout/form-billing.php:17
+#: templates/checkout/form-billing.php:15
 msgid "Billing &amp; Shipping"
 msgstr "Fatura &amp; Kargo"
 
-#: templates/checkout/form-billing.php:21
+#: templates/checkout/form-billing.php:19
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
 msgstr "Fatura Adresi"
 
-#: templates/checkout/form-billing.php:40
+#: templates/checkout/form-billing.php:38
 msgid "Create an account?"
 msgstr "Hesap oluştur?"
 
-#: templates/checkout/form-billing.php:51
+#: templates/checkout/form-billing.php:49
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
@@ -7474,7 +7475,7 @@ msgstr "Üzgünüz, bulunduğunuz konum için her hangi bir Ödeme Yöntemi bulu
 msgid "Pay for order"
 msgstr "Sipariş için Ödeme"
 
-#: templates/checkout/form-shipping.php:31
+#: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
 msgstr "Kargo farklı bir adrese gönderilsin mi?"
 
@@ -7663,13 +7664,17 @@ msgstr "Fatura Adresi"
 msgid "Shipping address"
 msgstr "Kargo Adresi"
 
-#: templates/emails/email-order-items.php:42
-#: templates/emails/plain/email-order-items.php:43
+#: templates/emails/email-order-items.php:25
+msgid "Product Image"
+msgstr "Ürün Resmi"
+
+#: templates/emails/email-order-items.php:46
+#: templates/emails/plain/email-order-items.php:46
 msgid "Download %d"
 msgstr "İndir %d"
 
-#: templates/emails/email-order-items.php:44
-#: templates/emails/plain/email-order-items.php:45
+#: templates/emails/email-order-items.php:48
+#: templates/emails/plain/email-order-items.php:48
 msgid "Download"
 msgstr "İndirme"
 
@@ -7707,11 +7712,11 @@ msgstr "Detaylarınız"
 msgid "Your password is <strong>%s</strong>."
 msgstr "Şifreniz <strong>%s</strong>"
 
-#: templates/emails/plain/email-order-items.php:29
+#: templates/emails/plain/email-order-items.php:32
 msgid "Quantity: %s"
 msgstr "Miktar: %s"
 
-#: templates/emails/plain/email-order-items.php:32
+#: templates/emails/plain/email-order-items.php:35
 msgid "Cost: %s"
 msgstr "Tutar: %s"
 
@@ -7772,23 +7777,23 @@ msgstr "Varsayılan Sıralama"
 
 #: templates/loop/orderby.php:22
 msgid "Sort by popularity"
-msgstr "Popülerliğe göre sırala"
+msgstr "En çok incelenene göre sırala"
 
 #: templates/loop/orderby.php:23
 msgid "Sort by average rating"
-msgstr "Oylara göre sırala"
+msgstr "En çok oy alana göre sırala"
 
 #: templates/loop/orderby.php:24
 msgid "Sort by newness"
-msgstr "Yenileri sırala"
+msgstr "En son eklenene göre sırala"
 
 #: templates/loop/orderby.php:25
 msgid "Sort by price: low to high"
-msgstr "Sırala: düşükten yükseğe"
+msgstr "Fiyata göre sırala: Düşükten yükseğe"
 
 #: templates/loop/orderby.php:26
 msgid "Sort by price: high to low"
-msgstr "Sırala: yüksekten düşüğe"
+msgstr "Fiyata göre sırala: Yüksekten düşüğe"
 
 #: templates/loop/result-count.php:28
 msgid "Showing the single result"
@@ -7915,7 +7920,7 @@ msgstr "Adresim"
 
 #: templates/myaccount/my-address.php:35
 msgid "The following addresses will be used on the checkout page by default."
-msgstr "Belirttiğiniz adresler Ödeme sayfasında varsayılan olarak kullanılacaktır."
+msgstr "Belirttiğiniz adresler ödeme sayfasında varsayılan olarak kullanılacaktır."
 
 #: templates/myaccount/my-address.php:64
 msgid "You have not set up this type of address yet."
@@ -7941,7 +7946,7 @@ msgstr "Durum"
 #: templates/myaccount/my-orders.php:62
 msgid "%s for %s item"
 msgid_plural "%s for %s items"
-msgstr[0] "%s %s öğe için"
+msgstr[0] "%s - %s ürün"
 
 #: templates/myaccount/my-orders.php:78
 msgid "Cancel"

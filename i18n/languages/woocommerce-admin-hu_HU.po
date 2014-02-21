@@ -8,10 +8,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 10:11+0000\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-20 12:30+0000\n"
 "Last-Translator: aroland.hu <info@aroland.hu>\n"
-"Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce-core/language/hu_HU/)\n"
+"Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce/language/hu_HU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -27,7 +27,7 @@ msgstr "WooCommerce"
 
 #: includes/admin/class-wc-admin-assets.php:108
 msgid "Please enter in decimal (%s) format without thousand separators."
-msgstr "Kérlek tizedes (%s) formában add meg, ezres elválasztók nélkül."
+msgstr "Kérlek, tizedes (%s) formában add meg, ezres elválasztók nélkül."
 
 #: includes/admin/class-wc-admin-assets.php:109
 msgid ""
@@ -40,11 +40,11 @@ msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
-msgstr "Biztos vagy benne hogy el akarod távolítani a kiválasztott tételeket? Ha korábban csökkentetted ennek a terméknek a készletét vagy a rendelést vásárló küldte be, akkor a termék készletét kézzel kell helyreállítanod."
+msgstr "Biztos vagy benne, hogy el akarod távolítani a kiválasztott tételeket? Ha korábban csökkentetted ennek a terméknek a készletét vagy a rendelést vásárló küldte be, akkor a termék készletét kézzel kell helyreállítanod."
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
-msgstr "Kérlek válassz elemeket."
+msgstr "Kérlek, válassz elemeket."
 
 #: includes/admin/class-wc-admin-assets.php:138
 msgid "Remove this item meta?"
@@ -94,7 +94,7 @@ msgstr "Érték(ek)"
 #: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:540
 msgid "Enter some text, or some attributes by pipe (|) separating values."
-msgstr "Írj be valamilyen szöveget vagy egy attribútumot függőleges vonallal (|) elválasztva az értékeket."
+msgstr "Írj be valamilyen szöveget vagy attribútumot, az értékeket függőleges vonallal (|) válaszd el."
 
 #: includes/admin/class-wc-admin-assets.php:145
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:490
@@ -176,7 +176,7 @@ msgstr "Írj be egy értéket"
 
 #: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value (fixed or %)"
-msgstr "Írj be egy értéke (fix vagy %)"
+msgstr "Írj be egy értéket (fix vagy %)"
 
 #: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
@@ -214,21 +214,21 @@ msgstr "Biztos vagy benne, hogy törölni szeretnéd ezt a variációt?"
 
 #: includes/admin/class-wc-admin-attributes.php:82
 msgid "Please, provide an attribute name, slug and type."
-msgstr "Kérlek add meg az attribútum nevét, keresőbarát nevét és típusát."
+msgstr "Kérlek, add meg az attribútum nevét, keresőbarát nevét és típusát."
 
 #: includes/admin/class-wc-admin-attributes.php:84
 msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
-msgstr "\"%s\" keresőbarát név túl hosszú (maximum 28 karakter). Kérlek rövidítsd."
+msgstr "\"%s\" keresőbarát név túl hosszú (maximum 28 karakter). Kérlek, rövidítsd."
 
 #: includes/admin/class-wc-admin-attributes.php:86
 msgid ""
 "Slug “%s” is not allowed because it is a reserved term. Change it, please."
-msgstr "\\\"%s\\\" keresőbarát név nem engedélyezett, mivel egy fenntartott kifejezés. Kérlek változtasd meg."
+msgstr "\\\"%s\\\" keresőbarát név nem engedélyezett, mivel egy fenntartott kifejezés. Kérlek, változtasd meg."
 
 #: includes/admin/class-wc-admin-attributes.php:91
 #: includes/admin/class-wc-admin-attributes.php:96
 msgid "Slug “%s” is already in use. Change it, please."
-msgstr "\\\"%s\\\" keresőbarát név már használatban van. Kérlek változtasd meg."
+msgstr "\\\"%s\\\" keresőbarát név már használatban van. Kérlek, változtasd meg."
 
 #: includes/admin/class-wc-admin-attributes.php:233
 msgid "Edit Attribute"
@@ -418,7 +418,7 @@ msgstr "Még nincsenek termékértékelések."
 
 #: includes/admin/class-wc-admin-duplicate-product.php:43
 msgid "Make a duplicate from this product"
-msgstr "Duplikátum készítése a termékről"
+msgstr "Duplikáció készítése a termékről"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:44
 msgid "Duplicate"
@@ -448,7 +448,7 @@ msgstr "Dokumentáció"
 msgid ""
 "Thank you for using WooCommerce :) Should you need help using or extending "
 "WooCommerce please read the documentation."
-msgstr "Köszönjük, hogy a WooCommerce mellett döntöttél. :) Ha bármilyen segítségre van szükséged a WooCommerce használatában vagy bővítésében, kérjük olvasd át a dokumentációt."
+msgstr "Köszönjük, hogy a WooCommerce mellett döntöttél. :) Ha bármilyen segítségre van szükséged a WooCommerce használatában vagy bővítésében, kérjük, olvasd át a dokumentációt."
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "WooCommerce Documentation"
@@ -473,7 +473,7 @@ msgstr "A <a href=\"%s\">dokumentáció elolvasása után</a>, további segíts�
 msgid ""
 "Before asking for help we recommend checking the status page to identify any"
 " problems with your configuration."
-msgstr "Mielőtt segítséget kérnél, javasoljuk hogy ellenőrizd az állapot oldalt a konfigurációddal kapcsolatos bármilyen hiba felderítésére."
+msgstr "Mielőtt segítséget kérnél, javasoljuk, hogy ellenőrizd az állapot oldalt a konfigurációddal kapcsolatos bármilyen hiba felderítésére."
 
 #: includes/admin/class-wc-admin-help.php:56
 #: includes/admin/class-wc-admin-help.php:67
@@ -502,7 +502,7 @@ msgid ""
 "href=\"%s\">contribution guide</a> prior to submitting your report. Be as "
 "descriptive as possible and please include your <a href=\"%s\">system status"
 " report</a>."
-msgstr "Ha hibát találtál a WooCommerce bővítményben, akkor létrehozhatsz egy jegyet a <a href=\"%s\">Github feladatokban</a>. Győződj meg róla, hogy átolvastad a <a href=\"%s\">közreműködési útmutatót</a> a jelentés beküldése előtt. Légy a lehető legalaposabb és kérjük mellékeld a <a href=\"%s\">rendszerállapot jelentést</a> is."
+msgstr "Ha hibát találtál a WooCommerce bővítményben, akkor létrehozhatsz egy jegyet a <a href=\"%s\">Github feladatokban</a>. Győződj meg róla, hogy átolvastad a <a href=\"%s\">közreműködési útmutatót</a> a jelentés beküldése előtt. Légy a lehető legalaposabb és kérjük, mellékeld a <a href=\"%s\">rendszerállapot jelentést</a> is."
 
 #: includes/admin/class-wc-admin-help.php:67
 msgid "Report a bug"
@@ -514,7 +514,7 @@ msgstr "További információk:"
 
 #: includes/admin/class-wc-admin-help.php:74
 msgid "About WooCommerce"
-msgstr "A WooCommerce névjegye"
+msgstr "WooCommerce névjegy"
 
 #: includes/admin/class-wc-admin-help.php:75
 msgid "Project on WordPress.org"
@@ -623,7 +623,7 @@ msgid "Default"
 msgstr "Alapértelmezett"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Termék"
 
@@ -1326,7 +1326,7 @@ msgstr "Google Analytics"
 
 #: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
-msgstr ""
+msgstr "Adj Google Analytics e-kereskedelmi követőkódot a WooCommerce áruházadhoz."
 
 #: includes/admin/class-wc-admin-welcome.php:285
 #: includes/admin/class-wc-admin-welcome.php:290
@@ -1482,7 +1482,7 @@ msgid ""
 "to our translation team. Want to see your name? <a "
 "href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
 "WooCommerce</a>."
-msgstr ""
+msgstr "A WooCommerce-t örömmel fordították le fordító csapataink más nyelvekre. Szeretnéd köztük látni a nevedet? <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Fordíts WooCommerce-t</a>."
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1910,7 +1910,7 @@ msgstr "Összeg"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Műveletek"
 
@@ -2799,7 +2799,7 @@ msgid ""
 msgstr "Raktár mennyiség. Ha ez egy variálható termék, akkor ez az érték kezeli a készletet minden variációra, kivéve ha variáció szinten megadod a készletet."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "Készletállapot"
 
@@ -3600,11 +3600,15 @@ msgstr "&larr; Válassz egy terméket a statisztika megtekintéséhez"
 msgid "No products found."
 msgstr "Nem találhatóak termékek."
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "termek"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Szülő"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr "Készleten lévő mennyiség"
 
@@ -5393,7 +5397,7 @@ msgstr "http://www.woothemes.com/woocommerce/"
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr "Egy e-kereskedelmi eszköztár ami segít eladni bármit. Gyönyörűen."
+msgstr "Egy e-kereskedelmi eszköztár, ami segít eladni bármit. Gyönyörűen."
 
 #. Author of the plugin/theme
 msgid "WooThemes"

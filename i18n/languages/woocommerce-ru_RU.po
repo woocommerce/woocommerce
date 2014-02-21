@@ -2,11 +2,13 @@
 # Translators:
 # me2you, 2014
 # Apelsinova <any.a@mail.ru>, 2014
+# Apelsinova <any.a@mail.ru>, 2014
 # me2you, 2013
 # Den Arefyev <>, 2012
 # flyingoff <lebedev.serge@gmail.com>, 2013
+# me2you, 2013-2014
 # me2you, 2013
-# me2you, 2013
+# kornienko <kornienko.cto1@gmail.com>, 2014
 # flyingoff <lebedev.serge@gmail.com>, 2013
 # Арефьев Денис <jujjer@gmail.com>, 2013
 # Иван Тюрин <wen89@inbox.ru>, 2013
@@ -14,10 +16,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Russian (Russia) (http://www.transifex.com/projects/p/woocommerce-core/language/ru_RU/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:46+00:00\n"
+"PO-Revision-Date: 2014-02-20 13:41+0000\n"
+"Last-Translator: Komarovski <komarovski21@gmail.com>\n"
+"Language-Team: Russian (Russia) (http://www.transifex.com/projects/p/woocommerce/language/ru_RU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -34,11 +36,11 @@ msgstr "Кнопка Цена товара/Корзина"
 
 #: assets/js/admin/editor_plugin_lang.php:7
 msgid "Product by SKU/ID"
-msgstr "Товар по SKU/ID"
+msgstr "Товар по ИТП/ID"
 
 #: assets/js/admin/editor_plugin_lang.php:8
 msgid "Products by SKU/ID"
-msgstr "Товары по SKU/ID"
+msgstr "Товары по ИТП/ID"
 
 #: assets/js/admin/editor_plugin_lang.php:9
 msgid "Product categories"
@@ -67,7 +69,6 @@ msgstr "Отслеживание заказа"
 #: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
 msgstr "Мой профиль"
@@ -3059,89 +3060,89 @@ msgstr "Номер карты"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:211
 msgid "Expiry (MM/YY)"
-msgstr "Истекает (MM/YY)"
+msgstr "Истекает (ММ/ГГ)"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
 msgstr "Код карты"
 
-#: includes/abstracts/abstract-wc-product.php:456
+#: includes/abstracts/abstract-wc-product.php:454
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
 msgstr "Добавить в корзину"
 
-#: includes/abstracts/abstract-wc-product.php:466
+#: includes/abstracts/abstract-wc-product.php:464
 msgid "Read more"
 msgstr "Подробнее"
 
-#: includes/abstracts/abstract-wc-product.php:574
-#: includes/abstracts/abstract-wc-product.php:579
-#: includes/abstracts/abstract-wc-product.php:599
+#: includes/abstracts/abstract-wc-product.php:572
+#: includes/abstracts/abstract-wc-product.php:577
+#: includes/abstracts/abstract-wc-product.php:597
 msgid "In stock"
 msgstr "В наличии"
 
-#: includes/abstracts/abstract-wc-product.php:579
+#: includes/abstracts/abstract-wc-product.php:577
 msgid "Only %s left in stock"
 msgstr "Осталось только %s в наличии"
 
-#: includes/abstracts/abstract-wc-product.php:582
+#: includes/abstracts/abstract-wc-product.php:580
 msgid "%s in stock"
 msgstr "%s в наличии"
 
-#: includes/abstracts/abstract-wc-product.php:589
+#: includes/abstracts/abstract-wc-product.php:587
 msgid "(backorders allowed)"
 msgstr "(резервирование разрешено)"
 
-#: includes/abstracts/abstract-wc-product.php:596
-#: includes/abstracts/abstract-wc-product.php:609 templates/cart/cart.php:74
+#: includes/abstracts/abstract-wc-product.php:594
+#: includes/abstracts/abstract-wc-product.php:607 templates/cart/cart.php:74
 msgid "Available on backorder"
 msgstr "Доступно для резервирования"
 
-#: includes/abstracts/abstract-wc-product.php:602
-#: includes/abstracts/abstract-wc-product.php:612
-#: includes/abstracts/abstract-wc-product.php:616
+#: includes/abstracts/abstract-wc-product.php:600
+#: includes/abstracts/abstract-wc-product.php:610
+#: includes/abstracts/abstract-wc-product.php:614
 msgid "Out of stock"
 msgstr "Нет в наличии"
 
-#: includes/abstracts/abstract-wc-product.php:909
-#: includes/abstracts/abstract-wc-product.php:915
+#: includes/abstracts/abstract-wc-product.php:907
+#: includes/abstracts/abstract-wc-product.php:913
 #: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Бесплатно!"
 
-#: includes/abstracts/abstract-wc-product.php:931
+#: includes/abstracts/abstract-wc-product.php:929
 msgctxt "min_price"
 msgid "From:"
 msgstr "От:"
 
-#: includes/abstracts/abstract-wc-product.php:1041
+#: includes/abstracts/abstract-wc-product.php:1039
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr "Оценка %s из 5"
 
-#: includes/abstracts/abstract-wc-product.php:1043
+#: includes/abstracts/abstract-wc-product.php:1041
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr "из 5"
 
-#: includes/abstracts/abstract-wc-product.php:1385
+#: includes/abstracts/abstract-wc-product.php:1383
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
 #: includes/api/class-wc-api-authentication.php:69
 msgid "Consumer Key is missing"
-msgstr ""
+msgstr "Потребительский ключ отсутствует"
 
 #: includes/api/class-wc-api-authentication.php:72
 msgid "Consumer Secret is missing"
-msgstr ""
+msgstr "Пароль отсутствует"
 
 #: includes/api/class-wc-api-authentication.php:80
 msgid "Consumer Secret is invalid"
-msgstr ""
+msgstr "Пароль не действительный"
 
 #: includes/api/class-wc-api-authentication.php:112
 msgid "%s parameter is missing"
@@ -3492,48 +3493,48 @@ msgstr "%b %d, %Y @ %I:%M %p"
 msgid "Backordered"
 msgstr "Зарезервировано"
 
-#: includes/class-wc-checkout.php:409
+#: includes/class-wc-checkout.php:413
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr "К сожалению, сессия истекла. <a href=\"%s\" class=\"wc-backward\">На главную</a>"
 
-#: includes/class-wc-checkout.php:484 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:488 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "обязательное поле."
 
-#: includes/class-wc-checkout.php:496 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Пожалуйста, введите правильный почтовый индекс."
 
-#: includes/class-wc-checkout.php:505 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:509 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "некорректный номер телефона."
 
-#: includes/class-wc-checkout.php:511 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:515 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "некорректный email."
 
-#: includes/class-wc-checkout.php:526
+#: includes/class-wc-checkout.php:530
 msgid "is not valid. Please enter one of the following:"
 msgstr "введено некорректно. Пожалуйста, выберите один из этих:"
 
-#: includes/class-wc-checkout.php:571
+#: includes/class-wc-checkout.php:575
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Вам необходимо принять наши условия и правила."
 
-#: includes/class-wc-checkout.php:576
+#: includes/class-wc-checkout.php:580
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr "К сожалению, <strong>мы не доставляем в %s</strong>. Пожалуйста, введите другой адрес доставки."
 
-#: includes/class-wc-checkout.php:584
+#: includes/class-wc-checkout.php:588
 msgid "Invalid shipping method."
 msgstr "Неправильный способ доставки."
 
-#: includes/class-wc-checkout.php:597
+#: includes/class-wc-checkout.php:601
 msgid "Invalid payment method."
 msgstr "Неправильный способ оплаты."
 
@@ -4752,7 +4753,6 @@ msgstr "Товар больше не существует."
 #: includes/shortcodes/class-wc-shortcode-checkout.php:86
 #: includes/shortcodes/class-wc-shortcode-checkout.php:167
 #: includes/shortcodes/class-wc-shortcode-my-account.php:106
-#: includes/shortcodes/class-wc-shortcode-view-order.php:49
 msgid "Invalid order."
 msgstr "Ошибка в заказе."
 
@@ -4988,15 +4988,15 @@ msgctxt "page_slug"
 msgid "my-account"
 msgstr "мой-профиль"
 
-#: includes/class-wc-install.php:444
+#: includes/class-wc-install.php:455
 msgid "Customer"
 msgstr "Покупатель"
 
-#: includes/class-wc-install.php:451
+#: includes/class-wc-install.php:462
 msgid "Shop Manager"
 msgstr "Управление магазином"
 
-#: includes/class-wc-install.php:692
+#: includes/class-wc-install.php:703
 msgid "What's new:"
 msgstr "Что нового:"
 
@@ -5092,7 +5092,7 @@ msgid "New Product Category Name"
 msgstr "Имя новой категории товаров"
 
 #: includes/class-wc-post-types.php:78
-#: includes/updates/woocommerce-update-2.0.php:49
+#: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "товарная-категория"
@@ -5144,7 +5144,7 @@ msgid "New Product Tag Name"
 msgstr "Имя новой метки товаров"
 
 #: includes/class-wc-post-types.php:113
-#: includes/updates/woocommerce-update-2.0.php:50
+#: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "товарный-тег"
@@ -5228,7 +5228,7 @@ msgid "New %s"
 msgstr "Новый %s"
 
 #: includes/class-wc-post-types.php:226
-#: includes/updates/woocommerce-update-2.0.php:58
+#: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "товар"
@@ -6113,9 +6113,12 @@ msgid "Order %s"
 msgstr "Заказ %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:358
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
 msgid "Shipping via"
 msgstr "Доставка"
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
+msgid "Shipping via %s"
+msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid ""
@@ -6314,7 +6317,7 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:139
 msgid "Costs Added..."
-msgstr ""
+msgstr "Затраты добавлены..."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:143
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:96
@@ -6345,7 +6348,7 @@ msgstr "Введите минимальную сумму. Суммы меньш�
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:515
 msgid "Costs"
-msgstr ""
+msgstr "Затраты"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:522
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:102
@@ -6368,11 +6371,11 @@ msgstr "Плата за исключением налога. Введите зн
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:528
 msgid "+ Add Cost"
-msgstr ""
+msgstr "+ Добавить стоимость"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:528
 msgid "Delete selected costs"
-msgstr ""
+msgstr "Удалить выбранные затраты"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:534
 msgid "Any class"
@@ -6463,7 +6466,7 @@ msgstr "Страны"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:92
 msgid "Cost Added..."
-msgstr ""
+msgstr "Стоимость добавлена..."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:105
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
@@ -6608,7 +6611,7 @@ msgid ""
 "Order <mark class=\"order-number\">%s</mark> was placed on <mark class"
 "=\"order-date\">%s</mark> and is currently <mark class=\"order-"
 "status\">%s</mark>."
-msgstr ""
+msgstr "Заказ <mark class=\"order-number\">%s</mark> оформлен <mark class=\"order-date\">%s</mark> и в данный момент находится в статусе <mark class=\"order-status\">%s</mark>."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:116
 #: templates/myaccount/view-order.php:17 templates/order/tracking.php:31
@@ -6922,7 +6925,7 @@ msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; Страница %s"
 
 #: includes/wc-template-functions.php:974
-#: templates/checkout/form-shipping.php:57
+#: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "Характеристики"
@@ -7286,7 +7289,7 @@ msgid ""
 "No shipping methods were found; please recalculate your shipping or continue"
 " to checkout and enter your full address to see if there is shipping "
 "available to your location."
-msgstr ""
+msgstr "Методы доставки небыли найдены; пожалуйста пересчитайте вашу доставку или продолжите оплату и введите ваш полный адрес, чтобы увидеть, доступна ли доставка в вашу локацию."
 
 #: templates/cart/cart-shipping.php:59
 msgid "Please fill in your details to see available shipping methods."
@@ -7294,7 +7297,7 @@ msgstr "Введите свои данные для того, чтобы уви�
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid "Sorry, shipping is unavailable %s."
-msgstr ""
+msgstr "Извините, доставка %s недоступна."
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid ""
@@ -7407,22 +7410,22 @@ msgstr "Возникли проблемы с наименованиями в в�
 msgid "Return To Cart"
 msgstr "Вернуться в корзину"
 
-#: templates/checkout/form-billing.php:17
+#: templates/checkout/form-billing.php:15
 msgid "Billing &amp; Shipping"
 msgstr "Оплата и доставка"
 
-#: templates/checkout/form-billing.php:21
+#: templates/checkout/form-billing.php:19
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
 msgstr "Реквизиты оплаты"
 
-#: templates/checkout/form-billing.php:40
+#: templates/checkout/form-billing.php:38
 msgid "Create an account?"
 msgstr "Зарегистрировать вас?"
 
-#: templates/checkout/form-billing.php:51
+#: templates/checkout/form-billing.php:49
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
@@ -7482,7 +7485,7 @@ msgstr "К сожалению, у нас не предусмотрены дос�
 msgid "Pay for order"
 msgstr "Оплатить заказ"
 
-#: templates/checkout/form-shipping.php:31
+#: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
 msgstr "Доставка по другому адресу?"
 
@@ -7671,13 +7674,17 @@ msgstr "Адрес оплаты"
 msgid "Shipping address"
 msgstr "Адрес доставки"
 
-#: templates/emails/email-order-items.php:42
-#: templates/emails/plain/email-order-items.php:43
+#: templates/emails/email-order-items.php:25
+msgid "Product Image"
+msgstr "Картинка товара"
+
+#: templates/emails/email-order-items.php:46
+#: templates/emails/plain/email-order-items.php:46
 msgid "Download %d"
 msgstr "Скачать %d"
 
-#: templates/emails/email-order-items.php:44
-#: templates/emails/plain/email-order-items.php:45
+#: templates/emails/email-order-items.php:48
+#: templates/emails/plain/email-order-items.php:48
 msgid "Download"
 msgstr "Скачать"
 
@@ -7715,11 +7722,11 @@ msgstr "Детали"
 msgid "Your password is <strong>%s</strong>."
 msgstr "Ваш пароль <strong>%s</strong>."
 
-#: templates/emails/plain/email-order-items.php:29
+#: templates/emails/plain/email-order-items.php:32
 msgid "Quantity: %s"
 msgstr "Количество: %s"
 
-#: templates/emails/plain/email-order-items.php:32
+#: templates/emails/plain/email-order-items.php:35
 msgid "Cost: %s"
 msgstr "Стоимость: %s"
 
@@ -7911,7 +7918,7 @@ msgid ""
 "From your account dashboard you can view your recent orders, manage your "
 "shipping and billing addresses and <a href=\"%s\">edit your password and "
 "account details</a>."
-msgstr ""
+msgstr "С главной панели вашего аккаунта вы можете просматривать недавние заказы, настроить адрес доставки и реквизиты оплаты, а также <a href=\"%s\">изменить пароль и детали аккаунта</a>."
 
 #: templates/myaccount/my-address.php:17
 msgid "My Addresses"
@@ -7936,9 +7943,9 @@ msgstr "Доступно загрузок"
 #: templates/myaccount/my-downloads.php:27
 msgid "%s download remaining"
 msgid_plural "%s downloads remaining"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "%s загрузка осталась"
+msgstr[1] "%s загрузки осталась"
+msgstr[2] "%s загрузок осталась"
 
 #: templates/myaccount/my-orders.php:26
 msgid "Recent Orders"

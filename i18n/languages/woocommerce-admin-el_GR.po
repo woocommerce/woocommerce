@@ -12,16 +12,18 @@
 # logothetis <thenovember5@gmail.com>, 2013
 # makisantypas <makis@realize.gr>, 2013
 # mariorho <marios.rodos@gmail.com>, 2013
+# ounos <ounos@live.com>, 2014
 # pefstra <pefstra@gmail.com>, 2013
 # pvs1984 <pissasvasilis@gmail.com>, 2013
+# alichani <salichani75@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-12 13:22:09+00:00\n"
-"PO-Revision-Date: 2014-02-13 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Greek (Greece) (http://www.transifex.com/projects/p/woocommerce-core/language/el_GR/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-15 08:40+0000\n"
+"Last-Translator: alichani <salichani75@gmail.com>\n"
+"Language-Team: Greek (Greece) (http://www.transifex.com/projects/p/woocommerce/language/el_GR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -216,7 +218,7 @@ msgstr "παραλλαγές προστέθηκαν"
 
 #: includes/admin/class-wc-admin-assets.php:212
 msgid "No variations added"
-msgstr "παραλλαγές προστέθηκαν"
+msgstr "Δεν προστέθηκαν παραλλαγές"
 
 #: includes/admin/class-wc-admin-assets.php:213
 msgid "Are you sure you want to remove this variation?"
@@ -352,7 +354,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:360
 msgid "No attributes currently exist."
-msgstr "Δεν υπάρχουν χαρακτηριστικά"
+msgstr "Δεν υπάρχουν χαρακτηριστικά ακόμα."
 
 #: includes/admin/class-wc-admin-attributes.php:370
 msgid "Add New Attribute"
@@ -384,7 +386,7 @@ msgstr "Κατάσταση WooCommerce"
 
 #: includes/admin/class-wc-admin-dashboard.php:132
 msgid "<strong>%s</strong> sales this month"
-msgstr ""
+msgstr "<strong>%s</strong> πωλήσεις αυτόν τον μήνα"
 
 #: includes/admin/class-wc-admin-dashboard.php:139
 msgid "%s top seller this month (sold %d)"
@@ -491,7 +493,7 @@ msgstr ""
 #: includes/admin/views/html-admin-page-status.php:5
 #: includes/admin/views/html-notice-template-check.php:6
 msgid "System Status"
-msgstr "Κατάσταση συστήματος"
+msgstr "Κατάσταση Συστήματος"
 
 #: includes/admin/class-wc-admin-help.php:56
 msgid "Community Support"
@@ -524,7 +526,7 @@ msgstr "Για περισσότερες πληροφορίες:"
 
 #: includes/admin/class-wc-admin-help.php:74
 msgid "About WooCommerce"
-msgstr ""
+msgstr "Σχετικά με το WooCommerce"
 
 #: includes/admin/class-wc-admin-help.php:75
 msgid "Project on WordPress.org"
@@ -595,7 +597,7 @@ msgstr "Βάση tag προϊοντος"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:52
 msgid "Product attribute base"
-msgstr "Βάση χαρακτηριστικού προϊόνοτς"
+msgstr "Βάση χαρακτηριστικού προϊόντος"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:65
 msgctxt "slug"
@@ -633,7 +635,7 @@ msgid "Default"
 msgstr "Προεπιλογή"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Προϊόν"
 
@@ -643,7 +645,7 @@ msgstr "Βάση Καταστήματος"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:126
 msgid "Shop base with category"
-msgstr "Βάση καταστήματος με καηγορία"
+msgstr "Βάση καταστήματος με κατηγορία"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:132
 msgid "Custom Base"
@@ -891,11 +893,11 @@ msgstr "Παραγγελίες"
 
 #: includes/admin/class-wc-admin-reports.php:49
 msgid "Sales by date"
-msgstr ""
+msgstr "Πωλήσεις ανά ημέρα"
 
 #: includes/admin/class-wc-admin-reports.php:55
 msgid "Sales by product"
-msgstr ""
+msgstr "Πωλήσεις ανά προϊόν"
 
 #: includes/admin/class-wc-admin-reports.php:61
 msgid "Sales by category"
@@ -903,7 +905,7 @@ msgstr "Πωλήσεις ανά κατηγορία"
 
 #: includes/admin/class-wc-admin-reports.php:67
 msgid "Coupons by date"
-msgstr ""
+msgstr "Κουπόνια ανά ημέρα"
 
 #: includes/admin/class-wc-admin-reports.php:75
 #: includes/admin/reports/class-wc-report-customer-list.php:25
@@ -912,11 +914,11 @@ msgstr "Πελάτες"
 
 #: includes/admin/class-wc-admin-reports.php:78
 msgid "Customers vs. Guests"
-msgstr ""
+msgstr "Πελάτες vs. Επισκέπτες"
 
 #: includes/admin/class-wc-admin-reports.php:84
 msgid "Customer List"
-msgstr ""
+msgstr "Λίστα Πελατών"
 
 #: includes/admin/class-wc-admin-reports.php:92
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
@@ -928,7 +930,7 @@ msgstr "Απόθεμα"
 
 #: includes/admin/class-wc-admin-reports.php:95
 msgid "Low in stock"
-msgstr ""
+msgstr "Χαμηλά σε απόθεμα"
 
 #: includes/admin/class-wc-admin-reports.php:101
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
@@ -941,12 +943,12 @@ msgstr "Εξαντλήθηκε"
 
 #: includes/admin/class-wc-admin-reports.php:107
 msgid "Most Stocked"
-msgstr ""
+msgstr "Με το μεγαλύτερο απόθεμα"
 
 #: includes/admin/class-wc-admin-reports.php:118
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
-msgstr ""
+msgstr "Φόροι"
 
 #: includes/admin/class-wc-admin-reports.php:121
 msgid "Taxes by code"
@@ -954,7 +956,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-reports.php:127
 msgid "Taxes by date"
-msgstr ""
+msgstr "Φόροι ανά ημέρα"
 
 #: includes/admin/class-wc-admin-settings.php:54
 msgid "Action failed. Please refresh the page and retry."
@@ -1576,7 +1578,7 @@ msgstr "Μεταφόρτωση αρχείου και εισαγωγή"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:103
 msgid "Product Image"
-msgstr ""
+msgstr "Εικόνα Προϊόντος"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:105
 msgid "Remove product image"
@@ -1879,7 +1881,7 @@ msgstr "%s / &infin;"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:208
 msgid "Show all types"
-msgstr ""
+msgstr "Προβολή όλων των τύπων"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
 #: includes/admin/settings/class-wc-settings-checkout.php:229
@@ -1893,11 +1895,11 @@ msgstr "Παραγγελία"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:93
 msgid "Purchased"
-msgstr ""
+msgstr "Αγοράστηκε"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 msgid "Ship to"
-msgstr ""
+msgstr "Αποστολή σε"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:96
 msgid "Customer Message"
@@ -1920,7 +1922,7 @@ msgstr "Σύνολο"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Ενέργειες"
 
@@ -1962,7 +1964,7 @@ msgstr[1] ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:228
 msgid "Billing:"
-msgstr ""
+msgstr "Χρέωση:"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:232
 msgid "Tel:"
@@ -1976,7 +1978,7 @@ msgstr "Επισκέπτης"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:281
 msgid "%s by %s"
-msgstr ""
+msgstr "%s από %s"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:301
 msgid "Processing"
@@ -2093,7 +2095,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:47
 msgid "Usage Limits"
-msgstr ""
+msgstr "Όρια Χρήσης"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:63
 msgid "Discount type"
@@ -2809,7 +2811,7 @@ msgid ""
 msgstr "Ποσότητα αποθεμάτων. Αν πρόκειται για ένα μεταβλητό προϊόν, αυτή η τιμή θα χρησιμοποιηθεί για τον έλεγχο αποθεμάτων όλων των παραλλαγών, εκτός και αν έχετε ορίσει απόθεμα σε επίπεδο παραλλαγής."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "Κατάσταση διαθεσιμότητας"
 
@@ -3610,11 +3612,15 @@ msgstr ""
 msgid "No products found."
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "προϊόν"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Γονικό"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr ""
 
