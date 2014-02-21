@@ -626,10 +626,10 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				$search_ids[] = $term;
 			}
 			// Attempt to get a SKU
-			$sku_to_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%' LIMIT 1;", wc_clean( $term ) ) );
+			$sku_to_id = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%';", wc_clean( $term ) ) );
 
-			if ( $sku_to_id )
-				$search_ids[] = $sku_to_id;
+			if ( $sku_to_id && sizeof( $sku_to_id ) > 0 )
+				$search_ids = array_merge( $search_ids, $sku_to_id );
 		}
 
 		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
