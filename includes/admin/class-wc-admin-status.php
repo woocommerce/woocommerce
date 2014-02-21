@@ -177,7 +177,7 @@ class WC_Admin_Status {
 			'clear_expired_transients' => array(
 				'name'		=> __( 'Expired Transients','woocommerce'),
 				'button'	=> __('Clear expired transients','woocommerce'),
-				'desc'		=> __( 'This tool will clear ALL expired transients from Wordpress.', 'woocommerce' ),
+				'desc'		=> __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'recount_terms' => array(
 				'name'		=> __('Term counts','woocommerce'),
