@@ -170,6 +170,20 @@ function wc_cart_totals_shipping_html() {
 }
 
 /**
+ * Get a coupon label
+ *
+ * @access public
+ * @param string $coupon
+ * @return void
+ */
+function wc_cart_totals_coupon_label( $coupon ) {
+	if ( is_string( $coupon ) )
+		$coupon = new WC_Coupon( $coupon );
+
+	echo apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:', 'woocommerce' ) . ' ' . $coupon->code ), $coupon );
+}
+
+/**
  * Get a coupon value
  *
  * @access public
