@@ -575,7 +575,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 					esc_attr( $_GET['s'] )
 				)
 			),
-			$wpdb->get_col(
+	/*		$wpdb->get_col(
 				$wpdb->prepare( "
 					SELECT p1.post_id
 					FROM {$wpdb->postmeta} p1
@@ -587,7 +587,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 					",
 					esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
 				)
-			),
+			),*/
 			$wpdb->get_col(
 				$wpdb->prepare( "
 					SELECT order_id
