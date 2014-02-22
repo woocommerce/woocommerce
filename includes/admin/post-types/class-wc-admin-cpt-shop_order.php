@@ -565,40 +565,35 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		}
 
 		// Search orders
-		$post_ids = array_unique( array_merge(
+		$gotten = esc_attr( $_GET['s'] );
+		$post_ids = array_merge(
 			$wpdb->get_col(
 				$wpdb->prepare( "
 					SELECT post_id
 					FROM {$wpdb->postmeta}
 					WHERE meta_key IN ('" . implode( "','", $search_fields ) . "') AND meta_value LIKE '%%%s%%'
-					",
-					esc_attr( $_GET['s'] )
-				)
-			),
-			$wpdb->get_col(
-				$wpdb->prepare( "
+
+					UNION
+
 					SELECT p1.post_id
 					FROM {$wpdb->postmeta} p1
-					INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
-					WHERE
-						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-					OR
-						( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-					",
-					esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
-				)
-			),
-			$wpdb->get_col(
-				$wpdb->prepare( "
+					INNER JOIN {$wpdb->postmeta} p2 ON p2.post_id = p1.post_id AND p2.meta_id != p1.meta_id
+					WHERE (
+						(p1.meta_key = '_billing_first_name'  AND p2.meta_key = '_billing_last_name')
+						OR (p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name')
+					) AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%'
+
+					UNION
+
 					SELECT order_id
 					FROM {$wpdb->prefix}woocommerce_order_items as order_items
 					WHERE order_item_name LIKE '%%%s%%'
 					",
-					esc_attr( $_GET['s'] )
+					$gotten, $gotten, $gotten
 				)
 			),
 			array( $search_order_id )
-		) );
+		);
 
 		// Remove s - we don't want to search order name
 		unset( $wp->query_vars['s'] );
