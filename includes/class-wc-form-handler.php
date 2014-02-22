@@ -375,6 +375,8 @@ class WC_Form_Handler {
 		// Update Cart - checks apply_coupon too because they are in the same form
 		if ( ( ! empty( $_POST['apply_coupon'] ) || ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
 
+			do_action( 'woocommerce_before_update_cart' );
+
 			$cart_updated = false;
 			$cart_totals  = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
 
