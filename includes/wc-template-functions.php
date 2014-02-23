@@ -228,6 +228,10 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		$classes[] = $product->stock_status;
 	}
 
+	if ( ( $key = array_search( 'hentry', $classes ) ) !== false ) {
+		unset( $classes[ $key ] );
+	}
+
 	return $classes;
 }
 
