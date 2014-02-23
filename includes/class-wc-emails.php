@@ -123,8 +123,7 @@ class WC_Emails {
 			
 			if(!is_a($path,'WC_Email'))
 			{
-			echo $path.'<br>';	
-			$this->email[$class] = include($path);
+				$this->email[$class] = include($path);
 			}
 		}	
 	}
