@@ -17,6 +17,14 @@ $alt = 1;
 $attributes = $product->get_attributes();
 
 if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $product->has_dimensions() && ! $product->has_weight() ) ) ) return;
+
+$visible = 0;
+foreach($attributes AS $attribute){
+    $visible = $attribute["is_visible"] ? 1 : 0;
+}
+if(!$visible) return;
+
+
 ?>
 <table class="shop_attributes">
 
