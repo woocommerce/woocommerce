@@ -179,7 +179,7 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * WC requires jQuery 1.7 since it uses functions like .on() for events.
+	 * WC requires jQuery 1.8 since it uses functions like .on() for events and .parseHTML.
 	 * If, by the time wp_print_scrips is called, jQuery is outdated (i.e not
 	 * using the version in core) we need to deregister it and register the
 	 * core version of the file.
@@ -191,9 +191,9 @@ class WC_Frontend_Scripts {
 		global $wp_scripts;
 
 		// Enforce minimum version of jQuery
-		if ( ! empty( $wp_scripts->registered['jquery']->ver ) && ! empty( $wp_scripts->registered['jquery']->src ) && 0 >= version_compare( $wp_scripts->registered['jquery']->ver, '1.7' ) ) {
+		if ( ! empty( $wp_scripts->registered['jquery']->ver ) && ! empty( $wp_scripts->registered['jquery']->src ) && 0 >= version_compare( $wp_scripts->registered['jquery']->ver, '1.8' ) ) {
 			wp_deregister_script( 'jquery' );
-			wp_register_script( 'jquery', '/wp-includes/js/jquery/jquery.js', array(), '1.7' );
+			wp_register_script( 'jquery', '/wp-includes/js/jquery/jquery.js', array(), '1.8' );
 			wp_enqueue_script( 'jquery' );
 		}
 	}
