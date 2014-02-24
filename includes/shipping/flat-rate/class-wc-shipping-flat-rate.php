@@ -273,12 +273,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						if ( $this_cost_percents ) {
 							foreach ( $this->find_shipping_classes( $package ) as $shipping_class => $items ){
 								foreach ( $items as $item_id => $values ) {
-									if ($this_cost_mathop == '+') {
-										$this_cost += $this_cost_percents * $values['line_total'];
-									}
-									else {
-										$this_cost -= $this_cost_percents * $values['line_total'];
-									}
+									$this_cost = $this->calc_percentage_adjustment( $this_cost, $this_cost_percents, $this_cost_mathop, $values['line_total'] );
 								}
 							}
 						}
@@ -289,24 +284,14 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						// Factor $this_cost by the percentage if provided.
 						if ( $this_cost_percents ) {
 							foreach ( $package['contents'] as $item_id => $values ) {
-								if ($this_cost_mathop == '+') {
-									$this_cost += $this_cost_percents * $values['line_total'];
-								}
-								else {
-									$this_cost -= $this_cost_percents * $values['line_total'];
-								}
+								$this_cost = $this->calc_percentage_adjustment( $this_cost, $this_cost_percents, $this_cost_mathop, $values['line_total'] );
 							}
 						}
 					break;
 					case  'order' :
 						// Factor $this_cost by the percentage if provided.
 						if ( $this_cost_percents ) {
-							if ($this_cost_mathop == '+') {
-								$this_cost += $this_cost_percents * $package['contents_cost'];
-							}
-							else {
-								$this_cost -= $this_cost_percents * $package['contents_cost'];
-							}
+							$this_cost = $this->calc_percentage_adjustment( $this_cost, $this_cost_percents, $this_cost_mathop, $package['contents_cost'] );
 						}
 					break;
 				}
@@ -320,6 +305,27 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$this->add_rate( $extra_rate );
 			}
 		}
+	}
+
+
+	/**
+	 * Calculate the percentage adjustment for each shipping rate.
+	 *
+	 * @access public
+	 * @param  float  $cost
+	 * @param  float  $percent_adjustment
+	 * @param  string $percent_operator
+	 * @param  float  $base_price
+	 * @return float
+	 */
+	function calc_percentage_adjustment( $cost, $percent_adjustment, $percent_operator, $base_price ) {
+		if ( '+' == $percent_operator ) {
+			$cost += $percent_adjustment * $base_price;
+		} else {
+			$cost -= $percent_adjustment * $base_price;
+		}
+
+		return $cost;
 	}
 
 
