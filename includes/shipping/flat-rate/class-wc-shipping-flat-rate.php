@@ -177,23 +177,25 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 			$shipping_total = $this->order_shipping( $package );
 
-			if ( ! is_null( $shipping_total ) || $cost_per_order > 0 )
+			if ( ! is_null( $shipping_total ) || $cost_per_order > 0 ) {
 				$rate = array(
 					'id' 	=> $this->id,
 					'label' => $this->title,
 					'cost' 	=> $shipping_total + $cost_per_order,
 				);
+			}
 
 		} elseif ( $this->type == 'class' ) {
 
 			$shipping_total = $this->class_shipping( $package );
 
-			if ( ! is_null( $shipping_total ) || $cost_per_order > 0 )
+			if ( ! is_null( $shipping_total ) || $cost_per_order > 0 ) {
 				$rate = array(
 					'id' 	=> $this->id,
 					'label' => $this->title,
 					'cost' 	=> $shipping_total + $cost_per_order,
 				);
+			}
 
 		} elseif ( $this->type == 'item' ) {
 
@@ -201,8 +203,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 			if ( ! is_null( $costs ) || $cost_per_order > 0 ) {
 
-				if ( ! is_array( $costs ) )
+				if ( ! is_array( $costs ) ) {
 					$costs = array();
+				}
 
 				$costs['order'] = $cost_per_order;
 
@@ -216,25 +219,29 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			}
 		}
 
-		if ( isset( $rate ) )
+		if ( isset( $rate ) ) {
 			$this->add_rate( $rate );
+		}
 
 		// Add any extra rates
 		if ( sizeof( $this->options ) > 0) {
 
-			if ( ! isset( $rate ) )
+			if ( ! isset( $rate ) ) {
 				$rate = array(
 					'id' 	=> $this->id,
 					'label' => $this->title,
 					'cost' 	=> 0,
 				);
+			}
 
 			// Get item qty
 			$total_quantity = 0;
 
-			foreach ( $package['contents'] as $item_id => $values )
-				if ( $values['quantity'] > 0 && $values['data']->needs_shipping() )
+			foreach ( $package['contents'] as $item_id => $values ) {
+				if ( $values['quantity'] > 0 && $values['data']->needs_shipping() ) {
 					$total_quantity += $values['quantity'];
+				}
+			}
 
 			// Loop options
 			foreach ( $this->options as $option ) {
@@ -291,8 +298,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 							foreach ( $package['contents'] as $item_id => $values ) {
 								if ($this_cost_mathop == '+') {
 									$this_cost += $this_cost_percents * $values['line_total'];
-								}
-								else {
+								} else {
 									$this_cost -= $this_cost_percents * $values['line_total'];
 								}
 							}
@@ -303,8 +309,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						if ( $this_cost_percents ) {
 							if ($this_cost_mathop == '+') {
 								$this_cost += $this_cost_percents * $package['contents_cost'];
-							}
-							else {
+							} else {
 								$this_cost -= $this_cost_percents * $package['contents_cost'];
 							}
 						}
@@ -392,8 +397,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$found_shipping_classes_values = array();
 
 			foreach ( $found_shipping_classes as $shipping_class => $products ) {
-				if ( ! isset( $found_shipping_classes_values[ $shipping_class ] ) )
+				if ( ! isset( $found_shipping_classes_values[ $shipping_class ] ) ) {
 					$found_shipping_classes_values[ $shipping_class ] = 0;
+				}
 
 				foreach ( $products as $product ) {
 					$found_shipping_classes_values[ $shipping_class ] += $product['data']->get_price() * $product['quantity'];
@@ -416,10 +422,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		}
 
 		// Total
-		if ( $matched )
+		if ( $matched ) {
 			return $cost + $fee;
-		else
+		} else {
 			return null;
+		}
 	}
 
 
@@ -459,10 +466,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			}
 		}
 
-		if ( $matched )
+		if ( $matched ) {
 			return $costs;
-		else
+		} else {
 			return null;
+		}
 	}
 
 	/**
@@ -480,8 +488,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			foreach ( $package['contents'] as $item_id => $values ) {
 				if ( $values['data']->needs_shipping() ) {
 					$found_class = $values['data']->get_shipping_class();
-					if ( ! isset( $found_shipping_classes[ $found_class ] ) )
+					if ( ! isset( $found_shipping_classes[ $found_class ] ) ) {
 						$found_shipping_classes[ $found_class ] = array();
+					}
 
 					$found_shipping_classes[ $found_class ][ $item_id ] = $values;
 				}
@@ -640,10 +649,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 				$flat_rate_cost[ $i ] = wc_format_decimal( $flat_rate_cost[$i] );
 
-				if ( ! strstr( $flat_rate_fee[$i], '%' ) )
+				if ( ! strstr( $flat_rate_fee[$i], '%' ) ) {
 					$flat_rate_fee[ $i ] = wc_format_decimal( $flat_rate_fee[$i] );
-				else
+				} else {
 					$flat_rate_fee[ $i ] = wc_clean( $flat_rate_fee[$i] );
+				}
 
 				// Add to flat rates array
 				$flat_rates[ sanitize_title($flat_rate_class[$i]) ] = array(
@@ -668,10 +678,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	function save_default_costs( $fields ) {
 	 	$default_cost = ( $_POST['default_cost'] === '' ) ? '' : wc_format_decimal( $_POST['default_cost'] );
 
-	 	if ( ! strstr( $_POST['default_fee'], '%' ) )
+	 	if ( ! strstr( $_POST['default_fee'], '%' ) ) {
 	 		$default_fee  = ( $_POST['default_fee'] === '' ) ? '' : wc_format_decimal( $_POST['default_fee'] );
-	 	else
+	 	} else {
 	 		$default_fee = wc_clean( $_POST['default_fee'] );
+	 	}
 
 	 	$fields['cost'] = $default_cost;
 	 	$fields['fee']  = $default_fee;
