@@ -610,7 +610,6 @@ class WC_Form_Handler {
 
 				if ( $passed_validation ) {
 					if ( WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
-						do_action( 'woocommerce_product_added_to_cart', $product_id );
 						wc_add_to_cart_message( $product_id );
 						$was_added_to_cart = true;
 						$added_to_cart[] = $product_id;
