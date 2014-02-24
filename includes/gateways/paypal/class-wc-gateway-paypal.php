@@ -240,6 +240,18 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Limit the length of item names
+	 * @param  string $item_name
+	 * @return string
+	 */
+	public function paypal_item_name( $item_name ) {
+		if ( strlen( $item_name ) > 127 ) {
+			$item_name = substr( $item_name, 0, 124 ) . '...';
+		}
+		return html_entity_decode( $item_name, ENT_NOQUOTES, 'UTF-8' );
+	}
+
+	/**
 	 * Get PayPal Args for passing to PP
 	 *
 	 * @access public
@@ -346,7 +358,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				}
 			}
 
-			$paypal_args['item_name_1'] 	= sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names );
+			$paypal_args['item_name_1'] 	= $this->paypal_item_name( sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names ) );
 			$paypal_args['quantity_1'] 		= 1;
 			$paypal_args['amount_1'] 		= number_format( $order->get_total() - $order->get_total_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '' );
 
@@ -355,7 +367,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			//		a) paypal ignore it if *any* shipping rules are within paypal
 			//		b) paypal ignore anything over 5 digits, so 999.99 is the max
 			if ( ( $order->get_total_shipping() + $order->get_shipping_tax() ) > 0 ) {
-				$paypal_args['item_name_2'] = __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->get_shipping_method() );
+				$paypal_args['item_name_2'] = $this->paypal_item_name( __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->get_shipping_method() ) );
 				$paypal_args['quantity_2'] 	= '1';
 				$paypal_args['amount_2'] 	= number_format( $order->get_total_shipping() + $order->get_shipping_tax(), 2, '.', '' );
 			}
@@ -382,7 +394,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 							$item_name .= ' ( ' . $meta . ' )';
 						}
 
-						$paypal_args[ 'item_name_' . $item_loop ] 	= html_entity_decode( $item_name, ENT_NOQUOTES, 'UTF-8' );
+						$paypal_args[ 'item_name_' . $item_loop ] 	= $this->paypal_item_name( $item_name );
 						$paypal_args[ 'quantity_' . $item_loop ] 	= $item['qty'];
 						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_subtotal( $item, false );
 
@@ -403,7 +415,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				foreach ( $order->get_fees() as $item ) {
 					$item_loop++;
 
-					$paypal_args[ 'item_name_' . $item_loop ] 	= $item['name'];
+					$paypal_args[ 'item_name_' . $item_loop ] 	= $this->paypal_item_name( $item['name'] );
 					$paypal_args[ 'quantity_' . $item_loop ] 	= 1;
 					$paypal_args[ 'amount_' . $item_loop ] 		= $item['line_total'];
 				}
@@ -412,7 +424,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
 			if ( $order->get_total_shipping() > 0 ) {
 				$item_loop++;
-				$paypal_args[ 'item_name_' . $item_loop ] 	= sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() );
+				$paypal_args[ 'item_name_' . $item_loop ] 	= $this->paypal_item_name( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ) );
 				$paypal_args[ 'quantity_' . $item_loop ] 	= '1';
 				$paypal_args[ 'amount_' . $item_loop ] 		= number_format( $order->get_total_shipping(), 2, '.', '' );
 			}
