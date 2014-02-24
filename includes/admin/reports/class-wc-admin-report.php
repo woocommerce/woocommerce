@@ -113,7 +113,7 @@ class WC_Admin_Report {
 				if ( ! is_array( $value ) )
 					continue;
 
-				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] : $value['meta_key'];
+				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'];
 
 				if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
 
@@ -165,7 +165,7 @@ class WC_Admin_Report {
 				if ( ! is_array( $value ) )
 					continue;
 
-				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] : $value['meta_key'];
+				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'];
 
 				if ( strtolower( $value['operator'] ) == 'in' ) {
 					if ( is_array( $value['meta_value'] ) )
