@@ -1,9 +1,15 @@
 <?php
 /**
- * WC_Report_Coupon_Usage class
+ * WC_Report_Coupon_Usage
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
+	public $chart_colours = array();
 	public $coupon_codes = array();
 
 	/**
@@ -85,8 +91,6 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 * Output the report
 	 */
 	public function output_report() {
-		global $woocommerce, $wpdb, $wp_locale;
-
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),

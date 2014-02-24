@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.1-RC1
+ * Version: 2.2.0-bleeding
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.8
@@ -33,7 +33,7 @@ final class WooCommerce {
 	/**
 	 * @var string
 	 */
-	public $version = '2.1.0';
+	public $version = '2.2.0';
 
 	/**
 	 * @var WooCommerce The single instance of the class
@@ -99,7 +99,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -108,7 +108,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -299,7 +299,7 @@ final class WooCommerce {
 		$this->query = include( 'includes/class-wc-query.php' );				// The main query class
 
 		// Post types
-		include( 'includes/class-wc-post-types.php' );						    // Registers post types
+		include_once( 'includes/class-wc-post-types.php' );						// Registers post types
 
 		// API Class
 		include_once( 'includes/class-wc-api.php' );
@@ -426,19 +426,17 @@ final class WooCommerce {
 	public function load_plugin_textdomain() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
 
+		// Frontend Locale
+		if ( ! is_admin() || is_ajax() ) {
+			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
+			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
+		}
+
 		// Admin Locale
 		if ( is_admin() ) {
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
 			load_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
-
-		// Frontend Locale
-		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
-
-		if ( apply_filters( 'woocommerce_load_alt_locale', false ) )
-			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages/alt" );
-		else
-			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
 	}
 
 	/**
@@ -696,6 +694,9 @@ final class WooCommerce {
 	 */
 	public function verify_nonce( $action, $method = '_POST', $error_message = false ) {
 		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'wp_verify_nonce' );
+		if ( ! isset( $method[ '_wpnonce' ] ) ) {
+			return false;
+		}
 		return wp_verify_nonce( $method[ '_wpnonce' ], 'woocommerce-' . $action );
 	}
 

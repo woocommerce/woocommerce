@@ -1,15 +1,17 @@
 # 
 # Translators:
-# SzLegradi <szabolcs.legradi@gmail.com>, 2013
+# aroland.hu <info@aroland.hu>, 2014
+# joesalty <joesalty77@gmail.com>, 2014
+# SzLegradi <szabolcs.legradi@gmail.com>, 2013-2014
 # SzLegradi <szabolcs.legradi@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-01-23 12:27:56+00:00\n"
-"PO-Revision-Date: 2014-01-24 08:31+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
-"Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce-core/language/hu_HU/)\n"
+"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
+"PO-Revision-Date: 2014-02-20 12:30+0000\n"
+"Last-Translator: aroland.hu <info@aroland.hu>\n"
+"Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce/language/hu_HU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -25,7 +27,7 @@ msgstr "WooCommerce"
 
 #: includes/admin/class-wc-admin-assets.php:108
 msgid "Please enter in decimal (%s) format without thousand separators."
-msgstr "Kérlek tizedes (%s) formában add meg, ezres elválasztók nélkül."
+msgstr "Kérlek, tizedes (%s) formában add meg, ezres elválasztók nélkül."
 
 #: includes/admin/class-wc-admin-assets.php:109
 msgid ""
@@ -38,11 +40,11 @@ msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
-msgstr "Biztos vagy benne hogy el akarod távolítani a kiválasztott tételeket? Ha korábban csökkentetted ennek a terméknek a készletét vagy a rendelést vásárló küldte be, akkor a termék készletét kézzel kell helyreállítanod."
+msgstr "Biztos vagy benne, hogy el akarod távolítani a kiválasztott tételeket? Ha korábban csökkentetted ennek a terméknek a készletét vagy a rendelést vásárló küldte be, akkor a termék készletét kézzel kell helyreállítanod."
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
-msgstr "Kérlek válassz elemeket."
+msgstr "Kérlek, válassz elemeket."
 
 #: includes/admin/class-wc-admin-assets.php:138
 msgid "Remove this item meta?"
@@ -59,50 +61,50 @@ msgstr "Eltávolítod ezt az attribútumot?"
 #: includes/admin/class-wc-admin-attributes.php:330
 #: includes/admin/class-wc-admin-attributes.php:374
 #: includes/admin/class-wc-admin-attributes.php:399
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:193
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:185
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:438
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:532
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:246
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:186
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:439
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:533
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:148
 #: includes/admin/settings/class-wc-settings-shipping.php:203
 msgid "Name"
 msgstr "Név"
 
 #: includes/admin/class-wc-admin-assets.php:141
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:430
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:524
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:431
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:525
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
 msgid "Remove"
 msgstr "Eltávolítás"
 
 #: includes/admin/class-wc-admin-assets.php:142
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:431
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:525
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:432
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:526
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:7
 msgid "Click to toggle"
 msgstr "Kattints a be-/kikapcsoláshoz"
 
 #: includes/admin/class-wc-admin-assets.php:143
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:446
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:538
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:447
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:539
 msgid "Value(s)"
 msgstr "Érték(ek)"
 
 #: includes/admin/class-wc-admin-assets.php:144
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:539
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:540
 msgid "Enter some text, or some attributes by pipe (|) separating values."
-msgstr "Írj be valamilyen szöveget vagy egy attribútumot függőleges vonallal (|) elválasztva az értékeket."
+msgstr "Írj be valamilyen szöveget vagy attribútumot, az értékeket függőleges vonallal (|) válaszd el."
 
 #: includes/admin/class-wc-admin-assets.php:145
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:489
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:544
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:490
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:545
 msgid "Visible on the product page"
 msgstr "Látható a termékoldalon"
 
 #: includes/admin/class-wc-admin-assets.php:146
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:502
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:550
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:503
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:551
 msgid "Used for variations"
 msgstr "Variációkhoz használt"
 
@@ -139,8 +141,8 @@ msgid ""
 msgstr "Betöltöd a vásárló szállítási adatait? Ez minden jelenleg beírt szállítási adatot törölni fog."
 
 #: includes/admin/class-wc-admin-assets.php:153
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:115
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:205
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:168
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:258
 #: includes/admin/views/html-bulk-edit-product.php:170
 #: includes/admin/views/html-quick-edit-product.php:128
 msgid "Featured"
@@ -174,7 +176,7 @@ msgstr "Írj be egy értéket"
 
 #: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value (fixed or %)"
-msgstr "Írj be egy értéke (fix vagy %)"
+msgstr "Írj be egy értéket (fix vagy %)"
 
 #: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
@@ -185,8 +187,8 @@ msgid "Last warning, are you sure?"
 msgstr "Utolsó figyelmeztetés, biztos vagy benne?"
 
 #: includes/admin/class-wc-admin-assets.php:208
-#: includes/admin/class-wc-admin-taxonomies.php:126
-#: includes/admin/class-wc-admin-taxonomies.php:213
+#: includes/admin/class-wc-admin-taxonomies.php:123
+#: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "Válassz egy képet"
 
@@ -212,21 +214,21 @@ msgstr "Biztos vagy benne, hogy törölni szeretnéd ezt a variációt?"
 
 #: includes/admin/class-wc-admin-attributes.php:82
 msgid "Please, provide an attribute name, slug and type."
-msgstr "Kérlek add meg az attribútum nevét, keresőbarát nevét és típusát."
+msgstr "Kérlek, add meg az attribútum nevét, keresőbarát nevét és típusát."
 
 #: includes/admin/class-wc-admin-attributes.php:84
 msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
-msgstr "\"%s\" keresőbarát név túl hosszú (maximum 28 karakter). Kérlek rövidítsd."
+msgstr "\"%s\" keresőbarát név túl hosszú (maximum 28 karakter). Kérlek, rövidítsd."
 
 #: includes/admin/class-wc-admin-attributes.php:86
 msgid ""
 "Slug “%s” is not allowed because it is a reserved term. Change it, please."
-msgstr "\\\"%s\\\" keresőbarát név nem engedélyezett, mivel egy fenntartott kifejezés. Kérlek változtasd meg."
+msgstr "\\\"%s\\\" keresőbarát név nem engedélyezett, mivel egy fenntartott kifejezés. Kérlek, változtasd meg."
 
 #: includes/admin/class-wc-admin-attributes.php:91
 #: includes/admin/class-wc-admin-attributes.php:96
 msgid "Slug “%s” is already in use. Change it, please."
-msgstr "\\\"%s\\\" keresőbarát név már használatban van. Kérlek változtasd meg."
+msgstr "\\\"%s\\\" keresőbarát név már használatban van. Kérlek, változtasd meg."
 
 #: includes/admin/class-wc-admin-attributes.php:233
 msgid "Edit Attribute"
@@ -252,7 +254,7 @@ msgstr "Egyedi keresőbarát név az attribútumnak; 28 karakternél rövidebb l
 #: includes/admin/class-wc-admin-attributes.php:257
 #: includes/admin/class-wc-admin-attributes.php:309
 #: includes/admin/class-wc-admin-attributes.php:386
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:206
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:259
 msgid "Type"
 msgstr "Típus"
 
@@ -305,7 +307,7 @@ msgstr "Frissítés"
 
 #: includes/admin/class-wc-admin-attributes.php:299
 #: includes/admin/class-wc-admin-menus.php:49
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:104
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:105
 msgid "Attributes"
 msgstr "Attribútumok"
 
@@ -318,8 +320,8 @@ msgid "Terms"
 msgstr "Értékek"
 
 #: includes/admin/class-wc-admin-attributes.php:323
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:118
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:250
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:171
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:303
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:82
 #: includes/admin/reports/class-wc-report-customer-list.php:187
 #: includes/admin/reports/class-wc-report-stock.php:107
@@ -361,58 +363,62 @@ msgstr "Attribútum hozzáadása"
 msgid "Are you sure you want to delete this attribute?"
 msgstr "Biztos vagy benne, hogy törölni szeretnéd ezt az attribútumot?"
 
-#: includes/admin/class-wc-admin-dashboard.php:34
+#: includes/admin/class-wc-admin-dashboard.php:35
 msgid "WooCommerce Recent Reviews"
 msgstr "WooCommerce legújabb értékelések"
 
-#: includes/admin/class-wc-admin-dashboard.php:37
+#: includes/admin/class-wc-admin-dashboard.php:38
 #: includes/admin/class-wc-admin-menus.php:80
 msgid "WooCommerce Status"
 msgstr "WooCommerce állapot"
 
-#: includes/admin/class-wc-admin-dashboard.php:131
+#: includes/admin/class-wc-admin-dashboard.php:132
 msgid "<strong>%s</strong> sales this month"
 msgstr "<strong>%s</strong> eladás a hónapban"
 
-#: includes/admin/class-wc-admin-dashboard.php:138
+#: includes/admin/class-wc-admin-dashboard.php:139
 msgid "%s top seller this month (sold %d)"
 msgstr "%s legkelendőbb a hónapban (elkelt %d)"
 
-#: includes/admin/class-wc-admin-dashboard.php:144
+#: includes/admin/class-wc-admin-dashboard.php:145
 msgid "<strong>%s order</strong> awaiting processing"
 msgid_plural "<strong>%s orders</strong> awaiting processing"
 msgstr[0] "<strong>%s rendelés</strong> feldolgozásra vár"
 msgstr[1] "<strong>%s rendelés</strong> feldolgozásra vár"
 
-#: includes/admin/class-wc-admin-dashboard.php:149
+#: includes/admin/class-wc-admin-dashboard.php:150
 msgid "<strong>%s order</strong> on-hold"
 msgid_plural "<strong>%s orders</strong> on-hold"
 msgstr[0] "<strong>%s rendelés</strong> fizetésre vár"
 msgstr[1] "<strong>%s rendelés</strong> fizetésre vár"
 
-#: includes/admin/class-wc-admin-dashboard.php:154
+#: includes/admin/class-wc-admin-dashboard.php:155
 msgid "<strong>%s product</strong> low in stock"
 msgid_plural "<strong>%s products</strong> low in stock"
 msgstr[0] "<strong>%s termék</strong> alacsony készleten van"
 msgstr[1] "<strong>%s termék</strong> alacsony készleten van"
 
-#: includes/admin/class-wc-admin-dashboard.php:159
+#: includes/admin/class-wc-admin-dashboard.php:160
 msgid "<strong>%s product</strong> out of stock"
 msgid_plural "<strong>%s products</strong> out of stock"
 msgstr[0] "<strong>%s termék</strong> nincs készleten"
 msgstr[1] "<strong>%s termék</strong> nincs készleten"
 
-#: includes/admin/class-wc-admin-dashboard.php:192
+#: includes/admin/class-wc-admin-dashboard.php:193
 msgid "out of 5"
 msgstr "/ 5"
 
-#: includes/admin/class-wc-admin-dashboard.php:200
+#: includes/admin/class-wc-admin-dashboard.php:195
+msgid "reviewed by"
+msgstr ""
+
+#: includes/admin/class-wc-admin-dashboard.php:201
 msgid "There are no product reviews yet."
 msgstr "Még nincsenek termékértékelések."
 
 #: includes/admin/class-wc-admin-duplicate-product.php:43
 msgid "Make a duplicate from this product"
-msgstr "Duplikátum készítése a termékről"
+msgstr "Duplikáció készítése a termékről"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:44
 msgid "Duplicate"
@@ -442,7 +448,7 @@ msgstr "Dokumentáció"
 msgid ""
 "Thank you for using WooCommerce :) Should you need help using or extending "
 "WooCommerce please read the documentation."
-msgstr "Köszönjük, hogy a WooCommerce mellett döntöttél. :) Ha bármilyen segítségre van szükséged a WooCommerce használatában vagy bővítésében, kérjük olvasd át a dokumentációt."
+msgstr "Köszönjük, hogy a WooCommerce mellett döntöttél. :) Ha bármilyen segítségre van szükséged a WooCommerce használatában vagy bővítésében, kérjük, olvasd át a dokumentációt."
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "WooCommerce Documentation"
@@ -467,12 +473,13 @@ msgstr "A <a href=\"%s\">dokumentáció elolvasása után</a>, további segíts�
 msgid ""
 "Before asking for help we recommend checking the status page to identify any"
 " problems with your configuration."
-msgstr "Mielőtt segítséget kérnél, javasoljuk hogy ellenőrizd az állapot oldalt a konfigurációddal kapcsolatos bármilyen hiba felderítésére."
+msgstr "Mielőtt segítséget kérnél, javasoljuk, hogy ellenőrizd az állapot oldalt a konfigurációddal kapcsolatos bármilyen hiba felderítésére."
 
 #: includes/admin/class-wc-admin-help.php:56
 #: includes/admin/class-wc-admin-help.php:67
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/views/html-admin-page-status.php:5
+#: includes/admin/views/html-notice-template-check.php:6
 msgid "System Status"
 msgstr "Rendszerállapot"
 
@@ -495,7 +502,7 @@ msgid ""
 "href=\"%s\">contribution guide</a> prior to submitting your report. Be as "
 "descriptive as possible and please include your <a href=\"%s\">system status"
 " report</a>."
-msgstr "Ha hibát találtál a WooCommerce bővítményben, akkor létrehozhatsz egy jegyet a <a href=\"%s\">Github feladatokban</a>. Győződj meg róla, hogy átolvastad a <a href=\"%s\">közreműködési útmutatót</a> a jelentés beküldése előtt. Légy a lehető legalaposabb és kérjük mellékeld a <a href=\"%s\">rendszerállapot jelentést</a> is."
+msgstr "Ha hibát találtál a WooCommerce bővítményben, akkor létrehozhatsz egy jegyet a <a href=\"%s\">Github feladatokban</a>. Győződj meg róla, hogy átolvastad a <a href=\"%s\">közreműködési útmutatót</a> a jelentés beküldése előtt. Légy a lehető legalaposabb és kérjük, mellékeld a <a href=\"%s\">rendszerállapot jelentést</a> is."
 
 #: includes/admin/class-wc-admin-help.php:67
 msgid "Report a bug"
@@ -507,7 +514,7 @@ msgstr "További információk:"
 
 #: includes/admin/class-wc-admin-help.php:74
 msgid "About WooCommerce"
-msgstr "A WooCommerce névjegye"
+msgstr "WooCommerce névjegy"
 
 #: includes/admin/class-wc-admin-help.php:75
 msgid "Project on WordPress.org"
@@ -542,7 +549,7 @@ msgid "WooCommerce Settings"
 msgstr "WooCommerce beállítások"
 
 #: includes/admin/class-wc-admin-menus.php:63
-#: includes/admin/class-wc-admin-welcome.php:209
+#: includes/admin/class-wc-admin-welcome.php:213
 #: includes/admin/settings/class-wc-settings-checkout.php:277
 #: includes/admin/settings/class-wc-settings-shipping.php:241
 #: includes/admin/views/html-admin-page-status-report.php:269
@@ -607,8 +614,8 @@ msgid "product"
 msgstr "termek"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:113
-#: includes/admin/class-wc-admin-taxonomies.php:91
-#: includes/admin/class-wc-admin-taxonomies.php:180
+#: includes/admin/class-wc-admin-taxonomies.php:88
+#: includes/admin/class-wc-admin-taxonomies.php:177
 #: includes/admin/settings/class-wc-settings-checkout.php:226
 #: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:70
@@ -616,7 +623,7 @@ msgid "Default"
 msgstr "Alapértelmezett"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:136
 msgid "Product"
 msgstr "Termék"
 
@@ -902,8 +909,8 @@ msgid "Customer List"
 msgstr "Vásárlói lista"
 
 #: includes/admin/class-wc-admin-reports.php:92
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:199
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:764
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:252
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 #: includes/admin/reports/class-wc-report-stock.php:20
 #: includes/admin/reports/class-wc-report-stock.php:21
 msgid "Stock"
@@ -914,8 +921,8 @@ msgid "Low in stock"
 msgstr "Alacsony készleten"
 
 #: includes/admin/class-wc-admin-reports.php:101
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:366
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:302
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:419
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
 #: includes/admin/reports/class-wc-report-stock.php:93
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
@@ -968,12 +975,12 @@ msgid "Choose countries&hellip;"
 msgstr "Válassz országokat&hellip;"
 
 #: includes/admin/class-wc-admin-settings.php:568
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:461
 msgid "Select all"
 msgstr "Összes kiválasztása"
 
 #: includes/admin/class-wc-admin-settings.php:568
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:460
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:461
 msgid "Select none"
 msgstr "Kiválasztás törlése"
 
@@ -1003,7 +1010,7 @@ msgstr "Minden hiányzó WooCommerce oldal sikeresen telepítve."
 
 #: includes/admin/class-wc-admin-status.php:137
 msgid "Tax rates successfully deleted"
-msgstr ""
+msgstr "Adókulcsok sikeresen törölve"
 
 #: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
@@ -1079,9 +1086,9 @@ msgstr "Munkamenetek törlése"
 
 #: includes/admin/class-wc-admin-status.php:195
 msgid ""
-"<strong class=\"red\">Warning</strong> This tool will delete all customer "
+"<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr "<strong class=\"red\">Figyelmeztetés</strong> Ez az eszköz minden vásárlói munkamenetet törölni fog az adatbázisból, beleértve a jelenlegi, élő kosarakat is."
+msgstr "<strong class=\"red\">Figyelmeztetés:</strong> Ez az eszköz minden vásárlói munkamenetet törölni fog az adatbázisból, beleértve a jelenlegi, élő kosarakat is."
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
@@ -1094,68 +1101,68 @@ msgstr "Oldalak telepítése"
 
 #: includes/admin/class-wc-admin-status.php:200
 msgid ""
-"<strong class=\"red\">Note</strong> This tool will install all the missing "
+"<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
-msgstr "<strong class=\"red\">Megjegyzés</strong> Ez az eszköz telepíteni fogja az összes hiányzó WooCommerce oldalt. A már beállított oldalak nem fognak felülíródni."
+msgstr "<strong class=\"red\">Megjegyzés:</strong> Ez az eszköz telepíteni fogja az összes hiányzó WooCommerce oldalt. A már beállított oldalak nem fognak felülíródni."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
-msgstr ""
+msgstr "Minden WooCommerce adókulcs törlése"
 
 #: includes/admin/class-wc-admin-status.php:204
 msgid "Delete ALL tax rates"
-msgstr ""
+msgstr "MINDEN adókulcs törlése"
 
 #: includes/admin/class-wc-admin-status.php:205
 msgid ""
-"<strong class=\"red\">Note</strong> This option will delete ALL of your tax "
-"rates, use with caution."
-msgstr ""
+"<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
+" rates, use with caution."
+msgstr "<strong class=\"red\">Megjegyzés:</strong> Ez az opció törli az ÖSSZES adókulcsot, használja óvatosan!"
 
-#: includes/admin/class-wc-admin-taxonomies.php:89
-#: includes/admin/class-wc-admin-taxonomies.php:177
+#: includes/admin/class-wc-admin-taxonomies.php:86
+#: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
 msgstr "Megjelenítési mód"
 
-#: includes/admin/class-wc-admin-taxonomies.php:92
-#: includes/admin/class-wc-admin-taxonomies.php:181
+#: includes/admin/class-wc-admin-taxonomies.php:89
+#: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "Products"
 msgstr "Termékek"
 
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:182
+#: includes/admin/class-wc-admin-taxonomies.php:90
+#: includes/admin/class-wc-admin-taxonomies.php:179
 msgid "Subcategories"
 msgstr "Alkategóriák"
 
-#: includes/admin/class-wc-admin-taxonomies.php:94
-#: includes/admin/class-wc-admin-taxonomies.php:183
+#: includes/admin/class-wc-admin-taxonomies.php:91
+#: includes/admin/class-wc-admin-taxonomies.php:180
 msgid "Both"
 msgstr "Mindkettő"
 
-#: includes/admin/class-wc-admin-taxonomies.php:98
-#: includes/admin/class-wc-admin-taxonomies.php:188
+#: includes/admin/class-wc-admin-taxonomies.php:95
+#: includes/admin/class-wc-admin-taxonomies.php:185
 msgid "Thumbnail"
 msgstr "Bélyegkép"
 
-#: includes/admin/class-wc-admin-taxonomies.php:102
-#: includes/admin/class-wc-admin-taxonomies.php:193
+#: includes/admin/class-wc-admin-taxonomies.php:99
+#: includes/admin/class-wc-admin-taxonomies.php:190
 msgid "Upload/Add image"
 msgstr "Kép feltöltése/hozzáadása"
 
-#: includes/admin/class-wc-admin-taxonomies.php:103
-#: includes/admin/class-wc-admin-taxonomies.php:194
+#: includes/admin/class-wc-admin-taxonomies.php:100
+#: includes/admin/class-wc-admin-taxonomies.php:191
 msgid "Remove image"
 msgstr "Kép eltávolítása"
 
-#: includes/admin/class-wc-admin-taxonomies.php:128
-#: includes/admin/class-wc-admin-taxonomies.php:215
+#: includes/admin/class-wc-admin-taxonomies.php:125
+#: includes/admin/class-wc-admin-taxonomies.php:212
 msgid "Use image"
 msgstr "Kép használata"
 
-#: includes/admin/class-wc-admin-taxonomies.php:273
+#: includes/admin/class-wc-admin-taxonomies.php:270
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -1163,15 +1170,15 @@ msgid ""
 "page."
 msgstr "Az üzlet termékkategóriái itt kezelhetők. A kategóriák főoldalon való megjelenítési sorrendjét fogd és vidd módszerrel tudod szabályozni. Több kategória listázásához kattints a \"Képernyő beállításai\" linkre az oldal tetején."
 
-#: includes/admin/class-wc-admin-taxonomies.php:283
+#: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
 msgstr "A szállítási osztályok hasonló típusú termékek csoportosítására alkalmasak. Ezek a csoportok később felhasználhatók az egyes szállítási módoknál, hogy különböző termékekhez különböző szállítási díjakat állíthass be."
 
-#: includes/admin/class-wc-admin-taxonomies.php:296
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:191
+#: includes/admin/class-wc-admin-taxonomies.php:293
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:244
 msgid "Image"
 msgstr "Kép"
 
@@ -1179,53 +1186,57 @@ msgstr "Kép"
 msgid "Welcome to WooCommerce"
 msgstr "Üdvözöl a WooCommerce"
 
-#: includes/admin/class-wc-admin-welcome.php:191
+#: includes/admin/class-wc-admin-welcome.php:195
 msgid "Welcome to WooCommerce %s"
 msgstr "Üdvözöl a WooCommerce %s"
 
-#: includes/admin/class-wc-admin-welcome.php:196
+#: includes/admin/class-wc-admin-welcome.php:200
 msgid "Thanks, all done!"
 msgstr "Köszönöm, mindennel megvagyunk!"
 
-#: includes/admin/class-wc-admin-welcome.php:198
+#: includes/admin/class-wc-admin-welcome.php:202
 msgid "Thank you for updating to the latest version!"
 msgstr "Köszönjük, hogy frissítettél a legújabb verzióra!"
 
-#: includes/admin/class-wc-admin-welcome.php:200
+#: includes/admin/class-wc-admin-welcome.php:204
 msgid "Thanks for installing!"
 msgstr "Köszönjük, hogy telepítetted a bővítményt!"
 
-#: includes/admin/class-wc-admin-welcome.php:202
+#: includes/admin/class-wc-admin-welcome.php:206
 msgid ""
 "%s WooCommerce %s is more powerful, stable, and secure than ever before. We "
 "hope you enjoy it."
 msgstr "%s A WooCommerce %s erőteljesebb, stabilabb és biztonságosabb, mint valaha. Reméljük tetszeni fog."
 
-#: includes/admin/class-wc-admin-welcome.php:206
+#: includes/admin/class-wc-admin-welcome.php:210
 msgid "Version %s"
 msgstr "%s verzió"
 
-#: includes/admin/class-wc-admin-welcome.php:210
+#: includes/admin/class-wc-admin-welcome.php:214
 msgid "Docs"
 msgstr "Dokumentáció"
 
-#: includes/admin/class-wc-admin-welcome.php:217
+#: includes/admin/class-wc-admin-welcome.php:221
 msgid "What's New"
 msgstr "Mik az újdonságok"
 
-#: includes/admin/class-wc-admin-welcome.php:219
+#: includes/admin/class-wc-admin-welcome.php:223
 msgid "Credits"
 msgstr "Készítők"
 
-#: includes/admin/class-wc-admin-welcome.php:240
+#: includes/admin/class-wc-admin-welcome.php:225
+msgid "Translators"
+msgstr "Fordítók"
+
+#: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
 msgstr "Egy új REST API, amit a fejlesztők &#10084; fognak"
 
-#: includes/admin/class-wc-admin-welcome.php:243
+#: includes/admin/class-wc-admin-welcome.php:246
 msgid "Access your data from 3rd party applications"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:244
+#: includes/admin/class-wc-admin-welcome.php:247
 msgid ""
 "Built on top of the WooCommerce API, and targetted directly at developers, "
 "the new REST API allows you to get data for <strong>Orders</strong>, "
@@ -1234,11 +1245,11 @@ msgid ""
 "<code>XML</code> and <code>JSON</code> formats."
 msgstr "A WooCommerce API alapjaira építve és kifejezetten a fejlesztőkre koncentrálva, az új REST API lehetővé teszi a <strong>rendelésekhez</strong>, <strong>kuponokhoz</strong>, <strong>vásárlókhoz</strong>, <strong>termékekhez</strong> és <strong>jelentésekhez</strong> tartozó adatok kinyerését mind <code>XML</code>, mind <code>JSON</code> formában."
 
-#: includes/admin/class-wc-admin-welcome.php:248
+#: includes/admin/class-wc-admin-welcome.php:251
 msgid "Authentication to keep data secure"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:249
+#: includes/admin/class-wc-admin-welcome.php:252
 msgid ""
 "Authentication for the REST API is performed using HTTP Basic Auth if you "
 "have SSL enabled, or signed according to the <a "
@@ -1246,15 +1257,15 @@ msgid ""
 "you don't have SSL. Data is only available to authenticated users."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:254
+#: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"
 msgstr "Felhasználói felület és a jelentések fejlesztése"
 
-#: includes/admin/class-wc-admin-welcome.php:257
+#: includes/admin/class-wc-admin-welcome.php:260
 msgid "WordPress 3.8 admin UI compatibility"
 msgstr "WordPress 3.8 admin felület kompatibilitás"
 
-#: includes/admin/class-wc-admin-welcome.php:258
+#: includes/admin/class-wc-admin-welcome.php:261
 msgid ""
 "WooCommerce 2.1 has had its UI restyled to work with the new admin design in"
 " WordPress 3.8. All bitmap icons have been replaced with a custom, "
@@ -1262,197 +1273,197 @@ msgid ""
 "improved performance."
 msgstr "A WooCommerce 2.1 felülete teljesen újra lett gondolva, hogy együttműködjön a WordPress 3.8 új admin felületével. A bitmap ikonok helyét egy egyedi, könnyed ikonbetűtípus vette át, ami tűéles képet ad retina kijelzőkön és teljesítményben is hatékonyabb."
 
-#: includes/admin/class-wc-admin-welcome.php:261
+#: includes/admin/class-wc-admin-welcome.php:264
 msgid "Simplified order UI"
 msgstr "Egyszerűsített rendelési felület"
 
-#: includes/admin/class-wc-admin-welcome.php:262
+#: includes/admin/class-wc-admin-welcome.php:265
 msgid ""
 "The orders panel has seen significant improvement to both the totals panel, "
 "and line item display making editing new and existing orders a breeze."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:263
+#: includes/admin/class-wc-admin-welcome.php:266
 msgid ""
 "Item meta has also been optimised and can now be viewed as HTML rather than "
 "stuck in a text input."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:266
+#: includes/admin/class-wc-admin-welcome.php:269
 msgid "Improved Reporting"
 msgstr "Továbbfejlesztett jelentések"
 
-#: includes/admin/class-wc-admin-welcome.php:267
+#: includes/admin/class-wc-admin-welcome.php:270
 msgid ""
 "Reports have been redesigned with new <strong>filtering</strong> "
 "capabilities, a new <strong>customer report</strong> showing "
 "orders/spending, and the ability to <strong>export CSVs</strong>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:268
+#: includes/admin/class-wc-admin-welcome.php:271
 msgid ""
 "The dashboard also has a new widget showing you an overview of current "
 "orders complete with sparklines for quick at-a-glance stats."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:273
+#: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
 msgstr "Különválasztott integrációk"
 
-#: includes/admin/class-wc-admin-welcome.php:276
+#: includes/admin/class-wc-admin-welcome.php:279
 msgid "New separate plugins"
 msgstr "Új, önálló bővítmények"
 
-#: includes/admin/class-wc-admin-welcome.php:277
+#: includes/admin/class-wc-admin-welcome.php:280
 msgid ""
 "To make core more lean, some integrations have been removed and turned into "
 "dedicated plugins which you can install as and when you need them."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:280
+#: includes/admin/class-wc-admin-welcome.php:283
 msgid "Google Analytics"
 msgstr "Google Analytics"
 
-#: includes/admin/class-wc-admin-welcome.php:281
+#: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
-msgstr ""
+msgstr "Adj Google Analytics e-kereskedelmi követőkódot a WooCommerce áruházadhoz."
 
-#: includes/admin/class-wc-admin-welcome.php:282
-#: includes/admin/class-wc-admin-welcome.php:287
-#: includes/admin/class-wc-admin-welcome.php:292
-#: includes/admin/class-wc-admin-welcome.php:297
-#: includes/admin/class-wc-admin-welcome.php:302
+#: includes/admin/class-wc-admin-welcome.php:285
+#: includes/admin/class-wc-admin-welcome.php:290
+#: includes/admin/class-wc-admin-welcome.php:295
+#: includes/admin/class-wc-admin-welcome.php:300
+#: includes/admin/class-wc-admin-welcome.php:305
 msgid "Download"
 msgstr "Letöltés"
 
-#: includes/admin/class-wc-admin-welcome.php:285
+#: includes/admin/class-wc-admin-welcome.php:288
 msgid "Piwik"
 msgstr "Piwik"
 
-#: includes/admin/class-wc-admin-welcome.php:286
+#: includes/admin/class-wc-admin-welcome.php:289
 msgid "Integrate WooCommerce with Piwik and the WP-Piwik plugin."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:290
+#: includes/admin/class-wc-admin-welcome.php:293
 msgid "ShareThis"
 msgstr "ShareThis"
 
-#: includes/admin/class-wc-admin-welcome.php:291
+#: includes/admin/class-wc-admin-welcome.php:294
 msgid "Add social network sharing buttons to products using ShareThis."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:295
+#: includes/admin/class-wc-admin-welcome.php:298
 msgid "Sharedaddy"
 msgstr "Sharedaddy"
 
-#: includes/admin/class-wc-admin-welcome.php:296
+#: includes/admin/class-wc-admin-welcome.php:299
 msgid "Add social network sharing buttons to products using Sharedaddy."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:300
+#: includes/admin/class-wc-admin-welcome.php:303
 msgid "ShareYourCart"
 msgstr "ShareYourCart"
 
-#: includes/admin/class-wc-admin-welcome.php:301
+#: includes/admin/class-wc-admin-welcome.php:304
 msgid ""
 "Let users share their carts for a discount using the ShareYourCart service."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:307
+#: includes/admin/class-wc-admin-welcome.php:310
 msgid "Under the Hood"
 msgstr "A motorháztető alatt"
 
-#: includes/admin/class-wc-admin-welcome.php:311
+#: includes/admin/class-wc-admin-welcome.php:314
 msgid "PayPal PDT support"
 msgstr "PayPal PDT támogatás"
 
-#: includes/admin/class-wc-admin-welcome.php:312
+#: includes/admin/class-wc-admin-welcome.php:315
 msgid ""
 "PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
 " the status of an order when a customer returns from PayPal."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:316
+#: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
 msgstr "Stíluslapok különválasztása"
 
-#: includes/admin/class-wc-admin-welcome.php:317
+#: includes/admin/class-wc-admin-welcome.php:320
 msgid ""
 "Frontend styles have been split into separate appearance/layout/smallscreen "
 "stylesheets to help with selective customisation."
 msgstr "A weboldal stílusai külön lettek választva megjelenés/elrendezés/kisméretű eszközök szerint a szelektív testreszabás megkönnyítése érdekében."
 
-#: includes/admin/class-wc-admin-welcome.php:321
+#: includes/admin/class-wc-admin-welcome.php:324
 msgid "New endpoints"
 msgstr "Új végpontok"
 
-#: includes/admin/class-wc-admin-welcome.php:322
+#: includes/admin/class-wc-admin-welcome.php:325
 msgid ""
 "Certain pages such as \"Pay\", \"Order Received\" and some account pages are"
 " now endpoints rather than pages to make checkout more reliable."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:328
+#: includes/admin/class-wc-admin-welcome.php:331
 msgid "Default credit card form for gateways"
 msgstr "Alapértelmezett bankkárty űrlap a fizetési módokhoz"
 
-#: includes/admin/class-wc-admin-welcome.php:329
+#: includes/admin/class-wc-admin-welcome.php:332
 msgid ""
 "We've added a standardized, default credit card form for gateways to use if "
 "they support <code>default_credit_card_form</code>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:333
+#: includes/admin/class-wc-admin-welcome.php:336
 msgid "Coupon limits per customer"
 msgstr "Kupon korlátozás vásárlónként"
 
-#: includes/admin/class-wc-admin-welcome.php:334
+#: includes/admin/class-wc-admin-welcome.php:337
 msgid ""
 "Coupon usage limits can now be set per user (using email + ID) rather than "
 "global."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:338
+#: includes/admin/class-wc-admin-welcome.php:341
 msgid "Streamlined new-account process"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:339
+#: includes/admin/class-wc-admin-welcome.php:342
 msgid ""
 "During checkout, username and passwords are optional and can be "
 "automatically generated by WooCommerce."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:346
+#: includes/admin/class-wc-admin-welcome.php:349
 msgid "Additional price display options"
 msgstr "További ár megjelenítési beállítások"
 
-#: includes/admin/class-wc-admin-welcome.php:347
+#: includes/admin/class-wc-admin-welcome.php:350
 msgid ""
 "Define whether prices should be shown incl. or excl. of tax on the frontend,"
 " and add an optional suffix."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:351
+#: includes/admin/class-wc-admin-welcome.php:354
 msgid "Past order linking"
 msgstr "Korábbi rendelések bekötése"
 
-#: includes/admin/class-wc-admin-welcome.php:352
+#: includes/admin/class-wc-admin-welcome.php:355
 msgid ""
 "Admins now have the ability to link past orders to a customer (before they "
 "registered) by email address."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:356
+#: includes/admin/class-wc-admin-welcome.php:359
 msgid "Review improvements"
 msgstr "Értékelések fejlesztése"
 
-#: includes/admin/class-wc-admin-welcome.php:357
+#: includes/admin/class-wc-admin-welcome.php:360
 msgid ""
 "We've added a new option to restrict reviews to logged in purchasers, and "
 "made ratings editable from the backend."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:364
+#: includes/admin/class-wc-admin-welcome.php:367
 msgid "Go to WooCommerce Settings"
 msgstr "Ugrás a WooCommerce beállításokhoz"
 
@@ -1465,7 +1476,15 @@ msgid ""
 " to WooCommerce</a>."
 msgstr "A WooCommerce lelkes egyének által fejlesztett és karbantartott bővítmény egy lenyűgőzö fejlesztői közösséggel mögötte. Viszont látnád a nevedet? <a href=\\\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\\\">Járulj hozzá WooCommerce projekthez</a>."
 
-#: includes/admin/class-wc-admin-welcome.php:408
+#: includes/admin/class-wc-admin-welcome.php:398
+msgid ""
+"WooCommerce has been kindly translated into several other languages thanks "
+"to our translation team. Want to see your name? <a "
+"href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
+"WooCommerce</a>."
+msgstr "A WooCommerce-t örömmel fordították le fordító csapataink más nyelvekre. Szeretnéd köztük látni a nevedet? <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Fordíts WooCommerce-t</a>."
+
+#: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
 msgstr "%s megtekintése"
 
@@ -1545,190 +1564,204 @@ msgstr "Elválasztó"
 msgid "Upload file and import"
 msgstr "Fájl feltöltése és importálása"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:83
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:103
+msgid "Product Image"
+msgstr "Termék kép"
+
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:105
+msgid "Remove product image"
+msgstr "Termék kép eltávolítása"
+
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:107
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:121
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:122
+msgid "Set product image"
+msgstr "Termék kép beállítása"
+
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:136
 msgid "Product name"
 msgstr "Termék neve"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:104
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:157
 msgid "Catalog/search"
 msgstr "Katalógus/keresés"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:105
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:158
 #: includes/admin/views/html-bulk-edit-product.php:158
 #: includes/admin/views/html-quick-edit-product.php:115
 msgid "Catalog"
 msgstr "Katalógus"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:106
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:159
 #: includes/admin/views/html-bulk-edit-product.php:159
 #: includes/admin/views/html-quick-edit-product.php:116
 msgid "Search"
 msgstr "Keresés"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:107
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:160
 #: includes/admin/views/html-bulk-edit-product.php:160
 #: includes/admin/views/html-quick-edit-product.php:117
 msgid "Hidden"
 msgstr "Rejtett"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:111
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:164
 msgid "Catalog visibility:"
 msgstr "Katalógus láthatóság:"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:126
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:179
 msgid ""
 "Define the loops this product should be visible in. The product will still "
 "be accessible directly."
 msgstr "A beállítással szabályozható hogy hol jelenjen meg a termék. A termék továbbra is elérhető lesz közvetlen linken keresztül."
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:132
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:185
 msgid "Enable this option to feature this product."
 msgstr "Az alábbi beállítással kiemelheted a terméket."
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:134
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:187
 msgid "Featured Product"
 msgstr "Kiemelt termék"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:137
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:190
 msgid "OK"
 msgstr "OK"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:138
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:169
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:191
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:170
 msgid "Cancel"
 msgstr "Mégsem"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:196
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:249
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:136
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:53
 #: includes/admin/views/html-quick-edit-product.php:11
 msgid "SKU"
 msgstr "Cikkszám"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:201
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:254
 #: includes/admin/views/html-bulk-edit-product.php:10
 #: includes/admin/views/html-quick-edit-product.php:22
 msgid "Price"
 msgstr "Ár"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:203
-#: includes/admin/reports/class-wc-report-sales-by-category.php:138
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:256
+#: includes/admin/reports/class-wc-report-sales-by-category.php:142
 msgid "Categories"
 msgstr "Kategóriák"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:204
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:257
 msgid "Tags"
 msgstr "Címkék"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:207
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:93
-#: includes/admin/reports/class-wc-report-coupon-usage.php:313
-#: includes/admin/reports/class-wc-report-customers.php:199
-#: includes/admin/reports/class-wc-report-sales-by-category.php:210
-#: includes/admin/reports/class-wc-report-sales-by-date.php:158
-#: includes/admin/reports/class-wc-report-sales-by-product.php:323
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:260
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
+#: includes/admin/reports/class-wc-report-coupon-usage.php:316
+#: includes/admin/reports/class-wc-report-customers.php:201
+#: includes/admin/reports/class-wc-report-sales-by-category.php:214
+#: includes/admin/reports/class-wc-report-sales-by-date.php:160
+#: includes/admin/reports/class-wc-report-sales-by-product.php:324
 msgid "Date"
 msgstr "Dátum"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:250
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:303
 msgid "Edit this item"
 msgstr "Elem szerkesztése"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:251
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:304
 msgid "Edit this item inline"
 msgstr "Elem szerkesztése helyben"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:251
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:304
 msgid "Quick&nbsp;Edit"
 msgstr "Gyors&nbsp;szerkesztés"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:255
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:308
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:111
 msgid "Restore this item from the Trash"
 msgstr "Elem visszaállítása a lomtárból"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:255
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:308
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:111
 msgid "Restore"
 msgstr "Visszaállítás"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:257
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:310
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:113
 msgid "Move this item to the Trash"
 msgstr "Elem lomtárba helyezése"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:257
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:310
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:113
 msgid "Trash"
 msgstr "Lomtár"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:259
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:312
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:115
 msgid "Delete this item permanently"
 msgstr "Elem végleges törlése"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:259
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:312
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:115
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:64
 msgid "Delete Permanently"
 msgstr "Végleges törlés"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:264
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:317
 msgid "Preview &#8220;%s&#8221;"
 msgstr "&#8220;%s&#8221; előnézete"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:264
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:317
 msgid "Preview"
 msgstr "Előnézet"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:266
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:319
 msgid "View &#8220;%s&#8221;"
 msgstr "&#8220;%s&#8221; megtekintése"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:266
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:296
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:319
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:316
 #: includes/admin/reports/class-wc-report-stock.php:114
 msgid "View"
 msgstr "Megtekintés"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:316
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:369
 msgid "Grouped"
 msgstr "Csoportosított"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:318
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:371
 msgid "External/Affiliate"
 msgstr "Külső/Partner"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:322
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:513
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:375
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:566
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:51
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:214
 msgid "Virtual"
 msgstr "Virtuális"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:324
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:506
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:377
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:559
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:58
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:212
 msgid "Downloadable"
 msgstr "Letölthető"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:326
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:379
 msgid "Simple"
 msgstr "Egyszerű"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:330
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:383
 msgid "Variable"
 msgstr "Variálható"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:353
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:406
 msgid "Toggle featured"
 msgstr "Kiemelés be-/kikapcsolása"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:355
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:133
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:198
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:200
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:408
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:139
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:204
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:208
 #: includes/admin/views/html-admin-page-status-report.php:38
 #: includes/admin/views/html-admin-page-status-report.php:66
 #: includes/admin/views/html-admin-page-status-report.php:91
@@ -1738,7 +1771,7 @@ msgstr "Kiemelés be-/kikapcsolása"
 msgid "Yes"
 msgstr "igen"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:357
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:410
 #: includes/admin/views/html-admin-page-status-report.php:38
 #: includes/admin/views/html-admin-page-status-report.php:66
 #: includes/admin/views/html-admin-page-status-report.php:91
@@ -1748,38 +1781,38 @@ msgstr "igen"
 msgid "No"
 msgstr "nem"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:364
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:417
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:302
 #: includes/admin/reports/class-wc-report-stock.php:91
 #: includes/admin/views/html-bulk-edit-product.php:194
 #: includes/admin/views/html-quick-edit-product.php:137
 msgid "In stock"
 msgstr "Készleten"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:448
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:501
 msgid "Sort Products"
 msgstr "Termékek rendezése"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:468
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:521
 msgid "Show all product types"
 msgstr "Összes terméktípus megjelenítése"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:480
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:533
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:37
 msgid "Grouped product"
 msgstr "Csoportosított termék"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:483
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:536
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:38
 msgid "External/Affiliate product"
 msgstr "Külső/Partner termék"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:486
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:539
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:39
 msgid "Variable product"
 msgstr "Variálható termék"
 
-#: includes/admin/post-types/class-wc-admin-cpt-product.php:489
+#: includes/admin/post-types/class-wc-admin-cpt-product.php:542
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:36
 msgid "Simple product"
 msgstr "Egyszerű termék"
@@ -1802,7 +1835,7 @@ msgstr "Kupon típus"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:79
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
-#: includes/admin/reports/class-wc-report-sales-by-date.php:320
+#: includes/admin/reports/class-wc-report-sales-by-date.php:322
 msgid "Coupon amount"
 msgstr "Kupon érték"
 
@@ -1838,34 +1871,34 @@ msgstr "%s / &infin;"
 msgid "Show all types"
 msgstr "Összes típus megjelenítése"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:86
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
 #: includes/admin/settings/class-wc-settings-checkout.php:229
 #: includes/admin/settings/class-wc-settings-shipping.php:205
 msgid "Status"
 msgstr "Állapot"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:87
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:92
 msgid "Order"
 msgstr "Rendelés"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:88
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:93
 msgid "Purchased"
 msgstr "Vásárolt"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:89
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 msgid "Ship to"
 msgstr "Szállítási cím"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:96
 msgid "Customer Message"
 msgstr "Vásárlói üzenet"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:92
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:97
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:101
 msgid "Order Notes"
 msgstr "Megjegyzés"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:99
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
@@ -1873,99 +1906,105 @@ msgstr "Megjegyzés"
 msgid "Total"
 msgstr "Összeg"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:95
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:100
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
 #: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:141
+#: includes/admin/reports/class-wc-report-stock.php:140
 msgid "Actions"
 msgstr "Műveletek"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:119
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:125
 msgid "Unpublished"
 msgstr "Nem publikált"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:121
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:127
 msgid "Y/m/d g:i:s A"
 msgstr "Y/m/d H:i:s"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:124
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:130
 msgid "Y/m/d"
 msgstr "Y/m/d"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:145
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:183
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:211
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:151
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:189
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:220
 msgid "Via"
 msgstr "Mód:"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:149
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:155
 msgid "%d item"
 msgid_plural "%d items"
 msgstr[0] "%d tétel"
 msgstr[1] "%d tétel"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:200
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
 msgid "plus %d other note"
 msgid_plural "plus %d other notes"
 msgstr[0] "plusz %d egyéb megjegyzés"
 msgstr[1] "plusz %d egyéb megjegyzés"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:218
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
+msgid "%d note"
+msgid_plural "%d notes"
+msgstr[0] "%d megjegyzés"
+msgstr[1] "%d megjegyzések"
+
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:228
 msgid "Billing:"
 msgstr "Számlázás:"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:221
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:232
 msgid "Tel:"
 msgstr "Tel:"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:240
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:261
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:254
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:277
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:169
 msgid "Guest"
 msgstr "Vendég"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:264
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:281
 msgid "%s by %s"
 msgstr "%s vásárolta %s"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:283
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:301
 msgid "Processing"
 msgstr "Feldolgozás alatt"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:290
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:309
 msgid "Complete"
 msgstr "Befejezett"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:382
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:404
 msgid "Show all statuses"
 msgstr "Összes állapot megjelenítése"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:401
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:426
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:424
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:449
 msgid "Show all customers"
 msgstr "Összes vásárló megjelenítése"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:654
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:655
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:689
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
 msgid "Mark processing"
 msgstr "Feldolgozás alattinak jelöl"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:657
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:658
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:692
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
 msgid "Mark on-hold"
 msgstr "Fizetésre vártnak jelöl"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:660
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:661
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:695
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:696
 msgid "Mark completed"
 msgstr "Befejezettnek jelöl"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:702
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:737
 msgid "Order status changed by bulk edit:"
 msgstr "Rendelési állapot megváltoztatva tömeges szerkesztéssel:"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:724
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:759
 msgid "Order status changed."
 msgid_plural "%s order statuses changed."
 msgstr[0] "Rendelés állapota megváltoztatva."
@@ -1973,11 +2012,11 @@ msgstr[1] "%s rendelés állapota megváltoztatva."
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:42
 msgid "Insert into %s"
-msgstr ""
+msgstr "%sbe beillesztése"
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:43
 msgid "Uploaded to this %s"
-msgstr ""
+msgstr "Feltöltve ebba a %s"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:93
 msgid "Product Short Description"
@@ -2033,7 +2072,7 @@ msgid "Reviews"
 msgstr "Vélemények"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:37
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:84
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:85
 #: includes/admin/settings/class-wc-settings-general.php:25
 msgid "General"
 msgstr "Általános"
@@ -2118,9 +2157,9 @@ msgstr "Pipáld be ezt a dobozt, ha a kupon nem érvényes akciós termékekre. 
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:98
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:585
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:602
-#: includes/admin/reports/class-wc-report-sales-by-product.php:177
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:586
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:603
+#: includes/admin/reports/class-wc-report-sales-by-product.php:178
 msgid "Search for a product&hellip;"
 msgstr "Termék keresése&hellip;"
 
@@ -2152,80 +2191,80 @@ msgstr "Termékkategóriák"
 msgid "Any category"
 msgstr "Bármely kategória"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:146
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:147
 msgid ""
 "A product must be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will be discounted."
 msgstr "A termék kötelezően a kategóriában kell legyen, hogy a kupon érvényes maradjon vagy \"Termék kedvezmény\" esetén a felsorolt kategóriákban lévő termékek kedvezményesek."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:151
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:152
 msgid "Exclude categories"
 msgstr "Kategóriák kizárása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:152
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:153
 msgid "No categories"
 msgstr "Nincsenek kategóriák"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:160
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:162
 msgid ""
 "Product must not be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will not be discounted."
 msgstr "A termék kötelezően nem szerepelhet a kategóriában, hogy a kupon érvényes maradjon vagy \"Termék kedvezmény\" esetén a felsorolt kategóriákban nem lévő termékek kedvezményesek."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:166
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "Email restrictions"
 msgstr "E-mail korlátozások"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:166
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "No restrictions"
 msgstr "Nincsenek korlátozások"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:166
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid ""
 "List of emails to check against the customer's billing email when an order "
 "is placed."
 msgstr "E-mail címek listája amelyeket össze kell vetni a vásárló számlázási e-mail címével."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:178
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "Usage limit per coupon"
 msgstr "Felhasználási korlát kupononként"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:178
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:190
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgctxt "placeholder"
 msgid "Unlimited usage"
 msgstr "Korlátlan felhasználás"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:178
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "How many times this coupon can be used before it is void."
 msgstr "Hány alkalommal használható a kupon, mielőtt lejárna."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:184
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid "Limit usage to X items"
 msgstr "Felhasználás korlátozása X tételre"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:184
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgctxt "placeholder"
 msgid "Apply to all qualifying items in cart"
 msgstr "Alkalmazás az összes megfelelő tételre a kosárban"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:184
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid ""
 "The maximum number of individual items this coupon can apply to when using "
 "product discounts. Leave blank to apply to all qualifying items in cart."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:190
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid "Usage limit per user"
 msgstr "Felhasználási korlát felhasználónként"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:190
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid ""
 "How many times this coupon can be used by an invidual user. Uses billing "
 "email for guests, and user ID for logged in users."
 msgstr "Hány alkalommal használhatja a kupont egy önálló felhasználó. Vendégek esetén a számlázási e-mail címet használja, bejelentkezett felhasználóknál a felhasználói azonosítót."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:226
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:230
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
@@ -2472,13 +2511,13 @@ msgid "Private note"
 msgstr "Privát megjegyzés"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:67
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:563
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:564
 msgid "Add"
 msgstr "Hozzáadás"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:31
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:94
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:95
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -2532,190 +2571,190 @@ msgstr "A virtuális termék nem kézzelfogható és nem szállítható."
 msgid "Downloadable products give access to a file upon purchase."
 msgstr "A letölthető termékek hozzáférést biztosítanak egy fájlhoz vásárláskor."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:89
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:90
 #: includes/admin/settings/class-wc-settings-products.php:41
 msgid "Inventory"
 msgstr "Készlet"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:99
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:100
 msgid "Linked Products"
 msgstr "Kapcsolódó termékek"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:109
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:110
 msgid "Variations"
 msgstr "Variációk"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:114
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:115
 msgid "Advanced"
 msgstr "Haladó"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:136
 msgid "Stock Keeping Unit"
 msgstr "Cikkszám"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:135
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:136
 msgid ""
 "SKU refers to a Stock-keeping unit, a unique identifier for each distinct "
 "product and service that can be purchased."
 msgstr "A CSZ a cikkszámra utal, egy egyedi azonosító minden egyes termékhez és szolgáltatáshoz, ami megvásárolható."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:146
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:147
 msgid "Product URL"
 msgstr "Termék URL"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:146
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:147
 msgid "Enter the external URL to the product."
 msgstr "Írd be a külső URL-t a termékhez."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:149
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:150
 msgid "Button text"
 msgstr "Gomb szövege"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:149
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:150
 msgctxt "placeholder"
 msgid "Buy product"
 msgstr "Termék megvásárlása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:149
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:150
 msgid "This text will be shown on the button linking to the external product."
 msgstr "Ez a szöveg fog megjelenni a külső termékre mutató gombon."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:156
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:157
 msgid "Regular Price"
 msgstr "Ár"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:159
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:160
 msgid "Sale Price"
 msgstr "Akciós ár"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:159
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:160
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Schedule"
 msgstr "Időzítés"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:166
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:167
 msgid "Sale Price Dates"
 msgstr "Akciós ár időzítése"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:167
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:168
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:85
 msgctxt "placeholder"
 msgid "From&hellip;"
 msgstr "Kezdete&hellip;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:168
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:169
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:89
 msgctxt "placeholder"
 msgid "To&hellip;"
 msgstr "Vége&hellip;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:180
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:181
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:144
 msgid "Downloadable Files"
 msgstr "Letölthető fájlok"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:185
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:186
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:148
 msgid "This is the name of the download shown to the customer."
 msgstr "Ez a letöltés neve, ahogyan a vásárló látni fogja."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:186
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:187
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:149
 msgid "File URL"
 msgstr "Fájl URL"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:186
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:187
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:149
 msgid ""
 "This is the URL or absolute path to the file which customers will get access"
 " to."
 msgstr "Ez az URL vagy abszolút útvonal a fájlhoz, amihez a vásárlók hozzáférést kapnak majd."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:201
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:202
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:164
 msgid "Add File"
 msgstr "Fájl hozzáadása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:222
 msgid "Download Limit"
 msgstr "Letöltési korlát"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:222
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:19
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:191
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:197
 msgid "Unlimited"
 msgstr "Korlátlan"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:221
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:222
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:190
 msgid "Leave blank for unlimited re-downloads."
 msgstr "Hagyd üresen a korlátlan újbóli letöltéshez."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:227
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:770
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:228
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:771
 msgid "Download Expiry"
 msgstr "Letöltés lejárat"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:227
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:228
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:23
 msgid "Never"
 msgstr "Soha"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:227
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:228
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:196
 msgid ""
 "Enter the number of days before a download link expires, or leave blank."
 msgstr "Írd be a napok számát mielőtt a letöltési link lejár vagy hagyd üresen."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:233
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:234
 msgid "Download Type"
 msgstr "Letöltés típusa"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:233
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:234
 msgid "Choose a download type - this controls the <a href=\"%s\">schema</a>."
 msgstr "Válassz egy letöltés típust - ez szabályozza a <a href=\"%s\">sémát</a>."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:234
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:235
 msgid "Standard Product"
 msgstr "Szabványos termék"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:235
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:236
 msgid "Application/Software"
 msgstr "Alkalmazás/szoftver"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:236
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:237
 msgid "Music"
 msgstr "Zene"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:248
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:249
 #: includes/admin/views/html-bulk-edit-product.php:58
 #: includes/admin/views/html-quick-edit-product.php:38
 msgid "Tax Status"
 msgstr "Adó állapot"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:249
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:250
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:34
 #: includes/admin/views/html-bulk-edit-product.php:64
 #: includes/admin/views/html-quick-edit-product.php:43
 msgid "Taxable"
 msgstr "Adóztatható"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:250
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:251
 #: includes/admin/views/html-bulk-edit-product.php:65
 #: includes/admin/views/html-quick-edit-product.php:44
 msgid "Shipping only"
 msgstr "Csak szállítás"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:251
-#: includes/admin/reports/class-wc-report-sales-by-category.php:167
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:252
+#: includes/admin/reports/class-wc-report-sales-by-category.php:171
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
 msgstr "Nincs"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:256
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:733
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:257
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:734
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
@@ -2726,310 +2765,310 @@ msgstr "Nincs"
 msgid "Standard"
 msgstr "Standard"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:261
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:262
 #: includes/admin/settings/class-wc-settings-tax.php:383
 #: includes/admin/views/html-bulk-edit-product.php:77
 #: includes/admin/views/html-quick-edit-product.php:56
 msgid "Tax Class"
 msgstr "Adózási osztály"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:282
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:283
 #: includes/admin/views/html-bulk-edit-product.php:207
 #: includes/admin/views/html-quick-edit-product.php:153
 msgid "Manage stock?"
 msgstr "Készletkezelés?"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:282
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:283
 msgid ""
 "Enable stock management at product level (not needed if managing stock at "
 "variation level)"
 msgstr "Készletkezelés engedélyezése termék szinten (nem szükséges, ha variáció szinten kezeled a készletet)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:289
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:290
 #: includes/admin/views/html-bulk-edit-product.php:226
 #: includes/admin/views/html-bulk-edit-product.php:242
 #: includes/admin/views/html-quick-edit-product.php:157
 msgid "Stock Qty"
 msgstr "Raktár mny"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:289
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:290
 msgid ""
 "Stock quantity. If this is a variable product this value will be used to "
 "control stock for all variations, unless you define stock at variation "
 "level."
 msgstr "Raktár mennyiség. Ha ez egy variálható termék, akkor ez az érték kezeli a készletet minden variációra, kivéve ha variáció szinten megadod a készletet."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:300
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
+#: includes/admin/reports/class-wc-report-stock.php:139
 msgid "Stock status"
 msgstr "Készletállapot"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:304
 msgid ""
 "Controls whether or not the product is listed as \"in stock\" or \"out of "
 "stock\" on the frontend."
 msgstr "Szabályozza, hogy \"raktáron\" vagy \"elfogyott\" termékként jelenik meg a termék az oldalon."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:310
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:311
 msgid "Allow Backorders?"
 msgstr "Visszarendelések engedélyezve?"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:311
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:312
 #: includes/admin/views/html-bulk-edit-product.php:253
 #: includes/admin/views/html-quick-edit-product.php:172
 msgid "Do not allow"
 msgstr "Nincs engedélyezve"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:312
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:313
 #: includes/admin/views/html-bulk-edit-product.php:254
 #: includes/admin/views/html-quick-edit-product.php:173
 msgid "Allow, but notify customer"
 msgstr "Engedélyezve a vásárló értesítésével"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:313
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:314
 #: includes/admin/views/html-bulk-edit-product.php:255
 #: includes/admin/views/html-quick-edit-product.php:174
 msgid "Allow"
 msgstr "Engedélyezve"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:314
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:315
 msgid ""
 "If managing stock, this controls whether or not backorders are allowed for "
 "this product and variations. If enabled, stock quantity can go below 0."
 msgstr "Ha a készletkezelés engedélyezett, akkor a visszarendeléseket engedélyezi vagy tiltja le a termékre és variációira vonatkozóan. Ha engedélyezett, akkor a készlet lehet kisebb mint 0."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:325
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:326
 msgid "Sold Individually"
 msgstr "Önállóan értékesített"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:325
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:326
 msgid ""
 "Enable this to only allow one of this item to be bought in a single order"
 msgstr "Kapcsold be ha ebből a termékből csak egy szerepelhet egy rendelésben"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:343
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:344
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:97
 #: includes/admin/views/html-bulk-edit-product.php:103
 #: includes/admin/views/html-quick-edit-product.php:84
 msgid "Weight"
 msgstr "Súly"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:343
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:344
 msgid "Weight in decimal form"
 msgstr "Súly tizedes formában"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:348
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:349
 msgid "Dimensions"
 msgstr "Méretek"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:350
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:351
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
 #: includes/admin/views/html-bulk-edit-product.php:143
 #: includes/admin/views/html-quick-edit-product.php:97
 msgid "Length"
 msgstr "Hosszúság"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:351
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:352
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
 #: includes/admin/views/html-bulk-edit-product.php:144
 #: includes/admin/views/html-quick-edit-product.php:98
 msgid "Width"
 msgstr "Szélesség"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:352
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:353
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
 #: includes/admin/views/html-bulk-edit-product.php:145
 #: includes/admin/views/html-quick-edit-product.php:99
 msgid "Height"
 msgstr "Magasság"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:354
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:355
 msgid "LxWxH in decimal form"
 msgstr "HxSzxM tizedes formában"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:371
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:372
 msgid "No shipping class"
 msgstr "Nincs szállítási osztály"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:377
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:378
 msgid "Shipping class"
 msgstr "Szállítási osztály"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:377
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:378
 msgid ""
 "Shipping classes are used by certain shipping methods to group similar "
 "products."
 msgstr "A szállítási osztályokat bizonyos szállítási módok használják hasonló termékek csoportosítására."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:389
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:751
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:390
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:752
 msgid "Close all"
 msgstr "Összes bezárása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:389
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:751
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:390
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:752
 msgid "Expand all"
 msgstr "Összes kibontása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:448
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:449
 msgid "Select terms"
 msgstr "Válassz értékeket"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:462
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:463
 msgid "Add new"
 msgstr "Új hozzáadása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:475
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:476
 msgid "Pipe (|) separate terms"
 msgstr "Függőleges vonallal (|) elválasztott kifejezések"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:565
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:566
 msgid "Custom product attribute"
 msgstr "Egyedi termékattribútum"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:577
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:578
 msgid "Save attributes"
 msgstr "Attribútumok mentése"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:584
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:585
 msgid "Up-Sells"
 msgstr "Upsell"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:599
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:600
 msgid ""
 "Up-sells are products which you recommend instead of the currently viewed "
 "product, for example, products that are more profitable or better quality or"
 " more expensive."
 msgstr "Az upsell termékek olyan termékek amiket az aktuálisan megtekintett termék helyett javasolsz, például olyan termékek amik nyereségesebbek vagy jobb minőségűek vagy drágábbak."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:601
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:602
 msgid "Cross-Sells"
 msgstr "Keresztértékesítés"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:616
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:617
 msgid ""
 "Cross-sells are products which you promote in the cart, based on the current"
 " product."
 msgstr "A keresztértékesített termékek a kosárban promótált termékek az aktuális termék alapján."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:626
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:627
 msgid "Choose a grouped product&hellip;"
 msgstr "Válassz egy csoportosított terméket&hellip;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:656
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:657
 msgid "Grouping"
 msgstr "Csoportosítás"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:656
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:657
 msgid "Set this option to make this product part of a grouped product."
 msgstr "Állítsd be ezt az opciót, ha ez egy csoportosított termék része."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:676
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:677
 msgid "Purchase Note"
 msgstr "Vásárlási megjegyzés"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:676
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:677
 msgid "Enter an optional note to send the customer after purchase."
 msgstr "Megadhatsz egy opcionális megjegyzést, amit vásárlás után megkap a vásárló."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:683
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:684
 msgid "Menu order"
 msgstr "Menü sorrend"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:683
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:684
 msgid "Custom ordering position."
 msgstr "Egyedi rendezési pozíció."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:691
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:692
 msgid "Enable reviews"
 msgstr "Vélemények engedélyezése"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:743
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:744
 msgid ""
 "Before adding variations, add and save some attributes on the "
 "<strong>Attributes</strong> tab."
 msgstr "Variációk hozzáadása előtt fel kell venned attribútumokat és el kell mentened őket az <strong>Attribútumok</strong> fülön."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:745
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:746
 msgid "Learn more"
 msgstr "További információk"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:752
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:753
 msgid "Bulk edit:"
 msgstr "Tömeges szerkesztés:"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:754
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:755
 msgid "Toggle &quot;Enabled&quot;"
 msgstr "&quot;Bekapcsolt&quot; váltása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:755
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:756
 msgid "Toggle &quot;Downloadable&quot;"
 msgstr "&quot;Letölthető&quot; váltása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:756
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:757
 msgid "Toggle &quot;Virtual&quot;"
 msgstr "&quot;Virtuális&quot; váltása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:757
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:758
 msgid "Delete all variations"
 msgstr "Összes variáció törlése"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:758
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:759
 msgid "Prices"
 msgstr "Árak"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:759
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:760
 msgid "Prices increase by (fixed amount or %)"
 msgstr "Árnövelés mértéke (fix összeg vagy %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:760
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:761
 msgid "Prices decrease by (fixed amount or %)"
 msgstr "Árcsökkentés mértéke (fix összes vagy %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:761
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
 msgid "Sale prices"
 msgstr "Akciós árak"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
 msgid "Sale prices increase by (fixed amount or %)"
 msgstr "Akciós árnövelés mértéke (fix összeg vagy %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:764
 msgid "Sale prices decrease by (fixed amount or %)"
 msgstr "Akciós árcsökkentés mértéke (fix összeg vagy %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:770
 msgid "Download limit"
 msgstr "Letöltési korlát"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:774
 #: includes/admin/views/html-report-by-date.php:31
 msgid "Go"
 msgstr "Mehet"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:868
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:869
 msgid "Add Variation"
 msgstr "Variáció hozzáadása"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:870
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:871
 msgid "Link all variations"
 msgstr "Összes variáció bekötése"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:872
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:873
 msgid "Default selections:"
 msgstr "Alapértelmezett választások:"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:885
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:886
 #: includes/admin/settings/class-wc-settings-shipping.php:214
 msgid "No default"
 msgstr "Nincs alapértelmezett"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:989
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:990
 msgid "Product SKU must be unique."
 msgstr "A termék cikkszáma egyedi kell hogy legyen."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1357
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1358
 msgid "Variation #%s of %s"
 msgstr "#%s variációja %s terméknek"
 
@@ -3246,59 +3285,59 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Kapcsold be ezt az opciót, ha a termék nem szállítható vagy nincs szállítási költség"
 
-#: includes/admin/reports/class-wc-admin-report.php:390
+#: includes/admin/reports/class-wc-admin-report.php:395
 msgid "Sold %s worth in the last %d days"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:392
+#: includes/admin/reports/class-wc-admin-report.php:397
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "1 tétel eladva az elmúlt %d napban"
 msgstr[1] "%d tétel eladva az elmúlt %d napban"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:69
+#: includes/admin/reports/class-wc-report-coupon-usage.php:71
 msgid "%s discounts in total"
 msgstr "%s kedvezmény összesen"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:75
+#: includes/admin/reports/class-wc-report-coupon-usage.php:77
 msgid "%s coupons used in total"
 msgstr "%s kupon felhasználva összesen"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:90
-#: includes/admin/reports/class-wc-report-customers.php:138
-#: includes/admin/reports/class-wc-report-sales-by-category.php:65
-#: includes/admin/reports/class-wc-report-sales-by-date.php:122
-#: includes/admin/reports/class-wc-report-sales-by-product.php:107
+#: includes/admin/reports/class-wc-report-customers.php:140
+#: includes/admin/reports/class-wc-report-sales-by-category.php:68
+#: includes/admin/reports/class-wc-report-sales-by-date.php:124
+#: includes/admin/reports/class-wc-report-sales-by-product.php:108
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:41
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:41
 msgid "Year"
 msgstr "Éves"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:91
-#: includes/admin/reports/class-wc-report-customers.php:139
-#: includes/admin/reports/class-wc-report-sales-by-category.php:66
-#: includes/admin/reports/class-wc-report-sales-by-date.php:123
-#: includes/admin/reports/class-wc-report-sales-by-product.php:108
+#: includes/admin/reports/class-wc-report-customers.php:141
+#: includes/admin/reports/class-wc-report-sales-by-category.php:69
+#: includes/admin/reports/class-wc-report-sales-by-date.php:125
+#: includes/admin/reports/class-wc-report-sales-by-product.php:109
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:42
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:42
 msgid "Last Month"
 msgstr "Múlt hónap"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:92
-#: includes/admin/reports/class-wc-report-customers.php:140
-#: includes/admin/reports/class-wc-report-sales-by-category.php:67
-#: includes/admin/reports/class-wc-report-sales-by-date.php:124
-#: includes/admin/reports/class-wc-report-sales-by-product.php:109
+#: includes/admin/reports/class-wc-report-customers.php:142
+#: includes/admin/reports/class-wc-report-sales-by-category.php:70
+#: includes/admin/reports/class-wc-report-sales-by-date.php:126
+#: includes/admin/reports/class-wc-report-sales-by-product.php:110
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:43
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:43
 msgid "This Month"
 msgstr "Folyó hónap"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:93
-#: includes/admin/reports/class-wc-report-customers.php:141
-#: includes/admin/reports/class-wc-report-sales-by-category.php:68
-#: includes/admin/reports/class-wc-report-sales-by-date.php:125
-#: includes/admin/reports/class-wc-report-sales-by-product.php:110
+#: includes/admin/reports/class-wc-report-customers.php:143
+#: includes/admin/reports/class-wc-report-sales-by-category.php:71
+#: includes/admin/reports/class-wc-report-sales-by-date.php:127
+#: includes/admin/reports/class-wc-report-sales-by-product.php:111
 msgid "Last 7 Days"
 msgstr "Elmúlt 7 nap"
 
@@ -3306,53 +3345,53 @@ msgstr "Elmúlt 7 nap"
 msgid "Filter by coupon"
 msgstr "Szűrés kupon szerint"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:137
+#: includes/admin/reports/class-wc-report-coupon-usage.php:161
 msgid "Choose coupons&hellip;"
 msgstr "Válassz kuponokat&hellip;"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:161
+#: includes/admin/reports/class-wc-report-coupon-usage.php:162
 msgid "All coupons"
 msgstr "Összes kupon"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:166
-msgid "No used coupons found"
-msgstr "Nem találhatóak felhasznált kuponok"
-
 #: includes/admin/reports/class-wc-report-coupon-usage.php:169
-#: includes/admin/reports/class-wc-report-sales-by-category.php:169
-#: includes/admin/reports/class-wc-report-sales-by-product.php:178
+#: includes/admin/reports/class-wc-report-sales-by-category.php:173
+#: includes/admin/reports/class-wc-report-sales-by-product.php:179
 msgid "Show"
 msgstr "Megjelenítés"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:184
+#: includes/admin/reports/class-wc-report-coupon-usage.php:182
+msgid "No used coupons found"
+msgstr "Nem találhatóak felhasznált kuponok"
+
+#: includes/admin/reports/class-wc-report-coupon-usage.php:187
 msgid "Most Popular"
 msgstr "Legnépszerűbb"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:226
-#: includes/admin/reports/class-wc-report-coupon-usage.php:273
+#: includes/admin/reports/class-wc-report-coupon-usage.php:229
+#: includes/admin/reports/class-wc-report-coupon-usage.php:276
 msgid "No coupons found in range"
 msgstr "Nem találhatóak kuponok az időszakra"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:231
+#: includes/admin/reports/class-wc-report-coupon-usage.php:234
 msgid "Most Discount"
 msgstr "Legnagyobb kedvezmény"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:316
-#: includes/admin/reports/class-wc-report-customers.php:202
-#: includes/admin/reports/class-wc-report-sales-by-category.php:213
-#: includes/admin/reports/class-wc-report-sales-by-date.php:162
-#: includes/admin/reports/class-wc-report-sales-by-product.php:326
+#: includes/admin/reports/class-wc-report-coupon-usage.php:319
+#: includes/admin/reports/class-wc-report-customers.php:204
+#: includes/admin/reports/class-wc-report-sales-by-category.php:217
+#: includes/admin/reports/class-wc-report-sales-by-date.php:164
+#: includes/admin/reports/class-wc-report-sales-by-product.php:327
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:29
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:29
 #: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "CSV exportálása"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:407
+#: includes/admin/reports/class-wc-report-coupon-usage.php:410
 msgid "Number of coupons used"
 msgstr "Felhasznált kuponok száma"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:415
+#: includes/admin/reports/class-wc-report-coupon-usage.php:418
 msgid "Discount amount"
 msgstr "Kedvezmény mértéke"
 
@@ -3402,45 +3441,45 @@ msgstr ""
 msgid "Last order"
 msgstr "Utolsó rendelés"
 
-#: includes/admin/reports/class-wc-report-customers.php:15
+#: includes/admin/reports/class-wc-report-customers.php:17
 msgid "%s signups in this period"
 msgstr "%s regisztráció az időszakban"
 
-#: includes/admin/reports/class-wc-report-customers.php:83
+#: includes/admin/reports/class-wc-report-customers.php:85
 msgid "Customer Sales"
 msgstr "Vásárlói eladások"
 
-#: includes/admin/reports/class-wc-report-customers.php:84
+#: includes/admin/reports/class-wc-report-customers.php:86
 msgid "Guest Sales"
 msgstr "Vendég eladások"
 
-#: includes/admin/reports/class-wc-report-customers.php:93
-#: includes/admin/reports/class-wc-report-customers.php:289
+#: includes/admin/reports/class-wc-report-customers.php:95
+#: includes/admin/reports/class-wc-report-customers.php:291
 msgid "Customer Orders"
 msgstr "Vásárlói rendelések"
 
-#: includes/admin/reports/class-wc-report-customers.php:98
-#: includes/admin/reports/class-wc-report-customers.php:299
+#: includes/admin/reports/class-wc-report-customers.php:100
+#: includes/admin/reports/class-wc-report-customers.php:301
 msgid "Guest Orders"
 msgstr "Vendég rendelések"
 
-#: includes/admin/reports/class-wc-report-customers.php:117
+#: includes/admin/reports/class-wc-report-customers.php:119
 msgid "orders"
 msgstr "rendelés"
 
-#: includes/admin/reports/class-wc-report-customers.php:295
+#: includes/admin/reports/class-wc-report-customers.php:297
 msgid "customer orders"
 msgstr "vásárlói rendelés"
 
-#: includes/admin/reports/class-wc-report-customers.php:305
+#: includes/admin/reports/class-wc-report-customers.php:307
 msgid "guest orders"
 msgstr "vendég rendelés"
 
-#: includes/admin/reports/class-wc-report-customers.php:309
+#: includes/admin/reports/class-wc-report-customers.php:311
 msgid "Signups"
 msgstr "Regisztrációk"
 
-#: includes/admin/reports/class-wc-report-customers.php:316
+#: includes/admin/reports/class-wc-report-customers.php:318
 msgid "new users"
 msgstr "új felhasználó"
 
@@ -3452,104 +3491,108 @@ msgstr "Egy termék sincs alacsony készleten."
 msgid "No out of stock products found."
 msgstr "Egy termék se fogyott el."
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:47
+#: includes/admin/reports/class-wc-report-sales-by-category.php:50
 msgid "%s sales in %s"
 msgstr "%s eladás - %s"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:168
+#: includes/admin/reports/class-wc-report-sales-by-category.php:157
+msgid "Select categories&hellip;"
+msgstr "Válassz kategóriákat&hellip;"
+
+#: includes/admin/reports/class-wc-report-sales-by-category.php:172
 msgid "All"
 msgstr "Összes"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:228
+#: includes/admin/reports/class-wc-report-sales-by-category.php:232
 msgid "&larr; Choose a category to view stats"
 msgstr "&larr; Válassz egy kategóriák a statisztika megtekintéséhez"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:74
+#: includes/admin/reports/class-wc-report-sales-by-date.php:76
 msgid "%s average daily sales"
 msgstr "%s átlagos napi eladás"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:77
+#: includes/admin/reports/class-wc-report-sales-by-date.php:79
 msgid "%s average monthly sales"
 msgstr "%s átlagos havi eladás"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:82
+#: includes/admin/reports/class-wc-report-sales-by-date.php:84
 msgid "%s sales in this period"
 msgstr "%s eladás ebben az időszakban"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:92
+#: includes/admin/reports/class-wc-report-sales-by-date.php:94
 msgid "%s orders placed"
 msgstr "%s feladott rendelés"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:97
+#: includes/admin/reports/class-wc-report-sales-by-date.php:99
 msgid "%s items purchased"
 msgstr "%s megvásárolt tétel"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:102
+#: includes/admin/reports/class-wc-report-sales-by-date.php:104
 msgid "%s charged for shipping"
 msgstr "%s felszámolva szállításra"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:107
+#: includes/admin/reports/class-wc-report-sales-by-date.php:109
 msgid "%s worth of coupons used"
 msgstr "%s értékben felhasznált kuponok"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:294
-#: includes/admin/reports/class-wc-report-sales-by-product.php:440
+#: includes/admin/reports/class-wc-report-sales-by-date.php:296
+#: includes/admin/reports/class-wc-report-sales-by-product.php:441
 msgid "Number of items sold"
 msgstr "Eladott tételek száma"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:302
+#: includes/admin/reports/class-wc-report-sales-by-date.php:304
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:113
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:109
 msgid "Number of orders"
 msgstr "Rendelések száma"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:310
+#: includes/admin/reports/class-wc-report-sales-by-date.php:312
 msgid "Average sales amount"
 msgstr "Átlagos eladások összege"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:330
+#: includes/admin/reports/class-wc-report-sales-by-date.php:332
 msgid "Shipping amount"
 msgstr "Szállítási költség"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:340
-#: includes/admin/reports/class-wc-report-sales-by-product.php:448
+#: includes/admin/reports/class-wc-report-sales-by-date.php:342
+#: includes/admin/reports/class-wc-report-sales-by-product.php:449
 msgid "Sales amount"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:87
+#: includes/admin/reports/class-wc-report-sales-by-product.php:88
 msgid "%s sales for the selected items"
 msgstr "%s eladás a kiválasztott tételekből"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:92
+#: includes/admin/reports/class-wc-report-sales-by-product.php:93
 msgid "%s purchases for the selected items"
 msgstr "%s vásárlás a kiválasztott tételekből"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:138
+#: includes/admin/reports/class-wc-report-sales-by-product.php:139
 msgid "Showing reports for:"
 msgstr "Jelentés a következőről:"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:164
+#: includes/admin/reports/class-wc-report-sales-by-product.php:165
 msgid "Reset"
 msgstr "Alaphelyzetbe állítás"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:173
+#: includes/admin/reports/class-wc-report-sales-by-product.php:174
 msgid "Product Search"
 msgstr "Termékkereső"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:210
+#: includes/admin/reports/class-wc-report-sales-by-product.php:211
 msgid "Top Sellers"
 msgstr "Top eladott termékek"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:245
-#: includes/admin/reports/class-wc-report-sales-by-product.php:285
+#: includes/admin/reports/class-wc-report-sales-by-product.php:246
+#: includes/admin/reports/class-wc-report-sales-by-product.php:286
 msgid "No products found in range"
 msgstr "Nem találhatóak termékek az időszakra"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:250
+#: includes/admin/reports/class-wc-report-sales-by-product.php:251
 msgid "Top Earners"
 msgstr "Top bevételt hozó termékek"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:341
+#: includes/admin/reports/class-wc-report-sales-by-product.php:342
 msgid "&larr; Choose a product to view stats"
 msgstr "&larr; Válassz egy terméket a statisztika megtekintéséhez"
 
@@ -3557,11 +3600,15 @@ msgstr "&larr; Válassz egy terméket a statisztika megtekintéséhez"
 msgid "No products found."
 msgstr "Nem találhatóak termékek."
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:121
+msgid "product"
+msgstr "termek"
+
+#: includes/admin/reports/class-wc-report-stock.php:137
 msgid "Parent"
 msgstr "Szülő"
 
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:138
 msgid "Units in stock"
 msgstr "Készleten lévő mennyiség"
 
@@ -3589,7 +3636,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:112
 msgid "Total Tax"
-msgstr ""
+msgstr "Összes adó"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:112
@@ -3742,8 +3789,7 @@ msgid "Automatically generate customer password"
 msgstr "Jelszó automatikus létrehozása"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
-#: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Settings tab label"
 msgid "Checkout"
 msgstr "Pénztár"
 
@@ -3766,6 +3812,11 @@ msgstr "Kuponok használatának engedélyezése"
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
 msgstr "A kuponok a kosár és pénztár oldalakon használhatók fel."
+
+#: includes/admin/settings/class-wc-settings-checkout.php:78
+#: includes/admin/views/html-admin-page-status-report.php:297
+msgid "Checkout"
+msgstr "Pénztár"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
@@ -4129,7 +4180,7 @@ msgstr "Elsődleges"
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Call to action buttons/price slider/layered nav UI"
-msgstr "Cselekvésre ösztönző gombok/árcsúszka/rétegezett navigáció felülete"
+msgstr "Cselekvésre ösztönző gombok/árcsúszka/többszintű szűrő felülete"
 
 #: includes/admin/settings/class-wc-settings-general.php:238
 msgid "Secondary"
@@ -5153,11 +5204,18 @@ msgstr "Szerző URL"
 msgid "Templates"
 msgstr "Sablonok"
 
-#: includes/admin/views/html-admin-page-status-report.php:451
+#: includes/admin/views/html-admin-page-status-report.php:478
+msgid ""
+"<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
+"date. The core version is %s"
+msgstr ""
+
+#: includes/admin/views/html-admin-page-status-report.php:489
+#: includes/admin/views/html-admin-page-status-report.php:495
 msgid "Template Overrides"
 msgstr "Sablon felülírások"
 
-#: includes/admin/views/html-admin-page-status-report.php:483
+#: includes/admin/views/html-admin-page-status-report.php:496
 msgid "No overrides present in theme."
 msgstr "A sablonban nincsenek felülírások."
 
@@ -5276,6 +5334,20 @@ msgstr "<strong>Üdvözöl a WooCommerce</strong> &#8211; Már majdnem készen �
 msgid "Skip setup"
 msgstr "Telepítő kihagyása"
 
+#: includes/admin/views/html-notice-template-check.php:5
+msgid ""
+"<strong>Your theme has bundled outdated copies of WooCommerce template "
+"files</strong> &#8211; if you encounter functionality issues on the frontend"
+" this could the reason. Ensure you update or remove them (in general we "
+"recommend only bundling the template files you actually need to customize). "
+"See the system report for full details."
+msgstr ""
+
+#: includes/admin/views/html-notice-template-check.php:6
+#: includes/admin/views/html-notice-theme-support.php:6
+msgid "Hide this notice"
+msgstr "Értesítés elrejtése"
+
 #: includes/admin/views/html-notice-theme-support.php:5
 msgid ""
 "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if "
@@ -5286,10 +5358,6 @@ msgstr "<strong>A sablonod nem tartalmaz WooCommerce támogatást</strong> &#821
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Theme Integration Guide"
 msgstr "Sablon integrációs útmutató"
-
-#: includes/admin/views/html-notice-theme-support.php:6
-msgid "Hide this notice"
-msgstr "Értesítés elrejtése"
 
 #: includes/admin/views/html-notice-update.php:5
 msgid ""
@@ -5329,7 +5397,7 @@ msgstr "http://www.woothemes.com/woocommerce/"
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr "Egy e-kereskedelmi eszköztár ami segít eladni bármit. Gyönyörűen."
+msgstr "Egy e-kereskedelmi eszköztár, ami segít eladni bármit. Gyönyörűen."
 
 #. Author of the plugin/theme
 msgid "WooThemes"

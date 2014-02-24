@@ -8,7 +8,12 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 /**
- * WC_Report_Customer_List class
+ * WC_Report_Customer_List
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Customer_List extends WP_List_Table {
 
@@ -171,7 +176,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 				if ( $order_ids ) {
 					$order = new WC_Order( $order_ids[0] );
 
-					echo '<a href="' . admin_url( 'post.php?post=' . $order->id . '&action=edit' ) . '">' . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format', strtotime( $order->order_date ) ) );
+					echo '<a href="' . admin_url( 'post.php?post=' . $order->id . '&action=edit' ) . '">' . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) );
 				} else echo '-';
 
 			break;

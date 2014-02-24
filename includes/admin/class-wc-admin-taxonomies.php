@@ -1,19 +1,16 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
- * Admin taxonomy functions.
+ * Handles taxonomies in admin
  *
+ * @class 		WC_Admin_Taxonomies
+ * @version		2.1.0
+ * @package		WooCommerce/Admin
+ * @category	Class
  * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
- * @version     2.1.0
- */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-if ( ! class_exists( 'WC_Admin_Taxonomies' ) ) :
-
-/**
- * WC_Admin_Taxonomies Class
  */
 class WC_Admin_Taxonomies {
 
@@ -321,6 +318,10 @@ class WC_Admin_Taxonomies {
 			else
 				$image = wc_placeholder_img_src();
 
+			// Prevent esc_url from breaking spaces in urls for image embeds
+			// Ref: http://core.trac.wordpress.org/ticket/23605
+			$image = str_replace( ' ', '%20', $image );
+
 			$columns .= '<img src="' . esc_url( $image ) . '" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
 
 		}
@@ -329,6 +330,4 @@ class WC_Admin_Taxonomies {
 	}
 }
 
-endif;
-
-return new WC_Admin_Taxonomies();
+new WC_Admin_Taxonomies();

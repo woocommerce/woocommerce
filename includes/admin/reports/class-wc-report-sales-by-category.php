@@ -1,9 +1,15 @@
 <?php
 /**
- * WC_Report_Sales_By_Category class
+ * WC_Report_Sales_By_Category
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
+	public $chart_colours = array();
 	public $show_categories = array();
 
 	/**

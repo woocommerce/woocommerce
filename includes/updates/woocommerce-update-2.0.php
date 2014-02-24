@@ -32,11 +32,6 @@ if ( $existing_file_paths ) {
 	}
 }
 
-// Update table primary keys
-$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions DROP PRIMARY KEY" );
-
-$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD PRIMARY KEY (  `product_id` ,  `order_id` ,  `order_key` ,  `download_id` )" );
-
 // Setup default permalinks if shop page is defined
 $permalinks 	= get_option( 'woocommerce_permalinks' );
 $shop_page_id 	= wc_get_page_id( 'shop' );

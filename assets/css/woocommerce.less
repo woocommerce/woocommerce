@@ -928,7 +928,6 @@ p.demo_store {
 
 	p.stars {
 		position: relative;
-		height: 1em;
 		font-size: 1em;
 
 		a {
@@ -955,7 +954,7 @@ p.demo_store {
 					position: absolute;
 					top: 0;
 					left: 0;
-					padding-right: 1em;
+					//padding-right: 1em;
 				}
 
 			}
@@ -1270,6 +1269,11 @@ p.demo_store {
 				float:none;
 				display:block;
 			}
+			.shipping-calculator-button {
+				&:after {
+					.iconafter( "\e02e" );
+				}
+			}
 		}
 		.cart_totals {
 			p {
@@ -1314,9 +1318,7 @@ p.demo_store {
 				border-top: 1px solid @secondary;
 			}
 			a.button.alt {
-				width: 193px;
-				display:block;
-				font-size: 0.92em;
+				display: inline-block;
 			}
 		}
 		.cross-sells {
@@ -1804,9 +1806,17 @@ p.demo_store {
 
 /* =Twenty Thirteen Specific styles
 -------------------------------------------------------------- */
-.twentythirteen {
-	.entry-summary {
-		padding:0;
+.single-product {
+	.twentythirteen {
+		.entry-summary,
+		#reply-title,
+		#respond #commentform {
+			padding: 0;
+		}
+
+		p.stars {
+			clear: both;
+		}
 	}
 }
 

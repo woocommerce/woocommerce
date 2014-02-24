@@ -13,7 +13,11 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Wrapper for wp_get_post_terms which supports ordering by parent
+ * Wrapper for wp_get_post_terms which supports ordering by parent.
+ *
+ * NOTE: At this point in time, ordering by menu_order for example isn't possible with this function. wp_get_post_terms has no
+ *   filters which we can utilise to modify it's query. https://core.trac.wordpress.org/ticket/19094
+ * 
  * @param  int $product_id
  * @param  string $taxonomy
  * @param  array  $args
@@ -23,31 +27,35 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	if ( ! taxonomy_exists( $taxonomy ) )
 		return array();
 
-	if ( empty( $args['fields'] ) && taxonomy_is_product_attribute( $taxonomy ) ) {
-		$args['fields'] = wc_attribute_orderby( $taxonomy );
+	if ( empty( $args['orderby'] ) && taxonomy_is_product_attribute( $taxonomy ) ) {
+		$args['orderby'] = wc_attribute_orderby( $taxonomy );
 	}
 
+	// Support ordering by parent
 	if ( ! empty( $args['orderby'] ) && $args['orderby'] == 'parent' ) {
-		$fields         = isset( $args['fields'] ) ? $args['fields'] : 'all';
-		$orderby_parent = true;
+		$fields = isset( $args['fields'] ) ? $args['fields'] : 'all';
 
+		// Unset for wp_get_post_terms
 		unset( $args['orderby'] );
 		unset( $args['fields'] );
-	}
 
-	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
+		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 
-	if ( ! empty( $orderby_parent ) ) {
 		usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
 
 		switch ( $fields ) {
 			case 'names' :
 				$terms = wp_list_pluck( $terms, 'name' );
+				break;
 			case 'ids' :
 				$terms = wp_list_pluck( $terms, 'term_id' );
+				break;
 			case 'slugs' :
 				$terms = wp_list_pluck( $terms, 'slug' );
+				break;
 		}
+	} else {
+		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 	}
 
 	return $terms;
@@ -315,13 +323,19 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	global $wpdb, $woocommerce;
 
 	// No sorting when menu_order is false
-	if ( isset($args['menu_order']) && $args['menu_order'] == false ) return $clauses;
+	if ( isset( $args['menu_order'] ) && $args['menu_order'] == false ) {
+		return $clauses;
+	}
 
 	// No sorting when orderby is non default
-	if ( isset($args['orderby']) && $args['orderby'] != 'name' ) return $clauses;
+	if ( isset( $args['orderby'] ) && $args['orderby'] != 'name' ) {
+		return $clauses;
+	}
 
 	// No sorting in admin when sorting by a column
-	if ( is_admin() && isset($_GET['orderby']) ) return $clauses;
+	if ( is_admin() && isset( $_GET['orderby'] ) ) {
+		return $clauses;
+	}
 
 	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
 	$found = false;
@@ -331,7 +345,9 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 			break;
 		}
 	}
-	if (!$found) return $clauses;
+	if ( ! $found ) {
+		return $clauses;
+	}
 
 	// Meta name
 	if ( ! empty( $taxonomies[0] ) && taxonomy_is_product_attribute( $taxonomies[0] ) ) {
@@ -341,13 +357,17 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// query fields
-	if ( strpos('COUNT(*)', $clauses['fields']) === false ) $clauses['fields']  .= ', tm.* ';
+	if ( strpos( 'COUNT(*)', $clauses['fields'] ) === false )  {
+		$clauses['fields']  .= ', tm.* ';
+	}
 
 	//query join
 	$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = '". $meta_name ."') ";
 
 	// default to ASC
-	if ( ! isset($args['menu_order']) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) $args['menu_order'] = 'ASC';
+	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) {
+		$args['menu_order'] = 'ASC';
+	}
 
 	$order = "ORDER BY tm.meta_value+0 " . $args['menu_order'];
 
@@ -391,7 +411,10 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	$count_query = "
 		SELECT COUNT( DISTINCT posts.ID ) FROM {$wpdb->posts} as posts
 		LEFT JOIN {$wpdb->postmeta} AS meta_visibility ON posts.ID = meta_visibility.post_id
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+		LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
 		$stock_join
 		WHERE 	post_status = 'publish'
 		AND 	post_type 	= 'product'
@@ -428,7 +451,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 			}
 
 			// Generate term query
-			$term_query = 'AND term_taxonomy_id IN ( ' . implode( ',', $terms_to_count ) . ' )';
+			$term_query = 'AND term_id IN ( ' . implode( ',', $terms_to_count ) . ' )';
 
 			// Get the count
 			$count = $wpdb->get_var( $count_query . $term_query );

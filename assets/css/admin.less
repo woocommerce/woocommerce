@@ -2040,7 +2040,7 @@ img.help_tip {
 		float: right;
 		width: 100%;
 
-		p, .wc-metaboxes, p.toolbar, fieldset.form-field {
+		.wc-metaboxes, p.toolbar {
 			padding-left: 12px !important;
 			padding-right: 20px !important;
 		}
@@ -2321,10 +2321,14 @@ img.help_tip {
 	p {
 		margin: 9px 0 9px;
 	}
+	p.form-field, fieldset.form-field {
+		padding: 5px 20px 5px 162px !important; /** Padding for aligning labels left - 12px + 150 label width **/
+	}
 	label, legend {
 		float: left;
 		width: 150px;
 		padding: 0;
+		margin: 0 0 0 -150px;
 
 		.req {
 			font-weight: bold;
@@ -2405,6 +2409,11 @@ img.help_tip {
 				}
 			}
 		}
+		ul.wc-radios {
+			label {
+				margin-left: 0;
+			}
+		}
 	}
 	.dimensions_field {
 		.wrap {
@@ -2439,6 +2448,10 @@ img.help_tip {
 		}
 		&:last-child {
 			border-bottom:0;
+		}
+		.link_all_variations, .add_variation {
+			float: right;
+			margin-left: 5px;
 		}
 	}
 	p.toolbar {
@@ -3055,14 +3068,14 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 			li {
 				border-right: 5px solid #aaa;
 				color: #aaa;
-				padding: 1em 1.5em;
+				padding: 1em;
 				display: block;
 				margin: 0;
 				-webkit-transition:all ease .5s;
 				box-shadow:
 					inset 0 -1px 0 0 #dfdfdf;
 				strong {
-					font-size: 2.618em;
+					font-size: 1.618em;
 					line-height: 1.2em;
 					color: #464646;
 					font-weight: normal;
@@ -3074,7 +3087,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 						inset 0 -1px 0 0 #dfdfdf,
 						inset 300px 0 0 fade(#9c5d90,10%);
 					border-right: 5px solid #9c5d90 !important;
-					padding-left:2em;
+					padding-left:1.5em;
 					color: #9c5d90;
 				}
 			}
@@ -3153,6 +3166,31 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 	.woocommerce-reports-right {
 		width: 49.5%;
 		float: right;
+	}
+	.column-wc_actions {
+		a.edit,
+		a.view {
+			.ir;
+			padding:0 !important;
+			height: 2em !important;
+			width:2em;
+			&:after {
+				.icon;
+				line-height: 1.85;
+			}
+		}
+
+		a.edit {
+			&:after {
+				content: "\e01c";
+			}
+		}
+
+		a.view {
+			&:after {
+				content: "\e010";
+			}
+		}
 	}
 }
 
@@ -3301,7 +3339,7 @@ table.bar_chart {
 	.woocommerce_options_panel .description {
 		display: block;
 		clear: both;
-		margin-left: 150px;
+		margin-left: 0;
 	}
 }
 

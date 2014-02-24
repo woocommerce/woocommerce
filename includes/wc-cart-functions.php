@@ -34,8 +34,6 @@ add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_c
  * @return void
  */
 function wc_empty_cart() {
-	global $woocommerce;
-
 	if ( ! isset( WC()->cart ) || WC()->cart == '' )
 		WC()->cart = new WC_Cart();
 
@@ -52,7 +50,6 @@ add_action( 'wp_logout', 'wc_empty_cart' );
  * @return void
  */
 function wc_load_persistent_cart( $user_login, $user = 0 ) {
-	global $woocommerce;
 
 	if ( ! $user )
 		return;
@@ -70,11 +67,10 @@ add_action( 'wp_login', 'wc_load_persistent_cart', 1, 2 );
  * Add to cart messages.
  *
  * @access public
- * @param int $product_id
+ * @param int|array $product_id
  * @return void
  */
 function wc_add_to_cart_message( $product_id ) {
-	global $woocommerce;
 
 	if ( is_array( $product_id ) ) {
 
@@ -103,7 +99,7 @@ function wc_add_to_cart_message( $product_id ) {
 
 	endif;
 
-	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message ) );
+	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
 }
 
 /**
@@ -113,7 +109,7 @@ function wc_add_to_cart_message( $product_id ) {
  * @return void
  */
 function wc_clear_cart_after_payment() {
-	global $woocommerce, $wp;
+	global $wp;
 
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
@@ -174,10 +170,24 @@ function wc_cart_totals_shipping_html() {
 }
 
 /**
+ * Get a coupon label
+ *
+ * @access public
+ * @param string $coupon
+ * @return void
+ */
+function wc_cart_totals_coupon_label( $coupon ) {
+	if ( is_string( $coupon ) )
+		$coupon = new WC_Coupon( $coupon );
+
+	echo apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:', 'woocommerce' ) . ' ' . $coupon->code ), $coupon );
+}
+
+/**
  * Get a coupon value
  *
  * @access public
- * @param string $code
+ * @param string $coupon
  * @return void
  */
 function wc_cart_totals_coupon_html( $coupon ) {

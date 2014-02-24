@@ -61,7 +61,7 @@ class WC_Checkout {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -70,7 +70,7 @@ class WC_Checkout {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -327,19 +327,22 @@ class WC_Checkout {
 
 		// Store tax rows
 		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $key ) {
+			$code = WC()->cart->tax->get_rate_code( $key );
+			
+			if ( $code ) {
+				$item_id = wc_add_order_item( $order_id, array(
+			 		'order_item_name' 		=> $code,
+			 		'order_item_type' 		=> 'tax'
+			 	) );
 
-			$item_id = wc_add_order_item( $order_id, array(
-		 		'order_item_name' 		=> WC()->cart->tax->get_rate_code( $key ),
-		 		'order_item_type' 		=> 'tax'
-		 	) );
-
-		 	// Add line item meta
-		 	if ( $item_id ) {
-		 		wc_add_order_item_meta( $item_id, 'rate_id', $key );
-		 		wc_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
-			 	wc_add_order_item_meta( $item_id, 'compound', absint( WC()->cart->tax->is_compound( $key ) ? 1 : 0 ) );
-			 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( isset( WC()->cart->taxes[ $key ] ) ? WC()->cart->taxes[ $key ] : 0 ) );
-			 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( isset( WC()->cart->shipping_taxes[ $key ] ) ? WC()->cart->shipping_taxes[ $key ] : 0 ) );
+			 	// Add line item meta
+			 	if ( $item_id ) {
+			 		wc_add_order_item_meta( $item_id, 'rate_id', $key );
+			 		wc_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
+				 	wc_add_order_item_meta( $item_id, 'compound', absint( WC()->cart->tax->is_compound( $key ) ? 1 : 0 ) );
+				 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( isset( WC()->cart->taxes[ $key ] ) ? WC()->cart->taxes[ $key ] : 0 ) );
+				 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( isset( WC()->cart->shipping_taxes[ $key ] ) ? WC()->cart->shipping_taxes[ $key ] : 0 ) );
+				}
 			}
 		}
 
@@ -363,11 +366,15 @@ class WC_Checkout {
 			update_post_meta( $order_id, '_payment_method', 		$this->payment_method->id );
 			update_post_meta( $order_id, '_payment_method_title', 	$this->payment_method->get_title() );
 		}
+		if ( empty( $this->posted['billing_email'] ) && is_user_logged_in() ) {
+			$current_user = wp_get_current_user();
+			update_post_meta( $order_id, '_billing_email', $current_user->user_email );
+		}
 		update_post_meta( $order_id, '_order_shipping', 		wc_format_decimal( WC()->cart->shipping_total ) );
 		update_post_meta( $order_id, '_order_discount', 		wc_format_decimal( WC()->cart->get_order_discount_total() ) );
 		update_post_meta( $order_id, '_cart_discount', 			wc_format_decimal( WC()->cart->get_cart_discount_total() ) );
-		update_post_meta( $order_id, '_order_tax', 				wc_format_decimal( wc_round_tax_total( WC()->cart->tax_total ) ) );
-		update_post_meta( $order_id, '_order_shipping_tax', 	wc_format_decimal( wc_round_tax_total( WC()->cart->shipping_tax_total ) ) );
+		update_post_meta( $order_id, '_order_tax', 				wc_format_decimal( WC()->cart->tax_total ) );
+		update_post_meta( $order_id, '_order_shipping_tax', 	wc_format_decimal( WC()->cart->shipping_tax_total ) );
 		update_post_meta( $order_id, '_order_total', 			wc_format_decimal( WC()->cart->total, get_option( 'woocommerce_price_num_decimals' ) ) );
 
 		update_post_meta( $order_id, '_order_key', 				'wc_' . apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
@@ -742,7 +749,7 @@ class WC_Checkout {
 	 *
 	 * @access public
 	 * @param string $input
-	 * @return string
+	 * @return string|null
 	 */
 	public function get_value( $input ) {
 		if ( ! empty( $_POST[ $input ] ) ) {
@@ -781,7 +788,7 @@ class WC_Checkout {
 				case "shipping_postcode" :
 					return apply_filters( 'default_checkout_postcode', WC()->customer->get_shipping_postcode() ? WC()->customer->get_shipping_postcode() : '', 'shipping' );
 				default :
-					return apply_filters( 'default_checkout_' . $input, '', $input );
+					return apply_filters( 'default_checkout_' . $input, null, $input );
 			}
 		}
 	}

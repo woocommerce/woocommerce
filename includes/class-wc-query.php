@@ -116,6 +116,14 @@ class WC_Query {
 	}
 
 	/**
+	 * Get query vars
+	 * @return array()
+	 */
+	public function get_query_vars() {
+		return $this->query_vars;
+	}
+
+	/**
 	 * Parse the request and look for query vars - endpoints may not be supported
 	 */
 	public function parse_request() {
@@ -242,7 +250,8 @@ class WC_Query {
 	 * @return string
 	 */
 	public function exclude_protected_products( $where ) {
-		$where .= " AND post_password = ''";
+		global $wpdb;
+		$where .= " AND {$wpdb->posts}.post_password = ''";
     	return $where;
 	}
 
@@ -335,18 +344,14 @@ class WC_Query {
 	 */
 	public function product_query( $q ) {
 
-		// Check that product post type has been requested
-		if ( $q->get( 'post_type' ) != 'product' )
-    		return;
-
 		// Meta query
 		$meta_query = $this->get_meta_query( $q->get( 'meta_query' ) );
 
 		// Ordering
-		$ordering = $this->get_catalog_ordering_args();
+		$ordering   = $this->get_catalog_ordering_args();
 
 		// Get a list of post id's which match the current filters set (in the layered nav and price filter)
-		$post__in = array_unique( apply_filters( 'loop_shop_post_in', array() ) );
+		$post__in   = array_unique( apply_filters( 'loop_shop_post_in', array() ) );
 
 		// Ordering query vars
 		$q->set( 'orderby', $ordering['orderby'] );
@@ -355,8 +360,6 @@ class WC_Query {
 			$q->set( 'meta_key', $ordering['meta_key'] );
 
 		// Query vars that affect posts shown
-		if ( ! $q->is_tax( 'product_cat' ) && ! $q->is_tax( 'product_tag' ) )
-			$q->set( 'post_type', 'product' );
 		$q->set( 'meta_query', $meta_query );
 		$q->set( 'post__in', $post__in );
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
@@ -756,7 +759,7 @@ class WC_Query {
 
 			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-			wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider' ), '1.6', true );
+			wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
 
 			wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
 				'currency_symbol' 	=> get_woocommerce_currency_symbol(),

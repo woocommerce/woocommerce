@@ -50,7 +50,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			$sections[ strtolower( get_class( $email ) ) ] = esc_html( $title );
 		}
 
-		return $sections;
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**

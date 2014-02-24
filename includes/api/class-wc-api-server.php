@@ -313,7 +313,7 @@ class WC_API_Server {
 				break;
 
 			default:
-				return new WP_Error( 'woocommerce_api_unsupported_method', __( 'Unsupported request method' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_api_unsupported_method', __( 'Unsupported request method', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		foreach ( $this->get_routes() as $route => $handlers ) {
@@ -330,7 +330,7 @@ class WC_API_Server {
 					continue;
 
 				if ( ! is_callable( $callback ) )
-					return new WP_Error( 'woocommerce_api_invalid_handler', __( 'The handler for the route is invalid' ), array( 'status' => 500 ) );
+					return new WP_Error( 'woocommerce_api_invalid_handler', __( 'The handler for the route is invalid', 'woocommerce' ), array( 'status' => 500 ) );
 
 				$args = array_merge( $args, $this->params['GET'] );
 				if ( $method & self::METHOD_POST ) {
@@ -366,7 +366,7 @@ class WC_API_Server {
 			}
 		}
 
-		return new WP_Error( 'woocommerce_api_no_route', __( 'No route was found matching the URL and request method' ), array( 'status' => 404 ) );
+		return new WP_Error( 'woocommerce_api_no_route', __( 'No route was found matching the URL and request method', 'woocommerce' ), array( 'status' => 404 ) );
 	}
 
 	/**
@@ -376,7 +376,7 @@ class WC_API_Server {
 	 * by the parameters the method actually needs, using the Reflection API
 	 *
 	 * @since 2.1
-	 * @param array $callback the endpoint callback
+	 * @param callable|array $callback the endpoint callback
 	 * @param array $provided the provided request parameters
 	 * @return array
 	 */
@@ -401,7 +401,7 @@ class WC_API_Server {
 			}
 			else {
 				// We don't have this parameter and it wasn't optional, abort!
-				return new WP_Error( 'woocommerce_api_missing_callback_param', sprintf( __( 'Missing parameter %s' ), $param->getName() ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_api_missing_callback_param', sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param->getName() ), array( 'status' => 400 ) );
 			}
 		}
 		return $ordered_parameters;

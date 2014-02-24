@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
 
 	// wc_add_to_cart_params is required to continue, ensure the object exists
 	if (typeof wc_add_to_cart_params === "undefined")

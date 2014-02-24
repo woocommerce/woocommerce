@@ -177,7 +177,7 @@ class WC_Admin_Status {
 			'clear_expired_transients' => array(
 				'name'		=> __( 'Expired Transients','woocommerce'),
 				'button'	=> __('Clear expired transients','woocommerce'),
-				'desc'		=> __( 'This tool will clear ALL expired transients from Wordpress.', 'woocommerce' ),
+				'desc'		=> __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'recount_terms' => array(
 				'name'		=> __('Term counts','woocommerce'),
@@ -207,6 +207,33 @@ class WC_Admin_Status {
 		) );
 	}
 
+	/**
+	 * Retrieve metadata from a file. Based on WP Core's get_file_data function
+	 *
+	 * @since 2.1.1
+	 * @param string $file Path to the file
+	 * @param array $all_headers List of headers, in the format array('HeaderKey' => 'Header Name')
+	 */
+	public function get_file_version( $file ) {
+		// We don't need to write to the file, so just open for reading.
+		$fp = fopen( $file, 'r' );
+
+		// Pull only the first 8kiB of the file in.
+		$file_data = fread( $fp, 8192 );
+
+		// PHP will close file handle, but we are good citizens.
+		fclose( $fp );
+
+		// Make sure we catch CR-only line endings.
+		$file_data = str_replace( "\r", "\n", $file_data );
+		$version   = '';
+
+		if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] )
+			$version = _cleanup_header_comment( $match[1] );
+
+		return $version ;
+	}
+	
 	/**
 	 * Scan the template files
 	 *

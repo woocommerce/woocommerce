@@ -165,7 +165,9 @@ class WC_Meta_Box_Coupon_Data {
 				echo '</div><div class="options_group">';
 
 				// Customers
-				woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Email restrictions', 'woocommerce' ), 'placeholder' => __( 'No restrictions', 'woocommerce' ), 'description' => __( 'List of emails to check against the customer\'s billing email when an order is placed.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ), 'desc_tip' => true, 'type' => 'email', 'class' => '' ) );
+				woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Email restrictions', 'woocommerce' ), 'placeholder' => __( 'No restrictions', 'woocommerce' ), 'description' => __( 'List of emails to check against the customer\'s billing email when an order is placed.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ), 'desc_tip' => true, 'type' => 'email', 'class' => '', 'custom_attributes' => array(
+						'multiple' 	=> 'multiple'
+					) ) );
 
 				echo '</div>';
 
@@ -275,7 +277,6 @@ class WC_Meta_Box_Coupon_Data {
 		update_post_meta( $post_id, 'minimum_amount', $minimum_amount );
 		update_post_meta( $post_id, 'customer_email', $customer_email );
 
-		/* Deprecated - same hook name as in the meta */ do_action( 'woocommerce_coupon_options' );
-		do_action( 'woocommerce_coupon_options_save' );
+		do_action( 'woocommerce_coupon_options_save', $post_id );
 	}
 }

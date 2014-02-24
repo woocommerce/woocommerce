@@ -565,7 +565,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		}
 
 		// Search orders
-		$post_ids = array_merge(
+		$post_ids = array_unique( array_merge(
 			$wpdb->get_col(
 				$wpdb->prepare( "
 					SELECT post_id
@@ -578,7 +578,8 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			$wpdb->get_col(
 				$wpdb->prepare( "
 					SELECT p1.post_id
-					FROM {$wpdb->postmeta} p1, {$wpdb->postmeta} p2
+					FROM {$wpdb->postmeta} p1
+					INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
 					WHERE
 						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
 					OR
@@ -597,7 +598,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				)
 			),
 			array( $search_order_id )
-		);
+		) );
 
 		// Remove s - we don't want to search order name
 		unset( $wp->query_vars['s'] );
@@ -685,7 +686,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		if ( 'shop_order' == $post_type ) {
 			?>
 			<script type="text/javascript">
-			jQuery(document).ready(function() {
+			jQuery(function() {
 				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action']");
 				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action2']");
 
@@ -756,7 +757,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
 
 			if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
-				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number ), number_format_i18n( $number ) );
+				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . $message . '</p></div>';
 			}
 		}

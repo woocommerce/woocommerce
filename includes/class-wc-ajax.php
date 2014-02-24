@@ -188,23 +188,45 @@ class WC_AJAX {
 		if ( isset( $_POST['address_2'] ) )
 			WC()->customer->set_address_2( $_POST['address_2'] );
 
-		if ( isset( $_POST['s_country'] ) )
-			WC()->customer->set_shipping_country( $_POST['s_country'] );
+		if ( "yes" == get_option( 'woocommerce_ship_to_billing_address_only' ) ) {
 
-		if ( isset( $_POST['s_state'] ) )
-			WC()->customer->set_shipping_state( $_POST['s_state'] );
+			if ( isset( $_POST['country'] ) )
+				WC()->customer->set_shipping_country( $_POST['country'] );
 
-		if ( isset( $_POST['s_postcode'] ) )
-			WC()->customer->set_shipping_postcode( $_POST['s_postcode'] );
+			if ( isset( $_POST['state'] ) )
+				WC()->customer->set_shipping_state( $_POST['state'] );
 
-		if ( isset( $_POST['s_city'] ) )
-			WC()->customer->set_shipping_city( $_POST['s_city'] );
+			if ( isset( $_POST['postcode'] ) )
+				WC()->customer->set_shipping_postcode( $_POST['postcode'] );
 
-		if ( isset( $_POST['s_address'] ) )
-			WC()->customer->set_shipping_address( $_POST['s_address'] );
+			if ( isset( $_POST['city'] ) )
+				WC()->customer->set_shipping_city( $_POST['city'] );
 
-		if ( isset( $_POST['s_address_2'] ) )
-			WC()->customer->set_shipping_address_2( $_POST['s_address_2'] );
+			if ( isset( $_POST['address'] ) )
+				WC()->customer->set_shipping_address( $_POST['address'] );
+
+			if ( isset( $_POST['address_2'] ) )
+				WC()->customer->set_shipping_address_2( $_POST['address_2'] );
+		} else {
+
+			if ( isset( $_POST['s_country'] ) )
+				WC()->customer->set_shipping_country( $_POST['s_country'] );
+
+			if ( isset( $_POST['s_state'] ) )
+				WC()->customer->set_shipping_state( $_POST['s_state'] );
+
+			if ( isset( $_POST['s_postcode'] ) )
+				WC()->customer->set_shipping_postcode( $_POST['s_postcode'] );
+
+			if ( isset( $_POST['s_city'] ) )
+				WC()->customer->set_shipping_city( $_POST['s_city'] );
+
+			if ( isset( $_POST['s_address'] ) )
+				WC()->customer->set_shipping_address( $_POST['s_address'] );
+
+			if ( isset( $_POST['s_address_2'] ) )
+				WC()->customer->set_shipping_address_2( $_POST['s_address_2'] );
+		}
 
 		WC()->cart->calculate_totals();
 
@@ -596,11 +618,7 @@ class WC_AJAX {
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
 			if ( $attribute['is_taxonomy'] ) {
-				$post_terms = wp_get_post_terms( $post_id, $attribute['name'] );
-				$options = array();
-				foreach ( $post_terms as $term ) {
-					$options[] = $term->slug;
-				}
+				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'slugs' ) );
 			} else {
 				$options = explode( WC_DELIMITER, $attribute['value'] );
 			}
@@ -626,12 +644,12 @@ class WC_AJAX {
 
 		// Created posts will all have the following data
 		$variation_post_data = array(
-			'post_title' => 'Product #' . $post_id . ' Variation',
+			'post_title'   => 'Product #' . $post_id . ' Variation',
 			'post_content' => '',
-			'post_status' => 'publish',
-			'post_author' => get_current_user_id(),
-			'post_parent' => $post_id,
-			'post_type' => 'product_variation'
+			'post_status'  => 'publish',
+			'post_author'  => get_current_user_id(),
+			'post_parent'  => $post_id,
+			'post_type'    => 'product_variation'
 		);
 
 		// Now find all combinations and create posts

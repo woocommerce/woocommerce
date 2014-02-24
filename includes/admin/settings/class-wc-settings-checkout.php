@@ -22,7 +22,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 */
 	public function __construct() {
 		$this->id    = 'checkout';
-		$this->label = __( 'Checkout', 'woocommerce' );
+		$this->label = _x( 'Checkout', 'Settings tab label', 'woocommerce' );
 
 		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
 		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
@@ -51,7 +51,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			$sections[ strtolower( get_class( $gateway ) ) ] = esc_html( $title );
 		}
 
-		return $sections;
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**

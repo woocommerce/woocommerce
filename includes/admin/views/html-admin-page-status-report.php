@@ -228,7 +228,7 @@
 
 						if ( strstr( $dirname, 'woocommerce' ) ) {
 
-							if ( false === ( $version_data = get_transient( $plugin . '_version_data' ) ) ) {
+							if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
 								$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
 								$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
 								if ( ! empty( $cl_lines ) ) {
@@ -239,7 +239,7 @@
 											$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 											$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
 											$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
-											set_transient( $plugin . '_version_data', $version_data , 60*60*12 );
+											set_transient( md5( $plugin ) . '_version_data', $version_data, 60*60*12 );
 											break;
 										}
 									}
@@ -389,7 +389,7 @@
         $active_theme = wp_get_theme();
         if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
 
-			$theme_dir = strtolower( str_replace( ' ','', $active_theme->Name ) );
+			$theme_dir = substr( strtolower( str_replace( ' ','', $active_theme->Name ) ), 0, 45 );
 
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) :
 
@@ -448,8 +448,7 @@
 
 	<tbody>
 		<tr>
-			<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
-			<td><?php
+			<?php
 
 				$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 				$found_files    = array();
@@ -460,30 +459,44 @@
 				foreach ( $scanned_files as $plugin_name => $files ) {
 					foreach ( $files as $file ) {
 						if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
-							$found_files[ $plugin_name ][] = '/' . $file;
+							$theme_file = get_stylesheet_directory() . '/' . $file;
 						} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
-							$found_files[ $plugin_name ][] = '/woocommerce/' . $file;
+							$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
 						} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
-							$found_files[ $plugin_name ][] = '/' . $file;
+							$theme_file = get_template_directory() . '/' . $file;
 						} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
-							$found_files[ $plugin_name ][] = '/woocommerce/' . $file;
+							$theme_file = get_template_directory() . '/woocommerce/' . $file;
+						} else {
+							$theme_file = false;
+						}
+
+						if ( $theme_file ) {
+							$core_version  = $this->get_file_version( WC()->plugin_path() . '/templates/' . $file );
+							$theme_version = $this->get_file_version( $theme_file );
+
+							if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
+								$found_files[ $plugin_name ][] = sprintf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), basename( $theme_file ), $theme_version ? $theme_version : '-', $core_version );
+							} else {
+								$found_files[ $plugin_name ][] = sprintf( '<code>%s</code>', basename( $theme_file ) );
+							}
 						}
 					}
 				}
 
 				if ( $found_files ) {
-					$loop = 0;
 					foreach ( $found_files as $plugin_name => $found_plugin_files ) {
-						echo $loop > 0 ? '<br/><br/>' : '';
-						echo $plugin_name . ': <br/>';
-						echo implode( ', <br/>', $found_plugin_files );
-						$loop++;
+						?>
+						<td><?php _e( 'Template Overrides', 'woocommerce' ); ?> (<?php echo $plugin_name; ?>):</td>
+						<td><?php echo implode( ', <br/>', $found_plugin_files ); ?></td>
+						<?php
 					}
 				} else {
-					_e( 'No overrides present in theme.', 'woocommerce' );
+					?>
+					<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
+					<td><?php _e( 'No overrides present in theme.', 'woocommerce' ); ?></td>
+					<?php
 				}
-
-			?></td>
+			?>
 		</tr>
 	</tbody>
 

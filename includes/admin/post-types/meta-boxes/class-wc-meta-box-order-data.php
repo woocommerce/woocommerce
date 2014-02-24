@@ -185,7 +185,7 @@ class WC_Meta_Box_Order_Data {
 							echo '<div class="address">';
 
 								if ( $order->get_formatted_billing_address() )
-									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $order->get_formatted_billing_address() ) ) . '</p>';
+									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 								else
 									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
 
@@ -264,7 +264,7 @@ class WC_Meta_Box_Order_Data {
 							echo '<div class="address">';
 
 								if ( $order->get_formatted_shipping_address() )
-									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $order->get_formatted_shipping_address() ) ) . '</p>';
+									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
 								else
 									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
 
