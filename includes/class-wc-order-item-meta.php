@@ -12,6 +12,7 @@
 class WC_Order_Item_Meta {
 
 	public $meta;
+	public $product;
 
 	/**
 	 * Constructor
@@ -20,8 +21,9 @@ class WC_Order_Item_Meta {
 	 * @param string $item_meta (default: '')
 	 * @return void
 	 */
-	public function __construct( $item_meta = array() ) {
-		$this->meta = $item_meta;
+	public function __construct( $item_meta = array(), $product = null ) {
+		$this->meta    = $item_meta;
+		$this->product = $product;
 	}
 
 	/**
@@ -55,6 +57,11 @@ class WC_Order_Item_Meta {
 		            	$term = get_term_by('slug', $meta_value, esc_attr( str_replace( 'attribute_', '', $meta_key ) ) );
 		            	if ( ! is_wp_error( $term ) && $term->name )
 		            		$meta_value = $term->name;
+		          	
+		          	// If we have a product, and its not a term, try to find its non-sanitized name
+		            } elseif ( $this->product ) {
+						$product_attributes = $this->product->get_attributes();
+						$meta_key           = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', urldecode( $meta_key ) ) ]['name'] );
 		            }
 
 					if ( $flat )
