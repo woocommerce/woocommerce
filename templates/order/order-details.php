@@ -39,7 +39,7 @@ $order = new WC_Order( $order_id );
 
 			foreach( $order->get_items() as $item ) {
 				$_product     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-				$item_meta    = new WC_Order_Item_Meta( $item['item_meta'] );
+				$item_meta    = new WC_Order_Item_Meta( $item['item_meta'], $_product );
 
 				?>
 				<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
