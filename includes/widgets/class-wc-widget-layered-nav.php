@@ -324,6 +324,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					if ( isset( $_GET['max_price'] ) )
 						$link = add_query_arg( 'max_price', $_GET['max_price'], $link );
 
+					// Orderby
+					if ( isset( $_GET['orderby'] ) )
+						$link = add_query_arg( 'orderby', $_GET['orderby'], $link );
+
 					// Current Filter = this widget
 					if ( isset( $_chosen_attributes[ $taxonomy ] ) && is_array( $_chosen_attributes[ $taxonomy ]['terms'] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) ) {
 
