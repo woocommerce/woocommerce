@@ -249,7 +249,15 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$extra_rate['label']	= $this_option[0];
 				$this_cost				= $this_option[1];
 
-				if (preg_match('/(\d+\.?\d*)\s*(\+|-)\s*(\d+\.?\d*)\%/', $this_cost, $this_cost_matches)) {
+				$pattern = 
+					'/' .           // start regex
+					'(\d+\.?\d*)' . // capture digits, optionally capture a `.` and more digits
+					'\s*' .         // match whitespace
+					'(\+|-)' .      // capture the operand
+					'\s*'.          // match whitespace
+					'(\d+\.?\d*)'.  // capture digits, optionally capture a `.` and more digits
+					'\%/';          // match the percent sign & end regex
+				if ( preg_match( $pattern, $this_cost, $this_cost_matches ) ) {
 					$this_cost_mathop = $this_cost_matches[2];
 					$this_cost_percents = $this_cost_matches[3] / 100;
 					$this_cost = $this_cost_matches[1];
