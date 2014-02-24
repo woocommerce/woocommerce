@@ -148,12 +148,23 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Cleaned noticed that might show when tax rates left empty
 * Fix - Prevented warning when you have hide shipping methods until address entered selected in CoD
 * Fix - Better URL detection for subdirectory installs in get_woocommerce_api_url
+* Fix - Transient names are now md5 hashed so they don't exceed max length
+* Fix - Fixed searching for orders and speed improvements there
+* Fix - "Show children of current category only" option working again in Product Category widget
+* Fix - Order search by SKU can now return multiple results again
+* Fix - Fixed alignment of radio button in settings API
+* Fix - Layered nav widget now shows terms again when using list OR
+* Fix - Prevent multiple attempts at cancelling actions on orders
+* Fix - Fixes in reporting for variations
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
 * Tweak - Trash pages swapped for endpoints instead of force delete
 * Tweak - Flip default status of price_trim_zeros (defaults to true now)
 * Tweak - Performance improvements for My Account view with a lot of available downloads
+* Tweak - Introduces woocommerce_return_to_shop_redirect filter
+* Tweak - Improved tax rounding, to calculate an accurate tax total
+* Tweak - Introduced failsafes to prevent actions trying to take place on removed products
 * Refactor - Multiple docblock updates
 * Refactor - Multiple code standards improvements
 * Refactor - Changed all text strings without explicit domain, to use the 'woocommerce' text domain
