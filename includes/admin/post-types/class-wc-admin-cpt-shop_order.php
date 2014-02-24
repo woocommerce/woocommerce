@@ -559,41 +559,43 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			'_shipping_state'
 		) ) );
 
-		$search_order_id = str_replace( 'Order #', '', $_GET['s'] );
-		if ( ! is_numeric( $search_order_id ) ) {
-			$search_order_id = 0;
+		// escape the search term for SQL
+		$search_term = esc_sql( $_GET['s'] );
+		// split the search string into terms delimited by any number of white-space chars or commas
+		// This will handle both '{first_name} {last_name}' and '{last_name}, '{first_name}'
+		$search_terms = esc_sql(preg_split("/[\s,]+/", $_GET['s']));
+		// this will extract any sequences of digits - possible order id's
+		// no need to escape these as they can contain only digits 0-9
+		$possible_order_ids = preg_split("/[^0-9]+/", $_GET['s'], 0, PREG_SPLIT_NO_EMPTY);
+
+		// this is the base query, selecting post
+		$qry = "
+select distinct p.id
+from {$wpdb->posts} p
+inner join {$wpdb->prefix}woocommerce_order_items wcoi on wcoi.order_id = p.id
+inner join {$wpdb->postmeta} pm on pm.post_id = p.id
+where p.post_type = 'shop_order'
+and (
+	(pm.meta_key in ('" . implode( "','", $search_fields ) . "') and pm.meta_value like '%{$search_term}%')
+	OR (wcoi.order_item_name like '%{$search_term}%')
+	OR (pm.meta_key in ('_billing_first_name', '_billing_first_name', '_shipping_first_name', '_shipping_last_name')
+		AND (pm.meta_value like '%" . implode("%' OR pm.meta_key like '%", $search_terms) . "%')
+	)
+";
+
+		// if there are any possible order id's then test for those as well
+		if (! empty($possible_order_ids)) {
+			$qry .= "\tOR p.id = " . implode('OR p.id = ', $possible_order_ids) . "\n";
+			$qry .= "\tOR (pm.meta_key = '_order_number' AND (pm.meta_value = "
+				. implode('OR pm.meta_value = ', $possible_order_ids) . "))\n";
 		}
+		// close the paren enclosing the OR'd conditions and sort by order#
+		// descending order so last order listed first
+		$qry .= ')';
 
-		// Search orders
-		$gotten = esc_attr( $_GET['s'] );
-		$post_ids = array_merge(
-			$wpdb->get_col(
-				$wpdb->prepare( "
-					SELECT post_id
-					FROM {$wpdb->postmeta}
-					WHERE meta_key IN ('" . implode( "','", $search_fields ) . "') AND meta_value LIKE '%%%s%%'
+		// fetch the one-column result set
+		$post_ids =	$wpdb->get_col($qry);
 
-					UNION
-
-					SELECT p1.post_id
-					FROM {$wpdb->postmeta} p1
-					INNER JOIN {$wpdb->postmeta} p2 ON p2.post_id = p1.post_id AND p2.meta_id != p1.meta_id
-					WHERE (
-						(p1.meta_key = '_billing_first_name'  AND p2.meta_key = '_billing_last_name')
-						OR (p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name')
-					) AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%'
-
-					UNION
-
-					SELECT order_id
-					FROM {$wpdb->prefix}woocommerce_order_items as order_items
-					WHERE order_item_name LIKE '%%%s%%'
-					",
-					$gotten, $gotten, $gotten
-				)
-			),
-			array( $search_order_id )
-		);
 
 		// Remove s - we don't want to search order name
 		unset( $wp->query_vars['s'] );
