@@ -341,7 +341,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( sizeof( $order->get_items() ) > 0 ) {
 				foreach ( $order->get_items() as $item ) {
 					if ( $item['qty'] ) {
-						$item_names[] = $item['name'] . ' x ' . $item['qty'];
+						$item_name = $item['name'];
+						$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+						if ( $meta = $item_meta->display( true, true ) ) {
+							$item_name .= ' ( ' . $meta . ' )';
+						}
+						$item_names[] = $item_name . ' x ' . $item['qty'];
 					}
 				}
 			}
