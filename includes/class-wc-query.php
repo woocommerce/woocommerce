@@ -250,7 +250,8 @@ class WC_Query {
 	 * @return string
 	 */
 	public function exclude_protected_products( $where ) {
-		$where .= " AND post_password = ''";
+		global $wpdb;
+		$where .= " AND {$wpdb->posts}.post_password = ''";
     	return $where;
 	}
 
