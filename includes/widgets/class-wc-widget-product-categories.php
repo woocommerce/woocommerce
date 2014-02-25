@@ -58,6 +58,11 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				'type'  => 'checkbox',
 				'std'   => 0,
 				'label' => __( 'Only show children for the current category', 'woocommerce' )
+			),
+			'exclude'  => array(
+				'type'  => 'text',
+				'std'   => '',
+				'label' => __( 'Exclude categories (separated by commas)', 'woocommerce' )
 			)
 		);
 		parent::__construct();
@@ -83,6 +88,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		$s     = ( isset( $instance['show_children_only'] ) && $instance['show_children_only'] ) ? '1' : '0';
 		$d     = ( isset( $instance['dropdown'] ) && $instance['dropdown'] ) ? '1' : '0';
 		$o     = $instance['orderby'] ? $instance['orderby'] : 'order';
+		$exclude_method = $instance['hierarchical'] ? 'exclude' : 'exclude_tree';
 
 		echo $before_widget;
 
@@ -177,6 +183,9 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			$cat_args['show_option_none'] 	= __('No product categories exist.', 'woocommerce' );
 			$cat_args['current_category']	= ( $this->current_cat ) ? $this->current_cat->term_id : '';
 			$cat_args['current_category_ancestors']	= $this->cat_ancestors;
+			if ( $instance['exclude']) {
+				$cat_args[$exclude_method]  = $instance['exclude'];
+			}
 
 			echo '<ul class="product-categories">';
 
