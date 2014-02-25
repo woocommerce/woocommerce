@@ -108,15 +108,24 @@ class WC_Emails {
 		// Include email classes
 		include_once( 'abstracts/abstract-wc-email.php' );
 
-		$this->emails['WC_Email_New_Order']                 = include( 'emails/class-wc-email-new-order.php' );
-		$this->emails['WC_Email_Customer_Processing_Order'] = include( 'emails/class-wc-email-customer-processing-order.php' );
-		$this->emails['WC_Email_Customer_Completed_Order']  = include( 'emails/class-wc-email-customer-completed-order.php' );
-		$this->emails['WC_Email_Customer_Invoice']          = include( 'emails/class-wc-email-customer-invoice.php' );
-		$this->emails['WC_Email_Customer_Note']             = include( 'emails/class-wc-email-customer-note.php' );
-		$this->emails['WC_Email_Customer_Reset_Password']   = include( 'emails/class-wc-email-customer-reset-password.php' );
-		$this->emails['WC_Email_Customer_New_Account']      = include( 'emails/class-wc-email-customer-new-account.php' );
-
-		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
+		$this->emails = apply_filters( 'woocommerce_email_classes',
+		array(
+		'WC_Email_New_Order'                 => 'emails/class-wc-email-new-order.php' ,
+		'WC_Email_Customer_Processing_Order' => 'emails/class-wc-email-customer-processing-order.php' ,
+		'WC_Email_Customer_Completed_Order'  => 'emails/class-wc-email-customer-completed-order.php' ,
+		'WC_Email_Customer_Invoice'          => 'emails/class-wc-email-customer-invoice.php' ,
+		'WC_Email_Customer_Note'             => 'emails/class-wc-email-customer-note.php' ,
+		'WC_Email_Customer_Reset_Password'   => 'emails/class-wc-email-customer-reset-password.php' ,
+		'WC_Email_Customer_New_Account'      => 'emails/class-wc-email-customer-new-account.php'
+		));
+		foreach($this->emails as $class=>$path)
+		{
+			
+			if(!is_a($path,'WC_Email'))
+			{
+				$this->email[$class] = include($path);
+			}
+		}	
 	}
 
 	/**
