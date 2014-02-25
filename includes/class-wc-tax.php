@@ -180,7 +180,7 @@ class WC_Tax {
 				if ( $rate['compound'] == 'no' )
 					continue;
 
-				$the_price_inc_tax = $price + ( $pre_compound_total * 100 );
+				$the_price_inc_tax = $price + ( $pre_compound_total );
 
 				$tax_amount = $the_price_inc_tax * ( $rate['rate'] / 100 );
 
