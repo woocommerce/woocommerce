@@ -266,15 +266,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					// If this is an OR query, show all options so search can be expanded
 					} else {
 
-						$filtered_product_ids_excluding_self = array();
-						foreach ( WC()->query->filtered_product_ids_for_taxonomy as $attribute => $ids )
-							if ( $attribute !== $taxonomy )
-								$filtered_product_ids_excluding_self = array_merge( $filtered_product_ids_excluding_self, $ids );
+							$count = sizeof( array_intersect( $_products_in_term, WC()->query->unfiltered_product_ids ) );
 
-						$count = sizeof( array_intersect( $_products_in_term, $filtered_product_ids_excluding_self ) );
-
-						if ( $count > 0 )
-							$found = true;
+							if ( $count > 0 )
+								$found = true;
 
 					}
 
