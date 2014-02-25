@@ -568,15 +568,6 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		$post_ids = array_unique( array_merge(
 			$wpdb->get_col(
 				$wpdb->prepare( "
-					SELECT post_id
-					FROM {$wpdb->postmeta}
-					WHERE meta_key IN ('" . implode( "','", $search_fields ) . "') AND meta_value LIKE '%%%s%%'
-					",
-					esc_attr( $_GET['s'] )
-				)
-			),
-			$wpdb->get_col(
-				$wpdb->prepare( "
 					SELECT p1.post_id
 					FROM {$wpdb->postmeta} p1
 					INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
@@ -584,8 +575,10 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
 					OR
 						( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
+					OR 
+						( p1.meta_key IN ('" . implode( "','", $search_fields ) . "') AND p1.meta_value LIKE '%%%s%%' )
 					",
-					esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
+					esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
 				)
 			),
 			$wpdb->get_col(
