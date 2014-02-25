@@ -1051,6 +1051,11 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		if ( $variation_id )
 			$product_id = $variation_id;
 
+		$downloadable_files = apply_filters( 'woocommerce_downloadable_files', $downloadable_files, $product_id );
+			
+		if ( empty( $downloadable_files ) )
+			return;
+			
 		$product               = get_product( $product_id );
 		$existing_download_ids = array_keys( (array) $product->get_files() );
 		$updated_download_ids  = array_keys( (array) $downloadable_files );
