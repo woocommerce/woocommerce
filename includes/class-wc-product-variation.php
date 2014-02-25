@@ -370,7 +370,9 @@ class WC_Product_Variation extends WC_Product {
 		} elseif ( $this->variation_has_stock || $force_variation_stock ) {
 
 			// Update stock amount
-			$this->stock = intval( $amount );
+			$this->stock               = intval( $amount );
+			$this->variation_has_stock = true;
+			$this->manage_stock        = 'yes';
 
 			// Update meta
 			update_post_meta( $this->variation_id, '_stock', $this->stock );

@@ -158,7 +158,7 @@ function wc_body_class( $classes ) {
 		$classes[] = 'woocommerce-page';
 	}
 
-	if ( get_option( 'woocommerce_demo_store' ) != 'no' ) {
+	if ( is_store_notice_showing() ) {
 		$classes[] = 'woocommerce-demo-store';
 	}
 
@@ -226,6 +226,10 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		}
 
 		$classes[] = $product->stock_status;
+	}
+
+	if ( ( $key = array_search( 'hentry', $classes ) ) !== false ) {
+		unset( $classes[ $key ] );
 	}
 
 	return $classes;
@@ -342,7 +346,7 @@ if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 	 * @return void
 	 */
 	function woocommerce_demo_store() {
-		if ( get_option( 'woocommerce_demo_store' ) == 'no' )
+		if ( !is_store_notice_showing() )
 			return;
 
 		$notice = get_option( 'woocommerce_demo_store_notice' );
@@ -547,7 +551,7 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 	function woocommerce_reset_loop() {
 		global $woocommerce_loop;
 		// Reset loop/columns globals when starting a new loop
-		$woocommerce_loop['loop'] = $woocommerce_loop['column'] = '';
+		$woocommerce_loop['loop'] = $woocommerce_loop['columns'] = '';
 	}
 }
 
@@ -960,28 +964,31 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		global $product, $post;
 
 		// Description tab - shows product content
-		if ( $post->post_content )
+		if ( $post->post_content ) {
 			$tabs['description'] = array(
 				'title'    => __( 'Description', 'woocommerce' ),
 				'priority' => 10,
 				'callback' => 'woocommerce_product_description_tab'
 			);
+		}
 
 		// Additional information tab - shows attributes
-		if ( $product->has_attributes() || ( $product->enable_dimensions_display() && ( $product->has_dimensions() || $product->has_weight() ) ) )
+		if ( $product && ( $product->has_attributes() || ( $product->enable_dimensions_display() && ( $product->has_dimensions() || $product->has_weight() ) ) ) ) {
 			$tabs['additional_information'] = array(
 				'title'    => __( 'Additional Information', 'woocommerce' ),
 				'priority' => 20,
 				'callback' => 'woocommerce_product_additional_information_tab'
 			);
+		}
 
 		// Reviews tab - shows comments
-		if ( comments_open() )
+		if ( comments_open() ) {
 			$tabs['reviews'] = array(
 				'title'    => sprintf( __( 'Reviews (%d)', 'woocommerce' ), get_comments_number( $post->ID ) ),
 				'priority' => 30,
 				'callback' => 'comments_template'
 			);
+		}
 
 		return $tabs;
 	}
@@ -1283,15 +1290,13 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
-		global $wpdb;
+		if ( is_shop() )
+			return get_option( 'woocommerce_shop_page_display' ) != 'subcategories';
 
-		if ( ! is_product_category() && ! is_product_tag() && ! is_shop() && ! is_product_taxonomy() )
+		if ( ! is_product_taxonomy() )
 			return false;
 
 		if ( is_search() || is_filtered() || is_paged() )
-			return true;
-
-		if ( is_shop() && get_option( 'woocommerce_shop_page_display' ) != 'subcategories' )
 			return true;
 
 		$term = get_queried_object();
@@ -1309,26 +1314,42 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 			}
 		}
 
-		$parent_id 		= empty( $term->term_id ) ? 0 : $term->term_id;
-		$has_children 	= $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d", $parent_id ) );
+		global $wpdb;
 
-		if ( $has_children ) {
-			// Check terms have products inside
-			$children = array();
-			foreach ( $has_children as $term ) {
-				$children = array_merge( $children, get_term_children( $term, 'product_cat' ) );
-				$children[] = $term;
-			}
-			$objects = get_objects_in_term( $children, 'product_cat' );
+		$parent_id             = empty( $term->term_id ) ? 0 : $term->term_id;
+		$taxonomy              = empty( $term->taxonomy ) ? '' : $term->taxonomy;
+		$products_will_display = false;
 
-			if ( sizeof( $objects ) > 0 ) {
-				return false;
-			} else {
-				return true;
-			}
-		} else {
+		if ( ! $parent_id && ! $taxonomy ) {
 			return true;
 		}
+
+		if ( false === ( $products_will_display = get_transient( 'wc_products_will_display_' . $parent_id ) ) ) {
+			$has_children = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d AND taxonomy = %s", $parent_id, $taxonomy ) );
+
+			if ( $has_children ) {
+				// Check terms have products inside - parents first
+				if ( sizeof( get_objects_in_term( $has_children, $taxonomy ) ) > 0 ) {
+					$products_will_display = true;
+				} else {
+					// If we get here, the parents were empty so we're forced to check children
+					foreach ( $has_children as $term ) {
+						$children = get_term_children( $term, $taxonomy );
+
+						if ( sizeof( get_objects_in_term( $children, $taxonomy ) ) > 0 ) {
+							$products_will_display = true;
+							break;
+						}
+					}
+				}
+			} else {
+				$products_will_display = true;
+			}
+		}
+
+		set_transient( 'wc_products_will_display_' . $parent_id, $products_will_display );
+
+		return $products_will_display;
 	}
 }
 
@@ -1468,8 +1489,13 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 			$image = wc_placeholder_img_src();
 		}
 
-		if ( $image )
-			echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_url( $dimensions['height'] ) . '" />';
+		if ( $image ) {
+			// Prevent esc_url from breaking spaces in urls for image embeds
+			// Ref: http://core.trac.wordpress.org/ticket/23605
+			$image = str_replace( ' ', '%20', $image );
+
+			echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';
+		}
 	}
 }
 

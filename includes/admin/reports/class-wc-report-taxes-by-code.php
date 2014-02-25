@@ -1,6 +1,11 @@
 <?php
 /**
- * WC_Report_Taxes_By_Code class
+ * WC_Report_Taxes_By_Code
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <p><?php _e( "Your order has been received and is now being processed. Your order details are shown below for your reference:", 'woocommerce' ); ?></p>
 
-<?php do_action('woocommerce_email_before_order_table', $order, $sent_to_admin = false, $plain_text = false ); ?>
+<?php do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text ); ?>
 
 <h2><?php echo __( 'Order:', 'woocommerce' ) . ' ' . $order->get_order_number(); ?></h2>
 
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 		</tr>
 	</thead>
 	<tbody>
-		<?php echo $order->email_order_items_table( $order->is_download_permitted(), true, ($order->status=='processing') ? true : false ); ?>
+		<?php echo $order->email_order_items_table( $order->is_download_permitted(), true, ( $order->status=='processing' ) ? true : false ); ?>
 	</tbody>
 	<tfoot>
 		<?php
@@ -44,9 +44,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	</tfoot>
 </table>
 
-<?php do_action('woocommerce_email_after_order_table', $order, $sent_to_admin = false, $plain_text = false ); ?>
+<?php do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text ); ?>
 
-<?php do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin = false, $plain_text = false ); ?>
+<?php do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text ); ?>
 
 <h2><?php _e( 'Customer details', 'woocommerce' ); ?></h2>
 
@@ -57,6 +57,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	<p><strong><?php _e( 'Tel:', 'woocommerce' ); ?></strong> <?php echo $order->billing_phone; ?></p>
 <?php endif; ?>
 
-<?php wc_get_template('emails/email-addresses.php', array( 'order' => $order )); ?>
+<?php wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) ); ?>
 
-<?php do_action('woocommerce_email_footer'); ?>
+<?php do_action( 'woocommerce_email_footer' ); ?>

@@ -81,7 +81,9 @@ abstract class WC_Email extends WC_Settings_API {
         '/&(apos|rsquo|lsquo|#8216|#8217);/i',   // Single quotes
         '/&gt;/i',                               // Greater-than
         '/&lt;/i',                               // Less-than
-        '/&(amp|#38);/i',                        // Ampersand
+        '/&#38;/i',                              // Ampersand
+        '/&#038;/i',                             // Ampersand
+        '/&amp;/i',                              // Ampersand
         '/&(copy|#169);/i',                      // Copyright
         '/&(trade|#8482|#153);/i',               // Trademark
         '/&(reg|#174);/i',                       // Registered
@@ -90,6 +92,7 @@ abstract class WC_Email extends WC_Settings_API {
         '/&(bull|#149|#8226);/i',                // Bullet
         '/&(pound|#163);/i',                     // Pound sign
         '/&(euro|#8364);/i',                     // Euro sign
+        '/&#36;/',                               // Dollar sign
         '/&[^&;]+;/i',                           // Unknown/unhandled entities
         '/[ ]{2,}/'                              // Runs of spaces, post-handling
     );
@@ -109,6 +112,8 @@ abstract class WC_Email extends WC_Settings_API {
         '>',
         '<',
         '&',
+        '&',
+        '&',
         '(c)',
         '(tm)',
         '(R)',
@@ -117,6 +122,7 @@ abstract class WC_Email extends WC_Settings_API {
         '*',
         '£',
         'EUR',                                  // Euro sign. € ?
+        '$',                                    // Dollar sign
         '',                                     // Unknown/unhandled entities
         ' '                                     // Runs of spaces, post-handling
     );
@@ -235,10 +241,10 @@ abstract class WC_Email extends WC_Settings_API {
 	 * get_attachments function.
 	 *
 	 * @access public
-	 * @return string
+	 * @return array
 	 */
 	function get_attachments() {
-		return apply_filters( 'woocommerce_email_attachments', '', $this->id, $this->object );
+		return apply_filters( 'woocommerce_email_attachments', array(), $this->id, $this->object );
 	}
 
 	/**

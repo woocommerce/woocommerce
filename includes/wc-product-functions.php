@@ -98,6 +98,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%') OR `option_name` LIKE ('_transient_timeout_wc_uf_pid_%')" );
 	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%') OR `option_name` LIKE ('_transient_timeout_wc_ln_count_%')" );
 	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%') OR `option_name` LIKE ('_transient_timeout_wc_ship_%')" );
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_products_will_display_%') OR `option_name` LIKE ('_transient_timeout_wc_products_will_display_%')" );
 
 	// Clear product specific transients
 	$post_transients_to_clear = array(
@@ -160,7 +161,7 @@ function wc_get_product_ids_on_sale() {
 		GROUP BY post.ID;
 	" );
 
-	$product_ids_on_sale = array_unique( array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), wp_list_pluck( $on_sale_posts, 'post_parent' ) ) );
+	$product_ids_on_sale = array_unique( array_map( 'absint', array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), wp_list_pluck( $on_sale_posts, 'post_parent' ) ) ) );
 
 	set_transient( 'wc_products_onsale', $product_ids_on_sale );
 

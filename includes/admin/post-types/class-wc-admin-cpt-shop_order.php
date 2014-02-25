@@ -8,10 +8,14 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
-if ( ! class_exists( 'WC_Admin_CPT' ) )
+if ( ! class_exists( 'WC_Admin_CPT' ) ) {
 	include( 'class-wc-admin-cpt.php' );
+}
 
 if ( ! class_exists( 'WC_Admin_CPT_Shop_Order' ) ) :
 
@@ -67,8 +71,9 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		if ( $data['post_type'] == 'shop_order' && isset( $data['post_date'] ) ) {
 
 			$order_title = 'Order';
-			if ( $data['post_date'] )
+			if ( $data['post_date'] ) {
 				$order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
+			}
 
 			$data['post_title'] = $order_title;
 		}
@@ -82,17 +87,17 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function edit_columns( $existing_columns ) {
 		$columns = array();
 
-		$columns["cb"]               = "<input type=\"checkbox\" />";
-		$columns["order_status"]     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
-		$columns["order_title"]      = __( 'Order', 'woocommerce' );
-		$columns["order_items"]      = __( 'Purchased', 'woocommerce' );
-		$columns["shipping_address"] = __( 'Ship to', 'woocommerce' );
+		$columns['cb']               = '<input type="checkbox" />';
+		$columns['order_status']     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
+		$columns['order_title']      = __( 'Order', 'woocommerce' );
+		$columns['order_items']      = __( 'Purchased', 'woocommerce' );
+		$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 
-		$columns["customer_message"] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer Message', 'woocommerce' ) . '">' . esc_attr__( 'Customer Message', 'woocommerce' ) . '</span>';
-		$columns["order_notes"]      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '">' . esc_attr__( 'Order Notes', 'woocommerce' ) . '</span>';
-		$columns["order_date"]       = __( 'Date', 'woocommerce' );
-		$columns["order_total"]      = __( 'Total', 'woocommerce' );
-		$columns["order_actions"]    = __( 'Actions', 'woocommerce' );
+		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer Message', 'woocommerce' ) . '">' . esc_attr__( 'Customer Message', 'woocommerce' ) . '</span>';
+		$columns['order_notes']      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '">' . esc_attr__( 'Order Notes', 'woocommerce' ) . '</span>';
+		$columns['order_date']       = __( 'Date', 'woocommerce' );
+		$columns['order_total']      = __( 'Total', 'woocommerce' );
+		$columns['order_actions']    = __( 'Actions', 'woocommerce' );
 
 		return $columns;
 	}
@@ -104,16 +109,17 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function custom_columns( $column ) {
 		global $post, $woocommerce, $the_order;
 
-		if ( empty( $the_order ) || $the_order->id != $post->ID )
+		if ( empty( $the_order ) || $the_order->id != $post->ID ) {
 			$the_order = new WC_Order( $post->ID );
+		}
 
 		switch ( $column ) {
-			case "order_status" :
+			case 'order_status' :
 
 				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->status ), esc_html__( $the_order->status, 'woocommerce' ), esc_html__( $the_order->status, 'woocommerce' ) );
 
 			break;
-			case "order_date" :
+			case 'order_date' :
 
 				if ( '0000-00-00 00:00:00' == $post->post_date ) {
 					$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
@@ -127,7 +133,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				echo '<abbr title="' . esc_attr( $t_time ) . '">' . esc_html( apply_filters( 'post_date_column_time', $h_time, $post ) ) . '</abbr>';
 
 			break;
-			case "customer_message" :
+			case 'customer_message' :
 
 				if ( $the_order->customer_message )
 					echo '<span class="note-on tips" data-tip="' . esc_attr( $the_order->customer_message ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
@@ -135,16 +141,16 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 					echo '<span class="na">&ndash;</span>';
 
 			break;
-			case "billing_address" :
+			case 'billing_address' :
 				if ( $the_order->get_formatted_billing_address() )
-	        		echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_billing_address() ) . '&z=16' ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_billing_address() ) ) .'</a>';
-	        	else
-	        		echo '&ndash;';
+					echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_billing_address() ) . '&z=16' ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_billing_address() ) ) .'</a>';
+				else
+					echo '&ndash;';
 
-	        	if ( $the_order->payment_method_title )
-	        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
+				if ( $the_order->payment_method_title )
+					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
 			break;
-			case "order_items" :
+			case 'order_items' :
 
 				printf( '<a href="#" class="show_order_items">' . _n( '%d item', '%d items', sizeof( $the_order->get_items() ), 'woocommerce' ) . '</a>', sizeof( $the_order->get_items() ) );
 
@@ -152,7 +158,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 					echo '<table class="order_items" cellspacing="0">';
 
-					foreach( $the_order->get_items() as $item ) {
+					foreach ( $the_order->get_items() as $item ) {
 						$_product       = apply_filters( 'woocommerce_order_item_product', $the_order->get_product_from_item( $item ), $item );
 						$item_meta      = new WC_Order_Item_Meta( $item['item_meta'] );
 						$item_meta_html = $item_meta->display( true, true );
@@ -173,103 +179,115 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 				} else echo '&ndash;';
 			break;
-			case "shipping_address" :
+			case 'shipping_address' :
 				if ( $the_order->get_formatted_shipping_address() )
-	            	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_shipping_address() ) . '&z=16' ) . '">'. esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_shipping_address() ) ) .'</a>';
-	        	else
-	        		echo '&ndash;';
+					echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_shipping_address() ) . '&z=16' ) . '">'. esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_shipping_address() ) ) .'</a>';
+				else
+					echo '&ndash;';
 
-	        	if ( $the_order->get_shipping_method() )
-	        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_shipping_method() ) . '</small>';
+				if ( $the_order->get_shipping_method() )
+					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_shipping_method() ) . '</small>';
 
 			break;
-			case "order_notes" :
+			case 'order_notes' :
 
 				if ( $post->comment_count ) {
 
 					$latest_notes = get_comments( array(
 						'post_id' => $post->ID,
 						'number'  => 1
-						) );
+					) );
 
 					$latest_note = current( $latest_notes );
 
-					if ( $post->comment_count == 1 )
+					if ( $post->comment_count == 1 ) {
 						echo '<span class="note-on tips" data-tip="' . esc_attr( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-					else
-						echo '<span class="note-on tips" data-tip="' . esc_attr( $latest_note->comment_content . '<small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), ( $post->comment_count - 1 ) ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					} else {
+						$note_tip = isset( $latest_note->comment_content ) ? esc_attr( $latest_note->comment_content . '<small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), ( $post->comment_count - 1 ) ) . '</small>' ) : sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count );
+
+						echo '<span class="note-on tips" data-tip="' . $note_tip . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					}
 
 				} else {
 					echo '<span class="na">&ndash;</span>';
 				}
 
 			break;
-			case "order_total" :
+			case 'order_total' :
 				echo esc_html( strip_tags( $the_order->get_formatted_order_total() ) );
 
-				if ( $the_order->payment_method_title )
-	        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
+				if ( $the_order->payment_method_title ) {
+					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
+				}
 			break;
-			case "order_title" :
+			case 'order_title' :
 
-	        	$customer_tip = '';
+				$customer_tip = '';
 
-	        	if ( $address = $the_order->get_formatted_billing_address() )
-	        		$customer_tip .= __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
+				if ( $address = $the_order->get_formatted_billing_address() ) {
+					$customer_tip .= __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
+				}
 
-	        	if ( $the_order->billing_phone )
-        			$customer_tip .= __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
+				if ( $the_order->billing_phone ) {
+					$customer_tip .= __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
+				}
 
 				echo '<div class="tips" data-tip="' . esc_attr( $customer_tip ) . '">';
 
-				if ( $the_order->user_id )
+				if ( $the_order->user_id ) {
 					$user_info = get_userdata( $the_order->user_id );
+				}
 
 				if ( ! empty( $user_info ) ) {
 
-	            	$user = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
+					$user = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
 
-	            	if ( $user_info->first_name || $user_info->last_name )
-	            		$user .= esc_html( $user_info->first_name . ' ' . $user_info->last_name );
-	            	else
-	            		$user .= esc_html( $user_info->display_name );
+					if ( $user_info->first_name || $user_info->last_name ) {
+						$user .= esc_html( $user_info->first_name . ' ' . $user_info->last_name );
+					} else {
+						$user .= esc_html( $user_info->display_name );
+					}
 
-	            	$user .= '</a>';
+					$user .= '</a>';
 
-	           	} else {
-	           		$user = __( 'Guest', 'woocommerce' );
-	           	}
+				} else {
+					$user = __( 'Guest', 'woocommerce' );
+				}
 
-	           	if ( $the_order->user_id )
+				if ( $the_order->user_id ) {
 					$user_info = get_userdata( $the_order->user_id );
+				}
 
 				if ( ! empty( $user_info ) ) {
 
-	            	$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
+					$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
 
-	            	if ( $user_info->first_name || $user_info->last_name )
-	            		$username .= esc_html( ucfirst( $user_info->first_name ) . ' ' . ucfirst( $user_info->last_name ) );
-	            	else
-	            		$username .= esc_html( ucfirst( $user_info->display_name ) );
+					if ( $user_info->first_name || $user_info->last_name ) {
+						$username .= esc_html( ucfirst( $user_info->first_name ) . ' ' . ucfirst( $user_info->last_name ) );
+					} else {
+						$username .= esc_html( ucfirst( $user_info->display_name ) );
+					}
 
-	            	$username .= '</a>';
+					$username .= '</a>';
 
-	           	} else {
-	           		if ( $the_order->billing_first_name || $the_order->billing_last_name )
-	           			$username = trim( $the_order->billing_first_name . ' ' . $the_order->billing_last_name );
-	           		else
-	           			$username = __( 'Guest', 'woocommerce' );
-	           	}
+				} else {
+					if ( $the_order->billing_first_name || $the_order->billing_last_name ) {
+						$username = trim( $the_order->billing_first_name . ' ' . $the_order->billing_last_name );
+					} else {
+						$username = __( 'Guest', 'woocommerce' );
+					}
+				}
 
-	           	printf( __( '%s by %s', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '"><strong>' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
+				printf( __( '%s by %s', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '"><strong>' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
 
-           		if ( $the_order->billing_email )
-        			echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
+				if ( $the_order->billing_email ) {
+					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
+				}
 
-        		echo '</div>';
+				echo '</div>';
 
 			break;
-			case "order_actions" :
+			case 'order_actions' :
 
 				?><p>
 					<?php
@@ -277,19 +295,21 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 						$actions = array();
 
-						if ( in_array( $the_order->status, array( 'pending', 'on-hold' ) ) )
+						if ( in_array( $the_order->status, array( 'pending', 'on-hold' ) ) ) {
 							$actions['processing'] = array(
 								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
 								'name' 		=> __( 'Processing', 'woocommerce' ),
 								'action' 	=> "processing"
 							);
+						}
 
-						if ( in_array( $the_order->status, array( 'pending', 'on-hold', 'processing' ) ) )
+						if ( in_array( $the_order->status, array( 'pending', 'on-hold', 'processing' ) ) ) {
 							$actions['complete'] = array(
 								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
 								'name' 		=> __( 'Complete', 'woocommerce' ),
 								'action' 	=> "complete"
 							);
+						}
 
 						$actions['view'] = array(
 							'url' 		=> admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
@@ -308,7 +328,6 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				</p><?php
 
 			break;
-
 
 		}
 	}
@@ -343,8 +362,9 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 */
 	public function bulk_actions( $actions ) {
 
-		if ( isset( $actions['edit'] ) )
+		if ( isset( $actions['edit'] ) ) {
 			unset( $actions['edit'] );
+		}
 
 		return $actions;
 	}
@@ -357,11 +377,12 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 * @return array
 	 */
 	public function remove_row_actions( $actions ) {
-	    if( get_post_type() === 'shop_order' ) {
-	        unset( $actions['view'] );
-	        unset( $actions['inline hide-if-no-js'] );
-	    }
-	    return $actions;
+		if ( 'shop_order' === get_post_type() ) {
+			unset( $actions['view'] );
+			unset( $actions['inline hide-if-no-js'] );
+		}
+
+		return $actions;
 	}
 
 	/**
@@ -373,8 +394,9 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function restrict_manage_orders() {
 		global $woocommerce, $typenow, $wp_query;
 
-		if ( $typenow != 'shop_order' )
+		if ( 'shop_order' != $typenow ) {
 			return;
+		}
 
 		// Status
 		?>
@@ -386,8 +408,9 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				foreach ( $terms as $term ) {
 					echo '<option value="' . esc_attr( $term->slug ) . '"';
 
-					if ( isset( $wp_query->query['shop_order_status'] ) )
+					if ( isset( $wp_query->query['shop_order_status'] ) ) {
 						selected( $term->slug, $wp_query->query['shop_order_status'] );
+					}
 
 					echo '>' . esc_html__( $term->name, 'woocommerce' ) . ' (' . absint( $term->count ) . ')</option>';
 				}
@@ -415,25 +438,25 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			jQuery('select#dropdown_shop_order_status, select[name=m]').css('width', '150px').chosen();
 
 			jQuery('select#dropdown_customers').css('width', '250px').ajaxChosen({
-			    method: 		'GET',
-			    url: 			'" . admin_url('admin-ajax.php') . "',
-			    dataType: 		'json',
-			    afterTypeDelay: 100,
-			    minTermLength: 	1,
-			    data:		{
-			    	action: 	'woocommerce_json_search_customers',
-					security: 	'" . wp_create_nonce("search-customers") . "',
+				method: 		'GET',
+				url: 			'" . admin_url( 'admin-ajax.php' ) . "',
+				dataType: 		'json',
+				afterTypeDelay: 100,
+				minTermLength: 	1,
+				data:		{
+					action: 	'woocommerce_json_search_customers',
+					security: 	'" . wp_create_nonce( 'search-customers' ) . "',
 					default:	'" . __( 'Show all customers', 'woocommerce' ) . "'
-			    }
+				}
 			}, function (data) {
 
 				var terms = {};
 
-			    $.each(data, function (i, val) {
-			        terms[i] = val;
-			    });
+				$.each(data, function (i, val) {
+					terms[i] = val;
+				});
 
-			    return terms;
+				return terms;
 			});
 		" );
 	}
@@ -447,11 +470,10 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 */
 	public function orders_by_customer_query( $vars ) {
 		global $typenow, $wp_query;
-	    if ( $typenow == 'shop_order' && isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
 
+		if ( $typenow == 'shop_order' && isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
 			$vars['meta_key'] = '_customer_user';
 			$vars['meta_value'] = (int) $_GET['_customer_user'];
-
 		}
 
 		return $vars;
@@ -459,7 +481,6 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 	/**
 	 * Make order columns sortable.
-	 *
 	 *
 	 * https://gist.github.com/906872
 	 *
@@ -474,6 +495,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			'order_date'	=> 'date'
 		);
 		unset( $columns['comments'] );
+
 		return wp_parse_args( $custom, $columns );
 	}
 
@@ -486,10 +508,12 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 */
 	public function custom_shop_order_orderby( $vars ) {
 		global $typenow, $wp_query;
-	    if ( $typenow != 'shop_order' )
-	    	return $vars;
 
-	    // Sorting
+		if ( 'shop_order' != $typenow ) {
+			return $vars;
+		}
+
+		// Sorting
 		if ( isset( $vars['orderby'] ) ) {
 			if ( 'order_total' == $vars['orderby'] ) {
 				$vars = array_merge( $vars, array(
@@ -512,8 +536,9 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function shop_order_search_custom_fields( $wp ) {
 		global $pagenow, $wpdb;
 
-		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' )
+		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' ) {
 			return;
+		}
 
 		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
 			'_order_key',
@@ -535,11 +560,12 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		) ) );
 
 		$search_order_id = str_replace( 'Order #', '', $_GET['s'] );
-		if ( ! is_numeric( $search_order_id ) )
+		if ( ! is_numeric( $search_order_id ) ) {
 			$search_order_id = 0;
+		}
 
 		// Search orders
-		$post_ids = array_merge(
+		$post_ids = array_unique( array_merge(
 			$wpdb->get_col(
 				$wpdb->prepare( "
 					SELECT post_id
@@ -552,7 +578,8 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			$wpdb->get_col(
 				$wpdb->prepare( "
 					SELECT p1.post_id
-					FROM {$wpdb->postmeta} p1, {$wpdb->postmeta} p2
+					FROM {$wpdb->postmeta} p1
+					INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
 					WHERE
 						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
 					OR
@@ -571,7 +598,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				)
 			),
 			array( $search_order_id )
-		);
+		) );
 
 		// Remove s - we don't want to search order name
 		unset( $wp->query_vars['s'] );
@@ -590,12 +617,20 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 * @param mixed $query
 	 * @return string
 	 */
-	public function shop_order_search_label($query) {
+	public function shop_order_search_label( $query ) {
 		global $pagenow, $typenow;
 
-	    if ( 'edit.php' != $pagenow ) return $query;
-	    if ( $typenow != 'shop_order' ) return $query;
-		if ( ! get_query_var( 'shop_order_search' ) ) return $query;
+		if ( 'edit.php' != $pagenow ) {
+			return $query;
+		}
+
+		if ( $typenow != 'shop_order' ) {
+			return $query;
+		}
+
+		if ( ! get_query_var( 'shop_order_search' ) ) {
+			return $query;
+		}
 
 		return wp_unslash( $_GET['s'] );
 	}
@@ -607,9 +642,10 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	 * @param mixed $public_query_vars
 	 * @return array
 	 */
-	public function add_custom_query_var($public_query_vars) {
+	public function add_custom_query_var( $public_query_vars ) {
 		$public_query_vars[] = 'sku';
 		$public_query_vars[] = 'shop_order_search';
+
 		return $public_query_vars;
 	}
 
@@ -650,7 +686,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		if ( 'shop_order' == $post_type ) {
 			?>
 			<script type="text/javascript">
-			jQuery(document).ready(function() {
+			jQuery(function() {
 				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action']");
 				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action2']");
 
@@ -697,7 +733,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 		$post_ids = array_map( 'absint', (array) $_REQUEST['post'] );
 
-		foreach( $post_ids as $post_id ) {
+		foreach ( $post_ids as $post_id ) {
 			$order = new WC_Order( $post_id );
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ) );
 			$changed++;
@@ -721,7 +757,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
 
 			if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
-				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number ), number_format_i18n( $number ) );
+				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . $message . '</p></div>';
 			}
 		}

@@ -191,6 +191,7 @@ class WC_Shortcodes {
 
 		<?php endif;
 
+		woocommerce_reset_loop();
 		wp_reset_postdata();
 
 		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
@@ -239,6 +240,14 @@ class WC_Shortcodes {
 
 		if ( $parent !== "" ) {
 			$product_categories = wp_list_filter( $product_categories, array( 'parent' => $parent ) );
+		}
+
+		if ( $hide_empty ) {
+			foreach ( $product_categories as $key => $category ) {
+				if ( $category->count == 0 ) {
+					unset( $product_categories[ $key ] );
+				}
+			}
 		}
 
 		if ( $number ) {

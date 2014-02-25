@@ -184,6 +184,15 @@ class WC_API_Authentication {
 		$consumer_signature = rawurldecode( $params['oauth_signature'] );
 		unset( $params['oauth_signature'] );
 
+		// remove filters and convert them from array to strings to void normalize issues
+		if ( isset( $params['filter'] ) ) {
+			$filters = $params['filter'];
+			unset( $params['filter'] );
+			foreach ( $filters as $filter => $filter_value ) {
+				$params['filter[' . $filter . ']'] = $filter_value;
+			}
+		}
+
 		// normalize parameter key/values
 		array_walk( $params, array( $this, 'normalize_parameters' ) );
 
@@ -259,7 +268,7 @@ class WC_API_Authentication {
 		// remove expired nonces
 		foreach( $used_nonces as $nonce_timestamp => $nonce ) {
 
-			if ( $nonce_timestamp < $valid_window )
+			if ( $nonce_timestamp < ( time() - $valid_window ) )
 				unset( $used_nonces[ $nonce_timestamp ] );
 		}
 

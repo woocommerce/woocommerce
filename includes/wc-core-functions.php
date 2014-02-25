@@ -56,19 +56,26 @@ function wc_get_template_part( $slug, $name = '' ) {
 	$template = '';
 
 	// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php
-	if ( $name )
-		$template = locate_template( array ( "{$slug}-{$name}.php", WC()->template_path() . "{$slug}-{$name}.php" ) );
+	if ( $name ) {
+		$template = locate_template( array( "{$slug}-{$name}.php", WC()->template_path() . "{$slug}-{$name}.php" ) );
+	}
 
 	// Get default slug-name.php
-	if ( !$template && $name && file_exists( WC()->plugin_path() . "/templates/{$slug}-{$name}.php" ) )
+	if ( ! $template && $name && file_exists( WC()->plugin_path() . "/templates/{$slug}-{$name}.php" ) ) {
 		$template = WC()->plugin_path() . "/templates/{$slug}-{$name}.php";
+	}
 
 	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php
-	if ( !$template )
-		$template = locate_template( array ( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
+	if ( ! $template ) {
+		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
+	}
 
-	if ( $template )
+	// Allow 3rd party plugin filter template file from their plugin
+	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
+
+	if ( $template ) {
 		load_template( $template, false );
+	}
 }
 
 /**
@@ -82,10 +89,16 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @return void
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	if ( $args && is_array($args) )
+	if ( $args && is_array( $args ) ) {
 		extract( $args );
+	}
 
 	$located = wc_locate_template( $template_name, $template_path, $default_path );
+
+	if ( ! file_exists( $located ) ) {
+		_doing_it_wrong( __FUNCTION__, sprintf( '<code>%s</code> does not exist.', $located ), '2.1' );
+		return;
+	}
 
 	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
 
@@ -110,8 +123,13 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
  * @return string
  */
 function wc_locate_template( $template_name, $template_path = '', $default_path = '' ) {
-	if ( ! $template_path ) $template_path = WC()->template_path();
-	if ( ! $default_path ) $default_path = WC()->plugin_path() . '/templates/';
+	if ( ! $template_path ) {
+		$template_path = WC()->template_path();
+	}
+
+	if ( ! $default_path ) {
+		$default_path = WC()->plugin_path() . '/templates/';
+	}
 
 	// Look within passed path within the theme - this is priority
 	$template = locate_template(
@@ -122,8 +140,9 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	);
 
 	// Get default template
-	if ( ! $template )
+	if ( ! $template ) {
 		$template = $default_path . $template_name;
+	}
 
 	// Return what we found
 	return apply_filters('woocommerce_locate_template', $template, $template_name, $template_path);
@@ -145,15 +164,19 @@ function get_woocommerce_currencies() {
 	return array_unique(
 		apply_filters( 'woocommerce_currencies',
 			array(
+				'AED' => __( 'United Arab Emirates Dirham', 'woocommerce' ),
 				'AUD' => __( 'Australian Dollars', 'woocommerce' ),
 				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
 				'BGN' => __( 'Bulgarian Lev', 'woocommerce' ),
 				'CAD' => __( 'Canadian Dollars', 'woocommerce' ),
+				'CLP' => __( 'Chilean Peso', 'woocommerce' ),
 				'CNY' => __( 'Chinese Yuan', 'woocommerce' ),
+				'COP' => __( 'Colombian Peso', 'woocommerce' ),				
 				'CZK' => __( 'Czech Koruna', 'woocommerce' ),
 				'DKK' => __( 'Danish Krone', 'woocommerce' ),
 				'EUR' => __( 'Euros', 'woocommerce' ),
 				'HKD' => __( 'Hong Kong Dollar', 'woocommerce' ),
+				'HRK' => __( 'Croatia kuna', 'woocommerce' ),
 				'HUF' => __( 'Hungarian Forint', 'woocommerce' ),
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'IDR' => __( 'Indonesia Rupiah', 'woocommerce' ),
@@ -163,6 +186,7 @@ function get_woocommerce_currencies() {
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
+				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
 				'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
 				'NZD' => __( 'New Zealand Dollar', 'woocommerce' ),
 				'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
@@ -190,10 +214,14 @@ function get_woocommerce_currencies() {
  * @return string
  */
 function get_woocommerce_currency_symbol( $currency = '' ) {
-	if ( ! $currency )
+	if ( ! $currency ) {
 		$currency = get_woocommerce_currency();
+	}
 
 	switch ( $currency ) {
+		case 'AED' :
+			$currency_symbol = '(د.إ';
+			break;
 		case 'BRL' :
 			$currency_symbol = '&#82;&#36;';
 			break;
@@ -202,6 +230,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			break;
 		case 'AUD' :
 		case 'CAD' :
+		case 'CLP' :
 		case 'MXN' :
 		case 'NZD' :
 		case 'HKD' :
@@ -241,6 +270,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'GBP' : $currency_symbol = '&pound;'; break;
 		case 'RON' : $currency_symbol = 'lei'; break;
 		case 'VND' : $currency_symbol = '&#8363;'; break;
+		case 'NGN' : $currency_symbol = '&#8358;'; break;
 		default    : $currency_symbol = ''; break;
 	}
 
@@ -285,6 +315,7 @@ function wc_get_image_size( $image_size ) {
 			'crop'   => 1
 		);
 	}
+
 	return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
 }
 
@@ -296,8 +327,9 @@ function wc_get_image_size( $image_size ) {
 function wc_enqueue_js( $code ) {
 	global $wc_queued_js;
 
-	if ( empty( $wc_queued_js ) )
-		$wc_queued_js = "";
+	if ( empty( $wc_queued_js ) ) {
+		$wc_queued_js = '';
+	}
 
 	$wc_queued_js .= "\n" . $code . "\n";
 }
@@ -310,7 +342,7 @@ function wc_print_js() {
 
 	if ( ! empty( $wc_queued_js ) ) {
 
-		echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
+		echo "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) {";
 
 		// Sanitize
 		$wc_queued_js = wp_check_invalid_utf8( $wc_queued_js );
@@ -349,8 +381,9 @@ function get_woocommerce_api_url( $path ) {
 
 	$url = get_home_url( null, 'wc-api/v' . WC_API::VERSION . '/', ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) ? 'https' : 'http' );
 
-	if ( ! empty( $path ) && is_string( $path ) )
+	if ( ! empty( $path ) && is_string( $path ) ) {
 		$url .= ltrim( $path, '/' );
+	}
 
 	return $url;
 }

@@ -41,7 +41,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 			'inventory' => __( 'Inventory', 'woocommerce' )
 		);
 
-		return $sections;
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**

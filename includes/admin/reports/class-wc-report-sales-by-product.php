@@ -1,9 +1,15 @@
 <?php
 /**
- * WC_Report_Sales_By_Product class
+ * WC_Report_Sales_By_Product
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
+	public $chart_colours = array();
 	public $product_ids = array();
 
 	/**
@@ -33,12 +39,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'order_item_type' => 'line_item',
 					'function' => 'SUM',
 					'name'     => 'order_item_amount'
-				),
-				'_product_id' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => '',
-					'name'            => 'product_id'
 				)
 			),
 			'where_meta' => array(
@@ -50,7 +50,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'operator'   => 'IN'
 				)
 			),
-			'group_by' => 'product_id',
 			'query_type'   => 'get_var',
 			'filter_range' => true
 		) );
@@ -61,13 +60,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
 					'name'            => 'order_item_count'
-				),
-				'_product_id' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => '',
-					'name'            => 'product_id'
-				),
+				)
 			),
 			'where_meta' => array(
 				'relation' => 'OR',
@@ -78,7 +71,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'operator'   => 'IN'
 				)
 			),
-			'group_by' => 'product_id',
 			'query_type'   => 'get_var',
 			'filter_range' => true
 		) ) );
@@ -370,7 +362,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'meta_key'   => array( '_product_id', '_variation_id' ),
 						'meta_value' => $this->product_ids,
 						'operator'   => 'IN'
-					)
+					),
 				),
 				'group_by'     => 'product_id,' . $this->group_by_query,
 				'order_by'     => 'post_date ASC',
@@ -405,13 +397,12 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'meta_key'   => array( '_product_id', '_variation_id' ),
 						'meta_value' => $this->product_ids,
 						'operator'   => 'IN'
-					)
+					),
 				),
 				'group_by'     => 'product_id, ' . $this->group_by_query,
 				'order_by'     => 'post_date ASC',
 				'query_type'   => 'get_results',
-				'filter_range' => true,
-				'nocache' => true
+				'filter_range' => true
 			) );
 
 			// Prepare data for report

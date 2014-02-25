@@ -31,7 +31,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	var $availability;
 
 	/** @var array Array of countries this method is enabled for. */
-	var $countries;
+	var $countries          = array();
 
 	/** @var string If 'taxable' tax will be charged for this method (if applicable) */
 	var $tax_status			= 'taxable';
@@ -169,8 +169,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
      * @return bool
      */
     public function is_available( $package ) {
-    	if ( $this->enabled == "no" )
+    	if ( "no" == $this->enabled ) {
     		return false;
+    	}
 
 		// Country availability
 		switch ( $this->availability ) {
@@ -186,8 +187,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			break;
 		}
 
-		if ( ! in_array( $package['destination']['country'], $ship_to_countries ) )
+		if ( ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
 			return false;
+		}
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
     }

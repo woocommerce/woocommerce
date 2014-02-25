@@ -48,7 +48,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			foreach ( $tax_classes as $class )
 				$sections[ sanitize_title( $class ) ] = sprintf( __( '%s Rates', 'woocommerce' ), $class );
 
-		return $sections;
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**
@@ -209,7 +209,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Save settings
 	 */
 	public function save() {
-		global $current_section;
+		global $current_section, $wpdb;
 
 		if ( ! $current_section ) {
 
@@ -221,6 +221,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$this->save_tax_rates();
 
 		}
+
+		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_tax_rates_%') OR `option_name` LIKE ('_transient_timeout_wc_tax_rates_%')" );
 	}
 
 	/**
@@ -631,7 +633,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				// Sanitize + format
 				$country  = strtoupper( wc_clean( $tax_rate_country[ $key ] ) );
 				$state    = strtoupper( wc_clean( $tax_rate_state[ $key ] ) );
-				$rate     = number_format( wc_clean( $tax_rate[ $key ] ), 4, '.', '' );
+				$rate     = number_format( (double) wc_clean( $tax_rate[ $key ] ), 4, '.', '' );
 				$name     = wc_clean( $tax_rate_name[ $key ] );
 				$priority = absint( wc_clean( $tax_rate_priority[ $key ] ) );
 				$compound = isset( $tax_rate_compound[ $key ] ) ? 1 : 0;

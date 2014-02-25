@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
 
 	// wc_country_select_params is required to continue, ensure the object exists
 	if (typeof wc_country_select_params === "undefined")
@@ -68,6 +68,6 @@ jQuery(document).ready(function($) {
 
 		$('body').trigger('country_to_state_changing', [country, $(this).closest('div')]);
 
-	});
+	}).change();
 
 });

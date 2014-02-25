@@ -35,13 +35,13 @@ global $woocommerce;
 		</tfoot>
 		<tbody>
 			<?php
-			if (sizeof($order->get_items())>0) :
-				foreach ($order->get_items() as $item) :
+			if ( sizeof( $order->get_items() )>0 ) :
+				foreach ( $order->get_items() as $item ) :
 					echo '
 						<tr>
-							<td class="product-name">'.$item['name'].'</td>
-							<td class="product-quantity">'.$item['qty'].'</td>
-							<td class="product-subtotal">' . $order->get_formatted_line_subtotal($item) . '</td>
+							<td class="product-name">' . $item['name'].'</td>
+							<td class="product-quantity">' . $item['qty'].'</td>
+							<td class="product-subtotal">' . $order->get_formatted_line_subtotal( $item ) . '</td>
 						</tr>';
 				endforeach;
 			endif;
@@ -62,7 +62,7 @@ global $woocommerce;
 					foreach ( $available_gateways as $gateway ) {
 						?>
 						<li class="payment_method_<?php echo $gateway->id; ?>">
-							<input id="payment_method_<?php echo $gateway->id; ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php if ($gateway->chosen) echo 'checked="checked"'; ?> />
+							<input id="payment_method_<?php echo $gateway->id; ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> data-order_button_text="<?php echo esc_attr( $gateway->order_button_text ); ?>" />
 							<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
 								if ( $gateway->has_fields() || $gateway->get_description() ) {
@@ -76,7 +76,7 @@ global $woocommerce;
 					}
 				} else {
 
-					echo '<p>'.__( 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ).'</p>';
+					echo '<p>' . __( 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) . '</p>';
 
 				}
 			?>
@@ -86,8 +86,9 @@ global $woocommerce;
 		<div class="form-row">
 			<?php wp_nonce_field( 'woocommerce-pay' ); ?>
 			<?php
-				$pay_order_button_text = apply_filters('woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ));
-				echo apply_filters('woocommerce_pay_order_button_html', '<input type="submit" class="button alt" id="place_order" value="' . esc_attr( $pay_order_button_text ) . '" />' );
+				$pay_order_button_text = apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) );
+				
+				echo apply_filters( 'woocommerce_pay_order_button_html', '<input type="submit" class="button alt" id="place_order" value="' . esc_attr( $pay_order_button_text ) . '" data-value="' . esc_attr( $pay_order_button_text ) . '" />' );
 			?>			
 			<input type="hidden" name="woocommerce_pay" value="1" />
 		</div>

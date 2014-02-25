@@ -1,4 +1,5 @@
 /nbproject/private/
+/node_modules/
 project.xml
 project.properties
 .DS_Store
@@ -7,6 +8,8 @@ Thumbs.db
 .project
 .settings*
 sftp-config.json
+/deploy/
+/wc-apidocs/
 
 # Ignore all log files except for .htaccess
 /logs/*

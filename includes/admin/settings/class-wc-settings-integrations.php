@@ -53,7 +53,7 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 			$sections[ strtolower( $integration->id ) ] = esc_html( $title );
 		}
 
-		return $sections;
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**

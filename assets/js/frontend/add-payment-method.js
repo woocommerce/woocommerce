@@ -1,4 +1,4 @@
-jQuery(document).ready(function($){
+jQuery(function($){
 
 	// woocommerce_params is required to continue, ensure the object exists
 	if (typeof woocommerce_params === "undefined")
@@ -10,9 +10,12 @@ jQuery(document).ready(function($){
 
 	.on( 'click init_add_payment_method', '.payment_methods input.input-radio', function() {
 		if ( $('.payment_methods input.input-radio').length > 1 ) {
-			$('div.payment_box').filter(':visible').slideUp(250);
-			if ($(this).is(':checked')) {
-				$('div.payment_box.' + $(this).attr('ID')).slideDown(250);
+			var target_payment_box = $('div.payment_box.' + $(this).attr('ID') );
+			if ( $(this).is(':checked') && ! target_payment_box.is(':visible') ) {
+				$('div.payment_box').filter(':visible').slideUp(250);
+				if ( $(this).is(':checked') ) {
+					$('div.payment_box.' + $(this).attr('ID') ).slideDown(250);
+				}
 			}
 		} else {
 			$('div.payment_box').show();

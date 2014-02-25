@@ -93,6 +93,11 @@ class WC_Meta_Box_Order_Actions {
 
 				do_action( 'woocommerce_before_resend_order_emails', $order );
 
+				// Ensure gateways are loaded in case they need to insert data into the emails
+				WC()->payment_gateways();
+				WC()->shipping();
+
+				// Load mailer
 				$mailer = WC()->mailer();
 
 				$email_to_send = str_replace( 'send_email_', '', $action );

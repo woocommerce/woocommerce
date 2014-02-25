@@ -1,6 +1,7 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Post types
@@ -13,34 +14,26 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @category	Class
  * @author 		WooThemes
  */
-if ( ! class_exists( 'WC_Post_types' ) ) :
-
 class WC_Post_types {
-
-	private $permalinks;
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->permalinks = get_option( 'woocommerce_permalinks' );
-
-		add_action( 'init', array( $this, 'register_taxonomies' ), 5 );
-		add_action( 'init', array( $this, 'register_post_types' ), 5 );
+		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 5 );
+		add_action( 'init', array( __CLASS__, 'register_post_types' ), 5 );
 	}
 
 	/**
 	 * Register WooCommerce taxonomies.
-	 *
-	 * @access public
-	 * @return void
 	 */
-	public function register_taxonomies() {
-
+	public static function register_taxonomies() {
 		if ( taxonomy_exists( 'product_type' ) )
 			return;
 
 		do_action( 'woocommerce_register_taxonomy' );
+
+		$permalinks = get_option( 'woocommerce_permalinks' );
 
 		register_taxonomy( 'product_type',
 	        apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
@@ -82,7 +75,7 @@ class WC_Post_types {
 					'assign_terms' 		=> 'assign_product_terms',
 	            ),
 	            'rewrite' 				=> array(
-					'slug'         => empty( $this->permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' ) : $this->permalinks['category_base'],
+					'slug'         => empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' ) : $permalinks['category_base'],
 					'with_front'   => false,
 					'hierarchical' => true,
 	            ),
@@ -117,7 +110,7 @@ class WC_Post_types {
 					'assign_terms' 		=> 'assign_product_terms',
 				),
 	            'rewrite' 				=> array(
-					'slug'       => empty( $this->permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' ) : $this->permalinks['tag_base'],
+					'slug'       => empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' ) : $permalinks['tag_base'],
 					'with_front' => false
 	            ),
 	        ) )
@@ -207,7 +200,7 @@ class WC_Post_types {
 				            ),
 				            'show_in_nav_menus' 		=> apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
 				            'rewrite' 					=> array(
-								'slug'         => ( empty( $this->permalinks['attribute_base'] ) ? '' : trailingslashit( $this->permalinks['attribute_base'] ) ) . sanitize_title( $tax->attribute_name ),
+								'slug'         => ( empty( $permalinks['attribute_base'] ) ? '' : trailingslashit( $permalinks['attribute_base'] ) ) . sanitize_title( $tax->attribute_name ),
 								'with_front'   => false,
 								'hierarchical' => true
 				            ),
@@ -215,23 +208,22 @@ class WC_Post_types {
 				    );
 		    	}
 		    }
+			
+			do_action( 'woocommerce_after_register_taxonomy' );
 		}
 	}
 
 	/**
 	 * Register core post types
 	 */
-	public function register_post_types() {
-
+	public static function register_post_types() {
 		if ( post_type_exists('product') )
 			return;
 
-	    /**
-		 * Post Types
-		 **/
 		do_action( 'woocommerce_register_post_type' );
 
-		$product_permalink = empty( $this->permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $this->permalinks['product_base'];
+		$permalinks        = get_option( 'woocommerce_permalinks' );
+		$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
 
 		register_post_type( "product",
 			apply_filters( 'woocommerce_register_post_type_product',
@@ -323,7 +315,7 @@ class WC_Post_types {
 			)
 		);
 
-		if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' )
+		if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' ) {
 		    register_post_type( "shop_coupon",
 			    apply_filters( 'woocommerce_register_post_type_shop_coupon',
 					array(
@@ -360,9 +352,8 @@ class WC_Post_types {
 					)
 				)
 			);
+		}
 	}
 }
 
-endif;
-
-return new WC_Post_types();
+new WC_Post_types();

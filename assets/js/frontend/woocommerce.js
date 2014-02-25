@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
 
 	// Orderby
 	$('.woocommerce-ordering').on( 'change', 'select.orderby', function() {

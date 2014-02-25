@@ -177,7 +177,7 @@ class WC_Admin_Status {
 			'clear_expired_transients' => array(
 				'name'		=> __( 'Expired Transients','woocommerce'),
 				'button'	=> __('Clear expired transients','woocommerce'),
-				'desc'		=> __( 'This tool will clear ALL expired transients from Wordpress.', 'woocommerce' ),
+				'desc'		=> __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'recount_terms' => array(
 				'name'		=> __('Term counts','woocommerce'),
@@ -192,21 +192,48 @@ class WC_Admin_Status {
 			'clear_sessions' => array(
 				'name'		=> __('Customer Sessions','woocommerce'),
 				'button'	=> __('Clear all sessions','woocommerce'),
-				'desc'		=> __( '<strong class="red">Warning</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+				'desc'		=> __( '<strong class="red">Warning:</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
 			),
 			'install_pages' => array(
 				'name'    => __( 'Install WooCommerce Pages', 'woocommerce' ),
 				'button'  => __( 'Install pages', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note:</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
 			),
 			'delete_taxes' => array(
 				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
 				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note:</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
 			),
 		) );
 	}
 
+	/**
+	 * Retrieve metadata from a file. Based on WP Core's get_file_data function
+	 *
+	 * @since 2.1.1
+	 * @param string $file Path to the file
+	 * @param array $all_headers List of headers, in the format array('HeaderKey' => 'Header Name')
+	 */
+	public function get_file_version( $file ) {
+		// We don't need to write to the file, so just open for reading.
+		$fp = fopen( $file, 'r' );
+
+		// Pull only the first 8kiB of the file in.
+		$file_data = fread( $fp, 8192 );
+
+		// PHP will close file handle, but we are good citizens.
+		fclose( $fp );
+
+		// Make sure we catch CR-only line endings.
+		$file_data = str_replace( "\r", "\n", $file_data );
+		$version   = '';
+
+		if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] )
+			$version = _cleanup_header_comment( $match[1] );
+
+		return $version ;
+	}
+	
 	/**
 	 * Scan the template files
 	 *

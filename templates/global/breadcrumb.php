@@ -41,7 +41,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		echo $before . single_cat_title( '', false ) . $after;
 
-	} elseif ( is_tax('product_cat') ) {
+	} elseif ( is_tax( 'product_cat' ) ) {
 
 		echo $prepend;
 
@@ -57,27 +57,27 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		echo $before . esc_html( $current_term->name ) . $after;
 
-	} elseif ( is_tax('product_tag') ) {
+	} elseif ( is_tax( 'product_tag' ) ) {
 
 		$queried_object = $wp_query->get_queried_object();
 		echo $prepend . $before . __( 'Products tagged &ldquo;', 'woocommerce' ) . $queried_object->name . '&rdquo;' . $after;
 
 	} elseif ( is_day() ) {
 
-		echo $before . '<a href="' . get_year_link(get_the_time('Y')) . '">' . get_the_time('Y') . '</a>' . $after . $delimiter;
-		echo $before . '<a href="' . get_month_link(get_the_time('Y'),get_the_time('m')) . '">' . get_the_time('F') . '</a>' . $after . $delimiter;
-		echo $before . get_the_time('d') . $after;
+		echo $before . '<a href="' . get_year_link( get_the_time( 'Y' ) ) . '">' . get_the_time( 'Y' ) . '</a>' . $after . $delimiter;
+		echo $before . '<a href="' . get_month_link( get_the_time( 'Y' ), get_the_time( 'm' ) ) . '">' . get_the_time( 'F' ) . '</a>' . $after . $delimiter;
+		echo $before . get_the_time( 'd' ) . $after;
 
 	} elseif ( is_month() ) {
 
-		echo $before . '<a href="' . get_year_link(get_the_time('Y')) . '">' . get_the_time('Y') . '</a>' . $after . $delimiter;
-		echo $before . get_the_time('F') . $after;
+		echo $before . '<a href="' . get_year_link( get_the_time( 'Y' ) ) . '">' . get_the_time( 'Y' ) . '</a>' . $after . $delimiter;
+		echo $before . get_the_time( 'F' ) . $after;
 
 	} elseif ( is_year() ) {
 
-		echo $before . get_the_time('Y') . $after;
+		echo $before . get_the_time( 'Y' ) . $after;
 
-	} elseif ( is_post_type_archive('product') && get_option('page_on_front') !== $shop_page_id ) {
+	} elseif ( is_post_type_archive( 'product' ) && get_option( 'page_on_front' ) !== $shop_page_id ) {
 
 		$_name = wc_get_page_id( 'shop' ) ? get_the_title( wc_get_page_id( 'shop' ) ) : '';
 
@@ -88,11 +88,11 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		if ( is_search() ) {
 
-			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $delimiter . __( 'Search results for &ldquo;', 'woocommerce' ) . get_search_query() . '&rdquo;' . $after;
+			echo $before . '<a href="' . get_post_type_archive_link( 'product' ) . '">' . $_name . '</a>' . $delimiter . __( 'Search results for &ldquo;', 'woocommerce' ) . get_search_query() . '&rdquo;' . $after;
 
 		} elseif ( is_paged() ) {
 
-			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $after;
+			echo $before . '<a href="' . get_post_type_archive_link( 'product' ) . '">' . $_name . '</a>' . $after;
 
 		} else {
 

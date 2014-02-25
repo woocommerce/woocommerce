@@ -73,6 +73,9 @@ class WC_Cart {
 	/** @var WC_Tax */
 	public $tax;
 
+	/** @var array cart_session_data */
+	public $cart_session_data = array();
+
 	/** @var array An array of fees. */
 	public $fees = array();
 
@@ -90,6 +93,25 @@ class WC_Cart {
 		$this->dp                    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl';
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl';
+		
+		// Array of data the cart calculates and stores in the session with defaults
+		$this->cart_session_data = array(
+			'cart_contents_total'     => 0,
+			'cart_contents_weight'    => 0,
+			'cart_contents_count'     => 0,
+			'cart_contents_tax'       => 0,
+			'total'                   => 0,
+			'subtotal'                => 0,
+			'subtotal_ex_tax'         => 0,
+			'tax_total'               => 0,
+			'taxes'                   => array(),
+			'shipping_taxes'          => array(),
+			'discount_cart'           => 0,
+			'discount_total'          => 0,
+			'shipping_total'          => 0,
+			'shipping_tax_total'      => 0,
+			'coupon_discount_amounts' => array(),
+		);
 
 		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
 	}
@@ -120,27 +142,10 @@ class WC_Cart {
 		 */
 		public function get_cart_from_session() {
 
-			// Array of data the cart calculates and stores in the session and defaults
-			$this->cart_session_data = array(
-				'cart_contents_total'     => 0,
-				'cart_contents_weight'    => 0,
-				'cart_contents_count'     => 0,
-				'cart_contents_tax'       => 0,
-				'total'                   => 0,
-				'subtotal'                => 0,
-				'subtotal_ex_tax'         => 0,
-				'tax_total'               => 0,
-				'taxes'                   => array(),
-				'shipping_taxes'          => array(),
-				'discount_cart'           => 0,
-				'discount_total'          => 0,
-				'shipping_total'          => 0,
-				'shipping_tax_total'      => 0,
-				'coupon_discount_amounts' => array(),
-			);
-
-			foreach ( $this->cart_session_data as $key => $default )
+			// Load cart session data from session
+			foreach ( $this->cart_session_data as $key => $default ) {
 				$this->$key = WC()->session->get( $key, $default );
+			}
 
 			// Load coupons
 			$this->applied_coupons = array_filter( WC()->session->get( 'applied_coupons', array() ) );
@@ -489,7 +494,7 @@ class WC_Cart {
 
 				foreach ( $cart_item['variation'] as $name => $value ) {
 
-					if ( ! $value )
+					if ( '' === $value )
 						continue;
 
 					$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
@@ -497,7 +502,7 @@ class WC_Cart {
 					// If this is a term slug, get the term's nice name
 		            if ( taxonomy_exists( $taxonomy ) ) {
 		            	$term = get_term_by( 'slug', $value, $taxonomy );
-		            	if ( ! is_wp_error( $term ) && $term->name ) {
+		            	if ( ! is_wp_error( $term ) && $term && $term->name ) {
 		            		$value = $term->name;
 		            	}
 		            	$label = wc_attribute_label( $taxonomy );
@@ -579,11 +584,8 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_cart_url() {
-			$cart_page_id = wc_get_page_id('cart');
-			if ( $cart_page_id )
-				return apply_filters( 'woocommerce_get_cart_url', get_permalink( $cart_page_id ) );
-
-			return '';
+			$cart_page_id = wc_get_page_id( 'cart' );
+			return apply_filters( 'woocommerce_get_cart_url', $cart_page_id ? get_permalink( $cart_page_id ) : '' );
 		}
 
 		/**
@@ -592,7 +594,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_checkout_url() {
-			$checkout_page_id = wc_get_page_id('checkout');
+			$checkout_page_id = wc_get_page_id( 'checkout' );
 			$checkout_url     = '';
 			if ( $checkout_page_id ) {
 				if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' )
@@ -611,8 +613,7 @@ class WC_Cart {
 		 */
 		public function get_remove_url( $cart_item_key ) {
 			$cart_page_id = wc_get_page_id('cart');
-			if ( $cart_page_id )
-				return apply_filters( 'woocommerce_get_remove_url', wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) );
+			return apply_filters( 'woocommerce_get_remove_url', $cart_page_id ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) : '' );
 		}
 
 		/**
@@ -673,16 +674,18 @@ class WC_Cart {
 
 				$code = $this->tax->get_rate_code( $key );
 
-				if ( ! isset( $tax_totals[ $code ] ) ) {
-					$tax_totals[ $code ] = new stdClass();
-					$tax_totals[ $code ]->amount = 0;
-				}
+				if ( $code ) {
+					if ( ! isset( $tax_totals[ $code ] ) ) {
+						$tax_totals[ $code ] = new stdClass();
+						$tax_totals[ $code ]->amount = 0;
+					}
 
-                $tax_totals[ $code ]->tax_rate_id       = $key;
-				$tax_totals[ $code ]->is_compound       = $this->tax->is_compound( $key );
-				$tax_totals[ $code ]->label             = $this->tax->get_rate_label( $key );
-				$tax_totals[ $code ]->amount           += wc_round_tax_total( $tax );
-				$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
+	                $tax_totals[ $code ]->tax_rate_id       = $key;
+					$tax_totals[ $code ]->is_compound       = $this->tax->is_compound( $key );
+					$tax_totals[ $code ]->label             = $this->tax->get_rate_label( $key );
+					$tax_totals[ $code ]->amount           += wc_round_tax_total( $tax );
+					$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
+				}
 			}
 
 			return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
@@ -757,18 +760,27 @@ class WC_Cart {
 		 */
 		public function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '', $cart_item_data = array() ) {
 
-			if ( $quantity <= 0 ) return false;
+			if ( $quantity <= 0 ) {
+				return false;
+			}
 
 			// Load cart item data - may be added by other plugins
 			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id );
-
+			
 			// Generate a ID based on product ID, variation ID, variation data, and other cart item data
-			$cart_id = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );
-
+			$cart_id        = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );
+			
 			// See if this product and its options is already in the cart
-			$cart_item_key = $this->find_product_in_cart( $cart_id );
+			$cart_item_key  = $this->find_product_in_cart( $cart_id );
 
-			$product_data = get_product( $variation_id ? $variation_id : $product_id );
+			// Ensure we don't add a variation to the cart directly by variation ID
+			if ( 'product_variation' == get_post_type( $product_id ) ) {
+				$variation_id = $product_id;
+				$product_id   = wp_get_post_parent_id( $variation_id );
+			}
+			
+			// Get the product
+			$product_data   = get_product( $variation_id ? $variation_id : $product_id );
 
 			if ( ! $product_data )
 				return false;
@@ -800,9 +812,14 @@ class WC_Cart {
 			if ( $product_data->is_sold_individually() ) {
 				$in_cart_quantity = $cart_item_key ? $this->cart_contents[$cart_item_key]['quantity'] : 0;
 
-				// If its greater than 0, its already in the cart
+				// If it's greater than 0, it's already in the cart
 				if ( $in_cart_quantity > 0 ) {
-					wc_add_notice( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ), 'error' );
+					wc_add_notice( sprintf(
+						'<a href="%s" class="button wc-forward">%s</a> %s',
+						$this->get_cart_url(),
+						__( 'View Cart', 'woocommerce' ),
+						sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() )
+					), 'error' );
 					return false;
 				}
 			}
@@ -816,7 +833,12 @@ class WC_Cart {
 				if ( $variation_id && $product_data->variation_has_stock ) {
 
 					if ( isset( $product_qty_in_cart[ $variation_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $variation_id ] + $quantity ) ) {
-						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ), 'error' );
+						wc_add_notice( sprintf(
+							'<a href="%s" class="button wc-forward">%s</a> %s',
+							$this->get_cart_url(),
+							__( 'View Cart', 'woocommerce' ),
+							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] )
+						), 'error' );
 						return false;
 					}
 
@@ -824,7 +846,12 @@ class WC_Cart {
 				} else {
 
 					if ( isset( $product_qty_in_cart[ $product_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $product_id ] + $quantity ) ) {
-						wc_add_notice( sprintf(__( '<a href="%s" class="button wc-forward">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink( wc_get_page_id( 'cart' ) ), __( 'View Cart', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ), 'error' );
+						wc_add_notice( sprintf(
+							'<a href="%s" class="button wc-forward">%s</a> %s',
+							$this->get_cart_url(),
+							__( 'View Cart', 'woocommerce' ),
+							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] )
+						), 'error' );
 						return false;
 					}
 
@@ -1003,7 +1030,7 @@ class WC_Cart {
 
 						// Now add modifed taxes
 						$tax_result            = $this->tax->calc_tax( $line_subtotal, $item_tax_rates );
-						$line_subtotal_tax     = array_sum( $taxes );
+						$line_subtotal_tax     = array_sum( $tax_result );
 
 					/**
 					 * Regular tax calculation (customer inside base and the tax class is unmodified
@@ -1136,7 +1163,7 @@ class WC_Cart {
 					$line_subtotal_tax     = array_sum( $taxes );
 
 					// Now calc product rates
-					$discounted_price      = $this->get_discounted_price( $values, $base_price );
+					$discounted_price      = $this->get_discounted_price( $values, $base_price, true );
 					$discounted_taxes      = $this->tax->calc_tax( $discounted_price * $values['quantity'], $item_tax_rates );
 					$discounted_tax_amount = array_sum( $discounted_taxes );
 					$line_tax              = $discounted_tax_amount;
@@ -1727,8 +1754,8 @@ class WC_Cart {
 
 					if ( $coupon->is_valid() && ! $coupon->apply_before_tax() && $coupon->is_valid_for_product( $values['data'] ) ) {
 						$discount_amount       = $coupon->get_discount_amount( $price, $values );
-						$this->discount_total += $discount_amount;
-						$this->increase_coupon_discount_amount( $code, $discount_amount );
+						$this->discount_total += $discount_amount * $values['quantity'];
+						$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
 						$this->increase_coupon_applied_count( $code, $values['quantity'] );
 					}
 				}
@@ -1815,19 +1842,23 @@ class WC_Cart {
 			do_action( 'woocommerce_cart_calculate_fees', $this );
 
 			// If fees were added, total them and calculate tax
-			if ( $fees = $this->get_fees() ) {
-				foreach ( $fees as $fee ) {
+			if ( ! empty( $this->fees ) ) {
+				foreach ( $this->fees as $fee_key => $fee ) {
 					$this->fee_total += $fee->amount;
 
 					if ( $fee->taxable ) {
 						// Get tax rates
 						$tax_rates = $this->tax->get_rates( $fee->tax_class );
 						$fee_taxes = $this->tax->calc_tax( $fee->amount, $tax_rates, false );
-						$fee->tax  = $fee_taxes['total_tax'];
+						
+						if ( ! empty( $fee_taxes ) ) {
+							// Set the tax total for this fee
+							$this->fees[ $fee_key ]->tax = array_sum( $fee_taxes );
 
-						// Tax rows - merge the totals we just got
-						foreach ( array_keys( $this->taxes + $fee_taxes['taxes'] ) as $key ) {
-						    $this->taxes[ $key ] = ( isset( $fee_taxes['taxes'][ $key ] ) ? $fee_taxes['taxes'][ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+							// Tax rows - merge the totals we just got
+							foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
+								$this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+							}
 						}
 					}
 				}

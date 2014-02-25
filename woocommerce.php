@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.1-beta-2
+ * Version: 2.2.0-bleeding
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.8
@@ -16,8 +16,9 @@
  * @category Core
  * @author WooThemes
  */
-if ( ! defined( 'ABSPATH' ) )
+if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WooCommerce' ) ) :
 
@@ -32,7 +33,7 @@ final class WooCommerce {
 	/**
 	 * @var string
 	 */
-	public $version = '2.1.0';
+	public $version = '2.2.0';
 
 	/**
 	 * @var WooCommerce The single instance of the class
@@ -98,7 +99,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -107,7 +108,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -159,11 +160,11 @@ final class WooCommerce {
 				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'WC_TEMPLATE_PATH constant' );
 				return WC_TEMPLATE_PATH;
 			case 'messages':
-				_deprecated_argument( 'Woocommerce->messages', '2.1', 'The "messages" field is moved to the messages helper class.' );
-				return $this->session->get( 'wc_messages', array() );
+				_deprecated_argument( 'Woocommerce->messages', '2.1', 'Use wc_get_notices' );
+				return wc_get_notices( 'success' );
 			case 'errors':
-				_deprecated_argument( 'Woocommerce->errors', '2.1', 'The "errors" field is moved to the messages helper class.' );
-				return $this->session->get( 'wc_errors', array() );
+				_deprecated_argument( 'Woocommerce->errors', '2.1', 'Use wc_get_notices' );
+				return wc_get_notices( 'error' );
 			default:
 				return false;
 		}
@@ -264,7 +265,7 @@ final class WooCommerce {
 
 		// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
 		if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) ) {
-			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) == 'yes' ? 2 : 1 ); 
+			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 ); 
 		}
 
 		if ( ! defined( 'WC_DELIMITER' ) ) {
@@ -286,11 +287,11 @@ final class WooCommerce {
 			include_once( 'includes/admin/class-wc-admin.php' );
 		}
 
-		if ( defined('DOING_AJAX') ) {
+		if ( defined( 'DOING_AJAX' ) ) {
 			$this->ajax_includes();
 		}
 
-		if ( ! is_admin() || defined('DOING_AJAX') ) {
+		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 			$this->frontend_includes();
 		}
 
@@ -384,7 +385,7 @@ final class WooCommerce {
 		$this->integrations			= new WC_Integrations();		// Integrations class
 
 		// Classes/actions loaded for the frontend and for ajax requests
-		if ( ! is_admin() || defined('DOING_AJAX') ) {
+		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 
 			// Session class, handles session data for customers - can be overwritten if custom handler is needed
 			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
@@ -425,19 +426,17 @@ final class WooCommerce {
 	public function load_plugin_textdomain() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
 
+		// Frontend Locale
+		if ( ! is_admin() || is_ajax() ) {
+			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
+			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
+		}
+
 		// Admin Locale
 		if ( is_admin() ) {
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
 			load_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
-
-		// Frontend Locale
-		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
-
-		if ( apply_filters( 'woocommerce_load_alt_locale', false ) )
-			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages/alt" );
-		else
-			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
 	}
 
 	/**
@@ -636,7 +635,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Transient_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $content
 	 * @return string
 	 */
@@ -646,7 +645,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Transient_Helper helper
+	 * @deprecated 2.1.0
 	 * @param int $post_id
 	 */
 	public function clear_product_transients( $post_id = 0 ) {
@@ -687,7 +686,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Nonce_Helper helper
+	 * @deprecated 2.1.0
 	 * @param        $action
 	 * @param string $method
 	 * @param bool   $error_message
@@ -695,11 +694,14 @@ final class WooCommerce {
 	 */
 	public function verify_nonce( $action, $method = '_POST', $error_message = false ) {
 		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'wp_verify_nonce' );
+		if ( ! isset( $method[ '_wpnonce' ] ) ) {
+			return false;
+		}
 		return wp_verify_nonce( $method[ '_wpnonce' ], 'woocommerce-' . $action );
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Shortcode_Helper helper
+	 * @deprecated 2.1.0
 	 * @param       $function
 	 * @param array $atts
 	 * @param array $wrapper
@@ -711,7 +713,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @return object
 	 */
 	public function get_attribute_taxonomies() {
@@ -720,7 +722,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $name
 	 * @return string
 	 */
@@ -730,7 +732,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $name
 	 * @return string
 	 */
@@ -740,7 +742,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $name
 	 * @return string
 	 */
@@ -750,7 +752,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Attribute_Helper helper
+	 * @deprecated 2.1.0
 	 * @return array
 	 */
 	public function get_attribute_taxonomy_names() {
@@ -778,7 +780,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Body_Class_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $class
 	 */
 	public function add_body_class( $class ) {
@@ -786,7 +788,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Body_Class_Helper helper
+	 * @deprecated 2.1.0
 	 * @param $classes
 	 */
 	public function output_body_class( $classes ) {
@@ -838,7 +840,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	 * @deprecated 2.1.0
 	 * @return mixed
 	 */
 	public function get_errors() {
@@ -847,7 +849,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	 * @deprecated 2.1.0
 	 * @return mixed
 	 */
 	public function get_messages() {
@@ -856,7 +858,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	 * @deprecated 2.1.0
 	 */
 	public function show_messages() {
 		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'wc_print_notices()' );
@@ -864,7 +866,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * @deprecated 2.1.0 Access via the WC_Messages_Helper helper
+	 * @deprecated 2.1.0
 	 */
 	public function set_messages() {
 		_deprecated_function( 'Woocommerce->set_messages', '2.1' );

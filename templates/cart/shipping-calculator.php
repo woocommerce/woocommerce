@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 
-if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! WC()->cart->needs_shipping() )
+if ( get_option( 'woocommerce_enable_shipping_calc' ) === 'no' || ! WC()->cart->needs_shipping() )
 	return;
 ?>
 
@@ -19,7 +19,7 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! WC()->cart->needs
 
 <form class="shipping_calculator" action="<?php echo esc_url( WC()->cart->get_cart_url() ); ?>" method="post">
 
-	<h2><a href="#" class="shipping-calculator-button"><?php _e( 'Calculate Shipping', 'woocommerce' ); ?> <span>&darr;</span></a></h2>
+	<h2><a href="#" class="shipping-calculator-button"><?php _e( 'Calculate Shipping', 'woocommerce' ); ?></a></h2>
 
 	<section class="shipping-calculator-form">
 

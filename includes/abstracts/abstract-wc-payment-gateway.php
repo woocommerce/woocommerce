@@ -19,6 +19,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/** @var string Payment method ID. */
 	var $id;
 
+	/** @var string Set if the place order button should be renamed on selection. */
+	var $order_button_text;
+
 	/** @var string Payment method title. */
 	var $title;
 
@@ -218,9 +221,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		?>
 		<fieldset id="<?php echo $this->id; ?>-cc-form">
 			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
-			<?php echo $fields['card-number-field']; ?>
-			<?php echo $fields['card-expiry-field']; ?>
-			<?php echo $fields['card-cvc-field']; ?>
+			<?php
+				foreach ( $fields as $field ) {
+					echo $field;
+				}
+			?>
 			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>
 			<div class="clear"></div>
 		</fieldset>

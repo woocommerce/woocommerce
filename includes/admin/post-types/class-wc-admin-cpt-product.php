@@ -29,6 +29,10 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		// Post title fields
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 
+		// Featured image text
+		add_filter( 'gettext', array( $this, 'featured_image_gettext' ) );
+		add_filter( 'media_view_strings', array( $this, 'media_view_strings' ), 10, 2 );
+
 		// Visibility option
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
@@ -70,6 +74,55 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		// Call WC_Admin_CPT constructor
 		parent::__construct();
+	}
+
+	/**
+	 * Check if we're editing or adding a product
+	 * @return boolean
+	 */
+	private function is_editing_product() {
+		if ( ! empty( $_GET['post_type'] ) && 'product' == $_GET['post_type'] ) {
+			return true;
+		}
+		if ( ! empty( $_GET['post'] ) && 'product' == get_post_type( $_GET['post'] ) ) {
+			return true;
+		}
+		if ( ! empty( $_REQUEST['post_id'] ) && 'product' == get_post_type( $_REQUEST['post_id'] ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Replace 'Featured' when editing a product. Adapted from https://gist.github.com/tw2113/c7fd8da782232ce90176
+	 * @param  string $string string being translated
+	 * @return string after manipulation
+	 */
+	public function featured_image_gettext( $string = '' ) {
+		if ( 'Featured Image' == $string && $this->is_editing_product() ) {
+			$string = __( 'Product Image', 'woocommerce' );
+		} elseif ( 'Remove featured image' == $string && $this->is_editing_product() ) {
+			$string = __( 'Remove product image', 'woocommerce' );
+		} elseif ( 'Set featured image' == $string && $this->is_editing_product() ) {
+			$string = __( 'Set product image', 'woocommerce' );
+		}
+		return $string;
+	}
+
+	/**
+	 * Change "Featured Image" to "Product Image" throughout media modals.
+	 * @param  array  $strings Array of strings to translate.
+	 * @param  object $post
+	 * @return array
+	 */
+	public function media_view_strings( $strings = array(), $post = null ) {
+		if ( is_object( $post ) ) {
+			if ( 'product' == $post->post_type ) {
+				$strings['setFeaturedImageTitle'] = __( 'Set product image', 'woocommerce' );
+				$strings['setFeaturedImage']      = __( 'Set product image', 'woocommerce' );
+			}
+		}
+		return $strings;
 	}
 
 	/**
@@ -247,23 +300,23 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				$actions['id'] = 'ID: ' . $post->ID;
 
 				if ( $can_edit_post && 'trash' != $post->post_status ) {
-					$actions['edit'] = '<a href="' . get_edit_post_link( $post->ID, true ) . '" title="' . esc_attr( __( 'Edit this item' ) ) . '">' . __( 'Edit' ) . '</a>';
-					$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="' . esc_attr( __( 'Edit this item inline' ) ) . '">' . __( 'Quick&nbsp;Edit' ) . '</a>';
+					$actions['edit'] = '<a href="' . get_edit_post_link( $post->ID, true ) . '" title="' . esc_attr( __( 'Edit this item', 'woocommerce' ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
+					$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="' . esc_attr( __( 'Edit this item inline', 'woocommerce' ) ) . '">' . __( 'Quick&nbsp;Edit', 'woocommerce' ) . '</a>';
 				}
 				if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
 					if ( 'trash' == $post->post_status )
-						$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ) . "'>" . __( 'Restore' ) . "</a>";
+						$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ) . "'>" . __( 'Restore', 'woocommerce' ) . "</a>";
 					elseif ( EMPTY_TRASH_DAYS )
-						$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash' ) . "</a>";
+						$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash', 'woocommerce' ) . "</a>";
 					if ( 'trash' == $post->post_status || !EMPTY_TRASH_DAYS )
-						$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently' ) . "</a>";
+						$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently', 'woocommerce' ) . "</a>";
 				}
 				if ( $post_type_object->public ) {
 					if ( in_array( $post->post_status, array( 'pending', 'draft', 'future' ) ) ) {
 						if ( $can_edit_post )
-							$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ) . '" rel="permalink">' . __( 'Preview' ) . '</a>';
+							$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'Preview', 'woocommerce' ) . '</a>';
 					} elseif ( 'trash' != $post->post_status ) {
-						$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $title ) ) . '" rel="permalink">' . __( 'View' ) . '</a>';
+						$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'View', 'woocommerce' ) . '</a>';
 					}
 				}
 
@@ -516,7 +569,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		$output .= "</select>";
 
-		echo $output;
+		echo apply_filters( 'woocommerce_product_filters', $output );
 	}
 
 	/**
@@ -573,10 +626,10 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				$search_ids[] = $term;
 			}
 			// Attempt to get a SKU
-			$sku_to_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%' LIMIT 1;", wc_clean( $term ) ) );
+			$sku_to_id = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%';", wc_clean( $term ) ) );
 
-			if ( $sku_to_id )
-				$search_ids[] = $sku_to_id;
+			if ( $sku_to_id && sizeof( $sku_to_id ) > 0 )
+				$search_ids = array_merge( $search_ids, $sku_to_id );
 		}
 
 		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
@@ -636,33 +689,45 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * @return int
 	 */
 	public function bulk_and_quick_edit_save_post( $post_id, $post ) {
+		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return $post_id;
+		}
 
-		// Don't save revisions, autosaves
-		if ( is_int( wp_is_post_revision( $post_id ) ) || is_int( wp_is_post_autosave( $post_id ) ) || defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+		// Don't save revisions and autosaves
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
 			return $post_id;
+		}
 
-		// Check post type
-		if ( $post->post_type != 'product' )
+		// Check post type is product
+		if ( $post->post_type != 'product' ) {
 			return $post_id;
-
-		// Check nonces
-		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) )
-			return $post_id;
-		if ( isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) )
-			return $post_id;
-		if ( isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ) )
-			return $post_id;
+		}
 
 		// Check user permission
-		if ( ! current_user_can( 'edit_post', $post_id ) )
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return $post_id;
+		}
 
-		$product           = get_product( $post );
+		// Check nonces
+		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) ) {
+			return $post_id;
+		}
+		if ( isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) ) {
+			return $post_id;
+		}
+		if ( isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ) ) {
+			return $post_id;
+		}
 
-		if ( ! empty( $_REQUEST['woocommerce_quick_edit'] ) )
+		// Get the product and save
+		$product = get_product( $post );
+
+		if ( ! empty( $_REQUEST['woocommerce_quick_edit'] ) ) {
 			$this->quick_edit_save( $post_id, $product );
-		else
+		} else {
 			$this->bulk_edit_save( $post_id, $product );
+		}
 
 		// Clear transient
 		wc_delete_product_transients( $post_id );
@@ -695,23 +760,36 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		if ( $product->is_type('simple') || $product->is_type('external') ) {
 
-			if ( isset( $_REQUEST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', wc_clean( $_REQUEST['_regular_price'] ) );
-			if ( isset( $_REQUEST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', wc_clean( $_REQUEST['_sale_price'] ) );
+			if ( isset( $_REQUEST['_regular_price'] ) ) {
+				$new_regular_price = $_REQUEST['_regular_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
+				update_post_meta( $post_id, '_regular_price', $new_regular_price );
+			} else {
+				$new_regular_price = null;
+			}
+			if ( isset( $_REQUEST['_sale_price'] ) ) {
+				$new_sale_price = $_REQUEST['_sale_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_sale_price'] );
+				update_post_meta( $post_id, '_sale_price', $new_sale_price );
+			} else {
+				$new_sale_price = null;
+			}
 
 			// Handle price - remove dates and set to lowest
 			$price_changed = false;
 
-			if ( isset( $_REQUEST['_regular_price'] ) && wc_clean( $_REQUEST['_regular_price'] ) != $old_regular_price ) $price_changed = true;
-			if ( isset( $_REQUEST['_sale_price'] ) && wc_clean( $_REQUEST['_sale_price'] ) != $old_sale_price ) $price_changed = true;
+			if ( ! is_null( $new_regular_price ) && $new_regular_price != $old_regular_price ) {
+				$price_changed = true;
+			} elseif ( ! is_null( $new_sale_price ) && $new_sale_price != $old_sale_price ) {
+				$price_changed = true;
+			}
 
 			if ( $price_changed ) {
 				update_post_meta( $post_id, '_sale_price_dates_from', '' );
 				update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
-				if ( isset( $_REQUEST['_sale_price'] ) && $_REQUEST['_sale_price'] != '' ) {
-					update_post_meta( $post_id, '_price', wc_clean( $_REQUEST['_sale_price'] ) );
+				if ( ! is_null( $new_sale_price ) && $new_sale_price !== '' ) {
+					update_post_meta( $post_id, '_price', $new_sale_price );
 				} else {
-					update_post_meta( $post_id, '_price', wc_clean( $_REQUEST['_regular_price'] ) );
+					update_post_meta( $post_id, '_price', $new_regular_price );
 				}
 			}
 		}

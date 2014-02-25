@@ -11,7 +11,7 @@ global $states;
 
 $states["ES"] = array(
     'C' => __('A Coru&ntilde;a', 'woocommerce'),
-    'VI' => __('&Aacute;lava', 'woocommerce'),
+    'VI' => __('Araba/&Aacute;lava', 'woocommerce'),
     'AB' => __('Albacete', 'woocommerce'),
     'A' => __('Alicante', 'woocommerce'),
     'AL' => __('Almer&iacute;a', 'woocommerce'),
@@ -32,7 +32,7 @@ $states["ES"] = array(
     'GI' => __('Girona', 'woocommerce'),
     'GR' => __('Granada', 'woocommerce'),
     'GU' => __('Guadalajara', 'woocommerce'),
-    'SS' => __('Guip&uacute;zcoa', 'woocommerce'),
+    'SS' => __('Gipuzkoa', 'woocommerce'),
     'H' => __('Huelva', 'woocommerce'),
     'HU' => __('Huesca', 'woocommerce'),
     'J' => __('Ja&eacute;n', 'woocommerce'),
@@ -59,7 +59,7 @@ $states["ES"] = array(
     'TO' => __('Toledo', 'woocommerce'),
     'V' => __('Valencia', 'woocommerce'),
     'VA' => __('Valladolid', 'woocommerce'),
-    'BI' => __('Vizcaya', 'woocommerce'),
+    'BI' => __('Bizkaia', 'woocommerce'),
     'ZA' => __('Zamora', 'woocommerce'),
     'Z' => __('Zaragoza', 'woocommerce')
 ); 

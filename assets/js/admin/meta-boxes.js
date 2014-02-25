@@ -233,10 +233,10 @@ jQuery( function($){
 		var $qty = $row.find('input.quantity');
 		var qty = $qty.val();
 
-		var line_subtotal 	= $row.find('input.line_subtotal').val();
-		var line_total 		= $row.find('input.line_total').val();
-		var line_tax 		= $row.find('input.line_tax').val();
-		var line_subtotal_tax = $row.find('input.line_subtotal_tax').val();
+		var line_subtotal 	= accounting.unformat( $row.find('input.line_subtotal').val(), woocommerce_admin.mon_decimal_point );
+		var line_total 		= accounting.unformat( $row.find('input.line_total').val(), woocommerce_admin.mon_decimal_point );
+		var line_tax 		= accounting.unformat( $row.find('input.line_tax').val(), woocommerce_admin.mon_decimal_point );
+		var line_subtotal_tax = accounting.unformat( $row.find('input.line_subtotal_tax').val(), woocommerce_admin.mon_decimal_point );
 
 		if ( qty ) {
 			unit_subtotal 		= parseFloat( accounting.toFixed( ( line_subtotal / qty ), woocommerce_admin_meta_boxes.rounding_precision ) );
@@ -282,6 +282,11 @@ jQuery( function($){
 		var tax       = parseFloat( accounting.formatNumber( unit_subtotal_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) );
 		var total     = parseFloat( accounting.formatNumber( unit_total * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) );
 		var total_tax = parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) );
+
+		subtotal  = subtotal.toString().replace( '.', woocommerce_admin.mon_decimal_point );
+		tax       = tax.toString().replace( '.', woocommerce_admin.mon_decimal_point );
+		total     = total.toString().replace( '.', woocommerce_admin.mon_decimal_point );
+		total_tax = total_tax.toString().replace( '.', woocommerce_admin.mon_decimal_point );
 
 		$row.find('input.line_subtotal').val( subtotal );
 		$row.find('input.line_total').val( total );
@@ -1502,13 +1507,19 @@ jQuery( function($){
 		}
 
 		// Create the media frame.
-		product_gallery_frame = wp.media.frames.downloadable_file = wp.media({
+		product_gallery_frame = wp.media.frames.product_gallery = wp.media({
 			// Set the title of the modal.
 			title: $el.data('choose'),
 			button: {
 				text: $el.data('update'),
 			},
-			multiple: true
+			states : [
+				new wp.media.controller.Library({
+					title: $el.data('choose'),
+					filterable :	'all',
+					multiple: true,
+				})
+			]
 		});
 
 		// When an image is selected, run a callback.

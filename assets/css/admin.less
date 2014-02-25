@@ -111,70 +111,6 @@
 	margin: 10px;
 }
 
-#wc_get_started  { position: relative; margin: 1em 0 2em; padding: 15px 15px 15px 90px; border: 1px solid #d9d9d9; background: #f5f5f5 url(../images/gear.png) no-repeat 15px 15px; border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #fff; -moz-box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #fff; -webkit-box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #fff; }
-#wc_get_started span  { display: block; text-shadow: 1px 1px 0 #fff; font-size: 14px; line-height: 22px; color: #595959; }
-#wc_get_started span.main  { margin-top: 2px; font-weight: bold; font-size: 16px; }
-#wc_get_started .main-button  { position: absolute; right: 20px; top: 27px; }
-#wc_get_started p { margin: 1em 0 .5em; }
-
-#wc_get_started.mijireh { background: #5bc0de url(../images/mijireh-logo.png) no-repeat 15px 18px; border: 1px solid #339bb9; padding: 15px 15px 15px 152px; box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.5 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.5 ); -moz-box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.5 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.5 ); -webkit-box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.5 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.5 ); }
-#wc_get_started.mijireh span { color: #fff; text-shadow: 0 1px 0 #4a94ac; }
-#wc_get_started.mijireh span a { color: #fff; }
-#wc_get_started.mijireh a.button { border-color: #fff; box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.1 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.1 ), 0 1px 3px #206d8b; -moz-box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.1 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.1 ), 0 1px 3px #206d8b; -webkit-box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.1 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.1 ), 0 1px 3px #206d8b; }
-#wc_get_started.mijireh a.button-primary { background: #2b7e9f; border-color: #266e8b; }
-
-
-#icon-woocommerce, .woocommerce_icon, .icon32-posts-product, .icon32-posts-shop_order, .icon32-posts-shop_coupon, .icon32-posts-product_variation {
-	background-image: url(../images/icons/woocommerce-icons.png) !important;
-	background-position: -11px -5px;
-	background-size: auto !important;
-}
-.icon32-posts-product {
-	background-position: -69px -5px !important;
-}
-.icon32-posts-shop_order {
-	background-position: -127px -5px !important;
-}
-.icon32-attributes {
-	background-position: -185px -5px !important;
-}
-.icon32-woocommerce-settings {
-	background-position: -359px -5px !important;
-}
-.icon32-posts-shop_coupon {
-	background-position: -475px -5px !important;
-}
-.icon32-posts-product_variation {
-	background-position: -533px -5px !important;
-}
-.icon32-woocommerce-reports {
-	background-position: -591px -5px !important;
-}
-.icon32-woocommerce-status {
-	background-position: -417px -5px !important;
-}
-.icon32-woocommerce-delivery {
-	background-position: -649px -5px !important;
-}
-.icon32-woocommerce-compose {
-	background-position: -708px -5px !important;
-}
-.icon32-woocommerce-telephone {
-	background-position: -766px -5px !important;
-}
-.icon32-woocommerce-users {
-	background-position: -824px -5px !important;
-}
-.icon32-woocommerce-nav {
-	background-position: -882px -5px !important;
-}
-.icon32-woocommerce-email {
-	background-position: -940px -5px !important;
-}
-.icon32-woocommerce-importer {
-	background-position: -11px -50px !important;
-}
-
 .wrap.woocommerce div.updated, .wrap.woocommerce div.error {
 	margin-top: 10px;
 }
@@ -2104,7 +2040,7 @@ img.help_tip {
 		float: right;
 		width: 100%;
 
-		p, .wc-metaboxes, p.toolbar, fieldset.form-field {
+		.wc-metaboxes, p.toolbar {
 			padding-left: 12px !important;
 			padding-right: 20px !important;
 		}
@@ -2345,19 +2281,26 @@ img.help_tip {
 				padding: 0;
 			}
 			td.sort {
-				padding: 0 0 0 1.5em;
+				padding: 0 8px;
 				cursor: move;
-				position: relative;
 				background: #f9f9f9;
+				text-align: center;
+				vertical-align: middle;
 				&:before {
-					content: "";
-					position: absolute;
-					top: 1em;
-					left: 0.5em;
-					width: 1em;
-					height: 0.125em;
-					border-top: 0.375em double #999;
-					border-bottom: 0.125em solid #999;
+					content: "\e032";
+					font-family: 'WooCommerce';
+					text-align: center;
+					line-height: 1;
+					color: #999;
+					display: block;
+					width: 17px;
+					float: left;
+					height: 100%;
+				}
+				&:hover {
+					&:before {
+						color: #333;
+					}
 				}
 			}
 		}
@@ -2378,10 +2321,14 @@ img.help_tip {
 	p {
 		margin: 9px 0 9px;
 	}
+	p.form-field, fieldset.form-field {
+		padding: 5px 20px 5px 162px !important; /** Padding for aligning labels left - 12px + 150 label width **/
+	}
 	label, legend {
 		float: left;
 		width: 150px;
 		padding: 0;
+		margin: 0 0 0 -150px;
 
 		.req {
 			font-weight: bold;
@@ -2405,7 +2352,9 @@ img.help_tip {
 		height: 3.5em;
 		line-height: 1.5em;
 	}
-	input[type="text"] {
+	input[type="text"],
+	input[type="email"],
+	input[type="number"] {
 		width: 50%;
 		float: left;
 	}
@@ -2416,6 +2365,9 @@ img.help_tip {
 	select {
 		float: left;
 	}
+	input[type="text"].short,
+	input[type="email"].short,
+	input[type="number"].short,
 	.short {
 		width: 25%;
 	}
@@ -2457,6 +2409,11 @@ img.help_tip {
 				}
 			}
 		}
+		ul.wc-radios {
+			label {
+				margin-left: 0;
+			}
+		}
 	}
 	.dimensions_field {
 		.wrap {
@@ -2491,6 +2448,10 @@ img.help_tip {
 		}
 		&:last-child {
 			border-bottom:0;
+		}
+		.link_all_variations, .add_variation {
+			float: right;
+			margin-left: 5px;
 		}
 	}
 	p.toolbar {
@@ -3107,14 +3068,14 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 			li {
 				border-right: 5px solid #aaa;
 				color: #aaa;
-				padding: 1em 1.5em;
+				padding: 1em;
 				display: block;
 				margin: 0;
 				-webkit-transition:all ease .5s;
 				box-shadow:
 					inset 0 -1px 0 0 #dfdfdf;
 				strong {
-					font-size: 2.618em;
+					font-size: 1.618em;
 					line-height: 1.2em;
 					color: #464646;
 					font-weight: normal;
@@ -3126,7 +3087,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 						inset 0 -1px 0 0 #dfdfdf,
 						inset 300px 0 0 fade(#9c5d90,10%);
 					border-right: 5px solid #9c5d90 !important;
-					padding-left:2em;
+					padding-left:1.5em;
 					color: #9c5d90;
 				}
 			}
@@ -3205,6 +3166,31 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 	.woocommerce-reports-right {
 		width: 49.5%;
 		float: right;
+	}
+	.column-wc_actions {
+		a.edit,
+		a.view {
+			.ir;
+			padding:0 !important;
+			height: 2em !important;
+			width:2em;
+			&:after {
+				.icon;
+				line-height: 1.85;
+			}
+		}
+
+		a.edit {
+			&:after {
+				content: "\e01c";
+			}
+		}
+
+		a.view {
+			&:after {
+				content: "\e010";
+			}
+		}
 	}
 }
 
@@ -3353,7 +3339,7 @@ table.bar_chart {
 	.woocommerce_options_panel .description {
 		display: block;
 		clear: both;
-		margin-left: 150px;
+		margin-left: 0;
 	}
 }
 
@@ -3410,15 +3396,6 @@ table.bar_chart {
 	}
 }
 
-// HiDPI optimisation
-@media
-(-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
-	#icon-woocommerce, .woocommerce_icon, .icon32-posts-product, .icon32-posts-shop_order, .icon32-posts-shop_coupon, .icon32-posts-product_variation {
-		background-image: url(../images/icons/woocommerce-icons-x2.png) !important;
-		background-size: 986px 91px !important;
-	}
-}
 @import 'chosen.less';
 
 .chosen-container-single .chosen-single {

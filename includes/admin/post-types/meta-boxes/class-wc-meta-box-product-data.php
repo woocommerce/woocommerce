@@ -64,8 +64,9 @@ class WC_Meta_Box_Product_Data {
 		foreach ( $product_type_options as $key => $option ) {
 			$selected_value = get_post_meta( $post->ID, '_' . $key, true );
 
-			if ( $selected_value == '' )
+			if ( $selected_value == '' && isset( $option['default'] ) ) {
 				$selected_value = $option['default'];
+			}
 
 			$type_box .= '<label for="' . esc_attr( $option['id'] ) . '" class="'. esc_attr( $option['wrapper_class'] ) . ' tips" data-tip="' . esc_attr( $option['description'] ) . '">' . esc_html( $option['label'] ) . ': <input type="checkbox" name="' . esc_attr( $option['id'] ) . '" id="' . esc_attr( $option['id'] ) . '" ' . checked( $selected_value, 'yes', false ) .' /></label>';
 		}
@@ -1262,7 +1263,7 @@ class WC_Meta_Box_Product_Data {
 				$files = array();
 
 				$file_names    = isset( $_POST['_wc_file_names'] ) ? array_map( 'wc_clean', $_POST['_wc_file_names'] ) : array();
-				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'esc_url_raw', array_map( 'trim', $_POST['_wc_file_urls'] ) ) : array();
+				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'wc_clean', $_POST['_wc_file_urls'] ) : array();
 				$file_url_size = sizeof( $file_urls );
 
 				for ( $i = 0; $i < $file_url_size; $i ++ ) {
@@ -1397,8 +1398,9 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_height', ( $variable_height[ $i ] === '' ) ? '' : wc_format_decimal( $variable_height[ $i ] ) );
 
 				// Stock handling
-				if ( isset($variable_stock[$i]) )
+				if ( isset( $variable_stock[$i] ) ) {
 					wc_update_product_stock( $variation_id, wc_clean( $variable_stock[ $i ] ) );
+				}
 
 				// Price handling
 				$regular_price 	= wc_format_decimal( $variable_regular_price[ $i ] );
@@ -1449,7 +1451,7 @@ class WC_Meta_Box_Product_Data {
 
 					$files         = array();
 					$file_names    = isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_names'][ $variation_id ] ) : array();
-					$file_urls     = isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'esc_url_raw', array_map( 'trim', $_POST['_wc_variation_file_urls'][ $variation_id ] ) ) : array();
+					$file_urls     = isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_urls'][ $variation_id ] ) : array();
 					$file_url_size = sizeof( $file_urls );
 
 					for ( $ii = 0; $ii < $file_url_size; $ii ++ ) {

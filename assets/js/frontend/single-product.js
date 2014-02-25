@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
 
 	// wc_single_product_params is required to continue, ensure the object exists
 	if (typeof wc_single_product_params === "undefined")
@@ -21,11 +21,19 @@ jQuery(document).ready(function($) {
 	});
 
 	$('.woocommerce-tabs').each(function() {
-		var hash = window.location.hash;
+		var hash 	= window.location.hash;
+		var url		= window.location.href;
+
 		if (hash.toLowerCase().indexOf("comment-") >= 0) {
 			$('ul.tabs li.reviews_tab a', $(this)).click();
 		} else {
 			$('ul.tabs li:first a', $(this)).click();
+		}
+
+		if ( url.indexOf("comment-page-") > 0 || url.indexOf("cpage=") > 0 ) {
+			$( 'ul.tabs li.reviews_tab a', $( this ) ).click();
+		} else {
+			$( 'ul.tabs li:first a', $( this ) ).click();
 		}
 	});
 

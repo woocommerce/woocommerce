@@ -306,15 +306,12 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_price( $price, $args = array() ) {
-	global $woocommerce;
-
 	extract( shortcode_atts( array(
 		'ex_tax_label' 	=> '0'
 	), $args ) );
 
 	$return          = '';
 	$num_decimals    = absint( get_option( 'woocommerce_price_num_decimals' ) );
-	$currency_pos    = get_option( 'woocommerce_currency_pos' );
 	$currency        = isset( $args['currency'] ) ? $args['currency'] : '';
 	$currency_symbol = get_woocommerce_currency_symbol($currency);
 	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
@@ -323,7 +320,7 @@ function wc_price( $price, $args = array() ) {
 	$price           = apply_filters( 'raw_woocommerce_price', floatval( $price ) );
 	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $price, $num_decimals, $decimal_sep, $thousands_sep ), $price, $num_decimals, $decimal_sep, $thousands_sep );
 
-	if ( apply_filters( 'woocommerce_price_trim_zeros', true ) && $num_decimals > 0 ) {
+	if ( apply_filters( 'woocommerce_price_trim_zeros', false ) && $num_decimals > 0 ) {
 		$price = wc_trim_zeros( $price );
 	}
 
