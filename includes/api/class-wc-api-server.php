@@ -576,7 +576,7 @@ class WC_API_Server {
 	}
 
 	/**
-	 * Returns the request URL with the page query parmeter set to the specified page
+	 * Returns the request URL with the page query parameter set to the specified page
 	 *
 	 * @since 2.1
 	 * @param int $page
@@ -590,8 +590,10 @@ class WC_API_Server {
 		// add provided page query param
 		$request = urldecode( add_query_arg( 'page', $page, $request ) );
 
-		// return full URL
-		return get_woocommerce_api_url( str_replace( '/wc-api/v1/', '', $request ) );
+		// get the home host
+		$host = parse_url( get_home_url(), PHP_URL_HOST );
+
+		return set_url_scheme( "http://{$host}{$request}" );
 	}
 
 	/**

@@ -256,7 +256,15 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$extra_rate['label']	= $this_option[0];
 				$this_cost				= $this_option[1];
 
-				if (preg_match('/(\d+\.?\d*)\s*(\+|-)\s*(\d+\.?\d*)\%/', $this_cost, $this_cost_matches)) {
+				$pattern = 
+					'/' .           // start regex
+					'(\d+\.?\d*)' . // capture digits, optionally capture a `.` and more digits
+					'\s*' .         // match whitespace
+					'(\+|-)' .      // capture the operand
+					'\s*'.          // match whitespace
+					'(\d+\.?\d*)'.  // capture digits, optionally capture a `.` and more digits
+					'\%/';          // match the percent sign & end regex
+				if ( preg_match( $pattern, $this_cost, $this_cost_matches ) ) {
 					$this_cost_mathop = $this_cost_matches[2];
 					$this_cost_percents = $this_cost_matches[3] / 100;
 					$this_cost = $this_cost_matches[1];
@@ -280,12 +288,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						if ( $this_cost_percents ) {
 							foreach ( $this->find_shipping_classes( $package ) as $shipping_class => $items ){
 								foreach ( $items as $item_id => $values ) {
-									if ($this_cost_mathop == '+') {
-										$this_cost += $this_cost_percents * $values['line_total'];
-									}
-									else {
-										$this_cost -= $this_cost_percents * $values['line_total'];
-									}
+									$this_cost = $this->calc_percentage_adjustment( $this_cost, $this_cost_percents, $this_cost_mathop, $values['line_total'] );
 								}
 							}
 						}
@@ -296,22 +299,14 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						// Factor $this_cost by the percentage if provided.
 						if ( $this_cost_percents ) {
 							foreach ( $package['contents'] as $item_id => $values ) {
-								if ($this_cost_mathop == '+') {
-									$this_cost += $this_cost_percents * $values['line_total'];
-								} else {
-									$this_cost -= $this_cost_percents * $values['line_total'];
-								}
+								$this_cost = $this->calc_percentage_adjustment( $this_cost, $this_cost_percents, $this_cost_mathop, $values['line_total'] );
 							}
 						}
 					break;
 					case  'order' :
 						// Factor $this_cost by the percentage if provided.
 						if ( $this_cost_percents ) {
-							if ($this_cost_mathop == '+') {
-								$this_cost += $this_cost_percents * $package['contents_cost'];
-							} else {
-								$this_cost -= $this_cost_percents * $package['contents_cost'];
-							}
+							$this_cost = $this->calc_percentage_adjustment( $this_cost, $this_cost_percents, $this_cost_mathop, $package['contents_cost'] );
 						}
 					break;
 				}
@@ -325,6 +320,27 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$this->add_rate( $extra_rate );
 			}
 		}
+	}
+
+
+	/**
+	 * Calculate the percentage adjustment for each shipping rate.
+	 *
+	 * @access public
+	 * @param  float  $cost
+	 * @param  float  $percent_adjustment
+	 * @param  string $percent_operator
+	 * @param  float  $base_price
+	 * @return float
+	 */
+	function calc_percentage_adjustment( $cost, $percent_adjustment, $percent_operator, $base_price ) {
+		if ( '+' == $percent_operator ) {
+			$cost += $percent_adjustment * $base_price;
+		} else {
+			$cost -= $percent_adjustment * $base_price;
+		}
+
+		return $cost;
 	}
 
 
