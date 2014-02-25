@@ -149,7 +149,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 		foreach ( $this->product_ids as $product_id ) {
 			$product = get_product( $product_id );
-			$this->product_ids_titles[] = $product->get_formatted_name();
+			if ( $product ) {
+				$this->product_ids_titles[] = $product->get_formatted_name();
+			} else {
+				$this->product_ids_titles[] = '#' . $product_id;
+			}
 		}
 
 		echo '<p>' . ' <strong>' . implode( ', ', $this->product_ids_titles ) . '</strong></p>';
