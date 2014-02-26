@@ -395,8 +395,6 @@ class WC_Meta_Box_Order_Data {
 		// Order status
 		$order->update_status( $_POST['order_status'] );
 
-		delete_transient( 'woocommerce_processing_order_count' );
-
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_report_%') OR `option_name` LIKE ('_transient_timeout_wc_report_%')" );
+		wc_delete_shop_order_transients( $post_id );
 	}
 }
