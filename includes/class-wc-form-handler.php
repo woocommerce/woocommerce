@@ -830,9 +830,7 @@ class WC_Form_Handler {
 
 					do_action( 'woocommerce_customer_reset_password', $user );
 
-					wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
-
-					wp_redirect( remove_query_arg( array( 'key', 'login' ) ) );
+					wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login' ) ) ) );
 					exit;
 				}
 			}
