@@ -97,6 +97,8 @@ jQuery(function($) {
     });
 
     var dates = jQuery( ".range_datepicker" ).datepicker({
+        changeMonth: true,
+        changeYear: true,
         defaultDate: "",
         dateFormat: "yy-mm-dd",
         numberOfMonths: 1,
