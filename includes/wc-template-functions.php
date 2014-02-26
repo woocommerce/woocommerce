@@ -1417,7 +1417,8 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			'taxonomy'		=> 'product_cat',
 			'pad_counts'	=> 1
 		);
-		$product_categories = get_categories( apply_filters( 'woocommerce_product_subcategories_args', $args ) );
+		$args = apply_filters( 'woocommerce_product_subcategories_args', $args );
+		$product_categories = get_categories( $args );
 
 		$product_category_found = false;
 
@@ -1425,7 +1426,9 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 			foreach ( $product_categories as $category ) {
 
-				if ( $category->parent != $parent_id || $category->count == 0 )
+				if ( $category->parent != $parent_id )
+					continue;
+				if ( $args['hide_empty'] && $category->count == 0 )  
 					continue;
 
 				if ( ! $product_category_found ) {
