@@ -300,7 +300,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				}
 
 				$order = new WC_Order( $order_id );
-				if ( $user_id == $order->user_id || empty( $order->user_id ) || 'no' == get_option( 'woocommerce_enable_guest_checkout' ) ) {
+				if ( $user_id == $order->user_id || empty( $order->user_id ) || 'yes' == get_option( 'woocommerce_enable_guest_checkout' ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
 
