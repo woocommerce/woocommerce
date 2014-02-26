@@ -183,7 +183,7 @@ class WC_Shortcode_My_Account {
 		$args = array( 'form' => 'lost_password' );
 
 		// process reset key / login from email confirmation link
-		if( isset( $_GET['key'] ) && isset( $_GET['login'] ) ) {
+		if ( isset( $_GET['key'] ) && isset( $_GET['login'] ) ) {
 
 			$user = self::check_password_reset_key( $_GET['key'], $_GET['login'] );
 
@@ -193,6 +193,8 @@ class WC_Shortcode_My_Account {
 				$args['key'] = esc_attr( $_GET['key'] );
 				$args['login'] = esc_attr( $_GET['login'] );
 			}
+		} elseif ( isset( $_GET['reset'] ) ) {
+			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 		}
 
 		wc_get_template( 'myaccount/form-lost-password.php', $args );
