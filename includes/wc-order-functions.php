@@ -325,3 +325,27 @@ function wc_processing_order_count() {
 	return $order_count;
 }
 
+/**
+ * Clear all transients cache for order data.
+ *
+ * @param int $post_id (default: 0)
+ */
+function wc_delete_shop_order_transients( $post_id = 0 ) {
+	global $wpdb;
+
+	$post_id = absint( $post_id );
+
+	// Clear core transients
+	$transients_to_clear = array(
+		'woocommerce_processing_order_count'
+	);
+
+	foreach( $transients_to_clear as $transient ) {
+		delete_transient( $transient );
+	}
+
+	// Clear transients for which we don't have the name
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_report_%') OR `option_name` LIKE ('_transient_timeout_wc_report_%')" );
+
+	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
+}
