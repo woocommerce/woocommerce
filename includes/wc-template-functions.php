@@ -1303,22 +1303,27 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 
 		if ( is_product_category() ) {
 			switch ( get_woocommerce_term_meta( $term->term_id, 'display_type', true ) ) {
+				case 'subcategories' :
+					// Nothing - we want to continue to see if there are products/subcats
+				break;
 				case 'products' :
 				case 'both' :
 					return true;
 				break;
-				case '' :
+				default :
+					// Default - no setting
 					if ( get_option( 'woocommerce_category_archive_display' ) != 'subcategories' )
 						return true;
 				break;
 			}
 		}
 
+		// Begin subcategory logic
 		global $wpdb;
 
 		$parent_id             = empty( $term->term_id ) ? 0 : $term->term_id;
 		$taxonomy              = empty( $term->taxonomy ) ? '' : $term->taxonomy;
-		$products_will_display = false;
+		$products_will_display = true;
 
 		if ( ! $parent_id && ! $taxonomy ) {
 			return true;
@@ -1328,16 +1333,16 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 			$has_children = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d AND taxonomy = %s", $parent_id, $taxonomy ) );
 
 			if ( $has_children ) {
-				// Check terms have products inside - parents first
+				// Check terms have products inside - parents first. If products are found inside, subcats will be shown instead of products so we can return false.
 				if ( sizeof( get_objects_in_term( $has_children, $taxonomy ) ) > 0 ) {
-					$products_will_display = true;
+					$products_will_display = false;
 				} else {
 					// If we get here, the parents were empty so we're forced to check children
 					foreach ( $has_children as $term ) {
 						$children = get_term_children( $term, $taxonomy );
 
 						if ( sizeof( get_objects_in_term( $children, $taxonomy ) ) > 0 ) {
-							$products_will_display = true;
+							$products_will_display = false;
 							break;
 						}
 					}
