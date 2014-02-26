@@ -32,6 +32,11 @@ class WC_Shortcode_Order_Tracking {
 	 */
 	public static function output( $atts ) {
 
+		// Check cart class is loaded or abort
+		if ( is_null( WC()->cart ) ) {
+			return;
+		}
+
 		extract(shortcode_atts(array(
 		), $atts));
 

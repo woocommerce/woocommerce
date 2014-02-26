@@ -32,6 +32,11 @@ class WC_Shortcode_My_Account {
 	public static function output( $atts ) {
 		global $woocommerce, $wp;
 
+		// Check cart class is loaded or abort
+		if ( is_null( WC()->cart ) ) {
+			return;
+		}
+
 		if ( ! is_user_logged_in() ) {
 
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
