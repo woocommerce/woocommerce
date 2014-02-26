@@ -33,8 +33,9 @@ class WC_Download_Handler {
 			$download_id          = isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '';
 			$_product             = get_product( $product_id );
 
-			if ( ! is_email( $email) )
+			if ( ! is_email( $email) ) {
 				wp_die( __( 'Invalid email address.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+			}
 
 			$query = "
 				SELECT order_id,downloads_remaining,user_id,download_count,access_expires,download_id
@@ -57,8 +58,9 @@ class WC_Download_Handler {
 
 			$download_result = $wpdb->get_row( $wpdb->prepare( $query, $args ) );
 
-			if ( ! $download_result )
+			if ( ! $download_result ) {
 				wp_die( __( 'Invalid download.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+			}
 
 			$download_id 			= $download_result->download_id;
 			$order_id 				= $download_result->order_id;
@@ -69,29 +71,33 @@ class WC_Download_Handler {
 
 			if ( $user_id && get_option( 'woocommerce_downloads_require_login' ) == 'yes' ) {
 
-				if ( ! is_user_logged_in() )
+				if ( ! is_user_logged_in() ) {
 					wp_die( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ) );
-
-				elseif ( !current_user_can( 'download_file', $download_result ) )
+				} elseif ( ! current_user_can( 'download_file', $download_result ) ) {
 					wp_die( __( 'This is not your download link.', 'woocommerce' ) );
+				}
 
 			}
 
-			if ( ! get_post( $product_id ) )
+			if ( ! get_post( $product_id ) ) {
 				wp_die( __( 'Product no longer exists.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+			}
 
 			if ( $order_id ) {
 				$order = new WC_Order( $order_id );
 
-				if ( ! $order->is_download_permitted() || $order->post_status != 'publish' )
+				if ( ! $order->is_download_permitted() || $order->post_status != 'publish' ) {
 					wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+				}
 			}
 
-			if ( $downloads_remaining == '0' )
+			if ( $downloads_remaining == '0' ) {
 				wp_die( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+			}
 
-			if ( $access_expires > 0 && strtotime( $access_expires) < current_time( 'timestamp' ) )
+			if ( $access_expires > 0 && strtotime( $access_expires) < current_time( 'timestamp' ) ) {
 				wp_die( __( 'Sorry, this download has expired', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+			}
 
 			if ( $downloads_remaining > 0 ) {
 				$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions", array(
@@ -133,8 +139,9 @@ class WC_Download_Handler {
 
 		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
 
-		if ( ! $file_path )
+		if ( ! $file_path ) {
 			wp_die( __( 'No file defined', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+		}
 
 		// Redirect to the file...
 		if ( $file_download_method == "redirect" ) {
@@ -181,8 +188,9 @@ class WC_Download_Handler {
 			$remote_file = false;
 
 			// Remove Query String
-			if ( strstr( $file_path, '?' ) )
+			if ( strstr( $file_path, '?' ) ) {
 				$file_path = current( explode( '?', $file_path ) );
+			}
 
 			$file_path   = realpath( $file_path );
 		}
@@ -199,14 +207,17 @@ class WC_Download_Handler {
 		}
 
 		// Start setting headers
-		if ( ! ini_get('safe_mode') )
+		if ( ! ini_get('safe_mode') ) {
 			@set_time_limit(0);
+		}
 
-		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() )
+		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() ) {
 			@set_magic_quotes_runtime(0);
+		}
 
-		if( function_exists( 'apache_setenv' ) )
+		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 );
+		}
 
 		@session_write_close();
 		@ini_set( 'zlib.output_compression', 'Off' );
@@ -236,8 +247,9 @@ class WC_Download_Handler {
 
 		$file_name = basename( $file_path );
 
-		if ( strstr( $file_name, '?' ) )
+		if ( strstr( $file_name, '?' ) ) {
 			$file_name = current( explode( '?', $file_name ) );
+		}
 
 		header( "X-Robots-Tag: noindex, nofollow", true );
 		header( "Content-Type: " . $ctype );
@@ -245,14 +257,16 @@ class WC_Download_Handler {
 		header( "Content-Disposition: attachment; filename=\"" . $file_name . "\";" );
 		header( "Content-Transfer-Encoding: binary" );
 
-        if ( $size = @filesize( $file_path ) )
+        if ( $size = @filesize( $file_path ) ) {
         	header( "Content-Length: " . $size );
+        }
 
 		if ( $file_download_method == 'xsendfile' ) {
 
 			// Path fix - kudos to Jason Judge
-         	if ( getcwd() )
+         	if ( getcwd() ) {
          		$file_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`' , '', $file_path ), '/' );
+         	}
 
             header( "Content-Disposition: attachment; filename=\"" . $file_name . "\";" );
 
@@ -274,10 +288,11 @@ class WC_Download_Handler {
             }
         }
 
-        if ( $remote_file )
+        if ( $remote_file ) {
         	$this->readfile_chunked( $file_path ) or header( 'Location: ' . $file_path );
-        else
+        } else {
         	$this->readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+        }
 
         exit;
 	}
@@ -297,8 +312,9 @@ class WC_Download_Handler {
 		$cnt = 0;
 
 		$handle = @fopen( $file, 'r' );
-		if ( $handle === FALSE )
+		if ( $handle === FALSE ) {
 			return FALSE;
+		}
 
 		while ( ! feof( $handle ) ) {
 			$buffer = fread( $handle, $chunksize );
@@ -306,14 +322,16 @@ class WC_Download_Handler {
 			ob_flush();
 			flush();
 
-			if ( $retbytes )
+			if ( $retbytes ) {
 				$cnt += strlen( $buffer );
+			}
 		}
 
 		$status = fclose( $handle );
 
-		if ( $retbytes && $status )
+		if ( $retbytes && $status ) {
 			return $cnt;
+		}
 
 		return $status;
 	}
