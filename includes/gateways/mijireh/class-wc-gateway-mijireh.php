@@ -264,10 +264,10 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		$mj_order->discount 		= $wc_order->get_total_discount();
 
 		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) {
-			$mj_order->shipping 		= $wc_order->get_total_shipping() + $wc_order->get_shipping_tax();
+			$mj_order->shipping 		= round( $wc_order->get_total_shipping() + $wc_order->get_shipping_tax(), 2 );
 			$mj_order->show_tax			= false;
 		} else {
-			$mj_order->shipping 		= $wc_order->get_total_shipping();
+			$mj_order->shipping 		= round( $wc_order->get_total_shipping(), 2 );
 			$mj_order->tax 				= $wc_order->get_total_tax();
 		}
 
