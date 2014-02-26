@@ -1173,7 +1173,7 @@ class WC_Product {
 		$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
 
 		// Generate query
-		$query['fields'] = "SELECT ID FROM {$wpdb->posts} p";
+		$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
 		$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
 		$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
 		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
