@@ -13,7 +13,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * WC_Admin_Welcome class.
+ * WC_Admin_Edtior class.
  *
  * @since 2.0
  */
