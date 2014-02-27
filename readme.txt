@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fixed Relevanssi conflicts
 * Fix - Fixed issue with Mijireh incorrectly rounding shipping totals
 * Fix - Shipping class selection will be hidden for virtual variations
+* Fix - Prevent product percentage based coupons to stack discounts
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
