@@ -156,6 +156,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Layered nav widget now shows terms again when using list OR
 * Fix - Prevent multiple attempts at cancelling actions on orders
 * Fix - Fixes in reporting for variations
+* Fix - My Accounts downloads section now shows files names
+* Fix - Improved code to log in via email address
+* Fix - When guest checkout is enabled, manual made admin orders can be paid without logging in
+* Fix - Fix product counts when subcategories are displayed
+* Fix - Fixed Relevanssi conflicts
+* Fix - Fixed issue with Mijireh incorrectly rounding shipping totals
+* Fix - Shipping class selection will be hidden for virtual variations
 * Tweak - Added United Arab Emirates Dirham currency
 * Tweak - Enforce a static base for product permalink structures to prevent 404 issues
 * Tweak - Introducing woocommerce_get_username_from_email filter in login processing method
@@ -165,9 +172,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Introduces woocommerce_return_to_shop_redirect filter
 * Tweak - Improved tax rounding, to calculate an accurate tax total
 * Tweak - Introduced failsafes to prevent actions trying to take place on removed products
+* Tweak - Permalinks enabled data in REST API
+* Tweak - Filters to restrict granting/revoking access to files
+* Tweak - Added Canadian address format
 * Refactor - Multiple docblock updates
 * Refactor - Multiple code standards improvements
 * Refactor - Changed all text strings without explicit domain, to use the 'woocommerce' text domain
+* Refactor - Speed improvements in various places
 
 = 2.1.2 - 13/02/2014 =
 * Fix - Removed nl2br function from plain text email-order-items email template
