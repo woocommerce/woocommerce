@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
-"PO-Revision-Date: 2014-02-14 08:50+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-02-21 16:11:55+00:00\n"
+"PO-Revision-Date: 2014-02-24 11:28+0000\n"
+"Last-Translator: Shohei Tanaka <shohei.tanaka@artisanworkshop.biz>\n"
 "Language-Team: Japanese (http://www.transifex.com/projects/p/woocommerce/language/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -322,8 +322,8 @@ msgstr "条件"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:171
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:303
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:82
-#: includes/admin/reports/class-wc-report-customer-list.php:187
-#: includes/admin/reports/class-wc-report-stock.php:107
+#: includes/admin/reports/class-wc-report-customer-list.php:192
+#: includes/admin/reports/class-wc-report-stock.php:112
 msgid "Edit"
 msgstr "編集"
 
@@ -546,7 +546,7 @@ msgstr "WooCommerce 設定"
 #: includes/admin/class-wc-admin-menus.php:63
 #: includes/admin/class-wc-admin-welcome.php:213
 #: includes/admin/settings/class-wc-settings-checkout.php:277
-#: includes/admin/settings/class-wc-settings-shipping.php:241
+#: includes/admin/settings/class-wc-settings-shipping.php:243
 #: includes/admin/views/html-admin-page-status-report.php:269
 msgid "Settings"
 msgstr "設定"
@@ -618,7 +618,7 @@ msgid "Default"
 msgstr "デフォルト"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:136
+#: includes/admin/reports/class-wc-report-stock.php:141
 msgid "Product"
 msgstr "商品"
 
@@ -639,6 +639,11 @@ msgid ""
 "Enter a custom base to use. A base <strong>must</strong> be set or WordPress"
 " will use default instead."
 msgstr "使用するカスタムベースを入力します。ベースを設定する必要があります、または、WordPressはその代わりにデフォルトを使います。"
+
+#: includes/admin/class-wc-admin-permalink-settings.php:184
+msgctxt "slug"
+msgid "product"
+msgstr "商品"
 
 #: includes/admin/class-wc-admin-post-types.php:58
 msgid "Product updated. <a href=\"%s\">View Product</a>"
@@ -825,7 +830,7 @@ msgstr "電話番号"
 
 #: includes/admin/class-wc-admin-profile.php:88
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:67
-#: includes/admin/reports/class-wc-report-customer-list.php:244
+#: includes/admin/reports/class-wc-report-customer-list.php:249
 msgid "Email"
 msgstr "Eメール"
 
@@ -870,7 +875,7 @@ msgid "Revoke API Key"
 msgstr "APIキーを取り消す"
 
 #: includes/admin/class-wc-admin-reports.php:46
-#: includes/admin/reports/class-wc-report-customer-list.php:246
+#: includes/admin/reports/class-wc-report-customer-list.php:251
 msgid "Orders"
 msgstr "受注"
 
@@ -891,7 +896,7 @@ msgid "Coupons by date"
 msgstr "日別クーポン"
 
 #: includes/admin/class-wc-admin-reports.php:75
-#: includes/admin/reports/class-wc-report-customer-list.php:25
+#: includes/admin/reports/class-wc-report-customer-list.php:30
 msgid "Customers"
 msgstr "お客様"
 
@@ -906,8 +911,8 @@ msgstr "顧客リスト"
 #: includes/admin/class-wc-admin-reports.php:92
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
-#: includes/admin/reports/class-wc-report-stock.php:20
-#: includes/admin/reports/class-wc-report-stock.php:21
+#: includes/admin/reports/class-wc-report-stock.php:25
+#: includes/admin/reports/class-wc-report-stock.php:26
 msgid "Stock"
 msgstr "在庫"
 
@@ -918,7 +923,7 @@ msgstr "在庫が少ない"
 #: includes/admin/class-wc-admin-reports.php:101
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
-#: includes/admin/reports/class-wc-report-stock.php:93
+#: includes/admin/reports/class-wc-report-stock.php:98
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
 msgid "Out of stock"
@@ -1040,8 +1045,8 @@ msgid "Clear expired transients"
 msgstr "期限切れのトランジェントをクリア"
 
 #: includes/admin/class-wc-admin-status.php:180
-msgid "This tool will clear ALL expired transients from Wordpress."
-msgstr "このツールは、Wordpressの全ての期限切れのトランジェントをクリアします。"
+msgid "This tool will clear ALL expired transients from WordPress."
+msgstr "このツールはすべての期限切れのトランジェントをWordPressからクリアします。"
 
 #: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
@@ -1475,9 +1480,9 @@ msgstr "WooCommerceが開発され、情熱的な個人の、世界的なチー�
 msgid ""
 "WooCommerce has been kindly translated into several other languages thanks "
 "to our translation team. Want to see your name? <a "
-"href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
+"href=\"https://www.transifex.com/projects/p/woocommerce/\">Translate "
 "WooCommerce</a>."
-msgstr "WooCommerceは各国の協力者によって各国の言語に翻訳されています。ご協力頂けたら、こちらに表示されます。<a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">WooCommerce翻訳関連</a>"
+msgstr "WooCommerceは各国の協力者によって各国の言語に翻訳されています。ご協力頂けたら、こちらに表示されます。<a href=\"https://www.transifex.com/projects/p/woocommerce/\">WooCommerce翻訳関連</a>"
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1640,7 +1645,7 @@ msgid "Price"
 msgstr "金額"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:256
-#: includes/admin/reports/class-wc-report-sales-by-category.php:142
+#: includes/admin/reports/class-wc-report-sales-by-category.php:147
 msgid "Categories"
 msgstr "カテゴリー"
 
@@ -1650,11 +1655,11 @@ msgstr "タグ"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:316
-#: includes/admin/reports/class-wc-report-customers.php:201
-#: includes/admin/reports/class-wc-report-sales-by-category.php:214
-#: includes/admin/reports/class-wc-report-sales-by-date.php:160
-#: includes/admin/reports/class-wc-report-sales-by-product.php:324
+#: includes/admin/reports/class-wc-report-coupon-usage.php:321
+#: includes/admin/reports/class-wc-report-customers.php:206
+#: includes/admin/reports/class-wc-report-sales-by-category.php:219
+#: includes/admin/reports/class-wc-report-sales-by-date.php:165
+#: includes/admin/reports/class-wc-report-sales-by-product.php:329
 msgid "Date"
 msgstr "日付"
 
@@ -1715,7 +1720,7 @@ msgstr "表示 &#8220;%s&#8221;"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:319
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:316
-#: includes/admin/reports/class-wc-report-stock.php:114
+#: includes/admin/reports/class-wc-report-stock.php:119
 msgid "View"
 msgstr "表示"
 
@@ -1778,7 +1783,7 @@ msgstr "なし"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:417
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:302
-#: includes/admin/reports/class-wc-report-stock.php:91
+#: includes/admin/reports/class-wc-report-stock.php:96
 #: includes/admin/views/html-bulk-edit-product.php:194
 #: includes/admin/views/html-quick-edit-product.php:137
 msgid "In stock"
@@ -1830,7 +1835,7 @@ msgstr "クーポンの種類"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:79
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
-#: includes/admin/reports/class-wc-report-sales-by-date.php:322
+#: includes/admin/reports/class-wc-report-sales-by-date.php:327
 msgid "Coupon amount"
 msgstr "クーポン金額"
 
@@ -1897,15 +1902,15 @@ msgstr "備考欄"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:122
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:127
 msgid "Total"
 msgstr "合計"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:100
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
-#: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-customer-list.php:254
+#: includes/admin/reports/class-wc-report-stock.php:145
 msgid "Actions"
 msgstr "アクション"
 
@@ -1977,26 +1982,26 @@ msgstr "すべてのステータスを表示"
 msgid "Show all customers"
 msgstr "すべての顧客を表示"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:689
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:691
 msgid "Mark processing"
 msgstr "マーク処理"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:692
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:694
 msgid "Mark on-hold"
 msgstr "保留をマークする"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:695
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:696
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:697
 msgid "Mark completed"
 msgstr "マーク完成"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:737
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:738
 msgid "Order status changed by bulk edit:"
 msgstr "一括編集で注文ステータスが変更されました:"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:759
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:760
 msgid "Order status changed."
 msgid_plural "%s order statuses changed."
 msgstr[0] "%s 注文ステータスが変更されました"
@@ -2150,7 +2155,7 @@ msgstr "クーポンがセール商品に適用すべきでない場合は、こ
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:586
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:603
-#: includes/admin/reports/class-wc-report-sales-by-product.php:178
+#: includes/admin/reports/class-wc-report-sales-by-product.php:183
 msgid "Search for a product&hellip;"
 msgstr "商品検索&hellip;"
 
@@ -2436,7 +2441,7 @@ msgid "Qty"
 msgstr "数量"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:111
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/settings/class-wc-settings-tax.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:550
 #: includes/admin/settings/class-wc-settings-tax.php:643
@@ -2738,7 +2743,7 @@ msgid "Shipping only"
 msgstr "送料のみ"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:252
-#: includes/admin/reports/class-wc-report-sales-by-category.php:171
+#: includes/admin/reports/class-wc-report-sales-by-category.php:176
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
@@ -2790,7 +2795,7 @@ msgid ""
 msgstr "在庫数：これが変数商品ならば、在庫数を定義しない限り、この値が全バリエーションの在庫制御に使用されます"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:144
 msgid "Stock status"
 msgstr "在庫状況"
 
@@ -3275,396 +3280,396 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "製品が出荷されていない場合、運送費が掛らない場合、このオプションを有効にします。"
 
-#: includes/admin/reports/class-wc-admin-report.php:395
+#: includes/admin/reports/class-wc-admin-report.php:391
 msgid "Sold %s worth in the last %d days"
 msgstr "売上%s 過去%d日間 "
 
-#: includes/admin/reports/class-wc-admin-report.php:397
+#: includes/admin/reports/class-wc-admin-report.php:393
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "売上個数%s 過去%d日間 "
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:71
+#: includes/admin/reports/class-wc-report-coupon-usage.php:76
 msgid "%s discounts in total"
 msgstr "%s 値引合計"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:77
+#: includes/admin/reports/class-wc-report-coupon-usage.php:82
 msgid "%s coupons used in total"
 msgstr "%s クーポン利用合計"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:90
-#: includes/admin/reports/class-wc-report-customers.php:140
-#: includes/admin/reports/class-wc-report-sales-by-category.php:68
-#: includes/admin/reports/class-wc-report-sales-by-date.php:124
-#: includes/admin/reports/class-wc-report-sales-by-product.php:108
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:41
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:41
+#: includes/admin/reports/class-wc-report-coupon-usage.php:95
+#: includes/admin/reports/class-wc-report-customers.php:145
+#: includes/admin/reports/class-wc-report-sales-by-category.php:73
+#: includes/admin/reports/class-wc-report-sales-by-date.php:129
+#: includes/admin/reports/class-wc-report-sales-by-product.php:113
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:46
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:46
 msgid "Year"
 msgstr "年間"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
-#: includes/admin/reports/class-wc-report-customers.php:141
-#: includes/admin/reports/class-wc-report-sales-by-category.php:69
-#: includes/admin/reports/class-wc-report-sales-by-date.php:125
-#: includes/admin/reports/class-wc-report-sales-by-product.php:109
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:42
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:42
+#: includes/admin/reports/class-wc-report-coupon-usage.php:96
+#: includes/admin/reports/class-wc-report-customers.php:146
+#: includes/admin/reports/class-wc-report-sales-by-category.php:74
+#: includes/admin/reports/class-wc-report-sales-by-date.php:130
+#: includes/admin/reports/class-wc-report-sales-by-product.php:114
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:47
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:47
 msgid "Last Month"
 msgstr "先月"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
-#: includes/admin/reports/class-wc-report-customers.php:142
-#: includes/admin/reports/class-wc-report-sales-by-category.php:70
-#: includes/admin/reports/class-wc-report-sales-by-date.php:126
-#: includes/admin/reports/class-wc-report-sales-by-product.php:110
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:43
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:43
+#: includes/admin/reports/class-wc-report-coupon-usage.php:97
+#: includes/admin/reports/class-wc-report-customers.php:147
+#: includes/admin/reports/class-wc-report-sales-by-category.php:75
+#: includes/admin/reports/class-wc-report-sales-by-date.php:131
+#: includes/admin/reports/class-wc-report-sales-by-product.php:115
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:48
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:48
 msgid "This Month"
 msgstr "今月"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:93
-#: includes/admin/reports/class-wc-report-customers.php:143
-#: includes/admin/reports/class-wc-report-sales-by-category.php:71
-#: includes/admin/reports/class-wc-report-sales-by-date.php:127
-#: includes/admin/reports/class-wc-report-sales-by-product.php:111
+#: includes/admin/reports/class-wc-report-coupon-usage.php:98
+#: includes/admin/reports/class-wc-report-customers.php:148
+#: includes/admin/reports/class-wc-report-sales-by-category.php:76
+#: includes/admin/reports/class-wc-report-sales-by-date.php:132
+#: includes/admin/reports/class-wc-report-sales-by-product.php:116
 msgid "Last 7 Days"
 msgstr "過去１週間"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:133
+#: includes/admin/reports/class-wc-report-coupon-usage.php:138
 msgid "Filter by coupon"
 msgstr "クーポンによるフィルター"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:161
+#: includes/admin/reports/class-wc-report-coupon-usage.php:166
 msgid "Choose coupons&hellip;"
 msgstr "クーポンを選択&hellip;"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:162
+#: includes/admin/reports/class-wc-report-coupon-usage.php:167
 msgid "All coupons"
 msgstr "すべてのクーポン"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:169
-#: includes/admin/reports/class-wc-report-sales-by-category.php:173
-#: includes/admin/reports/class-wc-report-sales-by-product.php:179
+#: includes/admin/reports/class-wc-report-coupon-usage.php:174
+#: includes/admin/reports/class-wc-report-sales-by-category.php:178
+#: includes/admin/reports/class-wc-report-sales-by-product.php:184
 msgid "Show"
 msgstr "表示する"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:182
+#: includes/admin/reports/class-wc-report-coupon-usage.php:187
 msgid "No used coupons found"
 msgstr "クーポンが使われていません"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:187
+#: includes/admin/reports/class-wc-report-coupon-usage.php:192
 msgid "Most Popular"
 msgstr "人気順"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:229
-#: includes/admin/reports/class-wc-report-coupon-usage.php:276
+#: includes/admin/reports/class-wc-report-coupon-usage.php:234
+#: includes/admin/reports/class-wc-report-coupon-usage.php:281
 msgid "No coupons found in range"
 msgstr "この範囲ではクーポンは見つかりませんでした"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:234
+#: includes/admin/reports/class-wc-report-coupon-usage.php:239
 msgid "Most Discount"
 msgstr "値引き順"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:319
-#: includes/admin/reports/class-wc-report-customers.php:204
-#: includes/admin/reports/class-wc-report-sales-by-category.php:217
-#: includes/admin/reports/class-wc-report-sales-by-date.php:164
-#: includes/admin/reports/class-wc-report-sales-by-product.php:327
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:29
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:29
+#: includes/admin/reports/class-wc-report-coupon-usage.php:324
+#: includes/admin/reports/class-wc-report-customers.php:209
+#: includes/admin/reports/class-wc-report-sales-by-category.php:222
+#: includes/admin/reports/class-wc-report-sales-by-date.php:169
+#: includes/admin/reports/class-wc-report-sales-by-product.php:332
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:34
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:34
 #: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "CSVのエクスポート"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:410
+#: includes/admin/reports/class-wc-report-coupon-usage.php:415
 msgid "Number of coupons used"
 msgstr "クーポンの利用数"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:418
+#: includes/admin/reports/class-wc-report-coupon-usage.php:423
 msgid "Discount amount"
 msgstr "割引合計"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:24
+#: includes/admin/reports/class-wc-report-customer-list.php:29
 msgid "Customer"
 msgstr "お客様"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:34
+#: includes/admin/reports/class-wc-report-customer-list.php:39
 msgid "No customers found."
 msgstr "会員が見つかりません。"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:48
+#: includes/admin/reports/class-wc-report-customer-list.php:53
 msgid "%s previous order linked"
 msgid_plural "%s previous orders linked"
 msgstr[0] "%s 以前の注文をリンクしました"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:53
+#: includes/admin/reports/class-wc-report-customer-list.php:58
 msgid "Search customers"
 msgstr "お客様検索"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:193
+#: includes/admin/reports/class-wc-report-customer-list.php:198
 msgid "View orders"
 msgstr "注文を表示"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:217
+#: includes/admin/reports/class-wc-report-customer-list.php:222
 msgid "Link previous orders"
 msgstr "以前の注文へのリンク"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:242
+#: includes/admin/reports/class-wc-report-customer-list.php:247
 msgid "Name (Last, First)"
 msgstr "名前(姓、名)"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:243
+#: includes/admin/reports/class-wc-report-customer-list.php:248
 msgid "Username"
 msgstr "ユーザー名"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:245
+#: includes/admin/reports/class-wc-report-customer-list.php:250
 msgid "Location"
 msgstr "地域"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:247
+#: includes/admin/reports/class-wc-report-customer-list.php:252
 msgid "Spent"
 msgstr "注文額"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:248
+#: includes/admin/reports/class-wc-report-customer-list.php:253
 msgid "Last order"
 msgstr "最終注文"
 
-#: includes/admin/reports/class-wc-report-customers.php:17
+#: includes/admin/reports/class-wc-report-customers.php:22
 msgid "%s signups in this period"
 msgstr "%s この期間のサインアップ数"
 
-#: includes/admin/reports/class-wc-report-customers.php:85
+#: includes/admin/reports/class-wc-report-customers.php:90
 msgid "Customer Sales"
 msgstr "顧客売上"
 
-#: includes/admin/reports/class-wc-report-customers.php:86
+#: includes/admin/reports/class-wc-report-customers.php:91
 msgid "Guest Sales"
 msgstr "非会員売上"
 
-#: includes/admin/reports/class-wc-report-customers.php:95
-#: includes/admin/reports/class-wc-report-customers.php:291
+#: includes/admin/reports/class-wc-report-customers.php:100
+#: includes/admin/reports/class-wc-report-customers.php:296
 msgid "Customer Orders"
 msgstr "会員注文"
 
-#: includes/admin/reports/class-wc-report-customers.php:100
-#: includes/admin/reports/class-wc-report-customers.php:301
+#: includes/admin/reports/class-wc-report-customers.php:105
+#: includes/admin/reports/class-wc-report-customers.php:306
 msgid "Guest Orders"
 msgstr "非会員注文"
 
-#: includes/admin/reports/class-wc-report-customers.php:119
+#: includes/admin/reports/class-wc-report-customers.php:124
 msgid "orders"
 msgstr "注文"
 
-#: includes/admin/reports/class-wc-report-customers.php:297
+#: includes/admin/reports/class-wc-report-customers.php:302
 msgid "customer orders"
 msgstr "会員注文"
 
-#: includes/admin/reports/class-wc-report-customers.php:307
+#: includes/admin/reports/class-wc-report-customers.php:312
 msgid "guest orders"
 msgstr "非会員注文"
 
-#: includes/admin/reports/class-wc-report-customers.php:311
+#: includes/admin/reports/class-wc-report-customers.php:316
 msgid "Signups"
 msgstr "Signups"
 
-#: includes/admin/reports/class-wc-report-customers.php:318
+#: includes/admin/reports/class-wc-report-customers.php:323
 msgid "new users"
 msgstr "新規ユーザー"
 
-#: includes/admin/reports/class-wc-report-low-in-stock.php:19
+#: includes/admin/reports/class-wc-report-low-in-stock.php:22
 msgid "No low in stock products found."
 msgstr "在庫の少ない商品はありません。"
 
-#: includes/admin/reports/class-wc-report-out-of-stock.php:19
+#: includes/admin/reports/class-wc-report-out-of-stock.php:22
 msgid "No out of stock products found."
 msgstr "在庫切れ商品がありません。"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:50
+#: includes/admin/reports/class-wc-report-sales-by-category.php:55
 msgid "%s sales in %s"
 msgstr "%s sales in %s"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:157
+#: includes/admin/reports/class-wc-report-sales-by-category.php:162
 msgid "Select categories&hellip;"
 msgstr "カテゴリーを選択&hellip;"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:172
+#: includes/admin/reports/class-wc-report-sales-by-category.php:177
 msgid "All"
 msgstr "すべて"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:232
+#: includes/admin/reports/class-wc-report-sales-by-category.php:237
 msgid "&larr; Choose a category to view stats"
 msgstr "&larr; データを表示するには、カテゴリを選択してください"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:76
+#: includes/admin/reports/class-wc-report-sales-by-date.php:81
 msgid "%s average daily sales"
 msgstr "%s １日平均売上"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:79
+#: includes/admin/reports/class-wc-report-sales-by-date.php:84
 msgid "%s average monthly sales"
 msgstr "%s 月間平均売上"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:84
+#: includes/admin/reports/class-wc-report-sales-by-date.php:89
 msgid "%s sales in this period"
 msgstr "%s この期間の売上"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:94
+#: includes/admin/reports/class-wc-report-sales-by-date.php:99
 msgid "%s orders placed"
 msgstr "%s 注文数"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:99
+#: includes/admin/reports/class-wc-report-sales-by-date.php:104
 msgid "%s items purchased"
 msgstr "%s 販売商品数"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:104
+#: includes/admin/reports/class-wc-report-sales-by-date.php:109
 msgid "%s charged for shipping"
 msgstr "%s 配送料"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:109
+#: includes/admin/reports/class-wc-report-sales-by-date.php:114
 msgid "%s worth of coupons used"
 msgstr "%s クーポンの利用額"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:296
-#: includes/admin/reports/class-wc-report-sales-by-product.php:441
+#: includes/admin/reports/class-wc-report-sales-by-date.php:301
+#: includes/admin/reports/class-wc-report-sales-by-product.php:446
 msgid "Number of items sold"
 msgstr "売れた商品数"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:304
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:113
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:109
+#: includes/admin/reports/class-wc-report-sales-by-date.php:309
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:118
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:114
 msgid "Number of orders"
 msgstr "受注数"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:312
+#: includes/admin/reports/class-wc-report-sales-by-date.php:317
 msgid "Average sales amount"
 msgstr "平均売上額"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:332
+#: includes/admin/reports/class-wc-report-sales-by-date.php:337
 msgid "Shipping amount"
 msgstr "配送料合計"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:342
-#: includes/admin/reports/class-wc-report-sales-by-product.php:449
+#: includes/admin/reports/class-wc-report-sales-by-date.php:347
+#: includes/admin/reports/class-wc-report-sales-by-product.php:454
 msgid "Sales amount"
 msgstr "売上高"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:88
+#: includes/admin/reports/class-wc-report-sales-by-product.php:93
 msgid "%s sales for the selected items"
 msgstr "%s 選択商品の売上"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:93
+#: includes/admin/reports/class-wc-report-sales-by-product.php:98
 msgid "%s purchases for the selected items"
 msgstr "選択商品の販売数"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:139
+#: includes/admin/reports/class-wc-report-sales-by-product.php:144
 msgid "Showing reports for:"
 msgstr "現在表示中のレポート:"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:165
+#: includes/admin/reports/class-wc-report-sales-by-product.php:170
 msgid "Reset"
 msgstr "リセット"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:174
+#: includes/admin/reports/class-wc-report-sales-by-product.php:179
 msgid "Product Search"
 msgstr "商品検索"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:211
+#: includes/admin/reports/class-wc-report-sales-by-product.php:216
 msgid "Top Sellers"
 msgstr "売れ筋商品"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:246
-#: includes/admin/reports/class-wc-report-sales-by-product.php:286
+#: includes/admin/reports/class-wc-report-sales-by-product.php:251
+#: includes/admin/reports/class-wc-report-sales-by-product.php:291
 msgid "No products found in range"
 msgstr "この期間に対応する商品はありません"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:251
+#: includes/admin/reports/class-wc-report-sales-by-product.php:256
 msgid "Top Earners"
 msgstr "売上額上位"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:342
+#: includes/admin/reports/class-wc-report-sales-by-product.php:347
 msgid "&larr; Choose a product to view stats"
 msgstr "&larr; 商品を選んでレポートを表示ください"
 
-#: includes/admin/reports/class-wc-report-stock.php:30
+#: includes/admin/reports/class-wc-report-stock.php:35
 msgid "No products found."
 msgstr "該当商品がありません。"
 
-#: includes/admin/reports/class-wc-report-stock.php:121
+#: includes/admin/reports/class-wc-report-stock.php:126
 msgid "product"
 msgstr "商品"
 
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:142
 msgid "Parent"
 msgstr "Parent"
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:143
 msgid "Units in stock"
 msgstr "在庫単位"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:112
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:117
 msgid "Rate"
 msgstr "率"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:114
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "Tax Amount"
 msgstr "税額合計"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:114
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "This is the sum of the \"Tax Rows\" tax amount within your orders."
 msgstr "これはご注文内の「税行」税額の合計です。"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:115
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:120
 msgid "Shipping Tax Amount"
 msgstr "配送料の（出荷）税額"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:115
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:120
 msgid ""
 "This is the sum of the \"Tax Rows\" shipping tax amount within your orders."
 msgstr "これはご注文内の「税行」送料税額の合計です。"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:116
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:112
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:121
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:117
 msgid "Total Tax"
 msgstr "税金合計"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:116
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:112
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:121
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:117
 msgid "This is the total tax for the rate (shipping tax + product tax)."
 msgstr "これは税金の合計です。(配送料税＋商品代金税)"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:165
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:156
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:170
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:161
 msgid "No taxes found in this period"
 msgstr "この期間内の税額はありません。"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:108
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:113
 msgid "Period"
 msgstr "期間"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:110
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "Total Sales"
 msgstr "総売上高"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:110
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "This is the sum of the 'Order Total' field within your orders."
 msgstr "これは受注フィールド内の総注文合計です"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:111
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:116
 msgid "Total Shipping"
 msgstr "総送料合計"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:111
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:116
 msgid "This is the sum of the 'Shipping Total' field within your orders."
 msgstr "これは受注フィールド内の総送料合計です"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:113
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:118
 msgid "Net profit"
 msgstr "純利益"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:113
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:118
 msgid "Total sales minus shipping and tax."
 msgstr "総売上高から「配送料と税金」を差し引く"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:122
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:127
 msgid "Totals"
 msgstr "合計"
 

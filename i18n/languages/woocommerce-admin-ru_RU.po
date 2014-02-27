@@ -5,15 +5,16 @@
 # Den Arefyev <>, 2012
 # flyingoff <lebedev.serge@gmail.com>, 2013
 # mortifactor <daniel.sergan@gmail.com>, 2014
+# Nikolay Nakuginkin <translator@mondaystar.ru>, 2014
 # Арефьев Денис <jujjer@gmail.com>, 2013
 # Иван Тюрин <wen89@inbox.ru>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
-"PO-Revision-Date: 2014-02-20 13:41+0000\n"
-"Last-Translator: Komarovski <komarovski21@gmail.com>\n"
+"POT-Creation-Date: 2014-02-21 16:11:55+00:00\n"
+"PO-Revision-Date: 2014-02-26 12:10+0000\n"
+"Last-Translator: Nikolay Nakuginkin <translator@mondaystar.ru>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.com/projects/p/woocommerce/language/ru_RU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -326,8 +327,8 @@ msgstr "Термины"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:171
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:303
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:82
-#: includes/admin/reports/class-wc-report-customer-list.php:187
-#: includes/admin/reports/class-wc-report-stock.php:107
+#: includes/admin/reports/class-wc-report-customer-list.php:192
+#: includes/admin/reports/class-wc-report-stock.php:112
 msgid "Edit"
 msgstr "Редактировать"
 
@@ -558,7 +559,7 @@ msgstr "Настройки WooCommerce"
 #: includes/admin/class-wc-admin-menus.php:63
 #: includes/admin/class-wc-admin-welcome.php:213
 #: includes/admin/settings/class-wc-settings-checkout.php:277
-#: includes/admin/settings/class-wc-settings-shipping.php:241
+#: includes/admin/settings/class-wc-settings-shipping.php:243
 #: includes/admin/views/html-admin-page-status-report.php:269
 msgid "Settings"
 msgstr "Настройки"
@@ -630,7 +631,7 @@ msgid "Default"
 msgstr "По умолчанию"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:136
+#: includes/admin/reports/class-wc-report-stock.php:141
 msgid "Product"
 msgstr "Товар"
 
@@ -651,6 +652,11 @@ msgid ""
 "Enter a custom base to use. A base <strong>must</strong> be set or WordPress"
 " will use default instead."
 msgstr "Введите свою постоянную ссылку. Постоянная ссылка <strong>должна</strong> быть установленной, либо WordPress будет использовать свою стандартную."
+
+#: includes/admin/class-wc-admin-permalink-settings.php:184
+msgctxt "slug"
+msgid "product"
+msgstr "товар"
 
 #: includes/admin/class-wc-admin-post-types.php:58
 msgid "Product updated. <a href=\"%s\">View Product</a>"
@@ -837,7 +843,7 @@ msgstr "Телефон"
 
 #: includes/admin/class-wc-admin-profile.php:88
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:67
-#: includes/admin/reports/class-wc-report-customer-list.php:244
+#: includes/admin/reports/class-wc-report-customer-list.php:249
 msgid "Email"
 msgstr "Email"
 
@@ -882,7 +888,7 @@ msgid "Revoke API Key"
 msgstr "Отозвать API ключ"
 
 #: includes/admin/class-wc-admin-reports.php:46
-#: includes/admin/reports/class-wc-report-customer-list.php:246
+#: includes/admin/reports/class-wc-report-customer-list.php:251
 msgid "Orders"
 msgstr "Заказы"
 
@@ -903,7 +909,7 @@ msgid "Coupons by date"
 msgstr "Купоны по дате"
 
 #: includes/admin/class-wc-admin-reports.php:75
-#: includes/admin/reports/class-wc-report-customer-list.php:25
+#: includes/admin/reports/class-wc-report-customer-list.php:30
 msgid "Customers"
 msgstr "Клиенты"
 
@@ -918,8 +924,8 @@ msgstr "Список клиентов"
 #: includes/admin/class-wc-admin-reports.php:92
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
-#: includes/admin/reports/class-wc-report-stock.php:20
-#: includes/admin/reports/class-wc-report-stock.php:21
+#: includes/admin/reports/class-wc-report-stock.php:25
+#: includes/admin/reports/class-wc-report-stock.php:26
 msgid "Stock"
 msgstr "Остатки"
 
@@ -930,7 +936,7 @@ msgstr "Товар заканчивается"
 #: includes/admin/class-wc-admin-reports.php:101
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
-#: includes/admin/reports/class-wc-report-stock.php:93
+#: includes/admin/reports/class-wc-report-stock.php:98
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
 msgid "Out of stock"
@@ -1052,8 +1058,8 @@ msgid "Clear expired transients"
 msgstr "Очистить просроченные переходные"
 
 #: includes/admin/class-wc-admin-status.php:180
-msgid "This tool will clear ALL expired transients from Wordpress."
-msgstr "Этот инструмент очистит ВСЕ просроченные переходные из Wordpress."
+msgid "This tool will clear ALL expired transients from WordPress."
+msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
@@ -1487,9 +1493,9 @@ msgstr "WooCommerce разрабатывается и сопровождаетс
 msgid ""
 "WooCommerce has been kindly translated into several other languages thanks "
 "to our translation team. Want to see your name? <a "
-"href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
+"href=\"https://www.transifex.com/projects/p/woocommerce/\">Translate "
 "WooCommerce</a>."
-msgstr "WooCommerce был переведен на несколько языков, благодаря нашей команде переводчиков. Хочешь увидеть свое имя? <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate WooCommerce</a>."
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1652,7 +1658,7 @@ msgid "Price"
 msgstr "Цена"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:256
-#: includes/admin/reports/class-wc-report-sales-by-category.php:142
+#: includes/admin/reports/class-wc-report-sales-by-category.php:147
 msgid "Categories"
 msgstr "Рубрики"
 
@@ -1662,11 +1668,11 @@ msgstr "Метки"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:316
-#: includes/admin/reports/class-wc-report-customers.php:201
-#: includes/admin/reports/class-wc-report-sales-by-category.php:214
-#: includes/admin/reports/class-wc-report-sales-by-date.php:160
-#: includes/admin/reports/class-wc-report-sales-by-product.php:324
+#: includes/admin/reports/class-wc-report-coupon-usage.php:321
+#: includes/admin/reports/class-wc-report-customers.php:206
+#: includes/admin/reports/class-wc-report-sales-by-category.php:219
+#: includes/admin/reports/class-wc-report-sales-by-date.php:165
+#: includes/admin/reports/class-wc-report-sales-by-product.php:329
 msgid "Date"
 msgstr "Дата"
 
@@ -1727,7 +1733,7 @@ msgstr "Просмотр &#8220;%s&#8221;"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:319
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:316
-#: includes/admin/reports/class-wc-report-stock.php:114
+#: includes/admin/reports/class-wc-report-stock.php:119
 msgid "View"
 msgstr "Просмотр"
 
@@ -1790,7 +1796,7 @@ msgstr "Нет"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:417
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:302
-#: includes/admin/reports/class-wc-report-stock.php:91
+#: includes/admin/reports/class-wc-report-stock.php:96
 #: includes/admin/views/html-bulk-edit-product.php:194
 #: includes/admin/views/html-quick-edit-product.php:137
 msgid "In stock"
@@ -1842,7 +1848,7 @@ msgstr "Тип купона"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:79
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
-#: includes/admin/reports/class-wc-report-sales-by-date.php:322
+#: includes/admin/reports/class-wc-report-sales-by-date.php:327
 msgid "Coupon amount"
 msgstr "Количество купонов"
 
@@ -1909,15 +1915,15 @@ msgstr "Заметки к заказу"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:122
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:127
 msgid "Total"
 msgstr "Всего"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:100
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
-#: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-customer-list.php:254
+#: includes/admin/reports/class-wc-report-stock.php:145
 msgid "Actions"
 msgstr "Действия"
 
@@ -1995,26 +2001,26 @@ msgstr "Все статусы"
 msgid "Show all customers"
 msgstr "Все клиенты"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:689
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:691
 msgid "Mark processing"
 msgstr "Отметить к обработке"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:692
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:694
 msgid "Mark on-hold"
 msgstr "Пометить на удержании"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:695
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:696
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:697
 msgid "Mark completed"
 msgstr "Пометить как выполненный"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:737
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:738
 msgid "Order status changed by bulk edit:"
 msgstr "Статус заказа, измененный массовым редактированием:"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:759
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:760
 msgid "Order status changed."
 msgid_plural "%s order statuses changed."
 msgstr[0] "Статус заказа(ов) изменился."
@@ -2170,7 +2176,7 @@ msgstr "Отметте этот пункт если купон не должен
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:586
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:603
-#: includes/admin/reports/class-wc-report-sales-by-product.php:178
+#: includes/admin/reports/class-wc-report-sales-by-product.php:183
 msgid "Search for a product&hellip;"
 msgstr "Найти товар&hellip;"
 
@@ -2456,7 +2462,7 @@ msgid "Qty"
 msgstr "Кол."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:111
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/settings/class-wc-settings-tax.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:550
 #: includes/admin/settings/class-wc-settings-tax.php:643
@@ -2758,7 +2764,7 @@ msgid "Shipping only"
 msgstr "Только доставка"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:252
-#: includes/admin/reports/class-wc-report-sales-by-category.php:171
+#: includes/admin/reports/class-wc-report-sales-by-category.php:176
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
@@ -2810,7 +2816,7 @@ msgid ""
 msgstr "Количество на складе. Если это переменный товарт, это значение будет использоватся, чтобы контролировать склад для всех переменных, если вы конечно же определите склад на уровне переменных."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:144
 msgid "Stock status"
 msgstr "Статус остатка"
 
@@ -3297,400 +3303,400 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Включите эту опцию если товар не доставляется или в нем нет уплат за доставку"
 
-#: includes/admin/reports/class-wc-admin-report.php:395
+#: includes/admin/reports/class-wc-admin-report.php:391
 msgid "Sold %s worth in the last %d days"
 msgstr "Продано на сумму %s в течении последних %d дней"
 
-#: includes/admin/reports/class-wc-admin-report.php:397
+#: includes/admin/reports/class-wc-admin-report.php:393
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Продан 1 товар за %d дней"
+msgstr[1] "Продано %d товара за %d дней"
+msgstr[2] "Продано %d товаров за %d дней"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:71
+#: includes/admin/reports/class-wc-report-coupon-usage.php:76
 msgid "%s discounts in total"
 msgstr "%s всего скидок"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:77
+#: includes/admin/reports/class-wc-report-coupon-usage.php:82
 msgid "%s coupons used in total"
 msgstr "%s всего использовано купонов"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:90
-#: includes/admin/reports/class-wc-report-customers.php:140
-#: includes/admin/reports/class-wc-report-sales-by-category.php:68
-#: includes/admin/reports/class-wc-report-sales-by-date.php:124
-#: includes/admin/reports/class-wc-report-sales-by-product.php:108
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:41
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:41
+#: includes/admin/reports/class-wc-report-coupon-usage.php:95
+#: includes/admin/reports/class-wc-report-customers.php:145
+#: includes/admin/reports/class-wc-report-sales-by-category.php:73
+#: includes/admin/reports/class-wc-report-sales-by-date.php:129
+#: includes/admin/reports/class-wc-report-sales-by-product.php:113
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:46
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:46
 msgid "Year"
 msgstr "Год"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
-#: includes/admin/reports/class-wc-report-customers.php:141
-#: includes/admin/reports/class-wc-report-sales-by-category.php:69
-#: includes/admin/reports/class-wc-report-sales-by-date.php:125
-#: includes/admin/reports/class-wc-report-sales-by-product.php:109
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:42
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:42
+#: includes/admin/reports/class-wc-report-coupon-usage.php:96
+#: includes/admin/reports/class-wc-report-customers.php:146
+#: includes/admin/reports/class-wc-report-sales-by-category.php:74
+#: includes/admin/reports/class-wc-report-sales-by-date.php:130
+#: includes/admin/reports/class-wc-report-sales-by-product.php:114
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:47
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:47
 msgid "Last Month"
 msgstr "Последний месяц"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
-#: includes/admin/reports/class-wc-report-customers.php:142
-#: includes/admin/reports/class-wc-report-sales-by-category.php:70
-#: includes/admin/reports/class-wc-report-sales-by-date.php:126
-#: includes/admin/reports/class-wc-report-sales-by-product.php:110
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:43
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:43
+#: includes/admin/reports/class-wc-report-coupon-usage.php:97
+#: includes/admin/reports/class-wc-report-customers.php:147
+#: includes/admin/reports/class-wc-report-sales-by-category.php:75
+#: includes/admin/reports/class-wc-report-sales-by-date.php:131
+#: includes/admin/reports/class-wc-report-sales-by-product.php:115
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:48
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:48
 msgid "This Month"
 msgstr "Этот месяц"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:93
-#: includes/admin/reports/class-wc-report-customers.php:143
-#: includes/admin/reports/class-wc-report-sales-by-category.php:71
-#: includes/admin/reports/class-wc-report-sales-by-date.php:127
-#: includes/admin/reports/class-wc-report-sales-by-product.php:111
+#: includes/admin/reports/class-wc-report-coupon-usage.php:98
+#: includes/admin/reports/class-wc-report-customers.php:148
+#: includes/admin/reports/class-wc-report-sales-by-category.php:76
+#: includes/admin/reports/class-wc-report-sales-by-date.php:132
+#: includes/admin/reports/class-wc-report-sales-by-product.php:116
 msgid "Last 7 Days"
 msgstr "Последние 7 дней"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:133
+#: includes/admin/reports/class-wc-report-coupon-usage.php:138
 msgid "Filter by coupon"
 msgstr "Фильтр по купонам"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:161
+#: includes/admin/reports/class-wc-report-coupon-usage.php:166
 msgid "Choose coupons&hellip;"
 msgstr "Выберите купоны&hellip;"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:162
+#: includes/admin/reports/class-wc-report-coupon-usage.php:167
 msgid "All coupons"
 msgstr "Все купоны"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:169
-#: includes/admin/reports/class-wc-report-sales-by-category.php:173
-#: includes/admin/reports/class-wc-report-sales-by-product.php:179
+#: includes/admin/reports/class-wc-report-coupon-usage.php:174
+#: includes/admin/reports/class-wc-report-sales-by-category.php:178
+#: includes/admin/reports/class-wc-report-sales-by-product.php:184
 msgid "Show"
 msgstr "Показать"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:182
+#: includes/admin/reports/class-wc-report-coupon-usage.php:187
 msgid "No used coupons found"
 msgstr "Использованных купонов не найдено"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:187
+#: includes/admin/reports/class-wc-report-coupon-usage.php:192
 msgid "Most Popular"
 msgstr "Самые популярные"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:229
-#: includes/admin/reports/class-wc-report-coupon-usage.php:276
+#: includes/admin/reports/class-wc-report-coupon-usage.php:234
+#: includes/admin/reports/class-wc-report-coupon-usage.php:281
 msgid "No coupons found in range"
 msgstr "В диапазоне, не найдено купонов"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:234
+#: includes/admin/reports/class-wc-report-coupon-usage.php:239
 msgid "Most Discount"
 msgstr "Самые большие скидки"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:319
-#: includes/admin/reports/class-wc-report-customers.php:204
-#: includes/admin/reports/class-wc-report-sales-by-category.php:217
-#: includes/admin/reports/class-wc-report-sales-by-date.php:164
-#: includes/admin/reports/class-wc-report-sales-by-product.php:327
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:29
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:29
+#: includes/admin/reports/class-wc-report-coupon-usage.php:324
+#: includes/admin/reports/class-wc-report-customers.php:209
+#: includes/admin/reports/class-wc-report-sales-by-category.php:222
+#: includes/admin/reports/class-wc-report-sales-by-date.php:169
+#: includes/admin/reports/class-wc-report-sales-by-product.php:332
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:34
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:34
 #: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "Экспорт CSV"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:410
+#: includes/admin/reports/class-wc-report-coupon-usage.php:415
 msgid "Number of coupons used"
 msgstr "Число использованых купонов"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:418
+#: includes/admin/reports/class-wc-report-coupon-usage.php:423
 msgid "Discount amount"
 msgstr "Сумма скидки"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:24
+#: includes/admin/reports/class-wc-report-customer-list.php:29
 msgid "Customer"
 msgstr "Клиент"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:34
+#: includes/admin/reports/class-wc-report-customer-list.php:39
 msgid "No customers found."
 msgstr "Клиентов не найдено."
 
-#: includes/admin/reports/class-wc-report-customer-list.php:48
+#: includes/admin/reports/class-wc-report-customer-list.php:53
 msgid "%s previous order linked"
 msgid_plural "%s previous orders linked"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "%s предыдущий заказ связан"
+msgstr[1] "%s предыдущих заказа связаны"
+msgstr[2] "%s предыдущих заказов связаны"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:53
+#: includes/admin/reports/class-wc-report-customer-list.php:58
 msgid "Search customers"
 msgstr "Искать клиентов"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:193
+#: includes/admin/reports/class-wc-report-customer-list.php:198
 msgid "View orders"
 msgstr "Смотреть заказы"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:217
+#: includes/admin/reports/class-wc-report-customer-list.php:222
 msgid "Link previous orders"
 msgstr "Привязать предыдущие заказы"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:242
+#: includes/admin/reports/class-wc-report-customer-list.php:247
 msgid "Name (Last, First)"
 msgstr "Имя (Имя, Фамилия)"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:243
+#: includes/admin/reports/class-wc-report-customer-list.php:248
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:245
+#: includes/admin/reports/class-wc-report-customer-list.php:250
 msgid "Location"
 msgstr "Местоположение"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:247
+#: includes/admin/reports/class-wc-report-customer-list.php:252
 msgid "Spent"
 msgstr "Потрачено"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:248
+#: includes/admin/reports/class-wc-report-customer-list.php:253
 msgid "Last order"
 msgstr "Последний заказ"
 
-#: includes/admin/reports/class-wc-report-customers.php:17
+#: includes/admin/reports/class-wc-report-customers.php:22
 msgid "%s signups in this period"
 msgstr "%s запросов в этот период"
 
-#: includes/admin/reports/class-wc-report-customers.php:85
+#: includes/admin/reports/class-wc-report-customers.php:90
 msgid "Customer Sales"
 msgstr "Клиентские продажи"
 
-#: includes/admin/reports/class-wc-report-customers.php:86
+#: includes/admin/reports/class-wc-report-customers.php:91
 msgid "Guest Sales"
 msgstr "Гостевые продажи"
 
-#: includes/admin/reports/class-wc-report-customers.php:95
-#: includes/admin/reports/class-wc-report-customers.php:291
+#: includes/admin/reports/class-wc-report-customers.php:100
+#: includes/admin/reports/class-wc-report-customers.php:296
 msgid "Customer Orders"
 msgstr "Заказы клиента"
 
-#: includes/admin/reports/class-wc-report-customers.php:100
-#: includes/admin/reports/class-wc-report-customers.php:301
+#: includes/admin/reports/class-wc-report-customers.php:105
+#: includes/admin/reports/class-wc-report-customers.php:306
 msgid "Guest Orders"
 msgstr "Заказы гостя"
 
-#: includes/admin/reports/class-wc-report-customers.php:119
+#: includes/admin/reports/class-wc-report-customers.php:124
 msgid "orders"
 msgstr "заказы"
 
-#: includes/admin/reports/class-wc-report-customers.php:297
+#: includes/admin/reports/class-wc-report-customers.php:302
 msgid "customer orders"
 msgstr "клиентские заказы"
 
-#: includes/admin/reports/class-wc-report-customers.php:307
+#: includes/admin/reports/class-wc-report-customers.php:312
 msgid "guest orders"
 msgstr "гостевые заказы"
 
-#: includes/admin/reports/class-wc-report-customers.php:311
+#: includes/admin/reports/class-wc-report-customers.php:316
 msgid "Signups"
 msgstr "Регистрации"
 
-#: includes/admin/reports/class-wc-report-customers.php:318
+#: includes/admin/reports/class-wc-report-customers.php:323
 msgid "new users"
 msgstr "новые пользователи"
 
-#: includes/admin/reports/class-wc-report-low-in-stock.php:19
+#: includes/admin/reports/class-wc-report-low-in-stock.php:22
 msgid "No low in stock products found."
 msgstr "Нет товаров, которые заканчиваются."
 
-#: includes/admin/reports/class-wc-report-out-of-stock.php:19
+#: includes/admin/reports/class-wc-report-out-of-stock.php:22
 msgid "No out of stock products found."
 msgstr "Нет товаров со статусом \"Нет в наличии\"."
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:50
+#: includes/admin/reports/class-wc-report-sales-by-category.php:55
 msgid "%s sales in %s"
 msgstr "%s продаж в %s"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:157
+#: includes/admin/reports/class-wc-report-sales-by-category.php:162
 msgid "Select categories&hellip;"
 msgstr "Выберите рубрики&hellip;"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:172
+#: includes/admin/reports/class-wc-report-sales-by-category.php:177
 msgid "All"
 msgstr "Все"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:232
+#: includes/admin/reports/class-wc-report-sales-by-category.php:237
 msgid "&larr; Choose a category to view stats"
 msgstr "&larr; Выберите рубрику, чтобы посмотреть статистику"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:76
+#: includes/admin/reports/class-wc-report-sales-by-date.php:81
 msgid "%s average daily sales"
 msgstr "%s среднесуточные продажи"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:79
+#: includes/admin/reports/class-wc-report-sales-by-date.php:84
 msgid "%s average monthly sales"
 msgstr "%s Среднемесяцные продажи"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:84
+#: includes/admin/reports/class-wc-report-sales-by-date.php:89
 msgid "%s sales in this period"
 msgstr "%s продаж в этот период"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:94
+#: includes/admin/reports/class-wc-report-sales-by-date.php:99
 msgid "%s orders placed"
 msgstr "%s заказов размещено"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:99
+#: includes/admin/reports/class-wc-report-sales-by-date.php:104
 msgid "%s items purchased"
 msgstr "%s позиций куплено"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:104
+#: includes/admin/reports/class-wc-report-sales-by-date.php:109
 msgid "%s charged for shipping"
 msgstr "%s снято за доставку"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:109
+#: includes/admin/reports/class-wc-report-sales-by-date.php:114
 msgid "%s worth of coupons used"
 msgstr "%s стоимость использованных купонов"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:296
-#: includes/admin/reports/class-wc-report-sales-by-product.php:441
+#: includes/admin/reports/class-wc-report-sales-by-date.php:301
+#: includes/admin/reports/class-wc-report-sales-by-product.php:446
 msgid "Number of items sold"
 msgstr "Количество проданных позиций"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:304
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:113
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:109
+#: includes/admin/reports/class-wc-report-sales-by-date.php:309
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:118
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:114
 msgid "Number of orders"
 msgstr "Количество заказов"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:312
+#: includes/admin/reports/class-wc-report-sales-by-date.php:317
 msgid "Average sales amount"
 msgstr "Средний объем продаж"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:332
+#: includes/admin/reports/class-wc-report-sales-by-date.php:337
 msgid "Shipping amount"
 msgstr "Количество доставки"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:342
-#: includes/admin/reports/class-wc-report-sales-by-product.php:449
+#: includes/admin/reports/class-wc-report-sales-by-date.php:347
+#: includes/admin/reports/class-wc-report-sales-by-product.php:454
 msgid "Sales amount"
 msgstr "Объем продаж"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:88
+#: includes/admin/reports/class-wc-report-sales-by-product.php:93
 msgid "%s sales for the selected items"
 msgstr "%s продаж по выбранным позициям"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:93
+#: includes/admin/reports/class-wc-report-sales-by-product.php:98
 msgid "%s purchases for the selected items"
 msgstr "%s покупок по выбранным позициям"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:139
+#: includes/admin/reports/class-wc-report-sales-by-product.php:144
 msgid "Showing reports for:"
 msgstr "Показать отчеты по:"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:165
+#: includes/admin/reports/class-wc-report-sales-by-product.php:170
 msgid "Reset"
 msgstr "Сброс"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:174
+#: includes/admin/reports/class-wc-report-sales-by-product.php:179
 msgid "Product Search"
 msgstr "Поиск товаров"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:211
+#: includes/admin/reports/class-wc-report-sales-by-product.php:216
 msgid "Top Sellers"
 msgstr "Топ продажи"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:246
-#: includes/admin/reports/class-wc-report-sales-by-product.php:286
+#: includes/admin/reports/class-wc-report-sales-by-product.php:251
+#: includes/admin/reports/class-wc-report-sales-by-product.php:291
 msgid "No products found in range"
 msgstr "В этом диапазоне, товаров не найдено"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:251
+#: includes/admin/reports/class-wc-report-sales-by-product.php:256
 msgid "Top Earners"
 msgstr "Лучшие по заработкам"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:342
+#: includes/admin/reports/class-wc-report-sales-by-product.php:347
 msgid "&larr; Choose a product to view stats"
 msgstr "&larr; Выберите товар, чтобы посмотреть статистику"
 
-#: includes/admin/reports/class-wc-report-stock.php:30
+#: includes/admin/reports/class-wc-report-stock.php:35
 msgid "No products found."
 msgstr "Товар не был найден."
 
-#: includes/admin/reports/class-wc-report-stock.php:121
+#: includes/admin/reports/class-wc-report-stock.php:126
 msgid "product"
 msgstr "товар"
 
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:142
 msgid "Parent"
 msgstr "Исходный"
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:143
 msgid "Units in stock"
 msgstr "Количество в наличии"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:112
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:117
 msgid "Rate"
 msgstr "Ставка"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:114
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "Tax Amount"
 msgstr "Сумма налога"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:114
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "This is the sum of the \"Tax Rows\" tax amount within your orders."
 msgstr "Это сумма \"Налоговых Ставок\" в пределах ваших заказов."
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:115
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:120
 msgid "Shipping Tax Amount"
 msgstr "Сумма налога за доставку"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:115
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:120
 msgid ""
 "This is the sum of the \"Tax Rows\" shipping tax amount within your orders."
 msgstr "Это сумма \"Налоговых Ставок\" налогов за доставку в пределах ваших заказов."
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:116
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:112
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:121
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:117
 msgid "Total Tax"
 msgstr "Итого налогов"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:116
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:112
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:121
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:117
 msgid "This is the total tax for the rate (shipping tax + product tax)."
 msgstr "Это общая сумма налога для ставки (налоги с доставки + налог на товар)."
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:165
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:156
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:170
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:161
 msgid "No taxes found in this period"
 msgstr "Налогов в этот период не найдено"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:108
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:113
 msgid "Period"
 msgstr "Период"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:110
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "Total Sales"
 msgstr "Всего продаж"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:110
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "This is the sum of the 'Order Total' field within your orders."
-msgstr ""
+msgstr "Это сумма поля \"Общий заказ\" внутри Ваших заказов."
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:111
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:116
 msgid "Total Shipping"
 msgstr "Полная доставка"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:111
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:116
 msgid "This is the sum of the 'Shipping Total' field within your orders."
-msgstr ""
+msgstr "Это сумма поля \"Общая доставка\" внутри Ваших заказов."
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:113
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:118
 msgid "Net profit"
 msgstr "Чистая прибыль"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:113
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:118
 msgid "Total sales minus shipping and tax."
 msgstr "Всего продаж за исключением доставки и налогов."
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:122
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:127
 msgid "Totals"
 msgstr "Всего"
 
@@ -4107,7 +4113,7 @@ msgstr "Валюта"
 msgid ""
 "This controls what currency prices are listed at in the catalog and which "
 "currency gateways will take payments in."
-msgstr ""
+msgstr "Это управляет тем, в какой валюте перечислены цены в каталоге и какие валютные шлюзы будут принимать платежи."
 
 #: includes/admin/settings/class-wc-settings-general.php:127
 msgid "Currency Position"
@@ -4210,7 +4216,7 @@ msgstr "Выделение"
 
 #: includes/admin/settings/class-wc-settings-general.php:239
 msgid "Price labels and Sale Flashes"
-msgstr ""
+msgstr "Ценники и мигающая распродажа"
 
 #: includes/admin/settings/class-wc-settings-general.php:240
 msgid "Content"
@@ -4304,7 +4310,7 @@ msgstr "Формат отображения остатков"
 
 #: includes/admin/settings/class-wc-settings-products.php:169
 msgid "This controls how stock is displayed on the frontend."
-msgstr ""
+msgstr "Это управляет тем, как склад отображается на внешнем интерфейсе."
 
 #: includes/admin/settings/class-wc-settings-products.php:175
 msgid "Always show stock e.g. \"12 in stock\""
@@ -4538,7 +4544,7 @@ msgid ""
 "files unreliably. If supported, <code>X-Accel-Redirect</code>/ "
 "<code>X-Sendfile</code> can be used to serve downloads instead (server "
 "requires <code>mod_xsendfile</code>)."
-msgstr ""
+msgstr "Принудительные загрузки будут держать URL-адреса скрытыми, но некоторые серверы могут обрабатывать большие файлы ненадежно. Если поддерживается <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code>, то это можно использовать вместо службы загрузки (серверу потребуется <code>mod_xsendfile</code>)."
 
 #: includes/admin/settings/class-wc-settings-products.php:421
 msgid "Force Downloads"
@@ -4827,7 +4833,7 @@ msgstr "Код&nbsp;страны"
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
-msgstr ""
+msgstr "2-х значный код страны, например, US. Оставьте пустым, чтобы применить ко всем."
 
 #: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "State&nbsp;Code"
@@ -4835,7 +4841,7 @@ msgstr "Код&nbsp;области"
 
 #: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
-msgstr ""
+msgstr "2-х значный код штата, например, AL. Оставьте пустым, чтобы применить ко всем."
 
 #: includes/admin/settings/class-wc-settings-tax.php:254
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -4847,7 +4853,7 @@ msgid ""
 "Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank"
 " to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
-msgstr ""
+msgstr "Почтовый индекс для этого правила. Точка с запятой (;) разделяет несколько значений. Оставьте пустым, чтобы применить ко всем областям. Знаки подстановки (*) можно использовать. Диапазоны для числовых почтовых индексов (например 12345-12350) будут расширены в индивидуальных почтовых индексах."
 
 #: includes/admin/settings/class-wc-settings-tax.php:256
 msgid ""

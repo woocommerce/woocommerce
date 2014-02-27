@@ -1,14 +1,17 @@
 # 
 # Translators:
 # kjosenet <appe@kjose.net>, 2014
+# kjosenet <appe@kjose.net>, 2014
+# mjepson <magnus@woothemes.com>, 2014
+# perdersongedal <peder@seoglaer.no>, 2014
 # perdersongedal <peder@seoglaer.no>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-13 21:18:47+00:00\n"
-"PO-Revision-Date: 2014-02-14 16:01+0000\n"
-"Last-Translator: kjosenet <appe@kjose.net>\n"
+"POT-Creation-Date: 2014-02-21 16:11:55+00:00\n"
+"PO-Revision-Date: 2014-02-25 13:30+0000\n"
+"Last-Translator: Aliom <tore@aliom.no>\n"
 "Language-Team: Norwegian Bokmål (Norway) (http://www.transifex.com/projects/p/woocommerce/language/nb_NO/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,20 +28,20 @@ msgstr "WooCommerce"
 
 #: includes/admin/class-wc-admin-assets.php:108
 msgid "Please enter in decimal (%s) format without thousand separators."
-msgstr "Vennligst skriv inn desimal (%s) format uten tusenskilletegn."
+msgstr "Vennligst skriv inn format for desimal (% s) uten tusenskilletegn."
 
 #: includes/admin/class-wc-admin-assets.php:109
 msgid ""
 "Please enter in monetary decimal (%s) format without thousand separators and"
 " currency symbols."
-msgstr ""
+msgstr "Vennligst skriv inn format for pengedesimal (% s) uten tusenskilletegn og valutasymboler."
 
 #: includes/admin/class-wc-admin-assets.php:136
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
-msgstr "Er du sikker på at du vil slette det valgte gjenstandene? Dersom du tidligere har redusert denne gjenstandens lagerbeholdningen, eller denne ordren ble sendt av en kunde, må du manuelt gjenopprette gjenstandens lagerbeholdning."
+msgstr "Er du sikker på at du vil slette de valgte gjenstandene? Dersom du tidligere har redusert denne gjenstandens lagerbeholdningen, eller hvis denne ordren ble sendt av en kunde, må du manuelt gjenopprette gjenstandens lagerbeholdning."
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
@@ -50,7 +53,7 @@ msgstr "Fjern denne gjenstandens meta?"
 
 #: includes/admin/class-wc-admin-assets.php:139
 msgid "Remove this attribute?"
-msgstr "Fjern denne attributten"
+msgstr "Fjern denne attributten?"
 
 #: includes/admin/class-wc-admin-assets.php:140
 #: includes/admin/class-wc-admin-attributes.php:239
@@ -92,7 +95,7 @@ msgstr "Verdi(er)"
 #: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:540
 msgid "Enter some text, or some attributes by pipe (|) separating values."
-msgstr "Skriv inn litt tekst, eller noen attributter med symbolet \"|\" som skiller verdier."
+msgstr "Tast inn litt tekst, eller noen attributter med symbolet \"|\" som skiller verdier."
 
 #: includes/admin/class-wc-admin-assets.php:145
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:490
@@ -112,7 +115,7 @@ msgstr "Tast inn et navn for den nye attributtermen:"
 
 #: includes/admin/class-wc-admin-assets.php:148
 msgid "Calculate totals based on order items, discounts, and shipping?"
-msgstr "Beregn totalen basert på ordregjenstander, rabatter og frakt?"
+msgstr "Beregn totaler basert på ordregjenstander, rabatter og frakt?"
 
 #: includes/admin/class-wc-admin-assets.php:149
 msgid ""
@@ -130,13 +133,13 @@ msgstr "Kopier faktureringsinformasjon til leveringsinformasjon? Dette vil fjern
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
-msgstr "Laste kundens faktureringsinformasjon? Dette vil fjerne envher allerede skrevet faktureringsinformasjon."
+msgstr "Last kundens faktureringsinformasjon? Dette vil fjerne envher allerede skrevet faktureringsinformasjon."
 
 #: includes/admin/class-wc-admin-assets.php:152
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
-msgstr "Laste kundens leveringsinformasjon? Dette vil fjerne envher allerede skrevet leveringsinformasjon."
+msgstr "Last kundens leveringsinformasjon? Dette vil fjerne envher allerede skrevet leveringsinformasjon."
 
 #: includes/admin/class-wc-admin-assets.php:153
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:168
@@ -159,22 +162,22 @@ msgstr "Kunne ikke gi tilgang - brukeren kan allerede ha tillatelse til denne fi
 
 #: includes/admin/class-wc-admin-assets.php:183
 msgid "Are you sure you want to revoke access to this download?"
-msgstr "Er du sikker på at du vil ta tilbake tilgang til denne nedlastingen?"
+msgstr "Er du sikker på at du vil fjerne tilgang til denne nedlastingen?"
 
 #: includes/admin/class-wc-admin-assets.php:203
 msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
-msgstr "Er di sikker på at du vil lenke til alle variantene? Dette vil lage en ny variant for hver mulige kombinasjon av variantattributter (maks 50 per gjennomgang)."
+msgstr "Er du sikker på at du vil lenke til alle variantene? Dette vil lage en ny variant for hver mulige kombinasjon av variantattributter (maks 50 per gjennomgang)."
 
 #: includes/admin/class-wc-admin-assets.php:204
 msgid "Enter a value"
-msgstr "Angi en verdi"
+msgstr "Tast inn en verdi"
 
 #: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value (fixed or %)"
-msgstr "Skriv inn en verdi (fast eller %)"
+msgstr "Tast inn en verdi (fast eller %)"
 
 #: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
@@ -273,7 +276,7 @@ msgid ""
 "products -> product data -> attributes -> values, <strong>Text</strong> "
 "allows manual entry whereas <strong>select</strong> allows pre-configured "
 "terms in a drop-down list."
-msgstr ""
+msgstr "Avgjør hvordan du velger attributter for produkter. Under adminpanel -> produkter -> produktdata -> attributter -> verdier, <strong>Tekst</strong> tillater manuell inntasting mens <strong>velg</strong> tillater pre-konfigurerte vilkår i en rullegardinliste."
 
 #: includes/admin/class-wc-admin-attributes.php:270
 #: includes/admin/class-wc-admin-attributes.php:396
@@ -290,18 +293,18 @@ msgstr "Tilpasset ordre"
 #: includes/admin/class-wc-admin-attributes.php:333
 #: includes/admin/class-wc-admin-attributes.php:400
 msgid "Term ID"
-msgstr "Term-ID"
+msgstr "Vilkår-ID"
 
 #: includes/admin/class-wc-admin-attributes.php:278
 #: includes/admin/class-wc-admin-attributes.php:402
 msgid ""
 "Determines the sort order of the terms on the frontend shop product pages. "
 "If using custom ordering, you can drag and drop the terms in this attribute."
-msgstr ""
+msgstr "Bestemmer sorteringsrekkefølgen for vilkårene for butikkproduktsidene på frontend. Hvis du bruker tilpasset bestilling, kan du dra og slippe vilkårene i denne egenskapen."
 
 #: includes/admin/class-wc-admin-attributes.php:283
 msgid "Update"
-msgstr "Oppdatere"
+msgstr "Oppdater"
 
 #: includes/admin/class-wc-admin-attributes.php:299
 #: includes/admin/class-wc-admin-menus.php:49
@@ -315,14 +318,14 @@ msgstr "Sorter etter"
 
 #: includes/admin/class-wc-admin-attributes.php:311
 msgid "Terms"
-msgstr "Termer"
+msgstr "Vilkår"
 
 #: includes/admin/class-wc-admin-attributes.php:323
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:171
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:303
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:82
-#: includes/admin/reports/class-wc-report-customer-list.php:187
-#: includes/admin/reports/class-wc-report-stock.php:107
+#: includes/admin/reports/class-wc-report-customer-list.php:192
+#: includes/admin/reports/class-wc-report-stock.php:112
 msgid "Edit"
 msgstr "Rediger"
 
@@ -336,7 +339,7 @@ msgstr "Slett"
 
 #: includes/admin/class-wc-admin-attributes.php:356
 msgid "Configure terms"
-msgstr ""
+msgstr "Konfigurer vilkår"
 
 #: includes/admin/class-wc-admin-attributes.php:360
 msgid "No attributes currently exist."
@@ -351,7 +354,7 @@ msgid ""
 "Attributes let you define extra product data, such as size or colour. You "
 "can use these attributes in the shop sidebar using the \"layered nav\" "
 "widgets. Please note: you cannot rename an attribute later on."
-msgstr "Attributter lar deg definere ekstra produktdata, som størrelse og farge. Du kan benytte disse attributtene i shoppens sidebar ved å bruke  \"layered nav\" widgets. Vennligst merk: du kan ikke gi en attributt et nytt navn senere."
+msgstr "Attributter lar deg definere ekstra produktdata, som størrelse og farge. Du kan benytte disse attributtene i butikkens sidebar ved å bruke  \"layered nav\" widgets. Vennligst merk: du kan ikke gi en attributt et nytt navn senere."
 
 #: includes/admin/class-wc-admin-attributes.php:405
 msgid "Add Attribute"
@@ -363,12 +366,12 @@ msgstr "Er du sikker på at du vil slette denne attributten?"
 
 #: includes/admin/class-wc-admin-dashboard.php:35
 msgid "WooCommerce Recent Reviews"
-msgstr "WooCommerce seneste anmeldelser"
+msgstr "WooCommerce seneste omtaler"
 
 #: includes/admin/class-wc-admin-dashboard.php:38
 #: includes/admin/class-wc-admin-menus.php:80
 msgid "WooCommerce Status"
-msgstr "WooCommerce status"
+msgstr "WooCommerce-status"
 
 #: includes/admin/class-wc-admin-dashboard.php:132
 msgid "<strong>%s</strong> sales this month"
@@ -381,26 +384,26 @@ msgstr "%s bestselger denne måneden (solgt %d)"
 #: includes/admin/class-wc-admin-dashboard.php:145
 msgid "<strong>%s order</strong> awaiting processing"
 msgid_plural "<strong>%s orders</strong> awaiting processing"
-msgstr[0] "<strong>%s ordre</strong> avventer håndtering"
-msgstr[1] "<strong>%s ordrer</strong> avventer håndtering"
+msgstr[0] "<strong>%s ordre</strong> venter på prosessering"
+msgstr[1] "<strong>%s ordrer</strong> venter på prosessering"
 
 #: includes/admin/class-wc-admin-dashboard.php:150
 msgid "<strong>%s order</strong> on-hold"
 msgid_plural "<strong>%s orders</strong> on-hold"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "<strong>%s ordre</strong> på vent"
+msgstr[1] "<strong>%s ordrer</strong> på vent"
 
 #: includes/admin/class-wc-admin-dashboard.php:155
 msgid "<strong>%s product</strong> low in stock"
 msgid_plural "<strong>%s products</strong> low in stock"
-msgstr[0] "<strong>%s produkt</strong> det er lite av på lager"
-msgstr[1] "<strong>%s produkter</strong> det er lite av på lager"
+msgstr[0] "<strong>%s produkt</strong> lite på lager"
+msgstr[1] "<strong>%s produkter</strong> lite på lager"
 
 #: includes/admin/class-wc-admin-dashboard.php:160
 msgid "<strong>%s product</strong> out of stock"
 msgid_plural "<strong>%s products</strong> out of stock"
-msgstr[0] "<strong>%s produkt</strong> det er tomt av på lager"
-msgstr[1] "<strong>%s produkter</strong> det er tomt av på lager"
+msgstr[0] "<strong>%s produkt</strong> tomt på lager"
+msgstr[1] "<strong>%s produkter</strong> tomt på lager"
 
 #: includes/admin/class-wc-admin-dashboard.php:193
 msgid "out of 5"
@@ -408,15 +411,15 @@ msgstr "av 5"
 
 #: includes/admin/class-wc-admin-dashboard.php:195
 msgid "reviewed by"
-msgstr "anmeldt av"
+msgstr "omtalt av"
 
 #: includes/admin/class-wc-admin-dashboard.php:201
 msgid "There are no product reviews yet."
-msgstr "Det er ingen produktanmeldelser ennå."
+msgstr "Det er ennå ingen produktomtaler."
 
 #: includes/admin/class-wc-admin-duplicate-product.php:43
 msgid "Make a duplicate from this product"
-msgstr "Lag et duplikat av dette produktet"
+msgstr "Lag en duplikat av dette produktet"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:44
 msgid "Duplicate"
@@ -446,11 +449,11 @@ msgstr "Dokumentasjon"
 msgid ""
 "Thank you for using WooCommerce :) Should you need help using or extending "
 "WooCommerce please read the documentation."
-msgstr "Takk for at du bruker WooCommerce :) Dersom du trenger hjelp med eller utvide WooCommerce kan du lese dokumentasjonen."
+msgstr "Takk for at du bruker WooCommerce :) Dersom du trenger hjelp med bruk av eller med å utvide WooCommerce kan du lese dokumentasjonen."
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "WooCommerce Documentation"
-msgstr "WooCommerce Dokumentasjon"
+msgstr "WooCommerce dokumentasjon"
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "Developer API Docs"
@@ -465,13 +468,13 @@ msgid ""
 "After <a href=\"%s\">reading the documentation</a>, for further assistance "
 "you can use the <a href=\"%s\">community forum</a>, or if you have access as"
 " a WooThemes customer, <a href=\"%s\">our support desk</a>."
-msgstr ""
+msgstr "Etter <a href=\"%s\">å ha lest dokumentasjonen</a>, kan du for videre assistanse bruke <a href=\"%s\">community forum</a>, eller hvis du har tilgang som en WooThemes-kunde, <a href=\"%s\">supportdesken vår</a>."
 
 #: includes/admin/class-wc-admin-help.php:54
 msgid ""
 "Before asking for help we recommend checking the status page to identify any"
 " problems with your configuration."
-msgstr ""
+msgstr "Før du ber om hjelp anbefaler vi å sjekke ut statussiden for å identifisere eventuelle problemer med konfigurasjonen."
 
 #: includes/admin/class-wc-admin-help.php:56
 #: includes/admin/class-wc-admin-help.php:67
@@ -483,7 +486,7 @@ msgstr "Systemstatus"
 
 #: includes/admin/class-wc-admin-help.php:56
 msgid "Community Support"
-msgstr "Støttesamfunn"
+msgstr "Supportsamfunn"
 
 #: includes/admin/class-wc-admin-help.php:56
 msgid "Customer Support"
@@ -500,7 +503,7 @@ msgid ""
 "href=\"%s\">contribution guide</a> prior to submitting your report. Be as "
 "descriptive as possible and please include your <a href=\"%s\">system status"
 " report</a>."
-msgstr ""
+msgstr "Hvis du finner en feil i WooCommerce kjerne du kan opprette en billett via <a href=\"%s\">GitHub issues</a>. Sørg for at du leser <a href=\"%s\">contribution guide</a> før du sender rapporten. Vær så beskrivende som mulig og vennligst inkluder <a href=\"%s\">system status report</a>."
 
 #: includes/admin/class-wc-admin-help.php:67
 msgid "Report a bug"
@@ -532,7 +535,7 @@ msgstr "Offisielle temaer"
 
 #: includes/admin/class-wc-admin-importers.php:32
 msgid "WooCommerce Tax Rates (CSV)"
-msgstr "WooCommerce skattesatser (CSV)"
+msgstr "WooCommerce-skattesatser (CSV)"
 
 #: includes/admin/class-wc-admin-importers.php:32
 msgid "Import <strong>tax rates</strong> to your store via a csv file."
@@ -549,7 +552,7 @@ msgstr "WooCommerce-innstillinger"
 #: includes/admin/class-wc-admin-menus.php:63
 #: includes/admin/class-wc-admin-welcome.php:213
 #: includes/admin/settings/class-wc-settings-checkout.php:277
-#: includes/admin/settings/class-wc-settings-shipping.php:241
+#: includes/admin/settings/class-wc-settings-shipping.php:243
 #: includes/admin/views/html-admin-page-status-report.php:269
 msgid "Settings"
 msgstr "Innstillinger"
@@ -561,7 +564,7 @@ msgstr "WooCommerce Add-ons/Extensions"
 
 #: includes/admin/class-wc-admin-menus.php:88
 msgid "Add-ons"
-msgstr "Utvidelse"
+msgstr "Add-ons"
 
 #: includes/admin/class-wc-admin-menus.php:126
 #: includes/admin/class-wc-admin-menus.php:128
@@ -621,7 +624,7 @@ msgid "Default"
 msgstr "Standard"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:117
-#: includes/admin/reports/class-wc-report-stock.php:136
+#: includes/admin/reports/class-wc-report-stock.php:141
 msgid "Product"
 msgstr "Produkt"
 
@@ -642,6 +645,11 @@ msgid ""
 "Enter a custom base to use. A base <strong>must</strong> be set or WordPress"
 " will use default instead."
 msgstr "Tast inn en egendefinert base å bruke. En base <strong>må</strong> være satt. Ellers vil WordPress bruke standard."
+
+#: includes/admin/class-wc-admin-permalink-settings.php:184
+msgctxt "slug"
+msgid "product"
+msgstr "produkt"
 
 #: includes/admin/class-wc-admin-post-types.php:58
 msgid "Product updated. <a href=\"%s\">View Product</a>"
@@ -669,7 +677,7 @@ msgstr "Produktet gjennopprettet til revidering fra %s"
 
 #: includes/admin/class-wc-admin-post-types.php:63
 msgid "Product published. <a href=\"%s\">View Product</a>"
-msgstr "Produktet publisert. <a href=\"%s\">Vis Produkt</a>"
+msgstr "Produktet publisert. <a href=\"%s\">Vis produkt</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:64
 msgid "Product saved."
@@ -693,7 +701,7 @@ msgstr "M j, Y @ G:i"
 
 #: includes/admin/class-wc-admin-post-types.php:68
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
-msgstr "Produktustkast oppdatert. <a target=\"_blank\" href=\"%s\">Forhåndsvis produkt</a>"
+msgstr "Produktutkast oppdatert. <a target=\"_blank\" href=\"%s\">Forhåndsvis produkt</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:73
 #: includes/admin/class-wc-admin-post-types.php:76
@@ -828,7 +836,7 @@ msgstr "Telefon"
 
 #: includes/admin/class-wc-admin-profile.php:88
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:67
-#: includes/admin/reports/class-wc-report-customer-list.php:244
+#: includes/admin/reports/class-wc-report-customer-list.php:249
 msgid "Email"
 msgstr "Epost"
 
@@ -846,11 +854,11 @@ msgstr "Skriv"
 
 #: includes/admin/class-wc-admin-profile.php:199
 msgid "Read/Write"
-msgstr "Les / skrive"
+msgstr "Les/skriv"
 
 #: includes/admin/class-wc-admin-profile.php:207
 msgid "WooCommerce API Keys"
-msgstr "WooCommerce API nøkler"
+msgstr "WooCommerce API-nøkler"
 
 #: includes/admin/class-wc-admin-profile.php:211
 msgid "Generate API Key"
@@ -858,32 +866,32 @@ msgstr "Generere API-nøkkel"
 
 #: includes/admin/class-wc-admin-profile.php:213
 msgid "Consumer Key:"
-msgstr "Kunde nøkkel:"
+msgstr "Kundenøkkel:"
 
 #: includes/admin/class-wc-admin-profile.php:214
 msgid "Consumer Secret:"
-msgstr ""
+msgstr "Kundehemmelighet"
 
 #: includes/admin/class-wc-admin-profile.php:215
 msgid "Permissions:"
-msgstr "tillatelser:"
+msgstr "Tillatelser:"
 
 #: includes/admin/class-wc-admin-profile.php:219
 msgid "Revoke API Key"
 msgstr "Tilbakekall API-nøkkel"
 
 #: includes/admin/class-wc-admin-reports.php:46
-#: includes/admin/reports/class-wc-report-customer-list.php:246
+#: includes/admin/reports/class-wc-report-customer-list.php:251
 msgid "Orders"
 msgstr "Ordrer"
 
 #: includes/admin/class-wc-admin-reports.php:49
 msgid "Sales by date"
-msgstr "Salg etter dato"
+msgstr "Salg per dato"
 
 #: includes/admin/class-wc-admin-reports.php:55
 msgid "Sales by product"
-msgstr "Salg etter produkt"
+msgstr "Salg per produkt"
 
 #: includes/admin/class-wc-admin-reports.php:61
 msgid "Sales by category"
@@ -894,13 +902,13 @@ msgid "Coupons by date"
 msgstr "Kuponger etter dato"
 
 #: includes/admin/class-wc-admin-reports.php:75
-#: includes/admin/reports/class-wc-report-customer-list.php:25
+#: includes/admin/reports/class-wc-report-customer-list.php:30
 msgid "Customers"
 msgstr "Kunder"
 
 #: includes/admin/class-wc-admin-reports.php:78
 msgid "Customers vs. Guests"
-msgstr "Kunder vs Gjester"
+msgstr "Kunder vs. gjester"
 
 #: includes/admin/class-wc-admin-reports.php:84
 msgid "Customer List"
@@ -909,8 +917,8 @@ msgstr "Kundeliste"
 #: includes/admin/class-wc-admin-reports.php:92
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
-#: includes/admin/reports/class-wc-report-stock.php:20
-#: includes/admin/reports/class-wc-report-stock.php:21
+#: includes/admin/reports/class-wc-report-stock.php:25
+#: includes/admin/reports/class-wc-report-stock.php:26
 msgid "Stock"
 msgstr "Lager"
 
@@ -921,7 +929,7 @@ msgstr "Lite på lager"
 #: includes/admin/class-wc-admin-reports.php:101
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
-#: includes/admin/reports/class-wc-report-stock.php:93
+#: includes/admin/reports/class-wc-report-stock.php:98
 #: includes/admin/views/html-bulk-edit-product.php:195
 #: includes/admin/views/html-quick-edit-product.php:138
 msgid "Out of stock"
@@ -929,20 +937,20 @@ msgstr "Tomt på lager"
 
 #: includes/admin/class-wc-admin-reports.php:107
 msgid "Most Stocked"
-msgstr "Fullt på lager"
+msgstr "Mest på lager"
 
 #: includes/admin/class-wc-admin-reports.php:118
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
-msgstr "Avgifter"
+msgstr "Skatter"
 
 #: includes/admin/class-wc-admin-reports.php:121
 msgid "Taxes by code"
-msgstr "Avgifter etter kode"
+msgstr "Skatter etter kode"
 
 #: includes/admin/class-wc-admin-reports.php:127
 msgid "Taxes by date"
-msgstr "Avgifter etter dato"
+msgstr "Skatter etter dato"
 
 #: includes/admin/class-wc-admin-settings.php:54
 msgid "Action failed. Please refresh the page and retry."
@@ -958,7 +966,7 @@ msgstr "Endringene du har gjort, vil gå tapt hvis du navigerer bort fra denne s
 
 #: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
-msgstr "Hard beskjæring"
+msgstr "Hard beskjæring?"
 
 #: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
@@ -996,19 +1004,19 @@ msgstr "Roller vellykket tilbakestilt"
 
 #: includes/admin/class-wc-admin-status.php:114
 msgid "Terms successfully recounted"
-msgstr "Termer vellykket telt igjen"
+msgstr "Vilkår vellykket telt igjen"
 
 #: includes/admin/class-wc-admin-status.php:125
 msgid "Sessions successfully cleared"
-msgstr ""
+msgstr "Sesjonene er vellykket tømt"
 
 #: includes/admin/class-wc-admin-status.php:129
 msgid "All missing WooCommerce pages was installed successfully."
-msgstr "Alle savnede WooCommerce sider ble installert med hell."
+msgstr "Alle savnede WooCommerce-sider ble vellykket installert."
 
 #: includes/admin/class-wc-admin-status.php:137
 msgid "Tax rates successfully deleted"
-msgstr ""
+msgstr "Skattesatser vellykket fjernet"
 
 #: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
@@ -1020,7 +1028,7 @@ msgstr "Det oppstod en feil ved å kalle %s"
 
 #: includes/admin/class-wc-admin-status.php:159
 msgid "Your changes have been saved."
-msgstr "Dine endringer har blitt lagret."
+msgstr "Endringene dine har blitt lagret."
 
 #: includes/admin/class-wc-admin-status.php:173
 msgid "WC Transients"
@@ -1043,12 +1051,12 @@ msgid "Clear expired transients"
 msgstr "Tøm utløpte transienter"
 
 #: includes/admin/class-wc-admin-status.php:180
-msgid "This tool will clear ALL expired transients from Wordpress."
-msgstr "Dette verktøyet vil fjerne ALLE utløpte transienter fra Wordpress."
+msgid "This tool will clear ALL expired transients from WordPress."
+msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
-msgstr "Telte termer"
+msgstr "Telte vilkår"
 
 #: includes/admin/class-wc-admin-status.php:184
 msgid "Recount terms"
@@ -1076,17 +1084,17 @@ msgstr "Dette verktøyet vil tilbakestille admin, kunde-og shop_managerroller ti
 
 #: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
-msgstr "Kundeøkt"
+msgstr "Kundesesjoner"
 
 #: includes/admin/class-wc-admin-status.php:194
 msgid "Clear all sessions"
-msgstr "Nullstill alle økter"
+msgstr "Tøm alle sesjoner"
 
 #: includes/admin/class-wc-admin-status.php:195
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr ""
+msgstr "<strong class=\"red\">Advarsel:</strong> Dette verktøyet vil slette alle kundesesjoner fra databasen, inkludert alle aktive handlevogner."
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
@@ -1095,27 +1103,27 @@ msgstr "Installer WooCommerce-sider"
 
 #: includes/admin/class-wc-admin-status.php:199
 msgid "Install pages"
-msgstr "Installere sider"
+msgstr "Installer sider"
 
 #: includes/admin/class-wc-admin-status.php:200
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
-msgstr ""
+msgstr "<strong class=\"red\">Note:</strong> Dette verktøyet vil installere manglende sider av WooCommerce. Sider som allerede er definert og satt opp vil ikke bli erstattet."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
-msgstr ""
+msgstr "Slett alle WooCommerce skattesatser"
 
 #: includes/admin/class-wc-admin-status.php:204
 msgid "Delete ALL tax rates"
-msgstr ""
+msgstr "Slett ALLE skattesatser"
 
 #: includes/admin/class-wc-admin-status.php:205
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
-msgstr ""
+msgstr "<strong class=\"red\">Merk:</strong> Dette valget vil slette ALLE skattesatsene dine. Bruk med forsiktighet."
 
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
@@ -1166,7 +1174,7 @@ msgid ""
 "of categories on the front-end you can drag and drop to sort them. To see "
 "more categories listed click the \"screen options\" link at the top of the "
 "page."
-msgstr "Produktkategorier for butikken din kan styres her. Hvis du vil endre rekkefølgen på kategoriene på front-end, kan du dra og slippe for å sortere dem. For å se flere kategorier oppført, klikk på \"screen options\"-linken øverst på siden."
+msgstr "Produktkategorier for butikken din kan styres her. Hvis du vil endre rekkefølgen på kategoriene på front-end, kan du dra og slippe for å sortere dem. For å se flere kategorier oppført, klikk på \"screen options\"-lenken øverst på siden."
 
 #: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
@@ -1228,11 +1236,11 @@ msgstr "Oversettere"
 
 #: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
-msgstr ""
+msgstr "En ny RESTful API utviklere vil &#10084;"
 
 #: includes/admin/class-wc-admin-welcome.php:246
 msgid "Access your data from 3rd party applications"
-msgstr "Få tilgang til dine data fra tredje parts programmer"
+msgstr "Få tilgang til dine data fra tredjepartsprogrammer"
 
 #: includes/admin/class-wc-admin-welcome.php:247
 msgid ""
@@ -1241,11 +1249,11 @@ msgid ""
 "<strong>Coupons</strong>, <strong>Customers</strong>, "
 "<strong>Products</strong> and <strong>Reports</strong> in both "
 "<code>XML</code> and <code>JSON</code> formats."
-msgstr ""
+msgstr "Bygget på toppen av WooCommerce API, og direkte målrettet mot utviklere, den nye REST API gjør det mulig å få data for <strong>Ordrer</strong>, <strong>Rabattkuponger</strong>, <strong>Kunder</strong>, <strong>Produkter</strong> og <strong>Rapporter</strong> i både <code>XML</code>- og <code>JSON</code>-formater."
 
 #: includes/admin/class-wc-admin-welcome.php:251
 msgid "Authentication to keep data secure"
-msgstr ""
+msgstr "Godkjenning for å holde data sikker"
 
 #: includes/admin/class-wc-admin-welcome.php:252
 msgid ""
@@ -1253,15 +1261,15 @@ msgid ""
 "have SSL enabled, or signed according to the <a "
 "href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> specification if "
 "you don't have SSL. Data is only available to authenticated users."
-msgstr ""
+msgstr "Godkjenning for REST API er utført ved hjelp av HTTP Basic Auth hvis du har SSL aktivert, eller signert i henhold til <a href=\"http://tools.ietf.org/html/rfc5849\"> OAuth 1.0a </a >-spesifikasjonen hvis du ikke har SSL. Data er kun tilgjengelig for godkjente brukere."
 
 #: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"
-msgstr ""
+msgstr "Brukergrensesnitt og rapporteringsforbedringer"
 
 #: includes/admin/class-wc-admin-welcome.php:260
 msgid "WordPress 3.8 admin UI compatibility"
-msgstr "WordPress 3.8 admin UI kompatibilitet"
+msgstr "WordPress 3.8 admin brukergrnsesnittkompatibilitet"
 
 #: includes/admin/class-wc-admin-welcome.php:261
 msgid ""
@@ -1269,23 +1277,23 @@ msgid ""
 " WordPress 3.8. All bitmap icons have been replaced with a custom, "
 "lightweight icon font for razor sharp clarity on retina devices as well as "
 "improved performance."
-msgstr ""
+msgstr "WooCommerce 2.1 har hatt brukergrnsesnittet sitt pusset opp for å virke sammen med det nye admindesignet i WordPress 3.8. Alle bitmapikoner har blitt erstattet med en tilpasset, lett ikonskrifttype for sylskarp klarhet på retina-skjermer, samt forbedret ytelse."
 
 #: includes/admin/class-wc-admin-welcome.php:264
 msgid "Simplified order UI"
-msgstr "Forenklet ordre UI"
+msgstr "Forenklet brukergrensesnitt for ordre"
 
 #: includes/admin/class-wc-admin-welcome.php:265
 msgid ""
 "The orders panel has seen significant improvement to both the totals panel, "
 "and line item display making editing new and existing orders a breeze."
-msgstr ""
+msgstr "Ordrepanelet har fått betydelige forbedringer i både panelet for totaler og visninger for ordrelinjer, slik at redigering av nye og eksisterende ordrer blir en lek."
 
 #: includes/admin/class-wc-admin-welcome.php:266
 msgid ""
 "Item meta has also been optimised and can now be viewed as HTML rather than "
 "stuck in a text input."
-msgstr ""
+msgstr "Gjenstandsmeta har også blitt optimalisert og kan nå vises som HTML snarere enn låst fast i tekstinput."
 
 #: includes/admin/class-wc-admin-welcome.php:269
 msgid "Improved Reporting"
@@ -1296,13 +1304,13 @@ msgid ""
 "Reports have been redesigned with new <strong>filtering</strong> "
 "capabilities, a new <strong>customer report</strong> showing "
 "orders/spending, and the ability to <strong>export CSVs</strong>."
-msgstr ""
+msgstr "Rapporter har blitt redesignet med nye <strong>filtrerings</strong>-egenskaper, en ny <strong>kunderapport</strong> som viser ordrer/utgifter, og evnen til å <strong>eksportere CSV</strong>."
 
 #: includes/admin/class-wc-admin-welcome.php:271
 msgid ""
 "The dashboard also has a new widget showing you an overview of current "
 "orders complete with sparklines for quick at-a-glance stats."
-msgstr ""
+msgstr "Dashbordet har også en ny widget som viser deg en oversikt over gjeldende ordrer komplett med \"sparklines\" for raskt overblikk på statistikker."
 
 #: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
@@ -1310,13 +1318,13 @@ msgstr "Separerte integrasjoner"
 
 #: includes/admin/class-wc-admin-welcome.php:279
 msgid "New separate plugins"
-msgstr ""
+msgstr "Nye separate utvidelser"
 
 #: includes/admin/class-wc-admin-welcome.php:280
 msgid ""
 "To make core more lean, some integrations have been removed and turned into "
 "dedicated plugins which you can install as and when you need them."
-msgstr ""
+msgstr "For å gjøre kjernen mer mager, har noen integrasjoner blitt fjernet og omgjort til dedikerte plugins som du kan installere hvis og når du trenger dem."
 
 #: includes/admin/class-wc-admin-welcome.php:283
 msgid "Google Analytics"
@@ -1324,7 +1332,7 @@ msgstr "Google Analytics"
 
 #: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
-msgstr "Legg til Google Analytics netthandels sporing til din WooCommerce butikken."
+msgstr "Legg til Google Analytics netthandelssporing til WooCommerce-butikken din."
 
 #: includes/admin/class-wc-admin-welcome.php:285
 #: includes/admin/class-wc-admin-welcome.php:290
@@ -1348,7 +1356,7 @@ msgstr "ShareThis"
 
 #: includes/admin/class-wc-admin-welcome.php:294
 msgid "Add social network sharing buttons to products using ShareThis."
-msgstr "Legg til sosialenettverk delings knapper til produkter ved hjelp av ShareThis."
+msgstr "Legg til sosiale nettverksdelingsknapper til produkter ved hjelp av ShareThis."
 
 #: includes/admin/class-wc-admin-welcome.php:298
 msgid "Sharedaddy"
@@ -1356,7 +1364,7 @@ msgstr "Sharedaddy"
 
 #: includes/admin/class-wc-admin-welcome.php:299
 msgid "Add social network sharing buttons to products using Sharedaddy."
-msgstr "Legg til sosiale nettverks deling knapper til produkter som bruker Sharedaddy."
+msgstr "Legg til sosiale nettverksdelingsknapper til produkter ved hjelp av Sharedaddy."
 
 #: includes/admin/class-wc-admin-welcome.php:303
 msgid "ShareYourCart"
@@ -1373,93 +1381,93 @@ msgstr "Under panseret"
 
 #: includes/admin/class-wc-admin-welcome.php:314
 msgid "PayPal PDT support"
-msgstr "PayPal PDT støtte"
+msgstr "PayPal PDT-støtte"
 
 #: includes/admin/class-wc-admin-welcome.php:315
 msgid ""
 "PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
 " the status of an order when a customer returns from PayPal."
-msgstr ""
+msgstr "PayPal Data Transfer (PDT) er et alternativ til PayPal IPN som sender tilbake status for en bestilling når en kunde returnerer fra PayPal."
 
 #: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
-msgstr ""
+msgstr "Stilarkseparering"
 
 #: includes/admin/class-wc-admin-welcome.php:320
 msgid ""
 "Frontend styles have been split into separate appearance/layout/smallscreen "
 "stylesheets to help with selective customisation."
-msgstr ""
+msgstr "Frontend-stiler har blitt delt inn i separate utseende-/layout-/smalskjerm-stilark for å hjelpe til med selektiv tilpasning."
 
 #: includes/admin/class-wc-admin-welcome.php:324
 msgid "New endpoints"
-msgstr ""
+msgstr "Nye endepunkter"
 
 #: includes/admin/class-wc-admin-welcome.php:325
 msgid ""
 "Certain pages such as \"Pay\", \"Order Received\" and some account pages are"
 " now endpoints rather than pages to make checkout more reliable."
-msgstr ""
+msgstr "Enkelte sider som \"Betal\", \"Ordre mottatt\" og noen kontosider er nå endepunkter snarere enn sider, for å gjøre kassen mer pålitelig."
 
 #: includes/admin/class-wc-admin-welcome.php:331
 msgid "Default credit card form for gateways"
-msgstr ""
+msgstr "Standard kredittkortskjema for gatewayer"
 
 #: includes/admin/class-wc-admin-welcome.php:332
 msgid ""
 "We've added a standardized, default credit card form for gateways to use if "
 "they support <code>default_credit_card_form</code>."
-msgstr ""
+msgstr "Vi har lagt til et standardisert, standard kredittkortskjema for gatewayer å bruke hvis de støtter <code>default_credit_card_form</code>."
 
 #: includes/admin/class-wc-admin-welcome.php:336
 msgid "Coupon limits per customer"
-msgstr "Kupong grenser per kunde"
+msgstr "Kupongbegrensninger per kunde"
 
 #: includes/admin/class-wc-admin-welcome.php:337
 msgid ""
 "Coupon usage limits can now be set per user (using email + ID) rather than "
 "global."
-msgstr ""
+msgstr "Begrensninger for bruk av rabattkuponger kan nå settes per bruker (ved hjelp av epost + ID) snarere enn globalt."
 
 #: includes/admin/class-wc-admin-welcome.php:341
 msgid "Streamlined new-account process"
-msgstr ""
+msgstr "Strømlinjeformet ny-konto prosess"
 
 #: includes/admin/class-wc-admin-welcome.php:342
 msgid ""
 "During checkout, username and passwords are optional and can be "
 "automatically generated by WooCommerce."
-msgstr ""
+msgstr "I kassen er brukernavn og passord valgfritt og kan automatisk genereres av WooCommerce."
 
 #: includes/admin/class-wc-admin-welcome.php:349
 msgid "Additional price display options"
-msgstr ""
+msgstr "Ekstra prisvisningsvalg"
 
 #: includes/admin/class-wc-admin-welcome.php:350
 msgid ""
 "Define whether prices should be shown incl. or excl. of tax on the frontend,"
 " and add an optional suffix."
-msgstr ""
+msgstr "Definer om prisene skal vises inkl. eller eks. skatt på frontend og legg til en valgfri suffiks."
 
 #: includes/admin/class-wc-admin-welcome.php:354
 msgid "Past order linking"
-msgstr ""
+msgstr "Lenker for tidligere ordrer"
 
 #: includes/admin/class-wc-admin-welcome.php:355
 msgid ""
 "Admins now have the ability to link past orders to a customer (before they "
 "registered) by email address."
-msgstr ""
+msgstr "Administratorer har nå mulighet til å lenke tidligere ordrer til en kunde (før de registrerer seg) via epostadresse."
 
 #: includes/admin/class-wc-admin-welcome.php:359
 msgid "Review improvements"
-msgstr ""
+msgstr "Omtal forbedringer"
 
 #: includes/admin/class-wc-admin-welcome.php:360
 msgid ""
 "We've added a new option to restrict reviews to logged in purchasers, and "
 "made ratings editable from the backend."
-msgstr ""
+msgstr "Vi har lagt til et nytt valg for å begrense omtaler til innloggede kunder og laget rangeringer redigerbare fra backend."
 
 #: includes/admin/class-wc-admin-welcome.php:367
 msgid "Go to WooCommerce Settings"
@@ -1478,9 +1486,9 @@ msgstr "WooCommerce er utviklet og vedlikeholdt av et verdensomspennende team av
 msgid ""
 "WooCommerce has been kindly translated into several other languages thanks "
 "to our translation team. Want to see your name? <a "
-"href=\"https://www.transifex.com/projects/p/woocommerce-core/\">Translate "
+"href=\"https://www.transifex.com/projects/p/woocommerce/\">Translate "
 "WooCommerce</a>."
-msgstr "WooCommerce har blitt oversatt til flere andre språk takket være vår oversettelse team. Lyst til å se navnet ditt? <a href=\"https://www.transifex.com/projects/p/woocommerce-core/\"> Oversett WooCommerce </ a>."
+msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1488,7 +1496,7 @@ msgstr "Vis %s"
 
 #: includes/admin/class-wc-admin.php:114
 msgid "HTML Email Template"
-msgstr "HTML Email Mal"
+msgstr "HTML epostmal"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:103
 #: includes/admin/importers/class-wc-tax-rate-importer.php:190
@@ -1552,7 +1560,7 @@ msgstr "Maksimum størrelse: %s"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:315
 msgid "OR enter path to file:"
-msgstr "ELLER legg inn stil til filen:"
+msgstr "ELLER legg inn sti til filen:"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:322
 msgid "Delimiter"
@@ -1643,7 +1651,7 @@ msgid "Price"
 msgstr "Pris"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:256
-#: includes/admin/reports/class-wc-report-sales-by-category.php:142
+#: includes/admin/reports/class-wc-report-sales-by-category.php:147
 msgid "Categories"
 msgstr "Kategorier"
 
@@ -1653,11 +1661,11 @@ msgstr "Stikkord"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:260
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:98
-#: includes/admin/reports/class-wc-report-coupon-usage.php:316
-#: includes/admin/reports/class-wc-report-customers.php:201
-#: includes/admin/reports/class-wc-report-sales-by-category.php:214
-#: includes/admin/reports/class-wc-report-sales-by-date.php:160
-#: includes/admin/reports/class-wc-report-sales-by-product.php:324
+#: includes/admin/reports/class-wc-report-coupon-usage.php:321
+#: includes/admin/reports/class-wc-report-customers.php:206
+#: includes/admin/reports/class-wc-report-sales-by-category.php:219
+#: includes/admin/reports/class-wc-report-sales-by-date.php:165
+#: includes/admin/reports/class-wc-report-sales-by-product.php:329
 msgid "Date"
 msgstr "Dato"
 
@@ -1718,7 +1726,7 @@ msgstr "Vis &#8220;%s&#8221;"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:319
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:316
-#: includes/admin/reports/class-wc-report-stock.php:114
+#: includes/admin/reports/class-wc-report-stock.php:119
 msgid "View"
 msgstr "Vis"
 
@@ -1781,7 +1789,7 @@ msgstr "Ingen"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:417
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:302
-#: includes/admin/reports/class-wc-report-stock.php:91
+#: includes/admin/reports/class-wc-report-stock.php:96
 #: includes/admin/views/html-bulk-edit-product.php:194
 #: includes/admin/views/html-quick-edit-product.php:137
 msgid "In stock"
@@ -1833,7 +1841,7 @@ msgstr "Kupongtype"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:79
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
-#: includes/admin/reports/class-wc-report-sales-by-date.php:322
+#: includes/admin/reports/class-wc-report-sales-by-date.php:327
 msgid "Coupon amount"
 msgstr "Kupongbeløp"
 
@@ -1885,7 +1893,7 @@ msgstr "Kjøpt"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 msgid "Ship to"
-msgstr "Ship to"
+msgstr "Send til"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:96
 msgid "Customer Message"
@@ -1900,15 +1908,15 @@ msgstr "Ordrenotater"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:122
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:127
 msgid "Total"
 msgstr "Total"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:100
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:34
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:81
-#: includes/admin/reports/class-wc-report-customer-list.php:249
-#: includes/admin/reports/class-wc-report-stock.php:140
+#: includes/admin/reports/class-wc-report-customer-list.php:254
+#: includes/admin/reports/class-wc-report-stock.php:145
 msgid "Actions"
 msgstr "Handlinger"
 
@@ -1945,16 +1953,16 @@ msgstr[1] "pluss %d andre notater"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
 msgid "%d note"
 msgid_plural "%d notes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d notat"
+msgstr[1] "%d notater"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:228
 msgid "Billing:"
-msgstr "Fakturering"
+msgstr "Fakturering:"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:232
 msgid "Tel:"
-msgstr "Tlf:"
+msgstr "Tel:"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:254
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:277
@@ -1983,30 +1991,30 @@ msgstr "Vis alle statuser"
 msgid "Show all customers"
 msgstr "Vis alle kunder"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:689
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:691
 msgid "Mark processing"
 msgstr "Merk behandler"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:692
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:694
 msgid "Mark on-hold"
 msgstr "Merk på vent"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:695
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:696
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:697
 msgid "Mark completed"
 msgstr "Merk ferdig"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:737
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:738
 msgid "Order status changed by bulk edit:"
 msgstr "Ordrestatus endret av bulkredigering:"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:759
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:760
 msgid "Order status changed."
 msgid_plural "%s order statuses changed."
-msgstr[0] "%s ordrestatus endret."
-msgstr[1] "%s ordrestatuser endret."
+msgstr[0] "Ordrestatus endret"
+msgstr[1] "Ordrestatuser endret"
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:42
 msgid "Insert into %s"
@@ -2014,7 +2022,7 @@ msgstr "Sett inn i %s"
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:43
 msgid "Uploaded to this %s"
-msgstr "Lastet opp til dette %s"
+msgstr "Lastet opp til denne %s"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:93
 msgid "Product Short Description"
@@ -2067,13 +2075,13 @@ msgstr "Rangering"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:144
 msgid "Reviews"
-msgstr "Anmeldelser"
+msgstr "Omtaler"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:37
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:85
 #: includes/admin/settings/class-wc-settings-general.php:25
 msgid "General"
-msgstr "Generelt"
+msgstr "Generelle"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:42
 msgid "Usage Restriction"
@@ -2093,13 +2101,13 @@ msgstr "Verdien av kupongen."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:69
 msgid "Allow free shipping"
-msgstr "Tillate fri frakt"
+msgstr "Tillat fri frakt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:69
 msgid ""
 "Check this box if the coupon grants free shipping. The <a href=\"%s\">free "
 "shipping method</a> must be enabled with the \"must use coupon\" setting."
-msgstr "Kryss av dersom kupongen gir gratis frakt. <a Href=\"%s\"> gratis frakt metode </ a> må være aktivert med \"må bruke kupongen\"-innstillingen."
+msgstr "Kryss av dersom kupongen gir gratis frakt. <a href=\"%s\">gratis fraktmetode</a> må være aktivert med \"må bruke kupongen\"-innstillingen."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:72
 msgid "Apply before tax"
@@ -2112,7 +2120,7 @@ msgstr "Merk denne boksen dersom kupongen skal brukes før beregning av skatter 
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:75
 msgid "Coupon expiry date"
-msgstr "Kupong utløpsdato"
+msgstr "Kupongens utløpsdato"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:75
 msgctxt "placeholder"
@@ -2157,7 +2165,7 @@ msgstr "Merk denne boksen dersom kupongen ikke skal brukes på gjenstander som e
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:586
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:603
-#: includes/admin/reports/class-wc-report-sales-by-product.php:178
+#: includes/admin/reports/class-wc-report-sales-by-product.php:183
 msgid "Search for a product&hellip;"
 msgstr "Søk etter et produkt&hellip;"
 
@@ -2193,7 +2201,7 @@ msgstr "Enhver kategori"
 msgid ""
 "A product must be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will be discounted."
-msgstr "Et produkt må være i denne kategorien for at kupongen skal forbli gyldig eller, for \"Produktrabatter\", vil produkter i disse kategoriene bli rabattert."
+msgstr "Et produkt må være i denne kategorien for at kupongen skal forbli gyldig eller så, for \"Produktrabatter\", vil produkter i disse kategoriene bli rabattert."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:152
 msgid "Exclude categories"
@@ -2211,7 +2219,7 @@ msgstr "Produktet kan ikke være i denne kategorien for at kupongen skal forbli 
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "Email restrictions"
-msgstr "Epost restriksjoner"
+msgstr "Epostrestriksjoner"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "No restrictions"
@@ -2221,7 +2229,7 @@ msgstr "Ingen restriksjoner"
 msgid ""
 "List of emails to check against the customer's billing email when an order "
 "is placed."
-msgstr ""
+msgstr "Liste med eposter for å sjekke mot kundens faktureringsepost når en ordre er plassert."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "Usage limit per coupon"
@@ -2235,22 +2243,22 @@ msgstr "Ubegrenset bruk"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "How many times this coupon can be used before it is void."
-msgstr "Hvor mange ganger denne kupongen kan brukes før det er ugyldig."
+msgstr "Hvor mange ganger denne kupongen kan brukes før den er ugyldig."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid "Limit usage to X items"
-msgstr "Begrens bruk til X artikler"
+msgstr "Begrens bruk til X gjenstander"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgctxt "placeholder"
 msgid "Apply to all qualifying items in cart"
-msgstr ""
+msgstr "La gjelde for alle kvalifiserte gjenstander i handlevognen"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid ""
 "The maximum number of individual items this coupon can apply to when using "
 "product discounts. Leave blank to apply to all qualifying items in cart."
-msgstr ""
+msgstr "Maksimalt antall individuelle gjenstander denne kupongen kan gjelde når du bruker produktrabatter. La stå tomt for å gjelde for alle kvalifiserte produkter i handlekurven."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid "Usage limit per user"
@@ -2260,7 +2268,7 @@ msgstr "Bruksgrensen per bruker"
 msgid ""
 "How many times this coupon can be used by an invidual user. Uses billing "
 "email for guests, and user ID for logged in users."
-msgstr ""
+msgstr "Hvor mange ganger denne kupongen kan brukes av en enkelt bruker. Bruker faktureringsepost for gjester, og bruker-ID for påloggede brukere."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:230
 msgid ""
@@ -2274,7 +2282,7 @@ msgstr "Send ordre-epostene igjen"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:51
 msgid "Generate Download Permissions"
-msgstr "Genererer Nedlastings Tillatelse"
+msgstr "Generer Nedlastingstillatelser"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:57
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:91
@@ -2424,7 +2432,7 @@ msgstr "Fil %d"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:64
 msgid "Search for a downloadable product&hellip;"
-msgstr ""
+msgstr "Søk etter nedlastbart produkt&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:65
 msgid "Grant Access"
@@ -2436,14 +2444,14 @@ msgstr "Gjenstand"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:38
 msgid "Tax&nbsp;Class"
-msgstr ""
+msgstr "Skatteklasse"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:41
 msgid "Qty"
 msgstr "Antall"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:111
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/settings/class-wc-settings-tax.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:550
 #: includes/admin/settings/class-wc-settings-tax.php:643
@@ -2525,11 +2533,11 @@ msgstr "Frakt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:66
 msgid "+ Add shipping cost"
-msgstr "+ Legg til frakt kostnader"
+msgstr "+ Legg til fraktkostnad"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:66
 msgid "These are the shipping and handling costs for the order."
-msgstr "Dette er frakt og håndtering kostnader for ordren."
+msgstr "Dette er frakt- og håndteringskostnader for ordren."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:106
 msgid "+ Add tax row"
@@ -2551,11 +2559,11 @@ msgstr "Ordretotal"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:148
 msgid "Calculate Tax"
-msgstr "Beregn Avgifter "
+msgstr "Beregn skatt "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:150
 msgid "Calculate Total"
-msgstr "Beregn Total"
+msgstr "Beregn total"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:42
 msgid "Product Type"
@@ -2588,7 +2596,7 @@ msgstr "Avansert"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:136
 msgid "Stock Keeping Unit"
-msgstr "Lagerholdsenhet"
+msgstr "Vareenhet"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:136
 msgid ""
@@ -2659,7 +2667,7 @@ msgstr "Dette er navnet på nedlastingen som vises til kunden."
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:187
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:149
 msgid "File URL"
-msgstr "Fil URL"
+msgstr "Fil-URL"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:187
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:149
@@ -2707,19 +2715,19 @@ msgstr "Skriv inn antall dager før en nedlastingslenke utløper, eller la stå 
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:234
 msgid "Download Type"
-msgstr "Nedlastingstype"
+msgstr "Nedlastningstype"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:234
 msgid "Choose a download type - this controls the <a href=\"%s\">schema</a>."
-msgstr ""
+msgstr "Velg en nedlastingstype - dette styrer <a href=\"%s\">skjemaet</a>."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:235
 msgid "Standard Product"
-msgstr "Standard Produkt"
+msgstr "Standardprodukt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:236
 msgid "Application/Software"
-msgstr "Applikasjon/Programvare"
+msgstr "Applikasjon/Software"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:237
 msgid "Music"
@@ -2745,7 +2753,7 @@ msgid "Shipping only"
 msgstr "Kun frakt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:252
-#: includes/admin/reports/class-wc-report-sales-by-category.php:171
+#: includes/admin/reports/class-wc-report-sales-by-category.php:176
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
 msgid "None"
@@ -2780,7 +2788,7 @@ msgstr "Administrere lager?"
 msgid ""
 "Enable stock management at product level (not needed if managing stock at "
 "variation level)"
-msgstr "Aktiver lagerstyring på produktnivå (ikke nødvendig hvis administrerende lager på variasjon nivå)"
+msgstr "Aktiver lagerstyring på produktnivå (ikke nødvendig hvis lagerstyring på variantnivå)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:290
 #: includes/admin/views/html-bulk-edit-product.php:226
@@ -2797,7 +2805,7 @@ msgid ""
 msgstr "Legerantall. Hvis dette er et variabelt produkt vil denne verdien bli brukt til å styre lager for alle varianter, med mindre du definerer lager på variantnivå."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
-#: includes/admin/reports/class-wc-report-stock.php:139
+#: includes/admin/reports/class-wc-report-stock.php:144
 msgid "Stock status"
 msgstr "Lagerstatus"
 
@@ -2911,7 +2919,7 @@ msgstr "Utvid alle"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:449
 msgid "Select terms"
-msgstr "Velg termer"
+msgstr "Velg vilkår"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:463
 msgid "Add new"
@@ -2919,7 +2927,7 @@ msgstr "Legg til ny"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:476
 msgid "Pipe (|) separate terms"
-msgstr "Vertikalstrek (|) skiller vilkår"
+msgstr "Skill vilkår med tegnet (|) "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:566
 msgid "Custom product attribute"
@@ -2948,7 +2956,7 @@ msgstr "Kryssalg"
 msgid ""
 "Cross-sells are products which you promote in the cart, based on the current"
 " product."
-msgstr "Kryssalg  er produkter som du promoterer i handlekurven, basert på gjeldende produkt."
+msgstr "Kryssalg er produkter som du promoterer i handlekurven, basert på gjeldende produkt."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:627
 msgid "Choose a grouped product&hellip;"
@@ -2980,7 +2988,7 @@ msgstr "Tilpasset ordreposisjon"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:692
 msgid "Enable reviews"
-msgstr "Aktiver anmeldelser"
+msgstr "Aktiver omtaler"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:744
 msgid ""
@@ -3018,7 +3026,7 @@ msgstr "Priser"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:760
 msgid "Prices increase by (fixed amount or %)"
-msgstr ""
+msgstr "Priser øker med (fast beløp eller %)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:761
 msgid "Prices decrease by (fixed amount or %)"
@@ -3089,17 +3097,17 @@ msgstr "Legg til bilder i produktgalleriet"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:6
 msgid "Revoke Access"
-msgstr "Opphev tilgang"
+msgstr "Tilbakekall tilgang"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "%s: %s"
-msgstr ""
+msgstr "%s: %s"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "Downloaded %s time"
 msgid_plural "Downloaded %s times"
-msgstr[0] "Lastet ned %s gang"
-msgstr[1] "Lastet ned %s ganger"
+msgstr[0] "Lasted ned %s gang"
+msgstr[1] "Lasted ned %s ganger"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:16
 msgid "Downloads Remaining"
@@ -3111,7 +3119,7 @@ msgstr "Tilgang utløper"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:12
 msgid "Fee"
-msgstr "Avgift"
+msgstr "Gebyr"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:16
 msgid "Fee Name"
@@ -3136,7 +3144,7 @@ msgstr "Produkt-VE:"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:74
 msgid "Add&nbsp;meta"
-msgstr "Legg til&nbsp;meta"
+msgstr "Legg til meta"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Subtotal"
@@ -3144,11 +3152,11 @@ msgstr "Delsum"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
 msgid "Before pre-tax discounts."
-msgstr ""
+msgstr "Før førskattsrabatter"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
 msgid "After pre-tax discounts."
-msgstr ""
+msgstr "Etter førskatt-rabatter."
 
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:6
 msgid "Label"
@@ -3188,7 +3196,7 @@ msgstr "Velg fil"
 #: includes/admin/post-types/meta-boxes/views/html-product-download.php:5
 #: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:4
 msgid "Insert file URL"
-msgstr "Skriv fil-URL"
+msgstr "Sett inn fil-URL"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:21
 msgid "Any"
@@ -3227,7 +3235,7 @@ msgstr "Avbryt planlegging"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:84
 msgid "Sale start date:"
-msgstr "Startdato for Salgspris:"
+msgstr "Startdato for salg:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:88
 msgid "Sale end date:"
@@ -3237,7 +3245,7 @@ msgstr "Sluttdato for salg:"
 msgid ""
 "Enter a weight for this variation or leave blank to use the parent product "
 "weight."
-msgstr "Angi en vekt for denne varianten eller la stå tom for å bruke det overordnede produktets vekt."
+msgstr "Tast inn en vekt for denne varianten eller la stå tom for å bruke det overordnede produktets vekt."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:105
 msgid "Dimensions (L&times;W&times;H)"
@@ -3283,400 +3291,400 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Aktiver dette valget hvis et produkt ikke er sendt eller hvis det ikke er noen fraktkostnader"
 
-#: includes/admin/reports/class-wc-admin-report.php:395
+#: includes/admin/reports/class-wc-admin-report.php:391
 msgid "Sold %s worth in the last %d days"
-msgstr "%s totale rabatter"
+msgstr "Solgt verdier for %s de siste %d dagene"
 
-#: includes/admin/reports/class-wc-admin-report.php:397
+#: includes/admin/reports/class-wc-admin-report.php:393
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Solgt 1 gjenstand de siste %d dagene"
+msgstr[1] "Solgt %d gjenstander de siste %d dagene"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:71
+#: includes/admin/reports/class-wc-report-coupon-usage.php:76
 msgid "%s discounts in total"
 msgstr "%s totale rabatter"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:77
+#: includes/admin/reports/class-wc-report-coupon-usage.php:82
 msgid "%s coupons used in total"
-msgstr ""
+msgstr "%s kuponger brukt totalt"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:90
-#: includes/admin/reports/class-wc-report-customers.php:140
-#: includes/admin/reports/class-wc-report-sales-by-category.php:68
-#: includes/admin/reports/class-wc-report-sales-by-date.php:124
-#: includes/admin/reports/class-wc-report-sales-by-product.php:108
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:41
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:41
+#: includes/admin/reports/class-wc-report-coupon-usage.php:95
+#: includes/admin/reports/class-wc-report-customers.php:145
+#: includes/admin/reports/class-wc-report-sales-by-category.php:73
+#: includes/admin/reports/class-wc-report-sales-by-date.php:129
+#: includes/admin/reports/class-wc-report-sales-by-product.php:113
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:46
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:46
 msgid "Year"
 msgstr "År"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:91
-#: includes/admin/reports/class-wc-report-customers.php:141
-#: includes/admin/reports/class-wc-report-sales-by-category.php:69
-#: includes/admin/reports/class-wc-report-sales-by-date.php:125
-#: includes/admin/reports/class-wc-report-sales-by-product.php:109
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:42
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:42
+#: includes/admin/reports/class-wc-report-coupon-usage.php:96
+#: includes/admin/reports/class-wc-report-customers.php:146
+#: includes/admin/reports/class-wc-report-sales-by-category.php:74
+#: includes/admin/reports/class-wc-report-sales-by-date.php:130
+#: includes/admin/reports/class-wc-report-sales-by-product.php:114
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:47
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:47
 msgid "Last Month"
 msgstr "Siste måned"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:92
-#: includes/admin/reports/class-wc-report-customers.php:142
-#: includes/admin/reports/class-wc-report-sales-by-category.php:70
-#: includes/admin/reports/class-wc-report-sales-by-date.php:126
-#: includes/admin/reports/class-wc-report-sales-by-product.php:110
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:43
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:43
+#: includes/admin/reports/class-wc-report-coupon-usage.php:97
+#: includes/admin/reports/class-wc-report-customers.php:147
+#: includes/admin/reports/class-wc-report-sales-by-category.php:75
+#: includes/admin/reports/class-wc-report-sales-by-date.php:131
+#: includes/admin/reports/class-wc-report-sales-by-product.php:115
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:48
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:48
 msgid "This Month"
 msgstr "Denne måneden"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:93
-#: includes/admin/reports/class-wc-report-customers.php:143
-#: includes/admin/reports/class-wc-report-sales-by-category.php:71
-#: includes/admin/reports/class-wc-report-sales-by-date.php:127
-#: includes/admin/reports/class-wc-report-sales-by-product.php:111
+#: includes/admin/reports/class-wc-report-coupon-usage.php:98
+#: includes/admin/reports/class-wc-report-customers.php:148
+#: includes/admin/reports/class-wc-report-sales-by-category.php:76
+#: includes/admin/reports/class-wc-report-sales-by-date.php:132
+#: includes/admin/reports/class-wc-report-sales-by-product.php:116
 msgid "Last 7 Days"
 msgstr "Siste 7 dager"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:133
+#: includes/admin/reports/class-wc-report-coupon-usage.php:138
 msgid "Filter by coupon"
 msgstr "Filtrer etter kuponger"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:161
+#: includes/admin/reports/class-wc-report-coupon-usage.php:166
 msgid "Choose coupons&hellip;"
-msgstr ""
+msgstr "Velg kuponger&hellip;"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:162
+#: includes/admin/reports/class-wc-report-coupon-usage.php:167
 msgid "All coupons"
 msgstr "Alle kuponger"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:169
-#: includes/admin/reports/class-wc-report-sales-by-category.php:173
-#: includes/admin/reports/class-wc-report-sales-by-product.php:179
+#: includes/admin/reports/class-wc-report-coupon-usage.php:174
+#: includes/admin/reports/class-wc-report-sales-by-category.php:178
+#: includes/admin/reports/class-wc-report-sales-by-product.php:184
 msgid "Show"
 msgstr "Vis"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:182
+#: includes/admin/reports/class-wc-report-coupon-usage.php:187
 msgid "No used coupons found"
 msgstr "Ingen brukte kuponger funnet"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:187
+#: includes/admin/reports/class-wc-report-coupon-usage.php:192
 msgid "Most Popular"
 msgstr "Mest populær"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:229
-#: includes/admin/reports/class-wc-report-coupon-usage.php:276
+#: includes/admin/reports/class-wc-report-coupon-usage.php:234
+#: includes/admin/reports/class-wc-report-coupon-usage.php:281
 msgid "No coupons found in range"
 msgstr "Ingen kuponger funnet i utvalg"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:234
+#: includes/admin/reports/class-wc-report-coupon-usage.php:239
 msgid "Most Discount"
 msgstr "Mest Rabattert"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:319
-#: includes/admin/reports/class-wc-report-customers.php:204
-#: includes/admin/reports/class-wc-report-sales-by-category.php:217
-#: includes/admin/reports/class-wc-report-sales-by-date.php:164
-#: includes/admin/reports/class-wc-report-sales-by-product.php:327
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:29
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:29
+#: includes/admin/reports/class-wc-report-coupon-usage.php:324
+#: includes/admin/reports/class-wc-report-customers.php:209
+#: includes/admin/reports/class-wc-report-sales-by-category.php:222
+#: includes/admin/reports/class-wc-report-sales-by-date.php:169
+#: includes/admin/reports/class-wc-report-sales-by-product.php:332
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:34
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:34
 #: includes/admin/settings/class-wc-settings-tax.php:289
 msgid "Export CSV"
 msgstr "Eksporter CSV"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:410
+#: includes/admin/reports/class-wc-report-coupon-usage.php:415
 msgid "Number of coupons used"
 msgstr "Antall kuponger som er brukt"
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:418
+#: includes/admin/reports/class-wc-report-coupon-usage.php:423
 msgid "Discount amount"
 msgstr "Rabattert beløp"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:24
+#: includes/admin/reports/class-wc-report-customer-list.php:29
 msgid "Customer"
 msgstr "Kunde"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:34
+#: includes/admin/reports/class-wc-report-customer-list.php:39
 msgid "No customers found."
 msgstr "Ingen kunder funnet."
 
-#: includes/admin/reports/class-wc-report-customer-list.php:48
+#: includes/admin/reports/class-wc-report-customer-list.php:53
 msgid "%s previous order linked"
 msgid_plural "%s previous orders linked"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s forrige ordre lenket"
+msgstr[1] "%s tidligere ordrer lenket"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:53
+#: includes/admin/reports/class-wc-report-customer-list.php:58
 msgid "Search customers"
-msgstr "Søke kunder"
+msgstr "Søk kunder"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:193
+#: includes/admin/reports/class-wc-report-customer-list.php:198
 msgid "View orders"
-msgstr "Vis ordre"
+msgstr "Vis ordrer"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:217
+#: includes/admin/reports/class-wc-report-customer-list.php:222
 msgid "Link previous orders"
-msgstr ""
+msgstr "Lenke til tidligere ordrer"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:242
+#: includes/admin/reports/class-wc-report-customer-list.php:247
 msgid "Name (Last, First)"
 msgstr "Navn (Etternavn, Fornavn)"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:243
+#: includes/admin/reports/class-wc-report-customer-list.php:248
 msgid "Username"
 msgstr "Brukernavn"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:245
+#: includes/admin/reports/class-wc-report-customer-list.php:250
 msgid "Location"
 msgstr "Beliggenhet"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:247
+#: includes/admin/reports/class-wc-report-customer-list.php:252
 msgid "Spent"
 msgstr "Brukt"
 
-#: includes/admin/reports/class-wc-report-customer-list.php:248
+#: includes/admin/reports/class-wc-report-customer-list.php:253
 msgid "Last order"
 msgstr "Siste ordre"
 
-#: includes/admin/reports/class-wc-report-customers.php:17
+#: includes/admin/reports/class-wc-report-customers.php:22
 msgid "%s signups in this period"
 msgstr "%s registreringer i denne perioden"
 
-#: includes/admin/reports/class-wc-report-customers.php:85
+#: includes/admin/reports/class-wc-report-customers.php:90
 msgid "Customer Sales"
-msgstr "Kunde Salg"
+msgstr "Kundesalg"
 
-#: includes/admin/reports/class-wc-report-customers.php:86
+#: includes/admin/reports/class-wc-report-customers.php:91
 msgid "Guest Sales"
-msgstr "Gjeste Salg"
-
-#: includes/admin/reports/class-wc-report-customers.php:95
-#: includes/admin/reports/class-wc-report-customers.php:291
-msgid "Customer Orders"
-msgstr "Kundebestillinger"
+msgstr "Gjestesalg"
 
 #: includes/admin/reports/class-wc-report-customers.php:100
-#: includes/admin/reports/class-wc-report-customers.php:301
+#: includes/admin/reports/class-wc-report-customers.php:296
+msgid "Customer Orders"
+msgstr "Kundeordrer"
+
+#: includes/admin/reports/class-wc-report-customers.php:105
+#: includes/admin/reports/class-wc-report-customers.php:306
 msgid "Guest Orders"
-msgstr "Gjestebestillinger"
+msgstr "Gjesteordrer"
 
-#: includes/admin/reports/class-wc-report-customers.php:119
+#: includes/admin/reports/class-wc-report-customers.php:124
 msgid "orders"
-msgstr "bestillinger"
+msgstr "ordrer"
 
-#: includes/admin/reports/class-wc-report-customers.php:297
+#: includes/admin/reports/class-wc-report-customers.php:302
 msgid "customer orders"
-msgstr "kundebestillinger"
+msgstr "kundeordrer"
 
-#: includes/admin/reports/class-wc-report-customers.php:307
+#: includes/admin/reports/class-wc-report-customers.php:312
 msgid "guest orders"
-msgstr "gjestebestillinger"
+msgstr "gjesteordrer"
 
-#: includes/admin/reports/class-wc-report-customers.php:311
+#: includes/admin/reports/class-wc-report-customers.php:316
 msgid "Signups"
 msgstr "Registreringer"
 
-#: includes/admin/reports/class-wc-report-customers.php:318
+#: includes/admin/reports/class-wc-report-customers.php:323
 msgid "new users"
 msgstr "nye brukere"
 
-#: includes/admin/reports/class-wc-report-low-in-stock.php:19
+#: includes/admin/reports/class-wc-report-low-in-stock.php:22
 msgid "No low in stock products found."
-msgstr ""
+msgstr "Ingen produkter med lite på lager er funnet"
 
-#: includes/admin/reports/class-wc-report-out-of-stock.php:19
+#: includes/admin/reports/class-wc-report-out-of-stock.php:22
 msgid "No out of stock products found."
-msgstr ""
+msgstr "Ingen produkter med tomt på lager er funnet"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:50
+#: includes/admin/reports/class-wc-report-sales-by-category.php:55
 msgid "%s sales in %s"
 msgstr "%s salg i %s"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:157
+#: includes/admin/reports/class-wc-report-sales-by-category.php:162
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "Velg kategorier&hellip;"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:172
+#: includes/admin/reports/class-wc-report-sales-by-category.php:177
 msgid "All"
 msgstr "Alle"
 
-#: includes/admin/reports/class-wc-report-sales-by-category.php:232
+#: includes/admin/reports/class-wc-report-sales-by-category.php:237
 msgid "&larr; Choose a category to view stats"
-msgstr ""
+msgstr "&larr; Velg en kategori for å vise statistikk"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:76
+#: includes/admin/reports/class-wc-report-sales-by-date.php:81
 msgid "%s average daily sales"
-msgstr "%s gjennomsnittlig daglig omsetning"
-
-#: includes/admin/reports/class-wc-report-sales-by-date.php:79
-msgid "%s average monthly sales"
-msgstr ""
+msgstr "%s gjennomsnittlig daglig salg"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:84
+msgid "%s average monthly sales"
+msgstr "%s gjennomsnittlig månedlig salg"
+
+#: includes/admin/reports/class-wc-report-sales-by-date.php:89
 msgid "%s sales in this period"
 msgstr "%s salg i denne perioden"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:94
-msgid "%s orders placed"
-msgstr ""
-
 #: includes/admin/reports/class-wc-report-sales-by-date.php:99
-msgid "%s items purchased"
-msgstr ""
+msgid "%s orders placed"
+msgstr "%s ordrer mottatt"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:104
-msgid "%s charged for shipping"
-msgstr ""
+msgid "%s items purchased"
+msgstr "%s gjenstander kjøpt"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:109
+msgid "%s charged for shipping"
+msgstr "%s tatt for frakt"
+
+#: includes/admin/reports/class-wc-report-sales-by-date.php:114
 msgid "%s worth of coupons used"
-msgstr ""
+msgstr "%s i verdi av kuponger brukt"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:296
-#: includes/admin/reports/class-wc-report-sales-by-product.php:441
+#: includes/admin/reports/class-wc-report-sales-by-date.php:301
+#: includes/admin/reports/class-wc-report-sales-by-product.php:446
 msgid "Number of items sold"
-msgstr ""
+msgstr "Antall gjenstander solgt"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:304
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:113
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:109
+#: includes/admin/reports/class-wc-report-sales-by-date.php:309
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:118
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:114
 msgid "Number of orders"
-msgstr "Antall bestillinger"
+msgstr "Antall ordrer"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:312
+#: includes/admin/reports/class-wc-report-sales-by-date.php:317
 msgid "Average sales amount"
 msgstr "Gjennomsnittlig salgssum"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:332
+#: includes/admin/reports/class-wc-report-sales-by-date.php:337
 msgid "Shipping amount"
-msgstr "Frakt beløp"
+msgstr "Fraktbeløp"
 
-#: includes/admin/reports/class-wc-report-sales-by-date.php:342
-#: includes/admin/reports/class-wc-report-sales-by-product.php:449
+#: includes/admin/reports/class-wc-report-sales-by-date.php:347
+#: includes/admin/reports/class-wc-report-sales-by-product.php:454
 msgid "Sales amount"
 msgstr "Salgsbeløp"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:88
-msgid "%s sales for the selected items"
-msgstr ""
-
 #: includes/admin/reports/class-wc-report-sales-by-product.php:93
-msgid "%s purchases for the selected items"
-msgstr ""
+msgid "%s sales for the selected items"
+msgstr "%s salg av valgte gjenstander"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:139
+#: includes/admin/reports/class-wc-report-sales-by-product.php:98
+msgid "%s purchases for the selected items"
+msgstr "%s kjøp av valgte gjenstander"
+
+#: includes/admin/reports/class-wc-report-sales-by-product.php:144
 msgid "Showing reports for:"
 msgstr "Viser rapporter for:"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:165
+#: includes/admin/reports/class-wc-report-sales-by-product.php:170
 msgid "Reset"
-msgstr "Nullstill"
+msgstr "Tilbakestill"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:174
+#: includes/admin/reports/class-wc-report-sales-by-product.php:179
 msgid "Product Search"
-msgstr "Produkt Søk"
+msgstr "Produktsøk"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:211
+#: includes/admin/reports/class-wc-report-sales-by-product.php:216
 msgid "Top Sellers"
 msgstr "Bestselgere"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:246
-#: includes/admin/reports/class-wc-report-sales-by-product.php:286
-msgid "No products found in range"
-msgstr "Fant ingen produkter i utvalget"
-
 #: includes/admin/reports/class-wc-report-sales-by-product.php:251
+#: includes/admin/reports/class-wc-report-sales-by-product.php:291
+msgid "No products found in range"
+msgstr "Ingen produkter funnet i utvalg"
+
+#: includes/admin/reports/class-wc-report-sales-by-product.php:256
 msgid "Top Earners"
-msgstr "Toppinntjenere"
+msgstr "Topp inntjenere"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:342
+#: includes/admin/reports/class-wc-report-sales-by-product.php:347
 msgid "&larr; Choose a product to view stats"
-msgstr "&larr; Velg et produkt for å se statistikk"
+msgstr "&larr; Velg et produkt for å vise statistikk"
 
-#: includes/admin/reports/class-wc-report-stock.php:30
+#: includes/admin/reports/class-wc-report-stock.php:35
 msgid "No products found."
 msgstr "Ingen produkter funnet."
 
-#: includes/admin/reports/class-wc-report-stock.php:121
+#: includes/admin/reports/class-wc-report-stock.php:126
 msgid "product"
 msgstr "produkt"
 
-#: includes/admin/reports/class-wc-report-stock.php:137
+#: includes/admin/reports/class-wc-report-stock.php:142
 msgid "Parent"
 msgstr "Forelder"
 
-#: includes/admin/reports/class-wc-report-stock.php:138
+#: includes/admin/reports/class-wc-report-stock.php:143
 msgid "Units in stock"
 msgstr "Enheter på lager"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:112
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:117
 msgid "Rate"
 msgstr "Sats"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:114
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "Tax Amount"
 msgstr "Skattebeløp"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:114
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "This is the sum of the \"Tax Rows\" tax amount within your orders."
-msgstr ""
+msgstr "Dette er summen av \"Skatte Rader \" skattebeløpet i dine bestillinger."
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:115
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:120
 msgid "Shipping Tax Amount"
-msgstr ""
+msgstr "Beløp for fraktskatt"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:115
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:120
 msgid ""
 "This is the sum of the \"Tax Rows\" shipping tax amount within your orders."
-msgstr ""
+msgstr "Dette er summen av \"Skatterader \" fraktskattbeløpet i dine bestillinger."
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:116
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:112
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:121
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:117
 msgid "Total Tax"
-msgstr ""
+msgstr "Total skatt"
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:116
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:112
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:121
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:117
 msgid "This is the total tax for the rate (shipping tax + product tax)."
-msgstr ""
+msgstr "Dette er den totale skatten for satsen (fraktskatt + produktskatt)."
 
-#: includes/admin/reports/class-wc-report-taxes-by-code.php:165
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:156
+#: includes/admin/reports/class-wc-report-taxes-by-code.php:170
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:161
 msgid "No taxes found in this period"
-msgstr "Ingen avgifter funnet i denne perioden"
+msgstr "Ingen skatter funnet i denne perioden"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:108
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:113
 msgid "Period"
 msgstr "Periode"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:110
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "Total Sales"
 msgstr "Totale salg"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:110
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "This is the sum of the 'Order Total' field within your orders."
 msgstr "Dette er summen av feltet 'Ordretotal' i ordrene dine."
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:111
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:116
 msgid "Total Shipping"
 msgstr "Total frakt"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:111
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:116
 msgid "This is the sum of the 'Shipping Total' field within your orders."
 msgstr "Dette er summen av feltet 'Frakttotal' i ordrene dine."
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:113
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:118
 msgid "Net profit"
 msgstr "Netto fortjeneste"
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:113
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:118
 msgid "Total sales minus shipping and tax."
 msgstr "Totale salg minus frakt og skatt."
 
-#: includes/admin/reports/class-wc-report-taxes-by-date.php:122
+#: includes/admin/reports/class-wc-report-taxes-by-date.php:127
 msgid "Totals"
-msgstr "Total"
+msgstr "Totaler"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:25
 msgid "Accounts"
@@ -3684,13 +3692,13 @@ msgstr "Kontoer"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid "Account Pages"
-msgstr "Konto Sider"
+msgstr "Kontosider"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "access account related functionality."
-msgstr ""
+msgstr "Disse sidene må settes slik at WooCommerce vet hvor du skal sende brukerne for å få tilgang til kontorelatert funksjonalitet."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:44
 msgid "My Account Page"
@@ -3704,13 +3712,13 @@ msgstr "Sideinnhold:"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:56
 msgid "My Account Endpoints"
-msgstr ""
+msgstr "Min konto-endepunkter"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:56
 msgid ""
 "Endpoints are appended to your page URLs to handle specific actions on the "
 "accounts pages. They should be unique."
-msgstr ""
+msgstr "Endepunkter er lagt til nettadressene dine for å håndtere konkrete handlinger på kontosidene. De bør være unike."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:59
 msgid "View Order"
@@ -3718,15 +3726,15 @@ msgstr "Vis ordre"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:60
 msgid "Endpoint for the My Account &rarr; View Order page"
-msgstr ""
+msgstr "Endepunkt for Min Konto &rarr; Vis ordreside"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:68
 msgid "Edit Account"
-msgstr "Endre konto"
+msgstr "Rediger konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:69
 msgid "Endpoint for the My Account &rarr; Edit Account page"
-msgstr ""
+msgstr "Endepunkt for Min Konto &rarr; Rediger kontoside"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:77
 msgid "Edit Address"
@@ -3734,7 +3742,7 @@ msgstr "Rediger adresse"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:78
 msgid "Endpoint for the My Account &rarr; Edit Address page"
-msgstr ""
+msgstr "Endepunkt for Min Konto &rarr; Rediger adresseside"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:86
 msgid "Lost Password"
@@ -3742,7 +3750,7 @@ msgstr "Glemt passord"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:87
 msgid "Endpoint for the My Account &rarr; Lost Password page"
-msgstr ""
+msgstr "Endepunkt for Min Konto &rarr; Side for Tapt passord"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:95
 msgid "Logout"
@@ -3752,27 +3760,27 @@ msgstr "Logg ut"
 msgid ""
 "Endpoint for the triggering logout. You can add this to your menus via a "
 "custom link: yoursite.com/?customer-logout=true"
-msgstr ""
+msgstr "Endepunkt for den utløsende utloggingen. Du kan legge dette til menyene dine via en tilpasset lenke: dinsite.com/?customer-logout=true"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:105
 msgid "Registration Options"
-msgstr "Registrerings alternativer"
+msgstr "Registreringsvalg"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:108
 msgid "Enable Registration"
-msgstr "Aktiver Registrering"
+msgstr "Aktiver registrering"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:109
 msgid "Enable registration on the \"Checkout\" page"
-msgstr "Aktiver registrering på \"Kasse\" side"
+msgstr "Aktiver registrering på \"Kasse\"-siden"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:118
 msgid "Enable registration on the \"My Account\" page"
-msgstr ""
+msgstr "Tillat registrering på \"Min konto\"-siden"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:127
 msgid "Display returning customer login reminder on the \"Checkout\" page"
-msgstr ""
+msgstr "Vis påminnelse for logg inn for tidligere kunde på \"kassen\"-side"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:136
 msgid "Account Creation"
@@ -3780,11 +3788,11 @@ msgstr "Opprette konto"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:137
 msgid "Automatically generate username from customer email"
-msgstr "Generere brukernavn automatisk fra kunde epost"
+msgstr "Generer brukernavn automatisk fra kundeepost"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:146
 msgid "Automatically generate customer password"
-msgstr "Generere kunde passord automatisk"
+msgstr "Generer kundepassord automatisk"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
 msgctxt "Settings tab label"
@@ -3793,11 +3801,11 @@ msgstr "Til kassen"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
 msgid "Checkout Options"
-msgstr "Kasse alternativer"
+msgstr "Kassealternativer"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:65
 msgid "Checkout Process"
-msgstr "Kasse Prosess "
+msgstr "Kasseprosess "
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
 msgid "Coupons"
@@ -3818,11 +3826,11 @@ msgstr "Til kassen"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
-msgstr "Aktiver gjestkassen"
+msgstr "Aktiver gjestekassen"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:80
 msgid "Allows customers to checkout without creating an account."
-msgstr ""
+msgstr "Tillater kunder gå til kassen uten å lage en konto."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:89
 msgid "Force secure checkout"
@@ -3839,13 +3847,13 @@ msgstr "Fjern påtvunget HTTPS når du forlater kassen"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid "Checkout Pages"
-msgstr "Kasse Sider"
+msgstr "Kassesider"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "checkout."
-msgstr ""
+msgstr "Disse sidene må settes slik at WooCommerce vet hvor du skal sende brukerne til kassen."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
 msgid "Cart Page"
@@ -3853,7 +3861,7 @@ msgstr "Side for handlekurv"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:123
 msgid "Checkout Page"
-msgstr "Side for kassen"
+msgstr "Kasseside"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:134
 msgid "Terms and Conditions"
@@ -3867,13 +3875,13 @@ msgstr "Hvis du definerer en \"Vilkår\"-side, vil kunden bli spurt om de godtar
 
 #: includes/admin/settings/class-wc-settings-checkout.php:147
 msgid "Checkout Endpoints"
-msgstr ""
+msgstr "Kasseendepunkter"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:147
 msgid ""
 "Endpoints are appended to your page URLs to handle specific actions during "
 "the checkout process. They should be unique."
-msgstr ""
+msgstr "Endepunkter er lagt til nettadressene dine for å håndtere konkrete handlinger under betalingsprosessen. De bør være unike."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:150
 msgid "Pay"
@@ -3882,7 +3890,7 @@ msgstr "Betal"
 #: includes/admin/settings/class-wc-settings-checkout.php:151
 #: includes/admin/settings/class-wc-settings-checkout.php:160
 msgid "Endpoint for the Checkout &rarr; Pay page"
-msgstr ""
+msgstr "Endepunkt for kassen &rarr; Betalingssiden"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:159
 msgid "Order Received"
@@ -3894,7 +3902,7 @@ msgstr "Legg til betalingsmåte"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
 msgid "Endpoint for the Checkout &rarr; Add Payment Method page"
-msgstr ""
+msgstr "Endepunkt for kassen &rarr; Legg til betalingsmåte-siden"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:178
 msgid "Payment Gateways"
@@ -3904,11 +3912,11 @@ msgstr "Betalingsløsninger"
 msgid ""
 "Installed gateways are listed below. Drag and drop gateways to control their"
 " display order on the frontend."
-msgstr ""
+msgstr "Installerte gatewayer er listet opp nedenfor. Dra og slipp gatewayer for å kontrollere visningsrekkefølgen deres på frontend."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:219
 msgid "Gateway Display"
-msgstr ""
+msgstr "Gateway-visning"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:227
 msgid "Gateway"
@@ -3928,7 +3936,7 @@ msgstr "Epostvalg"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
 msgid "Email Sender Options"
-msgstr "Epost avsendervalg"
+msgstr "Epostavsendervalg"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
 msgid ""
@@ -4030,19 +4038,19 @@ msgstr "Dette er baseplasseringen for bedriften din. Skattesatser vil være base
 
 #: includes/admin/settings/class-wc-settings-general.php:61
 msgid "Selling Location(s)"
-msgstr ""
+msgstr "Utsalgssted(er)"
 
 #: includes/admin/settings/class-wc-settings-general.php:62
 msgid "This option lets you limit which countries you are willing to sell to."
-msgstr ""
+msgstr "Dette valget lar deg begrense til hvilke land du er villig til å selge."
 
 #: includes/admin/settings/class-wc-settings-general.php:70
 msgid "Sell to all countries"
-msgstr ""
+msgstr "Selg til alle land"
 
 #: includes/admin/settings/class-wc-settings-general.php:71
 msgid "Sell to specific countries only"
-msgstr ""
+msgstr "Selg kun til spesifikke land"
 
 #: includes/admin/settings/class-wc-settings-general.php:76
 #: includes/admin/settings/class-wc-settings-shipping.php:147
@@ -4111,11 +4119,11 @@ msgstr "Høyre"
 
 #: includes/admin/settings/class-wc-settings-general.php:137
 msgid "Left with space"
-msgstr ""
+msgstr "Venstre med mellomrom"
 
 #: includes/admin/settings/class-wc-settings-general.php:138
 msgid "Right with space"
-msgstr ""
+msgstr "Høyre med mellomrom"
 
 #: includes/admin/settings/class-wc-settings-general.php:144
 msgid "Thousand Separator"
@@ -4139,7 +4147,7 @@ msgstr "Antall desimaler"
 
 #: includes/admin/settings/class-wc-settings-general.php:165
 msgid "This sets the number of decimal points shown in displayed prices."
-msgstr "Dette angir antall desimaler som vises i viste priser."
+msgstr "Dette setter antall desimaler som vises i viste priser."
 
 #: includes/admin/settings/class-wc-settings-general.php:179
 msgid "Styles and Scripts"
@@ -4157,7 +4165,7 @@ msgstr "Aktiver lysboks"
 msgid ""
 "Include WooCommerce's lightbox. Product gallery images will open in a "
 "lightbox."
-msgstr ""
+msgstr "Inkluder WooCommerce sin lysboks. Produktgalleribilder åpnes i en lysboks."
 
 #: includes/admin/settings/class-wc-settings-general.php:194
 msgid "Enable enhanced country select boxes"
@@ -4170,7 +4178,7 @@ msgstr "Dette vil starte en script som lar feltene for land å være søkbare."
 
 #: includes/admin/settings/class-wc-settings-general.php:217
 msgid "Frontend Styles"
-msgstr ""
+msgstr "Frontend-stiler"
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Primary"
@@ -4226,7 +4234,7 @@ msgstr "Integrering"
 
 #: includes/admin/settings/class-wc-settings-products.php:40
 msgid "Product Options"
-msgstr "Produktalternativer"
+msgstr "Produktvalg"
 
 #: includes/admin/settings/class-wc-settings-products.php:79
 msgid "Inventory Options"
@@ -4238,7 +4246,7 @@ msgstr "Administrere lager"
 
 #: includes/admin/settings/class-wc-settings-products.php:83
 msgid "Enable stock management"
-msgstr "Aktiver administrering av lager"
+msgstr "Aktiver lagerstyring"
 
 #: includes/admin/settings/class-wc-settings-products.php:90
 msgid "Hold Stock (minutes)"
@@ -4256,7 +4264,7 @@ msgstr "Varsler"
 
 #: includes/admin/settings/class-wc-settings-products.php:105
 msgid "Enable low stock notifications"
-msgstr "Aktiver varsler for lite lager"
+msgstr "Aktiver varsler for lite på lager"
 
 #: includes/admin/settings/class-wc-settings-products.php:114
 msgid "Enable out of stock notifications"
@@ -4268,7 +4276,7 @@ msgstr "Varselmottaker"
 
 #: includes/admin/settings/class-wc-settings-products.php:132
 msgid "Low Stock Threshold"
-msgstr "Terskel for lite lager"
+msgstr "Terskel for lite på lager"
 
 #: includes/admin/settings/class-wc-settings-products.php:146
 msgid "Out Of Stock Threshold"
@@ -4314,13 +4322,13 @@ msgstr "Produktoppføringer"
 
 #: includes/admin/settings/class-wc-settings-products.php:203
 msgid "Product Archive / Shop Page"
-msgstr ""
+msgstr "Produktarkiv / Butikkside"
 
 #: includes/admin/settings/class-wc-settings-products.php:204
 msgid ""
 "The base page can also be used in your <a href=\"%s\">product "
 "permalinks</a>."
-msgstr ""
+msgstr "Basesiden kan også brukes i <a href=\"%s\">produktpermalenker</a>."
 
 #: includes/admin/settings/class-wc-settings-products.php:210
 msgid ""
@@ -4457,23 +4465,23 @@ msgstr "Produktrangeringer"
 
 #: includes/admin/settings/class-wc-settings-products.php:322
 msgid "Enable ratings on reviews"
-msgstr "Aktiver rangeringer på anmeldelser"
+msgstr "Aktiver rangeringer på omtaler"
 
 #: includes/admin/settings/class-wc-settings-products.php:332
 msgid "Ratings are required to leave a review"
-msgstr "Rangeringer er pålagt å legge igjen en anmeldelse"
+msgstr "Rangeringer er pålagt for å legge igjen en omtale"
 
 #: includes/admin/settings/class-wc-settings-products.php:342
 msgid "Show \"verified owner\" label for customer reviews"
-msgstr "Vis \"bekreftet eier \"-etikett for kundeanmeldelser"
+msgstr "Vis \"bekreftet eier \"-etikett for kundeomtale"
 
 #: includes/admin/settings/class-wc-settings-products.php:352
 msgid "Only allow reviews from \"verified owners\""
-msgstr ""
+msgstr "Tillat omtaler kun fra \"verifiserte eiere\""
 
 #: includes/admin/settings/class-wc-settings-products.php:363
 msgid "Product Image Sizes"
-msgstr "Produktbilde Størrelser"
+msgstr "Produktbildestørrelser"
 
 #: includes/admin/settings/class-wc-settings-products.php:363
 msgid ""
@@ -4522,7 +4530,7 @@ msgid ""
 "files unreliably. If supported, <code>X-Accel-Redirect</code>/ "
 "<code>X-Sendfile</code> can be used to serve downloads instead (server "
 "requires <code>mod_xsendfile</code>)."
-msgstr "Å tvinge nedlastinger vil holde nettadresser skjult, men noen servere kan betjene store filer upålitelig. Hvis dette støttes, kan <code>X-Accel-Redirect</code>/ <code> X-Sendfile</code> brukes til å betjene nedlastinger i stedet (server krever <code>mod_xsendfile</code>)."
+msgstr "Å tvinge nedlastinger vil holde nettadresser skjult, men noen servere kan være upålitlige ved betjening av store filer. Hvis dette støttes, kan <code>X-Accel-Redirect</code>/ <code> X-Sendfile</code> brukes til å betjene nedlastinger i stedet (server krever <code>mod_xsendfile</code>)."
 
 #: includes/admin/settings/class-wc-settings-products.php:421
 msgid "Force Downloads"
@@ -4581,7 +4589,7 @@ msgstr "Skjul fraktkostnadene frem til en adresse skrives inn"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:97
 msgid "Shipping Display Mode"
-msgstr ""
+msgstr "Visningsmodus for frakt"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:98
 msgid ""
@@ -4590,11 +4598,11 @@ msgstr "Dette styrer hvordan flere fraktmetoder vises på front-end."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:103
 msgid "Display shipping methods with \"radio\" buttons"
-msgstr ""
+msgstr "Vis fraktmetoder i med \"radio\"-knapper"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:104
 msgid "Display shipping methods in a dropdown"
-msgstr ""
+msgstr "Vis fraktmetoder i en rullegarding"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:111
 msgid "Shipping Destination"
@@ -4610,25 +4618,25 @@ msgstr "Send kun til brukerens fakturaadresse"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:132
 msgid "Restrict shipping to Location(s)"
-msgstr ""
+msgstr "Begrens handel til lokalitet(er)"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:133
 msgid ""
 "Choose which countries you want to ship to, or choose to ship to all <a "
 "href=\"%s\">locations you sell to</a>."
-msgstr ""
+msgstr "Velg til hvilke land du ønsker å sendel, eller velg å sende til alle <a href=\"%s\">steder du selger</a>."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:140
 msgid "Ship to all countries you sell to"
-msgstr ""
+msgstr "Send til alle landene du selger til"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:141
 msgid "Ship to all countries"
-msgstr "Leverer til alle land"
+msgstr "Send til alle land"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:142
 msgid "Ship to specific countries only"
-msgstr "Frakt kun til enkelte land"
+msgstr "Send kun til enkelte land"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:197
 msgid "Shipping Methods"
@@ -4650,11 +4658,11 @@ msgstr "Skattevalg"
 
 #: includes/admin/settings/class-wc-settings-tax.php:41
 msgid "Standard Rates"
-msgstr ""
+msgstr "Standardsatser"
 
 #: includes/admin/settings/class-wc-settings-tax.php:49
 msgid "%s Rates"
-msgstr ""
+msgstr "%s Satser"
 
 #: includes/admin/settings/class-wc-settings-tax.php:71
 msgid "Enable Taxes"
@@ -4676,7 +4684,7 @@ msgstr "Dette valget er viktig fordi det vil påvirke hvordan du legger inn pris
 
 #: includes/admin/settings/class-wc-settings-tax.php:85
 msgid "Yes, I will enter prices inclusive of tax"
-msgstr "Ja, jeg skal legge inn priser inkludert skatt"
+msgstr "Ja, jeg skal legge inn priser inklusiv skatt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:86
 msgid "No, I will enter prices exclusive of tax"
@@ -4729,7 +4737,7 @@ msgstr "Valgfritt å styre hvilken skatteklasse frakt får, eller la det være s
 
 #: includes/admin/settings/class-wc-settings-tax.php:122
 msgid "Shipping tax class based on cart items"
-msgstr "Fraktskatteklasser basert pågjenstander i handlekurv"
+msgstr "Fraktskatteklasse basert på gjenstander i handlekurven"
 
 #: includes/admin/settings/class-wc-settings-tax.php:127
 msgid "Rounding"
@@ -4755,7 +4763,7 @@ msgstr "Redusert sats%sNullsats"
 
 #: includes/admin/settings/class-wc-settings-tax.php:144
 msgid "Display prices in the shop:"
-msgstr ""
+msgstr "Vis prisene i butikken:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:149
 #: includes/admin/settings/class-wc-settings-tax.php:168
@@ -4765,11 +4773,11 @@ msgstr "Inkludert skatt"
 #: includes/admin/settings/class-wc-settings-tax.php:150
 #: includes/admin/settings/class-wc-settings-tax.php:169
 msgid "Excluding tax"
-msgstr "Utelater skatt"
+msgstr "Eksklusiv skatt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:155
 msgid "Price display suffix:"
-msgstr ""
+msgstr "Prisvisningssuffiks"
 
 #: includes/admin/settings/class-wc-settings-tax.php:159
 msgid ""
@@ -4777,7 +4785,7 @@ msgid ""
 "\"inc. Vat\" to explain your pricing. You can also have prices substituted "
 "here using one of the following: <code>{price_including_tax}, "
 "{price_excluding_tax}</code>."
-msgstr ""
+msgstr "Definer tekst som vises etter produktprisene dine. Dette kan være, for eksempel \"inkl. MVA\" for å forklare prissettingen. Du kan også ha priser erstattet her ved å bruke en av følgende: <code>{price_including_tax}, {price_excluding_tax}</code>."
 
 #: includes/admin/settings/class-wc-settings-tax.php:163
 msgid "Display prices during cart/checkout:"
@@ -4785,11 +4793,11 @@ msgstr "Vis priser med handlekurv / kassen:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:175
 msgid "Display tax totals:"
-msgstr ""
+msgstr "Vis skattetotaler"
 
 #: includes/admin/settings/class-wc-settings-tax.php:180
 msgid "As a single total"
-msgstr ""
+msgstr "Som en enkel total"
 
 #: includes/admin/settings/class-wc-settings-tax.php:181
 msgid "Itemized"
@@ -4807,7 +4815,7 @@ msgstr "Definer skattesatser for land og delstater nedenfor. <a href=\"%s\">Se h
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "Country&nbsp;Code"
-msgstr "Land&nbsp;Kode"
+msgstr "Land&nbsp;kode"
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
@@ -4865,7 +4873,7 @@ msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
-msgstr "Velg en prioritet for denne skattesatsen. Bare 1 matching per prioritet vil bli brukt. For å definere flere skattesatser for et enkelt område må du angi en annen prioritet per sats."
+msgstr "Velg en prioritet for denne skattesatsen. Bare 1 matchende sats per prioritet vil bli brukt. For å definere flere skattesatser for et enkelt område må du angi en annen prioritet per sats."
 
 #: includes/admin/settings/class-wc-settings-tax.php:264
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -4916,11 +4924,11 @@ msgstr "Skattenavn"
 
 #: includes/admin/views/html-admin-page-addons.php:5
 msgid "Browse all extensions"
-msgstr ""
+msgstr "Bla gjennom alle utvidelser"
 
 #: includes/admin/views/html-admin-page-addons.php:6
 msgid "Browse themes"
-msgstr ""
+msgstr "Bla gjennom temaer"
 
 #: includes/admin/views/html-admin-page-addons.php:11
 msgid "Popular"
@@ -4928,7 +4936,7 @@ msgstr "Populær"
 
 #: includes/admin/views/html-admin-page-addons.php:12
 msgid "Gateways"
-msgstr ""
+msgstr "Gatewayer"
 
 #: includes/admin/views/html-admin-page-addons.php:14
 msgid "Import/export"
@@ -4948,7 +4956,7 @@ msgstr "Vennligst oppgi denne informasjonen når du ber om støtte:"
 
 #: includes/admin/views/html-admin-page-status-report.php:3
 msgid "Get System Report"
-msgstr "Få System Report"
+msgstr "Få Systemrapport"
 
 #: includes/admin/views/html-admin-page-status-report.php:11
 msgid "Environment"
@@ -4976,7 +4984,7 @@ msgstr "WP-versjon"
 
 #: includes/admin/views/html-admin-page-status-report.php:37
 msgid "WP Multisite Enabled"
-msgstr "WP Multisite Aktivert"
+msgstr "WP Multisite aktivert"
 
 #: includes/admin/views/html-admin-page-status-report.php:41
 msgid "Web Server Info"
@@ -5010,11 +5018,11 @@ msgstr "WP Språk"
 
 #: includes/admin/views/html-admin-page-status-report.php:73
 msgid "WP Max Upload Size"
-msgstr "WP maks opplastningsstørelse"
+msgstr "WP maks opplastningsstørrelse"
 
 #: includes/admin/views/html-admin-page-status-report.php:78
 msgid "PHP Post Max Size"
-msgstr "PHP Post Max Size"
+msgstr "PHP maks innleggsstørrelse"
 
 #: includes/admin/views/html-admin-page-status-report.php:82
 msgid "PHP Time Limit"
@@ -5022,7 +5030,7 @@ msgstr "PHP tidsbegrensning"
 
 #: includes/admin/views/html-admin-page-status-report.php:86
 msgid "PHP Max Input Vars"
-msgstr ""
+msgstr "PHP maks inputvariabler"
 
 #: includes/admin/views/html-admin-page-status-report.php:90
 msgid "SUHOSIN Installed"
@@ -5048,7 +5056,7 @@ msgstr "Standard tidssone"
 
 #: includes/admin/views/html-admin-page-status-report.php:108
 msgid "Default timezone is %s - it should be UTC"
-msgstr "Standard tidssone er %s - det skulle være UTC"
+msgstr "Standard tidssone er %s - det burde være UTC"
 
 #: includes/admin/views/html-admin-page-status-report.php:110
 msgid "Default timezone is %s"
@@ -5075,7 +5083,7 @@ msgid ""
 "Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
 "scripts which communicate with other servers will not work. Contact your "
 "hosting provider."
-msgstr "Serveren din har ikke fsockopen eller cURL aktivert - PayPal IPN og andre skripter som kommuniserer med andre servere vil ikke fungere. Ta kontakt med din hosting leverandør."
+msgstr "Serveren din har ikke fsockopen eller cURL aktivert - PayPal IPN og andre skripter som kommuniserer med andre servere vil ikke fungere. Ta kontakt med hostingleverandøren din."
 
 #: includes/admin/views/html-admin-page-status-report.php:134
 msgid "SOAP Client"
@@ -5103,7 +5111,7 @@ msgstr "wp_remote_post() var vellykket - PayPal IPN fungerer."
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider. Error:"
-msgstr "wp_remote_post() mislyktes. PayPal IPN vil ikke fungere med serveren din. Ta kontakt med din hostingleverandør. Feil:"
+msgstr "wp_remote_post() mislyktes. PayPal IPN vil ikke fungere med serveren din. Ta kontakt med hostingleverandøren din. Feil:"
 
 #: includes/admin/views/html-admin-page-status-report.php:161
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
@@ -5123,7 +5131,7 @@ msgstr "Installerte utvidelser"
 
 #: includes/admin/views/html-admin-page-status-report.php:226
 msgid "Visit plugin homepage"
-msgstr "Besøk plugin hjemmeside"
+msgstr "Besøk pluginhjemmeside"
 
 #: includes/admin/views/html-admin-page-status-report.php:250
 #: includes/admin/views/html-admin-page-status-report.php:432
@@ -5184,19 +5192,19 @@ msgstr "Produkttyper"
 
 #: includes/admin/views/html-admin-page-status-report.php:384
 msgid "Theme"
-msgstr ""
+msgstr "tema"
 
 #: includes/admin/views/html-admin-page-status-report.php:421
 msgid "Theme Name"
-msgstr ""
+msgstr "Temanavn"
 
 #: includes/admin/views/html-admin-page-status-report.php:427
 msgid "Theme Version"
-msgstr ""
+msgstr "Temaversjon"
 
 #: includes/admin/views/html-admin-page-status-report.php:436
 msgid "Author URL"
-msgstr "Forfatter URL"
+msgstr "Forfatter-URL"
 
 #: includes/admin/views/html-admin-page-status-report.php:445
 msgid "Templates"
@@ -5206,7 +5214,7 @@ msgstr "Maler"
 msgid ""
 "<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
 "date. The core version is %s"
-msgstr ""
+msgstr "<code>%s</code> versjon <strong style=\"color:red\">%s</strong> er utdatert. Kjerneversjonen er %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:489
 #: includes/admin/views/html-admin-page-status-report.php:495
@@ -5215,7 +5223,7 @@ msgstr "Mal-overstyring"
 
 #: includes/admin/views/html-admin-page-status-report.php:496
 msgid "No overrides present in theme."
-msgstr ""
+msgstr "Ingen overstyringer til stede i tema."
 
 #: includes/admin/views/html-admin-page-status-tools.php:7
 #: includes/admin/views/html-admin-page-status.php:6
@@ -5224,23 +5232,23 @@ msgstr "Verktøy"
 
 #: includes/admin/views/html-admin-page-status-tools.php:23
 msgid "Template Debug Mode"
-msgstr ""
+msgstr "Debug modus for mal"
 
 #: includes/admin/views/html-admin-page-status-tools.php:29
 msgid ""
 "This tool will disable template overrides for logged-in administrators for "
 "debugging purposes."
-msgstr ""
+msgstr "Dette verktøyet vil deaktivere maloverstyringer for innloggede administratorer for debuggingsformål."
 
 #: includes/admin/views/html-admin-page-status-tools.php:34
 msgid "Remove post types on uninstall"
-msgstr ""
+msgstr "Fjern innleggstyper ved avinstallering"
 
 #: includes/admin/views/html-admin-page-status-tools.php:40
 msgid ""
 "This tool will delete all product and order post data when uninstalling via "
 "Plugins > Delete."
-msgstr ""
+msgstr "Dette verktøyet vil slette alle produkt- og ordredata data du avinstallerer via Utvidelser > Slett."
 
 #: includes/admin/views/html-admin-page-status-tools.php:47
 msgid "Save Changes"
@@ -5320,13 +5328,13 @@ msgstr "På lager?"
 #: includes/admin/views/html-bulk-edit-product.php:247
 #: includes/admin/views/html-quick-edit-product.php:167
 msgid "Backorders?"
-msgstr "Restordrere?"
+msgstr "Restordrer?"
 
 #: includes/admin/views/html-notice-install.php:5
 msgid ""
 "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start"
 " selling :)"
-msgstr "<strong>Velkommen til WooCommerce</strong> &#8211; Du er nesten klar til å starte å selge :)"
+msgstr "<strong>Velkommen til WooCommerce</strong> &#8211; Du er nesten klar for å starte å selge :)"
 
 #: includes/admin/views/html-notice-install.php:6
 msgid "Skip setup"
@@ -5339,7 +5347,7 @@ msgid ""
 " this could the reason. Ensure you update or remove them (in general we "
 "recommend only bundling the template files you actually need to customize). "
 "See the system report for full details."
-msgstr ""
+msgstr "<strong>Temaet ditt har samlet utdaterte kopier av WooCommerce malfiler</strong> &#8211; Hvis du støter på funksjonalitetsspørsmål på frontend kan dette være grunnen. Sikre at at du oppdaterer eller fjerner dem (generelt anbefaler vi å kun samle malfiler som du faktisk har behov for å tilpasse). Se systemrapporten for alle detaljer."
 
 #: includes/admin/views/html-notice-template-check.php:6
 #: includes/admin/views/html-notice-theme-support.php:6
@@ -5361,7 +5369,7 @@ msgstr "Integreringsguide for tema"
 msgid ""
 "<strong>WooCommerce Data Update Required</strong> &#8211; We just need to "
 "update your install to the latest version"
-msgstr ""
+msgstr "<strong>WooCommerce dataoppdatering påkrevet</strong> &#8211; Vi må bare oppdatere installasjonen din til seneste versjon"
 
 #: includes/admin/views/html-notice-update.php:6
 msgid "Run the updater"
@@ -5383,7 +5391,7 @@ msgstr "Salgspris"
 
 #: includes/admin/views/html-report-by-date.php:16
 msgid "Custom:"
-msgstr ""
+msgstr "Tilpasset:"
 
 #: includes/admin/wc-admin-functions.php:193
 msgid "Could not compile woocommerce.less:"
@@ -5395,12 +5403,12 @@ msgstr "http://www.woothemes.com/woocommerce/"
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr ""
+msgstr "Et e-handelsverktøysett som hjelper deg å selge hva som helst. Vakkert."
 
 #. Author of the plugin/theme
 msgid "WooThemes"
-msgstr ""
+msgstr "Woothemes"
 
 #. Author URI of the plugin/theme
 msgid "http://woothemes.com"
-msgstr ""
+msgstr "http://woothemes.com"

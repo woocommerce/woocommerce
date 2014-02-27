@@ -2,14 +2,16 @@
 # Translators:
 # kjosenet <appe@kjose.net>, 2014
 # mjepson <magnus@woothemes.com>, 2014
+# mjepson <magnus@woothemes.com>, 2014
+# perdersongedal <peder@seoglaer.no>, 2014
 # perdersongedal <peder@seoglaer.no>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-13 21:18:46+00:00\n"
-"PO-Revision-Date: 2014-02-14 15:20+0000\n"
-"Last-Translator: kjosenet <appe@kjose.net>\n"
+"POT-Creation-Date: 2014-02-21 16:11:55+00:00\n"
+"PO-Revision-Date: 2014-02-25 13:30+0000\n"
+"Last-Translator: Aliom <tore@aliom.no>\n"
 "Language-Team: Norwegian Bokmål (Norway) (http://www.transifex.com/projects/p/woocommerce/language/nb_NO/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2639,7 +2641,7 @@ msgstr "Delaware"
 
 #: i18n/states/US.php:21
 msgid "District Of Columbia"
-msgstr "District Of Columbia"
+msgstr "District of Columbia"
 
 #: i18n/states/US.php:22
 msgid "Florida"
@@ -2871,7 +2873,7 @@ msgstr "Northern Cape"
 
 #: i18n/states/ZA.php:20
 msgid "North West"
-msgstr "Nord-vest"
+msgstr "Nordvest"
 
 #: i18n/states/ZA.php:21
 msgid "Western Cape"
@@ -2905,7 +2907,7 @@ msgstr "tilbakebetalt"
 msgid "cancelled"
 msgstr "avbrutt"
 
-#: includes/abstracts/abstract-wc-email.php:564
+#: includes/abstracts/abstract-wc-email.php:568
 #: includes/emails/class-wc-email-customer-completed-order.php:140
 #: includes/emails/class-wc-email-new-order.php:120
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
@@ -2918,19 +2920,19 @@ msgstr "avbrutt"
 msgid "Enable/Disable"
 msgstr "Aktiver/Deaktiver"
 
-#: includes/abstracts/abstract-wc-email.php:566
+#: includes/abstracts/abstract-wc-email.php:570
 #: includes/emails/class-wc-email-customer-completed-order.php:142
 #: includes/emails/class-wc-email-new-order.php:122
 msgid "Enable this email notification"
 msgstr "Aktiver dette epostvarselet"
 
-#: includes/abstracts/abstract-wc-email.php:570
+#: includes/abstracts/abstract-wc-email.php:574
 #: includes/emails/class-wc-email-customer-invoice.php:146
 msgid "Email subject"
 msgstr "Epostemne"
 
-#: includes/abstracts/abstract-wc-email.php:572
-#: includes/abstracts/abstract-wc-email.php:579
+#: includes/abstracts/abstract-wc-email.php:576
+#: includes/abstracts/abstract-wc-email.php:583
 #: includes/emails/class-wc-email-customer-completed-order.php:148
 #: includes/emails/class-wc-email-customer-completed-order.php:155
 #: includes/emails/class-wc-email-customer-completed-order.php:162
@@ -2942,106 +2944,106 @@ msgstr "Epostemne"
 msgid "Defaults to <code>%s</code>"
 msgstr "Brukes som standard: <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:577
+#: includes/abstracts/abstract-wc-email.php:581
 #: includes/emails/class-wc-email-customer-invoice.php:153
 msgid "Email heading"
 msgstr "Epostoverskrift"
 
-#: includes/abstracts/abstract-wc-email.php:584
+#: includes/abstracts/abstract-wc-email.php:588
 #: includes/emails/class-wc-email-customer-completed-order.php:174
 #: includes/emails/class-wc-email-customer-invoice.php:174
 #: includes/emails/class-wc-email-new-order.php:147
 msgid "Email type"
 msgstr "Eposttype"
 
-#: includes/abstracts/abstract-wc-email.php:586
+#: includes/abstracts/abstract-wc-email.php:590
 #: includes/emails/class-wc-email-customer-completed-order.php:176
 #: includes/emails/class-wc-email-customer-invoice.php:176
 #: includes/emails/class-wc-email-new-order.php:149
 msgid "Choose which format of email to send."
-msgstr "Velg hvilket epostformat å sende."
+msgstr "Velg hvilket epostformat å sende med."
 
-#: includes/abstracts/abstract-wc-email.php:590
+#: includes/abstracts/abstract-wc-email.php:594
 #: includes/emails/class-wc-email-customer-completed-order.php:180
 #: includes/emails/class-wc-email-customer-invoice.php:180
 #: includes/emails/class-wc-email-new-order.php:153
 msgid "Plain text"
 msgstr "Ren tekst"
 
-#: includes/abstracts/abstract-wc-email.php:591
+#: includes/abstracts/abstract-wc-email.php:595
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
 msgid "HTML"
 msgstr "HTML"
 
-#: includes/abstracts/abstract-wc-email.php:592
+#: includes/abstracts/abstract-wc-email.php:596
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
 msgid "Multipart"
 msgstr "Flerdelt"
 
-#: includes/abstracts/abstract-wc-email.php:628
-#: includes/abstracts/abstract-wc-email.php:649
+#: includes/abstracts/abstract-wc-email.php:632
+#: includes/abstracts/abstract-wc-email.php:653
 msgid "Could not write to template file."
 msgstr "Kunne ikke skrive til malfilen."
 
-#: includes/abstracts/abstract-wc-email.php:680
+#: includes/abstracts/abstract-wc-email.php:684
 msgid "Template file copied to theme."
 msgstr "Malfil kopiert til tema."
 
-#: includes/abstracts/abstract-wc-email.php:689
+#: includes/abstracts/abstract-wc-email.php:693
 msgid "Template file deleted from theme."
 msgstr "Malfil slettet fra tema."
 
-#: includes/abstracts/abstract-wc-email.php:697
+#: includes/abstracts/abstract-wc-email.php:701
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Innstillinger"
 
-#: includes/abstracts/abstract-wc-email.php:709
+#: includes/abstracts/abstract-wc-email.php:713
 msgid "HTML template"
 msgstr "HTML-mal"
 
-#: includes/abstracts/abstract-wc-email.php:710
+#: includes/abstracts/abstract-wc-email.php:714
 msgid "Plain text template"
 msgstr "Mal for ren tekst"
 
-#: includes/abstracts/abstract-wc-email.php:731
+#: includes/abstracts/abstract-wc-email.php:735
 msgid "Delete template file"
 msgstr "Slett malfil"
 
-#: includes/abstracts/abstract-wc-email.php:734
+#: includes/abstracts/abstract-wc-email.php:738
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
-msgstr "Denne malen har vært overstyrt av temaet ditt og kan finnes i: <code>%s</code>."
+msgstr "Denne malen har blitt overstyrt av temaet ditt og kan finnes i: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:749
+#: includes/abstracts/abstract-wc-email.php:753
 msgid "Copy file to theme"
 msgstr "Kopier fil til tema"
 
-#: includes/abstracts/abstract-wc-email.php:752
+#: includes/abstracts/abstract-wc-email.php:756
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "For å overstyre og redigere denne epostmalen, kopier<code>%s</code> til temamappen: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:763
+#: includes/abstracts/abstract-wc-email.php:767
 msgid "File was not found."
 msgstr "Fil ikke funnet."
 
-#: includes/abstracts/abstract-wc-email.php:788
+#: includes/abstracts/abstract-wc-email.php:792
 msgid "View template"
 msgstr "Vis mal"
 
-#: includes/abstracts/abstract-wc-email.php:789
+#: includes/abstracts/abstract-wc-email.php:793
 msgid "Hide template"
 msgstr "Skjul mal"
 
-#: includes/abstracts/abstract-wc-email.php:800
+#: includes/abstracts/abstract-wc-email.php:804
 msgid "Are you sure you want to delete this template file?"
 msgstr "Er du sikker på at du vil slette denne malfilen?"
 
@@ -3098,7 +3100,7 @@ msgstr "Tomt på lager"
 
 #: includes/abstracts/abstract-wc-product.php:907
 #: includes/abstracts/abstract-wc-product.php:913
-#: includes/class-wc-cart.php:1408 includes/class-wc-order.php:838
+#: includes/class-wc-cart.php:1415 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Gratis!"
@@ -3125,15 +3127,15 @@ msgstr "%s &ndash; %s"
 
 #: includes/api/class-wc-api-authentication.php:69
 msgid "Consumer Key is missing"
-msgstr "Forbruker nøkkel mangler"
+msgstr "Forbrukernøkkel mangler"
 
 #: includes/api/class-wc-api-authentication.php:72
 msgid "Consumer Secret is missing"
-msgstr "Kunde hemmelighet mangler"
+msgstr "Forbrukerhemmelighet mangler"
 
 #: includes/api/class-wc-api-authentication.php:80
 msgid "Consumer Secret is invalid"
-msgstr "Kunde hemmelighet er ugyldig"
+msgstr "Forbrukerhemmelighet er ugyldig"
 
 #: includes/api/class-wc-api-authentication.php:112
 msgid "%s parameter is missing"
@@ -3141,79 +3143,84 @@ msgstr "%s parameter mangler"
 
 #: includes/api/class-wc-api-authentication.php:151
 msgid "Consumer Key is invalid"
-msgstr "Kunde nøkkel er ugyldig"
+msgstr "Forbrukernøkkel er ugyldig"
 
-#: includes/api/class-wc-api-authentication.php:192
+#: includes/api/class-wc-api-authentication.php:201
 msgid "Invalid Signature - failed to sort parameters"
-msgstr "Ugyldig signatur - klar ikke å sortere parametere"
+msgstr "Ugyldig signatur - klarte ikke å sortere parametre"
 
-#: includes/api/class-wc-api-authentication.php:205
+#: includes/api/class-wc-api-authentication.php:214
 msgid "Invalid Signature - signature method is invalid"
-msgstr "Ugyldig Signatur - signatur metoden er ugyldig"
+msgstr "Ugyldig Signatur - signaturmetoden er ugyldig"
 
-#: includes/api/class-wc-api-authentication.php:212
+#: includes/api/class-wc-api-authentication.php:221
 msgid "Invalid Signature - provided signature does not match"
 msgstr "Ugyldig Signatur - gitt signatur samsvarer ikke"
 
-#: includes/api/class-wc-api-authentication.php:247
+#: includes/api/class-wc-api-authentication.php:256
 msgid "Invalid timestamp"
 msgstr "Ugyldig tidsstempel"
 
-#: includes/api/class-wc-api-authentication.php:255
+#: includes/api/class-wc-api-authentication.php:264
 msgid "Invalid nonce - nonce has already been used"
 msgstr "Ugyldig nonce - nonce har allerede blitt brukt"
 
-#: includes/api/class-wc-api-authentication.php:284
-msgid "The API key provided does not have read permissions"
-msgstr "Den API-nøkkel gitt har ikke leserettigheter"
-
 #: includes/api/class-wc-api-authentication.php:293
+msgid "The API key provided does not have read permissions"
+msgstr "Den gitte API-nøkkelen har ikke leserettigheter"
+
+#: includes/api/class-wc-api-authentication.php:302
 msgid "The API key provided does not have write permissions"
 msgstr "Den gitte API-nøkkelen har ikke skriverettigheter"
 
 #: includes/api/class-wc-api-coupons.php:107
 msgid "Invalid coupon ID"
-msgstr "Ugyldig kupong ID"
+msgstr "Ugyldig kupong-ID"
 
 #: includes/api/class-wc-api-coupons.php:152
 msgid "You do not have permission to read the coupons count"
-msgstr "Du har ikke tillatelse til å lese kupong antall"
+msgstr "Du har ikke tillatelse til å lese antall kuponger"
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
 msgstr "Ugyldig kupongkode"
 
-#: includes/api/class-wc-api-customers.php:192
+#: includes/api/class-wc-api-customers.php:198
+#: includes/api/class-wc-api-customers.php:201
+msgid "Invalid customer Email"
+msgstr "Ugyldig kundeepost"
+
+#: includes/api/class-wc-api-customers.php:219
 msgid "You do not have permission to read the customers count"
 msgstr "Du har ikke tillatelse til å lese antall kunder"
 
-#: includes/api/class-wc-api-customers.php:208
+#: includes/api/class-wc-api-customers.php:235
 msgid "You do not have permission to create this customer"
 msgstr "Du har ikke tillatelse til å opprette denne kunden"
 
-#: includes/api/class-wc-api-customers.php:455
+#: includes/api/class-wc-api-customers.php:482
 msgid "Invalid customer ID"
-msgstr "Ugyldig kunde ID"
+msgstr "Ugyldig kunde-ID"
 
-#: includes/api/class-wc-api-customers.php:461
+#: includes/api/class-wc-api-customers.php:488
 msgid "Invalid customer"
 msgstr "Ugyldig kunde"
 
-#: includes/api/class-wc-api-customers.php:468
+#: includes/api/class-wc-api-customers.php:495
 msgid "You do not have permission to read this customer"
 msgstr "Du har ikke tillatelse til å lese denne kunden"
 
-#: includes/api/class-wc-api-customers.php:473
+#: includes/api/class-wc-api-customers.php:500
 msgid "You do not have permission to edit this customer"
 msgstr "Du har ikke tillatelse til å redigere denne kunden"
 
-#: includes/api/class-wc-api-customers.php:478
+#: includes/api/class-wc-api-customers.php:505
 msgid "You do not have permission to delete this customer"
 msgstr "Du har ikke tillatelse til å slette denne kunden"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
-msgstr "JSONP støtte er deaktivert på dette nettstedet"
+msgstr "Støtte for JSONP er deaktivert på dette nettstedet"
 
 #: includes/api/class-wc-api-json-handler.php:64
 msgid "The JSONP callback function is invalid"
@@ -3270,7 +3277,7 @@ msgstr "Denne %s kan ikke slettes"
 
 #: includes/api/class-wc-api-resource.php:316
 msgid "Permanently deleted %s"
-msgstr "Slettes permanent %s"
+msgstr "Slettet permanent %s"
 
 #: includes/api/class-wc-api-resource.php:322
 msgid "Deleted %s"
@@ -3282,7 +3289,7 @@ msgstr "Ugyldig autentiseringsmetode"
 
 #: includes/api/class-wc-api-server.php:316
 msgid "Unsupported request method"
-msgstr "Ustøttet forespørsel metode"
+msgstr "Ustøttet forespørselsmetode"
 
 #: includes/api/class-wc-api-server.php:333
 msgid "The handler for the route is invalid"
@@ -3304,65 +3311,65 @@ msgstr "Beklager, sesjonen din på denne siden har gått ut på tid"
 msgid "Return to homepage"
 msgstr "Tilbake til startsiden"
 
-#: includes/class-wc-ajax.php:269 includes/class-wc-ajax.php:298
-#: includes/class-wc-ajax.php:315
+#: includes/class-wc-ajax.php:291 includes/class-wc-ajax.php:320
+#: includes/class-wc-ajax.php:337
 msgid "You do not have sufficient permissions to access this page."
 msgstr "Du har ikke tilstrekkelig rettigheter for å få tilgang til denne siden"
 
-#: includes/class-wc-ajax.php:272 includes/class-wc-ajax.php:299
-#: includes/class-wc-ajax.php:316
+#: includes/class-wc-ajax.php:294 includes/class-wc-ajax.php:321
+#: includes/class-wc-ajax.php:338
 msgid "You have taken too long. Please go back and retry."
 msgstr "Du har brukt for lang tid. Vennligst gå tilbake og prøv igjen."
 
-#: includes/class-wc-ajax.php:529
+#: includes/class-wc-ajax.php:551
 msgid "Same as parent"
 msgstr "Samme som forelder"
 
-#: includes/class-wc-ajax.php:530
+#: includes/class-wc-ajax.php:552
 msgid "Standard"
 msgstr "Standard"
 
-#: includes/class-wc-ajax.php:788 includes/class-wc-customer.php:624
-#: includes/class-wc-customer.php:636
+#: includes/class-wc-ajax.php:810 includes/class-wc-customer.php:639
+#: includes/class-wc-customer.php:650
 msgid "File %d"
 msgstr "Fil %d"
 
-#: includes/class-wc-ajax.php:978 includes/class-wc-ajax.php:979
-#: includes/class-wc-order.php:1537
+#: includes/class-wc-ajax.php:1000 includes/class-wc-ajax.php:1001
+#: includes/class-wc-order.php:1544
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Gjenstand #%s lagersaldo reduseres fra %s til %s."
 
-#: includes/class-wc-ajax.php:987
+#: includes/class-wc-ajax.php:1009
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
-msgstr "Ingen produkter hadde minsket lagernivået - de har muligens ikke administrering av lager aktivert"
+msgstr "Ingen produkter hadde minsket lagernivået - de har muligens ikke administrering av lager aktivert."
 
-#: includes/class-wc-ajax.php:1026 includes/class-wc-ajax.php:1027
+#: includes/class-wc-ajax.php:1048 includes/class-wc-ajax.php:1049
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Gjenstand #%s lagersaldo økes fra %s til %s."
 
-#: includes/class-wc-ajax.php:1034
+#: includes/class-wc-ajax.php:1056
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
-msgstr "Ingen produkter hadde øket lagernivået - de har muligens ikke administrering av lager aktivert"
+msgstr "Ingen produkter hadde øket lagernivået - de har muligens ikke administrering av lager aktivert."
 
-#: includes/class-wc-ajax.php:1050
+#: includes/class-wc-ajax.php:1072
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "Navn"
 
-#: includes/class-wc-ajax.php:1050
+#: includes/class-wc-ajax.php:1072
 msgid "Value"
 msgstr "Verdi"
 
-#: includes/class-wc-ajax.php:1268
+#: includes/class-wc-ajax.php:1290
 msgid "Delete note"
 msgstr "Slett notat"
 
-#: includes/class-wc-ajax.php:1413
+#: includes/class-wc-ajax.php:1435
 msgid "Guest"
 msgstr "Gjest"
 
@@ -3371,70 +3378,70 @@ msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
 "in W3 Total Cache settings <a href=\"%s\">here</a>."
-msgstr "For at <strong>database caching</strong> skal virke med WooCommerce, så må du legge til <code>_wc_session_</code> til \"Ignored Query Strings\" instillingen i W3 Total Cache settings <a href=\"%s\">her</a>."
+msgstr "For at <strong>database caching</strong> skal virke med WooCommerce, så må du legge til <code>_wc_session_</code> til \"Ignored Query Strings\"-innstillingen i W3 Total Cache settings <a href=\"%s\">her</a>."
 
-#: includes/class-wc-cart.php:163
+#: includes/class-wc-cart.php:168
 msgid ""
 "%s has been removed from your cart because it can no longer be purchased. "
 "Please contact us if you need assistance."
-msgstr "%s har blitt fjernet fra handlekurven dinfordi den ikke lenger kan kjøpes. Ta kontakt med oss ​​hvis du trenger hjelp."
+msgstr "%s har blitt fjernet fra handlekurven din fordi den ikke lenger kan kjøpes. Ta kontakt med oss hvis du trenger hjelp."
 
-#: includes/class-wc-cart.php:358
+#: includes/class-wc-cart.php:363
 msgid "An item which is no longer available was removed from your cart."
-msgstr "En var som ikke lenger er tilgjengelig ble fjernet fra din handlekurv."
+msgstr "En vaer som ikke lenger er tilgjengelig ble fjernet fra handlekurven din."
 
-#: includes/class-wc-cart.php:392 includes/class-wc-cart.php:411
-#: includes/class-wc-cart.php:420
+#: includes/class-wc-cart.php:397 includes/class-wc-cart.php:416
+#: includes/class-wc-cart.php:425
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in "
 "stock). Please edit your cart and try again. We apologise for any "
 "inconvenience caused."
-msgstr "Beklager, vi har dessverre ikke tilstrekkelig \"%s\" på lager i forhold til ditt ønske. (%s på lager). Vennligst rediger handlekurven din og prøv igjen. Vi beklager dette."
+msgstr "Beklager, vi har dessverre ikke tilstrekkelig \"%s\" på lager i henhold til ditt ønske. (%s på lager). Vennligst rediger handlekurven din og prøv igjen. Vi beklager eventuelle ulemper dette måtte medføre."
 
-#: includes/class-wc-cart.php:455
+#: includes/class-wc-cart.php:460
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order right "
 "now. Please try again in %d minutes or edit your cart and try again. We "
 "apologise for any inconvenience caused."
-msgstr "Beklager, vi har ikke nok \"%s\" på lager til å oppfylle din bestillingen akkurat nå. Vennligst prøv igjen om %d minutter eller du kan endre din handlekurv å prøv igjen. Vi beklager eventuelle ulemper dette måtte medføre."
+msgstr "Beklager, vi har ikke nok \"%s\" på lager til å oppfylle bestillingen din akkurat nå. Vennligst prøv igjen om %d minutter eller du kan endre handlekurven din og prøve igjen. Vi beklager eventuelle ulemper dette måtte medføre."
 
-#: includes/class-wc-cart.php:465
+#: includes/class-wc-cart.php:470
 msgid ""
 "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
 "apologise for any inconvenience caused."
 msgstr "Beklager, \"%s\" er ikke på lager. Vennligst rediger handlekurven og prøv igjen. Vi beklager eventuelle ulemper dette måtte medføre."
 
-#: includes/class-wc-cart.php:787
+#: includes/class-wc-cart.php:794
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
 msgstr "Beklager, &quot;%s&quot; kan ikke kjøpes."
 
-#: includes/class-wc-cart.php:794
+#: includes/class-wc-cart.php:801
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr "Du kan ikke legge til &quot;%s&quot; i handlekurven fordi produktet er utsolgt."
 
-#: includes/class-wc-cart.php:799
+#: includes/class-wc-cart.php:806
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
-msgstr "Du kan ikke legge til det antallet av \"% s\" i handlekurven fordi det ikke er nok lager (%s gjenstår)."
+msgstr "Du kan ikke legge til det antallet av \"% s\" i handlekurven fordi det ikke er nok på lager (%s gjenstår)."
 
-#: includes/class-wc-cart.php:813 includes/class-wc-cart.php:832
-#: includes/class-wc-cart.php:845 includes/class-wc-frontend-scripts.php:151
+#: includes/class-wc-cart.php:820 includes/class-wc-cart.php:839
+#: includes/class-wc-cart.php:852 includes/class-wc-frontend-scripts.php:157
 #: includes/wc-cart-functions.php:98 templates/cart/mini-cart.php:64
 msgid "View Cart"
-msgstr "Se handlevogn"
+msgstr "Vis handlekurv"
 
-#: includes/class-wc-cart.php:814
+#: includes/class-wc-cart.php:821
 msgid "You cannot add another &quot;%s&quot; to your cart."
-msgstr "Du kan ikke legge til en annen &quot;%s&quot; i handlekurven."
+msgstr "Du kan ikke legge en &quot;%s&quot; til i handlekurven."
 
-#: includes/class-wc-cart.php:833 includes/class-wc-cart.php:846
+#: includes/class-wc-cart.php:840 includes/class-wc-cart.php:853
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr "Du kan ikke legge til at beløpet til vogna &mdash; vi har %s på lager, og du allerede har %s i handlekurven."
+msgstr "Du kan ikke legge til det antallet til vogna &mdash; vi har %s på lager, og du allerede har %s i handlekurven."
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -3442,7 +3449,7 @@ msgstr "Du kan ikke legge til at beløpet til vogna &mdash; vi har %s på lager,
 #: includes/class-wc-payment-gateways.php:55 includes/class-wc-shipping.php:64
 #: includes/class-wc-shipping.php:73 woocommerce.php:102 woocommerce.php:111
 msgid "Cheatin&#8217; huh?"
-msgstr "Cheatin&#8217; huh?"
+msgstr "Jukser&#8217;u&#8217;a?"
 
 #: includes/class-wc-checkout.php:97
 msgid "Account username"
@@ -3484,50 +3491,50 @@ msgstr "%b %d, %Y @ %I:%M %p"
 msgid "Backordered"
 msgstr "Restordret"
 
-#: includes/class-wc-checkout.php:413
+#: includes/class-wc-checkout.php:416
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr "Beklager, sesjonen din på denne siden har gått ut på tid. <a href=\"%s\">Gå til startsiden &rarr;</a>"
 
-#: includes/class-wc-checkout.php:488 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:491 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "er et obligatorisk felt."
 
-#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:503 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:37
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Vennligst oppgi gyldig postnummer/ZIP."
 
-#: includes/class-wc-checkout.php:509 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
-msgstr "er ikke et gyldig nummer."
+msgstr "er ikke et gyldig telefonnummer."
 
-#: includes/class-wc-checkout.php:515 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:518 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "er ikke en gyldig epostadresse."
 
-#: includes/class-wc-checkout.php:530
+#: includes/class-wc-checkout.php:533
 msgid "is not valid. Please enter one of the following:"
 msgstr "er ikke gyldig. Vennligst bruk en av de følgende:"
 
-#: includes/class-wc-checkout.php:575
+#: includes/class-wc-checkout.php:578
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Du må akseptere vilkårene våre."
 
-#: includes/class-wc-checkout.php:580
+#: includes/class-wc-checkout.php:583
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
-msgstr "Dessverre <strong>vi leverer ikke til %s</strong>. Vennligst skriv inn en alternativ leveringsadresse."
+msgstr "Dessverre, <strong>vi leverer ikke til %s</strong>. Vennligst skriv inn en alternativ leveringsadresse."
 
-#: includes/class-wc-checkout.php:588
+#: includes/class-wc-checkout.php:591
 msgid "Invalid shipping method."
 msgstr "Ugyldig fraktmetode."
 
-#: includes/class-wc-checkout.php:601
+#: includes/class-wc-checkout.php:604
 msgid "Invalid payment method."
-msgstr "Ugyldig betalingsmetode"
+msgstr "Ugyldig betalingsmetode."
 
 #: includes/class-wc-comments.php:110
 msgid "You have taken too long. Please go back and refresh the page."
@@ -3715,7 +3722,7 @@ msgstr "Sentralafrikanske Republikk"
 
 #: includes/class-wc-countries.php:81
 msgid "Chad"
-msgstr "Chad"
+msgstr "Tsjad"
 
 #: includes/class-wc-countries.php:82
 msgid "Chile"
@@ -4646,7 +4653,7 @@ msgstr "Kupongkode fjernet."
 
 #: includes/class-wc-coupon.php:592
 msgid "Coupon is not valid."
-msgstr "Kupong er ikke gyldig."
+msgstr "Kupongen er ikke gyldig."
 
 #: includes/class-wc-coupon.php:595 includes/class-wc-coupon.php:645
 msgid "Coupon does not exist!"
@@ -4662,7 +4669,7 @@ msgstr "Beklager, det ser ut som om kupong \"%s\" er ikke gyldig - den har nå b
 msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
-msgstr "Beklager. det ser ut som om kupong \"%s\" er ikke din - den har nå blitt fjernet fra ordren din."
+msgstr "Beklager. det ser ut som om kupong \"%s\" ikke er din - den har nå blitt fjernet fra ordren din."
 
 #: includes/class-wc-coupon.php:604
 msgid "Coupon code already applied!"
@@ -4700,7 +4707,7 @@ msgstr "Vennligst skriv inn kupongkode."
 
 #: includes/class-wc-download-handler.php:37
 msgid "Invalid email address."
-msgstr "Ugyldig epostadresse"
+msgstr "Ugyldig epostadresse."
 
 #: includes/class-wc-download-handler.php:37
 #: includes/class-wc-download-handler.php:61
@@ -4761,7 +4768,7 @@ msgstr "Ingen fil definert"
 
 #: includes/class-wc-download-handler.php:280
 msgid "File not found"
-msgstr "Fant ikke filen"
+msgstr "Fil ikke funnet"
 
 #: includes/class-wc-emails.php:289
 msgid "Note"
@@ -4807,20 +4814,20 @@ msgstr "Addresse vellykket endret."
 
 #: includes/class-wc-form-handler.php:180
 msgid "Please enter your name."
-msgstr "Vennligst skriv inn ditt navn."
+msgstr "Vennligst skriv inn navnet ditt."
 
 #: includes/class-wc-form-handler.php:184
 #: includes/wc-customer-functions.php:48
 msgid "Please provide a valid email address."
-msgstr "Vennligst oppgi en gyldig e-postadresse."
+msgstr "Vennligst oppgi en gyldig epostadresse."
 
 #: includes/class-wc-form-handler.php:186
 msgid "This email address is already registered."
-msgstr "Denne e-postadressen er allerede registrert."
+msgstr "Denne epostadressen er allerede registrert."
 
 #: includes/class-wc-form-handler.php:190
 msgid "Please re-enter your password."
-msgstr "Vennligst skriv inn passordet ditt."
+msgstr "Vennligst skriv inn passordet ditt igjen."
 
 #: includes/class-wc-form-handler.php:192
 #: includes/class-wc-form-handler.php:809
@@ -4829,7 +4836,7 @@ msgstr "Passordene er ikke like."
 
 #: includes/class-wc-form-handler.php:208
 msgid "Account details changed successfully."
-msgstr "Endring av kontoinformasjon vellykket "
+msgstr "Vellykket endring av kontoinformasjon. "
 
 #: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
@@ -4846,7 +4853,7 @@ msgstr "Du kan bare ha 1 %s i handlekurven din."
 
 #: includes/class-wc-form-handler.php:488
 msgid "The cart has been filled with the items from your previous order."
-msgstr "Handlekurven har blitt oppdatert med varene fra ditt tidligere kjøp."
+msgstr "Handlekurven har blitt oppdatert med varene fra din tidligere ordre."
 
 #: includes/class-wc-form-handler.php:509
 msgid "Order cancelled by customer."
@@ -4860,7 +4867,7 @@ msgstr "Ordren din ble kansellert."
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
-msgstr "Bestillingen kan ikke lenger bli kansellert. Ta kontakt med oss ​​hvis du trenger hjelp."
+msgstr "Ordren din kan ikke lenger bli kansellert. Ta kontakt med oss hvis du trenger hjelp."
 
 #: includes/class-wc-form-handler.php:557
 #: includes/class-wc-form-handler.php:617
@@ -4919,29 +4926,29 @@ msgstr "FEIL"
 
 #: includes/class-wc-form-handler.php:873
 msgid "Anti-spam field was filled in."
-msgstr "Anti-spamfelt ble utfyllt."
+msgstr "Anti-spamfelt ble fylt ut."
 
-#: includes/class-wc-frontend-scripts.php:117
+#: includes/class-wc-frontend-scripts.php:123
 msgid "Please select a rating"
 msgstr "Vennligst velg en rangering"
 
-#: includes/class-wc-frontend-scripts.php:134
-#: includes/wc-template-functions.php:1573
+#: includes/class-wc-frontend-scripts.php:140
+#: includes/wc-template-functions.php:1578
 msgid "required"
 msgstr "påkrevet"
 
-#: includes/class-wc-frontend-scripts.php:158
+#: includes/class-wc-frontend-scripts.php:164
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "Beklager, ingen produkter matchet valget ditt. Vennligst velg en annen kombinasjon."
 
-#: includes/class-wc-frontend-scripts.php:159
+#: includes/class-wc-frontend-scripts.php:165
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "Beklager, dette produktet er ikke tilgjengelig. Velg en annen kombinasjon."
 
-#: includes/class-wc-frontend-scripts.php:164
+#: includes/class-wc-frontend-scripts.php:170
 msgid "Select an option&hellip;"
 msgstr "Velg et alternativ&hellip;"
 
@@ -5016,23 +5023,27 @@ msgstr "Frakt:"
 msgid "Order Discount:"
 msgstr "Ordrerabatt:"
 
-#: includes/class-wc-order.php:963
+#: includes/class-wc-order.php:964
+msgid "Payment Method:"
+msgstr "Betalingsmetode:"
+
+#: includes/class-wc-order.php:970
 msgid "Order Total:"
 msgstr "Ordretotal:"
 
-#: includes/class-wc-order.php:981 includes/wc-cart-functions.php:222
+#: includes/class-wc-order.php:988 includes/wc-cart-functions.php:236
 msgid "(Includes %s)"
-msgstr "(Innkluderer %s)"
+msgstr "(Inkluderer %s)"
 
-#: includes/class-wc-order.php:1224 includes/class-wc-order.php:1225
+#: includes/class-wc-order.php:1231 includes/class-wc-order.php:1232
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: includes/class-wc-order.php:1280
+#: includes/class-wc-order.php:1287
 msgid "Order status changed from %s to %s."
 msgstr "Ordrestatus endret fra %s til %s."
 
-#: includes/class-wc-order.php:1549
+#: includes/class-wc-order.php:1556
 msgid "Order item stock reduced successfully."
 msgstr "Minsket lagersaldo for ordregjenstanden vellykket."
 
@@ -5043,7 +5054,7 @@ msgstr "Produktkategorier"
 
 #: includes/class-wc-post-types.php:58
 msgid "Product Category"
-msgstr "Produktkategorier"
+msgstr "Produktkategori"
 
 #: includes/class-wc-post-types.php:59
 msgctxt "Admin menu name"
@@ -5052,7 +5063,7 @@ msgstr "Kategorier"
 
 #: includes/class-wc-post-types.php:60
 msgid "Search Product Categories"
-msgstr "Søk på produktkategori"
+msgstr "Søk produktkategori"
 
 #: includes/class-wc-post-types.php:61
 msgid "All Product Categories"
@@ -5060,11 +5071,11 @@ msgstr "Alle produktkategorier"
 
 #: includes/class-wc-post-types.php:62
 msgid "Parent Product Category"
-msgstr "Forelder produktkategori"
+msgstr "Forelderproduktkategori"
 
 #: includes/class-wc-post-types.php:63
 msgid "Parent Product Category:"
-msgstr "Forelder produktkategori:"
+msgstr "Forelderproduktkategori:"
 
 #: includes/class-wc-post-types.php:64
 msgid "Edit Product Category"
@@ -5112,11 +5123,11 @@ msgstr "Alle produktstikkord"
 
 #: includes/class-wc-post-types.php:97
 msgid "Parent Product Tag"
-msgstr "Forelder produktstikkord"
+msgstr "Forelderproduktstikkord"
 
 #: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag:"
-msgstr "Forelder produktstikkord:"
+msgstr "Forelderproduktstikkord:"
 
 #: includes/class-wc-post-types.php:99
 msgid "Edit Product Tag"
@@ -5128,11 +5139,11 @@ msgstr "Oppdater produkstikkord"
 
 #: includes/class-wc-post-types.php:101
 msgid "Add New Product Tag"
-msgstr "Legg til ny produktstikkord"
+msgstr "Legg til nytt produktstikkord"
 
 #: includes/class-wc-post-types.php:102
 msgid "New Product Tag Name"
-msgstr "Nytt stikordsnavn på produkt"
+msgstr "Nytt stikkordsnavn på produkt"
 
 #: includes/class-wc-post-types.php:113
 #: includes/updates/woocommerce-update-2.0.php:45
@@ -5164,15 +5175,15 @@ msgstr "Alle fraktklasser"
 
 #: includes/class-wc-post-types.php:131
 msgid "Parent Shipping Class"
-msgstr "Foreldre-klasse for frakt"
+msgstr "Forelderfraktklasse"
 
 #: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class:"
-msgstr "Foreldre-klasse for frakt:"
+msgstr "Forelderfraktklasse:"
 
 #: includes/class-wc-post-types.php:133
 msgid "Edit Shipping Class"
-msgstr "Redigere fraktklasse"
+msgstr "Rediger fraktklasse"
 
 #: includes/class-wc-post-types.php:134
 msgid "Update Shipping Class"
@@ -5204,11 +5215,11 @@ msgstr "Forelder %s:"
 
 #: includes/class-wc-post-types.php:188
 msgid "Edit %s"
-msgstr "Editer %s"
+msgstr "Rediger %s"
 
 #: includes/class-wc-post-types.php:189
 msgid "Update %s"
-msgstr "Lagre %s"
+msgstr "Oppdater %s"
 
 #: includes/class-wc-post-types.php:190
 msgid "Add New %s"
@@ -5285,7 +5296,7 @@ msgstr "Fant ingen produkter i papirkurven"
 
 #: includes/class-wc-post-types.php:245
 msgid "Parent Product"
-msgstr "Foreldreprodukt"
+msgstr "Forelderprodukt"
 
 #: includes/class-wc-post-types.php:247
 msgid "This is where you can add new products to your store."
@@ -5334,15 +5345,15 @@ msgstr "Søk ordrer"
 
 #: includes/class-wc-post-types.php:295
 msgid "No Orders found"
-msgstr "Fant ingen ordre"
+msgstr "Fant ingen ordrer"
 
 #: includes/class-wc-post-types.php:296
 msgid "No Orders found in trash"
-msgstr "Fant ingen ordre i papirkurven"
+msgstr "Fant ingen ordrer i papirkurven"
 
 #: includes/class-wc-post-types.php:297
 msgid "Parent Orders"
-msgstr "Foreldreordre"
+msgstr "Forelderordre"
 
 #: includes/class-wc-post-types.php:300
 msgid "This is where store orders are stored."
@@ -5387,7 +5398,7 @@ msgstr "Vis kupong"
 
 #: includes/class-wc-post-types.php:333
 msgid "Search Coupons"
-msgstr "Søk efter rabattkuponger"
+msgstr "Søk etter rabattkuponger"
 
 #: includes/class-wc-post-types.php:334
 msgid "No Coupons found"
@@ -5399,7 +5410,7 @@ msgstr "Ingen kuponger funnet i papirkurven"
 
 #: includes/class-wc-post-types.php:336
 msgid "Parent Coupon"
-msgstr "Foreldrekupong"
+msgstr "Forelderkupong"
 
 #: includes/class-wc-post-types.php:338
 msgid ""
@@ -5434,7 +5445,7 @@ msgstr "Velg alternativ"
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
-msgstr "Dette variabele produktet har ingen aktive variasjoner å kan ikke bli publisert. Endre status til utkast."
+msgstr "Dette variable produktet har ingen aktive varianter å kan ikke bli publisert. Endrer status til utkast."
 
 #: includes/class-wc-product-variation.php:494
 msgid "%s &ndash; %s%s"
@@ -5444,7 +5455,7 @@ msgstr "%s &ndash; %s%s"
 msgid ""
 "Use $args[\"posts_per_page\"] instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr "Bruk $args[\"posts_per_page\"] i stedet. Foreldet argument vil bli fjernet i WC 2.2."
+msgstr "Bruk $args[\"posts_per_page\"] i stedet. Utdatert argument vil bli fjernet i WC 2.2."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
 msgid "Completed order"
@@ -5462,7 +5473,7 @@ msgstr "Ordren din er fullført"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:30
 msgid "Your {site_title} order from {order_date} is complete"
-msgstr "Din {site_title} ordre fra {order_date} er fullført"
+msgstr "{site_title}-ordren din fra {order_date} er fullført"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:39
 msgid "Your order is complete - download your files"
@@ -5471,7 +5482,7 @@ msgstr "Ordren din er fullført - last ned filene dine"
 #: includes/emails/class-wc-email-customer-completed-order.php:40
 msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
-msgstr "Din {site_title} ordre fra {order_date} er fullført - laste ned filene dine"
+msgstr "{site_title}-ordren din fra {order_date} er fullført - laste ned filene dine"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:146
 #: includes/emails/class-wc-email-new-order.php:133
@@ -5511,7 +5522,7 @@ msgstr "Faktura for ordre {order_number}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:38
 msgid "Your {site_title} order from {order_date}"
-msgstr "Din {site_title} ordre fra {order_date}"
+msgstr "{site_title}-ordren fra {order_date}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:39
 msgid "Order {order_number} details"
@@ -5537,7 +5548,7 @@ msgstr "Epost med ny kundekonto sendes når en kunde registrerer seg via kassen 
 
 #: includes/emails/class-wc-email-customer-new-account.php:39
 msgid "Your account on {site_title}"
-msgstr "Din konto på {site_title}"
+msgstr "Kontoen din på {site_title}"
 
 #: includes/emails/class-wc-email-customer-new-account.php:40
 msgid "Welcome to {site_title}"
@@ -5553,7 +5564,7 @@ msgstr "Epost med kundenotater sendes når du legger til et notat i en ordre."
 
 #: includes/emails/class-wc-email-customer-note.php:37
 msgid "Note added to your {site_title} order from {order_date}"
-msgstr "Notat lagt til din {site_title} ordre fra {order_date}"
+msgstr "Notat lagt til {site_title}-ordren din fra {order_date}"
 
 #: includes/emails/class-wc-email-customer-note.php:38
 msgid "A note has been added to your order"
@@ -5575,7 +5586,7 @@ msgstr "Takk for ordren din"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {site_title} order receipt from {order_date}"
-msgstr "Din {site_title} ordre kvittering fra {order_date}"
+msgstr "{site_title}-ordrekvitteringen din fra {order_date}"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:38
 msgid "Reset password"
@@ -5601,7 +5612,7 @@ msgstr "Ny ordre"
 
 #: includes/emails/class-wc-email-new-order.php:27
 msgid "New order emails are sent when an order is received."
-msgstr "Ny ordre e-poster sendes når en ordre er mottatt."
+msgstr "Ny ordre-eposter sendes når en ordre er mottatt."
 
 #: includes/emails/class-wc-email-new-order.php:29
 msgid "New customer order"
@@ -5609,7 +5620,7 @@ msgstr "Ny kundeordre"
 
 #: includes/emails/class-wc-email-new-order.php:30
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
-msgstr "[{site_title}] Ny kunde ordre ({order_number}) - {order_date}"
+msgstr "[{site_title}] Ny kundeordre ({order_number}) - {order_date}"
 
 #: includes/emails/class-wc-email-new-order.php:126
 msgid "Recipient(s)"
@@ -5640,7 +5651,7 @@ msgstr "BACS / Bankkonto "
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:26
 msgid ""
 "Allows payments by BACS, more commonly known as direct bank/wire transfer."
-msgstr "Tillatt betaling med BACS, mer kjent som direkte bank / bankoverføring."
+msgstr "Tillatter betaling med BACS, mer kjent som direkte bank / bankoverføring."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:68
 msgid "Enable Bank Transfer"
@@ -5697,14 +5708,14 @@ msgstr "Beskrivelse"
 #: includes/gateways/cod/class-wc-gateway-cod.php:66
 msgid ""
 "Payment method description that the customer will see on your checkout."
-msgstr "Betalingsmåte beskrivelse som kunden vil se i kassen."
+msgstr "Beskrivelse av betalingsmetoden, som kunden vil se i kassen."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:82
 msgid ""
 "Make your payment directly into our bank account. Please use your Order ID "
 "as the payment reference. Your order won't be shipped until the funds have "
 "cleared in our account."
-msgstr "Betal direkte til vår bankkonto. Bruk ditt ordre-nummer som din betalingsreferanse. Ordren din sendes når vi har mottatt din betaling."
+msgstr "Betal direkte til vår bankkonto. Bruk ordrenummeret ditt som betalingsreferanse. Ordren din sendes når vi har mottatt betalingen din på konto."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:86
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:72
@@ -5715,7 +5726,7 @@ msgstr "Instruksjoner"
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:88
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:74
 msgid "Instructions that will be added to the thank you page and emails."
-msgstr "Instruksjoner som vil bli lagt til takkeside og e-poster."
+msgstr "Instruksjoner som vil bli lagt til takkeside og eposter."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:105
 msgid "Account Details"
@@ -5754,11 +5765,11 @@ msgstr "+ Legg til konto"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "Remove selected account(s)"
-msgstr "Fjern valgte konto (er)"
+msgstr "Fjern valgte konto(er)"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:240
 msgid "Our Bank Details"
-msgstr "Vår Bank Detaljer"
+msgstr "Vår Bankdetaljer"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:265
 msgid "BIC"
@@ -5766,7 +5777,7 @@ msgstr "BIC"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:295
 msgid "Awaiting BACS payment"
-msgstr "Ventende BACS betaling"
+msgstr "Ventende BACS-betaling"
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:25
 msgid "Cheque"
@@ -5816,7 +5827,7 @@ msgstr "Aktiver betaling ved levering"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:73
 msgid "Payment method description that the customer will see on your website."
-msgstr "Beskrivelse av betalingsmetoden som kunden ser på websiden din."
+msgstr "Beskrivelse av betalingsmetoden, som kunden ser på websiden din."
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:74
 #: includes/gateways/cod/class-wc-gateway-cod.php:81
@@ -5841,7 +5852,7 @@ msgstr "Hvis Kontant-ved-levering bare er tilgjengelig for visse metoder, sett d
 msgid "Select shipping methods"
 msgstr "Velg leveringsmetoder"
 
-#: includes/gateways/cod/class-wc-gateway-cod.php:157
+#: includes/gateways/cod/class-wc-gateway-cod.php:164
 msgid "Payment to be made upon delivery."
 msgstr "Betaling skjer ved levering."
 
@@ -5873,7 +5884,7 @@ msgstr "Kredittkort"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:151
 msgid "Pay securely with your credit card."
-msgstr "Betal sikkert med ditt kredittkort."
+msgstr "Betal sikkert med kredittkortet ditt."
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:152
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:141
@@ -5924,7 +5935,7 @@ msgstr "PayPal standard"
 msgid ""
 "PayPal standard works by sending the user to PayPal to enter their payment "
 "information."
-msgstr "PayPal standard fungerer slik at kunden sendes til PayPal for å oppgi sin betalingsinformajson."
+msgstr "PayPal standard fungerer slik at kunden sendes til PayPal for å oppgi betalingsinformasjonen sin."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:111
 msgid "Gateway Disabled"
@@ -5956,13 +5967,13 @@ msgstr "Vennligst oppgi den epostadressen som du bruker for PayPal. Dette trengs
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:153
 msgid "Receiver Email"
-msgstr "Mottaker E-mail"
+msgstr "Mottakerepost"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:155
 msgid ""
 "If this differs from the email entered above, input your main receiver email"
 " for your PayPal account. This is used to validate IPN requests."
-msgstr "Hvis denne er ulik din e-mail ovenfor, skal du sette inn din hovedmottaker e-mail for din PayPal konto. Denne er brukt til å validere IPN forespørsler."
+msgstr "Hvis denne er ulik eposten din ovenfor, skal du sette inn hovedmottakeren av epost for PayPal-kontoen din. Denne er brukt til å validere IPN forespørsler."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:161
 msgid "PayPal Identity Token"
@@ -5973,7 +5984,7 @@ msgid ""
 "Optionally enable \"Payment Data Transfer\" (Profile > Website Payment "
 "Preferences) and then copy your identity token here. This will allow "
 "payments to be verified without the need for PayPal IPN."
-msgstr "Eventuelt aktivere \"Betaling Dataoverføring\" (profil> Nettstedet betalingsmetoder) og deretter kopiere din identitet token her. Dette vil tillate betalinger som skal verifiseres uten behov for PayPal IPN."
+msgstr "Eventuelt aktivere \"Betalingsdataoverføring\" (Profil> Nettstedets betalingsmetoder) og deretter kopiere identitetsnøkkelen din her. Dette vil tillate betalinger som skal verifiseres uten behov for PayPal IPN."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:166
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:199
@@ -6021,7 +6032,7 @@ msgstr "Bruk skjemainnsendelsesmetode."
 msgid ""
 "Enable this to post order data to PayPal via a form instead of using a "
 "redirect/querystring."
-msgstr "Aktiver dette for å sende ordredata til PayPal via et skjema i stedentfor å benytte omdirigering/spørringsstreng."
+msgstr "Aktiver dette for å sende ordredata til PayPal via et skjema i stedet for å benytte omdirigering/spørringsstreng."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:194
 msgid "Page Style"
@@ -6031,7 +6042,7 @@ msgstr "Sidestil"
 msgid ""
 "Optionally enter the name of the page style you wish to use. These are "
 "defined within your PayPal account."
-msgstr "Valgfritt å skrive inn navnet på sidestilen du ønsker å benytte. Disse er definert i PayPal-kontoen did."
+msgstr "Valgfritt å skrive inn navnet på sidestilen du ønsker å benytte. Disse er definert i PayPal-kontoen din."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:202
 msgid "Shipping options"
@@ -6039,21 +6050,21 @@ msgstr "Fraktvalg"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:207
 msgid "Shipping details"
-msgstr "Fraktdetaljer"
+msgstr "Leveringsdetaljer"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:209
 msgid "Send shipping details to PayPal instead of billing."
-msgstr "Send detaljer om fraktadresse til PayPal i stedet for betalingsadresse."
+msgstr "Send detaljer om leveringsadresse til PayPal i stedet for fakturaadresse."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:210
 msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
-msgstr "PayPal tillater oss å sende 1 adresse. Hvis du benytter PayPal for fraktetiketter, ønsker du muligens å sende fraktadressen istedenfor betalingsadressen."
+msgstr "PayPal tillater oss å sende 1 adresse. Hvis du benytter PayPal for fraktetiketter, ønsker du muligens å sende leveringsadressen istedenfor fakturaadressen."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:214
 msgid "Address override"
-msgstr "Adresse-overstyring"
+msgstr "Adresseoverstyring"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:216
 msgid ""
@@ -6097,7 +6108,7 @@ msgstr "Aktiver loggføring"
 msgid ""
 "Log PayPal events, such as IPN requests, inside "
 "<code>woocommerce/logs/paypal-%s.txt</code>"
-msgstr "Logg PayPal hendelser, som IPN forespørsler, i <code>woocommerce/logs/paypal-%s.txt</code>"
+msgstr "Logg PayPal hendelser, som IPN-forespørsler, i <code>woocommerce/logs/paypal-%s.txt</code>"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:349
 msgid "Order %s"
@@ -6115,7 +6126,7 @@ msgstr "Forsendelse via %s"
 msgid ""
 "Thank you for your order. We are now redirecting you to PayPal to make "
 "payment."
-msgstr "Takk for din ordren din. Du sendes nå til PayPal betaling."
+msgstr "Takk for ordren din. Du sendes nå til PayPal for betaling."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:479
 msgid "Pay via PayPal"
@@ -6129,24 +6140,24 @@ msgstr "Avbryt ordre &amp; tilbakestill handlekurv"
 msgid ""
 "Thank you - your order is now pending payment. You should be automatically "
 "redirected to PayPal to make payment."
-msgstr "Takk - din bestilling venter nå på betaling. Du bør automatisk bli omdirigert til PayPal for å gjøre betalingen."
+msgstr "Takk - ordren din venter nå på betaling. Du bør automatisk bli omdirigert til PayPal for å gjennomføre betalingen."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:689
 msgid "Validation error: PayPal currencies do not match (code %s)."
-msgstr "Valideringsfeil: PayPal valutaer samsvarer ikke (code %s)."
+msgstr "Valideringsfeil: PayPalvalutaer stemmer ikke overens (code %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:700
 msgid "Validation error: PayPal amounts do not match (gross %s)."
-msgstr "Valideringsfeil: PayPal-beløp samsvarer ikke (brutto%s)."
+msgstr "Valideringsfeil: PayPalbeløp stemmer ikke overens (brutto%s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:711
 msgid ""
 "Validation error: PayPal IPN response from a different email address (%s)."
-msgstr "Valideringsfeil: PayPal IPN forespørsel fra en annen e-mail adresse (%s)."
+msgstr "Valideringsfeil: PayPal IPN-respons fra en annen epostadresse (%s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:734
 msgid "IPN payment completed"
-msgstr "IPM-betaling fullført"
+msgstr "IPN-betaling fullført"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:737
 msgid "Payment pending: %s"
@@ -6199,11 +6210,11 @@ msgstr "Reversering kansellert for ordre %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:868
 msgid "Validation error: PayPal amounts do not match (amt %s)."
-msgstr "Valideringsfeil: PayPal beløpet stemmer ikke (ant% s)."
+msgstr "Valideringsfeil: PayPalbeløp stemmer ikke overens (amt% s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:876
 msgid "PDT payment completed"
-msgstr "PDT betaling fullført"
+msgstr "PDT-betaling fullført"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:25
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:84
@@ -6212,7 +6223,7 @@ msgstr "Fastpris"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:27
 msgid "Flat rates let you define a standard rate per item, or per order."
-msgstr "Fastpriser lar deg definere en standard fraktrate per produkt, eller per ordre."
+msgstr "Fastpriser lar deg definere en standard rate per produkt, eller per ordre."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:77
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:51
@@ -6288,13 +6299,13 @@ msgid ""
 "Optional extra shipping options with additional costs (one per line): Option"
 " Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or "
 "item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
-msgstr "Valgfrie ekstra fraktalternativer med ekstra kostnader (en pr linje): Alternativ Navn | Tilleggs kostnad [+ - prosent] | Per kostnadstype (bestilling, klasse, eller produkt) Eksempel: <code> A-Post | 6,95 [+ 0,2%] | for </ code>."
+msgstr "Valgfrie ekstra fraktvalg med tilleggskostnader (én per linje): Valgnavn | Tilleggskostnad [+- prosent] | Per kostnadstype (ordre, klasse, eller gjenstand) Eksempel: <code> A-Post | 6,95 [+ 0,2%] | for </ code>."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:131
 msgid ""
 "Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
 "or item)"
-msgstr "Alternativ Navn | Tilleggs kostnad [+ - prosent%] | For kostnadstype (bestilling, klasse, eller produkt)"
+msgstr "Valgnavn | Tilleggskostnad [+- prosent%] | Per kostnadstype (bestilling, klasse, eller produkt)"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:134
 msgid "Additional Costs"
@@ -6318,7 +6329,7 @@ msgstr "Per ordre - ta betalt for frakt for hele ordren"
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:144
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:97
 msgid "Per Item - charge shipping for each item individually"
-msgstr "Per gjenstand - ta betalt for frakt på hver gjenstand individuellt"
+msgstr "Per gjenstand - ta betalt for frakt på hver gjenstand individuelt"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:145
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:98
@@ -6328,7 +6339,7 @@ msgstr "Per klasse - ta betalt for frakt for hver fraktklasse i en ordre"
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:152
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:118
 msgid "Minimum Handling Fee"
-msgstr "Minste Håndteringsgebyr"
+msgstr "Minste håndteringsgebyr"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:155
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:120
@@ -6410,11 +6421,11 @@ msgstr "Gratis frakt krever..."
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:103
 msgid "A valid free shipping coupon"
-msgstr "En gyldig gratis-frakt-kupong"
+msgstr "En gyldig gratisfrakt-kupong"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:104
 msgid "A minimum order amount (defined below)"
-msgstr "En minimums ordremengde (definer nedenfor)"
+msgstr "Et minimums ordrebeløp (definert nedenfor)"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:105
 msgid "A minimum order amount OR a coupon"
@@ -6457,7 +6468,7 @@ msgstr "Land"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:92
 msgid "Cost Added..."
-msgstr "Kostnader lagt til..."
+msgstr "Kostnad lagt til..."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:105
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
@@ -6511,7 +6522,7 @@ msgstr "Leveringsgebyr"
 msgid ""
 "What fee do you want to charge for local delivery, disregarded if you choose"
 " free. Leave blank to disable."
-msgstr "Hvilket gebyr vil du ta for lokal levering; gjelder ikke hvis du har satt som gratis. La stå tom for å deaktivere."
+msgstr "Hvilket gebyr vil du ta for lokal levering; tilsidesatt hvis du velger gratis. La stå tom for å deaktivere."
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:129
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:88
@@ -6522,7 +6533,7 @@ msgstr "Zip/Postnummer"
 msgid ""
 "What zip/post codes would you like to offer delivery to? Separate codes with"
 " a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr "Til hvilke zip/postnummer vil du tilby levering? Skill nummer med komma. Godtar wildcards, f.eks P* vil matche et postnummer som PE30."
+msgstr "Til hvilke postnummer vil du tilby levering? Skill numre med komma. Godtar wildcards, f.eks 3* vil matche et postnummer som 3167."
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:169
 msgid ""
@@ -6542,7 +6553,7 @@ msgstr "Aktiver lokal henting"
 msgid ""
 "What zip/post codes are available for local pickup? Separate codes with a "
 "comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr "Til hvilke postnummer vil du tilby levering? Skill nummer med komma. Godtar wildcards, f.eks 3* er lik et postnummer som 3677."
+msgstr "Til hvilke postnummer vil du tilby 'hente-selv'? Skill numre med komma. Godtar wildcards, f.eks 3* vil matche et postnummer som 3677."
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:128
 msgid ""
@@ -6559,7 +6570,7 @@ msgstr "Fraktkostnader oppdatert."
 msgid ""
 "This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. "
 "Please contact us if you need assistance."
-msgstr "Denne ordre &rsquo;s status er &ldquo;%s&rdquo;&mdash; den kan ikke bli betalt for. Ta kontakt med oss ​​hvis du trenger hjelp."
+msgstr "Denne ordrens status er '%s' &mdash; den kan ikke bli betalt for. Ta kontakt med oss hvis du trenger hjelp."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:112
 #: includes/shortcodes/class-wc-shortcode-checkout.php:163
@@ -6583,7 +6594,7 @@ msgstr "Dato:"
 #: includes/shortcodes/class-wc-shortcode-checkout.php:137
 #: templates/checkout/thankyou.php:48
 msgid "Total:"
-msgstr "Totalt:"
+msgstr "Total:"
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:142
 #: templates/checkout/thankyou.php:53
@@ -6596,51 +6607,33 @@ msgid ""
 "the Place Order button at the bottom of the page."
 msgstr "Ordrens totalbeløp er oppdatert. Bekreft ordren din ved å klikke på knappen \"Send\" lengst ned på siden."
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:112
-#: templates/myaccount/view-order.php:12
-msgid ""
-"Order <mark class=\"order-number\">%s</mark> was placed on <mark class"
-"=\"order-date\">%s</mark> and is currently <mark class=\"order-"
-"status\">%s</mark>."
-msgstr "Bestill <mark class=\"order-number\">%s</mark> ble plassert på <mark class=\"order-date\">%s</mark> og er for tiden <mark class=\"order-status\">%s</mark>."
-
-#: includes/shortcodes/class-wc-shortcode-my-account.php:116
-#: templates/myaccount/view-order.php:17 templates/order/tracking.php:31
-msgid "Order Updates"
-msgstr "Ordreoppdateringer"
-
-#: includes/shortcodes/class-wc-shortcode-my-account.php:122
-#: templates/myaccount/view-order.php:23 templates/order/tracking.php:37
-msgid "l jS \\o\\f F Y, h:ia"
-msgstr "l jS \\o\\f F Y, h:ia"
-
-#: includes/shortcodes/class-wc-shortcode-my-account.php:235
+#: includes/shortcodes/class-wc-shortcode-my-account.php:213
 msgid "Enter a username or e-mail address."
 msgstr "Skriv inn et brukernavn eller epostadresse."
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:242
+#: includes/shortcodes/class-wc-shortcode-my-account.php:220
 msgid "There is no user registered with that email address."
 msgstr "Det finnes ingen bruker registrert med den epostadressen."
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:257
+#: includes/shortcodes/class-wc-shortcode-my-account.php:235
 msgid "Invalid username or e-mail."
 msgstr "Ugyldig brukernavn eller epostadresse"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:271
+#: includes/shortcodes/class-wc-shortcode-my-account.php:249
 msgid "Password reset is not allowed for this user"
 msgstr "Tilbakestilling av passord ikke tillat for denne brukeren"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:299
+#: includes/shortcodes/class-wc-shortcode-my-account.php:277
 msgid "Check your e-mail for the confirmation link."
 msgstr "Sjekk eposten din for bekreftelseslenke."
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:319
-#: includes/shortcodes/class-wc-shortcode-my-account.php:324
-#: includes/shortcodes/class-wc-shortcode-my-account.php:331
+#: includes/shortcodes/class-wc-shortcode-my-account.php:297
+#: includes/shortcodes/class-wc-shortcode-my-account.php:302
+#: includes/shortcodes/class-wc-shortcode-my-account.php:309
 msgid "Invalid key"
 msgstr "Ugyldig nøkkel"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:368
+#: includes/shortcodes/class-wc-shortcode-my-account.php:346
 msgid "Add a new payment method."
 msgstr "Legg til en ny betalingsmåte."
 
@@ -6654,7 +6647,7 @@ msgstr "Vennligst skriv inn gyldig ordreepost."
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:72
 msgid "Sorry, we could not find that order id in our database."
-msgstr "Beklager, men vi kunne ikke finne den ordre-ID'en i vår database."
+msgstr "Beklager, men vi kunne ikke finne den ordre-ID'en i databasen vår."
 
 #: includes/wc-cart-functions.php:25
 msgid "This product is protected and cannot be purchased."
@@ -6676,167 +6669,175 @@ msgstr "&quot;%s&quot; ble vellykket lagt til i handlekurven din."
 msgid "Continue Shopping"
 msgstr "Fortsett å handle"
 
-#: includes/wc-cart-functions.php:194
-msgid "Free shipping coupon"
-msgstr "Gratis frakt kupong"
+#: includes/wc-cart-functions.php:183
+msgid "Coupon:"
+msgstr "Rabattkupong:"
 
-#: includes/wc-cart-functions.php:196
+#: includes/wc-cart-functions.php:208
+msgid "Free shipping coupon"
+msgstr "Kupong for gratis frakt"
+
+#: includes/wc-cart-functions.php:210
 msgid "[Remove]"
 msgstr "[Fjern]"
 
-#: includes/wc-cart-functions.php:257
+#: includes/wc-cart-functions.php:271
 msgid "Free"
 msgstr "Gratis"
 
 #: includes/wc-core-functions.php:167
+msgid "United Arab Emirates Dirham"
+msgstr "De Forente Arabiske Emirater Dirham"
+
+#: includes/wc-core-functions.php:168
 msgid "Australian Dollars"
 msgstr "Australske dollar"
 
-#: includes/wc-core-functions.php:168
+#: includes/wc-core-functions.php:169
 msgid "Brazilian Real"
 msgstr "Brasilske Real"
 
-#: includes/wc-core-functions.php:169
+#: includes/wc-core-functions.php:170
 msgid "Bulgarian Lev"
 msgstr "Bulgarsk Lev"
 
-#: includes/wc-core-functions.php:170
+#: includes/wc-core-functions.php:171
 msgid "Canadian Dollars"
 msgstr "Kanadiske dollar"
 
-#: includes/wc-core-functions.php:171
-msgid "Chilean Peso"
-msgstr "Chilensk peso"
-
 #: includes/wc-core-functions.php:172
+msgid "Chilean Peso"
+msgstr "Chilenske Peso"
+
+#: includes/wc-core-functions.php:173
 msgid "Chinese Yuan"
 msgstr "Kinesiske Yuan"
 
-#: includes/wc-core-functions.php:173
-msgid "Colombian Peso"
-msgstr "Colombiansk peso"
-
 #: includes/wc-core-functions.php:174
+msgid "Colombian Peso"
+msgstr "Colombianske Peso"
+
+#: includes/wc-core-functions.php:175
 msgid "Czech Koruna"
 msgstr "Tsjekkisk Koruna"
 
-#: includes/wc-core-functions.php:175
+#: includes/wc-core-functions.php:176
 msgid "Danish Krone"
 msgstr "Danske Kroner"
 
-#: includes/wc-core-functions.php:176
+#: includes/wc-core-functions.php:177
 msgid "Euros"
 msgstr "Euro"
 
-#: includes/wc-core-functions.php:177
+#: includes/wc-core-functions.php:178
 msgid "Hong Kong Dollar"
 msgstr "Hong Kong Dollar"
 
-#: includes/wc-core-functions.php:178
-msgid "Croatia kuna"
-msgstr "Kroatisk kuna"
-
 #: includes/wc-core-functions.php:179
+msgid "Croatia kuna"
+msgstr "Kroatiske Kuna"
+
+#: includes/wc-core-functions.php:180
 msgid "Hungarian Forint"
 msgstr "Ungarske Forint"
 
-#: includes/wc-core-functions.php:180
-msgid "Icelandic krona"
-msgstr "Islandske kronen"
-
 #: includes/wc-core-functions.php:181
+msgid "Icelandic krona"
+msgstr "Islandske kroner"
+
+#: includes/wc-core-functions.php:182
 msgid "Indonesia Rupiah"
 msgstr "Indonesisk Rupiah"
 
-#: includes/wc-core-functions.php:182
+#: includes/wc-core-functions.php:183
 msgid "Indian Rupee"
 msgstr "Indisk Rupi"
 
-#: includes/wc-core-functions.php:183
+#: includes/wc-core-functions.php:184
 msgid "Israeli Shekel"
 msgstr "Israelske Shekel"
 
-#: includes/wc-core-functions.php:184
+#: includes/wc-core-functions.php:185
 msgid "Japanese Yen"
 msgstr "Japanske Yen"
 
-#: includes/wc-core-functions.php:185
+#: includes/wc-core-functions.php:186
 msgid "South Korean Won"
 msgstr "Sør-Korea Won"
 
-#: includes/wc-core-functions.php:186
+#: includes/wc-core-functions.php:187
 msgid "Malaysian Ringgits"
 msgstr "Malaysiske Ringgit"
 
-#: includes/wc-core-functions.php:187
+#: includes/wc-core-functions.php:188
 msgid "Mexican Peso"
 msgstr "Meksikanske peso"
 
-#: includes/wc-core-functions.php:188
+#: includes/wc-core-functions.php:189
 msgid "Nigerian Naira"
 msgstr "Nigerian Naira"
 
-#: includes/wc-core-functions.php:189
+#: includes/wc-core-functions.php:190
 msgid "Norwegian Krone"
 msgstr "Norske Kroner"
 
-#: includes/wc-core-functions.php:190
+#: includes/wc-core-functions.php:191
 msgid "New Zealand Dollar"
 msgstr "New Zealandske Dollar"
 
-#: includes/wc-core-functions.php:191
+#: includes/wc-core-functions.php:192
 msgid "Philippine Pesos"
 msgstr "Filippinske Peso"
 
-#: includes/wc-core-functions.php:192
+#: includes/wc-core-functions.php:193
 msgid "Polish Zloty"
 msgstr "Polske Zloty"
 
-#: includes/wc-core-functions.php:193
+#: includes/wc-core-functions.php:194
 msgid "Pounds Sterling"
 msgstr "Britiske pund"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Romanian Leu"
 msgstr "Rumenske Leu"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Russian Ruble"
 msgstr "Russisk Ruble"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Singapore Dollar"
 msgstr "Singapore Dollar"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "South African rand"
 msgstr "Sørafrikanske Rand"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "Swedish Krona"
 msgstr "Svenske Kroner"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "Swiss Franc"
 msgstr "Sveitsiske Franc"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Taiwan New Dollars"
 msgstr "Taiwanesiske New Dollar"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Thai Baht"
 msgstr "Thai Baht"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Turkish Lira"
 msgstr "Tyrkiske Lire"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "US Dollars"
 msgstr "US Dollar"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "Vietnamese Dong"
 msgstr "Vietnamesisk Dong"
 
@@ -6880,9 +6881,9 @@ msgid ""
 "have problems."
 msgstr "Kunne ikke registrere deg&hellip; vennligst kontakt oss hvis du fortsetter å ha dette problemet."
 
-#: includes/wc-order-functions.php:294
+#: includes/wc-order-functions.php:295
 msgid "Unpaid order cancelled - time limit reached."
-msgstr "Ubetalt ordre kansellert -tidsfrist nådd."
+msgstr "Ubetalt ordre kansellert - tidsfrist nådd."
 
 #: includes/wc-product-functions.php:236
 msgctxt "slug"
@@ -6923,46 +6924,46 @@ msgstr "Tilleggsinformasjon"
 
 #: includes/wc-template-functions.php:983
 msgid "Reviews (%d)"
-msgstr "Anmeldelser (%d)"
+msgstr "Omtaler (%d)"
 
 #: includes/wc-template-functions.php:1074
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr "Bruk $args argumentet som en array istedenfor. Foreldet argument vil bli fjernet i WC 2.2."
+msgstr "Bruk $args argument som en matrise istedet. Utdatert argument vil bli fjernet i WC 2.2."
 
 #: includes/wc-template-functions.php:1242
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Hjem"
 
-#: includes/wc-template-functions.php:1529
+#: includes/wc-template-functions.php:1534
 msgid "Order Again"
 msgstr "Bestill på nytt"
 
-#: includes/wc-template-functions.php:1620
+#: includes/wc-template-functions.php:1625
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Velg et land&hellip;"
 
-#: includes/wc-template-functions.php:1627
+#: includes/wc-template-functions.php:1632
 msgid "Update country"
 msgstr "Oppdater land"
 
-#: includes/wc-template-functions.php:1670
+#: includes/wc-template-functions.php:1675
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Velg en delstat&hellip;"
 
-#: includes/wc-template-functions.php:1783
+#: includes/wc-template-functions.php:1788
 msgid "Search for:"
 msgstr "Søk etter:"
 
-#: includes/wc-template-functions.php:1784
+#: includes/wc-template-functions.php:1789
 msgid "Search for products"
 msgstr "Søk etter produkter"
 
-#: includes/wc-template-functions.php:1785
+#: includes/wc-template-functions.php:1790
 msgid "Search"
 msgstr "Søk"
 
@@ -6996,7 +6997,7 @@ msgstr "WooCommerce lagvis navigeringsfilter"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:27
 msgid "Active Filters"
-msgstr "Aktive Filtrer"
+msgstr "Aktive filtre"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:84
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:91
@@ -7016,7 +7017,7 @@ msgstr "Maks"
 msgid ""
 "Shows a custom attribute in a widget which lets you narrow down the list of "
 "products when viewing product categories."
-msgstr "Vis en tipasset attributt i en widget som lar deg begrense listen av produkter ved visning av produktkategorier."
+msgstr "Vis en tilpasset attributt i en widget som lar deg begrense listen av produkter ved visning av produktkategorier."
 
 #: includes/widgets/class-wc-widget-layered-nav.php:23
 msgid "WooCommerce Layered Nav"
@@ -7024,7 +7025,7 @@ msgstr "WooCommerce lagvis navigering"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:69
 msgid "Filter by"
-msgstr "Filtrer etter"
+msgstr "Filtrer på"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:75
 msgid "Attribute"
@@ -7062,11 +7063,11 @@ msgstr "Enhver %s"
 msgid ""
 "Shows a price filter slider in a widget which lets you narrow down the list "
 "of shown products when viewing product categories."
-msgstr "Vis en slider for prisfilter i en widget som lar deg begrense listen av viste produkter ved visning av produktkategorier."
+msgstr "Viser en slider for prisfilter i en widget som lar deg begrense listen av viste produkter ved visning av produktkategorier."
 
 #: includes/widgets/class-wc-widget-price-filter.php:25
 msgid "WooCommerce Price Filter"
-msgstr "WooCommerce Prisfilter"
+msgstr "WooCommerce prisfilter"
 
 #: includes/widgets/class-wc-widget-price-filter.php:29
 msgid "Filter by price"
@@ -7121,7 +7122,7 @@ msgstr "Vis hierarki"
 msgid "Only show children for the current category"
 msgstr "Vis kun underkategorier av nåværende kategori"
 
-#: includes/widgets/class-wc-widget-product-categories.php:156
+#: includes/widgets/class-wc-widget-product-categories.php:177
 msgid "No product categories exist."
 msgstr "Ingen produktkategorier finnes."
 
@@ -7143,7 +7144,7 @@ msgstr "WooCommerce produktstikkord"
 
 #: includes/widgets/class-wc-widget-products.php:21
 msgid "Display a list of your products on your site."
-msgstr "Vis en liste av produktene på nettstedet ditt."
+msgstr "Vis en liste med produktene på nettstedet ditt."
 
 #: includes/widgets/class-wc-widget-products.php:23
 msgid "WooCommerce Products"
@@ -7161,7 +7162,7 @@ msgstr "Vis"
 
 #: includes/widgets/class-wc-widget-products.php:43
 msgid "All Products"
-msgstr "Alle Produkter"
+msgstr "Alle produkter"
 
 #: includes/widgets/class-wc-widget-products.php:44
 msgid "Featured Products"
@@ -7169,7 +7170,7 @@ msgstr "Fremhevede produkter"
 
 #: includes/widgets/class-wc-widget-products.php:45
 msgid "On-sale Products"
-msgstr "Produkter på Salg"
+msgstr "Produkter på salg"
 
 #: includes/widgets/class-wc-widget-products.php:53
 #: templates/myaccount/my-orders.php:33
@@ -7196,7 +7197,7 @@ msgstr "Salg"
 #: includes/widgets/class-wc-widget-products.php:62
 msgctxt "Sorting order"
 msgid "Order"
-msgstr "Ordre"
+msgstr "Rekkefølge"
 
 #: includes/widgets/class-wc-widget-products.php:64
 msgid "ASC"
@@ -7216,19 +7217,19 @@ msgstr "Vis skjulte produkter"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:21
 msgid "Display a list of your most recent reviews on your site."
-msgstr "Vis en liste over de seneste anmeldelsene på nettstedet ditt."
+msgstr "Vis en liste med de seneste omtalene på nettstedet ditt."
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:23
 msgid "WooCommerce Recent Reviews"
-msgstr "WooCommerce seneste anmeldelser"
+msgstr "WooCommerce seneste omtaler"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:27
 msgid "Recent Reviews"
-msgstr "Nylige anmeldelser"
+msgstr "Nylige omtaler"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:36
 msgid "Number of reviews to show"
-msgstr "Antall anmeldelser å vise"
+msgstr "Antall omtaler å vise"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:85
 msgctxt "by comment author"
@@ -7249,7 +7250,7 @@ msgstr "Nylige viste produkter"
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:23
 msgid "Display a list of your top rated products on your site."
-msgstr "Vis en liste over toppranket produkter på ditt nettsted."
+msgstr "Vis en liste med de topprangerte produktene på nettstedet ditt."
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:25
 msgid "WooCommerce Top Rated Products"
@@ -7280,15 +7281,15 @@ msgid ""
 "No shipping methods were found; please recalculate your shipping or continue"
 " to checkout and enter your full address to see if there is shipping "
 "available to your location."
-msgstr "Ingen fraktmetoder ble funnet, vennligst endre din frakt eller fortsette til kassen og oppgi fullstendig adresse for å se om det levering tilgjengelig til din adresse. "
+msgstr "Ingen fraktmetoder ble funnet, vennligst regn om frakten din eller fortsett til kassen og oppgi fullstendig adresse for å se om det er levering tilgjengelig til adressen din. "
 
 #: templates/cart/cart-shipping.php:59
 msgid "Please fill in your details to see available shipping methods."
-msgstr "Vennligst fyll inn detaljer dinefor å se tilgjengelige fraktmetoder."
+msgstr "Vennligst fyll inn detaljene dine for å se tilgjengelige fraktmetoder."
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid "Sorry, shipping is unavailable %s."
-msgstr "Beklager, er levering er ikke tilgjengelig %s."
+msgstr "Beklager, levering er ikke tilgjengelig %s."
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid ""
@@ -7307,12 +7308,6 @@ msgstr "Handlekurv total"
 #: templates/cart/cart-totals.php:21 templates/checkout/review-order.php:25
 msgid "Cart Subtotal"
 msgstr "Handlekurv delsum"
-
-#: templates/cart/cart-totals.php:27 templates/cart/cart-totals.php:67
-#: templates/checkout/review-order.php:31
-#: templates/checkout/review-order.php:71
-msgid "Coupon:"
-msgstr "Rabbattkupong:"
 
 #: templates/cart/cart-totals.php:75 templates/checkout/review-order.php:79
 msgid "Order Total"
@@ -7420,11 +7415,11 @@ msgstr "Opprett en konto?"
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
-msgstr "Opprett en konto ved å skrive inn informasjonen nedenfor. Hvis du allerede har registrert deg, vennligst logg inn på toppen av siden."
+msgstr "Opprett en konto ved å skrive inn informasjonen nedenfor. Hvis du allerede har registrert deg, vennligst logg inn øverst på siden."
 
 #: templates/checkout/form-checkout.php:20
 msgid "You must be logged in to checkout."
-msgstr "Du må være pålogget for å gp til kassen."
+msgstr "Du må være pålogget for å gå til kassen."
 
 #: templates/checkout/form-checkout.php:51
 msgid "Your order"
@@ -7451,7 +7446,7 @@ msgid ""
 "If you have shopped with us before, please enter your details in the boxes "
 "below. If you are a new customer please proceed to the Billing &amp; "
 "Shipping section."
-msgstr "Hvis du har handlet hos oss før, vennligst fyll ut detaljene dine boksene nedenfor. Er du en ny kunde, vennligst fortsett til kassen &amp; fraktområdet."
+msgstr "Hvis du har handlet hos oss før, vennligst fyll ut detaljene dine i boksene nedenfor. Er du en ny kunde, vennligst fortsett til kassen &amp; fraktområdet."
 
 #: templates/checkout/form-pay.php:20
 msgid "Qty"
@@ -7470,7 +7465,7 @@ msgid ""
 "Sorry, it seems that there are no available payment methods for your "
 "location. Please contact us if you require assistance or wish to make "
 "alternate arrangements."
-msgstr "Beklager, det ser ikke ut til å finnes noe betalingsmetode for din adresse. Kontakt oss om du trenger hjelp, eller ønsker å benytte et alternativ."
+msgstr "Beklager, det ser ikke ut til å finnes noe betalingsmetode for adressen din. Kontakt oss om du trenger hjelp, eller ønsker å benytte et alternativ."
 
 #: templates/checkout/form-pay.php:89
 msgid "Pay for order"
@@ -7489,7 +7484,7 @@ msgid ""
 "Sorry, it seems that there are no available payment methods for your state. "
 "Please contact us if you require assistance or wish to make alternate "
 "arrangements."
-msgstr "Beklager, det ser ikke ut til å finnes noe betalingsmetode for din adresse. Kontakt oss om du trenger hjelp, eller ønsker å benytte et alternativ."
+msgstr "Beklager, det ser ikke ut til å finnes noe betalingsmetode for adressen din. Kontakt oss om du trenger hjelp, eller ønsker å benytte et alternativ."
 
 #: templates/checkout/review-order.php:161
 msgid ""
@@ -7519,11 +7514,11 @@ msgstr "vilkår"
 msgid ""
 "Unfortunately your order cannot be processed as the originating "
 "bank/merchant has declined your transaction."
-msgstr "Desverre kan ikke ordren din fullføres, fordi betalingen ikke er godkjent av bank/kortleverandør."
+msgstr "Dessverre kan ikke ordren din fullføres fordi betalingen er avvist av bank/kortleverandør."
 
 #: templates/checkout/thankyou.php:22
 msgid "Please attempt your purchase again or go to your account page."
-msgstr "Vennligst forsøk å gjennomføre kjøpet ditt igjen eller gå til din konto."
+msgstr "Vennligst forsøk å gjennomføre kjøpet ditt igjen eller gå til kontosiden din."
 
 #: templates/checkout/thankyou.php:24
 msgid "Please attempt your purchase again."
@@ -7576,7 +7571,7 @@ msgstr "Epost:"
 #: templates/emails/plain/customer-note.php:52
 #: templates/emails/plain/customer-processing-order.php:44
 msgid "Tel:"
-msgstr "Tlf:"
+msgstr "Tel:"
 
 #: templates/emails/customer-completed-order.php:14
 #: templates/emails/plain/customer-completed-order.php:13
@@ -7604,19 +7599,19 @@ msgstr "Takk for at du opprettet en konto på %s. Brukernavnet ditt er <strong>%
 
 #: templates/emails/customer-new-account.php:18
 msgid "Your password has been automatically generated: <strong>%s</strong>"
-msgstr "Ditt passordet er automatisk generert: <strong>%s</strong>"
+msgstr "Passordet ditt ble automatisk generert: <strong>%s</strong>"
 
 #: templates/emails/customer-new-account.php:22
 #: templates/emails/plain/customer-new-account.php:18
 msgid ""
 "You can access your account area to view your orders and change your "
 "password here: %s."
-msgstr "Du kan få tilgang til ditt konto området for å vise dine bestillinger og endre passordet ditt her: %s."
+msgstr "Du kan få tilgang til kontoområdet ditt for å vise ordrene dine og endre passordet ditt her: %s."
 
 #: templates/emails/customer-note.php:14
 #: templates/emails/plain/customer-note.php:13
 msgid "Hello, a note has just been added to your order:"
-msgstr "Hei, et notat har nylig blitt lagt til din ordre:"
+msgstr "Hei, et notat har nylig blitt lagt til ordren din:"
 
 #: templates/emails/customer-note.php:18
 #: templates/emails/plain/customer-note.php:21
@@ -7644,7 +7639,7 @@ msgstr "Brukernavn: %s"
 #: templates/emails/customer-reset-password.php:16
 #: templates/emails/plain/customer-reset-password.php:16
 msgid "If this was a mistake, just ignore this email and nothing will happen."
-msgstr "Hvis dette var en feil, bare ignorer denne e-posten, og ingenting vil skje."
+msgstr "Hvis dette var en feil, bare ignorer denne eposten, og ingenting vil skje."
 
 #: templates/emails/customer-reset-password.php:17
 #: templates/emails/plain/customer-reset-password.php:17
@@ -7663,7 +7658,7 @@ msgstr "Fakturaadresse"
 #: templates/emails/email-addresses.php:28
 #: templates/emails/plain/email-addresses.php:17
 msgid "Shipping address"
-msgstr "Fraktadresse"
+msgstr "Leveringsadresse"
 
 #: templates/emails/email-order-items.php:25
 msgid "Product Image"
@@ -7689,7 +7684,7 @@ msgstr "Ordrenummer: %s"
 
 #: templates/emails/plain/admin-new-order.php:20
 msgid "Order link: %s"
-msgstr "Bestill lenke: %s"
+msgstr "Ordrelenke: %s"
 
 #: templates/emails/plain/admin-new-order.php:21
 #: templates/emails/plain/customer-completed-order.php:20
@@ -7727,7 +7722,7 @@ msgstr "Produkter med stikkord &ldquo;"
 
 #: templates/global/breadcrumb.php:91 templates/global/breadcrumb.php:189
 msgid "Search results for &ldquo;"
-msgstr "Søkeresultat for &ldquo;"
+msgstr "Søkeresultater for &ldquo;"
 
 #: templates/global/breadcrumb.php:147
 msgid "Error 404"
@@ -7818,7 +7813,7 @@ msgid ""
 "Sorry, it seems that there are no payment methods which support adding a new"
 " payment method. Please contact us if you require assistance or wish to make"
 " alternate arrangements."
-msgstr "Beklager, det virker som det ikke er noen betalingsmetoder som støtter å legge en ny betalingsmåte. Ta kontakt med oss hvis du trenger hjelp eller ønsker å gjøre alternative ordninger."
+msgstr "Beklager, det virker som det ikke er noen betalingsmetoder som støtter å legge en ny betalingsmåte. Ta kontakt med oss hvis du trenger hjelp eller ønsker å benytt et alternativ."
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
@@ -7835,11 +7830,11 @@ msgstr "Etternavn"
 #: templates/myaccount/form-edit-account.php:28
 #: templates/myaccount/form-login.php:79
 msgid "Email address"
-msgstr "E-mail adresse"
+msgstr "Epostadresse"
 
 #: templates/myaccount/form-edit-account.php:32
 msgid "Password (leave blank to leave unchanged)"
-msgstr "Passord (la stå tom å forlate uendret)"
+msgstr "Passord (la stå tom for å forbli uendret)"
 
 #: templates/myaccount/form-edit-account.php:36
 msgid "Confirm new password"
@@ -7852,7 +7847,7 @@ msgstr "Lagre endringer"
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:133
 msgid "Shipping Address"
-msgstr "Fraktadresse"
+msgstr "Leveringsadresse"
 
 #: templates/myaccount/form-edit-address.php:38
 msgid "Save Address"
@@ -7860,7 +7855,7 @@ msgstr "Lagre adresse"
 
 #: templates/myaccount/form-login.php:32
 msgid "Username or email address"
-msgstr "Brukernavn eller e-postadresse"
+msgstr "Brukernavn eller epostadresse"
 
 #: templates/myaccount/form-login.php:63 templates/myaccount/form-login.php:96
 msgid "Register"
@@ -7902,14 +7897,14 @@ msgstr "Lagre"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
-msgstr "Hei <strong>%1$s</strong> (ikke %1$s? <a href=\"%2$s\">Logg ut</a>)."
+msgstr "Hei, <strong>%1$s</strong> (ikke %1$s? <a href=\"%2$s\">Logg ut</a>)."
 
 #: templates/myaccount/my-account.php:24
 msgid ""
 "From your account dashboard you can view your recent orders, manage your "
 "shipping and billing addresses and <a href=\"%s\">edit your password and "
 "account details</a>."
-msgstr "Fra din konto dashbordet kan du vise dine siste ordre, administrere frakt og fakturaadresse og <a href=\"%s\">redigere dine passord og kontodetaljer</a>."
+msgstr "Fra din kontos dashbord kan du se dine seneste ordre, administrere frakt- og fakturaadressene og <a href=\"%s\">redigere passord og kontodetaljene dine</a>."
 
 #: templates/myaccount/my-address.php:17
 msgid "My Addresses"
@@ -7959,12 +7954,27 @@ msgstr "Avbryt"
 msgid "View"
 msgstr "Vis"
 
+#: templates/myaccount/view-order.php:12
+msgid ""
+"Order <mark class=\"order-number\">%s</mark> was placed on <mark class"
+"=\"order-date\">%s</mark> and is currently <mark class=\"order-"
+"status\">%s</mark>."
+msgstr "Ordre <mark class=\"order-number\">%s</mark> ble plassert på <mark class=\"order-date\">%s</mark> og er for tiden <mark class=\"order-status\">%s</mark>."
+
+#: templates/myaccount/view-order.php:16 templates/order/tracking.php:31
+msgid "Order Updates"
+msgstr "Ordreoppdateringer"
+
+#: templates/myaccount/view-order.php:22 templates/order/tracking.php:37
+msgid "l jS \\o\\f F Y, h:ia"
+msgstr "l jS \\o\\f F Y, h:ia"
+
 #: templates/order/form-tracking.php:17
 msgid ""
 "To track your order please enter your Order ID in the box below and press "
 "return. This was given to you on your receipt and in the confirmation email "
 "you should have received."
-msgstr "For å lagre ordren dir, skriv ordre-IDen din i boksen nedenfor og trykk enter. Ordre-ID finner du på kvittering din og i ordrebekreftelsen du skal ha mottatt på epost."
+msgstr "For å spore ordren din, skriv ordre-IDen din i boksen nedenfor og trykk enter. Ordre-ID finner du på kvittering din og i ordrebekreftelsen du skal ha mottatt på epost."
 
 #: templates/order/form-tracking.php:19
 msgid "Order ID"
@@ -7972,7 +7982,7 @@ msgstr "Ordre-ID"
 
 #: templates/order/form-tracking.php:19
 msgid "Found in your order confirmation email."
-msgstr "Finnes i eposten din med ordrebekrefelse."
+msgstr "Finnes i eposten din med ordrebekreftelse."
 
 #: templates/order/form-tracking.php:20
 msgid "Billing Email"
@@ -8016,7 +8026,7 @@ msgstr "siden"
 
 #: templates/single-product/add-to-cart/variable.php:25
 msgid "Choose an option"
-msgstr "Velg en&hellip"
+msgstr "Velg en"
 
 #: templates/single-product/add-to-cart/variable.php:73
 msgid "Clear selection"
@@ -8026,21 +8036,21 @@ msgstr "Nullstill valg"
 msgid "This product is currently out of stock and unavailable."
 msgstr "Dette produktet er for tiden utsolgt og utilgjengelig."
 
-#: templates/single-product/meta.php:20
+#: templates/single-product/meta.php:23
 msgid "SKU:"
 msgstr "VE:"
 
-#: templates/single-product/meta.php:20
+#: templates/single-product/meta.php:23
 msgid "n/a"
 msgstr "i/a"
 
-#: templates/single-product/meta.php:24
+#: templates/single-product/meta.php:27
 msgid "Category:"
 msgid_plural "Categories:"
 msgstr[0] "Kategori:"
 msgstr[1] "Kategorier:"
 
-#: templates/single-product/meta.php:26
+#: templates/single-product/meta.php:29
 msgid "Tag:"
 msgid_plural "Tags:"
 msgstr[0] "Stikkord:"
@@ -8062,7 +8072,7 @@ msgstr[1] "%s kundeomtaler"
 
 #: templates/single-product/related.php:36
 msgid "Related Products"
-msgstr "Relaterte produkter"
+msgstr "Beslektede produkter"
 
 #: templates/single-product/review.php:26
 msgid "Rated %d out of 5"
@@ -8087,24 +8097,24 @@ msgstr "Du liker kanskje også&hellip;"
 #: templates/single-product-reviews.php:21
 msgid "%s review for %s"
 msgid_plural "%s reviews for %s"
-msgstr[0] "%s anmeldelse for %s"
-msgstr[1] "%s anmeldelser for %s"
+msgstr[0] "%s omtale for %s"
+msgstr[1] "%s omtaler for %s"
 
 #: templates/single-product-reviews.php:23
 msgid "Reviews"
-msgstr "Anmeldelser"
+msgstr "Omtaler"
 
 #: templates/single-product-reviews.php:44
 msgid "There are no reviews yet."
-msgstr "Det er ingen produktanmeldelser ennå."
+msgstr "Det er ingen produktomtaler ennå."
 
 #: templates/single-product-reviews.php:57
 msgid "Add a review"
-msgstr "Skriv en anmeldelse"
+msgstr "Skriv en omtale"
 
 #: templates/single-product-reviews.php:57
 msgid "Be the first to review"
-msgstr "Bli den første som skriver en anmeldelse"
+msgstr "Bli den første som skriver en omtale om"
 
 #: templates/single-product-reviews.php:58
 msgid "Leave a Reply to %s"
@@ -8120,11 +8130,11 @@ msgstr "Send inn"
 
 #: templates/single-product-reviews.php:73
 msgid "Your Rating"
-msgstr "Din rangering"
+msgstr "Rangeringen din"
 
 #: templates/single-product-reviews.php:74
 msgid "Rate&hellip;"
-msgstr "Vurder&hellip;"
+msgstr "Ranger&hellip;"
 
 #: templates/single-product-reviews.php:75
 msgid "Perfect"
@@ -8148,12 +8158,12 @@ msgstr "Veldig dårlig"
 
 #: templates/single-product-reviews.php:83
 msgid "Your Review"
-msgstr "Anmeldelsen din"
+msgstr "Omtalen din"
 
 #: templates/single-product-reviews.php:92
 msgid ""
 "Only logged in customers who have purchased this product may leave a review."
-msgstr "Bare innloggede kunder som har kjøpt dette produktet kan gi en vurdering."
+msgstr "Bare innloggede kunder som har kjøpt dette produktet kan legge igjen en omtale."
 
 #: woocommerce.php:182
 msgid "Docs"
