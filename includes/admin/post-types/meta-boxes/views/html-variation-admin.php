@@ -113,7 +113,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							</tr>
 						<?php endif; ?>
 						<tr>
-							<td><label><?php _e( 'Shipping class:', 'woocommerce' ); ?></label> <?php
+							<td class="hide_if_variation_virtual"><label><?php _e( 'Shipping class:', 'woocommerce' ); ?></label> <?php
 								$args = array(
 									'taxonomy' 			=> 'product_shipping_class',
 									'hide_empty'		=> 0,
