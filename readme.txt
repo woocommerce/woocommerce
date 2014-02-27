@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.4 =
+
 = 2.1.3 - 27/02/2014 =
 * Fix - Use correct thresholds to calculate out of stock number in dashboard widget 
 * Fix - Admin screen strings sanitised to work with Chinese characters
