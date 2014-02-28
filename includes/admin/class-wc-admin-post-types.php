@@ -135,19 +135,24 @@ class WC_Admin_Post_Types {
 			switch( $post_type ) {
 				case 'product' :
 
-					if ( $child_product_variations =& get_children( 'post_parent=' . $id . '&post_type=product_variation' ) )
-						if ( $child_product_variations )
-							foreach ( $child_product_variations as $child )
-								wp_delete_post( $child->ID, true );
+					$child_product_variations = get_children( 'post_parent=' . $id . '&post_type=product_variation' );
 
-					if ( $child_products =& get_children( 'post_parent=' . $id . '&post_type=product' ) )
-						if ( $child_products )
-							foreach ( $child_products as $child ) {
-								$child_post = array();
-								$child_post['ID'] = $child->ID;
-								$child_post['post_parent'] = 0;
-								wp_update_post( $child_post );
-							}
+					if ( $child_product_variations ) {
+						foreach ( $child_product_variations as $child ) {
+							wp_delete_post( $child->ID, true );
+						}
+					}
+
+					$child_products = get_children( 'post_parent=' . $id . '&post_type=product' );
+
+					if ( $child_products ) {
+						foreach ( $child_products as $child ) {
+							$child_post = array();
+							$child_post['ID'] = $child->ID;
+							$child_post['post_parent'] = 0;
+							wp_update_post( $child_post );
+						}
+					}
 
 					wc_delete_product_transients();
 
