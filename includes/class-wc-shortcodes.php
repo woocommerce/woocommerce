@@ -487,7 +487,7 @@ class WC_Shortcodes {
 		extract( shortcode_atts( array(
 			'id'         => '',
 			'class'      => '',
-            'quantity'   => '1',
+            		'quantity'   => '1',
 			'sku'        => '',
 			'style'      => 'border:4px solid #ccc; padding: 12px;',
 			'show_price' => 'true'
