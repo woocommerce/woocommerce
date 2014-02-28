@@ -109,8 +109,10 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 
 	$args = wp_parse_args( $args, $defaults );
 
-	if ( $args['orderby'] == 'order' )
-		$r['menu_order'] = 'asc';
+	if ( $args['orderby'] == 'order' ) {
+		$args['menu_order'] = 'asc';
+		$args['orderby']    = 'name';
+	}
 
 	$terms = get_terms( 'product_cat', $args );
 
