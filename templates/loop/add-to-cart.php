@@ -16,7 +16,7 @@ echo apply_filters( 'woocommerce_loop_add_to_cart_link',
 		esc_url( $product->add_to_cart_url() ),
 		esc_attr( $product->id ),
     esc_attr( $product->get_sku() ),
-    esc_attr( $quantity ),
+    esc_attr( isset( $quantity ) ? $quantity : 1 ),
 		$product->is_purchasable() ? 'add_to_cart_button' : '',
 		esc_attr( $product->product_type ),
 		esc_html( $product->add_to_cart_text() )
