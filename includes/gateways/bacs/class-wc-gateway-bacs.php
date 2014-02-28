@@ -184,8 +184,9 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			$bics            = array_map( 'wc_clean', $_POST['bacs_bic'] );
 
 			foreach ( $account_names as $i => $name ) {
-				if ( ! isset( $account_names[ $i ] ) )
+				if ( ! isset( $account_names[ $i ] ) ) {
 					continue;
+				}
 
 	    		$accounts[] = array(
 	    			'account_name'   => $account_names[ $i ],
@@ -205,9 +206,9 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * Output for the order received page.
      */
     public function thankyou_page( $order_id ) {
-		if ( $this->instructions )
+		if ( $this->instructions ) {
         	echo wpautop( wptexturize( wp_kses_post( $this->instructions ) ) );
-
+        }
         $this->bank_details( $order_id );
     }
 
@@ -221,11 +222,13 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      */
     public function email_instructions( $order, $sent_to_admin ) {
 
-    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' )
+    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' ) {
     		return;
+    	}
 
-		if ( $this->instructions )
+		if ( $this->instructions ) {
         	echo wpautop( wptexturize( $this->instructions ) );
+        }
 
 		$this->bank_details( $order->id );
     }
@@ -234,8 +237,9 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * Get bank details and place into a list format
      */
     private function bank_details( $order_id = '' ) {
-    	if ( empty( $this->account_details ) )
+    	if ( empty( $this->account_details ) ) {
     		return;
+    	}
 
     	echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>';
 
@@ -267,8 +271,9 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					)
 				), $order_id );
 
-				if ( $bacs_account->account_name || $bacs_account->bank_name )
+				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
 					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>';
+				}
 
 	    		foreach ( $account_fields as $field_key => $field ) {
 				    if ( ! empty( $field['value'] ) ) {
