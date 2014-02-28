@@ -277,11 +277,11 @@ final class WooCommerce {
 	 * Include required core files used in admin and on the frontend.
 	 */
 	private function includes() {
-		include( 'includes/wc-core-functions.php' );
-		include( 'includes/class-wc-install.php' );
-		include( 'includes/class-wc-download-handler.php' );
-		include( 'includes/class-wc-comments.php' );
-		include( 'includes/class-wc-post-data.php' );
+		include_once( 'includes/wc-core-functions.php' );
+		include_once( 'includes/class-wc-install.php' );
+		include_once( 'includes/class-wc-download-handler.php' );
+		include_once( 'includes/class-wc-comments.php' );
+		include_once( 'includes/class-wc-post-data.php' );
 
 		if ( is_admin() ) {
 			include_once( 'includes/admin/class-wc-admin.php' );
