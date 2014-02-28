@@ -54,7 +54,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
     	add_action( 'woocommerce_thankyou_bacs', array( $this, 'thankyou_page' ) );
 
     	// Customer Emails
-    	add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 2 );
+    	add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
     }
 
     /**
@@ -217,9 +217,10 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * @access public
      * @param WC_Order $order
      * @param bool $sent_to_admin
+     * @param bool $plain_text
      * @return void
      */
-    public function email_instructions( $order, $sent_to_admin ) {
+    public function email_instructions( $order, $sent_to_admin, $plain_text ) {
 
     	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' )
     		return;
