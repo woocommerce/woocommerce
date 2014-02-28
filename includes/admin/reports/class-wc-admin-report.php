@@ -274,13 +274,13 @@ class WC_Admin_Report {
 		for ( $i = 0; $i <= $interval; $i ++ ) {
 			switch ( $group_by ) {
 				case 'day' :
-					$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) * 1000;
+					$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) . '000';
 				break;
 				case 'month' :
-					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) * 1000;
+					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) . '000';
 				break;
 			}
-
+			
 			if ( ! isset( $prepared_data[ $time ] ) )
 				$prepared_data[ $time ] = array( esc_js( $time ), 0 );
 		}
@@ -288,10 +288,10 @@ class WC_Admin_Report {
 		foreach ( $data as $d ) {
 			switch ( $group_by ) {
 				case 'day' :
-					$time = strtotime( date( 'Ymd', strtotime( $d->$date_key ) ) ) * 1000;
+					$time = strtotime( date( 'Ymd', strtotime( $d->$date_key ) ) ) . '000';
 				break;
 				case 'month' :
-					$time = strtotime( date( 'Ym', strtotime( $d->$date_key ) ) . '01' ) * 1000;
+					$time = strtotime( date( 'Ym', strtotime( $d->$date_key ) ) . '01' ) . '000';
 				break;
 			}
 
