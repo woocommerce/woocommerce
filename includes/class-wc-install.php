@@ -679,18 +679,22 @@ class WC_Install {
 
 			// Output Upgrade Notice
 			$matches = null;
-			$regexp = '~==\s*Upgrade Notice\s*==\s*=\s*[0-9.]+\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
+			$regexp = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
 
 			if ( preg_match( $regexp, $response['body'], $matches ) ) {
-				$notices = (array) preg_split('~[\r\n]+~', trim( $matches[1] ) );
+				$version = trim( $matches[1] );
+				$notices = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
 
-				echo '<div style="font-weight: normal; background: #cc99c2; color: #fff !important; border: 1px solid #b76ca9; padding: 9px; margin: 9px 0;">';
+				if ( version_compare( WC_VERSION, $version, '<' ) ) {
 
-				foreach ( $notices as $index => $line ) {
-					echo '<p style="margin: 0; font-size: 1.1em; color: #fff; text-shadow: 0 1px 1px #b574a8;">' . preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) . '</p>';
+					echo '<div style="font-weight: normal; background: #cc99c2; color: #fff !important; border: 1px solid #b76ca9; padding: 9px; margin: 9px 0;">';
+
+					foreach ( $notices as $index => $line ) {
+						echo '<p style="margin: 0; font-size: 1.1em; color: #fff; text-shadow: 0 1px 1px #b574a8;">' . preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) . '</p>';
+					}
+
+					echo '</div>';
 				}
-
-				echo '</div>';
 			}
 
 			// Output Changelog
@@ -710,13 +714,23 @@ class WC_Install {
 							echo '<ul style="list-style: disc inside; margin: 9px 0 9px 20px; overflow:hidden; zoom: 1;">';
 							$ul = true;
 						}
+						
 						$line = preg_replace( '~^\s*\*\s*~', '', htmlspecialchars( $line ) );
+						
 						echo '<li style="width: 50%; margin: 0; float: left; ' . ( $index % 2 == 0 ? 'clear: left;' : '' ) . '">' . $line . '</li>';
 					} else {
+
+						$version = trim( current( explode( '-', str_replace( '=', '', $line ) ) ) );
+
+						if ( version_compare( WC_VERSION, $version, '>=' ) ) {
+							break;
+						}
+
 						if ( $ul ) {
 							echo '</ul>';
 							$ul = false;
 						}
+
 						echo '<p style="margin: 9px 0;">' . htmlspecialchars( $line ) . '</p>';
 					}
 				}
