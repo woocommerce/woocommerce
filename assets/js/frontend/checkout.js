@@ -72,7 +72,7 @@ jQuery(function($) {
 			data: 		data,
 			success: 	function( response ) {
 				if ( response ) {
-					var order_output = $($.parseHTML(response));
+					var order_output = $($.parseHTML(response.trim()));
 					$('#order_review').html(order_output.html());
 					$('body').trigger('updated_checkout');
 				}
