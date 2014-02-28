@@ -61,7 +61,10 @@ class WC_Order_Item_Meta {
 		          	// If we have a product, and its not a term, try to find its non-sanitized name
 		            } elseif ( $this->product ) {
 						$product_attributes = $this->product->get_attributes();
-						$meta_key           = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', urldecode( $meta_key ) ) ]['name'] );
+
+						if ( isset( $product_attributes[ str_replace( 'attribute_', '', urldecode( $meta_key ) ) ] ) ) {
+							$meta_key = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', urldecode( $meta_key ) ) ]['name'] );
+						}
 		            }
 
 					if ( $flat )
