@@ -228,7 +228,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
     	}
 
 		if ( $this->instructions ) {
-        	echo wpautop( wptexturize( $this->instructions ) );
+        	echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
         }
 
 		$this->bank_details( $order->id );
@@ -282,7 +282,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				    }
 				}
 
-	    		echo '</ul>' . PHP_EOL;
+	    		echo '</ul>';
 	    	}
 	    }
     }
