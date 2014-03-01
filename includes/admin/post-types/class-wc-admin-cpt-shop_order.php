@@ -193,9 +193,13 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 				if ( $post->comment_count ) {
 
+					// check the status of the post
+					( $post->post_status !== 'trash' ) ? $status = '' : $status = 'post-trashed';
+
 					$latest_notes = get_comments( array(
-						'post_id' => $post->ID,
-						'number'  => 1
+						'post_id'	=> $post->ID,
+						'number'	=> 1,
+						'status'	=> $status
 					) );
 
 					$latest_note = current( $latest_notes );
