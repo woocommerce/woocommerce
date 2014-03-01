@@ -161,7 +161,7 @@ function wc_get_product_ids_on_sale() {
 		GROUP BY post.ID;
 	" );
 
-	$product_ids_on_sale = array_unique( array_map( 'absint', array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), wp_list_pluck( $on_sale_posts, 'post_parent' ) ) ) );
+	$product_ids_on_sale = array_unique( array_map( 'absint', array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), array_diff( wp_list_pluck( $on_sale_posts, 'post_parent' ), array( 0 ) ) ) ) );
 
 	set_transient( 'wc_products_onsale', $product_ids_on_sale );
 
