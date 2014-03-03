@@ -65,6 +65,7 @@ function wc_template_redirect() {
 		WC()->shipping();
 	}
 }
+add_action( 'template_redirect', 'wc_template_redirect' );
 
 /**
  * When the_post is called, put product data into a global.
@@ -85,6 +86,7 @@ function wc_setup_product_data( $post ) {
 
 	return $GLOBALS['product'];
 }
+add_action( 'the_post', 'wc_setup_product_data' );
 
 /**
  * Products RSS Feed.
