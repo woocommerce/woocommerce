@@ -103,13 +103,7 @@ class WC_Admin_Status {
 				break;
 				case "recount_terms" :
 
-					$product_cats = get_terms( 'product_cat', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
-
-					_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
-
-					$product_tags = get_terms( 'product_tag', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
-
-					_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
+					wc_do_term_recount();
 
 					echo '<div class="updated"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
 				break;

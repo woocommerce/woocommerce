@@ -384,6 +384,22 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
 
 /**
+ * Function that handles the term recount
+ * @return void
+ */
+function wc_do_term_recount() {
+	$product_cats = get_terms( 'product_cat', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
+
+	_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
+
+	$product_tags = get_terms( 'product_tag', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
+
+	_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
+
+	return;
+}
+
+/**
  * Function for recounting product terms, ignoring hidden products.
  * @param  array  $terms
  * @param  string  $taxonomy

@@ -127,6 +127,9 @@ function wc_delete_product_transients( $post_id = 0 ) {
 
 	}
 
+	// recount terms
+	wc_do_term_recount();
+
 	do_action( 'woocommerce_delete_product_transients', $post_id );
 }
 
