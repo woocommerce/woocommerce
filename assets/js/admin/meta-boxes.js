@@ -1123,11 +1123,11 @@ jQuery( function($){
 	});
 
 	// File inputs
-	$('.downloadable_files').on('click','a.insert',function(){
+	$('#woocommerce-product-data').on('click','.downloadable_files a.insert',function(){
 		$(this).closest('.downloadable_files').find('tbody').append( $(this).data( 'row' ) );
 		return false;
 	});
-	$('.downloadable_files').on('click','a.delete',function(){
+	$('#woocommerce-product-data').on('click','.downloadable_files a.delete',function(){
 		$(this).closest('tr').remove();
 		return false;
 	});
