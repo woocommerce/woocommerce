@@ -228,7 +228,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
     	}
 
 		if ( $this->instructions ) {
-        	echo wpautop( wptexturize( $this->instructions ) );
+        	echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
         }
 
 		$this->bank_details( $order->id );
@@ -242,13 +242,13 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
     		return;
     	}
 
-    	echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>';
+    	echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>' . PHP_EOL;
 
     	$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details );
 
     	if ( ! empty( $bacs_accounts ) ) {
 	    	foreach ( $bacs_accounts as $bacs_account ) {
-	    		echo '<ul class="order_details bacs_details">';
+	    		echo '<ul class="order_details bacs_details">' . PHP_EOL;
 
 	    		$bacs_account = (object) $bacs_account;
 
@@ -273,12 +273,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				), $order_id );
 
 				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
-					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>';
+					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>' . PHP_EOL;
 				}
 
 	    		foreach ( $account_fields as $field_key => $field ) {
 				    if ( ! empty( $field['value'] ) ) {
-				    	echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>';
+				    	echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>' . PHP_EOL;
 				    }
 				}
 
