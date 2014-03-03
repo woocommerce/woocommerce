@@ -428,14 +428,16 @@ final class WooCommerce {
 
 		// Frontend Locale
 		if ( ! is_admin() || is_ajax() ) {
-			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
-		}
-
-		// Admin Locale
-		if ( is_admin() ) {
+			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
+		} elseif ( is_admin() ) {
+			// Admin Locale
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
 			load_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
+
+			// A LOT of strings used in Admin are still in the frontend language file, so we need to load it in admin too
+			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
+			load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
 		}
 	}
 
