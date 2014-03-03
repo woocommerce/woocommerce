@@ -282,6 +282,8 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-download-handler.php' );
 		include_once( 'includes/class-wc-comments.php' );
 		include_once( 'includes/class-wc-post-data.php' );
+		include_once( 'includes/abstracts/abstract-wc-session.php' );
+		include_once( 'includes/class-wc-session-handler.php' );
 
 		if ( is_admin() ) {
 			include_once( 'includes/admin/class-wc-admin.php' );
@@ -339,8 +341,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-cart.php' );					// The main cart class
 		include_once( 'includes/class-wc-tax.php' );					// Tax class
 		include_once( 'includes/class-wc-customer.php' ); 				// Customer class
-		include_once( 'includes/abstracts/abstract-wc-session.php' ); 	// Abstract for session implementations
-		include_once( 'includes/class-wc-session-handler.php' );   		// WC Session class
 		include_once( 'includes/class-wc-shortcodes.php' );				// Shortcodes class
 	}
 
@@ -379,19 +379,18 @@ final class WooCommerce {
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
+		// Session class, handles session data for users - can be overwritten if custom handler is needed
+		$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+
 		// Load class instances
-		$this->product_factory      = new WC_Product_Factory();     // Product Factory to create new product instances
-		$this->countries 			= new WC_Countries();			// Countries class
-		$this->integrations			= new WC_Integrations();		// Integrations class
+		$this->product_factory = new WC_Product_Factory();     // Product Factory to create new product instances
+		$this->countries       = new WC_Countries();			// Countries class
+		$this->integrations    = new WC_Integrations();		// Integrations class
+		$this->session         = new $session_class();
 
 		// Classes/actions loaded for the frontend and for ajax requests
 		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
-
-			// Session class, handles session data for customers - can be overwritten if custom handler is needed
-			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-
 			// Class instances
-			$this->session  = new $session_class();
 			$this->cart     = new WC_Cart();				// Cart class, stores the cart contents
 			$this->customer = new WC_Customer();			// Customer class, handles data such as customer location
 		}
