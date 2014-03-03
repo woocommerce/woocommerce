@@ -49,10 +49,17 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 	// Map endpoint to options
 	$endpoint = isset( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
 
-	if ( get_option( 'permalink_structure' ) )
-		$url = trailingslashit( $permalink ) . $endpoint . '/' . $value;
-	else
+	if ( get_option( 'permalink_structure' ) ) {
+		if ( strstr( $permalink, '?' ) ) {
+			$query_string = '?' . parse_url( $permalink, PHP_URL_QUERY );
+			$permalink    = current( explode( '?', $permalink ) );
+		} else {
+			$query_string = '';
+		}
+		$url = trailingslashit( $permalink ) . $endpoint . '/' . $value . $query_string;
+	} else {
 		$url = add_query_arg( $endpoint, $value, $permalink );
+	}
 
 	return apply_filters( 'woocommerce_get_endpoint_url', $url );
 }
