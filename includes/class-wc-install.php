@@ -634,17 +634,13 @@ class WC_Install {
 	 */
 	private function create_css_from_less() {
 		// Recompile LESS styles if they are custom
-		if ( get_option( 'woocommerce_frontend_css' ) == 'yes' ) {
+		$colors = get_option( 'woocommerce_frontend_css_colors' );
 
-			$colors = get_option( 'woocommerce_frontend_css_colors' );
-
-			if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) ) {
-				if ( ! function_exists( 'woocommerce_compile_less_styles' ) ) {
-					include_once( 'admin/wc-admin-functions.php' );
-				}
-				woocommerce_compile_less_styles();
+		if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) ) {
+			if ( ! function_exists( 'woocommerce_compile_less_styles' ) ) {
+				include_once( 'admin/wc-admin-functions.php' );
 			}
-
+			woocommerce_compile_less_styles();
 		}
 	}
 
