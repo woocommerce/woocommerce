@@ -63,7 +63,7 @@
 						''         => __( '— No Change —', 'woocommerce' ),
 						'taxable'  => __( 'Taxable', 'woocommerce' ),
 						'shipping' => __( 'Shipping only', 'woocommerce' ),
-						'none'     => __( 'None', 'woocommerce' )
+						'none'     => _x( 'None', 'Tax status', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
 						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';

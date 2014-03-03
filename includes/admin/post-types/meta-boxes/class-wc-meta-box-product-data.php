@@ -249,7 +249,7 @@ class WC_Meta_Box_Product_Data {
 						woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
 							'taxable' 	=> __( 'Taxable', 'woocommerce' ),
 							'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
-							'none' 		=> __( 'None', 'woocommerce' )
+							'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
 						) ) );
 
 						$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
