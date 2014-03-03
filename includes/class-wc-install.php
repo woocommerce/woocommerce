@@ -214,23 +214,23 @@ class WC_Install {
 	public static function create_pages() {
 		$pages = apply_filters( 'woocommerce_create_pages', array(
 			'shop' => array(
-				'name'    => _x( 'shop', 'page_slug', 'woocommerce' ),
-				'title'   => __( 'Shop', 'woocommerce' ),
+				'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
+				'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
 				'content' => ''
 			),
 			'cart' => array(
-				'name'    => _x( 'cart', 'page_slug', 'woocommerce' ),
-				'title'   => __( 'Cart', 'woocommerce' ),
+				'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
+				'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
 				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
 			),
 			'checkout' => array(
-				'name'    => _x( 'checkout', 'page_slug', 'woocommerce' ),
-				'title'   => __( 'Checkout', 'woocommerce' ),
+				'name'    => _x( 'checkout', 'Paeg slug', 'woocommerce' ),
+				'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
 				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
 			),
 			'myaccount' => array(
-				'name'    => _x( 'my-account', 'page_slug', 'woocommerce' ),
-				'title'   => __( 'My Account', 'woocommerce' ),
+				'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
+				'title'   => _x( 'My Account', 'Page title', 'woocommerce' ),
 				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
 			)
 		) );

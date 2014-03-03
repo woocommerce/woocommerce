@@ -85,7 +85,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'default'		=> 'taxable',
 							'options'		=> array(
 								'taxable'	=> __( 'Taxable', 'woocommerce' ),
-								'none'		=> __( 'None', 'woocommerce' )
+								'none'		=> _x( 'None', 'Tax status', 'woocommerce' )
 							)
 						),
 			'type' => array(
