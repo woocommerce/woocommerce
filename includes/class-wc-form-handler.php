@@ -411,10 +411,10 @@ class WC_Form_Handler {
 				}
 			}
 
-			if ( $cart_updated ) {
-				// Trigger action - the cart has been updated here
-				do_action( 'woocommerce_update_cart_action_cart_updated' );
+			// Trigger action - let 3rd parties update the cart if they need to and update the $cart_updated variable
+			$cart_updated = apply_filters( 'woocommerce_update_cart_action_cart_updated', $cart_updated );
 
+			if ( $cart_updated ) {
 				// Recalc our totals
 				WC()->cart->calculate_totals();
 			}
