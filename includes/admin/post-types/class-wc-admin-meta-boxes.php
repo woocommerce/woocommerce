@@ -29,11 +29,20 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'add_meta_boxes', array( 'WC_Gateway_Mijireh', 'add_page_slurp_meta' ) );
 		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
 
-		// Save Order Meta Boxes
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Data::save', 10, 2 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Items::save', 20, 2 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Totals::save', 30, 2 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Downloads::save', 40, 2 );
+		/**
+		 * Save Order Meta Boxes
+		 *
+		 * In order:
+		 * 		Save the order items
+		 * 		Save the order totals
+		 * 		Save the order downloads
+		 * 		Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
+		 * 		Save actions - sends out other emails. Last to show latest data.
+		 */
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Items::save', 10, 2 );
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Totals::save', 20, 2 );
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Downloads::save', 30, 2 );
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Data::save', 40, 2 );
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Actions::save', 50, 2 );
 
 		// Save Product Meta Boxes
