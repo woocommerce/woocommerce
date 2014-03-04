@@ -50,9 +50,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<?php elseif ( ! WC()->customer->get_shipping_state() || ! WC()->customer->get_shipping_postcode() ) : ?>
 
-			<?php if ( is_cart() ) : ?>
+			<?php if ( is_cart() && get_option( 'woocommerce_enable_shipping_calc' ) === 'no' ) : ?>
 
-				<p><?php _e( 'No shipping methods were found; please recalculate your shipping or continue to checkout and enter your full address to see if there is shipping available to your location.', 'woocommerce' ); ?></p>
+				<p><?php _e( 'Please use the shipping calculator to see available shipping methods.', 'woocommerce' ); ?></p>
+
+			<?php elseif ( is_cart() ) : ?>
+
+				<p><?php _e( 'Please continue to the checkout and enter your full address to see if there are any available shipping methods.', 'woocommerce' ); ?></p>
 
 			<?php else : ?>
 
