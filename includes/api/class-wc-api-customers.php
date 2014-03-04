@@ -66,9 +66,10 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
-		# GET /customers/<id>
+		# GET/PUT /customers/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_customer' ),  WC_API_SERVER::READABLE ),
+			array( array( $this, 'edit_customer' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
 		);
 
 		# GET /customers/<email>
@@ -340,17 +341,58 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Edit a customer
 	 *
-	 * @TODO implement in 2.2
+	 * @since 2.2
 	 * @param int $id the customer ID
 	 * @param array $data
 	 * @return array
 	 */
 	public function edit_customer( $id, $data ) {
 
+		// Validate the customer ID.
 		$id = $this->validate_request( $id, 'customer', 'edit' );
 
-		if ( ! is_wp_error( $id ) )
-			return $id;
+		// Return the validate error.
+		if ( is_wp_error( $id ) ) {
+			return new WP_Error( $id->get_error_code(), $id->get_error_message(), $id->get_error_data() );
+		}
+
+		// Customer email.
+		if ( isset( $data['email'] ) ) {
+			wp_update_user( array( 'ID' => $id, 'user_email' => sanitize_email( $data['email'] ) ) );
+		}
+
+		// Customer password.
+		if ( isset( $data['password'] ) ) {
+			wp_update_user( array( 'ID' => $id, 'user_pass' => sanitize_text_field( $data['password'] ) ) );
+		}
+
+		// Customer first name.
+		if ( isset( $data['first_name'] ) ) {
+			update_user_meta( $id, 'first_name', sanitize_text_field( $data['first_name'] ) );
+		}
+
+		// Customer last name.
+		if ( isset( $data['last_name'] ) ) {
+			update_user_meta( $id, 'last_name', sanitize_text_field( $data['last_name'] ) );
+		}
+
+		// Customer billing address.
+		if ( isset( $data['billing_address'] ) ) {
+			foreach ( $this->get_customer_billing_address() as $address ) {
+				if ( isset( $data['billing_address'][ $address ] ) ) {
+					update_user_meta( $id, 'billing_' . $address, sanitize_text_field( $data['billing_address'][ $address ] ) );
+				}
+			}
+		}
+
+		// Customer shipping address.
+		if ( isset( $data['shipping_address'] ) ) {
+			foreach ( $this->get_customer_shipping_address() as $address ) {
+				if ( isset( $data['shipping_address'][ $address ] ) ) {
+					update_user_meta( $id, 'shipping_' . $address, sanitize_text_field( $data['shipping_address'][ $address ] ) );
+				}
+			}
+		}
 
 		return $this->get_customer( $id );
 	}
