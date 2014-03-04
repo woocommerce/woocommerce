@@ -281,19 +281,19 @@ class WC_API_Customers extends WC_API_Resource {
 	protected function update_customer_data( $id, $data ) {
 		// Customer first name.
 		if ( isset( $data['first_name'] ) ) {
-			update_user_meta( $id, 'first_name', sanitize_text_field( $data['first_name'] ) );
+			update_user_meta( $id, 'first_name', wc_clean( $data['first_name'] ) );
 		}
 
 		// Customer last name.
 		if ( isset( $data['last_name'] ) ) {
-			update_user_meta( $id, 'last_name', sanitize_text_field( $data['last_name'] ) );
+			update_user_meta( $id, 'last_name', wc_clean( $data['last_name'] ) );
 		}
 
 		// Customer billing address.
 		if ( isset( $data['billing_address'] ) ) {
 			foreach ( $this->get_customer_billing_address() as $address ) {
 				if ( isset( $data['billing_address'][ $address ] ) ) {
-					update_user_meta( $id, 'billing_' . $address, sanitize_text_field( $data['billing_address'][ $address ] ) );
+					update_user_meta( $id, 'billing_' . $address, wc_clean( $data['billing_address'][ $address ] ) );
 				}
 			}
 		}
@@ -302,7 +302,7 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( isset( $data['shipping_address'] ) ) {
 			foreach ( $this->get_customer_shipping_address() as $address ) {
 				if ( isset( $data['shipping_address'][ $address ] ) ) {
-					update_user_meta( $id, 'shipping_' . $address, sanitize_text_field( $data['shipping_address'][ $address ] ) );
+					update_user_meta( $id, 'shipping_' . $address, wc_clean( $data['shipping_address'][ $address ] ) );
 				}
 			}
 		}
@@ -380,7 +380,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Customer password.
 		if ( isset( $data['password'] ) ) {
-			wp_update_user( array( 'ID' => $id, 'user_pass' => sanitize_text_field( $data['password'] ) ) );
+			wp_update_user( array( 'ID' => $id, 'user_pass' => wc_clean( $data['password'] ) ) );
 		}
 
 		// Update customer data.
