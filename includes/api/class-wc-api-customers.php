@@ -326,7 +326,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Checks with the email is missing.
 		if ( ! isset( $data['email'] ) ) {
-			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', sprintf( __( 'Missing parameter %s' ), 'email' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_missing_customer_email', sprintf( __( 'Missing parameter %s' ), 'email' ), array( 'status' => 400 ) );
 		}
 
 		// Sets the username.
@@ -344,7 +344,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Checks for an error in the customer creation.
 		if ( is_wp_error( $id ) ) {
-			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', $id->get_error_message(), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_cannot_create_customer', $id->get_error_message(), array( 'status' => 400 ) );
 		}
 
 		// Added customer data.
