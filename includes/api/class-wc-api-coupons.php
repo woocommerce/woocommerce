@@ -184,6 +184,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @return array
 	 */
 	public function create_coupon( $data ) {
+		global $wpdb;
 
 		if ( ! current_user_can( 'publish_shop_coupons' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_create_coupon', __( 'You do not have permission to create coupons', 'woocommerce' ), array( 'status' => 401 ) );
@@ -219,17 +220,17 @@ class WC_API_Coupons extends WC_API_Resource {
 			'expiry_date' => '',
 			'apply_before_tax' => 'yes',
 			'free_shipping' => 'no',
-			'product_categories' => array(),
-			'exclude_product_categories' => array(),
+			'product_categories' => '',
+			'exclude_product_categories' => '',
 			'exclude_sale_items' => 'no',
 			'minimum_amount' => '',
-			'customer_email' => array(),
+			'customer_email' => '',
 		);
 
 		$coupon_data = wp_parse_args( $data, $defaults );
 
 		$new_coupon = array(
-			'post_title' => $coupon_code,
+			'post_title' => wc_clean( $coupon_data['code'] ),
 			'post_content' => '',
 			'post_status' => 'publish',
 			'post_author' => get_current_user_id(),
@@ -251,11 +252,11 @@ class WC_API_Coupons extends WC_API_Resource {
 		update_post_meta( $id, 'expiry_date', wc_clean( $coupon_data['expiry_date'] ) );
 		update_post_meta( $id, 'apply_before_tax', $coupon_data['apply_before_tax'] );
 		update_post_meta( $id, 'free_shipping', $coupon_data['free_shipping'] );
-		update_post_meta( $id, 'product_categories', implode( ',', array_filter( array_map( 'intval', (array) $coupon_data['product_categories'] ) ) ) );
-		update_post_meta( $id, 'exclude_product_categories', implode( ',', array_filter( array_map( 'intval', (array) $coupon_data['exclude_product_categories'] ) ) ) );
+		update_post_meta( $id, 'product_categories', implode( ',', array_filter( array_map( 'intval', explode( ',', $coupon_data['product_categories'] ) ) ) ) );
+		update_post_meta( $id, 'exclude_product_categories', implode( ',', array_filter( array_map( 'intval', explode( ',', $coupon_data['exclude_product_categories'] ) ) ) ) );
 		update_post_meta( $id, 'exclude_sale_items', wc_clean( $coupon_data['exclude_sale_items'] ) );
 		update_post_meta( $id, 'minimum_amount', wc_format_decimal( $coupon_data['minimum_amount'] ) );
-		update_post_meta( $id, 'customer_email', implode( ',', array_filter( array_map( 'trim', explode( ',', coupon_data( $_POST['customer_email'] ) ) ) ) ) );
+		update_post_meta( $id, 'customer_email', implode( ',', array_filter( array_map( 'trim', explode( ',', $coupon_data['customer_email'] ) ) ) ) );
 
 		do_action( 'woocommerce_api_create_coupon', $id, $data );
 
@@ -275,7 +276,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		$id = $this->validate_request( $id, 'shop_coupon', 'edit' );
 
 		if ( is_wp_error( $id ) )
-			return new WP_Error( 'woocommerce_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), array( 'status' => 404 ) );
+			return $id;
 
 		return $this->get_coupon( $id );
 	}
