@@ -186,11 +186,11 @@ class WC_API_Coupons extends WC_API_Resource {
 	public function create_coupon( $data ) {
 
 		if ( ! current_user_can( 'publish_shop_coupons' ) ) {
-			return new WP_Error( 'woocommerce_api_user_cannot_create_coupon', __( 'You do not have permissions to create coupons', 'woocommerce' ), array( 'status' => 401 ) );
+			return new WP_Error( 'woocommerce_api_user_cannot_create_coupon', __( 'You do not have permission to create coupons', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		if ( ! isset( $data['code'] ) ) {
-			return new WP_Error( 'woocommerce_api_user_cannot_create_coupon', sprintf( __( 'Missing parameter %s' ), 'code' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s' ), 'code' ), array( 'status' => 400 ) );
 		}
 
 		// Check for duplicate coupon codes
@@ -203,7 +203,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		 ", wc_clean( $data['code'] ) ) );
 
 		if ( $coupon_found ) {
-			return new WP_Error( 'woocommerce_api_user_cannot_create_coupon', sprintf( __( 'The coupon code %s already exists' ), 'code' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_invalid_coupon_code', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
 		}
 
 		$defaults = array(
