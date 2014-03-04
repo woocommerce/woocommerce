@@ -2179,6 +2179,6 @@ class WC_Cart implements Iterator, Countable {
 		* 
 		*/
 		public function count() {
-			return count( $this->cart_content );
+			return count( $this->cart_contents );
 		}
 }
