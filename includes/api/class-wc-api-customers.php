@@ -270,6 +270,45 @@ class WC_API_Customers extends WC_API_Resource {
 		return array( 'count' => count( $query->get_results() ) );
 	}
 
+	/**
+	 * Add/Update customer data.
+	 *
+	 * @since 2.2
+	 * @param int $id the customer ID
+	 * @param array $data
+	 * @return void
+	 */
+	protected function update_customer_data( $id, $data ) {
+		// Customer first name.
+		if ( isset( $data['first_name'] ) ) {
+			update_user_meta( $id, 'first_name', sanitize_text_field( $data['first_name'] ) );
+		}
+
+		// Customer last name.
+		if ( isset( $data['last_name'] ) ) {
+			update_user_meta( $id, 'last_name', sanitize_text_field( $data['last_name'] ) );
+		}
+
+		// Customer billing address.
+		if ( isset( $data['billing_address'] ) ) {
+			foreach ( $this->get_customer_billing_address() as $address ) {
+				if ( isset( $data['billing_address'][ $address ] ) ) {
+					update_user_meta( $id, 'billing_' . $address, sanitize_text_field( $data['billing_address'][ $address ] ) );
+				}
+			}
+		}
+
+		// Customer shipping address.
+		if ( isset( $data['shipping_address'] ) ) {
+			foreach ( $this->get_customer_shipping_address() as $address ) {
+				if ( isset( $data['shipping_address'][ $address ] ) ) {
+					update_user_meta( $id, 'shipping_' . $address, sanitize_text_field( $data['shipping_address'][ $address ] ) );
+				}
+			}
+		}
+
+		do_action( 'woocommerce_api_update_customer_data', $id, $data );
+	}
 
 	/**
 	 * Create a customer
@@ -301,44 +340,19 @@ class WC_API_Customers extends WC_API_Resource {
 		}
 
 		// Attempts to create the new customer
-		$customer_id = wc_create_new_customer( $data['email'], $data['username'], $data['password'] );
+		$id = wc_create_new_customer( $data['email'], $data['username'], $data['password'] );
 
 		// Checks for an error in the customer creation.
-		if ( is_wp_error( $customer_id ) ) {
-			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', $customer_id->get_error_message(), array( 'status' => 400 ) );
+		if ( is_wp_error( $id ) ) {
+			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', $id->get_error_message(), array( 'status' => 400 ) );
 		}
 
-		// Customer first name.
-		if ( isset( $data['first_name'] ) ) {
-			update_user_meta( $customer_id, 'first_name', sanitize_text_field( $data['first_name'] ) );
-		}
+		// Added customer data.
+		$this->update_customer_data( $id, $data );
 
-		// Customer last name.
-		if ( isset( $data['last_name'] ) ) {
-			update_user_meta( $customer_id, 'last_name', sanitize_text_field( $data['last_name'] ) );
-		}
+		do_action( 'woocommerce_api_create_customer', $id, $data );
 
-		// Customer billing address.
-		if ( isset( $data['billing_address'] ) ) {
-			foreach ( $this->get_customer_billing_address() as $address ) {
-				if ( isset( $data['billing_address'][ $address ] ) ) {
-					update_user_meta( $customer_id, 'billing_' . $address, sanitize_text_field( $data['billing_address'][ $address ] ) );
-				}
-			}
-		}
-
-		// Customer shipping address.
-		if ( isset( $data['shipping_address'] ) ) {
-			foreach ( $this->get_customer_shipping_address() as $address ) {
-				if ( isset( $data['shipping_address'][ $address ] ) ) {
-					update_user_meta( $customer_id, 'shipping_' . $address, sanitize_text_field( $data['shipping_address'][ $address ] ) );
-				}
-			}
-		}
-
-		do_action( 'woocommerce_api_create_customer', $customer_id, $data );
-
-		return $this->get_customer( $customer_id );
+		return $this->get_customer( $id );
 	}
 
 	/**
@@ -369,33 +383,8 @@ class WC_API_Customers extends WC_API_Resource {
 			wp_update_user( array( 'ID' => $id, 'user_pass' => sanitize_text_field( $data['password'] ) ) );
 		}
 
-		// Customer first name.
-		if ( isset( $data['first_name'] ) ) {
-			update_user_meta( $id, 'first_name', sanitize_text_field( $data['first_name'] ) );
-		}
-
-		// Customer last name.
-		if ( isset( $data['last_name'] ) ) {
-			update_user_meta( $id, 'last_name', sanitize_text_field( $data['last_name'] ) );
-		}
-
-		// Customer billing address.
-		if ( isset( $data['billing_address'] ) ) {
-			foreach ( $this->get_customer_billing_address() as $address ) {
-				if ( isset( $data['billing_address'][ $address ] ) ) {
-					update_user_meta( $id, 'billing_' . $address, sanitize_text_field( $data['billing_address'][ $address ] ) );
-				}
-			}
-		}
-
-		// Customer shipping address.
-		if ( isset( $data['shipping_address'] ) ) {
-			foreach ( $this->get_customer_shipping_address() as $address ) {
-				if ( isset( $data['shipping_address'][ $address ] ) ) {
-					update_user_meta( $id, 'shipping_' . $address, sanitize_text_field( $data['shipping_address'][ $address ] ) );
-				}
-			}
-		}
+		// Update customer data.
+		$this->update_customer_data( $id, $data );
 
 		do_action( 'woocommerce_api_edit_customer', $id, $data );
 
