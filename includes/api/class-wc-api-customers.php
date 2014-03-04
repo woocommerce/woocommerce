@@ -335,6 +335,8 @@ class WC_API_Customers extends WC_API_Resource {
 			}
 		}
 
+		do_action( 'woocommerce_api_create_customer', $customer_id, $data );
+
 		return $this->get_customer( $customer_id );
 	}
 
