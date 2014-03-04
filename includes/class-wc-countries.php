@@ -547,7 +547,7 @@ class WC_Countries {
 	 * @return array of states
 	 */
 	public function get_states( $cc ) {
-		return ( isset( $this->states[ $cc ] ) ) ? $this->states[ $cc ] : array();
+		return ( isset( $this->states[ $cc ] ) ) ? $this->states[ $cc ] : false;
 	}
 
 
