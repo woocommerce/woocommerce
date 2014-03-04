@@ -367,6 +367,9 @@ class WC_Product_Variation extends WC_Product {
 			// Update meta
 			update_post_meta( $this->variation_id, '_stock', '' );
 
+			// Refresh parent prices
+			WC_Product_Variable::sync( $this->id );
+
 		} elseif ( $this->variation_has_stock || $force_variation_stock ) {
 
 			// Update stock amount
@@ -386,13 +389,32 @@ class WC_Product_Variation extends WC_Product {
 				// Check parent
 				$parent_product = get_product( $this->id );
 
-				// Only continue if the parent has backorders off
-				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) )
-					$this->set_stock_status( 'outofstock' );
+				// Only continue if the parent has backorders off and all children are stock managed and out of stock
+				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+
+					$all_managed = true;
+
+					if ( sizeof( $parent_product->get_children() ) > 0 ) {
+						foreach ( $parent_product->get_children() as $child_id ) {
+							$stock = get_post_meta( $child_id, '_stock', true );
+							if ( $stock == '' ) {
+								$all_managed = false;
+								break;
+							}
+						}
+					}
+
+					if ( $all_managed ) {
+						$this->set_stock_status( 'outofstock' );
+					}
+				}
 
 			} elseif ( $this->is_in_stock() ) {
 				$this->set_stock_status( 'instock' );
 			}
+
+			// Refresh parent prices
+			WC_Product_Variable::sync( $this->id );
 
 			// Trigger action
 			do_action( 'woocommerce_product_set_stock', $this );
