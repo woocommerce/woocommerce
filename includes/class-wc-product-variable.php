@@ -465,8 +465,17 @@ class WC_Product_Variable extends WC_Product {
 			foreach ( $children as $child ) {
 				$child_price        = get_post_meta( $child, '_price', true );
 
-				if ( $child_price === '' )
+				if ( $child_price === '' ) {
 					continue;
+				}
+
+				if ( get_post_status( $child ) != 'publish' ) {
+					continue;
+				}
+
+				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && "0" === get_post_meta( $child, '_stock', true ) ) {
+					continue;
+				}
 
 				if ( $child_price > $max_price ) {
 					$max_price    = $child_price;
