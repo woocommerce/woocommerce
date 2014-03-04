@@ -326,7 +326,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Checks with the email is missing.
 		if ( ! isset( $data['email'] ) ) {
-			return new WP_Error( 'woocommerce_api_missing_customer_email', sprintf( __( 'Missing parameter %s' ), 'email' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_missing_customer_email', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'email' ), array( 'status' => 400 ) );
 		}
 
 		// Sets the username.
