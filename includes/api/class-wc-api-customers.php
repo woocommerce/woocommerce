@@ -66,10 +66,11 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
-		# GET/PUT /customers/<id>
+		# GET/PUT/DELETE /customers/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_customer' ),  WC_API_SERVER::READABLE ),
 			array( array( $this, 'edit_customer' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
+			array( array( $this, 'delete_customer' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		# GET /customers/<email>
@@ -404,16 +405,19 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Delete a customer
 	 *
-	 * @TODO enable along with PUT/POST in 2.2
+	 * @since 2.2
 	 * @param int $id the customer ID
 	 * @return array
 	 */
 	public function delete_customer( $id ) {
 
+		// Validate the customer ID.
 		$id = $this->validate_request( $id, 'customer', 'delete' );
 
-		if ( ! is_wp_error( $id ) )
-			return $id;
+		// Return the validate error.
+		if ( is_wp_error( $id ) ) {
+			return new WP_Error( $id->get_error_code(), $id->get_error_message(), $id->get_error_data() );
+		}
 
 		return $this->delete( $id, 'customer' );
 	}
