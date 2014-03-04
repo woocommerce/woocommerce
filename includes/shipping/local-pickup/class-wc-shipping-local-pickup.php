@@ -70,7 +70,6 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 * @return void
 	 */
 	function init_form_fields() {
-		global $woocommerce;
 		$this->form_fields = array(
 			'enabled' => array(
 				'title'			=> __( 'Enable', 'woocommerce' ),
@@ -88,7 +87,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 			'codes' => array(
 				'title'			=> __( 'Zip/Post Codes', 'woocommerce' ),
 				'type' 			=> 'textarea',
-				'description'	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
+				'description'	=> __( 'What zip/post codes are available for local pickup? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
 				'default'		=> '',
 				'desc_tip'		=> true,
 				'placeholder'	=> '12345, 56789 etc'
@@ -109,7 +108,10 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'class'			=> 'chosen_select',
 				'css'			=> 'width: 450px;',
 				'default'		=> '',
-				'options'		=> $woocommerce->countries->get_shipping_countries()
+				'options'		=> WC()->countries->get_shipping_countries(),
+				'custom_attributes' => array(
+					'data-placeholder' => __( 'Select some countries', 'woocommerce' )
+				)
 			)
 		);
 	}
@@ -137,7 +139,6 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 * @return bool
 	 */
 	function is_available( $package ) {
-		global $woocommerce;
 
 		$is_available = true;
 
@@ -186,7 +187,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 					if ( $this->availability == 'specific' )
 						$ship_to_countries = $this->countries;
 					else
-						$ship_to_countries = array_keys( $woocommerce->countries->get_shipping_countries() );
+						$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );
 
 					if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
 						$is_available = false;
@@ -197,7 +198,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				if ( $this->availability == 'specific' )
 					$ship_to_countries = $this->countries;
 				else
-					$ship_to_countries = array_keys( $woocommerce->countries->get_shipping_countries() );
+					$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );
 
 				if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
 					$is_available = false;

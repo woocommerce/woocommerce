@@ -1,44 +1,7 @@
 .woocommerce-message {
 	position: relative;
-	z-index: 100;
-	border: 1px solid #b76ca9 !important;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-	-webkit-box-shadow: inset 0 0 15px rgba( 0,0,0,0.04 );
-	-moz-box-shadow: inset 0 0 15px rgba( 0,0,0,0.04 );
-	box-shadow: inset 0 0 15px rgba( 0,0,0,0.04 );
+	border-left-color: #cc99c2 !important;
 	overflow: hidden;
-	padding: 10px 0 10px !important;
-	background: #cc99c2 url(../images/message.png) no-repeat right bottom !important;
-	.squeezer {
-		max-width: 960px;
-		margin: 0;
-		padding: 0 10px;
-		text-align: left;
-		overflow: hidden;
-	}
-	h4 {
-		margin: 5px 10px 5px 0;
-		font-size: 18px;
-		line-height: 27px;
-		font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",Verdana,"Bitstream Vera Sans",sans-serif;
-		font-weight: normal;
-		color: #fff;
-		text-shadow: 0px 1px 1px #b574a8;
-		-moz-border-radius: 5px;
-		-webkit-border-radius: 5px;
-		border-radius: 5px;
-		float: left;
-		vertical-align: middle;
-	}
-	p {
-		margin: 5px 0 !important;
-		padding: 1px 2px !important;
-		float: left !important;
-		line-height: 27px;
-		vertical-align: middle;
-	}
 	.twitter-share-button {
 		vertical-align: middle;
 		margin-left:3px;
@@ -46,69 +9,22 @@
 }
 p.woocommerce-actions, .woocommerce-message {
 	a.button-primary {
-		font-size: 14px !important;
-		line-height: 16px !important;
-		height: auto !important;
-		-webkit-border-radius:3px;
-		border-radius:3px;
-		margin: 0 5px 0 0;
-		padding: 5px 12px;
-		vertical-align: middle;
+		background: #cc99c2;
+		border-color: #b366a4;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
+		box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		color: #fff;
-		text-align: center;
 		text-decoration: none;
-		border: 1px solid #76456d;
-		-webkit-transition:none;
-		-moz-transition:none;
-		cursor: pointer;
-		outline:none;
-		font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",Verdana,"Bitstream Vera Sans",sans-serif;
-		text-shadow: 0px 1px 0px rgba(0,0,0,0.3);
-		background-color: #a46497;
-		background-image: -webkit-gradient(linear, left top, left bottom, from(#a46497), to(#864f7b)); /* Saf4+, Chrome */
-		background-image: -webkit-linear-gradient(top, #a46497, #864f7b); /* Chrome 10+, Saf5.1+, iOS 5+ */
-		background-image:	-moz-linear-gradient(top, #a46497, #864f7b); /* FF3.6+ */
-		background-image:	 -ms-linear-gradient(top, #a46497, #864f7b); /* IE10 */
-		background-image:	  -o-linear-gradient(top, #a46497, #864f7b); /* Opera 11.10+ */
-		background-image:		 linear-gradient(to bottom, #a46497, #864f7b);
-		-webkit-box-shadow:
-			inset 0 1px 0 rgba(255,255,255,0.2),
-			inset 0 -1px 0 rgba(0,0,0,0.1);
-		box-shadow:
-			inset 0 1px 0 rgba(255,255,255,0.2),
-			inset 0 -1px 0 rgba(0,0,0,0.1);
-	}
-	a.button-primary:hover {
-		text-shadow: 0px -1px 0px rgba(0,0,0,0.3);
-		border: 1px solid #76456d;
-		background-color: #ad74a2;
-		background-image: -webkit-gradient(linear, left top, left bottom, from(#ad74a2), to(#864f7b)); /* Saf4+, Chrome */
-		background-image: -webkit-linear-gradient(top, #ad74a2, #864f7b); /* Chrome 10+, Saf5.1+, iOS 5+ */
-		background-image:	-moz-linear-gradient(top, #ad74a2, #864f7b); /* FF3.6+ */
-		background-image:	 -ms-linear-gradient(top, #ad74a2, #864f7b); /* IE10 */
-		background-image:	  -o-linear-gradient(top, #ad74a2, #864f7b); /* Opera 11.10+ */
-		background-image:		 linear-gradient(to bottom, #ad74a2, #864f7b);
-		-webkit-box-shadow:
-			inset 0 1px 0 rgba(255,255,255,0.2),
-			inset 0 -1px 0 rgba(0,0,0,0.1);
-		box-shadow:
-			inset 0 1px 0 rgba(255,255,255,0.2),
-			inset 0 -1px 0 rgba(0,0,0,0.1);
-	}
-	a.button-primary:active {
-		border: 1px solid #76456d;
-		text-shadow: 0px 1px 0px rgba(0,0,0,0.3);
-		background-color: #864f7b;
-		background-image: -webkit-gradient(linear, left top, left bottom, from(#864f7b), to(#864f7b)); /* Saf4+, Chrome */
-		background-image: -webkit-linear-gradient(top, #864f7b, #a46497); /* Chrome 10+, Saf5.1+, iOS 5+ */
-		background-image:	-moz-linear-gradient(top, #864f7b, #a46497); /* FF3.6+ */
-		background-image:	 -ms-linear-gradient(top, #864f7b, #a46497); /* IE10 */
-		background-image:	  -o-linear-gradient(top, #864f7b, #a46497); /* Opera 11.10+ */
-		background-image:		 linear-gradient(to bottom, #a46497, #a46497);
-		-webkit-box-shadow:
-			inset 0 1px 1px rgba(0,0,0,0.2);
-		box-shadow:
-			inset 0 1px 1px rgba(0,0,0,0.2);
+		&:hover {
+			background: #bb77ae;
+			border-color: #aa559a;
+			-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
+			box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
+		}
+		&:active {
+			background: #aa559a;
+			border-color: #aa559a;
+		}
 	}
 	a.skip, a.docs {
 		opacity: 0.7;

@@ -64,8 +64,9 @@ class WC_Meta_Box_Product_Data {
 		foreach ( $product_type_options as $key => $option ) {
 			$selected_value = get_post_meta( $post->ID, '_' . $key, true );
 
-			if ( $selected_value == '' )
+			if ( $selected_value == '' && isset( $option['default'] ) ) {
 				$selected_value = $option['default'];
+			}
 
 			$type_box .= '<label for="' . esc_attr( $option['id'] ) . '" class="'. esc_attr( $option['wrapper_class'] ) . ' tips" data-tip="' . esc_attr( $option['description'] ) . '">' . esc_html( $option['label'] ) . ': <input type="checkbox" name="' . esc_attr( $option['id'] ) . '" id="' . esc_attr( $option['id'] ) . '" ' . checked( $selected_value, 'yes', false ) .' /></label>';
 		}
@@ -102,7 +103,7 @@ class WC_Meta_Box_Product_Data {
 						),
 						'attribute' => array(
 							'label'  => __( 'Attributes', 'woocommerce' ),
-							'target' => 'woocommerce_attributes',
+							'target' => 'product_attributes',
 							'class'  => array(),
 						),
 						'variations' => array(
@@ -153,16 +154,10 @@ class WC_Meta_Box_Product_Data {
 				echo '<div class="options_group pricing show_if_simple show_if_external">';
 
 					// Price
-					woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_price short', 'label' => __( 'Regular Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> 'any',
-						'min'	=> '0'
-					) ) );
+					woocommerce_wp_text_input( array( 'id' => '_regular_price', 'label' => __( 'Regular Price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')', 'data_type' => 'price' ) );
 
 					// Special Price
-					woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_price short', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>', 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> 'any',
-						'min'	=> '0'
-					) ) );
+					woocommerce_wp_text_input( array( 'id' => '_sale_price', 'data_type' => 'price', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>' ) );
 
 					// Special Price date range
 					$sale_price_dates_from 	= ( $date = get_post_meta( $thepostid, '_sale_price_dates_from', true ) ) ? date_i18n( 'Y-m-d', $date ) : '';
@@ -170,8 +165,8 @@ class WC_Meta_Box_Product_Data {
 
 					echo '	<p class="form-field sale_price_dates_fields">
 								<label for="_sale_price_dates_from">' . __( 'Sale Price Dates', 'woocommerce' ) . '</label>
-								<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . $sale_price_dates_from . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
-								<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . $sale_price_dates_to . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+								<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+								<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 								<a href="#" class="cancel_sale_schedule">'. __( 'Cancel', 'woocommerce' ) .'</a>
 							</p>';
 
@@ -181,15 +176,47 @@ class WC_Meta_Box_Product_Data {
 
 				echo '<div class="options_group show_if_downloadable">';
 
-					// File URL
-					$file_paths = get_post_meta( $post->ID, '_file_paths', true );
-					if ( is_array( $file_paths ) )
-						$file_paths = implode( "\n", $file_paths );
+					?>
+					<div class="form-field downloadable_files">
+						<label><?php _e( 'Downloadable Files', 'woocommerce' ); ?>:</label>
+						<table class="widefat">
+							<thead>
+								<tr>
+									<th class="sort">&nbsp;</th>
+									<th><?php _e( 'Name', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the name of the download shown to the customer.', 'woocommerce' ); ?>">[?]</span></th>
+									<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to.', 'woocommerce' ); ?>">[?]</span></th>
+									<th>&nbsp;</th>
+								</tr>
+							</thead>
+							<tfoot>
+								<tr>
+									<th colspan="5">
+										<a href="#" class="button insert" data-row="<?php
+											$file = array(
+												'file' => '',
+												'name' => ''
+											);
+											ob_start();
+											include( 'views/html-product-download.php' );
+											echo esc_attr( ob_get_clean() );
+										?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
+									</th>
+								</tr>
+							</tfoot>
+							<tbody>
+								<?php
+								$downloadable_files = get_post_meta( $post->ID, '_downloadable_files', true );
 
-					echo '<p class="form-field"><label for="_file_paths">' . __( 'File paths (one per line)', 'woocommerce' ) . ':</label>
-						<textarea style="float:left;height:5em;" id="_file_paths" class="short file_paths" cols="20" rows="3" placeholder="' . __( 'File paths/URLs, one per line', 'woocommerce' ) . '" name="_file_paths" wrap="off">' . esc_textarea( $file_paths ) . '</textarea>
-						<input type="button" class="upload_file_button button" data-choose="' . __( 'Choose a file', 'woocommerce' ) . '" data-update="' . __( 'Insert file URL', 'woocommerce' ) . '" value="' . __( 'Choose a file', 'woocommerce' ) . '" />
-					</p>';
+								if ( $downloadable_files ) {
+									foreach ( $downloadable_files as $key => $file ) {
+										include( 'views/html-product-download.php' );
+									}
+								}
+								?>
+							</tbody>
+						</table>
+					</div>
+					<?php
 
 					// Download Limit
 					woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __( 'Download Limit', 'woocommerce' ), 'placeholder' => __( 'Unlimited', 'woocommerce' ), 'description' => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
@@ -204,7 +231,7 @@ class WC_Meta_Box_Product_Data {
 					) ) );
 
 					 // Download Type
-					woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download Type', 'woocommerce' ), 'options' => array(
+					woocommerce_wp_select( array( 'id' => '_download_type', 'label' => __( 'Download Type', 'woocommerce' ), 'description' => sprintf( __( 'Choose a download type - this controls the <a href="%s">schema</a>.', 'woocommerce' ), 'http://schema.org/' ), 'options' => array(
 						''            => __( 'Standard Product', 'woocommerce' ),
 						'application' => __( 'Application/Software', 'woocommerce' ),
 						'music'       => __( 'Music', 'woocommerce' ),
@@ -222,7 +249,7 @@ class WC_Meta_Box_Product_Data {
 						woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
 							'taxable' 	=> __( 'Taxable', 'woocommerce' ),
 							'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
-							'none' 		=> __( 'None', 'woocommerce' )
+							'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
 						) ) );
 
 						$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
@@ -313,31 +340,21 @@ class WC_Meta_Box_Product_Data {
 				echo '<div class="options_group">';
 
 					// Weight
-					if ( wc_product_weight_enabled() ) :
-						woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __( 'Weight in decimal form', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> 'any',
-						'min'	=> '0'
-					) ) );
-					else:
-						echo '<input type="hidden" name="_weight" value="' . esc_attr( get_post_meta( $thepostid, '_weight', true ) ) . '" />';
-					endif;
+					if ( wc_product_weight_enabled() )
+						woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' (' . get_option('woocommerce_weight_unit') . ')', 'placeholder' => wc_format_localized_decimal( 0 ), 'desc_tip' => 'true', 'description' => __( 'Weight in decimal form', 'woocommerce' ), 'type' => 'text', 'data_type' => 'decimal' ) );
 
 					// Size fields
-					if ( wc_product_dimensions_enabled() ) :
+					if ( wc_product_dimensions_enabled() ) {
 						?><p class="form-field dimensions_field">
 							<label for="product_length"><?php echo __( 'Dimensions', 'woocommerce' ) . ' (' . get_option( 'woocommerce_dimension_unit' ) . ')'; ?></label>
 							<span class="wrap">
-								<input id="product_length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_length" value="<?php echo esc_attr( get_post_meta( $thepostid, '_length', true ) ); ?>" step="any" min="0" />
-								<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_width" value="<?php echo esc_attr( get_post_meta( $thepostid, '_width', true ) ); ?>"  step="any" min="0" />
-								<input placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" class="input-text last" size="6" type="number" name="_height" value="<?php echo esc_attr( get_post_meta( $thepostid, '_height', true ) ); ?>"  step="any" min="0" />
+								<input id="product_length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="_length" value="<?php echo esc_attr( wc_format_localized_decimal( get_post_meta( $thepostid, '_length', true ) ) ); ?>" />
+								<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="_width" value="<?php echo esc_attr( wc_format_localized_decimal( get_post_meta( $thepostid, '_width', true ) ) ); ?>" />
+								<input placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" class="input-text wc_input_decimal last" size="6" type="text" name="_height" value="<?php echo esc_attr( wc_format_localized_decimal( get_post_meta( $thepostid, '_height', true ) ) ); ?>" />
 							</span>
-							<span class="description"><?php _e( 'LxWxH in decimal form', 'woocommerce' ); ?></span>
+							<img class="help_tip" data-tip="<?php esc_attr_e( 'LxWxH in decimal form', 'woocommerce' ); ?>" src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/help.png" height="16" width="16" />
 						</p><?php
-					else:
-						echo '<input type="hidden" name="_length" value="' . esc_attr( get_post_meta( $thepostid, '_length', true ) ) . '" />';
-						echo '<input type="hidden" name="_width" value="' . esc_attr( get_post_meta( $thepostid, '_width', true ) ) . '" />';
-						echo '<input type="hidden" name="_height" value="' . esc_attr( get_post_meta( $thepostid, '_height', true ) ) . '" />';
-					endif;
+					}
 
 					do_action( 'woocommerce_product_options_dimensions' );
 
@@ -358,7 +375,7 @@ class WC_Meta_Box_Product_Data {
 						'selected'			=> $current_shipping_class,
 						'class'				=> 'select short'
 					);
-					?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <span class="description"><?php _e( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ); ?></span></p><?php
+					?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <img class="help_tip" data-tip="<?php esc_attr_e( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ); ?>" src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/help.png" height="16" width="16" /></p><?php
 
 					do_action( 'woocommerce_product_options_shipping' );
 
@@ -367,13 +384,13 @@ class WC_Meta_Box_Product_Data {
 
 			</div>
 
-			<div id="woocommerce_attributes" class="panel wc-metaboxes-wrapper">
+			<div id="product_attributes" class="panel wc-metaboxes-wrapper">
 
 				<p class="toolbar">
 					<a href="#" class="close_all"><?php _e( 'Close all', 'woocommerce' ); ?></a><a href="#" class="expand_all"><?php _e( 'Expand all', 'woocommerce' ); ?></a>
 				</p>
 
-				<div class="woocommerce_attributes wc-metaboxes">
+				<div class="product_attributes wc-metaboxes">
 
 					<?php
 						// Array of defined attribute taxonomies
@@ -386,7 +403,7 @@ class WC_Meta_Box_Product_Data {
 
 						// Taxonomies
 						if ( $attribute_taxonomies ) {
-					    	foreach ( $attribute_taxonomies as $tax ) { $i++;
+					    	foreach ( $attribute_taxonomies as $tax ) {
 
 					    		// Get name of taxonomy we're now outputting (pa_xxx)
 					    		$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
@@ -394,6 +411,8 @@ class WC_Meta_Box_Product_Data {
 					    		// Ensure it exists
 					    		if ( ! taxonomy_exists( $attribute_taxonomy_name ) )
 					    			continue;
+
+					    		$i++;
 
 					    		// Get product data values for current taxonomy - this contains ordering and visibility data
 					    		if ( isset( $attributes[ sanitize_title( $attribute_taxonomy_name ) ] ) )
@@ -451,7 +470,7 @@ class WC_Meta_Box_Product_Data {
 																$values = array();
 																foreach ( $post_terms as $term )
 																	$values[] = $term->name;
-																echo esc_attr( implode( ' | ', $values ) );
+																echo esc_attr( implode( ' ' . WC_DELIMITER . ' ', $values ) );
 															}
 
 														?>" placeholder="<?php _e( 'Pipe (|) separate terms', 'woocommerce' ); ?>" />
@@ -607,28 +626,32 @@ class WC_Meta_Box_Product_Data {
 					$post_parents = array();
 					$post_parents[''] = __( 'Choose a grouped product&hellip;', 'woocommerce' );
 
-					$posts_in = array_unique( (array) get_objects_in_term( get_term_by( 'slug', 'grouped', 'product_type' )->term_id, 'product_type' ) );
-					if ( sizeof( $posts_in ) > 0 ) {
-						$args = array(
-							'post_type'		=> 'product',
-							'post_status' 	=> 'any',
-							'numberposts' 	=> -1,
-							'orderby' 		=> 'title',
-							'order' 		=> 'asc',
-							'post_parent' 	=> 0,
-							'include' 		=> $posts_in,
-						);
-						$grouped_products = get_posts( $args );
+					if ( $grouped_term = get_term_by( 'slug', 'grouped', 'product_type' ) ) {
 
-						if ( $grouped_products ) {
-							foreach ( $grouped_products as $product ) {
+						$posts_in = array_unique( (array) get_objects_in_term( $grouped_term->term_id, 'product_type' ) );
+						if ( sizeof( $posts_in ) > 0 ) {
+							$args = array(
+								'post_type'		=> 'product',
+								'post_status' 	=> 'any',
+								'numberposts' 	=> -1,
+								'orderby' 		=> 'title',
+								'order' 		=> 'asc',
+								'post_parent' 	=> 0,
+								'include' 		=> $posts_in,
+							);
+							$grouped_products = get_posts( $args );
 
-								if ( $product->ID == $post->ID )
-									continue;
+							if ( $grouped_products ) {
+								foreach ( $grouped_products as $product ) {
 
-								$post_parents[ $product->ID ] = $product->post_title;
+									if ( $product->ID == $post->ID )
+										continue;
+
+									$post_parents[ $product->ID ] = $product->post_title;
+								}
 							}
 						}
+
 					}
 
 					woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents, 'desc_tip' => true, 'description' => __( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ) );
@@ -651,14 +674,14 @@ class WC_Meta_Box_Product_Data {
 				echo '<div class="options_group hide_if_external">';
 
 					// Purchase note
-					woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
+					woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
 
 				echo '</div>';
 
 				echo '<div class="options_group">';
 
 					// menu_order
-					woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
+					woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
 						'step' 	=> '1'
 					)  ) );
 
@@ -691,7 +714,7 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Show options for the variable product type
 	 */
-	public function output_variations() {
+	public static function output_variations() {
 		global $post, $woocommerce;
 
 		$attributes = maybe_unserialize( get_post_meta( $post->ID, '_product_attributes', true ) );
@@ -718,11 +741,9 @@ class WC_Meta_Box_Product_Data {
 			<?php if ( ! $variation_attribute_found ) : ?>
 
 				<div id="message" class="inline woocommerce-message">
-					<div class="squeezer">
-						<h4><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></h4>
+					<p><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
 
-						<p class="submit"><a class="button-primary" href="http://docs.woothemes.com/document/product-variations/" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
-					</div>
+					<p class="submit"><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/product-variations', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
 				</div>
 
 			<?php else : ?>
@@ -746,7 +767,6 @@ class WC_Meta_Box_Product_Data {
 						<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
 						<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
 						<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
-						<option value="variable_file_paths"><?php _e( 'File Path', 'woocommerce' ); ?></option>
 						<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
 						<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
 						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
@@ -762,24 +782,24 @@ class WC_Meta_Box_Product_Data {
 						'attributes' => $attributes,
 						'tax_class_options' => $tax_class_options,
 						'sku' 		=> get_post_meta( $post->ID, '_sku', true ),
-						'weight' 	=> get_post_meta( $post->ID, '_weight', true ),
-						'length' 	=> get_post_meta( $post->ID, '_length', true ),
-						'width' 	=> get_post_meta( $post->ID, '_width', true ),
-						'height' 	=> get_post_meta( $post->ID, '_height', true ),
+						'weight' 	=> wc_format_localized_decimal( get_post_meta( $post->ID, '_weight', true ) ),
+						'length' 	=> wc_format_localized_decimal( get_post_meta( $post->ID, '_length', true ) ),
+						'width' 	=> wc_format_localized_decimal( get_post_meta( $post->ID, '_width', true ) ),
+						'height' 	=> wc_format_localized_decimal( get_post_meta( $post->ID, '_height', true ) ),
 						'tax_class' => get_post_meta( $post->ID, '_tax_class', true )
 					);
 
 					if ( ! $parent_data['weight'] )
-						$parent_data['weight'] = '0.00';
+						$parent_data['weight'] = wc_format_localized_decimal( 0 );
 
 					if ( ! $parent_data['length'] )
-						$parent_data['length'] = '0';
+						$parent_data['length'] = wc_format_localized_decimal( 0 );
 
 					if ( ! $parent_data['width'] )
-						$parent_data['width'] = '0';
+						$parent_data['width'] = wc_format_localized_decimal( 0 );
 
 					if ( ! $parent_data['height'] )
-						$parent_data['height'] = '0';
+						$parent_data['height'] = wc_format_localized_decimal( 0 );
 
 					// Get variations
 					$args = array(
@@ -806,7 +826,6 @@ class WC_Meta_Box_Product_Data {
 						$variation_fields = array(
 							'_sku',
 							'_stock',
-							'_price',
 							'_regular_price',
 							'_sale_price',
 							'_weight',
@@ -815,7 +834,7 @@ class WC_Meta_Box_Product_Data {
 							'_height',
 							'_download_limit',
 							'_download_expiry',
-							'_file_paths',
+							'_downloadable_files',
 							'_downloadable',
 							'_virtual',
 							'_thumbnail_id',
@@ -824,25 +843,19 @@ class WC_Meta_Box_Product_Data {
 						);
 
 						foreach ( $variation_fields as $field )
-							$$field = isset( $variation_data[ $field ][0] ) ? $variation_data[ $field ][0] : '';
+							$$field = isset( $variation_data[ $field ][0] ) ? maybe_unserialize( $variation_data[ $field ][0] ) : '';
 
-						// Tax class handling
 						$_tax_class = isset( $variation_data['_tax_class'][0] ) ? $variation_data['_tax_class'][0] : null;
+						$image_id   = absint( $_thumbnail_id );
+						$image      = $image_id ? wp_get_attachment_thumb_url( $image_id ) : '';
 
-						// Price backwards compat
-						if ( $_regular_price == '' && $_price )
-							$_regular_price = $_price;
-
-						// Get image
-						$image = '';
-						$image_id = absint( $_thumbnail_id );
-						if ( $image_id )
-							$image = wp_get_attachment_thumb_url( $image_id );
-
-						// Format file paths
-						$_file_paths = maybe_unserialize( $_file_paths );
-						if ( is_array( $_file_paths ) )
-							$_file_paths = implode( "\n", $_file_paths );
+						// Locale formatting
+						$_regular_price = wc_format_localized_price( $_regular_price );
+						$_sale_price    = wc_format_localized_price( $_sale_price );
+						$_weight        = wc_format_localized_decimal( $_weight );
+						$_length        = wc_format_localized_decimal( $_length );
+						$_width         = wc_format_localized_decimal( $_width );
+						$_height        = wc_format_localized_decimal( $_height );
 
 						include( 'views/html-variation-admin.php' );
 
@@ -882,7 +895,7 @@ class WC_Meta_Box_Product_Data {
 
 							} else {
 
-								$options = array_map( 'trim', explode( '|', $attribute['value'] ) );
+								$options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
 
 								foreach ( $options as $option )
 									echo '<option ' . selected( sanitize_title( $variation_selected_value ), sanitize_title( $option ), false ) . ' value="' . esc_attr( sanitize_title( $option ) ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
@@ -919,8 +932,10 @@ class WC_Meta_Box_Product_Data {
 		update_post_meta( $post_id, '_virtual', $is_virtual );
 
 		// Update post meta
-		if ( isset( $_POST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
-		if ( isset( $_POST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );
+		if ( isset( $_POST['_regular_price'] ) )
+			update_post_meta( $post_id, '_regular_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
+		if ( isset( $_POST['_sale_price'] ) )
+			update_post_meta( $post_id, '_sale_price', ( $_POST['_sale_price'] === '' ? '' : wc_format_decimal( $_POST['_sale_price'] ) ) );
 		if ( isset( $_POST['_tax_status'] ) ) update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
 		if ( isset( $_POST['_tax_class'] ) ) update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
 		if ( isset( $_POST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
@@ -929,10 +944,19 @@ class WC_Meta_Box_Product_Data {
 
 		// Dimensions
 		if ( $is_virtual == 'no' ) {
-			update_post_meta( $post_id, '_weight', stripslashes( $_POST['_weight'] ) );
-			update_post_meta( $post_id, '_length', stripslashes( $_POST['_length'] ) );
-			update_post_meta( $post_id, '_width', stripslashes( $_POST['_width'] ) );
-			update_post_meta( $post_id, '_height', stripslashes( $_POST['_height'] ) );
+
+			if ( isset( $_POST['_weight'] ) )
+				update_post_meta( $post_id, '_weight', ( $_POST['_weight'] === '' ) ? '' : wc_format_decimal( $_POST['_weight'] ) );
+
+			if ( isset( $_POST['_length'] ) )
+				update_post_meta( $post_id, '_length', ( $_POST['_length'] === '' ) ? '' : wc_format_decimal( $_POST['_length'] ) );
+
+			if ( isset( $_POST['_width'] ) )
+				update_post_meta( $post_id, '_width', ( $_POST['_width'] === '' ) ? '' : wc_format_decimal( $_POST['_width'] ) );
+
+			if ( isset( $_POST['_height'] ) )
+				update_post_meta( $post_id, '_height', ( $_POST['_height'] === '' ) ? '' : wc_format_decimal( $_POST['_height'] ) );
+
 		} else {
 			update_post_meta( $post_id, '_weight', '' );
 			update_post_meta( $post_id, '_length', '' );
@@ -945,8 +969,8 @@ class WC_Meta_Box_Product_Data {
 		wp_set_object_terms( $post_id, $product_shipping_class, 'product_shipping_class');
 
 		// Unique SKU
-		$sku				= get_post_meta($post_id, '_sku', true);
-		$new_sku 			= esc_html( trim( stripslashes( $_POST['_sku'] ) ) );
+		$sku				= get_post_meta( $post_id, '_sku', true );
+		$new_sku 			= wc_clean( stripslashes( $_POST['_sku'] ) );
 
 		if ( $new_sku == '' ) {
 			update_post_meta( $post_id, '_sku', '' );
@@ -1009,7 +1033,7 @@ class WC_Meta_Box_Product_Data {
 
 					 	// Text based attributes - Posted values are term names - don't change to slugs
 					 	} else {
-					 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( '|', $attribute_values[ $i ] ) ) );
+					 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
 					 	}
 
 					 	// Remove empty items in the array
@@ -1026,7 +1050,7 @@ class WC_Meta_Box_Product_Data {
 			 		if ( $values ) {
 				 		// Add attribute to array, but don't set values
 				 		$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-					 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
+					 		'name' 			=> wc_clean( $attribute_names[ $i ] ),
 					 		'value' 		=> '',
 					 		'position' 		=> $attribute_position[ $i ],
 					 		'is_visible' 	=> $is_visible,
@@ -1038,11 +1062,11 @@ class WC_Meta_Box_Product_Data {
 			 	} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 			 		// Text based, separate by pipe
-			 		$values = implode( ' | ', array_map( 'woocommerce_clean', explode( '|', $attribute_values[ $i ] ) ) );
+			 		$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
 
 			 		// Custom attribute - Add attribute to array and set the values
 				 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-				 		'name' 			=> woocommerce_clean( $attribute_names[ $i ] ),
+				 		'name' 			=> wc_clean( $attribute_names[ $i ] ),
 				 		'value' 		=> $values,
 				 		'position' 		=> $attribute_position[ $i ],
 				 		'is_visible' 	=> $is_visible,
@@ -1094,18 +1118,18 @@ class WC_Meta_Box_Product_Data {
 				update_post_meta( $post_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
 
 			// Update price if on sale
-			if ( $_POST['_sale_price'] != '' && $date_to == '' && $date_from == '' )
-				update_post_meta( $post_id, '_price', stripslashes( $_POST['_sale_price'] ) );
+			if ( $_POST['_sale_price'] !== '' && $date_to == '' && $date_from == '' )
+				update_post_meta( $post_id, '_price', wc_format_decimal( $_POST['_sale_price'] ) );
 			else
-				update_post_meta( $post_id, '_price', stripslashes( $_POST['_regular_price'] ) );
+				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
 
-			if ( $_POST['_sale_price'] != '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
-				update_post_meta( $post_id, '_price', stripslashes($_POST['_sale_price']) );
+			if ( $_POST['_sale_price'] !== '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
+				update_post_meta( $post_id, '_price', wc_format_decimal( $_POST['_sale_price'] ) );
 
 			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $post_id, '_price', stripslashes($_POST['_regular_price']) );
-				update_post_meta( $post_id, '_sale_price_dates_from', '');
-				update_post_meta( $post_id, '_sale_price_dates_to', '');
+				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
+				update_post_meta( $post_id, '_sale_price_dates_from', '' );
+				update_post_meta( $post_id, '_sale_price_dates_to', '' );
 			}
 		}
 
@@ -1149,7 +1173,7 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
-		// Sold Individuall
+		// Sold Individually
 		if ( ! empty( $_POST['_sold_individually'] ) ) {
 			update_post_meta( $post_id, '_sold_individually', 'yes' );
 		} else {
@@ -1165,7 +1189,7 @@ class WC_Meta_Box_Product_Data {
 				update_post_meta( $post_id, '_backorders', 'no' );
 				update_post_meta( $post_id, '_stock', '' );
 
-				wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
+				wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 
 			} elseif ( $product_type == 'external' ) {
 
@@ -1178,23 +1202,23 @@ class WC_Meta_Box_Product_Data {
 			} elseif ( ! empty( $_POST['_manage_stock'] ) ) {
 
 				update_post_meta( $post_id, '_manage_stock', 'yes' );
-				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_POST['_backorders'] ) );
+				update_post_meta( $post_id, '_backorders', wc_clean( $_POST['_backorders'] ) );
 
-				wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
+				wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 				wc_update_product_stock( $post_id, intval( $_POST['_stock'] ) );
 
 			} else {
 
 				// Don't manage stock
 				update_post_meta( $post_id, '_manage_stock', 'no' );
-				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_POST['_backorders'] ) );
+				update_post_meta( $post_id, '_backorders', wc_clean( $_POST['_backorders'] ) );
 				update_post_meta( $post_id, '_stock', '' );
 
-				wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
+				wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 			}
 
 		} else {
-			wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
+			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 		}
 
 		// Upsells
@@ -1235,30 +1259,32 @@ class WC_Meta_Box_Product_Data {
 				$_download_expiry = ''; // 0 or blank = unlimited
 
 			// file paths will be stored in an array keyed off md5(file path)
-			if ( isset( $_POST['_file_paths'] ) ) {
-				$_file_paths = array();
-				$file_paths = str_replace( "\r\n", "\n", esc_attr( $_POST['_file_paths'] ) );
-				$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
-				if ( $file_paths ) {
-					$file_paths = explode( "\n", $file_paths );
+			if ( isset( $_POST['_wc_file_urls'] ) ) {
+				$files = array();
 
-					foreach ( $file_paths as $file_path ) {
-						$file_path = trim( $file_path );
-						$_file_paths[ md5( $file_path ) ] = $file_path;
-					}
+				$file_names    = isset( $_POST['_wc_file_names'] ) ? array_map( 'wc_clean', $_POST['_wc_file_names'] ) : array();
+				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'wc_clean', $_POST['_wc_file_urls'] ) : array();
+				$file_url_size = sizeof( $file_urls );
+
+				for ( $i = 0; $i < $file_url_size; $i ++ ) {
+					if ( ! empty( $file_urls[ $i ] ) )
+						$files[ md5( $file_urls[ $i ] ) ] = array(
+							'name' => $file_names[ $i ],
+							'file' => $file_urls[ $i ]
+						);
 				}
 
-				// grant permission to any newly added files on any existing orders for this product
-				do_action( 'woocommerce_process_product_file_download_paths', $post_id, 0, $_file_paths );
+				// grant permission to any newly added files on any existing orders for this product prior to saving
+				do_action( 'woocommerce_process_product_file_download_paths', $post_id, 0, $files );
 
-				update_post_meta( $post_id, '_file_paths', $_file_paths );
+				update_post_meta( $post_id, '_downloadable_files', $files );
 			}
 
 			update_post_meta( $post_id, '_download_limit', $_download_limit );
 			update_post_meta( $post_id, '_download_expiry', $_download_expiry );
 
 			if ( isset( $_POST['_download_type'] ) )
-				update_post_meta( $post_id, '_download_type', woocommerce_clean( $_POST['_download_type'] ) );
+				update_post_meta( $post_id, '_download_type', wc_clean( $_POST['_download_type'] ) );
 		}
 
 		// Product url
@@ -1270,7 +1296,8 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Save variations
-		self::save_variations( $post_id, $post );
+		if ( $product_type == 'variable' )
+			self::save_variations( $post_id, $post );
 
 		// Do action for product type
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
@@ -1294,7 +1321,6 @@ class WC_Meta_Box_Product_Data {
 			$variable_regular_price 			= $_POST['variable_regular_price'];
 			$variable_sale_price				= $_POST['variable_sale_price'];
 			$upload_image_id					= $_POST['upload_image_id'];
-			$variable_file_paths 				= $_POST['variable_file_paths'];
 			$variable_download_limit 			= $_POST['variable_download_limit'];
 			$variable_download_expiry   		= $_POST['variable_download_expiry'];
 			$variable_shipping_class 			= $_POST['variable_shipping_class'];
@@ -1357,23 +1383,30 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				// Update post meta
-				update_post_meta( $variation_id, '_sku', woocommerce_clean( $variable_sku[ $i ] ) );
-				update_post_meta( $variation_id, '_weight', woocommerce_clean( $variable_weight[ $i ] ) );
-				update_post_meta( $variation_id, '_length', woocommerce_clean( $variable_length[ $i ] ) );
-				update_post_meta( $variation_id, '_width', woocommerce_clean( $variable_width[ $i ] ) );
-				update_post_meta( $variation_id, '_height', woocommerce_clean( $variable_height[ $i ] ) );
+				update_post_meta( $variation_id, '_sku', wc_clean( $variable_sku[ $i ] ) );
 				update_post_meta( $variation_id, '_thumbnail_id', absint( $upload_image_id[ $i ] ) );
-				update_post_meta( $variation_id, '_virtual', woocommerce_clean( $is_virtual ) );
-				update_post_meta( $variation_id, '_downloadable', woocommerce_clean( $is_downloadable ) );
+				update_post_meta( $variation_id, '_virtual', wc_clean( $is_virtual ) );
+				update_post_meta( $variation_id, '_downloadable', wc_clean( $is_downloadable ) );
+
+				if ( isset( $variable_weight[ $i ] ) )
+					update_post_meta( $variation_id, '_weight', ( $variable_weight[ $i ] === '' ) ? '' : wc_format_decimal( $variable_weight[ $i ] ) );
+				if ( isset( $variable_length[ $i ] ) )
+					update_post_meta( $variation_id, '_length', ( $variable_length[ $i ] === '' ) ? '' : wc_format_decimal( $variable_length[ $i ] ) );
+				if ( isset( $variable_width[ $i ] ) )
+					update_post_meta( $variation_id, '_width', ( $variable_width[ $i ] === '' ) ? '' : wc_format_decimal( $variable_width[ $i ] ) );
+				if ( isset( $variable_height[ $i ] ) )
+					update_post_meta( $variation_id, '_height', ( $variable_height[ $i ] === '' ) ? '' : wc_format_decimal( $variable_height[ $i ] ) );
 
 				// Stock handling
-				wc_update_product_stock( $variation_id, woocommerce_clean( $variable_stock[ $i ] ) );
+				if ( isset( $variable_stock[$i] ) ) {
+					wc_update_product_stock( $variation_id, wc_clean( $variable_stock[ $i ] ) );
+				}
 
 				// Price handling
-				$regular_price 	= woocommerce_clean( $variable_regular_price[ $i ] );
-				$sale_price 	= woocommerce_clean( $variable_sale_price[ $i ] );
-				$date_from 		= woocommerce_clean( $variable_sale_price_dates_from[ $i ] );
-				$date_to		= woocommerce_clean( $variable_sale_price_dates_to[ $i ] );
+				$regular_price 	= wc_format_decimal( $variable_regular_price[ $i ] );
+				$sale_price 	= ( $variable_sale_price[ $i ] === '' ? '' : wc_format_decimal( $variable_sale_price[ $i ] ) );
+				$date_from 		= wc_clean( $variable_sale_price_dates_from[ $i ] );
+				$date_to		= wc_clean( $variable_sale_price_dates_to[ $i ] );
 
 				update_post_meta( $variation_id, '_regular_price', $regular_price );
 				update_post_meta( $variation_id, '_sale_price', $sale_price );
@@ -1408,38 +1441,39 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				if ( isset( $variable_tax_class[ $i ] ) && $variable_tax_class[ $i ] !== 'parent' )
-					update_post_meta( $variation_id, '_tax_class', woocommerce_clean( $variable_tax_class[ $i ] ) );
+					update_post_meta( $variation_id, '_tax_class', wc_clean( $variable_tax_class[ $i ] ) );
 				else
 					delete_post_meta( $variation_id, '_tax_class' );
 
 				if ( $is_downloadable == 'yes' ) {
-					update_post_meta( $variation_id, '_download_limit', woocommerce_clean( $variable_download_limit[ $i ] ) );
-					update_post_meta( $variation_id, '_download_expiry', woocommerce_clean( $variable_download_expiry[ $i ] ) );
+					update_post_meta( $variation_id, '_download_limit', wc_clean( $variable_download_limit[ $i ] ) );
+					update_post_meta( $variation_id, '_download_expiry', wc_clean( $variable_download_expiry[ $i ] ) );
 
-					$_file_paths = array();
-					$file_paths = str_replace( "\r\n", "\n", $variable_file_paths[ $i ] );
-					$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
-					if ( $file_paths ) {
-						$file_paths = explode( "\n", $file_paths );
+					$files         = array();
+					$file_names    = isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_names'][ $variation_id ] ) : array();
+					$file_urls     = isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_urls'][ $variation_id ] ) : array();
+					$file_url_size = sizeof( $file_urls );
 
-						foreach ( $file_paths as $file_path ) {
-							$file_path = trim( $file_path );
-							$_file_paths[ md5( $file_path ) ] = $file_path;
-						}
+					for ( $ii = 0; $ii < $file_url_size; $ii ++ ) {
+						if ( ! empty( $file_urls[ $ii ] ) )
+							$files[ md5( $file_urls[ $ii ] ) ] = array(
+								'name' => $file_names[ $ii ],
+								'file' => $file_urls[ $ii ]
+							);
 					}
 
-					// grant permission to any newly added files on any existing orders for this product
-					do_action( 'woocommerce_process_product_file_download_paths', $post_id, $variation_id, $_file_paths );
+					// grant permission to any newly added files on any existing orders for this product prior to saving
+					do_action( 'woocommerce_process_product_file_download_paths', $post_id, $variation_id, $files );
 
-					update_post_meta( $variation_id, '_file_paths', $_file_paths );
+					update_post_meta( $variation_id, '_downloadable_files', $files );
 				} else {
 					update_post_meta( $variation_id, '_download_limit', '' );
 					update_post_meta( $variation_id, '_download_expiry', '' );
-					update_post_meta( $variation_id, '_file_paths', '' );
+					update_post_meta( $variation_id, '_downloadable_files', '' );
 				}
 
 				// Save shipping class
-				$variable_shipping_class[ $i ] = $variable_shipping_class[ $i ] > 0 ? (int) $variable_shipping_class[ $i ] : '';
+				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
 				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
 
 				// Remove old taxonomies attributes so data is kept up to date
@@ -1452,18 +1486,19 @@ class WC_Meta_Box_Product_Data {
 				foreach ( $attributes as $attribute ) {
 
 					if ( $attribute['is_variation'] ) {
-
-						// Don't use woocommerce_clean as it destroys sanitized characters
-						$value = sanitize_title( trim( stripslashes( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) ) );
+						// Don't use wc_clean as it destroys sanitized characters
+						if ( isset( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) )
+							$value = sanitize_title( trim( stripslashes( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) ) );
+						else
+							$value = '';
 
 						update_post_meta( $variation_id, 'attribute_' . sanitize_title( $attribute['name'] ), $value );
 					}
 
 				}
 
-				do_action( 'woocommerce_save_product_variation', $variation_id );
-			 }
-
+				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
+			}
 		}
 
 		// Update parent if variable so price sorting works and stays in sync with the cheapest child
@@ -1475,8 +1510,11 @@ class WC_Meta_Box_Product_Data {
 		foreach ( $attributes as $attribute ) {
 			if ( $attribute['is_variation'] ) {
 
-				// Don't use woocommerce_clean as it destroys sanitized characters
-				$value = sanitize_title( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
+				// Don't use wc_clean as it destroys sanitized characters
+				if ( isset( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) )
+					$value = sanitize_title( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
+				else
+					$value = '';
 
 				if ( $value )
 					$default_attributes[ sanitize_title( $attribute['name'] ) ] = $value;

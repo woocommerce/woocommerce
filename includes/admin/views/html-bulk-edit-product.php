@@ -18,7 +18,7 @@
 							'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
-							echo '<option value="' . $key . '">' . $value . '</option>';
+							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 						}
 					?>
 					</select>
@@ -43,7 +43,7 @@
 							'4' => __( 'Decrease regular price by (fixed amount or %):', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
-							echo '<option value="' . $key . '">' . $value . '</option>';
+							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 						}
 					?>
 					</select>
@@ -63,10 +63,10 @@
 						''         => __( '— No Change —', 'woocommerce' ),
 						'taxable'  => __( 'Taxable', 'woocommerce' ),
 						'shipping' => __( 'Shipping only', 'woocommerce' ),
-						'none'     => __( 'None', 'woocommerce' )
+						'none'     => _x( 'None', 'Tax status', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="' . $key . '">' . $value . '</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -90,7 +90,7 @@
 		    				$options[ sanitize_title( $class ) ] = esc_html( $class );
 
 					foreach ($options as $key => $value) {
-						echo '<option value="' . $key . '">' . $value . '</option>';
+						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 					}
 				?>
 				</select>
@@ -109,7 +109,7 @@
 								'1' => __( 'Change to:', 'woocommerce' )
 							);
 							foreach ($options as $key => $value) {
-								echo '<option value="' . $key . '">'. $value .'</option>';
+								echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 							}
 						?>
 						</select>
@@ -133,7 +133,7 @@
 								'1' => __( 'Change to:', 'woocommerce' )
 							);
 							foreach ($options as $key => $value) {
-								echo '<option value="' . $key . '">'. $value .'</option>';
+								echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 							}
 						?>
 						</select>
@@ -160,7 +160,7 @@
 						'hidden' => __( 'Hidden', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="' . $key . '">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 					}
 				?>
 				</select>
@@ -177,7 +177,7 @@
 						'no' => __( 'No', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="' . $key . '">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 					}
 				?>
 				</select>
@@ -195,7 +195,7 @@
 						'outofstock' => __( 'Out of stock', 'woocommerce' )
 					);
 					foreach ($options as $key => $value) {
-						echo '<option value="' . $key . '">'. $value .'</option>';
+						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 					}
 				?>
 				</select>
@@ -214,7 +214,7 @@
 							'no' => __( 'No', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
-							echo '<option value="' . $key . '">'. $value .'</option>';
+							echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 						}
 					?>
 					</select>
@@ -232,7 +232,7 @@
 								'1' => __( 'Change to:', 'woocommerce' )
 							);
 							foreach ($options as $key => $value) {
-								echo '<option value="' . $key . '">'. $value .'</option>';
+								echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 							}
 						?>
 						</select>
@@ -255,7 +255,7 @@
 							'yes'    => __( 'Allow', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
-							echo '<option value="' . $key . '">'. $value .'</option>';
+							echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 						}
 					?>
 					</select>

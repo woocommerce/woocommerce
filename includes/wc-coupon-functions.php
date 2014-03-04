@@ -36,4 +36,6 @@ function wc_get_coupon_type( $type = '' ) {
 	$types = wc_get_coupon_types();
 	if ( isset( $types[ $type ] ) )
 		return $types[ $type ];
+
+	return '';
 }

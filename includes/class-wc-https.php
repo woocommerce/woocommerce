@@ -14,22 +14,24 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class WC_HTTPS {
 
 	/**
-	 * __construct function.
+	 * Hook in our HTTPS functions if we're on the frontend. This will ensure any links output to a page (when viewing via HTTPS) are also served over HTTPS.
 	 */
 	public function __construct() {
-		if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' ) {
-			if ( ! is_admin() || defined('DOING_AJAX') ) {
+		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) ) {
+			if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && in_array( $_REQUEST['action'], array( 'woocommerce_get_refreshed_fragments', 'woocommerce_checkout', 'woocommerce_update_order_review', 'woocommerce_update_shipping_method', 'woocommerce_apply_coupon' ) ) ) ) {
 				// HTTPS urls with SSL on
-				$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
+				$filters = array( 'post_thumbnail_html', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
 
-				foreach ( $filters as $filter )
+				foreach ( $filters as $filter ) {
 					add_filter( $filter, 'WC_HTTPS::force_https_url' );
-			}
-			add_filter( 'page_link', array( $this, 'force_https_page_link' ), 10, 2 );
-			add_action( 'template_redirect', array( $this, 'force_https_template_redirect' ) );
+				}
+				
+				add_filter( 'page_link', array( $this, 'force_https_page_link' ), 10, 2 );
+				add_action( 'template_redirect', array( $this, 'force_https_template_redirect' ) );
 
-			if ( get_option('woocommerce_unforce_ssl_checkout') == 'yes' )
-				add_action( 'template_redirect', array( $this, 'unforce_https_template_redirect' ) );
+				if ( get_option('woocommerce_unforce_ssl_checkout') == 'yes' )
+					add_action( 'template_redirect', array( $this, 'unforce_https_template_redirect' ) );
+			}
 		}
 	}
 
@@ -75,7 +77,7 @@ class WC_HTTPS {
 				wp_safe_redirect( preg_replace( '|^http://|', 'https://', $_SERVER['REQUEST_URI'] ) );
 				exit;
 			} else {
-				wp_safe_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+				wp_safe_redirect( 'https://' . ( ! empty( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'] ) . $_SERVER['REQUEST_URI'] );
 				exit;
 			}
 		}
@@ -91,7 +93,7 @@ class WC_HTTPS {
 				wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
 				exit;
 			} else {
-				wp_safe_redirect( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+				wp_safe_redirect( 'http://' . ( ! empty( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'] ) . $_SERVER['REQUEST_URI'] );
 				exit;
 			}
 		}

@@ -7,10 +7,12 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @version 	2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar
@@ -21,14 +23,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @param bool $show_admin_bar
  * @return bool
  */
-function woocommerce_disable_admin_bar( $show_admin_bar ) {
-	if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', "yes" ) == "yes" ) && ! ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) ) {
+function wc_disable_admin_bar( $show_admin_bar ) {
+	if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', 'yes' ) == 'yes' ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
 		$show_admin_bar = false;
 	}
 
 	return $show_admin_bar;
 }
-add_filter( 'show_admin_bar', 'woocommerce_disable_admin_bar', 10, 1 );
+add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
 
 
 /**
@@ -37,29 +39,30 @@ add_filter( 'show_admin_bar', 'woocommerce_disable_admin_bar', 10, 1 );
  * @param  string $email
  * @param  string $username
  * @param  string $password
- * @return WP_Error on failure, Int (user ID) on success
+ * @return int|WP_Error on failure, Int (user ID) on success
  */
-function woocommerce_create_new_customer( $email, $username = '', $password = '' ) {
+function wc_create_new_customer( $email, $username = '', $password = '' ) {
 
 	// Check the e-mail address
-	if ( empty( $email ) || ! is_email( $email ) )
-		return new WP_Error( "registration-error", __( "Please provide a valid email address.", "woocommerce" ) );
+	if ( empty( $email ) || ! is_email( $email ) ) {
+		return new WP_Error( 'registration-error', __( 'Please provide a valid email address.', 'woocommerce' ) );
+	}
 
-	if ( email_exists( $email ) )
-		return new WP_Error( "registration-error", __( "An account is already registered with your email address. Please login.", "woocommerce" ) );
-
-	wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-register' );
+	if ( email_exists( $email ) ) {
+		return new WP_Error( 'registration-error', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
+	}
 
 	// Handle username creation
-	if ( get_option( 'woocommerce_registration_generate_username' ) == 'no' || ! empty( $username ) ) {
+	if ( 'no' == get_option( 'woocommerce_registration_generate_username' ) || ! empty( $username ) ) {
 
 		$username = sanitize_user( $username );
 
-		if ( empty( $username ) || ! validate_username( $username ) )
-			return new WP_Error( "registration-error", __( "Please enter a valid account username.", "woocommerce" ) );
+		if ( empty( $username ) || ! validate_username( $username ) ) {
+			return new WP_Error( 'registration-error', __( 'Please enter a valid account username.', 'woocommerce' ) );
+		}
 
 		if ( username_exists( $username ) )
-			return new WP_Error( "registration-error", __( "An account is already registered with that username. Please choose another.", "woocommerce" ) );
+			return new WP_Error( 'registration-error', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
 	} else {
 
 		$username = sanitize_user( current( explode( '@', $email ) ) );
@@ -75,11 +78,11 @@ function woocommerce_create_new_customer( $email, $username = '', $password = ''
 	}
 
 	// Handle password creation
-	if ( get_option( 'woocommerce_registration_generate_password' ) == 'yes' && empty( $password ) ) {
+	if ( 'yes' == get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) && ! isset( $_POST['register'] ) ) {
 		$password = wp_generate_password();
 		$password_generated = true;
 	} elseif ( empty( $password ) ) {
-		return new WP_Error( "registration-error", __( "Please enter an account password.", "woocommerce" ) );
+		return new WP_Error( 'registration-error', __( 'Please enter an account password.', 'woocommerce' ) );
 	} else {
 		$password_generated = false;
 	}
@@ -94,17 +97,18 @@ function woocommerce_create_new_customer( $email, $username = '', $password = ''
 	if ( $validation_errors->get_error_code() )
 		return $validation_errors;
 
-    $new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
-    	'user_login' => $username,
-    	'user_pass'  => $password,
-    	'user_email' => $email,
-    	'role'       => 'customer'
-    ) );
+	$new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
+		'user_login' => $username,
+		'user_pass'  => $password,
+		'user_email' => $email,
+		'role'       => 'customer'
+	) );
 
-    $customer_id = wp_insert_user( $new_customer_data );
+	$customer_id = wp_insert_user( $new_customer_data );
 
-    if ( is_wp_error( $customer_id ) )
-    	return new WP_Error( "registration-error", '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+	if ( is_wp_error( $customer_id ) ) {
+		return new WP_Error( 'registration-error', '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+	}
 
 	do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
 
@@ -117,7 +121,7 @@ function woocommerce_create_new_customer( $email, $username = '', $password = ''
  * @param  int $customer_id
  * @return void
  */
-function woocommerce_set_customer_auth_cookie( $customer_id ) {
+function wc_set_customer_auth_cookie( $customer_id ) {
 	global $current_user;
 
 	$current_user = get_user_by( 'id', $customer_id );
@@ -129,18 +133,18 @@ function woocommerce_set_customer_auth_cookie( $customer_id ) {
  * Get past orders (by email) and update them
  *
  * @param  int $customer_id
- * @return void
+ * @return int
  */
-function woocommerce_update_new_customer_past_orders( $customer_id ) {
+function wc_update_new_customer_past_orders( $customer_id ) {
 
-    $customer = get_user_by( 'id', absint( $customer_id ) );
+	$customer = get_user_by( 'id', absint( $customer_id ) );
 
-    $customer_orders = get_posts( array(
-        'numberposts' => -1,
-        'post_type'   => 'shop_order',
-        'post_status' => 'publish',
-        'fields'      => 'ids',
-        'meta_query' => array(
+	$customer_orders = get_posts( array(
+		'numberposts' => -1,
+		'post_type'   => 'shop_order',
+		'post_status' => 'publish',
+		'fields'      => 'ids',
+		'meta_query' => array(
 			array(
 				'key'     => '_customer_user',
 				'value'   => array( 0, '' ),
@@ -151,16 +155,16 @@ function woocommerce_update_new_customer_past_orders( $customer_id ) {
 				'value'   => $customer->user_email,
 			)
 		),
-    ) );
+	) );
 
-    $linked = 0;
-    $complete = 0;
+	$linked = 0;
+	$complete = 0;
 
-    if ( $customer_orders )
-        foreach ( $customer_orders as $order_id ) {
-        	update_post_meta( $order_id, '_customer_user', $customer->ID );
+	if ( $customer_orders )
+		foreach ( $customer_orders as $order_id ) {
+			update_post_meta( $order_id, '_customer_user', $customer->ID );
 
-        	$order_status = wp_get_post_terms( $order_id, 'shop_order_status' );
+			$order_status = wp_get_post_terms( $order_id, 'shop_order_status' );
 
 			if ( $order_status ) {
 				$order_status = current( $order_status );
@@ -170,16 +174,16 @@ function woocommerce_update_new_customer_past_orders( $customer_id ) {
 			if ( $order_status == 'completed' )
 				$complete ++;
 
-            $linked ++;
-        }
+			$linked ++;
+		}
 
-    if ( $complete ) {
-    	update_user_meta( $customer_id, 'paying_customer', 1 );
-    	update_user_meta( $customer_id, '_order_count', '' );
-    	update_user_meta( $customer_id, '_money_spent', '' );
-    }
+	if ( $complete ) {
+		update_user_meta( $customer_id, 'paying_customer', 1 );
+		update_user_meta( $customer_id, '_order_count', '' );
+		update_user_meta( $customer_id, '_money_spent', '' );
+	}
 
-    return $linked;
+	return $linked;
 }
 
 /**
@@ -189,7 +193,7 @@ function woocommerce_update_new_customer_past_orders( $customer_id ) {
  * @param int $order_id
  * @return void
  */
-function woocommerce_paying_customer( $order_id ) {
+function wc_paying_customer( $order_id ) {
 
 	$order = new WC_Order( $order_id );
 
@@ -203,12 +207,10 @@ function woocommerce_paying_customer( $order_id ) {
 		update_user_meta( $order->user_id, '_order_count', $old_count + 1 );
 	}
 }
-add_action( 'woocommerce_order_status_completed', 'woocommerce_paying_customer' );
+add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 
 /**
- * woocommerce_customer_bought_product
- *
  * Checks if a user (by email) has bought an item
  *
  * @access public
@@ -217,7 +219,7 @@ add_action( 'woocommerce_order_status_completed', 'woocommerce_paying_customer' 
  * @param int $product_id
  * @return bool
  */
-function woocommerce_customer_bought_product( $customer_email, $user_id, $product_id ) {
+function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
 	$emails = array();
@@ -227,13 +229,16 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 		$emails[] = $user->user_email;
 	}
 
-	if ( is_email( $customer_email ) )
+	if ( is_email( $customer_email ) ) {
 		$emails[] = $customer_email;
+	}
 
-	if ( sizeof( $emails ) == 0 )
+	if ( sizeof( $emails ) == 0 ) {
 		return false;
+	}
 
-	$completed = get_term_by( 'slug', 'completed', 'shop_order_status' );
+	$completed  = get_term_by( 'slug', 'completed', 'shop_order_status' );
+	$processing = get_term_by( 'slug', 'processing', 'shop_order_status' );
 
 	return $wpdb->get_var(
 		$wpdb->prepare( "
@@ -243,18 +248,97 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 			LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
 			LEFT JOIN {$wpdb->term_relationships} AS rel ON order_items.order_id = rel.object_ID
 			WHERE
-				rel.term_taxonomy_id = %d AND
+				rel.term_taxonomy_id IN ( %d, %d ) AND
 				itemmeta.meta_value  = %s AND
 				itemmeta.meta_key    IN ( '_variation_id', '_product_id' ) AND
 				postmeta.meta_key    IN ( '_billing_email', '_customer_user' ) AND
 				(
 					postmeta.meta_value  IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) OR
 					(
-						postmeta.meta_value = %d AND
+						postmeta.meta_value = %s AND
 						postmeta.meta_value > 0
 					)
 				)
-			", $completed->term_taxonomy_id, $product_id, $user_id
+			", $completed->term_taxonomy_id, $processing->term_taxonomy_id, $product_id, $user_id
 		)
 	);
 }
+
+/**
+ * Checks if a user has a certain capability
+ *
+ * @access public
+ * @param array $allcaps
+ * @param array $caps
+ * @param array $args
+ * @return bool
+ */
+function wc_customer_has_capability( $allcaps, $caps, $args ) {
+	if ( isset( $caps[0] ) ) {
+		switch ( $caps[0] ) {
+
+			case 'view_order' :
+				$user_id = $args[1];
+				$order = new WC_Order( $args[2] );
+
+				if ( $user_id == $order->user_id ) {
+					$allcaps['view_order'] = true;
+				}
+
+				break;
+
+			case 'pay_for_order' :
+				$user_id = $args[1];
+				$order_id = isset( $args[2] ) ? $args[2] : null;
+
+				// When no order ID, we assume it's a new order
+				// and thus, customer can pay for it
+				if ( ! $order_id ) {
+					$allcaps['pay_for_order'] = true;
+
+					break;
+				}
+
+				$order = new WC_Order( $order_id );
+				if ( $user_id == $order->user_id || empty( $order->user_id ) ) {
+					$allcaps['pay_for_order'] = true;
+				}
+
+				break;
+
+			case 'order_again' :
+				$user_id = $args[1];
+				$order = new WC_Order( $args[2] );
+
+				if ( $user_id == $order->user_id ) {
+					$allcaps['order_again'] = true;
+				}
+
+				break;
+
+			case 'cancel_order' :
+				$user_id = $args[1];
+				$order = new WC_Order( $args[2] );
+
+				if ( $user_id == $order->user_id ) {
+					$allcaps['cancel_order'] = true;
+				}
+
+				break;
+
+			case 'download_file' :
+				$user_id = $args[1];
+				$download = $args[2];
+
+				if ( $user_id == $download->user_id ) {
+					$allcaps['download_file'] = true;
+				}
+
+				break;
+		}
+	}
+
+	return $allcaps;
+}
+
+add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );

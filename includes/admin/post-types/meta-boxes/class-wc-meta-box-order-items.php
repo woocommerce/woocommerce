@@ -125,35 +125,41 @@ class WC_Meta_Box_Order_Items {
 				if ( isset( $order_item_name[ $item_id ] ) )
 					$wpdb->update(
 						$wpdb->prefix . "woocommerce_order_items",
-						array( 'order_item_name' => woocommerce_clean( $order_item_name[ $item_id ] ) ),
+						array( 'order_item_name' => wc_clean( $order_item_name[ $item_id ] ) ),
 						array( 'order_item_id' => $item_id ),
 						array( '%s' ),
 						array( '%d' )
 					);
 
 				if ( isset( $order_item_qty[ $item_id ] ) )
-			 		woocommerce_update_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $order_item_qty[ $item_id ] ) );
+			 		wc_update_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $order_item_qty[ $item_id ] ) );
 
-			 	if ( isset( $item_tax_class[ $item_id ] ) )
-			 		woocommerce_update_order_item_meta( $item_id, '_tax_class', woocommerce_clean( $item_tax_class[ $item_id ] ) );
+			 	if ( isset( $order_item_tax_class[ $item_id ] ) )
+			 		wc_update_order_item_meta( $item_id, '_tax_class', wc_clean( $order_item_tax_class[ $item_id ] ) );
 
 			 	if ( isset( $line_subtotal[ $item_id ] ) ) {
-			 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal', woocommerce_clean( $line_subtotal[ $item_id ] ) );
+			 		wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $line_subtotal[ $item_id ] ) );
 
-			 		$subtotal += woocommerce_clean( $line_subtotal[ $item_id ] );
+			 		$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] );
 			 	}
 
-			 	if ( isset(  $line_subtotal_tax[ $item_id ] ) )
-			 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_clean( $line_subtotal_tax[ $item_id ] ) );
+			 	if ( isset(  $line_subtotal_tax[ $item_id ] ) ) {
+			 		wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $line_subtotal_tax[ $item_id ] ) );
+
+			 		$subtotal += wc_format_decimal( $line_subtotal_tax[ $item_id ] );
+			 	}
 
 			 	if ( isset( $line_total[ $item_id ] ) ) {
-			 		woocommerce_update_order_item_meta( $item_id, '_line_total', woocommerce_clean( $line_total[ $item_id ] ) );
+			 		wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $line_total[ $item_id ] ) );
 
-			 		$total += woocommerce_clean( $line_total[ $item_id ] );
+			 		$total += wc_format_decimal( $line_total[ $item_id ] );
 			 	}
 
-			 	if ( isset( $line_tax[ $item_id ] ) )
-			 		woocommerce_update_order_item_meta( $item_id, '_line_tax', woocommerce_clean( $line_tax[ $item_id ] ) );
+			 	if ( isset( $line_tax[ $item_id ] ) ) {
+			 		wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax[ $item_id ] ) );
+
+			 		$total += wc_format_decimal( $line_tax[ $item_id ] );
+			 	}
 
 			 	// Clear meta cache
 			 	wp_cache_delete( $item_id, 'order_item_meta' );
@@ -166,6 +172,7 @@ class WC_Meta_Box_Order_Items {
 
 		foreach ( $meta_keys as $id => $meta_key ) {
 			$meta_value = ( empty( $meta_values[ $id ] ) && ! is_numeric( $meta_values[ $id ] ) ) ? '' : $meta_values[ $id ];
+			$meta_value = stripslashes( $meta_value );
 			$wpdb->update(
 				$wpdb->prefix . "woocommerce_order_itemmeta",
 				array(
@@ -179,6 +186,6 @@ class WC_Meta_Box_Order_Items {
 		}
 
 		// Update cart discount from item totals
-		update_post_meta( $post_id, '_cart_discount', woocommerce_format_total( $subtotal - $total ) );
+		update_post_meta( $post_id, '_cart_discount', $subtotal - $total );
 	}
 }

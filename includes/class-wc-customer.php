@@ -25,9 +25,8 @@ class WC_Customer {
 	 * @return void
 	 */
 	public function __construct() {
-		global $woocommerce;
 
-		if ( empty( $woocommerce->session->customer ) ) {
+		if ( empty( WC()->session->customer ) ) {
 
 			$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
 
@@ -57,7 +56,7 @@ class WC_Customer {
 
 		} else {
 
-			$this->_data = $woocommerce->session->customer;
+			$this->_data = WC()->session->customer;
 
 		}
 
@@ -76,14 +75,12 @@ class WC_Customer {
 			$GLOBALS['woocommerce']->session->customer = $this->_data;
 	}
 
-    /**
-     * __set function.
-     *
-     * @access public
-     * @param mixed $property
-     * @param mixed $value
-     * @return void
-     */
+	/**
+	 * __set function.
+	 * @access   public
+	 * @param mixed $property
+	 * @return bool
+	 */
     public function __isset( $property ) {
         return isset( $this->_data[ $property ] );
     }
@@ -93,7 +90,7 @@ class WC_Customer {
      *
      * @access public
      * @param mixed $property
-     * @return mixed
+     * @return mixed|null
      */
     public function __get( $property ) {
         return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : null;
@@ -130,7 +127,6 @@ class WC_Customer {
 	 * @return void
 	 */
 	public function set_to_base() {
-		global $woocommerce;
 		$default = apply_filters( 'woocommerce_customer_default_location', get_option('woocommerce_default_country') );
     	if ( strstr( $default, ':' ) ) {
     		list( $country, $state ) = explode( ':', $default );
@@ -152,7 +148,6 @@ class WC_Customer {
 	 * @return void
 	 */
 	public function set_shipping_to_base() {
-		global $woocommerce;
 		$default = get_option('woocommerce_default_country');
     	if ( strstr( $default, ':' ) ) {
     		list( $country, $state ) = explode( ':', $default );
@@ -244,7 +239,7 @@ class WC_Customer {
 	 * Get the city from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_city() {
 		if ( isset( $this->city ) ) return $this->city;
@@ -254,7 +249,7 @@ class WC_Customer {
 	 * Gets the address from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_address() {
 		if ( isset( $this->address ) ) return $this->address;
@@ -264,7 +259,7 @@ class WC_Customer {
 	 * Gets the address_2 from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_address_2() {
 		if ( isset( $this->address_2 ) ) return $this->address_2;
@@ -308,7 +303,7 @@ class WC_Customer {
 	 * Gets the city from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_shipping_city() {
 		if ( isset( $this->shipping_city ) ) return $this->shipping_city;
@@ -318,7 +313,7 @@ class WC_Customer {
 	 * Gets the address from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_shipping_address() {
 		if ( isset( $this->shipping_address ) ) return $this->shipping_address;
@@ -328,7 +323,7 @@ class WC_Customer {
 	 * Gets the address_2 from the current session.
 	 *
 	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function get_shipping_address_2() {
 		if ( isset( $this->shipping_address_2 ) ) return $this->shipping_address_2;
@@ -338,13 +333,13 @@ class WC_Customer {
 	 * get_taxable_address function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_taxable_address() {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		// Check shipping method at this point to see if we need special handling
-		if ( apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) == true && sizeof( array_intersect( WC()->session->get( 'chosen_shipping_methods', array() ), apply_filters( 'woocommerce_local_pickup_methods', array( 'local_pickup' ) ) ) ) > 0 ) {
+		if ( apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) == true && sizeof( array_intersect( WC()->session->get( 'chosen_shipping_methods', array( get_option( 'woocommerce_default_shipping_method' ) ) ), apply_filters( 'woocommerce_local_pickup_methods', array( 'local_pickup' ) ) ) ) > 0 ) {
 			$tax_based_on = 'base';
 		}
 
@@ -587,82 +582,82 @@ class WC_Customer {
 	 * @return array Array of downloadable products
 	 */
 	public function get_downloadable_products() {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
-		$downloads = array();
+		$downloads   = array();
+		$_product    = null;
+		$order       = null;
+		$file_number = 0;
 
-		if ( is_user_logged_in() ) :
+		if ( is_user_logged_in() ) {
 
-			$user_info = get_userdata( get_current_user_id() );
+			// Get results from valid orders only
+			$results = $wpdb->get_results( $wpdb->prepare( "
+				SELECT permissions.* 
+				FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
+				LEFT JOIN {$wpdb->posts} as posts ON permissions.order_id = posts.ID
+				WHERE user_id = %s 
+				AND permissions.order_id > 0
+				AND posts.post_status = 'publish'
+				AND 
+					(
+						permissions.downloads_remaining > 0
+						OR 
+						permissions.downloads_remaining = ''
+					)
+				GROUP BY permissions.download_id
+				ORDER BY permissions.order_id, permissions.product_id, permissions.download_id;
+				", get_current_user_id() ) );
 
-			$results = $wpdb->get_results( $wpdb->prepare("SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE user_id = '%s' ORDER BY order_id, product_id, download_id", get_current_user_id()) );
-
-			$_product = null;
-			$order = null;
-			$file_number = 0;
-			if ($results) foreach ($results as $result) :
-
-				if ($result->order_id>0) :
-
+			if ( $results ) {
+				foreach ( $results as $result ) {
 					if ( ! $order || $order->id != $result->order_id ) {
 						// new order
-						$order = new WC_Order( $result->order_id );
+						$order    = new WC_Order( $result->order_id );
 						$_product = null;
 					}
 
-					// order exists and downloads permitted?
-					if ( ! $order->id || ! $order->is_download_permitted() || $order->post_status != 'publish' ) continue;
+					// Downloads permitted?
+					if ( ! $order->is_download_permitted() ) {
+						continue;
+					}
 
-					if ( ! $_product || $_product->id != $result->product_id ) :
+					if ( ! $_product || $_product->id != $result->product_id ) {
 						// new product
 						$file_number = 0;
-						$_product = get_product( $result->product_id );
-					endif;
+						$_product    = get_product( $result->product_id );
+					}
 
-					if ( ! $_product || ! $_product->exists() ) continue;
+					// Check product exists and has the file
+					if ( ! $_product || ! $_product->exists() || ! $_product->has_file( $result->download_id ) ) {
+						continue;
+					}
 
-					if ( ! $_product->has_file( $result->download_id ) ) continue;
-
+					$download_file = $_product->get_file( $result->download_id );
 					// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
 					$download_name = apply_filters(
 						'woocommerce_downloadable_product_name',
-						$_product->get_title() . ( $file_number > 0 ? ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_number + 1 ) : '' ),
+						$_product->get_title() . ' &ndash; ' . $download_file['name'],
 						$_product,
 						$result->download_id,
 						$file_number
 					);
 
-					// Rename previous download with file number if there are multiple files only
-					if ( $file_number == 1 ) {
-						$previous_result = &$downloads[count($downloads)-1];
-						$previous_product = get_product($previous_result['product_id']);
-						$previous_result['download_name'] = apply_filters(
-							'woocommerce_downloadable_product_name',
-							$previous_result['download_name']. ' &mdash; ' . sprintf( __('File %d', 'woocommerce' ), $file_number ),
-							$previous_product,
-							$previous_result['download_id'],
-							0
-						);
-					}
-
 					$downloads[] = array(
-						'download_url' => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), trailingslashit( home_url( '', 'http' ) ) ),
-						'download_id' => $result->download_id,
-						'product_id' => $result->product_id,
-						'download_name' => $download_name,
-						'order_id' => $order->id,
-						'order_key' => $order->order_key,
+						'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/', 'http' ) ),
+						'download_id'         => $result->download_id,
+						'product_id'          => $result->product_id,
+						'download_name'       => $download_name,
+						'order_id'            => $order->id,
+						'order_key'           => $order->order_key,
 						'downloads_remaining' => $result->downloads_remaining
 					);
 
 					$file_number++;
+				}
+			}
+		}
 
-				endif;
-
-			endforeach;
-
-		endif;
-
-		return apply_filters('woocommerce_customer_get_downloadable_products', $downloads);
+		return apply_filters( 'woocommerce_customer_get_downloadable_products', $downloads );
 	}
 }

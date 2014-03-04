@@ -11,7 +11,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-get_header('shop'); ?>
+get_header( 'shop' ); ?>
 
 	<?php
 		/**
@@ -20,7 +20,7 @@ get_header('shop'); ?>
 		 * @hooked woocommerce_output_content_wrapper - 10 (outputs opening divs for the content)
 		 * @hooked woocommerce_breadcrumb - 20
 		 */
-		do_action('woocommerce_before_main_content');
+		do_action( 'woocommerce_before_main_content' );
 	?>
 
 		<?php if ( apply_filters( 'woocommerce_show_page_title', true ) ) : ?>
@@ -49,7 +49,7 @@ get_header('shop'); ?>
 
 				<?php while ( have_posts() ) : the_post(); ?>
 
-					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
 
 				<?php endwhile; // end of the loop. ?>
 
@@ -66,7 +66,7 @@ get_header('shop'); ?>
 
 		<?php elseif ( ! woocommerce_product_subcategories( array( 'before' => woocommerce_product_loop_start( false ), 'after' => woocommerce_product_loop_end( false ) ) ) ) : ?>
 
-			<?php woocommerce_get_template( 'loop/no-products-found.php' ); ?>
+			<?php wc_get_template( 'loop/no-products-found.php' ); ?>
 
 		<?php endif; ?>
 
@@ -76,7 +76,7 @@ get_header('shop'); ?>
 		 *
 		 * @hooked woocommerce_output_content_wrapper_end - 10 (outputs closing divs for the content)
 		 */
-		do_action('woocommerce_after_main_content');
+		do_action( 'woocommerce_after_main_content' );
 	?>
 
 	<?php
@@ -85,7 +85,7 @@ get_header('shop'); ?>
 		 *
 		 * @hooked woocommerce_get_sidebar - 10
 		 */
-		do_action('woocommerce_sidebar');
+		do_action( 'woocommerce_sidebar' );
 	?>
 
-<?php get_footer('shop'); ?>
+<?php get_footer( 'shop' ); ?>

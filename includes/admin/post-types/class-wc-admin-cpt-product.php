@@ -29,6 +29,10 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		// Post title fields
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 
+		// Featured image text
+		add_filter( 'gettext', array( $this, 'featured_image_gettext' ) );
+		add_filter( 'media_view_strings', array( $this, 'media_view_strings' ), 10, 2 );
+
 		// Visibility option
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
@@ -70,6 +74,55 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		// Call WC_Admin_CPT constructor
 		parent::__construct();
+	}
+
+	/**
+	 * Check if we're editing or adding a product
+	 * @return boolean
+	 */
+	private function is_editing_product() {
+		if ( ! empty( $_GET['post_type'] ) && 'product' == $_GET['post_type'] ) {
+			return true;
+		}
+		if ( ! empty( $_GET['post'] ) && 'product' == get_post_type( $_GET['post'] ) ) {
+			return true;
+		}
+		if ( ! empty( $_REQUEST['post_id'] ) && 'product' == get_post_type( $_REQUEST['post_id'] ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Replace 'Featured' when editing a product. Adapted from https://gist.github.com/tw2113/c7fd8da782232ce90176
+	 * @param  string $string string being translated
+	 * @return string after manipulation
+	 */
+	public function featured_image_gettext( $string = '' ) {
+		if ( 'Featured Image' == $string && $this->is_editing_product() ) {
+			$string = __( 'Product Image', 'woocommerce' );
+		} elseif ( 'Remove featured image' == $string && $this->is_editing_product() ) {
+			$string = __( 'Remove product image', 'woocommerce' );
+		} elseif ( 'Set featured image' == $string && $this->is_editing_product() ) {
+			$string = __( 'Set product image', 'woocommerce' );
+		}
+		return $string;
+	}
+
+	/**
+	 * Change "Featured Image" to "Product Image" throughout media modals.
+	 * @param  array  $strings Array of strings to translate.
+	 * @param  object $post
+	 * @return array
+	 */
+	public function media_view_strings( $strings = array(), $post = null ) {
+		if ( is_object( $post ) ) {
+			if ( 'product' == $post->post_type ) {
+				$strings['setFeaturedImageTitle'] = __( 'Set product image', 'woocommerce' );
+				$strings['setFeaturedImage']      = __( 'Set product image', 'woocommerce' );
+			}
+		}
+		return $strings;
 	}
 
 	/**
@@ -151,7 +204,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		if ( isset( $_POST['_visibility'] ) )
 			update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
 		if ( isset( $_POST['_stock_status'] ) )
-			wc_update_product_stock_status( $post_id, woocommerce_clean( $_POST['_stock_status'] ) );
+			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 	}
 
 	/**
@@ -180,7 +233,6 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * Change the columns shown in admin.
 	 */
 	public function edit_columns( $existing_columns ) {
-		global $woocommerce;
 
 		if ( empty( $existing_columns ) && ! is_array( $existing_columns ) )
 			$existing_columns = array();
@@ -230,7 +282,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				$post_type_object = get_post_type_object( $post->post_type );
 				$can_edit_post = current_user_can( $post_type_object->cap->edit_post, $post->ID );
 
-				echo '<strong><a class="row-title" href="'.$edit_link.'">' . $title.'</a>';
+				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) .'">' . $title.'</a>';
 
 				_post_states( $post );
 
@@ -248,23 +300,23 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				$actions['id'] = 'ID: ' . $post->ID;
 
 				if ( $can_edit_post && 'trash' != $post->post_status ) {
-					$actions['edit'] = '<a href="' . get_edit_post_link( $post->ID, true ) . '" title="' . esc_attr( __( 'Edit this item' ) ) . '">' . __( 'Edit' ) . '</a>';
-					$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="' . esc_attr( __( 'Edit this item inline' ) ) . '">' . __( 'Quick&nbsp;Edit' ) . '</a>';
+					$actions['edit'] = '<a href="' . get_edit_post_link( $post->ID, true ) . '" title="' . esc_attr( __( 'Edit this item', 'woocommerce' ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
+					$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="' . esc_attr( __( 'Edit this item inline', 'woocommerce' ) ) . '">' . __( 'Quick&nbsp;Edit', 'woocommerce' ) . '</a>';
 				}
 				if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
 					if ( 'trash' == $post->post_status )
-						$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ) . "'>" . __( 'Restore' ) . "</a>";
+						$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ) . "'>" . __( 'Restore', 'woocommerce' ) . "</a>";
 					elseif ( EMPTY_TRASH_DAYS )
-						$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash' ) . "</a>";
+						$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash', 'woocommerce' ) . "</a>";
 					if ( 'trash' == $post->post_status || !EMPTY_TRASH_DAYS )
-						$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently' ) . "</a>";
+						$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently', 'woocommerce' ) . "</a>";
 				}
 				if ( $post_type_object->public ) {
 					if ( in_array( $post->post_status, array( 'pending', 'draft', 'future' ) ) ) {
 						if ( $can_edit_post )
-							$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ) . '" rel="permalink">' . __( 'Preview' ) . '</a>';
+							$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'Preview', 'woocommerce' ) . '</a>';
 					} elseif ( 'trash' != $post->post_status ) {
-						$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $title ) ) . '" rel="permalink">' . __( 'View' ) . '</a>';
+						$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'woocommerce' ), $title ) ) . '" rel="permalink">' . __( 'View', 'woocommerce' ) . '</a>';
 					}
 				}
 
@@ -331,7 +383,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					echo '<span class="product-type tips variable" data-tip="' . __( 'Variable', 'woocommerce' ) . '"></span>';
 				else:
 					// Assuming that we have other types in future
-					echo '<span class="product-type tips ' . $the_product->product_type . '" data-tip="' . ucwords( $the_product->product_type ) . '"></span>';
+					echo '<span class="product-type tips ' . $the_product->product_type . '" data-tip="' . ucfirst( $the_product->product_type ) . '"></span>';
 				endif;
 			break;
 			case "price":
@@ -350,8 +402,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 				}
 			break;
 			case 'featured':
-				$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
-				echo '<a href="' . $url . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
+				$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_feature_product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
+				echo '<a href="' . esc_url( $url ) . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
 				if ( $the_product->is_featured() ) {
 					echo '<span class="wc-featured tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
@@ -446,7 +498,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		$query_string = remove_query_arg(array( 'orderby', 'order' ));
 		$query_string = add_query_arg( 'orderby', urlencode('menu_order title'), $query_string );
 		$query_string = add_query_arg( 'order', urlencode('ASC'), $query_string );
-		$views['byorder'] = '<a href="'. $query_string . '" class="' . $class . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
+		$views['byorder'] = '<a href="'. $query_string . '" class="' . esc_attr( $class ) . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
 
 		return $views;
 	}
@@ -461,7 +513,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	    	return;
 
 	    // Category Filtering
-	    woocommerce_product_dropdown_categories();
+	    wc_product_dropdown_categories();
 
 	    // Type filtering
 		$terms   = get_terms( 'product_type' );
@@ -491,7 +543,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					break;
 				default :
 					// Assuming that we have other types in future
-					$output .= ucwords( $term->name );
+					$output .= ucfirst( $term->name );
 					break;
 			}
 
@@ -517,7 +569,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		$output .= "</select>";
 
-		echo $output;
+		echo apply_filters( 'woocommerce_product_filters', $output );
 	}
 
 	/**
@@ -557,7 +609,8 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 	/**
 	 * Search by SKU or ID for products.
-	 * @param  object $wp
+	 * @param string $where
+	 * @return string
 	 */
 	public function product_search( $where ) {
 	    global $pagenow, $wpdb, $wp;
@@ -571,13 +624,12 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		foreach ( $terms as $term ) {
 			if ( is_numeric( $term ) ) {
 				$search_ids[] = $term;
-			} else {
-				// Attempt to get a SKU
-				$sku_to_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%' LIMIT 1;", woocommerce_clean( $term ) ) );
-
-				if ( $sku_to_id )
-					$search_ids[] = $sku_to_id;
 			}
+			// Attempt to get a SKU
+			$sku_to_id = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%';", wc_clean( $term ) ) );
+
+			if ( $sku_to_id && sizeof( $sku_to_id ) > 0 )
+				$search_ids = array_merge( $search_ids, $sku_to_id );
 		}
 
 		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
@@ -632,42 +684,55 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * Quick and bulk edit saving
 	 *
 	 * @access public
-	 * @param mixed $post_id
-	 * @param mixed $post
+	 * @param int $post_id
+	 * @param WP_Post $post
+	 * @return int
 	 */
 	public function bulk_and_quick_edit_save_post( $post_id, $post ) {
+		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return $post_id;
+		}
 
-		// Don't save revisions, autosaves
-		if ( is_int( wp_is_post_revision( $post_id ) ) || is_int( wp_is_post_autosave( $post_id ) ) || defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+		// Don't save revisions and autosaves
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
 			return $post_id;
+		}
 
-		// Check post type
-		if ( $post->post_type != 'product' )
+		// Check post type is product
+		if ( $post->post_type != 'product' ) {
 			return $post_id;
-
-		// Check nonces
-		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) )
-			return $post_id;
-		if ( isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) )
-			return $post_id;
-		if ( isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ) )
-			return $post_id;
+		}
 
 		// Check user permission
-		if ( ! current_user_can( 'edit_post', $post_id ) )
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return $post_id;
+		}
 
-		global $woocommerce, $wpdb;
+		// Check nonces
+		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) ) {
+			return $post_id;
+		}
+		if ( isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) ) {
+			return $post_id;
+		}
+		if ( isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) && ! wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ) ) {
+			return $post_id;
+		}
 
-		$product           = get_product( $post );
+		// Get the product and save
+		$product = get_product( $post );
 
-		if ( ! empty( $_REQUEST['woocommerce_quick_edit'] ) )
+		if ( ! empty( $_REQUEST['woocommerce_quick_edit'] ) ) {
 			$this->quick_edit_save( $post_id, $product );
-		else
+		} else {
 			$this->bulk_edit_save( $post_id, $product );
+		}
 
 		// Clear transient
 		wc_delete_product_transients( $post_id );
+
+		return $post_id;
 	}
 
 	/**
@@ -679,46 +744,59 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		$old_sale_price    = $product->sale_price;
 
 		// Save fields
-		if ( isset( $_REQUEST['_sku'] ) ) update_post_meta( $post_id, '_sku', woocommerce_clean( $_REQUEST['_sku'] ) );
-		if ( isset( $_REQUEST['_weight'] ) ) update_post_meta( $post_id, '_weight', woocommerce_clean( $_REQUEST['_weight'] ) );
-		if ( isset( $_REQUEST['_length'] ) ) update_post_meta( $post_id, '_length', woocommerce_clean( $_REQUEST['_length'] ) );
-		if ( isset( $_REQUEST['_width'] ) ) update_post_meta( $post_id, '_width', woocommerce_clean( $_REQUEST['_width'] ) );
-		if ( isset( $_REQUEST['_height'] ) ) update_post_meta( $post_id, '_height', woocommerce_clean( $_REQUEST['_height'] ) );
-		if ( isset( $_REQUEST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', woocommerce_clean( $_REQUEST['_visibility'] ) );
+		if ( isset( $_REQUEST['_sku'] ) ) update_post_meta( $post_id, '_sku', wc_clean( $_REQUEST['_sku'] ) );
+		if ( isset( $_REQUEST['_weight'] ) ) update_post_meta( $post_id, '_weight', wc_clean( $_REQUEST['_weight'] ) );
+		if ( isset( $_REQUEST['_length'] ) ) update_post_meta( $post_id, '_length', wc_clean( $_REQUEST['_length'] ) );
+		if ( isset( $_REQUEST['_width'] ) ) update_post_meta( $post_id, '_width', wc_clean( $_REQUEST['_width'] ) );
+		if ( isset( $_REQUEST['_height'] ) ) update_post_meta( $post_id, '_height', wc_clean( $_REQUEST['_height'] ) );
+		if ( isset( $_REQUEST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', wc_clean( $_REQUEST['_visibility'] ) );
 		if ( isset( $_REQUEST['_featured'] ) ) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
 
 		if ( isset( $_REQUEST['_tax_status'] ) )
-			update_post_meta( $post_id, '_tax_status', woocommerce_clean( $_REQUEST['_tax_status'] ) );
+			update_post_meta( $post_id, '_tax_status', wc_clean( $_REQUEST['_tax_status'] ) );
 
 		if ( isset( $_REQUEST['_tax_class'] ) )
-			update_post_meta( $post_id, '_tax_class', woocommerce_clean( $_REQUEST['_tax_class'] ) );
+			update_post_meta( $post_id, '_tax_class', wc_clean( $_REQUEST['_tax_class'] ) );
 
 		if ( $product->is_type('simple') || $product->is_type('external') ) {
 
-			if ( isset( $_REQUEST['_regular_price'] ) ) update_post_meta( $post_id, '_regular_price', woocommerce_clean( $_REQUEST['_regular_price'] ) );
-			if ( isset( $_REQUEST['_sale_price'] ) ) update_post_meta( $post_id, '_sale_price', woocommerce_clean( $_REQUEST['_sale_price'] ) );
+			if ( isset( $_REQUEST['_regular_price'] ) ) {
+				$new_regular_price = $_REQUEST['_regular_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
+				update_post_meta( $post_id, '_regular_price', $new_regular_price );
+			} else {
+				$new_regular_price = null;
+			}
+			if ( isset( $_REQUEST['_sale_price'] ) ) {
+				$new_sale_price = $_REQUEST['_sale_price'] === '' ? '' : wc_format_decimal( $_REQUEST['_sale_price'] );
+				update_post_meta( $post_id, '_sale_price', $new_sale_price );
+			} else {
+				$new_sale_price = null;
+			}
 
 			// Handle price - remove dates and set to lowest
 			$price_changed = false;
 
-			if ( isset( $_REQUEST['_regular_price'] ) && woocommerce_clean( $_REQUEST['_regular_price'] ) != $old_regular_price ) $price_changed = true;
-			if ( isset( $_REQUEST['_sale_price'] ) && woocommerce_clean( $_REQUEST['_sale_price'] ) != $old_sale_price ) $price_changed = true;
+			if ( ! is_null( $new_regular_price ) && $new_regular_price != $old_regular_price ) {
+				$price_changed = true;
+			} elseif ( ! is_null( $new_sale_price ) && $new_sale_price != $old_sale_price ) {
+				$price_changed = true;
+			}
 
 			if ( $price_changed ) {
 				update_post_meta( $post_id, '_sale_price_dates_from', '' );
 				update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
-				if ( isset( $_REQUEST['_sale_price'] ) && $_REQUEST['_sale_price'] != '' ) {
-					update_post_meta( $post_id, '_price', woocommerce_clean( $_REQUEST['_sale_price'] ) );
+				if ( ! is_null( $new_sale_price ) && $new_sale_price !== '' ) {
+					update_post_meta( $post_id, '_price', $new_sale_price );
 				} else {
-					update_post_meta( $post_id, '_price', woocommerce_clean( $_REQUEST['_regular_price'] ) );
+					update_post_meta( $post_id, '_price', $new_regular_price );
 				}
 			}
 		}
 
 		// Handle stock status
 		if ( isset( $_REQUEST['_stock_status'] ) )
-			wc_update_product_stock_status( $post_id, woocommerce_clean( $_REQUEST['_stock_status'] ) );
+			wc_update_product_stock_status( $post_id, wc_clean( $_REQUEST['_stock_status'] ) );
 
 		// Handle stock
 		if ( ! $product->is_type('grouped') ) {
@@ -731,7 +809,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 			}
 
 			if ( ! empty( $_REQUEST['_backorders'] ) ) {
-				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_REQUEST['_backorders'] ) );
+				update_post_meta( $post_id, '_backorders', wc_clean( $_REQUEST['_backorders'] ) );
 			}
 		}
 
@@ -748,29 +826,29 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 		// Save fields
 		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) )
-			update_post_meta( $post_id, '_weight', woocommerce_clean( stripslashes( $_REQUEST['_weight'] ) ) );
+			update_post_meta( $post_id, '_weight', wc_clean( stripslashes( $_REQUEST['_weight'] ) ) );
 
 		if ( ! empty( $_REQUEST['change_dimensions'] ) ) {
 			if ( isset( $_REQUEST['_length'] ) )
-				update_post_meta( $post_id, '_length', woocommerce_clean( stripslashes( $_REQUEST['_length'] ) ) );
+				update_post_meta( $post_id, '_length', wc_clean( stripslashes( $_REQUEST['_length'] ) ) );
 			if ( isset( $_REQUEST['_width'] ) )
-				update_post_meta( $post_id, '_width', woocommerce_clean( stripslashes( $_REQUEST['_width'] ) ) );
+				update_post_meta( $post_id, '_width', wc_clean( stripslashes( $_REQUEST['_width'] ) ) );
 			if ( isset( $_REQUEST['_height'] ) )
-				update_post_meta( $post_id, '_height', woocommerce_clean( stripslashes( $_REQUEST['_height'] ) ) );
+				update_post_meta( $post_id, '_height', wc_clean( stripslashes( $_REQUEST['_height'] ) ) );
 		}
 
 		if ( ! empty( $_REQUEST['_tax_status'] ) )
-			update_post_meta( $post_id, '_tax_status', woocommerce_clean( $_REQUEST['_tax_status'] ) );
+			update_post_meta( $post_id, '_tax_status', wc_clean( $_REQUEST['_tax_status'] ) );
 
 		if ( ! empty( $_REQUEST['_tax_class'] ) ) {
-			$tax_class = woocommerce_clean( $_REQUEST['_tax_class'] );
+			$tax_class = wc_clean( $_REQUEST['_tax_class'] );
 			if ( $tax_class == 'standard' )
 				$tax_class = '';
 			update_post_meta( $post_id, '_tax_class', $tax_class );
 		}
 
 		if ( ! empty( $_REQUEST['_stock_status'] ) )
-			wc_update_product_stock_status( $post_id, woocommerce_clean( $_REQUEST['_stock_status'] ) );
+			wc_update_product_stock_status( $post_id, wc_clean( $_REQUEST['_stock_status'] ) );
 
 		if ( ! empty( $_REQUEST['_visibility'] ) )
 			update_post_meta( $post_id, '_visibility', stripslashes( $_REQUEST['_visibility'] ) );
@@ -795,7 +873,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					case 2 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = $old_regular_price + ( $old_regular_price * $percent );
+							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) );
 						} else {
 							$new_price = $old_regular_price + $regular_price;
 						}
@@ -803,7 +881,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 					case 3 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = $old_regular_price - ( $old_regular_price * $percent );
+							$new_price = $old_regular_price - ( round ( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) );
 						} else {
 							$new_price = $old_regular_price - $regular_price;
 						}
@@ -812,6 +890,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 				if ( isset( $new_price ) && $new_price != $old_regular_price ) {
 					$price_changed = true;
+					$new_price = round( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 					update_post_meta( $post_id, '_regular_price', $new_price );
 					$product->regular_price = $new_price;
 				}
@@ -854,6 +933,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 
 				if ( isset( $new_price ) && $new_price != $old_sale_price ) {
 					$price_changed = true;
+					$new_price = round( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 					update_post_meta( $post_id, '_sale_price', $new_price );
 					$product->sale_price = $new_price;
 				}
@@ -895,7 +975,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 			}
 
 			if ( ! empty( $_REQUEST['_backorders'] ) ) {
-				update_post_meta( $post_id, '_backorders', woocommerce_clean( $_REQUEST['_backorders'] ) );
+				update_post_meta( $post_id, '_backorders', wc_clean( $_REQUEST['_backorders'] ) );
 			}
 
 		}
@@ -910,14 +990,19 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * @return array
 	 */
 	public function upload_dir( $pathdata ) {
-		// Change upload dir
+		// Change upload dir for downloadable files
 		if ( isset( $_POST['type'] ) && $_POST['type'] == 'downloadable_product' ) {
-			// Uploading a downloadable file
-			$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
-		 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
-		 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
-			$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
-			return $pathdata;
+			if ( empty( $pathdata['subdir'] ) ) {
+				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
+				$pathdata['url']    = $pathdata['url']. '/woocommerce_uploads';
+				$pathdata['subdir'] = '/woocommerce_uploads';
+			} else {
+				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
+
+				$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
+				$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
+				$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
+			}
 		}
 
 		return $pathdata;
@@ -931,7 +1016,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	}
 
 	/**
-	 * Protect downlodas from ms-files.php in multisite
+	 * Protect downloads from ms-files.php in multisite
 	 *
 	 * @param mixed $rewrite
 	 * @return string
@@ -956,34 +1041,48 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	 * Grant downloadable file access to any newly added files on any existing
 	 * orders for this product that have previously been granted downloadable file access
 	 *
-	 * @access public
 	 * @param int $product_id product identifier
 	 * @param int $variation_id optional product variation identifier
-	 * @param array $file_paths newly set file paths
+	 * @param array $downloadable_files newly set files
 	 */
-	public function process_product_file_download_paths( $product_id, $variation_id, $file_paths ) {
+	public function process_product_file_download_paths( $product_id, $variation_id, $downloadable_files ) {
 		global $wpdb;
 
 		if ( $variation_id )
 			$product_id = $variation_id;
 
-		// determine whether any new files have been added
-		$existing_file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, null, null );
-		if ( ! $existing_file_paths ) $existing_file_paths = array();
+		$product               = get_product( $product_id );
+		$existing_download_ids = array_keys( (array) $product->get_files() );
+		$updated_download_ids  = array_keys( (array) $downloadable_files );
 
-		$new_download_ids = array_diff( array_keys( (array) $file_paths ), array_keys( (array) $existing_file_paths ) );
+		$new_download_ids      = array_filter( array_diff( $updated_download_ids, $existing_download_ids ) );
+		$removed_download_ids  = array_filter( array_diff( $existing_download_ids, $updated_download_ids ) );
 
-		if ( $new_download_ids ) {
-			// determine whether downloadable file access has been granted (either via the typical order completion, or via the admin ajax method)
+		if ( $new_download_ids || $removed_download_ids ) {
+			// determine whether downloadable file access has been granted via the typical order completion, or via the admin ajax method
 			$existing_permissions = $wpdb->get_results( $wpdb->prepare( "SELECT * from {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE product_id = %d GROUP BY order_id", $product_id ) );
+
 			foreach ( $existing_permissions as $existing_permission ) {
 				$order = new WC_Order( $existing_permission->order_id );
 
 				if ( $order->id ) {
-					foreach ( $new_download_ids as $new_download_id ) {
-						// grant permission if it doesn't already exist
-						if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT true FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $new_download_id ) ) ) {
-							woocommerce_downloadable_file_permission( $new_download_id, $product_id, $order );
+					// Remove permissions
+					if ( $removed_download_ids ) {
+						foreach ( $removed_download_ids as $download_id ) {
+							if ( apply_filters( 'woocommerce_process_product_file_download_paths_remove_access_to_old_file', true, $download_id, $product_id, $order ) ) {
+								$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) );
+							}
+						}
+					}
+					// Add permissions
+					if ( $new_download_ids ) {
+						foreach ( $new_download_ids as $download_id ) {
+							if ( apply_filters( 'woocommerce_process_product_file_download_paths_grant_access_to_new_file', true, $download_id, $product_id, $order ) ) {
+								// grant permission if it doesn't already exist
+								if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) ) ) {
+									wc_downloadable_file_permission( $download_id, $product_id, $order );
+								}
+							}
 						}
 					}
 				}

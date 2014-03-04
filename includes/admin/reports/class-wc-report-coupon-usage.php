@@ -1,19 +1,26 @@
 <?php
 /**
- * WC_Report_Coupon_Usage class
+ * WC_Report_Coupon_Usage
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
+	public $chart_colours = array();
 	public $coupon_codes = array();
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( isset( $_GET['coupon_codes'] ) && is_array( $_GET['coupon_codes'] ) )
+		if ( isset( $_GET['coupon_codes'] ) && is_array( $_GET['coupon_codes'] ) ) {
 			$this->coupon_codes = array_filter( array_map( 'sanitize_text_field', $_GET['coupon_codes'] ) );
-		elseif ( isset( $_GET['coupon_codes'] ) )
+		} elseif ( isset( $_GET['coupon_codes'] ) ) {
 			$this->coupon_codes = array_filter( array( sanitize_text_field( $_GET['coupon_codes'] ) ) );
+		}
 	}
 
 	/**
@@ -66,7 +73,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		) ) );
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s discounts in total', 'woocommerce' ), '<strong>' . woocommerce_price( $total_discount ) . '</strong>' ),
+			'title' => sprintf( __( '%s discounts in total', 'woocommerce' ), '<strong>' . wc_price( $total_discount ) . '</strong>' ),
 			'color' => $this->chart_colours['discount_amount'],
 			'highlight_series' => 1
 		);
@@ -84,8 +91,6 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 * Output the report
 	 */
 	public function output_report() {
-		global $woocommerce, $wpdb, $wp_locale;
-
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
@@ -100,8 +105,9 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
+		}
 
 		$this->calculate_current_range( $current_range );
 
@@ -114,7 +120,6 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 */
 	public function get_chart_widgets() {
 		$widgets = array();
-
 
 		$widgets[] = array(
 			'title'    => '',
@@ -134,51 +139,54 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		<div class="section">
 			<form method="GET">
 				<div>
-					<select id="coupon_codes" name="coupon_codes" class="chosen_select" data-placeholder="<?php _e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
-						<?php
-							$used_coupons = $this->get_order_report_data( array(
-								'data' => array(
-									'order_item_name' => array(
-										'type'            => 'order_item',
-										'order_item_type' => 'coupon',
-										'function'        => '',
-										'distinct'        => true,
-										'name'            => 'order_item_name'
-									)
-								),
-								'where' => array(
-									array(
-										'key'      => 'order_item_type',
-										'value'    => 'coupon',
-										'operator' => '='
-									)
-								),
-								'query_type'   => 'get_col',
-								'filter_range' => false
-							) );
+					<?php
+						$used_coupons = $this->get_order_report_data( array(
+							'data' => array(
+								'order_item_name' => array(
+									'type'            => 'order_item',
+									'order_item_type' => 'coupon',
+									'function'        => '',
+									'distinct'        => true,
+									'name'            => 'order_item_name'
+								)
+							),
+							'where' => array(
+								array(
+									'key'      => 'order_item_type',
+									'value'    => 'coupon',
+									'operator' => '='
+								)
+							),
+							'query_type'   => 'get_col',
+							'filter_range' => false
+						) );
 
-							if ( $used_coupons ) {
-								echo '<option value="">' . __( 'All coupons', 'woocommerce' ) . '</option>';
+						if ( $used_coupons ) :
+					?>
+						<select id="coupon_codes" name="coupon_codes" class="chosen_select" data-placeholder="<?php _e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
+							<option value=""><?php _e( 'All coupons', 'woocommerce' ); ?></option>
+							<?php
 								foreach ( $used_coupons as $coupon ) {
-									echo '<option value="' . $coupon . '" ' . selected( in_array( $coupon, $this->coupon_codes ), true, false ) . '>' . $coupon . '</option>';
+									echo '<option value="' . esc_attr( $coupon ) . '" ' . selected( in_array( $coupon, $this->coupon_codes ), true, false ) . '>' . $coupon . '</option>';
 								}
-							} else
-								echo '<option value="">' . __( 'No used coupons found', 'woocommerce' ) . '</option>';
-						?>
-					</select>
-					<input type="submit" class="submit button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
-					<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
-					<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
-					<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
-					<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
-					<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
-					<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
+							 ?>
+						</select>
+						<input type="submit" class="submit button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
+						<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
+						<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
+						<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
+						<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
+						<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
+						<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
+						<script type="text/javascript">
+							jQuery(function() {
+								jQuery('select.chosen_select').chosen();
+							});
+						</script>
+					<?php else : ?>
+						<span><?php _e( 'No used coupons found', 'woocommerce' ); ?></span>
+					<?php endif; ?>
 				</div>
-				<script type="text/javascript">
-					jQuery(function(){
-						jQuery("select.chosen_select").chosen();
-					});
-				</script>
 			</form>
 		</div>
 		<h4 class="section_title"><span><?php _e( 'Most Popular', 'woocommerce' ); ?></span></h4>
@@ -265,7 +273,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 				if ( $most_discount ) {
 					foreach ( $most_discount as $coupon ) {
 						echo '<tr class="' . ( in_array( $coupon->coupon_code, $this->coupon_codes ) ? 'active' : '' ) . '">
-							<td class="count" width="1%">' . woocommerce_price( $coupon->discount_amount ) . '</td>
+							<td class="count" width="1%">' . wc_price( $coupon->discount_amount ) . '</td>
 							<td class="name"><a href="' . add_query_arg( 'coupon_codes', $coupon->coupon_code ) . '">' . $coupon->coupon_code . '</a></td>
 						</tr>';
 					}
@@ -443,46 +451,46 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							legend: {
 								show: false
 							},
-						    grid: {
-						        color: '#aaa',
-						        borderColor: 'transparent',
-						        borderWidth: 0,
-						        hoverable: true
-						    },
-						    xaxes: [ {
-						    	color: '#aaa',
-						    	position: "bottom",
-						    	tickColor: 'transparent',
+							grid: {
+								color: '#aaa',
+								borderColor: 'transparent',
+								borderWidth: 0,
+								hoverable: true
+							},
+							xaxes: [ {
+								color: '#aaa',
+								position: "bottom",
+								tickColor: 'transparent',
 								mode: "time",
 								timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
 								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 								tickLength: 1,
 								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 								font: {
-						    		color: "#aaa"
-						    	}
+									color: "#aaa"
+								}
 							} ],
-						    yaxes: [
-						    	{
-						    		min: 0,
-						    		minTickSize: 1,
-						    		tickDecimals: 0,
-						    		color: '#ecf0f1',
-						    		font: { color: "#aaa" }
-						    	},
-						    	{
-						    		position: "right",
-						    		min: 0,
-						    		tickDecimals: 2,
-						    		alignTicksWithAxis: 1,
-						    		color: 'transparent',
-						    		font: { color: "#aaa" }
-						    	}
-						    ],
-				 		}
-				 	);
+							yaxes: [
+								{
+									min: 0,
+									minTickSize: 1,
+									tickDecimals: 0,
+									color: '#ecf0f1',
+									font: { color: "#aaa" }
+								},
+								{
+									position: "right",
+									min: 0,
+									tickDecimals: 2,
+									alignTicksWithAxis: 1,
+									color: 'transparent',
+									font: { color: "#aaa" }
+								}
+							],
+						}
+					);
 
-				 	jQuery('.chart-placeholder').resize();
+					jQuery('.chart-placeholder').resize();
 				}
 
 				drawGraph();

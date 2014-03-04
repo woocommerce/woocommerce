@@ -12,6 +12,7 @@
 class WC_Order_Item_Meta {
 
 	public $meta;
+	public $product;
 
 	/**
 	 * Constructor
@@ -20,8 +21,9 @@ class WC_Order_Item_Meta {
 	 * @param string $item_meta (default: '')
 	 * @return void
 	 */
-	public function __construct( $item_meta = array() ) {
-		$this->meta = $item_meta;
+	public function __construct( $item_meta = array(), $product = null ) {
+		$this->meta    = $item_meta;
+		$this->product = $product;
 	}
 
 	/**
@@ -31,10 +33,9 @@ class WC_Order_Item_Meta {
 	 * @param bool $flat (default: false)
 	 * @param bool $return (default: false)
 	 * @param string $hideprefix (default: _)
-	 * @return void
+	 * @return string
 	 */
 	public function display( $flat = false, $return = false, $hideprefix = '_' ) {
-		global $woocommerce;
 
 		if ( ! empty( $this->meta ) ) {
 
@@ -44,8 +45,6 @@ class WC_Order_Item_Meta {
 
 				if ( empty( $meta_values ) || ( ! empty( $hideprefix ) && substr( $meta_key, 0, 1 ) == $hideprefix ) )
 					continue;
-
-				$found_meta = true;
 
 				foreach( $meta_values as $meta_value ) {
 
@@ -58,18 +57,26 @@ class WC_Order_Item_Meta {
 		            	$term = get_term_by('slug', $meta_value, esc_attr( str_replace( 'attribute_', '', $meta_key ) ) );
 		            	if ( ! is_wp_error( $term ) && $term->name )
 		            		$meta_value = $term->name;
+		          	
+		          	// If we have a product, and its not a term, try to find its non-sanitized name
+		            } elseif ( $this->product ) {
+						$product_attributes = $this->product->get_attributes();
+
+						if ( isset( $product_attributes[ str_replace( 'attribute_', '', urldecode( $meta_key ) ) ] ) ) {
+							$meta_key = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', urldecode( $meta_key ) ) ]['name'] );
+						}
 		            }
 
 					if ( $flat )
 						$meta_list[] = esc_attr( wc_attribute_label( str_replace( 'attribute_', '', $meta_key ) ) . ': ' . apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) );
 					else
-						$meta_list[] = '<dt>' . wp_kses_post( wc_attribute_label( str_replace( 'attribute_', '', $meta_key ) ) ) . ':</dt><dd>' . wp_kses_post( apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) ) . '</dd>';
+						$meta_list[] = '<dt>' . wp_kses_post( wc_attribute_label( str_replace( 'attribute_', '', $meta_key ) ) ) . ':</dt><dd>' . wp_kses_post( wpautop( apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) ) ) . '</dd>';
 
 				}
 			}
 
 			if ( ! sizeof( $meta_list ) )
-				return;
+				return '';
 
 			$output = $flat ? '' : '<dl class="variation">';
 
@@ -86,5 +93,7 @@ class WC_Order_Item_Meta {
 			else
 				echo $output;
 		}
+	
+		return '';
 	}
 }

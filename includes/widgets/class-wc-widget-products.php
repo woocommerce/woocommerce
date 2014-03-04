@@ -59,7 +59,7 @@ class WC_Widget_Products extends WC_Widget {
 			'order' => array(
 				'type'  => 'select',
 				'std'   => 'desc',
-				'label' => __( 'Order', 'woocommerce' ),
+				'label' => _x( 'Order', 'Sorting order', 'woocommerce' ),
 				'options' => array(
 					'asc'  => __( 'ASC', 'woocommerce' ),
 					'desc' => __( 'DESC', 'woocommerce' ),
@@ -89,7 +89,6 @@ class WC_Widget_Products extends WC_Widget {
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {
-		global $woocommerce;
 
 		if ( $this->get_cached_widget( $args ) )
 			return;
@@ -115,7 +114,7 @@ class WC_Widget_Products extends WC_Widget {
     	$query_args['meta_query'] = array();
 
     	if ( empty( $instance['show_hidden'] ) ) {
-			$query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
+			$query_args['meta_query'][] = WC()->query->visibility_meta_query();
 			$query_args['post_parent']  = 0;
 		}
 
@@ -128,7 +127,7 @@ class WC_Widget_Products extends WC_Widget {
 			);
     	}
 
-	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
+	    $query_args['meta_query'][] = WC()->query->stock_status_meta_query();
 	    $query_args['meta_query']   = array_filter( $query_args['meta_query'] );
 
     	switch ( $show ) {
@@ -139,7 +138,7 @@ class WC_Widget_Products extends WC_Widget {
 				);
     			break;
     		case 'onsale' :
-    			$product_ids_on_sale = woocommerce_get_product_ids_on_sale();
+    			$product_ids_on_sale = wc_get_product_ids_on_sale();
 				$product_ids_on_sale[] = 0;
 				$query_args['post__in'] = $product_ids_on_sale;
     			break;
@@ -174,7 +173,7 @@ class WC_Widget_Products extends WC_Widget {
 
 			while ( $r->have_posts()) {
 				$r->the_post();
-				woocommerce_get_template( 'content-widget-product.php', array( 'show_rating' => $show_rating ) );
+				wc_get_template( 'content-widget-product.php', array( 'show_rating' => $show_rating ) );
 			}
 
 			echo '</ul>';

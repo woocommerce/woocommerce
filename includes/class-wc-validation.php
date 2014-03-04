@@ -34,7 +34,7 @@ class WC_Validation {
 	}
 
 	/**
-	 * Checks for a valid postcode (UK)
+	 * Checks for a valid postcode
 	 *
 	 * @param   string	postcode
 	 * @param	string	country
@@ -52,6 +52,16 @@ class WC_Validation {
 				 	return true;
 				 else
 				 	return false;
+			case "CH" :
+				 if ( preg_match( "/^([0-9]{4})$/i", $postcode ) )
+				 	return true;
+				 else
+				 	return false;
+			case "BR" :
+				if ( preg_match( "/^([0-9]{5,5})([-])?([0-9]{3,3})$/", $postcode ) )
+					return true;
+				else
+					return false;
 		}
 
 		return true;

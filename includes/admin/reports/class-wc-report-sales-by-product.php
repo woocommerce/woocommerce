@@ -1,9 +1,15 @@
 <?php
 /**
- * WC_Report_Sales_By_Product class
+ * WC_Report_Sales_By_Product
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
+	public $chart_colours = array();
 	public $product_ids = array();
 
 	/**
@@ -33,12 +39,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'order_item_type' => 'line_item',
 					'function' => 'SUM',
 					'name'     => 'order_item_amount'
-				),
-				'_product_id' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => '',
-					'name'            => 'product_id'
 				)
 			),
 			'where_meta' => array(
@@ -50,7 +50,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'operator'   => 'IN'
 				)
 			),
-			'group_by' => 'product_id',
 			'query_type'   => 'get_var',
 			'filter_range' => true
 		) );
@@ -61,13 +60,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
 					'name'            => 'order_item_count'
-				),
-				'_product_id' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => '',
-					'name'            => 'product_id'
-				),
+				)
 			),
 			'where_meta' => array(
 				'relation' => 'OR',
@@ -78,13 +71,12 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'operator'   => 'IN'
 				)
 			),
-			'group_by' => 'product_id',
 			'query_type'   => 'get_var',
 			'filter_range' => true
 		) ) );
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . woocommerce_price( $total_sales ) . '</strong>' ),
+			'title' => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
 			'color' => $this->chart_colours['sales_amount'],
 			'highlight_series' => 1
 		);
@@ -157,7 +149,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 		foreach ( $this->product_ids as $product_id ) {
 			$product = get_product( $product_id );
-			$this->product_ids_titles[] = $product->get_formatted_name();
+			if ( $product ) {
+				$this->product_ids_titles[] = $product->get_formatted_name();
+			} else {
+				$this->product_ids_titles[] = '#' . $product_id;
+			}
 		}
 
 		echo '<p>' . ' <strong>' . implode( ', ', $this->product_ids_titles ) . '</strong></p>';
@@ -276,7 +272,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				if ( $top_earners ) {
 					foreach ( $top_earners as $product ) {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
-							<td class="count">' . woocommerce_price( $product->order_item_total ) . '</td>
+							<td class="count">' . wc_price( $product->order_item_total ) . '</td>
 							<td class="name"><a href="' . add_query_arg( 'product_ids', $product->product_id ) . '">' . get_the_title( $product->product_id ) . '</a></td>
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'sales' ) . '</td>
 						</tr>';
@@ -370,7 +366,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'meta_key'   => array( '_product_id', '_variation_id' ),
 						'meta_value' => $this->product_ids,
 						'operator'   => 'IN'
-					)
+					),
 				),
 				'group_by'     => 'product_id,' . $this->group_by_query,
 				'order_by'     => 'post_date ASC',
@@ -405,13 +401,12 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'meta_key'   => array( '_product_id', '_variation_id' ),
 						'meta_value' => $this->product_ids,
 						'operator'   => 'IN'
-					)
+					),
 				),
 				'group_by'     => 'product_id, ' . $this->group_by_query,
 				'order_by'     => 'post_date ASC',
 				'query_type'   => 'get_results',
-				'filter_range' => true,
-				'nocache' => true
+				'filter_range' => true
 			) );
 
 			// Prepare data for report

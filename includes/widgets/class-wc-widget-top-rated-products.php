@@ -51,7 +51,6 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 	 * @return void
 	 */
 	public function widget($args, $instance) {
-		global $woocommerce;
 
 		if ( $this->get_cached_widget( $args ) )
 			return;
@@ -62,11 +61,11 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 		$title  = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 		$number = absint( $instance['number'] );
 
-		add_filter( 'posts_clauses',  array( $woocommerce->query, 'order_by_rating_post_clauses' ) );
+		add_filter( 'posts_clauses',  array( WC()->query, 'order_by_rating_post_clauses' ) );
 
 		$query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product' );
 
-		$query_args['meta_query'] = $woocommerce->query->get_meta_query();
+		$query_args['meta_query'] = WC()->query->get_meta_query();
 
 		$r = new WP_Query( $query_args );
 
@@ -81,7 +80,7 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 			while ( $r->have_posts() ) {
 				$r->the_post();
-				woocommerce_get_template( 'content-widget-product.php', array( 'show_rating' => true ) );
+				wc_get_template( 'content-widget-product.php', array( 'show_rating' => true ) );
 			}
 
 			echo '</ul>';
@@ -89,7 +88,7 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 			echo $after_widget;
 		}
 
-		remove_filter( 'posts_clauses', array( $woocommerce->query, 'order_by_rating_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( WC()->query, 'order_by_rating_post_clauses' ) );
 
 		wp_reset_postdata();
 

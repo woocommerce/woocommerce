@@ -38,7 +38,7 @@ function wc_get_attribute_taxonomies() {
  * @return string
  */
 function wc_attribute_taxonomy_name( $name ) {
-	return 'pa_' . woocommerce_sanitize_taxonomy_name( $name );
+	return 'pa_' . wc_sanitize_taxonomy_name( $name );
 }
 
 /**
@@ -51,7 +51,7 @@ function wc_attribute_label( $name ) {
 	global $wpdb;
 
 	if ( taxonomy_is_product_attribute( $name ) ) {
-		$name = woocommerce_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
+		$name = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
 
 		$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 

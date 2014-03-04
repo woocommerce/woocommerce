@@ -51,6 +51,9 @@ class WC_Product_Variation extends WC_Product {
 	/** @public bool True if the variation has a tax class. */
 	public $variation_has_tax_class = false;
 
+	/** @public bool True if the variation has file paths. */
+	public $variation_has_downloadable_files = false;
+
 	/**
 	 * Loads all product data from custom fields
 	 *
@@ -74,7 +77,7 @@ class WC_Product_Variation extends WC_Product {
 
 		// The post doesn't have a parent id, therefore its invalid.
 		if ( empty( $this->id ) )
-			return false;
+			return;
 
 		// Get post data
 		$this->parent = ! empty( $args['parent'] ) ? $args['parent'] : get_product( $this->id );
@@ -93,6 +96,11 @@ class WC_Product_Variation extends WC_Product {
 		if ( ! empty( $this->product_custom_fields['_sku'][0] ) ) {
 			$this->variation_has_sku = true;
 			$this->sku               = $this->product_custom_fields['_sku'][0];
+		}
+
+		if ( ! empty( $this->product_custom_fields['_downloadable_files'][0] ) ) {
+			$this->variation_has_downloadable_files = true;
+			$this->downloadable_files               = $this->product_custom_fields['_downloadable_files'][0];
 		}
 
 		if ( isset( $this->product_custom_fields['_stock'][0] ) && $this->product_custom_fields['_stock'][0] !== '' ) {
@@ -142,7 +150,7 @@ class WC_Product_Variation extends WC_Product {
 			$this->sale_price_dates_from = $this->product_custom_fields['_sale_price_dates_from'][0];
 
 		if ( isset( $this->product_custom_fields['_sale_price_dates_to'][0] ) )
-			$this->sale_price_dates_from = $this->product_custom_fields['_sale_price_dates_to'][0];
+			$this->sale_price_dates_to = $this->product_custom_fields['_sale_price_dates_to'][0];
 
 		// Prices
 		$this->price         = isset( $this->product_custom_fields['_price'][0] ) ? $this->product_custom_fields['_price'][0] : '';
@@ -174,6 +182,38 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
+	 * @return string
+	 */
+	public function get_permalink() {
+		return add_query_arg( $this->variation_data, get_permalink( $this->id ) );
+	}
+
+	/**
+	 * Get the add to url used mainly in loops.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_url() {
+		$url = $this->is_purchasable() && $this->is_in_stock() ? remove_query_arg( 'added-to-cart', add_query_arg( array_merge( array( 'variation_id' => $this->variation_id, 'add-to-cart' => $this->id ), $this->variation_data ) ) ) : get_permalink( $this->id );
+
+		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
+	}
+
+	/**
+	 * Get the add to cart button text
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function add_to_cart_text() {
+		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart', 'woocommerce' ) : __( 'Read More', 'woocommerce' );
+
+		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
+	}
+
+	/**
 	 * Checks if this particular variation is visible (variations with no price, or out of stock, can be hidden)
 	 *
 	 * @return bool
@@ -181,7 +221,7 @@ class WC_Product_Variation extends WC_Product {
 	public function variation_is_visible() {
 		$visible = true;
 
-		// Published
+		// Published == enabled checkbox
 		if ( get_post_status( $this->variation_id ) != 'publish' )
 			$visible = false;
 
@@ -190,10 +230,28 @@ class WC_Product_Variation extends WC_Product {
 			$visible = false;
 
 		// Price not set
-		elseif ( $this->get_price() == "" )
+		elseif ( $this->get_price() === "" )
 			$visible = false;
 
 		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id );
+	}
+
+	/**
+	 * Returns false if the product cannot be bought.
+	 *
+	 * @access public
+	 * @return cool
+	 */
+	public function is_purchasable() {
+
+		// Published == enabled checkbox
+		if ( get_post_status( $this->variation_id ) != 'publish' )
+			$purchasable = false;
+
+		else
+			$purchasable = parent::is_purchasable();
+
+		return $purchasable;
 	}
 
 	/**
@@ -231,20 +289,28 @@ class WC_Product_Variation extends WC_Product {
      */
 	public function get_price_html( $price = '' ) {
 
+		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
+		$display_price         = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
+		$display_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_regular_price() ) : $this->get_price_excluding_tax( 1, $this->get_regular_price() );
+		$display_sale_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_sale_price() ) : $this->get_price_excluding_tax( 1, $this->get_sale_price() );
+
 		if ( $this->get_price() !== '' ) {
 			if ( $this->is_on_sale() ) {
 
-				$price = '<del>' . woocommerce_price( $this->get_regular_price() ) . '</del> <ins>' . woocommerce_price( $this->get_sale_price() ) . '</ins>';
+				$price = '<del>' . wc_price( $display_regular_price ) . '</del> <ins>' . wc_price( $display_sale_price ) . '</ins>' . $this->get_price_suffix();
+
 				$price = apply_filters( 'woocommerce_variation_sale_price_html', $price, $this );
 
 			} elseif ( $this->get_price() > 0 ) {
 
-				$price = woocommerce_price( $this->get_price() );
+				$price = wc_price( $display_price ) . $this->get_price_suffix();
+
 				$price = apply_filters( 'woocommerce_variation_price_html', $price, $this );
 
 			} else {
 
 				$price = __( 'Free!', 'woocommerce' );
+
 				$price = apply_filters( 'woocommerce_variation_free_price_html', $price, $this );
 
 			}
@@ -274,7 +340,7 @@ class WC_Product_Variation extends WC_Product {
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
 			$image = get_the_post_thumbnail( $parent_id, $size , $attr);
 		} else {
-			$image = woocommerce_placeholder_img( $size );
+			$image = wc_placeholder_img( $size );
 		}
 
 		return $image;
@@ -282,9 +348,10 @@ class WC_Product_Variation extends WC_Product {
 
 	/**
 	 * Set stock level of the product variation.
-	 *
-	 * @param int $amount
-	 * @param boolean $force_variation_stock If true, the variation's stock will be updated and not the parents.
+	 * @param int  $amount
+	 * @param bool $force_variation_stock If true, the variation's stock will be updated and not the parents.
+	 * @return int
+	 * @todo Need to return 0 if is_null? Or something. Should not be just return.
 	 */
 	function set_stock( $amount = null, $force_variation_stock = false ) {
 		if ( is_null( $amount ) )
@@ -303,7 +370,9 @@ class WC_Product_Variation extends WC_Product {
 		} elseif ( $this->variation_has_stock || $force_variation_stock ) {
 
 			// Update stock amount
-			$this->stock = intval( $amount );
+			$this->stock               = intval( $amount );
+			$this->variation_has_stock = true;
+			$this->manage_stock        = 'yes';
 
 			// Update meta
 			update_post_meta( $this->variation_id, '_stock', $this->stock );
@@ -318,7 +387,7 @@ class WC_Product_Variation extends WC_Product {
 				$parent_product = get_product( $this->id );
 
 				// Only continue if the parent has backorders off
-				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 )
+				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) )
 					$this->set_stock_status( 'outofstock' );
 
 			} elseif ( $this->is_in_stock() ) {
@@ -406,29 +475,6 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get file download path identified by $download_id
-	 *
-	 * @access public
-	 * @param string $download_id file identifier
-	 * @return array
-	 */
-	public function get_file_download_path( $download_id ) {
-
-		$file_path = '';
-		$file_paths = (array) apply_filters( 'woocommerce_file_download_paths', get_post_meta( $this->variation_id, '_file_paths', true ), $this->variation_id, null, null );
-
-		if ( ! $download_id && count( $file_paths ) == 1 ) {
-			// backwards compatibility for old-style download URLs and template files
-			$file_path = array_shift( $file_paths );
-		} elseif ( isset( $file_paths[ $download_id ] ) ) {
-			$file_path = $file_paths[ $download_id ];
-		}
-
-		// allow overriding based on the particular file being requested
-		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->variation_id, $download_id );
-	}
-
-	/**
 	 * Get product name with extra details such as SKU, price and attributes. Used within admin.
 	 *
 	 * @access public
@@ -443,7 +489,7 @@ class WC_Product_Variation extends WC_Product {
 			$identifier = '#' . $this->variation_id;
 
 		$attributes = $this->get_variation_attributes();
-		$extra_data = ' &ndash; ' . implode( ', ', $attributes ) . ' &ndash; ' . woocommerce_price( $this->get_price() );
+		$extra_data = ' &ndash; ' . implode( ', ', $attributes ) . ' &ndash; ' . wc_price( $this->get_price() );
 
 		return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
 	}

@@ -1,14 +1,18 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
+
+	// wc_cart_params is required to continue, ensure the object exists
+	if (typeof wc_cart_params === "undefined")
+		return false;
 
 	// Shipping calculator
 	$(document).on( 'click', '.shipping-calculator-button', function() {
 		$('.shipping-calculator-form').slideToggle('slow');
 		return false;
-	}).on( 'change', 'select#shipping_method, input[name^=shipping_method]', function() {
+	}).on( 'change', 'select.shipping_method, input[name^=shipping_method]', function() {
 
 		var shipping_methods = [];
 
-		$('select#shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
+		$('select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
 			shipping_methods[ $(this).data( 'index' ) ] = $(this).val();
 		} );
 

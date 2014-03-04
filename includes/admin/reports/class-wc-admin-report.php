@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Admin Report
  *
@@ -9,14 +11,12 @@
  * @package 	WooCommerce/Admin/Reports
  * @version     2.1.0
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-/**
- * WC_Admin_Report Class
- */
 class WC_Admin_Report {
 
+	public $chart_interval;
+	public $group_by_query;
+	public $barwidth;
+	public $chart_groupby;
 	public $start_date;
 	public $end_date;
 
@@ -32,7 +32,7 @@ class WC_Admin_Report {
 	 * )
 	 *
 	 * @param  array $args
-	 * @return array of results
+	 * @return array|string depending on query_type
 	 */
 	public function get_order_report_data( $args = array() ) {
 		global $wpdb;
@@ -113,7 +113,7 @@ class WC_Admin_Report {
 				if ( ! is_array( $value ) )
 					continue;
 
-				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] : $value['meta_key'];
+				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'];
 
 				if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
 
@@ -165,7 +165,7 @@ class WC_Admin_Report {
 				if ( ! is_array( $value ) )
 					continue;
 
-				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] : $value['meta_key'];
+				$key = is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'];
 
 				if ( strtolower( $value['operator'] ) == 'in' ) {
 					if ( is_array( $value['meta_value'] ) )
@@ -229,6 +229,7 @@ class WC_Admin_Report {
 			$query['limit'] = "LIMIT {$limit}";
 		}
 
+		$query      = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query      = implode( ' ', $query );
 		$query_hash = md5( $query_type . $query );
 
@@ -267,18 +268,19 @@ class WC_Admin_Report {
 	 */
 	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
 		$prepared_data = array();
-
+		$time          =  '';
+		
 		// Ensure all days (or months) have values first in this range
 		for ( $i = 0; $i <= $interval; $i ++ ) {
 			switch ( $group_by ) {
 				case 'day' :
-					$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) * 1000;
+					$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) . '000';
 				break;
 				case 'month' :
-					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) * 1000;
+					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) . '000';
 				break;
 			}
-
+			
 			if ( ! isset( $prepared_data[ $time ] ) )
 				$prepared_data[ $time ] = array( esc_js( $time ), 0 );
 		}
@@ -286,10 +288,10 @@ class WC_Admin_Report {
 		foreach ( $data as $d ) {
 			switch ( $group_by ) {
 				case 'day' :
-					$time = strtotime( date( 'Ymd', strtotime( $d->$date_key ) ) ) * 1000;
+					$time = strtotime( date( 'Ymd', strtotime( $d->$date_key ) ) ) . '000';
 				break;
 				case 'month' :
-					$time = strtotime( date( 'Ym', strtotime( $d->$date_key ) ) . '01' ) * 1000;
+					$time = strtotime( date( 'Ym', strtotime( $d->$date_key ) ) . '01' ) . '000';
 				break;
 			}
 
@@ -386,14 +388,14 @@ class WC_Admin_Report {
 			$total += $d->sparkline_value;
 
 		if ( $type == 'sales' ) {
-			$tooltip = sprintf( __( 'Sold %s worth in the last %d days', 'woocommerce' ), strip_tags( woocommerce_price( $total ) ), $days );
+			$tooltip = sprintf( __( 'Sold %s worth in the last %d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
 		} else {
 			$tooltip = sprintf( _n( 'Sold 1 item in the last %d days', 'Sold %d items in the last %d days', $total, 'woocommerce' ), $total, $days );
 		}
 
 		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
 
-		return '<span class="wc_sparkline ' . ( $type == 'sales' ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . $tooltip . '" data-barwidth="' . 60*60*16*1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
+		return '<span class="wc_sparkline ' . ( $type == 'sales' ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60*60*16*1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
 	}
 
 	/**

@@ -6,9 +6,12 @@ if ( ! class_exists( 'WC_Report_Stock' ) )
 	require_once( 'class-wc-report-stock.php' );
 
 /**
- * WC_Report_Most_Stocked class
+ * WC_Report_Most_Stocked
  *
- * @extends WC_Report_Stock
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Most_Stocked extends WC_Report_Stock {
 

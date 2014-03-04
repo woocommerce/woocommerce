@@ -19,7 +19,7 @@
 
 							var a=this;d.onRenderMenu.add(function(c,b){
 
-								a.addImmediate(b, ed.getLang('woocommerce.order_tracking'),"[woocommerce_order_tracking]" );
+								a.addImmediate(b, ed.getLang('woocommerce.order_tracking'), '[' + ed.getLang('woocommerce.order_tracking_shortcode') + ']' );
 								a.addImmediate(b, ed.getLang('woocommerce.price_button'), '[add_to_cart id="" sku=""]');
 								a.addImmediate(b, ed.getLang('woocommerce.product_by_sku'), '[product id="" sku=""]');
 								a.addImmediate(b, ed.getLang('woocommerce.products_by_sku'), '[products ids="" skus=""]');
@@ -33,17 +33,7 @@
 
 								b.addSeparator();
 
-								a.addImmediate(b, ed.getLang('woocommerce.shop_messages'), '[woocommerce_messages]');
-
-								b.addSeparator();
-
-								c=b.addMenu({title:ed.getLang('woocommerce.pages')});
-										a.addImmediate(c, ed.getLang('woocommerce.cart'),"[woocommerce_cart]" );
-										a.addImmediate(c, ed.getLang('woocommerce.checkout'),"[woocommerce_checkout]" );
-										a.addImmediate(c, ed.getLang('woocommerce.my_account'),"[woocommerce_my_account]" );
-										a.addImmediate(c, ed.getLang('woocommerce.pay'),"[woocommerce_pay]" );
-										a.addImmediate(c, ed.getLang('woocommerce.thankyou'),"[woocommerce_thankyou]" );
-
+								a.addImmediate(b, ed.getLang('woocommerce.shop_messages'), '[' + ed.getLang('woocommerce.shop_messages_shortcode') + ']');
 							});
 						return d
 

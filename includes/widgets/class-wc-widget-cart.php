@@ -48,7 +48,6 @@ class WC_Widget_Cart extends WC_Widget {
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {
-		global $woocommerce;
 
 		extract( $args );
 

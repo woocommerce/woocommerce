@@ -34,8 +34,7 @@ class WC_Meta_Box_Order_Actions {
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 					<optgroup label="<?php _e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
-						global $woocommerce;
-						$mailer = $woocommerce->mailer();
+										$mailer = WC()->mailer();
 
 						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
 						$mails = $mailer->get_emails();
@@ -49,6 +48,7 @@ class WC_Meta_Box_Order_Actions {
 						}
 						?>
 					</optgroup>
+					<option value="regenerate_download_permissions"><?php _e( 'Generate Download Permissions', 'woocommerce' ); ?></option>
 					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
@@ -87,12 +87,17 @@ class WC_Meta_Box_Order_Actions {
 		// Handle button actions
 		if ( ! empty( $_POST['wc_order_action'] ) ) {
 
-			$action = woocommerce_clean( $_POST['wc_order_action'] );
+			$action = wc_clean( $_POST['wc_order_action'] );
 
 			if ( strstr( $action, 'send_email_' ) ) {
 
 				do_action( 'woocommerce_before_resend_order_emails', $order );
 
+				// Ensure gateways are loaded in case they need to insert data into the emails
+				WC()->payment_gateways();
+				WC()->shipping();
+
+				// Load mailer
 				$mailer = WC()->mailer();
 
 				$email_to_send = str_replace( 'send_email_', '', $action );
@@ -108,6 +113,11 @@ class WC_Meta_Box_Order_Actions {
 				}
 
 				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
+
+			} elseif ( $action == 'regenerate_download_permissions' ) {
+
+				delete_post_meta( $post_id, '_download_permissions_granted' );
+				wc_downloadable_product_permissions( $post_id );
 
 			} else {
 

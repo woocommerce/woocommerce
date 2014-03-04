@@ -48,7 +48,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			foreach ( $tax_classes as $class )
 				$sections[ sanitize_title( $class ) ] = sprintf( __( '%s Rates', 'woocommerce' ), $class );
 
-		return $sections;
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**
@@ -141,6 +141,25 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			),
 
 			array(
+				'title'   => __( 'Display prices in the shop:', 'woocommerce' ),
+				'id'      => 'woocommerce_tax_display_shop',
+				'default' => 'excl',
+				'type'    => 'select',
+				'options' => array(
+					'incl'   => __( 'Including tax', 'woocommerce' ),
+					'excl'   => __( 'Excluding tax', 'woocommerce' ),
+				)
+			),
+
+			array(
+				'title'   => __( 'Price display suffix:', 'woocommerce' ),
+				'id'      => 'woocommerce_price_display_suffix',
+				'default' => '',
+				'type'    => 'text',
+				'desc' 		=> __( 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: <code>{price_including_tax}, {price_excluding_tax}</code>.', 'woocommerce' ),
+			),
+
+			array(
 				'title'   => __( 'Display prices during cart/checkout:', 'woocommerce' ),
 				'id'      => 'woocommerce_tax_display_cart',
 				'default' => 'excl',
@@ -148,6 +167,18 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'options' => array(
 					'incl'   => __( 'Including tax', 'woocommerce' ),
 					'excl'   => __( 'Excluding tax', 'woocommerce' ),
+				),
+				'autoload'      => false
+			),
+
+			array(
+				'title'   => __( 'Display tax totals:', 'woocommerce' ),
+				'id'      => 'woocommerce_tax_total_display',
+				'default' => 'itemized',
+				'type'    => 'select',
+				'options' => array(
+					'single'     => __( 'As a single total', 'woocommerce' ),
+					'itemized'   => __( 'Itemized', 'woocommerce' ),
 				),
 				'autoload'      => false
 			),
@@ -178,7 +209,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Save settings
 	 */
 	public function save() {
-		global $current_section;
+		global $current_section, $wpdb;
 
 		if ( ! $current_section ) {
 
@@ -190,6 +221,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$this->save_tax_rates();
 
 		}
+
+		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_tax_rates_%') OR `option_name` LIKE ('_transient_timeout_wc_tax_rates_%')" );
 	}
 
 	/**
@@ -247,7 +280,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 									'type'      => 'plain',
 									'prev_text' => '&laquo;',
 									'next_text' => '&raquo;',
-									'total'     => absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ),
+									'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit ),
 									'current'   => $page
 								) ) );
 							?>
@@ -440,14 +473,14 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 				var availableCountries = [<?php
 					$countries = array();
-					foreach ( $woocommerce->countries->get_allowed_countries() as $value => $label )
+					foreach ( WC()->countries->get_allowed_countries() as $value => $label )
 						$countries[] = '{ label: "' . $label . '", value: "' . $value . '" }';
 					echo implode( ', ', $countries );
 				?>];
 
 				var availableStates = [<?php
 					$countries = array();
-					foreach ( $woocommerce->countries->get_allowed_country_states() as $value => $label )
+					foreach ( WC()->countries->get_allowed_country_states() as $value => $label )
 						foreach ( $label as $code => $state )
 							$countries[] = '{ label: "' . $state . '", value: "' . $code . '" }';
 					echo implode( ', ', $countries );
@@ -503,13 +536,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				foreach ( $value as $new_key => $new_value ) {
 
 					// Sanitize + format
-					$country  = strtoupper( woocommerce_clean( $tax_rate_country[ $key ][ $new_key ] ) );
-					$state    = strtoupper( woocommerce_clean( $tax_rate_state[ $key ][ $new_key ] ) );
-					$postcode = woocommerce_clean( $tax_rate_postcode[ $key ][ $new_key ] );
-					$city     = woocommerce_clean( $tax_rate_city[ $key ][ $new_key ] );
-					$rate     = number_format( woocommerce_clean( $tax_rate[ $key ][ $new_key ] ), 4, '.', '' );
-					$name     = woocommerce_clean( $tax_rate_name[ $key ][ $new_key ] );
-					$priority = absint( woocommerce_clean( $tax_rate_priority[ $key ][ $new_key ] ) );
+					$country  = strtoupper( wc_clean( $tax_rate_country[ $key ][ $new_key ] ) );
+					$state    = strtoupper( wc_clean( $tax_rate_state[ $key ][ $new_key ] ) );
+					$postcode = wc_clean( $tax_rate_postcode[ $key ][ $new_key ] );
+					$city     = wc_clean( $tax_rate_city[ $key ][ $new_key ] );
+					$rate     = number_format( wc_clean( $tax_rate[ $key ][ $new_key ] ), 4, '.', '' );
+					$name     = wc_clean( $tax_rate_name[ $key ][ $new_key ] );
+					$priority = absint( wc_clean( $tax_rate_priority[ $key ][ $new_key ] ) );
 					$compound = isset( $tax_rate_compound[ $key ][ $new_key ] ) ? 1 : 0;
 					$shipping = isset( $tax_rate_shipping[ $key ][ $new_key ] ) ? 1 : 0;
 
@@ -541,7 +574,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 					if ( ! empty( $postcode ) ) {
 						$postcodes = explode( ';', $postcode );
-						$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
+						$postcodes = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
 
 						$postcode_query = array();
 
@@ -551,8 +584,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 								if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
 									for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
-										if ( $i )
-											$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
+										if ( ! $i )
+											continue;
+
+										if ( strlen( $i ) < strlen( $postcode_parts[0] ) )
+											$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
+										
+										$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 									}
 								}
 							} else {
@@ -565,7 +603,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 					if ( ! empty( $city ) ) {
 						$cities = explode( ';', $city );
-						$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
+						$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
 						foreach( $cities as $city ) {
 							$wpdb->insert(
 							$wpdb->prefix . "woocommerce_tax_rate_locations",
@@ -593,11 +631,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				}
 
 				// Sanitize + format
-				$country  = strtoupper( woocommerce_clean( $tax_rate_country[ $key ] ) );
-				$state    = strtoupper( woocommerce_clean( $tax_rate_state[ $key ] ) );
-				$rate     = number_format( woocommerce_clean( $tax_rate[ $key ] ), 4, '.', '' );
-				$name     = woocommerce_clean( $tax_rate_name[ $key ] );
-				$priority = absint( woocommerce_clean( $tax_rate_priority[ $key ] ) );
+				$country  = strtoupper( wc_clean( $tax_rate_country[ $key ] ) );
+				$state    = strtoupper( wc_clean( $tax_rate_state[ $key ] ) );
+				$rate     = number_format( (double) wc_clean( $tax_rate[ $key ] ), 4, '.', '' );
+				$name     = wc_clean( $tax_rate_name[ $key ] );
+				$priority = absint( wc_clean( $tax_rate_priority[ $key ] ) );
 				$compound = isset( $tax_rate_compound[ $key ] ) ? 1 : 0;
 				$shipping = isset( $tax_rate_shipping[ $key ] ) ? 1 : 0;
 
@@ -633,9 +671,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'postcode';", $tax_rate_id ) );
 
 					// Add changed
-					$postcode  = woocommerce_clean( $tax_rate_postcode[ $key ] );
+					$postcode  = wc_clean( $tax_rate_postcode[ $key ] );
 					$postcodes = explode( ';', $postcode );
-					$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
+					$postcodes = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
 
 					$postcode_query = array();
 
@@ -645,8 +683,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 							if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
 								for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
-									if ( $i )
-										$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
+									if ( ! $i )
+										continue;
+
+									if ( strlen( $i ) < strlen( $postcode_parts[0] ) )
+										$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
+									
+									$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 								}
 							}
 						} else {
@@ -663,9 +706,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'city';", $tax_rate_id ) );
 
 					// Add changed
-					$city   = woocommerce_clean( $tax_rate_city[ $key ] );
+					$city   = wc_clean( $tax_rate_city[ $key ] );
 					$cities = explode( ';', $city );
-					$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
+					$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
 					foreach( $cities as $city ) {
 						if ( $city ) {
 							$wpdb->insert(

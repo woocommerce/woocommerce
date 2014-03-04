@@ -1,4 +1,10 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
+
+	$.blockUI.defaults.overlayCSS.cursor = 'default'; 
+	
+	// wc_checkout_params is required to continue, ensure the object exists
+	if (typeof wc_checkout_params === "undefined")
+		return false;
 
 	var updateTimer;
 	var dirtyInput = false;
@@ -10,7 +16,7 @@ jQuery(document).ready(function($) {
 
 		var shipping_methods = [];
 
-		$('select#shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
+		$('select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
 			shipping_methods[ $(this).data( 'index' ) ] = $(this).val();
 		} );
 
@@ -66,8 +72,9 @@ jQuery(document).ready(function($) {
 			data: 		data,
 			success: 	function( response ) {
 				if ( response ) {
-					var order_output = $(response);
+					var order_output = $($.parseHTML(response.trim()));
 					$('#order_review').html(order_output.html());
+					$('#order_review').find('input[name=payment_method]:checked').click();
 					$('body').trigger('updated_checkout');
 				}
 			}
@@ -149,12 +156,20 @@ jQuery(document).ready(function($) {
 
 	.on( 'click', '.payment_methods input.input-radio', function() {
 		if ( $('.payment_methods input.input-radio').length > 1 ) {
-			$('div.payment_box').filter(':visible').slideUp(250);
-			if ($(this).is(':checked')) {
-				$('div.payment_box.' + $(this).attr('ID')).slideDown(250);
+			var target_payment_box = $('div.payment_box.' + $(this).attr('ID') );
+			if ( $(this).is(':checked') && ! target_payment_box.is(':visible') ) {
+				$('div.payment_box').filter(':visible').slideUp(250);
+				if ( $(this).is(':checked') ) {
+					$('div.payment_box.' + $(this).attr('ID') ).slideDown(250);
+				}
 			}
 		} else {
 			$('div.payment_box').show();
+		}
+		if ( $(this).data('order_button_text') ) {
+			$('#place_order').val( $(this).data('order_button_text') );
+		} else {
+			$('#place_order').val( $('#place_order').data( 'value' ) );
 		}
 	})
 
@@ -166,7 +181,7 @@ jQuery(document).ready(function($) {
 	/* Update totals/taxes/shipping */
 
 	// Inputs/selects which update totals instantly
-	.on( 'input change', 'select#shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
+	.on( 'input change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
 		clearTimeout( updateTimer );
 		dirtyInput = false;
 		$('body').trigger('update_checkout');
@@ -301,6 +316,8 @@ jQuery(document).ready(function($) {
 						// Trigger update in case we need a fresh nonce
 						if ( result.refresh == 'true' )
 							$('body').trigger('update_checkout');
+
+						$('body').trigger('checkout_error');
 					}
 				},
 				dataType: 	"html"
@@ -345,99 +362,7 @@ jQuery(document).ready(function($) {
 		return false;
 	});
 
-	/* Localisation */
-	var locale_json = wc_checkout_params.locale.replace(/&quot;/g, '"');
-	var locale = $.parseJSON( locale_json );
-	var required = ' <abbr class="required" title="' + wc_checkout_params.i18n_required_text + '">*</abbr>';
-
 	$('body')
-
-	// Handle locale
-	.bind('country_to_state_changing', function( event, country, wrapper ){
-
-		var thisform = wrapper;
-
-		if ( typeof locale[country] != 'undefined' ) {
-			var thislocale = locale[country];
-		} else {
-			var thislocale = locale['default'];
-		}
-
-		// Handle locale fields
-		var locale_fields = {
-			'address_1'	: 	'#billing_address_1_field, #shipping_address_1_field',
-			'address_2'	: 	'#billing_address_2_field, #shipping_address_2_field',
-			'state'		: 	'#billing_state_field, #shipping_state_field',
-			'postcode'	:	'#billing_postcode_field, #shipping_postcode_field',
-			'city'		: 	'#billing_city_field, #shipping_city_field'
-		};
-
-		$.each( locale_fields, function( key, value ) {
-
-			var field = thisform.find( value );
-
-			if ( thislocale[key] ) {
-
-				if ( thislocale[key]['label'] ) {
-					field.find('label').html( thislocale[key]['label'] );
-				}
-
-				if ( thislocale[key]['placeholder'] ) {
-					field.find('input').attr( 'placeholder', thislocale[key]['placeholder'] );
-				}
-
-				field.find('label abbr').remove();
-
-				if ( typeof thislocale[key]['required'] == 'undefined' && locale['default'][key]['required'] == true ) {
-					field.find('label').append( required );
-				} else if ( thislocale[key]['required'] == true ) {
-					field.find('label').append( required );
-				}
-
-				if ( key !== 'state' ) {
-					if ( thislocale[key]['hidden'] == true ) {
-						field.hide().find('input').val('');
-					} else {
-						field.show();
-					}
-				}
-
-			} else if ( locale['default'][key] ) {
-				if ( locale['default'][key]['required'] == true ) {
-					if (field.find('label abbr').size()==0) field.find('label').append( required );
-				}
-				if ( key !== 'state' && (typeof locale['default'][key]['hidden'] == 'undefined' || locale['default'][key]['hidden'] == false) ) {
-					field.show();
-				}
-			}
-
-		});
-
-		var $postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
-		var $cityfield     = thisform.find('#billing_city_field, #shipping_city_field');
-		var $statefield    = thisform.find('#billing_state_field, #shipping_state_field');
-
-		if ( ! $postcodefield.attr('data-o_class') ) {
-			$postcodefield.attr('data-o_class', $postcodefield.attr('class'));
-			$cityfield.attr('data-o_class', $cityfield.attr('class'));
-			$statefield.attr('data-o_class', $statefield.attr('class'));
-		}
-
-		// Re-order postcode/city
-		if ( thislocale['postcode_before_city'] ) {
-
-			$postcodefield.add( $cityfield ).add( $statefield ).removeClass('form-row-first form-row-last').addClass('form-row-wide');
-			$postcodefield.insertBefore( $cityfield );
-
-		} else {
-			// Default
-			$postcodefield.attr('class', $postcodefield.attr('data-o_class'));
-			$cityfield.attr('class', $cityfield.attr('data-o_class'));
-			$statefield.attr('class', $statefield.attr('data-o_class'));
-			$postcodefield.insertAfter( $statefield );
-		}
-
-	})
 
 	// Init trigger
 	.bind('init_checkout', function() {

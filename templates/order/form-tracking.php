@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $woocommerce, $post;
 ?>
 
-<form action="<?php echo esc_url( get_permalink($post->ID) ); ?>" method="post" class="track_order">
+<form action="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" method="post" class="track_order">
 
 	<p><?php _e( 'To track your order please enter your Order ID in the box below and press return. This was given to you on your receipt and in the confirmation email you should have received.', 'woocommerce' ); ?></p>
 
@@ -21,6 +21,6 @@ global $woocommerce, $post;
 	<div class="clear"></div>
 
 	<p class="form-row"><input type="submit" class="button" name="track" value="<?php _e( 'Track', 'woocommerce' ); ?>" /></p>
-	<?php wp_nonce_field( 'woocommerce-order_tracking') ?>
+	<?php wp_nonce_field( 'woocommerce-order_tracking' ); ?>
 
 </form>

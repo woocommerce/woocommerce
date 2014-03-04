@@ -11,7 +11,7 @@
  * @category	Class
  * @author 		WooThemes
  */
-class WC_Cart implements Iterator, Countable {
+class WC_Cart {
 
 	/** @var array Contains an array of cart items. */
 	public $cart_contents = array();
@@ -511,7 +511,11 @@ class WC_Cart implements Iterator, Countable {
 		            } else {
 						$value              = apply_filters( 'woocommerce_variation_option_name', $value );
 						$product_attributes = $cart_item['data']->get_attributes();
-						$label              = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', urldecode( $name ) ) ]['name'] );
+						if ( isset( $product_attributes[ str_replace( 'attribute_', '', urldecode( $name ) ) ] ) ) {
+							$label = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', urldecode( $name ) ) ]['name'] );
+						} else {
+							$label = $name;
+						}
 					}
 
 					$item_data[] = array(
@@ -2099,65 +2103,5 @@ class WC_Cart implements Iterator, Countable {
 				$total_discount = false;
 			}
 			return apply_filters( 'woocommerce_cart_total_discount', $total_discount, $this );
-		}
-		
-		/**
-		* Current position of the array.
-		*
-		* @link http://php.net/manual/en/iterator.current.php
-		*
-		* @return mixed
-		*/
-		public function current() {
-			return current( $this->cart_contents );
-		}
-		
-		/**
-		* Key of the current element.
-		*
-		* @link http://php.net/manual/en/iterator.key.php
-		*
-		* @return mixed
-		*/
-		public function key() {
-			return key( $this->cart_contents );
-		}
-		
-		/**
-		* Move the internal point of the container array to the next item
-		*
-		* @link http://www.php.net/manual/en/iterator.rewind.php
-		*
-		* @return void
-		*/
-		public function next() {
-			next( $this->cart_contents );
-		}
-		
-		
-		/**
-		*  Rewind the Iterator to the first element
-		*
-		* @link http://php.net/manual/en/iterator.next.php
-		*
-		* @return void
-		*/
-		public function rewind() {
-			reset( $this->cart_contents );
-		}
-		
-		/**
-		* Is the current key valid?
-		*
-		* @link http://php.net/manual/en/iterator.rewind.php
-		*
-		* @return bool
-		*/
-		public function valid() {
-			return isset( $this->cart_contents[ $this->key() ] );
-		}
-		
-		public function count() {
-			return $this->cart_contents;
 		}
 }

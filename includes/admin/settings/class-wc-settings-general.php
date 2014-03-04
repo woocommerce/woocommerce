@@ -99,6 +99,14 @@ class WC_Settings_General extends WC_Settings_Page {
 				'autoload'  => false
 			),
 
+			array(
+				'title'   => __( 'API', 'woocommerce' ),
+				'desc'    => __( 'Enable the REST API', 'woocommerce' ),
+				'id'      => 'woocommerce_api_enabled',
+				'type'    => 'checkbox',
+				'default' => 'yes',
+			),
+
 			array( 'type' => 'sectionend', 'id' => 'general_options'),
 
 			array(	'title' => __( 'Currency Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
@@ -177,7 +185,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'desc' 	=> __( 'Enable Lightbox', 'woocommerce' ),
 				'id' 		=> 'woocommerce_enable_lightbox',
 				'default'	=> 'yes',
-				'desc_tip'	=> __( 'Include WooCommerce\'s lightbox. Product gallery images and the add review form will open in a lightbox.', 'woocommerce' ),
+				'desc_tip'	=> __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
 				'type' 		=> 'checkbox',
 				'checkboxgroup'		=> 'start'
 			),
@@ -267,11 +275,11 @@ class WC_Settings_General extends WC_Settings_Page {
 		if ( isset( $_POST['woocommerce_frontend_css_primary'] ) ) {
 
 			// Save settings
-			$primary 		= ( ! empty( $_POST['woocommerce_frontend_css_primary'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_primary'] ) : '';
-			$secondary 		= ( ! empty( $_POST['woocommerce_frontend_css_secondary'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_secondary'] ) : '';
-			$highlight 		= ( ! empty( $_POST['woocommerce_frontend_css_highlight'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_highlight'] ) : '';
-			$content_bg 	= ( ! empty( $_POST['woocommerce_frontend_css_content_bg'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_content_bg'] ) : '';
-			$subtext 		= ( ! empty( $_POST['woocommerce_frontend_css_subtext'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_subtext'] ) : '';
+			$primary 		= ( ! empty( $_POST['woocommerce_frontend_css_primary'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_primary'] ) : '';
+			$secondary 		= ( ! empty( $_POST['woocommerce_frontend_css_secondary'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_secondary'] ) : '';
+			$highlight 		= ( ! empty( $_POST['woocommerce_frontend_css_highlight'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_highlight'] ) : '';
+			$content_bg 	= ( ! empty( $_POST['woocommerce_frontend_css_content_bg'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_content_bg'] ) : '';
+			$subtext 		= ( ! empty( $_POST['woocommerce_frontend_css_subtext'] ) ) ? wc_format_hex( $_POST['woocommerce_frontend_css_subtext'] ) : '';
 
 			$colors = array(
 				'primary' 		=> $primary,

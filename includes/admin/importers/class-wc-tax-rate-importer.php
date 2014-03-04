@@ -80,8 +80,8 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 *
 		 * @access public
 		 * @param mixed $data
-		 * @param mixed $enc
-		 * @return void
+		 * @param string $enc
+		 * @return string
 		 */
 		function format_data_from_csv( $data, $enc ) {
 			return ( $enc == 'UTF-8' ) ? $data : utf8_encode( $data );
@@ -129,13 +129,15 @@ if ( class_exists( 'WP_Importer' ) ) {
 							$country = '';
 						if ( $state == '*' )
 							$state = '';
+						if ( $class == 'standard' )
+							$class = '';
 
 						$wpdb->insert(
 							$wpdb->prefix . "woocommerce_tax_rates",
 							array(
 								'tax_rate_country'  => $country,
 								'tax_rate_state'    => $state,
-								'tax_rate'          => number_format( $rate, 4, '.', '' ),
+								'tax_rate'          => wc_format_decimal( $rate, 4 ),
 								'tax_rate_name'     => trim( $name ),
 								'tax_rate_priority' => absint( $priority ),
 								'tax_rate_compound' => $compound ? 1 : 0,
@@ -147,9 +149,9 @@ if ( class_exists( 'WP_Importer' ) ) {
 
 						$tax_rate_id = $wpdb->insert_id;
 
-						$postcode  = woocommerce_clean( $postcode );
+						$postcode  = wc_clean( $postcode );
 						$postcodes = explode( ';', $postcode );
-						$postcodes = array_map( 'strtoupper', array_map( 'woocommerce_clean', $postcodes ) );
+						$postcodes = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
 						foreach( $postcodes as $postcode ) {
 							if ( ! empty( $postcode ) && $postcode != '*' ) {
 								$wpdb->insert(
@@ -163,9 +165,9 @@ if ( class_exists( 'WP_Importer' ) ) {
 							}
 						}
 
-						$city   = woocommerce_clean( $city );
+						$city   = wc_clean( $city );
 						$cities = explode( ';', $city );
-						$cities = array_map( 'strtoupper', array_map( 'woocommerce_clean', $cities ) );
+						$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
 						foreach( $cities as $city ) {
 							if ( ! empty( $city ) && $city != '*' ) {
 								$wpdb->insert(
@@ -207,7 +209,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 * Performs post-import cleanup of files and the cache
 		 */
 		function import_end() {
-			echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url('admin.php?page=woocommerce_settings&tab=tax') . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
+			echo '<p>' . __( 'All done!', 'woocommerce' ) . ' <a href="' . admin_url('admin.php?page=wc-settings&tab=tax') . '">' . __( 'View Tax Rates', 'woocommerce' ) . '</a>' . '</p>';
 
 			do_action( 'import_end' );
 		}
@@ -278,12 +280,11 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 * @return void
 		 */
 		function greet() {
-			global $woocommerce;
-
+	
 			echo '<div class="narrow">';
 			echo '<p>' . __( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ).'</p>';
 
-			echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), $woocommerce->plugin_url() . '/includes/admin/importers/samples/sample_tax_rates.csv' ) . '</p>';
+			echo '<p>' . sprintf( __( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), WC()->plugin_url() . '/dummy-data/sample_tax_rates.csv' ) . '</p>';
 
 			$action = 'admin.php?import=woocommerce_tax_rate_csv&step=1';
 
@@ -291,7 +292,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 			$size = size_format( $bytes );
 			$upload_dir = wp_upload_dir();
 			if ( ! empty( $upload_dir['error'] ) ) :
-				?><div class="error"><p><?php _e('Before you can upload your import file, you will need to fix the following error:'); ?></p>
+				?><div class="error"><p><?php _e( 'Before you can upload your import file, you will need to fix the following error:', 'woocommerce' ); ?></p>
 				<p><strong><?php echo $upload_dir['error']; ?></strong></p></div><?php
 			else :
 				?>
@@ -300,13 +301,13 @@ if ( class_exists( 'WP_Importer' ) ) {
 						<tbody>
 							<tr>
 								<th>
-									<label for="upload"><?php _e( 'Choose a file from your computer:' ); ?></label>
+									<label for="upload"><?php _e( 'Choose a file from your computer:', 'woocommerce' ); ?></label>
 								</th>
 								<td>
 									<input type="file" id="upload" name="import" size="25" />
 									<input type="hidden" name="action" value="save" />
 									<input type="hidden" name="max_file_size" value="<?php echo $bytes; ?>" />
-									<small><?php printf( __('Maximum size: %s' ), $size ); ?></small>
+									<small><?php printf( __('Maximum size: %s', 'woocommerce' ), $size ); ?></small>
 								</td>
 							</tr>
 							<tr>
@@ -324,7 +325,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 						</tbody>
 					</table>
 					<p class="submit">
-						<input type="submit" class="button" value="<?php esc_attr_e( 'Upload file and import' ); ?>" />
+						<input type="submit" class="button" value="<?php esc_attr_e( 'Upload file and import', 'woocommerce' ); ?>" />
 					</p>
 				</form>
 				<?php
@@ -335,9 +336,10 @@ if ( class_exists( 'WP_Importer' ) ) {
 
 		/**
 		 * Added to http_request_timeout filter to force timeout at 60 seconds during import
+		 * @param  int $val
 		 * @return int 60
 		 */
-		function bump_request_timeout() {
+		function bump_request_timeout( $val ) {
 			return 60;
 		}
 	}

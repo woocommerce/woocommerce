@@ -22,7 +22,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 */
 	public function __construct() {
 		$this->id    = 'checkout';
-		$this->label = __( 'Checkout', 'woocommerce' );
+		$this->label = _x( 'Checkout', 'Settings tab label', 'woocommerce' );
 
 		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
 		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
@@ -46,12 +46,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		foreach ( $payment_gateways as $gateway ) {
 
-			$title = empty( $gateway->method_title ) ? ucwords( $gateway->id ) : ucwords( $gateway->method_title );
+			$title = empty( $gateway->method_title ) ? ucfirst( $gateway->id ) : $gateway->method_title;
 
 			$sections[ strtolower( get_class( $gateway ) ) ] = esc_html( $title );
 		}
 
-		return $sections;
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			),
 
 			array(
-				'title' => __( 'Checkout', 'woocommerce' ),
+				'title'     => _x( 'Checkout', 'Settings group label', 'woocommerce' ),
 				'desc' 		=> __( 'Enable guest checkout', 'woocommerce' ),
 				'desc_tip'	=>  __( 'Allows customers to checkout without creating an account.', 'woocommerce' ),
 				'id' 		=> 'woocommerce_enable_guest_checkout',
@@ -110,7 +110,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title' => __( 'Cart Page', 'woocommerce' ),
-				'desc' 		=> __( 'Page contents: [woocommerce_cart]', 'woocommerce' ),
+				'desc' 		=> __( 'Page contents:', 'woocommerce' ) . ' [' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
 				'id' 		=> 'woocommerce_cart_page_id',
 				'type' 		=> 'single_select_page',
 				'default'	=> '',
@@ -121,7 +121,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title' => __( 'Checkout Page', 'woocommerce' ),
-				'desc' 		=> __( 'Page contents: [woocommerce_checkout]', 'woocommerce' ),
+				'desc' 		=> __( 'Page contents:', 'woocommerce' ) . ' [' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
 				'id' 		=> 'woocommerce_checkout_page_id',
 				'type' 		=> 'single_select_page',
 				'default'	=> '',
@@ -162,6 +162,15 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'type' 		=> 'text',
 				'default'	=> 'order-received',
 				'desc_tip'	=> true,
+			),
+
+			array(
+				'title'    => __( 'Add Payment Method', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the Checkout &rarr; Add Payment Method page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_add_payment_method_endpoint',
+				'type'     => 'text',
+				'default'  => 'add-payment-method',
+				'desc_tip' => true,
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'checkout_endpoint_options' ),
@@ -265,7 +274,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 									break;
 									case 'settings' :
 										echo '<td class="settings">
-					        				<a class="button" href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=checkout&section=' . strtolower( get_class( $gateway ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
+					        				<a class="button" href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( get_class( $gateway ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
 					        			</td>';
 									break;
 									default :

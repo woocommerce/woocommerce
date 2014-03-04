@@ -1,9 +1,16 @@
 <?php
 /**
- * WC_Report_Sales_By_Date class
+ * WC_Report_Sales_By_Date
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
+	public $chart_colours = array();
+	
 	/**
 	 * Get the legend for the main chart sidebar
 	 * @return array
@@ -71,15 +78,15 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		switch ( $this->chart_groupby ) {
 			case 'day' :
-				$average_sales_title = sprintf( __( '%s average daily sales', 'woocommerce' ), '<strong>' . woocommerce_price( $this->average_sales ) . '</strong>' );
+				$average_sales_title = sprintf( __( '%s average daily sales', 'woocommerce' ), '<strong>' . wc_price( $this->average_sales ) . '</strong>' );
 			break;
 			case 'month' :
-				$average_sales_title = sprintf( __( '%s average monthly sales', 'woocommerce' ), '<strong>' . woocommerce_price( $this->average_sales ) . '</strong>' );
+				$average_sales_title = sprintf( __( '%s average monthly sales', 'woocommerce' ), '<strong>' . wc_price( $this->average_sales ) . '</strong>' );
 			break;
 		}
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s sales in this period', 'woocommerce' ), '<strong>' . woocommerce_price( $total_sales ) . '</strong>' ),
+			'title' => sprintf( __( '%s sales in this period', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
 			'color' => $this->chart_colours['sales_amount'],
 			'highlight_series' => 5
 		);
@@ -99,12 +106,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'highlight_series' => 0
 		);
 		$legend[] = array(
-			'title' => sprintf( __( '%s charged for shipping', 'woocommerce' ), '<strong>' . woocommerce_price( $total_shipping ) . '</strong>' ),
+			'title' => sprintf( __( '%s charged for shipping', 'woocommerce' ), '<strong>' . wc_price( $total_shipping ) . '</strong>' ),
 			'color' => $this->chart_colours['shipping_amount'],
 			'highlight_series' => 4
 		);
 		$legend[] = array(
-			'title' => sprintf( __( '%s worth of coupons used', 'woocommerce' ), '<strong>' . woocommerce_price( $total_coupons ) . '</strong>' ),
+			'title' => sprintf( __( '%s worth of coupons used', 'woocommerce' ), '<strong>' . wc_price( $total_coupons ) . '</strong>' ),
 			'color' => $this->chart_colours['coupon_amount'],
 			'highlight_series' => 3
 		);

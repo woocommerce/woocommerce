@@ -43,7 +43,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -52,7 +52,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -135,7 +135,12 @@ class WC_Payment_Gateways {
 
 		foreach ( $this->payment_gateways as $gateway ) :
 
-			if ($gateway->is_available()) $_available_gateways[$gateway->id] = $gateway;
+			if ( $gateway->is_available() ) {
+				if ( ! is_add_payment_method_page() )
+					$_available_gateways[$gateway->id] = $gateway;
+				elseif( $gateway->supports( 'add_payment_method' ) )
+					$_available_gateways[$gateway->id] = $gateway;
+			}
 
 		endforeach;
 

@@ -21,7 +21,7 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
-		register_activation_hook( WOOCOMMERCE_PLUGIN_FILE, array( $this, 'install' ) );
+		register_activation_hook( WC_PLUGIN_FILE, array( $this, 'install' ) );
 
 		add_action( 'admin_init', array( $this, 'install_actions' ) );
 		add_action( 'admin_init', array( $this, 'check_version' ), 5 );
@@ -35,8 +35,11 @@ class WC_Install {
 	 * @return void
 	 */
 	public function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version || get_option( 'woocommerce_db_version' ) != WC()->version ) )
+		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version || get_option( 'woocommerce_db_version' ) != WC()->version ) ) {
 			$this->install();
+
+			do_action( 'woocommerce_updated' );
+		}
 	}
 
 	/**
@@ -46,14 +49,14 @@ class WC_Install {
 		// Install - Add pages button
 		if ( ! empty( $_GET['install_woocommerce_pages'] ) ) {
 
-			$this->create_pages();
+			self::create_pages();
 
 			// We no longer need to install pages
 			delete_option( '_wc_needs_pages' );
 			delete_transient( '_wc_activation_redirect' );
 
 			// What's new redirect
-			wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
+			wp_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
 			exit;
 
 		// Skip button
@@ -63,11 +66,8 @@ class WC_Install {
 			delete_option( '_wc_needs_pages' );
 			delete_transient( '_wc_activation_redirect' );
 
-			// Flush rules after install
-			flush_rewrite_rules();
-
 			// What's new redirect
-			wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
+			wp_redirect( admin_url( 'index.php?page=wc-about' ) );
 			exit;
 
 		// Update button
@@ -81,7 +81,7 @@ class WC_Install {
 			delete_transient( '_wc_activation_redirect' );
 
 			// What's new redirect
-			wp_safe_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
+			wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
 			exit;
 		}
 	}
@@ -90,13 +90,18 @@ class WC_Install {
 	 * Install WC
 	 */
 	public function install() {
-
 		$this->create_options();
 		$this->create_tables();
 		$this->create_roles();
 
 		// Register post types
 		include_once( 'class-wc-post-types.php' );
+		WC_Post_types::register_post_types();
+		WC_Post_types::register_taxonomies();
+
+		// Also register endpoints - this needs to be done prior to rewrite rule flush
+		WC()->query->init_query_vars();
+		WC()->query->add_endpoints();
 
 		$this->create_terms();
 		$this->create_cron_jobs();
@@ -120,10 +125,11 @@ class WC_Install {
 		update_option( 'woocommerce_version', WC()->version );
 
 		// Check if pages are needed
-		if ( woocommerce_get_page_id( 'shop' ) < 1 )
+		if ( wc_get_page_id( 'shop' ) < 1 ) {
 			update_option( '_wc_needs_pages', 1 );
+		}
 
-		// Flush rewrite rules
+		// Flush rules after install
 		flush_rewrite_rules();
 
 		// Redirect to welcome screen
@@ -158,13 +164,14 @@ class WC_Install {
 		}
 
 		if ( version_compare( $current_db_version, '2.0.14', '<' ) ) {
-			if ( 'HU' == get_option( 'woocommerce_default_country' ) )
+			if ( 'HU' == get_option( 'woocommerce_default_country' ) ) {
 				update_option( 'woocommerce_default_country', 'HU:BU' );
+			}
 
 			update_option( 'woocommerce_db_version', '2.0.14' );
 		}
 
-		if ( version_compare( $current_db_version, '2.1.0', '<' ) ) {
+		if ( version_compare( $current_db_version, '2.1.0', '<' ) || WC_VERSION == '2.1-bleeding' ) {
 			include( 'updates/woocommerce-update-2.1.php' );
 			update_option( 'woocommerce_db_version', '2.1.0' );
 		}
@@ -181,17 +188,19 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
 
-		$ve = get_option('gmt_offset') > 0 ? '+' : '-';
+		$ve = get_option( 'gmt_offset' ) > 0 ? '+' : '-';
 
-		wp_schedule_event( strtotime( 'tomorrow ' . $ve . get_option('gmt_offset') . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales');
+		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . get_option( 'gmt_offset' ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', null );
 
-		if ( is_null( $held_duration ) )
+		if ( is_null( $held_duration ) ) {
 			$held_duration = '60';
+		}
 
-		if ( $held_duration != '' )
+		if ( $held_duration != '' ) {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+		}
 
 		wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
 	}
@@ -202,32 +211,33 @@ class WC_Install {
 	 * @access public
 	 * @return void
 	 */
-	private function create_pages() {
+	public static function create_pages() {
 		$pages = apply_filters( 'woocommerce_create_pages', array(
 			'shop' => array(
-				'name'    => _x( 'shop', 'page_slug', 'woocommerce' ),
-				'title'   => __( 'Shop', 'woocommerce' ),
+				'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
+				'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
 				'content' => ''
 			),
 			'cart' => array(
-				'name'    => _x( 'cart', 'page_slug', 'woocommerce' ),
-				'title'   => __( 'Cart', 'woocommerce' ),
-				'content' => '[woocommerce_cart]'
+				'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
+				'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
+				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
 			),
 			'checkout' => array(
-				'name'    => _x( 'checkout', 'page_slug', 'woocommerce' ),
-				'title'   => __( 'Checkout', 'woocommerce' ),
-				'content' => '[woocommerce_checkout]'
+				'name'    => _x( 'checkout', 'Paeg slug', 'woocommerce' ),
+				'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
+				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
 			),
 			'myaccount' => array(
-				'name'    => _x( 'my-account', 'page_slug', 'woocommerce' ),
-				'title'   => __( 'My Account', 'woocommerce' ),
-				'content' => '[woocommerce_my_account]'
+				'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
+				'title'   => _x( 'My Account', 'Page title', 'woocommerce' ),
+				'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
 			)
 		) );
 
-		foreach ( $pages as $key => $page )
-			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? woocommerce_get_page_id( $page['parent'] ) : '' );
+		foreach ( $pages as $key => $page ) {
+			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '' );
+		}
 	}
 
 	/**
@@ -279,14 +289,23 @@ class WC_Install {
 		$settings = WC_Admin_Settings::get_settings_pages();
 
 		foreach ( $settings as $section ) {
-			$section = $section->get_settings();
-			foreach ( $section as $value ) {
-		        if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
-		        	$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
-		        	add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
-		        }
-	        }
-	    }
+			foreach ( $section->get_settings() as $value ) {
+				if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
+					$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
+					add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+				}
+			}
+
+			// Special case to install the inventory settings.
+			if ( $section instanceof WC_Settings_Products ) {
+				foreach ( $section->get_settings( 'inventory' ) as $value ) {
+					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
+						$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
+						add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -312,17 +331,30 @@ class WC_Install {
 
 		$collate = '';
 
-	    if ( $wpdb->has_cap( 'collation' ) ) {
-			if( ! empty($wpdb->charset ) )
+		if ( $wpdb->has_cap( 'collation' ) ) {
+			if ( ! empty($wpdb->charset ) ) {
 				$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
-			if( ! empty($wpdb->collate ) )
+			}
+			if ( ! empty($wpdb->collate ) ) {
 				$collate .= " COLLATE $wpdb->collate";
-	    }
+			}
+		}
 
-	    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
-	    // WooCommerce Tables
-	    $woocommerce_tables = "
+		/**
+		 * Update schemas before DBDELTA
+		 *
+		 * Before updating, remove any primary keys which could be modified due to schema updates
+		 */
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
+			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions DROP PRIMARY KEY, ADD `permission_id` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT;" );
+			}
+		}
+
+		// WooCommerce Tables
+		$woocommerce_tables = "
 	CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
 	  attribute_id bigint(20) NOT NULL auto_increment,
 	  attribute_name varchar(200) NOT NULL,
@@ -397,12 +429,12 @@ class WC_Install {
 	  tax_rate_id bigint(20) NOT NULL,
 	  location_type varchar(40) NOT NULL,
 	  PRIMARY KEY  (location_id),
-      KEY tax_rate_id (tax_rate_id),
+	  KEY tax_rate_id (tax_rate_id),
 	  KEY location_type (location_type),
 	  KEY location_type_code (location_type,location_code)
 	) $collate;
 	";
-	    dbDelta( $woocommerce_tables );
+		dbDelta( $woocommerce_tables );
 	}
 
 	/**
@@ -411,17 +443,19 @@ class WC_Install {
 	public function create_roles() {
 		global $wp_roles;
 
-		if ( class_exists('WP_Roles') )
-			if ( ! isset( $wp_roles ) )
+		if ( class_exists( 'WP_Roles' ) ) {
+			if ( ! isset( $wp_roles ) ) {
 				$wp_roles = new WP_Roles();
+			}
+		}
 
 		if ( is_object( $wp_roles ) ) {
 
 			// Customer role
 			add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
-			    'read' 						=> true,
-			    'edit_posts' 				=> false,
-			    'delete_posts' 				=> false
+				'read' 						=> true,
+				'edit_posts' 				=> false,
+				'delete_posts' 				=> false
 			) );
 
 			// Shop manager role
@@ -436,41 +470,42 @@ class WC_Install {
 				'level_2'                => true,
 				'level_1'                => true,
 				'level_0'                => true,
-			    'read'                   => true,
-			    'read_private_pages'     => true,
-			    'read_private_posts'     => true,
-			    'edit_users'             => true,
-			    'edit_posts'             => true,
-			    'edit_pages'             => true,
-			    'edit_published_posts'   => true,
-			    'edit_published_pages'   => true,
-			    'edit_private_pages'     => true,
-			    'edit_private_posts'     => true,
-			    'edit_others_posts'      => true,
-			    'edit_others_pages'      => true,
-			    'publish_posts'          => true,
-			    'publish_pages'          => true,
-			    'delete_posts'           => true,
-			    'delete_pages'           => true,
-			    'delete_private_pages'   => true,
-			    'delete_private_posts'   => true,
-			    'delete_published_pages' => true,
-			    'delete_published_posts' => true,
-			    'delete_others_posts'    => true,
-			    'delete_others_pages'    => true,
-			    'manage_categories'      => true,
-			    'manage_links'           => true,
-			    'moderate_comments'      => true,
-			    'unfiltered_html'        => true,
-			    'upload_files'           => true,
-			   	'export'                 => true,
-				'import'                 => true
+				'read'                   => true,
+				'read_private_pages'     => true,
+				'read_private_posts'     => true,
+				'edit_users'             => true,
+				'edit_posts'             => true,
+				'edit_pages'             => true,
+				'edit_published_posts'   => true,
+				'edit_published_pages'   => true,
+				'edit_private_pages'     => true,
+				'edit_private_posts'     => true,
+				'edit_others_posts'      => true,
+				'edit_others_pages'      => true,
+				'publish_posts'          => true,
+				'publish_pages'          => true,
+				'delete_posts'           => true,
+				'delete_pages'           => true,
+				'delete_private_pages'   => true,
+				'delete_private_posts'   => true,
+				'delete_published_pages' => true,
+				'delete_published_posts' => true,
+				'delete_others_posts'    => true,
+				'delete_others_pages'    => true,
+				'manage_categories'      => true,
+				'manage_links'           => true,
+				'moderate_comments'      => true,
+				'unfiltered_html'        => true,
+				'upload_files'           => true,
+				'export'                 => true,
+				'import'                 => true,
+				'list_users'             => true
 			) );
 
 			$capabilities = $this->get_core_capabilities();
 
-			foreach( $capabilities as $cap_group ) {
-				foreach( $cap_group as $cap ) {
+			foreach ( $capabilities as $cap_group ) {
+				foreach ( $cap_group as $cap ) {
 					$wp_roles->add_cap( 'shop_manager', $cap );
 					$wp_roles->add_cap( 'administrator', $cap );
 				}
@@ -482,19 +517,19 @@ class WC_Install {
 	 * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_core_capabilities() {
 		$capabilities = array();
 
 		$capabilities['core'] = array(
-			"manage_woocommerce",
-			"view_woocommerce_reports"
+			'manage_woocommerce',
+			'view_woocommerce_reports'
 		);
 
 		$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
 
-		foreach( $capability_types as $capability_type ) {
+		foreach ( $capability_types as $capability_type ) {
 
 			$capabilities[ $capability_type ] = array(
 				// Post type
@@ -532,16 +567,18 @@ class WC_Install {
 	public function remove_roles() {
 		global $wp_roles;
 
-		if ( class_exists('WP_Roles') )
-			if ( ! isset( $wp_roles ) )
+		if ( class_exists( 'WP_Roles' ) ) {
+			if ( ! isset( $wp_roles ) ) {
 				$wp_roles = new WP_Roles();
+			}
+		}
 
 		if ( is_object( $wp_roles ) ) {
 
 			$capabilities = $this->get_core_capabilities();
 
-			foreach( $capabilities as $cap_group ) {
-				foreach( $cap_group as $cap ) {
+			foreach ( $capabilities as $cap_group ) {
+				foreach ( $cap_group as $cap ) {
 					$wp_roles->remove_cap( 'shop_manager', $cap );
 					$wp_roles->remove_cap( 'administrator', $cap );
 				}
@@ -597,96 +634,111 @@ class WC_Install {
 	 */
 	private function create_css_from_less() {
 		// Recompile LESS styles if they are custom
-		if ( get_option( 'woocommerce_frontend_css' ) == 'yes' ) {
+		$colors = get_option( 'woocommerce_frontend_css_colors' );
 
-			$colors = get_option( 'woocommerce_frontend_css_colors' );
-
-			if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) )
-				woocommerce_compile_less_styles();
-
+		if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) ) {
+			if ( ! function_exists( 'woocommerce_compile_less_styles' ) ) {
+				include_once( 'admin/wc-admin-functions.php' );
+			}
+			woocommerce_compile_less_styles();
 		}
 	}
 
-    /**
-     * Active plugins pre update option filter
-     *
-     * @param string $new_value
-     * @return string
-     */
-    function pre_update_option_active_plugins($new_value) {
-        $old_value = (array) get_option('active_plugins');
+	/**
+	 * Active plugins pre update option filter
+	 *
+	 * @param string $new_value
+	 * @return string
+	 */
+	function pre_update_option_active_plugins( $new_value ) {
+		$old_value = (array) get_option( 'active_plugins' );
 
-        if ($new_value !== $old_value && in_array(W3TC_FILE, (array) $new_value) && in_array(W3TC_FILE, (array) $old_value)) {
-                $this->_config->set('notes.plugins_updated', true);
-                try {
-                    $this->_config->save();
-                } catch(Exception $ex) {}
-        }
+		if ( $new_value !== $old_value && in_array( W3TC_FILE, (array) $new_value ) && in_array( W3TC_FILE, (array) $old_value ) ) {
+			$this->_config->set( 'notes.plugins_updated', true );
+			try {
+				$this->_config->save();
+			} catch( Exception $ex ) {}
+		}
 
-        return $new_value;
-    }
+		return $new_value;
+	}
 
-    /**
-     * Show plugin changes. Code adapted from W3 Total Cache.
-     *
-     * @return void
-     */
-    function in_plugin_update_message() {
-        $response = wp_remote_get( 'http://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
+	/**
+	 * Show plugin changes. Code adapted from W3 Total Cache.
+	 *
+	 * @return void
+	 */
+	function in_plugin_update_message() {
+		$response = wp_remote_get( 'http://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
 
-        if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
+		if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
 
-           	// Output Upgrade Notice
-            $matches = null;
-            $regexp = '~==\s*Upgrade Notice\s*==\s*=\s*[0-9.]+\s*=(.*)(=\s*' . preg_quote( WOOCOMMERCE_VERSION ) . '\s*=|$)~Uis';
+			// Output Upgrade Notice
+			$matches = null;
+			$regexp = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
 
-            if ( preg_match( $regexp, $response['body'], $matches ) ) {
-                $notices = (array) preg_split('~[\r\n]+~', trim( $matches[1] ) );
+			if ( preg_match( $regexp, $response['body'], $matches ) ) {
+				$version = trim( $matches[1] );
+				$notices = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
 
-                echo '<div style="font-weight: normal; background: #cc99c2; color: #fff !important; border: 1px solid #b76ca9; padding: 9px; margin: 9px 0;">';
+				if ( version_compare( WC_VERSION, $version, '<' ) ) {
 
-                foreach  ( $notices as $index => $line ) {
-                    echo '<p style="margin: 0; font-size: 1.1em; color: #fff; text-shadow: 0 1px 1px #b574a8;">' . preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) . '</p>';
-                }
+					echo '<div style="font-weight: normal; background: #cc99c2; color: #fff !important; border: 1px solid #b76ca9; padding: 9px; margin: 9px 0;">';
 
-                echo '</div>';
-            }
+					foreach ( $notices as $index => $line ) {
+						echo '<p style="margin: 0; font-size: 1.1em; color: #fff; text-shadow: 0 1px 1px #b574a8;">' . preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) . '</p>';
+					}
 
-        	// Output Changelog
-            $matches = null;
-            $regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*-(.*)=(.*)(=\s*' . preg_quote( WOOCOMMERCE_VERSION ) . '\s*-(.*)=|$)~Uis';
+					echo '</div>';
+				}
+			}
 
-            if ( preg_match( $regexp, $response['body'], $matches ) ) {
-                $changelog = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
+			// Output Changelog
+			$matches = null;
+			$regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*-(.*)=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*-(.*)=|$)~Uis';
 
-                echo ' ' . __( 'What\'s new:', 'woocommerce' ) . '<div style="font-weight: normal;">';
+			if ( preg_match( $regexp, $response['body'], $matches ) ) {
+				$changelog = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
-                $ul = false;
+				echo ' ' . __( 'What\'s new:', 'woocommerce' ) . '<div style="font-weight: normal;">';
 
-                foreach  ( $changelog as $index => $line ) {
-                    if ( preg_match('~^\s*\*\s*~', $line ) ) {
-                        if ( ! $ul ) {
-                            echo '<ul style="list-style: disc inside; margin: 9px 0 9px 20px; overflow:hidden; zoom: 1;">';
-                            $ul = true;
-                        }
-                        $line = preg_replace( '~^\s*\*\s*~', '', htmlspecialchars( $line ) );
-                        echo '<li style="width: 50%; margin: 0; float: left; ' . ( $index % 2 == 0 ? 'clear: left;' : '' ) . '">' . $line . '</li>';
-                    } else {
-                        if ( $ul ) {
-                            echo '</ul>';
-                            $ul = false;
-                        }
-                        echo '<p style="margin: 9px 0;">' . htmlspecialchars( $line ) . '</p>';
-                    }
-                }
+				$ul = false;
 
-                if ($ul)
-                    echo '</ul>';
+				foreach ( $changelog as $index => $line ) {
+					if ( preg_match('~^\s*\*\s*~', $line ) ) {
+						if ( ! $ul ) {
+							echo '<ul style="list-style: disc inside; margin: 9px 0 9px 20px; overflow:hidden; zoom: 1;">';
+							$ul = true;
+						}
+						
+						$line = preg_replace( '~^\s*\*\s*~', '', htmlspecialchars( $line ) );
+						
+						echo '<li style="width: 50%; margin: 0; float: left; ' . ( $index % 2 == 0 ? 'clear: left;' : '' ) . '">' . $line . '</li>';
+					} else {
 
-                echo '</div>';
-            }
-        }
-    }
+						$version = trim( current( explode( '-', str_replace( '=', '', $line ) ) ) );
+
+						if ( version_compare( WC_VERSION, $version, '>=' ) ) {
+							break;
+						}
+
+						if ( $ul ) {
+							echo '</ul>';
+							$ul = false;
+						}
+
+						echo '<p style="margin: 9px 0;">' . htmlspecialchars( $line ) . '</p>';
+					}
+				}
+
+				if ( $ul ) {
+					echo '</ul>';
+				}
+
+				echo '</div>';
+			}
+		}
+	}
 }
 
 endif;

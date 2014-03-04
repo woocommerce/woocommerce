@@ -6,7 +6,7 @@
 				'tools'  => __( 'Tools', 'woocommerce' ),
 			);
 			foreach ( $tabs as $name => $label ) {
-				echo '<a href="' . admin_url( 'admin.php?page=wc_status&tab=' . $name ) . '" class="nav-tab ';
+				echo '<a href="' . admin_url( 'admin.php?page=wc-status&tab=' . $name ) . '" class="nav-tab ';
 				if ( $current_tab == $name ) echo 'nav-tab-active';
 				echo '">' . $label . '</a>';
 			}

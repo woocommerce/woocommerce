@@ -11,13 +11,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $woocommerce;
 
-if ( ! $woocommerce->cart->coupons_enabled() )
+if ( ! WC()->cart->coupons_enabled() )
 	return;
 
-$info_message = apply_filters('woocommerce_checkout_coupon_message', __( 'Have a coupon?', 'woocommerce' ));
+$info_message = apply_filters( 'woocommerce_checkout_coupon_message', __( 'Have a coupon?', 'woocommerce' ) );
+$info_message .= ' <a href="#" class="showcoupon">' . __( 'Click here to enter your code', 'woocommerce' ) . '</a>';
+wc_print_notice( $info_message, 'notice' );
 ?>
-
-<p class="woocommerce-info"><?php echo $info_message; ?> <a href="#" class="showcoupon"><?php _e( 'Click here to enter your code', 'woocommerce' ); ?></a></p>
 
 <form class="checkout_coupon" method="post" style="display:none">
 

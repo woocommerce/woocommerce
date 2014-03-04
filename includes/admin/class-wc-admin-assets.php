@@ -30,10 +30,10 @@ class WC_Admin_Assets {
 	 * Enqueue styles
 	 */
 	public function admin_styles() {
-		global $woocommerce, $wp_scripts;
+		global $wp_scripts;
 
 		// Sitewide menu CSS
-		wp_enqueue_style( 'woocommerce_admin_menu_styles', $woocommerce->plugin_url() . '/assets/css/menu.css' );
+		wp_enqueue_style( 'woocommerce_admin_menu_styles', WC()->plugin_url() . '/assets/css/menu.css', array(), WC_VERSION );
 
 		$screen = get_current_screen();
 
@@ -42,13 +42,13 @@ class WC_Admin_Assets {
 			$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
 
 			// Admin styles for WC pages only
-			wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
-			wp_enqueue_style( 'jquery-ui-style', '//ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_version . '/themes/smoothness/jquery-ui.css' );
+			wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
+			wp_enqueue_style( 'jquery-ui-style', '//ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_version . '/themes/smoothness/jquery-ui.css', array(), WC_VERSION );
 			wp_enqueue_style( 'wp-color-picker' );
 		}
 
 		if ( in_array( $screen->id, array( 'dashboard' ) ) ) {
-			wp_enqueue_style( 'woocommerce_admin_dashboard_styles', $woocommerce->plugin_url() . '/assets/css/dashboard.css' );
+			wp_enqueue_style( 'woocommerce_admin_dashboard_styles', WC()->plugin_url() . '/assets/css/dashboard.css', array(), WC_VERSION );
 		}
 
 		do_action( 'woocommerce_admin_css' );
@@ -59,32 +59,39 @@ class WC_Admin_Assets {
 	 * Enqueue scripts
 	 */
 	public function admin_scripts() {
-		global $woocommerce, $wp_query, $post;
+		global $wp_query, $post;
 
 		$screen       = get_current_screen();
-		$wc_screen_id = strtolower( __( 'WooCommerce', 'woocommerce' ) );
+		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 		$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		// Register scripts
-		wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-placeholder', 'jquery-ui-sortable', 'jquery-ui-widget', 'jquery-ui-core', 'jquery-tiptip' ), $woocommerce->version );
+		wp_register_script( 'woocommerce_admin', WC()->plugin_url() . '/assets/js/admin/woocommerce_admin' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-ui-sortable', 'jquery-ui-widget', 'jquery-ui-core', 'jquery-tiptip' ), WC_VERSION );
 
-		wp_register_script( 'jquery-blockui', $woocommerce->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.60', true );
+		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.66', true );
 
-		wp_register_script( 'jquery-placeholder', $woocommerce->plugin_url() . '/assets/js/jquery-placeholder/jquery.placeholder' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
+		wp_register_script( 'jquery-tiptip', WC()->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 
-		wp_register_script( 'jquery-tiptip', $woocommerce->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
+		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/admin/accounting' . $suffix . '.js', array( 'jquery' ), '0.3.2' );
 
-		wp_register_script( 'accounting', $woocommerce->plugin_url() . '/assets/js/admin/accounting' . $suffix . '.js', array( 'jquery' ), '1.3.2' );
+		wp_register_script( 'round', WC()->plugin_url() . '/assets/js/admin/round' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 
-		wp_register_script( 'woocommerce_admin_meta_boxes', $woocommerce->plugin_url() . '/assets/js/admin/meta-boxes' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'accounting' ), $woocommerce->version );
+		wp_register_script( 'woocommerce_admin_meta_boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'accounting', 'round' ), WC_VERSION );
 
-		wp_register_script( 'woocommerce_admin_meta_boxes_variations', $woocommerce->plugin_url() . '/assets/js/admin/meta-boxes-variations' . $suffix . '.js', array( 'jquery', 'jquery-ui-sortable' ), $woocommerce->version );
+		wp_register_script( 'woocommerce_admin_meta_boxes_variations', WC()->plugin_url() . '/assets/js/admin/meta-boxes-variations' . $suffix . '.js', array( 'jquery', 'jquery-ui-sortable' ), WC_VERSION );
 
-		wp_register_script( 'ajax-chosen', $woocommerce->plugin_url() . '/assets/js/chosen/ajax-chosen.jquery' . $suffix . '.js', array('jquery', 'chosen'), $woocommerce->version );
+		wp_register_script( 'ajax-chosen', WC()->plugin_url() . '/assets/js/chosen/ajax-chosen.jquery' . $suffix . '.js', array('jquery', 'chosen'), WC_VERSION );
 
-		wp_register_script( 'chosen', $woocommerce->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array('jquery'), $woocommerce->version );
+		wp_register_script( 'chosen', WC()->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array('jquery'), WC_VERSION );
 
-		 // WooCommerce admin pages
+		// Accounting
+    	$params = array(
+			'mon_decimal_point' => get_option( 'woocommerce_price_decimal_sep' )
+    	);
+
+    	wp_localize_script( 'accounting', 'accounting_params', $params );
+
+		// WooCommerce admin pages
 	    if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
 
 	    	wp_enqueue_script( 'woocommerce_admin' );
@@ -93,6 +100,18 @@ class WC_Admin_Assets {
 	    	wp_enqueue_script( 'chosen' );
 	    	wp_enqueue_script( 'jquery-ui-sortable' );
 	    	wp_enqueue_script( 'jquery-ui-autocomplete' );
+
+	    	$locale  = localeconv();
+	    	$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
+
+	    	$params = array(
+				'i18n_decimal_error'     => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
+				'i18n_mon_decimal_error' => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), get_option( 'woocommerce_price_decimal_sep' ) ),
+				'decimal_point'          => $decimal,
+				'mon_decimal_point'      => get_option( 'woocommerce_price_decimal_sep' )
+	    	);
+
+	    	wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
 	    }
 
 	    // Edit product category pages
@@ -101,7 +120,7 @@ class WC_Admin_Assets {
 
 		// Products
 		if ( in_array( $screen->id, array( 'edit-product' ) ) )
-			wp_enqueue_script( 'woocommerce_quick-edit', $woocommerce->plugin_url() . '/assets/js/admin/quick-edit.js', array('jquery') );
+			wp_enqueue_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array('jquery'), WC_VERSION );
 
 		// Product/Coupon/Orders
 		if ( in_array( $screen->id, array( 'shop_coupon', 'shop_order', 'product', 'edit-shop_coupon', 'edit-shop_order', 'edit-product' ) ) ) {
@@ -135,7 +154,7 @@ class WC_Admin_Assets {
 				'prices_include_tax' 			=> esc_attr( get_option('woocommerce_prices_include_tax') ),
 				'round_at_subtotal'				=> esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
 				'no_customer_selected'			=> __( 'No customer selected', 'woocommerce' ),
-				'plugin_url' 					=> $woocommerce->plugin_url(),
+				'plugin_url' 					=> WC()->plugin_url(),
 				'ajax_url' 						=> admin_url('admin-ajax.php'),
 				'order_item_nonce' 				=> wp_create_nonce("order-item"),
 				'add_attribute_nonce' 			=> wp_create_nonce("add-attribute"),
@@ -143,17 +162,25 @@ class WC_Admin_Assets {
 				'calc_totals_nonce' 			=> wp_create_nonce("calc-totals"),
 				'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
 				'search_products_nonce' 		=> wp_create_nonce("search-products"),
-				'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png',
+				'grant_access_nonce'			=> wp_create_nonce("grant-access"),
+				'revoke_access_nonce'			=> wp_create_nonce("revoke-access"),
+				'add_order_note_nonce'			=> wp_create_nonce("add-order-note"),
+				'delete_order_note_nonce'		=> wp_create_nonce("delete-order-note"),
+				'calendar_image'				=> WC()->plugin_url().'/assets/images/calendar.png',
 				'post_id'						=> isset( $post->ID ) ? $post->ID : '',
-				'base_country'					=> $woocommerce->countries->get_base_country(),
+				'base_country'					=> WC()->countries->get_base_country(),
 				'currency_format_num_decimals'	=> absint( get_option( 'woocommerce_price_num_decimals' ) ),
 				'currency_format_symbol'		=> get_woocommerce_currency_symbol(),
 				'currency_format_decimal_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
 				'currency_format_thousand_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) ),
 				'currency_format'				=> esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS
+				'rounding_precision'            => WC_ROUNDING_PRECISION,
+				'tax_rounding_mode'             => WC_TAX_ROUNDING_MODE,
 				'product_types'					=> array_map( 'sanitize_title', get_terms( 'product_type', array( 'hide_empty' => false, 'fields' => 'names' ) ) ),
 				'default_attribute_visibility'  => apply_filters( 'default_attribute_visibility', false ),
-				'default_attribute_variation'   => apply_filters( 'default_attribute_variation', false )
+				'default_attribute_variation'   => apply_filters( 'default_attribute_variation', false ),
+				'i18n_download_permission_fail' => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
+				'i18n_permission_revoke'		=> __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 			);
 
 			wp_localize_script( 'woocommerce_admin_meta_boxes', 'woocommerce_admin_meta_boxes', $params );
@@ -166,9 +193,9 @@ class WC_Admin_Assets {
 
 			$params = array(
 				'post_id'                             => isset( $post->ID ) ? $post->ID : '',
-				'plugin_url'                          => $woocommerce->plugin_url(),
+				'plugin_url'                          => WC()->plugin_url(),
 				'ajax_url'                            => admin_url('admin-ajax.php'),
-				'woocommerce_placeholder_img_src'     => woocommerce_placeholder_img_src(),
+				'woocommerce_placeholder_img_src'     => wc_placeholder_img_src(),
 				'add_variation_nonce'                 => wp_create_nonce("add-variation"),
 				'link_variation_nonce'                => wp_create_nonce("link-variations"),
 				'delete_variation_nonce'              => wp_create_nonce("delete-variation"),
@@ -192,10 +219,10 @@ class WC_Admin_Assets {
 		// Term ordering - only when sorting by term_order
 		if ( ( strstr( $screen->id, 'edit-pa_' ) || ( ! empty( $_GET['taxonomy'] ) && in_array( $_GET['taxonomy'], apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) ) && ! isset( $_GET['orderby'] ) ) {
 
-			wp_register_script( 'woocommerce_term_ordering', $woocommerce->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable'), $woocommerce->version );
+			wp_register_script( 'woocommerce_term_ordering', WC()->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable'), WC_VERSION );
 			wp_enqueue_script( 'woocommerce_term_ordering' );
 
-			$taxonomy = isset( $_GET['taxonomy'] ) ? woocommerce_clean( $_GET['taxonomy'] ) : '';
+			$taxonomy = isset( $_GET['taxonomy'] ) ? wc_clean( $_GET['taxonomy'] ) : '';
 
 			$woocommerce_term_order_params = array(
 				'taxonomy' 			=>  $taxonomy
@@ -207,23 +234,23 @@ class WC_Admin_Assets {
 		// Product sorting - only when sorting by menu order on the products page
 		if ( current_user_can('edit_others_pages') && $screen->id == 'edit-product' && isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) {
 
-			wp_enqueue_script( 'woocommerce_product_ordering', $woocommerce->plugin_url() . '/assets/js/admin/product-ordering.js', array('jquery-ui-sortable'), '1.0', true );
+			wp_enqueue_script( 'woocommerce_product_ordering', WC()->plugin_url() . '/assets/js/admin/product-ordering.js', array('jquery-ui-sortable'), WC_VERSION, true );
 
 		}
 
 		// Reports Pages
-		if ( in_array( $screen->id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc_reports', 'dashboard' ) ) ) ) {
-			wp_enqueue_script( 'wc-reports', WC()->plugin_url() . '/assets/js/admin/reports' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker' ), '1.0' );
-			wp_enqueue_script( 'flot', WC()->plugin_url() . '/assets/js/admin/jquery.flot' . $suffix . '.js', array( 'jquery' ), '1.0' );
-			wp_enqueue_script( 'flot-resize', WC()->plugin_url() . '/assets/js/admin/jquery.flot.resize' . $suffix . '.js', array('jquery', 'flot'), '1.0' );
-			wp_enqueue_script( 'flot-time', WC()->plugin_url() . '/assets/js/admin/jquery.flot.time' . $suffix . '.js', array( 'jquery', 'flot' ), '1.0' );
-			wp_enqueue_script( 'flot-pie', WC()->plugin_url() . '/assets/js/admin/jquery.flot.pie' . $suffix . '.js', array( 'jquery', 'flot' ), '1.0' );
-			wp_enqueue_script( 'flot-stack', WC()->plugin_url() . '/assets/js/admin/jquery.flot.stack' . $suffix . '.js', array( 'jquery', 'flot' ), '1.0' );
+		if ( in_array( $screen->id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc-reports', 'dashboard' ) ) ) ) {
+			wp_enqueue_script( 'wc-reports', WC()->plugin_url() . '/assets/js/admin/reports' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker' ), WC_VERSION );
+			wp_enqueue_script( 'flot', WC()->plugin_url() . '/assets/js/admin/jquery.flot' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
+			wp_enqueue_script( 'flot-resize', WC()->plugin_url() . '/assets/js/admin/jquery.flot.resize' . $suffix . '.js', array('jquery', 'flot'), WC_VERSION );
+			wp_enqueue_script( 'flot-time', WC()->plugin_url() . '/assets/js/admin/jquery.flot.time' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
+			wp_enqueue_script( 'flot-pie', WC()->plugin_url() . '/assets/js/admin/jquery.flot.pie' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
+			wp_enqueue_script( 'flot-stack', WC()->plugin_url() . '/assets/js/admin/jquery.flot.stack' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 		}
 
 		// Chosen RTL
 		if ( is_rtl() ) {
-			wp_enqueue_script( 'chosen-rtl', WC()->plugin_url() . '/assets/js/chosen/chosen-rtl' . $suffix . '.js', array( 'jquery' ), $woocommerce->version, true );
+			wp_enqueue_script( 'chosen-rtl', WC()->plugin_url() . '/assets/js/chosen/chosen-rtl' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		}
 	}
 
@@ -236,9 +263,8 @@ class WC_Admin_Assets {
 	 * @return void
 	 */
 	public function product_taxonomy_styles() {
-		global $woocommerce;
 
-		if ( ! current_user_can( 'manage_woocommerce' ) ) return false;
+		if ( ! current_user_can( 'manage_woocommerce' ) ) return;
 		?>
 		<style type="text/css">
 			<?php if ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_cat' ) : ?>

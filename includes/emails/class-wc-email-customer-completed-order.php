@@ -27,7 +27,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 		$this->description		= __( 'Order complete emails are sent to the customer when the order is marked complete and usual indicates that the order has been shipped.', 'woocommerce' );
 
 		$this->heading 			= __( 'Your order is complete', 'woocommerce' );
-		$this->subject      	= __( 'Your {blogname} order from {order_date} is complete', 'woocommerce' );
+		$this->subject      	= __( 'Your {site_title} order from {order_date} is complete', 'woocommerce' );
 
 		$this->template_html 	= 'emails/customer-completed-order.php';
 		$this->template_plain 	= 'emails/plain/customer-completed-order.php';
@@ -37,7 +37,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 		// Other settings
 		$this->heading_downloadable = $this->get_option( 'heading_downloadable', __( 'Your order is complete - download your files', 'woocommerce' ) );
-		$this->subject_downloadable = $this->get_option( 'subject_downloadable', __( 'Your {blogname} order from {order_date} is complete - download your files', 'woocommerce' ) );
+		$this->subject_downloadable = $this->get_option( 'subject_downloadable', __( 'Your {site_title} order from {order_date} is complete - download your files', 'woocommerce' ) );
 
 		// Call parent constuctor
 		parent::__construct();
@@ -50,14 +50,13 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 * @return void
 	 */
 	function trigger( $order_id ) {
-		global $woocommerce;
 
 		if ( $order_id ) {
 			$this->object 		= new WC_Order( $order_id );
 			$this->recipient	= $this->object->billing_email;
 
 			$this->find[] = '{order_date}';
-			$this->replace[] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace[] = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 
 			$this->find[] = '{order_number}';
 			$this->replace[] = $this->object->get_order_number();
@@ -103,9 +102,11 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 */
 	function get_content_html() {
 		ob_start();
-		woocommerce_get_template( $this->template_html, array(
+		wc_get_template( $this->template_html, array(
 			'order' 		=> $this->object,
-			'email_heading' => $this->get_heading()
+			'email_heading' => $this->get_heading(),
+			'sent_to_admin' => false,
+			'plain_text'    => false
 		) );
 		return ob_get_clean();
 	}
@@ -118,9 +119,11 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 */
 	function get_content_plain() {
 		ob_start();
-		woocommerce_get_template( $this->template_plain, array(
+		wc_get_template( $this->template_plain, array(
 			'order' 		=> $this->object,
-			'email_heading' => $this->get_heading()
+			'email_heading' => $this->get_heading(),
+			'sent_to_admin' => false,
+			'plain_text'    => true
 		) );
 		return ob_get_clean();
 	}

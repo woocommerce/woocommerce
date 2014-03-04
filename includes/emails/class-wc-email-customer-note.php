@@ -34,7 +34,7 @@ class WC_Email_Customer_Note extends WC_Email {
 		$this->template_html 	= 'emails/customer-note.php';
 		$this->template_plain 	= 'emails/plain/customer-note.php';
 
-		$this->subject 			= __( 'Note added to your {blogname} order from {order_date}', 'woocommerce');
+		$this->subject 			= __( 'Note added to your {site_title} order from {order_date}', 'woocommerce');
 		$this->heading      	= __( 'A note has been added to your order', 'woocommerce');
 
 		// Triggers
@@ -51,7 +51,6 @@ class WC_Email_Customer_Note extends WC_Email {
 	 * @return void
 	 */
 	function trigger( $args ) {
-		global $woocommerce;
 
 		if ( $args ) {
 
@@ -89,10 +88,12 @@ class WC_Email_Customer_Note extends WC_Email {
 	 */
 	function get_content_html() {
 		ob_start();
-		woocommerce_get_template( $this->template_html, array(
+		wc_get_template( $this->template_html, array(
 			'order' 		=> $this->object,
 			'email_heading' => $this->get_heading(),
-			'customer_note' => $this->customer_note
+			'customer_note' => $this->customer_note,
+			'sent_to_admin' => false,
+			'plain_text'    => false
 		) );
 		return ob_get_clean();
 	}
@@ -105,10 +106,12 @@ class WC_Email_Customer_Note extends WC_Email {
 	 */
 	function get_content_plain() {
 		ob_start();
-		woocommerce_get_template( $this->template_plain, array(
+		wc_get_template( $this->template_plain, array(
 			'order' 		=> $this->object,
 			'email_heading' => $this->get_heading(),
-			'customer_note' => $this->customer_note
+			'customer_note' => $this->customer_note,
+			'sent_to_admin' => false,
+			'plain_text'    => true
 		) );
 		return ob_get_clean();
 	}

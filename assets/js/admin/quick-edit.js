@@ -1,4 +1,4 @@
-jQuery(document).ready(function(){
+jQuery(function(){
     jQuery('#the-list').on('click', '.editinline', function(){
 
 		inlineEditPost.revert();
@@ -94,7 +94,7 @@ jQuery(document).ready(function(){
 
     jQuery('#wpbody').on('click', '#doaction, #doaction2', function(){
 		jQuery('input.text', '.inline-edit-row').val('');
-		jQuery('select').prop('selectedIndex',0);
+		jQuery('#woocommerce-fields select').prop('selectedIndex',0);
 		jQuery('#woocommerce-fields-bulk .inline-edit-group .alignright').hide();
 	});
 

@@ -22,10 +22,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			<td><?php wc_cart_totals_subtotal_html(); ?></td>
 		</tr>
 
-		<?php foreach ( WC()->cart->get_applied_coupons( 'cart' ) as $code ) : ?>
+		<?php foreach ( WC()->cart->get_coupons( 'cart' ) as $code => $coupon ) : ?>
 			<tr class="cart-discount coupon-<?php echo esc_attr( $code ); ?>">
-				<th><?php echo esc_html( $code ); ?></th>
-				<td><?php wc_cart_totals_coupon_html( $code ); ?></td>
+				<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
+				<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
 			</tr>
 		<?php endforeach; ?>
 
@@ -47,18 +47,25 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<?php endforeach; ?>
 
 		<?php if ( WC()->cart->tax_display_cart == 'excl' ) : ?>
-			<?php foreach ( WC()->cart->get_tax_totals() as $code => $tax ) : ?>
-				<tr class="tax-rate tax-rate-<?php echo sanitize_title( $code ); ?>">
-					<th><?php echo esc_html( $tax->label ); ?></th>
-					<td><?php echo wp_kses_post( $tax->formatted_amount ); ?></td>
+			<?php if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) : ?>
+				<?php foreach ( WC()->cart->get_tax_totals() as $code => $tax ) : ?>
+					<tr class="tax-rate tax-rate-<?php echo sanitize_title( $code ); ?>">
+						<th><?php echo esc_html( $tax->label ); ?></th>
+						<td><?php echo wp_kses_post( $tax->formatted_amount ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			<?php else : ?>
+				<tr class="tax-total">
+					<th><?php echo esc_html( WC()->countries->tax_or_vat() ); ?></th>
+					<td><?php echo wc_price( WC()->cart->get_taxes_total() ); ?></td>
 				</tr>
-			<?php endforeach; ?>
+			<?php endif; ?>
 		<?php endif; ?>
 
-		<?php foreach ( WC()->cart->get_applied_coupons( 'order' ) as $code ) : ?>
+		<?php foreach ( WC()->cart->get_coupons( 'order' ) as $code => $coupon ) : ?>
 			<tr class="order-discount coupon-<?php echo esc_attr( $code ); ?>">
-				<th><?php echo esc_html( $code ); ?></th>
-				<td><?php wc_cart_totals_coupon_html( $code ); ?></td>
+				<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
+				<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
 			</tr>
 		<?php endforeach; ?>
 

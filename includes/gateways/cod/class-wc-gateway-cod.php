@@ -36,7 +36,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$this->enable_for_methods = $this->get_option( 'enable_for_methods', array() );
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_thankyou_cod', array( $this, 'thankyou' ) );
+		add_action( 'woocommerce_thankyou_cod', array( $this, 'thankyou_page' ) );
 	}
 
     /**
@@ -48,7 +48,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
     	$shipping_methods = array();
 
     	if ( is_admin() )
-	    	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
+	    	foreach ( WC()->shipping->load_shipping_methods() as $method ) {
 		    	$shipping_methods[ $method->id ] = $method->get_title();
 	    	}
 
@@ -82,14 +82,17 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'desc_tip'    => true,
 			),
 			'enable_for_methods' => array(
-				'title' 		=> __( 'Enable for shipping methods', 'woocommerce' ),
-				'type' 			=> 'multiselect',
-				'class'			=> 'chosen_select',
-				'css'			=> 'width: 450px;',
-				'default' 		=> '',
-				'description' 	=> __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
-				'options'		=> $shipping_methods,
-				'desc_tip'      => true,
+				'title'             => __( 'Enable for shipping methods', 'woocommerce' ),
+				'type'              => 'multiselect',
+				'class'             => 'chosen_select',
+				'css'               => 'width: 450px;',
+				'default'           => '',
+				'description'       => __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
+				'options'           => $shipping_methods,
+				'desc_tip'          => true,
+				'custom_attributes' => array(
+					'data-placeholder' => __( 'Select shipping methods', 'woocommerce' )
+				)
 			)
  	   );
     }
@@ -100,15 +103,21 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		global $woocommerce;
 
 		if ( ! empty( $this->enable_for_methods ) ) {
 
 			// Only apply if all packages are being shipped via local pickup
-			$chosen_shipping_methods = array_unique( WC()->session->get( 'chosen_shipping_methods' ) );
+			$chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' );
+
+			if ( isset( $chosen_shipping_methods_session ) ) {
+				$chosen_shipping_methods = array_unique( $chosen_shipping_methods_session );
+			} else {
+				$chosen_shipping_methods = array();
+			}
+
 			$check_method = false;
 
-			if ( is_page( woocommerce_get_page_id( 'checkout' ) ) && ! empty( $wp->query_vars['order-pay'] ) ) {
+			if ( is_page( wc_get_page_id( 'checkout' ) ) && ! empty( $wp->query_vars['order-pay'] ) ) {
 
 				$order_id = absint( $wp->query_vars['order-pay'] );
 				$order    = new WC_Order( $order_id );

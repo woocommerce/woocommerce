@@ -25,11 +25,10 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
      * @return void
      */
 	public function __construct() {
-		global $woocommerce;
 
 		$this->id 			= 'mijireh_checkout';
 		$this->method_title = __( 'Mijireh Checkout', 'woocommerce' );
-		$this->icon 		= apply_filters( 'woocommerce_mijireh_checkout_icon', $woocommerce->plugin_url() . '/includes/gateways/mijireh/assets/images/credit_cards.png' );
+		$this->icon 		= apply_filters( 'woocommerce_mijireh_checkout_icon', WC()->plugin_url() . '/includes/gateways/mijireh/assets/images/credit_cards.png' );
 		$this->has_fields = false;
 
 		// Load the settings.
@@ -98,14 +97,14 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
   		      $wc_order->payment_complete();
 
   		      // Empty cart and clear session
-  		      $woocommerce->cart->empty_cart();
+  		      WC()->cart->empty_cart();
 
   		      wp_redirect( $this->get_return_url( $wc_order ) );
   		      exit;
 
   		} catch (Mijireh_Exception $e) {
 
-  			wc_add_error( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage() );
+			wc_add_notice( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage(), 'error' );
 
   		}
     }
@@ -168,8 +167,8 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		<h3><?php _e( 'Mijireh Checkout', 'woocommerce' );?></h3>
 
 		<?php if ( empty( $this->access_key ) ) : ?>
-			<div id="wc_get_started" class="mijireh">
-				<span class="main"><?php _e( 'Get started with Mijireh Checkout', 'woocommerce' ); ?></span>
+			<div class="mijireh updated">
+				<p class="main"><strong><?php _e( 'Get started with Mijireh Checkout', 'woocommerce' ); ?></strong></p>
 				<span><a href="http://www.mijireh.com/integrations/woocommerce/">Mijireh Checkout</a> <?php _e( 'provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site. Mijireh supports a wide variety of payment gateways: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.', 'woocommerce' ); ?></span>
 
 				<p><a href="http://secure.mijireh.com/signup" target="_blank" class="button button-primary"><?php _e( 'Join for free', 'woocommerce' ); ?></a> <a href="http://www.mijireh.com/integrations/woocommerce/" target="_blank" class="button"><?php _e( 'Learn more about WooCommerce and Mijireh', 'woocommerce' ); ?></a></p>
@@ -194,7 +193,6 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
      * @return array
      */
     public function process_payment( $order_id ) {
-		global $woocommerce;
 
 		$this->init_mijireh();
 
@@ -262,14 +260,14 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		$mj_order->email 			= $wc_order->billing_email;
 
 		// set order totals
-		$mj_order->total 			= $wc_order->get_order_total();
+		$mj_order->total 			= $wc_order->get_total();
 		$mj_order->discount 		= $wc_order->get_total_discount();
 
 		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) {
-			$mj_order->shipping 		= $wc_order->get_shipping() + $wc_order->get_shipping_tax();
+			$mj_order->shipping 		= round( $wc_order->get_total_shipping() + $wc_order->get_shipping_tax(), 2 );
 			$mj_order->show_tax			= false;
 		} else {
-			$mj_order->shipping 		= $wc_order->get_shipping();
+			$mj_order->shipping 		= round( $wc_order->get_total_shipping(), 2 );
 			$mj_order->tax 				= $wc_order->get_total_tax();
 		}
 
@@ -290,7 +288,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 			);
 			return $result;
 		} catch (Mijireh_Exception $e) {
-			wc_add_error( __('Mijireh error:', 'woocommerce' ) . $e->getMessage() );
+			wc_add_notice( __( 'Mijireh error:', 'woocommerce' ) . $e->getMessage(), 'error' );
 		}
     }
 
@@ -348,9 +346,9 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
     	global $woocommerce;
 
     	if ( self::is_slurp_page() ) {
-        	wp_enqueue_style( 'mijireh_css', $woocommerce->plugin_url() . '/includes/gateways/mijireh/assets/css/mijireh.css' );
+        	wp_enqueue_style( 'mijireh_css', WC()->plugin_url() . '/includes/gateways/mijireh/assets/css/mijireh.css' );
         	wp_enqueue_script( 'pusher', 'https://d3dy5gmtp8yhk7.cloudfront.net/1.11/pusher.min.js', null, false, true );
-        	wp_enqueue_script( 'page_slurp', $woocommerce->plugin_url() . '/includes/gateways/mijireh/assets/js/page_slurp.js', array('jquery'), false, true );
+        	wp_enqueue_script( 'page_slurp', WC()->plugin_url() . '/includes/gateways/mijireh/assets/js/page_slurp.js', array('jquery'), false, true );
 
 			add_meta_box(
 				'slurp_meta_box', 		// $id
@@ -368,7 +366,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
      * is_slurp_page function.
      *
      * @access public
-     * @return void
+     * @return bool
      */
     public static function is_slurp_page() {
 		global $post;

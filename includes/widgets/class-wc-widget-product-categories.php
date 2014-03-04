@@ -33,7 +33,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			'orderby' => array(
 				'type'  => 'select',
 				'std'   => 'name',
-				'label' => __( 'Title', 'woocommerce' ),
+				'label' => __( 'Order by', 'woocommerce' ),
 				'options' => array(
 					'order' => __( 'Category Order', 'woocommerce' ),
 					'name'  => __( 'Name', 'woocommerce' )
@@ -75,41 +75,83 @@ class WC_Widget_Product_Categories extends WC_Widget {
 	public function widget( $args, $instance ) {
 		extract( $args );
 
+		global $wp_query, $post, $woocommerce;
+
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
-		$c     = $instance['count'] ? '1' : '0';
+		$c     = ( isset( $instance['count'] ) && $instance['count'] ) ? '1' : '0';
 		$h     = $instance['hierarchical'] ? true : false;
-		$s     = $instance['show_children_only'] ? '1' : '0';
-		$d     = $instance['dropdown'] ? '1' : '0';
+		$s     = ( isset( $instance['show_children_only'] ) && $instance['show_children_only'] ) ? '1' : '0';
+		$d     = ( isset( $instance['dropdown'] ) && $instance['dropdown'] ) ? '1' : '0';
 		$o     = $instance['orderby'] ? $instance['orderby'] : 'order';
 
 		echo $before_widget;
 
 		if ( $title )
 			echo $before_title . $title . $after_title;
-
+		
+		$dropdown_args = array();
 		$cat_args = array( 'show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat' );
 
+		// Menu Order
 		$cat_args['menu_order'] = false;
-
 		if ( $o == 'order' ) {
-
 			$cat_args['menu_order'] = 'asc';
-
 		} else {
-
 			$cat_args['orderby'] = 'title';
+		}
+		
+		// Setup Current Category
+		$this->current_cat = false;
+		$this->cat_ancestors = array();
+
+		if ( is_tax('product_cat') ) {
+
+			$this->current_cat = $wp_query->queried_object;
+			$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
+
+		} elseif ( is_singular('product') ) {
+
+			$product_category = wc_get_product_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent' ) );
+
+			if ( $product_category ) {
+				$this->current_cat   = end( $product_category );
+				$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
+			}
 
 		}
+		
+		// Show Siblings and Children Only
+		if ( $s && $this->current_cat ) {
+		
+			if ( $this->current_cat->parent == 0 ) {
+				$category_children = $this->current_cat->term_id;
+			} else {
+				$category_children = $this->current_cat->parent;
+			}
+			
+			$current_category_children = get_term_children( $category_children, 'product_cat' );
+			
+			if ( $current_category_children ) {
+				$current_category_children = implode ( ", ", $current_category_children );
+				$dropdown_args['include'] = $current_category_children;
+				$cat_args['include'] = $current_category_children;
+			}
+			
+		}
 
+		// Dropdown
 		if ( $d ) {
 
-			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
-			woocommerce_product_dropdown_categories( array(
+			$dropdown_defaults = array(
 				'show_counts'        => $c,
 				'hierarchical'       => $h,
 				'show_uncategorized' => 0,
 				'orderby'            => $o
-			) );
+			);
+			$dropdown_args = wp_parse_args( $dropdown_args, $dropdown_defaults );
+
+			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
+			wc_product_dropdown_categories( $dropdown_args );
 			?>
 			<script type='text/javascript'>
 			/* <![CDATA[ */
@@ -124,34 +166,13 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			</script>
 			<?php
 
+		// List
 		} else {
 
-			global $wp_query, $post, $woocommerce;
-
-			$this->current_cat = false;
-			$this->cat_ancestors = array();
-
-			if ( is_tax('product_cat') ) {
-
-				$this->current_cat = $wp_query->queried_object;
-				$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
-
-			} elseif ( is_singular('product') ) {
-
-				$product_category = wp_get_post_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent' ) );
-
-				if ( $product_category ) {
-					$this->current_cat   = end( $product_category );
-					$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
-				}
-
-			}
-
-			include_once( $woocommerce->plugin_path() . '/includes/walkers/class-product-cat-list-walker.php' );
+			include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-list-walker.php' );
 
 			$cat_args['walker'] 			= new WC_Product_Cat_List_Walker;
 			$cat_args['title_li'] 			= '';
-			$cat_args['show_children_only']	= ( isset( $instance['show_children_only'] ) && $instance['show_children_only'] ) ? 1 : 0;
 			$cat_args['pad_counts'] 		= 1;
 			$cat_args['show_option_none'] 	= __('No product categories exist.', 'woocommerce' );
 			$cat_args['current_category']	= ( $this->current_cat ) ? $this->current_cat->term_id : '';

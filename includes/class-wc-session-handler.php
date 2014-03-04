@@ -35,7 +35,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->_cookie = 'wc_session_cookie_' . COOKIEHASH;
+		$this->_cookie = 'wp_woocommerce_session_' . COOKIEHASH;
 
 		if ( $cookie = $this->get_session_cookie() ) {
 			$this->_customer_id        = $cookie[0];
@@ -55,25 +55,38 @@ class WC_Session_Handler extends WC_Session {
 
 		$this->_data = $this->get_session_data();
 
-    	// Set/renew our cookie
-    	$to_hash      = $this->_customer_id . $this->_session_expiration;
-    	$cookie_hash  = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
-    	$cookie_value = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
-
-    	setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, COOKIEPATH, COOKIE_DOMAIN, false, true );
-
     	// Actions
+    	add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
     	add_action( 'woocommerce_cleanup_sessions', array( $this, 'cleanup_sessions' ), 10 );
     	add_action( 'shutdown', array( $this, 'save_data' ), 20 );
     }
 
     /**
+     * Sets the session cookie on-demand (usually after adding an item to the cart).
+     *
+     * Since the cookie name (as of 2.1) is prepended with wp, cache systems like batcache will not cache pages when set.
+     *
+     * Warning: Cookies will only be set if this is called before the headers are sent.
+     */
+    public function set_customer_session_cookie( $set ) {
+    	if ( $set ) {
+	    	// Set/renew our cookie
+	    	$to_hash      = $this->_customer_id . $this->_session_expiration;
+	    	$cookie_hash  = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
+	    	$cookie_value = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
+
+	    	// Set the cookie
+	    	wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration );
+	    }
+    }
+
+    /**
      * set_session_expiration function.
      *
-     * @access private
+     * @access public
      * @return void
      */
-    private function set_session_expiration() {
+    public function set_session_expiration() {
 	    $this->_session_expiring    = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) ); // 47 Hours
 		$this->_session_expiration  = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) ); // 48 Hours
     }
@@ -81,10 +94,10 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * generate_customer_id function.
 	 *
-	 * @access private
+	 * @access public
 	 * @return mixed
 	 */
-	private function generate_customer_id() {
+	public function generate_customer_id() {
 		if ( is_user_logged_in() )
 			return get_current_user_id();
 		else
@@ -94,10 +107,10 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * get_session_cookie function.
 	 *
-	 * @access private
+	 * @access public
 	 * @return mixed
 	 */
-	private function get_session_cookie() {
+	public function get_session_cookie() {
 		if ( empty( $_COOKIE[ $this->_cookie ] ) )
 			return false;
 
@@ -116,10 +129,10 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * get_session_data function.
 	 *
-	 * @access private
+	 * @access public
 	 * @return array
 	 */
-	private function get_session_data() {
+	public function get_session_data() {
 		return (array) get_option( '_wc_session_' . $this->_customer_id, array() );
 	}
 
@@ -154,38 +167,23 @@ class WC_Session_Handler extends WC_Session {
 	public function cleanup_sessions() {
 		global $wpdb;
 
-		$now = time();
+		if ( ! defined( 'WP_SETUP_CONFIG' ) && ! defined( 'WP_INSTALLING' ) ) {
+			$now                = time();
+			$expired_sessions   = array();
+			$wc_session_expires = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE '_wc_session_expires_%'" );
 
-		$session_names = $wpdb->get_col( $wpdb->prepare( "
-			SELECT
-				a.option_name
-			FROM
-				{$wpdb->options} a
-			WHERE
-				a.option_name LIKE '_wc_session_expires_%%'
-				AND a.option_value < %s
-		", $now ) );
+			foreach ( $wc_session_expires as $wc_session_expire ) {
+				if ( $now > intval( $wc_session_expire->option_value ) ) {
+					$session_id         = substr( $wc_session_expire->option_name, 20 );
+					$expired_sessions[] = $wc_session_expire->option_name;  // Expires key
+					$expired_sessions[] = "_wc_session_$session_id"; // Session key
+				}
+			}
 
-		// Clear cache
-		foreach ( $session_names as $session_name )
-			wp_cache_delete( substr( $session_name, 10 ), 'options' );
-
-		// Delete rows
-		$wpdb->query( $wpdb->prepare( "
-			DELETE
-				a, b
-			FROM
-				{$wpdb->options} a, {$wpdb->options} b
-			WHERE
-				a.option_name LIKE '_wc_session_%%' AND
-				b.option_name = CONCAT(
-					'_wc_session_expires_',
-					SUBSTRING(
-						a.option_name,
-						CHAR_LENGTH('_wc_session_') + 1
-					)
-				)
-				AND b.option_value < %s
-		", $now ) );
+			if ( ! empty( $expired_sessions ) ) {
+				$option_names = implode( "','", $expired_sessions );
+				$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('$option_names')" );
+			}
+		}
 	}
 }

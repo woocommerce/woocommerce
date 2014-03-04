@@ -52,15 +52,16 @@ class WC_Admin_Attributes {
 
 			// Grab the submitted data
 			$attribute_label   = ( isset( $_POST['attribute_label'] ) )   ? (string) stripslashes( $_POST['attribute_label'] ) : '';
-			$attribute_name    = ( isset( $_POST['attribute_name'] ) )    ? woocommerce_sanitize_taxonomy_name( stripslashes( (string) $_POST['attribute_name'] ) ) : '';
+			$attribute_name    = ( isset( $_POST['attribute_name'] ) )    ? wc_sanitize_taxonomy_name( stripslashes( (string) $_POST['attribute_name'] ) ) : '';
 			$attribute_type    = ( isset( $_POST['attribute_type'] ) )    ? (string) stripslashes( $_POST['attribute_type'] ) : '';
 			$attribute_orderby = ( isset( $_POST['attribute_orderby'] ) ) ? (string) stripslashes( $_POST['attribute_orderby'] ) : '';
 
 			// Auto-generate the label or slug if only one of both was provided
 			if ( ! $attribute_label ) {
-				$attribute_label = ucwords( $attribute_name );
-			} elseif ( ! $attribute_name ) {
-				$attribute_name = woocommerce_sanitize_taxonomy_name( stripslashes( $attribute_label ) );
+				$attribute_label = ucfirst( $attribute_name );
+			}
+			if ( ! $attribute_name ) {
+				$attribute_name = wc_sanitize_taxonomy_name( stripslashes( $attribute_label ) );
 			}
 
 			// Forbidden attribute names
@@ -77,7 +78,7 @@ class WC_Admin_Attributes {
 			);
 
 			// Error checking
-			if ( ! $attribute_name || ! $attribute_name || ! $attribute_type ) {
+			if ( ! $attribute_name || ! $attribute_label || ! $attribute_type ) {
 				$error = __( 'Please, provide an attribute name, slug and type.', 'woocommerce' );
 			} elseif ( strlen( $attribute_name ) >= 28 ) {
 				$error = sprintf( __( 'Slug “%s” is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
@@ -91,7 +92,7 @@ class WC_Admin_Attributes {
 				}
 				if ( 'edit' === $action ) {
 					$old_attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
-					if ( $old_attribute_name != $attribute_name && woocommerce_sanitize_taxonomy_name( $old_attribute_name ) != $attribute_name && $taxonomy_exists ) {
+					if ( $old_attribute_name != $attribute_name && wc_sanitize_taxonomy_name( $old_attribute_name ) != $attribute_name && $taxonomy_exists ) {
 						$error = sprintf( __( 'Slug “%s” is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
 					}
 				}
@@ -198,11 +199,9 @@ class WC_Admin_Attributes {
 			}
 		}
 
-		// If an attribute was added, edited or deleted: clear cache and redirect
+		// If an attribute was added, edited or deleted: clear cache
 		if ( ! empty( $action_completed ) ) {
 			delete_transient( 'wc_attribute_taxonomies' );
-			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
-			exit;
 		}
 
 		// Show admin interface
@@ -232,7 +231,7 @@ class WC_Admin_Attributes {
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
 		    <h2><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h2>
-			<form action="admin.php?page=woocommerce_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
+			<form action="admin.php?page=product_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
 				<table class="form-table">
 					<tbody>
 						<tr class="form-field form-required">
@@ -263,7 +262,7 @@ class WC_Admin_Attributes {
 									<option value="text" <?php selected( $att_type, 'text' ); ?>><?php _e( 'Text', 'woocommerce' ) ?></option>
 									<?php do_action('woocommerce_admin_attribute_types'); ?>
 								</select>
-								<p class="description"><?php _e( 'Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce' ); ?></p>
+								<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
 							</td>
 						</tr>
 						<tr class="form-field form-required">
@@ -276,7 +275,7 @@ class WC_Admin_Attributes {
 									<option value="name" <?php selected( $att_orderby, 'name' ); ?>><?php _e( 'Name', 'woocommerce' ) ?></option>
 									<option value="id" <?php selected( $att_orderby, 'id' ); ?>><?php _e( 'Term ID', 'woocommerce' ) ?></option>
 								</select>
-								<p class="description"><?php _e( 'Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute', 'woocommerce' ); ?></p>
+								<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
@@ -294,7 +293,6 @@ class WC_Admin_Attributes {
 	 * Shows the interface for adding new attributes
 	 */
 	public function add_attribute() {
-		global $woocommerce;
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
@@ -303,7 +301,7 @@ class WC_Admin_Attributes {
 		    <div id="col-container">
 		    	<div id="col-right">
 		    		<div class="col-wrap">
-			    		<table class="widefat fixed" style="width:100%">
+			    		<table class="widefat attributes-table wp-list-table ui-sortable" style="width:100%">
 					        <thead>
 					            <tr>
 					                <th scope="col"><?php _e( 'Name', 'woocommerce' ) ?></th>
@@ -322,10 +320,10 @@ class WC_Admin_Attributes {
 
 					        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a>
 
-					        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=woocommerce_attributes') ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=woocommerce_attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
+					        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=product_attributes') ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=product_attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
 					        					</td>
 					        					<td><?php echo esc_html( $tax->attribute_name ); ?></td>
-					        					<td><?php echo esc_html( ucwords( $tax->attribute_type ) ); ?></td>
+					        					<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?></td>
 					        					<td><?php
 						        					switch ( $tax->attribute_orderby ) {
 							        					case 'name' :
@@ -339,7 +337,7 @@ class WC_Admin_Attributes {
 							        					break;
 						        					}
 					        					?></td>
-					        					<td><?php
+					        					<td class="attribute-terms"><?php
 					        						if (taxonomy_exists(wc_attribute_taxonomy_name($tax->attribute_name))) :
 						        						$terms_array = array();
 						        						$terms = get_terms( wc_attribute_taxonomy_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
@@ -355,7 +353,7 @@ class WC_Admin_Attributes {
 														echo '<span class="na">&ndash;</span>';
 													endif;
 					        					?></td>
-					        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright"><?php _e( 'Configure&nbsp;terms', 'woocommerce' ); ?></a></td>
+					        					<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php _e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
 					        				</tr><?php
 					        			endforeach;
 					        		else :
@@ -371,7 +369,7 @@ class WC_Admin_Attributes {
 		    			<div class="form-wrap">
 		    				<h3><?php _e( 'Add New Attribute', 'woocommerce' ) ?></h3>
 		    				<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ) ?></p>
-		    				<form action="admin.php?page=woocommerce_attributes" method="post">
+		    				<form action="admin.php?page=product_attributes" method="post">
 								<div class="form-field">
 									<label for="attribute_label"><?php _e( 'Name', 'woocommerce' ); ?></label>
 									<input name="attribute_label" id="attribute_label" type="text" value="" />
@@ -391,7 +389,7 @@ class WC_Admin_Attributes {
 										<option value="text"><?php _e( 'Text', 'woocommerce' ) ?></option>
 										<?php do_action('woocommerce_admin_attribute_types'); ?>
 									</select>
-									<p class="description"><?php _e( 'Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce' ); ?></p>
+									<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
 								</div>
 
 								<div class="form-field">
@@ -401,7 +399,7 @@ class WC_Admin_Attributes {
 										<option value="name"><?php _e( 'Name', 'woocommerce' ) ?></option>
 										<option value="id"><?php _e( 'Term ID', 'woocommerce' ) ?></option>
 									</select>
-									<p class="description"><?php _e( 'Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute', 'woocommerce' ); ?></p>
+									<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 								</div>
 
 								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button" value="<?php _e( 'Add Attribute', 'woocommerce' ); ?>"></p>

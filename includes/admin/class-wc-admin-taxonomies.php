@@ -1,19 +1,16 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
- * Admin taxonomy functions.
+ * Handles taxonomies in admin
  *
+ * @class 		WC_Admin_Taxonomies
+ * @version		2.1.0
+ * @package		WooCommerce/Admin
+ * @category	Class
  * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
- * @version     2.1.0
- */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-if ( ! class_exists( 'WC_Admin_Taxonomies' ) ) :
-
-/**
- * WC_Admin_Taxonomies Class
  */
 class WC_Admin_Taxonomies {
 
@@ -84,7 +81,6 @@ class WC_Admin_Taxonomies {
 	 * @return void
 	 */
 	public function add_category_fields() {
-		global $woocommerce;
 		?>
 		<div class="form-field">
 			<label for="display_type"><?php _e( 'Display type', 'woocommerce' ); ?></label>
@@ -97,11 +93,11 @@ class WC_Admin_Taxonomies {
 		</div>
 		<div class="form-field">
 			<label><?php _e( 'Thumbnail', 'woocommerce' ); ?></label>
-			<div id="product_cat_thumbnail" style="float:left;margin-right:10px;"><img src="<?php echo woocommerce_placeholder_img_src(); ?>" width="60px" height="60px" /></div>
+			<div id="product_cat_thumbnail" style="float:left;margin-right:10px;"><img src="<?php echo wc_placeholder_img_src(); ?>" width="60px" height="60px" /></div>
 			<div style="line-height:60px;">
 				<input type="hidden" id="product_cat_thumbnail_id" name="product_cat_thumbnail_id" />
-				<button type="submit" class="upload_image_button button"><?php _e( 'Upload/Add image', 'woocommerce' ); ?></button>
-				<button type="submit" class="remove_image_button button"><?php _e( 'Remove image', 'woocommerce' ); ?></button>
+				<button type="button" class="upload_image_button button"><?php _e( 'Upload/Add image', 'woocommerce' ); ?></button>
+				<button type="button" class="remove_image_button button"><?php _e( 'Remove image', 'woocommerce' ); ?></button>
 			</div>
 			<script type="text/javascript">
 
@@ -145,7 +141,7 @@ class WC_Admin_Taxonomies {
 				});
 
 				jQuery(document).on( 'click', '.remove_image_button', function( event ){
-					jQuery('#product_cat_thumbnail img').attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
+					jQuery('#product_cat_thumbnail img').attr('src', '<?php echo wc_placeholder_img_src(); ?>');
 					jQuery('#product_cat_thumbnail_id').val('');
 					jQuery('.remove_image_button').hide();
 					return false;
@@ -165,7 +161,6 @@ class WC_Admin_Taxonomies {
 	 * @param mixed $taxonomy Taxonomy of the term being edited
 	 */
 	public function edit_category_fields( $term, $taxonomy ) {
-		global $woocommerce;
 
 		$display_type	= get_woocommerce_term_meta( $term->term_id, 'display_type', true );
 		$image 			= '';
@@ -173,7 +168,7 @@ class WC_Admin_Taxonomies {
 		if ( $thumbnail_id )
 			$image = wp_get_attachment_thumb_url( $thumbnail_id );
 		else
-			$image = woocommerce_placeholder_img_src();
+			$image = wc_placeholder_img_src();
 		?>
 		<tr class="form-field">
 			<th scope="row" valign="top"><label><?php _e( 'Display type', 'woocommerce' ); ?></label></th>
@@ -233,7 +228,7 @@ class WC_Admin_Taxonomies {
 					});
 
 					jQuery(document).on( 'click', '.remove_image_button', function( event ){
-						jQuery('#product_cat_thumbnail img').attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
+						jQuery('#product_cat_thumbnail img').attr('src', '<?php echo wc_placeholder_img_src(); ?>');
 						jQuery('#product_cat_thumbnail_id').val('');
 						jQuery('.remove_image_button').hide();
 						return false;
@@ -290,7 +285,7 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @access public
 	 * @param mixed $columns
-	 * @return void
+	 * @return array
 	 */
 	public function product_cat_columns( $columns ) {
 		$new_columns          = array();
@@ -312,7 +307,6 @@ class WC_Admin_Taxonomies {
 	 * @return array
 	 */
 	public function product_cat_column( $columns, $column, $id ) {
-		global $woocommerce;
 
 		if ( $column == 'thumb' ) {
 
@@ -322,9 +316,13 @@ class WC_Admin_Taxonomies {
 			if ($thumbnail_id)
 				$image = wp_get_attachment_thumb_url( $thumbnail_id );
 			else
-				$image = woocommerce_placeholder_img_src();
+				$image = wc_placeholder_img_src();
 
-			$columns .= '<img src="' . $image . '" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
+			// Prevent esc_url from breaking spaces in urls for image embeds
+			// Ref: http://core.trac.wordpress.org/ticket/23605
+			$image = str_replace( ' ', '%20', $image );
+
+			$columns .= '<img src="' . esc_url( $image ) . '" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
 
 		}
 
@@ -332,6 +330,4 @@ class WC_Admin_Taxonomies {
 	}
 }
 
-endif;
-
-return new WC_Admin_Taxonomies();
+new WC_Admin_Taxonomies();

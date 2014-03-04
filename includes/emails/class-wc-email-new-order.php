@@ -24,10 +24,10 @@ class WC_Email_New_Order extends WC_Email {
 
 		$this->id 				= 'new_order';
 		$this->title 			= __( 'New order', 'woocommerce' );
-		$this->description		= __( 'New order emails are sent when an order is received/paid by a customer.', 'woocommerce' );
+		$this->description		= __( 'New order emails are sent when an order is received.', 'woocommerce' );
 
 		$this->heading 			= __( 'New customer order', 'woocommerce' );
-		$this->subject      	= __( '[{blogname}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
+		$this->subject      	= __( '[{site_title}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
 
 		$this->template_html 	= 'emails/admin-new-order.php';
 		$this->template_plain 	= 'emails/plain/admin-new-order.php';
@@ -57,13 +57,12 @@ class WC_Email_New_Order extends WC_Email {
 	 * @return void
 	 */
 	function trigger( $order_id ) {
-		global $woocommerce;
 
 		if ( $order_id ) {
 			$this->object 		= new WC_Order( $order_id );
 
 			$this->find[] = '{order_date}';
-			$this->replace[] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace[] = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 
 			$this->find[] = '{order_number}';
 			$this->replace[] = $this->object->get_order_number();
@@ -83,9 +82,11 @@ class WC_Email_New_Order extends WC_Email {
 	 */
 	function get_content_html() {
 		ob_start();
-		woocommerce_get_template( $this->template_html, array(
+		wc_get_template( $this->template_html, array(
 			'order' 		=> $this->object,
-			'email_heading' => $this->get_heading()
+			'email_heading' => $this->get_heading(),
+			'sent_to_admin' => true,
+			'plain_text'    => false
 		) );
 		return ob_get_clean();
 	}
@@ -98,9 +99,11 @@ class WC_Email_New_Order extends WC_Email {
 	 */
 	function get_content_plain() {
 		ob_start();
-		woocommerce_get_template( $this->template_plain, array(
+		wc_get_template( $this->template_plain, array(
 			'order' 		=> $this->object,
-			'email_heading' => $this->get_heading()
+			'email_heading' => $this->get_heading(),
+			'sent_to_admin' => true,
+			'plain_text'    => true
 		) );
 		return ob_get_clean();
 	}

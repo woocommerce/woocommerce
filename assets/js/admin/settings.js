@@ -90,13 +90,13 @@ jQuery(window).load(function(){
 	});
 
 	// Select all/none
-	jQuery('.select_all').live('click', function() {
+	jQuery( '.woocommerce' ).on( 'click', '.select_all', function() {
 		jQuery(this).closest( 'td' ).find( 'select option' ).attr( "selected", "selected" );
 		jQuery(this).closest( 'td' ).find('select').trigger( 'chosen:updated' );
 		return false;
 	});
 
-	jQuery('.select_none').live('click', function() {
+	jQuery( '.woocommerce' ).on( 'click', '.select_none', function() {
 		jQuery(this).closest( 'td' ).find( 'select option' ).removeAttr( "selected" );
 		jQuery(this).closest( 'td' ).find('select').trigger( 'chosen:updated' );
 		return false;

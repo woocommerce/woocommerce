@@ -11,11 +11,9 @@ $strings = 'tinyMCE.addI18n({' . _WP_Editors::$mce_locale . ':{
         recent_products: "' . esc_js( __( 'Recent products', 'woocommerce' ) ) . '",
         featured_products: "' . esc_js( __( 'Featured products', 'woocommerce' ) ) . '",
         shop_messages: "' . esc_js( __( 'Shop Messages', 'woocommerce' ) ) . '",
-        pages: "' . esc_js( __( 'Pages', 'woocommerce' ) ) . '",
-        cart: "' . esc_js( __( 'Cart', 'woocommerce' ) ) . '",
-        checkout: "' . esc_js( __( 'Checkout', 'woocommerce' ) ) . '",
         order_tracking: "' . esc_js( __( 'Order tracking', 'woocommerce' ) ) . '",
         my_account: "' . esc_js( __( 'My Account', 'woocommerce' ) ) . '",
-        edit_address: "' . esc_js( __( 'Edit Address', 'woocommerce' ) ) . '",
+        shop_messages_shortcode: "' . esc_js( apply_filters( "shop_messages_shortcode_tag", 'woocommerce_shop_messages' ) ) . '",
+        order_tracking_shortcode: "' . esc_js( apply_filters( "woocommerce_order_tracking_shortcode_tag", 'woocommerce_order_tracking' ) ) . '"
     }
 }})';

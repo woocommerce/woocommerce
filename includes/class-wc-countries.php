@@ -289,11 +289,11 @@ class WC_Countries {
 			'CZ' => array(),
 			'DE' => array(),
 			'DK' => array(),
+			'EE' => array(),
 			'FI' => array(),
 			'FR' => array(),
 			'IS' => array(),
 			'IL' => array(),
-			'JP' => array(),
 			'KR' => array(),
 			'NL' => array(),
 			'NO' => array(),
@@ -312,12 +312,11 @@ class WC_Countries {
 
 		if ( $allowed )
 			foreach ( $allowed as $CC => $country )
-				if ( ! isset( $states[ $CC ] ) && file_exists( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' ) )
-					include( $woocommerce->plugin_path() . '/i18n/states/' . $CC . '.php' );
+				if ( ! isset( $states[ $CC ] ) && file_exists( WC()->plugin_path() . '/i18n/states/' . $CC . '.php' ) )
+					include( WC()->plugin_path() . '/i18n/states/' . $CC . '.php' );
 
-		$this->states = apply_filters('woocommerce_states', $states );
+		$this->states = apply_filters( 'woocommerce_states', $states );
 	}
-
 
 	/**
 	 * Get the base country for the store.
@@ -327,23 +326,42 @@ class WC_Countries {
 	 */
 	public function get_base_country() {
 		$default = esc_attr( get_option('woocommerce_default_country') );
-		if ( ( $pos = strpos( $default, ':' ) ) === false )
-			return $default;
-		return substr( $default, 0, $pos );
+		$country = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? $default : substr( $default, 0, $pos );
+
+		return apply_filters( 'woocommerce_countries_base_country', $country );
 	}
 
-
 	/**
-	 * Get the base state for the state.
+	 * Get the base state for the store.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	public function get_base_state() {
-		$default = esc_attr( get_option( 'woocommerce_default_country' ) );
-		if ( ( $pos = strrpos( $default, ':' ) ) === false )
-			return '';
-		return substr( $default, $pos + 1 );
+		$default = wc_clean( get_option( 'woocommerce_default_country' ) );
+		$state   = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? '' : substr( $default, $pos + 1 );
+
+		return apply_filters( 'woocommerce_countries_base_state', $state );
+	}
+
+	/**
+	 * Get the base city for the store.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_base_city() {
+		return apply_filters( 'woocommerce_countries_base_city', '' );
+	}
+
+	/**
+	 * Get the base postcode for the store.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_base_postcode() {
+		return apply_filters( 'woocommerce_countries_base_postcode', '' );
 	}
 
 	/**
@@ -413,7 +431,7 @@ class WC_Countries {
 		$raw_countries = get_option( 'woocommerce_specific_allowed_countries' );
 
 		foreach ( $raw_countries as $country )
-			if ( ! empty( $this->states[ $country ] ) )
+			if ( isset( $this->states[ $country ] ) )
 				$states[ $country ] = $this->states[ $country ];
 
 		return apply_filters( 'woocommerce_countries_allowed_country_states', $states );
@@ -462,11 +480,10 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function shipping_to_prefix() {
-		global $woocommerce;
 		$return = '';
-		if (in_array($woocommerce->customer->get_shipping_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __( 'to the', 'woocommerce' );
+		if (in_array(WC()->customer->get_shipping_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __( 'to the', 'woocommerce' );
 		else $return = __( 'to', 'woocommerce' );
-		return apply_filters('woocommerce_countries_shipping_to_prefix', $return, $woocommerce->customer->get_shipping_country());
+		return apply_filters('woocommerce_countries_shipping_to_prefix', $return, WC()->customer->get_shipping_country());
 	}
 
 
@@ -526,11 +543,11 @@ class WC_Countries {
 	 * Get the states for a country.
 	 *
 	 * @access public
-	 * @param mixed $cc country code
+	 * @param string $cc country code
 	 * @return array of states
 	 */
 	public function get_states( $cc ) {
-		if (isset( $this->states[$cc] )) return $this->states[$cc];
+		return ( isset( $this->states[ $cc ] ) ) ? $this->states[ $cc ] : array();
 	}
 
 
@@ -550,9 +567,9 @@ class WC_Countries {
 
 		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
-				echo '<optgroup label="'.$value.'">';
+				echo '<optgroup label="' . esc_attr( $value ) . '">';
     				foreach ($states as $state_key=>$state_value) :
-    					echo '<option value="'.$key.':'.$state_key.'"';
+    					echo '<option value="' . esc_attr( $key ) . ':'.$state_key.'"';
 
     					if ($selected_country==$key && $selected_state==$state_key) echo ' selected="selected"';
 
@@ -562,7 +579,7 @@ class WC_Countries {
 			else :
     			echo '<option';
     			if ($selected_country==$key && $selected_state=='*') echo ' selected="selected"';
-    			echo ' value="'.$key.'">'. ($escape ? esc_js( $value ) : $value) .'</option>';
+    			echo ' value="' . esc_attr( $key ) . '">'. ($escape ? esc_js( $value ) : $value) .'</option>';
 			endif;
 		endforeach;
 	}
@@ -587,18 +604,20 @@ class WC_Countries {
 				'AU' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
 				'AT' => $postcode_before_city,
 				'BE' => $postcode_before_city,
+				'CA' => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
 				'CH' => $postcode_before_city,
 				'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
 				'CZ' => $postcode_before_city,
 				'DE' => $postcode_before_city,
+				'EE' => $postcode_before_city,
 				'FI' => $postcode_before_city,
 				'DK' => $postcode_before_city,
 				'FR' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city_upper}\n{country}",
 				'HK' => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}",
 				'HU' => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
 				'IS' => $postcode_before_city,
-				'IT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city} {state_upper}\n{country}",
-				'JP' => "{postcode}\n{state}{city}{address_2}\n{address_1}\n{company}\n{name}\n {country}",
+				'IT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode}\n{city}\n{state_upper}\n{country}",
+				'JP' => "{postcode}\n{state}{city}{address_2}\n{address_1}\n{company}\n{last_name} {first_name}\n {country}",
 				'LI' => $postcode_before_city,
 				'NL' => $postcode_before_city,
 				'NZ' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
@@ -691,65 +710,85 @@ class WC_Countries {
 	 * Returns the fields we show by default. This can be filtered later on.
 	 *
 	 * @access public
-	 * @return void
+	 * @return array
 	 */
 	public function get_default_address_fields() {
 		$fields = array(
 			'country'            => array(
-				'type'              => 'country',
-				'label'             => __( 'Country', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
+				'type'     => 'country',
+				'label'    => __( 'Country', 'woocommerce' ),
+				'required' => true,
+				'class'    => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
 			),
 			'first_name'         => array(
-				'label'             => __( 'First Name', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-first' ),
+				'label'    => __( 'First Name', 'woocommerce' ),
+				'required' => true,
+				'class'    => array( 'form-row-first' ),
 			),
 			'last_name'          => array(
-				'label'             => __( 'Last Name', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-last' ),
-				'clear'             => true
+				'label'    => __( 'Last Name', 'woocommerce' ),
+				'required' => true,
+				'class'    => array( 'form-row-last' ),
+				'clear'    => true
 			),
 			'company'            => array(
-				'label'             => __( 'Company Name', 'woocommerce' ),
-				'class'             => array( 'form-row-wide' ),
+				'label' => __( 'Company Name', 'woocommerce' ),
+				'class' => array( 'form-row-wide' ),
 			),
 			'address_1'          => array(
-				'label'             => __( 'Address', 'woocommerce' ),
-				'placeholder'       => _x( 'Street address', 'placeholder', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field' )
+				'label'       => __( 'Address', 'woocommerce' ),
+				'placeholder' => _x( 'Street address', 'placeholder', 'woocommerce' ),
+				'required'    => true,
+				'class'       => array( 'form-row-wide', 'address-field' )
 			),
 			'address_2'          => array(
-				'placeholder'       => _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
-				'class'             => array( 'form-row-wide', 'address-field' ),
-				'required'          => false
+				'placeholder' => _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
+				'class'       => array( 'form-row-wide', 'address-field' ),
+				'required'    => false
 			),
 			'city'               => array(
-				'label'             => __( 'Town / City', 'woocommerce' ),
-				'placeholder'       => __( 'Town / City', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-wide', 'address-field' )
+				'label'       => __( 'Town / City', 'woocommerce' ),
+				'placeholder' => __( 'Town / City', 'woocommerce' ),
+				'required'    => true,
+				'class'       => array( 'form-row-wide', 'address-field' )
 			),
 			'state'              => array(
-				'type'              => 'state',
-				'label'             => __( 'State / County', 'woocommerce' ),
-				'placeholder'       => __( 'State / County', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-first', 'address-field' )
+				'type'        => 'state',
+				'label'       => __( 'State / County', 'woocommerce' ),
+				'placeholder' => __( 'State / County', 'woocommerce' ),
+				'required'    => true,
+				'class'       => array( 'form-row-first', 'address-field' ),
+				'validate'    => array( 'state' )
 			),
 			'postcode'           => array(
-				'label'             => __( 'Postcode / Zip', 'woocommerce' ),
-				'placeholder'       => __( 'Postcode / Zip', 'woocommerce' ),
-				'required'          => true,
-				'class'             => array( 'form-row-last', 'address-field' ),
-				'clear'             => true
+				'label'       => __( 'Postcode / Zip', 'woocommerce' ),
+				'placeholder' => __( 'Postcode / Zip', 'woocommerce' ),
+				'required'    => true,
+				'class'       => array( 'form-row-last', 'address-field' ),
+				'clear'       => true,
+				'validate'    => array( 'postcode' )
 			),
 		);
 
 		return apply_filters( 'woocommerce_default_address_fields', $fields );
+	}
+
+	/**
+	 * Get JS selectors for fields which are shown/hidden depending on the locale.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_country_locale_field_selectors() {
+		$locale_fields = array (
+			'address_1'	=> '#billing_address_1_field, #shipping_address_1_field',
+			'address_2'	=> '#billing_address_2_field, #shipping_address_2_field',
+			'state'		=> '#billing_state_field, #shipping_state_field',
+			'postcode'	=> '#billing_postcode_field, #shipping_postcode_field',
+			'city'		=> '#billing_city_field, #shipping_city_field'
+		);
+		
+		return apply_filters( 'woocommerce_country_locale_field_selectors', $locale_fields );
 	}
 
 	/**
@@ -790,6 +829,12 @@ class WC_Countries {
 				'BI' => array(
 					'state' => array(
 						'required' => false,
+					),
+				),
+				'BO' => array(
+					'postcode' => array(
+						'required' 	=> false,
+						'hidden'	=> true
 					),
 				),
 				'CA' => array(
@@ -834,6 +879,12 @@ class WC_Countries {
 					)
 				),
 				'DK' => array(
+					'postcode_before_city' => true,
+					'state'		=> array(
+						'required' => false
+					)
+				),
+				'EE' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false
@@ -892,19 +943,8 @@ class WC_Countries {
 					)
 				),
 				'JP' => array(
-					'last_name'          => array(
-						'class'             => array( 'form-row-first' ),
-					),
-					'first_name'         => array(
-						'class'             => array( 'form-row-last' ),
-						'clear'             => true
-					),
-					'postcode'          => array(
-						'class'             => array( 'form-row-first' ),
-					),
-					'state'         => array(
-						'class'             => array( 'form-row-last' ),
-						'clear'             => true
+					'state'		=> array(
+						'label'    => __( 'Province', 'woocommerce' )
 					)
 				),
 				'KR' => array(
@@ -1065,7 +1105,7 @@ class WC_Countries {
 	 * @access public
 	 * @param mixed $country
 	 * @param string $type (default: 'billing_')
-	 * @return void
+	 * @return array
 	 */
 	public function get_address_fields( $country, $type = 'billing_' ) {
 
@@ -1077,7 +1117,7 @@ class WC_Countries {
 
 		if ( isset( $locale[ $country ] ) ) {
 
-			$fields = woocommerce_array_overlay( $fields, $locale[ $country ] );
+			$fields = wc_array_overlay( $fields, $locale[ $country ] );
 
 			// If default country has postcode_before_city switch the fields round.
 			// This is only done at this point, not if country changes on checkout.
@@ -1120,13 +1160,13 @@ class WC_Countries {
 				'label' 		=> __( 'Phone', 'woocommerce' ),
 				'required' 		=> true,
 				'class' 		=> array( 'form-row-last' ),
-				'clear'			=> true
+				'clear'			=> true,
+				'validate'		=> array( 'phone' ),
 			);
 
-			$address_fields = apply_filters( 'woocommerce_billing_fields', $address_fields, $country );
-		} else {
-			$address_fields = apply_filters( 'woocommerce_shipping_fields', $address_fields, $country );
 		}
+
+		$address_fields = apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
 
 		// Return
 		return $address_fields;

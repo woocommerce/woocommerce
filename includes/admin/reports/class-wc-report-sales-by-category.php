@@ -1,19 +1,26 @@
 <?php
 /**
- * WC_Report_Sales_By_Category class
+ * WC_Report_Sales_By_Category
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
+ * @version     2.1.0
  */
 class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
+	public $chart_colours = array();
 	public $show_categories = array();
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( isset( $_GET['show_categories'] ) && is_array( $_GET['show_categories'] ) )
+		if ( isset( $_GET['show_categories'] ) && is_array( $_GET['show_categories'] ) ) {
 			$this->show_categories = array_map( 'absint', $_GET['show_categories'] );
-		elseif ( isset( $_GET['show_categories'] ) )
+		} elseif ( isset( $_GET['show_categories'] ) ) {
 			$this->show_categories = array( absint( $_GET['show_categories'] ) );
+		}
 	}
 
 	/**
@@ -21,13 +28,14 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-		if ( ! $this->show_categories )
+		if ( ! $this->show_categories ) {
 			return array();
+		}
 
 		$legend    = array();
 		$index     = 0;
 
-		foreach( $this->show_categories as $category ) {
+		foreach ( $this->show_categories as $category ) {
 			$category       = get_term( $category, 'product_cat' );
 			$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
 			$term_ids[] 	= $category->term_id;
@@ -44,7 +52,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			//	continue;
 
 			$legend[] = array(
-				'title' => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . woocommerce_price( $total ) . '</strong>', $category->name ),
+				'title' => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
 				'color' => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[ 0 ],
 				'highlight_series' => $index
 			);
@@ -72,8 +80,9 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
+		}
 
 		$this->calculate_current_range( $current_range );
 
@@ -125,7 +134,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			}
 		}
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php');
+		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
 	}
 
 	/**
@@ -150,7 +159,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		?>
 		<form method="GET">
 			<div>
-				<select multiple="multiple" class="chosen_select" id="show_categories" name="show_categories[]" style="width: 205px;">
+				<select multiple="multiple" data-placeholder="<?php _e( 'Select categories&hellip;', 'woocommerce' ); ?>" class="chosen_select" id="show_categories" name="show_categories[]" style="width: 205px;">
 					<?php
 						$r = array();
 						$r['pad_counts'] 	= 1;
@@ -161,7 +170,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 						include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
 
-						echo woocommerce_walk_category_dropdown_tree( $categories, 0, $r );
+						echo wc_walk_category_dropdown_tree( $categories, 0, $r );
 					?>
 				</select>
 				<a href="#" class="select_none"><?php _e( 'None', 'woocommerce' ); ?></a>
@@ -179,13 +188,13 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					jQuery("select.chosen_select").chosen();
 
 					// Select all/none
-					jQuery('.select_all').live('click', function() {
+					jQuery( '.chart-widget' ).on( 'click', '.select_all', function() {
 						jQuery(this).closest( 'div' ).find( 'select option' ).attr( "selected", "selected" );
 						jQuery(this).closest( 'div' ).find('select').trigger( 'chosen:updated' );
 						return false;
 					});
 
-					jQuery('.select_none').live('click', function() {
+					jQuery( '.chart-widget').on( 'click', '.select_none', function() {
 						jQuery(this).closest( 'div' ).find( 'select option' ).removeAttr( "selected" );
 						jQuery(this).closest( 'div' ).find('select').trigger( 'chosen:updated' );
 						return false;
@@ -325,41 +334,41 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 								legend: {
 									show: false
 								},
-							    grid: {
-							        color: '#aaa',
-							        borderColor: 'transparent',
-							        borderWidth: 0,
-							        hoverable: true
-							    },
-							    xaxes: [ {
-							    	color: '#aaa',
-							    	reserveSpace: true,
-							    	position: "bottom",
-							    	tickColor: 'transparent',
+								grid: {
+									color: '#aaa',
+									borderColor: 'transparent',
+									borderWidth: 0,
+									hoverable: true
+								},
+								xaxes: [ {
+									color: '#aaa',
+									reserveSpace: true,
+									position: "bottom",
+									tickColor: 'transparent',
 									mode: "time",
 									timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
-									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
 									tickLength: 1,
 									minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 									tickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 									font: {
-							    		color: "#aaa"
-							    	}
+										color: "#aaa"
+									}
 								} ],
-							    yaxes: [
-							    	{
-							    		min: 0,
-							    		tickDecimals: 2,
-							    		color: 'transparent',
-							    		font: { color: "#aaa" }
-							    	}
-							    ],
-					 		}
-					 	);
+								yaxes: [
+									{
+										min: 0,
+										tickDecimals: 2,
+										color: 'transparent',
+										font: { color: "#aaa" }
+									}
+								],
+							}
+						);
 
-					 	jQuery('.chart-placeholder').resize();
+						jQuery('.chart-placeholder').resize();
 
-				 	}
+					}
 
 					drawGraph();
 

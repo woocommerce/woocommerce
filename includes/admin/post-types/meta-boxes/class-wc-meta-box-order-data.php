@@ -185,7 +185,7 @@ class WC_Meta_Box_Order_Data {
 							echo '<div class="address">';
 
 								if ( $order->get_formatted_billing_address() )
-									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $order->get_formatted_billing_address() ) ) . '</p>';
+									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 								else
 									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
 
@@ -264,7 +264,7 @@ class WC_Meta_Box_Order_Data {
 							echo '<div class="address">';
 
 								if ( $order->get_formatted_shipping_address() )
-									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $order->get_formatted_shipping_address() ) ) . '</p>';
+									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
 								else
 									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
 
@@ -279,7 +279,7 @@ class WC_Meta_Box_Order_Data {
 								}
 
 								if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) == 'yes' ) && $post->post_excerpt )
-									echo '<p><strong>' . __( 'Customer Note', 'woocommerce' ) . ':</strong> ' . esc_html( $post->post_excerpt ) . '</p>';
+									echo '<p><strong>' . __( 'Customer Note', 'woocommerce' ) . ':</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
 
 							echo '</div>';
 
@@ -357,18 +357,18 @@ class WC_Meta_Box_Order_Data {
 		update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
 
 		if ( self::$billing_fields )
-			foreach ( self::$shipping_fields as $key => $field )
-				update_post_meta( $post_id, '_billing_' . $key, woocommerce_clean( $_POST[ '_billing_' . $key ] ) );
+			foreach ( self::$billing_fields as $key => $field )
+				update_post_meta( $post_id, '_billing_' . $key, wc_clean( $_POST[ '_billing_' . $key ] ) );
 
 		if ( self::$shipping_fields )
 			foreach ( self::$shipping_fields as $key => $field )
-				update_post_meta( $post_id, '_shipping_' . $key, woocommerce_clean( $_POST[ '_shipping_' . $key ] ) );
+				update_post_meta( $post_id, '_shipping_' . $key, wc_clean( $_POST[ '_shipping_' . $key ] ) );
 
 		// Payment method handling
 		if ( get_post_meta( $post_id, '_payment_method', true ) !== stripslashes( $_POST['_payment_method'] ) ) {
 
-			$methods 				= $woocommerce->payment_gateways->payment_gateways();
-			$payment_method 		= woocommerce_clean( $_POST['_payment_method'] );
+			$methods 				= WC()->payment_gateways->payment_gateways();
+			$payment_method 		= wc_clean( $_POST['_payment_method'] );
 			$payment_method_title 	= $payment_method;
 
 			if ( isset( $methods) && isset( $methods[ $payment_method ] ) )
@@ -395,8 +395,6 @@ class WC_Meta_Box_Order_Data {
 		// Order status
 		$order->update_status( $_POST['order_status'] );
 
-		delete_transient( 'woocommerce_processing_order_count' );
-
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_report_%') OR `option_name` LIKE ('_transient_timeout_wc_report_%')" );
+		wc_delete_shop_order_transients( $post_id );
 	}
 }

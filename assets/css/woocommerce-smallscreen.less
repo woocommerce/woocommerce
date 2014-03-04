@@ -76,6 +76,15 @@
 	/**
 	 * Checkout
 	 */
+	&.woocommerce-checkout {
+		form.login {
+			.form-row {
+				width: 100%;
+				float: none;
+			}
+		}
+	}
+
 	#payment {
 		.terms {
 			text-align: left;
@@ -86,6 +95,29 @@
 			width:100%;
 			.borderbox;
 			margin-bottom:1em;
+		}
+	}
+
+	/**
+	 * Account
+	 */
+	.lost_reset_password {
+		.form-row-first,
+		.form-row-last {
+			width: 100%;
+			float: none;
+			margin-right: 0;
+		}
+	}
+}
+
+/* =Twenty Thirteen Specific styles
+-------------------------------------------------------------- */
+.single-product {
+	.twentythirteen {
+		.panel {
+			padding-left: 20px !important;
+			padding-right: 20px !important;
 		}
 	}
 }

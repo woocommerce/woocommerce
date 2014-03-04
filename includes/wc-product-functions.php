@@ -98,6 +98,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%') OR `option_name` LIKE ('_transient_timeout_wc_uf_pid_%')" );
 	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%') OR `option_name` LIKE ('_transient_timeout_wc_ln_count_%')" );
 	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%') OR `option_name` LIKE ('_transient_timeout_wc_ship_%')" );
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_products_will_display_%') OR `option_name` LIKE ('_transient_timeout_wc_products_will_display_%')" );
 
 	// Clear product specific transients
 	$post_transients_to_clear = array(
@@ -125,6 +126,8 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		}
 
 	}
+
+	do_action( 'woocommerce_delete_product_transients', $post_id );
 }
 
 /**
@@ -134,7 +137,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
  * @access public
  * @return array
  */
-function woocommerce_get_product_ids_on_sale() {
+function wc_get_product_ids_on_sale() {
 	global $wpdb;
 
 	// Load from cache
@@ -148,7 +151,7 @@ function woocommerce_get_product_ids_on_sale() {
 		SELECT post.ID, post.post_parent FROM `$wpdb->posts` AS post
 		LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
 		LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
-		WHERE post.post_type IN ( 'product1', 'product_variation' )
+		WHERE post.post_type IN ( 'product', 'product_variation' )
 			AND post.post_status = 'publish'
 			AND meta.meta_key = '_sale_price'
 			AND meta2.meta_key = '_price'
@@ -158,14 +161,7 @@ function woocommerce_get_product_ids_on_sale() {
 		GROUP BY post.ID;
 	" );
 
-	$product_ids_on_sale = array();
-
-	foreach ( $on_sale_posts as $post ) {
-		$product_ids_on_sale[] = $post->ID;
-		$product_ids_on_sale[] = $post->post_parent;
-	}
-
-	$product_ids_on_sale = array_unique( $product_ids_on_sale );
+	$product_ids_on_sale = array_unique( array_map( 'absint', array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), array_diff( wp_list_pluck( $on_sale_posts, 'post_parent' ), array( 0 ) ) ) ) );
 
 	set_transient( 'wc_products_onsale', $product_ids_on_sale );
 
@@ -179,7 +175,7 @@ function woocommerce_get_product_ids_on_sale() {
  * @access public
  * @return array
  */
-function woocommerce_get_featured_product_ids() {
+function wc_get_featured_product_ids() {
 
 	// Load from cache
 	$featured_product_ids = get_transient( 'wc_featured_products' );
@@ -216,73 +212,6 @@ function woocommerce_get_featured_product_ids() {
 }
 
 /**
- * woocommerce_get_product_terms function.
- *
- * Gets product terms in the order they are defined in the backend.
- *
- * @access public
- * @param mixed $object_id
- * @param mixed $taxonomy
- * @param mixed $fields ids, names, slugs, all
- * @return array
- */
-function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' ) {
-
-	if ( ! taxonomy_exists( $taxonomy ) )
-		return array();
-
-	$terms 			= array();
-	$object_terms 	= get_the_terms( $object_id, $taxonomy );
-
-	if ( ! is_array( $object_terms ) )
-    	return array();
-
-    $args = array( 'fields' => 'ids' );
-
-	$orderby = wc_attribute_orderby( $taxonomy );
-
-	switch ( $orderby ) {
-		case 'name' :
-			$args['orderby']    = 'name';
-			$args['menu_order'] = false;
-		break;
-		case 'id' :
-			$args['orderby']    = 'id';
-			$args['order']      = 'ASC';
-			$args['menu_order'] = false;
-		break;
-		case 'menu_order' :
-			$args['menu_order'] = 'ASC';
-		break;
-	}
-
-	$all_terms 		= array_flip( get_terms( $taxonomy, $args ) );
-
-	switch ( $fields ) {
-		case 'names' :
-			foreach ( $object_terms as $term )
-				$terms[ $all_terms[ $term->term_id ] ] = $term->name;
-			break;
-		case 'ids' :
-			foreach ( $object_terms as $term )
-				$terms[ $all_terms[ $term->term_id ] ] = $term->term_id;
-			break;
-		case 'slugs' :
-			foreach ( $object_terms as $term )
-				$terms[ $all_terms[ $term->term_id ] ] = $term->slug;
-			break;
-		case 'all' :
-			foreach ( $object_terms as $term )
-				$terms[ $all_terms[ $term->term_id ] ] = $term;
-			break;
-	}
-
-	ksort( $terms );
-
-	return $terms;
-}
-
-/**
  * Filter to allow product_cat in the permalinks for products.
  *
  * @access public
@@ -290,7 +219,7 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
  * @param object $post
  * @return string
  */
-function woocommerce_product_post_type_link( $permalink, $post ) {
+function wc_product_post_type_link( $permalink, $post ) {
     // Abort if post is not a product
     if ( $post->post_type !== 'product' )
     	return $permalink;
@@ -341,7 +270,7 @@ function woocommerce_product_post_type_link( $permalink, $post ) {
 
     return $permalink;
 }
-add_filter( 'post_type_link', 'woocommerce_product_post_type_link', 10, 2 );
+add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 
 
 /**
@@ -350,7 +279,7 @@ add_filter( 'post_type_link', 'woocommerce_product_post_type_link', 10, 2 );
  * @access public
  * @return string
  */
-function woocommerce_placeholder_img_src() {
+function wc_placeholder_img_src() {
 	return apply_filters( 'woocommerce_placeholder_img_src', WC()->plugin_url() . '/assets/images/placeholder.png' );
 }
 
@@ -360,10 +289,10 @@ function woocommerce_placeholder_img_src() {
  * @access public
  * @return string
  */
-function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
+function wc_placeholder_img( $size = 'shop_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters('woocommerce_placeholder_img', '<img src="' . woocommerce_placeholder_img_src() . '" alt="Placeholder" width="' . $dimensions['width'] . '" height="' . $dimensions['height'] . '" />' );
+	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="Placeholder" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />' );
 }
 
 /**
@@ -376,9 +305,7 @@ function woocommerce_placeholder_img( $size = 'shop_thumbnail' ) {
  * @param bool $flat (default: false)
  * @return string
  */
-function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
-	global $woocommerce;
-
+function wc_get_formatted_variation( $variation = '', $flat = false ) {
 	if ( is_array( $variation ) ) {
 
 		if ( ! $flat )
@@ -416,6 +343,8 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 
 		return $return;
 	}
+	
+	return '';
 }
 
 /**
@@ -424,8 +353,8 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
  * @access public
  * @return void
  */
-function woocommerce_scheduled_sales() {
-	global $woocommerce, $wpdb;
+function wc_scheduled_sales() {
+	global $wpdb;
 
 	// Sales which are due to start
 	$product_ids = $wpdb->get_col( $wpdb->prepare( "
@@ -458,8 +387,8 @@ function woocommerce_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
-				// We can force varaible product price to sync up by removing their min price meta
-				delete_post_meta( $parent, '_min_variation_price' );
+				// We can force variable product prices to sync up by removing their min price meta
+				delete_post_meta( $parent, '_min_price_variation_id' );
 
 				// Grouped products need syncing via a function
 				$this_product = get_product( $product_id );
@@ -512,50 +441,50 @@ function woocommerce_scheduled_sales() {
 		}
 	}
 }
-add_action( 'woocommerce_scheduled_sales', 'woocommerce_scheduled_sales' );
+add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
 
 /**
- * woocommerce_get_attachment_image_attributes function.
+ * wc_get_attachment_image_attributes function.
  *
  * @access public
- * @param mixed $attr
- * @return void
+ * @param array $attr
+ * @return array
  */
-function woocommerce_get_attachment_image_attributes( $attr ) {
+function wc_get_attachment_image_attributes( $attr ) {
 	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) )
-		$attr['src'] = woocommerce_placeholder_img_src();
+		$attr['src'] = wc_placeholder_img_src();
 
 	return $attr;
 }
-add_filter( 'wp_get_attachment_image_attributes', 'woocommerce_get_attachment_image_attributes' );
+add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attributes' );
 
 
 /**
- * woocommerce_prepare_attachment_for_js function.
+ * wc_prepare_attachment_for_js function.
  *
  * @access public
- * @param mixed $response
- * @return void
+ * @param array $response
+ * @return array
  */
-function woocommerce_prepare_attachment_for_js( $response ) {
+function wc_prepare_attachment_for_js( $response ) {
 
 	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
-		$response['full']['url'] = woocommerce_placeholder_img_src();
+		$response['full']['url'] = wc_placeholder_img_src();
 		if ( isset( $response['sizes'] ) ) {
 			foreach( $response['sizes'] as $size => $value ) {
-				$response['sizes'][ $size ]['url'] = woocommerce_placeholder_img_src();
+				$response['sizes'][ $size ]['url'] = wc_placeholder_img_src();
 			}
 		}
 	}
 
 	return $response;
 }
-add_filter( 'wp_prepare_attachment_for_js', 'woocommerce_prepare_attachment_for_js' );
+add_filter( 'wp_prepare_attachment_for_js', 'wc_prepare_attachment_for_js' );
 
 /**
  * Track product views
  */
-function woocommerce_track_product_view() {
+function wc_track_product_view() {
 	if ( ! is_singular( 'product' ) )
 		return;
 
@@ -573,7 +502,7 @@ function woocommerce_track_product_view() {
 		array_shift( $viewed_products );
 
 	// Store for session only
-	setcookie( "woocommerce_recently_viewed", implode( '|', $viewed_products ), 0, COOKIEPATH, COOKIE_DOMAIN, false, true );
+	wc_setcookie( 'woocommerce_recently_viewed', implode( '|', $viewed_products ) );
 }
 
-add_action( 'template_redirect', 'woocommerce_track_product_view', 20 );
+add_action( 'template_redirect', 'wc_track_product_view', 20 );

@@ -31,7 +31,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	var $availability;
 
 	/** @var array Array of countries this method is enabled for. */
-	var $countries;
+	var $countries          = array();
 
 	/** @var string If 'taxable' tax will be charged for this method (if applicable) */
 	var $tax_status			= 'taxable';
@@ -41,9 +41,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/** @var float Minimum fee for the method */
 	var $minimum_fee		= null;
-
-	/** @var float Min amount (if set) for the cart to use this method */
-	var $min_amount			= null;
 
 	/** @var bool Enabled for disabled */
 	var $enabled			= false;
@@ -58,6 +55,14 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	var $rates 				= array();
 
 	/**
+	 * Whether or not we need to calculate tax on top of the shipping rate
+	 * @return boolean
+	 */
+	public function is_taxable() {
+		return ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' && ! WC()->customer->is_vat_exempt() );
+	}
+
+	/**
 	 * Add a rate
 	 *
 	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
@@ -67,7 +72,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return void
 	 */
 	function add_rate( $args = array() ) {
-		global $woocommerce;
 
 		$defaults = array(
 			'id' 		=> '',			// ID for the rate
@@ -89,7 +93,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable
 		// This saves shipping methods having to do complex tax calculations
-		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' ) {
+		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && $this->is_taxable() ) {
 
 			$_tax 	= new WC_Tax();
 			$taxes 	= array();
@@ -101,7 +105,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 					// If we have an array of costs we can look up each items tax class and add tax accordingly
 					if ( is_array( $cost ) ) {
 
-						$cart = $woocommerce->cart->get_cart();
+						$cart = WC()->cart->get_cart();
 
 						foreach ( $cost as $cost_key => $amount ) {
 
@@ -152,11 +156,10 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * has_settings function.
 	 *
 	 * @access public
-	 * @return void
+	 * @return bool
 	 */
 	function has_settings() {
-		if ( $this->has_settings )
-			return true;
+		return ( $this->has_settings );
 	}
 
     /**
@@ -166,30 +169,27 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
      * @return bool
      */
     public function is_available( $package ) {
-    	global $woocommerce;
-
-    	if ( $this->enabled == "no" )
+    	if ( "no" == $this->enabled ) {
     		return false;
-
-		if ( isset( $woocommerce->cart->cart_contents_total ) && isset( $this->min_amount ) && $this->min_amount && $this->min_amount > $woocommerce->cart->cart_contents_total )
-			return false;
+    	}
 
 		// Country availability
 		switch ( $this->availability ) {
 			case 'specific' :
 			case 'including' :
-				$ship_to_countries = array_intersect( $this->countries, array_keys( $woocommerce->countries->get_shipping_countries() ) );
+				$ship_to_countries = array_intersect( $this->countries, array_keys( WC()->countries->get_shipping_countries() ) );
 			break;
 			case 'excluding' :
-				$ship_to_countries = array_diff( $this->countries, array_keys( $woocommerce->countries->get_shipping_countries() ) );
+				$ship_to_countries = array_diff( $this->countries, array_keys( WC()->countries->get_shipping_countries() ) );
 			break;
 			default :
-				$ship_to_countries = array_keys( $woocommerce->countries->get_shipping_countries() );
+				$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );
 			break;
 		}
 
-		if ( ! in_array( $package['destination']['country'], $ship_to_countries ) )
+		if ( ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
 			return false;
+		}
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
     }

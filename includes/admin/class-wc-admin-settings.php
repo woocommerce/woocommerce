@@ -17,6 +17,7 @@ if ( ! class_exists( 'WC_Admin_Settings' ) ) :
  */
 class WC_Admin_Settings {
 
+	private static $settings = array();
 	private static $errors   = array();
 	private static $messages = array();
 
@@ -24,22 +25,23 @@ class WC_Admin_Settings {
 	 * Include the settings page classes
 	 */
 	public static function get_settings_pages() {
-		$settings = array();
+		if ( empty( self::$settings ) ) {
+			$settings = array();
 
-		include_once( 'settings/class-wc-settings-page.php' );
+			include_once( 'settings/class-wc-settings-page.php' );
 
-		$settings[] = include( 'settings/class-wc-settings-general.php' );
-		$settings[] = include( 'settings/class-wc-settings-products.php' );
-		$settings[] = include( 'settings/class-wc-settings-checkout.php' );
-		$settings[] = include( 'settings/class-wc-settings-accounts.php' );
-		$settings[] = include( 'settings/class-wc-settings-shipping.php' );
-		$settings[] = include( 'settings/class-wc-settings-tax.php' );
-		$settings[] = include( 'settings/class-wc-settings-emails.php' );
-		$settings[] = include( 'settings/class-wc-settings-integrations.php' );
+			$settings[] = include( 'settings/class-wc-settings-general.php' );
+			$settings[] = include( 'settings/class-wc-settings-products.php' );
+			$settings[] = include( 'settings/class-wc-settings-tax.php' );
+			$settings[] = include( 'settings/class-wc-settings-checkout.php' );
+			$settings[] = include( 'settings/class-wc-settings-shipping.php' );
+			$settings[] = include( 'settings/class-wc-settings-accounts.php' );
+			$settings[] = include( 'settings/class-wc-settings-emails.php' );
+			$settings[] = include( 'settings/class-wc-settings-integrations.php' );
 
-		$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
-
-		return $settings;
+			self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
+		}
+		return self::$settings;
 	}
 
 	/**
@@ -113,7 +115,7 @@ class WC_Admin_Settings {
 
 	    do_action( 'woocommerce_settings_start' );
 
-	    wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings.min.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris' ), WC()->version, true );
+	    wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings.min.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'chosen' ), WC()->version, true );
 
 		wp_localize_script( 'woocommerce_settings', 'woocommerce_settings_params', array(
 			'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' )
@@ -123,8 +125,8 @@ class WC_Admin_Settings {
 		self::get_settings_pages();
 
 		// Get current tab/section
-		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_text_field( urldecode( $_GET['tab'] ) );
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_text_field( urldecode( $_REQUEST['section'] ) );
+		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( $_GET['tab'] );
+		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( $_REQUEST['section'] );
 
 	    // Save settings if data has been posted
 	    if ( ! empty( $_POST ) )
@@ -132,10 +134,10 @@ class WC_Admin_Settings {
 
 	    // Add any posted messages
 	    if ( ! empty( $_GET['wc_error'] ) )
-	    	self::add_error( urldecode( stripslashes( $_GET['wc_error'] ) ) );
+	    	self::add_error( stripslashes( $_GET['wc_error'] ) );
 
 	     if ( ! empty( $_GET['wc_message'] ) )
-	    	self::add_message( urldecode( stripslashes( $_GET['wc_message'] ) ) );
+	    	self::add_message( stripslashes( $_GET['wc_message'] ) );
 
 	    self::show_messages();
 
@@ -225,6 +227,8 @@ class WC_Admin_Settings {
 
 			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ) ) ) {
 				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
+			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ) ) ) {
+				$description =  wp_kses_post( $description );
 			} elseif ( $description ) {
 				$description = '<span class="description">' . wp_kses_post( $description ) . '</span>';
 			}
@@ -244,17 +248,27 @@ class WC_Admin_Settings {
 
 	        	// Section Titles
 	            case 'title':
-	            	if ( ! empty( $value['title'] ) ) echo '<h3>' . esc_html( $value['title'] ) . '</h3>';
-	            	if ( ! empty( $value['desc'] ) ) echo wpautop( wptexturize( wp_kses_post( $value['desc'] ) ) );
+	            	if ( ! empty( $value['title'] ) ) {
+	            		echo '<h3>' . esc_html( $value['title'] ) . '</h3>';
+	            	}
+	            	if ( ! empty( $value['desc'] ) ) {
+	            		echo wpautop( wptexturize( wp_kses_post( $value['desc'] ) ) );
+	            	}
 	            	echo '<table class="form-table">'. "\n\n";
-	            	if ( ! empty( $value['id'] ) ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) );
+	            	if ( ! empty( $value['id'] ) ) {
+	            		do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) );
+	            	}
 	            break;
 
 	            // Section Ends
 	            case 'sectionend':
-	            	if ( ! empty( $value['id'] ) ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_end' );
+	            	if ( ! empty( $value['id'] ) ) {
+	            		do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_end' );
+	            	}
 	            	echo '</table>';
-	            	if ( ! empty( $value['id'] ) ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_after' );
+	            	if ( ! empty( $value['id'] ) ) {
+	            		do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_after' );
+	            	}
 	            break;
 
 	            // Standard text inputs and subtypes like 'number'
@@ -396,58 +410,68 @@ class WC_Admin_Settings {
 	            // Checkbox input
 	            case 'checkbox' :
 
-	            	$option_value 	= self::get_option( $value['id'], $value['default'] );
+					$option_value    = self::get_option( $value['id'], $value['default'] );
+					$visbility_class = array();
 
-	            	if ( ! isset( $value['hide_if_checked'] ) ) $value['hide_if_checked'] = false;
-	            	if ( ! isset( $value['show_if_checked'] ) ) $value['show_if_checked'] = false;
+	            	if ( ! isset( $value['hide_if_checked'] ) ) {
+	            		$value['hide_if_checked'] = false;
+	            	}
+	            	if ( ! isset( $value['show_if_checked'] ) ) {
+	            		$value['show_if_checked'] = false;
+	            	}
+	            	if ( $value['hide_if_checked'] == 'yes' || $value['show_if_checked'] == 'yes' ) {
+	            		$visbility_class[] = 'hidden_option';
+	            	}
+	            	if ( $value['hide_if_checked'] == 'option' ) {
+	            		$visbility_class[] = 'hide_options_if_checked';
+	            	}
+	            	if ( $value['show_if_checked'] == 'option' ) {
+	            		$visbility_class[] = 'show_options_if_checked';
+	            	}
 
-	            	if ( ! isset( $value['checkboxgroup'] ) || ( isset( $value['checkboxgroup'] ) && $value['checkboxgroup'] == 'start' ) ) {
+	            	if ( ! isset( $value['checkboxgroup'] ) || 'start' == $value['checkboxgroup'] ) {
 	            		?>
-	            		<tr valign="top" class="<?php
-	            			if ( $value['hide_if_checked'] == 'yes' || $value['show_if_checked']=='yes') echo 'hidden_option';
-	            			if ( $value['hide_if_checked'] == 'option' ) echo 'hide_options_if_checked';
-	            			if ( $value['show_if_checked'] == 'option' ) echo 'show_options_if_checked';
-	            		?>">
-						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?></th>
-						<td class="forminp forminp-checkbox">
-							<fieldset>
+		            		<tr valign="top" class="<?php echo esc_attr( implode( ' ', $visbility_class ) ); ?>">
+								<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?></th>
+								<td class="forminp forminp-checkbox">
+									<fieldset>
 						<?php
 	            	} else {
 	            		?>
-	            		<fieldset class="<?php
-	            			if ( $value['hide_if_checked'] == 'yes' || $value['show_if_checked'] == 'yes') echo 'hidden_option';
-	            			if ( $value['hide_if_checked'] == 'option') echo 'hide_options_if_checked';
-	            			if ( $value['show_if_checked'] == 'option') echo 'show_options_if_checked';
-	            		?>">
+		            		<fieldset class="<?php echo esc_attr( implode( ' ', $visbility_class ) ); ?>">
+	            		<?php
+	            	}
+
+	            	if ( ! empty( $value['title'] ) ) {
+	            		?>
+	            			<legend class="screen-reader-text"><span><?php echo esc_html( $value['title'] ) ?></span></legend>
 	            		<?php
 	            	}
 
 	            	?>
-			            <legend class="screen-reader-text"><span><?php echo esc_html( $value['title'] ) ?></span></legend>
-
 						<label for="<?php echo $value['id'] ?>">
-						<input
-							name="<?php echo esc_attr( $value['id'] ); ?>"
-							id="<?php echo esc_attr( $value['id'] ); ?>"
-							type="checkbox"
-							value="1"
-							<?php checked( $option_value, 'yes'); ?>
-							<?php echo implode( ' ', $custom_attributes ); ?>
-						/> <?php echo wp_kses_post( $value['desc'] ) ?></label> <?php echo $tip; ?>
+							<input
+								name="<?php echo esc_attr( $value['id'] ); ?>"
+								id="<?php echo esc_attr( $value['id'] ); ?>"
+								type="checkbox"
+								value="1"
+								<?php checked( $option_value, 'yes'); ?>
+								<?php echo implode( ' ', $custom_attributes ); ?>
+							/> <?php echo $description ?>
+						</label> <?php echo $tip; ?>
 					<?php
 
-					if ( ! isset( $value['checkboxgroup'] ) || ( isset( $value['checkboxgroup'] ) && $value['checkboxgroup'] == 'end' ) ) {
-						?>
-							</fieldset>
-						</td>
-						</tr>
+					if ( ! isset( $value['checkboxgroup'] ) || 'end' == $value['checkboxgroup'] ) {
+									?>
+									</fieldset>
+								</td>
+							</tr>
 						<?php
 					} else {
 						?>
-						</fieldset>
+							</fieldset>
 						<?php
 					}
-
 	            break;
 
 	            // Image width settings
@@ -495,24 +519,24 @@ class WC_Admin_Settings {
 
 	            // Single country selects
 	            case 'single_select_country' :
+					$country_setting = (string) self::get_option( $value['id'] );
+					$countries       = WC()->countries->countries;
 
-	            	$country_setting = (string) self::get_option( $value['id'] );
-
-	            	$countries = WC()->countries->countries;
-	            	if (strstr($country_setting, ':')) :
-	            		$country = current(explode(':', $country_setting));
-	            		$state = end(explode(':', $country_setting));
-	            	else :
-	            		$country = $country_setting;
-	            		$state = '*';
-	            	endif;
+	            	if ( strstr( $country_setting, ':' ) ) {
+						$country_setting = explode( ':', $country_setting );
+						$country         = current( $country_setting );
+						$state           = end( $country_setting );
+	            	} else {
+						$country = $country_setting;
+						$state   = '*';
+	            	}
 	            	?><tr valign="top">
 						<th scope="row" class="titledesc">
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 							<?php echo $tip; ?>
 						</th>
 	                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
-				        	<?php echo WC()->countries->country_dropdown_options( $country, $state ); ?>
+				        	<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 				        </select> <?php echo $description; ?>
 	               		</td>
 	               	</tr><?php
@@ -539,7 +563,7 @@ class WC_Admin_Settings {
 					        	<?php
 					        		if ( $countries )
 					        			foreach ( $countries as $key => $val )
-		                    				echo '<option value="'.$key.'" ' . selected( in_array( $key, $selections ), true, false ).'>' . $val . '</option>';
+		                    				echo '<option value="' . esc_attr( $key ) . '" ' . selected( in_array( $key, $selections ), true, false ).'>' . $val . '</option>';
 		                    	?>
 					        </select> <?php if ( $description ) echo $description; ?> </br><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
 	               		</td>
@@ -561,6 +585,7 @@ class WC_Admin_Settings {
 	 *
 	 * @access public
 	 * @param array $options Opens array to output
+	 * @return bool
 	 */
 	public static function save_fields( $options ) {
 	    if ( empty( $_POST ) )
@@ -648,7 +673,7 @@ class WC_Admin_Settings {
 			        } else {
 
 				       if ( isset( $_POST[$value['id']] ) ) {
-			            	$option_value = woocommerce_clean( stripslashes( $_POST[ $value['id'] ] ) );
+			            	$option_value = wc_clean( stripslashes( $_POST[ $value['id'] ] ) );
 			            } else {
 			                $option_value = '';
 			            }
@@ -663,7 +688,7 @@ class WC_Admin_Settings {
 
 		    		// Get countries array
 					if ( isset( $_POST[ $value['id'] ] ) )
-						$selected_countries = array_map( 'woocommerce_clean', array_map( 'stripslashes', (array) $_POST[ $value['id'] ] ) );
+						$selected_countries = array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $value['id'] ] ) );
 					else
 						$selected_countries = array();
 
@@ -675,8 +700,8 @@ class WC_Admin_Settings {
 
 			    	if ( isset( $_POST[$value['id'] ]['width'] ) ) {
 
-		              	$update_options[ $value['id'] ]['width']  = woocommerce_clean( stripslashes( $_POST[ $value['id'] ]['width'] ) );
-		              	$update_options[ $value['id'] ]['height'] = woocommerce_clean( stripslashes( $_POST[ $value['id'] ]['height'] ) );
+		              	$update_options[ $value['id'] ]['width']  = wc_clean( stripslashes( $_POST[ $value['id'] ]['width'] ) );
+		              	$update_options[ $value['id'] ]['height'] = wc_clean( stripslashes( $_POST[ $value['id'] ]['height'] ) );
 
 						if ( isset( $_POST[ $value['id'] ]['crop'] ) )
 							$update_options[ $value['id'] ]['crop'] = 1;

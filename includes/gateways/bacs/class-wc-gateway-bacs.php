@@ -54,7 +54,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
     	add_action( 'woocommerce_thankyou_bacs', array( $this, 'thankyou_page' ) );
 
     	// Customer Emails
-    	add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 2 );
+    	add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
     }
 
     /**
@@ -176,16 +176,17 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
     	if ( isset( $_POST['bacs_account_name'] ) ) {
 
-			$account_names   = array_map( 'woocommerce_clean', $_POST['bacs_account_name'] );
-			$account_numbers = array_map( 'woocommerce_clean', $_POST['bacs_account_number'] );
-			$bank_names      = array_map( 'woocommerce_clean', $_POST['bacs_bank_name'] );
-			$sort_codes      = array_map( 'woocommerce_clean', $_POST['bacs_sort_code'] );
-			$ibans           = array_map( 'woocommerce_clean', $_POST['bacs_iban'] );
-			$bics            = array_map( 'woocommerce_clean', $_POST['bacs_bic'] );
+			$account_names   = array_map( 'wc_clean', $_POST['bacs_account_name'] );
+			$account_numbers = array_map( 'wc_clean', $_POST['bacs_account_number'] );
+			$bank_names      = array_map( 'wc_clean', $_POST['bacs_bank_name'] );
+			$sort_codes      = array_map( 'wc_clean', $_POST['bacs_sort_code'] );
+			$ibans           = array_map( 'wc_clean', $_POST['bacs_iban'] );
+			$bics            = array_map( 'wc_clean', $_POST['bacs_bic'] );
 
 			foreach ( $account_names as $i => $name ) {
-				if ( ! isset( $account_names[ $i ] ) )
+				if ( ! isset( $account_names[ $i ] ) ) {
 					continue;
+				}
 
 	    		$accounts[] = array(
 	    			'account_name'   => $account_names[ $i ],
@@ -205,9 +206,9 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * Output for the order received page.
      */
     public function thankyou_page( $order_id ) {
-		if ( $this->instructions )
+		if ( $this->instructions ) {
         	echo wpautop( wptexturize( wp_kses_post( $this->instructions ) ) );
-
+        }
         $this->bank_details( $order_id );
     }
 
@@ -217,15 +218,18 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * @access public
      * @param WC_Order $order
      * @param bool $sent_to_admin
+     * @param bool $plain_text
      * @return void
      */
-    public function email_instructions( $order, $sent_to_admin ) {
+    public function email_instructions( $order, $sent_to_admin, $plain_text ) {
 
-    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' )
+    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' ) {
     		return;
+    	}
 
-		if ( $this->instructions )
-        	echo wpautop( wptexturize( $this->instructions ) );
+		if ( $this->instructions ) {
+        	echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
+        }
 
 		$this->bank_details( $order->id );
     }
@@ -234,16 +238,17 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * Get bank details and place into a list format
      */
     private function bank_details( $order_id = '' ) {
-    	if ( empty( $this->account_details ) )
+    	if ( empty( $this->account_details ) ) {
     		return;
+    	}
 
-    	echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>';
+    	echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>' . PHP_EOL;
 
     	$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details );
 
     	if ( ! empty( $bacs_accounts ) ) {
 	    	foreach ( $bacs_accounts as $bacs_account ) {
-	    		echo '<ul class="order_details bacs_details">';
+	    		echo '<ul class="order_details bacs_details">' . PHP_EOL;
 
 	    		$bacs_account = (object) $bacs_account;
 
@@ -267,12 +272,13 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					)
 				), $order_id );
 
-				if ( $bacs_account->account_name || $bacs_account->bank_name )
-					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>';
+				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
+					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>' . PHP_EOL;
+				}
 
 	    		foreach ( $account_fields as $field_key => $field ) {
 				    if ( ! empty( $field['value'] ) ) {
-				    	echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>';
+				    	echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>' . PHP_EOL;
 				    }
 				}
 
