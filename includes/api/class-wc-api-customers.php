@@ -84,6 +84,52 @@ class WC_API_Customers extends WC_API_Resource {
 	}
 
 	/**
+	 * Get customer billing address fields.
+	 *
+	 * @since  2.2
+	 * @return array
+	 */
+	public function get_customer_billing_address() {
+		$billing_address = apply_filters( 'woocommerce_api_customer_billing_address', array(
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'country',
+			'email',
+			'phone',
+		) );
+
+		return $billing_address;
+	}
+
+	/**
+	 * Get customer shipping address fields.
+	 *
+	 * @since  2.2
+	 * @return array
+	 */
+	public function get_customer_shipping_address() {
+		$shipping_address = apply_filters( 'woocommerce_api_customer_shipping_address', array(
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'country',
+		) );
+
+		return $shipping_address;
+	}
+
+	/**
 	 * Get all customers
 	 *
 	 * @since 2.1
@@ -225,16 +271,69 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Create a customer
 	 *
-	 * @TODO implement in 2.2 with woocommerce_create_new_customer()
+	 * @since 2.2
 	 * @param array $data
 	 * @return array
 	 */
 	public function create_customer( $data ) {
 
-		if ( ! current_user_can( 'create_users' ) )
+		// Checks with can create new users.
+		if ( ! current_user_can( 'create_users' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', __( 'You do not have permission to create this customer', 'woocommerce' ), array( 'status' => 401 ) );
+		}
 
-		return array();
+		// Checks with the email is missing.
+		if ( ! isset( $data['email'] ) ) {
+			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', sprintf( __( 'Missing parameter %s' ), 'email' ), array( 'status' => 400 ) );
+		}
+
+		// Sets the username.
+		if ( ! isset( $data['username'] ) ) {
+			$data['username'] = '';
+		}
+
+		// Sets the password.
+		if ( ! isset( $data['password'] ) ) {
+			$data['password'] = wp_generate_password();
+		}
+
+		// Attempts to create the new customer
+		$customer_id = wc_create_new_customer( $data['email'], $data['username'], $data['password'] );
+
+		// Checks for an error in the customer creation.
+		if ( is_wp_error( $customer_id ) ) {
+			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', $customer_id->get_error_message(), array( 'status' => 400 ) );
+		}
+
+		// Customer first name.
+		if ( isset( $data['first_name'] ) ) {
+			update_user_meta( $customer_id, 'first_name', sanitize_text_field( $data['first_name'] ) );
+		}
+
+		// Customer last name.
+		if ( isset( $data['last_name'] ) ) {
+			update_user_meta( $customer_id, 'last_name', sanitize_text_field( $data['last_name'] ) );
+		}
+
+		// Customer billing address.
+		if ( isset( $data['billing_address'] ) ) {
+			foreach ( $this->customer_billing_address() as $address ) {
+				if ( isset( $data['billing_address'][ $address ] ) ) {
+					update_user_meta( $customer_id, 'billing_' . $address, sanitize_text_field( $data['billing_address'][ $address ] ) );
+				}
+			}
+		}
+
+		// Customer shipping address.
+		if ( isset( $data['shipping_address'] ) ) {
+			foreach ( $this->customer_shipping_address() as $address ) {
+				if ( isset( $data['shipping_address'][ $address ] ) ) {
+					update_user_meta( $customer_id, 'shipping_' . $address, sanitize_text_field( $data['shipping_address'][ $address ] ) );
+				}
+			}
+		}
+
+		return $this->get_customer( $customer_id );
 	}
 
 	/**
