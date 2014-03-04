@@ -55,9 +55,10 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	public function register_routes( $routes ) {
 
-		# GET /customers
+		# GET/POST /customers
 		$routes[ $this->base ] = array(
 			array( array( $this, 'get_customers' ),     WC_API_SERVER::READABLE ),
+			array( array( $this, 'create_customer' ),   WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /customers/count
