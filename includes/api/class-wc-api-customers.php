@@ -318,7 +318,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Customer billing address.
 		if ( isset( $data['billing_address'] ) ) {
-			foreach ( $this->customer_billing_address() as $address ) {
+			foreach ( $this->get_customer_billing_address() as $address ) {
 				if ( isset( $data['billing_address'][ $address ] ) ) {
 					update_user_meta( $customer_id, 'billing_' . $address, sanitize_text_field( $data['billing_address'][ $address ] ) );
 				}
@@ -327,7 +327,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Customer shipping address.
 		if ( isset( $data['shipping_address'] ) ) {
-			foreach ( $this->customer_shipping_address() as $address ) {
+			foreach ( $this->get_customer_shipping_address() as $address ) {
 				if ( isset( $data['shipping_address'][ $address ] ) ) {
 					update_user_meta( $customer_id, 'shipping_' . $address, sanitize_text_field( $data['shipping_address'][ $address ] ) );
 				}
