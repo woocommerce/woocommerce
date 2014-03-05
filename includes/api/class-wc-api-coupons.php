@@ -191,12 +191,19 @@ class WC_API_Coupons extends WC_API_Resource {
 	public function create_coupon( $data ) {
 		global $wpdb;
 
+		// Check user permission
 		if ( ! current_user_can( 'publish_shop_coupons' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_create_coupon', __( 'You do not have permission to create coupons', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
+		// Check if coupon code is specified
 		if ( ! isset( $data['code'] ) ) {
 			return new WP_Error( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s' ), 'code' ), array( 'status' => 400 ) );
+		}
+
+		// Validate coupon types
+		if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_coupon_types() ) ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_coupon_type', sprintf( __( 'Invalid coupon type - the coupon type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_coupon_types() ) ) ), array( 'status' => 400 ) );
 		}
 
 		// Check for duplicate coupon codes
