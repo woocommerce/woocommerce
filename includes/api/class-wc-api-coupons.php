@@ -241,6 +241,8 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupon_data = wp_parse_args( $data, $defaults );
 
+		$coupon_code = 
+
 		$new_coupon = array(
 			'post_title' 	=> wc_clean( $coupon_data['code'] ),
 			'post_content' 	=> '',
