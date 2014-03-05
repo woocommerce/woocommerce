@@ -126,7 +126,30 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.1.4 =
+= 2.1.4 - 05/03/2014 =
+* Fix - Prevent duplicate loading of functions files
+* Fix - Fixed breaking timeline for reports
+* Fix - Category widget ordering
+* Fix - BACS and Cheque gateway emails now have a plain text flag
+* Fix - wc_get_product_ids_on_sale will never return 0
+* Fix - Prevent errors upon comments when order is in trash
+* Fix - Reviews widget now links to proper review anchor
+* Fix - Added support for permalinks containing a query string in wc_get_endpoint_url
+* Fix - Variable product add file button works after adding a new variation
+* Fix - Resolved issue where styles didn't get compiled properly
+* Fix - Changed the save order so email data is correct for manual orders
+* Fix - Later hooking in for template redirect
+* Fix - Reverted load order change for language files and provided proper context
+* Fix - Made woocommerce_update_cart_action_cart_updated a filter which can return true or false to recalc totals
+* Fix - Updated sync logic to exclude hidden and out of stock variations from the price display
+* Fix - Changed set_stock to only make a variable product out of stock if all variations are stock managed to resync prices after stock changes
+* Fix - Use woocommerce_notify_no_stock_amount not 0 in variable class sync method
+* Fix - Suppress errors in download handler by silencing ob_flush and flush calls
+* Tweak - get_states method now returning false instead of array for countries without states
+* Tweak - Improved shipping language strings
+* Tweak - Remove admin check around global po translation file loading
+* Tweak - Improved styles for tab views
+* Refactor - Hardened code base and fixed strict standards notices
 
 = 2.1.3 - 27/02/2014 =
 * Fix - Use correct thresholds to calculate out of stock number in dashboard widget 
