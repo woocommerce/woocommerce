@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.5 =
+
 = 2.1.4 - 05/03/2014 =
 * Fix - Prevent duplicate loading of functions files
 * Fix - Fixed breaking timeline for reports
