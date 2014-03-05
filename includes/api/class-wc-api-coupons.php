@@ -216,7 +216,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		 ", wc_clean( $data['code'] ) ) );
 
 		if ( $coupon_found ) {
-			return new WP_Error( 'woocommerce_api_invalid_coupon_code', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
 		}
 
 		$defaults = array(
