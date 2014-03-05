@@ -241,10 +241,10 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupon_data = wp_parse_args( $data, $defaults );
 
-		$coupon_code = 
+		$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
 
 		$new_coupon = array(
-			'post_title' 	=> wc_clean( $coupon_data['code'] ),
+			'post_title' 	=> wc_clean( $coupon_code ),
 			'post_content' 	=> '',
 			'post_status' 	=> 'publish',
 			'post_author' 	=> get_current_user_id(),
