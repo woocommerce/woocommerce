@@ -288,7 +288,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['type'] ) ) {
-			update_post_meta( $id, 'discount_type', $data['discount_type'] );
+			update_post_meta( $id, 'discount_type', $data['type'] );
 		}
 
 		if ( isset( $data['amount'] ) ) {
