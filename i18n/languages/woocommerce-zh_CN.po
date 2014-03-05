@@ -3,12 +3,13 @@
 # deepinsource <deepinsource@gmail.com>, 2014
 # tetsu <waruii@msn.com>, 2014
 # xepin <xepinchan@qq.com>, 2014
+# george_pt <xinhaozheng@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-21 16:11:55+00:00\n"
-"PO-Revision-Date: 2014-02-22 08:50+0000\n"
+"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
+"PO-Revision-Date: 2014-03-04 08:35+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/projects/p/woocommerce/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
@@ -57,9 +58,9 @@ msgstr "商店管理"
 msgid "Order tracking"
 msgstr "订单跟踪"
 
-#: assets/js/admin/editor_plugin_lang.php:15 includes/class-wc-install.php:233
-#: includes/shortcodes/class-wc-shortcode-checkout.php:86
-#: includes/shortcodes/class-wc-shortcode-my-account.php:106
+#: assets/js/admin/editor_plugin_lang.php:15
+#: includes/shortcodes/class-wc-shortcode-checkout.php:91
+#: includes/shortcodes/class-wc-shortcode-my-account.php:111
 #: templates/checkout/thankyou.php:30
 msgid "My Account"
 msgstr "我的帐户"
@@ -98,35 +99,35 @@ msgstr "西澳大利亚州"
 
 #: i18n/states/BG.php:13
 msgid "Blagoevgrad"
-msgstr ""
+msgstr "Blagoevgrad"
 
 #: i18n/states/BG.php:14
 msgid "Burgas"
-msgstr ""
+msgstr "Burgas"
 
 #: i18n/states/BG.php:15
 msgid "Dobrich"
-msgstr ""
+msgstr "Dobrich"
 
 #: i18n/states/BG.php:16
 msgid "Gabrovo"
-msgstr ""
+msgstr "Gabrovo"
 
 #: i18n/states/BG.php:17
 msgid "Haskovo"
-msgstr ""
+msgstr "Haskovo"
 
 #: i18n/states/BG.php:18
 msgid "Kardzhali"
-msgstr ""
+msgstr "Kardzhali"
 
 #: i18n/states/BG.php:19
 msgid "Kyustendil"
-msgstr ""
+msgstr "Kyustendil"
 
 #: i18n/states/BG.php:20
 msgid "Lovech"
-msgstr ""
+msgstr "Lovech"
 
 #: i18n/states/BG.php:21 i18n/states/US.php:39
 msgid "Montana"
@@ -134,79 +135,79 @@ msgstr "蒙大拿"
 
 #: i18n/states/BG.php:22
 msgid "Pazardzhik"
-msgstr ""
+msgstr "Pazardzhik"
 
 #: i18n/states/BG.php:23
 msgid "Pernik"
-msgstr ""
+msgstr "Pernik"
 
 #: i18n/states/BG.php:24
 msgid "Pleven"
-msgstr ""
+msgstr "Pleven"
 
 #: i18n/states/BG.php:25
 msgid "Plovdiv"
-msgstr ""
+msgstr "Plovdiv"
 
 #: i18n/states/BG.php:26
 msgid "Razgrad"
-msgstr ""
+msgstr "Razgrad"
 
 #: i18n/states/BG.php:27
 msgid "Ruse"
-msgstr ""
+msgstr "Ruse"
 
 #: i18n/states/BG.php:28
 msgid "Shumen"
-msgstr ""
+msgstr "Shumen"
 
 #: i18n/states/BG.php:29
 msgid "Silistra"
-msgstr ""
+msgstr "Silistra"
 
 #: i18n/states/BG.php:30
 msgid "Sliven"
-msgstr ""
+msgstr "Sliven"
 
 #: i18n/states/BG.php:31
 msgid "Smolyan"
-msgstr ""
+msgstr "Smolyan"
 
 #: i18n/states/BG.php:32
 msgid "Sofia"
-msgstr ""
+msgstr "Sofia"
 
 #: i18n/states/BG.php:33
 msgid "Sofia-Grad"
-msgstr ""
+msgstr "Sofia-Grad"
 
 #: i18n/states/BG.php:34
 msgid "Stara Zagora"
-msgstr ""
+msgstr "Stara Zagora"
 
 #: i18n/states/BG.php:35
 msgid "Targovishte"
-msgstr ""
+msgstr "Targovishte"
 
 #: i18n/states/BG.php:36
 msgid "Varna"
-msgstr ""
+msgstr "Varna"
 
 #: i18n/states/BG.php:37
 msgid "Veliko Tarnovo"
-msgstr ""
+msgstr "Veliko Tarnovo"
 
 #: i18n/states/BG.php:38
 msgid "Vidin"
-msgstr ""
+msgstr "Vidin"
 
 #: i18n/states/BG.php:39
 msgid "Vratsa"
-msgstr ""
+msgstr "Vratsa"
 
 #: i18n/states/BG.php:40
 msgid "Yambol"
-msgstr ""
+msgstr "Yambol"
 
 #: i18n/states/BR.php:13
 msgid "Acre"
@@ -502,35 +503,35 @@ msgstr "拉科鲁尼亚"
 
 #: i18n/states/ES.php:14
 msgid "Araba/&Aacute;lava"
-msgstr ""
+msgstr "Araba/&Aacute;lava"
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
-msgstr ""
+msgstr "Albacete"
 
 #: i18n/states/ES.php:16
 msgid "Alicante"
-msgstr ""
+msgstr "Alicante"
 
 #: i18n/states/ES.php:17
 msgid "Almer&iacute;a"
-msgstr ""
+msgstr "Almer&iacute;a"
 
 #: i18n/states/ES.php:18
 msgid "Asturias"
-msgstr ""
+msgstr "Asturias"
 
 #: i18n/states/ES.php:19
 msgid "&Aacute;vila"
-msgstr ""
+msgstr "&Aacute;vila"
 
 #: i18n/states/ES.php:20
 msgid "Badajoz"
-msgstr ""
+msgstr "Badajoz"
 
 #: i18n/states/ES.php:21
 msgid "Baleares"
-msgstr ""
+msgstr "Baleares"
 
 #: i18n/states/ES.php:22
 msgid "Barcelona"
@@ -542,167 +543,167 @@ msgstr "布尔戈斯"
 
 #: i18n/states/ES.php:24
 msgid "C&aacute;ceres"
-msgstr ""
+msgstr "C&aacute;ceres"
 
 #: i18n/states/ES.php:25
 msgid "C&aacute;diz"
-msgstr ""
+msgstr "C&aacute;diz"
 
 #: i18n/states/ES.php:26
 msgid "Cantabria"
-msgstr ""
+msgstr "Cantabria"
 
 #: i18n/states/ES.php:27
 msgid "Castell&oacute;n"
-msgstr ""
+msgstr "Castell&oacute;n"
 
 #: i18n/states/ES.php:28
 msgid "Ceuta"
-msgstr ""
+msgstr "Ceuta"
 
 #: i18n/states/ES.php:29
 msgid "Ciudad Real"
-msgstr ""
+msgstr "Ciudad Real"
 
 #: i18n/states/ES.php:30
 msgid "C&oacute;rdoba"
-msgstr ""
+msgstr "C&oacute;rdoba"
 
 #: i18n/states/ES.php:31
 msgid "Cuenca"
-msgstr ""
+msgstr "Cuenca"
 
 #: i18n/states/ES.php:32
 msgid "Girona"
-msgstr ""
+msgstr "Girona"
 
 #: i18n/states/ES.php:33
 msgid "Granada"
-msgstr ""
+msgstr "Granada"
 
 #: i18n/states/ES.php:34
 msgid "Guadalajara"
-msgstr ""
+msgstr "Guadalajara"
 
 #: i18n/states/ES.php:35
 msgid "Gipuzkoa"
-msgstr ""
+msgstr "Gipuzkoa"
 
 #: i18n/states/ES.php:36
 msgid "Huelva"
-msgstr ""
+msgstr "Huelva"
 
 #: i18n/states/ES.php:37
 msgid "Huesca"
-msgstr ""
+msgstr "Huesca"
 
 #: i18n/states/ES.php:38
 msgid "Ja&eacute;n"
-msgstr ""
+msgstr "Ja&eacute;n"
 
 #: i18n/states/ES.php:39
 msgid "La Rioja"
-msgstr ""
+msgstr "La Rioja"
 
 #: i18n/states/ES.php:40
 msgid "Las Palmas"
-msgstr ""
+msgstr "Las Palmas"
 
 #: i18n/states/ES.php:41
 msgid "Le&oacute;n"
-msgstr ""
+msgstr "Le&oacute;n"
 
 #: i18n/states/ES.php:42
 msgid "Lleida"
-msgstr ""
+msgstr "Lleida"
 
 #: i18n/states/ES.php:43
 msgid "Lugo"
-msgstr ""
+msgstr "Lugo"
 
 #: i18n/states/ES.php:44
 msgid "Madrid"
-msgstr ""
+msgstr "Madrid"
 
 #: i18n/states/ES.php:45
 msgid "M&aacute;laga"
-msgstr ""
+msgstr "M&aacute;laga"
 
 #: i18n/states/ES.php:46
 msgid "Melilla"
-msgstr ""
+msgstr "Melilla"
 
 #: i18n/states/ES.php:47
 msgid "Murcia"
-msgstr ""
+msgstr "Murcia"
 
 #: i18n/states/ES.php:48
 msgid "Navarra"
-msgstr ""
+msgstr "Navarra"
 
 #: i18n/states/ES.php:49
 msgid "Ourense"
-msgstr ""
+msgstr "Ourense"
 
 #: i18n/states/ES.php:50
 msgid "Palencia"
-msgstr ""
+msgstr "Palencia"
 
 #: i18n/states/ES.php:51
 msgid "Pontevedra"
-msgstr ""
+msgstr "Pontevedra"
 
 #: i18n/states/ES.php:52
 msgid "Salamanca"
-msgstr ""
+msgstr "Salamanca"
 
 #: i18n/states/ES.php:53
 msgid "Santa Cruz de Tenerife"
-msgstr ""
+msgstr "Santa Cruz de Tenerife"
 
 #: i18n/states/ES.php:54
 msgid "Segovia"
-msgstr ""
+msgstr "Segovia"
 
 #: i18n/states/ES.php:55
 msgid "Sevilla"
-msgstr ""
+msgstr "Sevilla"
 
 #: i18n/states/ES.php:56
 msgid "Soria"
-msgstr ""
+msgstr "Soria"
 
 #: i18n/states/ES.php:57
 msgid "Tarragona"
-msgstr ""
+msgstr "Tarragona"
 
 #: i18n/states/ES.php:58
 msgid "Teruel"
-msgstr ""
+msgstr "Teruel"
 
 #: i18n/states/ES.php:59
 msgid "Toledo"
-msgstr ""
+msgstr "Toledo"
 
 #: i18n/states/ES.php:60
 msgid "Valencia"
-msgstr ""
+msgstr "Valencia"
 
 #: i18n/states/ES.php:61
 msgid "Valladolid"
-msgstr ""
+msgstr "Valladolid"
 
 #: i18n/states/ES.php:62
 msgid "Bizkaia"
-msgstr ""
+msgstr "Bizkaia"
 
 #: i18n/states/ES.php:63
 msgid "Zamora"
-msgstr ""
+msgstr "Zamora"
 
 #: i18n/states/ES.php:64
 msgid "Zaragoza"
-msgstr ""
+msgstr "Zaragoza"
 
 #: i18n/states/HK.php:13
 msgid "Hong Kong Island"
@@ -1134,35 +1135,35 @@ msgstr "Pondicherry (Puducherry)"
 
 #: i18n/states/IT.php:13
 msgid "Agrigento"
-msgstr ""
+msgstr "Agrigento"
 
 #: i18n/states/IT.php:14
 msgid "Alessandria"
-msgstr ""
+msgstr "Alessandria"
 
 #: i18n/states/IT.php:15
 msgid "Ancona"
-msgstr ""
+msgstr "Ancona"
 
 #: i18n/states/IT.php:16
 msgid "Aosta"
-msgstr ""
+msgstr "Aosta"
 
 #: i18n/states/IT.php:17
 msgid "Arezzo"
-msgstr ""
+msgstr "Arezzo"
 
 #: i18n/states/IT.php:18
 msgid "Ascoli Piceno"
-msgstr ""
+msgstr "Ascoli Piceno"
 
 #: i18n/states/IT.php:19
 msgid "Asti"
-msgstr ""
+msgstr "Asti"
 
 #: i18n/states/IT.php:20
 msgid "Avellino"
-msgstr ""
+msgstr "Avellino"
 
 #: i18n/states/IT.php:21
 msgid "Bari"
@@ -1170,591 +1171,591 @@ msgstr "巴里"
 
 #: i18n/states/IT.php:22
 msgid "Barletta-Andria-Trani"
-msgstr ""
+msgstr "Barletta-Andria-Trani"
 
 #: i18n/states/IT.php:23
 msgid "Belluno"
-msgstr ""
+msgstr "Belluno"
 
 #: i18n/states/IT.php:24
 msgid "Benevento"
-msgstr ""
+msgstr "Benevento"
 
 #: i18n/states/IT.php:25
 msgid "Bergamo"
-msgstr ""
+msgstr "Bergamo"
 
 #: i18n/states/IT.php:26
 msgid "Biella"
-msgstr ""
+msgstr "Biella"
 
 #: i18n/states/IT.php:27
 msgid "Bologna"
-msgstr ""
+msgstr "Bologna"
 
 #: i18n/states/IT.php:28
 msgid "Bolzano"
-msgstr ""
+msgstr "Bolzano"
 
 #: i18n/states/IT.php:29
 msgid "Brescia"
-msgstr ""
+msgstr "Brescia"
 
 #: i18n/states/IT.php:30
 msgid "Brindisi"
-msgstr ""
+msgstr "Brindisi"
 
 #: i18n/states/IT.php:31
 msgid "Cagliari"
-msgstr ""
+msgstr "Cagliari"
 
 #: i18n/states/IT.php:32
 msgid "Caltanissetta"
-msgstr ""
+msgstr "Caltanissetta"
 
 #: i18n/states/IT.php:33
 msgid "Campobasso"
-msgstr ""
+msgstr "Campobasso"
 
 #: i18n/states/IT.php:34
 msgid "Carbonia-Iglesias"
-msgstr ""
+msgstr "Carbonia-Iglesias"
 
 #: i18n/states/IT.php:35
 msgid "Caserta"
-msgstr ""
+msgstr "Caserta"
 
 #: i18n/states/IT.php:36
 msgid "Catania"
-msgstr ""
+msgstr "Catania"
 
 #: i18n/states/IT.php:37
 msgid "Catanzaro"
-msgstr ""
+msgstr "Catanzaro"
 
 #: i18n/states/IT.php:38
 msgid "Chieti"
-msgstr ""
+msgstr "Chieti"
 
 #: i18n/states/IT.php:39
 msgid "Como"
-msgstr ""
+msgstr "Como"
 
 #: i18n/states/IT.php:40
 msgid "Cosenza"
-msgstr ""
+msgstr "Cosenza"
 
 #: i18n/states/IT.php:41
 msgid "Cremona"
-msgstr ""
+msgstr "Cremona"
 
 #: i18n/states/IT.php:42
 msgid "Crotone"
-msgstr ""
+msgstr "Crotone"
 
 #: i18n/states/IT.php:43
 msgid "Cuneo"
-msgstr ""
+msgstr "Cuneo"
 
 #: i18n/states/IT.php:44
 msgid "Enna"
-msgstr ""
+msgstr "Enna"
 
 #: i18n/states/IT.php:45
 msgid "Fermo"
-msgstr ""
+msgstr "Fermo"
 
 #: i18n/states/IT.php:46
 msgid "Ferrara"
-msgstr ""
+msgstr "Ferrara"
 
 #: i18n/states/IT.php:47
 msgid "Firenze"
-msgstr ""
+msgstr "Firenze"
 
 #: i18n/states/IT.php:48
 msgid "Foggia"
-msgstr ""
+msgstr "Foggia"
 
 #: i18n/states/IT.php:49
 msgid "Forlì-Cesena"
-msgstr ""
+msgstr "Forlì-Cesena"
 
 #: i18n/states/IT.php:50
 msgid "Frosinone"
-msgstr ""
+msgstr "Frosinone"
 
 #: i18n/states/IT.php:51
 msgid "Genova"
-msgstr ""
+msgstr "Genova"
 
 #: i18n/states/IT.php:52
 msgid "Gorizia"
-msgstr ""
+msgstr "Gorizia"
 
 #: i18n/states/IT.php:53
 msgid "Grosseto"
-msgstr ""
+msgstr "Grosseto"
 
 #: i18n/states/IT.php:54
 msgid "Imperia"
-msgstr ""
+msgstr "Imperia"
 
 #: i18n/states/IT.php:55
 msgid "Isernia"
-msgstr ""
+msgstr "Isernia"
 
 #: i18n/states/IT.php:56
 msgid "La Spezia"
-msgstr ""
+msgstr "La Spezia"
 
 #: i18n/states/IT.php:57
 msgid "L&apos;Aquila"
-msgstr ""
+msgstr "L&apos;Aquila"
 
 #: i18n/states/IT.php:58
 msgid "Latina"
-msgstr ""
+msgstr "Latina"
 
 #: i18n/states/IT.php:59
 msgid "Lecce"
-msgstr ""
+msgstr "Lecce"
 
 #: i18n/states/IT.php:60
 msgid "Lecco"
-msgstr ""
+msgstr "Lecco"
 
 #: i18n/states/IT.php:61
 msgid "Livorno"
-msgstr ""
+msgstr "Livorno"
 
 #: i18n/states/IT.php:62
 msgid "Lodi"
-msgstr ""
+msgstr "Lodi"
 
 #: i18n/states/IT.php:63
 msgid "Lucca"
-msgstr ""
+msgstr "Lucca"
 
 #: i18n/states/IT.php:64
 msgid "Macerata"
-msgstr ""
+msgstr "Macerata"
 
 #: i18n/states/IT.php:65
 msgid "Mantova"
-msgstr ""
+msgstr "Mantova"
 
 #: i18n/states/IT.php:66
 msgid "Massa-Carrara"
-msgstr ""
+msgstr "Massa-Carrara"
 
 #: i18n/states/IT.php:67
 msgid "Matera"
-msgstr ""
+msgstr "Matera"
 
 #: i18n/states/IT.php:68
 msgid "Messina"
-msgstr ""
+msgstr "Messina"
 
 #: i18n/states/IT.php:69
 msgid "Milano"
-msgstr ""
+msgstr "Milano"
 
 #: i18n/states/IT.php:70
 msgid "Modena"
-msgstr ""
+msgstr "Modena"
 
 #: i18n/states/IT.php:71
 msgid "Monza e della Brianza"
-msgstr ""
+msgstr "Monza e della Brianza"
 
 #: i18n/states/IT.php:72
 msgid "Napoli"
-msgstr ""
+msgstr "Napoli"
 
 #: i18n/states/IT.php:73
 msgid "Novara"
-msgstr ""
+msgstr "Novara"
 
 #: i18n/states/IT.php:74
 msgid "Nuoro"
-msgstr ""
+msgstr "Nuoro"
 
 #: i18n/states/IT.php:75
 msgid "Olbia-Tempio"
-msgstr ""
+msgstr "Olbia-Tempio"
 
 #: i18n/states/IT.php:76
 msgid "Oristano"
-msgstr ""
+msgstr "Oristano"
 
 #: i18n/states/IT.php:77
 msgid "Padova"
-msgstr ""
+msgstr "Padova"
 
 #: i18n/states/IT.php:78
 msgid "Palermo"
-msgstr ""
+msgstr "Palermo"
 
 #: i18n/states/IT.php:79
 msgid "Parma"
-msgstr ""
+msgstr "Parma"
 
 #: i18n/states/IT.php:80
 msgid "Pavia"
-msgstr ""
+msgstr "Pavia"
 
 #: i18n/states/IT.php:81
 msgid "Perugia"
-msgstr ""
+msgstr "Perugia"
 
 #: i18n/states/IT.php:82
 msgid "Pesaro e Urbino"
-msgstr ""
+msgstr "Pesaro e Urbino"
 
 #: i18n/states/IT.php:83
 msgid "Pescara"
-msgstr ""
+msgstr "Pescara"
 
 #: i18n/states/IT.php:84
 msgid "Piacenza"
-msgstr ""
+msgstr "Piacenza"
 
 #: i18n/states/IT.php:85
 msgid "Pisa"
-msgstr ""
+msgstr "Pisa"
 
 #: i18n/states/IT.php:86
 msgid "Pistoia"
-msgstr ""
+msgstr "Pistoia"
 
 #: i18n/states/IT.php:87
 msgid "Pordenone"
-msgstr ""
+msgstr "Pordenone"
 
 #: i18n/states/IT.php:88
 msgid "Potenza"
-msgstr ""
+msgstr "Potenza"
 
 #: i18n/states/IT.php:89
 msgid "Prato"
-msgstr ""
+msgstr "Prato"
 
 #: i18n/states/IT.php:90
 msgid "Ragusa"
-msgstr ""
+msgstr "Ragusa"
 
 #: i18n/states/IT.php:91
 msgid "Ravenna"
-msgstr ""
+msgstr "Ravenna"
 
 #: i18n/states/IT.php:92
 msgid "Reggio Calabria"
-msgstr ""
+msgstr "Reggio Calabria"
 
 #: i18n/states/IT.php:93
 msgid "Reggio Emilia"
-msgstr ""
+msgstr "Reggio Emilia"
 
 #: i18n/states/IT.php:94
 msgid "Rieti"
-msgstr ""
+msgstr "Rieti"
 
 #: i18n/states/IT.php:95
 msgid "Rimini"
-msgstr ""
+msgstr "Rimini"
 
 #: i18n/states/IT.php:96
 msgid "Roma"
-msgstr ""
+msgstr "Roma"
 
 #: i18n/states/IT.php:97
 msgid "Rovigo"
-msgstr ""
+msgstr "Rovigo"
 
 #: i18n/states/IT.php:98
 msgid "Salerno"
-msgstr ""
+msgstr "Salerno"
 
 #: i18n/states/IT.php:99
 msgid "Medio Campidano"
-msgstr ""
+msgstr "Medio Campidano"
 
 #: i18n/states/IT.php:100
 msgid "Sassari"
-msgstr ""
+msgstr "Sassari"
 
 #: i18n/states/IT.php:101
 msgid "Savona"
-msgstr ""
+msgstr "Savona"
 
 #: i18n/states/IT.php:102
 msgid "Siena"
-msgstr ""
+msgstr "Siena"
 
 #: i18n/states/IT.php:103
 msgid "Siracusa"
-msgstr ""
+msgstr "Siracusa"
 
 #: i18n/states/IT.php:104
 msgid "Sondrio"
-msgstr ""
+msgstr "Sondrio"
 
 #: i18n/states/IT.php:105
 msgid "Taranto"
-msgstr ""
+msgstr "Taranto"
 
 #: i18n/states/IT.php:106
 msgid "Teramo"
-msgstr ""
+msgstr "Teramo"
 
 #: i18n/states/IT.php:107
 msgid "Terni"
-msgstr ""
+msgstr "Terni"
 
 #: i18n/states/IT.php:108
 msgid "Torino"
-msgstr ""
+msgstr "Torino"
 
 #: i18n/states/IT.php:109
 msgid "Ogliastra"
-msgstr ""
+msgstr "Ogliastra"
 
 #: i18n/states/IT.php:110
 msgid "Trapani"
-msgstr ""
+msgstr "Trapani"
 
 #: i18n/states/IT.php:111
 msgid "Trento"
-msgstr ""
+msgstr "Trento"
 
 #: i18n/states/IT.php:112
 msgid "Treviso"
-msgstr ""
+msgstr "Treviso"
 
 #: i18n/states/IT.php:113
 msgid "Trieste"
-msgstr ""
+msgstr "Trieste"
 
 #: i18n/states/IT.php:114
 msgid "Udine"
-msgstr ""
+msgstr "Udine"
 
 #: i18n/states/IT.php:115
 msgid "Varese"
-msgstr ""
+msgstr "Varese"
 
 #: i18n/states/IT.php:116
 msgid "Venezia"
-msgstr ""
+msgstr "Venezia"
 
 #: i18n/states/IT.php:117
 msgid "Verbano-Cusio-Ossola"
-msgstr ""
+msgstr "Verbano-Cusio-Ossola"
 
 #: i18n/states/IT.php:118
 msgid "Vercelli"
-msgstr ""
+msgstr "Vercelli"
 
 #: i18n/states/IT.php:119
 msgid "Verona"
-msgstr ""
+msgstr "Verona"
 
 #: i18n/states/IT.php:120
 msgid "Vibo Valentia"
-msgstr ""
+msgstr "Vibo Valentia"
 
 #: i18n/states/IT.php:121
 msgid "Vicenza"
-msgstr ""
+msgstr "Vicenza"
 
 #: i18n/states/IT.php:122
 msgid "Viterbo"
-msgstr ""
+msgstr "Viterbo"
 
 #: i18n/states/JP.php:13
 msgid "Hokkaido"
-msgstr ""
+msgstr "Hokkaido"
 
 #: i18n/states/JP.php:14
 msgid "Aomori"
-msgstr ""
+msgstr "Aomori"
 
 #: i18n/states/JP.php:15
 msgid "Iwate"
-msgstr ""
+msgstr "Iwate"
 
 #: i18n/states/JP.php:16
 msgid "Miyagi"
-msgstr ""
+msgstr "Miyagi"
 
 #: i18n/states/JP.php:17
 msgid "Akita"
-msgstr ""
+msgstr "Akita"
 
 #: i18n/states/JP.php:18
 msgid "Yamagata"
-msgstr ""
+msgstr "Yamagata"
 
 #: i18n/states/JP.php:19
 msgid "Fukushima"
-msgstr ""
+msgstr "Fukushima"
 
 #: i18n/states/JP.php:20
 msgid "Ibaraki"
-msgstr ""
+msgstr "Ibaraki"
 
 #: i18n/states/JP.php:21
 msgid "Tochigi"
-msgstr ""
+msgstr "Tochigi"
 
 #: i18n/states/JP.php:22
 msgid "Gunma"
-msgstr ""
+msgstr "Gunma"
 
 #: i18n/states/JP.php:23
 msgid "Saitama"
-msgstr ""
+msgstr "Saitama"
 
 #: i18n/states/JP.php:24
 msgid "Chiba"
-msgstr ""
+msgstr "Chiba"
 
 #: i18n/states/JP.php:25
 msgid "Tokyo"
-msgstr ""
+msgstr "Tokyo"
 
 #: i18n/states/JP.php:26
 msgid "Kanagawa"
-msgstr ""
+msgstr "Kanagawa"
 
 #: i18n/states/JP.php:27
 msgid "Niigata"
-msgstr ""
+msgstr "Niigata"
 
 #: i18n/states/JP.php:28
 msgid "Toyama"
-msgstr ""
+msgstr "Toyama"
 
 #: i18n/states/JP.php:29
 msgid "Ishikawa"
-msgstr ""
+msgstr "Ishikawa"
 
 #: i18n/states/JP.php:30
 msgid "Fukui"
-msgstr ""
+msgstr "Fukui"
 
 #: i18n/states/JP.php:31
 msgid "Yamanashi"
-msgstr ""
+msgstr "Yamanashi"
 
 #: i18n/states/JP.php:32
 msgid "Nagano"
-msgstr ""
+msgstr "Nagano"
 
 #: i18n/states/JP.php:33
 msgid "Gifu"
-msgstr ""
+msgstr "Gifu"
 
 #: i18n/states/JP.php:34
 msgid "Shizuoka"
-msgstr ""
+msgstr "Shizuoka"
 
 #: i18n/states/JP.php:35
 msgid "Aichi"
-msgstr ""
+msgstr "Aichi"
 
 #: i18n/states/JP.php:36
 msgid "Mie"
-msgstr ""
+msgstr "Mie"
 
 #: i18n/states/JP.php:37
 msgid "Shiga"
-msgstr ""
+msgstr "Shiga"
 
 #: i18n/states/JP.php:38
 msgid "Kyouto"
-msgstr ""
+msgstr "Kyouto"
 
 #: i18n/states/JP.php:39
 msgid "Osaka"
-msgstr ""
+msgstr "Osaka"
 
 #: i18n/states/JP.php:40
 msgid "Hyougo"
-msgstr ""
+msgstr "Hyougo"
 
 #: i18n/states/JP.php:41
 msgid "Nara"
-msgstr ""
+msgstr "Nara"
 
 #: i18n/states/JP.php:42
 msgid "Wakayama"
-msgstr ""
+msgstr "Wakayama"
 
 #: i18n/states/JP.php:43
 msgid "Tottori"
-msgstr ""
+msgstr "Tottori"
 
 #: i18n/states/JP.php:44
 msgid "Shimane"
-msgstr ""
+msgstr "Shimane"
 
 #: i18n/states/JP.php:45
 msgid "Okayama"
-msgstr ""
+msgstr "Okayama"
 
 #: i18n/states/JP.php:46
 msgid "Hiroshima"
-msgstr ""
+msgstr "Hiroshima"
 
 #: i18n/states/JP.php:47
 msgid "Yamaguchi"
-msgstr ""
+msgstr "Yamaguchi"
 
 #: i18n/states/JP.php:48
 msgid "Tokushima"
-msgstr ""
+msgstr "Tokushima"
 
 #: i18n/states/JP.php:49
 msgid "Kagawa"
-msgstr ""
+msgstr "Kagawa"
 
 #: i18n/states/JP.php:50
 msgid "Ehime"
-msgstr ""
+msgstr "Ehime"
 
 #: i18n/states/JP.php:51
 msgid "Kochi"
-msgstr ""
+msgstr "Kochi"
 
 #: i18n/states/JP.php:52
 msgid "Fukuoka"
-msgstr ""
+msgstr "Fukuoka"
 
 #: i18n/states/JP.php:53
 msgid "Saga"
-msgstr ""
+msgstr "Saga"
 
 #: i18n/states/JP.php:54
 msgid "Nagasaki"
-msgstr ""
+msgstr "Nagasaki"
 
 #: i18n/states/JP.php:55
 msgid "Kumamoto"
-msgstr ""
+msgstr "Kumamoto"
 
 #: i18n/states/JP.php:56
 msgid "Oita"
-msgstr ""
+msgstr "Oita"
 
 #: i18n/states/JP.php:57
 msgid "Miyazaki"
-msgstr ""
+msgstr "Miyazaki"
 
 #: i18n/states/JP.php:58
 msgid "Kagoshima"
-msgstr ""
+msgstr "Kagoshima"
 
 #: i18n/states/JP.php:59
 msgid "Okinawa"
@@ -1826,7 +1827,7 @@ msgstr "W.P. Putrajaya"
 
 #: i18n/states/PE.php:13
 msgid "El Callao"
-msgstr ""
+msgstr "El Callao"
 
 #: i18n/states/PE.php:14
 msgid "Municipalidad Metropolitana de Lima"
@@ -1834,95 +1835,95 @@ msgstr "首都利马市"
 
 #: i18n/states/PE.php:16
 msgid "Ancash"
-msgstr ""
+msgstr "Ancash"
 
 #: i18n/states/PE.php:17
 msgid "Apur&iacute;mac"
-msgstr ""
+msgstr "Apur&iacute;mac"
 
 #: i18n/states/PE.php:18
 msgid "Arequipa"
-msgstr ""
+msgstr "Arequipa"
 
 #: i18n/states/PE.php:19
 msgid "Ayacucho"
-msgstr ""
+msgstr "Ayacucho"
 
 #: i18n/states/PE.php:20
 msgid "Cajamarca"
-msgstr ""
+msgstr "Cajamarca"
 
 #: i18n/states/PE.php:21
 msgid "Cusco"
-msgstr ""
+msgstr "Cusco"
 
 #: i18n/states/PE.php:22
 msgid "Huancavelica"
-msgstr ""
+msgstr "Huancavelica"
 
 #: i18n/states/PE.php:23
 msgid "Hu&aacute;nuco"
-msgstr ""
+msgstr "Hu&aacute;nuco"
 
 #: i18n/states/PE.php:24
 msgid "Ica"
-msgstr ""
+msgstr "Ica"
 
 #: i18n/states/PE.php:25
 msgid "Jun&iacute;n"
-msgstr ""
+msgstr "Jun&iacute;n"
 
 #: i18n/states/PE.php:26
 msgid "La Libertad"
-msgstr ""
+msgstr "La Libertad"
 
 #: i18n/states/PE.php:27
 msgid "Lambayeque"
-msgstr ""
+msgstr "Lambayeque"
 
 #: i18n/states/PE.php:28
 msgid "Lima"
-msgstr ""
+msgstr "Lima"
 
 #: i18n/states/PE.php:29
 msgid "Loreto"
-msgstr ""
+msgstr "Loreto"
 
 #: i18n/states/PE.php:30
 msgid "Madre de Dios"
-msgstr ""
+msgstr "Madre de Dios"
 
 #: i18n/states/PE.php:31
 msgid "Moquegua"
-msgstr ""
+msgstr "Moquegua"
 
 #: i18n/states/PE.php:32
 msgid "Pasco"
-msgstr ""
+msgstr "Pasco"
 
 #: i18n/states/PE.php:33
 msgid "Piura"
-msgstr ""
+msgstr "Piura"
 
 #: i18n/states/PE.php:34
 msgid "Puno"
-msgstr ""
+msgstr "Puno"
 
 #: i18n/states/PE.php:35
 msgid "San Mart&iacute;n"
-msgstr ""
+msgstr "San Mart&iacute;n"
 
 #: i18n/states/PE.php:36
 msgid "Tacna"
-msgstr ""
+msgstr "Tacna"
 
 #: i18n/states/PE.php:37
 msgid "Tumbes"
-msgstr ""
+msgstr "Tumbes"
 
 #: i18n/states/PE.php:38
 msgid "Ucayali"
-msgstr ""
+msgstr "Ucayali"
 
 #: i18n/states/TH.php:13
 msgid ""
@@ -2283,279 +2284,279 @@ msgstr "Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)"
 
 #: i18n/states/TR.php:13
 msgid "Adana"
-msgstr ""
+msgstr "Adana"
 
 #: i18n/states/TR.php:14
 msgid "Ad&#305;yaman"
-msgstr ""
+msgstr "Ad&#305;yaman"
 
 #: i18n/states/TR.php:15
 msgid "Afyon"
-msgstr ""
+msgstr "Afyon"
 
 #: i18n/states/TR.php:16
 msgid "A&#287;r&#305;"
-msgstr ""
+msgstr "A&#287;r&#305;"
 
 #: i18n/states/TR.php:17
 msgid "Amasya"
-msgstr ""
+msgstr "Amasya"
 
 #: i18n/states/TR.php:18
 msgid "Ankara"
-msgstr ""
+msgstr "Ankara"
 
 #: i18n/states/TR.php:19
 msgid "Antalya"
-msgstr ""
+msgstr "Antalya"
 
 #: i18n/states/TR.php:20
 msgid "Artvin"
-msgstr ""
+msgstr "Artvin"
 
 #: i18n/states/TR.php:21
 msgid "Ayd&#305;n"
-msgstr ""
+msgstr "Ayd&#305;n"
 
 #: i18n/states/TR.php:22
 msgid "Bal&#305;kesir"
-msgstr ""
+msgstr "Bal&#305;kesir"
 
 #: i18n/states/TR.php:23
 msgid "Bilecik"
-msgstr ""
+msgstr "Bilecik"
 
 #: i18n/states/TR.php:24
 msgid "Bing&#246;l"
-msgstr ""
+msgstr "Bing&#246;l"
 
 #: i18n/states/TR.php:25
 msgid "Bitlis"
-msgstr ""
+msgstr "Bitlis"
 
 #: i18n/states/TR.php:26
 msgid "Bolu"
-msgstr ""
+msgstr "Bolu"
 
 #: i18n/states/TR.php:27
 msgid "Burdur"
-msgstr ""
+msgstr "Burdur"
 
 #: i18n/states/TR.php:28
 msgid "Bursa"
-msgstr ""
+msgstr "Bursa"
 
 #: i18n/states/TR.php:29
 msgid "&#199;anakkale"
-msgstr ""
+msgstr "&#199;anakkale"
 
 #: i18n/states/TR.php:30
 msgid "&#199;ank&#305;r&#305;"
-msgstr ""
+msgstr "&#199;ank&#305;r&#305;"
 
 #: i18n/states/TR.php:31
 msgid "&#199;orum"
-msgstr ""
+msgstr "&#199;orum"
 
 #: i18n/states/TR.php:32
 msgid "Denizli"
-msgstr ""
+msgstr "Denizli"
 
 #: i18n/states/TR.php:33
 msgid "Diyarbak&#305;r"
-msgstr ""
+msgstr "Diyarbak&#305;r"
 
 #: i18n/states/TR.php:34
 msgid "Edirne"
-msgstr ""
+msgstr "Edirne"
 
 #: i18n/states/TR.php:35
 msgid "Elaz&#305;&#287;"
-msgstr ""
+msgstr "Elaz&#305;&#287;"
 
 #: i18n/states/TR.php:36
 msgid "Erzincan"
-msgstr ""
+msgstr "Erzincan"
 
 #: i18n/states/TR.php:37
 msgid "Erzurum"
-msgstr ""
+msgstr "Erzurum"
 
 #: i18n/states/TR.php:38
 msgid "Eski&#351;ehir"
-msgstr ""
+msgstr "Eski&#351;ehir"
 
 #: i18n/states/TR.php:39
 msgid "Gaziantep"
-msgstr ""
+msgstr "Gaziantep"
 
 #: i18n/states/TR.php:40
 msgid "Giresun"
-msgstr ""
+msgstr "Giresun"
 
 #: i18n/states/TR.php:41
 msgid "G&#252;m&#252;&#351;hane"
-msgstr ""
+msgstr "G&#252;m&#252;&#351;hane"
 
 #: i18n/states/TR.php:42
 msgid "Hakkari"
-msgstr ""
+msgstr "Hakkari"
 
 #: i18n/states/TR.php:43
 msgid "Hatay"
-msgstr ""
+msgstr "Hatay"
 
 #: i18n/states/TR.php:44
 msgid "Isparta"
-msgstr ""
+msgstr "Isparta"
 
 #: i18n/states/TR.php:45
 msgid "&#304;&#231;el"
-msgstr ""
+msgstr "&#304;&#231;el"
 
 #: i18n/states/TR.php:46
 msgid "&#304;stanbul"
-msgstr ""
+msgstr "&#304;stanbul"
 
 #: i18n/states/TR.php:47
 msgid "&#304;zmir"
-msgstr ""
+msgstr "&#304;zmir"
 
 #: i18n/states/TR.php:48
 msgid "Kars"
-msgstr ""
+msgstr "Kars"
 
 #: i18n/states/TR.php:49
 msgid "Kastamonu"
-msgstr ""
+msgstr "Kastamonu"
 
 #: i18n/states/TR.php:50
 msgid "Kayseri"
-msgstr ""
+msgstr "Kayseri"
 
 #: i18n/states/TR.php:51
 msgid "K&#305;rklareli"
-msgstr ""
+msgstr "K&#305;rklareli"
 
 #: i18n/states/TR.php:52
 msgid "K&#305;r&#351;ehir"
-msgstr ""
+msgstr "K&#305;r&#351;ehir"
 
 #: i18n/states/TR.php:53
 msgid "Kocaeli"
-msgstr ""
+msgstr "Kocaeli"
 
 #: i18n/states/TR.php:54
 msgid "Konya"
-msgstr ""
+msgstr "Konya"
 
 #: i18n/states/TR.php:55
 msgid "K&#252;tahya"
-msgstr ""
+msgstr "K&#252;tahya"
 
 #: i18n/states/TR.php:56
 msgid "Malatya"
-msgstr ""
+msgstr "Malatya"
 
 #: i18n/states/TR.php:57
 msgid "Manisa"
-msgstr ""
+msgstr "Manisa"
 
 #: i18n/states/TR.php:58
 msgid "Kahramanmara&#351;"
-msgstr ""
+msgstr "Kahramanmara&#351;"
 
 #: i18n/states/TR.php:59
 msgid "Mardin"
-msgstr ""
+msgstr "Mardin"
 
 #: i18n/states/TR.php:60
 msgid "Mu&#287;la"
-msgstr ""
+msgstr "Mu&#287;la"
 
 #: i18n/states/TR.php:61
 msgid "Mu&#351;"
-msgstr ""
+msgstr "Mu&#351;"
 
 #: i18n/states/TR.php:62
 msgid "Nev&#351;ehir"
-msgstr ""
+msgstr "Nev&#351;ehir"
 
 #: i18n/states/TR.php:63
 msgid "Ni&#287;de"
-msgstr ""
+msgstr "Ni&#287;de"
 
 #: i18n/states/TR.php:64
 msgid "Ordu"
-msgstr ""
+msgstr "Ordu"
 
 #: i18n/states/TR.php:65
 msgid "Rize"
-msgstr ""
+msgstr "Rize"
 
 #: i18n/states/TR.php:66
 msgid "Sakarya"
-msgstr ""
+msgstr "Sakarya"
 
 #: i18n/states/TR.php:67
 msgid "Samsun"
-msgstr ""
+msgstr "Samsun"
 
 #: i18n/states/TR.php:68
 msgid "Siirt"
-msgstr ""
+msgstr "Siirt"
 
 #: i18n/states/TR.php:69
 msgid "Sinop"
-msgstr ""
+msgstr "Sinop"
 
 #: i18n/states/TR.php:70
 msgid "Sivas"
-msgstr ""
+msgstr "Sivas"
 
 #: i18n/states/TR.php:71
 msgid "Tekirda&#287;"
-msgstr ""
+msgstr "Tekirda&#287;"
 
 #: i18n/states/TR.php:72
 msgid "Tokat"
-msgstr ""
+msgstr "Tokat"
 
 #: i18n/states/TR.php:73
 msgid "Trabzon"
-msgstr ""
+msgstr "Trabzon"
 
 #: i18n/states/TR.php:74
 msgid "Tunceli"
-msgstr ""
+msgstr "Tunceli"
 
 #: i18n/states/TR.php:75
 msgid "&#350;anl&#305;urfa"
-msgstr ""
+msgstr "&#350;anl&#305;urfa"
 
 #: i18n/states/TR.php:76
 msgid "U&#351;ak"
-msgstr ""
+msgstr "U&#351;ak"
 
 #: i18n/states/TR.php:77
 msgid "Van"
-msgstr ""
+msgstr "Van"
 
 #: i18n/states/TR.php:78
 msgid "Yozgat"
-msgstr ""
+msgstr "Yozgat"
 
 #: i18n/states/TR.php:79
 msgid "Zonguldak"
-msgstr ""
+msgstr "Zonguldak"
 
 #: i18n/states/TR.php:80
 msgid "Aksaray"
-msgstr ""
+msgstr "Aksaray"
 
 #: i18n/states/TR.php:81
 msgid "Bayburt"
-msgstr ""
+msgstr "Bayburt"
 
 #: i18n/states/TR.php:82
 msgid "Karaman"
@@ -2563,27 +2564,27 @@ msgstr "卡拉曼"
 
 #: i18n/states/TR.php:83
 msgid "K&#305;r&#305;kkale"
-msgstr ""
+msgstr "K&#305;r&#305;kkale"
 
 #: i18n/states/TR.php:84
 msgid "Batman"
-msgstr ""
+msgstr "Batman"
 
 #: i18n/states/TR.php:85
 msgid "&#350;&#305;rnak"
-msgstr ""
+msgstr "&#350;&#305;rnak"
 
 #: i18n/states/TR.php:86
 msgid "Bart&#305;n"
-msgstr ""
+msgstr "Bart&#305;n"
 
 #: i18n/states/TR.php:87
 msgid "Ardahan"
-msgstr ""
+msgstr "Ardahan"
 
 #: i18n/states/TR.php:88
 msgid "I&#287;d&#305;r"
-msgstr ""
+msgstr "I&#287;d&#305;r"
 
 #: i18n/states/TR.php:89
 msgid "Yalova"
@@ -2591,7 +2592,7 @@ msgstr "Yalova"
 
 #: i18n/states/TR.php:90
 msgid "Karab&#252;k"
-msgstr ""
+msgstr "Karab&#252;k"
 
 #: i18n/states/TR.php:91
 msgid "Kilis"
@@ -2603,7 +2604,7 @@ msgstr "奥斯曼尼耶"
 
 #: i18n/states/TR.php:93
 msgid "D&#252;zce"
-msgstr ""
+msgstr "D&#252;zce"
 
 #: i18n/states/US.php:13
 msgid "Alabama"
@@ -3055,251 +3056,251 @@ msgstr "有效期(月/年)"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
-msgstr ""
+msgstr "Card Code"
 
-#: includes/abstracts/abstract-wc-product.php:454
+#: includes/abstracts/abstract-wc-product.php:455
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
 msgstr "加入购物车"
 
-#: includes/abstracts/abstract-wc-product.php:464
+#: includes/abstracts/abstract-wc-product.php:465
 msgid "Read more"
 msgstr "阅读更多"
 
-#: includes/abstracts/abstract-wc-product.php:572
-#: includes/abstracts/abstract-wc-product.php:577
-#: includes/abstracts/abstract-wc-product.php:597
+#: includes/abstracts/abstract-wc-product.php:573
+#: includes/abstracts/abstract-wc-product.php:578
+#: includes/abstracts/abstract-wc-product.php:598
 msgid "In stock"
 msgstr "有货"
 
-#: includes/abstracts/abstract-wc-product.php:577
+#: includes/abstracts/abstract-wc-product.php:578
 msgid "Only %s left in stock"
 msgstr "库存仅剩 %s"
 
-#: includes/abstracts/abstract-wc-product.php:580
+#: includes/abstracts/abstract-wc-product.php:581
 msgid "%s in stock"
 msgstr "库存 %s 件"
 
-#: includes/abstracts/abstract-wc-product.php:587
+#: includes/abstracts/abstract-wc-product.php:588
 msgid "(backorders allowed)"
 msgstr "（延期发货获准）"
 
-#: includes/abstracts/abstract-wc-product.php:594
-#: includes/abstracts/abstract-wc-product.php:607 templates/cart/cart.php:74
+#: includes/abstracts/abstract-wc-product.php:595
+#: includes/abstracts/abstract-wc-product.php:608 templates/cart/cart.php:74
 msgid "Available on backorder"
 msgstr "可用的延迟发货"
 
-#: includes/abstracts/abstract-wc-product.php:600
-#: includes/abstracts/abstract-wc-product.php:610
-#: includes/abstracts/abstract-wc-product.php:614
+#: includes/abstracts/abstract-wc-product.php:601
+#: includes/abstracts/abstract-wc-product.php:611
+#: includes/abstracts/abstract-wc-product.php:615
 msgid "Out of stock"
 msgstr "无货"
 
-#: includes/abstracts/abstract-wc-product.php:907
-#: includes/abstracts/abstract-wc-product.php:913
-#: includes/class-wc-cart.php:1415 includes/class-wc-order.php:838
+#: includes/abstracts/abstract-wc-product.php:908
+#: includes/abstracts/abstract-wc-product.php:914
+#: includes/class-wc-cart.php:1419 includes/class-wc-order.php:838
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "免费"
 
-#: includes/abstracts/abstract-wc-product.php:929
+#: includes/abstracts/abstract-wc-product.php:930
 msgctxt "min_price"
 msgid "From:"
 msgstr "来自："
 
-#: includes/abstracts/abstract-wc-product.php:1039
+#: includes/abstracts/abstract-wc-product.php:1040
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr "评分 %s 超出5"
 
-#: includes/abstracts/abstract-wc-product.php:1041
+#: includes/abstracts/abstract-wc-product.php:1042
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr "超出5"
 
-#: includes/abstracts/abstract-wc-product.php:1383
+#: includes/abstracts/abstract-wc-product.php:1384
 msgid "%s &ndash; %s"
-msgstr ""
+msgstr "%s &ndash; %s"
 
 #: includes/api/class-wc-api-authentication.php:69
 msgid "Consumer Key is missing"
-msgstr ""
+msgstr "Consumer Key is missing"
 
 #: includes/api/class-wc-api-authentication.php:72
 msgid "Consumer Secret is missing"
-msgstr ""
+msgstr "Consumer Secret is missing"
 
 #: includes/api/class-wc-api-authentication.php:80
 msgid "Consumer Secret is invalid"
-msgstr ""
+msgstr "Consumer Secret is invalid"
 
 #: includes/api/class-wc-api-authentication.php:112
 msgid "%s parameter is missing"
-msgstr ""
+msgstr "%s参数丢失"
 
 #: includes/api/class-wc-api-authentication.php:151
 msgid "Consumer Key is invalid"
-msgstr ""
+msgstr "Consumer Key is invalid"
 
 #: includes/api/class-wc-api-authentication.php:201
 msgid "Invalid Signature - failed to sort parameters"
-msgstr ""
+msgstr "无效签名，无法处理参数"
 
 #: includes/api/class-wc-api-authentication.php:214
 msgid "Invalid Signature - signature method is invalid"
-msgstr ""
+msgstr "无效签名 － 签名方式无效"
 
 #: includes/api/class-wc-api-authentication.php:221
 msgid "Invalid Signature - provided signature does not match"
-msgstr ""
+msgstr "无效签名 - 签名不匹配"
 
 #: includes/api/class-wc-api-authentication.php:256
 msgid "Invalid timestamp"
-msgstr ""
+msgstr "无效时间蹉"
 
 #: includes/api/class-wc-api-authentication.php:264
 msgid "Invalid nonce - nonce has already been used"
-msgstr ""
+msgstr "Invalid nonce - nonce has already been used"
 
 #: includes/api/class-wc-api-authentication.php:293
 msgid "The API key provided does not have read permissions"
-msgstr ""
+msgstr "当前所设置的API key没有读取权限"
 
 #: includes/api/class-wc-api-authentication.php:302
 msgid "The API key provided does not have write permissions"
-msgstr ""
+msgstr "当前所设置的API key没有写权限"
 
 #: includes/api/class-wc-api-coupons.php:107
 msgid "Invalid coupon ID"
-msgstr ""
+msgstr "无效优惠券ID"
 
 #: includes/api/class-wc-api-coupons.php:152
 msgid "You do not have permission to read the coupons count"
-msgstr ""
+msgstr "无权读取优惠券数量"
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
-msgstr ""
+msgstr "无效优惠券"
 
 #: includes/api/class-wc-api-customers.php:198
 #: includes/api/class-wc-api-customers.php:201
 msgid "Invalid customer Email"
-msgstr ""
+msgstr "无效的客户邮箱"
 
 #: includes/api/class-wc-api-customers.php:219
 msgid "You do not have permission to read the customers count"
-msgstr ""
+msgstr "你无权读取客户数量"
 
 #: includes/api/class-wc-api-customers.php:235
 msgid "You do not have permission to create this customer"
-msgstr ""
+msgstr "你无权创建客户"
 
 #: includes/api/class-wc-api-customers.php:482
 msgid "Invalid customer ID"
-msgstr ""
+msgstr "无效客户ID"
 
 #: includes/api/class-wc-api-customers.php:488
 msgid "Invalid customer"
-msgstr ""
+msgstr "无效客户"
 
 #: includes/api/class-wc-api-customers.php:495
 msgid "You do not have permission to read this customer"
-msgstr ""
+msgstr "你无权获取此客户信息"
 
 #: includes/api/class-wc-api-customers.php:500
 msgid "You do not have permission to edit this customer"
-msgstr ""
+msgstr "你无权编辑此客户信息"
 
 #: includes/api/class-wc-api-customers.php:505
 msgid "You do not have permission to delete this customer"
-msgstr ""
+msgstr "你无权删除此客户"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
-msgstr ""
+msgstr "该站禁止使用JSONP"
 
 #: includes/api/class-wc-api-json-handler.php:64
 msgid "The JSONP callback function is invalid"
-msgstr ""
+msgstr "JSONP回调函数无效"
 
 #: includes/api/class-wc-api-orders.php:255
 msgid "You do not have permission to read the orders count"
-msgstr ""
+msgstr "你无权读取订单数量"
 
 #: includes/api/class-wc-api-products.php:140
 msgid "You do not have permission to read the products count"
-msgstr ""
+msgstr "你无权读取商品数量"
 
 #: includes/api/class-wc-api-products.php:459
 #: includes/api/class-wc-api-products.php:460
 msgid "Placeholder"
-msgstr ""
+msgstr "占位"
 
 #: includes/api/class-wc-api-reports.php:469
 msgid "You do not have permission to read this report"
-msgstr ""
+msgstr "你无权读取这个报告"
 
 #: includes/api/class-wc-api-resource.php:71
 msgid "Invalid %s ID"
-msgstr ""
+msgstr "无效"
 
 #: includes/api/class-wc-api-resource.php:83
 msgid "Invalid %s"
-msgstr ""
+msgstr "无效的%s"
 
 #: includes/api/class-wc-api-resource.php:90
 msgid "You do not have permission to read this %s"
-msgstr ""
+msgstr "你无权获取"
 
 #: includes/api/class-wc-api-resource.php:95
 msgid "You do not have permission to edit this %s"
-msgstr ""
+msgstr "你无权编辑%s"
 
 #: includes/api/class-wc-api-resource.php:100
 msgid "You do not have permission to delete this %s"
-msgstr ""
+msgstr "你无权删除%s"
 
 #: includes/api/class-wc-api-resource.php:302
 msgid "Permanently deleted customer"
-msgstr ""
+msgstr "永久删除客户"
 
 #: includes/api/class-wc-api-resource.php:304
 msgid "The customer cannot be deleted"
-msgstr ""
+msgstr "该客户不能删除"
 
 #: includes/api/class-wc-api-resource.php:313
 msgid "This %s cannot be deleted"
-msgstr ""
+msgstr "不能删除%s"
 
 #: includes/api/class-wc-api-resource.php:316
 msgid "Permanently deleted %s"
-msgstr ""
+msgstr "永久删除"
 
 #: includes/api/class-wc-api-resource.php:322
 msgid "Deleted %s"
-msgstr ""
+msgstr "删除"
 
 #: includes/api/class-wc-api-server.php:165
 msgid "Invalid authentication method"
-msgstr ""
+msgstr "无效认证方式"
 
 #: includes/api/class-wc-api-server.php:316
 msgid "Unsupported request method"
-msgstr ""
+msgstr "不支持的请求方式"
 
 #: includes/api/class-wc-api-server.php:333
 msgid "The handler for the route is invalid"
-msgstr ""
+msgstr "The handler for the route is invalid"
 
 #: includes/api/class-wc-api-server.php:369
 msgid "No route was found matching the URL and request method"
-msgstr ""
+msgstr "No route was found matching the URL and request method"
 
 #: includes/api/class-wc-api-server.php:404
 msgid "Missing parameter %s"
-msgstr ""
+msgstr "缺少参数"
 
 #: includes/class-wc-ajax.php:158
 msgid "Sorry, your session has expired."
@@ -3327,8 +3328,7 @@ msgstr "与父级相同"
 msgid "Standard"
 msgstr "标准"
 
-#: includes/class-wc-ajax.php:810 includes/class-wc-customer.php:639
-#: includes/class-wc-customer.php:650
+#: includes/class-wc-ajax.php:810
 msgid "File %d"
 msgstr "文件 %d"
 
@@ -3382,7 +3382,7 @@ msgstr "为了 WooCommerce 能使用 <strong>数据库缓存</strong>,你必须�
 msgid ""
 "%s has been removed from your cart because it can no longer be purchased. "
 "Please contact us if you need assistance."
-msgstr ""
+msgstr "已从购物车中删除%s，因为它已经下架了。如果你需要帮助，请联系我们"
 
 #: includes/class-wc-cart.php:363
 msgid "An item which is no longer available was removed from your cart."
@@ -3409,37 +3409,37 @@ msgid ""
 "apologise for any inconvenience caused."
 msgstr "对不起,\"%s\"缺货了,请修改购物车内所购商品,然后再试一次。造成的任何不便，我们深表歉意。"
 
-#: includes/class-wc-cart.php:794
+#: includes/class-wc-cart.php:798
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
 msgstr "对不起, &quot;%s&quot; 不能下单。"
 
-#: includes/class-wc-cart.php:801
+#: includes/class-wc-cart.php:805
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr "你不能添加 &quot;%s&quot; 到购物车，因为产品已脱销。"
 
-#: includes/class-wc-cart.php:806
+#: includes/class-wc-cart.php:810
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr "你能购买的数量不能超过&quot;%s&quot; 因为我们的库存不足, (库存为%s)."
 
-#: includes/class-wc-cart.php:820 includes/class-wc-cart.php:839
-#: includes/class-wc-cart.php:852 includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-cart.php:824 includes/class-wc-cart.php:843
+#: includes/class-wc-cart.php:856 includes/class-wc-frontend-scripts.php:157
 #: includes/wc-cart-functions.php:98 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "查看购物车"
 
-#: includes/class-wc-cart.php:821
+#: includes/class-wc-cart.php:825
 msgid "You cannot add another &quot;%s&quot; to your cart."
-msgstr ""
+msgstr "无法添加另一个到购物车"
 
-#: includes/class-wc-cart.php:840 includes/class-wc-cart.php:853
+#: includes/class-wc-cart.php:844 includes/class-wc-cart.php:857
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr ""
+msgstr "不能添加那个数量的商品到购物车。我们库存有 %s 而且你购物车中已经有"
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -3447,7 +3447,7 @@ msgstr ""
 #: includes/class-wc-payment-gateways.php:55 includes/class-wc-shipping.php:64
 #: includes/class-wc-shipping.php:73 woocommerce.php:102 woocommerce.php:111
 msgid "Cheatin&#8217; huh?"
-msgstr ""
+msgstr "Cheatin&#8217; huh?"
 
 #: includes/class-wc-checkout.php:97
 msgid "Account username"
@@ -3493,20 +3493,20 @@ msgstr "延时交货"
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
-msgstr ""
+msgstr "抱歉，会话过期。<a href=\"%s\" class=\"wc-backward\">返回到首页</a>"
 
 #: includes/class-wc-checkout.php:491 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "为必填项"
 
 #: includes/class-wc-checkout.php:503 includes/class-wc-form-handler.php:99
-#: includes/shortcodes/class-wc-shortcode-cart.php:37
+#: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "请输入一个有效的邮政编码。"
 
 #: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
-msgstr ""
+msgstr "无效电话号码"
 
 #: includes/class-wc-checkout.php:518 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
@@ -3524,7 +3524,7 @@ msgstr "你必须接受我们的条款及条件。"
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
-msgstr ""
+msgstr "报歉，<strong>我们的物流无法送达%s<strong>。请输入一个可用的收货地址。"
 
 #: includes/class-wc-checkout.php:591
 msgid "Invalid shipping method."
@@ -4460,11 +4460,11 @@ msgstr "阿拉伯联合酋长国"
 
 #: includes/class-wc-countries.php:267
 msgid "United Kingdom (UK)"
-msgstr ""
+msgstr "United Kingdom (UK)"
 
 #: includes/class-wc-countries.php:268
 msgid "United States (US)"
-msgstr ""
+msgstr "United States (US)"
 
 #: includes/class-wc-countries.php:269
 msgid "Uruguay"
@@ -4550,94 +4550,94 @@ msgstr "(不含. 增值税)"
 msgid "(ex. tax)"
 msgstr "(税前)"
 
-#: includes/class-wc-countries.php:718
+#: includes/class-wc-countries.php:719
 msgid "Country"
 msgstr "国家"
 
-#: includes/class-wc-countries.php:723
+#: includes/class-wc-countries.php:724
 msgid "First Name"
 msgstr "名"
 
-#: includes/class-wc-countries.php:728
+#: includes/class-wc-countries.php:729
 msgid "Last Name"
 msgstr "姓"
 
-#: includes/class-wc-countries.php:734
+#: includes/class-wc-countries.php:735
 msgid "Company Name"
 msgstr "公司名称"
 
-#: includes/class-wc-countries.php:738
+#: includes/class-wc-countries.php:739
 msgid "Address"
 msgstr "地址"
 
-#: includes/class-wc-countries.php:739
+#: includes/class-wc-countries.php:740
 msgctxt "placeholder"
 msgid "Street address"
 msgstr "编辑地址"
 
-#: includes/class-wc-countries.php:744
+#: includes/class-wc-countries.php:745
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
 msgstr "Apartment, suite, unit etc. (optional)"
 
-#: includes/class-wc-countries.php:749 includes/class-wc-countries.php:750
+#: includes/class-wc-countries.php:750 includes/class-wc-countries.php:751
 msgid "Town / City"
 msgstr "镇/市"
 
-#: includes/class-wc-countries.php:756 includes/class-wc-countries.php:757
+#: includes/class-wc-countries.php:757 includes/class-wc-countries.php:758
 msgid "State / County"
 msgstr "地区/县"
 
-#: includes/class-wc-countries.php:763 includes/class-wc-countries.php:764
+#: includes/class-wc-countries.php:764 includes/class-wc-countries.php:765
 #: templates/cart/shipping-calculator.php:80
 msgid "Postcode / Zip"
 msgstr "邮政编码"
 
-#: includes/class-wc-countries.php:825 includes/class-wc-countries.php:841
-#: includes/class-wc-countries.php:861 includes/class-wc-countries.php:922
-#: includes/class-wc-countries.php:941 includes/class-wc-countries.php:946
-#: includes/class-wc-countries.php:958 includes/class-wc-countries.php:1008
-#: includes/class-wc-countries.php:1032 includes/class-wc-countries.php:1073
+#: includes/class-wc-countries.php:826 includes/class-wc-countries.php:842
+#: includes/class-wc-countries.php:862 includes/class-wc-countries.php:923
+#: includes/class-wc-countries.php:942 includes/class-wc-countries.php:947
+#: includes/class-wc-countries.php:959 includes/class-wc-countries.php:1009
+#: includes/class-wc-countries.php:1033 includes/class-wc-countries.php:1074
 msgid "Province"
 msgstr "省"
 
-#: includes/class-wc-countries.php:847
+#: includes/class-wc-countries.php:848
 msgid "Canton"
 msgstr "Canton"
 
-#: includes/class-wc-countries.php:856 includes/class-wc-countries.php:1014
+#: includes/class-wc-countries.php:857 includes/class-wc-countries.php:1015
 msgid "Municipality"
 msgstr "市"
 
-#: includes/class-wc-countries.php:909
+#: includes/class-wc-countries.php:910
 msgid "Town / District"
 msgstr "镇/街道"
 
-#: includes/class-wc-countries.php:912
+#: includes/class-wc-countries.php:913
 msgid "Region"
 msgstr "地区"
 
-#: includes/class-wc-countries.php:917 includes/class-wc-countries.php:1048
+#: includes/class-wc-countries.php:918 includes/class-wc-countries.php:1049
 msgid "County"
 msgstr "县"
 
-#: includes/class-wc-countries.php:1037
+#: includes/class-wc-countries.php:1038
 msgid "Zip"
 msgstr "邮政编码"
 
-#: includes/class-wc-countries.php:1040
+#: includes/class-wc-countries.php:1041
 msgid "State"
 msgstr "地区"
 
-#: includes/class-wc-countries.php:1045
+#: includes/class-wc-countries.php:1046
 msgid "Postcode"
 msgstr "邮编"
 
-#: includes/class-wc-countries.php:1153
+#: includes/class-wc-countries.php:1154
 msgid "Email Address"
 msgstr "Email 地址"
 
-#: includes/class-wc-countries.php:1159
+#: includes/class-wc-countries.php:1160
 msgid "Phone"
 msgstr "电话"
 
@@ -4647,7 +4647,7 @@ msgstr "优惠代码使用成功。"
 
 #: includes/class-wc-coupon.php:571
 msgid "Coupon code removed successfully."
-msgstr ""
+msgstr "成功去除优惠券"
 
 #: includes/class-wc-coupon.php:592
 msgid "Coupon is not valid."
@@ -4708,63 +4708,62 @@ msgid "Invalid email address."
 msgstr "无效email 地址。"
 
 #: includes/class-wc-download-handler.php:37
-#: includes/class-wc-download-handler.php:61
-#: includes/class-wc-download-handler.php:81
-#: includes/class-wc-download-handler.php:87
-#: includes/class-wc-download-handler.php:91
-#: includes/class-wc-download-handler.php:94
-#: includes/class-wc-download-handler.php:137
-#: includes/class-wc-download-handler.php:280
+#: includes/class-wc-download-handler.php:62
+#: includes/class-wc-download-handler.php:83
+#: includes/class-wc-download-handler.php:90
+#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-download-handler.php:99
+#: includes/class-wc-download-handler.php:143
+#: includes/class-wc-download-handler.php:294
 msgid "Go to homepage"
-msgstr ""
+msgstr "回到首页"
 
-#: includes/class-wc-download-handler.php:61
+#: includes/class-wc-download-handler.php:62
 msgid "Invalid download."
 msgstr "无效的下载。"
 
-#: includes/class-wc-download-handler.php:73
+#: includes/class-wc-download-handler.php:75
 msgid "You must be logged in to download files."
 msgstr "你必须登录才能下载此文件"
 
-#: includes/class-wc-download-handler.php:73
+#: includes/class-wc-download-handler.php:75
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:25
 #: templates/myaccount/form-login.php:44
 msgid "Login"
 msgstr "登录"
 
-#: includes/class-wc-download-handler.php:73
+#: includes/class-wc-download-handler.php:75
 msgid "Log in to Download Files"
-msgstr ""
+msgstr "登陆账户以下载文件"
 
-#: includes/class-wc-download-handler.php:76
+#: includes/class-wc-download-handler.php:77
 msgid "This is not your download link."
 msgstr "这不是你的下载链接。"
 
-#: includes/class-wc-download-handler.php:81
+#: includes/class-wc-download-handler.php:83
 msgid "Product no longer exists."
 msgstr "产品不再存在"
 
-#: includes/class-wc-download-handler.php:87
-#: includes/class-wc-form-handler.php:519
-#: includes/shortcodes/class-wc-shortcode-checkout.php:86
-#: includes/shortcodes/class-wc-shortcode-checkout.php:167
-#: includes/shortcodes/class-wc-shortcode-my-account.php:106
+#: includes/class-wc-download-handler.php:90
+#: includes/class-wc-form-handler.php:525
+#: includes/shortcodes/class-wc-shortcode-checkout.php:172
+#: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
 msgstr "无效订单。"
 
-#: includes/class-wc-download-handler.php:91
+#: includes/class-wc-download-handler.php:95
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "对不起，你已经达到这个文件的​​下载限制"
 
-#: includes/class-wc-download-handler.php:94
+#: includes/class-wc-download-handler.php:99
 msgid "Sorry, this download has expired"
 msgstr "对不起，此下载已失效"
 
-#: includes/class-wc-download-handler.php:137
+#: includes/class-wc-download-handler.php:143
 msgid "No file defined"
 msgstr "无效的文件类型"
 
-#: includes/class-wc-download-handler.php:280
+#: includes/class-wc-download-handler.php:294
 msgid "File not found"
 msgstr "文件无法找到"
 
@@ -4804,7 +4803,7 @@ msgstr "产品缺货"
 
 #: includes/class-wc-emails.php:411
 msgid "%s units of %s have been backordered in order %s."
-msgstr ""
+msgstr "%s 个 %s 因缺货而延期交付订单 %s."
 
 #: includes/class-wc-form-handler.php:129
 msgid "Address changed successfully."
@@ -4812,23 +4811,23 @@ msgstr "地址变更成功。"
 
 #: includes/class-wc-form-handler.php:180
 msgid "Please enter your name."
-msgstr ""
+msgstr "请输入你的名字"
 
 #: includes/class-wc-form-handler.php:184
 #: includes/wc-customer-functions.php:48
 msgid "Please provide a valid email address."
-msgstr ""
+msgstr "请提供有效的邮箱地址"
 
 #: includes/class-wc-form-handler.php:186
 msgid "This email address is already registered."
-msgstr ""
+msgstr "此邮箱已被注册过。"
 
 #: includes/class-wc-form-handler.php:190
 msgid "Please re-enter your password."
-msgstr ""
+msgstr "请再次输入你的密码"
 
 #: includes/class-wc-form-handler.php:192
-#: includes/class-wc-form-handler.php:809
+#: includes/class-wc-form-handler.php:815
 msgid "Passwords do not match."
 msgstr "密码不匹配."
 
@@ -4838,10 +4837,10 @@ msgstr "账户信息更改成功。"
 
 #: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
-msgstr ""
+msgstr "新的支付方式已添加"
 
 #: includes/class-wc-form-handler.php:367
-#: includes/class-wc-form-handler.php:420
+#: includes/class-wc-form-handler.php:426
 msgid "Cart updated."
 msgstr "购物车已更新。"
 
@@ -4849,80 +4848,72 @@ msgstr "购物车已更新。"
 msgid "You can only have 1 %s in your cart."
 msgstr "你只能有 1 %s在购物车。"
 
-#: includes/class-wc-form-handler.php:488
+#: includes/class-wc-form-handler.php:492
 msgid "The cart has been filled with the items from your previous order."
 msgstr "你的购物车里累计数量已满。"
 
-#: includes/class-wc-form-handler.php:509
+#: includes/class-wc-form-handler.php:515
 msgid "Order cancelled by customer."
 msgstr "订单已被客户取消。"
 
-#: includes/class-wc-form-handler.php:512
+#: includes/class-wc-form-handler.php:518
 msgid "Your order was cancelled."
 msgstr "你的订单已被取消。"
 
-#: includes/class-wc-form-handler.php:517
+#: includes/class-wc-form-handler.php:523
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
-msgstr ""
+msgstr "无法取消订单。如果你需要帮助，请联系我们。"
 
-#: includes/class-wc-form-handler.php:557
-#: includes/class-wc-form-handler.php:617
+#: includes/class-wc-form-handler.php:563
+#: includes/class-wc-form-handler.php:623
 msgid "Please choose product options&hellip;"
 msgstr "请选择产品选项&hellip;"
 
-#: includes/class-wc-form-handler.php:651
+#: includes/class-wc-form-handler.php:657
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "请选择您要购买的数量&hellip;"
 
-#: includes/class-wc-form-handler.php:658
+#: includes/class-wc-form-handler.php:664
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "请选择商品添加到购物车&hellip;"
 
-#: includes/class-wc-form-handler.php:718
-#: includes/class-wc-form-handler.php:722
-#: includes/class-wc-form-handler.php:726
-#: includes/class-wc-form-handler.php:735
-#: includes/class-wc-form-handler.php:857
+#: includes/class-wc-form-handler.php:724
+#: includes/class-wc-form-handler.php:728
+#: includes/class-wc-form-handler.php:732
+#: includes/class-wc-form-handler.php:741
+#: includes/class-wc-form-handler.php:861
 msgid "Error"
-msgstr ""
+msgstr "错误"
 
-#: includes/class-wc-form-handler.php:722
+#: includes/class-wc-form-handler.php:728
 msgid "Username is required."
 msgstr "用户名为必填。"
 
-#: includes/class-wc-form-handler.php:726
+#: includes/class-wc-form-handler.php:732
 msgid "Password is required."
 msgstr "密码为必填。"
 
-#: includes/class-wc-form-handler.php:735
+#: includes/class-wc-form-handler.php:741
 msgid "A user could not be found with this email address."
-msgstr ""
+msgstr "该邮箱末注册过账户"
 
-#: includes/class-wc-form-handler.php:760
+#: includes/class-wc-form-handler.php:766
 msgid "You are now logged in as <strong>%s</strong>"
-msgstr ""
+msgstr "当前登陆 <strong>%s</strong>"
 
-#: includes/class-wc-form-handler.php:804
+#: includes/class-wc-form-handler.php:810
 msgid "Please enter your password."
 msgstr "请输入你的密码。"
 
-#: includes/class-wc-form-handler.php:827
-msgid "Your password has been reset."
-msgstr "您的密码已被重置。"
-
-#: includes/class-wc-form-handler.php:827
-msgid "Log in"
-msgstr "登录"
-
-#: includes/class-wc-form-handler.php:873
+#: includes/class-wc-form-handler.php:877
 #: includes/wc-customer-functions.php:110
 msgid "ERROR"
 msgstr "错误"
 
-#: includes/class-wc-form-handler.php:873
+#: includes/class-wc-form-handler.php:877
 msgid "Anti-spam field was filled in."
 msgstr "验证码字段已填写。"
 
@@ -4931,7 +4922,7 @@ msgid "Please select a rating"
 msgstr "显示链接评级"
 
 #: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1578
+#: includes/wc-template-functions.php:1593
 msgid "required"
 msgstr "(必填)"
 
@@ -4944,44 +4935,50 @@ msgstr "很抱歉,没有商品符合您的选择条件,请尝试其它搜选条�
 #: includes/class-wc-frontend-scripts.php:165
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
-msgstr ""
+msgstr "抱歉,该商品已下架,请选择其它"
 
 #: includes/class-wc-frontend-scripts.php:170
 msgid "Select an option&hellip;"
 msgstr "选择一个选项&hellip;"
 
 #: includes/class-wc-install.php:217
-msgctxt "page_slug"
+msgctxt "Page slug"
 msgid "shop"
 msgstr "商店"
 
 #: includes/class-wc-install.php:218
+msgctxt "Page title"
 msgid "Shop"
 msgstr "商店"
 
 #: includes/class-wc-install.php:222
-msgctxt "page_slug"
+msgctxt "Page slug"
 msgid "cart"
 msgstr "购物车"
 
 #: includes/class-wc-install.php:223
-#: includes/widgets/class-wc-widget-cart.php:29
-#: includes/widgets/class-wc-widget-cart.php:56
+msgctxt "Page title"
 msgid "Cart"
 msgstr "购物车"
 
 #: includes/class-wc-install.php:227
-msgctxt "page_slug"
+msgctxt "Paeg slug"
 msgid "checkout"
 msgstr "结算"
 
-#: includes/class-wc-install.php:228 templates/cart/mini-cart.php:65
+#: includes/class-wc-install.php:228
+msgctxt "Page title"
 msgid "Checkout"
 msgstr "结算"
 
 #: includes/class-wc-install.php:232
-msgctxt "page_slug"
+msgctxt "Page slug"
 msgid "my-account"
+msgstr "我的帐户"
+
+#: includes/class-wc-install.php:233
+msgctxt "Page title"
+msgid "My Account"
 msgstr "我的帐户"
 
 #: includes/class-wc-install.php:455
@@ -5154,7 +5151,7 @@ msgid "Shipping Classes"
 msgstr "配送类型"
 
 #: includes/class-wc-post-types.php:127
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:521
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:546
 msgid "Shipping Class"
 msgstr "配送类型"
 
@@ -5421,14 +5418,14 @@ msgstr "买产品"
 
 #: includes/class-wc-product-grouped.php:42
 msgid "View products"
-msgstr ""
+msgstr "查看产品"
 
 #: includes/class-wc-product-grouped.php:194
 #: includes/class-wc-product-variable.php:251
 #: includes/class-wc-product-variable.php:256
 msgctxt "Price range: from-to"
 msgid "%1$s&ndash;%2$s"
-msgstr ""
+msgstr "%1$s&ndash;%2$s"
 
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
@@ -5443,7 +5440,7 @@ msgstr "选择选项"
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
-msgstr ""
+msgstr "产品没有活跃的可用变型所以不能发布。状态更改为draft。"
 
 #: includes/class-wc-product-variation.php:494
 msgid "%s &ndash; %s%s"
@@ -5453,7 +5450,7 @@ msgstr "%s &ndash; %s%s"
 msgid ""
 "Use $args[\"posts_per_page\"] instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr ""
+msgstr "请使用$args[\"posts_per_page\"]参数。不建议使用原先的参数，因为该参数在WC 2.2会删除掉。"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
 msgid "Completed order"
@@ -5471,7 +5468,7 @@ msgstr "[%s] 订单完成/下载链接"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:30
 msgid "Your {site_title} order from {order_date} is complete"
-msgstr ""
+msgstr "你 {order_date}日在 {site_title}下的订单已完成"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:39
 msgid "Your order is complete - download your files"
@@ -5480,7 +5477,7 @@ msgstr "您的订单已完成。您订单的详细信息如下："
 #: includes/emails/class-wc-email-customer-completed-order.php:40
 msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
-msgstr ""
+msgstr "你{order_date}日在{site_title}下的订单已完成 - 下载文件"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:146
 #: includes/emails/class-wc-email-new-order.php:133
@@ -5520,7 +5517,7 @@ msgstr "订单计划为：<strong>%1$s</strong>."
 
 #: includes/emails/class-wc-email-customer-invoice.php:38
 msgid "Your {site_title} order from {order_date}"
-msgstr ""
+msgstr "你{order_date}日在{site_title}的订单"
 
 #: includes/emails/class-wc-email-customer-invoice.php:39
 msgid "Order {order_number} details"
@@ -5546,11 +5543,11 @@ msgstr "当顾客注册结帐或者通过\"我的帐户\"结帐时,将会发送�
 
 #: includes/emails/class-wc-email-customer-new-account.php:39
 msgid "Your account on {site_title}"
-msgstr ""
+msgstr "你{site_title}的账户"
 
 #: includes/emails/class-wc-email-customer-new-account.php:40
 msgid "Welcome to {site_title}"
-msgstr ""
+msgstr "欢迎来到{site_title}"
 
 #: includes/emails/class-wc-email-customer-note.php:31
 msgid "Customer note"
@@ -5562,7 +5559,7 @@ msgstr "当你为订单添加备注时,发送电子邮件通知顾客."
 
 #: includes/emails/class-wc-email-customer-note.php:37
 msgid "Note added to your {site_title} order from {order_date}"
-msgstr ""
+msgstr "备注已添加到你{order_date}的 {site_title}订单"
 
 #: includes/emails/class-wc-email-customer-note.php:38
 msgid "A note has been added to your order"
@@ -5584,7 +5581,7 @@ msgstr "谢谢。您的订单已收到。"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {site_title} order receipt from {order_date}"
-msgstr ""
+msgstr "你{order_date}在 {site_title}所下订单的收据"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:38
 msgid "Reset password"
@@ -5598,7 +5595,7 @@ msgstr "当顾客重设密码时,给顾客发送密码重置电子邮件."
 
 #: includes/emails/class-wc-email-customer-reset-password.php:44
 msgid "Password Reset for {site_title}"
-msgstr ""
+msgstr "{site_title}账户密码重置"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:45
 msgid "Password Reset Instructions"
@@ -5610,7 +5607,7 @@ msgstr "新订单"
 
 #: includes/emails/class-wc-email-new-order.php:27
 msgid "New order emails are sent when an order is received."
-msgstr ""
+msgstr "客户下单后我们会发送新订单邮件"
 
 #: includes/emails/class-wc-email-new-order.php:29
 msgid "New customer order"
@@ -5618,7 +5615,7 @@ msgstr "新客户订单"
 
 #: includes/emails/class-wc-email-new-order.php:30
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
-msgstr ""
+msgstr "[{site_title}] 新订单  ({order_number}) - {order_date}"
 
 #: includes/emails/class-wc-email-new-order.php:126
 msgid "Recipient(s)"
@@ -5644,12 +5641,12 @@ msgstr "控制主标题包含在电子邮件通知。留空使用默认的标题
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:25
 msgid "BACS"
-msgstr ""
+msgstr "银行转账（线下）"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:26
 msgid ""
 "Allows payments by BACS, more commonly known as direct bank/wire transfer."
-msgstr ""
+msgstr "允许通过银行转账付款，通俗的说就是直接去银行转账或电汇"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:68
 msgid "Enable Bank Transfer"
@@ -5697,7 +5694,7 @@ msgstr "直接银行汇款"
 #: includes/gateways/cod/class-wc-gateway-cod.php:71
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:149
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:139
-#: includes/wc-template-functions.php:965
+#: includes/wc-template-functions.php:971
 msgid "Description"
 msgstr "描述"
 
@@ -5706,14 +5703,14 @@ msgstr "描述"
 #: includes/gateways/cod/class-wc-gateway-cod.php:66
 msgid ""
 "Payment method description that the customer will see on your checkout."
-msgstr ""
+msgstr "客户支付的时候会看到关于该支付方式的说明"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:82
 msgid ""
 "Make your payment directly into our bank account. Please use your Order ID "
 "as the payment reference. Your order won't be shipped until the funds have "
 "cleared in our account."
-msgstr ""
+msgstr "直接付款到我们的银行账户。请使用订单号作为付款名目。我们会在资金到账后配送订单。"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:86
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:72
@@ -5724,7 +5721,7 @@ msgstr "说明"
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:88
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:74
 msgid "Instructions that will be added to the thank you page and emails."
-msgstr ""
+msgstr "说明将会被显示在订单确认页面和相关邮件中"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:105
 msgid "Account Details"
@@ -5735,7 +5732,7 @@ msgid "Account Name"
 msgstr "帐户名"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:112
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:253
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:258
 msgid "Account Number"
 msgstr "帐号"
 
@@ -5744,36 +5741,36 @@ msgid "Bank Name"
 msgstr "银行名称"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:114
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:257
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:262
 msgid "Sort Code"
 msgstr "分类编号"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:115
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:261
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:266
 msgid "IBAN"
 msgstr "国际银行标准账号"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:116
 msgid "BIC / Swift"
-msgstr ""
+msgstr "BIC / Swift"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "+ Add Account"
-msgstr ""
+msgstr "添加账户"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "Remove selected account(s)"
-msgstr ""
+msgstr "删除选中的账户"
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:240
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:245
 msgid "Our Bank Details"
 msgstr "我们的银行账户详情"
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:265
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:270
 msgid "BIC"
 msgstr "BIC"
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:295
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:301
 msgid "Awaiting BACS payment"
 msgstr "等待跨行转帐付款"
 
@@ -5802,7 +5799,7 @@ msgid ""
 " / County, Store Postcode."
 msgstr "请发送您的支票到商店名称，商店街，商店镇，商店州/县，商店邮编。"
 
-#: includes/gateways/cheque/class-wc-gateway-cheque.php:115
+#: includes/gateways/cheque/class-wc-gateway-cheque.php:116
 msgid "Awaiting cheque payment"
 msgstr "等待支票付款"
 
@@ -5848,7 +5845,7 @@ msgstr "如果COD只适用于特定的方法，请在这里设置。留空启用
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:94
 msgid "Select shipping methods"
-msgstr ""
+msgstr "选择物流方式"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:164
 msgid "Payment to be made upon delivery."
@@ -5918,7 +5915,7 @@ msgstr "提供了充分的PCI规范，安全的方法来收集和传输信用卡
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:31
 msgid "Proceed to PayPal"
-msgstr ""
+msgstr "进入 PayPal"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:34
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:135
@@ -5975,14 +5972,14 @@ msgstr "如果不使用上面的电子邮件地址，输入你的PayPal帐户接
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:161
 msgid "PayPal Identity Token"
-msgstr ""
+msgstr "PayPal Identity Token"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:163
 msgid ""
 "Optionally enable \"Payment Data Transfer\" (Profile > Website Payment "
 "Preferences) and then copy your identity token here. This will allow "
 "payments to be verified without the need for PayPal IPN."
-msgstr ""
+msgstr "如果选择打开 \"Payment Data Transfer\" (Profile > Website Payment Preferences)并填入你的paypal identity token，这样就不需要通过PayPal IPN而直接验证支付。"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:166
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:199
@@ -6002,21 +5999,21 @@ msgstr "请输入您的帐单前缀。如果您使用PayPal帐户为多个店铺
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:176
 msgid "Payment Action"
-msgstr ""
+msgstr "Payment Action"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:178
 msgid ""
 "Choose whether you wish to capture funds immediately or authorize payment "
 "only."
-msgstr ""
+msgstr "选择你是要马上扣款还是先预授权"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:182
 msgid "Capture"
-msgstr ""
+msgstr "扣款"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:183
 msgid "Authorize"
-msgstr ""
+msgstr "授权"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:187
 msgid "Submission method"
@@ -6108,111 +6105,111 @@ msgid ""
 "<code>woocommerce/logs/paypal-%s.txt</code>"
 msgstr "记录贝宝事件，例如IPN请求，在 <code>woocommerce/logs/paypal-%s.txt</code>中。"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:349
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:361
 msgid "Order %s"
 msgstr "订单 %s"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:358
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:370
 msgid "Shipping via"
 msgstr "配送渠道"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:415
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:427
 msgid "Shipping via %s"
-msgstr ""
+msgstr "通过%s邮寄"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:454
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:466
 msgid ""
 "Thank you for your order. We are now redirecting you to PayPal to make "
 "payment."
 msgstr "感谢您下单。我们现在正在重定向到贝宝付款。"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:479
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:491
 msgid "Pay via PayPal"
 msgstr "通过贝宝支付"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:479
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:491
 msgid "Cancel order &amp; restore cart"
 msgstr "取消订单 &amp; 恢复购物车"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:534
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:546
 msgid ""
 "Thank you - your order is now pending payment. You should be automatically "
 "redirected to PayPal to make payment."
-msgstr ""
+msgstr "谢谢 - 你的订单正在进行支付。你将会转到PayPal网站进行付款。"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:689
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:701
 msgid "Validation error: PayPal currencies do not match (code %s)."
-msgstr ""
+msgstr "验证失败：PayPal货币不匹配(代码 %s)"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:700
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:712
 msgid "Validation error: PayPal amounts do not match (gross %s)."
 msgstr "验证错误：贝宝金额不匹配， (gross %s)."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:711
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:723
 msgid ""
 "Validation error: PayPal IPN response from a different email address (%s)."
 msgstr "验证错误：PayPal IPN响应从不同的电子邮件地址 (%s)."
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:734
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:746
 msgid "IPN payment completed"
 msgstr "IPN支付完成"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:737
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:749
 msgid "Payment pending: %s"
 msgstr "正在处理付款: %s"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:750
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:758
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:775
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:762
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:770
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:787
 msgid "Payment %s via IPN."
 msgstr "付款 %s 通过IPN。"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:763
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:775
 msgid "Order refunded/reversed"
 msgstr "订单被退款"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:764
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:776
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
 msgstr "订单%s 已被标记为退回 - 贝宝的原因代码：%s"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:767
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:779
 msgid "Payment for order %s refunded/reversed"
 msgstr "为订单 %s 退款付款"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:780
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:792
 msgid "Order reversed"
 msgstr "订单已撤销"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:781
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:793
 msgid ""
 "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
 msgstr "订单 %s 已被标记为退回 - 贝宝的原因代码: %s"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:784
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:796
 msgid "Payment for order %s reversed"
 msgstr "支付订单 %s 已撤销"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:792
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:804
 msgid "Reversal Cancelled"
 msgstr "撤消已取消"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:793
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:805
 msgid ""
 "Order %s has had a reversal cancelled. Please check the status of payment "
 "and update the order status accordingly."
 msgstr "订单 %s 已撤销取消。请确认付款的状态, 并相应地更新订单状态。"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:796
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:808
 msgid "Reversal cancelled for order %s"
 msgstr "已撤销取消订单 %s"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:868
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:880
 msgid "Validation error: PayPal amounts do not match (amt %s)."
-msgstr ""
+msgstr "验证错误：PayPal 金额不一致(amt %s)。"
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:876
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:888
 msgid "PDT payment completed"
-msgstr ""
+msgstr "PDT支付完成"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:25
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:84
@@ -6263,7 +6260,7 @@ msgstr "特定国家"
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:154
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:113
 msgid "Select some countries"
-msgstr ""
+msgstr "选择国家"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:109
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:83
@@ -6277,6 +6274,7 @@ msgstr "应纳税"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:114
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:88
+msgctxt "Tax status"
 msgid "None"
 msgstr "无"
 
@@ -6286,7 +6284,7 @@ msgstr "新添订单"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:121
 msgid "Enter a cost (excluding tax) per order, e.g. 5.00. Default is 0."
-msgstr ""
+msgstr "输入订单成本（含税），如5.00。默认为0。"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:126
 msgid "Additional Rates"
@@ -6297,13 +6295,13 @@ msgid ""
 "Optional extra shipping options with additional costs (one per line): Option"
 " Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or "
 "item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
-msgstr ""
+msgstr "需要附加费用的快递选项(一行一个)：选项名称｜附加费用 [+- 百分比] |收费 (按订单，分类，商品数量)  如：<code>Priority Mail | 6.95 [+ 0.2%] | 按订单收费</code>。"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:131
 msgid ""
 "Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
 "or item)"
-msgstr ""
+msgstr "选项名称 | 附加费用 [+- 百分比] | 收费  (按订单，分类，商品数量)"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:134
 msgid "Additional Costs"
@@ -6346,54 +6344,54 @@ msgid ""
 "blank to disable."
 msgstr "输入一个最低费用数额。费用将在此基础上增加。留空以禁用。"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:515
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:540
 msgid "Costs"
 msgstr "总运费"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:522
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:102
 msgid "Cost"
 msgstr "成本"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:522
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 msgid "Cost, excluding tax."
 msgstr "成本，不含税/运费."
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:523
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:548
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:110
 msgid "Handling Fee"
 msgstr "手续费"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:523
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:548
 msgid ""
 "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
 msgstr "费用不含税/运费。输入金额，例如2.50，或一个百分比，例如： 5%。"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:528
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:553
 msgid "+ Add Cost"
 msgstr "默认成本"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:528
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:553
 msgid "Delete selected costs"
 msgstr "删除选定的行"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:534
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:559
 msgid "Any class"
 msgstr "CSS 类"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:535
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:536
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:560
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:561
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:102
 #: templates/order/order-details.php:122 templates/order/order-details.php:137
 msgid "N/A"
 msgstr "N/A"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:554
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:584
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:579
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:609
 msgid "Select a class&hellip;"
 msgstr "选择一个类&hellip;"
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:598
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:623
 msgid "Delete the selected rates?"
 msgstr "删除选择的费率？"
 
@@ -6470,7 +6468,7 @@ msgstr "商品已添加"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:105
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
-msgstr ""
+msgstr "不含税成本。输入金额，如2.50。默认为0。"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:112
 msgid ""
@@ -6551,7 +6549,7 @@ msgstr "启用本地取件"
 msgid ""
 "What zip/post codes are available for local pickup? Separate codes with a "
 "comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr ""
+msgstr "哪些地区可以自提？请输入用逗号分隔的地区邮编号码。可以使用通配符，如p*可以匹配邮编PE30。"
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:128
 msgid ""
@@ -6559,23 +6557,27 @@ msgid ""
 "order themselves."
 msgstr "本地取件是一个让顾客自己提取他们的订单的简单方法。"
 
-#: includes/shortcodes/class-wc-shortcode-cart.php:52
+#: includes/shortcodes/class-wc-shortcode-cart.php:58
 msgid "Shipping costs updated."
 msgstr "运费已更新。"
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:108
-#: includes/shortcodes/class-wc-shortcode-checkout.php:159
+#: includes/shortcodes/class-wc-shortcode-checkout.php:91
+msgid "Invalid order. If you have an account please log in and try again."
+msgstr "无效订单。请登陆账户后尝试。   "
+
+#: includes/shortcodes/class-wc-shortcode-checkout.php:113
+#: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
 "This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. "
 "Please contact us if you need assistance."
-msgstr ""
+msgstr "订单状态是&ldquo;%s&rdquo; - 无法支付;如需帮助，请联系我们。"
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:112
-#: includes/shortcodes/class-wc-shortcode-checkout.php:163
+#: includes/shortcodes/class-wc-shortcode-checkout.php:117
+#: includes/shortcodes/class-wc-shortcode-checkout.php:168
 msgid "Sorry, this order is invalid and cannot be paid for."
-msgstr ""
+msgstr "抱歉，订单无效，不能付款。"
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:129
+#: includes/shortcodes/class-wc-shortcode-checkout.php:134
 #: templates/checkout/thankyou.php:40
 #: templates/emails/customer-completed-order.php:18
 #: templates/emails/customer-invoice.php:22
@@ -6584,72 +6586,80 @@ msgstr ""
 msgid "Order:"
 msgstr "订单："
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:133
+#: includes/shortcodes/class-wc-shortcode-checkout.php:138
 #: templates/checkout/thankyou.php:44
 msgid "Date:"
 msgstr "日期："
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:137
+#: includes/shortcodes/class-wc-shortcode-checkout.php:142
 #: templates/checkout/thankyou.php:48
 msgid "Total:"
 msgstr "总计："
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:142
+#: includes/shortcodes/class-wc-shortcode-checkout.php:147
 #: templates/checkout/thankyou.php:53
 msgid "Payment method:"
 msgstr "付款方式："
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:230
+#: includes/shortcodes/class-wc-shortcode-checkout.php:235
 msgid ""
 "The order totals have been updated. Please confirm your order by pressing "
 "the Place Order button at the bottom of the page."
 msgstr "订单总数已更新。请在页面底部按下单按钮确认您的订单。"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:213
+#: includes/shortcodes/class-wc-shortcode-my-account.php:202
+msgid "Your password has been reset."
+msgstr "您的密码已被重置。"
+
+#: includes/shortcodes/class-wc-shortcode-my-account.php:202
+msgid "Log in"
+msgstr "登录"
+
+#: includes/shortcodes/class-wc-shortcode-my-account.php:220
 msgid "Enter a username or e-mail address."
 msgstr "<strong>错误</strong>：请输入用户名或电子邮件地址。"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:220
+#: includes/shortcodes/class-wc-shortcode-my-account.php:227
 msgid "There is no user registered with that email address."
 msgstr "<strong>错误</strong>：未能通过电子邮件地址找到用户。"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:235
+#: includes/shortcodes/class-wc-shortcode-my-account.php:242
 msgid "Invalid username or e-mail."
 msgstr "<strong>错误</strong>：用户名或电子邮件地址无效。"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:249
+#: includes/shortcodes/class-wc-shortcode-my-account.php:256
 msgid "Password reset is not allowed for this user"
 msgstr "不能重设该用户的密码"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:277
+#: includes/shortcodes/class-wc-shortcode-my-account.php:284
 msgid "Check your e-mail for the confirmation link."
 msgstr "请检查您的邮件，内有确认激活链接。"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:297
-#: includes/shortcodes/class-wc-shortcode-my-account.php:302
+#: includes/shortcodes/class-wc-shortcode-my-account.php:304
 #: includes/shortcodes/class-wc-shortcode-my-account.php:309
+#: includes/shortcodes/class-wc-shortcode-my-account.php:316
 msgid "Invalid key"
 msgstr "无效 key"
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:346
+#: includes/shortcodes/class-wc-shortcode-my-account.php:353
 msgid "Add a new payment method."
-msgstr ""
+msgstr "添加一个新的支付方式"
 
-#: includes/shortcodes/class-wc-shortcode-order-tracking.php:49
+#: includes/shortcodes/class-wc-shortcode-order-tracking.php:54
 msgid "Please enter a valid order ID"
 msgstr "请输入正确的电子邮件地址。"
 
-#: includes/shortcodes/class-wc-shortcode-order-tracking.php:53
+#: includes/shortcodes/class-wc-shortcode-order-tracking.php:58
 msgid "Please enter a valid order email"
 msgstr "请输入正确的电子邮件地址。"
 
-#: includes/shortcodes/class-wc-shortcode-order-tracking.php:72
+#: includes/shortcodes/class-wc-shortcode-order-tracking.php:77
 msgid "Sorry, we could not find that order id in our database."
 msgstr "很抱歉,我们在数据库中找不到订单的ID."
 
 #: includes/wc-cart-functions.php:25
 msgid "This product is protected and cannot be purchased."
-msgstr ""
+msgstr "该产品在维护状态，不能购买。"
 
 #: includes/wc-cart-functions.php:83
 msgid "Added &quot;%s&quot; to your cart."
@@ -6665,15 +6675,15 @@ msgstr "&quot;%s&quot; 成功添加进您的购物车."
 
 #: includes/wc-cart-functions.php:94
 msgid "Continue Shopping"
-msgstr ""
+msgstr "继续购物"
 
 #: includes/wc-cart-functions.php:183
 msgid "Coupon:"
-msgstr ""
+msgstr "优惠券："
 
 #: includes/wc-cart-functions.php:208
 msgid "Free shipping coupon"
-msgstr ""
+msgstr "免邮费优惠券"
 
 #: includes/wc-cart-functions.php:210
 msgid "[Remove]"
@@ -6685,7 +6695,7 @@ msgstr "免费"
 
 #: includes/wc-core-functions.php:167
 msgid "United Arab Emirates Dirham"
-msgstr ""
+msgstr "United Arab Emirates Dirham"
 
 #: includes/wc-core-functions.php:168
 msgid "Australian Dollars"
@@ -6697,7 +6707,7 @@ msgstr "巴西雷亚尔 (&#36;)"
 
 #: includes/wc-core-functions.php:170
 msgid "Bulgarian Lev"
-msgstr ""
+msgstr "Bulgarian Lev"
 
 #: includes/wc-core-functions.php:171
 msgid "Canadian Dollars"
@@ -6705,7 +6715,7 @@ msgstr "加元(&#36;)"
 
 #: includes/wc-core-functions.php:172
 msgid "Chilean Peso"
-msgstr ""
+msgstr "Chilean Peso"
 
 #: includes/wc-core-functions.php:173
 msgid "Chinese Yuan"
@@ -6713,7 +6723,7 @@ msgstr "中国人民币(&yen;)"
 
 #: includes/wc-core-functions.php:174
 msgid "Colombian Peso"
-msgstr ""
+msgstr "Colombian Peso"
 
 #: includes/wc-core-functions.php:175
 msgid "Czech Koruna"
@@ -6733,7 +6743,7 @@ msgstr "港元(&#36;)"
 
 #: includes/wc-core-functions.php:179
 msgid "Croatia kuna"
-msgstr ""
+msgstr "Croatia kuna"
 
 #: includes/wc-core-functions.php:180
 msgid "Hungarian Forint"
@@ -6741,7 +6751,7 @@ msgstr "匈牙利福林"
 
 #: includes/wc-core-functions.php:181
 msgid "Icelandic krona"
-msgstr ""
+msgstr "Icelandic krona"
 
 #: includes/wc-core-functions.php:182
 msgid "Indonesia Rupiah"
@@ -6773,7 +6783,7 @@ msgstr "墨西哥比索 (&#36;)"
 
 #: includes/wc-core-functions.php:189
 msgid "Nigerian Naira"
-msgstr ""
+msgstr "Nigerian Naira"
 
 #: includes/wc-core-functions.php:190
 msgid "Norwegian Krone"
@@ -6801,7 +6811,7 @@ msgstr "罗马尼亚"
 
 #: includes/wc-core-functions.php:196
 msgid "Russian Ruble"
-msgstr ""
+msgstr "Russian Ruble"
 
 #: includes/wc-core-functions.php:197
 msgid "Singapore Dollar"
@@ -6837,7 +6847,7 @@ msgstr "美元 (&#36;)"
 
 #: includes/wc-core-functions.php:205
 msgid "Vietnamese Dong"
-msgstr ""
+msgstr "Vietnamese Dong"
 
 #: includes/wc-coupon-functions.php:22
 msgid "Cart Discount"
@@ -6862,7 +6872,7 @@ msgstr "这个账户的email 地址已被注册。请登录。"
 
 #: includes/wc-customer-functions.php:61
 msgid "Please enter a valid account username."
-msgstr ""
+msgstr "请输入有效的账户名"
 
 #: includes/wc-customer-functions.php:65
 msgid ""
@@ -6888,88 +6898,88 @@ msgctxt "slug"
 msgid "uncategorized"
 msgstr "未分类"
 
-#: includes/wc-template-functions.php:101
+#: includes/wc-template-functions.php:103
 msgid "New products"
 msgstr "新产品"
 
-#: includes/wc-template-functions.php:109
+#: includes/wc-template-functions.php:111
 msgid "New products added to %s"
 msgstr "新产品已添加到 %s"
 
-#: includes/wc-template-functions.php:117
+#: includes/wc-template-functions.php:119
 msgid "New products tagged %s"
 msgstr "新产品标签 %s"
 
-#: includes/wc-template-functions.php:350
+#: includes/wc-template-functions.php:356
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
 msgstr "这是一个用于测试的演示商店 - 订单无法完成。"
 
-#: includes/wc-template-functions.php:369
+#: includes/wc-template-functions.php:375
 msgid "Search Results: &ldquo;%s&rdquo;"
 msgstr "搜索结果: &ldquo;%s&rdquo;"
 
-#: includes/wc-template-functions.php:372
+#: includes/wc-template-functions.php:378
 msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash;页 %s"
 
-#: includes/wc-template-functions.php:974
+#: includes/wc-template-functions.php:980
 #: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "其他信息"
 
-#: includes/wc-template-functions.php:983
+#: includes/wc-template-functions.php:989
 msgid "Reviews (%d)"
 msgstr "用户评论  (%d)"
 
-#: includes/wc-template-functions.php:1074
+#: includes/wc-template-functions.php:1080
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr ""
+msgstr "请使用$args参数做数组。废弃的参数将在WC 2.2版本删除掉。"
 
-#: includes/wc-template-functions.php:1242
+#: includes/wc-template-functions.php:1248
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr "首页"
 
-#: includes/wc-template-functions.php:1534
+#: includes/wc-template-functions.php:1549
 msgid "Order Again"
 msgstr "再订货"
 
-#: includes/wc-template-functions.php:1625
+#: includes/wc-template-functions.php:1640
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "选择国家&hellip;"
 
-#: includes/wc-template-functions.php:1632
+#: includes/wc-template-functions.php:1647
 msgid "Update country"
 msgstr "%d 个插件更新"
 
-#: includes/wc-template-functions.php:1675
+#: includes/wc-template-functions.php:1690
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "选择地区&hellip;"
 
-#: includes/wc-template-functions.php:1788
+#: includes/wc-template-functions.php:1803
 msgid "Search for:"
 msgstr "搜索："
 
-#: includes/wc-template-functions.php:1789
+#: includes/wc-template-functions.php:1804
 msgid "Search for products"
 msgstr "搜索产品"
 
-#: includes/wc-template-functions.php:1790
+#: includes/wc-template-functions.php:1805
 msgid "Search"
 msgstr "搜索"
 
-#: includes/wc-term-functions.php:121
+#: includes/wc-term-functions.php:123
 msgid "Select a category"
 msgstr "选择一个类别"
 
-#: includes/wc-term-functions.php:125
+#: includes/wc-term-functions.php:127
 msgid "Uncategorized"
 msgstr "未分类"
 
@@ -6980,6 +6990,11 @@ msgstr "在侧边栏显示顾客购物车."
 #: includes/widgets/class-wc-widget-cart.php:25
 msgid "WooCommerce Cart"
 msgstr "页面内容: [woocommerce_cart]"
+
+#: includes/widgets/class-wc-widget-cart.php:29
+#: includes/widgets/class-wc-widget-cart.php:56
+msgid "Cart"
+msgstr "购物车"
 
 #: includes/widgets/class-wc-widget-cart.php:35
 msgid "Hide if cart is empty"
@@ -7227,7 +7242,7 @@ msgstr "最近评论"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:36
 msgid "Number of reviews to show"
-msgstr ""
+msgstr "评论显示数量"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:85
 msgctxt "by comment author"
@@ -7264,7 +7279,7 @@ msgstr "您的购物车目前是空的。"
 
 #: templates/cart/cart-empty.php:20
 msgid "Return To Shop"
-msgstr ""
+msgstr "还回商店"
 
 #: templates/cart/cart-shipping.php:16
 msgid "Shipping #%d"
@@ -7287,7 +7302,7 @@ msgstr "请参阅可用的配送方法填写您的详细资料。"
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid "Sorry, shipping is unavailable %s."
-msgstr ""
+msgstr "抱歉，物流无法送达 %s 。"
 
 #: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
 msgid ""
@@ -7365,6 +7380,10 @@ msgstr "购物车里没有产品"
 #: templates/cart/mini-cart.php:59
 msgid "Subtotal"
 msgstr "小计"
+
+#: templates/cart/mini-cart.php:65
+msgid "Checkout"
+msgstr "结算"
 
 #: templates/cart/shipping-calculator.php:22
 msgid "Calculate Shipping"
@@ -7456,7 +7475,7 @@ msgstr "总计"
 
 #: templates/checkout/form-pay.php:54
 msgid "Payment"
-msgstr ""
+msgstr "Payment"
 
 #: templates/checkout/form-pay.php:79
 msgid ""
@@ -7471,7 +7490,7 @@ msgstr "为订单付款"
 
 #: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
-msgstr ""
+msgstr "邮寄到另一个地址?"
 
 #: templates/checkout/review-order.php:150
 msgid "Please fill in your details above to see available payment methods."
@@ -7597,7 +7616,7 @@ msgstr "感谢在 %s 创建账户。你的用户名为<strong>%s</strong>."
 
 #: templates/emails/customer-new-account.php:18
 msgid "Your password has been automatically generated: <strong>%s</strong>"
-msgstr ""
+msgstr "密码已生成"
 
 #: templates/emails/customer-new-account.php:22
 #: templates/emails/plain/customer-new-account.php:18
@@ -7660,12 +7679,12 @@ msgstr "送货地址"
 
 #: templates/emails/email-order-items.php:25
 msgid "Product Image"
-msgstr ""
+msgstr "产品图片"
 
 #: templates/emails/email-order-items.php:46
 #: templates/emails/plain/email-order-items.php:46
 msgid "Download %d"
-msgstr ""
+msgstr "下载"
 
 #: templates/emails/email-order-items.php:48
 #: templates/emails/plain/email-order-items.php:48
@@ -7750,11 +7769,11 @@ msgstr "密码"
 
 #: templates/global/form-login.php:38 templates/myaccount/form-login.php:46
 msgid "Remember me"
-msgstr ""
+msgstr "记住我"
 
 #: templates/global/form-login.php:42 templates/myaccount/form-login.php:50
 msgid "Lost your password?"
-msgstr ""
+msgstr "忘记密码？"
 
 #: templates/global/quantity-input.php:12
 msgctxt "Product quantity input tooltip"
@@ -7763,7 +7782,7 @@ msgstr "数量"
 
 #: templates/loop/no-products-found.php:14
 msgid "No products were found matching your selection."
-msgstr ""
+msgstr "没有符合你要求的商品"
 
 #: templates/loop/orderby.php:21
 msgid "Default sorting"
@@ -7811,7 +7830,7 @@ msgid ""
 "Sorry, it seems that there are no payment methods which support adding a new"
 " payment method. Please contact us if you require assistance or wish to make"
 " alternate arrangements."
-msgstr ""
+msgstr "抱歉，没有可添加的支付方式，如果你需要帮助请联系我们。"
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
@@ -7832,11 +7851,11 @@ msgstr "电邮地址"
 
 #: templates/myaccount/form-edit-account.php:32
 msgid "Password (leave blank to leave unchanged)"
-msgstr ""
+msgstr "密码(不修改请放空)"
 
 #: templates/myaccount/form-edit-account.php:36
 msgid "Confirm new password"
-msgstr ""
+msgstr "确认新密码"
 
 #: templates/myaccount/form-edit-account.php:41
 msgid "Save changes"
@@ -7853,7 +7872,7 @@ msgstr "保存地址"
 
 #: templates/myaccount/form-login.php:32
 msgid "Username or email address"
-msgstr ""
+msgstr "用户名和邮箱"
 
 #: templates/myaccount/form-login.php:63 templates/myaccount/form-login.php:96
 msgid "Register"
@@ -7865,7 +7884,7 @@ msgstr "用户名"
 
 #: templates/myaccount/form-login.php:89
 msgid "Anti-spam"
-msgstr ""
+msgstr "反垃圾"
 
 #: templates/myaccount/form-lost-password.php:22
 msgid ""
@@ -7955,7 +7974,7 @@ msgid ""
 "Order <mark class=\"order-number\">%s</mark> was placed on <mark class"
 "=\"order-date\">%s</mark> and is currently <mark class=\"order-"
 "status\">%s</mark>."
-msgstr ""
+msgstr "继续购物"
 
 #: templates/myaccount/view-order.php:16 templates/order/tracking.php:31
 msgid "Order Updates"
@@ -7963,7 +7982,7 @@ msgstr "订单更新"
 
 #: templates/myaccount/view-order.php:22 templates/order/tracking.php:37
 msgid "l jS \\o\\f F Y, h:ia"
-msgstr ""
+msgstr "l jS \\o\\f F Y, h:ia"
 
 #: templates/order/form-tracking.php:17
 msgid ""
@@ -8030,7 +8049,7 @@ msgstr "清除临时状态"
 
 #: templates/single-product/add-to-cart/variable.php:103
 msgid "This product is currently out of stock and unavailable."
-msgstr ""
+msgstr "此产品缺货不能购买"
 
 #: templates/single-product/meta.php:23
 msgid "SKU:"
@@ -8054,14 +8073,14 @@ msgstr[0] "标签："
 msgid "Weight"
 msgstr "重量"
 
-#: templates/single-product/product-attributes.php:37
+#: templates/single-product/product-attributes.php:35
 msgid "Dimensions"
 msgstr "尺寸"
 
 #: templates/single-product/rating.php:28
 msgid "%s customer review"
 msgid_plural "%s customer reviews"
-msgstr[0] ""
+msgstr[0] "%s 条用户评论"
 
 #: templates/single-product/related.php:36
 msgid "Related Products"
@@ -8098,7 +8117,7 @@ msgstr "用户评论"
 
 #: templates/single-product-reviews.php:44
 msgid "There are no reviews yet."
-msgstr ""
+msgstr "目前还末有评论"
 
 #: templates/single-product-reviews.php:57
 msgid "Add a review"
@@ -8110,7 +8129,7 @@ msgstr "我要第一个评论!"
 
 #: templates/single-product-reviews.php:58
 msgid "Leave a Reply to %s"
-msgstr ""
+msgstr "回复给"
 
 #: templates/single-product-reviews.php:64
 msgid "Email"
@@ -8118,11 +8137,11 @@ msgstr "电子邮件"
 
 #: templates/single-product-reviews.php:67
 msgid "Submit"
-msgstr ""
+msgstr "提交"
 
 #: templates/single-product-reviews.php:73
 msgid "Your Rating"
-msgstr ""
+msgstr "你的评级"
 
 #: templates/single-product-reviews.php:74
 msgid "Rate&hellip;"
@@ -8155,7 +8174,7 @@ msgstr "你的评论"
 #: templates/single-product-reviews.php:92
 msgid ""
 "Only logged in customers who have purchased this product may leave a review."
-msgstr ""
+msgstr "只有买过此商品的客户登陆后才能发表评论"
 
 #: woocommerce.php:182
 msgid "Docs"

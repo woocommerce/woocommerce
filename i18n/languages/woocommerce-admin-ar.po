@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-02-21 16:11:55+00:00\n"
-"PO-Revision-Date: 2014-02-25 14:01+0000\n"
+"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
+"PO-Revision-Date: 2014-03-04 08:42+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/projects/p/woocommerce/language/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -108,11 +108,11 @@ msgstr "تستخدم في الأنواع"
 
 #: includes/admin/class-wc-admin-assets.php:147
 msgid "Enter a name for the new attribute term:"
-msgstr "أدخل اسم الصفة:"
+msgstr "أدخل اسم قيمة الصفة:"
 
 #: includes/admin/class-wc-admin-assets.php:148
 msgid "Calculate totals based on order items, discounts, and shipping?"
-msgstr "حساب السعر الأصلي لمنتجات الطلب مع الخصم و الشحن؟"
+msgstr "حساب السعر الكلي لمنتجات الطلب مع الخصم و الشحن؟"
 
 #: includes/admin/class-wc-admin-assets.php:149
 msgid ""
@@ -130,7 +130,7 @@ msgstr "نسخ بيانات المشتري إلى بيانات الشحن؟ هذ
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
-msgstr "جلب بيانات الزبون؟ هذا سمحو أي قيمة في بيانات المشتري."
+msgstr "جلب بيانات الزبون؟ هذا سمحو أي قيمة مدخلة في بيانات المشتري."
 
 #: includes/admin/class-wc-admin-assets.php:152
 msgid ""
@@ -144,7 +144,7 @@ msgstr "جلب بيانات الزبون؟ هذا سمحو أي قيمة في ب
 #: includes/admin/views/html-bulk-edit-product.php:170
 #: includes/admin/views/html-quick-edit-product.php:128
 msgid "Featured"
-msgstr "مميز؟"
+msgstr "مميز"
 
 #: includes/admin/class-wc-admin-assets.php:156
 msgid "No customer selected"
@@ -192,15 +192,15 @@ msgstr "أختر صورة"
 
 #: includes/admin/class-wc-admin-assets.php:209
 msgid "Set variation image"
-msgstr "تحديد كصورة المنتج"
+msgstr "تحديد صورة النوع"
 
 #: includes/admin/class-wc-admin-assets.php:210
 msgid "variation added"
-msgstr "التركيب أضيف"
+msgstr "تمت إضافة التركيب"
 
 #: includes/admin/class-wc-admin-assets.php:211
 msgid "variations added"
-msgstr "التركيبات أضيفت"
+msgstr "تمت إضافة التركيبات"
 
 #: includes/admin/class-wc-admin-assets.php:212
 msgid "No variations added"
@@ -226,7 +226,7 @@ msgstr "الاسم اللطيف “%s” لا يمكن استخدامه لأنه
 #: includes/admin/class-wc-admin-attributes.php:91
 #: includes/admin/class-wc-admin-attributes.php:96
 msgid "Slug “%s” is already in use. Change it, please."
-msgstr "الاسم اللطيف “%s” مستخدم بالفعل."
+msgstr "الاسم اللطيف “%s” مستخدم بالفعل. غيره رجاءً."
 
 #: includes/admin/class-wc-admin-attributes.php:233
 msgid "Edit Attribute"
@@ -247,7 +247,7 @@ msgstr "الاسم اللطيف"
 #: includes/admin/class-wc-admin-attributes.php:382
 msgid ""
 "Unique slug/reference for the attribute; must be shorter than 28 characters."
-msgstr "“slug” هو الرابط \"اللطيف\" للاسم، وهو في العادة يتكون من حروف صغيرة ويحتوي على حروف، أرقام وشرطات فقط."
+msgstr "“slug” هو الاسم اللطيف لشيء ما، وهو في العادة يتكون من حروف صغيرة ويحتوي على حروف، أرقام وشرطات فقط."
 
 #: includes/admin/class-wc-admin-attributes.php:257
 #: includes/admin/class-wc-admin-attributes.php:309
@@ -259,7 +259,7 @@ msgstr "النوع"
 #: includes/admin/class-wc-admin-attributes.php:261
 #: includes/admin/class-wc-admin-attributes.php:388
 msgid "Select"
-msgstr "قائمة منسدلة (مثل هذه)"
+msgstr "قائمة منسدلة"
 
 #: includes/admin/class-wc-admin-attributes.php:262
 #: includes/admin/class-wc-admin-attributes.php:389
@@ -273,12 +273,12 @@ msgid ""
 "products -> product data -> attributes -> values, <strong>Text</strong> "
 "allows manual entry whereas <strong>select</strong> allows pre-configured "
 "terms in a drop-down list."
-msgstr "هذا يحدد كيف تختار قيمة الصفة للمنتج. <strong>حقل نص</strong> لتختار القيم في صفحة المنتج، بينما <strong>قائمة منسدلة</strong> تمكنك من إضافة قيم محددة، لتستخدمها هي فقط في صفحة المنتج. إذا كانت الصفة لمنتج متغير أختر  <strong>قائمة منسدلة</strong>."
+msgstr "هذا يحدد كيف تختار قيمة الصفة للمنتج. <strong>حقل نص</strong> لتختار القيم في صفحة المنتج، بينما <strong>قائمة منسدلة</strong> تمكنك من إضافة قيم محددة، لتستخدمها هي فقط في صفحة المنتج."
 
 #: includes/admin/class-wc-admin-attributes.php:270
 #: includes/admin/class-wc-admin-attributes.php:396
 msgid "Default sort order"
-msgstr "ترتيب القيم"
+msgstr "الترتيب الإفتراضي"
 
 #: includes/admin/class-wc-admin-attributes.php:274
 #: includes/admin/class-wc-admin-attributes.php:336
@@ -297,7 +297,7 @@ msgstr "معرف القيمة"
 msgid ""
 "Determines the sort order of the terms on the frontend shop product pages. "
 "If using custom ordering, you can drag and drop the terms in this attribute."
-msgstr "هذا يحدد ترتيب القيم في والواجهة. إذا أخترت ترتيب مخصص، يمكنك سحب وإفلات القيم لترتيبها في صفحة القيم."
+msgstr "هذا يحدد ترتيب القيم في الواجهة. إذا أخترت ترتيب مخصص، يمكنك سحب وإفلات القيم لترتيبها في صفحة القيم."
 
 #: includes/admin/class-wc-admin-attributes.php:283
 msgid "Update"
@@ -344,14 +344,14 @@ msgstr "لا يوجد صفات حاليًا"
 
 #: includes/admin/class-wc-admin-attributes.php:370
 msgid "Add New Attribute"
-msgstr "إضافة صفة"
+msgstr "إضافة صفة جديدة"
 
 #: includes/admin/class-wc-admin-attributes.php:371
 msgid ""
 "Attributes let you define extra product data, such as size or colour. You "
 "can use these attributes in the shop sidebar using the \"layered nav\" "
 "widgets. Please note: you cannot rename an attribute later on."
-msgstr "الصفات تمكنك من تحديد معلومات أكثر عن المنتج، مثل الحجم أو اللون. ويمكنك عرض الخواص في موقعك عبر مربع \"\" الجانبي. تذكر أنه لا يمكنك تغيير اسم الصفات لاحقا."
+msgstr "الصفات تمكنك من تحديد معلومات أكثر عن المنتج، مثل الحجم أو اللون. ويمكنك عرض الخواص في موقعك عبر مربع \"التنقل ال\nمتدرج\" الجانبي. تذكر أنه لا يمكنك تغيير اسم الصفات لاحقا."
 
 #: includes/admin/class-wc-admin-attributes.php:405
 msgid "Add Attribute"
@@ -1678,7 +1678,7 @@ msgstr "الوسوم"
 #: includes/admin/reports/class-wc-report-customers.php:206
 #: includes/admin/reports/class-wc-report-sales-by-category.php:219
 #: includes/admin/reports/class-wc-report-sales-by-date.php:165
-#: includes/admin/reports/class-wc-report-sales-by-product.php:329
+#: includes/admin/reports/class-wc-report-sales-by-product.php:319
 msgid "Date"
 msgstr "التاريخ"
 
@@ -1738,7 +1738,7 @@ msgid "View &#8220;%s&#8221;"
 msgstr "عرض &#8220;%s&#8221;"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:319
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:316
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:320
 #: includes/admin/reports/class-wc-report-stock.php:119
 msgid "View"
 msgstr "عرض"
@@ -1779,8 +1779,8 @@ msgstr "تغيير التميز"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:408
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:139
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:204
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:208
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:212
 #: includes/admin/views/html-admin-page-status-report.php:38
 #: includes/admin/views/html-admin-page-status-report.php:66
 #: includes/admin/views/html-admin-page-status-report.php:91
@@ -1913,7 +1913,7 @@ msgid "Customer Message"
 msgstr "رسالة العميل"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:97
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:101
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:110
 msgid "Order Notes"
 msgstr "ملاحظات الطلب"
 
@@ -1947,7 +1947,7 @@ msgstr "Y/m/d"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:151
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:189
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:220
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:224
 msgid "Via"
 msgstr "عبر"
 
@@ -1961,7 +1961,7 @@ msgstr[3] ""
 msgstr[4] ""
 msgstr[5] ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:210
 msgid "plus %d other note"
 msgid_plural "plus %d other notes"
 msgstr[0] ""
@@ -1971,7 +1971,7 @@ msgstr[3] ""
 msgstr[4] ""
 msgstr[5] ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:206
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:210
 msgid "%d note"
 msgid_plural "%d notes"
 msgstr[0] ""
@@ -1981,61 +1981,61 @@ msgstr[3] ""
 msgstr[4] ""
 msgstr[5] ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:228
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:232
 msgid "Billing:"
 msgstr ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:232
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:236
 msgid "Tel:"
 msgstr "الهاتف:"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:254
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:277
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:258
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:281
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:169
 msgid "Guest"
 msgstr "زائر"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:281
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:285
 msgid "%s by %s"
 msgstr ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:301
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:305
 msgid "Processing"
 msgstr "جار العمل عليه"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:309
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:313
 msgid "Complete"
 msgstr "مكتمل"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:404
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:408
 msgid "Show all statuses"
 msgstr "مشاهدة جميع الحالات"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:424
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:449
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:428
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:453
 msgid "Show all customers"
 msgstr "شاهد جميع الزبائن"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:691
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:687
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:688
 msgid "Mark processing"
 msgstr "تعليم كجار العمل عليه"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:694
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:691
 msgid "Mark on-hold"
 msgstr ""
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:696
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:697
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:694
 msgid "Mark completed"
 msgstr "تعليم كمكتمل"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:738
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:735
 msgid "Order status changed by bulk edit:"
 msgstr "تغيرت حالة جميع الطلبات"
 
-#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:760
+#: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:757
 msgid "Order status changed."
 msgid_plural "%s order statuses changed."
 msgstr[0] "لم يغير شئء"
@@ -2053,56 +2053,56 @@ msgstr ""
 msgid "Uploaded to this %s"
 msgstr ""
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:93
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:102
 msgid "Product Short Description"
 msgstr "الوصف القصير للمنتج"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:94
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:103
 #: includes/admin/settings/class-wc-settings-products.php:283
 #: includes/admin/views/html-bulk-edit-product.php:4
 #: includes/admin/views/html-quick-edit-product.php:4
 msgid "Product Data"
 msgstr "معلومات المنتج"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:95
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:104
 msgid "Product Gallery"
 msgstr "معرض المنتج"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:98
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:107
 msgid "Order Data"
 msgstr "تاريخ الطلب"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:99
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:108
 msgid "Order Items"
 msgstr "عناصر الطلب"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:100
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:109
 msgid "Order Totals"
 msgstr "تكاليف الطلب"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:102
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:111
 msgid "Downloadable Product Permissions"
 msgstr "صلاحيات تحميل المرفقات"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:102
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:111
 msgid ""
 "Note: Permissions for order items will automatically be granted when the "
 "order status changes to processing/completed."
 msgstr "ملاحظة: الصلاحيات تعطى تلقائيا عند تغير حالة الطلب إلى \"جار العمل عليه\\مكتمل\"."
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:103
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:112
 msgid "Order Actions"
 msgstr "إجراءات الطلب"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:106
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:115
 msgid "Coupon Data"
 msgstr "بيانات القسيمة"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:111
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:120
 msgid "Rating"
 msgstr "التقييم"
 
-#: includes/admin/post-types/class-wc-admin-meta-boxes.php:144
+#: includes/admin/post-types/class-wc-admin-meta-boxes.php:153
 msgid "Reviews"
 msgstr "المراجعات"
 
@@ -2194,7 +2194,7 @@ msgstr "فعل هذا الخيار لمنع تفعيل القسيمة إذا و�
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:586
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:603
-#: includes/admin/reports/class-wc-report-sales-by-product.php:183
+#: includes/admin/reports/class-wc-report-sales-by-product.php:173
 msgid "Search for a product&hellip;"
 msgstr "أبحث عن منتج&hellip;"
 
@@ -2782,9 +2782,9 @@ msgid "Shipping only"
 msgstr "للشحن فقط"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:252
-#: includes/admin/reports/class-wc-report-sales-by-category.php:176
 #: includes/admin/views/html-bulk-edit-product.php:66
 #: includes/admin/views/html-quick-edit-product.php:45
+msgctxt "Tax status"
 msgid "None"
 msgstr "بدون"
 
@@ -3350,7 +3350,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-customers.php:145
 #: includes/admin/reports/class-wc-report-sales-by-category.php:73
 #: includes/admin/reports/class-wc-report-sales-by-date.php:129
-#: includes/admin/reports/class-wc-report-sales-by-product.php:113
+#: includes/admin/reports/class-wc-report-sales-by-product.php:99
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:46
 msgid "Year"
@@ -3360,7 +3360,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-customers.php:146
 #: includes/admin/reports/class-wc-report-sales-by-category.php:74
 #: includes/admin/reports/class-wc-report-sales-by-date.php:130
-#: includes/admin/reports/class-wc-report-sales-by-product.php:114
+#: includes/admin/reports/class-wc-report-sales-by-product.php:100
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:47
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:47
 msgid "Last Month"
@@ -3370,7 +3370,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-customers.php:147
 #: includes/admin/reports/class-wc-report-sales-by-category.php:75
 #: includes/admin/reports/class-wc-report-sales-by-date.php:131
-#: includes/admin/reports/class-wc-report-sales-by-product.php:115
+#: includes/admin/reports/class-wc-report-sales-by-product.php:101
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:48
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:48
 msgid "This Month"
@@ -3380,7 +3380,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-customers.php:148
 #: includes/admin/reports/class-wc-report-sales-by-category.php:76
 #: includes/admin/reports/class-wc-report-sales-by-date.php:132
-#: includes/admin/reports/class-wc-report-sales-by-product.php:116
+#: includes/admin/reports/class-wc-report-sales-by-product.php:102
 msgid "Last 7 Days"
 msgstr ""
 
@@ -3398,7 +3398,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:174
 #: includes/admin/reports/class-wc-report-sales-by-category.php:178
-#: includes/admin/reports/class-wc-report-sales-by-product.php:184
+#: includes/admin/reports/class-wc-report-sales-by-product.php:174
 msgid "Show"
 msgstr "عرض"
 
@@ -3423,7 +3423,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-customers.php:209
 #: includes/admin/reports/class-wc-report-sales-by-category.php:222
 #: includes/admin/reports/class-wc-report-sales-by-date.php:169
-#: includes/admin/reports/class-wc-report-sales-by-product.php:332
+#: includes/admin/reports/class-wc-report-sales-by-product.php:322
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:34
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:34
 #: includes/admin/settings/class-wc-settings-tax.php:289
@@ -3546,6 +3546,10 @@ msgstr ""
 msgid "Select categories&hellip;"
 msgstr ""
 
+#: includes/admin/reports/class-wc-report-sales-by-category.php:176
+msgid "None"
+msgstr "بدون"
+
 #: includes/admin/reports/class-wc-report-sales-by-category.php:177
 msgid "All"
 msgstr ""
@@ -3583,7 +3587,7 @@ msgid "%s worth of coupons used"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:301
-#: includes/admin/reports/class-wc-report-sales-by-product.php:446
+#: includes/admin/reports/class-wc-report-sales-by-product.php:435
 msgid "Number of items sold"
 msgstr ""
 
@@ -3602,44 +3606,44 @@ msgid "Shipping amount"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:347
-#: includes/admin/reports/class-wc-report-sales-by-product.php:454
+#: includes/admin/reports/class-wc-report-sales-by-product.php:443
 msgid "Sales amount"
 msgstr "قيمة المبيعات"
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:93
+#: includes/admin/reports/class-wc-report-sales-by-product.php:79
 msgid "%s sales for the selected items"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:98
+#: includes/admin/reports/class-wc-report-sales-by-product.php:84
 msgid "%s purchases for the selected items"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:144
+#: includes/admin/reports/class-wc-report-sales-by-product.php:130
 msgid "Showing reports for:"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:170
+#: includes/admin/reports/class-wc-report-sales-by-product.php:160
 msgid "Reset"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:179
+#: includes/admin/reports/class-wc-report-sales-by-product.php:169
 msgid "Product Search"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:216
+#: includes/admin/reports/class-wc-report-sales-by-product.php:206
 msgid "Top Sellers"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:251
-#: includes/admin/reports/class-wc-report-sales-by-product.php:291
+#: includes/admin/reports/class-wc-report-sales-by-product.php:241
+#: includes/admin/reports/class-wc-report-sales-by-product.php:281
 msgid "No products found in range"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:256
+#: includes/admin/reports/class-wc-report-sales-by-product.php:246
 msgid "Top Earners"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-sales-by-product.php:347
+#: includes/admin/reports/class-wc-report-sales-by-product.php:337
 msgid "&larr; Choose a product to view stats"
 msgstr ""
 
@@ -3861,7 +3865,7 @@ msgid "Coupons can be applied from the cart and checkout pages."
 msgstr "القسائم تستخدم في العربة وصفحة المحاسبة"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:78
-#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Settings group label"
 msgid "Checkout"
 msgstr "المحاسبة"
 
@@ -5196,14 +5200,22 @@ msgid "WC Pages"
 msgstr "صفحات WC"
 
 #: includes/admin/views/html-admin-page-status-report.php:289
+msgctxt "Page setting"
 msgid "Shop Base"
 msgstr "السوق"
 
 #: includes/admin/views/html-admin-page-status-report.php:293
+msgctxt "Page setting"
 msgid "Cart"
 msgstr "العربة"
 
+#: includes/admin/views/html-admin-page-status-report.php:297
+msgctxt "Page setting"
+msgid "Checkout"
+msgstr "المحاسبة"
+
 #: includes/admin/views/html-admin-page-status-report.php:301
+msgctxt "Page setting"
 msgid "My Account"
 msgstr "حسابي"
 
