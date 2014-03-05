@@ -230,21 +230,25 @@ class WC_API_Coupons extends WC_API_Resource {
 		$coupon_data = wp_parse_args( $data, $defaults );
 
 		$new_coupon = array(
-			'post_title' => wc_clean( $coupon_data['code'] ),
-			'post_content' => '',
-			'post_status' => 'publish',
-			'post_author' => get_current_user_id(),
+			'post_title' 	=> wc_clean( $coupon_data['code'] ),
+			'post_content' 	=> '',
+			'post_status' 	=> 'publish',
+			'post_author' 	=> get_current_user_id(),
 			'post_type'		=> 'shop_coupon'
 		);
 
 		$id = wp_insert_post( $new_coupon, $wp_error = false );
 
+		if ( is_wp_error( $id ) ) {
+			return new WP_Error( 'woocommerce_api_cannot_create_coupon', $id->get_error_message(), array( 'status' => 400 ) );
+		}
+
 		// Add POST Meta
 		update_post_meta( $id, 'discount_type', $coupon_data['type'] );
 		update_post_meta( $id, 'coupon_amount', wc_format_decimal( $coupon_data['amount'] ) );
 		update_post_meta( $id, 'individual_use', $coupon_data['individual_use'] );
-		update_post_meta( $id, 'product_ids', implode( ',', array_filter( array_map( 'intval', (array) $coupon_data['product_ids'] ) ) ) );
-		update_post_meta( $id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', (array) $coupon_data['exclude_product_ids'] ) ) ) );
+		update_post_meta( $id, 'product_ids', implode( ',', array_filter( array_map( 'intval', explode( ',', $coupon_data['product_ids'] ) ) ) ) );
+		update_post_meta( $id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', explode( ',', $coupon_data['exclude_product_ids'] ) ) ) ) );
 		update_post_meta( $id, 'usage_limit', absint( $coupon_data['usage_limit'] ) );
 		update_post_meta( $id, 'usage_limit_per_user', absint( $coupon_data['usage_limit_per_user'] ) );
 		update_post_meta( $id, 'limit_usage_to_x_items', absint( $coupon_data['limit_usage_to_x_items'] ) );
