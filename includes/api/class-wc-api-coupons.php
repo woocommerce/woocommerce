@@ -284,7 +284,10 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['code'] ) ) {
-			wp_update_post( array( 'ID' => intval( $id ), 'post_title' => wc_clean( $data['code'] ) ) );
+			$id = wp_update_post( array( 'ID' => intval( $id ), 'post_title' => wc_clean( $data['code'] ) ) );
+			if ( 0 === $id ) {
+				return new WP_Error( 'woocommerce_api_cannot_update_coupon', __( 'Failed to update coupon', 'woocommerce'), array( 'status' => 400 ) );
+			}
 		}
 
 		if ( isset( $data['type'] ) ) {
