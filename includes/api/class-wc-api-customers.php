@@ -135,7 +135,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get all customers
 	 *
-	 * @since 2.2
+	 * @since 2.1
 	 * @param array $fields
 	 * @param array $filter
 	 * @param int $page
@@ -166,7 +166,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get the customer for the given ID
 	 *
-	 * @since 2.2
+	 * @since 2.1
 	 * @param int $id the customer ID
 	 * @param string $fields
 	 * @return array
@@ -236,7 +236,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get the customer for the given email
 	 *
-	 * @since 2.2
+	 * @since 2.1
 	 * @param string $email the customer email
 	 * @param string $fields
 	 * @return array
@@ -258,7 +258,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get the total number of customers
 	 *
-	 * @since 2.2
+	 * @since 2.1
 	 * @param array $filter
 	 * @return array
 	 */
@@ -417,7 +417,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Get the orders for a customer
 	 *
-	 * @since 2.2
+	 * @since 2.1
 	 * @param int $id the customer ID
 	 * @param string $fields fields to include in response
 	 * @return array
@@ -572,7 +572,7 @@ class WC_API_Customers extends WC_API_Resource {
 	/**
 	 * Modify the WP_User_Query to support filtering on the date the customer was created
 	 *
-	 * @since 2.2
+	 * @since 2.1
 	 * @param WP_User_Query $query
 	 */
 	public function modify_user_query( $query ) {
@@ -612,7 +612,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * 2) the ID returns a valid WP_User
 	 * 3) the current user has the proper permissions
 	 *
-	 * @since 2.2
+	 * @since 2.1
 	 * @see WC_API_Resource::validate_request()
 	 * @param string|int $id the customer ID
 	 * @param string $type the request type, unused because this method overrides the parent class
