@@ -319,8 +319,8 @@ class WC_Download_Handler {
 		while ( ! feof( $handle ) ) {
 			$buffer = fread( $handle, $chunksize );
 			echo $buffer;
-			ob_flush();
-			flush();
+			@ob_flush();
+			@flush();
 
 			if ( $retbytes ) {
 				$cnt += strlen( $buffer );
