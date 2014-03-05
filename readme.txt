@@ -145,6 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Changed set_stock to only make a variable product out of stock if all variations are stock managed to resync prices after stock changes
 * Fix - Use woocommerce_notify_no_stock_amount not 0 in variable class sync method
 * Fix - Suppress errors in download handler by silencing ob_flush and flush calls
+* Fix - load_textdomain first from WP_LANG_DIR before load_plugin_textdomain
 * Tweak - get_states method now returning false instead of array for countries without states
 * Tweak - Improved shipping language strings
 * Tweak - Remove admin check around global po translation file loading
