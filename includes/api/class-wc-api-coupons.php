@@ -298,6 +298,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['code'] ) ) {
+			global $wpdb;
 
 			// Check for duplicate coupon codes
 			$coupon_found = $wpdb->get_var( $wpdb->prepare( "
