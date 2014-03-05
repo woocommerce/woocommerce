@@ -31,10 +31,10 @@ class WC_API_Coupons extends WC_API_Resource {
 	 */
 	public function register_routes( $routes ) {
 
-		# GET/POST/PUT /coupons
+		# GET/PUT /coupons
 		$routes[ $this->base ] = array(
 			array( array( $this, 'get_coupons' ),     WC_API_Server::READABLE ),
-			array( array( $this, 'create_coupon' ),   WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'create_coupon' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /coupons/count
@@ -279,8 +279,83 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'shop_coupon', 'edit' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
+
+		if ( isset( $data['code'] ) ) {
+			wp_update_post( array( 'ID' => intval( $id ), 'post_title' => wc_clean( $data['code'] ) ) );
+		}
+
+		if ( isset( $data['type'] ) ) {
+			update_post_meta( $id, 'discount_type', $data['discount_type'] );
+		}
+
+		if ( isset( $data['amount'] ) ) {
+			update_post_meta( $id, 'coupon_amount', wc_format_decimal( $data['amount'] ) );
+		}
+
+		if ( isset( $data['individual_use'] ) ) {
+			update_post_meta( $id, 'individual_use', $data['individual_use'] );
+		}
+
+		if ( isset( $data['product_ids'] ) ) {
+			update_post_meta( $id, 'product_ids', implode( ',', array_filter( array_map( 'intval', explode( ',', $data['product_ids'] ) ) ) ) );
+		}
+
+		if ( isset( $data['exclude_product_ids'] ) ) {
+			update_post_meta( $id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', explode( ',', $data['exclude_product_ids'] ) ) ) ) );
+		}
+
+		if ( isset( $data['usage_limit'] ) ) {
+			update_post_meta( $id, 'usage_limit', absint( $data['usage_limit'] ) );
+		}
+
+		if ( isset( $data['usage_limit_per_user'] ) ) {
+			update_post_meta( $id, 'usage_limit_per_user', absint( $data['usage_limit_per_user'] ) );
+		}
+
+		if ( isset( $data['limit_usage_to_x_items'] ) ) {
+			update_post_meta( $id, 'limit_usage_to_x_items', absint( $data['limit_usage_to_x_items'] ) );
+		}
+
+		if ( isset( $data['usage_count'] ) ) {
+			update_post_meta( $id, 'usage_count', absint( $data['usage_count'] ) );
+		}
+
+		if ( isset( $data['expiry_date'] ) ) {
+			update_post_meta( $id, 'expiry_date', wc_clean( $data['expiry_date'] ) );
+		}
+
+		if ( isset( $data['apply_before_tax'] ) ) {
+			update_post_meta( $id, 'apply_before_tax', wc_clean( $data['apply_before_tax'] ) );
+		}
+
+		if ( isset( $data['free_shipping'] ) ) {
+			update_post_meta( $id, 'free_shipping', wc_clean( $data['free_shipping'] ) );
+		}
+
+		if ( isset( $data['product_categories'] ) ) {
+			update_post_meta( $id, 'product_categories', implode( ',', array_filter( array_map( 'intval', explode( ',', $data['product_categories'] ) ) ) ) );
+		}
+
+		if ( isset( $data['exclude_product_categories'] ) ) {
+			update_post_meta( $id, 'exclude_product_categories', implode( ',', array_filter( array_map( 'intval', explode( ',', $data['exclude_product_categories'] ) ) ) ) );
+		}
+
+		if ( isset( $data['exclude_sale_items'] ) ) {
+			update_post_meta( $id, 'exclude_sale_items', wc_clean( $data['exclude_sale_items'] ) );
+		}
+
+		if ( isset( $data['minimum_amount'] ) ) {
+			update_post_meta( $id, 'minimum_amount', wc_format_decimal( $data['minimum_amount'] ) );
+		}
+
+		if ( isset( $data['customer_email'] ) ) {
+			update_post_meta( $id, 'customer_email', implode( ',', array_filter( array_map( 'trim', explode( ',', $data['customer_email'] ) ) ) ) );
+		}
+
+		do_action( 'woocommerce_api_edit_coupon', $id, $data );
 
 		return $this->get_coupon( $id );
 	}
