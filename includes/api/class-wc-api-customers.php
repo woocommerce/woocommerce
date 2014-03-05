@@ -373,7 +373,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Return the validate error.
 		if ( is_wp_error( $id ) ) {
-			return new WP_Error( $id->get_error_code(), $id->get_error_message(), $id->get_error_data() );
+			return $id;
 		}
 
 		// Customer email.
@@ -408,7 +408,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// Return the validate error.
 		if ( is_wp_error( $id ) ) {
-			return new WP_Error( $id->get_error_code(), $id->get_error_message(), $id->get_error_data() );
+			return $id;
 		}
 
 		return $this->delete( $id, 'customer' );
