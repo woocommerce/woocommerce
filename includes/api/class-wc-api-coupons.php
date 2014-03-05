@@ -298,6 +298,21 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['code'] ) ) {
+
+			// Check for duplicate coupon codes
+			$coupon_found = $wpdb->get_var( $wpdb->prepare( "
+				SELECT $wpdb->posts.ID
+				FROM $wpdb->posts
+				WHERE $wpdb->posts.post_type = 'shop_coupon'
+				AND $wpdb->posts.post_status = 'publish'
+				AND $wpdb->posts.post_title = '%s'
+				AND $wpdb->posts.ID != %s
+			 ", wc_clean( $data['code'] ), $id ) );
+
+			if ( $coupon_found ) {
+				return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
+			}
+
 			$id = wp_update_post( array( 'ID' => intval( $id ), 'post_title' => wc_clean( $data['code'] ) ) );
 			if ( 0 === $id ) {
 				return new WP_Error( 'woocommerce_api_cannot_update_coupon', __( 'Failed to update coupon', 'woocommerce'), array( 'status' => 400 ) );
