@@ -282,6 +282,8 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		do_action( 'woocommerce_api_create_coupon', $id, $data );
 
+		$this->server->send_status( 201 );
+
 		return $this->get_coupon( $id );
 	}
 
