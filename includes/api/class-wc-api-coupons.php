@@ -31,7 +31,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	 */
 	public function register_routes( $routes ) {
 
-		# GET/PUT /coupons
+		# GET/POST /coupons
 		$routes[ $this->base ] = array(
 			array( array( $this, 'get_coupons' ),     WC_API_Server::READABLE ),
 			array( array( $this, 'create_coupon' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
@@ -42,7 +42,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
-		# GET/POST/PUT/DELETE /coupons/<id>
+		# GET/PUT/DELETE /coupons/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_coupon' ),    WC_API_Server::READABLE ),
 			array( array( $this, 'edit_coupon' ),   WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
@@ -206,6 +206,8 @@ class WC_API_Coupons extends WC_API_Resource {
 			return new WP_Error( 'woocommerce_api_invalid_coupon_type', sprintf( __( 'Invalid coupon type - the coupon type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_coupon_types() ) ) ), array( 'status' => 400 ) );
 		}
 
+		$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+
 		// Check for duplicate coupon codes
 		$coupon_found = $wpdb->get_var( $wpdb->prepare( "
 			SELECT $wpdb->posts.ID
@@ -213,7 +215,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			WHERE $wpdb->posts.post_type = 'shop_coupon'
 			AND $wpdb->posts.post_status = 'publish'
 			AND $wpdb->posts.post_title = '%s'
-		 ", wc_clean( $data['code'] ) ) );
+		 ", $coupon_code ) );
 
 		if ( $coupon_found ) {
 			return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
@@ -241,10 +243,8 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupon_data = wp_parse_args( $data, $defaults );
 
-		$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
-
 		$new_coupon = array(
-			'post_title' 	=> wc_clean( $coupon_code ),
+			'post_title' 	=> $coupon_code,
 			'post_content' 	=> '',
 			'post_status' 	=> 'publish',
 			'post_author' 	=> get_current_user_id(),
@@ -300,6 +300,8 @@ class WC_API_Coupons extends WC_API_Resource {
 		if ( isset( $data['code'] ) ) {
 			global $wpdb;
 
+			$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
+
 			// Check for duplicate coupon codes
 			$coupon_found = $wpdb->get_var( $wpdb->prepare( "
 				SELECT $wpdb->posts.ID
@@ -308,19 +310,22 @@ class WC_API_Coupons extends WC_API_Resource {
 				AND $wpdb->posts.post_status = 'publish'
 				AND $wpdb->posts.post_title = '%s'
 				AND $wpdb->posts.ID != %s
-			 ", wc_clean( $data['code'] ), $id ) );
+			 ", $coupon_code, $id ) );
 
 			if ( $coupon_found ) {
 				return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
 			}
 
-			$id = wp_update_post( array( 'ID' => intval( $id ), 'post_title' => wc_clean( $data['code'] ) ) );
+			$id = wp_update_post( array( 'ID' => intval( $id ), 'post_title' => $coupon_code ) );
 			if ( 0 === $id ) {
 				return new WP_Error( 'woocommerce_api_cannot_update_coupon', __( 'Failed to update coupon', 'woocommerce'), array( 'status' => 400 ) );
 			}
 		}
 
 		if ( isset( $data['type'] ) ) {
+			if ( ! in_array( $data['type'], array_keys( wc_get_coupon_types() ) ) ) {
+				return new WP_Error( 'woocommerce_api_invalid_coupon_type', __( 'Invalid coupon type', 'woocommerce'), array( 'status' => 400 ) );
+			}
 			update_post_meta( $id, 'discount_type', $data['type'] );
 		}
 
