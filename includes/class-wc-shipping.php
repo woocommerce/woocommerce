@@ -137,13 +137,17 @@ class WC_Shipping {
 	 * @return void
 	 */
 	public function register_shipping_method( $method ) {
+		
+		if( $this->is_valid_shipping_methods( $method ) ) {
+			
+			if ( ! is_object( $method ) )
+				$method = new $method();
 
-		if ( ! is_object( $method ) )
-			$method = new $method();
+			$id = empty( $method->instance_id ) ? $method->id : $method->instance_id;
 
-		$id = empty( $method->instance_id ) ? $method->id : $method->instance_id;
-
-		$this->shipping_methods[ $id ] = $method;
+			$this->shipping_methods[ $id ] = $method;
+			
+		}
 	}
 
 	/**
@@ -154,6 +158,37 @@ class WC_Shipping {
 	 */
 	public function unregister_shipping_methods() {
 		unset( $this->shipping_methods );
+	}
+	
+	/*
+	* validate a class before using it here to calculate
+	* @return true if class extends WC_Shipping_Method
+	* @params class name
+	*/
+	public function is_valid_shipping_methods( $method ) {
+		
+		if( false === ( $reflection = new ReflectionClass( $method ) ) )
+			return false;
+			
+		//don't allow passed WC_Shipping_Method it self in params
+		// because WC_Shipping_Method is abstract, so we can't instantiate it
+		if( $method == ( $to_search = 'WC_Shipping_Method'  ) )
+			return false;
+		
+		do {
+			
+			if( false === ( $parent = $reflection->getParentClass() ) )
+				return false;
+			
+			if( $parent->getName() == $to_search )
+				return true;
+						
+			//change the reflection variable to the parent, 
+			$reflection = $parent;
+			
+		} while( false !== $reflection );
+		
+		return false;
 	}
 
 	/**
