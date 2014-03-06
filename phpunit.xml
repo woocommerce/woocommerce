@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit colors="true" 
+		backupGlobals="false"
+		convertErrorsToExceptions="true"
+		bootstrap="tests/bootstrap.php"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true">
+    <testsuites>
+        <testsuite name="Application Test Suite">
+            <directory suffix=".php">./tests/woocommerce/</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
