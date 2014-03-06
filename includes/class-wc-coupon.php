@@ -501,6 +501,12 @@ class WC_Coupon {
 
 			$discount = $discounting_amount < $this->amount ? $discounting_amount : $this->amount;
 
+			// If dealing with a line and not a single item, we need to multiple fixed discount by cart item qty.
+			if ( ! $single && ! is_null( $cart_item ) ) {
+				// Discount for the line.
+				$discount = $discount * $cart_item['quantity'];
+			}
+
 		} elseif ( $this->type == 'percent_product' || $this->type == 'percent' ) {
 
 			$discount = round( ( $discounting_amount / 100 ) * $this->amount, WC()->cart->dp );
@@ -525,6 +531,7 @@ class WC_Coupon {
 			}
 		}
 
+		// Handle the limit_usage_to_x_items option
 		if ( in_array( $this->type, array( 'percent_product', 'fixed_product' ) ) && ! is_null( $cart_item ) ) {
 			$qty = empty( $this->limit_usage_to_x_items ) ? $cart_item['quantity'] : min( $this->limit_usage_to_x_items, $cart_item['quantity'] );
 
