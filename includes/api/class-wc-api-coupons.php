@@ -243,7 +243,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupon_data = wp_parse_args( $data, $defaults );
 
-		if ( ! in_array( $coupon_data['type'], array_keys( wc_get_coupon_types() ) ) {
+		if ( ! in_array( $coupon_data['type'], array_keys( wc_get_coupon_types() ) ) ) {
 			return new WP_Error( 'woocommerce_api_invalid_coupon_type', __( 'Invalid coupon type', 'woocommerce'), array( 'status' => 400 ) );
 		}
 
