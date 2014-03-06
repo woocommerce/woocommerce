@@ -103,6 +103,37 @@ class WC_Payment_Gateways {
 
 		ksort( $this->payment_gateways );
     }
+	
+	/*
+	* validate a class before using it
+	* @return true if class extends WC_Payment_Gateway
+	* @params class name|object class
+	*/
+	public function is_valid_payment_gateway( $gateway ) {
+		
+		if( false === ( $reflection = new ReflectionClass( $gateway ) ) )
+			return false;
+			
+		//don't allow passed WC_Payment_Gateway it self in params
+		// because WC_Payment_Gateway is abstract, so we can't instantiate it
+		if( $gateway == ( $to_search = 'WC_Payment_Gateway'  ) )
+			return false;
+		
+		do {
+			
+			if( false === ( $parent = $reflection->getParentClass() ) )
+				return false;
+			
+			if( $parent->getName() == $to_search )
+				return true;
+						
+			//change the reflection variable to the parent, 
+			$reflection = $parent;
+			
+		} while( false !== $reflection );
+		
+		return false;
+	}
 
 
     /**
