@@ -605,9 +605,15 @@ class WC_Customer {
 						OR 
 						permissions.downloads_remaining = ''
 					)
+				AND 
+					(
+						permissions.access_expires IS NULL
+						OR 
+						permissions.access_expires >= %s
+					)
 				GROUP BY permissions.download_id
 				ORDER BY permissions.order_id, permissions.product_id, permissions.download_id;
-				", get_current_user_id() ) );
+				", get_current_user_id(), date( 'Y-m-d', current_time( 'timestamp' ) ) ) );
 
 			if ( $results ) {
 				foreach ( $results as $result ) {
