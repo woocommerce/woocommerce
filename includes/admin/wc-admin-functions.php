@@ -181,9 +181,8 @@ function woocommerce_compile_less_styles() {
 
             file_put_contents( $base_file, $color_rules );
 
-            $less           = new lessc( $less_file );
-            $compiled_css   = $less->parse();
-
+            $less         = new lessc;
+            $compiled_css = $less->compileFile( $less_file );
             $compiled_css = CssMin::minify( $compiled_css );
 
             if ( $compiled_css )
