@@ -230,22 +230,21 @@ jQuery( function ( $ ) {
 					edit_field = 'variable_sale_price';
 				}
 
-				value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent );
+				value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent ).toString();
 
-				$( ':input[name^="' + edit_field + '"]' ).each( function () {
-					var current_value = Number( $( this ).val() ),
-						new_value;
+				$( ':input[name^="' + edit_field + '"]' ).each( function() {
+					var current_value = Number( $( this ).val() ), new_value;
 
-					if ( value.toString().indexOf( '%' ) >= 0 ) {
-						value = Number( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, '' ) ) );
+					if ( value.indexOf( '%' ) >= 0 ) {
+						var mod_value = Number( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, '' ) ) );
 					} else {
-						value = Number( value );
+						var mod_value = Number( value );
 					}
 
 					if ( bulk_edit.indexOf( 'increase' ) !== -1 ) {
-						new_value = current_value + value;
+						new_value = current_value + mod_value;
 					} else {
-						new_value = current_value - value;
+						new_value = current_value - mod_value;
 					}
 
 					$( this ).val( new_value ).change();
