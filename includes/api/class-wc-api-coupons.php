@@ -394,7 +394,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['customer_email'] ) ) {
-			update_post_meta( $id, 'customer_email', implode( ',', array_filter( array_map( 'sanitize_email', $data['customer_email'] ) ) );
+			update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $data['customer_email'] ) ) );
 		}
 
 		do_action( 'woocommerce_api_edit_coupon', $id, $data );
