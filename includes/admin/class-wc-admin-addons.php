@@ -26,7 +26,10 @@ class WC_Admin_Addons {
 
 		if ( false === ( $addons = get_transient( 'woocommerce_addons_html_' . $view ) ) ) {
 
-			$raw_addons = wp_remote_get( 'http://www.woothemes.com/product-category/woocommerce-extensions/' . $view . '?orderby=popularity' );
+			$raw_addons = wp_remote_get( 'http://www.woothemes.com/product-category/woocommerce-extensions/' . $view . '?orderby=popularity', array(
+					'user-agent' => 'woocommerce-addons-page',
+					'timeout'    => 3
+				) );
 
 			if ( ! is_wp_error( $raw_addons ) ) {
 
@@ -37,6 +40,7 @@ class WC_Admin_Addons {
 				libxml_use_internal_errors(true);
 				$dom->loadHTML( $raw_addons );
 
+				$addons = '';
 				$xpath  = new DOMXPath( $dom );
 				$tags   = $xpath->query('//ul[@class="products"]');
 				foreach ( $tags as $tag ) {
