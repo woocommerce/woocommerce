@@ -201,11 +201,6 @@ class WC_API_Coupons extends WC_API_Resource {
 			return new WP_Error( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s' ), 'code' ), array( 'status' => 400 ) );
 		}
 
-		// Validate coupon types
-		if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_coupon_types() ) ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_coupon_type', sprintf( __( 'Invalid coupon type - the coupon type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_coupon_types() ) ) ), array( 'status' => 400 ) );
-		}
-
 		$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
 
 		// Check for duplicate coupon codes
@@ -243,8 +238,9 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupon_data = wp_parse_args( $data, $defaults );
 
-		if ( ! in_array( $coupon_data['type'], array_keys( wc_get_coupon_types() ) ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_coupon_type', __( 'Invalid coupon type', 'woocommerce'), array( 'status' => 400 ) );
+		// Validate coupon types
+		if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_coupon_types() ) ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_coupon_type', sprintf( __( 'Invalid coupon type - the coupon type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_coupon_types() ) ) ), array( 'status' => 400 ) );
 		}
 
 		$new_coupon = array(
@@ -329,8 +325,9 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['type'] ) ) {
-			if ( ! in_array( $data['type'], array_keys( wc_get_coupon_types() ) ) ) {
-				return new WP_Error( 'woocommerce_api_invalid_coupon_type', __( 'Invalid coupon type', 'woocommerce'), array( 'status' => 400 ) );
+			// Validate coupon types
+			if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_coupon_types() ) ) ) {
+				return new WP_Error( 'woocommerce_api_invalid_coupon_type', sprintf( __( 'Invalid coupon type - the coupon type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_coupon_types() ) ) ), array( 'status' => 400 ) );
 			}
 			update_post_meta( $id, 'discount_type', $data['type'] );
 		}
