@@ -265,8 +265,8 @@ class WC_API_Coupons extends WC_API_Resource {
 		update_post_meta( $id, 'discount_type', $coupon_data['type'] );
 		update_post_meta( $id, 'coupon_amount', wc_format_decimal( $coupon_data['amount'] ) );
 		update_post_meta( $id, 'individual_use', $coupon_data['individual_use'] );
-		update_post_meta( $id, 'product_ids', array_filter( array_map( 'intval', $coupon_data['product_ids'] ) ) );
-		update_post_meta( $id, 'exclude_product_ids', array_filter( array_map( 'intval', $coupon_data['exclude_product_ids'] ) ) );
+		update_post_meta( $id, 'product_ids', implode( ',', array_filter( array_map( 'intval', $coupon_data['product_ids'] ) ) ) );
+		update_post_meta( $id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', $coupon_data['exclude_product_ids'] ) ) ) );
 		update_post_meta( $id, 'usage_limit', absint( $coupon_data['usage_limit'] ) );
 		update_post_meta( $id, 'usage_limit_per_user', absint( $coupon_data['usage_limit_per_user'] ) );
 		update_post_meta( $id, 'limit_usage_to_x_items', absint( $coupon_data['limit_usage_to_x_items'] ) );
