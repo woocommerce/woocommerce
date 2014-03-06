@@ -473,8 +473,11 @@ class WC_Product_Variable extends WC_Product {
 					continue;
 				}
 
-				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && get_post_meta( $child, '_stock', true ) <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-					continue;
+				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+					$stock = get_post_meta( $child, '_stock', true );
+					if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+						continue;
+					}
 				}
 
 				if ( $child_price > $max_price ) {
