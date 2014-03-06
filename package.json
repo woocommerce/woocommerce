@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "homepage": "http://www.woothemes.com/woocommerce/",
   "main": "Gruntfile.js",
   "devDependencies": {

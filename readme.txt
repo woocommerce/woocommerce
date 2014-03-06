@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.6 =
+
 = 2.1.5 - 06/03/2014 =
 * Fix - Prevent notices on new plain text email parameter for BACS and Cheque gateways
 * Fix - Fixed issue where variation prices were hidden when variation stock management wasn't set
