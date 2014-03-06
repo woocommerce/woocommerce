@@ -498,8 +498,9 @@ class WC_Coupon {
 		$discount = 0;
 
 		if ( $this->type == 'fixed_product') {
-
-			$discount = $discounting_amount < $this->amount ? $discounting_amount : $this->amount;
+			$cart_item_quantity = is_null( $cart_item ) ? 1 : $cart_item['quantity'];
+			
+			$discount = ( $discounting_amount < $this->amount ? $discounting_amount : $this->amount ) * $cart_item_quantity;
 
 		} elseif ( $this->type == 'percent_product' || $this->type == 'percent' ) {
 
