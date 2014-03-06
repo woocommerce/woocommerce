@@ -127,6 +127,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.1.5 =
+* Fix - Prevent notices on new plain text email parameter for BACS and Cheque gateways
+* Fix - Fixed issue where variation prices were hidden when variation stock management wasn't set
+* Fix - Discounts fixed_product are now properly multiplied by quantity
+* Fix - Fixed bulk edit % increase and decrease
+* Fix - Extra check for access_expires when getting downloadable files
+* Fix - get_related method fixed tags OR query not excluding product ID
+* Tweak - Fallback for when add ons page is not loading
+* Tweak - Hide price suffix in admin panel lists
 
 = 2.1.4 - 05/03/2014 =
 * Fix - Prevent duplicate loading of functions files
