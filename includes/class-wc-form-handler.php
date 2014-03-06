@@ -48,7 +48,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || ( 'edit_address' !== $_POST[ 'action' ] ) ) {
+		if ( empty( $_POST[ 'action' ] ) || ( 'edit_address' !== $_POST[ 'action' ] ) || empty( $_POST['_wpnonce'] ) ) {
 			return;
 		}
 
@@ -144,7 +144,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || ( 'save_account_details' !== $_POST[ 'action' ] ) ) {
+		if ( empty( $_POST[ 'action' ] ) || ( 'save_account_details' !== $_POST[ 'action' ] ) || empty( $_POST['_wpnonce'] ) ) {
 			return;
 		}
 
@@ -240,7 +240,7 @@ class WC_Form_Handler {
 	public function pay_action() {
 		global $wp;
 
-		if ( isset( $_POST['woocommerce_pay'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-pay' ) ) {
+		if ( isset( $_POST['woocommerce_pay'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-pay' ) ) {
 
 			ob_start();
 
@@ -314,7 +314,7 @@ class WC_Form_Handler {
 	public function add_payment_method_action() {
 		global $wp;
 
-		if ( isset( $_POST['woocommerce_add_payment_method'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
+		if ( isset( $_POST['woocommerce_add_payment_method'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
 
 			ob_start();
 
@@ -360,7 +360,7 @@ class WC_Form_Handler {
 		}
 
 		// Remove from cart
-		elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+		elseif ( ! empty( $_GET['remove_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
 
 			WC()->cart->set_quantity( $_GET['remove_item'], 0 );
 
@@ -373,7 +373,7 @@ class WC_Form_Handler {
 		}
 
 		// Update Cart - checks apply_coupon too because they are in the same form
-		if ( ( ! empty( $_POST['apply_coupon'] ) || ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
+		if ( ( ! empty( $_POST['apply_coupon'] ) || ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
 
 			$cart_updated = false;
 			$cart_totals  = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
@@ -439,7 +439,7 @@ class WC_Form_Handler {
 	public function order_again() {
 
 		// Nothing to do
-		if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-order_again' ) ) {
+		if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-order_again' ) ) {
 			return;
 		}
 
@@ -511,7 +511,7 @@ class WC_Form_Handler {
 
 			if ( $order->status == 'cancelled' ) {
 				// Already cancelled - take no action
-			} elseif ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
+			} elseif ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
@@ -788,14 +788,14 @@ class WC_Form_Handler {
 		}
 
 		// process lost password form
-		if ( isset( $_POST['user_login'] ) ) {
+		if ( isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) ) {
 			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-lost_password' );
 
 			WC_Shortcode_My_Account::retrieve_password();
 		}
 
 		// process reset password form
-		if ( isset( $_POST['password_1'] ) && isset( $_POST['password_2'] ) && isset( $_POST['reset_key'] ) && isset( $_POST['reset_login'] ) ) {
+		if ( isset( $_POST['password_1'] ) && isset( $_POST['password_2'] ) && isset( $_POST['reset_key'] ) && isset( $_POST['reset_login'] ) && isset( $_POST['_wpnonce'] ) ) {
 
 			// verify reset key again
 			$user = WC_Shortcode_My_Account::check_password_reset_key( $_POST['reset_key'], $_POST['reset_login'] );
