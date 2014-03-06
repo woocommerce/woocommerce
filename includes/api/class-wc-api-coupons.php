@@ -342,11 +342,11 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['product_ids'] ) ) {
-			update_post_meta( $id, 'product_ids', array_filter( array_map( 'intval', $data['product_ids'] ) ) );
+			update_post_meta( $id, 'product_ids', implode( ',', array_filter( array_map( 'intval', $data['product_ids'] ) ) ) );
 		}
 
 		if ( isset( $data['exclude_product_ids'] ) ) {
-			update_post_meta( $id, 'exclude_product_ids', array_filter( array_map( 'intval', $data['exclude_product_ids'] ) ) );
+			update_post_meta( $id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', $data['exclude_product_ids'] ) ) ) );
 		}
 
 		if ( isset( $data['usage_limit'] ) ) {
