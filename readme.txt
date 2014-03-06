@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.8.1
-Stable tag: 2.1.4
+Stable tag: 2.1.5
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -126,7 +126,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.1.5 =
+= 2.1.5 - 06/03/2014 =
 * Fix - Prevent notices on new plain text email parameter for BACS and Cheque gateways
 * Fix - Fixed issue where variation prices were hidden when variation stock management wasn't set
 * Fix - Discounts fixed_product are now properly multiplied by quantity
