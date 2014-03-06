@@ -221,7 +221,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * @param bool $plain_text
      * @return void
      */
-    public function email_instructions( $order, $sent_to_admin, $plain_text ) {
+    public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
 
     	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' ) {
     		return;

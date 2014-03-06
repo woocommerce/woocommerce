@@ -94,7 +94,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
      * @param bool $sent_to_admin
      * @param bool $plain_text
      */
-	public function email_instructions( $order, $sent_to_admin, $plain_text ) {
+	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
     	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'cheque' )
     		return;
 
