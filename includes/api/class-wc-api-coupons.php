@@ -342,11 +342,11 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['product_ids'] ) ) {
-			update_post_meta( $id, 'product_ids', implode( ',', array_filter( array_map( 'intval', explode( ',', $data['product_ids'] ) ) ) ) );
+			update_post_meta( $id, 'product_ids', array_filter( array_map( 'intval', $data['product_ids'] ) ) );
 		}
 
 		if ( isset( $data['exclude_product_ids'] ) ) {
-			update_post_meta( $id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', explode( ',', $data['exclude_product_ids'] ) ) ) ) );
+			update_post_meta( $id, 'exclude_product_ids', array_filter( array_map( 'intval', $data['exclude_product_ids'] ) ) );
 		}
 
 		if ( isset( $data['usage_limit'] ) ) {
@@ -378,11 +378,11 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['product_categories'] ) ) {
-			update_post_meta( $id, 'product_categories', implode( ',', array_filter( array_map( 'intval', explode( ',', $data['product_categories'] ) ) ) ) );
+			update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $data['product_categories'] ) ) );
 		}
 
 		if ( isset( $data['exclude_product_categories'] ) ) {
-			update_post_meta( $id, 'exclude_product_categories', implode( ',', array_filter( array_map( 'intval', explode( ',', $data['exclude_product_categories'] ) ) ) ) );
+			update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $data['exclude_product_categories'] ) ) );
 		}
 
 		if ( isset( $data['exclude_sale_items'] ) ) {
@@ -394,7 +394,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['customer_email'] ) ) {
-			update_post_meta( $id, 'customer_email', implode( ',', array_filter( array_map( 'trim', explode( ',', $data['customer_email'] ) ) ) ) );
+			update_post_meta( $id, 'customer_email', implode( ',', array_filter( array_map( 'sanitize_email', $data['customer_email'] ) ) );
 		}
 
 		do_action( 'woocommerce_api_edit_coupon', $id, $data );
