@@ -1354,7 +1354,7 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 			}
 		}
 
-		set_transient( 'wc_products_will_display_' . $parent_id, $products_will_display );
+		set_transient( 'wc_products_will_display_' . $parent_id, $products_will_display, DAY_IN_SECONDS );
 
 		return $products_will_display;
 	}
