@@ -1,182 +1,191 @@
-jQuery(function($) {
+jQuery( function( $ ) {
 
 	$.blockUI.defaults.overlayCSS.cursor = 'default'; 
 	
 	// wc_checkout_params is required to continue, ensure the object exists
-	if (typeof wc_checkout_params === "undefined")
+	if ( typeof wc_checkout_params === 'undefined' )
 		return false;
 
-	var updateTimer;
-	var dirtyInput = false;
-	var xhr;
+	var updateTimer,
+		dirtyInput = false,
+		xhr;
 
 	function update_checkout() {
 
-		if (xhr) xhr.abort();
+		if ( xhr ) xhr.abort();
 
 		var shipping_methods = [];
 
-		$('select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]').each( function( index, input ) {
-			shipping_methods[ $(this).data( 'index' ) ] = $(this).val();
-		} );
+		$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function( index, input ) {
+			shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
+		});
+    
+		var payment_method		= $( '#order_review input[name=payment_method]:checked' ).val(),
+			country				= $( '#billing_country' ).val(),
+			state				= $( '#billing_state' ).val(),
+			postcode			= $( 'input#billing_postcode' ).val(),
+			city				= $( 'input#billing_city' ).val(),
+			address				= $( 'input#billing_address_1' ).val(),
+			address_2			= $( 'input#billing_address_2' ).val(),
+			s_country,
+			s_state,
+			s_postcode,
+			s_city,
+			s_address,
+			s_address_2;
 
-		var payment_method 	= $('#order_review input[name=payment_method]:checked').val();
-		var country 		= $('#billing_country').val();
-		var state 			= $('#billing_state').val();
-		var postcode 		= $('input#billing_postcode').val();
-		var city	 		= $('input#billing_city').val();
-		var address	 		= $('input#billing_address_1').val();
-		var address_2	 	= $('input#billing_address_2').val();
-
-		if ( $('#ship-to-different-address input').is(':checked') || $('#ship-to-different-address input').size() == 0 ) {
-			var s_country 	= $('#shipping_country').val();
-			var s_state 	= $('#shipping_state').val();
-			var s_postcode 	= $('input#shipping_postcode').val();
-			var s_city 		= $('input#shipping_city').val();
-			var s_address 	= $('input#shipping_address_1').val();
-			var s_address_2	= $('input#shipping_address_2').val();
+		if ( $( '#ship-to-different-address input' ).is( ':checked' ) || $( '#ship-to-different-address input' ).size() === 0 ) {
+			s_country	= $( '#shipping_country' ).val();
+			s_state		= $( '#shipping_state' ).val();
+			s_postcode	= $( 'input#shipping_postcode' ).val();
+			s_city		= $( 'input#shipping_city' ).val();
+			s_address	= $( 'input#shipping_address_1' ).val();
+			s_address_2	= $( 'input#shipping_address_2' ).val();
 		} else {
-			var s_country 	= country;
-			var s_state 	= state;
-			var s_postcode 	= postcode;
-			var s_city 		= city;
-			var s_address 	= address;
-			var s_address_2	= address_2;
+			s_country	= country;
+			s_state		= state;
+			s_postcode	= postcode;
+			s_city		= city;
+			s_address	= address;
+			s_address_2	= address_2;
 		}
 
-		$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
+		$( '#order_methods, #order_review' ).block( { message: null, overlayCSS: { background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } });
 
 		var data = {
-			action: 			'woocommerce_update_order_review',
-			security: 			wc_checkout_params.update_order_review_nonce,
-			shipping_method: 	shipping_methods,
+			action:				'woocommerce_update_order_review',
+			security:			wc_checkout_params.update_order_review_nonce,
+			shipping_method:	shipping_methods,
 			payment_method:		payment_method,
-			country: 			country,
-			state: 				state,
-			postcode: 			postcode,
+			country:			country,
+			state:				state,
+			postcode:			postcode,
 			city:				city,
 			address:			address,
 			address_2:			address_2,
-			s_country: 			s_country,
-			s_state: 			s_state,
-			s_postcode: 		s_postcode,
+			s_country:			s_country,
+			s_state:			s_state,
+			s_postcode:			s_postcode,
 			s_city:				s_city,
 			s_address:			s_address,
 			s_address_2:		s_address_2,
-			post_data:			$('form.checkout').serialize()
+			post_data:			$( 'form.checkout' ).serialize()
 		};
 
 		xhr = $.ajax({
-			type: 		'POST',
-			url: 		wc_checkout_params.ajax_url,
-			data: 		data,
-			success: 	function( response ) {
+			type:		'POST',
+			url:		wc_checkout_params.ajax_url,
+			data:		data,
+			success:    function( response ) {
 				if ( response ) {
-					var order_output = $($.parseHTML(response.trim()));
-					$('#order_review').html(order_output.html());
-					$('#order_review').find('input[name=payment_method]:checked').click();
-					$('body').trigger('updated_checkout');
+					var order_output = $( $.parseHTML( response.trim() ) );
+					$( '#order_review' ).html( order_output.html() );
+					$( '#order_review' ).find( 'input[name=payment_method]:checked' ).click();
+					$( 'body' ).trigger( 'updated_checkout' );
 				}
 			}
 		});
-
 	}
 
 	// Event for updating the checkout
-	$('body').bind('update_checkout', function() {
-		clearTimeout(updateTimer);
+	$( 'body' ).bind( 'update_checkout', function() {
+		clearTimeout( updateTimer );
 		update_checkout();
 	});
 
-	$('p.password, form.login, .checkout_coupon, div.shipping_address').hide();
+	$( 'p.password, form.login, .checkout_coupon, div.shipping_address' ).hide();
 
-	$('input.show_password').change(function(){
-		$('p.password').slideToggle();
+	$( 'input.show_password' ).change( function(){ 
+		$( 'p.password' ).slideToggle();
 	});
 
-	$('a.showlogin').click(function(){
-		$('form.login').slideToggle();
+	$( 'a.showlogin' ).click( function() {
+		$( 'form.login' ).slideToggle();
+
 		return false;
 	});
 
-	$('a.showcoupon').click(function(){
-		$('.checkout_coupon').slideToggle(400, function() {
-			$('#coupon_code').focus();
+	$( 'a.showcoupon' ).click( function() {
+		$( '.checkout_coupon' ).slideToggle( 400, function() {
+			$( '#coupon_code' ).focus();
 		});
+
 		return false;
 	});
 
-	$('#ship-to-different-address input').change(function(){
-		$('div.shipping_address').hide();
-		if ($(this).is(':checked')) {
-			$('div.shipping_address').slideDown();
+	$( '#ship-to-different-address input' ).change( function() {
+		$( 'div.shipping_address' ).hide();
+
+		if ( $( this ).is( ':checked' ) ) {
+			$( 'div.shipping_address' ).slideDown();
 		}
 	}).change();
 
-	if ( wc_checkout_params.option_guest_checkout == 'yes' ) {
+	if ( wc_checkout_params.option_guest_checkout === 'yes' ) {
 
-		$('div.create-account').hide();
+		$( 'div.create-account' ).hide();
 
-		$('input#createaccount').change(function(){
-			$('div.create-account').hide();
-			if ($(this).is(':checked')) {
-				$('div.create-account').slideDown();
+		$( 'input#createaccount' ).change( function() {
+			$( 'div.create-account' ).hide();
+			
+			if ( $( this ).is( ':checked' ) ) {
+				$( 'div.create-account' ).slideDown();
 			}
 		}).change();
-
 	}
 
 	// Used for input change events below
 	function input_changed() {
 		var update_totals = true;
 
-		if ( $(dirtyInput).size() ) {
+		if ( $( dirtyInput ).size() ) {
 
-			$required_siblings = $(dirtyInput).closest('.form-row').siblings('.address-field.validate-required');
+			$required_siblings = $( dirtyInput ).closest( '.form-row' ).siblings( '.address-field.validate-required' );
 
 			if ( $required_siblings.size() ) {
-				 $required_siblings.each(function(){
-					if ( $(this).find('input.input-text').val() == '' || $(this).find('input.input-text').val() == 'undefined' ) {
+				$required_siblings.each( function() {
+					if ( $( this ).find( 'input.input-text' ).val() === '' || $( this ).find( 'input.input-text' ).val() === 'undefined' ) {
 						update_totals = false;
 					}
-				 });
+        });
 			}
-
 		}
 
 		if ( update_totals ) {
 			dirtyInput = false;
-			$('body').trigger('update_checkout');
+			$( 'body' ).trigger( 'update_checkout' );
 		}
 	}
 
-	$('#order_review')
+	$( '#order_review' )
 
 	/* Payment option selection */
 
 	.on( 'click', '.payment_methods input.input-radio', function() {
-		if ( $('.payment_methods input.input-radio').length > 1 ) {
-			var target_payment_box = $('div.payment_box.' + $(this).attr('ID') );
-			if ( $(this).is(':checked') && ! target_payment_box.is(':visible') ) {
-				$('div.payment_box').filter(':visible').slideUp(250);
-				if ( $(this).is(':checked') ) {
-					$('div.payment_box.' + $(this).attr('ID') ).slideDown(250);
+		if ( $( '.payment_methods input.input-radio' ).length > 1 ) {
+			var target_payment_box = $( 'div.payment_box.' + $( this ).attr( 'ID' ) );
+
+			if ( $( this ).is( ':checked' ) && ! target_payment_box.is( ':visible' ) ) {
+				$( 'div.payment_box' ).filter( ':visible' ).slideUp( 250 );
+				if ( $( this ).is( ':checked' ) ) {
+					$( 'div.payment_box.' + $( this ).attr( 'ID' ) ).slideDown( 250 );
 				}
 			}
 		} else {
-			$('div.payment_box').show();
+			$( 'div.payment_box' ).show();
 		}
-		if ( $(this).data('order_button_text') ) {
-			$('#place_order').val( $(this).data('order_button_text') );
+
+		if ( $( this ).data( 'order_button_text' ) ) {
+			$( '#place_order' ).val( $( this ).data( 'order_button_text' ) );
 		} else {
-			$('#place_order').val( $('#place_order').data( 'value' ) );
+			$( '#place_order' ).val( $( '#place_order' ).data( 'value' ) );
 		}
 	})
 
 	// Trigger initial click
-	.find('input[name=payment_method]:checked').click();
+	.find( 'input[name=payment_method]:checked' ).click();
 
-	$('form.checkout')
+	$( 'form.checkout' )
 
 	/* Update totals/taxes/shipping */
 
@@ -184,7 +193,7 @@ jQuery(function($) {
 	.on( 'input change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function(){
 		clearTimeout( updateTimer );
 		dirtyInput = false;
-		$('body').trigger('update_checkout');
+		$( 'body' ).trigger( 'update_checkout' );
 	})
 
 	// Address-fields which refresh totals when all required fields are filled
@@ -201,8 +210,11 @@ jQuery(function($) {
 
 	.on( 'keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', function( e ){
 		var code = e.keyCode || e.which;
-		if ( code == '9' )
+		
+		if ( code === '9' ) {
 			return;
+		}
+
 		dirtyInput = this;
 		clearTimeout( updateTimer );
 		updateTimer = setTimeout( input_changed, '1000' );
@@ -211,12 +223,12 @@ jQuery(function($) {
 	/* Inline validation */
 
 	.on( 'blur input change', '.input-text, select', function() {
-		var $this = $(this);
-		var $parent = $this.closest('.form-row');
-		var validated = true;
+		var $this = $( this ),
+			$parent = $this.closest( '.form-row' ),
+			validated = true;
 
 		if ( $parent.is( '.validate-required' ) ) {
-			if ( $this.val() == '' ) {
+			if ( $this.val() === '' ) {
 				$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
 				validated = false;
 			}
@@ -245,26 +257,26 @@ jQuery(function($) {
 	.submit( function() {
 		clearTimeout( updateTimer );
 
-		var $form = $(this);
+		var $form = $( this );
 
-		if ( $form.is('.processing') )
+		if ( $form.is( '.processing' ) )
 			return false;
 
 		// Trigger a handler to let gateways manipulate the checkout if needed
-		if ( $form.triggerHandler('checkout_place_order') !== false && $form.triggerHandler('checkout_place_order_' + $('#order_review input[name=payment_method]:checked').val() ) !== false ) {
+		if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + $( '#order_review input[name=payment_method]:checked' ).val() ) !== false ) {
 
-			$form.addClass('processing');
+			$form.addClass( 'processing' );
 
 			var form_data = $form.data();
 
 			if ( form_data["blockUI.isBlocked"] != 1 )
-				$form.block({message: null, overlayCSS: {background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
+				$form.block({message: null, overlayCSS: {background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 }});
 
 			$.ajax({
-				type: 		'POST',
-				url: 		wc_checkout_params.checkout_url,
-				data: 		$form.serialize(),
-				success: 	function( code ) {
+				type:		'POST',
+				url:		wc_checkout_params.checkout_url,
+				data:		$form.serialize(),
+				success:	function( code ) {
 					var result = '';
 
 					try {
@@ -288,13 +300,13 @@ jQuery(function($) {
 					}
 					catch( err ) {
 
-						if ( result.reload == 'true' ) {
+						if ( result.reload === 'true' ) {
 							window.location.reload();
 							return;
 						}
 
 						// Remove old errors
-						$('.woocommerce-error, .woocommerce-message').remove();
+						$( '.woocommerce-error, .woocommerce-message' ).remove();
 
 						// Add new errors
 						if ( result.messages )
@@ -302,25 +314,25 @@ jQuery(function($) {
 						else
 							$form.prepend( code );
 
-					  	// Cancel processing
-						$form.removeClass('processing').unblock();
+						// Cancel processing
+						$form.removeClass( 'processing' ).unblock();
 
 						// Lose focus for all fields
 						$form.find( '.input-text, select' ).blur();
 
 						// Scroll to top
-						$('html, body').animate({
-						    scrollTop: ($('form.checkout').offset().top - 100)
-						}, 1000);
+						$( 'html, body' ).animate({
+							scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
+						}, 1000 );
 
 						// Trigger update in case we need a fresh nonce
-						if ( result.refresh == 'true' )
-							$('body').trigger('update_checkout');
+						if ( result.refresh === 'true' )
+							$( 'body' ).trigger( 'update_checkout' );
 
-						$('body').trigger('checkout_error');
+						$( 'body' ).trigger( 'checkout_error' );
 					}
 				},
-				dataType: 	"html"
+				dataType: "html"
 			});
 
 		}
@@ -329,50 +341,51 @@ jQuery(function($) {
 	});
 
 	/* AJAX Coupon Form Submission */
-	$('form.checkout_coupon').submit( function() {
-		var $form = $(this);
+	$( 'form.checkout_coupon' ).submit( function() {
+		var $form = $( this );
 
-		if ( $form.is('.processing') ) return false;
+		if ( $form.is( '.processing' ) ) return false;
 
-		$form.addClass('processing').block({message: null, overlayCSS: {background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6}});
+		$form.addClass( 'processing' ).block({ message: null, overlayCSS: { background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } });
 
 		var data = {
-			action: 			'woocommerce_apply_coupon',
-			security: 			wc_checkout_params.apply_coupon_nonce,
-			coupon_code:		$form.find('input[name=coupon_code]').val()
+			action:			'woocommerce_apply_coupon',
+			security:		wc_checkout_params.apply_coupon_nonce,
+			coupon_code:	$form.find( 'input[name=coupon_code]' ).val()
 		};
 
 		$.ajax({
-			type: 		'POST',
-			url: 		wc_checkout_params.ajax_url,
-			data: 		data,
-			success: 	function( code ) {
-				$('.woocommerce-error, .woocommerce-message').remove();
-				$form.removeClass('processing').unblock();
+			type:		'POST',
+			url:		wc_checkout_params.ajax_url,
+			data:		data,
+			success:	function( code ) {
+				$( '.woocommerce-error, .woocommerce-message' ).remove();
+				$form.removeClass( 'processing' ).unblock();
 
 				if ( code ) {
 					$form.before( code );
 					$form.slideUp();
 
-					$('body').trigger('update_checkout');
+					$( 'body' ).trigger( 'update_checkout' );
 				}
 			},
-			dataType: 	"html"
+			dataType: "html"
 		});
+
 		return false;
 	});
 
-	$('body')
+	$( 'body' )
 
 	// Init trigger
-	.bind('init_checkout', function() {
-		$('#billing_country, #shipping_country, .country_to_state').change();
-		$('body').trigger('update_checkout');
+	.bind( 'init_checkout', function() {
+		$( '#billing_country, #shipping_country, .country_to_state' ).change();
+		$( 'body' ).trigger( 'update_checkout' );
 	});
 
 	// Update on page load
-	if ( wc_checkout_params.is_checkout == 1 ) {
-		$('body').trigger('init_checkout');
+	if ( wc_checkout_params.is_checkout === 1 ) {
+		$( 'body' ).trigger( 'init_checkout' );
 	}
 
 });
