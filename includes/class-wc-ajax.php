@@ -1438,12 +1438,12 @@ class WC_AJAX {
 
 		add_action( 'pre_user_query', array( $this, 'json_search_customer_name' ) );
 
-		$customers_query = new WP_User_Query( array(
+		$customers_query = new WP_User_Query( apply_filters( 'woocommerce_json_search_customers_query', array(
 			'fields'			=> 'all',
 			'orderby'			=> 'display_name',
 			'search'			=> '*' . $term . '*',
 			'search_columns'	=> array( 'ID', 'user_login', 'user_email', 'user_nicename' )
-		) );
+		) ) );
 
 		remove_action( 'pre_user_query', array( $this, 'json_search_customer_name' ) );
 
