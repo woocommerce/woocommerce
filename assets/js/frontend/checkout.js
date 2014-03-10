@@ -24,7 +24,7 @@ jQuery(function($) {
 		var country 		= $('#billing_country').val();
 		var state 			= $('#billing_state').val();
 		var postcode 		= $('input#billing_postcode').val();
-		var city	 		= $('input#billing_city').val();
+		var city	 		= $('#billing_city').val();
 		var address	 		= $('input#billing_address_1').val();
 		var address_2	 	= $('input#billing_address_2').val();
 
@@ -32,7 +32,7 @@ jQuery(function($) {
 			var s_country 	= $('#shipping_country').val();
 			var s_state 	= $('#shipping_state').val();
 			var s_postcode 	= $('input#shipping_postcode').val();
-			var s_city 		= $('input#shipping_city').val();
+			var s_city 		= $('#shipping_city').val();
 			var s_address 	= $('input#shipping_address_1').val();
 			var s_address_2	= $('input#shipping_address_2').val();
 		} else {
