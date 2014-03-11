@@ -367,6 +367,10 @@ class WC_Product_Variable extends WC_Product {
 		foreach ( $this->get_children() as $child_id ) {
 
 			$variation = $this->get_child( $child_id );
+			
+			if ( ! $variation->variation_is_visible() )
+				continue; // Disabled or hidden			
+			
 
 			if ( ! empty( $variation->variation_id ) ) {
 				$variation_attributes 	= $variation->get_variation_attributes();
