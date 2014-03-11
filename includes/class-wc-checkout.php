@@ -289,7 +289,7 @@ class WC_Checkout {
 		}
 
 		// Store fees
-		foreach ( WC()->cart->get_fees() as $fee ) {
+		foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
 			$item_id = wc_add_order_item( $order_id, array(
 		 		'order_item_name' 		=> $fee->name,
 		 		'order_item_type' 		=> 'fee'
@@ -302,6 +302,9 @@ class WC_Checkout {
 
 		 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $fee->amount ) );
 			wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $fee->tax ) );
+			
+			// Allow plugins to add order item meta to fees
+			do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
 		}
 
 		// Store shipping for all packages
