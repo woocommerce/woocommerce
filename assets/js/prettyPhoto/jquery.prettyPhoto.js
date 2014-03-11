@@ -30,7 +30,7 @@
 			deeplinking: true, /* Allow prettyPhoto to update the url to enable deeplinking. */
 			overlay_gallery: true, /* If set to true, a gallery will overlay the fullscreen image on mouse over */
 			overlay_gallery_max: 30, /* Maximum number of pictures in the overlay gallery */
-			keyboard_shortcuts: false, /* Set to false if you open forms inside prettyPhoto */
+			keyboard_shortcuts: true, /* Set to false if you open forms inside prettyPhoto */
 			changepicturecallback: function(){}, /* Called everytime an item is shown/changed */
 			callback: function(){}, /* Called when prettyPhoto is closed */
 			ie6_fallback: true,
