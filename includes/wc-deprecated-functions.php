@@ -338,8 +338,8 @@ function woocommerce_deprecated_filter_mapping( $data, $arg_1 = '', $arg_2 = '',
 function woocommerce_product_dropdown_categories( $args = array(), $deprecated_hierarchical = 1, $deprecated_show_uncategorized = 1, $deprecated_orderby = '' ) {
 	return wc_product_dropdown_categories( $args, $deprecated_hierarchical, $deprecated_show_uncategorized, $deprecated_orderby );
 }
-function woocommerce_walk_category_dropdown_tree() {
-	return wc_walk_category_dropdown_tree();
+function woocommerce_walk_category_dropdown_tree( $a1 = '', $a2 = '', $a3 = '' ) {
+	return wc_walk_category_dropdown_tree( $a1, $a2, $a3 );
 }
 function woocommerce_taxonomy_metadata_wpdbfix() {
 	return wc_taxonomy_metadata_wpdbfix();
