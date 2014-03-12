@@ -127,8 +127,16 @@ function wc_products_rss_feed() {
  * @access public
  * @return void
  */
-function wc_generator_tag() {
-	echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WC_VERSION ) . '" />' . "\n\n";
+function wc_generator_tag( $gen, $type ) {
+	switch ( $type ) {
+		case 'html':
+			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WC_VERSION ) . '">';
+			break;
+		case 'xhtml':
+			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WC_VERSION ) . '" />';
+			break;
+	}
+	return $gen;
 }
 
 /**
