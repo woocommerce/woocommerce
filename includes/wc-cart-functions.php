@@ -244,7 +244,9 @@ function wc_cart_totals_order_total_html() {
  * @return void
  */
 function wc_cart_totals_fee_html( $fee ) {
-	echo WC()->cart->tax_display_cart == 'excl' ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );
+	$cart_totals_fee_html = ( 'excl' == WC()->cart->tax_display_cart ) ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );
+
+	echo apply_filters( 'woocommerce_cart_totals_fee_html', $cart_totals_fee_html, $fee );
 }
 
 /**
