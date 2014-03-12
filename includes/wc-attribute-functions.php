@@ -25,7 +25,7 @@ function wc_get_attribute_taxonomies() {
 
 		$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
 
-		set_transient( $transient_name, $attribute_taxonomies, DAY_IN_SECONDS );
+		set_transient( $transient_name, $attribute_taxonomies );
 	}
 
 	return apply_filters( 'woocommerce_attribute_taxonomies', $attribute_taxonomies );

@@ -69,7 +69,7 @@ class WC_Product_Variable extends WC_Product {
 					}
 				}
 
-				set_transient( $transient_name, $this->total_stock, DAY_IN_SECONDS );
+				set_transient( $transient_name, $this->total_stock, YEAR_IN_SECONDS );
 			}
 		}
 		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
@@ -107,7 +107,7 @@ class WC_Product_Variable extends WC_Product {
 
 		        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=product_variation&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
 
-				set_transient( $transient_name, $this->children, DAY_IN_SECONDS );
+				set_transient( $transient_name, $this->children, YEAR_IN_SECONDS );
 
 			}
 
