@@ -163,7 +163,7 @@ function wc_get_product_ids_on_sale() {
 
 	$product_ids_on_sale = array_unique( array_map( 'absint', array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), array_diff( wp_list_pluck( $on_sale_posts, 'post_parent' ), array( 0 ) ) ) ) );
 
-	set_transient( 'wc_products_onsale', $product_ids_on_sale );
+	set_transient( 'wc_products_onsale', $product_ids_on_sale, YEAR_IN_SECONDS );
 
 	return $product_ids_on_sale;
 }
@@ -206,7 +206,7 @@ function wc_get_featured_product_ids() {
 	$parent_ids           = array_values( $featured );
 	$featured_product_ids = array_unique( array_merge( $product_ids, $parent_ids ) );
 
-	set_transient( 'wc_featured_products', $featured_product_ids );
+	set_transient( 'wc_featured_products', $featured_product_ids, YEAR_IN_SECONDS );
 
 	return $featured_product_ids;
 }

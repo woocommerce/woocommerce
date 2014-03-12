@@ -990,7 +990,7 @@ class WC_Product {
 
 			}
 
-			set_transient( 'wc_average_rating_' . $this->id, $average_rating );
+			set_transient( 'wc_average_rating_' . $this->id, $average_rating, YEAR_IN_SECONDS );
 		}
 
 		return $average_rating;
@@ -1016,7 +1016,7 @@ class WC_Product {
 				AND meta_value > 0
 			", $this->id ) );
 
-			set_transient( 'wc_rating_count_' . $this->id, $count );
+			set_transient( 'wc_rating_count_' . $this->id, $count, YEAR_IN_SECONDS );
 		}
 
 		return $count;
