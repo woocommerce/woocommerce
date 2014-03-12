@@ -1608,7 +1608,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		if ( is_string( $args['label_class'] ) )
 			$args['label_class'] = array( $args['label_class'] );
 
-		if ( is_null( $value ) )
+		if ( empty( $value ) )
 			$value = $args['default'];
 
 		// Custom attribute handling
