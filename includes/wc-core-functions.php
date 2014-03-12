@@ -220,7 +220,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 
 	switch ( $currency ) {
 		case 'AED' :
-			$currency_symbol = '(د.إ';
+			$currency_symbol = 'د.إ';
 			break;
 		case 'BRL' :
 			$currency_symbol = '&#82;&#36;';
