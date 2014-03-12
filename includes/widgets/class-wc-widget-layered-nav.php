@@ -186,7 +186,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 							$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
 
-							set_transient( $transient_name, $_products_in_term, DAY_IN_SECONDS );
+							set_transient( $transient_name, $_products_in_term, YEAR_IN_SECONDS );
 						}
 
 						$option_is_set = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );

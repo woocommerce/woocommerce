@@ -55,7 +55,7 @@ class WC_Cache_Helper {
 	    	if ( ! is_null( $account_page ) )
 	    		$wc_page_uris[] = '/' . $account_page->post_name;
 
-	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris, DAY_IN_SECONDS );
+	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
 		}
 
 		if ( is_array( $wc_page_uris ) )
