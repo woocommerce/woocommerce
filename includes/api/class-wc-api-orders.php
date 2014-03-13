@@ -374,12 +374,6 @@ class WC_API_Orders extends WC_API_Resource {
 			unset( $args['status'] );
 		}
 
-		// allow order change (ASC or DESC)
-		if ( ! empty( $args['order'] ) ) {
-			$query_args['order'] = $args['order'];
-			unset( $args['order'] );
-		}
-
 		$query_args = $this->merge_query_args( $query_args, $args );
 
 		return new WP_Query( $query_args );
