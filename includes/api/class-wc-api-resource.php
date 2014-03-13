@@ -151,6 +151,12 @@ class WC_API_Resource {
 		if ( ! empty( $request_args['offset'] ) )
 			$args['offset'] = $request_args['offset'];
 
+		// allow order change (ASC or DESC)
+		if ( ! empty( $request_args['order'] ) ) {
+			$args['order'] = $request_args['order'];
+			unset( $request_args['order'] );
+		}
+		
 		// resource page
 		$args['paged'] = ( isset( $request_args['page'] ) ) ? absint( $request_args['page'] ) : 1;
 
