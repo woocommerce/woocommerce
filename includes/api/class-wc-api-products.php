@@ -44,6 +44,7 @@ class WC_API_Products extends WC_API_Resource {
 		# GET /products/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA )
 		);
 
 		# GET /products/<id>/reviews
@@ -158,6 +159,16 @@ class WC_API_Products extends WC_API_Resource {
 
 		if ( is_wp_error( $id ) )
 			return $id;
+		
+		$product = get_product( $id );
+
+        if ( ! empty( $data['stock'] ) ) {
+                $stock = sanitize_title($data['stock']);
+                if ( is_numeric($stock) )
+                {
+                        update_post_meta( $id, '_stock', $stock);
+                }
+        }
 
 		return $this->get_product( $id );
 	}
