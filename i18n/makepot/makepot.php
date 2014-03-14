@@ -134,7 +134,7 @@ class WC_Makepot {
 		$result = $pot->export_to_file( $config['file'] );
 
 		// Add plugin header
-		if ( $project == 'woocommerce-admin' ) {
+		if ( $project == 'woocommerce' ) {
 			$potextmeta = new PotExtMeta;
 			$potextmeta->append( $this->woocommerce_path . 'woocommerce.php', $config['file'] );
 		}
