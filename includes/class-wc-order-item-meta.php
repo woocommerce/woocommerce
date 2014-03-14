@@ -70,7 +70,10 @@ class WC_Order_Item_Meta {
 					if ( $flat )
 						$meta_list[] = esc_attr( wc_attribute_label( str_replace( 'attribute_', '', $meta_key ) ) . ': ' . apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) );
 					else
-						$meta_list[] = '<dt>' . wp_kses_post( wc_attribute_label( str_replace( 'attribute_', '', $meta_key ) ) ) . ':</dt><dd>' . wp_kses_post( wpautop( apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) ) ) . '</dd>';
+						$meta_list[] = '
+							<dt class="variation-' . sanitize_html_class( sanitize_text_field( $meta_key ) ) . '">' . wp_kses_post( wc_attribute_label( str_replace( 'attribute_', '', $meta_key ) ) ) . ':</dt>
+							<dd class="variation-' . sanitize_html_class( sanitize_text_field( $meta_key ) ) . '">' . wp_kses_post( wpautop( apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) ) ) . '</dd>
+						';
 
 				}
 			}
