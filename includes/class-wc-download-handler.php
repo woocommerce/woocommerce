@@ -245,16 +245,18 @@ class WC_Download_Handler {
 			nocache_headers();
 		}
 
-		$file_name = basename( $file_path );
+		$filename = basename( $file_path );
 
-		if ( strstr( $file_name, '?' ) ) {
-			$file_name = current( explode( '?', $file_name ) );
+		if ( strstr( $filename, '?' ) ) {
+			$filename = current( explode( '?', $filename ) );
 		}
+
+		$filename = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
 
 		header( "X-Robots-Tag: noindex, nofollow", true );
 		header( "Content-Type: " . $ctype );
 		header( "Content-Description: File Transfer" );
-		header( "Content-Disposition: attachment; filename=\"" . $file_name . "\";" );
+		header( "Content-Disposition: attachment; filename=\"" . $filename . "\";" );
 		header( "Content-Transfer-Encoding: binary" );
 
         if ( $size = @filesize( $file_path ) ) {
@@ -268,7 +270,7 @@ class WC_Download_Handler {
          		$file_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`' , '', $file_path ), '/' );
          	}
 
-            header( "Content-Disposition: attachment; filename=\"" . $file_name . "\";" );
+            header( "Content-Disposition: attachment; filename=\"" . $filename . "\";" );
 
             if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules() ) ) {
 
