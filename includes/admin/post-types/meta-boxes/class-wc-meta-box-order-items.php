@@ -137,29 +137,21 @@ class WC_Meta_Box_Order_Items {
 			 	if ( isset( $order_item_tax_class[ $item_id ] ) )
 			 		wc_update_order_item_meta( $item_id, '_tax_class', wc_clean( $order_item_tax_class[ $item_id ] ) );
 
-			 	if ( isset( $line_subtotal[ $item_id ] ) ) {
-			 		wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $line_subtotal[ $item_id ] ) );
+			 	// Get values. Subtotals might not exist, in which case copy value from total field
+				$line_total[ $item_id ]        = isset( $line_total[ $item_id ] ) ? $line_total[ $item_id ] : 0;
+				$line_tax[ $item_id ]          = isset( $line_tax[ $item_id ] ) ? $line_tax[ $item_id ] : 0;
+				$line_subtotal[ $item_id ]     = isset( $line_subtotal[ $item_id ] ) ? $line_subtotal[ $item_id ] : $line_total[ $item_id ];
+				$line_subtotal_tax[ $item_id ] = isset( $line_subtotal_tax[ $item_id ] ) ? $line_subtotal_tax[ $item_id ] : $line_tax[ $item_id ];
 
-			 		$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] );
-			 	}
+				// Update values
+				wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $line_subtotal[ $item_id ] ) );
+				wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $line_subtotal_tax[ $item_id ] ) );
+				wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $line_total[ $item_id ] ) );
+				wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax[ $item_id ] ) );
 
-			 	if ( isset(  $line_subtotal_tax[ $item_id ] ) ) {
-			 		wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $line_subtotal_tax[ $item_id ] ) );
-
-			 		$subtotal += wc_format_decimal( $line_subtotal_tax[ $item_id ] );
-			 	}
-
-			 	if ( isset( $line_total[ $item_id ] ) ) {
-			 		wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $line_total[ $item_id ] ) );
-
-			 		$total += wc_format_decimal( $line_total[ $item_id ] );
-			 	}
-
-			 	if ( isset( $line_tax[ $item_id ] ) ) {
-			 		wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax[ $item_id ] ) );
-
-			 		$total += wc_format_decimal( $line_tax[ $item_id ] );
-			 	}
+				// Total up
+				$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] ) + wc_format_decimal( $line_subtotal_tax[ $item_id ] );
+				$total    += wc_format_decimal( $line_total[ $item_id ] ) + wc_format_decimal( $line_tax[ $item_id ] );
 
 			 	// Clear meta cache
 			 	wp_cache_delete( $item_id, 'order_item_meta' );
@@ -176,7 +168,7 @@ class WC_Meta_Box_Order_Items {
 			$wpdb->update(
 				$wpdb->prefix . "woocommerce_order_itemmeta",
 				array(
-					'meta_key' => $meta_key,
+					'meta_key'   => $meta_key,
 					'meta_value' => $meta_value
 				),
 				array( 'meta_id' => $id ),
