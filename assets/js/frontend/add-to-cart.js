@@ -5,7 +5,7 @@ jQuery(function($) {
 		return false;
 
 	// Ajax add to cart
-	$(document).on( 'click', '.add_to_cart_button', function() {
+	$(document).on( 'click', '.add_to_cart_action', function() {
 
 		// AJAX add to cart request
 		var $thisbutton = $(this);
