@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.2.0-bleeding Front-end\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
+"POT-Creation-Date: 2014-03-14 10:08:23+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -3059,7 +3059,7 @@ msgstr ""
 msgid "out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1384
+#: includes/abstracts/abstract-wc-product.php:1386
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -3272,7 +3272,7 @@ msgid "File %d"
 msgstr ""
 
 #: includes/class-wc-ajax.php:1000 includes/class-wc-ajax.php:1001
-#: includes/class-wc-order.php:1544
+#: includes/class-wc-order.php:1550
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
@@ -3405,44 +3405,44 @@ msgstr ""
 msgid "Backordered"
 msgstr ""
 
-#: includes/class-wc-checkout.php:416
+#: includes/class-wc-checkout.php:419
 msgid "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return to homepage</a>"
 msgstr ""
 
-#: includes/class-wc-checkout.php:491 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:494 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr ""
 
-#: includes/class-wc-checkout.php:503 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:506 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr ""
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:515 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr ""
 
-#: includes/class-wc-checkout.php:518 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:533
+#: includes/class-wc-checkout.php:536
 msgid "is not valid. Please enter one of the following:"
 msgstr ""
 
-#: includes/class-wc-checkout.php:578
+#: includes/class-wc-checkout.php:581
 msgid "You must accept our Terms &amp; Conditions."
 msgstr ""
 
-#: includes/class-wc-checkout.php:583
+#: includes/class-wc-checkout.php:586
 msgid "Unfortunately <strong>we do not ship to %s</strong>. Please enter an alternative shipping address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:591
+#: includes/class-wc-checkout.php:594
 msgid "Invalid shipping method."
 msgstr ""
 
-#: includes/class-wc-checkout.php:604
+#: includes/class-wc-checkout.php:607
 msgid "Invalid payment method."
 msgstr ""
 
@@ -4553,59 +4553,59 @@ msgstr ""
 msgid "Phone"
 msgstr ""
 
-#: includes/class-wc-coupon.php:568
+#: includes/class-wc-coupon.php:575
 msgid "Coupon code applied successfully."
 msgstr ""
 
-#: includes/class-wc-coupon.php:571
+#: includes/class-wc-coupon.php:578
 msgid "Coupon code removed successfully."
 msgstr ""
 
-#: includes/class-wc-coupon.php:592
+#: includes/class-wc-coupon.php:599
 msgid "Coupon is not valid."
 msgstr ""
 
-#: includes/class-wc-coupon.php:595 includes/class-wc-coupon.php:645
+#: includes/class-wc-coupon.php:602 includes/class-wc-coupon.php:652
 msgid "Coupon does not exist!"
 msgstr ""
 
-#: includes/class-wc-coupon.php:598
+#: includes/class-wc-coupon.php:605
 msgid "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from your order."
 msgstr ""
 
-#: includes/class-wc-coupon.php:601
+#: includes/class-wc-coupon.php:608
 msgid "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed from your order."
 msgstr ""
 
-#: includes/class-wc-coupon.php:604
+#: includes/class-wc-coupon.php:611
 msgid "Coupon code already applied!"
 msgstr ""
 
-#: includes/class-wc-coupon.php:607
+#: includes/class-wc-coupon.php:614
 msgid "Sorry, coupon \"%s\" has already been applied and cannot be used in conjunction with other coupons."
 msgstr ""
 
-#: includes/class-wc-coupon.php:610
+#: includes/class-wc-coupon.php:617
 msgid "Coupon usage limit has been reached."
 msgstr ""
 
-#: includes/class-wc-coupon.php:613
+#: includes/class-wc-coupon.php:620
 msgid "This coupon has expired."
 msgstr ""
 
-#: includes/class-wc-coupon.php:616
+#: includes/class-wc-coupon.php:623
 msgid "The minimum spend for this coupon is %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:619
+#: includes/class-wc-coupon.php:626
 msgid "Sorry, this coupon is not applicable to your cart contents."
 msgstr ""
 
-#: includes/class-wc-coupon.php:622
+#: includes/class-wc-coupon.php:629
 msgid "Sorry, this coupon is not valid for sale items."
 msgstr ""
 
-#: includes/class-wc-coupon.php:648
+#: includes/class-wc-coupon.php:655
 msgid "Please enter a coupon code."
 msgstr ""
 
@@ -4620,7 +4620,7 @@ msgstr ""
 #: includes/class-wc-download-handler.php:95
 #: includes/class-wc-download-handler.php:99
 #: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:294
+#: includes/class-wc-download-handler.php:296
 msgid "Go to homepage"
 msgstr ""
 
@@ -4668,7 +4668,7 @@ msgstr ""
 msgid "No file defined"
 msgstr ""
 
-#: includes/class-wc-download-handler.php:294
+#: includes/class-wc-download-handler.php:296
 msgid "File not found"
 msgstr ""
 
@@ -4823,7 +4823,7 @@ msgid "Please select a rating"
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1593
+#: includes/wc-template-functions.php:1602
 msgid "required"
 msgstr ""
 
@@ -4928,15 +4928,15 @@ msgstr ""
 msgid "(Includes %s)"
 msgstr ""
 
-#: includes/class-wc-order.php:1231 includes/class-wc-order.php:1232
+#: includes/class-wc-order.php:1237 includes/class-wc-order.php:1238
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/class-wc-order.php:1287
+#: includes/class-wc-order.php:1293
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/class-wc-order.php:1556
+#: includes/class-wc-order.php:1562
 msgid "Order item stock reduced successfully."
 msgstr ""
 
@@ -5337,7 +5337,7 @@ msgstr ""
 msgid "This variable product has no active variations so cannot be published. Changing status to draft."
 msgstr ""
 
-#: includes/class-wc-product-variation.php:494
+#: includes/class-wc-product-variation.php:516
 msgid "%s &ndash; %s%s"
 msgstr ""
 
@@ -5569,7 +5569,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:71
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:149
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:139
-#: includes/wc-template-functions.php:971
+#: includes/wc-template-functions.php:980
 msgid "Description"
 msgstr ""
 
@@ -6481,7 +6481,7 @@ msgstr ""
 msgid "[Remove]"
 msgstr ""
 
-#: includes/wc-cart-functions.php:271
+#: includes/wc-cart-functions.php:273
 msgid "Free"
 msgstr ""
 
@@ -6686,76 +6686,76 @@ msgctxt "slug"
 msgid "uncategorized"
 msgstr ""
 
-#: includes/wc-template-functions.php:103
+#: includes/wc-template-functions.php:120
 msgid "New products"
 msgstr ""
 
-#: includes/wc-template-functions.php:111
+#: includes/wc-template-functions.php:128
 msgid "New products added to %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:119
+#: includes/wc-template-functions.php:136
 msgid "New products tagged %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:356
+#: includes/wc-template-functions.php:381
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
 msgstr ""
 
-#: includes/wc-template-functions.php:375
+#: includes/wc-template-functions.php:400
 msgid "Search Results: &ldquo;%s&rdquo;"
 msgstr ""
 
-#: includes/wc-template-functions.php:378
+#: includes/wc-template-functions.php:403
 msgid "&nbsp;&ndash; Page %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:980
+#: includes/wc-template-functions.php:989
 #: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr ""
 
-#: includes/wc-template-functions.php:989
+#: includes/wc-template-functions.php:998
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1080
+#: includes/wc-template-functions.php:1089
 msgid "Use $args argument as an array instead. Deprecated argument will be removed in WC 2.2."
 msgstr ""
 
-#: includes/wc-template-functions.php:1248
+#: includes/wc-template-functions.php:1257
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: includes/wc-template-functions.php:1549
+#: includes/wc-template-functions.php:1558
 msgid "Order Again"
 msgstr ""
 
-#: includes/wc-template-functions.php:1640
+#: includes/wc-template-functions.php:1649
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1647
+#: includes/wc-template-functions.php:1656
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:1690
+#: includes/wc-template-functions.php:1699
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1803
+#: includes/wc-template-functions.php:1812
 msgid "Search for:"
 msgstr ""
 
-#: includes/wc-template-functions.php:1804
+#: includes/wc-template-functions.php:1813
 msgid "Search for products"
 msgstr ""
 
-#: includes/wc-template-functions.php:1805
+#: includes/wc-template-functions.php:1814
 msgid "Search"
 msgstr ""
 
@@ -6915,7 +6915,7 @@ msgstr ""
 msgid "Only show children for the current category"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:177
+#: includes/widgets/class-wc-widget-product-categories.php:188
 msgid "No product categories exist."
 msgstr ""
 
@@ -7070,22 +7070,26 @@ msgid "Shipping and Handling"
 msgstr ""
 
 #: templates/cart/cart-shipping.php:55
-msgid "No shipping methods were found; please recalculate your shipping or continue to checkout and enter your full address to see if there is shipping available to your location."
+msgid "Please use the shipping calculator to see available shipping methods."
 msgstr ""
 
 #: templates/cart/cart-shipping.php:59
+msgid "Please continue to the checkout and enter your full address to see if there are any available shipping methods."
+msgstr ""
+
+#: templates/cart/cart-shipping.php:63
 msgid "Please fill in your details to see available shipping methods."
 msgstr ""
 
-#: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
+#: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid "Sorry, shipping is unavailable %s."
 msgstr ""
 
-#: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
+#: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid "If you require assistance or wish to make alternate arrangements please contact us."
 msgstr ""
 
-#: templates/cart/cart-shipping.php:93
+#: templates/cart/cart-shipping.php:97
 msgid "Shipping"
 msgstr ""
 
@@ -7263,23 +7267,23 @@ msgstr ""
 msgid "Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr ""
 
-#: templates/checkout/review-order.php:161
+#: templates/checkout/review-order.php:163
 msgid "Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so."
 msgstr ""
 
-#: templates/checkout/review-order.php:161
+#: templates/checkout/review-order.php:163
 msgid "Update totals"
 msgstr ""
 
-#: templates/checkout/review-order.php:168
+#: templates/checkout/review-order.php:170
 msgid "Place order"
 msgstr ""
 
-#: templates/checkout/review-order.php:177
+#: templates/checkout/review-order.php:179
 msgid "I have read and accept the"
 msgstr ""
 
-#: templates/checkout/review-order.php:177
+#: templates/checkout/review-order.php:179
 msgid "terms &amp; conditions"
 msgstr ""
 
@@ -7917,4 +7921,19 @@ msgstr ""
 
 #: woocommerce.php:183
 msgid "Premium Support"
+msgstr ""
+#. Plugin URI of the plugin/theme
+msgid "http://www.woothemes.com/woocommerce/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "WooThemes"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://woothemes.com"
 msgstr ""
