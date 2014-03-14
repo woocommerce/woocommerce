@@ -153,6 +153,12 @@ class WC_Product_Variable extends WC_Product {
 		if ( $this->has_child() ) {
 
 			foreach ( $this->get_children() as $child_id ) {
+				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+					$stock = get_post_meta( $child_id, '_stock', true );
+					if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+						continue;
+					}
+				}
 				$price      = get_post_meta( $child_id, '_price', true );
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
 				if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price )
