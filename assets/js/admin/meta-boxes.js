@@ -1,4 +1,18 @@
 jQuery( function($){
+	// run tip tip
+	function runTipTip() {
+		// remove any lingering tooltips
+		$( '#tiptip_holder' ).removeAttr( 'style' );
+		$( '#tiptip_arrow' ).removeAttr( 'style' );
+		
+		// init tiptip
+		$( '.tips' ).tipTip({
+			'attribute': 'data-tip',
+			'fadeIn': 50,
+			'fadeOut': 50,
+			'delay': 200
+		});
+	}
 
 	// Allow tabbing
 	$('#titlediv #title').keyup(function( event ) {
@@ -536,12 +550,9 @@ jQuery( function($){
 
 					if (!--count) {
 						$('select#add_item_id, #add_item_id_chosen .chosen-choices').css('border-color', '').val('');
-					    jQuery(".tips").tipTip({
-					    	'attribute' : 'data-tip',
-					    	'fadeIn' : 50,
-					    	'fadeOut' : 50,
-					    	'delay' : 200
-					    });
+					   	
+					   	runTipTip();
+
 					    $('select#add_item_id').trigger("chosen:updated");
 					    $('table.woocommerce_order_items').unblock();
 					}
@@ -1592,6 +1603,8 @@ jQuery( function($){
 			});
 
 			$image_gallery_ids.val( attachment_ids );
+
+			runTipTip();
 
 			return false;
 		});
