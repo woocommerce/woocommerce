@@ -34,7 +34,7 @@ global $woocommerce;
 					?>
 					<li>
 						<a href="<?php echo get_permalink( $product_id ); ?>">
-							<?php echo $thumbnail . $product_name; ?>
+							<?php echo str_replace( array( 'http:', 'https:' ), '', $thumbnail ) . $product_name; ?>
 						</a>
 
 						<?php echo WC()->cart->get_item_data( $cart_item ); ?>
