@@ -384,12 +384,11 @@
 
 				$single_variation_wrap.find( '.quantity' ).show();
 
-				if ( ! variation.is_in_stock && ! variation.backorders_allowed ) {
+				if ( ! variation.is_purchasable || ! variation.is_in_stock || ! variation.variation_is_visible ) {
 					$variation_form.find( '.variations_button' ).hide();
 				}
 
 				if ( ! variation.variation_is_visible ) {
-					$variation_form.find( '.variations_button' ).hide();
 					$variation_form.find( '.single_variation' ).html( '<p>' + wc_add_to_cart_variation_params.i18n_unavailable_text + '</p>' );
 				}
 
