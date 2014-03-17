@@ -24,7 +24,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category. Used for tab indentation.
 	 * @param array $args Will only append content if style argument value is 'list'.
 	 */
-	function start_lvl( &$output, $depth = 0, $args = array() ) {
+	public function start_lvl( &$output, $depth = 0, $args = array() ) {
 		if ( 'list' != $args['style'] )
 			return;
 
@@ -40,7 +40,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category. Used for tab indentation.
 	 * @param array $args Will only append content if style argument value is 'list'.
 	 */
-	function end_lvl( &$output, $depth = 0, $args = array() ) {
+	public function end_lvl( &$output, $depth = 0, $args = array() ) {
 		if ( 'list' != $args['style'] )
 			return;
 
@@ -57,24 +57,26 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category in reference to parents.
 	 * @param integer $current_object_id
 	 */
-	function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
-
+	public function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
 		$output .= '<li class="cat-item cat-item-' . $cat->term_id;
 
-		if ( $args['current_category'] == $cat->term_id )
+		if ( $args['current_category'] == $cat->term_id ) {
 			$output .= ' current-cat';
+		}
 
-		if ( $args['has_children'] && $args['hierarchical'] )
+		if ( $args['has_children'] && $args['hierarchical'] ) {
 			$output .= ' cat-parent';
+		}
 
-		if ( $args['current_category_ancestors'] && $args['current_category'] && in_array( $cat->term_id, $args['current_category_ancestors'] ) )
+		if ( $args['current_category_ancestors'] && $args['current_category'] && in_array( $cat->term_id, $args['current_category_ancestors'] ) ) {
 			$output .= ' current-cat-parent';
+		}
 
 		$output .=  '"><a href="' . get_term_link( (int) $cat->term_id, 'product_cat' ) . '">' . __( $cat->name, 'woocommerce' ) . '</a>';
 
-		if ( $args['show_count'] )
+		if ( $args['show_count'] ) {
 			$output .= ' <span class="count">(' . $cat->count . ')</span>';
-
+		}
 	}
 
 	/**
@@ -86,10 +88,8 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param int $depth Depth of category. Not used.
 	 * @param array $args Only uses 'list' for whether should append to output.
 	 */
-	function end_el( &$output, $cat, $depth = 0, $args = array() ) {
-
+	public function end_el( &$output, $cat, $depth = 0, $args = array() ) {
 		$output .= "</li>\n";
-
 	}
 
 	/**
@@ -112,47 +112,10 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param string $output Passed by reference. Used to append additional content.
 	 * @return null Null on failure with no changes to parameters.
 	 */
-	function display_element( $element, &$children_elements, $max_depth, $depth=0, $args, &$output ) {
-
-		if ( !$element )
+	public function display_element( $element, &$children_elements, $max_depth, $depth = 0, $args, &$output ) {
+		if ( ! $element || 0 === $element->count ) {
 			return;
-
-		$id_field = $this->db_fields['id'];
-
-		//display this element
-		if ( is_array( $args[0] ) )
-			$args[0]['has_children'] = ! empty( $children_elements[$element->$id_field] );
-		$cb_args = array_merge( array(&$output, $element, $depth), $args);
-		call_user_func_array(array(&$this, 'start_el'), $cb_args);
-
-		$id = $element->$id_field;
-
-		// descend only when the depth is right and there are children for this element
-		if ( ($max_depth == 0 || $max_depth > $depth+1 ) && isset( $children_elements[$id]) ) {
-
-			foreach( $children_elements[ $id ] as $child ){
-
-				if ( !isset($newlevel) ) {
-					$newlevel = true;
-					//start the child delimiter
-					$cb_args = array_merge( array(&$output, $depth), $args);
-					call_user_func_array(array(&$this, 'start_lvl'), $cb_args);
-				}
-				$this->display_element( $child, $children_elements, $max_depth, $depth + 1, $args, $output );
-			}
-			unset( $children_elements[ $id ] );
 		}
-
-		if ( isset($newlevel) && $newlevel ){
-			//end the child delimiter
-			$cb_args = array_merge( array(&$output, $depth), $args);
-			call_user_func_array(array(&$this, 'end_lvl'), $cb_args);
-		}
-
-		//end this element
-		$cb_args = array_merge( array(&$output, $element, $depth), $args);
-		call_user_func_array(array(&$this, 'end_el'), $cb_args);
-			
+		parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );
 	}
-
 }
