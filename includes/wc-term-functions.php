@@ -517,27 +517,30 @@ add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_chan
  * @return array
  */
 function wc_change_term_counts( $terms, $taxonomies, $args ) {
-	if ( is_admin() || is_ajax() )
+	if ( is_admin() || is_ajax() ) {
 		return $terms;
+	}
 
-	if ( ! isset( $taxonomies[0] ) || ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) )
+	if ( ! isset( $taxonomies[0] ) || ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ) ) ) {
 		return $terms;
+	}
 
 	$term_counts = $o_term_counts = get_transient( 'wc_term_counts' );
 
 	foreach ( $terms as &$term ) {
-		// If the original term count is zero, there's no way the product count could be higher.
-		if ( empty( $term->count ) ) continue;
+		if ( is_object( $term ) ) {
+			$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
 
-		$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0] , true );
-
-		if ( $term_counts[ $term->term_id ] != '' )
-			$term->count = $term_counts[ $term->term_id ];
+			if ( $term_counts[ $term->term_id ] !== '' ) {
+				$term->count = absint( $term_counts[ $term->term_id ] );
+			}
+		}
 	}
 
 	// Update transient
-	if ( $term_counts != $o_term_counts )
+	if ( $term_counts != $o_term_counts ) {
 		set_transient( 'wc_term_counts', $term_counts, YEAR_IN_SECONDS );
+	}
 
 	return $terms;
 }
