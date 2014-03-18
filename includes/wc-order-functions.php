@@ -344,8 +344,8 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	if ( wp_using_ext_object_cache() ) {
 		global $wp_object_cache;
 
-		if ( isset( $wp_object_cache['transient'] ) ) {
-			$keys = array_keys( $wp_object_cache['transient'] );
+		if ( isset( $wp_object_cache->cache['transient'] ) ) {
+			$keys = array_keys( $wp_object_cache->cache['transient'] );
 			foreach ( $keys as $key ) {
 				if ( 'wc_report_' === substr( $key, 0, 10 ) ) {
 					$transients_to_clear[] = $key;
