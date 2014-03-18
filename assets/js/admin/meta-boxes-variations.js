@@ -261,7 +261,7 @@ jQuery( function ( $ ) {
 			case 'variable_download_expiry' :
 				value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value );
 
-				$( ':input[name^="' + bulk_edit + '["]').val( value ).change();
+				$( ':input[name^="' + bulk_edit + '"]').not('[name*="dates"]').val( value ).change();
 			break;
 			default:
 				$( 'select#field_to_edit' ).trigger( bulk_edit );
