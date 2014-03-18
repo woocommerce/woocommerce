@@ -511,8 +511,8 @@ class WC_Cart {
 		            } else {
 						$value              = apply_filters( 'woocommerce_variation_option_name', $value );
 						$product_attributes = $cart_item['data']->get_attributes();
-						if ( isset( $product_attributes[ str_replace( 'attribute_', '', urldecode( $name ) ) ] ) ) {
-							$label = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', urldecode( $name ) ) ]['name'] );
+						if ( isset( $product_attributes[ str_replace( 'attribute_', '', $name ) ] ) ) {
+							$label = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', $name ) ]['name'] );
 						} else {
 							$label = $name;
 						}
