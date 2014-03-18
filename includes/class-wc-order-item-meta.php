@@ -62,8 +62,8 @@ class WC_Order_Item_Meta {
 		            } elseif ( $this->product ) {
 						$product_attributes = $this->product->get_attributes();
 
-						if ( isset( $product_attributes[ str_replace( 'attribute_', '', urldecode( $meta_key ) ) ] ) ) {
-							$meta_key = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', urldecode( $meta_key ) ) ]['name'] );
+						if ( isset( $product_attributes[ str_replace( 'attribute_', '', $meta_key ) ] ) ) {
+							$meta_key = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', $meta_key ) ]['name'] );
 						}
 		            }
 
