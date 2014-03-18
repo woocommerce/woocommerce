@@ -27,7 +27,11 @@ class WC_Meta_Box_Order_Notes {
 			'type' 		=> 'order_note'
 		);
 
+		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+
 		$notes = get_comments( $args );
+
+		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 		echo '<ul class="order_notes">';
 
