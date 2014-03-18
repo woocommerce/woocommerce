@@ -131,7 +131,6 @@ function wc_delete_product_transients( $post_id = 0 ) {
 					foreach ( $keys as $key ) {
 						if ( strpos( $key, $transient ) === 0 ) {
 							$transients_to_clear[] = $key;
-							break;
 						}
 					}
 				}
