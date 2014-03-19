@@ -277,7 +277,7 @@ class WC_Checkout {
 			 	// Store variation data in meta so admin can view it
 				if ( $values['variation'] && is_array( $values['variation'] ) ) {
 					foreach ( $values['variation'] as $key => $value ) {
-						$key = sanitize_text_field( str_replace( 'attribute_', '', $key ) );
+						$key = str_replace( 'attribute_', '', $key );
 						wc_add_order_item_meta( $item_id, $key, $value );
 					}
 				}
