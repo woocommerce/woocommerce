@@ -275,13 +275,17 @@ class WC_Checkout {
 			 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $values['line_subtotal_tax'] ) );
 
 			 	// Store variation data in meta so admin can view it
-				if ( $values['variation'] && is_array( $values['variation'] ) )
-					foreach ( $values['variation'] as $key => $value )
-						wc_add_order_item_meta( $item_id, esc_attr( str_replace( 'attribute_', '', $key ) ), $value );
+				if ( $values['variation'] && is_array( $values['variation'] ) ) {
+					foreach ( $values['variation'] as $key => $value ) {
+						$key = sanitize_text_field( str_replace( 'attribute_', '', $key ) );
+						wc_add_order_item_meta( $item_id, $key, $value );
+					}
+				}
 
 			 	// Add line item meta for backorder status
-			 	if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) )
+			 	if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) ) {
 			 		wc_add_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $cart_item_key, $order_id ), $values['quantity'] - max( 0, $_product->get_total_stock() ) );
+			 	}
 
 			 	// Allow plugins to add order item meta
 			 	do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
