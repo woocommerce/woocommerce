@@ -181,7 +181,12 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_variation_regular_price( $min_or_max = 'min', $display = false ) {
-		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_price_variation_id', true );
+		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_regular_price_variation_id', true );
+
+		if ( ! $variation_id ) {
+			return false;
+		}
+
 		$price        = get_post_meta( $variation_id, '_regular_price', true );
 
 		if ( $display ) {
@@ -200,7 +205,12 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_variation_sale_price( $min_or_max = 'min', $display = false ) {
-		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_price_variation_id', true );
+		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_sale_price_variation_id', true );
+
+		if ( ! $variation_id ) {
+			return false;
+		}
+
 		$price        = get_post_meta( $variation_id, '_sale_price', true );
 
 		if ( $display ) {
@@ -247,8 +257,9 @@ class WC_Product_Variable extends WC_Product {
 	public function get_price_html( $price = '' ) {
 
 		// Ensure variation prices are synced with variations
-		if ( $this->get_variation_price( 'min' ) === false || $this->get_variation_price( 'min' ) === '' || $this->get_price() === '' )
+		if ( $this->get_variation_regular_price( 'min' ) === false || $this->get_variation_price( 'min' ) === false || $this->get_variation_price( 'min' ) === '' || $this->get_price() === '' ) {
 			$this->variable_product_sync( $this->id );
+		}
 
 		// Get the price
 		if ( $this->get_price() === '' ) {
@@ -439,10 +450,17 @@ class WC_Product_Variable extends WC_Product {
 
 		// Re-load prices
 		$this->price                  = get_post_meta( $product_id, '_price', true );
-		$this->min_price_variation_id = get_post_meta( $product_id, '_min_price_variation_id', true );
-		$this->max_price_variation_id = get_post_meta( $product_id, '_max_price_variation_id', true );
-		$this->min_variation_price    = get_post_meta( $product_id, '_min_variation_price', true );
-		$this->max_variation_price    = get_post_meta( $product_id, '_max_variation_price', true );
+
+		foreach ( array( 'price', 'regular_price', 'sale_price' ) as $price_type ) {
+			$min_variation_id_key        = "min_{$price_type}_variation_id";
+			$max_variation_id_key        = "max_{$price_type}_variation_id";
+			$min_price_key               = "_min_variation_{$price_type}";
+			$max_price_key               = "_max_variation_{$price_type}";
+			$this->$min_variation_id_key = get_post_meta( $product_id, '_' . $min_variation_id_key, true );
+			$this->$max_variation_id_key = get_post_meta( $product_id, '_' . $max_variation_id_key, true );
+			$this->$min_price_key        = get_post_meta( $product_id, '_' . $min_price_key, true );
+			$this->$max_price_key        = get_post_meta( $product_id, '_' . $max_price_key, true );
+		}
 	}
 
 	/**
@@ -469,50 +487,68 @@ class WC_Product_Variable extends WC_Product {
 		
 		// Loop the variations
 		} else {
-			$min_price    = null;
-			$max_price    = null;
-			$min_price_id = null;
-			$max_price_id = null;
+			// Main active prices
+			$min_price            = null;
+			$max_price            = null;
+			$min_price_id         = null;
+			$max_price_id         = null;
+			
+			// Regular prices
+			$min_regular_price    = null;
+			$max_regular_price    = null;
+			$min_regular_price_id = null;
+			$max_regular_price_id = null;
+			
+			// Sale prices
+			$min_sale_price       = null;
+			$max_sale_price       = null;
+			$min_sale_price_id    = null;
+			$max_sale_price_id    = null;
 
-			foreach ( $children as $child ) {
-				$child_price        = get_post_meta( $child, '_price', true );
+			foreach ( array( 'price', 'regular_price', 'sale_price' ) as $price_type ) {
+				foreach ( $children as $child_id ) {
+					$child_price = get_post_meta( $child_id, '_' . $price_type, true );
 
-				if ( $child_price === '' ) {
-					continue;
-				}
-
-				if ( get_post_status( $child ) != 'publish' ) {
-					continue;
-				}
-
-				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-					$stock = get_post_meta( $child, '_stock', true );
-					if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+					// Skip non-priced variations
+					if ( $child_price === '' ) {
 						continue;
+					}
+
+					// Skip hidden variations
+					if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+						$stock = get_post_meta( $child_id, '_stock', true );
+						if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+							continue;
+						}
+					}
+
+					// Find min price
+					if ( is_null( ${"min_{$price_type}"} ) || $child_price < ${"min_{$price_type}"} ) {
+						${"min_{$price_type}"}    = $child_price;
+						${"min_{$price_type}_id"} = $child_id;
+					}
+
+					// Find max price
+					if ( $child_price > ${"max_{$price_type}"} ) {
+						${"max_{$price_type}"}    = $child_price;
+						${"max_{$price_type}_id"} = $child_id;
 					}
 				}
 
-				if ( $child_price > $max_price ) {
-					$max_price    = $child_price;
-					$max_price_id = $child;
-				}
+				// Store prices
+				update_post_meta( $product_id, '_min_variation_' . $price_type, ${"min_{$price_type}"} );
+				update_post_meta( $product_id, '_max_variation_' . $price_type, ${"max_{$price_type}"} );
 
-				if ( is_null( $min_price ) || $child_price < $min_price ) {
-					$min_price    = $child_price;
-					$min_price_id = $child;
-				}
+				// Store ids
+				update_post_meta( $product_id, '_min_' . $price_type . '_variation_id', ${"min_{$price_type}_id"} );
+				update_post_meta( $product_id, '_max_' . $price_type . '_variation_id', ${"max_{$price_type}_id"} );
 			}
 
-			// Store prices
+			// The VARIABLE PRODUCT price should equal the min price of any type
 			update_post_meta( $product_id, '_price', $min_price );
-			update_post_meta( $product_id, '_min_variation_price', $min_price );
-			update_post_meta( $product_id, '_max_variation_price', $max_price );
-
-			// Store IDS
-			update_post_meta( $product_id, '_min_price_variation_id', $min_price_id );
-			update_post_meta( $product_id, '_max_price_variation_id', $max_price_id );
 
 			do_action( 'woocommerce_variable_product_sync', $product_id, $children );
+
 			wc_delete_product_transients( $product_id );
 		}
 	}
