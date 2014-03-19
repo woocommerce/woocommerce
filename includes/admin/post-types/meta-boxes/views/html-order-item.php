@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						if ( is_serialized( $meta['meta_value'] ) )
 							continue;
 
-						echo '<tr><th>' . wp_kses_post( $meta['meta_key'] ) . ':</th><td>' . wp_kses_post( wpautop( urldecode( $meta['meta_value'] ) ) ) . '</td></tr>';
+						echo '<tr><th>' . wp_kses_post( urldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( urldecode( $meta['meta_value'] ) ) ) . '</td></tr>';
 					}
 					echo '</table>';
 				}
@@ -95,7 +95,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							if ( is_serialized( $meta['meta_value'] ) )
 								continue;
 
-							$meta['meta_key']   = esc_attr( $meta['meta_key'] );
+							$meta['meta_key']   = urldecode( $meta['meta_key'] );
 							$meta['meta_value'] = esc_textarea( urldecode( $meta['meta_value'] ) ); // using a <textarea />
 							$meta['meta_id']    = absint( $meta['meta_id'] );
 
