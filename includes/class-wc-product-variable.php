@@ -91,29 +91,40 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Return the products children posts.
-	 *
-	 * @access public
-	 * @return array
+	 * 
+	 * @param  boolean $visible_only Only return variations which are not hidden
+	 * @return array of children ids
 	 */
-	public function get_children() {
+	public function get_children( $visible_only = false ) {
 
 		if ( ! is_array( $this->children ) ) {
-
 			$this->children = array();
 
 			$transient_name = 'wc_product_children_ids_' . $this->id;
 
         	if ( false === ( $this->children = get_transient( $transient_name ) ) ) {
-
 		        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=product_variation&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
 
 				set_transient( $transient_name, $this->children, YEAR_IN_SECONDS );
-
 			}
-
 		}
 
-		return (array) $this->children;
+		if ( $visible_only ) {
+			$children = array();
+			foreach ( $this->children as $child_id ) {
+				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+					$stock = get_post_meta( $child_id, '_stock', true );
+					if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+						continue;
+					}
+				}
+				$children[] = $child_id;
+			}
+		} else {
+			$children = $this->children;
+		}
+
+		return $children;
 	}
 
 
@@ -152,13 +163,7 @@ class WC_Product_Variable extends WC_Product {
 	public function is_on_sale() {
 		if ( $this->has_child() ) {
 
-			foreach ( $this->get_children() as $child_id ) {
-				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-					$stock = get_post_meta( $child_id, '_stock', true );
-					if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-						continue;
-					}
-				}
+			foreach ( $this->get_children( true ) as $child_id ) {
 				$price      = get_post_meta( $child_id, '_price', true );
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
 				if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price )
@@ -177,7 +182,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_variation_regular_price( $min_or_max = 'min', $display = false ) {
 		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_price_variation_id', true );
-		$price = get_post_meta( $variation_id, '_regular_price', true );
+		$price        = get_post_meta( $variation_id, '_regular_price', true );
 
 		if ( $display ) {
 			$variation        = $this->get_child( $variation_id );
