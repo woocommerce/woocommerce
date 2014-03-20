@@ -32,7 +32,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->liveurl           = 'https://www.paypal.com/cgi-bin/webscr';
 		$this->testurl           = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 		$this->method_title      = __( 'PayPal', 'woocommerce' );
-		$this->notify_url        = str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Paypal', home_url( '/' ) ) );
+		$this->notify_url        = WC()->api_request_url( 'WC_Gateway_Paypal' );
 
 		// Load the settings.
 		$this->init_form_fields();
