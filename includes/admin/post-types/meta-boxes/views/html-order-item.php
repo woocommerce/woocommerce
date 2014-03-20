@@ -15,6 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				if ( $_product && $_product->get_sku() )
 					echo '<br/><strong>' . __( 'Product SKU:', 'woocommerce' ).'</strong> ' . esc_html( $_product->get_sku() );
 
+				if ( $_product && isset( $_product->variation_data ) )
+					echo '<br/>' . wc_get_formatted_variation( $_product->variation_data, true );
+
 			?>"><?php echo $_product->get_image( 'shop_thumbnail', array( 'title' => '' ) ); ?></a>
 		<?php else : ?>
 			<?php echo wc_placeholder_img( 'shop_thumbnail' ); ?>
@@ -34,11 +37,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 
-		<?php
-			if ( $_product && isset( $_product->variation_data ) )
-				echo '<br/>' . wc_get_formatted_variation( $_product->variation_data, true );
-		?>
-
 		<div class="view">
 			<?php
 				if ( $metadata = $order->has_meta( $item_id ) ) {
@@ -55,11 +53,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 							'_line_subtotal_tax',
 							'_line_total',
 							'_line_tax',
-						) ) ) ) continue;
+						) ) ) ) {
+							continue;
+						}
 
 						// Skip serialised meta
-						if ( is_serialized( $meta['meta_value'] ) )
+						if ( is_serialized( $meta['meta_value'] ) ) {
 							continue;
+						}
 
 						echo '<tr><th>' . wp_kses_post( urldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( urldecode( $meta['meta_value'] ) ) ) . '</td></tr>';
 					}
@@ -89,11 +90,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								'_line_subtotal_tax',
 								'_line_total',
 								'_line_tax',
-							) ) ) ) continue;
+							) ) ) ) {
+								continue;
+							}
 
 							// Skip serialised meta
-							if ( is_serialized( $meta['meta_value'] ) )
+							if ( is_serialized( $meta['meta_value'] ) ) {
 								continue;
+							}
 
 							$meta['meta_key']   = urldecode( $meta['meta_key'] );
 							$meta['meta_value'] = esc_textarea( urldecode( $meta['meta_value'] ) ); // using a <textarea />

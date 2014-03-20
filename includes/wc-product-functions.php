@@ -303,19 +303,20 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  * @return string
  */
 function wc_get_formatted_variation( $variation = '', $flat = false ) {
+	$return = '';
+
 	if ( is_array( $variation ) ) {
 
-		if ( ! $flat )
+		if ( ! $flat ) {
 			$return = '<dl class="variation">';
-		else
-			$return = '';
+		}
 
 		$variation_list = array();
 
 		foreach ( $variation as $name => $value ) {
-
-			if ( ! $value )
+			if ( ! $value ) {
 				continue;
+			}
 
 			// If this is a term slug, get the term's nice name
             if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
@@ -324,24 +325,24 @@ function wc_get_formatted_variation( $variation = '', $flat = false ) {
             		$value = $term->name;
             }
 
-			if ( $flat )
-				$variation_list[] = wc_attribute_label(str_replace('attribute_', '', $name)).': '.$value;
-			else
-				$variation_list[] = '<dt>'.wc_attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
+			if ( $flat ) {
+				$variation_list[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . urldecode( $value );
+			} else {
+				$variation_list[] = '<dt>' . wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . urldecode( $value ) . '</dd>';
+			}
 		}
 
-		if ( $flat )
+		if ( $flat ) {
 			$return .= implode( ', ', $variation_list );
-		else
+		} else {
 			$return .= implode( '', $variation_list );
+		}
 
-		if ( ! $flat )
+		if ( ! $flat ) {
 			$return .= '</dl>';
-
-		return $return;
+		}
 	}
-	
-	return '';
+	return $return;
 }
 
 /**
