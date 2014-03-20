@@ -28,14 +28,23 @@ global $woocommerce;
 		<label for="account_email"><?php _e( 'Email address', 'woocommerce' ); ?> <span class="required">*</span></label>
 		<input type="email" class="input-text" name="account_email" id="account_email" value="<?php esc_attr_e( $user->user_email ); ?>" />
 	</p>
-	<p class="form-row form-row-first">
-		<label for="password_1"><?php _e( 'Password (leave blank to leave unchanged)', 'woocommerce' ); ?></label>
-		<input type="password" class="input-text" name="password_1" id="password_1" />
-	</p>
-	<p class="form-row form-row-last">
-		<label for="password_2"><?php _e( 'Confirm new password', 'woocommerce' ); ?></label>
-		<input type="password" class="input-text" name="password_2" id="password_2" />
-	</p>
+
+	<fieldset>
+		<legend><?php _e( 'Password Change', 'woocommerce' ); ?></legend>
+	
+		<p class="form-row form-row-thirds">
+			<label for="password_current"><?php _e( 'Current Password (leave blank to leave unchanged)', 'woocommerce' ); ?></label>
+			<input type="password" class="input-text" name="password_current" id="password_current" />
+		</p>
+		<p class="form-row form-row-thirds">
+			<label for="password_1"><?php _e( 'New Password (leave blank to leave unchanged)', 'woocommerce' ); ?></label>
+			<input type="password" class="input-text" name="password_1" id="password_1" />
+		</p>
+		<p class="form-row form-row-thirds">
+			<label for="password_2"><?php _e( 'Confirm New Password', 'woocommerce' ); ?></label>
+			<input type="password" class="input-text" name="password_2" id="password_2" />
+		</p>
+	</fieldset>
 	<div class="clear"></div>
 
 	<p><input type="submit" class="button" name="save_account_details" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" /></p>
