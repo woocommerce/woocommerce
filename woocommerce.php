@@ -191,59 +191,35 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function autoload( $class ) {
-
+		$path  = null;
 		$class = strtolower( $class );
+		$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
 		if ( strpos( $class, 'wc_gateway_' ) === 0 ) {
-
 			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
-			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
-
-			if ( is_readable( $path . $file ) ) {
-				include_once( $path . $file );
-				return;
-			}
-
 		} elseif ( strpos( $class, 'wc_shipping_' ) === 0 ) {
-
 			$path = $this->plugin_path() . '/includes/shipping/' . trailingslashit( substr( str_replace( '_', '-', $class ), 12 ) );
-			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
-
-			if ( is_readable( $path . $file ) ) {
-				include_once( $path . $file );
-				return;
-			}
-
 		} elseif ( strpos( $class, 'wc_shortcode_' ) === 0 ) {
-
 			$path = $this->plugin_path() . '/includes/shortcodes/';
-			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
-
-			if ( is_readable( $path . $file ) ) {
-				include_once( $path . $file );
-				return;
-			}
-
 		} elseif ( strpos( $class, 'wc_meta_box' ) === 0 ) {
-
 			$path = $this->plugin_path() . '/includes/admin/post-types/meta-boxes/';
-			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
-
-			if ( is_readable( $path . $file ) ) {
-				include_once( $path . $file );
-				return;
-			}
+		} elseif ( strpos( $class, 'wc_admin' ) === 0 ) {
+			$path = $this->plugin_path() . '/includes/admin/';
 		}
 
+		if ( $path && is_readable( $path . $file ) ) {
+			include_once( $path . $file );
+			return;
+		}
+
+		// Fallback
 		if ( strpos( $class, 'wc_' ) === 0 ) {
-
 			$path = $this->plugin_path() . '/includes/';
-			$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
+		}
 
-			if ( is_readable( $path . $file ) ) {
-				include_once( $path . $file );
-				return;
-			}
+		if ( $path && is_readable( $path . $file ) ) {
+			include_once( $path . $file );
+			return;
 		}
 	}
 
