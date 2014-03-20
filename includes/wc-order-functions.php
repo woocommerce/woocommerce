@@ -340,20 +340,13 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 		'woocommerce_processing_order_count'
 	);
 
-	// Clear transients for which we don't have the name
-	if ( wp_using_ext_object_cache() ) {
-		global $wp_object_cache;
+	// Clear report transients
+	$reports = WC_Admin_Reports::get_reports();
 
-		if ( isset( $wp_object_cache->cache['transient'] ) ) {
-			$keys = array_keys( $wp_object_cache->cache['transient'] );
-			foreach ( $keys as $key ) {
-				if ( 'wc_report_' === substr( $key, 0, 10 ) ) {
-					$transients_to_clear[] = $key;
-				}
-			}
+	foreach ( $reports as $report_group ) {
+		foreach ( $report_group['reports'] as $report_key => $report ) {
+			$transients_to_clear[] = 'wc_report_' . $report_key;
 		}
-	} else {
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_report_%') OR `option_name` LIKE ('_transient_timeout_wc_report_%')" );
 	}
 
 	// Clear transients where we have names
