@@ -687,7 +687,7 @@ class WC_Product {
 	 * Returns false if the product cannot be bought.
 	 *
 	 * @access public
-	 * @return cool
+	 * @return bool
 	 */
 	public function is_purchasable() {
 
