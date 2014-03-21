@@ -2043,6 +2043,7 @@ class WC_Cart {
 
 		/**
 		 * Get tax row amounts with or without compound taxes includes.
+		 *
 		 * @param  boolean $compound True if getting compound taxes
 		 * @param  boolean $display  True if getting total to display
 		 * @return float price
@@ -2057,10 +2058,10 @@ class WC_Cart {
 				if ( ! $compound && $this->tax->is_compound( $key ) ) continue;
 				$total += $tax;
 			}
-			if ( $display )
-				return wc_round_tax_total( $total );
-			else
-				return $total;
+			if ( $display ) {
+				$total = wc_round_tax_total( $total );
+			}
+			return apply_filters( 'woocommerce_cart_taxes_total', $total, $compound, $display, $this );
 		}
 
 		/**
