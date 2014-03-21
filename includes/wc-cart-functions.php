@@ -170,6 +170,16 @@ function wc_cart_totals_shipping_html() {
 }
 
 /**
+ * Get taxes total
+ *
+ * @access public
+ * @return void
+ */
+function wc_cart_totals_taxes_total_html() {
+	echo apply_filters( 'woocommerce_cart_totals_taxes_total_html', wc_price( WC()->cart->get_taxes_total() ) );
+}
+
+/**
  * Get a coupon label
  *
  * @access public
