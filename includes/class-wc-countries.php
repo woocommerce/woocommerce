@@ -819,6 +819,14 @@ class WC_Countries {
 						'required' => false
 					)
 				),
+				'BD' => array(
+					'postcode' => array(
+						'required' => false
+					),
+					'state'    => array(
+						'label' => __( 'District', 'woocommerce' ),
+					)
+				),
 				'BE' => array(
 					'postcode_before_city' => true,
 					'state' => array(
