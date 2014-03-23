@@ -669,7 +669,7 @@ class WC_Install {
 	 * @return void
 	 */
 	function in_plugin_update_message() {
-		$response = wp_remote_get( 'http://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
+		$response = wp_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
 
 		if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
 
@@ -686,10 +686,10 @@ class WC_Install {
 					echo '<div style="font-weight: normal; background: #cc99c2; color: #fff !important; border: 1px solid #b76ca9; padding: 9px; margin: 9px 0;">';
 
 					foreach ( $notices as $index => $line ) {
-						echo '<p style="margin: 0; font-size: 1.1em; color: #fff; text-shadow: 0 1px 1px #b574a8;">' . preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) . '</p>';
+						echo '<p style="margin: 0; font-size: 1.1em; color: #fff; text-shadow: 0 1px 1px #b574a8;">' . wp_kses_post( preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) ) . '</p>';
 					}
 
-					echo '</div>';
+					echo '</div> ';
 				}
 			}
 
@@ -700,7 +700,7 @@ class WC_Install {
 			if ( preg_match( $regexp, $response['body'], $matches ) ) {
 				$changelog = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
-				echo ' ' . __( 'What\'s new:', 'woocommerce' ) . '<div style="font-weight: normal;">';
+				echo __( 'What\'s new:', 'woocommerce' ) . '<div style="font-weight: normal;">';
 
 				$ul = false;
 
@@ -713,7 +713,7 @@ class WC_Install {
 						
 						$line = preg_replace( '~^\s*\*\s*~', '', htmlspecialchars( $line ) );
 						
-						echo '<li style="width: 50%; margin: 0; float: left; ' . ( $index % 2 == 0 ? 'clear: left;' : '' ) . '">' . $line . '</li>';
+						echo '<li style="width: 50%; margin: 0; float: left; ' . ( $index % 2 == 0 ? 'clear: left;' : '' ) . '">' . esc_html( $line ) . '</li>';
 					} else {
 
 						$version = trim( current( explode( '-', str_replace( '=', '', $line ) ) ) );
@@ -727,7 +727,7 @@ class WC_Install {
 							$ul = false;
 						}
 
-						echo '<p style="margin: 9px 0;">' . htmlspecialchars( $line ) . '</p>';
+						echo '<p style="margin: 9px 0;">' . esc_html( htmlspecialchars( $line ) ) . '</p>';
 					}
 				}
 
