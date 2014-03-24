@@ -149,14 +149,25 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Remove comment exclusion in order notes meta box.
 * Fix - Sync min and max prices for regular and sale prices so prices are displayed correctly when sale price is lower than a regular price of another variation.
 * Fix - Expanding line item_meta causes conflicts if attributes are named with things like 'name', 'type' or 'qty'. Added blacklist to exclude unsafe values.
+* Fix - Added support for clearing report transients when using object caching.
+* Fix - encoding issues with attribute values.
+* Fix - Escape the contents of the changelog when displayed.
 * Tweak - Allow city field to use another input method.
 * Tweak - Several new filters.
 * Tweak - PayPal, modify currency error message to include both sent and returned currencies for comparison.
 * Tweak - enable keyboard shortcuts in prettyPhoto.
 * Tweak - Add classes to item meta.
 * Tweak - Use is_purchasable to determine if a variation cart button is needed, and potentially show empty_price_html.
+* Tweak - new woocommerce_cart_taxes_total filter.
+* Tweak - new wc_cart_totals_taxes_total_html() function.
+* Tweak - Use API request URL for mijireh and PayPal callbacks.
+* Tweak - move variation data to tooltip in order items meta box.
+* Tweak - Store variation data for order items added through the admin.
+* Tweak - Billing Address > Billing Details text. We take more than address in this section.
 * Refactor - jshint javascript files.
 * Localisation - add Bangladeshi currency and symbol.
+* Localisation - Bangladeshi states (districts).
+* Localisation - Croatian currency symbol.
 
 = 2.1.5 - 06/03/2014 =
 * Fix - Prevent notices on new plain text email parameter for BACS and Cheque gateways
