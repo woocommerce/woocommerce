@@ -880,15 +880,16 @@ class WC_AJAX {
 		// Set values
 		$item = array();
 
-		$item['product_id'] 			= $_product->id;
-		$item['variation_id'] 			= isset( $_product->variation_id ) ? $_product->variation_id : '';
-		$item['name'] 					= $_product->get_title();
-		$item['tax_class']				= $_product->get_tax_class();
-		$item['qty'] 					= 1;
-		$item['line_subtotal'] 			= wc_format_decimal( $_product->get_price_excluding_tax() );
-		$item['line_subtotal_tax'] 		= '';
-		$item['line_total'] 			= wc_format_decimal( $_product->get_price_excluding_tax() );
-		$item['line_tax'] 				= '';
+		$item['product_id']        = $_product->id;
+		$item['variation_id']      = isset( $_product->variation_id ) ? $_product->variation_id : '';
+		$item['variation_data']    = isset( $_product->variation_data ) ? $_product->variation_data : '';
+		$item['name']              = $_product->get_title();
+		$item['tax_class']         = $_product->get_tax_class();
+		$item['qty']               = 1;
+		$item['line_subtotal']     = wc_format_decimal( $_product->get_price_excluding_tax() );
+		$item['line_subtotal_tax'] = '';
+		$item['line_total']        = wc_format_decimal( $_product->get_price_excluding_tax() );
+		$item['line_tax']          = '';
 
 		// Add line item
 	   	$item_id = wc_add_order_item( $order_id, array(
@@ -906,9 +907,16 @@ class WC_AJAX {
 		 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
 		 	wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
 		 	wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
+	 		
+	 		// Store variation data in meta
+			if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
+				foreach ( $item['variation_data'] as $key => $value ) {
+					wc_add_order_item_meta( $item_id, esc_attr( str_replace( 'attribute_', '', $key ) ), $value );
+				}
+			}
+			
+			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 	 	}
-
-		do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 
 		$item = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
 
