@@ -542,18 +542,20 @@ abstract class WC_Email extends WC_Settings_API {
 	 * @param mixed $message
 	 * @param string $headers
 	 * @param string $attachments
-	 * @return void
+	 * @return bool
 	 */
 	function send( $to, $subject, $message, $headers, $attachments ) {
 		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
-		wp_mail( $to, $subject, $message, $headers, $attachments );
+		$return = wp_mail( $to, $subject, $message, $headers, $attachments );
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		remove_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
+		
+		return $return;
 	}
 
     /**
