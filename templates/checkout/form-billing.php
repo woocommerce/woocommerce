@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php else : ?>
 
-		<h3><?php _e( 'Billing Address', 'woocommerce' ); ?></h3>
+		<h3><?php _e( 'Billing Details', 'woocommerce' ); ?></h3>
 
 	<?php endif; ?>
 
