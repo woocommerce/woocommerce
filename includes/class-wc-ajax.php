@@ -911,7 +911,7 @@ class WC_AJAX {
 	 		// Store variation data in meta
 			if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
 				foreach ( $item['variation_data'] as $key => $value ) {
-					wc_add_order_item_meta( $item_id, esc_attr( str_replace( 'attribute_', '', $key ) ), $value );
+					wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
 				}
 			}
 			
