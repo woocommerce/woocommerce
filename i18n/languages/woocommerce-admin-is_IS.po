@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
-"PO-Revision-Date: 2014-03-05 10:24+0000\n"
-"Last-Translator: sindri <sindri@frumkvaedi.is>\n"
+"POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
+"PO-Revision-Date: 2014-03-25 08:51+0000\n"
+"Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Icelandic (Iceland) (http://www.transifex.com/projects/p/woocommerce/language/is_IS/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:65
 #: includes/admin/class-wc-admin-menus.php:47
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 #: includes/admin/wc-admin-functions.php:19
 msgid "WooCommerce"
 msgstr "WooCommerce"
@@ -157,7 +157,7 @@ msgid ""
 "Could not grant access - the user may already have permission for this file "
 "or billing email is not set. Ensure the billing email is set, and the order "
 "has been saved."
-msgstr ""
+msgstr "Gat ekki veitt aðgang - það má vera að þessi notandi hafi þegar aðgang að þessari skrá eða netfang greiðanda hefur ekki verið skilgreint. Gakktu úr skugga um að netfang greiðanda sé stillt, og að pöntunin hafi verið vistuð."
 
 #: includes/admin/class-wc-admin-assets.php:183
 msgid "Are you sure you want to revoke access to this download?"
@@ -401,8 +401,8 @@ msgstr[1] ""
 #: includes/admin/class-wc-admin-dashboard.php:160
 msgid "<strong>%s product</strong> out of stock"
 msgid_plural "<strong>%s products</strong> out of stock"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "<strong>%s vara</strong> ekki til á lager"
+msgstr[1] "<strong>%s vörur</strong> ekki til á lager"
 
 #: includes/admin/class-wc-admin-dashboard.php:193
 msgid "out of 5"
@@ -879,41 +879,41 @@ msgstr "Heimildir:"
 msgid "Revoke API Key"
 msgstr ""
 
-#: includes/admin/class-wc-admin-reports.php:46
+#: includes/admin/class-wc-admin-reports.php:43
 #: includes/admin/reports/class-wc-report-customer-list.php:251
 msgid "Orders"
 msgstr "Pantanir"
 
-#: includes/admin/class-wc-admin-reports.php:49
+#: includes/admin/class-wc-admin-reports.php:46
 msgid "Sales by date"
 msgstr "Sölum eftir dagsetningu"
 
-#: includes/admin/class-wc-admin-reports.php:55
+#: includes/admin/class-wc-admin-reports.php:52
 msgid "Sales by product"
 msgstr "Sala eftir vöru"
 
-#: includes/admin/class-wc-admin-reports.php:61
+#: includes/admin/class-wc-admin-reports.php:58
 msgid "Sales by category"
 msgstr "Sala eftir flokkum"
 
-#: includes/admin/class-wc-admin-reports.php:67
+#: includes/admin/class-wc-admin-reports.php:64
 msgid "Coupons by date"
 msgstr "Afsláttarmiðar eftir dagsetningu"
 
-#: includes/admin/class-wc-admin-reports.php:75
+#: includes/admin/class-wc-admin-reports.php:72
 #: includes/admin/reports/class-wc-report-customer-list.php:30
 msgid "Customers"
 msgstr "Viðskiptavinir"
 
-#: includes/admin/class-wc-admin-reports.php:78
+#: includes/admin/class-wc-admin-reports.php:75
 msgid "Customers vs. Guests"
 msgstr "Viðskiptavinir vs. Gestir"
 
-#: includes/admin/class-wc-admin-reports.php:84
+#: includes/admin/class-wc-admin-reports.php:81
 msgid "Customer List"
 msgstr "Listi yfir viðskiptavini"
 
-#: includes/admin/class-wc-admin-reports.php:92
+#: includes/admin/class-wc-admin-reports.php:89
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 #: includes/admin/reports/class-wc-report-stock.php:25
@@ -921,11 +921,11 @@ msgstr "Listi yfir viðskiptavini"
 msgid "Stock"
 msgstr "Lager"
 
-#: includes/admin/class-wc-admin-reports.php:95
+#: includes/admin/class-wc-admin-reports.php:92
 msgid "Low in stock"
 msgstr "Er að klárast"
 
-#: includes/admin/class-wc-admin-reports.php:101
+#: includes/admin/class-wc-admin-reports.php:98
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
 #: includes/admin/reports/class-wc-report-stock.php:98
@@ -934,20 +934,20 @@ msgstr "Er að klárast"
 msgid "Out of stock"
 msgstr "Ekki til á lager"
 
-#: includes/admin/class-wc-admin-reports.php:107
+#: includes/admin/class-wc-admin-reports.php:104
 msgid "Most Stocked"
 msgstr "Mest til á lager"
 
-#: includes/admin/class-wc-admin-reports.php:118
+#: includes/admin/class-wc-admin-reports.php:115
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
 msgstr "Skattar"
 
-#: includes/admin/class-wc-admin-reports.php:121
+#: includes/admin/class-wc-admin-reports.php:118
 msgid "Taxes by code"
 msgstr "Skattar eftir auðkenni"
 
-#: includes/admin/class-wc-admin-reports.php:127
+#: includes/admin/class-wc-admin-reports.php:124
 msgid "Taxes by date"
 msgstr "Skattar eftir dagsetningu"
 
@@ -1133,7 +1133,7 @@ msgstr "Birtingarmáti"
 #: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
-#: includes/admin/views/html-admin-page-addons.php:15
+#: includes/admin/views/html-admin-page-addons.php:16
 msgid "Products"
 msgstr "Vörur"
 
@@ -1495,7 +1495,7 @@ msgstr "Skoða %s"
 
 #: includes/admin/class-wc-admin.php:114
 msgid "HTML Email Template"
-msgstr ""
+msgstr "HTML tölvupóstsniðmát"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:103
 #: includes/admin/importers/class-wc-tax-rate-importer.php:190
@@ -1575,13 +1575,13 @@ msgstr "Mynd af vöru"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:105
 msgid "Remove product image"
-msgstr ""
+msgstr "Fjarlægja vörumynd"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:107
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:121
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:122
 msgid "Set product image"
-msgstr ""
+msgstr "Setja vörumynd"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:136
 msgid "Product name"
@@ -1906,7 +1906,7 @@ msgstr "Skýring með pöntun"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:99
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:127
 msgid "Total"
 msgstr "Samtals"
@@ -2025,14 +2025,14 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:102
 msgid "Product Short Description"
-msgstr ""
+msgstr "Stutt vörulýsing"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:103
 #: includes/admin/settings/class-wc-settings-products.php:283
 #: includes/admin/views/html-bulk-edit-product.php:4
 #: includes/admin/views/html-quick-edit-product.php:4
 msgid "Product Data"
-msgstr ""
+msgstr "Vöruupplýsingar"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:104
 msgid "Product Gallery"
@@ -2070,7 +2070,7 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:120
 msgid "Rating"
-msgstr ""
+msgstr "Einkunn"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:153
 msgid "Reviews"
@@ -2124,7 +2124,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:75
 msgctxt "placeholder"
 msgid "YYYY-MM-DD"
-msgstr ""
+msgstr "YYYY-MM-DD"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid "Minimum spend"
@@ -2176,7 +2176,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:116
 msgid "Exclude products"
-msgstr ""
+msgstr "Undanskilja vörur"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:117
 msgid "Search for a product…"
@@ -2358,7 +2358,7 @@ msgstr "Viðskiptavinur:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:182
 msgid "Billing Details"
-msgstr ""
+msgstr "Greiðsluupplýsingar"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:188
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:190
@@ -2377,7 +2377,7 @@ msgstr "Greiðslumáti"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:213
 msgid "Load billing address"
-msgstr ""
+msgstr "Sýna heimilisfang greiðanda"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:230
 msgid "Payment Method:"
@@ -2411,11 +2411,11 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:287
 msgid "Load shipping address"
-msgstr ""
+msgstr "Sýna heimilisfang móttakanda"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:287
 msgid "Copy from billing"
-msgstr ""
+msgstr "Afrita frá greiðanda"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:304
 msgid "Customer Note:"
@@ -2481,41 +2481,41 @@ msgstr ""
 msgid "Add fee"
 msgstr "Bæta við gjaldi"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:44
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:48
 msgid "added %s ago"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 msgid "by %s"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:50
 msgid "Delete note"
 msgstr "Eyða skilaboðum"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:56
 msgid "There are no notes for this order yet."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid "Add note"
 msgstr "Bæta við athugasemd"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid ""
 "Add a note for your reference, or add a customer note (the user will be "
 "notified)."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:68
 msgid "Customer note"
 msgstr "Skilaboð viðskiptavinar"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:69
 msgid "Private note"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:67
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:71
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:564
 msgid "Add"
 msgstr ""
@@ -2526,7 +2526,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
-#: includes/admin/views/html-admin-page-addons.php:13
+#: includes/admin/views/html-admin-page-addons.php:14
 msgid "Shipping"
 msgstr "Flutningur"
 
@@ -2762,7 +2762,7 @@ msgstr "Ekkert"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:734
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:126
 #: includes/admin/settings/class-wc-settings-tax.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:243
 #: includes/admin/views/html-bulk-edit-product.php:83
@@ -3054,7 +3054,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:869
 msgid "Add Variation"
-msgstr ""
+msgstr "Bæta við tilbrigði"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:871
 msgid "Link all variations"
@@ -3067,7 +3067,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:886
 #: includes/admin/settings/class-wc-settings-shipping.php:214
 msgid "No default"
-msgstr ""
+msgstr "Ekkert sjálfgilt"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:990
 msgid "Product SKU must be unique."
@@ -3125,7 +3125,7 @@ msgid "Fee Name"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:31
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:136
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:140
 msgid "Tax class"
 msgstr ""
 
@@ -3141,19 +3141,19 @@ msgstr ""
 msgid "Product SKU:"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:74
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:75
 msgid "Add&nbsp;meta"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Subtotal"
 msgstr "Millisamtala "
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Before pre-tax discounts."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 msgid "After pre-tax discounts."
 msgstr ""
 
@@ -3290,11 +3290,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:391
+#: includes/admin/reports/class-wc-admin-report.php:384
 msgid "Sold %s worth in the last %d days"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:393
+#: includes/admin/reports/class-wc-admin-report.php:386
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] ""
@@ -3502,7 +3502,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:162
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "Velja flokka&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:176
 msgid "None"
@@ -3691,11 +3691,11 @@ msgstr "Samtals"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:25
 msgid "Accounts"
-msgstr ""
+msgstr "Reikningar"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid "Account Pages"
-msgstr ""
+msgstr "Síður fyrir reikninga"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid ""
@@ -3775,11 +3775,11 @@ msgstr "Leyfa nýskráningar"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:109
 msgid "Enable registration on the \"Checkout\" page"
-msgstr ""
+msgstr "Virkja skráningu á pöntunarsíðu."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:118
 msgid "Enable registration on the \"My Account\" page"
-msgstr ""
+msgstr "VIrkja skráningu á \"Mín síða\""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:127
 msgid "Display returning customer login reminder on the \"Checkout\" page"
@@ -3787,15 +3787,15 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:136
 msgid "Account Creation"
-msgstr ""
+msgstr "Stofna reikning"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:137
 msgid "Automatically generate username from customer email"
-msgstr ""
+msgstr "Búa sjálfkrafa til notendanafn út frá netfangi"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:146
 msgid "Automatically generate customer password"
-msgstr ""
+msgstr "Búa sjálfkrafa til lykilorð "
 
 #: includes/admin/settings/class-wc-settings-checkout.php:25
 msgctxt "Settings tab label"
@@ -3829,24 +3829,24 @@ msgstr "Ganga frá pöntun"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
-msgstr ""
+msgstr "Virkja gestaaðgang"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:80
 msgid "Allows customers to checkout without creating an account."
-msgstr ""
+msgstr "Leyfa viðskiptavinum að ganga frá pöntun án þess að stofna reikning."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:89
 msgid "Force secure checkout"
-msgstr ""
+msgstr "Þvinga öruggan frágang pöntunar"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:95
 msgid ""
 "Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)."
-msgstr ""
+msgstr "Þvingar SSL (HTTPS) á pöntunarsíðunni (þú þarft að hafa SSL uppsett)."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:99
 msgid "Un-force HTTPS when leaving the checkout"
-msgstr ""
+msgstr "Af-þvinga HTTPS þegar notandi fer af pöntunarsíðu"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid "Checkout Pages"
@@ -3860,7 +3860,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
 msgid "Cart Page"
-msgstr ""
+msgstr "Körfu síða"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:123
 msgid "Checkout Page"
@@ -3897,7 +3897,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:159
 msgid "Order Received"
-msgstr ""
+msgstr "Pöntun móttekin"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:168
 msgid "Add Payment Method"
@@ -3915,11 +3915,11 @@ msgstr "Greiðslugáttir"
 msgid ""
 "Installed gateways are listed below. Drag and drop gateways to control their"
 " display order on the frontend."
-msgstr ""
+msgstr "Uppsettar gáttir eru sýndar hér fyrir neðan. Dragðu gáttirnar til til að stjórna röðinni sem þær birtast í."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:219
 msgid "Gateway Display"
-msgstr ""
+msgstr "Gáttir"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:227
 msgid "Gateway"
@@ -3939,13 +3939,13 @@ msgstr "Stillingar netfanga"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
 msgid "Email Sender Options"
-msgstr ""
+msgstr "Valmöguleikar fyrir sendanda tölvupósts"
 
 #: includes/admin/settings/class-wc-settings-emails.php:66
 msgid ""
 "The following options affect the sender (email address and name) used in "
 "WooCommerce emails."
-msgstr ""
+msgstr "Stjórnar upplýsingum um þann sem sendir tölvupóst frá versluninni (netfang og nafn)."
 
 #: includes/admin/settings/class-wc-settings-emails.php:69
 msgid "\"From\" Name"
@@ -3969,21 +3969,21 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:96
 msgid "Header Image"
-msgstr ""
+msgstr "Mynd í haus"
 
 #: includes/admin/settings/class-wc-settings-emails.php:97
 msgid ""
 "Enter a URL to an image you want to show in the email's header. Upload your "
 "image using the <a href=\"%s\">media uploader</a>."
-msgstr ""
+msgstr "Sláðu inn vefslóð á myndina sem þú vilt sýna í haus tölvupóstsins.  Þú getur hlaðið upp mynd með því að nota <a href=\"%s\">gagna upphleðslu</a>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:106
 msgid "Email Footer Text"
-msgstr ""
+msgstr "Texti í fæti tölvupósts"
 
 #: includes/admin/settings/class-wc-settings-emails.php:107
 msgid "The text to appear in the footer of WooCommerce emails."
-msgstr ""
+msgstr "Þessi texti birtist í fæti allra tölvupósta sem eru sendir úr WooCommerce kerfinu."
 
 #: includes/admin/settings/class-wc-settings-emails.php:111
 msgid "Powered by WooCommerce"
@@ -3997,7 +3997,7 @@ msgstr "Grunnlitur"
 msgid ""
 "The base colour for WooCommerce email templates. Default "
 "<code>#557da1</code>."
-msgstr ""
+msgstr "Grunnlitur í tölvupóstum frá WooCommerce. Sjálfgefinn litur er <code>#557da1</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:126
 msgid "Background Colour"
@@ -4007,11 +4007,11 @@ msgstr "Bakgrunnslitur "
 msgid ""
 "The background colour for WooCommerce email templates. Default "
 "<code>#f5f5f5</code>."
-msgstr ""
+msgstr "Bakgrunnslitur fyrir WooCommerce tölvupósta. Sjálfgefin litur er <code>#f5f5f5</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:136
 msgid "Email Body Background Colour"
-msgstr ""
+msgstr "Bakgrunnslitur tölvupósts"
 
 #: includes/admin/settings/class-wc-settings-emails.php:137
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
@@ -4027,33 +4027,33 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:48
 msgid "General Options"
-msgstr ""
+msgstr "Almennir valmöguleikar"
 
 #: includes/admin/settings/class-wc-settings-general.php:51
 msgid "Base Location"
-msgstr ""
+msgstr "Grunn staðsetning"
 
 #: includes/admin/settings/class-wc-settings-general.php:52
 msgid ""
 "This is the base location for your business. Tax rates will be based on this"
 " country."
-msgstr ""
+msgstr "Þetta er staðsetning verslunarinnar þinnar.  Skatthlutföll eru byggð á þessu landi."
 
 #: includes/admin/settings/class-wc-settings-general.php:61
 msgid "Selling Location(s)"
-msgstr ""
+msgstr "Lönd sem selt er til"
 
 #: includes/admin/settings/class-wc-settings-general.php:62
 msgid "This option lets you limit which countries you are willing to sell to."
-msgstr ""
+msgstr "Takamarkar þau lönd sem þú vilt selja til"
 
 #: includes/admin/settings/class-wc-settings-general.php:70
 msgid "Sell to all countries"
-msgstr ""
+msgstr "Selja til allra landa"
 
 #: includes/admin/settings/class-wc-settings-general.php:71
 msgid "Sell to specific countries only"
-msgstr ""
+msgstr "Selja til ákveðinna landa"
 
 #: includes/admin/settings/class-wc-settings-general.php:76
 #: includes/admin/settings/class-wc-settings-shipping.php:147
@@ -4062,11 +4062,11 @@ msgstr "Ákveðin lönd"
 
 #: includes/admin/settings/class-wc-settings-general.php:85
 msgid "Store Notice"
-msgstr ""
+msgstr "Skilaboð verslunar"
 
 #: includes/admin/settings/class-wc-settings-general.php:86
 msgid "Enable site-wide store notice text"
-msgstr ""
+msgstr "Virkja skilboð fyrir allar síður verslunar"
 
 #: includes/admin/settings/class-wc-settings-general.php:93
 msgid "Store Notice Text"
@@ -4088,7 +4088,7 @@ msgstr "Virkja REST API"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "Currency Options"
-msgstr ""
+msgstr "Gjaldmiðill í verslun"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "The following options affect how prices are displayed on the frontend."
@@ -4102,7 +4102,7 @@ msgstr "Gjaldmiðill"
 msgid ""
 "This controls what currency prices are listed at in the catalog and which "
 "currency gateways will take payments in."
-msgstr ""
+msgstr "Þetta stýrir gjaldmiðilinn sem verðin birtast í í vörulistanum og hvaða gjaldmiðla greiðslugáttirnar taka."
 
 #: includes/admin/settings/class-wc-settings-general.php:127
 msgid "Currency Position"
@@ -4122,35 +4122,35 @@ msgstr "Hægri"
 
 #: includes/admin/settings/class-wc-settings-general.php:137
 msgid "Left with space"
-msgstr ""
+msgstr "Vinstri með bili"
 
 #: includes/admin/settings/class-wc-settings-general.php:138
 msgid "Right with space"
-msgstr ""
+msgstr "Hægri með bili"
 
 #: includes/admin/settings/class-wc-settings-general.php:144
 msgid "Thousand Separator"
-msgstr ""
+msgstr "Þúsundaskiltákn"
 
 #: includes/admin/settings/class-wc-settings-general.php:145
 msgid "This sets the thousand separator of displayed prices."
-msgstr ""
+msgstr "Þetta skilgreinir Þúsundaskiltáknið sem er birt í verðum."
 
 #: includes/admin/settings/class-wc-settings-general.php:154
 msgid "Decimal Separator"
-msgstr ""
+msgstr "Tugabrotsskiltákn"
 
 #: includes/admin/settings/class-wc-settings-general.php:155
 msgid "This sets the decimal separator of displayed prices."
-msgstr ""
+msgstr "Þetta skilgreinir tugabrotsskiltáknið sem er birt í verðum."
 
 #: includes/admin/settings/class-wc-settings-general.php:164
 msgid "Number of Decimals"
-msgstr ""
+msgstr "Fjöldi aukastafa"
 
 #: includes/admin/settings/class-wc-settings-general.php:165
 msgid "This sets the number of decimal points shown in displayed prices."
-msgstr ""
+msgstr "Þetta ákveður hversu margir aukastafir (aurar) eru birtir í verði."
 
 #: includes/admin/settings/class-wc-settings-general.php:179
 msgid "Styles and Scripts"
@@ -4162,7 +4162,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:185
 msgid "Enable Lightbox"
-msgstr ""
+msgstr "Virkja Ligthbox"
 
 #: includes/admin/settings/class-wc-settings-general.php:188
 msgid ""
@@ -4172,7 +4172,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:194
 msgid "Enable enhanced country select boxes"
-msgstr ""
+msgstr "Virkja aukið val á löndum"
 
 #: includes/admin/settings/class-wc-settings-general.php:199
 msgid ""
@@ -4185,31 +4185,31 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Primary"
-msgstr ""
+msgstr "Aðal"
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Call to action buttons/price slider/layered nav UI"
-msgstr ""
+msgstr "\"Ákall til aðgerða\" - takkar / verð renna / layered nav UI"
 
 #: includes/admin/settings/class-wc-settings-general.php:238
 msgid "Secondary"
-msgstr ""
+msgstr "Undir"
 
 #: includes/admin/settings/class-wc-settings-general.php:238
 msgid "Buttons and tabs"
-msgstr ""
+msgstr "Takkar og flipar"
 
 #: includes/admin/settings/class-wc-settings-general.php:239
 msgid "Highlight"
-msgstr ""
+msgstr "Ljómun"
 
 #: includes/admin/settings/class-wc-settings-general.php:239
 msgid "Price labels and Sale Flashes"
-msgstr ""
+msgstr "Verð merkingar og Útsölu Leiftur"
 
 #: includes/admin/settings/class-wc-settings-general.php:240
 msgid "Content"
-msgstr ""
+msgstr "Efni"
 
 #: includes/admin/settings/class-wc-settings-general.php:240
 msgid "Your themes page background - used for tab active states"
@@ -4217,11 +4217,11 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:241
 msgid "Subtext"
-msgstr ""
+msgstr "Undirtexti"
 
 #: includes/admin/settings/class-wc-settings-general.php:241
 msgid "Used for certain text and asides - breadcrumbs, small text etc."
-msgstr ""
+msgstr "Notað fyrir ákveðna texta og útúrdúra - til dæmis brauðslóð, lítinn text o.s.frv. "
 
 #: includes/admin/settings/class-wc-settings-general.php:244
 msgid ""
@@ -4372,35 +4372,35 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:246
 msgid "Default Product Sorting"
-msgstr ""
+msgstr "Sjálfgefin vöruröðun"
 
 #: includes/admin/settings/class-wc-settings-products.php:247
 msgid "This controls the default sort order of the catalog."
-msgstr ""
+msgstr "Þetta stýrir sjálfgefinni vöruröðu í pöntunarlista."
 
 #: includes/admin/settings/class-wc-settings-products.php:254
 msgid "Default sorting (custom ordering + name)"
-msgstr ""
+msgstr "Sjálfgefin röðum (sérsniðin röðun + nafn)"
 
 #: includes/admin/settings/class-wc-settings-products.php:255
 msgid "Popularity (sales)"
-msgstr ""
+msgstr "Vinsældir (sölur)"
 
 #: includes/admin/settings/class-wc-settings-products.php:256
 msgid "Average Rating"
-msgstr ""
+msgstr "Meðaleinkunn"
 
 #: includes/admin/settings/class-wc-settings-products.php:257
 msgid "Sort by most recent"
-msgstr ""
+msgstr "Nýjasta varan"
 
 #: includes/admin/settings/class-wc-settings-products.php:258
 msgid "Sort by price (asc)"
-msgstr ""
+msgstr "Eftir verði (Hækkandi)"
 
 #: includes/admin/settings/class-wc-settings-products.php:259
 msgid "Sort by price (desc)"
-msgstr ""
+msgstr "Eftir verði (Lækkandi)"
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
@@ -4416,11 +4416,11 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:286
 msgid "Weight Unit"
-msgstr ""
+msgstr "Eining þyngdar"
 
 #: includes/admin/settings/class-wc-settings-products.php:287
 msgid "This controls what unit you will define weights in."
-msgstr ""
+msgstr "Þetta stýrir því í hvaða einingu þú skilgreinir þyngd í t.d. kg."
 
 #: includes/admin/settings/class-wc-settings-products.php:294
 msgid "kg"
@@ -4440,11 +4440,11 @@ msgstr "únsur"
 
 #: includes/admin/settings/class-wc-settings-products.php:303
 msgid "Dimensions Unit"
-msgstr ""
+msgstr "Stærðar eining"
 
 #: includes/admin/settings/class-wc-settings-products.php:304
 msgid "This controls what unit you will define lengths in."
-msgstr ""
+msgstr "Þetta skilgreininir í hvaða einingu þú skilgreinir stærð í t.d. cm."
 
 #: includes/admin/settings/class-wc-settings-products.php:312
 msgid "cm"
@@ -4464,27 +4464,27 @@ msgstr "yd"
 
 #: includes/admin/settings/class-wc-settings-products.php:321
 msgid "Product Ratings"
-msgstr ""
+msgstr "Einkunn vöru"
 
 #: includes/admin/settings/class-wc-settings-products.php:322
 msgid "Enable ratings on reviews"
-msgstr ""
+msgstr "Virkja einkunnagjöf í umsögnu"
 
 #: includes/admin/settings/class-wc-settings-products.php:332
 msgid "Ratings are required to leave a review"
-msgstr ""
+msgstr "Einkunn er nauðsynleg ef umsögn er gefin"
 
 #: includes/admin/settings/class-wc-settings-products.php:342
 msgid "Show \"verified owner\" label for customer reviews"
-msgstr ""
+msgstr "Sýna \"Sannreyndur eigandi\" skilaboð fyrir umsagnir viðskiptavina"
 
 #: includes/admin/settings/class-wc-settings-products.php:352
 msgid "Only allow reviews from \"verified owners\""
-msgstr ""
+msgstr "Aðeins leyfa umsagnir frá \"staðfestum kaupendum\""
 
 #: includes/admin/settings/class-wc-settings-products.php:363
 msgid "Product Image Sizes"
-msgstr ""
+msgstr "Stærð myndar með vörum"
 
 #: includes/admin/settings/class-wc-settings-products.php:363
 msgid ""
@@ -4496,7 +4496,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:366
 msgid "Catalog Images"
-msgstr ""
+msgstr "Myndir í pöntunarlista"
 
 #: includes/admin/settings/class-wc-settings-products.php:367
 msgid "This size is usually used in product listings"
@@ -4504,11 +4504,11 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:380
 msgid "Single Product Image"
-msgstr ""
+msgstr "Stærð myndar á stakri vöru"
 
 #: includes/admin/settings/class-wc-settings-products.php:381
 msgid "This is the size used by the main image on the product page."
-msgstr ""
+msgstr "Þetta er stærðin á myndinni sem er aðalmyndin með vörunni."
 
 #: includes/admin/settings/class-wc-settings-products.php:394
 msgid "Product Thumbnails"
@@ -4517,15 +4517,15 @@ msgstr "Smámynd vöru"
 #: includes/admin/settings/class-wc-settings-products.php:395
 msgid ""
 "This size is usually used for the gallery of images on the product page."
-msgstr ""
+msgstr "Þessi stærð er vandalega notuð í myndasafni með vöru."
 
 #: includes/admin/settings/class-wc-settings-products.php:409
 msgid "Downloadable Products"
-msgstr ""
+msgstr "Niðuarhalanlegar vörur"
 
 #: includes/admin/settings/class-wc-settings-products.php:412
 msgid "File Download Method"
-msgstr ""
+msgstr "Aðferð til að hlaða niður skrám"
 
 #: includes/admin/settings/class-wc-settings-products.php:413
 msgid ""
@@ -4537,46 +4537,46 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:421
 msgid "Force Downloads"
-msgstr ""
+msgstr "Þvinga niðurhal"
 
 #: includes/admin/settings/class-wc-settings-products.php:422
 msgid "X-Accel-Redirect/X-Sendfile"
-msgstr ""
+msgstr "X-Accel-Redirect/X-Sendfile"
 
 #: includes/admin/settings/class-wc-settings-products.php:423
 msgid "Redirect only"
-msgstr ""
+msgstr "Beina eingöngu"
 
 #: includes/admin/settings/class-wc-settings-products.php:429
 msgid "Access Restriction"
-msgstr ""
+msgstr "Aðgangshindranir"
 
 #: includes/admin/settings/class-wc-settings-products.php:430
 msgid "Downloads require login"
-msgstr ""
+msgstr "Niðurhal krefst innskráningar"
 
 #: includes/admin/settings/class-wc-settings-products.php:434
 msgid "This setting does not apply to guest purchases."
-msgstr ""
+msgstr "Þessi stilling á ekki við um kaup með gestaaðgang"
 
 #: includes/admin/settings/class-wc-settings-products.php:440
 msgid "Grant access to downloadable products after payment"
-msgstr ""
+msgstr "Heimila aðgengi að skrám eftir greiðslu"
 
 #: includes/admin/settings/class-wc-settings-products.php:444
 msgid ""
 "Enable this option to grant access to downloads when orders are "
 "\"processing\", rather than \"completed\"."
-msgstr ""
+msgstr "Virkja þennan valmöguleika til að veita aðgengi að niðurhali þegar pantanir eru \"í vinnslu\", frekar en þegar þær eru \"fullkláraðar\""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:41
 #: includes/admin/settings/class-wc-settings-shipping.php:67
 msgid "Shipping Options"
-msgstr ""
+msgstr "Sendingarmöguleikar"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:70
 msgid "Shipping Calculations"
-msgstr ""
+msgstr "Útreikningur sendingarkostnaðar"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:71
 msgid "Enable shipping"
@@ -4584,11 +4584,11 @@ msgstr "Virkja sendingu"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:79
 msgid "Enable the shipping calculator on the cart page"
-msgstr ""
+msgstr "Virkja reiknivél fyrir sendingarkostnað í körfu."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:88
 msgid "Hide shipping costs until an address is entered"
-msgstr ""
+msgstr "Fela sendingarkostnað þangað til heimilisfang hefur verið gefið."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:97
 msgid "Shipping Display Mode"
@@ -4657,7 +4657,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-tax.php:40
 #: includes/admin/settings/class-wc-settings-tax.php:68
 msgid "Tax Options"
-msgstr ""
+msgstr "Skattvalmöguleikar"
 
 #: includes/admin/settings/class-wc-settings-tax.php:41
 msgid "Standard Rates"
@@ -4669,104 +4669,104 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:71
 msgid "Enable Taxes"
-msgstr ""
+msgstr "Virkja skatta"
 
 #: includes/admin/settings/class-wc-settings-tax.php:72
 msgid "Enable taxes and tax calculations"
-msgstr ""
+msgstr "Virkja skatta og útreikning skatta"
 
 #: includes/admin/settings/class-wc-settings-tax.php:79
 msgid "Prices Entered With Tax"
-msgstr ""
+msgstr "Verð eru sett inn með sköttu"
 
 #: includes/admin/settings/class-wc-settings-tax.php:83
 msgid ""
 "This option is important as it will affect how you input prices. Changing it"
 " will not update existing products."
-msgstr ""
+msgstr "Þessi valmöguleiki er mikilvægur og hefur áhrif hvernig þú setur inn verð.  Breyting á þessum valmöguleika uppfærir ekki vörur sem eru þegar skráðar."
 
 #: includes/admin/settings/class-wc-settings-tax.php:85
 msgid "Yes, I will enter prices inclusive of tax"
-msgstr ""
+msgstr "Já, ég set inn verð með sköttum"
 
 #: includes/admin/settings/class-wc-settings-tax.php:86
 msgid "No, I will enter prices exclusive of tax"
-msgstr ""
+msgstr "Nei, ég set ekki inn verð með skatt"
 
 #: includes/admin/settings/class-wc-settings-tax.php:91
 msgid "Calculate Tax Based On:"
-msgstr ""
+msgstr "Reikna út skatt miðað við"
 
 #: includes/admin/settings/class-wc-settings-tax.php:93
 msgid "This option determines which address is used to calculate tax."
-msgstr ""
+msgstr "Þessi valmöuleiki ákveður hvaða heimilisfang verður notað við útreiking á sköttum"
 
 #: includes/admin/settings/class-wc-settings-tax.php:97
 msgid "Customer shipping address"
-msgstr ""
+msgstr "Heimilisfang sem á að senda á"
 
 #: includes/admin/settings/class-wc-settings-tax.php:98
 msgid "Customer billing address"
-msgstr ""
+msgstr "Heimilisfang viðskiptavinar"
 
 #: includes/admin/settings/class-wc-settings-tax.php:99
 #: includes/admin/settings/class-wc-settings-tax.php:111
 msgid "Shop base address"
-msgstr ""
+msgstr "Heimilisfang verslunar"
 
 #: includes/admin/settings/class-wc-settings-tax.php:104
 msgid "Default Customer Address:"
-msgstr ""
+msgstr "Sjálfgefið heimilisfang viðskiptavinar"
 
 #: includes/admin/settings/class-wc-settings-tax.php:106
 msgid ""
 "This option determines the customers default address (before they input "
 "their own)."
-msgstr ""
+msgstr "Þetta ákveður sjálfgefið heimilisfang viðskiptavinar (áður en hann slær það inn sjálfur)."
 
 #: includes/admin/settings/class-wc-settings-tax.php:110
 msgid "No address"
-msgstr ""
+msgstr "Ekkert heimilisfang"
 
 #: includes/admin/settings/class-wc-settings-tax.php:116
 msgid "Shipping Tax Class:"
-msgstr ""
+msgstr "Skattaflokkur sendingar"
 
 #: includes/admin/settings/class-wc-settings-tax.php:117
 msgid ""
 "Optionally control which tax class shipping gets, or leave it so shipping "
 "tax is based on the cart items themselves."
-msgstr ""
+msgstr "Þessi valmöguleiki ákveður hvaða skattþrep sendingar falla í eða sleppa þannig að skattur sé miðað við vöru í körfunni."
 
 #: includes/admin/settings/class-wc-settings-tax.php:122
 msgid "Shipping tax class based on cart items"
-msgstr ""
+msgstr "Skattur á sendingu miðast við vöru í körfu"
 
 #: includes/admin/settings/class-wc-settings-tax.php:127
 msgid "Rounding"
-msgstr ""
+msgstr "Afrúnun"
 
 #: includes/admin/settings/class-wc-settings-tax.php:128
 msgid "Round tax at subtotal level, instead of rounding per line"
-msgstr ""
+msgstr "Rúna skatt í samtölu en ekki fyrir hverjar línu"
 
 #: includes/admin/settings/class-wc-settings-tax.php:135
 msgid "Additional Tax Classes"
-msgstr ""
+msgstr "Viðbótar skattþrep"
 
 #: includes/admin/settings/class-wc-settings-tax.php:136
 msgid ""
 "List additonal tax classes below (1 per line). This is in addition to the "
 "default <code>Standard Rate</code>. Tax classes can be assigned to products."
-msgstr ""
+msgstr "Lista viðbótar skattþrep, eitt þrep í hverja línu.  Þetta er viðbót við sjálfgefið <code>skatt þrep</code>.  Hægt er að tengja ákveðin skattþrep er hægt að tengja við ákveðnar vörur."
 
 #: includes/admin/settings/class-wc-settings-tax.php:140
 msgid "Reduced Rate%sZero Rate"
-msgstr ""
+msgstr "Lækkað skattþrep: %s núll þrep."
 
 #: includes/admin/settings/class-wc-settings-tax.php:144
 msgid "Display prices in the shop:"
-msgstr ""
+msgstr "Sýna verð í verslun:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:149
 #: includes/admin/settings/class-wc-settings-tax.php:168
@@ -4780,7 +4780,7 @@ msgstr "án vsk."
 
 #: includes/admin/settings/class-wc-settings-tax.php:155
 msgid "Price display suffix:"
-msgstr ""
+msgstr "Viðskeyti fyrir framan verð:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:159
 msgid ""
@@ -4788,27 +4788,27 @@ msgid ""
 "\"inc. Vat\" to explain your pricing. You can also have prices substituted "
 "here using one of the following: <code>{price_including_tax}, "
 "{price_excluding_tax}</code>."
-msgstr ""
+msgstr "Þetta er texti sem er sýndur eftir verð vörunnar.  Þetta gæti t.d. verið (m.vsk) til að útskýra verðlagninguna.  Þú getur einnig haft verð leiðréttingu hérna með því að nota eftirfarandi:  <code>{price_including_tax}, {price_excluding_tax}</code>."
 
 #: includes/admin/settings/class-wc-settings-tax.php:163
 msgid "Display prices during cart/checkout:"
-msgstr ""
+msgstr "Hvernig verð eru birt í körfu eða pöntun:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:175
 msgid "Display tax totals:"
-msgstr ""
+msgstr "Sýna samtal skatta:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:180
 msgid "As a single total"
-msgstr ""
+msgstr "Sem eitt samtal"
 
 #: includes/admin/settings/class-wc-settings-tax.php:181
 msgid "Itemized"
-msgstr ""
+msgstr "Á hverja vörulínu"
 
 #: includes/admin/settings/class-wc-settings-tax.php:243
 msgid "Tax Rates for the \"%s\" Class"
-msgstr ""
+msgstr "Skattahlutföll fyrir \"%s\" Flokkinn"
 
 #: includes/admin/settings/class-wc-settings-tax.php:244
 msgid ""
@@ -4881,7 +4881,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-tax.php:264
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Compound"
-msgstr ""
+msgstr "Samsettur"
 
 #: includes/admin/settings/class-wc-settings-tax.php:264
 msgid ""
@@ -4895,7 +4895,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:273
 msgid "Insert row"
-msgstr ""
+msgstr "Flytja inn röð"
 
 #: includes/admin/settings/class-wc-settings-tax.php:274
 msgid "Remove selected row(s)"
@@ -4903,11 +4903,11 @@ msgstr "Fjarlægja valda röð(raðir)"
 
 #: includes/admin/settings/class-wc-settings-tax.php:290
 msgid "Import CSV"
-msgstr ""
+msgstr "Flytja inn CSV"
 
 #: includes/admin/settings/class-wc-settings-tax.php:376
 msgid "No row(s) selected"
-msgstr ""
+msgstr "Engin röð/raðir valdar"
 
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Country Code"
@@ -4923,55 +4923,61 @@ msgstr "Hlutfall %"
 
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Tax Name"
-msgstr ""
+msgstr "Nafn skatts"
 
 #: includes/admin/views/html-admin-page-addons.php:5
 msgid "Browse all extensions"
-msgstr ""
+msgstr "Skoða allar viðbætur"
 
 #: includes/admin/views/html-admin-page-addons.php:6
 msgid "Browse themes"
-msgstr ""
+msgstr "Vafra öll þemu"
 
-#: includes/admin/views/html-admin-page-addons.php:11
+#: includes/admin/views/html-admin-page-addons.php:12
 msgid "Popular"
 msgstr "Vinsælt"
 
-#: includes/admin/views/html-admin-page-addons.php:12
+#: includes/admin/views/html-admin-page-addons.php:13
 msgid "Gateways"
-msgstr ""
+msgstr "Gáttir"
 
-#: includes/admin/views/html-admin-page-addons.php:14
+#: includes/admin/views/html-admin-page-addons.php:15
 msgid "Import/export"
-msgstr ""
-
-#: includes/admin/views/html-admin-page-addons.php:16
-msgid "Marketing"
-msgstr ""
+msgstr "Flytja inn / Flytja út"
 
 #: includes/admin/views/html-admin-page-addons.php:17
+msgid "Marketing"
+msgstr "Markaðsetning"
+
+#: includes/admin/views/html-admin-page-addons.php:18
 msgid "Free"
 msgstr "Ókeypis"
 
+#: includes/admin/views/html-admin-page-addons.php:33
+msgid ""
+"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
+" href=\"%s\">WooCommerce Extensions Catalog</a>"
+msgstr ""
+
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
-msgstr ""
+msgstr "Vinsamlegast hafðu þessar upplýsingar með þegar óskað er eftir stuðningi."
 
 #: includes/admin/views/html-admin-page-status-report.php:3
 msgid "Get System Report"
-msgstr ""
+msgstr "Fá kerfisskýrslu"
 
 #: includes/admin/views/html-admin-page-status-report.php:11
 msgid "Environment"
-msgstr ""
+msgstr "Umhverfi"
 
 #: includes/admin/views/html-admin-page-status-report.php:17
 msgid "Home URL"
-msgstr ""
+msgstr "Vefslóð verslunar"
 
 #: includes/admin/views/html-admin-page-status-report.php:21
 msgid "Site URL"
-msgstr ""
+msgstr "Vefslóð síðu"
 
 #: includes/admin/views/html-admin-page-status-report.php:25
 msgid "WC Version"
@@ -4983,15 +4989,15 @@ msgstr "WC gagnagrunns útgáfa"
 
 #: includes/admin/views/html-admin-page-status-report.php:33
 msgid "WP Version"
-msgstr ""
+msgstr "WP útgáfa"
 
 #: includes/admin/views/html-admin-page-status-report.php:37
 msgid "WP Multisite Enabled"
-msgstr ""
+msgstr "WP fjölsíðuhamur virkur"
 
 #: includes/admin/views/html-admin-page-status-report.php:41
 msgid "Web Server Info"
-msgstr ""
+msgstr "Upplýsingar um netþjón"
 
 #: includes/admin/views/html-admin-page-status-report.php:45
 msgid "PHP Version"
@@ -5003,7 +5009,7 @@ msgstr "MySQL útgáfa"
 
 #: includes/admin/views/html-admin-page-status-report.php:53
 msgid "WP Memory Limit"
-msgstr ""
+msgstr "WP minnistakmörk"
 
 #: includes/admin/views/html-admin-page-status-report.php:58
 msgid ""
@@ -5013,15 +5019,15 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:65
 msgid "WP Debug Mode"
-msgstr ""
+msgstr "WP aflúsunarhamur"
 
 #: includes/admin/views/html-admin-page-status-report.php:69
 msgid "WP Language"
-msgstr ""
+msgstr "WP tungumál"
 
 #: includes/admin/views/html-admin-page-status-report.php:73
 msgid "WP Max Upload Size"
-msgstr ""
+msgstr "WP mesta upphleðsla"
 
 #: includes/admin/views/html-admin-page-status-report.php:78
 msgid "PHP Post Max Size"
@@ -5055,15 +5061,15 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:104
 msgid "Default Timezone"
-msgstr ""
+msgstr "Sjálfgefið tímabelti"
 
 #: includes/admin/views/html-admin-page-status-report.php:108
 msgid "Default timezone is %s - it should be UTC"
-msgstr ""
+msgstr "Sjálfgefið tímabelti er %s - það ætti að vera UTC"
 
 #: includes/admin/views/html-admin-page-status-report.php:110
 msgid "Default timezone is %s"
-msgstr ""
+msgstr "Sjálfgefið tímabelti er %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:118
 msgid "fsockopen/cURL"
@@ -5090,11 +5096,11 @@ msgstr "Netþjónninn þinn hefur hvorki fsockopen né cURL virkjað - PayPal IP
 
 #: includes/admin/views/html-admin-page-status-report.php:134
 msgid "SOAP Client"
-msgstr ""
+msgstr "SOAP þjón"
 
 #: includes/admin/views/html-admin-page-status-report.php:136
 msgid "Your server has the SOAP Client class enabled."
-msgstr ""
+msgstr "Netþjóninn þinn er með SOAP þjón virkan"
 
 #: includes/admin/views/html-admin-page-status-report.php:139
 msgid ""
@@ -5104,25 +5110,25 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:144
 msgid "WP Remote Post"
-msgstr ""
+msgstr "WP fjarpóstun"
 
 #: includes/admin/views/html-admin-page-status-report.php:155
 msgid "wp_remote_post() was successful - PayPal IPN is working."
-msgstr ""
+msgstr "wp_remote_post() tókst - PayPal IPN virkar."
 
 #: includes/admin/views/html-admin-page-status-report.php:158
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider. Error:"
-msgstr ""
+msgstr "wp_remote_post() mistókst. PayPal IPN virkar ekki hjá þér. Hafðu samband við hýsingaraðila. Villur:"
 
 #: includes/admin/views/html-admin-page-status-report.php:161
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
-msgstr ""
+msgstr "wp_remote_post() virkar ekki.  PayPal IPN virkar mögulega ekki."
 
 #: includes/admin/views/html-admin-page-status-report.php:184
 msgid "Locale"
-msgstr ""
+msgstr "Landsstaðall"
 
 #: includes/admin/views/html-admin-page-status-report.php:200
 msgid "Plugins"
@@ -5139,7 +5145,7 @@ msgstr "Skoða vefsíðu viðbótar"
 #: includes/admin/views/html-admin-page-status-report.php:250
 #: includes/admin/views/html-admin-page-status-report.php:432
 msgid "is available"
-msgstr ""
+msgstr "er mögulegt"
 
 #: includes/admin/views/html-admin-page-status-report.php:253
 msgid "by"
@@ -5155,7 +5161,7 @@ msgstr "Force SSL"
 
 #: includes/admin/views/html-admin-page-status-report.php:282
 msgid "WC Pages"
-msgstr ""
+msgstr "WC síður"
 
 #: includes/admin/views/html-admin-page-status-report.php:289
 msgctxt "Page setting"
@@ -5179,27 +5185,27 @@ msgstr "Mín síða"
 
 #: includes/admin/views/html-admin-page-status-report.php:321
 msgid "Page not set"
-msgstr ""
+msgstr "Síða er ekki skilgreind"
 
 #: includes/admin/views/html-admin-page-status-report.php:331
 msgid "Page does not exist"
-msgstr ""
+msgstr "Síða er ekki til"
 
 #: includes/admin/views/html-admin-page-status-report.php:336
 msgid "Page does not contain the shortcode: %s"
-msgstr ""
+msgstr "Síða inniheldur ekki stuttkóða: %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:355
 msgid "WC Taxonomies"
-msgstr ""
+msgstr "WC flokkunarfræði"
 
 #: includes/admin/views/html-admin-page-status-report.php:361
 msgid "Order Statuses"
-msgstr ""
+msgstr "Staða pöntunar"
 
 #: includes/admin/views/html-admin-page-status-report.php:371
 msgid "Product Types"
-msgstr ""
+msgstr "Vörutegundir"
 
 #: includes/admin/views/html-admin-page-status-report.php:384
 msgid "Theme"
@@ -5215,7 +5221,7 @@ msgstr "Þemaútgáfa"
 
 #: includes/admin/views/html-admin-page-status-report.php:436
 msgid "Author URL"
-msgstr ""
+msgstr "Vefslóð höfundar"
 
 #: includes/admin/views/html-admin-page-status-report.php:445
 msgid "Templates"
@@ -5230,30 +5236,30 @@ msgstr ""
 #: includes/admin/views/html-admin-page-status-report.php:489
 #: includes/admin/views/html-admin-page-status-report.php:495
 msgid "Template Overrides"
-msgstr ""
+msgstr "Yfirskrifa sniðmát"
 
 #: includes/admin/views/html-admin-page-status-report.php:496
 msgid "No overrides present in theme."
-msgstr ""
+msgstr "Engin yfirskrifun til staðar í sniðmáti."
 
 #: includes/admin/views/html-admin-page-status-tools.php:7
 #: includes/admin/views/html-admin-page-status.php:6
 msgid "Tools"
-msgstr ""
+msgstr "Verkfæri"
 
 #: includes/admin/views/html-admin-page-status-tools.php:23
 msgid "Template Debug Mode"
-msgstr ""
+msgstr "Sniðmát í aflúsunarham"
 
 #: includes/admin/views/html-admin-page-status-tools.php:29
 msgid ""
 "This tool will disable template overrides for logged-in administrators for "
 "debugging purposes."
-msgstr ""
+msgstr "Þetta verkfæri gerir yfirskrifun óvirka fyrir innskráða stjórnendur í aflúsunar tilgangi."
 
 #: includes/admin/views/html-admin-page-status-tools.php:34
 msgid "Remove post types on uninstall"
-msgstr ""
+msgstr "Fjarlæga póst tegundir þegar er fjarlægt."
 
 #: includes/admin/views/html-admin-page-status-tools.php:40
 msgid ""
@@ -5404,22 +5410,6 @@ msgstr "Útsöluverð"
 msgid "Custom:"
 msgstr ""
 
-#: includes/admin/wc-admin-functions.php:193
+#: includes/admin/wc-admin-functions.php:192
 msgid "Could not compile woocommerce.less:"
 msgstr ""
-
-#. Plugin URI of the plugin/theme
-msgid "http://www.woothemes.com/woocommerce/"
-msgstr "http://www.woothemes.com/woocommerce/"
-
-#. Description of the plugin/theme
-msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr ""
-
-#. Author of the plugin/theme
-msgid "WooThemes"
-msgstr "WooThemes"
-
-#. Author URI of the plugin/theme
-msgid "http://woothemes.com"
-msgstr "http://woothemes.com"

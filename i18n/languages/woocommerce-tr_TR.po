@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
-"PO-Revision-Date: 2014-03-04 13:35+0000\n"
+"POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
+"PO-Revision-Date: 2014-03-25 13:08+0000\n"
 "Last-Translator: TRFlavourart <vaporsbazar@gmail.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/projects/p/woocommerce/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -94,6 +94,254 @@ msgstr "Viktorya"
 #: i18n/states/AU.php:20
 msgid "Western Australia"
 msgstr "Batı Avustralya"
+
+#: i18n/states/BD.php:13
+msgid "Bagerhat"
+msgstr "Bagerhat"
+
+#: i18n/states/BD.php:14
+msgid "Bandarban"
+msgstr "Bandarban"
+
+#: i18n/states/BD.php:15
+msgid "Barguna"
+msgstr "Barguna"
+
+#: i18n/states/BD.php:16
+msgid "Barisal"
+msgstr "Barisal"
+
+#: i18n/states/BD.php:17
+msgid "Bhola"
+msgstr "Bhola"
+
+#: i18n/states/BD.php:18
+msgid "Bogra"
+msgstr "Bogra"
+
+#: i18n/states/BD.php:19
+msgid "Chandpur"
+msgstr "Chandpur"
+
+#: i18n/states/BD.php:20
+msgid "Chittagong"
+msgstr "Chittagong"
+
+#: i18n/states/BD.php:21
+msgid "Chuadanga"
+msgstr "Chuadanga"
+
+#: i18n/states/BD.php:22
+msgid "Comilla"
+msgstr "Comilla"
+
+#: i18n/states/BD.php:23
+msgid "Cox's Bazar"
+msgstr "Cox's Bazar"
+
+#: i18n/states/BD.php:24
+msgid "Dhaka"
+msgstr "Dhaka"
+
+#: i18n/states/BD.php:25
+msgid "Dinajpur"
+msgstr "Dinajpur"
+
+#: i18n/states/BD.php:26
+msgid "Faridpur "
+msgstr "Faridpur"
+
+#: i18n/states/BD.php:27
+msgid "Feni"
+msgstr "Feni"
+
+#: i18n/states/BD.php:28
+msgid "Gaibandha"
+msgstr "Gaibandha"
+
+#: i18n/states/BD.php:29
+msgid "Gazipur"
+msgstr "Gazipur"
+
+#: i18n/states/BD.php:30
+msgid "Gopalganj"
+msgstr "Gopalganj"
+
+#: i18n/states/BD.php:31
+msgid "Jamalpur"
+msgstr "Jamalpur"
+
+#: i18n/states/BD.php:32
+msgid "Jessore"
+msgstr "Jessore"
+
+#: i18n/states/BD.php:33
+msgid "Jhalokati"
+msgstr "Jhalokati"
+
+#: i18n/states/BD.php:34
+msgid "Jhenaidah"
+msgstr "Jhenaidah"
+
+#: i18n/states/BD.php:35
+msgid "Joypurhat"
+msgstr "Joypurhat"
+
+#: i18n/states/BD.php:36
+msgid "Khagrachhari"
+msgstr "Khagrachhari"
+
+#: i18n/states/BD.php:37
+msgid "Khulna"
+msgstr "Khulna"
+
+#: i18n/states/BD.php:38
+msgid "Kishoreganj"
+msgstr "Kishoreganj"
+
+#: i18n/states/BD.php:39
+msgid "Kurigram"
+msgstr "Kurigram"
+
+#: i18n/states/BD.php:40
+msgid "Kushtia"
+msgstr "Kushtia"
+
+#: i18n/states/BD.php:41
+msgid "Lakshmipur"
+msgstr "Lakshmipur"
+
+#: i18n/states/BD.php:42
+msgid "Lalmonirhat"
+msgstr "Lalmonirhat"
+
+#: i18n/states/BD.php:43
+msgid "Madaripur"
+msgstr "Madaripur"
+
+#: i18n/states/BD.php:44
+msgid "Magura"
+msgstr "Magura"
+
+#: i18n/states/BD.php:45
+msgid "Manikganj "
+msgstr "Manikganj"
+
+#: i18n/states/BD.php:46
+msgid "Meherpur"
+msgstr "Meherpur"
+
+#: i18n/states/BD.php:47
+msgid "Moulvibazar"
+msgstr "Moulvibazar"
+
+#: i18n/states/BD.php:48
+msgid "Munshiganj"
+msgstr "Munshiganj"
+
+#: i18n/states/BD.php:49
+msgid "Mymensingh"
+msgstr "Mymensingh"
+
+#: i18n/states/BD.php:50
+msgid "Naogaon"
+msgstr "Naogaon"
+
+#: i18n/states/BD.php:51
+msgid "Narail"
+msgstr "Narail"
+
+#: i18n/states/BD.php:52
+msgid "Narayanganj"
+msgstr "Narayanganj"
+
+#: i18n/states/BD.php:53
+msgid "Narsingdi"
+msgstr "Narsingdi"
+
+#: i18n/states/BD.php:54
+msgid "Natore"
+msgstr "Natore"
+
+#: i18n/states/BD.php:55
+msgid "Nawabganj"
+msgstr "Nawabganj"
+
+#: i18n/states/BD.php:56
+msgid "Netrakona"
+msgstr "Netrakona"
+
+#: i18n/states/BD.php:57
+msgid "Nilphamari"
+msgstr "Nilphamari"
+
+#: i18n/states/BD.php:58
+msgid "Noakhali"
+msgstr "Noakhali"
+
+#: i18n/states/BD.php:59
+msgid "Pabna"
+msgstr "Pabna"
+
+#: i18n/states/BD.php:60
+msgid "Panchagarh"
+msgstr "Panchagarh"
+
+#: i18n/states/BD.php:61
+msgid "Patuakhali"
+msgstr "Patuakhali"
+
+#: i18n/states/BD.php:62
+msgid "Pirojpur"
+msgstr "Pirojpur"
+
+#: i18n/states/BD.php:63
+msgid "Rajbari"
+msgstr "Rajbari"
+
+#: i18n/states/BD.php:64
+msgid "Rajshahi"
+msgstr "Rajshahi"
+
+#: i18n/states/BD.php:65
+msgid "Rangamati"
+msgstr "Rangamati"
+
+#: i18n/states/BD.php:66
+msgid "Rangpur"
+msgstr "Rangpur"
+
+#: i18n/states/BD.php:67
+msgid "Satkhira"
+msgstr "Satkhira"
+
+#: i18n/states/BD.php:68
+msgid "Shariatpur"
+msgstr "Shariatpur"
+
+#: i18n/states/BD.php:69
+msgid "Sherpur"
+msgstr "Sherpur"
+
+#: i18n/states/BD.php:70
+msgid "Sirajganj"
+msgstr "Sirajganj"
+
+#: i18n/states/BD.php:71
+msgid "Sunamganj"
+msgstr "Sunamganj"
+
+#: i18n/states/BD.php:72
+msgid "Sylhet"
+msgstr "Sylhet"
+
+#: i18n/states/BD.php:73
+msgid "Tangail"
+msgstr "Tangail"
+
+#: i18n/states/BD.php:74
+msgid "Thakurgaon"
+msgstr "Thakurgaon"
 
 #: i18n/states/BG.php:13
 msgid "Blagoevgrad"
@@ -2904,7 +3152,7 @@ msgstr "Ödeme İade Edildi"
 msgid "cancelled"
 msgstr "İptal Edildi"
 
-#: includes/abstracts/abstract-wc-email.php:568
+#: includes/abstracts/abstract-wc-email.php:570
 #: includes/emails/class-wc-email-customer-completed-order.php:140
 #: includes/emails/class-wc-email-new-order.php:120
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
@@ -2917,19 +3165,19 @@ msgstr "İptal Edildi"
 msgid "Enable/Disable"
 msgstr "Etkin / Devredışı"
 
-#: includes/abstracts/abstract-wc-email.php:570
+#: includes/abstracts/abstract-wc-email.php:572
 #: includes/emails/class-wc-email-customer-completed-order.php:142
 #: includes/emails/class-wc-email-new-order.php:122
 msgid "Enable this email notification"
 msgstr "Bu e-posta bilgilendirmesini etkinleştir"
 
-#: includes/abstracts/abstract-wc-email.php:574
+#: includes/abstracts/abstract-wc-email.php:576
 #: includes/emails/class-wc-email-customer-invoice.php:146
 msgid "Email subject"
 msgstr "E-Posta konusu"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/abstracts/abstract-wc-email.php:583
+#: includes/abstracts/abstract-wc-email.php:578
+#: includes/abstracts/abstract-wc-email.php:585
 #: includes/emails/class-wc-email-customer-completed-order.php:148
 #: includes/emails/class-wc-email-customer-completed-order.php:155
 #: includes/emails/class-wc-email-customer-completed-order.php:162
@@ -2941,106 +3189,106 @@ msgstr "E-Posta konusu"
 msgid "Defaults to <code>%s</code>"
 msgstr "Varsayılan <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:583
 #: includes/emails/class-wc-email-customer-invoice.php:153
 msgid "Email heading"
 msgstr "E-Posta başlığı"
 
-#: includes/abstracts/abstract-wc-email.php:588
+#: includes/abstracts/abstract-wc-email.php:590
 #: includes/emails/class-wc-email-customer-completed-order.php:174
 #: includes/emails/class-wc-email-customer-invoice.php:174
 #: includes/emails/class-wc-email-new-order.php:147
 msgid "Email type"
 msgstr "E-Posta türü"
 
-#: includes/abstracts/abstract-wc-email.php:590
+#: includes/abstracts/abstract-wc-email.php:592
 #: includes/emails/class-wc-email-customer-completed-order.php:176
 #: includes/emails/class-wc-email-customer-invoice.php:176
 #: includes/emails/class-wc-email-new-order.php:149
 msgid "Choose which format of email to send."
 msgstr "Göndermek istediğiniz e-posta formatını seçin."
 
-#: includes/abstracts/abstract-wc-email.php:594
+#: includes/abstracts/abstract-wc-email.php:596
 #: includes/emails/class-wc-email-customer-completed-order.php:180
 #: includes/emails/class-wc-email-customer-invoice.php:180
 #: includes/emails/class-wc-email-new-order.php:153
 msgid "Plain text"
 msgstr "Düz Metin"
 
-#: includes/abstracts/abstract-wc-email.php:595
+#: includes/abstracts/abstract-wc-email.php:597
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
 msgid "HTML"
 msgstr "HTML"
 
-#: includes/abstracts/abstract-wc-email.php:596
+#: includes/abstracts/abstract-wc-email.php:598
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
 msgid "Multipart"
 msgstr "Çok parçalı"
 
-#: includes/abstracts/abstract-wc-email.php:632
-#: includes/abstracts/abstract-wc-email.php:653
+#: includes/abstracts/abstract-wc-email.php:634
+#: includes/abstracts/abstract-wc-email.php:655
 msgid "Could not write to template file."
 msgstr "Şablon dosyasına yazdırılamıyor."
 
-#: includes/abstracts/abstract-wc-email.php:684
+#: includes/abstracts/abstract-wc-email.php:686
 msgid "Template file copied to theme."
 msgstr "Şablon dosyası temaya kopyalandı."
 
-#: includes/abstracts/abstract-wc-email.php:693
+#: includes/abstracts/abstract-wc-email.php:695
 msgid "Template file deleted from theme."
 msgstr "Şablon dosyası temadan silindi."
 
-#: includes/abstracts/abstract-wc-email.php:701
+#: includes/abstracts/abstract-wc-email.php:703
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Ayarlar"
 
-#: includes/abstracts/abstract-wc-email.php:713
+#: includes/abstracts/abstract-wc-email.php:715
 msgid "HTML template"
 msgstr "HTML Şablon"
 
-#: includes/abstracts/abstract-wc-email.php:714
+#: includes/abstracts/abstract-wc-email.php:716
 msgid "Plain text template"
 msgstr "Düz Metin Şablonu"
 
-#: includes/abstracts/abstract-wc-email.php:735
+#: includes/abstracts/abstract-wc-email.php:737
 msgid "Delete template file"
 msgstr "Şablonu Sil"
 
-#: includes/abstracts/abstract-wc-email.php:738
+#: includes/abstracts/abstract-wc-email.php:740
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "Bu şablon, kullandığınız tema tarafından geçersiz kılınmış: <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:753
+#: includes/abstracts/abstract-wc-email.php:755
 msgid "Copy file to theme"
 msgstr "Dosyayı temaya kopyala"
 
-#: includes/abstracts/abstract-wc-email.php:756
+#: includes/abstracts/abstract-wc-email.php:758
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "Bu e-posta şablonunun üzerine yazmak ve şablonu düzenlemek için <code>%s</code> içeriğini tema klasörüne <code>%s</code> kopyala."
 
-#: includes/abstracts/abstract-wc-email.php:767
+#: includes/abstracts/abstract-wc-email.php:769
 msgid "File was not found."
 msgstr "Dosya bulunamadı."
 
-#: includes/abstracts/abstract-wc-email.php:792
+#: includes/abstracts/abstract-wc-email.php:794
 msgid "View template"
 msgstr "Şablona gözat"
 
-#: includes/abstracts/abstract-wc-email.php:793
+#: includes/abstracts/abstract-wc-email.php:795
 msgid "Hide template"
 msgstr "Şablonu gizle"
 
-#: includes/abstracts/abstract-wc-email.php:804
+#: includes/abstracts/abstract-wc-email.php:806
 msgid "Are you sure you want to delete this template file?"
 msgstr "Bu şablonu silmek istediğinizden emin misiniz?"
 
@@ -3052,9 +3300,17 @@ msgstr "Kart Numarası"
 msgid "Expiry (MM/YY)"
 msgstr "Vade (MM / YY)"
 
+#: includes/abstracts/abstract-wc-payment-gateway.php:212
+msgid "MM / YY"
+msgstr "MM / YY"
+
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
 msgstr "Kart Kodu"
+
+#: includes/abstracts/abstract-wc-payment-gateway.php:216
+msgid "CVC"
+msgstr "CVC"
 
 #: includes/abstracts/abstract-wc-product.php:455
 #: includes/class-wc-product-simple.php:48
@@ -3097,7 +3353,7 @@ msgstr "Stokta Yok"
 
 #: includes/abstracts/abstract-wc-product.php:908
 #: includes/abstracts/abstract-wc-product.php:914
-#: includes/class-wc-cart.php:1419 includes/class-wc-order.php:838
+#: includes/class-wc-cart.php:1419 includes/class-wc-order.php:859
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Ücretsiz!"
@@ -3118,7 +3374,7 @@ msgstr "5 üzerinden %s değerlendirilmiş"
 msgid "out of 5"
 msgstr "5 üzerinden"
 
-#: includes/abstracts/abstract-wc-product.php:1384
+#: includes/abstracts/abstract-wc-product.php:1386
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -3330,42 +3586,42 @@ msgstr "Standart"
 msgid "File %d"
 msgstr "Dosya %d"
 
-#: includes/class-wc-ajax.php:1000 includes/class-wc-ajax.php:1001
-#: includes/class-wc-order.php:1544
+#: includes/class-wc-ajax.php:1008 includes/class-wc-ajax.php:1009
+#: includes/class-wc-order.php:1571
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Ürün: #%s için stok miktarı %s adetten %s adete düşürüldü."
 
-#: includes/class-wc-ajax.php:1009
+#: includes/class-wc-ajax.php:1017
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr "Stoğu düşürülen hiç bir ürün yok - stok yönetimleri etkin olmayabilir."
 
-#: includes/class-wc-ajax.php:1048 includes/class-wc-ajax.php:1049
+#: includes/class-wc-ajax.php:1056 includes/class-wc-ajax.php:1057
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Ürün: #%s için stok miktarı %s 'ten  %s 'e arttırıldı."
 
-#: includes/class-wc-ajax.php:1056
+#: includes/class-wc-ajax.php:1064
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr "Ürünün stok değeri arttı - stok yönetimi etkin olmayabilir."
 
-#: includes/class-wc-ajax.php:1072
+#: includes/class-wc-ajax.php:1080
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "İsim"
 
-#: includes/class-wc-ajax.php:1072
+#: includes/class-wc-ajax.php:1080
 msgid "Value"
 msgstr "Değer"
 
-#: includes/class-wc-ajax.php:1290
+#: includes/class-wc-ajax.php:1298
 msgid "Delete note"
 msgstr "Notu Sil"
 
-#: includes/class-wc-ajax.php:1435
+#: includes/class-wc-ajax.php:1443
 msgid "Guest"
 msgstr "Misafir"
 
@@ -3483,52 +3739,52 @@ msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr "%b %d, %Y @ %I:%M %p"
 
-#: includes/class-wc-checkout.php:284
+#: includes/class-wc-checkout.php:287
 msgid "Backordered"
 msgstr "Bakiye Siparişi verildi"
 
-#: includes/class-wc-checkout.php:416
+#: includes/class-wc-checkout.php:423
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr "Üzgünüz, oturum süreniz doldu. <a href=\"%s\" class=\"wc-backward\">Anasayfaya dön</a>"
 
-#: includes/class-wc-checkout.php:491 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:498 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "gerekli bir alandır."
 
-#: includes/class-wc-checkout.php:503 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:510 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Lütfen geçerli bir Posta Kodu girin."
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:519 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "geçerli bir telefon numarası değil."
 
-#: includes/class-wc-checkout.php:518 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:525 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "geçerli bir e-posta değil."
 
-#: includes/class-wc-checkout.php:533
+#: includes/class-wc-checkout.php:540
 msgid "is not valid. Please enter one of the following:"
 msgstr "geçerli değil. Lütfen şunlardan birini girin:"
 
-#: includes/class-wc-checkout.php:578
+#: includes/class-wc-checkout.php:585
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Şartları &amp; Koşulları kabul etmeniz gerekir."
 
-#: includes/class-wc-checkout.php:583
+#: includes/class-wc-checkout.php:590
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr "Maalesef <strong>%s konumuna kargo gönderemiyoruz</strong>. Lütfen alternatif bir kargo adresi girin."
 
-#: includes/class-wc-checkout.php:591
+#: includes/class-wc-checkout.php:598
 msgid "Invalid shipping method."
 msgstr "Geçersiz Kargo Yöntemi"
 
-#: includes/class-wc-checkout.php:604
+#: includes/class-wc-checkout.php:611
 msgid "Invalid payment method."
 msgstr "Geçersiz Ödeme Yöntemi."
 
@@ -4591,113 +4847,117 @@ msgstr "Şehir / Eyalet"
 msgid "Postcode / Zip"
 msgstr "Posta Kodu"
 
-#: includes/class-wc-countries.php:826 includes/class-wc-countries.php:842
-#: includes/class-wc-countries.php:862 includes/class-wc-countries.php:923
-#: includes/class-wc-countries.php:942 includes/class-wc-countries.php:947
-#: includes/class-wc-countries.php:959 includes/class-wc-countries.php:1009
-#: includes/class-wc-countries.php:1033 includes/class-wc-countries.php:1074
+#: includes/class-wc-countries.php:827
+msgid "District"
+msgstr "İlçe"
+
+#: includes/class-wc-countries.php:834 includes/class-wc-countries.php:850
+#: includes/class-wc-countries.php:870 includes/class-wc-countries.php:931
+#: includes/class-wc-countries.php:950 includes/class-wc-countries.php:955
+#: includes/class-wc-countries.php:967 includes/class-wc-countries.php:1017
+#: includes/class-wc-countries.php:1041 includes/class-wc-countries.php:1082
 msgid "Province"
 msgstr "Şehir"
 
-#: includes/class-wc-countries.php:848
+#: includes/class-wc-countries.php:856
 msgid "Canton"
 msgstr "Kanton"
 
-#: includes/class-wc-countries.php:857 includes/class-wc-countries.php:1015
+#: includes/class-wc-countries.php:865 includes/class-wc-countries.php:1023
 msgid "Municipality"
 msgstr "Belediye"
 
-#: includes/class-wc-countries.php:910
+#: includes/class-wc-countries.php:918
 msgid "Town / District"
 msgstr "İlçe / Semt"
 
-#: includes/class-wc-countries.php:913
+#: includes/class-wc-countries.php:921
 msgid "Region"
 msgstr "Bölge"
 
-#: includes/class-wc-countries.php:918 includes/class-wc-countries.php:1049
+#: includes/class-wc-countries.php:926 includes/class-wc-countries.php:1057
 msgid "County"
 msgstr "Eyalet"
 
-#: includes/class-wc-countries.php:1038
+#: includes/class-wc-countries.php:1046
 msgid "Zip"
 msgstr "Posta Kodu"
 
-#: includes/class-wc-countries.php:1041
+#: includes/class-wc-countries.php:1049
 msgid "State"
 msgstr "Eyalet"
 
-#: includes/class-wc-countries.php:1046
+#: includes/class-wc-countries.php:1054
 msgid "Postcode"
 msgstr "Posta Kodu"
 
-#: includes/class-wc-countries.php:1154
+#: includes/class-wc-countries.php:1162
 msgid "Email Address"
 msgstr "E-Posta Adresi"
 
-#: includes/class-wc-countries.php:1160
+#: includes/class-wc-countries.php:1168
 msgid "Phone"
 msgstr "Telefon"
 
-#: includes/class-wc-coupon.php:568
+#: includes/class-wc-coupon.php:575
 msgid "Coupon code applied successfully."
 msgstr "Kupon kodu başarıyla uygulandı."
 
-#: includes/class-wc-coupon.php:571
+#: includes/class-wc-coupon.php:578
 msgid "Coupon code removed successfully."
 msgstr "Kupon kodu başarılı bir şekilde silindi."
 
-#: includes/class-wc-coupon.php:592
+#: includes/class-wc-coupon.php:599
 msgid "Coupon is not valid."
 msgstr "Kupon geçerli değil."
 
-#: includes/class-wc-coupon.php:595 includes/class-wc-coupon.php:645
+#: includes/class-wc-coupon.php:602 includes/class-wc-coupon.php:652
 msgid "Coupon does not exist!"
 msgstr "Kupon bulunamadı!"
 
-#: includes/class-wc-coupon.php:598
+#: includes/class-wc-coupon.php:605
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
 msgstr "Özür dileriz ancak girdiğiniz Kupon Kodu  \"%s\" GEÇERSİZ - bu nedenle sipariş talebinizden kupon işlemi çıkarılmıştır."
 
-#: includes/class-wc-coupon.php:601
+#: includes/class-wc-coupon.php:608
 msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
 msgstr "Üzgünüz, ancak kullanıdığınız \"%s\" Kupon Kodu size ait görünmüyor! Siparişinizden ilgili kupon çıkarılmıştır."
 
-#: includes/class-wc-coupon.php:604
+#: includes/class-wc-coupon.php:611
 msgid "Coupon code already applied!"
 msgstr "Kupon kodu zaten kullanıldı!"
 
-#: includes/class-wc-coupon.php:607
+#: includes/class-wc-coupon.php:614
 msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
 msgstr "Üzgünüz, \"%s\" bu kupon zaten kullanılmış veya diğer kuponlar ile birlikte kullanılamaz."
 
-#: includes/class-wc-coupon.php:610
+#: includes/class-wc-coupon.php:617
 msgid "Coupon usage limit has been reached."
 msgstr "Kupon kullanım sınırına ulaşıldı."
 
-#: includes/class-wc-coupon.php:613
+#: includes/class-wc-coupon.php:620
 msgid "This coupon has expired."
 msgstr "Bu kuponun geçerlilik süresi dolmuş."
 
-#: includes/class-wc-coupon.php:616
+#: includes/class-wc-coupon.php:623
 msgid "The minimum spend for this coupon is %s."
 msgstr "Bu kuponun kullanılabilmesi için harcanması gereken en az tutar: %s."
 
-#: includes/class-wc-coupon.php:619
+#: includes/class-wc-coupon.php:626
 msgid "Sorry, this coupon is not applicable to your cart contents."
 msgstr "Üzgünüz, bu kupon sepetinizdeki ürünlere uygulanabilir değil!"
 
-#: includes/class-wc-coupon.php:622
+#: includes/class-wc-coupon.php:629
 msgid "Sorry, this coupon is not valid for sale items."
 msgstr "Üzgünüz, bu kupon indirim ürünleri için geçerli değil."
 
-#: includes/class-wc-coupon.php:648
+#: includes/class-wc-coupon.php:655
 msgid "Please enter a coupon code."
 msgstr "Lütfen bir kupon kodu girin."
 
@@ -4712,7 +4972,7 @@ msgstr "Geçersiz e-posta adresi."
 #: includes/class-wc-download-handler.php:95
 #: includes/class-wc-download-handler.php:99
 #: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:294
+#: includes/class-wc-download-handler.php:296
 msgid "Go to homepage"
 msgstr "Anasayfaya git"
 
@@ -4761,7 +5021,7 @@ msgstr "Üzgünüz, bu indirmenin süresi dolmuş"
 msgid "No file defined"
 msgstr "Tanımlı dosya yok"
 
-#: includes/class-wc-download-handler.php:294
+#: includes/class-wc-download-handler.php:296
 msgid "File not found"
 msgstr "Dosya bulunamadı"
 
@@ -4920,7 +5180,7 @@ msgid "Please select a rating"
 msgstr "Lütfen bir derecelendirme seçin"
 
 #: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1593
+#: includes/wc-template-functions.php:1602
 msgid "required"
 msgstr "gerekli"
 
@@ -4996,47 +5256,47 @@ msgctxt "hash before order number"
 msgid "#"
 msgstr "#"
 
-#: includes/class-wc-order.php:833
+#: includes/class-wc-order.php:854
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr "&nbsp;<small>%s -- %s</small>"
 
-#: includes/class-wc-order.php:896
+#: includes/class-wc-order.php:917
 msgid "Cart Subtotal:"
 msgstr "Sepet Ara Toplamı:"
 
-#: includes/class-wc-order.php:903
+#: includes/class-wc-order.php:924
 msgid "Cart Discount:"
 msgstr "Sepet İndirimi:"
 
-#: includes/class-wc-order.php:910
+#: includes/class-wc-order.php:931
 msgid "Shipping:"
 msgstr "Kargo:"
 
-#: includes/class-wc-order.php:957
+#: includes/class-wc-order.php:978
 msgid "Order Discount:"
 msgstr "Sipariş İndirimi:"
 
-#: includes/class-wc-order.php:964
+#: includes/class-wc-order.php:985
 msgid "Payment Method:"
 msgstr "Ödeme Yöntemi:"
 
-#: includes/class-wc-order.php:970
+#: includes/class-wc-order.php:991
 msgid "Order Total:"
 msgstr "Sipariş Tutarı:"
 
-#: includes/class-wc-order.php:988 includes/wc-cart-functions.php:236
+#: includes/class-wc-order.php:1009 includes/wc-cart-functions.php:251
 msgid "(Includes %s)"
 msgstr "(%s Dahil)"
 
-#: includes/class-wc-order.php:1231 includes/class-wc-order.php:1232
+#: includes/class-wc-order.php:1258 includes/class-wc-order.php:1259
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: includes/class-wc-order.php:1287
+#: includes/class-wc-order.php:1314
 msgid "Order status changed from %s to %s."
 msgstr "Sipariş Durumu: %s, %s olarak değişti."
 
-#: includes/class-wc-order.php:1556
+#: includes/class-wc-order.php:1583
 msgid "Order item stock reduced successfully."
 msgstr "Sipariş öğeleri stoktan başarıyla düşüldü."
 
@@ -5419,8 +5679,8 @@ msgid "View products"
 msgstr "Ürünleri Görüntüle"
 
 #: includes/class-wc-product-grouped.php:194
-#: includes/class-wc-product-variable.php:251
-#: includes/class-wc-product-variable.php:256
+#: includes/class-wc-product-variable.php:273
+#: includes/class-wc-product-variable.php:278
 msgctxt "Price range: from-to"
 msgid "%1$s&ndash;%2$s"
 msgstr "%1$s&ndash;%2$s"
@@ -5434,13 +5694,13 @@ msgstr "Devamını oku..."
 msgid "Select options"
 msgstr "Seçenekleri belirle"
 
-#: includes/class-wc-product-variable.php:455
+#: includes/class-wc-product-variable.php:485
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
 msgstr "Bu seçenekli ürün herhangi bir aktif seçeneğe sahip olmadığından yayınlanmayacak. Durumunu taslak olarak değiştirin."
 
-#: includes/class-wc-product-variation.php:494
+#: includes/class-wc-product-variation.php:516
 msgid "%s &ndash; %s%s"
 msgstr "%s &ndash; %s%s"
 
@@ -5583,7 +5843,7 @@ msgstr "{order_date} Tarihli {site_title} Siparişiniz Alındı"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:38
 msgid "Reset password"
-msgstr "Şifre Sıfırla"
+msgstr "Şifre Sıfırlama"
 
 #: includes/emails/class-wc-email-customer-reset-password.php:39
 msgid ""
@@ -5692,7 +5952,7 @@ msgstr "Banka Havalesi"
 #: includes/gateways/cod/class-wc-gateway-cod.php:71
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:149
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:139
-#: includes/wc-template-functions.php:971
+#: includes/wc-template-functions.php:980
 msgid "Description"
 msgstr "Açıklama"
 
@@ -6675,19 +6935,19 @@ msgstr "&quot;%s&quot; sepetinize başarıyla eklendi."
 msgid "Continue Shopping"
 msgstr "Alışverişe Devam Et"
 
-#: includes/wc-cart-functions.php:183
+#: includes/wc-cart-functions.php:193
 msgid "Coupon:"
 msgstr "Kupon:"
 
-#: includes/wc-cart-functions.php:208
+#: includes/wc-cart-functions.php:219
 msgid "Free shipping coupon"
 msgstr "Ücretsiz kargo kuponu"
 
-#: includes/wc-cart-functions.php:210
+#: includes/wc-cart-functions.php:225
 msgid "[Remove]"
 msgstr "[Kaldır]"
 
-#: includes/wc-cart-functions.php:271
+#: includes/wc-cart-functions.php:288
 msgid "Free"
 msgstr "Ücretsiz"
 
@@ -6700,150 +6960,154 @@ msgid "Australian Dollars"
 msgstr "Avustralya Doları"
 
 #: includes/wc-core-functions.php:169
+msgid "Bangladeshi Taka"
+msgstr "Bangladeş Takası"
+
+#: includes/wc-core-functions.php:170
 msgid "Brazilian Real"
 msgstr "Brezilya Reali"
 
-#: includes/wc-core-functions.php:170
+#: includes/wc-core-functions.php:171
 msgid "Bulgarian Lev"
 msgstr "Bulgar Levası"
 
-#: includes/wc-core-functions.php:171
+#: includes/wc-core-functions.php:172
 msgid "Canadian Dollars"
 msgstr "Kanada Doları"
 
-#: includes/wc-core-functions.php:172
+#: includes/wc-core-functions.php:173
 msgid "Chilean Peso"
 msgstr "Şili Pezosu"
 
-#: includes/wc-core-functions.php:173
+#: includes/wc-core-functions.php:174
 msgid "Chinese Yuan"
 msgstr "Çin Yuanı"
 
-#: includes/wc-core-functions.php:174
+#: includes/wc-core-functions.php:175
 msgid "Colombian Peso"
 msgstr "Kolombiya Pezosu"
 
-#: includes/wc-core-functions.php:175
+#: includes/wc-core-functions.php:176
 msgid "Czech Koruna"
 msgstr "Çek Korunası"
 
-#: includes/wc-core-functions.php:176
+#: includes/wc-core-functions.php:177
 msgid "Danish Krone"
 msgstr "Danimarka Kronu"
 
-#: includes/wc-core-functions.php:177
+#: includes/wc-core-functions.php:178
 msgid "Euros"
 msgstr "Euro"
 
-#: includes/wc-core-functions.php:178
+#: includes/wc-core-functions.php:179
 msgid "Hong Kong Dollar"
 msgstr "Hong Kong Doları"
 
-#: includes/wc-core-functions.php:179
+#: includes/wc-core-functions.php:180
 msgid "Croatia kuna"
 msgstr "Hırvat kunası"
 
-#: includes/wc-core-functions.php:180
+#: includes/wc-core-functions.php:181
 msgid "Hungarian Forint"
 msgstr "Macar Forinti"
 
-#: includes/wc-core-functions.php:181
+#: includes/wc-core-functions.php:182
 msgid "Icelandic krona"
 msgstr "İzlanda kronu"
 
-#: includes/wc-core-functions.php:182
+#: includes/wc-core-functions.php:183
 msgid "Indonesia Rupiah"
 msgstr "Endonezya Rupiah"
 
-#: includes/wc-core-functions.php:183
+#: includes/wc-core-functions.php:184
 msgid "Indian Rupee"
 msgstr "Hindistan Rupisi"
 
-#: includes/wc-core-functions.php:184
+#: includes/wc-core-functions.php:185
 msgid "Israeli Shekel"
 msgstr "İsrail Şekeli"
 
-#: includes/wc-core-functions.php:185
+#: includes/wc-core-functions.php:186
 msgid "Japanese Yen"
 msgstr "Japon Yeni"
 
-#: includes/wc-core-functions.php:186
+#: includes/wc-core-functions.php:187
 msgid "South Korean Won"
 msgstr "Güney Kore Wonu"
 
-#: includes/wc-core-functions.php:187
+#: includes/wc-core-functions.php:188
 msgid "Malaysian Ringgits"
 msgstr "Malezya Ringiti"
 
-#: includes/wc-core-functions.php:188
+#: includes/wc-core-functions.php:189
 msgid "Mexican Peso"
 msgstr "Meksika Pezosu"
 
-#: includes/wc-core-functions.php:189
+#: includes/wc-core-functions.php:190
 msgid "Nigerian Naira"
 msgstr "Nijerya Nairası"
 
-#: includes/wc-core-functions.php:190
+#: includes/wc-core-functions.php:191
 msgid "Norwegian Krone"
 msgstr "Norveç Kronu"
 
-#: includes/wc-core-functions.php:191
+#: includes/wc-core-functions.php:192
 msgid "New Zealand Dollar"
 msgstr "Yeni Zellanda Doları"
 
-#: includes/wc-core-functions.php:192
+#: includes/wc-core-functions.php:193
 msgid "Philippine Pesos"
 msgstr "Filipin Pezosu"
 
-#: includes/wc-core-functions.php:193
+#: includes/wc-core-functions.php:194
 msgid "Polish Zloty"
 msgstr "Polonya Zlotisi"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Pounds Sterling"
 msgstr "İngiliz Sterlini"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Romanian Leu"
 msgstr "Romanya Leyi"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Russian Ruble"
 msgstr "Rus Rublesi"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Singapore Dollar"
 msgstr "Singapur Doları"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "South African rand"
 msgstr "Güney Afrika Randı"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "Swedish Krona"
 msgstr "İsveç Kronu"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swiss Franc"
 msgstr "İsviçre Frangı"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Taiwan New Dollars"
 msgstr "Tayvan Yeni Doları"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Thai Baht"
 msgstr "Tayland Bahtı"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Turkish Lira"
 msgstr "Türk Lirası"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "US Dollars"
 msgstr "ABD Doları"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "Vietnamese Dong"
 msgstr "Vietnam Dongu"
 
@@ -6891,85 +7155,85 @@ msgstr "Kaydınız tamamlanamıyor &hellip; lütfen sorun yaşamaya devam ederse
 msgid "Unpaid order cancelled - time limit reached."
 msgstr "Ödemesi yapılmayan sipariş İPTAL edildi - bekleme süresi doldu."
 
-#: includes/wc-product-functions.php:236
+#: includes/wc-product-functions.php:233
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "kategorilenmemis"
 
-#: includes/wc-template-functions.php:103
+#: includes/wc-template-functions.php:120
 msgid "New products"
 msgstr "Yeni ürün"
 
-#: includes/wc-template-functions.php:111
+#: includes/wc-template-functions.php:128
 msgid "New products added to %s"
 msgstr "%s yeni ürünler eklendi"
 
-#: includes/wc-template-functions.php:119
+#: includes/wc-template-functions.php:136
 msgid "New products tagged %s"
 msgstr "Yeni Ürün Etiketi, %s"
 
-#: includes/wc-template-functions.php:356
+#: includes/wc-template-functions.php:381
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
 msgstr "Burası denemeler yapmak amacıyla oluşturulmuş bir Demo/Test sistemidir. &mdash; Sipariş işlemleri sonladırılamayacaktır, Lütfen herhangi bir ödeme işlemi yapmayın."
 
-#: includes/wc-template-functions.php:375
+#: includes/wc-template-functions.php:400
 msgid "Search Results: &ldquo;%s&rdquo;"
 msgstr "Arama Sonuçları: &ldquo;%s&rdquo;"
 
-#: includes/wc-template-functions.php:378
+#: includes/wc-template-functions.php:403
 msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; Sayfa %s"
 
-#: includes/wc-template-functions.php:980
+#: includes/wc-template-functions.php:989
 #: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "Ek Bilgi"
 
-#: includes/wc-template-functions.php:989
+#: includes/wc-template-functions.php:998
 msgid "Reviews (%d)"
 msgstr "Yorumlar (%d)"
 
-#: includes/wc-template-functions.php:1080
+#: includes/wc-template-functions.php:1089
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
 msgstr "Bir dizi yerine $args argümanını kullanın. Onaysız argüman WooCommerce 2.2 sürümünde kaldırılacaktır."
 
-#: includes/wc-template-functions.php:1248
+#: includes/wc-template-functions.php:1257
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Anasayfa"
 
-#: includes/wc-template-functions.php:1549
+#: includes/wc-template-functions.php:1558
 msgid "Order Again"
-msgstr "Tekrar Sipariş Et"
+msgstr "Tekrar Sipariş Ver"
 
-#: includes/wc-template-functions.php:1640
+#: includes/wc-template-functions.php:1649
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Ülke seçin&hellip;"
 
-#: includes/wc-template-functions.php:1647
+#: includes/wc-template-functions.php:1656
 msgid "Update country"
 msgstr "Ülke Güncelle"
 
-#: includes/wc-template-functions.php:1690
+#: includes/wc-template-functions.php:1699
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Şehir seçin&hellip;"
 
-#: includes/wc-template-functions.php:1803
+#: includes/wc-template-functions.php:1812
 msgid "Search for:"
 msgstr "Ara:"
 
-#: includes/wc-template-functions.php:1804
+#: includes/wc-template-functions.php:1813
 msgid "Search for products"
 msgstr "Ürün ara..."
 
-#: includes/wc-template-functions.php:1805
+#: includes/wc-template-functions.php:1814
 msgid "Search"
 msgstr "Ara"
 
@@ -7133,7 +7397,7 @@ msgstr "Hiyerarşiyi göster"
 msgid "Only show children for the current category"
 msgstr "Sadece geçerli kategori için alt-kategorileri göster"
 
-#: includes/widgets/class-wc-widget-product-categories.php:177
+#: includes/widgets/class-wc-widget-product-categories.php:214
 msgid "No product categories exist."
 msgstr "Ürün Kategorisi yok!"
 
@@ -7288,27 +7552,30 @@ msgid "Shipping and Handling"
 msgstr "Kargo ve Taşıma"
 
 #: templates/cart/cart-shipping.php:55
-msgid ""
-"No shipping methods were found; please recalculate your shipping or continue"
-" to checkout and enter your full address to see if there is shipping "
-"available to your location."
-msgstr "Herhangi bir kargo yöntemi bulunumadı; lütfen kargonuzu hesaplayın veya bulunduğunuz konum için mevcut bir kargo yöntemi olup olmadığını görmek için ödeme işlemine devam ederek  tam adresinizi girin."
+msgid "Please use the shipping calculator to see available shipping methods."
+msgstr "Mevcut kargo yöntemlerini görmek için lütfen kargo hesaplama bölümünü kullanın."
 
 #: templates/cart/cart-shipping.php:59
-msgid "Please fill in your details to see available shipping methods."
-msgstr "Lütfen uygun Kargo Yöntemlerini görmek için ilgili bilgilerinizi girin."
+msgid ""
+"Please continue to the checkout and enter your full address to see if there "
+"are any available shipping methods."
+msgstr "Mevcut herhangi bir kargo yöntemi olup olmadığını görmek için lütfen ödeme işlemine devam ederek tam adresinizi girin."
 
-#: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
+#: templates/cart/cart-shipping.php:63
+msgid "Please fill in your details to see available shipping methods."
+msgstr "Mevcut kargo yöntemlerini görmek için lütfen bilgilerinizi girin."
+
+#: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid "Sorry, shipping is unavailable %s."
 msgstr "Üzgünüz, %s için kargo mevcut değil."
 
-#: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
+#: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid ""
 "If you require assistance or wish to make alternate arrangements please "
 "contact us."
 msgstr "Yardıma ihtiyacınız veya alternatif düzenleme talebiniz varsa, lütfen bizimle irtibata geçin."
 
-#: templates/cart/cart-shipping.php:93
+#: templates/cart/cart-shipping.php:97
 msgid "Shipping"
 msgstr "Kargo"
 
@@ -7416,11 +7683,8 @@ msgid "Billing &amp; Shipping"
 msgstr "Fatura &amp; Kargo"
 
 #: templates/checkout/form-billing.php:19
-#: templates/myaccount/form-edit-address.php:14
-#: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
-#: templates/order/order-details.php:118
-msgid "Billing Address"
-msgstr "Fatura Adresi"
+msgid "Billing Details"
+msgstr "Fatura Bilgileri"
 
 #: templates/checkout/form-billing.php:38
 msgid "Create an account?"
@@ -7501,7 +7765,7 @@ msgid ""
 "arrangements."
 msgstr "Üzgünüz, bulunduğunuz konum için her hangi bir Ödeme Yöntemi bulunmamaktadır. Yardıma ihtiyaç duyuyor veya alternatif düzenlemeler yapmak istiyorsanız lütfen bizimle irtibata geçin."
 
-#: templates/checkout/review-order.php:161
+#: templates/checkout/review-order.php:163
 msgid ""
 "Since your browser does not support JavaScript, or it is disabled, please "
 "ensure you click the <em>Update Totals</em> button before placing your "
@@ -7509,21 +7773,19 @@ msgid ""
 "do so."
 msgstr "Web tarayıcınız JavaScripti desteklemiyor yada tarayıcınızın bu özelliği kapalı. Lütfen, sipariş vermeden önce <em> Toplamları Güncelle </em> butonuna tıklayın. Bunu yapmazsanız yukarıda görülen sipariş toplamından farklı bir ücret ödemeniz söz konusu olabilir."
 
-#: templates/checkout/review-order.php:161
+#: templates/checkout/review-order.php:163
 msgid "Update totals"
 msgstr "Toplamları Güncelle"
 
-#: templates/checkout/review-order.php:168
+#: templates/checkout/review-order.php:170
 msgid "Place order"
 msgstr "Siparişi Onayla"
 
-#: templates/checkout/review-order.php:177
-msgid "I have read and accept the"
-msgstr "Okudum ve Onayladım:"
-
-#: templates/checkout/review-order.php:177
-msgid "terms &amp; conditions"
-msgstr "Şartları &amp; koşulları kabul ediyorum."
+#: templates/checkout/review-order.php:179
+msgid ""
+"I&rsquo;ve read and accept the <a href=\"%s\" target=\"_blank\">terms &amp; "
+"conditions</a>"
+msgstr "<a href=\"%s\" target=\"_blank\">Şartları &amp; koşulları</a> okudum ve kabul ettim"
 
 #: templates/checkout/thankyou.php:18
 msgid ""
@@ -7550,7 +7812,7 @@ msgstr "Teşekkür ederiz. Siparişiniz alınmıştır."
 #: templates/emails/admin-new-order.php:13
 #: templates/emails/plain/admin-new-order.php:13
 msgid "You have received an order from %s. Their order is as follows:"
-msgstr "%s-den bir Sipariş aldınız. Sipariş Detayları şöyledir:"
+msgstr "%s isimli müşteri bir sipariş verdi. Sipariş detayları şu şekilde:"
 
 #: templates/emails/admin-new-order.php:17
 msgid "Order: %s"
@@ -7860,6 +8122,12 @@ msgid "Save changes"
 msgstr "Değişiklikleri Kaydet"
 
 #: templates/myaccount/form-edit-address.php:14
+#: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
+#: templates/order/order-details.php:118
+msgid "Billing Address"
+msgstr "Fatura Adresi"
+
+#: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:133
 msgid "Shipping Address"
 msgstr "Kargo Adresi"
@@ -7904,7 +8172,7 @@ msgstr "Yeni şifrenizi tekrar girin"
 
 #: templates/myaccount/form-lost-password.php:46
 msgid "Reset Password"
-msgstr "Şifre Sıfırla"
+msgstr "Şifreyi Sıfırla"
 
 #: templates/myaccount/form-lost-password.php:46
 msgid "Save"
@@ -7919,7 +8187,7 @@ msgid ""
 "From your account dashboard you can view your recent orders, manage your "
 "shipping and billing addresses and <a href=\"%s\">edit your password and "
 "account details</a>."
-msgstr "Admin panelinizden yeni siparişleri görüntüleyebilir, fatura ve kargo adreslerini yönetebilir ayrıca <a href=\"%s\">hesap bilgilerinizi ve şifrenizi düzenleyebilirsiniz</a>."
+msgstr "Hesap sayfanızdan yeni siparişleri görüntüleyebilir, fatura ve kargo adreslerini yönetebilir ayrıca <a href=\"%s\">hesap bilgilerinizi ve şifrenizi düzenleyebilirsiniz</a>."
 
 #: templates/myaccount/my-address.php:17
 msgid "My Addresses"
@@ -7972,7 +8240,7 @@ msgid ""
 "Order <mark class=\"order-number\">%s</mark> was placed on <mark class"
 "=\"order-date\">%s</mark> and is currently <mark class=\"order-"
 "status\">%s</mark>."
-msgstr "Sipariş <mark class=\"order-number\">%s</mark> <mark class=\"order-date\">%s</mark> tarihinde verildi, şu anki sipariş durumu: <mark class=\"order-status\">%s</mark>."
+msgstr "Sipariş No: <mark class=\\\"order-number\\\">%s</mark> Sipariş Tarihi: <mark class=\\\"order-date\\\">%s</mark> Sipariş Durumu: <mark class=\\\"order-status\\\">%s</mark>"
 
 #: templates/myaccount/view-order.php:16 templates/order/tracking.php:31
 msgid "Order Updates"
@@ -8051,7 +8319,7 @@ msgstr "Bu ürün şu anda stokta yok veya mevcut değil."
 
 #: templates/single-product/meta.php:23
 msgid "SKU:"
-msgstr "Stok Kodu:"
+msgstr "SKU:"
 
 #: templates/single-product/meta.php:23
 msgid "n/a"
@@ -8181,3 +8449,19 @@ msgstr "Dokümanlar"
 #: woocommerce.php:183
 msgid "Premium Support"
 msgstr "Ayrıcalıklı Destek"
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.woothemes.com/woocommerce/"
+msgstr "http://www.woothemes.com/woocommerce/"
+
+#. Description of the plugin/theme
+msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
+msgstr "Herhangi birşey satmak için size yardımcı olan e-ticaret aracı. Güzel bir şekilde.."
+
+#. Author of the plugin/theme
+msgid "WooThemes"
+msgstr "WooThemes"
+
+#. Author URI of the plugin/theme
+msgid "http://woothemes.com"
+msgstr "http://woothemes.com"

@@ -1,13 +1,14 @@
 # 
 # Translators:
+# mostafizur <jahid32@gmail.com>, 2014
 # smartdatasoft, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
-"PO-Revision-Date: 2014-03-04 11:30+0000\n"
-"Last-Translator: smartdatasoft\n"
+"POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
+"PO-Revision-Date: 2014-03-20 11:39+0000\n"
+"Last-Translator: mostafizur <jahid32@gmail.com>\n"
 "Language-Team: Bengali (Bangladesh) (http://www.transifex.com/projects/p/woocommerce/language/bn_BD/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17,7 +18,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:65
 #: includes/admin/class-wc-admin-menus.php:47
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 #: includes/admin/wc-admin-functions.php:19
 msgid "WooCommerce"
 msgstr "WooCommerce"
@@ -876,41 +877,41 @@ msgstr ""
 msgid "Revoke API Key"
 msgstr ""
 
-#: includes/admin/class-wc-admin-reports.php:46
+#: includes/admin/class-wc-admin-reports.php:43
 #: includes/admin/reports/class-wc-report-customer-list.php:251
 msgid "Orders"
 msgstr "ফরমায়েশ "
 
-#: includes/admin/class-wc-admin-reports.php:49
+#: includes/admin/class-wc-admin-reports.php:46
 msgid "Sales by date"
 msgstr "তারিখ অনুযায়ী বিক্রয় "
 
-#: includes/admin/class-wc-admin-reports.php:55
+#: includes/admin/class-wc-admin-reports.php:52
 msgid "Sales by product"
 msgstr "পণ্য অনুযায়ী বিক্রয় "
 
-#: includes/admin/class-wc-admin-reports.php:61
+#: includes/admin/class-wc-admin-reports.php:58
 msgid "Sales by category"
 msgstr "প্রকরণ অনুযায়ী বিক্রয় "
 
-#: includes/admin/class-wc-admin-reports.php:67
+#: includes/admin/class-wc-admin-reports.php:64
 msgid "Coupons by date"
 msgstr "তারিখ অনুযায়ী কুপন "
 
-#: includes/admin/class-wc-admin-reports.php:75
+#: includes/admin/class-wc-admin-reports.php:72
 #: includes/admin/reports/class-wc-report-customer-list.php:30
 msgid "Customers"
 msgstr "ক্রেতা "
 
-#: includes/admin/class-wc-admin-reports.php:78
+#: includes/admin/class-wc-admin-reports.php:75
 msgid "Customers vs. Guests"
 msgstr "ক্রেতা বনাম অতিথি "
 
-#: includes/admin/class-wc-admin-reports.php:84
+#: includes/admin/class-wc-admin-reports.php:81
 msgid "Customer List"
 msgstr "ক্রেতা তালিকা "
 
-#: includes/admin/class-wc-admin-reports.php:92
+#: includes/admin/class-wc-admin-reports.php:89
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 #: includes/admin/reports/class-wc-report-stock.php:25
@@ -918,11 +919,11 @@ msgstr "ক্রেতা তালিকা "
 msgid "Stock"
 msgstr "মজুদ "
 
-#: includes/admin/class-wc-admin-reports.php:95
+#: includes/admin/class-wc-admin-reports.php:92
 msgid "Low in stock"
 msgstr "মজুদ কম "
 
-#: includes/admin/class-wc-admin-reports.php:101
+#: includes/admin/class-wc-admin-reports.php:98
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
 #: includes/admin/reports/class-wc-report-stock.php:98
@@ -931,20 +932,20 @@ msgstr "মজুদ কম "
 msgid "Out of stock"
 msgstr "স্টক নেই"
 
-#: includes/admin/class-wc-admin-reports.php:107
+#: includes/admin/class-wc-admin-reports.php:104
 msgid "Most Stocked"
 msgstr "সর্বচ্চ মজুদ  "
 
-#: includes/admin/class-wc-admin-reports.php:118
+#: includes/admin/class-wc-admin-reports.php:115
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
 msgstr "ট্যাক্স"
 
-#: includes/admin/class-wc-admin-reports.php:121
+#: includes/admin/class-wc-admin-reports.php:118
 msgid "Taxes by code"
 msgstr "কোড অনুযায়ী ট্যাক্স "
 
-#: includes/admin/class-wc-admin-reports.php:127
+#: includes/admin/class-wc-admin-reports.php:124
 msgid "Taxes by date"
 msgstr "তারিখ অনুযায়ী ট্যাক্স "
 
@@ -1130,7 +1131,7 @@ msgstr "প্রদর্শনের ধরন "
 #: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
-#: includes/admin/views/html-admin-page-addons.php:15
+#: includes/admin/views/html-admin-page-addons.php:16
 msgid "Products"
 msgstr "পণ্যসমূহ"
 
@@ -1802,44 +1803,44 @@ msgstr "সকল পণ্যশ্রেণী দেখান "
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:533
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:37
 msgid "Grouped product"
-msgstr ""
+msgstr "শ্রেণীকৃত পণ্য "
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:536
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:38
 msgid "External/Affiliate product"
-msgstr ""
+msgstr "এক্সটারনাল/সংশ্লিষ্ট পণ্য  "
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:539
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:39
 msgid "Variable product"
-msgstr ""
+msgstr "পরিবর্তনীয় বৈশিষ্টের পণ্য "
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:542
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:36
 msgid "Simple product"
-msgstr ""
+msgstr "নমুনা পণ্য "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:53
 msgid "Coupon code"
-msgstr ""
+msgstr "কুপন কোড "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:66
 msgid "Description (optional)"
-msgstr ""
+msgstr "বর্ণনা (ঐচ্ছিক) "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:77
 msgid "Code"
-msgstr ""
+msgstr "কোড "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:78
 msgid "Coupon type"
-msgstr ""
+msgstr "কুপন এর ধরন "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:79
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
 #: includes/admin/reports/class-wc-report-sales-by-date.php:327
 msgid "Coupon amount"
-msgstr ""
+msgstr "কুপন এর পরিমান "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:80
 msgid "Description"
@@ -1847,63 +1848,63 @@ msgstr "বর্ণনা"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:81
 msgid "Product IDs"
-msgstr ""
+msgstr "পণ্য  ID সমূহ "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:82
 msgid "Usage / Limit"
-msgstr ""
+msgstr "ব্যবহার/ সীমা  "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:83
 msgid "Expiry date"
-msgstr ""
+msgstr "মেয়াদ উত্তীর্ন তাং"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:102
 msgid "Edit coupon"
-msgstr ""
+msgstr "কুপন এডিট করুন "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:160
 msgid "%s / %s"
-msgstr ""
+msgstr "।%s / %s"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:162
 msgid "%s / &infin;"
-msgstr ""
+msgstr "%s / &infin;"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:208
 msgid "Show all types"
-msgstr ""
+msgstr "সকল ধরন দেখান "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
 #: includes/admin/settings/class-wc-settings-checkout.php:229
 #: includes/admin/settings/class-wc-settings-shipping.php:205
 msgid "Status"
-msgstr ""
+msgstr "অবস্থা "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:92
 msgid "Order"
-msgstr ""
+msgstr "ফরমায়েশ "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:93
 msgid "Purchased"
-msgstr ""
+msgstr "ক্রয়কৃত  "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 msgid "Ship to"
-msgstr ""
+msgstr "পৌঁছান "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:96
 msgid "Customer Message"
-msgstr ""
+msgstr "গ্রাহক এর বার্তা "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:97
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:110
 msgid "Order Notes"
-msgstr ""
+msgstr "অর্ডার নোট "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:99
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:127
 msgid "Total"
 msgstr "মোট"
@@ -1914,37 +1915,37 @@ msgstr "মোট"
 #: includes/admin/reports/class-wc-report-customer-list.php:254
 #: includes/admin/reports/class-wc-report-stock.php:145
 msgid "Actions"
-msgstr ""
+msgstr "কার্যক্রম "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:125
 msgid "Unpublished"
-msgstr ""
+msgstr "অপ্রকাশিত "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:127
 msgid "Y/m/d g:i:s A"
-msgstr ""
+msgstr "দিন /মাস /তারিখ g:i:s A"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:130
 msgid "Y/m/d"
-msgstr ""
+msgstr "দিন /মাস /তারিখ"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:151
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:189
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:224
 msgid "Via"
-msgstr ""
+msgstr "মাধমে "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:155
 msgid "%d item"
 msgid_plural "%d items"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d আইটেম"
+msgstr[1] "%d আইটেম "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:210
 msgid "plus %d other note"
 msgid_plural "plus %d other notes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "যোগ %d অন্য নোট"
+msgstr[1] "যোগ %d অন্য নোট"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:210
 msgid "%d note"
@@ -1954,182 +1955,182 @@ msgstr[1] ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:232
 msgid "Billing:"
-msgstr ""
+msgstr "বিলিং; "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:236
 msgid "Tel:"
-msgstr ""
+msgstr "টেলিঃ   "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:258
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:281
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:169
 msgid "Guest"
-msgstr ""
+msgstr "অতিথি "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:285
 msgid "%s by %s"
-msgstr ""
+msgstr "%s দ্বারা %s"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:305
 msgid "Processing"
-msgstr ""
+msgstr "পক্রিয়াকরন চলছে  "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:313
 msgid "Complete"
-msgstr ""
+msgstr "সম্পূর্ণ "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:408
 msgid "Show all statuses"
-msgstr ""
+msgstr "সকল স্ট্যাটাস দেখান "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:428
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:453
 msgid "Show all customers"
-msgstr ""
+msgstr "সকল গ্রাহক দেখান "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:687
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:688
 msgid "Mark processing"
-msgstr ""
+msgstr "পক্রিয়াজাত করন মার্ক  "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:691
 msgid "Mark on-hold"
-msgstr ""
+msgstr "অন হোলড মার্ক    "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:694
 msgid "Mark completed"
-msgstr ""
+msgstr "মার্ক সম্পন্ন "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:735
 msgid "Order status changed by bulk edit:"
-msgstr ""
+msgstr "বাল্ক এডিট দ্বারা অন্যান্য পরিবর্তনঃ "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:757
 msgid "Order status changed."
 msgid_plural "%s order statuses changed."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s অর্ডার স্ট্যাটাস পরিবর্তন হয়েছে "
+msgstr[1] "%s অর্ডার স্ট্যাটাস পরিবর্তন হয়েছে "
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:42
 msgid "Insert into %s"
-msgstr ""
+msgstr "%s তে প্রবেশ করান "
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:43
 msgid "Uploaded to this %s"
-msgstr ""
+msgstr " %s তে আপলোড করুন "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:102
 msgid "Product Short Description"
-msgstr ""
+msgstr "পণ্যের সংক্ষিপ্ত বিবরণ  "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:103
 #: includes/admin/settings/class-wc-settings-products.php:283
 #: includes/admin/views/html-bulk-edit-product.php:4
 #: includes/admin/views/html-quick-edit-product.php:4
 msgid "Product Data"
-msgstr ""
+msgstr "পণ্য "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:104
 msgid "Product Gallery"
-msgstr ""
+msgstr "পণ্য গ্যালারি "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:107
 msgid "Order Data"
-msgstr ""
+msgstr "ফরমায়েশ তথ্য "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:108
 msgid "Order Items"
-msgstr ""
+msgstr "ফরমায়েশ আইটেম "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:109
 msgid "Order Totals"
-msgstr ""
+msgstr "মোট ফরমায়েশ "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:111
 msgid "Downloadable Product Permissions"
-msgstr ""
+msgstr "ডাউনলোড যোগ্য পণ্যের অনুমতি    "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:111
 msgid ""
 "Note: Permissions for order items will automatically be granted when the "
 "order status changes to processing/completed."
-msgstr ""
+msgstr "দ্রষ্টব্যঃ অর্ডার স্ট্যাটাস চলমান/সম্পন্ন তে পরিবর্তন হোলে অর্ডার অনুমতি স্বয়ংক্রিয় ভাবে গৃহীত হবে।   "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:112
 msgid "Order Actions"
-msgstr ""
+msgstr "ফরমায়েশ একসনস  "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:115
 msgid "Coupon Data"
-msgstr ""
+msgstr "কুপন তথ্য "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:120
 msgid "Rating"
-msgstr ""
+msgstr "রেটিং "
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:153
 msgid "Reviews"
-msgstr ""
+msgstr "পর্যালোচনা"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:37
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:85
 #: includes/admin/settings/class-wc-settings-general.php:25
 msgid "General"
-msgstr ""
+msgstr "সাধারন "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:42
 msgid "Usage Restriction"
-msgstr ""
+msgstr "ব্যবহার নিষিদ্ধ  "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:47
 msgid "Usage Limits"
-msgstr ""
+msgstr "ব্যবহার সীমা "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:63
 msgid "Discount type"
-msgstr ""
+msgstr "মূল্যছারের ধরন   "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
 msgid "Value of the coupon."
-msgstr ""
+msgstr "কুপন এর মূল্য "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:69
 msgid "Allow free shipping"
-msgstr ""
+msgstr "ফ্রি পরিবহন অনুমতি  "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:69
 msgid ""
 "Check this box if the coupon grants free shipping. The <a href=\"%s\">free "
 "shipping method</a> must be enabled with the \"must use coupon\" setting."
-msgstr ""
+msgstr "যদি কুপনটি ফ্রি পরিবহন দান করে তবে এই বক্সটি চেক করুন। <a href=\"%s\"> ফ্রি পরিবহন পদ্ধতিটি</a> অবশ্যই \"অবশ্যই কুপন ব্যাবহার করতে হবে\" সেটিংস এর সাথে সক্রিয় রাখতে হবে।  "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:72
 msgid "Apply before tax"
-msgstr ""
+msgstr "ট্যাক্স এর পূর্বে ব্যবহার করুন "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:72
 msgid ""
 "Check this box if the coupon should be applied before calculating cart tax."
-msgstr ""
+msgstr "কার্ট ট্যাক্স হিসাব করার পূর্বে কুপন ব্যাবহার করতে চাইলে এই বক্সটি চেক করুন। "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:75
 msgid "Coupon expiry date"
-msgstr ""
+msgstr "কুপন এর মেয়াদ উত্তীর্ণের তারিখ "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:75
 msgctxt "placeholder"
 msgid "YYYY-MM-DD"
-msgstr ""
+msgstr "বছর-মাস-দিন   "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid "Minimum spend"
-msgstr ""
+msgstr "সর্বনিম্ন খরচ "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid "No minimum"
-msgstr ""
+msgstr "কোন সর্বনিম্ন নেই "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid ""
@@ -2187,7 +2188,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:137
 msgid "Product categories"
-msgstr ""
+msgstr "পণ্য শ্রেণী "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:138
 msgid "Any category"
@@ -2310,15 +2311,15 @@ msgstr "নামের শেষাংশ"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:60
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:107
 msgid "Select a country&hellip;"
-msgstr ""
+msgstr "একটি দেশ এবং &hellip; নির্বাচন করুন "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:70
 msgid "Phone"
-msgstr ""
+msgstr "ফোন "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:139
 msgid "Order Details"
-msgstr ""
+msgstr "অর্ডার বিবরণ "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:142
 msgid "Order number"
@@ -2385,7 +2386,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-order-shipping.php:12
 #: includes/admin/post-types/meta-boxes/views/html-order-tax.php:8
 msgid "N/A"
-msgstr ""
+msgstr "প্রযোজ্য নয় "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:245
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:247
@@ -2444,7 +2445,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:41
 msgid "Qty"
-msgstr ""
+msgstr "পরিমান "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:116
@@ -2452,7 +2453,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-tax.php:550
 #: includes/admin/settings/class-wc-settings-tax.php:643
 msgid "Tax"
-msgstr ""
+msgstr "কর "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:83
 msgid "Delete Lines"
@@ -2478,41 +2479,41 @@ msgstr ""
 msgid "Add fee"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:44
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:48
 msgid "added %s ago"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 msgid "by %s"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:50
 msgid "Delete note"
-msgstr ""
+msgstr "নোট মুছে ফেলুন"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:56
 msgid "There are no notes for this order yet."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid "Add note"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid ""
 "Add a note for your reference, or add a customer note (the user will be "
 "notified)."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:68
 msgid "Customer note"
-msgstr ""
+msgstr "ক্রেতা নোট "
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:69
 msgid "Private note"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:67
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:71
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:564
 msgid "Add"
 msgstr ""
@@ -2523,7 +2524,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
-#: includes/admin/views/html-admin-page-addons.php:13
+#: includes/admin/views/html-admin-page-addons.php:14
 msgid "Shipping"
 msgstr "শিপিং"
 
@@ -2551,7 +2552,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:120
 msgid "Order Total"
-msgstr ""
+msgstr "মোট অর্ডার "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:148
 msgid "Calculate Tax"
@@ -2584,7 +2585,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:110
 msgid "Variations"
-msgstr ""
+msgstr "প্রকার "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:115
 msgid "Advanced"
@@ -2733,14 +2734,14 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:58
 #: includes/admin/views/html-quick-edit-product.php:38
 msgid "Tax Status"
-msgstr ""
+msgstr "কর অবস্থা "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:250
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:34
 #: includes/admin/views/html-bulk-edit-product.php:64
 #: includes/admin/views/html-quick-edit-product.php:43
 msgid "Taxable"
-msgstr ""
+msgstr "কর আরপ যোগ্য "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:251
 #: includes/admin/views/html-bulk-edit-product.php:65
@@ -2759,13 +2760,13 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:734
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:126
 #: includes/admin/settings/class-wc-settings-tax.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:243
 #: includes/admin/views/html-bulk-edit-product.php:83
 #: includes/admin/views/html-quick-edit-product.php:61
 msgid "Standard"
-msgstr ""
+msgstr "প্রমিত "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:262
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -2862,7 +2863,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:349
 msgid "Dimensions"
-msgstr ""
+msgstr "ধরন "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:351
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
@@ -3072,7 +3073,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1358
 msgid "Variation #%s of %s"
-msgstr ""
+msgstr "#%s এর %s প্রকার "
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:44
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:55
@@ -3122,7 +3123,7 @@ msgid "Fee Name"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:31
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:136
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:140
 msgid "Tax class"
 msgstr ""
 
@@ -3138,19 +3139,19 @@ msgstr ""
 msgid "Product SKU:"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:74
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:75
 msgid "Add&nbsp;meta"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Subtotal"
 msgstr "উপমোট"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Before pre-tax discounts."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 msgid "After pre-tax discounts."
 msgstr ""
 
@@ -3196,7 +3197,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:21
 msgid "Any"
-msgstr ""
+msgstr "যে কোন"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:53
 msgid ""
@@ -3215,7 +3216,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:73
 msgid "Regular Price:"
-msgstr ""
+msgstr "সাধারণ মূল্য"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:74
 msgid "Variation price (required)"
@@ -3223,19 +3224,19 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Sale Price:"
-msgstr ""
+msgstr "বিক্রয় মূল্য"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Cancel schedule"
-msgstr ""
+msgstr "সময় নির্ধারণ বাতিল করুন"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:84
 msgid "Sale start date:"
-msgstr ""
+msgstr "বিক্রয় শুরুর দিন"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:88
 msgid "Sale end date:"
-msgstr ""
+msgstr "বিক্রয় বন্ধের দিন"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:97
 msgid ""
@@ -3254,19 +3255,19 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:120
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:133
 msgid "Same as parent"
-msgstr ""
+msgstr "প্যারেন্ট এর অনুরুপ "
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:131
 msgid "Tax class:"
-msgstr ""
+msgstr "কর শ্রেণী"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:190
 msgid "Download Limit:"
-msgstr ""
+msgstr "ডাউনলোড সীমা:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:196
 msgid "Download Expiry:"
-msgstr ""
+msgstr "মেয়াদ উত্তীর্ন ডাউনলোড:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:210
 #: includes/admin/settings/class-wc-settings-checkout.php:269
@@ -3274,24 +3275,24 @@ msgstr ""
 #: includes/admin/views/html-admin-page-status-tools.php:26
 #: includes/admin/views/html-admin-page-status-tools.php:37
 msgid "Enabled"
-msgstr ""
+msgstr "সক্রিয়"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:212
 msgid ""
 "Enable this option if access is given to a downloadable file upon purchase "
 "of a product"
-msgstr ""
+msgstr "ক্রয় করা দ্রব্য ডাউনলোড করার জন্য এই ব্যবস্থাটি সক্রিয় করুন"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:214
 msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:391
+#: includes/admin/reports/class-wc-admin-report.php:384
 msgid "Sold %s worth in the last %d days"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:393
+#: includes/admin/reports/class-wc-admin-report.php:386
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] ""
@@ -3313,7 +3314,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:46
 msgid "Year"
-msgstr ""
+msgstr "বৎসর"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:96
 #: includes/admin/reports/class-wc-report-customers.php:146
@@ -3323,7 +3324,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:47
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:47
 msgid "Last Month"
-msgstr ""
+msgstr "গত মাস"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:97
 #: includes/admin/reports/class-wc-report-customers.php:147
@@ -3333,7 +3334,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:48
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:48
 msgid "This Month"
-msgstr ""
+msgstr "এই মাস"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:98
 #: includes/admin/reports/class-wc-report-customers.php:148
@@ -3341,11 +3342,11 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-date.php:132
 #: includes/admin/reports/class-wc-report-sales-by-product.php:102
 msgid "Last 7 Days"
-msgstr ""
+msgstr "গত 7 দিন"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:138
 msgid "Filter by coupon"
-msgstr ""
+msgstr "কুপন অনুসারে সাজান"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:166
 msgid "Choose coupons&hellip;"
@@ -3353,30 +3354,30 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:167
 msgid "All coupons"
-msgstr ""
+msgstr "সব কুপন"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:174
 #: includes/admin/reports/class-wc-report-sales-by-category.php:178
 #: includes/admin/reports/class-wc-report-sales-by-product.php:174
 msgid "Show"
-msgstr ""
+msgstr "দেখান "
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:187
 msgid "No used coupons found"
-msgstr ""
+msgstr "কোন ব্যবহৃত কুপন পাওয়া যায় নাই"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:192
 msgid "Most Popular"
-msgstr ""
+msgstr "সবচেয়ে জনপ্রিয়"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:234
 #: includes/admin/reports/class-wc-report-coupon-usage.php:281
 msgid "No coupons found in range"
-msgstr ""
+msgstr "এই সিমার মধ্য কোন কুপন পাওয়া যায় নাই"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:239
 msgid "Most Discount"
-msgstr ""
+msgstr "সর্বাধিক মূল্যছাড়"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:324
 #: includes/admin/reports/class-wc-report-customers.php:209
@@ -3395,7 +3396,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:423
 msgid "Discount amount"
-msgstr ""
+msgstr "মুল্যছাড়ের পরিমান"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:29
 msgid "Customer"
@@ -3403,7 +3404,7 @@ msgstr "ক্রেতা "
 
 #: includes/admin/reports/class-wc-report-customer-list.php:39
 msgid "No customers found."
-msgstr ""
+msgstr "কোন গ্রাহক পাওয়া যায় নাই"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:53
 msgid "%s previous order linked"
@@ -3413,35 +3414,35 @@ msgstr[1] ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:58
 msgid "Search customers"
-msgstr ""
+msgstr "গ্রাহক অনুসন্ধান"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:198
 msgid "View orders"
-msgstr ""
+msgstr "অর্ডার গুলি দেখুন"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:222
 msgid "Link previous orders"
-msgstr ""
+msgstr "আগের অর্ডার এর সাথে সংযোগ করুন"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:247
 msgid "Name (Last, First)"
-msgstr ""
+msgstr "নাম (শেষ অংশ, প্রথম অংশ)"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:248
 msgid "Username"
-msgstr ""
+msgstr "আপনার নাম "
 
 #: includes/admin/reports/class-wc-report-customer-list.php:250
 msgid "Location"
-msgstr ""
+msgstr "জায়গা"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:252
 msgid "Spent"
-msgstr ""
+msgstr "ব্যয়িত"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:253
 msgid "Last order"
-msgstr ""
+msgstr "শেষ অর্ডার"
 
 #: includes/admin/reports/class-wc-report-customers.php:22
 msgid "%s signups in this period"
@@ -3449,16 +3450,16 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customers.php:90
 msgid "Customer Sales"
-msgstr ""
+msgstr "গ্রহকের বিক্রি"
 
 #: includes/admin/reports/class-wc-report-customers.php:91
 msgid "Guest Sales"
-msgstr ""
+msgstr "অতিথির বিক্রি"
 
 #: includes/admin/reports/class-wc-report-customers.php:100
 #: includes/admin/reports/class-wc-report-customers.php:296
 msgid "Customer Orders"
-msgstr ""
+msgstr "ক্রেতার অর্ডার"
 
 #: includes/admin/reports/class-wc-report-customers.php:105
 #: includes/admin/reports/class-wc-report-customers.php:306
@@ -3475,15 +3476,15 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customers.php:312
 msgid "guest orders"
-msgstr ""
+msgstr "অতিথির অর্ডার"
 
 #: includes/admin/reports/class-wc-report-customers.php:316
 msgid "Signups"
-msgstr ""
+msgstr "নিবন্ধন"
 
 #: includes/admin/reports/class-wc-report-customers.php:323
 msgid "new users"
-msgstr ""
+msgstr "নতুন সদস্য"
 
 #: includes/admin/reports/class-wc-report-low-in-stock.php:22
 msgid "No low in stock products found."
@@ -3507,7 +3508,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:177
 msgid "All"
-msgstr ""
+msgstr "সব"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:237
 msgid "&larr; Choose a category to view stats"
@@ -3554,7 +3555,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:317
 msgid "Average sales amount"
-msgstr ""
+msgstr "গড় বিক্রয়ের পরিমান"
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:337
 msgid "Shipping amount"
@@ -3563,7 +3564,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-date.php:347
 #: includes/admin/reports/class-wc-report-sales-by-product.php:443
 msgid "Sales amount"
-msgstr ""
+msgstr "বিক্রয়ের পরিমান"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:79
 msgid "%s sales for the selected items"
@@ -3579,20 +3580,20 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:160
 msgid "Reset"
-msgstr ""
+msgstr "পুন:স্থাপন করা"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:169
 msgid "Product Search"
-msgstr ""
+msgstr "পণ্য অনুসন্ধান"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:206
 msgid "Top Sellers"
-msgstr ""
+msgstr "শ্রেষ্ঠ বিক্রেতা"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:241
 #: includes/admin/reports/class-wc-report-sales-by-product.php:281
 msgid "No products found in range"
-msgstr ""
+msgstr "সীমার মধ্য কোন পণ্য পাওয়া যায় নাই"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:246
 msgid "Top Earners"
@@ -3604,7 +3605,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-stock.php:35
 msgid "No products found."
-msgstr ""
+msgstr "কোন পণ্য পাওয়া যায় নাই"
 
 #: includes/admin/reports/class-wc-report-stock.php:126
 msgid "product"
@@ -3620,11 +3621,11 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:117
 msgid "Rate"
-msgstr ""
+msgstr "মুল্য"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "Tax Amount"
-msgstr ""
+msgstr "করের পরিমান"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "This is the sum of the \"Tax Rows\" tax amount within your orders."
@@ -3642,7 +3643,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:121
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:117
 msgid "Total Tax"
-msgstr ""
+msgstr "মোট কর"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:121
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:117
@@ -3656,11 +3657,11 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:113
 msgid "Period"
-msgstr ""
+msgstr "সময়"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "Total Sales"
-msgstr ""
+msgstr "সর্বমোট বিক্রি"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "This is the sum of the 'Order Total' field within your orders."
@@ -3684,15 +3685,15 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:127
 msgid "Totals"
-msgstr ""
+msgstr "মোট "
 
 #: includes/admin/settings/class-wc-settings-accounts.php:25
 msgid "Accounts"
-msgstr ""
+msgstr "একাউন্টস্"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid "Account Pages"
-msgstr ""
+msgstr "একাউন্ট পাতা"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid ""
@@ -3702,7 +3703,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:44
 msgid "My Account Page"
-msgstr ""
+msgstr "আমার একাউন্ট পাতা"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:45
 #: includes/admin/settings/class-wc-settings-checkout.php:113
@@ -3722,7 +3723,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:59
 msgid "View Order"
-msgstr ""
+msgstr "অর্ডার দেখুন "
 
 #: includes/admin/settings/class-wc-settings-accounts.php:60
 msgid "Endpoint for the My Account &rarr; View Order page"
@@ -3809,7 +3810,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
 msgid "Coupons"
-msgstr ""
+msgstr "কুপন সমূহ "
 
 #: includes/admin/settings/class-wc-settings-checkout.php:69
 msgid "Enable the use of coupons"
@@ -3885,7 +3886,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:150
 msgid "Pay"
-msgstr ""
+msgstr "পরিশোধ "
 
 #: includes/admin/settings/class-wc-settings-checkout.php:151
 #: includes/admin/settings/class-wc-settings-checkout.php:160
@@ -4024,11 +4025,11 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:48
 msgid "General Options"
-msgstr ""
+msgstr "সাধিরণ অপশন"
 
 #: includes/admin/settings/class-wc-settings-general.php:51
 msgid "Base Location"
-msgstr ""
+msgstr "স্থায়ি ঠিকানা"
 
 #: includes/admin/settings/class-wc-settings-general.php:52
 msgid ""
@@ -4055,7 +4056,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-general.php:76
 #: includes/admin/settings/class-wc-settings-shipping.php:147
 msgid "Specific Countries"
-msgstr ""
+msgstr "নির্দিষ্ট দেশসমূহ  "
 
 #: includes/admin/settings/class-wc-settings-general.php:85
 msgid "Store Notice"
@@ -4073,7 +4074,7 @@ msgstr ""
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
-msgstr ""
+msgstr "এটি পরীক্ষার জন্য একটি ডেমো দোকান এবং  mdash; কোনো অর্ডার সম্পূর্ণ হবে না "
 
 #: includes/admin/settings/class-wc-settings-general.php:103
 msgid "API"
@@ -4093,7 +4094,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:115
 msgid "Currency"
-msgstr ""
+msgstr "মুদ্রা"
 
 #: includes/admin/settings/class-wc-settings-general.php:116
 msgid ""
@@ -4155,11 +4156,11 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:184
 msgid "Scripts"
-msgstr ""
+msgstr "স্ক্রিপ্ট"
 
 #: includes/admin/settings/class-wc-settings-general.php:185
 msgid "Enable Lightbox"
-msgstr ""
+msgstr "লাইটবক্স সক্রিয় করুন"
 
 #: includes/admin/settings/class-wc-settings-general.php:188
 msgid ""
@@ -4401,7 +4402,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
-msgstr ""
+msgstr "কার্টে যোগ করুন  "
 
 #: includes/admin/settings/class-wc-settings-products.php:266
 msgid "Redirect to the cart page after successful addition"
@@ -4518,11 +4519,11 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:409
 msgid "Downloadable Products"
-msgstr ""
+msgstr "ডাউনলোডযোগ্য দ্রব্য"
 
 #: includes/admin/settings/class-wc-settings-products.php:412
 msgid "File Download Method"
-msgstr ""
+msgstr "ফাইল ডাউনলোড পদ্ধতি"
 
 #: includes/admin/settings/class-wc-settings-products.php:413
 msgid ""
@@ -4534,7 +4535,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:421
 msgid "Force Downloads"
-msgstr ""
+msgstr "জোর ডাউনলোড"
 
 #: includes/admin/settings/class-wc-settings-products.php:422
 msgid "X-Accel-Redirect/X-Sendfile"
@@ -4546,7 +4547,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:429
 msgid "Access Restriction"
-msgstr ""
+msgstr "প্রবেশ সীমাবদ্ধতা"
 
 #: includes/admin/settings/class-wc-settings-products.php:430
 msgid "Downloads require login"
@@ -4930,24 +4931,30 @@ msgstr ""
 msgid "Browse themes"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:11
+#: includes/admin/views/html-admin-page-addons.php:12
 msgid "Popular"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:12
+#: includes/admin/views/html-admin-page-addons.php:13
 msgid "Gateways"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:14
+#: includes/admin/views/html-admin-page-addons.php:15
 msgid "Import/export"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:16
+#: includes/admin/views/html-admin-page-addons.php:17
 msgid "Marketing"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:17
+#: includes/admin/views/html-admin-page-addons.php:18
 msgid "Free"
+msgstr ""
+
+#: includes/admin/views/html-admin-page-addons.php:33
+msgid ""
+"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
+" href=\"%s\">WooCommerce Extensions Catalog</a>"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:2
@@ -5264,7 +5271,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"
-msgstr ""
+msgstr "পরিবর্তন সমূহ সংরক্ষন করুন "
 
 #: includes/admin/views/html-bulk-edit-product.php:15
 #: includes/admin/views/html-bulk-edit-product.php:39
@@ -5401,22 +5408,6 @@ msgstr ""
 msgid "Custom:"
 msgstr ""
 
-#: includes/admin/wc-admin-functions.php:193
+#: includes/admin/wc-admin-functions.php:192
 msgid "Could not compile woocommerce.less:"
-msgstr ""
-
-#. Plugin URI of the plugin/theme
-msgid "http://www.woothemes.com/woocommerce/"
-msgstr ""
-
-#. Description of the plugin/theme
-msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr ""
-
-#. Author of the plugin/theme
-msgid "WooThemes"
-msgstr ""
-
-#. Author URI of the plugin/theme
-msgid "http://woothemes.com"
 msgstr ""

@@ -5,6 +5,9 @@
 # filippos.sdr <filippos.sdr@gmail.com>, 2014
 # gorfeas <gorfeas@hotmail.com>, 2014
 # Inceptive D. L. <inceptive@inceptive.gr>, 2014
+# AlexSunnO <info@taxpress.gr>, 2014
+# kostasx <kostas@creativecollective.gr>, 2014
+# mtzanidakis <mtzanidakis@gmail.com>, 2014
 # ounos <ounos@live.com>, 2014
 # alichani <salichani75@gmail.com>, 2014
 # seriusb <seriusb@gmail.com>, 2014
@@ -12,8 +15,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
-"PO-Revision-Date: 2014-03-04 08:35+0000\n"
+"POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
+"PO-Revision-Date: 2014-03-25 08:51+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Greek (Greece) (http://www.transifex.com/projects/p/woocommerce/language/el_GR/)\n"
 "MIME-Version: 1.0\n"
@@ -100,6 +103,254 @@ msgstr "Βικτώρια"
 #: i18n/states/AU.php:20
 msgid "Western Australia"
 msgstr "Δυτική Αυστραλία"
+
+#: i18n/states/BD.php:13
+msgid "Bagerhat"
+msgstr ""
+
+#: i18n/states/BD.php:14
+msgid "Bandarban"
+msgstr ""
+
+#: i18n/states/BD.php:15
+msgid "Barguna"
+msgstr ""
+
+#: i18n/states/BD.php:16
+msgid "Barisal"
+msgstr ""
+
+#: i18n/states/BD.php:17
+msgid "Bhola"
+msgstr ""
+
+#: i18n/states/BD.php:18
+msgid "Bogra"
+msgstr ""
+
+#: i18n/states/BD.php:19
+msgid "Chandpur"
+msgstr ""
+
+#: i18n/states/BD.php:20
+msgid "Chittagong"
+msgstr ""
+
+#: i18n/states/BD.php:21
+msgid "Chuadanga"
+msgstr ""
+
+#: i18n/states/BD.php:22
+msgid "Comilla"
+msgstr ""
+
+#: i18n/states/BD.php:23
+msgid "Cox's Bazar"
+msgstr ""
+
+#: i18n/states/BD.php:24
+msgid "Dhaka"
+msgstr ""
+
+#: i18n/states/BD.php:25
+msgid "Dinajpur"
+msgstr ""
+
+#: i18n/states/BD.php:26
+msgid "Faridpur "
+msgstr ""
+
+#: i18n/states/BD.php:27
+msgid "Feni"
+msgstr ""
+
+#: i18n/states/BD.php:28
+msgid "Gaibandha"
+msgstr ""
+
+#: i18n/states/BD.php:29
+msgid "Gazipur"
+msgstr ""
+
+#: i18n/states/BD.php:30
+msgid "Gopalganj"
+msgstr ""
+
+#: i18n/states/BD.php:31
+msgid "Jamalpur"
+msgstr ""
+
+#: i18n/states/BD.php:32
+msgid "Jessore"
+msgstr ""
+
+#: i18n/states/BD.php:33
+msgid "Jhalokati"
+msgstr ""
+
+#: i18n/states/BD.php:34
+msgid "Jhenaidah"
+msgstr ""
+
+#: i18n/states/BD.php:35
+msgid "Joypurhat"
+msgstr ""
+
+#: i18n/states/BD.php:36
+msgid "Khagrachhari"
+msgstr ""
+
+#: i18n/states/BD.php:37
+msgid "Khulna"
+msgstr ""
+
+#: i18n/states/BD.php:38
+msgid "Kishoreganj"
+msgstr ""
+
+#: i18n/states/BD.php:39
+msgid "Kurigram"
+msgstr ""
+
+#: i18n/states/BD.php:40
+msgid "Kushtia"
+msgstr ""
+
+#: i18n/states/BD.php:41
+msgid "Lakshmipur"
+msgstr ""
+
+#: i18n/states/BD.php:42
+msgid "Lalmonirhat"
+msgstr ""
+
+#: i18n/states/BD.php:43
+msgid "Madaripur"
+msgstr ""
+
+#: i18n/states/BD.php:44
+msgid "Magura"
+msgstr ""
+
+#: i18n/states/BD.php:45
+msgid "Manikganj "
+msgstr ""
+
+#: i18n/states/BD.php:46
+msgid "Meherpur"
+msgstr ""
+
+#: i18n/states/BD.php:47
+msgid "Moulvibazar"
+msgstr ""
+
+#: i18n/states/BD.php:48
+msgid "Munshiganj"
+msgstr ""
+
+#: i18n/states/BD.php:49
+msgid "Mymensingh"
+msgstr ""
+
+#: i18n/states/BD.php:50
+msgid "Naogaon"
+msgstr ""
+
+#: i18n/states/BD.php:51
+msgid "Narail"
+msgstr ""
+
+#: i18n/states/BD.php:52
+msgid "Narayanganj"
+msgstr ""
+
+#: i18n/states/BD.php:53
+msgid "Narsingdi"
+msgstr ""
+
+#: i18n/states/BD.php:54
+msgid "Natore"
+msgstr ""
+
+#: i18n/states/BD.php:55
+msgid "Nawabganj"
+msgstr ""
+
+#: i18n/states/BD.php:56
+msgid "Netrakona"
+msgstr ""
+
+#: i18n/states/BD.php:57
+msgid "Nilphamari"
+msgstr ""
+
+#: i18n/states/BD.php:58
+msgid "Noakhali"
+msgstr ""
+
+#: i18n/states/BD.php:59
+msgid "Pabna"
+msgstr ""
+
+#: i18n/states/BD.php:60
+msgid "Panchagarh"
+msgstr ""
+
+#: i18n/states/BD.php:61
+msgid "Patuakhali"
+msgstr ""
+
+#: i18n/states/BD.php:62
+msgid "Pirojpur"
+msgstr ""
+
+#: i18n/states/BD.php:63
+msgid "Rajbari"
+msgstr ""
+
+#: i18n/states/BD.php:64
+msgid "Rajshahi"
+msgstr ""
+
+#: i18n/states/BD.php:65
+msgid "Rangamati"
+msgstr ""
+
+#: i18n/states/BD.php:66
+msgid "Rangpur"
+msgstr ""
+
+#: i18n/states/BD.php:67
+msgid "Satkhira"
+msgstr ""
+
+#: i18n/states/BD.php:68
+msgid "Shariatpur"
+msgstr ""
+
+#: i18n/states/BD.php:69
+msgid "Sherpur"
+msgstr ""
+
+#: i18n/states/BD.php:70
+msgid "Sirajganj"
+msgstr ""
+
+#: i18n/states/BD.php:71
+msgid "Sunamganj"
+msgstr ""
+
+#: i18n/states/BD.php:72
+msgid "Sylhet"
+msgstr ""
+
+#: i18n/states/BD.php:73
+msgid "Tangail"
+msgstr ""
+
+#: i18n/states/BD.php:74
+msgid "Thakurgaon"
+msgstr ""
 
 #: i18n/states/BG.php:13
 msgid "Blagoevgrad"
@@ -2910,7 +3161,7 @@ msgstr "έγινε επιστροφή χρημάτων"
 msgid "cancelled"
 msgstr "ακυρώθηκε"
 
-#: includes/abstracts/abstract-wc-email.php:568
+#: includes/abstracts/abstract-wc-email.php:570
 #: includes/emails/class-wc-email-customer-completed-order.php:140
 #: includes/emails/class-wc-email-new-order.php:120
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
@@ -2923,19 +3174,19 @@ msgstr "ακυρώθηκε"
 msgid "Enable/Disable"
 msgstr "Ενεργοποίηση/Απενεργοποίηση"
 
-#: includes/abstracts/abstract-wc-email.php:570
+#: includes/abstracts/abstract-wc-email.php:572
 #: includes/emails/class-wc-email-customer-completed-order.php:142
 #: includes/emails/class-wc-email-new-order.php:122
 msgid "Enable this email notification"
 msgstr "Ενεργοποίηση αυτής της ειδοποίησης email"
 
-#: includes/abstracts/abstract-wc-email.php:574
+#: includes/abstracts/abstract-wc-email.php:576
 #: includes/emails/class-wc-email-customer-invoice.php:146
 msgid "Email subject"
 msgstr "Θέμα email"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/abstracts/abstract-wc-email.php:583
+#: includes/abstracts/abstract-wc-email.php:578
+#: includes/abstracts/abstract-wc-email.php:585
 #: includes/emails/class-wc-email-customer-completed-order.php:148
 #: includes/emails/class-wc-email-customer-completed-order.php:155
 #: includes/emails/class-wc-email-customer-completed-order.php:162
@@ -2947,106 +3198,106 @@ msgstr "Θέμα email"
 msgid "Defaults to <code>%s</code>"
 msgstr "Προεπιλογές στο <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:583
 #: includes/emails/class-wc-email-customer-invoice.php:153
 msgid "Email heading"
 msgstr "Επικεφαλίδα email"
 
-#: includes/abstracts/abstract-wc-email.php:588
+#: includes/abstracts/abstract-wc-email.php:590
 #: includes/emails/class-wc-email-customer-completed-order.php:174
 #: includes/emails/class-wc-email-customer-invoice.php:174
 #: includes/emails/class-wc-email-new-order.php:147
 msgid "Email type"
 msgstr "Τύπος email"
 
-#: includes/abstracts/abstract-wc-email.php:590
+#: includes/abstracts/abstract-wc-email.php:592
 #: includes/emails/class-wc-email-customer-completed-order.php:176
 #: includes/emails/class-wc-email-customer-invoice.php:176
 #: includes/emails/class-wc-email-new-order.php:149
 msgid "Choose which format of email to send."
 msgstr "Επιλέξτε ποια μορφή email να στείλετε."
 
-#: includes/abstracts/abstract-wc-email.php:594
+#: includes/abstracts/abstract-wc-email.php:596
 #: includes/emails/class-wc-email-customer-completed-order.php:180
 #: includes/emails/class-wc-email-customer-invoice.php:180
 #: includes/emails/class-wc-email-new-order.php:153
 msgid "Plain text"
 msgstr "Απλό κείμενο"
 
-#: includes/abstracts/abstract-wc-email.php:595
+#: includes/abstracts/abstract-wc-email.php:597
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
 msgid "HTML"
 msgstr "HTML"
 
-#: includes/abstracts/abstract-wc-email.php:596
+#: includes/abstracts/abstract-wc-email.php:598
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
 msgid "Multipart"
 msgstr "Σε πολλαπλά μέρη"
 
-#: includes/abstracts/abstract-wc-email.php:632
-#: includes/abstracts/abstract-wc-email.php:653
+#: includes/abstracts/abstract-wc-email.php:634
+#: includes/abstracts/abstract-wc-email.php:655
 msgid "Could not write to template file."
 msgstr "Δεν ήταν εφικτή η εγγραφή στο αρχείο προτύπου."
 
-#: includes/abstracts/abstract-wc-email.php:684
+#: includes/abstracts/abstract-wc-email.php:686
 msgid "Template file copied to theme."
 msgstr "Το αρχείο προτύπου αντιγράφτηκε στο θέμα."
 
-#: includes/abstracts/abstract-wc-email.php:693
+#: includes/abstracts/abstract-wc-email.php:695
 msgid "Template file deleted from theme."
 msgstr "Το αρχείο προτύπου διαγράφηκε από το θέμα."
 
-#: includes/abstracts/abstract-wc-email.php:701
+#: includes/abstracts/abstract-wc-email.php:703
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Ρυθμίσεις"
 
-#: includes/abstracts/abstract-wc-email.php:713
+#: includes/abstracts/abstract-wc-email.php:715
 msgid "HTML template"
 msgstr "Πρότυπο HTML"
 
-#: includes/abstracts/abstract-wc-email.php:714
+#: includes/abstracts/abstract-wc-email.php:716
 msgid "Plain text template"
 msgstr "Πρότυπο απλού κειμένου"
 
-#: includes/abstracts/abstract-wc-email.php:735
+#: includes/abstracts/abstract-wc-email.php:737
 msgid "Delete template file"
 msgstr "Διαγραφή αρχείου προτύπου"
 
-#: includes/abstracts/abstract-wc-email.php:738
+#: includes/abstracts/abstract-wc-email.php:740
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "Αυτό το πρότυπο έχει παρακαμφθεί από το θέμα σας και μπορείτε να το βρείτε στο: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:753
+#: includes/abstracts/abstract-wc-email.php:755
 msgid "Copy file to theme"
 msgstr "Αντιγραφή αρχείου προτύπου στο θέμα"
 
-#: includes/abstracts/abstract-wc-email.php:756
+#: includes/abstracts/abstract-wc-email.php:758
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "Για να παρακάμψετε και να επεξεργαστείτε αυτό το πρότυπο email αντιγράψτε <code>%s</code> στο φάκελο του θέματός σας:<code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:767
+#: includes/abstracts/abstract-wc-email.php:769
 msgid "File was not found."
 msgstr "Το αρχείο δεν βρέθηκε."
 
-#: includes/abstracts/abstract-wc-email.php:792
+#: includes/abstracts/abstract-wc-email.php:794
 msgid "View template"
 msgstr "Προβολή προτύπου"
 
-#: includes/abstracts/abstract-wc-email.php:793
+#: includes/abstracts/abstract-wc-email.php:795
 msgid "Hide template"
 msgstr "Απόκρυψη προτύπου"
 
-#: includes/abstracts/abstract-wc-email.php:804
+#: includes/abstracts/abstract-wc-email.php:806
 msgid "Are you sure you want to delete this template file?"
 msgstr "Είστε σίγουροι πως θέλετε να διαγραφεί αυτό το αρχείο προτύπου;"
 
@@ -3058,9 +3309,17 @@ msgstr "Αριθμός Κάρτας"
 msgid "Expiry (MM/YY)"
 msgstr "Λήξη (ΜΜ/ΕΕ)"
 
+#: includes/abstracts/abstract-wc-payment-gateway.php:212
+msgid "MM / YY"
+msgstr ""
+
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
 msgstr "Κωδικός Κάρτας"
+
+#: includes/abstracts/abstract-wc-payment-gateway.php:216
+msgid "CVC"
+msgstr ""
 
 #: includes/abstracts/abstract-wc-product.php:455
 #: includes/class-wc-product-simple.php:48
@@ -3103,7 +3362,7 @@ msgstr "Εξαντλήθηκε"
 
 #: includes/abstracts/abstract-wc-product.php:908
 #: includes/abstracts/abstract-wc-product.php:914
-#: includes/class-wc-cart.php:1419 includes/class-wc-order.php:838
+#: includes/class-wc-cart.php:1419 includes/class-wc-order.php:859
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Δωρεάν!"
@@ -3124,7 +3383,7 @@ msgstr "Αξιολόγηση %s από 5"
 msgid "out of 5"
 msgstr "από 5"
 
-#: includes/abstracts/abstract-wc-product.php:1384
+#: includes/abstracts/abstract-wc-product.php:1386
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -3150,15 +3409,15 @@ msgstr "Το κλειδί πελάτη είναι άκυρο"
 
 #: includes/api/class-wc-api-authentication.php:201
 msgid "Invalid Signature - failed to sort parameters"
-msgstr ""
+msgstr "Λάθος Υπογραφή - αδυναμία ταξινόμησης παραμέτρων"
 
 #: includes/api/class-wc-api-authentication.php:214
 msgid "Invalid Signature - signature method is invalid"
-msgstr ""
+msgstr "Λάθος Υπογραφή - η μέθοδος υπογραφής είναι λανθασμένη"
 
 #: includes/api/class-wc-api-authentication.php:221
 msgid "Invalid Signature - provided signature does not match"
-msgstr ""
+msgstr "Λάθος Υπογραφή - η παρεχόμενη υπογραφή δεν ταιριάζει"
 
 #: includes/api/class-wc-api-authentication.php:256
 msgid "Invalid timestamp"
@@ -3170,11 +3429,11 @@ msgstr ""
 
 #: includes/api/class-wc-api-authentication.php:293
 msgid "The API key provided does not have read permissions"
-msgstr ""
+msgstr "Το κλειδί API που εισάγατε δεν έχει δικαιώματα ανάγνωσης"
 
 #: includes/api/class-wc-api-authentication.php:302
 msgid "The API key provided does not have write permissions"
-msgstr ""
+msgstr "Το κλειδί API που εισάγατε δεν έχει δικαιώματα εγγραφής"
 
 #: includes/api/class-wc-api-coupons.php:107
 msgid "Invalid coupon ID"
@@ -3182,7 +3441,7 @@ msgstr "Μη έγκυρο ID κουπονιού"
 
 #: includes/api/class-wc-api-coupons.php:152
 msgid "You do not have permission to read the coupons count"
-msgstr ""
+msgstr "Δεν έχετε δικαιώματα ανάγνωσης του αριθμού των κουπονιών"
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
@@ -3191,11 +3450,11 @@ msgstr "Μη έγκυρος κωδικός κουπονιού"
 #: includes/api/class-wc-api-customers.php:198
 #: includes/api/class-wc-api-customers.php:201
 msgid "Invalid customer Email"
-msgstr ""
+msgstr "Λανθασμένο Email πελάτη"
 
 #: includes/api/class-wc-api-customers.php:219
 msgid "You do not have permission to read the customers count"
-msgstr ""
+msgstr "Δεν έχετε δικαιώματα ανάγνωσης του αριθμού των πελατών"
 
 #: includes/api/class-wc-api-customers.php:235
 msgid "You do not have permission to create this customer"
@@ -3336,42 +3595,42 @@ msgstr "Κανονική"
 msgid "File %d"
 msgstr "Αρχείο %d"
 
-#: includes/class-wc-ajax.php:1000 includes/class-wc-ajax.php:1001
-#: includes/class-wc-order.php:1544
+#: includes/class-wc-ajax.php:1008 includes/class-wc-ajax.php:1009
+#: includes/class-wc-order.php:1571
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Το απόθεμα του Προϊόντος #%s μειώθηκε από %s σε %s."
 
-#: includes/class-wc-ajax.php:1009
+#: includes/class-wc-ajax.php:1017
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr "Δεν έγινε μείωση αποθέματος σε κανένα προϊόν - ίσως δεν έχουν ενεργοποιημένη τη δυνατότητα διαχείρισης αποθεμάτων."
 
-#: includes/class-wc-ajax.php:1048 includes/class-wc-ajax.php:1049
+#: includes/class-wc-ajax.php:1056 includes/class-wc-ajax.php:1057
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Το απόθεμα του Προϊόντος #%s αυξήθηκε από %s σε %s."
 
-#: includes/class-wc-ajax.php:1056
+#: includes/class-wc-ajax.php:1064
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr "Δεν έγινε αύξηση αποθέματος σε κανένα προϊόν - ίσως δεν έχουν ενεργοποιημένη τη δυνατότητα διαχείρισης αποθεμάτων."
 
-#: includes/class-wc-ajax.php:1072
+#: includes/class-wc-ajax.php:1080
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "Όνομα"
 
-#: includes/class-wc-ajax.php:1072
+#: includes/class-wc-ajax.php:1080
 msgid "Value"
 msgstr "Ποσότητα"
 
-#: includes/class-wc-ajax.php:1290
+#: includes/class-wc-ajax.php:1298
 msgid "Delete note"
 msgstr "Διαγραφή σημείωσης"
 
-#: includes/class-wc-ajax.php:1435
+#: includes/class-wc-ajax.php:1443
 msgid "Guest"
 msgstr "Επισκέπτης"
 
@@ -3386,7 +3645,7 @@ msgstr "Προκειμένου να λειτουργίσει το <strong>cachin
 msgid ""
 "%s has been removed from your cart because it can no longer be purchased. "
 "Please contact us if you need assistance."
-msgstr ""
+msgstr "Το προϊόν %s αφαιρέθηκε από το καλάθι σας γιατί δεν είναι πλέον διαθέσιμο για πώληση. Παρακαλούμε επικοινωνήστε μαζί μας αν χρειάζεστε βοήθεια."
 
 #: includes/class-wc-cart.php:363
 msgid "An item which is no longer available was removed from your cart."
@@ -3451,7 +3710,7 @@ msgstr "Δεν μπορείτε να προσθέσετε αυτή την ποσ
 #: includes/class-wc-payment-gateways.php:55 includes/class-wc-shipping.php:64
 #: includes/class-wc-shipping.php:73 woocommerce.php:102 woocommerce.php:111
 msgid "Cheatin&#8217; huh?"
-msgstr ""
+msgstr "Προσπαθείς να κλέψεις;"
 
 #: includes/class-wc-checkout.php:97
 msgid "Account username"
@@ -3489,52 +3748,52 @@ msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr "%b %d, %Y @ %I:%M %p"
 
-#: includes/class-wc-checkout.php:284
+#: includes/class-wc-checkout.php:287
 msgid "Backordered"
 msgstr "Έγινε προ παραγγελία για όταν υπάρξει διαθέσιμο απόθεμα του προϊόντος"
 
-#: includes/class-wc-checkout.php:416
+#: includes/class-wc-checkout.php:423
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr "Συγγνώμη, η συνεδρία σας έχει λήξει. <a href=\"%s\" class=\"wc-backward\">Επιστροφή στην Αρχική</a>"
 
-#: includes/class-wc-checkout.php:491 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:498 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "είναι απαιτούμενο πεδίο."
 
-#: includes/class-wc-checkout.php:503 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:510 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Παρακαλώ πληκτρολογήστε ένα έγκυρο Τ.Κ."
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:519 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "δεν είναι έγκυρος αριθμός τηλεφώνου."
 
-#: includes/class-wc-checkout.php:518 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:525 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "δεν είναι έγκυρη διεύθυνση email."
 
-#: includes/class-wc-checkout.php:533
+#: includes/class-wc-checkout.php:540
 msgid "is not valid. Please enter one of the following:"
 msgstr "δεν είναι έγκυρο. Παρακαλούμε εισάγετε ένα από τα παρακάτω:"
 
-#: includes/class-wc-checkout.php:578
+#: includes/class-wc-checkout.php:585
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Πρέπει να αποδεχτείτε τους Όρους &amp; Προϋποθέσεις μας."
 
-#: includes/class-wc-checkout.php:583
+#: includes/class-wc-checkout.php:590
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr "Δυστυχώς  <strong>δεν αποστέλλουμε σε %s</strong>. Παρακαλώ πληκτρολογείστε μία εναλλακτική διεύθυνση αποστολής."
 
-#: includes/class-wc-checkout.php:591
+#: includes/class-wc-checkout.php:598
 msgid "Invalid shipping method."
 msgstr "Μη έγκυρος τρόπος αποστολής."
 
-#: includes/class-wc-checkout.php:604
+#: includes/class-wc-checkout.php:611
 msgid "Invalid payment method."
 msgstr "Μη έγκυρος τρόπος πληρωμής."
 
@@ -4597,113 +4856,117 @@ msgstr "Περιφέρεια"
 msgid "Postcode / Zip"
 msgstr "Ταχυδρομικός κώδικας"
 
-#: includes/class-wc-countries.php:826 includes/class-wc-countries.php:842
-#: includes/class-wc-countries.php:862 includes/class-wc-countries.php:923
-#: includes/class-wc-countries.php:942 includes/class-wc-countries.php:947
-#: includes/class-wc-countries.php:959 includes/class-wc-countries.php:1009
-#: includes/class-wc-countries.php:1033 includes/class-wc-countries.php:1074
+#: includes/class-wc-countries.php:827
+msgid "District"
+msgstr ""
+
+#: includes/class-wc-countries.php:834 includes/class-wc-countries.php:850
+#: includes/class-wc-countries.php:870 includes/class-wc-countries.php:931
+#: includes/class-wc-countries.php:950 includes/class-wc-countries.php:955
+#: includes/class-wc-countries.php:967 includes/class-wc-countries.php:1017
+#: includes/class-wc-countries.php:1041 includes/class-wc-countries.php:1082
 msgid "Province"
 msgstr "Επαρχία"
 
-#: includes/class-wc-countries.php:848
+#: includes/class-wc-countries.php:856
 msgid "Canton"
 msgstr "Canton"
 
-#: includes/class-wc-countries.php:857 includes/class-wc-countries.php:1015
+#: includes/class-wc-countries.php:865 includes/class-wc-countries.php:1023
 msgid "Municipality"
 msgstr "Δήμος"
 
-#: includes/class-wc-countries.php:910
+#: includes/class-wc-countries.php:918
 msgid "Town / District"
 msgstr "Πόλη / Επαρχία"
 
-#: includes/class-wc-countries.php:913
+#: includes/class-wc-countries.php:921
 msgid "Region"
 msgstr "Περιοχή"
 
-#: includes/class-wc-countries.php:918 includes/class-wc-countries.php:1049
+#: includes/class-wc-countries.php:926 includes/class-wc-countries.php:1057
 msgid "County"
 msgstr "Περιφέρεια"
 
-#: includes/class-wc-countries.php:1038
+#: includes/class-wc-countries.php:1046
 msgid "Zip"
 msgstr "Ταχ. Κώδ."
 
-#: includes/class-wc-countries.php:1041
+#: includes/class-wc-countries.php:1049
 msgid "State"
 msgstr "Περιφέρεια"
 
-#: includes/class-wc-countries.php:1046
+#: includes/class-wc-countries.php:1054
 msgid "Postcode"
 msgstr "Ταχυδρομικός κώδικας"
 
-#: includes/class-wc-countries.php:1154
+#: includes/class-wc-countries.php:1162
 msgid "Email Address"
 msgstr "Διεύθυνση Email"
 
-#: includes/class-wc-countries.php:1160
+#: includes/class-wc-countries.php:1168
 msgid "Phone"
 msgstr "Τηλέφωνο"
 
-#: includes/class-wc-coupon.php:568
+#: includes/class-wc-coupon.php:575
 msgid "Coupon code applied successfully."
 msgstr "Ο κωδικός έκπτωσης εφαρμόστηκε επιτυχώς."
 
-#: includes/class-wc-coupon.php:571
+#: includes/class-wc-coupon.php:578
 msgid "Coupon code removed successfully."
 msgstr "Ο Κωδικός του κουπονιού έχει αφαιρεθεί επιτυχώς."
 
-#: includes/class-wc-coupon.php:592
+#: includes/class-wc-coupon.php:599
 msgid "Coupon is not valid."
 msgstr "Το κουπόνι δεν είναι έγκυρο."
 
-#: includes/class-wc-coupon.php:595 includes/class-wc-coupon.php:645
+#: includes/class-wc-coupon.php:602 includes/class-wc-coupon.php:652
 msgid "Coupon does not exist!"
 msgstr "Το κουπόνι δεν υπάρχει!"
 
-#: includes/class-wc-coupon.php:598
+#: includes/class-wc-coupon.php:605
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
 msgstr "Λυπούμαστε, φαίνεται ότι το κουπόνι \"%s\" δεν είναι έγκυρο - έχει αφαιρεθεί από την παραγγελία σας."
 
-#: includes/class-wc-coupon.php:601
+#: includes/class-wc-coupon.php:608
 msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
 msgstr "Λυπούμαστε, φαίνεται ότι το κουπόνι \"%s\" δεν είναι δικό σας - έχει αφαιρεθεί από την παραγγελία σας."
 
-#: includes/class-wc-coupon.php:604
+#: includes/class-wc-coupon.php:611
 msgid "Coupon code already applied!"
 msgstr "ο κωδικός έκπτωσης έχει χρησιμοποιηθεί!"
 
-#: includes/class-wc-coupon.php:607
+#: includes/class-wc-coupon.php:614
 msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
 msgstr "Δυστυχώς, το κουπόνι \"% s\" έχει ήδη εφαρμοστεί και δεν μπορεί να χρησιμοποιηθεί σε συνδυασμό με άλλα κουπόνια."
 
-#: includes/class-wc-coupon.php:610
+#: includes/class-wc-coupon.php:617
 msgid "Coupon usage limit has been reached."
 msgstr "Αυτό το κουπόνι έχει εξαντληθεί."
 
-#: includes/class-wc-coupon.php:613
+#: includes/class-wc-coupon.php:620
 msgid "This coupon has expired."
 msgstr "Αυτό το κουπόνι έχει λήξει."
 
-#: includes/class-wc-coupon.php:616
+#: includes/class-wc-coupon.php:623
 msgid "The minimum spend for this coupon is %s."
 msgstr "Η ελάχιστη δαπάνη γι αυτό το κουπόνι είναι %s."
 
-#: includes/class-wc-coupon.php:619
+#: includes/class-wc-coupon.php:626
 msgid "Sorry, this coupon is not applicable to your cart contents."
 msgstr "Λυπούμαστε, αλλά αυτό το κουπόνι δεν ισχύει για το περιεχόμενο του καλαθιού σας."
 
-#: includes/class-wc-coupon.php:622
+#: includes/class-wc-coupon.php:629
 msgid "Sorry, this coupon is not valid for sale items."
 msgstr "Λυπούμαστε, αυτό το κουπόνι δεν ισχύει για προϊόντα με έκπτωση."
 
-#: includes/class-wc-coupon.php:648
+#: includes/class-wc-coupon.php:655
 msgid "Please enter a coupon code."
 msgstr "Παρακαλούμε εισάγετε τον κωδικό κουπονιού."
 
@@ -4718,7 +4981,7 @@ msgstr "Μη έγκυρη διεύθυνση email."
 #: includes/class-wc-download-handler.php:95
 #: includes/class-wc-download-handler.php:99
 #: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:294
+#: includes/class-wc-download-handler.php:296
 msgid "Go to homepage"
 msgstr "Πηγαίνετε στην αρχική σελίδα."
 
@@ -4767,7 +5030,7 @@ msgstr "Λυπούμαστε, η περίοδος λήψης αυτού του �
 msgid "No file defined"
 msgstr "Δεν έχει οριστεί αρχείο"
 
-#: includes/class-wc-download-handler.php:294
+#: includes/class-wc-download-handler.php:296
 msgid "File not found"
 msgstr "Το αρχείο δεν βρέθηκε"
 
@@ -4807,7 +5070,7 @@ msgstr "Προ παραγγελία προϊόντος όταν υπάρξει �
 
 #: includes/class-wc-emails.php:411
 msgid "%s units of %s have been backordered in order %s."
-msgstr ""
+msgstr "%s μονάδες της %s έχουν επιστραφεί στην παραγγελία %s"
 
 #: includes/class-wc-form-handler.php:129
 msgid "Address changed successfully."
@@ -4926,7 +5189,7 @@ msgid "Please select a rating"
 msgstr "Παρακαλούμε επιλέξτε μια βαθμολογία"
 
 #: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1593
+#: includes/wc-template-functions.php:1602
 msgid "required"
 msgstr "απαραίτητο"
 
@@ -5002,47 +5265,47 @@ msgctxt "hash before order number"
 msgid "#"
 msgstr "#"
 
-#: includes/class-wc-order.php:833
+#: includes/class-wc-order.php:854
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr "&nbsp;<small>%sμέσω %s</small>"
 
-#: includes/class-wc-order.php:896
+#: includes/class-wc-order.php:917
 msgid "Cart Subtotal:"
 msgstr "Υποσύνολο Καλαθιού:"
 
-#: includes/class-wc-order.php:903
+#: includes/class-wc-order.php:924
 msgid "Cart Discount:"
 msgstr "Έκπτωση Καλαθιού:"
 
-#: includes/class-wc-order.php:910
+#: includes/class-wc-order.php:931
 msgid "Shipping:"
 msgstr "Αποστολή:"
 
-#: includes/class-wc-order.php:957
+#: includes/class-wc-order.php:978
 msgid "Order Discount:"
 msgstr "Έκπτωση Παραγγελίας:"
 
-#: includes/class-wc-order.php:964
+#: includes/class-wc-order.php:985
 msgid "Payment Method:"
 msgstr "Τρόπος Πληρωμής:"
 
-#: includes/class-wc-order.php:970
+#: includes/class-wc-order.php:991
 msgid "Order Total:"
 msgstr "Σύνολο Παραγγελίας:"
 
-#: includes/class-wc-order.php:988 includes/wc-cart-functions.php:236
+#: includes/class-wc-order.php:1009 includes/wc-cart-functions.php:251
 msgid "(Includes %s)"
 msgstr "(Περιλαμβάνει %s)"
 
-#: includes/class-wc-order.php:1231 includes/class-wc-order.php:1232
+#: includes/class-wc-order.php:1258 includes/class-wc-order.php:1259
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: includes/class-wc-order.php:1287
+#: includes/class-wc-order.php:1314
 msgid "Order status changed from %s to %s."
 msgstr "Η κατάσταση της παραγγελίας άλλαξε από %s σε %s."
 
-#: includes/class-wc-order.php:1556
+#: includes/class-wc-order.php:1583
 msgid "Order item stock reduced successfully."
 msgstr "Το απόθεμα του προϊόντος της παραγγελίας μειώθηκε επιτυχώς."
 
@@ -5425,8 +5688,8 @@ msgid "View products"
 msgstr "Εμφάνιση Προϊόντων"
 
 #: includes/class-wc-product-grouped.php:194
-#: includes/class-wc-product-variable.php:251
-#: includes/class-wc-product-variable.php:256
+#: includes/class-wc-product-variable.php:273
+#: includes/class-wc-product-variable.php:278
 msgctxt "Price range: from-to"
 msgid "%1$s&ndash;%2$s"
 msgstr ""
@@ -5440,13 +5703,13 @@ msgstr "Διαβάστε Περισσότερα"
 msgid "Select options"
 msgstr "Επιλέξτε "
 
-#: includes/class-wc-product-variable.php:455
+#: includes/class-wc-product-variable.php:485
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
-msgstr ""
+msgstr "Αυτό το μεταβλητό προϊόν δεν έχει ενεργές διαφοροποιήσεις οπότε δε μπορεί να δημοσιευθεί. Αλλαγή κατάστασης σε πρόχειρο."
 
-#: includes/class-wc-product-variation.php:494
+#: includes/class-wc-product-variation.php:516
 msgid "%s &ndash; %s%s"
 msgstr "%s &ndash; %s%s"
 
@@ -5454,7 +5717,7 @@ msgstr "%s &ndash; %s%s"
 msgid ""
 "Use $args[\"posts_per_page\"] instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr ""
+msgstr "Χρησιμοποιείστε $args[\"posts_per_page\"] αντ' αυτού. Το αποδοκιμαστικό επιχείρημα θα αφαιρεθεί στην WC 2.2."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
 msgid "Completed order"
@@ -5650,7 +5913,7 @@ msgstr "BACS"
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:26
 msgid ""
 "Allows payments by BACS, more commonly known as direct bank/wire transfer."
-msgstr ""
+msgstr "Επιτρέπει πληρωμές μέσω BACS, γνωστότερες και ως απευθείας τραπεζικές μεταφορές. "
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:68
 msgid "Enable Bank Transfer"
@@ -5698,7 +5961,7 @@ msgstr "Απευθείας Τραπεζική Μεταφορά"
 #: includes/gateways/cod/class-wc-gateway-cod.php:71
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:149
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:139
-#: includes/wc-template-functions.php:971
+#: includes/wc-template-functions.php:980
 msgid "Description"
 msgstr "Περιγραφή"
 
@@ -5707,14 +5970,14 @@ msgstr "Περιγραφή"
 #: includes/gateways/cod/class-wc-gateway-cod.php:66
 msgid ""
 "Payment method description that the customer will see on your checkout."
-msgstr ""
+msgstr "Περιγραφή μεθόδου πληρωμής που θα δει ο πελάτης κατά την ολοκλήρωση της παραγγελίας."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:82
 msgid ""
 "Make your payment directly into our bank account. Please use your Order ID "
 "as the payment reference. Your order won't be shipped until the funds have "
 "cleared in our account."
-msgstr ""
+msgstr "Κάνετε την πληρωμή απευθείας στον τραπεζικό μας λογαριασμό. Παρακαλώ χρησιμοποιείστε το Order ID σαν αναφορά πληρωμής. Η παραγγελία σας δεν θα σταλθεί μέχρι το ποσό να εμφανιστεί στον λογαριασμό μας."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:86
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:72
@@ -5976,14 +6239,14 @@ msgstr "Αν αυτό διαφέρει από το email που έχει εισ�
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:161
 msgid "PayPal Identity Token"
-msgstr ""
+msgstr "Διακριτικό ταυτότητας PayPal"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:163
 msgid ""
 "Optionally enable \"Payment Data Transfer\" (Profile > Website Payment "
 "Preferences) and then copy your identity token here. This will allow "
 "payments to be verified without the need for PayPal IPN."
-msgstr ""
+msgstr "Προαιρετικά ενεργοποιήστε τη \"Μεταφορά Δεδομένων Πληρωμής\" (Προφίλ > Ρυθμίσεις Πληρωμών Ιστοτόπου) και αντιγράψτε το identity token σας εδώ. Αυτό θα επιτρέψει την πιστοποίηση των πληρωμών χωρίς να απαιτείται PayPal IPN."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:166
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:199
@@ -6009,11 +6272,11 @@ msgstr "Ενέργεια Πληρωμής"
 msgid ""
 "Choose whether you wish to capture funds immediately or authorize payment "
 "only."
-msgstr ""
+msgstr "Επιλέξτε αν επιθυμείτε να συλλέξετε τα ποσά άμεσα ή μόνο να εξουσιοδοτήσετε την πληρωμή."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:182
 msgid "Capture"
-msgstr ""
+msgstr "Συλλογή"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:183
 msgid "Authorize"
@@ -6139,11 +6402,11 @@ msgstr "Ακύρωση παραγγελίας και επαναφορά καλα
 msgid ""
 "Thank you - your order is now pending payment. You should be automatically "
 "redirected to PayPal to make payment."
-msgstr ""
+msgstr "Σας ευχαριστούμε - εκκρεμεί η πληρωμή για την παραγγελία σας. Θα μεταφερθείτε αυτόματα στο PayPal για την ολοκλήρωση της πληρωμής."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:701
 msgid "Validation error: PayPal currencies do not match (code %s)."
-msgstr ""
+msgstr "Λάθος επαλήθευσης: τα συναλλάγματα του PayPal δε συμφωνούν (amt %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:712
 msgid "Validation error: PayPal amounts do not match (gross %s)."
@@ -6201,7 +6464,7 @@ msgstr "Η αναστροφή ακυρώθηκε"
 msgid ""
 "Order %s has had a reversal cancelled. Please check the status of payment "
 "and update the order status accordingly."
-msgstr ""
+msgstr "Η παραγγελία %s είχε ακύρωση μιας αναστροφής. Παρακαλούμε ελέγξτε την κατάσταση της πληρωμής και ανανεώστε την κατάσταση της παραγγελίας ανάλογα."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:808
 msgid "Reversal cancelled for order %s"
@@ -6209,11 +6472,11 @@ msgstr "Η αναστροφή ακυρώθηκε για την παραγγελ�
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:880
 msgid "Validation error: PayPal amounts do not match (amt %s)."
-msgstr ""
+msgstr "Λάθος επαλήθευσης: τα ποσά του PayPal δε συμφωνούν (amt %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:888
 msgid "PDT payment completed"
-msgstr ""
+msgstr "Η πληρωμή του PDT ολοκληρώθηκε"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:25
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:84
@@ -6288,7 +6551,7 @@ msgstr "Κόστος ανα παραγγελία"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:121
 msgid "Enter a cost (excluding tax) per order, e.g. 5.00. Default is 0."
-msgstr ""
+msgstr "Εισάγετε το κόστος (χωρίς φόρους) ανα παραγγελία, π.χ. 5.00. Η προεπιλογή είναι 0."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:126
 msgid "Additional Rates"
@@ -6299,13 +6562,13 @@ msgid ""
 "Optional extra shipping options with additional costs (one per line): Option"
 " Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or "
 "item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
-msgstr ""
+msgstr "Επιπλέον επιλογές αποστολής με επιπρόσθετος κόστος (μια ανα γραμμή): Όνομα Επιλογής | Επιπρόσθετο Κόστος [+- Ποσοστό %] | Ανα Τύπο Κόστους (παραγγελία, κλάση ή αντικείμενο) Παράδειγμα: <code>ΕΛΤΑ Εξπρες | 6.95 [+ 0.2%] | παραγγελία</code>."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:131
 msgid ""
 "Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
 "or item)"
-msgstr ""
+msgstr "Όνομα Επιλογής | Επιπρόσθετο Κόστος [+- Ποσοστό%] | Ανα Τύπο Κόστους (παραγγελία, κλάση ή αντικείμενο)"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:134
 msgid "Additional Costs"
@@ -6315,7 +6578,7 @@ msgstr "Επιπρόσθετα Κόστη"
 msgid ""
 "Additional costs can be added below - these will all be added to the per-"
 "order cost above."
-msgstr ""
+msgstr "Τα επιπρόσθετα κόστη μπορούν να προστεθούν παρακάτω - όλα τα επιπρόσθετα κόστη θα προστεθούν στο κόστος-ανα-παραγγελία παραπάνω."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:139
 msgid "Costs Added..."
@@ -6553,7 +6816,7 @@ msgstr "Ενεργοποιήστε την παραλαβή από το κατά�
 msgid ""
 "What zip/post codes are available for local pickup? Separate codes with a "
 "comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr ""
+msgstr "Ποιοι ταχυδρόμικοι κωδικοί είναι διαθέσιμοι για τοπική παραλαβή; Χωρίστε τους κωδικούς με κόμματα. Υποστηρίζει wildcards, π.χ. P* θα συμπεριλάβει τον κωδικό PE30."
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:128
 msgid ""
@@ -6567,14 +6830,14 @@ msgstr "Ενημερώθηκε το κόστος αποστολής"
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:91
 msgid "Invalid order. If you have an account please log in and try again."
-msgstr ""
+msgstr "Λανθασμένη παραγγελία. Αν διαθέτε λογαριασμό παρακαλούμε συνδεθείτε και προσπαθήστε ξανά."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
 "This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. "
 "Please contact us if you need assistance."
-msgstr ""
+msgstr "Η κατάσταση αυτής της παραγγελίας είναι &ldquo;%s&rdquo;&mdash;δε μπορεί να πληρωθεί. Παρακαλούμε επικοινωνήστε μαζί μας αν χρειάζεστε βοήθεια."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:117
 #: includes/shortcodes/class-wc-shortcode-checkout.php:168
@@ -6681,175 +6944,179 @@ msgstr "&quot;%s&quot; προστέθηκε στο καλάθι σας."
 msgid "Continue Shopping"
 msgstr "Συνέχεια Αγορών"
 
-#: includes/wc-cart-functions.php:183
+#: includes/wc-cart-functions.php:193
 msgid "Coupon:"
 msgstr "Κουπόνι:"
 
-#: includes/wc-cart-functions.php:208
+#: includes/wc-cart-functions.php:219
 msgid "Free shipping coupon"
 msgstr "Κουπόνι δωρεάν αποστολής"
 
-#: includes/wc-cart-functions.php:210
+#: includes/wc-cart-functions.php:225
 msgid "[Remove]"
 msgstr "[Remove]"
 
-#: includes/wc-cart-functions.php:271
+#: includes/wc-cart-functions.php:288
 msgid "Free"
 msgstr "Δωρεάν"
 
 #: includes/wc-core-functions.php:167
 msgid "United Arab Emirates Dirham"
-msgstr ""
+msgstr "Dirham Ηνωμένων Αραβικών Εμιράτων"
 
 #: includes/wc-core-functions.php:168
 msgid "Australian Dollars"
 msgstr "Australian Dollars"
 
 #: includes/wc-core-functions.php:169
+msgid "Bangladeshi Taka"
+msgstr ""
+
+#: includes/wc-core-functions.php:170
 msgid "Brazilian Real"
 msgstr "Brazilian Real"
 
-#: includes/wc-core-functions.php:170
-msgid "Bulgarian Lev"
-msgstr ""
-
 #: includes/wc-core-functions.php:171
+msgid "Bulgarian Lev"
+msgstr "Lev Βουλγαρίας"
+
+#: includes/wc-core-functions.php:172
 msgid "Canadian Dollars"
 msgstr "Canadian Dollars"
 
-#: includes/wc-core-functions.php:172
+#: includes/wc-core-functions.php:173
 msgid "Chilean Peso"
 msgstr "Χιλιανό Πέσο"
 
-#: includes/wc-core-functions.php:173
+#: includes/wc-core-functions.php:174
 msgid "Chinese Yuan"
 msgstr "Chinese Yuan"
 
-#: includes/wc-core-functions.php:174
+#: includes/wc-core-functions.php:175
 msgid "Colombian Peso"
 msgstr "Κολομβιανό Πέσο"
 
-#: includes/wc-core-functions.php:175
+#: includes/wc-core-functions.php:176
 msgid "Czech Koruna"
 msgstr "Czech Koruna"
 
-#: includes/wc-core-functions.php:176
+#: includes/wc-core-functions.php:177
 msgid "Danish Krone"
 msgstr "Danish Krone"
 
-#: includes/wc-core-functions.php:177
+#: includes/wc-core-functions.php:178
 msgid "Euros"
 msgstr "Euros"
 
-#: includes/wc-core-functions.php:178
+#: includes/wc-core-functions.php:179
 msgid "Hong Kong Dollar"
 msgstr "Hong Kong Dollar"
 
-#: includes/wc-core-functions.php:179
+#: includes/wc-core-functions.php:180
 msgid "Croatia kuna"
 msgstr "Κροατική Κούνα"
 
-#: includes/wc-core-functions.php:180
+#: includes/wc-core-functions.php:181
 msgid "Hungarian Forint"
 msgstr "Hungarian Forint"
 
-#: includes/wc-core-functions.php:181
+#: includes/wc-core-functions.php:182
 msgid "Icelandic krona"
 msgstr "Ισλανδική κορόνα"
 
-#: includes/wc-core-functions.php:182
+#: includes/wc-core-functions.php:183
 msgid "Indonesia Rupiah"
 msgstr "Indonesia Rupiah"
 
-#: includes/wc-core-functions.php:183
+#: includes/wc-core-functions.php:184
 msgid "Indian Rupee"
 msgstr "Ρούπια Ινδίας"
 
-#: includes/wc-core-functions.php:184
+#: includes/wc-core-functions.php:185
 msgid "Israeli Shekel"
 msgstr "Israeli Shekel"
 
-#: includes/wc-core-functions.php:185
+#: includes/wc-core-functions.php:186
 msgid "Japanese Yen"
 msgstr "Japanese Yen"
 
-#: includes/wc-core-functions.php:186
-msgid "South Korean Won"
-msgstr ""
-
 #: includes/wc-core-functions.php:187
+msgid "South Korean Won"
+msgstr "Won Νότιας Κορέας"
+
+#: includes/wc-core-functions.php:188
 msgid "Malaysian Ringgits"
 msgstr "Malaysian Ringgits"
 
-#: includes/wc-core-functions.php:188
+#: includes/wc-core-functions.php:189
 msgid "Mexican Peso"
 msgstr "Mexican Peso"
 
-#: includes/wc-core-functions.php:189
+#: includes/wc-core-functions.php:190
 msgid "Nigerian Naira"
 msgstr "Νιγηριανή Naira"
 
-#: includes/wc-core-functions.php:190
+#: includes/wc-core-functions.php:191
 msgid "Norwegian Krone"
 msgstr "Norwegian Krone"
 
-#: includes/wc-core-functions.php:191
+#: includes/wc-core-functions.php:192
 msgid "New Zealand Dollar"
 msgstr "New Zealand Dollar"
 
-#: includes/wc-core-functions.php:192
+#: includes/wc-core-functions.php:193
 msgid "Philippine Pesos"
 msgstr "Philippine Pesos"
 
-#: includes/wc-core-functions.php:193
+#: includes/wc-core-functions.php:194
 msgid "Polish Zloty"
 msgstr "Polish Zloty"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Pounds Sterling"
 msgstr "Pounds Sterling"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Romanian Leu"
 msgstr "Romanian Leu"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Russian Ruble"
 msgstr "Ρούβλι Ρωσίας"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Singapore Dollar"
 msgstr "Singapore Dollar"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "South African rand"
 msgstr "South African rand"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "Swedish Krona"
 msgstr "Σουηδική Κορόνα"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swiss Franc"
 msgstr "Ελβετικό Φράγκο"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Taiwan New Dollars"
 msgstr "Taiwan New Dollars"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Thai Baht"
 msgstr "Thai Baht"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Turkish Lira"
 msgstr "Τουρκική Λίρα"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "US Dollars"
 msgstr "Δολλάρια ΗΠΑ"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "Vietnamese Dong"
 msgstr "Βιετναμέζικο Ντονγκ"
 
@@ -6897,85 +7164,85 @@ msgstr "Δεν ήταν δυνατή η εγγραφή σας&#8217;&hellip; Π�
 msgid "Unpaid order cancelled - time limit reached."
 msgstr "Απλήρωτη παραγγελία ακυρώθηκε - η προθεσμία έληξε."
 
-#: includes/wc-product-functions.php:236
+#: includes/wc-product-functions.php:233
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "Χωρίς κατηγορία"
 
-#: includes/wc-template-functions.php:103
+#: includes/wc-template-functions.php:120
 msgid "New products"
 msgstr "Νέα προϊόντα"
 
-#: includes/wc-template-functions.php:111
+#: includes/wc-template-functions.php:128
 msgid "New products added to %s"
 msgstr "Προστέθηκαν νέα προϊόντα στο %s"
 
-#: includes/wc-template-functions.php:119
+#: includes/wc-template-functions.php:136
 msgid "New products tagged %s"
 msgstr "Νέα προϊόντα με ετικέτα %s"
 
-#: includes/wc-template-functions.php:356
+#: includes/wc-template-functions.php:381
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
 msgstr "Αυτό είναι ένα δοκιμαστικό κατάστημα για το σκοπό δοκιμών &mdash; καμία παραγγελία δεν ολοκληρώνεται."
 
-#: includes/wc-template-functions.php:375
+#: includes/wc-template-functions.php:400
 msgid "Search Results: &ldquo;%s&rdquo;"
 msgstr "Αποτελέσματα Αναζήτησης: &ldquo;%s&rdquo;"
 
-#: includes/wc-template-functions.php:378
+#: includes/wc-template-functions.php:403
 msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; Σελίδα %s"
 
-#: includes/wc-template-functions.php:980
+#: includes/wc-template-functions.php:989
 #: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "Επιπλέον Πληροφορίες"
 
-#: includes/wc-template-functions.php:989
+#: includes/wc-template-functions.php:998
 msgid "Reviews (%d)"
 msgstr "Κριτικές (%d)"
 
-#: includes/wc-template-functions.php:1080
+#: includes/wc-template-functions.php:1089
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr ""
+msgstr "Χρησιμοποιήστε το $args όρισμα σαν πίνακα καλύτερα. Τα απαξιωμένα ορίσματα θα αφαιρεθούν στο WC 2.2."
 
-#: includes/wc-template-functions.php:1248
+#: includes/wc-template-functions.php:1257
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Αρχική"
 
-#: includes/wc-template-functions.php:1549
+#: includes/wc-template-functions.php:1558
 msgid "Order Again"
 msgstr "Παραγγείλτε Ξανά"
 
-#: includes/wc-template-functions.php:1640
+#: includes/wc-template-functions.php:1649
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Επιλέξτε χώρα&hellip;"
 
-#: includes/wc-template-functions.php:1647
+#: includes/wc-template-functions.php:1656
 msgid "Update country"
 msgstr "Ανανέωση χώρας"
 
-#: includes/wc-template-functions.php:1690
+#: includes/wc-template-functions.php:1699
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Επιλέξτε περιφέρεια&hellip;"
 
-#: includes/wc-template-functions.php:1803
+#: includes/wc-template-functions.php:1812
 msgid "Search for:"
 msgstr "Αναζήτηση για:"
 
-#: includes/wc-template-functions.php:1804
+#: includes/wc-template-functions.php:1813
 msgid "Search for products"
 msgstr "Αναζήτηση προϊόντων"
 
-#: includes/wc-template-functions.php:1805
+#: includes/wc-template-functions.php:1814
 msgid "Search"
 msgstr "Αναζήτηση"
 
@@ -7125,7 +7392,7 @@ msgstr "Σειρά κατηγοριών"
 
 #: includes/widgets/class-wc-widget-product-categories.php:45
 msgid "Show as dropdown"
-msgstr "Εμγανίζεται ως αναπτυσσόμενο μενού επιλογής"
+msgstr "Εμφανίζεται ως αναπτυσσόμενο μενού επιλογής"
 
 #: includes/widgets/class-wc-widget-product-categories.php:50
 msgid "Show post counts"
@@ -7139,7 +7406,7 @@ msgstr "Εμφανίζει την ιεραρχία"
 msgid "Only show children for the current category"
 msgstr "Δείξε μονο τις υποκατηγορίες για την τρέχουσα κατηγορία"
 
-#: includes/widgets/class-wc-widget-product-categories.php:177
+#: includes/widgets/class-wc-widget-product-categories.php:214
 msgid "No product categories exist."
 msgstr "Δεν υπάρχουν κατηγορίες προϊόντων."
 
@@ -7259,7 +7526,7 @@ msgstr "Προβάλει μία λίστα των προϊόντων που εθ
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:23
 msgid "WooCommerce Recently Viewed"
-msgstr ""
+msgstr "Πρόσφατες Κριτικές WooCommerce"
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:27
 msgid "Recently Viewed Products"
@@ -7287,34 +7554,37 @@ msgstr "Επιστροφή στο Κατάστημα"
 
 #: templates/cart/cart-shipping.php:16
 msgid "Shipping #%d"
-msgstr ""
+msgstr "Αποστολή #%d"
 
 #: templates/cart/cart-shipping.php:18
 msgid "Shipping and Handling"
 msgstr "Αποστολή και Χειρισμός"
 
 #: templates/cart/cart-shipping.php:55
-msgid ""
-"No shipping methods were found; please recalculate your shipping or continue"
-" to checkout and enter your full address to see if there is shipping "
-"available to your location."
+msgid "Please use the shipping calculator to see available shipping methods."
 msgstr ""
 
 #: templates/cart/cart-shipping.php:59
+msgid ""
+"Please continue to the checkout and enter your full address to see if there "
+"are any available shipping methods."
+msgstr ""
+
+#: templates/cart/cart-shipping.php:63
 msgid "Please fill in your details to see available shipping methods."
 msgstr "Παρακαλούμε συμπληρώστε τις πληροφορίες σας για να δείτε τους διαθέσιμους τρόπους αποστολής"
 
-#: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
+#: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid "Sorry, shipping is unavailable %s."
 msgstr "Συγγνώμη, η αποστολή δεν είναι διαθέσιμη %s."
 
-#: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
+#: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid ""
 "If you require assistance or wish to make alternate arrangements please "
 "contact us."
 msgstr "Αν χρειάζεστε βοήθεια ή θέλετε να κάνετε εναλλακτικές ρυθμίσεις παρακαλούμε επικοινωνήστε μαζί μας."
 
-#: templates/cart/cart-shipping.php:93
+#: templates/cart/cart-shipping.php:97
 msgid "Shipping"
 msgstr "Αποστολή"
 
@@ -7338,7 +7608,7 @@ msgstr "(υπολογισμός φόρων για %s)"
 msgid ""
 "Note: Shipping and taxes are estimated%s and will be updated during checkout"
 " based on your billing and shipping information."
-msgstr "Σημείωση: Τα έξοδα αποστολής και οι φόροι υπολογίζονται %s και θα ενημερώνονται κατά την ολοκλήρωση παραγγελίας με βάση τα στοιχεία σας χρέωσης και αποστολής."
+msgstr "Σημείωση: Τα έξοδα αποστολής και οι φόροι υπολογίζονται %s και θα ενημερωθούν κατά την ολοκλήρωση παραγγελίας με βάση τα στοιχεία σας χρέωσης και αποστολής."
 
 #: templates/cart/cart.php:29 templates/emails/admin-new-order.php:23
 #: templates/emails/customer-completed-order.php:24
@@ -7422,11 +7692,8 @@ msgid "Billing &amp; Shipping"
 msgstr "Χρέωση &amp; Αποστολή"
 
 #: templates/checkout/form-billing.php:19
-#: templates/myaccount/form-edit-address.php:14
-#: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
-#: templates/order/order-details.php:118
-msgid "Billing Address"
-msgstr "Διεύθυνση Χρέωσης"
+msgid "Billing Details"
+msgstr "Στοιχεία χρέωσης"
 
 #: templates/checkout/form-billing.php:38
 msgid "Create an account?"
@@ -7507,7 +7774,7 @@ msgid ""
 "arrangements."
 msgstr "Λυπούμαστε, φαίνεται ότι δεν υπάρχουν διαθέσιμοι τρόποι πληρωμής για τηνπολιτεία σας. Παρακαλώ επικοινωνήστε μαζί μας αν χρειάζεστε βοήθεια ή θέλετε να κάνετε εναλλακτικές διευθετήσεις."
 
-#: templates/checkout/review-order.php:161
+#: templates/checkout/review-order.php:163
 msgid ""
 "Since your browser does not support JavaScript, or it is disabled, please "
 "ensure you click the <em>Update Totals</em> button before placing your "
@@ -7515,21 +7782,19 @@ msgid ""
 "do so."
 msgstr "Αφού ο περιηγητής σας δεν υποστηρίζει JavaScript, ή είναι απενεργοποιημένη, παρακαλώ βεβαιωθείτε ότι θα πιέστε το κουμπί <em>Ενημέρωση Συνόλων</em> πριν ολοκληρώσετε την παραγγελία σας. Ενδέχεται να χρεωθείτε το παραπάνω ποσό αν δεν το κάνετε."
 
-#: templates/checkout/review-order.php:161
+#: templates/checkout/review-order.php:163
 msgid "Update totals"
 msgstr "Ενημέρωση συνόλων"
 
-#: templates/checkout/review-order.php:168
+#: templates/checkout/review-order.php:170
 msgid "Place order"
 msgstr "Κάντε παραγγελία"
 
-#: templates/checkout/review-order.php:177
-msgid "I have read and accept the"
-msgstr "Διάβασα και αποδέχομαι τους "
-
-#: templates/checkout/review-order.php:177
-msgid "terms &amp; conditions"
-msgstr "όρους &amp; προϋποθέσεις"
+#: templates/checkout/review-order.php:179
+msgid ""
+"I&rsquo;ve read and accept the <a href=\"%s\" target=\"_blank\">terms &amp; "
+"conditions</a>"
+msgstr ""
 
 #: templates/checkout/thankyou.php:18
 msgid ""
@@ -7627,7 +7892,7 @@ msgstr "Ο κωδικός πρόσβασής σας έχει αυτόματα π
 msgid ""
 "You can access your account area to view your orders and change your "
 "password here: %s."
-msgstr ""
+msgstr "Μπορείτε να δείτε τις παραγγελίες σας και να αλλάξετε τον κωδικό σας στη σελίδα του λογαριασμού σας, εδώ: %s."
 
 #: templates/emails/customer-note.php:14
 #: templates/emails/plain/customer-note.php:13
@@ -7866,6 +8131,12 @@ msgid "Save changes"
 msgstr "Αποθήκευση αλλαγών"
 
 #: templates/myaccount/form-edit-address.php:14
+#: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
+#: templates/order/order-details.php:118
+msgid "Billing Address"
+msgstr "Διεύθυνση Χρέωσης"
+
+#: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:133
 msgid "Shipping Address"
 msgstr "Διεύθυνση Αποστολής"
@@ -7980,7 +8251,7 @@ msgid ""
 "Order <mark class=\"order-number\">%s</mark> was placed on <mark class"
 "=\"order-date\">%s</mark> and is currently <mark class=\"order-"
 "status\">%s</mark>."
-msgstr ""
+msgstr "Η παραγγελία <mark class=\"order-number\">%s</mark> έγινε στις <mark class=\"order-date\">%s</mark> και η τρέχουσα κατάσταση της είναι <mark class=\"order-status\">%s</mark>."
 
 #: templates/myaccount/view-order.php:16 templates/order/tracking.php:31
 msgid "Order Updates"
@@ -8193,3 +8464,19 @@ msgstr "Έγγραφα"
 #: woocommerce.php:183
 msgid "Premium Support"
 msgstr "Υποστήριξη Premium"
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.woothemes.com/woocommerce/"
+msgstr "http://www.woothemes.com/woocommerce/"
+
+#. Description of the plugin/theme
+msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
+msgstr "Μια e-commerce πλατφόρμα που θα σας βοηθήσει να πουλήσετε τα πάντα. Όμορφα."
+
+#. Author of the plugin/theme
+msgid "WooThemes"
+msgstr "WooThemes"
+
+#. Author URI of the plugin/theme
+msgid "http://woothemes.com"
+msgstr "http://woothemes.com"
