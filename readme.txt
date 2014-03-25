@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Added support for clearing report transients when using object caching.
 * Fix - encoding issues with attribute values.
 * Fix - Escape the contents of the changelog when displayed.
+* Fix - Edge case where tax was still displayed for shipping when exempt.
 * Tweak - Allow city field to use another input method.
 * Tweak - Several new filters.
 * Tweak - PayPal, modify currency error message to include both sent and returned currencies for comparison.
@@ -164,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - move variation data to tooltip in order items meta box.
 * Tweak - Store variation data for order items added through the admin.
 * Tweak - Billing Address > Billing Details text. We take more than address in this section.
+* Tweak - Delete terms transient during recount.
 * Refactor - jshint javascript files.
 * Localisation - add Bangladeshi currency and symbol.
 * Localisation - Bangladeshi states (districts).
