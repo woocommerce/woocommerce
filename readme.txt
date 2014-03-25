@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.8.1
-Stable tag: 2.1.5
+Stable tag: 2.1.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -126,7 +126,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.1.6 =
+= 2.1.6 - 25/03/2014 =
 * Fix - Fixed a bug where cron events are scheduled using a function name rather than a hook name.
 * Fix - Given transients not required on all pages expiration times to prevent autoloading.
 * Fix - Don't trailingslash Order Cancel URLs with a Query String.
