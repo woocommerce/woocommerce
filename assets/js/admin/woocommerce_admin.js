@@ -140,6 +140,9 @@ jQuery(function(){
 		hasFocus = false;
 	});
 
+	// Additional cost tables
+	jQuery( '.woocommerce_page_wc-settings .shippingrows tbody tr:even' ).addClass( 'alternate' );
+
 	// Availability inputs
     jQuery('select.availability').change(function(){
 		if ( jQuery(this).val() == "all" ) {
