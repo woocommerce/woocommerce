@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.7 =
+
 = 2.1.6 - 25/03/2014 =
 * Fix - Fixed a bug where cron events are scheduled using a function name rather than a hook name.
 * Fix - Given transients not required on all pages expiration times to prevent autoloading.
