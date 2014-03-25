@@ -10,9 +10,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
-"PO-Revision-Date: 2014-03-05 10:30+0000\n"
-"Last-Translator: tomasha <tomasha@hotmail.com>\n"
+"POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
+"PO-Revision-Date: 2014-03-25 08:50+0000\n"
+"Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Icelandic (Iceland) (http://www.transifex.com/projects/p/woocommerce/language/is_IS/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -98,6 +98,254 @@ msgstr "Viktoría"
 #: i18n/states/AU.php:20
 msgid "Western Australia"
 msgstr "Vestur-Ástralía"
+
+#: i18n/states/BD.php:13
+msgid "Bagerhat"
+msgstr ""
+
+#: i18n/states/BD.php:14
+msgid "Bandarban"
+msgstr ""
+
+#: i18n/states/BD.php:15
+msgid "Barguna"
+msgstr ""
+
+#: i18n/states/BD.php:16
+msgid "Barisal"
+msgstr ""
+
+#: i18n/states/BD.php:17
+msgid "Bhola"
+msgstr ""
+
+#: i18n/states/BD.php:18
+msgid "Bogra"
+msgstr ""
+
+#: i18n/states/BD.php:19
+msgid "Chandpur"
+msgstr ""
+
+#: i18n/states/BD.php:20
+msgid "Chittagong"
+msgstr ""
+
+#: i18n/states/BD.php:21
+msgid "Chuadanga"
+msgstr ""
+
+#: i18n/states/BD.php:22
+msgid "Comilla"
+msgstr ""
+
+#: i18n/states/BD.php:23
+msgid "Cox's Bazar"
+msgstr ""
+
+#: i18n/states/BD.php:24
+msgid "Dhaka"
+msgstr ""
+
+#: i18n/states/BD.php:25
+msgid "Dinajpur"
+msgstr ""
+
+#: i18n/states/BD.php:26
+msgid "Faridpur "
+msgstr ""
+
+#: i18n/states/BD.php:27
+msgid "Feni"
+msgstr ""
+
+#: i18n/states/BD.php:28
+msgid "Gaibandha"
+msgstr ""
+
+#: i18n/states/BD.php:29
+msgid "Gazipur"
+msgstr ""
+
+#: i18n/states/BD.php:30
+msgid "Gopalganj"
+msgstr ""
+
+#: i18n/states/BD.php:31
+msgid "Jamalpur"
+msgstr ""
+
+#: i18n/states/BD.php:32
+msgid "Jessore"
+msgstr ""
+
+#: i18n/states/BD.php:33
+msgid "Jhalokati"
+msgstr ""
+
+#: i18n/states/BD.php:34
+msgid "Jhenaidah"
+msgstr ""
+
+#: i18n/states/BD.php:35
+msgid "Joypurhat"
+msgstr ""
+
+#: i18n/states/BD.php:36
+msgid "Khagrachhari"
+msgstr ""
+
+#: i18n/states/BD.php:37
+msgid "Khulna"
+msgstr ""
+
+#: i18n/states/BD.php:38
+msgid "Kishoreganj"
+msgstr ""
+
+#: i18n/states/BD.php:39
+msgid "Kurigram"
+msgstr ""
+
+#: i18n/states/BD.php:40
+msgid "Kushtia"
+msgstr ""
+
+#: i18n/states/BD.php:41
+msgid "Lakshmipur"
+msgstr ""
+
+#: i18n/states/BD.php:42
+msgid "Lalmonirhat"
+msgstr ""
+
+#: i18n/states/BD.php:43
+msgid "Madaripur"
+msgstr ""
+
+#: i18n/states/BD.php:44
+msgid "Magura"
+msgstr ""
+
+#: i18n/states/BD.php:45
+msgid "Manikganj "
+msgstr ""
+
+#: i18n/states/BD.php:46
+msgid "Meherpur"
+msgstr ""
+
+#: i18n/states/BD.php:47
+msgid "Moulvibazar"
+msgstr ""
+
+#: i18n/states/BD.php:48
+msgid "Munshiganj"
+msgstr ""
+
+#: i18n/states/BD.php:49
+msgid "Mymensingh"
+msgstr ""
+
+#: i18n/states/BD.php:50
+msgid "Naogaon"
+msgstr ""
+
+#: i18n/states/BD.php:51
+msgid "Narail"
+msgstr ""
+
+#: i18n/states/BD.php:52
+msgid "Narayanganj"
+msgstr ""
+
+#: i18n/states/BD.php:53
+msgid "Narsingdi"
+msgstr ""
+
+#: i18n/states/BD.php:54
+msgid "Natore"
+msgstr ""
+
+#: i18n/states/BD.php:55
+msgid "Nawabganj"
+msgstr ""
+
+#: i18n/states/BD.php:56
+msgid "Netrakona"
+msgstr ""
+
+#: i18n/states/BD.php:57
+msgid "Nilphamari"
+msgstr ""
+
+#: i18n/states/BD.php:58
+msgid "Noakhali"
+msgstr ""
+
+#: i18n/states/BD.php:59
+msgid "Pabna"
+msgstr ""
+
+#: i18n/states/BD.php:60
+msgid "Panchagarh"
+msgstr ""
+
+#: i18n/states/BD.php:61
+msgid "Patuakhali"
+msgstr ""
+
+#: i18n/states/BD.php:62
+msgid "Pirojpur"
+msgstr ""
+
+#: i18n/states/BD.php:63
+msgid "Rajbari"
+msgstr ""
+
+#: i18n/states/BD.php:64
+msgid "Rajshahi"
+msgstr ""
+
+#: i18n/states/BD.php:65
+msgid "Rangamati"
+msgstr ""
+
+#: i18n/states/BD.php:66
+msgid "Rangpur"
+msgstr ""
+
+#: i18n/states/BD.php:67
+msgid "Satkhira"
+msgstr ""
+
+#: i18n/states/BD.php:68
+msgid "Shariatpur"
+msgstr ""
+
+#: i18n/states/BD.php:69
+msgid "Sherpur"
+msgstr ""
+
+#: i18n/states/BD.php:70
+msgid "Sirajganj"
+msgstr ""
+
+#: i18n/states/BD.php:71
+msgid "Sunamganj"
+msgstr ""
+
+#: i18n/states/BD.php:72
+msgid "Sylhet"
+msgstr ""
+
+#: i18n/states/BD.php:73
+msgid "Tangail"
+msgstr ""
+
+#: i18n/states/BD.php:74
+msgid "Thakurgaon"
+msgstr ""
 
 #: i18n/states/BG.php:13
 msgid "Blagoevgrad"
@@ -325,7 +573,7 @@ msgstr "Alberta"
 
 #: i18n/states/CA.php:14
 msgid "British Columbia"
-msgstr "British Columbia"
+msgstr "Breska Kólombía"
 
 #: i18n/states/CA.php:15
 msgid "Manitoba"
@@ -333,7 +581,7 @@ msgstr "Manitoba"
 
 #: i18n/states/CA.php:16
 msgid "New Brunswick"
-msgstr "New Brunswick"
+msgstr "Nýja Brunsvík"
 
 #: i18n/states/CA.php:17
 msgid "Newfoundland"
@@ -2908,7 +3156,7 @@ msgstr "Endurgreitt"
 msgid "cancelled"
 msgstr "afturkallað"
 
-#: includes/abstracts/abstract-wc-email.php:568
+#: includes/abstracts/abstract-wc-email.php:570
 #: includes/emails/class-wc-email-customer-completed-order.php:140
 #: includes/emails/class-wc-email-new-order.php:120
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
@@ -2921,19 +3169,19 @@ msgstr "afturkallað"
 msgid "Enable/Disable"
 msgstr "Virkja /Afvirkja"
 
-#: includes/abstracts/abstract-wc-email.php:570
+#: includes/abstracts/abstract-wc-email.php:572
 #: includes/emails/class-wc-email-customer-completed-order.php:142
 #: includes/emails/class-wc-email-new-order.php:122
 msgid "Enable this email notification"
 msgstr "Virkja þessa tilkynning  í tölvupósti"
 
-#: includes/abstracts/abstract-wc-email.php:574
+#: includes/abstracts/abstract-wc-email.php:576
 #: includes/emails/class-wc-email-customer-invoice.php:146
 msgid "Email subject"
 msgstr "Fyrirsögn tölvupósts"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/abstracts/abstract-wc-email.php:583
+#: includes/abstracts/abstract-wc-email.php:578
+#: includes/abstracts/abstract-wc-email.php:585
 #: includes/emails/class-wc-email-customer-completed-order.php:148
 #: includes/emails/class-wc-email-customer-completed-order.php:155
 #: includes/emails/class-wc-email-customer-completed-order.php:162
@@ -2945,106 +3193,106 @@ msgstr "Fyrirsögn tölvupósts"
 msgid "Defaults to <code>%s</code>"
 msgstr "Sjálfgefið í <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:583
 #: includes/emails/class-wc-email-customer-invoice.php:153
 msgid "Email heading"
 msgstr "Fyrrisögn meginmáls tölvupósts"
 
-#: includes/abstracts/abstract-wc-email.php:588
+#: includes/abstracts/abstract-wc-email.php:590
 #: includes/emails/class-wc-email-customer-completed-order.php:174
 #: includes/emails/class-wc-email-customer-invoice.php:174
 #: includes/emails/class-wc-email-new-order.php:147
 msgid "Email type"
 msgstr "Tegund tölvupósts"
 
-#: includes/abstracts/abstract-wc-email.php:590
+#: includes/abstracts/abstract-wc-email.php:592
 #: includes/emails/class-wc-email-customer-completed-order.php:176
 #: includes/emails/class-wc-email-customer-invoice.php:176
 #: includes/emails/class-wc-email-new-order.php:149
 msgid "Choose which format of email to send."
 msgstr "Velja snið tölvupósts"
 
-#: includes/abstracts/abstract-wc-email.php:594
+#: includes/abstracts/abstract-wc-email.php:596
 #: includes/emails/class-wc-email-customer-completed-order.php:180
 #: includes/emails/class-wc-email-customer-invoice.php:180
 #: includes/emails/class-wc-email-new-order.php:153
 msgid "Plain text"
 msgstr "Einfaldur texti"
 
-#: includes/abstracts/abstract-wc-email.php:595
+#: includes/abstracts/abstract-wc-email.php:597
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
 msgid "HTML"
 msgstr "HTML"
 
-#: includes/abstracts/abstract-wc-email.php:596
+#: includes/abstracts/abstract-wc-email.php:598
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
 msgid "Multipart"
 msgstr "Fjölhluta"
 
-#: includes/abstracts/abstract-wc-email.php:632
-#: includes/abstracts/abstract-wc-email.php:653
+#: includes/abstracts/abstract-wc-email.php:634
+#: includes/abstracts/abstract-wc-email.php:655
 msgid "Could not write to template file."
 msgstr "Gat ekki ritað í sniðmátsskrá."
 
-#: includes/abstracts/abstract-wc-email.php:684
+#: includes/abstracts/abstract-wc-email.php:686
 msgid "Template file copied to theme."
 msgstr "Sniðmátsskrá afrituð yfir í þema"
 
-#: includes/abstracts/abstract-wc-email.php:693
+#: includes/abstracts/abstract-wc-email.php:695
 msgid "Template file deleted from theme."
 msgstr "Sniðmátsskrá eytt frá þema"
 
-#: includes/abstracts/abstract-wc-email.php:701
+#: includes/abstracts/abstract-wc-email.php:703
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Stillingar"
 
-#: includes/abstracts/abstract-wc-email.php:713
+#: includes/abstracts/abstract-wc-email.php:715
 msgid "HTML template"
 msgstr "HTML sniðmát"
 
-#: includes/abstracts/abstract-wc-email.php:714
+#: includes/abstracts/abstract-wc-email.php:716
 msgid "Plain text template"
 msgstr "Sniðmát fyrir einfaldan texta"
 
-#: includes/abstracts/abstract-wc-email.php:735
+#: includes/abstracts/abstract-wc-email.php:737
 msgid "Delete template file"
 msgstr "Eyða sniðmáta skrá"
 
-#: includes/abstracts/abstract-wc-email.php:738
+#: includes/abstracts/abstract-wc-email.php:740
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "Þemað þitt hefur skrifað yfir þetta sniðmát. Þú getur skoðað það í: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:753
+#: includes/abstracts/abstract-wc-email.php:755
 msgid "Copy file to theme"
 msgstr "Afrita skrá yfir í þema"
 
-#: includes/abstracts/abstract-wc-email.php:756
+#: includes/abstracts/abstract-wc-email.php:758
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "Til að yfirskrifa og breyta þessu tölvupóstssniði skal afrita <code>%s</code> í þema möppuna: <code>%s</code>,"
 
-#: includes/abstracts/abstract-wc-email.php:767
+#: includes/abstracts/abstract-wc-email.php:769
 msgid "File was not found."
 msgstr "Skrá fannst ekki."
 
-#: includes/abstracts/abstract-wc-email.php:792
+#: includes/abstracts/abstract-wc-email.php:794
 msgid "View template"
 msgstr "Skoða sniðmát"
 
-#: includes/abstracts/abstract-wc-email.php:793
+#: includes/abstracts/abstract-wc-email.php:795
 msgid "Hide template"
 msgstr "Fela sniðmát"
 
-#: includes/abstracts/abstract-wc-email.php:804
+#: includes/abstracts/abstract-wc-email.php:806
 msgid "Are you sure you want to delete this template file?"
 msgstr "Eru viss um að þú viljir eyða þessari sniðmáta skrá?"
 
@@ -3056,9 +3304,17 @@ msgstr "Korta númer"
 msgid "Expiry (MM/YY)"
 msgstr "gildistími (MM/ÁÁ)"
 
+#: includes/abstracts/abstract-wc-payment-gateway.php:212
+msgid "MM / YY"
+msgstr ""
+
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
 msgstr "Kortakóði"
+
+#: includes/abstracts/abstract-wc-payment-gateway.php:216
+msgid "CVC"
+msgstr ""
 
 #: includes/abstracts/abstract-wc-product.php:455
 #: includes/class-wc-product-simple.php:48
@@ -3101,7 +3357,7 @@ msgstr "Ekki til á lager"
 
 #: includes/abstracts/abstract-wc-product.php:908
 #: includes/abstracts/abstract-wc-product.php:914
-#: includes/class-wc-cart.php:1419 includes/class-wc-order.php:838
+#: includes/class-wc-cart.php:1419 includes/class-wc-order.php:859
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
 msgstr "Ókeypis!"
@@ -3122,7 +3378,7 @@ msgstr "Einkunn %s af 5"
 msgid "out of 5"
 msgstr "af 5"
 
-#: includes/abstracts/abstract-wc-product.php:1384
+#: includes/abstracts/abstract-wc-product.php:1386
 msgid "%s &ndash; %s"
 msgstr "%s &ndash; %s"
 
@@ -3225,7 +3481,7 @@ msgstr "JSONP stuðningur er óvirkur á þessum vef"
 
 #: includes/api/class-wc-api-json-handler.php:64
 msgid "The JSONP callback function is invalid"
-msgstr "The JSONP callback function is invalid"
+msgstr "JSONP endurkallsvirkni er ógild"
 
 #: includes/api/class-wc-api-orders.php:255
 msgid "You do not have permission to read the orders count"
@@ -3246,7 +3502,7 @@ msgstr "Þú hefur ekki réttindi til að skoða þessa skýrslu"
 
 #: includes/api/class-wc-api-resource.php:71
 msgid "Invalid %s ID"
-msgstr "Ógilt %s númer"
+msgstr "Ógilt %s auðkenni"
 
 #: includes/api/class-wc-api-resource.php:83
 msgid "Invalid %s"
@@ -3306,7 +3562,7 @@ msgstr "Vantar breytu %s"
 
 #: includes/class-wc-ajax.php:158
 msgid "Sorry, your session has expired."
-msgstr "Afsakið, virkur tími er liðinn."
+msgstr "Afsakið, lotan er liðin."
 
 #: includes/class-wc-ajax.php:158
 msgid "Return to homepage"
@@ -3334,42 +3590,42 @@ msgstr "Hefðbundin"
 msgid "File %d"
 msgstr "Skrá %d"
 
-#: includes/class-wc-ajax.php:1000 includes/class-wc-ajax.php:1001
-#: includes/class-wc-order.php:1544
+#: includes/class-wc-ajax.php:1008 includes/class-wc-ajax.php:1009
+#: includes/class-wc-order.php:1571
 msgid "Item #%s stock reduced from %s to %s."
-msgstr "Staða vörur #%s á lager lækkað úr %s í %s"
+msgstr "Lagerstaða vöru #%s lækkað úr %s í %s"
 
-#: includes/class-wc-ajax.php:1009
+#: includes/class-wc-ajax.php:1017
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr "Lagerstöðu var ekki breytt - mögulega er lagerhald ekki virkt."
 
-#: includes/class-wc-ajax.php:1048 includes/class-wc-ajax.php:1049
+#: includes/class-wc-ajax.php:1056 includes/class-wc-ajax.php:1057
 msgid "Item #%s stock increased from %s to %s."
-msgstr "Byrgðastað á vöru #%s hefur hækkað frá %s í %s"
+msgstr "Lagerstöðu á vöru #%s hefur hækkað frá %s í %s"
 
-#: includes/class-wc-ajax.php:1056
+#: includes/class-wc-ajax.php:1064
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr "Lagerstöðu var ekki breytt - mögulega er lagerhald ekki virkt."
 
-#: includes/class-wc-ajax.php:1072
+#: includes/class-wc-ajax.php:1080
 #: includes/widgets/class-wc-widget-product-categories.php:39
 #: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr "Nafn"
 
-#: includes/class-wc-ajax.php:1072
+#: includes/class-wc-ajax.php:1080
 msgid "Value"
 msgstr "Gildi"
 
-#: includes/class-wc-ajax.php:1290
+#: includes/class-wc-ajax.php:1298
 msgid "Delete note"
 msgstr "Eyða skilaboðum"
 
-#: includes/class-wc-ajax.php:1435
+#: includes/class-wc-ajax.php:1443
 msgid "Guest"
 msgstr "Gestur"
 
@@ -3487,52 +3743,52 @@ msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr "%d %b  %Y @ %I:%M %p"
 
-#: includes/class-wc-checkout.php:284
+#: includes/class-wc-checkout.php:287
 msgid "Backordered"
 msgstr "Biðpöntun"
 
-#: includes/class-wc-checkout.php:416
+#: includes/class-wc-checkout.php:423
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" class=\"wc-backward\">Return"
 " to homepage</a>"
 msgstr "Afsakið, tíminn er liðinn.  <a href=\"%s\" class=\"wc-backward\">Fara aftur á forsíðu</a>"
 
-#: includes/class-wc-checkout.php:491 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:498 includes/class-wc-form-handler.php:88
 msgid "is a required field."
 msgstr "krefst útfyllingar"
 
-#: includes/class-wc-checkout.php:503 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:510 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Sláðu inn gilt póstnúmer."
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:519 includes/class-wc-form-handler.php:108
 msgid "is not a valid phone number."
 msgstr "er ekki gilt símanúmer"
 
-#: includes/class-wc-checkout.php:518 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:525 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
 msgstr "er ekki gilt netfang"
 
-#: includes/class-wc-checkout.php:533
+#: includes/class-wc-checkout.php:540
 msgid "is not valid. Please enter one of the following:"
 msgstr "er ógilt. Vinsamlegast notaðu eitt af eftirtöldu:"
 
-#: includes/class-wc-checkout.php:578
+#: includes/class-wc-checkout.php:585
 msgid "You must accept our Terms &amp; Conditions."
 msgstr "Þú verður að samþykkja skilmálana okkar."
 
-#: includes/class-wc-checkout.php:583
+#: includes/class-wc-checkout.php:590
 msgid ""
 "Unfortunately <strong>we do not ship to %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr "Því miður <strong>sendum við ekki til %s</strong>. Vinsamlegast veldu annað heimilisfang."
 
-#: includes/class-wc-checkout.php:591
+#: includes/class-wc-checkout.php:598
 msgid "Invalid shipping method."
 msgstr "Óleyfilegur sendingarmáti."
 
-#: includes/class-wc-checkout.php:604
+#: includes/class-wc-checkout.php:611
 msgid "Invalid payment method."
 msgstr "Ógildur greiðslumáti"
 
@@ -4546,7 +4802,7 @@ msgstr "(m. vsk.)"
 
 #: includes/class-wc-countries.php:536
 msgid "(ex. VAT)"
-msgstr "(án vsk)"
+msgstr "(án vsk.)"
 
 #: includes/class-wc-countries.php:536
 msgid "(ex. tax)"
@@ -4595,113 +4851,117 @@ msgstr "Sýsla / Hérað"
 msgid "Postcode / Zip"
 msgstr "Póstnúmer"
 
-#: includes/class-wc-countries.php:826 includes/class-wc-countries.php:842
-#: includes/class-wc-countries.php:862 includes/class-wc-countries.php:923
-#: includes/class-wc-countries.php:942 includes/class-wc-countries.php:947
-#: includes/class-wc-countries.php:959 includes/class-wc-countries.php:1009
-#: includes/class-wc-countries.php:1033 includes/class-wc-countries.php:1074
+#: includes/class-wc-countries.php:827
+msgid "District"
+msgstr ""
+
+#: includes/class-wc-countries.php:834 includes/class-wc-countries.php:850
+#: includes/class-wc-countries.php:870 includes/class-wc-countries.php:931
+#: includes/class-wc-countries.php:950 includes/class-wc-countries.php:955
+#: includes/class-wc-countries.php:967 includes/class-wc-countries.php:1017
+#: includes/class-wc-countries.php:1041 includes/class-wc-countries.php:1082
 msgid "Province"
 msgstr "Sýsla"
 
-#: includes/class-wc-countries.php:848
+#: includes/class-wc-countries.php:856
 msgid "Canton"
 msgstr "Kantóna"
 
-#: includes/class-wc-countries.php:857 includes/class-wc-countries.php:1015
+#: includes/class-wc-countries.php:865 includes/class-wc-countries.php:1023
 msgid "Municipality"
 msgstr "Sveitarfélag"
 
-#: includes/class-wc-countries.php:910
+#: includes/class-wc-countries.php:918
 msgid "Town / District"
 msgstr "Borg / Bær"
 
-#: includes/class-wc-countries.php:913
+#: includes/class-wc-countries.php:921
 msgid "Region"
 msgstr "Svæði"
 
-#: includes/class-wc-countries.php:918 includes/class-wc-countries.php:1049
+#: includes/class-wc-countries.php:926 includes/class-wc-countries.php:1057
 msgid "County"
 msgstr "Sýsla"
 
-#: includes/class-wc-countries.php:1038
+#: includes/class-wc-countries.php:1046
 msgid "Zip"
 msgstr "Póstnúmer"
 
-#: includes/class-wc-countries.php:1041
+#: includes/class-wc-countries.php:1049
 msgid "State"
 msgstr "Ríki"
 
-#: includes/class-wc-countries.php:1046
+#: includes/class-wc-countries.php:1054
 msgid "Postcode"
 msgstr "Póstnúmer"
 
-#: includes/class-wc-countries.php:1154
+#: includes/class-wc-countries.php:1162
 msgid "Email Address"
 msgstr "Netfang"
 
-#: includes/class-wc-countries.php:1160
+#: includes/class-wc-countries.php:1168
 msgid "Phone"
 msgstr "Sími"
 
-#: includes/class-wc-coupon.php:568
+#: includes/class-wc-coupon.php:575
 msgid "Coupon code applied successfully."
 msgstr "Tókst að nota afsláttarmiða."
 
-#: includes/class-wc-coupon.php:571
+#: includes/class-wc-coupon.php:578
 msgid "Coupon code removed successfully."
 msgstr "Afsláttarmiði hefur verið fjarlægður"
 
-#: includes/class-wc-coupon.php:592
+#: includes/class-wc-coupon.php:599
 msgid "Coupon is not valid."
 msgstr "Afsláttarmiði er ógildur."
 
-#: includes/class-wc-coupon.php:595 includes/class-wc-coupon.php:645
+#: includes/class-wc-coupon.php:602 includes/class-wc-coupon.php:652
 msgid "Coupon does not exist!"
-msgstr "Afsláttarmiði finnst ekki í kerfi."
+msgstr "Afsláttarmiði finnst ekki!"
 
-#: includes/class-wc-coupon.php:598
+#: includes/class-wc-coupon.php:605
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
-msgstr "Afsakið, það virðist sem afsláttarmiði \"%s\" sé ógildur, hann hefur verið fjarlægður úr pöntuninni."
+msgstr "Afsakið, það virðist sem afsláttarmiði \"%s\" sé ógildur, ekki er hægt að nýta hann."
 
-#: includes/class-wc-coupon.php:601
+#: includes/class-wc-coupon.php:608
 msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
-msgstr "Afsakið, en það virðist sem afsláttarmiði \"%s\" sé ekki skráður á þig.  Hann hefur verið fjarlægður úr pöntuninni."
+msgstr "Afsakið, en það virðist sem afsláttarmiði \"%s\" sé ekki skráður á þig.  Hann hefur verið fjarlægður úr pöntun."
 
-#: includes/class-wc-coupon.php:604
+#: includes/class-wc-coupon.php:611
 msgid "Coupon code already applied!"
-msgstr "Það er nú þegar búið að nota þennan afsláttarmiða."
+msgstr "Afsláttarmiði nú þegar nýttur!"
 
-#: includes/class-wc-coupon.php:607
+#: includes/class-wc-coupon.php:614
 msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
-msgstr "Afsakið, afsláttarmiðinn \"%s\" hefur nú þegar verið notaður og ekki er hægt að nota hann með öðrum aflsáttarmiðum."
+msgstr "Afsakið, afsláttarmiðinn \"%s\" hefur nú þegar verið nýttur og ekki er hægt að nota hann með öðrum aflsáttarmiðum."
 
-#: includes/class-wc-coupon.php:610
+#: includes/class-wc-coupon.php:617
 msgid "Coupon usage limit has been reached."
-msgstr "Hámarksfjölda afsláttarmiða hefur verið náð."
+msgstr "Búið er að fullnýta afsláttarmiða."
 
-#: includes/class-wc-coupon.php:613
+#: includes/class-wc-coupon.php:620
 msgid "This coupon has expired."
-msgstr "Afsláttarmiðinn er útrunninn."
+msgstr "Afsláttarmiði er útrunninn."
 
-#: includes/class-wc-coupon.php:616
+#: includes/class-wc-coupon.php:623
 msgid "The minimum spend for this coupon is %s."
 msgstr "Lágmarkspöntun fyrir þennan afsláttarmiða er \"%s\"."
 
-#: includes/class-wc-coupon.php:619
+#: includes/class-wc-coupon.php:626
 msgid "Sorry, this coupon is not applicable to your cart contents."
 msgstr "Afsakið, það er ekki hægt að nota þennan afsláttarmiða fyrir vörur í pöntun."
 
-#: includes/class-wc-coupon.php:622
+#: includes/class-wc-coupon.php:629
 msgid "Sorry, this coupon is not valid for sale items."
 msgstr "Afsakið, þessi afsláttarmiði gildir ekki fyrir útsöluvörur."
 
-#: includes/class-wc-coupon.php:648
+#: includes/class-wc-coupon.php:655
 msgid "Please enter a coupon code."
 msgstr "Sláðu inn númer afsláttarmiða."
 
@@ -4716,7 +4976,7 @@ msgstr "Ógilt netfang"
 #: includes/class-wc-download-handler.php:95
 #: includes/class-wc-download-handler.php:99
 #: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:294
+#: includes/class-wc-download-handler.php:296
 msgid "Go to homepage"
 msgstr "Fara á forsíðu"
 
@@ -4759,13 +5019,13 @@ msgstr "Afsakið, þú hefur fullnýtt niðuhal á þessari skrá"
 
 #: includes/class-wc-download-handler.php:99
 msgid "Sorry, this download has expired"
-msgstr "Afsakaði, tíminn til að sækja skránna er liðinn"
+msgstr "Afsakaði, tíminn til að sækja þessa skrá er liðinn"
 
 #: includes/class-wc-download-handler.php:143
 msgid "No file defined"
 msgstr "Engin skrá skilgreind"
 
-#: includes/class-wc-download-handler.php:294
+#: includes/class-wc-download-handler.php:296
 msgid "File not found"
 msgstr "Skrá finnst ekki."
 
@@ -4839,7 +5099,7 @@ msgstr "Aðgangsupplýsingum hefur verið breytt."
 
 #: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
-msgstr "Greiðslumáta var bætt við "
+msgstr "Greiðslumáta var bætt við."
 
 #: includes/class-wc-form-handler.php:367
 #: includes/class-wc-form-handler.php:426
@@ -4917,14 +5177,14 @@ msgstr "VILLA"
 
 #: includes/class-wc-form-handler.php:877
 msgid "Anti-spam field was filled in."
-msgstr "Kæfuvörnin var fillt inn."
+msgstr "Kæfuvörnin var fyllt inn."
 
 #: includes/class-wc-frontend-scripts.php:123
 msgid "Please select a rating"
 msgstr "Gefðu einkunn"
 
 #: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1593
+#: includes/wc-template-functions.php:1602
 msgid "required"
 msgstr "nauðsynlegt"
 
@@ -4941,7 +5201,7 @@ msgstr "Afsakið, þessi vara er ekki í boði.  Vinsamlegast veldu aðra vörus
 
 #: includes/class-wc-frontend-scripts.php:170
 msgid "Select an option&hellip;"
-msgstr "Veldu valmöguleika&hellip;"
+msgstr "Notaðu valmöguleika&hellip;"
 
 #: includes/class-wc-install.php:217
 msgctxt "Page slug"
@@ -4966,7 +5226,7 @@ msgstr "Karfa"
 #: includes/class-wc-install.php:227
 msgctxt "Paeg slug"
 msgid "checkout"
-msgstr "Ganga frá pöntun"
+msgstr "ganga frá pöntun"
 
 #: includes/class-wc-install.php:228
 msgctxt "Page title"
@@ -5000,49 +5260,49 @@ msgctxt "hash before order number"
 msgid "#"
 msgstr "Nr."
 
-#: includes/class-wc-order.php:833
+#: includes/class-wc-order.php:854
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr "&nbsp;<small>%svia %s</small>"
 
-#: includes/class-wc-order.php:896
+#: includes/class-wc-order.php:917
 msgid "Cart Subtotal:"
 msgstr "Millisamtala körfu:"
 
-#: includes/class-wc-order.php:903
+#: includes/class-wc-order.php:924
 msgid "Cart Discount:"
 msgstr "Afsláttur á körfu"
 
-#: includes/class-wc-order.php:910
+#: includes/class-wc-order.php:931
 msgid "Shipping:"
-msgstr "Sendingarkostnaður:"
+msgstr "Sending:"
 
-#: includes/class-wc-order.php:957
+#: includes/class-wc-order.php:978
 msgid "Order Discount:"
 msgstr "Afsláttur á pöntun:"
 
-#: includes/class-wc-order.php:964
+#: includes/class-wc-order.php:985
 msgid "Payment Method:"
 msgstr "Greiðslumáti:"
 
-#: includes/class-wc-order.php:970
+#: includes/class-wc-order.php:991
 msgid "Order Total:"
 msgstr "Pöntun samtals:"
 
-#: includes/class-wc-order.php:988 includes/wc-cart-functions.php:236
+#: includes/class-wc-order.php:1009 includes/wc-cart-functions.php:251
 msgid "(Includes %s)"
 msgstr "(Innheldur %s)"
 
-#: includes/class-wc-order.php:1231 includes/class-wc-order.php:1232
+#: includes/class-wc-order.php:1258 includes/class-wc-order.php:1259
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: includes/class-wc-order.php:1287
+#: includes/class-wc-order.php:1314
 msgid "Order status changed from %s to %s."
-msgstr "Staða pöntunar var breytt úr %s í %s."
+msgstr "Stöðu pöntunar breytt úr %s í %s."
 
-#: includes/class-wc-order.php:1556
+#: includes/class-wc-order.php:1583
 msgid "Order item stock reduced successfully."
-msgstr "Það tóks að minnka stöðu á lager."
+msgstr "Það tóks að minnka lagerstöðu."
 
 #: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
 #: includes/widgets/class-wc-widget-product-categories.php:30
@@ -5056,7 +5316,7 @@ msgstr "Vöruflokkur"
 #: includes/class-wc-post-types.php:59
 msgctxt "Admin menu name"
 msgid "Categories"
-msgstr "Flokkar"
+msgstr "Vöruflokkar"
 
 #: includes/class-wc-post-types.php:60
 msgid "Search Product Categories"
@@ -5099,7 +5359,7 @@ msgstr "voruflokkur"
 #: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
-msgstr "Vörur merki"
+msgstr "Vörurmerki"
 
 #: includes/class-wc-post-types.php:93
 msgid "Product Tag"
@@ -5172,27 +5432,27 @@ msgstr "Allir Sendingarflokkar"
 
 #: includes/class-wc-post-types.php:131
 msgid "Parent Shipping Class"
-msgstr "Yfir Sendingarflokkur"
+msgstr "Yfirsendingarflokkur"
 
 #: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class:"
-msgstr "Yfir Sendingarflokkur:"
+msgstr "Yfirsendingarflokkur:"
 
 #: includes/class-wc-post-types.php:133
 msgid "Edit Shipping Class"
-msgstr "Breyta Sendingarflokk"
+msgstr "Breyta sendingarflokk"
 
 #: includes/class-wc-post-types.php:134
 msgid "Update Shipping Class"
-msgstr "Uppfæra Sendingarflokk"
+msgstr "Uppfæra sendingarflokk"
 
 #: includes/class-wc-post-types.php:135
 msgid "Add New Shipping Class"
-msgstr "Bæta við Sendingarflokk"
+msgstr "Bæta við sendingarflokk"
 
 #: includes/class-wc-post-types.php:136
 msgid "New Shipping Class Name"
-msgstr "Nafn á Sendingarflokk"
+msgstr "Nafn á sendingarflokk"
 
 #: includes/class-wc-post-types.php:184
 msgid "Search %s"
@@ -5220,7 +5480,7 @@ msgstr "Uppfæra %s"
 
 #: includes/class-wc-post-types.php:190
 msgid "Add New %s"
-msgstr "Bæta við nýrri %s"
+msgstr "Ný %s"
 
 #: includes/class-wc-post-types.php:191
 msgid "New %s"
@@ -5281,7 +5541,7 @@ msgstr "Skoða vöru"
 #: includes/class-wc-post-types.php:242
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
-msgstr "Leita í vörum"
+msgstr "Leita að vöru"
 
 #: includes/class-wc-post-types.php:243
 msgid "No Products found"
@@ -5293,11 +5553,11 @@ msgstr "Engin vara fannst í rusli"
 
 #: includes/class-wc-post-types.php:245
 msgid "Parent Product"
-msgstr "Yfir vara"
+msgstr "Yfirvara"
 
 #: includes/class-wc-post-types.php:247
 msgid "This is where you can add new products to your store."
-msgstr "Hérna getur þú bætt við nýrra vöru í verslunina."
+msgstr "Hérna getur þú bætt við nýrri vöru í verslunina."
 
 #: includes/class-wc-post-types.php:267
 msgid "Variations"
@@ -5322,7 +5582,7 @@ msgstr "Bæta við pöntun"
 
 #: includes/class-wc-post-types.php:288
 msgid "Add New Order"
-msgstr "Bæta við nýja pöntun"
+msgstr "Stofna nýja pöntun"
 
 #: includes/class-wc-post-types.php:290
 msgid "Edit Order"
@@ -5350,7 +5610,7 @@ msgstr "Engar pantanir í rusli"
 
 #: includes/class-wc-post-types.php:297
 msgid "Parent Orders"
-msgstr "Yfir pantanir"
+msgstr "Yfirpantanir"
 
 #: includes/class-wc-post-types.php:300
 msgid "This is where store orders are stored."
@@ -5367,7 +5627,7 @@ msgstr "Afsláttarmiði"
 #: includes/class-wc-post-types.php:325
 msgctxt "Admin menu name"
 msgid "Coupons"
-msgstr "Afsláttarkóðar"
+msgstr "Afsláttarmiðar"
 
 #: includes/class-wc-post-types.php:326
 msgid "Add Coupon"
@@ -5423,8 +5683,8 @@ msgid "View products"
 msgstr "Skoða vörur"
 
 #: includes/class-wc-product-grouped.php:194
-#: includes/class-wc-product-variable.php:251
-#: includes/class-wc-product-variable.php:256
+#: includes/class-wc-product-variable.php:273
+#: includes/class-wc-product-variable.php:278
 msgctxt "Price range: from-to"
 msgid "%1$s&ndash;%2$s"
 msgstr "%1$s&ndash;%2$s"
@@ -5438,13 +5698,13 @@ msgstr "Lesa meira"
 msgid "Select options"
 msgstr "Veldu kosti"
 
-#: includes/class-wc-product-variable.php:455
+#: includes/class-wc-product-variable.php:485
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
-msgstr "Þetta er breytileg vara, en af því hún hefur e\nThis variable product has no active variations so cannot be published. Changing status to draft."
+msgstr "Þetta er breytileg vara, en af því hún hefur engan breytileika og getur því ekki verið birt. Vistuð í drögum."
 
-#: includes/class-wc-product-variation.php:494
+#: includes/class-wc-product-variation.php:516
 msgid "%s &ndash; %s%s"
 msgstr "%s &ndash; %s%s"
 
@@ -5456,13 +5716,13 @@ msgstr "Notaðu $args[\"posts_per_page\"] í staðin. Úrelt gildi verða fjarl�
 
 #: includes/emails/class-wc-email-customer-completed-order.php:26
 msgid "Completed order"
-msgstr "Fullafgreiddpöntun"
+msgstr "Fullafgreidd pöntun"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:27
 msgid ""
 "Order complete emails are sent to the customer when the order is marked "
 "complete and usual indicates that the order has been shipped."
-msgstr "Tölvupóstur um að pöntun sé afgreidd eru send út þegar pöntun hefur verið merkt afgreidd og þýðir vanalega að pöntun hefur verið send til viðskiptavinar."
+msgstr "Tölvupóstur er sendur um að pöntun sé afgreidd þegar pöntun hefur verið merkt afgreidd í kerfinu og þýðir vanalega að pöntun hefur verið send til viðskiptavinar."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:29
 msgid "Your order is complete"
@@ -5501,21 +5761,21 @@ msgstr "Fyrrisögn meginmáls tölvupósts (niðurhalanlegt)"
 
 #: includes/emails/class-wc-email-customer-invoice.php:29
 msgid "Customer invoice"
-msgstr "Reikningur viðskiptavinar"
+msgstr "Vörureikningur viðskiptavinar"
 
 #: includes/emails/class-wc-email-customer-invoice.php:30
 msgid ""
 "Customer invoice emails can be sent to the user containing order info and "
 "payment links."
-msgstr "Hægt er að senda reikning í tölvupósti til viðskiptavinar, sem inniheldur upplýsingar um pöntun og greiðsluupplýsingar."
+msgstr "Hægt er að senda vörureikning í tölvupósti til viðskiptavinar, sem inniheldur upplýsingar um pöntun og greiðsluupplýsingar."
 
 #: includes/emails/class-wc-email-customer-invoice.php:35
 msgid "Invoice for order {order_number} from {order_date}"
-msgstr "Reikningur fyrir pöntun {order_number} síðan {order_date}"
+msgstr "Vörureikningur fyrir pöntun {order_number} síðan {order_date}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:36
 msgid "Invoice for order {order_number}"
-msgstr "Reikningur fyrir pöntun {order_number}"
+msgstr "Vörureikningur fyrir pöntun {order_number}"
 
 #: includes/emails/class-wc-email-customer-invoice.php:38
 msgid "Your {site_title} order from {order_date}"
@@ -5531,7 +5791,7 @@ msgstr "Fyrirsögn tölvupósts (greitt)"
 
 #: includes/emails/class-wc-email-customer-invoice.php:167
 msgid "Email heading (paid)"
-msgstr "Fyrrisögn meginmáls tölvupósts (greitt)"
+msgstr "Fyrirsögn meginmáls tölvupósts (greitt)"
 
 #: includes/emails/class-wc-email-customer-new-account.php:33
 msgid "New account"
@@ -5541,7 +5801,7 @@ msgstr "Nýr reikningur"
 msgid ""
 "Customer new account emails are sent when a customer signs up via the "
 "checkout or My Account page."
-msgstr "Tölvupóstur um nýja viðskiptavini eru send þegar viðskiptavinur stofnar reikning um leið og hann gengur frá pöntun eða á sínum síðum."
+msgstr "Tölvupóstur er sendur þegar viðskiptavinur stofnar reikning um leið og hann gengur frá pöntun eða í gengum mínar síður."
 
 #: includes/emails/class-wc-email-customer-new-account.php:39
 msgid "Your account on {site_title}"
@@ -5557,7 +5817,7 @@ msgstr "Skilaboð viðskiptavinar"
 
 #: includes/emails/class-wc-email-customer-note.php:32
 msgid "Customer note emails are sent when you add a note to an order."
-msgstr "Viðskiptavinur fær tölvupóst með skýringum þegar þú bætir við skýringu við pöntun"
+msgstr "Viðskiptavinur fær tölvupóst með skýringum þegar þú bætir skýringu við pöntun"
 
 #: includes/emails/class-wc-email-customer-note.php:37
 msgid "Note added to your {site_title} order from {order_date}"
@@ -5565,7 +5825,7 @@ msgstr "Skilaboðum bætt við pöntun þína frá {site_title} þann {order_dat
 
 #: includes/emails/class-wc-email-customer-note.php:38
 msgid "A note has been added to your order"
-msgstr "Skilaboðum hefur verið bætt við pöntunina"
+msgstr "Skýringu hefur verið bætt við pöntunina"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:26
 msgid "Processing order"
@@ -5593,7 +5853,7 @@ msgstr "Endursetja lykilorð"
 msgid ""
 "Customer reset password emails are sent when a customer resets their "
 "password."
-msgstr "Endursett lykilorð viðskiptavinar eru sent í tölvupósti þegar viðskiptavinur endursetur lykilorð."
+msgstr "Endursett lykilorð er sent í tölvupósti þegar viðskiptavinur endursetur lykilorð."
 
 #: includes/emails/class-wc-email-customer-reset-password.php:44
 msgid "Password Reset for {site_title}"
@@ -5652,7 +5912,7 @@ msgstr "Leyfa millifærslur inn á bankareikninginn þinn."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:68
 msgid "Enable Bank Transfer"
-msgstr "Virkja millifærslu í gegnum banka"
+msgstr "Virkja millifærslu inn á bankareikning"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:72
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:58
@@ -5673,7 +5933,7 @@ msgstr "Virkja millifærslu í gegnum banka"
 #: includes/widgets/class-wc-widget-recently-viewed.php:28
 #: includes/widgets/class-wc-widget-top-rated-products.php:30
 msgid "Title"
-msgstr "Titill"
+msgstr "Fyrirsögn"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:74
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:60
@@ -5689,14 +5949,14 @@ msgstr "Þetta stýrir fyrirsögninni sem notandi sér þegar viðskiptavinur ge
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:75
 msgid "Direct Bank Transfer"
-msgstr "Millifærslan"
+msgstr "Millifæra inn á bankareikning"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:79
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:65
 #: includes/gateways/cod/class-wc-gateway-cod.php:71
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:149
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:139
-#: includes/wc-template-functions.php:971
+#: includes/wc-template-functions.php:980
 msgid "Description"
 msgstr "Lýsing"
 
@@ -5785,7 +6045,7 @@ msgid ""
 "Allows cheque payments. Why would you take cheques in this day and age? Well"
 " you probably wouldn't but it does allow you to make test purchases for "
 "testing order emails and the 'success' pages etc."
-msgstr "Leyfa greiðslu með ávísun.  Af hverju ættirðu að leyfa greiðslu með ávísun í dag? Líklegast ekki, en þú getur prófað verslunina með ávísanagreiðslukerfinu."
+msgstr "Leyfa greiðslu með ávísun.  Af hverju ættirðu að leyfa greiðslu með ávísun í dag?  Líklegast ekki, en þú getur prófað verslunina með ávísanagreiðslukerfinu."
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:54
 msgid "Enable Cheque Payment"
@@ -5824,7 +6084,7 @@ msgstr "Virkja greiðslu við afhendingu"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:73
 msgid "Payment method description that the customer will see on your website."
-msgstr "Lýsing á greiðslumáta. Viðskiptavinir sjá lýsinguna á vefnum. "
+msgstr "Lýsing á greiðslumáta, sem Viðskiptavinir sjá lýsinguna á vefnum. "
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:74
 #: includes/gateways/cod/class-wc-gateway-cod.php:81
@@ -5877,7 +6137,7 @@ msgstr "Aðgangslykill (access key) fyrir þína verslun."
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:145
 msgid "Credit Card"
-msgstr "Kreditkort"
+msgstr "Greiðslukort"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:151
 msgid "Pay securely with your credit card."
@@ -5898,7 +6158,7 @@ msgid ""
 "card data to your payment gateway while keeping you in control of the design"
 " of your site. Mijireh supports a wide variety of payment gateways: Stripe, "
 "Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more."
-msgstr "býður upp á PCI sannreynda, örugga leið til að safna saman og senda greiðslukortaupplýsingar til greiðslugáttarinn sem þú notar, en á sama tíma að stjórna hönnun síðunnar.  Mijireh styður fjölmargar greiðslugáttir: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap og fleiri."
+msgstr "býður upp á PCI sannreynda, örugga leið til að safna saman og senda greiðslukortaupplýsingar til greiðslugáttarinnar sem þú notar, en á sama tíma að stjórna útliti síðunnar.  Mijireh styður fjölmargar greiðslugáttir: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap og fleiri."
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:174
 msgid "Join for free"
@@ -5913,7 +6173,7 @@ msgid ""
 "provides a fully PCI Compliant, secure way to collect and transmit credit "
 "card data to your payment gateway while keeping you in control of the design"
 " of your site."
-msgstr "býður upp á PCI sannreynda, örugga leið til að safna saman og senda greiðslukortaupplýsingar til greiðslugáttarinn sem þú notar, en á sama tíma að stjórna hönnun síðunnar. "
+msgstr "býður upp á PCI sannreynda, örugga leið til að safna saman og senda greiðslukortaupplýsingar til greiðslugáttarinn sem þú notar, en á sama tíma að stjórna útliti síðunnar. "
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:31
 msgid "Proceed to PayPal"
@@ -5997,7 +6257,7 @@ msgid ""
 "Please enter a prefix for your invoice numbers. If you use your PayPal "
 "account for multiple stores ensure this prefix is unique as PayPal will not "
 "allow orders with the same invoice number."
-msgstr "Vinsamlegast sláðu inn forskeyti fyrir númer á vörureikningum.   Ef þú notar Paypal fyrir fleiri en eina verslun, þarf þetta forskeyti að vera einkvæmt, þar sem Paypal leyfir ekki fleiri en einn vörureikning með sama númeri."
+msgstr "Vinsamlegast sláðu inn forskeyti sem bætist fyrir fram númer vörureiknings. Ef þú notar Paypal fyrir fleiri en eina verslun, þarf þetta forskeyti að vera einkvæmt, þar sem Paypal leyfir ekki fleiri en einn vörureikning með sama númeri."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:176
 msgid "Payment Action"
@@ -6029,7 +6289,7 @@ msgstr "Nota vefform til skráningar"
 msgid ""
 "Enable this to post order data to PayPal via a form instead of using a "
 "redirect/querystring."
-msgstr "Virkja þetta til að nota vefform til að eiga samskipti við PayPal í staðin fyrir að senda viðskiptavin yfir á síðuna þeirra."
+msgstr "Virkja þetta til að nota vefform til að eiga samskipti við PayPal í staðin fyrir að senda viðskiptavin yfir á heimasíðu PayPal."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:194
 msgid "Page Style"
@@ -6051,13 +6311,13 @@ msgstr "Upplýsingar um sendingu"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:209
 msgid "Send shipping details to PayPal instead of billing."
-msgstr "Senda til Paypal heimilisfangið sem á að senda á, í stað þess sem er skráð fyrir reikning."
+msgstr "Láta Paypal hafa heimilisfangið sem á að senda á í stað heimilisfangs viðkomandi."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:210
 msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
-msgstr "PayPal leyfir notendum að nota 1 heimilisfang.  Ef þú ert að nota PayPal fyrir sendingar, gætir verið betra að nota heimilisfangið sem á að senda á, frekar en reikningsheimilisfangið."
+msgstr "PayPal leyfir notendum að nota 1 heimilisfang.  Ef þú ert að nota PayPal fyrir sendingar, gætir verið betra að nota heimilisfangið sem á að senda á frekar en skráð á notandann."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:214
 msgid "Address override"
@@ -6131,7 +6391,7 @@ msgstr "Greiða með PayPal"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:491
 msgid "Cancel order &amp; restore cart"
-msgstr "Hætta við pöntun &amp; endurstilla körfu"
+msgstr "Hætta við pöntun &amp; eyða vörum úr körfu"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:546
 msgid ""
@@ -6145,7 +6405,7 @@ msgstr "Villa! Staðfesting tókst ekki: PayPal gjaldmiðlar stemma ekki (code %
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:712
 msgid "Validation error: PayPal amounts do not match (gross %s)."
-msgstr "Villa við prófun: Upphæðir hjá PayPal pass ekki (heild %s)."
+msgstr "Villa við prófun: Upphæðir hjá PayPal passa ekki (heild %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:723
 msgid ""
@@ -6185,7 +6445,7 @@ msgstr "Pöntun afturkölluð"
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:793
 msgid ""
 "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
-msgstr "Pöntun %s hefur verið merkt sem í bið vegna afturköllunnar pöntunar - ástæða frá Paypal: %s"
+msgstr "Pöntun %s hefur verið merkt í bið vegna afturköllunnar pöntunar - ástæða frá Paypal: %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:796
 msgid "Payment for order %s reversed"
@@ -6207,11 +6467,11 @@ msgstr "Hætt við afturköllun fyrir pöntun %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:880
 msgid "Validation error: PayPal amounts do not match (amt %s)."
-msgstr "Villa við prófuin: PayPal upphæðir stemma ekki (amt %s)."
+msgstr "Villa við prófun: PayPal upphæðir stemma ekki (amt %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:888
 msgid "PDT payment completed"
-msgstr "PDF greiðslu lokið"
+msgstr "PDT greiðslu lokið"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:25
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:84
@@ -6236,7 +6496,7 @@ msgstr "Fyrirsögn aðferðr"
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:88
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:62
 msgid "Availability"
-msgstr "Aðgengi"
+msgstr "Framboð"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:93
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:82
@@ -6297,7 +6557,7 @@ msgid ""
 "Optional extra shipping options with additional costs (one per line): Option"
 " Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or "
 "item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
-msgstr "Valkvætt auka sendingarvalmöguleiki með auka kostnað (einn fyrir hverja línu): Nafn valmöuleika | Auka kostnaður [+- prósenta] | Aukakostanður (per pöntun, flokkur eða á stykki) T.d.  <code>A Póstur| 695 [+ 0.2%] | order</code>."
+msgstr "Valkvæður auka sendingarmöguleiki með auka kostnað (einn fyrir hverja línu): Nafn valmöguleika | Auka kostnaður [+- prósenta] | Aukakostnaður (á hverja pöntun, flokkur eða á stykki) T.d.  <code>A Póstur| 695 [+ 0.2%] | order</code>."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:131
 msgid ""
@@ -6307,7 +6567,7 @@ msgstr "Valmöguleiki | Viðbótarkostnaður [+- Prósenta %] | Tegund kostnaða
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:134
 msgid "Additional Costs"
-msgstr "Viðbótar gjöld"
+msgstr "Viðbótar kostnaður"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:136
 msgid ""
@@ -6322,17 +6582,17 @@ msgstr "Kostnaði bætt við..."
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:143
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:96
 msgid "Per Order - charge shipping for the entire order as a whole"
-msgstr "Á hverja pöntun - flutningur er innheimtur af allri pöntuninni"
+msgstr "Á hverja pöntun - sending er innheimt af allri pöntuninni"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:144
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:97
 msgid "Per Item - charge shipping for each item individually"
-msgstr "Á hvert stykki - flutningur er inheimtur af sérhverju stykki í pöntun"
+msgstr "Á hvert stykki - sending er inheimt af sérhverju stykki í pöntun"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:145
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:98
 msgid "Per Class - charge shipping for each shipping class in an order"
-msgstr "Fyrir hvern flokk - greitt fyrri sendingu á hverjum flokk í pöntuninni"
+msgstr "Fyrir hvern flokk - greitt fyrri sendingu út frá flokkum í pöntun"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:152
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:118
@@ -6344,7 +6604,7 @@ msgstr "Lágmarks afgreiðslugjald"
 msgid ""
 "Enter a minimum fee amount. Fee's less than this will be increased. Leave "
 "blank to disable."
-msgstr "Skráðu lágmarksafgreiðslugjald.  Sé sendingarkostnaður undir þessari upphæð, verður hann hækkaður í hana.  Þetta er óvirkt ef reitur er auður."
+msgstr "Skráðu lágmarksafgreiðslugjald.  Sé sendingarkostnaður undir þessari upphæð, verður hann hækkaður í þessa upphæð.  Þetta er óvirkt ef reitur er auður."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:540
 msgid "Costs"
@@ -6401,11 +6661,11 @@ msgstr "Eyða völdum gjaldflokkum?"
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:73
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:133
 msgid "Free Shipping"
-msgstr "Ókeypis sendingarkostnaður"
+msgstr "Frítt að senda"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:66
 msgid "Enable Free Shipping"
-msgstr "Virkja ókeypis sendingu"
+msgstr "Virkja fría sendingu"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:77
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:137
@@ -6415,11 +6675,11 @@ msgstr "Í boði fyrir"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:98
 msgid "Free Shipping Requires..."
-msgstr "Ókeypis flutningur þarfnast..."
+msgstr "Frí sending krefst ..."
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:103
 msgid "A valid free shipping coupon"
-msgstr "Aflsláttarmiða fyrir ókeypis flutning"
+msgstr "Aflsláttarmiða fyrir fría sendingu"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:104
 msgid "A minimum order amount (defined below)"
@@ -6441,7 +6701,7 @@ msgstr "Lágmarskupphæð pöntunar"
 msgid ""
 "Users will need to spend this amount to get free shipping (if enabled "
 "above)."
-msgstr "Viðskiptavinur þarf að eyða þessari upphæð til þess að öðlast ókeypis flutnings (ef virkjað hér að ofan)."
+msgstr "Viðskiptavinur þarf að kaupa fyrir þesssa upphæð til þess að öðlast fría sendingu (ef virkjað hér að ofan)."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:29
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:58
@@ -6481,7 +6741,7 @@ msgstr "Þóknun án vsk. Skráðu inn upphæð t.d. 2.5 eða prósentu t.d. 5%.
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:25
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:105
 msgid "Local Delivery"
-msgstr "Staðbundin sending"
+msgstr "Grendardreifing"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:96
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:75
@@ -6490,7 +6750,7 @@ msgstr "Virkja"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:98
 msgid "Enable local delivery"
-msgstr "Virkja staðbundna sendingu"
+msgstr "Virkja grendardreifingu"
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:109
 msgid "Fee Type"
@@ -6520,7 +6780,7 @@ msgstr "Afhendingarþóknun"
 msgid ""
 "What fee do you want to charge for local delivery, disregarded if you choose"
 " free. Leave blank to disable."
-msgstr "Hvaða upphæð viltu innheimta fyrir staðbundna dreifingu, slepptu ef þú vilt dreifa frítt.  Skildu eftir autt ef óvirkt."
+msgstr "Hvaða upphæð viltu innheimta fyrir staðbundna sendingu, slepptu ef þú vilt dreifa frítt.  Skildu eftir autt ef óvirkt."
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:129
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:88
@@ -6531,12 +6791,12 @@ msgstr "Póstnúmer"
 msgid ""
 "What zip/post codes would you like to offer delivery to? Separate codes with"
 " a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr "Hvaða póstnúmer viltu dreifa í?  Aðgreindu póstnúmer með kommu.  Algildistákn t.d. 1* myndi samþykkja öll póstnúmer sem byrja á 1 t.d. 101."
+msgstr "Hvaða póstnúmer viltu dreifa í?  Aðgreindu póstnúmer með kommu.  Algildistákn t.d. 1* myndi samþykkja öll póstnúmer sem byrja á 1 t.d. 101,102..."
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:169
 msgid ""
 "Local delivery is a simple shipping method for delivering orders locally."
-msgstr "Staðbundin dreifing er einfaldur flutningsmáti til að dreifa vöru í nágrenni verslunar."
+msgstr "Grendardreifing er einfaldur sendingarmáti til að dreifa vöru í nágrenni verslunar."
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:25
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:84
@@ -6551,7 +6811,7 @@ msgstr "Virkja \"Sótt í verslun\""
 msgid ""
 "What zip/post codes are available for local pickup? Separate codes with a "
 "comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr "Hvaða póstnúmer leyfa viðstkipavini að sækja vöru? Settu inn öll póstnúmer, með kommu á milli. Stjörnur samþykktar til að víkka leitarskilyrði, t.d. þá mun 1* leyfa póstnúmerin 101, 107, 130 o.s.frv."
+msgstr "Hvaða póstnúmer leyfa viðskipavini að sækja vöru? Settu inn öll póstnúmer, með kommu á milli. Stjörnur samþykktar til að víkka leitarskilyrði, t.d. þá mun 1* leyfa póstnúmerin 101, 107, 130 o.s.frv."
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:128
 msgid ""
@@ -6561,7 +6821,7 @@ msgstr "Sækja í verslun er einföld aðferð þar sem viðskiptavinir koma í 
 
 #: includes/shortcodes/class-wc-shortcode-cart.php:58
 msgid "Shipping costs updated."
-msgstr "Flutningskostnaður uppfærður."
+msgstr "Sendingarkostnaður uppfærður."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:91
 msgid "Invalid order. If you have an account please log in and try again."
@@ -6607,7 +6867,7 @@ msgstr "Greiðslumáti:"
 msgid ""
 "The order totals have been updated. Please confirm your order by pressing "
 "the Place Order button at the bottom of the page."
-msgstr "Upphæð pöntunarinnar verður uppfærð. Vinsamlegast staðfestu pöntunina með því að ýta á \"staðfesta pöntun\" takkann neðst á síðunni."
+msgstr "Upphæð pöntunarinnar uppfærð. Vinsamlegast staðfestu pöntunina með því að ýta á \"staðfesta pöntun\" takkann neðst á síðunni."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:202
 msgid "Your password has been reset."
@@ -6627,7 +6887,7 @@ msgstr "Enginn notandi er skráður með þetta netfang"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:242
 msgid "Invalid username or e-mail."
-msgstr "Ógilt notandanafn eða netfang"
+msgstr "Ógilt notendanafn eða netfang"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:256
 msgid "Password reset is not allowed for this user"
@@ -6679,19 +6939,19 @@ msgstr "&quot;%s&quot; var sett í körfuna þína."
 msgid "Continue Shopping"
 msgstr "Halda áfram að versla"
 
-#: includes/wc-cart-functions.php:183
+#: includes/wc-cart-functions.php:193
 msgid "Coupon:"
 msgstr "Afsláttarmiði:"
 
-#: includes/wc-cart-functions.php:208
+#: includes/wc-cart-functions.php:219
 msgid "Free shipping coupon"
-msgstr "Afsláttarmiði fyrir ókeypis sendingar"
+msgstr "Afsláttarmiði fyrir fríar sendingar"
 
-#: includes/wc-cart-functions.php:210
+#: includes/wc-cart-functions.php:225
 msgid "[Remove]"
 msgstr "[Fjarlægja]"
 
-#: includes/wc-cart-functions.php:271
+#: includes/wc-cart-functions.php:288
 msgid "Free"
 msgstr "Ókeypis"
 
@@ -6704,150 +6964,154 @@ msgid "Australian Dollars"
 msgstr "Ástralskir dalur"
 
 #: includes/wc-core-functions.php:169
+msgid "Bangladeshi Taka"
+msgstr ""
+
+#: includes/wc-core-functions.php:170
 msgid "Brazilian Real"
 msgstr "Brasilískt real"
 
-#: includes/wc-core-functions.php:170
+#: includes/wc-core-functions.php:171
 msgid "Bulgarian Lev"
 msgstr "Búlgörsk lev"
 
-#: includes/wc-core-functions.php:171
+#: includes/wc-core-functions.php:172
 msgid "Canadian Dollars"
 msgstr "Kanadadalur"
 
-#: includes/wc-core-functions.php:172
+#: includes/wc-core-functions.php:173
 msgid "Chilean Peso"
 msgstr "Síleskur pesi"
 
-#: includes/wc-core-functions.php:173
+#: includes/wc-core-functions.php:174
 msgid "Chinese Yuan"
 msgstr "Kínverskt Yuan"
 
-#: includes/wc-core-functions.php:174
+#: includes/wc-core-functions.php:175
 msgid "Colombian Peso"
 msgstr "Kólumbískur pesi"
 
-#: includes/wc-core-functions.php:175
+#: includes/wc-core-functions.php:176
 msgid "Czech Koruna"
 msgstr "Tékknesk króna"
 
-#: includes/wc-core-functions.php:176
+#: includes/wc-core-functions.php:177
 msgid "Danish Krone"
 msgstr "Dönsk króna"
 
-#: includes/wc-core-functions.php:177
+#: includes/wc-core-functions.php:178
 msgid "Euros"
 msgstr "Evrur"
 
-#: includes/wc-core-functions.php:178
+#: includes/wc-core-functions.php:179
 msgid "Hong Kong Dollar"
 msgstr "Hong Kong dalur"
 
-#: includes/wc-core-functions.php:179
+#: includes/wc-core-functions.php:180
 msgid "Croatia kuna"
 msgstr "Króatísk kúna"
 
-#: includes/wc-core-functions.php:180
+#: includes/wc-core-functions.php:181
 msgid "Hungarian Forint"
 msgstr "Ungversk forinta"
 
-#: includes/wc-core-functions.php:181
+#: includes/wc-core-functions.php:182
 msgid "Icelandic krona"
 msgstr "Íslensk króna"
 
-#: includes/wc-core-functions.php:182
+#: includes/wc-core-functions.php:183
 msgid "Indonesia Rupiah"
 msgstr "Indónesískt rúpía"
 
-#: includes/wc-core-functions.php:183
+#: includes/wc-core-functions.php:184
 msgid "Indian Rupee"
 msgstr "Indversk rúpía"
 
-#: includes/wc-core-functions.php:184
+#: includes/wc-core-functions.php:185
 msgid "Israeli Shekel"
 msgstr "Israelstt Shekel"
 
-#: includes/wc-core-functions.php:185
+#: includes/wc-core-functions.php:186
 msgid "Japanese Yen"
 msgstr "Japanskt jen"
 
-#: includes/wc-core-functions.php:186
+#: includes/wc-core-functions.php:187
 msgid "South Korean Won"
 msgstr "Suður-kóreskt vonn"
 
-#: includes/wc-core-functions.php:187
+#: includes/wc-core-functions.php:188
 msgid "Malaysian Ringgits"
 msgstr "Malasísk ringit"
 
-#: includes/wc-core-functions.php:188
+#: includes/wc-core-functions.php:189
 msgid "Mexican Peso"
 msgstr "Mexíkóskur pesi"
 
-#: includes/wc-core-functions.php:189
+#: includes/wc-core-functions.php:190
 msgid "Nigerian Naira"
 msgstr "Nígersk næra"
 
-#: includes/wc-core-functions.php:190
+#: includes/wc-core-functions.php:191
 msgid "Norwegian Krone"
 msgstr "Norsk króna"
 
-#: includes/wc-core-functions.php:191
+#: includes/wc-core-functions.php:192
 msgid "New Zealand Dollar"
 msgstr "Nýsjálenskur dalur"
 
-#: includes/wc-core-functions.php:192
+#: includes/wc-core-functions.php:193
 msgid "Philippine Pesos"
 msgstr "Filippeyskur pesi"
 
-#: includes/wc-core-functions.php:193
+#: includes/wc-core-functions.php:194
 msgid "Polish Zloty"
 msgstr "Pólskt slot"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Pounds Sterling"
 msgstr "Sterlingspund"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Romanian Leu"
 msgstr "Rúmversk lei"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Russian Ruble"
 msgstr "Rússnesk rúbla"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Singapore Dollar"
 msgstr "Singapúrskur dalur"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "South African rand"
 msgstr "Suður-afrískt rand"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "Swedish Krona"
 msgstr "Sænsk króna"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swiss Franc"
 msgstr "Svissneskur franki"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Taiwan New Dollars"
 msgstr "Tævanskur dalur"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Thai Baht"
 msgstr "Tælenskt bat"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Turkish Lira"
 msgstr "Tyrknesk líra"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "US Dollars"
 msgstr "Bandaríkjadalur"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "Vietnamese Dong"
 msgstr "Víetnam Dong"
 
@@ -6870,7 +7134,7 @@ msgstr "Prósentuafsláttur vöru"
 #: includes/wc-customer-functions.php:52
 msgid ""
 "An account is already registered with your email address. Please login."
-msgstr "Þetta netfang er nú þegar skráð.  Vinsamlegast skráðu þig inn."
+msgstr "Þetta netfang er nú þegar á skrá.  Vinsamlegast skráðu þig inn."
 
 #: includes/wc-customer-functions.php:61
 msgid "Please enter a valid account username."
@@ -6895,85 +7159,85 @@ msgstr "Nýskráning tókst ekki&hellip; vinsamlegast hafðu samband við okkur 
 msgid "Unpaid order cancelled - time limit reached."
 msgstr "Ógreidd pöntun afturkölluð – tímarammi útrunninn"
 
-#: includes/wc-product-functions.php:236
+#: includes/wc-product-functions.php:233
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "Óflokkað"
 
-#: includes/wc-template-functions.php:103
+#: includes/wc-template-functions.php:120
 msgid "New products"
 msgstr "Nýjar vörur"
 
-#: includes/wc-template-functions.php:111
+#: includes/wc-template-functions.php:128
 msgid "New products added to %s"
 msgstr "Nýjum vörum bætt við %s"
 
-#: includes/wc-template-functions.php:119
+#: includes/wc-template-functions.php:136
 msgid "New products tagged %s"
 msgstr "Nýjar vörur merktar %s"
 
-#: includes/wc-template-functions.php:356
+#: includes/wc-template-functions.php:381
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
 msgstr "Þetta er sýnisverslun til prófunar &mdash; engar pantanir eru afgreiddar."
 
-#: includes/wc-template-functions.php:375
+#: includes/wc-template-functions.php:400
 msgid "Search Results: &ldquo;%s&rdquo;"
 msgstr "Leitarniðurstöður: &ldquo;%s&rdquo;"
 
-#: includes/wc-template-functions.php:378
+#: includes/wc-template-functions.php:403
 msgid "&nbsp;&ndash; Page %s"
 msgstr "&nbsp;&ndash; Síða %s"
 
-#: includes/wc-template-functions.php:980
+#: includes/wc-template-functions.php:989
 #: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
 msgstr "Viðbótarupplýsingar"
 
-#: includes/wc-template-functions.php:989
+#: includes/wc-template-functions.php:998
 msgid "Reviews (%d)"
 msgstr "Umsagnir (%d)"
 
-#: includes/wc-template-functions.php:1080
+#: includes/wc-template-functions.php:1089
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
 msgstr "Notaðu $arg breytur sem fylki í staðin.  Úreltar breytur verða fjarlægðar í útgáfu WC 2.2. "
 
-#: includes/wc-template-functions.php:1248
+#: includes/wc-template-functions.php:1257
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Heim"
 
-#: includes/wc-template-functions.php:1549
+#: includes/wc-template-functions.php:1558
 msgid "Order Again"
 msgstr "Panta aftur"
 
-#: includes/wc-template-functions.php:1640
+#: includes/wc-template-functions.php:1649
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Veldu land&hellip;"
 
-#: includes/wc-template-functions.php:1647
+#: includes/wc-template-functions.php:1656
 msgid "Update country"
 msgstr "Uppfæra land"
 
-#: includes/wc-template-functions.php:1690
+#: includes/wc-template-functions.php:1699
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Velja ríki&hellip;"
 
-#: includes/wc-template-functions.php:1803
+#: includes/wc-template-functions.php:1812
 msgid "Search for:"
-msgstr "Leita af:"
+msgstr "Leita eftir:"
 
-#: includes/wc-template-functions.php:1804
+#: includes/wc-template-functions.php:1813
 msgid "Search for products"
 msgstr "Leita að vörum"
 
-#: includes/wc-template-functions.php:1805
+#: includes/wc-template-functions.php:1814
 msgid "Search"
 msgstr "Leita"
 
@@ -7022,17 +7286,17 @@ msgstr "Fjarlægja síu"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:91
 msgid "Min"
-msgstr "Min"
+msgstr "Lágmark"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:96
 msgid "Max"
-msgstr "Max"
+msgstr "Hámark"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:21
 msgid ""
 "Shows a custom attribute in a widget which lets you narrow down the list of "
 "products when viewing product categories."
-msgstr "Sýna sérsnið eigind í verkfæru sem leyfir þér að þrengja niður listann af vörum, þegar verið að er skoða vörur í flokkum."
+msgstr "Sýna sérsniðin eigindini í aukahlutum sem leyfir þér að þrengja niður listann af vörum, þegar verið að er skoða vörur í flokkum."
 
 #: includes/widgets/class-wc-widget-layered-nav.php:23
 msgid "WooCommerce Layered Nav"
@@ -7040,7 +7304,7 @@ msgstr "WooCommerce Layered Nav"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:69
 msgid "Filter by"
-msgstr "Flokka eftir"
+msgstr "Sía eftir"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:75
 msgid "Attribute"
@@ -7056,7 +7320,7 @@ msgstr "Listi"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:84
 msgid "Dropdown"
-msgstr "Dropdown"
+msgstr "Fellilisti"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:90
 msgid "Query type"
@@ -7137,7 +7401,7 @@ msgstr "Sýna stigveldi"
 msgid "Only show children for the current category"
 msgstr "Eingöngu sýna undirflokka fyrir núverandi flokk"
 
-#: includes/widgets/class-wc-widget-product-categories.php:177
+#: includes/widgets/class-wc-widget-product-categories.php:214
 msgid "No product categories exist."
 msgstr "Engin vöruflokkur er til"
 
@@ -7232,7 +7496,7 @@ msgstr "Sýna ókeypis vörur"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:21
 msgid "Display a list of your most recent reviews on your site."
-msgstr "Sýna lista með nýstu umsögnunum á síðunni"
+msgstr "Sýna lista með nýjustu umsögnunum á síðunni"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:23
 msgid "WooCommerce Recent Reviews"
@@ -7285,36 +7549,39 @@ msgstr "Fara aftur í verslun"
 
 #: templates/cart/cart-shipping.php:16
 msgid "Shipping #%d"
-msgstr "Flutningur #%d"
+msgstr "Sending #%d"
 
 #: templates/cart/cart-shipping.php:18
 msgid "Shipping and Handling"
 msgstr "Sending og afgreiðsla"
 
 #: templates/cart/cart-shipping.php:55
-msgid ""
-"No shipping methods were found; please recalculate your shipping or continue"
-" to checkout and enter your full address to see if there is shipping "
-"available to your location."
-msgstr "Engir sendingarmátar fundust; vinsamlegast endureiknaðu flutninginn eða haltu áfram í frágangi pöntunar og sláðu inn fullt heimilisfang til að kanna hvort við sendum til þín."
+msgid "Please use the shipping calculator to see available shipping methods."
+msgstr ""
 
 #: templates/cart/cart-shipping.php:59
+msgid ""
+"Please continue to the checkout and enter your full address to see if there "
+"are any available shipping methods."
+msgstr ""
+
+#: templates/cart/cart-shipping.php:63
 msgid "Please fill in your details to see available shipping methods."
 msgstr "Vinsamlegast sláðu inn heimilisfang til að hægt sé að kanna hvort við sendum þangað."
 
-#: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
+#: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid "Sorry, shipping is unavailable %s."
 msgstr "Því miður, þá er heimsending ekki í boði %s."
 
-#: templates/cart/cart-shipping.php:69 templates/cart/cart-shipping.php:77
+#: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid ""
 "If you require assistance or wish to make alternate arrangements please "
 "contact us."
 msgstr "Hafðu samband ef þú þarft á aðstoð að halda eða ef þú ert með séróskir."
 
-#: templates/cart/cart-shipping.php:93
+#: templates/cart/cart-shipping.php:97
 msgid "Shipping"
-msgstr "Flutningur"
+msgstr "Sendingar"
 
 #: templates/cart/cart-totals.php:16
 msgid "Cart Totals"
@@ -7353,7 +7620,7 @@ msgstr "Samtals"
 
 #: templates/cart/cart.php:47
 msgid "Remove this item"
-msgstr "Fjarlægja þennan hlut "
+msgstr "Fjarlægja þennan hlut"
 
 #: templates/cart/cart.php:118 templates/checkout/form-coupon.php:25
 msgid "Coupon code"
@@ -7417,14 +7684,11 @@ msgstr "Til baka í körfu"
 
 #: templates/checkout/form-billing.php:15
 msgid "Billing &amp; Shipping"
-msgstr "Greiðsla og sending"
+msgstr "Greiðsla &amp; Sending"
 
 #: templates/checkout/form-billing.php:19
-#: templates/myaccount/form-edit-address.php:14
-#: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
-#: templates/order/order-details.php:118
-msgid "Billing Address"
-msgstr "Heimilisfang greiðanda"
+msgid "Billing Details"
+msgstr "Greiðsluupplýsingar"
 
 #: templates/checkout/form-billing.php:38
 msgid "Create an account?"
@@ -7442,7 +7706,7 @@ msgstr "Þú verður að vera innskráður til að geta gengið frá pöntun."
 
 #: templates/checkout/form-checkout.php:51
 msgid "Your order"
-msgstr "Pöntunin þín"
+msgstr "Þín pöntun"
 
 #: templates/checkout/form-coupon.php:17
 msgid "Have a coupon?"
@@ -7465,7 +7729,7 @@ msgid ""
 "If you have shopped with us before, please enter your details in the boxes "
 "below. If you are a new customer please proceed to the Billing &amp; "
 "Shipping section."
-msgstr "Vinsamlegast bættu við upplýsingum hér fyrir neðan ef þú hefur verslað hjá okkur áður. Ef þú ert nýr viðskiptavinur farðu þá yfir í greiðslu og sendingar hlutann."
+msgstr "Vinsamlegast bættu við upplýsingum hér fyrir neðan ef þú hefur verslað hjá okkur áður. Ef þú ert nýr viðskiptavinur farðu þá yfir í greiðslu og sendingar."
 
 #: templates/checkout/form-pay.php:20
 msgid "Qty"
@@ -7505,7 +7769,7 @@ msgid ""
 "arrangements."
 msgstr "Því miður, en það lítur allt út fyrir að engin greiðslumáti sé í boði fyrir þessa staðsetningu. Vinsamlegast hafðu samband við okkur ef þú þarft einhverja aðstoð eða ef þú vilt gera aðrar ráðstafanir."
 
-#: templates/checkout/review-order.php:161
+#: templates/checkout/review-order.php:163
 msgid ""
 "Since your browser does not support JavaScript, or it is disabled, please "
 "ensure you click the <em>Update Totals</em> button before placing your "
@@ -7513,21 +7777,19 @@ msgid ""
 "do so."
 msgstr "Vefskoðarinn þinn styður ekki JavaScript eða það er óvirkt. Vinsamlegst athugaðu að smella á <em>Uppfæra samtölu</em> hnappinn áður en þú staðfestir pöntunina. Þú gætir fengið rukkun sem er hærri en hér að ofan ef þú gerir þetta ekki."
 
-#: templates/checkout/review-order.php:161
+#: templates/checkout/review-order.php:163
 msgid "Update totals"
 msgstr "Uppfæra samtölu"
 
-#: templates/checkout/review-order.php:168
+#: templates/checkout/review-order.php:170
 msgid "Place order"
 msgstr "Ganga frá pöntun"
 
-#: templates/checkout/review-order.php:177
-msgid "I have read and accept the"
-msgstr "Ég hef lesið og samþykki"
-
-#: templates/checkout/review-order.php:177
-msgid "terms &amp; conditions"
-msgstr "skilmála"
+#: templates/checkout/review-order.php:179
+msgid ""
+"I&rsquo;ve read and accept the <a href=\"%s\" target=\"_blank\">terms &amp; "
+"conditions</a>"
+msgstr ""
 
 #: templates/checkout/thankyou.php:18
 msgid ""
@@ -7630,7 +7892,7 @@ msgstr "Þú getur farið inn á reikninginn þinn, séð pantanir og breytt lyk
 #: templates/emails/customer-note.php:14
 #: templates/emails/plain/customer-note.php:13
 msgid "Hello, a note has just been added to your order:"
-msgstr "Hæ, skilaboðumhefur verið bætt við pöntunina þína"
+msgstr "Hæ, skilaboðum hefur verið bætt við pöntunina þína"
 
 #: templates/emails/customer-note.php:18
 #: templates/emails/plain/customer-note.php:21
@@ -7653,7 +7915,7 @@ msgstr "Einhver bað um endurstillingu lykilorðs fyrir eftirfarandi reikning:"
 #: templates/emails/customer-reset-password.php:15
 #: templates/emails/plain/customer-reset-password.php:15
 msgid "Username: %s"
-msgstr "Notandanafn: %s"
+msgstr "Notendanafn: %s"
 
 #: templates/emails/customer-reset-password.php:16
 #: templates/emails/plain/customer-reset-password.php:16
@@ -7733,7 +7995,7 @@ msgstr "Magn: %s"
 
 #: templates/emails/plain/email-order-items.php:35
 msgid "Cost: %s"
-msgstr "Cost: %s"
+msgstr "Verð: %s"
 
 #: templates/global/breadcrumb.php:63
 msgid "Products tagged &ldquo;"
@@ -7762,7 +8024,7 @@ msgstr "Síða"
 #: templates/global/form-login.php:22
 #: templates/myaccount/form-lost-password.php:24
 msgid "Username or email"
-msgstr "Notandanafn eða netfang"
+msgstr "Notendanafn eða netfang"
 
 #: templates/global/form-login.php:26 templates/myaccount/form-login.php:36
 #: templates/myaccount/form-login.php:84
@@ -7788,7 +8050,7 @@ msgstr "Engin vara fannst sem passar við valið"
 
 #: templates/loop/orderby.php:21
 msgid "Default sorting"
-msgstr "Sjálfgefin flokkun"
+msgstr "Sjálfgefin röðun"
 
 #: templates/loop/orderby.php:22
 msgid "Sort by popularity"
@@ -7853,7 +8115,7 @@ msgstr "Netfang"
 
 #: templates/myaccount/form-edit-account.php:32
 msgid "Password (leave blank to leave unchanged)"
-msgstr "Lykilorð (skildu reitinn eftir auðann til að halda því óbreyttu)"
+msgstr "Lykilorð (skildu reitinn eftir auðan til að halda því óbreyttu)"
 
 #: templates/myaccount/form-edit-account.php:36
 msgid "Confirm new password"
@@ -7862,6 +8124,12 @@ msgstr "Staðfesta nýtt lykilorð"
 #: templates/myaccount/form-edit-account.php:41
 msgid "Save changes"
 msgstr "Vista breytingar"
+
+#: templates/myaccount/form-edit-address.php:14
+#: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
+#: templates/order/order-details.php:118
+msgid "Billing Address"
+msgstr "Heimilisfang greiðanda"
 
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:133
@@ -7874,7 +8142,7 @@ msgstr "Vista heimilisfang"
 
 #: templates/myaccount/form-login.php:32
 msgid "Username or email address"
-msgstr "Notandanafn eða netfang"
+msgstr "Notendanafn eða netfang"
 
 #: templates/myaccount/form-login.php:63 templates/myaccount/form-login.php:96
 msgid "Register"
@@ -7892,7 +8160,7 @@ msgstr "Anti-spam"
 msgid ""
 "Lost your password? Please enter your username or email address. You will "
 "receive a link to create a new password via email."
-msgstr "Gleymdirðu lykilorðinu þínu? Sláðu inn notandanafn eða netfang, og þú munt fá póst til að endurstilla lykilorðið þitt."
+msgstr "Gleymdirðu lykilorðinu þínu? Sláðu inn notendanafn eða netfang, og þú munt fá póst til að endurstilla lykilorðið þitt."
 
 #: templates/myaccount/form-lost-password.php:28
 msgid "Enter a new password below."
@@ -7982,7 +8250,7 @@ msgstr "Pöntun númer <mark class=\"order-number\">%s</mark> var gerð þann <m
 
 #: templates/myaccount/view-order.php:16 templates/order/tracking.php:31
 msgid "Order Updates"
-msgstr "Vöruuppfærslur"
+msgstr "Pantanauppfærslur"
 
 #: templates/myaccount/view-order.php:22 templates/order/tracking.php:37
 msgid "l jS \\o\\f F Y, h:ia"
@@ -7993,15 +8261,15 @@ msgid ""
 "To track your order please enter your Order ID in the box below and press "
 "return. This was given to you on your receipt and in the confirmation email "
 "you should have received."
-msgstr "Til að fylgjast með stöðu pöntunarinnar settu pöntunar númerið í reitinn hér fyrir neðan og ýttu á Enter. Pöntunarnúmerið er á kvittuninni þinni og í staðfestingarpóstinum sem þú fékkst. "
+msgstr "Til að fylgjast með stöðu pöntunar settu pöntunar númerið í reitinn hér fyrir neðan og ýttu á Enter. Pöntunarnúmerið er á kvittuninni þinni og í staðfestingarpóstinum sem þú fékkst. "
 
 #: templates/order/form-tracking.php:19
 msgid "Order ID"
-msgstr "Auðkenni pöntunar"
+msgstr "Pöntunarnúmer"
 
 #: templates/order/form-tracking.php:19
 msgid "Found in your order confirmation email."
-msgstr "Sem þú finnur í staðfestingarpóstinum fyrir pöntunina þína."
+msgstr "Finnst í staðfestingarpóstinum fyrir pöntunina þína."
 
 #: templates/order/form-tracking.php:20
 msgid "Billing Email"
@@ -8111,7 +8379,7 @@ msgstr "Vörulýsing"
 
 #: templates/single-product/up-sells.php:39
 msgid "You may also like&hellip;"
-msgstr "Þér gæti einnig líkað&hellip;"
+msgstr "Þér gæti einnig líkað við&hellip;"
 
 #: templates/single-product-reviews.php:21
 msgid "%s review for %s"
@@ -8191,3 +8459,19 @@ msgstr "Skjöl"
 #: woocommerce.php:183
 msgid "Premium Support"
 msgstr "Gæðastuðningur"
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.woothemes.com/woocommerce/"
+msgstr "http://www.woothemes.com/woocommerce/"
+
+#. Description of the plugin/theme
+msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "WooThemes"
+msgstr "WooThemes"
+
+#. Author URI of the plugin/theme
+msgid "http://woothemes.com"
+msgstr "http://woothemes.com"
