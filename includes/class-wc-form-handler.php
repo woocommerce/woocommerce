@@ -515,7 +515,7 @@ class WC_Form_Handler {
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
 
 				// Message
-				wc_add_notice( apply_filters( 'woocommerce_order_cancelled_message',__( 'Your order was cancelled.', 'woocommerce' ) ) , apply_filters( 'woocommerce_order_cancelled_status', 'notice' ) );
+				wc_add_notice( apply_filters( 'woocommerce_order_cancelled_notice',__( 'Your order was cancelled.', 'woocommerce' ) ) , apply_filters( 'woocommerce_order_cancelled_notice_type', 'notice' ) );
 
 				do_action( 'woocommerce_cancelled_order', $order->id );
 
