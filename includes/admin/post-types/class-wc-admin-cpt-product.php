@@ -54,7 +54,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		add_filter( 'parse_query', array( $this, 'product_filters_query' ) );
 
 		// Enhanced search
-		add_action( 'posts_where', array( $this, 'product_search' ) );
+		add_filter( 'posts_search', array( $this, 'product_search' ) );
 
 		// Maintain hierarchy of terms
 		add_filter( 'wp_terms_checklist_args', array( $this, 'disable_checked_ontop' ) );
@@ -615,8 +615,9 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 	public function product_search( $where ) {
 	    global $pagenow, $wpdb, $wp;
 
-		if ( 'edit.php' != $pagenow || ! is_search() || ! isset( $wp->query_vars['s'] ) || 'product' != $wp->query_vars['post_type'] )
+		if ( 'edit.php' != $pagenow || ! is_search() || ! isset( $wp->query_vars['s'] ) || 'product' != $wp->query_vars['post_type'] ) {
 			return $where;
+		}
 
 		$search_ids = array();
 		$terms      = explode( ',', $wp->query_vars['s'] );
@@ -628,14 +629,16 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 			// Attempt to get a SKU
 			$sku_to_id = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%';", wc_clean( $term ) ) );
 
-			if ( $sku_to_id && sizeof( $sku_to_id ) > 0 )
+			if ( $sku_to_id && sizeof( $sku_to_id ) > 0 ) {
 				$search_ids = array_merge( $search_ids, $sku_to_id );
+			}
 		}
 
 		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
 
-		if ( sizeof( $search_ids ) > 0 )
-			$where .= ' OR ' . $wpdb->posts . '.ID IN (' . implode( ',', $search_ids ) . ')';
+		if ( sizeof( $search_ids ) > 0 ) {
+			$where = str_replace( ')))', ") OR ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . "))))", $where );
+		}
 
 		return $where;
 	}
