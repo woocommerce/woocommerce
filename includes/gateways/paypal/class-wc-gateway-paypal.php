@@ -360,7 +360,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$paypal_args['item_name_1'] 	= $this->paypal_item_name( sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names ) );
 			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format( $order->get_total() - $order->get_total_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '' );
+			$paypal_args['amount_1'] 		= number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ) + $order->get_order_discount(), 2, '.', '' );
 
 			// Shipping Cost
 			// No longer using shipping_1 because
