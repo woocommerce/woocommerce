@@ -1352,7 +1352,18 @@ class WC_Cart {
 				}
 			}
 
-			return apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
+			return $needs_shipping;
+		}
+
+		/**
+		 * Show the shipping address form even if the cart contains virtual products
+		 * 
+		 * @return bool
+		 *
+		 * Use add_filter( 'woocommerce_needs_shipping_address', '__return_true' ); to override
+		 */
+		function needs_shipping_address() {
+			return apply_filters( 'woocommerce_needs_shipping_address', false );
 		}
 
 		/**
