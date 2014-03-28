@@ -1356,14 +1356,19 @@ class WC_Cart {
 		}
 
 		/**
-		 * Show the shipping address form even if the cart contains virtual products
+		 * Should the shipping address form be shown
 		 * 
 		 * @return bool
-		 *
-		 * Use add_filter( 'woocommerce_needs_shipping_address', '__return_true' ); to override
 		 */
 		function needs_shipping_address() {
-			return apply_filters( 'woocommerce_needs_shipping_address', false );
+
+			$needs_shipping_address = false;
+
+			if ( WC()->cart->needs_shipping() === true && ! WC()->cart->ship_to_billing_address_only() ) {
+				$needs_shipping_address = true;
+			}
+
+			return apply_filters( 'woocommerce_cart_needs_shipping_address', $needs_shipping_address );
 		}
 
 		/**
