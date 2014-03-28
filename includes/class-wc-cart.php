@@ -1352,7 +1352,7 @@ class WC_Cart {
 				}
 			}
 
-			return $needs_shipping;
+			return apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
 		}
 
 		/**
