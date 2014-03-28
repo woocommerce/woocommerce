@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.8.1
-Stable tag: 2.1.5
+Stable tag: 2.1.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -129,6 +129,51 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.2.0 =
 * Feature - Added used payment gateway to view orders screens
 * Feature - API: Lookup customers by email endpoint
+
+= 2.1.6 - 25/03/2014 =
+* Fix - Fixed a bug where cron events are scheduled using a function name rather than a hook name.
+* Fix - Given transients not required on all pages expiration times to prevent autoloading.
+* Fix - Don't trailingslash Order Cancel URLs with a Query String.
+* Fix - Switch to jquery trim to allow checkout in older IE.
+* Fix - Variation bulk sale price edit over reaching causing errors on save.
+* Fix - Only append generator tag on HTML pages.
+* Fix - AED currency symbol.
+* Fix - Move loop_end hooks as it is generic and used in all WP loops. Prevents some theme conflicts.
+* Fix - Lingering tooltip after gallery image delete.
+* Fix - Move plugin headers to main WC POT file.
+* Fix - Correct discount calculation in admin when fees are involved.
+* Fix - Fix sale flash for out of stock sale items.
+* Fix - Use protocol relative URLs in the cart widget because it gets cached and can display on https or http pages.
+* Fix - Fix term recount during WP callbacks.
+* Fix - Convert states to strings for PayPal (non-US).
+* Fix - Hide empty at walker level to fix category widget display.
+* Fix - form-login form values were not persistent after failed submission.
+* Fix - URL decode not needed for custom text attribute names.
+* Fix - Fix bulk editing variation sale price.
+* Fix - Remove comment exclusion in order notes meta box.
+* Fix - Sync min and max prices for regular and sale prices so prices are displayed correctly when sale price is lower than a regular price of another variation.
+* Fix - Expanding line item_meta causes conflicts if attributes are named with things like 'name', 'type' or 'qty'. Added blacklist to exclude unsafe values.
+* Fix - Added support for clearing report transients when using object caching.
+* Fix - encoding issues with attribute values.
+* Fix - Escape the contents of the changelog when displayed.
+* Fix - Edge case where tax was still displayed for shipping when exempt.
+* Tweak - Allow city field to use another input method.
+* Tweak - Several new filters.
+* Tweak - PayPal, modify currency error message to include both sent and returned currencies for comparison.
+* Tweak - enable keyboard shortcuts in prettyPhoto.
+* Tweak - Add classes to item meta.
+* Tweak - Use is_purchasable to determine if a variation cart button is needed, and potentially show empty_price_html.
+* Tweak - new woocommerce_cart_taxes_total filter.
+* Tweak - new wc_cart_totals_taxes_total_html() function.
+* Tweak - Use API request URL for mijireh and PayPal callbacks.
+* Tweak - move variation data to tooltip in order items meta box.
+* Tweak - Store variation data for order items added through the admin.
+* Tweak - Billing Address > Billing Details text. We take more than address in this section.
+* Tweak - Delete terms transient during recount.
+* Refactor - jshint javascript files.
+* Localisation - add Bangladeshi currency and symbol.
+* Localisation - Bangladeshi states (districts).
+* Localisation - Croatian currency symbol.
 
 = 2.1.5 - 06/03/2014 =
 * Fix - Prevent notices on new plain text email parameter for BACS and Cheque gateways

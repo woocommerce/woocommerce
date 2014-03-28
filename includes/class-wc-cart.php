@@ -1213,8 +1213,9 @@ class WC_Cart {
 				}
 
 				// VAT exemption done at this point - so all totals are correct before exemption
-				if ( WC()->customer->is_vat_exempt() )
+				if ( WC()->customer->is_vat_exempt() ) {
 					$this->remove_taxes();
+				}
 
 				// Cart Discounts (after tax)
 				$this->apply_cart_discounts_after_tax();
@@ -1231,8 +1232,9 @@ class WC_Cart {
 				$this->tax_total = $this->tax->get_tax_total( $this->taxes );
 
 				// VAT exemption done at this point - so all totals are correct before exemption
-				if ( WC()->customer->is_vat_exempt() )
+				if ( WC()->customer->is_vat_exempt() ) {
 					$this->remove_taxes();
+				}
 
 				// Cart Discounts (after tax)
 				$this->apply_cart_discounts_after_tax();
@@ -1249,10 +1251,11 @@ class WC_Cart {
 		 */
 		public function remove_taxes() {
 			$this->shipping_tax_total = $this->tax_total = 0;
-			$this->subtotal = $this->subtotal_ex_tax;
+			$this->subtotal           = $this->subtotal_ex_tax;
 
-			foreach ( $this->cart_contents as $cart_item_key => $item )
+			foreach ( $this->cart_contents as $cart_item_key => $item ) {
 				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
+			}
 
 			// If true, zero rate is applied so '0' tax is displayed on the frontend rather than nothing.
 			if ( apply_filters( 'woocommerce_cart_remove_taxes_apply_zero_rate', true ) ) {

@@ -1,6 +1,7 @@
 # 
 # Translators:
 # aner42 <ae@mobilasystem.se>, 2014
+# aner42 <ae@mobilasystem.se>, 2014
 # sennbrink <konsult@sennbrink.se>, 2014
 # bobosbodega <henrik.boo@gmail.com>, 2014
 # sennbrink <konsult@sennbrink.se>, 2014
@@ -8,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
-"PO-Revision-Date: 2014-03-04 22:07+0000\n"
+"POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
+"PO-Revision-Date: 2014-03-25 08:51+0000\n"
 "Last-Translator: sennbrink <konsult@sennbrink.se>\n"
 "Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce/language/sv_SE/)\n"
 "MIME-Version: 1.0\n"
@@ -20,7 +21,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:65
 #: includes/admin/class-wc-admin-menus.php:47
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 #: includes/admin/wc-admin-functions.php:19
 msgid "WooCommerce"
 msgstr "WooCommerce"
@@ -48,7 +49,7 @@ msgstr "Vänligen välj några produkter."
 
 #: includes/admin/class-wc-admin-assets.php:138
 msgid "Remove this item meta?"
-msgstr "Ta bort detta meta för produkten"
+msgstr "Ta bort meta för produkten?"
 
 #: includes/admin/class-wc-admin-assets.php:139
 msgid "Remove this attribute?"
@@ -353,7 +354,7 @@ msgid ""
 "Attributes let you define extra product data, such as size or colour. You "
 "can use these attributes in the shop sidebar using the \"layered nav\" "
 "widgets. Please note: you cannot rename an attribute later on."
-msgstr "Attribut låter dig deffiniera extra produktdata, som storlek eller färg. Du kan använda dessa attribut i butikens sidebar genom att använda \"layered nav\" widgets. Observera: du kan inte byta namn på ett attribut senare."
+msgstr "Attribut låter dig definiera extra produktdata, som storlek eller färg. Du kan använda dessa attribut i butikens sidebar genom att använda \"flerskikts\"-widgets. Observera: du kan inte byta namn på ett attribut senare."
 
 #: includes/admin/class-wc-admin-attributes.php:405
 msgid "Add Attribute"
@@ -365,7 +366,7 @@ msgstr "Är du säker på att du vill radera det här attributet?"
 
 #: includes/admin/class-wc-admin-dashboard.php:35
 msgid "WooCommerce Recent Reviews"
-msgstr "WooCommerce senaste recensioner"
+msgstr "WooCommerce Senaste recensioner"
 
 #: includes/admin/class-wc-admin-dashboard.php:38
 #: includes/admin/class-wc-admin-menus.php:80
@@ -879,41 +880,41 @@ msgstr "Behörigheter:"
 msgid "Revoke API Key"
 msgstr "Återkalla API-nyckel"
 
-#: includes/admin/class-wc-admin-reports.php:46
+#: includes/admin/class-wc-admin-reports.php:43
 #: includes/admin/reports/class-wc-report-customer-list.php:251
 msgid "Orders"
 msgstr "Ordrar"
 
-#: includes/admin/class-wc-admin-reports.php:49
+#: includes/admin/class-wc-admin-reports.php:46
 msgid "Sales by date"
 msgstr "Försäljning i datumordning"
 
-#: includes/admin/class-wc-admin-reports.php:55
+#: includes/admin/class-wc-admin-reports.php:52
 msgid "Sales by product"
 msgstr "Försäljning per produkt"
 
-#: includes/admin/class-wc-admin-reports.php:61
+#: includes/admin/class-wc-admin-reports.php:58
 msgid "Sales by category"
 msgstr "Försäljning efter kategori"
 
-#: includes/admin/class-wc-admin-reports.php:67
+#: includes/admin/class-wc-admin-reports.php:64
 msgid "Coupons by date"
 msgstr "Rabattkoder i datumordning"
 
-#: includes/admin/class-wc-admin-reports.php:75
+#: includes/admin/class-wc-admin-reports.php:72
 #: includes/admin/reports/class-wc-report-customer-list.php:30
 msgid "Customers"
 msgstr "Kunder"
 
-#: includes/admin/class-wc-admin-reports.php:78
+#: includes/admin/class-wc-admin-reports.php:75
 msgid "Customers vs. Guests"
 msgstr "Kunder kontra gäster"
 
-#: includes/admin/class-wc-admin-reports.php:84
+#: includes/admin/class-wc-admin-reports.php:81
 msgid "Customer List"
 msgstr "Kundlista"
 
-#: includes/admin/class-wc-admin-reports.php:92
+#: includes/admin/class-wc-admin-reports.php:89
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 #: includes/admin/reports/class-wc-report-stock.php:25
@@ -921,11 +922,11 @@ msgstr "Kundlista"
 msgid "Stock"
 msgstr "Lager"
 
-#: includes/admin/class-wc-admin-reports.php:95
+#: includes/admin/class-wc-admin-reports.php:92
 msgid "Low in stock"
 msgstr "Lågt lagersaldo"
 
-#: includes/admin/class-wc-admin-reports.php:101
+#: includes/admin/class-wc-admin-reports.php:98
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
 #: includes/admin/reports/class-wc-report-stock.php:98
@@ -934,20 +935,20 @@ msgstr "Lågt lagersaldo"
 msgid "Out of stock"
 msgstr "Slut i lager"
 
-#: includes/admin/class-wc-admin-reports.php:107
+#: includes/admin/class-wc-admin-reports.php:104
 msgid "Most Stocked"
 msgstr "Högst lagersaldo"
 
-#: includes/admin/class-wc-admin-reports.php:118
+#: includes/admin/class-wc-admin-reports.php:115
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
 msgstr "Moms"
 
-#: includes/admin/class-wc-admin-reports.php:121
+#: includes/admin/class-wc-admin-reports.php:118
 msgid "Taxes by code"
 msgstr "Moms efter kod"
 
-#: includes/admin/class-wc-admin-reports.php:127
+#: includes/admin/class-wc-admin-reports.php:124
 msgid "Taxes by date"
 msgstr "Moms i datumordning"
 
@@ -1133,7 +1134,7 @@ msgstr "Visningstyp"
 #: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
-#: includes/admin/views/html-admin-page-addons.php:15
+#: includes/admin/views/html-admin-page-addons.php:16
 msgid "Products"
 msgstr "Produkter"
 
@@ -1173,14 +1174,14 @@ msgid ""
 "of categories on the front-end you can drag and drop to sort them. To see "
 "more categories listed click the \"screen options\" link at the top of the "
 "page."
-msgstr "Produktkategorier för din webbutik kan hanteras här. För att ändra ordning av visningen av kategorierna för kunden kan du dra och släppa för att sortera. För att se fler kategorier klicka på \"skärminställningar\" längst upp på sidan."
+msgstr "Produktkategorier för din webbutik kan hanteras här. För att ändra ordning av visningen av kategorierna för kunden kan du dra och släppa för att sortera. För att lista fler kategorier klicka på \"panelinställningar\" längst upp på sidan."
 
 #: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
 "Shipping classes can be used to group products of similar type. These groups"
 " can then be used by certain shipping methods to provide different rates to "
 "different products."
-msgstr "Fraktklasser kan användas för att gruppera liknande produkter. Dessa grupper kan sen användas av olika fraktmetoder för att ge olika lösningar/prisförlsag för frakt."
+msgstr "Fraktklasser kan användas för att gruppera liknande produkter. Dessa grupper kan sen användas av olika fraktmetoder för att ge olika lösningar/prisförslag för frakt."
 
 #: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
@@ -1906,7 +1907,7 @@ msgstr "Ordernoteringar"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:99
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:127
 msgid "Total"
 msgstr "Total"
@@ -2106,7 +2107,7 @@ msgstr "Tillåt fri frakt"
 msgid ""
 "Check this box if the coupon grants free shipping. The <a href=\"%s\">free "
 "shipping method</a> must be enabled with the \"must use coupon\" setting."
-msgstr "Markera den här rutan om rabattkoden ger fri frakt. Fraktmetoden The <a href=\"%s\">fri frakt</a> måste vara aktiverad tillsammans med \"måste använda kod\"-inställningen."
+msgstr "Markera den här rutan om rabattkoden ger fri frakt. Fraktmetoden <a href=\"%s\">Fri frakt</a> måste vara aktiverad tillsammans med \"måste använda kod\"-inställningen."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:72
 msgid "Apply before tax"
@@ -2481,41 +2482,41 @@ msgstr "Lägg till artiklar"
 msgid "Add fee"
 msgstr "Lägg till avgift"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:44
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:48
 msgid "added %s ago"
 msgstr "tillagd för %s timmar sedan"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 msgid "by %s"
 msgstr "av %s"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:50
 msgid "Delete note"
 msgstr "Radera notering"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:56
 msgid "There are no notes for this order yet."
 msgstr "Det finns inga noteringar för denna order ännu."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid "Add note"
 msgstr "Lägg till notering"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid ""
 "Add a note for your reference, or add a customer note (the user will be "
 "notified)."
 msgstr "Lägg till en egen notis eller lägg till ett kundmeddelande (användaren kommer att notifieras)."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:68
 msgid "Customer note"
 msgstr "Kundnotering"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:69
 msgid "Private note"
 msgstr "Egen notering"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:67
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:71
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:564
 msgid "Add"
 msgstr "Lägg till"
@@ -2526,7 +2527,7 @@ msgstr "Lägg till"
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
-#: includes/admin/views/html-admin-page-addons.php:13
+#: includes/admin/views/html-admin-page-addons.php:14
 msgid "Shipping"
 msgstr "Frakt"
 
@@ -2546,7 +2547,7 @@ msgstr "+ Lägg till momsrad"
 msgid ""
 "These rows contain taxes for this order. This allows you to display multiple"
 " or compound taxes rather than a single total."
-msgstr "Dessa rader innehåller moms/skatt för denna order. Detta låter dig visa flera eller sammanräknad skatt istället för en totalsumma."
+msgstr "Dessa rader innehåller moms för denna order. Detta låter dig visa flera eller sammanräknad skatt istället för en totalsumma."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:113
 msgid "Order Discount"
@@ -2762,7 +2763,7 @@ msgstr "Ingen"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:734
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:126
 #: includes/admin/settings/class-wc-settings-tax.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:243
 #: includes/admin/views/html-bulk-edit-product.php:83
@@ -2840,7 +2841,7 @@ msgstr "Tillåt"
 msgid ""
 "If managing stock, this controls whether or not backorders are allowed for "
 "this product and variations. If enabled, stock quantity can go below 0."
-msgstr "Om lagersaldo hanteras, kommer detta att bestämma om restnotering är tillåtet för den här produkten och dess varianter. Om aktiverat finns det risk för att lagersaldo kan understiga noll."
+msgstr "Om lagersaldo hanteras, kommer detta att bestämma om bokning är tillåtet för den här produkten och dess varianter. Om aktiverat finns det risk för att lagersaldo kan understiga noll."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:326
 msgid "Sold Individually"
@@ -3125,7 +3126,7 @@ msgid "Fee Name"
 msgstr "Avgiftsnamn"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:31
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:136
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:140
 msgid "Tax class"
 msgstr "Momsgrupp"
 
@@ -3141,19 +3142,19 @@ msgstr "Variant-ID:"
 msgid "Product SKU:"
 msgstr "Artikelnummer:"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:74
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:75
 msgid "Add&nbsp;meta"
 msgstr "Lägg till meta"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Subtotal"
 msgstr "Delsumma"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Before pre-tax discounts."
 msgstr "Rabatt före moms."
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 msgid "After pre-tax discounts."
 msgstr "Rabatt efter moms."
 
@@ -3290,11 +3291,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Aktivera det här alternativet om en produkt inte kan skickas eller om det inte finns någon fraktkostnad"
 
-#: includes/admin/reports/class-wc-admin-report.php:391
+#: includes/admin/reports/class-wc-admin-report.php:384
 msgid "Sold %s worth in the last %d days"
 msgstr "Sålde till ett värde av %s de senaste %d dagarna"
 
-#: includes/admin/reports/class-wc-admin-report.php:393
+#: includes/admin/reports/class-wc-admin-report.php:386
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "Sålde 1 produkt de senaste %d dagarna"
@@ -3804,7 +3805,7 @@ msgstr "Kassan"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
 msgid "Checkout Options"
-msgstr "Val för utloggning"
+msgstr "Val för kassafunktion"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:65
 msgid "Checkout Process"
@@ -4396,11 +4397,11 @@ msgstr "Sortera efter senaste"
 
 #: includes/admin/settings/class-wc-settings-products.php:258
 msgid "Sort by price (asc)"
-msgstr "Sortera efter pris (asc)"
+msgstr "Sortera efter pris (stigande)"
 
 #: includes/admin/settings/class-wc-settings-products.php:259
 msgid "Sort by price (desc)"
-msgstr "Sortera efter pris (desc)"
+msgstr "Sortera efter pris (fallande)"
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
@@ -4677,7 +4678,7 @@ msgstr "Aktivera moms och momsberäkningar"
 
 #: includes/admin/settings/class-wc-settings-tax.php:79
 msgid "Prices Entered With Tax"
-msgstr "Priser anges med moms/skatt"
+msgstr "Visa priser med moms?"
 
 #: includes/admin/settings/class-wc-settings-tax.php:83
 msgid ""
@@ -4687,11 +4688,11 @@ msgstr "Denna inställning är viktig då den påverkar hur du matar in priser. 
 
 #: includes/admin/settings/class-wc-settings-tax.php:85
 msgid "Yes, I will enter prices inclusive of tax"
-msgstr "Ja, jag vill ange priser inklusive moms/skatt"
+msgstr "Ja, jag vill ange priser inklusive moms"
 
 #: includes/admin/settings/class-wc-settings-tax.php:86
 msgid "No, I will enter prices exclusive of tax"
-msgstr "Nej, jag vill ange priser exklusive moms/skatt"
+msgstr "Nej, jag vill ange priser exklusive moms"
 
 #: includes/admin/settings/class-wc-settings-tax.php:91
 msgid "Calculate Tax Based On:"
@@ -4933,25 +4934,31 @@ msgstr "Bläddra bland alla extensions"
 msgid "Browse themes"
 msgstr "Bläddra bland teman"
 
-#: includes/admin/views/html-admin-page-addons.php:11
+#: includes/admin/views/html-admin-page-addons.php:12
 msgid "Popular"
 msgstr "Populära"
 
-#: includes/admin/views/html-admin-page-addons.php:12
+#: includes/admin/views/html-admin-page-addons.php:13
 msgid "Gateways"
 msgstr "Gateways"
 
-#: includes/admin/views/html-admin-page-addons.php:14
+#: includes/admin/views/html-admin-page-addons.php:15
 msgid "Import/export"
 msgstr "Importera/exportera"
 
-#: includes/admin/views/html-admin-page-addons.php:16
+#: includes/admin/views/html-admin-page-addons.php:17
 msgid "Marketing"
 msgstr "Marknadsföring"
 
-#: includes/admin/views/html-admin-page-addons.php:17
+#: includes/admin/views/html-admin-page-addons.php:18
 msgid "Free"
 msgstr "Gratis"
+
+#: includes/admin/views/html-admin-page-addons.php:33
+msgid ""
+"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
+" href=\"%s\">WooCommerce Extensions Catalog</a>"
+msgstr "Vår katalog med WooCommerce-extensions hittar du på WooThemes.com här: <a href=\"%s\">WooCommerce Extensions-katalogen</a>"
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
@@ -5404,22 +5411,6 @@ msgstr "Rea-pris"
 msgid "Custom:"
 msgstr "Egna val:"
 
-#: includes/admin/wc-admin-functions.php:193
+#: includes/admin/wc-admin-functions.php:192
 msgid "Could not compile woocommerce.less:"
 msgstr "Kunde inte kompilera woocommerce.less:"
-
-#. Plugin URI of the plugin/theme
-msgid "http://www.woothemes.com/woocommerce/"
-msgstr "http://www.woothemes.com/woocommerce/"
-
-#. Description of the plugin/theme
-msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr "Ett e-butiksverktyg som hjälper dig att sälja vad som helst. Stiligt."
-
-#. Author of the plugin/theme
-msgid "WooThemes"
-msgstr "WooThemes"
-
-#. Author URI of the plugin/theme
-msgid "http://woothemes.com"
-msgstr "http://woothemes.com"
