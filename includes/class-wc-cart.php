@@ -1356,6 +1356,22 @@ class WC_Cart {
 		}
 
 		/**
+		 * Should the shipping address form be shown
+		 * 
+		 * @return bool
+		 */
+		function needs_shipping_address() {
+
+			$needs_shipping_address = false;
+
+			if ( WC()->cart->needs_shipping() === true && ! WC()->cart->ship_to_billing_address_only() ) {
+				$needs_shipping_address = true;
+			}
+
+			return apply_filters( 'woocommerce_cart_needs_shipping_address', $needs_shipping_address );
+		}
+
+		/**
 		 * Sees if the customer has entered enough data to calc the shipping yet.
 		 *
 		 * @return bool
