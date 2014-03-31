@@ -189,11 +189,11 @@ class WC_Checkout {
 			$order_id = absint( WC()->session->order_awaiting_payment );
 
 			/* Check order is unpaid by getting its status */
-			$terms = wp_get_object_terms( $order_id, 'shop_order_status', array( 'fields' => 'slugs' ) );
+			$terms        = wp_get_object_terms( $order_id, 'shop_order_status', array( 'fields' => 'slugs' ) );
 			$order_status = isset( $terms[0] ) ? $terms[0] : 'pending';
 
 			// Resume the unpaid order if its pending
-			if ( $order_status == 'pending' || $order_status == 'failed' ) {
+			if ( get_post( $order_id ) && ( $order_status == 'pending' || $order_status == 'failed' ) ) {
 
 				// Update the existing order as we are resuming it
 				$create_new_order = false;
