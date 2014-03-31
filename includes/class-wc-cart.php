@@ -1113,7 +1113,7 @@ class WC_Cart {
 						$taxes             = $this->tax->calc_tax( $line_price, $base_tax_rates, true, true );
 
 						// Now we have a new item price (excluding TAX)
-						$line_subtotal     = $line_price - array_sum( $taxes );
+						$line_subtotal     = round( $line_price - array_sum( $taxes ), WC_ROUNDING_PRECISION );
 
 						// Now add modifed taxes
 						$taxes             = $this->tax->calc_tax( $line_subtotal, $item_tax_rates );
