@@ -39,7 +39,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 		$this->init_settings();
 
 		// Define user set variables
-		$this->title = $this->get_option( 'title' );
+		$this->title        = $this->get_option( 'title' );
 		$this->type         = $this->get_option( 'type' );
 		$this->fee          = $this->get_option( 'fee' );
 		$this->type         = $this->get_option( 'type' );
