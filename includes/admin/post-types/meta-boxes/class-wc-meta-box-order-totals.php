@@ -340,5 +340,6 @@ class WC_Meta_Box_Order_Totals {
 		delete_post_meta( $post_id, '_shipping_method' );
 		delete_post_meta( $post_id, '_shipping_method_title' );
 		update_post_meta( $post_id, '_order_shipping', $order_shipping );
+		add_post_meta( $post_id, '_order_currency', get_woocommerce_currency(), true );
 	}
 }
