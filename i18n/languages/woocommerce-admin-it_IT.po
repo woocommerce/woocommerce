@@ -1,4 +1,4 @@
-# 
+#
 # Translators:
 # Fredev <federico.paletta88@gmail.com>, 2014
 # Gabriele Polidori <webmaster@onenet.it>, 2014
@@ -11,14 +11,16 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:51+0000\n"
-"Last-Translator: Fredev <federico.paletta88@gmail.com>\n"
-"Language-Team: Italian (Italy) (http://www.transifex.com/projects/p/woocommerce/language/it_IT/)\n"
+"PO-Revision-Date: 2014-04-01 09:08+0100\n"
+"Last-Translator: Nicola Mustone <nicola.mustone@ecomstore.net>\n"
+"Language-Team: Italian (Italy) (http://www.transifex.com/projects/p/"
+"woocommerce/language/it_IT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: it_IT\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.6.4\n"
 
 #: includes/admin/class-wc-admin-assets.php:65
 #: includes/admin/class-wc-admin-menus.php:47
@@ -29,12 +31,14 @@ msgstr "WooCommerce"
 
 #: includes/admin/class-wc-admin-assets.php:108
 msgid "Please enter in decimal (%s) format without thousand separators."
-msgstr "Per favore inserisci in formato decimale (%s) senza separatori delle migliaia."
+msgstr ""
+"Per favore inserisci in formato decimale (%s) senza separatori delle "
+"migliaia."
 
 #: includes/admin/class-wc-admin-assets.php:109
 msgid ""
-"Please enter in monetary decimal (%s) format without thousand separators and"
-" currency symbols."
+"Please enter in monetary decimal (%s) format without thousand separators and "
+"currency symbols."
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:136
@@ -42,7 +46,10 @@ msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
-msgstr "Sei sicuro di voler rimuovere i prodotti selezionati? Se in precedenza hai ridotto il magazzino di questo prodotto, o questo ordine è stato inviato da un cliente, sarà necessario ripristinare manualmente lo stock dell'articolo."
+msgstr ""
+"Sei sicuro di voler rimuovere i prodotti selezionati? Se in precedenza hai "
+"ridotto il magazzino di questo prodotto, o questo ordine è stato inviato da "
+"un cliente, sarà necessario ripristinare manualmente lo stock dell'articolo."
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
@@ -96,7 +103,8 @@ msgstr "Valore(i)"
 #: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:540
 msgid "Enter some text, or some attributes by pipe (|) separating values."
-msgstr "Inserire del testo, o alcuni attributi separando i valori col simbolo (|)."
+msgstr ""
+"Inserire del testo, o alcuni attributi separando i valori col simbolo (|)."
 
 #: includes/admin/class-wc-admin-assets.php:145
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:490
@@ -122,25 +130,34 @@ msgstr "Calcolare i totali in base alle voci dell'ordine, sconti e spedizione?"
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
-msgstr "Calcolare le tasse per riga? Questo calcolerà le imposte in base allla nazione dei clienti. Se nessun di indirizzo di fatturazione o spedizione è stato impostato verrà utilizzata la nazione in cui si trova negozio."
+msgstr ""
+"Calcolare le tasse per riga? Questo calcolerà le imposte in base allla "
+"nazione dei clienti. Se nessun di indirizzo di fatturazione o spedizione è "
+"stato impostato verrà utilizzata la nazione in cui si trova negozio."
 
 #: includes/admin/class-wc-admin-assets.php:150
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
-msgstr "Copia i dati di fatturazione sui dati di spedizione? Questa operazione rimuoverà gli eventuali dati di spedizione inseriti."
+msgstr ""
+"Copia i dati di fatturazione sui dati di spedizione? Questa operazione "
+"rimuoverà gli eventuali dati di spedizione inseriti."
 
 #: includes/admin/class-wc-admin-assets.php:151
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
-msgstr "Caricare i dati di fatturazione del cliente? Questo elimina ogni informazione di fatturazione attualmente inserita."
+msgstr ""
+"Caricare i dati di fatturazione del cliente? Questo elimina ogni "
+"informazione di fatturazione attualmente inserita."
 
 #: includes/admin/class-wc-admin-assets.php:152
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
-msgstr "Caricare dati di spedizione del cliente? Questo elimina ogni informazione di spedizione attualmente inserita."
+msgstr ""
+"Caricare dati di spedizione del cliente? Questo elimina ogni informazione di "
+"spedizione attualmente inserita."
 
 #: includes/admin/class-wc-admin-assets.php:153
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:168
@@ -159,7 +176,10 @@ msgid ""
 "Could not grant access - the user may already have permission for this file "
 "or billing email is not set. Ensure the billing email is set, and the order "
 "has been saved."
-msgstr "Impossibile concedere l'accesso - l'utente potrebbe già avere il permesso per questo file o l'email di fatturazione non è impostata. Assicurarsi che l'email di fatturazione sia impostata e che l'ordine sia stato salvato."
+msgstr ""
+"Impossibile concedere l'accesso - l'utente potrebbe già avere il permesso "
+"per questo file o l'email di fatturazione non è impostata. Assicurarsi che "
+"l'email di fatturazione sia impostata e che l'ordine sia stato salvato."
 
 #: includes/admin/class-wc-admin-assets.php:183
 msgid "Are you sure you want to revoke access to this download?"
@@ -170,7 +190,10 @@ msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
-msgstr "Sei sicuro che si desidera collegare tutte le varianti? Questo creerà una nuova variante per ciascuno e per ogni possibile combinazione di attributi di variazione (max 50 per esecuzione)."
+msgstr ""
+"Sei sicuro che si desidera collegare tutte le varianti? Questo creerà una "
+"nuova variante per ciascuno e per ogni possibile combinazione di attributi "
+"di variazione (max 50 per esecuzione)."
 
 #: includes/admin/class-wc-admin-assets.php:204
 msgid "Enter a value"
@@ -182,7 +205,9 @@ msgstr "Inserisci un valore (fisso o %)"
 
 #: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
-msgstr "Sei sicuro di voler cancellare tutte le varianti? Ciò non può essere annullato."
+msgstr ""
+"Sei sicuro di voler cancellare tutte le varianti? Ciò non può essere "
+"annullato."
 
 #: includes/admin/class-wc-admin-assets.php:207
 msgid "Last warning, are you sure?"
@@ -225,7 +250,9 @@ msgstr "Lo slug “%s” è troppo lungo (28 caratteri max). Ridurre, per favore
 #: includes/admin/class-wc-admin-attributes.php:86
 msgid ""
 "Slug “%s” is not allowed because it is a reserved term. Change it, please."
-msgstr "Lo slug “%s” non è consentito, perché è un termine riservato. Modifica, per favore."
+msgstr ""
+"Lo slug “%s” non è consentito, perché è un termine riservato. Modifica, per "
+"favore."
 
 #: includes/admin/class-wc-admin-attributes.php:91
 #: includes/admin/class-wc-admin-attributes.php:96
@@ -251,7 +278,9 @@ msgstr "Slug"
 #: includes/admin/class-wc-admin-attributes.php:382
 msgid ""
 "Unique slug/reference for the attribute; must be shorter than 28 characters."
-msgstr "Slug / riferimento unico per l'attributo, deve essere inferiore a 28 caratteri."
+msgstr ""
+"Slug / riferimento unico per l'attributo, deve essere inferiore a 28 "
+"caratteri."
 
 #: includes/admin/class-wc-admin-attributes.php:257
 #: includes/admin/class-wc-admin-attributes.php:309
@@ -277,7 +306,11 @@ msgid ""
 "products -> product data -> attributes -> values, <strong>Text</strong> "
 "allows manual entry whereas <strong>select</strong> allows pre-configured "
 "terms in a drop-down list."
-msgstr "Stabilisce come selezionare gli attributi dei prodotti. Dal pannello amministratore -> prodotti -> Dati Prodotto -> attributi -> valori <strong>Text</strong>  permette l'inserimento manuale mentre <strong>select</strong> permette l'inserimento di termini predefiniti in un menù  a discesa."
+msgstr ""
+"Stabilisce come selezionare gli attributi dei prodotti. Dal pannello "
+"amministratore -> prodotti -> Dati Prodotto -> attributi -> valori "
+"<strong>Text</strong>  permette l'inserimento manuale mentre <strong>select</"
+"strong> permette l'inserimento di termini predefiniti in un menù  a discesa."
 
 #: includes/admin/class-wc-admin-attributes.php:270
 #: includes/admin/class-wc-admin-attributes.php:396
@@ -301,7 +334,10 @@ msgstr "ID termine"
 msgid ""
 "Determines the sort order of the terms on the frontend shop product pages. "
 "If using custom ordering, you can drag and drop the terms in this attribute."
-msgstr "Stabilisce l'ordinamento dei termini nelle pagine prodotto del frontend. Se si usa un ordinamento personalizzato, è possibile trascinare i termini in questo attributo."
+msgstr ""
+"Stabilisce l'ordinamento dei termini nelle pagine prodotto del frontend. Se "
+"si usa un ordinamento personalizzato, è possibile trascinare i termini in "
+"questo attributo."
 
 #: includes/admin/class-wc-admin-attributes.php:283
 msgid "Update"
@@ -355,7 +391,11 @@ msgid ""
 "Attributes let you define extra product data, such as size or colour. You "
 "can use these attributes in the shop sidebar using the \"layered nav\" "
 "widgets. Please note: you cannot rename an attribute later on."
-msgstr "Gli attributi consentono di definire i dati extra del prodotto, come la dimensione o il colore. È possibile utilizzare questi attributi nella barra laterale negozio con il widget \"layered nav\". Attenzione: non è possibile rinominare un attributo in seguito."
+msgstr ""
+"Gli attributi consentono di definire i dati extra del prodotto, come la "
+"dimensione o il colore. È possibile utilizzare questi attributi nella barra "
+"laterale negozio con il widget \"layered nav\". Attenzione: non è possibile "
+"rinominare un attributo in seguito."
 
 #: includes/admin/class-wc-admin-attributes.php:405
 msgid "Add Attribute"
@@ -391,8 +431,8 @@ msgstr[1] "<strong>%s ordini</strong> in attesa di elaborazione"
 #: includes/admin/class-wc-admin-dashboard.php:150
 msgid "<strong>%s order</strong> on-hold"
 msgid_plural "<strong>%s orders</strong> on-hold"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "<strong>%s ordine</strong> in attesa"
+msgstr[1] "<strong>%s ordini</strong> in attesa"
 
 #: includes/admin/class-wc-admin-dashboard.php:155
 msgid "<strong>%s product</strong> low in stock"
@@ -436,7 +476,8 @@ msgstr "Nessun prodotto da duplicare è stato fornito!"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:99
 msgid "Product creation failed, could not find original product:"
-msgstr "Creazione del prodotto non riuscita, impossibile trovare prodotto originale:"
+msgstr ""
+"Creazione del prodotto non riuscita, impossibile trovare prodotto originale:"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:126
 msgid "(Copy)"
@@ -450,7 +491,10 @@ msgstr "Documentazione"
 msgid ""
 "Thank you for using WooCommerce :) Should you need help using or extending "
 "WooCommerce please read the documentation."
-msgstr "Grazie per aver scelto di usare WooCommerce :) Se hai bisogno di aiuto nell'utilizzo o per ampliare le funzionalità di WooCommerce, leggi la documentazione del plugin."
+msgstr ""
+"Grazie per aver scelto di usare WooCommerce :) Se hai bisogno di aiuto "
+"nell'utilizzo o per ampliare le funzionalità di WooCommerce, leggi la "
+"documentazione del plugin."
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "WooCommerce Documentation"
@@ -467,15 +511,22 @@ msgstr "Supporto"
 #: includes/admin/class-wc-admin-help.php:52
 msgid ""
 "After <a href=\"%s\">reading the documentation</a>, for further assistance "
-"you can use the <a href=\"%s\">community forum</a>, or if you have access as"
-" a WooThemes customer, <a href=\"%s\">our support desk</a>."
-msgstr "Dopo <a href=\"%s\">aver letto la documentazione</a>, per ulteriore assistenza puoi usare i <a href=\"%s\">forum pubblici</a>, oppure se hai accesso come cliente WooThemes, <a href=\"%s\">il nostro supporto dedicato</a>."
+"you can use the <a href=\"%s\">community forum</a>, or if you have access as "
+"a WooThemes customer, <a href=\"%s\">our support desk</a>."
+msgstr ""
+"Dopo <a href=\"%s\">aver letto la documentazione</a>, per ulteriore "
+"assistenza puoi usare i <a href=\"%s\">forum pubblici</a>, oppure se hai "
+"accesso come cliente WooThemes, <a href=\"%s\">il nostro supporto dedicato</"
+"a>."
 
 #: includes/admin/class-wc-admin-help.php:54
 msgid ""
-"Before asking for help we recommend checking the status page to identify any"
-" problems with your configuration."
-msgstr "Prima di chiedere assistenza, raccomandiamo di controllare la pagina sullo stato del sistema per identificare qualsiasi problema nella tua configurazione."
+"Before asking for help we recommend checking the status page to identify any "
+"problems with your configuration."
+msgstr ""
+"Prima di chiedere assistenza, raccomandiamo di controllare la pagina sullo "
+"stato del sistema per identificare qualsiasi problema nella tua "
+"configurazione."
 
 #: includes/admin/class-wc-admin-help.php:56
 #: includes/admin/class-wc-admin-help.php:67
@@ -500,11 +551,15 @@ msgstr "Hai trovato un bug?"
 #: includes/admin/class-wc-admin-help.php:65
 msgid ""
 "If you find a bug within WooCommerce core you can create a ticket via <a "
-"href=\"%s\">Github issues</a>. Ensure you read the <a "
-"href=\"%s\">contribution guide</a> prior to submitting your report. Be as "
-"descriptive as possible and please include your <a href=\"%s\">system status"
-" report</a>."
-msgstr "Se trovi un bug nel core di WooCommerce, puoi aprire un ticket via <a href=\"%s\">Github issues</a>. Assicurati di aver letto la   <a href=\"%s\">contribution guide</a> prima di inviare la tua comunicazione. Sii il più preciso possibile nella descrizione e non dimenticare di includere il tuo href=\"%s\">system status report</a>."
+"href=\"%s\">Github issues</a>. Ensure you read the <a href=\"%s"
+"\">contribution guide</a> prior to submitting your report. Be as descriptive "
+"as possible and please include your <a href=\"%s\">system status report</a>."
+msgstr ""
+"Se trovi un bug nel core di WooCommerce, puoi aprire un ticket via <a href="
+"\"%s\">Github issues</a>. Assicurati di aver letto la   <a href=\"%s"
+"\">contribution guide</a> prima di inviare la tua comunicazione. Sii il più "
+"preciso possibile nella descrizione e non dimenticare di includere il tuo "
+"href=\"%s\">system status report</a>."
 
 #: includes/admin/class-wc-admin-help.php:67
 msgid "Report a bug"
@@ -540,7 +595,9 @@ msgstr "WooCommerce Tax Rates (CSV)"
 
 #: includes/admin/class-wc-admin-importers.php:32
 msgid "Import <strong>tax rates</strong> to your store via a csv file."
-msgstr "Importazione <strong>aliquote fiscali</strong> per il tuo negozio tramite un file CSV."
+msgstr ""
+"Importazione <strong>aliquote fiscali</strong> per il tuo negozio tramite un "
+"file CSV."
 
 #: includes/admin/class-wc-admin-menus.php:56
 msgid "Reports"
@@ -601,9 +658,12 @@ msgstr "tag-prodotto"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:93
 msgid ""
-"These settings control the permalinks used for products. These settings only"
-" apply when <strong>not using \"default\" permalinks above</strong>."
-msgstr "Queste impostazioni controllano i permalink utilizzati per i prodotti. Queste impostazioni si applicano solo quando <strong>non si usano i permalink di \"default \" </ strong>."
+"These settings control the permalinks used for products. These settings only "
+"apply when <strong>not using \"default\" permalinks above</strong>."
+msgstr ""
+"Queste impostazioni controllano i permalink utilizzati per i prodotti. "
+"Queste impostazioni si applicano solo quando <strong>non si usano i "
+"permalink di \"default \" </ strong>."
 
 #: includes/admin/class-wc-admin-permalink-settings.php:100
 msgctxt "default-slug"
@@ -643,9 +703,11 @@ msgstr "Base personalizzata"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:134
 msgid ""
-"Enter a custom base to use. A base <strong>must</strong> be set or WordPress"
-" will use default instead."
-msgstr "Inserire una base personalizzata da utilizzare. Una base <strong >deve essere impostata</strong> o WordPress utilizzerà quella di default."
+"Enter a custom base to use. A base <strong>must</strong> be set or WordPress "
+"will use default instead."
+msgstr ""
+"Inserire una base personalizzata da utilizzare. Una base <strong >deve "
+"essere impostata</strong> o WordPress utilizzerà quella di default."
 
 #: includes/admin/class-wc-admin-permalink-settings.php:184
 msgctxt "slug"
@@ -690,9 +752,11 @@ msgstr "Prodotto inviato. <a href=\"%s\">Anteprima Prodotto</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:66
 msgid ""
-"Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" "
-"href=\"%2$s\">Preview Product</a>"
-msgstr "Prodotto previsto per: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Anteprima Prodotto</a>"
+"Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href="
+"\"%2$s\">Preview Product</a>"
+msgstr ""
+"Prodotto previsto per: <strong>%1$s</strong>. <a target=\"_blank\" href="
+"\"%2$s\">Anteprima Prodotto</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:67
 #: includes/admin/class-wc-admin-post-types.php:82
@@ -701,8 +765,11 @@ msgid "M j, Y @ G:i"
 msgstr "M j, Y @ G:i"
 
 #: includes/admin/class-wc-admin-post-types.php:68
-msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
-msgstr "Bozza prodotto aggiornata. <a target=\"_blank\" href=\"%s\">Anteprima prodotto</a>"
+msgid ""
+"Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr ""
+"Bozza prodotto aggiornata. <a target=\"_blank\" href=\"%s\">Anteprima "
+"prodotto</a>"
 
 #: includes/admin/class-wc-admin-post-types.php:73
 #: includes/admin/class-wc-admin-post-types.php:76
@@ -1013,7 +1080,8 @@ msgstr "Sessione cancellata con successo"
 
 #: includes/admin/class-wc-admin-status.php:129
 msgid "All missing WooCommerce pages was installed successfully."
-msgstr "Tutte le pagine di WooCommerce mancanti sono state installate con successo."
+msgstr ""
+"Tutte le pagine di WooCommerce mancanti sono state installate con successo."
 
 #: includes/admin/class-wc-admin-status.php:137
 msgid "Tax rates successfully deleted"
@@ -1053,7 +1121,7 @@ msgstr "Clear expired transients"
 
 #: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from WordPress."
-msgstr ""
+msgstr "Questo tool canceller&agrave; TUTTI i transient scaduti da WordPress."
 
 #: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
@@ -1065,9 +1133,11 @@ msgstr "Riconteggia i termini"
 
 #: includes/admin/class-wc-admin-status.php:185
 msgid ""
-"This tool will recount product terms - useful when changing your settings in"
-" a way which hides products from the catalog."
-msgstr "Questo strumento riconteggia i termini di prodotto - utile quando si modificano le impostazioni in modo che si nascondono prodotti dal catalogo."
+"This tool will recount product terms - useful when changing your settings in "
+"a way which hides products from the catalog."
+msgstr ""
+"Questo strumento riconteggia i termini di prodotto - utile quando si "
+"modificano le impostazioni in modo che si nascondono prodotti dal catalogo."
 
 #: includes/admin/class-wc-admin-status.php:188
 msgid "Capabilities"
@@ -1081,7 +1151,10 @@ msgstr "Resetta le funzionalità"
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
-msgstr "Questo strumento ripristinerà i ruoli admin, clienti e shop_manager al default. Utilizzare questa opzione se gli utenti non possono accedere a tutte le pagine di amministrazione WooCommerce."
+msgstr ""
+"Questo strumento ripristinerà i ruoli admin, clienti e shop_manager al "
+"default. Utilizzare questa opzione se gli utenti non possono accedere a "
+"tutte le pagine di amministrazione WooCommerce."
 
 #: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
@@ -1095,7 +1168,9 @@ msgstr "Pulisci tutte le sessioni"
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr "<strong class=\"red\">Pericolo:</strong> Questo strumento cancellerà tutti i dati di sessione del cliente dal database, insieme a tutti i carrelli attivi."
+msgstr ""
+"<strong class=\"red\">Pericolo:</strong> Questo strumento cancellerà tutti i "
+"dati di sessione del cliente dal database, insieme a tutti i carrelli attivi."
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
@@ -1111,6 +1186,9 @@ msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
 msgstr ""
+"<strong> class=\"red\">Nota:</strong> Questo tool installer&agrave; tutte le "
+"pagine mancanti di WooCommerce. Le pagine gi&agrave; definite e configurate "
+"non saranno rimpiazzate."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
@@ -1122,9 +1200,11 @@ msgstr "Cancella TUTTE le aliquote create"
 
 #: includes/admin/class-wc-admin-status.php:205
 msgid ""
-"<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
-" rates, use with caution."
-msgstr "<strong class=\"red\">Nota:</strong> Questa opzione eliminerà TUTTE le aliquote create. Usare con cautela."
+"<strong class=\"red\">Note:</strong> This option will delete ALL of your tax "
+"rates, use with caution."
+msgstr ""
+"<strong class=\"red\">Nota:</strong> Questa opzione eliminerà TUTTE le "
+"aliquote create. Usare con cautela."
 
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
@@ -1175,14 +1255,22 @@ msgid ""
 "of categories on the front-end you can drag and drop to sort them. To see "
 "more categories listed click the \"screen options\" link at the top of the "
 "page."
-msgstr "Le categorie di prodotti per il tuo negozio possono essere gestite da qui. Per modificare l'ordine delle categorie sul front-end è possibile trascinarle e rilasciarle per ordinarle. Per visualizzare altre categorie elencate cliccare sul collegamento \"opzioni dello schermo \" nella parte superiore della pagina."
+msgstr ""
+"Le categorie di prodotti per il tuo negozio possono essere gestite da qui. "
+"Per modificare l'ordine delle categorie sul front-end è possibile "
+"trascinarle e rilasciarle per ordinarle. Per visualizzare altre categorie "
+"elencate cliccare sul collegamento \"opzioni dello schermo \" nella parte "
+"superiore della pagina."
 
 #: includes/admin/class-wc-admin-taxonomies.php:280
 msgid ""
-"Shipping classes can be used to group products of similar type. These groups"
-" can then be used by certain shipping methods to provide different rates to "
+"Shipping classes can be used to group products of similar type. These groups "
+"can then be used by certain shipping methods to provide different rates to "
 "different products."
-msgstr "Le classi di spedizione possono essere utilizzate per raggruppare i prodotti di tipo simile. Tali gruppi possono quindi essere utilizzati dalle modalità di spedizione stabilite per offrire tariffe diverse per prodotti diversi."
+msgstr ""
+"Le classi di spedizione possono essere utilizzate per raggruppare i prodotti "
+"di tipo simile. Tali gruppi possono quindi essere utilizzati dalle modalità "
+"di spedizione stabilite per offrire tariffe diverse per prodotti diversi."
 
 #: includes/admin/class-wc-admin-taxonomies.php:293
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:244
@@ -1213,7 +1301,9 @@ msgstr "Grazie per l'installazione!"
 msgid ""
 "%s WooCommerce %s is more powerful, stable, and secure than ever before. We "
 "hope you enjoy it."
-msgstr "% s WooCommerce% s è più potente, stabile e sicuro che mai. Speriamo che vi piaccia."
+msgstr ""
+"% s WooCommerce% s è più potente, stabile e sicuro che mai. Speriamo che vi "
+"piaccia."
 
 #: includes/admin/class-wc-admin-welcome.php:210
 msgid "Version %s"
@@ -1247,10 +1337,15 @@ msgstr "Accedi ai tuoi dati da applicazioni di terze parti."
 msgid ""
 "Built on top of the WooCommerce API, and targetted directly at developers, "
 "the new REST API allows you to get data for <strong>Orders</strong>, "
-"<strong>Coupons</strong>, <strong>Customers</strong>, "
-"<strong>Products</strong> and <strong>Reports</strong> in both "
-"<code>XML</code> and <code>JSON</code> formats."
-msgstr "Costruite sulla base delle API WooCommerce, e pensate direttamente per gli sviluppatori, le nuove API REST ti consentono di ottenere i dati per <strong>Ordini</ strong>, <strong>Coupon</ strong>, <strong>Clienti</ strong>, <strong>Prodotti</ strong> e <strong>Resoconti</ strong>in formato<code>XML</ code> e <code>JSON</code>."
+"<strong>Coupons</strong>, <strong>Customers</strong>, <strong>Products</"
+"strong> and <strong>Reports</strong> in both <code>XML</code> and "
+"<code>JSON</code> formats."
+msgstr ""
+"Costruite sulla base delle API WooCommerce, e pensate direttamente per gli "
+"sviluppatori, le nuove API REST ti consentono di ottenere i dati per "
+"<strong>Ordini</ strong>, <strong>Coupon</ strong>, <strong>Clienti</ "
+"strong>, <strong>Prodotti</ strong> e <strong>Resoconti</ strong>in "
+"formato<code>XML</ code> e <code>JSON</code>."
 
 #: includes/admin/class-wc-admin-welcome.php:251
 msgid "Authentication to keep data secure"
@@ -1259,10 +1354,14 @@ msgstr "Autenticazione per la sicurezza"
 #: includes/admin/class-wc-admin-welcome.php:252
 msgid ""
 "Authentication for the REST API is performed using HTTP Basic Auth if you "
-"have SSL enabled, or signed according to the <a "
-"href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> specification if "
-"you don't have SSL. Data is only available to authenticated users."
-msgstr "L'autenticazione per le API REST è eseguita usando HTTP Basic Auth se è abilitato l'SSL, o firmato secondo le specifiche <a href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> se non è disponibile SSL. I dati sono disponbili solo per gli utenti autenticati."
+"have SSL enabled, or signed according to the <a href=\"http://tools.ietf.org/"
+"html/rfc5849\">OAuth 1.0a</a> specification if you don't have SSL. Data is "
+"only available to authenticated users."
+msgstr ""
+"L'autenticazione per le API REST è eseguita usando HTTP Basic Auth se è "
+"abilitato l'SSL, o firmato secondo le specifiche <a href=\"http://tools.ietf."
+"org/html/rfc5849\">OAuth 1.0a</a> se non è disponibile SSL. I dati sono "
+"disponbili solo per gli utenti autenticati."
 
 #: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"
@@ -1274,15 +1373,15 @@ msgstr "Compatibilità con l'interfaccia utente di Wordpress 3.8"
 
 #: includes/admin/class-wc-admin-welcome.php:261
 msgid ""
-"WooCommerce 2.1 has had its UI restyled to work with the new admin design in"
-" WordPress 3.8. All bitmap icons have been replaced with a custom, "
+"WooCommerce 2.1 has had its UI restyled to work with the new admin design in "
+"WordPress 3.8. All bitmap icons have been replaced with a custom, "
 "lightweight icon font for razor sharp clarity on retina devices as well as "
 "improved performance."
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:264
 msgid "Simplified order UI"
-msgstr ""
+msgstr "UI dell'ordine semplificata"
 
 #: includes/admin/class-wc-admin-welcome.php:265
 msgid ""
@@ -1298,13 +1397,13 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:269
 msgid "Improved Reporting"
-msgstr ""
+msgstr "Report migliorati"
 
 #: includes/admin/class-wc-admin-welcome.php:270
 msgid ""
 "Reports have been redesigned with new <strong>filtering</strong> "
-"capabilities, a new <strong>customer report</strong> showing "
-"orders/spending, and the ability to <strong>export CSVs</strong>."
+"capabilities, a new <strong>customer report</strong> showing orders/"
+"spending, and the ability to <strong>export CSVs</strong>."
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:271
@@ -1315,17 +1414,20 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
-msgstr ""
+msgstr "Integrazione separata"
 
 #: includes/admin/class-wc-admin-welcome.php:279
 msgid "New separate plugins"
-msgstr ""
+msgstr "Nuovi plugin separati"
 
 #: includes/admin/class-wc-admin-welcome.php:280
 msgid ""
 "To make core more lean, some integrations have been removed and turned into "
 "dedicated plugins which you can install as and when you need them."
-msgstr "Per rendere il core più snello, alcune integrazioni sono state rimosse e trasformate in plugin dedicati che possono essere installati qualora ce ne fosse la necessità."
+msgstr ""
+"Per rendere il core più snello, alcune integrazioni sono state rimosse e "
+"trasformate in plugin dedicati che possono essere installati qualora ce ne "
+"fosse la necessità."
 
 #: includes/admin/class-wc-admin-welcome.php:283
 msgid "Google Analytics"
@@ -1333,7 +1435,9 @@ msgstr "Google Analytics"
 
 #: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
-msgstr "Aggiungi il tracciamento Google Analytics eCommerce al tuo negozio WooCommerce."
+msgstr ""
+"Aggiungi il tracciamento Google Analytics eCommerce al tuo negozio "
+"WooCommerce."
 
 #: includes/admin/class-wc-admin-welcome.php:285
 #: includes/admin/class-wc-admin-welcome.php:290
@@ -1365,7 +1469,8 @@ msgstr "Sharedaddy"
 
 #: includes/admin/class-wc-admin-welcome.php:299
 msgid "Add social network sharing buttons to products using Sharedaddy."
-msgstr "Aggiungi i pulsanti di condivisione sociale ai prodotti con ShareDaddy."
+msgstr ""
+"Aggiungi i pulsanti di condivisione sociale ai prodotti con ShareDaddy."
 
 #: includes/admin/class-wc-admin-welcome.php:303
 msgid "ShareYourCart"
@@ -1374,7 +1479,9 @@ msgstr "ShareYourCart"
 #: includes/admin/class-wc-admin-welcome.php:304
 msgid ""
 "Let users share their carts for a discount using the ShareYourCart service."
-msgstr "Permetti agli utenti di condividere il proprio carrello per ottenere uno sconto usando il servizio ShareYourCart."
+msgstr ""
+"Permetti agli utenti di condividere il proprio carrello per ottenere uno "
+"sconto usando il servizio ShareYourCart."
 
 #: includes/admin/class-wc-admin-welcome.php:310
 msgid "Under the Hood"
@@ -1386,9 +1493,11 @@ msgstr "Supporto PDT PayPal"
 
 #: includes/admin/class-wc-admin-welcome.php:315
 msgid ""
-"PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back"
-" the status of an order when a customer returns from PayPal."
-msgstr "PayPal Data Transfer (PDT) è una alternativa a PayPal IPN che manda indietro lo stato di un ordine quando un cliente torna da PayPal."
+"PayPal Data Transfer (PDT) is an alternative for PayPal IPN which sends back "
+"the status of an order when a customer returns from PayPal."
+msgstr ""
+"PayPal Data Transfer (PDT) è una alternativa a PayPal IPN che manda indietro "
+"lo stato di un ordine quando un cliente torna da PayPal."
 
 #: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
@@ -1406,13 +1515,13 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:325
 msgid ""
-"Certain pages such as \"Pay\", \"Order Received\" and some account pages are"
-" now endpoints rather than pages to make checkout more reliable."
+"Certain pages such as \"Pay\", \"Order Received\" and some account pages are "
+"now endpoints rather than pages to make checkout more reliable."
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:331
 msgid "Default credit card form for gateways"
-msgstr ""
+msgstr "Modulo di default della carta di credito per i gateway"
 
 #: includes/admin/class-wc-admin-welcome.php:332
 msgid ""
@@ -1438,7 +1547,9 @@ msgstr ""
 msgid ""
 "During checkout, username and passwords are optional and can be "
 "automatically generated by WooCommerce."
-msgstr "Durante il pagamento, nome utente e password sono opzionali e possono essere generati automaticamente da WooCommerce."
+msgstr ""
+"Durante il pagamento, nome utente e password sono opzionali e possono essere "
+"generati automaticamente da WooCommerce."
 
 #: includes/admin/class-wc-admin-welcome.php:349
 msgid "Additional price display options"
@@ -1446,8 +1557,8 @@ msgstr "Ulteriori opzioni di visualizzazione del prezzo"
 
 #: includes/admin/class-wc-admin-welcome.php:350
 msgid ""
-"Define whether prices should be shown incl. or excl. of tax on the frontend,"
-" and add an optional suffix."
+"Define whether prices should be shown incl. or excl. of tax on the frontend, "
+"and add an optional suffix."
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:354
@@ -1459,10 +1570,12 @@ msgid ""
 "Admins now have the ability to link past orders to a customer (before they "
 "registered) by email address."
 msgstr ""
+"Gli admin possono collegare ordini precedenti ad un cliente (prima che "
+"questo fosse registrato) con l'indirizzo email."
 
 #: includes/admin/class-wc-admin-welcome.php:359
 msgid "Review improvements"
-msgstr ""
+msgstr "Miglioramenti per le recensioni"
 
 #: includes/admin/class-wc-admin-welcome.php:360
 msgid ""
@@ -1478,18 +1591,24 @@ msgstr "Vai alle impostazioni di WooCommerce"
 msgid ""
 "WooCommerce is developed and maintained by a worldwide team of passionate "
 "individuals and backed by an awesome developer community. Want to see your "
-"name? <a "
-"href=\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\">Contribute"
-" to WooCommerce</a>."
-msgstr "WooCommerce è sviluppato e mantenuto da un team internazionale di persone appassionate e sostenuta da una comunità di sviluppatori impressionante. Vuoi vedere anche il tuo nome? <a href=\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\">Contribuisci a WooCommerce</a>."
+"name? <a href=\"https://github.com/woothemes/woocommerce/blob/master/"
+"CONTRIBUTING.md\">Contribute to WooCommerce</a>."
+msgstr ""
+"WooCommerce è sviluppato e mantenuto da un team internazionale di persone "
+"appassionate e sostenuta da una comunità di sviluppatori impressionante. "
+"Vuoi vedere anche il tuo nome? <a href=\"https://github.com/woothemes/"
+"woocommerce/blob/master/CONTRIBUTING.md\">Contribuisci a WooCommerce</a>."
 
 #: includes/admin/class-wc-admin-welcome.php:398
 msgid ""
 "WooCommerce has been kindly translated into several other languages thanks "
-"to our translation team. Want to see your name? <a "
-"href=\"https://www.transifex.com/projects/p/woocommerce/\">Translate "
-"WooCommerce</a>."
-msgstr "WooCommerce è stato gentilmente tradotto in tantissime lingue grazie al nostro team di traduzione. Vuoi vedere apparire qui il tuo nome? <a href=\"https://www.transifex.com/projects/p/woocommerce/\">Traduci WooCommerce</a>."
+"to our translation team. Want to see your name? <a href=\"https://www."
+"transifex.com/projects/p/woocommerce/\">Translate WooCommerce</a>."
+msgstr ""
+"WooCommerce è stato gentilmente tradotto in tantissime lingue grazie al "
+"nostro team di traduzione. Vuoi vedere apparire qui il tuo nome? <a href="
+"\"https://www.transifex.com/projects/p/woocommerce/\">Traduci WooCommerce</"
+"a>."
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1516,9 +1635,11 @@ msgstr "Il CSV non è valido."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:202
 msgid ""
-"Import complete - imported <strong>%s</strong> tax rates and skipped "
-"<strong>%s</strong>."
-msgstr "Importazione completa - importato <strong>% s</strong> aliquote fiscali e saltato <strong>% s</strong>."
+"Import complete - imported <strong>%s</strong> tax rates and skipped <strong>"
+"%s</strong>."
+msgstr ""
+"Importazione completa - importato <strong>% s</strong> aliquote fiscali e "
+"saltato <strong>% s</strong>."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:212
 msgid "All done!"
@@ -1534,22 +1655,30 @@ msgstr "Importa Aliquote"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:285
 msgid ""
-"Hi there! Upload a CSV file containing tax rates to import the contents into"
-" your shop. Choose a .csv file to upload, then click \"Upload file and "
-"import\"."
-msgstr "Hi there! Carica un file CSV contenente le aliquote fiscali per importarne il contenuto nel vostro negozio. Scegliere un file .csv da caricare, quindi fare clic su \"Carica e importa file\"."
+"Hi there! Upload a CSV file containing tax rates to import the contents into "
+"your shop. Choose a .csv file to upload, then click \"Upload file and import"
+"\"."
+msgstr ""
+"Hi there! Carica un file CSV contenente le aliquote fiscali per importarne "
+"il contenuto nel vostro negozio. Scegliere un file .csv da caricare, quindi "
+"fare clic su \"Carica e importa file\"."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:287
 msgid ""
 "Tax rates need to be defined with columns in a specific order (10 columns). "
 "<a href=\"%s\">Click here to download a sample</a>."
-msgstr "Le aliquote fiscali devono essere definiti con colonne in un ordine specifico (10 colonne). <a href=\"%s\">Clicca qui per scaricare un esempio</a>."
+msgstr ""
+"Le aliquote fiscali devono essere definiti con colonne in un ordine "
+"specifico (10 colonne). <a href=\"%s\">Clicca qui per scaricare un esempio</"
+"a>."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:295
 msgid ""
 "Before you can upload your import file, you will need to fix the following "
 "error:"
-msgstr "Prima di caricare il file di importazione, è necessario risolvere il seguente errore:"
+msgstr ""
+"Prima di caricare il file di importazione, è necessario risolvere il "
+"seguente errore:"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:304
 msgid "Choose a file from your computer:"
@@ -1619,7 +1748,9 @@ msgstr "Visibilità Catalogo:"
 msgid ""
 "Define the loops this product should be visible in. The product will still "
 "be accessible directly."
-msgstr "Definire i loop in cui questo prodotto dovrebbe essere visibile. Il prodotto sarà ancora accessibile direttamente."
+msgstr ""
+"Definire i loop in cui questo prodotto dovrebbe essere visibile. Il prodotto "
+"sarà ancora accessibile direttamente."
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:185
 msgid "Enable this option to feature this product."
@@ -2060,7 +2191,9 @@ msgstr "Permessi per i prodotti scaricabili"
 msgid ""
 "Note: Permissions for order items will automatically be granted when the "
 "order status changes to processing/completed."
-msgstr "Nota: I permessi per i prodotti in ordine verranno automaticamente concessi nel momento in cui lo stato dell'ordine cambierà in lavorazione/completato."
+msgstr ""
+"Nota: I permessi per i prodotti in ordine verranno automaticamente concessi "
+"nel momento in cui lo stato dell'ordine cambierà in lavorazione/completato."
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:112
 msgid "Order Actions"
@@ -2108,7 +2241,10 @@ msgstr "Permetti la spedizione gratuita"
 msgid ""
 "Check this box if the coupon grants free shipping. The <a href=\"%s\">free "
 "shipping method</a> must be enabled with the \"must use coupon\" setting."
-msgstr "Spunta questa casella se al coupon è associata la spedizione gratuita. Il <a href=\"%s\">free shipping method</a> deve essere abilitato con il settaggio \"devi usare il coupon\"."
+msgstr ""
+"Spunta questa casella se al coupon è associata la spedizione gratuita. Il <a "
+"href=\"%s\">free shipping method</a> deve essere abilitato con il settaggio "
+"\"devi usare il coupon\"."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:72
 msgid "Apply before tax"
@@ -2117,7 +2253,9 @@ msgstr "Applicare prima delle imposte"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:72
 msgid ""
 "Check this box if the coupon should be applied before calculating cart tax."
-msgstr "Seleziona questa casella se il coupon deve essere applicato prima del calcolo delle imposte nel carrello."
+msgstr ""
+"Seleziona questa casella se il coupon deve essere applicato prima del "
+"calcolo delle imposte nel carrello."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:75
 msgid "Coupon expiry date"
@@ -2139,7 +2277,9 @@ msgstr "Nessun minimo"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid ""
 "This field allows you to set the minimum subtotal needed to use the coupon."
-msgstr "Questo campo consente di impostare un minimo subtotale necessario per utilizzare il coupon."
+msgstr ""
+"Questo campo consente di impostare un minimo subtotale necessario per "
+"utilizzare il coupon."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:88
 msgid "Individual use only"
@@ -2149,7 +2289,9 @@ msgstr "Solo utilizzo individuale"
 msgid ""
 "Check this box if the coupon cannot be used in conjunction with other "
 "coupons."
-msgstr "Seleziona questa casella se il coupon non può essere utilizzato in combinazione con altri coupon."
+msgstr ""
+"Seleziona questa casella se il coupon non può essere utilizzato in "
+"combinazione con altri coupon."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:91
 msgid "Exclude sale items"
@@ -2160,7 +2302,10 @@ msgid ""
 "Check this box if the coupon should not apply to items on sale. Per-item "
 "coupons will only work if the item is not on sale. Per-cart coupons will "
 "only work if there are no sale items in the cart."
-msgstr "Seleziona questa casella se il coupon non si applica alle oggetti in saldo. I coupon per prodotto funzionano solo se l'oggetto non è in saldo. I coupon per carrello funzionano solo se non ci sono articoli in saldo nel carrello."
+msgstr ""
+"Seleziona questa casella se il coupon non si applica alle oggetti in saldo. "
+"I coupon per prodotto funzionano solo se l'oggetto non è in saldo. I coupon "
+"per carrello funzionano solo se non ci sono articoli in saldo nel carrello."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:98
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
@@ -2174,7 +2319,9 @@ msgstr "Cerca un prodotto&hellip;"
 msgid ""
 "Products which need to be in the cart to use this coupon or, for \"Product "
 "Discounts\", which products are discounted."
-msgstr "Prodotti che devono essere nel carrello per utilizzare questo coupon o, per \"Sconti prodotto generici\", quali prodotti siano scontati."
+msgstr ""
+"Prodotti che devono essere nel carrello per utilizzare questo coupon o, per "
+"\"Sconti prodotto generici\", quali prodotti siano scontati."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:116
 msgid "Exclude products"
@@ -2188,7 +2335,9 @@ msgstr "Cerca un prodotto..."
 msgid ""
 "Products which must not be in the cart to use this coupon or, for \"Product "
 "Discounts\", which products are not discounted."
-msgstr "Prodotti che non devono essere nel carrello per utilizzare questo coupon o, per \"Sconti Prodotto\", prodotti che non siano scontati."
+msgstr ""
+"Prodotti che non devono essere nel carrello per utilizzare questo coupon o, "
+"per \"Sconti Prodotto\", prodotti che non siano scontati."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:137
 msgid "Product categories"
@@ -2202,7 +2351,9 @@ msgstr "Qualsiasi categoria"
 msgid ""
 "A product must be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will be discounted."
-msgstr "Un prodotto deve essere in questa categoria perchè il coupon sia valido o, per \"Sconti Prodotto\", prodotti in queste categorie saranno scontati"
+msgstr ""
+"Un prodotto deve essere in questa categoria perchè il coupon sia valido o, "
+"per \"Sconti Prodotto\", prodotti in queste categorie saranno scontati"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:152
 msgid "Exclude categories"
@@ -2216,7 +2367,9 @@ msgstr "Nessuna categoria"
 msgid ""
 "Product must not be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will not be discounted."
-msgstr "Un prodotto non deve essere in questa categoria perchè il coupon sia valido o, per \"Sconti Prodotto\", prodotti in queste categorie non saranno scontati"
+msgstr ""
+"Un prodotto non deve essere in questa categoria perchè il coupon sia valido "
+"o, per \"Sconti Prodotto\", prodotti in queste categorie non saranno scontati"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "Email restrictions"
@@ -2230,7 +2383,9 @@ msgstr "Nessuna restrizione"
 msgid ""
 "List of emails to check against the customer's billing email when an order "
 "is placed."
-msgstr "Lista delle mail da controllare rispetto alla mail di fatturazione fornita dal cliente al momento dell'ordine."
+msgstr ""
+"Lista delle mail da controllare rispetto alla mail di fatturazione fornita "
+"dal cliente al momento dell'ordine."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "Usage limit per coupon"
@@ -2259,7 +2414,10 @@ msgstr "Applica a tutti i prodotti adatti presenti nel carrello"
 msgid ""
 "The maximum number of individual items this coupon can apply to when using "
 "product discounts. Leave blank to apply to all qualifying items in cart."
-msgstr "Il numero massimo di prodotti singoli a cui il coupon può essere applicato quando si usano gli sconti per i prodotti. Lasciare non compilato per applicare a tutti i prodotti adatti presenti nel carrello."
+msgstr ""
+"Il numero massimo di prodotti singoli a cui il coupon può essere applicato "
+"quando si usano gli sconti per i prodotti. Lasciare non compilato per "
+"applicare a tutti i prodotti adatti presenti nel carrello."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid "Usage limit per user"
@@ -2269,13 +2427,18 @@ msgstr "Limite di utilizzo per utente"
 msgid ""
 "How many times this coupon can be used by an invidual user. Uses billing "
 "email for guests, and user ID for logged in users."
-msgstr "Quante volte questo buono sconto può essere usato da un singolo utente. Utilizza la email di fatturazione per gli ospiti e l'ID utente per quelli registrati."
+msgstr ""
+"Quante volte questo buono sconto può essere usato da un singolo utente. "
+"Utilizza la email di fatturazione per gli ospiti e l'ID utente per quelli "
+"registrati."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:230
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
-msgstr "Codice promozionale già esistente - i clienti potranno utilizzare l'ultimo coupon con questo codice."
+msgstr ""
+"Codice promozionale già esistente - i clienti potranno utilizzare l'ultimo "
+"coupon con questo codice."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-actions.php:35
 msgid "Resend order emails"
@@ -2433,7 +2596,7 @@ msgstr "File %d"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:64
 msgid "Search for a downloadable product&hellip;"
-msgstr ""
+msgstr "Ricerca per un prodotto scaricabile&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:65
 msgid "Grant Access"
@@ -2507,7 +2670,9 @@ msgstr "Aggiungi una nota"
 msgid ""
 "Add a note for your reference, or add a customer note (the user will be "
 "notified)."
-msgstr "Aggiungi una nota come tuo promemoria, o aggiungi una nota del cliente (l'utente riceverà una notifica)"
+msgstr ""
+"Aggiungi una nota come tuo promemoria, o aggiungi una nota del cliente "
+"(l'utente riceverà una notifica)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:68
 msgid "Customer note"
@@ -2546,9 +2711,11 @@ msgstr "+ Aggiungi una riga per tassa"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:106
 msgid ""
-"These rows contain taxes for this order. This allows you to display multiple"
-" or compound taxes rather than a single total."
-msgstr "Queste righe contengono le tasse per questo ordine. Questo permette di visualizzare le tasse multiple o composte, piuttosto che un unico totale."
+"These rows contain taxes for this order. This allows you to display multiple "
+"or compound taxes rather than a single total."
+msgstr ""
+"Queste righe contengono le tasse per questo ordine. Questo permette di "
+"visualizzare le tasse multiple o composte, piuttosto che un unico totale."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:113
 msgid "Order Discount"
@@ -2576,7 +2743,8 @@ msgstr "I prodotti virtuali sono immateriali e non vengono spediti."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:59
 msgid "Downloadable products give access to a file upon purchase."
-msgstr "I prodotti scaricabili danno accesso a un file al momento dell'acquisto."
+msgstr ""
+"I prodotti scaricabili danno accesso a un file al momento dell'acquisto."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:90
 #: includes/admin/settings/class-wc-settings-products.php:41
@@ -2603,7 +2771,9 @@ msgstr "Stock Keeping Unit"
 msgid ""
 "SKU refers to a Stock-keeping unit, a unique identifier for each distinct "
 "product and service that can be purchased."
-msgstr "COD si riferisce a una Stock-keeping unit, un identificatore univoco per ogni distinto prodotto o servizio che possono essere acquistati."
+msgstr ""
+"COD si riferisce a una Stock-keeping unit, un identificatore univoco per "
+"ogni distinto prodotto o servizio che possono essere acquistati."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:147
 msgid "Product URL"
@@ -2624,7 +2794,9 @@ msgstr "Acquista prodotto"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:150
 msgid "This text will be shown on the button linking to the external product."
-msgstr "Questo testo verrà visualizzato sul pulsante di collegamento al prodotto esterno."
+msgstr ""
+"Questo testo verrà visualizzato sul pulsante di collegamento al prodotto "
+"esterno."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:157
 msgid "Regular Price"
@@ -2673,8 +2845,8 @@ msgstr "URL del file"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:187
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:149
 msgid ""
-"This is the URL or absolute path to the file which customers will get access"
-" to."
+"This is the URL or absolute path to the file which customers will get access "
+"to."
 msgstr "URL del file o percorso assoluto a cui avrà accesso il cliente"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:202
@@ -2712,7 +2884,9 @@ msgstr "Mai"
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:196
 msgid ""
 "Enter the number of days before a download link expires, or leave blank."
-msgstr "Inserisci il numero di giorni prima che un link di download scada, o lasciare vuoto."
+msgstr ""
+"Inserisci il numero di giorni prima che un link di download scada, o "
+"lasciare vuoto."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:234
 msgid "Download Type"
@@ -2720,7 +2894,8 @@ msgstr "Tipo di download"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:234
 msgid "Choose a download type - this controls the <a href=\"%s\">schema</a>."
-msgstr "Scegli il tipo di download - questo controlla <a href=\"%s\">schema</a>."
+msgstr ""
+"Scegli il tipo di download - questo controlla <a href=\"%s\">schema</a>."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:235
 msgid "Standard Product"
@@ -2789,7 +2964,9 @@ msgstr "Gestire magazzino?"
 msgid ""
 "Enable stock management at product level (not needed if managing stock at "
 "variation level)"
-msgstr "Abilita la gestione delle scorte a livello prodotto (non necessario se si gestiscono le scorte a variazione livello)"
+msgstr ""
+"Abilita la gestione delle scorte a livello prodotto (non necessario se si "
+"gestiscono le scorte a variazione livello)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:290
 #: includes/admin/views/html-bulk-edit-product.php:226
@@ -2801,9 +2978,11 @@ msgstr "Quantità in stock"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:290
 msgid ""
 "Stock quantity. If this is a variable product this value will be used to "
-"control stock for all variations, unless you define stock at variation "
-"level."
-msgstr "Quantità Stock Articolo. Se questo è un prodotto variabile questo valore verrà utilizzato per controllare lo stock a magazzino per tutti i tipi, a meno di definire il magazzino per ogni variante."
+"control stock for all variations, unless you define stock at variation level."
+msgstr ""
+"Quantità Stock Articolo. Se questo è un prodotto variabile questo valore "
+"verrà utilizzato per controllare lo stock a magazzino per tutti i tipi, a "
+"meno di definire il magazzino per ogni variante."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
 #: includes/admin/reports/class-wc-report-stock.php:144
@@ -2814,7 +2993,9 @@ msgstr "Status magazzino"
 msgid ""
 "Controls whether or not the product is listed as \"in stock\" or \"out of "
 "stock\" on the frontend."
-msgstr "Controlli per gestire se il prodotto sia considerato \"in magazzino\" o \"Non disponibile\" sul frontend."
+msgstr ""
+"Controlli per gestire se il prodotto sia considerato \"in magazzino\" o "
+"\"Non disponibile\" sul frontend."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:311
 msgid "Allow Backorders?"
@@ -2842,7 +3023,10 @@ msgstr "Permettere"
 msgid ""
 "If managing stock, this controls whether or not backorders are allowed for "
 "this product and variations. If enabled, stock quantity can go below 0."
-msgstr "In caso di gestione di magazzino, controlla se gli ordini in prenotazione sono ammessi per questo prodotto e le sue variazioni. Se abilitato, la quantità a magazzino può andare al di sotto di 0."
+msgstr ""
+"In caso di gestione di magazzino, controlla se gli ordini in prenotazione "
+"sono ammessi per questo prodotto e le sue variazioni. Se abilitato, la "
+"quantità a magazzino può andare al di sotto di 0."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:326
 msgid "Sold Individually"
@@ -2851,7 +3035,9 @@ msgstr "Venduto singolarmente"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:326
 msgid ""
 "Enable this to only allow one of this item to be bought in a single order"
-msgstr "Abilita per permettere che solo un pezzo di questo prodotto possa essere acquistato in un singolo ordine."
+msgstr ""
+"Abilita per permettere che solo un pezzo di questo prodotto possa essere "
+"acquistato in un singolo ordine."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:344
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
@@ -2906,7 +3092,9 @@ msgstr "Classe di spedizione"
 msgid ""
 "Shipping classes are used by certain shipping methods to group similar "
 "products."
-msgstr "Le classi di spedizione sono utilizzati da certi metodi di spedizione per raggruppare prodotti simili."
+msgstr ""
+"Le classi di spedizione sono utilizzati da certi metodi di spedizione per "
+"raggruppare prodotti simili."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:390
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:752
@@ -2945,9 +3133,12 @@ msgstr "Up-Sells"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:600
 msgid ""
 "Up-sells are products which you recommend instead of the currently viewed "
-"product, for example, products that are more profitable or better quality or"
-" more expensive."
-msgstr "Up-selling sono prodotti che voi raccomandate invece del prodotto attualmente visualizzato, per esempio, i prodotti che sono più redditizi o di migliore qualità o più costosi."
+"product, for example, products that are more profitable or better quality or "
+"more expensive."
+msgstr ""
+"Up-selling sono prodotti che voi raccomandate invece del prodotto "
+"attualmente visualizzato, per esempio, i prodotti che sono più redditizi o "
+"di migliore qualità o più costosi."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:602
 msgid "Cross-Sells"
@@ -2955,9 +3146,11 @@ msgstr "Cross-Sells"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:617
 msgid ""
-"Cross-sells are products which you promote in the cart, based on the current"
-" product."
-msgstr "Cross-sells sono prodotti che vengono promossi nel carrello, in base al prodotto corrente."
+"Cross-sells are products which you promote in the cart, based on the current "
+"product."
+msgstr ""
+"Cross-sells sono prodotti che vengono promossi nel carrello, in base al "
+"prodotto corrente."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:627
 msgid "Choose a grouped product&hellip;"
@@ -2969,7 +3162,9 @@ msgstr "Inserire in un gruppo"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:657
 msgid "Set this option to make this product part of a grouped product."
-msgstr "Impostare questa opzione per inserire questo prodotto in un gruppo di prodotti"
+msgstr ""
+"Impostare questa opzione per inserire questo prodotto in un gruppo di "
+"prodotti"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:677
 msgid "Purchase Note"
@@ -2995,7 +3190,9 @@ msgstr "Attiva le recensioni"
 msgid ""
 "Before adding variations, add and save some attributes on the "
 "<strong>Attributes</strong> tab."
-msgstr "Prima di aggiungere varianti, aggiungere e salvare alcuni attributi nella tab <strong>Attributi</strong>."
+msgstr ""
+"Prima di aggiungere varianti, aggiungere e salvare alcuni attributi nella "
+"tab <strong>Attributi</strong>."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:746
 msgid "Learn more"
@@ -3102,7 +3299,7 @@ msgstr "Revocare l'accesso"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "%s: %s"
-msgstr ""
+msgstr "%s: %s"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "Downloaded %s time"
@@ -3206,7 +3403,9 @@ msgstr "Qualsiasi"
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:53
 msgid ""
 "Enter a SKU for this variation or leave blank to use the parent product SKU."
-msgstr "Immettere un codice per questa variante o lascia vuoto per usare il codice del prodotto principale."
+msgstr ""
+"Immettere un codice per questa variante o lascia vuoto per usare il codice "
+"del prodotto principale."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:64
 msgid "Stock Qty:"
@@ -3216,7 +3415,9 @@ msgstr "Quantità a magazzino:"
 msgid ""
 "Enter a quantity to enable stock management at variation level, or leave "
 "blank to use the parent product's options."
-msgstr "Inserisci una quantità per permettere la gestione degli stock a livello di variazione, o lascia vuoto per utilizzare le opzioni del prodotto principale."
+msgstr ""
+"Inserisci una quantità per permettere la gestione degli stock a livello di "
+"variazione, o lascia vuoto per utilizzare le opzioni del prodotto principale."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:73
 msgid "Regular Price:"
@@ -3246,7 +3447,9 @@ msgstr "Data di fine vendita:"
 msgid ""
 "Enter a weight for this variation or leave blank to use the parent product "
 "weight."
-msgstr "Immettere un peso per questa variazione o lasciare vuoto per utilizzare il peso del prodotto principale."
+msgstr ""
+"Immettere un peso per questa variazione o lasciare vuoto per utilizzare il "
+"peso del prodotto principale."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:105
 msgid "Dimensions (L&times;W&times;H)"
@@ -3285,12 +3488,16 @@ msgstr "Abilitato"
 msgid ""
 "Enable this option if access is given to a downloadable file upon purchase "
 "of a product"
-msgstr "Abilitare questa opzione se l'accesso è dato a un file scaricabile al momento dell'acquisto di un prodotto"
+msgstr ""
+"Abilitare questa opzione se l'accesso è dato a un file scaricabile al "
+"momento dell'acquisto di un prodotto"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:214
 msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
-msgstr "Abilitare questa opzione se un prodotto non viene spedito o non vi è alcun costo di spedizione"
+msgstr ""
+"Abilitare questa opzione se un prodotto non viene spedito o non vi è alcun "
+"costo di spedizione"
 
 #: includes/admin/reports/class-wc-admin-report.php:384
 msgid "Sold %s worth in the last %d days"
@@ -3642,7 +3849,9 @@ msgstr "Ammontare della tassazione per la spedizione"
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:120
 msgid ""
 "This is the sum of the \"Tax Rows\" shipping tax amount within your orders."
-msgstr "Somma dell'ammontare delle righe \"Tax Rows\" per le spedizioni dei tuoi ordini."
+msgstr ""
+"Somma dell'ammontare delle righe \"Tax Rows\" per le spedizioni dei tuoi "
+"ordini."
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:121
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:117
@@ -3669,7 +3878,8 @@ msgstr "Vendite totali"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "This is the sum of the 'Order Total' field within your orders."
-msgstr "Questa è la somma del campo 'Totale Ordini' all'interno dei tuoi ordini."
+msgstr ""
+"Questa è la somma del campo 'Totale Ordini' all'interno dei tuoi ordini."
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:116
 msgid "Total Shipping"
@@ -3677,7 +3887,8 @@ msgstr "Totale spedizioni"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:116
 msgid "This is the sum of the 'Shipping Total' field within your orders."
-msgstr "Questa è la somma del campo 'Totale Spedizioni' all'interno dei tuoi ordini."
+msgstr ""
+"Questa è la somma del campo 'Totale Spedizioni' all'interno dei tuoi ordini."
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:118
 msgid "Net profit"
@@ -3703,7 +3914,9 @@ msgstr "Pagina dell'account"
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "access account related functionality."
-msgstr "Questa pagine devono essere presenti per permettere a Woocommerce di indirizzare i clienti alla gestione delle funzionalità del proprio account."
+msgstr ""
+"Questa pagine devono essere presenti per permettere a Woocommerce di "
+"indirizzare i clienti alla gestione delle funzionalità del proprio account."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:44
 msgid "My Account Page"
@@ -3723,7 +3936,9 @@ msgstr "Endpoints dell'account"
 msgid ""
 "Endpoints are appended to your page URLs to handle specific actions on the "
 "accounts pages. They should be unique."
-msgstr "Gli endpoints sono inseriti negli indirizzi delle tue pagine per gestire specifiche azioni nelle pagine dell'account. Devono essere univoci."
+msgstr ""
+"Gli endpoints sono inseriti negli indirizzi delle tue pagine per gestire "
+"specifiche azioni nelle pagine dell'account. Devono essere univoci."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:59
 msgid "View Order"
@@ -3765,7 +3980,9 @@ msgstr "Logout"
 msgid ""
 "Endpoint for the triggering logout. You can add this to your menus via a "
 "custom link: yoursite.com/?customer-logout=true"
-msgstr "Endpoint per avviare il logout. E' possibile aggiungerlo ai propri menu attraverso un link personalizzato: yoursite.com/?customer-logout=true"
+msgstr ""
+"Endpoint per avviare il logout. E' possibile aggiungerlo ai propri menu "
+"attraverso un link personalizzato: yoursite.com/?customer-logout=true"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:105
 msgid "Registration Options"
@@ -3822,7 +4039,8 @@ msgstr "Attiva l'uso di coupon/codici promozionali"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:73
 msgid "Coupons can be applied from the cart and checkout pages."
-msgstr "I coupon possono essere inseriti dal carrello e dalle pagine di checkout."
+msgstr ""
+"I coupon possono essere inseriti dal carrello e dalle pagine di checkout."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:78
 msgctxt "Settings group label"
@@ -3844,7 +4062,8 @@ msgstr "Forza Pagamento Sicuro"
 #: includes/admin/settings/class-wc-settings-checkout.php:95
 msgid ""
 "Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)."
-msgstr "Forza SSL (HTTPS) sulla pagina di checkout (è richiesto un certificato SSL)."
+msgstr ""
+"Forza SSL (HTTPS) sulla pagina di checkout (è richiesto un certificato SSL)."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:99
 msgid "Un-force HTTPS when leaving the checkout"
@@ -3858,7 +4077,9 @@ msgstr "Pagine di checkout"
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "checkout."
-msgstr "Questa pagine devono essere presenti per permettere a Woocommerce di indirizzare i clienti al checkout"
+msgstr ""
+"Questa pagine devono essere presenti per permettere a Woocommerce di "
+"indirizzare i clienti al checkout"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
 msgid "Cart Page"
@@ -3876,7 +4097,9 @@ msgstr "Termini e condizioni"
 msgid ""
 "If you define a \"Terms\" page the customer will be asked if they accept "
 "them when checking out."
-msgstr "Se si definisce una pagina per le \"Condizioni generali\",  al cliente verrà chiesto di accettarle al momento del check out."
+msgstr ""
+"Se si definisce una pagina per le \"Condizioni generali\",  al cliente verrà "
+"chiesto di accettarle al momento del check out."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:147
 msgid "Checkout Endpoints"
@@ -3886,7 +4109,9 @@ msgstr "Endpoints per il checkout"
 msgid ""
 "Endpoints are appended to your page URLs to handle specific actions during "
 "the checkout process. They should be unique."
-msgstr "Gli endpoints sono aggiunti agli url della tua pagina per gestire azioni specifiche durante il processo di checkout. Essi devono essere univoci."
+msgstr ""
+"Gli endpoints sono aggiunti agli url della tua pagina per gestire azioni "
+"specifiche durante il processo di checkout. Essi devono essere univoci."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:150
 msgid "Pay"
@@ -3915,9 +4140,11 @@ msgstr "Metodi di pagamento"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:178
 msgid ""
-"Installed gateways are listed below. Drag and drop gateways to control their"
-" display order on the frontend."
-msgstr "I gateways installati sono elencati sotto. Trascina e rilascia i gateways per impostare l'ordine di visualizzazione nel frontend."
+"Installed gateways are listed below. Drag and drop gateways to control their "
+"display order on the frontend."
+msgstr ""
+"I gateways installati sono elencati sotto. Trascina e rilascia i gateways "
+"per impostare l'ordine di visualizzazione nel frontend."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:219
 msgid "Gateway Display"
@@ -3947,7 +4174,9 @@ msgstr "Opzioni email mittente"
 msgid ""
 "The following options affect the sender (email address and name) used in "
 "WooCommerce emails."
-msgstr "Le opzioni seguenti incidono sul mittente (indirizzo email e nome) utilizzato nelle email inviate da WooCommerce."
+msgstr ""
+"Le opzioni seguenti incidono sul mittente (indirizzo email e nome) "
+"utilizzato nelle email inviate da WooCommerce."
 
 #: includes/admin/settings/class-wc-settings-emails.php:69
 msgid "\"From\" Name"
@@ -3967,7 +4196,11 @@ msgid ""
 "target=\"_blank\">Click here to preview your email template</a>. For more "
 "advanced control copy <code>woocommerce/templates/emails/</code> to "
 "<code>yourtheme/woocommerce/emails/</code>."
-msgstr "Questa sezione permette di personalizzare le email WooCommerce. <a href=\"%s\" target=\"_blank\">Clicca qui per un'anteprima del template email</a>. Per un controllo più avanzato copia <code>woocommerce/templates/emails/</code>nel <code>tuotema/woocommerce/emails/</code>."
+msgstr ""
+"Questa sezione permette di personalizzare le email WooCommerce. <a href=\"%s"
+"\" target=\"_blank\">Clicca qui per un'anteprima del template email</a>. Per "
+"un controllo più avanzato copia <code>woocommerce/templates/emails/</"
+"code>nel <code>tuotema/woocommerce/emails/</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:96
 msgid "Header Image"
@@ -3977,7 +4210,10 @@ msgstr "Immagine intestazione"
 msgid ""
 "Enter a URL to an image you want to show in the email's header. Upload your "
 "image using the <a href=\"%s\">media uploader</a>."
-msgstr "Inserire un URL di un'immagine che si desidera visualizzare nella intestazione della email.  Carica la tua immagine usando il <a href=\"%s\">media uploader</a>."
+msgstr ""
+"Inserire un URL di un'immagine che si desidera visualizzare nella "
+"intestazione della email.  Carica la tua immagine usando il <a href=\"%s"
+"\">media uploader</a>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:106
 msgid "Email Footer Text"
@@ -3997,9 +4233,11 @@ msgstr "Colore di base"
 
 #: includes/admin/settings/class-wc-settings-emails.php:117
 msgid ""
-"The base colour for WooCommerce email templates. Default "
+"The base colour for WooCommerce email templates. Default <code>#557da1</"
+"code>."
+msgstr ""
+"Colore di base per i modelli di posta elettronica WooCommerce. Default "
 "<code>#557da1</code>."
-msgstr "Colore di base per i modelli di posta elettronica WooCommerce. Default <code>#557da1</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:126
 msgid "Background Colour"
@@ -4009,7 +4247,9 @@ msgstr "Colore di sfondo"
 msgid ""
 "The background colour for WooCommerce email templates. Default "
 "<code>#f5f5f5</code>."
-msgstr "Colore di sfondo per i modelli di posta elettronica WooCommerce. Default <code>#f5f5f5</code>."
+msgstr ""
+"Colore di sfondo per i modelli di posta elettronica WooCommerce. Default "
+"<code>#f5f5f5</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:136
 msgid "Email Body Background Colour"
@@ -4017,7 +4257,9 @@ msgstr "Colore di sfondo del corpo dell'email"
 
 #: includes/admin/settings/class-wc-settings-emails.php:137
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
-msgstr "Colore di sfondo principale del corpo dell'email. Default <code>#fdfdfd</code>."
+msgstr ""
+"Colore di sfondo principale del corpo dell'email. Default <code>#fdfdfd</"
+"code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:146
 msgid "Email Body Text Colour"
@@ -4037,9 +4279,11 @@ msgstr "Nazione Negozio"
 
 #: includes/admin/settings/class-wc-settings-general.php:52
 msgid ""
-"This is the base location for your business. Tax rates will be based on this"
-" country."
-msgstr "Questa è la posizione di base per il vostro business. Le aliquote fiscali saranno basate su questo paese."
+"This is the base location for your business. Tax rates will be based on this "
+"country."
+msgstr ""
+"Questa è la posizione di base per il vostro business. Le aliquote fiscali "
+"saranno basate su questo paese."
 
 #: includes/admin/settings/class-wc-settings-general.php:61
 msgid "Selling Location(s)"
@@ -4047,7 +4291,8 @@ msgstr "Località di vendita"
 
 #: includes/admin/settings/class-wc-settings-general.php:62
 msgid "This option lets you limit which countries you are willing to sell to."
-msgstr "Questa opzione permette di limitare le nazioni in cui effettuare le vendite."
+msgstr ""
+"Questa opzione permette di limitare le nazioni in cui effettuare le vendite."
 
 #: includes/admin/settings/class-wc-settings-general.php:70
 msgid "Sell to all countries"
@@ -4078,7 +4323,9 @@ msgstr "Testo dell'avviso"
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
-msgstr "Questo è un negozio di prova &mdash; nessun ordine sarà preso in considerazione."
+msgstr ""
+"Questo è un negozio di prova &mdash; nessun ordine sarà preso in "
+"considerazione."
 
 #: includes/admin/settings/class-wc-settings-general.php:103
 msgid "API"
@@ -4094,7 +4341,8 @@ msgstr "Opzioni valuta"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "The following options affect how prices are displayed on the frontend."
-msgstr "Le seguenti opzioni incidono su come i prezzi sono visualizzati sul frontend."
+msgstr ""
+"Le seguenti opzioni incidono su come i prezzi sono visualizzati sul frontend."
 
 #: includes/admin/settings/class-wc-settings-general.php:115
 msgid "Currency"
@@ -4170,16 +4418,19 @@ msgstr "Attiva Lightbox"
 msgid ""
 "Include WooCommerce's lightbox. Product gallery images will open in a "
 "lightbox."
-msgstr "Includi la Woocommerce lightbox. Le immagini della galleria saranno aperte in una lightbox."
+msgstr ""
+"Includi la Woocommerce lightbox. Le immagini della galleria saranno aperte "
+"in una lightbox."
 
 #: includes/admin/settings/class-wc-settings-general.php:194
 msgid "Enable enhanced country select boxes"
 msgstr "Attiva il campo nazioni migliorato"
 
 #: includes/admin/settings/class-wc-settings-general.php:199
-msgid ""
-"This will enable a script allowing the country fields to be searchable."
-msgstr "Questo attiverà uno script che permette al campo nazioni di essere ricercabile."
+msgid "This will enable a script allowing the country fields to be searchable."
+msgstr ""
+"Questo attiverà uno script che permette al campo nazioni di essere "
+"ricercabile."
 
 #: includes/admin/settings/class-wc-settings-general.php:217
 msgid "Frontend Styles"
@@ -4215,7 +4466,8 @@ msgstr "Contenuto"
 
 #: includes/admin/settings/class-wc-settings-general.php:240
 msgid "Your themes page background - used for tab active states"
-msgstr "Background della pagina nel tuo tema - usato per lo stato attivo della tab"
+msgstr ""
+"Background della pagina nel tuo tema - usato per lo stato attivo della tab"
 
 #: includes/admin/settings/class-wc-settings-general.php:241
 msgid "Subtext"
@@ -4223,15 +4475,21 @@ msgstr "Subtext"
 
 #: includes/admin/settings/class-wc-settings-general.php:241
 msgid "Used for certain text and asides - breadcrumbs, small text etc."
-msgstr "Usato per un determinato testo e digressioni - breadcrumbs, testo in piccolo ecc"
+msgstr ""
+"Usato per un determinato testo e digressioni - breadcrumbs, testo in piccolo "
+"ecc"
 
 #: includes/admin/settings/class-wc-settings-general.php:244
 msgid ""
 "To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> "
-"and <code>woocommerce.css</code> need to be writable. See <a "
-"href=\"http://codex.wordpress.org/Changing_File_Permissions\">the Codex</a> "
-"for more information."
-msgstr "Per modificare i colori <code>woocommerce/assets/css/woocommerce-base.less</code> and <code>woocommerce.css</code> devono essere scrivibili. Vedi <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">il Codex</a> per informazioni."
+"and <code>woocommerce.css</code> need to be writable. See <a href=\"http://"
+"codex.wordpress.org/Changing_File_Permissions\">the Codex</a> for more "
+"information."
+msgstr ""
+"Per modificare i colori <code>woocommerce/assets/css/woocommerce-base.less</"
+"code> and <code>woocommerce.css</code> devono essere scrivibili. Vedi <a "
+"href=\"http://codex.wordpress.org/Changing_File_Permissions\">il Codex</a> "
+"per informazioni."
 
 #: includes/admin/settings/class-wc-settings-integrations.php:25
 msgid "Integration"
@@ -4261,7 +4519,10 @@ msgstr "Mantenere scorte (minuti)"
 msgid ""
 "Hold stock (for unpaid orders) for x minutes. When this limit is reached, "
 "the pending order will be cancelled. Leave blank to disable."
-msgstr "Mantenere scorte (per gli ordini non pagati) per x minuti. Quando viene raggiunto questo limite, l'ordine in corso verrà annullato. Lascia vuoto per disabilitare."
+msgstr ""
+"Mantenere scorte (per gli ordini non pagati) per x minuti. Quando viene "
+"raggiunto questo limite, l'ordine in corso verrà annullato. Lascia vuoto per "
+"disabilitare."
 
 #: includes/admin/settings/class-wc-settings-products.php:104
 msgid "Notifications"
@@ -4309,7 +4570,9 @@ msgstr "Mostra sempre la disponibilità a magazzino es. \"12 in stock\""
 
 #: includes/admin/settings/class-wc-settings-products.php:176
 msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
-msgstr "Mostra solo quando lo stock è basso es. \"Solo 2 pezzi disponibili\" vs. \"Disponibile\""
+msgstr ""
+"Mostra solo quando lo stock è basso es. \"Solo 2 pezzi disponibili\" vs. "
+"\"Disponibile\""
 
 #: includes/admin/settings/class-wc-settings-products.php:177
 msgid "Never show stock amount"
@@ -4319,7 +4582,9 @@ msgstr "Non mostrare mai la disponiblità a magazzino"
 msgid ""
 "Note: The shop page has children - child pages will not work if you enable "
 "this option."
-msgstr "Nota: La pagina negozio ha pagine figlio - le pagine figlio non funzionano se si attiva questa opzione."
+msgstr ""
+"Nota: La pagina negozio ha pagine figlio - le pagine figlio non funzionano "
+"se si attiva questa opzione."
 
 #: includes/admin/settings/class-wc-settings-products.php:200
 msgid "Product Listings"
@@ -4331,15 +4596,18 @@ msgstr "Archivio prodotti / Pagina del Negozio"
 
 #: includes/admin/settings/class-wc-settings-products.php:204
 msgid ""
-"The base page can also be used in your <a href=\"%s\">product "
+"The base page can also be used in your <a href=\"%s\">product permalinks</a>."
+msgstr ""
+"La pagina base può inoltre essere utilizzata nel tuo <a href=\"%s\">product "
 "permalinks</a>."
-msgstr "La pagina base può inoltre essere utilizzata nel tuo <a href=\"%s\">product permalinks</a>."
 
 #: includes/admin/settings/class-wc-settings-products.php:210
 msgid ""
 "This sets the base page of your shop - this is where your product archive "
 "will be."
-msgstr "Questo imposta la pagina di base del tuo negozio - qua è dove si troverà il vostro archivio prodotti."
+msgstr ""
+"Questo imposta la pagina di base del tuo negozio - qua è dove si troverà il "
+"vostro archivio prodotti."
 
 #: includes/admin/settings/class-wc-settings-products.php:214
 msgid "Shop Page Display"
@@ -4370,7 +4638,8 @@ msgstr "Categoria di default"
 
 #: includes/admin/settings/class-wc-settings-products.php:231
 msgid "This controls what is shown on category archives."
-msgstr "Questa opzione controlla ciò che viene mostrato nelle pagine per categoria."
+msgstr ""
+"Questa opzione controlla ciò che viene mostrato nelle pagine per categoria."
 
 #: includes/admin/settings/class-wc-settings-products.php:246
 msgid "Default Product Sorting"
@@ -4478,7 +4747,8 @@ msgstr "Per votare bisogna scrivere una recensione"
 
 #: includes/admin/settings/class-wc-settings-products.php:342
 msgid "Show \"verified owner\" label for customer reviews"
-msgstr "Mostra l'etichetta \"proprietario verificato\"  nelle recensioni dei clienti"
+msgstr ""
+"Mostra l'etichetta \"proprietario verificato\"  nelle recensioni dei clienti"
 
 #: includes/admin/settings/class-wc-settings-products.php:352
 msgid "Only allow reviews from \"verified owners\""
@@ -4494,7 +4764,11 @@ msgid ""
 "display on the front-end will still be affected by CSS styles. After "
 "changing these settings you may need to <a href=\"%s\">regenerate your "
 "thumbnails</a>."
-msgstr "Queste impostazioni influiscono sulle dimensioni effettive delle immagini contenute nel catalogo - il display del front-end sarà ancora influenzato dagli stili CSS. Dopo aver modificato queste impostazioni potrebbe essere necessario <a href=\"%s\">rigenerare le miniature</a>."
+msgstr ""
+"Queste impostazioni influiscono sulle dimensioni effettive delle immagini "
+"contenute nel catalogo - il display del front-end sarà ancora influenzato "
+"dagli stili CSS. Dopo aver modificato queste impostazioni potrebbe essere "
+"necessario <a href=\"%s\">rigenerare le miniature</a>."
 
 #: includes/admin/settings/class-wc-settings-products.php:366
 msgid "Catalog Images"
@@ -4510,7 +4784,9 @@ msgstr "Foto del singolo prodotto"
 
 #: includes/admin/settings/class-wc-settings-products.php:381
 msgid "This is the size used by the main image on the product page."
-msgstr "Questo è la dimensione usata per l'immagine principale sulla pagina del prodotto."
+msgstr ""
+"Questo è la dimensione usata per l'immagine principale sulla pagina del "
+"prodotto."
 
 #: includes/admin/settings/class-wc-settings-products.php:394
 msgid "Product Thumbnails"
@@ -4519,7 +4795,9 @@ msgstr "Immagini prodotto"
 #: includes/admin/settings/class-wc-settings-products.php:395
 msgid ""
 "This size is usually used for the gallery of images on the product page."
-msgstr "Questa dimensione è di solito utilizzata per la galleria di immagini sulla pagina del prodotto."
+msgstr ""
+"Questa dimensione è di solito utilizzata per la galleria di immagini sulla "
+"pagina del prodotto."
 
 #: includes/admin/settings/class-wc-settings-products.php:409
 msgid "Downloadable Products"
@@ -4532,10 +4810,15 @@ msgstr "Tipo di download dei file"
 #: includes/admin/settings/class-wc-settings-products.php:413
 msgid ""
 "Forcing downloads will keep URLs hidden, but some servers may serve large "
-"files unreliably. If supported, <code>X-Accel-Redirect</code>/ "
-"<code>X-Sendfile</code> can be used to serve downloads instead (server "
-"requires <code>mod_xsendfile</code>)."
-msgstr "Forzare il download manterrà gli URL nascosti, ma alcuni server possono servire file di grandi dimensioni in modo non affidabile. Se supportato,  <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> può essere utilizzato per servire download al posto di (server requires <code>mod_xsendfile</code>)."
+"files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-"
+"Sendfile</code> can be used to serve downloads instead (server requires "
+"<code>mod_xsendfile</code>)."
+msgstr ""
+"Forzare il download manterrà gli URL nascosti, ma alcuni server possono "
+"servire file di grandi dimensioni in modo non affidabile. Se supportato,  "
+"<code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> può essere utilizzato "
+"per servire download al posto di (server requires <code>mod_xsendfile</"
+"code>)."
 
 #: includes/admin/settings/class-wc-settings-products.php:421
 msgid "Force Downloads"
@@ -4567,9 +4850,11 @@ msgstr "Concedere l'accesso ai prodotti scaricabili dopo il pagamento"
 
 #: includes/admin/settings/class-wc-settings-products.php:444
 msgid ""
-"Enable this option to grant access to downloads when orders are "
-"\"processing\", rather than \"completed\"."
-msgstr "Attivare questa opzione per concedere l'accesso ai download quando gli ordini sono \"processati\", piuttosto che \"completati\"."
+"Enable this option to grant access to downloads when orders are \"processing"
+"\", rather than \"completed\"."
+msgstr ""
+"Attivare questa opzione per concedere l'accesso ai download quando gli "
+"ordini sono \"processati\", piuttosto che \"completati\"."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:41
 #: includes/admin/settings/class-wc-settings-shipping.php:67
@@ -4590,7 +4875,8 @@ msgstr "Attiva il calcolo delle spese di spedizione sulla pagina del carrello"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:88
 msgid "Hide shipping costs until an address is entered"
-msgstr "Nascondi le spese di spedizione fino a quando viene immesso un indirizzo"
+msgstr ""
+"Nascondi le spese di spedizione fino a quando viene immesso un indirizzo"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:97
 msgid "Shipping Display Mode"
@@ -4599,7 +4885,9 @@ msgstr "Modalità visualizzazione spedizioni"
 #: includes/admin/settings/class-wc-settings-shipping.php:98
 msgid ""
 "This controls how multiple shipping methods are displayed on the frontend."
-msgstr "Questo controlla come le diverse modalità di spedizione vengono visualizzate sul frontend."
+msgstr ""
+"Questo controlla come le diverse modalità di spedizione vengono visualizzate "
+"sul frontend."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:103
 msgid "Display shipping methods with \"radio\" buttons"
@@ -4627,9 +4915,11 @@ msgstr "Restringi la spedizione alle località"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:133
 msgid ""
-"Choose which countries you want to ship to, or choose to ship to all <a "
+"Choose which countries you want to ship to, or choose to ship to all <a href="
+"\"%s\">locations you sell to</a>."
+msgstr ""
+"Scegli le nazioni verso cui vuoi spedire, oppure scegli di spedire in <a "
 "href=\"%s\">locations you sell to</a>."
-msgstr "Scegli le nazioni verso cui vuoi spedire, oppure scegli di spedire in <a href=\"%s\">locations you sell to</a>."
 
 #: includes/admin/settings/class-wc-settings-shipping.php:140
 msgid "Ship to all countries you sell to"
@@ -4654,7 +4944,9 @@ msgstr "ID"
 #: includes/admin/settings/class-wc-settings-shipping.php:215
 msgid ""
 "Drag and drop the above shipping methods to control their display order."
-msgstr "Trascina e rilascia le modalità di spedizione per impostare il loro ordine di visualizzazione"
+msgstr ""
+"Trascina e rilascia le modalità di spedizione per impostare il loro ordine "
+"di visualizzazione"
 
 #: includes/admin/settings/class-wc-settings-tax.php:40
 #: includes/admin/settings/class-wc-settings-tax.php:68
@@ -4683,9 +4975,11 @@ msgstr "Prezzi inseriti con imposte"
 
 #: includes/admin/settings/class-wc-settings-tax.php:83
 msgid ""
-"This option is important as it will affect how you input prices. Changing it"
-" will not update existing products."
-msgstr "Questa opzione è importante in quanto influirà sull'inserimento dei prezzi. La modifica non interviene sui prodotti già esistenti."
+"This option is important as it will affect how you input prices. Changing it "
+"will not update existing products."
+msgstr ""
+"Questa opzione è importante in quanto influirà sull'inserimento dei prezzi. "
+"La modifica non interviene sui prodotti già esistenti."
 
 #: includes/admin/settings/class-wc-settings-tax.php:85
 msgid "Yes, I will enter prices inclusive of tax"
@@ -4701,7 +4995,9 @@ msgstr "Calcolo tassazione riferita ad:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:93
 msgid "This option determines which address is used to calculate tax."
-msgstr "Questa opzione determina quale indirizzo viene utilizzato per calcolare l'imposta."
+msgstr ""
+"Questa opzione determina quale indirizzo viene utilizzato per calcolare "
+"l'imposta."
 
 #: includes/admin/settings/class-wc-settings-tax.php:97
 msgid "Customer shipping address"
@@ -4724,7 +5020,9 @@ msgstr "Indirizzo predefinito clienti:"
 msgid ""
 "This option determines the customers default address (before they input "
 "their own)."
-msgstr "Questa opzione determina l'indirizzo di default clienti (prima che immettano il proprio)."
+msgstr ""
+"Questa opzione determina l'indirizzo di default clienti (prima che immettano "
+"il proprio)."
 
 #: includes/admin/settings/class-wc-settings-tax.php:110
 msgid "No address"
@@ -4738,7 +5036,9 @@ msgstr "Aliquota spese di spedizione:"
 msgid ""
 "Optionally control which tax class shipping gets, or leave it so shipping "
 "tax is based on the cart items themselves."
-msgstr "Controlla opzionalmente quale aliquota ha la spedizione, o lascia invariato così che l'aliquota si basi su quella applicata ai prodotti nel carrello."
+msgstr ""
+"Controlla opzionalmente quale aliquota ha la spedizione, o lascia invariato "
+"così che l'aliquota si basi su quella applicata ai prodotti nel carrello."
 
 #: includes/admin/settings/class-wc-settings-tax.php:122
 msgid "Shipping tax class based on cart items"
@@ -4750,7 +5050,8 @@ msgstr "Arrotondamento"
 
 #: includes/admin/settings/class-wc-settings-tax.php:128
 msgid "Round tax at subtotal level, instead of rounding per line"
-msgstr "Arrotonda le imposte nel subtotale, invece di arrotondare per ogni riga"
+msgstr ""
+"Arrotonda le imposte nel subtotale, invece di arrotondare per ogni riga"
 
 #: includes/admin/settings/class-wc-settings-tax.php:135
 msgid "Additional Tax Classes"
@@ -4760,7 +5061,10 @@ msgstr "Aliquote addizionali"
 msgid ""
 "List additonal tax classes below (1 per line). This is in addition to the "
 "default <code>Standard Rate</code>. Tax classes can be assigned to products."
-msgstr "Elenca le aliquote aggiuntive sotto (1 per linea). Questo è in aggiunta all'<code>Aliquota Standard</code>. Le diverse aliquote possono essere assegnate ai prodotti."
+msgstr ""
+"Elenca le aliquote aggiuntive sotto (1 per linea). Questo è in aggiunta "
+"all'<code>Aliquota Standard</code>. Le diverse aliquote possono essere "
+"assegnate ai prodotti."
 
 #: includes/admin/settings/class-wc-settings-tax.php:140
 msgid "Reduced Rate%sZero Rate"
@@ -4790,7 +5094,11 @@ msgid ""
 "\"inc. Vat\" to explain your pricing. You can also have prices substituted "
 "here using one of the following: <code>{price_including_tax}, "
 "{price_excluding_tax}</code>."
-msgstr "Definisci il testo da mostrare dopo il prezzo dei tuoi prodotti. Questo può essere, per esempio, \"IVA inclusa\" per spiegare il prezzo di listino. Puoi avere anche sostituti dei prezzi usando uno dei seguenti: <code>{price_including_tax}, {price_excluding_tax}</code>."
+msgstr ""
+"Definisci il testo da mostrare dopo il prezzo dei tuoi prodotti. Questo può "
+"essere, per esempio, \"IVA inclusa\" per spiegare il prezzo di listino. Puoi "
+"avere anche sostituti dei prezzi usando uno dei seguenti: "
+"<code>{price_including_tax}, {price_excluding_tax}</code>."
 
 #: includes/admin/settings/class-wc-settings-tax.php:163
 msgid "Display prices during cart/checkout:"
@@ -4814,9 +5122,11 @@ msgstr "Aliquote per la \"%s\" classe"
 
 #: includes/admin/settings/class-wc-settings-tax.php:244
 msgid ""
-"Define tax rates for countries and states below. <a href=\"%s\">See here</a>"
-" for available alpha-2 country codes."
-msgstr "Definire le aliquote fiscali per i paesi e stati di seguito. <a href=\"%s\">Vedi qui</a> per i codici alfa-2 disponibili per nazione."
+"Define tax rates for countries and states below. <a href=\"%s\">See here</a> "
+"for available alpha-2 country codes."
+msgstr ""
+"Definire le aliquote fiscali per i paesi e stati di seguito. <a href=\"%s"
+"\">Vedi qui</a> per i codici alfa-2 disponibili per nazione."
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "Country&nbsp;Code"
@@ -4824,7 +5134,9 @@ msgstr "Codice&nbsp;Nazione"
 
 #: includes/admin/settings/class-wc-settings-tax.php:250
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
-msgstr "Codice del paese a 2 cifre, ad esempio US. Lascia in bianco per applicare a tutti."
+msgstr ""
+"Codice del paese a 2 cifre, ad esempio US. Lascia in bianco per applicare a "
+"tutti."
 
 #: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "State&nbsp;Code"
@@ -4832,7 +5144,9 @@ msgstr "Siglae&nbsp;Provincia"
 
 #: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
-msgstr "Sigla provincia a 2 lettere, ad esempio AL. Lascia in bianco per applicare a tutti."
+msgstr ""
+"Sigla provincia a 2 lettere, ad esempio AL. Lascia in bianco per applicare a "
+"tutti."
 
 #: includes/admin/settings/class-wc-settings-tax.php:254
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -4841,16 +5155,22 @@ msgstr "Cap/Codice Postale"
 
 #: includes/admin/settings/class-wc-settings-tax.php:254
 msgid ""
-"Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank"
-" to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
+"Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank "
+"to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
-msgstr "CAP per questa regola. Punto e virgola (;) separano i valori multipli. Lascia in bianco per applicare a tutte le aree. I caratteri jolly (*) possono essere utilizzati. Intervalli per codici postali numerici (ad esempio 12.345-12.350) saranno suddivisi in singoli codici postali."
+msgstr ""
+"CAP per questa regola. Punto e virgola (;) separano i valori multipli. "
+"Lascia in bianco per applicare a tutte le aree. I caratteri jolly (*) "
+"possono essere utilizzati. Intervalli per codici postali numerici (ad "
+"esempio 12.345-12.350) saranno suddivisi in singoli codici postali."
 
 #: includes/admin/settings/class-wc-settings-tax.php:256
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
-msgstr "Città per questa regola. Punto e virgola (;) separano valori multipli. Lascia in bianco per applicare a tutte le città."
+msgstr ""
+"Città per questa regola. Punto e virgola (;) separano valori multipli. "
+"Lascia in bianco per applicare a tutte le città."
 
 #: includes/admin/settings/class-wc-settings-tax.php:258
 msgid "Rate&nbsp;%"
@@ -4878,7 +5198,10 @@ msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
-msgstr "Scegliere una priorità per questa aliquota. Sarà usato solo 1 tasso corrispondente per priorità. Per definire multiple aliquote fiscali per una singola area è necessario specificare una diversa priorità per aliquota."
+msgstr ""
+"Scegliere una priorità per questa aliquota. Sarà usato solo 1 tasso "
+"corrispondente per priorità. Per definire multiple aliquote fiscali per una "
+"singola area è necessario specificare una diversa priorità per aliquota."
 
 #: includes/admin/settings/class-wc-settings-tax.php:264
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -4889,7 +5212,9 @@ msgstr "Composto"
 msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
-msgstr "Scegli se questo è un tasso composto. Le aliquote fiscali composte vengono applicate sulle altre aliquote."
+msgstr ""
+"Scegli se questo è un tasso composto. Le aliquote fiscali composte vengono "
+"applicate sulle altre aliquote."
 
 #: includes/admin/settings/class-wc-settings-tax.php:266
 msgid "Choose whether or not this tax rate also gets applied to shipping."
@@ -4957,13 +5282,16 @@ msgstr "Gratis"
 
 #: includes/admin/views/html-admin-page-addons.php:33
 msgid ""
-"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
-" href=\"%s\">WooCommerce Extensions Catalog</a>"
+"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a "
+"href=\"%s\">WooCommerce Extensions Catalog</a>"
 msgstr ""
+"Il nostro catalogo delle Estensioni di WooCommerce &egrave; disponibile su "
+"WooThemes.com: <a href=\"%s\">Catalogo delle Estensioni di WooCommerce</a>"
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
-msgstr "Si prega di includere queste informazioni quando si richiede assistenza:"
+msgstr ""
+"Si prega di includere queste informazioni quando si richiede assistenza:"
 
 #: includes/admin/views/html-admin-page-status-report.php:3
 msgid "Get System Report"
@@ -5015,9 +5343,11 @@ msgstr "WP Memory Limit"
 
 #: includes/admin/views/html-admin-page-status-report.php:58
 msgid ""
-"%s - We recommend setting memory to at least 64MB. See: <a "
-"href=\"%s\">Increasing memory allocated to PHP</a>"
-msgstr "%s - Si consiglia di impostare la memoria ad almeno 64 MB. Vedi: <a href=\"%s\">Aumentare la memoria allocata a PHP</a>"
+"%s - We recommend setting memory to at least 64MB. See: <a href=\"%s"
+"\">Increasing memory allocated to PHP</a>"
+msgstr ""
+"%s - Si consiglia di impostare la memoria ad almeno 64 MB. Vedi: <a href=\"%s"
+"\">Aumentare la memoria allocata a PHP</a>"
 
 #: includes/admin/views/html-admin-page-status-report.php:65
 msgid "WP Debug Mode"
@@ -5057,9 +5387,11 @@ msgstr "Directory di log è scrivibile."
 
 #: includes/admin/views/html-admin-page-status-report.php:100
 msgid ""
-"Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will"
-" not be possible."
-msgstr "Directory di log (<code>woocommerce/logs/</code>) non è scrivibile. La registrazione non sarà possibile."
+"Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will "
+"not be possible."
+msgstr ""
+"Directory di log (<code>woocommerce/logs/</code>) non è scrivibile. La "
+"registrazione non sarà possibile."
 
 #: includes/admin/views/html-admin-page-status-report.php:104
 msgid "Default Timezone"
@@ -5094,7 +5426,10 @@ msgid ""
 "Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
 "scripts which communicate with other servers will not work. Contact your "
 "hosting provider."
-msgstr "Il server non ha né fsockopen né cURL abilitati - PayPal IPN ed altri script che comunicano con gli altri server non funzioneranno. Rivolgersi al fornitore di hosting."
+msgstr ""
+"Il server non ha né fsockopen né cURL abilitati - PayPal IPN ed altri script "
+"che comunicano con gli altri server non funzioneranno. Rivolgersi al "
+"fornitore di hosting."
 
 #: includes/admin/views/html-admin-page-status-report.php:134
 msgid "SOAP Client"
@@ -5106,9 +5441,12 @@ msgstr "Il server ha il SOAP class Client abilitato."
 
 #: includes/admin/views/html-admin-page-status-report.php:139
 msgid ""
-"Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled -"
-" some gateway plugins which use SOAP may not work as expected."
-msgstr "Il server non ha la classe <a href=\"%s\">SOAP Client</a> abilitata – alcuni plugin di gateway che utilizzano SOAP potrebbero non funzionare come previsto."
+"Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - "
+"some gateway plugins which use SOAP may not work as expected."
+msgstr ""
+"Il server non ha la classe <a href=\"%s\">SOAP Client</a> abilitata – alcuni "
+"plugin di gateway che utilizzano SOAP potrebbero non funzionare come "
+"previsto."
 
 #: includes/admin/views/html-admin-page-status-report.php:144
 msgid "WP Remote Post"
@@ -5122,11 +5460,15 @@ msgstr "wp_remote_post() ha avuto successo - PayPal IPN sta funzionando."
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider. Error:"
-msgstr "wp_remote_post() fallito. PayPal IPN non funziona con il vostro server. Rivolgersi al fornitore di hosting. Errore:"
+msgstr ""
+"wp_remote_post() fallito. PayPal IPN non funziona con il vostro server. "
+"Rivolgersi al fornitore di hosting. Errore:"
 
 #: includes/admin/views/html-admin-page-status-report.php:161
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
-msgstr "wp_remote_post() fallito. PayPal IPN potrebbe non funzionare con il vostro server."
+msgstr ""
+"wp_remote_post() fallito. PayPal IPN potrebbe non funzionare con il vostro "
+"server."
 
 #: includes/admin/views/html-admin-page-status-report.php:184
 msgid "Locale"
@@ -5257,7 +5599,9 @@ msgstr "Modalità Debug Template"
 msgid ""
 "This tool will disable template overrides for logged-in administrators for "
 "debugging purposes."
-msgstr "Abilitando questa casella si disabiliteranno gli override del template per tutti gli amministratori loggati."
+msgstr ""
+"Abilitando questa casella si disabiliteranno gli override del template per "
+"tutti gli amministratori loggati."
 
 #: includes/admin/views/html-admin-page-status-tools.php:34
 msgid "Remove post types on uninstall"
@@ -5267,7 +5611,9 @@ msgstr "Elimina i post type se disintallato"
 msgid ""
 "This tool will delete all product and order post data when uninstalling via "
 "Plugins > Delete."
-msgstr "Abilitando questa casella, i prodotti e gli ordini verranno cancellati se si disinstalla il plugin tramite Plugin -> Cancella"
+msgstr ""
+"Abilitando questa casella, i prodotti e gli ordini verranno cancellati se si "
+"disinstalla il plugin tramite Plugin -> Cancella"
 
 #: includes/admin/views/html-admin-page-status-tools.php:47
 msgid "Save Changes"
@@ -5351,9 +5697,11 @@ msgstr "Ordini arretrati?"
 
 #: includes/admin/views/html-notice-install.php:5
 msgid ""
-"<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start"
-" selling :)"
-msgstr "<strong>Benvenuti in WooCommerce</strong> &#8211; Sei quasi pronto per iniziare a vendere :)"
+"<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start "
+"selling :)"
+msgstr ""
+"<strong>Benvenuti in WooCommerce</strong> &#8211; Sei quasi pronto per "
+"iniziare a vendere :)"
 
 #: includes/admin/views/html-notice-install.php:6
 msgid "Skip setup"
@@ -5362,8 +5710,8 @@ msgstr "Salta configurazione"
 #: includes/admin/views/html-notice-template-check.php:5
 msgid ""
 "<strong>Your theme has bundled outdated copies of WooCommerce template "
-"files</strong> &#8211; if you encounter functionality issues on the frontend"
-" this could the reason. Ensure you update or remove them (in general we "
+"files</strong> &#8211; if you encounter functionality issues on the frontend "
+"this could the reason. Ensure you update or remove them (in general we "
 "recommend only bundling the template files you actually need to customize). "
 "See the system report for full details."
 msgstr ""
@@ -5378,7 +5726,10 @@ msgid ""
 "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if "
 "you encounter layout issues please read our integration guide or choose a "
 "WooCommerce theme :)"
-msgstr "<strong>Il tuo tema non dichiara il supporto a WooCommerce</strong> &#8211; se si riscontrano problemi di layout si prega di leggere la nostra guida per l'integrazione o scegli un tema WooCommerce :)"
+msgstr ""
+"<strong>Il tuo tema non dichiara il supporto a WooCommerce</strong> &#8211; "
+"se si riscontrano problemi di layout si prega di leggere la nostra guida per "
+"l'integrazione o scegli un tema WooCommerce :)"
 
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Theme Integration Guide"
@@ -5388,7 +5739,9 @@ msgstr "Theme Integration Guide"
 msgid ""
 "<strong>WooCommerce Data Update Required</strong> &#8211; We just need to "
 "update your install to the latest version"
-msgstr "<strong>Aggiornamento dei Dati di WooCommerce Necessario</strong> &#8211; Dobbiamo solo aggiornare la tua installazione all'ultima versione"
+msgstr ""
+"<strong>Aggiornamento dei Dati di WooCommerce Necessario</strong> &#8211; "
+"Dobbiamo solo aggiornare la tua installazione all'ultima versione"
 
 #: includes/admin/views/html-notice-update.php:6
 msgid "Run the updater"
@@ -5398,7 +5751,9 @@ msgstr "Eseguire il programma di aggiornamento"
 msgid ""
 "It is strongly recommended that you backup your database before proceeding. "
 "Are you sure you wish to run the updater now?"
-msgstr "Si raccomanda vivamente di eseguire il backup del database prima di procedere. Sei sicuro di eseguire il programma di aggiornamento adesso?"
+msgstr ""
+"Si raccomanda vivamente di eseguire il backup del database prima di "
+"procedere. Sei sicuro di eseguire il programma di aggiornamento adesso?"
 
 #: includes/admin/views/html-quick-edit-product.php:24
 msgid "Regular price"
