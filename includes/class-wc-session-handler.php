@@ -181,8 +181,11 @@ class WC_Session_Handler extends WC_Session {
 			}
 
 			if ( ! empty( $expired_sessions ) ) {
-				$option_names = implode( "','", $expired_sessions );
-				$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('$option_names')" );
+				$expired_sessions_chunked = array_chunk( $expired_sessions, 100 );
+				foreach ( $expired_sessions_chunked as $chunk ) {
+					$option_names = implode( "','", $chunk );
+					$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('$option_names')" );
+				}
 			}
 		}
 	}
