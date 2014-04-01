@@ -391,7 +391,7 @@ jQuery( function( $ ) {
 	});
 
 	// Update on page load
-	if ( wc_checkout_params.is_checkout === 1 ) {
+	if ( wc_checkout_params.is_checkout === '1' ) {
 		$( 'body' ).trigger( 'init_checkout' );
 	}
 
