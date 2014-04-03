@@ -197,8 +197,9 @@ class WC_API_Authentication {
 		array_walk( $params, array( $this, 'normalize_parameters' ) );
 
 		// sort parameters
-		if ( ! uksort( $params, 'strcmp' ) )
+		if ( ! uksort( $params, 'strcmp' ) ) {
 			throw new Exception( __( 'Invalid Signature - failed to sort parameters', 'woocommerce' ), 401 );
+		}
 
 		// form query string
 		$query_params = array();
@@ -210,15 +211,17 @@ class WC_API_Authentication {
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
-		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' )
+		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' ) {
 			throw new Exception( __( 'Invalid Signature - signature method is invalid', 'woocommerce' ), 401 );
+		}
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 
 		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $user->woocommerce_api_consumer_secret, true ) );
 
-		if ( $signature !== $consumer_signature )
+		if ( $signature !== $consumer_signature ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
+		}
 	}
 
 	/**
