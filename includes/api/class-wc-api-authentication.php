@@ -250,7 +250,11 @@ class WC_API_Authentication {
 
 		foreach ( $parameters as $key => $value ) {
 
-			$normalized_parameters[ rawurlencode( rawurldecode( $key ) ) ] = rawurlencode( rawurldecode( $value ) );
+			// percent symbols (%) must be double-encoded
+			$key   = str_replace( '%', '%25', rawurlencode( rawurldecode( $key ) ) );
+			$value = str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
+
+			$normalized_parameters[ $key ] = $value;
 		}
 
 		return $normalized_parameters;
