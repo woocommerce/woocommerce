@@ -194,7 +194,7 @@ class WC_API_Authentication {
 		}
 
 		// normalize parameter key/values
-		array_walk( $params, array( $this, 'normalize_parameters' ) );
+		$params = $this->normalize_parameters( $params );
 
 		// sort parameters
 		if ( ! uksort( $params, 'strcmp' ) ) {
@@ -225,18 +225,35 @@ class WC_API_Authentication {
 	}
 
 	/**
-	 * Normalize each parameter by assuming each parameter may have already been encoded, so attempt to decode, and then
-	 * re-encode according to RFC 3986
+	 * Normalize each parameter by assuming each parameter may have already been
+	 * encoded, so attempt to decode, and then re-encode according to RFC 3986
+	 *
+	 * Note both the key and value is normalized so a filter param like:
+	 *
+	 * 'filter[period]' => 'week'
+	 *
+	 * is encoded to:
+	 *
+	 * 'filter%5Bperiod%5D' => 'week'
+	 *
+	 * This conforms to the OAuth 1.0a spec which indicates the entire query string
+	 * should be URL encoded
 	 *
 	 * @since 2.1
 	 * @see rawurlencode()
-	 * @param string $key
-	 * @param string $value
+	 * @param array $parameters un-normalized pararmeters
+	 * @return array normalized parameters
 	 */
-	private function normalize_parameters( &$key, &$value ) {
+	private function normalize_parameters( $parameters ) {
 
-		$key = rawurlencode( rawurldecode( $key ) );
-		$value = rawurlencode( rawurldecode( $value ) );
+		$normalized_parameters = array();
+
+		foreach ( $parameters as $key => $value ) {
+
+			$normalized_parameters[ rawurlencode( rawurldecode( $key ) ) ] = rawurlencode( rawurldecode( $value ) );
+		}
+
+		return $normalized_parameters;
 	}
 
 	/**
