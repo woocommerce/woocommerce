@@ -1243,7 +1243,7 @@ class WC_Order {
 
 		$is_customer_note = intval( $is_customer_note );
 
-		if ( is_user_logged_in() && current_user_can( 'manage_woocommerce' ) ) {
+		if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->id ) ) {
 			$user                 = get_user_by( 'id', get_current_user_id() );
 			$comment_author       = $user->display_name;
 			$comment_author_email = $user->user_email;
