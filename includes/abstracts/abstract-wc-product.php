@@ -846,7 +846,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_suffix() {
-		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
+		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' ); //could you please make this term translatable with WPML ?
 
 		if ( $price_display_suffix ) {
 			$price_display_suffix = ' <small class="woocommerce-price-suffix">' . $price_display_suffix . '</small>';
