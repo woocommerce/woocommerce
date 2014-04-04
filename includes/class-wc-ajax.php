@@ -287,28 +287,31 @@ class WC_AJAX {
 	 * Feature a product from admin
 	 */
 	public function feature_product() {
-		if ( ! current_user_can('edit_products') )
+		if ( ! current_user_can( 'edit_products' ) ) {
 			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+		}
 
-		if ( ! check_admin_referer('woocommerce-feature-product'))
+		if ( ! check_admin_referer( 'woocommerce-feature-product' ) ) {
 			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
+		}
 
-		$post_id = isset( $_GET['product_id'] ) && (int) $_GET['product_id'] ? (int) $_GET['product_id'] : '';
+		$post_id = ! empty( $_GET['product_id'] ) ? (int) $_GET['product_id'] : '';
 
-		if (!$post_id) die;
+		if ( ! $post_id || get_post_type( $post_id ) !== 'product' ) {
+			die;
+		}
 
-		$post = get_post($post_id);
+		$featured = get_post_meta( $post_id, '_featured', true );
 
-		if ( ! $post || $post->post_type !== 'product' ) die;
+		if ( 'yes' === $featured ) {
+			update_post_meta( $post_id, '_featured', 'no' );
+		} else {
+			update_post_meta( $post_id, '_featured', 'yes' );
+		}
 
-		$featured = get_post_meta( $post->ID, '_featured', true );
+		wc_delete_product_transients();
 
-		if ( $featured == 'yes' )
-			update_post_meta($post->ID, '_featured', 'no');
-		else
-			update_post_meta($post->ID, '_featured', 'yes');
-
-		wp_safe_redirect( remove_query_arg( array('trashed', 'untrashed', 'deleted', 'ids'), wp_get_referer() ) );
+		wp_safe_redirect( remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) );
 
 		die();
 	}
