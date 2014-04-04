@@ -119,11 +119,6 @@ class WC_API_Authentication {
 		$this->check_oauth_signature( $user, $params );
 		$this->check_oauth_timestamp_and_nonce( $user, $params['oauth_timestamp'], $params['oauth_nonce'] );
 
-		// remove oauth params before further parsing
-		foreach( $param_names as $param_name ) {
-			unset( WC()->api->server->params[ $param_name ] );
-		}
-
 		// authentication successful, return user
 		return $user;
 	}
