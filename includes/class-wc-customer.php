@@ -196,8 +196,7 @@ class WC_Customer {
 	 * @return bool
 	 */
 	function is_paying_customer( $user_id ) {
-		 
-		 return '1' === get_user_meta( $user_id, 'paying_customer', true );
+		return '1' === get_user_meta( $user_id, 'paying_customer', true );
 	}
 
 
