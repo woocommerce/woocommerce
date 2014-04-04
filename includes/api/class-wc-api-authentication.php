@@ -56,8 +56,10 @@ class WC_API_Authentication {
 	}
 
 	/**
-	 * SSL-encrypted requests are not subject to sniffing or man-in-the-middle attacks, so the request can be authenticated
-	 * by simply looking up the user associated with the given consumer key and confirming the consumer secret provided is valid
+	 * SSL-encrypted requests are not subject to sniffing or man-in-the-middle
+	 * attacks, so the request can be authenticated by simply looking up the user
+	 * associated with the given consumer key and confirming the consumer secret
+	 * provided is valid
 	 *
 	 * @since 2.1
 	 * @return WP_User
@@ -65,19 +67,45 @@ class WC_API_Authentication {
 	 */
 	private function perform_ssl_authentication() {
 
-		if ( empty( $_SERVER['PHP_AUTH_USER'] ) )
+		$params = WC()->api->server->params['GET'];
+
+		// get consumer key
+		if ( ! empty( $_SERVER['PHP_AUTH_USER'] ) ) {
+
+			// should be in HTTP Auth header by default
+			$consumer_key = $_SERVER['PHP_AUTH_USER'];
+
+		} elseif ( ! empty( $params['consumer_key'] ) ) {
+
+			// allow a query string parameter as a fallback
+			$consumer_key = $params['consumer_key'];
+
+		} else {
+
 			throw new Exception( __( 'Consumer Key is missing', 'woocommerce' ), 404 );
+		}
 
-		if ( empty( $_SERVER['PHP_AUTH_PW'] ) )
+		// get consumer secret
+		if ( ! empty( $_SERVER['PHP_AUTH_PW'] ) ) {
+
+			// should be in HTTP Auth header by default
+			$consumer_secret = $_SERVER['PHP_AUTH_PW'];
+
+		} elseif ( ! empty( $params['consumer_secret'] ) ) {
+
+			// allow a query string parameter as a fallback
+			$consumer_secret = $params['consumer_secret'];
+
+		} else {
+
 			throw new Exception( __( 'Consumer Secret is missing', 'woocommerce' ), 404 );
-
-		$consumer_key    = $_SERVER['PHP_AUTH_USER'];
-		$consumer_secret = $_SERVER['PHP_AUTH_PW'];
+		}
 
 		$user = $this->get_user_by_consumer_key( $consumer_key );
 
-		if ( ! $this->is_consumer_secret_valid( $user, $consumer_secret ) )
-			throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce'), 401 );
+		if ( ! $this->is_consumer_secret_valid( $user, $consumer_secret ) ) {
+			throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce' ), 401 );
+		}
 
 		return $user;
 	}
