@@ -196,13 +196,8 @@ class WC_Customer {
 	 * @return bool
 	 */
 	function is_paying_customer( $user_id ) {
-	
-	     $paying_customer = get_user_meta( $user_id, 'paying_customer', true );  
-		 if( $paying_customer != '' && absint( $paying_customer ) > 0) {
-			 return true;
-		 }
-	     
-	     return false;
+		 
+		 return '1' === get_user_meta( $user_id, 'paying_customer', true );
 	}
 
 
