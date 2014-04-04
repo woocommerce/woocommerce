@@ -188,6 +188,22 @@ class WC_Customer {
 		}
 		return false;
 	}
+	
+	/**
+	 * Is the user a paying customer?
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	function is_paying_customer( $user_id ) {
+	
+	     $paying_customer = get_user_meta( $user_id, 'paying_customer', true );  
+		 if( $paying_customer != '' && absint( $paying_customer ) > 0) {
+			 return true;
+		 }
+	     
+	     return false;
+	}
 
 
 	/**
