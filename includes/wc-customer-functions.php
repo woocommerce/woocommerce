@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool
  */
 function wc_disable_admin_bar( $show_admin_bar ) {
-	if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', 'yes' ) == 'yes' ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
+	if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', 'yes' ) === 'yes' ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
 		$show_admin_bar = false;
 	}
 
@@ -53,7 +53,7 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 	}
 
 	// Handle username creation
-	if ( 'no' == get_option( 'woocommerce_registration_generate_username' ) || ! empty( $username ) ) {
+	if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) || ! empty( $username ) ) {
 
 		$username = sanitize_user( $username );
 
@@ -78,11 +78,13 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 	}
 
 	// Handle password creation
-	if ( 'yes' == get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) && ! isset( $_POST['register'] ) ) {
+	if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
 		$password = wp_generate_password();
 		$password_generated = true;
+
 	} elseif ( empty( $password ) ) {
 		return new WP_Error( 'registration-error', __( 'Please enter an account password.', 'woocommerce' ) );
+
 	} else {
 		$password_generated = false;
 	}
