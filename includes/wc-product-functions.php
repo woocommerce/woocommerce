@@ -92,7 +92,8 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_hidden_product_ids',
 		'wc_hidden_product_ids_search',
 		'wc_attribute_taxonomies',
-		'wc_term_counts'
+		'wc_term_counts',
+		'wc_featured_products'
 	);
 
 	// Clear transients for which we don't have the name
