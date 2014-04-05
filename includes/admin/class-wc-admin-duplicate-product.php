@@ -151,7 +151,7 @@ class WC_Admin_Duplicate_Product {
 		$this->duplicate_post_meta( $post->ID, $new_post_id );
 
 		// Copy the children (variations)
-		if ( $children_products =& get_children( 'post_parent='.$post->ID.'&post_type=product_variation' ) ) {
+		if ( $children_products = get_children( 'post_parent='.$post->ID.'&post_type=product_variation' ) ) {
 
 			if ( $children_products )
 				foreach ( $children_products as $child )
