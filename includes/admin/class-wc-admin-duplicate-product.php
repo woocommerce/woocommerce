@@ -28,9 +28,9 @@ class WC_Admin_Duplicate_Product {
 	}
 
 	/**
-	 * Show the duplicate link in admin
-	 * @param  array of $actions
-	 * @param  array $post object
+	 * Show the "Duplicate" link in admin products list
+	 * @param  array   $actions
+	 * @param  WP_Post $post Post object
 	 * @return array
 	 */
 	public function dupe_link( $actions, $post ) {
