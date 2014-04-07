@@ -311,15 +311,17 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
 function wc_processing_order_count() {
 	if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
 		$order_statuses = get_terms( 'shop_order_status' );
-			$order_count = false;
+		$order_count    = false;
+		if ( is_array( $order_statuses ) ) {
 			foreach ( $order_statuses as $status ) {
-					if( $status->slug === 'processing' ) {
+					if ( $status->slug === 'processing' ) {
 							$order_count += $status->count;
 							break;
 					}
 			}
 			$order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
-		set_transient( 'woocommerce_processing_order_count', $order_count, YEAR_IN_SECONDS );
+			set_transient( 'woocommerce_processing_order_count', $order_count, YEAR_IN_SECONDS );
+		}
 	}
 
 	return $order_count;
