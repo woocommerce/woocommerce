@@ -503,6 +503,8 @@ function wc_recount_after_stock_change( $product_id ) {
 
 		_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
 	}
+
+	delete_transient( 'wc_term_counts' );
 }
 add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_change' );
 
