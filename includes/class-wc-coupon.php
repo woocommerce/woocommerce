@@ -522,8 +522,9 @@ class WC_Coupon {
 				 */
 				$discount_percent = 0;
 
-				if ( WC()->cart->subtotal_ex_tax )
+				if ( WC()->cart->subtotal_ex_tax ) {
 					$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item['quantity'] ) / WC()->cart->subtotal_ex_tax;
+				}
 					
 				$discount = min( ( $this->amount * $discount_percent ) / $cart_item['quantity'], $discounting_amount );
 			} else {
@@ -542,7 +543,7 @@ class WC_Coupon {
 			}
 		}
 
-		return $discount;
+		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
 	}
 
 	/**
