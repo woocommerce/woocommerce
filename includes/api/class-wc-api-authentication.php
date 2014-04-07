@@ -194,11 +194,12 @@ class WC_API_Authentication {
 		}
 
 		// normalize parameter key/values
-		array_walk( $params, array( $this, 'normalize_parameters' ) );
+		$params = $this->normalize_parameters( $params );
 
 		// sort parameters
-		if ( ! uksort( $params, 'strcmp' ) )
+		if ( ! uksort( $params, 'strcmp' ) ) {
 			throw new Exception( __( 'Invalid Signature - failed to sort parameters', 'woocommerce' ), 401 );
+		}
 
 		// form query string
 		$query_params = array();
@@ -210,30 +211,53 @@ class WC_API_Authentication {
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
-		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' )
+		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' ) {
 			throw new Exception( __( 'Invalid Signature - signature method is invalid', 'woocommerce' ), 401 );
+		}
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 
 		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $user->woocommerce_api_consumer_secret, true ) );
 
-		if ( $signature !== $consumer_signature )
+		if ( $signature !== $consumer_signature ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
+		}
 	}
 
 	/**
-	 * Normalize each parameter by assuming each parameter may have already been encoded, so attempt to decode, and then
-	 * re-encode according to RFC 3986
+	 * Normalize each parameter by assuming each parameter may have already been
+	 * encoded, so attempt to decode, and then re-encode according to RFC 3986
+	 *
+	 * Note both the key and value is normalized so a filter param like:
+	 *
+	 * 'filter[period]' => 'week'
+	 *
+	 * is encoded to:
+	 *
+	 * 'filter%5Bperiod%5D' => 'week'
+	 *
+	 * This conforms to the OAuth 1.0a spec which indicates the entire query string
+	 * should be URL encoded
 	 *
 	 * @since 2.1
 	 * @see rawurlencode()
-	 * @param string $key
-	 * @param string $value
+	 * @param array $parameters un-normalized pararmeters
+	 * @return array normalized parameters
 	 */
-	private function normalize_parameters( &$key, &$value ) {
+	private function normalize_parameters( $parameters ) {
 
-		$key = rawurlencode( rawurldecode( $key ) );
-		$value = rawurlencode( rawurldecode( $value ) );
+		$normalized_parameters = array();
+
+		foreach ( $parameters as $key => $value ) {
+
+			// percent symbols (%) must be double-encoded
+			$key   = str_replace( '%', '%25', rawurlencode( rawurldecode( $key ) ) );
+			$value = str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
+
+			$normalized_parameters[ $key ] = $value;
+		}
+
+		return $normalized_parameters;
 	}
 
 	/**
