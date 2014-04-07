@@ -562,10 +562,10 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
  * @return  string	formatted postcode
  */
 function wc_format_postcode( $postcode, $country ) {
-	$postcode = strtoupper(trim($postcode));
-	$postcode = trim(preg_replace('/[\s]/', '', $postcode));
+	$postcode = strtoupper( trim( $postcode ) );
+	$postcode = trim( preg_replace( '/[\s]/', '', $postcode ) );
 
-	if ( in_array( $country, array('GB', 'CA') ) ) {
+	if ( in_array( $country, array( 'GB', 'CA' ) ) ) {
 		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
 	}
 
