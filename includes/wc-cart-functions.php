@@ -222,7 +222,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
     // get rid of empty array elements
     $value = array_filter( $value );
 
-	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
 }
