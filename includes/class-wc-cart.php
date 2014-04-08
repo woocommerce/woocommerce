@@ -1937,7 +1937,7 @@ class WC_Cart {
 		 * @return string formatted price
 		 */
 		public function get_cart_total() {
-			if ( ! $this->prices_include_tax ) {
+			if ( ! $this->prices_include_tax && ! $this->tax_display_cart ) {
 				$cart_contents_total = wc_price( $this->cart_contents_total );
 			} else {
 				$cart_contents_total = wc_price( $this->cart_contents_total + $this->tax_total );
