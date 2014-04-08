@@ -1399,7 +1399,7 @@ class WC_Cart {
 		 * @return bool
 		 */
 		public function ship_to_billing_address_only() {
-			return get_option('woocommerce_ship_to_billing_address_only') == 'yes';
+			return wc_ship_to_billing_address_only();
 		}
 
 		/**

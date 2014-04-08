@@ -188,7 +188,7 @@ class WC_AJAX {
 		if ( isset( $_POST['address_2'] ) )
 			WC()->customer->set_address_2( $_POST['address_2'] );
 
-		if ( "yes" == get_option( 'woocommerce_ship_to_billing_address_only' ) ) {
+		if ( wc_ship_to_billing_address_only() ) {
 
 			if ( isset( $_POST['country'] ) )
 				WC()->customer->set_shipping_country( $_POST['country'] );

@@ -290,3 +290,11 @@ function wc_cart_totals_shipping_method_label( $method ) {
 
 	return apply_filters( 'woocommerce_cart_shipping_method_full_label', $label, $method );
 }
+
+/**
+ * See if we only ship to billing addresses
+ * @return bool
+ */
+function wc_ship_to_billing_address_only() {
+	return 'billing_only' === get_option( 'woocommerce_ship_to_destination' );
+}
