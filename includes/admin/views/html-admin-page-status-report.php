@@ -47,13 +47,7 @@
 		</tr>
 		<tr>
 			<td><?php _e( 'MySQL Version','woocommerce' ); ?>:</td>
-			<td>
-				<?php
-				/** @global wpdb $wpdb */
-				global $wpdb;
-				echo $wpdb->db_version();
-				?>
-			</td>
+			<td><?php if ( function_exists( 'mysql_get_server_info' ) ) echo esc_html( mysql_get_server_info() ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Memory Limit','woocommerce' ); ?>:</td>
@@ -199,6 +193,55 @@
 				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) )
 					echo '<tr><td>' . $key . ':</td><td>' . $val . '</td></tr>';
 		?>
+	</tbody>
+	
+	<thead>
+		<tr>
+			<th colspan="2"><?php _e( 'Local Environment', 'woocommerce' ); ?></th>
+		</tr>
+	</thead>
+	
+	<tbody>
+        <tr>
+            <td><?php _e( 'Browser', 'woocommerce' ); ?>:</td>
+            <?php if( ini_get( 'browscap' ) ) { ?>
+            <td><?php 
+            	$browser = get_browse(null, true);
+            	echo $browser['parent'];
+            	?></td>
+			<?php } else { ?>
+			<td><?php 
+				$user_agent = $_SERVER['HTTP_USER_AGENT'];
+				$browser = '';
+				
+				if( preg_match( '/MSIE/i', $user_agent ) ) 
+				{
+				    $browser = "ie";
+				}
+				elseif( preg_match( '/Firefox/i', $user_agent ) )
+				{
+				    $browser = "firefox";
+				}
+				elseif( preg_match( '/Chrome/i', $user_agent ) )
+				{
+				    $browser = "chrome";
+				}
+				elseif( preg_match( '/Safari/i', $user_agent ) )
+				{
+				    $browser = "safari";
+				}
+				elseif( preg_match( '/Flock/i', $user_agent ) )
+				{
+				    $browser = "flock";
+				}
+				elseif( preg_match( '/Opera/i', $user_agent ) )
+				{
+				    $browser = "opera";
+				}
+				echo $browser;
+			?></td>
+			<?php } ?>
+        </tr>
 	</tbody>
 
 	<thead>
