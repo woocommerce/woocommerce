@@ -35,7 +35,7 @@ global $woocommerce;
 		</tfoot>
 		<tbody>
 			<?php
-			if ( sizeof( $order->get_items() )>0 ) :
+			if ( sizeof( $order->get_items() ) > 0 ) :
 				foreach ( $order->get_items() as $item ) :
 					echo '
 						<tr>

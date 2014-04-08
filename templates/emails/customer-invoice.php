@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <?php do_action( 'woocommerce_email_header', $email_heading ); ?>
 
-<?php if ( $order->status=='pending' ) : ?>
+<?php if ( $order->status === 'pending' ) : ?>
 
 	<p><?php printf( __( 'An order has been created for you on %s. To pay for this order please use the following link: %s', 'woocommerce' ), get_bloginfo( 'name' ), '<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . __( 'pay', 'woocommerce' ) . '</a>' ); ?></p>
 
