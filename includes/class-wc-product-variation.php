@@ -322,6 +322,23 @@ class WC_Product_Variation extends WC_Product {
 	}
 
     /**
+     * Gets the main product image ID.
+     * @return int
+     */
+    public function get_image_id() {
+    	if ( $this->variation_id && has_post_thumbnail( $this->variation_id ) ) {
+			$image_id = get_post_thumbnail_id( $this->variation_id );
+		} elseif ( has_post_thumbnail( $this->id ) ) {
+			$image_id = get_post_thumbnail_id( $this->id );
+		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
+			$image_id = get_post_thumbnail_id( $parent_id );
+		} else {
+			$image_id = 0;
+		}
+		return $image_id;
+    }
+
+    /**
      * Gets the main product image.
      *
      * @access public
@@ -329,10 +346,6 @@ class WC_Product_Variation extends WC_Product {
      * @return string
      */
     public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
-    	global $woocommerce;
-
-    	$image = '';
-
     	if ( $this->variation_id && has_post_thumbnail( $this->variation_id ) ) {
 			$image = get_the_post_thumbnail( $this->variation_id, $size, $attr );
 		} elseif ( has_post_thumbnail( $this->id ) ) {
