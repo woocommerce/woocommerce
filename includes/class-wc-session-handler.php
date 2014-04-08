@@ -45,7 +45,13 @@ class WC_Session_Handler extends WC_Session {
 			// Update session if its close to expiring
 			if ( time() > $this->_session_expiring ) {
 				$this->set_session_expiration();
-				update_option( '_wc_session_expires_' . $this->_customer_id, $this->_session_expiration );
+				$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
+				// Check if option exists first to avoid auloading cleaned up sessions
+				if ( false === get_option( $session_expiry_option ) ) {
+					add_option( $session_expiry_option, $this->_session_expiration, '', 'no' );
+				} else {
+					update_option( $session_expiry_option, $this->_session_expiration );
+				}
 			}
 
 		} else {
