@@ -289,11 +289,24 @@ class WC_Settings_General extends WC_Settings_Page {
 				'subtext' 		=> $subtext
 			);
 
-			$old_colors = get_option( 'woocommerce_frontend_css_colors' );
-			update_option( 'woocommerce_frontend_css_colors', $colors );
+			// Check the colors.
+			$valid_colors = true;
+			foreach ( $colors as $color ) {
+				if ( ! preg_match( '/^#[a-f0-9]{6}$/i', $color ) ) {
+					$valid_colors = false;
+					WC_Admin_Settings::add_error( sprintf( __( 'Error saving the Frontend Styles, %s is not a valid color, please use only valid colors code.', 'woocommerce' ), $color ) );
+					break;
+				}
+			}
 
-			if ( $old_colors != $colors )
-				woocommerce_compile_less_styles();
+			if ( $valid_colors ) {
+				$old_colors = get_option( 'woocommerce_frontend_css_colors' );
+				update_option( 'woocommerce_frontend_css_colors', $colors );
+
+				if ( $old_colors != $colors ) {
+					woocommerce_compile_less_styles();
+				}
+			}
 		}
 	}
 
