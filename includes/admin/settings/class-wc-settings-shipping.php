@@ -110,11 +110,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			array(
 				'title'   => __( 'Shipping Destination', 'woocommerce' ),
 				'desc'    => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
-				'id'      => 'woocommerce_ship_to_billing',
+				'id'      => 'woocommerce_ship_to_destination',
 				'default' => 'shipping',
 				'type'    => 'radio',
 				'options' => array(
-					''     => __( 'Default to shipping address', 'woocommerce' ),
+					'shipping'     => __( 'Default to shipping address', 'woocommerce' ),
 					'billing'      => __( 'Default to billing address', 'woocommerce' ),
 					'billing_only' => __( 'Only ship to the users billing address', 'woocommerce' ),
 				),
@@ -122,8 +122,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'desc_tip'        =>  true,
 				'show_if_checked' => 'option',
 			),
-
-			//woocommerce_ship_to_billing_address_only
 
 			array(
 				'title' => __( 'Restrict shipping to Location(s)', 'woocommerce' ),
