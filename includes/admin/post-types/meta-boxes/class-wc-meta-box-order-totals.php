@@ -110,7 +110,7 @@ class WC_Meta_Box_Order_Totals {
 		<?php endif; ?>
 
 		<div class="totals_group">
-			<h4><label for="_order_discount"><?php _e( 'Order Discount', 'woocommerce' ); ?></label></h4>
+			<h4><label for="_order_discount"><?php _e( 'Order Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total discount applied after tax.', 'woocommerce' ); ?>">[?]</span></label></h4>
 			<input type="text" class="wc_input_price" id="_order_discount" name="_order_discount" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php
 				if ( isset( $data['_order_discount'][0] ) )
 					echo esc_attr( wc_format_localized_price( $data['_order_discount'][0] ) );
