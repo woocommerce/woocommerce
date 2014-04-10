@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.8 - xx/xx/xxxx =
+
 = 2.1.7 - 10/04/2014 =
 * Fix - Allow WC API to generate API keys for different user than the one that is making request.
 * Fix - Fix the SKU search logic so it works with other filters.
