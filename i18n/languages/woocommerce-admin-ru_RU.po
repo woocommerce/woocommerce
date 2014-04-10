@@ -3,7 +3,7 @@
 # me2you, 2014
 # mortifactor <daniel.sergan@gmail.com>, 2014
 # Den Arefyev <>, 2012
-# dix.alex <dix.alex@gmail.com>, 2014
+# Alexander Tinyaev <dix.alex@gmail.com>, 2014
 # flyingoff <lebedev.serge@gmail.com>, 2013
 # Сергей Павленко <info@vortexinter.ru>, 2014
 # mortifactor <daniel.sergan@gmail.com>, 2014
@@ -18,8 +18,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:51+0000\n"
-"Last-Translator: dix.alex <dix.alex@gmail.com>\n"
+"PO-Revision-Date: 2014-04-02 03:25+0000\n"
+"Last-Translator: Nikolay Nakuginkin <translator@mondaystar.ru>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.com/projects/p/woocommerce/language/ru_RU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -77,7 +77,7 @@ msgstr "Удалить этот атрибут?"
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:148
 #: includes/admin/settings/class-wc-settings-shipping.php:203
 msgid "Name"
-msgstr "Фамилия"
+msgstr "Название"
 
 #: includes/admin/class-wc-admin-assets.php:141
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:431
@@ -3783,7 +3783,7 @@ msgstr "Выйти"
 msgid ""
 "Endpoint for the triggering logout. You can add this to your menus via a "
 "custom link: yoursite.com/?customer-logout=true"
-msgstr ""
+msgstr "Конечная точка для срабатывания выхода. Вы можете добавить это в свои меню с помощью пользовательской ссылки: yoursite.com/?customer-logout=true"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:105
 msgid "Registration Options"
@@ -4209,7 +4209,7 @@ msgstr "Первичные"
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Call to action buttons/price slider/layered nav UI"
-msgstr ""
+msgstr "Призыв к действию кнопок/цена слайдер/слои навигации UI"
 
 #: includes/admin/settings/class-wc-settings-general.php:238
 msgid "Secondary"
@@ -4233,7 +4233,7 @@ msgstr "Содержание"
 
 #: includes/admin/settings/class-wc-settings-general.php:240
 msgid "Your themes page background - used for tab active states"
-msgstr ""
+msgstr "Фон Вашей страницы темы - используется для активной вкладки государств"
 
 #: includes/admin/settings/class-wc-settings-general.php:241
 msgid "Subtext"

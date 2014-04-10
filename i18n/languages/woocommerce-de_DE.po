@@ -1,7 +1,8 @@
 # 
 # Translators:
+# inpsyde <c.huebinger@inpsyde.com>, 2014
 # Henryk Ibe-Meinhardt <henryk.ibemeinhardt@googlemail.com>, 2014
-# inpsyde <info@inpsyde.com>, 2013-2014
+# inpsyde <c.huebinger@inpsyde.com>, 2013-2014
 # Stefan Klose <long.run.international@googlemail.com>, 2014
 # zodiac1978 <mail@torstenlandsiedel.de>, 2014
 msgid ""
@@ -9,8 +10,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:50+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-04-03 15:11+0000\n"
+"Last-Translator: inpsyde <c.huebinger@inpsyde.com>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/projects/p/woocommerce/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -99,283 +100,283 @@ msgstr "Westaustralien"
 
 #: i18n/states/BD.php:13
 msgid "Bagerhat"
-msgstr ""
+msgstr "Bagerhat"
 
 #: i18n/states/BD.php:14
 msgid "Bandarban"
-msgstr ""
+msgstr "Bandarban"
 
 #: i18n/states/BD.php:15
 msgid "Barguna"
-msgstr ""
+msgstr "Barguna"
 
 #: i18n/states/BD.php:16
 msgid "Barisal"
-msgstr ""
+msgstr "Barisal"
 
 #: i18n/states/BD.php:17
 msgid "Bhola"
-msgstr ""
+msgstr "Bhola"
 
 #: i18n/states/BD.php:18
 msgid "Bogra"
-msgstr ""
+msgstr "Bogra"
 
 #: i18n/states/BD.php:19
 msgid "Chandpur"
-msgstr ""
+msgstr "Chandpur"
 
 #: i18n/states/BD.php:20
 msgid "Chittagong"
-msgstr ""
+msgstr "Chittagong"
 
 #: i18n/states/BD.php:21
 msgid "Chuadanga"
-msgstr ""
+msgstr "Chuadanga"
 
 #: i18n/states/BD.php:22
 msgid "Comilla"
-msgstr ""
+msgstr "Comilla"
 
 #: i18n/states/BD.php:23
 msgid "Cox's Bazar"
-msgstr ""
+msgstr "Cox's Bazar"
 
 #: i18n/states/BD.php:24
 msgid "Dhaka"
-msgstr ""
+msgstr "Dhaka"
 
 #: i18n/states/BD.php:25
 msgid "Dinajpur"
-msgstr ""
+msgstr "Dinajpur"
 
 #: i18n/states/BD.php:26
 msgid "Faridpur "
-msgstr ""
+msgstr "Faridpur "
 
 #: i18n/states/BD.php:27
 msgid "Feni"
-msgstr ""
+msgstr "Feni"
 
 #: i18n/states/BD.php:28
 msgid "Gaibandha"
-msgstr ""
+msgstr "Gaibandha"
 
 #: i18n/states/BD.php:29
 msgid "Gazipur"
-msgstr ""
+msgstr "Gazipur"
 
 #: i18n/states/BD.php:30
 msgid "Gopalganj"
-msgstr ""
+msgstr "Gopalganj"
 
 #: i18n/states/BD.php:31
 msgid "Jamalpur"
-msgstr ""
+msgstr "Jamalpur"
 
 #: i18n/states/BD.php:32
 msgid "Jessore"
-msgstr ""
+msgstr "Jessore"
 
 #: i18n/states/BD.php:33
 msgid "Jhalokati"
-msgstr ""
+msgstr "Jhalokati"
 
 #: i18n/states/BD.php:34
 msgid "Jhenaidah"
-msgstr ""
+msgstr "Jhenaidah"
 
 #: i18n/states/BD.php:35
 msgid "Joypurhat"
-msgstr ""
+msgstr "Joypurhat"
 
 #: i18n/states/BD.php:36
 msgid "Khagrachhari"
-msgstr ""
+msgstr "Khagrachhari"
 
 #: i18n/states/BD.php:37
 msgid "Khulna"
-msgstr ""
+msgstr "Khulna"
 
 #: i18n/states/BD.php:38
 msgid "Kishoreganj"
-msgstr ""
+msgstr "Kishoreganj"
 
 #: i18n/states/BD.php:39
 msgid "Kurigram"
-msgstr ""
+msgstr "Kurigram"
 
 #: i18n/states/BD.php:40
 msgid "Kushtia"
-msgstr ""
+msgstr "Kushtia"
 
 #: i18n/states/BD.php:41
 msgid "Lakshmipur"
-msgstr ""
+msgstr "Lakshmipur"
 
 #: i18n/states/BD.php:42
 msgid "Lalmonirhat"
-msgstr ""
+msgstr "Lalmonirhat"
 
 #: i18n/states/BD.php:43
 msgid "Madaripur"
-msgstr ""
+msgstr "Madaripur"
 
 #: i18n/states/BD.php:44
 msgid "Magura"
-msgstr ""
+msgstr "Magura"
 
 #: i18n/states/BD.php:45
 msgid "Manikganj "
-msgstr ""
+msgstr "Manikganj "
 
 #: i18n/states/BD.php:46
 msgid "Meherpur"
-msgstr ""
+msgstr "Meherpur"
 
 #: i18n/states/BD.php:47
 msgid "Moulvibazar"
-msgstr ""
+msgstr "Moulvibazar"
 
 #: i18n/states/BD.php:48
 msgid "Munshiganj"
-msgstr ""
+msgstr "Munshiganj"
 
 #: i18n/states/BD.php:49
 msgid "Mymensingh"
-msgstr ""
+msgstr "Mymensingh"
 
 #: i18n/states/BD.php:50
 msgid "Naogaon"
-msgstr ""
+msgstr "Naogaon"
 
 #: i18n/states/BD.php:51
 msgid "Narail"
-msgstr ""
+msgstr "Narail"
 
 #: i18n/states/BD.php:52
 msgid "Narayanganj"
-msgstr ""
+msgstr "Narayanganj"
 
 #: i18n/states/BD.php:53
 msgid "Narsingdi"
-msgstr ""
+msgstr "Narsingdi"
 
 #: i18n/states/BD.php:54
 msgid "Natore"
-msgstr ""
+msgstr "Natore"
 
 #: i18n/states/BD.php:55
 msgid "Nawabganj"
-msgstr ""
+msgstr "Nawabganj"
 
 #: i18n/states/BD.php:56
 msgid "Netrakona"
-msgstr ""
+msgstr "Netrakona"
 
 #: i18n/states/BD.php:57
 msgid "Nilphamari"
-msgstr ""
+msgstr "Nilphamari"
 
 #: i18n/states/BD.php:58
 msgid "Noakhali"
-msgstr ""
+msgstr "Noakhali"
 
 #: i18n/states/BD.php:59
 msgid "Pabna"
-msgstr ""
+msgstr "Pabna"
 
 #: i18n/states/BD.php:60
 msgid "Panchagarh"
-msgstr ""
+msgstr "Panchagarh"
 
 #: i18n/states/BD.php:61
 msgid "Patuakhali"
-msgstr ""
+msgstr "Patuakhali"
 
 #: i18n/states/BD.php:62
 msgid "Pirojpur"
-msgstr ""
+msgstr "Pirojpur"
 
 #: i18n/states/BD.php:63
 msgid "Rajbari"
-msgstr ""
+msgstr "Rajbari"
 
 #: i18n/states/BD.php:64
 msgid "Rajshahi"
-msgstr ""
+msgstr "Rajshahi"
 
 #: i18n/states/BD.php:65
 msgid "Rangamati"
-msgstr ""
+msgstr "Rangamati"
 
 #: i18n/states/BD.php:66
 msgid "Rangpur"
-msgstr ""
+msgstr "Rangpur"
 
 #: i18n/states/BD.php:67
 msgid "Satkhira"
-msgstr ""
+msgstr "Satkhira"
 
 #: i18n/states/BD.php:68
 msgid "Shariatpur"
-msgstr ""
+msgstr "Shariatpur"
 
 #: i18n/states/BD.php:69
 msgid "Sherpur"
-msgstr ""
+msgstr "Sherpur"
 
 #: i18n/states/BD.php:70
 msgid "Sirajganj"
-msgstr ""
+msgstr "Sirajganj"
 
 #: i18n/states/BD.php:71
 msgid "Sunamganj"
-msgstr ""
+msgstr "Sunamganj"
 
 #: i18n/states/BD.php:72
 msgid "Sylhet"
-msgstr ""
+msgstr "Sylhet"
 
 #: i18n/states/BD.php:73
 msgid "Tangail"
-msgstr ""
+msgstr "Tangail"
 
 #: i18n/states/BD.php:74
 msgid "Thakurgaon"
-msgstr ""
+msgstr "Thakurgaon"
 
 #: i18n/states/BG.php:13
 msgid "Blagoevgrad"
-msgstr ""
+msgstr "Blagoevgrad"
 
 #: i18n/states/BG.php:14
 msgid "Burgas"
-msgstr ""
+msgstr "Burgas"
 
 #: i18n/states/BG.php:15
 msgid "Dobrich"
-msgstr ""
+msgstr "Dobrich"
 
 #: i18n/states/BG.php:16
 msgid "Gabrovo"
-msgstr ""
+msgstr "Gabrovo"
 
 #: i18n/states/BG.php:17
 msgid "Haskovo"
-msgstr ""
+msgstr "Haskovo"
 
 #: i18n/states/BG.php:18
 msgid "Kardzhali"
-msgstr ""
+msgstr "Kardzhali"
 
 #: i18n/states/BG.php:19
 msgid "Kyustendil"
-msgstr ""
+msgstr "Kyustendil"
 
 #: i18n/states/BG.php:20
 msgid "Lovech"
-msgstr ""
+msgstr "Lovech"
 
 #: i18n/states/BG.php:21 i18n/states/US.php:39
 msgid "Montana"
@@ -383,79 +384,79 @@ msgstr "Montana"
 
 #: i18n/states/BG.php:22
 msgid "Pazardzhik"
-msgstr ""
+msgstr "Pazardzhik"
 
 #: i18n/states/BG.php:23
 msgid "Pernik"
-msgstr ""
+msgstr "Pernik"
 
 #: i18n/states/BG.php:24
 msgid "Pleven"
-msgstr ""
+msgstr "Pleven"
 
 #: i18n/states/BG.php:25
 msgid "Plovdiv"
-msgstr ""
+msgstr "Plovdiv"
 
 #: i18n/states/BG.php:26
 msgid "Razgrad"
-msgstr ""
+msgstr "Razgrad"
 
 #: i18n/states/BG.php:27
 msgid "Ruse"
-msgstr ""
+msgstr "Ruse"
 
 #: i18n/states/BG.php:28
 msgid "Shumen"
-msgstr ""
+msgstr "Shumen"
 
 #: i18n/states/BG.php:29
 msgid "Silistra"
-msgstr ""
+msgstr "Silistra"
 
 #: i18n/states/BG.php:30
 msgid "Sliven"
-msgstr ""
+msgstr "Sliven"
 
 #: i18n/states/BG.php:31
 msgid "Smolyan"
-msgstr ""
+msgstr "Smolyan"
 
 #: i18n/states/BG.php:32
 msgid "Sofia"
-msgstr ""
+msgstr "Sofia"
 
 #: i18n/states/BG.php:33
 msgid "Sofia-Grad"
-msgstr ""
+msgstr "Sofia-Grad"
 
 #: i18n/states/BG.php:34
 msgid "Stara Zagora"
-msgstr ""
+msgstr "Stara Zagora"
 
 #: i18n/states/BG.php:35
 msgid "Targovishte"
-msgstr ""
+msgstr "Targovishte"
 
 #: i18n/states/BG.php:36
 msgid "Varna"
-msgstr ""
+msgstr "Varna"
 
 #: i18n/states/BG.php:37
 msgid "Veliko Tarnovo"
-msgstr ""
+msgstr "Veliko Tarnovo"
 
 #: i18n/states/BG.php:38
 msgid "Vidin"
-msgstr ""
+msgstr "Vidin"
 
 #: i18n/states/BG.php:39
 msgid "Vratsa"
-msgstr ""
+msgstr "Vratsa"
 
 #: i18n/states/BG.php:40
 msgid "Yambol"
-msgstr ""
+msgstr "Yambol"
 
 #: i18n/states/BR.php:13
 msgid "Acre"
@@ -747,15 +748,15 @@ msgstr "Xinjiang / &#26032;&#30086;"
 
 #: i18n/states/ES.php:13
 msgid "A Coru&ntilde;a"
-msgstr ""
+msgstr "A Coru&ntilde;a"
 
 #: i18n/states/ES.php:14
 msgid "Araba/&Aacute;lava"
-msgstr ""
+msgstr "Araba/&Aacute;lava"
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
-msgstr ""
+msgstr "Albacete"
 
 #: i18n/states/ES.php:16
 msgid "Alicante"
@@ -763,15 +764,15 @@ msgstr "Alicante"
 
 #: i18n/states/ES.php:17
 msgid "Almer&iacute;a"
-msgstr ""
+msgstr "Almer&iacute;a"
 
 #: i18n/states/ES.php:18
 msgid "Asturias"
-msgstr ""
+msgstr "Asturias"
 
 #: i18n/states/ES.php:19
 msgid "&Aacute;vila"
-msgstr ""
+msgstr "&Aacute;vila"
 
 #: i18n/states/ES.php:20
 msgid "Badajoz"
@@ -791,11 +792,11 @@ msgstr "Burgos"
 
 #: i18n/states/ES.php:24
 msgid "C&aacute;ceres"
-msgstr ""
+msgstr "C&aacute;ceres"
 
 #: i18n/states/ES.php:25
 msgid "C&aacute;diz"
-msgstr ""
+msgstr "C&aacute;diz"
 
 #: i18n/states/ES.php:26
 msgid "Cantabria"
@@ -803,7 +804,7 @@ msgstr "Kantabrien"
 
 #: i18n/states/ES.php:27
 msgid "Castell&oacute;n"
-msgstr ""
+msgstr "Castell&oacute;n"
 
 #: i18n/states/ES.php:28
 msgid "Ceuta"
@@ -815,7 +816,7 @@ msgstr "Ciudad Real"
 
 #: i18n/states/ES.php:30
 msgid "C&oacute;rdoba"
-msgstr ""
+msgstr "C&oacute;rdoba"
 
 #: i18n/states/ES.php:31
 msgid "Cuenca"
@@ -835,7 +836,7 @@ msgstr "Guadalajara"
 
 #: i18n/states/ES.php:35
 msgid "Gipuzkoa"
-msgstr ""
+msgstr "Gipuzkoa"
 
 #: i18n/states/ES.php:36
 msgid "Huelva"
@@ -847,7 +848,7 @@ msgstr "Huesca"
 
 #: i18n/states/ES.php:38
 msgid "Ja&eacute;n"
-msgstr ""
+msgstr "Ja&eacute;n"
 
 #: i18n/states/ES.php:39
 msgid "La Rioja"
@@ -859,11 +860,11 @@ msgstr "Las Palmas"
 
 #: i18n/states/ES.php:41
 msgid "Le&oacute;n"
-msgstr ""
+msgstr "Le&oacute;n"
 
 #: i18n/states/ES.php:42
 msgid "Lleida"
-msgstr ""
+msgstr "Lleida"
 
 #: i18n/states/ES.php:43
 msgid "Lugo"
@@ -875,7 +876,7 @@ msgstr "Madrid"
 
 #: i18n/states/ES.php:45
 msgid "M&aacute;laga"
-msgstr ""
+msgstr "M&aacute;laga"
 
 #: i18n/states/ES.php:46
 msgid "Melilla"
@@ -911,7 +912,7 @@ msgstr "Santa Cruz de Tenerife"
 
 #: i18n/states/ES.php:54
 msgid "Segovia"
-msgstr ""
+msgstr "Segovia"
 
 #: i18n/states/ES.php:55
 msgid "Sevilla"
@@ -919,7 +920,7 @@ msgstr "Sevilla"
 
 #: i18n/states/ES.php:56
 msgid "Soria"
-msgstr ""
+msgstr "Soria"
 
 #: i18n/states/ES.php:57
 msgid "Tarragona"
@@ -927,7 +928,7 @@ msgstr "Tarragona"
 
 #: i18n/states/ES.php:58
 msgid "Teruel"
-msgstr ""
+msgstr "Teruel"
 
 #: i18n/states/ES.php:59
 msgid "Toledo"
@@ -939,15 +940,15 @@ msgstr "Valencia"
 
 #: i18n/states/ES.php:61
 msgid "Valladolid"
-msgstr ""
+msgstr "Valladolid"
 
 #: i18n/states/ES.php:62
 msgid "Bizkaia"
-msgstr ""
+msgstr "Bizkaia"
 
 #: i18n/states/ES.php:63
 msgid "Zamora"
-msgstr ""
+msgstr "Zamora"
 
 #: i18n/states/ES.php:64
 msgid "Zaragoza"
@@ -1383,7 +1384,7 @@ msgstr "Pondicherry (Puducherry)"
 
 #: i18n/states/IT.php:13
 msgid "Agrigento"
-msgstr ""
+msgstr "Agrigento"
 
 #: i18n/states/IT.php:14
 msgid "Alessandria"
@@ -1403,7 +1404,7 @@ msgstr "Arezzo"
 
 #: i18n/states/IT.php:18
 msgid "Ascoli Piceno"
-msgstr ""
+msgstr "Ascoli Piceno"
 
 #: i18n/states/IT.php:19
 msgid "Asti"
@@ -1411,7 +1412,7 @@ msgstr "Asti"
 
 #: i18n/states/IT.php:20
 msgid "Avellino"
-msgstr ""
+msgstr "Avellino"
 
 #: i18n/states/IT.php:21
 msgid "Bari"
@@ -1419,11 +1420,11 @@ msgstr "Bari"
 
 #: i18n/states/IT.php:22
 msgid "Barletta-Andria-Trani"
-msgstr ""
+msgstr "Barletta-Andria-Trani"
 
 #: i18n/states/IT.php:23
 msgid "Belluno"
-msgstr ""
+msgstr "Belluno"
 
 #: i18n/states/IT.php:24
 msgid "Benevento"
@@ -1451,7 +1452,7 @@ msgstr "Brescia"
 
 #: i18n/states/IT.php:30
 msgid "Brindisi"
-msgstr ""
+msgstr "Brindisi"
 
 #: i18n/states/IT.php:31
 msgid "Cagliari"
@@ -1459,31 +1460,31 @@ msgstr "Cagliari"
 
 #: i18n/states/IT.php:32
 msgid "Caltanissetta"
-msgstr ""
+msgstr "Caltanissetta"
 
 #: i18n/states/IT.php:33
 msgid "Campobasso"
-msgstr ""
+msgstr "Campobasso"
 
 #: i18n/states/IT.php:34
 msgid "Carbonia-Iglesias"
-msgstr ""
+msgstr "Carbonia-Iglesias"
 
 #: i18n/states/IT.php:35
 msgid "Caserta"
-msgstr ""
+msgstr "Caserta"
 
 #: i18n/states/IT.php:36
 msgid "Catania"
-msgstr ""
+msgstr "Catania"
 
 #: i18n/states/IT.php:37
 msgid "Catanzaro"
-msgstr ""
+msgstr "Catanzaro"
 
 #: i18n/states/IT.php:38
 msgid "Chieti"
-msgstr ""
+msgstr "Chieti"
 
 #: i18n/states/IT.php:39
 msgid "Como"
@@ -1491,7 +1492,7 @@ msgstr "Como"
 
 #: i18n/states/IT.php:40
 msgid "Cosenza"
-msgstr ""
+msgstr "Cosenza"
 
 #: i18n/states/IT.php:41
 msgid "Cremona"
@@ -1499,7 +1500,7 @@ msgstr "Cremona"
 
 #: i18n/states/IT.php:42
 msgid "Crotone"
-msgstr ""
+msgstr "Crotone"
 
 #: i18n/states/IT.php:43
 msgid "Cuneo"
@@ -1507,11 +1508,11 @@ msgstr "Cuneo"
 
 #: i18n/states/IT.php:44
 msgid "Enna"
-msgstr ""
+msgstr "Enna"
 
 #: i18n/states/IT.php:45
 msgid "Fermo"
-msgstr ""
+msgstr "Fermo"
 
 #: i18n/states/IT.php:46
 msgid "Ferrara"
@@ -1523,15 +1524,15 @@ msgstr "Florenz"
 
 #: i18n/states/IT.php:48
 msgid "Foggia"
-msgstr ""
+msgstr "Foggia"
 
 #: i18n/states/IT.php:49
 msgid "Forlì-Cesena"
-msgstr ""
+msgstr "Forlì-Cesena"
 
 #: i18n/states/IT.php:50
 msgid "Frosinone"
-msgstr ""
+msgstr "Frosinone"
 
 #: i18n/states/IT.php:51
 msgid "Genova"
@@ -1539,7 +1540,7 @@ msgstr "Genua"
 
 #: i18n/states/IT.php:52
 msgid "Gorizia"
-msgstr ""
+msgstr "Gorizia"
 
 #: i18n/states/IT.php:53
 msgid "Grosseto"
@@ -1547,11 +1548,11 @@ msgstr "Grosseto"
 
 #: i18n/states/IT.php:54
 msgid "Imperia"
-msgstr ""
+msgstr "Imperia"
 
 #: i18n/states/IT.php:55
 msgid "Isernia"
-msgstr ""
+msgstr "Isernia"
 
 #: i18n/states/IT.php:56
 msgid "La Spezia"
@@ -1559,7 +1560,7 @@ msgstr "La Spezia"
 
 #: i18n/states/IT.php:57
 msgid "L&apos;Aquila"
-msgstr ""
+msgstr "L&apos;Aquila"
 
 #: i18n/states/IT.php:58
 msgid "Latina"
@@ -1567,11 +1568,11 @@ msgstr "Latina"
 
 #: i18n/states/IT.php:59
 msgid "Lecce"
-msgstr ""
+msgstr "Lecce"
 
 #: i18n/states/IT.php:60
 msgid "Lecco"
-msgstr ""
+msgstr "Lecco"
 
 #: i18n/states/IT.php:61
 msgid "Livorno"
@@ -1579,15 +1580,15 @@ msgstr "Livorno"
 
 #: i18n/states/IT.php:62
 msgid "Lodi"
-msgstr ""
+msgstr "Lodi"
 
 #: i18n/states/IT.php:63
 msgid "Lucca"
-msgstr ""
+msgstr "Lucca"
 
 #: i18n/states/IT.php:64
 msgid "Macerata"
-msgstr ""
+msgstr "Macerata"
 
 #: i18n/states/IT.php:65
 msgid "Mantova"
@@ -1595,15 +1596,15 @@ msgstr "Mantova"
 
 #: i18n/states/IT.php:66
 msgid "Massa-Carrara"
-msgstr ""
+msgstr "Massa-Carrara"
 
 #: i18n/states/IT.php:67
 msgid "Matera"
-msgstr ""
+msgstr "Matera"
 
 #: i18n/states/IT.php:68
 msgid "Messina"
-msgstr ""
+msgstr "Messina"
 
 #: i18n/states/IT.php:69
 msgid "Milano"
@@ -1623,23 +1624,23 @@ msgstr "Neapel"
 
 #: i18n/states/IT.php:73
 msgid "Novara"
-msgstr ""
+msgstr "Novara"
 
 #: i18n/states/IT.php:74
 msgid "Nuoro"
-msgstr ""
+msgstr "Nuoro"
 
 #: i18n/states/IT.php:75
 msgid "Olbia-Tempio"
-msgstr ""
+msgstr "Olbia-Tempio"
 
 #: i18n/states/IT.php:76
 msgid "Oristano"
-msgstr ""
+msgstr "Oristano"
 
 #: i18n/states/IT.php:77
 msgid "Padova"
-msgstr ""
+msgstr "Padova"
 
 #: i18n/states/IT.php:78
 msgid "Palermo"
@@ -1651,7 +1652,7 @@ msgstr "Parma"
 
 #: i18n/states/IT.php:80
 msgid "Pavia"
-msgstr ""
+msgstr "Pavia"
 
 #: i18n/states/IT.php:81
 msgid "Perugia"
@@ -1659,15 +1660,15 @@ msgstr "Perugia"
 
 #: i18n/states/IT.php:82
 msgid "Pesaro e Urbino"
-msgstr ""
+msgstr "Pesaro e Urbino"
 
 #: i18n/states/IT.php:83
 msgid "Pescara"
-msgstr ""
+msgstr "Pescara"
 
 #: i18n/states/IT.php:84
 msgid "Piacenza"
-msgstr ""
+msgstr "Piacenza"
 
 #: i18n/states/IT.php:85
 msgid "Pisa"
@@ -1675,11 +1676,11 @@ msgstr "Pisa"
 
 #: i18n/states/IT.php:86
 msgid "Pistoia"
-msgstr ""
+msgstr "Pistoia"
 
 #: i18n/states/IT.php:87
 msgid "Pordenone"
-msgstr ""
+msgstr "Pordenone"
 
 #: i18n/states/IT.php:88
 msgid "Potenza"
@@ -1691,7 +1692,7 @@ msgstr "Prato"
 
 #: i18n/states/IT.php:90
 msgid "Ragusa"
-msgstr ""
+msgstr "Ragusa"
 
 #: i18n/states/IT.php:91
 msgid "Ravenna"
@@ -1699,7 +1700,7 @@ msgstr "Ravenna"
 
 #: i18n/states/IT.php:92
 msgid "Reggio Calabria"
-msgstr ""
+msgstr "Reggio Calabria"
 
 #: i18n/states/IT.php:93
 msgid "Reggio Emilia"
@@ -1707,7 +1708,7 @@ msgstr "Reggio Emilia"
 
 #: i18n/states/IT.php:94
 msgid "Rieti"
-msgstr ""
+msgstr "Rieti"
 
 #: i18n/states/IT.php:95
 msgid "Rimini"
@@ -1719,7 +1720,7 @@ msgstr "Rom"
 
 #: i18n/states/IT.php:97
 msgid "Rovigo"
-msgstr ""
+msgstr "Rovigo"
 
 #: i18n/states/IT.php:98
 msgid "Salerno"
@@ -1727,15 +1728,15 @@ msgstr "Salerno"
 
 #: i18n/states/IT.php:99
 msgid "Medio Campidano"
-msgstr ""
+msgstr "Medio Campidano"
 
 #: i18n/states/IT.php:100
 msgid "Sassari"
-msgstr ""
+msgstr "Sassari"
 
 #: i18n/states/IT.php:101
 msgid "Savona"
-msgstr ""
+msgstr "Savona"
 
 #: i18n/states/IT.php:102
 msgid "Siena"
@@ -1743,15 +1744,15 @@ msgstr "Siena"
 
 #: i18n/states/IT.php:103
 msgid "Siracusa"
-msgstr ""
+msgstr "Siracusa"
 
 #: i18n/states/IT.php:104
 msgid "Sondrio"
-msgstr ""
+msgstr "Sondrio"
 
 #: i18n/states/IT.php:105
 msgid "Taranto"
-msgstr ""
+msgstr "Taranto"
 
 #: i18n/states/IT.php:106
 msgid "Teramo"
@@ -1759,7 +1760,7 @@ msgstr "Teramo"
 
 #: i18n/states/IT.php:107
 msgid "Terni"
-msgstr ""
+msgstr "Terni"
 
 #: i18n/states/IT.php:108
 msgid "Torino"
@@ -1767,11 +1768,11 @@ msgstr "Turin"
 
 #: i18n/states/IT.php:109
 msgid "Ogliastra"
-msgstr ""
+msgstr "Ogliastra"
 
 #: i18n/states/IT.php:110
 msgid "Trapani"
-msgstr ""
+msgstr "Trapani"
 
 #: i18n/states/IT.php:111
 msgid "Trento"
@@ -1779,7 +1780,7 @@ msgstr "Trento"
 
 #: i18n/states/IT.php:112
 msgid "Treviso"
-msgstr ""
+msgstr "Treviso"
 
 #: i18n/states/IT.php:113
 msgid "Trieste"
@@ -1791,7 +1792,7 @@ msgstr "Udine"
 
 #: i18n/states/IT.php:115
 msgid "Varese"
-msgstr ""
+msgstr "Varese"
 
 #: i18n/states/IT.php:116
 msgid "Venezia"
@@ -1799,11 +1800,11 @@ msgstr "Venezien"
 
 #: i18n/states/IT.php:117
 msgid "Verbano-Cusio-Ossola"
-msgstr ""
+msgstr "Verbano-Cusio-Ossola"
 
 #: i18n/states/IT.php:118
 msgid "Vercelli"
-msgstr ""
+msgstr "Vercelli"
 
 #: i18n/states/IT.php:119
 msgid "Verona"
@@ -1811,15 +1812,15 @@ msgstr "Verona"
 
 #: i18n/states/IT.php:120
 msgid "Vibo Valentia"
-msgstr ""
+msgstr "Vibo Valentia"
 
 #: i18n/states/IT.php:121
 msgid "Vicenza"
-msgstr ""
+msgstr "Vicenza"
 
 #: i18n/states/IT.php:122
 msgid "Viterbo"
-msgstr ""
+msgstr "Viterbo"
 
 #: i18n/states/JP.php:13
 msgid "Hokkaido"
@@ -1827,23 +1828,23 @@ msgstr "Hokkaido"
 
 #: i18n/states/JP.php:14
 msgid "Aomori"
-msgstr ""
+msgstr "Aomori"
 
 #: i18n/states/JP.php:15
 msgid "Iwate"
-msgstr ""
+msgstr "Iwate"
 
 #: i18n/states/JP.php:16
 msgid "Miyagi"
-msgstr ""
+msgstr "Miyagi"
 
 #: i18n/states/JP.php:17
 msgid "Akita"
-msgstr ""
+msgstr "Akita"
 
 #: i18n/states/JP.php:18
 msgid "Yamagata"
-msgstr ""
+msgstr "Yamagata"
 
 #: i18n/states/JP.php:19
 msgid "Fukushima"
@@ -1851,23 +1852,23 @@ msgstr "Fukushima"
 
 #: i18n/states/JP.php:20
 msgid "Ibaraki"
-msgstr ""
+msgstr "Ibaraki"
 
 #: i18n/states/JP.php:21
 msgid "Tochigi"
-msgstr ""
+msgstr "Tochigi"
 
 #: i18n/states/JP.php:22
 msgid "Gunma"
-msgstr ""
+msgstr "Gunma"
 
 #: i18n/states/JP.php:23
 msgid "Saitama"
-msgstr ""
+msgstr "Saitama"
 
 #: i18n/states/JP.php:24
 msgid "Chiba"
-msgstr ""
+msgstr "Chiba"
 
 #: i18n/states/JP.php:25
 msgid "Tokyo"
@@ -1875,51 +1876,51 @@ msgstr "Tokio"
 
 #: i18n/states/JP.php:26
 msgid "Kanagawa"
-msgstr ""
+msgstr "Kanagawa"
 
 #: i18n/states/JP.php:27
 msgid "Niigata"
-msgstr ""
+msgstr "Niigata"
 
 #: i18n/states/JP.php:28
 msgid "Toyama"
-msgstr ""
+msgstr "Toyama"
 
 #: i18n/states/JP.php:29
 msgid "Ishikawa"
-msgstr ""
+msgstr "Ishikawa"
 
 #: i18n/states/JP.php:30
 msgid "Fukui"
-msgstr ""
+msgstr "Fukui"
 
 #: i18n/states/JP.php:31
 msgid "Yamanashi"
-msgstr ""
+msgstr "Yamanashi"
 
 #: i18n/states/JP.php:32
 msgid "Nagano"
-msgstr ""
+msgstr "Nagano"
 
 #: i18n/states/JP.php:33
 msgid "Gifu"
-msgstr ""
+msgstr "Gifu"
 
 #: i18n/states/JP.php:34
 msgid "Shizuoka"
-msgstr ""
+msgstr "Shizuoka"
 
 #: i18n/states/JP.php:35
 msgid "Aichi"
-msgstr ""
+msgstr "Aichi"
 
 #: i18n/states/JP.php:36
 msgid "Mie"
-msgstr ""
+msgstr "Mie"
 
 #: i18n/states/JP.php:37
 msgid "Shiga"
-msgstr ""
+msgstr "Shiga"
 
 #: i18n/states/JP.php:38
 msgid "Kyouto"
@@ -1931,23 +1932,23 @@ msgstr "Osaka"
 
 #: i18n/states/JP.php:40
 msgid "Hyougo"
-msgstr ""
+msgstr "Hyougo"
 
 #: i18n/states/JP.php:41
 msgid "Nara"
-msgstr ""
+msgstr "Nara"
 
 #: i18n/states/JP.php:42
 msgid "Wakayama"
-msgstr ""
+msgstr "Wakayama"
 
 #: i18n/states/JP.php:43
 msgid "Tottori"
-msgstr ""
+msgstr "Tottori"
 
 #: i18n/states/JP.php:44
 msgid "Shimane"
-msgstr ""
+msgstr "Shimane"
 
 #: i18n/states/JP.php:45
 msgid "Okayama"
@@ -1959,7 +1960,7 @@ msgstr "Hiroshima"
 
 #: i18n/states/JP.php:47
 msgid "Yamaguchi"
-msgstr ""
+msgstr "Yamaguchi"
 
 #: i18n/states/JP.php:48
 msgid "Tokushima"
@@ -1967,23 +1968,23 @@ msgstr "Tokushima"
 
 #: i18n/states/JP.php:49
 msgid "Kagawa"
-msgstr ""
+msgstr "Kagawa"
 
 #: i18n/states/JP.php:50
 msgid "Ehime"
-msgstr ""
+msgstr "Ehime"
 
 #: i18n/states/JP.php:51
 msgid "Kochi"
-msgstr ""
+msgstr "Kochi"
 
 #: i18n/states/JP.php:52
 msgid "Fukuoka"
-msgstr ""
+msgstr "Fukuoka"
 
 #: i18n/states/JP.php:53
 msgid "Saga"
-msgstr ""
+msgstr "Saga"
 
 #: i18n/states/JP.php:54
 msgid "Nagasaki"
@@ -1991,23 +1992,23 @@ msgstr "Nagasaki"
 
 #: i18n/states/JP.php:55
 msgid "Kumamoto"
-msgstr ""
+msgstr "Kumamoto"
 
 #: i18n/states/JP.php:56
 msgid "Oita"
-msgstr ""
+msgstr "Oita"
 
 #: i18n/states/JP.php:57
 msgid "Miyazaki"
-msgstr ""
+msgstr "Miyazaki"
 
 #: i18n/states/JP.php:58
 msgid "Kagoshima"
-msgstr ""
+msgstr "Kagoshima"
 
 #: i18n/states/JP.php:59
 msgid "Okinawa"
-msgstr ""
+msgstr "Okinawa"
 
 #: i18n/states/MY.php:13
 msgid "Johor"
@@ -2075,103 +2076,103 @@ msgstr "W.P. Putrajaya"
 
 #: i18n/states/PE.php:13
 msgid "El Callao"
-msgstr ""
+msgstr "El Callao"
 
 #: i18n/states/PE.php:14
 msgid "Municipalidad Metropolitana de Lima"
-msgstr ""
+msgstr "Municipalidad Metropolitana de Lima"
 
 #: i18n/states/PE.php:16
 msgid "Ancash"
-msgstr ""
+msgstr "Ancash"
 
 #: i18n/states/PE.php:17
 msgid "Apur&iacute;mac"
-msgstr ""
+msgstr "Apur&iacute;mac"
 
 #: i18n/states/PE.php:18
 msgid "Arequipa"
-msgstr ""
+msgstr "Arequipa"
 
 #: i18n/states/PE.php:19
 msgid "Ayacucho"
-msgstr ""
+msgstr "Ayacucho"
 
 #: i18n/states/PE.php:20
 msgid "Cajamarca"
-msgstr ""
+msgstr "Cajamarca"
 
 #: i18n/states/PE.php:21
 msgid "Cusco"
-msgstr ""
+msgstr "Cusco"
 
 #: i18n/states/PE.php:22
 msgid "Huancavelica"
-msgstr ""
+msgstr "Huancavelica"
 
 #: i18n/states/PE.php:23
 msgid "Hu&aacute;nuco"
-msgstr ""
+msgstr "Hu&aacute;nuco"
 
 #: i18n/states/PE.php:24
 msgid "Ica"
-msgstr ""
+msgstr "Ica"
 
 #: i18n/states/PE.php:25
 msgid "Jun&iacute;n"
-msgstr ""
+msgstr "Jun&iacute;n"
 
 #: i18n/states/PE.php:26
 msgid "La Libertad"
-msgstr ""
+msgstr "La Libertad"
 
 #: i18n/states/PE.php:27
 msgid "Lambayeque"
-msgstr ""
+msgstr "Lambayeque"
 
 #: i18n/states/PE.php:28
 msgid "Lima"
-msgstr ""
+msgstr "Lima"
 
 #: i18n/states/PE.php:29
 msgid "Loreto"
-msgstr ""
+msgstr "Loreto"
 
 #: i18n/states/PE.php:30
 msgid "Madre de Dios"
-msgstr ""
+msgstr "Madre de Dios"
 
 #: i18n/states/PE.php:31
 msgid "Moquegua"
-msgstr ""
+msgstr "Moquegua"
 
 #: i18n/states/PE.php:32
 msgid "Pasco"
-msgstr ""
+msgstr "Pasco"
 
 #: i18n/states/PE.php:33
 msgid "Piura"
-msgstr ""
+msgstr "Piura"
 
 #: i18n/states/PE.php:34
 msgid "Puno"
-msgstr ""
+msgstr "Puno"
 
 #: i18n/states/PE.php:35
 msgid "San Mart&iacute;n"
-msgstr ""
+msgstr "San Mart&iacute;n"
 
 #: i18n/states/PE.php:36
 msgid "Tacna"
-msgstr ""
+msgstr "Tacna"
 
 #: i18n/states/PE.php:37
 msgid "Tumbes"
-msgstr ""
+msgstr "Tumbes"
 
 #: i18n/states/PE.php:38
 msgid "Ucayali"
-msgstr ""
+msgstr "Ucayali"
 
 #: i18n/states/TH.php:13
 msgid ""
@@ -2532,23 +2533,23 @@ msgstr "Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)"
 
 #: i18n/states/TR.php:13
 msgid "Adana"
-msgstr ""
+msgstr "Adana"
 
 #: i18n/states/TR.php:14
 msgid "Ad&#305;yaman"
-msgstr ""
+msgstr "Ad&#305;yaman"
 
 #: i18n/states/TR.php:15
 msgid "Afyon"
-msgstr ""
+msgstr "Afyon"
 
 #: i18n/states/TR.php:16
 msgid "A&#287;r&#305;"
-msgstr ""
+msgstr "A&#287;r&#305;"
 
 #: i18n/states/TR.php:17
 msgid "Amasya"
-msgstr ""
+msgstr "Amasya"
 
 #: i18n/states/TR.php:18
 msgid "Ankara"
@@ -2560,35 +2561,35 @@ msgstr "Antalya"
 
 #: i18n/states/TR.php:20
 msgid "Artvin"
-msgstr ""
+msgstr "Artvin"
 
 #: i18n/states/TR.php:21
 msgid "Ayd&#305;n"
-msgstr ""
+msgstr "Ayd&#305;n"
 
 #: i18n/states/TR.php:22
 msgid "Bal&#305;kesir"
-msgstr ""
+msgstr "Bal&#305;kesir"
 
 #: i18n/states/TR.php:23
 msgid "Bilecik"
-msgstr ""
+msgstr "Bilecik"
 
 #: i18n/states/TR.php:24
 msgid "Bing&#246;l"
-msgstr ""
+msgstr "Bing&#246;l"
 
 #: i18n/states/TR.php:25
 msgid "Bitlis"
-msgstr ""
+msgstr "Bitlis"
 
 #: i18n/states/TR.php:26
 msgid "Bolu"
-msgstr ""
+msgstr "Bolu"
 
 #: i18n/states/TR.php:27
 msgid "Burdur"
-msgstr ""
+msgstr "Burdur"
 
 #: i18n/states/TR.php:28
 msgid "Bursa"
@@ -2596,15 +2597,15 @@ msgstr "Bursa"
 
 #: i18n/states/TR.php:29
 msgid "&#199;anakkale"
-msgstr ""
+msgstr "&#199;anakkale"
 
 #: i18n/states/TR.php:30
 msgid "&#199;ank&#305;r&#305;"
-msgstr ""
+msgstr "&#199;ank&#305;r&#305;"
 
 #: i18n/states/TR.php:31
 msgid "&#199;orum"
-msgstr ""
+msgstr "&#199;orum"
 
 #: i18n/states/TR.php:32
 msgid "Denizli"
@@ -2612,67 +2613,67 @@ msgstr "Denizli"
 
 #: i18n/states/TR.php:33
 msgid "Diyarbak&#305;r"
-msgstr ""
+msgstr "Diyarbak&#305;r"
 
 #: i18n/states/TR.php:34
 msgid "Edirne"
-msgstr ""
+msgstr "Edirne"
 
 #: i18n/states/TR.php:35
 msgid "Elaz&#305;&#287;"
-msgstr ""
+msgstr "Elaz&#305;&#287;"
 
 #: i18n/states/TR.php:36
 msgid "Erzincan"
-msgstr ""
+msgstr "Erzincan"
 
 #: i18n/states/TR.php:37
 msgid "Erzurum"
-msgstr ""
+msgstr "Erzurum"
 
 #: i18n/states/TR.php:38
 msgid "Eski&#351;ehir"
-msgstr ""
+msgstr "Eski&#351;ehir"
 
 #: i18n/states/TR.php:39
 msgid "Gaziantep"
-msgstr ""
+msgstr "Gaziantep"
 
 #: i18n/states/TR.php:40
 msgid "Giresun"
-msgstr ""
+msgstr "Giresun"
 
 #: i18n/states/TR.php:41
 msgid "G&#252;m&#252;&#351;hane"
-msgstr ""
+msgstr "G&#252;m&#252;&#351;hane"
 
 #: i18n/states/TR.php:42
 msgid "Hakkari"
-msgstr ""
+msgstr "Hakkari"
 
 #: i18n/states/TR.php:43
 msgid "Hatay"
-msgstr ""
+msgstr "Hatay"
 
 #: i18n/states/TR.php:44
 msgid "Isparta"
-msgstr ""
+msgstr "Isparta"
 
 #: i18n/states/TR.php:45
 msgid "&#304;&#231;el"
-msgstr ""
+msgstr "&#304;&#231;el"
 
 #: i18n/states/TR.php:46
 msgid "&#304;stanbul"
-msgstr ""
+msgstr "&#304;stanbul"
 
 #: i18n/states/TR.php:47
 msgid "&#304;zmir"
-msgstr ""
+msgstr "&#304;zmir"
 
 #: i18n/states/TR.php:48
 msgid "Kars"
-msgstr ""
+msgstr "Kars"
 
 #: i18n/states/TR.php:49
 msgid "Kastamonu"
@@ -2680,123 +2681,123 @@ msgstr "Kastamonu"
 
 #: i18n/states/TR.php:50
 msgid "Kayseri"
-msgstr ""
+msgstr "Kayseri"
 
 #: i18n/states/TR.php:51
 msgid "K&#305;rklareli"
-msgstr ""
+msgstr "K&#305;rklareli"
 
 #: i18n/states/TR.php:52
 msgid "K&#305;r&#351;ehir"
-msgstr ""
+msgstr "K&#305;r&#351;ehir"
 
 #: i18n/states/TR.php:53
 msgid "Kocaeli"
-msgstr ""
+msgstr "Kocaeli"
 
 #: i18n/states/TR.php:54
 msgid "Konya"
-msgstr ""
+msgstr "Konya"
 
 #: i18n/states/TR.php:55
 msgid "K&#252;tahya"
-msgstr ""
+msgstr "K&#252;tahya"
 
 #: i18n/states/TR.php:56
 msgid "Malatya"
-msgstr ""
+msgstr "Malatya"
 
 #: i18n/states/TR.php:57
 msgid "Manisa"
-msgstr ""
+msgstr "Manisa"
 
 #: i18n/states/TR.php:58
 msgid "Kahramanmara&#351;"
-msgstr ""
+msgstr "Kahramanmara&#351;"
 
 #: i18n/states/TR.php:59
 msgid "Mardin"
-msgstr ""
+msgstr "Mardin"
 
 #: i18n/states/TR.php:60
 msgid "Mu&#287;la"
-msgstr ""
+msgstr "Mu&#287;la"
 
 #: i18n/states/TR.php:61
 msgid "Mu&#351;"
-msgstr ""
+msgstr "Mu&#351;"
 
 #: i18n/states/TR.php:62
 msgid "Nev&#351;ehir"
-msgstr ""
+msgstr "Nev&#351;ehir"
 
 #: i18n/states/TR.php:63
 msgid "Ni&#287;de"
-msgstr ""
+msgstr "Ni&#287;de"
 
 #: i18n/states/TR.php:64
 msgid "Ordu"
-msgstr ""
+msgstr "Ordu"
 
 #: i18n/states/TR.php:65
 msgid "Rize"
-msgstr ""
+msgstr "Rize"
 
 #: i18n/states/TR.php:66
 msgid "Sakarya"
-msgstr ""
+msgstr "Sakarya"
 
 #: i18n/states/TR.php:67
 msgid "Samsun"
-msgstr ""
+msgstr "Samsun"
 
 #: i18n/states/TR.php:68
 msgid "Siirt"
-msgstr ""
+msgstr "Siirt"
 
 #: i18n/states/TR.php:69
 msgid "Sinop"
-msgstr ""
+msgstr "Sinop"
 
 #: i18n/states/TR.php:70
 msgid "Sivas"
-msgstr ""
+msgstr "Sivas"
 
 #: i18n/states/TR.php:71
 msgid "Tekirda&#287;"
-msgstr ""
+msgstr "Tekirda&#287;"
 
 #: i18n/states/TR.php:72
 msgid "Tokat"
-msgstr ""
+msgstr "Tokat"
 
 #: i18n/states/TR.php:73
 msgid "Trabzon"
-msgstr ""
+msgstr "Trabzon"
 
 #: i18n/states/TR.php:74
 msgid "Tunceli"
-msgstr ""
+msgstr "Tunceli"
 
 #: i18n/states/TR.php:75
 msgid "&#350;anl&#305;urfa"
-msgstr ""
+msgstr "&#350;anl&#305;urfa"
 
 #: i18n/states/TR.php:76
 msgid "U&#351;ak"
-msgstr ""
+msgstr "U&#351;ak"
 
 #: i18n/states/TR.php:77
 msgid "Van"
-msgstr ""
+msgstr "Van"
 
 #: i18n/states/TR.php:78
 msgid "Yozgat"
-msgstr ""
+msgstr "Yozgat"
 
 #: i18n/states/TR.php:79
 msgid "Zonguldak"
-msgstr ""
+msgstr "Zonguldak"
 
 #: i18n/states/TR.php:80
 msgid "Aksaray"
@@ -2812,7 +2813,7 @@ msgstr "Karaman"
 
 #: i18n/states/TR.php:83
 msgid "K&#305;r&#305;kkale"
-msgstr ""
+msgstr "K&#305;r&#305;kkale"
 
 #: i18n/states/TR.php:84
 msgid "Batman"
@@ -2820,19 +2821,19 @@ msgstr "Batman"
 
 #: i18n/states/TR.php:85
 msgid "&#350;&#305;rnak"
-msgstr ""
+msgstr "&#350;&#305;rnak"
 
 #: i18n/states/TR.php:86
 msgid "Bart&#305;n"
-msgstr ""
+msgstr "Bart&#305;n"
 
 #: i18n/states/TR.php:87
 msgid "Ardahan"
-msgstr ""
+msgstr "Ardahan"
 
 #: i18n/states/TR.php:88
 msgid "I&#287;d&#305;r"
-msgstr ""
+msgstr "I&#287;d&#305;r"
 
 #: i18n/states/TR.php:89
 msgid "Yalova"
@@ -2840,19 +2841,19 @@ msgstr "Yalova"
 
 #: i18n/states/TR.php:90
 msgid "Karab&#252;k"
-msgstr ""
+msgstr "Karab&#252;k"
 
 #: i18n/states/TR.php:91
 msgid "Kilis"
-msgstr ""
+msgstr "Kilis"
 
 #: i18n/states/TR.php:92
 msgid "Osmaniye"
-msgstr ""
+msgstr "Osmaniye"
 
 #: i18n/states/TR.php:93
 msgid "D&#252;zce"
-msgstr ""
+msgstr "D&#252;zce"
 
 #: i18n/states/US.php:13
 msgid "Alabama"
@@ -3276,7 +3277,7 @@ msgstr "Datei zum Theme kopieren"
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
-msgstr "Um das E-Mail-Template zu überschreiben und zu bearbeiten, <code>%s</code> in den Theme Ordner  <code>%s</code> kopieren. "
+msgstr "Um das E-Mail-Template zu überschreiben und zu bearbeiten, <code>%s</code> in den Theme Ordner <code>%s</code> kopieren. "
 
 #: includes/abstracts/abstract-wc-email.php:769
 msgid "File was not found."
@@ -3304,7 +3305,7 @@ msgstr "Gültig bis (MM/JJ)"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:212
 msgid "MM / YY"
-msgstr ""
+msgstr "MM / JJ"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
@@ -3312,7 +3313,7 @@ msgstr "Sicherheitscode"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:216
 msgid "CVC"
-msgstr ""
+msgstr "Sicherheitscode"
 
 #: includes/abstracts/abstract-wc-product.php:455
 #: includes/class-wc-product-simple.php:48
@@ -3382,35 +3383,35 @@ msgstr "%s &ndash; %s"
 
 #: includes/api/class-wc-api-authentication.php:69
 msgid "Consumer Key is missing"
-msgstr "Konsumentenschlüssel fehlt"
+msgstr "Consumer Key fehlt"
 
 #: includes/api/class-wc-api-authentication.php:72
 msgid "Consumer Secret is missing"
-msgstr "Konsumentensicherheit fehlt"
+msgstr "Consumer Secret fehlt"
 
 #: includes/api/class-wc-api-authentication.php:80
 msgid "Consumer Secret is invalid"
-msgstr "Konsumentensicherheit ist ungültig"
+msgstr "Consumer Secret ist ungültig"
 
 #: includes/api/class-wc-api-authentication.php:112
 msgid "%s parameter is missing"
-msgstr "% s Parameter fehlt"
+msgstr "Parameter %s fehlt"
 
 #: includes/api/class-wc-api-authentication.php:151
 msgid "Consumer Key is invalid"
-msgstr "Konsumentenschlüssel ist ungültig"
+msgstr "Consumer Key ist ungültig"
 
 #: includes/api/class-wc-api-authentication.php:201
 msgid "Invalid Signature - failed to sort parameters"
-msgstr "Ungültige Signatur -  konnte keine Sortiereinstellungen finden"
+msgstr "Ungültige Signatur –  konnte keine Parameter sortieren"
 
 #: includes/api/class-wc-api-authentication.php:214
 msgid "Invalid Signature - signature method is invalid"
-msgstr "Ungültige Signatur -  Die Signaturmethode ist ungültig"
+msgstr "Ungültige Signatur – die Signaturmethode ist ungültig"
 
 #: includes/api/class-wc-api-authentication.php:221
 msgid "Invalid Signature - provided signature does not match"
-msgstr "Ungültige Signatur -  vorgesehene Signatur stimmt nicht überein"
+msgstr "Ungültige Signatur – angegebene Signatur stimmt nicht überein"
 
 #: includes/api/class-wc-api-authentication.php:256
 msgid "Invalid timestamp"
@@ -3418,15 +3419,15 @@ msgstr "Ungültiger Zeitstempel"
 
 #: includes/api/class-wc-api-authentication.php:264
 msgid "Invalid nonce - nonce has already been used"
-msgstr "Ungültiges Anmeldungsmerkmal - Das Anmeldungsmerkmal wurde bereits verwendet"
+msgstr "Ungültiges Nonce – das Nonce wurde bereits verwendet"
 
 #: includes/api/class-wc-api-authentication.php:293
 msgid "The API key provided does not have read permissions"
-msgstr "Der bereitgestellte API-Schlüssel ermöglicht keine Leseberechtigungen"
+msgstr "Der angegebene API-Schlüssel hat keine Leseberechtigungen"
 
 #: includes/api/class-wc-api-authentication.php:302
 msgid "The API key provided does not have write permissions"
-msgstr "Der bereitgestellte API-Schlüssel ermöglicht keine Leseberechtigungen"
+msgstr "Der angegebene API-Schlüssel ermöglicht keine Leseberechtigungen"
 
 #: includes/api/class-wc-api-coupons.php:107
 msgid "Invalid coupon ID"
@@ -3434,7 +3435,7 @@ msgstr "Ungültige Gutschein-ID"
 
 #: includes/api/class-wc-api-coupons.php:152
 msgid "You do not have permission to read the coupons count"
-msgstr "Sie haben keine Berechtigung , um die Anzahl der Coupons zu sehen"
+msgstr "Sie haben keine Berechtigung, um die Anzahl der Coupons zu sehen"
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
@@ -3443,15 +3444,15 @@ msgstr "Ungültiger Gutschein-Code"
 #: includes/api/class-wc-api-customers.php:198
 #: includes/api/class-wc-api-customers.php:201
 msgid "Invalid customer Email"
-msgstr ""
+msgstr "Ungültige Kunden-E-Mail"
 
 #: includes/api/class-wc-api-customers.php:219
 msgid "You do not have permission to read the customers count"
-msgstr "Sie haben keine Berechtigung , um die Anzahl der Käufer zu sehen"
+msgstr "Sie haben keine Berechtigung, um die Anzahl der Kunden zu sehen"
 
 #: includes/api/class-wc-api-customers.php:235
 msgid "You do not have permission to create this customer"
-msgstr "Sie haben keine Berechtigung diesen Käufer anzulegen"
+msgstr "Sie haben keine Berechtigung, diesen Kunden anzulegen"
 
 #: includes/api/class-wc-api-customers.php:482
 msgid "Invalid customer ID"
@@ -3463,31 +3464,31 @@ msgstr "Ungültiger Kunde"
 
 #: includes/api/class-wc-api-customers.php:495
 msgid "You do not have permission to read this customer"
-msgstr "Sie haben keine Berechtigung diesen Käufer anzusehen"
+msgstr "Sie haben keine Berechtigung, diesen Kunden anzusehen"
 
 #: includes/api/class-wc-api-customers.php:500
 msgid "You do not have permission to edit this customer"
-msgstr "Sie haben keine Berechtigung diesen Käufer zu bearbeiten"
+msgstr "Sie haben keine Berechtigung, diesen Kunden zu bearbeiten"
 
 #: includes/api/class-wc-api-customers.php:505
 msgid "You do not have permission to delete this customer"
-msgstr "Sie haben keine Berechtigung diesen Käufer zu löschen"
+msgstr "Sie haben keine Berechtigung, diesen Kunden zu löschen"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
-msgstr "Die SONP Unterstützung ist für diese Seite deaktiviert"
+msgstr "JSONP support is disabled on this site"
 
 #: includes/api/class-wc-api-json-handler.php:64
 msgid "The JSONP callback function is invalid"
-msgstr "Die JSONP Rückruffunktion ist ausgeschaltet"
+msgstr "The JSONP callback function is invalid"
 
 #: includes/api/class-wc-api-orders.php:255
 msgid "You do not have permission to read the orders count"
-msgstr "Sie haben keine Berechtigung die Anzahl der Einkäufe anzusehen"
+msgstr "Sie haben keine Berechtigung, die Anzahl der Bestellungen anzusehen"
 
 #: includes/api/class-wc-api-products.php:140
 msgid "You do not have permission to read the products count"
-msgstr "Sie haben keine Berechtigung die Anzahl der Produkte anzusehen"
+msgstr "Sie haben keine Berechtigung, die Anzahl der Produkte anzusehen"
 
 #: includes/api/class-wc-api-products.php:459
 #: includes/api/class-wc-api-products.php:460
@@ -3496,27 +3497,27 @@ msgstr "Platzhalter"
 
 #: includes/api/class-wc-api-reports.php:469
 msgid "You do not have permission to read this report"
-msgstr "Sie haben keine Berechtigung den Report anzusehen"
+msgstr "Sie haben keine Berechtigung, diesen Bericht anzusehen"
 
 #: includes/api/class-wc-api-resource.php:71
 msgid "Invalid %s ID"
-msgstr "Ungültige %s ID"
+msgstr "Ungültige ID für %s"
 
 #: includes/api/class-wc-api-resource.php:83
 msgid "Invalid %s"
-msgstr "Ungültige %s"
+msgstr "%s ist ungültig"
 
 #: includes/api/class-wc-api-resource.php:90
 msgid "You do not have permission to read this %s"
-msgstr "Sie haben keine Berechtigung %s anzusehen"
+msgstr "Sie haben keine Berechtigung, %s anzusehen"
 
 #: includes/api/class-wc-api-resource.php:95
 msgid "You do not have permission to edit this %s"
-msgstr "Sie haben keine Berechtigung %s zu ändern"
+msgstr "Sie haben keine Berechtigung, %s zu bearbeiten"
 
 #: includes/api/class-wc-api-resource.php:100
 msgid "You do not have permission to delete this %s"
-msgstr "Sie haben keine Berechtigung %s zu löschen"
+msgstr "Sie haben keine Berechtigung, %s zu löschen"
 
 #: includes/api/class-wc-api-resource.php:302
 msgid "Permanently deleted customer"
@@ -3528,15 +3529,15 @@ msgstr "Der Kunde kann nicht gelöscht werden"
 
 #: includes/api/class-wc-api-resource.php:313
 msgid "This %s cannot be deleted"
-msgstr "Diese% s kann nicht gelöscht werden"
+msgstr "%s kann nicht gelöscht werden"
 
 #: includes/api/class-wc-api-resource.php:316
 msgid "Permanently deleted %s"
-msgstr "Dauerhaft gelöscht %s"
+msgstr "%s dauerhaft gelöscht"
 
 #: includes/api/class-wc-api-resource.php:322
 msgid "Deleted %s"
-msgstr "Gelöscht %s"
+msgstr "%s gelöscht"
 
 #: includes/api/class-wc-api-server.php:165
 msgid "Invalid authentication method"
@@ -3548,11 +3549,11 @@ msgstr "Nicht unterstützte Request-Methode"
 
 #: includes/api/class-wc-api-server.php:333
 msgid "The handler for the route is invalid"
-msgstr "Die Prozedur für die Route ist ungültig"
+msgstr "Der Handler für die Route ist ungültig"
 
 #: includes/api/class-wc-api-server.php:369
 msgid "No route was found matching the URL and request method"
-msgstr "Es wurde kein Weg gefunden, die  zu URL und Anfrage-Methode passt."
+msgstr "Keine Route für URL und Request-Methode gefunden"
 
 #: includes/api/class-wc-api-server.php:404
 msgid "Missing parameter %s"
@@ -3695,7 +3696,7 @@ msgstr "Sie können kein weiteres Exemplar von „%s“ zu Ihrem Warenkorb hinzu
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr "Sie können diesen Betrag nicht in den Warenkorb &mdash; hinzufügen - wenn wir %s auf Lager haben, haben Sie %s sofort in Ihrem Warenkorb."
+msgstr "Sie können diese Menge nicht in den Warenkorb legen. Sobald wir %s auf Lager haben, haben Sie %s sofort in Ihrem Warenkorb."
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -4804,7 +4805,7 @@ msgstr "(exkl. MwSt.)"
 
 #: includes/class-wc-countries.php:536
 msgid "(ex. tax)"
-msgstr "(exkl. Mehrwertsteuer)"
+msgstr "(exkl. MwSt.)"
 
 #: includes/class-wc-countries.php:719
 msgid "Country"
@@ -4851,7 +4852,7 @@ msgstr "Postleitzahl / Zip"
 
 #: includes/class-wc-countries.php:827
 msgid "District"
-msgstr ""
+msgstr "Bezirk"
 
 #: includes/class-wc-countries.php:834 includes/class-wc-countries.php:850
 #: includes/class-wc-countries.php:870 includes/class-wc-countries.php:931
@@ -4976,7 +4977,7 @@ msgstr "Ungültige E-Mail-Adresse."
 #: includes/class-wc-download-handler.php:143
 #: includes/class-wc-download-handler.php:296
 msgid "Go to homepage"
-msgstr "Gehe zur Startseite"
+msgstr "Zur Startseite gehen"
 
 #: includes/class-wc-download-handler.php:62
 msgid "Invalid download."
@@ -5097,7 +5098,7 @@ msgstr "Kontodetails erfolgreich geändert."
 
 #: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
-msgstr "Zahlungsart hinzugefügt."
+msgstr "Zahlungsweise hinzugefügt."
 
 #: includes/class-wc-form-handler.php:367
 #: includes/class-wc-form-handler.php:426
@@ -5124,7 +5125,7 @@ msgstr "Ihre Bestellung wurde abgebrochen."
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
-msgstr "Ihr Auftrag kann nicht mehr storniert werden. Bitte kontaktieren Sie uns, wenn Sie Hilfe benötigen."
+msgstr "Ihre Bestellung kann nicht mehr storniert werden. Bitte kontaktieren Sie uns, wenn Sie Hilfe benötigen."
 
 #: includes/class-wc-form-handler.php:563
 #: includes/class-wc-form-handler.php:623
@@ -5700,7 +5701,7 @@ msgstr "Ausführung wählen"
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
-msgstr "Dieses variable Produkt hat keine aktiven Variationen und wird nicht veröffentlicht. Ändere Status zu Entwurf."
+msgstr "Dieses variable Produkt hat keine aktiven Variationen und wird nicht veröffentlicht. Status wird in Entwurf geändert."
 
 #: includes/class-wc-product-variation.php:516
 msgid "%s &ndash; %s%s"
@@ -6265,7 +6266,7 @@ msgstr "Zahlungsaktion"
 msgid ""
 "Choose whether you wish to capture funds immediately or authorize payment "
 "only."
-msgstr "Wählen Sie, ob das Geld sofort erfasst werden soll oder ob die  Zahlung nur  genehmigt werden soll."
+msgstr "Wählen Sie, ob die Zahlung sofort erfasst oder nur  genehmigt werden soll."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:182
 msgid "Capture"
@@ -6544,7 +6545,7 @@ msgstr "Kosten pro Bestellung"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:121
 msgid "Enter a cost (excluding tax) per order, e.g. 5.00. Default is 0."
-msgstr "Geben Sie die Kosten (exklusive Steuer) pro Bestellung ein. bspw. 5.00. Voreinstellung ist 0."
+msgstr "Geben Sie die Kosten (exklusive Steuer) pro Bestellung ein, z.B. 5.00. Standard ist 0."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:126
 msgid "Additional Rates"
@@ -6728,7 +6729,7 @@ msgstr "Kosten hinzugefügt…"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:105
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
-msgstr "Kosten exklusive Mehrwertsteuer. Geben Sie einen Wert ein, z.B. 2.50. Voreinstellung ist 0"
+msgstr "Kosten exklusive Steuer. Geben Sie einen Wert ein, z.B. 2.50. Standard ist 0"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:112
 msgid ""
@@ -6823,14 +6824,14 @@ msgstr "Versandkosten aktualisiert."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:91
 msgid "Invalid order. If you have an account please log in and try again."
-msgstr ""
+msgstr "Ungültige Bestellung. Falls Sie ein Benutzerkonto haben, melden Sie sich bitte dort an und versuchen es erneut."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
 "This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. "
 "Please contact us if you need assistance."
-msgstr "Der Bestellstatus dieser Bestellung ist &ldquo;%s&rdquo;&mdash;für sie kann nicht gezahlt werden. Bitte kontaktieren Sie uns, wenn Sie weitere Hilfestellung benötigen."
+msgstr "Der Status dieser Bestellung ist „%s“ – sie kann nicht bezahlt werden. Bitte kontaktieren Sie uns, wenn Sie weitere Untersützung benötigen."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:117
 #: includes/shortcodes/class-wc-shortcode-checkout.php:168
@@ -6903,7 +6904,7 @@ msgstr "Ungültiger Schlüssel"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:353
 msgid "Add a new payment method."
-msgstr "Fügen Sie eine neue Zahlungsmethode ein."
+msgstr "Fügen Sie eine neue Zahlungsweise ein."
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:54
 msgid "Please enter a valid order ID"
@@ -6955,7 +6956,7 @@ msgstr "Frei"
 
 #: includes/wc-core-functions.php:167
 msgid "United Arab Emirates Dirham"
-msgstr ""
+msgstr "United Arab Emirates Dirham"
 
 #: includes/wc-core-functions.php:168
 msgid "Australian Dollars"
@@ -6963,7 +6964,7 @@ msgstr "Australischer Dollar"
 
 #: includes/wc-core-functions.php:169
 msgid "Bangladeshi Taka"
-msgstr ""
+msgstr "Bangladeshi Taka"
 
 #: includes/wc-core-functions.php:170
 msgid "Brazilian Real"
@@ -6979,7 +6980,7 @@ msgstr "Kanadischer Dollar"
 
 #: includes/wc-core-functions.php:173
 msgid "Chilean Peso"
-msgstr ""
+msgstr "Chilean Peso"
 
 #: includes/wc-core-functions.php:174
 msgid "Chinese Yuan"
@@ -6987,7 +6988,7 @@ msgstr "Chinesischer Yuan"
 
 #: includes/wc-core-functions.php:175
 msgid "Colombian Peso"
-msgstr ""
+msgstr "Colombian Peso"
 
 #: includes/wc-core-functions.php:176
 msgid "Czech Koruna"
@@ -7007,7 +7008,7 @@ msgstr "Hong Kong Dollar"
 
 #: includes/wc-core-functions.php:180
 msgid "Croatia kuna"
-msgstr ""
+msgstr "Croatia kuna"
 
 #: includes/wc-core-functions.php:181
 msgid "Hungarian Forint"
@@ -7015,7 +7016,7 @@ msgstr "Ungarische Forint"
 
 #: includes/wc-core-functions.php:182
 msgid "Icelandic krona"
-msgstr ""
+msgstr "Icelandic krona"
 
 #: includes/wc-core-functions.php:183
 msgid "Indonesia Rupiah"
@@ -7047,7 +7048,7 @@ msgstr "Mexikanischer Peso"
 
 #: includes/wc-core-functions.php:190
 msgid "Nigerian Naira"
-msgstr ""
+msgstr "Nigerian Naira"
 
 #: includes/wc-core-functions.php:191
 msgid "Norwegian Krone"
@@ -7202,7 +7203,7 @@ msgstr "Bewertungen (%d)"
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
-msgstr "Nutzen Sie $args Argument als eine Matrix stattdessen. Veralteter Parameter wird in WooCommerce 2.2 entfernt."
+msgstr "Use $args argument as an array instead. Deprecated argument will be removed in WC 2.2."
 
 #: includes/wc-template-functions.php:1257
 msgctxt "breadcrumb"
@@ -7551,17 +7552,17 @@ msgstr "Versand #%d"
 
 #: templates/cart/cart-shipping.php:18
 msgid "Shipping and Handling"
-msgstr "Versandkostenanteil"
+msgstr "Versand und Abwicklung"
 
 #: templates/cart/cart-shipping.php:55
 msgid "Please use the shipping calculator to see available shipping methods."
-msgstr ""
+msgstr "Bitte nutzen Sie den Versandkosten-Rechner zur Anzeige möglicher Versandmethoden."
 
 #: templates/cart/cart-shipping.php:59
 msgid ""
 "Please continue to the checkout and enter your full address to see if there "
 "are any available shipping methods."
-msgstr ""
+msgstr "Bitte gehen Sie zur Kasse und geben Sie Ihre Lieferanschrift ein, um sich mögliche Versandoptionen anzeigen zu lassen."
 
 #: templates/cart/cart-shipping.php:63
 msgid "Please fill in your details to see available shipping methods."
@@ -7569,7 +7570,7 @@ msgstr "Bitte geben Sie Ihre Details ein um verfügbare Versandarten zu sehen."
 
 #: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid "Sorry, shipping is unavailable %s."
-msgstr "Entschuldigen Sie, der Versand ist nicht möglich %s."
+msgstr "Versand ist leider nicht möglich %s."
 
 #: templates/cart/cart-shipping.php:73 templates/cart/cart-shipping.php:81
 msgid ""
@@ -7746,7 +7747,7 @@ msgid ""
 "Sorry, it seems that there are no available payment methods for your "
 "location. Please contact us if you require assistance or wish to make "
 "alternate arrangements."
-msgstr "Entschuldigung, aber es sind keine Zahlungsarten für Ihr Land verfügbar. Bitte kontaktieren Sie uns für weitere Hilfe oder wenn Sie alternative Absprachen treffen möchten."
+msgstr "Leider sind keine Zahlungsweisen für Ihr Land verfügbar. Bitte kontaktieren Sie uns, wenn Sie Hilfe benötigen oder alternative Absprachen treffen möchten."
 
 #: templates/checkout/form-pay.php:89
 msgid "Pay for order"
@@ -7754,18 +7755,18 @@ msgstr "Für Bestellung bezahlen"
 
 #: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
-msgstr "Die Lieferung an eine andere Adresse senden?"
+msgstr "Lieferung an eine andere Adresse senden?"
 
 #: templates/checkout/review-order.php:150
 msgid "Please fill in your details above to see available payment methods."
-msgstr "Bitte füllen Sie die Angaben oben aus, um die verfügbaren Zahlungsarten abzurufen."
+msgstr "Bitte füllen Sie die Angaben oben aus, um die verfügbaren Zahlungsweisen abzurufen."
 
 #: templates/checkout/review-order.php:152
 msgid ""
 "Sorry, it seems that there are no available payment methods for your state. "
 "Please contact us if you require assistance or wish to make alternate "
 "arrangements."
-msgstr "Entschuldigung, aber es sind keine Zahlungsarten für Ihr Bundesland/Region verfügbar. Bitte kontaktieren Sie uns für weitere Hilfe oder wenn Sie alternative Absprachen treffen möchten."
+msgstr "Leider sind keine Zahlungsweisen für Ihr/e Bundesland/Region verfügbar. Bitte kontaktieren Sie uns, wenn Sie Hilfe benötigen oder alternative Absprachen treffen möchten."
 
 #: templates/checkout/review-order.php:163
 msgid ""
@@ -7787,7 +7788,7 @@ msgstr "Bestellung abschicken"
 msgid ""
 "I&rsquo;ve read and accept the <a href=\"%s\" target=\"_blank\">terms &amp; "
 "conditions</a>"
-msgstr ""
+msgstr "Ich habe die <a href=\"%s\" target=\"_blank\">Liefer- und Zahlungsbedingungen (AGB)</a> gelesen und bestätige diese hiermit."
 
 #: templates/checkout/thankyou.php:18
 msgid ""
@@ -7885,7 +7886,7 @@ msgstr "Ihr Password wurde automatisch generiert: <strong>%s</strong>"
 msgid ""
 "You can access your account area to view your orders and change your "
 "password here: %s."
-msgstr "In ihrem Anmeldebereich können Sie ihre Aufträge anzuschauen und Ihr Passwort hier %s. ändern."
+msgstr "Um Bestellungen anzusehen oder Ihr Passwort zu ändern, melden Sie sich hier in Ihrem Benutzerkonto an: %s"
 
 #: templates/emails/customer-note.php:14
 #: templates/emails/plain/customer-note.php:13
@@ -7951,7 +7952,7 @@ msgstr "Download %d:"
 #: templates/emails/email-order-items.php:48
 #: templates/emails/plain/email-order-items.php:48
 msgid "Download"
-msgstr "Download"
+msgstr "Download:"
 
 #: templates/emails/plain/admin-new-order.php:19
 #: templates/emails/plain/customer-completed-order.php:19
@@ -7963,7 +7964,7 @@ msgstr "Bestellnummer: %s"
 
 #: templates/emails/plain/admin-new-order.php:20
 msgid "Order link: %s"
-msgstr "Bestell-Link: %s"
+msgstr "Link zur Bestellung: %s"
 
 #: templates/emails/plain/admin-new-order.php:21
 #: templates/emails/plain/customer-completed-order.php:20
@@ -7985,7 +7986,7 @@ msgstr "Ihre Details"
 
 #: templates/emails/plain/customer-new-account.php:16
 msgid "Your password is <strong>%s</strong>."
-msgstr "Ihr Passwort lautet <strong>%s</strong>."
+msgstr "Ihr Passwort lautet: <strong>%s</strong>"
 
 #: templates/emails/plain/email-order-items.php:32
 msgid "Quantity: %s"
@@ -8044,7 +8045,7 @@ msgstr "Menge"
 
 #: templates/loop/no-products-found.php:14
 msgid "No products were found matching your selection."
-msgstr "Es wurden keine Produkte gefunden, die Ihrer Auswahl entsprechen."
+msgstr "Keine Ihrer Auswahl entsprechenden Produkte gefunden."
 
 #: templates/loop/orderby.php:21
 msgid "Default sorting"
@@ -8092,11 +8093,11 @@ msgid ""
 "Sorry, it seems that there are no payment methods which support adding a new"
 " payment method. Please contact us if you require assistance or wish to make"
 " alternate arrangements."
-msgstr "Entschuldigen Sie, es scheint so, dass keine Zahlungsmethode ausgewählt worden ist. Bitte kontaktieren Sie uns, wenn Sie weiter Hilfe benötigen oder wechselnde Zahlungsmethoden."
+msgstr "Leider gibt es anscheinend keine Zahlungsweisen, die das Hinzufügen einer neuen Zahlungsweise zulassen. Bitte kontaktieren Sie uns, wenn Sie Hilfe benötigen oder alternative Absprachen treffen möchten."
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
-msgstr "Zahlungsart hinzufügen"
+msgstr "Zahlungsweise hinzufügen"
 
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
@@ -8189,7 +8190,7 @@ msgid ""
 "From your account dashboard you can view your recent orders, manage your "
 "shipping and billing addresses and <a href=\"%s\">edit your password and "
 "account details</a>."
-msgstr "Von Ihrer Anmeldeübersicht können Sie Ihre letzten Bestellungen sehen. Hier verwalten Sie Ihre Liefer- und Rechnungsadressen und <a href=\"%s\">bearbeiten ihr Passwort und Konto-Details </a>."
+msgstr "In Ihrer Kontoübersicht können Sie Ihre letzten Bestellungen sehen, Liefer- und Rechnungsadressen verwalten, sowie Ihr <a href=\"%s\">Passwort und Konto-Details bearbeiten</a>."
 
 #: templates/myaccount/my-address.php:17
 msgid "My Addresses"
@@ -8353,7 +8354,7 @@ msgstr "Abmessungen"
 msgid "%s customer review"
 msgid_plural "%s customer reviews"
 msgstr[0] "%s Kundenrezension"
-msgstr[1] "%s Kundenrezensionen"
+msgstr[1] "%s Kundenbewertungen"
 
 #: templates/single-product/related.php:36
 msgid "Related Products"
@@ -8399,11 +8400,11 @@ msgstr "Fügen Sie Ihre Bewertung hinzu"
 
 #: templates/single-product-reviews.php:57
 msgid "Be the first to review"
-msgstr "Seien Sie der erste Rezensent von"
+msgstr "Schreiben Sie die erste Bewertung zu"
 
 #: templates/single-product-reviews.php:58
 msgid "Leave a Reply to %s"
-msgstr "Hinterlasse eine Antwort zu %s"
+msgstr "Schreiben Sie eine Antwort zu %s"
 
 #: templates/single-product-reviews.php:64
 msgid "Email"
@@ -8411,11 +8412,11 @@ msgstr "E-Mail"
 
 #: templates/single-product-reviews.php:67
 msgid "Submit"
-msgstr "Absenden"
+msgstr "Senden"
 
 #: templates/single-product-reviews.php:73
 msgid "Your Rating"
-msgstr "Deine Bewertung"
+msgstr "Ihre Bewertung"
 
 #: templates/single-product-reviews.php:74
 msgid "Rate&hellip;"
@@ -8448,7 +8449,7 @@ msgstr "Ihre Bewertung"
 #: templates/single-product-reviews.php:92
 msgid ""
 "Only logged in customers who have purchased this product may leave a review."
-msgstr "Nur eingeloggte Kunden, die dieses Produkt gekauft haben, dürfen eine Bewertung abgeben."
+msgstr "Nur angemeldete Kunden, die dieses Produkt gekauft haben, dürfen eine Bewertung abgeben."
 
 #: woocommerce.php:182
 msgid "Docs"
@@ -8464,7 +8465,7 @@ msgstr "http://www.woothemes.com/woocommerce/"
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr "Ein E-Commerce Werkzeugkasten der dir hilft alles zu verkaufen. Fantastisch, oder?"
+msgstr "Ein E-Commerce Werkzeugkasten, der dir hilft, alles zu verkaufen. Fantastisch, oder?"
 
 #. Author of the plugin/theme
 msgid "WooThemes"

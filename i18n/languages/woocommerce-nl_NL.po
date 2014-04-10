@@ -1,17 +1,19 @@
 # 
 # Translators:
+# Flobin <7dabe782@opayq.com>, 2014
 # coenjacobs <coen@woothemes.com>, 2013
 # coenjacobs <coen@woothemes.com>, 2014
 # Ramon Van Belzen <ramoonus@zeelandnet.nl>, 2014
 # stgoos, 2013
 # sylvie_janssens <sylvie_janssens@yahoo.com>, 2014
+# SilverXp <thom.pp9@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:51+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-04-02 18:03+0000\n"
+"Last-Translator: SilverXp <thom.pp9@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.com/projects/p/woocommerce/language/nl_NL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -6824,7 +6826,7 @@ msgstr "Verzendkosten bijgewerkt."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:91
 msgid "Invalid order. If you have an account please log in and try again."
-msgstr ""
+msgstr "Ongeldige bestelling. Als u een account heeft, log dan in en probeer het opnieuw."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
@@ -7556,7 +7558,7 @@ msgstr "Verzenden en verwerken"
 
 #: templates/cart/cart-shipping.php:55
 msgid "Please use the shipping calculator to see available shipping methods."
-msgstr ""
+msgstr "Gebruik de verzendcalculator om de beschikbare verzendmethoden te zien."
 
 #: templates/cart/cart-shipping.php:59
 msgid ""
@@ -7788,7 +7790,7 @@ msgstr "Bestelling plaatsen"
 msgid ""
 "I&rsquo;ve read and accept the <a href=\"%s\" target=\"_blank\">terms &amp; "
 "conditions</a>"
-msgstr ""
+msgstr "Ik heb de <a href=\"%s\" target=\"_blank\">algemene voorwaarden</a> gelezen en accepteer deze"
 
 #: templates/checkout/thankyou.php:18
 msgid ""
