@@ -7,7 +7,7 @@
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.8
- * Tested up to: 3.8
+ * Tested up to: 3.9
  *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/

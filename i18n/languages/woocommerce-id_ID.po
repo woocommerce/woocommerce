@@ -7,13 +7,14 @@
 # globalaperta <globalaperta@gmail.com>, 2014
 # globalaperta <globalaperta@gmail.com>, 2014
 # globalaperta <globalaperta@gmail.com>, 2014
+# SeaBiz <seabiz@hotmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-04-10 05:29+0000\n"
+"Last-Translator: SeaBiz <seabiz@hotmail.com>\n"
 "Language-Team: Indonesian (Indonesia) (http://www.transifex.com/projects/p/woocommerce/language/id_ID/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -6838,7 +6839,7 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-checkout.php:117
 #: includes/shortcodes/class-wc-shortcode-checkout.php:168
 msgid "Sorry, this order is invalid and cannot be paid for."
-msgstr ""
+msgstr "Maaf, pesanan ini tidak valid oleh karena itu tidak dapat dilakukan pembayaran."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:134
 #: templates/checkout/thankyou.php:40
@@ -6922,7 +6923,7 @@ msgstr "Maaf, kami tidak menemukan ID pesanan di database kami."
 
 #: includes/wc-cart-functions.php:25
 msgid "This product is protected and cannot be purchased."
-msgstr ""
+msgstr "Produk ini dilindungi dan tidak dapat dibeli."
 
 #: includes/wc-cart-functions.php:83
 msgid "Added &quot;%s&quot; to your cart."
@@ -7689,7 +7690,7 @@ msgstr "Tagihan &amp; Pengiriman"
 
 #: templates/checkout/form-billing.php:19
 msgid "Billing Details"
-msgstr ""
+msgstr "Detil Tagihan"
 
 #: templates/checkout/form-billing.php:38
 msgid "Create an account?"

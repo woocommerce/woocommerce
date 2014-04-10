@@ -5,14 +5,15 @@
 # FrancoBaccarini <info@francobaccarini.it>, 2014
 # Marco Gobbo <kiba.no.michi@gmail.com>, 2014
 # maxlam <lam.max@tiscali.it>, 2014
+# Nicola Mustone <mustone.nicola@gmail.com>, 2014
 # paoloalbera <albera.paolo@yahoo.it>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:51+0000\n"
-"Last-Translator: Fredev <federico.paletta88@gmail.com>\n"
+"PO-Revision-Date: 2014-04-01 07:20+0000\n"
+"Last-Translator: Nicola Mustone <mustone.nicola@gmail.com>\n"
 "Language-Team: Italian (Italy) (http://www.transifex.com/projects/p/woocommerce/language/it_IT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -391,8 +392,8 @@ msgstr[1] "<strong>%s ordini</strong> in attesa di elaborazione"
 #: includes/admin/class-wc-admin-dashboard.php:150
 msgid "<strong>%s order</strong> on-hold"
 msgid_plural "<strong>%s orders</strong> on-hold"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "<strong>%s ordine</strong> in attesa"
+msgstr[1] "<strong>%s ordini</strong> in attesa"
 
 #: includes/admin/class-wc-admin-dashboard.php:155
 msgid "<strong>%s product</strong> low in stock"
@@ -1110,7 +1111,7 @@ msgstr "Installa pagine"
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
-msgstr ""
+msgstr "<strong> class=\"red\">Nota:</strong> Questo tool installer&agrave; tutte le pagine mancanti di WooCommerce. Le pagine gi&agrave; definite e configurate non saranno rimpiazzate."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
@@ -1282,7 +1283,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:264
 msgid "Simplified order UI"
-msgstr ""
+msgstr "UI dell'ordine semplificata"
 
 #: includes/admin/class-wc-admin-welcome.php:265
 msgid ""
@@ -1298,7 +1299,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:269
 msgid "Improved Reporting"
-msgstr ""
+msgstr "Report migliorati"
 
 #: includes/admin/class-wc-admin-welcome.php:270
 msgid ""
@@ -1315,7 +1316,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
-msgstr ""
+msgstr "Integrazioni seaparate"
 
 #: includes/admin/class-wc-admin-welcome.php:279
 msgid "New separate plugins"
@@ -1428,7 +1429,7 @@ msgstr "Limite coupon per cliente"
 msgid ""
 "Coupon usage limits can now be set per user (using email + ID) rather than "
 "global."
-msgstr ""
+msgstr "I limiti di utilizzo dei Codici sconto pu&opgrave; essere impostato per utente (utilizzando email + ID) anzich&egrave; globale."
 
 #: includes/admin/class-wc-admin-welcome.php:341
 msgid "Streamlined new-account process"
@@ -1452,23 +1453,23 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:354
 msgid "Past order linking"
-msgstr ""
+msgstr "Collegamento di ordini precedenti"
 
 #: includes/admin/class-wc-admin-welcome.php:355
 msgid ""
 "Admins now have the ability to link past orders to a customer (before they "
 "registered) by email address."
-msgstr ""
+msgstr "Gli admin possono ora collegari ordini precedenti ad un cliente (effettuati prima che si registrassero) tramite l'indirizzo email."
 
 #: includes/admin/class-wc-admin-welcome.php:359
 msgid "Review improvements"
-msgstr ""
+msgstr "Miglioramenti delle recensioni"
 
 #: includes/admin/class-wc-admin-welcome.php:360
 msgid ""
 "We've added a new option to restrict reviews to logged in purchasers, and "
 "made ratings editable from the backend."
-msgstr ""
+msgstr "Abbiamo aggiunto una nuova opzione per permettere le recensioni agli acquirenti registrati, e reso le valutazioni modificabili da pannello admin."
 
 #: includes/admin/class-wc-admin-welcome.php:367
 msgid "Go to WooCommerce Settings"
@@ -2433,7 +2434,7 @@ msgstr "File %d"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:64
 msgid "Search for a downloadable product&hellip;"
-msgstr ""
+msgstr "Cerca un prodotto scaricabile&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:65
 msgid "Grant Access"
@@ -4959,7 +4960,7 @@ msgstr "Gratis"
 msgid ""
 "Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
 " href=\"%s\">WooCommerce Extensions Catalog</a>"
-msgstr ""
+msgstr "Il nostro catalogo delle Estensioni di WooCommerce &egrave; disponibile su WooThemes.com: <a href=\"%s\">Catalogo delle Estensioni di WooCommerce</a>"
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"

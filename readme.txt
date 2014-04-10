@@ -3,8 +3,8 @@ Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
-Tested up to: 3.8.1
-Stable tag: 2.1.6
+Tested up to: 3.9
+Stable tag: 2.1.7
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -129,6 +129,47 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.2.0 =
 * Feature - Added used payment gateway to view orders screens
 * Feature - API: Lookup customers by email endpoint
+
+= 2.1.7 - 10/04/2014 =
+* Fix - Allow WC API to generate API keys for different user than the one that is making request.
+* Fix - Fix the SKU search logic so it works with other filters.
+* Fix - Correctly round shipping + shipping tax together when passes the tax inclusive total to paypal.
+* Fix - orderby - skip adding hidden input of submit on a GET so JS can submit properly.
+* Fix - Check wc_checkout_params.is_checkout against string '1' instead of int 1.
+* Fix - Check order exists when resuming on checkout.
+* Fix - When removing base taxes, round to precision.
+* Fix - Ensure _order_currency is set.
+* Fix - Use `$wpdb->db_version()` instead of `mysql_get_server_info()` deprecated in PHP 5.5.
+* Fix - myaccount registration added check for auto generate password option.
+* Fix - API: normalize both key and value before calculating OAuth signature.
+* Fix - API: double-encode percent symbols when normalizing parameters.
+* Fix - API: Remove post_parent so grouped simple products are also returned.
+* Fix - Clear featured transients when needed.
+* Fix - Stay on checkout when removing coupon.
+* Fix - Prevent totals refreshing on every keydown event on the checkout.
+* Fix - When hierarchy is off, only show children in the cat widget.
+* Fix - Delete term count transients after stock status change and trashed post.
+* Fix - During save_meta_boxes, only save for the "main" post being saved, not nested or subsequent save_post events.
+* Fix - Stop _wc_session_expires autoloading.
+* Fix - Remove nonce from comment form to prevent issues with caching.
+* Fix - reset grouped products correctly to work with short codes.
+* Fix - In admin, work out cart discount without tax amounts.
+* Tweak - Apply filters to $product_type and we can set a default product type to new products.
+* Tweak - wp_kses_post for meta display in admin.
+* Tweak - woocommerce_order_cancelled_notice hook.
+* Tweak - Use is_ssl() for get_woocommerce_api_url().
+* Tweak - Changes to filters to see if shipping is needed or not in the cart class.
+* Tweak - Chunk option names in cleanup_sessions() to reduce load.
+* Tweak - Change \WC_Order::add_order_note cap to edit_shop_order instead of manage_woocommerce.
+* Tweak - Allow filtering order statuses in dashboard reports widget.
+* Tweak - Added is_paying_customer() to easily check if a user is a WC customer.
+* Tweak - Allow query string fallback for REST API SSL auth.
+* Tweak - woocommerce_coupon_get_discount_amount filter in coupon class.
+* Tweak - More friendly/less blunt "no shipping" messages.
+* Tweak - use network_site_url instead of network_admin_url for multisite.
+* Tweak - Updater - Only show upgrade notices, and use transient cache.
+* Tweak - get_image_id method for use in email template. Shows correct variation images.
+* Tweak - added validation when save the frontend colors.
 
 = 2.1.6 - 25/03/2014 =
 * Fix - Fixed a bug where cron events are scheduled using a function name rather than a hook name.

@@ -1,14 +1,14 @@
 # 
 # Translators:
-# TRFlavourart <vaporsbazar@gmail.com>, 2013-2014
-# TRFlavourart <vaporsbazar@gmail.com>, 2014
+# TRFlavourart <commerceword@gmail.com>, 2013-2014
+# TRFlavourart <commerceword@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 13:08+0000\n"
-"Last-Translator: TRFlavourart <vaporsbazar@gmail.com>\n"
+"PO-Revision-Date: 2014-04-01 07:55+0000\n"
+"Last-Translator: TRFlavourart <commerceword@gmail.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/projects/p/woocommerce/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -6173,7 +6173,7 @@ msgstr "tam PCI Uyumluluğu sağlar, sizi, sitenizin tasarım kontrol sınırlar
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:31
 msgid "Proceed to PayPal"
-msgstr "PayPal'a Devam"
+msgstr "Paypal ile Öde"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:34
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:135

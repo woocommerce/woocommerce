@@ -1,6 +1,6 @@
 # 
 # Translators:
-# lad.ruz <pbelavic@gmail.com>, 2013
+# lad.ruz <inactive+lad.ruz@transifex.com>, 2013
 # vlinicx <toolrijeka@gmail.com>, 2014
 msgid ""
 msgstr ""

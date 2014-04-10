@@ -1,16 +1,18 @@
 # 
 # Translators:
+# arielk <relklik@gmail.com>, 2014
 # joelbal <jbalbachan@gmail.com>, 2014
 # josh_marom <josh@josh.co.il>, 2014
 # roidayan <roi.dayan@gmail.com>, 2014
+# ronshe <ronny.sherer@gmail.com>, 2014
 # Yakir Gottesman <yakir@go-press.co.il>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:50+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-04-01 19:50+0000\n"
+"Last-Translator: arielk <relklik@gmail.com>\n"
 "Language-Team: Hebrew (Israel) (http://www.transifex.com/projects/p/woocommerce/language/he_IL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3318,7 +3320,7 @@ msgstr ""
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
-msgstr "הוסף לסל הקניות"
+msgstr "הוסף לסל"
 
 #: includes/abstracts/abstract-wc-product.php:465
 msgid "Read more"
@@ -3463,15 +3465,15 @@ msgstr ""
 
 #: includes/api/class-wc-api-customers.php:495
 msgid "You do not have permission to read this customer"
-msgstr ""
+msgstr "אין לך הרשאות מתאימות לצפות בעמוד הזה."
 
 #: includes/api/class-wc-api-customers.php:500
 msgid "You do not have permission to edit this customer"
-msgstr ""
+msgstr "אין לך הרשאה לערוך את העמוד הזה"
 
 #: includes/api/class-wc-api-customers.php:505
 msgid "You do not have permission to delete this customer"
-msgstr ""
+msgstr "אין לך הרשאות למחוק את העמוד הזה"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
@@ -3483,7 +3485,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-orders.php:255
 msgid "You do not have permission to read the orders count"
-msgstr ""
+msgstr "אין לך הרשאות מתאימות לצפיות במספר הזמנות "
 
 #: includes/api/class-wc-api-products.php:140
 msgid "You do not have permission to read the products count"
@@ -5097,7 +5099,7 @@ msgstr "פרטי החשבון שונו בהצלחה."
 
 #: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
-msgstr ""
+msgstr "נוספה אפשרות תשלום."
 
 #: includes/class-wc-form-handler.php:367
 #: includes/class-wc-form-handler.php:426
@@ -7814,7 +7816,7 @@ msgstr "תודה לך. ההזמנה שלך התקבלה בהצלחה."
 #: templates/emails/admin-new-order.php:13
 #: templates/emails/plain/admin-new-order.php:13
 msgid "You have received an order from %s. Their order is as follows:"
-msgstr "קיבלת הזמנה מ- %s. לְהַלָן ההזמנה שלהם:"
+msgstr "התקבלה הזמנה מ%s, פרטי ההזמנה הינם:"
 
 #: templates/emails/admin-new-order.php:17
 msgid "Order: %s"
@@ -8096,7 +8098,7 @@ msgstr ""
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
-msgstr ""
+msgstr "הוספת אמצעי תשלום"
 
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
