@@ -8336,7 +8336,7 @@ msgstr "Этого товара нет в наличии, заказ недос�
 
 #: templates/single-product/meta.php:23
 msgid "SKU:"
-msgstr "Кол-во:"
+msgstr "ИТП:"
 
 #: templates/single-product/meta.php:23
 msgid "n/a"
