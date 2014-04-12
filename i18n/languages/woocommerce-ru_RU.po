@@ -39,11 +39,11 @@ msgstr "Кнопка Цена товара/Корзина"
 
 #: assets/js/admin/editor_plugin_lang.php:7
 msgid "Product by SKU/ID"
-msgstr "Товар по ИТП/ID"
+msgstr "Товар по Артикулу/ID"
 
 #: assets/js/admin/editor_plugin_lang.php:8
 msgid "Products by SKU/ID"
-msgstr "Товары по ИТП/ID"
+msgstr "Товары по Артикулу/ID"
 
 #: assets/js/admin/editor_plugin_lang.php:9
 msgid "Product categories"
@@ -8336,7 +8336,7 @@ msgstr "Этого товара нет в наличии, заказ недос�
 
 #: templates/single-product/meta.php:23
 msgid "SKU:"
-msgstr "ИТП:"
+msgstr "Артикул:"
 
 #: templates/single-product/meta.php:23
 msgid "n/a"
