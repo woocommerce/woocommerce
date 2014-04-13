@@ -7203,7 +7203,7 @@ msgstr "&nbsp;&ndash; Страница %s"
 #: templates/checkout/form-shipping.php:55
 #: templates/single-product/tabs/additional-information.php:14
 msgid "Additional Information"
-msgstr "Дополнительная инфомация"
+msgstr "Дополнительная информация"
 
 #: includes/wc-template-functions.php:998
 msgid "Reviews (%d)"
