@@ -170,6 +170,16 @@ function wc_cart_totals_shipping_html() {
 }
 
 /**
+ * Get taxes total
+ *
+ * @access public
+ * @return void
+ */
+function wc_cart_totals_taxes_total_html() {
+	echo apply_filters( 'woocommerce_cart_totals_taxes_total_html', wc_price( WC()->cart->get_taxes_total() ) );
+}
+
+/**
  * Get a coupon label
  *
  * @access public
@@ -212,7 +222,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
     // get rid of empty array elements
     $value = array_filter( $value );
 
-	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
 }
@@ -279,4 +289,12 @@ function wc_cart_totals_shipping_method_label( $method ) {
 	}
 
 	return apply_filters( 'woocommerce_cart_shipping_method_full_label', $label, $method );
+}
+
+/**
+ * See if we only ship to billing addresses
+ * @return bool
+ */
+function wc_ship_to_billing_address_only() {
+	return 'billing_only' === get_option( 'woocommerce_ship_to_destination' );
 }

@@ -22,7 +22,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	 * @access public
 	 * @return void
 	 */
-	function __construct() {
+	public function __construct() {
 
 		$this->id 						= 'international_delivery';
 		$this->flat_rate_option			= 'woocommerce_international_delivery_flat_rates';
@@ -42,7 +42,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	 * @access public
 	 * @return void
 	 */
-	function init_form_fields() {
+	public function init_form_fields() {
 
 		$this->form_fields = array(
 			'enabled' => array(
@@ -112,7 +112,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'description'	=> __( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true,
-							'placeholder'	=> wc_format_localized_price( 0 ),
+							'placeholder'	=> __( 'N/A', 'woocommerce' )
 						),
 			'minimum_fee' => array(
 							'title'			=> __( 'Minimum Handling Fee', 'woocommerce' ),
@@ -120,7 +120,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 							'description'	=> __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 							'desc_tip'		=> true,
-							'placeholder'	=> wc_format_localized_decimal( '0' )
+							'placeholder'	=> __( 'N/A', 'woocommerce' )
 						),
 			);
 
@@ -134,25 +134,78 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	 * @param mixed $package
 	 * @return bool
 	 */
-	function is_available( $package ) {
+	public function is_available( $package ) {
 
-		if ($this->enabled=="no") return false;
+		if ( "no" === $this->enabled ) {
+			return false;
+		}
 
-		if ($this->availability=='including') :
+		if ( 'including' === $this->availability ) {
 
-			if (is_array($this->countries)) :
-				if ( ! in_array( $package['destination']['country'], $this->countries) ) return false;
-			endif;
+			if ( is_array( $this->countries ) && ! in_array( $package['destination']['country'], $this->countries ) ) {
+				return false;
+			}
 
-		else :
+		} else {
 
-			if (is_array($this->countries)) :
-				if ( in_array( $package['destination']['country'], $this->countries) ) return false;
-			endif;
+			if ( is_array( $this->countries ) && in_array( $package['destination']['country'], $this->countries ) ) {
+				return false;
+			}
 
-		endif;
+		}
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
+	}
+
+	/**
+	 * calculate_shipping function.
+	 *
+	 * @access public
+	 * @param array $package (default: array())
+	 * @return void
+	 */
+	public function calculate_shipping( $package = array() ) {
+		$this->rates = array();
+
+		if ( 'order' === $this->type ) {
+
+			$shipping_total = $this->order_shipping( $package );
+
+			$rate = array(
+				'id' 	=> $this->id,
+				'label' => $this->title,
+				'cost' 	=> $shipping_total ? $shipping_total : 0,
+			);
+
+		} elseif ( 'class' === $this->type ) {
+
+			$shipping_total = $this->class_shipping( $package );
+
+			$rate = array(
+				'id' 	=> $this->id,
+				'label' => $this->title,
+				'cost' 	=> $shipping_total ? $shipping_total : 0,
+			);
+
+		} elseif ( 'item' === $this->type ) {
+
+			$costs = $this->item_shipping( $package );
+
+			if ( ! is_array( $costs ) ) {
+				$costs = array();
+			}
+
+			$rate = array(
+				'id' 		=> $this->id,
+				'label' 	=> $this->title,
+				'cost' 		=> $costs,
+				'calc_tax' 	=> 'per_item',
+			);
+		}
+
+		if ( isset( $rate ) ) {
+			$this->add_rate( $rate );
+		}
 	}
 
 }

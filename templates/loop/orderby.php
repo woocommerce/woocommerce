@@ -36,7 +36,7 @@ if ( 1 == $wp_query->found_posts || ! woocommerce_products_will_display() )
 	<?php
 		// Keep query string vars intact
 		foreach ( $_GET as $key => $val ) {
-			if ( 'orderby' == $key )
+			if ( 'orderby' === $key || 'submit' === $key )
 				continue;
 			
 			if ( is_array( $val ) ) {

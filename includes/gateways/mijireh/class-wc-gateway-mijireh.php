@@ -275,7 +275,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		$mj_order->add_meta_data( 'wc_order_id', $order_id );
 
 		// Set URL for mijireh payment notificatoin - use WC API
-		$mj_order->return_url 		= str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Mijireh', home_url( '/' ) ) );
+		$mj_order->return_url 		= WC()->api_request_url( 'WC_Gateway_Mijireh' );
 
 		// Identify woocommerce
 		$mj_order->partner_id 		= 'woo';

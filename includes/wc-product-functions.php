@@ -79,6 +79,11 @@ function wc_product_dimensions_enabled() {
 function wc_delete_product_transients( $post_id = 0 ) {
 	global $wpdb;
 
+	if ( wp_using_ext_object_cache() ) {
+		wp_cache_flush(); // There isn't a reliable method of looking up the names, so flush the cache.
+		return;
+	} 
+
 	$post_id = absint( $post_id );
 
 	// Clear core transients
@@ -87,27 +92,15 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_hidden_product_ids',
 		'wc_hidden_product_ids_search',
 		'wc_attribute_taxonomies',
-		'wc_term_counts'
+		'wc_term_counts',
+		'wc_featured_products'
 	);
 
 	// Clear transients for which we don't have the name
-	if ( wp_using_ext_object_cache() ) {
-		global $wp_object_cache;
-
-		if ( isset( $wp_object_cache->cache['transient'] ) ) {
-			$keys = array_keys( $wp_object_cache->cache['transient'] );
-			foreach ( $keys as $key ) {
-				if ( strpos( $key, 'wc_uf_pid_' ) === 0 || strpos( $key, 'wc_ship_' ) === 0 || strpos( $key, 'wc_products_will_display_' ) === 0 || strpos( $key, 'wc_ln_count_' ) === 0 ) {
-					$transients_to_clear[] = $key;
-				}
-			}
-		}
-	} else {
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%') OR `option_name` LIKE ('_transient_timeout_wc_uf_pid_%')" );
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%') OR `option_name` LIKE ('_transient_timeout_wc_ln_count_%')" );
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%') OR `option_name` LIKE ('_transient_timeout_wc_ship_%')" );
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_products_will_display_%') OR `option_name` LIKE ('_transient_timeout_wc_products_will_display_%')" );
-	}
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%') OR `option_name` LIKE ('_transient_timeout_wc_uf_pid_%')" );
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%') OR `option_name` LIKE ('_transient_timeout_wc_ln_count_%')" );
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%') OR `option_name` LIKE ('_transient_timeout_wc_ship_%')" );
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_products_will_display_%') OR `option_name` LIKE ('_transient_timeout_wc_products_will_display_%')" );
 
 	// Clear product specific transients
 	$post_transient_names = array(
@@ -122,27 +115,12 @@ function wc_delete_product_transients( $post_id = 0 ) {
 			$transients_to_clear[] = $transient . $post_id;
 		}
 	} else {
-		if ( wp_using_ext_object_cache() ) {
-			global $wp_object_cache;
-
-			if ( isset( $wp_object_cache->cache['transient'] ) ) {
-				$keys = array_keys( $wp_object_cache->cache['transient'] );
-				foreach( $post_transient_names as $transient ) {
-					foreach ( $keys as $key ) {
-						if ( strpos( $key, $transient ) === 0 ) {
-							$transients_to_clear[] = $key;
-						}
-					}
-				}
-			}
-		} else {
-			foreach( $post_transient_names as $transient ) {
-				$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '_transient_' . $transient . '%', '_transient_timeout_' . $transient . '%' ) );
-			}
+		foreach( $post_transient_names as $transient ) {
+			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '_transient_' . $transient . '%', '_transient_timeout_' . $transient . '%' ) );
 		}
 	}
 
-	// Clear transients where we have names
+	// Delete transients
 	foreach( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
@@ -326,19 +304,20 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  * @return string
  */
 function wc_get_formatted_variation( $variation = '', $flat = false ) {
+	$return = '';
+
 	if ( is_array( $variation ) ) {
 
-		if ( ! $flat )
+		if ( ! $flat ) {
 			$return = '<dl class="variation">';
-		else
-			$return = '';
+		}
 
 		$variation_list = array();
 
 		foreach ( $variation as $name => $value ) {
-
-			if ( ! $value )
+			if ( ! $value ) {
 				continue;
+			}
 
 			// If this is a term slug, get the term's nice name
             if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
@@ -347,24 +326,24 @@ function wc_get_formatted_variation( $variation = '', $flat = false ) {
             		$value = $term->name;
             }
 
-			if ( $flat )
-				$variation_list[] = wc_attribute_label(str_replace('attribute_', '', $name)).': '.$value;
-			else
-				$variation_list[] = '<dt>'.wc_attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
+			if ( $flat ) {
+				$variation_list[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . urldecode( $value );
+			} else {
+				$variation_list[] = '<dt>' . wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . urldecode( $value ) . '</dd>';
+			}
 		}
 
-		if ( $flat )
+		if ( $flat ) {
 			$return .= implode( ', ', $variation_list );
-		else
+		} else {
 			$return .= implode( '', $variation_list );
+		}
 
-		if ( ! $flat )
+		if ( ! $flat ) {
 			$return .= '</dl>';
-
-		return $return;
+		}
 	}
-	
-	return '';
+	return $return;
 }
 
 /**

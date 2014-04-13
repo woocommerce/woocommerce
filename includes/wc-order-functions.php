@@ -311,15 +311,17 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
 function wc_processing_order_count() {
 	if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
 		$order_statuses = get_terms( 'shop_order_status' );
-			$order_count = false;
+		$order_count    = false;
+		if ( is_array( $order_statuses ) ) {
 			foreach ( $order_statuses as $status ) {
-					if( $status->slug === 'processing' ) {
+					if ( $status->slug === 'processing' ) {
 							$order_count += $status->count;
 							break;
 					}
 			}
 			$order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
-		set_transient( 'woocommerce_processing_order_count', $order_count, YEAR_IN_SECONDS );
+			set_transient( 'woocommerce_processing_order_count', $order_count, YEAR_IN_SECONDS );
+		}
 	}
 
 	return $order_count;
@@ -340,20 +342,13 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 		'woocommerce_processing_order_count'
 	);
 
-	// Clear transients for which we don't have the name
-	if ( wp_using_ext_object_cache() ) {
-		global $wp_object_cache;
+	// Clear report transients
+	$reports = WC_Admin_Reports::get_reports();
 
-		if ( isset( $wp_object_cache->cache['transient'] ) ) {
-			$keys = array_keys( $wp_object_cache->cache['transient'] );
-			foreach ( $keys as $key ) {
-				if ( 'wc_report_' === substr( $key, 0, 10 ) ) {
-					$transients_to_clear[] = $key;
-				}
-			}
+	foreach ( $reports as $report_group ) {
+		foreach ( $report_group['reports'] as $report_key => $report ) {
+			$transients_to_clear[] = 'wc_report_' . $report_key;
 		}
-	} else {
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_report_%') OR `option_name` LIKE ('_transient_timeout_wc_report_%')" );
 	}
 
 	// Clear transients where we have names

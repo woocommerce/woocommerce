@@ -1,5 +1,6 @@
 # 
 # Translators:
+# arielk <relklik@gmail.com>, 2014
 # amitgilad <gilad.amit@gmail.com>, 2014
 # joelbal <jbalbachan@gmail.com>, 2014
 # josh_marom <josh@josh.co.il>, 2014
@@ -8,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
-"PO-Revision-Date: 2014-03-04 08:42+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
+"PO-Revision-Date: 2014-04-01 19:45+0000\n"
+"Last-Translator: arielk <relklik@gmail.com>\n"
 "Language-Team: Hebrew (Israel) (http://www.transifex.com/projects/p/woocommerce/language/he_IL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,7 +21,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:65
 #: includes/admin/class-wc-admin-menus.php:47
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 #: includes/admin/wc-admin-functions.php:19
 msgid "WooCommerce"
 msgstr "WooCommerce"
@@ -214,21 +215,21 @@ msgstr "האם אתה בטוח שברצונך להסיר וריאציה זאת?"
 
 #: includes/admin/class-wc-admin-attributes.php:82
 msgid "Please, provide an attribute name, slug and type."
-msgstr "אנא, הזן  את שם התכונה, הכתובת והסוג."
+msgstr "יש להזין את שם התכונה, מזהה הכתובת וסוג התכונה."
 
 #: includes/admin/class-wc-admin-attributes.php:84
 msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
-msgstr "הכתובת \"%s\" ארוכה מדי (28 תווים לכל היותר). קצר אותו, בבקשה."
+msgstr "מזהה הכתובת \"%s\" ארוך מדי (28 תווים לכל היותר). יש לקצר אותו בבקשה."
 
 #: includes/admin/class-wc-admin-attributes.php:86
 msgid ""
 "Slug “%s” is not allowed because it is a reserved term. Change it, please."
-msgstr "הכתובת “%s” אינה מותרת משום שהיא מונח שמור. שנה אותה, בבקשה."
+msgstr "מזהה הכתובת “%s” אינו מותר משום שהוא מונח שמור. יש לשנות אותו בבקשה."
 
 #: includes/admin/class-wc-admin-attributes.php:91
 #: includes/admin/class-wc-admin-attributes.php:96
 msgid "Slug “%s” is already in use. Change it, please."
-msgstr "הקליע %s\"\" כבר נמצא בשימוש. לשנות אותו, בבקשה."
+msgstr "מזהה הכתובת \"%s\" כבר נמצא בשימוש. יש לשנות אותו בבקשה."
 
 #: includes/admin/class-wc-admin-attributes.php:233
 msgid "Edit Attribute"
@@ -243,13 +244,13 @@ msgstr "שם התכונה (המוצגת בצד ממשק הלקוח)."
 #: includes/admin/class-wc-admin-attributes.php:308
 #: includes/admin/class-wc-admin-attributes.php:380
 msgid "Slug"
-msgstr "כתובת"
+msgstr "מזהה כתובת"
 
 #: includes/admin/class-wc-admin-attributes.php:252
 #: includes/admin/class-wc-admin-attributes.php:382
 msgid ""
 "Unique slug/reference for the attribute; must be shorter than 28 characters."
-msgstr "כתובת ייחודית / ייחוס לתכונה; חייבת להיות קצרה יותר מ 28 תווים."
+msgstr "מזהה כתובת ייחודי / ייחוס לתכונה; חייב להיות קצר יותר מ 28 תווים."
 
 #: includes/admin/class-wc-admin-attributes.php:257
 #: includes/admin/class-wc-admin-attributes.php:309
@@ -865,7 +866,7 @@ msgstr "צור מפתח API"
 
 #: includes/admin/class-wc-admin-profile.php:213
 msgid "Consumer Key:"
-msgstr ""
+msgstr "מפתח לקוח:"
 
 #: includes/admin/class-wc-admin-profile.php:214
 msgid "Consumer Secret:"
@@ -879,41 +880,41 @@ msgstr "הרשאות:"
 msgid "Revoke API Key"
 msgstr ""
 
-#: includes/admin/class-wc-admin-reports.php:46
+#: includes/admin/class-wc-admin-reports.php:43
 #: includes/admin/reports/class-wc-report-customer-list.php:251
 msgid "Orders"
 msgstr "הזמנות"
 
-#: includes/admin/class-wc-admin-reports.php:49
+#: includes/admin/class-wc-admin-reports.php:46
 msgid "Sales by date"
 msgstr "מכירות לפי תאריך"
 
-#: includes/admin/class-wc-admin-reports.php:55
+#: includes/admin/class-wc-admin-reports.php:52
 msgid "Sales by product"
 msgstr "מכירות לפי מוצר"
 
-#: includes/admin/class-wc-admin-reports.php:61
+#: includes/admin/class-wc-admin-reports.php:58
 msgid "Sales by category"
 msgstr "מכירות לפי קטגוריה"
 
-#: includes/admin/class-wc-admin-reports.php:67
+#: includes/admin/class-wc-admin-reports.php:64
 msgid "Coupons by date"
 msgstr "קופונים לפי תאריך"
 
-#: includes/admin/class-wc-admin-reports.php:75
+#: includes/admin/class-wc-admin-reports.php:72
 #: includes/admin/reports/class-wc-report-customer-list.php:30
 msgid "Customers"
 msgstr "לקוחות"
 
-#: includes/admin/class-wc-admin-reports.php:78
+#: includes/admin/class-wc-admin-reports.php:75
 msgid "Customers vs. Guests"
 msgstr "לקוחות לעומת אורחים"
 
-#: includes/admin/class-wc-admin-reports.php:84
+#: includes/admin/class-wc-admin-reports.php:81
 msgid "Customer List"
 msgstr "רשימת לקוחות"
 
-#: includes/admin/class-wc-admin-reports.php:92
+#: includes/admin/class-wc-admin-reports.php:89
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 #: includes/admin/reports/class-wc-report-stock.php:25
@@ -921,11 +922,11 @@ msgstr "רשימת לקוחות"
 msgid "Stock"
 msgstr "מלאי"
 
-#: includes/admin/class-wc-admin-reports.php:95
+#: includes/admin/class-wc-admin-reports.php:92
 msgid "Low in stock"
 msgstr "מלאי נמוך"
 
-#: includes/admin/class-wc-admin-reports.php:101
+#: includes/admin/class-wc-admin-reports.php:98
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
 #: includes/admin/reports/class-wc-report-stock.php:98
@@ -934,20 +935,20 @@ msgstr "מלאי נמוך"
 msgid "Out of stock"
 msgstr "המלאי אזל"
 
-#: includes/admin/class-wc-admin-reports.php:107
+#: includes/admin/class-wc-admin-reports.php:104
 msgid "Most Stocked"
 msgstr ""
 
-#: includes/admin/class-wc-admin-reports.php:118
+#: includes/admin/class-wc-admin-reports.php:115
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
 msgstr "מיסים"
 
-#: includes/admin/class-wc-admin-reports.php:121
+#: includes/admin/class-wc-admin-reports.php:118
 msgid "Taxes by code"
 msgstr ""
 
-#: includes/admin/class-wc-admin-reports.php:127
+#: includes/admin/class-wc-admin-reports.php:124
 msgid "Taxes by date"
 msgstr ""
 
@@ -1133,7 +1134,7 @@ msgstr "סוג התצוגה"
 #: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
-#: includes/admin/views/html-admin-page-addons.php:15
+#: includes/admin/views/html-admin-page-addons.php:16
 msgid "Products"
 msgstr "מוצרים"
 
@@ -1327,7 +1328,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:283
 msgid "Google Analytics"
-msgstr ""
+msgstr "Google Analytics"
 
 #: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
@@ -1380,7 +1381,7 @@ msgstr "מתחת למכסה המנוע"
 
 #: includes/admin/class-wc-admin-welcome.php:314
 msgid "PayPal PDT support"
-msgstr ""
+msgstr "תמיכה ב- PayPal PDT"
 
 #: includes/admin/class-wc-admin-welcome.php:315
 msgid ""
@@ -1906,7 +1907,7 @@ msgstr "הערות הזמנה"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:99
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:127
 msgid "Total"
 msgstr "סה&quot;כ"
@@ -1952,8 +1953,8 @@ msgstr[1] ""
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:210
 msgid "%d note"
 msgid_plural "%d notes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "הערה %d"
+msgstr[1] "%d הערות"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:232
 msgid "Billing:"
@@ -2017,7 +2018,7 @@ msgstr[1] "מצב הזמנה השתנה."
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:42
 msgid "Insert into %s"
-msgstr ""
+msgstr "להכניס לתוך %s"
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:43
 msgid "Uploaded to this %s"
@@ -2481,41 +2482,41 @@ msgstr "הוסף פריט(ים)"
 msgid "Add fee"
 msgstr "הוסף עמלה"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:44
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:48
 msgid "added %s ago"
 msgstr "נוסף לפני %s"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 msgid "by %s"
 msgstr "על ידי %s"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:50
 msgid "Delete note"
 msgstr "למחוק את ההערה"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:56
 msgid "There are no notes for this order yet."
 msgstr "אין הערות להזמנה עדיין."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid "Add note"
 msgstr "הוסף הערה"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid ""
 "Add a note for your reference, or add a customer note (the user will be "
 "notified)."
 msgstr "הוספת הערה לעיונך, או להוסיף הערת ללקוח (הלקוח יקבל הודעה לאימייל)."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:68
 msgid "Customer note"
 msgstr "הערת לקוח"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:69
 msgid "Private note"
 msgstr "הערה פרטית"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:67
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:71
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:564
 msgid "Add"
 msgstr "הוספה"
@@ -2526,7 +2527,7 @@ msgstr "הוספה"
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
-#: includes/admin/views/html-admin-page-addons.php:13
+#: includes/admin/views/html-admin-page-addons.php:14
 msgid "Shipping"
 msgstr "משלוח"
 
@@ -2762,7 +2763,7 @@ msgstr "ללא"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:734
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:126
 #: includes/admin/settings/class-wc-settings-tax.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:243
 #: includes/admin/views/html-bulk-edit-product.php:83
@@ -3118,14 +3119,14 @@ msgstr "גישה פגה תוקף"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:12
 msgid "Fee"
-msgstr ""
+msgstr "חיוב"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:16
 msgid "Fee Name"
 msgstr "שם עמלה"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:31
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:136
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:140
 msgid "Tax class"
 msgstr "סוג מס"
 
@@ -3141,19 +3142,19 @@ msgstr "מזהה וריאציה:"
 msgid "Product SKU:"
 msgstr "מק&quot;ט מוצר:"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:74
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:75
 msgid "Add&nbsp;meta"
 msgstr "הוסף מטא"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Subtotal"
 msgstr "סיכום ביניים"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Before pre-tax discounts."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 msgid "After pre-tax discounts."
 msgstr ""
 
@@ -3277,7 +3278,7 @@ msgstr "פקיעת הורדה:"
 #: includes/admin/views/html-admin-page-status-tools.php:26
 #: includes/admin/views/html-admin-page-status-tools.php:37
 msgid "Enabled"
-msgstr "מאופשר"
+msgstr "פעיל"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:212
 msgid ""
@@ -3290,11 +3291,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "הפעל אפשרות זו אם מוצר לא בעל אפשרות משלוח או שאין עלות משלוח"
 
-#: includes/admin/reports/class-wc-admin-report.php:391
+#: includes/admin/reports/class-wc-admin-report.php:384
 msgid "Sold %s worth in the last %d days"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:393
+#: includes/admin/reports/class-wc-admin-report.php:386
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] ""
@@ -3424,7 +3425,7 @@ msgstr "הצג הזמנות"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:222
 msgid "Link previous orders"
-msgstr ""
+msgstr "קישור להזמנה קודמת"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:247
 msgid "Name (Last, First)"
@@ -3502,7 +3503,7 @@ msgstr "%s מכירות ב %s"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:162
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "בחור קטגוריות&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:176
 msgid "None"
@@ -3590,7 +3591,7 @@ msgstr "חיפוש מוצר"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:206
 msgid "Top Sellers"
-msgstr ""
+msgstr "הכי נמכרים"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:241
 #: includes/admin/reports/class-wc-report-sales-by-product.php:281
@@ -3599,7 +3600,7 @@ msgstr "לא נמצאו מוצרים בטווח"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:246
 msgid "Top Earners"
-msgstr ""
+msgstr "הכי ריוחיים"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:337
 msgid "&larr; Choose a product to view stats"
@@ -3623,7 +3624,7 @@ msgstr "יחידות במלאי"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:117
 msgid "Rate"
-msgstr ""
+msgstr "שיעור"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:119
 msgid "Tax Amount"
@@ -3645,7 +3646,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:121
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:117
 msgid "Total Tax"
-msgstr ""
+msgstr "סך הכל מס"
 
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:121
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:117
@@ -3901,7 +3902,7 @@ msgstr "הזמנה התקבלה"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:168
 msgid "Add Payment Method"
-msgstr ""
+msgstr "הוספת אמצעי תשלום"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
 msgid "Endpoint for the Checkout &rarr; Add Payment Method page"
@@ -3965,7 +3966,7 @@ msgid ""
 "target=\"_blank\">Click here to preview your email template</a>. For more "
 "advanced control copy <code>woocommerce/templates/emails/</code> to "
 "<code>yourtheme/woocommerce/emails/</code>."
-msgstr "סעיף זה מאפשר לך להתאים באופן אישי את מראה האימיילים שנשלחים מהחנות. <a href=\"%s\" target=\"_blank\">לחץ כאן כדי לצפות בתצוגה מקדימה בתבנית הדוא\"ל שלך</a>. לשליטה מתקדמת יותר, העתק את התיקייה <code>woocommerce/templates/emails/</code> לתיקיית העיצוב שלך <code>yourtheme/woocommerce/emails/</code>."
+msgstr "סעיף זה מאפשר לך להתאים באופן אישי את מראה האימיילים שנשלחים מהחנות. <a href=\"%s\" target=\"_blank\">לחץ כאן כדי לצפות בתצוגה מקדימה בתבנית האימייל שלך</a>. לשליטה מתקדמת יותר, העתק את התיקייה <code>woocommerce/templates/emails/</code> לתיקיית העיצוב שלך <code>yourtheme/woocommerce/emails/</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:96
 msgid "Header Image"
@@ -4931,27 +4932,33 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-addons.php:6
 msgid "Browse themes"
-msgstr ""
+msgstr "חיפוש ערכות עיצוב"
 
-#: includes/admin/views/html-admin-page-addons.php:11
+#: includes/admin/views/html-admin-page-addons.php:12
 msgid "Popular"
 msgstr "פופולרי"
 
-#: includes/admin/views/html-admin-page-addons.php:12
+#: includes/admin/views/html-admin-page-addons.php:13
 msgid "Gateways"
-msgstr ""
+msgstr "אפשרויות סליקה"
 
-#: includes/admin/views/html-admin-page-addons.php:14
+#: includes/admin/views/html-admin-page-addons.php:15
 msgid "Import/export"
 msgstr "יצוא/יבוא"
 
-#: includes/admin/views/html-admin-page-addons.php:16
+#: includes/admin/views/html-admin-page-addons.php:17
 msgid "Marketing"
 msgstr "שיווק"
 
-#: includes/admin/views/html-admin-page-addons.php:17
+#: includes/admin/views/html-admin-page-addons.php:18
 msgid "Free"
 msgstr "חינם"
+
+#: includes/admin/views/html-admin-page-addons.php:33
+msgid ""
+"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
+" href=\"%s\">WooCommerce Extensions Catalog</a>"
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
@@ -5075,18 +5082,18 @@ msgstr "השרת שלך fsockopen ולהתכרבל מופעל."
 
 #: includes/admin/views/html-admin-page-status-report.php:123
 msgid "Your server has fsockopen enabled, cURL is disabled."
-msgstr "השרת שלך fsockopen מאופשר, סלסול הוא מושבת."
+msgstr "בשרת שלך fsockopen זמין, cURL לא זמין."
 
 #: includes/admin/views/html-admin-page-status-report.php:125
 msgid "Your server has cURL enabled, fsockopen is disabled."
-msgstr "השרת שלך להתכרבל מאופשר, fsockopen אינו זמין."
+msgstr "בשרת שלך cURL זמין, fsockopen אינו זמין."
 
 #: includes/admin/views/html-admin-page-status-report.php:129
 msgid ""
 "Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
 "scripts which communicate with other servers will not work. Contact your "
 "hosting provider."
-msgstr "השרת שלך לא צריך fsockopen או להתכרבל מאופשר - IPN PayPal ותסריטים אחרים אשר מתקשר עם שרתים אחרים לא יעבוד. צור קשר עם ספק האירוח שלך."
+msgstr "בשרת שלך fsockopen ו- cURL לא זמינים - PayPal IPN וסקריפטים אחרים אשר מתקשרים עם שרתים אחרים לא יעבדו. צור קשר עם ספק האירוח שלך."
 
 #: includes/admin/views/html-admin-page-status-report.php:134
 msgid "SOAP Client"
@@ -5094,7 +5101,7 @@ msgstr "SOAP לקוח"
 
 #: includes/admin/views/html-admin-page-status-report.php:136
 msgid "Your server has the SOAP Client class enabled."
-msgstr "השרת שלך יש המעמד של הלקוח מאופשר SOAP."
+msgstr "בשרת שלך SOAP Client class זמין."
 
 #: includes/admin/views/html-admin-page-status-report.php:139
 msgid ""
@@ -5122,7 +5129,7 @@ msgstr "wp_remote_post() failed. PayPal IPN may not work with your server."
 
 #: includes/admin/views/html-admin-page-status-report.php:184
 msgid "Locale"
-msgstr ""
+msgstr "מקומי"
 
 #: includes/admin/views/html-admin-page-status-report.php:200
 msgid "Plugins"
@@ -5215,7 +5222,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:436
 msgid "Author URL"
-msgstr ""
+msgstr "URL מחבר"
 
 #: includes/admin/views/html-admin-page-status-report.php:445
 msgid "Templates"
@@ -5404,22 +5411,6 @@ msgstr "מחיר מבצע"
 msgid "Custom:"
 msgstr "מותרם אישית:"
 
-#: includes/admin/wc-admin-functions.php:193
+#: includes/admin/wc-admin-functions.php:192
 msgid "Could not compile woocommerce.less:"
 msgstr "לא יכל לקמפל woocommerce.less:"
-
-#. Plugin URI of the plugin/theme
-msgid "http://www.woothemes.com/woocommerce/"
-msgstr ""
-
-#. Description of the plugin/theme
-msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr ""
-
-#. Author of the plugin/theme
-msgid "WooThemes"
-msgstr ""
-
-#. Author URI of the plugin/theme
-msgid "http://woothemes.com"
-msgstr ""

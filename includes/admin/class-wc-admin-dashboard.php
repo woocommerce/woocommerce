@@ -57,7 +57,7 @@ class WC_Admin_Dashboard {
 			WHERE 	posts.post_type 	= 'shop_order'
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ( 'completed', 'processing', 'on-hold' )
+			AND		term.slug			IN ( '" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' )
 			AND 	postmeta.meta_key   = '_order_total'
 			AND 	posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "'
 			AND 	posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "'
@@ -75,7 +75,7 @@ class WC_Admin_Dashboard {
 			WHERE 	posts.post_type 	= 'shop_order'
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ( 'completed', 'processing', 'on-hold' )
+			AND		term.slug			IN ( '" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' )
 			AND 	order_item_meta.meta_key = '_qty'
 			AND 	order_item_meta_2.meta_key = '_product_id'
 			AND 	posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "'

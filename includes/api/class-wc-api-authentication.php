@@ -56,8 +56,10 @@ class WC_API_Authentication {
 	}
 
 	/**
-	 * SSL-encrypted requests are not subject to sniffing or man-in-the-middle attacks, so the request can be authenticated
-	 * by simply looking up the user associated with the given consumer key and confirming the consumer secret provided is valid
+	 * SSL-encrypted requests are not subject to sniffing or man-in-the-middle
+	 * attacks, so the request can be authenticated by simply looking up the user
+	 * associated with the given consumer key and confirming the consumer secret
+	 * provided is valid
 	 *
 	 * @since 2.1
 	 * @return WP_User
@@ -65,19 +67,45 @@ class WC_API_Authentication {
 	 */
 	private function perform_ssl_authentication() {
 
-		if ( empty( $_SERVER['PHP_AUTH_USER'] ) )
+		$params = WC()->api->server->params['GET'];
+
+		// get consumer key
+		if ( ! empty( $_SERVER['PHP_AUTH_USER'] ) ) {
+
+			// should be in HTTP Auth header by default
+			$consumer_key = $_SERVER['PHP_AUTH_USER'];
+
+		} elseif ( ! empty( $params['consumer_key'] ) ) {
+
+			// allow a query string parameter as a fallback
+			$consumer_key = $params['consumer_key'];
+
+		} else {
+
 			throw new Exception( __( 'Consumer Key is missing', 'woocommerce' ), 404 );
+		}
 
-		if ( empty( $_SERVER['PHP_AUTH_PW'] ) )
+		// get consumer secret
+		if ( ! empty( $_SERVER['PHP_AUTH_PW'] ) ) {
+
+			// should be in HTTP Auth header by default
+			$consumer_secret = $_SERVER['PHP_AUTH_PW'];
+
+		} elseif ( ! empty( $params['consumer_secret'] ) ) {
+
+			// allow a query string parameter as a fallback
+			$consumer_secret = $params['consumer_secret'];
+
+		} else {
+
 			throw new Exception( __( 'Consumer Secret is missing', 'woocommerce' ), 404 );
-
-		$consumer_key    = $_SERVER['PHP_AUTH_USER'];
-		$consumer_secret = $_SERVER['PHP_AUTH_PW'];
+		}
 
 		$user = $this->get_user_by_consumer_key( $consumer_key );
 
-		if ( ! $this->is_consumer_secret_valid( $user, $consumer_secret ) )
-			throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce'), 401 );
+		if ( ! $this->is_consumer_secret_valid( $user, $consumer_secret ) ) {
+			throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce' ), 401 );
+		}
 
 		return $user;
 	}
@@ -118,11 +146,6 @@ class WC_API_Authentication {
 		// perform OAuth validation
 		$this->check_oauth_signature( $user, $params );
 		$this->check_oauth_timestamp_and_nonce( $user, $params['oauth_timestamp'], $params['oauth_nonce'] );
-
-		// remove oauth params before further parsing
-		foreach( $param_names as $param_name ) {
-			unset( WC()->api->server->params[ $param_name ] );
-		}
 
 		// authentication successful, return user
 		return $user;
@@ -194,11 +217,12 @@ class WC_API_Authentication {
 		}
 
 		// normalize parameter key/values
-		array_walk( $params, array( $this, 'normalize_parameters' ) );
+		$params = $this->normalize_parameters( $params );
 
 		// sort parameters
-		if ( ! uksort( $params, 'strcmp' ) )
+		if ( ! uksort( $params, 'strcmp' ) ) {
 			throw new Exception( __( 'Invalid Signature - failed to sort parameters', 'woocommerce' ), 401 );
+		}
 
 		// form query string
 		$query_params = array();
@@ -210,30 +234,53 @@ class WC_API_Authentication {
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
-		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' )
+		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' ) {
 			throw new Exception( __( 'Invalid Signature - signature method is invalid', 'woocommerce' ), 401 );
+		}
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 
 		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $user->woocommerce_api_consumer_secret, true ) );
 
-		if ( $signature !== $consumer_signature )
+		if ( $signature !== $consumer_signature ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
+		}
 	}
 
 	/**
-	 * Normalize each parameter by assuming each parameter may have already been encoded, so attempt to decode, and then
-	 * re-encode according to RFC 3986
+	 * Normalize each parameter by assuming each parameter may have already been
+	 * encoded, so attempt to decode, and then re-encode according to RFC 3986
+	 *
+	 * Note both the key and value is normalized so a filter param like:
+	 *
+	 * 'filter[period]' => 'week'
+	 *
+	 * is encoded to:
+	 *
+	 * 'filter%5Bperiod%5D' => 'week'
+	 *
+	 * This conforms to the OAuth 1.0a spec which indicates the entire query string
+	 * should be URL encoded
 	 *
 	 * @since 2.1
 	 * @see rawurlencode()
-	 * @param string $key
-	 * @param string $value
+	 * @param array $parameters un-normalized pararmeters
+	 * @return array normalized parameters
 	 */
-	private function normalize_parameters( &$key, &$value ) {
+	private function normalize_parameters( $parameters ) {
 
-		$key = rawurlencode( rawurldecode( $key ) );
-		$value = rawurlencode( rawurldecode( $value ) );
+		$normalized_parameters = array();
+
+		foreach ( $parameters as $key => $value ) {
+
+			// percent symbols (%) must be double-encoded
+			$key   = str_replace( '%', '%25', rawurlencode( rawurldecode( $key ) ) );
+			$value = str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
+
+			$normalized_parameters[ $key ] = $value;
+		}
+
+		return $normalized_parameters;
 	}
 
 	/**

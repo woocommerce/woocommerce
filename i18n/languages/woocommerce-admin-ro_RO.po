@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-03-03 14:47:31+00:00\n"
-"PO-Revision-Date: 2014-03-04 08:42+0000\n"
+"POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
+"PO-Revision-Date: 2014-03-15 08:29+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.com/projects/p/woocommerce/language/ro_RO/)\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:65
 #: includes/admin/class-wc-admin-menus.php:47
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 #: includes/admin/wc-admin-functions.php:19
 msgid "WooCommerce"
 msgstr "WooCommerce"
@@ -273,7 +273,7 @@ msgid ""
 "products -> product data -> attributes -> values, <strong>Text</strong> "
 "allows manual entry whereas <strong>select</strong> allows pre-configured "
 "terms in a drop-down list."
-msgstr ""
+msgstr "Determină modul în care selectați atributele de produse. Sub panoul de administrare -> produse -> de date produs -> atribute -> valori, <strong>Modul Text <strong> permite introducerea manuală în timp ce <strong> Modul select </ strong> permite termeni de pre-configurate într-o listă verticală."
 
 #: includes/admin/class-wc-admin-attributes.php:270
 #: includes/admin/class-wc-admin-attributes.php:396
@@ -881,41 +881,41 @@ msgstr "Permisiuni:"
 msgid "Revoke API Key"
 msgstr "Revocă cheie API"
 
-#: includes/admin/class-wc-admin-reports.php:46
+#: includes/admin/class-wc-admin-reports.php:43
 #: includes/admin/reports/class-wc-report-customer-list.php:251
 msgid "Orders"
 msgstr "Comenzi"
 
-#: includes/admin/class-wc-admin-reports.php:49
+#: includes/admin/class-wc-admin-reports.php:46
 msgid "Sales by date"
 msgstr "Vânzări per dată"
 
-#: includes/admin/class-wc-admin-reports.php:55
+#: includes/admin/class-wc-admin-reports.php:52
 msgid "Sales by product"
 msgstr "Vânzări per produs"
 
-#: includes/admin/class-wc-admin-reports.php:61
+#: includes/admin/class-wc-admin-reports.php:58
 msgid "Sales by category"
 msgstr "Vânzări per categorie"
 
-#: includes/admin/class-wc-admin-reports.php:67
+#: includes/admin/class-wc-admin-reports.php:64
 msgid "Coupons by date"
 msgstr "Coduri promotionale per data"
 
-#: includes/admin/class-wc-admin-reports.php:75
+#: includes/admin/class-wc-admin-reports.php:72
 #: includes/admin/reports/class-wc-report-customer-list.php:30
 msgid "Customers"
 msgstr "Clienți"
 
-#: includes/admin/class-wc-admin-reports.php:78
+#: includes/admin/class-wc-admin-reports.php:75
 msgid "Customers vs. Guests"
 msgstr "Clienți vs Vizitatori"
 
-#: includes/admin/class-wc-admin-reports.php:84
+#: includes/admin/class-wc-admin-reports.php:81
 msgid "Customer List"
 msgstr "Lista de clienți"
 
-#: includes/admin/class-wc-admin-reports.php:92
+#: includes/admin/class-wc-admin-reports.php:89
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:252
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 #: includes/admin/reports/class-wc-report-stock.php:25
@@ -923,11 +923,11 @@ msgstr "Lista de clienți"
 msgid "Stock"
 msgstr "Stoc"
 
-#: includes/admin/class-wc-admin-reports.php:95
+#: includes/admin/class-wc-admin-reports.php:92
 msgid "Low in stock"
 msgstr "Stoc Redus"
 
-#: includes/admin/class-wc-admin-reports.php:101
+#: includes/admin/class-wc-admin-reports.php:98
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:303
 #: includes/admin/reports/class-wc-report-stock.php:98
@@ -936,20 +936,20 @@ msgstr "Stoc Redus"
 msgid "Out of stock"
 msgstr "Stoc epuizat"
 
-#: includes/admin/class-wc-admin-reports.php:107
+#: includes/admin/class-wc-admin-reports.php:104
 msgid "Most Stocked"
 msgstr "Produs cu stoc ridicat"
 
-#: includes/admin/class-wc-admin-reports.php:118
+#: includes/admin/class-wc-admin-reports.php:115
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
 msgstr "Taxe"
 
-#: includes/admin/class-wc-admin-reports.php:121
+#: includes/admin/class-wc-admin-reports.php:118
 msgid "Taxes by code"
 msgstr "Taxe după cod poștal"
 
-#: includes/admin/class-wc-admin-reports.php:127
+#: includes/admin/class-wc-admin-reports.php:124
 msgid "Taxes by date"
 msgstr "Taxe per dată"
 
@@ -1053,7 +1053,7 @@ msgstr "Șterge tranzienți expirați"
 
 #: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from WordPress."
-msgstr ""
+msgstr "Acest instrument va șterge toate tranzitoriile expirate din baza de date a WordPress."
 
 #: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
@@ -1095,7 +1095,7 @@ msgstr "Șterge toate sesiunile"
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
-msgstr ""
+msgstr "<strong class=\"red\">Atenție:</ strong> Acest instrument va șterge toate sesiunile clientilor din baza de date, inclusiv cele corespunzatoare cosurilor de cumparaturi active live in acest moment."
 
 #: includes/admin/class-wc-admin-status.php:198
 #: includes/admin/views/html-notice-install.php:6
@@ -1110,7 +1110,7 @@ msgstr "Instalați paginile"
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
-msgstr ""
+msgstr "<strong class=\"red\">Notă:</ strong> Acest instrument va instala toate paginile WooCommerce lipsă. Pagini deja instalate și definite nu vor fi înlocuite."
 
 #: includes/admin/class-wc-admin-status.php:203
 msgid "Delete all WooCommerce tax rates"
@@ -1124,7 +1124,7 @@ msgstr ""
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
-msgstr ""
+msgstr "<strong class=\"red\">Notă:</strong> Această opțiune va șterge toate cotele de impozitare, folosiți cu prudență."
 
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
@@ -1135,7 +1135,7 @@ msgstr "Mod de afisare"
 #: includes/admin/class-wc-admin-taxonomies.php:178
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:97
 #: includes/admin/settings/class-wc-settings-products.php:25
-#: includes/admin/views/html-admin-page-addons.php:15
+#: includes/admin/views/html-admin-page-addons.php:16
 msgid "Products"
 msgstr "Produse"
 
@@ -1266,11 +1266,11 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"
-msgstr ""
+msgstr "UI și raportare îmbunătățite"
 
 #: includes/admin/class-wc-admin-welcome.php:260
 msgid "WordPress 3.8 admin UI compatibility"
-msgstr ""
+msgstr "Compatibilitate cu admin UI-ul din WordPress 3.8"
 
 #: includes/admin/class-wc-admin-welcome.php:261
 msgid ""
@@ -1333,7 +1333,7 @@ msgstr "Google Analytics"
 
 #: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
-msgstr ""
+msgstr "Adăuga urmărire Google Analytics eCommerce pentru a magazinul dvs. WooCommerce."
 
 #: includes/admin/class-wc-admin-welcome.php:285
 #: includes/admin/class-wc-admin-welcome.php:290
@@ -1374,7 +1374,7 @@ msgstr "ShareYourCart"
 #: includes/admin/class-wc-admin-welcome.php:304
 msgid ""
 "Let users share their carts for a discount using the ShareYourCart service."
-msgstr ""
+msgstr "Permite utilizatorilor să distribuie cosurile de cumparaturi, pentru o reducere prin utilizarea serviciului ShareYourCart."
 
 #: includes/admin/class-wc-admin-welcome.php:310
 msgid "Under the Hood"
@@ -1392,7 +1392,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:319
 msgid "Stylesheet separation"
-msgstr ""
+msgstr "Separarea Stilurilor  / Stylesheet"
 
 #: includes/admin/class-wc-admin-welcome.php:320
 msgid ""
@@ -1452,13 +1452,13 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:354
 msgid "Past order linking"
-msgstr ""
+msgstr "Legatura catre comenzile anterioare"
 
 #: includes/admin/class-wc-admin-welcome.php:355
 msgid ""
 "Admins now have the ability to link past orders to a customer (before they "
 "registered) by email address."
-msgstr ""
+msgstr "Adminii au acum capacitatea de a lega comenzile anterioare ale unui client  (înainte ca acestea înregistrate) de adresa de e-mail a acestuia"
 
 #: includes/admin/class-wc-admin-welcome.php:359
 msgid "Review improvements"
@@ -1489,7 +1489,7 @@ msgid ""
 "to our translation team. Want to see your name? <a "
 "href=\"https://www.transifex.com/projects/p/woocommerce/\">Translate "
 "WooCommerce</a>."
-msgstr ""
+msgstr "WooCommerce a fost cu amabilitate tradus în mai multe limbi datorită echipei noastre de traducere. Vrei sa iti vezi numele tau? <a href=\"https://www.transifex.com/projects/p/woocommerce/\">Traducere WooCommerce</a>."
 
 #: includes/admin/class-wc-admin-welcome.php:423
 msgid "View %s"
@@ -1908,7 +1908,7 @@ msgstr "Mențiuni Comandă"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:99
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:43
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:62
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:127
 msgid "Total"
 msgstr "Total"
@@ -2387,7 +2387,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:230
 msgid "Payment Method:"
-msgstr ""
+msgstr "Modalitate de Plata:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:232
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:33
@@ -2487,41 +2487,41 @@ msgstr ""
 msgid "Add fee"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:44
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:48
 msgid "added %s ago"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:45
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:49
 msgid "by %s"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:46
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:50
 msgid "Delete note"
 msgstr "Șterge mențiune"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:52
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:56
 msgid "There are no notes for this order yet."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid "Add note"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:58
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:62
 msgid ""
 "Add a note for your reference, or add a customer note (the user will be "
 "notified)."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:64
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:68
 msgid "Customer note"
 msgstr "Notiță Client"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:65
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:69
 msgid "Private note"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:67
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:71
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:564
 msgid "Add"
 msgstr ""
@@ -2532,7 +2532,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
-#: includes/admin/views/html-admin-page-addons.php:13
+#: includes/admin/views/html-admin-page-addons.php:14
 msgid "Shipping"
 msgstr "Livrare"
 
@@ -2768,7 +2768,7 @@ msgstr "Nici unul"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:734
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:122
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:126
 #: includes/admin/settings/class-wc-settings-tax.php:122
 #: includes/admin/settings/class-wc-settings-tax.php:243
 #: includes/admin/views/html-bulk-edit-product.php:83
@@ -3132,7 +3132,7 @@ msgid "Fee Name"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:31
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:136
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:140
 msgid "Tax class"
 msgstr ""
 
@@ -3148,19 +3148,19 @@ msgstr ""
 msgid "Product SKU:"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:74
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:75
 msgid "Add&nbsp;meta"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Subtotal"
 msgstr "Subtotal"
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:169
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:173
 msgid "Before pre-tax discounts."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/views/html-order-item.php:171
+#: includes/admin/post-types/meta-boxes/views/html-order-item.php:175
 msgid "After pre-tax discounts."
 msgstr ""
 
@@ -3297,11 +3297,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:391
+#: includes/admin/reports/class-wc-admin-report.php:384
 msgid "Sold %s worth in the last %d days"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:393
+#: includes/admin/reports/class-wc-admin-report.php:386
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] ""
@@ -3511,7 +3511,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:162
 msgid "Select categories&hellip;"
-msgstr ""
+msgstr "Selectați categoriile&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:176
 msgid "None"
@@ -3710,7 +3710,7 @@ msgstr ""
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "access account related functionality."
-msgstr ""
+msgstr "Aceste pagini trebuie să fie stabilite astfel încât WooCommerce să știe unde va trimite utilizatorii pentru a accesa funcționalitati legate de cont."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:44
 msgid "My Account Page"
@@ -3758,7 +3758,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:86
 msgid "Lost Password"
-msgstr ""
+msgstr "Ai uitat parola"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:87
 msgid "Endpoint for the My Account &rarr; Lost Password page"
@@ -3772,15 +3772,15 @@ msgstr "Ieși din Cont"
 msgid ""
 "Endpoint for the triggering logout. You can add this to your menus via a "
 "custom link: yoursite.com/?customer-logout=true"
-msgstr ""
+msgstr "EndPoint pentru declanșarea \"Deconectare\" . Puteți adăuga acest EndPoint la meniuri prin intermediul unui link personalizat de genul: yoursite.com/?customer-logout=true"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:105
 msgid "Registration Options"
-msgstr ""
+msgstr "Opțiuni înregistrare"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:108
 msgid "Enable Registration"
-msgstr ""
+msgstr "Activați Înregistrare"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:109
 msgid "Enable registration on the \"Checkout\" page"
@@ -3792,11 +3792,11 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:127
 msgid "Display returning customer login reminder on the \"Checkout\" page"
-msgstr ""
+msgstr "Afișarea optiunea \"Pastreaza-ma autentificat\" pe pagina \"Checkout\""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:136
 msgid "Account Creation"
-msgstr ""
+msgstr "Crearea Contului"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:137
 msgid "Automatically generate username from customer email"
@@ -3869,7 +3869,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
 msgid "Cart Page"
-msgstr ""
+msgstr "Pagina Cos"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:123
 msgid "Checkout Page"
@@ -3877,7 +3877,7 @@ msgstr "Plasează Comanda"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:134
 msgid "Terms and Conditions"
-msgstr ""
+msgstr "Termeni și condiții"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:135
 msgid ""
@@ -3914,7 +3914,7 @@ msgstr "Adaugă o Modalitate de Plată"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
 msgid "Endpoint for the Checkout &rarr; Add Payment Method page"
-msgstr ""
+msgstr "Endpoint pentru Checkout &rarr; Adauga pagina Metoda de plată"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:178
 msgid "Payment Gateways"
@@ -3958,15 +3958,15 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-emails.php:69
 msgid "\"From\" Name"
-msgstr ""
+msgstr "\"De la\" nume"
 
 #: includes/admin/settings/class-wc-settings-emails.php:79
 msgid "\"From\" Email Address"
-msgstr ""
+msgstr "\"De la\" adresa de email"
 
 #: includes/admin/settings/class-wc-settings-emails.php:93
 msgid "Email Template"
-msgstr ""
+msgstr "Sablon Email"
 
 #: includes/admin/settings/class-wc-settings-emails.php:93
 msgid ""
@@ -4089,11 +4089,11 @@ msgstr "Acesta magazin demo pentru testare &mdash; nici o comandă nu va fi onor
 
 #: includes/admin/settings/class-wc-settings-general.php:103
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #: includes/admin/settings/class-wc-settings-general.php:104
 msgid "Enable the REST API"
-msgstr ""
+msgstr "Activeaza API-ul REST"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "Currency Options"
@@ -4101,7 +4101,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "The following options affect how prices are displayed on the frontend."
-msgstr ""
+msgstr "Următoarele opțiuni afectează modul în care sunt afișate prețurile pe front-end."
 
 #: includes/admin/settings/class-wc-settings-general.php:115
 msgid "Currency"
@@ -4115,19 +4115,19 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:127
 msgid "Currency Position"
-msgstr ""
+msgstr "Poziția Monedei"
 
 #: includes/admin/settings/class-wc-settings-general.php:128
 msgid "This controls the position of the currency symbol."
-msgstr ""
+msgstr "Aceasta controlează poziția simbolului monedei."
 
 #: includes/admin/settings/class-wc-settings-general.php:135
 msgid "Left"
-msgstr ""
+msgstr "Stanga"
 
 #: includes/admin/settings/class-wc-settings-general.php:136
 msgid "Right"
-msgstr ""
+msgstr "Dreapta"
 
 #: includes/admin/settings/class-wc-settings-general.php:137
 msgid "Left with space"
@@ -4139,27 +4139,27 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:144
 msgid "Thousand Separator"
-msgstr ""
+msgstr "Separator Mii"
 
 #: includes/admin/settings/class-wc-settings-general.php:145
 msgid "This sets the thousand separator of displayed prices."
-msgstr ""
+msgstr "Aceasta stabilește separatorul de mii pentru prețurile afișate."
 
 #: includes/admin/settings/class-wc-settings-general.php:154
 msgid "Decimal Separator"
-msgstr ""
+msgstr "Separator Zecimale"
 
 #: includes/admin/settings/class-wc-settings-general.php:155
 msgid "This sets the decimal separator of displayed prices."
-msgstr ""
+msgstr "Aceasta stabilește separatorul de zecimale pentru prețurile afișate."
 
 #: includes/admin/settings/class-wc-settings-general.php:164
 msgid "Number of Decimals"
-msgstr ""
+msgstr "Număr de zecimale"
 
 #: includes/admin/settings/class-wc-settings-general.php:165
 msgid "This sets the number of decimal points shown in displayed prices."
-msgstr ""
+msgstr "Aceasta stabilește numărul de zecimale afișat la prețuri."
 
 #: includes/admin/settings/class-wc-settings-general.php:179
 msgid "Styles and Scripts"
@@ -4194,7 +4194,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Primary"
-msgstr ""
+msgstr "Primar"
 
 #: includes/admin/settings/class-wc-settings-general.php:237
 msgid "Call to action buttons/price slider/layered nav UI"
@@ -4202,15 +4202,15 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:238
 msgid "Secondary"
-msgstr ""
+msgstr "Secundar"
 
 #: includes/admin/settings/class-wc-settings-general.php:238
 msgid "Buttons and tabs"
-msgstr ""
+msgstr "Butoane și taburi"
 
 #: includes/admin/settings/class-wc-settings-general.php:239
 msgid "Highlight"
-msgstr ""
+msgstr "Evidențieaza"
 
 #: includes/admin/settings/class-wc-settings-general.php:239
 msgid "Price labels and Sale Flashes"
@@ -4238,7 +4238,7 @@ msgid ""
 "and <code>woocommerce.css</code> need to be writable. See <a "
 "href=\"http://codex.wordpress.org/Changing_File_Permissions\">the Codex</a> "
 "for more information."
-msgstr ""
+msgstr "Pentru a modifica culorile <code>woocommerce/assets/css/woocommerce-base.less</code> și <code>woocommerce.css</code> trebuie să fie inscriptibile. Vezi <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">Codex</a> pentru mai multe informații."
 
 #: includes/admin/settings/class-wc-settings-integrations.php:25
 msgid "Integration"
@@ -4350,66 +4350,66 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:214
 msgid "Shop Page Display"
-msgstr ""
+msgstr "Afișare Pagină Magazin"
 
 #: includes/admin/settings/class-wc-settings-products.php:215
 msgid "This controls what is shown on the product archive."
-msgstr ""
+msgstr "Aceasta controlează ceea ce este afișat pe paginile arhivelor de produs."
 
 #: includes/admin/settings/class-wc-settings-products.php:222
 #: includes/admin/settings/class-wc-settings-products.php:238
 msgid "Show products"
-msgstr ""
+msgstr "Afiseaza produse"
 
 #: includes/admin/settings/class-wc-settings-products.php:223
 #: includes/admin/settings/class-wc-settings-products.php:239
 msgid "Show subcategories"
-msgstr ""
+msgstr "Afișează subcategoriile"
 
 #: includes/admin/settings/class-wc-settings-products.php:224
 #: includes/admin/settings/class-wc-settings-products.php:240
 msgid "Show both"
-msgstr ""
+msgstr "Afiseaza ambele"
 
 #: includes/admin/settings/class-wc-settings-products.php:230
 msgid "Default Category Display"
-msgstr ""
+msgstr "Afișare implicita a Categorilor"
 
 #: includes/admin/settings/class-wc-settings-products.php:231
 msgid "This controls what is shown on category archives."
-msgstr ""
+msgstr "Aceasta controlează ceea ce este afișat pe pagina de arhiva categorilor."
 
 #: includes/admin/settings/class-wc-settings-products.php:246
 msgid "Default Product Sorting"
-msgstr ""
+msgstr "Sortarea Implicita a Produselor"
 
 #: includes/admin/settings/class-wc-settings-products.php:247
 msgid "This controls the default sort order of the catalog."
-msgstr ""
+msgstr "Aceasta controlează ordinea de sortare implicită a catalogului."
 
 #: includes/admin/settings/class-wc-settings-products.php:254
 msgid "Default sorting (custom ordering + name)"
-msgstr ""
+msgstr "Sortare implicită (ordonare personalizată + nume)"
 
 #: includes/admin/settings/class-wc-settings-products.php:255
 msgid "Popularity (sales)"
-msgstr ""
+msgstr "Popularitate (vânzări)"
 
 #: includes/admin/settings/class-wc-settings-products.php:256
 msgid "Average Rating"
-msgstr ""
+msgstr "Notarea Medie "
 
 #: includes/admin/settings/class-wc-settings-products.php:257
 msgid "Sort by most recent"
-msgstr ""
+msgstr "Sortează după cel mai recent"
 
 #: includes/admin/settings/class-wc-settings-products.php:258
 msgid "Sort by price (asc)"
-msgstr ""
+msgstr "Sortează după preț (crescător)"
 
 #: includes/admin/settings/class-wc-settings-products.php:259
 msgid "Sort by price (desc)"
-msgstr ""
+msgstr "Sortează după preț (descrescător)"
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
@@ -4417,11 +4417,11 @@ msgstr "Adaugă în Coș"
 
 #: includes/admin/settings/class-wc-settings-products.php:266
 msgid "Redirect to the cart page after successful addition"
-msgstr ""
+msgstr "Redirecționa către pagina de coș după adăugarea cu succes"
 
 #: includes/admin/settings/class-wc-settings-products.php:274
 msgid "Enable AJAX add to cart buttons on archives"
-msgstr ""
+msgstr "Activeaza adăugarea prin AJAX la butoane de adăugare în coș în arhive"
 
 #: includes/admin/settings/class-wc-settings-products.php:286
 msgid "Weight Unit"
@@ -4674,68 +4674,68 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:49
 msgid "%s Rates"
-msgstr ""
+msgstr "%s Taxe"
 
 #: includes/admin/settings/class-wc-settings-tax.php:71
 msgid "Enable Taxes"
-msgstr ""
+msgstr "Activeaza Taxele"
 
 #: includes/admin/settings/class-wc-settings-tax.php:72
 msgid "Enable taxes and tax calculations"
-msgstr ""
+msgstr "Activeaza taxele și calcule fiscale"
 
 #: includes/admin/settings/class-wc-settings-tax.php:79
 msgid "Prices Entered With Tax"
-msgstr ""
+msgstr "Prețurile sunt introduse cu Taxe"
 
 #: includes/admin/settings/class-wc-settings-tax.php:83
 msgid ""
 "This option is important as it will affect how you input prices. Changing it"
 " will not update existing products."
-msgstr ""
+msgstr "Această opțiune este importantă, deoarece va afecta modul în care sunt introduse prețurile. Schimbarea nu va actualiza produsele existente."
 
 #: includes/admin/settings/class-wc-settings-tax.php:85
 msgid "Yes, I will enter prices inclusive of tax"
-msgstr ""
+msgstr "Da, voi introduce prețurile brute, inclusiv taxele"
 
 #: includes/admin/settings/class-wc-settings-tax.php:86
 msgid "No, I will enter prices exclusive of tax"
-msgstr ""
+msgstr "Nu, voi introduce prețurile nete, fara taxe"
 
 #: includes/admin/settings/class-wc-settings-tax.php:91
 msgid "Calculate Tax Based On:"
-msgstr ""
+msgstr "Calculati taxele fiscale pe baza:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:93
 msgid "This option determines which address is used to calculate tax."
-msgstr ""
+msgstr "Această opțiune determină ce adresă este folosită pentru a calcula taxele fiscale."
 
 #: includes/admin/settings/class-wc-settings-tax.php:97
 msgid "Customer shipping address"
-msgstr ""
+msgstr "Adresa de livrare a clientului"
 
 #: includes/admin/settings/class-wc-settings-tax.php:98
 msgid "Customer billing address"
-msgstr ""
+msgstr "Adresa de facturare a clientului"
 
 #: includes/admin/settings/class-wc-settings-tax.php:99
 #: includes/admin/settings/class-wc-settings-tax.php:111
 msgid "Shop base address"
-msgstr ""
+msgstr "Bazat pe adresa magazinului"
 
 #: includes/admin/settings/class-wc-settings-tax.php:104
 msgid "Default Customer Address:"
-msgstr ""
+msgstr "Adresa Implicita a clientului:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:106
 msgid ""
 "This option determines the customers default address (before they input "
 "their own)."
-msgstr ""
+msgstr "Această opțiune determină adresa implicit clienților (înainte de intrarea lor)."
 
 #: includes/admin/settings/class-wc-settings-tax.php:110
 msgid "No address"
-msgstr ""
+msgstr "Nici o adresă"
 
 #: includes/admin/settings/class-wc-settings-tax.php:116
 msgid "Shipping Tax Class:"
@@ -4753,7 +4753,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:127
 msgid "Rounding"
-msgstr ""
+msgstr "Rotunjire"
 
 #: includes/admin/settings/class-wc-settings-tax.php:128
 msgid "Round tax at subtotal level, instead of rounding per line"
@@ -4771,21 +4771,21 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:140
 msgid "Reduced Rate%sZero Rate"
-msgstr ""
+msgstr "Cota redusă%sCota Zero"
 
 #: includes/admin/settings/class-wc-settings-tax.php:144
 msgid "Display prices in the shop:"
-msgstr ""
+msgstr "Afiseza preturile in magazin:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:149
 #: includes/admin/settings/class-wc-settings-tax.php:168
 msgid "Including tax"
-msgstr ""
+msgstr "Incluzand taxele"
 
 #: includes/admin/settings/class-wc-settings-tax.php:150
 #: includes/admin/settings/class-wc-settings-tax.php:169
 msgid "Excluding tax"
-msgstr ""
+msgstr "Fara taxe"
 
 #: includes/admin/settings/class-wc-settings-tax.php:155
 msgid "Price display suffix:"
@@ -4801,19 +4801,19 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:163
 msgid "Display prices during cart/checkout:"
-msgstr ""
+msgstr "Afișeaza prețurile în coș / verificare:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:175
 msgid "Display tax totals:"
-msgstr ""
+msgstr "Afișeaza totalurile fiscale:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:180
 msgid "As a single total"
-msgstr ""
+msgstr "Ca un singur total"
 
 #: includes/admin/settings/class-wc-settings-tax.php:181
 msgid "Itemized"
-msgstr ""
+msgstr "Detaliat"
 
 #: includes/admin/settings/class-wc-settings-tax.php:243
 msgid "Tax Rates for the \"%s\" Class"
@@ -4942,25 +4942,31 @@ msgstr ""
 msgid "Browse themes"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:11
+#: includes/admin/views/html-admin-page-addons.php:12
 msgid "Popular"
 msgstr "Popular"
 
-#: includes/admin/views/html-admin-page-addons.php:12
+#: includes/admin/views/html-admin-page-addons.php:13
 msgid "Gateways"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:14
+#: includes/admin/views/html-admin-page-addons.php:15
 msgid "Import/export"
 msgstr "Import/export"
 
-#: includes/admin/views/html-admin-page-addons.php:16
+#: includes/admin/views/html-admin-page-addons.php:17
 msgid "Marketing"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:17
+#: includes/admin/views/html-admin-page-addons.php:18
 msgid "Free"
 msgstr "Gratis!"
+
+#: includes/admin/views/html-admin-page-addons.php:33
+msgid ""
+"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
+" href=\"%s\">WooCommerce Extensions Catalog</a>"
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
@@ -5131,7 +5137,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:184
 msgid "Locale"
-msgstr ""
+msgstr "Localizare"
 
 #: includes/admin/views/html-admin-page-status-report.php:200
 msgid "Plugins"
@@ -5139,11 +5145,11 @@ msgstr "Module"
 
 #: includes/admin/views/html-admin-page-status-report.php:206
 msgid "Installed Plugins"
-msgstr ""
+msgstr "Module Instalate"
 
 #: includes/admin/views/html-admin-page-status-report.php:226
 msgid "Visit plugin homepage"
-msgstr ""
+msgstr "Vizitați pagina pluginului"
 
 #: includes/admin/views/html-admin-page-status-report.php:250
 #: includes/admin/views/html-admin-page-status-report.php:432
@@ -5164,12 +5170,12 @@ msgstr "Forteaza SSL"
 
 #: includes/admin/views/html-admin-page-status-report.php:282
 msgid "WC Pages"
-msgstr ""
+msgstr "Pagini WC"
 
 #: includes/admin/views/html-admin-page-status-report.php:289
 msgctxt "Page setting"
 msgid "Shop Base"
-msgstr ""
+msgstr "Bază Magazin"
 
 #: includes/admin/views/html-admin-page-status-report.php:293
 msgctxt "Page setting"
@@ -5188,19 +5194,19 @@ msgstr "Contul Meu"
 
 #: includes/admin/views/html-admin-page-status-report.php:321
 msgid "Page not set"
-msgstr ""
+msgstr "Pagina nu a fost setata"
 
 #: includes/admin/views/html-admin-page-status-report.php:331
 msgid "Page does not exist"
-msgstr ""
+msgstr "Pagina nu există"
 
 #: includes/admin/views/html-admin-page-status-report.php:336
 msgid "Page does not contain the shortcode: %s"
-msgstr ""
+msgstr "Pagina nu conține scurtătura de cod: %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:355
 msgid "WC Taxonomies"
-msgstr ""
+msgstr "WC Taxonomii"
 
 #: includes/admin/views/html-admin-page-status-report.php:361
 msgid "Order Statuses"
@@ -5239,40 +5245,40 @@ msgstr ""
 #: includes/admin/views/html-admin-page-status-report.php:489
 #: includes/admin/views/html-admin-page-status-report.php:495
 msgid "Template Overrides"
-msgstr ""
+msgstr "Sabloane Suprascrise"
 
 #: includes/admin/views/html-admin-page-status-report.php:496
 msgid "No overrides present in theme."
-msgstr ""
+msgstr "Nici o suprascrie prezentă în temă."
 
 #: includes/admin/views/html-admin-page-status-tools.php:7
 #: includes/admin/views/html-admin-page-status.php:6
 msgid "Tools"
-msgstr ""
+msgstr "Instrumente"
 
 #: includes/admin/views/html-admin-page-status-tools.php:23
 msgid "Template Debug Mode"
-msgstr ""
+msgstr "Modul Depanare șablon"
 
 #: includes/admin/views/html-admin-page-status-tools.php:29
 msgid ""
 "This tool will disable template overrides for logged-in administrators for "
 "debugging purposes."
-msgstr ""
+msgstr "Acest instrument va dezactiva suprascrierea șablonelor pentru administratori autentificați in scopul de depanare."
 
 #: includes/admin/views/html-admin-page-status-tools.php:34
 msgid "Remove post types on uninstall"
-msgstr ""
+msgstr "Elimina tipurile de post la dezinstalare"
 
 #: includes/admin/views/html-admin-page-status-tools.php:40
 msgid ""
 "This tool will delete all product and order post data when uninstalling via "
 "Plugins > Delete."
-msgstr ""
+msgstr "Acest instrument va șterge toate produsele și comenzile la dezinstalare prin intermediul  Module > Sterge."
 
 #: includes/admin/views/html-admin-page-status-tools.php:47
 msgid "Save Changes"
-msgstr ""
+msgstr "Salvați modificările"
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"
@@ -5299,17 +5305,17 @@ msgstr "— Nicio schimbare —"
 #: includes/admin/views/html-bulk-edit-product.php:133
 #: includes/admin/views/html-bulk-edit-product.php:232
 msgid "Change to:"
-msgstr ""
+msgstr "Modifica in:"
 
 #: includes/admin/views/html-bulk-edit-product.php:17
 #: includes/admin/views/html-bulk-edit-product.php:41
 msgid "Increase by (fixed amount or %):"
-msgstr ""
+msgstr "Crește cu (sumă fixă ​​sau %):"
 
 #: includes/admin/views/html-bulk-edit-product.php:18
 #: includes/admin/views/html-bulk-edit-product.php:42
 msgid "Decrease by (fixed amount or %):"
-msgstr ""
+msgstr "Scăde cu (sumă fixă ​​sau %):"
 
 #: includes/admin/views/html-bulk-edit-product.php:28
 #: includes/admin/views/html-bulk-edit-product.php:53
@@ -5323,7 +5329,7 @@ msgstr "Vânzare"
 
 #: includes/admin/views/html-bulk-edit-product.php:43
 msgid "Decrease regular price by (fixed amount or %):"
-msgstr ""
+msgstr "Scăde prețul normal cu (sumă fixă ​​sau %):"
 
 #: includes/admin/views/html-bulk-edit-product.php:127
 #: includes/admin/views/html-quick-edit-product.php:95
@@ -5338,7 +5344,7 @@ msgstr "Vizibilitate"
 #: includes/admin/views/html-bulk-edit-product.php:157
 #: includes/admin/views/html-quick-edit-product.php:114
 msgid "Catalog &amp; search"
-msgstr ""
+msgstr "Cautare &amp; Catalog"
 
 #: includes/admin/views/html-bulk-edit-product.php:188
 #: includes/admin/views/html-quick-edit-product.php:132
@@ -5354,7 +5360,7 @@ msgstr "Comenzi pe Lista de așteptare?"
 msgid ""
 "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start"
 " selling :)"
-msgstr ""
+msgstr "<strong>Bine ati venit la WooCommerce</strong> &#8211; Ești aproape gata pentru a începe vânzarea :)"
 
 #: includes/admin/views/html-notice-install.php:6
 msgid "Skip setup"
@@ -5379,11 +5385,11 @@ msgid ""
 "<strong>Your theme does not declare WooCommerce support</strong> &#8211; if "
 "you encounter layout issues please read our integration guide or choose a "
 "WooCommerce theme :)"
-msgstr ""
+msgstr "<strong>Tema ta nu are declarata compatibilitatea cu WooCommerce </strong> &#8211; dacă aveți probleme de afisare / aspect vă rugăm să citiți ghidul nostru de integrare sau alegeti o temă WooCommerce :)"
 
 #: includes/admin/views/html-notice-theme-support.php:6
 msgid "Theme Integration Guide"
-msgstr ""
+msgstr "Ghid de integrare tema"
 
 #: includes/admin/views/html-notice-update.php:5
 msgid ""
@@ -5399,7 +5405,7 @@ msgstr ""
 msgid ""
 "It is strongly recommended that you backup your database before proceeding. "
 "Are you sure you wish to run the updater now?"
-msgstr ""
+msgstr "Este recomandat sa efectuati o copie de rezervă a bazei de date înainte de a continua. Sunteți sigur că doriți să rulați programul de actualizare acum?"
 
 #: includes/admin/views/html-quick-edit-product.php:24
 msgid "Regular price"
@@ -5413,22 +5419,6 @@ msgstr "Preț Redus"
 msgid "Custom:"
 msgstr ""
 
-#: includes/admin/wc-admin-functions.php:193
+#: includes/admin/wc-admin-functions.php:192
 msgid "Could not compile woocommerce.less:"
 msgstr ""
-
-#. Plugin URI of the plugin/theme
-msgid "http://www.woothemes.com/woocommerce/"
-msgstr ""
-
-#. Description of the plugin/theme
-msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr ""
-
-#. Author of the plugin/theme
-msgid "WooThemes"
-msgstr "WooThemes"
-
-#. Author URI of the plugin/theme
-msgid "http://woothemes.com"
-msgstr "http://woothemes.com"

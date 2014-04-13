@@ -1395,162 +1395,6 @@ table.wp-list-table {
 	}
 }
 
-/* Dashboard */
-ul.woocommerce_stats {
-	overflow: hidden;
-	zoom: 1;
-	li {
-		width: 22%;
-		padding: 0 1.4%;
-		float: left;
-		font-size: 0.8em;
-		border-left: 1px solid #fff;
-		border-right: 1px solid #ececec;
-		text-align: center;
-	}
-	li:first-child {
-		border-left: 0;
-	}
-	li:last-child {
-		border-right: 0;
-	}
-	strong {
-		font-family: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
-		font-size: 4em;
-		line-height: 1.2em;
-		font-weight: normal;
-		text-align: center;
-		display:block;
-	}
-}
-
-#woocommerce_dashboard_right_now p.sub,
-#woocommerce_dashboard_right_now .table,
-#woocommerce_dashboard_right_now .versions {
-	margin: -12px;
-}
-#woocommerce_dashboard_right_now .inside {
-	font-size: 12px;
-	margin-bottom: 0;
-	padding-top: 20px;
-}
-#woocommerce_dashboard_right_now p.sub {
-	padding: 5px 0 15px;
-	color: #8f8f8f;
-	font-size: 14px;
-	position: absolute;
-	top: -17px;
-	left: 15px;
-}
-#woocommerce_dashboard_right_now .table {
-	margin: 0;
-	padding: 0;
-	position: relative;
-}
-#woocommerce_dashboard_right_now .table_shop_content {
-	float: left;
-	border-top: #ececec 1px solid;
-	width: 45%;
-}
-#woocommerce_dashboard_right_now .table_orders {
-	float: right;
-	border-top: #ececec 1px solid;
-	width: 45%;
-}
-#woocommerce_dashboard_right_now table td {
-	padding: 3px 0;
-	white-space: nowrap;
-}
-#woocommerce_dashboard_right_now table tr.first td {
-	border-top: none;
-}
-#woocommerce_dashboard_right_now td.b {
-	padding-right: 6px;
-	text-align: right;
-	font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
-	font-size: 14px;
-	width: 1%;
-}
-#woocommerce_dashboard_right_now td.b a {
-	font-size: 18px;
-}
-#woocommerce_dashboard_right_now td.b a:hover {
-	color: @red;
-}
-#woocommerce_dashboard_right_now .t {
-	font-size: 12px;
-	padding-right: 12px;
-	padding-top: 6px;
-	color: #777;
-}
-#woocommerce_dashboard_right_now .t a {
-	white-space: nowrap;
-}
-#woocommerce_dashboard_right_now .on-hold a {
-	color: @red;
-}
-#woocommerce_dashboard_right_now .pending a {
-	color: #e66f00;
-}
-#woocommerce_dashboard_right_now .completed a {
-	color: @green;
-}
-#woocommerce_dashboard_right_now .versions {
-	padding: 6px 10px 12px;
-	clear: both;
-}
-#woocommerce_dashboard_right_now .versions .b {
-	font-weight: bold;
-}
-#woocommerce_dashboard_right_now a.button {
-	float: right;
-	clear: right;
-	position: relative;
-	top: -5px;
-}
-
-ul.recent-orders, ul.stock_list {
-	li {
-		overflow: hidden;
-		zoom: 1;
-		border-bottom: #ECECEC 1px solid;
-		padding: 0 0 8px;
-		margin: 0 0 8px;
-		.order-status {
-			float: right;
-		}
-		small {
-			color: #999;
-		}
-		.order-cost, .order-customer {
-			margin-left: 8px;
-		}
-		.completed {
-			color: @green;
-		}
-		.on-hold {
-			color: @red;
-		}
-		.processing {
-			color: @blue;
-		}
-		.pending {
-			color: #E66F00;
-		}
-		.refunded, .cancelled {
-			color: #999;
-		}
-	}
-	&.stock_list {
-		small {
-			float: right;
-		}
-		a {
-			text-decoration: none;
-		}
-	}
-}
-
 /* Settings */
 mark.notice {
 	background: #fff;
@@ -2172,6 +2016,27 @@ img.help_tip {
 					margin: 0 -1px 0 0;
 				}
 			}
+		}
+	}
+}
+
+/**
+ * Shipping
+ */
+.woocommerce_page_wc-settings {
+	.shippingrows {
+		th.check-column {
+			padding-top: 20px;
+		}
+
+		tfoot {
+			th {
+				padding-left: 10px;
+			}
+		}
+
+		.add.button:before {
+			.iconbefore( "\e007" );
 		}
 	}
 }
@@ -2802,6 +2667,7 @@ img.tips {
 	-moz-box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
 	box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
 	text-align: center;
+	max-width: 150px;
 	code {
 		background: #888;
 		padding: 1px;

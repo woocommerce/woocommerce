@@ -150,8 +150,8 @@ class WC_Meta_Box_Order_Items {
 				wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax[ $item_id ] ) );
 
 				// Total up
-				$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] ) + wc_format_decimal( $line_subtotal_tax[ $item_id ] );
-				$total    += wc_format_decimal( $line_total[ $item_id ] ) + wc_format_decimal( $line_tax[ $item_id ] );
+				$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] );
+				$total    += wc_format_decimal( $line_total[ $item_id ] );
 
 			 	// Clear meta cache
 			 	wp_cache_delete( $item_id, 'order_item_meta' );

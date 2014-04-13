@@ -104,12 +104,8 @@ class WC_Comments {
 	 * @return array
 	 */
 	public function check_comment_rating( $comment_data ) {
-
 		// If posting a comment (not trackback etc) and not logged in
-		if ( isset( $_POST['rating'] ) && ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-comment_rating' ) )
-			wp_die( __( 'You have taken too long. Please go back and refresh the page.', 'woocommerce' ) );
-
-		elseif ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && $comment_data['comment_type'] == '' && get_option('woocommerce_review_rating_required') == 'yes' ) {
+		if ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && $comment_data['comment_type'] === '' && get_option('woocommerce_review_rating_required') === 'yes' ) {
 			wp_die( __( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}

@@ -161,13 +161,35 @@ class WC_Admin_Meta_Boxes {
 	 * @param  object $post
 	 */
 	public function save_meta_boxes( $post_id, $post ) {
-		if ( empty( $post_id ) || empty( $post ) ) return;
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
-		if ( is_int( wp_is_post_revision( $post ) ) ) return;
-		if ( is_int( wp_is_post_autosave( $post ) ) ) return;
-		if ( empty( $_POST['woocommerce_meta_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) ) return;
-		if ( ! current_user_can( 'edit_post', $post_id  )) return;
-		if ( $post->post_type != 'product' && $post->post_type != 'shop_order' && $post->post_type != 'shop_coupon' ) return;
+		// $post_id and $post are required
+		if ( empty( $post_id ) || empty( $post ) ) {
+			return;
+		}
+
+		// Dont' save meta boxes for revisions or autosaves
+		if ( defined( 'DOING_AUTOSAVE' ) || is_int( wp_is_post_revision( $post ) ) || is_int( wp_is_post_autosave( $post ) ) ) {
+			return;
+		}
+		
+		// Check the nonce
+		if ( empty( $_POST['woocommerce_meta_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) ) {
+			return;
+		} 
+
+		// Check the post being saved == the $post_id to prevent triggering this call for other save_post events
+		if ( empty( $_POST['post_ID'] ) || $_POST['post_ID'] != $post_id ) {
+			return;
+		}
+
+		// Check user has permission to edit
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
+		// Check the post type
+		if ( ! in_array( $post->post_type, array( 'product', 'shop_order', 'shop_coupon' ) ) ) {
+			return;
+		}
 
 		do_action( 'woocommerce_process_' . $post->post_type . '_meta', $post_id, $post );
 	}

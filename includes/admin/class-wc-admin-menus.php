@@ -188,8 +188,8 @@ class WC_Admin_Menus {
 	 * Init the reports page
 	 */
 	public function reports_page() {
-		$page = include( 'class-wc-admin-reports.php' );
-		$page->output();
+		include_once( 'class-wc-admin-reports.php' );
+		WC_Admin_Reports::output();
 	}
 
 	/**

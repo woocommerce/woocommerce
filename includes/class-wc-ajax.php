@@ -188,7 +188,7 @@ class WC_AJAX {
 		if ( isset( $_POST['address_2'] ) )
 			WC()->customer->set_address_2( $_POST['address_2'] );
 
-		if ( "yes" == get_option( 'woocommerce_ship_to_billing_address_only' ) ) {
+		if ( wc_ship_to_billing_address_only() ) {
 
 			if ( isset( $_POST['country'] ) )
 				WC()->customer->set_shipping_country( $_POST['country'] );
@@ -287,28 +287,31 @@ class WC_AJAX {
 	 * Feature a product from admin
 	 */
 	public function feature_product() {
-		if ( ! current_user_can('edit_products') )
+		if ( ! current_user_can( 'edit_products' ) ) {
 			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+		}
 
-		if ( ! check_admin_referer('woocommerce-feature-product'))
+		if ( ! check_admin_referer( 'woocommerce-feature-product' ) ) {
 			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
+		}
 
-		$post_id = isset( $_GET['product_id'] ) && (int) $_GET['product_id'] ? (int) $_GET['product_id'] : '';
+		$post_id = ! empty( $_GET['product_id'] ) ? (int) $_GET['product_id'] : '';
 
-		if (!$post_id) die;
+		if ( ! $post_id || get_post_type( $post_id ) !== 'product' ) {
+			die;
+		}
 
-		$post = get_post($post_id);
+		$featured = get_post_meta( $post_id, '_featured', true );
 
-		if ( ! $post || $post->post_type !== 'product' ) die;
+		if ( 'yes' === $featured ) {
+			update_post_meta( $post_id, '_featured', 'no' );
+		} else {
+			update_post_meta( $post_id, '_featured', 'yes' );
+		}
 
-		$featured = get_post_meta( $post->ID, '_featured', true );
+		wc_delete_product_transients();
 
-		if ( $featured == 'yes' )
-			update_post_meta($post->ID, '_featured', 'no');
-		else
-			update_post_meta($post->ID, '_featured', 'yes');
-
-		wp_safe_redirect( remove_query_arg( array('trashed', 'untrashed', 'deleted', 'ids'), wp_get_referer() ) );
+		wp_safe_redirect( remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) );
 
 		die();
 	}
@@ -880,15 +883,16 @@ class WC_AJAX {
 		// Set values
 		$item = array();
 
-		$item['product_id'] 			= $_product->id;
-		$item['variation_id'] 			= isset( $_product->variation_id ) ? $_product->variation_id : '';
-		$item['name'] 					= $_product->get_title();
-		$item['tax_class']				= $_product->get_tax_class();
-		$item['qty'] 					= 1;
-		$item['line_subtotal'] 			= wc_format_decimal( $_product->get_price_excluding_tax() );
-		$item['line_subtotal_tax'] 		= '';
-		$item['line_total'] 			= wc_format_decimal( $_product->get_price_excluding_tax() );
-		$item['line_tax'] 				= '';
+		$item['product_id']        = $_product->id;
+		$item['variation_id']      = isset( $_product->variation_id ) ? $_product->variation_id : '';
+		$item['variation_data']    = isset( $_product->variation_data ) ? $_product->variation_data : '';
+		$item['name']              = $_product->get_title();
+		$item['tax_class']         = $_product->get_tax_class();
+		$item['qty']               = 1;
+		$item['line_subtotal']     = wc_format_decimal( $_product->get_price_excluding_tax() );
+		$item['line_subtotal_tax'] = '';
+		$item['line_total']        = wc_format_decimal( $_product->get_price_excluding_tax() );
+		$item['line_tax']          = '';
 
 		// Add line item
 	   	$item_id = wc_add_order_item( $order_id, array(
@@ -906,9 +910,16 @@ class WC_AJAX {
 		 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
 		 	wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
 		 	wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
+	 		
+	 		// Store variation data in meta
+			if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
+				foreach ( $item['variation_data'] as $key => $value ) {
+					wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
+				}
+			}
+			
+			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 	 	}
-
-		do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 
 		$item = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
 

@@ -6,7 +6,11 @@ jQuery( function( $ ) {
 	}
 
 	/** Cart Handling */
-	$supports_html5_storage = ( 'sessionStorage' in window && window.sessionStorage !== null );
+	try {
+		$supports_html5_storage = ( 'sessionStorage' in window && window.sessionStorage !== null );
+	} catch( err ) {
+		$supports_html5_storage = false;
+	}
 
 	$fragment_refresh = {
 		url: wc_cart_fragments_params.ajax_url,

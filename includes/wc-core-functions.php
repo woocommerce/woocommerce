@@ -172,7 +172,7 @@ function get_woocommerce_currencies() {
 				'CAD' => __( 'Canadian Dollars', 'woocommerce' ),
 				'CLP' => __( 'Chilean Peso', 'woocommerce' ),
 				'CNY' => __( 'Chinese Yuan', 'woocommerce' ),
-				'COP' => __( 'Colombian Peso', 'woocommerce' ),				
+				'COP' => __( 'Colombian Peso', 'woocommerce' ),
 				'CZK' => __( 'Czech Koruna', 'woocommerce' ),
 				'DKK' => __( 'Danish Krone', 'woocommerce' ),
 				'EUR' => __( 'Euros', 'woocommerce' ),
@@ -275,6 +275,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'RON' : $currency_symbol = 'lei'; break;
 		case 'VND' : $currency_symbol = '&#8363;'; break;
 		case 'NGN' : $currency_symbol = '&#8358;'; break;
+		case 'HRK' : $currency_symbol = 'Kn'; break;
 		default    : $currency_symbol = ''; break;
 	}
 
@@ -384,7 +385,7 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
  */
 function get_woocommerce_api_url( $path ) {
 
-	$url = get_home_url( null, 'wc-api/v' . WC_API::VERSION . '/', ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) ? 'https' : 'http' );
+	$url = get_home_url( null, 'wc-api/v' . WC_API::VERSION . '/', is_ssl() ? 'https' : 'http' );
 
 	if ( ! empty( $path ) && is_string( $path ) ) {
 		$url .= ltrim( $path, '/' );

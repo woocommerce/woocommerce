@@ -3,8 +3,8 @@ Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
-Tested up to: 3.8.1
-Stable tag: 2.1.5
+Tested up to: 3.9
+Stable tag: 2.1.7
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -129,6 +129,92 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.2.0 =
 * Feature - Added used payment gateway to view orders screens
 * Feature - API: Lookup customers by email endpoint
+
+= 2.1.7 - 10/04/2014 =
+* Fix - Allow WC API to generate API keys for different user than the one that is making request.
+* Fix - Fix the SKU search logic so it works with other filters.
+* Fix - Correctly round shipping + shipping tax together when passes the tax inclusive total to paypal.
+* Fix - orderby - skip adding hidden input of submit on a GET so JS can submit properly.
+* Fix - Check wc_checkout_params.is_checkout against string '1' instead of int 1.
+* Fix - Check order exists when resuming on checkout.
+* Fix - When removing base taxes, round to precision.
+* Fix - Ensure _order_currency is set.
+* Fix - Use `$wpdb->db_version()` instead of `mysql_get_server_info()` deprecated in PHP 5.5.
+* Fix - myaccount registration added check for auto generate password option.
+* Fix - API: normalize both key and value before calculating OAuth signature.
+* Fix - API: double-encode percent symbols when normalizing parameters.
+* Fix - API: Remove post_parent so grouped simple products are also returned.
+* Fix - Clear featured transients when needed.
+* Fix - Stay on checkout when removing coupon.
+* Fix - Prevent totals refreshing on every keydown event on the checkout.
+* Fix - When hierarchy is off, only show children in the cat widget.
+* Fix - Delete term count transients after stock status change and trashed post.
+* Fix - During save_meta_boxes, only save for the "main" post being saved, not nested or subsequent save_post events.
+* Fix - Stop _wc_session_expires autoloading.
+* Fix - Remove nonce from comment form to prevent issues with caching.
+* Fix - reset grouped products correctly to work with short codes.
+* Fix - In admin, work out cart discount without tax amounts.
+* Tweak - Apply filters to $product_type and we can set a default product type to new products.
+* Tweak - wp_kses_post for meta display in admin.
+* Tweak - woocommerce_order_cancelled_notice hook.
+* Tweak - Use is_ssl() for get_woocommerce_api_url().
+* Tweak - Changes to filters to see if shipping is needed or not in the cart class.
+* Tweak - Chunk option names in cleanup_sessions() to reduce load.
+* Tweak - Change \WC_Order::add_order_note cap to edit_shop_order instead of manage_woocommerce.
+* Tweak - Allow filtering order statuses in dashboard reports widget.
+* Tweak - Added is_paying_customer() to easily check if a user is a WC customer.
+* Tweak - Allow query string fallback for REST API SSL auth.
+* Tweak - woocommerce_coupon_get_discount_amount filter in coupon class.
+* Tweak - More friendly/less blunt "no shipping" messages.
+* Tweak - use network_site_url instead of network_admin_url for multisite.
+* Tweak - Updater - Only show upgrade notices, and use transient cache.
+* Tweak - get_image_id method for use in email template. Shows correct variation images.
+* Tweak - added validation when save the frontend colors.
+
+= 2.1.6 - 25/03/2014 =
+* Fix - Fixed a bug where cron events are scheduled using a function name rather than a hook name.
+* Fix - Given transients not required on all pages expiration times to prevent autoloading.
+* Fix - Don't trailingslash Order Cancel URLs with a Query String.
+* Fix - Switch to jquery trim to allow checkout in older IE.
+* Fix - Variation bulk sale price edit over reaching causing errors on save.
+* Fix - Only append generator tag on HTML pages.
+* Fix - AED currency symbol.
+* Fix - Move loop_end hooks as it is generic and used in all WP loops. Prevents some theme conflicts.
+* Fix - Lingering tooltip after gallery image delete.
+* Fix - Move plugin headers to main WC POT file.
+* Fix - Correct discount calculation in admin when fees are involved.
+* Fix - Fix sale flash for out of stock sale items.
+* Fix - Use protocol relative URLs in the cart widget because it gets cached and can display on https or http pages.
+* Fix - Fix term recount during WP callbacks.
+* Fix - Convert states to strings for PayPal (non-US).
+* Fix - Hide empty at walker level to fix category widget display.
+* Fix - form-login form values were not persistent after failed submission.
+* Fix - URL decode not needed for custom text attribute names.
+* Fix - Fix bulk editing variation sale price.
+* Fix - Remove comment exclusion in order notes meta box.
+* Fix - Sync min and max prices for regular and sale prices so prices are displayed correctly when sale price is lower than a regular price of another variation.
+* Fix - Expanding line item_meta causes conflicts if attributes are named with things like 'name', 'type' or 'qty'. Added blacklist to exclude unsafe values.
+* Fix - Added support for clearing report transients when using object caching.
+* Fix - encoding issues with attribute values.
+* Fix - Escape the contents of the changelog when displayed.
+* Fix - Edge case where tax was still displayed for shipping when exempt.
+* Tweak - Allow city field to use another input method.
+* Tweak - Several new filters.
+* Tweak - PayPal, modify currency error message to include both sent and returned currencies for comparison.
+* Tweak - enable keyboard shortcuts in prettyPhoto.
+* Tweak - Add classes to item meta.
+* Tweak - Use is_purchasable to determine if a variation cart button is needed, and potentially show empty_price_html.
+* Tweak - new woocommerce_cart_taxes_total filter.
+* Tweak - new wc_cart_totals_taxes_total_html() function.
+* Tweak - Use API request URL for mijireh and PayPal callbacks.
+* Tweak - move variation data to tooltip in order items meta box.
+* Tweak - Store variation data for order items added through the admin.
+* Tweak - Billing Address > Billing Details text. We take more than address in this section.
+* Tweak - Delete terms transient during recount.
+* Refactor - jshint javascript files.
+* Localisation - add Bangladeshi currency and symbol.
+* Localisation - Bangladeshi states (districts).
+* Localisation - Croatian currency symbol.
 
 = 2.1.5 - 06/03/2014 =
 * Fix - Prevent notices on new plain text email parameter for BACS and Cheque gateways

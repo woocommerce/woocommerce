@@ -234,8 +234,7 @@ class WC_API_Products extends WC_API_Resource {
 			'fields'      => 'ids',
 			'post_type'   => 'product',
 			'post_status' => 'publish',
-			'post_parent' => 0,
-			'meta_query' => array(),
+			'meta_query'  => array(),
 		);
 
 		if ( ! empty( $args['type'] ) ) {

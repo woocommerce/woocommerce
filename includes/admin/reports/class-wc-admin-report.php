@@ -98,12 +98,12 @@ class WC_Admin_Report {
 
 			} elseif ( $value['type'] == 'order_item_meta' ) {
 
-				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
+				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
 				$joins["order_item_meta_{$key}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
 
 			} elseif ( $value['type'] == 'order_item' ) {
 
-				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
+				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
 
 			}
 		}
@@ -117,7 +117,7 @@ class WC_Admin_Report {
 
 				if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
 
-					$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
+					$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
 					$joins["order_item_meta_{$key}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
 
 				} else {
@@ -229,28 +229,21 @@ class WC_Admin_Report {
 			$query['limit'] = "LIMIT {$limit}";
 		}
 
-		$query      = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
-		$query      = implode( ' ', $query );
-		$query_hash = md5( $query_type . $query );
+		$query          = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
+		$query          = implode( ' ', $query );
+		$query_hash     = md5( $query_type . $query );
+		$cached_results = get_transient( strtolower( get_class( $this ) ) );
 
-		if ( $debug )
+		if ( $debug ) {
 			var_dump( $query );
-
-		if ( $debug || $nocache || ( false === ( $result = get_transient( 'wc_report_' . $query_hash ) ) ) ) {
-			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
-
-			if ( $filter_range ) {
-				if ( date('Y-m-d', strtotime( $this->end_date ) ) == date('Y-m-d', current_time( 'timestamp' ) ) ) {
-					$expiration = 60 * 60 * 1; // 1 hour
-				} else {
-					$expiration = 60 * 60 * 24; // 24 hour
-				}
-			} else {
-				$expiration = 60 * 60 * 24; // 24 hour
-			}
-
-			set_transient( 'wc_report_' . $query_hash, $result, $expiration );
 		}
+
+		if ( $debug || $nocache || false === $cached_results || ! isset( $cached_results[ $query_hash ] ) ) {
+			$cached_results[ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+			set_transient( strtolower( get_class( $this ) ), $cached_results, DAY_IN_SECONDS );
+		}
+
+		$result = $cached_results[ $query_hash ];
 
 		return $result;
 	}

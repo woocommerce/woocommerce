@@ -150,51 +150,59 @@ class WC_Download_Handler {
 		}
 
 		// ...or serve it
-		if ( ! is_multisite() ) {
+		$remote_file      = true;
+		$parsed_file_path = parse_url( $file_path );
+		
+		$wp_uploads       = wp_upload_dir();
+		$wp_uploads_dir   = $wp_uploads['basedir'];
+		$wp_uploads_url   = $wp_uploads['baseurl'];
 
-			/*
-			 * Download file may be either http or https.
-			 * site_url() depends on whether the page containing the download (ie; My Account) is served via SSL because WC
-			 * modifies site_url() via a filter to force_ssl.
-			 * So blindly doing a str_replace is incorrect because it will fail when schemes are mismatched. This code
-			 * handles the various permutations.
-			 */
-			$scheme = parse_url( $file_path, PHP_URL_SCHEME );
+		if ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ) ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
 
-			if ( $scheme ) {
-				$site_url = set_url_scheme( site_url( '' ), $scheme );
-			} else {
-				$site_url = is_ssl() ? str_replace( 'https:', 'http:', site_url() ) : site_url();
-			}
+			/** This is an absolute path */
+			$remote_file  = false;
 
-			$file_path   = str_replace( trailingslashit( $site_url ), ABSPATH, $file_path );
+		} elseif( strpos( $file_path, $wp_uploads_url ) !== false ) {
 
-		} else {
+			/** This is a local file given by URL so we need to figure out the path */
+			$remote_file  = false;
+			$file_path    = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
 
-			$network_url = is_ssl() ? str_replace( 'https:', 'http:', network_admin_url() ) : network_admin_url();
-			$upload_dir  = wp_upload_dir();
+		} elseif( is_multisite() && ( strpos( $file_path, network_site_url( '/', 'http' ) ) !== false || strpos( $file_path, network_site_url( '/', 'https' ) ) !== false ) ) {
 
+			/** This is a local file outside of wp-content so figure out the path */
+			$remote_file = false;
 			// Try to replace network url
-			$file_path   = str_replace( trailingslashit( $network_url ), ABSPATH, $file_path );
+            $file_path   = str_replace( network_site_url( '/', 'https' ), ABSPATH, $file_path );
+            $file_path   = str_replace( network_site_url( '/', 'http' ), ABSPATH, $file_path );
+            // Try to replace upload URL
+            $file_path   = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
 
-			// Now try to replace upload URL
-			$file_path   = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $file_path );
+		} elseif( strpos( $file_path, site_url( '/', 'http' ) ) !== false || strpos( $file_path, site_url( '/', 'https' ) ) !== false ) {
+
+			/** This is a local file outside of wp-content so figure out the path */
+			$remote_file = false;
+			$file_path   = str_replace( site_url( '/', 'https' ), ABSPATH, $file_path );
+			$file_path   = str_replace( site_url( '/', 'http' ), ABSPATH, $file_path );
+
+		} elseif ( file_exists( ABSPATH . $file_path ) ) {
+			
+			/** Path needs an abspath to work */
+			$remote_file = false;
+			$file_path   = ABSPATH . $file_path;
 		}
 
-		// See if its local or remote
-		if ( strstr( $file_path, 'http:' ) || strstr( $file_path, 'https:' ) || strstr( $file_path, 'ftp:' ) ) {
-			$remote_file = true;
-		} else {
-			$remote_file = false;
-
+		if ( ! $remote_file ) {
 			// Remove Query String
 			if ( strstr( $file_path, '?' ) ) {
 				$file_path = current( explode( '?', $file_path ) );
 			}
 
-			$file_path   = realpath( $file_path );
+			// Run realpath
+			$file_path = realpath( $file_path );
 		}
 
+		// Get extension and type
 		$file_extension  = strtolower( substr( strrchr( $file_path, "." ), 1 ) );
 		$ctype           = "application/force-download";
 

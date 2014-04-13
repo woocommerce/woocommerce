@@ -28,9 +28,9 @@ class WC_Admin_Duplicate_Product {
 	}
 
 	/**
-	 * Show the duplicate link in admin
-	 * @param  array of $actions
-	 * @param  array $post object
+	 * Show the "Duplicate" link in admin products list
+	 * @param  array   $actions
+	 * @param  WP_Post $post Post object
 	 * @return array
 	 */
 	public function dupe_link( $actions, $post ) {
@@ -151,7 +151,7 @@ class WC_Admin_Duplicate_Product {
 		$this->duplicate_post_meta( $post->ID, $new_post_id );
 
 		// Copy the children (variations)
-		if ( $children_products =& get_children( 'post_parent='.$post->ID.'&post_type=product_variation' ) ) {
+		if ( $children_products = get_children( 'post_parent='.$post->ID.'&post_type=product_variation' ) ) {
 
 			if ( $children_products )
 				foreach ( $children_products as $child )
@@ -221,6 +221,7 @@ class WC_Admin_Duplicate_Product {
 		$post_meta_infos = $wpdb->get_results("SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=$id");
 
 		if (count($post_meta_infos)!=0) {
+			$sql_query_sel = array();
 			$sql_query = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";
 			foreach ($post_meta_infos as $meta_info) {
 				$meta_key = $meta_info->meta_key;
