@@ -163,9 +163,9 @@ class WC_Form_Handler {
 
 		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? wc_clean( $_POST[ 'account_first_name' ] ) : '';
 		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? wc_clean( $_POST[ 'account_last_name' ] ) : '';
-		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? wc_clean( $_POST[ 'account_email' ] ) : '';
-		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? wc_clean( $_POST[ 'password_1' ] ) : '';
-		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? wc_clean( $_POST[ 'password_2' ] ) : '';
+		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? sanitize_email( $_POST[ 'account_email' ] ) : '';
+		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
+		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? $_POST[ 'password_2' ] : '';
 
 		$user->first_name   = $account_first_name;
 		$user->last_name    = $account_last_name;
@@ -828,7 +828,7 @@ class WC_Form_Handler {
 
 				if ( 0 == wc_notice_count( 'error' ) ) {
 
-					WC_Shortcode_My_Account::reset_password( $user, wc_clean( $_POST['password_1'] ) );
+					WC_Shortcode_My_Account::reset_password( $user, $_POST['password_1'] );
 
 					do_action( 'woocommerce_customer_reset_password', $user );
 
@@ -877,8 +877,8 @@ class WC_Form_Handler {
 			}
 
 			$username   = ! empty( $_username ) ? wc_clean( $_username ) : '';
-			$email      = ! empty( $_POST['email'] ) ? wc_clean( $_POST['email'] ) : '';
-			$password   = wc_clean( $_password );
+			$email      = ! empty( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : '';
+			$password   = $_password;
 
 			// Anti-spam trap
 			if ( ! empty( $_POST['email_2'] ) ) {
