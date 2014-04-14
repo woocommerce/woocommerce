@@ -578,7 +578,7 @@ msgstr "Токантинс"
 
 #: i18n/states/CA.php:13
 msgid "Alberta"
-msgstr "Алберта"
+msgstr "Альберта"
 
 #: i18n/states/CA.php:14
 msgid "British Columbia"
@@ -590,7 +590,7 @@ msgstr "Манитоба"
 
 #: i18n/states/CA.php:16
 msgid "New Brunswick"
-msgstr "Нью-Брвнсуик"
+msgstr "Нью-Брансуик"
 
 #: i18n/states/CA.php:17
 msgid "Newfoundland"
@@ -598,7 +598,7 @@ msgstr "Ньюфаундленд"
 
 #: i18n/states/CA.php:18
 msgid "Northwest Territories"
-msgstr "Северо-западные территории"
+msgstr "Северо-западные Территории"
 
 #: i18n/states/CA.php:19
 msgid "Nova Scotia"
@@ -626,7 +626,7 @@ msgstr "Саскачеван"
 
 #: i18n/states/CA.php:25
 msgid "Yukon Territory"
-msgstr "Территория Юкон"
+msgstr "Юкон"
 
 #: i18n/states/CN.php:13
 msgid "Yunnan / &#20113;&#21335;"
