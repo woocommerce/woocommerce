@@ -52,7 +52,7 @@ $blue:        #2ea2cc;
 }
 
 @mixin opacity( $opacity: 0.75 ) {
-	filter:~"alpha(opacity=$opacity * 100)";
+	filter: unquote( "alpha(opacity=$opacity * 100)" );
 	-moz-opacity: $opacity;
 	-khtml-opacity: $opacity;
 	opacity: $opacity;
@@ -113,25 +113,28 @@ $blue:        #2ea2cc;
  * Objects
  */
 @mixin menu() {
-	.clearfix;
+	@include clearfix();
+
 	li {
 		display: inline-block;
 	}
 }
 
 @mixin mediaright() {
-	.clearfix;
+	@include clearfix();
+
 	img {
-		float:right;
-		height:auto;
+		float: right;
+		height: auto;
 	}
 }
 
 @mixin medialeft() {
-	.clearfix;
+	@include clearfix();
+
 	img {
-		float:right;
-		height:auto;
+		float: right;
+		height: auto;
 	}
 }
 
@@ -139,8 +142,8 @@ $blue:        #2ea2cc;
 	display: block;
 	text-indent: -9999px;
 	position: relative;
-	height:1em;
-	width:1em;
+	height: 1em;
+	width: 1em;
 }
 
 @mixin icon( $glyph: "\e001" ) {
@@ -154,9 +157,9 @@ $blue:        #2ea2cc;
 	margin:0;
 	text-indent: 0;
 	position: absolute;
-	top:0;
-	left:0;
-	width:100%;
+	top: 0;
+	left: 0;
+	width: 100%;
 	height: 100%;
 	text-align: center;
 	content: $glyph;
@@ -170,7 +173,7 @@ $blue:        #2ea2cc;
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin-right:7px;
+	margin-right: 7px;
 	content: $glyph;
 }
 
@@ -182,7 +185,7 @@ $blue:        #2ea2cc;
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin-left:7px;
+	margin-left: 7px;
 	content: $glyph;
 }
 
