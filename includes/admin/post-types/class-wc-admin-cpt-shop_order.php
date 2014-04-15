@@ -244,26 +244,6 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 				if ( ! empty( $user_info ) ) {
 
-					$user = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
-
-					if ( $user_info->first_name || $user_info->last_name ) {
-						$user .= esc_html( $user_info->first_name . ' ' . $user_info->last_name );
-					} else {
-						$user .= esc_html( $user_info->display_name );
-					}
-
-					$user .= '</a>';
-
-				} else {
-					$user = __( 'Guest', 'woocommerce' );
-				}
-
-				if ( $the_order->user_id ) {
-					$user_info = get_userdata( $the_order->user_id );
-				}
-
-				if ( ! empty( $user_info ) ) {
-
 					$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
 
 					if ( $user_info->first_name || $user_info->last_name ) {
@@ -579,7 +559,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
 					OR
 						( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-					OR 
+					OR
 						( p1.meta_key IN ('" . implode( "','", $search_fields ) . "') AND p1.meta_value LIKE '%%%s%%' )
 					",
 					esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
