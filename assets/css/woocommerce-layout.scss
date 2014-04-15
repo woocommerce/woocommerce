@@ -1,5 +1,5 @@
-@import "mixins.less";
-@import "woocommerce-base.less"; /* Contains base colours like @primary */
+@import "mixins";
+@import "woocommerce-base"; /* Contains base colours like @primary */
 
 .woocommerce, .woocommerce-page {
 
@@ -7,7 +7,7 @@
 	-------------------------------------------------------------- */
 
 	.col2-set {
-		.clearfix;
+		@include clearfix();
 		width: 100%;
 		.col-1 {
 			float:left;
@@ -33,7 +33,7 @@
 			width: 48%;
 		}
 		div.thumbnails {
-			.clearfix;
+			@include clearfix();
 			a {
 				float:left;
 				width: 30.75%;
@@ -54,12 +54,12 @@
 		.woocommerce-tabs {
 			clear:both;
 			ul.tabs {
-				.menu;
+				@include menu();
 			}
 		}
 		#reviews {
 			.comment {
-				.mediaright;
+				@include mediaright();
 			}
 		}
 	}
@@ -74,7 +74,7 @@
 	-------------------------------------------------------------- */
 
 	.related, .upsells.products {
-		.clearfix();
+		@include clearfix();
 		ul.products, ul {
 			float:none;
 			li.product {
@@ -89,7 +89,7 @@
 
 	ul.products {
 		clear:both;
-		.clearfix;
+		@include clearfix();
 		li.product {
 			float:left;
 			margin: 0 3.8% 2.992em 0;
@@ -156,7 +156,7 @@
 
 	.woocommerce-pagination {
 		ul.page-numbers {
-			.menu;
+			@include menu();
 		}
 	}
 
@@ -182,7 +182,7 @@
 	}
 
 	.cart-collaterals {
-		.clearfix;
+		@include clearfix();
 		width: 100%;
 		.related {
 			width: 30.75%;
@@ -203,7 +203,7 @@
 		}
 		.shipping_calculator {
 			width: 48%;
-			.clearfix;
+			@include clearfix();
 			clear: right;
 			float: right;
 			.col2-set {
@@ -224,7 +224,7 @@
 
 	ul.cart_list, ul.product_list_widget {
 		li {
-			.mediaright;
+			@include mediaright();
 		}
 	}
 
@@ -233,7 +233,7 @@
 
 	form {
 		.form-row {
-			.clearfix;
+			@include clearfix();
 			label {
 				display:block;
 				&.checkbox {
@@ -244,7 +244,7 @@
 				width: 100%;
 			}
 			.input-text {
-				.borderbox;
+				@include borderbox();
 				width:100%;
 			}
 		}

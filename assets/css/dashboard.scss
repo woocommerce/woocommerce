@@ -1,9 +1,9 @@
-@import 'mixins.less';
+@import "mixins";
 
 @font-face {
 	font-family: 'WooCommerce';
-	src:url('../fonts/WooCommerce.eot');
-	src:url('../fonts/WooCommerce.eot?#iefix') format('embedded-opentype'),
+	src: url('../fonts/WooCommerce.eot');
+	src: url('../fonts/WooCommerce.eot?#iefix') format('embedded-opentype'),
 		url('../fonts/WooCommerce.woff') format('woff'),
 		url('../fonts/WooCommerce.ttf') format('truetype'),
 		url('../fonts/WooCommerce.svg#WooCommerce') format('svg');
@@ -34,7 +34,7 @@ ul.woocommerce_stats {
 		border-right: 0;
 	}
 	strong {
-		font-family: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
+		font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
 		font-size: 4em;
 		line-height: 1.2em;
 		font-weight: normal;
@@ -99,7 +99,7 @@ ul.woocommerce_stats {
 				}
 
 				&:before {
-					.icon();
+					@include icon();
 					font-size: 2em;
 					position: relative;
 					width: auto;
@@ -132,7 +132,7 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 			a:before {
 				content: "\e011";
-				color: @green;
+				color: $green;
 			}
 		}
 		li.on-hold-orders {
@@ -145,13 +145,13 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 			a:before {
 				content: "\e02c";
-				color: @orange;
+				color: $orange;
 			}
 		}
 		li.out-of-stock {
 			a:before {
 				content: "\e02c";
-				color: @red;
+				color: $red;
 			}
 		}
 	}
