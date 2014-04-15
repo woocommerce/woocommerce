@@ -300,13 +300,19 @@ class WC_Emails {
 
 			if ( $plain_text ) {
 
-				foreach ( $meta as $key => $value )
-					echo $key . ': ' . $value . "\n";
+				foreach ( $meta as $key => $value ) {
+					if ( $value ) {
+						echo $key . ': ' . $value . "\n";
+					}
+				}
 
 			} else {
 
-				foreach ( $meta as $key => $value )
-					echo '<p><strong>' . $key . ':</strong> ' . $value . '</p>';
+				foreach ( $meta as $key => $value ) {
+					if ( $value ) {
+						echo '<p><strong>' . $key . ':</strong> ' . $value . '</p>';
+					}
+				}
 			}
 		}
 	}
