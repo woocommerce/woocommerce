@@ -1151,7 +1151,7 @@ class WC_Order {
 	/**
 	 * Gets any downloadable product file urls.
 	 *
-	 * @deprecated as of 2.1 get_item_downloads is prefered as downloads are more than just file urls
+	 * @deprecated as of 2.1 get_item_downloads is preferred as downloads are more than just file urls
 	 * @param int $product_id product identifier
 	 * @param int $variation_id variation identifier, or null
 	 * @param array $item the item
