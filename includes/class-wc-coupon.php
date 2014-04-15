@@ -287,7 +287,7 @@ class WC_Coupon {
 				}
 			}
 
-			// Per user usage limit - check here if user is logged in (aginst user IDs)
+			// Per user usage limit - check here if user is logged in (against user IDs)
 			// Checked again for emails later on in WC_Cart::check_customer_coupons()
 			if ( $this->usage_limit_per_user > 0 && is_user_logged_in() ) {
 				$used_by     = get_post_meta( $this->id, '_used_by' );
