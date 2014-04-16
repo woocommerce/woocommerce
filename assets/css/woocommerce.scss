@@ -192,7 +192,7 @@ p.demo_store {
 			}
 			del {
 				font-size: 0.67em;
-				color:fade( desaturate( $highlight, 75% ), 50% );
+				color:rgba( desaturate( $highlight, 75% ), 0.5 );
 			}
 		}
 
@@ -485,7 +485,7 @@ p.demo_store {
 				margin-bottom: .5em;
 				del {
 					font-size: 0.67em;
-					color:fade( desaturate( $highlight, 75% ), 50% );
+					color:rgba( desaturate( $highlight, 75% ), 0.5 );
 					margin: -2px 0 0 0;
 				}
 				ins {
@@ -495,7 +495,7 @@ p.demo_store {
 					font-size: 0.67em;
 					margin: -2px 0 0 0;
 					text-transform: uppercase;
-					color:fade( desaturate( $highlight, 75% ), 50% );
+					color:rgba( desaturate( $highlight, 75% ), 0.5 );
 				}
 			}
 		}

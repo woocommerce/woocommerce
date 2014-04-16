@@ -2598,7 +2598,7 @@ img.ui-datepicker-trigger {
       display: block;
       font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif; }
     .woocommerce-reports-wrap .postbox .chart-legend li:hover, .woocommerce-reports-wide .postbox .chart-legend li:hover {
-      box-shadow: inset 0 -1px 0 0 #dfdfdf, inset 300px 0 0 fade(#9c5d90, 10%);
+      box-shadow: inset 0 -1px 0 0 #dfdfdf, inset 300px 0 0 rgba(156, 93, 144, 0.1);
       border-right: 5px solid #9c5d90 !important;
       padding-left: 1.5em;
       color: #9c5d90; }
