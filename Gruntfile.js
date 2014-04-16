@@ -11,21 +11,13 @@ module.exports = function( grunt ){
 			js: 'assets/js'
 		},
 
-		// Compile all .less files.
-		less: {
+		// Compile all .scss files.
+		sass: {
 			compile: {
-				options: {
-					// These paths are searched for @imports
-					paths: ['<%= dirs.css %>/']
-				},
 				files: [{
 					expand: true,
 					cwd: '<%= dirs.css %>/',
-					src: [
-						'*.less',
-						'!woocommerce-base.less',
-						'!mixins.less'
-					],
+					src: ['*.scss'],
 					dest: '<%= dirs.css %>/',
 					ext: '.css'
 				}]
@@ -167,7 +159,7 @@ module.exports = function( grunt ){
 
 	// Load NPM tasks to be used here
 	grunt.loadNpmTasks( 'grunt-shell' );
-	grunt.loadNpmTasks( 'grunt-contrib-less' );
+	grunt.loadNpmTasks( 'grunt-contrib-sass' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
@@ -176,7 +168,7 @@ module.exports = function( grunt ){
 
 	// Register tasks
 	grunt.registerTask( 'default', [
-		'less',
+		'sass',
 		'cssmin',
 		'uglify'
 	]);
@@ -187,7 +179,7 @@ module.exports = function( grunt ){
 	]);
 
 	grunt.registerTask( 'docs', [
-		'clean:apigen', 
+		'clean:apigen',
 		'shell:apigen'
 	]);
 
@@ -197,8 +189,8 @@ module.exports = function( grunt ){
 		'shell:generatemos'
 	]);
 
-	grunt.registerTask( 'deploy', [ 
-		'clean:deploy', 
+	grunt.registerTask( 'deploy', [
+		'clean:deploy',
 		'copy:deploy'
 	]);
 
