@@ -1,5 +1,5 @@
 /* jshint node:true */
-module.exports = function( grunt ){
+module.exports = function( grunt ) {
 	'use strict';
 
 	grunt.initConfig({
@@ -149,10 +149,10 @@ module.exports = function( grunt ){
 
 		clean: {
 			apigen: {
-				src: [ 'wc-apidocs' ]
+				src: [ 'wc-apidocs', '.sass-cache' ]
 			},
 			deploy: {
-				src: [ 'deploy' ]
+				src: [ 'deploy', '.sass-cache' ]
 			},
 		}
 	});
