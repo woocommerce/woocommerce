@@ -157,7 +157,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title' => __( 'Order Received', 'woocommerce' ),
-				'desc' 		=> __( 'Endpoint for the Checkout &rarr; Pay page', 'woocommerce' ),
+				'desc' 		=> __( 'Endpoint for the Checkout &rarr; Order Received page', 'woocommerce' ),
 				'id' 		=> 'woocommerce_checkout_order_received_endpoint',
 				'type' 		=> 'text',
 				'default'	=> 'order-received',
