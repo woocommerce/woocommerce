@@ -11,7 +11,7 @@ jQuery(function(){
 
 	jQuery('body').on('keyup change', '.wc_input_price[type=text]', function(){
 		var value		= jQuery(this).val();
-		var regex		= new RegExp( "[^0-9\%.\\" + woocommerce_admin.mon_decimal_point + "]+", "gi" );
+		var regex		= new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.mon_decimal_point + "]+", "gi" );
 		var newvalue = value.replace( regex, '' );
 
 			if ( value !== newvalue ) {
@@ -28,9 +28,9 @@ jQuery(function(){
 			return this;
 		});
 
-	jQuery('body').on('keyup change', '.wc_input_price[type=text]', function(){
+	jQuery('body').on('keyup change', '.wc_input_decimal[type=text]', function(){
 		var value		= jQuery(this).val();
-		var regex		= new RegExp( "[^0-9\%.\\" + woocommerce_admin.decimal_point + "]+", "gi" );
+		var regex		= new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.decimal_point + "]+", "gi" );
 		var newvalue = value.replace( regex, '' );
 
 			if ( value !== newvalue ) {
