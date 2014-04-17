@@ -79,9 +79,9 @@ module.exports = function( grunt ) {
 
 		// Watch changes for assets
 		watch: {
-			less: {
-				files: ['<%= dirs.css %>/*.less'],
-				tasks: ['less', 'cssmin'],
+			sass: {
+				files: ['<%= dirs.css %>/*.scss'],
+				tasks: ['sass', 'cssmin'],
 			},
 			js: {
 				files: [
