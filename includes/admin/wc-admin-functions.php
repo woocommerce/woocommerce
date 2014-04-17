@@ -194,7 +194,7 @@ $highlightext:  ' . wc_light_or_dark( $colors['highlight'], 'desaturate(darken($
 $contentbg:     ' . $colors['content_bg'] . ';
 
 $subtext:       ' . $colors['subtext'] . ';
-            ';
+';
 
             file_put_contents( $base_file, $color_rules );
 
