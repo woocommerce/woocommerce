@@ -1311,7 +1311,7 @@ class WC_Order {
 				do_action( 'woocommerce_order_status_changed', $this->id, $this->status, $new_status->slug );
 
 				if ( $old_status ) {
-					$this->add_order_note( $note . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), __( $old_status->name, 'woocommerce' ), __( $new_status->name, 'woocommerce' ) ) );
+					$this->add_order_note( $note . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), __( $old_status->name, 'woocommerce' ), $old_status ), apply_filters( 'woocommerce_order_status_name', __( $new_status->name, 'woocommerce' ), $new_status ) ) );
 				}
 
 				// Record the completed date of the order
