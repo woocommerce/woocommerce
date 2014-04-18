@@ -65,6 +65,16 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			array(	'title' => __( 'Checkout Process', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_process_options' ),
 
 			array(
+				'title' => __( 'Payments', 'woocommerce' ),
+				'desc'          => __( 'Enable payments', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_coupons',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'desc_tip'		=>  __( 'If disabled, customers can place orders without paying. Useful if you simply want to accept orders and handle payments outside of WooCommerce.', 'woocommerce' ),
+				'autoload'      => false
+			),
+
+			array(
 				'title' => __( 'Coupons', 'woocommerce' ),
 				'desc'          => __( 'Enable the use of coupons', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_coupons',
