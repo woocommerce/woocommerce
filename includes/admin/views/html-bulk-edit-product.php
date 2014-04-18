@@ -264,6 +264,24 @@
 
 		<?php endif; ?>
 
+		<label>
+			<span class="title"><?php esc_html_e( 'Sold Individually?', 'woocommerce' ); ?></span>
+			    <span class="input-text-wrap">
+			    	<select class="sold_individually" name="_sold_individually">
+					<?php
+					$options = array(
+						''    => __( '— No Change —', 'woocommerce' ),
+						'yes' => __( 'Yes', 'woocommerce' ),
+						'no'  => __( 'No', 'woocommerce' )
+					);
+					foreach ( $options as $key => $value ) {
+						echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
+					}
+					?>
+				</select>
+			</span>
+		</label>
+
 		<?php do_action( 'woocommerce_product_bulk_edit_end' ); ?>
 
 		<input type="hidden" name="woocommerce_bulk_edit" value="1" />
