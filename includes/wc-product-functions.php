@@ -214,7 +214,7 @@ function wc_get_featured_product_ids() {
  *
  * @access public
  * @param string $permalink The existing permalink URL.
- * @param object $post
+ * @param WP_Post $post
  * @return string
  */
 function wc_product_post_type_link( $permalink, $post ) {
