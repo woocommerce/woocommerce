@@ -1245,6 +1245,41 @@ class WC_Product {
 
 		return '';
 	}
+	
+	
+	/**
+	 * Returns slug of single product attribute.
+	 *
+	 * @access public
+	 * @param mixed $attr
+	 * @return string
+	 */
+	public function get_attribute_slug($attr)
+	{
+		$attributes = $this->get_attributes();
+
+		$attr = sanitize_title( $attr );
+
+		if ( isset( $attributes[ $attr ] ) || isset( $attributes[ 'pa_' . $attr ] ) ) {
+
+			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
+
+			if ( $attribute['is_taxonomy'] ) {
+
+				return implode( ', ', woocommerce_get_product_terms( $this->id, $attribute['name'], 'slugs' ) );
+
+			} else {
+
+				return $attribute['key'];
+
+			}
+
+		}
+
+		return false;
+
+	}
+	
 
 	/**
 	 * Returns product attributes.
