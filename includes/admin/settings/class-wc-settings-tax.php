@@ -133,7 +133,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 			array(
 				'title' 		=> __( 'Additional Tax Classes', 'woocommerce' ),
-				'desc' 		=> __( 'List additonal tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>. Tax classes can be assigned to products.', 'woocommerce' ),
+				'desc' 		=> __( 'List additional tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>. Tax classes can be assigned to products.', 'woocommerce' ),
 				'id' 		=> 'woocommerce_tax_classes',
 				'css' 		=> 'width:100%; height: 65px;',
 				'type' 		=> 'textarea',

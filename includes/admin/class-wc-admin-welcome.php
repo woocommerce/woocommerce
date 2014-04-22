@@ -244,7 +244,7 @@ class WC_Admin_Welcome {
 				<div class="wc-feature feature-rest feature-section col three-col">
 					<div>
 						<h4><?php _e( 'Access your data from 3rd party applications', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Built on top of the WooCommerce API, and targetted directly at developers, the new REST API allows you to get data for <strong>Orders</strong>, <strong>Coupons</strong>, <strong>Customers</strong>, <strong>Products</strong> and <strong>Reports</strong> in both <code>XML</code> and <code>JSON</code> formats.', 'woocommerce' ); ?></p>
+						<p><?php _e( 'Built on top of the WooCommerce API, and targeted directly at developers, the new REST API allows you to get data for <strong>Orders</strong>, <strong>Coupons</strong>, <strong>Customers</strong>, <strong>Products</strong> and <strong>Reports</strong> in both <code>XML</code> and <code>JSON</code> formats.', 'woocommerce' ); ?></p>
 					</div>
 					<div class="icon"></div>
 					<div class="last-feature">

@@ -564,7 +564,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->log->add( 'paypal', 'Checking IPN response is valid via ' . $paypal_adr . '...' );
 		}
 
-		// Get recieved values from post data
+		// Get received values from post data
 		$validate_ipn = array( 'cmd' => '_notify-validate' );
 		$validate_ipn += stripslashes_deep( $ipn_response );
 
