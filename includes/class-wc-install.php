@@ -106,7 +106,7 @@ class WC_Install {
 		$this->create_terms();
 		$this->create_cron_jobs();
 		$this->create_files();
-		$this->create_css_from_less();
+		$this->create_css_from_scss();
 
 		// Clear transient cache
 		wc_delete_product_transients();
@@ -630,17 +630,17 @@ class WC_Install {
 	}
 
 	/**
-	 * Create CSS from LESS file
+	 * Create CSS from SCSS file
 	 */
-	private function create_css_from_less() {
-		// Recompile LESS styles if they are custom
+	private function create_css_from_scss() {
+		// Recompile SCSS styles if they are custom
 		$colors = get_option( 'woocommerce_frontend_css_colors' );
 
 		if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) ) {
-			if ( ! function_exists( 'woocommerce_compile_less_styles' ) ) {
+			if ( ! function_exists( 'woocommerce_compile_scss_styles' ) ) {
 				include_once( 'admin/wc-admin-functions.php' );
 			}
-			woocommerce_compile_less_styles();
+			woocommerce_compile_scss_styles();
 		}
 	}
 
@@ -685,7 +685,7 @@ class WC_Install {
 				if ( preg_match( $regexp, $response['body'], $matches ) ) {
 					$version        = trim( $matches[1] );
 					$notices        = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
-					
+
 					if ( version_compare( WC_VERSION, $version, '<' ) ) {
 
 						$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';

@@ -2,7 +2,7 @@
  * This stylesheet optimises the default WooCommerce layout when viewed on smaller screens.
  */
 
-@import "mixins.less";
+@import "mixins";
 
 .woocommerce, .woocommerce-page {
 
@@ -53,12 +53,12 @@
 			text-align: left;
 			.coupon {
 				float:none;
-				.clearfix;
+				@include clearfix();
 				padding-bottom:.5em;
 			}
 			input, .button, .input-text {
 				width:48%;
-				.borderbox;
+				@include borderbox();
 			}
 			.input-text + .button, .button.alt {
 				float: right;
@@ -93,7 +93,7 @@
 		#place_order {
 			float: none;
 			width:100%;
-			.borderbox;
+			@include borderbox();
 			margin-bottom:1em;
 		}
 	}

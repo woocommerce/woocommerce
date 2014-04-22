@@ -1,6 +1,6 @@
 /* =Mixins
 -------------------------------------------------------------- */
-@import "mixins.less";
+@import "mixins";
 
 
 /* =Custom Font
@@ -148,13 +148,13 @@ table.wc_status_table {
 			background: transparent none;
 		}
 		mark.yes {
-			color: @green;
+			color: $green;
 		}
 		mark.no {
 			color: #999;
 		}
 		mark.error {
-			color: @red;
+			color: $red;
 		}
 		ul {
 			margin: 0;
@@ -379,7 +379,7 @@ ul.wc_coupon_list_block {
 
 /* Orders */
 .button.wc-reload {
-	.ir;
+	@include ir();
 	padding:0;
 	-webkit-border-radius:100%;
 	border-radius:100%;
@@ -387,7 +387,7 @@ ul.wc_coupon_list_block {
 	width:24px !important;
 	display: inline-block;
 	&:after {
-		.icon( "\e031" );
+		@include icon( "\e031" );
 		line-height: 22px;
 	}
 }
@@ -808,14 +808,14 @@ ul.wc_coupon_list_block {
 			}
 		}
 		a.delete_tax_row, a.delete_total_row {
-			.ir;
+			@include ir();
 			display:none;
 			position: absolute;
 			top:-.5em;
 			right:-.5em;
 			font-size:1.4em;
 			&:before {
-				.icon( "\e013" );
+				@include icon( "\e013" );
 				color:white;
 				background-color: #000;
 				-webkit-border-radius:100%;
@@ -823,7 +823,7 @@ ul.wc_coupon_list_block {
 				box-shadow:0 1px 2px rgba(0,0,0,0.2);
 			}
 			&:hover:before {
-				background-color: @red;
+				background-color: $red;
 			}
 		}
 		&:hover, &:focus {
@@ -1049,23 +1049,23 @@ ul.wc_coupon_list_block {
 		width:45px;
 		text-align: center;
 		mark {
-			.ir;
+			@include ir();
 			background: none;
 			font-size: 1.4em;
 			margin: 0 auto;
 		}
 		mark.pending, mark.completed, mark.on-hold, mark.failed, mark.cancelled, mark.processing, mark.refunded {
 			&:after {
-				.icon;
+				@include icon();
 			}
 		}
 		mark.pending:after {
 			content: "\e012";
-			color: @orange;
+			color: $orange;
 		}
 		mark.completed:after {
 			content: "\e015";
-			color: @blue;
+			color: $blue;
 		}
 		mark.on-hold:after {
 			content: "\e033";
@@ -1077,7 +1077,7 @@ ul.wc_coupon_list_block {
 		}
 		mark.cancelled:after {
 			content: "\e013";
-			color: @red;
+			color: $red;
 		}
 		mark.processing:after {
 			content: "\e011";
@@ -1094,34 +1094,34 @@ ul.wc_coupon_list_block {
 }
 .column-customer_message {
 	.note-on {
-		.ir;
+		@include ir();
 		margin:0 auto;
 		color: #999;
 		&:after {
-			.icon( "\e026" );
+			@include icon( "\e026" );
 			line-height: 16px;
 		}
 	}
 }
 .column-order_notes {
 	.note-on {
-		.ir;
+		@include ir();
 		margin:0 auto;
 		color: #999;
 		&:after {
-			.icon( "\e027" );
+			@include icon( "\e027" );
 			line-height: 16px;
 		}
 	}
 }
 .order_actions {
 	.processing, .complete, .view {
-		.ir;
+		@include ir();
 		padding:0 !important;
 		height: 2em !important;
 		width:2em;
 		&:after {
-			.icon;
+			@include icon();
 			line-height: 1.85;
 		}
 	}
@@ -1137,12 +1137,12 @@ ul.wc_coupon_list_block {
 }
 .user_actions {
 	.edit, .link, .view {
-		.ir;
+		@include ir();
 		padding:0 !important;
 		height: 2em !important;
 		width:2em;
 		&:after {
-			.icon;
+			@include icon();
 			line-height: 1.85;
 		}
 	}
@@ -1168,12 +1168,12 @@ ul.wc_coupon_list_block {
 	.attribute-actions {
 		width:2em;
 		.configure-terms {
-			.ir;
+			@include ir();
 			padding:0 !important;
 			height: 2em !important;
 			width:2em;
 			&:after {
-				.icon("\e01c");
+				@include icon("\e01c");
 				line-height: 1.85;
 			}
 		}
@@ -1204,7 +1204,7 @@ ul.order_notes {
 			}
 		}
 		a.delete_note {
-			color: @red
+			color: $red
 		}
 		.note_content:after {
 		  content: "";
@@ -1294,10 +1294,10 @@ table.wp-list-table {
 		text-align: left !important;
 	}
 	span.wc-image, span.wc-featured, span.wc-type {
-		.ir;
+		@include ir();
 		margin:0 auto;
 		&:before {
-			.icon( "\e00c" );
+			@include icon( "\e00c" );
 		}
 	}
 	span.wc-featured {
@@ -1324,10 +1324,10 @@ table.wp-list-table {
 		}
 	}
 	span.product-type {
-		.ir;
+		@include ir();
 		font-size:1.2em;
 		&:before {
-			.icon( "\e006" );
+			@include icon( "\e006" );
 		}
 		&.grouped:before {
 			content: "\e002";
@@ -1347,7 +1347,7 @@ table.wp-list-table {
 	}
 	mark.instock {
 		font-weight: bold;
-		color: @green;
+		color: $green;
 		background: transparent none;
 		line-height: 1;
 	}
@@ -1358,11 +1358,11 @@ table.wp-list-table {
 		line-height: 1;
 	}
 	.order-notes_head, .notes_head, .status_head {
-		.ir;
+		@include ir();
 		margin:0 auto;
 
 		&:after {
-			.icon;
+			@include icon();
 		}
 	}
 	.order-notes_head:after {
@@ -1398,7 +1398,7 @@ table.wp-list-table {
 /* Settings */
 mark.notice {
 	background: #fff;
-	color: @red;
+	color: $red;
 	margin: 0 0 0 10px;
 }
 a.export_rates, a.import_rates {
@@ -1410,7 +1410,7 @@ a.export_rates, a.import_rates {
 table.wc_tax_rates, table.wc_input_table {
 	width: 100%;
 	span.tips {
-		color: @blue;
+		color: $blue;
 	}
 	td {
 		padding: 0;
@@ -1551,12 +1551,12 @@ img.help_tip {
 
 .status-enabled, .status-disabled {
 	font-size:1.4em;
-	.ir;
+	@include ir();
 }
 .status-enabled {
 	&:before {
-		.icon( "\e015" );
-		color: @woocommerce;
+		@include icon( "\e015" );
+		color: $woocommerce;
 	}
 }
 
@@ -1605,7 +1605,7 @@ img.help_tip {
 		}
 		span.help_tip {
 			cursor: help;
-			color: @blue;
+			color: $blue;
 		}
 		th {
 			position: relative;
@@ -1739,7 +1739,7 @@ img.help_tip {
 		#product_images_container {
 			padding: 0 0 0 9px;
 			ul {
-				.clearfix;
+				@include clearfix();
 				margin: 0;
 				padding: 0;
 				li.image, li.add, li.wc-metabox-sortable-placeholder {
@@ -1766,7 +1766,7 @@ img.help_tip {
 					border: 3px dashed #dddddd;
 					position: relative;
 					&:after {
-						.icon( "\e00c" );
+						@include icon( "\e00c" );
 						font-size:2.618em;
 						line-height: 72px;
 						color: #ddd;
@@ -1793,19 +1793,19 @@ img.help_tip {
 							}
 						}
 						a.view {
-							.ir;
+							@include ir();
 							font-size:1.4em;
 							&:before {
-								.icon( "\e00c" );
+								@include icon( "\e00c" );
 								background-color: #000;
 								color: #fff;
 							}
 						}
 						a.delete {
-							.ir;
+							@include ir();
 							font-size:1.4em;
 							&:before {
-								.icon( "\e013" );
+								@include icon( "\e013" );
 								color:white;
 								background-color: #000;
 								-webkit-border-radius:100%;
@@ -1813,7 +1813,7 @@ img.help_tip {
 								box-shadow:0 1px 2px rgba(0,0,0,0.2);
 							}
 							&:hover:before {
-								background-color: @red;
+								background-color: $red;
 							}
 						}
 					}
@@ -1942,7 +1942,7 @@ img.help_tip {
 				border-bottom: 1px solid #f5f5f5;
 				border-top: 1px solid #eaeaea;
 				&:before {
-					.iconbefore( "\e028" );
+					@include iconbefore( "\e028" );
 				}
 			}
 
@@ -2036,7 +2036,7 @@ img.help_tip {
 		}
 
 		.add.button:before {
-			.iconbefore( "\e007" );
+			@include iconbefore( "\e007" );
 		}
 	}
 }
@@ -2132,15 +2132,15 @@ img.help_tip {
 					cursor: pointer;
 				}
 				.delete {
-					.ir;
+					@include ir();
 					&:before {
-						.icon;
+						@include icon();
 						content: "\e013";
 						color: #999;
 					}
 					&:hover {
 						&:before {
-							color: @red;
+							color: $red;
 						}
 					}
 				}
@@ -2202,7 +2202,7 @@ img.help_tip {
 		.req {
 			font-weight: bold;
 			font-style: normal;
-			color: @red;
+			color: $red;
 		}
 	}
 	.description {
@@ -2460,7 +2460,7 @@ img.help_tip {
 		line-height: 22px;
 		text-decoration: none;
 		&:before {
-			.iconbefore( "\e036" );
+			@include iconbefore( "\e036" );
 			font-size: .8em;
 			color: #999;
 		}
@@ -2753,7 +2753,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 				display: block;
 				text-decoration: none;
 				&:before {
-					.iconbefore( "\e00a" );
+					@include iconbefore( "\e00a" );
 					margin-right:4px;
 				}
 			}
@@ -2841,7 +2841,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					border-right-width: 0;
 					padding: 10px;
 					margin:0;
-					color: @blue;
+					color: $blue;
 					border-top-width:0;
 					background-image: -webkit-gradient(linear,left bottom,left top,from(#ececec),to(#f9f9f9));
 					background-image: -webkit-linear-gradient(bottom,#ececec,#f9f9f9);
@@ -2849,7 +2849,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					background-image: -o-linear-gradient(bottom,#ececec,#f9f9f9);
 					background-image: linear-gradient(to top,#ececec,#f9f9f9);
 					&.section_title:hover {
-						color:@red;
+						color:$red;
 					}
 				}
 				.section_title {
@@ -2857,7 +2857,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 					span {
 						display: block;
 						&:after {
-							.iconafter( "\e035" );
+							@include iconafter( "\e035" );
 							float: right;
 							font-size:.9em;
 							line-height: 1.618;
@@ -2955,7 +2955,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 				&:hover {
 					box-shadow:
 						inset 0 -1px 0 0 #dfdfdf,
-						inset 300px 0 0 fade(#9c5d90,10%);
+						inset 300px 0 0 rgba(#9c5d90, 0.1);
 					border-right: 5px solid #9c5d90 !important;
 					padding-left:1.5em;
 					color: #9c5d90;
@@ -3040,12 +3040,12 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 	.column-wc_actions {
 		a.edit,
 		a.view {
-			.ir;
+			@include ir();
 			padding:0 !important;
 			height: 2em !important;
 			width:2em;
 			&:after {
-				.icon;
+				@include icon();
 				line-height: 1.85;
 			}
 		}
@@ -3266,7 +3266,7 @@ table.bar_chart {
 	}
 }
 
-@import 'chosen.less';
+@import 'chosen';
 
 .chosen-container-single .chosen-single {
   	abbr {

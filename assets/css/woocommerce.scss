@@ -1,10 +1,10 @@
-@import "mixins.less";
-@import "woocommerce-base.less"; /* Contains base colours like @primary */
+@import "mixins";
+@import "woocommerce-base"; /* Contains base colours like $primary */
 
 /* Colours */
-@tertiary: 		@primary; 									/* Price slider bar / layered nav UI */
-@tertiarytext: 	@primarytext;								/* Text on tertiary colour bg */
-@quaternary: 	desaturate( darken( @tertiary, 45%), 40% ); /* Price slider bg */
+$tertiary:     $primary; 									/* Price slider bar / layered nav UI */
+$tertiarytext: $primarytext;								/* Text on tertiary colour bg */
+$quaternary:   desaturate( darken( $tertiary, 45% ), 40% ); /* Price slider bg */
 
 /* =Custom Font
 -------------------------------------------------------------- */
@@ -41,11 +41,11 @@ p.demo_store {
 	font-size: 1em;
 	padding: .5em 0;
 	text-align: center;
-	.vertical_gradient( @primary, darken(@primary, 10) );
-	border: 1px solid darken(@primary, 10);
-	color: @primarytext;
+	@include vertical_gradient( $primary, darken($primary, 10%) );
+	border: 1px solid darken($primary, 10%);
+	color: $primarytext;
 	z-index: 99998;
-	.inset_box_shadow( 0, 0, 0, 3px, rgba(255,255,255,0.2) );
+	@include inset_box_shadow( 0, 0, 0, 3px, rgba(255,255,255,0.2) );
 }
 
 .admin-bar { // Styles applied when the admin bar is present
@@ -58,13 +58,13 @@ p.demo_store {
 -------------------------------------------------------------- */
 .wc-forward, .wc-forward a {
 	&:after {
-		.iconafter( "\e029" );
+		@include iconafter( "\e029" );
 		font-size:.75em;
 	}
 }
 .wc-backward, .wc-backward a {
 	&:before {
-		.iconbefore( "\e02f" );
+		@include iconbefore( "\e02f" );
 		font-size:.75em;
 	}
 }
@@ -77,12 +77,12 @@ p.demo_store {
 		padding: 1em 1em 1em 3.5em !important;
 		margin: 0 0 2em !important;
 		position: relative;
-		.border_radius(4px);
-		.vertical_gradient( lighten( @secondary, 2 ), @secondary );
-		color: @secondarytext;
-		.text_shadow( 0, 1px, 0, lighten( @secondary, 4 ) );
+		@include border_radius(4px);
+		@include vertical_gradient( lighten( $secondary, 2% ), $secondary );
+		color: $secondarytext;
+		@include text_shadow( 0, 1px, 0, lighten( $secondary, 4% ) );
 		list-style:none outside !important;
-		.clearfix();
+		@include clearfix();
 		width: auto;
 		-webkit-box-shadow:
 			inset 0 -2px 6px rgba(0,0,0,0.05),
@@ -110,8 +110,8 @@ p.demo_store {
 			color: #fff;
 			text-shadow:0 1px 0 rgba(0,0,0,0.2);
 			padding-top:1em;
-			.border_radius_bottom(4px);
-			.inset_box_shadow(0,-1px,0,0,rgba(0,0,0,0.1));
+			@include border_radius_bottom(4px);
+			@include inset_box_shadow(0,-1px,0,0,rgba(0,0,0,0.1));
 		}
 
 		.button {
@@ -152,20 +152,20 @@ p.demo_store {
 
 	small.note {
 		display:block;
-		color: @subtext;
+		color: $subtext;
 		font-size: 11px;
 		line-height: 21px;
 		margin-top: 10px;
 	}
 
 	.woocommerce-breadcrumb{
-		.clearfix();
+		@include clearfix();
 		margin: 0 0 1em;
 		padding: 0;
 		font-size: 0.92em;
-		color: @subtext;
+		color: $subtext;
 		a {
-			color: @subtext;
+			color: $subtext;
 		}
 	}
 
@@ -185,14 +185,14 @@ p.demo_store {
 
 		/* Price */
 		span.price, p.price {
-			color: @highlight;
+			color: $highlight;
 			font-size: 1.25em;
 			ins {
 				background: inherit;
 			}
 			del {
 				font-size: 0.67em;
-				color:fade( desaturate( @highlight, 75% ), 50% );
+				color:rgba( desaturate( $highlight, 75% ), 0.5 );
 			}
 		}
 
@@ -201,7 +201,7 @@ p.demo_store {
 			font-size: 0.92em;
 		}
 		.stock {
-			color: @highlight;
+			color: $highlight;
 		}
 		.out-of-stock {
 			color: red;
@@ -214,8 +214,8 @@ p.demo_store {
 				display:block;
 				width: 100%;
 				height:auto;
-				.box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
-				.transition();
+				@include box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
+				@include transition();
 			}
 			div.thumbnails {
 				padding-top: 1em;
@@ -258,12 +258,12 @@ p.demo_store {
 				position: relative;
 
 				li {
-					border: 1px solid darken( @secondary, 10 );
-					.vertical_gradient( @secondary, darken( @secondary, 10 ) );
+					border: 1px solid darken( $secondary, 10% );
+					@include vertical_gradient( $secondary, darken( $secondary, 10% ) );
 					display: inline-block;
 					position: relative;
 					z-index: 0;
-					.border_radius_top(4px);
+					@include border_radius_top(4px);
 					box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.6);
 					margin: 0 -5px;
 					padding: 0 1em;
@@ -272,20 +272,20 @@ p.demo_store {
 						display: inline-block;
 						padding: .5em 0;
 						font-weight:bold;
-						color: @secondarytext;
-						.darkorlighttextshadow( @secondarytext );
+						color: $secondarytext;
+						@include darkorlighttextshadow( $secondarytext );
 						text-decoration: none;
 
 						&:hover {
 							text-decoration:none;
-							color: lighten( @secondarytext, 10 );
+							color: lighten( $secondarytext, 10% );
 						}
 					}
 
 					&.active {
-						background: @contentbg;
+						background: $contentbg;
 						z-index: 2;
-						border-bottom-color: @contentbg;
+						border-bottom-color: $contentbg;
 
 						a {
 							color: inherit;
@@ -293,15 +293,15 @@ p.demo_store {
 						}
 
 						&:before {
-							box-shadow: 2px 2px 0 @contentbg;
+							box-shadow: 2px 2px 0 $contentbg;
 						}
 
 						&:after {
-							box-shadow: -2px 2px 0 @contentbg;
+							box-shadow: -2px 2px 0 $contentbg;
 						}
 					}
 					&:before, &:after {
-						border: 1px solid darken( @secondary, 10 );
+						border: 1px solid darken( $secondary, 10% );
 						position:absolute;
 						bottom: -1px;
 						width: 5px;
@@ -314,7 +314,7 @@ p.demo_store {
 						-moz-border-bottom-right-radius: 4px;
 						border-bottom-right-radius: 4px;
 						border-width: 0 1px 1px 0;
-						box-shadow: 2px 2px 0 darken( @secondary, 10 );
+						box-shadow: 2px 2px 0 darken( $secondary, 10% );
 					}
 					&:after {
 						right: -6px;
@@ -322,7 +322,7 @@ p.demo_store {
 						-moz-border-bottom-left-radius: 4px;
 						border-bottom-left-radius: 4px;
 						border-width: 0 0 1px 1px;
-						box-shadow: -2px 2px 0 darken( @secondary, 10 );
+						box-shadow: -2px 2px 0 darken( $secondary, 10% );
 					}
 				}
 				&:before {
@@ -331,7 +331,7 @@ p.demo_store {
 					width: 100%;
 					bottom: 0;
 					left: 0;
-					border-bottom: 1px solid darken( @secondary, 10 );
+					border-bottom: 1px solid darken( $secondary, 10% );
 					z-index: 1;
 				}
 			}
@@ -344,13 +344,13 @@ p.demo_store {
 		/* Cart button */
 		p.cart {
 			margin-bottom: 2em;
-			.clearfix();
+			@include clearfix();
 		}
 
 		/* add to cart forms */
 		form.cart {
 			margin-bottom: 2em;
-			.clearfix();
+			@include clearfix();
 			div.quantity {
 				float:left;
 				margin: 0 4px 0 0;
@@ -416,10 +416,10 @@ p.demo_store {
 		top: 6px;
 		left: 6px;
 		margin: 0;
-		.border_radius(20px);
-		.vertical_gradient( lighten( @highlight, 10), @highlight );
-		.text_shadow( 0, -1px, 0, @highlight );
-		color: @highlightext;
+		@include border_radius(20px);
+		@include vertical_gradient( lighten( $highlight, 10%), $highlight );
+		@include text_shadow( 0, -1px, 0, $highlight );
+		color: $highlightext;
 		-webkit-box-shadow:
 			inset 0 1px 0 rgba(255,255,255,0.3),
 			inset 0 -1px 0 rgba(0,0,0,0.2),
@@ -442,7 +442,7 @@ p.demo_store {
 		padding: 0;
 		list-style:none outside;
 		clear:both;
-		.clearfix();
+		@include clearfix();
 		li {
 			list-style:none outside;
 		}
@@ -469,23 +469,23 @@ p.demo_store {
 				height:auto;
 				display:block;
 				margin: 0 0 8px;
-				.box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
-				.transition();
+				@include box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
+				@include transition();
 			}
 			a:hover img {
-				.box_shadow(0,1px,3px,0,rgba(0,0,0,0.4));
+				@include box_shadow(0,1px,3px,0,rgba(0,0,0,0.4));
 			}
 			strong {
 				display:block;
 			}
 			.price {
-				color: @highlight;
+				color: $highlight;
 				display:block;
 				font-weight:normal;
 				margin-bottom: .5em;
 				del {
 					font-size: 0.67em;
-					color:fade( desaturate( @highlight, 75% ), 50% );
+					color:rgba( desaturate( $highlight, 75% ), 0.5 );
 					margin: -2px 0 0 0;
 				}
 				ins {
@@ -495,7 +495,7 @@ p.demo_store {
 					font-size: 0.67em;
 					margin: -2px 0 0 0;
 					text-transform: uppercase;
-					color:fade( desaturate( @highlight, 75% ), 50% );
+					color:rgba( desaturate( $highlight, 75% ), 0.5 );
 				}
 			}
 		}
@@ -517,11 +517,11 @@ p.demo_store {
 			white-space: nowrap;
 			padding:0;
 			clear: both;
-			border: 1px solid darken( @secondary, 10 );
+			border: 1px solid darken( $secondary, 10% );
 			border-right: 0;
 			margin: 1px;
 			li {
-				border-right: 1px solid darken( @secondary, 10 );
+				border-right: 1px solid darken( $secondary, 10% );
 				padding: 0;
 				margin: 0;
 				float: left;
@@ -539,8 +539,8 @@ p.demo_store {
 					display: block;
 				}
 				span.current, a:hover, a:focus {
-					background: @secondary;
-					color: darken( @secondary, 40 );
+					background: $secondary;
+					color: darken( $secondary, 40% );
 				}
 			}
 		}
@@ -561,13 +561,13 @@ p.demo_store {
 		padding: 6px 10px;
 		text-decoration:none;
 		font-weight:bold;
-		.border_radius(2px);
+		@include border_radius(2px);
 		left: auto;
-		text-shadow:0 1px 0 @secondary + #111;
-		color: @secondarytext;
-		.darkorlighttextshadow( @secondarytext );
-		border: 1px solid darken( @secondary, 20 );
-		.vertical_gradient( @secondary, darken( @secondary, 10 ) );
+		text-shadow:0 1px 0 $secondary + #111;
+		color: $secondarytext;
+		@include darkorlighttextshadow( $secondarytext );
+		border: 1px solid darken( $secondary, 20% );
+		@include vertical_gradient( $secondary, darken( $secondary, 10% ) );
 		white-space: nowrap;
 		display: inline-block;
 
@@ -585,8 +585,8 @@ p.demo_store {
 			0 1px 2px rgba(0,0,0,0.1);
 
 		&.loading {
-			color: lighten( @secondarytext, 10 );
-			border: 1px solid @secondary;
+			color: lighten( $secondarytext, 10% );
+			border: 1px solid $secondary;
 
 			&:before {
 				content: "";
@@ -613,7 +613,7 @@ p.demo_store {
 		}
 
 		&:hover {
-			.vertical_gradient( @secondary, darken( @secondary, 15 ) );
+			@include vertical_gradient( $secondary, darken( $secondary, 15% ) );
 			text-decoration:none;
 		}
 
@@ -622,24 +622,24 @@ p.demo_store {
 		}
 
 		&.alt {
-			.vertical_gradient( @primary, darken( @primary, 10 ) );
-			border-color: darken(@primary, 20);
-			color: @primarytext;
-			.darkorlighttextshadow( @primarytext, 0.6 );
+			@include vertical_gradient( $primary, darken( $primary, 10% ) );
+			border-color: darken($primary, 20%);
+			color: $primarytext;
+			@include darkorlighttextshadow( $primarytext, 0.6 );
 
 			&:hover {
-				.vertical_gradient( @primary, darken( @primary, 15 ) );
-				color:@primarytext + #111;
-				.darkorlighttextshadow( @primarytext + #111, 0.6 );
+				@include vertical_gradient( $primary, darken( $primary, 15% ) );
+				color:$primarytext + #111;
+				@include darkorlighttextshadow( $primarytext + #111, 0.6 );
 			}
 		}
 
 		&:disabled,
 		&.disabled {
-			color: lighten( @secondarytext, 30 );
-			border: 1px solid darken( @secondary, 10 );
+			color: lighten( $secondarytext, 30% );
+			border: 1px solid darken( $secondary, 10% );
 
-			background: @secondary;
+			background: $secondary;
 			-webkit-box-shadow: none;
 			-moz-box-shadow: none;
 			box-shadow: none;
@@ -677,12 +677,12 @@ p.demo_store {
 			float:left;
 			padding: 0;
 			text-align: center;
-			border: 1px solid darken( @secondary, 20 );
+			border: 1px solid darken( $secondary, 20% );
 			border-right: 0;
-			.border_radius_right(0);
-			.inset_box_shadow( 0, 0, 2px, 0, @secondary );
+			@include border_radius_right(0);
+			@include inset_box_shadow( 0, 0, 2px, 0, $secondary );
 			font-weight:bold;
-			.border_radius_left(2px);
+			@include border_radius_left(2px);
 		}
 
 		/* Hide buttons for opera */
@@ -706,12 +706,12 @@ p.demo_store {
 			cursor: pointer;
 			line-height: 13px;
 			font-size: 12px;
-			.border_radius(2px);
+			@include border_radius(2px);
 
-			color: @secondarytext;
-			.darkorlighttextshadow( @secondarytext );
-			border: 1px solid darken( @secondary, 20 );
-			.vertical_gradient( @secondary, darken( @secondary, 10 ) );
+			color: $secondarytext;
+			@include darkorlighttextshadow( $secondarytext );
+			border: 1px solid darken( $secondary, 20% );
+			@include vertical_gradient( $secondary, darken( $secondary, 10% ) );
 
 			-webkit-box-shadow:
 				inset 0 -1px 0 rgba(0,0,0,0.075),
@@ -727,7 +727,7 @@ p.demo_store {
 				0 1px 2px rgba(0,0,0,0.1);
 
 			&:hover {
-				.vertical_gradient( @secondary, darken( @secondary, 15 ) );
+				@include vertical_gradient( $secondary, darken( $secondary, 15% ) );
 			}
 		}
 
@@ -735,13 +735,13 @@ p.demo_store {
 			top: 0;
 			right: 0;
 			border-bottom: 0;
-			.border_radius_bottom(0);
+			@include border_radius_bottom(0);
 		}
 
 		.minus {
 			bottom: 0;
 			right: 0;
-			.border_radius_top(0);
+			@include border_radius_top(0);
 		}
 	}
 
@@ -750,13 +750,13 @@ p.demo_store {
 	#reviews {
 		h2 small {
 			float: right;
-			color: @subtext;
+			color: $subtext;
 			font-size: 15px;
 			line-height: 21px;
 			margin: 10px 0 0 0;
 			a {
 				text-decoration:none;
-				color: @subtext;
+				color: $subtext;
 			}
 		}
 		h3 {
@@ -772,13 +772,13 @@ p.demo_store {
 		}
 		#comments {
 			.add_review {
-				.clearfix();
+				@include clearfix();
 			}
 			h2 {
 				clear:none;
 			}
 			ol.commentlist {
-				.clearfix();
+				@include clearfix();
 				margin: 0;
 				width: 100%;
 				background:none;
@@ -791,7 +791,7 @@ p.demo_store {
 					background: 0;
 					border: 0;
 					.meta {
-						color: @subtext;
+						color: $subtext;
 						font-size: 0.75em;
 					}
 					img.avatar {
@@ -802,17 +802,17 @@ p.demo_store {
 						padding: 3px;
 						width: 32px;
 						height:auto;
-						background: @secondary;
-						border: 1px solid darken( @secondary, 3 );
+						background: $secondary;
+						border: 1px solid darken( $secondary, 3% );
 						margin: 0;
 						line-height: 1;
 					}
 					.comment-text {
 						margin: 0 0 0 50px;
-						border: 1px solid darken( @secondary, 3 );
-						.border_radius(4px);
+						border: 1px solid darken( $secondary, 3% );
+						@include border_radius(4px);
 						padding: 1em 1em 0;
-						.clearfix();
+						@include clearfix();
 						p {
 							margin: 0 0 1em;
 						}
@@ -830,8 +830,8 @@ p.demo_store {
 					}
 				}
 				#respond {
-					border: 1px solid darken( @secondary, 3 );
-					.border_radius(4px);
+					border: 1px solid darken( $secondary, 3% );
+					@include border_radius(4px);
 					padding: 1em 1em 0;
 					margin: 20px 0 0 50px;
 				}
@@ -854,7 +854,7 @@ p.demo_store {
 		font-family: 'star';
 		&:before {
 			content: "\73\73\73\73\73";
-			color: darken( @secondary, 10 );
+			color: darken( $secondary, 10% );
 			float: left;
 			top: 0;
 			left: 0;
@@ -902,7 +902,7 @@ p.demo_store {
 
 	#review_form {
 		#respond {
-			.clearfix();
+			@include clearfix();
 			position: static;
 			margin: 0;
 			width: auto;
@@ -1067,7 +1067,7 @@ p.demo_store {
 		text-align:left;
 		width: 100%;
 		border-collapse: separate;
-		.border_radius(5px);
+		@include border_radius(5px);
 		th {
 			font-weight:bold;
 			line-height: 18px;
@@ -1107,7 +1107,7 @@ p.demo_store {
 	td.product-name {
 		dl.variation {
 			margin: .25em 0;
-			.clearfix;
+			@include clearfix();
 
 			dt, dd {
 				display: inline-block;
@@ -1156,7 +1156,7 @@ p.demo_store {
 			width:1em;
 			text-align: center;
 			line-height: 1;
-			.border_radius(100%);
+			@include border_radius(100%);
 			color: red;
 			text-decoration: none;
 			font-weight: bold;
@@ -1173,9 +1173,9 @@ p.demo_store {
 					-moz-box-sizing:border-box;
 					box-sizing:border-box;
 
-					.inset_box_shadow(0, 1px, 4px, 0, rgba(0,0,0,0.1));
+					@include inset_box_shadow(0, 1px, 4px, 0, rgba(0,0,0,0.1));
 
-					border: 1px solid darken( @secondary, 10 );
+					border: 1px solid darken( $secondary, 10% );
 					padding: 6px 6px 5px;
 					margin: 0 4px 0 0;
 					outline: 0;
@@ -1201,7 +1201,7 @@ p.demo_store {
 		li {
 			padding: 4px 0;
 			margin: 0;
-			.clearfix;
+			@include clearfix();
 			list-style:none;
 			a {
 				display:block;
@@ -1212,13 +1212,13 @@ p.demo_store {
 				margin-left: 4px;
 				width: 32px;
 				height:auto;
-				.box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
+				@include box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
 			}
 			dl {
 				margin: 0;
 				padding-left: 1em;
 				border-left: 2px solid rgba(0,0,0,0.1);
-				.clearfix;
+				@include clearfix();
 
 				dt, dd {
 					display: inline-block;
@@ -1246,7 +1246,7 @@ p.demo_store {
 
 	&.widget_shopping_cart, .widget_shopping_cart {
 		.total {
-			border-top: 3px double @secondary;
+			border-top: 3px double $secondary;
 			padding: 4px 0 0;
 			strong {
 				min-width: 40px;
@@ -1254,7 +1254,7 @@ p.demo_store {
 			}
 		}
 		.buttons {
-			.clearfix;
+			@include clearfix();
 		}
 	}
 
@@ -1271,7 +1271,7 @@ p.demo_store {
 			}
 			.shipping-calculator-button {
 				&:after {
-					.iconafter( "\e02e" );
+					@include iconafter( "\e02e" );
 				}
 			}
 		}
@@ -1279,13 +1279,13 @@ p.demo_store {
 			p {
 				margin: 0;
 				small {
-					color: @subtext;
+					color: $subtext;
 					font-size: 0.83em;
 				}
 			}
 			table {
 				border-collapse: separate;
-				.border_radius(5px);
+				@include border_radius(5px);
 				margin: 0 0 6px;
 				padding: 0;
 				tr:first-child {
@@ -1305,17 +1305,17 @@ p.demo_store {
 				}
 				small {
 					display:block;
-					color: @subtext;
+					color: $subtext;
 				}
 				select {
 					width: 100%;
 				}
 			}
 			.discount td {
-				color: @highlight;
+				color: $highlight;
 			}
 			tr td, tr th {
-				border-top: 1px solid @secondary;
+				border-top: 1px solid $secondary;
 			}
 			a.button.alt {
 				display: inline-block;
@@ -1369,7 +1369,7 @@ p.demo_store {
 				vertical-align: middle;
 			}
 			input.input-text, textarea {
-				.borderbox;
+				@include borderbox;
 				width: 100%;
 				margin: 0;
 				outline: 0;
@@ -1401,11 +1401,11 @@ p.demo_store {
 	}
 
 	form.login, form.checkout_coupon, form.register {
-		border: 1px solid darken( @secondary, 10 );
+		border: 1px solid darken( $secondary, 10% );
 		padding: 20px;
 		margin: 2em 0 2em 0px;
 		text-align:left;
-		.border_radius(5px);
+		@include border_radius(5px);
 	}
 
 	ul#shipping_method {
@@ -1446,7 +1446,7 @@ p.demo_store {
 		}
 		.create-account small {
 			font-size: 11px;
-			color: @subtext;
+			color: $subtext;
 			line-height: 13px;
 			font-weight:normal;
 		}
@@ -1462,14 +1462,14 @@ p.demo_store {
 
 	/* Payment box - appears on checkout and page page */
 	#payment {
-		background: @secondary;
-		.border_radius(5px);
+		background: $secondary;
+		@include border_radius(5px);
 
 		ul.payment_methods {
-			.clearfix;
+			@include clearfix();
 			text-align:left;
 			padding: 1em;
-			border-bottom: 1px solid darken( @secondary, 10 );
+			border-bottom: 1px solid darken( $secondary, 10% );
 			margin: 0;
 			list-style:none outside;
 			li {
@@ -1490,7 +1490,7 @@ p.demo_store {
 
 		div.form-row {
 			padding: 1em;
-			border-top: 1px solid lighten( @secondary, 5 );
+			border-top: 1px solid lighten( $secondary, 5% );
 		}
 		div.payment_box {
 			position: relative;
@@ -1498,26 +1498,26 @@ p.demo_store {
 			padding: 1em 2%;
 			margin: 1em 0 1em 0;
 			font-size: 0.92em;
-			.border_radius(2px);
+			@include border_radius(2px);
 			line-height: 1.5em;
-			.vertical_gradient( darken( @secondary, 5 ), darken( @secondary, 10 ) );
-			.box_shadow(0,1px,2px,0,rgba(0,0,0,0.25));
-			color: @secondarytext;
-			.darkorlighttextshadow( @secondarytext );
+			@include vertical_gradient( darken( $secondary, 5% ), darken( $secondary, 10% ) );
+			@include box_shadow(0,1px,2px,0,rgba(0,0,0,0.25));
+			color: $secondarytext;
+			@include darkorlighttextshadow( $secondarytext );
 
 			input.input-text, textarea {
-				border-color: darken( @secondary, 15 );
-				border-top-color: darken( @secondary, 20 );
-				.box_shadow( 0, 1px, 0, 0, rgba( 255,255,255,0.4 ) );
+				border-color: darken( $secondary, 15% );
+				border-top-color: darken( $secondary, 20% );
+				@include box_shadow( 0, 1px, 0, 0, rgba( 255,255,255,0.4 ) );
 			}
 			::-webkit-input-placeholder {
-				color: darken( @secondary, 20 );
+				color: darken( $secondary, 20% );
 			}
 			:-moz-placeholder {
-				color: darken( @secondary, 20 );
+				color: darken( $secondary, 20% );
 			}
 			:-ms-input-placeholder {
-				color: darken( @secondary, 20 );
+				color: darken( $secondary, 20% );
 			}
 			.wc-credit-card-form-card-number,
 			.wc-credit-card-form-card-expiry,
@@ -1554,7 +1554,7 @@ p.demo_store {
 			}
 			span.help {
 				font-size: 11px;
-				color: @subtext;
+				color: $subtext;
 				line-height: 13px;
 				font-weight:normal;
 			}
@@ -1567,7 +1567,7 @@ p.demo_store {
 			&:after {
 				content: "";
 				display:block;
-				border: 8px solid darken( @secondary, 5 ); /* arrow size / color */
+				border: 8px solid darken( $secondary, 5% ); /* arrow size / color */
 				border-right-color: transparent;
 				border-left-color: transparent;
 				border-top-color: transparent;
@@ -1583,7 +1583,7 @@ p.demo_store {
 	-------------------------------------------------------------- */
 
 	.order_details {
-		.clearfix();
+		@include clearfix();
 		margin: 0 0 1.5em;
 		list-style:none;
 
@@ -1593,7 +1593,7 @@ p.demo_store {
 			text-transform: uppercase;
 			font-size: 0.715em;
 			line-height: 1em;
-			border-right: 1px dashed darken( @secondary, 10 );
+			border-right: 1px dashed darken( $secondary, 10% );
 			padding-right: 2em;
 
 			strong {
@@ -1614,7 +1614,7 @@ p.demo_store {
 
 	.addresses {
 		.title {
-			.clearfix();
+			@include clearfix();
 
 			h3 {
 				float:left;
@@ -1647,7 +1647,7 @@ p.demo_store {
 			margin-left: 0;
 			padding-left: 0;
 			&:before {
-				.iconbefore( "\e00a" );
+				@include iconbefore( "\e00a" );
 			}
 			.count {
 				float: right;
@@ -1665,7 +1665,7 @@ p.demo_store {
 			border: 0;
 			list-style:none outside;
 			li {
-				.clearfix();
+				@include clearfix();
 				padding: 0 0 1px;
 				list-style:none;
 				a, span {
@@ -1677,13 +1677,13 @@ p.demo_store {
 				a {
 					padding:0 6px;
 					text-decoration: none;
-					border: 1px solid @tertiary;
-					background: @tertiary;
-					.inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
-					color: @tertiarytext;
-					.border_radius(3px);
+					border: 1px solid $tertiary;
+					background: $tertiary;
+					@include inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
+					color: $tertiarytext;
+					@include border_radius(3px);
 					&:before {
-						.iconbefore( "\e013" );
+						@include iconbefore( "\e013" );
 					}
 				}
 			}
@@ -1692,7 +1692,7 @@ p.demo_store {
 				margin-left: 6px;
 				font-size: 1em;
 				padding: 1px 0;
-				color: @subtext;
+				color: $subtext;
 			}
 		}
 	}
@@ -1712,14 +1712,14 @@ p.demo_store {
 				a {
 					padding:0 6px;
 					text-decoration: none;
-					border: 1px solid @tertiary;
-					background: @tertiary;
-					.inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
-					color: @tertiarytext;
-					.border_radius(3px);
+					border: 1px solid $tertiary;
+					background: $tertiary;
+					@include inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
+					color: $tertiarytext;
+					@include border_radius(3px);
 					float: left;
 					&:before {
-						.iconbefore( "\e013" );
+						@include iconbefore( "\e013" );
 					}
 				}
 			}
@@ -1753,10 +1753,10 @@ p.demo_store {
 			z-index: 2;
 			width: 0.9em;
 			height: 0.9em;
-			.border_radius(1em);
-			border: 1px solid darken( @tertiary, 50 );
+			@include border_radius(1em);
+			border: 1px solid darken( $tertiary, 50% );
 			cursor: pointer;
-			.vertical_gradient( @tertiary, darken( @tertiary, 10 ));
+			@include vertical_gradient( $tertiary, darken( $tertiary, 10% ));
 			outline:none;
 			top: -.3em;
 			-webkit-box-shadow:
@@ -1779,13 +1779,13 @@ p.demo_store {
 			font-size: .7em;
 			display:block;
 			border: 0;
-			background: @tertiary url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAADCAYAAABS3WWCAAAAFUlEQVQIHWP4//9/PRMDA8NzEPEMADLLBU76a5idAAAAAElFTkSuQmCC) top repeat-x; /* transparent png */
-			.inset_box_shadow(0,0,0,1px,rgba(0,0,0,0.5));
-			.border_radius(1em);
+			background: $tertiary url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAADCAYAAABS3WWCAAAAFUlEQVQIHWP4//9/PRMDA8NzEPEMADLLBU76a5idAAAAAElFTkSuQmCC) top repeat-x; /* transparent png */
+			@include inset_box_shadow(0,0,0,1px,rgba(0,0,0,0.5));
+			@include border_radius(1em);
 		}
 		.price_slider_wrapper .ui-widget-content {
-			.border_radius(1em);
-			.vertical_gradient( @quaternary, lighten( @quaternary, 30 ) );
+			@include border_radius(1em);
+			@include vertical_gradient( $quaternary, lighten( $quaternary, 30% ) );
 		}
 		.ui-slider-horizontal {
 			height: .5em;

@@ -222,7 +222,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			</th>
 			<td class="forminp"><?php
 
-				$base_file = WC()->plugin_path() . '/assets/css/woocommerce-base.less';
+				$base_file = WC()->plugin_path() . '/assets/css/_woocommerce-base.scss';
 				$css_file  = WC()->plugin_path() . '/assets/css/woocommerce.css';
 
 				if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
@@ -255,7 +255,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					$this->color_picker( __( 'Subtext', 'woocommerce' ), 'woocommerce_frontend_css_subtext', $colors['subtext'], __( 'Used for certain text and asides - breadcrumbs, small text etc.', 'woocommerce' ) );
 
 				} else {
-					echo '<span class="description">' . __( 'To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> and <code>woocommerce.css</code> need to be writable. See <a href="http://codex.wordpress.org/Changing_File_Permissions">the Codex</a> for more information.', 'woocommerce' ) . '</span>';
+					echo '<span class="description">' . __( 'To edit colours <code>woocommerce/assets/css/_woocommerce-base.scss</code> and <code>woocommerce.css</code> need to be writable. See <a href="http://codex.wordpress.org/Changing_File_Permissions">the Codex</a> for more information.', 'woocommerce' ) . '</span>';
 				}
 
 			?></td>
@@ -318,7 +318,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				update_option( 'woocommerce_frontend_css_colors', $colors );
 
 				if ( $old_colors != $colors ) {
-					woocommerce_compile_less_styles();
+					woocommerce_compile_scss_styles();
 				}
 			}
 		}

@@ -69,7 +69,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
     if ( $page_found ) {
         if ( ! $option_value )
             update_option( $option, $page_found );
-		
+
 		return $page_found;
     }
 
@@ -133,63 +133,82 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
 }
 
 /**
- * Generate CSS from the less file when changing colours.
+ * Generate CSS from the scss file when changing colours.
  *
  * @access public
  * @return void
  */
-function woocommerce_compile_less_styles() {
+function woocommerce_compile_scss_styles() {
     global $woocommerce;
 
-    $colors         = array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
-    $base_file      = WC()->plugin_path() . '/assets/css/woocommerce-base.less';
-    $less_file      = WC()->plugin_path() . '/assets/css/woocommerce.less';
-    $css_file       = WC()->plugin_path() . '/assets/css/woocommerce.css';
+    $colors       = array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
+    $css_diretory = WC()->plugin_path() . '/assets/css/';
+    $base_file    = $css_diretory . '_woocommerce-base.scss';
+    $scss_file    = $css_diretory . 'woocommerce.scss';
+    $css_file     = $css_diretory . 'woocommerce.css';
 
-    // Write less file
+    // Write scss file
     if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
 
-        // Colours changed - recompile less
-        if ( ! class_exists( 'lessc' ) )
-            include_once( WC()->plugin_path() . '/includes/libraries/class-lessc.php' );
-        if ( ! class_exists( 'cssmin' ) )
+        // Colours changed - recompile scss
+        if ( ! class_exists( 'scssc' ) ) {
+            include_once( WC()->plugin_path() . '/includes/libraries/class-scssc.php' );
+        }
+        if ( ! class_exists( 'cssmin' ) ) {
             include_once( WC()->plugin_path() . '/includes/libraries/class-cssmin.php' );
+        }
 
         try {
             // Set default if colours not set
-            if ( ! $colors['primary'] ) $colors['primary'] = '#ad74a2';
-            if ( ! $colors['secondary'] ) $colors['secondary'] = '#f7f6f7';
-            if ( ! $colors['highlight'] ) $colors['highlight'] = '#85ad74';
-            if ( ! $colors['content_bg'] ) $colors['content_bg'] = '#ffffff';
-            if ( ! $colors['subtext'] ) $colors['subtext'] = '#777777';
+            if ( ! $colors['primary'] ) {
+            	$colors['primary'] = '#ad74a2';
+            }
+
+            if ( ! $colors['secondary'] ) {
+            	$colors['secondary'] = '#f7f6f7';
+            }
+
+            if ( ! $colors['highlight'] ) {
+            	$colors['highlight'] = '#85ad74';
+            }
+
+            if ( ! $colors['content_bg'] ) {
+            	$colors['content_bg'] = '#ffffff';
+            }
+
+            if ( ! $colors['subtext'] ) {
+            	$colors['subtext'] = '#777777';
+            }
 
             // Write new color to base file
-            $color_rules = "
-@primary:       " . $colors['primary'] . ";
-@primarytext:   " . wc_light_or_dark( $colors['primary'], 'desaturate(darken(@primary,50%),18%)', 'desaturate(lighten(@primary,50%),18%)' ) . ";
+            $color_rules = '
+$primary:       ' . $colors['primary'] . ';
+$primarytext:   ' . wc_light_or_dark( $colors['primary'], 'desaturate(darken($primary,50%),18%)', 'desaturate(lighten($primary,50%),18%)' ) . ';
 
-@secondary:     " . $colors['secondary'] . ";
-@secondarytext: " . wc_light_or_dark( $colors['secondary'], 'desaturate(darken(@secondary,60%),18%)', 'desaturate(lighten(@secondary,60%),18%)' ) . ";
+$secondary:     ' . $colors['secondary'] . ';
+$secondarytext: ' . wc_light_or_dark( $colors['secondary'], 'desaturate(darken($secondary,60%),18%)', 'desaturate(lighten($secondary,60%),18%)' ) . ';
 
-@highlight:     " . $colors['highlight'] . ";
-@highlightext:  " . wc_light_or_dark( $colors['highlight'], 'desaturate(darken(@highlight,60%),18%)', 'desaturate(lighten(@highlight,60%),18%)' ) . ";
+$highlight:     ' . $colors['highlight'] . ';
+$highlightext:  ' . wc_light_or_dark( $colors['highlight'], 'desaturate(darken($highlight,60%),18%)', 'desaturate(lighten($highlight,60%),18%)' ) . ';
 
-@contentbg:     " . $colors['content_bg'] . ";
+$contentbg:     ' . $colors['content_bg'] . ';
 
-@subtext:       " . $colors['subtext'] . ";
-            ";
+$subtext:       ' . $colors['subtext'] . ';
+';
 
             file_put_contents( $base_file, $color_rules );
 
-            $less         = new lessc;
-            $compiled_css = $less->compileFile( $less_file );
+            $scss         = new scssc;
+            $scss->setImportPaths( $css_diretory );
+            $compiled_css = $scss->compile( trim( file_get_contents( $scss_file ) ) );
             $compiled_css = CssMin::minify( $compiled_css );
 
-            if ( $compiled_css )
+            if ( $compiled_css ) {
                 file_put_contents( $css_file, $compiled_css );
+            }
 
         } catch ( exception $ex ) {
-            wp_die( __( 'Could not compile woocommerce.less:', 'woocommerce' ) . ' ' . $ex->getMessage() );
+            wp_die( __( 'Could not compile woocommerce.scss:', 'woocommerce' ) . ' ' . $ex->getMessage() );
         }
     }
 }
