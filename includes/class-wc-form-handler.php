@@ -164,17 +164,15 @@ class WC_Form_Handler {
 		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? wc_clean( $_POST[ 'account_first_name' ] ) : '';
 		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? wc_clean( $_POST[ 'account_last_name' ] ) : '';
 		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? sanitize_email( $_POST[ 'account_email' ] ) : '';
+		$pass_cur           = ! empty( $_POST[ 'password_current' ] ) ? $_POST[ 'password_current' ] : '';
 		$pass1              = ! empty( $_POST[ 'password_1' ] ) ? $_POST[ 'password_1' ] : '';
 		$pass2              = ! empty( $_POST[ 'password_2' ] ) ? $_POST[ 'password_2' ] : '';
+		$save_pass          = true;
 
 		$user->first_name   = $account_first_name;
 		$user->last_name    = $account_last_name;
 		$user->user_email   = $account_email;
 		$user->display_name = $user->first_name;
-
-		if ( $pass1 ) {
-			$user->user_pass = $pass1;
-		}
 
 		if ( empty( $account_first_name ) || empty( $account_last_name ) ) {
 			wc_add_notice( __( 'Please enter your name.', 'woocommerce' ), 'error' );
@@ -186,10 +184,31 @@ class WC_Form_Handler {
 			wc_add_notice( __( 'This email address is already registered.', 'woocommerce' ), 'error' );
 		}
 
-		if ( ! empty( $pass1 ) && empty( $pass2 ) ) {
+		if ( ! empty( $pass1 ) && ! wp_check_password( $pass_cur, $current_user->user_pass, $current_user->ID ) ) {
+			wc_add_notice( __( 'Your current password is incorrect.', 'woocommerce' ), 'error' );
+			$save_pass = false;
+		}
+
+		if ( ! empty( $pass_cur ) && empty( $pass1 ) && empty( $pass2 ) ) {
+			wc_add_notice( __( 'Please fill out all password fields.', 'woocommerce' ), 'error' );
+
+			$save_pass = false;
+		} elseif ( ! empty( $pass1 ) && empty( $pass_cur ) ) {
+			wc_add_notice( __( 'Please enter your current password.', 'woocommerce' ), 'error' );
+
+			$save_pass = false;
+		} elseif ( ! empty( $pass1 ) && empty( $pass2 ) ) {
 			wc_add_notice( __( 'Please re-enter your password.', 'woocommerce' ), 'error' );
+
+			$save_pass = false;
 		} elseif ( ! empty( $pass1 ) && $pass1 !== $pass2 ) {
 			wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
+
+			$save_pass = false;
+		}
+
+		if ( $pass1 && $save_pass ) {
+			$user->user_pass = $pass1;
 		}
 
 		// Allow plugins to return their own errors.
@@ -201,7 +220,7 @@ class WC_Form_Handler {
 			}
 		}
 
-		if ( wc_notice_count( 'error' ) == 0 ) {
+		if ( wc_notice_count( 'error' ) === 0 ) {
 
 			wp_update_user( $user ) ;
 
