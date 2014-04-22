@@ -351,6 +351,9 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 		}
 	}
 
+	// clear API report transient
+	$transients_to_clear[] = 'wc_admin_report';
+
 	// Clear transients where we have names
 	foreach( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
