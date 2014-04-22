@@ -947,6 +947,16 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 			update_post_meta( $post_id, '_featured', stripslashes( $_REQUEST['_featured'] ) );
 		}
 
+		// Sold Individually
+		if ( ! empty( $_REQUEST['_sold_individually'] ) ) {
+			if ( $_REQUEST['_sold_individually'] == 'yes' ) {
+				update_post_meta( $post_id, '_sold_individually', 'yes' );
+			}
+			else {
+				update_post_meta( $post_id, '_sold_individually', '' );
+			}
+		}
+
 		// Handle price - remove dates and set to lowest
 		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
 
