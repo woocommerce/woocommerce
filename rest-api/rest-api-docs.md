@@ -4,7 +4,7 @@ With v2.1, WooCommerce includes a REST API that allows store data to be accessed
 
 ## Requirements
 
-You must be using WooCommerce 2.1 and the REST API must be enabled under WooCommerce > Settings.
+You must be using WooCommerce 2.1 and the REST API must be enabled under WooCommerce > Settings. You must enable pretty permalinks (default permalinks will not work).
 
 ## Schema
 
