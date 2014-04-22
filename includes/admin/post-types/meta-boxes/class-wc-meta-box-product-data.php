@@ -735,6 +735,13 @@ class WC_Meta_Box_Product_Data {
 		if ( $tax_classes )
 			foreach ( $tax_classes as $class )
 				$tax_class_options[ sanitize_title( $class ) ] = esc_attr( $class );
+		
+		$backorder_options = array(
+			'no'     => __( 'Do not allow', 'woocommerce' ),
+			'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
+			'yes'    => __( 'Allow', 'woocommerce' )
+		);
+		
 		?>
 		<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
 
@@ -786,7 +793,8 @@ class WC_Meta_Box_Product_Data {
 						'length' 	=> wc_format_localized_decimal( get_post_meta( $post->ID, '_length', true ) ),
 						'width' 	=> wc_format_localized_decimal( get_post_meta( $post->ID, '_width', true ) ),
 						'height' 	=> wc_format_localized_decimal( get_post_meta( $post->ID, '_height', true ) ),
-						'tax_class' => get_post_meta( $post->ID, '_tax_class', true )
+						'tax_class' => get_post_meta( $post->ID, '_tax_class', true ),
+						'backorder_options' => $backorder_options
 					);
 
 					if ( ! $parent_data['weight'] )
@@ -844,7 +852,8 @@ class WC_Meta_Box_Product_Data {
 
 						foreach ( $variation_fields as $field )
 							$$field = isset( $variation_data[ $field ][0] ) ? maybe_unserialize( $variation_data[ $field ][0] ) : '';
-
+						
+						$_backorders = isset( $variation_data['_backorders'][0] ) ? $variation_data['_backorders'][0] : null;
 						$_tax_class = isset( $variation_data['_tax_class'][0] ) ? $variation_data['_tax_class'][0] : null;
 						$image_id   = absint( $_thumbnail_id );
 						$image      = $image_id ? wp_get_attachment_thumb_url( $image_id ) : '';
@@ -1334,6 +1343,7 @@ class WC_Meta_Box_Product_Data {
 			$variable_width						= isset( $_POST['variable_width'] ) ? $_POST['variable_width'] : array();
 			$variable_height					= isset( $_POST['variable_height'] ) ? $_POST['variable_height'] : array();
 			$variable_stock 					= isset( $_POST['variable_stock'] ) ? $_POST['variable_stock'] : array();
+			$variable_backorders				= isset( $_POST['variable_backorders'] ) ? $_POST['variable_backorders'] : array();
 			$variable_enabled 					= isset( $_POST['variable_enabled'] ) ? $_POST['variable_enabled'] : array();
 			$variable_is_virtual				= isset( $_POST['variable_is_virtual'] ) ? $_POST['variable_is_virtual'] : array();
 			$variable_is_downloadable 			= isset( $_POST['variable_is_downloadable'] ) ? $_POST['variable_is_downloadable'] : array();
@@ -1401,6 +1411,12 @@ class WC_Meta_Box_Product_Data {
 				if ( isset( $variable_stock[$i] ) ) {
 					wc_update_product_stock( $variation_id, wc_clean( $variable_stock[ $i ] ) );
 				}
+				
+				// Backorders
+				if ( isset( $variable_backorders[ $i ] ) && $variable_backorders[ $i ] !== 'parent' )
+					update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
+				else
+					delete_post_meta( $variation_id, '_backorders' );
 
 				// Price handling
 				$regular_price 	= wc_format_decimal( $variable_regular_price[ $i ] );
