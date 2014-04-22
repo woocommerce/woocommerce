@@ -158,7 +158,7 @@ class WC_Meta_Box_Order_Data {
 							<?php
 								$statuses = (array) get_terms( 'shop_order_status', array( 'hide_empty' => 0, 'orderby' => 'id' ) );
 								foreach ( $statuses as $status ) {
-									echo '<option value="' . esc_attr( $status->slug ) . '" ' . selected( $status->slug, $order->status, false ) . '>' . esc_html__( $status->name, 'woocommerce' ) . '</option>';
+									echo '<option value="' . esc_attr( $status->slug ) . '" ' . selected( $status->slug, $order->status, false ) . '>' . esc_html( apply_filters( 'woocommerce_order_status_name', __( $status->name, 'woocommerce' ), $status ) ) . '</option>';
 								}
 							?>
 						</select></p>

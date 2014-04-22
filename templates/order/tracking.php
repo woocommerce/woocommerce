@@ -15,7 +15,7 @@ global $woocommerce;
 <?php
 	$status = get_term_by( 'slug', $order->status, 'shop_order_status' );
 
-	$order_status_text = sprintf( __( 'Order %s which was made %s has the status &ldquo;%s&rdquo;', 'woocommerce' ), $order->get_order_number(), human_time_diff( strtotime( $order->order_date ), current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'woocommerce' ), __( $status->name, 'woocommerce' ) );
+	$order_status_text = sprintf( __( 'Order %s which was made %s has the status &ldquo;%s&rdquo;', 'woocommerce' ), $order->get_order_number(), human_time_diff( strtotime( $order->order_date ), current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'woocommerce' ), apply_filters( 'woocommerce_order_status_name', __( $status->name, 'woocommerce' ), $status ) );
 
 	if ( $order->status === 'completed' ) $order_status_text .= ' ' . __( 'and was completed', 'woocommerce' ) . ' ' . human_time_diff( strtotime( $order->completed_date ), current_time( 'timestamp' ) ) . __( ' ago', 'woocommerce' );
 

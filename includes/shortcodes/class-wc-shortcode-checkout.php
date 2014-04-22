@@ -110,7 +110,7 @@ class WC_Shortcode_Checkout {
 
 					$status = get_term_by('slug', $order->status, 'shop_order_status');
 
-					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), apply_filters( 'woocommerce_order_status_name', __( $status->name, 'woocommerce' ), $status ) ), 'error' );
 				}
 
 			} else {
@@ -161,7 +161,7 @@ class WC_Shortcode_Checkout {
 
 					$status = get_term_by('slug', $order->status, 'shop_order_status');
 
-					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), apply_filters( 'woocommerce_order_status_name', __( $status->name, 'woocommerce' ), $status ) ), 'error' );
 				}
 
 			} else {
