@@ -211,7 +211,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 							<th width="1%" class="default">
 								<input type="radio" name="default_shipping_method" value="" <?php checked( $default_shipping_method, '' ); ?> />
 							</th>
-							<th><?php _e( 'No default', 'woocommerce' ); ?></th>
+							<th><?php _e( 'Automatic', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'The cheapest available shipping method will be selected by default.', 'woocommerce' ); ?>">[?]</a></th>
 							<th colspan="3"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
 						</tr>
 					</tfoot>
