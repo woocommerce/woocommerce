@@ -7,9 +7,9 @@
  * @version     1.6.4
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-global $woocommerce;
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 ?>
 
 <?php wc_print_notices(); ?>
