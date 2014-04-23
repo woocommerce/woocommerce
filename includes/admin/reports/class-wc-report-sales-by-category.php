@@ -33,6 +33,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			$category       = get_term( $category, 'product_cat' );
 			$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
 			$term_ids[] 	= $category->term_id;
+            $term_ids = apply_filters('woocommerce_term_ids_sales_by_category_legend', $term_ids);
 			$total          = 0;
 			$product_ids 	= array_unique( get_objects_in_term( $term_ids, 'product_cat' ) );
 
@@ -241,6 +242,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				$category       = get_term( $category, 'product_cat' );
 				$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
 				$term_ids[] 	= $category->term_id;
+                $term_ids = apply_filters('woocommerce_term_ids_sales_by_category_chart', $term_ids);
 				$product_ids 	= array_unique( get_objects_in_term( $term_ids, 'product_cat' ) );
 				$category_total = 0;
 				$category_chart_data = array();
