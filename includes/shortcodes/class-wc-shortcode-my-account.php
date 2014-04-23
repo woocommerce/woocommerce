@@ -41,9 +41,9 @@ class WC_Shortcode_My_Account {
 
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
-			if ( ! empty( $message ) )
-
+			if ( ! empty( $message ) ) {
 				wc_add_notice( $message );
+			}
 
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
 

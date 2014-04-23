@@ -7,9 +7,9 @@
  * @version     2.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-global $woocommerce;
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 $customer_id = get_current_user_id();
 
