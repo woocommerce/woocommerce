@@ -43,38 +43,44 @@ class WC_Order_Item_Meta {
 
 			foreach ( $this->meta as $meta_key => $meta_values ) {
 
-				if ( empty( $meta_values ) || ( ! empty( $hideprefix ) && substr( $meta_key, 0, 1 ) == $hideprefix ) )
+				if ( empty( $meta_values ) || ( ! empty( $hideprefix ) && substr( $meta_key, 0, 1 ) == $hideprefix ) ) {
 					continue;
+				}
 
 				foreach( $meta_values as $meta_value ) {
 
 					// Skip serialised meta
-					if ( is_serialized( $meta_value ) )
+					if ( is_serialized( $meta_value ) ) {
 						continue;
+					}
+
+					$attribute_key = urldecode( str_replace( 'attribute_', '', $meta_key ) );
 
 					// If this is a term slug, get the term's nice name
-		            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $meta_key ) ) ) ) {
-		            	$term = get_term_by('slug', $meta_value, esc_attr( str_replace( 'attribute_', '', $meta_key ) ) );
-		            	if ( ! is_wp_error( $term ) && $term->name )
+		            if ( taxonomy_exists( $attribute_key ) ) {
+		            	$term = get_term_by( 'slug', $meta_value, $attribute_key );
+		            		
+		            	if ( ! is_wp_error( $term ) && $term->name ) {
 		            		$meta_value = $term->name;
+		            	}
 		          	
 		          	// If we have a product, and its not a term, try to find its non-sanitized name
 		            } elseif ( $this->product ) {
 						$product_attributes = $this->product->get_attributes();
 
-						if ( isset( $product_attributes[ str_replace( 'attribute_', '', $meta_key ) ] ) ) {
-							$meta_key = wc_attribute_label( $product_attributes[ str_replace( 'attribute_', '', $meta_key ) ]['name'] );
+						if ( isset( $product_attributes[ $attribute_key ] ) ) {
+							$meta_key = wc_attribute_label( $product_attributes[ $attribute_key ]['name'] );
 						}
 		            }
 
-					if ( $flat )
-						$meta_list[] = wp_kses_post( wc_attribute_label( str_replace( 'attribute_', '', $meta_key ) ) . ': ' . apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) );
-					else
+					if ( $flat ) {
+						$meta_list[] = wp_kses_post( wc_attribute_label( $attribute_key ) . ': ' . apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) );
+					} else {
 						$meta_list[] = '
-							<dt class="variation-' . sanitize_html_class( sanitize_text_field( $meta_key ) ) . '">' . wp_kses_post( wc_attribute_label( str_replace( 'attribute_', '', $meta_key ) ) ) . ':</dt>
+							<dt class="variation-' . sanitize_html_class( sanitize_text_field( $meta_key ) ) . '">' . wp_kses_post( wc_attribute_label( $attribute_key ) ) . ':</dt>
 							<dd class="variation-' . sanitize_html_class( sanitize_text_field( $meta_key ) ) . '">' . wp_kses_post( wpautop( apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ) ) ) . '</dd>
 						';
-
+					}
 				}
 			}
 
