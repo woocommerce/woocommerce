@@ -40,8 +40,10 @@ class WC_Admin_Post_Types {
 		include( 'post-types/class-wc-admin-cpt-shop_order.php' );
 		include( 'post-types/class-wc-admin-cpt-shop_coupon.php' );
 
-		if ( ! function_exists( 'duplicate_post_plugin_activation' ) )
+		if ( ! function_exists( 'duplicate_post_plugin_activation' ) ) {
 			include( 'class-wc-admin-duplicate-product.php' );
+			include( 'class-wc-admin-duplicate-coupon.php' );
+		}
 	}
 
 	/**
