@@ -278,26 +278,22 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 function wc_customer_has_capability( $allcaps, $caps, $args ) {
 	if ( isset( $caps[0] ) ) {
 		switch ( $caps[0] ) {
-
 			case 'view_order' :
 				$user_id = $args[1];
-				$order = new WC_Order( $args[2] );
+				$order   = new WC_Order( $args[2] );
 
 				if ( $user_id == $order->user_id ) {
 					$allcaps['view_order'] = true;
 				}
-
-				break;
-
+			break;
 			case 'pay_for_order' :
-				$user_id = $args[1];
+				$user_id  = $args[1];
 				$order_id = isset( $args[2] ) ? $args[2] : null;
 
 				// When no order ID, we assume it's a new order
 				// and thus, customer can pay for it
 				if ( ! $order_id ) {
 					$allcaps['pay_for_order'] = true;
-
 					break;
 				}
 
@@ -305,42 +301,79 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				if ( $user_id == $order->user_id || empty( $order->user_id ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
-
-				break;
-
+			break;
 			case 'order_again' :
 				$user_id = $args[1];
-				$order = new WC_Order( $args[2] );
+				$order   = new WC_Order( $args[2] );
 
 				if ( $user_id == $order->user_id ) {
 					$allcaps['order_again'] = true;
 				}
-
-				break;
-
+			break;
 			case 'cancel_order' :
 				$user_id = $args[1];
-				$order = new WC_Order( $args[2] );
+				$order   = new WC_Order( $args[2] );
 
 				if ( $user_id == $order->user_id ) {
 					$allcaps['cancel_order'] = true;
 				}
-
-				break;
-
+			break;
 			case 'download_file' :
-				$user_id = $args[1];
+				$user_id  = $args[1];
 				$download = $args[2];
 
 				if ( $user_id == $download->user_id ) {
 					$allcaps['download_file'] = true;
 				}
-
-				break;
+			break;
 		}
 	}
-
 	return $allcaps;
 }
-
 add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
+
+/**
+ * Modify the list of editable roles to prevent non-admin adding admin users
+ * @param  array $roles
+ * @return array
+ */
+function wc_modify_editable_roles( $roles ){
+	if ( ! current_user_can( 'administrator' ) ) {
+		unset( $roles[ 'administrator' ] );
+	}
+    return $roles;
+}
+add_filter( 'editable_roles', 'wc_modify_editable_roles' );
+
+/**
+ * Modify capabiltiies to prevent non-admin users editing admin users
+ *
+ * $args[0] will be the user being edited in this case.
+ * 
+ * @param  array $caps Array of caps
+ * @param  string $cap Name of the cap we are checking
+ * @param  int $user_id ID of the user being checked against
+ * @param  array $args
+ * @return array
+ */
+function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
+	switch ( $cap ) {
+		case 'edit_user' :
+		case 'remove_user' :
+		case 'promote_user' :
+		case 'delete_user' :
+		case 'delete_users' :
+			if ( ! isset( $args[0] ) ) {
+				$caps[] = 'do_not_allow';
+			} elseif ( $args[0] === $user_id ) {
+				break;
+			} else {
+				if ( user_can( $args[0], 'administrator' ) && ! current_user_can( 'administrator' ) ) {
+					$caps[] = 'do_not_allow';
+				}
+			}
+		break;
+	}
+	return $caps;
+}
+add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );

@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 include( 'wc-cart-functions.php' );
 include( 'wc-conditional-functions.php' );
 include( 'wc-coupon-functions.php' );
-include( 'wc-customer-functions.php' );
+include( 'wc-user-functions.php' );
 include( 'wc-deprecated-functions.php' );
 include( 'wc-formatting-functions.php' );
 include( 'wc-notice-functions.php' );
