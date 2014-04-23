@@ -1379,7 +1379,9 @@ class WC_Order {
 			unset( WC()->session->order_awaiting_payment );
 		}
 
-		if ( $this->id && ( 'on-hold' == $this->status || 'pending' == $this->status || 'failed' == $this->status ) ) {
+		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed' ), $this );
+
+		if ( $this->id && in_array( $this->status, $valid_order_statuses ) ) {
 
 			$order_needs_processing = true;
 

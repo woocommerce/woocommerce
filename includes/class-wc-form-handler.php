@@ -264,11 +264,13 @@ class WC_Form_Handler {
 			ob_start();
 
 			// Pay for existing order
-			$order_key 	= $_GET['key'];
-			$order_id 	= absint( $wp->query_vars['order-pay'] );
-			$order 		= new WC_Order( $order_id );
+			$order_key  = $_GET['key'];
+			$order_id   = absint( $wp->query_vars['order-pay'] );
+			$order      = new WC_Order( $order_id );
+			
+			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) ) {
+			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, $valid_order_statuses ) ) {
 
 				// Set customer location to order location
 				if ( $order->billing_country ) {
