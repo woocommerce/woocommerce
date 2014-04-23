@@ -638,7 +638,6 @@ class WC_Meta_Box_Product_Data {
 								'order' 		=> 'asc',
 								'post_parent' 	=> 0,
 								'include' 		=> $posts_in,
-                                'suppress_filters' => 0,                                
 							);
 							$grouped_products = get_posts( $args );
 
