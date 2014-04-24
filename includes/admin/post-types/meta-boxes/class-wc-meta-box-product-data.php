@@ -1251,35 +1251,37 @@ class WC_Meta_Box_Product_Data {
 		if ( $is_downloadable == 'yes' ) {
 
 			$_download_limit = absint( $_POST['_download_limit'] );
-			if ( ! $_download_limit )
+			if ( ! $_download_limit ) {
 				$_download_limit = ''; // 0 or blank = unlimited
+			}
 
 			$_download_expiry = absint( $_POST['_download_expiry'] );
-			if ( ! $_download_expiry )
+			if ( ! $_download_expiry ) {
 				$_download_expiry = ''; // 0 or blank = unlimited
+			}
 
 			// file paths will be stored in an array keyed off md5(file path)
-			if ( isset( $_POST['_wc_file_urls'] ) ) {
-				$files = array();
+			$files = array();
 
+			if ( isset( $_POST['_wc_file_urls'] ) ) {
 				$file_names    = isset( $_POST['_wc_file_names'] ) ? array_map( 'wc_clean', $_POST['_wc_file_names'] ) : array();
 				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'wc_clean', $_POST['_wc_file_urls'] ) : array();
 				$file_url_size = sizeof( $file_urls );
 
 				for ( $i = 0; $i < $file_url_size; $i ++ ) {
-					if ( ! empty( $file_urls[ $i ] ) )
+					if ( ! empty( $file_urls[ $i ] ) ) {
 						$files[ md5( $file_urls[ $i ] ) ] = array(
 							'name' => $file_names[ $i ],
 							'file' => $file_urls[ $i ]
 						);
+					}
 				}
-
-				// grant permission to any newly added files on any existing orders for this product prior to saving
-				do_action( 'woocommerce_process_product_file_download_paths', $post_id, 0, $files );
-
-				update_post_meta( $post_id, '_downloadable_files', $files );
 			}
 
+			// grant permission to any newly added files on any existing orders for this product prior to saving
+			do_action( 'woocommerce_process_product_file_download_paths', $post_id, 0, $files );
+
+			update_post_meta( $post_id, '_downloadable_files', $files );
 			update_post_meta( $post_id, '_download_limit', $_download_limit );
 			update_post_meta( $post_id, '_download_expiry', $_download_expiry );
 
