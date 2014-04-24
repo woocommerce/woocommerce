@@ -103,9 +103,35 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
+		$order = null;
 
 		if ( ! WC()->cart->needs_shipping() ) {
 			return false;
+		}
+
+		if ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
+			$order_id = absint( get_query_var( 'order-pay' ) );
+			$order    = new WC_Order( $order_id );
+
+			// Test if order needs shipping.
+			$needs_shipping = false;
+
+			if ( 0 < sizeof( $order->get_items() ) ) {
+				foreach ( $order->get_items() as $item ) {
+					$_product = $order->get_product_from_item( $item );
+
+					if ( $_product->needs_shipping() ) {
+						$needs_shipping = true;
+						break;
+					}
+				}
+			}
+
+			$needs_shipping = apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
+
+			if ( $needs_shipping ) {
+				return false;
+			}
 		}
 
 		if ( ! empty( $this->enable_for_methods ) ) {
@@ -121,13 +147,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 			$check_method = false;
 
-			if ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
-
-				$order_id = absint( get_query_var( 'order-pay' ) );
-				$order    = new WC_Order( $order_id );
-
-				if ( $order->shipping_method )
+			if ( is_object( $order ) ) {
+				if ( $order->shipping_method ) {
 					$check_method = $order->shipping_method;
+				}
 
 			} elseif ( empty( $chosen_shipping_methods ) || sizeof( $chosen_shipping_methods ) > 1 ) {
 				$check_method = false;
