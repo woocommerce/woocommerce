@@ -296,10 +296,12 @@ class WC_Product {
 	 * @param string $download_id file identifier
 	 * @return array|false if not found
 	 */
-	public function get_file( $download_id ) {
+	public function get_file( $download_id = '' ) {
 		$files = $this->get_files();
 
-		if ( isset( $files[ $download_id ] ) ) {
+		if ( '' === $download_id ) {
+			$file = sizeof( $files ) ? current( $files ) : false;
+		} elseif ( isset( $files[ $download_id ] ) ) {
 			$file = $files[ $download_id ];
 		} else {
 			$file = false;
