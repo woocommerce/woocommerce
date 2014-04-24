@@ -266,6 +266,16 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/
 
 		/**
+		 * Payments enabled function. Filterable.
+		 *
+		 * @access public
+		 * @return bool
+		 */
+		public function payments_enabled() {
+			return apply_filters( 'woocommerce_payments_enabled', get_option( 'woocommerce_enable_payments' ) == 'yes' );
+		}
+
+		/**
 		 * Coupons enabled function. Filterable.
 		 *
 		 * @access public
@@ -1271,7 +1281,7 @@ class WC_Cart {
 		 * @return bool
 		 */
 		public function needs_payment() {
-			return apply_filters( 'woocommerce_cart_needs_payment', $this->total > 0, $this );
+			return apply_filters( 'woocommerce_cart_needs_payment', $this->payments_enabled() && $this->total > 0, $this );
 		}
 
     /*-----------------------------------------------------------------------------------*/
