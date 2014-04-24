@@ -78,8 +78,7 @@ jQuery( function( $ ) {
 			data:		data,
 			success:	function( response ) {
 				if ( response ) {
-					var order_output = $( $.parseHTML( $.trim( response ) ) );
-					$( '#order_review' ).html( order_output.html() );
+					$( '#order_review' ).html( $.trim( response ) );
 					$( '#order_review' ).find( 'input[name=payment_method]:checked' ).trigger('click');
 					$( 'body' ).trigger('updated_checkout' );
 				}
