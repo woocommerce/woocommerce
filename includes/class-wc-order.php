@@ -1075,7 +1075,7 @@ class WC_Order {
 
 			$_product = $this->get_product_from_item( $item );
 
-			if ( $_product && $_product->exists() && $_product->is_downloadable() ) {
+			if ( $_product && $_product->exists() && $_product->is_downloadable() && $_product->has_file() ) {
 				$has_downloadable_item = true;
 			}
 
