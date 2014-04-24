@@ -103,7 +103,7 @@ class WC_Product_Variation extends WC_Product {
 			$this->downloadable_files               = $this->product_custom_fields['_downloadable_files'][0];
 		}
 
-		if ( isset( $this->product_custom_fields['_stock'][0] ) && $this->product_custom_fields['_stock'][0] !== '' ) {
+		if ( isset( $this->product_custom_fields['_stock'][0] ) && '' !== $this->product_custom_fields['_stock'][0] && 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			$this->variation_has_stock = true;
 			$this->manage_stock        = 'yes';
 			$this->stock               = $this->product_custom_fields['_stock'][0];
