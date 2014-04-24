@@ -229,8 +229,9 @@ class WC_Coupon {
 		$this->usage_count++;
 		update_post_meta( $this->id, 'usage_count', $this->usage_count );
 
-		if ( $used_by )
+		if ( $used_by ) {
 			add_post_meta( $this->id, '_used_by', strtolower( $used_by ) );
+		}
 	}
 
 
@@ -249,8 +250,9 @@ class WC_Coupon {
 
 		// Delete 1 used by meta
 		$meta_id = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE meta_key = '_used_by' AND meta_value = %s AND post_id = %d LIMIT 1;", $used_by, $this->id ) );
-		if ( $meta_id )
+		if ( $meta_id ) {
 			delete_metadata_by_mid( 'post', $meta_id );
+		}
 	}
 
 	/**
@@ -290,7 +292,7 @@ class WC_Coupon {
 			// Per user usage limit - check here if user is logged in (against user IDs)
 			// Checked again for emails later on in WC_Cart::check_customer_coupons()
 			if ( $this->usage_limit_per_user > 0 && is_user_logged_in() ) {
-				$used_by     = get_post_meta( $this->id, '_used_by' );
+				$used_by     = (array) get_post_meta( $this->id, '_used_by' );
 				$usage_count = sizeof( array_keys( $used_by, get_current_user_id() ) );
 
 				if ( $usage_count >= $this->usage_limit_per_user ) {
