@@ -117,9 +117,9 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 			$check_method = false;
 
-			if ( is_page( wc_get_page_id( 'checkout' ) ) && ! empty( $wp->query_vars['order-pay'] ) ) {
+			if ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
 
-				$order_id = absint( $wp->query_vars['order-pay'] );
+				$order_id = absint( get_query_var( 'order-pay' ) );
 				$order    = new WC_Order( $order_id );
 
 				if ( $order->shipping_method )
@@ -149,6 +149,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		return parent::is_available();
 	}
+
 
     /**
      * Process the payment and return the result
