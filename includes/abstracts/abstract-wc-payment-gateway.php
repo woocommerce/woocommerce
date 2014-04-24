@@ -80,12 +80,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	protected function order_total() {
 		$total = 0;
+		$order_id = absint( get_query_var( 'order-pay' ) );
 
 		// Gets order total from "pay for order" page.
-		if ( isset( $_GET['pay_for_order'] ) && isset( $_GET['key'] ) ) {
-			$order_id = wc_get_order_id_by_order_key( wc_clean( $_GET['key'] ) );
+		if ( 0 < $order_id ) {
 			$order = new WC_Order( $order_id );
-
 			$total = (float) $order->order_total;
 
 		// Gets order total from cart/checkout.
