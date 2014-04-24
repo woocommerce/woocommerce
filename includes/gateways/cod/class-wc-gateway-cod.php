@@ -104,6 +104,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 */
 	public function is_available() {
 
+		if ( ! WC()->cart->needs_shipping() ) {
+			return false;
+		}
+
 		if ( ! empty( $this->enable_for_methods ) ) {
 
 			// Only apply if all packages are being shipped via local pickup
@@ -131,8 +135,9 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				$check_method = $chosen_shipping_methods[0];
 			}
 
-			if ( ! $check_method )
+			if ( ! $check_method ) {
 				return false;
+			}
 
 			$found = false;
 
@@ -143,8 +148,9 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				}
 			}
 
-			if ( ! $found )
+			if ( ! $found ) {
 				return false;
+			}
 		}
 
 		return parent::is_available();
