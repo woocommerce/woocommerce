@@ -67,7 +67,7 @@ class WC_Shortcode_My_Account {
 
 			} elseif ( isset( $wp->query_vars['edit-address'] ) ) {
 
-				self::edit_address( sanitize_title( $wp->query_vars['edit-address'] ) );
+				self::edit_address( wc_edit_address_i18n( sanitize_title( $wp->query_vars['edit-address'] ), true ) );
 
 			} elseif ( isset( $wp->query_vars['add-payment-method'] ) ) {
 

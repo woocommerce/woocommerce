@@ -60,7 +60,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$load_address = isset( $wp->query_vars['edit-address'] ) ? sanitize_key( $wp->query_vars['edit-address'] ) : 'billing';
+		$load_address = isset( $wp->query_vars['edit-address'] ) ? wc_edit_address_i18n( sanitize_key( $wp->query_vars['edit-address'] ), true ) : 'billing';
 
 		$address = WC()->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
 
@@ -267,7 +267,7 @@ class WC_Form_Handler {
 			$order_key  = $_GET['key'];
 			$order_id   = absint( $wp->query_vars['order-pay'] );
 			$order      = new WC_Order( $order_id );
-			
+
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
 			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, $valid_order_statuses ) ) {
