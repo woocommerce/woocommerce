@@ -24,6 +24,19 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	}
 
 	/**
+	 * Get all product ids in a category (and its children)
+	 * @param  int $category_id
+	 * @return array
+	 */
+	public function get_products_in_category( $category_id ) {
+		$term_ids    = get_term_children( $category_id, 'product_cat' );
+		$term_ids[]  = $category_id;
+		$product_ids = get_objects_in_term( $term_ids, 'product_cat' );
+
+		return array_unique( apply_filters( 'woocommerce_report_sales_by_category_get_products_in_category', $product_ids, $category_id ) );
+	}
+
+	/**
 	 * Get the legend for the main chart sidebar
 	 * @return array
 	 */
@@ -32,15 +45,13 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			return array();
 		}
 
-		$legend    = array();
-		$index     = 0;
+		$legend = array();
+		$index  = 0;
 
 		foreach ( $this->show_categories as $category ) {
-			$category       = get_term( $category, 'product_cat' );
-			$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
-			$term_ids[] 	= $category->term_id;
-			$total          = 0;
-			$product_ids 	= array_unique( get_objects_in_term( $term_ids, 'product_cat' ) );
+			$category    = get_term( $category, 'product_cat' );
+			$total       = 0;
+			$product_ids = $this->get_products_in_category( $category->term_id );
 
 			foreach ( $product_ids as $id ) {
 				if ( isset( $this->item_sales[ $id ] ) ) {
@@ -48,12 +59,9 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				}
 			}
 
-			//if ( ! $total )
-			//	continue;
-
 			$legend[] = array(
-				'title' => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
-				'color' => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[ 0 ],
+				'title'            => sprintf( __( '%s sales in %s', 'woocommerce' ), '<strong>' . wc_price( $total ) . '</strong>', $category->name ),
+				'color'            => isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[ 0 ],
 				'highlight_series' => $index
 			);
 
@@ -244,11 +252,9 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			$index              = 0;
 
 			foreach ( $this->show_categories as $category ) {
-				$category       = get_term( $category, 'product_cat' );
-				$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
-				$term_ids[] 	= $category->term_id;
-				$product_ids 	= array_unique( get_objects_in_term( $term_ids, 'product_cat' ) );
-				$category_total = 0;
+				$category            = get_term( $category, 'product_cat' );
+				$product_ids         = $this->get_products_in_category( $category->term_id );
+				$category_total      = 0;
 				$category_chart_data = array();
 
 				for ( $i = 0; $i <= $this->chart_interval; $i ++ ) {
