@@ -150,62 +150,80 @@ class WC_Product {
 	}
 
 	/**
+	 * Check if the stock status needs changing
+	 */
+	private function check_stock_status() {
+		// Update stock status
+		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			$this->set_stock_status( 'outofstock' );
+
+		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			$this->set_stock_status( 'instock' );
+		}
+	}
+
+	/**
 	 * Set stock level of the product.
 	 *
-	 * @param mixed $amount (default: null)
-	 * @return int Stock
+	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues). 
+	 * We cannot rely on the original loaded value in case another order was made since then.
+	 *
+	 * @param int $amount (default: null)
+	 * @param string $mode can be set, add, or subtract
+	 * @return int new stock level
 	 */
-	public function set_stock( $amount = null ) {
-		if ( is_null( $amount ) ) {
-			return 0;
-		}
+	public function set_stock( $amount = null, $mode = 'set' ) {
+		global $wpdb;
 
-		if ( $this->managing_stock() ) {
+		if ( ! is_null( $amount ) && $this->managing_stock() ) {
 
-			// Update stock amount
-			$this->stock = apply_filters( 'woocommerce_stock_amount', $amount );
-
-			// Update meta
-			update_post_meta( $this->id, '_stock', $this->stock );
-
-			// Update stock status
-			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				$this->set_stock_status( 'outofstock' );
-
-			} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				$this->set_stock_status( 'instock' );
+			// Update stock in DB directly
+			switch ( $mode ) {
+				case 'add' :
+					$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + {$amount} WHERE post_id = {$this->id} AND meta_key='_stock'" );
+				break;
+				case 'subtract' :
+					$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - {$amount} WHERE post_id = {$this->id} AND meta_key='_stock'" );
+				break;
+				default :
+					$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = {$amount} WHERE post_id = {$this->id} AND meta_key='_stock'" );
+				break;
 			}
+
+			// Clear caches
+			wp_cache_delete( $this->id, 'post_meta' );
 
 			// Clear total stock transient
 			delete_transient( 'wc_product_total_stock_' . $this->id );
 
+			// Stock status
+			$this->check_stock_status();
+
 			// Trigger action
 			do_action( 'woocommerce_product_set_stock', $this );
-
-			return $this->get_stock_quantity();
 		}
 
-		return 0;
+		return $this->get_stock_quantity();
 	}
 
 	/**
-	 * Reduce stock level of the product.
+	 * Reduce stock level of the product. 
 	 *
-	 * @param int $by (default: 1) Amount to reduce by.
-	 * @return int Stock
+	 * @param int $amount (default: 1) Amount to reduce by.
+	 * @return int new stock level
 	 */
-	public function reduce_stock( $by = 1 ) {
-		return $this->set_stock( $this->stock - $by );
+	public function reduce_stock( $amount = 1 ) {
+		return $this->set_stock( $amount, 'subtract' );
 	}
 
 	/**
 	 * Increase stock level of the product.
 	 *
-	 * @param int $by (default: 1) Amount to increase by
-	 * @return int Stock
+	 * @param int $amount (default: 1) Amount to increase by
+	 * @return int new stock level
 	 */
-	public function increase_stock( $by = 1 ) {
-		return $this->set_stock( $this->stock + $by );
+	public function increase_stock( $amount = 1 ) {
+		return $this->set_stock( $amount, 'add' );		
 	}
 
 	/**

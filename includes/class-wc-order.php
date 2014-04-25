@@ -1568,17 +1568,11 @@ class WC_Order {
 					$_product = $this->get_product_from_item( $item );
 
 					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
+						$qty       = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $this, $item );
+						$new_stock = $_product->reduce_stock( $qty );
 
-						$old_stock = $_product->stock;
-
-						$qty = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $this, $item );
-
-						$new_quantity = $_product->reduce_stock( $qty );
-
-						$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $old_stock, $new_quantity) );
-
-						$this->send_stock_notifications( $_product, $new_quantity, $item['qty'] );
-
+						$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $new_stock + $qty, $new_stock) );
+						$this->send_stock_notifications( $_product, $new_stock, $item['qty'] );
 					}
 
 				}

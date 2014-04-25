@@ -361,111 +361,130 @@ class WC_Product_Variation extends WC_Product {
 
 	/**
 	 * Set stock level of the product variation.
-	 * @param int  $amount
+	 *
+	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues). 
+	 * We cannot rely on the original loaded value in case another order was made since then.
+	 *
+	 * @param int $amount
 	 * @param bool $force_variation_stock If true, the variation's stock will be updated and not the parents.
-	 * @return int
-	 * @todo Need to return 0 if is_null? Or something. Should not be just return.
+	 * @param string $mode can be set, add, or subtract
+	 * @return int new stock level
 	 */
-	function set_stock( $amount = null, $force_variation_stock = false ) {
-		if ( is_null( $amount ) )
-			return;
+	public function set_stock( $amount = null, $force_variation_stock = false, $mode = 'set' ) {
+		global $wpdb;
 
-		if ( $amount === '' && $force_variation_stock ) {
+		if ( ! is_null( $amount ) ) {
 
-			// If amount is an empty string, stock management is being turned off at variation level
-			$this->variation_has_stock = false;
-			$this->stock               = '';
-			unset( $this->manage_stock );
+			if ( '' === $amount && $force_variation_stock ) {
 
-			// Update meta
-			update_post_meta( $this->variation_id, '_stock', '' );
+				// If amount is an empty string, stock management is being turned off at variation level
+				$this->variation_has_stock = false;
+				$this->stock               = '';
+				unset( $this->manage_stock );
 
-			// Refresh parent prices
-			WC_Product_Variable::sync( $this->id );
+				// Update meta
+				update_post_meta( $this->variation_id, '_stock', '' );
 
-		} elseif ( $this->variation_has_stock || $force_variation_stock ) {
+				// Refresh parent prices
+				WC_Product_Variable::sync( $this->id );
 
-			// Update stock amount
-			$this->stock               = intval( $amount );
-			$this->variation_has_stock = true;
-			$this->manage_stock        = 'yes';
+			} elseif ( $this->variation_has_stock || $force_variation_stock ) {
 
-			// Update meta
-			update_post_meta( $this->variation_id, '_stock', $this->stock );
+				// Update stock values
+				$this->variation_has_stock = true;
+				$this->manage_stock        = 'yes';
 
-			// Clear total stock transient
-			delete_transient( 'wc_product_total_stock_' . $this->id );
+				// Update stock in DB directly
+				switch ( $mode ) {
+					case 'add' :
+						$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + {$amount} WHERE post_id = {$this->variation_id} AND meta_key='_stock'" );
+					break;
+					case 'subtract' :
+						$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - {$amount} WHERE post_id = {$this->variation_id} AND meta_key='_stock'" );
+					break;
+					default :
+						$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = {$amount} WHERE post_id = {$this->variation_id} AND meta_key='_stock'" );
+					break;
+				}
 
-			// Check parents out of stock attribute
-			if ( ! $this->is_in_stock() ) {
+				// Clear caches
+				wp_cache_delete( $this->variation_id, 'post_meta' );
 
-				// Check parent
-				$parent_product = get_product( $this->id );
+				// Update stock amount in class
+				$this->stock = get_post_meta( $this->variation_id, '_stock', true );
 
-				// Only continue if the parent has backorders off and all children are stock managed and out of stock
-				if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				// Clear total stock transient
+				delete_transient( 'wc_product_total_stock_' . $this->id );
 
-					$all_managed = true;
+				// Check parents out of stock attribute
+				if ( ! $this->is_in_stock() ) {
 
-					if ( sizeof( $parent_product->get_children() ) > 0 ) {
-						foreach ( $parent_product->get_children() as $child_id ) {
-							$stock = get_post_meta( $child_id, '_stock', true );
-							if ( $stock == '' ) {
-								$all_managed = false;
-								break;
+					// Check parent
+					$parent_product = get_product( $this->id );
+
+					// Only continue if the parent has backorders off and all children are stock managed and out of stock
+					if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+
+						$all_managed = true;
+
+						if ( sizeof( $parent_product->get_children() ) > 0 ) {
+							foreach ( $parent_product->get_children() as $child_id ) {
+								$stock = get_post_meta( $child_id, '_stock', true );
+								if ( $stock == '' ) {
+									$all_managed = false;
+									break;
+								}
 							}
+						}
+
+						if ( $all_managed ) {
+							$this->set_stock_status( 'outofstock' );
 						}
 					}
 
-					if ( $all_managed ) {
-						$this->set_stock_status( 'outofstock' );
-					}
+				} elseif ( $this->is_in_stock() ) {
+					$this->set_stock_status( 'instock' );
 				}
 
-			} elseif ( $this->is_in_stock() ) {
-				$this->set_stock_status( 'instock' );
+				// Refresh parent prices
+				WC_Product_Variable::sync( $this->id );
+
+				// Trigger action
+				do_action( 'woocommerce_product_set_stock', $this );
+
+			} else {
+				return parent::set_stock( $amount, $mode );
 			}
-
-			// Refresh parent prices
-			WC_Product_Variable::sync( $this->id );
-
-			// Trigger action
-			do_action( 'woocommerce_product_set_stock', $this );
-
-			return $this->get_stock_quantity();
-
-		} else {
-
-			return parent::set_stock( $amount );
-
 		}
+
+		return $this->get_stock_quantity();
 	}
 
 	/**
 	 * Reduce stock level of the product.
 	 *
-	 * @param int $by (default: 1) Amount to reduce by
+	 * @param int $amount (default: 1) Amount to reduce by
 	 * @return int stock level
 	 */
-	public function reduce_stock( $by = 1 ) {
+	public function reduce_stock( $amount = 1 ) {
 		if ( $this->variation_has_stock ) {
-			return $this->set_stock( $this->stock - $by );
+			return $this->set_stock( $amount, false, 'subtract' );
 		} else {
-			return parent::reduce_stock( $by );
+			return parent::reduce_stock( $amount );
 		}
 	}
 
 	/**
 	 * Increase stock level of the product.
 	 *
-	 * @param int $by (default: 1) Amount to increase by
+	 * @param int $amount (default: 1) Amount to increase by
 	 * @return int stock level
 	 */
-	public function increase_stock( $by = 1 ) {
+	public function increase_stock( $amount = 1 ) {
 		if ( $this->variation_has_stock ) {
-			return $this->set_stock( $this->stock + $by );
+			return $this->set_stock( $amount, false, 'add' );
 		} else {
-			return parent::increase_stock( $by );
+			return parent::increase_stock( $amount );
 		}
 	}
 
