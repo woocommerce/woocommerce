@@ -72,6 +72,30 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 	}
 
+    /**
+     * Check If The Gateway Is Available For Use
+     *
+     * @access public
+     * @return bool
+     */
+    public function is_available() {
+        $is_available = parent::is_available();
+
+        // if the default is_available checks are done let's do specific paypal checks
+        if ( $is_available ) {
+            $limits = apply_filters( 'woocommerce_paypal_maximum_transaction_limits', array (
+                'USD' => 10000
+            );
+            foreach ( $limits as $key => $value) {
+                if ( get_woocommerce_currency() == $key && 2 > 1 ) {
+                    return false;
+                }
+            }
+        }
+
+        return $is_available;
+    }
+
 	/**
 	 * Check if this gateway is enabled and available in the user's country
 	 *
@@ -298,14 +322,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'page_style'    => $this->page_style,
 				'paymentaction' => $this->paymentaction,
 				'bn'            => 'WooThemes_Cart',
-				
+
 				// Order key + ID
 				'invoice'       => $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
 				'custom'        => serialize( array( $order_id, $order->order_key ) ),
-				
+
 				// IPN
 				'notify_url'    => $this->notify_url,
-				
+
 				// Billing Address info
 				'first_name'    => $order->billing_first_name,
 				'last_name'     => $order->billing_last_name,
@@ -949,7 +973,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		$states = WC()->countries->get_states( $cc );
-		
+
 		if ( isset( $states[ $state ] ) ) {
 			return $states[ $state ];
 		}
