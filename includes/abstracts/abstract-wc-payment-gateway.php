@@ -49,6 +49,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/** @var array Array of supported features such as 'default_credit_card_form' */
 	var $supports		= array( 'products' );
 
+	/** @var int Maximum transaction amount, zero does not define a maximum */
+	public $max_amount = 0;
+
 	/**
 	 * Get the return url (thank you page)
 	 *
@@ -71,13 +74,41 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
+	 * Get the order total in checkout and pay_for_order.
+	 *
+	 * @return bool
+	 */
+	protected function get_order_total() {
+		$total = 0;
+		$order_id = absint( get_query_var( 'order-pay' ) );
+
+		// Gets order total from "pay for order" page.
+		if ( 0 < $order_id ) {
+			$order = new WC_Order( $order_id );
+			$total = (float) $order->get_total();
+
+		// Gets order total from cart/checkout.
+		} elseif ( 0 < WC()->cart->total ) {
+			$total = (float) WC()->cart->total;
+		}
+
+		return $total;
+	}
+
+	/**
 	 * Check If The Gateway Is Available For Use
 	 *
 	 * @access public
 	 * @return bool
 	 */
 	public function is_available() {
-		return ( $this->enabled === "yes" );
+		$is_available = ( 'yes' === $this->enabled ) ? true : false;
+
+		if ( 0 < $this->get_order_total() && $this->max_amount >= $this->get_order_total() ) {
+			$is_available = false;
+		}
+
+		return $is_available;
 	}
 
 	/**
