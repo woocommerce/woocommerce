@@ -48,6 +48,7 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 
 	// Map endpoint to options
 	$endpoint = isset( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
+	$value    = ( 'edit-address' == $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
 
 	if ( get_option( 'permalink_structure' ) ) {
 		if ( strstr( $permalink, '?' ) ) {
@@ -62,6 +63,31 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 	}
 
 	return apply_filters( 'woocommerce_get_endpoint_url', $url );
+}
+
+/**
+ * Get the edit address slug translation.
+ *
+ * @param  string  $id   Address ID.
+ * @param  bool    $flip Flip the array to make it possible to retrieve the values ​​from both sides.
+ *
+ * @return string        Address slug i18n.
+ */
+function wc_edit_address_i18n( $id, $flip = false ) {
+	$slugs = apply_filters( 'woocommerce_edit_address_slugs', array(
+		'billing'  => _x( 'billing', 'edit-address-slug', 'woocommerce' ),
+		'shipping' => _x( 'shipping', 'edit-address-slug', 'woocommerce' )
+	) );
+
+	if ( $flip ) {
+		$slugs = array_flip( $slugs );
+	}
+
+	if ( ! isset( $slugs[ $id ] ) ) {
+		return $id;
+	}
+
+	return $slugs[ $id ];
 }
 
 /**
@@ -133,10 +159,10 @@ function wc_nav_menu_item_classes( $menu_items, $args ) {
 		// Unset active class for blog page
 		if ( $page_for_posts == $menu_item->object_id ) {
 			$menu_items[$key]->current = false;
-			
+
 			if ( in_array( 'current_page_parent', $classes ) )
 				unset( $classes[ array_search('current_page_parent', $classes) ] );
-			
+
 			if ( in_array( 'current-menu-item', $classes ) )
 				unset( $classes[ array_search('current-menu-item', $classes) ] );
 
