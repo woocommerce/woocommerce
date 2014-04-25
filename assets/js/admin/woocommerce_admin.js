@@ -14,38 +14,38 @@ jQuery(function(){
 		var regex		= new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.mon_decimal_point + "]+", "gi" );
 		var newvalue = value.replace( regex, '' );
 
-			if ( value !== newvalue ) {
-				jQuery(this).val( newvalue );
-				if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
-					var offset = jQuery(this).position();
-					jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_mon_decimal_error + '</div>' );
-					jQuery('.wc_error_tip')
-						.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
-						.css('top', offset.top + jQuery(this).height() )
-						.fadeIn('100');
-				}
+		if ( value !== newvalue ) {
+			jQuery(this).val( newvalue );
+			if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
+				var offset = jQuery(this).position();
+				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_mon_decimal_error + '</div>' );
+				jQuery('.wc_error_tip')
+					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
+					.css('top', offset.top + jQuery(this).height() )
+					.fadeIn('100');
 			}
-			return this;
-		});
+		}
+		return this;
+	});
 
 	jQuery('body').on('keyup change', '.wc_input_decimal[type=text]', function(){
 		var value		= jQuery(this).val();
 		var regex		= new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.decimal_point + "]+", "gi" );
 		var newvalue = value.replace( regex, '' );
 
-			if ( value !== newvalue ) {
-				jQuery(this).val( newvalue );
-				if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
-					var offset = jQuery(this).position();
-					jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_decimal_error + '</div>' );
-					jQuery('.wc_error_tip')
-						.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
-						.css('top', offset.top + jQuery(this).height() )
-						.fadeIn('100');
-				}
+		if ( value !== newvalue ) {
+			jQuery(this).val( newvalue );
+			if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
+				var offset = jQuery(this).position();
+				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_decimal_error + '</div>' );
+				jQuery('.wc_error_tip')
+					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
+					.css('top', offset.top + jQuery(this).height() )
+					.fadeIn('100');
 			}
-			return this;
-		});
+		}
+		return this;
+	});
 
 	jQuery("body").click(function(){
 		jQuery('.wc_error_tip').fadeOut('100', function(){ jQuery(this).remove(); } );
@@ -53,11 +53,11 @@ jQuery(function(){
 
 	// Tooltips
 	jQuery(".tips, .help_tip").tipTip({
-			'attribute' : 'data-tip',
-			'fadeIn' : 50,
-			'fadeOut' : 50,
-			'delay' : 200
-		});
+		'attribute' : 'data-tip',
+		'fadeIn' : 50,
+		'fadeOut' : 50,
+		'delay' : 200
+	});
 
 	// wc_input_table tables
 	jQuery('.wc_input_table.sortable tbody').sortable({
@@ -98,7 +98,7 @@ jQuery(function(){
 	jQuery('.wc_input_table').on( 'focus click', 'input', function( e ) {
 
 		$this_table = jQuery(this).closest('table');
-		$this_row	 = jQuery(this).closest('tr');
+		$this_row   = jQuery(this).closest('tr');
 
 		if ( ( e.type == 'focus' && hasFocus != $this_row.index() ) || ( e.type == 'click' && jQuery(this).is(':focus') ) ) {
 
@@ -141,7 +141,7 @@ jQuery(function(){
 	jQuery( '.woocommerce_page_wc-settings .shippingrows tbody tr:even' ).addClass( 'alternate' );
 
 	// Availability inputs
-		jQuery('select.availability').change(function(){
+	jQuery('select.availability').change(function(){
 		if ( jQuery(this).val() == "all" ) {
 			jQuery(this).closest('tr').next('tr').hide();
 		} else {
