@@ -330,7 +330,8 @@ class WC_Meta_Box_Product_Data {
 				do_action('woocommerce_product_options_sold_individually');
 
 				echo '</div>';
-
+				
+				do_action( 'woocommerce_product_options_inventory_product_data' );
 				?>
 
 			</div>
