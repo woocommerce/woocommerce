@@ -64,7 +64,15 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 									<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 									<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
 								</td>
-								<td>&nbsp;</td>
+								<td>
+									<label><?php _e( 'Allow Backorders?', 'woocommerce' ); ?></label>
+									<select name="variable_backorders[<?php echo $loop; ?>]">
+										<option value="parent" <?php selected( is_null( $_backorders ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
+										<?php
+										foreach ( $parent_data['backorder_options'] as $key => $value )
+											echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
+									?></select>
+								</td>
 							</tr>
 						<?php endif; ?>
 

@@ -108,6 +108,10 @@ class WC_Product_Variation extends WC_Product {
 			$this->manage_stock        = 'yes';
 			$this->stock               = $this->product_custom_fields['_stock'][0];
 		}
+		
+		if ( isset( $this->product_custom_fields['_backorders'][0] ) && ! is_null( $this->product_custom_fields['_backorders'][0] ) ) {
+			$this->backorders          = $this->product_custom_fields['_backorders'][0];
+		}
 
 		if ( isset( $this->product_custom_fields['_weight'][0] ) && $this->product_custom_fields['_weight'][0] !== '' ) {
 			$this->variation_has_weight = true;
