@@ -317,7 +317,9 @@ class WC_Meta_Box_Product_Data {
 					echo '</div>';
 
 				}
-
+				
+				do_action('woocommerce_product_options_stock_status');
+				
 				echo '</div>';
 
 				echo '<div class="options_group show_if_simple show_if_variable">';
@@ -328,7 +330,8 @@ class WC_Meta_Box_Product_Data {
 				do_action('woocommerce_product_options_sold_individually');
 
 				echo '</div>';
-
+				
+				do_action( 'woocommerce_product_options_inventory_product_data' );
 				?>
 
 			</div>
