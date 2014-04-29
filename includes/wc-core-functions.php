@@ -82,7 +82,7 @@ function wc_get_template_part( $slug, $name = '' ) {
  * Get other templates (e.g. product attributes) passing attributes and including the file.
  *
  * @access public
- * @param mixed $template_name
+ * @param string $template_name
  * @param array $args (default: array())
  * @param string $template_path (default: '')
  * @param string $default_path (default: '')
@@ -117,7 +117,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
  *		$default_path	/	$template_name
  *
  * @access public
- * @param mixed $template_name
+ * @param string $template_name
  * @param string $template_path (default: '')
  * @param string $default_path (default: '')
  * @return string
