@@ -138,7 +138,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Prevent duplicate admin menu items when using menu editor plugins.
 * Tweak - Updated REST API docs link.
 * Tweak - Updated prettyphoto dependencies.
-* Tweak - Customer serch performance improvements.
+* Tweak - Customer search performance improvements.
 * Tweak - Made default shipping label clearer.
 * Tweak - Default order email to user email.
 * Tweak - Only show downloadable item related text when product has downloads.
