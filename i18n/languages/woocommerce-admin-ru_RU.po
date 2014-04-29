@@ -1,5 +1,6 @@
 # 
 # Translators:
+# Alexander Tinyaev <dix.alex@gmail.com>, 2014
 # me2you, 2014
 # mortifactor <daniel.sergan@gmail.com>, 2014
 # Den Arefyev <>, 2012
@@ -18,8 +19,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-04-02 03:25+0000\n"
-"Last-Translator: Nikolay Nakuginkin <translator@mondaystar.ru>\n"
+"PO-Revision-Date: 2014-04-19 07:50+0000\n"
+"Last-Translator: mortifactor <daniel.sergan@gmail.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.com/projects/p/woocommerce/language/ru_RU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3849,7 +3850,7 @@ msgstr "Оплата"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
-msgstr "Разрежить оплату гостям"
+msgstr "Разрешить оплату гостям"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:80
 msgid "Allows customers to checkout without creating an account."
@@ -3969,11 +3970,11 @@ msgstr "Следующие опции влияют на отображение W
 
 #: includes/admin/settings/class-wc-settings-emails.php:69
 msgid "\"From\" Name"
-msgstr "\"От\" Имени"
+msgstr "Имя \"От кого\""
 
 #: includes/admin/settings/class-wc-settings-emails.php:79
 msgid "\"From\" Email Address"
-msgstr "\"От\" Email адрес"
+msgstr "Email адрес \"От кого\""
 
 #: includes/admin/settings/class-wc-settings-emails.php:93
 msgid "Email Template"
@@ -3985,7 +3986,7 @@ msgid ""
 "target=\"_blank\">Click here to preview your email template</a>. For more "
 "advanced control copy <code>woocommerce/templates/emails/</code> to "
 "<code>yourtheme/woocommerce/emails/</code>."
-msgstr "Эта секция позволит вам настроить WooCommerce email-ы. <a href=\"%s\" target=\"_blank\">Нажмите для предпросмотра шаблона</a>. Для дополнительного контроля над шаблоном, скопируйте <code>woocommerce/templates/emails/</code> в <code>ваша_тема/woocommerce/emails/</code>."
+msgstr "Эта секция позволит вам настроить внешний вид электронных писем в WooCommerce. <a href=\"%s\" target=\"_blank\">Нажмите для предпросмотра шаблона</a>. Для дополнительного контроля над шаблоном, скопируйте <code>woocommerce/templates/emails/</code> в <code>ваша_тема/woocommerce/emails/</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:96
 msgid "Header Image"
@@ -4003,7 +4004,7 @@ msgstr "Текст в подвале письма"
 
 #: includes/admin/settings/class-wc-settings-emails.php:107
 msgid "The text to appear in the footer of WooCommerce emails."
-msgstr "Текст появится в подвале WooCommerce email-ов."
+msgstr "Текст в подвале электронных писем WooCommerce."
 
 #: includes/admin/settings/class-wc-settings-emails.php:111
 msgid "Powered by WooCommerce"
@@ -4031,11 +4032,11 @@ msgstr "Фоновый цвет для email шаблонов WooCommerce. По 
 
 #: includes/admin/settings/class-wc-settings-emails.php:136
 msgid "Email Body Background Colour"
-msgstr "Фон, тела письма"
+msgstr "Фон тела письма"
 
 #: includes/admin/settings/class-wc-settings-emails.php:137
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
-msgstr "Главный фон, тела письма. По умолчанию <code>#fdfdfd</code>."
+msgstr "Главный фон тела письма. По умолчанию <code>#fdfdfd</code>."
 
 #: includes/admin/settings/class-wc-settings-emails.php:146
 msgid "Email Body Text Colour"

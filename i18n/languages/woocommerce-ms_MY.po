@@ -1,13 +1,14 @@
 # 
 # Translators:
 # hafizero <hafizero@gmail.com>, 2014
+# akmalff <akmal.ff@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-04-28 08:42+0000\n"
+"Last-Translator: akmalff <akmal.ff@gmail.com>\n"
 "Language-Team: Malay (Malaysia) (http://www.transifex.com/projects/p/woocommerce/language/ms_MY/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -4908,7 +4909,7 @@ msgstr ""
 
 #: includes/class-wc-coupon.php:599
 msgid "Coupon is not valid."
-msgstr "Kopun tidak sah."
+msgstr "Kupon tidak sah."
 
 #: includes/class-wc-coupon.php:602 includes/class-wc-coupon.php:652
 msgid "Coupon does not exist!"
@@ -5609,7 +5610,7 @@ msgstr "Susunan Induk"
 
 #: includes/class-wc-post-types.php:300
 msgid "This is where store orders are stored."
-msgstr ""
+msgstr "Di sini tempat tersimpannya pesanan kedai."
 
 #: includes/class-wc-post-types.php:323
 msgid "Coupons"

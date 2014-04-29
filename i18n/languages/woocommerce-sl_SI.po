@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-08 12:09+0000\n"
+"PO-Revision-Date: 2014-04-22 07:01+0000\n"
 "Last-Translator: ellena <info@ellena.si>\n"
 "Language-Team: Slovenian (Slovenia) (http://www.transifex.com/projects/p/woocommerce/language/sl_SI/)\n"
 "MIME-Version: 1.0\n"
@@ -7522,7 +7522,7 @@ msgstr "WooCommerce zadnje ogledano"
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:27
 msgid "Recently Viewed Products"
-msgstr "Zadnji ogledani izdelki"
+msgstr "Nazadnje ste si ogledali"
 
 #: includes/widgets/class-wc-widget-top-rated-products.php:23
 msgid "Display a list of your top rated products on your site."
@@ -8084,7 +8084,7 @@ msgstr "Prikazujem %1$d–%2$d od %3$d rezultatov"
 
 #: templates/loop/sale-flash.php:16 templates/single-product/sale-flash.php:16
 msgid "Sale!"
-msgstr "Akcija!"
+msgstr "Promocija"
 
 #: templates/myaccount/form-add-payment-method.php:40
 msgid ""

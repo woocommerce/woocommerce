@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-27 20:50+0000\n"
+"PO-Revision-Date: 2014-04-24 16:30+0000\n"
 "Last-Translator: Adrian Dimitrov <dimitrov.adrian@gmail.com>\n"
 "Language-Team: Bulgarian (Bulgaria) (http://www.transifex.com/projects/p/woocommerce/language/bg_BG/)\n"
 "MIME-Version: 1.0\n"
@@ -8363,7 +8363,7 @@ msgstr "Оценено на %d от 5"
 
 #: templates/single-product/review.php:34
 msgid "Your comment is awaiting approval"
-msgstr "Вашият коментар очаква удобрение"
+msgstr "Вашият коментар очаква одобрение"
 
 #: templates/single-product/review.php:43
 msgid "verified owner"

@@ -1,5 +1,6 @@
 # 
 # Translators:
+# Kind Weaverson <kind@venatus.ge>, 2014
 # nodarik <nodar1983@gmail.com>, 2014
 # nodarik <nodar1983@gmail.com>, 2014
 msgid ""
@@ -7,8 +8,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:32+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-04-16 19:36+0000\n"
+"Last-Translator: Kind Weaverson <kind@venatus.ge>\n"
 "Language-Team: Georgian (Georgia) (http://www.transifex.com/projects/p/woocommerce/language/ka_GE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3163,7 +3164,7 @@ msgstr ""
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:64
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:49
 msgid "Enable/Disable"
-msgstr ""
+msgstr "ჩართვა/გამორთვა"
 
 #: includes/abstracts/abstract-wc-email.php:572
 #: includes/emails/class-wc-email-customer-completed-order.php:142
@@ -3220,7 +3221,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: includes/abstracts/abstract-wc-email.php:598
 #: includes/emails/class-wc-email-customer-completed-order.php:182
@@ -5227,7 +5228,7 @@ msgstr ""
 #: includes/class-wc-install.php:228
 msgctxt "Page title"
 msgid "Checkout"
-msgstr ""
+msgstr "შემოწმება"
 
 #: includes/class-wc-install.php:232
 msgctxt "Page slug"
@@ -5290,7 +5291,7 @@ msgstr ""
 
 #: includes/class-wc-order.php:1258 includes/class-wc-order.php:1259
 msgid "WooCommerce"
-msgstr ""
+msgstr "WooCommerce"
 
 #: includes/class-wc-order.php:1314
 msgid "Order status changed from %s to %s."
@@ -5618,7 +5619,7 @@ msgstr "კუპონები"
 
 #: includes/class-wc-post-types.php:324 templates/cart/cart.php:118
 msgid "Coupon"
-msgstr ""
+msgstr "კუპონი"
 
 #: includes/class-wc-post-types.php:325
 msgctxt "Admin menu name"
@@ -6852,7 +6853,7 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-checkout.php:142
 #: templates/checkout/thankyou.php:48
 msgid "Total:"
-msgstr ""
+msgstr "სულ"
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:147
 #: templates/checkout/thankyou.php:53
@@ -7607,12 +7608,12 @@ msgstr ""
 #: templates/emails/customer-note.php:28
 #: templates/emails/customer-processing-order.php:24
 msgid "Quantity"
-msgstr ""
+msgstr "რაოდენობა"
 
 #: templates/cart/cart.php:30 templates/checkout/review-order.php:19
 #: templates/myaccount/my-orders.php:35 templates/order/order-details.php:21
 msgid "Total"
-msgstr ""
+msgstr "სულ"
 
 #: templates/cart/cart.php:47
 msgid "Remove this item"
@@ -7644,11 +7645,11 @@ msgstr ""
 
 #: templates/cart/mini-cart.php:59
 msgid "Subtotal"
-msgstr ""
+msgstr "სულ"
 
 #: templates/cart/mini-cart.php:65
 msgid "Checkout"
-msgstr ""
+msgstr "შემოწმება"
 
 #: templates/cart/shipping-calculator.php:22
 msgid "Calculate Shipping"
@@ -7803,7 +7804,7 @@ msgstr ""
 
 #: templates/checkout/thankyou.php:28 templates/myaccount/my-orders.php:71
 msgid "Pay"
-msgstr ""
+msgstr "გადახდა"
 
 #: templates/checkout/thankyou.php:36 templates/checkout/thankyou.php:67
 msgid "Thank you. Your order has been received."
@@ -8098,16 +8099,16 @@ msgstr ""
 
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
-msgstr ""
+msgstr "სახელი"
 
 #: templates/myaccount/form-edit-account.php:24
 msgid "Last name"
-msgstr ""
+msgstr "გვარი"
 
 #: templates/myaccount/form-edit-account.php:28
 #: templates/myaccount/form-login.php:79
 msgid "Email address"
-msgstr ""
+msgstr "მისამართი"
 
 #: templates/myaccount/form-edit-account.php:32
 msgid "Password (leave blank to leave unchanged)"
@@ -8125,12 +8126,12 @@ msgstr ""
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
-msgstr ""
+msgstr "გადახდის მისამართი"
 
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:133
 msgid "Shipping Address"
-msgstr ""
+msgstr "მისამართი"
 
 #: templates/myaccount/form-edit-address.php:38
 msgid "Save Address"

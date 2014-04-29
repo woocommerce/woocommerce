@@ -1,5 +1,6 @@
 # 
 # Translators:
+# Csaba Sári <clausewitz45@gmail.com>, 2014
 # aroland.hu <info@aroland.hu>, 2014
 # joesalty <joesalty77@gmail.com>, 2014
 # Laszlo Espadas <kw@kardiweb.org>, 2014
@@ -9,8 +10,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:50+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-04-26 15:30+0000\n"
+"Last-Translator: Csaba Sári <clausewitz45@gmail.com>\n"
 "Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce/language/hu_HU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3304,7 +3305,7 @@ msgstr "Lejárat (HH/ÉÉ)"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:212
 msgid "MM / YY"
-msgstr ""
+msgstr "HÓ / ÉV"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
@@ -3312,7 +3313,7 @@ msgstr "Kártyakód"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:216
 msgid "CVC"
-msgstr ""
+msgstr "CVC kód"
 
 #: includes/abstracts/abstract-wc-product.php:455
 #: includes/class-wc-product-simple.php:48
@@ -4851,7 +4852,7 @@ msgstr "Irányítószám"
 
 #: includes/class-wc-countries.php:827
 msgid "District"
-msgstr ""
+msgstr "Kerület"
 
 #: includes/class-wc-countries.php:834 includes/class-wc-countries.php:850
 #: includes/class-wc-countries.php:870 includes/class-wc-countries.php:931
@@ -4871,7 +4872,7 @@ msgstr "Község"
 
 #: includes/class-wc-countries.php:918
 msgid "Town / District"
-msgstr "Város / Kerüelt"
+msgstr "Város / Kerület"
 
 #: includes/class-wc-countries.php:921
 msgid "Region"
@@ -4921,13 +4922,13 @@ msgstr "A kupon nem létezik!"
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
-msgstr "Sajnáljuk, úgy tűnik ez a kupon érvénytelen: \"%s\" - eltávolítottuk a rendelésedből."
+msgstr "Sajnáljuk, de úgy tűnik ez a kupon érvénytelen: \"%s\" - eltávolítottuk a rendelésedből."
 
 #: includes/class-wc-coupon.php:608
 msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
-msgstr "Sajnáljuk, úgy tűnik ez a kupon nem a tiéd: \"%s\" - eltávolítottuk a rendelésedből."
+msgstr "Sajnáljuk, de úgy tűnik ez a kupon nem a tiéd: \"%s\" - eltávolítottuk a rendelésedből."
 
 #: includes/class-wc-coupon.php:611
 msgid "Coupon code already applied!"
@@ -4941,7 +4942,7 @@ msgstr "Sajnáljuk, de a(z) \"%s\" kupon már alkalmazva lett és nem használha
 
 #: includes/class-wc-coupon.php:617
 msgid "Coupon usage limit has been reached."
-msgstr "A kupon felhasználható korlátját elérték."
+msgstr "A kupon felhasználási korlátját elérték."
 
 #: includes/class-wc-coupon.php:620
 msgid "This coupon has expired."
@@ -4953,11 +4954,11 @@ msgstr "A minimálisan elköltendő összeg a kuponhoz %s."
 
 #: includes/class-wc-coupon.php:626
 msgid "Sorry, this coupon is not applicable to your cart contents."
-msgstr "Sajnáljuk, ez a kupon nem alkalmazható a kosaradban lévő termékekre."
+msgstr "Sajnáljuk, de ez a kupon nem alkalmazható a kosaradban lévő termékekre."
 
 #: includes/class-wc-coupon.php:629
 msgid "Sorry, this coupon is not valid for sale items."
-msgstr "Sajnáljuk, ez a kupon nem alkalmazható akciós termékekre."
+msgstr "Sajnáljuk, de ez a kupon nem alkalmazható akciós termékekre."
 
 #: includes/class-wc-coupon.php:655
 msgid "Please enter a coupon code."
@@ -5190,7 +5191,7 @@ msgstr "kötelező"
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
-msgstr "Sajnáljuk, egy termék sem felelt meg a feltételeknek. Kérjük válassz egy másik kombinációt."
+msgstr "Sajnáljuk, de egy termék sem felelt meg a feltételeknek. Kérjük válassz egy másik kombinációt."
 
 #: includes/class-wc-frontend-scripts.php:165
 msgid ""
@@ -5833,7 +5834,7 @@ msgstr "Rendelés feldolgozása"
 msgid ""
 "This is an order notification sent to the customer after payment containing "
 "order details."
-msgstr "Ez egy rendelési értesítő, amit a vásárló fizetés után kap tartalmazva a rendelés adatait."
+msgstr "Ez egy rendelési értesítő amit a vásárló fizetés után kap, tartalmazva a rendelés adatait."
 
 #: includes/emails/class-wc-email-customer-processing-order.php:29
 msgid "Thank you for your order"
@@ -5985,16 +5986,16 @@ msgstr "A köszönet oldalon és e-mailekben megjelenő instrukciók."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:105
 msgid "Account Details"
-msgstr "Fiók adatok"
+msgstr "Fiókadatok"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:111
 msgid "Account Name"
-msgstr "Fiók név"
+msgstr "Fióknév"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:112
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:258
 msgid "Account Number"
-msgstr "Fiók szám"
+msgstr "Fiókszám"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:113
 msgid "Bank Name"
@@ -6082,7 +6083,7 @@ msgstr "Utánvétel engedélyezése"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:73
 msgid "Payment method description that the customer will see on your website."
-msgstr "Fizetési mód leírása, amit a vásárló a weboldalon látni fog."
+msgstr "Fizetési mód leírása amit a vásárló a weboldalon látni fog."
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:74
 #: includes/gateways/cod/class-wc-gateway-cod.php:81
@@ -7787,7 +7788,7 @@ msgstr "Megrendelés elküldése"
 msgid ""
 "I&rsquo;ve read and accept the <a href=\"%s\" target=\"_blank\">terms &amp; "
 "conditions</a>"
-msgstr ""
+msgstr "Elolvastam és elfogadom a <a href=\"%s\" target=\"_blank\">felhasználási és rendelési feltételeket</a>"
 
 #: templates/checkout/thankyou.php:18
 msgid ""

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:51+0000\n"
+"PO-Revision-Date: 2014-04-19 09:35+0000\n"
 "Last-Translator: Shohei Tanaka <shohei.tanaka@artisanworkshop.biz>\n"
 "Language-Team: Japanese (http://www.transifex.com/projects/p/woocommerce/language/ja/)\n"
 "MIME-Version: 1.0\n"
@@ -1206,7 +1206,7 @@ msgstr "インストールしていただき、ありがとうございます！
 msgid ""
 "%s WooCommerce %s is more powerful, stable, and secure than ever before. We "
 "hope you enjoy it."
-msgstr "%s WooCommerce %s はより強力で、安定的で、以前にもまして安全です。我々はあなたがそれを楽しむことを望みます。"
+msgstr "%s WooCommerce %s はより強力で、安定的で、より安全です。是非楽しんで、ご使用ください。"
 
 #: includes/admin/class-wc-admin-welcome.php:210
 msgid "Version %s"

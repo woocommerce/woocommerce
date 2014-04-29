@@ -1,14 +1,15 @@
 # 
 # Translators:
 # Joe Sadaeng, 2014
+# Axium <mickael@axium-services.com>, 2014
 # monsterporing <monsterporing@live.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-30 15:20+0000\n"
-"Last-Translator: Joe Sadaeng\n"
+"PO-Revision-Date: 2014-04-19 06:48+0000\n"
+"Last-Translator: Axium <mickael@axium-services.com>\n"
 "Language-Team: Thai (http://www.transifex.com/projects/p/woocommerce/language/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -8366,7 +8367,7 @@ msgstr ""
 
 #: templates/single-product/tabs/description.php:14
 msgid "Product Description"
-msgstr ""
+msgstr "คุณสมบัติ"
 
 #: templates/single-product/up-sells.php:39
 msgid "You may also like&hellip;"

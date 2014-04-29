@@ -1,5 +1,6 @@
 # 
 # Translators:
+# axdil <axdil@hotmail.it>, 2014
 # Fredev <federico.paletta88@gmail.com>, 2014
 # Gabriele Polidori <webmaster@onenet.it>, 2014
 # FrancoBaccarini <info@francobaccarini.it>, 2014
@@ -12,8 +13,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-04-01 07:20+0000\n"
-"Last-Translator: Nicola Mustone <mustone.nicola@gmail.com>\n"
+"PO-Revision-Date: 2014-04-13 08:58+0000\n"
+"Last-Translator: axdil <axdil@hotmail.it>\n"
 "Language-Team: Italian (Italy) (http://www.transifex.com/projects/p/woocommerce/language/it_IT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -36,7 +37,7 @@ msgstr "Per favore inserisci in formato decimale (%s) senza separatori delle mig
 msgid ""
 "Please enter in monetary decimal (%s) format without thousand separators and"
 " currency symbols."
-msgstr ""
+msgstr "Inserisci in formato decimale monetario (%s) senza separatori delle migliaia e simboli di valuta."
 
 #: includes/admin/class-wc-admin-assets.php:136
 msgid ""
@@ -1054,7 +1055,7 @@ msgstr "Clear expired transients"
 
 #: includes/admin/class-wc-admin-status.php:180
 msgid "This tool will clear ALL expired transients from WordPress."
-msgstr ""
+msgstr "Questo strumento cancellerà TUTTE le transazioni scadute da WordPress."
 
 #: includes/admin/class-wc-admin-status.php:183
 msgid "Term counts"
@@ -1267,7 +1268,7 @@ msgstr "L'autenticazione per le API REST è eseguita usando HTTP Basic Auth se �
 
 #: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"
-msgstr ""
+msgstr "Miglioramenti dell'IU e dei report"
 
 #: includes/admin/class-wc-admin-welcome.php:260
 msgid "WordPress 3.8 admin UI compatibility"
@@ -1279,7 +1280,7 @@ msgid ""
 " WordPress 3.8. All bitmap icons have been replaced with a custom, "
 "lightweight icon font for razor sharp clarity on retina devices as well as "
 "improved performance."
-msgstr ""
+msgstr "In WooCommerce 2.1 abbiamo ridisegnata la sua UI per funzionare con il nuovo design admin di WordPress 3.8. Tutte le icone bitmap sono state sostituiti con icon font personalizzate, leggere e nitidissime su dispositivi retina, così come il miglioramento delle prestazioni."
 
 #: includes/admin/class-wc-admin-welcome.php:264
 msgid "Simplified order UI"
@@ -1289,13 +1290,13 @@ msgstr "UI dell'ordine semplificata"
 msgid ""
 "The orders panel has seen significant improvement to both the totals panel, "
 "and line item display making editing new and existing orders a breeze."
-msgstr ""
+msgstr "Il pannello degli ordini e dei totali sono stati entrambi migliorati in modo significativo, ora grazie alla nuova line di modifica,visualizza... prodotto, modificare gli ordini nuovi o gli esistenti sarà un gioco da ragazzi."
 
 #: includes/admin/class-wc-admin-welcome.php:266
 msgid ""
 "Item meta has also been optimised and can now be viewed as HTML rather than "
 "stuck in a text input."
-msgstr ""
+msgstr "I Meta del prodotto sono stati ottimizzati e ora può essere visulizzati come HTML, piuttosto che bloccati in un input di testo."
 
 #: includes/admin/class-wc-admin-welcome.php:269
 msgid "Improved Reporting"
@@ -1306,13 +1307,13 @@ msgid ""
 "Reports have been redesigned with new <strong>filtering</strong> "
 "capabilities, a new <strong>customer report</strong> showing "
 "orders/spending, and the ability to <strong>export CSVs</strong>."
-msgstr ""
+msgstr "I report sono stati ridisegnati con un nuovo metodo di <strong>filtraggio</strong>, un nuovo <strong>report cliente</strong> che mostra gli ordini/spesa, e la possibilità di <strong>esportare in file CSV</strong>."
 
 #: includes/admin/class-wc-admin-welcome.php:271
 msgid ""
 "The dashboard also has a new widget showing you an overview of current "
 "orders complete with sparklines for quick at-a-glance stats."
-msgstr ""
+msgstr "La Bacheca di WP ha anche un nuovo widget che mostra una panoramica degli ordini in corso, completo di grafici sparkline per un rapido colpo d'occhio alle statistiche."
 
 #: includes/admin/class-wc-admin-welcome.php:276
 msgid "Separated integrations"
@@ -1320,7 +1321,7 @@ msgstr "Integrazioni seaparate"
 
 #: includes/admin/class-wc-admin-welcome.php:279
 msgid "New separate plugins"
-msgstr ""
+msgstr "Nuovi plugin separati"
 
 #: includes/admin/class-wc-admin-welcome.php:280
 msgid ""
@@ -1399,27 +1400,27 @@ msgstr "Separazione fogli stile"
 msgid ""
 "Frontend styles have been split into separate appearance/layout/smallscreen "
 "stylesheets to help with selective customisation."
-msgstr ""
+msgstr "Gli stili del frontend sono stati suddivisi in fogli di stile separati, appearance/layout/smallscreen, per facilitare la personalizzazione selettiva."
 
 #: includes/admin/class-wc-admin-welcome.php:324
 msgid "New endpoints"
-msgstr ""
+msgstr "Nuovi endpoint"
 
 #: includes/admin/class-wc-admin-welcome.php:325
 msgid ""
 "Certain pages such as \"Pay\", \"Order Received\" and some account pages are"
 " now endpoints rather than pages to make checkout more reliable."
-msgstr ""
+msgstr "Alcune pagine come \"Paga\", \"Ordine Ricevuto\" ed altre pagine di account ora sono degli endpoint cosi che si rendono le pagine di checkout più affidabili."
 
 #: includes/admin/class-wc-admin-welcome.php:331
 msgid "Default credit card form for gateways"
-msgstr ""
+msgstr "Modulo predefinito di carta di credito per i metodi di pagamento"
 
 #: includes/admin/class-wc-admin-welcome.php:332
 msgid ""
 "We've added a standardized, default credit card form for gateways to use if "
 "they support <code>default_credit_card_form</code>."
-msgstr ""
+msgstr "Abbiamo aggiunto un modulo predefinito di carta di credito per i gateway standard, da utilizzare se questi supportano <code>default_credit_card_form</code>."
 
 #: includes/admin/class-wc-admin-welcome.php:336
 msgid "Coupon limits per customer"
@@ -1433,7 +1434,7 @@ msgstr "I limiti di utilizzo dei Codici sconto pu&opgrave; essere impostato per 
 
 #: includes/admin/class-wc-admin-welcome.php:341
 msgid "Streamlined new-account process"
-msgstr ""
+msgstr "Processo razionalizzato di un nuovo-account"
 
 #: includes/admin/class-wc-admin-welcome.php:342
 msgid ""
@@ -1449,7 +1450,7 @@ msgstr "Ulteriori opzioni di visualizzazione del prezzo"
 msgid ""
 "Define whether prices should be shown incl. or excl. of tax on the frontend,"
 " and add an optional suffix."
-msgstr ""
+msgstr "Definire se i prezzi devono essere indicati incl. o escl. d'imposta sul frontend, e se aggiungere un suffisso opzionale."
 
 #: includes/admin/class-wc-admin-welcome.php:354
 msgid "Past order linking"
@@ -3103,7 +3104,7 @@ msgstr "Revocare l'accesso"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "%s: %s"
-msgstr ""
+msgstr "%s: %s"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:9
 msgid "Downloaded %s time"
@@ -3778,7 +3779,7 @@ msgstr "Abilita registrazione"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:109
 msgid "Enable registration on the \"Checkout\" page"
-msgstr "Abilita la registrazione della pagina di checkout"
+msgstr "Abilita la registrazione nella pagina \"Checkout\""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:118
 msgid "Enable registration on the \"My Account\" page"
@@ -3786,7 +3787,7 @@ msgstr "Abilita la registrazione nella pagina \"Il mio account\""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:127
 msgid "Display returning customer login reminder on the \"Checkout\" page"
-msgstr ""
+msgstr "Visualizza un promemoria/sollecito, per i clienti che ritornano ad accedere al negozio senza aver ancora compilato i moduli di Fatturazione e Spedizione,  sulla pagina \"Checkout\""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:136
 msgid "Account Creation"
@@ -3794,7 +3795,7 @@ msgstr "Creazione dell'account"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:137
 msgid "Automatically generate username from customer email"
-msgstr "Genera automaticamente la password dalla mail del cliente"
+msgstr "Genera automaticamente l'username dalla mail del cliente"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:146
 msgid "Automatically generate customer password"
@@ -3908,7 +3909,7 @@ msgstr "Aggiungi un mezzo di pagamento"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
 msgid "Endpoint for the Checkout &rarr; Add Payment Method page"
-msgstr ""
+msgstr "Endpoint per il Checkout &rarr; Aggiungere la pagina Metodo di pagamento"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:178
 msgid "Payment Gateways"
@@ -5234,7 +5235,7 @@ msgstr "Templates"
 msgid ""
 "<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
 "date. The core version is %s"
-msgstr ""
+msgstr "<code>%s</code> versione <strong style=\"color:red\">%s</strong> il file non è aggiornato. La versione di base è %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:489
 #: includes/admin/views/html-admin-page-status-report.php:495
@@ -5367,7 +5368,7 @@ msgid ""
 " this could the reason. Ensure you update or remove them (in general we "
 "recommend only bundling the template files you actually need to customize). "
 "See the system report for full details."
-msgstr ""
+msgstr "<strong>Il vostro tema contiene delle copie obsolete dei file di template per WooCommerce</strong> &#8211; se si riscontrano problemi di funzionalità sul frontend questo potrebbe essere il motivo. Assicuratevi di aggiornare o rimuovere tali file (in generale vi consigliamo di aggiungere solo i file template di cui avete realmente il bisogno di personalizzare). Vedere il report di sistema per i dettagli."
 
 #: includes/admin/views/html-notice-template-check.php:6
 #: includes/admin/views/html-notice-theme-support.php:6
