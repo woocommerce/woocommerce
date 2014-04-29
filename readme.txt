@@ -127,8 +127,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.2.0 =
-* Feature - Added used payment gateway to view orders screens
-* Feature - API: Lookup customers by email endpoint
+* Feature - Added used payment gateway to view orders screens.
+* Feature - API: Lookup customers by email endpoint.
+* Feature - Allow backorders to be configured at variation level.
+* Feature - Protect admins from shop manager users.
+* Tweak - Recalculate the cart totals, in the event a user registers during checkout and in doing so qualifies for any discounts.
+* Tweak - Use `woocommerce_valid_order_statuses_for_payment` in `pay_action` too
+* Tweak - Introduce `woocommerce_valid_order_statuses_for_payment_complete` filter
+* Tweak - Introduce `woocommerce_thankyou_order_received_text` filter
+* Tweak - Added the possibility to translate the edit-address endpoint slug
+* Refactor - Update stock amounts with DB queries
 
 = 2.1.7 - 10/04/2014 =
 * Fix - Allow WC API to generate API keys for different user than the one that is making request.
