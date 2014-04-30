@@ -4,13 +4,13 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @version     2.1.8
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 ?>
-<div id="order_review">
+
+<?php if ( ! is_ajax() ) : ?><div id="order_review"><?php endif; ?>
 
 	<table class="shop_table">
 		<thead>
@@ -191,4 +191,4 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php do_action( 'woocommerce_review_order_after_payment' ); ?>
 
-</div>
+<?php if ( ! is_ajax() ) : ?></div><?php endif; ?>
