@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.9 - xx/xx/xxxx =
+
 = 2.1.8 - 30/04/2014 =
 * Fix - Prevent saving duplicate skus in quick edit.
 * Fix - Sorting of downloads on my account page.
