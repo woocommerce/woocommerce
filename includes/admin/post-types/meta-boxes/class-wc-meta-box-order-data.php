@@ -172,6 +172,10 @@ class WC_Meta_Box_Order_Data {
 										$user = get_user_by( 'id', $order->customer_user );
 										echo '<option value="' . esc_attr( $user->ID ) . '" ' . selected( 1, 1, false ) . '>' . esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')</option>';
 									}
+                                    $users = get_users(array('role' =>'Customer'));
+                                    foreach ($users as $u) {
+                                        echo '<option value="' . esc_attr( $u->ID ). '">' . esc_html( $u->display_name ) . ' (#' . absint( $u->ID ) . ' &ndash; ' . esc_html( $u->user_email ) . ')</option>';
+                                    }
 								?>
 							</select>
 						</p>
