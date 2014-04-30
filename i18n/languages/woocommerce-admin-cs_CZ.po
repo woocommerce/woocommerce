@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-04-06 20:05+0000\n"
+"PO-Revision-Date: 2014-04-19 19:45+0000\n"
 "Last-Translator: dudlaj\n"
 "Language-Team: Czech (Czech Republic) (http://www.transifex.com/projects/p/woocommerce/language/cs_CZ/)\n"
 "MIME-Version: 1.0\n"
@@ -39,7 +39,7 @@ msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
-msgstr ""
+msgstr "Jste si jisti, že chcete odstranit vybrané položky? Pokud jste již dříve snížili stav skladu této položky nebo pokud tuto objednávku vložil zákazník, budete muset ručně obnovit stav skladu této položky."
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
@@ -113,7 +113,7 @@ msgstr "Zadejte název pro pojmenování nové vlastnosti:"
 
 #: includes/admin/class-wc-admin-assets.php:148
 msgid "Calculate totals based on order items, discounts, and shipping?"
-msgstr ""
+msgstr "Spočítat součet na základě položek objednávky, slev a poštovného?"
 
 #: includes/admin/class-wc-admin-assets.php:149
 msgid ""
@@ -193,7 +193,7 @@ msgstr "Zvolit obrázek"
 
 #: includes/admin/class-wc-admin-assets.php:209
 msgid "Set variation image"
-msgstr ""
+msgstr "Nastavit obrázek varianty"
 
 #: includes/admin/class-wc-admin-assets.php:210
 msgid "variation added"
@@ -291,7 +291,7 @@ msgstr "Vlastní třídění"
 #: includes/admin/class-wc-admin-attributes.php:333
 #: includes/admin/class-wc-admin-attributes.php:400
 msgid "Term ID"
-msgstr ""
+msgstr "ID podmínky"
 
 #: includes/admin/class-wc-admin-attributes.php:278
 #: includes/admin/class-wc-admin-attributes.php:402
@@ -377,14 +377,14 @@ msgstr "<strong>%s</strong> prodejů tento měsíc"
 
 #: includes/admin/class-wc-admin-dashboard.php:139
 msgid "%s top seller this month (sold %d)"
-msgstr ""
+msgstr "Produkt %s se tento měsíc prodává nejvíce. (prodáno %d)"
 
 #: includes/admin/class-wc-admin-dashboard.php:145
 msgid "<strong>%s order</strong> awaiting processing"
 msgid_plural "<strong>%s orders</strong> awaiting processing"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "<strong>%s onjednávka</strong> čeká na vyřízení"
+msgstr[1] "<strong>%s onjednávky</strong> čekájí na vyřízení"
+msgstr[2] "<strong>%s onjednávek</strong> čeká na vyřízení"
 
 #: includes/admin/class-wc-admin-dashboard.php:150
 msgid "<strong>%s order</strong> on-hold"
@@ -396,16 +396,16 @@ msgstr[2] ""
 #: includes/admin/class-wc-admin-dashboard.php:155
 msgid "<strong>%s product</strong> low in stock"
 msgid_plural "<strong>%s products</strong> low in stock"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "<strong>%s produkt</strong> má nízké skladové zásoby"
+msgstr[1] "<strong>%s produkty</strong> májí nízké skladové zásoby"
+msgstr[2] "<strong>%s produktů</strong> má nízké skladové zásoby"
 
 #: includes/admin/class-wc-admin-dashboard.php:160
 msgid "<strong>%s product</strong> out of stock"
 msgid_plural "<strong>%s products</strong> out of stock"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "<strong>%s produkt</strong> není skladem"
+msgstr[1] "<strong>%s produkty</strong> nejsou skladem"
+msgstr[2] "<strong>%s produktů</strong> není skladem"
 
 #: includes/admin/class-wc-admin-dashboard.php:193
 msgid "out of 5"
@@ -488,11 +488,11 @@ msgstr "Stav systému"
 
 #: includes/admin/class-wc-admin-help.php:56
 msgid "Community Support"
-msgstr ""
+msgstr "Komunitní podpora"
 
 #: includes/admin/class-wc-admin-help.php:56
 msgid "Customer Support"
-msgstr ""
+msgstr "Zákaznická podpora"
 
 #: includes/admin/class-wc-admin-help.php:62
 msgid "Found a bug?"
@@ -562,11 +562,11 @@ msgstr "Nastavení"
 #: includes/admin/class-wc-admin-menus.php:88
 #: includes/admin/views/html-admin-page-addons.php:4
 msgid "WooCommerce Add-ons/Extensions"
-msgstr ""
+msgstr "WooCommerce doplňky/rozšíření"
 
 #: includes/admin/class-wc-admin-menus.php:88
 msgid "Add-ons"
-msgstr ""
+msgstr "Doplňky"
 
 #: includes/admin/class-wc-admin-menus.php:126
 #: includes/admin/class-wc-admin-menus.php:128
@@ -926,7 +926,7 @@ msgstr "Sklad"
 
 #: includes/admin/class-wc-admin-reports.php:92
 msgid "Low in stock"
-msgstr ""
+msgstr "Nízké skladové zásoby"
 
 #: includes/admin/class-wc-admin-reports.php:98
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:419
@@ -939,20 +939,20 @@ msgstr "Není skladem"
 
 #: includes/admin/class-wc-admin-reports.php:104
 msgid "Most Stocked"
-msgstr ""
+msgstr "Skladem nejvíce"
 
 #: includes/admin/class-wc-admin-reports.php:115
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:75
 msgid "Taxes"
-msgstr ""
+msgstr "Daně"
 
 #: includes/admin/class-wc-admin-reports.php:118
 msgid "Taxes by code"
-msgstr ""
+msgstr "Daně dle PSČ"
 
 #: includes/admin/class-wc-admin-reports.php:124
 msgid "Taxes by date"
-msgstr ""
+msgstr "Daně dle data"
 
 #: includes/admin/class-wc-admin-settings.php:54
 msgid "Action failed. Please refresh the page and retry."
@@ -968,7 +968,7 @@ msgstr "Provedené změny budou ztraceny, pokud tuto stránku opustíte."
 
 #: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
-msgstr ""
+msgstr "Tvdrý ořez?"
 
 #: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
@@ -1062,7 +1062,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:184
 msgid "Recount terms"
-msgstr ""
+msgstr "Přepočítat výrazy"
 
 #: includes/admin/class-wc-admin-status.php:185
 msgid ""
@@ -1505,7 +1505,7 @@ msgstr "HTML Emailová šablona"
 #: includes/admin/importers/class-wc-tax-rate-importer.php:230
 #: includes/admin/importers/class-wc-tax-rate-importer.php:245
 msgid "Sorry, there has been an error."
-msgstr ""
+msgstr "Omlouváme se, ale vyskytla se nějaká chyba."
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:104
 msgid "The file does not exist, please try again."
@@ -1562,11 +1562,11 @@ msgstr "Maximální velikost: %s"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:315
 msgid "OR enter path to file:"
-msgstr ""
+msgstr "NEBO vložte cestu k souboru:"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:322
 msgid "Delimiter"
-msgstr ""
+msgstr "Oddělovač"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:328
 msgid "Upload file and import"
@@ -1673,7 +1673,7 @@ msgstr "Datum"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:303
 msgid "Edit this item"
-msgstr ""
+msgstr "Upravit tuto položku"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:304
 msgid "Edit this item inline"
@@ -1831,7 +1831,7 @@ msgstr "Kód kupónu"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:66
 msgid "Description (optional)"
-msgstr ""
+msgstr "Popis (volitelně)"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:77
 msgid "Code"
@@ -1857,7 +1857,7 @@ msgstr "Číslo ID produktu"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:82
 msgid "Usage / Limit"
-msgstr ""
+msgstr "Použití / Limit"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:83
 msgid "Expiry date"
@@ -1891,11 +1891,11 @@ msgstr "Objednávka"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:93
 msgid "Purchased"
-msgstr ""
+msgstr "Zakoupil"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:94
 msgid "Ship to"
-msgstr ""
+msgstr "Odeslat na "
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:96
 msgid "Customer Message"
@@ -1943,9 +1943,9 @@ msgstr "Přes"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:155
 msgid "%d item"
 msgid_plural "%d items"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "%d položka"
+msgstr[1] "%d položky"
+msgstr[2] "%d položek"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:210
 msgid "plus %d other note"
@@ -1963,7 +1963,7 @@ msgstr[2] "%d poznámek"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:232
 msgid "Billing:"
-msgstr ""
+msgstr "Fakturace:"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:236
 msgid "Tel:"
@@ -2004,7 +2004,7 @@ msgstr "Značení se zpracovává"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:691
 msgid "Mark on-hold"
-msgstr ""
+msgstr "Označit jako čekající na vyřízení"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:694
@@ -2051,7 +2051,7 @@ msgstr "Údaje o objednávce"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:108
 msgid "Order Items"
-msgstr ""
+msgstr "Položky objednávky"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:109
 msgid "Order Totals"
@@ -2059,13 +2059,13 @@ msgstr "Celková částka objednávky"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:111
 msgid "Downloadable Product Permissions"
-msgstr ""
+msgstr "Oprávnění pro položky ke stažení"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:111
 msgid ""
 "Note: Permissions for order items will automatically be granted when the "
 "order status changes to processing/completed."
-msgstr ""
+msgstr "Poznámka: Opravnění pro položky objednávky budou automaticky přidělena v okamžiku změny stavu objednávky na ve zpracování/dokončena."
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:112
 msgid "Order Actions"
@@ -2091,11 +2091,11 @@ msgstr "Obecné"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:42
 msgid "Usage Restriction"
-msgstr ""
+msgstr "Omezení použití"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:47
 msgid "Usage Limits"
-msgstr ""
+msgstr "Limit použití"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:63
 msgid "Discount type"
@@ -2113,7 +2113,7 @@ msgstr "Povolit doručení zdarma"
 msgid ""
 "Check this box if the coupon grants free shipping. The <a href=\"%s\">free "
 "shipping method</a> must be enabled with the \"must use coupon\" setting."
-msgstr ""
+msgstr "Zvolte tuto možnost pokud má být po aplikaci tohoto kupónu poštovné zdarma. <a href=\"%s\">Poštovné zdarma</a> musí být povoleno možnostech nastavení \"doručení\"."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:72
 msgid "Apply before tax"
@@ -2131,7 +2131,7 @@ msgstr "Vypršení platnosti kupónu"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:75
 msgctxt "placeholder"
 msgid "YYYY-MM-DD"
-msgstr ""
+msgstr "RRRR-MM-DD"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid "Minimum spend"
@@ -2148,24 +2148,24 @@ msgstr "Toto pole Vám umožňuje nastavit minimální součet potřebný k pou�
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:88
 msgid "Individual use only"
-msgstr ""
+msgstr "Nelze kombinovat"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:88
 msgid ""
 "Check this box if the coupon cannot be used in conjunction with other "
 "coupons."
-msgstr ""
+msgstr "Zvolte tuto možnost pokud tento kupón nesmí být použit v kombinaci s jinými kupóny."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:91
 msgid "Exclude sale items"
-msgstr ""
+msgstr "Vyloučit položky ve slevě"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:91
 msgid ""
 "Check this box if the coupon should not apply to items on sale. Per-item "
 "coupons will only work if the item is not on sale. Per-cart coupons will "
 "only work if there are no sale items in the cart."
-msgstr ""
+msgstr "Zvolte tuto možnost pokud nesmí být tento kupón použit na produkty, které jsou ve slevě. Kupón na položku funguje na položky jež nejsou ve slevě. Kupón na nákup bude fungovat pouze tehdy pokud nebude obsahem nákupu žádná položka ve slevě."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:98
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:95
@@ -2183,7 +2183,7 @@ msgstr "Produkty, které musí být v košíku k použití tohoto kupónu, nebo 
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:116
 msgid "Exclude products"
-msgstr ""
+msgstr "Vyloučit produkty"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:117
 msgid "Search for a product…"
@@ -2225,11 +2225,11 @@ msgstr "Produkt nesmí být v této kategorii, aby kupón zůstal platný, nebo 
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "Email restrictions"
-msgstr ""
+msgstr "Omezení emailů"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "No restrictions"
-msgstr ""
+msgstr "Bez omezení"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid ""
@@ -2466,11 +2466,11 @@ msgstr "DPH"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:83
 msgid "Delete Lines"
-msgstr ""
+msgstr "Vymazat řádky"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:85
 msgid "Stock Actions"
-msgstr ""
+msgstr "Akce skladu"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-items.php:86
 msgid "Reduce Line Stock"
@@ -2539,11 +2539,11 @@ msgstr "Doručení"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:66
 msgid "+ Add shipping cost"
-msgstr ""
+msgstr "+ Přidat sazbu poštovného"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:66
 msgid "These are the shipping and handling costs for the order."
-msgstr ""
+msgstr "Toto jsou poplatky za poštovné a manipulaci pro tuto objedávku."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:106
 msgid "+ Add tax row"
@@ -2565,11 +2565,11 @@ msgstr "Cena celkem"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:148
 msgid "Calculate Tax"
-msgstr ""
+msgstr "Spočítat daň"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:150
 msgid "Calculate Total"
-msgstr ""
+msgstr "Celkový součet"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:42
 msgid "Product Type"

@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-03-26 13:01+0000\n"
+"PO-Revision-Date: 2014-04-18 12:25+0000\n"
 "Last-Translator: sennbrink <konsult@sennbrink.se>\n"
 "Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce/language/sv_SE/)\n"
 "MIME-Version: 1.0\n"
@@ -41,7 +41,7 @@ msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
-msgstr "Är du säker att du vill radera denna produkt? Om du nyligen minskat produktens lagersaldo eller om ordern lades av en kund, behöver du manuellt återställa antal produkter i lager."
+msgstr "Är du säker på att du vill radera valda produkter? Om du nyligen minskat produktens lagersaldo eller om ordern lades av en kund, behöver du manuellt återställa antal produkter i lager."
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
@@ -84,7 +84,7 @@ msgstr "Ta bort"
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:7
 msgid "Click to toggle"
-msgstr "Klicka för att akttivera/avaktivera"
+msgstr "Klicka för att aktivera/avaktivera"
 
 #: includes/admin/class-wc-admin-assets.php:143
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:447
@@ -107,7 +107,7 @@ msgstr "Synlig på produktsidan"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:503
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:551
 msgid "Used for variations"
-msgstr "Använd variationer"
+msgstr "Används för variationer"
 
 #: includes/admin/class-wc-admin-assets.php:147
 msgid "Enter a name for the new attribute term:"
@@ -1224,7 +1224,7 @@ msgstr "Dokumentation"
 
 #: includes/admin/class-wc-admin-welcome.php:221
 msgid "What's New"
-msgstr "Det här är nytt"
+msgstr "Vad som är nytt"
 
 #: includes/admin/class-wc-admin-welcome.php:223
 msgid "Credits"
@@ -1249,7 +1249,7 @@ msgid ""
 "<strong>Coupons</strong>, <strong>Customers</strong>, "
 "<strong>Products</strong> and <strong>Reports</strong> in both "
 "<code>XML</code> and <code>JSON</code> formats."
-msgstr "Byggt ovanpå WooCommerce API, med utvecklare som direkt målgrupp, ger det nya REST API:et dig tillgång till data för <strong>Ordrar</strong>, <strong>Rabattkoder</strong>, <strong>Kunder</strong>, <strong>Produkter</strong> and <strong>Rapporter</strong> i både <code>XML</code> och <code>JSON</code>-format."
+msgstr "Byggt ovanpå WooCommerce API, med utvecklare som målgrupp, ger det nya REST API:et dig tillgång till data för <strong>Ordrar</strong>, <strong>Rabattkoder</strong>, <strong>Kunder</strong>, <strong>Produkter</strong> och <strong>Rapporter</strong> i både <code>XML</code>- och <code>JSON</code>-format."
 
 #: includes/admin/class-wc-admin-welcome.php:251
 msgid "Authentication to keep data secure"
@@ -1261,7 +1261,7 @@ msgid ""
 "have SSL enabled, or signed according to the <a "
 "href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> specification if "
 "you don't have SSL. Data is only available to authenticated users."
-msgstr "Autentisering för REST API sker genom HTTP Basic Auth om du har SSL aktiverat, eller signerat enligt specifikationen för <a href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> om du inte har SSL. Data är endast tillgängligt för autentiserade användare."
+msgstr "Autentisering för REST API sker genom HTTP Basic Auth om du har SSL aktiverat, eller signerat enligt specifikationen för <a href=\"http://tools.ietf.org/html/rfc5849\">OAuth 1.0a</a> om du inte har SSL. Data är endast tillgänglig för autentiserade användare."
 
 #: includes/admin/class-wc-admin-welcome.php:257
 msgid "UI and reporting improvements"

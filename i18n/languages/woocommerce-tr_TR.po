@@ -1,14 +1,16 @@
 # 
 # Translators:
-# TRFlavourart <commerceword@gmail.com>, 2013-2014
-# TRFlavourart <commerceword@gmail.com>, 2014
+# TRFlavourart <vaporsbazar@gmail.com>, 2013-2014
+# TRFlavourart <vaporsbazar@gmail.com>, 2014
+# TRFlavourart <vaporsbazar@gmail.com>, 2014
+# TRFlavourart <vaporsbazar@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-01 07:55+0000\n"
-"Last-Translator: TRFlavourart <commerceword@gmail.com>\n"
+"PO-Revision-Date: 2014-04-28 13:57+0000\n"
+"Last-Translator: TRFlavourart <vaporsbazar@gmail.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/projects/p/woocommerce/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3366,7 +3368,7 @@ msgstr "En Düşük:"
 #: includes/abstracts/abstract-wc-product.php:1040
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
-msgstr "5 üzerinden %s değerlendirilmiş"
+msgstr "5 üzerinden %s oy aldı"
 
 #: includes/abstracts/abstract-wc-product.php:1042
 #: templates/single-product/rating.php:25
@@ -3683,7 +3685,7 @@ msgstr "Stoklarda yeterli miktarda kalmadığından (stokta: %s); sepetinize bu 
 #: includes/class-wc-cart.php:856 includes/class-wc-frontend-scripts.php:157
 #: includes/wc-cart-functions.php:98 templates/cart/mini-cart.php:64
 msgid "View Cart"
-msgstr "Sepete Bak"
+msgstr "Sepete Git"
 
 #: includes/class-wc-cart.php:825
 msgid "You cannot add another &quot;%s&quot; to your cart."

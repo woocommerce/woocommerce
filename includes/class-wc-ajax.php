@@ -1515,11 +1515,8 @@ class WC_AJAX {
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
 
-		$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta2 ON ({$wpdb->users}.ID = meta2.user_id) ";
-		$query->query_from  .= " LEFT JOIN {$wpdb->usermeta} as meta3 ON ({$wpdb->users}.ID = meta3.user_id) ";
-
-		$query->query_where .= $wpdb->prepare( " OR ( meta2.meta_value LIKE %s OR meta3.meta_value LIKE %s )", '%' . like_escape( $term ) . '%', '%' . like_escape( $term ) . '%' );
-		$query->query_where .= " AND meta2.meta_key = 'first_name' AND meta3.meta_key = 'last_name' ";
+		$query->query_from  .= " INNER JOIN {$wpdb->usermeta} AS user_name ON {$wpdb->users}.ID = user_name.user_id AND ( user_name.meta_key = 'first_name' OR user_name.meta_key = 'last_name' ) ";
+		$query->query_where .= $wpdb->prepare( " OR user_name.meta_value LIKE %s ", '%' . like_escape( $term ) . '%' );
 	}
 
 	/**

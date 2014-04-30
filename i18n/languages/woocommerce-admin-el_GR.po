@@ -17,14 +17,15 @@
 # pefstra <pefstra@gmail.com>, 2013
 # pvs1984 <pissasvasilis@gmail.com>, 2013
 # alichani <salichani75@gmail.com>, 2014
+# theWeavers_ <the.weavers.are.weaving@gmail.com>, 2014
 # Vasilis Zboukis <vasilis@minima.net.gr>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-03-31 19:00+0000\n"
-"Last-Translator: MariosVlahos <marios.vlahos@outlook.com>\n"
+"PO-Revision-Date: 2014-04-22 15:13+0000\n"
+"Last-Translator: theWeavers_ <the.weavers.are.weaving@gmail.com>\n"
 "Language-Team: Greek (Greece) (http://www.transifex.com/projects/p/woocommerce/language/el_GR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -190,7 +191,7 @@ msgstr "Εισάγετε μια τιμή"
 
 #: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value (fixed or %)"
-msgstr ""
+msgstr "Εισάγετε μια τιμή (σταθερή ή %)"
 
 #: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
@@ -392,7 +393,7 @@ msgstr "<strong>%s</strong> πωλήσεις αυτόν τον μήνα"
 
 #: includes/admin/class-wc-admin-dashboard.php:139
 msgid "%s top seller this month (sold %d)"
-msgstr ""
+msgstr "%s πρώτο σε πωλήσεις αυτό το μήνα (πωλήσεις %d)"
 
 #: includes/admin/class-wc-admin-dashboard.php:145
 msgid "<strong>%s order</strong> awaiting processing"
@@ -462,7 +463,7 @@ msgstr "Τεκμηρίωση"
 msgid ""
 "Thank you for using WooCommerce :) Should you need help using or extending "
 "WooCommerce please read the documentation."
-msgstr ""
+msgstr "Ευχαριστούμε που χρησιμοποιείτε το WooCommerce :) Αν χρειαστείτε βοήθεια στη χρήση ή την επέκτασή του συμβουλευτείτε τα συνοδευτικά έγγραφα."
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "WooCommerce Documentation"
@@ -470,7 +471,7 @@ msgstr "Τεκμηρίωση WooCommerce"
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "Developer API Docs"
-msgstr ""
+msgstr "Έγγραφα API για developers"
 
 #: includes/admin/class-wc-admin-help.php:49
 msgid "Support"
@@ -481,13 +482,13 @@ msgid ""
 "After <a href=\"%s\">reading the documentation</a>, for further assistance "
 "you can use the <a href=\"%s\">community forum</a>, or if you have access as"
 " a WooThemes customer, <a href=\"%s\">our support desk</a>."
-msgstr ""
+msgstr "Αφού <a href=\"%s\">διαβάσετε τα συνοδευτικά έγγραφα</a>, για επιπλέον βοήθεια συμβουλευτείτε <a href=\"%s\"> το φόρουμ υποστήριξης</a>, ή αν είστε πελάτης WooThemes, <a href=\"%s\">την υποστήριξη πελατών</a>."
 
 #: includes/admin/class-wc-admin-help.php:54
 msgid ""
 "Before asking for help we recommend checking the status page to identify any"
 " problems with your configuration."
-msgstr ""
+msgstr "Προτού ζητήσετε βοήθεια παρακαλούμε συμβουλευτείτε τη σελίδα κατάστασης για να εντοπίσετε τυχόν προβλήματα στην εγκατάστασή σας."
 
 #: includes/admin/class-wc-admin-help.php:56
 #: includes/admin/class-wc-admin-help.php:67
@@ -507,7 +508,7 @@ msgstr "Υποστήριξη Πελατών"
 
 #: includes/admin/class-wc-admin-help.php:62
 msgid "Found a bug?"
-msgstr ""
+msgstr "Βρήκατε κάποιο λάθος λογισμικού;"
 
 #: includes/admin/class-wc-admin-help.php:65
 msgid ""
@@ -520,7 +521,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:67
 msgid "Report a bug"
-msgstr ""
+msgstr "Αναφέρετε ένα λάθος λογισμικού"
 
 #: includes/admin/class-wc-admin-help.php:73
 msgid "For more information:"
@@ -573,7 +574,7 @@ msgstr "Ρυθμίσεις"
 #: includes/admin/class-wc-admin-menus.php:88
 #: includes/admin/views/html-admin-page-addons.php:4
 msgid "WooCommerce Add-ons/Extensions"
-msgstr ""
+msgstr "Πρόσθετα/επεκτάσεις του WooCommerce"
 
 #: includes/admin/class-wc-admin-menus.php:88
 msgid "Add-ons"
@@ -959,7 +960,7 @@ msgstr "Φόροι"
 
 #: includes/admin/class-wc-admin-reports.php:118
 msgid "Taxes by code"
-msgstr ""
+msgstr "Φόροι ανά κωδικό"
 
 #: includes/admin/class-wc-admin-reports.php:124
 msgid "Taxes by date"
@@ -979,7 +980,7 @@ msgstr "Οι αλλαγές που έγιναν θα χαθούν αν κλεί�
 
 #: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
-msgstr ""
+msgstr "Απόλυτη περικοπή;"
 
 #: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
@@ -1097,11 +1098,11 @@ msgstr "Αυτό το εργαλείο θα αρχικοποιήσει τους 
 
 #: includes/admin/class-wc-admin-status.php:193
 msgid "Customer Sessions"
-msgstr ""
+msgstr "Συνεδρίες πελατων"
 
 #: includes/admin/class-wc-admin-status.php:194
 msgid "Clear all sessions"
-msgstr ""
+msgstr "Καθάρισμα όλων των συνεδριών"
 
 #: includes/admin/class-wc-admin-status.php:195
 msgid ""
@@ -1509,7 +1510,7 @@ msgstr "Προβολή %s"
 
 #: includes/admin/class-wc-admin.php:114
 msgid "HTML Email Template"
-msgstr ""
+msgstr "HTML πρότυπο για email"
 
 #: includes/admin/importers/class-wc-tax-rate-importer.php:103
 #: includes/admin/importers/class-wc-tax-rate-importer.php:190
@@ -2012,7 +2013,7 @@ msgstr "Εμφάνιση ως \"Σε επεξεργασία\""
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:691
 msgid "Mark on-hold"
-msgstr ""
+msgstr "σε αναμονή"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:694
@@ -2031,11 +2032,11 @@ msgstr[1] "%s καταστάσεις παραγγελίας άλλαξαν."
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:42
 msgid "Insert into %s"
-msgstr ""
+msgstr "Εισάγετε στο %s"
 
 #: includes/admin/post-types/class-wc-admin-cpt.php:43
 msgid "Uploaded to this %s"
-msgstr ""
+msgstr "Ανεβάστηκε σε αυτό το %s"
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:102
 msgid "Product Short Description"
@@ -2098,7 +2099,7 @@ msgstr "Γενικά"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:42
 msgid "Usage Restriction"
-msgstr ""
+msgstr "Περιορισμός χρήσης"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:47
 msgid "Usage Limits"
@@ -2110,7 +2111,7 @@ msgstr "Τύπος έκπτωσης"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
 msgid "Value of the coupon."
-msgstr ""
+msgstr "Αξία κουπονιού"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:69
 msgid "Allow free shipping"
@@ -2142,7 +2143,7 @@ msgstr "ΕΕΕΕ-ΜΜ-ΗΗ"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid "Minimum spend"
-msgstr ""
+msgstr "Ελάχιστη χρέωση"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:85
 msgid "No minimum"
@@ -2155,7 +2156,7 @@ msgstr "Αυτό το πεδίο σας επιτρέπει να ορίσετε �
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:88
 msgid "Individual use only"
-msgstr ""
+msgstr "Ατομική χρήση μόνο"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:88
 msgid ""
@@ -2232,11 +2233,11 @@ msgstr "Ένα προϊόν δεν θα πρέπει να βρίσκεται σ�
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "Email restrictions"
-msgstr ""
+msgstr "Περιορισμοί email"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "No restrictions"
-msgstr ""
+msgstr "Χωρίς περιορισμούς"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid ""

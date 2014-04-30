@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-04-08 12:43+0000\n"
+"PO-Revision-Date: 2014-04-22 15:30+0000\n"
 "Last-Translator: inpsyde <c.huebinger@inpsyde.com>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/projects/p/woocommerce/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
@@ -158,7 +158,7 @@ msgid ""
 "Could not grant access - the user may already have permission for this file "
 "or billing email is not set. Ensure the billing email is set, and the order "
 "has been saved."
-msgstr "Zugriff konnte nicht gewährt werden. Der Benutzer hat entweder schon Zugriff auf diese Datei oder die Rechnungs-/ Bezahl-E-Mail ist nicht festgelegt. Stellen Sie sicher, dass die Rechnungs-/ Bezahl-E-Mail festgelegt ist und die Bestellung gespeichert wurde."
+msgstr "Zugriff konnte nicht gewährt werden. Der Benutzer hat entweder schon Zugriff auf diese Datei oder die Rechnungs-E-Mail-Adresse ist nicht festgelegt. Stellen Sie sicher, dass die Rechnungs-/ Bezahl-E-Mail festgelegt ist und die Bestellung gespeichert wurde."
 
 #: includes/admin/class-wc-admin-assets.php:183
 msgid "Are you sure you want to revoke access to this download?"
@@ -1016,7 +1016,7 @@ msgstr "Alle fehlenden WooCommerce Seiten wurden erfolgreich installiert."
 
 #: includes/admin/class-wc-admin-status.php:137
 msgid "Tax rates successfully deleted"
-msgstr "Die Steuersätze wurden alle vollständig gelöscht"
+msgstr "Steuersätze wurden erfolgreich gelöscht"
 
 #: includes/admin/class-wc-admin-status.php:146
 msgid "There was an error calling %s::%s"
@@ -1028,7 +1028,7 @@ msgstr "Es gab einen Fehler beim Aufruf von %s"
 
 #: includes/admin/class-wc-admin-status.php:159
 msgid "Your changes have been saved."
-msgstr "Ihre Änderungen wurden gesichert"
+msgstr "Ihre Änderungen wurden gespeichert."
 
 #: includes/admin/class-wc-admin-status.php:173
 msgid "WC Transients"
@@ -1117,7 +1117,7 @@ msgstr "Alle WooCommerce Steuersätze löschen"
 
 #: includes/admin/class-wc-admin-status.php:204
 msgid "Delete ALL tax rates"
-msgstr "Alle Steuersätze löschen"
+msgstr "ALLE Steuersätze löschen"
 
 #: includes/admin/class-wc-admin-status.php:205
 msgid ""
@@ -1332,7 +1332,7 @@ msgstr "Google Analytics"
 
 #: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
-msgstr "Google Analytics eCommerce Tracking in ihren WooCommerce Laden installieren."
+msgstr "Google Analytics eCommerce-Tracking zu Ihrem WooCommerce Shop hinzufügen."
 
 #: includes/admin/class-wc-admin-welcome.php:285
 #: includes/admin/class-wc-admin-welcome.php:290
@@ -1356,7 +1356,7 @@ msgstr "ShareThis"
 
 #: includes/admin/class-wc-admin-welcome.php:294
 msgid "Add social network sharing buttons to products using ShareThis."
-msgstr "Fügen Sie social network Tasten zu den Produkten hinzu, indem Sie Sharethis verwenden."
+msgstr "Social-Share-Buttons zu Produkten hinzufügen, mittels ShareThis."
 
 #: includes/admin/class-wc-admin-welcome.php:298
 msgid "Sharedaddy"
@@ -1364,11 +1364,11 @@ msgstr "Sharedaddy"
 
 #: includes/admin/class-wc-admin-welcome.php:299
 msgid "Add social network sharing buttons to products using Sharedaddy."
-msgstr "Fügen Sie social network Tasten zu den Produkten hinzu, indem Sie Sharedaddy verwenden."
+msgstr "Social-Share-Buttons zu Produkten hinzufügen, mittels Sharedaddy."
 
 #: includes/admin/class-wc-admin-welcome.php:303
 msgid "ShareYourCart"
-msgstr "Verteile dein Warenkorb"
+msgstr "ShareYourCart"
 
 #: includes/admin/class-wc-admin-welcome.php:304
 msgid ""
@@ -1407,7 +1407,7 @@ msgstr "Neue Endpunkte"
 msgid ""
 "Certain pages such as \"Pay\", \"Order Received\" and some account pages are"
 " now endpoints rather than pages to make checkout more reliable."
-msgstr "Einige Seiten wie \"Pay\", \"Bestellung erhalten\" und einige Kontoseiten sind jetzt eher Endpunkte als Seiten. Dadurch soll das Auschecken zuverlässiger werden."
+msgstr "Einige Seiten wie „Bezahlen/ Kasse“, „Bestellung erhalten“ und einige Kontoseiten sind jetzt sog. Endpoints anstatt reguläre Seiten. Dadurch soll der Bezahlvorgang zuverlässiger werden."
 
 #: includes/admin/class-wc-admin-welcome.php:331
 msgid "Default credit card form for gateways"
@@ -1421,7 +1421,7 @@ msgstr "Wir haben eine standardisierte Kreditkarten-Unterstützung zur Benutzung
 
 #: includes/admin/class-wc-admin-welcome.php:336
 msgid "Coupon limits per customer"
-msgstr "Gutscheinbeschränkung pro Benutzer"
+msgstr "Gutscheinbeschränkung pro Kunde"
 
 #: includes/admin/class-wc-admin-welcome.php:337
 msgid ""
@@ -1441,7 +1441,7 @@ msgstr "Während des Bezahlvorgangs sind Benutzernamen und Passwörter optional.
 
 #: includes/admin/class-wc-admin-welcome.php:349
 msgid "Additional price display options"
-msgstr "Weitere Preisanzeigeoptionen"
+msgstr "Weitere Preisanzeige-Optionen"
 
 #: includes/admin/class-wc-admin-welcome.php:350
 msgid ""
@@ -1582,7 +1582,7 @@ msgstr "Produktbild entfernen"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:121
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:122
 msgid "Set product image"
-msgstr "Produktbild hinzufügen"
+msgstr "Produktbild festlegen"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:136
 msgid "Product name"
@@ -1855,7 +1855,7 @@ msgstr "Produkt-IDs"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:82
 msgid "Usage / Limit"
-msgstr "Verwendung/ Limit"
+msgstr "Verwendung / Limit"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:83
 msgid "Expiry date"
@@ -1999,7 +1999,7 @@ msgstr "Kennzeichnung läuft"
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:690
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:691
 msgid "Mark on-hold"
-msgstr "Markieren auf Halten"
+msgstr "Kennzeichnung auf Halten"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:693
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:694
@@ -2233,7 +2233,7 @@ msgstr "Liste der zu prüfenden E-Mails, die sich von der E-Mail unterscheidet, 
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "Usage limit per coupon"
-msgstr "Eingeschränkte Nutzung pro Coupon"
+msgstr "Nutzungs-Limit pro Gutschein"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:194
@@ -2408,7 +2408,7 @@ msgstr "Keine Versandanschrift angegeben."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:282
 msgid "Customer Note"
-msgstr "Kundennotiz:"
+msgstr "Kundennotiz"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-data.php:287
 msgid "Load shipping address"
@@ -2432,7 +2432,7 @@ msgstr "Datei %d"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:64
 msgid "Search for a downloadable product&hellip;"
-msgstr "Nach einem herunterladbaren Produkt suchen&hellip;"
+msgstr "Nach herunterladbarem Produkt suchen&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:65
 msgid "Grant Access"
@@ -2674,7 +2674,7 @@ msgstr "Dateipfad"
 msgid ""
 "This is the URL or absolute path to the file which customers will get access"
 " to."
-msgstr "Dieses ist die URL oder der absolute Pfad zu der Datei, über die die Kunden den Zugang erhalten."
+msgstr "Die URL oder der absolute Pfad zu der Datei, zu der die Kunden Zugang erhalten."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:202
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:164
@@ -3503,7 +3503,7 @@ msgstr "%s Verkäufe in %s"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:162
 msgid "Select categories&hellip;"
-msgstr "Wähle Kategorien…"
+msgstr "Wähle Kategorien&hellip;"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:176
 msgid "None"
@@ -3591,7 +3591,7 @@ msgstr "Produktsuche"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:206
 msgid "Top Sellers"
-msgstr "TOP Verkäufer"
+msgstr "Top Verkäufer"
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:241
 #: includes/admin/reports/class-wc-report-sales-by-product.php:281
@@ -3692,7 +3692,7 @@ msgstr "Gesamtbetrag"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:25
 msgid "Accounts"
-msgstr "Benutzerkontos"
+msgstr "Benutzerkonten"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid "Account Pages"
@@ -3776,7 +3776,7 @@ msgstr "Registrierung aktivieren"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:109
 msgid "Enable registration on the \"Checkout\" page"
-msgstr "Anmeldung aktivieren auf der \"Checkout\"-Seite"
+msgstr "Anmeldung aktivieren auf der Seite „Kasse“."
 
 #: includes/admin/settings/class-wc-settings-accounts.php:118
 msgid "Enable registration on the \"My Account\" page"
@@ -3784,7 +3784,7 @@ msgstr "Anmeldung aktivieren auf der \"Mein Benutzerkonto\"-Seite"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:127
 msgid "Display returning customer login reminder on the \"Checkout\" page"
-msgstr "Zeigen Sie wiederkehrenden Kunden eine Login Erinnerung auf der Seite \"Zur Kasse\""
+msgstr "Zeigen Sie wiederkehrenden Kunden eine Login-Erinnerung auf der Seite „Kasse“"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:136
 msgid "Account Creation"
@@ -3805,11 +3805,11 @@ msgstr "Kasse"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
 msgid "Checkout Options"
-msgstr "Checkout Einstellungen"
+msgstr "Einstellungen für Bezahlvorgang"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:65
 msgid "Checkout Process"
-msgstr "Checkout Prozess"
+msgstr "Bestellvorgang"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
 msgid "Coupons"
@@ -3830,7 +3830,7 @@ msgstr "Kasse"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
-msgstr "Gästen das Auschecken erlauben"
+msgstr "Bezahlvorgang (Kasse) für nicht angemeldete Nutzer (Gäste) freigeben"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:80
 msgid "Allows customers to checkout without creating an account."
@@ -3851,13 +3851,13 @@ msgstr "HTTPS nicht mehr erzwingen, wenn der Bezahlvorgang (Kasse/ Checkout) ver
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid "Checkout Pages"
-msgstr "Seiten zum Auschecken"
+msgstr "Seiten zum Bestellvorgang"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "checkout."
-msgstr "Diese Seiten müssen so eingestellt werden, dass WooCommerce weiß, wie die Benutzer zur Kasse geschickt werden."
+msgstr "Diese Seiten müssen so eingestellt werden, dass WooCommerce weiß, wohin Kunden für den Bezahlvorgang weitergeleitet werden sollen."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
 msgid "Cart Page"
@@ -3865,7 +3865,7 @@ msgstr "'Warenkorb' Seite"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:123
 msgid "Checkout Page"
-msgstr "'Zur Kasse' Seite"
+msgstr "Bezahlen (Kasse)"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:134
 msgid "Terms and Conditions"
@@ -3875,11 +3875,11 @@ msgstr "Allgemeine Geschäftsbedingungen"
 msgid ""
 "If you define a \"Terms\" page the customer will be asked if they accept "
 "them when checking out."
-msgstr "Wenn Sie eine \"AGB\"-Seite festlegen, wird der Kunde gebeten, diese zu akzeptieren, wenn die Kasse-/ Bezahlen-Seite aufgerufen wird."
+msgstr "Wenn Sie eine „AGB“-Seite festlegen, wird der Kunde gebeten, diese zu akzeptieren, wenn die Kasse-/ Bezahlen-Seite aufgerufen wird."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:147
 msgid "Checkout Endpoints"
-msgstr "Checkout "
+msgstr "Endpoints für Bezahlvorgang"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:147
 msgid ""
@@ -3894,7 +3894,7 @@ msgstr "Bezahlen"
 #: includes/admin/settings/class-wc-settings-checkout.php:151
 #: includes/admin/settings/class-wc-settings-checkout.php:160
 msgid "Endpoint for the Checkout &rarr; Pay page"
-msgstr "Endpunkt für die zur Kasse  &rarr;  Bezahlseite"
+msgstr "Endpunkt für die Seite „Kasse &rarr; Bezahlen“"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:159
 msgid "Order Received"
@@ -3906,7 +3906,7 @@ msgstr "Zahlungsart hinzufügen"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:169
 msgid "Endpoint for the Checkout &rarr; Add Payment Method page"
-msgstr "Endpunkt für die zur Kasse  &rarr;  Zahlungsmethode hinzufügen Seite"
+msgstr "Endpunkt für die Seite „Kasse &rarr; Zahlungsweise hinzufügen“"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:178
 msgid "Payment Gateways"
@@ -4046,15 +4046,15 @@ msgstr "Verkaufsort (e)"
 
 #: includes/admin/settings/class-wc-settings-general.php:62
 msgid "This option lets you limit which countries you are willing to sell to."
-msgstr "Mit dieser Option können Sie einschränken, an welche Länder Sie verkaufen möchten."
+msgstr "Mit dieser Option können Sie einschränken, in welche Länder Sie verkaufen möchten."
 
 #: includes/admin/settings/class-wc-settings-general.php:70
 msgid "Sell to all countries"
-msgstr "Verkauf in alle Länder"
+msgstr "In alle Länder verkaufen"
 
 #: includes/admin/settings/class-wc-settings-general.php:71
 msgid "Sell to specific countries only"
-msgstr "Verkauf nur an eine Auswahl von Länder"
+msgstr "Nur in bestimmte Länder verkaufen"
 
 #: includes/admin/settings/class-wc-settings-general.php:76
 #: includes/admin/settings/class-wc-settings-shipping.php:147
@@ -4085,7 +4085,7 @@ msgstr "API"
 
 #: includes/admin/settings/class-wc-settings-general.php:104
 msgid "Enable the REST API"
-msgstr "Aktivieren Sie die REST-API"
+msgstr " REST-API aktivieren"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "Currency Options"
@@ -4111,7 +4111,7 @@ msgstr "Position der Währung"
 
 #: includes/admin/settings/class-wc-settings-general.php:128
 msgid "This controls the position of the currency symbol."
-msgstr "Dies legt die Position des Währungssymbols fest."
+msgstr "Legt die Position des Währungssymbols fest."
 
 #: includes/admin/settings/class-wc-settings-general.php:135
 msgid "Left"
@@ -4346,7 +4346,7 @@ msgstr "Shop-Seitenanzeige"
 
 #: includes/admin/settings/class-wc-settings-products.php:215
 msgid "This controls what is shown on the product archive."
-msgstr "Dies legt fest, was auf den Produktarchiven angezeigt wird."
+msgstr "Legt fest, was in den Produktarchiven angezeigt wird."
 
 #: includes/admin/settings/class-wc-settings-products.php:222
 #: includes/admin/settings/class-wc-settings-products.php:238
@@ -4377,7 +4377,7 @@ msgstr "Standard-Produktsortierung"
 
 #: includes/admin/settings/class-wc-settings-products.php:247
 msgid "This controls the default sort order of the catalog."
-msgstr "Dies kontrolliert die Standardsortierung des Produktkatalogs."
+msgstr "Legt die Standardsortierung des Produktkatalogs fest."
 
 #: includes/admin/settings/class-wc-settings-products.php:254
 msgid "Default sorting (custom ordering + name)"
@@ -4397,11 +4397,11 @@ msgstr "Nach Neuestem Produkt"
 
 #: includes/admin/settings/class-wc-settings-products.php:258
 msgid "Sort by price (asc)"
-msgstr "Nach Preis (aufsteigend)"
+msgstr "Nach Preis sortieren (aufsteigend)"
 
 #: includes/admin/settings/class-wc-settings-products.php:259
 msgid "Sort by price (desc)"
-msgstr "Nach Preis (absteigend)"
+msgstr "Nach Preis sortieren (absteigend)"
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
@@ -4513,7 +4513,7 @@ msgstr "Dies ist die Größe, die vom Hauptproduktbild auf der Produktseite verw
 
 #: includes/admin/settings/class-wc-settings-products.php:394
 msgid "Product Thumbnails"
-msgstr "Produktvorschaubilder"
+msgstr "Produkt-Vorschaubilder"
 
 #: includes/admin/settings/class-wc-settings-products.php:395
 msgid ""
@@ -4632,15 +4632,15 @@ msgstr "Wählen Sie die Länder aus, in die Sie versenden möchten, oder wählen
 
 #: includes/admin/settings/class-wc-settings-shipping.php:140
 msgid "Ship to all countries you sell to"
-msgstr "Versand zu allen Ländern zu denen Sie verkaufen "
+msgstr "In alle Länder versenden, in die Sie auch verkaufen "
 
 #: includes/admin/settings/class-wc-settings-shipping.php:141
 msgid "Ship to all countries"
-msgstr "Versand zu allen Ländern"
+msgstr "In alle Länder versenden"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:142
 msgid "Ship to specific countries only"
-msgstr "Versand nur zu bestimmten Ländern"
+msgstr "Nur in bestimmte Länder versenden"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:197
 msgid "Shipping Methods"
@@ -4731,7 +4731,7 @@ msgstr "Keine Anschrift"
 
 #: includes/admin/settings/class-wc-settings-tax.php:116
 msgid "Shipping Tax Class:"
-msgstr "Versandsteuerklasse:"
+msgstr "Versand-Steuerklasse:"
 
 #: includes/admin/settings/class-wc-settings-tax.php:117
 msgid ""
@@ -5074,19 +5074,19 @@ msgstr "Standard-Zeitzone ist %s"
 
 #: includes/admin/views/html-admin-page-status-report.php:118
 msgid "fsockopen/cURL"
-msgstr "<code>fsockopen</code> / <code>cURL</code>"
+msgstr "fsockopen/cURL"
 
 #: includes/admin/views/html-admin-page-status-report.php:121
 msgid "Your server has fsockopen and cURL enabled."
-msgstr "Ihr Webserver hat <code>fsockopen</code> und <code>cURL</code> aktiviert."
+msgstr "Ihr Server hat fsockopen und cURL aktiviert."
 
 #: includes/admin/views/html-admin-page-status-report.php:123
 msgid "Your server has fsockopen enabled, cURL is disabled."
-msgstr "Ihr Webserver hat <code>fsockopen</code> aktiviert, <code>cURL</code> ist deaktiviert."
+msgstr "Ihr Server hat fsockopen aktiviert, cURL ist deaktiviert."
 
 #: includes/admin/views/html-admin-page-status-report.php:125
 msgid "Your server has cURL enabled, fsockopen is disabled."
-msgstr "Ihr Webserver hat <code>cURL</code> aktiviert, <code>fsockopen</code> ist deaktiviert."
+msgstr "Ihr Server hat cURL aktiviert, fsockopen ist deaktiviert."
 
 #: includes/admin/views/html-admin-page-status-report.php:129
 msgid ""
@@ -5101,7 +5101,7 @@ msgstr "SOAP Client"
 
 #: includes/admin/views/html-admin-page-status-report.php:136
 msgid "Your server has the SOAP Client class enabled."
-msgstr "Ihr Webserver hat die SOAP Client Klasse aktiviert."
+msgstr "Ihr Server hat die SOAP Client Klasse aktiviert."
 
 #: includes/admin/views/html-admin-page-status-report.php:139
 msgid ""
@@ -5115,17 +5115,17 @@ msgstr "WP Remote Post"
 
 #: includes/admin/views/html-admin-page-status-report.php:155
 msgid "wp_remote_post() was successful - PayPal IPN is working."
-msgstr "<code>wp_remote_post()</code> war erfolgreich - PayPal IPN funktioniert."
+msgstr "wp_remote_post() war erfolgreich - PayPal IPN funktioniert."
 
 #: includes/admin/views/html-admin-page-status-report.php:158
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider. Error:"
-msgstr "<code>wp_remote_post()</code> schulg fehl. Die sofortige Zahlungsbestätigung durch PayPal (IPN) wird mit Ihrem Webserver nicht funktionieren. Kontaktieren Sie bitte Ihren Webhosting-Anbieter. Fehlermeldung:"
+msgstr "wp_remote_post() fehlgeschlagen. PayPal IPN wird mit Ihrem Server nicht funktionieren. Kontaktieren Sie bitte Ihren Webhosting-Anbieter. Fehlermeldung:"
 
 #: includes/admin/views/html-admin-page-status-report.php:161
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
-msgstr "Die Funktion <code>wp_remote_post()</code> schlug fehl. PayPal Sofortige Zahlungsbestätigung (IPN) wird wohl auf Ihrem Webserver nicht funktionieren."
+msgstr "wp_remote_post() fehlgeschlagen. PayPal IPN wird wohl auf Ihrem Server nicht funktionieren."
 
 #: includes/admin/views/html-admin-page-status-report.php:184
 msgid "Locale"
@@ -5141,7 +5141,7 @@ msgstr "Installierte Plugins"
 
 #: includes/admin/views/html-admin-page-status-report.php:226
 msgid "Visit plugin homepage"
-msgstr "Besuche Plugin Homepage"
+msgstr "Plugin-Homepage besuchen"
 
 #: includes/admin/views/html-admin-page-status-report.php:250
 #: includes/admin/views/html-admin-page-status-report.php:432
@@ -5214,11 +5214,11 @@ msgstr "Theme"
 
 #: includes/admin/views/html-admin-page-status-report.php:421
 msgid "Theme Name"
-msgstr "Theme Name"
+msgstr "Theme-Name"
 
 #: includes/admin/views/html-admin-page-status-report.php:427
 msgid "Theme Version"
-msgstr "Theme Version"
+msgstr "Theme-Version"
 
 #: includes/admin/views/html-admin-page-status-report.php:436
 msgid "Author URL"
@@ -5250,7 +5250,7 @@ msgstr "Werkzeuge"
 
 #: includes/admin/views/html-admin-page-status-tools.php:23
 msgid "Template Debug Mode"
-msgstr "Template Debug Mode"
+msgstr "Template Debug Modus"
 
 #: includes/admin/views/html-admin-page-status-tools.php:29
 msgid ""
@@ -5270,7 +5270,7 @@ msgstr "Dieses Tool wird alle Produkt- und Auftrags Post-Daten löschen, wenn Si
 
 #: includes/admin/views/html-admin-page-status-tools.php:47
 msgid "Save Changes"
-msgstr "Sichere die Änderungen"
+msgstr "Änderungen speichern"
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"
@@ -5397,7 +5397,7 @@ msgstr "Die Aktualisierung jetzt starten"
 msgid ""
 "It is strongly recommended that you backup your database before proceeding. "
 "Are you sure you wish to run the updater now?"
-msgstr "Es wird dringend empfohlen, dass Sie eine Datenbank-Sicherung Ihrer WordPress-Installation anlegen. Sind Sie sicher, dass Sie die Aktualisierung jetzt starten wollen?"
+msgstr "Es wird dringend empfohlen, Ihre Datenbank zu sichern, bevor Sie fortfahren. Sind Sie sicher, dass Sie die Aktualisierung jetzt starten wollen?"
 
 #: includes/admin/views/html-quick-edit-product.php:24
 msgid "Regular price"
@@ -5413,4 +5413,4 @@ msgstr "Benutzerdefiniert:"
 
 #: includes/admin/wc-admin-functions.php:192
 msgid "Could not compile woocommerce.less:"
-msgstr "<code>woocommerce.less</code> konnte nicht kompiliert werden:"
+msgstr "woocommerce.less konnte nicht kompiliert werden:"

@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.9
-Stable tag: 2.1.7
+Stable tag: 2.1.8
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -137,6 +137,25 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Introduce `woocommerce_thankyou_order_received_text` filter
 * Tweak - Added the possibility to translate the edit-address endpoint slug
 * Refactor - Update stock amounts with DB queries
+
+= 2.1.8 - 30/04/2014 =
+* Fix - Prevent saving duplicate skus in quick edit.
+* Fix - Sorting of downloads on my account page.
+* Fix - Clear cached API reports when deleting other order transients.
+* Fix - Shipping calculator cart messages.
+* Fix - Display of UTF8 attributes on view order page.
+* Fix - Changed the way the order review html is appended to the checkout page via JS to reduce likelihood of errors.
+* Fix - Allow removing downloads from product by removing all rows.
+* Fix - Ignore variation stock if disabled globally.
+* Fix - Prevent duplicate admin menu items when using menu editor plugins.
+* Tweak - Updated REST API docs link.
+* Tweak - Updated prettyphoto dependencies.
+* Tweak - Customer search performance improvements.
+* Tweak - Made default shipping label clearer.
+* Tweak - Default order email to user email.
+* Tweak - Only show downloadable item related text when product has downloads.
+* Tweak - Improved Abstract product constructor.
+* Tweak - Add COD instructions to emails.
 
 = 2.1.7 - 10/04/2014 =
 * Fix - Allow WC API to generate API keys for different user than the one that is making request.

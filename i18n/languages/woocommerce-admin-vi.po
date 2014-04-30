@@ -1,12 +1,13 @@
 # 
 # Translators:
+# baobinh152 <doanbc1502@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-03-15 08:29+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-04-26 15:06+0000\n"
+"Last-Translator: baobinh152 <doanbc1502@gmail.com>\n"
 "Language-Team: Vietnamese (http://www.transifex.com/projects/p/woocommerce/language/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -40,7 +41,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
-msgstr ""
+msgstr "Chọn một số mặt hàng"
 
 #: includes/admin/class-wc-admin-assets.php:138
 msgid "Remove this item meta?"
@@ -48,7 +49,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:139
 msgid "Remove this attribute?"
-msgstr ""
+msgstr "Loại bỏ thuộc tính này"
 
 #: includes/admin/class-wc-admin-assets.php:140
 #: includes/admin/class-wc-admin-attributes.php:239
@@ -71,7 +72,7 @@ msgstr "Tên"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:525
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
 msgid "Remove"
-msgstr ""
+msgstr "Xoá"
 
 #: includes/admin/class-wc-admin-assets.php:142
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:432
@@ -85,7 +86,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:447
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:539
 msgid "Value(s)"
-msgstr ""
+msgstr "Giá trị (s)"
 
 #: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:540
@@ -96,7 +97,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:490
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:545
 msgid "Visible on the product page"
-msgstr ""
+msgstr "Có thể nhìn thấy trên trag sản phẩm"
 
 #: includes/admin/class-wc-admin-assets.php:146
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:503
@@ -186,7 +187,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-taxonomies.php:123
 #: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
-msgstr ""
+msgstr "Chọn hình ảnh"
 
 #: includes/admin/class-wc-admin-assets.php:209
 msgid "Set variation image"
@@ -299,7 +300,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:283
 msgid "Update"
-msgstr ""
+msgstr "Cập nhật"
 
 #: includes/admin/class-wc-admin-attributes.php:299
 #: includes/admin/class-wc-admin-menus.php:49
@@ -330,7 +331,7 @@ msgstr "Sửa"
 #: includes/admin/post-types/meta-boxes/views/html-product-download.php:6
 #: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:5
 msgid "Delete"
-msgstr ""
+msgstr "Xoá"
 
 #: includes/admin/class-wc-admin-attributes.php:356
 msgid "Configure terms"
@@ -414,7 +415,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-duplicate-product.php:44
 msgid "Duplicate"
-msgstr ""
+msgstr "Nhân bản"
 
 #: includes/admin/class-wc-admin-duplicate-product.php:67
 msgid "Copy to a new draft"
@@ -452,7 +453,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:49
 msgid "Support"
-msgstr ""
+msgstr "Hỗ trợ"
 
 #: includes/admin/class-wc-admin-help.php:52
 msgid ""
@@ -481,7 +482,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:56
 msgid "Customer Support"
-msgstr ""
+msgstr "Hỗ trợ khách hàng"
 
 #: includes/admin/class-wc-admin-help.php:62
 msgid "Found a bug?"
@@ -498,7 +499,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:67
 msgid "Report a bug"
-msgstr ""
+msgstr "Báo lỗi"
 
 #: includes/admin/class-wc-admin-help.php:73
 msgid "For more information:"
@@ -534,7 +535,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:56
 msgid "Reports"
-msgstr ""
+msgstr "Báo cáo"
 
 #: includes/admin/class-wc-admin-menus.php:63
 msgid "WooCommerce Settings"
@@ -555,7 +556,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:88
 msgid "Add-ons"
-msgstr ""
+msgstr "Tiện ích"
 
 #: includes/admin/class-wc-admin-menus.php:126
 #: includes/admin/class-wc-admin-menus.php:128
@@ -3742,7 +3743,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:95
 msgid "Logout"
-msgstr ""
+msgstr "Đăng xuất"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:96
 msgid ""

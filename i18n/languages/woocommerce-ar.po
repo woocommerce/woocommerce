@@ -1,15 +1,19 @@
 # 
 # Translators:
+# abouolia <a.bouhuolia@live.com>, 2014
 # adamedotco <social@adame.co>, 2014
 # Ahmad Karama <ahmad.karama@hotmail.com>, 2014
+# doorbook <doorbook@gmail.com>, 2014
 # mustafamsy <mustafamsy@gmail.com>, 2014
+# imSuhaib <Souhaib.Haidar@gmail.com>, 2014
+# Updulah <Updulah@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:51+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-04-22 21:58+0000\n"
+"Last-Translator: Updulah <Updulah@gmail.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/projects/p/woocommerce/language/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,39 +23,39 @@ msgstr ""
 
 #: assets/js/admin/editor_plugin_lang.php:5
 msgid "Insert Shortcode"
-msgstr "أضف أختصار"
+msgstr "إضافة إختصار"
 
 #: assets/js/admin/editor_plugin_lang.php:6
 msgid "Product price/cart button"
-msgstr "سعر المنتج \\ زر العربة"
+msgstr "سعر المنتج/زر السلة"
 
 #: assets/js/admin/editor_plugin_lang.php:7
 msgid "Product by SKU/ID"
-msgstr "منتج عبر المعرف"
+msgstr "منتج عبر رقم SKU/ID"
 
 #: assets/js/admin/editor_plugin_lang.php:8
 msgid "Products by SKU/ID"
-msgstr "منتجات عبر المعرف"
+msgstr "منتجات عبر رقم SKU/ID"
 
 #: assets/js/admin/editor_plugin_lang.php:9
 msgid "Product categories"
-msgstr "قوائم المنتجات"
+msgstr "تصنيفات المنتج"
 
 #: assets/js/admin/editor_plugin_lang.php:10
 msgid "Products by category slug"
-msgstr "المنتجات عبر الاسم اللطيف لقائمتها"
+msgstr "منتجات عبر الاسم اللطيف لتصنيفها"
 
 #: assets/js/admin/editor_plugin_lang.php:11
 msgid "Recent products"
-msgstr "أحدث المنتجات"
+msgstr "منتجات حديثة"
 
 #: assets/js/admin/editor_plugin_lang.php:12
 msgid "Featured products"
-msgstr "المنتجات المميزة"
+msgstr "منتجات بارزة"
 
 #: assets/js/admin/editor_plugin_lang.php:13
 msgid "Shop Messages"
-msgstr "رسائل التنبيه"
+msgstr "رسائل المتجر"
 
 #: assets/js/admin/editor_plugin_lang.php:14
 msgid "Order tracking"
@@ -786,7 +790,7 @@ msgstr ""
 
 #: i18n/states/ES.php:23
 msgid "Burgos"
-msgstr ""
+msgstr "براغ"
 
 #: i18n/states/ES.php:24
 msgid "C&aacute;ceres"
@@ -3164,18 +3168,18 @@ msgstr "ملغى"
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:64
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:49
 msgid "Enable/Disable"
-msgstr "تمكين\\تعطيل"
+msgstr "تفعيل/تعطيل"
 
 #: includes/abstracts/abstract-wc-email.php:572
 #: includes/emails/class-wc-email-customer-completed-order.php:142
 #: includes/emails/class-wc-email-new-order.php:122
 msgid "Enable this email notification"
-msgstr "تمكين هذا التنبيه"
+msgstr "تفعيل هذا التنبيه عبر البريد الإلكتروني"
 
 #: includes/abstracts/abstract-wc-email.php:576
 #: includes/emails/class-wc-email-customer-invoice.php:146
 msgid "Email subject"
-msgstr "نوان الرسالة"
+msgstr "عنوان الرسالة"
 
 #: includes/abstracts/abstract-wc-email.php:578
 #: includes/abstracts/abstract-wc-email.php:585
@@ -3188,12 +3192,12 @@ msgstr "نوان الرسالة"
 #: includes/emails/class-wc-email-customer-invoice.php:162
 #: includes/emails/class-wc-email-customer-invoice.php:169
 msgid "Defaults to <code>%s</code>"
-msgstr "افتراضيا <code>%s</code>"
+msgstr "إفتراضيًا لـ <code>%s</code>"
 
 #: includes/abstracts/abstract-wc-email.php:583
 #: includes/emails/class-wc-email-customer-invoice.php:153
 msgid "Email heading"
-msgstr "رأس الرسالة"
+msgstr "ترويسة الرسالة"
 
 #: includes/abstracts/abstract-wc-email.php:590
 #: includes/emails/class-wc-email-customer-completed-order.php:174
@@ -3207,7 +3211,7 @@ msgstr "نوع الرسالة"
 #: includes/emails/class-wc-email-customer-invoice.php:176
 #: includes/emails/class-wc-email-new-order.php:149
 msgid "Choose which format of email to send."
-msgstr "حدد صيغة الرسالة المرسلة."
+msgstr "إختر صيغة الرسالة المرسلة."
 
 #: includes/abstracts/abstract-wc-email.php:596
 #: includes/emails/class-wc-email-customer-completed-order.php:180
@@ -3228,20 +3232,20 @@ msgstr "HTML"
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
 msgid "Multipart"
-msgstr "متعدد"
+msgstr "متعدد الأجزاء"
 
 #: includes/abstracts/abstract-wc-email.php:634
 #: includes/abstracts/abstract-wc-email.php:655
 msgid "Could not write to template file."
-msgstr "لا يمكن تحرير قالب الرسالة."
+msgstr "لم يتمكن من الكتابة لملف القالب."
 
 #: includes/abstracts/abstract-wc-email.php:686
 msgid "Template file copied to theme."
-msgstr "قالب الرسالة نسخ للقالب الحالي."
+msgstr "تم نسخ قالب الملف إلى الثيم."
 
 #: includes/abstracts/abstract-wc-email.php:695
 msgid "Template file deleted from theme."
-msgstr "قالب الرسالة حذف من القالب الحالي."
+msgstr "تم حذف قالب الملف من الثيم."
 
 #: includes/abstracts/abstract-wc-email.php:703
 #: includes/abstracts/abstract-wc-integration.php:30
@@ -3255,39 +3259,39 @@ msgstr "قالب HTML"
 
 #: includes/abstracts/abstract-wc-email.php:716
 msgid "Plain text template"
-msgstr "قالب نصي"
+msgstr "قالب نص عادي"
 
 #: includes/abstracts/abstract-wc-email.php:737
 msgid "Delete template file"
-msgstr "حذف القالب"
+msgstr "حذف ملف القالب"
 
 #: includes/abstracts/abstract-wc-email.php:740
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
-msgstr "هذا القالب تم استبداله بواسطة القالب الخاص بك، يمكن أن تعدل ملف في قالبك من هنا: <code>%s</code>."
+msgstr "تمت الكتابة على هذا القالب بواسطة ثيمك والذي بإمكانك إيجاده في: <code>%s</code>."
 
 #: includes/abstracts/abstract-wc-email.php:755
 msgid "Copy file to theme"
-msgstr "أنسخ الملف لقالبك"
+msgstr "نسخ الملف إلى الثيم"
 
 #: includes/abstracts/abstract-wc-email.php:758
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
-msgstr "استبدل وحرر قالب البريد عبر نسخ <code>%s</code> إلى قالبك في <code>%s</code> ثم تحريره."
+msgstr "لكتابة وتحرير قالب البريد الإلكتروني إنسخ <code>%s</code> إلى مجلد ثيمك: <code>%s</code>."
 
 #: includes/abstracts/abstract-wc-email.php:769
 msgid "File was not found."
-msgstr "الملف غير موجود"
+msgstr "لم يتم إيجاد الملف."
 
 #: includes/abstracts/abstract-wc-email.php:794
 msgid "View template"
-msgstr "شاهد القالب"
+msgstr "عرض القالب"
 
 #: includes/abstracts/abstract-wc-email.php:795
 msgid "Hide template"
-msgstr "أخفي القالب"
+msgstr "إخفاء القالب"
 
 #: includes/abstracts/abstract-wc-email.php:806
 msgid "Are you sure you want to delete this template file?"
@@ -3303,7 +3307,7 @@ msgstr "تاريخ الإنتهاء (شهر/السنة)"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:212
 msgid "MM / YY"
-msgstr ""
+msgstr "شهر/سنة"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
@@ -3317,7 +3321,7 @@ msgstr ""
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:211
 msgid "Add to cart"
-msgstr "إضافة للعربة"
+msgstr "إضافة إلى السلة"
 
 #: includes/abstracts/abstract-wc-product.php:465
 msgid "Read more"
@@ -3331,43 +3335,43 @@ msgstr "متوفر"
 
 #: includes/abstracts/abstract-wc-product.php:578
 msgid "Only %s left in stock"
-msgstr "باقي %s فقط"
+msgstr "فقط %s متبقية في المخزون"
 
 #: includes/abstracts/abstract-wc-product.php:581
 msgid "%s in stock"
-msgstr "باقي %s"
+msgstr "%s في المخزون"
 
 #: includes/abstracts/abstract-wc-product.php:588
 msgid "(backorders allowed)"
-msgstr "(الطلبات المؤجلة ممكنة)"
+msgstr "(الطلبات الغير متوفرة في المخزون حاليًا متاحة)"
 
 #: includes/abstracts/abstract-wc-product.php:595
 #: includes/abstracts/abstract-wc-product.php:608 templates/cart/cart.php:74
 msgid "Available on backorder"
-msgstr "متوفر كطلب مسبق"
+msgstr "متاح كطلب غير متوفر في المخزون حاليًا"
 
 #: includes/abstracts/abstract-wc-product.php:601
 #: includes/abstracts/abstract-wc-product.php:611
 #: includes/abstracts/abstract-wc-product.php:615
 msgid "Out of stock"
-msgstr "نفد"
+msgstr "نفذت الكمية"
 
 #: includes/abstracts/abstract-wc-product.php:908
 #: includes/abstracts/abstract-wc-product.php:914
 #: includes/class-wc-cart.php:1419 includes/class-wc-order.php:859
 #: includes/class-wc-product-variation.php:312
 msgid "Free!"
-msgstr "مجاني!"
+msgstr "مجانًا!"
 
 #: includes/abstracts/abstract-wc-product.php:930
 msgctxt "min_price"
 msgid "From:"
-msgstr "إبتداءً بـ"
+msgstr "من:"
 
 #: includes/abstracts/abstract-wc-product.php:1040
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
-msgstr "التقيم %s من 5"
+msgstr "قيم بـ %s من 5"
 
 #: includes/abstracts/abstract-wc-product.php:1042
 #: templates/single-product/rating.php:25
@@ -3429,52 +3433,52 @@ msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:107
 msgid "Invalid coupon ID"
-msgstr "معرف قسيمة خاطئ %s"
+msgstr "معرف قسيمة غير صالح"
 
 #: includes/api/class-wc-api-coupons.php:152
 msgid "You do not have permission to read the coupons count"
-msgstr "لا تملك الصلاحية الكافية لقراءة العدد الإجمالي للقسائم"
+msgstr "أنت لا تمتلك الصلاحية لقراءة عدد القسائم"
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
-msgstr "رمز قسيمة خاطئ"
+msgstr "كود قسيمة غير صالح"
 
 #: includes/api/class-wc-api-customers.php:198
 #: includes/api/class-wc-api-customers.php:201
 msgid "Invalid customer Email"
-msgstr ""
+msgstr "بريد الكتروني خاطئ"
 
 #: includes/api/class-wc-api-customers.php:219
 msgid "You do not have permission to read the customers count"
-msgstr "لا تملك الصلاحية الكافية لقراءة بيانات عدد العملاء الإجمالي"
+msgstr "أنت لا تمتلك الصلاحية لقراءة عدد العملاء"
 
 #: includes/api/class-wc-api-customers.php:235
 msgid "You do not have permission to create this customer"
-msgstr "لا تملك الصلاحية الكافية لإنشاء هذا العميل"
+msgstr "أنت لا تمتلك الصلاحية لإنشاء حساب هذا العميل"
 
 #: includes/api/class-wc-api-customers.php:482
 msgid "Invalid customer ID"
-msgstr "معرف عميل خاطئ %s"
+msgstr "معرف عميل غير صالح"
 
 #: includes/api/class-wc-api-customers.php:488
 msgid "Invalid customer"
-msgstr "عميل غير مسجل"
+msgstr "عميل غير صالح"
 
 #: includes/api/class-wc-api-customers.php:495
 msgid "You do not have permission to read this customer"
-msgstr "لا تملك الصلاحية الكافية لقراءة بيانات هذا العميل"
+msgstr "أنت لا تمتلك الصلاحية لقراءة بيانات هذا العميل"
 
 #: includes/api/class-wc-api-customers.php:500
 msgid "You do not have permission to edit this customer"
-msgstr "لا تملك الصلاحية الكافية للتعديل على بيانات هذا العميل"
+msgstr "أنت لا تمتلك الصلاحية لتعديل بيانات هذا العميل"
 
 #: includes/api/class-wc-api-customers.php:505
 msgid "You do not have permission to delete this customer"
-msgstr "لا تملك الصلاحية الكافية لحذف هذا العميل"
+msgstr "أنت لا تمتلك الصلاحية لحذف هذا العميل"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
-msgstr "دعم JSONP غير مفعل في هذا الموقع"
+msgstr "دعم JSONP معطل لهذا الموقع"
 
 #: includes/api/class-wc-api-json-handler.php:64
 msgid "The JSONP callback function is invalid"
@@ -3482,80 +3486,80 @@ msgstr "عملية طلب JSONP غير صالحة"
 
 #: includes/api/class-wc-api-orders.php:255
 msgid "You do not have permission to read the orders count"
-msgstr "لا تملك الصلاحية الكافية لقراءة عدد الطلبات"
+msgstr "أنت لا تمتلك الصلاحية لقراءة عدد الطلبات"
 
 #: includes/api/class-wc-api-products.php:140
 msgid "You do not have permission to read the products count"
-msgstr "لا تملك الصلاحية الكافية لقراءة عدد المنتجات"
+msgstr "أنت لا تمتلك الصلاحية لقراءة عدد المنتجات"
 
 #: includes/api/class-wc-api-products.php:459
 #: includes/api/class-wc-api-products.php:460
 msgid "Placeholder"
-msgstr "عنصر نائب"
+msgstr ""
 
 #: includes/api/class-wc-api-reports.php:469
 msgid "You do not have permission to read this report"
-msgstr "لا تملك الصلاحية الكافية لقراءة هذا التقرير"
+msgstr "أنت لا تمتلك الصلاحية لقراءة هذا التقرير"
 
 #: includes/api/class-wc-api-resource.php:71
 msgid "Invalid %s ID"
-msgstr "معرف خاطئ %s"
+msgstr "معرف %s غير صالح"
 
 #: includes/api/class-wc-api-resource.php:83
 msgid "Invalid %s"
-msgstr "%s خاطئ"
+msgstr "غير صالح %s"
 
 #: includes/api/class-wc-api-resource.php:90
 msgid "You do not have permission to read this %s"
-msgstr "لا تملك الصلاحية الكافية لقراءة %s"
+msgstr "أنت لا تمتلك الصلاحية لقراءة هذا %s"
 
 #: includes/api/class-wc-api-resource.php:95
 msgid "You do not have permission to edit this %s"
-msgstr "لا تملك الصلاحية الكافية لتعديل %s"
+msgstr "أنت لا تمتلك الصلاحية لتعديل هذا %s"
 
 #: includes/api/class-wc-api-resource.php:100
 msgid "You do not have permission to delete this %s"
-msgstr "لا تملك الصلاحية الكافية لحذف %s "
+msgstr "أنت لا تمتلك الصلاحية لحذف هذا %s"
 
 #: includes/api/class-wc-api-resource.php:302
 msgid "Permanently deleted customer"
-msgstr "حذف الزبون بالمرة"
+msgstr "زبون محذوف بشكل دائم"
 
 #: includes/api/class-wc-api-resource.php:304
 msgid "The customer cannot be deleted"
-msgstr "لا يمكن حذف هذا الزبون"
+msgstr "لا يمكن للعميل أن يكون محذوفًا"
 
 #: includes/api/class-wc-api-resource.php:313
 msgid "This %s cannot be deleted"
-msgstr "لا يمكن حذف %s"
+msgstr "هذا %s لا يمكن أن يكون محذوفًا"
 
 #: includes/api/class-wc-api-resource.php:316
 msgid "Permanently deleted %s"
-msgstr "حذف %s بالمرة"
+msgstr "حذفت بشكل دائم %s"
 
 #: includes/api/class-wc-api-resource.php:322
 msgid "Deleted %s"
-msgstr "حذف %s"
+msgstr "حذفت %s"
 
 #: includes/api/class-wc-api-server.php:165
 msgid "Invalid authentication method"
-msgstr "طريقة دفع غير مصادقة"
+msgstr "وسيلة مصادقة غير صالحة"
 
 #: includes/api/class-wc-api-server.php:316
 msgid "Unsupported request method"
-msgstr "طريقة الطلب غير مدعومة"
+msgstr "طريقة طلب غير مدعومة"
 
 #: includes/api/class-wc-api-server.php:333
 msgid "The handler for the route is invalid"
-msgstr "معالج المسار غير صالح"
+msgstr "الـ handler المتعلق بالمسار غير صالح"
 
 #: includes/api/class-wc-api-server.php:369
 msgid "No route was found matching the URL and request method"
-msgstr "لم يتم العثور على اتجاه محدد إلى الصفحة المرادة والطريقة المطلوبة"
+msgstr "لم يتم ايجاد مسار يتوافق مع الرابط ووسيلة الطلب."
 
 #: includes/api/class-wc-api-server.php:404
 msgid "Missing parameter %s"
-msgstr "عناصر مفقودة %s"
+msgstr "عامل مفقود %s"
 
 #: includes/class-wc-ajax.php:158
 msgid "Sorry, your session has expired."
@@ -3577,7 +3581,7 @@ msgstr "لقد تأخر تنفيذ العملية أعد المحاولة."
 
 #: includes/class-wc-ajax.php:551
 msgid "Same as parent"
-msgstr "مثل الأصلي"
+msgstr "مماثل للأب"
 
 #: includes/class-wc-ajax.php:552
 msgid "Standard"
@@ -3624,20 +3628,20 @@ msgstr "حذف الملاحظة"
 
 #: includes/class-wc-ajax.php:1443
 msgid "Guest"
-msgstr "ضيف"
+msgstr "زائر"
 
 #: includes/class-wc-cache-helper.php:105
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
 "in W3 Total Cache settings <a href=\"%s\">here</a>."
-msgstr "ليعمل تخزين الطلبات مؤقتا<strong>في قواعد البيانات</strong> في WooCommerce يجب أن تضيف <code>_wc_session_</code> في \"Ignored Query Strings\" ( خيار لإضافة W3 Total Cache ) الموجودة <a href=\"%s\">here</a>."
+msgstr "ليعمل <strong>التخزين المؤقت لقاعدة البيانات</strong> في ووكومرس يجب عليك إضافة <code>_wc_session_</code> إلى خيار \"Ignored Query Strings\" في إعدادات W3 Total Cache <a href=\"%s\">من هنا</a>."
 
 #: includes/class-wc-cart.php:168
 msgid ""
 "%s has been removed from your cart because it can no longer be purchased. "
 "Please contact us if you need assistance."
-msgstr ""
+msgstr "%s تمت ازالته من سلتك لأنه أصبح غير قابل للشراء. الرجاء الاتصال بنا اذا احتجت أي مساعدة."
 
 #: includes/class-wc-cart.php:363
 msgid "An item which is no longer available was removed from your cart."
@@ -3694,7 +3698,7 @@ msgstr "لا يمكنك إضافة &quot;%s&quot; آخر إلى عربتك."
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
-msgstr "لا يمكنك إضافة هذه الكمية إلى عربة التسوق &mdash; لدينا فقط %s في المستودع ولديك الآن %s في عربة التسوق الخاصة بك. "
+msgstr "لا يمكنك إضافة هذه الكمية إلى السلة &mdash; لدينا %s في المخزون ولديك %s في سلتك."
 
 #: includes/class-wc-checkout.php:64 includes/class-wc-checkout.php:73
 #: includes/class-wc-emails.php:67 includes/class-wc-emails.php:76
@@ -4787,7 +4791,7 @@ msgstr "ضريبة"
 
 #: includes/class-wc-countries.php:510
 msgid "Tax"
-msgstr "ضربية"
+msgstr "الضريبة"
 
 #: includes/class-wc-countries.php:523
 msgid "(incl. VAT)"
@@ -4803,7 +4807,7 @@ msgstr "(بدون الضريبة)"
 
 #: includes/class-wc-countries.php:536
 msgid "(ex. tax)"
-msgstr "(بدون الضريبة)"
+msgstr "(بدون ضريبة)"
 
 #: includes/class-wc-countries.php:719
 msgid "Country"
@@ -4815,7 +4819,7 @@ msgstr "الاسم الأول"
 
 #: includes/class-wc-countries.php:729
 msgid "Last Name"
-msgstr "العائلة"
+msgstr "الاسم الأخير"
 
 #: includes/class-wc-countries.php:735
 msgid "Company Name"
@@ -4850,7 +4854,7 @@ msgstr "الرمز البريدي"
 
 #: includes/class-wc-countries.php:827
 msgid "District"
-msgstr ""
+msgstr "المنطقة"
 
 #: includes/class-wc-countries.php:834 includes/class-wc-countries.php:850
 #: includes/class-wc-countries.php:870 includes/class-wc-countries.php:931
@@ -4890,7 +4894,7 @@ msgstr "الولاية"
 
 #: includes/class-wc-countries.php:1054
 msgid "Postcode"
-msgstr "الروز البريدي"
+msgstr "الرمز البريدي"
 
 #: includes/class-wc-countries.php:1162
 msgid "Email Address"
@@ -4975,7 +4979,7 @@ msgstr "بريد غير صحيح."
 #: includes/class-wc-download-handler.php:143
 #: includes/class-wc-download-handler.php:296
 msgid "Go to homepage"
-msgstr "العودة للرئيسية"
+msgstr "الذهاب الى صفحة البداية."
 
 #: includes/class-wc-download-handler.php:62
 msgid "Invalid download."
@@ -5037,7 +5041,7 @@ msgstr "أحد المنتجات قريب من النفاد."
 #: includes/class-wc-emails.php:330 includes/class-wc-emails.php:362
 #: includes/class-wc-emails.php:406
 msgid "Variation #%s of %s"
-msgstr "النوع #%s من %s"
+msgstr "إختلاف #%s من %s"
 
 #: includes/class-wc-emails.php:332 includes/class-wc-emails.php:364
 #: includes/class-wc-emails.php:408
@@ -5096,7 +5100,7 @@ msgstr "تم تحديث معلومات الحساب بنجاح"
 
 #: includes/class-wc-form-handler.php:334
 msgid "Payment method added."
-msgstr "تم إضافة طريقة دفع جديدة."
+msgstr "تم اضافة وسيلة الدفع."
 
 #: includes/class-wc-form-handler.php:367
 #: includes/class-wc-form-handler.php:426
@@ -5123,7 +5127,7 @@ msgstr "طلبك ألغي."
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
-msgstr "طلبك لم يعد يمكنك إلغاؤه. الرجاء التواصل معنا إذا أحتجت لأية مساعدة."
+msgstr "طلبك لم يعد قابلًا للإلغاء. الرجاء التواصل معنا إذا أحتجت لأي مساعدة."
 
 #: includes/class-wc-form-handler.php:563
 #: includes/class-wc-form-handler.php:623
@@ -5161,7 +5165,7 @@ msgstr "لا يوجد مستخدم بهذا البريد الإلكتروني"
 
 #: includes/class-wc-form-handler.php:766
 msgid "You are now logged in as <strong>%s</strong>"
-msgstr ""
+msgstr "أنت مسجل باسم <strong>%s</strong>"
 
 #: includes/class-wc-form-handler.php:810
 msgid "Please enter your password."
@@ -5208,32 +5212,32 @@ msgstr "shop"
 #: includes/class-wc-install.php:218
 msgctxt "Page title"
 msgid "Shop"
-msgstr "محل تجاري"
+msgstr "المتجر"
 
 #: includes/class-wc-install.php:222
 msgctxt "Page slug"
 msgid "cart"
-msgstr "عربة"
+msgstr "cart"
 
 #: includes/class-wc-install.php:223
 msgctxt "Page title"
 msgid "Cart"
-msgstr "العربة"
+msgstr "السلة"
 
 #: includes/class-wc-install.php:227
 msgctxt "Paeg slug"
 msgid "checkout"
-msgstr "المحاسبة"
+msgstr "checkout"
 
 #: includes/class-wc-install.php:228
 msgctxt "Page title"
 msgid "Checkout"
-msgstr "المحاسبة"
+msgstr "انهاء الطلب"
 
 #: includes/class-wc-install.php:232
 msgctxt "Page slug"
 msgid "my-account"
-msgstr "حسابي"
+msgstr "my-account"
 
 #: includes/class-wc-install.php:233
 msgctxt "Page title"
@@ -5242,7 +5246,7 @@ msgstr "حسابي"
 
 #: includes/class-wc-install.php:455
 msgid "Customer"
-msgstr "زبون"
+msgstr "الزبون"
 
 #: includes/class-wc-install.php:462
 msgid "Shop Manager"
@@ -5250,7 +5254,7 @@ msgstr "مدير للمتجر"
 
 #: includes/class-wc-install.php:703
 msgid "What's new:"
-msgstr "الجديد:"
+msgstr "مالجديد:"
 
 #: includes/class-wc-order.php:137
 msgctxt "hash before order number"
@@ -5267,7 +5271,7 @@ msgstr "سعر العربة:"
 
 #: includes/class-wc-order.php:924
 msgid "Cart Discount:"
-msgstr "خصم آخر:"
+msgstr "خصم السلة:"
 
 #: includes/class-wc-order.php:931
 msgid "Shipping:"
@@ -5275,15 +5279,15 @@ msgstr "الشحن"
 
 #: includes/class-wc-order.php:978
 msgid "Order Discount:"
-msgstr "الخصم الكلي:"
+msgstr "خصم الطلب:"
 
 #: includes/class-wc-order.php:985
 msgid "Payment Method:"
-msgstr "طريقة الدفع:"
+msgstr "وسيلة الدفع:"
 
 #: includes/class-wc-order.php:991
 msgid "Order Total:"
-msgstr "السعر النهائي:"
+msgstr "مجموع الطلب:"
 
 #: includes/class-wc-order.php:1009 includes/wc-cart-functions.php:251
 msgid "(Includes %s)"
@@ -5291,7 +5295,7 @@ msgstr "(يتضمن %s)"
 
 #: includes/class-wc-order.php:1258 includes/class-wc-order.php:1259
 msgid "WooCommerce"
-msgstr "وو كومرس"
+msgstr "ووكومرس"
 
 #: includes/class-wc-order.php:1314
 msgid "Order status changed from %s to %s."
@@ -5351,7 +5355,7 @@ msgstr "تصنيف منتجات جديد"
 #: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
-msgstr "product-category"
+msgstr "تصنيف-المنتج"
 
 #: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
@@ -5360,7 +5364,7 @@ msgstr "وسوم المنتجات"
 
 #: includes/class-wc-post-types.php:93
 msgid "Product Tag"
-msgstr "وسم منتجات"
+msgstr "وسم المنتج"
 
 #: includes/class-wc-post-types.php:94
 msgctxt "Admin menu name"
@@ -5403,7 +5407,7 @@ msgstr "وسم منتجات جديد"
 #: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
-msgstr "product-tag"
+msgstr "وسم-المنتج "
 
 #: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
 msgid "Shipping Classes"
@@ -5487,7 +5491,7 @@ msgstr "جديد %s"
 #: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
-msgstr "منتوج"
+msgstr "منتج"
 
 #: includes/class-wc-post-types.php:232
 #: includes/widgets/class-wc-widget-products.php:27
@@ -5558,7 +5562,7 @@ msgstr "هنا يمكنك إضافة منتجات جديدة"
 
 #: includes/class-wc-post-types.php:267
 msgid "Variations"
-msgstr "الصفات"
+msgstr "الإختلافات"
 
 #: includes/class-wc-post-types.php:275
 msgctxt "Admin menu name"
@@ -5699,7 +5703,7 @@ msgstr "اختر نوعك"
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
-msgstr "هذا المنتج المتغير لا يوجد لديه متغيرات نشطة الآن ولهذا لا يمكن نشره. تم تغيير الحالة إلى مسودة."
+msgstr "هذا المنتج المتغير لا يوجد لديه متغيرات نشطة، لذلك لا يمكن نشره. جاري تغيير حالة المنتج الى مسودة."
 
 #: includes/class-wc-product-variation.php:516
 msgid "%s &ndash; %s%s"
@@ -5810,7 +5814,7 @@ msgstr "مرحبا بكم على {site_title}"
 
 #: includes/emails/class-wc-email-customer-note.php:31
 msgid "Customer note"
-msgstr "ملاحظات الزبون"
+msgstr "ملاحظة الزبون"
 
 #: includes/emails/class-wc-email-customer-note.php:32
 msgid "Customer note emails are sent when you add a note to an order."
@@ -6174,7 +6178,7 @@ msgstr "توفر توافق تام مع PCI، وهي طريقة آمنة لنق�
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:31
 msgid "Proceed to PayPal"
-msgstr "قم بالدفع عبر الباي بال"
+msgstr "استكمال العملية بواسطة PayPal"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:34
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:135
@@ -6394,11 +6398,11 @@ msgstr "ألغي الطلب وأفرغ العربة"
 msgid ""
 "Thank you - your order is now pending payment. You should be automatically "
 "redirected to PayPal to make payment."
-msgstr ""
+msgstr "شكراً لك - سيتم الآن تحويلك تلقائياً لموقع PayPal لإتمام عملية الدفع."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:701
 msgid "Validation error: PayPal currencies do not match (code %s)."
-msgstr "خطأ في التحقق: العملة في الباي بال لا تتوافق (الكود %s)."
+msgstr "خطأ في التحقق: عملات PayPal غير متوافقة (الشفرة %s)"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:712
 msgid "Validation error: PayPal amounts do not match (gross %s)."
@@ -6511,7 +6515,7 @@ msgstr "متوفر لكل الدول"
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:102
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:106
 msgid "Specific Countries"
-msgstr "دول محددة"
+msgstr "الدول المحددة"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:105
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:94
@@ -6535,7 +6539,7 @@ msgstr "خاضع للضريبة"
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:88
 msgctxt "Tax status"
 msgid "None"
-msgstr "بدون"
+msgstr "بلا"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:118
 msgid "Cost per order"
@@ -6543,7 +6547,7 @@ msgstr "تكلفة كل الطلب"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:121
 msgid "Enter a cost (excluding tax) per order, e.g. 5.00. Default is 0."
-msgstr "أدخل التكلفة (بدون الضرائب) لكل طلب. على سبيل المثال 5.00. التلقائي هو 0."
+msgstr "أدخل تكلفةً (بدون الضرائب) لكل طلب. مثلًا 5.00. الإفتراضي هو 0."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:126
 msgid "Additional Rates"
@@ -6643,7 +6647,7 @@ msgstr "أي فئة"
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:102
 #: templates/order/order-details.php:122 templates/order/order-details.php:137
 msgid "N/A"
-msgstr "ليس قيمة"
+msgstr "N/A"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:579
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:609
@@ -6727,7 +6731,7 @@ msgstr "السعر لـ"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:105
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
-msgstr "السعر بدون الضريبة. أدخل عدد على سييل المثال: 2.50. التلقائي هو 0. "
+msgstr "التكلفة بدون الضريبة. أدخل عددًا، مثال: 2.50. الافتراضي هو 0."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:112
 msgid ""
@@ -6822,7 +6826,7 @@ msgstr "تم تحديث أسعار الشحن."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:91
 msgid "Invalid order. If you have an account please log in and try again."
-msgstr ""
+msgstr "طلب غير صالح. اذا كان لديك حساب، الرجاء تسجيل الدخول والمحاولة مرة أخرى."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
@@ -6902,7 +6906,7 @@ msgstr "مفتاح خاطئ"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:353
 msgid "Add a new payment method."
-msgstr "أضف طريقة دفع جديدة."
+msgstr "إضافة وسيلة دفع جديدة."
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:54
 msgid "Please enter a valid order ID"
@@ -6934,11 +6938,11 @@ msgstr "&quot;%s&quot; أضيف لعبتك بنجاح."
 
 #: includes/wc-cart-functions.php:94
 msgid "Continue Shopping"
-msgstr "تابع التسوق"
+msgstr "متابعة التسوق"
 
 #: includes/wc-cart-functions.php:193
 msgid "Coupon:"
-msgstr "القسيمة:"
+msgstr "قسيمة:"
 
 #: includes/wc-cart-functions.php:219
 msgid "Free shipping coupon"
@@ -6954,7 +6958,7 @@ msgstr "مجانا"
 
 #: includes/wc-core-functions.php:167
 msgid "United Arab Emirates Dirham"
-msgstr ""
+msgstr "درهم إماراتي"
 
 #: includes/wc-core-functions.php:168
 msgid "Australian Dollars"
@@ -7177,7 +7181,7 @@ msgstr "منتجات جديدة بالوسم %s"
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
-msgstr "هذا متجر تجريبي لتجريب العرض &mdash; الطلبات لن تلبى."
+msgstr "هذا المتجر تجريبي &mdash; لن يتم إستقبال أي طلبات."
 
 #: includes/wc-template-functions.php:400
 msgid "Search Results: &ldquo;%s&rdquo;"
@@ -7257,7 +7261,7 @@ msgstr "العربة لـ WooCommerce"
 #: includes/widgets/class-wc-widget-cart.php:29
 #: includes/widgets/class-wc-widget-cart.php:56
 msgid "Cart"
-msgstr "العربة"
+msgstr "السلة"
 
 #: includes/widgets/class-wc-widget-cart.php:35
 msgid "Hide if cart is empty"
@@ -7305,11 +7309,11 @@ msgstr "فرز بواسطة"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:75
 msgid "Attribute"
-msgstr "صفة"
+msgstr "الصفة"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:81
 msgid "Display type"
-msgstr "ماذا يعرض؟"
+msgstr "طريقة العرض"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:83
 msgid "List"
@@ -7376,7 +7380,7 @@ msgstr "تصنيفات المنتجات لـ WooCommerce"
 #: includes/widgets/class-wc-widget-product-categories.php:36
 #: includes/widgets/class-wc-widget-products.php:51
 msgid "Order by"
-msgstr "طريقة الترتيب"
+msgstr "ترتيب بواسطة"
 
 #: includes/widgets/class-wc-widget-product-categories.php:38
 msgid "Category Order"
@@ -7468,7 +7472,7 @@ msgstr "عشوائي"
 
 #: includes/widgets/class-wc-widget-products.php:56
 msgid "Sales"
-msgstr "العروض"
+msgstr "الخصومات"
 
 #: includes/widgets/class-wc-widget-products.php:62
 msgctxt "Sorting order"
@@ -7497,7 +7501,7 @@ msgstr "عرض قائمة لأحدث المراجعات قي موقعك."
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:23
 msgid "WooCommerce Recent Reviews"
-msgstr "المراجعات الحديثة لـ WooCommerce"
+msgstr "آخر مراجعات المتجر"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:27
 msgid "Recent Reviews"
@@ -7554,13 +7558,13 @@ msgstr "الشحن والتسليم"
 
 #: templates/cart/cart-shipping.php:55
 msgid "Please use the shipping calculator to see available shipping methods."
-msgstr ""
+msgstr "الرجاء استخدام حاسبة الشحن لعرض وسائل الشحن المتاحة."
 
 #: templates/cart/cart-shipping.php:59
 msgid ""
 "Please continue to the checkout and enter your full address to see if there "
 "are any available shipping methods."
-msgstr ""
+msgstr "الرجاء استكمال عملية انهاء الطلب وادخال عنوانك الكامل لترى اذا كان هنالك أي وسائل شحن متاحة."
 
 #: templates/cart/cart-shipping.php:63
 msgid "Please fill in your details to see available shipping methods."
@@ -7613,7 +7617,7 @@ msgstr "الكمية"
 #: templates/cart/cart.php:30 templates/checkout/review-order.php:19
 #: templates/myaccount/my-orders.php:35 templates/order/order-details.php:21
 msgid "Total"
-msgstr "المجموع"
+msgstr "المجموع النهائي"
 
 #: templates/cart/cart.php:47
 msgid "Remove this item"
@@ -7649,7 +7653,7 @@ msgstr "المجموع"
 
 #: templates/cart/mini-cart.php:65
 msgid "Checkout"
-msgstr "المحاسبة"
+msgstr "إنهاء الطلب"
 
 #: templates/cart/shipping-calculator.php:22
 msgid "Calculate Shipping"
@@ -7685,7 +7689,7 @@ msgstr "الدفع والشحن"
 
 #: templates/checkout/form-billing.php:19
 msgid "Billing Details"
-msgstr "بيانات المشتري"
+msgstr "تفاصيل الفاتورة"
 
 #: templates/checkout/form-billing.php:38
 msgid "Create an account?"
@@ -7738,7 +7742,7 @@ msgstr "المجموع"
 
 #: templates/checkout/form-pay.php:54
 msgid "Payment"
-msgstr "الدفع"
+msgstr "الدفعة"
 
 #: templates/checkout/form-pay.php:79
 msgid ""
@@ -7786,7 +7790,7 @@ msgstr "تأكيد الطلب"
 msgid ""
 "I&rsquo;ve read and accept the <a href=\"%s\" target=\"_blank\">terms &amp; "
 "conditions</a>"
-msgstr ""
+msgstr "لقد قرأت ووافقت على <a href=\"%s\" target=\"_blank\">الأحكام والشروط</a>"
 
 #: templates/checkout/thankyou.php:18
 msgid ""
@@ -7804,7 +7808,7 @@ msgstr "رجاء أعد تقديم طلبك من جديد"
 
 #: templates/checkout/thankyou.php:28 templates/myaccount/my-orders.php:71
 msgid "Pay"
-msgstr "الدفع"
+msgstr "دفع"
 
 #: templates/checkout/thankyou.php:36 templates/checkout/thankyou.php:67
 msgid "Thank you. Your order has been received."
@@ -7826,7 +7830,7 @@ msgstr "الطلب: %s"
 #: templates/emails/plain/admin-new-order.php:39
 #: templates/order/order-details.php:97
 msgid "Customer details"
-msgstr "معلومات الزبون"
+msgstr "تفاصيل الزبون"
 
 #: templates/emails/admin-new-order.php:53
 #: templates/emails/customer-completed-order.php:54
@@ -7838,7 +7842,7 @@ msgstr "معلومات الزبون"
 #: templates/emails/plain/customer-processing-order.php:41
 #: templates/order/order-details.php:101
 msgid "Email:"
-msgstr "البريد الالكتروني:"
+msgstr "البريد الإلكتروني:"
 
 #: templates/emails/admin-new-order.php:56
 #: templates/emails/customer-completed-order.php:57
@@ -7931,7 +7935,7 @@ msgstr "إضغط هنا لإعادة تعيين كلمة المرور"
 #: templates/emails/email-addresses.php:18
 #: templates/emails/plain/email-addresses.php:12
 msgid "Billing address"
-msgstr "عنوان المشتري"
+msgstr "عنوان الفاتورة"
 
 #: templates/emails/email-addresses.php:28
 #: templates/emails/plain/email-addresses.php:17
@@ -7996,11 +8000,11 @@ msgstr "السعر: $s"
 
 #: templates/global/breadcrumb.php:63
 msgid "Products tagged &ldquo;"
-msgstr "المنتجات المعلمة ك&ldquo;"
+msgstr "منتجات موسمة &ldquo;"
 
 #: templates/global/breadcrumb.php:91 templates/global/breadcrumb.php:189
 msgid "Search results for &ldquo;"
-msgstr "نتائج البحث عن ldquo;"
+msgstr "نتائج البحث عن &ldquo;"
 
 #: templates/global/breadcrumb.php:147
 msgid "Error 404"
@@ -8008,7 +8012,7 @@ msgstr "خطأ 404"
 
 #: templates/global/breadcrumb.php:193
 msgid "Posts tagged &ldquo;"
-msgstr "المنشورات المعلمة ك&ldquo;"
+msgstr "مقالات موسمة &ldquo;"
 
 #: templates/global/breadcrumb.php:198
 msgid "Author:"
@@ -8016,7 +8020,7 @@ msgstr "الكاتب:"
 
 #: templates/global/breadcrumb.php:203
 msgid "Page"
-msgstr "صفحة"
+msgstr "الصفحة"
 
 #: templates/global/form-login.php:22
 #: templates/myaccount/form-lost-password.php:24
@@ -8043,7 +8047,7 @@ msgstr "الكمية"
 
 #: templates/loop/no-products-found.php:14
 msgid "No products were found matching your selection."
-msgstr "لا يوجد منتجات توافق إختياراتك."
+msgstr "لم يتم ايجاد اي منتجات تتوافق مع اختيارك."
 
 #: templates/loop/orderby.php:21
 msgid "Default sorting"
@@ -8091,11 +8095,11 @@ msgid ""
 "Sorry, it seems that there are no payment methods which support adding a new"
 " payment method. Please contact us if you require assistance or wish to make"
 " alternate arrangements."
-msgstr "للأسف، يبدو أنه لا توجد طرق دفع تدعم إضافة طرق دفع جديدة. الرجاء الاتصال بنا إذا احتجت لأي مساعدة أو لأية اقتراحات بديلة."
+msgstr "عذرًا، يبدو بأنه لا توجد وسائل دفع تدعم إضافة وسيلة دفع جديدة. الرجاء الاتصال بنا إذا احتجت لأي مساعدة أو اقتراحات بديلة."
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
-msgstr "أضف طريقة دفع"
+msgstr "اضافة وسيلة دفع"
 
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
@@ -8120,13 +8124,13 @@ msgstr "تأكيد كلمة المرور الجديدة"
 
 #: templates/myaccount/form-edit-account.php:41
 msgid "Save changes"
-msgstr "حفظ الإعدادات"
+msgstr "حفظ التغييرات"
 
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
 #: templates/order/order-details.php:118
 msgid "Billing Address"
-msgstr "عنوان المشتري"
+msgstr "عنوان الفاتورة"
 
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:20 templates/order/order-details.php:133
@@ -8181,7 +8185,7 @@ msgstr "حفظ"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
-msgstr "أهلا وسهلاً <strong>%1$s</strong>، ( إذا لم تكن %1$s؟ <a href=\"%2$s\">قم بتسجيل الخروج</a )."
+msgstr "مرحبًا <strong>%1$s</strong> (لست %1$s؟ <a href=\"%2$s\">سجل خروجك الآن</a>)."
 
 #: templates/myaccount/my-account.php:24
 msgid ""
@@ -8208,21 +8212,21 @@ msgstr "أنت لم تعد هذا النوع من العناوين بعد."
 
 #: templates/myaccount/my-downloads.php:18
 msgid "Available downloads"
-msgstr "التحميلات المتوفرة"
+msgstr "التحميلات المتاحة"
 
 #: templates/myaccount/my-downloads.php:27
 msgid "%s download remaining"
 msgid_plural "%s downloads remaining"
-msgstr[0] "نفذت مرات التحميل"
-msgstr[1] "بقي تحميل واحد"
-msgstr[2] "بقي تحميلان"
-msgstr[3] "بقي %s مرات تحميل"
-msgstr[4] "بقي %s مرة تحميل"
-msgstr[5] "بقي %s مرات تحميل"
+msgstr[0] "لا تستطيع إجراء المزيد من التحميلات"
+msgstr[1] "تستطيع إجراء تحميل واحد فقط"
+msgstr[2] "تستطيع إجراء تحميلان"
+msgstr[3] "%s تحميلات متبقية"
+msgstr[4] "%s تحميلات متبقية"
+msgstr[5] "%s تحميلات متبقية"
 
 #: templates/myaccount/my-orders.php:26
 msgid "Recent Orders"
-msgstr "طلبات حديثة"
+msgstr "أحدث الطلبات"
 
 #: templates/myaccount/my-orders.php:34
 msgid "Status"
@@ -8236,7 +8240,7 @@ msgstr[1] "%s مقابل عنصر واحد"
 msgstr[2] "%s مقاب عنصرين"
 msgstr[3] "%s مقابل %s عناصر"
 msgstr[4] "%s مقابل %s عنصرا"
-msgstr[5] "%s مقابل %s عنصر"
+msgstr[5] "%s لـ %s عناصر"
 
 #: templates/myaccount/my-orders.php:78
 msgid "Cancel"
@@ -8251,7 +8255,7 @@ msgid ""
 "Order <mark class=\"order-number\">%s</mark> was placed on <mark class"
 "=\"order-date\">%s</mark> and is currently <mark class=\"order-"
 "status\">%s</mark>."
-msgstr "الطلب <mark class=\"order-number\">%s</mark> بتاريخ <mark class=\"order-date\">%s</mark> والحالة <mark class=\"order-status\">%s</mark>. "
+msgstr "الطلب <mark class=\"order-number\">%s</mark> تم بتاريخ <mark class=\"order-date\">%s</mark> وهو حاليًا <mark class=\"order-status\">%s</mark>."
 
 #: templates/myaccount/view-order.php:16 templates/order/tracking.php:31
 msgid "Order Updates"
@@ -8266,7 +8270,7 @@ msgid ""
 "To track your order please enter your Order ID in the box below and press "
 "return. This was given to you on your receipt and in the confirmation email "
 "you should have received."
-msgstr "لتتبع طلبك رجاء أدخل رقم الطلب في الصندوق أدناه وأضغط \"إدخال\" من لوحة المفاتيح. فاتورة وستستلم بريد تأكيد."
+msgstr "لتتبع طلبك، الرجاء ادخال رقم الطلب في الصندوق أدناه. رقم الطلب متواجد في فاتورتك وفي بريد تأكيد الطلب الذي تم إرساله لعنوان بريدك الإلكتروني."
 
 #: templates/order/form-tracking.php:19
 msgid "Order ID"
@@ -8274,15 +8278,15 @@ msgstr "رقم الطلب"
 
 #: templates/order/form-tracking.php:19
 msgid "Found in your order confirmation email."
-msgstr "موجد في بريدك الإلكتروني."
+msgstr "وجد في بريد تأكيد طلبك."
 
 #: templates/order/form-tracking.php:20
 msgid "Billing Email"
-msgstr "بريد المشتري"
+msgstr "البريد الإلكتروني للفاتورة"
 
 #: templates/order/form-tracking.php:20
 msgid "Email you used during checkout."
-msgstr "البريد الذي استخدمته في المحاسبة."
+msgstr "البريد الإلكتروني الذي استخدمته أثناء انهاء الطلب."
 
 #: templates/order/form-tracking.php:23
 msgid "Track"
@@ -8290,11 +8294,11 @@ msgstr "تتبع"
 
 #: templates/order/order-details.php:16
 msgid "Order Details"
-msgstr "معلومات الطلب"
+msgstr "تفاصيل الطلب"
 
 #: templates/order/order-details.php:66
 msgid "Download file%s"
-msgstr "تحميل الملف"
+msgstr "تحميل الملف%s"
 
 #: templates/order/order-details.php:102
 msgid "Telephone:"
@@ -8302,31 +8306,31 @@ msgstr "الهاتف:"
 
 #: templates/order/tracking.php:18
 msgid "Order %s which was made %s has the status &ldquo;%s&rdquo;"
-msgstr "الطلب %s منذ %s حالته &ldquo;%s&rdquo;"
+msgstr "الطلب %s والذي تم بتاريخ %s تمت تغيير حالته إلى &ldquo;%s&rdquo;"
 
 #: templates/order/tracking.php:18
 msgid "ago"
-msgstr "مضت"
+msgstr "منذ"
 
 #: templates/order/tracking.php:20
 msgid "and was completed"
-msgstr "وأكتمل منذ"
+msgstr "وأكتملت"
 
 #: templates/order/tracking.php:20
 msgid " ago"
-msgstr " مضت "
+msgstr "منذ"
 
 #: templates/single-product/add-to-cart/variable.php:25
 msgid "Choose an option"
-msgstr "حدد أحد الخيارات"
+msgstr "إختر أحد الخيارات"
 
 #: templates/single-product/add-to-cart/variable.php:73
 msgid "Clear selection"
-msgstr "ألغي التحديد"
+msgstr "إلغاء الإختيار"
 
 #: templates/single-product/add-to-cart/variable.php:103
 msgid "This product is currently out of stock and unavailable."
-msgstr "هذا المنتج غير متاح حالياً بسبب عدم توفر المخزون الكافي منه."
+msgstr "هذا المنتج غير متوفر في المخزون حاليًا."
 
 #: templates/single-product/meta.php:23
 msgid "SKU:"
@@ -8372,7 +8376,7 @@ msgstr[1] "مراجعة واحدة"
 msgstr[2] "مراجعين "
 msgstr[3] "مراجعات قليلة"
 msgstr[4] "مراجعات كثيرة"
-msgstr[5] "%s مراجعات الزبائن"
+msgstr[5] "%s مراجعات عملاء"
 
 #: templates/single-product/related.php:36
 msgid "Related Products"
@@ -8380,11 +8384,11 @@ msgstr "منتجات ذات صلة"
 
 #: templates/single-product/review.php:26
 msgid "Rated %d out of 5"
-msgstr "التقييم %d من 5"
+msgstr "قيم بـ %d من 5"
 
 #: templates/single-product/review.php:34
 msgid "Your comment is awaiting approval"
-msgstr "تعليقك بانتظار الموافقة"
+msgstr "تعليقك بإنتظار الموافقة"
 
 #: templates/single-product/review.php:43
 msgid "verified owner"
@@ -8396,7 +8400,7 @@ msgstr "وصف المنتج"
 
 #: templates/single-product/up-sells.php:39
 msgid "You may also like&hellip;"
-msgstr "ربما تحب أيضا&hellip;"
+msgstr "قد يعجبك أيضًا&hellip;"
 
 #: templates/single-product-reviews.php:21
 msgid "%s review for %s"
@@ -8406,7 +8410,7 @@ msgstr[1] "%0.0sمراجعة واحد ل%s"
 msgstr[2] "%0.0sمراجعتان ل %s"
 msgstr[3] "%s مراجعات ل %s"
 msgstr[4] "%s مراجعتا ل %s"
-msgstr[5] "%s مراجعة ل %s"
+msgstr[5] "%s مراجعات لـ %s"
 
 #: templates/single-product-reviews.php:23
 msgid "Reviews"
@@ -8414,7 +8418,7 @@ msgstr "المراجعات"
 
 #: templates/single-product-reviews.php:44
 msgid "There are no reviews yet."
-msgstr "لا يوجد مراجعات لهذا المنتج بعد."
+msgstr "لا يوجد أي مراجعات بعد."
 
 #: templates/single-product-reviews.php:57
 msgid "Add a review"
@@ -8422,11 +8426,11 @@ msgstr "إضافة مراجعة"
 
 #: templates/single-product-reviews.php:57
 msgid "Be the first to review"
-msgstr "كن أول مراجع"
+msgstr "كل الأول لمراجعة هذا المنتج"
 
 #: templates/single-product-reviews.php:58
 msgid "Leave a Reply to %s"
-msgstr "اترك تعقيباً إلى %s"
+msgstr "اترك ردًا لـ %s"
 
 #: templates/single-product-reviews.php:64
 msgid "Email"
@@ -8434,15 +8438,15 @@ msgstr "البريد الإلكتروني"
 
 #: templates/single-product-reviews.php:67
 msgid "Submit"
-msgstr "أرسل"
+msgstr "إرسال"
 
 #: templates/single-product-reviews.php:73
 msgid "Your Rating"
-msgstr "تقييم المنتج"
+msgstr "تقييمك"
 
 #: templates/single-product-reviews.php:74
 msgid "Rate&hellip;"
-msgstr "تقييم&hellip;"
+msgstr "قيم&hellip;"
 
 #: templates/single-product-reviews.php:75
 msgid "Perfect"
@@ -8450,7 +8454,7 @@ msgstr "مثالي"
 
 #: templates/single-product-reviews.php:76
 msgid "Good"
-msgstr "ممتاز"
+msgstr "جيد"
 
 #: templates/single-product-reviews.php:77
 msgid "Average"
@@ -8458,11 +8462,11 @@ msgstr "متوسط"
 
 #: templates/single-product-reviews.php:78
 msgid "Not that bad"
-msgstr "ليس سيء"
+msgstr "ليس بذلك السوء"
 
 #: templates/single-product-reviews.php:79
 msgid "Very Poor"
-msgstr "ضعيف جدا"
+msgstr "ضعيف جدًا"
 
 #: templates/single-product-reviews.php:83
 msgid "Your Review"
@@ -8475,7 +8479,7 @@ msgstr ""
 
 #: woocommerce.php:182
 msgid "Docs"
-msgstr "التوثيق"
+msgstr "المستندات"
 
 #: woocommerce.php:183
 msgid "Premium Support"
@@ -8487,7 +8491,7 @@ msgstr "http://www.woothemes.com/woocommerce/"
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr "أداة متجر إلكتروني تساعدك في بيع أي شيء جميل."
+msgstr "مجموعة أدوات للتجارة الإلكترونية تساعدك في بيع أي شيء بشكل جميل."
 
 #. Author of the plugin/theme
 msgid "WooThemes"

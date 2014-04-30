@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-09 07:48+0000\n"
+"PO-Revision-Date: 2014-04-19 18:33+0000\n"
 "Last-Translator: dudlaj\n"
 "Language-Team: Czech (Czech Republic) (http://www.transifex.com/projects/p/woocommerce/language/cs_CZ/)\n"
 "MIME-Version: 1.0\n"
@@ -3306,7 +3306,7 @@ msgstr "Ukončení platnosti (MM/RR)"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:212
 msgid "MM / YY"
-msgstr ""
+msgstr "MM / RR"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:215
 msgid "Card Code"
@@ -3314,7 +3314,7 @@ msgstr "Kód karty"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:216
 msgid "CVC"
-msgstr ""
+msgstr "CVC"
 
 #: includes/abstracts/abstract-wc-product.php:455
 #: includes/class-wc-product-simple.php:48
@@ -3384,39 +3384,39 @@ msgstr "%s &ndash; %s"
 
 #: includes/api/class-wc-api-authentication.php:69
 msgid "Consumer Key is missing"
-msgstr ""
+msgstr "Chybí klíč zákazníka"
 
 #: includes/api/class-wc-api-authentication.php:72
 msgid "Consumer Secret is missing"
-msgstr ""
+msgstr "Chybí ověřovacé kód zákazníka"
 
 #: includes/api/class-wc-api-authentication.php:80
 msgid "Consumer Secret is invalid"
-msgstr ""
+msgstr "Ověřovacé kód zákazníka je neplatný"
 
 #: includes/api/class-wc-api-authentication.php:112
 msgid "%s parameter is missing"
-msgstr ""
+msgstr "Chybí parametr %s"
 
 #: includes/api/class-wc-api-authentication.php:151
 msgid "Consumer Key is invalid"
-msgstr ""
+msgstr "Klíč zákazníka je neplatný"
 
 #: includes/api/class-wc-api-authentication.php:201
 msgid "Invalid Signature - failed to sort parameters"
-msgstr ""
+msgstr "Neplatný podpis - selhalo třídění parametrů"
 
 #: includes/api/class-wc-api-authentication.php:214
 msgid "Invalid Signature - signature method is invalid"
-msgstr ""
+msgstr "Neplatný podpis - neplatný způsob podpisu"
 
 #: includes/api/class-wc-api-authentication.php:221
 msgid "Invalid Signature - provided signature does not match"
-msgstr ""
+msgstr "Neplatný podpis - poskytnutý podpis se neshoduje"
 
 #: includes/api/class-wc-api-authentication.php:256
 msgid "Invalid timestamp"
-msgstr ""
+msgstr "Neplatný časový kód"
 
 #: includes/api/class-wc-api-authentication.php:264
 msgid "Invalid nonce - nonce has already been used"
@@ -3436,7 +3436,7 @@ msgstr "Neplatné ID kupónu"
 
 #: includes/api/class-wc-api-coupons.php:152
 msgid "You do not have permission to read the coupons count"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k zobrazení počtu kupónů"
 
 #: includes/api/class-wc-api-coupons.php:171
 msgid "Invalid coupon code"
@@ -3449,31 +3449,31 @@ msgstr "Neplatný zákaznický email"
 
 #: includes/api/class-wc-api-customers.php:219
 msgid "You do not have permission to read the customers count"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k zobrazení počtu zákazníků"
 
 #: includes/api/class-wc-api-customers.php:235
 msgid "You do not have permission to create this customer"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k vytvoření tohoto zákazníka"
 
 #: includes/api/class-wc-api-customers.php:482
 msgid "Invalid customer ID"
-msgstr ""
+msgstr "Neplatné ID zákazníka"
 
 #: includes/api/class-wc-api-customers.php:488
 msgid "Invalid customer"
-msgstr ""
+msgstr "Neplatný zákazník"
 
 #: includes/api/class-wc-api-customers.php:495
 msgid "You do not have permission to read this customer"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k zobrazení tohoto zákazníka"
 
 #: includes/api/class-wc-api-customers.php:500
 msgid "You do not have permission to edit this customer"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k úpravě tohoto zákazníka"
 
 #: includes/api/class-wc-api-customers.php:505
 msgid "You do not have permission to delete this customer"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění ke smazání tohoto zákazníka"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
@@ -3485,7 +3485,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-orders.php:255
 msgid "You do not have permission to read the orders count"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k zobrazení počtů objednávek"
 
 #: includes/api/class-wc-api-products.php:140
 msgid "You do not have permission to read the products count"
@@ -3494,59 +3494,59 @@ msgstr "Nemáte dostatečná oprávnění pro zobrazení počtu produktů"
 #: includes/api/class-wc-api-products.php:459
 #: includes/api/class-wc-api-products.php:460
 msgid "Placeholder"
-msgstr ""
+msgstr "Zástupný symbol"
 
 #: includes/api/class-wc-api-reports.php:469
 msgid "You do not have permission to read this report"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k zobrazení této zprávy"
 
 #: includes/api/class-wc-api-resource.php:71
 msgid "Invalid %s ID"
-msgstr ""
+msgstr "Neplatné ID %s"
 
 #: includes/api/class-wc-api-resource.php:83
 msgid "Invalid %s"
-msgstr ""
+msgstr "Neplatný %s"
 
 #: includes/api/class-wc-api-resource.php:90
 msgid "You do not have permission to read this %s"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k zobrazení tohoto %s"
 
 #: includes/api/class-wc-api-resource.php:95
 msgid "You do not have permission to edit this %s"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k úpravě tohoto %s"
 
 #: includes/api/class-wc-api-resource.php:100
 msgid "You do not have permission to delete this %s"
-msgstr ""
+msgstr "Nemáte dostatečná oprávnění k odstranění tohoto %s"
 
 #: includes/api/class-wc-api-resource.php:302
 msgid "Permanently deleted customer"
-msgstr ""
+msgstr "Trvale odstraněný zákazník"
 
 #: includes/api/class-wc-api-resource.php:304
 msgid "The customer cannot be deleted"
-msgstr ""
+msgstr "Tento zákazník nemůže být odstraněn"
 
 #: includes/api/class-wc-api-resource.php:313
 msgid "This %s cannot be deleted"
-msgstr ""
+msgstr "Tento %s nemohl být odtraněn"
 
 #: includes/api/class-wc-api-resource.php:316
 msgid "Permanently deleted %s"
-msgstr ""
+msgstr "Trvale odstraněno %s"
 
 #: includes/api/class-wc-api-resource.php:322
 msgid "Deleted %s"
-msgstr ""
+msgstr "Odstraněno %s"
 
 #: includes/api/class-wc-api-server.php:165
 msgid "Invalid authentication method"
-msgstr ""
+msgstr "Neplatný způsob ověření"
 
 #: includes/api/class-wc-api-server.php:316
 msgid "Unsupported request method"
-msgstr ""
+msgstr "Neplatný způsob požadavku"
 
 #: includes/api/class-wc-api-server.php:333
 msgid "The handler for the route is invalid"
@@ -3558,7 +3558,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-server.php:404
 msgid "Missing parameter %s"
-msgstr ""
+msgstr "Chybějící parametr %s"
 
 #: includes/class-wc-ajax.php:158
 msgid "Sorry, your session has expired."
@@ -3599,7 +3599,7 @@ msgstr "Zásoby položky č. %s klesly z  %s na %s."
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
-msgstr ""
+msgstr "U žádného produktu nebyl redukován stav skladu - je možné, že nemají povolenu správu skladu."
 
 #: includes/class-wc-ajax.php:1056 includes/class-wc-ajax.php:1057
 msgid "Item #%s stock increased from %s to %s."
@@ -3609,7 +3609,7 @@ msgstr "Zásoby položky č. %s vzrostly z %s na %s."
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
-msgstr ""
+msgstr "U žádného produktu nebyl navýšen stav skladu - je možné, že nemají povolenu správu skladu."
 
 #: includes/class-wc-ajax.php:1080
 #: includes/widgets/class-wc-widget-product-categories.php:39
@@ -3640,7 +3640,7 @@ msgstr "Pokud chcete zprovoznit <strong>mezipaměť databáze</strong> i ve Wooc
 msgid ""
 "%s has been removed from your cart because it can no longer be purchased. "
 "Please contact us if you need assistance."
-msgstr ""
+msgstr "%s byl odstraněn z vašeho košíku, jelikož ho již nelze zakoupit. Prosím kontaktujte nás pokud potřebujete pomoc."
 
 #: includes/class-wc-cart.php:363
 msgid "An item which is no longer available was removed from your cart."
@@ -3691,7 +3691,7 @@ msgstr "Zobrazit košík"
 
 #: includes/class-wc-cart.php:825
 msgid "You cannot add another &quot;%s&quot; to your cart."
-msgstr ""
+msgstr "Do vašeho košíku nemůžete přidat další &quot;%s&quot;."
 
 #: includes/class-wc-cart.php:844 includes/class-wc-cart.php:857
 msgid ""
@@ -4978,7 +4978,7 @@ msgstr "Špatná e-mailová adresa"
 #: includes/class-wc-download-handler.php:143
 #: includes/class-wc-download-handler.php:296
 msgid "Go to homepage"
-msgstr ""
+msgstr "Zpět na hlavní stránku"
 
 #: includes/class-wc-download-handler.php:62
 msgid "Invalid download."
@@ -5702,7 +5702,7 @@ msgstr "Výběr možností"
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
-msgstr ""
+msgstr "Tento variabilní produkt nemá žádné aktivní varianty a nemůže být publikován. Měním jeho status na koncept."
 
 #: includes/class-wc-product-variation.php:516
 msgid "%s &ndash; %s%s"
@@ -5869,7 +5869,7 @@ msgstr "Nová objednávka"
 
 #: includes/emails/class-wc-email-new-order.php:27
 msgid "New order emails are sent when an order is received."
-msgstr ""
+msgstr "Emaily o nové objednávce jsou odesílány po přijetí objednávky,"
 
 #: includes/emails/class-wc-email-new-order.php:29
 msgid "New customer order"
@@ -5965,7 +5965,7 @@ msgstr "Popis"
 #: includes/gateways/cod/class-wc-gateway-cod.php:66
 msgid ""
 "Payment method description that the customer will see on your checkout."
-msgstr ""
+msgstr "Popis způsobu platby, který uvidí zákazník na stránce platby."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:82
 msgid ""
@@ -5983,7 +5983,7 @@ msgstr "Instrukce"
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:88
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:74
 msgid "Instructions that will be added to the thank you page and emails."
-msgstr ""
+msgstr "Instrukce, které budou přidány na stránku s poděkovaním a do emailů."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:105
 msgid "Account Details"
@@ -6418,7 +6418,7 @@ msgstr "IPN platba dokončena"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:749
 msgid "Payment pending: %s"
-msgstr ""
+msgstr "Platba ve zpracovaní: %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:762
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:770
@@ -6440,34 +6440,34 @@ msgstr "Platba za objednávku %s vrácena"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:792
 msgid "Order reversed"
-msgstr ""
+msgstr "Objednávka stornována"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:793
 msgid ""
 "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
-msgstr ""
+msgstr "Objednávka %s byla označena jako čekající, kvůli stornu - PayPal kód příčiny: %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:796
 msgid "Payment for order %s reversed"
-msgstr ""
+msgstr "Platba za objednávku %s byla vrácena"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:804
 msgid "Reversal Cancelled"
-msgstr ""
+msgstr "Storno bylo zrušeno"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:805
 msgid ""
 "Order %s has had a reversal cancelled. Please check the status of payment "
 "and update the order status accordingly."
-msgstr ""
+msgstr "Objednávka %s měla zrušené storno objednávky. Prosím zkontrolujte stav platby a aktualizujte stav objednávky."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:808
 msgid "Reversal cancelled for order %s"
-msgstr ""
+msgstr "Storno objednávky %s bylo zrušeno"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:880
 msgid "Validation error: PayPal amounts do not match (amt %s)."
-msgstr ""
+msgstr "Chyba ověření: PayPal částky se neshodují (amt %s)."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:888
 msgid "PDT payment completed"
@@ -6522,7 +6522,7 @@ msgstr "Vybrané země"
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:154
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:113
 msgid "Select some countries"
-msgstr ""
+msgstr "Vyberte některé země"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:109
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:83
@@ -6550,7 +6550,7 @@ msgstr "Vložte cenu (bez daně) za objednávku. Např. 5.00. Výchozí hodnota 
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:126
 msgid "Additional Rates"
-msgstr ""
+msgstr "Další sazby"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:128
 msgid ""
@@ -6567,17 +6567,17 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:134
 msgid "Additional Costs"
-msgstr ""
+msgstr "Další poplatky"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:136
 msgid ""
 "Additional costs can be added below - these will all be added to the per-"
 "order cost above."
-msgstr ""
+msgstr "Další poplatky můžete přidat zde - tyto budou připočteny k výchozí sazbě za objednávku výše."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:139
 msgid "Costs Added..."
-msgstr ""
+msgstr "Poplatky přidány..."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:143
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:96
@@ -6608,7 +6608,7 @@ msgstr "Zadejte minimální výši poplatku. Menší výše poplatku než toto b
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:540
 msgid "Costs"
-msgstr ""
+msgstr "Poplatky"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:102
@@ -6631,11 +6631,11 @@ msgstr "Poplatek bez daně. Zadejte částku, např. 120, nebo procento, např. 
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:553
 msgid "+ Add Cost"
-msgstr ""
+msgstr "+ Přidat poplatek"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:553
 msgid "Delete selected costs"
-msgstr ""
+msgstr "Odstranit vybrané poplatky"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:559
 msgid "Any class"
@@ -6675,23 +6675,23 @@ msgstr "Dostupnost metody"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:98
 msgid "Free Shipping Requires..."
-msgstr ""
+msgstr "Doručení zdarma vyžaduje..."
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:103
 msgid "A valid free shipping coupon"
-msgstr ""
+msgstr "Platný kupon na poštovné zdarma"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:104
 msgid "A minimum order amount (defined below)"
-msgstr ""
+msgstr "Minimální objednané množství (definováno níže)"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:105
 msgid "A minimum order amount OR a coupon"
-msgstr ""
+msgstr "Minimální objednané množství nebo kupón"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:106
 msgid "A minimum order amount AND a coupon"
-msgstr ""
+msgstr "Minimální objednané množství a kupón"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:110
 msgid "Minimum Order Amount"
@@ -6701,7 +6701,7 @@ msgstr "Minimální objednané množství"
 msgid ""
 "Users will need to spend this amount to get free shipping (if enabled "
 "above)."
-msgstr ""
+msgstr "Zákazníci budou muset utratit minimálně tuto částku, aby měli poštovné zdarma (pokud je povoleno výše)"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:29
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:58
@@ -6726,7 +6726,7 @@ msgstr "Země"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:92
 msgid "Cost Added..."
-msgstr ""
+msgstr "Poplatek přidán..."
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:105
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
@@ -6791,7 +6791,7 @@ msgstr "PSČ kódy"
 msgid ""
 "What zip/post codes would you like to offer delivery to? Separate codes with"
 " a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr ""
+msgstr "Na která PSČ chcete nabídnout možnost zaslání? Oddělte PSČ čárkami. Můžete použít zástupné znaky např. P* je možné použít pro PSČ PE30."
 
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:169
 msgid ""
@@ -6811,7 +6811,7 @@ msgstr "Povolit místní vyzvednutí"
 msgid ""
 "What zip/post codes are available for local pickup? Separate codes with a "
 "comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr ""
+msgstr "Pro která PSČ chcete nabídnout možnost osobního odběru? Oddělte PSČ čárkami. Můžete použít zástupné znaky např. P* je možné použít pro PSČ PE30."
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:128
 msgid ""
@@ -6837,7 +6837,7 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-checkout.php:117
 #: includes/shortcodes/class-wc-shortcode-checkout.php:168
 msgid "Sorry, this order is invalid and cannot be paid for."
-msgstr ""
+msgstr "Omlouváme se, ale tato objednávka je neplatná a nemůže být zaplacena."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:134
 #: templates/checkout/thankyou.php:40
@@ -7009,7 +7009,7 @@ msgstr "Hong Kong Dollar"
 
 #: includes/wc-core-functions.php:180
 msgid "Croatia kuna"
-msgstr ""
+msgstr "Chorvatská kuna"
 
 #: includes/wc-core-functions.php:181
 msgid "Hungarian Forint"
@@ -7268,7 +7268,7 @@ msgstr "Schovat, pokud je košík prázdný"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:21
 msgid "Shows active layered nav filters so users can see and deactivate them."
-msgstr ""
+msgstr "Zobrazí aktivní filtry vrstvené navigace viditelné pro uživatele, kteří je budou moci deaktivovat."
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:23
 msgid "WooCommerce Layered Nav Filters"
@@ -7276,7 +7276,7 @@ msgstr "WooCommerce vrstvené navigační filtry"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:27
 msgid "Active Filters"
-msgstr ""
+msgstr "Aktivní filtry"
 
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:84
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:91
@@ -7304,7 +7304,7 @@ msgstr "E-shop - vrstvená navigace"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:69
 msgid "Filter by"
-msgstr ""
+msgstr "Filtrovat dle"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:75
 msgid "Attribute"
@@ -7324,7 +7324,7 @@ msgstr "Vyskakovací"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:90
 msgid "Query type"
-msgstr ""
+msgstr "Typ požadavku"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:92
 msgid "AND"
@@ -7467,7 +7467,7 @@ msgstr "Cena"
 
 #: includes/widgets/class-wc-widget-products.php:55
 msgid "Random"
-msgstr ""
+msgstr "Náhodně"
 
 #: includes/widgets/class-wc-widget-products.php:56
 msgid "Sales"
@@ -7521,7 +7521,7 @@ msgstr "Zobrazit seznam naposledy prohlížených produktů."
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:23
 msgid "WooCommerce Recently Viewed"
-msgstr ""
+msgstr "WooCommerce nedávno zobrazené"
 
 #: includes/widgets/class-wc-widget-recently-viewed.php:27
 msgid "Recently Viewed Products"
@@ -7948,7 +7948,7 @@ msgstr "Obrázek produktu"
 #: templates/emails/email-order-items.php:46
 #: templates/emails/plain/email-order-items.php:46
 msgid "Download %d"
-msgstr ""
+msgstr "Stáhnout %d"
 
 #: templates/emails/email-order-items.php:48
 #: templates/emails/plain/email-order-items.php:48
@@ -8094,7 +8094,7 @@ msgid ""
 "Sorry, it seems that there are no payment methods which support adding a new"
 " payment method. Please contact us if you require assistance or wish to make"
 " alternate arrangements."
-msgstr ""
+msgstr "Omlouváme se, ale zdá se, že nejsou k dispozici žádné způsoby platby, které umožńují vytvoření nového způsobu platby. Prosím kontaktujte nás pokud potřebujete pomoc nebo alternativní řešení."
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"

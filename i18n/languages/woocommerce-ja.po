@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-08 02:58+0000\n"
+"PO-Revision-Date: 2014-04-19 09:31+0000\n"
 "Last-Translator: Shohei Tanaka <shohei.tanaka@artisanworkshop.biz>\n"
 "Language-Team: Japanese (http://www.transifex.com/projects/p/woocommerce/language/ja/)\n"
 "MIME-Version: 1.0\n"
@@ -187,7 +187,7 @@ msgstr "ジェナイダ"
 
 #: i18n/states/BD.php:35
 msgid "Joypurhat"
-msgstr ""
+msgstr "ジョイプールハット"
 
 #: i18n/states/BD.php:36
 msgid "Khagrachhari"
@@ -235,7 +235,7 @@ msgstr "メヘルプール"
 
 #: i18n/states/BD.php:47
 msgid "Moulvibazar"
-msgstr ""
+msgstr "マウルビ=バザール"
 
 #: i18n/states/BD.php:48
 msgid "Munshiganj"
@@ -7787,7 +7787,7 @@ msgstr "注文する"
 msgid ""
 "I&rsquo;ve read and accept the <a href=\"%s\" target=\"_blank\">terms &amp; "
 "conditions</a>"
-msgstr ""
+msgstr "私は<a href=\"%s\" target=\"_blank\">規約と条件</a>を読んで理解し了承しました。"
 
 #: templates/checkout/thankyou.php:18
 msgid ""
@@ -8458,7 +8458,7 @@ msgstr "http://www.woothemes.com/woocommerce/"
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr "何かを販売するためのEコマースツールです。しかも、美しく。"
+msgstr "だれもが自由に商品やサービスを販売するためのEコマースツールです。しかも、自由なデザインで。"
 
 #. Author of the plugin/theme
 msgid "WooThemes"

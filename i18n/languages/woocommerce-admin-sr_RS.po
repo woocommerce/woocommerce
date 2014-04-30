@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-04-08 17:10+0000\n"
+"PO-Revision-Date: 2014-04-29 09:59+0000\n"
 "Last-Translator: mikejolley <mike.jolley@me.com>\n"
 "Language-Team: Serbian (Serbia) (http://www.transifex.com/projects/p/woocommerce/language/sr_RS/)\n"
 "MIME-Version: 1.0\n"
@@ -361,7 +361,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-dashboard.php:35
 msgid "WooCommerce Recent Reviews"
-msgstr ""
+msgstr "WooCommerce скорашње рецензије"
 
 #: includes/admin/class-wc-admin-dashboard.php:38
 #: includes/admin/class-wc-admin-menus.php:80
@@ -406,7 +406,7 @@ msgstr[2] ""
 
 #: includes/admin/class-wc-admin-dashboard.php:193
 msgid "out of 5"
-msgstr ""
+msgstr "од 5"
 
 #: includes/admin/class-wc-admin-dashboard.php:195
 msgid "reviewed by"
@@ -1127,7 +1127,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-taxonomies.php:86
 #: includes/admin/class-wc-admin-taxonomies.php:174
 msgid "Display type"
-msgstr ""
+msgstr "Тип приказа"
 
 #: includes/admin/class-wc-admin-taxonomies.php:89
 #: includes/admin/class-wc-admin-taxonomies.php:178
@@ -1634,7 +1634,7 @@ msgstr ""
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:191
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:170
 msgid "Cancel"
-msgstr ""
+msgstr "Отказати"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:249
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:136
@@ -1652,7 +1652,7 @@ msgstr "Cena"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:256
 #: includes/admin/reports/class-wc-report-sales-by-category.php:147
 msgid "Categories"
-msgstr ""
+msgstr "Врсте"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:257
 msgid "Tags"
@@ -1824,7 +1824,7 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:53
 msgid "Coupon code"
-msgstr ""
+msgstr "Код купона"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:66
 msgid "Description (optional)"
@@ -2078,7 +2078,7 @@ msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-meta-boxes.php:153
 msgid "Reviews"
-msgstr ""
+msgstr "Рецензије"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:37
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:85
@@ -2431,7 +2431,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:51
 msgid "File %d"
-msgstr ""
+msgstr "Документ %d"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-downloads.php:64
 msgid "Search for a downloadable product&hellip;"
@@ -2495,7 +2495,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:50
 msgid "Delete note"
-msgstr ""
+msgstr "Обрисати белешку"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:56
 msgid "There are no notes for this order yet."
@@ -2513,7 +2513,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:68
 msgid "Customer note"
-msgstr ""
+msgstr "Белешка купца"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:69
 msgid "Private note"
@@ -2591,7 +2591,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:110
 msgid "Variations"
-msgstr ""
+msgstr "Варијације"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:115
 msgid "Advanced"
@@ -2740,7 +2740,7 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:58
 #: includes/admin/views/html-quick-edit-product.php:38
 msgid "Tax Status"
-msgstr ""
+msgstr "Стање пореза"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:250
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:34
@@ -2869,7 +2869,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:349
 msgid "Dimensions"
-msgstr ""
+msgstr "Димензије"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:351
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
@@ -3079,7 +3079,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1358
 msgid "Variation #%s of %s"
-msgstr ""
+msgstr "Варијација #%s of %s"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:44
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-images.php:55
@@ -3368,7 +3368,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-sales-by-category.php:178
 #: includes/admin/reports/class-wc-report-sales-by-product.php:174
 msgid "Show"
-msgstr ""
+msgstr "Приказати"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:187
 msgid "No used coupons found"
@@ -3408,7 +3408,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:29
 msgid "Customer"
-msgstr ""
+msgstr "Купац"
 
 #: includes/admin/reports/class-wc-report-customer-list.php:39
 msgid "No customers found."
@@ -3807,7 +3807,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-checkout.php:25
 msgctxt "Settings tab label"
 msgid "Checkout"
-msgstr ""
+msgstr "Плаћање"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:41
 msgid "Checkout Options"
@@ -3819,7 +3819,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:68
 msgid "Coupons"
-msgstr ""
+msgstr "Купони"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:69
 msgid "Enable the use of coupons"
@@ -3832,7 +3832,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-checkout.php:78
 msgctxt "Settings group label"
 msgid "Checkout"
-msgstr ""
+msgstr "Плаћање"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:79
 msgid "Enable guest checkout"
@@ -3895,7 +3895,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-checkout.php:150
 msgid "Pay"
-msgstr ""
+msgstr "Платити"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:151
 #: includes/admin/settings/class-wc-settings-checkout.php:160
@@ -4065,7 +4065,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-general.php:76
 #: includes/admin/settings/class-wc-settings-shipping.php:147
 msgid "Specific Countries"
-msgstr ""
+msgstr "Специфичне државе"
 
 #: includes/admin/settings/class-wc-settings-general.php:85
 msgid "Store Notice"
@@ -4411,7 +4411,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
-msgstr ""
+msgstr "Додати у корпу"
 
 #: includes/admin/settings/class-wc-settings-products.php:266
 msgid "Redirect to the cart page after successful addition"
@@ -4958,7 +4958,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-addons.php:18
 msgid "Free"
-msgstr ""
+msgstr "Бесплатно"
 
 #: includes/admin/views/html-admin-page-addons.php:33
 msgid ""
@@ -5178,17 +5178,17 @@ msgstr ""
 #: includes/admin/views/html-admin-page-status-report.php:293
 msgctxt "Page setting"
 msgid "Cart"
-msgstr ""
+msgstr "Корпа"
 
 #: includes/admin/views/html-admin-page-status-report.php:297
 msgctxt "Page setting"
 msgid "Checkout"
-msgstr ""
+msgstr "Плаћање"
 
 #: includes/admin/views/html-admin-page-status-report.php:301
 msgctxt "Page setting"
 msgid "My Account"
-msgstr ""
+msgstr "Мој налог"
 
 #: includes/admin/views/html-admin-page-status-report.php:321
 msgid "Page not set"
@@ -5280,7 +5280,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"
-msgstr ""
+msgstr "Сачувати промене"
 
 #: includes/admin/views/html-bulk-edit-product.php:15
 #: includes/admin/views/html-bulk-edit-product.php:39
