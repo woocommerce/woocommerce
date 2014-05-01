@@ -444,9 +444,11 @@ class WC_Checkout {
 		// Update customer shipping and payment method to posted method
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-		if ( isset( $this->posted['shipping_method'] ) && is_array( $this->posted['shipping_method'] ) )
-			foreach ( $this->posted['shipping_method'] as $i => $value )
+		if ( isset( $this->posted['shipping_method'] ) && is_array( $this->posted['shipping_method'] ) ) {
+			foreach ( $this->posted['shipping_method'] as $i => $value ) {
 				$chosen_shipping_methods[ $i ] = wc_clean( $value );
+			}
+		}
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 		WC()->session->set( 'chosen_payment_method', $this->posted['payment_method'] );
