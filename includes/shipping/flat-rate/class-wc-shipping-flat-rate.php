@@ -252,7 +252,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 				$extra_rate = $rate;
 
-				$extra_rate['id']    = $this->id . ':' . $this_option[0];
+				$extra_rate['id']    = $this->id . ':' . urldecode( sanitize_title( $this_option[0] ) );
 				$extra_rate['label'] = $this_option[0];
 				$this_cost           = $this_option[1];
 				$this_cost_percents  = '';
@@ -665,7 +665,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				}
 
 				// Add to flat rates array
-				$flat_rates[ $flat_rate_class[ $i ] ] = array(
+				$flat_rates[ urldecode( sanitize_title( $flat_rate_class[ $i ] ) ) ] = array(
 					'cost' => $flat_rate_cost[ $i ],
 					'fee'  => $flat_rate_fee[ $i ],
 				);
