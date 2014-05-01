@@ -1,6 +1,6 @@
 <form method="post" action="options.php">
 	<?php settings_fields( 'woocommerce_status_settings_fields' ); ?>
-	<?php $options = wp_parse_args( get_option( 'woocommerce_status_options', array() ), array( 'uninstall_data' => 0, 'template_debug_mode' => 0 ) ); ?>
+	<?php $options = wp_parse_args( get_option( 'woocommerce_status_options', array() ), array( 'uninstall_data' => 0, 'template_debug_mode' => 0, 'shipping_debug_mode' => 0 ) ); ?>
 	<table class="wc_status_table widefat" cellspacing="0">
 		<thead class="tools">
 			<tr>
@@ -19,6 +19,17 @@
 					</td>
 				</tr>
 			<?php } ?>
+			<tr>
+				<td><?php _e( 'Shipping Debug Mode', 'woocommerce' ); ?></td>
+	 			<td>
+	 				<p>
+						<label><input type="checkbox" class="checkbox" name="woocommerce_status_options[shipping_debug_mode]" value="1" <?php checked( '1', $options['shipping_debug_mode'] ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
+					</p>
+					<p>
+						<span class="description"><?php _e( 'This tool will disable shipping rate caching.', 'woocommerce' ); ?></span>
+	 				</p>
+	 			</td>
+	 		</tr>
 	 		<tr>
 				<td><?php _e( 'Template Debug Mode', 'woocommerce' ); ?></td>
 	 			<td>
