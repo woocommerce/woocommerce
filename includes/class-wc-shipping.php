@@ -338,9 +338,10 @@ class WC_Shipping {
 		if ( ! $package ) return false;
 
 		// Check if we need to recalculate shipping for this package
-		$package_hash = 'wc_ship_' . md5( json_encode( $package ) );
+		$package_hash   = 'wc_ship_' . md5( json_encode( $package ) );
+		$status_options = get_option( 'woocommerce_status_options', array() );
 
-		if ( false === ( $stored_rates = get_transient( $package_hash ) ) ) {
+		if ( false === ( $stored_rates = get_transient( $package_hash ) ) || ( ! empty( $status_options['shipping_debug_mode'] ) && current_user_can( 'manage_options' ) ) ) {
 
 			// Calculate shipping method rates
 			$package['rates'] = array();
