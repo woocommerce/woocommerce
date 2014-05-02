@@ -36,7 +36,6 @@ class WC_Admin_Addons {
 					'timeout'    => 5,
 					'cookies' => $cookies,
 				) );
-			error_log( print_r( $raw_addons, true ) );
 
 			if ( ! is_wp_error( $raw_addons ) ) {
 
