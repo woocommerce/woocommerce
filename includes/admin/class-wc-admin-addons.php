@@ -26,9 +26,15 @@ class WC_Admin_Addons {
 
 		if ( false === ( $addons = get_transient( 'woocommerce_addons_html_' . $view ) ) ) {
 
+			// Send through cookies to bypass spoofing checks
+			foreach ( $_COOKIE as $name => $value ) {
+    			$cookies[] = new WP_Http_Cookie( array( 'name' => $name, 'value' => $value ) );
+			}
+
 			$raw_addons = wp_remote_get( 'http://www.woothemes.com/product-category/woocommerce-extensions/' . $view . '?orderby=popularity', array(
 					'user-agent' => 'woocommerce-addons-page',
-					'timeout'    => 3
+					'timeout'    => 3,
+					'cookies' => $cookies,
 				) );
 
 			if ( ! is_wp_error( $raw_addons ) ) {
