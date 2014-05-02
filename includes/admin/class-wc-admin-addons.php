@@ -33,9 +33,10 @@ class WC_Admin_Addons {
 
 			$raw_addons = wp_remote_get( 'http://www.woothemes.com/product-category/woocommerce-extensions/' . $view . '?orderby=popularity', array(
 					'user-agent' => 'woocommerce-addons-page',
-					'timeout'    => 3,
+					'timeout'    => 5,
 					'cookies' => $cookies,
 				) );
+			error_log( print_r( $raw_addons, true ) );
 
 			if ( ! is_wp_error( $raw_addons ) ) {
 
