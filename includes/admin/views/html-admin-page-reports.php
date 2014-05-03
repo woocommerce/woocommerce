@@ -48,7 +48,8 @@
 			echo '<p>' . $report['description'] . '</p>';
 
 		if ( $report['callback'] && ( is_callable( $report['callback'] ) ) )
-			call_user_func( $report['callback'], $current_report );
+			$callback_parm = isset($report['callback_parm']) ? $report['callback_parm'] : null;
+			call_user_func( $report['callback'], $current_report, $callback_parm );
 	}
 	?>
 </div>
