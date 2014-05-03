@@ -180,7 +180,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 				$ship_to_countries = array_intersect( $this->countries, array_keys( WC()->countries->get_shipping_countries() ) );
 			break;
 			case 'excluding' :
-				$ship_to_countries = array_diff( $this->countries, array_keys( WC()->countries->get_shipping_countries() ) );
+				$ship_to_countries = array_diff( array_keys( WC()->countries->get_shipping_countries() ), $this->countries );
 			break;
 			default :
 				$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );
