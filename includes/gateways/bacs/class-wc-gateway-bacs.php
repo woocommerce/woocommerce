@@ -223,7 +223,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      */
     public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
 
-    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' ) {
+    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' || $order->status === apply_filters( 'woocommerce_bacs_email_ins_order_status', 'completed' ) ) {
     		return;
     	}
 
