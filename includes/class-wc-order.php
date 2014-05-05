@@ -1231,7 +1231,7 @@ class WC_Order {
 		return add_query_arg( array(
 			'download_file' => $product_id,
 			'order'         => $this->order_key,
-			'email'         => $this->billing_email,
+			'email'         => urlencode( $this->billing_email ),
 			'key'           => $download_id
 		), trailingslashit( home_url() ) );
 	}
