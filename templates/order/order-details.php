@@ -21,18 +21,6 @@ $order = new WC_Order( $order_id );
 			<th class="product-total"><?php _e( 'Total', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-	<tfoot>
-	<?php
-		if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
-			?>
-			<tr>
-				<th scope="row"><?php echo $total['label']; ?></th>
-				<td><?php echo $total['value']; ?></td>
-			</tr>
-			<?php
-		endforeach;
-	?>
-	</tfoot>
 	<tbody>
 		<?php
 		if ( sizeof( $order->get_items() ) > 0 ) {
@@ -89,6 +77,18 @@ $order = new WC_Order( $order_id );
 		do_action( 'woocommerce_order_items_table', $order );
 		?>
 	</tbody>
+	<tfoot>
+	<?php
+		if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
+			?>
+			<tr>
+				<th scope="row"><?php echo $total['label']; ?></th>
+				<td><?php echo $total['value']; ?></td>
+			</tr>
+			<?php
+		endforeach;
+	?>
+	</tfoot>
 </table>
 
 <?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
