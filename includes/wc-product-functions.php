@@ -299,13 +299,12 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  * Gets a formatted version of variation data or item meta
  *
  * @access public
- * @param string $variation (default: '')
+ * @param array $variation
  * @param bool $flat (default: false)
  * @return string
  */
-function wc_get_formatted_variation( $variation = '', $flat = false ) {
+function wc_get_formatted_variation( $variation, $flat = false ) {
 	$return = '';
-
 	if ( is_array( $variation ) ) {
 
 		if ( ! $flat ) {
