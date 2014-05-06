@@ -154,7 +154,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 
 		}
 
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
 	}
 
 	/**
