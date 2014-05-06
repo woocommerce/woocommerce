@@ -1363,12 +1363,12 @@ class WC_Meta_Box_Product_Data {
 				$variation_id = absint( $variable_post_id[ $i ] );
 
 				// Virtal/Downloadable
-				$is_virtual = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
-				$is_downloadable = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
-
+				$is_virtual           = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
+				$is_downloadable      = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
+				
 				// Enabled or disabled
-				$post_status = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
-
+				$post_status          = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
+				
 				// Generate a useful post title
 				$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), absint( $variation_id ), esc_html( get_the_title( $post_id ) ) );
 
@@ -1397,6 +1397,11 @@ class WC_Meta_Box_Product_Data {
 
 				}
 
+				// Only continue if we have a variation ID
+				if ( ! $variation_id ) {
+					continue;
+				}
+
 				// Update post meta
 				update_post_meta( $variation_id, '_sku', wc_clean( $variable_sku[ $i ] ) );
 				update_post_meta( $variation_id, '_thumbnail_id', absint( $upload_image_id[ $i ] ) );
@@ -1418,10 +1423,11 @@ class WC_Meta_Box_Product_Data {
 				}
 				
 				// Backorders
-				if ( isset( $variable_backorders[ $i ] ) && $variable_backorders[ $i ] !== 'parent' )
+				if ( isset( $variable_backorders[ $i ] ) && $variable_backorders[ $i ] !== 'parent' ) {
 					update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
-				else
+				} else {
 					delete_post_meta( $variation_id, '_backorders' );
+				}
 
 				// Price handling
 				$regular_price 	= wc_format_decimal( $variable_regular_price[ $i ] );
@@ -1497,25 +1503,22 @@ class WC_Meta_Box_Product_Data {
 				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
 				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
 
-				// Remove old taxonomies attributes so data is kept up to date
-				if ( $variation_id ) {
-					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND post_id = %d;", $variation_id ) );
-					wp_cache_delete( $variation_id, 'post_meta');
+				// Update taxonomies - don't use wc_clean as it destroys sanitized characters
+				$updated_attribute_keys = array();
+				foreach ( $attributes as $attribute ) {
+					if ( $attribute['is_variation'] ) {
+						$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
+						$value         = isset( $_POST[ $attribute_key ][ $i ] ) ? sanitize_title( stripslashes( $_POST[ $attribute_key ][ $i ] ) ) : '';
+						$updated_attribute_keys[] = $attribute_key;
+						update_post_meta( $variation_id, $attribute_key, $value );
+					}
 				}
 
-				// Update taxonomies
-				foreach ( $attributes as $attribute ) {
+				// Remove old taxonomies attributes so data is kept up to date - first get attribute key names
+				$delete_attribute_keys = $wpdb->get_col( $wpdb->prepare( "SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND meta_key NOT IN ( '" . implode( "','", $updated_attribute_keys ) . "' ) AND post_id = %d;", $variation_id ) );
 
-					if ( $attribute['is_variation'] ) {
-						// Don't use wc_clean as it destroys sanitized characters
-						if ( isset( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) )
-							$value = sanitize_title( trim( stripslashes( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) ) );
-						else
-							$value = '';
-
-						update_post_meta( $variation_id, 'attribute_' . sanitize_title( $attribute['name'] ), $value );
-					}
-
+				foreach ( $delete_attribute_keys as $key ) {
+					delete_post_meta( $variation_id, $key );
 				}
 
 				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
