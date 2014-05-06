@@ -207,7 +207,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			break;
 		}
 
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
 	}
 
 
