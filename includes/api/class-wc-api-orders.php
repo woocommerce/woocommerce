@@ -214,7 +214,7 @@ class WC_API_Orders extends WC_API_Resource {
 		// add fees
 		foreach ( $order->get_fees() as $fee_item_id => $fee_item ) {
 
-			$order_data['fee_lines'] = array(
+			$order_data['fee_lines'][] = array(
 				'id'        => $fee_item_id,
 				'title'     => $fee_item['name'],
 				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
@@ -226,7 +226,7 @@ class WC_API_Orders extends WC_API_Resource {
 		// add coupons
 		foreach ( $order->get_items( 'coupon' ) as $coupon_item_id => $coupon_item ) {
 
-			$order_data['coupon_lines'] = array(
+			$order_data['coupon_lines'][] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item['name'],
 				'amount' => wc_format_decimal( $coupon_item['discount_amount'], 2 ),
