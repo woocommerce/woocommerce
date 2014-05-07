@@ -15,19 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 /**
  * Sanitize taxonomy names. Slug format (no spaces, lowercase).
  *
- * Doesn't use sanitize_title as this destroys utf chars.
+ * urldecode is used to reverse munging of UTF8 characters.
  *
  * @access public
  * @param mixed $taxonomy
  * @return string
  */
 function wc_sanitize_taxonomy_name( $taxonomy ) {
-	$filtered = strtolower( remove_accents( stripslashes( strip_tags( $taxonomy ) ) ) );
-	$filtered = preg_replace( '/&.+?;/', '', $filtered ); // Kill entities
-	$filtered = str_replace( array( '.', '\'', '"' ), '', $filtered ); // Kill quotes and full stops.
-	$filtered = str_replace( array( ' ', '_' ), '-', $filtered ); // Replace spaces and underscores.
-
-	return apply_filters( 'sanitize_taxonomy_name', $filtered, $taxonomy );
+	return apply_filters( 'sanitize_taxonomy_name', urldecode( sanitize_title( $taxonomy ) ), $taxonomy );
 }
 
 /**
