@@ -222,16 +222,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * @return void
      */
     public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-
-    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' ) {
-    		return;
-    	}
-
-		if ( $this->instructions ) {
-        	echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
-        }
-
-		$this->bank_details( $order->id );
+    	if ( ! $sent_to_admin && 'bacs' === $order->payment_method && 'on-hold' === $order->status ) {
+			if ( $this->instructions ) {
+				echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
+			}
+			$this->bank_details( $order->id );
+		}
     }
 
     /**

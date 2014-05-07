@@ -213,8 +213,9 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      * Output for the order received page.
      */
 	public function thankyou_page() {
-		if ( $this->instructions )
+		if ( $this->instructions ) {
         	echo wpautop( wptexturize( $this->instructions ) );
+		}
 	}
 
     /**
@@ -226,10 +227,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      * @param bool $plain_text
      */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-    	if ( $sent_to_admin || $order->payment_method !== 'cod' )
-    		return;
-
-		if ( $this->instructions )
-        	echo wpautop( wptexturize( $this->instructions ) );
+		if ( $this->instructions && ! $sent_to_admin && 'cod' === $order->payment_method ) {
+			echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
+		}
 	}
 }
