@@ -95,11 +95,9 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
      * @param bool $plain_text
      */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'cheque' )
-    		return;
-
-		if ( $this->instructions )
-        	echo wpautop( wptexturize( $this->instructions ) );
+        if ( $this->instructions && ! $sent_to_admin && 'cheque' === $order->payment_method && 'on-hold' === $order->status ) {
+			echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
+		}
 	}
 
     /**
