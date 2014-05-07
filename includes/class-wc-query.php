@@ -193,7 +193,7 @@ class WC_Query {
 			$q->is_archive = true;
 
 			// Fix WP SEO
-			if ( function_exists( 'wpseo_get_value' ) ) {
+			if ( class_exists( 'WPSEO_Meta' ) ) {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
@@ -263,7 +263,8 @@ class WC_Query {
 	 * @return string
 	 */
 	public function wpseo_metadesc() {
-		return wpseo_get_value( 'metadesc', wc_get_page_id('shop') );
+		return WPSEO_Meta::get_value( 'metadesc', wc_get_page_id('shop') );
+
 	}
 
 
@@ -275,7 +276,7 @@ class WC_Query {
 	 * @return string
 	 */
 	public function wpseo_metakey() {
-		return wpseo_get_value( 'metakey', wc_get_page_id('shop') );
+		return WPSEO_Meta::get_value( 'metakey', wc_get_page_id('shop') );
 	}
 
 
