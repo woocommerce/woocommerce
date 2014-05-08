@@ -183,8 +183,9 @@ class WC_Cart {
 				}
 			}
 
-			if ( $update_cart_session )
+			if ( $update_cart_session ) {
 				WC()->session->cart = $this->get_cart_for_session();
+			}
 
 			$this->set_cart_cookies( sizeof( $this->cart_contents ) > 0 );
 
@@ -192,8 +193,9 @@ class WC_Cart {
 			do_action( 'woocommerce_cart_loaded_from_session', $this );
 
 			// Queue re-calc if subtotal is not set
-			if ( ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 ) || $update_cart_session )
+			if ( ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 ) || $update_cart_session ) {
 				$this->calculate_totals();
+			}
 		}
 
 		/**
@@ -207,11 +209,13 @@ class WC_Cart {
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
 			WC()->session->set( 'coupon_discount_amounts', $this->coupon_discount_amounts );
 
-			foreach ( $this->cart_session_data as $key => $default )
+			foreach ( $this->cart_session_data as $key => $default ) {
 				WC()->session->set( $key, $this->$key );
+			}
 
-			if ( get_current_user_id() )
+			if ( get_current_user_id() ) {
 				$this->persistent_cart_update();
+			}
 
 			do_action( 'woocommerce_cart_updated' );
 		}
@@ -229,8 +233,9 @@ class WC_Cart {
 
 			unset( WC()->session->order_awaiting_payment, WC()->session->applied_coupons, WC()->session->coupon_discount_amounts, WC()->session->cart );
 
-			if ( $clear_persistent_cart && get_current_user_id() )
+			if ( $clear_persistent_cart && get_current_user_id() ) {
 				$this->persistent_cart_destroy();
+			}
 
 			do_action( 'woocommerce_cart_emptied' );
 		}
@@ -294,14 +299,16 @@ class WC_Cart {
 		public function check_cart_items() {
 			$result = $this->check_cart_item_validity();
 
-			if ( is_wp_error( $result ) )
+			if ( is_wp_error( $result ) ) {
 				wc_add_notice( $result->get_error_message(), 'error' );
+			}
 
 			// Check item stock
 			$result = $this->check_cart_item_stock();
 
-			if ( is_wp_error( $result ) )
+			if ( is_wp_error( $result ) ) { 
 				wc_add_notice( $result->get_error_message(), 'error' );
+			}
 		}
 
 		/**
@@ -549,9 +556,9 @@ class WC_Cart {
 				ob_start();
 
 				if ( $flat ) {
-					foreach ( $item_data as $data )
+					foreach ( $item_data as $data ) {
 						echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['value'] ) . "\n";
-
+					}
 				} else {
 					wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
 				}
@@ -601,10 +608,11 @@ class WC_Cart {
 			$checkout_page_id = wc_get_page_id( 'checkout' );
 			$checkout_url     = '';
 			if ( $checkout_page_id ) {
-				if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' )
+				if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' ) {
 					$checkout_url = str_replace( 'http:', 'https:', get_permalink( $checkout_page_id ) );
-				else
+				} else {
 					$checkout_url = get_permalink( $checkout_page_id );
+				}
 			}
 			return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 		}
@@ -708,12 +716,15 @@ class WC_Cart {
 	     * @return string cart item key
 	     */
 	    public function find_product_in_cart( $cart_id = false ) {
-	        if ( $cart_id !== false )
-	        	if ( is_array( $this->cart_contents ) )
-	        		foreach ( $this->cart_contents as $cart_item_key => $cart_item )
-	        			if ( $cart_item_key == $cart_id )
+	        if ( $cart_id !== false ) {
+	        	if ( is_array( $this->cart_contents ) ) {
+	        		foreach ( $this->cart_contents as $cart_item_key => $cart_item ) {
+	        			if ( $cart_item_key == $cart_id ) {
 	        				return $cart_item_key;
-
+	        			}
+	        		}
+	        	}
+	        }
 			return '';
 		}
 
@@ -901,7 +912,6 @@ class WC_Cart {
 		 * @param boolean 	$refresh_totals	whether or not to calculate totals after setting the new qty
 		 */
 		public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
-
 			if ( $quantity == 0 || $quantity < 0 ) {
 				do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
 				unset( $this->cart_contents[ $cart_item_key ] );
@@ -910,8 +920,9 @@ class WC_Cart {
 				do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity );
 			}
 
-			if ( $refresh_totals )
+			if ( $refresh_totals ) {
 				$this->calculate_totals();
+			}
 		}
 
 		/**

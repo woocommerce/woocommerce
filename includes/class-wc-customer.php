@@ -71,8 +71,9 @@ class WC_Customer {
 	 * @return void
 	 */
 	public function save_data() {
-		if ( $this->_changed )
+		if ( $this->_changed ) {
 			$GLOBALS['woocommerce']->session->customer = $this->_data;
+		}
 	}
 
 	/**
