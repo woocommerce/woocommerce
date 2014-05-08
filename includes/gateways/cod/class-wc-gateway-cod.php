@@ -115,8 +115,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	public function is_available() {
 		$order = null;
 
-		if ( ! $this->enable_for_virtual )
-			if ( ! WC()->cart->needs_shipping() ) {
+		if ( ! $this->enable_for_virtual ) {
+			if ( WC()->cart && ! WC()->cart->needs_shipping() ) {
 				return false;
 			}
 
