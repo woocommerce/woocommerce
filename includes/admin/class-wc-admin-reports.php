@@ -151,11 +151,12 @@ class WC_Admin_Reports {
 	/**
 	 * Get a report from our reports subfolder
 	 */
-	public static function get_report( $name ) {
+	public static function get_report( $name, $directory = null ) {
+		$directory = isset($directory) ? $directory : dirname(__FILE__);
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );
 		$class = 'WC_Report_' . str_replace( '-', '_', $name );
 
-		include_once( 'reports/class-wc-report-' . $name . '.php' );
+		include_once( $directory . '/reports/class-wc-report-' . $name . '.php' );
 
 		if ( ! class_exists( $class ) )
 			return;
