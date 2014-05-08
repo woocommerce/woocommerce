@@ -108,7 +108,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	public function is_available() {
 		$order = null;
 
-		if ( ! WC()->cart->needs_shipping() ) {
+		if ( WC()->cart && ! WC()->cart->needs_shipping() ) {
 			return false;
 		}
 
