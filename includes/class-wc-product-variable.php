@@ -79,19 +79,20 @@ class WC_Product_Variable extends WC_Product {
 	 * Set stock level of the product.
 	 *
 	 * @param mixed $amount (default: null)
+	 * @param string $mode can be set, add, or subtract
 	 * @return int Stock
 	 */
-	function set_stock( $amount = null ) {
+	function set_stock( $amount = null, $mode = 'set' ) {
 		// Empty total stock so its refreshed
 		$this->total_stock = '';
 
 		// Call parent set_stock
-		return parent::set_stock( $amount );
+		return parent::set_stock( $amount, $mode );
 	}
 
 	/**
 	 * Return the products children posts.
-	 * 
+	 *
 	 * @param  boolean $visible_only Only return variations which are not hidden
 	 * @return array of children ids
 	 */
@@ -230,7 +231,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_variation_price( $min_or_max = 'min', $display = false ) {
 		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_price_variation_id', true );
-		
+
 		if ( $display ) {
 			$variation        = $this->get_child( $variation_id );
 
@@ -484,7 +485,7 @@ class WC_Product_Variable extends WC_Product {
 			if ( is_admin() ) {
 				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations so cannot be published. Changing status to draft.', 'woocommerce' ) );
 			}
-		
+
 		// Loop the variations
 		} else {
 			// Main active prices
@@ -492,13 +493,13 @@ class WC_Product_Variable extends WC_Product {
 			$max_price            = null;
 			$min_price_id         = null;
 			$max_price_id         = null;
-			
+
 			// Regular prices
 			$min_regular_price    = null;
 			$max_regular_price    = null;
 			$min_regular_price_id = null;
 			$max_regular_price_id = null;
-			
+
 			// Sale prices
 			$min_sale_price       = null;
 			$max_sale_price       = null;
