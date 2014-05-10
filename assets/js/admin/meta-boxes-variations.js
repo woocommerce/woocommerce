@@ -31,13 +31,20 @@ jQuery( function ( $ ) {
 			}
 		});
 
-		var loop = $('.woocommerce_variation').size();
+		var loop = $('.woocommerce_variation').size(),
+			attributes = {};
+
+		$( '#variable_product_options .toolbar select[name^="default_attribute"]' ).each( function () {
+			var attr = $( this ).attr( 'name' ).replace( 'default_attribute_', '' );
+			attributes[ attr ] = $( this ).find( ':selected' ).val();
+		});
 
 		var data = {
 			action: 'woocommerce_add_variation',
 			post_id: woocommerce_admin_meta_boxes_variations.post_id,
 			loop: loop,
-			security: woocommerce_admin_meta_boxes_variations.add_variation_nonce
+			security: woocommerce_admin_meta_boxes_variations.add_variation_nonce,
+			attributes: attributes
 		};
 
 		$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function ( response ) {

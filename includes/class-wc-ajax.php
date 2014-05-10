@@ -527,6 +527,7 @@ class WC_AJAX {
 
 		$post_id = intval( $_POST['post_id'] );
 		$loop = intval( $_POST['loop'] );
+		$attributes = $_POST['attributes'];
 
 		$variation = array(
 			'post_title' 	=> 'Product #' . $post_id . ' Variation',
@@ -547,8 +548,15 @@ class WC_AJAX {
 			$variation_data = get_post_meta( $variation_id );
 			$variation_data['variation_post_id'] = $variation_id;
 
-			// Get attributes
-			$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
+			// Get product attributes
+			$product_attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
+
+			// Set the product attributes values
+			foreach ( $product_attributes as $key => $value ) {
+				if ( isset( $attributes[ $key ] ) ) {
+					$product_attributes[ $key ]['value'] = sanitize_text_field( $attributes[ $key ] );
+				}
+			}
 
 			// Get tax classes
 			$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
@@ -561,7 +569,7 @@ class WC_AJAX {
 			// Get parent data
 			$parent_data = array(
 				'id'		=> $post_id,
-				'attributes' => $attributes,
+				'attributes' => $product_attributes,
 				'tax_class_options' => $tax_class_options,
 				'sku' 		=> get_post_meta( $post_id, '_sku', true ),
 				'weight' 	=> get_post_meta( $post_id, '_weight', true ),
@@ -912,14 +920,14 @@ class WC_AJAX {
 		 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
 		 	wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
 		 	wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
-	 		
+
 	 		// Store variation data in meta
 			if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
 				foreach ( $item['variation_data'] as $key => $value ) {
 					wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
 				}
 			}
-			
+
 			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 	 	}
 
