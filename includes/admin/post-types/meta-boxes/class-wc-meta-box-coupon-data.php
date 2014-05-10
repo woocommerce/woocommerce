@@ -201,6 +201,7 @@ class WC_Meta_Box_Coupon_Data {
 				do_action( 'woocommerce_coupon_options_usage_limit' );
 
 			?></div>
+			<?php do_action( 'woocommerce_coupon_data_panels' ); ?>
 			<div class="clear"></div>
 		</div>
 		<?php
