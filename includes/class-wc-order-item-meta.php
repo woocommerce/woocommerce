@@ -59,11 +59,11 @@ class WC_Order_Item_Meta {
 					// If this is a term slug, get the term's nice name
 		            if ( taxonomy_exists( $attribute_key ) ) {
 		            	$term = get_term_by( 'slug', $meta_value, $attribute_key );
-		            		
-		            	if ( ! is_wp_error( $term ) && $term->name ) {
+
+		            	if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
 		            		$meta_value = $term->name;
 		            	}
-		          	
+
 		          	// If we have a product, and its not a term, try to find its non-sanitized name
 		            } elseif ( $this->product ) {
 						$product_attributes = $this->product->get_attributes();
@@ -102,7 +102,7 @@ class WC_Order_Item_Meta {
 			else
 				echo $output;
 		}
-	
+
 		return '';
 	}
 }
