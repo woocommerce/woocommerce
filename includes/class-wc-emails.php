@@ -343,7 +343,7 @@ class WC_Emails {
 		$headers = apply_filters('woocommerce_email_headers', '', 'low_stock', $product);
 
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'low_stock', $product);
+		$attachments = apply_filters('woocommerce_email_attachments', array(), 'low_stock', $product);
 
 		// Send the mail
 		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
@@ -375,7 +375,7 @@ class WC_Emails {
 		$headers = apply_filters('woocommerce_email_headers', '', 'no_stock', $product);
 
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'no_stock', $product);
+		$attachments = apply_filters('woocommerce_email_attachments', array(), 'no_stock', $product);
 
 		// Send the mail
 		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
@@ -420,7 +420,7 @@ class WC_Emails {
 		$headers = apply_filters('woocommerce_email_headers', '', 'backorder', $args);
 
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'backorder', $args);
+		$attachments = apply_filters('woocommerce_email_attachments', array(), 'backorder', $args);
 
 		// Send the mail
 		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
