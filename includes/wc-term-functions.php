@@ -24,15 +24,16 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @return array
  */
 function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
-	if ( ! taxonomy_exists( $taxonomy ) )
+	if ( ! taxonomy_exists( $taxonomy ) ) {
 		return array();
+	}
 
 	if ( empty( $args['orderby'] ) && taxonomy_is_product_attribute( $taxonomy ) ) {
 		$args['orderby'] = wc_attribute_orderby( $taxonomy );
 	}
 
 	// Support ordering by parent
-	if ( ! empty( $args['orderby'] ) && $args['orderby'] == 'parent' ) {
+	if ( ! empty( $args['orderby'] ) && $args['orderby'] === 'parent' ) {
 		$fields = isset( $args['fields'] ) ? $args['fields'] : 'all';
 
 		// Unset for wp_get_post_terms
@@ -54,6 +55,14 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 				$terms = wp_list_pluck( $terms, 'slug' );
 				break;
 		}
+	} elseif ( ! empty( $args['orderby'] ) && $args['orderby'] === 'menu_order' ) {
+		// wp_get_post_terms doens't let us use custom sort order
+		$args['include']    = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
+		$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
+
+		unset( $args['orderby'] );
+		
+		$terms              = get_terms( $taxonomy, $args );
 	} else {
 		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 	}
@@ -68,8 +77,9 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
  * @return int
  */
 function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
-	if( $a->parent === $b->parent )
+	if( $a->parent === $b->parent ) {
 		return 0;
+	}
 	return ( $a->parent < $b->parent ) ? 1 : -1;
 }
 
