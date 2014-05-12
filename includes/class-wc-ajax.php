@@ -61,8 +61,9 @@ class WC_AJAX {
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( $this, $ajax_event ) );
 
-			if ( $nopriv )
+			if ( $nopriv ) {
 				add_action( 'wp_ajax_nopriv_woocommerce_' . $ajax_event, array( $this, $ajax_event ) );
+			}
 		}
 	}
 
@@ -127,7 +128,9 @@ class WC_AJAX {
 
 		check_ajax_referer( 'update-shipping-method', 'security' );
 
-		if ( ! defined('WOOCOMMERCE_CART') ) define( 'WOOCOMMERCE_CART', true );
+		if ( ! defined('WOOCOMMERCE_CART') ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
 
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
@@ -153,10 +156,11 @@ class WC_AJAX {
 
 		check_ajax_referer( 'update-order-review', 'security' );
 
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
 
-		if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
+		if ( 0 == sizeof( WC()->cart->get_cart() ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>';
 			die();
 		}
@@ -165,69 +169,89 @@ class WC_AJAX {
 
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-		if ( isset( $_POST['shipping_method'] ) && is_array( $_POST['shipping_method'] ) )
-			foreach ( $_POST['shipping_method'] as $i => $value )
+		if ( isset( $_POST['shipping_method'] ) && is_array( $_POST['shipping_method'] ) ) {
+			foreach ( $_POST['shipping_method'] as $i => $value ) {
 				$chosen_shipping_methods[ $i ] = wc_clean( $value );
+			}
+		}
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 		WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'] );
 
-		if ( isset( $_POST['country'] ) )
+		if ( isset( $_POST['country'] ) ) {
 			WC()->customer->set_country( $_POST['country'] );
+		}
 
-		if ( isset( $_POST['state'] ) )
+		if ( isset( $_POST['state'] ) ) {
 			WC()->customer->set_state( $_POST['state'] );
+		}
 
-		if ( isset( $_POST['postcode'] ) )
+		if ( isset( $_POST['postcode'] ) ) {
 			WC()->customer->set_postcode( $_POST['postcode'] );
+		}
 
-		if ( isset( $_POST['city'] ) )
+		if ( isset( $_POST['city'] ) ) {
 			WC()->customer->set_city( $_POST['city'] );
+		}
 
-		if ( isset( $_POST['address'] ) )
+		if ( isset( $_POST['address'] ) ) {
 			WC()->customer->set_address( $_POST['address'] );
+		}
 
-		if ( isset( $_POST['address_2'] ) )
+		if ( isset( $_POST['address_2'] ) ) {
 			WC()->customer->set_address_2( $_POST['address_2'] );
+		}
 
 		if ( "yes" == get_option( 'woocommerce_ship_to_billing_address_only' ) ) {
 
-			if ( isset( $_POST['country'] ) )
+			if ( isset( $_POST['country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['country'] );
+			}
 
-			if ( isset( $_POST['state'] ) )
+			if ( isset( $_POST['state'] ) ) {
 				WC()->customer->set_shipping_state( $_POST['state'] );
+			}
 
-			if ( isset( $_POST['postcode'] ) )
+			if ( isset( $_POST['postcode'] ) ) {
 				WC()->customer->set_shipping_postcode( $_POST['postcode'] );
+			}
 
-			if ( isset( $_POST['city'] ) )
+			if ( isset( $_POST['city'] ) ) {
 				WC()->customer->set_shipping_city( $_POST['city'] );
+			}
 
-			if ( isset( $_POST['address'] ) )
+			if ( isset( $_POST['address'] ) ) {
 				WC()->customer->set_shipping_address( $_POST['address'] );
+			}
 
-			if ( isset( $_POST['address_2'] ) )
+			if ( isset( $_POST['address_2'] ) ) {
 				WC()->customer->set_shipping_address_2( $_POST['address_2'] );
+			}
 		} else {
 
-			if ( isset( $_POST['s_country'] ) )
+			if ( isset( $_POST['s_country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['s_country'] );
+			}
 
-			if ( isset( $_POST['s_state'] ) )
+			if ( isset( $_POST['s_state'] ) ) {
 				WC()->customer->set_shipping_state( $_POST['s_state'] );
+			}
 
-			if ( isset( $_POST['s_postcode'] ) )
+			if ( isset( $_POST['s_postcode'] ) ) {
 				WC()->customer->set_shipping_postcode( $_POST['s_postcode'] );
+			}
 
-			if ( isset( $_POST['s_city'] ) )
+			if ( isset( $_POST['s_city'] ) ) {
 				WC()->customer->set_shipping_city( $_POST['s_city'] );
+			}
 
-			if ( isset( $_POST['s_address'] ) )
+			if ( isset( $_POST['s_address'] ) ) {
 				WC()->customer->set_shipping_address( $_POST['s_address'] );
+			}
 
-			if ( isset( $_POST['s_address_2'] ) )
+			if ( isset( $_POST['s_address_2'] ) ) {
 				WC()->customer->set_shipping_address_2( $_POST['s_address_2'] );
+			}
 		}
 
 		WC()->cart->calculate_totals();
@@ -276,8 +300,9 @@ class WC_AJAX {
 	 * Process ajax checkout form
 	 */
 	public function checkout() {
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
 
 		$woocommerce_checkout = WC()->checkout();
 		$woocommerce_checkout->process_checkout();
@@ -322,10 +347,18 @@ class WC_AJAX {
 	 * Mark an order as complete
 	 */
 	public function mark_order_complete() {
-		if ( !current_user_can('edit_shop_orders') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
-		if ( !check_admin_referer('woocommerce-mark-order-complete')) wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
-		$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
-		if (!$order_id) die;
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+		}
+
+		if ( ! check_admin_referer( 'woocommerce-mark-order-complete' ) ) {
+			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
+		}
+
+		$order_id = isset( $_GET['order_id'] ) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
+		if ( ! $order_id ) {
+			die();
+		}
 
 		$order = new WC_Order( $order_id );
 		$order->update_status( 'completed' );
@@ -339,10 +372,18 @@ class WC_AJAX {
 	 * Mark an order as processing
 	 */
 	public function mark_order_processing() {
-		if ( !current_user_can('edit_shop_orders') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
-		if ( !check_admin_referer('woocommerce-mark-order-processing')) wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
-		$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
-		if (!$order_id) die;
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+		}
+
+		if ( ! check_admin_referer( 'woocommerce-mark-order-processing' ) ) {
+			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
+		}
+
+		$order_id = isset( $_GET['order_id'] ) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
+		if ( ! $order_id ) {
+			die();
+		}
 
 		$order = new WC_Order( $order_id );
 		$order->update_status( 'processing' );
@@ -362,21 +403,21 @@ class WC_AJAX {
 		$this->json_headers();
 
 		$taxonomy = esc_attr( $_POST['taxonomy'] );
-		$term = stripslashes( $_POST['term'] );
+		$term     = stripslashes( $_POST['term'] );
 
 		if ( taxonomy_exists( $taxonomy ) ) {
 
 			$result = wp_insert_term( $term, $taxonomy );
 
-			if ( is_wp_error($result) ) {
-	   			echo json_encode(array(
-					'error'			=> $result->get_error_message()
+			if ( is_wp_error( $result ) ) {
+				echo json_encode( array(
+					'error' => $result->get_error_message()
 				));
-	   		} else {
-		   		echo json_encode(array(
-					'term_id'		=> $result['term_id'],
-					'name'			=> $term,
-					'slug'  		=> sanitize_title( $term ),
+			} else {
+				echo json_encode( array(
+					'term_id' => $result['term_id'],
+					'name'    => $term,
+					'slug'    => sanitize_title( $term ),
 				));
 			}
 		}
@@ -390,10 +431,14 @@ class WC_AJAX {
 	public function remove_variation() {
 
 		check_ajax_referer( 'delete-variation', 'security' );
+
 		$variation_id = intval( $_POST['variation_id'] );
-		$variation = get_post($variation_id);
-		if ( $variation && $variation->post_type == "product_variation" )
+		$variation = get_post( $variation_id );
+
+		if ( $variation && 'product_variation' == $variation->post_type ) {
 			wp_delete_post( $variation_id );
+		}
+
 		die();
 	}
 
@@ -403,12 +448,17 @@ class WC_AJAX {
 	public function remove_variations() {
 
 		check_ajax_referer( 'delete-variations', 'security' );
+
 		$variation_ids = (array) $_POST['variation_ids'];
+
 		foreach ( $variation_ids as $variation_id ) {
-			$variation = get_post($variation_id);
-			if ( $variation && $variation->post_type == "product_variation" )
+			$variation = get_post( $variation_id );
+
+			if ( $variation && 'product_variation' == $variation->post_type ) {
 				wp_delete_post( $variation_id );
+			}
 		}
+
 		die();
 	}
 
@@ -431,84 +481,90 @@ class WC_AJAX {
 			$attribute_names  = array_map( 'stripslashes', $data['attribute_names'] );
 			$attribute_values = isset( $data['attribute_values'] ) ? $data['attribute_values'] : array();
 
-			if ( isset( $data['attribute_visibility'] ) )
+			if ( isset( $data['attribute_visibility'] ) ) {
 				$attribute_visibility = $data['attribute_visibility'];
+			}
 
-			if ( isset( $data['attribute_variation'] ) )
+			if ( isset( $data['attribute_variation'] ) ) {
 				$attribute_variation = $data['attribute_variation'];
+			}
 
 			$attribute_is_taxonomy = $data['attribute_is_taxonomy'];
-			$attribute_position = $data['attribute_position'];
-
+			$attribute_position    = $data['attribute_position'];
 			$attribute_names_count = sizeof( $attribute_names );
 
-			for ( $i=0; $i < $attribute_names_count; $i++ ) {
-				if ( ! $attribute_names[ $i ] )
+			for ( $i = 0; $i < $attribute_names_count; $i++ ) {
+				if ( ! $attribute_names[ $i ] ) {
 					continue;
+				}
 
-				$is_visible 	= isset( $attribute_visibility[ $i ] ) ? 1 : 0;
-				$is_variation 	= isset( $attribute_variation[ $i ] ) ? 1 : 0;
-				$is_taxonomy 	= $attribute_is_taxonomy[ $i ] ? 1 : 0;
+				$is_visible   = isset( $attribute_visibility[ $i ] ) ? 1 : 0;
+				$is_variation = isset( $attribute_variation[ $i ] ) ? 1 : 0;
+				$is_taxonomy  = $attribute_is_taxonomy[ $i ] ? 1 : 0;
 
 				if ( $is_taxonomy ) {
 
 					if ( isset( $attribute_values[ $i ] ) ) {
 
-				 		// Select based attributes - Format values (posted values are slugs)
-				 		if ( is_array( $attribute_values[ $i ] ) ) {
-					 		$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
+						// Select based attributes - Format values (posted values are slugs)
+						if ( is_array( $attribute_values[ $i ] ) ) {
+							$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
 
-					 	// Text based attributes - Posted values are term names - don't change to slugs
-					 	} else {
-					 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
-					 	}
+						// Text based attributes - Posted values are term names - don't change to slugs
+						} else {
+							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
+						}
 
-					 	// Remove empty items in the array
-					 	$values = array_filter( $values, 'strlen' );
+						// Remove empty items in the array
+						$values = array_filter( $values, 'strlen' );
 
-				 	} else {
-				 		$values = array();
-				 	}
+					} else {
+						$values = array();
+					}
 
-			 		// Update post terms
-			 		if ( taxonomy_exists( $attribute_names[ $i ] ) )
-			 			wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
+					// Update post terms
+					if ( taxonomy_exists( $attribute_names[ $i ] ) ) {
+						wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
+					}
 
-			 		if ( $values ) {
-				 		// Add attribute to array, but don't set values
-				 		$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-					 		'name' 			=> wc_clean( $attribute_names[ $i ] ),
-					 		'value' 		=> '',
-					 		'position' 		=> $attribute_position[ $i ],
-					 		'is_visible' 	=> $is_visible,
-					 		'is_variation' 	=> $is_variation,
-					 		'is_taxonomy' 	=> $is_taxonomy
-					 	);
-				 	}
+					if ( $values ) {
+						// Add attribute to array, but don't set values
+						$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
+							'name' 			=> wc_clean( $attribute_names[ $i ] ),
+							'value' 		=> '',
+							'position' 		=> $attribute_position[ $i ],
+							'is_visible' 	=> $is_visible,
+							'is_variation' 	=> $is_variation,
+							'is_taxonomy' 	=> $is_taxonomy
+						);
+					}
 
-			 	} elseif ( isset( $attribute_values[ $i ] ) ) {
+				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
-			 		// Text based, separate by pipe
-			 		$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', array_map( 'stripslashes', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) ) );
+					// Text based, separate by pipe
+					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', array_map( 'stripslashes', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) ) );
 
-			 		// Custom attribute - Add attribute to array and set the values
-				 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-				 		'name' 			=> wc_clean( $attribute_names[ $i ] ),
-				 		'value' 		=> $values,
-				 		'position' 		=> $attribute_position[ $i ],
-				 		'is_visible' 	=> $is_visible,
-				 		'is_variation' 	=> $is_variation,
-				 		'is_taxonomy' 	=> $is_taxonomy
-				 	);
-			 	}
+					// Custom attribute - Add attribute to array and set the values
+					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
+						'name' 			=> wc_clean( $attribute_names[ $i ] ),
+						'value' 		=> $values,
+						'position' 		=> $attribute_position[ $i ],
+						'is_visible' 	=> $is_visible,
+						'is_variation' 	=> $is_variation,
+						'is_taxonomy' 	=> $is_taxonomy
+					);
+				}
 
 			 }
 		}
 
 		if ( ! function_exists( 'attributes_cmp' ) ) {
 			function attributes_cmp( $a, $b ) {
-			    if ( $a['position'] == $b['position'] ) return 0;
-			    return ( $a['position'] < $b['position'] ) ? -1 : 1;
+				if ( $a['position'] == $b['position'] ) {
+					return 0;
+				}
+
+				return ( $a['position'] < $b['position'] ) ? -1 : 1;
 			}
 		}
 		uasort( $attributes, 'attributes_cmp' );
@@ -529,12 +585,12 @@ class WC_AJAX {
 		$loop = intval( $_POST['loop'] );
 
 		$variation = array(
-			'post_title' 	=> 'Product #' . $post_id . ' Variation',
-			'post_content' 	=> '',
-			'post_status' 	=> 'publish',
-			'post_author' 	=> get_current_user_id(),
-			'post_parent' 	=> $post_id,
-			'post_type' 	=> 'product_variation'
+			'post_title'   => 'Product #' . $post_id . ' Variation',
+			'post_content' => '',
+			'post_status'  => 'publish',
+			'post_author'  => get_current_user_id(),
+			'post_parent'  => $post_id,
+			'post_type'    => 'product_variation'
 		);
 
 		$variation_id = wp_insert_post( $variation );
@@ -551,42 +607,50 @@ class WC_AJAX {
 			$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
 
 			// Get tax classes
-			$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
-			$tax_class_options = array();
+			$tax_classes                 = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
+			$tax_class_options           = array();
 			$tax_class_options['parent'] =__( 'Same as parent', 'woocommerce' );
-			$tax_class_options[''] = __( 'Standard', 'woocommerce' );
-			if ($tax_classes) foreach ( $tax_classes as $class )
-				$tax_class_options[sanitize_title($class)] = $class;
+			$tax_class_options['']       = __( 'Standard', 'woocommerce' );
+
+			if ( $tax_classes ) {
+				foreach ( $tax_classes as $class ) {
+					$tax_class_options[ sanitize_title( $class ) ] = $class;
+				}
+			}
 
 			// Get parent data
 			$parent_data = array(
-				'id'		=> $post_id,
-				'attributes' => $attributes,
+				'id'                => $post_id,
+				'attributes'        => $attributes,
 				'tax_class_options' => $tax_class_options,
-				'sku' 		=> get_post_meta( $post_id, '_sku', true ),
-				'weight' 	=> get_post_meta( $post_id, '_weight', true ),
-				'length' 	=> get_post_meta( $post_id, '_length', true ),
-				'width' 	=> get_post_meta( $post_id, '_width', true ),
-				'height' 	=> get_post_meta( $post_id, '_height', true ),
-				'tax_class' => get_post_meta( $post_id, '_tax_class', true )
+				'sku'               => get_post_meta( $post_id, '_sku', true ),
+				'weight'            => get_post_meta( $post_id, '_weight', true ),
+				'length'            => get_post_meta( $post_id, '_length', true ),
+				'width'             => get_post_meta( $post_id, '_width', true ),
+				'height'           => get_post_meta( $post_id, '_height', true ),
+				'tax_class'        => get_post_meta( $post_id, '_tax_class', true )
 			);
 
-			if ( ! $parent_data['weight'] )
+			if ( ! $parent_data['weight'] ) {
 				$parent_data['weight'] = '0.00';
+			}
 
-			if ( ! $parent_data['length'] )
+			if ( ! $parent_data['length'] ) {
 				$parent_data['length'] = '0';
+			}
 
-			if ( ! $parent_data['width'] )
+			if ( ! $parent_data['width'] ) {
 				$parent_data['width'] = '0';
+			}
 
-			if ( ! $parent_data['height'] )
+			if ( ! $parent_data['height'] ) {
 				$parent_data['height'] = '0';
+			}
 
-			$_tax_class = '';
+			$_tax_class          = '';
 			$_downloadable_files = '';
-			$image_id = 0;
-			$variation = get_post( $variation_id ); // Get the variation object
+			$image_id            = 0;
+			$variation           = get_post( $variation_id ); // Get the variation object
 
 			include( 'admin/post-types/meta-boxes/views/html-variation-admin.php' );
 		}
@@ -609,16 +673,19 @@ class WC_AJAX {
 
 		$post_id = intval( $_POST['post_id'] );
 
-		if ( ! $post_id ) die();
+		if ( ! $post_id ) {
+			die();
+		}
 
 		$variations = array();
-
-		$_product = get_product( $post_id, array( 'product_type' => 'variable' ) );
+		$_product   = get_product( $post_id, array( 'product_type' => 'variable' ) );
 
 		// Put variation attributes into an array
 		foreach ( $_product->get_attributes() as $attribute ) {
 
-			if ( ! $attribute['is_variation'] ) continue;
+			if ( ! $attribute['is_variation'] ) {
+				continue;
+			}
 
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
@@ -634,18 +701,20 @@ class WC_AJAX {
 		}
 
 		// Quit out if none were found
-		if ( sizeof( $variations ) == 0 ) die();
+		if ( sizeof( $variations ) == 0 ) {
+			die();
+		}
 
 		// Get existing variations so we don't create duplicates
-	    $available_variations = array();
+		$available_variations = array();
 
-	    foreach( $_product->get_children() as $child_id ) {
-	    	$child = $_product->get_child( $child_id );
+		foreach( $_product->get_children() as $child_id ) {
+			$child = $_product->get_child( $child_id );
 
-	        if ( ! empty( $child->variation_id ) ) {
-	            $available_variations[] = $child->get_variation_attributes();
-	        }
-	    }
+			if ( ! empty( $child->variation_id ) ) {
+				$available_variations[] = $child->get_variation_attributes();
+			}
+		}
 
 		// Created posts will all have the following data
 		$variation_post_data = array(
@@ -659,74 +728,76 @@ class WC_AJAX {
 
 		// Now find all combinations and create posts
 		if ( ! function_exists( 'array_cartesian' ) ) {
+
 			/**
 			 * @param array $input
 			 * @return array
 			 */
 			function array_cartesian( $input ) {
-			    $result = array();
+				$result = array();
 
-			    while ( list( $key, $values ) = each( $input ) ) {
-			        // If a sub-array is empty, it doesn't affect the cartesian product
-			        if ( empty( $values ) ) {
-			            continue;
-			        }
+				while ( list( $key, $values ) = each( $input ) ) {
+					// If a sub-array is empty, it doesn't affect the cartesian product
+					if ( empty( $values ) ) {
+						continue;
+					}
 
-			        // Special case: seeding the product array with the values from the first sub-array
-			        if ( empty( $result ) ) {
-			            foreach ( $values as $value ) {
-			                $result[] = array( $key => $value );
-			            }
-			        }
-			        else {
-			            // Second and subsequent input sub-arrays work like this:
-			            //   1. In each existing array inside $product, add an item with
-			            //      key == $key and value == first item in input sub-array
-			            //   2. Then, for each remaining item in current input sub-array,
-			            //      add a copy of each existing array inside $product with
-			            //      key == $key and value == first item in current input sub-array
+					// Special case: seeding the product array with the values from the first sub-array
+					if ( empty( $result ) ) {
+						foreach ( $values as $value ) {
+							$result[] = array( $key => $value );
+						}
+					}
+					else {
+						// Second and subsequent input sub-arrays work like this:
+						//   1. In each existing array inside $product, add an item with
+						//      key == $key and value == first item in input sub-array
+						//   2. Then, for each remaining item in current input sub-array,
+						//      add a copy of each existing array inside $product with
+						//      key == $key and value == first item in current input sub-array
 
-			            // Store all items to be added to $product here; adding them on the spot
-			            // inside the foreach will result in an infinite loop
-			            $append = array();
-			            foreach( $result as &$product ) {
-			                // Do step 1 above. array_shift is not the most efficient, but it
-			                // allows us to iterate over the rest of the items with a simple
-			                // foreach, making the code short and familiar.
-			                $product[ $key ] = array_shift( $values );
+						// Store all items to be added to $product here; adding them on the spot
+						// inside the foreach will result in an infinite loop
+						$append = array();
+						foreach ( $result as &$product ) {
+							// Do step 1 above. array_shift is not the most efficient, but it
+							// allows us to iterate over the rest of the items with a simple
+							// foreach, making the code short and familiar.
+							$product[ $key ] = array_shift( $values );
 
-			                // $product is by reference (that's why the key we added above
-			                // will appear in the end result), so make a copy of it here
-			                $copy = $product;
+							// $product is by reference (that's why the key we added above
+							// will appear in the end result), so make a copy of it here
+							$copy = $product;
 
-			                // Do step 2 above.
-			                foreach( $values as $item ) {
-			                    $copy[ $key ] = $item;
-			                    $append[] = $copy;
-			                }
+							// Do step 2 above.
+							foreach ( $values as $item ) {
+								$copy[ $key ] = $item;
+								$append[] = $copy;
+							}
 
-			                // Undo the side effecst of array_shift
-			                array_unshift( $values, $product[ $key ] );
-			            }
+							// Undo the side effecst of array_shift
+							array_unshift( $values, $product[ $key ] );
+						}
 
-			            // Out of the foreach, we can add to $results now
-			            $result = array_merge( $result, $append );
-			        }
-			    }
+						// Out of the foreach, we can add to $results now
+						$result = array_merge( $result, $append );
+					}
+				}
 
-			    return $result;
+				return $result;
 			}
 		}
 
-		$variation_ids = array();
-		$added = 0;
+		$variation_ids       = array();
+		$added               = 0;
 		$possible_variations = array_cartesian( $variations );
 
 		foreach ( $possible_variations as $variation ) {
 
 			// Check if variation already exists
-			if ( in_array( $variation, $available_variations ) )
+			if ( in_array( $variation, $available_variations ) ) {
 				continue;
+			}
 
 			$variation_id = wp_insert_post( $variation_post_data );
 
@@ -740,8 +811,9 @@ class WC_AJAX {
 
 			do_action( 'product_variation_linked', $variation_id );
 
-			if ( $added > WC_MAX_LINKED_VARIATIONS )
+			if ( $added > WC_MAX_LINKED_VARIATIONS ) {
 				break;
+			}
 		}
 
 		wc_delete_product_transients( $post_id );
@@ -782,22 +854,23 @@ class WC_AJAX {
 
 		$wpdb->hide_errors();
 
-		$order_id 	  	= intval( $_POST['order_id'] );
-		$product_ids    = $_POST['product_ids'];
-		$loop 		    = intval( $_POST['loop'] );
-		$file_counter   = 0;
-		$order 		    = new WC_Order( $order_id );
+		$order_id     = intval( $_POST['order_id'] );
+		$product_ids  = $_POST['product_ids'];
+		$loop         = intval( $_POST['loop'] );
+		$file_counter = 0;
+		$order        = new WC_Order( $order_id );
 
 		if ( ! is_array( $product_ids ) ) {
 			$product_ids = array( $product_ids );
 		}
 
 		foreach ( $product_ids as $product_id ) {
-			$product 	= get_product( $product_id );
-			$files      = $product->get_files();
+			$product = get_product( $product_id );
+			$files   = $product->get_files();
 
-			if ( ! $order->billing_email )
+			if ( ! $order->billing_email ) {
 				die();
+			}
 
 			if ( $files ) {
 				foreach ( $files as $download_id => $file ) {
@@ -832,21 +905,21 @@ class WC_AJAX {
 
 		$this->json_headers();
 
-		$user_id = (int) trim(stripslashes($_POST['user_id']));
+		$user_id      = (int) trim(stripslashes($_POST['user_id']));
 		$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
 
 		$customer_data = array(
 			$type_to_load . '_first_name' => get_user_meta( $user_id, $type_to_load . '_first_name', true ),
-			$type_to_load . '_last_name' => get_user_meta( $user_id, $type_to_load . '_last_name', true ),
-			$type_to_load . '_company' => get_user_meta( $user_id, $type_to_load . '_company', true ),
-			$type_to_load . '_address_1' => get_user_meta( $user_id, $type_to_load . '_address_1', true ),
-			$type_to_load . '_address_2' => get_user_meta( $user_id, $type_to_load . '_address_2', true ),
-			$type_to_load . '_city' => get_user_meta( $user_id, $type_to_load . '_city', true ),
-			$type_to_load . '_postcode' => get_user_meta( $user_id, $type_to_load . '_postcode', true ),
-			$type_to_load . '_country' => get_user_meta( $user_id, $type_to_load . '_country', true ),
-			$type_to_load . '_state' => get_user_meta( $user_id, $type_to_load . '_state', true ),
-			$type_to_load . '_email' => get_user_meta( $user_id, $type_to_load . '_email', true ),
-			$type_to_load . '_phone' => get_user_meta( $user_id, $type_to_load . '_phone', true ),
+			$type_to_load . '_last_name'  => get_user_meta( $user_id, $type_to_load . '_last_name', true ),
+			$type_to_load . '_company'    => get_user_meta( $user_id, $type_to_load . '_company', true ),
+			$type_to_load . '_address_1'  => get_user_meta( $user_id, $type_to_load . '_address_1', true ),
+			$type_to_load . '_address_2'  => get_user_meta( $user_id, $type_to_load . '_address_2', true ),
+			$type_to_load . '_city'       => get_user_meta( $user_id, $type_to_load . '_city', true ),
+			$type_to_load . '_postcode'   => get_user_meta( $user_id, $type_to_load . '_postcode', true ),
+			$type_to_load . '_country'    => get_user_meta( $user_id, $type_to_load . '_country', true ),
+			$type_to_load . '_state'      => get_user_meta( $user_id, $type_to_load . '_state', true ),
+			$type_to_load . '_email'      => get_user_meta( $user_id, $type_to_load . '_email', true ),
+			$type_to_load . '_phone'      => get_user_meta( $user_id, $type_to_load . '_phone', true ),
 		);
 
 		$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer_data );
@@ -866,21 +939,22 @@ class WC_AJAX {
 		check_ajax_referer( 'order-item', 'security' );
 
 		$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
-		$order_id = absint( $_POST['order_id'] );
+		$order_id    = absint( $_POST['order_id'] );
 
 		// Find the item
-		if ( ! is_numeric( $item_to_add ) )
+		if ( ! is_numeric( $item_to_add ) ) {
 			die();
+		}
 
 		$post = get_post( $item_to_add );
 
-		if ( ! $post || ( $post->post_type !== 'product' && $post->post_type !== 'product_variation' ) )
+		if ( ! $post || ( 'product' !== $post->post_type && 'product_variation' !== $post->post_type ) ) {
 			die();
+		}
 
 		$_product = get_product( $post->ID );
-
-		$order = new WC_Order( $order_id );
-		$class = 'new_row';
+		$order    = new WC_Order( $order_id );
+		$class    = 'new_row';
 
 		// Set values
 		$item = array();
@@ -897,31 +971,31 @@ class WC_AJAX {
 		$item['line_tax']          = '';
 
 		// Add line item
-	   	$item_id = wc_add_order_item( $order_id, array(
-	 		'order_item_name' 		=> $item['name'],
-	 		'order_item_type' 		=> 'line_item'
-	 	) );
+		$item_id = wc_add_order_item( $order_id, array(
+			'order_item_name' 		=> $item['name'],
+			'order_item_type' 		=> 'line_item'
+		) );
 
-	 	// Add line item meta
-	 	if ( $item_id ) {
-		 	wc_add_order_item_meta( $item_id, '_qty', $item['qty'] );
-		 	wc_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
-		 	wc_add_order_item_meta( $item_id, '_product_id', $item['product_id'] );
-		 	wc_add_order_item_meta( $item_id, '_variation_id', $item['variation_id'] );
-		 	wc_add_order_item_meta( $item_id, '_line_subtotal', $item['line_subtotal'] );
-		 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
-		 	wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
-		 	wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
-	 		
-	 		// Store variation data in meta
+		// Add line item meta
+		if ( $item_id ) {
+			wc_add_order_item_meta( $item_id, '_qty', $item['qty'] );
+			wc_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
+			wc_add_order_item_meta( $item_id, '_product_id', $item['product_id'] );
+			wc_add_order_item_meta( $item_id, '_variation_id', $item['variation_id'] );
+			wc_add_order_item_meta( $item_id, '_line_subtotal', $item['line_subtotal'] );
+			wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
+			wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
+			wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
+
+			// Store variation data in meta
 			if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
 				foreach ( $item['variation_data'] as $key => $value ) {
 					wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
 				}
 			}
-			
+
 			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
-	 	}
+		}
 
 		$item = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
 
@@ -938,21 +1012,21 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
-		$order_id 	= absint( $_POST['order_id'] );
-		$order 		= new WC_Order( $order_id );
+		$order_id = absint( $_POST['order_id'] );
+		$order    = new WC_Order( $order_id );
 
 		// Add line item
-	   	$item_id = wc_add_order_item( $order_id, array(
-	 		'order_item_name' 		=> '',
-	 		'order_item_type' 		=> 'fee'
-	 	) );
+		$item_id = wc_add_order_item( $order_id, array(
+			'order_item_name' => '',
+			'order_item_type' => 'fee'
+		) );
 
-	 	// Add line item meta
-	 	if ( $item_id ) {
-		 	wc_add_order_item_meta( $item_id, '_tax_class', '' );
-		 	wc_add_order_item_meta( $item_id, '_line_total', '' );
-		 	wc_add_order_item_meta( $item_id, '_line_tax', '' );
-	 	}
+		// Add line item meta
+		if ( $item_id ) {
+			wc_add_order_item_meta( $item_id, '_tax_class', '' );
+			wc_add_order_item_meta( $item_id, '_line_total', '' );
+			wc_add_order_item_meta( $item_id, '_line_tax', '' );
+		}
 
 		include( 'admin/post-types/meta-boxes/views/html-order-fee.php' );
 
@@ -987,20 +1061,21 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
-		$order_id		= absint( $_POST['order_id'] );
-		$order_item_ids	= isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
-		$order_item_qty	= isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
-		$order 			= new WC_Order( $order_id );
-		$order_items 	= $order->get_items();
-		$return 		= array();
+		$order_id       = absint( $_POST['order_id'] );
+		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
+		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
+		$order          = new WC_Order( $order_id );
+		$order_items    = $order->get_items();
+		$return         = array();
 
 		if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
 
 			foreach ( $order_items as $item_id => $order_item ) {
 
 				// Only reduce checked items
-				if ( ! in_array( $item_id, $order_item_ids ) )
+				if ( ! in_array( $item_id, $order_item_ids ) ) {
 					continue;
+				}
 
 				$_product = $order->get_product_from_item( $order_item );
 
@@ -1018,8 +1093,9 @@ class WC_AJAX {
 
 			do_action( 'woocommerce_reduce_order_stock', $order );
 
-			if ( empty( $return ) )
+			if ( empty( $return ) ) {
 				$return[] = __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' );
+			}
 
 			echo implode( ', ', $return );
 		}
@@ -1035,28 +1111,29 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
-		$order_id		= absint( $_POST['order_id'] );
-		$order_item_ids	= isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
-		$order_item_qty	= isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
-		$order 			= new WC_Order( $order_id );
-		$order_items 	= $order->get_items();
-		$return 		= array();
+		$order_id       = absint( $_POST['order_id'] );
+		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
+		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
+		$order          = new WC_Order( $order_id );
+		$order_items    = $order->get_items();
+		$return         = array();
 
 		if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
 
 			foreach ( $order_items as $item_id => $order_item ) {
 
 				// Only reduce checked items
-				if ( ! in_array( $item_id, $order_item_ids ) )
+				if ( ! in_array( $item_id, $order_item_ids ) ) {
 					continue;
+				}
 
 				$_product = $order->get_product_from_item( $order_item );
 
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 
-					$old_stock 		= $_product->stock;
-					$stock_change   = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
-					$new_quantity 	= $_product->increase_stock( $stock_change );
+					$old_stock    = $_product->stock;
+					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
+					$new_quantity = $_product->increase_stock( $stock_change );
 
 					$return[] = sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity );
 					$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
@@ -1065,8 +1142,9 @@ class WC_AJAX {
 
 			do_action( 'woocommerce_restore_order_stock', $order );
 
-			if ( empty( $return ) )
+			if ( empty( $return ) ) {
 				$return[] = __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' );
+			}
 
 			echo implode( ', ', $return );
 		}
@@ -1085,9 +1163,7 @@ class WC_AJAX {
 		$meta_id = wc_add_order_item_meta( absint( $_POST['order_item_id'] ), __( 'Name', 'woocommerce' ), __( 'Value', 'woocommerce' ) );
 
 		if ( $meta_id ) {
-
 			echo '<tr data-meta_id="' . esc_attr( $meta_id ) . '"><td><input type="text" name="meta_key[' . $meta_id . ']" /><textarea name="meta_value[' . $meta_id . ']"></textarea></td><td width="1%"><button class="remove_order_item_meta button">&times;</button></td></tr>';
-
 		}
 
 		die();
@@ -1118,50 +1194,48 @@ class WC_AJAX {
 
 		$this->json_headers();
 
-		$tax = new WC_Tax();
-
-		$taxes = $tax_rows = $item_taxes = $shipping_taxes = array();
-
-		$order_id 		= absint( $_POST['order_id'] );
-		$order          = new WC_Order( $order_id );
-		$country 		= strtoupper( esc_attr( $_POST['country'] ) );
-		$state 			= strtoupper( esc_attr( $_POST['state'] ) );
-		$postcode 		= strtoupper( esc_attr( $_POST['postcode'] ) );
-		$city 			= sanitize_title( esc_attr( $_POST['city'] ) );
-
-		$items			= isset( $_POST['items'] ) ? $_POST['items'] : array();
-		$shipping		= $_POST['shipping'];
-		$item_tax		= 0;
+		$tax      = new WC_Tax();
+		$taxes    = $tax_rows = $item_taxes = $shipping_taxes = array();
+		$order_id = absint( $_POST['order_id'] );
+		$order    = new WC_Order( $order_id );
+		$country  = strtoupper( esc_attr( $_POST['country'] ) );
+		$state    = strtoupper( esc_attr( $_POST['state'] ) );
+		$postcode = strtoupper( esc_attr( $_POST['postcode'] ) );
+		$city     = sanitize_title( esc_attr( $_POST['city'] ) );
+		$items    = isset( $_POST['items'] ) ? $_POST['items'] : array();
+		$shipping = $_POST['shipping'];
+		$item_tax = 0;
 
 		// Calculate sales tax first
 		if ( sizeof( $items ) > 0 ) {
 			foreach( $items as $item_id => $item ) {
 
-				$item_id		= absint( $item_id );
-				$line_subtotal 	= isset( $item['line_subtotal'] ) ? wc_format_decimal( $item['line_subtotal'] ) : 0;
-				$line_total		= wc_format_decimal( $item['line_total'] );
-				$tax_class 		= sanitize_text_field( $item['tax_class'] );
-				$product_id     = $order->get_item_meta( $item_id, '_product_id', true );
+				$item_id       = absint( $item_id );
+				$line_subtotal = isset( $item['line_subtotal'] ) ? wc_format_decimal( $item['line_subtotal'] ) : 0;
+				$line_total    = wc_format_decimal( $item['line_total'] );
+				$tax_class     = sanitize_text_field( $item['tax_class'] );
+				$product_id    = $order->get_item_meta( $item_id, '_product_id', true );
 
-				if ( ! $item_id || $tax_class == '0' )
+				if ( ! $item_id || '0' == $tax_class ) {
 					continue;
+				}
 
 				// Get product details
 				if ( get_post_type( $product_id ) == 'product' ) {
-					$_product			= get_product( $product_id );
-					$item_tax_status 	= $_product->get_tax_status();
+					$_product        = get_product( $product_id );
+					$item_tax_status = $_product->get_tax_status();
 				} else {
-					$item_tax_status 	= 'taxable';
+					$item_tax_status = 'taxable';
 				}
 
 				// Only calc if taxable
-				if ( $item_tax_status == 'taxable' ) {
+				if ( 'taxable' == $item_tax_status ) {
 
 					$tax_rates = $tax->find_rates( array(
-						'country' 	=> $country,
-						'state' 	=> $state,
-						'postcode' 	=> $postcode,
-						'city'		=> $city,
+						'country'   => $country,
+						'state'     => $state,
+						'postcode'  => $postcode,
+						'city'      => $city,
 						'tax_class' => $tax_class
 					) );
 
@@ -1170,22 +1244,25 @@ class WC_AJAX {
 					$line_subtotal_tax   = array_sum( $line_subtotal_taxes );
 					$line_tax            = array_sum( $line_taxes );
 
-					if ( $line_subtotal_tax < 0 )
+					if ( $line_subtotal_tax < 0 ) {
 						$line_subtotal_tax = 0;
+					}
 
-					if ( $line_tax < 0 )
+					if ( $line_tax < 0 ) {
 						$line_tax = 0;
+					}
 
 					$item_taxes[ $item_id ] = array(
 						'line_subtotal_tax' => wc_format_localized_price( $line_subtotal_tax ),
-						'line_tax' 			=> wc_format_localized_price( $line_tax )
+						'line_tax'          => wc_format_localized_price( $line_tax )
 					);
 
 					$item_tax += $line_tax;
 
 					// Sum the item taxes
-					foreach ( array_keys( $taxes + $line_taxes ) as $key )
+					foreach ( array_keys( $taxes + $line_taxes ) as $key ) {
 						$taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+					}
 				}
 
 			}
@@ -1195,27 +1272,30 @@ class WC_AJAX {
 		$matched_tax_rates = array();
 
 		$tax_rates = $tax->find_rates( array(
-			'country' 	=> $country,
-			'state' 	=> $state,
-			'postcode' 	=> $postcode,
-			'city'		=> $city,
+			'country'   => $country,
+			'state'     => $state,
+			'postcode'  => $postcode,
+			'city'      => $city,
 			'tax_class' => ''
 		) );
 
-		if ( $tax_rates )
-			foreach ( $tax_rates as $key => $rate )
-				if ( isset( $rate['shipping'] ) && $rate['shipping'] == 'yes' )
+		if ( $tax_rates ) {
+			foreach ( $tax_rates as $key => $rate ) {
+				if ( isset( $rate['shipping'] ) && 'yes' == $rate['shipping'] ) {
 					$matched_tax_rates[ $key ] = $rate;
+				}
+			}
+		}
 
 		$shipping_taxes = $tax->calc_shipping_tax( $shipping, $matched_tax_rates );
-		$shipping_tax = $tax->round( array_sum( $shipping_taxes ) );
+		$shipping_tax   = $tax->round( array_sum( $shipping_taxes ) );
 
 		// Remove old tax rows
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax' )", $order_id ) );
 
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax'", $order_id ) );
 
-	 	// Get tax rates
+		// Get tax rates
 		$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
 
 		$tax_codes = array();
@@ -1236,31 +1316,32 @@ class WC_AJAX {
 
 		foreach ( array_keys( $taxes + $shipping_taxes ) as $key ) {
 
-		 	$item 							= array();
-		 	$item['rate_id']			 	= $key;
-			$item['name'] 					= $tax_codes[ $key ];
-			$item['label'] 					= $tax->get_rate_label( $key );
-			$item['compound'] 				= $tax->is_compound( $key ) ? 1 : 0;
-			$item['tax_amount'] 			= wc_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
-			$item['shipping_tax_amount'] 	= wc_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
+			$item                        = array();
+			$item['rate_id']             = $key;
+			$item['name']                = $tax_codes[ $key ];
+			$item['label']               = $tax->get_rate_label( $key );
+			$item['compound']            = $tax->is_compound( $key ) ? 1 : 0;
+			$item['tax_amount']          = wc_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+			$item['shipping_tax_amount'] = wc_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
 
-			if ( ! $item['label'] )
+			if ( ! $item['label'] ) {
 				$item['label'] = WC()->countries->tax_or_vat();
+			}
 
 			// Add line item
-		   	$item_id = wc_add_order_item( $order_id, array(
-		 		'order_item_name' 		=> $item['name'],
-		 		'order_item_type' 		=> 'tax'
-		 	) );
+			$item_id = wc_add_order_item( $order_id, array(
+				'order_item_name' => $item['name'],
+				'order_item_type' => 'tax'
+			) );
 
-		 	// Add line item meta
-		 	if ( $item_id ) {
-		 		wc_add_order_item_meta( $item_id, 'rate_id', $item['rate_id'] );
-		 		wc_add_order_item_meta( $item_id, 'label', $item['label'] );
-			 	wc_add_order_item_meta( $item_id, 'compound', $item['compound'] );
-			 	wc_add_order_item_meta( $item_id, 'tax_amount', $item['tax_amount'] );
-			 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
-		 	}
+			// Add line item meta
+			if ( $item_id ) {
+				wc_add_order_item_meta( $item_id, 'rate_id', $item['rate_id'] );
+				wc_add_order_item_meta( $item_id, 'label', $item['label'] );
+				wc_add_order_item_meta( $item_id, 'compound', $item['compound'] );
+				wc_add_order_item_meta( $item_id, 'tax_amount', $item['tax_amount'] );
+				wc_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
+			}
 
 			include( 'admin/post-types/meta-boxes/views/html-order-tax.php' );
 		}
@@ -1269,10 +1350,10 @@ class WC_AJAX {
 
 		// Return
 		echo json_encode( array(
-			'item_tax' 		=> $item_tax,
-			'item_taxes' 	=> $item_taxes,
-			'shipping_tax' 	=> $shipping_tax,
-			'tax_row_html' 	=> $tax_row_html
+			'item_tax'     => $item_tax,
+			'item_taxes'   => $item_taxes,
+			'shipping_tax' => $shipping_tax,
+			'tax_row_html' => $tax_row_html
 		) );
 
 		// Quit out
@@ -1286,18 +1367,20 @@ class WC_AJAX {
 
 		check_ajax_referer( 'add-order-note', 'security' );
 
-		$post_id 	= (int) $_POST['post_id'];
-		$note		= wp_kses_post( trim( stripslashes( $_POST['note'] ) ) );
-		$note_type	= $_POST['note_type'];
+		$post_id   = (int) $_POST['post_id'];
+		$note      = wp_kses_post( trim( stripslashes( $_POST['note'] ) ) );
+		$note_type = $_POST['note_type'];
 
 		$is_customer_note = $note_type == 'customer' ? 1 : 0;
 
 		if ( $post_id > 0 ) {
-			$order = new WC_Order( $post_id );
+			$order      = new WC_Order( $post_id );
 			$comment_id = $order->add_order_note( $note, $is_customer_note );
 
 			echo '<li rel="' . esc_attr( $comment_id ) . '" class="note ';
-			if ( $is_customer_note ) echo 'customer-note';
+			if ( $is_customer_note ) {
+				echo 'customer-note';
+			}
 			echo '"><div class="note_content">';
 			echo wpautop( wptexturize( $note ) );
 			echo '</div><p class="meta"><a href="#" class="delete_note">'.__( 'Delete note', 'woocommerce' ).'</a></p>';
@@ -1315,11 +1398,11 @@ class WC_AJAX {
 
 		check_ajax_referer( 'delete-order-note', 'security' );
 
-		$note_id 	= (int) $_POST['note_id'];
+		$note_id = (int) $_POST['note_id'];
 
-		if ($note_id>0) :
+		if ( $note_id > 0 ) {
 			wp_delete_comment( $note_id );
-		endif;
+		}
 
 		// Quit out
 		die();
@@ -1339,78 +1422,80 @@ class WC_AJAX {
 
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
-		if (empty($term)) die();
+		if ( empty( $term ) ) {
+			die();
+		}
 
 		if ( is_numeric( $term ) ) {
 
 			$args = array(
-				'post_type'			=> $post_types,
-				'post_status'	 	=> 'publish',
-				'posts_per_page' 	=> -1,
-				'post__in' 			=> array(0, $term),
-				'fields'			=> 'ids'
+				'post_type'      => $post_types,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'post__in'       => array(0, $term),
+				'fields'         => 'ids'
 			);
 
 			$args2 = array(
-				'post_type'			=> $post_types,
-				'post_status'	 	=> 'publish',
-				'posts_per_page' 	=> -1,
-				'post_parent' 		=> $term,
-				'fields'			=> 'ids'
+				'post_type'      => $post_types,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'post_parent'    => $term,
+				'fields'         => 'ids'
 			);
 
 			$args3 = array(
-				'post_type'			=> $post_types,
-				'post_status' 		=> 'publish',
-				'posts_per_page' 	=> -1,
-				'meta_query' 		=> array(
+				'post_type'      => $post_types,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'meta_query'     => array(
 					array(
-					'key' 	=> '_sku',
-					'value' => $term,
-					'compare' => 'LIKE'
+						'key'     => '_sku',
+						'value'   => $term,
+						'compare' => 'LIKE'
 					)
 				),
-				'fields'			=> 'ids'
+				'fields'         => 'ids'
 			);
 
-			$posts = array_unique(array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ) ));
+			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ) ) );
 
 		} else {
 
 			$args = array(
-				'post_type'			=> $post_types,
-				'post_status' 		=> 'publish',
-				'posts_per_page' 	=> -1,
-				's' 				=> $term,
-				'fields'			=> 'ids'
+				'post_type'      => $post_types,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				's'              => $term,
+				'fields'         => 'ids'
 			);
 
 			$args2 = array(
-				'post_type'			=> $post_types,
-				'post_status' 		=> 'publish',
-				'posts_per_page' 	=> -1,
-				'meta_query' 		=> array(
+				'post_type'      => $post_types,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'meta_query'     => array(
 					array(
-					'key' 	=> '_sku',
-					'value' => $term,
+					'key'     => '_sku',
+					'value'   => $term,
 					'compare' => 'LIKE'
 					)
 				),
-				'fields'			=> 'ids'
+				'fields'         => 'ids'
 			);
 
-			$posts = array_unique(array_merge( get_posts( $args ), get_posts( $args2 ) ));
+			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ) ) );
 
 		}
 
 		$found_products = array();
 
-		if ( $posts ) foreach ( $posts as $post ) {
+		if ( $posts ) {
+			foreach ( $posts as $post ) {
+				$product = get_product( $post );
 
-			$product = get_product( $post );
-
-			$found_products[ $post ] = $product->get_formatted_name();
-
+				$found_products[ $post ] = $product->get_formatted_name();
+			}
 		}
 
 		$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products );
@@ -1442,8 +1527,9 @@ class WC_AJAX {
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
 
-		if ( empty( $term ) )
+		if ( empty( $term ) ) {
 			die();
+		}
 
 		$default = isset( $_GET['default'] ) ? $_GET['default'] : __( 'Guest', 'woocommerce' );
 
@@ -1452,10 +1538,10 @@ class WC_AJAX {
 		add_action( 'pre_user_query', array( $this, 'json_search_customer_name' ) );
 
 		$customers_query = new WP_User_Query( apply_filters( 'woocommerce_json_search_customers_query', array(
-			'fields'			=> 'all',
-			'orderby'			=> 'display_name',
-			'search'			=> '*' . $term . '*',
-			'search_columns'	=> array( 'ID', 'user_login', 'user_email', 'user_nicename' )
+			'fields'         => 'all',
+			'orderby'        => 'display_name',
+			'search'         => '*' . $term . '*',
+			'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' )
 		) ) );
 
 		remove_action( 'pre_user_query', array( $this, 'json_search_customer_name' ) );
@@ -1483,24 +1569,28 @@ class WC_AJAX {
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		$args = array(
-			'post_type' 		=> array( 'product', 'product_variation' ),
-			'posts_per_page' 	=> -1,
-			'post_status'		=> 'publish',
-			'order'				=> 'ASC',
-			'orderby'			=> 'parent title',
-			'meta_query'		=> array(
+			'post_type'      => array( 'product', 'product_variation' ),
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+			'order'          => 'ASC',
+			'orderby'        => 'parent title',
+			'meta_query'     => array(
 				array(
-					'key' 	=> '_downloadable',
+					'key'   => '_downloadable',
 					'value' => 'yes'
 				)
 			),
-			's'					=> $term
+			's'              => $term
 		);
+
 		$posts = get_posts( $args );
 		$found_products = array();
-		if ( $posts ) foreach ( $posts as $post ) {
-			$product = get_product( $post->ID );
-			$found_products[ $post->ID ] = $product->get_formatted_name();
+
+		if ( $posts ) {
+			foreach ( $posts as $post ) {
+				$product = get_product( $post->ID );
+				$found_products[ $post->ID ] = $product->get_formatted_name();
+			}
 		}
 
 		echo json_encode( $found_products );
@@ -1527,20 +1617,22 @@ class WC_AJAX {
 	public function term_ordering() {
 		global $wpdb;
 
-		$id = (int) $_POST['id'];
-		$next_id  = isset($_POST['nextid']) && (int) $_POST['nextid'] ? (int) $_POST['nextid'] : null;
-		$taxonomy = isset($_POST['thetaxonomy']) ? esc_attr( $_POST['thetaxonomy'] ) : null;
-		$term = get_term_by('id', $id, $taxonomy);
+		$id       = (int) $_POST['id'];
+		$next_id  = isset( $_POST['nextid'] ) && (int) $_POST['nextid'] ? (int) $_POST['nextid'] : null;
+		$taxonomy = isset( $_POST['thetaxonomy'] ) ? esc_attr( $_POST['thetaxonomy'] ) : null;
+		$term     = get_term_by('id', $id, $taxonomy);
 
-		if ( !$id || !$term || !$taxonomy ) die(0);
+		if ( ! $id || ! $term || ! $taxonomy ) {
+			die(0);
+		}
 
 		wc_reorder_terms( $term, $next_id, $taxonomy );
 
-		$children = get_terms($taxonomy, "child_of=$id&menu_order=ASC&hide_empty=0");
+		$children = get_terms( $taxonomy, "child_of=$id&menu_order=ASC&hide_empty=0" );
 
-		if ( $term && sizeof($children) ) {
+		if ( $term && sizeof( $children ) ) {
 			echo 'children';
-			die;
+			die();
 		}
 	}
 
@@ -1553,17 +1645,19 @@ class WC_AJAX {
 		global $wpdb;
 
 		// check permissions again and make sure we have what we need
-		if ( ! current_user_can('edit_products') || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) )
+		if ( ! current_user_can('edit_products') || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) ) {
 			die(-1);
+		}
 
 		// real post?
-		if ( ! $post = get_post( $_POST['id'] ) )
+		if ( ! $post = get_post( $_POST['id'] ) ) {
 			die(-1);
+		}
 
 		$this->json_headers();
 
-		$previd = isset( $_POST['previd'] ) ? $_POST['previd'] : false;
-		$nextid = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
+		$previd  = isset( $_POST['previd'] ) ? $_POST['previd'] : false;
+		$nextid  = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
 		$new_pos = array(); // store new positions for ajax
 
 		$siblings = $wpdb->get_results( $wpdb->prepare('
@@ -1576,7 +1670,7 @@ class WC_AJAX {
 
 		$menu_order = 0;
 
-		foreach( $siblings as $sibling ) {
+		foreach ( $siblings as $sibling ) {
 
 			// if this is the post that comes after our repositioned post, set our repositioned post position and increment menu order
 			if ( $nextid == $sibling->ID ) {
@@ -1594,8 +1688,9 @@ class WC_AJAX {
 			}
 
 			// if repositioned post has been set, and new items are already in the right order, we can stop
-			if ( isset( $new_pos[ $post->ID ] ) && $sibling->menu_order >= $menu_order )
+			if ( isset( $new_pos[ $post->ID ] ) && $sibling->menu_order >= $menu_order ) {
 				break;
+			}
 
 			// set the menu order of the current sibling and increment the menu order
 			$wpdb->update(
