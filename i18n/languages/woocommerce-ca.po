@@ -5350,7 +5350,7 @@ msgstr "Nom de la nova categoria de producte"
 #: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
-msgstr "producte-categoria"
+msgstr "categoria-producte"
 
 #: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
