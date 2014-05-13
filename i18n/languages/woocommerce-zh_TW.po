@@ -5,13 +5,14 @@
 # nel tseng, 2014
 # nel tseng, 2014
 # pdb <ray12369@gmail.com>, 2014
+# y12studio <y12studio@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:51+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-05-06 04:02+0000\n"
+"Last-Translator: y12studio <y12studio@gmail.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/projects/p/woocommerce/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3267,7 +3268,7 @@ msgstr "刪除範本檔案"
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
-msgstr "可由此發現此範本已被主題改寫: <code>%s</code>"
+msgstr "可由此發現此範本已被你的佈景主題改寫: <code>%s</code>"
 
 #: includes/abstracts/abstract-wc-email.php:755
 msgid "Copy file to theme"
@@ -3633,7 +3634,7 @@ msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
 "in W3 Total Cache settings <a href=\"%s\">here</a>."
-msgstr ""
+msgstr "為確保 <strong>資料庫快取</strong> 在 WooCommerce 運作正常，你必須在 W3 Total Cache settings 裡新增 <code>_wc_session_</code> 到 \"Ignored Query Strings\" 選項， 請點選 <a href=\"%s\">這裡</a>。"
 
 #: includes/class-wc-cart.php:168
 msgid ""
@@ -5289,7 +5290,7 @@ msgstr "訂單總計："
 
 #: includes/class-wc-order.php:1009 includes/wc-cart-functions.php:251
 msgid "(Includes %s)"
-msgstr ""
+msgstr "(包含 %s)"
 
 #: includes/class-wc-order.php:1258 includes/class-wc-order.php:1259
 msgid "WooCommerce"
@@ -5327,11 +5328,11 @@ msgstr "所有商品分類"
 
 #: includes/class-wc-post-types.php:62
 msgid "Parent Product Category"
-msgstr "父母商品類別"
+msgstr "上層商品類別"
 
 #: includes/class-wc-post-types.php:63
 msgid "Parent Product Category:"
-msgstr "父母商品類別:"
+msgstr "商品上層類別:"
 
 #: includes/class-wc-post-types.php:64
 msgid "Edit Product Category"
@@ -5379,11 +5380,11 @@ msgstr "所有商品標籤"
 
 #: includes/class-wc-post-types.php:97
 msgid "Parent Product Tag"
-msgstr "父母商品標籤"
+msgstr "上層商品標籤"
 
 #: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag:"
-msgstr "父母商品標籤:"
+msgstr "上層商品標籤:"
 
 #: includes/class-wc-post-types.php:99
 msgid "Edit Product Tag"
@@ -5463,11 +5464,11 @@ msgstr "全部 %s"
 
 #: includes/class-wc-post-types.php:186
 msgid "Parent %s"
-msgstr ""
+msgstr "上層 %s"
 
 #: includes/class-wc-post-types.php:187
 msgid "Parent %s:"
-msgstr ""
+msgstr "上層 %s:"
 
 #: includes/class-wc-post-types.php:188
 msgid "Edit %s"
@@ -5479,11 +5480,11 @@ msgstr "更新 %s"
 
 #: includes/class-wc-post-types.php:190
 msgid "Add New %s"
-msgstr ""
+msgstr "新增 %s"
 
 #: includes/class-wc-post-types.php:191
 msgid "New %s"
-msgstr ""
+msgstr "新%s"
 
 #: includes/class-wc-post-types.php:226
 #: includes/updates/woocommerce-update-2.0.php:53
@@ -5552,7 +5553,7 @@ msgstr "垃圾桶裡找不到商品"
 
 #: includes/class-wc-post-types.php:245
 msgid "Parent Product"
-msgstr "父母商品"
+msgstr "上層商品"
 
 #: includes/class-wc-post-types.php:247
 msgid "This is where you can add new products to your store."
@@ -5721,7 +5722,7 @@ msgstr "訂單完成"
 msgid ""
 "Order complete emails are sent to the customer when the order is marked "
 "complete and usual indicates that the order has been shipped."
-msgstr ""
+msgstr "交寄貨品後，當訂單被標示為完成，將會寄送訂單完成電子郵件給客戶。"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:29
 msgid "Your order is complete"
@@ -5752,29 +5753,29 @@ msgstr "Email 標題"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:160
 msgid "Subject (downloadable)"
-msgstr ""
+msgstr "主題 (可下載)"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:167
 msgid "Email Heading (downloadable)"
-msgstr ""
+msgstr "電郵標題 (可下載)"
 
 #: includes/emails/class-wc-email-customer-invoice.php:29
 msgid "Customer invoice"
-msgstr ""
+msgstr "客戶購物明細"
 
 #: includes/emails/class-wc-email-customer-invoice.php:30
 msgid ""
 "Customer invoice emails can be sent to the user containing order info and "
 "payment links."
-msgstr ""
+msgstr "客戶購物明細電郵包含訂單資訊以及付款連結。"
 
 #: includes/emails/class-wc-email-customer-invoice.php:35
 msgid "Invoice for order {order_number} from {order_date}"
-msgstr ""
+msgstr "訂單 {order_number} 於 {order_date} 的購物明細"
 
 #: includes/emails/class-wc-email-customer-invoice.php:36
 msgid "Invoice for order {order_number}"
-msgstr ""
+msgstr "訂單 {order_number} 的購物明細"
 
 #: includes/emails/class-wc-email-customer-invoice.php:38
 msgid "Your {site_title} order from {order_date}"
@@ -5782,15 +5783,15 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-invoice.php:39
 msgid "Order {order_number} details"
-msgstr ""
+msgstr "訂單 {order_number} 明細"
 
 #: includes/emails/class-wc-email-customer-invoice.php:160
 msgid "Email subject (paid)"
-msgstr ""
+msgstr "電郵主旨 (付款)"
 
 #: includes/emails/class-wc-email-customer-invoice.php:167
 msgid "Email heading (paid)"
-msgstr ""
+msgstr "電郵標題 (付款)"
 
 #: includes/emails/class-wc-email-customer-new-account.php:33
 msgid "New account"
@@ -5800,7 +5801,7 @@ msgstr "新帳號"
 msgid ""
 "Customer new account emails are sent when a customer signs up via the "
 "checkout or My Account page."
-msgstr ""
+msgstr "當客戶由 checkout 或是 My Account 頁面註冊完成，客戶新帳號電郵將被寄送。"
 
 #: includes/emails/class-wc-email-customer-new-account.php:39
 msgid "Your account on {site_title}"
@@ -5816,7 +5817,7 @@ msgstr "顧客備註"
 
 #: includes/emails/class-wc-email-customer-note.php:32
 msgid "Customer note emails are sent when you add a note to an order."
-msgstr ""
+msgstr "當你新增一個注意事項到訂單，將會寄送客戶注意事項電郵。"
 
 #: includes/emails/class-wc-email-customer-note.php:37
 msgid "Note added to your {site_title} order from {order_date}"
@@ -5828,7 +5829,7 @@ msgstr "您的訂單添加了一筆備註"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:26
 msgid "Processing order"
-msgstr ""
+msgstr "處理訂單"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:27
 msgid ""
@@ -5838,7 +5839,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-processing-order.php:29
 msgid "Thank you for your order"
-msgstr ""
+msgstr "感謝你的訂單。"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {site_title} order receipt from {order_date}"
@@ -7361,7 +7362,7 @@ msgstr "最高價格"
 
 #: includes/widgets/class-wc-widget-price-filter.php:162
 msgid "Filter"
-msgstr "篩選器"
+msgstr "篩選"
 
 #: includes/widgets/class-wc-widget-price-filter.php:164
 msgid "Price:"
@@ -7410,7 +7411,7 @@ msgstr "只給商品的搜尋框."
 
 #: includes/widgets/class-wc-widget-product-search.php:23
 msgid "WooCommerce Product Search"
-msgstr "WooCommerce 三品搜尋"
+msgstr "WooCommerce 商品搜尋"
 
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:21
 msgid "Your most used product tags in cloud format."
@@ -8023,7 +8024,7 @@ msgstr "頁面"
 #: templates/global/form-login.php:22
 #: templates/myaccount/form-lost-password.php:24
 msgid "Username or email"
-msgstr "使用者名稱或密碼"
+msgstr "使用者名稱 或 Email"
 
 #: templates/global/form-login.php:26 templates/myaccount/form-login.php:36
 #: templates/myaccount/form-login.php:84
@@ -8053,15 +8054,15 @@ msgstr "預設排序"
 
 #: templates/loop/orderby.php:22
 msgid "Sort by popularity"
-msgstr ""
+msgstr "依熱門度"
 
 #: templates/loop/orderby.php:23
 msgid "Sort by average rating"
-msgstr ""
+msgstr "依評比"
 
 #: templates/loop/orderby.php:24
 msgid "Sort by newness"
-msgstr ""
+msgstr "依上架時間"
 
 #: templates/loop/orderby.php:25
 msgid "Sort by price: low to high"
@@ -8190,7 +8191,7 @@ msgid ""
 "From your account dashboard you can view your recent orders, manage your "
 "shipping and billing addresses and <a href=\"%s\">edit your password and "
 "account details</a>."
-msgstr "您可以在此查詢近期的交易紀錄， 收貨地址或是 <a href=\\\"%s\\\">修改個人資料及登入密碼</a>。"
+msgstr "您可以在此查詢近期的交易紀錄、 收貨地址或 <a href=\\\"%s\\\">修改帳戶資料及密碼</a>。"
 
 #: templates/myaccount/my-address.php:17
 msgid "My Addresses"

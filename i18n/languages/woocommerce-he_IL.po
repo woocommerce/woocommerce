@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-28 17:13+0000\n"
+"PO-Revision-Date: 2014-05-13 14:02+0000\n"
 "Last-Translator: shoresh319\n"
 "Language-Team: Hebrew (Israel) (http://www.transifex.com/projects/p/woocommerce/language/he_IL/)\n"
 "MIME-Version: 1.0\n"
@@ -35,7 +35,7 @@ msgstr "מוצר לפי מק&quot;ט/מזהה"
 
 #: assets/js/admin/editor_plugin_lang.php:8
 msgid "Products by SKU/ID"
-msgstr "מוצרים לפי מזהה"
+msgstr "מוצרים לפי מק&quot;ט/מזהה"
 
 #: assets/js/admin/editor_plugin_lang.php:9
 msgid "Product categories"
@@ -1586,79 +1586,79 @@ msgstr "לודי"
 
 #: i18n/states/IT.php:63
 msgid "Lucca"
-msgstr "לוקה"
+msgstr "Lucca"
 
 #: i18n/states/IT.php:64
 msgid "Macerata"
-msgstr "מצ'רטה"
+msgstr "Macerata"
 
 #: i18n/states/IT.php:65
 msgid "Mantova"
-msgstr "מנטובה"
+msgstr "Mantova"
 
 #: i18n/states/IT.php:66
 msgid "Massa-Carrara"
-msgstr "מאסה קאררה"
+msgstr ""
 
 #: i18n/states/IT.php:67
 msgid "Matera"
-msgstr "מאטרה"
+msgstr ""
 
 #: i18n/states/IT.php:68
 msgid "Messina"
-msgstr "מסינה"
+msgstr ""
 
 #: i18n/states/IT.php:69
 msgid "Milano"
-msgstr "מילאנו"
+msgstr ""
 
 #: i18n/states/IT.php:70
 msgid "Modena"
-msgstr "מודנה"
+msgstr ""
 
 #: i18n/states/IT.php:71
 msgid "Monza e della Brianza"
-msgstr "דלה דואר מונזה Brianza"
+msgstr ""
 
 #: i18n/states/IT.php:72
 msgid "Napoli"
-msgstr "נאפולי"
+msgstr ""
 
 #: i18n/states/IT.php:73
 msgid "Novara"
-msgstr "נובארה"
+msgstr ""
 
 #: i18n/states/IT.php:74
 msgid "Nuoro"
-msgstr "נואורו"
+msgstr ""
 
 #: i18n/states/IT.php:75
 msgid "Olbia-Tempio"
-msgstr "אולביה-טמפיו"
+msgstr ""
 
 #: i18n/states/IT.php:76
 msgid "Oristano"
-msgstr "אוריסטאנו"
+msgstr ""
 
 #: i18n/states/IT.php:77
 msgid "Padova"
-msgstr "פדובה"
+msgstr ""
 
 #: i18n/states/IT.php:78
 msgid "Palermo"
-msgstr "פאלרמו"
+msgstr ""
 
 #: i18n/states/IT.php:79
 msgid "Parma"
-msgstr "פארמה"
+msgstr ""
 
 #: i18n/states/IT.php:80
 msgid "Pavia"
-msgstr "פאביה"
+msgstr ""
 
 #: i18n/states/IT.php:81
 msgid "Perugia"
-msgstr "פרוג'ה"
+msgstr ""
 
 #: i18n/states/IT.php:82
 msgid "Pesaro e Urbino"
@@ -2437,19 +2437,19 @@ msgstr "סקון יחנון (สกลนคร)"
 msgid ""
 "Samut Prakan "
 "(&#3626;&#3617;&#3640;&#3607;&#3619;&#3611;&#3619;&#3634;&#3585;&#3634;&#3619;)"
-msgstr "סמוט פראקן (สมุทรปราการ)"
+msgstr "Samut Prakan (&#3626;&#3617;&#3640;&#3607;&#3619;&#3611;&#3619;&#3634;&#3585;&#3634;&#3619;)"
 
 #: i18n/states/TH.php:70
 msgid ""
 "Samut Sakhon "
 "(&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3634;&#3588;&#3619;)"
-msgstr "סאמוט סחון (สมุทรสาคร)"
+msgstr "Samut Sakhon (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3634;&#3588;&#3619;)"
 
 #: i18n/states/TH.php:71
 msgid ""
 "Samut Songkhram "
 "(&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588;&#3619;&#3634;&#3617;)"
-msgstr "סאמוט סונגחראם (สมุทรสงคราม)"
+msgstr "Samut Songkhram (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588;&#3619;&#3634;&#3617;)"
 
 #: i18n/states/TH.php:72
 msgid "Saraburi (&#3626;&#3619;&#3632;&#3610;&#3640;&#3619;&#3637;)"
@@ -2759,7 +2759,7 @@ msgstr ""
 
 #: i18n/states/TR.php:69
 msgid "Sinop"
-msgstr ""
+msgstr "סינופ"
 
 #: i18n/states/TR.php:70
 msgid "Sivas"
@@ -2823,11 +2823,11 @@ msgstr "באטמן"
 
 #: i18n/states/TR.php:85
 msgid "&#350;&#305;rnak"
-msgstr ""
+msgstr "סירנאק"
 
 #: i18n/states/TR.php:86
 msgid "Bart&#305;n"
-msgstr ""
+msgstr "ברטין"
 
 #: i18n/states/TR.php:87
 msgid "Ardahan"
@@ -2835,7 +2835,7 @@ msgstr "ארדהאן"
 
 #: i18n/states/TR.php:88
 msgid "I&#287;d&#305;r"
-msgstr ""
+msgstr "איגדיר"
 
 #: i18n/states/TR.php:89
 msgid "Yalova"
@@ -2843,7 +2843,7 @@ msgstr "יאלובה"
 
 #: i18n/states/TR.php:90
 msgid "Karab&#252;k"
-msgstr ""
+msgstr "קרבוק"
 
 #: i18n/states/TR.php:91
 msgid "Kilis"
@@ -3168,18 +3168,18 @@ msgstr "בוטל"
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:64
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:49
 msgid "Enable/Disable"
-msgstr "הפעל/כבה"
+msgstr "הפעלה/כיבוי"
 
 #: includes/abstracts/abstract-wc-email.php:572
 #: includes/emails/class-wc-email-customer-completed-order.php:142
 #: includes/emails/class-wc-email-new-order.php:122
 msgid "Enable this email notification"
-msgstr "הפעל את התרעות המייל"
+msgstr "להפעיל התראות אימייל"
 
 #: includes/abstracts/abstract-wc-email.php:576
 #: includes/emails/class-wc-email-customer-invoice.php:146
 msgid "Email subject"
-msgstr "נושא המייל"
+msgstr "כותרת אימייל"
 
 #: includes/abstracts/abstract-wc-email.php:578
 #: includes/abstracts/abstract-wc-email.php:585
@@ -3197,21 +3197,21 @@ msgstr "ברירת המחדל היא <code>%s</code>"
 #: includes/abstracts/abstract-wc-email.php:583
 #: includes/emails/class-wc-email-customer-invoice.php:153
 msgid "Email heading"
-msgstr "הדינג של המייל"
+msgstr "כותרת האימייל"
 
 #: includes/abstracts/abstract-wc-email.php:590
 #: includes/emails/class-wc-email-customer-completed-order.php:174
 #: includes/emails/class-wc-email-customer-invoice.php:174
 #: includes/emails/class-wc-email-new-order.php:147
 msgid "Email type"
-msgstr "סוג מייל"
+msgstr "סוג אימייל"
 
 #: includes/abstracts/abstract-wc-email.php:592
 #: includes/emails/class-wc-email-customer-completed-order.php:176
 #: includes/emails/class-wc-email-customer-invoice.php:176
 #: includes/emails/class-wc-email-new-order.php:149
 msgid "Choose which format of email to send."
-msgstr "בחר סוג מייל לשליחה"
+msgstr "בחר סוג אימייל לשליחה"
 
 #: includes/abstracts/abstract-wc-email.php:596
 #: includes/emails/class-wc-email-customer-completed-order.php:180
@@ -3478,7 +3478,7 @@ msgstr "אין לך הרשאות למחוק את העמוד הזה"
 
 #: includes/api/class-wc-api-json-handler.php:56
 msgid "JSONP support is disabled on this site"
-msgstr ""
+msgstr "תמיכת JSONP אינה פועלת באתר זה"
 
 #: includes/api/class-wc-api-json-handler.php:64
 msgid "The JSONP callback function is invalid"
@@ -3547,7 +3547,7 @@ msgstr "שיטת אימות בלתי תקינה"
 
 #: includes/api/class-wc-api-server.php:316
 msgid "Unsupported request method"
-msgstr ""
+msgstr "שיטת בקשה שאינה נתמכת"
 
 #: includes/api/class-wc-api-server.php:333
 msgid "The handler for the route is invalid"
@@ -3555,7 +3555,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-server.php:369
 msgid "No route was found matching the URL and request method"
-msgstr ""
+msgstr "לא נמצא נתיב אשר תואם את הURL ושיטת הבקשה"
 
 #: includes/api/class-wc-api-server.php:404
 msgid "Missing parameter %s"
@@ -3666,7 +3666,7 @@ msgstr "אנו מצטערים, אך אין לנו מספיק \"%s\" במלאי �
 msgid ""
 "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
 "apologise for any inconvenience caused."
-msgstr "אנו מצטערים, אך \"%s\" לא במלאי. אנא ערוך את ההזמנה שלך ונסה שנית. אנו מתנצלים על כל אי נוחות שנגרמה. "
+msgstr "אנו מצטערים, אך \"%s\" לא במלאי. יש לערוך את ההזמנה ולנסות שנית. אנו מתנצלים על אי הנוחות שנגרמה. "
 
 #: includes/class-wc-cart.php:798
 msgid "Sorry, &quot;%s&quot; cannot be purchased."
@@ -3676,13 +3676,13 @@ msgstr "אנו מתנצלים, אך לא ניתן לקנות את המוצר \"%
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
-msgstr "אתה לא יכול להוסיף %s לסל הקניות כי המוצר אזל מהמלאי."
+msgstr "לא ניתן להוסיף את %s לסל הקניות - המוצר אזל מהמלאי."
 
 #: includes/class-wc-cart.php:810
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
-msgstr "אתה לא יכול להוסיף כמות זו של &quote;%s&quote; לסל הקניות בגלל שאין מספיק במלאי (נותר %s)."
+msgstr "לא ניתן להוסיף כמות זו של &quote;%s&quote; לסל הקניות - לא נותר מספיר במלאי (נותר %s)."
 
 #: includes/class-wc-cart.php:824 includes/class-wc-cart.php:843
 #: includes/class-wc-cart.php:856 includes/class-wc-frontend-scripts.php:157
@@ -3710,7 +3710,7 @@ msgstr "מרמה, הא?"
 
 #: includes/class-wc-checkout.php:97
 msgid "Account username"
-msgstr "שם משתמש החשבון"
+msgstr "חשבון משתמש"
 
 #: includes/class-wc-checkout.php:99
 msgctxt "placeholder"
@@ -3724,7 +3724,7 @@ msgstr "סיסמת החשבון"
 #: includes/class-wc-checkout.php:108
 msgctxt "placeholder"
 msgid "Password"
-msgstr "סיסמא"
+msgstr "סיסמה"
 
 #: includes/class-wc-checkout.php:116
 msgid "Order Notes"
@@ -3756,7 +3756,7 @@ msgstr "אנו מצטערים, אך פג תוקף החיבור שלך. <a href=\
 
 #: includes/class-wc-checkout.php:498 includes/class-wc-form-handler.php:88
 msgid "is a required field."
-msgstr "שדה חובה למילוי."
+msgstr "שדה חובה."
 
 #: includes/class-wc-checkout.php:510 includes/class-wc-form-handler.php:99
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
@@ -3769,15 +3769,15 @@ msgstr "אינו מספר תקני."
 
 #: includes/class-wc-checkout.php:525 includes/class-wc-form-handler.php:115
 msgid "is not a valid email address."
-msgstr "לא מייל תקני."
+msgstr "כתובת האימייל אינה תקנית."
 
 #: includes/class-wc-checkout.php:540
 msgid "is not valid. Please enter one of the following:"
-msgstr "לא תקין. אנא כתוב את זה:"
+msgstr "לא תקין. יש לכתוב:"
 
 #: includes/class-wc-checkout.php:585
 msgid "You must accept our Terms &amp; Conditions."
-msgstr "אתה חייב לאשר את תנאי השימוש שלנו."
+msgstr "עליך לאשר את תנאי השימוש."
 
 #: includes/class-wc-checkout.php:590
 msgid ""
@@ -3787,11 +3787,11 @@ msgstr "לצערנו <strong>אנחנו לא מבצעים משלוחים אל %s
 
 #: includes/class-wc-checkout.php:598
 msgid "Invalid shipping method."
-msgstr "צורת המשלוח לא תקנית."
+msgstr "צורת המשלוח אינה תקנית."
 
 #: includes/class-wc-checkout.php:611
 msgid "Invalid payment method."
-msgstr "צורת התשלום לא תקנית."
+msgstr "צורת התשלום אינה תקנית."
 
 #: includes/class-wc-comments.php:110
 msgid "You have taken too long. Please go back and refresh the page."
@@ -3911,11 +3911,11 @@ msgstr "בוליביה"
 
 #: includes/class-wc-countries.php:64
 msgid "Bonaire, Saint Eustatius and Saba"
-msgstr "Bonaire, Saint יוסטאציוס וסבא"
+msgstr ""
 
 #: includes/class-wc-countries.php:65
 msgid "Bosnia and Herzegovina"
-msgstr "בוסניה והרצגובינה"
+msgstr ""
 
 #: includes/class-wc-countries.php:66
 msgid "Botswana"
@@ -4914,11 +4914,11 @@ msgstr "קוד קופון הוסר בהצלחה."
 
 #: includes/class-wc-coupon.php:599
 msgid "Coupon is not valid."
-msgstr "הקופון לא תקני."
+msgstr "הקופון אינו תקני."
 
 #: includes/class-wc-coupon.php:602 includes/class-wc-coupon.php:652
 msgid "Coupon does not exist!"
-msgstr "הקופון לא קיים!"
+msgstr "הקופון אינו קיים!"
 
 #: includes/class-wc-coupon.php:605
 msgid ""
@@ -4964,7 +4964,7 @@ msgstr "לא ניתן לממש את הקופון הזה למוצרים במבצ�
 
 #: includes/class-wc-coupon.php:655
 msgid "Please enter a coupon code."
-msgstr "אנא הזן קוד הקופון"
+msgstr "יש להזין קוד קופון."
 
 #: includes/class-wc-download-handler.php:37
 msgid "Invalid email address."
@@ -4979,7 +4979,7 @@ msgstr "כתובת מייל לא תקנית."
 #: includes/class-wc-download-handler.php:143
 #: includes/class-wc-download-handler.php:296
 msgid "Go to homepage"
-msgstr "עבור לדף הבית"
+msgstr "לעבור אל דף הבית"
 
 #: includes/class-wc-download-handler.php:62
 msgid "Invalid download."
@@ -5041,7 +5041,7 @@ msgstr "כמות היחידות של המוצר במלאי נמוכה"
 #: includes/class-wc-emails.php:330 includes/class-wc-emails.php:362
 #: includes/class-wc-emails.php:406
 msgid "Variation #%s of %s"
-msgstr "מאפיין מספר %s מתוך %s"
+msgstr "וריאציה מספר %s מתוך %s"
 
 #: includes/class-wc-emails.php:332 includes/class-wc-emails.php:364
 #: includes/class-wc-emails.php:408
@@ -5092,7 +5092,7 @@ msgstr "אנא הזן סיסמא בשנית."
 #: includes/class-wc-form-handler.php:192
 #: includes/class-wc-form-handler.php:815
 msgid "Passwords do not match."
-msgstr "הסיסמאות לא תואמות אחת את השנייה."
+msgstr "לא נמצאה התאמה בין הסיסמאות."
 
 #: includes/class-wc-form-handler.php:208
 msgid "Account details changed successfully."
@@ -5271,7 +5271,7 @@ msgstr "סכום ביניים סל הקניות:"
 
 #: includes/class-wc-order.php:924
 msgid "Cart Discount:"
-msgstr "הנחת סל הקניות:"
+msgstr "הנחת סל קניות:"
 
 #: includes/class-wc-order.php:931
 msgid "Shipping:"
@@ -5312,7 +5312,7 @@ msgstr "קטגוריות המוצרים"
 
 #: includes/class-wc-post-types.php:58
 msgid "Product Category"
-msgstr "קטגורית מוצר"
+msgstr "קטגוריית מוצר"
 
 #: includes/class-wc-post-types.php:59
 msgctxt "Admin menu name"
@@ -5595,7 +5595,7 @@ msgstr "הזמנה חדשה"
 
 #: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
 msgid "View Order"
-msgstr "הצג הזמנה"
+msgstr "הצגת הזמנה"
 
 #: includes/class-wc-post-types.php:294
 msgid "Search Orders"
@@ -5973,7 +5973,7 @@ msgid ""
 "Make your payment directly into our bank account. Please use your Order ID "
 "as the payment reference. Your order won't be shipped until the funds have "
 "cleared in our account."
-msgstr "בצע את התשלום שלך ישירות לחשבון הבנק שלנו. אנא השתמש במזהה ההזמנה שלך כסימוכין התשלום. ההשמנה שלך לא תישלח עד שהכספים יועברו לחשבון שלנו."
+msgstr "בצע את התשלום שלך ישירות לחשבון הבנק שלנו. אנא השתמש במזהה ההזמנה שלך כסימוכין התשלום. ההזמנה שלך לא תישלח עד שהכספים יועברו לחשבון שלנו."
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:86
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:72
@@ -6533,7 +6533,7 @@ msgstr "מצב המיסים"
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:113
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:87
 msgid "Taxable"
-msgstr "טעון מס"
+msgstr "חייב במס"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:114
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:88
@@ -6558,13 +6558,13 @@ msgid ""
 "Optional extra shipping options with additional costs (one per line): Option"
 " Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or "
 "item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
-msgstr ""
+msgstr "אפשרויות משלוח נוספות ואופציונליות עם עלויות נוספות (אחד עבור שורה): שם האפשרות | מחיר [+- אחוזים] | סוג עבור כל מחיר (הזמנה, סוג [class], או פריט)\nלדוגמא: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:131
 msgid ""
 "Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
 "or item)"
-msgstr ""
+msgstr "שם האפשרות | מחיר [+- אחוזים] | סוג עבור כל מחיר (הזמנה, סוג [class], או פריט)"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:134
 msgid "Additional Costs"
@@ -7135,7 +7135,7 @@ msgstr "אחוז הנחת המוצר"
 #: includes/wc-customer-functions.php:52
 msgid ""
 "An account is already registered with your email address. Please login."
-msgstr "נמצא כבר חשבון שרשום באמצעות כתובת המייל הזאת. אנא התחבר."
+msgstr "נמצא כבר חשבון שרשום באמצעות כתובת האימייל הזאת. יש להתחבר."
 
 #: includes/wc-customer-functions.php:61
 msgid "Please enter a valid account username."
@@ -7144,11 +7144,11 @@ msgstr "אנא הכנס שם משתמש קיים"
 #: includes/wc-customer-functions.php:65
 msgid ""
 "An account is already registered with that username. Please choose another."
-msgstr "נמצא כבר משתמש שרשום תחת שם המשתמש הזה. אנא בחר אחר."
+msgstr "קיים כבר משתמש שרשום תחת שם משתמש זה. יש לבחור שם אחר."
 
 #: includes/wc-customer-functions.php:85
 msgid "Please enter an account password."
-msgstr "אנא הכנס את סיסמת החשבון."
+msgstr "יש להזין את סיסמת החשבון."
 
 #: includes/wc-customer-functions.php:110
 msgid ""
@@ -7181,7 +7181,7 @@ msgstr "מוצרים חדשים תויגו %s"
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
-msgstr "זוהי חנות ההדגמה למטרות בדיקה - הזמנות לא ימולאו."
+msgstr "זוהי חנות ההדגמה למטרות בדיקה - לא יתקבלו הזמנות."
 
 #: includes/wc-template-functions.php:400
 msgid "Search Results: &ldquo;%s&rdquo;"
@@ -7219,7 +7219,7 @@ msgstr "הזמן שוב"
 #: includes/wc-template-functions.php:1649
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
-msgstr "בחר ארץ&hellip;"
+msgstr "בחירת ארץ&hellip;"
 
 #: includes/wc-template-functions.php:1656
 msgid "Update country"
@@ -7261,7 +7261,7 @@ msgstr "עגלת WooConmmerce"
 #: includes/widgets/class-wc-widget-cart.php:29
 #: includes/widgets/class-wc-widget-cart.php:56
 msgid "Cart"
-msgstr "סל הקניות"
+msgstr "סל קניות"
 
 #: includes/widgets/class-wc-widget-cart.php:35
 msgid "Hide if cart is empty"
@@ -7313,7 +7313,7 @@ msgstr "תכונה"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:81
 msgid "Display type"
-msgstr "סוג התצוגה"
+msgstr "סוג תצוגה"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:83
 msgid "List"
@@ -7438,7 +7438,7 @@ msgstr "מספר מוצרים להציג"
 
 #: includes/widgets/class-wc-widget-products.php:41
 msgid "Show"
-msgstr "הצג"
+msgstr "הצגה"
 
 #: includes/widgets/class-wc-widget-products.php:43
 msgid "All Products"
@@ -7501,7 +7501,7 @@ msgstr "הצגת רשימה של הסקירות האחרונות שלך באתר
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:23
 msgid "WooCommerce Recent Reviews"
-msgstr "סקירות אחרונות"
+msgstr "חוות דעת אחרונות"
 
 #: includes/widgets/class-wc-widget-recent-reviews.php:27
 msgid "Recent Reviews"
@@ -7738,7 +7738,7 @@ msgstr "כמות"
 
 #: templates/checkout/form-pay.php:21
 msgid "Totals"
-msgstr "סכום"
+msgstr "סך הכל"
 
 #: templates/checkout/form-pay.php:54
 msgid "Payment"
@@ -7808,7 +7808,7 @@ msgstr "אנא תנסה שוב לבצע את הרכישה."
 
 #: templates/checkout/thankyou.php:28 templates/myaccount/my-orders.php:71
 msgid "Pay"
-msgstr "שלם"
+msgstr "תשלום"
 
 #: templates/checkout/thankyou.php:36 templates/checkout/thankyou.php:67
 msgid "Thank you. Your order has been received."
@@ -8016,7 +8016,7 @@ msgstr "הודעות שתוייגו &ldquo;"
 
 #: templates/global/breadcrumb.php:198
 msgid "Author:"
-msgstr "מאת:"
+msgstr "מחבר:"
 
 #: templates/global/breadcrumb.php:203
 msgid "Page"
@@ -8236,7 +8236,7 @@ msgstr[1] "%s עבור %s פריטים"
 
 #: templates/myaccount/my-orders.php:78
 msgid "Cancel"
-msgstr "בטל"
+msgstr "ביטול"
 
 #: templates/myaccount/my-orders.php:84
 msgid "View"
@@ -8410,7 +8410,7 @@ msgstr "השאר תגובה ל%s"
 
 #: templates/single-product-reviews.php:64
 msgid "Email"
-msgstr "מייל"
+msgstr "אימייל"
 
 #: templates/single-product-reviews.php:67
 msgid "Submit"

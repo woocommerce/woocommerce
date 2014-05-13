@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.1.8 Admin\n"
+"Project-Id-Version: WooCommerce 2.1.9 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-04-29 14:27:45+00:00\n"
+"POT-Creation-Date: 2014-05-13 15:19:41+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -860,7 +860,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-reports.php:89
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:266
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
 #: includes/admin/reports/class-wc-report-stock.php:25
 #: includes/admin/reports/class-wc-report-stock.php:26
 msgid "Stock"
@@ -1740,6 +1740,7 @@ msgid "Show all types"
 msgstr ""
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:758
 #: includes/admin/settings/class-wc-settings-checkout.php:229
 #: includes/admin/settings/class-wc-settings-shipping.php:205
 msgid "Status"
@@ -2106,7 +2107,7 @@ msgstr ""
 msgid "How many times this coupon can be used by an invidual user. Uses billing email for guests, and user ID for logged in users."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:230
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:231
 msgid "Coupon code already exists - customers will use the latest coupon with this code."
 msgstr ""
 
@@ -2356,6 +2357,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:31
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:95
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:775
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -2412,6 +2414,7 @@ msgid "Downloadable products give access to a file upon purchase."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:90
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:772
 #: includes/admin/settings/class-wc-settings-products.php:41
 msgid "Inventory"
 msgstr ""
@@ -2528,7 +2531,7 @@ msgid "Leave blank for unlimited re-downloads."
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:228
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:774
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:783
 msgid "Download Expiry"
 msgstr ""
 
@@ -2672,7 +2675,7 @@ msgid "Enable this to only allow one of this item to be bought in a single order
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:347
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:779
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:97
 #: includes/admin/views/html-bulk-edit-product.php:103
 #: includes/admin/views/html-quick-edit-product.php:84
@@ -2688,21 +2691,21 @@ msgid "Dimensions"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:354
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:770
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:776
 #: includes/admin/views/html-bulk-edit-product.php:143
 #: includes/admin/views/html-quick-edit-product.php:97
 msgid "Length"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:355
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:771
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:777
 #: includes/admin/views/html-bulk-edit-product.php:144
 #: includes/admin/views/html-quick-edit-product.php:98
 msgid "Width"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:356
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:772
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:778
 #: includes/admin/views/html-bulk-edit-product.php:145
 #: includes/admin/views/html-quick-edit-product.php:99
 msgid "Height"
@@ -2810,80 +2813,92 @@ msgstr ""
 msgid "Learn more"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:756
-msgid "Bulk edit:"
-msgstr ""
-
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:758
-msgid "Toggle &quot;Enabled&quot;"
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:757
+msgid "Choose a field to bulk edit&hellip;"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:759
-msgid "Toggle &quot;Downloadable&quot;"
+msgid "Toggle &quot;Enabled&quot;"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:760
-msgid "Toggle &quot;Virtual&quot;"
+msgid "Toggle &quot;Downloadable&quot;"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:761
-msgid "Delete all variations"
+msgid "Toggle &quot;Virtual&quot;"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
-msgid "Prices"
-msgstr ""
-
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
-msgid "Prices increase by (fixed amount or %)"
+msgid "Delete all variations"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:764
-msgid "Prices decrease by (fixed amount or %)"
+msgid "Pricing"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
-msgid "Sale prices"
+msgid "Prices"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
-msgid "Sale prices increase by (fixed amount or %)"
+msgid "Prices increase by (fixed amount or %)"
 msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
+msgid "Prices decrease by (fixed amount or %)"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
+msgid "Sale prices"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
+msgid "Sale prices increase by (fixed amount or %)"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:770
 msgid "Sale prices decrease by (fixed amount or %)"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:781
+msgid "Downloadable products"
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:782
 msgid "Download limit"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:777
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:787
 #: includes/admin/views/html-report-by-date.php:31
 msgid "Go"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:872
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:882
 msgid "Add Variation"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:874
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:884
 msgid "Link all variations"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:876
-msgid "Default selections:"
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:886
+msgid "Defaults"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:889
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:886
+msgid "These are the attributes that will be pre-selected on the frontend."
+msgstr ""
+
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:899
 msgid "No default"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:993
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1003
 msgid "Product SKU must be unique."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1363
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1373
 msgid "Variation #%s of %s"
 msgstr ""
 
@@ -3081,6 +3096,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-shipping.php:235
 #: includes/admin/views/html-admin-page-status-tools.php:26
 #: includes/admin/views/html-admin-page-status-tools.php:37
+#: includes/admin/views/html-admin-page-status-tools.php:48
 msgid "Enabled"
 msgstr ""
 
@@ -4943,16 +4959,16 @@ msgstr ""
 msgid "Templates"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:484
+#: includes/admin/views/html-admin-page-status-report.php:486
 msgid "<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of date. The core version is %s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:495
-#: includes/admin/views/html-admin-page-status-report.php:501
+#: includes/admin/views/html-admin-page-status-report.php:497
+#: includes/admin/views/html-admin-page-status-report.php:503
 msgid "Template Overrides"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:502
+#: includes/admin/views/html-admin-page-status-report.php:504
 msgid "No overrides present in theme."
 msgstr ""
 
@@ -4962,22 +4978,30 @@ msgid "Tools"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-tools.php:23
-msgid "Template Debug Mode"
+msgid "Shipping Debug Mode"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-tools.php:29
-msgid "This tool will disable template overrides for logged-in administrators for debugging purposes."
+msgid "This tool will disable shipping rate caching."
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-tools.php:34
-msgid "Remove post types on uninstall"
+msgid "Template Debug Mode"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-tools.php:40
+msgid "This tool will disable template overrides for logged-in administrators for debugging purposes."
+msgstr ""
+
+#: includes/admin/views/html-admin-page-status-tools.php:45
+msgid "Remove post types on uninstall"
+msgstr ""
+
+#: includes/admin/views/html-admin-page-status-tools.php:51
 msgid "This tool will delete all product and order post data when uninstalling via Plugins > Delete."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-tools.php:47
+#: includes/admin/views/html-admin-page-status-tools.php:58
 msgid "Save Changes"
 msgstr ""
 
