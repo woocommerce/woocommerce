@@ -4933,7 +4933,7 @@ msgstr "¡El cupón no existe!"
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
-msgstr "Lo sentimos, parece que el cupón \"%s\" es inválido - ha sido eliminado de tu orden. "
+msgstr "Lo sentimos, parece que el cupón \"%s\" es inválido - ha sido eliminado de tu pedido. "
 
 #: includes/class-wc-coupon.php:608
 msgid ""
@@ -5740,7 +5740,7 @@ msgstr "El pedido se ha completado"
 
 #: includes/emails/class-wc-email-customer-completed-order.php:30
 msgid "Your {site_title} order from {order_date} is complete"
-msgstr "atu pedido de {site_title} del {order_date} está completo."
+msgstr "Tu pedido de {site_title} del {order_date} se ha completado."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:39
 msgid "Your order is complete - download your files"
@@ -5749,7 +5749,7 @@ msgstr "Tu pedido se ha completado - descarga tus archivos"
 #: includes/emails/class-wc-email-customer-completed-order.php:40
 msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
-msgstr "Tu pedido de {site_title} del {order_date} está completo - descarga tus archivos."
+msgstr "Tu pedido de {site_title} del {order_date} se ha completado - descarga tus archivos."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:146
 #: includes/emails/class-wc-email-new-order.php:133
@@ -5849,7 +5849,7 @@ msgstr "Esto es una notificación de pedido que se envía al cliente después de
 
 #: includes/emails/class-wc-email-customer-processing-order.php:29
 msgid "Thank you for your order"
-msgstr "Gracias por tu orden"
+msgstr "Gracias por tu pedido"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:30
 msgid "Your {site_title} order receipt from {order_date}"
@@ -6455,7 +6455,7 @@ msgstr "Pedido anulado"
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:793
 msgid ""
 "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
-msgstr "Orden %s ha sido marcada como en-espera por una anulación - Codigo de razón de PayPal: %s"
+msgstr "El pedido %s ha sido marcado como en-espera por una anulación - Código de razón de PayPal: %s"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:796
 msgid "Payment for order %s reversed"
@@ -6919,15 +6919,15 @@ msgstr "Añadir una nueva forma de pago."
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:54
 msgid "Please enter a valid order ID"
-msgstr "Por favor, ingrese un ID de Orden válido"
+msgstr "Por favor, ingrese un ID de Pedido válido"
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:58
 msgid "Please enter a valid order email"
-msgstr "Por favor, ingrese un email de orden válido"
+msgstr "Por favor, ingrese un email de pedido válido"
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:77
 msgid "Sorry, we could not find that order id in our database."
-msgstr "Lamentablemente no pudimos encontrar ese ID de orden en nuestra base de datos."
+msgstr "Lamentablemente no pudimos encontrar ese ID de pedido en nuestra base de datos."
 
 #: includes/wc-cart-functions.php:25
 msgid "This product is protected and cannot be purchased."
@@ -7914,7 +7914,7 @@ msgstr "Para tu referencia, los detalles de tu pedido se muestran a continuació
 msgid ""
 "Your order has been received and is now being processed. Your order details "
 "are shown below for your reference:"
-msgstr "Tu orden ha sido recibida y está siendo procesada. Los detalles de tu orden son mostrados para tu referencia:"
+msgstr "Tu pedido ha sido recibido y está siendo procesado. Los detalles de tu pedido se muestran más abajo para tu referencia:"
 
 #: templates/emails/customer-reset-password.php:14
 #: templates/emails/plain/customer-reset-password.php:13
@@ -7971,7 +7971,7 @@ msgstr "Descarga"
 #: templates/emails/plain/customer-note.php:27
 #: templates/emails/plain/customer-processing-order.php:19
 msgid "Order number: %s"
-msgstr "Orden número: %s"
+msgstr "Pedido número: %s"
 
 #: templates/emails/plain/admin-new-order.php:20
 msgid "Order link: %s"
@@ -8170,7 +8170,7 @@ msgstr "Anti-spam"
 msgid ""
 "Lost your password? Please enter your username or email address. You will "
 "receive a link to create a new password via email."
-msgstr "¿Perdiste tu constraseña? Por favor ingresa tu nombre de usuario o correo electronico. Recibirás un enlace para crear una contraseña nueva por correo electronico. "
+msgstr "¿Perdiste tu contraseña? Por favor ingresa tu nombre de usuario o correo electronico. Recibirás un enlace para crear una contraseña nueva por correo electronico. "
 
 #: templates/myaccount/form-lost-password.php:28
 msgid "Enter a new password below."
@@ -8307,7 +8307,7 @@ msgstr "Teléfono:"
 
 #: templates/order/tracking.php:18
 msgid "Order %s which was made %s has the status &ldquo;%s&rdquo;"
-msgstr "Orden %s que fue realizada %s está en estado &ldquo;%s&rdquo;"
+msgstr "Pedido %s que fue realizado %s está en estado &ldquo;%s&rdquo;"
 
 #: templates/order/tracking.php:18
 msgid "ago"
