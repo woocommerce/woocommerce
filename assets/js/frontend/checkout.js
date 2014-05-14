@@ -93,11 +93,7 @@ jQuery( function( $ ) {
 		update_checkout();
 	});
 
-	$( 'p.password, form.login, .checkout_coupon, div.shipping_address' ).hide();
-
-	$( 'input.show_password' ).change( function() {
-		$( 'p.password' ).slideToggle();
-	});
+	$( '.checkout_coupon, div.shipping_address' ).hide();
 
 	$( 'a.showlogin' ).click( function() {
 		$( 'form.login' ).slideToggle();
