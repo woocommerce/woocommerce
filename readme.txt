@@ -145,6 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - fixed WC_Product_Variable::set_stock() compatibility with WC_Product::set_stock().
 * Fix - Fix notice when not scanning any files in system status.
 * Fix - Made wc_get_product_terms support custom menu_order by using get_terms and an include.
+* Fix - Correct character 3 vaildation for UK postcodes.
 * Tweak - Add a tip for default selections, and use opt groups for the long bulk edit list.
 * Tweak - Option to toggle enable_for_virtual for COD, rather than just doing it.
 * Dev - Introduce `woocommerce_coupon_data_panels` action.
