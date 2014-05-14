@@ -1,12 +1,13 @@
 # 
 # Translators:
+# avarx <a.vonarx@frappant.ch>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:51+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-05-14 06:25+0000\n"
+"Last-Translator: avarx <a.vonarx@frappant.ch>\n"
 "Language-Team: German (Switzerland) (http://www.transifex.com/projects/p/woocommerce/language/de_CH/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -438,7 +439,7 @@ msgstr "(Kopieren)"
 
 #: includes/admin/class-wc-admin-help.php:38
 msgid "Documentation"
-msgstr ""
+msgstr "Dokumentation"
 
 #: includes/admin/class-wc-admin-help.php:41
 msgid ""
@@ -448,7 +449,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "WooCommerce Documentation"
-msgstr ""
+msgstr "WooCommerce Dokumentation"
 
 #: includes/admin/class-wc-admin-help.php:43
 msgid "Developer API Docs"
@@ -456,7 +457,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:49
 msgid "Support"
-msgstr ""
+msgstr "Support"
 
 #: includes/admin/class-wc-admin-help.php:52
 msgid ""
@@ -489,7 +490,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:62
 msgid "Found a bug?"
-msgstr ""
+msgstr "Fehler gefunden?"
 
 #: includes/admin/class-wc-admin-help.php:65
 msgid ""
@@ -502,7 +503,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:67
 msgid "Report a bug"
-msgstr ""
+msgstr "Fehler melden"
 
 #: includes/admin/class-wc-admin-help.php:73
 msgid "For more information:"
@@ -510,7 +511,7 @@ msgstr "Für weitere Informationen:"
 
 #: includes/admin/class-wc-admin-help.php:74
 msgid "About WooCommerce"
-msgstr ""
+msgstr "Über WooCommerce"
 
 #: includes/admin/class-wc-admin-help.php:75
 msgid "Project on WordPress.org"
@@ -841,19 +842,19 @@ msgstr "Versandanschrift des Kunden"
 
 #: includes/admin/class-wc-admin-profile.php:197
 msgid "Read"
-msgstr ""
+msgstr "Lesen"
 
 #: includes/admin/class-wc-admin-profile.php:198
 msgid "Write"
-msgstr ""
+msgstr "Schreiben"
 
 #: includes/admin/class-wc-admin-profile.php:199
 msgid "Read/Write"
-msgstr ""
+msgstr "Lesen/Schreiben"
 
 #: includes/admin/class-wc-admin-profile.php:207
 msgid "WooCommerce API Keys"
-msgstr ""
+msgstr "WooCommerce API Keys"
 
 #: includes/admin/class-wc-admin-profile.php:211
 msgid "Generate API Key"
@@ -869,7 +870,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-profile.php:215
 msgid "Permissions:"
-msgstr ""
+msgstr "Berechtigungen:"
 
 #: includes/admin/class-wc-admin-profile.php:219
 msgid "Revoke API Key"
@@ -1227,7 +1228,7 @@ msgstr "Danksagungen"
 
 #: includes/admin/class-wc-admin-welcome.php:225
 msgid "Translators"
-msgstr ""
+msgstr "Übersetzer"
 
 #: includes/admin/class-wc-admin-welcome.php:243
 msgid "A new RESTful API developers will &#10084;"
@@ -1323,7 +1324,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:283
 msgid "Google Analytics"
-msgstr ""
+msgstr "Google Analytics"
 
 #: includes/admin/class-wc-admin-welcome.php:284
 msgid "Add Google Analytics eCommerce tracking to your WooCommerce store."
@@ -1335,7 +1336,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-welcome.php:300
 #: includes/admin/class-wc-admin-welcome.php:305
 msgid "Download"
-msgstr ""
+msgstr "Download"
 
 #: includes/admin/class-wc-admin-welcome.php:288
 msgid "Piwik"
@@ -2726,7 +2727,7 @@ msgstr ""
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:237
 msgid "Music"
-msgstr ""
+msgstr "Musik"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:249
 #: includes/admin/views/html-bulk-edit-product.php:58
@@ -3181,7 +3182,7 @@ msgstr ""
 #: includes/admin/post-types/meta-boxes/views/html-product-download.php:4
 #: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:3
 msgid "http://"
-msgstr ""
+msgstr "http://"
 
 #: includes/admin/post-types/meta-boxes/views/html-product-download.php:5
 #: includes/admin/post-types/meta-boxes/views/html-product-variation-download.php:4
@@ -3312,7 +3313,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:46
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:46
 msgid "Year"
-msgstr ""
+msgstr "Jahr"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:96
 #: includes/admin/reports/class-wc-report-customers.php:146
@@ -3322,7 +3323,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:47
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:47
 msgid "Last Month"
-msgstr ""
+msgstr "Letzten Monat"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:97
 #: includes/admin/reports/class-wc-report-customers.php:147
@@ -3332,7 +3333,7 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:48
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:48
 msgid "This Month"
-msgstr ""
+msgstr "Diesen Monat"
 
 #: includes/admin/reports/class-wc-report-coupon-usage.php:98
 #: includes/admin/reports/class-wc-report-customers.php:148
@@ -3506,7 +3507,7 @@ msgstr "mehrwertsteuerfrei"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:177
 msgid "All"
-msgstr ""
+msgstr "Alle"
 
 #: includes/admin/reports/class-wc-report-sales-by-category.php:237
 msgid "&larr; Choose a category to view stats"
@@ -4076,11 +4077,11 @@ msgstr "Dies ist ein Demo-Shop, nur für Testzwecke &mdash; Bestellungen werden 
 
 #: includes/admin/settings/class-wc-settings-general.php:103
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #: includes/admin/settings/class-wc-settings-general.php:104
 msgid "Enable the REST API"
-msgstr ""
+msgstr "REST API einschalten"
 
 #: includes/admin/settings/class-wc-settings-general.php:112
 msgid "Currency Options"
@@ -4643,7 +4644,7 @@ msgstr "Versandmethoden"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:204
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:215
 msgid ""
@@ -4931,7 +4932,7 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-addons.php:12
 msgid "Popular"
-msgstr ""
+msgstr "Beliebt"
 
 #: includes/admin/views/html-admin-page-addons.php:13
 msgid "Gateways"
@@ -5205,11 +5206,11 @@ msgstr "Produkttypen"
 
 #: includes/admin/views/html-admin-page-status-report.php:384
 msgid "Theme"
-msgstr ""
+msgstr "Theme"
 
 #: includes/admin/views/html-admin-page-status-report.php:421
 msgid "Theme Name"
-msgstr ""
+msgstr "Theme Name"
 
 #: includes/admin/views/html-admin-page-status-report.php:427
 msgid "Theme Version"
