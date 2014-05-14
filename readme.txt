@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.10 - XXX =
+
 = 2.1.9 - 14/05/2014 =
 * Fix - fix case-insensitive matching for coupon posts with uppercase chars.
 * Fix - Make the welcome page RTL compatible.
