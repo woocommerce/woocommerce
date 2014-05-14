@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-28 13:57+0000\n"
+"PO-Revision-Date: 2014-05-13 13:09+0000\n"
 "Last-Translator: TRFlavourart <vaporsbazar@gmail.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/projects/p/woocommerce/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -6248,14 +6248,14 @@ msgstr "İsteğe bağlı"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:169
 msgid "Invoice Prefix"
-msgstr "Fatura Ön-eki"
+msgstr "Fatura Öneki"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:171
 msgid ""
 "Please enter a prefix for your invoice numbers. If you use your PayPal "
 "account for multiple stores ensure this prefix is unique as PayPal will not "
 "allow orders with the same invoice number."
-msgstr "Faturalarınızın seri numarasını girin. Eğer PayPal hesabınızı birden fazla mağaza için kullanıyorsanız aynı seri numarası ile satış yapmanıza izin verilmez."
+msgstr "Fatura numaraları için bir önek girin. Eğer PayPal hesabınızı birden çok mağaza için kullanıyorsanız, -PayPal aynı fatura numarasına sahip siparişlere izin vermeyeceği için- girdiğiniz önekin benzersiz olduğundan emin olun."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:176
 msgid "Payment Action"
@@ -6287,7 +6287,7 @@ msgstr "Form Gönderme Yöntemini Kullan."
 msgid ""
 "Enable this to post order data to PayPal via a form instead of using a "
 "redirect/querystring."
-msgstr "Paypal-e Sipariş Bilgilerini, yönlendirme veya sorgu ifadeleri yerine, bir Form aracılığı ile göndermek için bu seçeneği etkinleştirin."
+msgstr "Sipariş bilgilerini PayPal'a, bir yönlendirme / sorgu satırı kullanarak göndermek yerine bir form aracılığıyla göndermek için bu seçeneği etkinleştirin."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:194
 msgid "Page Style"
@@ -6309,13 +6309,13 @@ msgstr "Kargo Detayları"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:209
 msgid "Send shipping details to PayPal instead of billing."
-msgstr "PayPal-e Fatura Adresini değil Kargo Adresini gönder."
+msgstr "Paypal'a fatura adresi yerine kargo adresini gönder."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:210
 msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
-msgstr "PayPal sadece tek 1 adres bilgisi gönderilmesine izin verir. Kargo Etiketleri için PayPal detaylarını kullanıyorsanız, Fatura Adresi yerine Kargo Adresini göndermek isteyebilirsiniz."
+msgstr "PayPal sadece 1 adres bilgisi gönderilmesine izin verir. Kargo etiketleri için PayPal kullanıyorsanız, fatura adresi yerine kargo adresini göndermeyi tercih edebilirsiniz."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:214
 msgid "Address override"
@@ -6349,7 +6349,7 @@ msgstr "PayPal sandbox Etkinleştir"
 msgid ""
 "PayPal sandbox can be used to test payments. Sign up for a developer account"
 " <a href=\"%s\">here</a>."
-msgstr "Deneme ödemeleri/işlemleri için PayPal sandbox kullanabilir. <a href=\"%s\">Buradan</a> bir Geliştirici hesabı oluşturabilirsiniz."
+msgstr "Deneme ödemeleri için PayPal sandbox kullanabilir. <a href=\"%s\">Buraya tıklayarak</a> bir Geliştirici hesabı oluşturabilirsiniz."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:233
 msgid "Debug Log"
@@ -8022,7 +8022,7 @@ msgstr "Sayfa"
 #: templates/global/form-login.php:22
 #: templates/myaccount/form-lost-password.php:24
 msgid "Username or email"
-msgstr "Kullanıcı Adı veya ePosta"
+msgstr "Kullanıcı adı veya e-posta adresi"
 
 #: templates/global/form-login.php:26 templates/myaccount/form-login.php:36
 #: templates/myaccount/form-login.php:84
@@ -8158,7 +8158,7 @@ msgstr "Anti-spam"
 msgid ""
 "Lost your password? Please enter your username or email address. You will "
 "receive a link to create a new password via email."
-msgstr "Şifrenizi mi Unuttunuz? Lütfen Kullanıcı Adı veya E-posta'nızı giriniz. Yeni şifre oluşturmanız için kayıtlı adresinize bir e-posta gönderilecektir."
+msgstr "Şifrenizi mi kaybettiniz? Lütfen kullanıcı adınızı veya e-posta adresinizi girin. Yeni bir şifre oluşturmanız için e-posta adresinize bir bağlantı gönderilecektir."
 
 #: templates/myaccount/form-lost-password.php:28
 msgid "Enter a new password below."

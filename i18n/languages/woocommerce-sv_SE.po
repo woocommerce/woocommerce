@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-12 10:35+0000\n"
+"PO-Revision-Date: 2014-05-13 18:43+0000\n"
 "Last-Translator: sennbrink <konsult@sennbrink.se>\n"
 "Language-Team: Swedish (Sweden) (http://www.transifex.com/projects/p/woocommerce/language/sv_SE/)\n"
 "MIME-Version: 1.0\n"
@@ -8319,7 +8319,7 @@ msgstr "Rensa"
 
 #: templates/single-product/add-to-cart/variable.php:103
 msgid "This product is currently out of stock and unavailable."
-msgstr "Den här produkten är för nuvarande slut i lager och ej tillgänglig."
+msgstr "Den här produkten är just nu slut i lager och ej tillgänglig."
 
 #: templates/single-product/meta.php:23
 msgid "SKU:"
@@ -8365,7 +8365,7 @@ msgstr "Betygsatt %d av 5"
 
 #: templates/single-product/review.php:34
 msgid "Your comment is awaiting approval"
-msgstr "Dinn kommentar väntar på godkännande"
+msgstr "Din kommentar väntar på godkännande"
 
 #: templates/single-product/review.php:43
 msgid "verified owner"
@@ -8403,7 +8403,7 @@ msgstr "Bli den första att skriva en recension"
 
 #: templates/single-product-reviews.php:58
 msgid "Leave a Reply to %s"
-msgstr "Lämna en kommentar till %s"
+msgstr "Lämna en kommentar på %s"
 
 #: templates/single-product-reviews.php:64
 msgid "Email"

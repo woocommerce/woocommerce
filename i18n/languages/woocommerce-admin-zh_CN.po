@@ -4,13 +4,14 @@
 # guxin <info@guxinweb.com>, 2014
 # tetsu <waruii@msn.com>, 2014
 # xepin <xepinchan@qq.com>, 2014
+# michelle_zhang <michelle_zhangi@163.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-04-14 08:54+0000\n"
-"Last-Translator: xepin <xepinchan@qq.com>\n"
+"PO-Revision-Date: 2014-05-07 13:07+0000\n"
+"Last-Translator: michelle_zhang <michelle_zhangi@163.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/projects/p/woocommerce/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2220,7 +2221,7 @@ msgstr "无限制"
 msgid ""
 "List of emails to check against the customer's billing email when an order "
 "is placed."
-msgstr ""
+msgstr "下单后，会对照客户的账单检查一系列的电子邮件"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "Usage limit per coupon"
@@ -2497,7 +2498,7 @@ msgstr "添加备注"
 msgid ""
 "Add a note for your reference, or add a customer note (the user will be "
 "notified)."
-msgstr ""
+msgstr "加入一条注释以做参考，或者加入一条客户备注(用户即可识别)"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-notes.php:68
 msgid "Customer note"
@@ -3441,7 +3442,7 @@ msgstr "这段时间共有 %s 个注册"
 
 #: includes/admin/reports/class-wc-report-customers.php:90
 msgid "Customer Sales"
-msgstr ""
+msgstr "客户销量"
 
 #: includes/admin/reports/class-wc-report-customers.php:91
 msgid "Guest Sales"
@@ -3644,11 +3645,11 @@ msgstr ""
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:170
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:161
 msgid "No taxes found in this period"
-msgstr ""
+msgstr "这段时间没有产生税"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:113
 msgid "Period"
-msgstr ""
+msgstr "期间"
 
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:115
 msgid "Total Sales"
@@ -3700,7 +3701,7 @@ msgstr "我的账户页"
 #: includes/admin/settings/class-wc-settings-checkout.php:113
 #: includes/admin/settings/class-wc-settings-checkout.php:124
 msgid "Page contents:"
-msgstr ""
+msgstr "页面的内容:"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:56
 msgid "My Account Endpoints"
@@ -3857,7 +3858,7 @@ msgstr "结账页"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:134
 msgid "Terms and Conditions"
-msgstr ""
+msgstr "条款和规定"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:135
 msgid ""

@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-03-25 08:51+0000\n"
+"PO-Revision-Date: 2014-05-12 23:14+0000\n"
 "Last-Translator: Adrian Dimitrov <dimitrov.adrian@gmail.com>\n"
 "Language-Team: Bulgarian (Bulgaria) (http://www.transifex.com/projects/p/woocommerce/language/bg_BG/)\n"
 "MIME-Version: 1.0\n"
@@ -166,7 +166,7 @@ msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
-msgstr "Сигурни ли сте, че желаете да свържете всички варияции? Това ще създаде нови варияции за всички възможни комбинации на вариращите атрибути (ограничение 50 на опит)"
+msgstr "Сигурни ли сте, че желаете да свържете всички вариации? Това ще създаде нови вариации за всички възможни комбинации на вариращите атрибути (ограничение 50 на опит)"
 
 #: includes/admin/class-wc-admin-assets.php:204
 msgid "Enter a value"
@@ -178,7 +178,7 @@ msgstr "Въведете стойност (точна или %)"
 
 #: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
-msgstr "Сигурни ли сте, че желаете да изтриете всички варияции? Тази операция не може да бъде отменена."
+msgstr "Сигурни ли сте, че желаете да изтриете всички вариации? Тази операция не може да бъде отменена."
 
 #: includes/admin/class-wc-admin-assets.php:207
 msgid "Last warning, are you sure?"
@@ -192,7 +192,7 @@ msgstr "Избор на изображение"
 
 #: includes/admin/class-wc-admin-assets.php:209
 msgid "Set variation image"
-msgstr "Задай изображение на варияцията"
+msgstr "Задай изображение на вариацията"
 
 #: includes/admin/class-wc-admin-assets.php:210
 msgid "variation added"
@@ -588,12 +588,12 @@ msgstr "URL основа за атрибутите в магазина"
 #: includes/admin/class-wc-admin-permalink-settings.php:65
 msgctxt "slug"
 msgid "product-category"
-msgstr "категория"
+msgstr "produkt-kategoria"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:75
 msgctxt "slug"
 msgid "product-tag"
-msgstr "продукт-етикет"
+msgstr "produkt-etiket"
 
 #: includes/admin/class-wc-admin-permalink-settings.php:93
 msgid ""
@@ -1209,7 +1209,7 @@ msgstr "Благодарим за инсталирането!"
 msgid ""
 "%s WooCommerce %s is more powerful, stable, and secure than ever before. We "
 "hope you enjoy it."
-msgstr "%s WooCommerce %s е вече по мощтен, стабилен и сигурен. Надяваме се да му се насладите."
+msgstr "%s WooCommerce %s е вече по-мощен, стабилен и сигурен. Надяваме се, да ви хареса."
 
 #: includes/admin/class-wc-admin-welcome.php:210
 msgid "Version %s"
@@ -1246,7 +1246,7 @@ msgid ""
 "<strong>Coupons</strong>, <strong>Customers</strong>, "
 "<strong>Products</strong> and <strong>Reports</strong> in both "
 "<code>XML</code> and <code>JSON</code> formats."
-msgstr "Направено върху основата на WooCommerce API, целящ се към разработчиците, новото  REST API позволява достъп до данни за <strong>поръчки</strong>, <strong>купони</strong>, <strong>клиенти</strong>, <strong>продукти</strong> и <strong>доклади</strong> в <code>XML</code> или <code>JSON</code> формати."
+msgstr "Направен върху основата на WooCommerce API, целящ се към разработчиците, новата REST API функционалност позволява достъп до данни за <strong>поръчки</strong>, <strong>купони</strong>, <strong>клиенти</strong>, <strong>продукти</strong> и <strong>доклади</strong> в <code>XML</code> или <code>JSON</code> формати."
 
 #: includes/admin/class-wc-admin-welcome.php:251
 msgid "Authentication to keep data secure"
@@ -1840,7 +1840,7 @@ msgstr "Тип купон"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
 #: includes/admin/reports/class-wc-report-sales-by-date.php:327
 msgid "Coupon amount"
-msgstr "Наличност на купони"
+msgstr "Стойност"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_coupon.php:80
 msgid "Description"
@@ -2094,7 +2094,7 @@ msgstr "Тип намаление:"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:66
 msgid "Value of the coupon."
-msgstr "Стойност на купона."
+msgstr "Стойността на купона спрямо избрания тип на намаление."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:69
 msgid "Allow free shipping"
@@ -2244,7 +2244,7 @@ msgstr "Колко пъти този купон може да бъде изпо�
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid "Limit usage to X items"
-msgstr "Ограничи ползването то Х продукта"
+msgstr "Ограничи ползването до Х продукта"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgctxt "placeholder"
@@ -2799,7 +2799,7 @@ msgid ""
 "Stock quantity. If this is a variable product this value will be used to "
 "control stock for all variations, unless you define stock at variation "
 "level."
-msgstr "Стокова наличност. Ако този продукт е вариращ, тази стойност ще се използва за контрол на всички варияции, докато не зададете наличността да бъде на ниво варияция."
+msgstr "Стокова наличност. Ако този продукт е вариращ, тази стойност ще се използва за контрол на всички вариации, докато не зададете наличността да бъде на ниво вариация."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:301
 #: includes/admin/reports/class-wc-report-stock.php:144
@@ -2991,7 +2991,7 @@ msgstr "Разрешаване на ревюта"
 msgid ""
 "Before adding variations, add and save some attributes on the "
 "<strong>Attributes</strong> tab."
-msgstr "Преди да добавите варияция, добавете и запишете някои атрибути от раздела<strong>Атрибути</strong>."
+msgstr "Преди да добавите вариация, добавете и запишете някои атрибути от раздела<strong>Атрибути</strong>."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:746
 msgid "Learn more"
@@ -3056,7 +3056,7 @@ msgstr "Добави вариация"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:871
 msgid "Link all variations"
-msgstr "Свързване на всички варияции"
+msgstr "Свързване на всички вариации"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:873
 msgid "Default selections:"
@@ -3133,7 +3133,7 @@ msgstr "Продукт ID:"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:13
 msgid "Variation ID:"
-msgstr "Варияция ID:"
+msgstr "Вариациа ID:"
 
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:16
 msgid "Product SKU:"
@@ -3202,7 +3202,7 @@ msgstr "Всички"
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:53
 msgid ""
 "Enter a SKU for this variation or leave blank to use the parent product SKU."
-msgstr "Въведи SKU на тази варияция или остави празно за да се използва оригиналното."
+msgstr "Въведи SKU на тази вариация или остави празно за да се използва оригиналното."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:64
 msgid "Stock Qty:"
@@ -3212,7 +3212,7 @@ msgstr "Брой наличност:"
 msgid ""
 "Enter a quantity to enable stock management at variation level, or leave "
 "blank to use the parent product's options."
-msgstr "Въведи брой за да се разрши управлението на наличности на ниво варияция, или остави празно за да се използват оригиналните настройки."
+msgstr "Въведи брой за да се разреши управлението на наличности на ниво вариация, или остави празно за да се използват оригиналните настройки."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:73
 msgid "Regular Price:"
@@ -3220,7 +3220,7 @@ msgstr "Редовна цена:"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:74
 msgid "Variation price (required)"
-msgstr "Цена на варияцията (задължително)"
+msgstr "Цена на вариацията (задължително)"
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Sale Price:"
@@ -3242,7 +3242,7 @@ msgstr "Крайна дата на разпродажбата:"
 msgid ""
 "Enter a weight for this variation or leave blank to use the parent product "
 "weight."
-msgstr "Въведете тежест на тази варияция или оставете празно за да се използва оригиналната."
+msgstr "Въведете тежест на тази вариация или оставете празно за да се използва оригиналната."
 
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:105
 msgid "Dimensions (L&times;W&times;H)"
@@ -3773,11 +3773,11 @@ msgstr "Позволи регистрациите"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:109
 msgid "Enable registration on the \"Checkout\" page"
-msgstr "Даване на възможност за регистрация при поръчка"
+msgstr "Позволяване на регистрацията по време на поръчка"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:118
 msgid "Enable registration on the \"My Account\" page"
-msgstr "Разрешаване регистрация от профилната страница"
+msgstr "Позволяване на регистрация от профилната страница"
 
 #: includes/admin/settings/class-wc-settings-accounts.php:127
 msgid "Display returning customer login reminder on the \"Checkout\" page"
@@ -3835,7 +3835,7 @@ msgstr "Позволяване на клиентите да поръчват б�
 
 #: includes/admin/settings/class-wc-settings-checkout.php:89
 msgid "Force secure checkout"
-msgstr "Винаги да се използва подсигурено поръчване"
+msgstr "Винаги да се използва подсигурено връзка при поръчка"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:95
 msgid ""
@@ -3854,7 +3854,7 @@ msgstr "Страница за поръчка"
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "checkout."
-msgstr "Нужно е тези страници да бъдат задавани, така, че WooCommerce да знае къде да изпрати клиентите за при поръчка."
+msgstr "Нужно е тези страници да бъдат зададени, така, че WooCommerce да знае къде да изпрати клиентите за при поръчка."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:112
 msgid "Cart Page"
@@ -4402,15 +4402,15 @@ msgstr "Подредба по цена (низх.)"
 
 #: includes/admin/settings/class-wc-settings-products.php:265
 msgid "Add to cart"
-msgstr "Купи"
+msgstr "Купуване"
 
 #: includes/admin/settings/class-wc-settings-products.php:266
 msgid "Redirect to the cart page after successful addition"
-msgstr "Прехвърли към страницата на количката след успешно добавяне на продукт"
+msgstr "Прехвърляне към страницата на количката след успешно добавяне на продукт"
 
 #: includes/admin/settings/class-wc-settings-products.php:274
 msgid "Enable AJAX add to cart buttons on archives"
-msgstr "Използвай AJAX при добавянето в количката"
+msgstr "Използване на AJAX при добавяне в количката"
 
 #: includes/admin/settings/class-wc-settings-products.php:286
 msgid "Weight Unit"
@@ -4963,7 +4963,7 @@ msgstr "Моля включете следната информация при �
 
 #: includes/admin/views/html-admin-page-status-report.php:3
 msgid "Get System Report"
-msgstr "Изтегляне на системен доклад"
+msgstr "Изтегляне на системния доклад"
 
 #: includes/admin/views/html-admin-page-status-report.php:11
 msgid "Environment"
@@ -5271,7 +5271,7 @@ msgstr "Запис на промените"
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"
-msgstr "Запиши промените"
+msgstr "Запазване на промените"
 
 #: includes/admin/views/html-bulk-edit-product.php:15
 #: includes/admin/views/html-bulk-edit-product.php:39

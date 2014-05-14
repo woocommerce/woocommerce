@@ -1,6 +1,7 @@
 # 
 # Translators:
 # adi88nugroho <adi88nugroho@gmail.com>, 2013
+# dhikkay14 <dhikkay14@gmail.com>, 2014
 # Muhammad Panji <sumodirjo@gmail.com>, 2013
 # ridhoyp <ridhoyp@gmail.com>, 2014
 # ridhoyp <ridhoyp@gmail.com>, 2014
@@ -9,8 +10,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:54+00:00\n"
-"PO-Revision-Date: 2014-04-10 05:30+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-05-01 08:16+0000\n"
+"Last-Translator: dhikkay14 <dhikkay14@gmail.com>\n"
 "Language-Team: Indonesian (Indonesia) (http://www.transifex.com/projects/p/woocommerce/language/id_ID/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -94,51 +95,51 @@ msgstr "Nilai Kolom"
 #: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:540
 msgid "Enter some text, or some attributes by pipe (|) separating values."
-msgstr ""
+msgstr "Masukkan beberapa teks, atau beberapa atribut dengan pipa (|) memisahkan nilai-nilai."
 
 #: includes/admin/class-wc-admin-assets.php:145
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:490
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:545
 msgid "Visible on the product page"
-msgstr ""
+msgstr "Terlihat pada halaman produk"
 
 #: includes/admin/class-wc-admin-assets.php:146
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:503
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:551
 msgid "Used for variations"
-msgstr ""
+msgstr "Digunakan untuk variasi"
 
 #: includes/admin/class-wc-admin-assets.php:147
 msgid "Enter a name for the new attribute term:"
-msgstr ""
+msgstr "Masukkan nama untuk jangka atribut baru:"
 
 #: includes/admin/class-wc-admin-assets.php:148
 msgid "Calculate totals based on order items, discounts, and shipping?"
-msgstr ""
+msgstr "Hitung total berdasarkan barang pesanan, diskon, dan pengiriman?"
 
 #: includes/admin/class-wc-admin-assets.php:149
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
-msgstr ""
+msgstr "Hitung baris pajak? Hal ini akan menghitung pajak berdasarkan negara pelanggan. Jika tidak ada penagihan / pengiriman diatur akan menggunakan negara tempat toko."
 
 #: includes/admin/class-wc-admin-assets.php:150
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
-msgstr ""
+msgstr "Salin informasi penagihan untuk pengiriman informasi? Ini akan menghapus semua informasi pengiriman saat ini masuk."
 
 #: includes/admin/class-wc-admin-assets.php:151
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
-msgstr ""
+msgstr "Memuat informasi penagihan pelanggan? Ini akan menghapus informasi penagihan setiap saat masuk."
 
 #: includes/admin/class-wc-admin-assets.php:152
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
-msgstr ""
+msgstr "Memuat informasi pengiriman pelanggan? Ini akan menghapus semua informasi pengiriman saat ini masuk."
 
 #: includes/admin/class-wc-admin-assets.php:153
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:168
@@ -146,11 +147,11 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:170
 #: includes/admin/views/html-quick-edit-product.php:128
 msgid "Featured"
-msgstr ""
+msgstr "Fitur"
 
 #: includes/admin/class-wc-admin-assets.php:156
 msgid "No customer selected"
-msgstr ""
+msgstr "Tidak ada pelanggan yang dipilih"
 
 #: includes/admin/class-wc-admin-assets.php:182
 msgid ""
@@ -168,57 +169,57 @@ msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
-msgstr ""
+msgstr "Apakah Anda yakin ingin menghubungkan semua variasi? Ini akan membuat variasi baru untuk setiap kemungkinan kombinasi variasi atribut (maksimal 50 per jumlah)."
 
 #: includes/admin/class-wc-admin-assets.php:204
 msgid "Enter a value"
-msgstr ""
+msgstr "Masukkan nilai"
 
 #: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value (fixed or %)"
-msgstr ""
+msgstr "Masukkan nilai (tetap atau%)"
 
 #: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
-msgstr ""
+msgstr "Apakah Anda yakin ingin menghapus semua variasi? Hal ini tidak dapat dibatalkan."
 
 #: includes/admin/class-wc-admin-assets.php:207
 msgid "Last warning, are you sure?"
-msgstr ""
+msgstr "Peringatan terakhir, apakah Anda yakin?"
 
 #: includes/admin/class-wc-admin-assets.php:208
 #: includes/admin/class-wc-admin-taxonomies.php:123
 #: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
-msgstr ""
+msgstr "Pilih gambar"
 
 #: includes/admin/class-wc-admin-assets.php:209
 msgid "Set variation image"
-msgstr ""
+msgstr "Mengatur variasi gambar"
 
 #: includes/admin/class-wc-admin-assets.php:210
 msgid "variation added"
-msgstr ""
+msgstr "variasi ditambahkan"
 
 #: includes/admin/class-wc-admin-assets.php:211
 msgid "variations added"
-msgstr ""
+msgstr "variasi ditambahkan"
 
 #: includes/admin/class-wc-admin-assets.php:212
 msgid "No variations added"
-msgstr ""
+msgstr "Tidak ada variasi ditambahkan"
 
 #: includes/admin/class-wc-admin-assets.php:213
 msgid "Are you sure you want to remove this variation?"
-msgstr ""
+msgstr "Apakah Anda yakin ingin menghapus variasi ini?"
 
 #: includes/admin/class-wc-admin-attributes.php:82
 msgid "Please, provide an attribute name, slug and type."
-msgstr ""
+msgstr "Tolong, berikan atribut nama, slug dan tipe."
 
 #: includes/admin/class-wc-admin-attributes.php:84
 msgid "Slug “%s” is too long (28 characters max). Shorten it, please."
-msgstr ""
+msgstr "Slug \"% s\" terlalu panjang (maksimal 28 karakter). Silahkan dipersingkat"
 
 #: includes/admin/class-wc-admin-attributes.php:86
 msgid ""

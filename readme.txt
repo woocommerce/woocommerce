@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.9
-Stable tag: 2.1.8
+Stable tag: 2.1.9
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -137,6 +137,32 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Introduce `woocommerce_thankyou_order_received_text` filter
 * Tweak - Added the possibility to translate the edit-address endpoint slug
 * Refactor - Update stock amounts with DB queries
+
+= 2.1.9 - 14/05/2014 =
+* Fix - fix case-insensitive matching for coupon posts with uppercase chars.
+* Fix - Make the welcome page RTL compatible.
+* Fix - Sanitize, but decode, flat rate shipping method ids. UTF-8 Friendly.
+* Fix - Stop sending line items to Mijireh. Like PayPal, Mijireh struggles with out prices including tax due to rounding errors. Since the validation cannot be disabled, its better to just send the order as 1 item. This will prevent rounding errors and payment failures. Prices excluding tax are unaffected.
+* Fix - Fix fee/coupon lines typo in REST API order response.
+* Fix - Fixes a fatal error when WC()->payment_gateways()->get_available_payment_gateways() is called in the admin.
+* Fix - is_available check in shipping for excluding countries was backwards.
+* Fix - Encoding of @ in download links.
+* Fix - Revise how variation attributes are deleted/updated. Prevents issues with WPE caching when you delete and then update right after.
+* Fix - Trim commas and empty lines off address formats.
+* Fix - defined a min value to cart quantity input.
+* Fix - Fix qty input styling in Firefox 29.
+* Fix - Use WP SEO class method rather than deprecated fn.
+* Fix - Cleaned up logic in email_instructions.
+* Fix - Prevent empty session data being stored until a cookie or session exists to retrieve it.
+* Fix - fixed WC_Product_Variable::set_stock() compatibility with WC_Product::set_stock().
+* Fix - Fix notice when not scanning any files in system status.
+* Fix - Made wc_get_product_terms support custom menu_order by using get_terms and an include.
+* Fix - Correct character 3 vaildation for UK postcodes.
+* Tweak - Add a tip for default selections, and use opt groups for the long bulk edit list.
+* Tweak - Option to toggle enable_for_virtual for COD, rather than just doing it.
+* Dev - Introduce `woocommerce_coupon_data_panels` action.
+* Dev - Add $package to is_available shipping method hooks.
+* Dev - Add tool for disabling shipping rate cache for debug.
 
 = 2.1.8 - 30/04/2014 =
 * Fix - Prevent saving duplicate skus in quick edit.
