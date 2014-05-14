@@ -155,7 +155,7 @@ class WC_Admin_Reports {
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );
 		$class = 'WC_Report_' . str_replace( '-', '_', $name );
 
-		include_once( apply_filters( 'wc_admin_reports_path', 'reports/class-wc-report-' . $name . '.php', $class ) );
+		include_once( apply_filters( 'wc_admin_reports_path', 'reports/class-wc-report-' . $name . '.php', $name, $class ) );
 
 		if ( ! class_exists( $class ) )
 			return;
