@@ -74,7 +74,7 @@ class WC_Comments {
 	public function exclude_order_comments_from_feed_join( $join ) {
 		global $wpdb;
 
-	    if ( ! strstr( $join, $wpdb->posts ) ) 
+	    if ( ! strstr( $join, $wpdb->posts ) )
 	    	$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
 
 	    return $join;
@@ -143,5 +143,3 @@ class WC_Comments {
 		}
 	}
 }
-
-new WC_Comments();

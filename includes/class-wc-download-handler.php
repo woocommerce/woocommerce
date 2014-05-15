@@ -152,7 +152,7 @@ class WC_Download_Handler {
 		// ...or serve it
 		$remote_file      = true;
 		$parsed_file_path = parse_url( $file_path );
-		
+
 		$wp_uploads       = wp_upload_dir();
 		$wp_uploads_dir   = $wp_uploads['basedir'];
 		$wp_uploads_url   = $wp_uploads['baseurl'];
@@ -186,7 +186,7 @@ class WC_Download_Handler {
 			$file_path   = str_replace( site_url( '/', 'http' ), ABSPATH, $file_path );
 
 		} elseif ( file_exists( ABSPATH . $file_path ) ) {
-			
+
 			/** Path needs an abspath to work */
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
@@ -346,5 +346,3 @@ class WC_Download_Handler {
 		return $status;
 	}
 }
-
-new WC_Download_Handler();

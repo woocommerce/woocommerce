@@ -25,7 +25,7 @@ class WC_HTTPS {
 				foreach ( $filters as $filter ) {
 					add_filter( $filter, 'WC_HTTPS::force_https_url' );
 				}
-				
+
 				add_filter( 'page_link', array( $this, 'force_https_page_link' ), 10, 2 );
 				add_action( 'template_redirect', array( $this, 'force_https_template_redirect' ) );
 
@@ -99,5 +99,3 @@ class WC_HTTPS {
 		}
 	}
 }
-
-new WC_HTTPS();

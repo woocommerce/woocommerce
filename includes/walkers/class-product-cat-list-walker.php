@@ -13,8 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class WC_Product_Cat_List_Walker extends Walker {
 
-	var $tree_type = 'product_cat';
-	var $db_fields = array ( 'parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
+	public $tree_type = 'product_cat';
+	public $db_fields = array ( 'parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
 
 	/**
 	 * @see Walker::start_lvl()

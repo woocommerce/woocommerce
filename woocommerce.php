@@ -112,6 +112,30 @@ final class WooCommerce {
 		// Include required files
 		$this->includes();
 
+                new WC_Install();
+                new WC_Download_Handler();
+                new WC_Comments();
+                new WC_Post_Data();
+
+		if ( is_admin() ) {
+                    new WC_Admin();
+		}
+
+		if ( defined( 'DOING_AJAX' ) ) {
+                    new WC_AJAX();
+		}
+
+		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+                    new WC_Template_Loader();
+                    new WC_Frontend_Scripts();
+                    new WC_Form_Handler();
+		}
+
+                $this->query = new WC_Query();
+                new WC_Post_types();
+                new WC_Cache_Helper();
+                new WC_HTTPS();
+
 		// Init API
 		$this->api = new WC_API();
 
@@ -235,96 +259,91 @@ final class WooCommerce {
 	 * Include required core files used in admin and on the frontend.
 	 */
 	private function includes() {
-		include_once( 'includes/wc-core-functions.php' );
-		include_once( 'includes/class-wc-install.php' );
-		include_once( 'includes/class-wc-download-handler.php' );
-		include_once( 'includes/class-wc-comments.php' );
-		include_once( 'includes/class-wc-post-data.php' );
-		include_once( 'includes/abstracts/abstract-wc-session.php' );
-		include_once( 'includes/class-wc-session-handler.php' );
+                // Include core functions
+		include_once( './includes/wc-core-functions.php' );
+                include_once( './includes/wc-cart-functions.php' );
+                include_once( './includes/wc-conditional-functions.php' );
+                include_once( './includes/wc-coupon-functions.php' );
+                include_once( './includes/wc-user-functions.php' );
+                include_once( './includes/wc-deprecated-functions.php' );
+                include_once( './includes/wc-formatting-functions.php' );
+                include_once( './includes/wc-notice-functions.php' );
+                include_once( './includes/wc-order-functions.php' );
+                include_once( './includes/wc-page-functions.php' );
+                include_once( './includes/wc-product-functions.php' );
+                include_once( './includes/wc-term-functions.php' );
+                include_once( './includes/wc-attribute-functions.php' );
 
-		if ( is_admin() ) {
-			include_once( 'includes/admin/class-wc-admin.php' );
-		}
+		include_once( './includes/class-wc-install.php' );
+		include_once( './includes/class-wc-download-handler.php' );
+		include_once( './includes/class-wc-comments.php' );
+		include_once( './includes/class-wc-post-data.php' );
+		include_once( './includes/abstracts/abstract-wc-session.php' );
+		include_once( './includes/class-wc-session-handler.php' );
 
-		if ( defined( 'DOING_AJAX' ) ) {
-			$this->ajax_includes();
-		}
+                include_once( './includes/admin/class-wc-admin.php' );
 
-		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
-			$this->frontend_includes();
-		}
+                include_once( './includes/class-wc-ajax.php' );
+
+                include_once( './includes/class-wc-template-loader.php' );		// Template Loader
+                include_once( './includes/class-wc-frontend-scripts.php' );		// Frontend Scripts
+                include_once( './includes/class-wc-form-handler.php' );			// Form Handlers
+                include_once( './includes/class-wc-cart.php' );					// The main cart class
+                include_once( './includes/class-wc-tax.php' );					// Tax class
+                include_once( './includes/class-wc-customer.php' ); 				// Customer class
+                include_once( './includes/class-wc-shortcodes.php' );				// Shortcodes class
 
 		// Query class
-		$this->query = include( 'includes/class-wc-query.php' );				// The main query class
+		include_once( './includes/class-wc-query.php' );				// The main query class
 
 		// Post types
-		include_once( 'includes/class-wc-post-types.php' );						// Registers post types
+		include_once( './includes/class-wc-post-types.php' );						// Registers post types
 
 		// API Class
-		include_once( 'includes/class-wc-api.php' );
+		include_once( './includes/class-wc-api.php' );
 
 		// Include abstract classes
-		include_once( 'includes/abstracts/abstract-wc-product.php' );			// Products
-		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
-		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
-		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' ); 	// A Payment gateway
-		include_once( 'includes/abstracts/abstract-wc-integration.php' );		// An integration with a service
+		include_once( './includes/abstracts/abstract-wc-product.php' );			// Products
+		include_once( './includes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
+		include_once( './includes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
+		include_once( './includes/abstracts/abstract-wc-payment-gateway.php' ); 	// A Payment gateway
+		include_once( './includes/abstracts/abstract-wc-integration.php' );		// An integration with a service
 
 		// Classes (used on all pages)
-		include_once( 'includes/class-wc-product-factory.php' );				// Product factory
-		include_once( 'includes/class-wc-countries.php' );						// Defines countries and states
-		include_once( 'includes/class-wc-integrations.php' );					// Loads integrations
-		include_once( 'includes/class-wc-cache-helper.php' );					// Cache Helper
-		include_once( 'includes/class-wc-https.php' );							// https Helper
+		include_once( './includes/class-wc-product-factory.php' );				// Product factory
+		include_once( './includes/class-wc-countries.php' );						// Defines countries and states
+		include_once( './includes/class-wc-integrations.php' );					// Loads integrations
+		include_once( './includes/class-wc-cache-helper.php' );					// Cache Helper
+
+                include_once( './includes/class-wc-https.php' );							// https Helper
 
 		// Include template hooks in time for themes to remove/modify them
-		include_once( 'includes/wc-template-hooks.php' );
-	}
-
-	/**
-	 * Include required ajax files.
-	 */
-	public function ajax_includes() {
-		include_once( 'includes/class-wc-ajax.php' );					// Ajax functions for admin and the front-end
-	}
-
-	/**
-	 * Include required frontend files.
-	 */
-	public function frontend_includes() {
-		include_once( 'includes/class-wc-template-loader.php' );		// Template Loader
-		include_once( 'includes/class-wc-frontend-scripts.php' );		// Frontend Scripts
-		include_once( 'includes/class-wc-form-handler.php' );			// Form Handlers
-		include_once( 'includes/class-wc-cart.php' );					// The main cart class
-		include_once( 'includes/class-wc-tax.php' );					// Tax class
-		include_once( 'includes/class-wc-customer.php' ); 				// Customer class
-		include_once( 'includes/class-wc-shortcodes.php' );				// Shortcodes class
+		include_once( './includes/wc-template-hooks.php' );
 	}
 
 	/**
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
 	 */
 	public function include_template_functions() {
-		include_once( 'includes/wc-template-functions.php' );
+		include_once( './includes/wc-template-functions.php' );
 	}
 
 	/**
 	 * Include core widgets
 	 */
 	public function include_widgets() {
-		include_once( 'includes/abstracts/abstract-wc-widget.php' );
-		include_once( 'includes/widgets/class-wc-widget-cart.php' );
-		include_once( 'includes/widgets/class-wc-widget-products.php' );
-		include_once( 'includes/widgets/class-wc-widget-layered-nav.php' );
-		include_once( 'includes/widgets/class-wc-widget-layered-nav-filters.php' );
-		include_once( 'includes/widgets/class-wc-widget-price-filter.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-categories.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-search.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-tag-cloud.php' );
-		include_once( 'includes/widgets/class-wc-widget-recent-reviews.php' );
-		include_once( 'includes/widgets/class-wc-widget-recently-viewed.php' );
-		include_once( 'includes/widgets/class-wc-widget-top-rated-products.php' );
+		include_once( './includes/abstracts/abstract-wc-widget.php' );
+		include_once( './includes/widgets/class-wc-widget-cart.php' );
+		include_once( './includes/widgets/class-wc-widget-products.php' );
+		include_once( './includes/widgets/class-wc-widget-layered-nav.php' );
+		include_once( './includes/widgets/class-wc-widget-layered-nav-filters.php' );
+		include_once( './includes/widgets/class-wc-widget-price-filter.php' );
+		include_once( './includes/widgets/class-wc-widget-product-categories.php' );
+		include_once( './includes/widgets/class-wc-widget-product-search.php' );
+		include_once( './includes/widgets/class-wc-widget-product-tag-cloud.php' );
+		include_once( './includes/widgets/class-wc-widget-recent-reviews.php' );
+		include_once( './includes/widgets/class-wc-widget-recently-viewed.php' );
+		include_once( './includes/widgets/class-wc-widget-top-rated-products.php' );
 	}
 
 	/**

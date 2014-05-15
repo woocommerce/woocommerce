@@ -63,7 +63,7 @@ class WC_Post_Data {
 
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale
-	 * 
+	 *
 	 * @param  null $check
 	 * @param  int $object_id
 	 * @param  string $meta_key
@@ -88,7 +88,7 @@ class WC_Post_Data {
 
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale
-	 * 
+	 *
 	 * @param  null $check
 	 * @param  int $object_id
 	 * @param  string $meta_key
@@ -112,5 +112,3 @@ class WC_Post_Data {
 	}
 
 }
-
-new WC_Post_Data();

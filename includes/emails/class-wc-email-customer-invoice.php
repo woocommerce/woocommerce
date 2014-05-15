@@ -17,8 +17,8 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice' ) ) :
  */
 class WC_Email_Customer_Invoice extends WC_Email {
 
-	var $find;
-	var $replace;
+	public $find;
+	public $replace;
 
 	/**
 	 * Constructor

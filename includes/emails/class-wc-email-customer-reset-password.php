@@ -18,13 +18,13 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password' ) ) :
 class WC_Email_Customer_Reset_Password extends WC_Email {
 
 	/** @var string */
-	var $user_login;
+	public $user_login;
 
 	/** @var string */
-	var $user_email;
+	public $user_email;
 
 	/** @var string */
-	var $reset_key;
+	public $reset_key;
 
 	/**
 	 * Constructor

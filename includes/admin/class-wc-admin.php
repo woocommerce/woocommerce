@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WooCommerce Admin.
  *
- * @class 		WC_Admin 
+ * @class 		WC_Admin
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin
@@ -118,5 +118,3 @@ class WC_Admin {
 		}
 	}
 }
-
-return new WC_Admin();

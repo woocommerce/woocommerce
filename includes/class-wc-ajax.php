@@ -1722,5 +1722,3 @@ class WC_AJAX {
 		die( json_encode( $new_pos ) );
 	}
 }
-
-new WC_AJAX();

@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
-	var $notify_url;
+	public $notify_url;
 
 	/**
 	 * Constructor for the gateway.

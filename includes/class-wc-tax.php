@@ -14,7 +14,7 @@ class WC_Tax {
 	public $matched_rates;
 
 
-	var $log = array();
+	public $log = array();
 
 	/**
 	 * __construct function.

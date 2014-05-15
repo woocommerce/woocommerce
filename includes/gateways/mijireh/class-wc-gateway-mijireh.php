@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 
 	/** @var string Access key for mijireh */
-	var $access_key;
+	public $access_key;
 
     /**
      * Constructor for the gateway.
