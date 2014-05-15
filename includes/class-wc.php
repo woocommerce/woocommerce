@@ -112,7 +112,7 @@ final class WooCommerce {
 		$this->api = new WC_API();
 
 		// Hooks
-		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'action_links' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( WC_PLUGIN_FILE ), array( $this, 'action_links' ) );
 		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'include_template_functions' ) );
@@ -205,7 +205,6 @@ final class WooCommerce {
 	 * Define WC Constants
 	 */
 	private function define_constants() {
-		define( 'WC_PLUGIN_FILE', __FILE__ );
 		define( 'WC_VERSION', $this->version );
 		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compat
 
@@ -382,12 +381,12 @@ final class WooCommerce {
 		// Admin Locale
 		if ( is_admin() ) {
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
-			load_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
+			load_textdomain( 'woocommerce', dirname( WC_PLUGIN_FILE ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
 
 		// Global + Frontend Locale
 		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
-		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
+		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( WC_PLUGIN_FILE ) ) . "/i18n/languages" );
 	}
 
 	/**
@@ -443,7 +442,7 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_url() {
-		return untrailingslashit( plugins_url( '/', __FILE__ ) );
+		return untrailingslashit( plugins_url( '/', WC_PLUGIN_FILE ) );
 	}
 
 	/**
@@ -452,7 +451,7 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		return untrailingslashit( plugin_dir_path( __FILE__ ) );
+		return untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
 	}
 
 	/**
