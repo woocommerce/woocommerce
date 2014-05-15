@@ -13,7 +13,7 @@
 class WC_Payment_Gateways {
 
 	/** @var array Array of payment gateway classes. */
-	var $payment_gateways;
+	public $payment_gateways;
 
 	/**
 	 * @var WooCommerce The single instance of the class

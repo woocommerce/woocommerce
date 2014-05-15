@@ -17,37 +17,37 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/** @var string Payment method ID. */
-	var $id;
+	public $id;
 
 	/** @var string Set if the place order button should be renamed on selection. */
-	var $order_button_text;
+	public $order_button_text;
 
 	/** @var string Payment method title. */
-	var $title;
+	public $title;
 
 	/** @var string Chosen payment method id. */
-	var $chosen;
+	public $chosen;
 
 	/** @var bool True if the gateway shows fields on the checkout. */
-	var $has_fields;
+	public $has_fields;
 
 	/** @var array Array of countries this gateway is allowed for. */
-	var $countries;
+	public $countries;
 
 	/** @var string Available for all counties or specific. */
-	var $availability;
+	public $availability;
 
 	/** @var string 'yes' if the method is enabled. */
-	var $enabled;
+	public $enabled;
 
 	/** @var string Icon for the gateway. */
-	var $icon;
+	public $icon;
 
 	/** @var string Description for the gateway. */
-	var $description;
+	public $description;
 
 	/** @var array Array of supported features such as 'default_credit_card_form' */
-	var $supports		= array( 'products' );
+	public $supports		= array( 'products' );
 
 	/** @var int Maximum transaction amount, zero does not define a maximum */
 	public $max_amount = 0;

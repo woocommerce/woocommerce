@@ -17,9 +17,9 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
  */
 class WC_Email_Customer_New_Account extends WC_Email {
 
-	var $user_login;
-	var $user_email;
-	var $user_pass;
+	public $user_login;
+	public $user_email;
+	public $user_pass;
 
 	/**
 	 * Constructor

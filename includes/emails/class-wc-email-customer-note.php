@@ -17,7 +17,7 @@ if ( ! class_exists( 'WC_Email_Customer_Note' ) ) :
  */
 class WC_Email_Customer_Note extends WC_Email {
 
-	var $customer_note;
+	public $customer_note;
 
 	/**
 	 * Constructor
