@@ -20,6 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+define('WC_PLUGIN_FILE', __FILE__);
+
 /**
  * Returns the main instance of WC to prevent the need to use globals.
  *
