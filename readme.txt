@@ -135,6 +135,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Use `woocommerce_valid_order_statuses_for_payment` in `pay_action` too.
 * Tweak - Added the possibility to translate the edit-address endpoint slug.
 * Tweak - Removed all the_content filter in favor to wpautop() and do_shortcode().
+* Tweak - Send IPN email notifications to new order email.
 * Dev - Introduce `woocommerce_valid_order_statuses_for_payment_complete` filter.
 * Dev - Introduce `woocommerce_thankyou_order_received_text` filter.
 * Dev - Introduce `woocommerce_product_backorders_allowed` filter.
