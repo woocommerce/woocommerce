@@ -1,26 +1,8 @@
 <?php
-/**
- * Plugin Name: WooCommerce
- * Plugin URI: http://www.woothemes.com/woocommerce/
- * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.2.0-bleeding
- * Author: WooThemes
- * Author URI: http://woothemes.com
- * Requires at least: 3.8
- * Tested up to: 3.9
- *
- * Text Domain: woocommerce
- * Domain Path: /i18n/languages/
- *
- * @package WooCommerce
- * @category Core
- * @author WooThemes
- */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
-
-if ( ! class_exists( 'WooCommerce' ) ) :
 
 /**
  * Main WooCommerce Class
@@ -234,14 +216,14 @@ final class WooCommerce {
 		if ( ! defined( 'WC_TEMPLATE_PATH' ) ) {
 			define( 'WC_TEMPLATE_PATH', $this->template_path() );
 		}
-		
+
 		if ( ! defined( 'WC_ROUNDING_PRECISION' ) ) {
 			define( 'WC_ROUNDING_PRECISION', 4 );
 		}
 
 		// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
 		if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) ) {
-			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 ); 
+			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 );
 		}
 
 		if ( ! defined( 'WC_DELIMITER' ) ) {
@@ -406,7 +388,7 @@ final class WooCommerce {
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
 			load_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
-		
+
 		// Global + Frontend Locale
 		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
 		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
@@ -845,18 +827,3 @@ final class WooCommerce {
 		_deprecated_function( 'Woocommerce->set_messages', '2.1' );
 	}
 }
-
-endif;
-
-/**
- * Returns the main instance of WC to prevent the need to use globals.
- *
- * @since  2.1
- * @return WooCommerce
- */
-function WC() {
-	return WooCommerce::instance();
-}
-
-// Global for backwards compatibility.
-$GLOBALS['woocommerce'] = WC();
