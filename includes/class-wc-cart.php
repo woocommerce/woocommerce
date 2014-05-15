@@ -1328,6 +1328,7 @@ class WC_Cart {
 			$packages[0]['contents']                 = $this->get_cart();		// Items in the package
 			$packages[0]['contents_cost']            = 0;						// Cost of items in the package, set below
 			$packages[0]['applied_coupons']          = $this->applied_coupons;
+			$packages[0]['user']['ID']               = get_current_user_id();
 			$packages[0]['destination']['country']   = WC()->customer->get_shipping_country();
 			$packages[0]['destination']['state']     = WC()->customer->get_shipping_state();
 			$packages[0]['destination']['postcode']  = WC()->customer->get_shipping_postcode();
