@@ -93,5 +93,3 @@ class WC_Template_Loader {
 			return WC()->plugin_path() . '/templates/single-product-reviews.php';
 	}
 }
-
-new WC_Template_Loader();

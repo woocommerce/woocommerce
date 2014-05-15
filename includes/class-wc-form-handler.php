@@ -926,5 +926,3 @@ class WC_Form_Handler {
 		}
 	}
 }
-
-new WC_Form_Handler();

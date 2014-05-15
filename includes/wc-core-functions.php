@@ -12,20 +12,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-// Include core functions
-include( 'wc-cart-functions.php' );
-include( 'wc-conditional-functions.php' );
-include( 'wc-coupon-functions.php' );
-include( 'wc-user-functions.php' );
-include( 'wc-deprecated-functions.php' );
-include( 'wc-formatting-functions.php' );
-include( 'wc-notice-functions.php' );
-include( 'wc-order-functions.php' );
-include( 'wc-page-functions.php' );
-include( 'wc-product-functions.php' );
-include( 'wc-term-functions.php' );
-include( 'wc-attribute-functions.php' );
-
 /**
  * Filters on data used in admin and frontend
  */

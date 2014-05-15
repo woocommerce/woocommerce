@@ -360,7 +360,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		<script type="text/javascript">
 			jQuery( function() {
 				jQuery('.wc_tax_rates .remove_tax_rates').click(function() {
-					var $tbody = jQuery('.wc_tax_rates').find('tbody');
+					public $tbody = jQuery('.wc_tax_rates').find('tbody');
 					if ( $tbody.find('tr.current').size() > 0 ) {
 						$current = $tbody.find('tr.current');
 						$current.find('input').val('');
@@ -415,7 +415,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				});
 
 				jQuery('.wc_tax_rates .insert').click(function() {
-					var $tbody = jQuery('.wc_tax_rates').find('tbody');
+					public $tbody = jQuery('.wc_tax_rates').find('tbody');
 					var size = $tbody.find('tr').size();
 					var code = '<tr class="new">\
 							<td class="sort">&nbsp;</td>\

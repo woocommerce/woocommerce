@@ -685,7 +685,7 @@ class WC_Install {
 				if ( preg_match( $regexp, $response['body'], $matches ) ) {
 					$version        = trim( $matches[1] );
 					$notices        = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
-					
+
 					if ( version_compare( WC_VERSION, $version, '<' ) ) {
 
 						$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';
@@ -707,5 +707,3 @@ class WC_Install {
 }
 
 endif;
-
-return new WC_Install();

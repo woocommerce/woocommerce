@@ -820,5 +820,3 @@ class WC_Query {
 }
 
 endif;
-
-return new WC_Query();

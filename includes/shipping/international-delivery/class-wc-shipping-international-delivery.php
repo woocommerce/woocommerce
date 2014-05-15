@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 
-	var $id = 'international_delivery';
+	public $id = 'international_delivery';
 
 	/**
 	 * __construct function.

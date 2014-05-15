@@ -108,5 +108,3 @@ class WC_Cache_Helper {
 		}
 	}
 }
-
-new WC_Cache_Helper();

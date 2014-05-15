@@ -215,5 +215,3 @@ class WC_Frontend_Scripts {
 		return $styles;
 	}
 }
-
-new WC_Frontend_Scripts();
