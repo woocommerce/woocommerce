@@ -471,7 +471,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 */
 	function woocommerce_taxonomy_archive_description() {
 		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 ) {
-			$description = apply_filters( 'the_content', term_description() );
+			$description = wpautop( do_shortcode( term_description() ) );
 			if ( $description ) {
 				echo '<div class="term-description">' . $description . '</div>';
 			}
@@ -491,7 +491,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		if ( is_post_type_archive( 'product' ) && get_query_var( 'paged' ) == 0 ) {
 			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
-				$description = apply_filters( 'the_content', $shop_page->post_content );
+				$description = wpautop( do_shortcode( $shop_page->post_content ) );
 				if ( $description ) {
 					echo '<div class="page-description">' . $description . '</div>';
 				}
@@ -890,9 +890,9 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 
 	/**
 	 * Output the quantity input for add to cart forms.
-	 * 
+	 *
 	 * @param  array $args Args for the input
-	 * @param  WC_Product|null $product 
+	 * @param  WC_Product|null $product
 	 * @param  boolean $echo Whether to return or echo
 	 * @return void|string
 	 */
@@ -1015,7 +1015,7 @@ if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
 	 * @return array
 	 */
 	function woocommerce_sort_product_tabs( $tabs = array() ) {
-		
+
 		// Make sure the $tabs parameter is an array
 		if ( ! is_array( $tabs ) ) {
 			trigger_error( "Function woocommerce_sort_product_tabs() expects an array as the first parameter. Defaulting to empty array." );
@@ -1574,7 +1574,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * @param mixed $args
 	 * @param string $value (default: null)
 	 * @return void
-	 * @todo This function needs to be broken up in smaller pieces 
+	 * @todo This function needs to be broken up in smaller pieces
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {
 		$defaults = array(
@@ -1796,7 +1796,7 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 	 * @subpackage	Forms
 	 * @param bool $echo (default: true)
 	 * @return string
-	 * @todo This function needs to be broken up in smaller pieces 
+	 * @todo This function needs to be broken up in smaller pieces
 	 */
 	function get_product_search_form( $echo = true  ) {
 		do_action( 'get_product_search_form'  );
