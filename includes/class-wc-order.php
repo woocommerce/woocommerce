@@ -965,14 +965,14 @@ class WC_Order {
 				if ( 'excl' == $tax_display ) {
 
 					$total_rows[ 'fee_' . $id ] = array(
-						'label' => $fee['name'],
+						'label' => $fee['name'] . ':',
 						'value'	=> wc_price( $fee['line_total'], array('currency' => $this->get_order_currency()) )
 					);
 
 				} else {
 
 					$total_rows[ 'fee_' . $id ] = array(
-						'label' => $fee['name'],
+						'label' => $fee['name'] . ':',
 						'value'	=> wc_price( $fee['line_total'] + $fee['line_tax'], array('currency' => $this->get_order_currency()) )
 					);
 
