@@ -13,13 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 if ( class_exists( 'WP_Importer' ) ) {
 	class WC_Tax_Rate_Importer extends WP_Importer {
 
-		var $id;
-		var $file_url;
-		var $import_page;
-		var $delimiter;
-		var $posts = array();
-		var $imported;
-		var $skipped;
+		public $id;
+		public $file_url;
+		public $import_page;
+		public $delimiter;
+		public $posts = array();
+		public $imported;
+		public $skipped;
 
 		/**
 		 * __construct function.

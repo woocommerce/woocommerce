@@ -16,22 +16,22 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class WC_Shipping {
 
 	/** @var bool True if shipping is enabled. */
-	var $enabled					= false;
+	public $enabled					= false;
 
 	/** @var array Stores methods loaded into woocommerce. */
-	var $shipping_methods 			= array();
+	public $shipping_methods 			= array();
 
 	/** @var float Stores the cost of shipping */
-	var $shipping_total 			= 0;
+	public $shipping_total 			= 0;
 
 	/**  @var array Stores an array of shipping taxes. */
-	var $shipping_taxes				= array();
+	public $shipping_taxes				= array();
 
 	/** @var array Stores the shipping classes. */
-	var $shipping_classes			= array();
+	public $shipping_classes			= array();
 
 	/** @var array Stores packages to ship and to get quotes for. */
-	var $packages					= array();
+	public $packages					= array();
 
 	/**
 	 * @var WooCommerce The single instance of the class

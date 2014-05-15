@@ -13,7 +13,7 @@
 class WC_Integrations {
 
 	/** @var array Array of integration classes */
-	var $integrations = array();
+	public $integrations = array();
 
     /**
      * __construct function.

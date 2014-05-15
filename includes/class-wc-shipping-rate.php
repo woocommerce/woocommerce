@@ -17,11 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class WC_Shipping_Rate {
 
-	var $id 		= '';
-	var $label 		= '';
-	var $cost 		= 0;
-	var $taxes 		= array();
-	var $method_id 	= '';
+	public $id 		= '';
+	public $label 		= '';
+	public $cost 		= 0;
+	public $taxes 		= array();
+	public $method_id 	= '';
 
 	/**
 	 * __construct function.

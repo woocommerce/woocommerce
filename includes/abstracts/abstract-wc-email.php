@@ -17,52 +17,52 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 abstract class WC_Email extends WC_Settings_API {
 
 	/** @var string Payment method ID. */
-	var $id;
+	public $id;
 
 	/** @var string Payment method title. */
-	var $title;
+	public $title;
 
 	/** @var string 'yes' if the method is enabled. */
-	var $enabled;
+	public $enabled;
 
 	/** @var string Description for the gateway. */
-	var $description;
+	public $description;
 
 	/** @var string plain text template path */
-	var $template_plain;
+	public $template_plain;
 
 	/** @var string html template path */
-	var $template_html;
+	public $template_html;
 
 	/** @var string template path */
-	var $template_base;
+	public $template_base;
 
 	/** @var string recipients for the email */
-	var $recipient;
+	public $recipient;
 
 	/** @var string heading for the email content */
-	var $heading;
+	public $heading;
 
 	/** @var string subject for the email */
-	var $subject;
+	public $subject;
 
 	/** @var object this email is for, for example a customer, product, or email */
-	var $object;
+	public $object;
 
 	/** @var array strings to find in subjects/headings */
-	var $find;
+	public $find;
 
 	/** @var array strings to replace in subjects/headings */
-	var $replace;
+	public $replace;
 
 	/** @var string For multipart emails */
-	var $mime_boundary;
+	public $mime_boundary;
 
 	/** @var string For multipart emails */
-	var $mime_boundary_header;
+	public $mime_boundary_header;
 
 	/** @var bool true when email is being sent */
-	var $sending;
+	public $sending;
 
 	/**
      *  List of preg* regular expression patterns to search for,
@@ -73,7 +73,7 @@ abstract class WC_Email extends WC_Settings_API {
      *  @access public
      *  @see $replace
      */
-    var $plain_search = array(
+    public $plain_search = array(
         "/\r/",                                  // Non-legal carriage return
         '/&(nbsp|#160);/i',                      // Non-breaking space
         '/&(quot|rdquo|ldquo|#8220|#8221|#147|#148);/i',
@@ -104,7 +104,7 @@ abstract class WC_Email extends WC_Settings_API {
      *  @access public
      *  @see $search
      */
-    var $plain_replace = array(
+    public $plain_replace = array(
         '',                                     // Non-legal carriage return
         ' ',                                    // Non-breaking space
         '"',                                    // Double quotes
