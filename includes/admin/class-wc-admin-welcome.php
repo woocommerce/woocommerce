@@ -150,14 +150,14 @@ class WC_Admin_Welcome {
 			}
 			.about-wrap .feature-rest div.last-feature {
 				padding-<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'right' : 'left'; ?>: 100px;
-				padding-<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'left: ' : 'right'; ?>: 0;
+				padding-<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'left' : 'right'; ?>: 0;
 			}
 			.about-wrap div.icon {
 				width: 0 !important;
 				padding: 0;
 				margin: 0;
 			}
-			.about-wrap .feature-rest div.icon:before { 
+			.about-wrap .feature-rest div.icon:before {
 				font-family: WooCommerce !important;
 				font-weight: normal;
 				width: 100%;
