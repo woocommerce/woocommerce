@@ -392,6 +392,10 @@ class WC_API_Server {
 		foreach ( $wanted as $param ) {
 			if ( isset( $provided[ $param->getName() ] ) ) {
 				// We have this parameters in the list to choose from
+				if ( 'data' == $param->getName() ) {
+					$ordered_parameters[] = $provided[ $param->getName() ];
+					continue;
+				}
 
 				$ordered_parameters[] = is_array( $provided[ $param->getName() ] ) ? array_map( 'urldecode', $provided[ $param->getName() ] ) : urldecode( $provided[ $param->getName() ] );
 			}
