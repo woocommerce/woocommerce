@@ -81,7 +81,10 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $this->is_readable( $order_id ) )
 				continue;
 
-			$orders[] = current( $this->get_order( $order_id, $fields ) );
+			$order = $this->get_order( $order_id, $fields , $filter);
+
+			if( $order != null )
+				$orders[] = current( $order );
 		}
 
 		$this->server->add_pagination_headers( $query );
@@ -170,6 +173,14 @@ class WC_API_Orders extends WC_API_Resource {
 			'coupon_lines'              => array(),
 		);
 
+		// Setup line item filter by product_id
+		$filtered_id = null;
+		$has_product = false;
+		if($filter && array_key_exists('line_items.product_id', $filter)){
+			$filtered_id = $filter['line_items.product_id'];
+		}
+
+
 		// add line items
 		foreach( $order->get_items() as $item_id => $item ) {
 
@@ -187,6 +198,16 @@ class WC_API_Orders extends WC_API_Resource {
 				'product_id' => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
 				'sku'        => is_object( $product ) ? $product->get_sku() : null,
 			);
+
+			if($internal_id == $filtered_id) {
+				$has_product = true;
+			}
+		}
+
+		// Return null if the order should be filtered out of the results, Note this does not work with limit as this comes
+		// after the limit return set.
+		if($filtered_id != null && !$has_product){
+			return null;
 		}
 
 		// add shipping
