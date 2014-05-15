@@ -146,6 +146,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Add user ID to shipping packages.
 * Refactor - Update stock amounts with DB queries.
 * Refactor - Simplified attribute name sanitisation which maintains UTF8 char integrity.
+* Refactor - Country class return methods.
 
 = 2.1.9 - 14/05/2014 =
 * Fix - fix case-insensitive matching for coupon posts with uppercase chars.
