@@ -230,10 +230,6 @@ final class WooCommerce {
 		define( 'WC_PLUGIN_FILE', __FILE__ );
 		define( 'WC_VERSION', $this->version );
 		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compat
-
-		if ( ! defined( 'WC_TEMPLATE_PATH' ) ) {
-			define( 'WC_TEMPLATE_PATH', $this->template_path() );
-		}
 		
 		if ( ! defined( 'WC_ROUNDING_PRECISION' ) ) {
 			define( 'WC_ROUNDING_PRECISION', 4 );
@@ -433,6 +429,11 @@ final class WooCommerce {
 		add_image_size( 'shop_thumbnail', $shop_thumbnail['width'], $shop_thumbnail['height'], $shop_thumbnail['crop'] );
 		add_image_size( 'shop_catalog', $shop_catalog['width'], $shop_catalog['height'], $shop_catalog['crop'] );
 		add_image_size( 'shop_single', $shop_single['width'], $shop_single['height'], $shop_single['crop'] );
+
+		// Define template path
+		if ( ! defined( 'WC_TEMPLATE_PATH' ) ) {
+			define( 'WC_TEMPLATE_PATH', $this->template_path() );
+		}
 
 		// IIS
 		if ( ! isset($_SERVER['REQUEST_URI'] ) ) {
