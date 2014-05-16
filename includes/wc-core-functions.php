@@ -174,6 +174,7 @@ function get_woocommerce_currencies() {
 				'CNY' => __( 'Chinese Yuan', 'woocommerce' ),
 				'COP' => __( 'Colombian Peso', 'woocommerce' ),
 				'CZK' => __( 'Czech Koruna', 'woocommerce' ),
+				'DOP' => __( 'Dominican Peso', 'woocommerce' ),
 				'DKK' => __( 'Danish Krone', 'woocommerce' ),
 				'EUR' => __( 'Euros', 'woocommerce' ),
 				'HKD' => __( 'Hong Kong Dollar', 'woocommerce' ),
@@ -276,6 +277,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'VND' : $currency_symbol = '&#8363;'; break;
 		case 'NGN' : $currency_symbol = '&#8358;'; break;
 		case 'HRK' : $currency_symbol = 'Kn'; break;
+		case 'DOP' :  $currency_symbol = 'RD&#36;'; break;
 		default    : $currency_symbol = ''; break;
 	}
 
