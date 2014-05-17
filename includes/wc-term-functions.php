@@ -59,6 +59,8 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		// wp_get_post_terms doens't let us use custom sort order
 		$args['include']    = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
 		$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
+		$args['hide_empty'] = 0;
+		$args['fields']     = 'names';
 
 		unset( $args['orderby'] );
 		
@@ -77,7 +79,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
  * @return int
  */
 function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
-	if( $a->parent === $b->parent ) {
+	if ( $a->parent === $b->parent ) {
 		return 0;
 	}
 	return ( $a->parent < $b->parent ) ? 1 : -1;
