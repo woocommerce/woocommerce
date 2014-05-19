@@ -555,20 +555,21 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					if ( $state == '*' )
 						$state = '';
 
-					$wpdb->insert(
-						$wpdb->prefix . "woocommerce_tax_rates",
-						array(
-							'tax_rate_country'  => $country,
-							'tax_rate_state'    => $state,
-							'tax_rate'          => $rate,
-							'tax_rate_name'     => $name,
-							'tax_rate_priority' => $priority,
-							'tax_rate_compound' => $compound,
-							'tax_rate_shipping' => $shipping,
-							'tax_rate_order'    => $i,
-							'tax_rate_class'    => sanitize_title( $current_class )
-						)
+					$tax_rate = array(
+						'tax_rate_country'  => $country,
+						'tax_rate_state'    => $state,
+						'tax_rate'          => $rate,
+						'tax_rate_name'     => $name,
+						'tax_rate_priority' => $priority,
+						'tax_rate_compound' => $compound,
+						'tax_rate_shipping' => $shipping,
+						'tax_rate_order'    => $i,
+						'tax_rate_class'    => sanitize_title( $current_class )
 					);
+
+					do_action( 'woocommerce_tax_rate_added', $tax_rate );
+
+					$wpdb->insert( $wpdb->prefix . "woocommerce_tax_rates", $tax_rate );
 
 					$tax_rate_id = $wpdb->insert_id;
 
@@ -589,7 +590,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 										if ( strlen( $i ) < strlen( $postcode_parts[0] ) )
 											$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
-										
+
 										$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 									}
 								}
@@ -625,8 +626,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				$tax_rate_id = absint( $key );
 
 				if ( $_POST['remove_tax_rate'][ $key ] == 1 ) {
+					do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
+
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
+
 					continue;
 				}
 
@@ -648,21 +652,25 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				if ( $state == '*' )
 					$state = '';
 
+				$tax_rate = array(
+					'tax_rate_country'  => $country,
+					'tax_rate_state'    => $state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => $name,
+					'tax_rate_priority' => $priority,
+					'tax_rate_compound' => $compound,
+					'tax_rate_shipping' => $shipping,
+					'tax_rate_order'    => $i,
+					'tax_rate_class'    => sanitize_title( $current_class )
+				);
+
+				do_action( 'woocommerce_tax_rate_updated', $tax_rate );
+
 				$wpdb->update(
 					$wpdb->prefix . "woocommerce_tax_rates",
+					$tax_rate,
 					array(
-						'tax_rate_country'  => $country,
-						'tax_rate_state'    => $state,
-						'tax_rate'          => $rate,
-						'tax_rate_name'     => $name,
-						'tax_rate_priority' => $priority,
-						'tax_rate_compound' => $compound,
-						'tax_rate_shipping' => $shipping,
-						'tax_rate_order'    => $i,
-						'tax_rate_class'    => sanitize_title( $current_class )
-					),
-					array(
-						'tax_rate_id' 		=> $tax_rate_id
+						'tax_rate_id' => $tax_rate_id
 					)
 				);
 
@@ -688,7 +696,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 									if ( strlen( $i ) < strlen( $postcode_parts[0] ) )
 										$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
-									
+
 									$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 								}
 							}
