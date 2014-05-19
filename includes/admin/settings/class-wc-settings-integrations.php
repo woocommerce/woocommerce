@@ -44,7 +44,7 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 
 		$integrations = WC()->integrations->get_integrations();
 
-		if ( ! $current_section )
+		if ( ! $current_section && ! empty( $integrations ) )
 			$current_section = current( $integrations )->id;
 
 		foreach ( $integrations as $integration ) {
