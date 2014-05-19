@@ -27,7 +27,7 @@ class WC_Admin_Addons {
 			if ( ! is_wp_error( $addons_json ) ) {
 				$addons = json_decode( wp_remote_retrieve_body( $addons_json ) );
 				if ( $addons ) {
-					set_transient( 'woocommerce_addons_data', $addons );
+					set_transient( 'woocommerce_addons_data', $addons, 60*60*24*7 ); // 1 Week
 				}
 			}
 		}
