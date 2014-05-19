@@ -1,21 +1,25 @@
 # 
 # Translators:
 # disaada <bafridas121296@gmail.com>, 2014
+# dickysun <dickysun@jasawebplus.com>, 2014
 # didikpri <didik.priyanto@gmail.com>, 2014
 # didikpri <didik.priyanto@gmail.com>, 2014
 # disaada <bafridas121296@gmail.com>, 2014
+# the_fafa, 2014
 # globalaperta <globalaperta@gmail.com>, 2014
 # globalaperta <globalaperta@gmail.com>, 2014
+# haruman <haruman.bagus@gmail.com>, 2014
 # jhn_rustan <jhn_rustan@yahoo.com>, 2014
 # globalaperta <globalaperta@gmail.com>, 2014
 # SeaBiz <seabiz@hotmail.com>, 2014
+# Vernando Simbolon <usedgrey05@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-25 04:14+0000\n"
-"Last-Translator: jhn_rustan <jhn_rustan@yahoo.com>\n"
+"PO-Revision-Date: 2014-05-14 10:57+0000\n"
+"Last-Translator: Vernando Simbolon <usedgrey05@gmail.com>\n"
 "Language-Team: Indonesian (Indonesia) (http://www.transifex.com/projects/p/woocommerce/language/id_ID/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3637,7 +3641,7 @@ msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
 "in W3 Total Cache settings <a href=\"%s\">here</a>."
-msgstr ""
+msgstr "Agar <strong>caching basisdata</strong> dapat bekerja di WooCommerce Anda harus menambahkan <code>_wc_session_</code> pada pilihan \"Ignored Query Strings\" di pengaturan W3 Total Cache <a href=\"%s\">disini</a>"
 
 #: includes/class-wc-cart.php:168
 msgid ""
@@ -3744,11 +3748,11 @@ msgstr "Pesanan &ndash; %s"
 #: includes/class-wc-checkout.php:176
 msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
-msgstr ""
+msgstr "%b %d, %Y @ %I:%M %p"
 
 #: includes/class-wc-checkout.php:287
 msgid "Backordered"
-msgstr ""
+msgstr "Order kembali"
 
 #: includes/class-wc-checkout.php:423
 msgid ""
@@ -5064,7 +5068,7 @@ msgstr "Stok kosong"
 
 #: includes/class-wc-emails.php:401
 msgid "Product Backorder"
-msgstr ""
+msgstr "Produk yang di order kembali"
 
 #: includes/class-wc-emails.php:411
 msgid "%s units of %s have been backordered in order %s."
@@ -5297,7 +5301,7 @@ msgstr "(Termasuk %s)"
 
 #: includes/class-wc-order.php:1258 includes/class-wc-order.php:1259
 msgid "WooCommerce"
-msgstr "WooCommerce"
+msgstr "Woocommerce"
 
 #: includes/class-wc-order.php:1314
 msgid "Order status changed from %s to %s."
@@ -5725,7 +5729,7 @@ msgstr "Pesanan selesai"
 msgid ""
 "Order complete emails are sent to the customer when the order is marked "
 "complete and usual indicates that the order has been shipped."
-msgstr ""
+msgstr "Email pemberitahuan pesanan lengkap dikirim ke pelanggan saat pesanan ditandai lengkap dan biasanya hal ini menunjukkan bahwa pesanan telah dikirimkan."
 
 #: includes/emails/class-wc-email-customer-completed-order.php:29
 msgid "Your order is complete"
@@ -5770,7 +5774,7 @@ msgstr "Invoice Pelanggan"
 msgid ""
 "Customer invoice emails can be sent to the user containing order info and "
 "payment links."
-msgstr ""
+msgstr "Email faktur pelanggan dapat dikirim ke pengguna yang berisi informasi pesanan dan tautan link pembayaran."
 
 #: includes/emails/class-wc-email-customer-invoice.php:35
 msgid "Invoice for order {order_number} from {order_date}"
@@ -6165,7 +6169,7 @@ msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:174
 msgid "Join for free"
-msgstr ""
+msgstr "Daftar gratis"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:174
 msgid "Learn more about WooCommerce and Mijireh"
@@ -6634,11 +6638,11 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:553
 msgid "+ Add Cost"
-msgstr ""
+msgstr "+ Tambah biaya"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:553
 msgid "Delete selected costs"
-msgstr ""
+msgstr "Hapus biaya terpilih"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:559
 msgid "Any class"
@@ -6886,7 +6890,7 @@ msgstr "Masukkan username atau e-mail."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:227
 msgid "There is no user registered with that email address."
-msgstr ""
+msgstr "Tidak ada pengguna yang terdaftar dengan email tersebut"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:242
 msgid "Invalid username or e-mail."
@@ -6898,7 +6902,7 @@ msgstr "Reset password tidak diperkenankan untuk user ini."
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:284
 msgid "Check your e-mail for the confirmation link."
-msgstr ""
+msgstr "Periksa email anda untuk alamat konfirmasi"
 
 #: includes/shortcodes/class-wc-shortcode-my-account.php:304
 #: includes/shortcodes/class-wc-shortcode-my-account.php:309
@@ -7331,11 +7335,11 @@ msgstr ""
 
 #: includes/widgets/class-wc-widget-layered-nav.php:92
 msgid "AND"
-msgstr ""
+msgstr "DAN"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:93
 msgid "OR"
-msgstr ""
+msgstr "ATAU"
 
 #: includes/widgets/class-wc-widget-layered-nav.php:174
 msgid "Any %s"
@@ -7436,7 +7440,7 @@ msgstr "Produk Woocommerce"
 #: includes/widgets/class-wc-widget-recently-viewed.php:36
 #: includes/widgets/class-wc-widget-top-rated-products.php:38
 msgid "Number of products to show"
-msgstr ""
+msgstr "Jumlah produk yang ditampilkan"
 
 #: includes/widgets/class-wc-widget-products.php:41
 msgid "Show"
@@ -7483,11 +7487,11 @@ msgstr "Pesanan"
 
 #: includes/widgets/class-wc-widget-products.php:64
 msgid "ASC"
-msgstr ""
+msgstr "A-Z"
 
 #: includes/widgets/class-wc-widget-products.php:65
 msgid "DESC"
-msgstr ""
+msgstr "Z-A"
 
 #: includes/widgets/class-wc-widget-products.php:71
 msgid "Hide free products"

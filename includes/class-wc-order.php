@@ -116,6 +116,24 @@ class WC_Order {
 	}
 
 	/**
+	 * Gets the user ID associated with the order. Guests are 0.
+	 * @since  2.2
+	 * @return int|false
+	 */
+	public function get_user_id() {
+		return $this->customer_user ? $this->customer_user : 0;
+	}
+
+	/**
+	 * Get the user associated with the order. False for guests.
+	 * @since  2.2
+	 * @return WP_User|false
+	 */
+	public function get_user() {
+		return $user_id = $this->get_user_id() ? get_user_by( 'id', $user_id ) : false;
+	}
+
+	/**
 	 * Check if an order key is valid.
 	 *
 	 * @access public
@@ -947,14 +965,14 @@ class WC_Order {
 				if ( 'excl' == $tax_display ) {
 
 					$total_rows[ 'fee_' . $id ] = array(
-						'label' => $fee['name'],
+						'label' => $fee['name'] . ':',
 						'value'	=> wc_price( $fee['line_total'], array('currency' => $this->get_order_currency()) )
 					);
 
 				} else {
 
 					$total_rows[ 'fee_' . $id ] = array(
-						'label' => $fee['name'],
+						'label' => $fee['name'] . ':',
 						'value'	=> wc_price( $fee['line_total'] + $fee['line_tax'], array('currency' => $this->get_order_currency()) )
 					);
 
@@ -1238,7 +1256,7 @@ class WC_Order {
 		return add_query_arg( array(
 			'download_file' => $product_id,
 			'order'         => $this->order_key,
-			'email'         => $this->billing_email,
+			'email'         => urlencode( $this->billing_email ),
 			'key'           => $download_id
 		), trailingslashit( home_url() ) );
 	}

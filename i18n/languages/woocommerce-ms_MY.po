@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-28 08:42+0000\n"
+"PO-Revision-Date: 2014-05-11 07:40+0000\n"
 "Last-Translator: akmalff <akmal.ff@gmail.com>\n"
 "Language-Team: Malay (Malaysia) (http://www.transifex.com/projects/p/woocommerce/language/ms_MY/)\n"
 "MIME-Version: 1.0\n"
@@ -3310,7 +3310,7 @@ msgstr "Kod Kad"
 
 #: includes/abstracts/abstract-wc-payment-gateway.php:216
 msgid "CVC"
-msgstr ""
+msgstr "CVC"
 
 #: includes/abstracts/abstract-wc-product.php:455
 #: includes/class-wc-product-simple.php:48
@@ -3441,7 +3441,7 @@ msgstr "Kod kupon tidak sah"
 #: includes/api/class-wc-api-customers.php:198
 #: includes/api/class-wc-api-customers.php:201
 msgid "Invalid customer Email"
-msgstr ""
+msgstr "Email pelanggan tidak sah"
 
 #: includes/api/class-wc-api-customers.php:219
 msgid "You do not have permission to read the customers count"
@@ -3457,7 +3457,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-customers.php:488
 msgid "Invalid customer"
-msgstr ""
+msgstr "Pelanggan tidak sah"
 
 #: includes/api/class-wc-api-customers.php:495
 msgid "You do not have permission to read this customer"
@@ -3502,7 +3502,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-resource.php:83
 msgid "Invalid %s"
-msgstr ""
+msgstr "Tidak sah %s"
 
 #: includes/api/class-wc-api-resource.php:90
 msgid "You do not have permission to read this %s"
@@ -3522,11 +3522,11 @@ msgstr ""
 
 #: includes/api/class-wc-api-resource.php:304
 msgid "The customer cannot be deleted"
-msgstr ""
+msgstr "Pelanggan tidak dapat dihapus"
 
 #: includes/api/class-wc-api-resource.php:313
 msgid "This %s cannot be deleted"
-msgstr ""
+msgstr "%s ini tidak dapat dihapuskan"
 
 #: includes/api/class-wc-api-resource.php:316
 msgid "Permanently deleted %s"
@@ -3534,7 +3534,7 @@ msgstr ""
 
 #: includes/api/class-wc-api-resource.php:322
 msgid "Deleted %s"
-msgstr ""
+msgstr "%s dihapuskan"
 
 #: includes/api/class-wc-api-server.php:165
 msgid "Invalid authentication method"
@@ -3728,7 +3728,7 @@ msgstr "Nota Pesanan"
 #: includes/class-wc-checkout.php:117
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr ""
+msgstr "Nota mengenai pesanan anda, cth. pesanan khas untuk penghantaran."
 
 #: includes/class-wc-checkout.php:176
 msgid "Order &ndash; %s"
@@ -3768,11 +3768,11 @@ msgstr "adalah alamat emel yang tidak sah."
 
 #: includes/class-wc-checkout.php:540
 msgid "is not valid. Please enter one of the following:"
-msgstr ""
+msgstr "tidak sah. Tolong masukkan salah satu yang berikut:"
 
 #: includes/class-wc-checkout.php:585
 msgid "You must accept our Terms &amp; Conditions."
-msgstr ""
+msgstr "Anda perlu menerima Syarat &amp; Terma kami."
 
 #: includes/class-wc-checkout.php:590
 msgid ""
@@ -3782,11 +3782,11 @@ msgstr ""
 
 #: includes/class-wc-checkout.php:598
 msgid "Invalid shipping method."
-msgstr ""
+msgstr "Kaedah penghantaran tidak sah."
 
 #: includes/class-wc-checkout.php:611
 msgid "Invalid payment method."
-msgstr ""
+msgstr "Kaedah pembayaran tidak sah."
 
 #: includes/class-wc-comments.php:110
 msgid "You have taken too long. Please go back and refresh the page."
@@ -4849,7 +4849,7 @@ msgstr "Poskod / Zip"
 
 #: includes/class-wc-countries.php:827
 msgid "District"
-msgstr ""
+msgstr "Daerah"
 
 #: includes/class-wc-countries.php:834 includes/class-wc-countries.php:850
 #: includes/class-wc-countries.php:870 includes/class-wc-countries.php:931
@@ -4974,7 +4974,7 @@ msgstr "Alamat emel yang tidak sah."
 #: includes/class-wc-download-handler.php:143
 #: includes/class-wc-download-handler.php:296
 msgid "Go to homepage"
-msgstr ""
+msgstr "Pergi ke laman utama"
 
 #: includes/class-wc-download-handler.php:62
 msgid "Invalid download."
@@ -4988,7 +4988,7 @@ msgstr "Anda mesti log masuk untuk memuat turun fail."
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:25
 #: templates/myaccount/form-login.php:44
 msgid "Login"
-msgstr ""
+msgstr "Log masuk"
 
 #: includes/class-wc-download-handler.php:75
 msgid "Log in to Download Files"
@@ -5278,7 +5278,7 @@ msgstr "Diskaun Pesanan:"
 
 #: includes/class-wc-order.php:985
 msgid "Payment Method:"
-msgstr ""
+msgstr "Kaedah Pembayaran:"
 
 #: includes/class-wc-order.php:991
 msgid "Order Total:"
@@ -5821,7 +5821,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-note.php:38
 msgid "A note has been added to your order"
-msgstr ""
+msgstr "Satu nota telah ditambah ke pesanan anda"
 
 #: includes/emails/class-wc-email-customer-processing-order.php:26
 msgid "Processing order"
@@ -5869,7 +5869,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-new-order.php:29
 msgid "New customer order"
-msgstr ""
+msgstr "Pesanan pelanggan baru"
 
 #: includes/emails/class-wc-email-new-order.php:30
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
@@ -5877,7 +5877,7 @@ msgstr ""
 
 #: includes/emails/class-wc-email-new-order.php:126
 msgid "Recipient(s)"
-msgstr ""
+msgstr "Penerima (-penerima)"
 
 #: includes/emails/class-wc-email-new-order.php:128
 msgid ""
@@ -6072,11 +6072,11 @@ msgstr ""
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:57
 msgid "Enable COD"
-msgstr ""
+msgstr "Hidupkan COD"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:58
 msgid "Enable Cash on Delivery"
-msgstr ""
+msgstr "Hidupkan Wang Tunai sewaktu Penghantaran"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:73
 msgid "Payment method description that the customer will see on your website."
@@ -6085,7 +6085,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:74
 #: includes/gateways/cod/class-wc-gateway-cod.php:81
 msgid "Pay with cash upon delivery."
-msgstr ""
+msgstr "Bayar secara 'Tunai semasa Penghantaran'"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:80
 msgid "Instructions that will be added to the thank you page."
@@ -6107,7 +6107,7 @@ msgstr ""
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:164
 msgid "Payment to be made upon delivery."
-msgstr ""
+msgstr "Pembayaran akan dibuat sewaktu penghantaran"
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:30
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:167
@@ -6146,7 +6146,7 @@ msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:171
 msgid "Get started with Mijireh Checkout"
-msgstr ""
+msgstr "Mulakan dengan Pembayaran Mijireh "
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:172
 msgid ""
@@ -6379,7 +6379,7 @@ msgstr ""
 msgid ""
 "Thank you for your order. We are now redirecting you to PayPal to make "
 "payment."
-msgstr ""
+msgstr "Terima kasih diatas pesanan anda. Kami sedang mengubah hala anda ke Paypal untuk membuat pembayaran."
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:491
 msgid "Pay via PayPal"
@@ -6481,13 +6481,13 @@ msgstr ""
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:77
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:51
 msgid "Enable this shipping method"
-msgstr ""
+msgstr "Hidupkan kaedah penghantaran ini"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:81
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:70
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:55
 msgid "Method Title"
-msgstr ""
+msgstr "Tajuk Kaedah"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:88
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:62
@@ -6573,7 +6573,7 @@ msgstr ""
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:139
 msgid "Costs Added..."
-msgstr ""
+msgstr "Kos ditambah"
 
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:143
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:96
@@ -6710,11 +6710,11 @@ msgstr ""
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:67
 msgid "Selected countries"
-msgstr ""
+msgstr "Negara-negara terpilih"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:68
 msgid "Excluding selected countries"
-msgstr ""
+msgstr "Tidak termasuk negara-negara terpilih"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:72
 msgid "Countries"
@@ -6722,7 +6722,7 @@ msgstr "Negara"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:92
 msgid "Cost Added..."
-msgstr ""
+msgstr "Kos Ditambah"
 
 #: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:105
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
@@ -6821,7 +6821,7 @@ msgstr ""
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:91
 msgid "Invalid order. If you have an account please log in and try again."
-msgstr ""
+msgstr "Pesanan tidak sah. Jika anda akan akaun, sila log masuk and cuba lagi."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
@@ -6833,7 +6833,7 @@ msgstr ""
 #: includes/shortcodes/class-wc-shortcode-checkout.php:117
 #: includes/shortcodes/class-wc-shortcode-checkout.php:168
 msgid "Sorry, this order is invalid and cannot be paid for."
-msgstr ""
+msgstr "Maaf, pesanan ini tidak sah dan tidak dapat dibayar."
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:134
 #: templates/checkout/thankyou.php:40
@@ -6949,7 +6949,7 @@ msgstr ""
 
 #: includes/wc-cart-functions.php:288
 msgid "Free"
-msgstr ""
+msgstr "Percuma"
 
 #: includes/wc-core-functions.php:167
 msgid "United Arab Emirates Dirham"
@@ -6957,7 +6957,7 @@ msgstr ""
 
 #: includes/wc-core-functions.php:168
 msgid "Australian Dollars"
-msgstr ""
+msgstr "Dolar Australia"
 
 #: includes/wc-core-functions.php:169
 msgid "Bangladeshi Taka"
@@ -6973,7 +6973,7 @@ msgstr ""
 
 #: includes/wc-core-functions.php:172
 msgid "Canadian Dollars"
-msgstr ""
+msgstr "Dolar Kanada"
 
 #: includes/wc-core-functions.php:173
 msgid "Chilean Peso"
@@ -6981,7 +6981,7 @@ msgstr "Chilean Peso"
 
 #: includes/wc-core-functions.php:174
 msgid "Chinese Yuan"
-msgstr ""
+msgstr "Yuan China"
 
 #: includes/wc-core-functions.php:175
 msgid "Colombian Peso"
@@ -7017,11 +7017,11 @@ msgstr ""
 
 #: includes/wc-core-functions.php:183
 msgid "Indonesia Rupiah"
-msgstr ""
+msgstr "Rupiah Indonesia"
 
 #: includes/wc-core-functions.php:184
 msgid "Indian Rupee"
-msgstr ""
+msgstr "Rupee India"
 
 #: includes/wc-core-functions.php:185
 msgid "Israeli Shekel"
@@ -7029,19 +7029,19 @@ msgstr ""
 
 #: includes/wc-core-functions.php:186
 msgid "Japanese Yen"
-msgstr ""
+msgstr "Yen Jepun"
 
 #: includes/wc-core-functions.php:187
 msgid "South Korean Won"
-msgstr ""
+msgstr "Won Korea Selatan"
 
 #: includes/wc-core-functions.php:188
 msgid "Malaysian Ringgits"
-msgstr ""
+msgstr "Ringgit Malaysia"
 
 #: includes/wc-core-functions.php:189
 msgid "Mexican Peso"
-msgstr ""
+msgstr "Peso Mexico"
 
 #: includes/wc-core-functions.php:190
 msgid "Nigerian Naira"
@@ -7053,7 +7053,7 @@ msgstr ""
 
 #: includes/wc-core-functions.php:192
 msgid "New Zealand Dollar"
-msgstr ""
+msgstr "Dollar New Zealand"
 
 #: includes/wc-core-functions.php:193
 msgid "Philippine Pesos"
@@ -7077,7 +7077,7 @@ msgstr ""
 
 #: includes/wc-core-functions.php:198
 msgid "Singapore Dollar"
-msgstr ""
+msgstr "Dollar Singapura"
 
 #: includes/wc-core-functions.php:199
 msgid "South African rand"
@@ -7105,11 +7105,11 @@ msgstr ""
 
 #: includes/wc-core-functions.php:205
 msgid "US Dollars"
-msgstr ""
+msgstr "Dollar US"
 
 #: includes/wc-core-functions.php:206
 msgid "Vietnamese Dong"
-msgstr ""
+msgstr "Dong Vietnam"
 
 #: includes/wc-coupon-functions.php:22
 msgid "Cart Discount"
@@ -7134,12 +7134,12 @@ msgstr "Akaun ini telah berdaftar dengan alamat emel anda. Sila log masuk."
 
 #: includes/wc-customer-functions.php:61
 msgid "Please enter a valid account username."
-msgstr ""
+msgstr "Tolong isikan kata nama akaun yang sah."
 
 #: includes/wc-customer-functions.php:65
 msgid ""
 "An account is already registered with that username. Please choose another."
-msgstr ""
+msgstr "Satu akaun telah didaftar dengan kata nama itu. Tolong pilih yang lain."
 
 #: includes/wc-customer-functions.php:85
 msgid "Please enter an account password."
@@ -7153,20 +7153,20 @@ msgstr ""
 
 #: includes/wc-order-functions.php:295
 msgid "Unpaid order cancelled - time limit reached."
-msgstr ""
+msgstr "Pesanan tidak berbayar batal -  tempoh masa tamat."
 
 #: includes/wc-product-functions.php:233
 msgctxt "slug"
 msgid "uncategorized"
-msgstr ""
+msgstr "tiada kategori"
 
 #: includes/wc-template-functions.php:120
 msgid "New products"
-msgstr ""
+msgstr "Produk baru"
 
 #: includes/wc-template-functions.php:128
 msgid "New products added to %s"
-msgstr ""
+msgstr "Produk baru ditambah ke %s"
 
 #: includes/wc-template-functions.php:136
 msgid "New products tagged %s"
@@ -7205,11 +7205,11 @@ msgstr ""
 #: includes/wc-template-functions.php:1257
 msgctxt "breadcrumb"
 msgid "Home"
-msgstr ""
+msgstr "Laman Utama"
 
 #: includes/wc-template-functions.php:1558
 msgid "Order Again"
-msgstr ""
+msgstr "Pesanan Semula"
 
 #: includes/wc-template-functions.php:1649
 #: templates/cart/shipping-calculator.php:28
@@ -7227,7 +7227,7 @@ msgstr ""
 
 #: includes/wc-template-functions.php:1812
 msgid "Search for:"
-msgstr ""
+msgstr "Carian untuk:"
 
 #: includes/wc-template-functions.php:1813
 msgid "Search for products"
@@ -7239,7 +7239,7 @@ msgstr "Cari"
 
 #: includes/wc-term-functions.php:123
 msgid "Select a category"
-msgstr ""
+msgstr "Pilih Kategori"
 
 #: includes/wc-term-functions.php:127
 msgid "Uncategorized"
@@ -7541,11 +7541,11 @@ msgstr ""
 
 #: templates/cart/cart-empty.php:20
 msgid "Return To Shop"
-msgstr ""
+msgstr "Kembali ke Kedai"
 
 #: templates/cart/cart-shipping.php:16
 msgid "Shipping #%d"
-msgstr ""
+msgstr "Penghantaran #%d"
 
 #: templates/cart/cart-shipping.php:18
 msgid "Shipping and Handling"
@@ -7676,7 +7676,7 @@ msgstr ""
 
 #: templates/checkout/cart-errors.php:20
 msgid "Return To Cart"
-msgstr ""
+msgstr "Kembali ke Troli"
 
 #: templates/checkout/form-billing.php:15
 msgid "Billing &amp; Shipping"
@@ -7688,7 +7688,7 @@ msgstr ""
 
 #: templates/checkout/form-billing.php:38
 msgid "Create an account?"
-msgstr ""
+msgstr "Cipta akaun?"
 
 #: templates/checkout/form-billing.php:49
 msgid ""
@@ -7702,15 +7702,15 @@ msgstr ""
 
 #: templates/checkout/form-checkout.php:51
 msgid "Your order"
-msgstr ""
+msgstr "Pesanan anda"
 
 #: templates/checkout/form-coupon.php:17
 msgid "Have a coupon?"
-msgstr ""
+msgstr "Ada kupon?"
 
 #: templates/checkout/form-coupon.php:18
 msgid "Click here to enter your code"
-msgstr ""
+msgstr "Klik disini untuk mengisi kod anda"
 
 #: templates/checkout/form-login.php:14
 msgid "Returning customer?"
@@ -7718,7 +7718,7 @@ msgstr ""
 
 #: templates/checkout/form-login.php:15
 msgid "Click here to login"
-msgstr ""
+msgstr "Klik disini untuk log masuk"
 
 #: templates/checkout/form-login.php:22
 msgid ""
@@ -7748,15 +7748,15 @@ msgstr ""
 
 #: templates/checkout/form-pay.php:89
 msgid "Pay for order"
-msgstr ""
+msgstr "Bayar untuk pesanan"
 
 #: templates/checkout/form-shipping.php:29
 msgid "Ship to a different address?"
-msgstr ""
+msgstr "Hantar ke alamat berbeza?"
 
 #: templates/checkout/review-order.php:150
 msgid "Please fill in your details above to see available payment methods."
-msgstr ""
+msgstr "Tolong isikan butir anda diatas untuk melihat kaedah pembayaran sedia ada."
 
 #: templates/checkout/review-order.php:152
 msgid ""
@@ -7816,7 +7816,7 @@ msgstr ""
 
 #: templates/emails/admin-new-order.php:17
 msgid "Order: %s"
-msgstr ""
+msgstr "Pesanan: %s"
 
 #: templates/emails/admin-new-order.php:50
 #: templates/emails/customer-completed-order.php:51
@@ -7855,7 +7855,7 @@ msgstr "Tel:"
 msgid ""
 "Hi there. Your recent order on %s has been completed. Your order details are"
 " shown below for your reference:"
-msgstr ""
+msgstr "Hello. Pesanan terbaru anda di %s telah selesai. Butir pesanan anda dipamerkan dibawah untuk rujukan anda:"
 
 #: templates/emails/customer-invoice.php:16
 #: templates/emails/plain/customer-invoice.php:14
@@ -7888,7 +7888,7 @@ msgstr ""
 #: templates/emails/customer-note.php:14
 #: templates/emails/plain/customer-note.php:13
 msgid "Hello, a note has just been added to your order:"
-msgstr ""
+msgstr "Hello, satu nota telah ditambahkan ke pesanan anda:"
 
 #: templates/emails/customer-note.php:18
 #: templates/emails/plain/customer-note.php:21
@@ -7939,7 +7939,7 @@ msgstr "Alamat penghantaran"
 
 #: templates/emails/email-order-items.php:25
 msgid "Product Image"
-msgstr ""
+msgstr "Imej Produk"
 
 #: templates/emails/email-order-items.php:46
 #: templates/emails/plain/email-order-items.php:46
@@ -7949,7 +7949,7 @@ msgstr ""
 #: templates/emails/email-order-items.php:48
 #: templates/emails/plain/email-order-items.php:48
 msgid "Download"
-msgstr ""
+msgstr "Muat turun"
 
 #: templates/emails/plain/admin-new-order.php:19
 #: templates/emails/plain/customer-completed-order.php:19
@@ -7991,7 +7991,7 @@ msgstr ""
 
 #: templates/emails/plain/email-order-items.php:35
 msgid "Cost: %s"
-msgstr ""
+msgstr "Kos: %s"
 
 #: templates/global/breadcrumb.php:63
 msgid "Products tagged &ldquo;"
@@ -8029,11 +8029,11 @@ msgstr "Kata laluan"
 
 #: templates/global/form-login.php:38 templates/myaccount/form-login.php:46
 msgid "Remember me"
-msgstr ""
+msgstr "Ingat saya"
 
 #: templates/global/form-login.php:42 templates/myaccount/form-login.php:50
 msgid "Lost your password?"
-msgstr ""
+msgstr "Hilang kata laluan anda?"
 
 #: templates/global/quantity-input.php:12
 msgctxt "Product quantity input tooltip"
@@ -8050,7 +8050,7 @@ msgstr ""
 
 #: templates/loop/orderby.php:22
 msgid "Sort by popularity"
-msgstr ""
+msgstr "Asingkan mengikut populariti"
 
 #: templates/loop/orderby.php:23
 msgid "Sort by average rating"
@@ -8094,7 +8094,7 @@ msgstr ""
 
 #: templates/myaccount/form-add-payment-method.php:48
 msgid "Add Payment Method"
-msgstr ""
+msgstr "Tamba Kaedah Pembayaran"
 
 #: templates/myaccount/form-edit-account.php:20
 msgid "First name"
@@ -8115,7 +8115,7 @@ msgstr ""
 
 #: templates/myaccount/form-edit-account.php:36
 msgid "Confirm new password"
-msgstr ""
+msgstr "Pastikan kata laluan baru"
 
 #: templates/myaccount/form-edit-account.php:41
 msgid "Save changes"
@@ -8134,7 +8134,7 @@ msgstr "Alamat Penghantaran"
 
 #: templates/myaccount/form-edit-address.php:38
 msgid "Save Address"
-msgstr ""
+msgstr "Simpan Alamat"
 
 #: templates/myaccount/form-login.php:32
 msgid "Username or email address"
@@ -8164,11 +8164,11 @@ msgstr ""
 
 #: templates/myaccount/form-lost-password.php:31
 msgid "New password"
-msgstr ""
+msgstr "Kata laluan baru"
 
 #: templates/myaccount/form-lost-password.php:35
 msgid "Re-enter new password"
-msgstr ""
+msgstr "Masukkan kembali kata laluan baru"
 
 #: templates/myaccount/form-lost-password.php:46
 msgid "Reset Password"
@@ -8176,7 +8176,7 @@ msgstr ""
 
 #: templates/myaccount/form-lost-password.php:46
 msgid "Save"
-msgstr ""
+msgstr "Simpan"
 
 #: templates/myaccount/my-account.php:19
 msgid "Hello <strong>%1$s</strong> (not %1$s? <a href=\"%2$s\">Sign out</a>)."
@@ -8191,11 +8191,11 @@ msgstr ""
 
 #: templates/myaccount/my-address.php:17
 msgid "My Addresses"
-msgstr ""
+msgstr "Alamat-alamat Saya"
 
 #: templates/myaccount/my-address.php:23
 msgid "My Address"
-msgstr ""
+msgstr "Alamat Saya"
 
 #: templates/myaccount/my-address.php:35
 msgid "The following addresses will be used on the checkout page by default."
@@ -8203,11 +8203,11 @@ msgstr ""
 
 #: templates/myaccount/my-address.php:64
 msgid "You have not set up this type of address yet."
-msgstr ""
+msgstr "Anda belum menetapkan jenis alamat ini."
 
 #: templates/myaccount/my-downloads.php:18
 msgid "Available downloads"
-msgstr ""
+msgstr "Muat turun sedia ada"
 
 #: templates/myaccount/my-downloads.php:27
 msgid "%s download remaining"
@@ -8216,7 +8216,7 @@ msgstr[0] "%s muat turun yang tinggal"
 
 #: templates/myaccount/my-orders.php:26
 msgid "Recent Orders"
-msgstr ""
+msgstr "Pesanan Terbaru"
 
 #: templates/myaccount/my-orders.php:34
 msgid "Status"
@@ -8311,7 +8311,7 @@ msgstr ""
 
 #: templates/single-product/add-to-cart/variable.php:73
 msgid "Clear selection"
-msgstr ""
+msgstr "Hilangkan pilihan"
 
 #: templates/single-product/add-to-cart/variable.php:103
 msgid "This product is currently out of stock and unavailable."
@@ -8419,19 +8419,19 @@ msgstr ""
 
 #: templates/single-product-reviews.php:76
 msgid "Good"
-msgstr ""
+msgstr "Baik"
 
 #: templates/single-product-reviews.php:77
 msgid "Average"
-msgstr ""
+msgstr "Sederhana"
 
 #: templates/single-product-reviews.php:78
 msgid "Not that bad"
-msgstr ""
+msgstr "Tidak begitu teruk"
 
 #: templates/single-product-reviews.php:79
 msgid "Very Poor"
-msgstr ""
+msgstr "Sangat Teruk"
 
 #: templates/single-product-reviews.php:83
 msgid "Your Review"
@@ -8452,7 +8452,7 @@ msgstr "Khidmat Sokongan Premium"
 
 #. Plugin URI of the plugin/theme
 msgid "http://www.woothemes.com/woocommerce/"
-msgstr ""
+msgstr "http://www.woothemes.com/woocommerce/"
 
 #. Description of the plugin/theme
 msgid "An e-commerce toolkit that helps you sell anything. Beautifully."

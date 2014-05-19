@@ -760,25 +760,35 @@ class WC_Meta_Box_Product_Data {
 
 				<p class="toolbar">
 					<a href="#" class="close_all"><?php _e( 'Close all', 'woocommerce' ); ?></a><a href="#" class="expand_all"><?php _e( 'Expand all', 'woocommerce' ); ?></a>
-					<strong><?php _e( 'Bulk edit:', 'woocommerce' ); ?></strong>
 					<select id="field_to_edit">
-						<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
-						<option value="toggle_downloadable"><?php _e( 'Toggle &quot;Downloadable&quot;', 'woocommerce' ); ?></option>
-						<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
-						<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
-						<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
-						<option value="variable_regular_price_increase"><?php _e( 'Prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
-						<option value="variable_regular_price_decrease"><?php _e( 'Prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
-						<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
-						<option value="variable_sale_price_increase"><?php _e( 'Sale prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
-						<option value="variable_sale_price_decrease"><?php _e( 'Sale prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
-						<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
-						<option value="variable_weight"><?php _e( 'Weight', 'woocommerce' ); ?></option>
-						<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
-						<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
-						<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
-						<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
-						<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
+						<option value=""><?php _e( 'Choose a field to bulk edit&hellip;', 'woocommerce' ); ?></option>
+						<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
+							<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
+							<option value="toggle_downloadable"><?php _e( 'Toggle &quot;Downloadable&quot;', 'woocommerce' ); ?></option>
+							<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
+							<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Pricing', 'woocommerce' ); ?>">
+							<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price_increase"><?php _e( 'Prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price_decrease"><?php _e( 'Prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price_increase"><?php _e( 'Sale prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price_decrease"><?php _e( 'Sale prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
+							<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Shipping', 'woocommerce' ); ?>">
+							<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
+							<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
+							<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
+							<option value="variable_weight"><?php _e( 'Weight', 'woocommerce' ); ?></option>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Downloadable products', 'woocommerce' ); ?>">
+							<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
+							<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
+						</optgroup>
 						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					</select>
 					<a class="button bulk_edit"><?php _e( 'Go', 'woocommerce' ); ?></a>
@@ -882,7 +892,7 @@ class WC_Meta_Box_Product_Data {
 
 					<button type="button" class="button link_all_variations" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Link all variations', 'woocommerce' ); ?></button>
 
-					<strong><?php _e( 'Default selections:', 'woocommerce' ); ?></strong>
+					<strong><?php _e( 'Defaults', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php _e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
 					<?php
 						$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
 						foreach ( $attributes as $attribute ) {
@@ -1363,12 +1373,12 @@ class WC_Meta_Box_Product_Data {
 				$variation_id = absint( $variable_post_id[ $i ] );
 
 				// Virtal/Downloadable
-				$is_virtual = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
-				$is_downloadable = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
-
+				$is_virtual           = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
+				$is_downloadable      = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
+				
 				// Enabled or disabled
-				$post_status = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
-
+				$post_status          = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
+				
 				// Generate a useful post title
 				$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), absint( $variation_id ), esc_html( get_the_title( $post_id ) ) );
 
@@ -1397,6 +1407,11 @@ class WC_Meta_Box_Product_Data {
 
 				}
 
+				// Only continue if we have a variation ID
+				if ( ! $variation_id ) {
+					continue;
+				}
+
 				// Update post meta
 				update_post_meta( $variation_id, '_sku', wc_clean( $variable_sku[ $i ] ) );
 				update_post_meta( $variation_id, '_thumbnail_id', absint( $upload_image_id[ $i ] ) );
@@ -1418,10 +1433,11 @@ class WC_Meta_Box_Product_Data {
 				}
 				
 				// Backorders
-				if ( isset( $variable_backorders[ $i ] ) && $variable_backorders[ $i ] !== 'parent' )
+				if ( isset( $variable_backorders[ $i ] ) && $variable_backorders[ $i ] !== 'parent' ) {
 					update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
-				else
+				} else {
 					delete_post_meta( $variation_id, '_backorders' );
+				}
 
 				// Price handling
 				$regular_price 	= wc_format_decimal( $variable_regular_price[ $i ] );
@@ -1497,25 +1513,22 @@ class WC_Meta_Box_Product_Data {
 				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
 				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
 
-				// Remove old taxonomies attributes so data is kept up to date
-				if ( $variation_id ) {
-					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND post_id = %d;", $variation_id ) );
-					wp_cache_delete( $variation_id, 'post_meta');
+				// Update taxonomies - don't use wc_clean as it destroys sanitized characters
+				$updated_attribute_keys = array();
+				foreach ( $attributes as $attribute ) {
+					if ( $attribute['is_variation'] ) {
+						$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
+						$value         = isset( $_POST[ $attribute_key ][ $i ] ) ? sanitize_title( stripslashes( $_POST[ $attribute_key ][ $i ] ) ) : '';
+						$updated_attribute_keys[] = $attribute_key;
+						update_post_meta( $variation_id, $attribute_key, $value );
+					}
 				}
 
-				// Update taxonomies
-				foreach ( $attributes as $attribute ) {
+				// Remove old taxonomies attributes so data is kept up to date - first get attribute key names
+				$delete_attribute_keys = $wpdb->get_col( $wpdb->prepare( "SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND meta_key NOT IN ( '" . implode( "','", $updated_attribute_keys ) . "' ) AND post_id = %d;", $variation_id ) );
 
-					if ( $attribute['is_variation'] ) {
-						// Don't use wc_clean as it destroys sanitized characters
-						if ( isset( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) )
-							$value = sanitize_title( trim( stripslashes( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) ) );
-						else
-							$value = '';
-
-						update_post_meta( $variation_id, 'attribute_' . sanitize_title( $attribute['name'] ), $value );
-					}
-
+				foreach ( $delete_attribute_keys as $key ) {
+					delete_post_meta( $variation_id, $key );
 				}
 
 				do_action( 'woocommerce_save_product_variation', $variation_id, $i );

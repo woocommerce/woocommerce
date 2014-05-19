@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-03-24 12:16:53+00:00\n"
-"PO-Revision-Date: 2014-04-24 16:30+0000\n"
+"PO-Revision-Date: 2014-05-06 19:50+0000\n"
 "Last-Translator: Adrian Dimitrov <dimitrov.adrian@gmail.com>\n"
 "Language-Team: Bulgarian (Bulgaria) (http://www.transifex.com/projects/p/woocommerce/language/bg_BG/)\n"
 "MIME-Version: 1.0\n"
@@ -6014,11 +6014,11 @@ msgstr "BIC (Swift)"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "+ Add Account"
-msgstr "+ Добави сметка"
+msgstr "+ Добавяне на сметка"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:121
 msgid "Remove selected account(s)"
-msgstr "Изтрий избраните сметки"
+msgstr "Изтриване на избраните сметки"
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:245
 msgid "Our Bank Details"
@@ -6064,7 +6064,7 @@ msgstr "Очаква плащане с чек"
 #: includes/gateways/cod/class-wc-gateway-cod.php:24
 #: includes/gateways/cod/class-wc-gateway-cod.php:67
 msgid "Cash on Delivery"
-msgstr "Плащане при доставка"
+msgstr "Наложен платеж"
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:25
 msgid "Have your customers pay with cash (or by other means) upon delivery."
@@ -6797,7 +6797,7 @@ msgstr "Местната доставка е прост метод за дост
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:25
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:84
 msgid "Local Pickup"
-msgstr "Взимане от магазина"
+msgstr "Вземане от магазина"
 
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:77
 msgid "Enable local pickup"
@@ -8119,7 +8119,7 @@ msgstr "Потвърдете новата парола"
 
 #: templates/myaccount/form-edit-account.php:41
 msgid "Save changes"
-msgstr "Запиши промените"
+msgstr "Запазване на промените"
 
 #: templates/myaccount/form-edit-address.php:14
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25

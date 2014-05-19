@@ -96,7 +96,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			),
 
 			array(
-				'desc' 		=> __( 'Un-force HTTPS when leaving the checkout', 'woocommerce' ),
+				'desc' 		=> __( 'Force HTTP when leaving the checkout', 'woocommerce' ),
 				'id' 		=> 'woocommerce_unforce_ssl_checkout',
 				'default'	=> 'no',
 				'type' 		=> 'checkbox',

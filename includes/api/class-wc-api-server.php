@@ -370,12 +370,27 @@ class WC_API_Server {
 	}
 
 	/**
+	 * urldecode deep.
+	 *
+	 * @since  2.2
+	 * @param  string/array $value Data to decode with urldecode.
+	 * @return string/array        Decoded data.
+	 */
+	protected function urldecode_deep( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( array( $this, 'urldecode_deep' ), $value );
+		} else {
+			return urldecode( $value );
+		}
+	}
+
+	/**
 	 * Sort parameters by order specified in method declaration
 	 *
 	 * Takes a callback and a list of available params, then filters and sorts
 	 * by the parameters the method actually needs, using the Reflection API
 	 *
-	 * @since 2.1
+	 * @since 2.2
 	 * @param callable|array $callback the endpoint callback
 	 * @param array $provided the provided request parameters
 	 * @return array
@@ -392,8 +407,12 @@ class WC_API_Server {
 		foreach ( $wanted as $param ) {
 			if ( isset( $provided[ $param->getName() ] ) ) {
 				// We have this parameters in the list to choose from
+				if ( 'data' == $param->getName() ) {
+					$ordered_parameters[] = $provided[ $param->getName() ];
+					continue;
+				}
 
-				$ordered_parameters[] = is_array( $provided[ $param->getName() ] ) ? array_map( 'urldecode', $provided[ $param->getName() ] ) : urldecode( $provided[ $param->getName() ] );
+				$ordered_parameters[] = $this->urldecode_deep( $provided[ $param->getName() ] );
 			}
 			elseif ( $param->isDefaultValueAvailable() ) {
 				// We don't have this parameter, but it's optional

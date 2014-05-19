@@ -252,7 +252,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
         }
 
 		// Yay! We passed!
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
 	}
 
 

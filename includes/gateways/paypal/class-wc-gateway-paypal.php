@@ -769,15 +769,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						// Mark order as refunded
 						$order->update_status( 'refunded', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
-						$mailer = WC()->mailer();
-
-						$message = $mailer->wrap_message(
-							__( 'Order refunded/reversed', 'woocommerce' ),
+						$this->send_ipn_email_notification( 
+							sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ),
 							sprintf( __( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 						);
-
-						$mailer->send( get_option( 'admin_email' ), sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ), $message );
-
 					}
 
 				break;
@@ -786,27 +781,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					// Mark order as refunded
 					$order->update_status( 'on-hold', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
-					$mailer = WC()->mailer();
-
-					$message = $mailer->wrap_message(
-						__( 'Order reversed', 'woocommerce' ),
+					$this->send_ipn_email_notification( 
+						sprintf( __( 'Payment for order %s reversed', 'woocommerce' ), $order->get_order_number() ),
 						sprintf(__( 'Order %s has been marked on-hold due to a reversal - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 					);
 
-					$mailer->send( get_option( 'admin_email' ), sprintf( __( 'Payment for order %s reversed', 'woocommerce' ), $order->get_order_number() ), $message );
-
 				break;
 				case 'canceled_reversal' :
-
-					$mailer = WC()->mailer();
-
-					$message = $mailer->wrap_message(
-						__( 'Reversal Cancelled', 'woocommerce' ),
-						sprintf( __( 'Order %s has had a reversal cancelled. Please check the status of payment and update the order status accordingly.', 'woocommerce' ), $order->get_order_number() )
+					$this->send_ipn_email_notification( 
+						sprintf( __( 'Reversal cancelled for order %s', 'woocommerce' ), $order->get_order_number() ), 
+						sprintf( __( 'Order %s has had a reversal cancelled. Please check the status of payment and update the order status accordingly.', 'woocommerce' ), $order->get_order_number() ) 
 					);
-
-					$mailer->send( get_option( 'admin_email' ), sprintf( __( 'Reversal cancelled for order %s', 'woocommerce' ), $order->get_order_number() ), $message );
-
 				break;
 				default :
 					// No action
@@ -815,7 +800,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			exit;
 		}
+	}
 
+	/**
+	 * Send a notification to the user handling orders.
+	 * @param  string $subject
+	 * @param  string $message
+	 */
+	public function send_ipn_email_notification( $subject, $message ) {
+		$new_order_settings = get_option( 'woocommerce_new_order_settings', array() );
+		$mailer             = WC()->mailer();
+		$message            = $mailer->wrap_message( $subject, $message );
+
+		$mailer->send( ! empty( $new_order_settings['recipient'] ) ? $new_order_settings['recipient'] : get_option( 'admin_email' ), $subject, $message );
 	}
 
 	/**

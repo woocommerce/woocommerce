@@ -34,6 +34,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$this->description        = $this->get_option( 'description' );
 		$this->instructions       = $this->get_option( 'instructions', $this->description );
 		$this->enable_for_methods = $this->get_option( 'enable_for_methods', array() );
+		$this->enable_for_virtual = $this->get_option( 'enable_for_virtual', 'yes' ) === 'yes' ? true : false;
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_thankyou_cod', array( $this, 'thankyou_page' ) );
@@ -96,6 +97,12 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'custom_attributes' => array(
 					'data-placeholder' => __( 'Select shipping methods', 'woocommerce' )
 				)
+			),
+			'enable_for_virtual' => array(
+				'title'             => __( 'Enable for virtual orders', 'woocommerce' ),
+				'label'             => __( 'Enable COD if the order is virtual', 'woocommerce' ),
+				'type'              => 'checkbox',
+				'default'           => 'yes'
 			)
  	   );
     }
@@ -108,32 +115,34 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	public function is_available() {
 		$order = null;
 
-		if ( ! WC()->cart->needs_shipping() ) {
-			return false;
-		}
-
-		if ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
-			$order_id = absint( get_query_var( 'order-pay' ) );
-			$order    = new WC_Order( $order_id );
-
-			// Test if order needs shipping.
-			$needs_shipping = false;
-
-			if ( 0 < sizeof( $order->get_items() ) ) {
-				foreach ( $order->get_items() as $item ) {
-					$_product = $order->get_product_from_item( $item );
-
-					if ( $_product->needs_shipping() ) {
-						$needs_shipping = true;
-						break;
-					}
-				}
+		if ( ! $this->enable_for_virtual ) {
+			if ( WC()->cart && ! WC()->cart->needs_shipping() ) {
+				return false;
 			}
 
-			$needs_shipping = apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
+			if ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
+				$order_id = absint( get_query_var( 'order-pay' ) );
+				$order    = new WC_Order( $order_id );
 
-			if ( $needs_shipping ) {
-				return false;
+				// Test if order needs shipping.
+				$needs_shipping = false;
+
+				if ( 0 < sizeof( $order->get_items() ) ) {
+					foreach ( $order->get_items() as $item ) {
+						$_product = $order->get_product_from_item( $item );
+
+						if ( $_product->needs_shipping() ) {
+							$needs_shipping = true;
+							break;
+						}
+					}
+				}
+
+				$needs_shipping = apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
+
+				if ( $needs_shipping ) {
+					return false;
+				}
 			}
 		}
 
@@ -213,8 +222,9 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      * Output for the order received page.
      */
 	public function thankyou_page() {
-		if ( $this->instructions )
+		if ( $this->instructions ) {
         	echo wpautop( wptexturize( $this->instructions ) );
+		}
 	}
 
     /**
@@ -226,10 +236,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      * @param bool $plain_text
      */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-    	if ( $sent_to_admin || $order->payment_method !== 'cod' )
-    		return;
-
-		if ( $this->instructions )
-        	echo wpautop( wptexturize( $this->instructions ) );
+		if ( $this->instructions && ! $sent_to_admin && 'cod' === $order->payment_method ) {
+			echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
+		}
 	}
 }

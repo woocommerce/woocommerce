@@ -79,7 +79,7 @@ $order = new WC_Order( $order_id );
 				if ( in_array( $order->status, array( 'processing', 'completed' ) ) && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) {
 					?>
 					<tr class="product-purchase-note">
-						<td colspan="3"><?php echo apply_filters( 'the_content', $purchase_note ); ?></td>
+						<td colspan="3"><?php echo wpautop( do_shortcode( $purchase_note ) ); ?></td>
 					</tr>
 					<?php
 				}
