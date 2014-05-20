@@ -644,7 +644,7 @@ class WC_Checkout {
                 	WC()->session->set( 'reload_checkout', true );
                 	
                 	// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering
-			WC()->cart->calculate_totals();
+					WC()->cart->calculate_totals();
 
                 	// Add customer info from other billing fields
                 	if ( $this->posted['billing_first_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
