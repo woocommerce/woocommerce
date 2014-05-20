@@ -34,13 +34,11 @@ add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_c
  * @return void
  */
 function wc_empty_cart() {
-	if ( ! isset( WC()->cart ) || WC()->cart == '' )
+	if ( ! isset( WC()->cart ) || WC()->cart == '' ) {
 		WC()->cart = new WC_Cart();
-
+	}
 	WC()->cart->empty_cart( false );
 }
-add_action( 'wp_logout', 'wc_empty_cart' );
-
 
 /**
  * Load the cart upon login
