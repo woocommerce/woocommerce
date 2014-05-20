@@ -111,16 +111,20 @@ class WC_Session_Handler extends WC_Session {
     }
 
 	/**
-	 * generate_customer_id function.
+	 * Generate a unique customer ID for guests, or return user ID if logged in. 
+	 * 
+	 * Uses Portable PHP password hashing framework to generate a unique cryptographically strong ID.
 	 *
 	 * @access public
-	 * @return mixed
+	 * @return int|string
 	 */
 	public function generate_customer_id() {
 		if ( is_user_logged_in() ) {
 			return get_current_user_id();
 		} else {
-			return wp_generate_password( 32, false );
+			require_once( ABSPATH . 'wp-includes/class-phpass.php');
+			$hasher = new PasswordHash( 8, false );
+			return md5( $hasher->get_random_bytes( 32 ) );
 		}
 	}
 
