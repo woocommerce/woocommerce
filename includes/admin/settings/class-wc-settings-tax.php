@@ -567,11 +567,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 						'tax_rate_class'    => sanitize_title( $current_class )
 					);
 
-					do_action( 'woocommerce_tax_rate_added', $tax_rate );
-
 					$wpdb->insert( $wpdb->prefix . "woocommerce_tax_rates", $tax_rate );
 
 					$tax_rate_id = $wpdb->insert_id;
+
+					do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $tax_rate );
 
 					if ( ! empty( $postcode ) ) {
 						$postcodes = explode( ';', $postcode );
@@ -664,8 +664,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					'tax_rate_class'    => sanitize_title( $current_class )
 				);
 
-				do_action( 'woocommerce_tax_rate_updated', $tax_rate );
-
 				$wpdb->update(
 					$wpdb->prefix . "woocommerce_tax_rates",
 					$tax_rate,
@@ -673,6 +671,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 						'tax_rate_id' => $tax_rate_id
 					)
 				);
+
+				do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $tax_rate );
 
 				if ( isset( $tax_rate_postcode[ $key ] ) ) {
 					// Delete old
