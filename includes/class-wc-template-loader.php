@@ -53,7 +53,8 @@ class WC_Template_Loader {
 			$find[] 	= $file;
 			$find[] 	= WC_TEMPLATE_PATH . $file;
 
-		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
+		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) )
+			|| ( get_post_type() == 'product' && is_tax() ) ) {
 
 			$file 	= 'archive-product.php';
 			$find[] = $file;
