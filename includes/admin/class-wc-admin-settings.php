@@ -477,17 +477,27 @@ class WC_Admin_Settings {
 	            // Image width settings
 	            case 'image_width' :
 
-	            	$width 	= self::get_option( $value['id'] . '[width]', $value['default']['width'] );
-	            	$height = self::get_option( $value['id'] . '[height]', $value['default']['height'] );
-	            	$crop 	= checked( 1, self::get_option( $value['id'] . '[crop]', $value['default']['crop'] ), false );
+	            	$image_size = str_replace( '_image_size', '', $value[ 'id' ] );
+	            	$size   = wc_get_image_size( $image_size );
+	            	$width  = isset( $size[ 'width' ] )     ? $size[ 'width' ]  : $value[ 'default' ][ 'width' ];
+	            	$height = isset( $size[ 'height' ] )    ? $size[ 'height' ] : $value[ 'default' ][ 'height' ];
+	            	$crop   = isset( $size[ 'height' ] )    ? $size[ 'crop' ]   : $value[ 'default' ][ 'crop' ];
+
+	            	$disabled_attr = '';
+	            	$disabled_message = '';
+	            	
+	            	if ( has_filter( 'woocommerce_get_image_size_' . $image_size ) ) {
+	            		$disabled_attr = 'disabled="disabled"';
+	            		$disabled_message = "<p><small>" . __( 'The settings of this image size have been disabled because its values are being overwritten by a filter.', 'woocommerce' ) . "</small></p>";
+	            	}
 
 	            	?><tr valign="top">
-						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tip; ?></th>
+						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tip; echo $disabled_message; ?></th>
 	                    <td class="forminp image_width_settings">
 
-	                    	<input name="<?php echo esc_attr( $value['id'] ); ?>[width]" id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo $height; ?>" />px
+	                    	<input name="<?php echo esc_attr( $value['id'] ); ?>[width]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo $height; ?>" />px
 
-	                    	<label><input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" <?php echo $crop; ?> /> <?php _e( 'Hard Crop?', 'woocommerce' ); ?></label>
+	                    	<label><input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" <?php echo $crop; ?> /> <?php _e( 'Hard Crop?', 'woocommerce' ); ?></label>
 
 	                    	</td>
 	                </tr><?php
