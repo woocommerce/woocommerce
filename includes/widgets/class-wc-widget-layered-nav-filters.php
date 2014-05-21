@@ -50,7 +50,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 
 		$current_term 	= is_tax() ? get_queried_object()->term_id : '';
 		$current_tax 	= is_tax() ? get_queried_object()->taxonomy : '';
-		$title          = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
+		$title          = isset( $instance['title'] ) ? $instance['title'] : '';
+		$title          = apply_filters( 'widget_title', $title, $instance, $this->id_base );
 
 		// Price
 		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : 0;
