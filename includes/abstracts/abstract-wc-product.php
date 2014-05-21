@@ -1213,7 +1213,7 @@ class WC_Product {
 			$query['where'] .= " AND pm2.meta_value = 'instock'";
 		}
 
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true ) ) {
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $this->id ) ) {
 			$query['where'] .= " AND ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) )";
 			$andor = 'OR';
 		} else {
@@ -1221,7 +1221,7 @@ class WC_Product {
 		}
 
 		// when query is OR - need to check against excluded ids again
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true ) ) {
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $this->id ) ) {
 			$query['where'] .= " {$andor} ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) )";
 			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
 		}
@@ -1230,7 +1230,7 @@ class WC_Product {
 		$query['limits']   = " LIMIT " . absint( $limit ) . " ";
 
 		// Get the posts
-		$related_posts = $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $query ) ) );
+		$related_posts = $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id ) ) );
 
 		return $related_posts;
 	}
