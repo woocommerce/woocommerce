@@ -186,6 +186,8 @@ class WC_Query {
 			$wp_post_types['product']->ID 			= $shop_page->ID;
 			$wp_post_types['product']->post_title 	= $shop_page->post_title;
 			$wp_post_types['product']->post_name 	= $shop_page->post_name;
+			$wp_post_types['product']->post_type    = $shop_page->post_type;
+			$wp_post_types['product']->ancestors    = get_ancestors( $shop_page->ID, $shop_page->post_type );
 
 			// Fix conditional Functions like is_front_page
 			$q->is_singular = false;
