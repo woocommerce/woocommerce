@@ -486,6 +486,8 @@ class WC_Shortcodes {
 
 		extract( shortcode_atts( array(
 			'id'         => '',
+			'class'      => '',
+            		'quantity'   => '1',
 			'sku'        => '',
 			'style'      => 'border:4px solid #ccc; padding: 12px;',
 			'show_price' => 'true'
@@ -508,13 +510,13 @@ class WC_Shortcodes {
 
 		ob_start();
 		?>
-		<p class="product woocommerce" style="<?php echo $style; ?>">
+		<p class="product woocommerce add_to_cart_inline <?php echo $class; ?>" style="<?php echo $style; ?>">
 
 			<?php if ( $show_price == 'true' ) : ?>
 				<?php echo $product->get_price_html(); ?>
 			<?php endif; ?>
 
-			<?php woocommerce_template_loop_add_to_cart(); ?>
+			<?php woocommerce_template_loop_add_to_cart( array( "quantity" => $quantity )); ?>
 
 		</p><?php
 

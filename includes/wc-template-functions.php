@@ -509,8 +509,8 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 	 * @subpackage	Loop
 	 * @return void
 	 */
-	function woocommerce_template_loop_add_to_cart() {
-		wc_get_template( 'loop/add-to-cart.php' );
+	function woocommerce_template_loop_add_to_cart( $args = array() ) {
+		wc_get_template( 'loop/add-to-cart.php' , $args );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_product_thumbnail' ) ) {
