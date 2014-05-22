@@ -127,6 +127,17 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.1.10 - XXX =
+* Fix - Removed unecessary localization from edit account.
+* Fix - Admin welcome screen css.
+* Fix - Fixed my account setting values to wrong user submitted strings.
+* Fix - Menu order terms were coming back empty.
+* Fix - Fix notice that occurs from external function call.
+* Fix - Addons page, reference new json API endpoint.
+* Fix - Notices when rendering WooCommerce Shop as Front Page.
+* Fix - Prevent undefined notice for Layered Nav title.
+* Fix - state_province is not required for mijireh any longer.
+* Tweak - Stronger session ID generation.
+* Dev - Add action hooks when saving tax rates.
 
 = 2.1.9 - 14/05/2014 =
 * Fix - fix case-insensitive matching for coupon posts with uppercase chars.
