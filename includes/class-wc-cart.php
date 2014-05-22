@@ -1476,6 +1476,7 @@ class WC_Cart {
 
 						// Limit to defined email addresses
 						if ( is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
+							$check_emails           = array();
 							$coupon->customer_email = array_map( 'sanitize_email', $coupon->customer_email );
 
 							if ( is_user_logged_in() ) {
@@ -1498,18 +1499,25 @@ class WC_Cart {
 
 						// Usage limits per user - check against billing and user email and user ID
 						if ( $coupon->usage_limit_per_user > 0 ) {
-							$used_by = (array) get_post_meta( $this->id, '_used_by' );
+							$check_emails = array();
+							$used_by      = array_filter( (array) get_post_meta( $coupon->id, '_used_by' ) );
 
 							if ( is_user_logged_in() ) {
 								$current_user   = wp_get_current_user();
-								$check_emails[] = $current_user->user_email;
+								$check_emails[] = sanitize_email( $current_user->user_email );
+								$usage_count    = sizeof( array_keys( $used_by, get_current_user_id() ) );
+							} else {
+								$check_emails[] = sanitize_email( $posted['billing_email'] );
+								$user           = get_user_by( 'email', $posted['billing_email'] );
+								if ( $user ) {
+									$usage_count = sizeof( array_keys( $used_by, $user->ID ) );
+								} else {
+									$usage_count = 0;
+								}
 							}
-							$check_emails[] = $posted['billing_email'];
-							$check_emails   = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
-							$usage_count    = sizeof( array_keys( $used_by, get_current_user_id() ) );
-
+							
 							foreach ( $check_emails as $check_email ) {
-								$usage_count    = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
+								$usage_count = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
 							}
 
 							if ( $usage_count >= $coupon->usage_limit_per_user ) {
