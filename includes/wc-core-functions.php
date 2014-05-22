@@ -204,6 +204,7 @@ function get_woocommerce_currencies() {
 				'TRY' => __( 'Turkish Lira', 'woocommerce' ),
 				'USD' => __( 'US Dollars', 'woocommerce' ),
 				'VND' => __( 'Vietnamese Dong', 'woocommerce' ),
+				'EGP' => __( 'Egyptian Pound', 'woocommerce' ),
 			)
 		)
 	);
@@ -276,6 +277,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'VND' : $currency_symbol = '&#8363;'; break;
 		case 'NGN' : $currency_symbol = '&#8358;'; break;
 		case 'HRK' : $currency_symbol = 'Kn'; break;
+		case 'EGP' : $currency_symbol = 'EGP'; break;
 		default    : $currency_symbol = ''; break;
 	}
 
