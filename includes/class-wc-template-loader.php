@@ -43,15 +43,22 @@ class WC_Template_Loader {
 			$find[] = $file;
 			$find[] = WC_TEMPLATE_PATH . $file;
 
-		} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
+		} elseif ( is_product_taxonomy() ) {
 
-			$term = get_queried_object();
+			$term   = get_queried_object();
 
-			$file 		= 'taxonomy-' . $term->taxonomy . '.php';
-			$find[] 	= 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] 	= WC_TEMPLATE_PATH . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] 	= $file;
-			$find[] 	= WC_TEMPLATE_PATH . $file;
+			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
+				$file = 'taxonomy-' . $term->taxonomy . '.php';
+			} else {
+				$file = 'archive-product.php';
+			}
+
+			$find[] = 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$find[] = WC_TEMPLATE_PATH . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$find[] = 'taxonomy-' . $term->taxonomy . '.php';
+			$find[] = WC_TEMPLATE_PATH . 'taxonomy-' . $term->taxonomy . '.php';
+			$find[] = $file;
+			$find[] = WC_TEMPLATE_PATH . $file;
 
 		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
 
@@ -62,10 +69,11 @@ class WC_Template_Loader {
 		}
 
 		if ( $file ) {
-			$template       = locate_template( $find );
+			$template       = locate_template( array_unique( $find ) );
 			$status_options = get_option( 'woocommerce_status_options', array() );
-			if ( ! $template || ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) )
+			if ( ! $template || ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) ) {
 				$template = WC()->plugin_path() . '/templates/' . $file;
+			}
 		}
 
 		return $template;
