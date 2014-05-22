@@ -131,12 +131,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - API: Lookup customers by email endpoint.
 * Feature - Allow backorders to be configured at variation level.
 * Feature - Protect admins from shop manager users.
+* Feature - Ability to add custom quantity using add_to_cart shortcode.
 * Tweak - Recalculate the cart totals, in the event a user registers during checkout and in doing so qualifies for any discounts.
 * Tweak - Use `woocommerce_valid_order_statuses_for_payment` in `pay_action` too.
 * Tweak - Added the possibility to translate the edit-address endpoint slug.
 * Tweak - Removed all the_content filter in favor to wpautop() and do_shortcode().
 * Tweak - Send IPN email notifications to new order email.
 * Tweak - Clear and wipe session data on logout and end of checkout for guests.
+* Tweak - Load archive-product.php for other product taxonomies.
+* Tweak - Disable image size settings if filters are being used.
+* Dev - Added description parameter to the woocommerce_form_field function.
 * Dev - Introduce `woocommerce_valid_order_statuses_for_payment_complete` filter.
 * Dev - Introduce `woocommerce_thankyou_order_received_text` filter.
 * Dev - Introduce `woocommerce_product_backorders_allowed` filter.
@@ -146,9 +150,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - REST API: Allow ordering on the resource level.
 * Dev - Add new 'wc_admin_reports_path' filter to reports.
 * Dev - Add user ID to shipping packages.
+* Dev - Added product id parameter to related posts filters.
 * Refactor - Update stock amounts with DB queries.
 * Refactor - Simplified attribute name sanitisation which maintains UTF8 char integrity.
 * Refactor - Country class return methods.
+* Localisation - Egypptian currency.
+* Localisation - Address format of Taiwan.
 
 = 2.1.9 - 14/05/2014 =
 * Fix - fix case-insensitive matching for coupon posts with uppercase chars.
