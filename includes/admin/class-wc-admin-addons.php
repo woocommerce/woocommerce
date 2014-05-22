@@ -22,36 +22,17 @@ class WC_Admin_Addons {
 	 */
 	public function output() {
 
-		$view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : '';
-
-		if ( false === ( $addons = get_transient( 'woocommerce_addons_html_' . $view ) ) ) {
-
-			$raw_addons = wp_remote_get( 'http://www.woothemes.com/product-category/woocommerce-extensions/' . $view . '?orderby=popularity', array(
-					'user-agent' => 'woocommerce-addons-page',
-					'timeout'    => 3
-				) );
-
-			if ( ! is_wp_error( $raw_addons ) ) {
-
-				$raw_addons = wp_remote_retrieve_body( $raw_addons );
-
-				// Get Products
-				$dom = new DOMDocument();
-				libxml_use_internal_errors(true);
-				$dom->loadHTML( $raw_addons );
-
-				$addons = '';
-				$xpath  = new DOMXPath( $dom );
-				$tags   = $xpath->query('//ul[@class="products"]');
-				foreach ( $tags as $tag ) {
-					$addons = $tag->ownerDocument->saveXML( $tag );
-					break;
+		if ( false === ( $addons = get_transient( 'woocommerce_addons_data' ) ) ) {
+			$addons_json = wp_remote_get( 'http://d3t0oesq8995hv.cloudfront.net/woocommerce-addons.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+			if ( ! is_wp_error( $addons_json ) ) {
+				$addons = json_decode( wp_remote_retrieve_body( $addons_json ) );
+				if ( $addons ) {
+					set_transient( 'woocommerce_addons_data', $addons, 60*60*24*7 ); // 1 Week
 				}
-
-				if ( $addons )
-					set_transient( 'woocommerce_addons_html_' . $view, wp_kses_post( $addons ), 60*60*24*7 ); // Cached for a week
 			}
 		}
+
+		$view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : '';
 
 		include_once( 'views/html-admin-page-addons.php' );
 	}
