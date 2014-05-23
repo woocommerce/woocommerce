@@ -360,7 +360,7 @@ jQuery( function ( $ ) {
 
 				setting_variation_image.find( '.upload_image_id' ).val( attachment.id );
 				setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
-				setting_variation_image.find( 'img' ).attr( 'src', attachment.url );
+				setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', attachment.sizes.thumbnail.url );
 
 				wp.media.model.settings.post.id = wp_media_post_id;
 			});
