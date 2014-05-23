@@ -15,7 +15,7 @@
 					'import-export-extensions' => __( 'Import/export', 'woocommerce' ),
 					'product-extensions'       => __( 'Products', 'woocommerce' ),
 					'marketing-extensions'     => __( 'Marketing', 'woocommerce' ),
-					'accounting-extensions'	   => __( 'Acounting', 'woocommerce' ),
+					'accounting-extensions'	   => __( 'Accounting', 'woocommerce' ),
 					'free-extensions'          => __( 'Free', 'woocommerce' ),
 					'third-party-extensions'   => __( 'Third-party', 'woocommerce' ),
 				);
