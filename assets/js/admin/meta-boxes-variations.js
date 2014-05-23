@@ -324,7 +324,7 @@ jQuery( function ( $ ) {
 		if ( $button.is( '.remove' ) ) {
 
 			setting_variation_image.find( '.upload_image_id' ).val( '' );
-			setting_variation_image.find( 'img' ).attr( 'src', woocommerce_admin_meta_boxes_variations.woocommerce_placeholder_img_src );
+			setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', woocommerce_admin_meta_boxes_variations.woocommerce_placeholder_img_src );
 			setting_variation_image.find( '.upload_image_button' ).removeClass( 'remove' );
 
 		} else {
