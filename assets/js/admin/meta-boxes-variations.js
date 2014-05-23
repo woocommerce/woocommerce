@@ -356,11 +356,12 @@ jQuery( function ( $ ) {
 			// When an image is selected, run a callback.
 			variable_image_frame.on( 'select', function () {
 
-				var attachment = variable_image_frame.state().get( 'selection' ).first().toJSON();
+				var attachment = variable_image_frame.state().get( 'selection' ).first().toJSON(),
+					url = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
 				setting_variation_image.find( '.upload_image_id' ).val( attachment.id );
 				setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
-				setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', attachment.sizes.thumbnail.url );
+				setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', url );
 
 				wp.media.model.settings.post.id = wp_media_post_id;
 			});
