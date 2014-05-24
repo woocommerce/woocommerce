@@ -82,25 +82,25 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	if ( wp_using_ext_object_cache() ) {
 		wp_cache_flush(); // There isn't a reliable method of looking up the names, so flush the cache.
 		return;
-	} 
+	}
 
 	$post_id = absint( $post_id );
 
 	// Clear core transients
 	$transients_to_clear = array(
-		'wc_products_onsale',
-		'wc_hidden_product_ids',
-		'wc_hidden_product_ids_search',
-		'wc_attribute_taxonomies',
-		'wc_term_counts',
-		'wc_featured_products'
+		'wc\_products\_onsale',
+		'wc\_hidden\_product\_ids',
+		'wc\_hidden\_product\_ids\_search',
+		'wc\_attribute\_taxonomies',
+		'wc\_term\_counts',
+		'wc\_featured\_products'
 	);
 
 	// Clear transients for which we don't have the name
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%') OR `option_name` LIKE ('_transient_timeout_wc_uf_pid_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%') OR `option_name` LIKE ('_transient_timeout_wc_ln_count_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%') OR `option_name` LIKE ('_transient_timeout_wc_ship_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_products_will_display_%') OR `option_name` LIKE ('_transient_timeout_wc_products_will_display_%')" );
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_uf\_pid\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_uf\_pid\_%')" );
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_ln\_count\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_ln\_count\_%')" );
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_ship\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_ship\_%')" );
+	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_products\_will\_display\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_products\_will\_display\_%')" );
 
 	// Clear product specific transients
 	$post_transient_names = array(
@@ -116,7 +116,8 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		}
 	} else {
 		foreach( $post_transient_names as $transient ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '_transient_' . $transient . '%', '_transient_timeout_' . $transient . '%' ) );
+			$transient = str_replace('_', '\_', $transient);
+			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '\_transient\_' . $transient . '%', '\_transient\_timeout\_' . $transient . '%' ) );
 		}
 	}
 
