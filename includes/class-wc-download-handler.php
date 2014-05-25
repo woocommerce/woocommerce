@@ -152,7 +152,7 @@ class WC_Download_Handler {
 		// ...or serve it
 		$remote_file      = true;
 		$parsed_file_path = parse_url( $file_path );
-		
+
 		$wp_uploads       = wp_upload_dir();
 		$wp_uploads_dir   = $wp_uploads['basedir'];
 		$wp_uploads_url   = $wp_uploads['baseurl'];
@@ -186,7 +186,7 @@ class WC_Download_Handler {
 			$file_path   = str_replace( site_url( '/', 'http' ), ABSPATH, $file_path );
 
 		} elseif ( file_exists( ABSPATH . $file_path ) ) {
-			
+
 			/** Path needs an abspath to work */
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
@@ -233,16 +233,19 @@ class WC_Download_Handler {
 		/**
 		 * Prevents errors, for example: transfer closed with 3 bytes remaining to read
 		 */
-		@ob_end_clean(); // Clear the output buffer
+		if ( ob_get_length() ) {
 
-		if ( ob_get_level() ) {
+			if ( ob_get_level() ) {
 
-			$levels = ob_get_level();
+				$levels = ob_get_level();
 
-			for ( $i = 0; $i < $levels; $i++ ) {
-				@ob_end_clean(); // Zip corruption fix
+				for ( $i = 0; $i < $levels; $i++ ) {
+					ob_end_clean(); // Zip corruption fix
+				}
+
+			} else {
+				ob_end_clean(); // Clear the output buffer
 			}
-
 		}
 
 		if ( $is_IE && is_ssl() ) {
@@ -299,9 +302,9 @@ class WC_Download_Handler {
         }
 
         if ( $remote_file ) {
-        	$this->readfile_chunked( $file_path ) or header( 'Location: ' . $file_path );
+        	$this->readfile_chunked( $file_path ) || header( 'Location: ' . $file_path );
         } else {
-        	$this->readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+        	$this->readfile_chunked( $file_path ) || wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
         }
 
         exit;
@@ -321,16 +324,27 @@ class WC_Download_Handler {
 		$buffer = '';
 		$cnt = 0;
 
-		$handle = @fopen( $file, 'r' );
-		if ( $handle === FALSE ) {
+		if ( file_exists( $file ) ) {
+			$handle = fopen( $file, 'r' );
+			if ( $handle === FALSE ) {
+				return FALSE;
+			}
+		} elseif ( version_compare( PHP_VERSION, '5.4.0', '<' ) && ini_get( 'safe_mode' ) ) {
+			$handle = @fopen( $file, 'r' );
+			if ( $handle === FALSE ) {
+				return FALSE;
+			}
+		} else {
 			return FALSE;
 		}
 
 		while ( ! feof( $handle ) ) {
 			$buffer = fread( $handle, $chunksize );
 			echo $buffer;
-			@ob_flush();
-			@flush();
+			if ( ob_get_length() ) {
+				ob_flush();
+				flush();
+			}
 
 			if ( $retbytes ) {
 				$cnt += strlen( $buffer );
