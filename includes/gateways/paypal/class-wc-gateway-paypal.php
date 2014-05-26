@@ -730,7 +730,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						update_post_meta( $order->id, 'Payer PayPal address', wc_clean( $posted['payer_email'] ) );
 					}
 					if ( ! empty( $posted['txn_id'] ) ) {
-						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['txn_id'] ) );
+						update_post_meta( $order->id, $this->get_transaction_id_field_name(), wc_clean( $posted['txn_id'] ) );
 					}
 					if ( ! empty( $posted['first_name'] ) ) {
 						update_post_meta( $order->id, 'Payer first name', wc_clean( $posted['first_name'] ) );
@@ -880,7 +880,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					} else {
 
 						// Store PP Details
-						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['tx'] ) );
+						update_post_meta( $order->id, $this->get_transaction_id_field_name(), wc_clean( $posted['tx'] ) );
 
 						$order->add_order_note( __( 'PDT payment completed', 'woocommerce' ) );
 						$order->payment_complete();
@@ -952,5 +952,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		return $state;
+	}
+
+	/**
+	 * Returns the name of the field the transaction id is stored in
+	 * Override method from the WC_Payment_Gateway abstract
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_transaction_id_field_name() {
+		return 'Transaction ID';
 	}
 }
