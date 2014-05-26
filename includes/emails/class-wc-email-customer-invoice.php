@@ -54,7 +54,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	function trigger( $order ) {
 
 		if ( ! is_object( $order ) ) {
-			$order = new WC_Order( absint( $order ) );
+			$order = get_order( absint( $order ) );
 		}
 
 		if ( $order ) {

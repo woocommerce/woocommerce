@@ -117,7 +117,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 		return; // Only do this once
 	}
 
-	$order = new WC_Order( $order_id );
+	$order = get_order( $order_id );
 
 	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
@@ -300,7 +300,7 @@ function wc_cancel_unpaid_orders() {
 
 	if ( $unpaid_orders ) {
 		foreach ( $unpaid_orders as $unpaid_order ) {
-			$order = new WC_Order( $unpaid_order );
+			$order = get_order( $unpaid_order );
 
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', true, $order ) )
 				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );

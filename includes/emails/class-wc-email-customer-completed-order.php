@@ -52,7 +52,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	function trigger( $order_id ) {
 
 		if ( $order_id ) {
-			$this->object 		= new WC_Order( $order_id );
+			$this->object 		= get_order( $order_id );
 			$this->recipient	= $this->object->billing_email;
 
 			$this->find[] = '{order_date}';
