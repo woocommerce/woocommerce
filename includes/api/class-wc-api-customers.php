@@ -608,7 +608,7 @@ class WC_API_Customers extends WC_API_Resource {
 			return esc_url_raw( $matches[1] );
 		}
 
-		return '';
+		return null;
 	}
 
 	/**
