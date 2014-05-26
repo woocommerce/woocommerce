@@ -445,7 +445,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	function generate_paypal_form( $order_id ) {
 
-		$order = new WC_Order( $order_id );
+		$order = get_order( $order_id );
 
 		if ( 'yes' == $this->testmode ) {
 			$paypal_adr = $this->testurl . '?test_ipn=1&';
@@ -506,7 +506,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	function process_payment( $order_id ) {
 
-		$order = new WC_Order( $order_id );
+		$order = get_order( $order_id );
 
 		if ( ! $this->form_submission_method ) {
 
@@ -915,12 +915,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			list( $order_id, $order_key ) = $custom;
 		}
 
-		$order = new WC_Order( $order_id );
+		$order = get_order( $order_id );
 
 		if ( ! isset( $order->id ) ) {
 			// We have an invalid $order_id, probably because invoice_prefix has changed
 			$order_id 	= wc_get_order_id_by_order_key( $order_key );
-			$order 		= new WC_Order( $order_id );
+			$order 		= get_order( $order_id );
 		}
 
 		// Validate key
