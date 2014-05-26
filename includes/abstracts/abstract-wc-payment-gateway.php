@@ -49,6 +49,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/** @var array Array of supported features such as 'default_credit_card_form' */
 	var $supports		= array( 'products' );
 
+	/** @var string Field name of the transaction id, so it can be included in reports */
+	public $transaction_id_field_name = null;
+
 	/** @var int Maximum transaction amount, zero does not define a maximum */
 	public $max_amount = 0;
 
@@ -261,5 +264,20 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			<div class="clear"></div>
 		</fieldset>
 		<?php
+	}
+
+	/**
+	 * Returns the name of the field where the transaction id is stored
+	 * This make it easier to include this data in reports for example
+	 *
+	 * @access public
+	 * @return string Name of the field or empty string if not provided
+	 */
+	public function get_transaction_id_field_name() {
+		if ( null != $this->transaction_id_field_name ) {
+			return $this->transaction_id_field_name;
+		}
+
+		return '';
 	}
 }
