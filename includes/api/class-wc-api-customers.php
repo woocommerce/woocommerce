@@ -592,19 +592,23 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Wrapper for @see get_avatar() which doesn't simply return
 	 * the URL so we need to pluck it from the HTML img tag
 	 *
+	 * Kudos to https://github.com/WP-API/WP-API for offering a better solution
+	 *
 	 * @since 2.1
 	 * @param string $email the customer's email
 	 * @return string the URL to the customer's avatar
 	 */
 	private function get_avatar_url( $email ) {
+		$avatar_html = get_avatar( $email );
 
-		$dom = new DOMDocument();
+		// Get the URL of the avatar from the provided HTML
+		preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
 
-		$dom->loadHTML( get_avatar( $email ) );
+		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
+			return esc_url_raw( $matches[1] );
+		}
 
-		$url = $dom->getElementsByTagName( 'img' )->item( 0 )->getAttribute( 'src' );
-
-		return ( ! empty( $url ) ) ? $url : null;
+		return '';
 	}
 
 	/**
