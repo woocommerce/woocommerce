@@ -57,6 +57,11 @@ final class WooCommerce {
 	public $product_factory = null;
 
 	/**
+	 * @var WC_Order_Factory $order_factory
+	 */
+	public $order_factory = null;
+
+	/**
 	 * @var WC_Countries $countries
 	 */
 	public $countries = null;
@@ -360,6 +365,7 @@ final class WooCommerce {
 
 		// Load class instances
 		$this->product_factory = new WC_Product_Factory();     // Product Factory to create new product instances
+		$this->order_factory   = new WC_Order_Factory();     // Order Factory to create new order instances
 		$this->countries       = new WC_Countries();			// Countries class
 		$this->integrations    = new WC_Integrations();		// Integrations class
 		$this->session         = new $session_class();
