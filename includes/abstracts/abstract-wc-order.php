@@ -40,12 +40,15 @@ class WC_Order {
 		if ( is_numeric( $order ) ) {
 			$this->id   = absint( $order );
 			$this->post = get_post( $this->id );
+			$this->get_order( $this->id );
 		} elseif ( $order instanceof WC_Order ) {
 			$this->id   = absint( $order->id );
 			$this->post = $order;
+			$this->get_order( $this->id );
 		} elseif ( $order instanceof WP_Post || isset( $order->ID ) ) {
 			$this->id   = absint( $order->ID );
 			$this->post = $order;
+			$this->get_order( $this->id );
 		}
 	}
 
