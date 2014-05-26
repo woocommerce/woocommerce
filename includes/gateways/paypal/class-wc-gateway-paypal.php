@@ -34,6 +34,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->method_title      = __( 'PayPal', 'woocommerce' );
 		$this->notify_url        = WC()->api_request_url( 'WC_Gateway_Paypal' );
 
+		// Set the name of the transaction id field
+		$this->transaction_id_field_name = 'Transaction ID';
+
 		// Load the settings.
 		$this->init_form_fields();
 		$this->init_settings();
@@ -730,7 +733,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						update_post_meta( $order->id, 'Payer PayPal address', wc_clean( $posted['payer_email'] ) );
 					}
 					if ( ! empty( $posted['txn_id'] ) ) {
-						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['txn_id'] ) );
+						update_post_meta( $order->id, $this->transaction_id_field_name, wc_clean( $posted['txn_id'] ) );
 					}
 					if ( ! empty( $posted['first_name'] ) ) {
 						update_post_meta( $order->id, 'Payer first name', wc_clean( $posted['first_name'] ) );
@@ -880,7 +883,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					} else {
 
 						// Store PP Details
-						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['tx'] ) );
+						update_post_meta( $order->id, $this->transaction_id_field_name, wc_clean( $posted['tx'] ) );
 
 						$order->add_order_note( __( 'PDT payment completed', 'woocommerce' ) );
 						$order->payment_complete();
