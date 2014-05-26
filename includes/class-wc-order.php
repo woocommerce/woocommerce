@@ -581,7 +581,7 @@ class WC_Order {
 
 		$price = $round ? round( $price, 2 ) : $price;
 
-		return apply_filters( 'woocommerce_order_amount_item_subtotal', $price, $this );
+		return apply_filters( 'woocommerce_order_amount_item_subtotal', $price, $this, $item );
 	}
 
 	/**
@@ -602,7 +602,7 @@ class WC_Order {
 
 		$price = $round ? round( $price, 2 ) : $price;
 
-		return apply_filters( 'woocommerce_order_amount_line_subtotal', $price, $this );
+		return apply_filters( 'woocommerce_order_amount_line_subtotal', $price, $this, $item );
 	}
 
 	/**
