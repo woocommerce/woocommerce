@@ -44,7 +44,7 @@ class WC_Shortcode_Checkout {
 
 			// Get the order to work out what we are showing
 			$order_id             = absint( $_GET['order'] );
-			$order                = new WC_Order( $order_id );
+			$order                = get_order( $order_id );
 
 			if ( $order->status == 'pending' )
 				$wp->query_vars['order-pay'] = absint( $_GET['order'] );
@@ -84,7 +84,7 @@ class WC_Shortcode_Checkout {
 
 			// Pay for existing order
 			$order_key            = $_GET[ 'key' ];
-			$order                = new WC_Order( $order_id );
+			$order                = get_order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
@@ -121,7 +121,7 @@ class WC_Shortcode_Checkout {
 
 			// Pay for order after checkout step
 			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
-			$order                = new WC_Order( $order_id );
+			$order                = get_order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
@@ -191,7 +191,7 @@ class WC_Shortcode_Checkout {
 		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( $_GET['key'] ) );
 
 		if ( $order_id > 0 ) {
-			$order = new WC_Order( $order_id );
+			$order = get_order( $order_id );
 			if ( $order->order_key != $order_key )
 				unset( $order );
 		}

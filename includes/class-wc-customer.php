@@ -624,7 +624,7 @@ class WC_Customer {
 				foreach ( $results as $result ) {
 					if ( ! $order || $order->id != $result->order_id ) {
 						// new order
-						$order    = new WC_Order( $result->order_id );
+						$order    = get_order( $result->order_id );
 						$_product = null;
 					}
 

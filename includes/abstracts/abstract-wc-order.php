@@ -1,11 +1,11 @@
 <?php
 /**
- * Order
+ * Abstract Order Class
  *
  * The WooCommerce order class handles order data.
  *
  * @class 		WC_Order
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -15,6 +15,9 @@ class WC_Order {
 	/** @public int Order (post) ID */
 	public $id;
 
+	/** @public string Order type */
+	public $order_type = null;
+
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
 	 *
@@ -22,15 +25,30 @@ class WC_Order {
 	 * @param string $id (default: '')
 	 * @return void
 	 */
-	public function __construct( $id = '' ) {
+	public function __construct( $order = '' ) {
+		// Added deprecated notice to calling this class directly (as it's soft-deprecated now, will be for real after 2.2)
+		if ( ( function_exists( 'get_called_class' ) && get_called_class() == 'WC_Order' ) || ( ! function_exists( 'get_called_class' ) && is_null( $this->order_type ) ) ) {
+			_doing_it_wrong( 'WC_Order', __( 'The <code>WC_Order</code> class is now abstract. Use <code>get_order()</code> to instantiate an instance of a order instead of calling this class directly.', 'woocommerce' ), '2.2 of WooCommerce' );
+		}
+
 		$this->prices_include_tax = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;
 		$this->tax_display_cart   = get_option( 'woocommerce_tax_display_cart' );
 
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl' ? true : false;
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl' ? true : false;
 
-		if ( $id > 0 ) {
-			$this->get_order( $id );
+		if ( is_numeric( $order ) ) {
+			$this->id   = absint( $order );
+			$this->post = get_post( $this->id );
+			$this->get_order( $this->id );
+		} elseif ( $order instanceof WC_Order ) {
+			$this->id   = absint( $order->id );
+			$this->post = $order;
+			$this->get_order( $this->id );
+		} elseif ( $order instanceof WP_Post || isset( $order->ID ) ) {
+			$this->id   = absint( $order->ID );
+			$this->post = $order;
+			$this->get_order( $this->id );
 		}
 	}
 

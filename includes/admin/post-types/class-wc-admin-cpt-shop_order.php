@@ -110,7 +110,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		global $post, $woocommerce, $the_order;
 
 		if ( empty( $the_order ) || $the_order->id != $post->ID ) {
-			$the_order = new WC_Order( $post->ID );
+			$the_order = get_order( $post->ID );
 		}
 
 		switch ( $column ) {
@@ -711,7 +711,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		$post_ids = array_map( 'absint', (array) $_REQUEST['post'] );
 
 		foreach ( $post_ids as $post_id ) {
-			$order = new WC_Order( $post_id );
+			$order = get_order( $post_id );
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ) );
 			$changed++;
 		}

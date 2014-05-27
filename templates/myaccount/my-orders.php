@@ -39,7 +39,7 @@ if ( $customer_orders ) : ?>
 
 		<tbody><?php
 			foreach ( $customer_orders as $customer_order ) {
-				$order = new WC_Order();
+				$order = get_order();
 
 				$order->populate( $customer_order );
 

@@ -1172,7 +1172,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 			$existing_permissions = $wpdb->get_results( $wpdb->prepare( "SELECT * from {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE product_id = %d GROUP BY order_id", $product_id ) );
 
 			foreach ( $existing_permissions as $existing_permission ) {
-				$order = new WC_Order( $existing_permission->order_id );
+				$order = get_order( $existing_permission->order_id );
 
 				if ( $order->id ) {
 					// Remove permissions

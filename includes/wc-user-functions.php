@@ -197,7 +197,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
  */
 function wc_paying_customer( $order_id ) {
 
-	$order = new WC_Order( $order_id );
+	$order = get_order( $order_id );
 
 	if ( $order->user_id > 0 ) {
 		update_user_meta( $order->user_id, 'paying_customer', 1 );
@@ -280,7 +280,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 		switch ( $caps[0] ) {
 			case 'view_order' :
 				$user_id = $args[1];
-				$order   = new WC_Order( $args[2] );
+				$order   = get_order( $args[2] );
 
 				if ( $user_id == $order->user_id ) {
 					$allcaps['view_order'] = true;
@@ -297,14 +297,14 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 					break;
 				}
 
-				$order = new WC_Order( $order_id );
+				$order = get_order( $order_id );
 				if ( $user_id == $order->user_id || empty( $order->user_id ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
 			break;
 			case 'order_again' :
 				$user_id = $args[1];
-				$order   = new WC_Order( $args[2] );
+				$order   = get_order( $args[2] );
 
 				if ( $user_id == $order->user_id ) {
 					$allcaps['order_again'] = true;
@@ -312,7 +312,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 			break;
 			case 'cancel_order' :
 				$user_id = $args[1];
-				$order   = new WC_Order( $args[2] );
+				$order   = get_order( $args[2] );
 
 				if ( $user_id == $order->user_id ) {
 					$allcaps['cancel_order'] = true;

@@ -105,7 +105,7 @@ class WC_Shortcode_My_Account {
 	private static function view_order( $order_id ) {
 
 		$user_id      	= get_current_user_id();
-		$order 			= new WC_Order( $order_id );
+		$order 			= get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ).'" class="wc-forward">'. __( 'My Account', 'woocommerce' ) .'</a>' . '</div>';
@@ -114,7 +114,7 @@ class WC_Shortcode_My_Account {
 
 		wc_get_template( 'myaccount/view-order.php', array(
 	        'status'    => get_term_by( 'slug', $order->status, 'shop_order_status' ),
-	        'order'     => new WC_Order( $order_id ),
+	        'order'     => get_order( $order_id ),
 	        'order_id'  => $order_id
 	    ) );
 	}

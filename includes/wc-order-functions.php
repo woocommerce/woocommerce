@@ -13,6 +13,17 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
+ * Main function for returning orders, uses the WC_Order_Factory class.
+ *
+ * @param mixed $the_order Post object or post ID of the order.
+ * @param array $args (default: array()) Contains all arguments to be used to get this order.
+ * @return WC_Order
+ */
+function get_order( $the_order = false, $args = array() ) {
+	return WC()->order_factory->get_order( $the_order, $args );
+}
+
+/**
  * Finds an Order ID based on an order key.
  *
  * @access public
@@ -106,7 +117,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 		return; // Only do this once
 	}
 
-	$order = new WC_Order( $order_id );
+	$order = get_order( $order_id );
 
 	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
@@ -289,7 +300,7 @@ function wc_cancel_unpaid_orders() {
 
 	if ( $unpaid_orders ) {
 		foreach ( $unpaid_orders as $unpaid_order ) {
-			$order = new WC_Order( $unpaid_order );
+			$order = get_order( $unpaid_order );
 
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', true, $order ) )
 				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
