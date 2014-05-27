@@ -56,11 +56,11 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 				break;
 		}
 	} elseif ( ! empty( $args['orderby'] ) && $args['orderby'] === 'menu_order' ) {
-		// wp_get_post_terms doens't let us use custom sort order
+		// wp_get_post_terms doesn't let us use custom sort order
 		$args['include']    = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
 		$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
-		$args['hide_empty'] = 0;
-		$args['fields']     = 'names';
+		$args['hide_empty'] = isset( $args['hide_empty'] ) ? $args['hide_empty'] : 0;
+		$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
 
 		unset( $args['orderby'] );
 		
