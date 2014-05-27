@@ -45,7 +45,6 @@ class WC_Admin {
 			include( 'class-wc-admin-notices.php' );
 			include( 'class-wc-admin-assets.php' );
 			include( 'class-wc-admin-permalink-settings.php' );
-			include( 'class-wc-admin-editor.php' );
 
 			// Help
 			if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) )
