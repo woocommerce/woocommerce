@@ -403,12 +403,12 @@ final class WooCommerce {
 
 		// Admin Locale
 		if ( is_admin() ) {
-			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
-			load_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
+			load_plugin_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
+			load_plugin_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
 		
 		// Global + Frontend Locale
-		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
+		load_plugin_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
 		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
 	}
 
