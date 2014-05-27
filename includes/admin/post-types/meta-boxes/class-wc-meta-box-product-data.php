@@ -1006,6 +1006,7 @@ class WC_Meta_Box_Product_Data {
 					    WHERE $wpdb->posts.post_type = 'product'
 					    AND $wpdb->posts.post_status = 'publish'
 					    AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
+					    AND $wpdb->postmeta.post_id <> $post_id LIMIT 1
 					 ", $new_sku ) )
 					) {
 
