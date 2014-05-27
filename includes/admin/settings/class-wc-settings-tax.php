@@ -310,7 +310,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 							<td class="sort"><input type="hidden" class="remove_tax_rate" name="remove_tax_rate[<?php echo $rate->tax_rate_id ?>]" value="0" /></td>
 
 							<td class="country" width="8%">
-								<input type="text" value="<?php echo esc_attr( $rate->tax_rate_country ) ?>" placeholder="*" name="tax_rate_country[<?php echo $rate->tax_rate_id ?>]" />
+								<input type="text" value="<?php echo esc_attr( $rate->tax_rate_country ) ?>" placeholder="*" name="tax_rate_country[<?php echo $rate->tax_rate_id ?>]" class="wc_input_country_iso" />
 							</td>
 
 							<td class="state" width="8%">
@@ -420,7 +420,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					var code = '<tr class="new">\
 							<td class="sort">&nbsp;</td>\
 							<td class="country" width="8%">\
-								<input type="text" placeholder="*" name="tax_rate_country[new][' + size + ']" />\
+								<input type="text" placeholder="*" name="tax_rate_country[new][' + size + ']" class="wc_input_country_iso" />\
 							</td>\
 							<td class="state" width="8%">\
 								<input type="text" placeholder="*" name="tax_rate_state[new][' + size + ']" />\

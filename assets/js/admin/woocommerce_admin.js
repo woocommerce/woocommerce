@@ -1,13 +1,15 @@
+/* global woocommerce_admin */
+
 /**
  * WooCommerce Admin JS
  */
 jQuery(function(){
 
 	// Price input validation
-	jQuery('body').on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text]', function() {
-			jQuery('.wc_error_tip').fadeOut('100', function(){ jQuery(this).remove(); } );
-			return this;
-		});
+	jQuery('body').on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text], .wc_input_country_iso[type=text]', function() {
+		jQuery('.wc_error_tip').fadeOut('100', function(){ jQuery(this).remove(); } );
+		return this;
+	});
 
 	jQuery('body').on('keyup change', '.wc_input_price[type=text]', function(){
 		var value		= jQuery(this).val();
@@ -38,6 +40,24 @@ jQuery(function(){
 			if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
 				var offset = jQuery(this).position();
 				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_decimal_error + '</div>' );
+				jQuery('.wc_error_tip')
+					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
+					.css('top', offset.top + jQuery(this).height() )
+					.fadeIn('100');
+			}
+		}
+		return this;
+	});
+
+	jQuery('body').on('keyup change', '.wc_input_country_iso[type=text]', function(){
+		var value = jQuery(this).val();
+		var regex = new RegExp( '^([A-Z])?([A-Z])$' );
+
+		if ( ! regex.test( value ) ) {
+			jQuery(this).val( '' );
+			if ( jQuery(this).parent().find('.wc_error_tip').size() === 0 ) {
+				var offset = jQuery(this).position();
+				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_country_iso_error + '</div>' );
 				jQuery('.wc_error_tip')
 					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
 					.css('top', offset.top + jQuery(this).height() )
