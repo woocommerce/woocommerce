@@ -555,7 +555,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					if ( $state == '*' )
 						$state = '';
 
-					$tax_rate = array(
+					$_tax_rate = array(
 						'tax_rate_country'  => $country,
 						'tax_rate_state'    => $state,
 						'tax_rate'          => $rate,
@@ -567,11 +567,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 						'tax_rate_class'    => sanitize_title( $current_class )
 					);
 
-					$wpdb->insert( $wpdb->prefix . "woocommerce_tax_rates", $tax_rate );
+					$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', $_tax_rate );
 
 					$tax_rate_id = $wpdb->insert_id;
 
-					do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $tax_rate );
+					do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $_tax_rate );
 
 					if ( ! empty( $postcode ) ) {
 						$postcodes = explode( ';', $postcode );
@@ -652,7 +652,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				if ( $state == '*' )
 					$state = '';
 
-				$tax_rate = array(
+				$_tax_rate = array(
 					'tax_rate_country'  => $country,
 					'tax_rate_state'    => $state,
 					'tax_rate'          => $rate,
@@ -666,13 +666,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 				$wpdb->update(
 					$wpdb->prefix . "woocommerce_tax_rates",
-					$tax_rate,
+					$_tax_rate,
 					array(
 						'tax_rate_id' => $tax_rate_id
 					)
 				);
 
-				do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $tax_rate );
+				do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $_tax_rate );
 
 				if ( isset( $tax_rate_postcode[ $key ] ) ) {
 					// Delete old
