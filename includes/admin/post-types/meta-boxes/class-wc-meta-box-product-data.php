@@ -634,13 +634,14 @@ class WC_Meta_Box_Product_Data {
 						$posts_in = array_unique( (array) get_objects_in_term( $grouped_term->term_id, 'product_type' ) );
 						if ( sizeof( $posts_in ) > 0 ) {
 							$args = array(
-								'post_type'		=> 'product',
-								'post_status' 	=> 'any',
-								'numberposts' 	=> -1,
-								'orderby' 		=> 'title',
-								'order' 		=> 'asc',
-								'post_parent' 	=> 0,
-								'include' 		=> $posts_in,
+								'post_type'        => 'product',
+								'post_status'      => 'any',
+								'numberposts'      => -1,
+								'orderby'          => 'title',
+								'order'            => 'asc',
+								'post_parent'      => 0,
+								'suppress_filters' => 0,
+								'include'          => $posts_in,
 							);
 							$grouped_products = get_posts( $args );
 
