@@ -106,7 +106,7 @@ $order = new WC_Order( $order_id );
 ?>
 </dl>
 
-<?php if ( ! wc_ship_to_billing_address_only() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
+<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
 
 <div class="col2-set addresses">
 
@@ -123,7 +123,7 @@ $order = new WC_Order( $order_id );
 			?>
 		</p></address>
 
-<?php if ( ! wc_ship_to_billing_address_only() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
+<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
 
 	</div><!-- /.col-1 -->
 
