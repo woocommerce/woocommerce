@@ -83,6 +83,11 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'get_customer_orders' ), WC_API_SERVER::READABLE ),
 		);
 
+		# GET /customers/<id>/downloads
+		$routes[ $this->base . '/(?P<id>\d+)/downloads' ] = array(
+			array( array( $this, 'get_customer_downloads' ), WC_API_SERVER::READABLE ),
+		);
+
 		return $routes;
 	}
 
@@ -453,6 +458,32 @@ class WC_API_Customers extends WC_API_Resource {
 		}
 
 		return array( 'orders' => apply_filters( 'woocommerce_api_customer_orders_response', $orders, $id, $fields, $order_ids, $this->server ) );
+	}
+
+	/**
+	 * Get the available downloads for a customer
+	 *
+	 * @since 2.2
+	 * @param int $id the customer ID
+	 * @param string $fields fields to include in response
+	 * @return array
+	 */
+	public function get_customer_downloads( $id, $fields = null ) {
+		global $wpdb;
+
+		$id = $this->validate_request( $id, 'customer', 'read' );
+
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+
+		$downloads = wc_get_customer_available_downloads( $id );
+
+		if ( empty( $downloads ) ) {
+			return array( 'downloads' => array() );
+		}
+
+		return array( 'downloads' => apply_filters( 'woocommerce_api_customer_downloads_response', $downloads, $id, $fields, $this->server ) );
 	}
 
 	/**
