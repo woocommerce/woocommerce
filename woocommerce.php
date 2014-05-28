@@ -241,7 +241,7 @@ final class WooCommerce {
 
 		if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) ) {
 			// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
-			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 ); 
+			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 );
 		}
 
 		if ( ! defined( 'WC_DELIMITER' ) ) {
@@ -303,6 +303,9 @@ final class WooCommerce {
 
 		// Include template hooks in time for themes to remove/modify them
 		include_once( 'includes/wc-template-hooks.php' );
+
+		// Download/update languages
+		include_once( 'includes/class-wc-language-pack-upgrader.php' );
 	}
 
 	/**
@@ -411,7 +414,7 @@ final class WooCommerce {
 			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
 			load_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
 		}
-		
+
 		// Global + Frontend Locale
 		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
 		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
