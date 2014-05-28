@@ -154,7 +154,7 @@ class WC_Admin_Status {
 				break;
 			}
 		}
-		
+
 	    // Display message if settings settings have been saved
 	    if ( isset( $_REQUEST['settings-updated'] ) ) {
 			echo '<div class="updated"><p>' . __( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
@@ -247,7 +247,7 @@ class WC_Admin_Status {
 
 		return $version ;
 	}
-	
+
 	/**
 	 * Scan the template files
 	 *
@@ -280,11 +280,11 @@ class WC_Admin_Status {
  	 * @return array
 	 */
 	public function scan_log_files() {
-		$files         = scandir( WC_LOG_DIR );
+		$files         = @scandir( WC_LOG_DIR );
 		$result        = array();
 		if ( $files ) {
 			foreach ( $files as $key => $value ) {
-				if ( ! in_array( $value, array( ".",".." ) ) ) {
+				if ( ! in_array( $value, array( '.', '..' ) ) ) {
 					if ( ! is_dir( $value ) && strstr( $value, '.log' ) ) {
 						$result[ sanitize_title( $value ) ] = $value;
 					}
