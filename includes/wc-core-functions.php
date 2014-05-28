@@ -395,3 +395,14 @@ function get_woocommerce_api_url( $path ) {
 
 	return $url;
 }
+
+/**
+ * Get a log file path
+ *
+ * @since 2.2
+ * @param string $handle name
+ * @return string the log file path
+ */
+function wc_get_log_file_path( $handle ) {
+	return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
+}

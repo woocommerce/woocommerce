@@ -52,7 +52,7 @@ class WC_Logger {
 			return true;
 		}
 
-		if ( $this->_handles[ $handle ] = @fopen( WC_LOG_DIR . $this->file_name( $handle ) . '.log', 'a' ) ) {
+		if ( $this->_handles[ $handle ] = @fopen( wc_get_log_file_path( $handle ), 'a' ) ) {
 			return true;
 		}
 
@@ -87,18 +87,6 @@ class WC_Logger {
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
 			@ftruncate( $this->_handles[ $handle ], 0 );
 		}
-	}
-
-
-	/**
-	 * file_name function.
-	 *
-	 * @access private
-	 * @param mixed $handle
-	 * @return string
-	 */
-	private function file_name( $handle ) {
-		return $handle . '-' . sanitize_file_name( wp_hash( $handle ) );
 	}
 
 }
