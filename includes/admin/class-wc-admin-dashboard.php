@@ -49,7 +49,7 @@ class WC_Admin_Dashboard {
 		$reports = new WC_Admin_Report();
 
 		// Get sales
-		$sales = $wpdb->get_var( "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts
+		$sales_query = "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts
 			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
 			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -61,10 +61,13 @@ class WC_Admin_Dashboard {
 			AND 	postmeta.meta_key   = '_order_total'
 			AND 	posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "'
 			AND 	posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "'
-		" );
+		";
+		$sales_query = apply_filters( 'woocommerce_dashboard_sales_query', $sales_query );
+
+		$sales = $wpdb->get_var( $sales_query );
 
 		// Get top seller
-		$top_seller = $wpdb->get_row( "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id
+		$top_seller_query = "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id
 			FROM {$wpdb->posts} as posts
 			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
 			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
@@ -83,7 +86,9 @@ class WC_Admin_Dashboard {
 			GROUP BY product_id
 			ORDER BY qty DESC
 			LIMIT   1
-		" );
+		";
+		$top_seller_query = apply_filters( 'woocommerce_dashboard_sales_query', $top_seller_query );
+		$top_seller = $wpdb->get_row( $top_seller_query );
 
 		// Counts
 		$on_hold_count      = get_term_by( 'slug', 'on-hold', 'shop_order_status' )->count;
