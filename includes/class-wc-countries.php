@@ -31,7 +31,7 @@ class WC_Countries {
 	 * @return void
 	 */
 	public function __construct() {
-		global $woocommerce, $states;
+		global $states;
 
 		$this->countries = apply_filters( 'woocommerce_countries', array(
 			'AF' => __( 'Afghanistan', 'woocommerce' ),

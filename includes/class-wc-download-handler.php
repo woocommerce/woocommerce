@@ -1,11 +1,16 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Download handler
  *
  * Handle digital downloads.
  *
  * @class 		WC_Download_Handler
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -13,16 +18,16 @@
 class WC_Download_Handler {
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct() {
-		add_action( 'init', array( $this, 'download_product' ) );
+	public static function init() {
+		add_action( 'init', array( __CLASS__, 'download_product' ) );
 	}
 
 	/**
 	 * Check if we need to download a file and check validity
 	 */
-	public function download_product() {
+	public static function download_product() {
 		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
 
 			global $wpdb;
@@ -127,14 +132,14 @@ class WC_Download_Handler {
 			$file_path = $_product->get_file_download_path( $download_id );
 
 			// Download it!
-			$this->download( $file_path, $product_id );
+			self::download( $file_path, $product_id );
 		}
 	}
 
 	/**
 	 * Download a file - hook into init function.
 	 */
-	public function download( $file_path, $product_id ) {
+	public static function download( $file_path, $product_id ) {
 		global $wpdb, $is_IE;
 
 		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
@@ -299,9 +304,9 @@ class WC_Download_Handler {
         }
 
         if ( $remote_file ) {
-        	$this->readfile_chunked( $file_path ) or header( 'Location: ' . $file_path );
+        	self::readfile_chunked( $file_path ) or header( 'Location: ' . $file_path );
         } else {
-        	$this->readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+        	self::readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
         }
 
         exit;
@@ -316,7 +321,6 @@ class WC_Download_Handler {
 	 * @todo Meaning of the return value? Last return is status of fclose?
 	 */
 	public static function readfile_chunked( $file, $retbytes = true ) {
-
 		$chunksize = 1 * ( 1024 * 1024 );
 		$buffer = '';
 		$cnt = 0;
@@ -347,4 +351,4 @@ class WC_Download_Handler {
 	}
 }
 
-new WC_Download_Handler();
+WC_Download_Handler::init();

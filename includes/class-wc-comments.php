@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Comments
@@ -8,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * Handle comments (reviews and order notes)
  *
  * @class 		WC_Post_types
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
@@ -16,21 +18,21 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class WC_Comments {
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct() {
+	public static function init() {
 		// Rating posts
-		add_filter( 'preprocess_comment', array( $this, 'check_comment_rating' ), 0 );
-		add_action( 'comment_post', array( $this, 'add_comment_rating' ), 1 );
+		add_filter( 'preprocess_comment', array( __CLASS__, 'check_comment_rating' ), 0 );
+		add_action( 'comment_post', array( __CLASS__, 'add_comment_rating' ), 1 );
 
 		// clear transients
-		add_action( 'wp_set_comment_status', array( $this, 'clear_transients' ) );
-		add_action( 'edit_comment', array( $this, 'clear_transients' ) );
+		add_action( 'wp_set_comment_status', array( __CLASS__, 'clear_transients' ) );
+		add_action( 'edit_comment', array( __CLASS__, 'clear_transients' ) );
 
 		// Secure order notes
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ), 10, 1 );
-		add_action( 'comment_feed_join', array( $this, 'exclude_order_comments_from_feed_join' ) );
-		add_action( 'comment_feed_where', array( $this, 'exclude_order_comments_from_feed_where' ) );
+		add_action( 'comment_feed_join', array( __CLASS__, 'exclude_order_comments_from_feed_join' ) );
+		add_action( 'comment_feed_where', array( __CLASS__, 'exclude_order_comments_from_feed_where' ) );
 	}
 
 	/**
@@ -71,7 +73,7 @@ class WC_Comments {
 	 * @param string $join
 	 * @return string
 	 */
-	public function exclude_order_comments_from_feed_join( $join ) {
+	public static function exclude_order_comments_from_feed_join( $join ) {
 		global $wpdb;
 
 	    if ( ! strstr( $join, $wpdb->posts ) ) 
@@ -86,7 +88,7 @@ class WC_Comments {
 	 * @param string $where
 	 * @return string
 	 */
-	public function exclude_order_comments_from_feed_where( $where ) {
+	public static function exclude_order_comments_from_feed_where( $where ) {
 		global $wpdb;
 
 	    if ( $where )
@@ -103,7 +105,7 @@ class WC_Comments {
 	 * @param array $comment_data
 	 * @return array
 	 */
-	public function check_comment_rating( $comment_data ) {
+	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in
 		if ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && $comment_data['comment_type'] === '' && get_option('woocommerce_review_rating_required') === 'yes' ) {
 			wp_die( __( 'Please rate the product.', 'woocommerce' ) );
@@ -117,7 +119,7 @@ class WC_Comments {
 	 *
 	 * @param mixed $comment_id
 	 */
-	public function add_comment_rating( $comment_id ) {
+	public static function add_comment_rating( $comment_id ) {
 		if ( isset( $_POST['rating'] ) ) {
 
 			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 )
@@ -125,7 +127,7 @@ class WC_Comments {
 
 			add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
 
-			$this->clear_transients( $comment_id );
+			self::clear_transients( $comment_id );
 		}
 	}
 
@@ -134,7 +136,7 @@ class WC_Comments {
 	 *
 	 * @param mixed $comment_id
 	 */
-	public function clear_transients( $comment_id ) {
+	public static function clear_transients( $comment_id ) {
 		$comment = get_comment( $comment_id );
 
 		if ( ! empty( $comment->comment_post_ID ) ) {
@@ -144,4 +146,4 @@ class WC_Comments {
 	}
 }
 
-new WC_Comments();
+WC_Comments::init();

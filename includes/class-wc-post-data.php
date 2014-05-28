@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Post Data
@@ -8,23 +10,23 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * Standardises certain post data on save.
  *
  * @class 		WC_Post_Data
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes/Data
  * @category	Class
  * @author 		WooThemes
  */
 class WC_Post_Data {
 
-	private $editing_term = null;
+	private static $editing_term = null;
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct() {
-		add_action( 'edit_term', array( $this, 'edit_term' ), 10, 3 );
-		add_action( 'edited_term', array( $this, 'edited_term' ), 10, 3 );
-		add_filter( 'update_order_item_metadata', array( $this, 'update_order_item_metadata' ), 10, 5 );
-		add_filter( 'update_post_metadata', array( $this, 'update_post_metadata' ), 10, 5 );
+	public static function init() {
+		add_action( 'edit_term', array( __CLASS__, 'edit_term' ), 10, 3 );
+		add_action( 'edited_term', array( __CLASS__, 'edited_term' ), 10, 3 );
+		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
+		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 	}
 
 	/**
@@ -33,11 +35,11 @@ class WC_Post_Data {
 	 * @param  id $tt_id
 	 * @param  string $taxonomy
 	 */
-	public function edit_term( $term_id, $tt_id, $taxonomy ) {
+	public static function edit_term( $term_id, $tt_id, $taxonomy ) {
 		if ( strpos( $taxonomy, 'pa_' ) === 0 ) {
-			$this->editing_term = get_term_by( 'id', $term_id, $taxonomy );
+			self::$editing_term = get_term_by( 'id', $term_id, $taxonomy );
 		} else {
-			$this->editing_term = null;
+			self::$editing_term = null;
 		}
 	}
 
@@ -47,17 +49,17 @@ class WC_Post_Data {
 	 * @param  id $tt_id
 	 * @param  string $taxonomy
 	 */
-	public function edited_term( $term_id, $tt_id, $taxonomy ) {
-		if ( ! is_null( $this->editing_term ) && strpos( $taxonomy, 'pa_' ) === 0 ) {
+	public static function edited_term( $term_id, $tt_id, $taxonomy ) {
+		if ( ! is_null( self::$editing_term ) && strpos( $taxonomy, 'pa_' ) === 0 ) {
 			$edited_term = get_term_by( 'id', $term_id, $taxonomy );
 
-			if ( $edited_term->slug !== $this->editing_term->slug ) {
+			if ( $edited_term->slug !== self::$editing_term->slug ) {
 				global $wpdb;
 
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = %s AND meta_value = %s;", $edited_term->slug, 'attribute_' . sanitize_title( $taxonomy ), $this->editing_term->slug ) );
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = %s AND meta_value = %s;", $edited_term->slug, 'attribute_' . sanitize_title( $taxonomy ), self::$editing_term->slug ) );
 			}
 		} else {
-			$this->editing_term = null;
+			self::$editing_term = null;
 		}
 	}
 
@@ -71,7 +73,7 @@ class WC_Post_Data {
 	 * @param  mixed $prev_value
 	 * @return null|bool
 	 */
-	public function update_order_item_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
+	public static function update_order_item_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
 		if ( ! empty( $meta_value ) && is_float( $meta_value ) ) {
 
 			// Convert float to string
@@ -96,7 +98,7 @@ class WC_Post_Data {
 	 * @param  mixed $prev_value
 	 * @return null|bool
 	 */
-	public function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
+	public static function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
 		if ( ! empty( $meta_value ) && is_float( $meta_value ) && in_array( get_post_type( $object_id ), array( 'shop_order', 'shop_coupon', 'product', 'product_variation' ) ) ) {
 
 			// Convert float to string
@@ -110,7 +112,6 @@ class WC_Post_Data {
 		}
 		return $check;
 	}
-
 }
 
-new WC_Post_Data();
+WC_Post_Data::init();

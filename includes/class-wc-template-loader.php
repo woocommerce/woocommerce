@@ -3,7 +3,7 @@
  * Template Loader
  *
  * @class 		WC_Template
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -11,11 +11,11 @@
 class WC_Template_Loader {
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct() {
-		add_filter( 'template_include', array( $this, 'template_loader' ) );
-		add_filter( 'comments_template', array( $this, 'comments_template_loader' ) );
+	public static function init() {
+		add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
+		add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
 	}
 
 	/**
@@ -33,7 +33,7 @@ class WC_Template_Loader {
 	 * @param mixed $template
 	 * @return string
 	 */
-	public function template_loader( $template ) {
+	public static function template_loader( $template ) {
 		$find = array( 'woocommerce.php' );
 		$file = '';
 
@@ -85,7 +85,7 @@ class WC_Template_Loader {
 	 * @param mixed $template
 	 * @return string
 	 */
-	public function comments_template_loader( $template ) {
+	public static function comments_template_loader( $template ) {
 		if ( get_post_type() !== 'product' )
 			return $template;
 
@@ -102,4 +102,4 @@ class WC_Template_Loader {
 	}
 }
 
-new WC_Template_Loader();
+WC_Template_Loader::init();

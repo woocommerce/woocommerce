@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * WooCommerce WC_AJAX
@@ -8,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * AJAX Event Handler
  *
  * @class 		WC_AJAX
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -16,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class WC_AJAX {
 
 	/**
-	 * Hook into ajax events
+	 * Hook in methods
 	 */
-	public function __construct() {
+	public static function init() {
 
 		// woocommerce_EVENT => nopriv
 		$ajax_events = array(
@@ -59,10 +61,10 @@ class WC_AJAX {
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
-			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( $this, $ajax_event ) );
+			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
 
 			if ( $nopriv ) {
-				add_action( 'wp_ajax_nopriv_woocommerce_' . $ajax_event, array( $this, $ajax_event ) );
+				add_action( 'wp_ajax_nopriv_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
 			}
 		}
 	}
@@ -70,7 +72,7 @@ class WC_AJAX {
 	/**
 	 * Output headers for JSON requests
 	 */
-	private function json_headers() {
+	private static function json_headers() {
 		header( 'Content-Type: application/json; charset=utf-8' );
 	}
 
@@ -78,9 +80,9 @@ class WC_AJAX {
 	/**
 	 * Get a refreshed cart fragment
 	 */
-	public function get_refreshed_fragments() {
+	public static function get_refreshed_fragments() {
 
-		$this->json_headers();
+		self::json_headers();
 
 		// Get mini cart
 		ob_start();
@@ -106,7 +108,7 @@ class WC_AJAX {
 	/**
 	 * AJAX apply coupon on checkout page
 	 */
-	public function apply_coupon() {
+	public static function apply_coupon() {
 
 		check_ajax_referer( 'apply-coupon', 'security' );
 
@@ -124,7 +126,7 @@ class WC_AJAX {
 	/**
 	 * AJAX update shipping method on cart page
 	 */
-	public function update_shipping_method() {
+	public static function update_shipping_method() {
 
 		check_ajax_referer( 'update-shipping-method', 'security' );
 
@@ -152,7 +154,7 @@ class WC_AJAX {
 	/**
 	 * AJAX update order review on checkout
 	 */
-	public function update_order_review() {
+	public static function update_order_review() {
 
 		check_ajax_referer( 'update-order-review', 'security' );
 
@@ -264,7 +266,7 @@ class WC_AJAX {
 	/**
 	 * AJAX add to cart
 	 */
-	public function add_to_cart() {
+	public static function add_to_cart() {
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
 		$quantity          = empty( $_POST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_POST['quantity'] );
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
@@ -278,11 +280,11 @@ class WC_AJAX {
 			}
 
 			// Return fragments
-			$this->get_refreshed_fragments();
+			self::get_refreshed_fragments();
 
 		} else {
 
-			$this->json_headers();
+			self::json_headers();
 
 			// If there was an error adding to the cart, redirect to the product page to show any errors
 			$data = array(
@@ -299,13 +301,12 @@ class WC_AJAX {
 	/**
 	 * Process ajax checkout form
 	 */
-	public function checkout() {
+	public static function checkout() {
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 		}
 
-		$woocommerce_checkout = WC()->checkout();
-		$woocommerce_checkout->process_checkout();
+		WC()->checkout()->process_checkout();
 
 		die(0);
 	}
@@ -313,7 +314,7 @@ class WC_AJAX {
 	/**
 	 * Feature a product from admin
 	 */
-	public function feature_product() {
+	public static function feature_product() {
 		if ( ! current_user_can( 'edit_products' ) ) {
 			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
 		}
@@ -346,7 +347,7 @@ class WC_AJAX {
 	/**
 	 * Mark an order as complete
 	 */
-	public function mark_order_complete() {
+	public static function mark_order_complete() {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
 		}
@@ -371,7 +372,7 @@ class WC_AJAX {
 	/**
 	 * Mark an order as processing
 	 */
-	public function mark_order_processing() {
+	public static function mark_order_processing() {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
 		}
@@ -396,11 +397,11 @@ class WC_AJAX {
 	/**
 	 * Add a new attribute via ajax function
 	 */
-	public function add_new_attribute() {
+	public static function add_new_attribute() {
 
 		check_ajax_referer( 'add-attribute', 'security' );
 
-		$this->json_headers();
+		self::json_headers();
 
 		$taxonomy = esc_attr( $_POST['taxonomy'] );
 		$term     = stripslashes( $_POST['term'] );
@@ -428,7 +429,7 @@ class WC_AJAX {
 	/**
 	 * Delete variation via ajax function
 	 */
-	public function remove_variation() {
+	public static function remove_variation() {
 
 		check_ajax_referer( 'delete-variation', 'security' );
 
@@ -445,7 +446,7 @@ class WC_AJAX {
 	/**
 	 * Delete variations via ajax function
 	 */
-	public function remove_variations() {
+	public static function remove_variations() {
 
 		check_ajax_referer( 'delete-variations', 'security' );
 
@@ -465,7 +466,7 @@ class WC_AJAX {
 	/**
 	 * Save attributes via ajax
 	 */
-	public function save_attributes() {
+	public static function save_attributes() {
 
 		check_ajax_referer( 'save-attributes', 'security' );
 
@@ -577,7 +578,7 @@ class WC_AJAX {
 	/**
 	 * Add variation via ajax function
 	 */
-	public function add_variation() {
+	public static function add_variation() {
 
 		check_ajax_referer( 'add-variation', 'security' );
 
@@ -661,7 +662,7 @@ class WC_AJAX {
 	/**
 	 * Link all variations via ajax function
 	 */
-	public function link_all_variations() {
+	public static function link_all_variations() {
 
 		if ( ! defined( 'WC_MAX_LINKED_VARIATIONS' ) ) {
 			define( 'WC_MAX_LINKED_VARIATIONS', 49 );
@@ -826,7 +827,7 @@ class WC_AJAX {
 	/**
 	 * Delete download permissions via ajax function
 	 */
-	public function revoke_access_to_download() {
+	public static function revoke_access_to_download() {
 
 		check_ajax_referer( 'revoke-access', 'security' );
 
@@ -846,7 +847,7 @@ class WC_AJAX {
 	/**
 	 * Grant download permissions via ajax function
 	 */
-	public function grant_access_to_download() {
+	public static function grant_access_to_download() {
 
 		check_ajax_referer( 'grant-access', 'security' );
 
@@ -899,11 +900,11 @@ class WC_AJAX {
 	/**
 	 * Get customer details via ajax
 	 */
-	public function get_customer_details() {
+	public static function get_customer_details() {
 
 		check_ajax_referer( 'get-customer-details', 'security' );
 
-		$this->json_headers();
+		self::json_headers();
 
 		$user_id      = (int) trim(stripslashes($_POST['user_id']));
 		$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
@@ -933,7 +934,7 @@ class WC_AJAX {
 	/**
 	 * Add order item via ajax
 	 */
-	public function add_order_item() {
+	public static function add_order_item() {
 		global $wpdb;
 
 		check_ajax_referer( 'order-item', 'security' );
@@ -1008,7 +1009,7 @@ class WC_AJAX {
 	/**
 	 * Add order fee via ajax
 	 */
-	public function add_order_fee() {
+	public static function add_order_fee() {
 
 		check_ajax_referer( 'order-item', 'security' );
 
@@ -1037,7 +1038,7 @@ class WC_AJAX {
 	/**
 	 * Remove an order item
 	 */
-	public function remove_order_item() {
+	public static function remove_order_item() {
 		global $wpdb;
 
 		check_ajax_referer( 'order-item', 'security' );
@@ -1056,7 +1057,7 @@ class WC_AJAX {
 	/**
 	 * Reduce order item stock
 	 */
-	public function reduce_order_item_stock() {
+	public static function reduce_order_item_stock() {
 		global $wpdb;
 
 		check_ajax_referer( 'order-item', 'security' );
@@ -1104,7 +1105,7 @@ class WC_AJAX {
 	/**
 	 * Increase order item stock
 	 */
-	public function increase_order_item_stock() {
+	public static function increase_order_item_stock() {
 		global $wpdb;
 
 		check_ajax_referer( 'order-item', 'security' );
@@ -1153,7 +1154,7 @@ class WC_AJAX {
 	/**
 	 * Add some meta to a line item
 	 */
-	public function add_order_item_meta() {
+	public static function add_order_item_meta() {
 		global $wpdb;
 
 		check_ajax_referer( 'order-item', 'security' );
@@ -1170,7 +1171,7 @@ class WC_AJAX {
 	/**
 	 * Remove meta from a line item
 	 */
-	public function remove_order_item_meta() {
+	public static function remove_order_item_meta() {
 		global $wpdb;
 
 		check_ajax_referer( 'order-item', 'security' );
@@ -1185,12 +1186,12 @@ class WC_AJAX {
 	/**
 	 * Calc line tax
 	 */
-	public function calc_line_taxes() {
+	public static function calc_line_taxes() {
 		global $wpdb;
 
 		check_ajax_referer( 'calc-totals', 'security' );
 
-		$this->json_headers();
+		self::json_headers();
 
 		$tax      = new WC_Tax();
 		$taxes    = $tax_rows = $item_taxes = $shipping_taxes = array();
@@ -1361,7 +1362,7 @@ class WC_AJAX {
 	/**
 	 * Add order note via ajax
 	 */
-	public function add_order_note() {
+	public static function add_order_note() {
 
 		check_ajax_referer( 'add-order-note', 'security' );
 
@@ -1392,7 +1393,7 @@ class WC_AJAX {
 	/**
 	 * Delete order note via ajax
 	 */
-	public function delete_order_note() {
+	public static function delete_order_note() {
 
 		check_ajax_referer( 'delete-order-note', 'security' );
 
@@ -1412,11 +1413,11 @@ class WC_AJAX {
 	 * @param string $x (default: '')
 	 * @param string $post_types (default: array('product'))
 	 */
-	public function json_search_products( $x = '', $post_types = array('product') ) {
+	public static function json_search_products( $x = '', $post_types = array('product') ) {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		$this->json_headers();
+		self::json_headers();
 
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1510,18 +1511,18 @@ class WC_AJAX {
 	 * @return void
 	 * @see WC_AJAX::json_search_products()
 	 */
-	public function json_search_products_and_variations() {
-		$this->json_search_products( '', array('product', 'product_variation') );
+	public static function json_search_products_and_variations() {
+		self::json_search_products( '', array('product', 'product_variation') );
 	}
 
 	/**
 	 * Search for customers and return json
 	 */
-	public function json_search_customers() {
+	public static function json_search_customers() {
 
 		check_ajax_referer( 'search-customers', 'security' );
 
-		$this->json_headers();
+		self::json_headers();
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1533,7 +1534,7 @@ class WC_AJAX {
 
 		$found_customers = array( '' => $default );
 
-		add_action( 'pre_user_query', array( $this, 'json_search_customer_name' ) );
+		add_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
 
 		$customers_query = new WP_User_Query( apply_filters( 'woocommerce_json_search_customers_query', array(
 			'fields'         => 'all',
@@ -1542,7 +1543,7 @@ class WC_AJAX {
 			'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' )
 		) ) );
 
-		remove_action( 'pre_user_query', array( $this, 'json_search_customer_name' ) );
+		remove_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
 
 		$customers = $customers_query->get_results();
 
@@ -1563,7 +1564,7 @@ class WC_AJAX {
 	 * @return void
 	 * @see WC_AJAX::json_search_products()
 	 */
-	public function json_search_downloadable_products_and_variations() {
+	public static function json_search_downloadable_products_and_variations() {
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		$args = array(
@@ -1600,7 +1601,7 @@ class WC_AJAX {
 	 * @param  object $query
 	 * @return object
 	 */
-	public function json_search_customer_name( $query ) {
+	public static function json_search_customer_name( $query ) {
 		global $wpdb;
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
@@ -1612,7 +1613,7 @@ class WC_AJAX {
 	/**
 	 * Ajax request handling for categories ordering
 	 */
-	public function term_ordering() {
+	public static function term_ordering() {
 		global $wpdb;
 
 		$id       = (int) $_POST['id'];
@@ -1639,7 +1640,7 @@ class WC_AJAX {
 	 *
 	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/)
 	 */
-	public function product_ordering() {
+	public static function product_ordering() {
 		global $wpdb;
 
 		// check permissions again and make sure we have what we need
@@ -1652,7 +1653,7 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$this->json_headers();
+		self::json_headers();
 
 		$previd  = isset( $_POST['previd'] ) ? $_POST['previd'] : false;
 		$nextid  = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
@@ -1723,4 +1724,4 @@ class WC_AJAX {
 	}
 }
 
-new WC_AJAX();
+WC_AJAX::init();

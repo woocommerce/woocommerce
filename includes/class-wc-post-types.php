@@ -1,4 +1,5 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -9,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Registers post types and taxonomies
  *
  * @class 		WC_Post_types
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
@@ -17,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Post_types {
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct() {
+	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_post_types' ), 5 );
 	}
@@ -161,7 +162,7 @@ class WC_Post_types {
 	        ) )
 	    );
 
-	    global $wc_product_attributes, $woocommerce;
+	    global $wc_product_attributes;
 
 	    $wc_product_attributes = array();
 
@@ -356,4 +357,4 @@ class WC_Post_types {
 	}
 }
 
-new WC_Post_types();
+WC_Post_types::init();

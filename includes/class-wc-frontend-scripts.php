@@ -1,9 +1,14 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Handle frontend forms
  *
  * @class 		WC_Frontend_Scripts
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes/
  * @category	Class
  * @author 		WooThemes
@@ -11,12 +16,12 @@
 class WC_Frontend_Scripts {
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct () {
-		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
-		add_action( 'wp_print_scripts', array( $this, 'check_jquery' ), 25 );
-		add_filter( 'woocommerce_enqueue_styles', array( $this, 'backwards_compat' ) );
+	public static function init() {
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
+		add_action( 'wp_print_scripts', array( __CLASS__, 'check_jquery' ), 25 );
+		add_filter( 'woocommerce_enqueue_styles', array( __CLASS__, 'backwards_compat' ) );
 	}
 
 	/**
@@ -52,7 +57,7 @@ class WC_Frontend_Scripts {
 	 * @access public
 	 * @return void
 	 */
-	public function load_scripts() {
+	public static function load_scripts() {
 		global $post, $wp;
 
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
@@ -171,11 +176,13 @@ class WC_Frontend_Scripts {
 		) ) );
 
 		// CSS Styles
-		$enqueue_styles = $this->get_styles();
+		$enqueue_styles = self::get_styles();
 
-		if ( $enqueue_styles )
-			foreach ( $enqueue_styles as $handle => $args )
+		if ( $enqueue_styles ) {
+			foreach ( $enqueue_styles as $handle => $args ) {
 				wp_enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
+			}
+		}
 	}
 
 	/**
@@ -187,7 +194,7 @@ class WC_Frontend_Scripts {
 	 * @access public
 	 * @return void
 	 */
-	public function check_jquery() {
+	public static function check_jquery() {
 		global $wp_scripts;
 
 		// Enforce minimum version of jQuery
@@ -203,7 +210,7 @@ class WC_Frontend_Scripts {
 	 * @param  array $styles
 	 * @return array
 	 */
-	public function backwards_compat( $styles ) {
+	public static function backwards_compat( $styles ) {
 		if ( defined( 'WOOCOMMERCE_USE_CSS' ) ) {
 
 			_deprecated_function( 'WOOCOMMERCE_USE_CSS', '2.1', 'Styles should be removed using wp_deregister_style or the woocommerce_enqueue_styles filter rather than the WOOCOMMERCE_USE_CSS constant.' );
@@ -216,4 +223,4 @@ class WC_Frontend_Scripts {
 	}
 }
 
-new WC_Frontend_Scripts();
+WC_Frontend_Scripts::init();
