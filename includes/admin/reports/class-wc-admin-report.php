@@ -50,12 +50,13 @@ class WC_Admin_Report {
 			'debug'        => false
 		);
 
-		$args = wp_parse_args( $args, $defaults );
+		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', wp_parse_args( $args, $defaults ) );
 
 		extract( $args );
 
-		if ( empty( $data ) )
+		if ( empty( $data ) ) {
 			return false;
+		}
 
 		$select = array();
 
