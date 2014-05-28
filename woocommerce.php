@@ -234,18 +234,23 @@ final class WooCommerce {
 		if ( ! defined( 'WC_TEMPLATE_PATH' ) ) {
 			define( 'WC_TEMPLATE_PATH', $this->template_path() );
 		}
-		
+
 		if ( ! defined( 'WC_ROUNDING_PRECISION' ) ) {
 			define( 'WC_ROUNDING_PRECISION', 4 );
 		}
 
-		// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
 		if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) ) {
+			// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
 			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 ); 
 		}
 
 		if ( ! defined( 'WC_DELIMITER' ) ) {
 			define( 'WC_DELIMITER', '|' );
+		}
+
+		if ( ! defined( 'WC_LOG_DIR' ) ) {
+			// Absolute path to the folder for logs. Defaults to 1 level above WordPress.
+			define( 'WC_LOG_DIR', dirname( ABSPATH ) . '/wc-logs/' );
 		}
 	}
 

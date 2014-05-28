@@ -608,12 +608,12 @@ class WC_Install {
 				'content' 	=> ''
 			),
 			array(
-				'base' 		=> WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
+				'base' 		=> WC_LOG_DIR,
 				'file' 		=> '.htaccess',
 				'content' 	=> 'deny from all'
 			),
 			array(
-				'base' 		=> WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
+				'base' 		=> WC_LOG_DIR,
 				'file' 		=> 'index.html',
 				'content' 	=> ''
 			)

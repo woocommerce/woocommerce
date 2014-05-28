@@ -100,10 +100,11 @@
 		<tr>
 			<td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
 			<td><?php
-				if ( @fopen( WC()->plugin_path() . '/logs/paypal.txt', 'a' ) )
-					echo '<mark class="yes">' . __( 'Log directory is writable.', 'woocommerce' ) . '</mark>';
-				else
-					echo '<mark class="error">' . __( 'Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce' ) . '</mark>';
+				if ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ) {
+					printf( '<mark class="yes">' . __( 'Log directory (%s) is writable.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
+				} else {
+					printf( '<mark class="error">' . __( 'Log directory (<code>%s</code>) is not writable. To allow logging, make this writable or define a custom <code>WC_LOG_DIR</code>.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
+				}
 			?></td>
 		</tr>
 		<tr>

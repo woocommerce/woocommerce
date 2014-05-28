@@ -30,8 +30,7 @@ class WC_Admin_Status {
 	 * Handles output of report
 	 */
 	public function status_report() {
-		global $woocommerce, $wpdb;
-
+		global $wpdb;
 		include_once( 'views/html-admin-page-status-report.php' );
 	}
 
@@ -210,6 +209,19 @@ class WC_Admin_Status {
 	}
 
 	/**
+	 * Show the logs page
+	 */
+	public function status_logs() {
+		$logs = $this->scan_log_files();
+		if ( ! empty( $_POST['log_file'] ) && isset( $logs[ sanitize_title( $_POST['log_file'] ) ] ) ) {
+			$viewed_log = $logs[ sanitize_title( $_POST['log_file'] ) ];
+		} elseif ( $logs ) {
+			$viewed_log = current( $logs );
+		}
+		include_once( 'views/html-admin-page-status-logs.php' );
+	}
+
+	/**
 	 * Retrieve metadata from a file. Based on WP Core's get_file_data function
 	 *
 	 * @since 2.1.1
@@ -239,7 +251,6 @@ class WC_Admin_Status {
 	/**
 	 * Scan the template files
 	 *
-	 * @access public
  	 * @param string $template_path
  	 * @return array
 	 */
@@ -256,6 +267,26 @@ class WC_Admin_Status {
 						}
 					} else {
 						$result[] = $value;
+					}
+				}
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Scan the log files
+	 *
+ 	 * @return array
+	 */
+	public function scan_log_files() {
+		$files         = scandir( WC_LOG_DIR );
+		$result        = array();
+		if ( $files ) {
+			foreach ( $files as $key => $value ) {
+				if ( ! in_array( $value, array( ".",".." ) ) ) {
+					if ( ! is_dir( $value ) && strstr( $value, '.log' ) ) {
+						$result[ sanitize_title( $value ) ] = $value;
 					}
 				}
 			}

@@ -310,10 +310,13 @@ class WC_Countries {
 		// Load only the state files the shop owner wants/needs
 		$allowed = array_merge( $this->get_allowed_countries(), $this->get_shipping_countries() );
 
-		if ( $allowed )
-			foreach ( $allowed as $CC => $country )
-				if ( ! isset( $states[ $CC ] ) && file_exists( WC()->plugin_path() . '/i18n/states/' . $CC . '.php' ) )
-					include( WC()->plugin_path() . '/i18n/states/' . $CC . '.php' );
+		if ( $allowed ) {
+			foreach ( $allowed as $code => $country ) {
+				if ( ! isset( $states[ $code ] ) && file_exists( WC()->plugin_path() . '/i18n/states/' . $code . '.php' ) ) {
+					include( WC()->plugin_path() . '/i18n/states/' . $code . '.php' );
+				}
+			}
+		}
 
 		$this->states = apply_filters( 'woocommerce_states', $states );
 	}

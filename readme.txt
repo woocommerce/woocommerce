@@ -151,6 +151,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Add new 'wc_admin_reports_path' filter to reports.
 * Dev - Add user ID to shipping packages.
 * Dev - Added product id parameter to related posts filters.
+* Dev - WC_LOG_DIR constant for defining the log directory.
+* Dev - Moved default logging directory 1 level above WordPress, rather than in the plugin folder.
+* Dev - Added log viewer in System Status.
 * Refactor - Update stock amounts with DB queries.
 * Refactor - Simplified attribute name sanitisation which maintains UTF8 char integrity.
 * Refactor - Country class return methods.
