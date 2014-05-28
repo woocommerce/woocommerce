@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version 	2.1.0
+ * @version 	2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -349,7 +349,7 @@ add_filter( 'editable_roles', 'wc_modify_editable_roles' );
  * Modify capabiltiies to prevent non-admin users editing admin users
  *
  * $args[0] will be the user being edited in this case.
- * 
+ *
  * @param  array $caps Array of caps
  * @param  string $cap Name of the cap we are checking
  * @param  int $user_id ID of the user being checked against
@@ -377,3 +377,92 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 	return $caps;
 }
 add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
+
+/**
+ * Get customer available downloads
+ *
+ * @param int $customer_id Customer/User ID
+ * @return array
+ */
+function wc_get_customer_available_downloads( $customer_id ) {
+	global $wpdb;
+
+	$downloads   = array();
+	$_product    = null;
+	$order       = null;
+	$file_number = 0;
+
+	// Get results from valid orders only
+	$results = $wpdb->get_results( $wpdb->prepare( "
+		SELECT permissions.*
+		FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
+		LEFT JOIN {$wpdb->posts} as posts ON permissions.order_id = posts.ID
+		WHERE user_id = %d
+		AND permissions.order_id > 0
+		AND posts.post_status = 'publish'
+		AND
+			(
+				permissions.downloads_remaining > 0
+				OR
+				permissions.downloads_remaining = ''
+			)
+		AND
+			(
+				permissions.access_expires IS NULL
+				OR
+				permissions.access_expires >= %s
+			)
+		GROUP BY permissions.download_id
+		ORDER BY permissions.order_id, permissions.product_id, permissions.permission_id;
+		", $customer_id, date( 'Y-m-d', current_time( 'timestamp' ) ) ) );
+
+	if ( $results ) {
+		foreach ( $results as $result ) {
+			if ( ! $order || $order->id != $result->order_id ) {
+				// new order
+				$order    = new WC_Order( $result->order_id );
+				$_product = null;
+			}
+
+			// Downloads permitted?
+			if ( ! $order->is_download_permitted() ) {
+				continue;
+			}
+
+			if ( ! $_product || $_product->id != $result->product_id ) {
+				// new product
+				$file_number = 0;
+				$_product    = get_product( $result->product_id );
+			}
+
+			// Check product exists and has the file
+			if ( ! $_product || ! $_product->exists() || ! $_product->has_file( $result->download_id ) ) {
+				continue;
+			}
+
+			$download_file = $_product->get_file( $result->download_id );
+			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
+			$download_name = apply_filters(
+				'woocommerce_downloadable_product_name',
+				$_product->get_title() . ' &ndash; ' . $download_file['name'],
+				$_product,
+				$result->download_id,
+				$file_number
+			);
+
+			$downloads[] = array(
+				'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/', 'http' ) ),
+				'download_id'         => $result->download_id,
+				'product_id'          => $result->product_id,
+				'download_name'       => $download_name,
+				'order_id'            => $order->id,
+				'order_key'           => $order->order_key,
+				'downloads_remaining' => $result->downloads_remaining
+			);
+
+			$file_number++;
+		}
+	}
+
+	return $downloads;
+}
