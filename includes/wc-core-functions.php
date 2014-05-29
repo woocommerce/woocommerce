@@ -190,7 +190,7 @@ function get_woocommerce_currencies() {
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
 				'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
 				'NZD' => __( 'New Zealand Dollar', 'woocommerce' ),
-                'PYG' => __( 'Paraguayan guaraní', 'woocommerce' ),
+                'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 				'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
 				'PLN' => __( 'Polish Zloty', 'woocommerce' ),
 				'GBP' => __( 'Pounds Sterling', 'woocommerce' ),
