@@ -21,7 +21,7 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @var string
 	 */
-	protected $repo = 'https://github.com/woothemes/woocommerce-language-packs/blob/v';
+	protected $repo = 'https://github.com/woothemes/woocommerce-language-packs/raw/v';
 
 	/**
 	 * Initialize the language pack upgrader
@@ -50,7 +50,7 @@ class WC_Language_Pack_Upgrader {
 	 * @return string
 	 */
 	public function get_language_package_uri() {
-		return $this->repo . '/' . WC_VERSION . '/' . $this->get_language() . '.zip';
+		return $this->repo . WC_VERSION . '/packages/' . $this->get_language() . '.zip';
 	}
 
 	/**
