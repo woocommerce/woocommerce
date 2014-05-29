@@ -190,6 +190,7 @@ function get_woocommerce_currencies() {
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
 				'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
 				'NZD' => __( 'New Zealand Dollar', 'woocommerce' ),
+                'PYG' => __( 'Paraguayan guaraní', 'woocommerce' ),
 				'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
 				'PLN' => __( 'Polish Zloty', 'woocommerce' ),
 				'GBP' => __( 'Pounds Sterling', 'woocommerce' ),
@@ -255,6 +256,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = '&#1088;&#1091;&#1073;.';
 			break;
 		case 'KRW' : $currency_symbol = '&#8361;'; break;
+        case 'PYG' : $currency_symbol = '&#8370;'; break;
 		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
 		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
 		case 'ZAR' : $currency_symbol = '&#82;'; break;
