@@ -7,7 +7,9 @@
  * @version     2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 ?><table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
 
@@ -21,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		</td>
 
-		<?php if ( ! wc_ship_to_billing_address_only() && ( $shipping = $order->get_formatted_shipping_address() ) ) : ?>
+		<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && ( $shipping = $order->get_formatted_shipping_address() ) ) : ?>
 
 		<td valign="top" width="50%">
 

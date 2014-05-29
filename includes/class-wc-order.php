@@ -1687,4 +1687,24 @@ class WC_Order {
 
 		return apply_filters( 'woocommerce_order_needs_payment', $needs_payment, $this, $valid_order_statuses );
 	}
+
+	/**
+	 * Checks if an order needs display the shipping address, based on shipping method
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	public function needs_shipping_address() {
+		$hide  = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
+		$needs = false;
+
+		foreach ( $this->get_shipping_methods() as $shipping_method ) {
+			if ( ! in_array( $shipping_method['method_id'], $hide ) ) {
+				$needs = true;
+				break;
+			}
+		}
+
+		return apply_filters( 'woocommerce_order_needs_shipping_address', $needs, $this, $hide );
+	}
 }
