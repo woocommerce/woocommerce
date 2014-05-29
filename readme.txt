@@ -127,6 +127,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.2.0 =
+* Feature - Language pack downloader. po and mo files removed from core (too heavy).
 * Feature - Added used payment gateway to view orders screens.
 * Feature - API: Lookup customers by email endpoint.
 * Feature - Allow backorders to be configured at variation level.
