@@ -12,8 +12,7 @@
     "grunt-shell": "~0.6.4",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-copy": "~0.5.0",
-    "grunt-contrib-clean": "0.5.x",
-    "grunt-wp-deploy": "0.3.x"
+    "grunt-contrib-clean": "0.5.x"
   },
   "engines": {
     "node": ">=0.8.0",
