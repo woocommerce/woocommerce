@@ -408,16 +408,17 @@ final class WooCommerce {
 	 */
 	public function load_plugin_textdomain() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
+		$dir    = trailingslashit( WP_LANG_DIR );
 
 		// Admin Locale
 		if ( is_admin() ) {
-			load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-admin-$locale.mo" );
-			load_textdomain( 'woocommerce', dirname( __FILE__ ) . "/i18n/languages/woocommerce-admin-$locale.mo" );
+			load_textdomain( 'woocommerce', $dir . 'woocommerce/woocommerce-admin-' . $locale . '.mo' );
+			load_textdomain( 'woocommerce', $dir . 'plugins/woocommerce-admin-' . $locale . '.mo' );
 		}
 
 		// Global + Frontend Locale
-		load_textdomain( 'woocommerce', WP_LANG_DIR . "/woocommerce/woocommerce-$locale.mo" );
-		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
+		load_textdomain( 'woocommerce', $dir . 'woocommerce/woocommerce-' . $locale . '.mo' );
+		load_plugin_textdomain( 'woocommerce', false, $dir . 'plugins' );
 	}
 
 	/**
