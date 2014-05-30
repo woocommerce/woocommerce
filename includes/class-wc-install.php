@@ -254,15 +254,6 @@ class WC_Install {
 				'grouped',
 				'variable',
 				'external'
-			),
-			'shop_order_status' => array(
-				'pending',
-				'failed',
-				'on-hold',
-				'processing',
-				'completed',
-				'refunded',
-				'cancelled'
 			)
 		);
 
