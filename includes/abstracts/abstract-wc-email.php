@@ -153,8 +153,11 @@ abstract class WC_Email extends WC_Settings_API {
 		$this->enabled   		= $this->get_option( 'enabled' );
 
 		// Find/replace
-		$this->find = array( '{blogname}', '{site_title}' );
-		$this->replace = array( $this->get_blogname(), $this->get_blogname() );
+		$this->find['blogname']      = '{blogname}';
+		$this->find['site-title']    = '{site_title}';
+		
+		$this->replace['blogname']   = $this->get_blogname();
+		$this->replace['site-title'] = $this->get_blogname();
 
 		// For multipart messages
 		add_filter( 'phpmailer_init', array( $this, 'handle_multipart' ) );
