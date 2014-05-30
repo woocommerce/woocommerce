@@ -365,16 +365,6 @@
 
 	<tbody>
 		<tr>
-			<td><?php _e( 'Order Statuses', 'woocommerce' ); ?>:</td>
-			<td><?php
-				$display_terms = array();
-				$terms = get_terms( 'shop_order_status', array( 'hide_empty' => 0 ) );
-				foreach ( $terms as $term )
-					$display_terms[] = $term->name . ' (' . $term->slug . ')';
-				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
-			?></td>
-		</tr>
-		<tr>
 			<td><?php _e( 'Product Types', 'woocommerce' ); ?>:</td>
 			<td><?php
 				$display_terms = array();
