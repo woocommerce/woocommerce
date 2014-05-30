@@ -181,6 +181,15 @@ table.wc_status_table {
 		outline: 0;
 	}
 }
+#log-viewer-select {
+	padding: 10px 0 8px;
+	line-height: 180%;
+}
+#log-viewer {
+	textarea {
+		width: 100%;
+	}
+}
 
 /* Bulk/Quick edit */
 .inline-edit-product.quick-edit-row {
