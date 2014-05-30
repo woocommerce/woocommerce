@@ -136,6 +136,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Notices when rendering WooCommerce Shop as Front Page.
 * Fix - Prevent undefined notice for Layered Nav title.
 * Fix - state_province is not required for mijireh any longer.
+* Fix - Fix coupon limit checks and enhance to check ID by provided email (if logged out).
+* Fix - Danish krone symbol.
+* Fix - check for the existence of the cart during the is_available().
+* Fix - Fixes performance degredation on large wp_options tables.
+* Fix - improved the shortcodes button for support WordPress 3.9.
 * Tweak - Stronger session ID generation.
 * Dev - Add action hooks when saving tax rates.
 
