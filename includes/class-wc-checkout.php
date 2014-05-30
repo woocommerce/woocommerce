@@ -174,7 +174,7 @@ class WC_Checkout {
 		$order_data = apply_filters( 'woocommerce_new_order_data', array(
 			'post_type' 	=> 'shop_order',
 			'post_title' 	=> sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
-			'post_status' 	=> 'publish',
+			'post_status' 	=> apply_filters( 'woocommerce_default_order_status', 'pending' ),
 			'ping_status'	=> 'closed',
 			'post_excerpt' 	=> isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
 			'post_author' 	=> 1,
@@ -188,12 +188,8 @@ class WC_Checkout {
 
 			$order_id = absint( WC()->session->order_awaiting_payment );
 
-			/* Check order is unpaid by getting its status */
-			$terms        = wp_get_object_terms( $order_id, 'shop_order_status', array( 'fields' => 'slugs' ) );
-			$order_status = isset( $terms[0] ) ? $terms[0] : 'pending';
-
 			// Resume the unpaid order if its pending
-			if ( get_post( $order_id ) && ( $order_status == 'pending' || $order_status == 'failed' ) ) {
+			if ( ( $existing_order = get_post( $order_id ) ) && $existing_order->is_status( array( 'pending', 'failed' ) ) ) {
 
 				// Update the existing order as we are resuming it
 				$create_new_order = false;
@@ -393,9 +389,6 @@ class WC_Checkout {
 
 		// Let plugins add meta
 		do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
-
-		// Order status
-		wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );
 
 		return $order_id;
 	}
