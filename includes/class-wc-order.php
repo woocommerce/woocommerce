@@ -75,10 +75,6 @@ class WC_Order {
 			$user                = get_user_by( 'id', $this->customer_user );
 			$this->billing_email = $user->user_email;
 		}
-
-		// Get status
-		$terms        = wp_get_object_terms( $this->id, 'shop_order_status', array( 'fields' => 'slugs' ) );
-		$this->status = isset( $terms[0] ) ? $terms[0] : apply_filters( 'woocommerce_default_order_status', 'pending' );
 	}
 
 	/**
@@ -111,8 +107,26 @@ class WC_Order {
 		} else {
 			$value = get_post_meta( $this->id, '_' . $key, true );
 		}
-
 		return $value;
+	}
+
+	/**
+	 * Return the order status
+	 * @return string - pending, on-hold, processing, completed, cancelled, refunded
+	 */
+	public function get_status() {
+		return $this->post_status;
+	}
+
+	/**
+	 * Checks the order status against a passed in status.
+	 *
+	 * @access public
+	 * @param mixed $type Array or string of types
+	 * @return bool
+	 */
+	public function is_status( $status ) {
+		return ( $this->post_status === $status || ( is_array( $status ) && in_array( $this->post_status, $status ) ) ) ? true : false;
 	}
 
 	/**
