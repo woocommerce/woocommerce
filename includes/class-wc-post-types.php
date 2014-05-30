@@ -150,19 +150,6 @@ class WC_Post_types {
 	        ) )
 	    );
 
-	    register_taxonomy( 'shop_order_status',
-	        apply_filters( 'woocommerce_taxonomy_objects_shop_order_status', array('shop_order') ),
-	        apply_filters( 'woocommerce_taxonomy_args_shop_order_status', array(
-	            'hierarchical' 			=> false,
-	            'update_count_callback' => '_update_post_term_count',
-	            'show_ui' 				=> false,
-	            'show_in_nav_menus' 	=> false,
-	            'query_var' 			=> is_admin(),
-	            'rewrite' 				=> false,
-	            'public'                => false
-	        ) )
-	    );
-
 	    global $wc_product_attributes;
 
 	    $wc_product_attributes = array();
