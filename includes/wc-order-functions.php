@@ -13,6 +13,26 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
+ * Get all order statuses
+ *
+ * @since 2.2
+ * @return array
+ */
+function wc_get_order_statuses() {
+	$order_statuses = array(
+		'pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+		'processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
+		'on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
+		'complete'   => _x( 'Complete', 'Order status', 'woocommerce' ),
+		'cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
+		'refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
+		'failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
+	);
+
+	return apply_filters( 'wc_order_statuses', $order_statuses );
+}
+
+/**
  * Finds an Order ID based on an order key.
  *
  * @access public
