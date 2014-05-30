@@ -119,15 +119,6 @@ class WC_Order {
 	}
 
 	/**
-	 * Return the order statuses formatted name
-	 * @return string
-	 */
-	public function get_status_name() {
-		$statuses = wc_get_order_statuses();
-		return isset( $statuses[ $this->post_status ] ) ? $statuses[ $this->post_status ] : '';
-	}
-
-	/**
 	 * Checks the order status against a passed in status.
 	 *
 	 * @access public
@@ -1416,7 +1407,7 @@ class WC_Order {
 
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed' ), $this );
 
-		if ( $this->id && in_array( $this->status, $valid_order_statuses ) ) {
+		if ( $this->id && $this->is_status( $valid_order_statuses ) ) {
 
 			$order_needs_processing = true;
 
@@ -1462,7 +1453,7 @@ class WC_Order {
 
 		} else {
 
-			do_action( 'woocommerce_payment_complete_order_status_' . $this->status, $this->id );
+			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->id );
 
 		}
 	}
@@ -1691,7 +1682,7 @@ class WC_Order {
 	public function needs_payment() {
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
 
-		if ( in_array( $this->status, $valid_order_statuses ) && $this->get_total() > 0 ) {
+		if ( $this->is_status( $valid_order_statuses ) && $this->get_total() > 0 ) {
 			$needs_payment = true;
 		} else {
 			$needs_payment = false;

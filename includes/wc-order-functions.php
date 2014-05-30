@@ -33,6 +33,16 @@ function wc_get_order_statuses() {
 }
 
 /**
+ * Get the nice name for an orer status
+ * @param  string $status
+ * @return string
+ */
+function wc_get_order_status_name( $status ) {
+	$statuses = wc_get_order_statuses();
+	return isset( $statuses[ $status ] ) ? $statuses[ $status ] : '';
+}
+
+/**
  * Finds an Order ID based on an order key.
  *
  * @access public
@@ -128,7 +138,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 
 	$order = new WC_Order( $order_id );
 
-	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
+	if ( $order->is_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
 	}
 

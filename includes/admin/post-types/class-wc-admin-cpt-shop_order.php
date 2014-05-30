@@ -116,7 +116,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		switch ( $column ) {
 			case 'order_status' :
 
-				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->status ), esc_html__( $the_order->status, 'woocommerce' ), esc_html__( $the_order->status, 'woocommerce' ) );
+				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
 
 			break;
 			case 'order_date' :
@@ -279,7 +279,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 
 						$actions = array();
 
-						if ( in_array( $the_order->status, array( 'pending', 'on-hold' ) ) ) {
+						if ( $the_order->is_status( array( 'pending', 'on-hold' ) ) ) {
 							$actions['processing'] = array(
 								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
 								'name' 		=> __( 'Processing', 'woocommerce' ),
@@ -287,7 +287,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 							);
 						}
 
-						if ( in_array( $the_order->status, array( 'pending', 'on-hold', 'processing' ) ) ) {
+						if ( $the_order->is_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
 							$actions['complete'] = array(
 								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
 								'name' 		=> __( 'Complete', 'woocommerce' ),

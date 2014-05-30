@@ -265,7 +265,7 @@ class WC_Form_Handler {
 
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, $valid_order_statuses ) ) {
+			if ( $order->id == $order_id && $order->order_key == $order_key && $order->is_status( $valid_order_statuses ) ) {
 
 				// Set customer location to order location
 				if ( $order->billing_country ) {
@@ -520,10 +520,10 @@ class WC_Form_Handler {
 			$order_id         = absint( $_GET['order_id'] );
 			$order            = new WC_Order( $order_id );
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
-			$order_can_cancel = in_array( $order->status, apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
+			$order_can_cancel = $order->is_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
 			$redirect         = $_GET['redirect'];
 
-			if ( $order->status == 'cancelled' ) {
+			if ( $order->is_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
 			} elseif ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
 

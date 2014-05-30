@@ -116,7 +116,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
 			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
-			'status'                    => $order->status,
+			'status'                    => $order->get_status(),
 			'currency'                  => $order->order_currency,
 			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
 			'subtotal'                  => wc_format_decimal( $this->get_order_subtotal( $order ), 2 ),

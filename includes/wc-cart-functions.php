@@ -134,8 +134,9 @@ function wc_clear_cart_after_payment() {
 
 		if ( $order->id > 0 ) {
 			// If the order has not failed, or is not pending, the order must have gone through
-			if ( $order->status != 'failed' && $order->status != 'pending' )
+			if ( ! $order->is_status( array( 'failed', 'pending' ) ) ) {
 				WC()->cart->empty_cart();
+			}
 		}
 	}
 }

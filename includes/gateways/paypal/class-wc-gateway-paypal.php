@@ -827,7 +827,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$order = $this->get_paypal_order( $posted['cm'] );
 
-			if ( 'pending' != $order->status ) {
+			if ( ! $order->is_status( 'pending' ) ) {
 				return false;
 			}
 
