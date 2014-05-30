@@ -382,26 +382,6 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			return;
 		}
 
-		// Status
-		?>
-		<select name='shop_order_status' id='dropdown_shop_order_status'>
-			<option value=""><?php _e( 'Show all statuses', 'woocommerce' ); ?></option>
-			<?php
-				$terms = get_terms('shop_order_status');
-
-				foreach ( $terms as $term ) {
-					echo '<option value="' . esc_attr( $term->slug ) . '"';
-
-					if ( isset( $wp_query->query['shop_order_status'] ) ) {
-						selected( $term->slug, $wp_query->query['shop_order_status'] );
-					}
-
-					echo '>' . esc_html__( $term->name, 'woocommerce' ) . ' (' . absint( $term->count ) . ')</option>';
-				}
-			?>
-			</select>
-		<?php
-
 		// Customers
 		?>
 		<select id="dropdown_customers" name="_customer_user">
@@ -418,9 +398,6 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		<?php
 
 		wc_enqueue_js( "
-
-			jQuery('select#dropdown_shop_order_status, select[name=m]').css('width', '150px').chosen();
-
 			jQuery('select#dropdown_customers').css('width', '250px').ajaxChosen({
 				method: 		'GET',
 				url: 			'" . admin_url( 'admin-ajax.php' ) . "',
