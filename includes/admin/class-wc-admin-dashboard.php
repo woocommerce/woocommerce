@@ -51,7 +51,7 @@ class WC_Admin_Dashboard {
 		// Sales
 		$query            = array();
 		$query['fields']  = "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts";
-		$query['join']   .= "INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id ";
+		$query['join']    = "INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id ";
 		$query['where']   = "WHERE posts.post_type = 'shop_order' ";
 		$query['where']  .= "AND posts.post_status IN ( '" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
 		$query['where']  .= "AND postmeta.meta_key   = '_order_total' ";
@@ -64,7 +64,7 @@ class WC_Admin_Dashboard {
 		$query            = array();
 		$query['fields']  = "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id
 			FROM {$wpdb->posts} as posts";
-		$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id ";
+		$query['join']    = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id ";
 		$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
 		$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
 		$query['where']   = "WHERE posts.post_type = 'shop_order' ";
@@ -80,9 +80,9 @@ class WC_Admin_Dashboard {
 		$top_seller = $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) );
 
 		// Counts
-		$counts           = wp_count_posts( 'shop_order' );
-		$on_hold_count    = $counts->${"on-hold"};
-		$processing_count = $counts->processing;
+		$counts           = (array) wp_count_posts( 'shop_order' );
+		$on_hold_count    = $counts['on-hold'];
+		$processing_count = $counts['processing'];
 
 		// Get products using a query - this is too advanced for get_posts :(
 		$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
