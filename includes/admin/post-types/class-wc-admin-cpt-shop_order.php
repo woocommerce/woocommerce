@@ -647,8 +647,8 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo("select[name='action']");
 				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo("select[name='action2']");
 
-				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action']");
-				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action2']");
+				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo("select[name='action']");
+				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo("select[name='action2']");
 			});
 			</script>
 			<?php
@@ -668,7 +668,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 		switch ( $action ) {
 			case 'mark_completed':
 				$new_status = 'completed';
-				$report_action = 'marked_completed';
+				$report_action = 'marked_complete';
 				break;
 			case 'mark_processing':
 				$new_status = 'processing';
@@ -707,7 +707,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 	public function bulk_admin_notices() {
 		global $post_type, $pagenow;
 
-		if ( isset( $_REQUEST['marked_completed'] ) || isset( $_REQUEST['marked_processing'] ) || isset( $_REQUEST['marked_on-hold'] ) ) {
+		if ( isset( $_REQUEST['marked_complete'] ) || isset( $_REQUEST['marked_processing'] ) || isset( $_REQUEST['marked_on-hold'] ) ) {
 			$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
 
 			if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {

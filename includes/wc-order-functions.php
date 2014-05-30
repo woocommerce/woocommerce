@@ -23,7 +23,7 @@ function wc_get_order_statuses() {
 		'pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 		'processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
 		'on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
-		'complete'   => _x( 'Complete', 'Order status', 'woocommerce' ),
+		'completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
 		'cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 		'refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
 		'failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),

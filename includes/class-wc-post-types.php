@@ -372,13 +372,13 @@ class WC_Post_types {
 			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'On hold <span class="count">(%s)</span>', 'On hold <span class="count">(%s)</span>', 'woocommerce' )
 		) );
-		register_post_status( 'complete', array(
-			'label'                     => _x( 'Complete', 'Order status', 'woocommerce' ),
+		register_post_status( 'completed', array(
+			'label'                     => _x( 'Completed', 'Order status', 'woocommerce' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
-			'label_count'               => _n_noop( 'Complete <span class="count">(%s)</span>', 'Complete <span class="count">(%s)</span>', 'woocommerce' )
+			'label_count'               => _n_noop( 'Completed <span class="count">(%s)</span>', 'Completed <span class="count">(%s)</span>', 'woocommerce' )
 		) );
 		register_post_status( 'cancelled', array(
 			'label'                     => _x( 'Cancelled', 'Order status', 'woocommerce' ),

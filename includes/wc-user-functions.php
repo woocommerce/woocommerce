@@ -173,7 +173,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 				$order_status = sanitize_title( $order_status->slug );
 			}
 
-			if ( $order_status === 'complete' ) {
+			if ( $order_status === 'completed' ) {
 				$complete ++;
 			}
 
@@ -248,7 +248,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
 			LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
 			WHERE
-				posts.post_status IN ( 'complete', 'processing' ) AND
+				posts.post_status IN ( 'completed', 'processing' ) AND
 				itemmeta.meta_value  = %s AND
 				itemmeta.meta_key    IN ( '_variation_id', '_product_id' ) AND
 				postmeta.meta_key    IN ( '_billing_email', '_customer_user' ) AND

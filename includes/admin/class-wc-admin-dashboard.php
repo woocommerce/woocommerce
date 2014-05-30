@@ -53,7 +53,7 @@ class WC_Admin_Dashboard {
 		$query['fields']  = "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts";
 		$query['join']   .= "INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id ";
 		$query['where']   = "WHERE posts.post_type = 'shop_order' ";
-		$query['where']  .= "AND posts.post_status IN ( '" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'complete', 'processing', 'on-hold' ) ) ) . "' ) ";
+		$query['where']  .= "AND posts.post_status IN ( '" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
 		$query['where']  .= "AND postmeta.meta_key   = '_order_total' ";
 		$query['where']  .= "AND posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
 		$query['where']  .= "AND posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";

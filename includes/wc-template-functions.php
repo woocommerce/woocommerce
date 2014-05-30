@@ -1541,9 +1541,9 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 	 * @return void
 	 */
 	function woocommerce_order_again_button( $order ) {
-		if ( ! $order || $order->status != 'completed' )
+		if ( ! $order || ! $order->is_status( 'completed' ) ) {
 			return;
-
+		}
 		?>
 		<p class="order-again">
 			<a href="<?php echo wp_nonce_url( add_query_arg( 'order_again', $order->id ) , 'woocommerce-order_again' ); ?>" class="button"><?php _e( 'Order Again', 'woocommerce' ); ?></a>

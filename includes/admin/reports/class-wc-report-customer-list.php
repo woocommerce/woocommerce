@@ -119,7 +119,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 						WHERE 	meta.meta_key 		= '_customer_user'
 						AND 	meta.meta_value 	= $user->ID
 						AND 	posts.post_type 	= 'shop_order'
-						AND 	posts.post_status 	= 'complete'
+						AND 	posts.post_status 	= 'completed'
 						AND     meta2.meta_key 		= '_order_total'
 					" );
 
@@ -138,7 +138,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 						WHERE 	meta.meta_key 		= '_customer_user'
 						AND 	posts.post_type 	= 'shop_order'
-						AND 	posts.post_status 	= 'complete'
+						AND 	posts.post_status 	= 'completed'
 						AND 	meta_value 			= $user->ID
 					" );
 

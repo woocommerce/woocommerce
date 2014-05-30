@@ -467,7 +467,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( 'completed' != $order->status ) {
+		if ( ! $order->is_status( 'completed' ) ) {
 			return;
 		}
 
