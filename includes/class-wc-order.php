@@ -111,11 +111,20 @@ class WC_Order {
 	}
 
 	/**
-	 * Return the order status
-	 * @return string - pending, on-hold, processing, completed, cancelled, refunded
+	 * Return the order statuses
+	 * @return string
 	 */
 	public function get_status() {
 		return $this->post_status;
+	}
+
+	/**
+	 * Return the order statuses formatted name
+	 * @return string
+	 */
+	public function get_status_name() {
+		$statuses = wc_get_order_statuses();
+		return isset( $statuses[ $this->post_status ] ) ? $statuses[ $this->post_status ] : '';
 	}
 
 	/**
