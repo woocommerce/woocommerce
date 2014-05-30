@@ -39,7 +39,7 @@ function wc_get_order_statuses() {
  */
 function wc_get_order_status_name( $status ) {
 	$statuses = wc_get_order_statuses();
-	return isset( $statuses[ $status ] ) ? $statuses[ $status ] : '';
+	return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
 }
 
 /**
@@ -333,7 +333,8 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
  * @return int
  */
 function wc_processing_order_count() {
-	return wp_count_posts( 'shop_order', 'readable' )->processing;
+	$count = wp_count_posts( 'shop_order', 'readable' );
+	return isset( $count->processing ) ? $count->processing : 0;
 }
 
 /**
