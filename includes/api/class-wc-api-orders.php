@@ -355,24 +355,17 @@ class WC_API_Orders extends WC_API_Resource {
 		// set base query arguments
 		$query_args = array(
 			'fields'      => 'ids',
-			'post_type'   => 'shop_order',
-			'post_status' => 'publish',
+			'post_type'   => 'shop_order'
 		);
 
 		// add status argument
 		if ( ! empty( $args['status'] ) ) {
-
-			$statuses = explode( ',', $args['status'] );
-
-			$query_args['tax_query'] = array(
-				array(
-					'taxonomy' => 'shop_order_status',
-					'field'    => 'slug',
-					'terms'    => $statuses,
-				),
-			);
+			$statuses                  = explode( ',', $args['status'] );
+			$query_args['post_status'] = $statuses;
 
 			unset( $args['status'] );
+		} else {
+			$query_args['post_status'] = array_keys( wc_get_order_statuses() );
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );
