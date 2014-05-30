@@ -100,11 +100,11 @@ class WC_Countries {
 	 * @param string $cc country code
 	 * @return array of states
 	 */
-	public function get_states( $cc = false ) {
+	public function get_states( $cc = null ) {
 		if ( empty( $this->states ) ) {
 			$this->load_country_states();
 		}
-		if ( $cc ) {
+		if ( ! is_null( $cc ) ) {
 			return isset( $this->states[ $cc ] ) ? $this->states[ $cc ] : false;
 		} else {
 			return $this->states;
