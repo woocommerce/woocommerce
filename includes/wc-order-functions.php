@@ -296,14 +296,8 @@ function wc_cancel_unpaid_orders() {
 	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
 		SELECT posts.ID
 		FROM {$wpdb->posts} AS posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
 		WHERE 	posts.post_type   = 'shop_order'
-		AND 	posts.post_status = 'publish'
-		AND 	tax.taxonomy      = 'shop_order_status'
-		AND		term.slug	      = 'pending'
+		AND 	posts.post_status = 'pending'
 		AND 	posts.post_modified < %s
 	", $date ) );
 
@@ -329,22 +323,7 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
  * @return int
  */
 function wc_processing_order_count() {
-	if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
-		$order_statuses = get_terms( 'shop_order_status' );
-		$order_count    = false;
-		if ( is_array( $order_statuses ) ) {
-			foreach ( $order_statuses as $status ) {
-					if ( $status->slug === 'processing' ) {
-							$order_count += $status->count;
-							break;
-					}
-			}
-			$order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
-			set_transient( 'woocommerce_processing_order_count', $order_count, YEAR_IN_SECONDS );
-		}
-	}
-
-	return $order_count;
+	return wp_count_posts( 'shop_order', 'readable' )->processing;
 }
 
 /**
@@ -356,11 +335,6 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	global $wpdb;
 
 	$post_id = absint( $post_id );
-
-	// Clear core transients
-	$transients_to_clear = array(
-		'woocommerce_processing_order_count'
-	);
 
 	// Clear report transients
 	$reports = WC_Admin_Reports::get_reports();
