@@ -68,19 +68,9 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Output headers for JSON requests
-	 */
-	private function json_headers() {
-		header( 'Content-Type: application/json; charset=utf-8' );
-	}
-
-
-	/**
 	 * Get a refreshed cart fragment
 	 */
 	public function get_refreshed_fragments() {
-
-		$this->json_headers();
 
 		// Get mini cart
 		ob_start();
@@ -98,9 +88,8 @@ class WC_AJAX {
 			'cart_hash' => WC()->cart->get_cart() ? md5( json_encode( WC()->cart->get_cart() ) ) : ''
 		);
 
-		echo json_encode( $data );
+		wp_send_json( $data );
 
-		die();
 	}
 
 	/**
@@ -282,15 +271,14 @@ class WC_AJAX {
 
 		} else {
 
-			$this->json_headers();
-
 			// If there was an error adding to the cart, redirect to the product page to show any errors
 			$data = array(
 				'error' => true,
 				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id )
 			);
 
-			echo json_encode( $data );
+			wp_send_json( $data );
+
 		}
 
 		die();
@@ -400,8 +388,6 @@ class WC_AJAX {
 
 		check_ajax_referer( 'add-attribute', 'security' );
 
-		$this->json_headers();
-
 		$taxonomy = esc_attr( $_POST['taxonomy'] );
 		$term     = stripslashes( $_POST['term'] );
 
@@ -410,15 +396,15 @@ class WC_AJAX {
 			$result = wp_insert_term( $term, $taxonomy );
 
 			if ( is_wp_error( $result ) ) {
-				echo json_encode( array(
+				wp_send_json( array(
 					'error' => $result->get_error_message()
-				));
+				) );
 			} else {
-				echo json_encode( array(
+				wp_send_json( array(
 					'term_id' => $result['term_id'],
 					'name'    => $term,
 					'slug'    => sanitize_title( $term ),
-				));
+				) );
 			}
 		}
 
@@ -690,7 +676,7 @@ class WC_AJAX {
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
 			if ( $attribute['is_taxonomy'] ) {
-				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'slugs' ) );
+				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'names' ) );
 			} else {
 				$options = explode( WC_DELIMITER, $attribute['value'] );
 			}
@@ -903,8 +889,6 @@ class WC_AJAX {
 
 		check_ajax_referer( 'get-customer-details', 'security' );
 
-		$this->json_headers();
-
 		$user_id      = (int) trim(stripslashes($_POST['user_id']));
 		$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
 
@@ -924,10 +908,8 @@ class WC_AJAX {
 
 		$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer_data );
 
-		echo json_encode( $customer_data );
+		wp_send_json( $customer_data );
 
-		// Quit out
-		die();
 	}
 
 	/**
@@ -1190,8 +1172,6 @@ class WC_AJAX {
 
 		check_ajax_referer( 'calc-totals', 'security' );
 
-		$this->json_headers();
-
 		$tax      = new WC_Tax();
 		$taxes    = $tax_rows = $item_taxes = $shipping_taxes = array();
 		$order_id = absint( $_POST['order_id'] );
@@ -1346,16 +1326,13 @@ class WC_AJAX {
 
 		$tax_row_html = ob_get_clean();
 
-		// Return
-		echo json_encode( array(
+		wp_send_json( array(
 			'item_tax'     => $item_tax,
 			'item_taxes'   => $item_taxes,
 			'shipping_tax' => $shipping_tax,
 			'tax_row_html' => $tax_row_html
 		) );
 
-		// Quit out
-		die();
 	}
 
 	/**
@@ -1415,8 +1392,6 @@ class WC_AJAX {
 	public function json_search_products( $x = '', $post_types = array('product') ) {
 
 		check_ajax_referer( 'search-products', 'security' );
-
-		$this->json_headers();
 
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1498,9 +1473,8 @@ class WC_AJAX {
 
 		$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products );
 
-		echo json_encode( $found_products );
+		wp_send_json( $found_products );
 
-		die();
 	}
 
 	/**
@@ -1520,8 +1494,6 @@ class WC_AJAX {
 	public function json_search_customers() {
 
 		check_ajax_referer( 'search-customers', 'security' );
-
-		$this->json_headers();
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1552,8 +1524,8 @@ class WC_AJAX {
 			}
 		}
 
-		echo json_encode( $found_customers );
-		die();
+		wp_send_json( $found_customers );
+
 	}
 
 	/**
@@ -1591,8 +1563,8 @@ class WC_AJAX {
 			}
 		}
 
-		echo json_encode( $found_products );
-		die();
+		wp_send_json( $found_products );
+
 	}
 
 	/**
@@ -1651,8 +1623,6 @@ class WC_AJAX {
 		if ( ! $post = get_post( $_POST['id'] ) ) {
 			die(-1);
 		}
-
-		$this->json_headers();
 
 		$previd  = isset( $_POST['previd'] ) ? $_POST['previd'] : false;
 		$nextid  = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
@@ -1719,7 +1689,8 @@ class WC_AJAX {
 
 		}
 
-		die( json_encode( $new_pos ) );
+		wp_send_json( $new_pos );
+
 	}
 }
 
