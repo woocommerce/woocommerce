@@ -224,7 +224,7 @@ class WC_Install {
 				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
 			),
 			'checkout' => array(
-				'name'    => _x( 'checkout', 'Paeg slug', 'woocommerce' ),
+				'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
 				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
 			),
@@ -685,7 +685,7 @@ class WC_Install {
 				if ( preg_match( $regexp, $response['body'], $matches ) ) {
 					$version        = trim( $matches[1] );
 					$notices        = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
-					
+
 					if ( version_compare( WC_VERSION, $version, '<' ) ) {
 
 						$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';
