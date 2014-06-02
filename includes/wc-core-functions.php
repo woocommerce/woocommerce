@@ -408,3 +408,27 @@ function get_woocommerce_api_url( $path ) {
 function wc_get_log_file_path( $handle ) {
 	return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
 }
+
+/**
+ * Fix the rewrite rules when the product permalink have %product_cat% flag.
+ *
+ * @since 2.2
+ * @param array $rules
+ * @return array
+ */
+function wc_fix_rewrite_rules( $rules ) {
+	$permalinks = get_option( 'woocommerce_permalinks' );
+	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+
+	if ( preg_match( '/\/(.+)(\/%product_cat%)/' , $product_permalink, $matches ) ) {
+		foreach ( $rules as $rule => $rewrite ) {
+			if ( preg_match( '/^' . $matches[1] . '/', $rule ) && preg_match( '/^(index\.php\?product_cat)(?!(.*product))/', $rewrite ) ) {
+				unset( $rules[ $rule ] );
+			}
+		}
+	}
+
+	return $rules;
+}
+
+add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
