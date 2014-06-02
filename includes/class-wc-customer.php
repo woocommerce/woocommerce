@@ -18,50 +18,15 @@ class WC_Customer {
 	/** Stores bool when data is changed */
 	private $_changed = false;
 
-	/** @var string customer address */
-	public $address = '';
-
-	/** @var string customer address_2 */
-	public $address_2 = '';
-
-	/** @var string customer country */
-	public $city = '';
-
-	/** @var string customer postcode */
-	public $postcode = '';
-
-	/** @var string customer state */
-	public $state = '';
-
-	/** @var string customer country */
-	public $country = '';
-
-	/** @var string customer address */
-	public $shipping_address = '';
-
-	/** @var string customer address_2 */
-	public $shipping_address_2 = '';
-
-	/** @var string customer country */
-	public $shipping_city = '';
-
-	/** @var string customer postcode */
-	public $shipping_postcode = '';
-
-	/** @var string customer state */
-	public $shipping_state = '';
-
-	/** @var string customer country */
-	public $shipping_country = '';
-
 	/**
 	 * Constructor for the customer class loads the customer data.
 	 *
 	 * @access public
 	 */
 	public function __construct() {
+		$this->_data = WC()->session->get( 'customer' );
 
-		if ( empty( WC()->session->customer ) ) {
+		if ( empty( $this->_data ) ) {
 
 			$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
 
@@ -88,11 +53,6 @@ class WC_Customer {
 				'is_vat_exempt' 		=> false,
 				'calculated_shipping'	=> false
 			);
-
-		} else {
-
-			$this->_data = WC()->session->customer;
-
 		}
 
 		// When leaving or ending page load, store data
@@ -106,7 +66,7 @@ class WC_Customer {
 	 */
 	public function save_data() {
 		if ( $this->_changed ) {
-			$GLOBALS['woocommerce']->session->customer = $this->_data;
+			WC()->session->set( 'customer', $this->_data );
 		}
 	}
 
@@ -124,11 +84,11 @@ class WC_Customer {
      * __get function.
      *
      * @access public
-     * @param mixed $property
-     * @return mixed|null
+     * @param string $property
+     * @return string
      */
     public function __get( $property ) {
-        return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : null;
+        return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : '';
     }
 
     /**
