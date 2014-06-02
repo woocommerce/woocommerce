@@ -62,6 +62,9 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		$args['hide_empty'] = isset( $args['hide_empty'] ) ? $args['hide_empty'] : 0;
 		$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
 
+		// Ensure slugs is valid for get_terms - slugs isn't supported
+		$args['fields']     = $args['fields'] === 'slugs' ? 'id=>slug' : $args['fields'];
+
 		unset( $args['orderby'] );
 		
 		$terms              = get_terms( $taxonomy, $args );
