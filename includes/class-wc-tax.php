@@ -220,8 +220,9 @@ class WC_Tax {
 
 		extract( $args, EXTR_SKIP );
 
-		if ( ! $country )
+		if ( ! $country ) {
 			return array();
+		}
 
 		// Handle postcodes
 		$valid_postcodes 	= array( '*', strtoupper( wc_clean( $postcode ) ) );
@@ -245,57 +246,39 @@ class WC_Tax {
 
 			// Run the query
 			$found_rates = $wpdb->get_results( $wpdb->prepare( "
-				SELECT * FROM (
-					SELECT tax_rates.* FROM
-						{$wpdb->prefix}woocommerce_tax_rates as tax_rates
-					LEFT OUTER JOIN
-						{$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
-					LEFT OUTER JOIN
-						{$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
-					WHERE
-						tax_rate_country IN ( %s, '' )
-						AND tax_rate_state IN ( %s, '' )
-						AND tax_rate_class = %s
-						AND
-						(
-							(
-								locations.location_type IS NULL
-							)
-							OR
-							(
-								locations.location_type = 'postcode'
-								AND locations.location_code IN ('" . implode( "','", $valid_postcodes ) . "')
-								AND locations2.location_type = 'city'
-								AND locations2.location_code = %s
-							)
-							OR
-							(
-								locations.location_type = 'postcode'
-								AND locations.location_code IN ('" . implode( "','", $valid_postcodes ) . "')
-								AND 0 = (
-									SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
-									WHERE sublocations.location_type = 'city'
-									AND sublocations.tax_rate_id = tax_rates.tax_rate_id
-								)
-							)
-							OR
-							(
-								locations.location_type = 'city'
-								AND locations.location_code = %s
-								AND 0 = (
-									SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
-									WHERE sublocations.location_type = 'postcode'
-									AND sublocations.tax_rate_id = tax_rates.tax_rate_id
-								)
+				SELECT tax_rates.* 
+				FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
+				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
+				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
+				WHERE tax_rate_country IN ( %s, '' ) 
+				AND tax_rate_state IN ( %s, '' ) 
+				AND tax_rate_class = %s
+				AND (
+					locations.location_type IS NULL
+					OR (
+						locations.location_type = 'postcode'
+						AND locations.location_code IN ('" . implode( "','", $valid_postcodes ) . "')
+						AND (
+							locations2.location_type = 'city' AND locations2.location_code = %s
+							OR 0 = (
+								SELECT COUNT(*) FROM wp_woocommerce_tax_rate_locations as sublocations
+								WHERE sublocations.location_type = 'city'
+								AND sublocations.tax_rate_id = tax_rates.tax_rate_id
 							)
 						)
-					GROUP BY
-						tax_rate_id
-					ORDER BY
-						tax_rate_priority, tax_rate_order
-				) as ordered_taxes
-				GROUP BY
-					tax_rate_priority
+					)
+					OR (
+						locations.location_type = 'city'
+						AND locations.location_code = %s
+						AND 0 = (
+								SELECT COUNT(*) FROM wp_woocommerce_tax_rate_locations as sublocations
+								WHERE sublocations.location_type = 'postcode'
+								AND sublocations.tax_rate_id = tax_rates.tax_rate_id
+							)
+					)
+				)
+				GROUP BY tax_rate_id
+				ORDER BY tax_rate_priority, tax_rate_order
 				",
 				strtoupper( $country ),
 				strtoupper( $state ),
@@ -304,16 +287,23 @@ class WC_Tax {
 				strtoupper( $city )
 			) );
 
-			// Put results into array
 			$matched_tax_rates = array();
+			$found_priority    = array();
 
-			foreach ( $found_rates as $found_rate )
+			foreach ( $found_rates as $found_rate ) {
+				if ( in_array( $found_rate->tax_rate_priority, $found_priority ) ) {
+					continue;
+				}
+				
 				$matched_tax_rates[ $found_rate->tax_rate_id ] = array(
 					'rate'     => $found_rate->tax_rate,
 					'label'    => $found_rate->tax_rate_name,
 					'shipping' => $found_rate->tax_rate_shipping ? 'yes' : 'no',
 					'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no'
 				);
+
+				$found_priority[] = $found_rate->tax_rate_priority;
+			}
 
 			$matched_tax_rates = apply_filters( 'woocommerce_matched_tax_rates', $matched_tax_rates, $country, $state, $postcode, $city, $tax_class );
 
