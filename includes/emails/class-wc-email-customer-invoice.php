@@ -82,7 +82,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @return string
 	 */
 	function get_subject() {
-		if ( $this->object->is_status( array( 'processing', 'completed' ) ) ) {
+		if ( $this->object->has_status( array( 'processing', 'completed' ) ) ) {
 			return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $this->subject_paid ), $this->object );
 		} else {
 			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $this->subject ), $this->object );
@@ -96,7 +96,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @return string
 	 */
 	function get_heading() {
-		if ( $this->object->is_status( array( 'completed', 'processing' ) ) ) {
+		if ( $this->object->has_status( array( 'completed', 'processing' ) ) ) {
 			return apply_filters( 'woocommerce_email_heading_customer_invoice_paid', $this->format_string( $this->heading_paid ), $this->object );
 		} else {
 			return apply_filters( 'woocommerce_email_heading_customer_invoice', $this->format_string( $this->heading ), $this->object );

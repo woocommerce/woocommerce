@@ -189,7 +189,7 @@ class WC_Checkout {
 			$order_id = absint( WC()->session->order_awaiting_payment );
 
 			// Resume the unpaid order if its pending
-			if ( ( $existing_order = get_post( $order_id ) ) && $existing_order->is_status( array( 'pending', 'failed' ) ) ) {
+			if ( ( $existing_order = get_post( $order_id ) ) && $existing_order->has_status( array( 'pending', 'failed' ) ) ) {
 
 				// Update the existing order as we are resuming it
 				$create_new_order = false;

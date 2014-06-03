@@ -100,10 +100,16 @@ class WC_Order {
 	 */
 	public function __get( $key ) {
 		// Get values or default if not set
-		if ( 'completed_date' == $key ) {
+		if ( 'completed_date' === $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_completed_date', true ) ) ? $value : $this->modified_date;
-		} elseif ( 'user_id' == $key ) {
+		} elseif ( 'user_id' === $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_customer_user', true ) ) ? absint( $value ) : '';
+		} elseif ( 'status' === $key ) {
+
+
+
+
+
 		} else {
 			$value = get_post_meta( $this->id, '_' . $key, true );
 		}

@@ -46,7 +46,7 @@ class WC_Shortcode_Checkout {
 			$order_id             = absint( $_GET['order'] );
 			$order                = new WC_Order( $order_id );
 
-			if ( $order->is_status( 'pending' ) ) {
+			if ( $order->has_status( 'pending' ) ) {
 				$wp->query_vars['order-pay'] = absint( $_GET['order'] );
 			} else {
 				$wp->query_vars['order-received'] = absint( $_GET['order'] );
@@ -95,7 +95,7 @@ class WC_Shortcode_Checkout {
 
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				if ( $order->is_status( $valid_order_statuses ) ) {
+				if ( $order->has_status( $valid_order_statuses ) ) {
 
 					// Set customer location to order location
 					if ( $order->billing_country )
@@ -124,7 +124,7 @@ class WC_Shortcode_Checkout {
 
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				if ( $order->is_status( $valid_order_statuses ) ) {
+				if ( $order->has_status( $valid_order_statuses ) ) {
 
 					?>
 					<ul class="order_details">
