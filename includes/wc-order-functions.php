@@ -20,13 +20,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 function wc_get_order_statuses() {
 	$order_statuses = array(
-		'pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
-		'processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
-		'on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
-		'completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
-		'cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
-		'refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
-		'failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
+		'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+		'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
+		'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
+		'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
+		'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
+		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
+		'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
 	);
 
 	return apply_filters( 'wc_order_statuses', $order_statuses );

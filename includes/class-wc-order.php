@@ -105,11 +105,7 @@ class WC_Order {
 		} elseif ( 'user_id' === $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_customer_user', true ) ) ? absint( $value ) : '';
 		} elseif ( 'status' === $key ) {
-
-
-
-
-
+			$value = $this->get_status();
 		} else {
 			$value = get_post_meta( $this->id, '_' . $key, true );
 		}
@@ -117,11 +113,11 @@ class WC_Order {
 	}
 
 	/**
-	 * Return the order statuses
+	 * Return the order statuses without wc- internal prefix
 	 * @return string
 	 */
 	public function get_status() {
-		return $this->post_status;
+		return apply_filters( 'woocommerce_order_get_status', 'wc-' === substr( $this->post_status, 0, 3 ) ? substr( $this->post_status, 3 ) : $this->post_status, $this );
 	}
 
 	/**
@@ -132,7 +128,7 @@ class WC_Order {
 	 * @return bool
 	 */
 	public function has_status( $status ) {
-		return apply_filters( 'woocommerce_order_has_status', ( $this->post_status === $status || ( is_array( $status ) && in_array( $this->post_status, $status ) ) ) ? true : false, $this, $status );
+		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status ) ) || $this->get_status() === $status ? true : false, $this, $status );
 	}
 
 	/**

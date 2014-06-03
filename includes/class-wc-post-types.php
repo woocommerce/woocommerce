@@ -348,7 +348,7 @@ class WC_Post_types {
 	 * Register our custom post statuses, used for order status
 	 */
 	public static function register_post_status() {
-		register_post_status( 'pending', array(
+		register_post_status( 'wc-pending', array(
 			'label'                     => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,
@@ -356,7 +356,7 @@ class WC_Post_types {
 			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'Pending payment <span class="count">(%s)</span>', 'Pending payment <span class="count">(%s)</span>', 'woocommerce' )
 		) );
-		register_post_status( 'processing', array(
+		register_post_status( 'wc-processing', array(
 			'label'                     => _x( 'Processing', 'Order status', 'woocommerce' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,
@@ -364,7 +364,7 @@ class WC_Post_types {
 			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'Processing <span class="count">(%s)</span>', 'Processing <span class="count">(%s)</span>', 'woocommerce' )
 		) );
-		register_post_status( 'on-hold', array(
+		register_post_status( 'wc-on-hold', array(
 			'label'                     => _x( 'On hold', 'Order status', 'woocommerce' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,
@@ -372,7 +372,7 @@ class WC_Post_types {
 			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'On hold <span class="count">(%s)</span>', 'On hold <span class="count">(%s)</span>', 'woocommerce' )
 		) );
-		register_post_status( 'completed', array(
+		register_post_status( 'wc-completed', array(
 			'label'                     => _x( 'Completed', 'Order status', 'woocommerce' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,
@@ -380,7 +380,7 @@ class WC_Post_types {
 			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'Completed <span class="count">(%s)</span>', 'Completed <span class="count">(%s)</span>', 'woocommerce' )
 		) );
-		register_post_status( 'cancelled', array(
+		register_post_status( 'wc-cancelled', array(
 			'label'                     => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,
@@ -388,7 +388,7 @@ class WC_Post_types {
 			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'Cancelled <span class="count">(%s)</span>', 'Cancelled <span class="count">(%s)</span>', 'woocommerce' )
 		) );
-		register_post_status( 'refunded', array(
+		register_post_status( 'wc-refunded', array(
 			'label'                     => _x( 'Refunded', 'Order status', 'woocommerce' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,
@@ -396,7 +396,7 @@ class WC_Post_types {
 			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'Refunded <span class="count">(%s)</span>', 'Refunded <span class="count">(%s)</span>', 'woocommerce' )
 		) );
-		register_post_status( 'failed', array(
+		register_post_status( 'wc-failed', array(
 			'label'                     => _x( 'Failed', 'Order status', 'woocommerce' ),
 			'public'                    => true,
 			'exclude_from_search'       => false,

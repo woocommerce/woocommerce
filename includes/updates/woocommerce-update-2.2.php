@@ -22,14 +22,14 @@ if ( get_option( 'woocommerce_ship_to_billing_address_only' ) === 'yes' ) {
 }
 
 add_option( 'woocommerce_ship_to_destination', $woocommerce_ship_to_destination, '', 'no' );
-$wpdb->show_errors();
+
 // Update order statuses
 $wpdb->query( "
 	UPDATE {$wpdb->posts} as posts
 	LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-	SET posts.post_status = 'pending'
+	SET posts.post_status = 'wc-pending'
 	WHERE posts.post_type = 'shop_order' 
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
@@ -41,7 +41,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-	SET posts.post_status = 'processing'
+	SET posts.post_status = 'wc-processing'
 	WHERE posts.post_type = 'shop_order' 
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
@@ -53,7 +53,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-	SET posts.post_status = 'on-hold'
+	SET posts.post_status = 'wc-on-hold'
 	WHERE posts.post_type = 'shop_order' 
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
@@ -65,7 +65,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-	SET posts.post_status = 'completed'
+	SET posts.post_status = 'wc-completed'
 	WHERE posts.post_type = 'shop_order' 
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
@@ -77,7 +77,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-	SET posts.post_status = 'cancelled'
+	SET posts.post_status = 'wc-cancelled'
 	WHERE posts.post_type = 'shop_order' 
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
@@ -89,7 +89,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-	SET posts.post_status = 'refunded'
+	SET posts.post_status = 'wc-refunded'
 	WHERE posts.post_type = 'shop_order' 
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
@@ -101,7 +101,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-	SET posts.post_status = 'failed'
+	SET posts.post_status = 'wc-failed'
 	WHERE posts.post_type = 'shop_order' 
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
