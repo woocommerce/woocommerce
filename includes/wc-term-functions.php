@@ -57,17 +57,23 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		}
 	} elseif ( ! empty( $args['orderby'] ) && $args['orderby'] === 'menu_order' ) {
 		// wp_get_post_terms doesn't let us use custom sort order
-		$args['include']    = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
-		$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
-		$args['hide_empty'] = isset( $args['hide_empty'] ) ? $args['hide_empty'] : 0;
-		$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
-
-		// Ensure slugs is valid for get_terms - slugs isn't supported
-		$args['fields']     = $args['fields'] === 'slugs' ? 'id=>slug' : $args['fields'];
-
-		unset( $args['orderby'] );
+		$args['include'] = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
 		
-		$terms              = get_terms( $taxonomy, $args );
+		if ( empty( $args['include'] ) ) {
+			$terms = array();
+		} else {
+			// This isn't needed for get_terms
+			unset( $args['orderby'] );
+
+			// Set args for get_terms
+			$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
+			$args['hide_empty'] = isset( $args['hide_empty'] ) ? $args['hide_empty'] : 0;
+			$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
+
+			// Ensure slugs is valid for get_terms - slugs isn't supported
+			$args['fields']     = $args['fields'] === 'slugs' ? 'id=>slug' : $args['fields'];
+			$terms              = get_terms( $taxonomy, $args );
+		}
 	} else {
 		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 	}
