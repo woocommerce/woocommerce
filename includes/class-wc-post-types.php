@@ -209,7 +209,7 @@ class WC_Post_types {
 				    );
 		    	}
 		    }
-			
+
 			do_action( 'woocommerce_after_register_taxonomy' );
 		}
 	}
@@ -261,6 +261,10 @@ class WC_Post_types {
 				)
 			)
 		);
+
+		if ( preg_match( '/\/(.+)(\/%product_cat%)$/' , $product_permalink, $matches ) ) {
+			add_rewrite_rule( '^' . $matches[1] . '/.+?/[^/]+/([^/]+)/?$', 'index.php?attachment=$matches[1]', 'top' );
+		}
 
 		register_post_type( "product_variation",
 			apply_filters( 'woocommerce_register_post_type_product_variation',
