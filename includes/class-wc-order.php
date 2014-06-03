@@ -131,8 +131,8 @@ class WC_Order {
 	 * @param mixed $type Array or string of types
 	 * @return bool
 	 */
-	public function is_status( $status ) {
-		return ( $this->post_status === $status || ( is_array( $status ) && in_array( $this->post_status, $status ) ) ) ? true : false;
+	public function has_status( $status ) {
+		return apply_filters( 'woocommerce_order_has_status', ( $this->post_status === $status || ( is_array( $status ) && in_array( $this->post_status, $status ) ) ) ? true : false, $this, $status );
 	}
 
 	/**
@@ -1097,7 +1097,7 @@ class WC_Order {
 	 * @return bool
 	 */
 	public function is_download_permitted() {
-		return apply_filters( 'woocommerce_order_is_download_permitted', $this->is_status( 'completed' ) || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $this->is_status( 'processing' ) ), $this );
+		return apply_filters( 'woocommerce_order_is_download_permitted', $this->has_status( 'completed' ) || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $this->has_status( 'processing' ) ), $this );
 	}
 
 	/**
@@ -1413,7 +1413,7 @@ class WC_Order {
 
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed' ), $this );
 
-		if ( $this->id && $this->is_status( $valid_order_statuses ) ) {
+		if ( $this->id && $this->has_status( $valid_order_statuses ) ) {
 
 			$order_needs_processing = true;
 
@@ -1688,7 +1688,7 @@ class WC_Order {
 	public function needs_payment() {
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
 
-		if ( $this->is_status( $valid_order_statuses ) && $this->get_total() > 0 ) {
+		if ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ) {
 			$needs_payment = true;
 		} else {
 			$needs_payment = false;
