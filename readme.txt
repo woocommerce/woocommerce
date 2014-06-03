@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.11 - XXX =
+
 = 2.1.10 - 03/06/2014 =
 * Fix - Removed unecessary localization from edit account.
 * Fix - Admin welcome screen css.
