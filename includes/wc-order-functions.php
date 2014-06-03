@@ -28,7 +28,6 @@ function wc_get_order_statuses() {
 		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
 		'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
 	);
-
 	return apply_filters( 'wc_order_statuses', $order_statuses );
 }
 
@@ -307,7 +306,7 @@ function wc_cancel_unpaid_orders() {
 		SELECT posts.ID
 		FROM {$wpdb->posts} AS posts
 		WHERE 	posts.post_type   = 'shop_order'
-		AND 	posts.post_status = 'pending'
+		AND 	posts.post_status = 'wc-pending'
 		AND 	posts.post_modified < %s
 	", $date ) );
 

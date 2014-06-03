@@ -129,7 +129,7 @@ class WC_Admin_Report {
 
 		$query['where']  = "
 			WHERE 	posts.post_type 	= 'shop_order'
-			AND 	posts.post_status 	IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+			AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			";
 
 		if ( $filter_range ) {

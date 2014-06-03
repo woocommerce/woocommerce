@@ -174,7 +174,7 @@ class WC_Checkout {
 		$order_data = apply_filters( 'woocommerce_new_order_data', array(
 			'post_type' 	=> 'shop_order',
 			'post_title' 	=> sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
-			'post_status' 	=> apply_filters( 'woocommerce_default_order_status', 'pending' ),
+			'post_status' 	=> 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' ),
 			'ping_status'	=> 'closed',
 			'post_excerpt' 	=> isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
 			'post_author' 	=> 1,

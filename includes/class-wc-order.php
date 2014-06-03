@@ -1324,18 +1324,19 @@ class WC_Order {
 	 * Updates status of order
 	 *
 	 * @access public
-	 * @param string $new_status Status to change the order to
+	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add
 	 */
 	public function update_status( $new_status, $note = '' ) {
 		$old_status = $this->get_status();
+		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 		
 		// Only update if they differ
 		if ( $this->id && $new_status !== $old_status ) {
 			
 			// Update the order
-			wp_update_post( array( 'ID' => $this->id, 'post_status' => $new_status ) );
-			$this->post_status = $new_status;
+			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
+			$this->post_status = 'wc-' . $new_status;
 			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), $old_status, $new_status ) ) );
 
 			// Status was changed
