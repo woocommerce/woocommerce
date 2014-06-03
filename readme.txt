@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.9
-Stable tag: 2.1.9
+Stable tag: 2.1.10
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,6 +165,24 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localisation - Egypptian currency.
 * Localisation - Address format of Taiwan.
 * Localisation - Removed language files from core to made the package lighter (see anguage pack downloader feature).
+
+= 2.1.10 - 03/06/2014 =
+* Fix - Removed unecessary localization from edit account.
+* Fix - Admin welcome screen css.
+* Fix - Fixed my account setting values to wrong user submitted strings.
+* Fix - Menu order terms were coming back empty.
+* Fix - Fix notice that occurs from external function call.
+* Fix - Addons page, reference new json API endpoint.
+* Fix - Notices when rendering WooCommerce Shop as Front Page.
+* Fix - Prevent undefined notice for Layered Nav title.
+* Fix - state_province is not required for mijireh any longer.
+* Fix - Fix coupon limit checks and enhance to check ID by provided email (if logged out).
+* Fix - Danish krone symbol.
+* Fix - check for the existence of the cart during the is_available().
+* Fix - Fixes performance degredation on large wp_options tables.
+* Fix - improved the shortcodes button for support WordPress 3.9.
+* Tweak - Stronger session ID generation.
+* Dev - Add action hooks when saving tax rates.
 
 = 2.1.9 - 14/05/2014 =
 * Fix - fix case-insensitive matching for coupon posts with uppercase chars.
