@@ -165,7 +165,7 @@ class WC_Product {
 	/**
 	 * Set stock level of the product.
 	 *
-	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues). 
+	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 * We cannot rely on the original loaded value in case another order was made since then.
 	 *
 	 * @param int $amount (default: null)
@@ -207,7 +207,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Reduce stock level of the product. 
+	 * Reduce stock level of the product.
 	 *
 	 * @param int $amount (default: 1) Amount to reduce by.
 	 * @return int new stock level
@@ -223,7 +223,7 @@ class WC_Product {
 	 * @return int new stock level
 	 */
 	public function increase_stock( $amount = 1 ) {
-		return $this->set_stock( $amount, 'add' );		
+		return $this->set_stock( $amount, 'add' );
 	}
 
 	/**
@@ -583,9 +583,9 @@ class WC_Product {
 
 		if ( $this->managing_stock() ) {
 
-			if ( $this->is_in_stock() && $this->get_total_stock() >= $quantity ) {
+			if ( $this->is_in_stock() ) {
 
-				if ( $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				if ( $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) && $this->get_total_stock() >= $quantity ) {
 
 					$format_option = get_option( 'woocommerce_stock_format' );
 
