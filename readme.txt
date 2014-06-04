@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Made stateless classes static to allow unhooking of methods.
 * Dev - Introduces the wc_get_log_file_path() function.
 * Dev - Introduces the WC_Order::needs_shipping_address() method.
+* Refactor - Changed the method in which order statuses are stored. Previously, order status was a taxonomy. This caused issues when unique term slugs differed from what we were expecting, and also added additonal overhead to order queries in reports. https://github.com/woothemes/woocommerce/issues/3064 Order status is now stored as post status - several new post statuses have been added. Order class variables are backwards compatible. The only thing to note (for devs) is that any query must use the order status instead of 'publish' when getting orders and querying by post_status. THe shop_order_status has also been removed.
 * Refactor - Update stock amounts with DB queries.
 * Refactor - Simplified attribute name sanitisation which maintains UTF8 char integrity.
 * Refactor - Country class return methods.
