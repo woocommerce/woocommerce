@@ -16,13 +16,13 @@
 	<?php
 		switch ( $current_tab ) {
 			case "tools" :
-				$this->status_tools();
+				WC_Admin_Status::status_tools();
 			break;
 			case "logs" :
-				$this->status_logs();
+				WC_Admin_Status::status_logs();
 			break;
 			default :
-				$this->status_report();
+				WC_Admin_Status::status_report();
 			break;
 		}
 	?>

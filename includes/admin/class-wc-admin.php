@@ -21,7 +21,6 @@ class WC_Admin {
 		add_action( 'init', array( $this, 'includes' ) );
 		add_action( 'current_screen', array( $this, 'conditonal_includes' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
-		add_action( 'wp_ajax_page_slurp', array( 'WC_Gateway_Mijireh', 'page_slurp' ) );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 	}
@@ -38,22 +37,23 @@ class WC_Admin {
 		include_once( 'class-wc-admin-post-types.php' );
 		include_once( 'class-wc-admin-taxonomies.php' );
 
-		// Classes we only need if the ajax is not-ajax
+		// Classes we only need during non-ajax requests
 		if ( ! is_ajax() ) {
 			include( 'class-wc-admin-menus.php' );
 			include( 'class-wc-admin-welcome.php' );
 			include( 'class-wc-admin-notices.php' );
 			include( 'class-wc-admin-assets.php' );
-			include( 'class-wc-admin-permalink-settings.php' );
 
 			// Help
-			if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) )
+			if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
 				include( 'class-wc-admin-help.php' );
+			}
 		}
 
 		// Importers
-		if ( defined( 'WP_LOAD_IMPORTERS' ) )
+		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
 			include( 'class-wc-admin-importers.php' );
+		}
 	}
 
 	/**
@@ -65,6 +65,9 @@ class WC_Admin {
 		switch ( $screen->id ) {
 			case 'dashboard' :
 				include( 'class-wc-admin-dashboard.php' );
+			break;
+			case 'options-permalink' :
+				include( 'class-wc-admin-permalink-settings.php' );
 			break;
 			case 'users' :
 			case 'user' :

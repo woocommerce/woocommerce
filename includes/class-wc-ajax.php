@@ -67,6 +67,8 @@ class WC_AJAX {
 				add_action( 'wp_ajax_nopriv_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
 			}
 		}
+
+		add_action( 'wp_ajax_page_slurp', array( 'WC_Gateway_Mijireh', 'page_slurp' ) );
 	}
 
 	/**
@@ -653,7 +655,7 @@ class WC_AJAX {
 			$image_id            = 0;
 			$variation           = get_post( $variation_id ); // Get the variation object
 
-			include( 'admin/post-types/meta-boxes/views/html-variation-admin.php' );
+			include( 'admin/meta-boxes/views/html-variation-admin.php' );
 		}
 
 		die();
@@ -888,7 +890,7 @@ class WC_AJAX {
 						} else {
 							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 						}
-						include( 'admin/post-types/meta-boxes/views/html-order-download-permission.php' );
+						include( 'admin/meta-boxes/views/html-order-download-permission.php' );
 					}
 				}
 			}
@@ -1000,7 +1002,7 @@ class WC_AJAX {
 
 		$item = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
 
-		include( 'admin/post-types/meta-boxes/views/html-order-item.php' );
+		include( 'admin/meta-boxes/views/html-order-item.php' );
 
 		// Quit out
 		die();
@@ -1029,7 +1031,7 @@ class WC_AJAX {
 			wc_add_order_item_meta( $item_id, '_line_tax', '' );
 		}
 
-		include( 'admin/post-types/meta-boxes/views/html-order-fee.php' );
+		include( 'admin/meta-boxes/views/html-order-fee.php' );
 
 		// Quit out
 		die();
@@ -1342,7 +1344,7 @@ class WC_AJAX {
 				wc_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
 			}
 
-			include( 'admin/post-types/meta-boxes/views/html-order-tax.php' );
+			include( 'admin/meta-boxes/views/html-order-tax.php' );
 		}
 
 		$tax_row_html = ob_get_clean();

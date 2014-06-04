@@ -202,7 +202,7 @@ final class WooCommerce {
 		} elseif ( strpos( $class, 'wc_shortcode_' ) === 0 ) {
 			$path = $this->plugin_path() . '/includes/shortcodes/';
 		} elseif ( strpos( $class, 'wc_meta_box' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/admin/post-types/meta-boxes/';
+			$path = $this->plugin_path() . '/includes/admin/meta-boxes/';
 		} elseif ( strpos( $class, 'wc_admin' ) === 0 ) {
 			$path = $this->plugin_path() . '/includes/admin/';
 		}
@@ -263,8 +263,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-download-handler.php' );
 		include_once( 'includes/class-wc-comments.php' );
 		include_once( 'includes/class-wc-post-data.php' );
-		include_once( 'includes/abstracts/abstract-wc-session.php' );
-		include_once( 'includes/class-wc-session-handler.php' );
 
 		if ( is_admin() ) {
 			include_once( 'includes/admin/class-wc-admin.php' );
@@ -299,10 +297,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-countries.php' );						// Defines countries and states
 		include_once( 'includes/class-wc-integrations.php' );					// Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );					// Cache Helper
-		include_once( 'includes/class-wc-https.php' );							// https Helper
-
-		// Include template hooks in time for themes to remove/modify them
-		include_once( 'includes/wc-template-hooks.php' );
 
 		// Download/update languages
 		include_once( 'includes/class-wc-language-pack-upgrader.php' );
@@ -319,6 +313,14 @@ final class WooCommerce {
 	 * Include required frontend files.
 	 */
 	public function frontend_includes() {
+		// Functions
+		include_once( 'includes/wc-cart-functions.php' );
+		include_once( 'includes/wc-notice-functions.php' );
+
+		// Classes
+		include_once( 'includes/abstracts/abstract-wc-session.php' );
+		include_once( 'includes/class-wc-session-handler.php' );
+		include_once( 'includes/wc-template-hooks.php' );
 		include_once( 'includes/class-wc-template-loader.php' );		// Template Loader
 		include_once( 'includes/class-wc-frontend-scripts.php' );		// Frontend Scripts
 		include_once( 'includes/class-wc-form-handler.php' );			// Form Handlers
@@ -326,13 +328,16 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-tax.php' );					// Tax class
 		include_once( 'includes/class-wc-customer.php' ); 				// Customer class
 		include_once( 'includes/class-wc-shortcodes.php' );				// Shortcodes class
+		include_once( 'includes/class-wc-https.php' );							// https Helper
 	}
 
 	/**
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
 	 */
 	public function include_template_functions() {
-		include_once( 'includes/wc-template-functions.php' );
+		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+			include_once( 'includes/wc-template-functions.php' );
+		}
 	}
 
 	/**
@@ -363,18 +368,18 @@ final class WooCommerce {
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
-		// Session class, handles session data for users - can be overwritten if custom handler is needed
-		$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-
 		// Load class instances
 		$this->product_factory = new WC_Product_Factory();     // Product Factory to create new product instances
 		$this->countries       = new WC_Countries();			// Countries class
 		$this->integrations    = new WC_Integrations();		// Integrations class
-		$this->session         = new $session_class();
 
 		// Classes/actions loaded for the frontend and for ajax requests
 		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+			// Session class, handles session data for users - can be overwritten if custom handler is needed
+			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+
 			// Class instances
+			$this->session  = new $session_class();
 			$this->cart     = new WC_Cart();				// Cart class, stores the cart contents
 			$this->customer = new WC_Customer();			// Customer class, handles data such as customer location
 		}
@@ -394,8 +399,9 @@ final class WooCommerce {
 			'woocommerce_created_customer'
 		);
 
-		foreach ( $email_actions as $action )
+		foreach ( $email_actions as $action ) {
 			add_action( $action, array( $this, 'send_transactional_email' ), 10, 10 );
+		}
 
 		// Init action
 		do_action( 'woocommerce_init' );

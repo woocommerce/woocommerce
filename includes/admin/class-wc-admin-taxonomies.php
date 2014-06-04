@@ -36,6 +36,9 @@ class WC_Admin_Taxonomies {
 		// Taxonomy page descriptions
 		add_action( 'product_cat_pre_add_form', array( $this, 'product_cat_description' ) );
 		add_action( 'product_shipping_class_pre_add_form', array( $this, 'shipping_class_description' ) );
+
+		// Maintain hierarchy of terms
+		add_filter( 'wp_terms_checklist_args', array( $this, 'disable_checked_ontop' ) );
 	}
 
 	/**
@@ -328,6 +331,18 @@ class WC_Admin_Taxonomies {
 
 		return $columns;
 	}
+
+	/**
+	 * Maintain term hierarchy when editing a product.
+	 * @param  array $args
+	 * @return array
+	 */
+	public function disable_checked_ontop( $args ) {
+		if ( 'product_cat' == $args['taxonomy'] ) {
+			$args['checked_ontop'] = false;
+		}
+		return $args;
+	}	
 }
 
 new WC_Admin_Taxonomies();

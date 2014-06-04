@@ -99,8 +99,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		$status         = include( 'class-wc-admin-status.php' );
-		$core_templates = $status->scan_template_files( WC()->plugin_path() . '/templates' );
+		$core_templates = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates' );
 		$outdated       = false;
 
 		foreach ( $core_templates as $file ) {

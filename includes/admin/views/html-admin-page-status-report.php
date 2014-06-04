@@ -452,7 +452,7 @@
 				$found_files    = array();
 
 				foreach ( $template_paths as $plugin_name => $template_path ) {
-					$scanned_files[ $plugin_name ] = $this->scan_template_files( $template_path );
+					$scanned_files[ $plugin_name ] = WC_Admin_Status::scan_template_files( $template_path );
 				}
 
 				foreach ( $scanned_files as $plugin_name => $files ) {
@@ -470,8 +470,8 @@
 						}
 
 						if ( $theme_file ) {
-							$core_version  = $this->get_file_version( WC()->plugin_path() . '/templates/' . $file );
-							$theme_version = $this->get_file_version( $theme_file );
+							$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
+							$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
 							if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
 								$found_files[ $plugin_name ][] = sprintf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), basename( $theme_file ), $theme_version ? $theme_version : '-', $core_version );

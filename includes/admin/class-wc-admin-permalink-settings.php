@@ -21,8 +21,8 @@ class WC_Admin_Permalink_Settings {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
-		add_action( 'admin_init', array( $this, 'settings_init' ) );
-		add_action( 'admin_init', array( $this, 'settings_save' ) );
+		$this->settings_init();
+		$this->settings_save();
 	}
 
 	/**

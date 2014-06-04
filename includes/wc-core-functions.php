@@ -12,14 +12,12 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-// Include core functions
-include( 'wc-cart-functions.php' );
+// Include core functions (available in both admin and frontend)
 include( 'wc-conditional-functions.php' );
 include( 'wc-coupon-functions.php' );
 include( 'wc-user-functions.php' );
 include( 'wc-deprecated-functions.php' );
 include( 'wc-formatting-functions.php' );
-include( 'wc-notice-functions.php' );
 include( 'wc-order-functions.php' );
 include( 'wc-page-functions.php' );
 include( 'wc-product-functions.php' );
@@ -452,3 +450,27 @@ function wc_fix_rewrite_rules( $rules ) {
 	return $rules;
 }
 add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
+
+/**
+ * Protect downloads from ms-files.php in multisite
+ *
+ * @param mixed $rewrite
+ * @return string
+ */
+function wc_ms_protect_download_rewite_rules( $rewrite ) {
+	global $wp_rewrite;
+
+	if ( ! is_multisite() || 'redirect' == get_option( 'woocommerce_file_download_method' ) ) {
+		return $rewrite;
+	}
+
+	$rule  = "\n# WooCommerce Rules - Protect Files from ms-files.php\n\n";
+	$rule .= "<IfModule mod_rewrite.c>\n";
+	$rule .= "RewriteEngine On\n";
+	$rule .= "RewriteCond %{QUERY_STRING} file=woocommerce_uploads/ [NC]\n";
+	$rule .= "RewriteRule /ms-files.php$ - [F]\n";
+	$rule .= "</IfModule>\n\n";
+
+	return $rule . $rewrite;
+}
+add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );

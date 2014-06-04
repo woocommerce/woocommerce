@@ -27,6 +27,8 @@ class WC_Post_Data {
 		add_action( 'edited_term', array( __CLASS__, 'edited_term' ), 10, 3 );
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
+		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
+		add_action( 'pre_post_update', array( __CLASS__, 'pre_post_update' ) );
 	}
 
 	/**
@@ -112,6 +114,51 @@ class WC_Post_Data {
 		}
 		return $check;
 	}
+
+	/**
+	 * Forces the order posts to have a title in a certain format (containing the date).
+	 * Forces certain product data based on the product's type, e.g. grouped products cannot have a parent.
+	 *
+	 * @param array $data
+	 * @return array
+	 */
+	public static function wp_insert_post_data( $data ) {
+		global $post;
+
+		if ( 'shop_order' === $data['post_type'] && isset( $data['post_date'] ) ) {
+			$order_title = 'Order';
+			if ( $data['post_date'] ) {
+				$order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
+			}
+			$data['post_title'] = $order_title;
+		} 
+
+		elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
+			$product_type = stripslashes( $_POST['product-type'] );
+			switch ( $product_type ) {
+				case 'grouped' :
+				case 'variable' :
+					$data['post_parent'] = 0;
+				break;
+			}
+		}
+
+		return $data;
+	}	
+
+	/**
+	 * Some functions, like the term recount, require the visibility to be set prior. Lets save that here.
+	 *
+	 * @param int $post_id
+	 */
+	public function pre_post_update( $post_id ) {
+		if ( isset( $_POST['_visibility'] ) ) {
+			update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
+		}
+		if ( isset( $_POST['_stock_status'] ) ) {
+			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
+		}
+	}	
 }
 
 WC_Post_Data::init();
