@@ -67,6 +67,10 @@ class WC_Admin_Notices {
 			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 			add_action( 'admin_notices', array( $this, 'template_file_check_notice' ) );
 		}
+
+		if ( in_array( 'translation_upgrade', $notices ) ) {
+			add_action( 'admin_notices', array( $this, 'translation_upgrade_notice' ) );
+		}
 	}
 
 	/**
@@ -89,6 +93,17 @@ class WC_Admin_Notices {
 	 */
 	public function theme_check_notice() {
 		include( 'views/html-notice-theme-support.php' );
+	}
+
+	/**
+	 * Show the translation upgrade notice
+	 */
+	public function translation_upgrade_notice() {
+		$screen = get_current_screen();
+
+		if ( 'update-core' !== $screen->id ) {
+			include( 'views/html-notice-translation-upgrade.php' );
+		}
 	}
 
 	/**
