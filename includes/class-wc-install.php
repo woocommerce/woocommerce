@@ -112,10 +112,10 @@ class WC_Install {
 		wc_delete_product_transients();
 
 		// Queue upgrades
-		$current_version = get_option( 'woocommerce_version', null );
+		$current_version    = get_option( 'woocommerce_version', null );
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 
-		if ( version_compare( $current_db_version, '2.1.0', '<' ) && null !== $current_db_version ) {
+		if ( version_compare( $current_db_version, '2.2.0', '<' ) && null !== $current_db_version ) {
 			update_option( '_wc_needs_update', 1 );
 		} else {
 			update_option( 'woocommerce_db_version', WC()->version );
@@ -174,6 +174,11 @@ class WC_Install {
 		if ( version_compare( $current_db_version, '2.1.0', '<' ) || WC_VERSION == '2.1-bleeding' ) {
 			include( 'updates/woocommerce-update-2.1.php' );
 			update_option( 'woocommerce_db_version', '2.1.0' );
+		}
+
+		if ( version_compare( $current_db_version, '2.2.0', '<' ) || WC_VERSION == '2.2-bleeding' ) {
+			include( 'updates/woocommerce-update-2.2.php' );
+			update_option( 'woocommerce_db_version', '2.2.0' );
 		}
 
 		update_option( 'woocommerce_db_version', WC()->version );
@@ -254,15 +259,6 @@ class WC_Install {
 				'grouped',
 				'variable',
 				'external'
-			),
-			'shop_order_status' => array(
-				'pending',
-				'failed',
-				'on-hold',
-				'processing',
-				'completed',
-				'refunded',
-				'cancelled'
 			)
 		);
 

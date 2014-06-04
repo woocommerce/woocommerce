@@ -674,7 +674,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				case 'pending' :
 
 					// Check order not already completed
-					if ( $order->status == 'completed' ) {
+					if ( $order->has_status( 'completed' ) ) {
 						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Aborting, Order #' . $order->id . ' is already complete.' );
 						}
@@ -827,7 +827,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$order = $this->get_paypal_order( $posted['cm'] );
 
-			if ( 'pending' != $order->status ) {
+			if ( ! $order->has_status( 'pending' ) ) {
 				return false;
 			}
 

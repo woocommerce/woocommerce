@@ -144,7 +144,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 	$customer_orders = get_posts( array(
 		'numberposts' => -1,
 		'post_type'   => 'shop_order',
-		'post_status' => 'publish',
+		'post_status' => array_keys( wc_get_order_statuses() ),
 		'fields'      => 'ids',
 		'meta_query' => array(
 			array(
@@ -159,22 +159,23 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 		),
 	) );
 
-	$linked = 0;
+	$linked   = 0;
 	$complete = 0;
 
 	if ( $customer_orders )
 		foreach ( $customer_orders as $order_id ) {
 			update_post_meta( $order_id, '_customer_user', $customer->ID );
 
-			$order_status = wp_get_post_terms( $order_id, 'shop_order_status' );
+			$order_status = get_post_status( $order_id );
 
 			if ( $order_status ) {
 				$order_status = current( $order_status );
 				$order_status = sanitize_title( $order_status->slug );
 			}
 
-			if ( $order_status == 'completed' )
+			if ( $order_status === 'completed' ) {
 				$complete ++;
+			}
 
 			$linked ++;
 		}
@@ -239,18 +240,15 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		return false;
 	}
 
-	$completed  = get_term_by( 'slug', 'completed', 'shop_order_status' );
-	$processing = get_term_by( 'slug', 'processing', 'shop_order_status' );
-
 	return $wpdb->get_var(
 		$wpdb->prepare( "
 			SELECT COUNT( DISTINCT order_items.order_item_id )
 			FROM {$wpdb->prefix}woocommerce_order_items as order_items
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
 			LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON order_items.order_id = rel.object_ID
+			LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
 			WHERE
-				rel.term_taxonomy_id IN ( %d, %d ) AND
+				posts.post_status IN ( 'wc-completed', 'wc-processing' ) AND
 				itemmeta.meta_value  = %s AND
 				itemmeta.meta_key    IN ( '_variation_id', '_product_id' ) AND
 				postmeta.meta_key    IN ( '_billing_email', '_customer_user' ) AND
@@ -261,7 +259,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 						postmeta.meta_value > 0
 					)
 				)
-			", $completed->term_taxonomy_id, $processing->term_taxonomy_id, $product_id, $user_id
+			", $product_id, $user_id
 		)
 	);
 }

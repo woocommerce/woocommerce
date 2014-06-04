@@ -116,7 +116,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
 			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
-			'status'                    => $order->status,
+			'status'                    => $order->get_status(),
 			'currency'                  => $order->order_currency,
 			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
 			'subtotal'                  => wc_format_decimal( $this->get_order_subtotal( $order ), 2 ),
@@ -355,24 +355,17 @@ class WC_API_Orders extends WC_API_Resource {
 		// set base query arguments
 		$query_args = array(
 			'fields'      => 'ids',
-			'post_type'   => 'shop_order',
-			'post_status' => 'publish',
+			'post_type'   => 'shop_order'
 		);
 
 		// add status argument
 		if ( ! empty( $args['status'] ) ) {
-
-			$statuses = explode( ',', $args['status'] );
-
-			$query_args['tax_query'] = array(
-				array(
-					'taxonomy' => 'shop_order_status',
-					'field'    => 'slug',
-					'terms'    => $statuses,
-				),
-			);
+			$statuses                  = explode( ',', $args['status'] );
+			$query_args['post_status'] = $statuses;
 
 			unset( $args['status'] );
+		} else {
+			$query_args['post_status'] = array_keys( wc_get_order_statuses() );
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );

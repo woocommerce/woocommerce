@@ -194,7 +194,7 @@ class WC_API_Customers extends WC_API_Resource {
 						WHERE meta.meta_key = '_customer_user'
 						AND   meta.meta_value = {$customer->ID}
 						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status = 'publish'
+						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
 					" );
 
 		$customer_data = array(
@@ -444,7 +444,7 @@ class WC_API_Customers extends WC_API_Resource {
 						WHERE meta.meta_key = '_customer_user'
 						AND   meta.meta_value = '%s'
 						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status = 'publish'
+						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
 					", $id ) );
 
 		if ( empty( $order_ids ) ) {

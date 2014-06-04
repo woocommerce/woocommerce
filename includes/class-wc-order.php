@@ -75,10 +75,6 @@ class WC_Order {
 			$user                = get_user_by( 'id', $this->customer_user );
 			$this->billing_email = $user->user_email;
 		}
-
-		// Get status
-		$terms        = wp_get_object_terms( $this->id, 'shop_order_status', array( 'fields' => 'slugs' ) );
-		$this->status = isset( $terms[0] ) ? $terms[0] : apply_filters( 'woocommerce_default_order_status', 'pending' );
 	}
 
 	/**
@@ -104,15 +100,35 @@ class WC_Order {
 	 */
 	public function __get( $key ) {
 		// Get values or default if not set
-		if ( 'completed_date' == $key ) {
+		if ( 'completed_date' === $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_completed_date', true ) ) ? $value : $this->modified_date;
-		} elseif ( 'user_id' == $key ) {
+		} elseif ( 'user_id' === $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_customer_user', true ) ) ? absint( $value ) : '';
+		} elseif ( 'status' === $key ) {
+			$value = $this->get_status();
 		} else {
 			$value = get_post_meta( $this->id, '_' . $key, true );
 		}
-
 		return $value;
+	}
+
+	/**
+	 * Return the order statuses without wc- internal prefix
+	 * @return string
+	 */
+	public function get_status() {
+		return apply_filters( 'woocommerce_order_get_status', 'wc-' === substr( $this->post_status, 0, 3 ) ? substr( $this->post_status, 3 ) : $this->post_status, $this );
+	}
+
+	/**
+	 * Checks the order status against a passed in status.
+	 *
+	 * @access public
+	 * @param mixed $type Array or string of types
+	 * @return bool
+	 */
+	public function has_status( $status ) {
+		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status ) ) || $this->get_status() === $status ? true : false, $this, $status );
 	}
 
 	/**
@@ -1077,7 +1093,7 @@ class WC_Order {
 	 * @return bool
 	 */
 	public function is_download_permitted() {
-		return apply_filters( 'woocommerce_order_is_download_permitted', $this->status == 'completed' || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $this->status == 'processing' ), $this );
+		return apply_filters( 'woocommerce_order_is_download_permitted', $this->has_status( 'completed' ) || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $this->has_status( 'processing' ) ), $this );
 	}
 
 	/**
@@ -1304,64 +1320,54 @@ class WC_Order {
 		return $comment_id;
 	}
 
-
 	/**
 	 * Updates status of order
 	 *
 	 * @access public
-	 * @param string $new_status_slug Status to change the order to
+	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add
-	 * @return void
 	 */
-	public function update_status( $new_status_slug, $note = '' ) {
+	public function update_status( $new_status, $note = '' ) {
+		$old_status = $this->get_status();
+		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+		
+		// Only update if they differ
+		if ( $this->id && $new_status !== $old_status ) {
+			
+			// Update the order
+			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
+			$this->post_status = 'wc-' . $new_status;
+			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), $old_status, $new_status ) ) );
 
-		if ( $note ) {
-			$note .= ' ';
-		}
+			// Status was changed
+			do_action( 'woocommerce_order_status_' . $new_status, $this->id );
+			do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
+			do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
 
-		$old_status = get_term_by( 'slug', sanitize_title( $this->status ), 'shop_order_status' );
-		$new_status = get_term_by( 'slug', sanitize_title( $new_status_slug ), 'shop_order_status' );
-
-		if ( $new_status ) {
-
-			wp_set_object_terms( $this->id, array( $new_status->slug ), 'shop_order_status', false );
-
-			if ( $this->id && $this->status != $new_status->slug ) {
-
-				// Status was changed
-				do_action( 'woocommerce_order_status_' . $new_status->slug, $this->id );
-				do_action( 'woocommerce_order_status_' . $this->status . '_to_' . $new_status->slug, $this->id );
-				do_action( 'woocommerce_order_status_changed', $this->id, $this->status, $new_status->slug );
-
-				if ( $old_status ) {
-					$this->add_order_note( $note . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), __( $old_status->name, 'woocommerce' ), __( $new_status->name, 'woocommerce' ) ) );
-				}
-
-				// Record the completed date of the order
-				if ( 'completed' == $new_status->slug ) {
-					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
-				}
-
-				if ( 'processing' == $new_status->slug || 'completed' == $new_status->slug || 'on-hold' == $new_status->slug ) {
-
+			switch ( $new_status ) {
+				case 'completed' :
 					// Record the sales
 					$this->record_product_sales();
 
 					// Increase coupon usage counts
 					$this->increase_coupon_usage_counts();
-				}
 
-				// If the order is cancelled, restore used coupons
-				if ( 'cancelled' == $new_status->slug ) {
+					// Record the completed date of the order
+					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
+				break;
+				case 'processing' :
+				case 'on-hold' :
+					// Record the sales
+					$this->record_product_sales();
+
+					// Increase coupon usage counts
+					$this->increase_coupon_usage_counts();
+				break;
+				case 'cancelled' :
+					// If the order is cancelled, restore used coupons
 					$this->decrease_coupon_usage_counts();
-				}
-
-				// Update last modified
-				wp_update_post( array( 'ID' => $this->id ) );
-
-				$this->status = $new_status->slug;
+				break;
 			}
-
 		}
 
 		wc_delete_shop_order_transients( $this->id );
@@ -1386,7 +1392,7 @@ class WC_Order {
 	 * When a payment is complete this function is called
 	 *
 	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items
-	 * If the cart contains only downloadable items then the order is 'complete' since the admin needs to take no action
+	 * If the cart contains only downloadable items then the order is 'completed' since the admin needs to take no action
 	 * Stock levels are reduced at this point
 	 * Sales are also recorded for products
 	 * Finally, record the date of payment
@@ -1404,7 +1410,7 @@ class WC_Order {
 
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed' ), $this );
 
-		if ( $this->id && in_array( $this->status, $valid_order_statuses ) ) {
+		if ( $this->id && $this->has_status( $valid_order_statuses ) ) {
 
 			$order_needs_processing = true;
 
@@ -1450,7 +1456,7 @@ class WC_Order {
 
 		} else {
 
-			do_action( 'woocommerce_payment_complete_order_status_' . $this->status, $this->id );
+			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->id );
 
 		}
 	}
@@ -1679,7 +1685,7 @@ class WC_Order {
 	public function needs_payment() {
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
 
-		if ( in_array( $this->status, $valid_order_statuses ) && $this->get_total() > 0 ) {
+		if ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ) {
 			$needs_payment = true;
 		} else {
 			$needs_payment = false;

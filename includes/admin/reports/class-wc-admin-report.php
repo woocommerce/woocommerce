@@ -88,9 +88,6 @@ class WC_Admin_Report {
 
 		// Joins
 		$joins         = array();
-		$joins['rel']  = "LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID";
-		$joins['tax']  = "LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )";
-		$joins['term'] = "LEFT JOIN {$wpdb->terms} AS term USING( term_id )";
 
 		foreach ( $data as $key => $value ) {
 			if ( $value['type'] == 'meta' ) {
@@ -132,9 +129,7 @@ class WC_Admin_Report {
 
 		$query['where']  = "
 			WHERE 	posts.post_type 	= 'shop_order'
-			AND 	posts.post_status 	= 'publish'
-			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+			AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			";
 
 		if ( $filter_range ) {
