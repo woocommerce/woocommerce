@@ -410,25 +410,45 @@ function wc_get_log_file_path( $handle ) {
 }
 
 /**
- * Fix the rewrite rules when the product permalink have %product_cat% flag.
+ * Init for our rewrite rule fixes
+ */
+function wc_fix_rewrite_rules_init() {
+	$permalinks = get_option( 'woocommerce_permalinks' );
+
+	if ( ! empty( $permalinks['use_verbose_page_rules'] ) ) {
+		$GLOBALS['wp_rewrite']->use_verbose_page_rules = true;
+	}
+}
+add_action( 'init', 'wc_fix_rewrite_rules_init' );
+
+/**
+ * Various rewrite rule fixes
  *
  * @since 2.2
  * @param array $rules
  * @return array
  */
 function wc_fix_rewrite_rules( $rules ) {
-	$permalinks = get_option( 'woocommerce_permalinks' );
+	global $wp_rewrite;
+
+	$permalinks        = get_option( 'woocommerce_permalinks' );
 	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
 
+	// Fix the rewrite rules when the product permalink have %product_cat% flag
 	if ( preg_match( '/\/(.+)(\/%product_cat%)/' , $product_permalink, $matches ) ) {
 		foreach ( $rules as $rule => $rewrite ) {
-			if ( preg_match( '/^' . $matches[1] . '/', $rule ) && preg_match( '/^(index\.php\?product_cat)(?!(.*product))/', $rewrite ) ) {
+			if ( preg_match( '/^' . $matches[1] . '\/\(/', $rule ) && preg_match( '/^(index\.php\?product_cat)(?!(.*product))/', $rewrite ) ) {
 				unset( $rules[ $rule ] );
 			}
 		}
 	}
 
+	// If the shop page is used as the base, we need to enable verbose rewrite rules or sub pages will 404
+	if ( ! empty( $permalinks['use_verbose_page_rules'] ) ) {
+		$page_rewrite_rules = $wp_rewrite->page_rewrite_rules();
+		$rules              = array_merge( $page_rewrite_rules, $rules );
+	}
+
 	return $rules;
 }
-
 add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
