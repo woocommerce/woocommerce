@@ -1,4 +1,5 @@
 Country Code,State Code,ZIP/Postcode,City,Rate %,Tax Name,Priority,Compound,Shipping,Tax Class
+IT,*,*,*,22.0000,VAT,1,1,1,
 GB,*,*,*,20.0000,VAT,1,1,1,
 GB,*,*,*,5.0000,VAT,1,1,1,reduced-rate
 GB,*,*,*,0.0000,VAT,1,1,1,zero-rate
