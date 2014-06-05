@@ -217,7 +217,7 @@ class WC_Customer {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Is the user a paying customer?
 	 *
@@ -598,22 +598,22 @@ class WC_Customer {
 
 			// Get results from valid orders only
 			$results = $wpdb->get_results( $wpdb->prepare( "
-				SELECT permissions.* 
+				SELECT permissions.*
 				FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
 				LEFT JOIN {$wpdb->posts} as posts ON permissions.order_id = posts.ID
-				WHERE user_id = %s 
+				WHERE user_id = %s
 				AND permissions.order_id > 0
 				AND posts.post_status = 'publish'
-				AND 
+				AND
 					(
 						permissions.downloads_remaining > 0
-						OR 
+						OR
 						permissions.downloads_remaining = ''
 					)
-				AND 
+				AND
 					(
 						permissions.access_expires IS NULL
-						OR 
+						OR
 						permissions.access_expires >= %s
 					)
 				GROUP BY permissions.download_id
@@ -655,7 +655,7 @@ class WC_Customer {
 					);
 
 					$downloads[] = array(
-						'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/', 'http' ) ),
+						'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/', 'relative' ) ),
 						'download_id'         => $result->download_id,
 						'product_id'          => $result->product_id,
 						'download_name'       => $download_name,
