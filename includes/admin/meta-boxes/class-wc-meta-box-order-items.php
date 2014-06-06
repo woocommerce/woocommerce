@@ -164,12 +164,11 @@ class WC_Meta_Box_Order_Items {
 
 		foreach ( $meta_keys as $id => $meta_key ) {
 			$meta_value = ( empty( $meta_values[ $id ] ) && ! is_numeric( $meta_values[ $id ] ) ) ? '' : $meta_values[ $id ];
-			$meta_value = stripslashes( $meta_value );
 			$wpdb->update(
 				$wpdb->prefix . "woocommerce_order_itemmeta",
 				array(
-					'meta_key'   => $meta_key,
-					'meta_value' => $meta_value
+					'meta_key'   => wp_unslash($meta_key),
+					'meta_value' => wp_unslash($meta_value)
 				),
 				array( 'meta_id' => $id ),
 				array( '%s', '%s' ),
