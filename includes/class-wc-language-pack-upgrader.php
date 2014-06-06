@@ -87,6 +87,8 @@ class WC_Language_Pack_Upgrader {
 		if ( version_compare( $version, WC_VERSION, '<' ) && 'en' !== $this->get_language() ) {
 
 			if ( $this->check_if_language_pack_exists() ) {
+				$this->configure_woocommerce_upgrade_notice();
+
 				return true;
 			} else {
 				// Updated the woocommerce_language_pack_version to avoid searching translations for this release again
@@ -95,6 +97,20 @@ class WC_Language_Pack_Upgrader {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Configure the WooCommerce translation upgrade notice
+	 *
+	 * @return void
+	 */
+	public function configure_woocommerce_upgrade_notice() {
+		$notices = get_option( 'woocommerce_admin_notices', array() );
+		if ( false === array_search( 'translation_upgrade', $notices ) ) {
+			$notices[] = 'translation_upgrade';
+
+			update_option( 'woocommerce_admin_notices', $notices );
+		}
 	}
 
 	/**
@@ -126,7 +142,13 @@ class WC_Language_Pack_Upgrader {
 				( isset( $hook_extra['language_update_type'] ) && 'plugin' == $hook_extra['language_update_type'] )
 				&& ( isset( $hook_extra['language_update']->slug ) && 'woocommerce' == $hook_extra['language_update']->slug )
 			) {
+				// Update the language pack version
 				update_option( 'woocommerce_language_pack_version', WC_VERSION );
+
+				// Remove the translation upgrade notice
+				$notices = get_option( 'woocommerce_admin_notices', array() );
+				$notices = array_diff( $notices, array( 'translation_upgrade' ) );
+				update_option( 'woocommerce_admin_notices', $notices );
 			}
 		}
 
