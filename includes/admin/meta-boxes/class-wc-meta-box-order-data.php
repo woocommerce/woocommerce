@@ -142,7 +142,7 @@ class WC_Meta_Box_Order_Data {
 					echo __( 'Order number', 'woocommerce' ) . ' ' . esc_html( $order->get_order_number() ) . '. ';
 
 					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) )
-						echo __( 'Customer IP:', 'woocommerce' ) . ' ' . esc_html( $ip_address );
+						echo __( 'Customer IP:', 'woocommerce' ) . ' <a href="http://ip-adress.com/ip_tracer/' .$ip_address. '" target="top"> ' . esc_html( $ip_address ) . '</a>';
 				?></p>
 
 				<div class="order_data_column_container">
