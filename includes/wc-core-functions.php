@@ -43,6 +43,52 @@ add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
 
 /**
+ * Create a new order programmatically
+ *
+ * Returns a new order object on success which can then be used to add additonal data.
+ * 
+ * @return WC_Order on success, WP_Error on failure
+ */
+function wc_create_order( $args ) {
+	$default_args = array(
+		'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
+		'customer_id'   => 0,
+		'customer_note' => ''
+	);
+
+	$args = wp_parse_args( $args, $default_args );
+
+	// Validate status
+	if ( ! in_array( 'wc-' . $args['status'], array_keys( wc_get_order_statuses() ) ) ) {
+		return new WP_Error( __( 'Invalid order status', 'woocommerce' ) );
+	}
+
+	$order_data = apply_filters( 'woocommerce_new_order_data', array(
+		'post_type'     => 'shop_order',
+		'post_title'    => sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
+		'post_status'   => 'wc-' . $args['status'],
+		'ping_status'   => 'closed',
+		'post_excerpt'  => $args['customer_note'],
+		'post_author'   => 1,
+		'post_password' => uniqid( 'order_' )
+	) );
+
+	$order_id = wp_insert_post( $order_data, true );
+
+	if ( is_wp_error( $order_id ) ) {
+		return $order_id;
+	} else {
+		// Set meta data automatically
+		update_post_meta( $order_id, '_order_key', 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
+		update_post_meta( $order_id, '_customer_user', absint( $args['customer_id'] ) );
+		update_post_meta( $order_id, '_order_currency', get_woocommerce_currency() );
+		update_post_meta( $order_id, '_prices_include_tax', get_option( 'woocommerce_prices_include_tax' ) );
+
+		return new WC_Order( $order_id );
+	}
+}
+
+/**
  * Get template part (for templates like the shop-loop).
  *
  * @access public

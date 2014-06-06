@@ -5,7 +5,7 @@
  * The WooCommerce order class handles order data.
  *
  * @class 		WC_Order
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -33,6 +33,48 @@ class WC_Order {
 			$this->get_order( $id );
 		}
 	}
+
+
+
+	public function set_address( $address_data, $type = 'billing' ) {
+		update_post_meta( $order_id, '_' . $type . '_address', $postvalue );
+	}
+
+	public function set_payment_method( $payment_method ) {
+
+	}
+
+	public function add_item( $item_name, $meta = array() ) {
+		$item_id = wc_add_order_item( $this->id, array(
+	 		'order_item_name' 		=> $item_name,
+	 		'order_item_type' 		=> 'line_item'
+	 	) );
+
+	 	if ( $item_id ) {
+			wc_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $values['quantity'] ) );
+
+			foreach ( $meta as $key => $value ) {
+				wc_add_order_item_meta( $item_id, $key, $value );
+			}
+		}
+	}
+
+	public function add_fee() {
+
+	}
+
+	public function add_tax() {
+
+	}
+
+	public function add_shipping() {
+
+	}
+
+
+
+
+
 
 
 	/**
@@ -160,7 +202,6 @@ class WC_Order {
 		if ( $key == $this->order_key ) {
 			return true;
 		}
-
 		return false;
 	}
 
@@ -259,7 +300,6 @@ class WC_Order {
 		}
 		return $this->formatted_shipping_address;
 	}
-
 
 	/**
 	 * Get the shipping address in an array.
@@ -1607,9 +1647,7 @@ class WC_Order {
 
 			$this->add_order_note( __( 'Order item stock reduced successfully.', 'woocommerce' ) );
 		}
-
 	}
-
 
 	/**
 	 * send_stock_notifications function.

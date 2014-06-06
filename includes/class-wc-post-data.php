@@ -151,7 +151,7 @@ class WC_Post_Data {
 	 *
 	 * @param int $post_id
 	 */
-	public function pre_post_update( $post_id ) {
+	public static function pre_post_update( $post_id ) {
 		if ( isset( $_POST['_visibility'] ) ) {
 			update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
 		}
