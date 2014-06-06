@@ -5,7 +5,7 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/System Status
- * @version     2.1.0
+ * @version     2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -43,12 +43,12 @@ class WC_Admin_Status {
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
 
 			switch ( $_GET['action'] ) {
-				case "clear_transients" :
+				case 'clear_transients' :
 					wc_delete_product_transients();
 
 					echo '<div class="updated"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
 				break;
-				case "clear_expired_transients" :
+				case 'clear_expired_transients' :
 
 					// http://w-shadow.com/blog/2012/04/17/delete-stale-transients/
 					$rows = $wpdb->query( "
@@ -90,7 +90,7 @@ class WC_Admin_Status {
 					echo '<div class="updated"><p>' . sprintf( __( '%d Transients Rows Cleared', 'woocommerce' ), $rows + $rows2 ) . '</p></div>';
 
 				break;
-				case "reset_roles" :
+				case 'reset_roles' :
 					// Remove then re-add caps and roles
 					$installer = include( WC()->plugin_path() . '/includes/class-wc-install.php' );
 					$installer->remove_roles();
@@ -98,7 +98,7 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
 				break;
-				case "recount_terms" :
+				case 'recount_terms' :
 
 					$product_cats = get_terms( 'product_cat', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
 
@@ -112,7 +112,7 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
 				break;
-				case "clear_sessions" :
+				case 'clear_sessions' :
 
 					$wpdb->query( "
 						DELETE FROM {$wpdb->options}
@@ -123,11 +123,11 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Sessions successfully cleared', 'woocommerce' ) . '</p></div>';
 				break;
-				case "install_pages" :
+				case 'install_pages' :
 					WC_Install::create_pages();
 					echo '<div class="updated"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
-                break;
-                case "delete_taxes" :
+				break;
+				case 'delete_taxes' :
 
 					$wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_tax_rates" );
 
@@ -135,13 +135,22 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
 				break;
-				default:
+				case 'translation_upgrade' :
+					// Delete language pack version
+					delete_option( 'woocommerce_language_pack_version' );
+
+					// Force WordPress find for new updates
+					set_site_transient( 'update_plugins', null );
+
+					echo '<div class="updated"><p>' . sprintf( __( 'Forced the translations upgrade successfully, please check the <a href="%s">Updates page</a>', 'woocommerce' ), add_query_arg( array( 'force-check' => '1' ), admin_url( 'update-core.php' ) ) ) . '</p></div>';
+				break;
+				default :
 					$action = esc_attr( $_GET['action'] );
-					if( isset( $tools[ $action ]['callback'] ) ) {
+					if ( isset( $tools[ $action ]['callback'] ) ) {
 						$callback = $tools[ $action ]['callback'];
 						$return = call_user_func( $callback );
-						if( $return === false ) {
-							if( is_array( $callback ) ) {
+						if ( $return === false ) {
+							if ( is_array( $callback ) ) {
 								echo '<div class="error"><p>' . sprintf( __( 'There was an error calling %s::%s', 'woocommerce' ), get_class( $callback[0] ), $callback[1] ) . '</p></div>';
 
 							} else {
@@ -153,8 +162,8 @@ class WC_Admin_Status {
 			}
 		}
 
-	    // Display message if settings settings have been saved
-	    if ( isset( $_REQUEST['settings-updated'] ) ) {
+		// Display message if settings settings have been saved
+		if ( isset( $_REQUEST['settings-updated'] ) ) {
 			echo '<div class="updated"><p>' . __( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
 		}
 
@@ -167,7 +176,7 @@ class WC_Admin_Status {
 	 * @return array of tools
 	 */
 	public static function get_tools() {
-		return apply_filters( 'woocommerce_debug_tools', array(
+		$tools = array(
 			'clear_transients' => array(
 				'name'		=> __( 'WC Transients','woocommerce'),
 				'button'	=> __('Clear transients','woocommerce'),
@@ -202,8 +211,18 @@ class WC_Admin_Status {
 				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
 				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
 				'desc'    => __( '<strong class="red">Note:</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
-			),
-		) );
+			)
+		);
+
+		if ( defined( 'WPLANG' ) && '' !== WPLANG ) {
+			$tools['translation_upgrade'] = array(
+				'name'    => __( 'Translation Upgrade', 'woocommerce' ),
+				'button'  => __( 'Force Translation Upgrade', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note:</strong> This option will force the translation upgrade for your language if a translation is available.', 'woocommerce' ),
+			);
+		}
+
+		return apply_filters( 'woocommerce_debug_tools', $tools );
 	}
 
 	/**
@@ -249,8 +268,8 @@ class WC_Admin_Status {
 	/**
 	 * Scan the template files
 	 *
- 	 * @param string $template_path
- 	 * @return array
+	 * @param string $template_path
+	 * @return array
 	 */
 	public static function scan_template_files( $template_path ) {
 		$files         = scandir( $template_path );
@@ -275,7 +294,7 @@ class WC_Admin_Status {
 	/**
 	 * Scan the log files
 	 *
- 	 * @return array
+	 * @return array
 	 */
 	public static function scan_log_files() {
 		$files         = @scandir( WC_LOG_DIR );
