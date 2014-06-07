@@ -14,7 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 global $woocommerce;
 ?>
 
-<?php do_action( 'woocommerce_before_mini_cart' ); ?>
+<?php 
+	/**
+	 * woocommerce_before_mini_cart hook
+	 */
+	do_action( 'woocommerce_before_mini_cart' ); 
+?>
 
 <ul class="cart_list product_list_widget <?php echo $args['list_class']; ?>">
 
@@ -58,7 +63,12 @@ global $woocommerce;
 
 	<p class="total"><strong><?php _e( 'Subtotal', 'woocommerce' ); ?>:</strong> <?php echo WC()->cart->get_cart_subtotal(); ?></p>
 
-	<?php do_action( 'woocommerce_widget_shopping_cart_before_buttons' ); ?>
+	<?php 
+		/**
+		 * woocommerce_widget_shopping_cart_before_buttons hook
+		 */
+		do_action( 'woocommerce_widget_shopping_cart_before_buttons' ); 
+	?>
 
 	<p class="buttons">
 		<a href="<?php echo WC()->cart->get_cart_url(); ?>" class="button wc-forward"><?php _e( 'View Cart', 'woocommerce' ); ?></a>
@@ -67,4 +77,9 @@ global $woocommerce;
 
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_after_mini_cart' ); ?>
+<?php 
+	/**
+	 * woocommerce_after_mini_cart hook
+	 */
+	do_action( 'woocommerce_after_mini_cart' ); 
+?>

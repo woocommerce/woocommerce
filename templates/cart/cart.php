@@ -13,11 +13,20 @@ global $woocommerce;
 
 wc_print_notices();
 
-do_action( 'woocommerce_before_cart' ); ?>
+/**
+ * woocommerce_before_cart hook
+ */
+do_action( 'woocommerce_before_cart' ); 
+?>
 
 <form action="<?php echo esc_url( WC()->cart->get_cart_url() ); ?>" method="post">
 
-<?php do_action( 'woocommerce_before_cart_table' ); ?>
+<?php
+	/**
+	 * woocommerce_before_cart_table hook
+	 */
+	do_action( 'woocommerce_before_cart_table' ); 
+?>
 
 <table class="shop_table cart" cellspacing="0">
 	<thead>
@@ -31,7 +40,12 @@ do_action( 'woocommerce_before_cart' ); ?>
 		</tr>
 	</thead>
 	<tbody>
-		<?php do_action( 'woocommerce_before_cart_contents' ); ?>
+		<?php 
+			/**
+	 		 * woocommerce_before_cart_contents hook
+	 		 */
+			do_action( 'woocommerce_before_cart_contents' ); 
+		?>
 
 		<?php
 		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -108,6 +122,9 @@ do_action( 'woocommerce_before_cart' ); ?>
 			}
 		}
 
+		/**
+ 		 * woocommerce_cart_contents hook
+ 		 */
 		do_action( 'woocommerce_cart_contents' );
 		?>
 		<tr>
@@ -118,30 +135,55 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 						<label for="coupon_code"><?php _e( 'Coupon', 'woocommerce' ); ?>:</label> <input type="text" name="coupon_code" class="input-text" id="coupon_code" value="" placeholder="<?php _e( 'Coupon code', 'woocommerce' ); ?>" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e( 'Apply Coupon', 'woocommerce' ); ?>" />
 
-						<?php do_action('woocommerce_cart_coupon'); ?>
+						<?php 
+							/**
+					 		 * woocommerce_cart_coupon hook
+					 		 */
+							do_action('woocommerce_cart_coupon'); 
+						?>
 
 					</div>
 				<?php } ?>
 
 				<input type="submit" class="button" name="update_cart" value="<?php _e( 'Update Cart', 'woocommerce' ); ?>" /> <input type="submit" class="checkout-button button alt wc-forward" name="proceed" value="<?php _e( 'Proceed to Checkout', 'woocommerce' ); ?>" />
 
-				<?php do_action( 'woocommerce_proceed_to_checkout' ); ?>
+				<?php 
+					/**
+			 		 * woocommerce_proceed_to_checkout hook
+			 		 */
+					do_action( 'woocommerce_proceed_to_checkout' ); 
+				?>
 
 				<?php wp_nonce_field( 'woocommerce-cart' ); ?>
 			</td>
 		</tr>
 
-		<?php do_action( 'woocommerce_after_cart_contents' ); ?>
+		<?php
+			/**
+	 		 * woocommerce_after_cart_contents hook
+	 		 */ 
+			do_action( 'woocommerce_after_cart_contents' ); 
+		?>
 	</tbody>
 </table>
 
-<?php do_action( 'woocommerce_after_cart_table' ); ?>
+<?php 
+	/**
+	 * woocommerce_after_cart_table hook
+	 */
+	do_action( 'woocommerce_after_cart_table' ); 
+?>
 
 </form>
 
 <div class="cart-collaterals">
 
-	<?php do_action( 'woocommerce_cart_collaterals' ); ?>
+	<?php 
+		/**
+		 * woocommerce_cart_collaterals hook
+		 */
+		do_action( 'woocommerce_cart_collaterals' ); 
+	?>
 
 	<?php woocommerce_cart_totals(); ?>
 
@@ -149,4 +191,9 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 </div>
 
-<?php do_action( 'woocommerce_after_cart' ); ?>
+<?php 
+	/**
+	 * woocommerce_after_cart hook
+	 */
+	do_action( 'woocommerce_after_cart' ); 
+?>
