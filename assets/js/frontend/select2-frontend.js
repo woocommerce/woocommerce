@@ -11,7 +11,7 @@ jQuery( function( $ ) {
 	initSelect2();
 
 	// reinit select2 on country change
-	$( 'body' ).bind( 'country_to_state_changed', function() {
+	$( 'body' ).on( 'country_to_state_changed', function() {
 		initSelect2();
 	});
 
