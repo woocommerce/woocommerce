@@ -175,6 +175,7 @@ class WC_Admin_Assets {
 				'customer_search_text'          => __( 'Show All Customers', 'woocommerce' ),
 				'customer_search_guest_text'    => __( 'Guest', 'woocommerce' ),
 				'search_product_text'           => __( 'Search for a product', 'woocommerce' ),
+				'search_download_product_text'  => __( 'Search for a downloadable product...', 'woocommerce' ),
 				'ajax_search_no_matches_text'   => __( 'No Matches Found', 'woocommerce' ),
 				'ajax_searching_text'           => __( 'searching...', 'woocommerce' ),
 				'ajax_input_too_short_text_1'   => __( 'Please enter', 'woocommerce' ),

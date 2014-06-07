@@ -737,6 +737,47 @@ jQuery( function($){
 		return false;
 	} );
 
+	// orders grant downloadable product access
+	$( 'input.ajax_select2_select_downloadable_products_and_variations' ).select2({
+		minimumInputLength: 3,
+		width: '400px',
+		placeholder: woocommerce_admin_meta_boxes.search_download_product_text,
+		multiple: true,
+		id: function( data ) {
+			return data.id;
+		},
+		ajax: {
+			url: woocommerce_admin_meta_boxes.ajax_url,
+			dataType: 'json',
+			method: 'GET',
+			data: function ( term, page ) {
+				return {
+					action:     'woocommerce_json_search_products_and_variations',
+					security:   woocommerce_admin_meta_boxes.search_products_nonce,
+					term:       term,
+					default:    woocommerce_admin_meta_boxes.search_download_product_text
+				};
+			},
+			results: function ( data, page ) {
+				var returnArray = $.map( data, function( value, index ) {
+					return {id: index, val: value};
+				});
+
+				return {results: returnArray};
+			}
+		},
+		formatResult: function ( data ) {
+			return data.val;
+		},
+		formatSelection: function( data ) {
+    		return data.val;
+		},
+		initSelection: woocommerce_admin_meta_boxes.search_download_product_text,
+		formatNoMatches: woocommerce_admin_meta_boxes.ajax_search_no_matches_text,
+		formatSearching: woocommerce_admin_meta_boxes.ajax_searching_text,
+		formatInputTooShort: function ( input, min ) { var n = min - input.length; return woocommerce_admin_meta_boxes.ajax_input_too_short_text_1 + ' ' + n + ' ' + woocommerce_admin_meta_boxes.ajax_input_too_short_text_2; }
+	});
+
 	// Download permissions
 	$('.order_download_permissions').on('click', 'button.grant_access', function(){
 		var products = $( 'input#grant_access_id' ).val().length > 0 ? $( 'input#grant_access_id' ).val().split( ',' ) : '';
@@ -745,7 +786,8 @@ jQuery( function($){
 			return;
 		}
 
-		$('.order_download_permissions').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+		$('.order_download_permissions').block({ message: null, overlayCSS: { background: '#fff url(' + 
+			woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
 		var data = {
 			action: 		'woocommerce_grant_access_to_download',
@@ -771,7 +813,7 @@ jQuery( function($){
 				buttonImage: woocommerce_admin_meta_boxes.calendar_image,
 				buttonImageOnly: true
 			});
-			$('#grant_access_id').val('').trigger( 'change' );
+			$('input#grant_access_id').select2( 'val', '' );
 			$('.order_download_permissions').unblock();
 
 		});
