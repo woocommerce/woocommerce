@@ -135,7 +135,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Categories
 				?>
 				<p class="form-field"><label for="product_ids"><?php _e( 'Product categories', 'woocommerce' ); ?></label>
-				<select id="product_categories" name="product_categories[]" class="chosen_select" multiple="multiple" data-placeholder="<?php _e( 'Any category', 'woocommerce' ); ?>">
+				<select id="product_categories" name="product_categories[]" class="select2_select" multiple="multiple" data-placeholder="<?php _e( 'Any category', 'woocommerce' ); ?>">
 					<?php
 						$category_ids = (array) get_post_meta( $post->ID, 'product_categories', true );
 
@@ -150,7 +150,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Exclude Categories
 				?>
 				<p class="form-field"><label for="exclude_product_categories"><?php _e( 'Exclude categories', 'woocommerce' ); ?></label>
-				<select id="exclude_product_categories" name="exclude_product_categories[]" class="chosen_select" multiple="multiple" data-placeholder="<?php _e( 'No categories', 'woocommerce' ); ?>">
+				<select id="exclude_product_categories" name="exclude_product_categories[]" class="select2_select" multiple="multiple" data-placeholder="<?php _e( 'No categories', 'woocommerce' ); ?>">
 					<?php
 						$category_ids = (array) get_post_meta( $post->ID, 'exclude_product_categories', true );
 

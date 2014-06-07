@@ -154,7 +154,7 @@ class WC_Meta_Box_Order_Data {
 						</p>
 
 						<p class="form-field form-field-wide"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?></label>
-						<select id="order_status" name="order_status" class="chosen_select">
+						<select id="order_status" name="order_status" class="select2_select">
 							<?php
 								$statuses = wc_get_order_statuses();
 								foreach ( $statuses as $status => $status_name ) {

@@ -163,7 +163,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 						if ( $used_coupons ) :
 					?>
-						<select id="coupon_codes" name="coupon_codes" class="chosen_select" data-placeholder="<?php _e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
+						<select id="coupon_codes" name="coupon_codes" class="select2_select" data-placeholder="<?php _e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
 							<option value=""><?php _e( 'All coupons', 'woocommerce' ); ?></option>
 							<?php
 								foreach ( $used_coupons as $coupon ) {
