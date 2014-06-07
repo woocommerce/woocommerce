@@ -16,6 +16,11 @@ jQuery( function($){
 
 	runTipTip();
 
+	$( '.select2_select' ).select2({
+		minimumResultsForSearch: 3,
+		width: '400px'
+	});
+
 	// Allow tabbing
 	$('#titlediv #title').keyup(function( event ) {
 		var code = event.keyCode || event.which;
@@ -25,6 +30,55 @@ jQuery( function($){
     		$('#woocommerce-coupon-description').focus();
     		return false;
     	}
+	});
+
+	// coupon
+	$( 'input.ajax_select2_coupon_select_products_and_variations' ).select2({
+		minimumInputLength: 3,
+		width: '400px',
+		placeholder: woocommerce_admin_meta_boxes.search_product_text,
+		multiple: true,
+		id: function( data ) {
+			return data.id;
+		},
+		ajax: {
+			url: woocommerce_admin_meta_boxes.ajax_url,
+			dataType: 'json',
+			method: 'GET',
+			data: function ( term, page ) {
+				return {
+					action:     'woocommerce_json_search_products_and_variations',
+					security:   woocommerce_admin_meta_boxes.search_products_nonce,
+					term:       term,
+					default:    woocommerce_admin_meta_boxes.search_product_text
+				};
+			},
+			results: function ( data, page ) {
+				var returnArray = $.map( data, function( value, index ) {
+					return {id: index, val: value};
+				});
+
+				return {results: returnArray};
+			}
+		},
+		formatResult: function ( data ) {
+			return data.val;
+		},
+		formatSelection: function( data ) {
+    		return data.val;
+		},
+		initSelection: function( element, callback ) {
+			var data = [];
+
+			$( element.data( 'elements' ) ).each( function () {
+			    data.push( { id: this.id, val: this.val } );
+			});
+
+			callback( data );
+		},
+		formatNoMatches: woocommerce_admin_meta_boxes.ajax_search_no_matches_text,
+		formatSearching: woocommerce_admin_meta_boxes.ajax_searching_text,
+		formatInputTooShort: function ( input, min ) { var n = min - input.length; return woocommerce_admin_meta_boxes.ajax_input_too_short_text_1 + ' ' + n + ' ' + woocommerce_admin_meta_boxes.ajax_input_too_short_text_2; }
 	});
 
 	// Coupon type options
