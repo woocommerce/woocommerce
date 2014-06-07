@@ -88,7 +88,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 							'title' 		=> __( 'Availability', 'woocommerce' ),
 							'type' 			=> 'select',
 							'default' 		=> 'all',
-							'class'			=> 'availability',
+							'class'			=> 'availability select2_select',
 							'options'		=> array(
 								'all' 		=> __( 'All allowed countries', 'woocommerce' ),
 								'specific' 	=> __( 'Specific Countries', 'woocommerce' ),
@@ -109,6 +109,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 							'title' 		=> __( 'Tax Status', 'woocommerce' ),
 							'type' 			=> 'select',
 							'default' 		=> 'taxable',
+							'class'		    => 'select2_select',
 							'options'		=> array(
 								'taxable' 	=> __( 'Taxable', 'woocommerce' ),
 								'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
@@ -138,6 +139,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			'type' => array(
 							'title' 		=> __( 'Costs Added...', 'woocommerce' ),
 							'type' 			=> 'select',
+							'class'		    => 'select2_select',
 							'default' 		=> 'order',
 							'options' 		=> array(
 								'order' 	=> __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),
@@ -570,7 +572,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 								echo '<tr class="flat_rate">
 									<th class="check-column"><input type="checkbox" name="select" /></th>
 									<td class="flat_rate_class">
-											<select name="' . esc_attr( $this->id . '_class[' . $i . ']' ) . '" class="select">';
+											<select name="' . esc_attr( $this->id . '_class[' . $i . ']' ) . '" class="select select2_select">';
 
 								if ( WC()->shipping->get_shipping_classes() ) {
 									foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
@@ -600,7 +602,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 							jQuery('<tr class="flat_rate">\
 								<th class="check-column"><input type="checkbox" name="select" /></th>\
 								<td class="flat_rate_class">\
-									<select name="<?php echo $this->id; ?>_class[' + size + ']" class="select">\
+									<select name="<?php echo $this->id; ?>_class[' + size + ']" class="select select2_select">\
 						   				<?php
 						   				if (WC()->shipping->get_shipping_classes()) :
 											foreach (WC()->shipping->get_shipping_classes() as $class) :
@@ -615,6 +617,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 								<td><input type="text" name="<?php echo $this->id; ?>_cost[' + size + ']" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" size="4" class="wc_input_price" /></td>\
 								<td><input type="text" name="<?php echo $this->id; ?>_fee[' + size + ']" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" size="4" class="wc_input_price" /></td>\
 							</tr>').appendTo('#<?php echo $this->id; ?>_flat_rates table tbody');
+
+							jQuery( 'tr.flat_rate select.select2_select' ).select2({
+								width: '200px',
+								minimumResultsForSearch: 5
+							});
 
 							return false;
 						});

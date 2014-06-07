@@ -178,6 +178,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
 				'default'     => 'sale',
 				'desc_tip'    => true,
+				'class'		  => 'select2_select',
 				'options'     => array(
 					'sale'          => __( 'Capture', 'woocommerce' ),
 					'authorization' => __( 'Authorize', 'woocommerce' )

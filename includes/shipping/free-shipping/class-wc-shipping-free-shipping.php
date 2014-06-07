@@ -77,7 +77,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 							'title' 		=> __( 'Method availability', 'woocommerce' ),
 							'type' 			=> 'select',
 							'default' 		=> 'all',
-							'class'			=> 'availability',
+							'class'			=> 'availability select2_select',
 							'options'		=> array(
 								'all' 		=> __( 'All allowed countries', 'woocommerce' ),
 								'specific' 	=> __( 'Specific Countries', 'woocommerce' )
@@ -97,6 +97,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			'requires' => array(
 							'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
 							'type' 			=> 'select',
+							'class'			=> 'select2_select',
 							'default' 		=> '',
 							'options'		=> array(
 								'' 				=> __( 'N/A', 'woocommerce' ),

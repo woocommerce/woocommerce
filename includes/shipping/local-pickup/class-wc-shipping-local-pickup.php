@@ -96,7 +96,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'title'			=> __( 'Method availability', 'woocommerce' ),
 				'type'			=> 'select',
 				'default'		=> 'all',
-				'class'			=> 'availability',
+				'class'			=> 'availability select2_select',
 				'options'		=> array(
 					'all'		=> __( 'All allowed countries', 'woocommerce' ),
 					'specific'	=> __( 'Specific Countries', 'woocommerce' )

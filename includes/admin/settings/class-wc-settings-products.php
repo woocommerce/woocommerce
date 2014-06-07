@@ -171,6 +171,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css' 		=> 'min-width:150px;',
 					'default'	=> '',
 					'type' 		=> 'select',
+					'class'     => 'select2_select2',
 					'options' => array(
 						''  			=> __( 'Always show stock e.g. "12 in stock"', 'woocommerce' ),
 						'low_amount'	=> __( 'Only show stock when low e.g. "Only 2 left in stock" vs. "In Stock"', 'woocommerce' ),
