@@ -69,7 +69,8 @@ class WC_Frontend_Scripts {
 		$frontend_script_path = $assets_path . 'js/frontend/';
 
 		// Register any scripts for later use, or used as dependencies
-		wp_register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '1.0.0', true );
+		wp_register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '1.0.0', true ); // to be removed in future
+		wp_register_script( 'select2', $assets_path . 'js/jquery-select2/select2' . $suffix . '.js', array( 'jquery' ), '3.4.8', true );
 		wp_register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.60', true );
 		wp_register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.0.2', true );
 		wp_register_script( 'wc-credit-card-form', $assets_path . 'js/frontend/credit-card-form' . $suffix . '.js', array( 'jquery', 'jquery-payment' ), WC_VERSION, true );
@@ -90,8 +91,8 @@ class WC_Frontend_Scripts {
 		if ( is_checkout() ) {
 
 			if ( apply_filters( 'woocommerce_enable_jquery_select_on_checkout', true ) ) {
-				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), WC_VERSION, true );
-				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
+				wp_enqueue_script( 'wc-select2', $frontend_script_path . 'select2-frontend' . $suffix . '.js', array( 'select2' ), WC_VERSION, true );
+				wp_enqueue_style( 'woocommerce_select2_styles', $assets_path . 'css/select2.css' );
 			}
 
 			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ), WC_VERSION, true );
@@ -99,8 +100,8 @@ class WC_Frontend_Scripts {
 
 		if ( is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) {
 			if ( apply_filters( 'woocommerce_enable_jquery_select_on_checkout', true ) ) {
-				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), WC_VERSION, true );
-				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
+				wp_enqueue_script( 'wc-select2', $frontend_script_path . 'select2-frontend' . $suffix . '.js', array( 'select2' ), WC_VERSION, true );
+				wp_enqueue_style( 'woocommerce_select2_styles', $assets_path . 'css/select2.css' );
 			}
 		}
 
