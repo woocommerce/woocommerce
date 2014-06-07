@@ -11,18 +11,18 @@ jQuery( function( $ ) {
 
 	$( 'select.country_to_state, input.country_to_state' ).change( function() {
 
-		var country = $( this ).val(),
-			$statebox = $( this ).closest( 'div' ).find( '#billing_state, #shipping_state, #calc_shipping_state' ),
-			$parent = $statebox.parent(),
-			input_name = $statebox.attr( 'name' ),
-			input_id = $statebox.attr( 'id' ),
-			value = $statebox.val(),
+		var country     = $( this ).val(),
+			$statebox   = $( this ).closest( 'div' ).find( '#billing_state, #shipping_state, #calc_shipping_state' ),
+			$parent     = $statebox.parent(),
+			input_name  = $statebox.attr( 'name' ),
+			input_id    = $statebox.attr( 'id' ),
+			value       = $statebox.val(),
 			placeholder = $statebox.attr( 'placeholder' );
 
 		if ( states[ country ] ) {
 			if ( states[ country ].length === 0 ) {
 
-				$statebox.parent().hide().find( '.chosen-container' ).remove();
+				$statebox.parent().hide().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />' );
 
 				$( 'body' ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
@@ -32,7 +32,7 @@ jQuery( function( $ ) {
 				var options = '',
 					state = states[ country ];
 
-				for( var index in state ) {
+				for ( var index in state ) {
 					if ( state.hasOwnProperty( index ) ) {
 						options = options + '<option value="' + index + '">' + state[ index ] + '</option>';
 					}
@@ -56,14 +56,14 @@ jQuery( function( $ ) {
 		} else {
 			if ( $statebox.is( 'select' ) ) {
 
-				$parent.show().find( '.chosen-container' ).remove();
+				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
 
 				$( 'body' ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
 
 			} else if ( $statebox.is( '.hidden' ) ) {
 
-				$parent.show().find( '.chosen-container' ).remove();
+				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
 
 				$( 'body' ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
