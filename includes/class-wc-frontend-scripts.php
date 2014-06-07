@@ -82,11 +82,18 @@ class WC_Frontend_Scripts {
 		wp_register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.3.1', true );
 
 		// Queue frontend scripts conditionally
-		if ( $ajax_cart_en )
+		if ( $ajax_cart_en ) {
 			wp_enqueue_script( 'wc-add-to-cart', $frontend_script_path . 'add-to-cart' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+		}
 
-		if ( is_cart() )
+		if ( is_cart() ) {
 			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select' ), WC_VERSION, true );
+
+			if ( apply_filters( 'woocommerce_enable_jquery_select_on_checkout', true ) ) {
+				wp_enqueue_script( 'wc-select2', $frontend_script_path . 'select2-frontend' . $suffix . '.js', array( 'select2' ), WC_VERSION, true );
+				wp_enqueue_style( 'woocommerce_select2_styles', $assets_path . 'css/select2.css' );
+			}
+		}
 
 		if ( is_checkout() ) {
 
