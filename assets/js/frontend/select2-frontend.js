@@ -1,7 +1,7 @@
 jQuery( function( $ ) {
 	// run select2
 	function initSelect2() {
-		$( 'select.country_select, #calc_shipping_country, #calc_shipping_state' ).select2( 'destroy' ).select2({
+		$( 'select.country_select, select#calc_shipping_country, select#calc_shipping_state' ).select2( 'destroy' ).select2({
 			width: 'resolve',
 			dropdownAutoWidth: true
 		});
@@ -12,7 +12,7 @@ jQuery( function( $ ) {
 	
 	// run state/province select2
 	function initStateSelect2() {
-		$( 'select.state_select, #calc_shipping_state' ).select2( 'destroy' ).select2({
+		$( 'select.state_select, select#calc_shipping_state' ).select2( 'destroy' ).select2({
 			width: 'element',
 			dropdownAutoWidth: true,
 			placeholderOption: 'first'
