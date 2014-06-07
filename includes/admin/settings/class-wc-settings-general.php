@@ -194,16 +194,6 @@ class WC_Settings_General extends WC_Settings_Page {
 				'checkboxgroup'		=> 'start'
 			),
 
-			array(
-				'desc' 		=> __( 'Enable enhanced country select boxes', 'woocommerce' ),
-				'id' 		=> 'woocommerce_enable_chosen',
-				'default'	=> 'yes',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> 'end',
-				'desc_tip'	=> __( 'This will enable a script allowing the country fields to be searchable.', 'woocommerce' ),
-				'autoload'  => false
-			),
-
 			array( 'type' => 'sectionend', 'id' => 'script_styling_options' ),
 
 		) ); // End general settings
