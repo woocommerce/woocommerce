@@ -89,7 +89,7 @@ class WC_Frontend_Scripts {
 
 		if ( is_checkout() ) {
 
-			if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) {
+			if ( apply_filters( 'woocommerce_enable_jquery_select_on_checkout', true ) ) {
 				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), WC_VERSION, true );
 				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
 			}
@@ -98,7 +98,7 @@ class WC_Frontend_Scripts {
 		}
 
 		if ( is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) {
-			if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) {
+			if ( apply_filters( 'woocommerce_enable_jquery_select_on_checkout', true ) ) {
 				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), WC_VERSION, true );
 				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
 			}
