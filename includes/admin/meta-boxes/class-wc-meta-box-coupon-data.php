@@ -95,7 +95,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Product ids
 				?>
 				<p class="form-field"><label for="product_ids"><?php _e( 'Products', 'woocommerce' ); ?></label>
-				<select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
+				<select id="product_ids" name="product_ids[]" class="ajax_select2_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
 					<?php
 						$product_ids = get_post_meta( $post->ID, 'product_ids', true );
 						if ( $product_ids ) {
@@ -114,7 +114,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Exclude Product ids
 				?>
 				<p class="form-field"><label for="exclude_product_ids"><?php _e( 'Exclude products', 'woocommerce' ); ?></label>
-				<select id="exclude_product_ids" name="exclude_product_ids[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product…', 'woocommerce' ); ?>">
+				<select id="exclude_product_ids" name="exclude_product_ids[]" class="ajax_select2_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product…', 'woocommerce' ); ?>">
 					<?php
 						$product_ids = get_post_meta( $post->ID, 'exclude_product_ids', true );
 						if ( $product_ids ) {

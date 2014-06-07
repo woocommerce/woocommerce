@@ -129,7 +129,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'id' 		=> 'woocommerce_ship_to_countries',
 				'default'	=> '',
 				'type' 		=> 'select',
-				'class'		=> 'chosen_select',
+				'class'		=> 'select2_select',
 				'desc_tip'	=> false,
 				'options' => array(
 					''         => __( 'Ship to all countries you sell to', 'woocommerce' ),

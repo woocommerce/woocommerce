@@ -165,7 +165,7 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?></label>
-							<select id="customer_user" name="customer_user" class="ajax_chosen_select_customer">
+							<select id="customer_user" name="customer_user" class="ajax_select2_select_customer">
 								<option value=""><?php _e( 'Guest', 'woocommerce' ) ?></option>
 								<?php
 									if ( $order->customer_user ) {

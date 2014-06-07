@@ -97,7 +97,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			'countries' => array(
 							'title' 		=> __( 'Specific Countries', 'woocommerce' ),
 							'type' 			=> 'multiselect',
-							'class'			=> 'chosen_select',
+							'class'			=> 'select2_select',
 							'css'			=> 'width: 450px;',
 							'default' 		=> '',
 							'options'		=> WC()->countries->get_shipping_countries(),

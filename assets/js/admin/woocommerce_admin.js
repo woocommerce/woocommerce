@@ -3,7 +3,7 @@
 /**
  * WooCommerce Admin JS
  */
-jQuery(function(){
+jQuery( function( $ ) {
 
 	// Price input validation
 	jQuery('body').on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text], .wc_input_country_iso[type=text]', function() {
@@ -215,4 +215,64 @@ jQuery(function(){
 	// Attribute term table
 	jQuery( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 
+	$( 'input.ajax_select2_select_products' ).select2({
+		minimumInputLength: 3,
+		placeholder: woocommerce_admin.ajax_search_product,
+		multiple: true,
+		width: '203px',
+		id: function( data ) {
+			return data.id;
+		},
+		ajax: {
+			url: woocommerce_admin.ajax_url,
+			dataType: 'json',
+			method: 'GET',
+			data: function ( term, page ) {
+				return {
+					action:     'woocommerce_json_search_products_and_variations',
+					security:   woocommerce_admin.search_products_nonce,
+					term:       term,
+					default:    woocommerce_admin.ajax_search_product
+				};
+			},
+			results: function ( data, page ) {
+				var returnArray = $.map( data, function( value, index ) {
+					return {id: index, val: value};
+				});
+
+				return {results: returnArray};
+			}
+		},
+		formatResult: function ( data ) {
+			return data.val;
+		},
+		formatSelection: function( data ) {
+    		return data.val;
+		},
+		initSelection: function( data, callback ) {
+			var output = ( $( data ).val().length > 0 ) ? {id: $( data ).val(), val: $( data ).data( 'display' ) } : woocommerce_admin.ajax_search_product;
+
+			callback( output );
+		},
+		formatNoMatches: woocommerce_admin.ajax_search_no_matches,
+		formatSearching: woocommerce_admin.select2_ajax_searching,
+		formatInputTooShort: function ( input, min ) { var n = min - input.length; return woocommerce_admin.select2_ajax_input_too_short_1 + ' ' + n + ' ' + woocommerce_admin.select2_ajax_input_too_short_2; }
+	});
+
+	$( 'select.select2_select' ).select2({
+		allowClear: true
+	});
+
+	// Select all/none
+	jQuery( '.chart-widget' ).on( 'click', '.select_all', function() {
+		jQuery(this).closest( 'div' ).find( 'select option' ).attr( "selected", "selected" );
+		jQuery(this).closest( 'div' ).find('select').trigger( 'change' );
+		return false;
+	});
+
+	jQuery( '.chart-widget').on( 'click', '.select_none', function() {
+		jQuery(this).closest( 'div' ).find( 'select option' ).removeAttr( "selected" );
+		jQuery(this).closest( 'div' ).find('select').trigger( 'change' );
+		return false;
+	});
 });
