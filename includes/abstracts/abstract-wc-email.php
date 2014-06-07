@@ -594,7 +594,7 @@ abstract class WC_Email extends WC_Settings_API {
 				'type' 			=> 'select',
 				'description' 	=> __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default' 		=> 'html',
-				'class'			=> 'email_type',
+				'class'			=> 'email_type select2_select',
 				'options'		=> array(
 					'plain' 		=> __( 'Plain text', 'woocommerce' ),
 					'html' 			=> __( 'HTML', 'woocommerce' ),
