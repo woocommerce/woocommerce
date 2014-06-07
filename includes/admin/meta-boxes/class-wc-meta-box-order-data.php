@@ -165,15 +165,17 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?></label>
-							<select id="customer_user" name="customer_user" class="ajax_select2_select_customer">
-								<option value=""><?php _e( 'Guest', 'woocommerce' ) ?></option>
-								<?php
-									if ( $order->customer_user ) {
-										$user = get_user_by( 'id', $order->customer_user );
-										echo '<option value="' . esc_attr( $user->ID ) . '" ' . selected( 1, 1, false ) . '>' . esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')</option>';
-									}
-								?>
-							</select>
+							<?php if ( $order->customer_user ) {
+								$user = get_user_by( 'id', $order->customer_user );
+							?>
+							
+								<input type="hidden" id="customer_user" name="customer_user" class="ajax_select2_select_customer" value="<?php echo esc_attr( $user->ID ); ?>" data-display="<?php echo esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')'; ?>" />
+							
+							<?php } else { ?>
+								
+								<input type="hidden" id="customer_user" name="customer_user" class="ajax_select2_select_customer" />
+								
+							<?php }	?>
 						</p>
 
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
@@ -316,30 +318,6 @@ class WC_Meta_Box_Order_Data {
 			</div>
 		</div>
 		<?php
-
-		// Ajax Chosen Customer Selectors JS
-		wc_enqueue_js( "
-			jQuery('select.ajax_chosen_select_customer').ajaxChosen({
-			    method: 		'GET',
-			    url: 			'" . admin_url('admin-ajax.php') . "',
-			    dataType: 		'json',
-			    afterTypeDelay: 100,
-			    minTermLength: 	1,
-			    data:		{
-			    	action: 	'woocommerce_json_search_customers',
-					security: 	'" . wp_create_nonce("search-customers") . "'
-			    }
-			}, function (data) {
-
-				var terms = {};
-
-			    $.each(data, function (i, val) {
-			        terms[i] = val;
-			    });
-
-			    return terms;
-			});
-		" );
 	}
 
 	/**

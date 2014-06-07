@@ -8,7 +8,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 
@@ -1470,30 +1472,6 @@ class WC_Admin_Post_Types {
 			?>
 		</select>
 		<?php
-
-		wc_enqueue_js( "
-			jQuery('select#dropdown_customers').css('width', '250px').ajaxChosen({
-				method: 		'GET',
-				url: 			'" . admin_url( 'admin-ajax.php' ) . "',
-				dataType: 		'json',
-				afterTypeDelay: 100,
-				minTermLength: 	1,
-				data:		{
-					action: 	'woocommerce_json_search_customers',
-					security: 	'" . wp_create_nonce( 'search-customers' ) . "',
-					default:	'" . __( 'Show all customers', 'woocommerce' ) . "'
-				}
-			}, function (data) {
-
-				var terms = {};
-
-				$.each(data, function (i, val) {
-					terms[i] = val;
-				});
-
-				return terms;
-			});
-		" );
 	}
 
 	/**

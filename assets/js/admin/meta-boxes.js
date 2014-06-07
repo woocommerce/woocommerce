@@ -164,74 +164,6 @@ jQuery( function($){
 		return false;
 	});
 
-	// Chosen selects
-	jQuery("select.chosen_select").chosen();
-
-	jQuery("select.chosen_select_nostd").chosen({
-		allow_single_deselect: 'true'
-	});
-
-	// Ajax Chosen Product Selectors
-	jQuery("select.ajax_chosen_select_products").ajaxChosen({
-	    method: 	'GET',
-	    url: 		woocommerce_admin_meta_boxes.ajax_url,
-	    dataType: 	'json',
-	    afterTypeDelay: 100,
-	    data:		{
-	    	action: 		'woocommerce_json_search_products',
-			security: 		woocommerce_admin_meta_boxes.search_products_nonce
-	    }
-	}, function (data) {
-
-		var terms = {};
-
-	    $.each(data, function (i, val) {
-	        terms[i] = val;
-	    });
-
-	    return terms;
-	});
-
-	jQuery("select.ajax_chosen_select_products_and_variations").ajaxChosen({
-	    method: 	'GET',
-	    url: 		woocommerce_admin_meta_boxes.ajax_url,
-	    dataType: 	'json',
-	    afterTypeDelay: 100,
-	    data:		{
-	    	action: 		'woocommerce_json_search_products_and_variations',
-			security: 		woocommerce_admin_meta_boxes.search_products_nonce
-	    }
-	}, function (data) {
-
-		var terms = {};
-
-	    $.each(data, function (i, val) {
-	        terms[i] = val;
-	    });
-
-	    return terms;
-	});
-
-	jQuery("select.ajax_chosen_select_downloadable_products_and_variations").ajaxChosen({
-	    method: 	'GET',
-	    url: 		woocommerce_admin_meta_boxes.ajax_url,
-	    dataType: 	'json',
-	    afterTypeDelay: 100,
-	    data:		{
-	    	action: 		'woocommerce_json_search_downloadable_products_and_variations',
-			security: 		woocommerce_admin_meta_boxes.search_products_nonce
-	    }
-	}, function (data) {
-
-		var terms = {};
-
-	    $.each(data, function (i, val) {
-	        terms[i] = val;
-	    });
-
-	    return terms;
-	});
-
 	// ORDERS
 	jQuery('#woocommerce-order-actions input, #woocommerce-order-actions a').click(function(){
 		window.onbeforeunload = '';
@@ -551,21 +483,23 @@ jQuery( function($){
 					$('table.woocommerce_order_items tbody#order_items_list').append( response );
 
 					if (!--count) {
-						$('select#add_item_id, #add_item_id_chosen .chosen-choices').css('border-color', '').val('');
+						$('select#add_item_id, #add_item_id_chosen .ajax_select2_select_products_and_variations ul.select2-choices').css('border-color', '').val('');
 					   	
 					   	runTipTip();
 
-					    $('select#add_item_id').trigger("chosen:updated");
+					    $('select#add_item_id').trigger( 'change' );
 					    $('table.woocommerce_order_items').unblock();
 					}
 
 					$('#order_items_list tr.new_row').trigger('init_row').removeClass('new_row');
 				});
 
+				// clear the value after adding product
+				$( 'input.ajax_select2_select_products_and_variations' ).select2( 'val', '' );
 			});
 
 		} else {
-			$('select#add_item_id, #add_item_id_chosen .chosen-choices').css('border-color', 'red');
+			$('select#add_item_id, #add_item_id_chosen .ajax_select2_select_products_and_variations ul.select2-choices').css('border-color', 'red');
 		}
 		return false;
 	});
@@ -766,8 +700,11 @@ jQuery( function($){
 
 	// Download permissions
 	$('.order_download_permissions').on('click', 'button.grant_access', function(){
-		var products = $('select#grant_access_id').val();
-			if (!products) return;
+		var products = $( 'input#grant_access_id' ).val().length > 0 ? $( 'input#grant_access_id' ).val().split( ',' ) : '';
+
+		if ( ! products ) {
+			return;
+		}
 
 		$('.order_download_permissions').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
@@ -795,7 +732,7 @@ jQuery( function($){
 				buttonImage: woocommerce_admin_meta_boxes.calendar_image,
 				buttonImageOnly: true
 			});
-			$('#grant_access_id').val('').trigger('chosen:updated');
+			$('#grant_access_id').val('').trigger( 'change' );
 			$('.order_download_permissions').unblock();
 
 		});
@@ -1214,7 +1151,7 @@ jQuery( function($){
 	// ATTRIBUTE TABLES
 
 		// Multiselect attributes
-		$(".product_attributes select.multiselect").chosen();
+		$( '.product_attributes select.multiselect' ).select2();
 
 		// Initial order
 		var woocommerce_attribute_items = $('.product_attributes').find('.woocommerce_attribute').get();
@@ -1300,13 +1237,13 @@ jQuery( function($){
 
 		$('.product_attributes').on('click', 'button.select_all_attributes', function(){
 			$(this).closest('td').find('select option').attr("selected","selected");
-			$(this).closest('td').find('select').trigger("chosen:updated");
+			$(this).closest('td').find('select').trigger( 'change' );
 			return false;
 		});
 
 		$('.product_attributes').on('click', 'button.select_no_attributes', function(){
 			$(this).closest('td').find('select option').removeAttr("selected");
-			$(this).closest('td').find('select').trigger("chosen:updated");
+			$(this).closest('td').find('select').trigger( 'change' );
 			return false;
 		});
 
@@ -1373,7 +1310,7 @@ jQuery( function($){
 					} else if ( response.slug ) {
 						// Success
 						$wrapper.find('select.attribute_values').append('<option value="' + response.slug + '" selected="selected">' + response.name + '</option>');
-						$wrapper.find('select.attribute_values').trigger("chosen:updated");
+						$wrapper.find('select.attribute_values').trigger( 'change' );
 					}
 
 					$('.product_attributes').unblock();

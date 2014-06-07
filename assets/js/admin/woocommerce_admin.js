@@ -215,6 +215,51 @@ jQuery( function( $ ) {
 	// Attribute term table
 	jQuery( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 
+	// select2 must be initialized on an input instead
+	// of a select tag. Select2 4.0 will change this
+	$( 'input.ajax_select2_select_customer' ).select2({
+		minimumInputLength: 1,
+		width: 'resolve',
+		placeholder: woocommerce_admin_meta_boxes.customer_search_guest_text,
+		id: function( data ) {
+			return data.id;
+		},
+		ajax: {
+			url: woocommerce_admin_meta_boxes.ajax_url,
+			dataType: 'json',
+			method: 'GET',
+			data: function ( term, page ) {
+				return {
+					action:     'woocommerce_json_search_customers',
+					security:   woocommerce_admin_meta_boxes.search_customers_nonce,
+					term:       term,
+					default:    woocommerce_admin_meta_boxes.customer_search_guest_text
+				};
+			},
+			results: function ( data, page ) { 
+				var returnArray = $.map( data, function( value, index ) {
+					return {id: index, val: value};
+				});
+
+				return {results: returnArray};
+			}
+		},
+		formatResult: function ( data ) {
+			return data.val;
+		},
+		formatSelection: function( data ) {
+    		return data.val;
+		},
+		initSelection: function( data, callback ) {
+			var output = ( $( data ).val().length > 0 ) ? {id: $( data ).val(), val: $( data ).data( 'display' ) } : woocommerce_admin_meta_boxes.customer_search_guest_text;
+
+			callback( output );
+		},
+		formatNoMatches: woocommerce_admin_meta_boxes.ajax_search_no_matches_text,
+		formatSearching: woocommerce_admin_meta_boxes.ajax_searching_text,
+		formatInputTooShort: function ( input, min ) { var n = min - input.length; return woocommerce_admin_meta_boxes.ajax_input_too_short_text_1 + ' ' + n + ' ' + woocommerce_admin_meta_boxes.ajax_input_too_short_text_2; }
+	});
+
 	$( 'input.ajax_select2_select_products' ).select2({
 		minimumInputLength: 3,
 		placeholder: woocommerce_admin.ajax_search_product,
@@ -259,7 +304,11 @@ jQuery( function( $ ) {
 		formatInputTooShort: function ( input, min ) { var n = min - input.length; return woocommerce_admin.select2_ajax_input_too_short_1 + ' ' + n + ' ' + woocommerce_admin.select2_ajax_input_too_short_2; }
 	});
 
-	$( 'select.select2_select' ).select2({
+	$( '.order_data_column_container select#order_status' ).select2({
+		width: 'resolve'
+	});
+
+	$( 'select.select2_selects' ).select2({
 		allowClear: true
 	});
 
