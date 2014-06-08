@@ -59,8 +59,25 @@ if ( $order ) : ?>
 
 	<?php endif; ?>
 
-	<?php do_action( 'woocommerce_thankyou_' . $order->payment_method, $order->id ); ?>
-	<?php do_action( 'woocommerce_thankyou', $order->id ); ?>
+	<?php 
+		/**
+		 * 'woocommerce_thankyou_' . $order->payment_method hook
+		 *
+		 * @hooked WC_Gateway_BACS::thankyou_page
+		 * @hooked WC_Gateway_Cheque::thankyou_page
+		 * @hooked WC_Gateway_COD::thankyou_page
+		 * @hooked WC_Gateway_Paypal::pdt_return_handler
+		 */
+		do_action( 'woocommerce_thankyou_' . $order->payment_method, $order->id ); 
+	?>
+	<?php
+		/**
+		 * woocommerce_thankyou hook
+		 *
+		 * @hooked woocommerce_order_details_table - 10
+		 */ 
+		do_action( 'woocommerce_thankyou', $order->id ); 
+	?>
 
 <?php else : ?>
 

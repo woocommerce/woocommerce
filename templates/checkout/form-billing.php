@@ -20,7 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php endif; ?>
 
-	<?php do_action( 'woocommerce_before_checkout_billing_form', $checkout ); ?>
+	<?php 
+		/**
+		 * woocommerce_before_checkout_billing_form hook
+		 */
+		do_action( 'woocommerce_before_checkout_billing_form', $checkout ); 
+	?>
 
 	<?php foreach ( $checkout->checkout_fields['billing'] as $key => $field ) : ?>
 
@@ -28,7 +33,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php endforeach; ?>
 
-	<?php do_action('woocommerce_after_checkout_billing_form', $checkout ); ?>
+	<?php 
+		/**
+		 * woocommerce_after_checkout_billing_form hook
+		 */
+		do_action('woocommerce_after_checkout_billing_form', $checkout ); 
+	?>
 
 	<?php if ( ! is_user_logged_in() && $checkout->enable_signup ) : ?>
 
@@ -40,7 +50,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<?php endif; ?>
 
-		<?php do_action( 'woocommerce_before_checkout_registration_form', $checkout ); ?>
+		<?php 
+			/**
+			 * woocommerce_before_checkout_registration_form hook
+			 */
+			do_action( 'woocommerce_before_checkout_registration_form', $checkout ); 
+		?>
 
 		<?php if ( ! empty( $checkout->checkout_fields['account'] ) ) : ?>
 
@@ -60,7 +75,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<?php endif; ?>
 
-		<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
+		<?php 
+			/**
+			 * woocommerce_after_checkout_registration_form hook
+			 */
+			do_action( 'woocommerce_after_checkout_registration_form', $checkout ); 
+		?>
 
 	<?php endif; ?>
 </div>
