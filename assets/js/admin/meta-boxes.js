@@ -1728,24 +1728,24 @@ jQuery( function($){
 		formatInputTooShort: function ( input, min ) { var n = min - input.length; return woocommerce_admin_meta_boxes.ajax_input_too_short_text_1 + ' ' + n + ' ' + woocommerce_admin_meta_boxes.ajax_input_too_short_text_2; }
 	});
 
-	$( 'input.ajax_select2_select_products' ).select2({
+	$( 'input.ajax_select2_upsell_select_products_and_variations, input.ajax_select2_cross_sell_select_products_and_variations' ).select2({
 		minimumInputLength: 3,
-		placeholder: woocommerce_admin.ajax_search_product,
+		placeholder: woocommerce_admin_meta_boxes.search_product_text,
 		multiple: true,
-		width: '203px',
+		width: 'resolve',
 		id: function( data ) {
 			return data.id;
 		},
 		ajax: {
-			url: woocommerce_admin.ajax_url,
+			url: woocommerce_admin_meta_boxes.ajax_url,
 			dataType: 'json',
 			method: 'GET',
 			data: function ( term, page ) {
 				return {
 					action:     'woocommerce_json_search_products_and_variations',
-					security:   woocommerce_admin.search_products_nonce,
+					security:   woocommerce_admin_meta_boxes.search_products_nonce,
 					term:       term,
-					default:    woocommerce_admin.ajax_search_product
+					default:    woocommerce_admin_meta_boxes.search_product_text
 				};
 			},
 			results: function ( data, page ) {
@@ -1762,14 +1762,19 @@ jQuery( function($){
 		formatSelection: function( data ) {
     		return data.val;
 		},
-		initSelection: function( data, callback ) {
-			var output = ( $( data ).val().length > 0 ) ? {id: $( data ).val(), val: $( data ).data( 'display' ) } : woocommerce_admin.ajax_search_product;
+		initSelection: function( element, callback ) {
+			var data = [];
 
-			callback( output );
+			$( element.data( 'elements' ) ).each( function () {
+			    data.push( { id: this.id, val: this.val } );
+			});
+
+			callback( data );
 		},
-		formatNoMatches: woocommerce_admin.ajax_search_no_matches,
-		formatSearching: woocommerce_admin.select2_ajax_searching,
-		formatInputTooShort: function ( input, min ) { var n = min - input.length; return woocommerce_admin.select2_ajax_input_too_short_1 + ' ' + n + ' ' + woocommerce_admin.select2_ajax_input_too_short_2; }
+		formatNoMatches: woocommerce_admin_meta_boxes.ajax_search_no_matches_text,
+		formatSearching: woocommerce_admin_meta_boxes.ajax_searching_text,
+		formatInputTooShort: function ( input, min ) { var n = min - input.length; return woocommerce_admin_meta_boxes.ajax_input_too_short_text_1 
+			+ ' ' + n + ' ' + woocommerce_admin_meta_boxes.ajax_input_too_short_text_2; }
 	});
 
 	$( '.order_data_column_container select#order_status' ).select2({
