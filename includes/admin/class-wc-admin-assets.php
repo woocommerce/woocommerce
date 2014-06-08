@@ -107,6 +107,9 @@ class WC_Admin_Assets {
 	    	wp_enqueue_script( 'woocommerce_admin' );
 	    	wp_enqueue_script( 'iris' );
 	    	wp_enqueue_script( 'select2' );
+	    	// chosen to be removed in the future
+	    	wp_enqueue_script( 'ajax-chosen' );
+	    	wp_enqueue_script( 'chosen' );
 	    	wp_enqueue_script( 'jquery-ui-sortable' );
 	    	wp_enqueue_script( 'jquery-ui-autocomplete' );
 
@@ -148,6 +151,9 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'jquery-ui-datepicker' );
 			wp_enqueue_media();
 			wp_enqueue_script( 'select2' );
+			// chosen to be removed in the future
+	    	wp_enqueue_script( 'ajax-chosen' );
+	    	wp_enqueue_script( 'chosen' );
 			wp_enqueue_script( 'plupload-all' );
 
 			$params = array(
