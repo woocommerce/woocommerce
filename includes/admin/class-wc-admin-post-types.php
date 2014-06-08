@@ -1448,10 +1448,6 @@ class WC_Admin_Post_Types {
 			?>
 			</select>
 		<?php
-
-		wc_enqueue_js( "
-			jQuery('select#dropdown_shop_coupon_type, select[name=m]').css('width', '150px').chosen();
-		" );
 	}
 
 	/**

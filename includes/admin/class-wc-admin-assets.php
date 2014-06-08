@@ -276,11 +276,6 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'flot-pie', WC()->plugin_url() . '/assets/js/admin/jquery.flot.pie' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 			wp_enqueue_script( 'flot-stack', WC()->plugin_url() . '/assets/js/admin/jquery.flot.stack' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 		}
-
-		// Chosen RTL
-		if ( is_rtl() ) {
-			wp_enqueue_script( 'select2-rtl', WC()->plugin_url() . '/assets/js/jquery-select2/select2-rtl' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
-		}
 	}
 
 	/**
