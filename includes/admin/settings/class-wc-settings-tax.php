@@ -229,7 +229,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Output tax rate tables
 	 */
 	public function output_tax_rates() {
-		global $woocommerce, $current_section, $wpdb;
+		global $current_section, $wpdb;
 
 		$page          = ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1;
 		$limit         = 100;

@@ -40,7 +40,7 @@ class WC_Admin_Menus {
 	 * Add menu items
 	 */
 	public function admin_menu() {
-		global $menu, $woocommerce;
+		global $menu;
 
 	    if ( current_user_can( 'manage_woocommerce' ) )
 	    	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );

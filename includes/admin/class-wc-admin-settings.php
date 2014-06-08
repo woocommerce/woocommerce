@@ -48,7 +48,7 @@ class WC_Admin_Settings {
 	 * Save the settings
 	 */
 	public static function save() {
-		global $current_section, $current_tab;
+		global $current_tab;
 
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) )
 	    		die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );

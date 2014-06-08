@@ -171,7 +171,7 @@ class WC_Admin_Post_Types {
 	 * @param  string $column
 	 */
 	public function render_product_columns( $column ) {
-		global $post, $woocommerce, $the_product;
+		global $post;
 
 		if ( empty( $the_product ) || $the_product->id != $post->ID ) {
 			$the_product = get_product( $post );

@@ -123,8 +123,6 @@ class WC_Post_Data {
 	 * @return array
 	 */
 	public static function wp_insert_post_data( $data ) {
-		global $post;
-
 		if ( 'shop_order' === $data['post_type'] && isset( $data['post_date'] ) ) {
 			$order_title = 'Order';
 			if ( $data['post_date'] ) {

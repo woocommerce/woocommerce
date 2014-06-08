@@ -469,8 +469,6 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @return array
 	 */
 	public function get_customer_downloads( $id, $fields = null ) {
-		global $wpdb;
-
 		$id = $this->validate_request( $id, 'customer', 'read' );
 
 		if ( is_wp_error( $id ) ) {

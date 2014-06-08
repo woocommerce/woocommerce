@@ -197,7 +197,6 @@ class WC_Admin_Duplicate_Product {
 	 * @return void
 	 */
 	private function duplicate_post_taxonomies( $id, $new_id, $post_type ) {
-		global $wpdb;
 		$taxonomies = get_object_taxonomies($post_type); //array("category", "post_tag");
 		foreach ($taxonomies as $taxonomy) {
 			$post_terms = wp_get_object_terms($id, $taxonomy);

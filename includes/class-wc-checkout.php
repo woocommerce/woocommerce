@@ -400,8 +400,6 @@ class WC_Checkout {
 	 * @return void
 	 */
 	public function process_checkout() {
-		global $wpdb, $current_user;
-
 		wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-process_checkout' );
 
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )

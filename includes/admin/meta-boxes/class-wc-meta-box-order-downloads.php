@@ -19,7 +19,7 @@ class WC_Meta_Box_Order_Downloads {
 	 * Output the metabox
 	 */
 	public static function output( $post ) {
-		global $woocommerce, $post, $wpdb;
+		global $post, $wpdb;
 		?>
 		<div class="order_download_permissions wc-metaboxes-wrapper">
 
@@ -75,7 +75,7 @@ class WC_Meta_Box_Order_Downloads {
 	 * Save meta box data
 	 */
 	public static function save( $post_id, $post ) {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
 		if ( isset( $_POST['download_id'] ) ) {
 

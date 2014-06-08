@@ -139,8 +139,6 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
  * @return void
  */
 function woocommerce_compile_less_styles() {
-    global $woocommerce;
-
     $colors         = array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
     $base_file      = WC()->plugin_path() . '/assets/css/woocommerce-base.less';
     $less_file      = WC()->plugin_path() . '/assets/css/woocommerce.less';

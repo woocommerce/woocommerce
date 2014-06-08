@@ -61,7 +61,7 @@ class WC_Report_Stock extends WP_List_Table {
      * @param mixed $column_name
      */
     function column_default( $item, $column_name ) {
-    	global $woocommerce, $wpdb, $product;
+    	global $product;
 
     	if ( ! $product || $product->id !== $item->id )
     		$product = get_product( $item->id );

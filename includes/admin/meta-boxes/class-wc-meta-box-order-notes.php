@@ -19,7 +19,7 @@ class WC_Meta_Box_Order_Notes {
 	 * Output the metabox
 	 */
 	public static function output( $post ) {
-		global $woocommerce, $post;
+		global $post;
 
 		$args = array(
 			'post_id' 	=> $post->ID,

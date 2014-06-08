@@ -75,7 +75,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 	public function widget( $args, $instance ) {
 		extract( $args );
 
-		global $wp_query, $post, $woocommerce;
+		global $wp_query, $post;
 
 		$title         = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 		$c             = ! empty( $instance['count'] );

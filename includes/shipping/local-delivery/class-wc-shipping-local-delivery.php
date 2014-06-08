@@ -165,7 +165,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 	 * @return void
 	 */
 	function admin_options() {
-		global $woocommerce; ?>
+		?>
 		<h3><?php echo $this->method_title; ?></h3>
 		<p><?php _e( 'Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce' ); ?></p>
 		<table class="form-table">

@@ -366,8 +366,6 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_item_count( $type = '' ) {
-		global $wpdb;
-
 		if ( empty( $type ) ) {
 			$type = array( 'line_item' );
 		}
