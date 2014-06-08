@@ -16,10 +16,12 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( isset( $_GET['product_ids'] ) && is_array( $_GET['product_ids'] ) )
-			$this->product_ids = array_map( 'absint', $_GET['product_ids'] );
-		elseif ( isset( $_GET['product_ids'] ) )
-			$this->product_ids = array( absint( $_GET['product_ids'] ) );
+		if ( isset( $_GET['product_ids'] ) && ! empty( $_GET['product_ids'] ) ) {
+			$ids = explode( ',', $_GET['product_ids'] );
+			$this->product_ids = array_map( 'absint', $ids );
+		} else {
+			$this->product_ids = array();
+		}
 	}
 
 	/**
@@ -170,7 +172,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		<div class="section">
 			<form method="GET">
 				<div>
-					<select id="product_ids" name="product_ids[]" class="ajax_select2_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width:203px;"></select>
+					<input type="hidden" name="product_ids" class="ajax_select2_select_report_products" />
 					<input type="submit" class="submit button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
 					<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
 					<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
@@ -179,28 +181,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
 					<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
 				</div>
-				<script type="text/javascript">
-					jQuery(function(){
-						// Ajax Chosen Product Selectors
-						jQuery("select.ajax_chosen_select_products").ajaxChosen({
-						    method: 	'GET',
-						    url: 		'<?php echo admin_url('admin-ajax.php'); ?>',
-						    dataType: 	'json',
-						    afterTypeDelay: 100,
-						    data:		{
-						    	action: 		'woocommerce_json_search_products_and_variations',
-								security: 		'<?php echo wp_create_nonce("search-products"); ?>'
-						    }
-						}, function (data) {
-							var terms = {};
-
-						    jQuery.each(data, function (i, val) {
-						        terms[i] = val;
-						    });
-						    return terms;
-						});
-					});
-				</script>
 			</form>
 		</div>
 		<h4 class="section_title"><span><?php _e( 'Top Sellers', 'woocommerce' ); ?></span></h4>

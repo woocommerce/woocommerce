@@ -121,7 +121,7 @@ class WC_Admin_Assets {
 				'mon_decimal_point'              => get_option( 'woocommerce_price_decimal_sep' ),
 				'search_products_nonce'          => wp_create_nonce( 'search-products' ),
 				'ajax_url'                       => admin_url( 'admin-ajax.php' ),
-				'ajax_search_product_text'       => __( 'Search for a product', 'woocommerce' ),
+				'search_product_text'            => __( 'Search for a product', 'woocommerce' ),
 				'ajax_search_no_matches_text'    => __( 'No Matches Found', 'woocommerce' ),
 				'ajax_searching_text'            => __( 'searching...', 'woocommerce' ),
 				'ajax_input_too_short_text_1'    => __( 'Please enter', 'woocommerce' ),
