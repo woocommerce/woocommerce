@@ -9,7 +9,14 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
-<?php do_action( 'woocommerce_email_header', $email_heading ); ?>
+<?php 
+	/**
+ 	 * woocommerce_email_header hook
+ 	 *
+ 	 * @hooked WC_Emails::email_header
+ 	 */
+	do_action( 'woocommerce_email_header', $email_heading ); 
+?>
 
 <p><?php _e( "Hello, a note has just been added to your order:", 'woocommerce' ); ?></p>
 
@@ -17,7 +24,16 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <p><?php _e( "For your reference, your order details are shown below.", 'woocommerce' ); ?></p>
 
-<?php do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text ); ?>
+<?php 
+	/**
+	 * woocommerce_email_before_order_table hook
+	 * 
+	 * @hooked WC_Gateway_BACS::email_instructions
+	 * @hooked WC_Gateway_Cheque::email_instructions
+	 * @hooked WC_Gateway_COD::email_instructions
+	 */
+	do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text ); 
+?>
 
 <h2><?php echo __( 'Order:', 'woocommerce' ) . ' ' . $order->get_order_number(); ?></h2>
 
@@ -48,9 +64,21 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	</tfoot>
 </table>
 
-<?php do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text ); ?>
+<?php 
+	/**
+	 * woocommerce_email_after_order_table hook
+	 */
+	do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text ); 
+?>
 
-<?php do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text ); ?>
+<?php 
+	/**
+	 * woocommerce_email_order_meta hook
+	 *
+	 * @hooked WC_Emails::order_meta
+	 */
+	do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text ); 
+?>
 
 <h2><?php _e( 'Customer details', 'woocommerce' ); ?></h2>
 
@@ -63,4 +91,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <?php wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) ); ?>
 
-<?php do_action( 'woocommerce_email_footer' ); ?>
+<?php 
+	/**
+ 	 * woocommerce_email_footer hook
+ 	 *
+ 	 * @hooked WC_Emails::email_footer
+ 	 */
+	do_action( 'woocommerce_email_footer' ); 
+?>
