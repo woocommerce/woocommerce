@@ -22,11 +22,13 @@ echo __( "For your reference, your order details are shown below.", 'woocommerce
 
 echo "****************************************************\n\n";
 
+/** This action is documented in templates/emails/customer-invoice.php */
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text );
 
 echo sprintf( __( 'Order number: %s', 'woocommerce'), $order->get_order_number() ) . "\n";
 echo sprintf( __( 'Order date: %s', 'woocommerce'), date_i18n( wc_date_format(), strtotime( $order->order_date ) ) ) . "\n";
 
+/** This action is documented in templates/emails/customer-invoice.php */
 do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text );
 
 echo "\n" . $order->email_order_items_table( $order->is_download_permitted(), true, '', '', '', true );
@@ -41,6 +43,7 @@ if ( $totals = $order->get_order_item_totals() ) {
 
 echo "\n****************************************************\n\n";
 
+/** This action is documented in templates/emails/customer-invoice.php */
 do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
 
 echo __( 'Your details', 'woocommerce' ) . "\n\n";
