@@ -321,7 +321,7 @@ class WC_Install {
 	 * @return void
 	 */
 	private function create_tables() {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
 		$wpdb->hide_errors();
 

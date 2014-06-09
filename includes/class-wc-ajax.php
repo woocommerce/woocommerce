@@ -937,8 +937,6 @@ class WC_AJAX {
 	 * Add order item via ajax
 	 */
 	public static function add_order_item() {
-		global $wpdb;
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
@@ -1041,8 +1039,6 @@ class WC_AJAX {
 	 * Remove an order item
 	 */
 	public static function remove_order_item() {
-		global $wpdb;
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		$order_item_ids = $_POST['order_item_ids'];
@@ -1060,8 +1056,6 @@ class WC_AJAX {
 	 * Reduce order item stock
 	 */
 	public static function reduce_order_item_stock() {
-		global $wpdb;
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		$order_id       = absint( $_POST['order_id'] );
@@ -1108,8 +1102,6 @@ class WC_AJAX {
 	 * Increase order item stock
 	 */
 	public static function increase_order_item_stock() {
-		global $wpdb;
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		$order_id       = absint( $_POST['order_id'] );
@@ -1157,8 +1149,6 @@ class WC_AJAX {
 	 * Add some meta to a line item
 	 */
 	public static function add_order_item_meta() {
-		global $wpdb;
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		$meta_id = wc_add_order_item_meta( absint( $_POST['order_item_id'] ), __( 'Name', 'woocommerce' ), __( 'Value', 'woocommerce' ) );
@@ -1616,8 +1606,6 @@ class WC_AJAX {
 	 * Ajax request handling for categories ordering
 	 */
 	public static function term_ordering() {
-		global $wpdb;
-
 		$id       = (int) $_POST['id'];
 		$next_id  = isset( $_POST['nextid'] ) && (int) $_POST['nextid'] ? (int) $_POST['nextid'] : null;
 		$taxonomy = isset( $_POST['thetaxonomy'] ) ? esc_attr( $_POST['thetaxonomy'] ) : null;

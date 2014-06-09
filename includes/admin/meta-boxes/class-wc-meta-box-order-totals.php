@@ -18,7 +18,7 @@ class WC_Meta_Box_Order_Totals {
 	 * Output the metabox
 	 */
 	public static function output() {
-		global $woocommerce, $theorder, $wpdb, $post;
+		global $theorder, $wpdb, $post;
 
 		if ( ! is_object( $theorder ) )
 			$theorder = new WC_Order( $post->ID );

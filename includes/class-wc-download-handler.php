@@ -140,7 +140,7 @@ class WC_Download_Handler {
 	 * Download a file - hook into init function.
 	 */
 	public static function download( $file_path, $product_id ) {
-		global $wpdb, $is_IE;
+		global $is_IE;
 
 		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
 

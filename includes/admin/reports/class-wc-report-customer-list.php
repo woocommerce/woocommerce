@@ -23,8 +23,6 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * @access public
 	 */
 	function __construct(){
-		global $status, $page;
-
 		parent::__construct( array(
 			'singular'  => __( 'Customer', 'woocommerce' ),
 			'plural'    => __( 'Customers', 'woocommerce' ),

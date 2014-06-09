@@ -60,7 +60,7 @@ class WC_Frontend_Scripts {
 	 * @return void
 	 */
 	public static function load_scripts() {
-		global $post, $wp;
+		global $post;
 
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$lightbox_en          = get_option( 'woocommerce_enable_lightbox' ) == 'yes' ? true : false;
@@ -134,7 +134,7 @@ class WC_Frontend_Scripts {
 	 * Localize scripts only when enqueued
 	 */
 	public static function localize_printed_scripts() {
-		global $post, $wp;
+		global $wp;
 
 		$assets_path = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 

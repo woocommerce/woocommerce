@@ -344,7 +344,7 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
  * @return array
  */
 function wc_terms_clauses( $clauses, $taxonomies, $args ) {
-	global $wpdb, $woocommerce;
+	global $wpdb;
 
 	// No sorting when menu_order is false
 	if ( isset( $args['menu_order'] ) && $args['menu_order'] == false ) {

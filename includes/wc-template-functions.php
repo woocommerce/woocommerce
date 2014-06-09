@@ -573,7 +573,7 @@ if ( ! function_exists( 'woocommerce_get_product_schema' ) ) {
 	 * @return string
 	 */
 	function woocommerce_get_product_schema() {
-		global $post, $product;
+		global $product;
 
 		$schema = "Product";
 

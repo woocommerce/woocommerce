@@ -28,7 +28,6 @@ class WC_Admin_Status {
 	 * Handles output of report
 	 */
 	public static function status_report() {
-		global $wpdb;
 		include_once( 'views/html-admin-page-status-report.php' );
 	}
 

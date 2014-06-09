@@ -74,8 +74,6 @@ class WC_Product_Simple extends WC_Product {
 	 * @return void
 	 */
 	public function grouped_product_sync() {
-		global $wpdb, $woocommerce;
-
 		if ( ! $this->get_parent() ) return;
 
 		$children_by_price = get_posts( array(

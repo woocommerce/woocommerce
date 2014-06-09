@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @return void
  */
 function woocommerce_wp_text_input( $field ) {
-	global $thepostid, $post, $woocommerce;
+	global $thepostid, $post;
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
@@ -86,7 +86,7 @@ function woocommerce_wp_hidden_input( $field ) {
  * @return void
  */
 function woocommerce_wp_textarea_input( $field ) {
-	global $thepostid, $post, $woocommerce;
+	global $thepostid, $post;
 
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder'] 	= isset( $field['placeholder'] ) ? $field['placeholder'] : '';
@@ -140,7 +140,7 @@ function woocommerce_wp_checkbox( $field ) {
  * @return void
  */
 function woocommerce_wp_select( $field ) {
-	global $thepostid, $post, $woocommerce;
+	global $thepostid, $post;
 
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'select short';
@@ -177,7 +177,7 @@ function woocommerce_wp_select( $field ) {
  * @return void
  */
 function woocommerce_wp_radio( $field ) {
-	global $thepostid, $post, $woocommerce;
+	global $thepostid, $post;
 
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'select short';

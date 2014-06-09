@@ -342,8 +342,6 @@ function wc_processing_order_count() {
  * @param int $post_id (default: 0)
  */
 function wc_delete_shop_order_transients( $post_id = 0 ) {
-	global $wpdb;
-
 	$post_id = absint( $post_id );
 
 	// Clear report transients
