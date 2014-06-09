@@ -39,4 +39,11 @@ if ( $notes ) : ?>
 	</ol>
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_view_order', $order->id ); ?>
+<?php 
+	/**
+	 * woocommerce_view_order hook
+	 *
+	 * @hooked woocommerce_order_details_table - 10
+	 */
+	do_action( 'woocommerce_view_order', $order->id ); 
+?>

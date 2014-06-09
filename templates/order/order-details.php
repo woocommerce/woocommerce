@@ -86,12 +86,22 @@ $order = new WC_Order( $order_id );
 			}
 		}
 
+		/**
+		 * woocommerce_order_items_table hook
+		 */
 		do_action( 'woocommerce_order_items_table', $order );
 		?>
 	</tbody>
 </table>
 
-<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
+<?php 
+	/**
+	 * woocommerce_order_details_after_order_table hook
+	 *
+	 * @hooked woocommerce_order_again_button
+	 */
+	do_action( 'woocommerce_order_details_after_order_table', $order ); 
+?>
 
 <header>
 	<h2><?php _e( 'Customer details', 'woocommerce' ); ?></h2>
@@ -101,7 +111,9 @@ $order = new WC_Order( $order_id );
 	if ( $order->billing_email ) echo '<dt>' . __( 'Email:', 'woocommerce' ) . '</dt><dd>' . $order->billing_email . '</dd>';
 	if ( $order->billing_phone ) echo '<dt>' . __( 'Telephone:', 'woocommerce' ) . '</dt><dd>' . $order->billing_phone . '</dd>';
 
-	// Additional customer details hook
+	/**
+	 * woocommerce_order_details_after_customer_details hook
+	 */
 	do_action( 'woocommerce_order_details_after_customer_details', $order );
 ?>
 </dl>
