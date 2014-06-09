@@ -167,6 +167,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localisation - Address format of Taiwan.
 * Localisation - Removed language files from core to made the package lighter (see anguage pack downloader feature).
 
+= 2.1.11 - 09/06/2014 =
+* Fix - Plain text email display of customer address.
+* Fix - Saving tax rates threw notices (missing git cherry pick).
+
 = 2.1.10 - 03/06/2014 =
 * Fix - Removed unecessary localization from edit account.
 * Fix - Admin welcome screen css.
