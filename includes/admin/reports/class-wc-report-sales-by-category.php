@@ -165,7 +165,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		?>
 		<form method="GET">
 			<div>
-				<select multiple="multiple" data-placeholder="<?php _e( 'Select categories&hellip;', 'woocommerce' ); ?>" class="chosen_select" id="show_categories" name="show_categories[]" style="width: 205px;">
+				<select multiple="multiple" data-placeholder="<?php _e( 'Select categories&hellip;', 'woocommerce' ); ?>" class="report_category_select2_select" id="show_categories" name="show_categories[]" style="width: 205px;">
 					<?php
 						$r = array();
 						$r['pad_counts'] 	= 1;
@@ -189,24 +189,6 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
 				<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
 			</div>
-			<script type="text/javascript">
-				jQuery(function(){
-					jQuery("select.chosen_select").chosen();
-
-					// Select all/none
-					jQuery( '.chart-widget' ).on( 'click', '.select_all', function() {
-						jQuery(this).closest( 'div' ).find( 'select option' ).attr( "selected", "selected" );
-						jQuery(this).closest( 'div' ).find('select').trigger( 'chosen:updated' );
-						return false;
-					});
-
-					jQuery( '.chart-widget').on( 'click', '.select_none', function() {
-						jQuery(this).closest( 'div' ).find( 'select option' ).removeAttr( "selected" );
-						jQuery(this).closest( 'div' ).find('select').trigger( 'chosen:updated' );
-						return false;
-					});
-				});
-			</script>
 		</form>
 		<?php
 	}

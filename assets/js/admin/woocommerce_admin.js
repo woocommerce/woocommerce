@@ -3,7 +3,7 @@
 /**
  * WooCommerce Admin JS
  */
-jQuery(function(){
+jQuery( function( $ ) {
 
 	// Price input validation
 	jQuery('body').on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text], .wc_input_country_iso[type=text]', function() {
@@ -215,4 +215,59 @@ jQuery(function(){
 	// Attribute term table
 	jQuery( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 
+	// Select all/none
+	jQuery( '.chart-widget' ).on( 'click', '.select_all', function() {
+		jQuery(this).closest( 'div' ).find( 'select option' ).attr( "selected", "selected" );
+		jQuery(this).closest( 'div' ).find('select').trigger( 'change' );
+		return false;
+	});
+
+	jQuery( '.chart-widget').on( 'click', '.select_none', function() {
+		jQuery(this).closest( 'div' ).find( 'select option' ).removeAttr( "selected" );
+		jQuery(this).closest( 'div' ).find('select').trigger( 'change' );
+		return false;
+	});
+
+	$( 'input.ajax_select2_select_report_products' ).select2({
+		minimumInputLength: 3,
+		multiple: true,
+		placeholder: woocommerce_admin.search_product_text,
+		id: function( data ) {
+			return data.id;
+		},
+		ajax: {
+			url: woocommerce_admin.ajax_url,
+			dataType: 'json',
+			method: 'GET',
+			data: function ( term, page ) {
+				return {
+					action:     'woocommerce_json_search_products',
+					security:   woocommerce_admin.search_products_nonce,
+					term:       term,
+					default:    woocommerce_admin.search_product_text
+				};
+			},
+			results: function ( data, page ) {
+				var returnArray = $.map( data, function( value, index ) {
+					return {id: index, val: value};
+				});
+
+				return {results: returnArray};
+			}
+		},
+		formatResult: function ( data ) {
+			return data.val;
+		},
+		formatSelection: function( data ) {
+    		return data.val;
+		},
+		initSelection: woocommerce_admin.search_product_text,
+		formatNoMatches: woocommerce_admin.ajax_search_no_matches_text,
+		formatSearching: woocommerce_admin.ajax_searching_text,
+		formatInputTooShort: function ( input, min ) { var n = min - input.length; return woocommerce_admin.ajax_input_too_short_text_1 + ' ' + n + ' ' + woocommerce_admin.ajax_input_too_short_text_2; }
+	});
+
+	$( 'select.report_category_select2_select' ).select2({
+		allowClear: true
+	});
 });

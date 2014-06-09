@@ -16,6 +16,15 @@
 	font-style: normal;
 }
 
+/* select2 */
+select.select2_select, select.select2_select_nostd {
+visibility:hidden;
+}
+
+.select2-container {
+margin:0 5px !important;
+}
+
 /* Addons */
 .wc_addons_wrap {
 	.products {
@@ -403,10 +412,7 @@ ul.wc_coupon_list_block {
 .tablenav .actions {
 	overflow: visible;
 }
-.alignleft.actions .chosen-container-single {
-	display: inline-block;
-	vertical-align: middle;
-}
+
 #woocommerce-order-data {
 	h3.hndle, .handlediv {
 		display: none;
@@ -478,9 +484,7 @@ ul.wc_coupon_list_block {
 					display: none;
 				}
 			}
-			.chosen-container {
-				width: 100% !important;
-			}
+
 			.date-picker-field {
 				width: 50%;
 			}
@@ -607,7 +611,7 @@ ul.wc_coupon_list_block {
 		float:right;
 		padding-right: 12px;
 		vertical-align: top;
-		.add_item_id, .chosen-container {
+		.add_item_id {
 			margin-right: 9px;
 			vertical-align: top;
 			float:left;
@@ -638,7 +642,7 @@ ul.wc_coupon_list_block {
 		padding: 0;
 		margin: 0;
 		vertical-align: top;
-		.add_item_id, .chosen-container {
+		.add_item_id {
 			width: 400px !important;
 			margin-right: 9px;
 			vertical-align: top;
@@ -1620,10 +1624,7 @@ img.help_tip {
 			position: relative;
 			padding-right: 24px;
 		}
-		.chosen-container {
-			vertical-align: top;
-			margin-bottom: 3px;
-		}
+
 		table.widefat th {
 			padding-right: inherit;
 		}
@@ -2435,7 +2436,7 @@ img.help_tip {
 					padding: 4px;
 					color: #555;
 				}
-				select, .chosen-container  {
+				select {
 					width: 100% !important;
 				}
 				input.short {
@@ -2881,9 +2882,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 				}
 				.section {
 					border-bottom:1px solid #dfdfdf;
-					.chosen-container {
-						width:100% !important;
-					}
+
 					&:last-of-type {
 						border-radius:0 0 3px 3px;
 					}
@@ -3165,46 +3164,6 @@ table.bar_chart {
 	}
 }
 
-/* Chosen multiselect enhancement
-----------------------------------*/
-.chosen-container-single .chosen-single {
-	height: 26px;
-  	line-height: 26px;
-  	margin-top:1px;
-}
-.chosen-container-single .chosen-single div b {
-	background: url('../images/chosen-sprite.png') no-repeat 0 4px !important;
-}
-.chosen-container-active .chosen-single-with-drop div b {
-  background-position: -18px 2px !important;
-}
-.chosen-container-single .chosen-search input {
-	line-height: 13px;
-	width: 100% !important;
-	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-	box-sizing: border-box;         /* Opera/IE 8+ */
-}
-.chosen-container .chosen-drop {
-	width: 100% !important;
-	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-	box-sizing: border-box;         /* Opera/IE 8+ */
-}
-.chosen-container-multi .chosen-choices .search-field input {
-	height: 21px !important;
-}
-.woocommerce_options_panel .chosen-container-multi {
-	width: 50% !important;
-	float: left;
-	.search-field {
-		min-width: 50%;
-		input {
-			min-width: 100%;
-		}
-	}
-}
-
 // Small screen optimisation
 @media only screen and (max-width: 1280px) {
 	#order_data {
@@ -3273,12 +3232,4 @@ table.bar_chart {
 	#woocommerce-product-data .checkbox {
 	    width: 25px;
 	}
-}
-
-@import 'chosen.less';
-
-.chosen-container-single .chosen-single {
-  	abbr {
-  		top: 8px;
-  	}
 }

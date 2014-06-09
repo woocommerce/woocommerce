@@ -61,6 +61,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 			'availability' => array(
 							'title'			=> __( 'Availability', 'woocommerce' ),
 							'type'			=> 'select',
+							'class'			=> 'select2_select',
 							'description'	=> '',
 							'default'		=> 'including',
 							'options'		=> array(
@@ -71,7 +72,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 			'countries' => array(
 							'title'			=> __( 'Countries', 'woocommerce' ),
 							'type'			=> 'multiselect',
-							'class'			=> 'chosen_select',
+							'class'			=> 'select2_select',
 							'css'			=> 'width: 450px;',
 							'default'		=> '',
 							'options'		=> WC()->countries->get_shipping_countries(),
@@ -82,6 +83,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 			'tax_status' => array(
 							'title'			=> __( 'Tax Status', 'woocommerce' ),
 							'type'			=> 'select',
+							'class'			=> 'select2_select',
 							'default'		=> 'taxable',
 							'options'		=> array(
 								'taxable'	=> __( 'Taxable', 'woocommerce' ),
@@ -91,6 +93,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 			'type' => array(
 							'title'			=> __( 'Cost Added...', 'woocommerce' ),
 							'type'			=> 'select',
+							'class'			=> 'select2_select',
 							'default'		=> 'order',
 							'options'		=> array(
 								'order'		=> __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),

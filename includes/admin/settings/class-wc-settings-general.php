@@ -67,7 +67,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'id' 		=> 'woocommerce_allowed_countries',
 				'default'	=> 'all',
 				'type' 		=> 'select',
-				'class'		=> 'chosen_select',
+				'class'		=> 'select2_select',
 				'css' 		=> 'min-width: 350px;',
 				'desc_tip'	=>  true,
 				'options' => array(
@@ -122,7 +122,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css' 		=> 'min-width:350px;',
 				'default'	=> 'GBP',
 				'type' 		=> 'select',
-				'class'		=> 'chosen_select',
+				'class'		=> 'select2_select',
 				'desc_tip'	=>  true,
 				'options'   => $currency_code_options
 			),
@@ -132,7 +132,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'desc' 		=> __( 'This controls the position of the currency symbol.', 'woocommerce' ),
 				'id' 		=> 'woocommerce_currency_pos',
 				'css' 		=> 'min-width:350px;',
-				'class'		=> 'chosen_select',
+				'class'		=> 'select2_select',
 				'default'	=> 'left',
 				'type' 		=> 'select',
 				'options' => array(
@@ -192,16 +192,6 @@ class WC_Settings_General extends WC_Settings_Page {
 				'desc_tip'	=> __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
 				'type' 		=> 'checkbox',
 				'checkboxgroup'		=> 'start'
-			),
-
-			array(
-				'desc' 		=> __( 'Enable enhanced country select boxes', 'woocommerce' ),
-				'id' 		=> 'woocommerce_enable_chosen',
-				'default'	=> 'yes',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> 'end',
-				'desc_tip'	=> __( 'This will enable a script allowing the country fields to be searchable.', 'woocommerce' ),
-				'autoload'  => false
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'script_styling_options' ),

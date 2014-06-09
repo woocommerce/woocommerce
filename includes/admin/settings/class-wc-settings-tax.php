@@ -93,6 +93,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'desc_tip'	=>  __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
 				'default'   => 'shipping',
 				'type'      => 'select',
+				'class'		=> 'select2_select',
 				'options'   => array(
 					'shipping' => __( 'Customer shipping address', 'woocommerce' ),
 					'billing'  => __( 'Customer billing address', 'woocommerce' ),
@@ -106,6 +107,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'desc_tip'	=>  __( 'This option determines the customers default address (before they input their own).', 'woocommerce' ),
 				'default'   => 'base',
 				'type'      => 'select',
+				'class'		=> 'select2_select',
 				'options'   => array(
 					''     => __( 'No address', 'woocommerce' ),
 					'base' => __( 'Shop base address', 'woocommerce' ),
@@ -119,6 +121,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'css' 		=> 'min-width:150px;',
 				'default'	=> 'title',
 				'type' 		=> 'select',
+				'class'		=> 'select2_select',
 				'options' 	=> array( '' => __( 'Shipping tax class based on cart items', 'woocommerce' ), 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
 				'desc_tip'	=>  true,
 			),
@@ -132,7 +135,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			),
 
 			array(
-				'title' 		=> __( 'Additional Tax Classes', 'woocommerce' ),
+				'title' 	=> __( 'Additional Tax Classes', 'woocommerce' ),
 				'desc' 		=> __( 'List additional tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>. Tax classes can be assigned to products.', 'woocommerce' ),
 				'id' 		=> 'woocommerce_tax_classes',
 				'css' 		=> 'width:100%; height: 65px;',
@@ -145,6 +148,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'id'      => 'woocommerce_tax_display_shop',
 				'default' => 'excl',
 				'type'    => 'select',
+				'class'	  => 'select2_select',
 				'options' => array(
 					'incl'   => __( 'Including tax', 'woocommerce' ),
 					'excl'   => __( 'Excluding tax', 'woocommerce' ),
@@ -164,6 +168,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'id'      => 'woocommerce_tax_display_cart',
 				'default' => 'excl',
 				'type'    => 'select',
+				'class'		=> 'select2_select',
 				'options' => array(
 					'incl'   => __( 'Including tax', 'woocommerce' ),
 					'excl'   => __( 'Excluding tax', 'woocommerce' ),
@@ -176,6 +181,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'id'      => 'woocommerce_tax_total_display',
 				'default' => 'itemized',
 				'type'    => 'select',
+				'class'		=> 'select2_select',
 				'options' => array(
 					'single'     => __( 'As a single total', 'woocommerce' ),
 					'itemized'   => __( 'Itemized', 'woocommerce' ),
