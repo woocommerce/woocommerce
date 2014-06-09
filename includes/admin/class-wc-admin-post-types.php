@@ -470,15 +470,6 @@ class WC_Admin_Post_Types {
 					echo '<span class="na">&ndash;</span>';
 
 			break;
-			case 'billing_address' :
-				if ( $the_order->get_formatted_billing_address() )
-					echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_billing_address() ) . '&z=16' ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_billing_address() ) ) .'</a>';
-				else
-					echo '&ndash;';
-
-				if ( $the_order->payment_method_title )
-					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
-			break;
 			case 'order_items' :
 
 				printf( '<a href="#" class="show_order_items">' . _n( '%d item', '%d items', sizeof( $the_order->get_items() ), 'woocommerce' ) . '</a>', sizeof( $the_order->get_items() ) );
