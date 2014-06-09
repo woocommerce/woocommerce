@@ -14,7 +14,12 @@ if ( is_user_logged_in() )
 ?>
 <form method="post" class="login" <?php if ( $hidden ) echo 'style="display:none;"'; ?>>
 
-	<?php do_action( 'woocommerce_login_form_start' ); ?>
+	<?php 
+		/**
+		 * woocommerce_login_form_start hook
+		 */
+		do_action( 'woocommerce_login_form_start' ); 
+	?>
 
 	<?php if ( $message ) echo wpautop( wptexturize( $message ) ); ?>
 
@@ -28,7 +33,12 @@ if ( is_user_logged_in() )
 	</p>
 	<div class="clear"></div>
 
-	<?php do_action( 'woocommerce_login_form' ); ?>
+	<?php 
+		/**
+		 * woocommerce_login_form hook
+		 */
+		do_action( 'woocommerce_login_form' ); 
+	?>
 
 	<p class="form-row">
 		<?php wp_nonce_field( 'woocommerce-login' ); ?>
@@ -44,6 +54,11 @@ if ( is_user_logged_in() )
 
 	<div class="clear"></div>
 
-	<?php do_action( 'woocommerce_login_form_end' ); ?>
+	<?php 
+		/**
+		 * woocommerce_login_form_end hook
+		 */
+		do_action( 'woocommerce_login_form_end' ); 
+	?>
 
 </form>
