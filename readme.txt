@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.12 - X =
+
 = 2.1.11 - 09/06/2014 =
 * Fix - Plain text email display of customer address.
 * Fix - Saving tax rates threw notices (missing git cherry pick).
