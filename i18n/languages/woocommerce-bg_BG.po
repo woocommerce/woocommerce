@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-05-22 10:45:21+00:00\n"
-"PO-Revision-Date: 2014-05-24 21:15+0000\n"
+"POT-Creation-Date: 2014-06-03 15:13:58+00:00\n"
+"PO-Revision-Date: 2014-06-06 08:10+0000\n"
 "Last-Translator: Adrian Dimitrov <dimitrov.adrian@gmail.com>\n"
 "Language-Team: Bulgarian (Bulgaria) (http://www.transifex.com/projects/p/woocommerce/language/bg_BG/)\n"
 "MIME-Version: 1.0\n"
@@ -16,52 +16,981 @@ msgstr ""
 "Language: bg_BG\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: assets/js/admin/editor_plugin_lang.php:5
-msgid "Insert Shortcode"
-msgstr "Вмъкване на кратък код"
+#: i18n/countries.php:16
+msgid "Afghanistan"
+msgstr "Афганистан"
 
-#: assets/js/admin/editor_plugin_lang.php:6
-msgid "Product price/cart button"
-msgstr "Бутон за цена/количка на продукта"
+#: i18n/countries.php:17
+msgid "&#197;land Islands"
+msgstr "Оландски острови"
 
-#: assets/js/admin/editor_plugin_lang.php:7
-msgid "Product by SKU/ID"
-msgstr "Продукт по SKU/ID"
+#: i18n/countries.php:18
+msgid "Albania"
+msgstr "Албания"
 
-#: assets/js/admin/editor_plugin_lang.php:8
-msgid "Products by SKU/ID"
-msgstr "Продукти по SKU/ID"
+#: i18n/countries.php:19
+msgid "Algeria"
+msgstr "Алжир"
 
-#: assets/js/admin/editor_plugin_lang.php:9
-msgid "Product categories"
-msgstr "Категории продукти"
+#: i18n/countries.php:20
+msgid "Andorra"
+msgstr "Андора"
 
-#: assets/js/admin/editor_plugin_lang.php:10
-msgid "Products by category slug"
-msgstr "Продукти по кратко име на категорията"
+#: i18n/countries.php:21
+msgid "Angola"
+msgstr "Ангола"
 
-#: assets/js/admin/editor_plugin_lang.php:11
-msgid "Recent products"
-msgstr "Нови продукти"
+#: i18n/countries.php:22
+msgid "Anguilla"
+msgstr "Ангила"
 
-#: assets/js/admin/editor_plugin_lang.php:12
-msgid "Featured products"
-msgstr "Избрани продукти"
+#: i18n/countries.php:23
+msgid "Antarctica"
+msgstr "Антартика"
 
-#: assets/js/admin/editor_plugin_lang.php:13
-msgid "Shop Messages"
-msgstr "Съобщения от магазина"
+#: i18n/countries.php:24
+msgid "Antigua and Barbuda"
+msgstr "Антигуа и Барбуда"
 
-#: assets/js/admin/editor_plugin_lang.php:14
-msgid "Order tracking"
-msgstr "Проследяване на поръчка"
+#: i18n/countries.php:25
+msgid "Argentina"
+msgstr "Аржентина"
 
-#: assets/js/admin/editor_plugin_lang.php:15
-#: includes/shortcodes/class-wc-shortcode-checkout.php:91
-#: includes/shortcodes/class-wc-shortcode-my-account.php:111
-#: templates/checkout/thankyou.php:30
-msgid "My Account"
-msgstr "Моят профил"
+#: i18n/countries.php:26
+msgid "Armenia"
+msgstr "Армения"
+
+#: i18n/countries.php:27
+msgid "Aruba"
+msgstr "Аруба"
+
+#: i18n/countries.php:28
+msgid "Australia"
+msgstr "Австралия"
+
+#: i18n/countries.php:29
+msgid "Austria"
+msgstr "Австрия"
+
+#: i18n/countries.php:30
+msgid "Azerbaijan"
+msgstr "Азърбейджан"
+
+#: i18n/countries.php:31
+msgid "Bahamas"
+msgstr "Бахами"
+
+#: i18n/countries.php:32
+msgid "Bahrain"
+msgstr "Бахрейн"
+
+#: i18n/countries.php:33
+msgid "Bangladesh"
+msgstr "Бангладеш"
+
+#: i18n/countries.php:34
+msgid "Barbados"
+msgstr "Барбадос"
+
+#: i18n/countries.php:35
+msgid "Belarus"
+msgstr "Беларус"
+
+#: i18n/countries.php:36
+msgid "Belgium"
+msgstr "Белгия"
+
+#: i18n/countries.php:37
+msgid "Belau"
+msgstr "Палау"
+
+#: i18n/countries.php:38
+msgid "Belize"
+msgstr "Белиз"
+
+#: i18n/countries.php:39
+msgid "Benin"
+msgstr "Бенин"
+
+#: i18n/countries.php:40
+msgid "Bermuda"
+msgstr "Бермуда"
+
+#: i18n/countries.php:41
+msgid "Bhutan"
+msgstr "Бутан"
+
+#: i18n/countries.php:42
+msgid "Bolivia"
+msgstr "Боливия"
+
+#: i18n/countries.php:43
+msgid "Bonaire, Saint Eustatius and Saba"
+msgstr "Бонер, Сейнт Естатийс и Саба"
+
+#: i18n/countries.php:44
+msgid "Bosnia and Herzegovina"
+msgstr "Босна и Херцеговина"
+
+#: i18n/countries.php:45
+msgid "Botswana"
+msgstr "Ботсвана"
+
+#: i18n/countries.php:46
+msgid "Bouvet Island"
+msgstr "Буве"
+
+#: i18n/countries.php:47
+msgid "Brazil"
+msgstr "Бразилия"
+
+#: i18n/countries.php:48
+msgid "British Indian Ocean Territory"
+msgstr "Британска индоокеанска територия"
+
+#: i18n/countries.php:49
+msgid "British Virgin Islands"
+msgstr "Британски Вирджински острови"
+
+#: i18n/countries.php:50
+msgid "Brunei"
+msgstr "Бруней"
+
+#: i18n/countries.php:51
+msgid "Bulgaria"
+msgstr "България"
+
+#: i18n/countries.php:52
+msgid "Burkina Faso"
+msgstr "Буркина Фасо"
+
+#: i18n/countries.php:53
+msgid "Burundi"
+msgstr "Бурунди"
+
+#: i18n/countries.php:54
+msgid "Cambodia"
+msgstr "Камбоджа"
+
+#: i18n/countries.php:55
+msgid "Cameroon"
+msgstr "Камерун"
+
+#: i18n/countries.php:56
+msgid "Canada"
+msgstr "Канада"
+
+#: i18n/countries.php:57
+msgid "Cape Verde"
+msgstr "Кабо Верде"
+
+#: i18n/countries.php:58
+msgid "Cayman Islands"
+msgstr "Кайманови острови"
+
+#: i18n/countries.php:59
+msgid "Central African Republic"
+msgstr "Централноафриканска република"
+
+#: i18n/countries.php:60
+msgid "Chad"
+msgstr "Чад"
+
+#: i18n/countries.php:61
+msgid "Chile"
+msgstr "Чили"
+
+#: i18n/countries.php:62
+msgid "China"
+msgstr "Китай"
+
+#: i18n/countries.php:63
+msgid "Christmas Island"
+msgstr "Рождество"
+
+#: i18n/countries.php:64
+msgid "Cocos (Keeling) Islands"
+msgstr "Кокосови оствори"
+
+#: i18n/countries.php:65
+msgid "Colombia"
+msgstr "Колумбия"
+
+#: i18n/countries.php:66
+msgid "Comoros"
+msgstr "Коморски острови"
+
+#: i18n/countries.php:67
+msgid "Congo (Brazzaville)"
+msgstr "Конго (Бразвийл)"
+
+#: i18n/countries.php:68
+msgid "Congo (Kinshasa)"
+msgstr "Конго (Киншаса)"
+
+#: i18n/countries.php:69
+msgid "Cook Islands"
+msgstr "Кук"
+
+#: i18n/countries.php:70
+msgid "Costa Rica"
+msgstr "Коста Рика"
+
+#: i18n/countries.php:71
+msgid "Croatia"
+msgstr "Хърватия"
+
+#: i18n/countries.php:72
+msgid "Cuba"
+msgstr "Куба"
+
+#: i18n/countries.php:73
+msgid "Cura&Ccedil;ao"
+msgstr "Кюрасао"
+
+#: i18n/countries.php:74
+msgid "Cyprus"
+msgstr "Кипър"
+
+#: i18n/countries.php:75
+msgid "Czech Republic"
+msgstr "Република Чехия"
+
+#: i18n/countries.php:76
+msgid "Denmark"
+msgstr "Дания"
+
+#: i18n/countries.php:77
+msgid "Djibouti"
+msgstr "Джиботи"
+
+#: i18n/countries.php:78
+msgid "Dominica"
+msgstr "Доминика"
+
+#: i18n/countries.php:79
+msgid "Dominican Republic"
+msgstr "Република Доминикана"
+
+#: i18n/countries.php:80
+msgid "Ecuador"
+msgstr "Еквадор"
+
+#: i18n/countries.php:81
+msgid "Egypt"
+msgstr "Египет"
+
+#: i18n/countries.php:82
+msgid "El Salvador"
+msgstr "Салвадор"
+
+#: i18n/countries.php:83
+msgid "Equatorial Guinea"
+msgstr "Екваториална Гвинея"
+
+#: i18n/countries.php:84
+msgid "Eritrea"
+msgstr "Еритея"
+
+#: i18n/countries.php:85
+msgid "Estonia"
+msgstr "Естония"
+
+#: i18n/countries.php:86
+msgid "Ethiopia"
+msgstr "Етеопия"
+
+#: i18n/countries.php:87
+msgid "Falkland Islands"
+msgstr "Фолкландски острови"
+
+#: i18n/countries.php:88
+msgid "Faroe Islands"
+msgstr "Ферьорски острови"
+
+#: i18n/countries.php:89
+msgid "Fiji"
+msgstr "Фиджи"
+
+#: i18n/countries.php:90
+msgid "Finland"
+msgstr "Финландия"
+
+#: i18n/countries.php:91
+msgid "France"
+msgstr "Франция"
+
+#: i18n/countries.php:92
+msgid "French Guiana"
+msgstr "Френска Гвиана"
+
+#: i18n/countries.php:93
+msgid "French Polynesia"
+msgstr "Френска Полинезия"
+
+#: i18n/countries.php:94
+msgid "French Southern Territories"
+msgstr "Френски южни и антарктически територии"
+
+#: i18n/countries.php:95
+msgid "Gabon"
+msgstr "Габон"
+
+#: i18n/countries.php:96
+msgid "Gambia"
+msgstr "Гамбия"
+
+#: i18n/countries.php:97 i18n/states/US.php:23
+msgid "Georgia"
+msgstr "Грузия"
+
+#: i18n/countries.php:98
+msgid "Germany"
+msgstr "Германия"
+
+#: i18n/countries.php:99
+msgid "Ghana"
+msgstr "Гана"
+
+#: i18n/countries.php:100
+msgid "Gibraltar"
+msgstr "Гибралтар"
+
+#: i18n/countries.php:101
+msgid "Greece"
+msgstr "Гърция"
+
+#: i18n/countries.php:102
+msgid "Greenland"
+msgstr "Гренландия"
+
+#: i18n/countries.php:103
+msgid "Grenada"
+msgstr "Гренада"
+
+#: i18n/countries.php:104
+msgid "Guadeloupe"
+msgstr "Гуаделупе"
+
+#: i18n/countries.php:105
+msgid "Guatemala"
+msgstr "Гватемала"
+
+#: i18n/countries.php:106
+msgid "Guernsey"
+msgstr "Гърнси"
+
+#: i18n/countries.php:107
+msgid "Guinea"
+msgstr "Гвинея"
+
+#: i18n/countries.php:108
+msgid "Guinea-Bissau"
+msgstr "Гвинея-Бисау"
+
+#: i18n/countries.php:109
+msgid "Guyana"
+msgstr "Гуана"
+
+#: i18n/countries.php:110
+msgid "Haiti"
+msgstr "Хаити"
+
+#: i18n/countries.php:111
+msgid "Heard Island and McDonald Islands"
+msgstr "Хърд и Макдоналд"
+
+#: i18n/countries.php:112
+msgid "Honduras"
+msgstr "Хондурас"
+
+#: i18n/countries.php:113
+msgid "Hong Kong"
+msgstr "Хонг Конг"
+
+#: i18n/countries.php:114
+msgid "Hungary"
+msgstr "Унгария"
+
+#: i18n/countries.php:115
+msgid "Iceland"
+msgstr "Исландия"
+
+#: i18n/countries.php:116
+msgid "India"
+msgstr "Индия"
+
+#: i18n/countries.php:117
+msgid "Indonesia"
+msgstr "Индонезия"
+
+#: i18n/countries.php:118
+msgid "Iran"
+msgstr "Иран"
+
+#: i18n/countries.php:119
+msgid "Iraq"
+msgstr "Ирак"
+
+#: i18n/countries.php:120
+msgid "Republic of Ireland"
+msgstr "Република Ирландия"
+
+#: i18n/countries.php:121
+msgid "Isle of Man"
+msgstr "Ман"
+
+#: i18n/countries.php:122
+msgid "Israel"
+msgstr "Израел"
+
+#: i18n/countries.php:123
+msgid "Italy"
+msgstr "Италия"
+
+#: i18n/countries.php:124
+msgid "Ivory Coast"
+msgstr "Кот д'Ивоар"
+
+#: i18n/countries.php:125
+msgid "Jamaica"
+msgstr "Ямайка"
+
+#: i18n/countries.php:126
+msgid "Japan"
+msgstr "Япония"
+
+#: i18n/countries.php:127
+msgid "Jersey"
+msgstr "Джърси"
+
+#: i18n/countries.php:128
+msgid "Jordan"
+msgstr "Йордания"
+
+#: i18n/countries.php:129
+msgid "Kazakhstan"
+msgstr "Казахстан"
+
+#: i18n/countries.php:130
+msgid "Kenya"
+msgstr "Кения"
+
+#: i18n/countries.php:131
+msgid "Kiribati"
+msgstr "Кирибати"
+
+#: i18n/countries.php:132
+msgid "Kuwait"
+msgstr "Кувейт"
+
+#: i18n/countries.php:133
+msgid "Kyrgyzstan"
+msgstr "Киргизстан"
+
+#: i18n/countries.php:134
+msgid "Laos"
+msgstr "Лаос"
+
+#: i18n/countries.php:135
+msgid "Latvia"
+msgstr "Латвия"
+
+#: i18n/countries.php:136
+msgid "Lebanon"
+msgstr "Ливан"
+
+#: i18n/countries.php:137
+msgid "Lesotho"
+msgstr "Лесото"
+
+#: i18n/countries.php:138
+msgid "Liberia"
+msgstr "Либерия"
+
+#: i18n/countries.php:139
+msgid "Libya"
+msgstr "Либия"
+
+#: i18n/countries.php:140
+msgid "Liechtenstein"
+msgstr "Лихтенщайн"
+
+#: i18n/countries.php:141
+msgid "Lithuania"
+msgstr "Литуана"
+
+#: i18n/countries.php:142
+msgid "Luxembourg"
+msgstr "Люксембург"
+
+#: i18n/countries.php:143
+msgid "Macao S.A.R., China"
+msgstr "Макао, Китай"
+
+#: i18n/countries.php:144
+msgid "Macedonia"
+msgstr "Македония"
+
+#: i18n/countries.php:145
+msgid "Madagascar"
+msgstr "Мадагаскар"
+
+#: i18n/countries.php:146
+msgid "Malawi"
+msgstr "Малави"
+
+#: i18n/countries.php:147
+msgid "Malaysia"
+msgstr "Малайзия"
+
+#: i18n/countries.php:148
+msgid "Maldives"
+msgstr "Малдиви"
+
+#: i18n/countries.php:149
+msgid "Mali"
+msgstr "Мали"
+
+#: i18n/countries.php:150
+msgid "Malta"
+msgstr "Малта"
+
+#: i18n/countries.php:151
+msgid "Marshall Islands"
+msgstr "Маршалови острови"
+
+#: i18n/countries.php:152
+msgid "Martinique"
+msgstr "Мартиника"
+
+#: i18n/countries.php:153
+msgid "Mauritania"
+msgstr "Мавритания"
+
+#: i18n/countries.php:154
+msgid "Mauritius"
+msgstr "Мавриций"
+
+#: i18n/countries.php:155
+msgid "Mayotte"
+msgstr "Майот"
+
+#: i18n/countries.php:156
+msgid "Mexico"
+msgstr "Мексико"
+
+#: i18n/countries.php:157
+msgid "Micronesia"
+msgstr "Микронезия"
+
+#: i18n/countries.php:158
+msgid "Moldova"
+msgstr "Молдова"
+
+#: i18n/countries.php:159
+msgid "Monaco"
+msgstr "Монако"
+
+#: i18n/countries.php:160
+msgid "Mongolia"
+msgstr "Монголия"
+
+#: i18n/countries.php:161
+msgid "Montenegro"
+msgstr "Монтенегро"
+
+#: i18n/countries.php:162
+msgid "Montserrat"
+msgstr "Монсерат"
+
+#: i18n/countries.php:163
+msgid "Morocco"
+msgstr "Мароко"
+
+#: i18n/countries.php:164
+msgid "Mozambique"
+msgstr "Мозамбик"
+
+#: i18n/countries.php:165
+msgid "Myanmar"
+msgstr "Мианмар"
+
+#: i18n/countries.php:166
+msgid "Namibia"
+msgstr "Намибия"
+
+#: i18n/countries.php:167
+msgid "Nauru"
+msgstr "Науру"
+
+#: i18n/countries.php:168
+msgid "Nepal"
+msgstr "Непал"
+
+#: i18n/countries.php:169
+msgid "Netherlands"
+msgstr "Нидерландия"
+
+#: i18n/countries.php:170
+msgid "Netherlands Antilles"
+msgstr "Нидерландски Антили"
+
+#: i18n/countries.php:171
+msgid "New Caledonia"
+msgstr "Нова Каледония"
+
+#: i18n/countries.php:172
+msgid "New Zealand"
+msgstr "Нова Зеландия"
+
+#: i18n/countries.php:173
+msgid "Nicaragua"
+msgstr "Никарагуа"
+
+#: i18n/countries.php:174
+msgid "Niger"
+msgstr "Нигер"
+
+#: i18n/countries.php:175
+msgid "Nigeria"
+msgstr "Нигерия"
+
+#: i18n/countries.php:176
+msgid "Niue"
+msgstr "Ниуе"
+
+#: i18n/countries.php:177
+msgid "Norfolk Island"
+msgstr "Норфолк"
+
+#: i18n/countries.php:178
+msgid "North Korea"
+msgstr "Северна Корея"
+
+#: i18n/countries.php:179
+msgid "Norway"
+msgstr "Норвегия"
+
+#: i18n/countries.php:180
+msgid "Oman"
+msgstr "Оман"
+
+#: i18n/countries.php:181
+msgid "Pakistan"
+msgstr "Пакистан"
+
+#: i18n/countries.php:182
+msgid "Palestinian Territory"
+msgstr "Палестинска територия"
+
+#: i18n/countries.php:183
+msgid "Panama"
+msgstr "Панама"
+
+#: i18n/countries.php:184
+msgid "Papua New Guinea"
+msgstr "Папа Нова Гвинея"
+
+#: i18n/countries.php:185
+msgid "Paraguay"
+msgstr "Парагуа"
+
+#: i18n/countries.php:186
+msgid "Peru"
+msgstr "Перу"
+
+#: i18n/countries.php:187
+msgid "Philippines"
+msgstr "Филипини"
+
+#: i18n/countries.php:188
+msgid "Pitcairn"
+msgstr "Питкерн"
+
+#: i18n/countries.php:189
+msgid "Poland"
+msgstr "Полша"
+
+#: i18n/countries.php:190
+msgid "Portugal"
+msgstr "Португалия"
+
+#: i18n/countries.php:191
+msgid "Qatar"
+msgstr "Катар"
+
+#: i18n/countries.php:192
+msgid "Reunion"
+msgstr "Реюнион"
+
+#: i18n/countries.php:193
+msgid "Romania"
+msgstr "Ромъния"
+
+#: i18n/countries.php:194
+msgid "Russia"
+msgstr "Русия"
+
+#: i18n/countries.php:195
+msgid "Rwanda"
+msgstr "Руанда"
+
+#: i18n/countries.php:196
+msgid "Saint Barth&eacute;lemy"
+msgstr "Сен Бартелми"
+
+#: i18n/countries.php:197
+msgid "Saint Helena"
+msgstr "Сен Хелена"
+
+#: i18n/countries.php:198
+msgid "Saint Kitts and Nevis"
+msgstr "Сейнт Китс и Невис"
+
+#: i18n/countries.php:199
+msgid "Saint Lucia"
+msgstr "Сент Лусия"
+
+#: i18n/countries.php:200
+msgid "Saint Martin (French part)"
+msgstr "Сент Мартин (Френска част)"
+
+#: i18n/countries.php:201
+msgid "Saint Martin (Dutch part)"
+msgstr "Сент Мартин (Холандска част)"
+
+#: i18n/countries.php:202
+msgid "Saint Pierre and Miquelon"
+msgstr "Сен Пиер и Микелон"
+
+#: i18n/countries.php:203
+msgid "Saint Vincent and the Grenadines"
+msgstr "Сейнт Винсент и Гренадини"
+
+#: i18n/countries.php:204
+msgid "San Marino"
+msgstr "Сан Марино"
+
+#: i18n/countries.php:205
+msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+msgstr "Сао Томе и Принсипи"
+
+#: i18n/countries.php:206
+msgid "Saudi Arabia"
+msgstr "Саудитска Арабия"
+
+#: i18n/countries.php:207
+msgid "Senegal"
+msgstr "Сенегал"
+
+#: i18n/countries.php:208
+msgid "Serbia"
+msgstr "Сърбия"
+
+#: i18n/countries.php:209
+msgid "Seychelles"
+msgstr "Сейшели"
+
+#: i18n/countries.php:210
+msgid "Sierra Leone"
+msgstr "Сиера Леоне"
+
+#: i18n/countries.php:211
+msgid "Singapore"
+msgstr "Сингапур"
+
+#: i18n/countries.php:212
+msgid "Slovakia"
+msgstr "Словакия"
+
+#: i18n/countries.php:213
+msgid "Slovenia"
+msgstr "Словения"
+
+#: i18n/countries.php:214
+msgid "Solomon Islands"
+msgstr "Соломонови острови"
+
+#: i18n/countries.php:215
+msgid "Somalia"
+msgstr "Сомалия"
+
+#: i18n/countries.php:216
+msgid "South Africa"
+msgstr "Република Южна Африка"
+
+#: i18n/countries.php:217
+msgid "South Georgia/Sandwich Islands"
+msgstr "Южна Джорджия и Южни Сандвичеви острови"
+
+#: i18n/countries.php:218
+msgid "South Korea"
+msgstr "Южна Корея"
+
+#: i18n/countries.php:219
+msgid "South Sudan"
+msgstr "Южен Судан"
+
+#: i18n/countries.php:220
+msgid "Spain"
+msgstr "Испания"
+
+#: i18n/countries.php:221
+msgid "Sri Lanka"
+msgstr "Шри Ланка"
+
+#: i18n/countries.php:222
+msgid "Sudan"
+msgstr "Судан"
+
+#: i18n/countries.php:223
+msgid "Suriname"
+msgstr "Суринам"
+
+#: i18n/countries.php:224
+msgid "Svalbard and Jan Mayen"
+msgstr "Свалбард и Ян Майен"
+
+#: i18n/countries.php:225
+msgid "Swaziland"
+msgstr "Свазиленд"
+
+#: i18n/countries.php:226
+msgid "Sweden"
+msgstr "Швеция"
+
+#: i18n/countries.php:227
+msgid "Switzerland"
+msgstr "Швейцария"
+
+#: i18n/countries.php:228
+msgid "Syria"
+msgstr "Сирия"
+
+#: i18n/countries.php:229
+msgid "Taiwan"
+msgstr "Тайван"
+
+#: i18n/countries.php:230
+msgid "Tajikistan"
+msgstr "Таджикистан"
+
+#: i18n/countries.php:231
+msgid "Tanzania"
+msgstr "Танзания"
+
+#: i18n/countries.php:232
+msgid "Thailand"
+msgstr "Тайланд"
+
+#: i18n/countries.php:233
+msgid "Timor-Leste"
+msgstr "Източен Тимор"
+
+#: i18n/countries.php:234
+msgid "Togo"
+msgstr "Того"
+
+#: i18n/countries.php:235
+msgid "Tokelau"
+msgstr "Токелау"
+
+#: i18n/countries.php:236
+msgid "Tonga"
+msgstr "Тонга"
+
+#: i18n/countries.php:237
+msgid "Trinidad and Tobago"
+msgstr "Тринидат и Тобаго"
+
+#: i18n/countries.php:238
+msgid "Tunisia"
+msgstr "Тунис"
+
+#: i18n/countries.php:239
+msgid "Turkey"
+msgstr "Турция"
+
+#: i18n/countries.php:240
+msgid "Turkmenistan"
+msgstr "Тюркменистан"
+
+#: i18n/countries.php:241
+msgid "Turks and Caicos Islands"
+msgstr "Търкс и Кайкос"
+
+#: i18n/countries.php:242
+msgid "Tuvalu"
+msgstr "Тувалу"
+
+#: i18n/countries.php:243
+msgid "Uganda"
+msgstr "Уганда"
+
+#: i18n/countries.php:244
+msgid "Ukraine"
+msgstr "Украйна"
+
+#: i18n/countries.php:245
+msgid "United Arab Emirates"
+msgstr "Обединени Арабски Емирства"
+
+#: i18n/countries.php:246
+msgid "United Kingdom (UK)"
+msgstr "Великобритания "
+
+#: i18n/countries.php:247
+msgid "United States (US)"
+msgstr "Съединени Американски Щати (САЩ)"
+
+#: i18n/countries.php:248
+msgid "Uruguay"
+msgstr "Уругвай"
+
+#: i18n/countries.php:249
+msgid "Uzbekistan"
+msgstr "Узбекистан"
+
+#: i18n/countries.php:250
+msgid "Vanuatu"
+msgstr "Вануату"
+
+#: i18n/countries.php:251
+msgid "Vatican"
+msgstr "Ватикана"
+
+#: i18n/countries.php:252
+msgid "Venezuela"
+msgstr "Венецуела"
+
+#: i18n/countries.php:253
+msgid "Vietnam"
+msgstr "Виетнам"
+
+#: i18n/countries.php:254
+msgid "Wallis and Futuna"
+msgstr "Уолис и Футуна"
+
+#: i18n/countries.php:255
+msgid "Western Sahara"
+msgstr "Западна Сахара"
+
+#: i18n/countries.php:256
+msgid "Western Samoa"
+msgstr "Западна Самоа"
+
+#: i18n/countries.php:257
+msgid "Yemen"
+msgstr "Йемен"
+
+#: i18n/countries.php:258
+msgid "Zambia"
+msgstr "Замбия"
+
+#: i18n/countries.php:259
+msgid "Zimbabwe"
+msgstr "Зимбабве"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
@@ -2900,10 +3829,6 @@ msgstr "District Of Columbia"
 msgid "Florida"
 msgstr "Florida"
 
-#: i18n/states/US.php:23 includes/class-wc-countries.php:118
-msgid "Georgia"
-msgstr "Грузия"
-
 #: i18n/states/US.php:24
 msgid "Hawaii"
 msgstr "Hawaii"
@@ -3160,9 +4085,9 @@ msgstr "върнати"
 msgid "cancelled"
 msgstr "отменена"
 
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/emails/class-wc-email-customer-completed-order.php:140
-#: includes/emails/class-wc-email-new-order.php:120
+#: includes/abstracts/abstract-wc-email.php:573
+#: includes/emails/class-wc-email-customer-completed-order.php:141
+#: includes/emails/class-wc-email-new-order.php:121
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:52
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:122
@@ -3173,130 +4098,130 @@ msgstr "отменена"
 msgid "Enable/Disable"
 msgstr "Включване/Изключване"
 
-#: includes/abstracts/abstract-wc-email.php:572
-#: includes/emails/class-wc-email-customer-completed-order.php:142
-#: includes/emails/class-wc-email-new-order.php:122
+#: includes/abstracts/abstract-wc-email.php:575
+#: includes/emails/class-wc-email-customer-completed-order.php:143
+#: includes/emails/class-wc-email-new-order.php:123
 msgid "Enable this email notification"
 msgstr "Включване уведомленията за този email"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/emails/class-wc-email-customer-invoice.php:146
+#: includes/abstracts/abstract-wc-email.php:579
+#: includes/emails/class-wc-email-customer-invoice.php:147
 msgid "Email subject"
 msgstr "Тема"
 
-#: includes/abstracts/abstract-wc-email.php:578
-#: includes/abstracts/abstract-wc-email.php:585
-#: includes/emails/class-wc-email-customer-completed-order.php:148
-#: includes/emails/class-wc-email-customer-completed-order.php:155
-#: includes/emails/class-wc-email-customer-completed-order.php:162
-#: includes/emails/class-wc-email-customer-completed-order.php:169
-#: includes/emails/class-wc-email-customer-invoice.php:148
-#: includes/emails/class-wc-email-customer-invoice.php:155
-#: includes/emails/class-wc-email-customer-invoice.php:162
-#: includes/emails/class-wc-email-customer-invoice.php:169
+#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:588
+#: includes/emails/class-wc-email-customer-completed-order.php:149
+#: includes/emails/class-wc-email-customer-completed-order.php:156
+#: includes/emails/class-wc-email-customer-completed-order.php:163
+#: includes/emails/class-wc-email-customer-completed-order.php:170
+#: includes/emails/class-wc-email-customer-invoice.php:149
+#: includes/emails/class-wc-email-customer-invoice.php:156
+#: includes/emails/class-wc-email-customer-invoice.php:163
+#: includes/emails/class-wc-email-customer-invoice.php:170
 msgid "Defaults to <code>%s</code>"
 msgstr "По подразбиране <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:583
-#: includes/emails/class-wc-email-customer-invoice.php:153
+#: includes/abstracts/abstract-wc-email.php:586
+#: includes/emails/class-wc-email-customer-invoice.php:154
 msgid "Email heading"
 msgstr "Заглавие"
 
-#: includes/abstracts/abstract-wc-email.php:590
-#: includes/emails/class-wc-email-customer-completed-order.php:174
-#: includes/emails/class-wc-email-customer-invoice.php:174
-#: includes/emails/class-wc-email-new-order.php:147
+#: includes/abstracts/abstract-wc-email.php:593
+#: includes/emails/class-wc-email-customer-completed-order.php:175
+#: includes/emails/class-wc-email-customer-invoice.php:175
+#: includes/emails/class-wc-email-new-order.php:148
 msgid "Email type"
 msgstr "Тип"
 
-#: includes/abstracts/abstract-wc-email.php:592
-#: includes/emails/class-wc-email-customer-completed-order.php:176
-#: includes/emails/class-wc-email-customer-invoice.php:176
-#: includes/emails/class-wc-email-new-order.php:149
+#: includes/abstracts/abstract-wc-email.php:595
+#: includes/emails/class-wc-email-customer-completed-order.php:177
+#: includes/emails/class-wc-email-customer-invoice.php:177
+#: includes/emails/class-wc-email-new-order.php:150
 msgid "Choose which format of email to send."
 msgstr "Избор формат на email за изпращане."
 
-#: includes/abstracts/abstract-wc-email.php:596
-#: includes/emails/class-wc-email-customer-completed-order.php:180
-#: includes/emails/class-wc-email-customer-invoice.php:180
-#: includes/emails/class-wc-email-new-order.php:153
-msgid "Plain text"
-msgstr "Обикновен текст"
-
-#: includes/abstracts/abstract-wc-email.php:597
+#: includes/abstracts/abstract-wc-email.php:599
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
-msgid "HTML"
-msgstr "HTML"
+msgid "Plain text"
+msgstr "Обикновен текст"
 
-#: includes/abstracts/abstract-wc-email.php:598
+#: includes/abstracts/abstract-wc-email.php:600
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
+msgid "HTML"
+msgstr "HTML"
+
+#: includes/abstracts/abstract-wc-email.php:601
+#: includes/emails/class-wc-email-customer-completed-order.php:183
+#: includes/emails/class-wc-email-customer-invoice.php:183
+#: includes/emails/class-wc-email-new-order.php:156
 msgid "Multipart"
 msgstr "Multipart"
 
-#: includes/abstracts/abstract-wc-email.php:634
-#: includes/abstracts/abstract-wc-email.php:655
+#: includes/abstracts/abstract-wc-email.php:637
+#: includes/abstracts/abstract-wc-email.php:658
 msgid "Could not write to template file."
 msgstr "Не е възможно записването на шаблонния файл."
 
-#: includes/abstracts/abstract-wc-email.php:686
+#: includes/abstracts/abstract-wc-email.php:689
 msgid "Template file copied to theme."
 msgstr "Шаблонният файл е копиран в темата."
 
-#: includes/abstracts/abstract-wc-email.php:695
+#: includes/abstracts/abstract-wc-email.php:698
 msgid "Template file deleted from theme."
 msgstr "Шаблонният файл е изтрит от темата."
 
-#: includes/abstracts/abstract-wc-email.php:703
+#: includes/abstracts/abstract-wc-email.php:706
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Настройки"
 
-#: includes/abstracts/abstract-wc-email.php:715
+#: includes/abstracts/abstract-wc-email.php:718
 msgid "HTML template"
 msgstr "HTML шаблон"
 
-#: includes/abstracts/abstract-wc-email.php:716
+#: includes/abstracts/abstract-wc-email.php:719
 msgid "Plain text template"
 msgstr "Plain text шаблон"
 
-#: includes/abstracts/abstract-wc-email.php:737
+#: includes/abstracts/abstract-wc-email.php:740
 msgid "Delete template file"
 msgstr "Изтриване на шаблон"
 
-#: includes/abstracts/abstract-wc-email.php:740
+#: includes/abstracts/abstract-wc-email.php:743
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "Този шаблон е заменен от друг във вашата тема и може да бъде намерен тук: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:755
+#: includes/abstracts/abstract-wc-email.php:758
 msgid "Copy file to theme"
 msgstr "Копиране файл в тема"
 
-#: includes/abstracts/abstract-wc-email.php:758
+#: includes/abstracts/abstract-wc-email.php:761
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "За да промените и редактирате шаблона на email-а, копирайте <code>%s</code> в папката на темата: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:769
+#: includes/abstracts/abstract-wc-email.php:772
 msgid "File was not found."
 msgstr "Файла не е намерен."
 
-#: includes/abstracts/abstract-wc-email.php:794
+#: includes/abstracts/abstract-wc-email.php:797
 msgid "View template"
 msgstr "Преглед шаблон"
 
-#: includes/abstracts/abstract-wc-email.php:795
+#: includes/abstracts/abstract-wc-email.php:798
 msgid "Hide template"
 msgstr "Скриване на шаблон"
 
-#: includes/abstracts/abstract-wc-email.php:806
+#: includes/abstracts/abstract-wc-email.php:809
 msgid "Are you sure you want to delete this template file?"
 msgstr "Сигурни ли сте, че желаете да изтриете този шаблонен файл?"
 
@@ -3451,7 +4376,7 @@ msgid "You do not have permission to create coupons"
 msgstr "Нямате правомощия за създаване на купони"
 
 #: includes/api/class-wc-api-coupons.php:201
-#: includes/api/class-wc-api-customers.php:332
+#: includes/api/class-wc-api-customers.php:337
 #: includes/api/class-wc-api-server.php:423
 msgid "Missing parameter %s"
 msgstr "Липсва параметър %s"
@@ -3470,36 +4395,36 @@ msgstr "Невалиден тип на купон - типът трябва да
 msgid "Failed to update coupon"
 msgstr "Проблем при обновяването на купона"
 
-#: includes/api/class-wc-api-customers.php:249
-#: includes/api/class-wc-api-customers.php:252
+#: includes/api/class-wc-api-customers.php:254
+#: includes/api/class-wc-api-customers.php:257
 msgid "Invalid customer Email"
 msgstr "Невалиден email"
 
-#: includes/api/class-wc-api-customers.php:270
+#: includes/api/class-wc-api-customers.php:275
 msgid "You do not have permission to read the customers count"
 msgstr "Нямате правомощия за прочитането на броя клиенти"
 
-#: includes/api/class-wc-api-customers.php:327
+#: includes/api/class-wc-api-customers.php:332
 msgid "You do not have permission to create this customer"
 msgstr "Нямате правомощия за създаването на този клиент"
 
-#: includes/api/class-wc-api-customers.php:630
+#: includes/api/class-wc-api-customers.php:665
 msgid "Invalid customer ID"
 msgstr "Невалиден клиентски ID"
 
-#: includes/api/class-wc-api-customers.php:637
+#: includes/api/class-wc-api-customers.php:672
 msgid "Invalid customer"
 msgstr "Невалиден клиент"
 
-#: includes/api/class-wc-api-customers.php:645
+#: includes/api/class-wc-api-customers.php:680
 msgid "You do not have permission to read this customer"
 msgstr "Нямате правомощия за преглеждането на този клиент"
 
-#: includes/api/class-wc-api-customers.php:651
+#: includes/api/class-wc-api-customers.php:686
 msgid "You do not have permission to edit this customer"
 msgstr "Нямате правомощия за редактирането на този клиент"
 
-#: includes/api/class-wc-api-customers.php:657
+#: includes/api/class-wc-api-customers.php:692
 msgid "You do not have permission to delete this customer"
 msgstr "Нямате правомощия за изтриването на този клиент"
 
@@ -3548,23 +4473,23 @@ msgstr "Нямате правомощия за редактирането на %
 msgid "You do not have permission to delete this %s"
 msgstr "Нямате правомощия за изтриването на %s"
 
-#: includes/api/class-wc-api-resource.php:308
+#: includes/api/class-wc-api-resource.php:314
 msgid "Permanently deleted customer"
 msgstr "Безвъзвратно изтрит клиент"
 
-#: includes/api/class-wc-api-resource.php:310
+#: includes/api/class-wc-api-resource.php:316
 msgid "The customer cannot be deleted"
 msgstr "Клиентът не може да бъде изтрит"
 
-#: includes/api/class-wc-api-resource.php:319
+#: includes/api/class-wc-api-resource.php:325
 msgid "This %s cannot be deleted"
 msgstr "%s не може да бъде изтрито"
 
-#: includes/api/class-wc-api-resource.php:322
+#: includes/api/class-wc-api-resource.php:328
 msgid "Permanently deleted %s"
 msgstr "Безвъзвратно изтрито %s"
 
-#: includes/api/class-wc-api-resource.php:328
+#: includes/api/class-wc-api-resource.php:334
 msgid "Deleted %s"
 msgstr "Изтрит %s"
 
@@ -3584,76 +4509,7 @@ msgstr "Handler за този път е невалиден"
 msgid "No route was found matching the URL and request method"
 msgstr "Няма намерена страница отговаряща на URL заявката и метода."
 
-#: includes/class-wc-ajax.php:164
-msgid "Sorry, your session has expired."
-msgstr "Съжаляваме, сесията ви е изтекла."
-
-#: includes/class-wc-ajax.php:164
-msgid "Return to homepage"
-msgstr "Връщане към началната страница"
-
-#: includes/class-wc-ajax.php:318 includes/class-wc-ajax.php:351
-#: includes/class-wc-ajax.php:376
-msgid "You do not have sufficient permissions to access this page."
-msgstr "Нямате необходимите пермисии за да видите тази страница."
-
-#: includes/class-wc-ajax.php:322 includes/class-wc-ajax.php:355
-#: includes/class-wc-ajax.php:380
-msgid "You have taken too long. Please go back and retry."
-msgstr "Изминало е прекалено много време. Моля, върнете се и опитайте отново."
-
-#: includes/class-wc-ajax.php:612
-msgid "Same as parent"
-msgstr "Също като родителя"
-
-#: includes/class-wc-ajax.php:613
-msgid "Standard"
-msgstr "Стандарт"
-
-#: includes/class-wc-ajax.php:888
-msgid "File %d"
-msgstr "Файл %d"
-
-#: includes/class-wc-ajax.php:1086 includes/class-wc-ajax.php:1087
-#: includes/class-wc-order.php:1592
-msgid "Item #%s stock reduced from %s to %s."
-msgstr "Наличността на продукт #%s намалена от %s на %s."
-
-#: includes/class-wc-ajax.php:1095
-msgid ""
-"No products had their stock reduced - they may not have stock management "
-"enabled."
-msgstr "Няма намаляване в продуктите - възможно е продуктите да не използват наличности."
-
-#: includes/class-wc-ajax.php:1136 includes/class-wc-ajax.php:1137
-msgid "Item #%s stock increased from %s to %s."
-msgstr "Наличността на продукта #%s увеличена от %s на %s."
-
-#: includes/class-wc-ajax.php:1144
-msgid ""
-"No products had their stock increased - they may not have stock management "
-"enabled."
-msgstr "Няма увеличение в продуктите - възможно е продуктите да не използват наличности."
-
-#: includes/class-wc-ajax.php:1161
-#: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:62
-msgid "Name"
-msgstr "Име"
-
-#: includes/class-wc-ajax.php:1161
-msgid "Value"
-msgstr "Стойност"
-
-#: includes/class-wc-ajax.php:1384
-msgid "Delete note"
-msgstr "Изтриване бележка"
-
-#: includes/class-wc-ajax.php:1532
-msgid "Guest"
-msgstr "Гост"
-
-#: includes/class-wc-cache-helper.php:105
+#: includes/class-wc-cache-helper.php:106
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
@@ -3708,7 +4564,7 @@ msgid ""
 msgstr "Не може да добавите това количество от &quot;%s&quot; към количката, защото няма достатъчно налично. Разполагаемата ни наличност е - %s."
 
 #: includes/class-wc-cart.php:835 includes/class-wc-cart.php:854
-#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:188
 #: includes/wc-cart-functions.php:96 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "Преглед на количката"
@@ -3777,20 +4633,20 @@ msgid ""
 " to homepage</a>"
 msgstr "Вашата сесия е изтекла. <a href=\"%s\" class=\"wc-backward\">Връщане към началната страница</a>"
 
-#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:84
 msgid "is a required field."
 msgstr "е задължително поле."
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:95
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Моля, въведете валиден пощенски код."
 
-#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:104
 msgid "is not a valid phone number."
 msgstr "не е валиден телефонен номер"
 
-#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:111
 msgid "is not a valid email address."
 msgstr "е невалиден email адрес."
 
@@ -3816,1112 +4672,45 @@ msgstr "Невалиден метод за доставка."
 msgid "Invalid payment method."
 msgstr "Невалиден метод за плащане."
 
-#: includes/class-wc-comments.php:109
+#: includes/class-wc-comments.php:111
 msgid "Please rate the product."
 msgstr "Моля, оценете този продукт."
 
-#: includes/class-wc-countries.php:37
-msgid "Afghanistan"
-msgstr "Афганистан"
-
-#: includes/class-wc-countries.php:38
-msgid "&#197;land Islands"
-msgstr "Оландски острови"
-
-#: includes/class-wc-countries.php:39
-msgid "Albania"
-msgstr "Албания"
-
-#: includes/class-wc-countries.php:40
-msgid "Algeria"
-msgstr "Алжир"
-
-#: includes/class-wc-countries.php:41
-msgid "Andorra"
-msgstr "Андора"
-
-#: includes/class-wc-countries.php:42
-msgid "Angola"
-msgstr "Ангола"
-
-#: includes/class-wc-countries.php:43
-msgid "Anguilla"
-msgstr "Ангила"
-
-#: includes/class-wc-countries.php:44
-msgid "Antarctica"
-msgstr "Антартика"
-
-#: includes/class-wc-countries.php:45
-msgid "Antigua and Barbuda"
-msgstr "Антигуа и Барбуда"
-
-#: includes/class-wc-countries.php:46
-msgid "Argentina"
-msgstr "Аржентина"
-
-#: includes/class-wc-countries.php:47
-msgid "Armenia"
-msgstr "Армения"
-
-#: includes/class-wc-countries.php:48
-msgid "Aruba"
-msgstr "Аруба"
-
-#: includes/class-wc-countries.php:49
-msgid "Australia"
-msgstr "Австралия"
-
-#: includes/class-wc-countries.php:50
-msgid "Austria"
-msgstr "Австрия"
-
-#: includes/class-wc-countries.php:51
-msgid "Azerbaijan"
-msgstr "Азърбейджан"
-
-#: includes/class-wc-countries.php:52
-msgid "Bahamas"
-msgstr "Бахами"
-
-#: includes/class-wc-countries.php:53
-msgid "Bahrain"
-msgstr "Бахрейн"
-
-#: includes/class-wc-countries.php:54
-msgid "Bangladesh"
-msgstr "Бангладеш"
-
-#: includes/class-wc-countries.php:55
-msgid "Barbados"
-msgstr "Барбадос"
-
-#: includes/class-wc-countries.php:56
-msgid "Belarus"
-msgstr "Беларус"
-
-#: includes/class-wc-countries.php:57
-msgid "Belgium"
-msgstr "Белгия"
-
-#: includes/class-wc-countries.php:58
-msgid "Belau"
-msgstr "Палау"
-
-#: includes/class-wc-countries.php:59
-msgid "Belize"
-msgstr "Белиз"
-
-#: includes/class-wc-countries.php:60
-msgid "Benin"
-msgstr "Бенин"
-
-#: includes/class-wc-countries.php:61
-msgid "Bermuda"
-msgstr "Бермуда"
-
-#: includes/class-wc-countries.php:62
-msgid "Bhutan"
-msgstr "Бутан"
-
-#: includes/class-wc-countries.php:63
-msgid "Bolivia"
-msgstr "Боливия"
-
-#: includes/class-wc-countries.php:64
-msgid "Bonaire, Saint Eustatius and Saba"
-msgstr "Бонер, Сейнт Естатийс и Саба"
-
-#: includes/class-wc-countries.php:65
-msgid "Bosnia and Herzegovina"
-msgstr "Босна и Херцеговина"
-
-#: includes/class-wc-countries.php:66
-msgid "Botswana"
-msgstr "Ботсвана"
-
-#: includes/class-wc-countries.php:67
-msgid "Bouvet Island"
-msgstr "Буве"
-
-#: includes/class-wc-countries.php:68
-msgid "Brazil"
-msgstr "Бразилия"
-
-#: includes/class-wc-countries.php:69
-msgid "British Indian Ocean Territory"
-msgstr "Британска индоокеанска територия"
-
-#: includes/class-wc-countries.php:70
-msgid "British Virgin Islands"
-msgstr "Британски Вирджински острови"
-
-#: includes/class-wc-countries.php:71
-msgid "Brunei"
-msgstr "Бруней"
-
-#: includes/class-wc-countries.php:72
-msgid "Bulgaria"
-msgstr "България"
-
-#: includes/class-wc-countries.php:73
-msgid "Burkina Faso"
-msgstr "Буркина Фасо"
-
-#: includes/class-wc-countries.php:74
-msgid "Burundi"
-msgstr "Бурунди"
-
-#: includes/class-wc-countries.php:75
-msgid "Cambodia"
-msgstr "Камбоджа"
-
-#: includes/class-wc-countries.php:76
-msgid "Cameroon"
-msgstr "Камерун"
-
-#: includes/class-wc-countries.php:77
-msgid "Canada"
-msgstr "Канада"
-
-#: includes/class-wc-countries.php:78
-msgid "Cape Verde"
-msgstr "Кабо Верде"
-
-#: includes/class-wc-countries.php:79
-msgid "Cayman Islands"
-msgstr "Кайманови острови"
-
-#: includes/class-wc-countries.php:80
-msgid "Central African Republic"
-msgstr "Централноафриканска република"
-
-#: includes/class-wc-countries.php:81
-msgid "Chad"
-msgstr "Чад"
-
-#: includes/class-wc-countries.php:82
-msgid "Chile"
-msgstr "Чили"
-
-#: includes/class-wc-countries.php:83
-msgid "China"
-msgstr "Китай"
-
-#: includes/class-wc-countries.php:84
-msgid "Christmas Island"
-msgstr "Рождество"
-
-#: includes/class-wc-countries.php:85
-msgid "Cocos (Keeling) Islands"
-msgstr "Кокосови оствори"
-
-#: includes/class-wc-countries.php:86
-msgid "Colombia"
-msgstr "Колумбия"
-
-#: includes/class-wc-countries.php:87
-msgid "Comoros"
-msgstr "Коморски острови"
-
-#: includes/class-wc-countries.php:88
-msgid "Congo (Brazzaville)"
-msgstr "Конго (Бразвийл)"
-
-#: includes/class-wc-countries.php:89
-msgid "Congo (Kinshasa)"
-msgstr "Конго (Киншаса)"
-
-#: includes/class-wc-countries.php:90
-msgid "Cook Islands"
-msgstr "Кук"
-
-#: includes/class-wc-countries.php:91
-msgid "Costa Rica"
-msgstr "Коста Рика"
-
-#: includes/class-wc-countries.php:92
-msgid "Croatia"
-msgstr "Хърватия"
-
-#: includes/class-wc-countries.php:93
-msgid "Cuba"
-msgstr "Куба"
-
-#: includes/class-wc-countries.php:94
-msgid "Cura&Ccedil;ao"
-msgstr "Кюрасао"
-
-#: includes/class-wc-countries.php:95
-msgid "Cyprus"
-msgstr "Кипър"
-
-#: includes/class-wc-countries.php:96
-msgid "Czech Republic"
-msgstr "Република Чехия"
-
-#: includes/class-wc-countries.php:97
-msgid "Denmark"
-msgstr "Дания"
-
-#: includes/class-wc-countries.php:98
-msgid "Djibouti"
-msgstr "Джиботи"
-
-#: includes/class-wc-countries.php:99
-msgid "Dominica"
-msgstr "Доминика"
-
-#: includes/class-wc-countries.php:100
-msgid "Dominican Republic"
-msgstr "Република Доминикана"
-
-#: includes/class-wc-countries.php:101
-msgid "Ecuador"
-msgstr "Еквадор"
-
-#: includes/class-wc-countries.php:102
-msgid "Egypt"
-msgstr "Египет"
-
-#: includes/class-wc-countries.php:103
-msgid "El Salvador"
-msgstr "Салвадор"
-
-#: includes/class-wc-countries.php:104
-msgid "Equatorial Guinea"
-msgstr "Екваториална Гвинея"
-
-#: includes/class-wc-countries.php:105
-msgid "Eritrea"
-msgstr "Еритея"
-
-#: includes/class-wc-countries.php:106
-msgid "Estonia"
-msgstr "Естония"
-
-#: includes/class-wc-countries.php:107
-msgid "Ethiopia"
-msgstr "Етеопия"
-
-#: includes/class-wc-countries.php:108
-msgid "Falkland Islands"
-msgstr "Фолкландски острови"
-
-#: includes/class-wc-countries.php:109
-msgid "Faroe Islands"
-msgstr "Ферьорски острови"
-
-#: includes/class-wc-countries.php:110
-msgid "Fiji"
-msgstr "Фиджи"
-
-#: includes/class-wc-countries.php:111
-msgid "Finland"
-msgstr "Финландия"
-
-#: includes/class-wc-countries.php:112
-msgid "France"
-msgstr "Франция"
-
-#: includes/class-wc-countries.php:113
-msgid "French Guiana"
-msgstr "Френска Гвиана"
-
-#: includes/class-wc-countries.php:114
-msgid "French Polynesia"
-msgstr "Френска Полинезия"
-
-#: includes/class-wc-countries.php:115
-msgid "French Southern Territories"
-msgstr "Френски южни и антарктически територии"
-
-#: includes/class-wc-countries.php:116
-msgid "Gabon"
-msgstr "Габон"
-
-#: includes/class-wc-countries.php:117
-msgid "Gambia"
-msgstr "Гамбия"
-
-#: includes/class-wc-countries.php:119
-msgid "Germany"
-msgstr "Германия"
-
-#: includes/class-wc-countries.php:120
-msgid "Ghana"
-msgstr "Гана"
-
-#: includes/class-wc-countries.php:121
-msgid "Gibraltar"
-msgstr "Гибралтар"
-
-#: includes/class-wc-countries.php:122
-msgid "Greece"
-msgstr "Гърция"
-
-#: includes/class-wc-countries.php:123
-msgid "Greenland"
-msgstr "Гренландия"
-
-#: includes/class-wc-countries.php:124
-msgid "Grenada"
-msgstr "Гренада"
-
-#: includes/class-wc-countries.php:125
-msgid "Guadeloupe"
-msgstr "Гуаделупе"
-
-#: includes/class-wc-countries.php:126
-msgid "Guatemala"
-msgstr "Гватемала"
-
-#: includes/class-wc-countries.php:127
-msgid "Guernsey"
-msgstr "Гърнси"
-
-#: includes/class-wc-countries.php:128
-msgid "Guinea"
-msgstr "Гвинея"
-
-#: includes/class-wc-countries.php:129
-msgid "Guinea-Bissau"
-msgstr "Гвинея-Бисау"
-
-#: includes/class-wc-countries.php:130
-msgid "Guyana"
-msgstr "Гуана"
-
-#: includes/class-wc-countries.php:131
-msgid "Haiti"
-msgstr "Хаити"
-
-#: includes/class-wc-countries.php:132
-msgid "Heard Island and McDonald Islands"
-msgstr "Хърд и Макдоналд"
-
-#: includes/class-wc-countries.php:133
-msgid "Honduras"
-msgstr "Хондурас"
-
-#: includes/class-wc-countries.php:134
-msgid "Hong Kong"
-msgstr "Хонг Конг"
-
-#: includes/class-wc-countries.php:135
-msgid "Hungary"
-msgstr "Унгария"
-
-#: includes/class-wc-countries.php:136
-msgid "Iceland"
-msgstr "Исландия"
-
-#: includes/class-wc-countries.php:137
-msgid "India"
-msgstr "Индия"
-
-#: includes/class-wc-countries.php:138
-msgid "Indonesia"
-msgstr "Индонезия"
-
-#: includes/class-wc-countries.php:139
-msgid "Iran"
-msgstr "Иран"
-
-#: includes/class-wc-countries.php:140
-msgid "Iraq"
-msgstr "Ирак"
-
-#: includes/class-wc-countries.php:141
-msgid "Republic of Ireland"
-msgstr "Република Ирландия"
-
-#: includes/class-wc-countries.php:142
-msgid "Isle of Man"
-msgstr "Ман"
-
-#: includes/class-wc-countries.php:143
-msgid "Israel"
-msgstr "Израел"
-
-#: includes/class-wc-countries.php:144
-msgid "Italy"
-msgstr "Италия"
-
-#: includes/class-wc-countries.php:145
-msgid "Ivory Coast"
-msgstr "Кот д'Ивоар"
-
-#: includes/class-wc-countries.php:146
-msgid "Jamaica"
-msgstr "Ямайка"
-
-#: includes/class-wc-countries.php:147
-msgid "Japan"
-msgstr "Япония"
-
-#: includes/class-wc-countries.php:148
-msgid "Jersey"
-msgstr "Джърси"
-
-#: includes/class-wc-countries.php:149
-msgid "Jordan"
-msgstr "Йордания"
-
-#: includes/class-wc-countries.php:150
-msgid "Kazakhstan"
-msgstr "Казахстан"
-
-#: includes/class-wc-countries.php:151
-msgid "Kenya"
-msgstr "Кения"
-
-#: includes/class-wc-countries.php:152
-msgid "Kiribati"
-msgstr "Кирибати"
-
-#: includes/class-wc-countries.php:153
-msgid "Kuwait"
-msgstr "Кувейт"
-
-#: includes/class-wc-countries.php:154
-msgid "Kyrgyzstan"
-msgstr "Киргизстан"
-
-#: includes/class-wc-countries.php:155
-msgid "Laos"
-msgstr "Лаос"
-
-#: includes/class-wc-countries.php:156
-msgid "Latvia"
-msgstr "Латвия"
-
-#: includes/class-wc-countries.php:157
-msgid "Lebanon"
-msgstr "Ливан"
-
-#: includes/class-wc-countries.php:158
-msgid "Lesotho"
-msgstr "Лесото"
-
-#: includes/class-wc-countries.php:159
-msgid "Liberia"
-msgstr "Либерия"
-
-#: includes/class-wc-countries.php:160
-msgid "Libya"
-msgstr "Либия"
-
-#: includes/class-wc-countries.php:161
-msgid "Liechtenstein"
-msgstr "Лихтенщайн"
-
-#: includes/class-wc-countries.php:162
-msgid "Lithuania"
-msgstr "Литуана"
-
-#: includes/class-wc-countries.php:163
-msgid "Luxembourg"
-msgstr "Люксембург"
-
-#: includes/class-wc-countries.php:164
-msgid "Macao S.A.R., China"
-msgstr "Макао, Китай"
-
-#: includes/class-wc-countries.php:165
-msgid "Macedonia"
-msgstr "Македония"
-
-#: includes/class-wc-countries.php:166
-msgid "Madagascar"
-msgstr "Мадагаскар"
-
-#: includes/class-wc-countries.php:167
-msgid "Malawi"
-msgstr "Малави"
-
-#: includes/class-wc-countries.php:168
-msgid "Malaysia"
-msgstr "Малайзия"
-
-#: includes/class-wc-countries.php:169
-msgid "Maldives"
-msgstr "Малдиви"
-
-#: includes/class-wc-countries.php:170
-msgid "Mali"
-msgstr "Мали"
-
-#: includes/class-wc-countries.php:171
-msgid "Malta"
-msgstr "Малта"
-
-#: includes/class-wc-countries.php:172
-msgid "Marshall Islands"
-msgstr "Маршалови острови"
-
-#: includes/class-wc-countries.php:173
-msgid "Martinique"
-msgstr "Мартиника"
-
-#: includes/class-wc-countries.php:174
-msgid "Mauritania"
-msgstr "Мавритания"
-
-#: includes/class-wc-countries.php:175
-msgid "Mauritius"
-msgstr "Мавриций"
-
-#: includes/class-wc-countries.php:176
-msgid "Mayotte"
-msgstr "Майот"
-
-#: includes/class-wc-countries.php:177
-msgid "Mexico"
-msgstr "Мексико"
-
-#: includes/class-wc-countries.php:178
-msgid "Micronesia"
-msgstr "Микронезия"
-
-#: includes/class-wc-countries.php:179
-msgid "Moldova"
-msgstr "Молдова"
-
-#: includes/class-wc-countries.php:180
-msgid "Monaco"
-msgstr "Монако"
-
-#: includes/class-wc-countries.php:181
-msgid "Mongolia"
-msgstr "Монголия"
-
-#: includes/class-wc-countries.php:182
-msgid "Montenegro"
-msgstr "Монтенегро"
-
-#: includes/class-wc-countries.php:183
-msgid "Montserrat"
-msgstr "Монсерат"
-
-#: includes/class-wc-countries.php:184
-msgid "Morocco"
-msgstr "Мароко"
-
-#: includes/class-wc-countries.php:185
-msgid "Mozambique"
-msgstr "Мозамбик"
-
-#: includes/class-wc-countries.php:186
-msgid "Myanmar"
-msgstr "Мианмар"
-
-#: includes/class-wc-countries.php:187
-msgid "Namibia"
-msgstr "Намибия"
-
-#: includes/class-wc-countries.php:188
-msgid "Nauru"
-msgstr "Науру"
-
-#: includes/class-wc-countries.php:189
-msgid "Nepal"
-msgstr "Непал"
-
-#: includes/class-wc-countries.php:190
-msgid "Netherlands"
-msgstr "Нидерландия"
-
-#: includes/class-wc-countries.php:191
-msgid "Netherlands Antilles"
-msgstr "Нидерландски Антили"
-
-#: includes/class-wc-countries.php:192
-msgid "New Caledonia"
-msgstr "Нова Каледония"
-
-#: includes/class-wc-countries.php:193
-msgid "New Zealand"
-msgstr "Нова Зеландия"
-
-#: includes/class-wc-countries.php:194
-msgid "Nicaragua"
-msgstr "Никарагуа"
-
-#: includes/class-wc-countries.php:195
-msgid "Niger"
-msgstr "Нигер"
-
-#: includes/class-wc-countries.php:196
-msgid "Nigeria"
-msgstr "Нигерия"
-
-#: includes/class-wc-countries.php:197
-msgid "Niue"
-msgstr "Ниуе"
-
-#: includes/class-wc-countries.php:198
-msgid "Norfolk Island"
-msgstr "Норфолк"
-
-#: includes/class-wc-countries.php:199
-msgid "North Korea"
-msgstr "Северна Корея"
-
-#: includes/class-wc-countries.php:200
-msgid "Norway"
-msgstr "Норвегия"
-
-#: includes/class-wc-countries.php:201
-msgid "Oman"
-msgstr "Оман"
-
-#: includes/class-wc-countries.php:202
-msgid "Pakistan"
-msgstr "Пакистан"
-
-#: includes/class-wc-countries.php:203
-msgid "Palestinian Territory"
-msgstr "Палестинска територия"
-
-#: includes/class-wc-countries.php:204
-msgid "Panama"
-msgstr "Панама"
-
-#: includes/class-wc-countries.php:205
-msgid "Papua New Guinea"
-msgstr "Папа Нова Гвинея"
-
-#: includes/class-wc-countries.php:206
-msgid "Paraguay"
-msgstr "Парагуа"
-
-#: includes/class-wc-countries.php:207
-msgid "Peru"
-msgstr "Перу"
-
-#: includes/class-wc-countries.php:208
-msgid "Philippines"
-msgstr "Филипини"
-
-#: includes/class-wc-countries.php:209
-msgid "Pitcairn"
-msgstr "Питкерн"
-
-#: includes/class-wc-countries.php:210
-msgid "Poland"
-msgstr "Полша"
-
-#: includes/class-wc-countries.php:211
-msgid "Portugal"
-msgstr "Португалия"
-
-#: includes/class-wc-countries.php:212
-msgid "Qatar"
-msgstr "Катар"
-
-#: includes/class-wc-countries.php:213
-msgid "Reunion"
-msgstr "Реюнион"
-
-#: includes/class-wc-countries.php:214
-msgid "Romania"
-msgstr "Ромъния"
-
-#: includes/class-wc-countries.php:215
-msgid "Russia"
-msgstr "Русия"
-
-#: includes/class-wc-countries.php:216
-msgid "Rwanda"
-msgstr "Руанда"
-
-#: includes/class-wc-countries.php:217
-msgid "Saint Barth&eacute;lemy"
-msgstr "Сен Бартелми"
-
-#: includes/class-wc-countries.php:218
-msgid "Saint Helena"
-msgstr "Сен Хелена"
-
-#: includes/class-wc-countries.php:219
-msgid "Saint Kitts and Nevis"
-msgstr "Сейнт Китс и Невис"
-
-#: includes/class-wc-countries.php:220
-msgid "Saint Lucia"
-msgstr "Сент Лусия"
-
-#: includes/class-wc-countries.php:221
-msgid "Saint Martin (French part)"
-msgstr "Сент Мартин (Френска част)"
-
-#: includes/class-wc-countries.php:222
-msgid "Saint Martin (Dutch part)"
-msgstr "Сент Мартин (Холандска част)"
-
-#: includes/class-wc-countries.php:223
-msgid "Saint Pierre and Miquelon"
-msgstr "Сен Пиер и Микелон"
-
-#: includes/class-wc-countries.php:224
-msgid "Saint Vincent and the Grenadines"
-msgstr "Сейнт Винсент и Гренадини"
-
-#: includes/class-wc-countries.php:225
-msgid "San Marino"
-msgstr "Сан Марино"
-
-#: includes/class-wc-countries.php:226
-msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-msgstr "Сао Томе и Принсипи"
-
-#: includes/class-wc-countries.php:227
-msgid "Saudi Arabia"
-msgstr "Саудитска Арабия"
-
-#: includes/class-wc-countries.php:228
-msgid "Senegal"
-msgstr "Сенегал"
-
-#: includes/class-wc-countries.php:229
-msgid "Serbia"
-msgstr "Сърбия"
-
-#: includes/class-wc-countries.php:230
-msgid "Seychelles"
-msgstr "Сейшели"
-
-#: includes/class-wc-countries.php:231
-msgid "Sierra Leone"
-msgstr "Сиера Леоне"
-
-#: includes/class-wc-countries.php:232
-msgid "Singapore"
-msgstr "Сингапур"
-
-#: includes/class-wc-countries.php:233
-msgid "Slovakia"
-msgstr "Словакия"
-
-#: includes/class-wc-countries.php:234
-msgid "Slovenia"
-msgstr "Словения"
-
-#: includes/class-wc-countries.php:235
-msgid "Solomon Islands"
-msgstr "Соломонови острови"
-
-#: includes/class-wc-countries.php:236
-msgid "Somalia"
-msgstr "Сомалия"
-
-#: includes/class-wc-countries.php:237
-msgid "South Africa"
-msgstr "Република Южна Африка"
-
-#: includes/class-wc-countries.php:238
-msgid "South Georgia/Sandwich Islands"
-msgstr "Южна Джорджия и Южни Сандвичеви острови"
-
-#: includes/class-wc-countries.php:239
-msgid "South Korea"
-msgstr "Южна Корея"
-
-#: includes/class-wc-countries.php:240
-msgid "South Sudan"
-msgstr "Южен Судан"
-
-#: includes/class-wc-countries.php:241
-msgid "Spain"
-msgstr "Испания"
-
-#: includes/class-wc-countries.php:242
-msgid "Sri Lanka"
-msgstr "Шри Ланка"
-
-#: includes/class-wc-countries.php:243
-msgid "Sudan"
-msgstr "Судан"
-
-#: includes/class-wc-countries.php:244
-msgid "Suriname"
-msgstr "Суринам"
-
-#: includes/class-wc-countries.php:245
-msgid "Svalbard and Jan Mayen"
-msgstr "Свалбард и Ян Майен"
-
-#: includes/class-wc-countries.php:246
-msgid "Swaziland"
-msgstr "Свазиленд"
-
-#: includes/class-wc-countries.php:247
-msgid "Sweden"
-msgstr "Швеция"
-
-#: includes/class-wc-countries.php:248
-msgid "Switzerland"
-msgstr "Швейцария"
-
-#: includes/class-wc-countries.php:249
-msgid "Syria"
-msgstr "Сирия"
-
-#: includes/class-wc-countries.php:250
-msgid "Taiwan"
-msgstr "Тайван"
-
-#: includes/class-wc-countries.php:251
-msgid "Tajikistan"
-msgstr "Таджикистан"
-
-#: includes/class-wc-countries.php:252
-msgid "Tanzania"
-msgstr "Танзания"
-
-#: includes/class-wc-countries.php:253
-msgid "Thailand"
-msgstr "Тайланд"
-
-#: includes/class-wc-countries.php:254
-msgid "Timor-Leste"
-msgstr "Източен Тимор"
-
-#: includes/class-wc-countries.php:255
-msgid "Togo"
-msgstr "Того"
-
-#: includes/class-wc-countries.php:256
-msgid "Tokelau"
-msgstr "Токелау"
-
-#: includes/class-wc-countries.php:257
-msgid "Tonga"
-msgstr "Тонга"
-
-#: includes/class-wc-countries.php:258
-msgid "Trinidad and Tobago"
-msgstr "Тринидат и Тобаго"
-
-#: includes/class-wc-countries.php:259
-msgid "Tunisia"
-msgstr "Тунис"
-
-#: includes/class-wc-countries.php:260
-msgid "Turkey"
-msgstr "Турция"
-
-#: includes/class-wc-countries.php:261
-msgid "Turkmenistan"
-msgstr "Тюркменистан"
-
-#: includes/class-wc-countries.php:262
-msgid "Turks and Caicos Islands"
-msgstr "Търкс и Кайкос"
-
-#: includes/class-wc-countries.php:263
-msgid "Tuvalu"
-msgstr "Тувалу"
-
-#: includes/class-wc-countries.php:264
-msgid "Uganda"
-msgstr "Уганда"
-
-#: includes/class-wc-countries.php:265
-msgid "Ukraine"
-msgstr "Украйна"
-
-#: includes/class-wc-countries.php:266
-msgid "United Arab Emirates"
-msgstr "Обединени Арабски Емирства"
-
-#: includes/class-wc-countries.php:267
-msgid "United Kingdom (UK)"
-msgstr "Великобритания "
-
-#: includes/class-wc-countries.php:268
-msgid "United States (US)"
-msgstr "Съединени Американски Щати (САЩ)"
-
 #: includes/class-wc-countries.php:269
-msgid "Uruguay"
-msgstr "Уругвай"
-
-#: includes/class-wc-countries.php:270
-msgid "Uzbekistan"
-msgstr "Узбекистан"
-
-#: includes/class-wc-countries.php:271
-msgid "Vanuatu"
-msgstr "Вануату"
-
-#: includes/class-wc-countries.php:272
-msgid "Vatican"
-msgstr "Ватикана"
-
-#: includes/class-wc-countries.php:273
-msgid "Venezuela"
-msgstr "Венецуела"
-
-#: includes/class-wc-countries.php:274
-msgid "Vietnam"
-msgstr "Виетнам"
-
-#: includes/class-wc-countries.php:275
-msgid "Wallis and Futuna"
-msgstr "Уолис и Футуна"
-
-#: includes/class-wc-countries.php:276
-msgid "Western Sahara"
-msgstr "Западна Сахара"
-
-#: includes/class-wc-countries.php:277
-msgid "Western Samoa"
-msgstr "Западна Самоа"
-
-#: includes/class-wc-countries.php:278
-msgid "Yemen"
-msgstr "Йемен"
-
-#: includes/class-wc-countries.php:279
-msgid "Zambia"
-msgstr "Замбия"
-
-#: includes/class-wc-countries.php:280
-msgid "Zimbabwe"
-msgstr "Зимбабве"
-
-#: includes/class-wc-countries.php:484
 msgid "to the"
 msgstr "към"
 
-#: includes/class-wc-countries.php:485
+#: includes/class-wc-countries.php:270
 msgid "to"
 msgstr "към"
 
-#: includes/class-wc-countries.php:498
+#: includes/class-wc-countries.php:282
 msgid "the"
 msgstr " "
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "VAT"
 msgstr "ДДС"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "Tax"
 msgstr "Такса"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. VAT)"
 msgstr "(вкл. ДДС)"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. tax)"
 msgstr "(вкл. такса)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. VAT)"
 msgstr "(без ДДС)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. tax)"
 msgstr "(без такса)"
-
-#: includes/class-wc-countries.php:730
-msgid "Country"
-msgstr "Държава"
-
-#: includes/class-wc-countries.php:735
-msgid "First Name"
-msgstr "Име"
-
-#: includes/class-wc-countries.php:740
-msgid "Last Name"
-msgstr "Фамилия"
-
-#: includes/class-wc-countries.php:746
-msgid "Company Name"
-msgstr "Име фирма"
-
-#: includes/class-wc-countries.php:750
-msgid "Address"
-msgstr "Адрес"
-
-#: includes/class-wc-countries.php:751
-msgctxt "placeholder"
-msgid "Street address"
-msgstr "Улица"
-
-#: includes/class-wc-countries.php:756
-msgctxt "placeholder"
-msgid "Apartment, suite, unit etc. (optional)"
-msgstr "Апартамент, номер, отдел и др. (по желание)"
-
-#: includes/class-wc-countries.php:761 includes/class-wc-countries.php:762
-msgid "Town / City"
-msgstr "Град"
-
-#: includes/class-wc-countries.php:768 includes/class-wc-countries.php:769
-msgid "State / County"
-msgstr "Област"
-
-#: includes/class-wc-countries.php:775 includes/class-wc-countries.php:776
-#: templates/cart/shipping-calculator.php:80
-msgid "Postcode / Zip"
-msgstr "Пощенски код"
-
-#: includes/class-wc-countries.php:838
-msgid "District"
-msgstr "Район"
-
-#: includes/class-wc-countries.php:845 includes/class-wc-countries.php:861
-#: includes/class-wc-countries.php:881 includes/class-wc-countries.php:942
-#: includes/class-wc-countries.php:961 includes/class-wc-countries.php:966
-#: includes/class-wc-countries.php:978 includes/class-wc-countries.php:1028
-#: includes/class-wc-countries.php:1052 includes/class-wc-countries.php:1093
-msgid "Province"
-msgstr "Провинция"
-
-#: includes/class-wc-countries.php:867
-msgid "Canton"
-msgstr "Кантон"
-
-#: includes/class-wc-countries.php:876 includes/class-wc-countries.php:1034
-msgid "Municipality"
-msgstr "Община"
-
-#: includes/class-wc-countries.php:929
-msgid "Town / District"
-msgstr "Квартал"
-
-#: includes/class-wc-countries.php:932
-msgid "Region"
-msgstr "Район"
-
-#: includes/class-wc-countries.php:937 includes/class-wc-countries.php:1068
-msgid "County"
-msgstr "Държава"
-
-#: includes/class-wc-countries.php:1057
-msgid "Zip"
-msgstr "Пощ. код"
-
-#: includes/class-wc-countries.php:1060
-msgid "State"
-msgstr "Област "
-
-#: includes/class-wc-countries.php:1065
-msgid "Postcode"
-msgstr "Пощенски код"
-
-#: includes/class-wc-countries.php:1173
-msgid "Email Address"
-msgstr "E-mail"
-
-#: includes/class-wc-countries.php:1179
-msgid "Phone"
-msgstr "Телефон"
 
 #: includes/class-wc-coupon.php:578
 msgid "Coupon code applied successfully."
@@ -4985,67 +4774,67 @@ msgstr "Съжаляваме, този купон не е валиден за п
 msgid "Please enter a coupon code."
 msgstr "Моля, въведете код на купона."
 
-#: includes/class-wc-download-handler.php:37
+#: includes/class-wc-download-handler.php:42
 msgid "Invalid email address."
 msgstr "Невалиден email адрес."
 
-#: includes/class-wc-download-handler.php:37
-#: includes/class-wc-download-handler.php:62
-#: includes/class-wc-download-handler.php:83
-#: includes/class-wc-download-handler.php:90
+#: includes/class-wc-download-handler.php:42
+#: includes/class-wc-download-handler.php:67
+#: includes/class-wc-download-handler.php:88
 #: includes/class-wc-download-handler.php:95
-#: includes/class-wc-download-handler.php:99
-#: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:100
+#: includes/class-wc-download-handler.php:104
+#: includes/class-wc-download-handler.php:148
+#: includes/class-wc-download-handler.php:309
 msgid "Go to homepage"
 msgstr "Обратно към началната страница"
 
-#: includes/class-wc-download-handler.php:62
+#: includes/class-wc-download-handler.php:67
 msgid "Invalid download."
 msgstr "Невалидно сваляне."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "You must be logged in to download files."
 msgstr "Трябва да влезете в системата за да сваляте файлове."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:27
 #: templates/myaccount/form-login.php:46
 msgid "Login"
 msgstr "Вход"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "Log in to Download Files"
 msgstr "Влизане за изтегляне на файлове"
 
-#: includes/class-wc-download-handler.php:77
+#: includes/class-wc-download-handler.php:82
 msgid "This is not your download link."
 msgstr "Това не е валиден линк за сваляне."
 
-#: includes/class-wc-download-handler.php:83
+#: includes/class-wc-download-handler.php:88
 msgid "Product no longer exists."
 msgstr "Продукта вече не съществува"
 
-#: includes/class-wc-download-handler.php:90
-#: includes/class-wc-form-handler.php:546
+#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-form-handler.php:541
 #: includes/shortcodes/class-wc-shortcode-checkout.php:172
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
 msgstr "Невалидна поръчка."
 
-#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-download-handler.php:100
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "Съжаляваме, достигнахте лимита за сваляне на този файл"
 
-#: includes/class-wc-download-handler.php:99
+#: includes/class-wc-download-handler.php:104
 msgid "Sorry, this download has expired"
 msgstr "Съжаляваме, това сваляне е изтекло"
 
-#: includes/class-wc-download-handler.php:143
+#: includes/class-wc-download-handler.php:148
 msgid "No file defined"
 msgstr "Няма зададен файл."
 
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:309
 msgid "File not found"
 msgstr "Файла не е намерен"
 
@@ -5087,149 +4876,149 @@ msgstr "Предварителна поръчка на продукт"
 msgid "%s units of %s have been backordered in order %s."
 msgstr "%s бройки от %s са предварително продадени в поръчка %s."
 
-#: includes/class-wc-form-handler.php:129
+#: includes/class-wc-form-handler.php:125
 msgid "Address changed successfully."
 msgstr "Адресът беше променен успешно."
 
-#: includes/class-wc-form-handler.php:178
+#: includes/class-wc-form-handler.php:174
 msgid "Please enter your name."
 msgstr "Моля, въведете вашето име."
 
-#: includes/class-wc-form-handler.php:182 includes/wc-user-functions.php:48
+#: includes/class-wc-form-handler.php:178 includes/wc-user-functions.php:48
 msgid "Please provide a valid email address."
 msgstr "Моля дайте валиден email адрес."
 
-#: includes/class-wc-form-handler.php:184
+#: includes/class-wc-form-handler.php:180
 msgid "This email address is already registered."
 msgstr "Този email вече се използва, моля изберете друг."
 
-#: includes/class-wc-form-handler.php:188
+#: includes/class-wc-form-handler.php:184
 msgid "Your current password is incorrect."
 msgstr "Текущата ви парола е невалидна."
 
-#: includes/class-wc-form-handler.php:193
+#: includes/class-wc-form-handler.php:189
 msgid "Please fill out all password fields."
 msgstr "Попълнете всички полета за парола."
 
-#: includes/class-wc-form-handler.php:197
+#: includes/class-wc-form-handler.php:193
 msgid "Please enter your current password."
 msgstr "Въведете текущата си парола."
 
-#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:197
 msgid "Please re-enter your password."
 msgstr "Моля, въведете отново вашата парола."
 
-#: includes/class-wc-form-handler.php:205
-#: includes/class-wc-form-handler.php:836
+#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:831
 msgid "Passwords do not match."
 msgstr "Паролите не съвпадат."
 
-#: includes/class-wc-form-handler.php:227
+#: includes/class-wc-form-handler.php:223
 msgid "Account details changed successfully."
 msgstr "Данните на профила бяха променени успешно."
 
-#: includes/class-wc-form-handler.php:355
+#: includes/class-wc-form-handler.php:350
 msgid "Payment method added."
 msgstr "Методът за разплащане е добавен."
 
-#: includes/class-wc-form-handler.php:388
-#: includes/class-wc-form-handler.php:447
+#: includes/class-wc-form-handler.php:383
+#: includes/class-wc-form-handler.php:442
 msgid "Cart updated."
 msgstr "Количката е обновена."
 
-#: includes/class-wc-form-handler.php:423
+#: includes/class-wc-form-handler.php:418
 msgid "You can only have 1 %s in your cart."
 msgstr "Имате само 1 %s в количката."
 
-#: includes/class-wc-form-handler.php:513
+#: includes/class-wc-form-handler.php:508
 msgid "The cart has been filled with the items from your previous order."
 msgstr "Количката съдържа продукти от предишната ви поръчка."
 
-#: includes/class-wc-form-handler.php:536
+#: includes/class-wc-form-handler.php:531
 msgid "Order cancelled by customer."
 msgstr "Поръчката е канселирана от клиента."
 
-#: includes/class-wc-form-handler.php:539
+#: includes/class-wc-form-handler.php:534
 msgid "Your order was cancelled."
 msgstr "Вашата поръчка беше канселирана."
 
-#: includes/class-wc-form-handler.php:544
+#: includes/class-wc-form-handler.php:539
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr "Вашата поръчка вече не може да бъде отказа. Свържете се с нас ако имате нужда от съдействие."
 
-#: includes/class-wc-form-handler.php:584
-#: includes/class-wc-form-handler.php:644
+#: includes/class-wc-form-handler.php:579
+#: includes/class-wc-form-handler.php:639
 msgid "Please choose product options&hellip;"
 msgstr "Моля, изберете опции на продукта&hellip;"
 
-#: includes/class-wc-form-handler.php:678
+#: includes/class-wc-form-handler.php:673
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "Моля изберете наличност за продуктите които искате да добавите към количката&hellip;"
 
-#: includes/class-wc-form-handler.php:685
+#: includes/class-wc-form-handler.php:680
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "Моля, изберете продукт за да го добавите във вашата количка&hellip;"
 
-#: includes/class-wc-form-handler.php:745
-#: includes/class-wc-form-handler.php:749
-#: includes/class-wc-form-handler.php:753
-#: includes/class-wc-form-handler.php:762
-#: includes/class-wc-form-handler.php:888
+#: includes/class-wc-form-handler.php:740
+#: includes/class-wc-form-handler.php:744
+#: includes/class-wc-form-handler.php:748
+#: includes/class-wc-form-handler.php:757
+#: includes/class-wc-form-handler.php:883
 msgid "Error"
 msgstr "Грешка"
 
-#: includes/class-wc-form-handler.php:749
+#: includes/class-wc-form-handler.php:744
 msgid "Username is required."
 msgstr "Потребилтеското име е задължително."
 
-#: includes/class-wc-form-handler.php:753
+#: includes/class-wc-form-handler.php:748
 msgid "Password is required."
 msgstr "Паролата е задължителна."
 
-#: includes/class-wc-form-handler.php:762
+#: includes/class-wc-form-handler.php:757
 msgid "A user could not be found with this email address."
 msgstr "Не може да се намери потребител с този email адрес."
 
-#: includes/class-wc-form-handler.php:787
+#: includes/class-wc-form-handler.php:782
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "Вие сте влезли с <strong>%s</strong>."
 
-#: includes/class-wc-form-handler.php:831
+#: includes/class-wc-form-handler.php:826
 msgid "Please enter your password."
 msgstr "Моля, въведете парола."
 
-#: includes/class-wc-form-handler.php:904 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:899 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr "ГРЕШКА"
 
-#: includes/class-wc-form-handler.php:904
+#: includes/class-wc-form-handler.php:899
 msgid "Anti-spam field was filled in."
 msgstr "Полето за спам проверка трябва да се попълни."
 
-#: includes/class-wc-frontend-scripts.php:123
+#: includes/class-wc-frontend-scripts.php:149
 msgid "Please select a rating"
 msgstr "Изберете стойност"
 
-#: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1603
+#: includes/class-wc-frontend-scripts.php:168
+#: includes/wc-template-functions.php:1594
 msgid "required"
 msgstr "задължително"
 
-#: includes/class-wc-frontend-scripts.php:164
+#: includes/class-wc-frontend-scripts.php:196
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "Няма продукти отговарящи на вашето търсене. Изберете друга комбинация."
 
-#: includes/class-wc-frontend-scripts.php:165
+#: includes/class-wc-frontend-scripts.php:197
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "Продуктът не е наличен. Изберете друга комбинация"
 
-#: includes/class-wc-frontend-scripts.php:170
+#: includes/class-wc-frontend-scripts.php:204
 msgid "Select an option&hellip;"
 msgstr "Избор на опция&hellip;"
 
@@ -5254,7 +5043,7 @@ msgid "Cart"
 msgstr "Количка"
 
 #: includes/class-wc-install.php:227
-msgctxt "Paeg slug"
+msgctxt "Page slug"
 msgid "checkout"
 msgstr "porachka"
 
@@ -5326,204 +5115,208 @@ msgstr "WooCommerce"
 msgid "Order status changed from %s to %s."
 msgstr "Статуса на поръчкате е променен от %s на %s."
 
+#: includes/class-wc-order.php:1592
+msgid "Item #%s stock reduced from %s to %s."
+msgstr "Наличността на продукт #%s намалена от %s на %s."
+
 #: includes/class-wc-order.php:1602
 msgid "Order item stock reduced successfully."
 msgstr "Наличността на продукта в поръчката е намалена успешно."
 
-#: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
+#: includes/class-wc-post-types.php:56 includes/class-wc-post-types.php:58
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
 msgstr "Категории продукти"
 
-#: includes/class-wc-post-types.php:58
+#: includes/class-wc-post-types.php:59
 msgid "Product Category"
 msgstr "Категория на продукт"
 
-#: includes/class-wc-post-types.php:59
+#: includes/class-wc-post-types.php:60
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr "Категории"
 
-#: includes/class-wc-post-types.php:60
+#: includes/class-wc-post-types.php:61
 msgid "Search Product Categories"
 msgstr "Търси в категориите продукти"
 
-#: includes/class-wc-post-types.php:61
+#: includes/class-wc-post-types.php:62
 msgid "All Product Categories"
 msgstr "Всички категории"
 
-#: includes/class-wc-post-types.php:62
+#: includes/class-wc-post-types.php:63
 msgid "Parent Product Category"
 msgstr "Родителска категория продукти"
 
-#: includes/class-wc-post-types.php:63
+#: includes/class-wc-post-types.php:64
 msgid "Parent Product Category:"
 msgstr "Родителска категория продукти:"
 
-#: includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:65
 msgid "Edit Product Category"
 msgstr "Редактирай категорията на продукта"
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:66
 msgid "Update Product Category"
 msgstr "Обнови категорията на продукта"
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:67
 msgid "Add New Product Category"
 msgstr "Добави нова продуктова категория"
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:68
 msgid "New Product Category Name"
 msgstr "Име на новата продуктова категория"
 
-#: includes/class-wc-post-types.php:78
+#: includes/class-wc-post-types.php:79
 #: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "produktova-kategoria"
 
-#: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
+#: includes/class-wc-post-types.php:91 includes/class-wc-post-types.php:93
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
 msgstr "Етикети на продукта"
 
-#: includes/class-wc-post-types.php:93
+#: includes/class-wc-post-types.php:94
 msgid "Product Tag"
 msgstr "Етикет на продукт"
 
-#: includes/class-wc-post-types.php:94
+#: includes/class-wc-post-types.php:95
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "Етикети"
 
-#: includes/class-wc-post-types.php:95
+#: includes/class-wc-post-types.php:96
 msgid "Search Product Tags"
 msgstr "Търси в етикетите"
 
-#: includes/class-wc-post-types.php:96
+#: includes/class-wc-post-types.php:97
 msgid "All Product Tags"
 msgstr "Всички продуктови етикети"
 
-#: includes/class-wc-post-types.php:97
+#: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag"
 msgstr "Етикет на родителски продукт"
 
-#: includes/class-wc-post-types.php:98
+#: includes/class-wc-post-types.php:99
 msgid "Parent Product Tag:"
 msgstr "Етикет на родителски продукт:"
 
-#: includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:100
 msgid "Edit Product Tag"
 msgstr "Редактирай продуктовия етикет"
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:101
 msgid "Update Product Tag"
 msgstr "Обнови продуктовия етикет"
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:102
 msgid "Add New Product Tag"
 msgstr "Добави нов продуктов етикет"
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:103
 msgid "New Product Tag Name"
 msgstr "Име на новия продуктов етикет"
 
-#: includes/class-wc-post-types.php:113
+#: includes/class-wc-post-types.php:114
 #: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "produktov-etiket"
 
-#: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
+#: includes/class-wc-post-types.php:125 includes/class-wc-post-types.php:127
 msgid "Shipping Classes"
 msgstr "Класове доставка"
 
-#: includes/class-wc-post-types.php:127
+#: includes/class-wc-post-types.php:128
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 msgid "Shipping Class"
 msgstr "Клас доставка"
 
-#: includes/class-wc-post-types.php:128
+#: includes/class-wc-post-types.php:129
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "Класове на доставка"
 
-#: includes/class-wc-post-types.php:129
+#: includes/class-wc-post-types.php:130
 msgid "Search Shipping Classes"
 msgstr "Търси клас доставка"
 
-#: includes/class-wc-post-types.php:130
+#: includes/class-wc-post-types.php:131
 msgid "All Shipping Classes"
 msgstr "Всички класове на доставка"
 
-#: includes/class-wc-post-types.php:131
+#: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class"
 msgstr "Родителски клас доставка"
 
-#: includes/class-wc-post-types.php:132
+#: includes/class-wc-post-types.php:133
 msgid "Parent Shipping Class:"
 msgstr "Родителски клас доставка:"
 
-#: includes/class-wc-post-types.php:133
+#: includes/class-wc-post-types.php:134
 msgid "Edit Shipping Class"
 msgstr "Редактирай класа на доставка"
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:135
 msgid "Update Shipping Class"
 msgstr "Обнови класа на доставка"
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:136
 msgid "Add New Shipping Class"
 msgstr "Добави нов клас доставка"
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:137
 msgid "New Shipping Class Name"
 msgstr "Име на новия клас доставка"
 
-#: includes/class-wc-post-types.php:184
+#: includes/class-wc-post-types.php:185
 msgid "Search %s"
 msgstr "Търсене %s"
 
-#: includes/class-wc-post-types.php:185
+#: includes/class-wc-post-types.php:186
 msgid "All %s"
 msgstr "Всички %s"
 
-#: includes/class-wc-post-types.php:186
+#: includes/class-wc-post-types.php:187
 msgid "Parent %s"
 msgstr "Родител %s"
 
-#: includes/class-wc-post-types.php:187
+#: includes/class-wc-post-types.php:188
 msgid "Parent %s:"
 msgstr "Родител %s:"
 
-#: includes/class-wc-post-types.php:188
+#: includes/class-wc-post-types.php:189
 msgid "Edit %s"
 msgstr "Редактиране %s"
 
-#: includes/class-wc-post-types.php:189
+#: includes/class-wc-post-types.php:190
 msgid "Update %s"
 msgstr "Обновяване %s"
 
-#: includes/class-wc-post-types.php:190
+#: includes/class-wc-post-types.php:191
 msgid "Add New %s"
 msgstr "Добавяне нов %s"
 
-#: includes/class-wc-post-types.php:191
+#: includes/class-wc-post-types.php:192
 msgid "New %s"
 msgstr "Нов %s"
 
-#: includes/class-wc-post-types.php:226
+#: includes/class-wc-post-types.php:227
 #: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "продукт"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:233
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Продукти"
 
-#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:234 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5534,168 +5327,168 @@ msgstr "Продукти"
 msgid "Product"
 msgstr "Продукт"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:235
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Продукти"
 
-#: includes/class-wc-post-types.php:235
+#: includes/class-wc-post-types.php:236
 msgid "Add Product"
 msgstr "Добави продукт"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:237
 msgid "Add New Product"
 msgstr "Добави нов продукт"
 
-#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
-#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:329 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Редактиране"
 
-#: includes/class-wc-post-types.php:238
+#: includes/class-wc-post-types.php:239
 msgid "Edit Product"
 msgstr "Редактирай продукт"
 
-#: includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240
 msgid "New Product"
 msgstr "Нов продукт"
 
-#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:241 includes/class-wc-post-types.php:242
 msgid "View Product"
 msgstr "Виж продукт"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:243
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Търси продукт"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:244
 msgid "No Products found"
 msgstr "Не са намерени продукти"
 
-#: includes/class-wc-post-types.php:244
+#: includes/class-wc-post-types.php:245
 msgid "No Products found in trash"
 msgstr "Не са намерени продукти в кошчето"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:246
 msgid "Parent Product"
 msgstr "Родителски продукт"
 
-#: includes/class-wc-post-types.php:247
+#: includes/class-wc-post-types.php:248
 msgid "This is where you can add new products to your store."
 msgstr "От тук се добавят нови продукти в магазина."
 
-#: includes/class-wc-post-types.php:267
+#: includes/class-wc-post-types.php:268
 msgid "Variations"
 msgstr "Вариации"
 
-#: includes/class-wc-post-types.php:275
+#: includes/class-wc-post-types.php:276
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Поръчки"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:286
 msgid "Orders"
 msgstr "Поръчки"
 
-#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:287 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Поръчка"
 
-#: includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:288
 msgid "Add Order"
 msgstr "Добави поръчка"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:289
 msgid "Add New Order"
 msgstr "Добави нова поръчка"
 
-#: includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:291
 msgid "Edit Order"
 msgstr "Редактирай поръчка"
 
-#: includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292
 msgid "New Order"
 msgstr "Нова поръчка"
 
-#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:293 includes/class-wc-post-types.php:294
 msgid "View Order"
 msgstr "Виж поръчка"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:295
 msgid "Search Orders"
 msgstr "Търси поръчки"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found"
 msgstr "Не са намерени поръчки"
 
-#: includes/class-wc-post-types.php:296
+#: includes/class-wc-post-types.php:297
 msgid "No Orders found in trash"
 msgstr "Не са намерени поръчки в коша"
 
-#: includes/class-wc-post-types.php:297
+#: includes/class-wc-post-types.php:298
 msgid "Parent Orders"
 msgstr "Родителски поръчки"
 
-#: includes/class-wc-post-types.php:300
+#: includes/class-wc-post-types.php:301
 msgid "This is where store orders are stored."
 msgstr "Тук се записват поръчките в магазина."
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:324
 msgid "Coupons"
 msgstr "Купони"
 
-#: includes/class-wc-post-types.php:324 templates/cart/cart.php:119
+#: includes/class-wc-post-types.php:325 templates/cart/cart.php:119
 msgid "Coupon"
 msgstr "Купон"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:326
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Купони"
 
-#: includes/class-wc-post-types.php:326
+#: includes/class-wc-post-types.php:327
 msgid "Add Coupon"
 msgstr "Добави купон"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:328
 msgid "Add New Coupon"
 msgstr "Добави нов купон"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:330
 msgid "Edit Coupon"
 msgstr "Редактирай купон"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:331
 msgid "New Coupon"
 msgstr "Нов купон"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:332
 msgid "View Coupons"
 msgstr "Виж купоните"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:333
 msgid "View Coupon"
 msgstr "Виж купона"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:334
 msgid "Search Coupons"
 msgstr "Търси купони"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found"
 msgstr "Няма намерени купони"
 
-#: includes/class-wc-post-types.php:335
+#: includes/class-wc-post-types.php:336
 msgid "No Coupons found in trash"
 msgstr "Няма намерени купони в коша"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:337
 msgid "Parent Coupon"
 msgstr "Родителски купон"
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:339
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Тук може да добавите нови купони за вашите потребители."
@@ -5767,21 +5560,21 @@ msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
 msgstr "Вашата {site_title} поръчка от {order_date} е завършена - изтеглете вашите файлове"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:146
-#: includes/emails/class-wc-email-new-order.php:133
+#: includes/emails/class-wc-email-customer-completed-order.php:147
+#: includes/emails/class-wc-email-new-order.php:134
 msgid "Subject"
 msgstr "Относно"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:153
-#: includes/emails/class-wc-email-new-order.php:140
+#: includes/emails/class-wc-email-customer-completed-order.php:154
+#: includes/emails/class-wc-email-new-order.php:141
 msgid "Email Heading"
 msgstr "Озаглавяване на email"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:160
+#: includes/emails/class-wc-email-customer-completed-order.php:161
 msgid "Subject (downloadable)"
 msgstr "Тема (за сваляне)"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:167
+#: includes/emails/class-wc-email-customer-completed-order.php:168
 msgid "Email Heading (downloadable)"
 msgstr "Email заглавие (за изтегляне)"
 
@@ -5811,11 +5604,11 @@ msgstr "Вашата {site_title} поръчка от {order_date}"
 msgid "Order {order_number} details"
 msgstr "Детайли към поръчка {order_number}"
 
-#: includes/emails/class-wc-email-customer-invoice.php:160
+#: includes/emails/class-wc-email-customer-invoice.php:161
 msgid "Email subject (paid)"
 msgstr "Тема на email (платено)"
 
-#: includes/emails/class-wc-email-customer-invoice.php:167
+#: includes/emails/class-wc-email-customer-invoice.php:168
 msgid "Email heading (paid)"
 msgstr "Заглавие на email (платено)"
 
@@ -5905,23 +5698,23 @@ msgstr "Поръчка от нов клиент"
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
 msgstr "[{site_title}] Нови клиентски поръчки ({order_number}) - {order_date}"
 
-#: includes/emails/class-wc-email-new-order.php:126
+#: includes/emails/class-wc-email-new-order.php:127
 msgid "Recipient(s)"
 msgstr "Получател(и)"
 
-#: includes/emails/class-wc-email-new-order.php:128
+#: includes/emails/class-wc-email-new-order.php:129
 msgid ""
 "Enter recipients (comma separated) for this email. Defaults to "
 "<code>%s</code>."
 msgstr "Въведете получатели (разделени със запетая) за този email. По подразбиране <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:135
+#: includes/emails/class-wc-email-new-order.php:136
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr "Относно, оставете празно за да се използва <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:142
+#: includes/emails/class-wc-email-new-order.php:143
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
@@ -6401,10 +6194,8 @@ msgid "Enable logging"
 msgstr "Включване на логването"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:237
-msgid ""
-"Log PayPal events, such as IPN requests, inside "
-"<code>woocommerce/logs/paypal-%s.txt</code>"
-msgstr "Записва PayPal събития, като IPN заявки, в <code>woocommerce/logs/paypal-%s.txt</code>"
+msgid "Log PayPal events, such as IPN requests, inside <code>%s</code>"
+msgstr "Записва PayPal събития, като IPN заявки, в <code>%s</code>"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:370
 msgid "Shipping via"
@@ -6853,6 +6644,12 @@ msgstr "Разходите за доставка обновени."
 msgid "Invalid order. If you have an account please log in and try again."
 msgstr "Невалидна поръчка. Ако имате профил, моля влезте и опитайте отново."
 
+#: includes/shortcodes/class-wc-shortcode-checkout.php:91
+#: includes/shortcodes/class-wc-shortcode-my-account.php:111
+#: templates/checkout/thankyou.php:30
+msgid "My Account"
+msgstr "Моят профил"
+
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
@@ -7086,62 +6883,66 @@ msgid "New Zealand Dollar"
 msgstr "Новозаландски Долар"
 
 #: includes/wc-core-functions.php:193
+msgid "Paraguayan Guaraní"
+msgstr "Парагвайски гуарани"
+
+#: includes/wc-core-functions.php:194
 msgid "Philippine Pesos"
 msgstr "Филипински Песота"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Polish Zloty"
 msgstr "Полска Злота"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Pounds Sterling"
 msgstr "Британска Лира"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Romanian Leu"
 msgstr "Румънска Леа"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Russian Ruble"
 msgstr "Руска Рубла"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "Singapore Dollar"
 msgstr "Сингапурски Долар"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "South African rand"
 msgstr "Южноафрикански Ранд"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swedish Krona"
 msgstr "Шведска Крона"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Swiss Franc"
 msgstr "Швейцарски франк"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Taiwan New Dollars"
 msgstr "Тайвански нови Долари"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Thai Baht"
 msgstr "Тайландски Бат"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "Turkish Lira"
 msgstr "Турска лира"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "US Dollars"
 msgstr "Щатски Долар"
 
-#: includes/wc-core-functions.php:206
+#: includes/wc-core-functions.php:207
 msgid "Vietnamese Dong"
 msgstr "Виетнамски Донг"
 
-#: includes/wc-core-functions.php:207
+#: includes/wc-core-functions.php:208
 msgid "Egyptian Pound"
 msgstr "Египетски паунд"
 
@@ -7175,7 +6976,7 @@ msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr "доставка"
 
-#: includes/wc-product-functions.php:234
+#: includes/wc-product-functions.php:235
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "некатегоризирани"
@@ -7227,41 +7028,41 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Начало"
 
-#: includes/wc-template-functions.php:1558
+#: includes/wc-template-functions.php:1549
 msgid "Order Again"
 msgstr "Поръчай отново"
 
-#: includes/wc-template-functions.php:1653
+#: includes/wc-template-functions.php:1644
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Избор на държава&hellip;"
 
-#: includes/wc-template-functions.php:1660
+#: includes/wc-template-functions.php:1651
 msgid "Update country"
 msgstr "Обнови държава"
 
-#: includes/wc-template-functions.php:1710
+#: includes/wc-template-functions.php:1701
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Избери област&hellip;"
 
-#: includes/wc-template-functions.php:1851
+#: includes/wc-template-functions.php:1842
 msgid "Search for:"
 msgstr "Търси за:"
 
-#: includes/wc-template-functions.php:1852
+#: includes/wc-template-functions.php:1843
 msgid "Search for products"
 msgstr "Търсене на продукти"
 
-#: includes/wc-template-functions.php:1853
+#: includes/wc-template-functions.php:1844
 msgid "Search"
 msgstr "Търси"
 
-#: includes/wc-term-functions.php:135
+#: includes/wc-term-functions.php:146
 msgid "Select a category"
 msgstr "Изберете категория"
 
-#: includes/wc-term-functions.php:139
+#: includes/wc-term-functions.php:149
 msgid "Uncategorized"
 msgstr "Некатегоризирани"
 
@@ -7424,6 +7225,11 @@ msgstr "Подредба по"
 #: includes/widgets/class-wc-widget-product-categories.php:38
 msgid "Category Order"
 msgstr "Подредба на категориите"
+
+#: includes/widgets/class-wc-widget-product-categories.php:39
+#: templates/single-product-reviews.php:62
+msgid "Name"
+msgstr "Име"
 
 #: includes/widgets/class-wc-widget-product-categories.php:45
 msgid "Show as dropdown"
@@ -7704,6 +7510,10 @@ msgstr "Страна/Държава"
 msgid "City"
 msgstr "Град"
 
+#: templates/cart/shipping-calculator.php:80
+msgid "Postcode / Zip"
+msgstr "Пощенски код"
+
 #: templates/cart/shipping-calculator.php:85
 msgid "Update Totals"
 msgstr "Обновяване на сумата"
@@ -7967,13 +7777,13 @@ msgstr "За да нулирате вашата парола, моля идет�
 msgid "Click here to reset your password"
 msgstr "Кликнете тук за да нулирате вашата парола"
 
-#: templates/emails/email-addresses.php:18
-#: templates/emails/plain/email-addresses.php:12
+#: templates/emails/email-addresses.php:20
+#: templates/emails/plain/email-addresses.php:14
 msgid "Billing address"
 msgstr "Адрес"
 
-#: templates/emails/email-addresses.php:28
-#: templates/emails/plain/email-addresses.php:17
+#: templates/emails/email-addresses.php:30
+#: templates/emails/plain/email-addresses.php:19
 msgid "Shipping address"
 msgstr "Адрес за доставка"
 
@@ -8149,23 +7959,31 @@ msgstr "Фамилия"
 msgid "Email address"
 msgstr "Email адреси"
 
-#: templates/myaccount/form-edit-account.php:33
+#: templates/myaccount/form-edit-account.php:34
+msgid "Password (leave blank to leave unchanged)"
+msgstr "Парола (оставете празно за да избегнете промяна)"
+
+#: templates/myaccount/form-edit-account.php:38
+msgid "Confirm new password"
+msgstr "Потвърдете новата парола"
+
+#: templates/myaccount/form-edit-account.php:44
 msgid "Password Change"
 msgstr "Промяна на парола"
 
-#: templates/myaccount/form-edit-account.php:36
+#: templates/myaccount/form-edit-account.php:47
 msgid "Current Password (leave blank to leave unchanged)"
 msgstr "Текуща парола (оставете празно ако не желаете промяна)"
 
-#: templates/myaccount/form-edit-account.php:40
+#: templates/myaccount/form-edit-account.php:51
 msgid "New Password (leave blank to leave unchanged)"
 msgstr "Нова парола (оставете празно ако не желаете промяна)"
 
-#: templates/myaccount/form-edit-account.php:44
+#: templates/myaccount/form-edit-account.php:55
 msgid "Confirm New Password"
 msgstr "Потвърждение на новата парола"
 
-#: templates/myaccount/form-edit-account.php:50
+#: templates/myaccount/form-edit-account.php:61
 msgid "Save changes"
 msgstr "Запазване на промените"
 

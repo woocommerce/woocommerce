@@ -1,18 +1,19 @@
 # 
 # Translators:
-# arielk <relklik@gmail.com>, 2014
+# Ariel Klikstein <relklik@gmail.com>, 2014
 # amitgilad <gilad.amit@gmail.com>, 2014
 # joelbal <jbalbachan@gmail.com>, 2014
-# josh_marom <josh@josh.co.il>, 2014
+# Josh Marom <josh@josh.co.il>, 2014
 # roidayan <roi.dayan@gmail.com>, 2014
-# shoresh319, 2014
+# Seggev Shoresh, 2014
+# Yakir Gottesman <yakir@go-press.co.il>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-05-22 10:45:21+00:00\n"
-"PO-Revision-Date: 2014-05-23 10:07+0000\n"
-"Last-Translator: shoresh319\n"
+"POT-Creation-Date: 2014-06-03 15:13:59+00:00\n"
+"PO-Revision-Date: 2014-06-04 12:52+0000\n"
+"Last-Translator: Yakir Gottesman <yakir@go-press.co.il>\n"
 "Language-Team: Hebrew (Israel) (http://www.transifex.com/projects/p/woocommerce/language/he_IL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,26 +38,30 @@ msgid ""
 " currency symbols."
 msgstr "אנא הזן פורמט כספי עשרוני (%s) ללא מפרידי אלפים וסימני מטבע."
 
-#: includes/admin/class-wc-admin-assets.php:136
+#: includes/admin/class-wc-admin-assets.php:110
+msgid "Please enter in country code with two capital letters."
+msgstr ""
+
+#: includes/admin/class-wc-admin-assets.php:137
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
 msgstr "האם אתה בטוח שברצונך להסיר את הפריטים שנבחרו? אם הפחתת בעבר מלאי של פריט זה או שלקוח הזמין פריט זה יהיה עליך לשחזר ידנית ידני את המלאי של פריט זה"
 
-#: includes/admin/class-wc-admin-assets.php:137
+#: includes/admin/class-wc-admin-assets.php:138
 msgid "Please select some items."
 msgstr "בחר מספר פריטים."
 
-#: includes/admin/class-wc-admin-assets.php:138
+#: includes/admin/class-wc-admin-assets.php:139
 msgid "Remove this item meta?"
 msgstr "הסר מטא פריט זה?"
 
-#: includes/admin/class-wc-admin-assets.php:139
+#: includes/admin/class-wc-admin-assets.php:140
 msgid "Remove this attribute?"
 msgstr "להסיר את התכונה הזאת?"
 
-#: includes/admin/class-wc-admin-assets.php:140
+#: includes/admin/class-wc-admin-assets.php:141
 #: includes/admin/class-wc-admin-attributes.php:239
 #: includes/admin/class-wc-admin-attributes.php:275
 #: includes/admin/class-wc-admin-attributes.php:307
@@ -72,14 +77,14 @@ msgstr "להסיר את התכונה הזאת?"
 msgid "Name"
 msgstr "שם"
 
-#: includes/admin/class-wc-admin-assets.php:141
+#: includes/admin/class-wc-admin-assets.php:142
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:434
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:528
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
 msgid "Remove"
 msgstr "הסר"
 
-#: includes/admin/class-wc-admin-assets.php:142
+#: includes/admin/class-wc-admin-assets.php:143
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:435
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:529
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
@@ -87,62 +92,62 @@ msgstr "הסר"
 msgid "Click to toggle"
 msgstr "לחץ כדי להפעיל/לכבות"
 
-#: includes/admin/class-wc-admin-assets.php:143
+#: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:450
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:542
 msgid "Value(s)"
 msgstr "ערך(ים)"
 
-#: includes/admin/class-wc-admin-assets.php:144
+#: includes/admin/class-wc-admin-assets.php:145
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:543
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr "הזן טקסט כלשהו, ​​או כמה תכונות  והפרד על ידי קו (|) מפריד."
 
-#: includes/admin/class-wc-admin-assets.php:145
+#: includes/admin/class-wc-admin-assets.php:146
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:493
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:548
 msgid "Visible on the product page"
 msgstr "מוצג בעמוד המוצר"
 
-#: includes/admin/class-wc-admin-assets.php:146
+#: includes/admin/class-wc-admin-assets.php:147
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:506
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:554
 msgid "Used for variations"
 msgstr "נועד עבור וריאציות"
 
-#: includes/admin/class-wc-admin-assets.php:147
+#: includes/admin/class-wc-admin-assets.php:148
 msgid "Enter a name for the new attribute term:"
 msgstr "הזן שם עבור ערך התכונה:"
 
-#: includes/admin/class-wc-admin-assets.php:148
+#: includes/admin/class-wc-admin-assets.php:149
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr "חישוב סכומים הבוסס על פריטי סדר, הנחות ומשלוח?"
 
-#: includes/admin/class-wc-admin-assets.php:149
+#: includes/admin/class-wc-admin-assets.php:150
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
 msgstr "חישוב מסי שורות? זה ייחשב מסים המבוססים על מדינת הלקוחות. אם אין חיוב / משלוח מוגדר הוא ישתמש מדינת בסיס החנות."
 
-#: includes/admin/class-wc-admin-assets.php:150
+#: includes/admin/class-wc-admin-assets.php:151
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
 msgstr "פרטי חיוב של העתקה למשלוח מידע? זו תסיר את כל מידע משלוח נכנס ברגע זה."
 
-#: includes/admin/class-wc-admin-assets.php:151
+#: includes/admin/class-wc-admin-assets.php:152
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
 msgstr "טען את פרטי החיוב של הלקוח? זו תסיר את כל פרטי חיוב נכנסו כרגע."
 
-#: includes/admin/class-wc-admin-assets.php:152
+#: includes/admin/class-wc-admin-assets.php:153
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
 msgstr "טען מידע המשלוח של הלקוח? זו תסיר את כל מידע משלוח נכנס ברגע זה."
 
-#: includes/admin/class-wc-admin-assets.php:153
+#: includes/admin/class-wc-admin-assets.php:154
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:173
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:273
 #: includes/admin/views/html-bulk-edit-product.php:170
@@ -150,67 +155,67 @@ msgstr "טען מידע המשלוח של הלקוח? זו תסיר את כל מ
 msgid "Featured"
 msgstr "מועדף"
 
-#: includes/admin/class-wc-admin-assets.php:156
+#: includes/admin/class-wc-admin-assets.php:157
 msgid "No customer selected"
 msgstr "לא נבחר לקוח"
 
-#: includes/admin/class-wc-admin-assets.php:182
+#: includes/admin/class-wc-admin-assets.php:183
 msgid ""
 "Could not grant access - the user may already have permission for this file "
 "or billing email is not set. Ensure the billing email is set, and the order "
 "has been saved."
 msgstr "לא יכל להעניק לו גישה - למשתמש כבר יש הרשאה לקובץ הזה או שהמייל חיוב אינו מוגדר. ודא כי מייל החיוב מוגדר, ושההזמנה נשמרה."
 
-#: includes/admin/class-wc-admin-assets.php:183
+#: includes/admin/class-wc-admin-assets.php:184
 msgid "Are you sure you want to revoke access to this download?"
 msgstr "האם אתה בטוח שאתה רוצה לבטל את הגישה להורדה זו?"
 
-#: includes/admin/class-wc-admin-assets.php:203
+#: includes/admin/class-wc-admin-assets.php:204
 msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
 msgstr "האם אתה בטוח שברצונך לקשר כל הוריאציות? פעולה זו תיצור וריאציה חדשה עבור כל שילוב אפשרי של תכונות (מקסימום 50 לכל ריצה)."
 
-#: includes/admin/class-wc-admin-assets.php:204
+#: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value"
 msgstr "הזן ערך"
 
-#: includes/admin/class-wc-admin-assets.php:205
+#: includes/admin/class-wc-admin-assets.php:206
 msgid "Enter a value (fixed or %)"
 msgstr "הזן ערך (מס' קבוע או באחוזים)"
 
-#: includes/admin/class-wc-admin-assets.php:206
+#: includes/admin/class-wc-admin-assets.php:207
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr "האם אתה בטוח שברצונך למחוק את כל הוריאציות? לא ניתן לבטל פעולה זו."
 
-#: includes/admin/class-wc-admin-assets.php:207
+#: includes/admin/class-wc-admin-assets.php:208
 msgid "Last warning, are you sure?"
 msgstr "אזהרה אחרונה, אתה בטוח?"
 
-#: includes/admin/class-wc-admin-assets.php:208
+#: includes/admin/class-wc-admin-assets.php:209
 #: includes/admin/class-wc-admin-taxonomies.php:123
 #: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "בחר תמונה"
 
-#: includes/admin/class-wc-admin-assets.php:209
+#: includes/admin/class-wc-admin-assets.php:210
 msgid "Set variation image"
 msgstr "הגדר את תמונת הוריאציה"
 
-#: includes/admin/class-wc-admin-assets.php:210
+#: includes/admin/class-wc-admin-assets.php:211
 msgid "variation added"
 msgstr "הוריאציה נוספה"
 
-#: includes/admin/class-wc-admin-assets.php:211
+#: includes/admin/class-wc-admin-assets.php:212
 msgid "variations added"
 msgstr "הוריאציות נוספו"
 
-#: includes/admin/class-wc-admin-assets.php:212
+#: includes/admin/class-wc-admin-assets.php:213
 msgid "No variations added"
 msgstr "לא נוספה וריאציה"
 
-#: includes/admin/class-wc-admin-assets.php:213
+#: includes/admin/class-wc-admin-assets.php:214
 msgid "Are you sure you want to remove this variation?"
 msgstr "האם אתה בטוח שברצונך להסיר וריאציה זאת?"
 
@@ -374,47 +379,47 @@ msgstr "סקירות אחרונות"
 msgid "WooCommerce Status"
 msgstr "מצב חנות"
 
-#: includes/admin/class-wc-admin-dashboard.php:132
+#: includes/admin/class-wc-admin-dashboard.php:136
 msgid "<strong>%s</strong> sales this month"
 msgstr "<strong>%s</strong> עסקאות החודש"
 
-#: includes/admin/class-wc-admin-dashboard.php:139
+#: includes/admin/class-wc-admin-dashboard.php:143
 msgid "%s top seller this month (sold %d)"
 msgstr "%s רב מכר החודש (מכר %d)"
 
-#: includes/admin/class-wc-admin-dashboard.php:145
+#: includes/admin/class-wc-admin-dashboard.php:149
 msgid "<strong>%s order</strong> awaiting processing"
 msgid_plural "<strong>%s orders</strong> awaiting processing"
 msgstr[0] "<strong>%s עסקאות</strong> ממתינות לטיפול"
 msgstr[1] "<strong>%s עסקאות</strong> ממתינות לטיפול"
 
-#: includes/admin/class-wc-admin-dashboard.php:150
+#: includes/admin/class-wc-admin-dashboard.php:154
 msgid "<strong>%s order</strong> on-hold"
 msgid_plural "<strong>%s orders</strong> on-hold"
 msgstr[0] "<strong>%s הזמנות</strong> בהמתנה"
 msgstr[1] "<strong>%s הזמנות</strong> מושהות"
 
-#: includes/admin/class-wc-admin-dashboard.php:155
+#: includes/admin/class-wc-admin-dashboard.php:159
 msgid "<strong>%s product</strong> low in stock"
 msgid_plural "<strong>%s products</strong> low in stock"
 msgstr[0] "<strong>%s מוצרים</strong> המלאי נמוך"
 msgstr[1] "<strong>%s מוצרים</strong> בעלי מלאי נמוך"
 
-#: includes/admin/class-wc-admin-dashboard.php:160
+#: includes/admin/class-wc-admin-dashboard.php:164
 msgid "<strong>%s product</strong> out of stock"
 msgid_plural "<strong>%s products</strong> out of stock"
 msgstr[0] "<strong>%s מוצרים</strong> המלאי אזל"
 msgstr[1] "<strong>%s מוצרים</strong> אזלו מן המלאי"
 
-#: includes/admin/class-wc-admin-dashboard.php:193
+#: includes/admin/class-wc-admin-dashboard.php:197
 msgid "out of 5"
 msgstr "מתוך 5"
 
-#: includes/admin/class-wc-admin-dashboard.php:195
+#: includes/admin/class-wc-admin-dashboard.php:199
 msgid "reviewed by"
 msgstr "נסקר על ידי"
 
-#: includes/admin/class-wc-admin-dashboard.php:201
+#: includes/admin/class-wc-admin-dashboard.php:205
 msgid "There are no product reviews yet."
 msgstr "עדיין אין ביקורות."
 
@@ -555,7 +560,7 @@ msgstr "הגדרות חנות"
 #: includes/admin/class-wc-admin-welcome.php:219
 #: includes/admin/settings/class-wc-settings-checkout.php:277
 #: includes/admin/settings/class-wc-settings-shipping.php:238
-#: includes/admin/views/html-admin-page-status-report.php:275
+#: includes/admin/views/html-admin-page-status-report.php:276
 msgid "Settings"
 msgstr "הגדרות"
 
@@ -918,7 +923,7 @@ msgstr "רשימת לקוחות"
 
 #: includes/admin/class-wc-admin-reports.php:89
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:266
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:780
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:781
 #: includes/admin/reports/class-wc-report-stock.php:25
 #: includes/admin/reports/class-wc-report-stock.php:26
 msgid "Stock"
@@ -998,136 +1003,136 @@ msgstr "לבחור הכל"
 msgid "Select none"
 msgstr "לא לבחור כלום"
 
-#: includes/admin/class-wc-admin-status.php:52
+#: includes/admin/class-wc-admin-status.php:51
 msgid "Product Transients Cleared"
 msgstr "קבצים זמניים נוקו"
 
-#: includes/admin/class-wc-admin-status.php:93
+#: includes/admin/class-wc-admin-status.php:92
 msgid "%d Transients Rows Cleared"
 msgstr "%d שורות קבצים זמניים נוקו"
 
-#: includes/admin/class-wc-admin-status.php:102
+#: includes/admin/class-wc-admin-status.php:101
 msgid "Roles successfully reset"
 msgstr "תפקידים אופסו בהצלחה"
 
-#: includes/admin/class-wc-admin-status.php:116
+#: includes/admin/class-wc-admin-status.php:115
 msgid "Terms successfully recounted"
 msgstr "מונחים נספרו בהצלחה"
 
-#: includes/admin/class-wc-admin-status.php:127
+#: includes/admin/class-wc-admin-status.php:126
 msgid "Sessions successfully cleared"
 msgstr "כל הSessions נמחקו בהצלחה"
 
-#: includes/admin/class-wc-admin-status.php:131
+#: includes/admin/class-wc-admin-status.php:130
 msgid "All missing WooCommerce pages was installed successfully."
 msgstr "כל עמודי WooCommerce החסרים הותקנו בהצלחה."
 
-#: includes/admin/class-wc-admin-status.php:139
+#: includes/admin/class-wc-admin-status.php:138
 msgid "Tax rates successfully deleted"
 msgstr "שיעור מס נמחקו בהצלחה"
 
-#: includes/admin/class-wc-admin-status.php:148
+#: includes/admin/class-wc-admin-status.php:147
 msgid "There was an error calling %s::%s"
 msgstr "הייתה שגיאה בקריאה %s::%s"
 
-#: includes/admin/class-wc-admin-status.php:151
+#: includes/admin/class-wc-admin-status.php:150
 msgid "There was an error calling %s"
 msgstr "הייתה שגיאה בקריאה ל %s"
 
-#: includes/admin/class-wc-admin-status.php:161
+#: includes/admin/class-wc-admin-status.php:160
 msgid "Your changes have been saved."
 msgstr "השינויים שלך נשמרו."
 
-#: includes/admin/class-wc-admin-status.php:175
+#: includes/admin/class-wc-admin-status.php:174
 msgid "WC Transients"
 msgstr "קבצים זמניים של החנות"
 
-#: includes/admin/class-wc-admin-status.php:176
+#: includes/admin/class-wc-admin-status.php:175
 msgid "Clear transients"
 msgstr "נקוי קבצים זמניים"
 
-#: includes/admin/class-wc-admin-status.php:177
+#: includes/admin/class-wc-admin-status.php:176
 msgid "This tool will clear the product/shop transients cache."
 msgstr "כלי זה נועד לנקות את המטמון הזמני של המוצרים / החנות."
 
-#: includes/admin/class-wc-admin-status.php:180
+#: includes/admin/class-wc-admin-status.php:179
 msgid "Expired Transients"
 msgstr "קבצים זמניים שפגו תוקף"
 
-#: includes/admin/class-wc-admin-status.php:181
+#: includes/admin/class-wc-admin-status.php:180
 msgid "Clear expired transients"
 msgstr "נקה קבצים זמניים שפגו תוקף"
 
-#: includes/admin/class-wc-admin-status.php:182
+#: includes/admin/class-wc-admin-status.php:181
 msgid "This tool will clear ALL expired transients from WordPress."
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:185
+#: includes/admin/class-wc-admin-status.php:184
 msgid "Term counts"
 msgstr "ספירת מונחים"
 
-#: includes/admin/class-wc-admin-status.php:186
+#: includes/admin/class-wc-admin-status.php:185
 msgid "Recount terms"
 msgstr "ספירה מחדש"
 
-#: includes/admin/class-wc-admin-status.php:187
+#: includes/admin/class-wc-admin-status.php:186
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
 msgstr "כלי זה יספור מונחי מוצר - שימושי בעת שינוי ההגדרות שלך באופן שמסתיר את המוצרים מהקטלוג."
 
-#: includes/admin/class-wc-admin-status.php:190
+#: includes/admin/class-wc-admin-status.php:189
 msgid "Capabilities"
 msgstr "תפקידים"
 
-#: includes/admin/class-wc-admin-status.php:191
+#: includes/admin/class-wc-admin-status.php:190
 msgid "Reset capabilities"
 msgstr "איפוס תפקידים"
 
-#: includes/admin/class-wc-admin-status.php:192
+#: includes/admin/class-wc-admin-status.php:191
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr "כלי זה יאפס את תפקידי המנהל, הלקוחות ומנהל החנות לברירת מחדל. השתמש באפשרות זו אם המשתמשים שלך לא יכולים לגשת לכל דפי ניהול של החנות."
 
-#: includes/admin/class-wc-admin-status.php:195
+#: includes/admin/class-wc-admin-status.php:194
 msgid "Customer Sessions"
 msgstr "Sessions לקוחות"
 
-#: includes/admin/class-wc-admin-status.php:196
+#: includes/admin/class-wc-admin-status.php:195
 msgid "Clear all sessions"
 msgstr "מחק את כל הSessions"
 
-#: includes/admin/class-wc-admin-status.php:197
+#: includes/admin/class-wc-admin-status.php:196
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
 msgstr "<strong class=\"red\">הזהרה:</strong> הכלי הזה ימחק את כל נתוני session לקוחות ממסד הנתונים, כולל כל עגלות פעילות כרגע."
 
-#: includes/admin/class-wc-admin-status.php:200
+#: includes/admin/class-wc-admin-status.php:199
 #: includes/admin/views/html-notice-install.php:6
 msgid "Install WooCommerce Pages"
 msgstr "התקנת עמודי החנות"
 
-#: includes/admin/class-wc-admin-status.php:201
+#: includes/admin/class-wc-admin-status.php:200
 msgid "Install pages"
 msgstr "התקן דפים"
 
-#: includes/admin/class-wc-admin-status.php:202
+#: includes/admin/class-wc-admin-status.php:201
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
 msgstr "<strong class=\"red\">הערה:</strong> כלי זה יתקין את כל עמודי WooCommerce החסרים. עמודים אשר הוגדרו כבר לא יוחלפו."
 
-#: includes/admin/class-wc-admin-status.php:205
+#: includes/admin/class-wc-admin-status.php:204
 msgid "Delete all WooCommerce tax rates"
 msgstr "מחק את כל תעריפי המס של WooCommerce."
 
-#: includes/admin/class-wc-admin-status.php:206
+#: includes/admin/class-wc-admin-status.php:205
 msgid "Delete ALL tax rates"
 msgstr "מחק את כל שיערי המס"
 
-#: includes/admin/class-wc-admin-status.php:207
+#: includes/admin/class-wc-admin-status.php:206
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
@@ -1273,7 +1278,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:263
 msgid "UI and reporting improvements"
-msgstr "שיפורי מנשק משתמש ודיווח"
+msgstr "שיפורי ממשק משתמש ודיווח"
 
 #: includes/admin/class-wc-admin-welcome.php:266
 msgid "WordPress 3.8 admin UI compatibility"
@@ -1289,7 +1294,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:270
 msgid "Simplified order UI"
-msgstr "מנשק הזמנה מפושט"
+msgstr "ממשק הזמנה מפושט"
 
 #: includes/admin/class-wc-admin-welcome.php:271
 msgid ""
@@ -1502,7 +1507,7 @@ msgstr ""
 msgid "View %s"
 msgstr "צפייה %s"
 
-#: includes/admin/class-wc-admin.php:114
+#: includes/admin/class-wc-admin.php:113
 msgid "HTML Email Template"
 msgstr "תבנית HTML של אימייל"
 
@@ -1735,6 +1740,7 @@ msgstr "הצגת &#8220;%s&#8221;"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:341
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:300
 #: includes/admin/reports/class-wc-report-stock.php:119
+#: includes/admin/views/html-admin-page-status-logs.php:13
 msgid "View"
 msgstr "צפייה"
 
@@ -1779,7 +1785,7 @@ msgstr "הפעלה/כיבוי מוצר מועדף"
 #: includes/admin/views/html-admin-page-status-report.php:38
 #: includes/admin/views/html-admin-page-status-report.php:72
 #: includes/admin/views/html-admin-page-status-report.php:97
-#: includes/admin/views/html-admin-page-status-report.php:282
+#: includes/admin/views/html-admin-page-status-report.php:283
 #: includes/admin/views/html-bulk-edit-product.php:176
 #: includes/admin/views/html-bulk-edit-product.php:213
 #: includes/admin/views/html-bulk-edit-product.php:274
@@ -1790,7 +1796,7 @@ msgstr "כן"
 #: includes/admin/views/html-admin-page-status-report.php:38
 #: includes/admin/views/html-admin-page-status-report.php:72
 #: includes/admin/views/html-admin-page-status-report.php:97
-#: includes/admin/views/html-admin-page-status-report.php:282
+#: includes/admin/views/html-admin-page-status-report.php:283
 #: includes/admin/views/html-bulk-edit-product.php:177
 #: includes/admin/views/html-bulk-edit-product.php:214
 #: includes/admin/views/html-bulk-edit-product.php:275
@@ -1888,7 +1894,7 @@ msgid "Show all types"
 msgstr "הצג את כל הסוגים"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
 #: includes/admin/settings/class-wc-settings-checkout.php:229
 #: includes/admin/settings/class-wc-settings-shipping.php:200
 msgid "Status"
@@ -2464,7 +2470,6 @@ msgstr "כמות"
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/settings/class-wc-settings-tax.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:550
-#: includes/admin/settings/class-wc-settings-tax.php:647
 msgid "Tax"
 msgstr "מיסים"
 
@@ -2534,7 +2539,7 @@ msgstr "הוספה"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:31
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:95
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:782
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:783
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -2593,7 +2598,7 @@ msgid "Downloadable products give access to a file upon purchase."
 msgstr "מוצרים להורדה מעניקים גישה לקובץ לאחר הרכישה."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:90
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:779
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:780
 #: includes/admin/settings/class-wc-settings-products.php:41
 msgid "Inventory"
 msgstr "מלאי"
@@ -2714,7 +2719,7 @@ msgid "Leave blank for unlimited re-downloads."
 msgstr "להשאיר ריק בשביל לא להגביל הורדות."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:228
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:790
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:791
 msgid "Download Expiry"
 msgstr "פקיעת ההורדה"
 
@@ -2776,7 +2781,7 @@ msgid "None"
 msgstr "ללא"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:257
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:737
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:738
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:126
@@ -2837,21 +2842,21 @@ msgid "Allow Backorders?"
 msgstr "הפעל הזמנה מראש?"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:312
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:743
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:744
 #: includes/admin/views/html-bulk-edit-product.php:253
 #: includes/admin/views/html-quick-edit-product.php:172
 msgid "Do not allow"
 msgstr "אל תאפשר"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:313
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:744
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:745
 #: includes/admin/views/html-bulk-edit-product.php:254
 #: includes/admin/views/html-quick-edit-product.php:173
 msgid "Allow, but notify customer"
 msgstr "הפעל, אבל תודיע ללקוח"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:314
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:745
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:746
 #: includes/admin/views/html-bulk-edit-product.php:255
 #: includes/admin/views/html-quick-edit-product.php:174
 msgid "Allow"
@@ -2873,7 +2878,7 @@ msgid ""
 msgstr "הפעל אפשרות זאת כדי להגביל קניית פריט אחד בלבד בכל הזמנה"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:347
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:786
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:787
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:105
 #: includes/admin/views/html-bulk-edit-product.php:103
 #: includes/admin/views/html-quick-edit-product.php:84
@@ -2889,21 +2894,21 @@ msgid "Dimensions"
 msgstr "מידות"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:354
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:783
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:784
 #: includes/admin/views/html-bulk-edit-product.php:143
 #: includes/admin/views/html-quick-edit-product.php:97
 msgid "Length"
 msgstr "אורך"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:355
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:784
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:785
 #: includes/admin/views/html-bulk-edit-product.php:144
 #: includes/admin/views/html-quick-edit-product.php:98
 msgid "Width"
 msgstr "רוחב"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:356
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:785
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:786
 #: includes/admin/views/html-bulk-edit-product.php:145
 #: includes/admin/views/html-quick-edit-product.php:99
 msgid "Height"
@@ -2928,12 +2933,12 @@ msgid ""
 msgstr "סוגי משלוח מאפשרים לקבץ יחד מוצרים לפי סוג המשלוח."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:393
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
 msgid "Close all"
 msgstr "סגור הכל"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:393
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
 msgid "Expand all"
 msgstr "הרחב הכל"
 
@@ -2982,130 +2987,130 @@ msgstr "מוצרים משלימים הם מוצרים שאתה מקדם בעגל
 msgid "Choose a grouped product&hellip;"
 msgstr "בחר קבוצת מוצרים&hellip;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:660
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
 msgid "Grouping"
 msgstr "קבוצה"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:660
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
 msgid "Set this option to make this product part of a grouped product."
 msgstr "הגדר אפשרות זו כדי להפוך את המוצר הזה לחלק מקבוצת מוצרים."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:680
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:681
 msgid "Purchase Note"
 msgstr "הערת רכישה"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:680
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:681
 msgid "Enter an optional note to send the customer after purchase."
 msgstr "הזן הערה אופציונלית שתשלח ללקוח לאחר הרכישה."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:687
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:688
 msgid "Menu order"
 msgstr "סידור תפריט"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:687
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:688
 msgid "Custom ordering position."
 msgstr "סידור מותאם אישית."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:695
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:696
 msgid "Enable reviews"
 msgstr "הפעל חוות דעת"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:754
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:755
 msgid ""
 "Before adding variations, add and save some attributes on the "
 "<strong>Attributes</strong> tab."
 msgstr "לפני הוספת וריאציות, יש להוסיף ולשמור כמה <strong>תכונות</strong> בטאב התכונות."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:756
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:757
 msgid "Learn more"
 msgstr "למידע נוסף"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:764
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 msgid "Choose a field to bulk edit&hellip;"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
 msgid "Toggle &quot;Enabled&quot;"
 msgstr "הפעל/כבה"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
 msgid "Toggle &quot;Downloadable&quot;"
 msgstr "הפעל/כבה &quot;בר הורדה&quot;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
 msgid "Toggle &quot;Virtual&quot;"
 msgstr "הפעל/כבה &quot;וירטואלי&quot;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:770
 msgid "Delete all variations"
 msgstr "מחק את כל הוריאציות"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:771
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:772
 msgid "Pricing"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:772
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
 msgid "Prices"
 msgstr "מחירים"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:774
 msgid "Prices increase by (fixed amount or %)"
 msgstr "מחירים מועלים ב... (סכום קבוע או %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:774
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:775
 msgid "Prices decrease by (fixed amount or %)"
 msgstr "מחירים מורדים ב... (סכום קבוע או %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:775
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:776
 msgid "Sale prices"
 msgstr "מחירי מבצע"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:776
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:777
 msgid "Sale prices increase by (fixed amount or %)"
 msgstr "מחירי מבצע מועלים ב... (סכום קבוע או %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:777
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:778
 msgid "Sale prices decrease by (fixed amount or %)"
 msgstr "מחירי מבצע מורדים ב... (סכום קבוע או %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:788
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:789
 msgid "Downloadable products"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:789
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:790
 msgid "Download limit"
 msgstr "הגבלת הורדה"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:794
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:795
 #: includes/admin/views/html-report-by-date.php:31
 msgid "Go"
 msgstr "בצע"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:891
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:892
 msgid "Add Variation"
 msgstr "הוספת וריאציה"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:893
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:894
 msgid "Link all variations"
 msgstr "חיבור כל הוריאציות"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:895
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:896
 msgid "Defaults"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:895
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:896
 msgid "These are the attributes that will be pre-selected on the frontend."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:908
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:909
 msgid "No default"
 msgstr "ללא ברירת מחדל"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1012
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1013
 msgid "Product SKU must be unique."
 msgstr "מק&quot;ט המוצר חייב להיות ייחודי."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1383
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1384
 msgid "Variation #%s of %s"
 msgstr "וריאציה מספר %s מתוך %s"
 
@@ -3324,11 +3329,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "הפעל אפשרות זו אם מוצר לא בעל אפשרות משלוח או שאין עלות משלוח"
 
-#: includes/admin/reports/class-wc-admin-report.php:384
+#: includes/admin/reports/class-wc-admin-report.php:385
 msgid "Sold %s worth in the last %d days"
 msgstr "נמכר בשווי של %s ב%d ימים האחרונים"
 
-#: includes/admin/reports/class-wc-admin-report.php:386
+#: includes/admin/reports/class-wc-admin-report.php:387
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "%d פריט נמכר ב%d הימים האחרונים"
@@ -4226,7 +4231,7 @@ msgstr "עיקרי"
 
 #: includes/admin/settings/class-wc-settings-general.php:251
 msgid "Call to action buttons/price slider/layered nav UI"
-msgstr "מנשק משתמש של כפתורי פעולה/סליידר מחיר/ניווט שכבות"
+msgstr "ממשק משתמש של כפתורי פעולה/סליידר מחיר/ניווט שכבות"
 
 #: includes/admin/settings/class-wc-settings-general.php:252
 msgid "Secondary"
@@ -5008,22 +5013,12 @@ msgstr "יצוא/יבוא"
 msgid "Marketing"
 msgstr "שיווק"
 
-#: includes/admin/views/html-admin-page-addons.php:18
-msgid "Acounting"
+#: includes/admin/views/html-admin-page-status-logs.php:4
+msgid "Viewing %s (%s)"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:19
-msgid "Free"
-msgstr "חינם"
-
-#: includes/admin/views/html-admin-page-addons.php:20
-msgid "Third-party"
-msgstr ""
-
-#: includes/admin/views/html-admin-page-addons.php:81
-msgid ""
-"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
-" href=\"%s\">WooCommerce Extensions Catalog</a>"
+#: includes/admin/views/html-admin-page-status-logs.php:22
+msgid "There are currently no logs to view."
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:2
@@ -5117,195 +5112,195 @@ msgid "WC Logging"
 msgstr "רישום מערכת"
 
 #: includes/admin/views/html-admin-page-status-report.php:104
-msgid "Log directory is writable."
-msgstr "הספרייה התחברה לכתוב אליו."
+msgid "Log directory (%s) is writable."
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:106
 msgid ""
-"Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will"
-" not be possible."
-msgstr "ספרייה התחברה (<code> woocommerce / יומנים / </ code>) אינה ניתנת לכתיבה. רישום לא יהיה אפשרי."
+"Log directory (<code>%s</code>) is not writable. To allow logging, make this"
+" writable or define a custom <code>WC_LOG_DIR</code>."
+msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:110
+#: includes/admin/views/html-admin-page-status-report.php:111
 msgid "Default Timezone"
 msgstr "איזור זמן ברירת מחדל"
 
-#: includes/admin/views/html-admin-page-status-report.php:114
+#: includes/admin/views/html-admin-page-status-report.php:115
 msgid "Default timezone is %s - it should be UTC"
 msgstr "איזור זמן ברירת מחדל הוא %s - צריך להיות UTC"
 
-#: includes/admin/views/html-admin-page-status-report.php:116
+#: includes/admin/views/html-admin-page-status-report.php:117
 msgid "Default timezone is %s"
 msgstr "איזור זמן ברירת מחדל הוא %s"
 
-#: includes/admin/views/html-admin-page-status-report.php:124
+#: includes/admin/views/html-admin-page-status-report.php:125
 msgid "fsockopen/cURL"
 msgstr "fsockopen / CURL"
 
-#: includes/admin/views/html-admin-page-status-report.php:127
+#: includes/admin/views/html-admin-page-status-report.php:128
 msgid "Your server has fsockopen and cURL enabled."
 msgstr "השרת שלך fsockopen ולהתכרבל מופעל."
 
-#: includes/admin/views/html-admin-page-status-report.php:129
+#: includes/admin/views/html-admin-page-status-report.php:130
 msgid "Your server has fsockopen enabled, cURL is disabled."
 msgstr "בשרת שלך fsockopen זמין, cURL לא זמין."
 
-#: includes/admin/views/html-admin-page-status-report.php:131
+#: includes/admin/views/html-admin-page-status-report.php:132
 msgid "Your server has cURL enabled, fsockopen is disabled."
 msgstr "בשרת שלך cURL זמין, fsockopen אינו זמין."
 
-#: includes/admin/views/html-admin-page-status-report.php:135
+#: includes/admin/views/html-admin-page-status-report.php:136
 msgid ""
 "Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
 "scripts which communicate with other servers will not work. Contact your "
 "hosting provider."
 msgstr "בשרת שלך fsockopen ו- cURL לא זמינים - PayPal IPN וסקריפטים אחרים אשר מתקשרים עם שרתים אחרים לא יעבדו. צור קשר עם ספק האירוח שלך."
 
-#: includes/admin/views/html-admin-page-status-report.php:140
+#: includes/admin/views/html-admin-page-status-report.php:141
 msgid "SOAP Client"
 msgstr "SOAP לקוח"
 
-#: includes/admin/views/html-admin-page-status-report.php:142
+#: includes/admin/views/html-admin-page-status-report.php:143
 msgid "Your server has the SOAP Client class enabled."
 msgstr "בשרת שלך SOAP Client class זמין."
 
-#: includes/admin/views/html-admin-page-status-report.php:145
+#: includes/admin/views/html-admin-page-status-report.php:146
 msgid ""
 "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled -"
 " some gateway plugins which use SOAP may not work as expected."
 msgstr "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected."
 
-#: includes/admin/views/html-admin-page-status-report.php:150
+#: includes/admin/views/html-admin-page-status-report.php:151
 msgid "WP Remote Post"
 msgstr "WP Remote Post"
 
-#: includes/admin/views/html-admin-page-status-report.php:161
+#: includes/admin/views/html-admin-page-status-report.php:162
 msgid "wp_remote_post() was successful - PayPal IPN is working."
 msgstr "wp_remote_post() was successful - PayPal IPN is working."
 
-#: includes/admin/views/html-admin-page-status-report.php:164
+#: includes/admin/views/html-admin-page-status-report.php:165
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider. Error:"
 msgstr "wp_remote_post() failed. PayPal IPN won't work with your server. Contact your hosting provider. Error:"
 
-#: includes/admin/views/html-admin-page-status-report.php:167
+#: includes/admin/views/html-admin-page-status-report.php:168
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
 msgstr "wp_remote_post() failed. PayPal IPN may not work with your server."
 
-#: includes/admin/views/html-admin-page-status-report.php:190
+#: includes/admin/views/html-admin-page-status-report.php:191
 msgid "Locale"
 msgstr "מקומי"
 
-#: includes/admin/views/html-admin-page-status-report.php:206
+#: includes/admin/views/html-admin-page-status-report.php:207
 msgid "Plugins"
 msgstr "תוספים"
 
-#: includes/admin/views/html-admin-page-status-report.php:212
+#: includes/admin/views/html-admin-page-status-report.php:213
 msgid "Installed Plugins"
 msgstr "תוספים מותקנים"
 
-#: includes/admin/views/html-admin-page-status-report.php:232
+#: includes/admin/views/html-admin-page-status-report.php:233
 msgid "Visit plugin homepage"
 msgstr "בקר בעמוד הבית של התוסף"
 
-#: includes/admin/views/html-admin-page-status-report.php:256
-#: includes/admin/views/html-admin-page-status-report.php:438
+#: includes/admin/views/html-admin-page-status-report.php:257
+#: includes/admin/views/html-admin-page-status-report.php:439
 msgid "is available"
 msgstr "זמין"
 
-#: includes/admin/views/html-admin-page-status-report.php:259
+#: includes/admin/views/html-admin-page-status-report.php:260
 msgid "by"
 msgstr "על ידי"
 
-#: includes/admin/views/html-admin-page-status-report.php:259
+#: includes/admin/views/html-admin-page-status-report.php:260
 msgid "version"
 msgstr "גירסה"
 
-#: includes/admin/views/html-admin-page-status-report.php:281
+#: includes/admin/views/html-admin-page-status-report.php:282
 msgid "Force SSL"
 msgstr "הכרח SSL"
 
-#: includes/admin/views/html-admin-page-status-report.php:288
+#: includes/admin/views/html-admin-page-status-report.php:289
 msgid "WC Pages"
 msgstr "עמודי החנות"
 
-#: includes/admin/views/html-admin-page-status-report.php:295
+#: includes/admin/views/html-admin-page-status-report.php:296
 msgctxt "Page setting"
 msgid "Shop Base"
 msgstr "מאגר החנות"
 
-#: includes/admin/views/html-admin-page-status-report.php:299
+#: includes/admin/views/html-admin-page-status-report.php:300
 msgctxt "Page setting"
 msgid "Cart"
 msgstr "סל הקניות"
 
-#: includes/admin/views/html-admin-page-status-report.php:303
+#: includes/admin/views/html-admin-page-status-report.php:304
 msgctxt "Page setting"
 msgid "Checkout"
 msgstr "לתשלום"
 
-#: includes/admin/views/html-admin-page-status-report.php:307
+#: includes/admin/views/html-admin-page-status-report.php:308
 msgctxt "Page setting"
 msgid "My Account"
 msgstr "החשבון שלי"
 
-#: includes/admin/views/html-admin-page-status-report.php:327
+#: includes/admin/views/html-admin-page-status-report.php:328
 msgid "Page not set"
 msgstr "דף לא מוגדר"
 
-#: includes/admin/views/html-admin-page-status-report.php:337
+#: includes/admin/views/html-admin-page-status-report.php:338
 msgid "Page does not exist"
 msgstr "עמוד לא קיים"
 
-#: includes/admin/views/html-admin-page-status-report.php:342
+#: includes/admin/views/html-admin-page-status-report.php:343
 msgid "Page does not contain the shortcode: %s"
 msgstr "עמוד אינו מכיל את %s"
 
-#: includes/admin/views/html-admin-page-status-report.php:361
+#: includes/admin/views/html-admin-page-status-report.php:362
 msgid "WC Taxonomies"
 msgstr "טקסונומיה של WooCommerce"
 
-#: includes/admin/views/html-admin-page-status-report.php:367
+#: includes/admin/views/html-admin-page-status-report.php:368
 msgid "Order Statuses"
 msgstr "סטטוסים להזמין"
 
-#: includes/admin/views/html-admin-page-status-report.php:377
+#: includes/admin/views/html-admin-page-status-report.php:378
 msgid "Product Types"
 msgstr "סוגי מוצרים"
 
-#: includes/admin/views/html-admin-page-status-report.php:390
+#: includes/admin/views/html-admin-page-status-report.php:391
 msgid "Theme"
 msgstr "ערכת עיצוב"
 
-#: includes/admin/views/html-admin-page-status-report.php:427
+#: includes/admin/views/html-admin-page-status-report.php:428
 msgid "Theme Name"
 msgstr "שם ערכת נושא"
 
-#: includes/admin/views/html-admin-page-status-report.php:433
+#: includes/admin/views/html-admin-page-status-report.php:434
 msgid "Theme Version"
 msgstr "גרסת ערכת עיצוב"
 
-#: includes/admin/views/html-admin-page-status-report.php:442
+#: includes/admin/views/html-admin-page-status-report.php:443
 msgid "Author URL"
 msgstr "URL מחבר"
 
-#: includes/admin/views/html-admin-page-status-report.php:451
+#: includes/admin/views/html-admin-page-status-report.php:452
 msgid "Templates"
 msgstr "תבניות"
 
-#: includes/admin/views/html-admin-page-status-report.php:486
+#: includes/admin/views/html-admin-page-status-report.php:487
 msgid ""
 "<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
 "date. The core version is %s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:497
-#: includes/admin/views/html-admin-page-status-report.php:503
+#: includes/admin/views/html-admin-page-status-report.php:498
+#: includes/admin/views/html-admin-page-status-report.php:504
 msgid "Template Overrides"
 msgstr "עוקפי תבניות"
 
-#: includes/admin/views/html-admin-page-status-report.php:504
+#: includes/admin/views/html-admin-page-status-report.php:505
 msgid "No overrides present in theme."
 msgstr "אין שכתובים בערכת העיצוב."
 
@@ -5345,6 +5340,10 @@ msgstr "כלי זה ימחק את כל המוצרים ונתוני פוסט הה
 #: includes/admin/views/html-admin-page-status-tools.php:58
 msgid "Save Changes"
 msgstr "שמירת שינויים"
+
+#: includes/admin/views/html-admin-page-status.php:7
+msgid "Logs"
+msgstr ""
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"

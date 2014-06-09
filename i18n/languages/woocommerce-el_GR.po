@@ -1,26 +1,27 @@
 # 
 # Translators:
 # andromeas <andromeas@hotmail.com>, 2014
-# Dimis13 <dimikats1@gmail.com>, 2014
-# filippos.sdr <filippos.sdr@gmail.com>, 2014
-# filippos.sdr <filippos.sdr@gmail.com>, 2014
+# Dimitris katsanis <dimikats1@gmail.com>, 2014
+# Filippos Sdralias <filippos.sdr@gmail.com>, 2014
+# Filippos Sdralias <filippos.sdr@gmail.com>, 2014
 # gorfeas <gorfeas@hotmail.com>, 2014
-# Inceptive D. L. <inceptive@inceptive.gr>, 2014
+# Inceptive Design Labs <inceptive@inceptive.gr>, 2014
+# g.nikolopoulos <info@interactive-design.gr>, 2014
 # AlexSunnO <info@taxpress.gr>, 2014
-# kostasx <kostas@creativecollective.gr>, 2014
+# Kostas M <kostas@creativecollective.gr>, 2014
 # mtzanidakis <mtzanidakis@gmail.com>, 2014
 # ounos <ounos@live.com>, 2014
-# alichani <salichani75@gmail.com>, 2014
-# seriusb <seriusb@gmail.com>, 2014
+# Socrates Alichanides <salichani75@gmail.com>, 2014
+# ted gudis <seriusb@gmail.com>, 2014
 # theWeavers_ <the.weavers.are.weaving@gmail.com>, 2014
 # Psili <tsilimidoum@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-05-22 10:45:21+00:00\n"
-"PO-Revision-Date: 2014-05-28 17:52+0000\n"
-"Last-Translator: andromeas <andromeas@hotmail.com>\n"
+"POT-Creation-Date: 2014-06-03 15:13:58+00:00\n"
+"PO-Revision-Date: 2014-06-06 15:16+0000\n"
+"Last-Translator: g.nikolopoulos <info@interactive-design.gr>\n"
 "Language-Team: Greek (Greece) (http://www.transifex.com/projects/p/woocommerce/language/el_GR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,52 +29,981 @@ msgstr ""
 "Language: el_GR\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: assets/js/admin/editor_plugin_lang.php:5
-msgid "Insert Shortcode"
-msgstr "Εισάγετε σύντομο κωδικό"
+#: i18n/countries.php:16
+msgid "Afghanistan"
+msgstr "Αφγανιστάν"
 
-#: assets/js/admin/editor_plugin_lang.php:6
-msgid "Product price/cart button"
-msgstr "Τιμή προϊόντος/κουμπί καλαθιού"
+#: i18n/countries.php:17
+msgid "&#197;land Islands"
+msgstr "&#197;land Islands"
 
-#: assets/js/admin/editor_plugin_lang.php:7
-msgid "Product by SKU/ID"
-msgstr "Προϊόν ανά κωδικό"
+#: i18n/countries.php:18
+msgid "Albania"
+msgstr "Αλβανία"
 
-#: assets/js/admin/editor_plugin_lang.php:8
-msgid "Products by SKU/ID"
-msgstr "Προϊόντα ανά κωδικό"
+#: i18n/countries.php:19
+msgid "Algeria"
+msgstr "Αλγερία"
 
-#: assets/js/admin/editor_plugin_lang.php:9
-msgid "Product categories"
-msgstr "Κατηγορίες προϊόντος"
+#: i18n/countries.php:20
+msgid "Andorra"
+msgstr "Ανδόρα"
 
-#: assets/js/admin/editor_plugin_lang.php:10
-msgid "Products by category slug"
-msgstr "Προϊόντα κατά σύντομο όνομα κατηγορίας"
+#: i18n/countries.php:21
+msgid "Angola"
+msgstr "Αγκόλα"
 
-#: assets/js/admin/editor_plugin_lang.php:11
-msgid "Recent products"
-msgstr "Πρόσφατα προϊόντα"
+#: i18n/countries.php:22
+msgid "Anguilla"
+msgstr "Ανγκουίλα"
 
-#: assets/js/admin/editor_plugin_lang.php:12
-msgid "Featured products"
-msgstr "Προβεβλημένα προϊόντα"
+#: i18n/countries.php:23
+msgid "Antarctica"
+msgstr "Ανταρκτική"
 
-#: assets/js/admin/editor_plugin_lang.php:13
-msgid "Shop Messages"
-msgstr "Μηνύματα Καταστήματος"
+#: i18n/countries.php:24
+msgid "Antigua and Barbuda"
+msgstr "Αντίγκουα και Μπαρμπούντα"
 
-#: assets/js/admin/editor_plugin_lang.php:14
-msgid "Order tracking"
-msgstr "Παρακολούθηση παραγγελίας"
+#: i18n/countries.php:25
+msgid "Argentina"
+msgstr "Αργεντινή"
 
-#: assets/js/admin/editor_plugin_lang.php:15
-#: includes/shortcodes/class-wc-shortcode-checkout.php:91
-#: includes/shortcodes/class-wc-shortcode-my-account.php:111
-#: templates/checkout/thankyou.php:30
-msgid "My Account"
-msgstr "Ο Λογαριασμός μου"
+#: i18n/countries.php:26
+msgid "Armenia"
+msgstr "Αρμενία"
+
+#: i18n/countries.php:27
+msgid "Aruba"
+msgstr "Αρούμπα"
+
+#: i18n/countries.php:28
+msgid "Australia"
+msgstr "Αυστραλία"
+
+#: i18n/countries.php:29
+msgid "Austria"
+msgstr "Αυστρία"
+
+#: i18n/countries.php:30
+msgid "Azerbaijan"
+msgstr "Αζερμπαϊτζάν"
+
+#: i18n/countries.php:31
+msgid "Bahamas"
+msgstr "Μπαχάμες"
+
+#: i18n/countries.php:32
+msgid "Bahrain"
+msgstr "Μπαχρέιν"
+
+#: i18n/countries.php:33
+msgid "Bangladesh"
+msgstr "Μπανγκλαντές"
+
+#: i18n/countries.php:34
+msgid "Barbados"
+msgstr "Μπαρμπάντος"
+
+#: i18n/countries.php:35
+msgid "Belarus"
+msgstr "Λευκορωσία"
+
+#: i18n/countries.php:36
+msgid "Belgium"
+msgstr "Βέλγιο"
+
+#: i18n/countries.php:37
+msgid "Belau"
+msgstr "Belau"
+
+#: i18n/countries.php:38
+msgid "Belize"
+msgstr "Μπελίσε"
+
+#: i18n/countries.php:39
+msgid "Benin"
+msgstr "Μπενίν"
+
+#: i18n/countries.php:40
+msgid "Bermuda"
+msgstr "Βερμούδες"
+
+#: i18n/countries.php:41
+msgid "Bhutan"
+msgstr "Μπουτάν"
+
+#: i18n/countries.php:42
+msgid "Bolivia"
+msgstr "Βολιβία"
+
+#: i18n/countries.php:43
+msgid "Bonaire, Saint Eustatius and Saba"
+msgstr "Bonaire, Saint Eustatius and Saba"
+
+#: i18n/countries.php:44
+msgid "Bosnia and Herzegovina"
+msgstr "Βοσνία-Ερζεγοβίνη"
+
+#: i18n/countries.php:45
+msgid "Botswana"
+msgstr "Μποτσουάνα"
+
+#: i18n/countries.php:46
+msgid "Bouvet Island"
+msgstr "Bouvet Island"
+
+#: i18n/countries.php:47
+msgid "Brazil"
+msgstr "Βραζιλία"
+
+#: i18n/countries.php:48
+msgid "British Indian Ocean Territory"
+msgstr "Βρετανικό Έδαφος του Ινδικού Ωκεανού"
+
+#: i18n/countries.php:49
+msgid "British Virgin Islands"
+msgstr "Βρετανικές Παρθένοι Νήσοι"
+
+#: i18n/countries.php:50
+msgid "Brunei"
+msgstr "Μπρουνέι"
+
+#: i18n/countries.php:51
+msgid "Bulgaria"
+msgstr "Βουλγαρία"
+
+#: i18n/countries.php:52
+msgid "Burkina Faso"
+msgstr "Μπουρκίνα Φάσο"
+
+#: i18n/countries.php:53
+msgid "Burundi"
+msgstr "Μπουρούντι"
+
+#: i18n/countries.php:54
+msgid "Cambodia"
+msgstr "Καμπότζη"
+
+#: i18n/countries.php:55
+msgid "Cameroon"
+msgstr "Καμερούν"
+
+#: i18n/countries.php:56
+msgid "Canada"
+msgstr "Καναδάς"
+
+#: i18n/countries.php:57
+msgid "Cape Verde"
+msgstr "Πράσινο Ακρωτήριο"
+
+#: i18n/countries.php:58
+msgid "Cayman Islands"
+msgstr "Νησιά Κέιμαν"
+
+#: i18n/countries.php:59
+msgid "Central African Republic"
+msgstr "Κεντροαφρικανική Δημοκρατία"
+
+#: i18n/countries.php:60
+msgid "Chad"
+msgstr "Τσαντ"
+
+#: i18n/countries.php:61
+msgid "Chile"
+msgstr "Χιλή"
+
+#: i18n/countries.php:62
+msgid "China"
+msgstr "Κίνα"
+
+#: i18n/countries.php:63
+msgid "Christmas Island"
+msgstr "Νήσος Χριστουγέννων"
+
+#: i18n/countries.php:64
+msgid "Cocos (Keeling) Islands"
+msgstr "Νήσοι Κόκος"
+
+#: i18n/countries.php:65
+msgid "Colombia"
+msgstr "Κολομβία"
+
+#: i18n/countries.php:66
+msgid "Comoros"
+msgstr "Κομόρες"
+
+#: i18n/countries.php:67
+msgid "Congo (Brazzaville)"
+msgstr "Κονγκό (Μπραζαβίλ)"
+
+#: i18n/countries.php:68
+msgid "Congo (Kinshasa)"
+msgstr "Κονγκό (Κινσάσα)"
+
+#: i18n/countries.php:69
+msgid "Cook Islands"
+msgstr "Νήσοι Κουκ"
+
+#: i18n/countries.php:70
+msgid "Costa Rica"
+msgstr "Κόστα Ρίκα"
+
+#: i18n/countries.php:71
+msgid "Croatia"
+msgstr "Κροατία"
+
+#: i18n/countries.php:72
+msgid "Cuba"
+msgstr "Κούβα"
+
+#: i18n/countries.php:73
+msgid "Cura&Ccedil;ao"
+msgstr "Cura&Ccedil;ao"
+
+#: i18n/countries.php:74
+msgid "Cyprus"
+msgstr "Κύπρος"
+
+#: i18n/countries.php:75
+msgid "Czech Republic"
+msgstr "Τσεχία"
+
+#: i18n/countries.php:76
+msgid "Denmark"
+msgstr "Δανία"
+
+#: i18n/countries.php:77
+msgid "Djibouti"
+msgstr "Τζιμπουτί"
+
+#: i18n/countries.php:78
+msgid "Dominica"
+msgstr "Ντομίνικα"
+
+#: i18n/countries.php:79
+msgid "Dominican Republic"
+msgstr "Δομινικανή Δημοκρατία"
+
+#: i18n/countries.php:80
+msgid "Ecuador"
+msgstr "Ισημερινός"
+
+#: i18n/countries.php:81
+msgid "Egypt"
+msgstr "Αίγυπτος"
+
+#: i18n/countries.php:82
+msgid "El Salvador"
+msgstr "Ελ Σαλβαδόρ"
+
+#: i18n/countries.php:83
+msgid "Equatorial Guinea"
+msgstr "Ισημερινή Γουινέα"
+
+#: i18n/countries.php:84
+msgid "Eritrea"
+msgstr "Ερυθραία"
+
+#: i18n/countries.php:85
+msgid "Estonia"
+msgstr "Εσθονία"
+
+#: i18n/countries.php:86
+msgid "Ethiopia"
+msgstr "Αιθιοπία"
+
+#: i18n/countries.php:87
+msgid "Falkland Islands"
+msgstr "Νήσοι Φώκλαντ"
+
+#: i18n/countries.php:88
+msgid "Faroe Islands"
+msgstr "Νησιά Φερόε"
+
+#: i18n/countries.php:89
+msgid "Fiji"
+msgstr "Φίτζι"
+
+#: i18n/countries.php:90
+msgid "Finland"
+msgstr "Φινλανδία"
+
+#: i18n/countries.php:91
+msgid "France"
+msgstr "Γαλλία"
+
+#: i18n/countries.php:92
+msgid "French Guiana"
+msgstr "Γαλλική Γουιάνα"
+
+#: i18n/countries.php:93
+msgid "French Polynesia"
+msgstr "Γαλλική Πολυνησία"
+
+#: i18n/countries.php:94
+msgid "French Southern Territories"
+msgstr "Γαλλικά Νότια Εδάφη"
+
+#: i18n/countries.php:95
+msgid "Gabon"
+msgstr "Γκαμπόν"
+
+#: i18n/countries.php:96
+msgid "Gambia"
+msgstr "Γκάμπια"
+
+#: i18n/countries.php:97 i18n/states/US.php:23
+msgid "Georgia"
+msgstr "Γεωργία"
+
+#: i18n/countries.php:98
+msgid "Germany"
+msgstr "Γερμανία"
+
+#: i18n/countries.php:99
+msgid "Ghana"
+msgstr "Γκάνα"
+
+#: i18n/countries.php:100
+msgid "Gibraltar"
+msgstr "Γιβραλτάρ"
+
+#: i18n/countries.php:101
+msgid "Greece"
+msgstr "Ελλάδα"
+
+#: i18n/countries.php:102
+msgid "Greenland"
+msgstr "Γροιλανδία"
+
+#: i18n/countries.php:103
+msgid "Grenada"
+msgstr "Γρενάδα"
+
+#: i18n/countries.php:104
+msgid "Guadeloupe"
+msgstr "Γουαδελούπη"
+
+#: i18n/countries.php:105
+msgid "Guatemala"
+msgstr "Γουατεμάλα"
+
+#: i18n/countries.php:106
+msgid "Guernsey"
+msgstr "Γκέρνσεϊ"
+
+#: i18n/countries.php:107
+msgid "Guinea"
+msgstr "Γουινέα"
+
+#: i18n/countries.php:108
+msgid "Guinea-Bissau"
+msgstr "Γουϊνέα-Μπισάου"
+
+#: i18n/countries.php:109
+msgid "Guyana"
+msgstr "Γουιάνα"
+
+#: i18n/countries.php:110
+msgid "Haiti"
+msgstr "Αϊτή"
+
+#: i18n/countries.php:111
+msgid "Heard Island and McDonald Islands"
+msgstr "Heard Island and McDonald Islands"
+
+#: i18n/countries.php:112
+msgid "Honduras"
+msgstr "Ονδούρα"
+
+#: i18n/countries.php:113
+msgid "Hong Kong"
+msgstr "Χονγκ Κονγκ"
+
+#: i18n/countries.php:114
+msgid "Hungary"
+msgstr "Ουγγαρία"
+
+#: i18n/countries.php:115
+msgid "Iceland"
+msgstr "Ισλανδία"
+
+#: i18n/countries.php:116
+msgid "India"
+msgstr "Ινδία"
+
+#: i18n/countries.php:117
+msgid "Indonesia"
+msgstr "Ινδονησία"
+
+#: i18n/countries.php:118
+msgid "Iran"
+msgstr "Ιράν"
+
+#: i18n/countries.php:119
+msgid "Iraq"
+msgstr "Ιράκ"
+
+#: i18n/countries.php:120
+msgid "Republic of Ireland"
+msgstr "Republic of Ireland"
+
+#: i18n/countries.php:121
+msgid "Isle of Man"
+msgstr "Νήσος του Μαν"
+
+#: i18n/countries.php:122
+msgid "Israel"
+msgstr "Ισραήλ"
+
+#: i18n/countries.php:123
+msgid "Italy"
+msgstr "Ιταλία"
+
+#: i18n/countries.php:124
+msgid "Ivory Coast"
+msgstr "Ακτή Ελεφαντοστού"
+
+#: i18n/countries.php:125
+msgid "Jamaica"
+msgstr "Ιαμαϊκή"
+
+#: i18n/countries.php:126
+msgid "Japan"
+msgstr "Ιαπωνία"
+
+#: i18n/countries.php:127
+msgid "Jersey"
+msgstr "Τζέρσεϊ"
+
+#: i18n/countries.php:128
+msgid "Jordan"
+msgstr "Ιορδανία"
+
+#: i18n/countries.php:129
+msgid "Kazakhstan"
+msgstr "Καζακστάν"
+
+#: i18n/countries.php:130
+msgid "Kenya"
+msgstr "Κένυα"
+
+#: i18n/countries.php:131
+msgid "Kiribati"
+msgstr "Κιριμπάτι"
+
+#: i18n/countries.php:132
+msgid "Kuwait"
+msgstr "Κουβέιτ"
+
+#: i18n/countries.php:133
+msgid "Kyrgyzstan"
+msgstr "Κιργιστάν"
+
+#: i18n/countries.php:134
+msgid "Laos"
+msgstr "Λάος"
+
+#: i18n/countries.php:135
+msgid "Latvia"
+msgstr "Λετονία"
+
+#: i18n/countries.php:136
+msgid "Lebanon"
+msgstr "Λίβανος"
+
+#: i18n/countries.php:137
+msgid "Lesotho"
+msgstr "Λεσότο"
+
+#: i18n/countries.php:138
+msgid "Liberia"
+msgstr "Λιβερία"
+
+#: i18n/countries.php:139
+msgid "Libya"
+msgstr "Λιβύη"
+
+#: i18n/countries.php:140
+msgid "Liechtenstein"
+msgstr "Λιχτενστάιν"
+
+#: i18n/countries.php:141
+msgid "Lithuania"
+msgstr "Λιθουανία"
+
+#: i18n/countries.php:142
+msgid "Luxembourg"
+msgstr "Λουξεμβούργο"
+
+#: i18n/countries.php:143
+msgid "Macao S.A.R., China"
+msgstr "Μακάο ΕΔΠ Κίνας"
+
+#: i18n/countries.php:144
+msgid "Macedonia"
+msgstr "ΠΓΔ Μακεδονίας"
+
+#: i18n/countries.php:145
+msgid "Madagascar"
+msgstr "Μαδαγασκάρη"
+
+#: i18n/countries.php:146
+msgid "Malawi"
+msgstr "Μαλάουι"
+
+#: i18n/countries.php:147
+msgid "Malaysia"
+msgstr "Μαλαισία"
+
+#: i18n/countries.php:148
+msgid "Maldives"
+msgstr "Μαλδίβες"
+
+#: i18n/countries.php:149
+msgid "Mali"
+msgstr "Μάλι"
+
+#: i18n/countries.php:150
+msgid "Malta"
+msgstr "Μάλτα"
+
+#: i18n/countries.php:151
+msgid "Marshall Islands"
+msgstr "Νήσοι Μάρσαλ"
+
+#: i18n/countries.php:152
+msgid "Martinique"
+msgstr "Μαρτινίκα"
+
+#: i18n/countries.php:153
+msgid "Mauritania"
+msgstr "Μαυριτανία"
+
+#: i18n/countries.php:154
+msgid "Mauritius"
+msgstr "Μαυρίκιος"
+
+#: i18n/countries.php:155
+msgid "Mayotte"
+msgstr "Μαγιότ"
+
+#: i18n/countries.php:156
+msgid "Mexico"
+msgstr "Μεξικό"
+
+#: i18n/countries.php:157
+msgid "Micronesia"
+msgstr "Μικρονησία"
+
+#: i18n/countries.php:158
+msgid "Moldova"
+msgstr "Μολδαβία"
+
+#: i18n/countries.php:159
+msgid "Monaco"
+msgstr "Μονακό"
+
+#: i18n/countries.php:160
+msgid "Mongolia"
+msgstr "Μογγολία"
+
+#: i18n/countries.php:161
+msgid "Montenegro"
+msgstr "Μαυροβούνιο"
+
+#: i18n/countries.php:162
+msgid "Montserrat"
+msgstr "Μονσεράτ"
+
+#: i18n/countries.php:163
+msgid "Morocco"
+msgstr "Μαρόκο"
+
+#: i18n/countries.php:164
+msgid "Mozambique"
+msgstr "Μοζαμβίκη"
+
+#: i18n/countries.php:165
+msgid "Myanmar"
+msgstr "Μιανμάρ"
+
+#: i18n/countries.php:166
+msgid "Namibia"
+msgstr "Ναμίμπια"
+
+#: i18n/countries.php:167
+msgid "Nauru"
+msgstr "Ναούρου"
+
+#: i18n/countries.php:168
+msgid "Nepal"
+msgstr "Νεπάλ"
+
+#: i18n/countries.php:169
+msgid "Netherlands"
+msgstr "Ολλανδία"
+
+#: i18n/countries.php:170
+msgid "Netherlands Antilles"
+msgstr "Ολλανδικές Αντίλλες"
+
+#: i18n/countries.php:171
+msgid "New Caledonia"
+msgstr "Νέα Καληδονία"
+
+#: i18n/countries.php:172
+msgid "New Zealand"
+msgstr "Νέα Ζηλανδία"
+
+#: i18n/countries.php:173
+msgid "Nicaragua"
+msgstr "Νικαράγουα"
+
+#: i18n/countries.php:174
+msgid "Niger"
+msgstr "Νίγηρας"
+
+#: i18n/countries.php:175
+msgid "Nigeria"
+msgstr "Νιγηρία"
+
+#: i18n/countries.php:176
+msgid "Niue"
+msgstr "Νιούε"
+
+#: i18n/countries.php:177
+msgid "Norfolk Island"
+msgstr "Νήσος Νόρφολκ"
+
+#: i18n/countries.php:178
+msgid "North Korea"
+msgstr "Βόρεια Κορέα"
+
+#: i18n/countries.php:179
+msgid "Norway"
+msgstr "Νορβηγία"
+
+#: i18n/countries.php:180
+msgid "Oman"
+msgstr "Ομάν"
+
+#: i18n/countries.php:181
+msgid "Pakistan"
+msgstr "Πακιστάν"
+
+#: i18n/countries.php:182
+msgid "Palestinian Territory"
+msgstr "Παλαιστίνη"
+
+#: i18n/countries.php:183
+msgid "Panama"
+msgstr "Παναμάς"
+
+#: i18n/countries.php:184
+msgid "Papua New Guinea"
+msgstr "Παπούα Νέα Γουινέα"
+
+#: i18n/countries.php:185
+msgid "Paraguay"
+msgstr "Παραγουάη"
+
+#: i18n/countries.php:186
+msgid "Peru"
+msgstr "Περού"
+
+#: i18n/countries.php:187
+msgid "Philippines"
+msgstr "Φιλιππίνες"
+
+#: i18n/countries.php:188
+msgid "Pitcairn"
+msgstr "Πίτκαιρν"
+
+#: i18n/countries.php:189
+msgid "Poland"
+msgstr "Πολωνία"
+
+#: i18n/countries.php:190
+msgid "Portugal"
+msgstr "Πορτογαλία"
+
+#: i18n/countries.php:191
+msgid "Qatar"
+msgstr "Κατάρ"
+
+#: i18n/countries.php:192
+msgid "Reunion"
+msgstr "Ρεϊνιόν"
+
+#: i18n/countries.php:193
+msgid "Romania"
+msgstr "Ρουμανία"
+
+#: i18n/countries.php:194
+msgid "Russia"
+msgstr "Ρωσία"
+
+#: i18n/countries.php:195
+msgid "Rwanda"
+msgstr "Ρουάντα"
+
+#: i18n/countries.php:196
+msgid "Saint Barth&eacute;lemy"
+msgstr "Saint Barth&eacute;lemy"
+
+#: i18n/countries.php:197
+msgid "Saint Helena"
+msgstr "Αγία Ελένη"
+
+#: i18n/countries.php:198
+msgid "Saint Kitts and Nevis"
+msgstr "Άγιος Χριστόφορος και Νέβις"
+
+#: i18n/countries.php:199
+msgid "Saint Lucia"
+msgstr "Αγία Λουκία"
+
+#: i18n/countries.php:200
+msgid "Saint Martin (French part)"
+msgstr "Άγιος Μαρτίνος"
+
+#: i18n/countries.php:201
+msgid "Saint Martin (Dutch part)"
+msgstr "Saint Martin (Dutch part)"
+
+#: i18n/countries.php:202
+msgid "Saint Pierre and Miquelon"
+msgstr "Σεν Πιερ και Μικελόν"
+
+#: i18n/countries.php:203
+msgid "Saint Vincent and the Grenadines"
+msgstr "Άγιος Βικέντιος και Γρεναδίνες"
+
+#: i18n/countries.php:204
+msgid "San Marino"
+msgstr "Σαν Μαρίνο"
+
+#: i18n/countries.php:205
+msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+msgstr "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+
+#: i18n/countries.php:206
+msgid "Saudi Arabia"
+msgstr "Σαουδική Αραβία"
+
+#: i18n/countries.php:207
+msgid "Senegal"
+msgstr "Σενεγάλη"
+
+#: i18n/countries.php:208
+msgid "Serbia"
+msgstr "Σερβία"
+
+#: i18n/countries.php:209
+msgid "Seychelles"
+msgstr "Σεϋχέλλες"
+
+#: i18n/countries.php:210
+msgid "Sierra Leone"
+msgstr "Σιέρα Λεόνε"
+
+#: i18n/countries.php:211
+msgid "Singapore"
+msgstr "Σιγκαπούρη"
+
+#: i18n/countries.php:212
+msgid "Slovakia"
+msgstr "Σλοβακία"
+
+#: i18n/countries.php:213
+msgid "Slovenia"
+msgstr "Σλοβενία"
+
+#: i18n/countries.php:214
+msgid "Solomon Islands"
+msgstr "Νησιά Σολομώντα"
+
+#: i18n/countries.php:215
+msgid "Somalia"
+msgstr "Σομαλία"
+
+#: i18n/countries.php:216
+msgid "South Africa"
+msgstr "Νότια Αφρική"
+
+#: i18n/countries.php:217
+msgid "South Georgia/Sandwich Islands"
+msgstr "Νότια Γεωργία / Νησιά Σάντουιτς"
+
+#: i18n/countries.php:218
+msgid "South Korea"
+msgstr "Νότια Κορέα"
+
+#: i18n/countries.php:219
+msgid "South Sudan"
+msgstr "Νότιο Σουδάν"
+
+#: i18n/countries.php:220
+msgid "Spain"
+msgstr "Ισπανία"
+
+#: i18n/countries.php:221
+msgid "Sri Lanka"
+msgstr "Σρι Λάνκα"
+
+#: i18n/countries.php:222
+msgid "Sudan"
+msgstr "Σουδάν"
+
+#: i18n/countries.php:223
+msgid "Suriname"
+msgstr "Σουρινάμ"
+
+#: i18n/countries.php:224
+msgid "Svalbard and Jan Mayen"
+msgstr "Σβάλμπαρντ και Γιαν Μαγιέν"
+
+#: i18n/countries.php:225
+msgid "Swaziland"
+msgstr "Σουαζιλάνδη"
+
+#: i18n/countries.php:226
+msgid "Sweden"
+msgstr "Σουηδία"
+
+#: i18n/countries.php:227
+msgid "Switzerland"
+msgstr "Ελβετία"
+
+#: i18n/countries.php:228
+msgid "Syria"
+msgstr "Συρία"
+
+#: i18n/countries.php:229
+msgid "Taiwan"
+msgstr "Ταϊβάν"
+
+#: i18n/countries.php:230
+msgid "Tajikistan"
+msgstr "Τατζικιστάν"
+
+#: i18n/countries.php:231
+msgid "Tanzania"
+msgstr "Τανζανία"
+
+#: i18n/countries.php:232
+msgid "Thailand"
+msgstr "Ταϊλάνδη"
+
+#: i18n/countries.php:233
+msgid "Timor-Leste"
+msgstr "Τιμόρ-Λέστε"
+
+#: i18n/countries.php:234
+msgid "Togo"
+msgstr "Τόγκο"
+
+#: i18n/countries.php:235
+msgid "Tokelau"
+msgstr "Τοκελάου"
+
+#: i18n/countries.php:236
+msgid "Tonga"
+msgstr "Τόνγκα"
+
+#: i18n/countries.php:237
+msgid "Trinidad and Tobago"
+msgstr "Τρινιντάντ και Τομπάγκο"
+
+#: i18n/countries.php:238
+msgid "Tunisia"
+msgstr "Τυνησία"
+
+#: i18n/countries.php:239
+msgid "Turkey"
+msgstr "Τουρκία"
+
+#: i18n/countries.php:240
+msgid "Turkmenistan"
+msgstr "Τουρκμενιστάν"
+
+#: i18n/countries.php:241
+msgid "Turks and Caicos Islands"
+msgstr "Τερκς και Κάικος"
+
+#: i18n/countries.php:242
+msgid "Tuvalu"
+msgstr "Τουβαλού"
+
+#: i18n/countries.php:243
+msgid "Uganda"
+msgstr "Ουγκάντα"
+
+#: i18n/countries.php:244
+msgid "Ukraine"
+msgstr "Ουκρανία"
+
+#: i18n/countries.php:245
+msgid "United Arab Emirates"
+msgstr "Ηνωμένα Αραβικά Εμιράτα"
+
+#: i18n/countries.php:246
+msgid "United Kingdom (UK)"
+msgstr "Ηνωμένο Βασίλειο (ΗΒ)"
+
+#: i18n/countries.php:247
+msgid "United States (US)"
+msgstr "Ηνωμένες Πολιτείες (ΗΠΑ)"
+
+#: i18n/countries.php:248
+msgid "Uruguay"
+msgstr "Ουρουγουάη"
+
+#: i18n/countries.php:249
+msgid "Uzbekistan"
+msgstr "Ουζμπεκιστάν"
+
+#: i18n/countries.php:250
+msgid "Vanuatu"
+msgstr "Βανουάτου"
+
+#: i18n/countries.php:251
+msgid "Vatican"
+msgstr "Βατικανό"
+
+#: i18n/countries.php:252
+msgid "Venezuela"
+msgstr "Βενεζουέλα"
+
+#: i18n/countries.php:253
+msgid "Vietnam"
+msgstr "Βιετνάμ"
+
+#: i18n/countries.php:254
+msgid "Wallis and Futuna"
+msgstr "Νήσοι Ουαλλίς και Φουτουνά"
+
+#: i18n/countries.php:255
+msgid "Western Sahara"
+msgstr "Δυτική Σαχάρα"
+
+#: i18n/countries.php:256
+msgid "Western Samoa"
+msgstr "Δυτική Σαμόα"
+
+#: i18n/countries.php:257
+msgid "Yemen"
+msgstr "Υεμένη"
+
+#: i18n/countries.php:258
+msgid "Zambia"
+msgstr "Ζάμπια"
+
+#: i18n/countries.php:259
+msgid "Zimbabwe"
+msgstr "Ζιμπάμπουε"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
@@ -2912,10 +3842,6 @@ msgstr "District Of Columbia"
 msgid "Florida"
 msgstr "Florida"
 
-#: i18n/states/US.php:23 includes/class-wc-countries.php:118
-msgid "Georgia"
-msgstr "Γεωργία"
-
 #: i18n/states/US.php:24
 msgid "Hawaii"
 msgstr "Hawaii"
@@ -3172,9 +4098,9 @@ msgstr "έγινε επιστροφή χρημάτων"
 msgid "cancelled"
 msgstr "ακυρώθηκε"
 
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/emails/class-wc-email-customer-completed-order.php:140
-#: includes/emails/class-wc-email-new-order.php:120
+#: includes/abstracts/abstract-wc-email.php:573
+#: includes/emails/class-wc-email-customer-completed-order.php:141
+#: includes/emails/class-wc-email-new-order.php:121
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:52
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:122
@@ -3185,130 +4111,130 @@ msgstr "ακυρώθηκε"
 msgid "Enable/Disable"
 msgstr "Ενεργοποίηση/Απενεργοποίηση"
 
-#: includes/abstracts/abstract-wc-email.php:572
-#: includes/emails/class-wc-email-customer-completed-order.php:142
-#: includes/emails/class-wc-email-new-order.php:122
+#: includes/abstracts/abstract-wc-email.php:575
+#: includes/emails/class-wc-email-customer-completed-order.php:143
+#: includes/emails/class-wc-email-new-order.php:123
 msgid "Enable this email notification"
 msgstr "Ενεργοποίηση αυτής της ειδοποίησης email"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/emails/class-wc-email-customer-invoice.php:146
+#: includes/abstracts/abstract-wc-email.php:579
+#: includes/emails/class-wc-email-customer-invoice.php:147
 msgid "Email subject"
 msgstr "Θέμα email"
 
-#: includes/abstracts/abstract-wc-email.php:578
-#: includes/abstracts/abstract-wc-email.php:585
-#: includes/emails/class-wc-email-customer-completed-order.php:148
-#: includes/emails/class-wc-email-customer-completed-order.php:155
-#: includes/emails/class-wc-email-customer-completed-order.php:162
-#: includes/emails/class-wc-email-customer-completed-order.php:169
-#: includes/emails/class-wc-email-customer-invoice.php:148
-#: includes/emails/class-wc-email-customer-invoice.php:155
-#: includes/emails/class-wc-email-customer-invoice.php:162
-#: includes/emails/class-wc-email-customer-invoice.php:169
+#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:588
+#: includes/emails/class-wc-email-customer-completed-order.php:149
+#: includes/emails/class-wc-email-customer-completed-order.php:156
+#: includes/emails/class-wc-email-customer-completed-order.php:163
+#: includes/emails/class-wc-email-customer-completed-order.php:170
+#: includes/emails/class-wc-email-customer-invoice.php:149
+#: includes/emails/class-wc-email-customer-invoice.php:156
+#: includes/emails/class-wc-email-customer-invoice.php:163
+#: includes/emails/class-wc-email-customer-invoice.php:170
 msgid "Defaults to <code>%s</code>"
 msgstr "Προεπιλογές στο <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:583
-#: includes/emails/class-wc-email-customer-invoice.php:153
+#: includes/abstracts/abstract-wc-email.php:586
+#: includes/emails/class-wc-email-customer-invoice.php:154
 msgid "Email heading"
 msgstr "Επικεφαλίδα email"
 
-#: includes/abstracts/abstract-wc-email.php:590
-#: includes/emails/class-wc-email-customer-completed-order.php:174
-#: includes/emails/class-wc-email-customer-invoice.php:174
-#: includes/emails/class-wc-email-new-order.php:147
+#: includes/abstracts/abstract-wc-email.php:593
+#: includes/emails/class-wc-email-customer-completed-order.php:175
+#: includes/emails/class-wc-email-customer-invoice.php:175
+#: includes/emails/class-wc-email-new-order.php:148
 msgid "Email type"
 msgstr "Τύπος email"
 
-#: includes/abstracts/abstract-wc-email.php:592
-#: includes/emails/class-wc-email-customer-completed-order.php:176
-#: includes/emails/class-wc-email-customer-invoice.php:176
-#: includes/emails/class-wc-email-new-order.php:149
+#: includes/abstracts/abstract-wc-email.php:595
+#: includes/emails/class-wc-email-customer-completed-order.php:177
+#: includes/emails/class-wc-email-customer-invoice.php:177
+#: includes/emails/class-wc-email-new-order.php:150
 msgid "Choose which format of email to send."
 msgstr "Επιλέξτε ποια μορφή email να στείλετε."
 
-#: includes/abstracts/abstract-wc-email.php:596
-#: includes/emails/class-wc-email-customer-completed-order.php:180
-#: includes/emails/class-wc-email-customer-invoice.php:180
-#: includes/emails/class-wc-email-new-order.php:153
-msgid "Plain text"
-msgstr "Απλό κείμενο"
-
-#: includes/abstracts/abstract-wc-email.php:597
+#: includes/abstracts/abstract-wc-email.php:599
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
-msgid "HTML"
-msgstr "HTML"
+msgid "Plain text"
+msgstr "Απλό κείμενο"
 
-#: includes/abstracts/abstract-wc-email.php:598
+#: includes/abstracts/abstract-wc-email.php:600
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
+msgid "HTML"
+msgstr "HTML"
+
+#: includes/abstracts/abstract-wc-email.php:601
+#: includes/emails/class-wc-email-customer-completed-order.php:183
+#: includes/emails/class-wc-email-customer-invoice.php:183
+#: includes/emails/class-wc-email-new-order.php:156
 msgid "Multipart"
 msgstr "Σε πολλαπλά μέρη"
 
-#: includes/abstracts/abstract-wc-email.php:634
-#: includes/abstracts/abstract-wc-email.php:655
+#: includes/abstracts/abstract-wc-email.php:637
+#: includes/abstracts/abstract-wc-email.php:658
 msgid "Could not write to template file."
 msgstr "Δεν ήταν εφικτή η εγγραφή στο αρχείο προτύπου."
 
-#: includes/abstracts/abstract-wc-email.php:686
+#: includes/abstracts/abstract-wc-email.php:689
 msgid "Template file copied to theme."
 msgstr "Το αρχείο προτύπου αντιγράφτηκε στο θέμα."
 
-#: includes/abstracts/abstract-wc-email.php:695
+#: includes/abstracts/abstract-wc-email.php:698
 msgid "Template file deleted from theme."
 msgstr "Το αρχείο προτύπου διαγράφηκε από το θέμα."
 
-#: includes/abstracts/abstract-wc-email.php:703
+#: includes/abstracts/abstract-wc-email.php:706
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Ρυθμίσεις"
 
-#: includes/abstracts/abstract-wc-email.php:715
+#: includes/abstracts/abstract-wc-email.php:718
 msgid "HTML template"
 msgstr "Πρότυπο HTML"
 
-#: includes/abstracts/abstract-wc-email.php:716
+#: includes/abstracts/abstract-wc-email.php:719
 msgid "Plain text template"
 msgstr "Πρότυπο απλού κειμένου"
 
-#: includes/abstracts/abstract-wc-email.php:737
+#: includes/abstracts/abstract-wc-email.php:740
 msgid "Delete template file"
 msgstr "Διαγραφή αρχείου προτύπου"
 
-#: includes/abstracts/abstract-wc-email.php:740
+#: includes/abstracts/abstract-wc-email.php:743
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "Αυτό το πρότυπο έχει παρακαμφθεί από το θέμα σας και μπορείτε να το βρείτε στο: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:755
+#: includes/abstracts/abstract-wc-email.php:758
 msgid "Copy file to theme"
 msgstr "Αντιγραφή αρχείου προτύπου στο θέμα"
 
-#: includes/abstracts/abstract-wc-email.php:758
+#: includes/abstracts/abstract-wc-email.php:761
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
-msgstr "Για να παρακάμψετε και να επεξεργαστείτε αυτό το πρότυπο email αντιγράψτε <code>%s</code> στο φάκελο του θέματός σας:<code>%s</code>."
+msgstr "Για να παρακάμψετε και να επεξεργαστείτε αυτό το πρότυπο email αντιγράψτε το αρχείο <code>%s</code> στο φάκελο του θέματός σας:<code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:769
+#: includes/abstracts/abstract-wc-email.php:772
 msgid "File was not found."
 msgstr "Το αρχείο δεν βρέθηκε."
 
-#: includes/abstracts/abstract-wc-email.php:794
+#: includes/abstracts/abstract-wc-email.php:797
 msgid "View template"
 msgstr "Προβολή προτύπου"
 
-#: includes/abstracts/abstract-wc-email.php:795
+#: includes/abstracts/abstract-wc-email.php:798
 msgid "Hide template"
 msgstr "Απόκρυψη προτύπου"
 
-#: includes/abstracts/abstract-wc-email.php:806
+#: includes/abstracts/abstract-wc-email.php:809
 msgid "Are you sure you want to delete this template file?"
 msgstr "Είστε σίγουροι πως θέλετε να διαγραφεί αυτό το αρχείο προτύπου;"
 
@@ -3463,7 +4389,7 @@ msgid "You do not have permission to create coupons"
 msgstr "Δεν έχεις την άδεια να δημιουργήσεις κουπόνια"
 
 #: includes/api/class-wc-api-coupons.php:201
-#: includes/api/class-wc-api-customers.php:332
+#: includes/api/class-wc-api-customers.php:337
 #: includes/api/class-wc-api-server.php:423
 msgid "Missing parameter %s"
 msgstr "Λείπει η παράμετρος %s"
@@ -3482,36 +4408,36 @@ msgstr "Λάθος τύπος κουπονιού - ο τύπος του κουπ
 msgid "Failed to update coupon"
 msgstr "Αποτυχία στο να ανανεωθεί το κουπόνι"
 
-#: includes/api/class-wc-api-customers.php:249
-#: includes/api/class-wc-api-customers.php:252
+#: includes/api/class-wc-api-customers.php:254
+#: includes/api/class-wc-api-customers.php:257
 msgid "Invalid customer Email"
 msgstr "Λανθασμένο Email πελάτη"
 
-#: includes/api/class-wc-api-customers.php:270
+#: includes/api/class-wc-api-customers.php:275
 msgid "You do not have permission to read the customers count"
 msgstr "Δεν έχετε δικαιώματα ανάγνωσης του αριθμού των πελατών"
 
-#: includes/api/class-wc-api-customers.php:327
+#: includes/api/class-wc-api-customers.php:332
 msgid "You do not have permission to create this customer"
 msgstr "Δεν έχετε δικαίωμα να δημιουργήσετε αυτόν τον πελάτη"
 
-#: includes/api/class-wc-api-customers.php:630
+#: includes/api/class-wc-api-customers.php:665
 msgid "Invalid customer ID"
 msgstr "Μη έγκυρο αναγνωριστικό πελάτη"
 
-#: includes/api/class-wc-api-customers.php:637
+#: includes/api/class-wc-api-customers.php:672
 msgid "Invalid customer"
 msgstr "Μη έγκυρος πελάτης"
 
-#: includes/api/class-wc-api-customers.php:645
+#: includes/api/class-wc-api-customers.php:680
 msgid "You do not have permission to read this customer"
 msgstr "Δεν έχετε δικαίωμα να δείτε αυτόν τον πελάτη"
 
-#: includes/api/class-wc-api-customers.php:651
+#: includes/api/class-wc-api-customers.php:686
 msgid "You do not have permission to edit this customer"
 msgstr "Δεν έχετε δικαίωμα να επεξεργαστείτε αυτόν τον πελάτη"
 
-#: includes/api/class-wc-api-customers.php:657
+#: includes/api/class-wc-api-customers.php:692
 msgid "You do not have permission to delete this customer"
 msgstr "Δεν έχετε δικαίωμα να διαγράψετε αυτόν τον πελάτη"
 
@@ -3560,23 +4486,23 @@ msgstr "Δεν έχετε το δικαίωμα να επεξεργαστείτ�
 msgid "You do not have permission to delete this %s"
 msgstr "Δεν έχετε το δικαίωμα να διαγράψετε το %s"
 
-#: includes/api/class-wc-api-resource.php:308
+#: includes/api/class-wc-api-resource.php:314
 msgid "Permanently deleted customer"
 msgstr "Ο πελάτης διαγράφηκε μόνιμα"
 
-#: includes/api/class-wc-api-resource.php:310
+#: includes/api/class-wc-api-resource.php:316
 msgid "The customer cannot be deleted"
 msgstr "Ο πελάτης δεν μπορεί να διαγραφεί"
 
-#: includes/api/class-wc-api-resource.php:319
+#: includes/api/class-wc-api-resource.php:325
 msgid "This %s cannot be deleted"
 msgstr "Αυτό το %s δεν μπορεί να διαγραφεί"
 
-#: includes/api/class-wc-api-resource.php:322
+#: includes/api/class-wc-api-resource.php:328
 msgid "Permanently deleted %s"
 msgstr "Διαγράφηκε μόνιμα %s"
 
-#: includes/api/class-wc-api-resource.php:328
+#: includes/api/class-wc-api-resource.php:334
 msgid "Deleted %s"
 msgstr "Διαγράφηκε %s"
 
@@ -3596,76 +4522,7 @@ msgstr "Ο χειριστής για αυτήν την διαδρομή δεν �
 msgid "No route was found matching the URL and request method"
 msgstr "Δεν βρέθηκε διαδρομή που να ταιριάζει με  τη διεύθυνση URL και τη μέθοδο του αιτήματος"
 
-#: includes/class-wc-ajax.php:164
-msgid "Sorry, your session has expired."
-msgstr "Μας συγχωρείτε, η περίοδος χρήσης έχει λήξει."
-
-#: includes/class-wc-ajax.php:164
-msgid "Return to homepage"
-msgstr "Επιστροφή στην αρχική σελίδα"
-
-#: includes/class-wc-ajax.php:318 includes/class-wc-ajax.php:351
-#: includes/class-wc-ajax.php:376
-msgid "You do not have sufficient permissions to access this page."
-msgstr "Δεν έχετε επαρκή δικαιώματα για να αποκτήσετε πρόσβαση σε αυτήν τη σελίδα."
-
-#: includes/class-wc-ajax.php:322 includes/class-wc-ajax.php:355
-#: includes/class-wc-ajax.php:380
-msgid "You have taken too long. Please go back and retry."
-msgstr "Αργήσατε. Παρακαλώ ξαναπροσπαθήστε"
-
-#: includes/class-wc-ajax.php:612
-msgid "Same as parent"
-msgstr "Ίδιο με το γονέα"
-
-#: includes/class-wc-ajax.php:613
-msgid "Standard"
-msgstr "Κανονική"
-
-#: includes/class-wc-ajax.php:888
-msgid "File %d"
-msgstr "Αρχείο %d"
-
-#: includes/class-wc-ajax.php:1086 includes/class-wc-ajax.php:1087
-#: includes/class-wc-order.php:1592
-msgid "Item #%s stock reduced from %s to %s."
-msgstr "Το απόθεμα του Προϊόντος #%s μειώθηκε από %s σε %s."
-
-#: includes/class-wc-ajax.php:1095
-msgid ""
-"No products had their stock reduced - they may not have stock management "
-"enabled."
-msgstr "Δεν έγινε μείωση αποθέματος σε κανένα προϊόν - ίσως δεν έχουν ενεργοποιημένη τη δυνατότητα διαχείρισης αποθεμάτων."
-
-#: includes/class-wc-ajax.php:1136 includes/class-wc-ajax.php:1137
-msgid "Item #%s stock increased from %s to %s."
-msgstr "Το απόθεμα του Προϊόντος #%s αυξήθηκε από %s σε %s."
-
-#: includes/class-wc-ajax.php:1144
-msgid ""
-"No products had their stock increased - they may not have stock management "
-"enabled."
-msgstr "Δεν έγινε αύξηση αποθέματος σε κανένα προϊόν - ίσως δεν έχουν ενεργοποιημένη τη δυνατότητα διαχείρισης αποθεμάτων."
-
-#: includes/class-wc-ajax.php:1161
-#: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:62
-msgid "Name"
-msgstr "Όνομα"
-
-#: includes/class-wc-ajax.php:1161
-msgid "Value"
-msgstr "Ποσότητα"
-
-#: includes/class-wc-ajax.php:1384
-msgid "Delete note"
-msgstr "Διαγραφή σημείωσης"
-
-#: includes/class-wc-ajax.php:1532
-msgid "Guest"
-msgstr "Επισκέπτης"
-
-#: includes/class-wc-cache-helper.php:105
+#: includes/class-wc-cache-helper.php:106
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
@@ -3720,7 +4577,7 @@ msgid ""
 msgstr "Δεν μπορείτε να προσθέσετε αυτή την ποσότητα &quot;%s&quot; στο καλάθι, διότι δεν υπάρχει αρκετό απόθεμα (%s απομένουν)."
 
 #: includes/class-wc-cart.php:835 includes/class-wc-cart.php:854
-#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:188
 #: includes/wc-cart-functions.php:96 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "Προβολή Καλαθιού"
@@ -3789,20 +4646,20 @@ msgid ""
 " to homepage</a>"
 msgstr "Συγγνώμη, η συνεδρία σας έχει λήξει. <a href=\"%s\" class=\"wc-backward\">Επιστροφή στην Αρχική</a>"
 
-#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:84
 msgid "is a required field."
 msgstr "είναι απαιτούμενο πεδίο."
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:95
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Παρακαλώ πληκτρολογήστε ένα έγκυρο Τ.Κ."
 
-#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:104
 msgid "is not a valid phone number."
 msgstr "δεν είναι έγκυρος αριθμός τηλεφώνου."
 
-#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:111
 msgid "is not a valid email address."
 msgstr "δεν είναι έγκυρη διεύθυνση email."
 
@@ -3828,1112 +4685,45 @@ msgstr "Μη έγκυρος τρόπος αποστολής."
 msgid "Invalid payment method."
 msgstr "Μη έγκυρος τρόπος πληρωμής."
 
-#: includes/class-wc-comments.php:109
+#: includes/class-wc-comments.php:111
 msgid "Please rate the product."
 msgstr "Παρακαλούμε αξιολογήστε το προίόν."
 
-#: includes/class-wc-countries.php:37
-msgid "Afghanistan"
-msgstr "Αφγανιστάν"
-
-#: includes/class-wc-countries.php:38
-msgid "&#197;land Islands"
-msgstr "&#197;land Islands"
-
-#: includes/class-wc-countries.php:39
-msgid "Albania"
-msgstr "Αλβανία"
-
-#: includes/class-wc-countries.php:40
-msgid "Algeria"
-msgstr "Αλγερία"
-
-#: includes/class-wc-countries.php:41
-msgid "Andorra"
-msgstr "Ανδόρα"
-
-#: includes/class-wc-countries.php:42
-msgid "Angola"
-msgstr "Αγκόλα"
-
-#: includes/class-wc-countries.php:43
-msgid "Anguilla"
-msgstr "Ανγκουίλα"
-
-#: includes/class-wc-countries.php:44
-msgid "Antarctica"
-msgstr "Ανταρκτική"
-
-#: includes/class-wc-countries.php:45
-msgid "Antigua and Barbuda"
-msgstr "Αντίγκουα και Μπαρμπούντα"
-
-#: includes/class-wc-countries.php:46
-msgid "Argentina"
-msgstr "Αργεντινή"
-
-#: includes/class-wc-countries.php:47
-msgid "Armenia"
-msgstr "Αρμενία"
-
-#: includes/class-wc-countries.php:48
-msgid "Aruba"
-msgstr "Αρούμπα"
-
-#: includes/class-wc-countries.php:49
-msgid "Australia"
-msgstr "Αυστραλία"
-
-#: includes/class-wc-countries.php:50
-msgid "Austria"
-msgstr "Αυστρία"
-
-#: includes/class-wc-countries.php:51
-msgid "Azerbaijan"
-msgstr "Αζερμπαϊτζάν"
-
-#: includes/class-wc-countries.php:52
-msgid "Bahamas"
-msgstr "Μπαχάμες"
-
-#: includes/class-wc-countries.php:53
-msgid "Bahrain"
-msgstr "Μπαχρέιν"
-
-#: includes/class-wc-countries.php:54
-msgid "Bangladesh"
-msgstr "Μπανγκλαντές"
-
-#: includes/class-wc-countries.php:55
-msgid "Barbados"
-msgstr "Μπαρμπάντος"
-
-#: includes/class-wc-countries.php:56
-msgid "Belarus"
-msgstr "Λευκορωσία"
-
-#: includes/class-wc-countries.php:57
-msgid "Belgium"
-msgstr "Βέλγιο"
-
-#: includes/class-wc-countries.php:58
-msgid "Belau"
-msgstr "Belau"
-
-#: includes/class-wc-countries.php:59
-msgid "Belize"
-msgstr "Μπελίσε"
-
-#: includes/class-wc-countries.php:60
-msgid "Benin"
-msgstr "Μπενίν"
-
-#: includes/class-wc-countries.php:61
-msgid "Bermuda"
-msgstr "Βερμούδες"
-
-#: includes/class-wc-countries.php:62
-msgid "Bhutan"
-msgstr "Μπουτάν"
-
-#: includes/class-wc-countries.php:63
-msgid "Bolivia"
-msgstr "Βολιβία"
-
-#: includes/class-wc-countries.php:64
-msgid "Bonaire, Saint Eustatius and Saba"
-msgstr "Bonaire, Saint Eustatius and Saba"
-
-#: includes/class-wc-countries.php:65
-msgid "Bosnia and Herzegovina"
-msgstr "Βοσνία-Ερζεγοβίνη"
-
-#: includes/class-wc-countries.php:66
-msgid "Botswana"
-msgstr "Μποτσουάνα"
-
-#: includes/class-wc-countries.php:67
-msgid "Bouvet Island"
-msgstr "Bouvet Island"
-
-#: includes/class-wc-countries.php:68
-msgid "Brazil"
-msgstr "Βραζιλία"
-
-#: includes/class-wc-countries.php:69
-msgid "British Indian Ocean Territory"
-msgstr "Βρετανικό Έδαφος του Ινδικού Ωκεανού"
-
-#: includes/class-wc-countries.php:70
-msgid "British Virgin Islands"
-msgstr "Βρετανικές Παρθένοι Νήσοι"
-
-#: includes/class-wc-countries.php:71
-msgid "Brunei"
-msgstr "Μπρουνέι"
-
-#: includes/class-wc-countries.php:72
-msgid "Bulgaria"
-msgstr "Βουλγαρία"
-
-#: includes/class-wc-countries.php:73
-msgid "Burkina Faso"
-msgstr "Μπουρκίνα Φάσο"
-
-#: includes/class-wc-countries.php:74
-msgid "Burundi"
-msgstr "Μπουρούντι"
-
-#: includes/class-wc-countries.php:75
-msgid "Cambodia"
-msgstr "Καμπότζη"
-
-#: includes/class-wc-countries.php:76
-msgid "Cameroon"
-msgstr "Καμερούν"
-
-#: includes/class-wc-countries.php:77
-msgid "Canada"
-msgstr "Καναδάς"
-
-#: includes/class-wc-countries.php:78
-msgid "Cape Verde"
-msgstr "Πράσινο Ακρωτήριο"
-
-#: includes/class-wc-countries.php:79
-msgid "Cayman Islands"
-msgstr "Νησιά Κέιμαν"
-
-#: includes/class-wc-countries.php:80
-msgid "Central African Republic"
-msgstr "Κεντροαφρικανική Δημοκρατία"
-
-#: includes/class-wc-countries.php:81
-msgid "Chad"
-msgstr "Τσαντ"
-
-#: includes/class-wc-countries.php:82
-msgid "Chile"
-msgstr "Χιλή"
-
-#: includes/class-wc-countries.php:83
-msgid "China"
-msgstr "Κίνα"
-
-#: includes/class-wc-countries.php:84
-msgid "Christmas Island"
-msgstr "Νήσος Χριστουγέννων"
-
-#: includes/class-wc-countries.php:85
-msgid "Cocos (Keeling) Islands"
-msgstr "Νήσοι Κόκος"
-
-#: includes/class-wc-countries.php:86
-msgid "Colombia"
-msgstr "Κολομβία"
-
-#: includes/class-wc-countries.php:87
-msgid "Comoros"
-msgstr "Κομόρες"
-
-#: includes/class-wc-countries.php:88
-msgid "Congo (Brazzaville)"
-msgstr "Κονγκό (Μπραζαβίλ)"
-
-#: includes/class-wc-countries.php:89
-msgid "Congo (Kinshasa)"
-msgstr "Κονγκό (Κινσάσα)"
-
-#: includes/class-wc-countries.php:90
-msgid "Cook Islands"
-msgstr "Νήσοι Κουκ"
-
-#: includes/class-wc-countries.php:91
-msgid "Costa Rica"
-msgstr "Κόστα Ρίκα"
-
-#: includes/class-wc-countries.php:92
-msgid "Croatia"
-msgstr "Κροατία"
-
-#: includes/class-wc-countries.php:93
-msgid "Cuba"
-msgstr "Κούβα"
-
-#: includes/class-wc-countries.php:94
-msgid "Cura&Ccedil;ao"
-msgstr "Cura&Ccedil;ao"
-
-#: includes/class-wc-countries.php:95
-msgid "Cyprus"
-msgstr "Κύπρος"
-
-#: includes/class-wc-countries.php:96
-msgid "Czech Republic"
-msgstr "Τσεχία"
-
-#: includes/class-wc-countries.php:97
-msgid "Denmark"
-msgstr "Δανία"
-
-#: includes/class-wc-countries.php:98
-msgid "Djibouti"
-msgstr "Τζιμπουτί"
-
-#: includes/class-wc-countries.php:99
-msgid "Dominica"
-msgstr "Ντομίνικα"
-
-#: includes/class-wc-countries.php:100
-msgid "Dominican Republic"
-msgstr "Δομινικανή Δημοκρατία"
-
-#: includes/class-wc-countries.php:101
-msgid "Ecuador"
-msgstr "Ισημερινός"
-
-#: includes/class-wc-countries.php:102
-msgid "Egypt"
-msgstr "Αίγυπτος"
-
-#: includes/class-wc-countries.php:103
-msgid "El Salvador"
-msgstr "Ελ Σαλβαδόρ"
-
-#: includes/class-wc-countries.php:104
-msgid "Equatorial Guinea"
-msgstr "Ισημερινή Γουινέα"
-
-#: includes/class-wc-countries.php:105
-msgid "Eritrea"
-msgstr "Ερυθραία"
-
-#: includes/class-wc-countries.php:106
-msgid "Estonia"
-msgstr "Εσθονία"
-
-#: includes/class-wc-countries.php:107
-msgid "Ethiopia"
-msgstr "Αιθιοπία"
-
-#: includes/class-wc-countries.php:108
-msgid "Falkland Islands"
-msgstr "Νήσοι Φώκλαντ"
-
-#: includes/class-wc-countries.php:109
-msgid "Faroe Islands"
-msgstr "Νησιά Φερόε"
-
-#: includes/class-wc-countries.php:110
-msgid "Fiji"
-msgstr "Φίτζι"
-
-#: includes/class-wc-countries.php:111
-msgid "Finland"
-msgstr "Φινλανδία"
-
-#: includes/class-wc-countries.php:112
-msgid "France"
-msgstr "Γαλλία"
-
-#: includes/class-wc-countries.php:113
-msgid "French Guiana"
-msgstr "Γαλλική Γουιάνα"
-
-#: includes/class-wc-countries.php:114
-msgid "French Polynesia"
-msgstr "Γαλλική Πολυνησία"
-
-#: includes/class-wc-countries.php:115
-msgid "French Southern Territories"
-msgstr "Γαλλικά Νότια Εδάφη"
-
-#: includes/class-wc-countries.php:116
-msgid "Gabon"
-msgstr "Γκαμπόν"
-
-#: includes/class-wc-countries.php:117
-msgid "Gambia"
-msgstr "Γκάμπια"
-
-#: includes/class-wc-countries.php:119
-msgid "Germany"
-msgstr "Γερμανία"
-
-#: includes/class-wc-countries.php:120
-msgid "Ghana"
-msgstr "Γκάνα"
-
-#: includes/class-wc-countries.php:121
-msgid "Gibraltar"
-msgstr "Γιβραλτάρ"
-
-#: includes/class-wc-countries.php:122
-msgid "Greece"
-msgstr "Ελλάδα"
-
-#: includes/class-wc-countries.php:123
-msgid "Greenland"
-msgstr "Γροιλανδία"
-
-#: includes/class-wc-countries.php:124
-msgid "Grenada"
-msgstr "Γρενάδα"
-
-#: includes/class-wc-countries.php:125
-msgid "Guadeloupe"
-msgstr "Γουαδελούπη"
-
-#: includes/class-wc-countries.php:126
-msgid "Guatemala"
-msgstr "Γουατεμάλα"
-
-#: includes/class-wc-countries.php:127
-msgid "Guernsey"
-msgstr "Γκέρνσεϊ"
-
-#: includes/class-wc-countries.php:128
-msgid "Guinea"
-msgstr "Γουινέα"
-
-#: includes/class-wc-countries.php:129
-msgid "Guinea-Bissau"
-msgstr "Γουϊνέα-Μπισάου"
-
-#: includes/class-wc-countries.php:130
-msgid "Guyana"
-msgstr "Γουιάνα"
-
-#: includes/class-wc-countries.php:131
-msgid "Haiti"
-msgstr "Αϊτή"
-
-#: includes/class-wc-countries.php:132
-msgid "Heard Island and McDonald Islands"
-msgstr "Heard Island and McDonald Islands"
-
-#: includes/class-wc-countries.php:133
-msgid "Honduras"
-msgstr "Ονδούρα"
-
-#: includes/class-wc-countries.php:134
-msgid "Hong Kong"
-msgstr "Χονγκ Κονγκ"
-
-#: includes/class-wc-countries.php:135
-msgid "Hungary"
-msgstr "Ουγγαρία"
-
-#: includes/class-wc-countries.php:136
-msgid "Iceland"
-msgstr "Ισλανδία"
-
-#: includes/class-wc-countries.php:137
-msgid "India"
-msgstr "Ινδία"
-
-#: includes/class-wc-countries.php:138
-msgid "Indonesia"
-msgstr "Ινδονησία"
-
-#: includes/class-wc-countries.php:139
-msgid "Iran"
-msgstr "Ιράν"
-
-#: includes/class-wc-countries.php:140
-msgid "Iraq"
-msgstr "Ιράκ"
-
-#: includes/class-wc-countries.php:141
-msgid "Republic of Ireland"
-msgstr "Republic of Ireland"
-
-#: includes/class-wc-countries.php:142
-msgid "Isle of Man"
-msgstr "Νήσος του Μαν"
-
-#: includes/class-wc-countries.php:143
-msgid "Israel"
-msgstr "Ισραήλ"
-
-#: includes/class-wc-countries.php:144
-msgid "Italy"
-msgstr "Ιταλία"
-
-#: includes/class-wc-countries.php:145
-msgid "Ivory Coast"
-msgstr "Ακτή Ελεφαντοστού"
-
-#: includes/class-wc-countries.php:146
-msgid "Jamaica"
-msgstr "Ιαμαϊκή"
-
-#: includes/class-wc-countries.php:147
-msgid "Japan"
-msgstr "Ιαπωνία"
-
-#: includes/class-wc-countries.php:148
-msgid "Jersey"
-msgstr "Τζέρσεϊ"
-
-#: includes/class-wc-countries.php:149
-msgid "Jordan"
-msgstr "Ιορδανία"
-
-#: includes/class-wc-countries.php:150
-msgid "Kazakhstan"
-msgstr "Καζακστάν"
-
-#: includes/class-wc-countries.php:151
-msgid "Kenya"
-msgstr "Κένυα"
-
-#: includes/class-wc-countries.php:152
-msgid "Kiribati"
-msgstr "Κιριμπάτι"
-
-#: includes/class-wc-countries.php:153
-msgid "Kuwait"
-msgstr "Κουβέιτ"
-
-#: includes/class-wc-countries.php:154
-msgid "Kyrgyzstan"
-msgstr "Κιργιστάν"
-
-#: includes/class-wc-countries.php:155
-msgid "Laos"
-msgstr "Λάος"
-
-#: includes/class-wc-countries.php:156
-msgid "Latvia"
-msgstr "Λετονία"
-
-#: includes/class-wc-countries.php:157
-msgid "Lebanon"
-msgstr "Λίβανος"
-
-#: includes/class-wc-countries.php:158
-msgid "Lesotho"
-msgstr "Λεσότο"
-
-#: includes/class-wc-countries.php:159
-msgid "Liberia"
-msgstr "Λιβερία"
-
-#: includes/class-wc-countries.php:160
-msgid "Libya"
-msgstr "Λιβύη"
-
-#: includes/class-wc-countries.php:161
-msgid "Liechtenstein"
-msgstr "Λιχτενστάιν"
-
-#: includes/class-wc-countries.php:162
-msgid "Lithuania"
-msgstr "Λιθουανία"
-
-#: includes/class-wc-countries.php:163
-msgid "Luxembourg"
-msgstr "Λουξεμβούργο"
-
-#: includes/class-wc-countries.php:164
-msgid "Macao S.A.R., China"
-msgstr "Μακάο ΕΔΠ Κίνας"
-
-#: includes/class-wc-countries.php:165
-msgid "Macedonia"
-msgstr "ΠΓΔ Μακεδονίας"
-
-#: includes/class-wc-countries.php:166
-msgid "Madagascar"
-msgstr "Μαδαγασκάρη"
-
-#: includes/class-wc-countries.php:167
-msgid "Malawi"
-msgstr "Μαλάουι"
-
-#: includes/class-wc-countries.php:168
-msgid "Malaysia"
-msgstr "Μαλαισία"
-
-#: includes/class-wc-countries.php:169
-msgid "Maldives"
-msgstr "Μαλδίβες"
-
-#: includes/class-wc-countries.php:170
-msgid "Mali"
-msgstr "Μάλι"
-
-#: includes/class-wc-countries.php:171
-msgid "Malta"
-msgstr "Μάλτα"
-
-#: includes/class-wc-countries.php:172
-msgid "Marshall Islands"
-msgstr "Νήσοι Μάρσαλ"
-
-#: includes/class-wc-countries.php:173
-msgid "Martinique"
-msgstr "Μαρτινίκα"
-
-#: includes/class-wc-countries.php:174
-msgid "Mauritania"
-msgstr "Μαυριτανία"
-
-#: includes/class-wc-countries.php:175
-msgid "Mauritius"
-msgstr "Μαυρίκιος"
-
-#: includes/class-wc-countries.php:176
-msgid "Mayotte"
-msgstr "Μαγιότ"
-
-#: includes/class-wc-countries.php:177
-msgid "Mexico"
-msgstr "Μεξικό"
-
-#: includes/class-wc-countries.php:178
-msgid "Micronesia"
-msgstr "Μικρονησία"
-
-#: includes/class-wc-countries.php:179
-msgid "Moldova"
-msgstr "Μολδαβία"
-
-#: includes/class-wc-countries.php:180
-msgid "Monaco"
-msgstr "Μονακό"
-
-#: includes/class-wc-countries.php:181
-msgid "Mongolia"
-msgstr "Μογγολία"
-
-#: includes/class-wc-countries.php:182
-msgid "Montenegro"
-msgstr "Μαυροβούνιο"
-
-#: includes/class-wc-countries.php:183
-msgid "Montserrat"
-msgstr "Μονσεράτ"
-
-#: includes/class-wc-countries.php:184
-msgid "Morocco"
-msgstr "Μαρόκο"
-
-#: includes/class-wc-countries.php:185
-msgid "Mozambique"
-msgstr "Μοζαμβίκη"
-
-#: includes/class-wc-countries.php:186
-msgid "Myanmar"
-msgstr "Μιανμάρ"
-
-#: includes/class-wc-countries.php:187
-msgid "Namibia"
-msgstr "Ναμίμπια"
-
-#: includes/class-wc-countries.php:188
-msgid "Nauru"
-msgstr "Ναούρου"
-
-#: includes/class-wc-countries.php:189
-msgid "Nepal"
-msgstr "Νεπάλ"
-
-#: includes/class-wc-countries.php:190
-msgid "Netherlands"
-msgstr "Ολλανδία"
-
-#: includes/class-wc-countries.php:191
-msgid "Netherlands Antilles"
-msgstr "Ολλανδικές Αντίλλες"
-
-#: includes/class-wc-countries.php:192
-msgid "New Caledonia"
-msgstr "Νέα Καληδονία"
-
-#: includes/class-wc-countries.php:193
-msgid "New Zealand"
-msgstr "Νέα Ζηλανδία"
-
-#: includes/class-wc-countries.php:194
-msgid "Nicaragua"
-msgstr "Νικαράγουα"
-
-#: includes/class-wc-countries.php:195
-msgid "Niger"
-msgstr "Νίγηρας"
-
-#: includes/class-wc-countries.php:196
-msgid "Nigeria"
-msgstr "Νιγηρία"
-
-#: includes/class-wc-countries.php:197
-msgid "Niue"
-msgstr "Νιούε"
-
-#: includes/class-wc-countries.php:198
-msgid "Norfolk Island"
-msgstr "Νήσος Νόρφολκ"
-
-#: includes/class-wc-countries.php:199
-msgid "North Korea"
-msgstr "Βόρεια Κορέα"
-
-#: includes/class-wc-countries.php:200
-msgid "Norway"
-msgstr "Νορβηγία"
-
-#: includes/class-wc-countries.php:201
-msgid "Oman"
-msgstr "Ομάν"
-
-#: includes/class-wc-countries.php:202
-msgid "Pakistan"
-msgstr "Πακιστάν"
-
-#: includes/class-wc-countries.php:203
-msgid "Palestinian Territory"
-msgstr "Παλαιστίνη"
-
-#: includes/class-wc-countries.php:204
-msgid "Panama"
-msgstr "Παναμάς"
-
-#: includes/class-wc-countries.php:205
-msgid "Papua New Guinea"
-msgstr "Παπούα Νέα Γουινέα"
-
-#: includes/class-wc-countries.php:206
-msgid "Paraguay"
-msgstr "Παραγουάη"
-
-#: includes/class-wc-countries.php:207
-msgid "Peru"
-msgstr "Περού"
-
-#: includes/class-wc-countries.php:208
-msgid "Philippines"
-msgstr "Φιλιππίνες"
-
-#: includes/class-wc-countries.php:209
-msgid "Pitcairn"
-msgstr "Πίτκαιρν"
-
-#: includes/class-wc-countries.php:210
-msgid "Poland"
-msgstr "Πολωνία"
-
-#: includes/class-wc-countries.php:211
-msgid "Portugal"
-msgstr "Πορτογαλία"
-
-#: includes/class-wc-countries.php:212
-msgid "Qatar"
-msgstr "Κατάρ"
-
-#: includes/class-wc-countries.php:213
-msgid "Reunion"
-msgstr "Ρεϊνιόν"
-
-#: includes/class-wc-countries.php:214
-msgid "Romania"
-msgstr "Ρουμανία"
-
-#: includes/class-wc-countries.php:215
-msgid "Russia"
-msgstr "Ρωσία"
-
-#: includes/class-wc-countries.php:216
-msgid "Rwanda"
-msgstr "Ρουάντα"
-
-#: includes/class-wc-countries.php:217
-msgid "Saint Barth&eacute;lemy"
-msgstr "Saint Barth&eacute;lemy"
-
-#: includes/class-wc-countries.php:218
-msgid "Saint Helena"
-msgstr "Αγία Ελένη"
-
-#: includes/class-wc-countries.php:219
-msgid "Saint Kitts and Nevis"
-msgstr "Άγιος Χριστόφορος και Νέβις"
-
-#: includes/class-wc-countries.php:220
-msgid "Saint Lucia"
-msgstr "Αγία Λουκία"
-
-#: includes/class-wc-countries.php:221
-msgid "Saint Martin (French part)"
-msgstr "Άγιος Μαρτίνος"
-
-#: includes/class-wc-countries.php:222
-msgid "Saint Martin (Dutch part)"
-msgstr "Saint Martin (Dutch part)"
-
-#: includes/class-wc-countries.php:223
-msgid "Saint Pierre and Miquelon"
-msgstr "Σεν Πιερ και Μικελόν"
-
-#: includes/class-wc-countries.php:224
-msgid "Saint Vincent and the Grenadines"
-msgstr "Άγιος Βικέντιος και Γρεναδίνες"
-
-#: includes/class-wc-countries.php:225
-msgid "San Marino"
-msgstr "Σαν Μαρίνο"
-
-#: includes/class-wc-countries.php:226
-msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-msgstr "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-
-#: includes/class-wc-countries.php:227
-msgid "Saudi Arabia"
-msgstr "Σαουδική Αραβία"
-
-#: includes/class-wc-countries.php:228
-msgid "Senegal"
-msgstr "Σενεγάλη"
-
-#: includes/class-wc-countries.php:229
-msgid "Serbia"
-msgstr "Σερβία"
-
-#: includes/class-wc-countries.php:230
-msgid "Seychelles"
-msgstr "Σεϋχέλλες"
-
-#: includes/class-wc-countries.php:231
-msgid "Sierra Leone"
-msgstr "Σιέρα Λεόνε"
-
-#: includes/class-wc-countries.php:232
-msgid "Singapore"
-msgstr "Σιγκαπούρη"
-
-#: includes/class-wc-countries.php:233
-msgid "Slovakia"
-msgstr "Σλοβακία"
-
-#: includes/class-wc-countries.php:234
-msgid "Slovenia"
-msgstr "Σλοβενία"
-
-#: includes/class-wc-countries.php:235
-msgid "Solomon Islands"
-msgstr "Νησιά Σολομώντα"
-
-#: includes/class-wc-countries.php:236
-msgid "Somalia"
-msgstr "Σομαλία"
-
-#: includes/class-wc-countries.php:237
-msgid "South Africa"
-msgstr "Νότια Αφρική"
-
-#: includes/class-wc-countries.php:238
-msgid "South Georgia/Sandwich Islands"
-msgstr "Νότια Γεωργία / Νησιά Σάντουιτς"
-
-#: includes/class-wc-countries.php:239
-msgid "South Korea"
-msgstr "Νότια Κορέα"
-
-#: includes/class-wc-countries.php:240
-msgid "South Sudan"
-msgstr "Νότιο Σουδάν"
-
-#: includes/class-wc-countries.php:241
-msgid "Spain"
-msgstr "Ισπανία"
-
-#: includes/class-wc-countries.php:242
-msgid "Sri Lanka"
-msgstr "Σρι Λάνκα"
-
-#: includes/class-wc-countries.php:243
-msgid "Sudan"
-msgstr "Σουδάν"
-
-#: includes/class-wc-countries.php:244
-msgid "Suriname"
-msgstr "Σουρινάμ"
-
-#: includes/class-wc-countries.php:245
-msgid "Svalbard and Jan Mayen"
-msgstr "Σβάλμπαρντ και Γιαν Μαγιέν"
-
-#: includes/class-wc-countries.php:246
-msgid "Swaziland"
-msgstr "Σουαζιλάνδη"
-
-#: includes/class-wc-countries.php:247
-msgid "Sweden"
-msgstr "Σουηδία"
-
-#: includes/class-wc-countries.php:248
-msgid "Switzerland"
-msgstr "Ελβετία"
-
-#: includes/class-wc-countries.php:249
-msgid "Syria"
-msgstr "Συρία"
-
-#: includes/class-wc-countries.php:250
-msgid "Taiwan"
-msgstr "Ταϊβάν"
-
-#: includes/class-wc-countries.php:251
-msgid "Tajikistan"
-msgstr "Τατζικιστάν"
-
-#: includes/class-wc-countries.php:252
-msgid "Tanzania"
-msgstr "Τανζανία"
-
-#: includes/class-wc-countries.php:253
-msgid "Thailand"
-msgstr "Ταϊλάνδη"
-
-#: includes/class-wc-countries.php:254
-msgid "Timor-Leste"
-msgstr "Τιμόρ-Λέστε"
-
-#: includes/class-wc-countries.php:255
-msgid "Togo"
-msgstr "Τόγκο"
-
-#: includes/class-wc-countries.php:256
-msgid "Tokelau"
-msgstr "Τοκελάου"
-
-#: includes/class-wc-countries.php:257
-msgid "Tonga"
-msgstr "Τόνγκα"
-
-#: includes/class-wc-countries.php:258
-msgid "Trinidad and Tobago"
-msgstr "Τρινιντάντ και Τομπάγκο"
-
-#: includes/class-wc-countries.php:259
-msgid "Tunisia"
-msgstr "Τυνησία"
-
-#: includes/class-wc-countries.php:260
-msgid "Turkey"
-msgstr "Τουρκία"
-
-#: includes/class-wc-countries.php:261
-msgid "Turkmenistan"
-msgstr "Τουρκμενιστάν"
-
-#: includes/class-wc-countries.php:262
-msgid "Turks and Caicos Islands"
-msgstr "Τερκς και Κάικος"
-
-#: includes/class-wc-countries.php:263
-msgid "Tuvalu"
-msgstr "Τουβαλού"
-
-#: includes/class-wc-countries.php:264
-msgid "Uganda"
-msgstr "Ουγκάντα"
-
-#: includes/class-wc-countries.php:265
-msgid "Ukraine"
-msgstr "Ουκρανία"
-
-#: includes/class-wc-countries.php:266
-msgid "United Arab Emirates"
-msgstr "Ηνωμένα Αραβικά Εμιράτα"
-
-#: includes/class-wc-countries.php:267
-msgid "United Kingdom (UK)"
-msgstr "Ηνωμένο Βασίλειο (ΗΒ)"
-
-#: includes/class-wc-countries.php:268
-msgid "United States (US)"
-msgstr "Ηνωμένες Πολιτείες (ΗΠΑ)"
-
 #: includes/class-wc-countries.php:269
-msgid "Uruguay"
-msgstr "Ουρουγουάη"
-
-#: includes/class-wc-countries.php:270
-msgid "Uzbekistan"
-msgstr "Ουζμπεκιστάν"
-
-#: includes/class-wc-countries.php:271
-msgid "Vanuatu"
-msgstr "Βανουάτου"
-
-#: includes/class-wc-countries.php:272
-msgid "Vatican"
-msgstr "Βατικανό"
-
-#: includes/class-wc-countries.php:273
-msgid "Venezuela"
-msgstr "Βενεζουέλα"
-
-#: includes/class-wc-countries.php:274
-msgid "Vietnam"
-msgstr "Βιετνάμ"
-
-#: includes/class-wc-countries.php:275
-msgid "Wallis and Futuna"
-msgstr "Νήσοι Ουαλλίς και Φουτουνά"
-
-#: includes/class-wc-countries.php:276
-msgid "Western Sahara"
-msgstr "Δυτική Σαχάρα"
-
-#: includes/class-wc-countries.php:277
-msgid "Western Samoa"
-msgstr "Δυτική Σαμόα"
-
-#: includes/class-wc-countries.php:278
-msgid "Yemen"
-msgstr "Υεμένη"
-
-#: includes/class-wc-countries.php:279
-msgid "Zambia"
-msgstr "Ζάμπια"
-
-#: includes/class-wc-countries.php:280
-msgid "Zimbabwe"
-msgstr "Ζιμπάμπουε"
-
-#: includes/class-wc-countries.php:484
 msgid "to the"
 msgstr "εις τον"
 
-#: includes/class-wc-countries.php:485
+#: includes/class-wc-countries.php:270
 msgid "to"
 msgstr "εις"
 
-#: includes/class-wc-countries.php:498
+#: includes/class-wc-countries.php:282
 msgid "the"
 msgstr "τον"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "VAT"
 msgstr "ΦΠΑ"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "Tax"
 msgstr "Φόρος"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. VAT)"
 msgstr "(με ΦΠΑ)"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. tax)"
 msgstr "(με φόρους)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. VAT)"
 msgstr "(προ ΦΠΑ)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. tax)"
 msgstr "(προ φόρου)"
-
-#: includes/class-wc-countries.php:730
-msgid "Country"
-msgstr "Χώρα"
-
-#: includes/class-wc-countries.php:735
-msgid "First Name"
-msgstr "Όνομα"
-
-#: includes/class-wc-countries.php:740
-msgid "Last Name"
-msgstr "Επίθετο"
-
-#: includes/class-wc-countries.php:746
-msgid "Company Name"
-msgstr "Όνομα Εταιρίας"
-
-#: includes/class-wc-countries.php:750
-msgid "Address"
-msgstr "Διεύθυνση"
-
-#: includes/class-wc-countries.php:751
-msgctxt "placeholder"
-msgid "Street address"
-msgstr "Οδός"
-
-#: includes/class-wc-countries.php:756
-msgctxt "placeholder"
-msgid "Apartment, suite, unit etc. (optional)"
-msgstr "Διαμέρισμα, σουίτα κλπ. (προαιρετικό)"
-
-#: includes/class-wc-countries.php:761 includes/class-wc-countries.php:762
-msgid "Town / City"
-msgstr "Πόλη"
-
-#: includes/class-wc-countries.php:768 includes/class-wc-countries.php:769
-msgid "State / County"
-msgstr "Περιφέρεια"
-
-#: includes/class-wc-countries.php:775 includes/class-wc-countries.php:776
-#: templates/cart/shipping-calculator.php:80
-msgid "Postcode / Zip"
-msgstr "Ταχυδρομικός κώδικας"
-
-#: includes/class-wc-countries.php:838
-msgid "District"
-msgstr "Περιοχή"
-
-#: includes/class-wc-countries.php:845 includes/class-wc-countries.php:861
-#: includes/class-wc-countries.php:881 includes/class-wc-countries.php:942
-#: includes/class-wc-countries.php:961 includes/class-wc-countries.php:966
-#: includes/class-wc-countries.php:978 includes/class-wc-countries.php:1028
-#: includes/class-wc-countries.php:1052 includes/class-wc-countries.php:1093
-msgid "Province"
-msgstr "Επαρχία"
-
-#: includes/class-wc-countries.php:867
-msgid "Canton"
-msgstr "Canton"
-
-#: includes/class-wc-countries.php:876 includes/class-wc-countries.php:1034
-msgid "Municipality"
-msgstr "Δήμος"
-
-#: includes/class-wc-countries.php:929
-msgid "Town / District"
-msgstr "Πόλη / Επαρχία"
-
-#: includes/class-wc-countries.php:932
-msgid "Region"
-msgstr "Περιοχή"
-
-#: includes/class-wc-countries.php:937 includes/class-wc-countries.php:1068
-msgid "County"
-msgstr "Περιφέρεια"
-
-#: includes/class-wc-countries.php:1057
-msgid "Zip"
-msgstr "Ταχ. Κώδ."
-
-#: includes/class-wc-countries.php:1060
-msgid "State"
-msgstr "Περιφέρεια"
-
-#: includes/class-wc-countries.php:1065
-msgid "Postcode"
-msgstr "Ταχυδρομικός κώδικας"
-
-#: includes/class-wc-countries.php:1173
-msgid "Email Address"
-msgstr "Διεύθυνση Email"
-
-#: includes/class-wc-countries.php:1179
-msgid "Phone"
-msgstr "Τηλέφωνο"
 
 #: includes/class-wc-coupon.php:578
 msgid "Coupon code applied successfully."
@@ -4997,67 +4787,67 @@ msgstr "Λυπούμαστε, αυτό το κουπόνι δεν ισχύει �
 msgid "Please enter a coupon code."
 msgstr "Παρακαλούμε εισάγετε τον κωδικό κουπονιού."
 
-#: includes/class-wc-download-handler.php:37
+#: includes/class-wc-download-handler.php:42
 msgid "Invalid email address."
 msgstr "Μη έγκυρη διεύθυνση email."
 
-#: includes/class-wc-download-handler.php:37
-#: includes/class-wc-download-handler.php:62
-#: includes/class-wc-download-handler.php:83
-#: includes/class-wc-download-handler.php:90
+#: includes/class-wc-download-handler.php:42
+#: includes/class-wc-download-handler.php:67
+#: includes/class-wc-download-handler.php:88
 #: includes/class-wc-download-handler.php:95
-#: includes/class-wc-download-handler.php:99
-#: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:100
+#: includes/class-wc-download-handler.php:104
+#: includes/class-wc-download-handler.php:148
+#: includes/class-wc-download-handler.php:309
 msgid "Go to homepage"
 msgstr "Πηγαίνετε στην αρχική σελίδα."
 
-#: includes/class-wc-download-handler.php:62
+#: includes/class-wc-download-handler.php:67
 msgid "Invalid download."
 msgstr "Μη έγκυρο αντικείμενο λήψης."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "You must be logged in to download files."
 msgstr "Πρέπει να είστε συνδεδεμένος για να κατεβάσετε αρχεία."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:27
 #: templates/myaccount/form-login.php:46
 msgid "Login"
 msgstr "Είσοδος"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "Log in to Download Files"
 msgstr "Συνδεθείτε για να Κατεβάσετε Αρχεία"
 
-#: includes/class-wc-download-handler.php:77
+#: includes/class-wc-download-handler.php:82
 msgid "This is not your download link."
 msgstr "Αυτός δεν είναι δικός σας σύνδεσμος λήψης."
 
-#: includes/class-wc-download-handler.php:83
+#: includes/class-wc-download-handler.php:88
 msgid "Product no longer exists."
 msgstr "Το προϊόν δεν υπάρχει πλέον."
 
-#: includes/class-wc-download-handler.php:90
-#: includes/class-wc-form-handler.php:546
+#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-form-handler.php:541
 #: includes/shortcodes/class-wc-shortcode-checkout.php:172
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
 msgstr "Λανθασμένη Παραγγελία"
 
-#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-download-handler.php:100
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "Λυπούμαστε, έχετε φτάσει το όριο λήψης αυτού του αρχείου"
 
-#: includes/class-wc-download-handler.php:99
+#: includes/class-wc-download-handler.php:104
 msgid "Sorry, this download has expired"
 msgstr "Λυπούμαστε, η περίοδος λήψης αυτού του αρχείου έχει λήξει"
 
-#: includes/class-wc-download-handler.php:143
+#: includes/class-wc-download-handler.php:148
 msgid "No file defined"
 msgstr "Δεν έχει οριστεί αρχείο"
 
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:309
 msgid "File not found"
 msgstr "Το αρχείο δεν βρέθηκε"
 
@@ -5099,149 +4889,149 @@ msgstr "Προ παραγγελία προϊόντος όταν υπάρξει �
 msgid "%s units of %s have been backordered in order %s."
 msgstr "%s μονάδες της %s έχουν επιστραφεί στην παραγγελία %s"
 
-#: includes/class-wc-form-handler.php:129
+#: includes/class-wc-form-handler.php:125
 msgid "Address changed successfully."
 msgstr "Η διεύθυνση άλλαξε με επιτυχία."
 
-#: includes/class-wc-form-handler.php:178
+#: includes/class-wc-form-handler.php:174
 msgid "Please enter your name."
 msgstr "Παρακαλούμε εισάγετε το όνομα σας."
 
-#: includes/class-wc-form-handler.php:182 includes/wc-user-functions.php:48
+#: includes/class-wc-form-handler.php:178 includes/wc-user-functions.php:48
 msgid "Please provide a valid email address."
 msgstr "Παρακαλώ δώστε μια έγκυρη διεύθυνση email."
 
-#: includes/class-wc-form-handler.php:184
+#: includes/class-wc-form-handler.php:180
 msgid "This email address is already registered."
 msgstr "Αυτή η διεύθυνση email έχει ήδη εγγραφεί."
 
-#: includes/class-wc-form-handler.php:188
+#: includes/class-wc-form-handler.php:184
 msgid "Your current password is incorrect."
 msgstr "Ο ισχύων κωδικός είναι λανθασμένος"
 
-#: includes/class-wc-form-handler.php:193
+#: includes/class-wc-form-handler.php:189
 msgid "Please fill out all password fields."
 msgstr "Παρακαλούμε συμπληρώστε όλα τα πεδία του κωδικού"
 
-#: includes/class-wc-form-handler.php:197
+#: includes/class-wc-form-handler.php:193
 msgid "Please enter your current password."
 msgstr "Παρακαλούμε βάλτε τον τρέχον κωδικό"
 
-#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:197
 msgid "Please re-enter your password."
 msgstr "Εισαγάγετε ξανά τον κωδικό πρόσβασής σας."
 
-#: includes/class-wc-form-handler.php:205
-#: includes/class-wc-form-handler.php:836
+#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:831
 msgid "Passwords do not match."
 msgstr "Τα συνθηματικά δεν ταυτίζονται."
 
-#: includes/class-wc-form-handler.php:227
+#: includes/class-wc-form-handler.php:223
 msgid "Account details changed successfully."
 msgstr "Οι πληροφορίες του λογαριασμού αλλάξαν επιτυχώς."
 
-#: includes/class-wc-form-handler.php:355
+#: includes/class-wc-form-handler.php:350
 msgid "Payment method added."
 msgstr "Προστέθηκε μέθοδος πληρωμής."
 
-#: includes/class-wc-form-handler.php:388
-#: includes/class-wc-form-handler.php:447
+#: includes/class-wc-form-handler.php:383
+#: includes/class-wc-form-handler.php:442
 msgid "Cart updated."
 msgstr "Το καλάθι ανανεώθηκε."
 
-#: includes/class-wc-form-handler.php:423
+#: includes/class-wc-form-handler.php:418
 msgid "You can only have 1 %s in your cart."
 msgstr "Μπορείτε να έχετε μόνο 1 %s στο καλάθι σας."
 
-#: includes/class-wc-form-handler.php:513
+#: includes/class-wc-form-handler.php:508
 msgid "The cart has been filled with the items from your previous order."
 msgstr "Το καλάθι έχει γεμίσει με προϊόντα από την προηγούμενη παραγγελία σας."
 
-#: includes/class-wc-form-handler.php:536
+#: includes/class-wc-form-handler.php:531
 msgid "Order cancelled by customer."
 msgstr "Η παραγγελίας ακυρώθηκε από τον πελάτη."
 
-#: includes/class-wc-form-handler.php:539
+#: includes/class-wc-form-handler.php:534
 msgid "Your order was cancelled."
 msgstr "Η παραγγελίας σας ακυρώθηκε."
 
-#: includes/class-wc-form-handler.php:544
+#: includes/class-wc-form-handler.php:539
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr "Η παραγγελία σας δεν μπορεί πλέον να ακυρωθεί. Παρακαλώ επικοινωνήστε μαζί μας αν χρειάζεστε βοήθεια."
 
-#: includes/class-wc-form-handler.php:584
-#: includes/class-wc-form-handler.php:644
+#: includes/class-wc-form-handler.php:579
+#: includes/class-wc-form-handler.php:639
 msgid "Please choose product options&hellip;"
 msgstr "Παρακαλώ επιλέξτε επιλογές προϊόντος&hellip;"
 
-#: includes/class-wc-form-handler.php:678
+#: includes/class-wc-form-handler.php:673
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "Παρακαλώ επιλέξτε την ποσότητα των προϊόντων που θέλετε να προσθέσετε στο καλάθι σας&hellip;"
 
-#: includes/class-wc-form-handler.php:685
+#: includes/class-wc-form-handler.php:680
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "Παρακαλώ επιλέξτε ένα προϊόν για να προστεθεί στο καλάθι σας&hellip;"
 
-#: includes/class-wc-form-handler.php:745
-#: includes/class-wc-form-handler.php:749
-#: includes/class-wc-form-handler.php:753
-#: includes/class-wc-form-handler.php:762
-#: includes/class-wc-form-handler.php:888
+#: includes/class-wc-form-handler.php:740
+#: includes/class-wc-form-handler.php:744
+#: includes/class-wc-form-handler.php:748
+#: includes/class-wc-form-handler.php:757
+#: includes/class-wc-form-handler.php:883
 msgid "Error"
 msgstr "Σφάλμα"
 
-#: includes/class-wc-form-handler.php:749
+#: includes/class-wc-form-handler.php:744
 msgid "Username is required."
 msgstr "Το Όνομα Χρήστη απαιτείται."
 
-#: includes/class-wc-form-handler.php:753
+#: includes/class-wc-form-handler.php:748
 msgid "Password is required."
 msgstr "Ο Κωδικός Πρόσβασης απαιτείται."
 
-#: includes/class-wc-form-handler.php:762
+#: includes/class-wc-form-handler.php:757
 msgid "A user could not be found with this email address."
 msgstr "Δεν βρέθηκε χρήστης με αυτήν την διεύθυνση email."
 
-#: includes/class-wc-form-handler.php:787
+#: includes/class-wc-form-handler.php:782
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "Είστε συνδεδεμένος ως <strong>%s</ strong>"
 
-#: includes/class-wc-form-handler.php:831
+#: includes/class-wc-form-handler.php:826
 msgid "Please enter your password."
 msgstr "Παρακαλούμε εισάγετε τον κωδικό σας"
 
-#: includes/class-wc-form-handler.php:904 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:899 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr "ΣΦΑΛΜΑ"
 
-#: includes/class-wc-form-handler.php:904
+#: includes/class-wc-form-handler.php:899
 msgid "Anti-spam field was filled in."
 msgstr "Το πεδίο Anti-spam έχει συμπληρωθεί."
 
-#: includes/class-wc-frontend-scripts.php:123
+#: includes/class-wc-frontend-scripts.php:149
 msgid "Please select a rating"
 msgstr "Παρακαλούμε επιλέξτε μια βαθμολογία"
 
-#: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1603
+#: includes/class-wc-frontend-scripts.php:168
+#: includes/wc-template-functions.php:1594
 msgid "required"
 msgstr "απαραίτητο"
 
-#: includes/class-wc-frontend-scripts.php:164
+#: includes/class-wc-frontend-scripts.php:196
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "Λυπούμαστε, κανένα προϊόν δεν ταιριάζει στην επιλογή σας. Παρακαλώ επιλέξτε ένα διαφορετικό συνδυασμό."
 
-#: includes/class-wc-frontend-scripts.php:165
+#: includes/class-wc-frontend-scripts.php:197
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "Λυπούμαστε, αυτό το προϊόν δεν είναι διαθέσιμο. Παρακαλώ επιλέξτε ένα διαφορετικό συνδιασμό."
 
-#: includes/class-wc-frontend-scripts.php:170
+#: includes/class-wc-frontend-scripts.php:204
 msgid "Select an option&hellip;"
 msgstr "Επιλέξτε ένα&hellip;"
 
@@ -5266,7 +5056,7 @@ msgid "Cart"
 msgstr "Καλάθι"
 
 #: includes/class-wc-install.php:227
-msgctxt "Paeg slug"
+msgctxt "Page slug"
 msgid "checkout"
 msgstr "ολοκλήρωση παραγγελίας"
 
@@ -5338,204 +5128,208 @@ msgstr "WooCommerce"
 msgid "Order status changed from %s to %s."
 msgstr "Η κατάσταση της παραγγελίας άλλαξε από %s σε %s."
 
+#: includes/class-wc-order.php:1592
+msgid "Item #%s stock reduced from %s to %s."
+msgstr "Το απόθεμα του Προϊόντος #%s μειώθηκε από %s σε %s."
+
 #: includes/class-wc-order.php:1602
 msgid "Order item stock reduced successfully."
 msgstr "Το απόθεμα του προϊόντος της παραγγελίας μειώθηκε επιτυχώς."
 
-#: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
+#: includes/class-wc-post-types.php:56 includes/class-wc-post-types.php:58
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
 msgstr "Κατηγορίες Προϊόντων"
 
-#: includes/class-wc-post-types.php:58
+#: includes/class-wc-post-types.php:59
 msgid "Product Category"
 msgstr "Κατηγορία Προϊόντος"
 
-#: includes/class-wc-post-types.php:59
+#: includes/class-wc-post-types.php:60
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr "Κατηγορίες"
 
-#: includes/class-wc-post-types.php:60
+#: includes/class-wc-post-types.php:61
 msgid "Search Product Categories"
 msgstr "Αναζήτηση στις Κατηγορίες Προϊόντων"
 
-#: includes/class-wc-post-types.php:61
+#: includes/class-wc-post-types.php:62
 msgid "All Product Categories"
 msgstr "Όλες οι Κατηγορίες Προϊόντων"
 
-#: includes/class-wc-post-types.php:62
+#: includes/class-wc-post-types.php:63
 msgid "Parent Product Category"
 msgstr "Κατηγορία Γονικού Προϊόντος"
 
-#: includes/class-wc-post-types.php:63
+#: includes/class-wc-post-types.php:64
 msgid "Parent Product Category:"
 msgstr "Κατηγορία Γονικού Προϊόντος:"
 
-#: includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:65
 msgid "Edit Product Category"
 msgstr "Επεξεργασία Κατηγορίας Προϊόντων"
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:66
 msgid "Update Product Category"
 msgstr "Αναννέωση Κατηγορίας Προϊόντων"
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:67
 msgid "Add New Product Category"
 msgstr "Προσθήκη Νέας Κατηγορίας Προϊόντων"
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:68
 msgid "New Product Category Name"
 msgstr "Όνομα Νέας Κατηγορίας Προϊόντων"
 
-#: includes/class-wc-post-types.php:78
+#: includes/class-wc-post-types.php:79
 #: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "κατηγορία-προϊόντος"
 
-#: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
+#: includes/class-wc-post-types.php:91 includes/class-wc-post-types.php:93
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
 msgstr "Ετικέτες Προϊόντος"
 
-#: includes/class-wc-post-types.php:93
+#: includes/class-wc-post-types.php:94
 msgid "Product Tag"
 msgstr "Ετικέτα Προϊόντος"
 
-#: includes/class-wc-post-types.php:94
+#: includes/class-wc-post-types.php:95
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "Ετικέτες"
 
-#: includes/class-wc-post-types.php:95
+#: includes/class-wc-post-types.php:96
 msgid "Search Product Tags"
 msgstr "Αναζήτηση Ετικέτας Προϊόντος"
 
-#: includes/class-wc-post-types.php:96
+#: includes/class-wc-post-types.php:97
 msgid "All Product Tags"
 msgstr "Όλες οι Ετικέτες Προϊόντων"
 
-#: includes/class-wc-post-types.php:97
+#: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag"
 msgstr "Ετικέτα Γονικού Προϊόντος"
 
-#: includes/class-wc-post-types.php:98
+#: includes/class-wc-post-types.php:99
 msgid "Parent Product Tag:"
 msgstr "Ετικέτα Γονικού Προϊόντος:"
 
-#: includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:100
 msgid "Edit Product Tag"
 msgstr "Επεξεργασία Ετικέτας Προϊόντος"
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:101
 msgid "Update Product Tag"
 msgstr "Ενημέρωση Ετικέτας Προϊόντος"
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:102
 msgid "Add New Product Tag"
 msgstr "Προσθήκη Νέας Ετικέτας Προϊόντος"
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:103
 msgid "New Product Tag Name"
 msgstr "Όνομα ετικέτας νέου προϊόντος"
 
-#: includes/class-wc-post-types.php:113
+#: includes/class-wc-post-types.php:114
 #: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "ετικέτα-προϊόντος"
 
-#: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
+#: includes/class-wc-post-types.php:125 includes/class-wc-post-types.php:127
 msgid "Shipping Classes"
 msgstr "Κλάσεις Μεταφορικών"
 
-#: includes/class-wc-post-types.php:127
+#: includes/class-wc-post-types.php:128
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 msgid "Shipping Class"
 msgstr "Κλάση Μεταφορικών"
 
-#: includes/class-wc-post-types.php:128
+#: includes/class-wc-post-types.php:129
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "Κλάσεις Μεταφορικών"
 
-#: includes/class-wc-post-types.php:129
+#: includes/class-wc-post-types.php:130
 msgid "Search Shipping Classes"
 msgstr "Αναζήτηση Κλάσης Μεταφορικών"
 
-#: includes/class-wc-post-types.php:130
+#: includes/class-wc-post-types.php:131
 msgid "All Shipping Classes"
 msgstr "Όλες οι Κλάσεις Μεταφορικών"
 
-#: includes/class-wc-post-types.php:131
+#: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class"
 msgstr "Γονική Κλάση Μεταφορικών"
 
-#: includes/class-wc-post-types.php:132
+#: includes/class-wc-post-types.php:133
 msgid "Parent Shipping Class:"
 msgstr "Γονική Κλάση Μεταφορικών:"
 
-#: includes/class-wc-post-types.php:133
+#: includes/class-wc-post-types.php:134
 msgid "Edit Shipping Class"
 msgstr "Επεξεργασία Κλάσης Μεταφορικών"
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:135
 msgid "Update Shipping Class"
 msgstr "Ενημέρωση Κλάσης Μεταφορικών"
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:136
 msgid "Add New Shipping Class"
 msgstr "Προσθήκη Νέας Κλάσης Μεταφορικών"
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:137
 msgid "New Shipping Class Name"
 msgstr "Όνομα Νέας Κλάσης Μεταφορικών"
 
-#: includes/class-wc-post-types.php:184
+#: includes/class-wc-post-types.php:185
 msgid "Search %s"
 msgstr "Αναζήτηση %s"
 
-#: includes/class-wc-post-types.php:185
+#: includes/class-wc-post-types.php:186
 msgid "All %s"
 msgstr "Όλα %s"
 
-#: includes/class-wc-post-types.php:186
+#: includes/class-wc-post-types.php:187
 msgid "Parent %s"
 msgstr "Γονικό %s"
 
-#: includes/class-wc-post-types.php:187
+#: includes/class-wc-post-types.php:188
 msgid "Parent %s:"
 msgstr "Γονικό %s:"
 
-#: includes/class-wc-post-types.php:188
+#: includes/class-wc-post-types.php:189
 msgid "Edit %s"
 msgstr "Επεξεργασία %s"
 
-#: includes/class-wc-post-types.php:189
+#: includes/class-wc-post-types.php:190
 msgid "Update %s"
 msgstr "Ενημέρωση %s"
 
-#: includes/class-wc-post-types.php:190
+#: includes/class-wc-post-types.php:191
 msgid "Add New %s"
 msgstr "Προσθήκη Νέου %s"
 
-#: includes/class-wc-post-types.php:191
+#: includes/class-wc-post-types.php:192
 msgid "New %s"
 msgstr "Νέο %s"
 
-#: includes/class-wc-post-types.php:226
+#: includes/class-wc-post-types.php:227
 #: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "προϊόν"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:233
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Προϊόντα"
 
-#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:234 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5546,168 +5340,168 @@ msgstr "Προϊόντα"
 msgid "Product"
 msgstr "Προϊόν"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:235
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Προϊόντα"
 
-#: includes/class-wc-post-types.php:235
+#: includes/class-wc-post-types.php:236
 msgid "Add Product"
 msgstr "Προσθήκη Προϊόντος"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:237
 msgid "Add New Product"
 msgstr "Προσθήκη Νέου Προϊόντος"
 
-#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
-#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:329 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Επεξεργασία"
 
-#: includes/class-wc-post-types.php:238
+#: includes/class-wc-post-types.php:239
 msgid "Edit Product"
 msgstr "Επεξεργασία Προϊόντος"
 
-#: includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240
 msgid "New Product"
 msgstr "Νέο Προϊόν"
 
-#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:241 includes/class-wc-post-types.php:242
 msgid "View Product"
 msgstr "Εμφάνιση Προϊόντος"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:243
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Αναζήτηση Προϊόντων"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:244
 msgid "No Products found"
 msgstr "Δεν βρέθηκαν προϊόντα"
 
-#: includes/class-wc-post-types.php:244
+#: includes/class-wc-post-types.php:245
 msgid "No Products found in trash"
 msgstr "Δεν βρέθηκαν προϊόντα στα απορρίματα"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:246
 msgid "Parent Product"
 msgstr "Γονικό Προϊόν"
 
-#: includes/class-wc-post-types.php:247
+#: includes/class-wc-post-types.php:248
 msgid "This is where you can add new products to your store."
 msgstr "Εδώ μπορείτε να προσθέσετε νέα προϊόντα στο κατάστημά σας"
 
-#: includes/class-wc-post-types.php:267
+#: includes/class-wc-post-types.php:268
 msgid "Variations"
 msgstr "Παραλλαγές"
 
-#: includes/class-wc-post-types.php:275
+#: includes/class-wc-post-types.php:276
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Παραγγελίες:"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:286
 msgid "Orders"
 msgstr "Παραγγελίες"
 
-#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:287 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Παραγγελία"
 
-#: includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:288
 msgid "Add Order"
 msgstr "Προσθήκη Παραγγελίας"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:289
 msgid "Add New Order"
 msgstr "Προσθήκη Νέας Παραγγελίας"
 
-#: includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:291
 msgid "Edit Order"
 msgstr "Επεξεργασία Παραγγελίας"
 
-#: includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292
 msgid "New Order"
 msgstr "Νέα Παραγγελία"
 
-#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:293 includes/class-wc-post-types.php:294
 msgid "View Order"
 msgstr "Εμφάνιση Παραγγελίας"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:295
 msgid "Search Orders"
 msgstr "Αναζήτηση στις Παραγγελίες"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found"
 msgstr "Δεν βρέθηκαν Παραγγελίες"
 
-#: includes/class-wc-post-types.php:296
+#: includes/class-wc-post-types.php:297
 msgid "No Orders found in trash"
 msgstr "Δεν βρέθηκαν παραγγελίες στον κάδο ανακύκλωσης"
 
-#: includes/class-wc-post-types.php:297
+#: includes/class-wc-post-types.php:298
 msgid "Parent Orders"
 msgstr "Γονικές Παραγγελίες"
 
-#: includes/class-wc-post-types.php:300
+#: includes/class-wc-post-types.php:301
 msgid "This is where store orders are stored."
 msgstr "Εδώ αποθηκεύονται οι παραγγελίες του καταστήματος."
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:324
 msgid "Coupons"
 msgstr "Κουπόνια"
 
-#: includes/class-wc-post-types.php:324 templates/cart/cart.php:119
+#: includes/class-wc-post-types.php:325 templates/cart/cart.php:119
 msgid "Coupon"
 msgstr "Κουπόνι"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:326
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Κουπόνια"
 
-#: includes/class-wc-post-types.php:326
+#: includes/class-wc-post-types.php:327
 msgid "Add Coupon"
 msgstr "Προσθήκη Κουπονιού"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:328
 msgid "Add New Coupon"
 msgstr "Προσθήκη Νέου Κουπονιού"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:330
 msgid "Edit Coupon"
 msgstr "Τροποποίηση κουπονιού"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:331
 msgid "New Coupon"
 msgstr "Νέο κουπόνι"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:332
 msgid "View Coupons"
 msgstr "Εμφάνιση Κουπονιών"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:333
 msgid "View Coupon"
 msgstr "Εμφάνιση κουπονιού"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:334
 msgid "Search Coupons"
 msgstr "Αναζήτηση κουπονιού"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found"
 msgstr "Δεν βρέθηκαν κουπόνια"
 
-#: includes/class-wc-post-types.php:335
+#: includes/class-wc-post-types.php:336
 msgid "No Coupons found in trash"
 msgstr "Δεν βρέθηκαν κουπόνια στον κάδο ανακύκλωσης"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:337
 msgid "Parent Coupon"
 msgstr "Γονικό Κουπόνι"
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:339
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Εδώ μπορείτε να προσθέσετε νέα κουπόνια που μπορούν να χρησιμοποιήσουν οι πελάτες στο κατάστημά σας."
@@ -5779,21 +5573,21 @@ msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
 msgstr "Η {site_title} παραγγελία σας από {order_date} έχει ολοκληρωθεί - κατεβάσετε τα αρχεία σας"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:146
-#: includes/emails/class-wc-email-new-order.php:133
+#: includes/emails/class-wc-email-customer-completed-order.php:147
+#: includes/emails/class-wc-email-new-order.php:134
 msgid "Subject"
 msgstr "Θέμα"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:153
-#: includes/emails/class-wc-email-new-order.php:140
+#: includes/emails/class-wc-email-customer-completed-order.php:154
+#: includes/emails/class-wc-email-new-order.php:141
 msgid "Email Heading"
 msgstr "Επικεφαλίδα Email"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:160
+#: includes/emails/class-wc-email-customer-completed-order.php:161
 msgid "Subject (downloadable)"
 msgstr "Θέμα (για κατέβασμα)"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:167
+#: includes/emails/class-wc-email-customer-completed-order.php:168
 msgid "Email Heading (downloadable)"
 msgstr "Κεφαλίδα Email (για κατέβασμα)"
 
@@ -5823,11 +5617,11 @@ msgstr "Η {site_title} παραγγελία σας από {order_date}"
 msgid "Order {order_number} details"
 msgstr "Πληροφορίες παραγγελίας {order_number}"
 
-#: includes/emails/class-wc-email-customer-invoice.php:160
+#: includes/emails/class-wc-email-customer-invoice.php:161
 msgid "Email subject (paid)"
 msgstr "Θέμα Email (πληρωμένο)"
 
-#: includes/emails/class-wc-email-customer-invoice.php:167
+#: includes/emails/class-wc-email-customer-invoice.php:168
 msgid "Email heading (paid)"
 msgstr "Κεφαλίδα Email (πληρωμένο)"
 
@@ -5917,23 +5711,23 @@ msgstr "Νέα παραγγελία πελάτη"
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
 msgstr "[{site_title}] Νέα παραγγελία του πελάτη ({order_number}) - {order_date}"
 
-#: includes/emails/class-wc-email-new-order.php:126
+#: includes/emails/class-wc-email-new-order.php:127
 msgid "Recipient(s)"
 msgstr "Παραλήπτης(ες)"
 
-#: includes/emails/class-wc-email-new-order.php:128
+#: includes/emails/class-wc-email-new-order.php:129
 msgid ""
 "Enter recipients (comma separated) for this email. Defaults to "
 "<code>%s</code>."
 msgstr "Εισαγωγή παραληπτών (διαχωρίστε με κόμμα) γι' αυτό το email. Προεπιλεγμένοι <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:135
+#: includes/emails/class-wc-email-new-order.php:136
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr "Αυτό ελέγχει τη γραμμή θέματος του email. Αφήστε το κενό για να χρησιμοποιήσετε το προεπιλεγμένο θέμα: <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:142
+#: includes/emails/class-wc-email-new-order.php:143
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
@@ -6413,10 +6207,8 @@ msgid "Enable logging"
 msgstr "Ενεργοποίηση καταγραφής"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:237
-msgid ""
-"Log PayPal events, such as IPN requests, inside "
-"<code>woocommerce/logs/paypal-%s.txt</code>"
-msgstr "Κατέγραψε τα συμβάντα PayPal, όπως οι αιτήσεις IPN, μέσα στο <code>woocommerce/logs/paypal-%s.txt</code>"
+msgid "Log PayPal events, such as IPN requests, inside <code>%s</code>"
+msgstr "Καταγραφή των συμβάντων PayPal, όπως οι αιτήσεις IPN, μέσα στο <code>woocommerce/logs/paypal-%s.txt</code>"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:370
 msgid "Shipping via"
@@ -6865,6 +6657,12 @@ msgstr "Ενημερώθηκε το κόστος αποστολής"
 msgid "Invalid order. If you have an account please log in and try again."
 msgstr "Λανθασμένη παραγγελία. Αν διαθέτε λογαριασμό παρακαλούμε συνδεθείτε και προσπαθήστε ξανά."
 
+#: includes/shortcodes/class-wc-shortcode-checkout.php:91
+#: includes/shortcodes/class-wc-shortcode-my-account.php:111
+#: templates/checkout/thankyou.php:30
+msgid "My Account"
+msgstr "Ο Λογαριασμός μου"
+
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
@@ -7098,62 +6896,66 @@ msgid "New Zealand Dollar"
 msgstr "New Zealand Dollar"
 
 #: includes/wc-core-functions.php:193
+msgid "Paraguayan Guaraní"
+msgstr ""
+
+#: includes/wc-core-functions.php:194
 msgid "Philippine Pesos"
 msgstr "Philippine Pesos"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Polish Zloty"
 msgstr "Polish Zloty"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Pounds Sterling"
 msgstr "Pounds Sterling"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Romanian Leu"
 msgstr "Romanian Leu"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Russian Ruble"
 msgstr "Ρούβλι Ρωσίας"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "Singapore Dollar"
 msgstr "Singapore Dollar"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "South African rand"
 msgstr "South African rand"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swedish Krona"
 msgstr "Σουηδική Κορόνα"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Swiss Franc"
 msgstr "Ελβετικό Φράγκο"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Taiwan New Dollars"
 msgstr "Taiwan New Dollars"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Thai Baht"
 msgstr "Thai Baht"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "Turkish Lira"
 msgstr "Τουρκική Λίρα"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "US Dollars"
 msgstr "Δολλάρια ΗΠΑ"
 
-#: includes/wc-core-functions.php:206
+#: includes/wc-core-functions.php:207
 msgid "Vietnamese Dong"
 msgstr "Βιετναμέζικο Ντονγκ"
 
-#: includes/wc-core-functions.php:207
+#: includes/wc-core-functions.php:208
 msgid "Egyptian Pound"
 msgstr "Αιγυπτιακή λίβρα"
 
@@ -7187,7 +6989,7 @@ msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr "ναύλα"
 
-#: includes/wc-product-functions.php:234
+#: includes/wc-product-functions.php:235
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "Χωρίς κατηγορία"
@@ -7239,41 +7041,41 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Αρχική"
 
-#: includes/wc-template-functions.php:1558
+#: includes/wc-template-functions.php:1549
 msgid "Order Again"
 msgstr "Παραγγείλτε Ξανά"
 
-#: includes/wc-template-functions.php:1653
+#: includes/wc-template-functions.php:1644
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Επιλέξτε χώρα&hellip;"
 
-#: includes/wc-template-functions.php:1660
+#: includes/wc-template-functions.php:1651
 msgid "Update country"
 msgstr "Ανανέωση χώρας"
 
-#: includes/wc-template-functions.php:1710
+#: includes/wc-template-functions.php:1701
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Επιλέξτε περιφέρεια&hellip;"
 
-#: includes/wc-template-functions.php:1851
+#: includes/wc-template-functions.php:1842
 msgid "Search for:"
 msgstr "Αναζήτηση για:"
 
-#: includes/wc-template-functions.php:1852
+#: includes/wc-template-functions.php:1843
 msgid "Search for products"
 msgstr "Αναζήτηση προϊόντων"
 
-#: includes/wc-template-functions.php:1853
+#: includes/wc-template-functions.php:1844
 msgid "Search"
 msgstr "Αναζήτηση"
 
-#: includes/wc-term-functions.php:135
+#: includes/wc-term-functions.php:146
 msgid "Select a category"
 msgstr "Επιλογή κατηγορίας"
 
-#: includes/wc-term-functions.php:139
+#: includes/wc-term-functions.php:149
 msgid "Uncategorized"
 msgstr "Χωρίς κατηγορία"
 
@@ -7436,6 +7238,11 @@ msgstr "Ταξινόμηση ανά"
 #: includes/widgets/class-wc-widget-product-categories.php:38
 msgid "Category Order"
 msgstr "Σειρά κατηγοριών"
+
+#: includes/widgets/class-wc-widget-product-categories.php:39
+#: templates/single-product-reviews.php:62
+msgid "Name"
+msgstr "Όνομα"
 
 #: includes/widgets/class-wc-widget-product-categories.php:45
 msgid "Show as dropdown"
@@ -7716,6 +7523,10 @@ msgstr "Περιφέρεια / Κράτος"
 msgid "City"
 msgstr "Πόλη"
 
+#: templates/cart/shipping-calculator.php:80
+msgid "Postcode / Zip"
+msgstr "Ταχυδρομικός κώδικας"
+
 #: templates/cart/shipping-calculator.php:85
 msgid "Update Totals"
 msgstr "Ενημέρωση Συνόλων"
@@ -7979,13 +7790,13 @@ msgstr "Για να επαναφέρετε τον κωδικός σας, επι�
 msgid "Click here to reset your password"
 msgstr "Κάντε κλικ εδώ για να επαναφέρετε τον κωδικό σας"
 
-#: templates/emails/email-addresses.php:18
-#: templates/emails/plain/email-addresses.php:12
+#: templates/emails/email-addresses.php:20
+#: templates/emails/plain/email-addresses.php:14
 msgid "Billing address"
 msgstr "Διεύθυνση χρέωσης"
 
-#: templates/emails/email-addresses.php:28
-#: templates/emails/plain/email-addresses.php:17
+#: templates/emails/email-addresses.php:30
+#: templates/emails/plain/email-addresses.php:19
 msgid "Shipping address"
 msgstr "Διεύθυνση αποστολής"
 
@@ -8161,23 +7972,31 @@ msgstr "Επίθετο"
 msgid "Email address"
 msgstr "Διεύθυνση Email"
 
-#: templates/myaccount/form-edit-account.php:33
+#: templates/myaccount/form-edit-account.php:34
+msgid "Password (leave blank to leave unchanged)"
+msgstr "Κωδικός Πρόσβασης (αφήστε κενό για να μην αλλάξει)"
+
+#: templates/myaccount/form-edit-account.php:38
+msgid "Confirm new password"
+msgstr "Επιβεβαίωση νέου κωδικού πρόσβασης"
+
+#: templates/myaccount/form-edit-account.php:44
 msgid "Password Change"
 msgstr "Αλλαγή Κωδικού"
 
-#: templates/myaccount/form-edit-account.php:36
+#: templates/myaccount/form-edit-account.php:47
 msgid "Current Password (leave blank to leave unchanged)"
 msgstr "Τρέχον Κωδικός (αφήστε το κενό για να παραμείνει το ίδιο)"
 
-#: templates/myaccount/form-edit-account.php:40
+#: templates/myaccount/form-edit-account.php:51
 msgid "New Password (leave blank to leave unchanged)"
 msgstr "Νέος Κωδικός (αφήστε το κενό για να παραμείνει το ίδιο)"
 
-#: templates/myaccount/form-edit-account.php:44
+#: templates/myaccount/form-edit-account.php:55
 msgid "Confirm New Password"
 msgstr "Επιβεβαιώστε το Νέο σας Κωδικό"
 
-#: templates/myaccount/form-edit-account.php:50
+#: templates/myaccount/form-edit-account.php:61
 msgid "Save changes"
 msgstr "Αποθήκευση αλλαγών"
 

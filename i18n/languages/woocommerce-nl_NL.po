@@ -1,21 +1,21 @@
 # 
 # Translators:
 # Flobin <7dabe782@opayq.com>, 2014
-# coenjacobs <coen@woothemes.com>, 2013
-# coenjacobs <coen@woothemes.com>, 2014
+# Coen Jacobs <coen@woothemes.com>, 2013
+# Coen Jacobs <coen@woothemes.com>, 2014
 # Geert De Deckere <geertdd@gmail.com>, 2014
-# Ramon Van Belzen <ramoonus@zeelandnet.nl>, 2014
+# Ramon van Belzen <ramoonus@zeelandnet.nl>, 2014
 # rvoogdgeert <rvoogdgeert@gmail.com>, 2014
 # stgoos, 2013
 # sylvie_janssens <sylvie_janssens@yahoo.com>, 2014
-# SilverXp <thom.pp9@gmail.com>, 2014
+# Thom <thom.pp9@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-05-22 10:45:21+00:00\n"
-"PO-Revision-Date: 2014-05-23 08:28+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-06-03 15:13:58+00:00\n"
+"PO-Revision-Date: 2014-06-04 08:41+0000\n"
+"Last-Translator: Mike Jolley <mike.jolley@me.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.com/projects/p/woocommerce/language/nl_NL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,52 +23,981 @@ msgstr ""
 "Language: nl_NL\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: assets/js/admin/editor_plugin_lang.php:5
-msgid "Insert Shortcode"
-msgstr "Shortcode invoegen"
+#: i18n/countries.php:16
+msgid "Afghanistan"
+msgstr "Afghanistan"
 
-#: assets/js/admin/editor_plugin_lang.php:6
-msgid "Product price/cart button"
-msgstr "Product prijs/winkelwagen button"
+#: i18n/countries.php:17
+msgid "&#197;land Islands"
+msgstr "&Aring;landseilanden"
 
-#: assets/js/admin/editor_plugin_lang.php:7
-msgid "Product by SKU/ID"
-msgstr "Product via SKU/ID"
+#: i18n/countries.php:18
+msgid "Albania"
+msgstr "Albanië"
 
-#: assets/js/admin/editor_plugin_lang.php:8
-msgid "Products by SKU/ID"
-msgstr "Producten via SKU/ID"
+#: i18n/countries.php:19
+msgid "Algeria"
+msgstr "Algerije"
 
-#: assets/js/admin/editor_plugin_lang.php:9
-msgid "Product categories"
-msgstr "Productcategorieën"
+#: i18n/countries.php:20
+msgid "Andorra"
+msgstr "Andorra"
 
-#: assets/js/admin/editor_plugin_lang.php:10
-msgid "Products by category slug"
-msgstr "Producten via categorie slug"
+#: i18n/countries.php:21
+msgid "Angola"
+msgstr "Angola"
 
-#: assets/js/admin/editor_plugin_lang.php:11
-msgid "Recent products"
-msgstr "Recente producten"
+#: i18n/countries.php:22
+msgid "Anguilla"
+msgstr "Anguilla"
 
-#: assets/js/admin/editor_plugin_lang.php:12
-msgid "Featured products"
-msgstr "Uitgelichte producten"
+#: i18n/countries.php:23
+msgid "Antarctica"
+msgstr "Antarctica"
 
-#: assets/js/admin/editor_plugin_lang.php:13
-msgid "Shop Messages"
-msgstr "Winkelberichten"
+#: i18n/countries.php:24
+msgid "Antigua and Barbuda"
+msgstr "Antigua en Barbuda"
 
-#: assets/js/admin/editor_plugin_lang.php:14
-msgid "Order tracking"
-msgstr "Bestelling volgen"
+#: i18n/countries.php:25
+msgid "Argentina"
+msgstr "Argentinië"
 
-#: assets/js/admin/editor_plugin_lang.php:15
-#: includes/shortcodes/class-wc-shortcode-checkout.php:91
-#: includes/shortcodes/class-wc-shortcode-my-account.php:111
-#: templates/checkout/thankyou.php:30
-msgid "My Account"
-msgstr "Mijn account"
+#: i18n/countries.php:26
+msgid "Armenia"
+msgstr "Armenië"
+
+#: i18n/countries.php:27
+msgid "Aruba"
+msgstr "Aruba"
+
+#: i18n/countries.php:28
+msgid "Australia"
+msgstr "Australië"
+
+#: i18n/countries.php:29
+msgid "Austria"
+msgstr "Oostenrijk"
+
+#: i18n/countries.php:30
+msgid "Azerbaijan"
+msgstr "Azerbeidzjan"
+
+#: i18n/countries.php:31
+msgid "Bahamas"
+msgstr "Bahamas"
+
+#: i18n/countries.php:32
+msgid "Bahrain"
+msgstr "Bahrein"
+
+#: i18n/countries.php:33
+msgid "Bangladesh"
+msgstr "Bangladesh"
+
+#: i18n/countries.php:34
+msgid "Barbados"
+msgstr "Barbados"
+
+#: i18n/countries.php:35
+msgid "Belarus"
+msgstr "Belarus"
+
+#: i18n/countries.php:36
+msgid "Belgium"
+msgstr "België"
+
+#: i18n/countries.php:37
+msgid "Belau"
+msgstr "Belau"
+
+#: i18n/countries.php:38
+msgid "Belize"
+msgstr "Belize"
+
+#: i18n/countries.php:39
+msgid "Benin"
+msgstr "Benin"
+
+#: i18n/countries.php:40
+msgid "Bermuda"
+msgstr "Bermuda"
+
+#: i18n/countries.php:41
+msgid "Bhutan"
+msgstr "Bhutan"
+
+#: i18n/countries.php:42
+msgid "Bolivia"
+msgstr "Bolivia"
+
+#: i18n/countries.php:43
+msgid "Bonaire, Saint Eustatius and Saba"
+msgstr "Bonaire, Sint Eustatius en Saba"
+
+#: i18n/countries.php:44
+msgid "Bosnia and Herzegovina"
+msgstr "Bosnië en Herzegovina"
+
+#: i18n/countries.php:45
+msgid "Botswana"
+msgstr "Botswana"
+
+#: i18n/countries.php:46
+msgid "Bouvet Island"
+msgstr "Bouvet"
+
+#: i18n/countries.php:47
+msgid "Brazil"
+msgstr "Brazilië"
+
+#: i18n/countries.php:48
+msgid "British Indian Ocean Territory"
+msgstr "Brits Indische Oceaanterritorium"
+
+#: i18n/countries.php:49
+msgid "British Virgin Islands"
+msgstr "Britse Maagdeneilanden"
+
+#: i18n/countries.php:50
+msgid "Brunei"
+msgstr "Brunei"
+
+#: i18n/countries.php:51
+msgid "Bulgaria"
+msgstr "Bulgarije"
+
+#: i18n/countries.php:52
+msgid "Burkina Faso"
+msgstr "Burkina Faso"
+
+#: i18n/countries.php:53
+msgid "Burundi"
+msgstr "Boeroendi"
+
+#: i18n/countries.php:54
+msgid "Cambodia"
+msgstr "Cambodja"
+
+#: i18n/countries.php:55
+msgid "Cameroon"
+msgstr "Kameroen"
+
+#: i18n/countries.php:56
+msgid "Canada"
+msgstr "Canada"
+
+#: i18n/countries.php:57
+msgid "Cape Verde"
+msgstr "Cape Verde"
+
+#: i18n/countries.php:58
+msgid "Cayman Islands"
+msgstr "Kaaimaneilanden"
+
+#: i18n/countries.php:59
+msgid "Central African Republic"
+msgstr "Centraal-Afrikaanse Republiek"
+
+#: i18n/countries.php:60
+msgid "Chad"
+msgstr "Tsjaad"
+
+#: i18n/countries.php:61
+msgid "Chile"
+msgstr "Chili"
+
+#: i18n/countries.php:62
+msgid "China"
+msgstr "China"
+
+#: i18n/countries.php:63
+msgid "Christmas Island"
+msgstr "Christmaseiland"
+
+#: i18n/countries.php:64
+msgid "Cocos (Keeling) Islands"
+msgstr "Cocoseilanden"
+
+#: i18n/countries.php:65
+msgid "Colombia"
+msgstr "Colombia"
+
+#: i18n/countries.php:66
+msgid "Comoros"
+msgstr "Comoren"
+
+#: i18n/countries.php:67
+msgid "Congo (Brazzaville)"
+msgstr "Congo-Brazzaville"
+
+#: i18n/countries.php:68
+msgid "Congo (Kinshasa)"
+msgstr "Congo-Kinshasa"
+
+#: i18n/countries.php:69
+msgid "Cook Islands"
+msgstr "Cookeilanden"
+
+#: i18n/countries.php:70
+msgid "Costa Rica"
+msgstr "Costa Rica"
+
+#: i18n/countries.php:71
+msgid "Croatia"
+msgstr "Kroatië"
+
+#: i18n/countries.php:72
+msgid "Cuba"
+msgstr "Cuba"
+
+#: i18n/countries.php:73
+msgid "Cura&Ccedil;ao"
+msgstr "Curaçao"
+
+#: i18n/countries.php:74
+msgid "Cyprus"
+msgstr "Cyprus"
+
+#: i18n/countries.php:75
+msgid "Czech Republic"
+msgstr "Tsjechië"
+
+#: i18n/countries.php:76
+msgid "Denmark"
+msgstr "Denemarken"
+
+#: i18n/countries.php:77
+msgid "Djibouti"
+msgstr "Djibouti"
+
+#: i18n/countries.php:78
+msgid "Dominica"
+msgstr "Dominica"
+
+#: i18n/countries.php:79
+msgid "Dominican Republic"
+msgstr "Dominicaanse Republiek"
+
+#: i18n/countries.php:80
+msgid "Ecuador"
+msgstr "Ecuador"
+
+#: i18n/countries.php:81
+msgid "Egypt"
+msgstr "Egypte"
+
+#: i18n/countries.php:82
+msgid "El Salvador"
+msgstr "El Salvador"
+
+#: i18n/countries.php:83
+msgid "Equatorial Guinea"
+msgstr "Equatoriaal-Guinea"
+
+#: i18n/countries.php:84
+msgid "Eritrea"
+msgstr "Eritrea"
+
+#: i18n/countries.php:85
+msgid "Estonia"
+msgstr "Estland"
+
+#: i18n/countries.php:86
+msgid "Ethiopia"
+msgstr "Ethiopië"
+
+#: i18n/countries.php:87
+msgid "Falkland Islands"
+msgstr "Falklandeilanden"
+
+#: i18n/countries.php:88
+msgid "Faroe Islands"
+msgstr "Faeröer"
+
+#: i18n/countries.php:89
+msgid "Fiji"
+msgstr "Fiji"
+
+#: i18n/countries.php:90
+msgid "Finland"
+msgstr "Finland"
+
+#: i18n/countries.php:91
+msgid "France"
+msgstr "Frankrijk"
+
+#: i18n/countries.php:92
+msgid "French Guiana"
+msgstr "Frans-Guyana"
+
+#: i18n/countries.php:93
+msgid "French Polynesia"
+msgstr "Frans-Polynesië"
+
+#: i18n/countries.php:94
+msgid "French Southern Territories"
+msgstr "Franse Zuidelijke Gebieden"
+
+#: i18n/countries.php:95
+msgid "Gabon"
+msgstr "Gabon"
+
+#: i18n/countries.php:96
+msgid "Gambia"
+msgstr "Gambia"
+
+#: i18n/countries.php:97 i18n/states/US.php:23
+msgid "Georgia"
+msgstr "Georgië"
+
+#: i18n/countries.php:98
+msgid "Germany"
+msgstr "Duitsland"
+
+#: i18n/countries.php:99
+msgid "Ghana"
+msgstr "Ghana"
+
+#: i18n/countries.php:100
+msgid "Gibraltar"
+msgstr "Gibraltar"
+
+#: i18n/countries.php:101
+msgid "Greece"
+msgstr "Griekenland"
+
+#: i18n/countries.php:102
+msgid "Greenland"
+msgstr "Groenland"
+
+#: i18n/countries.php:103
+msgid "Grenada"
+msgstr "Grenada"
+
+#: i18n/countries.php:104
+msgid "Guadeloupe"
+msgstr "Guadeloupe"
+
+#: i18n/countries.php:105
+msgid "Guatemala"
+msgstr "Guatemala"
+
+#: i18n/countries.php:106
+msgid "Guernsey"
+msgstr "Guernsey"
+
+#: i18n/countries.php:107
+msgid "Guinea"
+msgstr "Guinea"
+
+#: i18n/countries.php:108
+msgid "Guinea-Bissau"
+msgstr "Guinee-Bissau"
+
+#: i18n/countries.php:109
+msgid "Guyana"
+msgstr "Guyana"
+
+#: i18n/countries.php:110
+msgid "Haiti"
+msgstr "Haïti"
+
+#: i18n/countries.php:111
+msgid "Heard Island and McDonald Islands"
+msgstr "Heard en MacDonaldeilanden"
+
+#: i18n/countries.php:112
+msgid "Honduras"
+msgstr "Honduras"
+
+#: i18n/countries.php:113
+msgid "Hong Kong"
+msgstr "Hongkong"
+
+#: i18n/countries.php:114
+msgid "Hungary"
+msgstr "Hongarije"
+
+#: i18n/countries.php:115
+msgid "Iceland"
+msgstr "IJsland"
+
+#: i18n/countries.php:116
+msgid "India"
+msgstr "Indië"
+
+#: i18n/countries.php:117
+msgid "Indonesia"
+msgstr "Indonesië"
+
+#: i18n/countries.php:118
+msgid "Iran"
+msgstr "Iran"
+
+#: i18n/countries.php:119
+msgid "Iraq"
+msgstr "Irak"
+
+#: i18n/countries.php:120
+msgid "Republic of Ireland"
+msgstr "Ierland"
+
+#: i18n/countries.php:121
+msgid "Isle of Man"
+msgstr "Man"
+
+#: i18n/countries.php:122
+msgid "Israel"
+msgstr "Israël"
+
+#: i18n/countries.php:123
+msgid "Italy"
+msgstr "Italië"
+
+#: i18n/countries.php:124
+msgid "Ivory Coast"
+msgstr "Ivoorkust"
+
+#: i18n/countries.php:125
+msgid "Jamaica"
+msgstr "Jamaica"
+
+#: i18n/countries.php:126
+msgid "Japan"
+msgstr "Japan"
+
+#: i18n/countries.php:127
+msgid "Jersey"
+msgstr "Jersey"
+
+#: i18n/countries.php:128
+msgid "Jordan"
+msgstr "Jordanië"
+
+#: i18n/countries.php:129
+msgid "Kazakhstan"
+msgstr "Kazachstan"
+
+#: i18n/countries.php:130
+msgid "Kenya"
+msgstr "Kenia"
+
+#: i18n/countries.php:131
+msgid "Kiribati"
+msgstr "Kiribati"
+
+#: i18n/countries.php:132
+msgid "Kuwait"
+msgstr "Koeweit"
+
+#: i18n/countries.php:133
+msgid "Kyrgyzstan"
+msgstr "Kirgizië"
+
+#: i18n/countries.php:134
+msgid "Laos"
+msgstr "Laos"
+
+#: i18n/countries.php:135
+msgid "Latvia"
+msgstr "Letland"
+
+#: i18n/countries.php:136
+msgid "Lebanon"
+msgstr "Libanon"
+
+#: i18n/countries.php:137
+msgid "Lesotho"
+msgstr "Lesotho"
+
+#: i18n/countries.php:138
+msgid "Liberia"
+msgstr "Liberia"
+
+#: i18n/countries.php:139
+msgid "Libya"
+msgstr "Libië"
+
+#: i18n/countries.php:140
+msgid "Liechtenstein"
+msgstr "Liechtenstein"
+
+#: i18n/countries.php:141
+msgid "Lithuania"
+msgstr "Litouwen"
+
+#: i18n/countries.php:142
+msgid "Luxembourg"
+msgstr "Luxemburg"
+
+#: i18n/countries.php:143
+msgid "Macao S.A.R., China"
+msgstr "Macao S.A.R., China"
+
+#: i18n/countries.php:144
+msgid "Macedonia"
+msgstr "Macedonië"
+
+#: i18n/countries.php:145
+msgid "Madagascar"
+msgstr "Madagascar"
+
+#: i18n/countries.php:146
+msgid "Malawi"
+msgstr "Malawi"
+
+#: i18n/countries.php:147
+msgid "Malaysia"
+msgstr "Maleisië"
+
+#: i18n/countries.php:148
+msgid "Maldives"
+msgstr "Maldiven"
+
+#: i18n/countries.php:149
+msgid "Mali"
+msgstr "Mali"
+
+#: i18n/countries.php:150
+msgid "Malta"
+msgstr "Malta"
+
+#: i18n/countries.php:151
+msgid "Marshall Islands"
+msgstr "Marshalleilanden"
+
+#: i18n/countries.php:152
+msgid "Martinique"
+msgstr "Martinique"
+
+#: i18n/countries.php:153
+msgid "Mauritania"
+msgstr "Mauritanië"
+
+#: i18n/countries.php:154
+msgid "Mauritius"
+msgstr "Mauritius"
+
+#: i18n/countries.php:155
+msgid "Mayotte"
+msgstr "Mayotte"
+
+#: i18n/countries.php:156
+msgid "Mexico"
+msgstr "Mexico"
+
+#: i18n/countries.php:157
+msgid "Micronesia"
+msgstr "Micronesië"
+
+#: i18n/countries.php:158
+msgid "Moldova"
+msgstr "Moldavië"
+
+#: i18n/countries.php:159
+msgid "Monaco"
+msgstr "Monaco"
+
+#: i18n/countries.php:160
+msgid "Mongolia"
+msgstr "Mongolië"
+
+#: i18n/countries.php:161
+msgid "Montenegro"
+msgstr "Montenegro"
+
+#: i18n/countries.php:162
+msgid "Montserrat"
+msgstr "Montserrat"
+
+#: i18n/countries.php:163
+msgid "Morocco"
+msgstr "Marokko"
+
+#: i18n/countries.php:164
+msgid "Mozambique"
+msgstr "Mozambique"
+
+#: i18n/countries.php:165
+msgid "Myanmar"
+msgstr "Myanmar"
+
+#: i18n/countries.php:166
+msgid "Namibia"
+msgstr "Namibië"
+
+#: i18n/countries.php:167
+msgid "Nauru"
+msgstr "Nauru"
+
+#: i18n/countries.php:168
+msgid "Nepal"
+msgstr "Nepal"
+
+#: i18n/countries.php:169
+msgid "Netherlands"
+msgstr "Nederland"
+
+#: i18n/countries.php:170
+msgid "Netherlands Antilles"
+msgstr "Nederlandse Antillen"
+
+#: i18n/countries.php:171
+msgid "New Caledonia"
+msgstr "Nieuw-Caledonië"
+
+#: i18n/countries.php:172
+msgid "New Zealand"
+msgstr "Nieuw-Zeeland"
+
+#: i18n/countries.php:173
+msgid "Nicaragua"
+msgstr "Nicaragua"
+
+#: i18n/countries.php:174
+msgid "Niger"
+msgstr "Niger"
+
+#: i18n/countries.php:175
+msgid "Nigeria"
+msgstr "Nigeria"
+
+#: i18n/countries.php:176
+msgid "Niue"
+msgstr "Niue"
+
+#: i18n/countries.php:177
+msgid "Norfolk Island"
+msgstr "Norfolk Island"
+
+#: i18n/countries.php:178
+msgid "North Korea"
+msgstr "Noord-Korea"
+
+#: i18n/countries.php:179
+msgid "Norway"
+msgstr "Noorwegen"
+
+#: i18n/countries.php:180
+msgid "Oman"
+msgstr "Oman"
+
+#: i18n/countries.php:181
+msgid "Pakistan"
+msgstr "Pakistan"
+
+#: i18n/countries.php:182
+msgid "Palestinian Territory"
+msgstr "Palestijnse Gebieden"
+
+#: i18n/countries.php:183
+msgid "Panama"
+msgstr "Panama"
+
+#: i18n/countries.php:184
+msgid "Papua New Guinea"
+msgstr "Papoea-Nieuw-Guinea"
+
+#: i18n/countries.php:185
+msgid "Paraguay"
+msgstr "Paraguay"
+
+#: i18n/countries.php:186
+msgid "Peru"
+msgstr "Peru"
+
+#: i18n/countries.php:187
+msgid "Philippines"
+msgstr "Filippijnen"
+
+#: i18n/countries.php:188
+msgid "Pitcairn"
+msgstr "Pitcairn"
+
+#: i18n/countries.php:189
+msgid "Poland"
+msgstr "Polen"
+
+#: i18n/countries.php:190
+msgid "Portugal"
+msgstr "Portugal"
+
+#: i18n/countries.php:191
+msgid "Qatar"
+msgstr "Katar"
+
+#: i18n/countries.php:192
+msgid "Reunion"
+msgstr "Réunion"
+
+#: i18n/countries.php:193
+msgid "Romania"
+msgstr "Roemenië"
+
+#: i18n/countries.php:194
+msgid "Russia"
+msgstr "Rusland"
+
+#: i18n/countries.php:195
+msgid "Rwanda"
+msgstr "Rwanda"
+
+#: i18n/countries.php:196
+msgid "Saint Barth&eacute;lemy"
+msgstr "Sint-Bartholomeus"
+
+#: i18n/countries.php:197
+msgid "Saint Helena"
+msgstr "Sint-Helena"
+
+#: i18n/countries.php:198
+msgid "Saint Kitts and Nevis"
+msgstr "Saint Kitts en Nevis"
+
+#: i18n/countries.php:199
+msgid "Saint Lucia"
+msgstr "Saint Lucia"
+
+#: i18n/countries.php:200
+msgid "Saint Martin (French part)"
+msgstr "Sint-Maarten (Frans deel)"
+
+#: i18n/countries.php:201
+msgid "Saint Martin (Dutch part)"
+msgstr "Sint Maarten"
+
+#: i18n/countries.php:202
+msgid "Saint Pierre and Miquelon"
+msgstr "Saint-Pierre en Miquelon"
+
+#: i18n/countries.php:203
+msgid "Saint Vincent and the Grenadines"
+msgstr "Saint Vincent en de Grenadines"
+
+#: i18n/countries.php:204
+msgid "San Marino"
+msgstr "San Marino"
+
+#: i18n/countries.php:205
+msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+msgstr "Sao Tom&eacute; en Principe"
+
+#: i18n/countries.php:206
+msgid "Saudi Arabia"
+msgstr "Saudi-Arabië"
+
+#: i18n/countries.php:207
+msgid "Senegal"
+msgstr "Senegal"
+
+#: i18n/countries.php:208
+msgid "Serbia"
+msgstr "Servië"
+
+#: i18n/countries.php:209
+msgid "Seychelles"
+msgstr "Seychellen"
+
+#: i18n/countries.php:210
+msgid "Sierra Leone"
+msgstr "Sierra Leone"
+
+#: i18n/countries.php:211
+msgid "Singapore"
+msgstr "Singapore"
+
+#: i18n/countries.php:212
+msgid "Slovakia"
+msgstr "Slowakije"
+
+#: i18n/countries.php:213
+msgid "Slovenia"
+msgstr "Slovenië"
+
+#: i18n/countries.php:214
+msgid "Solomon Islands"
+msgstr "Salomonseilanden"
+
+#: i18n/countries.php:215
+msgid "Somalia"
+msgstr "Somalië"
+
+#: i18n/countries.php:216
+msgid "South Africa"
+msgstr "Zuid-Afrika"
+
+#: i18n/countries.php:217
+msgid "South Georgia/Sandwich Islands"
+msgstr "Zuid-Georgia en de Zuidelijke Sandwicheilanden"
+
+#: i18n/countries.php:218
+msgid "South Korea"
+msgstr "Zuid-Korea"
+
+#: i18n/countries.php:219
+msgid "South Sudan"
+msgstr "Zuid-Soedan"
+
+#: i18n/countries.php:220
+msgid "Spain"
+msgstr "Spanje"
+
+#: i18n/countries.php:221
+msgid "Sri Lanka"
+msgstr "Sri Lanka"
+
+#: i18n/countries.php:222
+msgid "Sudan"
+msgstr "Soedan"
+
+#: i18n/countries.php:223
+msgid "Suriname"
+msgstr "Suriname"
+
+#: i18n/countries.php:224
+msgid "Svalbard and Jan Mayen"
+msgstr "Spitsbergen en Jan Mayen"
+
+#: i18n/countries.php:225
+msgid "Swaziland"
+msgstr "Swaziland"
+
+#: i18n/countries.php:226
+msgid "Sweden"
+msgstr "Zweden"
+
+#: i18n/countries.php:227
+msgid "Switzerland"
+msgstr "Zwitserland"
+
+#: i18n/countries.php:228
+msgid "Syria"
+msgstr "Syrië"
+
+#: i18n/countries.php:229
+msgid "Taiwan"
+msgstr "Taiwan"
+
+#: i18n/countries.php:230
+msgid "Tajikistan"
+msgstr "Tadzjikistan"
+
+#: i18n/countries.php:231
+msgid "Tanzania"
+msgstr "Tanzania"
+
+#: i18n/countries.php:232
+msgid "Thailand"
+msgstr "Thailand"
+
+#: i18n/countries.php:233
+msgid "Timor-Leste"
+msgstr "Oost-Timor"
+
+#: i18n/countries.php:234
+msgid "Togo"
+msgstr "Togo"
+
+#: i18n/countries.php:235
+msgid "Tokelau"
+msgstr "Tokelau"
+
+#: i18n/countries.php:236
+msgid "Tonga"
+msgstr "Tonga"
+
+#: i18n/countries.php:237
+msgid "Trinidad and Tobago"
+msgstr "Trinidad en Tobago"
+
+#: i18n/countries.php:238
+msgid "Tunisia"
+msgstr "Tunesië"
+
+#: i18n/countries.php:239
+msgid "Turkey"
+msgstr "Turkije"
+
+#: i18n/countries.php:240
+msgid "Turkmenistan"
+msgstr "Turkmenistan"
+
+#: i18n/countries.php:241
+msgid "Turks and Caicos Islands"
+msgstr "Turks- en Caicoseilanden"
+
+#: i18n/countries.php:242
+msgid "Tuvalu"
+msgstr "Tuvalu"
+
+#: i18n/countries.php:243
+msgid "Uganda"
+msgstr "Oeganda"
+
+#: i18n/countries.php:244
+msgid "Ukraine"
+msgstr "Oekraïne"
+
+#: i18n/countries.php:245
+msgid "United Arab Emirates"
+msgstr "Verenigde Arabische Emiraten"
+
+#: i18n/countries.php:246
+msgid "United Kingdom (UK)"
+msgstr "Verenigd Koninkrijk (UK)"
+
+#: i18n/countries.php:247
+msgid "United States (US)"
+msgstr "Verenigde Staten (US)"
+
+#: i18n/countries.php:248
+msgid "Uruguay"
+msgstr "Uruguay"
+
+#: i18n/countries.php:249
+msgid "Uzbekistan"
+msgstr "Oezbekistan"
+
+#: i18n/countries.php:250
+msgid "Vanuatu"
+msgstr "Vanuatu"
+
+#: i18n/countries.php:251
+msgid "Vatican"
+msgstr "Vaticaan"
+
+#: i18n/countries.php:252
+msgid "Venezuela"
+msgstr "Venezuela"
+
+#: i18n/countries.php:253
+msgid "Vietnam"
+msgstr "Vietnam"
+
+#: i18n/countries.php:254
+msgid "Wallis and Futuna"
+msgstr "Wallis en Futuna"
+
+#: i18n/countries.php:255
+msgid "Western Sahara"
+msgstr "Westelijke Sahara"
+
+#: i18n/countries.php:256
+msgid "Western Samoa"
+msgstr "West-Samoa"
+
+#: i18n/countries.php:257
+msgid "Yemen"
+msgstr "Jemen"
+
+#: i18n/countries.php:258
+msgid "Zambia"
+msgstr "Zambia"
+
+#: i18n/countries.php:259
+msgid "Zimbabwe"
+msgstr "Zimbabwe"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
@@ -2907,10 +3836,6 @@ msgstr "District of Columbia"
 msgid "Florida"
 msgstr "Florida"
 
-#: i18n/states/US.php:23 includes/class-wc-countries.php:118
-msgid "Georgia"
-msgstr "Georgië"
-
 #: i18n/states/US.php:24
 msgid "Hawaii"
 msgstr "Hawaii"
@@ -3167,9 +4092,9 @@ msgstr "terugbetaald"
 msgid "cancelled"
 msgstr "geannuleerd"
 
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/emails/class-wc-email-customer-completed-order.php:140
-#: includes/emails/class-wc-email-new-order.php:120
+#: includes/abstracts/abstract-wc-email.php:573
+#: includes/emails/class-wc-email-customer-completed-order.php:141
+#: includes/emails/class-wc-email-new-order.php:121
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:52
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:122
@@ -3180,130 +4105,130 @@ msgstr "geannuleerd"
 msgid "Enable/Disable"
 msgstr "Inschakelen/uitschakelen"
 
-#: includes/abstracts/abstract-wc-email.php:572
-#: includes/emails/class-wc-email-customer-completed-order.php:142
-#: includes/emails/class-wc-email-new-order.php:122
+#: includes/abstracts/abstract-wc-email.php:575
+#: includes/emails/class-wc-email-customer-completed-order.php:143
+#: includes/emails/class-wc-email-new-order.php:123
 msgid "Enable this email notification"
 msgstr "Deze e-mail notificatie inschakelen"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/emails/class-wc-email-customer-invoice.php:146
+#: includes/abstracts/abstract-wc-email.php:579
+#: includes/emails/class-wc-email-customer-invoice.php:147
 msgid "Email subject"
 msgstr "E-mailonderwerp"
 
-#: includes/abstracts/abstract-wc-email.php:578
-#: includes/abstracts/abstract-wc-email.php:585
-#: includes/emails/class-wc-email-customer-completed-order.php:148
-#: includes/emails/class-wc-email-customer-completed-order.php:155
-#: includes/emails/class-wc-email-customer-completed-order.php:162
-#: includes/emails/class-wc-email-customer-completed-order.php:169
-#: includes/emails/class-wc-email-customer-invoice.php:148
-#: includes/emails/class-wc-email-customer-invoice.php:155
-#: includes/emails/class-wc-email-customer-invoice.php:162
-#: includes/emails/class-wc-email-customer-invoice.php:169
+#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:588
+#: includes/emails/class-wc-email-customer-completed-order.php:149
+#: includes/emails/class-wc-email-customer-completed-order.php:156
+#: includes/emails/class-wc-email-customer-completed-order.php:163
+#: includes/emails/class-wc-email-customer-completed-order.php:170
+#: includes/emails/class-wc-email-customer-invoice.php:149
+#: includes/emails/class-wc-email-customer-invoice.php:156
+#: includes/emails/class-wc-email-customer-invoice.php:163
+#: includes/emails/class-wc-email-customer-invoice.php:170
 msgid "Defaults to <code>%s</code>"
 msgstr "Standaard <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:583
-#: includes/emails/class-wc-email-customer-invoice.php:153
+#: includes/abstracts/abstract-wc-email.php:586
+#: includes/emails/class-wc-email-customer-invoice.php:154
 msgid "Email heading"
 msgstr "E-mailkop"
 
-#: includes/abstracts/abstract-wc-email.php:590
-#: includes/emails/class-wc-email-customer-completed-order.php:174
-#: includes/emails/class-wc-email-customer-invoice.php:174
-#: includes/emails/class-wc-email-new-order.php:147
+#: includes/abstracts/abstract-wc-email.php:593
+#: includes/emails/class-wc-email-customer-completed-order.php:175
+#: includes/emails/class-wc-email-customer-invoice.php:175
+#: includes/emails/class-wc-email-new-order.php:148
 msgid "Email type"
 msgstr "E-mailtype"
 
-#: includes/abstracts/abstract-wc-email.php:592
-#: includes/emails/class-wc-email-customer-completed-order.php:176
-#: includes/emails/class-wc-email-customer-invoice.php:176
-#: includes/emails/class-wc-email-new-order.php:149
+#: includes/abstracts/abstract-wc-email.php:595
+#: includes/emails/class-wc-email-customer-completed-order.php:177
+#: includes/emails/class-wc-email-customer-invoice.php:177
+#: includes/emails/class-wc-email-new-order.php:150
 msgid "Choose which format of email to send."
 msgstr "Kies de te versturen e-mailindeling."
 
-#: includes/abstracts/abstract-wc-email.php:596
-#: includes/emails/class-wc-email-customer-completed-order.php:180
-#: includes/emails/class-wc-email-customer-invoice.php:180
-#: includes/emails/class-wc-email-new-order.php:153
-msgid "Plain text"
-msgstr "Platte tekst"
-
-#: includes/abstracts/abstract-wc-email.php:597
+#: includes/abstracts/abstract-wc-email.php:599
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
-msgid "HTML"
-msgstr "HTML"
+msgid "Plain text"
+msgstr "Platte tekst"
 
-#: includes/abstracts/abstract-wc-email.php:598
+#: includes/abstracts/abstract-wc-email.php:600
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
+msgid "HTML"
+msgstr "HTML"
+
+#: includes/abstracts/abstract-wc-email.php:601
+#: includes/emails/class-wc-email-customer-completed-order.php:183
+#: includes/emails/class-wc-email-customer-invoice.php:183
+#: includes/emails/class-wc-email-new-order.php:156
 msgid "Multipart"
 msgstr "Multipart"
 
-#: includes/abstracts/abstract-wc-email.php:634
-#: includes/abstracts/abstract-wc-email.php:655
+#: includes/abstracts/abstract-wc-email.php:637
+#: includes/abstracts/abstract-wc-email.php:658
 msgid "Could not write to template file."
 msgstr "Kon niet schrijven naar template bestand."
 
-#: includes/abstracts/abstract-wc-email.php:686
+#: includes/abstracts/abstract-wc-email.php:689
 msgid "Template file copied to theme."
 msgstr "Template bestand gekopieerd naar thema."
 
-#: includes/abstracts/abstract-wc-email.php:695
+#: includes/abstracts/abstract-wc-email.php:698
 msgid "Template file deleted from theme."
 msgstr "Template bestand verwijderd van thema."
 
-#: includes/abstracts/abstract-wc-email.php:703
+#: includes/abstracts/abstract-wc-email.php:706
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Instellingen"
 
-#: includes/abstracts/abstract-wc-email.php:715
+#: includes/abstracts/abstract-wc-email.php:718
 msgid "HTML template"
 msgstr "HTML-template"
 
-#: includes/abstracts/abstract-wc-email.php:716
+#: includes/abstracts/abstract-wc-email.php:719
 msgid "Plain text template"
 msgstr "Platte tekst template"
 
-#: includes/abstracts/abstract-wc-email.php:737
+#: includes/abstracts/abstract-wc-email.php:740
 msgid "Delete template file"
 msgstr "Verwijder template bestand"
 
-#: includes/abstracts/abstract-wc-email.php:740
+#: includes/abstracts/abstract-wc-email.php:743
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "Dit template is overschreven door uw thema en kan gevonden worden in: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:755
+#: includes/abstracts/abstract-wc-email.php:758
 msgid "Copy file to theme"
 msgstr "Kopieer bestand naar thema"
 
-#: includes/abstracts/abstract-wc-email.php:758
+#: includes/abstracts/abstract-wc-email.php:761
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "Om dit template <code>%s</code> te overschrijven en te bewerken kopieert u deze naar uw thema map: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:769
+#: includes/abstracts/abstract-wc-email.php:772
 msgid "File was not found."
 msgstr "Bestand is niet gevonden."
 
-#: includes/abstracts/abstract-wc-email.php:794
+#: includes/abstracts/abstract-wc-email.php:797
 msgid "View template"
 msgstr "Bekijk template"
 
-#: includes/abstracts/abstract-wc-email.php:795
+#: includes/abstracts/abstract-wc-email.php:798
 msgid "Hide template"
 msgstr "Verberg template"
 
-#: includes/abstracts/abstract-wc-email.php:806
+#: includes/abstracts/abstract-wc-email.php:809
 msgid "Are you sure you want to delete this template file?"
 msgstr "Weet u zeker dat u dit template bestand wilt verwijderen?"
 
@@ -3458,7 +4383,7 @@ msgid "You do not have permission to create coupons"
 msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:201
-#: includes/api/class-wc-api-customers.php:332
+#: includes/api/class-wc-api-customers.php:337
 #: includes/api/class-wc-api-server.php:423
 msgid "Missing parameter %s"
 msgstr "Ontbrekende parameter %^s"
@@ -3477,36 +4402,36 @@ msgstr ""
 msgid "Failed to update coupon"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:249
-#: includes/api/class-wc-api-customers.php:252
+#: includes/api/class-wc-api-customers.php:254
+#: includes/api/class-wc-api-customers.php:257
 msgid "Invalid customer Email"
 msgstr "Ongeldig klant email adres"
 
-#: includes/api/class-wc-api-customers.php:270
+#: includes/api/class-wc-api-customers.php:275
 msgid "You do not have permission to read the customers count"
 msgstr "U heeft geen toestemming om het klantenaantal te bekijken"
 
-#: includes/api/class-wc-api-customers.php:327
+#: includes/api/class-wc-api-customers.php:332
 msgid "You do not have permission to create this customer"
 msgstr "U heeft geen toestemming om deze klant aan te maken"
 
-#: includes/api/class-wc-api-customers.php:630
+#: includes/api/class-wc-api-customers.php:665
 msgid "Invalid customer ID"
 msgstr "Ongeldige klant ID"
 
-#: includes/api/class-wc-api-customers.php:637
+#: includes/api/class-wc-api-customers.php:672
 msgid "Invalid customer"
 msgstr "Ongeldige klant"
 
-#: includes/api/class-wc-api-customers.php:645
+#: includes/api/class-wc-api-customers.php:680
 msgid "You do not have permission to read this customer"
 msgstr "U heeft geen toestemming om deze klant te bekijken"
 
-#: includes/api/class-wc-api-customers.php:651
+#: includes/api/class-wc-api-customers.php:686
 msgid "You do not have permission to edit this customer"
 msgstr "U heeft geen toestemming om deze klant te bewerken"
 
-#: includes/api/class-wc-api-customers.php:657
+#: includes/api/class-wc-api-customers.php:692
 msgid "You do not have permission to delete this customer"
 msgstr "U heeft geen toestemming om deze klant te verwijderen"
 
@@ -3555,23 +4480,23 @@ msgstr "U heeft geen toestemming om deze %s te bewerken"
 msgid "You do not have permission to delete this %s"
 msgstr "U heeft geen toestemming om deze %s te verwijderen"
 
-#: includes/api/class-wc-api-resource.php:308
+#: includes/api/class-wc-api-resource.php:314
 msgid "Permanently deleted customer"
 msgstr "Klant permanent verwijderd"
 
-#: includes/api/class-wc-api-resource.php:310
+#: includes/api/class-wc-api-resource.php:316
 msgid "The customer cannot be deleted"
 msgstr "De klant kan niet verwijderd worden"
 
-#: includes/api/class-wc-api-resource.php:319
+#: includes/api/class-wc-api-resource.php:325
 msgid "This %s cannot be deleted"
 msgstr "Deze %s kan niet worden verwijderd"
 
-#: includes/api/class-wc-api-resource.php:322
+#: includes/api/class-wc-api-resource.php:328
 msgid "Permanently deleted %s"
 msgstr "%s permanent verwijderd"
 
-#: includes/api/class-wc-api-resource.php:328
+#: includes/api/class-wc-api-resource.php:334
 msgid "Deleted %s"
 msgstr "Verwijderd %s"
 
@@ -3591,76 +4516,7 @@ msgstr "De handler voor deze route is ongeldig"
 msgid "No route was found matching the URL and request method"
 msgstr "Geen route gevonden die matcht met de URL en aanvraagmethode"
 
-#: includes/class-wc-ajax.php:164
-msgid "Sorry, your session has expired."
-msgstr "Sorry, uw sessie is verlopen."
-
-#: includes/class-wc-ajax.php:164
-msgid "Return to homepage"
-msgstr "Keer terug naar de homepage"
-
-#: includes/class-wc-ajax.php:318 includes/class-wc-ajax.php:351
-#: includes/class-wc-ajax.php:376
-msgid "You do not have sufficient permissions to access this page."
-msgstr "U heeft niet voldoende rechten om deze pagina te bekijken."
-
-#: includes/class-wc-ajax.php:322 includes/class-wc-ajax.php:355
-#: includes/class-wc-ajax.php:380
-msgid "You have taken too long. Please go back and retry."
-msgstr "Sessie is afgebroken. Ga terug en probeer het opnieuw."
-
-#: includes/class-wc-ajax.php:612
-msgid "Same as parent"
-msgstr "Zelfde als bovenliggende"
-
-#: includes/class-wc-ajax.php:613
-msgid "Standard"
-msgstr "Standaard"
-
-#: includes/class-wc-ajax.php:888
-msgid "File %d"
-msgstr "Bestand %d"
-
-#: includes/class-wc-ajax.php:1086 includes/class-wc-ajax.php:1087
-#: includes/class-wc-order.php:1592
-msgid "Item #%s stock reduced from %s to %s."
-msgstr "Item #%s voorraad verlaagd van %s naar %s."
-
-#: includes/class-wc-ajax.php:1095
-msgid ""
-"No products had their stock reduced - they may not have stock management "
-"enabled."
-msgstr "Geen producten in voorraad verlaagd - misschien is voorraadbeheer niet ingeschakeld."
-
-#: includes/class-wc-ajax.php:1136 includes/class-wc-ajax.php:1137
-msgid "Item #%s stock increased from %s to %s."
-msgstr "Item #%s voorraad verhoogd van %s naar %s."
-
-#: includes/class-wc-ajax.php:1144
-msgid ""
-"No products had their stock increased - they may not have stock management "
-"enabled."
-msgstr "Geen producten in voorraad verhoogd - misschien is voorraadbeheer niet ingeschakeld."
-
-#: includes/class-wc-ajax.php:1161
-#: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:62
-msgid "Name"
-msgstr "Naam"
-
-#: includes/class-wc-ajax.php:1161
-msgid "Value"
-msgstr "Waarde"
-
-#: includes/class-wc-ajax.php:1384
-msgid "Delete note"
-msgstr "Verwijder opmerking"
-
-#: includes/class-wc-ajax.php:1532
-msgid "Guest"
-msgstr "Gast"
-
-#: includes/class-wc-cache-helper.php:105
+#: includes/class-wc-cache-helper.php:106
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
@@ -3715,7 +4571,7 @@ msgid ""
 msgstr "U kan dit aantal van &quot;%s&quot; niet toevoegen aan de winkelwagen omdat er niet genoeg in voorraad is (%s resterend)."
 
 #: includes/class-wc-cart.php:835 includes/class-wc-cart.php:854
-#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:188
 #: includes/wc-cart-functions.php:96 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "Bekijk Winkelwagen"
@@ -3784,20 +4640,20 @@ msgid ""
 " to homepage</a>"
 msgstr "Sorry, uw sessie is verlopen. <a href=\"%s\" class=\"wc-backward\">Terug naar de homepage</a>"
 
-#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:84
 msgid "is a required field."
 msgstr "is een verplicht veld."
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:95
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Voer een geldige postcode in."
 
-#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:104
 msgid "is not a valid phone number."
 msgstr "is geen geldig telefoonnummer."
 
-#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:111
 msgid "is not a valid email address."
 msgstr "is een ongeldig e-mailadres."
 
@@ -3823,1112 +4679,45 @@ msgstr "Ongeldige verzendmethode."
 msgid "Invalid payment method."
 msgstr "Ongeldige betaalmethode."
 
-#: includes/class-wc-comments.php:109
+#: includes/class-wc-comments.php:111
 msgid "Please rate the product."
 msgstr "Beoordeel het product."
 
-#: includes/class-wc-countries.php:37
-msgid "Afghanistan"
-msgstr "Afghanistan"
-
-#: includes/class-wc-countries.php:38
-msgid "&#197;land Islands"
-msgstr "&Aring;landseilanden"
-
-#: includes/class-wc-countries.php:39
-msgid "Albania"
-msgstr "Albanië"
-
-#: includes/class-wc-countries.php:40
-msgid "Algeria"
-msgstr "Algerije"
-
-#: includes/class-wc-countries.php:41
-msgid "Andorra"
-msgstr "Andorra"
-
-#: includes/class-wc-countries.php:42
-msgid "Angola"
-msgstr "Angola"
-
-#: includes/class-wc-countries.php:43
-msgid "Anguilla"
-msgstr "Anguilla"
-
-#: includes/class-wc-countries.php:44
-msgid "Antarctica"
-msgstr "Antarctica"
-
-#: includes/class-wc-countries.php:45
-msgid "Antigua and Barbuda"
-msgstr "Antigua en Barbuda"
-
-#: includes/class-wc-countries.php:46
-msgid "Argentina"
-msgstr "Argentinië"
-
-#: includes/class-wc-countries.php:47
-msgid "Armenia"
-msgstr "Armenië"
-
-#: includes/class-wc-countries.php:48
-msgid "Aruba"
-msgstr "Aruba"
-
-#: includes/class-wc-countries.php:49
-msgid "Australia"
-msgstr "Australië"
-
-#: includes/class-wc-countries.php:50
-msgid "Austria"
-msgstr "Oostenrijk"
-
-#: includes/class-wc-countries.php:51
-msgid "Azerbaijan"
-msgstr "Azerbeidzjan"
-
-#: includes/class-wc-countries.php:52
-msgid "Bahamas"
-msgstr "Bahamas"
-
-#: includes/class-wc-countries.php:53
-msgid "Bahrain"
-msgstr "Bahrein"
-
-#: includes/class-wc-countries.php:54
-msgid "Bangladesh"
-msgstr "Bangladesh"
-
-#: includes/class-wc-countries.php:55
-msgid "Barbados"
-msgstr "Barbados"
-
-#: includes/class-wc-countries.php:56
-msgid "Belarus"
-msgstr "Belarus"
-
-#: includes/class-wc-countries.php:57
-msgid "Belgium"
-msgstr "België"
-
-#: includes/class-wc-countries.php:58
-msgid "Belau"
-msgstr "Belau"
-
-#: includes/class-wc-countries.php:59
-msgid "Belize"
-msgstr "Belize"
-
-#: includes/class-wc-countries.php:60
-msgid "Benin"
-msgstr "Benin"
-
-#: includes/class-wc-countries.php:61
-msgid "Bermuda"
-msgstr "Bermuda"
-
-#: includes/class-wc-countries.php:62
-msgid "Bhutan"
-msgstr "Bhutan"
-
-#: includes/class-wc-countries.php:63
-msgid "Bolivia"
-msgstr "Bolivia"
-
-#: includes/class-wc-countries.php:64
-msgid "Bonaire, Saint Eustatius and Saba"
-msgstr "Bonaire, Sint Eustatius en Saba"
-
-#: includes/class-wc-countries.php:65
-msgid "Bosnia and Herzegovina"
-msgstr "Bosnië en Herzegovina"
-
-#: includes/class-wc-countries.php:66
-msgid "Botswana"
-msgstr "Botswana"
-
-#: includes/class-wc-countries.php:67
-msgid "Bouvet Island"
-msgstr "Bouvet"
-
-#: includes/class-wc-countries.php:68
-msgid "Brazil"
-msgstr "Brazilië"
-
-#: includes/class-wc-countries.php:69
-msgid "British Indian Ocean Territory"
-msgstr "Brits Indische Oceaanterritorium"
-
-#: includes/class-wc-countries.php:70
-msgid "British Virgin Islands"
-msgstr "Britse Maagdeneilanden"
-
-#: includes/class-wc-countries.php:71
-msgid "Brunei"
-msgstr "Brunei"
-
-#: includes/class-wc-countries.php:72
-msgid "Bulgaria"
-msgstr "Bulgarije"
-
-#: includes/class-wc-countries.php:73
-msgid "Burkina Faso"
-msgstr "Burkina Faso"
-
-#: includes/class-wc-countries.php:74
-msgid "Burundi"
-msgstr "Boeroendi"
-
-#: includes/class-wc-countries.php:75
-msgid "Cambodia"
-msgstr "Cambodja"
-
-#: includes/class-wc-countries.php:76
-msgid "Cameroon"
-msgstr "Kameroen"
-
-#: includes/class-wc-countries.php:77
-msgid "Canada"
-msgstr "Canada"
-
-#: includes/class-wc-countries.php:78
-msgid "Cape Verde"
-msgstr "Cape Verde"
-
-#: includes/class-wc-countries.php:79
-msgid "Cayman Islands"
-msgstr "Kaaimaneilanden"
-
-#: includes/class-wc-countries.php:80
-msgid "Central African Republic"
-msgstr "Centraal-Afrikaanse Republiek"
-
-#: includes/class-wc-countries.php:81
-msgid "Chad"
-msgstr "Tsjaad"
-
-#: includes/class-wc-countries.php:82
-msgid "Chile"
-msgstr "Chili"
-
-#: includes/class-wc-countries.php:83
-msgid "China"
-msgstr "China"
-
-#: includes/class-wc-countries.php:84
-msgid "Christmas Island"
-msgstr "Christmaseiland"
-
-#: includes/class-wc-countries.php:85
-msgid "Cocos (Keeling) Islands"
-msgstr "Cocoseilanden"
-
-#: includes/class-wc-countries.php:86
-msgid "Colombia"
-msgstr "Colombia"
-
-#: includes/class-wc-countries.php:87
-msgid "Comoros"
-msgstr "Comoren"
-
-#: includes/class-wc-countries.php:88
-msgid "Congo (Brazzaville)"
-msgstr "Congo-Brazzaville"
-
-#: includes/class-wc-countries.php:89
-msgid "Congo (Kinshasa)"
-msgstr "Congo-Kinshasa"
-
-#: includes/class-wc-countries.php:90
-msgid "Cook Islands"
-msgstr "Cookeilanden"
-
-#: includes/class-wc-countries.php:91
-msgid "Costa Rica"
-msgstr "Costa Rica"
-
-#: includes/class-wc-countries.php:92
-msgid "Croatia"
-msgstr "Kroatië"
-
-#: includes/class-wc-countries.php:93
-msgid "Cuba"
-msgstr "Cuba"
-
-#: includes/class-wc-countries.php:94
-msgid "Cura&Ccedil;ao"
-msgstr "Curaçao"
-
-#: includes/class-wc-countries.php:95
-msgid "Cyprus"
-msgstr "Cyprus"
-
-#: includes/class-wc-countries.php:96
-msgid "Czech Republic"
-msgstr "Tsjechië"
-
-#: includes/class-wc-countries.php:97
-msgid "Denmark"
-msgstr "Denemarken"
-
-#: includes/class-wc-countries.php:98
-msgid "Djibouti"
-msgstr "Djibouti"
-
-#: includes/class-wc-countries.php:99
-msgid "Dominica"
-msgstr "Dominica"
-
-#: includes/class-wc-countries.php:100
-msgid "Dominican Republic"
-msgstr "Dominicaanse Republiek"
-
-#: includes/class-wc-countries.php:101
-msgid "Ecuador"
-msgstr "Ecuador"
-
-#: includes/class-wc-countries.php:102
-msgid "Egypt"
-msgstr "Egypte"
-
-#: includes/class-wc-countries.php:103
-msgid "El Salvador"
-msgstr "El Salvador"
-
-#: includes/class-wc-countries.php:104
-msgid "Equatorial Guinea"
-msgstr "Equatoriaal-Guinea"
-
-#: includes/class-wc-countries.php:105
-msgid "Eritrea"
-msgstr "Eritrea"
-
-#: includes/class-wc-countries.php:106
-msgid "Estonia"
-msgstr "Estland"
-
-#: includes/class-wc-countries.php:107
-msgid "Ethiopia"
-msgstr "Ethiopië"
-
-#: includes/class-wc-countries.php:108
-msgid "Falkland Islands"
-msgstr "Falklandeilanden"
-
-#: includes/class-wc-countries.php:109
-msgid "Faroe Islands"
-msgstr "Faeröer"
-
-#: includes/class-wc-countries.php:110
-msgid "Fiji"
-msgstr "Fiji"
-
-#: includes/class-wc-countries.php:111
-msgid "Finland"
-msgstr "Finland"
-
-#: includes/class-wc-countries.php:112
-msgid "France"
-msgstr "Frankrijk"
-
-#: includes/class-wc-countries.php:113
-msgid "French Guiana"
-msgstr "Frans-Guyana"
-
-#: includes/class-wc-countries.php:114
-msgid "French Polynesia"
-msgstr "Frans-Polynesië"
-
-#: includes/class-wc-countries.php:115
-msgid "French Southern Territories"
-msgstr "Franse Zuidelijke Gebieden"
-
-#: includes/class-wc-countries.php:116
-msgid "Gabon"
-msgstr "Gabon"
-
-#: includes/class-wc-countries.php:117
-msgid "Gambia"
-msgstr "Gambia"
-
-#: includes/class-wc-countries.php:119
-msgid "Germany"
-msgstr "Duitsland"
-
-#: includes/class-wc-countries.php:120
-msgid "Ghana"
-msgstr "Ghana"
-
-#: includes/class-wc-countries.php:121
-msgid "Gibraltar"
-msgstr "Gibraltar"
-
-#: includes/class-wc-countries.php:122
-msgid "Greece"
-msgstr "Griekenland"
-
-#: includes/class-wc-countries.php:123
-msgid "Greenland"
-msgstr "Groenland"
-
-#: includes/class-wc-countries.php:124
-msgid "Grenada"
-msgstr "Grenada"
-
-#: includes/class-wc-countries.php:125
-msgid "Guadeloupe"
-msgstr "Guadeloupe"
-
-#: includes/class-wc-countries.php:126
-msgid "Guatemala"
-msgstr "Guatemala"
-
-#: includes/class-wc-countries.php:127
-msgid "Guernsey"
-msgstr "Guernsey"
-
-#: includes/class-wc-countries.php:128
-msgid "Guinea"
-msgstr "Guinea"
-
-#: includes/class-wc-countries.php:129
-msgid "Guinea-Bissau"
-msgstr "Guinee-Bissau"
-
-#: includes/class-wc-countries.php:130
-msgid "Guyana"
-msgstr "Guyana"
-
-#: includes/class-wc-countries.php:131
-msgid "Haiti"
-msgstr "Haïti"
-
-#: includes/class-wc-countries.php:132
-msgid "Heard Island and McDonald Islands"
-msgstr "Heard en MacDonaldeilanden"
-
-#: includes/class-wc-countries.php:133
-msgid "Honduras"
-msgstr "Honduras"
-
-#: includes/class-wc-countries.php:134
-msgid "Hong Kong"
-msgstr "Hongkong"
-
-#: includes/class-wc-countries.php:135
-msgid "Hungary"
-msgstr "Hongarije"
-
-#: includes/class-wc-countries.php:136
-msgid "Iceland"
-msgstr "IJsland"
-
-#: includes/class-wc-countries.php:137
-msgid "India"
-msgstr "Indië"
-
-#: includes/class-wc-countries.php:138
-msgid "Indonesia"
-msgstr "Indonesië"
-
-#: includes/class-wc-countries.php:139
-msgid "Iran"
-msgstr "Iran"
-
-#: includes/class-wc-countries.php:140
-msgid "Iraq"
-msgstr "Irak"
-
-#: includes/class-wc-countries.php:141
-msgid "Republic of Ireland"
-msgstr "Ierland"
-
-#: includes/class-wc-countries.php:142
-msgid "Isle of Man"
-msgstr "Man"
-
-#: includes/class-wc-countries.php:143
-msgid "Israel"
-msgstr "Israël"
-
-#: includes/class-wc-countries.php:144
-msgid "Italy"
-msgstr "Italië"
-
-#: includes/class-wc-countries.php:145
-msgid "Ivory Coast"
-msgstr "Ivoorkust"
-
-#: includes/class-wc-countries.php:146
-msgid "Jamaica"
-msgstr "Jamaica"
-
-#: includes/class-wc-countries.php:147
-msgid "Japan"
-msgstr "Japan"
-
-#: includes/class-wc-countries.php:148
-msgid "Jersey"
-msgstr "Jersey"
-
-#: includes/class-wc-countries.php:149
-msgid "Jordan"
-msgstr "Jordanië"
-
-#: includes/class-wc-countries.php:150
-msgid "Kazakhstan"
-msgstr "Kazachstan"
-
-#: includes/class-wc-countries.php:151
-msgid "Kenya"
-msgstr "Kenia"
-
-#: includes/class-wc-countries.php:152
-msgid "Kiribati"
-msgstr "Kiribati"
-
-#: includes/class-wc-countries.php:153
-msgid "Kuwait"
-msgstr "Koeweit"
-
-#: includes/class-wc-countries.php:154
-msgid "Kyrgyzstan"
-msgstr "Kirgizië"
-
-#: includes/class-wc-countries.php:155
-msgid "Laos"
-msgstr "Laos"
-
-#: includes/class-wc-countries.php:156
-msgid "Latvia"
-msgstr "Letland"
-
-#: includes/class-wc-countries.php:157
-msgid "Lebanon"
-msgstr "Libanon"
-
-#: includes/class-wc-countries.php:158
-msgid "Lesotho"
-msgstr "Lesotho"
-
-#: includes/class-wc-countries.php:159
-msgid "Liberia"
-msgstr "Liberia"
-
-#: includes/class-wc-countries.php:160
-msgid "Libya"
-msgstr "Libië"
-
-#: includes/class-wc-countries.php:161
-msgid "Liechtenstein"
-msgstr "Liechtenstein"
-
-#: includes/class-wc-countries.php:162
-msgid "Lithuania"
-msgstr "Litouwen"
-
-#: includes/class-wc-countries.php:163
-msgid "Luxembourg"
-msgstr "Luxemburg"
-
-#: includes/class-wc-countries.php:164
-msgid "Macao S.A.R., China"
-msgstr "Macao S.A.R., China"
-
-#: includes/class-wc-countries.php:165
-msgid "Macedonia"
-msgstr "Macedonië"
-
-#: includes/class-wc-countries.php:166
-msgid "Madagascar"
-msgstr "Madagascar"
-
-#: includes/class-wc-countries.php:167
-msgid "Malawi"
-msgstr "Malawi"
-
-#: includes/class-wc-countries.php:168
-msgid "Malaysia"
-msgstr "Maleisië"
-
-#: includes/class-wc-countries.php:169
-msgid "Maldives"
-msgstr "Maldiven"
-
-#: includes/class-wc-countries.php:170
-msgid "Mali"
-msgstr "Mali"
-
-#: includes/class-wc-countries.php:171
-msgid "Malta"
-msgstr "Malta"
-
-#: includes/class-wc-countries.php:172
-msgid "Marshall Islands"
-msgstr "Marshalleilanden"
-
-#: includes/class-wc-countries.php:173
-msgid "Martinique"
-msgstr "Martinique"
-
-#: includes/class-wc-countries.php:174
-msgid "Mauritania"
-msgstr "Mauritanië"
-
-#: includes/class-wc-countries.php:175
-msgid "Mauritius"
-msgstr "Mauritius"
-
-#: includes/class-wc-countries.php:176
-msgid "Mayotte"
-msgstr "Mayotte"
-
-#: includes/class-wc-countries.php:177
-msgid "Mexico"
-msgstr "Mexico"
-
-#: includes/class-wc-countries.php:178
-msgid "Micronesia"
-msgstr "Micronesië"
-
-#: includes/class-wc-countries.php:179
-msgid "Moldova"
-msgstr "Moldavië"
-
-#: includes/class-wc-countries.php:180
-msgid "Monaco"
-msgstr "Monaco"
-
-#: includes/class-wc-countries.php:181
-msgid "Mongolia"
-msgstr "Mongolië"
-
-#: includes/class-wc-countries.php:182
-msgid "Montenegro"
-msgstr "Montenegro"
-
-#: includes/class-wc-countries.php:183
-msgid "Montserrat"
-msgstr "Montserrat"
-
-#: includes/class-wc-countries.php:184
-msgid "Morocco"
-msgstr "Marokko"
-
-#: includes/class-wc-countries.php:185
-msgid "Mozambique"
-msgstr "Mozambique"
-
-#: includes/class-wc-countries.php:186
-msgid "Myanmar"
-msgstr "Myanmar"
-
-#: includes/class-wc-countries.php:187
-msgid "Namibia"
-msgstr "Namibië"
-
-#: includes/class-wc-countries.php:188
-msgid "Nauru"
-msgstr "Nauru"
-
-#: includes/class-wc-countries.php:189
-msgid "Nepal"
-msgstr "Nepal"
-
-#: includes/class-wc-countries.php:190
-msgid "Netherlands"
-msgstr "Nederland"
-
-#: includes/class-wc-countries.php:191
-msgid "Netherlands Antilles"
-msgstr "Nederlandse Antillen"
-
-#: includes/class-wc-countries.php:192
-msgid "New Caledonia"
-msgstr "Nieuw-Caledonië"
-
-#: includes/class-wc-countries.php:193
-msgid "New Zealand"
-msgstr "Nieuw-Zeeland"
-
-#: includes/class-wc-countries.php:194
-msgid "Nicaragua"
-msgstr "Nicaragua"
-
-#: includes/class-wc-countries.php:195
-msgid "Niger"
-msgstr "Niger"
-
-#: includes/class-wc-countries.php:196
-msgid "Nigeria"
-msgstr "Nigeria"
-
-#: includes/class-wc-countries.php:197
-msgid "Niue"
-msgstr "Niue"
-
-#: includes/class-wc-countries.php:198
-msgid "Norfolk Island"
-msgstr "Norfolk Island"
-
-#: includes/class-wc-countries.php:199
-msgid "North Korea"
-msgstr "Noord-Korea"
-
-#: includes/class-wc-countries.php:200
-msgid "Norway"
-msgstr "Noorwegen"
-
-#: includes/class-wc-countries.php:201
-msgid "Oman"
-msgstr "Oman"
-
-#: includes/class-wc-countries.php:202
-msgid "Pakistan"
-msgstr "Pakistan"
-
-#: includes/class-wc-countries.php:203
-msgid "Palestinian Territory"
-msgstr "Palestijnse Gebieden"
-
-#: includes/class-wc-countries.php:204
-msgid "Panama"
-msgstr "Panama"
-
-#: includes/class-wc-countries.php:205
-msgid "Papua New Guinea"
-msgstr "Papoea-Nieuw-Guinea"
-
-#: includes/class-wc-countries.php:206
-msgid "Paraguay"
-msgstr "Paraguay"
-
-#: includes/class-wc-countries.php:207
-msgid "Peru"
-msgstr "Peru"
-
-#: includes/class-wc-countries.php:208
-msgid "Philippines"
-msgstr "Filippijnen"
-
-#: includes/class-wc-countries.php:209
-msgid "Pitcairn"
-msgstr "Pitcairn"
-
-#: includes/class-wc-countries.php:210
-msgid "Poland"
-msgstr "Polen"
-
-#: includes/class-wc-countries.php:211
-msgid "Portugal"
-msgstr "Portugal"
-
-#: includes/class-wc-countries.php:212
-msgid "Qatar"
-msgstr "Katar"
-
-#: includes/class-wc-countries.php:213
-msgid "Reunion"
-msgstr "Réunion"
-
-#: includes/class-wc-countries.php:214
-msgid "Romania"
-msgstr "Roemenië"
-
-#: includes/class-wc-countries.php:215
-msgid "Russia"
-msgstr "Rusland"
-
-#: includes/class-wc-countries.php:216
-msgid "Rwanda"
-msgstr "Rwanda"
-
-#: includes/class-wc-countries.php:217
-msgid "Saint Barth&eacute;lemy"
-msgstr "Sint-Bartholomeus"
-
-#: includes/class-wc-countries.php:218
-msgid "Saint Helena"
-msgstr "Sint-Helena"
-
-#: includes/class-wc-countries.php:219
-msgid "Saint Kitts and Nevis"
-msgstr "Saint Kitts en Nevis"
-
-#: includes/class-wc-countries.php:220
-msgid "Saint Lucia"
-msgstr "Saint Lucia"
-
-#: includes/class-wc-countries.php:221
-msgid "Saint Martin (French part)"
-msgstr "Sint-Maarten (Frans deel)"
-
-#: includes/class-wc-countries.php:222
-msgid "Saint Martin (Dutch part)"
-msgstr "Sint Maarten"
-
-#: includes/class-wc-countries.php:223
-msgid "Saint Pierre and Miquelon"
-msgstr "Saint-Pierre en Miquelon"
-
-#: includes/class-wc-countries.php:224
-msgid "Saint Vincent and the Grenadines"
-msgstr "Saint Vincent en de Grenadines"
-
-#: includes/class-wc-countries.php:225
-msgid "San Marino"
-msgstr "San Marino"
-
-#: includes/class-wc-countries.php:226
-msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-msgstr "Sao Tom&eacute; en Principe"
-
-#: includes/class-wc-countries.php:227
-msgid "Saudi Arabia"
-msgstr "Saudi-Arabië"
-
-#: includes/class-wc-countries.php:228
-msgid "Senegal"
-msgstr "Senegal"
-
-#: includes/class-wc-countries.php:229
-msgid "Serbia"
-msgstr "Servië"
-
-#: includes/class-wc-countries.php:230
-msgid "Seychelles"
-msgstr "Seychellen"
-
-#: includes/class-wc-countries.php:231
-msgid "Sierra Leone"
-msgstr "Sierra Leone"
-
-#: includes/class-wc-countries.php:232
-msgid "Singapore"
-msgstr "Singapore"
-
-#: includes/class-wc-countries.php:233
-msgid "Slovakia"
-msgstr "Slowakije"
-
-#: includes/class-wc-countries.php:234
-msgid "Slovenia"
-msgstr "Slovenië"
-
-#: includes/class-wc-countries.php:235
-msgid "Solomon Islands"
-msgstr "Salomonseilanden"
-
-#: includes/class-wc-countries.php:236
-msgid "Somalia"
-msgstr "Somalië"
-
-#: includes/class-wc-countries.php:237
-msgid "South Africa"
-msgstr "Zuid-Afrika"
-
-#: includes/class-wc-countries.php:238
-msgid "South Georgia/Sandwich Islands"
-msgstr "Zuid-Georgia en de Zuidelijke Sandwicheilanden"
-
-#: includes/class-wc-countries.php:239
-msgid "South Korea"
-msgstr "Zuid-Korea"
-
-#: includes/class-wc-countries.php:240
-msgid "South Sudan"
-msgstr "Zuid-Soedan"
-
-#: includes/class-wc-countries.php:241
-msgid "Spain"
-msgstr "Spanje"
-
-#: includes/class-wc-countries.php:242
-msgid "Sri Lanka"
-msgstr "Sri Lanka"
-
-#: includes/class-wc-countries.php:243
-msgid "Sudan"
-msgstr "Soedan"
-
-#: includes/class-wc-countries.php:244
-msgid "Suriname"
-msgstr "Suriname"
-
-#: includes/class-wc-countries.php:245
-msgid "Svalbard and Jan Mayen"
-msgstr "Spitsbergen en Jan Mayen"
-
-#: includes/class-wc-countries.php:246
-msgid "Swaziland"
-msgstr "Swaziland"
-
-#: includes/class-wc-countries.php:247
-msgid "Sweden"
-msgstr "Zweden"
-
-#: includes/class-wc-countries.php:248
-msgid "Switzerland"
-msgstr "Zwitserland"
-
-#: includes/class-wc-countries.php:249
-msgid "Syria"
-msgstr "Syrië"
-
-#: includes/class-wc-countries.php:250
-msgid "Taiwan"
-msgstr "Taiwan"
-
-#: includes/class-wc-countries.php:251
-msgid "Tajikistan"
-msgstr "Tadzjikistan"
-
-#: includes/class-wc-countries.php:252
-msgid "Tanzania"
-msgstr "Tanzania"
-
-#: includes/class-wc-countries.php:253
-msgid "Thailand"
-msgstr "Thailand"
-
-#: includes/class-wc-countries.php:254
-msgid "Timor-Leste"
-msgstr "Oost-Timor"
-
-#: includes/class-wc-countries.php:255
-msgid "Togo"
-msgstr "Togo"
-
-#: includes/class-wc-countries.php:256
-msgid "Tokelau"
-msgstr "Tokelau"
-
-#: includes/class-wc-countries.php:257
-msgid "Tonga"
-msgstr "Tonga"
-
-#: includes/class-wc-countries.php:258
-msgid "Trinidad and Tobago"
-msgstr "Trinidad en Tobago"
-
-#: includes/class-wc-countries.php:259
-msgid "Tunisia"
-msgstr "Tunesië"
-
-#: includes/class-wc-countries.php:260
-msgid "Turkey"
-msgstr "Turkije"
-
-#: includes/class-wc-countries.php:261
-msgid "Turkmenistan"
-msgstr "Turkmenistan"
-
-#: includes/class-wc-countries.php:262
-msgid "Turks and Caicos Islands"
-msgstr "Turks- en Caicoseilanden"
-
-#: includes/class-wc-countries.php:263
-msgid "Tuvalu"
-msgstr "Tuvalu"
-
-#: includes/class-wc-countries.php:264
-msgid "Uganda"
-msgstr "Oeganda"
-
-#: includes/class-wc-countries.php:265
-msgid "Ukraine"
-msgstr "Oekraïne"
-
-#: includes/class-wc-countries.php:266
-msgid "United Arab Emirates"
-msgstr "Verenigde Arabische Emiraten"
-
-#: includes/class-wc-countries.php:267
-msgid "United Kingdom (UK)"
-msgstr "Verenigd Koninkrijk (UK)"
-
-#: includes/class-wc-countries.php:268
-msgid "United States (US)"
-msgstr "Verenigde Staten (US)"
-
 #: includes/class-wc-countries.php:269
-msgid "Uruguay"
-msgstr "Uruguay"
-
-#: includes/class-wc-countries.php:270
-msgid "Uzbekistan"
-msgstr "Oezbekistan"
-
-#: includes/class-wc-countries.php:271
-msgid "Vanuatu"
-msgstr "Vanuatu"
-
-#: includes/class-wc-countries.php:272
-msgid "Vatican"
-msgstr "Vaticaan"
-
-#: includes/class-wc-countries.php:273
-msgid "Venezuela"
-msgstr "Venezuela"
-
-#: includes/class-wc-countries.php:274
-msgid "Vietnam"
-msgstr "Vietnam"
-
-#: includes/class-wc-countries.php:275
-msgid "Wallis and Futuna"
-msgstr "Wallis en Futuna"
-
-#: includes/class-wc-countries.php:276
-msgid "Western Sahara"
-msgstr "Westelijke Sahara"
-
-#: includes/class-wc-countries.php:277
-msgid "Western Samoa"
-msgstr "West-Samoa"
-
-#: includes/class-wc-countries.php:278
-msgid "Yemen"
-msgstr "Jemen"
-
-#: includes/class-wc-countries.php:279
-msgid "Zambia"
-msgstr "Zambia"
-
-#: includes/class-wc-countries.php:280
-msgid "Zimbabwe"
-msgstr "Zimbabwe"
-
-#: includes/class-wc-countries.php:484
 msgid "to the"
 msgstr "naar de"
 
-#: includes/class-wc-countries.php:485
+#: includes/class-wc-countries.php:270
 msgid "to"
 msgstr "naar"
 
-#: includes/class-wc-countries.php:498
+#: includes/class-wc-countries.php:282
 msgid "the"
 msgstr "de"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "VAT"
 msgstr "BTW"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "Tax"
 msgstr "Belasting"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. VAT)"
 msgstr "(incl. BTW)"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. tax)"
 msgstr "(incl. belasting)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. VAT)"
 msgstr "(excl. BTW)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. tax)"
 msgstr "(excl. belasting)"
-
-#: includes/class-wc-countries.php:730
-msgid "Country"
-msgstr "Land"
-
-#: includes/class-wc-countries.php:735
-msgid "First Name"
-msgstr "Voornaam"
-
-#: includes/class-wc-countries.php:740
-msgid "Last Name"
-msgstr "Achternaam"
-
-#: includes/class-wc-countries.php:746
-msgid "Company Name"
-msgstr "Bedrijfsnaam"
-
-#: includes/class-wc-countries.php:750
-msgid "Address"
-msgstr "Adres"
-
-#: includes/class-wc-countries.php:751
-msgctxt "placeholder"
-msgid "Street address"
-msgstr "Straat"
-
-#: includes/class-wc-countries.php:756
-msgctxt "placeholder"
-msgid "Apartment, suite, unit etc. (optional)"
-msgstr "Appartement, bus (indien van toepassing)"
-
-#: includes/class-wc-countries.php:761 includes/class-wc-countries.php:762
-msgid "Town / City"
-msgstr "Plaats"
-
-#: includes/class-wc-countries.php:768 includes/class-wc-countries.php:769
-msgid "State / County"
-msgstr "Provincie"
-
-#: includes/class-wc-countries.php:775 includes/class-wc-countries.php:776
-#: templates/cart/shipping-calculator.php:80
-msgid "Postcode / Zip"
-msgstr "Postcode"
-
-#: includes/class-wc-countries.php:838
-msgid "District"
-msgstr ""
-
-#: includes/class-wc-countries.php:845 includes/class-wc-countries.php:861
-#: includes/class-wc-countries.php:881 includes/class-wc-countries.php:942
-#: includes/class-wc-countries.php:961 includes/class-wc-countries.php:966
-#: includes/class-wc-countries.php:978 includes/class-wc-countries.php:1028
-#: includes/class-wc-countries.php:1052 includes/class-wc-countries.php:1093
-msgid "Province"
-msgstr "Provincie"
-
-#: includes/class-wc-countries.php:867
-msgid "Canton"
-msgstr "Kanton"
-
-#: includes/class-wc-countries.php:876 includes/class-wc-countries.php:1034
-msgid "Municipality"
-msgstr "Gemeente"
-
-#: includes/class-wc-countries.php:929
-msgid "Town / District"
-msgstr "Plaats"
-
-#: includes/class-wc-countries.php:932
-msgid "Region"
-msgstr "Regio"
-
-#: includes/class-wc-countries.php:937 includes/class-wc-countries.php:1068
-msgid "County"
-msgstr "Provincie"
-
-#: includes/class-wc-countries.php:1057
-msgid "Zip"
-msgstr "Postcode"
-
-#: includes/class-wc-countries.php:1060
-msgid "State"
-msgstr "Provincie"
-
-#: includes/class-wc-countries.php:1065
-msgid "Postcode"
-msgstr "Postcode"
-
-#: includes/class-wc-countries.php:1173
-msgid "Email Address"
-msgstr "E-mailadres"
-
-#: includes/class-wc-countries.php:1179
-msgid "Phone"
-msgstr "Telefoon"
 
 #: includes/class-wc-coupon.php:578
 msgid "Coupon code applied successfully."
@@ -4992,67 +4781,67 @@ msgstr "Sorry, deze kortingscode is niet geldig voor de sale items."
 msgid "Please enter a coupon code."
 msgstr "Voer een kortingscode in."
 
-#: includes/class-wc-download-handler.php:37
+#: includes/class-wc-download-handler.php:42
 msgid "Invalid email address."
 msgstr "Ongeldig e-mailadres."
 
-#: includes/class-wc-download-handler.php:37
-#: includes/class-wc-download-handler.php:62
-#: includes/class-wc-download-handler.php:83
-#: includes/class-wc-download-handler.php:90
+#: includes/class-wc-download-handler.php:42
+#: includes/class-wc-download-handler.php:67
+#: includes/class-wc-download-handler.php:88
 #: includes/class-wc-download-handler.php:95
-#: includes/class-wc-download-handler.php:99
-#: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:100
+#: includes/class-wc-download-handler.php:104
+#: includes/class-wc-download-handler.php:148
+#: includes/class-wc-download-handler.php:309
 msgid "Go to homepage"
 msgstr "Ga naar de homepage"
 
-#: includes/class-wc-download-handler.php:62
+#: includes/class-wc-download-handler.php:67
 msgid "Invalid download."
 msgstr "Ongeldige download."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "You must be logged in to download files."
 msgstr "U moet ingelogd zijn om bestanden te downloaden."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:27
 #: templates/myaccount/form-login.php:46
 msgid "Login"
 msgstr "Login"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "Log in to Download Files"
 msgstr "Log in om bestanden te downloaden"
 
-#: includes/class-wc-download-handler.php:77
+#: includes/class-wc-download-handler.php:82
 msgid "This is not your download link."
 msgstr "Dit is niet uw download link."
 
-#: includes/class-wc-download-handler.php:83
+#: includes/class-wc-download-handler.php:88
 msgid "Product no longer exists."
 msgstr "Product bestaat niet langer."
 
-#: includes/class-wc-download-handler.php:90
-#: includes/class-wc-form-handler.php:546
+#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-form-handler.php:541
 #: includes/shortcodes/class-wc-shortcode-checkout.php:172
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
 msgstr "Ongeldige bestelling."
 
-#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-download-handler.php:100
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "Sorry, u heeft het download limiet voor dit bestand bereikt"
 
-#: includes/class-wc-download-handler.php:99
+#: includes/class-wc-download-handler.php:104
 msgid "Sorry, this download has expired"
 msgstr "Sorry, deze download is verlopen"
 
-#: includes/class-wc-download-handler.php:143
+#: includes/class-wc-download-handler.php:148
 msgid "No file defined"
 msgstr "Geen bestand gedefinieerd"
 
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:309
 msgid "File not found"
 msgstr "Bestand niet gevonden"
 
@@ -5094,149 +4883,149 @@ msgstr "Product nabestelling"
 msgid "%s units of %s have been backordered in order %s."
 msgstr "%s stuks van %s zijn als backorder geplaatst in bestelling #%s."
 
-#: includes/class-wc-form-handler.php:129
+#: includes/class-wc-form-handler.php:125
 msgid "Address changed successfully."
 msgstr "Adres succesvol gewijzigd."
 
-#: includes/class-wc-form-handler.php:178
+#: includes/class-wc-form-handler.php:174
 msgid "Please enter your name."
 msgstr "Gelieve een naam in te vullen."
 
-#: includes/class-wc-form-handler.php:182 includes/wc-user-functions.php:48
+#: includes/class-wc-form-handler.php:178 includes/wc-user-functions.php:48
 msgid "Please provide a valid email address."
 msgstr "Gelieve een geldig e-mailadres in te voeren."
 
-#: includes/class-wc-form-handler.php:184
+#: includes/class-wc-form-handler.php:180
 msgid "This email address is already registered."
 msgstr "Dit e-mailadres is al geregistreerd."
 
-#: includes/class-wc-form-handler.php:188
+#: includes/class-wc-form-handler.php:184
 msgid "Your current password is incorrect."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:193
+#: includes/class-wc-form-handler.php:189
 msgid "Please fill out all password fields."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:197
+#: includes/class-wc-form-handler.php:193
 msgid "Please enter your current password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:197
 msgid "Please re-enter your password."
 msgstr "Vul a.u.b. uw wachtwoord in."
 
-#: includes/class-wc-form-handler.php:205
-#: includes/class-wc-form-handler.php:836
+#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:831
 msgid "Passwords do not match."
 msgstr "Wachtwoorden komen niet overeen."
 
-#: includes/class-wc-form-handler.php:227
+#: includes/class-wc-form-handler.php:223
 msgid "Account details changed successfully."
 msgstr "Accountgegevens succesvol aangepast."
 
-#: includes/class-wc-form-handler.php:355
+#: includes/class-wc-form-handler.php:350
 msgid "Payment method added."
 msgstr "Betalingsmethode toegevoegd."
 
-#: includes/class-wc-form-handler.php:388
-#: includes/class-wc-form-handler.php:447
+#: includes/class-wc-form-handler.php:383
+#: includes/class-wc-form-handler.php:442
 msgid "Cart updated."
 msgstr "Winkelwagen bijgewerkt."
 
-#: includes/class-wc-form-handler.php:423
+#: includes/class-wc-form-handler.php:418
 msgid "You can only have 1 %s in your cart."
 msgstr "U kunt slechts 1 %s in uw winkelwagen hebben."
 
-#: includes/class-wc-form-handler.php:513
+#: includes/class-wc-form-handler.php:508
 msgid "The cart has been filled with the items from your previous order."
 msgstr "De winkelwagen is gevuld met de items van uw vorige bestelling."
 
-#: includes/class-wc-form-handler.php:536
+#: includes/class-wc-form-handler.php:531
 msgid "Order cancelled by customer."
 msgstr "Bestelling geannuleerd door de klant."
 
-#: includes/class-wc-form-handler.php:539
+#: includes/class-wc-form-handler.php:534
 msgid "Your order was cancelled."
 msgstr "Uw bestelling is geannuleerd."
 
-#: includes/class-wc-form-handler.php:544
+#: includes/class-wc-form-handler.php:539
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr "Uw bestelling kan niet meer geannuleerd worden. Contacteer ons als u verdere assistentie nodig heeft."
 
-#: includes/class-wc-form-handler.php:584
-#: includes/class-wc-form-handler.php:644
+#: includes/class-wc-form-handler.php:579
+#: includes/class-wc-form-handler.php:639
 msgid "Please choose product options&hellip;"
 msgstr "Kies product opties&hellip;"
 
-#: includes/class-wc-form-handler.php:678
+#: includes/class-wc-form-handler.php:673
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "Kies het aantal items die u wenst toe te voegen aan uw winkelwagen&hellip;"
 
-#: includes/class-wc-form-handler.php:685
+#: includes/class-wc-form-handler.php:680
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "Kies een product om aan uw winkelwagen toe te voegen&hellip;"
 
-#: includes/class-wc-form-handler.php:745
-#: includes/class-wc-form-handler.php:749
-#: includes/class-wc-form-handler.php:753
-#: includes/class-wc-form-handler.php:762
-#: includes/class-wc-form-handler.php:888
+#: includes/class-wc-form-handler.php:740
+#: includes/class-wc-form-handler.php:744
+#: includes/class-wc-form-handler.php:748
+#: includes/class-wc-form-handler.php:757
+#: includes/class-wc-form-handler.php:883
 msgid "Error"
 msgstr "Fout"
 
-#: includes/class-wc-form-handler.php:749
+#: includes/class-wc-form-handler.php:744
 msgid "Username is required."
 msgstr "Gebruikersnaam is verplicht."
 
-#: includes/class-wc-form-handler.php:753
+#: includes/class-wc-form-handler.php:748
 msgid "Password is required."
 msgstr "Wachtwoord is verplicht."
 
-#: includes/class-wc-form-handler.php:762
+#: includes/class-wc-form-handler.php:757
 msgid "A user could not be found with this email address."
 msgstr "Kon geen gebruiker vinden met dit e-mailadres."
 
-#: includes/class-wc-form-handler.php:787
+#: includes/class-wc-form-handler.php:782
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "U bent nu ingelogd als <strong>%s</strong>"
 
-#: includes/class-wc-form-handler.php:831
+#: includes/class-wc-form-handler.php:826
 msgid "Please enter your password."
 msgstr "Voer uw wachtwoord in."
 
-#: includes/class-wc-form-handler.php:904 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:899 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr "FOUT"
 
-#: includes/class-wc-form-handler.php:904
+#: includes/class-wc-form-handler.php:899
 msgid "Anti-spam field was filled in."
 msgstr "Anti-span veld was ingevuld."
 
-#: includes/class-wc-frontend-scripts.php:123
+#: includes/class-wc-frontend-scripts.php:149
 msgid "Please select a rating"
 msgstr "Selecteer een beoordeling"
 
-#: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1603
+#: includes/class-wc-frontend-scripts.php:168
+#: includes/wc-template-functions.php:1594
 msgid "required"
 msgstr "verplicht"
 
-#: includes/class-wc-frontend-scripts.php:164
+#: includes/class-wc-frontend-scripts.php:196
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "Sorry, geen producten kwamen overeen met je selectie. Kies een andere combinatie."
 
-#: includes/class-wc-frontend-scripts.php:165
+#: includes/class-wc-frontend-scripts.php:197
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "Sorry, dit product is niet beschikbaar. Kies een andere combinatie a.u.b."
 
-#: includes/class-wc-frontend-scripts.php:170
+#: includes/class-wc-frontend-scripts.php:204
 msgid "Select an option&hellip;"
 msgstr "Selecteer een optie&hellip;"
 
@@ -5261,7 +5050,7 @@ msgid "Cart"
 msgstr "Winkelwagen"
 
 #: includes/class-wc-install.php:227
-msgctxt "Paeg slug"
+msgctxt "Page slug"
 msgid "checkout"
 msgstr "afrekenen"
 
@@ -5333,204 +5122,208 @@ msgstr "WooCommerce"
 msgid "Order status changed from %s to %s."
 msgstr "Bestelling status gewijzigd van %s naar %s."
 
+#: includes/class-wc-order.php:1592
+msgid "Item #%s stock reduced from %s to %s."
+msgstr "Item #%s voorraad verlaagd van %s naar %s."
+
 #: includes/class-wc-order.php:1602
 msgid "Order item stock reduced successfully."
 msgstr "Bestelling item voorraad succesvol verminderd."
 
-#: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
+#: includes/class-wc-post-types.php:56 includes/class-wc-post-types.php:58
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
 msgstr "Product categorieën"
 
-#: includes/class-wc-post-types.php:58
+#: includes/class-wc-post-types.php:59
 msgid "Product Category"
 msgstr "Product categorie"
 
-#: includes/class-wc-post-types.php:59
+#: includes/class-wc-post-types.php:60
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr "Categorieën"
 
-#: includes/class-wc-post-types.php:60
+#: includes/class-wc-post-types.php:61
 msgid "Search Product Categories"
 msgstr "Product categorieën zoeken"
 
-#: includes/class-wc-post-types.php:61
+#: includes/class-wc-post-types.php:62
 msgid "All Product Categories"
 msgstr "Alle product categorieën"
 
-#: includes/class-wc-post-types.php:62
+#: includes/class-wc-post-types.php:63
 msgid "Parent Product Category"
 msgstr "Bovenliggende product categorie"
 
-#: includes/class-wc-post-types.php:63
+#: includes/class-wc-post-types.php:64
 msgid "Parent Product Category:"
 msgstr "Bovenliggende product categorie:"
 
-#: includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:65
 msgid "Edit Product Category"
 msgstr "Product categorie bewerken"
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:66
 msgid "Update Product Category"
 msgstr "Product categorie bijwerken"
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:67
 msgid "Add New Product Category"
 msgstr "Nieuwe product categorie toevoegen"
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:68
 msgid "New Product Category Name"
 msgstr "Nieuwe naam Product Categorie"
 
-#: includes/class-wc-post-types.php:78
+#: includes/class-wc-post-types.php:79
 #: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "product-categorie"
 
-#: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
+#: includes/class-wc-post-types.php:91 includes/class-wc-post-types.php:93
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
 msgstr "Product tags"
 
-#: includes/class-wc-post-types.php:93
+#: includes/class-wc-post-types.php:94
 msgid "Product Tag"
 msgstr "Product tag"
 
-#: includes/class-wc-post-types.php:94
+#: includes/class-wc-post-types.php:95
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "Tags"
 
-#: includes/class-wc-post-types.php:95
+#: includes/class-wc-post-types.php:96
 msgid "Search Product Tags"
 msgstr "Product tags zoeken"
 
-#: includes/class-wc-post-types.php:96
+#: includes/class-wc-post-types.php:97
 msgid "All Product Tags"
 msgstr "Alle product tags"
 
-#: includes/class-wc-post-types.php:97
+#: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag"
 msgstr "Bovenliggende product tag"
 
-#: includes/class-wc-post-types.php:98
+#: includes/class-wc-post-types.php:99
 msgid "Parent Product Tag:"
 msgstr "Bovenliggende product tag:"
 
-#: includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:100
 msgid "Edit Product Tag"
 msgstr "Product tag bewerken"
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:101
 msgid "Update Product Tag"
 msgstr "Product tag bijwerken"
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:102
 msgid "Add New Product Tag"
 msgstr "Nieuwe product tag toevoegen"
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:103
 msgid "New Product Tag Name"
 msgstr "Nieuwe product tag naam"
 
-#: includes/class-wc-post-types.php:113
+#: includes/class-wc-post-types.php:114
 #: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "product-tag"
 
-#: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
+#: includes/class-wc-post-types.php:125 includes/class-wc-post-types.php:127
 msgid "Shipping Classes"
 msgstr "Verzendingklassen"
 
-#: includes/class-wc-post-types.php:127
+#: includes/class-wc-post-types.php:128
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 msgid "Shipping Class"
 msgstr "Verzendingklasse"
 
-#: includes/class-wc-post-types.php:128
+#: includes/class-wc-post-types.php:129
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "Verzendingklassen"
 
-#: includes/class-wc-post-types.php:129
+#: includes/class-wc-post-types.php:130
 msgid "Search Shipping Classes"
 msgstr "Verzendingklassen zoeken"
 
-#: includes/class-wc-post-types.php:130
+#: includes/class-wc-post-types.php:131
 msgid "All Shipping Classes"
 msgstr "Alle verzendingklassen"
 
-#: includes/class-wc-post-types.php:131
+#: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class"
 msgstr "Bovenliggende verzendingklasse"
 
-#: includes/class-wc-post-types.php:132
+#: includes/class-wc-post-types.php:133
 msgid "Parent Shipping Class:"
 msgstr "Bovenliggende verzendingklasse:"
 
-#: includes/class-wc-post-types.php:133
+#: includes/class-wc-post-types.php:134
 msgid "Edit Shipping Class"
 msgstr "Verzendingklasse bewerken"
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:135
 msgid "Update Shipping Class"
 msgstr "Verzendingklasse bijwerken"
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:136
 msgid "Add New Shipping Class"
 msgstr "Nieuwe verzendingklasse toevoegen"
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:137
 msgid "New Shipping Class Name"
 msgstr "Nieuwe verzendingklassenaam"
 
-#: includes/class-wc-post-types.php:184
+#: includes/class-wc-post-types.php:185
 msgid "Search %s"
 msgstr "Zoeken %s"
 
-#: includes/class-wc-post-types.php:185
+#: includes/class-wc-post-types.php:186
 msgid "All %s"
 msgstr "Alle %s"
 
-#: includes/class-wc-post-types.php:186
+#: includes/class-wc-post-types.php:187
 msgid "Parent %s"
 msgstr "Hoofd %s"
 
-#: includes/class-wc-post-types.php:187
+#: includes/class-wc-post-types.php:188
 msgid "Parent %s:"
 msgstr "Hoofd %s:"
 
-#: includes/class-wc-post-types.php:188
+#: includes/class-wc-post-types.php:189
 msgid "Edit %s"
 msgstr "Bewerken %s"
 
-#: includes/class-wc-post-types.php:189
+#: includes/class-wc-post-types.php:190
 msgid "Update %s"
 msgstr "Bijwerken %s"
 
-#: includes/class-wc-post-types.php:190
+#: includes/class-wc-post-types.php:191
 msgid "Add New %s"
 msgstr "Toevoegen nieuwe %s"
 
-#: includes/class-wc-post-types.php:191
+#: includes/class-wc-post-types.php:192
 msgid "New %s"
 msgstr "Nieuwe %s"
 
-#: includes/class-wc-post-types.php:226
+#: includes/class-wc-post-types.php:227
 #: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "product"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:233
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Producten"
 
-#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:234 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5541,168 +5334,168 @@ msgstr "Producten"
 msgid "Product"
 msgstr "Product"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:235
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Producten"
 
-#: includes/class-wc-post-types.php:235
+#: includes/class-wc-post-types.php:236
 msgid "Add Product"
 msgstr "Product toevoegen"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:237
 msgid "Add New Product"
 msgstr "Nieuw product toevoegen"
 
-#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
-#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:329 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Bewerken"
 
-#: includes/class-wc-post-types.php:238
+#: includes/class-wc-post-types.php:239
 msgid "Edit Product"
 msgstr "Product bewerken"
 
-#: includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240
 msgid "New Product"
 msgstr "Nieuw product"
 
-#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:241 includes/class-wc-post-types.php:242
 msgid "View Product"
 msgstr "Bekijk product"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:243
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Zoek producten"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:244
 msgid "No Products found"
 msgstr "Geen producten gevonden"
 
-#: includes/class-wc-post-types.php:244
+#: includes/class-wc-post-types.php:245
 msgid "No Products found in trash"
 msgstr "Geen producten gevonden in de prullenbak"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:246
 msgid "Parent Product"
 msgstr "Bovenliggend product"
 
-#: includes/class-wc-post-types.php:247
+#: includes/class-wc-post-types.php:248
 msgid "This is where you can add new products to your store."
 msgstr "Hier kunt u nieuwe producten toevoegen aan uw winkel."
 
-#: includes/class-wc-post-types.php:267
+#: includes/class-wc-post-types.php:268
 msgid "Variations"
 msgstr "Variaties"
 
-#: includes/class-wc-post-types.php:275
+#: includes/class-wc-post-types.php:276
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Bestellingen"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:286
 msgid "Orders"
 msgstr "Bestellingen"
 
-#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:287 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Bestelling"
 
-#: includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:288
 msgid "Add Order"
 msgstr "Bestelling toevoegen"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:289
 msgid "Add New Order"
 msgstr "Nieuwe bestelling toevoegen"
 
-#: includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:291
 msgid "Edit Order"
 msgstr "Bestelling bewerken"
 
-#: includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292
 msgid "New Order"
 msgstr "Nieuwe bestelling"
 
-#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:293 includes/class-wc-post-types.php:294
 msgid "View Order"
 msgstr "Bekijk bestelling"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:295
 msgid "Search Orders"
 msgstr "Zoek bestellingen"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found"
 msgstr "Geen bestellingen gevonden"
 
-#: includes/class-wc-post-types.php:296
+#: includes/class-wc-post-types.php:297
 msgid "No Orders found in trash"
 msgstr "Geen bestellingen gevonden in de prullenbak"
 
-#: includes/class-wc-post-types.php:297
+#: includes/class-wc-post-types.php:298
 msgid "Parent Orders"
 msgstr "Bovenliggende bestellingen"
 
-#: includes/class-wc-post-types.php:300
+#: includes/class-wc-post-types.php:301
 msgid "This is where store orders are stored."
 msgstr "Hier worden de winkel bestellingen opgeslagen."
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:324
 msgid "Coupons"
 msgstr "Coupons"
 
-#: includes/class-wc-post-types.php:324 templates/cart/cart.php:119
+#: includes/class-wc-post-types.php:325 templates/cart/cart.php:119
 msgid "Coupon"
 msgstr "Kortingscode"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:326
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Coupons"
 
-#: includes/class-wc-post-types.php:326
+#: includes/class-wc-post-types.php:327
 msgid "Add Coupon"
 msgstr "Coupon toevoegen"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:328
 msgid "Add New Coupon"
 msgstr "Nieuwe coupon toevoegen"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:330
 msgid "Edit Coupon"
 msgstr "Coupon bewerken"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:331
 msgid "New Coupon"
 msgstr "Nieuwe coupon"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:332
 msgid "View Coupons"
 msgstr "Bekijk coupons"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:333
 msgid "View Coupon"
 msgstr "Bekijk coupon"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:334
 msgid "Search Coupons"
 msgstr "Coupons zoeken"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found"
 msgstr "Geen coupons gevonden"
 
-#: includes/class-wc-post-types.php:335
+#: includes/class-wc-post-types.php:336
 msgid "No Coupons found in trash"
 msgstr "Geen coupons gevonden in prullenbak"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:337
 msgid "Parent Coupon"
 msgstr "Bovenliggende coupon"
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:339
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Hier kunt u nieuwe coupons toevoegen waar klanten gebruik van kunnen maken in uw winkel."
@@ -5774,21 +5567,21 @@ msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
 msgstr "Uw bestelling bij {site_title} van {order_date} is afgerond – download uw bestanden"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:146
-#: includes/emails/class-wc-email-new-order.php:133
+#: includes/emails/class-wc-email-customer-completed-order.php:147
+#: includes/emails/class-wc-email-new-order.php:134
 msgid "Subject"
 msgstr "Onderwerp"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:153
-#: includes/emails/class-wc-email-new-order.php:140
+#: includes/emails/class-wc-email-customer-completed-order.php:154
+#: includes/emails/class-wc-email-new-order.php:141
 msgid "Email Heading"
 msgstr "E-mail kop"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:160
+#: includes/emails/class-wc-email-customer-completed-order.php:161
 msgid "Subject (downloadable)"
 msgstr "Onderwerp (downloadbaar)"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:167
+#: includes/emails/class-wc-email-customer-completed-order.php:168
 msgid "Email Heading (downloadable)"
 msgstr "E-mail kop (downloadbaar)"
 
@@ -5818,11 +5611,11 @@ msgstr "Uw bestelling bij {site_title} van {order_date}"
 msgid "Order {order_number} details"
 msgstr "Bestelling {order_number} details"
 
-#: includes/emails/class-wc-email-customer-invoice.php:160
+#: includes/emails/class-wc-email-customer-invoice.php:161
 msgid "Email subject (paid)"
 msgstr "E-mail onderwerp (betaald)"
 
-#: includes/emails/class-wc-email-customer-invoice.php:167
+#: includes/emails/class-wc-email-customer-invoice.php:168
 msgid "Email heading (paid)"
 msgstr "E-mail kop (betaald)"
 
@@ -5912,23 +5705,23 @@ msgstr "Nieuwe klant bestelling"
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
 msgstr "[{site_title}] Nieuwe bestelling ({order_number}) – {order_date}"
 
-#: includes/emails/class-wc-email-new-order.php:126
+#: includes/emails/class-wc-email-new-order.php:127
 msgid "Recipient(s)"
 msgstr "Ontvanger(s)"
 
-#: includes/emails/class-wc-email-new-order.php:128
+#: includes/emails/class-wc-email-new-order.php:129
 msgid ""
 "Enter recipients (comma separated) for this email. Defaults to "
 "<code>%s</code>."
 msgstr "Voer ontvanger in (komma gescheiden) voor deze e-mail. Standaard <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:135
+#: includes/emails/class-wc-email-new-order.php:136
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr "Dit bepaalt het e-mail onderwerp. Laat leeg om het standaard onderwerp te gebruiken: <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:142
+#: includes/emails/class-wc-email-new-order.php:143
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
@@ -6408,10 +6201,8 @@ msgid "Enable logging"
 msgstr "Logboek inschakelen"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:237
-msgid ""
-"Log PayPal events, such as IPN requests, inside "
-"<code>woocommerce/logs/paypal-%s.txt</code>"
-msgstr "Log PayPal evenementen, zoals IPN requests, binnen <code>woocommerce/logs/paypal-%s.txt</code>"
+msgid "Log PayPal events, such as IPN requests, inside <code>%s</code>"
+msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:370
 msgid "Shipping via"
@@ -6860,6 +6651,12 @@ msgstr "Verzendkosten bijgewerkt."
 msgid "Invalid order. If you have an account please log in and try again."
 msgstr "Ongeldige bestelling. Als u een account heeft, log dan in en probeer het opnieuw."
 
+#: includes/shortcodes/class-wc-shortcode-checkout.php:91
+#: includes/shortcodes/class-wc-shortcode-my-account.php:111
+#: templates/checkout/thankyou.php:30
+msgid "My Account"
+msgstr "Mijn account"
+
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
@@ -7093,62 +6890,66 @@ msgid "New Zealand Dollar"
 msgstr "Nieuw-Zeelandse dollar"
 
 #: includes/wc-core-functions.php:193
+msgid "Paraguayan Guaraní"
+msgstr ""
+
+#: includes/wc-core-functions.php:194
 msgid "Philippine Pesos"
 msgstr "Filipijnse peso"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Polish Zloty"
 msgstr "Poolse zloty"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Pounds Sterling"
 msgstr "Pond sterling"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Romanian Leu"
 msgstr "Roemeense leu"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Russian Ruble"
 msgstr "Russische roebel"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "Singapore Dollar"
 msgstr "Singaporese dollar"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "South African rand"
 msgstr "Zuid-Afrikaanse rand"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swedish Krona"
 msgstr "Zweedse kroon"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Swiss Franc"
 msgstr "Zwitserse frank"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Taiwan New Dollars"
 msgstr "Taiwanese dollar"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Thai Baht"
 msgstr "Thaise baht"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "Turkish Lira"
 msgstr "Turkse lira"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "US Dollars"
 msgstr "Amerikaanse dollar"
 
-#: includes/wc-core-functions.php:206
+#: includes/wc-core-functions.php:207
 msgid "Vietnamese Dong"
 msgstr "Vietnamese Dong"
 
-#: includes/wc-core-functions.php:207
+#: includes/wc-core-functions.php:208
 msgid "Egyptian Pound"
 msgstr ""
 
@@ -7182,7 +6983,7 @@ msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr ""
 
-#: includes/wc-product-functions.php:234
+#: includes/wc-product-functions.php:235
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "geen-categorie"
@@ -7234,41 +7035,41 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Home"
 
-#: includes/wc-template-functions.php:1558
+#: includes/wc-template-functions.php:1549
 msgid "Order Again"
 msgstr "Bestel opnieuw"
 
-#: includes/wc-template-functions.php:1653
+#: includes/wc-template-functions.php:1644
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Selecteer een land&hellip;"
 
-#: includes/wc-template-functions.php:1660
+#: includes/wc-template-functions.php:1651
 msgid "Update country"
 msgstr "Update land"
 
-#: includes/wc-template-functions.php:1710
+#: includes/wc-template-functions.php:1701
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Selecteer een provincie&hellip;"
 
-#: includes/wc-template-functions.php:1851
+#: includes/wc-template-functions.php:1842
 msgid "Search for:"
 msgstr "Zoeken voor:"
 
-#: includes/wc-template-functions.php:1852
+#: includes/wc-template-functions.php:1843
 msgid "Search for products"
 msgstr "Zoek naar producten"
 
-#: includes/wc-template-functions.php:1853
+#: includes/wc-template-functions.php:1844
 msgid "Search"
 msgstr "Zoeken"
 
-#: includes/wc-term-functions.php:135
+#: includes/wc-term-functions.php:146
 msgid "Select a category"
 msgstr "Selecteer een categorie"
 
-#: includes/wc-term-functions.php:139
+#: includes/wc-term-functions.php:149
 msgid "Uncategorized"
 msgstr "Geen categorie"
 
@@ -7431,6 +7232,11 @@ msgstr "Sorteer op"
 #: includes/widgets/class-wc-widget-product-categories.php:38
 msgid "Category Order"
 msgstr "Categorie volgorde"
+
+#: includes/widgets/class-wc-widget-product-categories.php:39
+#: templates/single-product-reviews.php:62
+msgid "Name"
+msgstr "Naam"
 
 #: includes/widgets/class-wc-widget-product-categories.php:45
 msgid "Show as dropdown"
@@ -7711,6 +7517,10 @@ msgstr "Staat/provincie"
 msgid "City"
 msgstr "Plaats"
 
+#: templates/cart/shipping-calculator.php:80
+msgid "Postcode / Zip"
+msgstr "Postcode"
+
 #: templates/cart/shipping-calculator.php:85
 msgid "Update Totals"
 msgstr "Totalen bijwerken"
@@ -7974,13 +7784,13 @@ msgstr "Om uw wachtwoord opnieuw in te stellen, bezoek het volgende adres:"
 msgid "Click here to reset your password"
 msgstr "Klik hier om uw wachtwoord opnieuw in te stellen"
 
-#: templates/emails/email-addresses.php:18
-#: templates/emails/plain/email-addresses.php:12
+#: templates/emails/email-addresses.php:20
+#: templates/emails/plain/email-addresses.php:14
 msgid "Billing address"
 msgstr "Factuuradres"
 
-#: templates/emails/email-addresses.php:28
-#: templates/emails/plain/email-addresses.php:17
+#: templates/emails/email-addresses.php:30
+#: templates/emails/plain/email-addresses.php:19
 msgid "Shipping address"
 msgstr "Verzendadres"
 
@@ -8156,23 +7966,31 @@ msgstr "Achternaam"
 msgid "Email address"
 msgstr "E-mailadres"
 
-#: templates/myaccount/form-edit-account.php:33
+#: templates/myaccount/form-edit-account.php:34
+msgid "Password (leave blank to leave unchanged)"
+msgstr "Wachtwoord (laat leeg om niet te veranderen)"
+
+#: templates/myaccount/form-edit-account.php:38
+msgid "Confirm new password"
+msgstr "Bevestig nieuw wachtwoord"
+
+#: templates/myaccount/form-edit-account.php:44
 msgid "Password Change"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:36
+#: templates/myaccount/form-edit-account.php:47
 msgid "Current Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:40
+#: templates/myaccount/form-edit-account.php:51
 msgid "New Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:44
+#: templates/myaccount/form-edit-account.php:55
 msgid "Confirm New Password"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:50
+#: templates/myaccount/form-edit-account.php:61
 msgid "Save changes"
 msgstr "Wijzigingen opslaan"
 

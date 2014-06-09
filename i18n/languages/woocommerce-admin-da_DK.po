@@ -1,19 +1,19 @@
 # 
 # Translators:
 # blaagnu <den@blaagnu.dk>, 2014
-# mikejolley <mike.jolley@me.com>, 2014
-# Morten Andersen <morten@w-academy.dk>, 2014
+# Mike Jolley <mike.jolley@me.com>, 2014
+# Morten <morten@w-academy.dk>, 2014
 # Rudimidtgaard <rudimidtgaard@gmail.com>, 2014
 # teddyostergaard <teddyostergaard@gmail.com>, 2014
-# Thomas Clausen <tntc1978@gmail.com>, 2014
-# tue.holm <tuh@liederbrau.de>, 2013
+# tntc1978 <tntc1978@gmail.com>, 2014
+# Tue Travel <tuh@liederbrau.de>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-05-22 10:45:21+00:00\n"
-"PO-Revision-Date: 2014-05-23 08:29+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-06-03 15:13:59+00:00\n"
+"PO-Revision-Date: 2014-06-04 08:29+0000\n"
+"Last-Translator: Mike Jolley <mike.jolley@me.com>\n"
 "Language-Team: Danish (Denmark) (http://www.transifex.com/projects/p/woocommerce/language/da_DK/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -38,26 +38,30 @@ msgid ""
 " currency symbols."
 msgstr "Indtast i monetære decimal (%s) format uden tusind separatorer og valutasymboler."
 
-#: includes/admin/class-wc-admin-assets.php:136
+#: includes/admin/class-wc-admin-assets.php:110
+msgid "Please enter in country code with two capital letters."
+msgstr ""
+
+#: includes/admin/class-wc-admin-assets.php:137
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
 msgstr "Er du sikker på at du vil fjerne de udvalgte produkter? Hvis du tidligere har reduceret dette produkt lager, eller denne ordre blev bestilt af en kunde, er du nødt til til manuelt at genskabe produktes lager."
 
-#: includes/admin/class-wc-admin-assets.php:137
+#: includes/admin/class-wc-admin-assets.php:138
 msgid "Please select some items."
 msgstr "Vælg venligst nogle produkter"
 
-#: includes/admin/class-wc-admin-assets.php:138
+#: includes/admin/class-wc-admin-assets.php:139
 msgid "Remove this item meta?"
 msgstr "Fjern dette produkt meta?"
 
-#: includes/admin/class-wc-admin-assets.php:139
+#: includes/admin/class-wc-admin-assets.php:140
 msgid "Remove this attribute?"
 msgstr "Fjern dette attribut?"
 
-#: includes/admin/class-wc-admin-assets.php:140
+#: includes/admin/class-wc-admin-assets.php:141
 #: includes/admin/class-wc-admin-attributes.php:239
 #: includes/admin/class-wc-admin-attributes.php:275
 #: includes/admin/class-wc-admin-attributes.php:307
@@ -73,14 +77,14 @@ msgstr "Fjern dette attribut?"
 msgid "Name"
 msgstr "Navn"
 
-#: includes/admin/class-wc-admin-assets.php:141
+#: includes/admin/class-wc-admin-assets.php:142
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:434
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:528
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
 msgid "Remove"
 msgstr "Fjern"
 
-#: includes/admin/class-wc-admin-assets.php:142
+#: includes/admin/class-wc-admin-assets.php:143
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:435
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:529
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
@@ -88,62 +92,62 @@ msgstr "Fjern"
 msgid "Click to toggle"
 msgstr "Klik for at (slå) til/fra"
 
-#: includes/admin/class-wc-admin-assets.php:143
+#: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:450
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:542
 msgid "Value(s)"
 msgstr "Værdi(er)"
 
-#: includes/admin/class-wc-admin-assets.php:144
+#: includes/admin/class-wc-admin-assets.php:145
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:543
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr "Angiv noget tekst eller nogle egenskaber separeret med det man kalder en kanal (|)."
 
-#: includes/admin/class-wc-admin-assets.php:145
+#: includes/admin/class-wc-admin-assets.php:146
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:493
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:548
 msgid "Visible on the product page"
 msgstr "Synlig på produktsiden"
 
-#: includes/admin/class-wc-admin-assets.php:146
+#: includes/admin/class-wc-admin-assets.php:147
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:506
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:554
 msgid "Used for variations"
 msgstr "Brugt til varianter"
 
-#: includes/admin/class-wc-admin-assets.php:147
+#: includes/admin/class-wc-admin-assets.php:148
 msgid "Enter a name for the new attribute term:"
 msgstr "Indtast et navn for det nye attribut term:"
 
-#: includes/admin/class-wc-admin-assets.php:148
+#: includes/admin/class-wc-admin-assets.php:149
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr "Kalkuler total baseret på ordre produkter, rabatter, og forsendelse?"
 
-#: includes/admin/class-wc-admin-assets.php:149
+#: includes/admin/class-wc-admin-assets.php:150
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
 msgstr "Beregn linie-moms? Dette vil beregne moms baseret på kundelandet. Hvis ingen fakturering/forsendelse er sat vil den bruge butiksgrundlandet."
 
-#: includes/admin/class-wc-admin-assets.php:150
+#: includes/admin/class-wc-admin-assets.php:151
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
 msgstr "Kopier faktureringsoplysninger til forsendelsesoplysninger? Dette vil fjerne enhver allerede indtastet forsendelsesoplysning."
 
-#: includes/admin/class-wc-admin-assets.php:151
+#: includes/admin/class-wc-admin-assets.php:152
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
 msgstr "Indlæs kundens faktureringsoplysninger? Dette vil fjerne enhver allerede indtastet faktureringsoplysning."
 
-#: includes/admin/class-wc-admin-assets.php:152
+#: includes/admin/class-wc-admin-assets.php:153
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
 msgstr "Indlæs kundens forsendelsesoplysninger? Dette vil fjerne enhver allerede indtastet forsendelsesoplysning."
 
-#: includes/admin/class-wc-admin-assets.php:153
+#: includes/admin/class-wc-admin-assets.php:154
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:173
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:273
 #: includes/admin/views/html-bulk-edit-product.php:170
@@ -151,67 +155,67 @@ msgstr "Indlæs kundens forsendelsesoplysninger? Dette vil fjerne enhver allered
 msgid "Featured"
 msgstr "Udvalgte"
 
-#: includes/admin/class-wc-admin-assets.php:156
+#: includes/admin/class-wc-admin-assets.php:157
 msgid "No customer selected"
 msgstr "Ingen kunde valgt"
 
-#: includes/admin/class-wc-admin-assets.php:182
+#: includes/admin/class-wc-admin-assets.php:183
 msgid ""
 "Could not grant access - the user may already have permission for this file "
 "or billing email is not set. Ensure the billing email is set, and the order "
 "has been saved."
 msgstr "Kunne ikke tildele adgang - brugeren kan allerede have tilladelse til denne fil eller fakturering email er ikke sat. Du skal sikre dig at din fakturerings-email er sat, og ordre er blevet gemt."
 
-#: includes/admin/class-wc-admin-assets.php:183
+#: includes/admin/class-wc-admin-assets.php:184
 msgid "Are you sure you want to revoke access to this download?"
 msgstr "Er du sikker på, at du vil tilbagekalde adgang til denne download?"
 
-#: includes/admin/class-wc-admin-assets.php:203
+#: includes/admin/class-wc-admin-assets.php:204
 msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
 msgstr "Er du sikker på, at du vil linke alle varianter? Dette vil oprette en ny variant for hver mulig kombination af variantegenskaber (maks. 50 pr. kørsel)."
 
-#: includes/admin/class-wc-admin-assets.php:204
+#: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value"
 msgstr "Angiv en værdi"
 
-#: includes/admin/class-wc-admin-assets.php:205
+#: includes/admin/class-wc-admin-assets.php:206
 msgid "Enter a value (fixed or %)"
 msgstr "Indtast en værdi (fast eller %)"
 
-#: includes/admin/class-wc-admin-assets.php:206
+#: includes/admin/class-wc-admin-assets.php:207
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr "Er du sikker på, at du vil slette alle varianter? Dette kan ikke fortrydes."
 
-#: includes/admin/class-wc-admin-assets.php:207
+#: includes/admin/class-wc-admin-assets.php:208
 msgid "Last warning, are you sure?"
 msgstr "Sidste advarsel, er du sikker?"
 
-#: includes/admin/class-wc-admin-assets.php:208
+#: includes/admin/class-wc-admin-assets.php:209
 #: includes/admin/class-wc-admin-taxonomies.php:123
 #: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "Vælg et billede"
 
-#: includes/admin/class-wc-admin-assets.php:209
+#: includes/admin/class-wc-admin-assets.php:210
 msgid "Set variation image"
 msgstr "Sæt variationsbillede"
 
-#: includes/admin/class-wc-admin-assets.php:210
+#: includes/admin/class-wc-admin-assets.php:211
 msgid "variation added"
 msgstr "variant tilføjet"
 
-#: includes/admin/class-wc-admin-assets.php:211
+#: includes/admin/class-wc-admin-assets.php:212
 msgid "variations added"
 msgstr "varianter tilføjet"
 
-#: includes/admin/class-wc-admin-assets.php:212
+#: includes/admin/class-wc-admin-assets.php:213
 msgid "No variations added"
 msgstr "Ingen varianter tilføjet"
 
-#: includes/admin/class-wc-admin-assets.php:213
+#: includes/admin/class-wc-admin-assets.php:214
 msgid "Are you sure you want to remove this variation?"
 msgstr "Er du sikker på, at du vil fjerne denne variant?"
 
@@ -375,47 +379,47 @@ msgstr "WooCommerce seneste anmeldelser"
 msgid "WooCommerce Status"
 msgstr "WooCommerce Status"
 
-#: includes/admin/class-wc-admin-dashboard.php:132
+#: includes/admin/class-wc-admin-dashboard.php:136
 msgid "<strong>%s</strong> sales this month"
 msgstr "<strong>%s</strong> salg denne måned"
 
-#: includes/admin/class-wc-admin-dashboard.php:139
+#: includes/admin/class-wc-admin-dashboard.php:143
 msgid "%s top seller this month (sold %d)"
 msgstr "%s top sælger denne måned (solgte %d)"
 
-#: includes/admin/class-wc-admin-dashboard.php:145
+#: includes/admin/class-wc-admin-dashboard.php:149
 msgid "<strong>%s order</strong> awaiting processing"
 msgid_plural "<strong>%s orders</strong> awaiting processing"
 msgstr[0] "<strong>%s ordre</strong> afventer behandling"
 msgstr[1] "<strong>%s ordrer</strong> afventer behandling"
 
-#: includes/admin/class-wc-admin-dashboard.php:150
+#: includes/admin/class-wc-admin-dashboard.php:154
 msgid "<strong>%s order</strong> on-hold"
 msgid_plural "<strong>%s orders</strong> on-hold"
 msgstr[0] "<strong>%s ordre</strong> afventer"
 msgstr[1] "<strong>%s ordrer</strong> afventer"
 
-#: includes/admin/class-wc-admin-dashboard.php:155
+#: includes/admin/class-wc-admin-dashboard.php:159
 msgid "<strong>%s product</strong> low in stock"
 msgid_plural "<strong>%s products</strong> low in stock"
 msgstr[0] "<strong>%s produkt</strong> med lav lagerstatus"
 msgstr[1] "<strong>%s produkter</strong> med lav lagerstatus"
 
-#: includes/admin/class-wc-admin-dashboard.php:160
+#: includes/admin/class-wc-admin-dashboard.php:164
 msgid "<strong>%s product</strong> out of stock"
 msgid_plural "<strong>%s products</strong> out of stock"
 msgstr[0] "<strong>%s produkt</strong> er udsolgt"
 msgstr[1] "<strong>%s produkter</strong> er udsolgt"
 
-#: includes/admin/class-wc-admin-dashboard.php:193
+#: includes/admin/class-wc-admin-dashboard.php:197
 msgid "out of 5"
 msgstr "ud af 5"
 
-#: includes/admin/class-wc-admin-dashboard.php:195
+#: includes/admin/class-wc-admin-dashboard.php:199
 msgid "reviewed by"
 msgstr "anmeldt af"
 
-#: includes/admin/class-wc-admin-dashboard.php:201
+#: includes/admin/class-wc-admin-dashboard.php:205
 msgid "There are no product reviews yet."
 msgstr "Der er ingen produktanmeldelser endnu."
 
@@ -556,7 +560,7 @@ msgstr "WooCommerce Indstillinger"
 #: includes/admin/class-wc-admin-welcome.php:219
 #: includes/admin/settings/class-wc-settings-checkout.php:277
 #: includes/admin/settings/class-wc-settings-shipping.php:238
-#: includes/admin/views/html-admin-page-status-report.php:275
+#: includes/admin/views/html-admin-page-status-report.php:276
 msgid "Settings"
 msgstr "Indstillinger"
 
@@ -919,7 +923,7 @@ msgstr "Kunde liste"
 
 #: includes/admin/class-wc-admin-reports.php:89
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:266
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:780
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:781
 #: includes/admin/reports/class-wc-report-stock.php:25
 #: includes/admin/reports/class-wc-report-stock.php:26
 msgid "Stock"
@@ -999,136 +1003,136 @@ msgstr "Vælg alle"
 msgid "Select none"
 msgstr "Vælg ingen"
 
-#: includes/admin/class-wc-admin-status.php:52
+#: includes/admin/class-wc-admin-status.php:51
 msgid "Product Transients Cleared"
 msgstr "Produkt transient ryddet"
 
-#: includes/admin/class-wc-admin-status.php:93
+#: includes/admin/class-wc-admin-status.php:92
 msgid "%d Transients Rows Cleared"
 msgstr "%d Transients Kolonner Rydet"
 
-#: includes/admin/class-wc-admin-status.php:102
+#: includes/admin/class-wc-admin-status.php:101
 msgid "Roles successfully reset"
 msgstr "Roller nulstillet"
 
-#: includes/admin/class-wc-admin-status.php:116
+#: includes/admin/class-wc-admin-status.php:115
 msgid "Terms successfully recounted"
 msgstr "Termer succesfuldt fintalte"
 
-#: includes/admin/class-wc-admin-status.php:127
+#: includes/admin/class-wc-admin-status.php:126
 msgid "Sessions successfully cleared"
 msgstr "Sessions ryddet med succes."
 
-#: includes/admin/class-wc-admin-status.php:131
+#: includes/admin/class-wc-admin-status.php:130
 msgid "All missing WooCommerce pages was installed successfully."
 msgstr "Alle manglende WooCommerce sider er nu blevet oprettet."
 
-#: includes/admin/class-wc-admin-status.php:139
+#: includes/admin/class-wc-admin-status.php:138
 msgid "Tax rates successfully deleted"
 msgstr "Moms satser slette med succes"
 
-#: includes/admin/class-wc-admin-status.php:148
+#: includes/admin/class-wc-admin-status.php:147
 msgid "There was an error calling %s::%s"
 msgstr "Der var en kaldefejl %s::%s"
 
-#: includes/admin/class-wc-admin-status.php:151
+#: includes/admin/class-wc-admin-status.php:150
 msgid "There was an error calling %s"
 msgstr "Der var en kaldefejl %s"
 
-#: includes/admin/class-wc-admin-status.php:161
+#: includes/admin/class-wc-admin-status.php:160
 msgid "Your changes have been saved."
 msgstr "Dine ændringer er nu gemt."
 
-#: includes/admin/class-wc-admin-status.php:175
+#: includes/admin/class-wc-admin-status.php:174
 msgid "WC Transients"
 msgstr "WC Transients"
 
-#: includes/admin/class-wc-admin-status.php:176
+#: includes/admin/class-wc-admin-status.php:175
 msgid "Clear transients"
 msgstr "Ryd transients"
 
-#: includes/admin/class-wc-admin-status.php:177
+#: includes/admin/class-wc-admin-status.php:176
 msgid "This tool will clear the product/shop transients cache."
 msgstr "Dette redskab vil ryde produkt/butik transients cache."
 
-#: includes/admin/class-wc-admin-status.php:180
+#: includes/admin/class-wc-admin-status.php:179
 msgid "Expired Transients"
 msgstr "Udløbede Transients"
 
-#: includes/admin/class-wc-admin-status.php:181
+#: includes/admin/class-wc-admin-status.php:180
 msgid "Clear expired transients"
 msgstr "Ryd udløbende  transients"
 
-#: includes/admin/class-wc-admin-status.php:182
+#: includes/admin/class-wc-admin-status.php:181
 msgid "This tool will clear ALL expired transients from WordPress."
 msgstr "Dette værktøj vil ryde ALLE udløbedt transients fra Wordpress."
 
-#: includes/admin/class-wc-admin-status.php:185
+#: includes/admin/class-wc-admin-status.php:184
 msgid "Term counts"
 msgstr "Termtællinger"
 
-#: includes/admin/class-wc-admin-status.php:186
+#: includes/admin/class-wc-admin-status.php:185
 msgid "Recount terms"
 msgstr "Fintælling termer"
 
-#: includes/admin/class-wc-admin-status.php:187
+#: includes/admin/class-wc-admin-status.php:186
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
 msgstr "Dette redskab vil fintælle produkttermer - nyttigt når man ændrer sine indstillinger på en måde som skjuler produkter for kataloget."
 
-#: includes/admin/class-wc-admin-status.php:190
+#: includes/admin/class-wc-admin-status.php:189
 msgid "Capabilities"
 msgstr "Funktioner"
 
-#: includes/admin/class-wc-admin-status.php:191
+#: includes/admin/class-wc-admin-status.php:190
 msgid "Reset capabilities"
 msgstr "Nulstil funktioner"
 
-#: includes/admin/class-wc-admin-status.php:192
+#: includes/admin/class-wc-admin-status.php:191
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr "Dette værktøj vil nulstille admin, kunde og shop-administrator roller til standard. Brug denne hvis brugere ikke kan tilgå alle WooCommerce administrationssider."
 
-#: includes/admin/class-wc-admin-status.php:195
+#: includes/admin/class-wc-admin-status.php:194
 msgid "Customer Sessions"
 msgstr "Kunde Sessions"
 
-#: includes/admin/class-wc-admin-status.php:196
+#: includes/admin/class-wc-admin-status.php:195
 msgid "Clear all sessions"
 msgstr "Ryd alle Sessions"
 
-#: includes/admin/class-wc-admin-status.php:197
+#: includes/admin/class-wc-admin-status.php:196
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
 msgstr "<strong class=\"red\"> Advarsel: </strong> Dette værktøj vil slette alle oplysninger om kundens session fra databasen, herunder eventuelle igangværende indkøbskurve."
 
-#: includes/admin/class-wc-admin-status.php:200
+#: includes/admin/class-wc-admin-status.php:199
 #: includes/admin/views/html-notice-install.php:6
 msgid "Install WooCommerce Pages"
 msgstr "Installer WooCommerce Sider"
 
-#: includes/admin/class-wc-admin-status.php:201
+#: includes/admin/class-wc-admin-status.php:200
 msgid "Install pages"
 msgstr "Opret sider"
 
-#: includes/admin/class-wc-admin-status.php:202
+#: includes/admin/class-wc-admin-status.php:201
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
 msgstr "<strong class=\"red\"> Bemærk: </strong> Dette værktøj vil installere alle de forsvundne WooCommerce sider. Sider, der allerede er defineret og sat op, vil ikke blive erstattet."
 
-#: includes/admin/class-wc-admin-status.php:205
+#: includes/admin/class-wc-admin-status.php:204
 msgid "Delete all WooCommerce tax rates"
 msgstr "Slet alle WooCommerce moms satser"
 
-#: includes/admin/class-wc-admin-status.php:206
+#: includes/admin/class-wc-admin-status.php:205
 msgid "Delete ALL tax rates"
 msgstr "Slet alle moms satser"
 
-#: includes/admin/class-wc-admin-status.php:207
+#: includes/admin/class-wc-admin-status.php:206
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
@@ -1503,7 +1507,7 @@ msgstr "WooCommerce er blevet oversat til adskillige andre sprog takket være vo
 msgid "View %s"
 msgstr "Vis %s"
 
-#: includes/admin/class-wc-admin.php:114
+#: includes/admin/class-wc-admin.php:113
 msgid "HTML Email Template"
 msgstr "HTML Email Skabelon"
 
@@ -1736,6 +1740,7 @@ msgstr "Vis &#8220;%s&#8221;"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:341
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:300
 #: includes/admin/reports/class-wc-report-stock.php:119
+#: includes/admin/views/html-admin-page-status-logs.php:13
 msgid "View"
 msgstr "Vis"
 
@@ -1780,7 +1785,7 @@ msgstr "(slå) til/fra fremhævet"
 #: includes/admin/views/html-admin-page-status-report.php:38
 #: includes/admin/views/html-admin-page-status-report.php:72
 #: includes/admin/views/html-admin-page-status-report.php:97
-#: includes/admin/views/html-admin-page-status-report.php:282
+#: includes/admin/views/html-admin-page-status-report.php:283
 #: includes/admin/views/html-bulk-edit-product.php:176
 #: includes/admin/views/html-bulk-edit-product.php:213
 #: includes/admin/views/html-bulk-edit-product.php:274
@@ -1791,7 +1796,7 @@ msgstr "Ja"
 #: includes/admin/views/html-admin-page-status-report.php:38
 #: includes/admin/views/html-admin-page-status-report.php:72
 #: includes/admin/views/html-admin-page-status-report.php:97
-#: includes/admin/views/html-admin-page-status-report.php:282
+#: includes/admin/views/html-admin-page-status-report.php:283
 #: includes/admin/views/html-bulk-edit-product.php:177
 #: includes/admin/views/html-bulk-edit-product.php:214
 #: includes/admin/views/html-bulk-edit-product.php:275
@@ -1889,7 +1894,7 @@ msgid "Show all types"
 msgstr "Vis alle typer"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
 #: includes/admin/settings/class-wc-settings-checkout.php:229
 #: includes/admin/settings/class-wc-settings-shipping.php:200
 msgid "Status"
@@ -2465,7 +2470,6 @@ msgstr "Stk"
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/settings/class-wc-settings-tax.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:550
-#: includes/admin/settings/class-wc-settings-tax.php:647
 msgid "Tax"
 msgstr "Moms"
 
@@ -2535,7 +2539,7 @@ msgstr "Tilføj"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:31
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:95
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:782
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:783
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -2594,7 +2598,7 @@ msgid "Downloadable products give access to a file upon purchase."
 msgstr "Downloadbare produkter giver adgang til en fil ved køb."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:90
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:779
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:780
 #: includes/admin/settings/class-wc-settings-products.php:41
 msgid "Inventory"
 msgstr "Beholdning"
@@ -2715,7 +2719,7 @@ msgid "Leave blank for unlimited re-downloads."
 msgstr "Efterlad blank for ubegrænsede tibagevendende-downloads."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:228
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:790
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:791
 msgid "Download Expiry"
 msgstr "Download udløb"
 
@@ -2777,7 +2781,7 @@ msgid "None"
 msgstr "Ingen"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:257
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:737
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:738
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:126
@@ -2838,21 +2842,21 @@ msgid "Allow Backorders?"
 msgstr "Tillad restordrer?"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:312
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:743
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:744
 #: includes/admin/views/html-bulk-edit-product.php:253
 #: includes/admin/views/html-quick-edit-product.php:172
 msgid "Do not allow"
 msgstr "Tillad ikke"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:313
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:744
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:745
 #: includes/admin/views/html-bulk-edit-product.php:254
 #: includes/admin/views/html-quick-edit-product.php:173
 msgid "Allow, but notify customer"
 msgstr "Tillad, men underret kunde"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:314
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:745
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:746
 #: includes/admin/views/html-bulk-edit-product.php:255
 #: includes/admin/views/html-quick-edit-product.php:174
 msgid "Allow"
@@ -2874,7 +2878,7 @@ msgid ""
 msgstr "Aktiver kun dette for at tillade et af dette produkt kan købes i en enkelt ordre"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:347
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:786
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:787
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:105
 #: includes/admin/views/html-bulk-edit-product.php:103
 #: includes/admin/views/html-quick-edit-product.php:84
@@ -2890,21 +2894,21 @@ msgid "Dimensions"
 msgstr "Størrelse"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:354
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:783
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:784
 #: includes/admin/views/html-bulk-edit-product.php:143
 #: includes/admin/views/html-quick-edit-product.php:97
 msgid "Length"
 msgstr "Længde"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:355
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:784
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:785
 #: includes/admin/views/html-bulk-edit-product.php:144
 #: includes/admin/views/html-quick-edit-product.php:98
 msgid "Width"
 msgstr "Brede"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:356
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:785
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:786
 #: includes/admin/views/html-bulk-edit-product.php:145
 #: includes/admin/views/html-quick-edit-product.php:99
 msgid "Height"
@@ -2929,12 +2933,12 @@ msgid ""
 msgstr "Forsendelse klasser bliver brugt til at visse sendemetoder for at gruppere lignende produkter."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:393
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
 msgid "Close all"
 msgstr "Luk alle"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:393
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
 msgid "Expand all"
 msgstr "Udvid alle"
 
@@ -2983,130 +2987,130 @@ msgstr "Cross-sells er produkter som du promoverer i kassen, baseret på det akt
 msgid "Choose a grouped product&hellip;"
 msgstr "Vælg et grupperet produkt&hellip;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:660
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
 msgid "Grouping"
 msgstr "Gruppering"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:660
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
 msgid "Set this option to make this product part of a grouped product."
 msgstr "Sæt denne indstilling for at lave denne produktdel af et grupperet produkt."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:680
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:681
 msgid "Purchase Note"
 msgstr "Købs bemærkning"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:680
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:681
 msgid "Enter an optional note to send the customer after purchase."
 msgstr "Angiv en valgfri beemærkning der sendes til kunden efter et køb."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:687
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:688
 msgid "Menu order"
 msgstr "Menu orden"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:687
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:688
 msgid "Custom ordering position."
 msgstr "Tilpasset bestilling position"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:695
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:696
 msgid "Enable reviews"
 msgstr "Aktiver anmeldelser"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:754
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:755
 msgid ""
 "Before adding variations, add and save some attributes on the "
 "<strong>Attributes</strong> tab."
 msgstr "Før du begynder at tilføje varianter, skal du oprette og gemme nogle attributter under <strong>Attributter</ strong>."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:756
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:757
 msgid "Learn more"
 msgstr "Lær mere"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:764
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 msgid "Choose a field to bulk edit&hellip;"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
 msgid "Toggle &quot;Enabled&quot;"
 msgstr "(slå) til/fra &quot;Aktiveret&quot;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
 msgid "Toggle &quot;Downloadable&quot;"
 msgstr "(slå) til/fra &quot;\"Download-bare&quot;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
 msgid "Toggle &quot;Virtual&quot;"
 msgstr "(slå) til/fra &quot;Virtuel&quot;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:770
 msgid "Delete all variations"
 msgstr "Slette alle varianter"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:771
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:772
 msgid "Pricing"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:772
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
 msgid "Prices"
 msgstr "Priser"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:774
 msgid "Prices increase by (fixed amount or %)"
 msgstr "Priserne stiger med (fast beløb eller %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:774
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:775
 msgid "Prices decrease by (fixed amount or %)"
 msgstr "Priser falder med (fast beløb eller %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:775
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:776
 msgid "Sale prices"
 msgstr "Salgspriser"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:776
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:777
 msgid "Sale prices increase by (fixed amount or %)"
 msgstr "Salgspriser stiger med (fast beløb eller %)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:777
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:778
 msgid "Sale prices decrease by (fixed amount or %)"
 msgstr "Salgspriser falder med (fast beløb eller%)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:788
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:789
 msgid "Downloadable products"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:789
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:790
 msgid "Download limit"
 msgstr "Downloadbegrænsning"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:794
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:795
 #: includes/admin/views/html-report-by-date.php:31
 msgid "Go"
 msgstr "Gå vidre"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:891
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:892
 msgid "Add Variation"
 msgstr "Tilføj variant"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:893
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:894
 msgid "Link all variations"
 msgstr "Sammenkæd alle variationer"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:895
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:896
 msgid "Defaults"
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:895
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:896
 msgid "These are the attributes that will be pre-selected on the frontend."
 msgstr ""
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:908
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:909
 msgid "No default"
 msgstr "Ingen standard"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1012
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1013
 msgid "Product SKU must be unique."
 msgstr "Produkt SKU/varenummer skal være unikt."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1383
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1384
 msgid "Variation #%s of %s"
 msgstr "Variant #%s af %s"
 
@@ -3325,11 +3329,11 @@ msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Aktiver denne indstilling hvis et produkt ikke er sendt, eller der ikke er nogen forsendelsesomkostninger"
 
-#: includes/admin/reports/class-wc-admin-report.php:384
+#: includes/admin/reports/class-wc-admin-report.php:385
 msgid "Sold %s worth in the last %d days"
 msgstr "Solgt %s værd i de sidste %d dage"
 
-#: includes/admin/reports/class-wc-admin-report.php:386
+#: includes/admin/reports/class-wc-admin-report.php:387
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "Solgte 1 produkt de sidste %d dage"
@@ -5009,23 +5013,13 @@ msgstr "import/eksport"
 msgid "Marketing"
 msgstr "Marketing"
 
-#: includes/admin/views/html-admin-page-addons.php:18
-msgid "Acounting"
+#: includes/admin/views/html-admin-page-status-logs.php:4
+msgid "Viewing %s (%s)"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-addons.php:19
-msgid "Free"
-msgstr "Gratis!"
-
-#: includes/admin/views/html-admin-page-addons.php:20
-msgid "Third-party"
+#: includes/admin/views/html-admin-page-status-logs.php:22
+msgid "There are currently no logs to view."
 msgstr ""
-
-#: includes/admin/views/html-admin-page-addons.php:81
-msgid ""
-"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
-" href=\"%s\">WooCommerce Extensions Catalog</a>"
-msgstr "Vores katalog over WooCommerce Extensions kan findes på WooThemes.com her: <a href=\"%s\">WooCommerce Extensions Catalog</ a>"
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
@@ -5118,195 +5112,195 @@ msgid "WC Logging"
 msgstr "WC Logging"
 
 #: includes/admin/views/html-admin-page-status-report.php:104
-msgid "Log directory is writable."
-msgstr "Log biblioteket er skrivbar."
+msgid "Log directory (%s) is writable."
+msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:106
 msgid ""
-"Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will"
-" not be possible."
-msgstr "Log biblioteket (<code>woocommerce/logs/</code>) er ikke skrivbar. Logning er ikke mulig."
+"Log directory (<code>%s</code>) is not writable. To allow logging, make this"
+" writable or define a custom <code>WC_LOG_DIR</code>."
+msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:110
+#: includes/admin/views/html-admin-page-status-report.php:111
 msgid "Default Timezone"
 msgstr "Standard tidszone"
 
-#: includes/admin/views/html-admin-page-status-report.php:114
+#: includes/admin/views/html-admin-page-status-report.php:115
 msgid "Default timezone is %s - it should be UTC"
 msgstr "Standard tidszone er %s - Det bør være UTC"
 
-#: includes/admin/views/html-admin-page-status-report.php:116
+#: includes/admin/views/html-admin-page-status-report.php:117
 msgid "Default timezone is %s"
 msgstr "Standard tidszone er %s"
 
-#: includes/admin/views/html-admin-page-status-report.php:124
+#: includes/admin/views/html-admin-page-status-report.php:125
 msgid "fsockopen/cURL"
 msgstr "fsockopen/cURL"
 
-#: includes/admin/views/html-admin-page-status-report.php:127
+#: includes/admin/views/html-admin-page-status-report.php:128
 msgid "Your server has fsockopen and cURL enabled."
 msgstr "Din server har fsockopen og cURL aktiveret"
 
-#: includes/admin/views/html-admin-page-status-report.php:129
+#: includes/admin/views/html-admin-page-status-report.php:130
 msgid "Your server has fsockopen enabled, cURL is disabled."
 msgstr "Din server har fsockopen aktiveret, cURL er deaktiveret."
 
-#: includes/admin/views/html-admin-page-status-report.php:131
+#: includes/admin/views/html-admin-page-status-report.php:132
 msgid "Your server has cURL enabled, fsockopen is disabled."
 msgstr "Din server har cURL aktiveret, fsockopen er deaktiveret."
 
-#: includes/admin/views/html-admin-page-status-report.php:135
+#: includes/admin/views/html-admin-page-status-report.php:136
 msgid ""
 "Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
 "scripts which communicate with other servers will not work. Contact your "
 "hosting provider."
 msgstr "Din server har ikke fsockopen eller cURL aktiveret - PayPal IPN og andre script som kommunikerer med andre servere vil ikke fungere. Kontakt din webhosting leverandør."
 
-#: includes/admin/views/html-admin-page-status-report.php:140
+#: includes/admin/views/html-admin-page-status-report.php:141
 msgid "SOAP Client"
 msgstr "SOAP Client"
 
-#: includes/admin/views/html-admin-page-status-report.php:142
+#: includes/admin/views/html-admin-page-status-report.php:143
 msgid "Your server has the SOAP Client class enabled."
 msgstr "Din server har SOAP-klientklasse aktiveret."
 
-#: includes/admin/views/html-admin-page-status-report.php:145
+#: includes/admin/views/html-admin-page-status-report.php:146
 msgid ""
 "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled -"
 " some gateway plugins which use SOAP may not work as expected."
 msgstr "Din server har ikke  <a href=\"%s\">SOAP Client</a> klasse aktiveret - nogle gateways som bruger SOAP fungerer måske ikke som ventet."
 
-#: includes/admin/views/html-admin-page-status-report.php:150
+#: includes/admin/views/html-admin-page-status-report.php:151
 msgid "WP Remote Post"
 msgstr "WP Remote Post"
 
-#: includes/admin/views/html-admin-page-status-report.php:161
+#: includes/admin/views/html-admin-page-status-report.php:162
 msgid "wp_remote_post() was successful - PayPal IPN is working."
 msgstr "wp_remote_post() var vellykket - PayPal IPN virker."
 
-#: includes/admin/views/html-admin-page-status-report.php:164
+#: includes/admin/views/html-admin-page-status-report.php:165
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider. Error:"
 msgstr "wp_remote_post() fejlede. PayPal IPN vil ikke virke med din server. Kontakt din webudbyder. Fejl:"
 
-#: includes/admin/views/html-admin-page-status-report.php:167
+#: includes/admin/views/html-admin-page-status-report.php:168
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
 msgstr "wp_remote_post() fejlede. PayPal IPN virker måske ikke med din server."
 
-#: includes/admin/views/html-admin-page-status-report.php:190
+#: includes/admin/views/html-admin-page-status-report.php:191
 msgid "Locale"
 msgstr "Lokal"
 
-#: includes/admin/views/html-admin-page-status-report.php:206
+#: includes/admin/views/html-admin-page-status-report.php:207
 msgid "Plugins"
 msgstr "Plugins"
 
-#: includes/admin/views/html-admin-page-status-report.php:212
+#: includes/admin/views/html-admin-page-status-report.php:213
 msgid "Installed Plugins"
 msgstr "Installerede Plugins"
 
-#: includes/admin/views/html-admin-page-status-report.php:232
+#: includes/admin/views/html-admin-page-status-report.php:233
 msgid "Visit plugin homepage"
 msgstr "Gå Til Plugin Siden"
 
-#: includes/admin/views/html-admin-page-status-report.php:256
-#: includes/admin/views/html-admin-page-status-report.php:438
+#: includes/admin/views/html-admin-page-status-report.php:257
+#: includes/admin/views/html-admin-page-status-report.php:439
 msgid "is available"
 msgstr "er tilgængelig"
 
-#: includes/admin/views/html-admin-page-status-report.php:259
+#: includes/admin/views/html-admin-page-status-report.php:260
 msgid "by"
 msgstr "af"
 
-#: includes/admin/views/html-admin-page-status-report.php:259
+#: includes/admin/views/html-admin-page-status-report.php:260
 msgid "version"
 msgstr "version"
 
-#: includes/admin/views/html-admin-page-status-report.php:281
+#: includes/admin/views/html-admin-page-status-report.php:282
 msgid "Force SSL"
 msgstr "Gennemtving SSL"
 
-#: includes/admin/views/html-admin-page-status-report.php:288
+#: includes/admin/views/html-admin-page-status-report.php:289
 msgid "WC Pages"
 msgstr "WC Sider"
 
-#: includes/admin/views/html-admin-page-status-report.php:295
+#: includes/admin/views/html-admin-page-status-report.php:296
 msgctxt "Page setting"
 msgid "Shop Base"
 msgstr "Butik basisside"
 
-#: includes/admin/views/html-admin-page-status-report.php:299
+#: includes/admin/views/html-admin-page-status-report.php:300
 msgctxt "Page setting"
 msgid "Cart"
 msgstr "Kurv"
 
-#: includes/admin/views/html-admin-page-status-report.php:303
+#: includes/admin/views/html-admin-page-status-report.php:304
 msgctxt "Page setting"
 msgid "Checkout"
 msgstr "Checkout"
 
-#: includes/admin/views/html-admin-page-status-report.php:307
+#: includes/admin/views/html-admin-page-status-report.php:308
 msgctxt "Page setting"
 msgid "My Account"
 msgstr "Min Konto"
 
-#: includes/admin/views/html-admin-page-status-report.php:327
+#: includes/admin/views/html-admin-page-status-report.php:328
 msgid "Page not set"
 msgstr "Siden er ikke defineret"
 
-#: includes/admin/views/html-admin-page-status-report.php:337
+#: includes/admin/views/html-admin-page-status-report.php:338
 msgid "Page does not exist"
 msgstr "Side eksisterer ikke"
 
-#: includes/admin/views/html-admin-page-status-report.php:342
+#: includes/admin/views/html-admin-page-status-report.php:343
 msgid "Page does not contain the shortcode: %s"
 msgstr "Siden indeholder ikke shortcode: %s"
 
-#: includes/admin/views/html-admin-page-status-report.php:361
+#: includes/admin/views/html-admin-page-status-report.php:362
 msgid "WC Taxonomies"
 msgstr "WC Taxonomies"
 
-#: includes/admin/views/html-admin-page-status-report.php:367
+#: includes/admin/views/html-admin-page-status-report.php:368
 msgid "Order Statuses"
 msgstr "Ordre-Statusser"
 
-#: includes/admin/views/html-admin-page-status-report.php:377
+#: includes/admin/views/html-admin-page-status-report.php:378
 msgid "Product Types"
 msgstr "Produkttyper"
 
-#: includes/admin/views/html-admin-page-status-report.php:390
+#: includes/admin/views/html-admin-page-status-report.php:391
 msgid "Theme"
 msgstr "Tema"
 
-#: includes/admin/views/html-admin-page-status-report.php:427
+#: includes/admin/views/html-admin-page-status-report.php:428
 msgid "Theme Name"
 msgstr "Temanavn"
 
-#: includes/admin/views/html-admin-page-status-report.php:433
+#: includes/admin/views/html-admin-page-status-report.php:434
 msgid "Theme Version"
 msgstr "Temaversion"
 
-#: includes/admin/views/html-admin-page-status-report.php:442
+#: includes/admin/views/html-admin-page-status-report.php:443
 msgid "Author URL"
 msgstr "Skribent URL"
 
-#: includes/admin/views/html-admin-page-status-report.php:451
+#: includes/admin/views/html-admin-page-status-report.php:452
 msgid "Templates"
 msgstr "Templates"
 
-#: includes/admin/views/html-admin-page-status-report.php:486
+#: includes/admin/views/html-admin-page-status-report.php:487
 msgid ""
 "<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
 "date. The core version is %s"
 msgstr "<code>%s</code> version <strong style=\"color:red\">%s</strong> er forældet. Kerne versionen er %s"
 
-#: includes/admin/views/html-admin-page-status-report.php:497
-#: includes/admin/views/html-admin-page-status-report.php:503
+#: includes/admin/views/html-admin-page-status-report.php:498
+#: includes/admin/views/html-admin-page-status-report.php:504
 msgid "Template Overrides"
 msgstr "Template Overskriver"
 
-#: includes/admin/views/html-admin-page-status-report.php:504
+#: includes/admin/views/html-admin-page-status-report.php:505
 msgid "No overrides present in theme."
 msgstr "No overrides present in theme."
 
@@ -5346,6 +5340,10 @@ msgstr "Dette værktøj vil slette alle produkt og ordre indlægs data, når du 
 #: includes/admin/views/html-admin-page-status-tools.php:58
 msgid "Save Changes"
 msgstr "Gem Ændringer"
+
+#: includes/admin/views/html-admin-page-status.php:7
+msgid "Logs"
+msgstr ""
 
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"

@@ -4,14 +4,14 @@
 # aroland.hu <info@aroland.hu>, 2014
 # joesalty <joesalty77@gmail.com>, 2014
 # Laszlo Espadas <kw@kardiweb.org>, 2014
-# SzLegradi <szabolcs.legradi@gmail.com>, 2013-2014
+# Szabolcs Légrádi <szabolcs.legradi@gmail.com>, 2013-2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-05-22 10:45:21+00:00\n"
-"PO-Revision-Date: 2014-06-01 07:01+0000\n"
-"Last-Translator: SzLegradi <szabolcs.legradi@gmail.com>\n"
+"POT-Creation-Date: 2014-06-03 15:13:58+00:00\n"
+"PO-Revision-Date: 2014-06-04 08:41+0000\n"
+"Last-Translator: Mike Jolley <mike.jolley@me.com>\n"
 "Language-Team: Hungarian (Hungary) (http://www.transifex.com/projects/p/woocommerce/language/hu_HU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,52 +19,981 @@ msgstr ""
 "Language: hu_HU\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: assets/js/admin/editor_plugin_lang.php:5
-msgid "Insert Shortcode"
-msgstr "Gyorskód beszúrása"
+#: i18n/countries.php:16
+msgid "Afghanistan"
+msgstr "Afganisztán"
 
-#: assets/js/admin/editor_plugin_lang.php:6
-msgid "Product price/cart button"
-msgstr "Termék ár/kosár gomb"
+#: i18n/countries.php:17
+msgid "&#197;land Islands"
+msgstr "Aland-szigetek"
 
-#: assets/js/admin/editor_plugin_lang.php:7
-msgid "Product by SKU/ID"
-msgstr "Termék CSZ/azonosító szerint"
+#: i18n/countries.php:18
+msgid "Albania"
+msgstr "Albánia"
 
-#: assets/js/admin/editor_plugin_lang.php:8
-msgid "Products by SKU/ID"
-msgstr "Termékek CSZ/azonosító szerint"
+#: i18n/countries.php:19
+msgid "Algeria"
+msgstr "Algéria"
 
-#: assets/js/admin/editor_plugin_lang.php:9
-msgid "Product categories"
-msgstr "Termékkategóriák"
+#: i18n/countries.php:20
+msgid "Andorra"
+msgstr "Andorra"
 
-#: assets/js/admin/editor_plugin_lang.php:10
-msgid "Products by category slug"
-msgstr "Termékek kategória keresőbarát neve alapján"
+#: i18n/countries.php:21
+msgid "Angola"
+msgstr "Angola"
 
-#: assets/js/admin/editor_plugin_lang.php:11
-msgid "Recent products"
-msgstr "Legújabb termékek"
+#: i18n/countries.php:22
+msgid "Anguilla"
+msgstr "Anguilla"
 
-#: assets/js/admin/editor_plugin_lang.php:12
-msgid "Featured products"
-msgstr "Kiemelt termékek"
+#: i18n/countries.php:23
+msgid "Antarctica"
+msgstr "Antarktisz"
 
-#: assets/js/admin/editor_plugin_lang.php:13
-msgid "Shop Messages"
-msgstr "Üzlet üzenetek"
+#: i18n/countries.php:24
+msgid "Antigua and Barbuda"
+msgstr "Antigua és Barbuda"
 
-#: assets/js/admin/editor_plugin_lang.php:14
-msgid "Order tracking"
-msgstr "Rendelés követése"
+#: i18n/countries.php:25
+msgid "Argentina"
+msgstr "Argentína"
 
-#: assets/js/admin/editor_plugin_lang.php:15
-#: includes/shortcodes/class-wc-shortcode-checkout.php:91
-#: includes/shortcodes/class-wc-shortcode-my-account.php:111
-#: templates/checkout/thankyou.php:30
-msgid "My Account"
-msgstr "Fiókom"
+#: i18n/countries.php:26
+msgid "Armenia"
+msgstr "Örményország"
+
+#: i18n/countries.php:27
+msgid "Aruba"
+msgstr "Aruba "
+
+#: i18n/countries.php:28
+msgid "Australia"
+msgstr "Ausztrália"
+
+#: i18n/countries.php:29
+msgid "Austria"
+msgstr "Ausztria"
+
+#: i18n/countries.php:30
+msgid "Azerbaijan"
+msgstr "Azerbajdzsán"
+
+#: i18n/countries.php:31
+msgid "Bahamas"
+msgstr "Bahama-szigetek"
+
+#: i18n/countries.php:32
+msgid "Bahrain"
+msgstr "Bahrein"
+
+#: i18n/countries.php:33
+msgid "Bangladesh"
+msgstr "Banglades"
+
+#: i18n/countries.php:34
+msgid "Barbados"
+msgstr "Barbados"
+
+#: i18n/countries.php:35
+msgid "Belarus"
+msgstr "Belarusz "
+
+#: i18n/countries.php:36
+msgid "Belgium"
+msgstr "Belgium"
+
+#: i18n/countries.php:37
+msgid "Belau"
+msgstr "Belau"
+
+#: i18n/countries.php:38
+msgid "Belize"
+msgstr "Belize"
+
+#: i18n/countries.php:39
+msgid "Benin"
+msgstr "Benin"
+
+#: i18n/countries.php:40
+msgid "Bermuda"
+msgstr "Bermuda"
+
+#: i18n/countries.php:41
+msgid "Bhutan"
+msgstr "Bhután"
+
+#: i18n/countries.php:42
+msgid "Bolivia"
+msgstr "Bolívia"
+
+#: i18n/countries.php:43
+msgid "Bonaire, Saint Eustatius and Saba"
+msgstr "Bonaire, Saint Eustatius és Saba"
+
+#: i18n/countries.php:44
+msgid "Bosnia and Herzegovina"
+msgstr "Bosznia-Hercegovina"
+
+#: i18n/countries.php:45
+msgid "Botswana"
+msgstr "Botswana"
+
+#: i18n/countries.php:46
+msgid "Bouvet Island"
+msgstr "Bouvet-sziget "
+
+#: i18n/countries.php:47
+msgid "Brazil"
+msgstr "Brazília"
+
+#: i18n/countries.php:48
+msgid "British Indian Ocean Territory"
+msgstr "Brit Indiai-óceáni Terület"
+
+#: i18n/countries.php:49
+msgid "British Virgin Islands"
+msgstr "Brit Virgin-szigetek "
+
+#: i18n/countries.php:50
+msgid "Brunei"
+msgstr "Brunei"
+
+#: i18n/countries.php:51
+msgid "Bulgaria"
+msgstr "Bulgária"
+
+#: i18n/countries.php:52
+msgid "Burkina Faso"
+msgstr "Burkina Faso"
+
+#: i18n/countries.php:53
+msgid "Burundi"
+msgstr "Burundi"
+
+#: i18n/countries.php:54
+msgid "Cambodia"
+msgstr "Kambodzsa"
+
+#: i18n/countries.php:55
+msgid "Cameroon"
+msgstr "Kamerun"
+
+#: i18n/countries.php:56
+msgid "Canada"
+msgstr "Kanada"
+
+#: i18n/countries.php:57
+msgid "Cape Verde"
+msgstr "Zöld-foki-szigetek"
+
+#: i18n/countries.php:58
+msgid "Cayman Islands"
+msgstr "Kajmán-szigetek "
+
+#: i18n/countries.php:59
+msgid "Central African Republic"
+msgstr "Közép-afrikai Köztársaság"
+
+#: i18n/countries.php:60
+msgid "Chad"
+msgstr "Csád"
+
+#: i18n/countries.php:61
+msgid "Chile"
+msgstr "Chile"
+
+#: i18n/countries.php:62
+msgid "China"
+msgstr "Kína"
+
+#: i18n/countries.php:63
+msgid "Christmas Island"
+msgstr "Karácsony-sziget "
+
+#: i18n/countries.php:64
+msgid "Cocos (Keeling) Islands"
+msgstr "Kókusz-szigetek/Keeling-szigetek"
+
+#: i18n/countries.php:65
+msgid "Colombia"
+msgstr "Kolumbia"
+
+#: i18n/countries.php:66
+msgid "Comoros"
+msgstr "Comore-szigetek"
+
+#: i18n/countries.php:67
+msgid "Congo (Brazzaville)"
+msgstr "Kongó"
+
+#: i18n/countries.php:68
+msgid "Congo (Kinshasa)"
+msgstr "Kongói Demokratikus Köztársaság"
+
+#: i18n/countries.php:69
+msgid "Cook Islands"
+msgstr "Cook-szigetek"
+
+#: i18n/countries.php:70
+msgid "Costa Rica"
+msgstr "Costa Rica"
+
+#: i18n/countries.php:71
+msgid "Croatia"
+msgstr "Horvátország"
+
+#: i18n/countries.php:72
+msgid "Cuba"
+msgstr "Kuba"
+
+#: i18n/countries.php:73
+msgid "Cura&Ccedil;ao"
+msgstr "Cura&Ccedil;ao"
+
+#: i18n/countries.php:74
+msgid "Cyprus"
+msgstr "Ciprus"
+
+#: i18n/countries.php:75
+msgid "Czech Republic"
+msgstr "Csehország"
+
+#: i18n/countries.php:76
+msgid "Denmark"
+msgstr "Dánia"
+
+#: i18n/countries.php:77
+msgid "Djibouti"
+msgstr "Dzsibuti"
+
+#: i18n/countries.php:78
+msgid "Dominica"
+msgstr "Dominika"
+
+#: i18n/countries.php:79
+msgid "Dominican Republic"
+msgstr "Dominikai Köztársaság"
+
+#: i18n/countries.php:80
+msgid "Ecuador"
+msgstr "Ecuador"
+
+#: i18n/countries.php:81
+msgid "Egypt"
+msgstr "Egyiptom"
+
+#: i18n/countries.php:82
+msgid "El Salvador"
+msgstr "Salvador"
+
+#: i18n/countries.php:83
+msgid "Equatorial Guinea"
+msgstr "Egyenlítői-Guinea"
+
+#: i18n/countries.php:84
+msgid "Eritrea"
+msgstr "Eritrea"
+
+#: i18n/countries.php:85
+msgid "Estonia"
+msgstr "Észtország"
+
+#: i18n/countries.php:86
+msgid "Ethiopia"
+msgstr "Etiópia"
+
+#: i18n/countries.php:87
+msgid "Falkland Islands"
+msgstr "Falkland-szigetek"
+
+#: i18n/countries.php:88
+msgid "Faroe Islands"
+msgstr "Feröer-szigetek"
+
+#: i18n/countries.php:89
+msgid "Fiji"
+msgstr "Fidzsi-szigetek"
+
+#: i18n/countries.php:90
+msgid "Finland"
+msgstr "Finnország"
+
+#: i18n/countries.php:91
+msgid "France"
+msgstr "Franciaország"
+
+#: i18n/countries.php:92
+msgid "French Guiana"
+msgstr "Francia Guyana"
+
+#: i18n/countries.php:93
+msgid "French Polynesia"
+msgstr "Francia Polinézia"
+
+#: i18n/countries.php:94
+msgid "French Southern Territories"
+msgstr "Francia Déli Területek"
+
+#: i18n/countries.php:95
+msgid "Gabon"
+msgstr "Gabon"
+
+#: i18n/countries.php:96
+msgid "Gambia"
+msgstr "Gambia"
+
+#: i18n/countries.php:97 i18n/states/US.php:23
+msgid "Georgia"
+msgstr "Grúzia"
+
+#: i18n/countries.php:98
+msgid "Germany"
+msgstr "Németország"
+
+#: i18n/countries.php:99
+msgid "Ghana"
+msgstr "Ghána"
+
+#: i18n/countries.php:100
+msgid "Gibraltar"
+msgstr "Gibraltár"
+
+#: i18n/countries.php:101
+msgid "Greece"
+msgstr "Görögország"
+
+#: i18n/countries.php:102
+msgid "Greenland"
+msgstr "Grönland"
+
+#: i18n/countries.php:103
+msgid "Grenada"
+msgstr "Grenada"
+
+#: i18n/countries.php:104
+msgid "Guadeloupe"
+msgstr "Guadeloupe"
+
+#: i18n/countries.php:105
+msgid "Guatemala"
+msgstr "Guatemala"
+
+#: i18n/countries.php:106
+msgid "Guernsey"
+msgstr "Guernsey"
+
+#: i18n/countries.php:107
+msgid "Guinea"
+msgstr "Guinea"
+
+#: i18n/countries.php:108
+msgid "Guinea-Bissau"
+msgstr "Bissau-Guinea"
+
+#: i18n/countries.php:109
+msgid "Guyana"
+msgstr "Guyana"
+
+#: i18n/countries.php:110
+msgid "Haiti"
+msgstr "Haiti"
+
+#: i18n/countries.php:111
+msgid "Heard Island and McDonald Islands"
+msgstr "Heard-sziget és McDonald-szigetek"
+
+#: i18n/countries.php:112
+msgid "Honduras"
+msgstr "Honduras"
+
+#: i18n/countries.php:113
+msgid "Hong Kong"
+msgstr "Hongkong"
+
+#: i18n/countries.php:114
+msgid "Hungary"
+msgstr "Magyarország"
+
+#: i18n/countries.php:115
+msgid "Iceland"
+msgstr "Izland"
+
+#: i18n/countries.php:116
+msgid "India"
+msgstr "India"
+
+#: i18n/countries.php:117
+msgid "Indonesia"
+msgstr "Indonézia"
+
+#: i18n/countries.php:118
+msgid "Iran"
+msgstr "Irán"
+
+#: i18n/countries.php:119
+msgid "Iraq"
+msgstr "Irak"
+
+#: i18n/countries.php:120
+msgid "Republic of Ireland"
+msgstr "Írország"
+
+#: i18n/countries.php:121
+msgid "Isle of Man"
+msgstr "Man"
+
+#: i18n/countries.php:122
+msgid "Israel"
+msgstr "Izrael"
+
+#: i18n/countries.php:123
+msgid "Italy"
+msgstr "Olaszország"
+
+#: i18n/countries.php:124
+msgid "Ivory Coast"
+msgstr "Elefántcsontpart"
+
+#: i18n/countries.php:125
+msgid "Jamaica"
+msgstr "Jamaica"
+
+#: i18n/countries.php:126
+msgid "Japan"
+msgstr "Japán"
+
+#: i18n/countries.php:127
+msgid "Jersey"
+msgstr "Jersey"
+
+#: i18n/countries.php:128
+msgid "Jordan"
+msgstr "Jordánia"
+
+#: i18n/countries.php:129
+msgid "Kazakhstan"
+msgstr "Kazahsztán"
+
+#: i18n/countries.php:130
+msgid "Kenya"
+msgstr "Kenya"
+
+#: i18n/countries.php:131
+msgid "Kiribati"
+msgstr "Kiribati"
+
+#: i18n/countries.php:132
+msgid "Kuwait"
+msgstr "Kuvait"
+
+#: i18n/countries.php:133
+msgid "Kyrgyzstan"
+msgstr "Kirgizisztán"
+
+#: i18n/countries.php:134
+msgid "Laos"
+msgstr "Laosz"
+
+#: i18n/countries.php:135
+msgid "Latvia"
+msgstr "Lettország"
+
+#: i18n/countries.php:136
+msgid "Lebanon"
+msgstr "Libanon"
+
+#: i18n/countries.php:137
+msgid "Lesotho"
+msgstr "Lesotho"
+
+#: i18n/countries.php:138
+msgid "Liberia"
+msgstr "Libéria"
+
+#: i18n/countries.php:139
+msgid "Libya"
+msgstr "Líbia"
+
+#: i18n/countries.php:140
+msgid "Liechtenstein"
+msgstr "Liechtenstein"
+
+#: i18n/countries.php:141
+msgid "Lithuania"
+msgstr "Litvánia"
+
+#: i18n/countries.php:142
+msgid "Luxembourg"
+msgstr "Luxemburg"
+
+#: i18n/countries.php:143
+msgid "Macao S.A.R., China"
+msgstr "Makaó"
+
+#: i18n/countries.php:144
+msgid "Macedonia"
+msgstr "Macedónia"
+
+#: i18n/countries.php:145
+msgid "Madagascar"
+msgstr "Madagaszkár"
+
+#: i18n/countries.php:146
+msgid "Malawi"
+msgstr "Malawi"
+
+#: i18n/countries.php:147
+msgid "Malaysia"
+msgstr "Malajzia"
+
+#: i18n/countries.php:148
+msgid "Maldives"
+msgstr "Maldiv-szigetek"
+
+#: i18n/countries.php:149
+msgid "Mali"
+msgstr "Mali"
+
+#: i18n/countries.php:150
+msgid "Malta"
+msgstr "Málta"
+
+#: i18n/countries.php:151
+msgid "Marshall Islands"
+msgstr "Marshall-szigetek"
+
+#: i18n/countries.php:152
+msgid "Martinique"
+msgstr "Martinique"
+
+#: i18n/countries.php:153
+msgid "Mauritania"
+msgstr "Mauritánia"
+
+#: i18n/countries.php:154
+msgid "Mauritius"
+msgstr "Mauritius"
+
+#: i18n/countries.php:155
+msgid "Mayotte"
+msgstr "Mayotte"
+
+#: i18n/countries.php:156
+msgid "Mexico"
+msgstr "Mexikó"
+
+#: i18n/countries.php:157
+msgid "Micronesia"
+msgstr "Mikronézia"
+
+#: i18n/countries.php:158
+msgid "Moldova"
+msgstr "Moldova"
+
+#: i18n/countries.php:159
+msgid "Monaco"
+msgstr "Monaco"
+
+#: i18n/countries.php:160
+msgid "Mongolia"
+msgstr "Mongólia"
+
+#: i18n/countries.php:161
+msgid "Montenegro"
+msgstr "Montenegró"
+
+#: i18n/countries.php:162
+msgid "Montserrat"
+msgstr "Montserrat"
+
+#: i18n/countries.php:163
+msgid "Morocco"
+msgstr "Marokkó"
+
+#: i18n/countries.php:164
+msgid "Mozambique"
+msgstr "Mozambzik"
+
+#: i18n/countries.php:165
+msgid "Myanmar"
+msgstr "Mianmar"
+
+#: i18n/countries.php:166
+msgid "Namibia"
+msgstr "Namíbia"
+
+#: i18n/countries.php:167
+msgid "Nauru"
+msgstr "Nauru"
+
+#: i18n/countries.php:168
+msgid "Nepal"
+msgstr "Nepál"
+
+#: i18n/countries.php:169
+msgid "Netherlands"
+msgstr "Hollandia"
+
+#: i18n/countries.php:170
+msgid "Netherlands Antilles"
+msgstr "Holland Antillák"
+
+#: i18n/countries.php:171
+msgid "New Caledonia"
+msgstr "Új-Kaledónia"
+
+#: i18n/countries.php:172
+msgid "New Zealand"
+msgstr "Új-Zéland"
+
+#: i18n/countries.php:173
+msgid "Nicaragua"
+msgstr "Nicaragua"
+
+#: i18n/countries.php:174
+msgid "Niger"
+msgstr "Niger"
+
+#: i18n/countries.php:175
+msgid "Nigeria"
+msgstr "Nigéria"
+
+#: i18n/countries.php:176
+msgid "Niue"
+msgstr "Niue"
+
+#: i18n/countries.php:177
+msgid "Norfolk Island"
+msgstr "Norfolk-sziget"
+
+#: i18n/countries.php:178
+msgid "North Korea"
+msgstr "Észak-Korea"
+
+#: i18n/countries.php:179
+msgid "Norway"
+msgstr "Norvégia"
+
+#: i18n/countries.php:180
+msgid "Oman"
+msgstr "Omán"
+
+#: i18n/countries.php:181
+msgid "Pakistan"
+msgstr "Pakisztán"
+
+#: i18n/countries.php:182
+msgid "Palestinian Territory"
+msgstr "Palesztina"
+
+#: i18n/countries.php:183
+msgid "Panama"
+msgstr "Panama"
+
+#: i18n/countries.php:184
+msgid "Papua New Guinea"
+msgstr "Pápua Új-Guinea"
+
+#: i18n/countries.php:185
+msgid "Paraguay"
+msgstr "Paraguay"
+
+#: i18n/countries.php:186
+msgid "Peru"
+msgstr "Peru"
+
+#: i18n/countries.php:187
+msgid "Philippines"
+msgstr "Fülöp-szigetek"
+
+#: i18n/countries.php:188
+msgid "Pitcairn"
+msgstr "Pitcairn-szigetek"
+
+#: i18n/countries.php:189
+msgid "Poland"
+msgstr "Lengyelország"
+
+#: i18n/countries.php:190
+msgid "Portugal"
+msgstr "Portugália"
+
+#: i18n/countries.php:191
+msgid "Qatar"
+msgstr "Katár"
+
+#: i18n/countries.php:192
+msgid "Reunion"
+msgstr "Réunion"
+
+#: i18n/countries.php:193
+msgid "Romania"
+msgstr "Románia"
+
+#: i18n/countries.php:194
+msgid "Russia"
+msgstr "Oroszország"
+
+#: i18n/countries.php:195
+msgid "Rwanda"
+msgstr "Ruanda"
+
+#: i18n/countries.php:196
+msgid "Saint Barth&eacute;lemy"
+msgstr "Saint Barth&eacute;lemy"
+
+#: i18n/countries.php:197
+msgid "Saint Helena"
+msgstr "Saint Helena"
+
+#: i18n/countries.php:198
+msgid "Saint Kitts and Nevis"
+msgstr "Saint Kitts és Nevis"
+
+#: i18n/countries.php:199
+msgid "Saint Lucia"
+msgstr "Saint Lucia"
+
+#: i18n/countries.php:200
+msgid "Saint Martin (French part)"
+msgstr "Saint Martin (Francia rész)"
+
+#: i18n/countries.php:201
+msgid "Saint Martin (Dutch part)"
+msgstr "Saint Martin (Holland rész)"
+
+#: i18n/countries.php:202
+msgid "Saint Pierre and Miquelon"
+msgstr "Saint-Pierre és Miquelon"
+
+#: i18n/countries.php:203
+msgid "Saint Vincent and the Grenadines"
+msgstr "Saint Vincent és Grenadine-szigetek"
+
+#: i18n/countries.php:204
+msgid "San Marino"
+msgstr "San Marino"
+
+#: i18n/countries.php:205
+msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+msgstr "S&atilde;o Tom&eacute; és Pr&iacute;ncipe"
+
+#: i18n/countries.php:206
+msgid "Saudi Arabia"
+msgstr "Szaúd-Arábia"
+
+#: i18n/countries.php:207
+msgid "Senegal"
+msgstr "Szenegál"
+
+#: i18n/countries.php:208
+msgid "Serbia"
+msgstr "Szerbia"
+
+#: i18n/countries.php:209
+msgid "Seychelles"
+msgstr "Seychelle-szigetek"
+
+#: i18n/countries.php:210
+msgid "Sierra Leone"
+msgstr "Sierra Leone"
+
+#: i18n/countries.php:211
+msgid "Singapore"
+msgstr "Szingapúr"
+
+#: i18n/countries.php:212
+msgid "Slovakia"
+msgstr "Szlovákia"
+
+#: i18n/countries.php:213
+msgid "Slovenia"
+msgstr "Szlovénia"
+
+#: i18n/countries.php:214
+msgid "Solomon Islands"
+msgstr "Salamon-szigetek"
+
+#: i18n/countries.php:215
+msgid "Somalia"
+msgstr "Szomália"
+
+#: i18n/countries.php:216
+msgid "South Africa"
+msgstr "Dél-Afrika"
+
+#: i18n/countries.php:217
+msgid "South Georgia/Sandwich Islands"
+msgstr "Dél-Georgia és Déli-Sandwish-szigetek"
+
+#: i18n/countries.php:218
+msgid "South Korea"
+msgstr "Dél-Korea"
+
+#: i18n/countries.php:219
+msgid "South Sudan"
+msgstr "Dél-Szudán"
+
+#: i18n/countries.php:220
+msgid "Spain"
+msgstr "Spanyolország"
+
+#: i18n/countries.php:221
+msgid "Sri Lanka"
+msgstr "Srí Lanka"
+
+#: i18n/countries.php:222
+msgid "Sudan"
+msgstr "Szudán"
+
+#: i18n/countries.php:223
+msgid "Suriname"
+msgstr "Suriname"
+
+#: i18n/countries.php:224
+msgid "Svalbard and Jan Mayen"
+msgstr "Svalbard- és Jan Mayen-szigetek"
+
+#: i18n/countries.php:225
+msgid "Swaziland"
+msgstr "Szváziföld"
+
+#: i18n/countries.php:226
+msgid "Sweden"
+msgstr "Svédország"
+
+#: i18n/countries.php:227
+msgid "Switzerland"
+msgstr "Svájc"
+
+#: i18n/countries.php:228
+msgid "Syria"
+msgstr "Szíria"
+
+#: i18n/countries.php:229
+msgid "Taiwan"
+msgstr "Tajvan"
+
+#: i18n/countries.php:230
+msgid "Tajikistan"
+msgstr "Tádzsikisztán"
+
+#: i18n/countries.php:231
+msgid "Tanzania"
+msgstr "Tanzánia"
+
+#: i18n/countries.php:232
+msgid "Thailand"
+msgstr "Thaiföld"
+
+#: i18n/countries.php:233
+msgid "Timor-Leste"
+msgstr "Kelet-Timor"
+
+#: i18n/countries.php:234
+msgid "Togo"
+msgstr "Togo"
+
+#: i18n/countries.php:235
+msgid "Tokelau"
+msgstr "Tokelau-szigetek"
+
+#: i18n/countries.php:236
+msgid "Tonga"
+msgstr "Tonga"
+
+#: i18n/countries.php:237
+msgid "Trinidad and Tobago"
+msgstr "Trinidad és Tobago"
+
+#: i18n/countries.php:238
+msgid "Tunisia"
+msgstr "Tunézia"
+
+#: i18n/countries.php:239
+msgid "Turkey"
+msgstr "Törökország"
+
+#: i18n/countries.php:240
+msgid "Turkmenistan"
+msgstr "Türkmenisztán"
+
+#: i18n/countries.php:241
+msgid "Turks and Caicos Islands"
+msgstr "Turks- és Caicos-szigetek"
+
+#: i18n/countries.php:242
+msgid "Tuvalu"
+msgstr "Tuvalue"
+
+#: i18n/countries.php:243
+msgid "Uganda"
+msgstr "Uganda"
+
+#: i18n/countries.php:244
+msgid "Ukraine"
+msgstr "Ukrajna"
+
+#: i18n/countries.php:245
+msgid "United Arab Emirates"
+msgstr "Egyesült Arab Emírségek"
+
+#: i18n/countries.php:246
+msgid "United Kingdom (UK)"
+msgstr "Egyesült Királyság"
+
+#: i18n/countries.php:247
+msgid "United States (US)"
+msgstr "Amerikai Egyesült Államok"
+
+#: i18n/countries.php:248
+msgid "Uruguay"
+msgstr "Uruguay"
+
+#: i18n/countries.php:249
+msgid "Uzbekistan"
+msgstr "Üzbegisztán"
+
+#: i18n/countries.php:250
+msgid "Vanuatu"
+msgstr "Vanuatu"
+
+#: i18n/countries.php:251
+msgid "Vatican"
+msgstr "Vatikán"
+
+#: i18n/countries.php:252
+msgid "Venezuela"
+msgstr "Venezuela"
+
+#: i18n/countries.php:253
+msgid "Vietnam"
+msgstr "Vietnám"
+
+#: i18n/countries.php:254
+msgid "Wallis and Futuna"
+msgstr "Wallis és Futuna"
+
+#: i18n/countries.php:255
+msgid "Western Sahara"
+msgstr "Nyugat-Szahara"
+
+#: i18n/countries.php:256
+msgid "Western Samoa"
+msgstr "Nyugat-Szamoa"
+
+#: i18n/countries.php:257
+msgid "Yemen"
+msgstr "Jemen"
+
+#: i18n/countries.php:258
+msgid "Zambia"
+msgstr "Zambia"
+
+#: i18n/countries.php:259
+msgid "Zimbabwe"
+msgstr "Zimbabwe"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
@@ -2903,10 +3832,6 @@ msgstr "District Of Columbia"
 msgid "Florida"
 msgstr "Florida"
 
-#: i18n/states/US.php:23 includes/class-wc-countries.php:118
-msgid "Georgia"
-msgstr "Grúzia"
-
 #: i18n/states/US.php:24
 msgid "Hawaii"
 msgstr "Hawaii"
@@ -3163,9 +4088,9 @@ msgstr "visszatérítve"
 msgid "cancelled"
 msgstr "visszamondva"
 
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/emails/class-wc-email-customer-completed-order.php:140
-#: includes/emails/class-wc-email-new-order.php:120
+#: includes/abstracts/abstract-wc-email.php:573
+#: includes/emails/class-wc-email-customer-completed-order.php:141
+#: includes/emails/class-wc-email-new-order.php:121
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:52
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:122
@@ -3176,130 +4101,130 @@ msgstr "visszamondva"
 msgid "Enable/Disable"
 msgstr "Bekapcsolás/Kikapcsolás"
 
-#: includes/abstracts/abstract-wc-email.php:572
-#: includes/emails/class-wc-email-customer-completed-order.php:142
-#: includes/emails/class-wc-email-new-order.php:122
+#: includes/abstracts/abstract-wc-email.php:575
+#: includes/emails/class-wc-email-customer-completed-order.php:143
+#: includes/emails/class-wc-email-new-order.php:123
 msgid "Enable this email notification"
 msgstr "E-mail értesítés bekapcsolása"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/emails/class-wc-email-customer-invoice.php:146
+#: includes/abstracts/abstract-wc-email.php:579
+#: includes/emails/class-wc-email-customer-invoice.php:147
 msgid "Email subject"
 msgstr "E-mail tárgy"
 
-#: includes/abstracts/abstract-wc-email.php:578
-#: includes/abstracts/abstract-wc-email.php:585
-#: includes/emails/class-wc-email-customer-completed-order.php:148
-#: includes/emails/class-wc-email-customer-completed-order.php:155
-#: includes/emails/class-wc-email-customer-completed-order.php:162
-#: includes/emails/class-wc-email-customer-completed-order.php:169
-#: includes/emails/class-wc-email-customer-invoice.php:148
-#: includes/emails/class-wc-email-customer-invoice.php:155
-#: includes/emails/class-wc-email-customer-invoice.php:162
-#: includes/emails/class-wc-email-customer-invoice.php:169
+#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:588
+#: includes/emails/class-wc-email-customer-completed-order.php:149
+#: includes/emails/class-wc-email-customer-completed-order.php:156
+#: includes/emails/class-wc-email-customer-completed-order.php:163
+#: includes/emails/class-wc-email-customer-completed-order.php:170
+#: includes/emails/class-wc-email-customer-invoice.php:149
+#: includes/emails/class-wc-email-customer-invoice.php:156
+#: includes/emails/class-wc-email-customer-invoice.php:163
+#: includes/emails/class-wc-email-customer-invoice.php:170
 msgid "Defaults to <code>%s</code>"
 msgstr "Alapértelmezésként <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:583
-#: includes/emails/class-wc-email-customer-invoice.php:153
+#: includes/abstracts/abstract-wc-email.php:586
+#: includes/emails/class-wc-email-customer-invoice.php:154
 msgid "Email heading"
 msgstr "E-mail fejléc"
 
-#: includes/abstracts/abstract-wc-email.php:590
-#: includes/emails/class-wc-email-customer-completed-order.php:174
-#: includes/emails/class-wc-email-customer-invoice.php:174
-#: includes/emails/class-wc-email-new-order.php:147
+#: includes/abstracts/abstract-wc-email.php:593
+#: includes/emails/class-wc-email-customer-completed-order.php:175
+#: includes/emails/class-wc-email-customer-invoice.php:175
+#: includes/emails/class-wc-email-new-order.php:148
 msgid "Email type"
 msgstr "E-mail típus"
 
-#: includes/abstracts/abstract-wc-email.php:592
-#: includes/emails/class-wc-email-customer-completed-order.php:176
-#: includes/emails/class-wc-email-customer-invoice.php:176
-#: includes/emails/class-wc-email-new-order.php:149
+#: includes/abstracts/abstract-wc-email.php:595
+#: includes/emails/class-wc-email-customer-completed-order.php:177
+#: includes/emails/class-wc-email-customer-invoice.php:177
+#: includes/emails/class-wc-email-new-order.php:150
 msgid "Choose which format of email to send."
 msgstr "Válaszd ki milyen formátumban kerüljön kiküldésre az e-mail."
 
-#: includes/abstracts/abstract-wc-email.php:596
-#: includes/emails/class-wc-email-customer-completed-order.php:180
-#: includes/emails/class-wc-email-customer-invoice.php:180
-#: includes/emails/class-wc-email-new-order.php:153
-msgid "Plain text"
-msgstr "Szöveges"
-
-#: includes/abstracts/abstract-wc-email.php:597
+#: includes/abstracts/abstract-wc-email.php:599
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
-msgid "HTML"
-msgstr "HTML"
+msgid "Plain text"
+msgstr "Szöveges"
 
-#: includes/abstracts/abstract-wc-email.php:598
+#: includes/abstracts/abstract-wc-email.php:600
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
+msgid "HTML"
+msgstr "HTML"
+
+#: includes/abstracts/abstract-wc-email.php:601
+#: includes/emails/class-wc-email-customer-completed-order.php:183
+#: includes/emails/class-wc-email-customer-invoice.php:183
+#: includes/emails/class-wc-email-new-order.php:156
 msgid "Multipart"
 msgstr "Multipart"
 
-#: includes/abstracts/abstract-wc-email.php:634
-#: includes/abstracts/abstract-wc-email.php:655
+#: includes/abstracts/abstract-wc-email.php:637
+#: includes/abstracts/abstract-wc-email.php:658
 msgid "Could not write to template file."
 msgstr "Nem írható a sablonfájl."
 
-#: includes/abstracts/abstract-wc-email.php:686
+#: includes/abstracts/abstract-wc-email.php:689
 msgid "Template file copied to theme."
 msgstr "A sablonfájl le lett másolva a sablonba."
 
-#: includes/abstracts/abstract-wc-email.php:695
+#: includes/abstracts/abstract-wc-email.php:698
 msgid "Template file deleted from theme."
 msgstr "A sablonfájl törölve a sablonból."
 
-#: includes/abstracts/abstract-wc-email.php:703
+#: includes/abstracts/abstract-wc-email.php:706
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Beállítások"
 
-#: includes/abstracts/abstract-wc-email.php:715
+#: includes/abstracts/abstract-wc-email.php:718
 msgid "HTML template"
 msgstr "HTML sablon"
 
-#: includes/abstracts/abstract-wc-email.php:716
+#: includes/abstracts/abstract-wc-email.php:719
 msgid "Plain text template"
 msgstr "Szöveges sablon"
 
-#: includes/abstracts/abstract-wc-email.php:737
+#: includes/abstracts/abstract-wc-email.php:740
 msgid "Delete template file"
 msgstr "Sablonfájl törlése"
 
-#: includes/abstracts/abstract-wc-email.php:740
+#: includes/abstracts/abstract-wc-email.php:743
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "Ez a fájl felül lett írva a sablonból és itt található: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:755
+#: includes/abstracts/abstract-wc-email.php:758
 msgid "Copy file to theme"
 msgstr "Fájl másolása a sablonba"
 
-#: includes/abstracts/abstract-wc-email.php:758
+#: includes/abstracts/abstract-wc-email.php:761
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "Az e-mail sablon felülírásához és szerkesztéséhez másold ezt a fájlt: <code>%s</code> a sablonod mappájába: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:769
+#: includes/abstracts/abstract-wc-email.php:772
 msgid "File was not found."
 msgstr "Fájl nem található."
 
-#: includes/abstracts/abstract-wc-email.php:794
+#: includes/abstracts/abstract-wc-email.php:797
 msgid "View template"
 msgstr "Sablon megtekintése"
 
-#: includes/abstracts/abstract-wc-email.php:795
+#: includes/abstracts/abstract-wc-email.php:798
 msgid "Hide template"
 msgstr "Sablon elrejtése"
 
-#: includes/abstracts/abstract-wc-email.php:806
+#: includes/abstracts/abstract-wc-email.php:809
 msgid "Are you sure you want to delete this template file?"
 msgstr "Biztos vagy benne, hogy törölni szeretnéd ezt a sablonfájlt?"
 
@@ -3454,7 +4379,7 @@ msgid "You do not have permission to create coupons"
 msgstr "Nincs jogosultságod kuponok létrehozásához"
 
 #: includes/api/class-wc-api-coupons.php:201
-#: includes/api/class-wc-api-customers.php:332
+#: includes/api/class-wc-api-customers.php:337
 #: includes/api/class-wc-api-server.php:423
 msgid "Missing parameter %s"
 msgstr "Hiányzó %s paraméter"
@@ -3473,36 +4398,36 @@ msgstr "Érvénytelen kupon típus - a kupon típusa a következők valamelyike 
 msgid "Failed to update coupon"
 msgstr "A kupon frissítése sikertelen"
 
-#: includes/api/class-wc-api-customers.php:249
-#: includes/api/class-wc-api-customers.php:252
+#: includes/api/class-wc-api-customers.php:254
+#: includes/api/class-wc-api-customers.php:257
 msgid "Invalid customer Email"
 msgstr "Érvnytelen vásárlói e-mail"
 
-#: includes/api/class-wc-api-customers.php:270
+#: includes/api/class-wc-api-customers.php:275
 msgid "You do not have permission to read the customers count"
 msgstr "Nincs jogosultságok a vásárlók számának kiolvasásához"
 
-#: includes/api/class-wc-api-customers.php:327
+#: includes/api/class-wc-api-customers.php:332
 msgid "You do not have permission to create this customer"
 msgstr "Nincs jogosultságod a vásárló létrehozásához"
 
-#: includes/api/class-wc-api-customers.php:630
+#: includes/api/class-wc-api-customers.php:665
 msgid "Invalid customer ID"
 msgstr "Érvénytelen vásárló azonosító"
 
-#: includes/api/class-wc-api-customers.php:637
+#: includes/api/class-wc-api-customers.php:672
 msgid "Invalid customer"
 msgstr "Érvénytelen vásárló"
 
-#: includes/api/class-wc-api-customers.php:645
+#: includes/api/class-wc-api-customers.php:680
 msgid "You do not have permission to read this customer"
 msgstr "Nincs jogosultságod a vásárló olvasásához"
 
-#: includes/api/class-wc-api-customers.php:651
+#: includes/api/class-wc-api-customers.php:686
 msgid "You do not have permission to edit this customer"
 msgstr "Nincs jogosultságod a vásárló szerkesztéséhez"
 
-#: includes/api/class-wc-api-customers.php:657
+#: includes/api/class-wc-api-customers.php:692
 msgid "You do not have permission to delete this customer"
 msgstr "Nincs jogosultságod a vásárló törléséhez"
 
@@ -3551,23 +4476,23 @@ msgstr "Nincs jogosultságod a %s szerkesztéséhez"
 msgid "You do not have permission to delete this %s"
 msgstr "Nincs jogosultságod a %s törléséhez"
 
-#: includes/api/class-wc-api-resource.php:308
+#: includes/api/class-wc-api-resource.php:314
 msgid "Permanently deleted customer"
 msgstr "Véglegesen törölt vásárló"
 
-#: includes/api/class-wc-api-resource.php:310
+#: includes/api/class-wc-api-resource.php:316
 msgid "The customer cannot be deleted"
 msgstr "A vásárló nem törölhető"
 
-#: includes/api/class-wc-api-resource.php:319
+#: includes/api/class-wc-api-resource.php:325
 msgid "This %s cannot be deleted"
 msgstr "Ez a %s nem törölhető"
 
-#: includes/api/class-wc-api-resource.php:322
+#: includes/api/class-wc-api-resource.php:328
 msgid "Permanently deleted %s"
 msgstr "Véglegesen törölt %s"
 
-#: includes/api/class-wc-api-resource.php:328
+#: includes/api/class-wc-api-resource.php:334
 msgid "Deleted %s"
 msgstr "Törölt %s"
 
@@ -3587,76 +4512,7 @@ msgstr "Az útvonal kezelője érvénytelen"
 msgid "No route was found matching the URL and request method"
 msgstr "Nem található az URL-hez és lekérési módhoz tartozó útvonal"
 
-#: includes/class-wc-ajax.php:164
-msgid "Sorry, your session has expired."
-msgstr "Sajnáljuk, a munkamenet lejárt."
-
-#: includes/class-wc-ajax.php:164
-msgid "Return to homepage"
-msgstr "Vissza a főoldalra"
-
-#: includes/class-wc-ajax.php:318 includes/class-wc-ajax.php:351
-#: includes/class-wc-ajax.php:376
-msgid "You do not have sufficient permissions to access this page."
-msgstr "Nincs megfelelő jogosultságod az oldal megtekintéséhez."
-
-#: includes/class-wc-ajax.php:322 includes/class-wc-ajax.php:355
-#: includes/class-wc-ajax.php:380
-msgid "You have taken too long. Please go back and retry."
-msgstr "Túl sokáig gondolkoztál. Kérjük lépj vissza és próbáld újra."
-
-#: includes/class-wc-ajax.php:612
-msgid "Same as parent"
-msgstr "Szülővel megegyezik"
-
-#: includes/class-wc-ajax.php:613
-msgid "Standard"
-msgstr "Standard"
-
-#: includes/class-wc-ajax.php:888
-msgid "File %d"
-msgstr "Fájl %d"
-
-#: includes/class-wc-ajax.php:1086 includes/class-wc-ajax.php:1087
-#: includes/class-wc-order.php:1592
-msgid "Item #%s stock reduced from %s to %s."
-msgstr "#%s termék készlete csökkentve: %s volt, majd %s lett."
-
-#: includes/class-wc-ajax.php:1095
-msgid ""
-"No products had their stock reduced - they may not have stock management "
-"enabled."
-msgstr "Egy termék készlete sem csökkent - lehet hogy nincs engedélyezve a készletkezelés."
-
-#: includes/class-wc-ajax.php:1136 includes/class-wc-ajax.php:1137
-msgid "Item #%s stock increased from %s to %s."
-msgstr "#%s termék készlete megemelve: %s volt, majd %s lett."
-
-#: includes/class-wc-ajax.php:1144
-msgid ""
-"No products had their stock increased - they may not have stock management "
-"enabled."
-msgstr "Egy termék készlete sem növekedett - lehet hogy nincs engedélyezve a készletkezelés."
-
-#: includes/class-wc-ajax.php:1161
-#: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:62
-msgid "Name"
-msgstr "Név"
-
-#: includes/class-wc-ajax.php:1161
-msgid "Value"
-msgstr "Érték"
-
-#: includes/class-wc-ajax.php:1384
-msgid "Delete note"
-msgstr "Megjegyzés törlése"
-
-#: includes/class-wc-ajax.php:1532
-msgid "Guest"
-msgstr "Vendég"
-
-#: includes/class-wc-cache-helper.php:105
+#: includes/class-wc-cache-helper.php:106
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
@@ -3711,7 +4567,7 @@ msgid ""
 msgstr "Ekkora mennyiségű &quot;%s&quot; nem rakható a kosárba, mivel nincs elég készleten (%s maradt)."
 
 #: includes/class-wc-cart.php:835 includes/class-wc-cart.php:854
-#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:188
 #: includes/wc-cart-functions.php:96 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "Kosár megtekintése"
@@ -3780,20 +4636,20 @@ msgid ""
 " to homepage</a>"
 msgstr "Sajnáljuk, lejárt a munkameneted. <a href=\"%s\" class=\"wc-backward\">Vissza a főoldalra</a>"
 
-#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:84
 msgid "is a required field."
 msgstr "mező kitöltése kötelező."
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:95
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Kérjük valós irányítószámot írj be."
 
-#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:104
 msgid "is not a valid phone number."
 msgstr "nem érvényes telefonszám."
 
-#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:111
 msgid "is not a valid email address."
 msgstr "érvénytelen e-mail cím."
 
@@ -3819,1112 +4675,45 @@ msgstr "Érvénytelen szállítási mód."
 msgid "Invalid payment method."
 msgstr "Érvénytelen fizetési mód."
 
-#: includes/class-wc-comments.php:109
+#: includes/class-wc-comments.php:111
 msgid "Please rate the product."
 msgstr "Kérjük értékeld a terméket."
 
-#: includes/class-wc-countries.php:37
-msgid "Afghanistan"
-msgstr "Afganisztán"
-
-#: includes/class-wc-countries.php:38
-msgid "&#197;land Islands"
-msgstr "Aland-szigetek"
-
-#: includes/class-wc-countries.php:39
-msgid "Albania"
-msgstr "Albánia"
-
-#: includes/class-wc-countries.php:40
-msgid "Algeria"
-msgstr "Algéria"
-
-#: includes/class-wc-countries.php:41
-msgid "Andorra"
-msgstr "Andorra"
-
-#: includes/class-wc-countries.php:42
-msgid "Angola"
-msgstr "Angola"
-
-#: includes/class-wc-countries.php:43
-msgid "Anguilla"
-msgstr "Anguilla"
-
-#: includes/class-wc-countries.php:44
-msgid "Antarctica"
-msgstr "Antarktisz"
-
-#: includes/class-wc-countries.php:45
-msgid "Antigua and Barbuda"
-msgstr "Antigua és Barbuda"
-
-#: includes/class-wc-countries.php:46
-msgid "Argentina"
-msgstr "Argentína"
-
-#: includes/class-wc-countries.php:47
-msgid "Armenia"
-msgstr "Örményország"
-
-#: includes/class-wc-countries.php:48
-msgid "Aruba"
-msgstr "Aruba "
-
-#: includes/class-wc-countries.php:49
-msgid "Australia"
-msgstr "Ausztrália"
-
-#: includes/class-wc-countries.php:50
-msgid "Austria"
-msgstr "Ausztria"
-
-#: includes/class-wc-countries.php:51
-msgid "Azerbaijan"
-msgstr "Azerbajdzsán"
-
-#: includes/class-wc-countries.php:52
-msgid "Bahamas"
-msgstr "Bahama-szigetek"
-
-#: includes/class-wc-countries.php:53
-msgid "Bahrain"
-msgstr "Bahrein"
-
-#: includes/class-wc-countries.php:54
-msgid "Bangladesh"
-msgstr "Banglades"
-
-#: includes/class-wc-countries.php:55
-msgid "Barbados"
-msgstr "Barbados"
-
-#: includes/class-wc-countries.php:56
-msgid "Belarus"
-msgstr "Belarusz "
-
-#: includes/class-wc-countries.php:57
-msgid "Belgium"
-msgstr "Belgium"
-
-#: includes/class-wc-countries.php:58
-msgid "Belau"
-msgstr "Belau"
-
-#: includes/class-wc-countries.php:59
-msgid "Belize"
-msgstr "Belize"
-
-#: includes/class-wc-countries.php:60
-msgid "Benin"
-msgstr "Benin"
-
-#: includes/class-wc-countries.php:61
-msgid "Bermuda"
-msgstr "Bermuda"
-
-#: includes/class-wc-countries.php:62
-msgid "Bhutan"
-msgstr "Bhután"
-
-#: includes/class-wc-countries.php:63
-msgid "Bolivia"
-msgstr "Bolívia"
-
-#: includes/class-wc-countries.php:64
-msgid "Bonaire, Saint Eustatius and Saba"
-msgstr "Bonaire, Saint Eustatius és Saba"
-
-#: includes/class-wc-countries.php:65
-msgid "Bosnia and Herzegovina"
-msgstr "Bosznia-Hercegovina"
-
-#: includes/class-wc-countries.php:66
-msgid "Botswana"
-msgstr "Botswana"
-
-#: includes/class-wc-countries.php:67
-msgid "Bouvet Island"
-msgstr "Bouvet-sziget "
-
-#: includes/class-wc-countries.php:68
-msgid "Brazil"
-msgstr "Brazília"
-
-#: includes/class-wc-countries.php:69
-msgid "British Indian Ocean Territory"
-msgstr "Brit Indiai-óceáni Terület"
-
-#: includes/class-wc-countries.php:70
-msgid "British Virgin Islands"
-msgstr "Brit Virgin-szigetek "
-
-#: includes/class-wc-countries.php:71
-msgid "Brunei"
-msgstr "Brunei"
-
-#: includes/class-wc-countries.php:72
-msgid "Bulgaria"
-msgstr "Bulgária"
-
-#: includes/class-wc-countries.php:73
-msgid "Burkina Faso"
-msgstr "Burkina Faso"
-
-#: includes/class-wc-countries.php:74
-msgid "Burundi"
-msgstr "Burundi"
-
-#: includes/class-wc-countries.php:75
-msgid "Cambodia"
-msgstr "Kambodzsa"
-
-#: includes/class-wc-countries.php:76
-msgid "Cameroon"
-msgstr "Kamerun"
-
-#: includes/class-wc-countries.php:77
-msgid "Canada"
-msgstr "Kanada"
-
-#: includes/class-wc-countries.php:78
-msgid "Cape Verde"
-msgstr "Zöld-foki-szigetek"
-
-#: includes/class-wc-countries.php:79
-msgid "Cayman Islands"
-msgstr "Kajmán-szigetek "
-
-#: includes/class-wc-countries.php:80
-msgid "Central African Republic"
-msgstr "Közép-afrikai Köztársaság"
-
-#: includes/class-wc-countries.php:81
-msgid "Chad"
-msgstr "Csád"
-
-#: includes/class-wc-countries.php:82
-msgid "Chile"
-msgstr "Chile"
-
-#: includes/class-wc-countries.php:83
-msgid "China"
-msgstr "Kína"
-
-#: includes/class-wc-countries.php:84
-msgid "Christmas Island"
-msgstr "Karácsony-sziget "
-
-#: includes/class-wc-countries.php:85
-msgid "Cocos (Keeling) Islands"
-msgstr "Kókusz-szigetek/Keeling-szigetek"
-
-#: includes/class-wc-countries.php:86
-msgid "Colombia"
-msgstr "Kolumbia"
-
-#: includes/class-wc-countries.php:87
-msgid "Comoros"
-msgstr "Comore-szigetek"
-
-#: includes/class-wc-countries.php:88
-msgid "Congo (Brazzaville)"
-msgstr "Kongó"
-
-#: includes/class-wc-countries.php:89
-msgid "Congo (Kinshasa)"
-msgstr "Kongói Demokratikus Köztársaság"
-
-#: includes/class-wc-countries.php:90
-msgid "Cook Islands"
-msgstr "Cook-szigetek"
-
-#: includes/class-wc-countries.php:91
-msgid "Costa Rica"
-msgstr "Costa Rica"
-
-#: includes/class-wc-countries.php:92
-msgid "Croatia"
-msgstr "Horvátország"
-
-#: includes/class-wc-countries.php:93
-msgid "Cuba"
-msgstr "Kuba"
-
-#: includes/class-wc-countries.php:94
-msgid "Cura&Ccedil;ao"
-msgstr "Cura&Ccedil;ao"
-
-#: includes/class-wc-countries.php:95
-msgid "Cyprus"
-msgstr "Ciprus"
-
-#: includes/class-wc-countries.php:96
-msgid "Czech Republic"
-msgstr "Csehország"
-
-#: includes/class-wc-countries.php:97
-msgid "Denmark"
-msgstr "Dánia"
-
-#: includes/class-wc-countries.php:98
-msgid "Djibouti"
-msgstr "Dzsibuti"
-
-#: includes/class-wc-countries.php:99
-msgid "Dominica"
-msgstr "Dominika"
-
-#: includes/class-wc-countries.php:100
-msgid "Dominican Republic"
-msgstr "Dominikai Köztársaság"
-
-#: includes/class-wc-countries.php:101
-msgid "Ecuador"
-msgstr "Ecuador"
-
-#: includes/class-wc-countries.php:102
-msgid "Egypt"
-msgstr "Egyiptom"
-
-#: includes/class-wc-countries.php:103
-msgid "El Salvador"
-msgstr "Salvador"
-
-#: includes/class-wc-countries.php:104
-msgid "Equatorial Guinea"
-msgstr "Egyenlítői-Guinea"
-
-#: includes/class-wc-countries.php:105
-msgid "Eritrea"
-msgstr "Eritrea"
-
-#: includes/class-wc-countries.php:106
-msgid "Estonia"
-msgstr "Észtország"
-
-#: includes/class-wc-countries.php:107
-msgid "Ethiopia"
-msgstr "Etiópia"
-
-#: includes/class-wc-countries.php:108
-msgid "Falkland Islands"
-msgstr "Falkland-szigetek"
-
-#: includes/class-wc-countries.php:109
-msgid "Faroe Islands"
-msgstr "Feröer-szigetek"
-
-#: includes/class-wc-countries.php:110
-msgid "Fiji"
-msgstr "Fidzsi-szigetek"
-
-#: includes/class-wc-countries.php:111
-msgid "Finland"
-msgstr "Finnország"
-
-#: includes/class-wc-countries.php:112
-msgid "France"
-msgstr "Franciaország"
-
-#: includes/class-wc-countries.php:113
-msgid "French Guiana"
-msgstr "Francia Guyana"
-
-#: includes/class-wc-countries.php:114
-msgid "French Polynesia"
-msgstr "Francia Polinézia"
-
-#: includes/class-wc-countries.php:115
-msgid "French Southern Territories"
-msgstr "Francia Déli Területek"
-
-#: includes/class-wc-countries.php:116
-msgid "Gabon"
-msgstr "Gabon"
-
-#: includes/class-wc-countries.php:117
-msgid "Gambia"
-msgstr "Gambia"
-
-#: includes/class-wc-countries.php:119
-msgid "Germany"
-msgstr "Németország"
-
-#: includes/class-wc-countries.php:120
-msgid "Ghana"
-msgstr "Ghána"
-
-#: includes/class-wc-countries.php:121
-msgid "Gibraltar"
-msgstr "Gibraltár"
-
-#: includes/class-wc-countries.php:122
-msgid "Greece"
-msgstr "Görögország"
-
-#: includes/class-wc-countries.php:123
-msgid "Greenland"
-msgstr "Grönland"
-
-#: includes/class-wc-countries.php:124
-msgid "Grenada"
-msgstr "Grenada"
-
-#: includes/class-wc-countries.php:125
-msgid "Guadeloupe"
-msgstr "Guadeloupe"
-
-#: includes/class-wc-countries.php:126
-msgid "Guatemala"
-msgstr "Guatemala"
-
-#: includes/class-wc-countries.php:127
-msgid "Guernsey"
-msgstr "Guernsey"
-
-#: includes/class-wc-countries.php:128
-msgid "Guinea"
-msgstr "Guinea"
-
-#: includes/class-wc-countries.php:129
-msgid "Guinea-Bissau"
-msgstr "Bissau-Guinea"
-
-#: includes/class-wc-countries.php:130
-msgid "Guyana"
-msgstr "Guyana"
-
-#: includes/class-wc-countries.php:131
-msgid "Haiti"
-msgstr "Haiti"
-
-#: includes/class-wc-countries.php:132
-msgid "Heard Island and McDonald Islands"
-msgstr "Heard-sziget és McDonald-szigetek"
-
-#: includes/class-wc-countries.php:133
-msgid "Honduras"
-msgstr "Honduras"
-
-#: includes/class-wc-countries.php:134
-msgid "Hong Kong"
-msgstr "Hongkong"
-
-#: includes/class-wc-countries.php:135
-msgid "Hungary"
-msgstr "Magyarország"
-
-#: includes/class-wc-countries.php:136
-msgid "Iceland"
-msgstr "Izland"
-
-#: includes/class-wc-countries.php:137
-msgid "India"
-msgstr "India"
-
-#: includes/class-wc-countries.php:138
-msgid "Indonesia"
-msgstr "Indonézia"
-
-#: includes/class-wc-countries.php:139
-msgid "Iran"
-msgstr "Irán"
-
-#: includes/class-wc-countries.php:140
-msgid "Iraq"
-msgstr "Irak"
-
-#: includes/class-wc-countries.php:141
-msgid "Republic of Ireland"
-msgstr "Írország"
-
-#: includes/class-wc-countries.php:142
-msgid "Isle of Man"
-msgstr "Man"
-
-#: includes/class-wc-countries.php:143
-msgid "Israel"
-msgstr "Izrael"
-
-#: includes/class-wc-countries.php:144
-msgid "Italy"
-msgstr "Olaszország"
-
-#: includes/class-wc-countries.php:145
-msgid "Ivory Coast"
-msgstr "Elefántcsontpart"
-
-#: includes/class-wc-countries.php:146
-msgid "Jamaica"
-msgstr "Jamaica"
-
-#: includes/class-wc-countries.php:147
-msgid "Japan"
-msgstr "Japán"
-
-#: includes/class-wc-countries.php:148
-msgid "Jersey"
-msgstr "Jersey"
-
-#: includes/class-wc-countries.php:149
-msgid "Jordan"
-msgstr "Jordánia"
-
-#: includes/class-wc-countries.php:150
-msgid "Kazakhstan"
-msgstr "Kazahsztán"
-
-#: includes/class-wc-countries.php:151
-msgid "Kenya"
-msgstr "Kenya"
-
-#: includes/class-wc-countries.php:152
-msgid "Kiribati"
-msgstr "Kiribati"
-
-#: includes/class-wc-countries.php:153
-msgid "Kuwait"
-msgstr "Kuvait"
-
-#: includes/class-wc-countries.php:154
-msgid "Kyrgyzstan"
-msgstr "Kirgizisztán"
-
-#: includes/class-wc-countries.php:155
-msgid "Laos"
-msgstr "Laosz"
-
-#: includes/class-wc-countries.php:156
-msgid "Latvia"
-msgstr "Lettország"
-
-#: includes/class-wc-countries.php:157
-msgid "Lebanon"
-msgstr "Libanon"
-
-#: includes/class-wc-countries.php:158
-msgid "Lesotho"
-msgstr "Lesotho"
-
-#: includes/class-wc-countries.php:159
-msgid "Liberia"
-msgstr "Libéria"
-
-#: includes/class-wc-countries.php:160
-msgid "Libya"
-msgstr "Líbia"
-
-#: includes/class-wc-countries.php:161
-msgid "Liechtenstein"
-msgstr "Liechtenstein"
-
-#: includes/class-wc-countries.php:162
-msgid "Lithuania"
-msgstr "Litvánia"
-
-#: includes/class-wc-countries.php:163
-msgid "Luxembourg"
-msgstr "Luxemburg"
-
-#: includes/class-wc-countries.php:164
-msgid "Macao S.A.R., China"
-msgstr "Makaó"
-
-#: includes/class-wc-countries.php:165
-msgid "Macedonia"
-msgstr "Macedónia"
-
-#: includes/class-wc-countries.php:166
-msgid "Madagascar"
-msgstr "Madagaszkár"
-
-#: includes/class-wc-countries.php:167
-msgid "Malawi"
-msgstr "Malawi"
-
-#: includes/class-wc-countries.php:168
-msgid "Malaysia"
-msgstr "Malajzia"
-
-#: includes/class-wc-countries.php:169
-msgid "Maldives"
-msgstr "Maldiv-szigetek"
-
-#: includes/class-wc-countries.php:170
-msgid "Mali"
-msgstr "Mali"
-
-#: includes/class-wc-countries.php:171
-msgid "Malta"
-msgstr "Málta"
-
-#: includes/class-wc-countries.php:172
-msgid "Marshall Islands"
-msgstr "Marshall-szigetek"
-
-#: includes/class-wc-countries.php:173
-msgid "Martinique"
-msgstr "Martinique"
-
-#: includes/class-wc-countries.php:174
-msgid "Mauritania"
-msgstr "Mauritánia"
-
-#: includes/class-wc-countries.php:175
-msgid "Mauritius"
-msgstr "Mauritius"
-
-#: includes/class-wc-countries.php:176
-msgid "Mayotte"
-msgstr "Mayotte"
-
-#: includes/class-wc-countries.php:177
-msgid "Mexico"
-msgstr "Mexikó"
-
-#: includes/class-wc-countries.php:178
-msgid "Micronesia"
-msgstr "Mikronézia"
-
-#: includes/class-wc-countries.php:179
-msgid "Moldova"
-msgstr "Moldova"
-
-#: includes/class-wc-countries.php:180
-msgid "Monaco"
-msgstr "Monaco"
-
-#: includes/class-wc-countries.php:181
-msgid "Mongolia"
-msgstr "Mongólia"
-
-#: includes/class-wc-countries.php:182
-msgid "Montenegro"
-msgstr "Montenegró"
-
-#: includes/class-wc-countries.php:183
-msgid "Montserrat"
-msgstr "Montserrat"
-
-#: includes/class-wc-countries.php:184
-msgid "Morocco"
-msgstr "Marokkó"
-
-#: includes/class-wc-countries.php:185
-msgid "Mozambique"
-msgstr "Mozambzik"
-
-#: includes/class-wc-countries.php:186
-msgid "Myanmar"
-msgstr "Mianmar"
-
-#: includes/class-wc-countries.php:187
-msgid "Namibia"
-msgstr "Namíbia"
-
-#: includes/class-wc-countries.php:188
-msgid "Nauru"
-msgstr "Nauru"
-
-#: includes/class-wc-countries.php:189
-msgid "Nepal"
-msgstr "Nepál"
-
-#: includes/class-wc-countries.php:190
-msgid "Netherlands"
-msgstr "Hollandia"
-
-#: includes/class-wc-countries.php:191
-msgid "Netherlands Antilles"
-msgstr "Holland Antillák"
-
-#: includes/class-wc-countries.php:192
-msgid "New Caledonia"
-msgstr "Új-Kaledónia"
-
-#: includes/class-wc-countries.php:193
-msgid "New Zealand"
-msgstr "Új-Zéland"
-
-#: includes/class-wc-countries.php:194
-msgid "Nicaragua"
-msgstr "Nicaragua"
-
-#: includes/class-wc-countries.php:195
-msgid "Niger"
-msgstr "Niger"
-
-#: includes/class-wc-countries.php:196
-msgid "Nigeria"
-msgstr "Nigéria"
-
-#: includes/class-wc-countries.php:197
-msgid "Niue"
-msgstr "Niue"
-
-#: includes/class-wc-countries.php:198
-msgid "Norfolk Island"
-msgstr "Norfolk-sziget"
-
-#: includes/class-wc-countries.php:199
-msgid "North Korea"
-msgstr "Észak-Korea"
-
-#: includes/class-wc-countries.php:200
-msgid "Norway"
-msgstr "Norvégia"
-
-#: includes/class-wc-countries.php:201
-msgid "Oman"
-msgstr "Omán"
-
-#: includes/class-wc-countries.php:202
-msgid "Pakistan"
-msgstr "Pakisztán"
-
-#: includes/class-wc-countries.php:203
-msgid "Palestinian Territory"
-msgstr "Palesztina"
-
-#: includes/class-wc-countries.php:204
-msgid "Panama"
-msgstr "Panama"
-
-#: includes/class-wc-countries.php:205
-msgid "Papua New Guinea"
-msgstr "Pápua Új-Guinea"
-
-#: includes/class-wc-countries.php:206
-msgid "Paraguay"
-msgstr "Paraguay"
-
-#: includes/class-wc-countries.php:207
-msgid "Peru"
-msgstr "Peru"
-
-#: includes/class-wc-countries.php:208
-msgid "Philippines"
-msgstr "Fülöp-szigetek"
-
-#: includes/class-wc-countries.php:209
-msgid "Pitcairn"
-msgstr "Pitcairn-szigetek"
-
-#: includes/class-wc-countries.php:210
-msgid "Poland"
-msgstr "Lengyelország"
-
-#: includes/class-wc-countries.php:211
-msgid "Portugal"
-msgstr "Portugália"
-
-#: includes/class-wc-countries.php:212
-msgid "Qatar"
-msgstr "Katár"
-
-#: includes/class-wc-countries.php:213
-msgid "Reunion"
-msgstr "Réunion"
-
-#: includes/class-wc-countries.php:214
-msgid "Romania"
-msgstr "Románia"
-
-#: includes/class-wc-countries.php:215
-msgid "Russia"
-msgstr "Oroszország"
-
-#: includes/class-wc-countries.php:216
-msgid "Rwanda"
-msgstr "Ruanda"
-
-#: includes/class-wc-countries.php:217
-msgid "Saint Barth&eacute;lemy"
-msgstr "Saint Barth&eacute;lemy"
-
-#: includes/class-wc-countries.php:218
-msgid "Saint Helena"
-msgstr "Saint Helena"
-
-#: includes/class-wc-countries.php:219
-msgid "Saint Kitts and Nevis"
-msgstr "Saint Kitts és Nevis"
-
-#: includes/class-wc-countries.php:220
-msgid "Saint Lucia"
-msgstr "Saint Lucia"
-
-#: includes/class-wc-countries.php:221
-msgid "Saint Martin (French part)"
-msgstr "Saint Martin (Francia rész)"
-
-#: includes/class-wc-countries.php:222
-msgid "Saint Martin (Dutch part)"
-msgstr "Saint Martin (Holland rész)"
-
-#: includes/class-wc-countries.php:223
-msgid "Saint Pierre and Miquelon"
-msgstr "Saint-Pierre és Miquelon"
-
-#: includes/class-wc-countries.php:224
-msgid "Saint Vincent and the Grenadines"
-msgstr "Saint Vincent és Grenadine-szigetek"
-
-#: includes/class-wc-countries.php:225
-msgid "San Marino"
-msgstr "San Marino"
-
-#: includes/class-wc-countries.php:226
-msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-msgstr "S&atilde;o Tom&eacute; és Pr&iacute;ncipe"
-
-#: includes/class-wc-countries.php:227
-msgid "Saudi Arabia"
-msgstr "Szaúd-Arábia"
-
-#: includes/class-wc-countries.php:228
-msgid "Senegal"
-msgstr "Szenegál"
-
-#: includes/class-wc-countries.php:229
-msgid "Serbia"
-msgstr "Szerbia"
-
-#: includes/class-wc-countries.php:230
-msgid "Seychelles"
-msgstr "Seychelle-szigetek"
-
-#: includes/class-wc-countries.php:231
-msgid "Sierra Leone"
-msgstr "Sierra Leone"
-
-#: includes/class-wc-countries.php:232
-msgid "Singapore"
-msgstr "Szingapúr"
-
-#: includes/class-wc-countries.php:233
-msgid "Slovakia"
-msgstr "Szlovákia"
-
-#: includes/class-wc-countries.php:234
-msgid "Slovenia"
-msgstr "Szlovénia"
-
-#: includes/class-wc-countries.php:235
-msgid "Solomon Islands"
-msgstr "Salamon-szigetek"
-
-#: includes/class-wc-countries.php:236
-msgid "Somalia"
-msgstr "Szomália"
-
-#: includes/class-wc-countries.php:237
-msgid "South Africa"
-msgstr "Dél-Afrika"
-
-#: includes/class-wc-countries.php:238
-msgid "South Georgia/Sandwich Islands"
-msgstr "Dél-Georgia és Déli-Sandwish-szigetek"
-
-#: includes/class-wc-countries.php:239
-msgid "South Korea"
-msgstr "Dél-Korea"
-
-#: includes/class-wc-countries.php:240
-msgid "South Sudan"
-msgstr "Dél-Szudán"
-
-#: includes/class-wc-countries.php:241
-msgid "Spain"
-msgstr "Spanyolország"
-
-#: includes/class-wc-countries.php:242
-msgid "Sri Lanka"
-msgstr "Srí Lanka"
-
-#: includes/class-wc-countries.php:243
-msgid "Sudan"
-msgstr "Szudán"
-
-#: includes/class-wc-countries.php:244
-msgid "Suriname"
-msgstr "Suriname"
-
-#: includes/class-wc-countries.php:245
-msgid "Svalbard and Jan Mayen"
-msgstr "Svalbard- és Jan Mayen-szigetek"
-
-#: includes/class-wc-countries.php:246
-msgid "Swaziland"
-msgstr "Szváziföld"
-
-#: includes/class-wc-countries.php:247
-msgid "Sweden"
-msgstr "Svédország"
-
-#: includes/class-wc-countries.php:248
-msgid "Switzerland"
-msgstr "Svájc"
-
-#: includes/class-wc-countries.php:249
-msgid "Syria"
-msgstr "Szíria"
-
-#: includes/class-wc-countries.php:250
-msgid "Taiwan"
-msgstr "Tajvan"
-
-#: includes/class-wc-countries.php:251
-msgid "Tajikistan"
-msgstr "Tádzsikisztán"
-
-#: includes/class-wc-countries.php:252
-msgid "Tanzania"
-msgstr "Tanzánia"
-
-#: includes/class-wc-countries.php:253
-msgid "Thailand"
-msgstr "Thaiföld"
-
-#: includes/class-wc-countries.php:254
-msgid "Timor-Leste"
-msgstr "Kelet-Timor"
-
-#: includes/class-wc-countries.php:255
-msgid "Togo"
-msgstr "Togo"
-
-#: includes/class-wc-countries.php:256
-msgid "Tokelau"
-msgstr "Tokelau-szigetek"
-
-#: includes/class-wc-countries.php:257
-msgid "Tonga"
-msgstr "Tonga"
-
-#: includes/class-wc-countries.php:258
-msgid "Trinidad and Tobago"
-msgstr "Trinidad és Tobago"
-
-#: includes/class-wc-countries.php:259
-msgid "Tunisia"
-msgstr "Tunézia"
-
-#: includes/class-wc-countries.php:260
-msgid "Turkey"
-msgstr "Törökország"
-
-#: includes/class-wc-countries.php:261
-msgid "Turkmenistan"
-msgstr "Türkmenisztán"
-
-#: includes/class-wc-countries.php:262
-msgid "Turks and Caicos Islands"
-msgstr "Turks- és Caicos-szigetek"
-
-#: includes/class-wc-countries.php:263
-msgid "Tuvalu"
-msgstr "Tuvalue"
-
-#: includes/class-wc-countries.php:264
-msgid "Uganda"
-msgstr "Uganda"
-
-#: includes/class-wc-countries.php:265
-msgid "Ukraine"
-msgstr "Ukrajna"
-
-#: includes/class-wc-countries.php:266
-msgid "United Arab Emirates"
-msgstr "Egyesült Arab Emírségek"
-
-#: includes/class-wc-countries.php:267
-msgid "United Kingdom (UK)"
-msgstr "Egyesült Királyság"
-
-#: includes/class-wc-countries.php:268
-msgid "United States (US)"
-msgstr "Amerikai Egyesült Államok"
-
 #: includes/class-wc-countries.php:269
-msgid "Uruguay"
-msgstr "Uruguay"
-
-#: includes/class-wc-countries.php:270
-msgid "Uzbekistan"
-msgstr "Üzbegisztán"
-
-#: includes/class-wc-countries.php:271
-msgid "Vanuatu"
-msgstr "Vanuatu"
-
-#: includes/class-wc-countries.php:272
-msgid "Vatican"
-msgstr "Vatikán"
-
-#: includes/class-wc-countries.php:273
-msgid "Venezuela"
-msgstr "Venezuela"
-
-#: includes/class-wc-countries.php:274
-msgid "Vietnam"
-msgstr "Vietnám"
-
-#: includes/class-wc-countries.php:275
-msgid "Wallis and Futuna"
-msgstr "Wallis és Futuna"
-
-#: includes/class-wc-countries.php:276
-msgid "Western Sahara"
-msgstr "Nyugat-Szahara"
-
-#: includes/class-wc-countries.php:277
-msgid "Western Samoa"
-msgstr "Nyugat-Szamoa"
-
-#: includes/class-wc-countries.php:278
-msgid "Yemen"
-msgstr "Jemen"
-
-#: includes/class-wc-countries.php:279
-msgid "Zambia"
-msgstr "Zambia"
-
-#: includes/class-wc-countries.php:280
-msgid "Zimbabwe"
-msgstr "Zimbabwe"
-
-#: includes/class-wc-countries.php:484
 msgid "to the"
 msgstr "-"
 
-#: includes/class-wc-countries.php:485
+#: includes/class-wc-countries.php:270
 msgid "to"
 msgstr "-"
 
-#: includes/class-wc-countries.php:498
+#: includes/class-wc-countries.php:282
 msgid "the"
 msgstr "-"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "VAT"
 msgstr "ÁFA"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "Tax"
 msgstr "Adó"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. VAT)"
 msgstr "(ÁFA-val)"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. tax)"
 msgstr "(adóval)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. VAT)"
 msgstr "(ÁFA nélkül)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. tax)"
 msgstr "(adó nélkül)"
-
-#: includes/class-wc-countries.php:730
-msgid "Country"
-msgstr "Ország"
-
-#: includes/class-wc-countries.php:735
-msgid "First Name"
-msgstr "Vezetéknév"
-
-#: includes/class-wc-countries.php:740
-msgid "Last Name"
-msgstr "Keresztnév"
-
-#: includes/class-wc-countries.php:746
-msgid "Company Name"
-msgstr "Cégnév"
-
-#: includes/class-wc-countries.php:750
-msgid "Address"
-msgstr "Cím"
-
-#: includes/class-wc-countries.php:751
-msgctxt "placeholder"
-msgid "Street address"
-msgstr "Utca"
-
-#: includes/class-wc-countries.php:756
-msgctxt "placeholder"
-msgid "Apartment, suite, unit etc. (optional)"
-msgstr "Kapucsengő, ajtó, stb. (nem kötelező)"
-
-#: includes/class-wc-countries.php:761 includes/class-wc-countries.php:762
-msgid "Town / City"
-msgstr "Város"
-
-#: includes/class-wc-countries.php:768 includes/class-wc-countries.php:769
-msgid "State / County"
-msgstr "Állam / Megye"
-
-#: includes/class-wc-countries.php:775 includes/class-wc-countries.php:776
-#: templates/cart/shipping-calculator.php:80
-msgid "Postcode / Zip"
-msgstr "Irányítószám"
-
-#: includes/class-wc-countries.php:838
-msgid "District"
-msgstr "Kerület"
-
-#: includes/class-wc-countries.php:845 includes/class-wc-countries.php:861
-#: includes/class-wc-countries.php:881 includes/class-wc-countries.php:942
-#: includes/class-wc-countries.php:961 includes/class-wc-countries.php:966
-#: includes/class-wc-countries.php:978 includes/class-wc-countries.php:1028
-#: includes/class-wc-countries.php:1052 includes/class-wc-countries.php:1093
-msgid "Province"
-msgstr "Tartomány"
-
-#: includes/class-wc-countries.php:867
-msgid "Canton"
-msgstr "Kanton"
-
-#: includes/class-wc-countries.php:876 includes/class-wc-countries.php:1034
-msgid "Municipality"
-msgstr "Község"
-
-#: includes/class-wc-countries.php:929
-msgid "Town / District"
-msgstr "Város / Kerület"
-
-#: includes/class-wc-countries.php:932
-msgid "Region"
-msgstr "Régió"
-
-#: includes/class-wc-countries.php:937 includes/class-wc-countries.php:1068
-msgid "County"
-msgstr "Megye"
-
-#: includes/class-wc-countries.php:1057
-msgid "Zip"
-msgstr "Irányítószám"
-
-#: includes/class-wc-countries.php:1060
-msgid "State"
-msgstr "Állam"
-
-#: includes/class-wc-countries.php:1065
-msgid "Postcode"
-msgstr "Irányítószám"
-
-#: includes/class-wc-countries.php:1173
-msgid "Email Address"
-msgstr "E-mail cím"
-
-#: includes/class-wc-countries.php:1179
-msgid "Phone"
-msgstr "Telefonszám"
 
 #: includes/class-wc-coupon.php:578
 msgid "Coupon code applied successfully."
@@ -4988,67 +4777,67 @@ msgstr "Sajnáljuk, de ez a kupon nem alkalmazható akciós termékekre."
 msgid "Please enter a coupon code."
 msgstr "Kérjük írj be egy kuponkódot."
 
-#: includes/class-wc-download-handler.php:37
+#: includes/class-wc-download-handler.php:42
 msgid "Invalid email address."
 msgstr "Érvénytelen e-mail cím."
 
-#: includes/class-wc-download-handler.php:37
-#: includes/class-wc-download-handler.php:62
-#: includes/class-wc-download-handler.php:83
-#: includes/class-wc-download-handler.php:90
+#: includes/class-wc-download-handler.php:42
+#: includes/class-wc-download-handler.php:67
+#: includes/class-wc-download-handler.php:88
 #: includes/class-wc-download-handler.php:95
-#: includes/class-wc-download-handler.php:99
-#: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:100
+#: includes/class-wc-download-handler.php:104
+#: includes/class-wc-download-handler.php:148
+#: includes/class-wc-download-handler.php:309
 msgid "Go to homepage"
 msgstr "Ugrás a főoldalra"
 
-#: includes/class-wc-download-handler.php:62
+#: includes/class-wc-download-handler.php:67
 msgid "Invalid download."
 msgstr "Érvénytelen letöltés."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "You must be logged in to download files."
 msgstr "A fájlok letöltéséhez be kell jelentkezned."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:27
 #: templates/myaccount/form-login.php:46
 msgid "Login"
 msgstr "Bejelentkezés"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "Log in to Download Files"
 msgstr "Jelentkezz be a fájlok letöltéséhez"
 
-#: includes/class-wc-download-handler.php:77
+#: includes/class-wc-download-handler.php:82
 msgid "This is not your download link."
 msgstr "Ez nem a te letöltési linked."
 
-#: includes/class-wc-download-handler.php:83
+#: includes/class-wc-download-handler.php:88
 msgid "Product no longer exists."
 msgstr "A termék már nem létezik."
 
-#: includes/class-wc-download-handler.php:90
-#: includes/class-wc-form-handler.php:546
+#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-form-handler.php:541
 #: includes/shortcodes/class-wc-shortcode-checkout.php:172
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
 msgstr "Érvénytelen rendelés."
 
-#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-download-handler.php:100
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "Sajnáljuk, elérted a letöltési korlátot ehhez a fájlhoz"
 
-#: includes/class-wc-download-handler.php:99
+#: includes/class-wc-download-handler.php:104
 msgid "Sorry, this download has expired"
 msgstr "Sajnáljuk, ez a letöltés lejárt"
 
-#: includes/class-wc-download-handler.php:143
+#: includes/class-wc-download-handler.php:148
 msgid "No file defined"
 msgstr "Nincs fájl megadva"
 
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:309
 msgid "File not found"
 msgstr "Fájl nem található"
 
@@ -5090,149 +4879,149 @@ msgstr "Termék visszarendelés"
 msgid "%s units of %s have been backordered in order %s."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:129
+#: includes/class-wc-form-handler.php:125
 msgid "Address changed successfully."
 msgstr "Cím sikeresen megváltoztatva."
 
-#: includes/class-wc-form-handler.php:178
+#: includes/class-wc-form-handler.php:174
 msgid "Please enter your name."
 msgstr "Kérlek írd be a nevedet."
 
-#: includes/class-wc-form-handler.php:182 includes/wc-user-functions.php:48
+#: includes/class-wc-form-handler.php:178 includes/wc-user-functions.php:48
 msgid "Please provide a valid email address."
 msgstr "Kérlek írj be egy érvényes e-mail címet."
 
-#: includes/class-wc-form-handler.php:184
+#: includes/class-wc-form-handler.php:180
 msgid "This email address is already registered."
 msgstr "Ez az e-mail cím már regisztrálva van."
 
-#: includes/class-wc-form-handler.php:188
+#: includes/class-wc-form-handler.php:184
 msgid "Your current password is incorrect."
 msgstr "A jelenlegi jelszavad hibásan adtad meg."
 
-#: includes/class-wc-form-handler.php:193
+#: includes/class-wc-form-handler.php:189
 msgid "Please fill out all password fields."
 msgstr "Kérjük töltsd ki az összes jelszó mezőt."
 
-#: includes/class-wc-form-handler.php:197
+#: includes/class-wc-form-handler.php:193
 msgid "Please enter your current password."
 msgstr "Kérjük írd be a jelenlegi jelszavadat."
 
-#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:197
 msgid "Please re-enter your password."
 msgstr "Kérlek ismételd meg a jelszavadat."
 
-#: includes/class-wc-form-handler.php:205
-#: includes/class-wc-form-handler.php:836
+#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:831
 msgid "Passwords do not match."
 msgstr "A jelszavak nem egyeznek."
 
-#: includes/class-wc-form-handler.php:227
+#: includes/class-wc-form-handler.php:223
 msgid "Account details changed successfully."
 msgstr "Fiókadatok sikeresen megváltoztatva."
 
-#: includes/class-wc-form-handler.php:355
+#: includes/class-wc-form-handler.php:350
 msgid "Payment method added."
 msgstr "Fizetési mód hozzáadva."
 
-#: includes/class-wc-form-handler.php:388
-#: includes/class-wc-form-handler.php:447
+#: includes/class-wc-form-handler.php:383
+#: includes/class-wc-form-handler.php:442
 msgid "Cart updated."
 msgstr "Kosár frissítve."
 
-#: includes/class-wc-form-handler.php:423
+#: includes/class-wc-form-handler.php:418
 msgid "You can only have 1 %s in your cart."
 msgstr "Csak 1 %s lehet a kosárban."
 
-#: includes/class-wc-form-handler.php:513
+#: includes/class-wc-form-handler.php:508
 msgid "The cart has been filled with the items from your previous order."
 msgstr "A kosárt feltöltöttük a korábbi rendelésedben szereplő termékekkel."
 
-#: includes/class-wc-form-handler.php:536
+#: includes/class-wc-form-handler.php:531
 msgid "Order cancelled by customer."
 msgstr "Rendelés visszamondva a vásárló által."
 
-#: includes/class-wc-form-handler.php:539
+#: includes/class-wc-form-handler.php:534
 msgid "Your order was cancelled."
 msgstr "A rendelésed visszamondva."
 
-#: includes/class-wc-form-handler.php:544
+#: includes/class-wc-form-handler.php:539
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr "A rendelés már nem visszamondható. Kérjük lépj kapcsolatba velünk, ha segítségre van szükséged."
 
-#: includes/class-wc-form-handler.php:584
-#: includes/class-wc-form-handler.php:644
+#: includes/class-wc-form-handler.php:579
+#: includes/class-wc-form-handler.php:639
 msgid "Please choose product options&hellip;"
 msgstr "Kérlek válassz termék opciókat&hellip;"
 
-#: includes/class-wc-form-handler.php:678
+#: includes/class-wc-form-handler.php:673
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "Kérlek válaszd ki a kosárba helyezni kívánt termékek mennyiségét&hellip;"
 
-#: includes/class-wc-form-handler.php:685
+#: includes/class-wc-form-handler.php:680
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "Kérlek válassz egy terméket, amit a kosárba szeretnél tenni&hellip;"
 
-#: includes/class-wc-form-handler.php:745
-#: includes/class-wc-form-handler.php:749
-#: includes/class-wc-form-handler.php:753
-#: includes/class-wc-form-handler.php:762
-#: includes/class-wc-form-handler.php:888
+#: includes/class-wc-form-handler.php:740
+#: includes/class-wc-form-handler.php:744
+#: includes/class-wc-form-handler.php:748
+#: includes/class-wc-form-handler.php:757
+#: includes/class-wc-form-handler.php:883
 msgid "Error"
 msgstr "Hiba"
 
-#: includes/class-wc-form-handler.php:749
+#: includes/class-wc-form-handler.php:744
 msgid "Username is required."
 msgstr "A felhasználónév kötelező."
 
-#: includes/class-wc-form-handler.php:753
+#: includes/class-wc-form-handler.php:748
 msgid "Password is required."
 msgstr "A jelszó kötelező."
 
-#: includes/class-wc-form-handler.php:762
+#: includes/class-wc-form-handler.php:757
 msgid "A user could not be found with this email address."
 msgstr "Nem található felhasználó ezzel az e-mail címmel."
 
-#: includes/class-wc-form-handler.php:787
+#: includes/class-wc-form-handler.php:782
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "Bejelentkezve, mint <strong>%s</strong>"
 
-#: includes/class-wc-form-handler.php:831
+#: includes/class-wc-form-handler.php:826
 msgid "Please enter your password."
 msgstr "Kérjük írd be a jelszavadat."
 
-#: includes/class-wc-form-handler.php:904 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:899 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr "HIBA"
 
-#: includes/class-wc-form-handler.php:904
+#: includes/class-wc-form-handler.php:899
 msgid "Anti-spam field was filled in."
 msgstr "Az anti-spam mező ki lett töltve."
 
-#: includes/class-wc-frontend-scripts.php:123
+#: includes/class-wc-frontend-scripts.php:149
 msgid "Please select a rating"
 msgstr "Kérjük válassz egy értékelést"
 
-#: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1603
+#: includes/class-wc-frontend-scripts.php:168
+#: includes/wc-template-functions.php:1594
 msgid "required"
 msgstr "kötelező"
 
-#: includes/class-wc-frontend-scripts.php:164
+#: includes/class-wc-frontend-scripts.php:196
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "Sajnáljuk, de egy termék sem felelt meg a feltételeknek. Kérjük válassz egy másik kombinációt."
 
-#: includes/class-wc-frontend-scripts.php:165
+#: includes/class-wc-frontend-scripts.php:197
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "Sajnáljuk, ez a termék nem elérhető. Kérjük válassz egy másik kombinációt."
 
-#: includes/class-wc-frontend-scripts.php:170
+#: includes/class-wc-frontend-scripts.php:204
 msgid "Select an option&hellip;"
 msgstr "Válassz egy opciót&hellip;"
 
@@ -5257,7 +5046,7 @@ msgid "Cart"
 msgstr "Kosár"
 
 #: includes/class-wc-install.php:227
-msgctxt "Paeg slug"
+msgctxt "Page slug"
 msgid "checkout"
 msgstr "penztar"
 
@@ -5329,204 +5118,208 @@ msgstr "WooCommerce"
 msgid "Order status changed from %s to %s."
 msgstr "Rendelés állapota %s volt, majd %s lett."
 
+#: includes/class-wc-order.php:1592
+msgid "Item #%s stock reduced from %s to %s."
+msgstr "#%s termék készlete csökkentve: %s volt, majd %s lett."
+
 #: includes/class-wc-order.php:1602
 msgid "Order item stock reduced successfully."
 msgstr "Termék készletmennyiség sikeresen csökkentve."
 
-#: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
+#: includes/class-wc-post-types.php:56 includes/class-wc-post-types.php:58
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
 msgstr "Termékkategóriák"
 
-#: includes/class-wc-post-types.php:58
+#: includes/class-wc-post-types.php:59
 msgid "Product Category"
 msgstr "Termékkategória"
 
-#: includes/class-wc-post-types.php:59
+#: includes/class-wc-post-types.php:60
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr "Kategóriák"
 
-#: includes/class-wc-post-types.php:60
+#: includes/class-wc-post-types.php:61
 msgid "Search Product Categories"
 msgstr "Termékkategóriák keresése"
 
-#: includes/class-wc-post-types.php:61
+#: includes/class-wc-post-types.php:62
 msgid "All Product Categories"
 msgstr "Összes termékkategória"
 
-#: includes/class-wc-post-types.php:62
+#: includes/class-wc-post-types.php:63
 msgid "Parent Product Category"
 msgstr "Szülő termékkategória"
 
-#: includes/class-wc-post-types.php:63
+#: includes/class-wc-post-types.php:64
 msgid "Parent Product Category:"
 msgstr "Szülő termékkategória:"
 
-#: includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:65
 msgid "Edit Product Category"
 msgstr "Termékkategória szerkesztése"
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:66
 msgid "Update Product Category"
 msgstr "Termékkategória frissítése"
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:67
 msgid "Add New Product Category"
 msgstr "Új termékkategória hozzáadása"
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:68
 msgid "New Product Category Name"
 msgstr "Új termékkategória neve"
 
-#: includes/class-wc-post-types.php:78
+#: includes/class-wc-post-types.php:79
 #: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "termekkategoria"
 
-#: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
+#: includes/class-wc-post-types.php:91 includes/class-wc-post-types.php:93
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
 msgstr "Termékcímkék"
 
-#: includes/class-wc-post-types.php:93
+#: includes/class-wc-post-types.php:94
 msgid "Product Tag"
 msgstr "Termékcímke"
 
-#: includes/class-wc-post-types.php:94
+#: includes/class-wc-post-types.php:95
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "Címkék"
 
-#: includes/class-wc-post-types.php:95
+#: includes/class-wc-post-types.php:96
 msgid "Search Product Tags"
 msgstr "Termékcímkék keresése"
 
-#: includes/class-wc-post-types.php:96
+#: includes/class-wc-post-types.php:97
 msgid "All Product Tags"
 msgstr "Összes termékcímke"
 
-#: includes/class-wc-post-types.php:97
+#: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag"
 msgstr "Szülő termékcímke"
 
-#: includes/class-wc-post-types.php:98
+#: includes/class-wc-post-types.php:99
 msgid "Parent Product Tag:"
 msgstr "Szülő termékcímke:"
 
-#: includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:100
 msgid "Edit Product Tag"
 msgstr "Termékcímke szerkesztése"
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:101
 msgid "Update Product Tag"
 msgstr "Termékcímke frissítése"
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:102
 msgid "Add New Product Tag"
 msgstr "Új termékcímke hozzáadása"
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:103
 msgid "New Product Tag Name"
 msgstr "Új termékcímke neve"
 
-#: includes/class-wc-post-types.php:113
+#: includes/class-wc-post-types.php:114
 #: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "termekcimke"
 
-#: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
+#: includes/class-wc-post-types.php:125 includes/class-wc-post-types.php:127
 msgid "Shipping Classes"
 msgstr "Szállítási osztályok"
 
-#: includes/class-wc-post-types.php:127
+#: includes/class-wc-post-types.php:128
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 msgid "Shipping Class"
 msgstr "Szállítási osztály"
 
-#: includes/class-wc-post-types.php:128
+#: includes/class-wc-post-types.php:129
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "Szállítási osztályok"
 
-#: includes/class-wc-post-types.php:129
+#: includes/class-wc-post-types.php:130
 msgid "Search Shipping Classes"
 msgstr "Szállítási osztályok keresése"
 
-#: includes/class-wc-post-types.php:130
+#: includes/class-wc-post-types.php:131
 msgid "All Shipping Classes"
 msgstr "Összes szállítási osztály"
 
-#: includes/class-wc-post-types.php:131
+#: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class"
 msgstr "Szülő szállítási osztály"
 
-#: includes/class-wc-post-types.php:132
+#: includes/class-wc-post-types.php:133
 msgid "Parent Shipping Class:"
 msgstr "Szülő szállítási osztály:"
 
-#: includes/class-wc-post-types.php:133
+#: includes/class-wc-post-types.php:134
 msgid "Edit Shipping Class"
 msgstr "Szállítási osztály szerkesztése"
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:135
 msgid "Update Shipping Class"
 msgstr "Szállítási osztály frissítése"
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:136
 msgid "Add New Shipping Class"
 msgstr "Új szállítási osztály hozzáadása"
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:137
 msgid "New Shipping Class Name"
 msgstr "Új szállítási osztály neve"
 
-#: includes/class-wc-post-types.php:184
+#: includes/class-wc-post-types.php:185
 msgid "Search %s"
 msgstr "%s keresése"
 
-#: includes/class-wc-post-types.php:185
+#: includes/class-wc-post-types.php:186
 msgid "All %s"
 msgstr "Összes %s"
 
-#: includes/class-wc-post-types.php:186
+#: includes/class-wc-post-types.php:187
 msgid "Parent %s"
 msgstr "Szülő %s"
 
-#: includes/class-wc-post-types.php:187
+#: includes/class-wc-post-types.php:188
 msgid "Parent %s:"
 msgstr "Szülő %s:"
 
-#: includes/class-wc-post-types.php:188
+#: includes/class-wc-post-types.php:189
 msgid "Edit %s"
 msgstr "%s szerkesztése"
 
-#: includes/class-wc-post-types.php:189
+#: includes/class-wc-post-types.php:190
 msgid "Update %s"
 msgstr "%s frissítése"
 
-#: includes/class-wc-post-types.php:190
+#: includes/class-wc-post-types.php:191
 msgid "Add New %s"
 msgstr "Új %s hozzáadása"
 
-#: includes/class-wc-post-types.php:191
+#: includes/class-wc-post-types.php:192
 msgid "New %s"
 msgstr "Új %s"
 
-#: includes/class-wc-post-types.php:226
+#: includes/class-wc-post-types.php:227
 #: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "termek"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:233
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Termékek"
 
-#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:234 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5537,168 +5330,168 @@ msgstr "Termékek"
 msgid "Product"
 msgstr "Termék"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:235
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Termékek"
 
-#: includes/class-wc-post-types.php:235
+#: includes/class-wc-post-types.php:236
 msgid "Add Product"
 msgstr "Termék hozzáadása"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:237
 msgid "Add New Product"
 msgstr "Új termék hozzáadása"
 
-#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
-#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:329 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Szerkesztés"
 
-#: includes/class-wc-post-types.php:238
+#: includes/class-wc-post-types.php:239
 msgid "Edit Product"
 msgstr "Termék szerkesztése"
 
-#: includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240
 msgid "New Product"
 msgstr "Új termék"
 
-#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:241 includes/class-wc-post-types.php:242
 msgid "View Product"
 msgstr "Termék megtekintése"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:243
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Termékek keresése"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:244
 msgid "No Products found"
 msgstr "Nem találhatóak termékek"
 
-#: includes/class-wc-post-types.php:244
+#: includes/class-wc-post-types.php:245
 msgid "No Products found in trash"
 msgstr "Nem találhatóak termékek a lomtárban"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:246
 msgid "Parent Product"
 msgstr "Szülő termék"
 
-#: includes/class-wc-post-types.php:247
+#: includes/class-wc-post-types.php:248
 msgid "This is where you can add new products to your store."
 msgstr "Itt adhatsz hozzá új termékeket az üzlethez."
 
-#: includes/class-wc-post-types.php:267
+#: includes/class-wc-post-types.php:268
 msgid "Variations"
 msgstr "Variációk"
 
-#: includes/class-wc-post-types.php:275
+#: includes/class-wc-post-types.php:276
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Rendelések"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:286
 msgid "Orders"
 msgstr "Rendelések"
 
-#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:287 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Rendelés"
 
-#: includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:288
 msgid "Add Order"
 msgstr "Rendelés hozzáadása"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:289
 msgid "Add New Order"
 msgstr "Új rendelés hozzáadása"
 
-#: includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:291
 msgid "Edit Order"
 msgstr "Rendelés szerkesztése"
 
-#: includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292
 msgid "New Order"
 msgstr "Új rendelés"
 
-#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:293 includes/class-wc-post-types.php:294
 msgid "View Order"
 msgstr "Rendelés megtekintése"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:295
 msgid "Search Orders"
 msgstr "Rendelések keresése"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found"
 msgstr "Nem találhatóak rendelések"
 
-#: includes/class-wc-post-types.php:296
+#: includes/class-wc-post-types.php:297
 msgid "No Orders found in trash"
 msgstr "Nem találhatóak rendelések a lomtárban"
 
-#: includes/class-wc-post-types.php:297
+#: includes/class-wc-post-types.php:298
 msgid "Parent Orders"
 msgstr "Szülő rendelések"
 
-#: includes/class-wc-post-types.php:300
+#: includes/class-wc-post-types.php:301
 msgid "This is where store orders are stored."
 msgstr "Itt kerülnek tárolásra az üzletben történő rendelések."
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:324
 msgid "Coupons"
 msgstr "Kuponok"
 
-#: includes/class-wc-post-types.php:324 templates/cart/cart.php:119
+#: includes/class-wc-post-types.php:325 templates/cart/cart.php:119
 msgid "Coupon"
 msgstr "Kupon"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:326
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Kuponok"
 
-#: includes/class-wc-post-types.php:326
+#: includes/class-wc-post-types.php:327
 msgid "Add Coupon"
 msgstr "Kupon hozzáadása"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:328
 msgid "Add New Coupon"
 msgstr "Új kupon hozzáadása"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:330
 msgid "Edit Coupon"
 msgstr "Kupon szerkesztése"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:331
 msgid "New Coupon"
 msgstr "Új kupon"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:332
 msgid "View Coupons"
 msgstr "Kuponok megtekintése"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:333
 msgid "View Coupon"
 msgstr "Kupon megtekintése"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:334
 msgid "Search Coupons"
 msgstr "Kuponok keresése"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found"
 msgstr "Nem találhatóak kuponok"
 
-#: includes/class-wc-post-types.php:335
+#: includes/class-wc-post-types.php:336
 msgid "No Coupons found in trash"
 msgstr "Nem találhatóak kuponok a lomtárban"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:337
 msgid "Parent Coupon"
 msgstr "Szülő kupon"
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:339
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Itt hozhatsz létre új kuponokat, amiket a vásárlók felhasználhatnak az üzletben."
@@ -5770,21 +5563,21 @@ msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
 msgstr "{site_title} rendelésed {order_date} keltezéssel teljesítve - letöltheted a fájlokat"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:146
-#: includes/emails/class-wc-email-new-order.php:133
+#: includes/emails/class-wc-email-customer-completed-order.php:147
+#: includes/emails/class-wc-email-new-order.php:134
 msgid "Subject"
 msgstr "Tárgy"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:153
-#: includes/emails/class-wc-email-new-order.php:140
+#: includes/emails/class-wc-email-customer-completed-order.php:154
+#: includes/emails/class-wc-email-new-order.php:141
 msgid "Email Heading"
 msgstr "E-mail fejléc"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:160
+#: includes/emails/class-wc-email-customer-completed-order.php:161
 msgid "Subject (downloadable)"
 msgstr "Tárgy (letölthető)"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:167
+#: includes/emails/class-wc-email-customer-completed-order.php:168
 msgid "Email Heading (downloadable)"
 msgstr "E-mail fejléc (letölthető)"
 
@@ -5814,11 +5607,11 @@ msgstr "{site_title} rendelésed {order_date} keltezéssel"
 msgid "Order {order_number} details"
 msgstr "{order_number} rendelés adatai"
 
-#: includes/emails/class-wc-email-customer-invoice.php:160
+#: includes/emails/class-wc-email-customer-invoice.php:161
 msgid "Email subject (paid)"
 msgstr "E-mail tárgy (kifizetett)"
 
-#: includes/emails/class-wc-email-customer-invoice.php:167
+#: includes/emails/class-wc-email-customer-invoice.php:168
 msgid "Email heading (paid)"
 msgstr "E-mail fejléc (kifizetett)"
 
@@ -5908,23 +5701,23 @@ msgstr "Új vásárlói rendelés"
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
 msgstr "[{site_title}] Új vásárlói rendelés ({order_number}) - {order_date}"
 
-#: includes/emails/class-wc-email-new-order.php:126
+#: includes/emails/class-wc-email-new-order.php:127
 msgid "Recipient(s)"
 msgstr "Címzett(ek)"
 
-#: includes/emails/class-wc-email-new-order.php:128
+#: includes/emails/class-wc-email-new-order.php:129
 msgid ""
 "Enter recipients (comma separated) for this email. Defaults to "
 "<code>%s</code>."
 msgstr "Írd be a címzetteket (vesszővel elválasztva). Alapértelmezésként <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:135
+#: includes/emails/class-wc-email-new-order.php:136
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr "Az e-mail tárgy mezője. Hagyd üresen az alapértelmezett tárgyhoz: <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:142
+#: includes/emails/class-wc-email-new-order.php:143
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
@@ -6404,10 +6197,8 @@ msgid "Enable logging"
 msgstr "Naplózás engedélyezése"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:237
-msgid ""
-"Log PayPal events, such as IPN requests, inside "
-"<code>woocommerce/logs/paypal-%s.txt</code>"
-msgstr "PayPal események naplózása, úgymint IPN lekérések, helye <code>woocommerce/logs/paypal-%s.txt</code>"
+msgid "Log PayPal events, such as IPN requests, inside <code>%s</code>"
+msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:370
 msgid "Shipping via"
@@ -6856,6 +6647,12 @@ msgstr "Szállítási költségek frissítve."
 msgid "Invalid order. If you have an account please log in and try again."
 msgstr "Érvénytelen rendelés. Ha rendelkezel azonosítóval, kérjük jelentkezz be és próbáld újra."
 
+#: includes/shortcodes/class-wc-shortcode-checkout.php:91
+#: includes/shortcodes/class-wc-shortcode-my-account.php:111
+#: templates/checkout/thankyou.php:30
+msgid "My Account"
+msgstr "Fiókom"
+
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
@@ -7089,62 +6886,66 @@ msgid "New Zealand Dollar"
 msgstr "új-zélandi dollár"
 
 #: includes/wc-core-functions.php:193
+msgid "Paraguayan Guaraní"
+msgstr ""
+
+#: includes/wc-core-functions.php:194
 msgid "Philippine Pesos"
 msgstr "fülöp-szigeteki peso"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Polish Zloty"
 msgstr "lengyel zloty"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Pounds Sterling"
 msgstr "font sterling"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Romanian Leu"
 msgstr "román lej"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Russian Ruble"
 msgstr "orosz rubel"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "Singapore Dollar"
 msgstr "szingapúri dollár"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "South African rand"
 msgstr "dél-afrikai rand"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swedish Krona"
 msgstr "svéd korona"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Swiss Franc"
 msgstr "svájci frank"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Taiwan New Dollars"
 msgstr "tajvani új dollár"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Thai Baht"
 msgstr "thai bát"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "Turkish Lira"
 msgstr "török líra"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "US Dollars"
 msgstr "USA-dollár"
 
-#: includes/wc-core-functions.php:206
+#: includes/wc-core-functions.php:207
 msgid "Vietnamese Dong"
 msgstr "vietnám dong"
 
-#: includes/wc-core-functions.php:207
+#: includes/wc-core-functions.php:208
 msgid "Egyptian Pound"
 msgstr "egyiptomi font"
 
@@ -7178,7 +6979,7 @@ msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr "szállítás"
 
-#: includes/wc-product-functions.php:234
+#: includes/wc-product-functions.php:235
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "nem-kategorizalt"
@@ -7230,41 +7031,41 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Főoldal"
 
-#: includes/wc-template-functions.php:1558
+#: includes/wc-template-functions.php:1549
 msgid "Order Again"
 msgstr "Újrarendelés"
 
-#: includes/wc-template-functions.php:1653
+#: includes/wc-template-functions.php:1644
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Válassz országot&hellip;"
 
-#: includes/wc-template-functions.php:1660
+#: includes/wc-template-functions.php:1651
 msgid "Update country"
 msgstr "Ország frissítése"
 
-#: includes/wc-template-functions.php:1710
+#: includes/wc-template-functions.php:1701
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Válassz megyét&hellip;"
 
-#: includes/wc-template-functions.php:1851
+#: includes/wc-template-functions.php:1842
 msgid "Search for:"
 msgstr "Keresés a következőre:"
 
-#: includes/wc-template-functions.php:1852
+#: includes/wc-template-functions.php:1843
 msgid "Search for products"
 msgstr "Termékek keresése"
 
-#: includes/wc-template-functions.php:1853
+#: includes/wc-template-functions.php:1844
 msgid "Search"
 msgstr "Keresés"
 
-#: includes/wc-term-functions.php:135
+#: includes/wc-term-functions.php:146
 msgid "Select a category"
 msgstr "Válassz egy kategóriát"
 
-#: includes/wc-term-functions.php:139
+#: includes/wc-term-functions.php:149
 msgid "Uncategorized"
 msgstr "Nem kategorizált"
 
@@ -7427,6 +7228,11 @@ msgstr "Rendezés"
 #: includes/widgets/class-wc-widget-product-categories.php:38
 msgid "Category Order"
 msgstr "Kategória sorrend"
+
+#: includes/widgets/class-wc-widget-product-categories.php:39
+#: templates/single-product-reviews.php:62
+msgid "Name"
+msgstr "Név"
 
 #: includes/widgets/class-wc-widget-product-categories.php:45
 msgid "Show as dropdown"
@@ -7707,6 +7513,10 @@ msgstr "Megye"
 msgid "City"
 msgstr "Város"
 
+#: templates/cart/shipping-calculator.php:80
+msgid "Postcode / Zip"
+msgstr "Irányítószám"
+
 #: templates/cart/shipping-calculator.php:85
 msgid "Update Totals"
 msgstr "Végösszeg frissítése"
@@ -7970,13 +7780,13 @@ msgstr "A jelszavad megváltoztatásához látogasd meg a következő címet:"
 msgid "Click here to reset your password"
 msgstr "Kattints ide a jelszavad megváltoztatásához"
 
-#: templates/emails/email-addresses.php:18
-#: templates/emails/plain/email-addresses.php:12
+#: templates/emails/email-addresses.php:20
+#: templates/emails/plain/email-addresses.php:14
 msgid "Billing address"
 msgstr "Számlázási cím"
 
-#: templates/emails/email-addresses.php:28
-#: templates/emails/plain/email-addresses.php:17
+#: templates/emails/email-addresses.php:30
+#: templates/emails/plain/email-addresses.php:19
 msgid "Shipping address"
 msgstr "Szállítási cím"
 
@@ -8152,23 +7962,31 @@ msgstr "Keresztnév"
 msgid "Email address"
 msgstr "E-mail cím"
 
-#: templates/myaccount/form-edit-account.php:33
+#: templates/myaccount/form-edit-account.php:34
+msgid "Password (leave blank to leave unchanged)"
+msgstr "Jelszó (hagyd üresen ha nem kívánod módosítani)"
+
+#: templates/myaccount/form-edit-account.php:38
+msgid "Confirm new password"
+msgstr "Új jelszó megerősítése"
+
+#: templates/myaccount/form-edit-account.php:44
 msgid "Password Change"
 msgstr "Jelszó módosítás"
 
-#: templates/myaccount/form-edit-account.php:36
+#: templates/myaccount/form-edit-account.php:47
 msgid "Current Password (leave blank to leave unchanged)"
 msgstr "Jelenlegi jelszó (hagyd üresen ha nem kívánod módosítani)"
 
-#: templates/myaccount/form-edit-account.php:40
+#: templates/myaccount/form-edit-account.php:51
 msgid "New Password (leave blank to leave unchanged)"
 msgstr "Új jelszó (hagyd üresen ha nem kívánod módosítani)"
 
-#: templates/myaccount/form-edit-account.php:44
+#: templates/myaccount/form-edit-account.php:55
 msgid "Confirm New Password"
 msgstr "Új jelszó megerősítése"
 
-#: templates/myaccount/form-edit-account.php:50
+#: templates/myaccount/form-edit-account.php:61
 msgid "Save changes"
 msgstr "Módosítások mentése"
 

@@ -2,17 +2,17 @@
 # Translators:
 # egill <egill@automattic.com>, 2014
 # HelgaRakel <helga.rakel.gudrunardottir@gmail.com>, 2014
-# sindri <sindri@frumkvaedi.is>, 2014
-# sverrirp <sverrirp@gmail.com>, 2014
+# Sindri Snær Einarsson <sindri@frumkvaedi.is>, 2014
+# Sverrir Björgvinsson <sverrirp@gmail.com>, 2014
 # tomasha <tomasha@hotmail.com>, 2014
-# Valur Thor Gunnarsson <valurthor@gmail.com>, 2014
+# valurthorgunnarsson <valurthor@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-05-22 10:45:21+00:00\n"
-"PO-Revision-Date: 2014-05-23 08:28+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-06-03 15:13:58+00:00\n"
+"PO-Revision-Date: 2014-06-04 08:41+0000\n"
+"Last-Translator: Mike Jolley <mike.jolley@me.com>\n"
 "Language-Team: Icelandic (Iceland) (http://www.transifex.com/projects/p/woocommerce/language/is_IS/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,52 +20,981 @@ msgstr ""
 "Language: is_IS\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: assets/js/admin/editor_plugin_lang.php:5
-msgid "Insert Shortcode"
-msgstr "Setja inn stuttkóða"
+#: i18n/countries.php:16
+msgid "Afghanistan"
+msgstr "Afganistan"
 
-#: assets/js/admin/editor_plugin_lang.php:6
-msgid "Product price/cart button"
-msgstr "Takki fyrir verð á vöru / vörukörfu"
+#: i18n/countries.php:17
+msgid "&#197;land Islands"
+msgstr "Álandseyjar"
 
-#: assets/js/admin/editor_plugin_lang.php:7
-msgid "Product by SKU/ID"
-msgstr "Vara eftir vörunúmeri | SKU/ID"
+#: i18n/countries.php:18
+msgid "Albania"
+msgstr "Albanía"
 
-#: assets/js/admin/editor_plugin_lang.php:8
-msgid "Products by SKU/ID"
-msgstr "Vörur eftir vörunúmeri | SKU/ID"
+#: i18n/countries.php:19
+msgid "Algeria"
+msgstr "Alsír"
 
-#: assets/js/admin/editor_plugin_lang.php:9
-msgid "Product categories"
-msgstr "Vöruflokkar"
+#: i18n/countries.php:20
+msgid "Andorra"
+msgstr "Andorra"
 
-#: assets/js/admin/editor_plugin_lang.php:10
-msgid "Products by category slug"
-msgstr "Vörur eftir slóð á vöruflokk"
+#: i18n/countries.php:21
+msgid "Angola"
+msgstr "Angóla"
 
-#: assets/js/admin/editor_plugin_lang.php:11
-msgid "Recent products"
-msgstr "Nýlegar vörur"
+#: i18n/countries.php:22
+msgid "Anguilla"
+msgstr "Angvilla"
 
-#: assets/js/admin/editor_plugin_lang.php:12
-msgid "Featured products"
-msgstr "Athygliverðar vörur"
+#: i18n/countries.php:23
+msgid "Antarctica"
+msgstr "Suðurskautslandið"
 
-#: assets/js/admin/editor_plugin_lang.php:13
-msgid "Shop Messages"
-msgstr "Skilaboð frá verslun"
+#: i18n/countries.php:24
+msgid "Antigua and Barbuda"
+msgstr "Antígva og Barbúa"
 
-#: assets/js/admin/editor_plugin_lang.php:14
-msgid "Order tracking"
-msgstr "Rekja pöntun"
+#: i18n/countries.php:25
+msgid "Argentina"
+msgstr "Argentína"
 
-#: assets/js/admin/editor_plugin_lang.php:15
-#: includes/shortcodes/class-wc-shortcode-checkout.php:91
-#: includes/shortcodes/class-wc-shortcode-my-account.php:111
-#: templates/checkout/thankyou.php:30
-msgid "My Account"
-msgstr "Mín síða"
+#: i18n/countries.php:26
+msgid "Armenia"
+msgstr "Armenía"
+
+#: i18n/countries.php:27
+msgid "Aruba"
+msgstr "Arúba"
+
+#: i18n/countries.php:28
+msgid "Australia"
+msgstr "Ástralía"
+
+#: i18n/countries.php:29
+msgid "Austria"
+msgstr "Austurríki"
+
+#: i18n/countries.php:30
+msgid "Azerbaijan"
+msgstr "Aserbaidsjan"
+
+#: i18n/countries.php:31
+msgid "Bahamas"
+msgstr "Bahamaeyjar"
+
+#: i18n/countries.php:32
+msgid "Bahrain"
+msgstr "Barein"
+
+#: i18n/countries.php:33
+msgid "Bangladesh"
+msgstr "Bangladess"
+
+#: i18n/countries.php:34
+msgid "Barbados"
+msgstr "Barbados"
+
+#: i18n/countries.php:35
+msgid "Belarus"
+msgstr "Hvíta-Rússland"
+
+#: i18n/countries.php:36
+msgid "Belgium"
+msgstr "Belgía"
+
+#: i18n/countries.php:37
+msgid "Belau"
+msgstr "Belau"
+
+#: i18n/countries.php:38
+msgid "Belize"
+msgstr "Belís"
+
+#: i18n/countries.php:39
+msgid "Benin"
+msgstr "Benín"
+
+#: i18n/countries.php:40
+msgid "Bermuda"
+msgstr "Bermúdaeyjar"
+
+#: i18n/countries.php:41
+msgid "Bhutan"
+msgstr "Bútan"
+
+#: i18n/countries.php:42
+msgid "Bolivia"
+msgstr "Bólivía"
+
+#: i18n/countries.php:43
+msgid "Bonaire, Saint Eustatius and Saba"
+msgstr "Bonaire, Sint Eustatius og Saba"
+
+#: i18n/countries.php:44
+msgid "Bosnia and Herzegovina"
+msgstr "Bosnía og Hersegóvína"
+
+#: i18n/countries.php:45
+msgid "Botswana"
+msgstr "Botsvana"
+
+#: i18n/countries.php:46
+msgid "Bouvet Island"
+msgstr "Bouvet-eyja"
+
+#: i18n/countries.php:47
+msgid "Brazil"
+msgstr "Brasilía"
+
+#: i18n/countries.php:48
+msgid "British Indian Ocean Territory"
+msgstr "Bresku Indlandshafseyjar"
+
+#: i18n/countries.php:49
+msgid "British Virgin Islands"
+msgstr "Bresku Jómfrúareyjar"
+
+#: i18n/countries.php:50
+msgid "Brunei"
+msgstr "Brúnei"
+
+#: i18n/countries.php:51
+msgid "Bulgaria"
+msgstr "Búlgaría"
+
+#: i18n/countries.php:52
+msgid "Burkina Faso"
+msgstr "Búrkína Fasó"
+
+#: i18n/countries.php:53
+msgid "Burundi"
+msgstr "Búrúndí"
+
+#: i18n/countries.php:54
+msgid "Cambodia"
+msgstr "Kambódía"
+
+#: i18n/countries.php:55
+msgid "Cameroon"
+msgstr "Kamarún"
+
+#: i18n/countries.php:56
+msgid "Canada"
+msgstr "Kanada"
+
+#: i18n/countries.php:57
+msgid "Cape Verde"
+msgstr "Grænhöfðaeyjar"
+
+#: i18n/countries.php:58
+msgid "Cayman Islands"
+msgstr "Cayman-eyjar"
+
+#: i18n/countries.php:59
+msgid "Central African Republic"
+msgstr "Mið-Afríkulýðveldið"
+
+#: i18n/countries.php:60
+msgid "Chad"
+msgstr "Tsjad"
+
+#: i18n/countries.php:61
+msgid "Chile"
+msgstr "Síle"
+
+#: i18n/countries.php:62
+msgid "China"
+msgstr "Kína"
+
+#: i18n/countries.php:63
+msgid "Christmas Island"
+msgstr "Jólaey"
+
+#: i18n/countries.php:64
+msgid "Cocos (Keeling) Islands"
+msgstr "Kókoseyjar (Keeling)"
+
+#: i18n/countries.php:65
+msgid "Colombia"
+msgstr "Kólumbía"
+
+#: i18n/countries.php:66
+msgid "Comoros"
+msgstr "Kómoreyjar"
+
+#: i18n/countries.php:67
+msgid "Congo (Brazzaville)"
+msgstr "Lýðveldið Kongó (Brazzaville)"
+
+#: i18n/countries.php:68
+msgid "Congo (Kinshasa)"
+msgstr "Lýðstjórnarlýðveldið Kongó  (Kinshasa)"
+
+#: i18n/countries.php:69
+msgid "Cook Islands"
+msgstr "Cooks-eyjar"
+
+#: i18n/countries.php:70
+msgid "Costa Rica"
+msgstr "Kosta Ríka"
+
+#: i18n/countries.php:71
+msgid "Croatia"
+msgstr "Króatía"
+
+#: i18n/countries.php:72
+msgid "Cuba"
+msgstr "Kúba"
+
+#: i18n/countries.php:73
+msgid "Cura&Ccedil;ao"
+msgstr "Curacao"
+
+#: i18n/countries.php:74
+msgid "Cyprus"
+msgstr "Kýpur"
+
+#: i18n/countries.php:75
+msgid "Czech Republic"
+msgstr "Tékkland"
+
+#: i18n/countries.php:76
+msgid "Denmark"
+msgstr "Danmörk"
+
+#: i18n/countries.php:77
+msgid "Djibouti"
+msgstr "Djíbútí"
+
+#: i18n/countries.php:78
+msgid "Dominica"
+msgstr "Dóminíka"
+
+#: i18n/countries.php:79
+msgid "Dominican Republic"
+msgstr "Dóminíska lýðveldið"
+
+#: i18n/countries.php:80
+msgid "Ecuador"
+msgstr "Ekvador"
+
+#: i18n/countries.php:81
+msgid "Egypt"
+msgstr "Egyptaland"
+
+#: i18n/countries.php:82
+msgid "El Salvador"
+msgstr "El Salvador"
+
+#: i18n/countries.php:83
+msgid "Equatorial Guinea"
+msgstr "Miðbaugs-Gínea"
+
+#: i18n/countries.php:84
+msgid "Eritrea"
+msgstr "Erítrea"
+
+#: i18n/countries.php:85
+msgid "Estonia"
+msgstr "Eistland"
+
+#: i18n/countries.php:86
+msgid "Ethiopia"
+msgstr "Eþíópía"
+
+#: i18n/countries.php:87
+msgid "Falkland Islands"
+msgstr "Falklandseyjar"
+
+#: i18n/countries.php:88
+msgid "Faroe Islands"
+msgstr "Færeyjar"
+
+#: i18n/countries.php:89
+msgid "Fiji"
+msgstr "Fijieyjar"
+
+#: i18n/countries.php:90
+msgid "Finland"
+msgstr "Finnland"
+
+#: i18n/countries.php:91
+msgid "France"
+msgstr "Frakkland"
+
+#: i18n/countries.php:92
+msgid "French Guiana"
+msgstr "Franska Gínea"
+
+#: i18n/countries.php:93
+msgid "French Polynesia"
+msgstr "Franska Pólýnesía"
+
+#: i18n/countries.php:94
+msgid "French Southern Territories"
+msgstr "Frönsku suðlægu landsvæðin"
+
+#: i18n/countries.php:95
+msgid "Gabon"
+msgstr "Gabon"
+
+#: i18n/countries.php:96
+msgid "Gambia"
+msgstr "Gambía"
+
+#: i18n/countries.php:97 i18n/states/US.php:23
+msgid "Georgia"
+msgstr "Georgía"
+
+#: i18n/countries.php:98
+msgid "Germany"
+msgstr "Þýskaland"
+
+#: i18n/countries.php:99
+msgid "Ghana"
+msgstr "Gana"
+
+#: i18n/countries.php:100
+msgid "Gibraltar"
+msgstr "Gíbraltar"
+
+#: i18n/countries.php:101
+msgid "Greece"
+msgstr "Grikkland"
+
+#: i18n/countries.php:102
+msgid "Greenland"
+msgstr "Grænland"
+
+#: i18n/countries.php:103
+msgid "Grenada"
+msgstr "Grenada"
+
+#: i18n/countries.php:104
+msgid "Guadeloupe"
+msgstr "Guadeloupe"
+
+#: i18n/countries.php:105
+msgid "Guatemala"
+msgstr "Gvatemala"
+
+#: i18n/countries.php:106
+msgid "Guernsey"
+msgstr "Guernsey"
+
+#: i18n/countries.php:107
+msgid "Guinea"
+msgstr "Gínea"
+
+#: i18n/countries.php:108
+msgid "Guinea-Bissau"
+msgstr "Gínea-Bissá"
+
+#: i18n/countries.php:109
+msgid "Guyana"
+msgstr "Gvæjana"
+
+#: i18n/countries.php:110
+msgid "Haiti"
+msgstr "Haítí"
+
+#: i18n/countries.php:111
+msgid "Heard Island and McDonald Islands"
+msgstr "Heard og McDonalds-eyjar"
+
+#: i18n/countries.php:112
+msgid "Honduras"
+msgstr "Hondúras"
+
+#: i18n/countries.php:113
+msgid "Hong Kong"
+msgstr "Hong Kong"
+
+#: i18n/countries.php:114
+msgid "Hungary"
+msgstr "Ungverjaland"
+
+#: i18n/countries.php:115
+msgid "Iceland"
+msgstr "Ísland"
+
+#: i18n/countries.php:116
+msgid "India"
+msgstr "Indland"
+
+#: i18n/countries.php:117
+msgid "Indonesia"
+msgstr "Indónesía"
+
+#: i18n/countries.php:118
+msgid "Iran"
+msgstr "Íran"
+
+#: i18n/countries.php:119
+msgid "Iraq"
+msgstr "Írak"
+
+#: i18n/countries.php:120
+msgid "Republic of Ireland"
+msgstr "Írland"
+
+#: i18n/countries.php:121
+msgid "Isle of Man"
+msgstr "Mön"
+
+#: i18n/countries.php:122
+msgid "Israel"
+msgstr "Ísrael"
+
+#: i18n/countries.php:123
+msgid "Italy"
+msgstr "Ítalía"
+
+#: i18n/countries.php:124
+msgid "Ivory Coast"
+msgstr "Fílabeinsströndin"
+
+#: i18n/countries.php:125
+msgid "Jamaica"
+msgstr "Jamaíka"
+
+#: i18n/countries.php:126
+msgid "Japan"
+msgstr "Japan"
+
+#: i18n/countries.php:127
+msgid "Jersey"
+msgstr "Jersey"
+
+#: i18n/countries.php:128
+msgid "Jordan"
+msgstr "Jórdanía"
+
+#: i18n/countries.php:129
+msgid "Kazakhstan"
+msgstr "Kasakstan"
+
+#: i18n/countries.php:130
+msgid "Kenya"
+msgstr "Kenía"
+
+#: i18n/countries.php:131
+msgid "Kiribati"
+msgstr "Kíribatí"
+
+#: i18n/countries.php:132
+msgid "Kuwait"
+msgstr "Kúveit"
+
+#: i18n/countries.php:133
+msgid "Kyrgyzstan"
+msgstr "Kirgistan"
+
+#: i18n/countries.php:134
+msgid "Laos"
+msgstr "Laos"
+
+#: i18n/countries.php:135
+msgid "Latvia"
+msgstr "Lettland"
+
+#: i18n/countries.php:136
+msgid "Lebanon"
+msgstr "Líbanon"
+
+#: i18n/countries.php:137
+msgid "Lesotho"
+msgstr "Lesótó"
+
+#: i18n/countries.php:138
+msgid "Liberia"
+msgstr "Líbería"
+
+#: i18n/countries.php:139
+msgid "Libya"
+msgstr "Líbýa"
+
+#: i18n/countries.php:140
+msgid "Liechtenstein"
+msgstr "Liectenstein"
+
+#: i18n/countries.php:141
+msgid "Lithuania"
+msgstr "Litháen"
+
+#: i18n/countries.php:142
+msgid "Luxembourg"
+msgstr "Lúxemborg"
+
+#: i18n/countries.php:143
+msgid "Macao S.A.R., China"
+msgstr "Makaó, í Alþýðulýðveldinu Kína"
+
+#: i18n/countries.php:144
+msgid "Macedonia"
+msgstr "Makedónía"
+
+#: i18n/countries.php:145
+msgid "Madagascar"
+msgstr "Madagaskar"
+
+#: i18n/countries.php:146
+msgid "Malawi"
+msgstr "Malaví"
+
+#: i18n/countries.php:147
+msgid "Malaysia"
+msgstr "Malasía"
+
+#: i18n/countries.php:148
+msgid "Maldives"
+msgstr "Maldíveyjar"
+
+#: i18n/countries.php:149
+msgid "Mali"
+msgstr "Malí"
+
+#: i18n/countries.php:150
+msgid "Malta"
+msgstr "Malta"
+
+#: i18n/countries.php:151
+msgid "Marshall Islands"
+msgstr "Marshall-eyjar"
+
+#: i18n/countries.php:152
+msgid "Martinique"
+msgstr "Martiník"
+
+#: i18n/countries.php:153
+msgid "Mauritania"
+msgstr "Máritanía"
+
+#: i18n/countries.php:154
+msgid "Mauritius"
+msgstr "Máritíus"
+
+#: i18n/countries.php:155
+msgid "Mayotte"
+msgstr "Mayotte"
+
+#: i18n/countries.php:156
+msgid "Mexico"
+msgstr "Mexíkó"
+
+#: i18n/countries.php:157
+msgid "Micronesia"
+msgstr "Míkrónesía"
+
+#: i18n/countries.php:158
+msgid "Moldova"
+msgstr "Moldóva"
+
+#: i18n/countries.php:159
+msgid "Monaco"
+msgstr "Mónakó"
+
+#: i18n/countries.php:160
+msgid "Mongolia"
+msgstr "Mongólía"
+
+#: i18n/countries.php:161
+msgid "Montenegro"
+msgstr "Svartfjallaland"
+
+#: i18n/countries.php:162
+msgid "Montserrat"
+msgstr "Montserrat"
+
+#: i18n/countries.php:163
+msgid "Morocco"
+msgstr "Marokkó"
+
+#: i18n/countries.php:164
+msgid "Mozambique"
+msgstr "Mósambík"
+
+#: i18n/countries.php:165
+msgid "Myanmar"
+msgstr "Búrma"
+
+#: i18n/countries.php:166
+msgid "Namibia"
+msgstr "Namibía"
+
+#: i18n/countries.php:167
+msgid "Nauru"
+msgstr "Nárú"
+
+#: i18n/countries.php:168
+msgid "Nepal"
+msgstr "Nepal"
+
+#: i18n/countries.php:169
+msgid "Netherlands"
+msgstr "Holland"
+
+#: i18n/countries.php:170
+msgid "Netherlands Antilles"
+msgstr "Hollensku Antillur"
+
+#: i18n/countries.php:171
+msgid "New Caledonia"
+msgstr "Nýja-Kaledónía"
+
+#: i18n/countries.php:172
+msgid "New Zealand"
+msgstr "Nýja-Sjáland"
+
+#: i18n/countries.php:173
+msgid "Nicaragua"
+msgstr "Níkaragva"
+
+#: i18n/countries.php:174
+msgid "Niger"
+msgstr "Níger"
+
+#: i18n/countries.php:175
+msgid "Nigeria"
+msgstr "Nígería"
+
+#: i18n/countries.php:176
+msgid "Niue"
+msgstr "Niue"
+
+#: i18n/countries.php:177
+msgid "Norfolk Island"
+msgstr "Norfolkeyja"
+
+#: i18n/countries.php:178
+msgid "North Korea"
+msgstr "Norður-Kórea"
+
+#: i18n/countries.php:179
+msgid "Norway"
+msgstr "Noregur"
+
+#: i18n/countries.php:180
+msgid "Oman"
+msgstr "Óman"
+
+#: i18n/countries.php:181
+msgid "Pakistan"
+msgstr "Pakistan"
+
+#: i18n/countries.php:182
+msgid "Palestinian Territory"
+msgstr "Palestína, heimastjórnarsvæði"
+
+#: i18n/countries.php:183
+msgid "Panama"
+msgstr "Panama"
+
+#: i18n/countries.php:184
+msgid "Papua New Guinea"
+msgstr "Papúa Nýja-Gínea"
+
+#: i18n/countries.php:185
+msgid "Paraguay"
+msgstr "Paragvæ"
+
+#: i18n/countries.php:186
+msgid "Peru"
+msgstr "Perú"
+
+#: i18n/countries.php:187
+msgid "Philippines"
+msgstr "Filippseyjar"
+
+#: i18n/countries.php:188
+msgid "Pitcairn"
+msgstr "Pitcairn"
+
+#: i18n/countries.php:189
+msgid "Poland"
+msgstr "Pólland"
+
+#: i18n/countries.php:190
+msgid "Portugal"
+msgstr "Portúgal"
+
+#: i18n/countries.php:191
+msgid "Qatar"
+msgstr "Katar"
+
+#: i18n/countries.php:192
+msgid "Reunion"
+msgstr "Reunion"
+
+#: i18n/countries.php:193
+msgid "Romania"
+msgstr "Rúmenía"
+
+#: i18n/countries.php:194
+msgid "Russia"
+msgstr "Rússland"
+
+#: i18n/countries.php:195
+msgid "Rwanda"
+msgstr "Rúanda"
+
+#: i18n/countries.php:196
+msgid "Saint Barth&eacute;lemy"
+msgstr "Sankti Bartólómeusareyjar"
+
+#: i18n/countries.php:197
+msgid "Saint Helena"
+msgstr "Sankti Helena"
+
+#: i18n/countries.php:198
+msgid "Saint Kitts and Nevis"
+msgstr "Sankti Kitts og Nevis"
+
+#: i18n/countries.php:199
+msgid "Saint Lucia"
+msgstr "Sankti Lúsía"
+
+#: i18n/countries.php:200
+msgid "Saint Martin (French part)"
+msgstr "Sankti Martin (framski hluti)"
+
+#: i18n/countries.php:201
+msgid "Saint Martin (Dutch part)"
+msgstr "Sankti Martin (hollenski hluti)"
+
+#: i18n/countries.php:202
+msgid "Saint Pierre and Miquelon"
+msgstr "Sankti Pierre og Miquelon"
+
+#: i18n/countries.php:203
+msgid "Saint Vincent and the Grenadines"
+msgstr "Sankti Vinsent og Grenadíneyjar"
+
+#: i18n/countries.php:204
+msgid "San Marino"
+msgstr "San Marínó"
+
+#: i18n/countries.php:205
+msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+msgstr "Saó Tóme og Prinsípe"
+
+#: i18n/countries.php:206
+msgid "Saudi Arabia"
+msgstr "Saudi Arabia"
+
+#: i18n/countries.php:207
+msgid "Senegal"
+msgstr "Senegal"
+
+#: i18n/countries.php:208
+msgid "Serbia"
+msgstr "Serbía"
+
+#: i18n/countries.php:209
+msgid "Seychelles"
+msgstr "Seychelles-eyjar"
+
+#: i18n/countries.php:210
+msgid "Sierra Leone"
+msgstr "Síerra Leóne"
+
+#: i18n/countries.php:211
+msgid "Singapore"
+msgstr "Singapúr"
+
+#: i18n/countries.php:212
+msgid "Slovakia"
+msgstr "Slóvakía"
+
+#: i18n/countries.php:213
+msgid "Slovenia"
+msgstr "Slóvenía"
+
+#: i18n/countries.php:214
+msgid "Solomon Islands"
+msgstr "Salómonseyjar"
+
+#: i18n/countries.php:215
+msgid "Somalia"
+msgstr "Sómalía"
+
+#: i18n/countries.php:216
+msgid "South Africa"
+msgstr "Suður-Afríka"
+
+#: i18n/countries.php:217
+msgid "South Georgia/Sandwich Islands"
+msgstr "Suður-Georgía og Suður-Sandvíkureyjar"
+
+#: i18n/countries.php:218
+msgid "South Korea"
+msgstr "Suður-Kórea"
+
+#: i18n/countries.php:219
+msgid "South Sudan"
+msgstr "Suður-Súdan"
+
+#: i18n/countries.php:220
+msgid "Spain"
+msgstr "Spánn"
+
+#: i18n/countries.php:221
+msgid "Sri Lanka"
+msgstr "Srí Lanka"
+
+#: i18n/countries.php:222
+msgid "Sudan"
+msgstr "Súdan"
+
+#: i18n/countries.php:223
+msgid "Suriname"
+msgstr "Súrínam"
+
+#: i18n/countries.php:224
+msgid "Svalbard and Jan Mayen"
+msgstr "Svalbarði og Jan Majen"
+
+#: i18n/countries.php:225
+msgid "Swaziland"
+msgstr "Svasíland"
+
+#: i18n/countries.php:226
+msgid "Sweden"
+msgstr "Svíþjóð"
+
+#: i18n/countries.php:227
+msgid "Switzerland"
+msgstr "Sviss"
+
+#: i18n/countries.php:228
+msgid "Syria"
+msgstr "Sýrland"
+
+#: i18n/countries.php:229
+msgid "Taiwan"
+msgstr "Taívan"
+
+#: i18n/countries.php:230
+msgid "Tajikistan"
+msgstr "Tadsjikistan"
+
+#: i18n/countries.php:231
+msgid "Tanzania"
+msgstr "Tansanía"
+
+#: i18n/countries.php:232
+msgid "Thailand"
+msgstr "Taíland"
+
+#: i18n/countries.php:233
+msgid "Timor-Leste"
+msgstr "Tímor-Leste"
+
+#: i18n/countries.php:234
+msgid "Togo"
+msgstr "Tógó"
+
+#: i18n/countries.php:235
+msgid "Tokelau"
+msgstr "Tókelá"
+
+#: i18n/countries.php:236
+msgid "Tonga"
+msgstr "Tonga"
+
+#: i18n/countries.php:237
+msgid "Trinidad and Tobago"
+msgstr "Trínidad og Tóbagó"
+
+#: i18n/countries.php:238
+msgid "Tunisia"
+msgstr "Túnis"
+
+#: i18n/countries.php:239
+msgid "Turkey"
+msgstr "Tyrkland"
+
+#: i18n/countries.php:240
+msgid "Turkmenistan"
+msgstr "Túrkmenistan"
+
+#: i18n/countries.php:241
+msgid "Turks and Caicos Islands"
+msgstr "Turks- og Caicos-eyjar"
+
+#: i18n/countries.php:242
+msgid "Tuvalu"
+msgstr "Túvalú"
+
+#: i18n/countries.php:243
+msgid "Uganda"
+msgstr "Úganda"
+
+#: i18n/countries.php:244
+msgid "Ukraine"
+msgstr "Úkraína"
+
+#: i18n/countries.php:245
+msgid "United Arab Emirates"
+msgstr "Sameinuðu arabísku furstadæmin"
+
+#: i18n/countries.php:246
+msgid "United Kingdom (UK)"
+msgstr "Bretland"
+
+#: i18n/countries.php:247
+msgid "United States (US)"
+msgstr "Bandaríkin (BNA)"
+
+#: i18n/countries.php:248
+msgid "Uruguay"
+msgstr "Úrúgvæ"
+
+#: i18n/countries.php:249
+msgid "Uzbekistan"
+msgstr "Úsbekistan"
+
+#: i18n/countries.php:250
+msgid "Vanuatu"
+msgstr "Vanúatú"
+
+#: i18n/countries.php:251
+msgid "Vatican"
+msgstr "Vatíkanið"
+
+#: i18n/countries.php:252
+msgid "Venezuela"
+msgstr "Venesúela"
+
+#: i18n/countries.php:253
+msgid "Vietnam"
+msgstr "Víetnam"
+
+#: i18n/countries.php:254
+msgid "Wallis and Futuna"
+msgstr "Wallis- og Fútúnaeyjar"
+
+#: i18n/countries.php:255
+msgid "Western Sahara"
+msgstr "Vestur-Sahara"
+
+#: i18n/countries.php:256
+msgid "Western Samoa"
+msgstr "Vestur-Samóa"
+
+#: i18n/countries.php:257
+msgid "Yemen"
+msgstr "Jemen"
+
+#: i18n/countries.php:258
+msgid "Zambia"
+msgstr "Sambía"
+
+#: i18n/countries.php:259
+msgid "Zimbabwe"
+msgstr "Simbabve"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
@@ -2904,10 +3833,6 @@ msgstr "District of Columbia"
 msgid "Florida"
 msgstr "Flórída"
 
-#: i18n/states/US.php:23 includes/class-wc-countries.php:118
-msgid "Georgia"
-msgstr "Georgía"
-
 #: i18n/states/US.php:24
 msgid "Hawaii"
 msgstr "Hawaii"
@@ -3164,9 +4089,9 @@ msgstr "Endurgreitt"
 msgid "cancelled"
 msgstr "afturkallað"
 
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/emails/class-wc-email-customer-completed-order.php:140
-#: includes/emails/class-wc-email-new-order.php:120
+#: includes/abstracts/abstract-wc-email.php:573
+#: includes/emails/class-wc-email-customer-completed-order.php:141
+#: includes/emails/class-wc-email-new-order.php:121
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:52
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:122
@@ -3177,130 +4102,130 @@ msgstr "afturkallað"
 msgid "Enable/Disable"
 msgstr "Virkja /Afvirkja"
 
-#: includes/abstracts/abstract-wc-email.php:572
-#: includes/emails/class-wc-email-customer-completed-order.php:142
-#: includes/emails/class-wc-email-new-order.php:122
+#: includes/abstracts/abstract-wc-email.php:575
+#: includes/emails/class-wc-email-customer-completed-order.php:143
+#: includes/emails/class-wc-email-new-order.php:123
 msgid "Enable this email notification"
 msgstr "Virkja þessa tilkynning  í tölvupósti"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/emails/class-wc-email-customer-invoice.php:146
+#: includes/abstracts/abstract-wc-email.php:579
+#: includes/emails/class-wc-email-customer-invoice.php:147
 msgid "Email subject"
 msgstr "Fyrirsögn tölvupósts"
 
-#: includes/abstracts/abstract-wc-email.php:578
-#: includes/abstracts/abstract-wc-email.php:585
-#: includes/emails/class-wc-email-customer-completed-order.php:148
-#: includes/emails/class-wc-email-customer-completed-order.php:155
-#: includes/emails/class-wc-email-customer-completed-order.php:162
-#: includes/emails/class-wc-email-customer-completed-order.php:169
-#: includes/emails/class-wc-email-customer-invoice.php:148
-#: includes/emails/class-wc-email-customer-invoice.php:155
-#: includes/emails/class-wc-email-customer-invoice.php:162
-#: includes/emails/class-wc-email-customer-invoice.php:169
+#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:588
+#: includes/emails/class-wc-email-customer-completed-order.php:149
+#: includes/emails/class-wc-email-customer-completed-order.php:156
+#: includes/emails/class-wc-email-customer-completed-order.php:163
+#: includes/emails/class-wc-email-customer-completed-order.php:170
+#: includes/emails/class-wc-email-customer-invoice.php:149
+#: includes/emails/class-wc-email-customer-invoice.php:156
+#: includes/emails/class-wc-email-customer-invoice.php:163
+#: includes/emails/class-wc-email-customer-invoice.php:170
 msgid "Defaults to <code>%s</code>"
 msgstr "Sjálfgefið í <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:583
-#: includes/emails/class-wc-email-customer-invoice.php:153
+#: includes/abstracts/abstract-wc-email.php:586
+#: includes/emails/class-wc-email-customer-invoice.php:154
 msgid "Email heading"
 msgstr "Fyrrisögn meginmáls tölvupósts"
 
-#: includes/abstracts/abstract-wc-email.php:590
-#: includes/emails/class-wc-email-customer-completed-order.php:174
-#: includes/emails/class-wc-email-customer-invoice.php:174
-#: includes/emails/class-wc-email-new-order.php:147
+#: includes/abstracts/abstract-wc-email.php:593
+#: includes/emails/class-wc-email-customer-completed-order.php:175
+#: includes/emails/class-wc-email-customer-invoice.php:175
+#: includes/emails/class-wc-email-new-order.php:148
 msgid "Email type"
 msgstr "Tegund tölvupósts"
 
-#: includes/abstracts/abstract-wc-email.php:592
-#: includes/emails/class-wc-email-customer-completed-order.php:176
-#: includes/emails/class-wc-email-customer-invoice.php:176
-#: includes/emails/class-wc-email-new-order.php:149
+#: includes/abstracts/abstract-wc-email.php:595
+#: includes/emails/class-wc-email-customer-completed-order.php:177
+#: includes/emails/class-wc-email-customer-invoice.php:177
+#: includes/emails/class-wc-email-new-order.php:150
 msgid "Choose which format of email to send."
 msgstr "Velja snið tölvupósts"
 
-#: includes/abstracts/abstract-wc-email.php:596
-#: includes/emails/class-wc-email-customer-completed-order.php:180
-#: includes/emails/class-wc-email-customer-invoice.php:180
-#: includes/emails/class-wc-email-new-order.php:153
-msgid "Plain text"
-msgstr "Einfaldur texti"
-
-#: includes/abstracts/abstract-wc-email.php:597
+#: includes/abstracts/abstract-wc-email.php:599
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
-msgid "HTML"
-msgstr "HTML"
+msgid "Plain text"
+msgstr "Einfaldur texti"
 
-#: includes/abstracts/abstract-wc-email.php:598
+#: includes/abstracts/abstract-wc-email.php:600
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
+msgid "HTML"
+msgstr "HTML"
+
+#: includes/abstracts/abstract-wc-email.php:601
+#: includes/emails/class-wc-email-customer-completed-order.php:183
+#: includes/emails/class-wc-email-customer-invoice.php:183
+#: includes/emails/class-wc-email-new-order.php:156
 msgid "Multipart"
 msgstr "Fjölhluta"
 
-#: includes/abstracts/abstract-wc-email.php:634
-#: includes/abstracts/abstract-wc-email.php:655
+#: includes/abstracts/abstract-wc-email.php:637
+#: includes/abstracts/abstract-wc-email.php:658
 msgid "Could not write to template file."
 msgstr "Gat ekki ritað í sniðmátsskrá."
 
-#: includes/abstracts/abstract-wc-email.php:686
+#: includes/abstracts/abstract-wc-email.php:689
 msgid "Template file copied to theme."
 msgstr "Sniðmátsskrá afrituð yfir í þema"
 
-#: includes/abstracts/abstract-wc-email.php:695
+#: includes/abstracts/abstract-wc-email.php:698
 msgid "Template file deleted from theme."
 msgstr "Sniðmátsskrá eytt frá þema"
 
-#: includes/abstracts/abstract-wc-email.php:703
+#: includes/abstracts/abstract-wc-email.php:706
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "Stillingar"
 
-#: includes/abstracts/abstract-wc-email.php:715
+#: includes/abstracts/abstract-wc-email.php:718
 msgid "HTML template"
 msgstr "HTML sniðmát"
 
-#: includes/abstracts/abstract-wc-email.php:716
+#: includes/abstracts/abstract-wc-email.php:719
 msgid "Plain text template"
 msgstr "Sniðmát fyrir einfaldan texta"
 
-#: includes/abstracts/abstract-wc-email.php:737
+#: includes/abstracts/abstract-wc-email.php:740
 msgid "Delete template file"
 msgstr "Eyða sniðmáta skrá"
 
-#: includes/abstracts/abstract-wc-email.php:740
+#: includes/abstracts/abstract-wc-email.php:743
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "Þemað þitt hefur skrifað yfir þetta sniðmát. Þú getur skoðað það í: <code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:755
+#: includes/abstracts/abstract-wc-email.php:758
 msgid "Copy file to theme"
 msgstr "Afrita skrá yfir í þema"
 
-#: includes/abstracts/abstract-wc-email.php:758
+#: includes/abstracts/abstract-wc-email.php:761
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "Til að yfirskrifa og breyta þessu tölvupóstssniði skal afrita <code>%s</code> í þema möppuna: <code>%s</code>,"
 
-#: includes/abstracts/abstract-wc-email.php:769
+#: includes/abstracts/abstract-wc-email.php:772
 msgid "File was not found."
 msgstr "Skrá fannst ekki."
 
-#: includes/abstracts/abstract-wc-email.php:794
+#: includes/abstracts/abstract-wc-email.php:797
 msgid "View template"
 msgstr "Skoða sniðmát"
 
-#: includes/abstracts/abstract-wc-email.php:795
+#: includes/abstracts/abstract-wc-email.php:798
 msgid "Hide template"
 msgstr "Fela sniðmát"
 
-#: includes/abstracts/abstract-wc-email.php:806
+#: includes/abstracts/abstract-wc-email.php:809
 msgid "Are you sure you want to delete this template file?"
 msgstr "Eru viss um að þú viljir eyða þessari sniðmáta skrá?"
 
@@ -3455,7 +4380,7 @@ msgid "You do not have permission to create coupons"
 msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:201
-#: includes/api/class-wc-api-customers.php:332
+#: includes/api/class-wc-api-customers.php:337
 #: includes/api/class-wc-api-server.php:423
 msgid "Missing parameter %s"
 msgstr "Vantar breytu %s"
@@ -3474,36 +4399,36 @@ msgstr ""
 msgid "Failed to update coupon"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:249
-#: includes/api/class-wc-api-customers.php:252
+#: includes/api/class-wc-api-customers.php:254
+#: includes/api/class-wc-api-customers.php:257
 msgid "Invalid customer Email"
 msgstr "Netfang viðskiptavinar er ógilt"
 
-#: includes/api/class-wc-api-customers.php:270
+#: includes/api/class-wc-api-customers.php:275
 msgid "You do not have permission to read the customers count"
 msgstr "Þú hefur ekki réttindi til að skoða fjölda viðskiptavina"
 
-#: includes/api/class-wc-api-customers.php:327
+#: includes/api/class-wc-api-customers.php:332
 msgid "You do not have permission to create this customer"
 msgstr "Þú hefur ekki réttindi til að búa til þennan viðskiptavin"
 
-#: includes/api/class-wc-api-customers.php:630
+#: includes/api/class-wc-api-customers.php:665
 msgid "Invalid customer ID"
 msgstr "Ógilt númer viðskiptavinar"
 
-#: includes/api/class-wc-api-customers.php:637
+#: includes/api/class-wc-api-customers.php:672
 msgid "Invalid customer"
 msgstr "Ógildur viðskiptavinur"
 
-#: includes/api/class-wc-api-customers.php:645
+#: includes/api/class-wc-api-customers.php:680
 msgid "You do not have permission to read this customer"
 msgstr "Þú hefur ekki réttindi til að skoða þennan viðskiptavin"
 
-#: includes/api/class-wc-api-customers.php:651
+#: includes/api/class-wc-api-customers.php:686
 msgid "You do not have permission to edit this customer"
 msgstr "Þú hefur ekki réttindi til að breyta þessum viðskiptavin"
 
-#: includes/api/class-wc-api-customers.php:657
+#: includes/api/class-wc-api-customers.php:692
 msgid "You do not have permission to delete this customer"
 msgstr "Þú hefur ekki réttindi til að eyða þessum viðskiptavini"
 
@@ -3552,23 +4477,23 @@ msgstr "Þú hefur ekki réttindi til að breyta þessu %s"
 msgid "You do not have permission to delete this %s"
 msgstr "Þú hefur ekki réttindi til að eyða þessu %s"
 
-#: includes/api/class-wc-api-resource.php:308
+#: includes/api/class-wc-api-resource.php:314
 msgid "Permanently deleted customer"
 msgstr "Viðskiptavini eytt varanlega"
 
-#: includes/api/class-wc-api-resource.php:310
+#: includes/api/class-wc-api-resource.php:316
 msgid "The customer cannot be deleted"
 msgstr "Ekki er hægt að eyða þessum viðskiptavini"
 
-#: includes/api/class-wc-api-resource.php:319
+#: includes/api/class-wc-api-resource.php:325
 msgid "This %s cannot be deleted"
 msgstr "Ekki er hægt að eyða %s"
 
-#: includes/api/class-wc-api-resource.php:322
+#: includes/api/class-wc-api-resource.php:328
 msgid "Permanently deleted %s"
 msgstr "Endanlega eytt %s"
 
-#: includes/api/class-wc-api-resource.php:328
+#: includes/api/class-wc-api-resource.php:334
 msgid "Deleted %s"
 msgstr "Eyða %s"
 
@@ -3588,76 +4513,7 @@ msgstr "Meðhöndlun fyrir þessa leið er ógild"
 msgid "No route was found matching the URL and request method"
 msgstr "Engin leið fannst út frá gefinni vefslóð og umbeðna aðferð"
 
-#: includes/class-wc-ajax.php:164
-msgid "Sorry, your session has expired."
-msgstr "Afsakið, lotan er liðin."
-
-#: includes/class-wc-ajax.php:164
-msgid "Return to homepage"
-msgstr "Fara aftur á forsíðu"
-
-#: includes/class-wc-ajax.php:318 includes/class-wc-ajax.php:351
-#: includes/class-wc-ajax.php:376
-msgid "You do not have sufficient permissions to access this page."
-msgstr "Þú hefur ekki réttindi til að skoða þessa síðu"
-
-#: includes/class-wc-ajax.php:322 includes/class-wc-ajax.php:355
-#: includes/class-wc-ajax.php:380
-msgid "You have taken too long. Please go back and retry."
-msgstr "Þetta tók of langan tíma. Vinsamlegast byrjaðu aftur."
-
-#: includes/class-wc-ajax.php:612
-msgid "Same as parent"
-msgstr "Sama og yfirflokkur"
-
-#: includes/class-wc-ajax.php:613
-msgid "Standard"
-msgstr "Hefðbundin"
-
-#: includes/class-wc-ajax.php:888
-msgid "File %d"
-msgstr "Skrá %d"
-
-#: includes/class-wc-ajax.php:1086 includes/class-wc-ajax.php:1087
-#: includes/class-wc-order.php:1592
-msgid "Item #%s stock reduced from %s to %s."
-msgstr "Lagerstaða vöru #%s lækkað úr %s í %s"
-
-#: includes/class-wc-ajax.php:1095
-msgid ""
-"No products had their stock reduced - they may not have stock management "
-"enabled."
-msgstr "Lagerstöðu var ekki breytt - mögulega er lagerhald ekki virkt."
-
-#: includes/class-wc-ajax.php:1136 includes/class-wc-ajax.php:1137
-msgid "Item #%s stock increased from %s to %s."
-msgstr "Lagerstöðu á vöru #%s hefur hækkað frá %s í %s"
-
-#: includes/class-wc-ajax.php:1144
-msgid ""
-"No products had their stock increased - they may not have stock management "
-"enabled."
-msgstr "Lagerstöðu var ekki breytt - mögulega er lagerhald ekki virkt."
-
-#: includes/class-wc-ajax.php:1161
-#: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:62
-msgid "Name"
-msgstr "Nafn"
-
-#: includes/class-wc-ajax.php:1161
-msgid "Value"
-msgstr "Gildi"
-
-#: includes/class-wc-ajax.php:1384
-msgid "Delete note"
-msgstr "Eyða skilaboðum"
-
-#: includes/class-wc-ajax.php:1532
-msgid "Guest"
-msgstr "Gestur"
-
-#: includes/class-wc-cache-helper.php:105
+#: includes/class-wc-cache-helper.php:106
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
@@ -3712,7 +4568,7 @@ msgid ""
 msgstr "Þú getur ekki bætt við þessu magni af &quot;%s&quot; í körfuna því það er ekki nóg til á lager (%s til á lager)."
 
 #: includes/class-wc-cart.php:835 includes/class-wc-cart.php:854
-#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:188
 #: includes/wc-cart-functions.php:96 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "Skoða körfu"
@@ -3781,20 +4637,20 @@ msgid ""
 " to homepage</a>"
 msgstr "Afsakið, tíminn er liðinn.  <a href=\"%s\" class=\"wc-backward\">Fara aftur á forsíðu</a>"
 
-#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:84
 msgid "is a required field."
 msgstr "krefst útfyllingar"
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:95
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "Sláðu inn gilt póstnúmer."
 
-#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:104
 msgid "is not a valid phone number."
 msgstr "er ekki gilt símanúmer"
 
-#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:111
 msgid "is not a valid email address."
 msgstr "er ekki gilt netfang"
 
@@ -3820,1112 +4676,45 @@ msgstr "Óleyfilegur sendingarmáti."
 msgid "Invalid payment method."
 msgstr "Ógildur greiðslumáti"
 
-#: includes/class-wc-comments.php:109
+#: includes/class-wc-comments.php:111
 msgid "Please rate the product."
 msgstr "Vinsamlegast gefðu vörunni einkunn"
 
-#: includes/class-wc-countries.php:37
-msgid "Afghanistan"
-msgstr "Afganistan"
-
-#: includes/class-wc-countries.php:38
-msgid "&#197;land Islands"
-msgstr "Álandseyjar"
-
-#: includes/class-wc-countries.php:39
-msgid "Albania"
-msgstr "Albanía"
-
-#: includes/class-wc-countries.php:40
-msgid "Algeria"
-msgstr "Alsír"
-
-#: includes/class-wc-countries.php:41
-msgid "Andorra"
-msgstr "Andorra"
-
-#: includes/class-wc-countries.php:42
-msgid "Angola"
-msgstr "Angóla"
-
-#: includes/class-wc-countries.php:43
-msgid "Anguilla"
-msgstr "Angvilla"
-
-#: includes/class-wc-countries.php:44
-msgid "Antarctica"
-msgstr "Suðurskautslandið"
-
-#: includes/class-wc-countries.php:45
-msgid "Antigua and Barbuda"
-msgstr "Antígva og Barbúa"
-
-#: includes/class-wc-countries.php:46
-msgid "Argentina"
-msgstr "Argentína"
-
-#: includes/class-wc-countries.php:47
-msgid "Armenia"
-msgstr "Armenía"
-
-#: includes/class-wc-countries.php:48
-msgid "Aruba"
-msgstr "Arúba"
-
-#: includes/class-wc-countries.php:49
-msgid "Australia"
-msgstr "Ástralía"
-
-#: includes/class-wc-countries.php:50
-msgid "Austria"
-msgstr "Austurríki"
-
-#: includes/class-wc-countries.php:51
-msgid "Azerbaijan"
-msgstr "Aserbaidsjan"
-
-#: includes/class-wc-countries.php:52
-msgid "Bahamas"
-msgstr "Bahamaeyjar"
-
-#: includes/class-wc-countries.php:53
-msgid "Bahrain"
-msgstr "Barein"
-
-#: includes/class-wc-countries.php:54
-msgid "Bangladesh"
-msgstr "Bangladess"
-
-#: includes/class-wc-countries.php:55
-msgid "Barbados"
-msgstr "Barbados"
-
-#: includes/class-wc-countries.php:56
-msgid "Belarus"
-msgstr "Hvíta-Rússland"
-
-#: includes/class-wc-countries.php:57
-msgid "Belgium"
-msgstr "Belgía"
-
-#: includes/class-wc-countries.php:58
-msgid "Belau"
-msgstr "Belau"
-
-#: includes/class-wc-countries.php:59
-msgid "Belize"
-msgstr "Belís"
-
-#: includes/class-wc-countries.php:60
-msgid "Benin"
-msgstr "Benín"
-
-#: includes/class-wc-countries.php:61
-msgid "Bermuda"
-msgstr "Bermúdaeyjar"
-
-#: includes/class-wc-countries.php:62
-msgid "Bhutan"
-msgstr "Bútan"
-
-#: includes/class-wc-countries.php:63
-msgid "Bolivia"
-msgstr "Bólivía"
-
-#: includes/class-wc-countries.php:64
-msgid "Bonaire, Saint Eustatius and Saba"
-msgstr "Bonaire, Sint Eustatius og Saba"
-
-#: includes/class-wc-countries.php:65
-msgid "Bosnia and Herzegovina"
-msgstr "Bosnía og Hersegóvína"
-
-#: includes/class-wc-countries.php:66
-msgid "Botswana"
-msgstr "Botsvana"
-
-#: includes/class-wc-countries.php:67
-msgid "Bouvet Island"
-msgstr "Bouvet-eyja"
-
-#: includes/class-wc-countries.php:68
-msgid "Brazil"
-msgstr "Brasilía"
-
-#: includes/class-wc-countries.php:69
-msgid "British Indian Ocean Territory"
-msgstr "Bresku Indlandshafseyjar"
-
-#: includes/class-wc-countries.php:70
-msgid "British Virgin Islands"
-msgstr "Bresku Jómfrúareyjar"
-
-#: includes/class-wc-countries.php:71
-msgid "Brunei"
-msgstr "Brúnei"
-
-#: includes/class-wc-countries.php:72
-msgid "Bulgaria"
-msgstr "Búlgaría"
-
-#: includes/class-wc-countries.php:73
-msgid "Burkina Faso"
-msgstr "Búrkína Fasó"
-
-#: includes/class-wc-countries.php:74
-msgid "Burundi"
-msgstr "Búrúndí"
-
-#: includes/class-wc-countries.php:75
-msgid "Cambodia"
-msgstr "Kambódía"
-
-#: includes/class-wc-countries.php:76
-msgid "Cameroon"
-msgstr "Kamarún"
-
-#: includes/class-wc-countries.php:77
-msgid "Canada"
-msgstr "Kanada"
-
-#: includes/class-wc-countries.php:78
-msgid "Cape Verde"
-msgstr "Grænhöfðaeyjar"
-
-#: includes/class-wc-countries.php:79
-msgid "Cayman Islands"
-msgstr "Cayman-eyjar"
-
-#: includes/class-wc-countries.php:80
-msgid "Central African Republic"
-msgstr "Mið-Afríkulýðveldið"
-
-#: includes/class-wc-countries.php:81
-msgid "Chad"
-msgstr "Tsjad"
-
-#: includes/class-wc-countries.php:82
-msgid "Chile"
-msgstr "Síle"
-
-#: includes/class-wc-countries.php:83
-msgid "China"
-msgstr "Kína"
-
-#: includes/class-wc-countries.php:84
-msgid "Christmas Island"
-msgstr "Jólaey"
-
-#: includes/class-wc-countries.php:85
-msgid "Cocos (Keeling) Islands"
-msgstr "Kókoseyjar (Keeling)"
-
-#: includes/class-wc-countries.php:86
-msgid "Colombia"
-msgstr "Kólumbía"
-
-#: includes/class-wc-countries.php:87
-msgid "Comoros"
-msgstr "Kómoreyjar"
-
-#: includes/class-wc-countries.php:88
-msgid "Congo (Brazzaville)"
-msgstr "Lýðveldið Kongó (Brazzaville)"
-
-#: includes/class-wc-countries.php:89
-msgid "Congo (Kinshasa)"
-msgstr "Lýðstjórnarlýðveldið Kongó  (Kinshasa)"
-
-#: includes/class-wc-countries.php:90
-msgid "Cook Islands"
-msgstr "Cooks-eyjar"
-
-#: includes/class-wc-countries.php:91
-msgid "Costa Rica"
-msgstr "Kosta Ríka"
-
-#: includes/class-wc-countries.php:92
-msgid "Croatia"
-msgstr "Króatía"
-
-#: includes/class-wc-countries.php:93
-msgid "Cuba"
-msgstr "Kúba"
-
-#: includes/class-wc-countries.php:94
-msgid "Cura&Ccedil;ao"
-msgstr "Curacao"
-
-#: includes/class-wc-countries.php:95
-msgid "Cyprus"
-msgstr "Kýpur"
-
-#: includes/class-wc-countries.php:96
-msgid "Czech Republic"
-msgstr "Tékkland"
-
-#: includes/class-wc-countries.php:97
-msgid "Denmark"
-msgstr "Danmörk"
-
-#: includes/class-wc-countries.php:98
-msgid "Djibouti"
-msgstr "Djíbútí"
-
-#: includes/class-wc-countries.php:99
-msgid "Dominica"
-msgstr "Dóminíka"
-
-#: includes/class-wc-countries.php:100
-msgid "Dominican Republic"
-msgstr "Dóminíska lýðveldið"
-
-#: includes/class-wc-countries.php:101
-msgid "Ecuador"
-msgstr "Ekvador"
-
-#: includes/class-wc-countries.php:102
-msgid "Egypt"
-msgstr "Egyptaland"
-
-#: includes/class-wc-countries.php:103
-msgid "El Salvador"
-msgstr "El Salvador"
-
-#: includes/class-wc-countries.php:104
-msgid "Equatorial Guinea"
-msgstr "Miðbaugs-Gínea"
-
-#: includes/class-wc-countries.php:105
-msgid "Eritrea"
-msgstr "Erítrea"
-
-#: includes/class-wc-countries.php:106
-msgid "Estonia"
-msgstr "Eistland"
-
-#: includes/class-wc-countries.php:107
-msgid "Ethiopia"
-msgstr "Eþíópía"
-
-#: includes/class-wc-countries.php:108
-msgid "Falkland Islands"
-msgstr "Falklandseyjar"
-
-#: includes/class-wc-countries.php:109
-msgid "Faroe Islands"
-msgstr "Færeyjar"
-
-#: includes/class-wc-countries.php:110
-msgid "Fiji"
-msgstr "Fijieyjar"
-
-#: includes/class-wc-countries.php:111
-msgid "Finland"
-msgstr "Finnland"
-
-#: includes/class-wc-countries.php:112
-msgid "France"
-msgstr "Frakkland"
-
-#: includes/class-wc-countries.php:113
-msgid "French Guiana"
-msgstr "Franska Gínea"
-
-#: includes/class-wc-countries.php:114
-msgid "French Polynesia"
-msgstr "Franska Pólýnesía"
-
-#: includes/class-wc-countries.php:115
-msgid "French Southern Territories"
-msgstr "Frönsku suðlægu landsvæðin"
-
-#: includes/class-wc-countries.php:116
-msgid "Gabon"
-msgstr "Gabon"
-
-#: includes/class-wc-countries.php:117
-msgid "Gambia"
-msgstr "Gambía"
-
-#: includes/class-wc-countries.php:119
-msgid "Germany"
-msgstr "Þýskaland"
-
-#: includes/class-wc-countries.php:120
-msgid "Ghana"
-msgstr "Gana"
-
-#: includes/class-wc-countries.php:121
-msgid "Gibraltar"
-msgstr "Gíbraltar"
-
-#: includes/class-wc-countries.php:122
-msgid "Greece"
-msgstr "Grikkland"
-
-#: includes/class-wc-countries.php:123
-msgid "Greenland"
-msgstr "Grænland"
-
-#: includes/class-wc-countries.php:124
-msgid "Grenada"
-msgstr "Grenada"
-
-#: includes/class-wc-countries.php:125
-msgid "Guadeloupe"
-msgstr "Guadeloupe"
-
-#: includes/class-wc-countries.php:126
-msgid "Guatemala"
-msgstr "Gvatemala"
-
-#: includes/class-wc-countries.php:127
-msgid "Guernsey"
-msgstr "Guernsey"
-
-#: includes/class-wc-countries.php:128
-msgid "Guinea"
-msgstr "Gínea"
-
-#: includes/class-wc-countries.php:129
-msgid "Guinea-Bissau"
-msgstr "Gínea-Bissá"
-
-#: includes/class-wc-countries.php:130
-msgid "Guyana"
-msgstr "Gvæjana"
-
-#: includes/class-wc-countries.php:131
-msgid "Haiti"
-msgstr "Haítí"
-
-#: includes/class-wc-countries.php:132
-msgid "Heard Island and McDonald Islands"
-msgstr "Heard og McDonalds-eyjar"
-
-#: includes/class-wc-countries.php:133
-msgid "Honduras"
-msgstr "Hondúras"
-
-#: includes/class-wc-countries.php:134
-msgid "Hong Kong"
-msgstr "Hong Kong"
-
-#: includes/class-wc-countries.php:135
-msgid "Hungary"
-msgstr "Ungverjaland"
-
-#: includes/class-wc-countries.php:136
-msgid "Iceland"
-msgstr "Ísland"
-
-#: includes/class-wc-countries.php:137
-msgid "India"
-msgstr "Indland"
-
-#: includes/class-wc-countries.php:138
-msgid "Indonesia"
-msgstr "Indónesía"
-
-#: includes/class-wc-countries.php:139
-msgid "Iran"
-msgstr "Íran"
-
-#: includes/class-wc-countries.php:140
-msgid "Iraq"
-msgstr "Írak"
-
-#: includes/class-wc-countries.php:141
-msgid "Republic of Ireland"
-msgstr "Írland"
-
-#: includes/class-wc-countries.php:142
-msgid "Isle of Man"
-msgstr "Mön"
-
-#: includes/class-wc-countries.php:143
-msgid "Israel"
-msgstr "Ísrael"
-
-#: includes/class-wc-countries.php:144
-msgid "Italy"
-msgstr "Ítalía"
-
-#: includes/class-wc-countries.php:145
-msgid "Ivory Coast"
-msgstr "Fílabeinsströndin"
-
-#: includes/class-wc-countries.php:146
-msgid "Jamaica"
-msgstr "Jamaíka"
-
-#: includes/class-wc-countries.php:147
-msgid "Japan"
-msgstr "Japan"
-
-#: includes/class-wc-countries.php:148
-msgid "Jersey"
-msgstr "Jersey"
-
-#: includes/class-wc-countries.php:149
-msgid "Jordan"
-msgstr "Jórdanía"
-
-#: includes/class-wc-countries.php:150
-msgid "Kazakhstan"
-msgstr "Kasakstan"
-
-#: includes/class-wc-countries.php:151
-msgid "Kenya"
-msgstr "Kenía"
-
-#: includes/class-wc-countries.php:152
-msgid "Kiribati"
-msgstr "Kíribatí"
-
-#: includes/class-wc-countries.php:153
-msgid "Kuwait"
-msgstr "Kúveit"
-
-#: includes/class-wc-countries.php:154
-msgid "Kyrgyzstan"
-msgstr "Kirgistan"
-
-#: includes/class-wc-countries.php:155
-msgid "Laos"
-msgstr "Laos"
-
-#: includes/class-wc-countries.php:156
-msgid "Latvia"
-msgstr "Lettland"
-
-#: includes/class-wc-countries.php:157
-msgid "Lebanon"
-msgstr "Líbanon"
-
-#: includes/class-wc-countries.php:158
-msgid "Lesotho"
-msgstr "Lesótó"
-
-#: includes/class-wc-countries.php:159
-msgid "Liberia"
-msgstr "Líbería"
-
-#: includes/class-wc-countries.php:160
-msgid "Libya"
-msgstr "Líbýa"
-
-#: includes/class-wc-countries.php:161
-msgid "Liechtenstein"
-msgstr "Liectenstein"
-
-#: includes/class-wc-countries.php:162
-msgid "Lithuania"
-msgstr "Litháen"
-
-#: includes/class-wc-countries.php:163
-msgid "Luxembourg"
-msgstr "Lúxemborg"
-
-#: includes/class-wc-countries.php:164
-msgid "Macao S.A.R., China"
-msgstr "Makaó, í Alþýðulýðveldinu Kína"
-
-#: includes/class-wc-countries.php:165
-msgid "Macedonia"
-msgstr "Makedónía"
-
-#: includes/class-wc-countries.php:166
-msgid "Madagascar"
-msgstr "Madagaskar"
-
-#: includes/class-wc-countries.php:167
-msgid "Malawi"
-msgstr "Malaví"
-
-#: includes/class-wc-countries.php:168
-msgid "Malaysia"
-msgstr "Malasía"
-
-#: includes/class-wc-countries.php:169
-msgid "Maldives"
-msgstr "Maldíveyjar"
-
-#: includes/class-wc-countries.php:170
-msgid "Mali"
-msgstr "Malí"
-
-#: includes/class-wc-countries.php:171
-msgid "Malta"
-msgstr "Malta"
-
-#: includes/class-wc-countries.php:172
-msgid "Marshall Islands"
-msgstr "Marshall-eyjar"
-
-#: includes/class-wc-countries.php:173
-msgid "Martinique"
-msgstr "Martiník"
-
-#: includes/class-wc-countries.php:174
-msgid "Mauritania"
-msgstr "Máritanía"
-
-#: includes/class-wc-countries.php:175
-msgid "Mauritius"
-msgstr "Máritíus"
-
-#: includes/class-wc-countries.php:176
-msgid "Mayotte"
-msgstr "Mayotte"
-
-#: includes/class-wc-countries.php:177
-msgid "Mexico"
-msgstr "Mexíkó"
-
-#: includes/class-wc-countries.php:178
-msgid "Micronesia"
-msgstr "Míkrónesía"
-
-#: includes/class-wc-countries.php:179
-msgid "Moldova"
-msgstr "Moldóva"
-
-#: includes/class-wc-countries.php:180
-msgid "Monaco"
-msgstr "Mónakó"
-
-#: includes/class-wc-countries.php:181
-msgid "Mongolia"
-msgstr "Mongólía"
-
-#: includes/class-wc-countries.php:182
-msgid "Montenegro"
-msgstr "Svartfjallaland"
-
-#: includes/class-wc-countries.php:183
-msgid "Montserrat"
-msgstr "Montserrat"
-
-#: includes/class-wc-countries.php:184
-msgid "Morocco"
-msgstr "Marokkó"
-
-#: includes/class-wc-countries.php:185
-msgid "Mozambique"
-msgstr "Mósambík"
-
-#: includes/class-wc-countries.php:186
-msgid "Myanmar"
-msgstr "Búrma"
-
-#: includes/class-wc-countries.php:187
-msgid "Namibia"
-msgstr "Namibía"
-
-#: includes/class-wc-countries.php:188
-msgid "Nauru"
-msgstr "Nárú"
-
-#: includes/class-wc-countries.php:189
-msgid "Nepal"
-msgstr "Nepal"
-
-#: includes/class-wc-countries.php:190
-msgid "Netherlands"
-msgstr "Holland"
-
-#: includes/class-wc-countries.php:191
-msgid "Netherlands Antilles"
-msgstr "Hollensku Antillur"
-
-#: includes/class-wc-countries.php:192
-msgid "New Caledonia"
-msgstr "Nýja-Kaledónía"
-
-#: includes/class-wc-countries.php:193
-msgid "New Zealand"
-msgstr "Nýja-Sjáland"
-
-#: includes/class-wc-countries.php:194
-msgid "Nicaragua"
-msgstr "Níkaragva"
-
-#: includes/class-wc-countries.php:195
-msgid "Niger"
-msgstr "Níger"
-
-#: includes/class-wc-countries.php:196
-msgid "Nigeria"
-msgstr "Nígería"
-
-#: includes/class-wc-countries.php:197
-msgid "Niue"
-msgstr "Niue"
-
-#: includes/class-wc-countries.php:198
-msgid "Norfolk Island"
-msgstr "Norfolkeyja"
-
-#: includes/class-wc-countries.php:199
-msgid "North Korea"
-msgstr "Norður-Kórea"
-
-#: includes/class-wc-countries.php:200
-msgid "Norway"
-msgstr "Noregur"
-
-#: includes/class-wc-countries.php:201
-msgid "Oman"
-msgstr "Óman"
-
-#: includes/class-wc-countries.php:202
-msgid "Pakistan"
-msgstr "Pakistan"
-
-#: includes/class-wc-countries.php:203
-msgid "Palestinian Territory"
-msgstr "Palestína, heimastjórnarsvæði"
-
-#: includes/class-wc-countries.php:204
-msgid "Panama"
-msgstr "Panama"
-
-#: includes/class-wc-countries.php:205
-msgid "Papua New Guinea"
-msgstr "Papúa Nýja-Gínea"
-
-#: includes/class-wc-countries.php:206
-msgid "Paraguay"
-msgstr "Paragvæ"
-
-#: includes/class-wc-countries.php:207
-msgid "Peru"
-msgstr "Perú"
-
-#: includes/class-wc-countries.php:208
-msgid "Philippines"
-msgstr "Filippseyjar"
-
-#: includes/class-wc-countries.php:209
-msgid "Pitcairn"
-msgstr "Pitcairn"
-
-#: includes/class-wc-countries.php:210
-msgid "Poland"
-msgstr "Pólland"
-
-#: includes/class-wc-countries.php:211
-msgid "Portugal"
-msgstr "Portúgal"
-
-#: includes/class-wc-countries.php:212
-msgid "Qatar"
-msgstr "Katar"
-
-#: includes/class-wc-countries.php:213
-msgid "Reunion"
-msgstr "Reunion"
-
-#: includes/class-wc-countries.php:214
-msgid "Romania"
-msgstr "Rúmenía"
-
-#: includes/class-wc-countries.php:215
-msgid "Russia"
-msgstr "Rússland"
-
-#: includes/class-wc-countries.php:216
-msgid "Rwanda"
-msgstr "Rúanda"
-
-#: includes/class-wc-countries.php:217
-msgid "Saint Barth&eacute;lemy"
-msgstr "Sankti Bartólómeusareyjar"
-
-#: includes/class-wc-countries.php:218
-msgid "Saint Helena"
-msgstr "Sankti Helena"
-
-#: includes/class-wc-countries.php:219
-msgid "Saint Kitts and Nevis"
-msgstr "Sankti Kitts og Nevis"
-
-#: includes/class-wc-countries.php:220
-msgid "Saint Lucia"
-msgstr "Sankti Lúsía"
-
-#: includes/class-wc-countries.php:221
-msgid "Saint Martin (French part)"
-msgstr "Sankti Martin (framski hluti)"
-
-#: includes/class-wc-countries.php:222
-msgid "Saint Martin (Dutch part)"
-msgstr "Sankti Martin (hollenski hluti)"
-
-#: includes/class-wc-countries.php:223
-msgid "Saint Pierre and Miquelon"
-msgstr "Sankti Pierre og Miquelon"
-
-#: includes/class-wc-countries.php:224
-msgid "Saint Vincent and the Grenadines"
-msgstr "Sankti Vinsent og Grenadíneyjar"
-
-#: includes/class-wc-countries.php:225
-msgid "San Marino"
-msgstr "San Marínó"
-
-#: includes/class-wc-countries.php:226
-msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-msgstr "Saó Tóme og Prinsípe"
-
-#: includes/class-wc-countries.php:227
-msgid "Saudi Arabia"
-msgstr "Saudi Arabia"
-
-#: includes/class-wc-countries.php:228
-msgid "Senegal"
-msgstr "Senegal"
-
-#: includes/class-wc-countries.php:229
-msgid "Serbia"
-msgstr "Serbía"
-
-#: includes/class-wc-countries.php:230
-msgid "Seychelles"
-msgstr "Seychelles-eyjar"
-
-#: includes/class-wc-countries.php:231
-msgid "Sierra Leone"
-msgstr "Síerra Leóne"
-
-#: includes/class-wc-countries.php:232
-msgid "Singapore"
-msgstr "Singapúr"
-
-#: includes/class-wc-countries.php:233
-msgid "Slovakia"
-msgstr "Slóvakía"
-
-#: includes/class-wc-countries.php:234
-msgid "Slovenia"
-msgstr "Slóvenía"
-
-#: includes/class-wc-countries.php:235
-msgid "Solomon Islands"
-msgstr "Salómonseyjar"
-
-#: includes/class-wc-countries.php:236
-msgid "Somalia"
-msgstr "Sómalía"
-
-#: includes/class-wc-countries.php:237
-msgid "South Africa"
-msgstr "Suður-Afríka"
-
-#: includes/class-wc-countries.php:238
-msgid "South Georgia/Sandwich Islands"
-msgstr "Suður-Georgía og Suður-Sandvíkureyjar"
-
-#: includes/class-wc-countries.php:239
-msgid "South Korea"
-msgstr "Suður-Kórea"
-
-#: includes/class-wc-countries.php:240
-msgid "South Sudan"
-msgstr "Suður-Súdan"
-
-#: includes/class-wc-countries.php:241
-msgid "Spain"
-msgstr "Spánn"
-
-#: includes/class-wc-countries.php:242
-msgid "Sri Lanka"
-msgstr "Srí Lanka"
-
-#: includes/class-wc-countries.php:243
-msgid "Sudan"
-msgstr "Súdan"
-
-#: includes/class-wc-countries.php:244
-msgid "Suriname"
-msgstr "Súrínam"
-
-#: includes/class-wc-countries.php:245
-msgid "Svalbard and Jan Mayen"
-msgstr "Svalbarði og Jan Majen"
-
-#: includes/class-wc-countries.php:246
-msgid "Swaziland"
-msgstr "Svasíland"
-
-#: includes/class-wc-countries.php:247
-msgid "Sweden"
-msgstr "Svíþjóð"
-
-#: includes/class-wc-countries.php:248
-msgid "Switzerland"
-msgstr "Sviss"
-
-#: includes/class-wc-countries.php:249
-msgid "Syria"
-msgstr "Sýrland"
-
-#: includes/class-wc-countries.php:250
-msgid "Taiwan"
-msgstr "Taívan"
-
-#: includes/class-wc-countries.php:251
-msgid "Tajikistan"
-msgstr "Tadsjikistan"
-
-#: includes/class-wc-countries.php:252
-msgid "Tanzania"
-msgstr "Tansanía"
-
-#: includes/class-wc-countries.php:253
-msgid "Thailand"
-msgstr "Taíland"
-
-#: includes/class-wc-countries.php:254
-msgid "Timor-Leste"
-msgstr "Tímor-Leste"
-
-#: includes/class-wc-countries.php:255
-msgid "Togo"
-msgstr "Tógó"
-
-#: includes/class-wc-countries.php:256
-msgid "Tokelau"
-msgstr "Tókelá"
-
-#: includes/class-wc-countries.php:257
-msgid "Tonga"
-msgstr "Tonga"
-
-#: includes/class-wc-countries.php:258
-msgid "Trinidad and Tobago"
-msgstr "Trínidad og Tóbagó"
-
-#: includes/class-wc-countries.php:259
-msgid "Tunisia"
-msgstr "Túnis"
-
-#: includes/class-wc-countries.php:260
-msgid "Turkey"
-msgstr "Tyrkland"
-
-#: includes/class-wc-countries.php:261
-msgid "Turkmenistan"
-msgstr "Túrkmenistan"
-
-#: includes/class-wc-countries.php:262
-msgid "Turks and Caicos Islands"
-msgstr "Turks- og Caicos-eyjar"
-
-#: includes/class-wc-countries.php:263
-msgid "Tuvalu"
-msgstr "Túvalú"
-
-#: includes/class-wc-countries.php:264
-msgid "Uganda"
-msgstr "Úganda"
-
-#: includes/class-wc-countries.php:265
-msgid "Ukraine"
-msgstr "Úkraína"
-
-#: includes/class-wc-countries.php:266
-msgid "United Arab Emirates"
-msgstr "Sameinuðu arabísku furstadæmin"
-
-#: includes/class-wc-countries.php:267
-msgid "United Kingdom (UK)"
-msgstr "Bretland"
-
-#: includes/class-wc-countries.php:268
-msgid "United States (US)"
-msgstr "Bandaríkin (BNA)"
-
 #: includes/class-wc-countries.php:269
-msgid "Uruguay"
-msgstr "Úrúgvæ"
-
-#: includes/class-wc-countries.php:270
-msgid "Uzbekistan"
-msgstr "Úsbekistan"
-
-#: includes/class-wc-countries.php:271
-msgid "Vanuatu"
-msgstr "Vanúatú"
-
-#: includes/class-wc-countries.php:272
-msgid "Vatican"
-msgstr "Vatíkanið"
-
-#: includes/class-wc-countries.php:273
-msgid "Venezuela"
-msgstr "Venesúela"
-
-#: includes/class-wc-countries.php:274
-msgid "Vietnam"
-msgstr "Víetnam"
-
-#: includes/class-wc-countries.php:275
-msgid "Wallis and Futuna"
-msgstr "Wallis- og Fútúnaeyjar"
-
-#: includes/class-wc-countries.php:276
-msgid "Western Sahara"
-msgstr "Vestur-Sahara"
-
-#: includes/class-wc-countries.php:277
-msgid "Western Samoa"
-msgstr "Vestur-Samóa"
-
-#: includes/class-wc-countries.php:278
-msgid "Yemen"
-msgstr "Jemen"
-
-#: includes/class-wc-countries.php:279
-msgid "Zambia"
-msgstr "Sambía"
-
-#: includes/class-wc-countries.php:280
-msgid "Zimbabwe"
-msgstr "Simbabve"
-
-#: includes/class-wc-countries.php:484
 msgid "to the"
 msgstr "til"
 
-#: includes/class-wc-countries.php:485
+#: includes/class-wc-countries.php:270
 msgid "to"
 msgstr "til"
 
-#: includes/class-wc-countries.php:498
+#: includes/class-wc-countries.php:282
 msgid "the"
 msgstr " "
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "VAT"
 msgstr "vsk."
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "Tax"
 msgstr "vsk."
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. VAT)"
 msgstr "(m. vsk.)"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. tax)"
 msgstr "(m. vsk.)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. VAT)"
 msgstr "(án vsk.)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. tax)"
 msgstr "(án vsk)"
-
-#: includes/class-wc-countries.php:730
-msgid "Country"
-msgstr "Land"
-
-#: includes/class-wc-countries.php:735
-msgid "First Name"
-msgstr "Fornafn"
-
-#: includes/class-wc-countries.php:740
-msgid "Last Name"
-msgstr "Eftirnafn"
-
-#: includes/class-wc-countries.php:746
-msgid "Company Name"
-msgstr "Nafn fyrirtækis"
-
-#: includes/class-wc-countries.php:750
-msgid "Address"
-msgstr "Heimilisfang"
-
-#: includes/class-wc-countries.php:751
-msgctxt "placeholder"
-msgid "Street address"
-msgstr "Heimilisfang"
-
-#: includes/class-wc-countries.php:756
-msgctxt "placeholder"
-msgid "Apartment, suite, unit etc. (optional)"
-msgstr "Íbúð, hæð eða hurð (valkvætt)"
-
-#: includes/class-wc-countries.php:761 includes/class-wc-countries.php:762
-msgid "Town / City"
-msgstr "Borg / Bær"
-
-#: includes/class-wc-countries.php:768 includes/class-wc-countries.php:769
-msgid "State / County"
-msgstr "Sýsla / Hérað"
-
-#: includes/class-wc-countries.php:775 includes/class-wc-countries.php:776
-#: templates/cart/shipping-calculator.php:80
-msgid "Postcode / Zip"
-msgstr "Póstnúmer"
-
-#: includes/class-wc-countries.php:838
-msgid "District"
-msgstr ""
-
-#: includes/class-wc-countries.php:845 includes/class-wc-countries.php:861
-#: includes/class-wc-countries.php:881 includes/class-wc-countries.php:942
-#: includes/class-wc-countries.php:961 includes/class-wc-countries.php:966
-#: includes/class-wc-countries.php:978 includes/class-wc-countries.php:1028
-#: includes/class-wc-countries.php:1052 includes/class-wc-countries.php:1093
-msgid "Province"
-msgstr "Sýsla"
-
-#: includes/class-wc-countries.php:867
-msgid "Canton"
-msgstr "Kantóna"
-
-#: includes/class-wc-countries.php:876 includes/class-wc-countries.php:1034
-msgid "Municipality"
-msgstr "Sveitarfélag"
-
-#: includes/class-wc-countries.php:929
-msgid "Town / District"
-msgstr "Borg / Bær"
-
-#: includes/class-wc-countries.php:932
-msgid "Region"
-msgstr "Svæði"
-
-#: includes/class-wc-countries.php:937 includes/class-wc-countries.php:1068
-msgid "County"
-msgstr "Sýsla"
-
-#: includes/class-wc-countries.php:1057
-msgid "Zip"
-msgstr "Póstnúmer"
-
-#: includes/class-wc-countries.php:1060
-msgid "State"
-msgstr "Ríki"
-
-#: includes/class-wc-countries.php:1065
-msgid "Postcode"
-msgstr "Póstnúmer"
-
-#: includes/class-wc-countries.php:1173
-msgid "Email Address"
-msgstr "Netfang"
-
-#: includes/class-wc-countries.php:1179
-msgid "Phone"
-msgstr "Sími"
 
 #: includes/class-wc-coupon.php:578
 msgid "Coupon code applied successfully."
@@ -4989,67 +4778,67 @@ msgstr "Afsakið, þessi afsláttarmiði gildir ekki fyrir útsöluvörur."
 msgid "Please enter a coupon code."
 msgstr "Sláðu inn númer afsláttarmiða."
 
-#: includes/class-wc-download-handler.php:37
+#: includes/class-wc-download-handler.php:42
 msgid "Invalid email address."
 msgstr "Ógilt netfang"
 
-#: includes/class-wc-download-handler.php:37
-#: includes/class-wc-download-handler.php:62
-#: includes/class-wc-download-handler.php:83
-#: includes/class-wc-download-handler.php:90
+#: includes/class-wc-download-handler.php:42
+#: includes/class-wc-download-handler.php:67
+#: includes/class-wc-download-handler.php:88
 #: includes/class-wc-download-handler.php:95
-#: includes/class-wc-download-handler.php:99
-#: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:100
+#: includes/class-wc-download-handler.php:104
+#: includes/class-wc-download-handler.php:148
+#: includes/class-wc-download-handler.php:309
 msgid "Go to homepage"
 msgstr "Fara á forsíðu"
 
-#: includes/class-wc-download-handler.php:62
+#: includes/class-wc-download-handler.php:67
 msgid "Invalid download."
 msgstr "Ógild aðgerð (niðurhal)"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "You must be logged in to download files."
 msgstr "Þú verður að vera skráð/ur inn til að geta sótt skrár."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:27
 #: templates/myaccount/form-login.php:46
 msgid "Login"
 msgstr "Innskráning"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "Log in to Download Files"
 msgstr "Skráðu þig inn til að sækja skrá"
 
-#: includes/class-wc-download-handler.php:77
+#: includes/class-wc-download-handler.php:82
 msgid "This is not your download link."
 msgstr "Þetta er ekki þinn niðuhalshlekkur."
 
-#: includes/class-wc-download-handler.php:83
+#: includes/class-wc-download-handler.php:88
 msgid "Product no longer exists."
 msgstr "Varan er ekki lengur til"
 
-#: includes/class-wc-download-handler.php:90
-#: includes/class-wc-form-handler.php:546
+#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-form-handler.php:541
 #: includes/shortcodes/class-wc-shortcode-checkout.php:172
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
 msgstr "Ógild pöntun."
 
-#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-download-handler.php:100
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "Afsakið, þú hefur fullnýtt niðuhal á þessari skrá"
 
-#: includes/class-wc-download-handler.php:99
+#: includes/class-wc-download-handler.php:104
 msgid "Sorry, this download has expired"
 msgstr "Afsakaði, tíminn til að sækja þessa skrá er liðinn"
 
-#: includes/class-wc-download-handler.php:143
+#: includes/class-wc-download-handler.php:148
 msgid "No file defined"
 msgstr "Engin skrá skilgreind"
 
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:309
 msgid "File not found"
 msgstr "Skrá finnst ekki."
 
@@ -5091,149 +4880,149 @@ msgstr "Biðpöntun vöru"
 msgid "%s units of %s have been backordered in order %s."
 msgstr "%s einingar af %s hafa verið settar í biðpöntun %s."
 
-#: includes/class-wc-form-handler.php:129
+#: includes/class-wc-form-handler.php:125
 msgid "Address changed successfully."
 msgstr "Heimilisfangi hefur verið breytt."
 
-#: includes/class-wc-form-handler.php:178
+#: includes/class-wc-form-handler.php:174
 msgid "Please enter your name."
 msgstr "Vinsamlegast sláðu inn nafnið þitt."
 
-#: includes/class-wc-form-handler.php:182 includes/wc-user-functions.php:48
+#: includes/class-wc-form-handler.php:178 includes/wc-user-functions.php:48
 msgid "Please provide a valid email address."
 msgstr "Vinsamlegast sláðu inn gilt netfang."
 
-#: includes/class-wc-form-handler.php:184
+#: includes/class-wc-form-handler.php:180
 msgid "This email address is already registered."
 msgstr "Þetta netfang er þegar á skrá."
 
-#: includes/class-wc-form-handler.php:188
+#: includes/class-wc-form-handler.php:184
 msgid "Your current password is incorrect."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:193
+#: includes/class-wc-form-handler.php:189
 msgid "Please fill out all password fields."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:197
+#: includes/class-wc-form-handler.php:193
 msgid "Please enter your current password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:197
 msgid "Please re-enter your password."
 msgstr "Vinsamlegast sláðu aftur inn lykilorð "
 
-#: includes/class-wc-form-handler.php:205
-#: includes/class-wc-form-handler.php:836
+#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:831
 msgid "Passwords do not match."
 msgstr "Lykilorð stemma ekki."
 
-#: includes/class-wc-form-handler.php:227
+#: includes/class-wc-form-handler.php:223
 msgid "Account details changed successfully."
 msgstr "Aðgangsupplýsingum hefur verið breytt."
 
-#: includes/class-wc-form-handler.php:355
+#: includes/class-wc-form-handler.php:350
 msgid "Payment method added."
 msgstr "Greiðslumáta var bætt við."
 
-#: includes/class-wc-form-handler.php:388
-#: includes/class-wc-form-handler.php:447
+#: includes/class-wc-form-handler.php:383
+#: includes/class-wc-form-handler.php:442
 msgid "Cart updated."
 msgstr "Karfa uppfærð."
 
-#: includes/class-wc-form-handler.php:423
+#: includes/class-wc-form-handler.php:418
 msgid "You can only have 1 %s in your cart."
 msgstr "Þú getur eingöngu haft 1 %s í körfunni þinni"
 
-#: includes/class-wc-form-handler.php:513
+#: includes/class-wc-form-handler.php:508
 msgid "The cart has been filled with the items from your previous order."
 msgstr "Vörur úr eldri pöntun hafa verið settar í körfuna þína."
 
-#: includes/class-wc-form-handler.php:536
+#: includes/class-wc-form-handler.php:531
 msgid "Order cancelled by customer."
 msgstr "Viðskiptavinur hætti við pöntun."
 
-#: includes/class-wc-form-handler.php:539
+#: includes/class-wc-form-handler.php:534
 msgid "Your order was cancelled."
 msgstr "Hætt hefur verið við pöntun þína."
 
-#: includes/class-wc-form-handler.php:544
+#: includes/class-wc-form-handler.php:539
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr "Því miður, þá er ekki hægt að hætta við pöntun eins og er. Vinsamlegast hafðu samband við okkur ef þú þarft einhverja aðstoð."
 
-#: includes/class-wc-form-handler.php:584
-#: includes/class-wc-form-handler.php:644
+#: includes/class-wc-form-handler.php:579
+#: includes/class-wc-form-handler.php:639
 msgid "Please choose product options&hellip;"
 msgstr "Vinsamlegast veldu valmöguleika fyrir vöru&hellip;"
 
-#: includes/class-wc-form-handler.php:678
+#: includes/class-wc-form-handler.php:673
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "Vinsamlegast veldu magn sem þú vilt bæta í körfuna þína&hellip;"
 
-#: includes/class-wc-form-handler.php:685
+#: includes/class-wc-form-handler.php:680
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "Vinsamlegast veldu vöru til að bæta í körfuna þína&hellip;"
 
-#: includes/class-wc-form-handler.php:745
-#: includes/class-wc-form-handler.php:749
-#: includes/class-wc-form-handler.php:753
-#: includes/class-wc-form-handler.php:762
-#: includes/class-wc-form-handler.php:888
+#: includes/class-wc-form-handler.php:740
+#: includes/class-wc-form-handler.php:744
+#: includes/class-wc-form-handler.php:748
+#: includes/class-wc-form-handler.php:757
+#: includes/class-wc-form-handler.php:883
 msgid "Error"
 msgstr "Villa"
 
-#: includes/class-wc-form-handler.php:749
+#: includes/class-wc-form-handler.php:744
 msgid "Username is required."
 msgstr "Notandanafns er krafist"
 
-#: includes/class-wc-form-handler.php:753
+#: includes/class-wc-form-handler.php:748
 msgid "Password is required."
 msgstr "Lykilorð er krafist"
 
-#: includes/class-wc-form-handler.php:762
+#: includes/class-wc-form-handler.php:757
 msgid "A user could not be found with this email address."
 msgstr "Enginn notandi er skráður með þetta netfang."
 
-#: includes/class-wc-form-handler.php:787
+#: includes/class-wc-form-handler.php:782
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "Þú ert núna skráður inn sem  <strong>%s</strong>"
 
-#: includes/class-wc-form-handler.php:831
+#: includes/class-wc-form-handler.php:826
 msgid "Please enter your password."
 msgstr "Vinsamlegast sláðu inn lykilorð"
 
-#: includes/class-wc-form-handler.php:904 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:899 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr "VILLA"
 
-#: includes/class-wc-form-handler.php:904
+#: includes/class-wc-form-handler.php:899
 msgid "Anti-spam field was filled in."
 msgstr "Kæfuvörnin var fyllt inn."
 
-#: includes/class-wc-frontend-scripts.php:123
+#: includes/class-wc-frontend-scripts.php:149
 msgid "Please select a rating"
 msgstr "Gefðu einkunn"
 
-#: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1603
+#: includes/class-wc-frontend-scripts.php:168
+#: includes/wc-template-functions.php:1594
 msgid "required"
 msgstr "nauðsynlegt"
 
-#: includes/class-wc-frontend-scripts.php:164
+#: includes/class-wc-frontend-scripts.php:196
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "Afsakið, engar vörur samræmast valinu þínu.  Vinsamlegast veldu aðrar vörur."
 
-#: includes/class-wc-frontend-scripts.php:165
+#: includes/class-wc-frontend-scripts.php:197
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "Afsakið, þessi vara er ekki í boði.  Vinsamlegast veldu aðra vörusamsetningu."
 
-#: includes/class-wc-frontend-scripts.php:170
+#: includes/class-wc-frontend-scripts.php:204
 msgid "Select an option&hellip;"
 msgstr "Notaðu valmöguleika&hellip;"
 
@@ -5258,7 +5047,7 @@ msgid "Cart"
 msgstr "Karfa"
 
 #: includes/class-wc-install.php:227
-msgctxt "Paeg slug"
+msgctxt "Page slug"
 msgid "checkout"
 msgstr "ganga frá pöntun"
 
@@ -5330,204 +5119,208 @@ msgstr "WooCommerce"
 msgid "Order status changed from %s to %s."
 msgstr "Stöðu pöntunar breytt úr %s í %s."
 
+#: includes/class-wc-order.php:1592
+msgid "Item #%s stock reduced from %s to %s."
+msgstr "Lagerstaða vöru #%s lækkað úr %s í %s"
+
 #: includes/class-wc-order.php:1602
 msgid "Order item stock reduced successfully."
 msgstr "Það tóks að minnka lagerstöðu."
 
-#: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
+#: includes/class-wc-post-types.php:56 includes/class-wc-post-types.php:58
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
 msgstr "Vöruflokkar"
 
-#: includes/class-wc-post-types.php:58
+#: includes/class-wc-post-types.php:59
 msgid "Product Category"
 msgstr "Vöruflokkur"
 
-#: includes/class-wc-post-types.php:59
+#: includes/class-wc-post-types.php:60
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr "Vöruflokkar"
 
-#: includes/class-wc-post-types.php:60
+#: includes/class-wc-post-types.php:61
 msgid "Search Product Categories"
 msgstr "Leita í vöruflokkum"
 
-#: includes/class-wc-post-types.php:61
+#: includes/class-wc-post-types.php:62
 msgid "All Product Categories"
 msgstr "Allir vöruflokkar"
 
-#: includes/class-wc-post-types.php:62
+#: includes/class-wc-post-types.php:63
 msgid "Parent Product Category"
 msgstr "Yfirvöruflokkur"
 
-#: includes/class-wc-post-types.php:63
+#: includes/class-wc-post-types.php:64
 msgid "Parent Product Category:"
 msgstr "Yfirvöruflokkur:"
 
-#: includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:65
 msgid "Edit Product Category"
 msgstr "Breyta vöruflokk "
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:66
 msgid "Update Product Category"
 msgstr "Uppfæra vöruflokk"
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:67
 msgid "Add New Product Category"
 msgstr "Bæta við nýrri vöru í vöruflokk"
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:68
 msgid "New Product Category Name"
 msgstr "Nýr vöruflokur:"
 
-#: includes/class-wc-post-types.php:78
+#: includes/class-wc-post-types.php:79
 #: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "voruflokkur"
 
-#: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
+#: includes/class-wc-post-types.php:91 includes/class-wc-post-types.php:93
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
 msgstr "Vörurmerki"
 
-#: includes/class-wc-post-types.php:93
+#: includes/class-wc-post-types.php:94
 msgid "Product Tag"
 msgstr "Vörur merki"
 
-#: includes/class-wc-post-types.php:94
+#: includes/class-wc-post-types.php:95
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "Merki"
 
-#: includes/class-wc-post-types.php:95
+#: includes/class-wc-post-types.php:96
 msgid "Search Product Tags"
 msgstr "Leita eftir vörumerkjum"
 
-#: includes/class-wc-post-types.php:96
+#: includes/class-wc-post-types.php:97
 msgid "All Product Tags"
 msgstr "Öll vörumerki"
 
-#: includes/class-wc-post-types.php:97
+#: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag"
 msgstr "Yfirvörumerki"
 
-#: includes/class-wc-post-types.php:98
+#: includes/class-wc-post-types.php:99
 msgid "Parent Product Tag:"
 msgstr "Yfirvörumerki:"
 
-#: includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:100
 msgid "Edit Product Tag"
 msgstr "Breyta vörumerki"
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:101
 msgid "Update Product Tag"
 msgstr "Uppfæra vörumerki"
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:102
 msgid "Add New Product Tag"
 msgstr "Bæta við nýju vörumerki"
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:103
 msgid "New Product Tag Name"
 msgstr "Nafn á nýtt vörumerki"
 
-#: includes/class-wc-post-types.php:113
+#: includes/class-wc-post-types.php:114
 #: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "vara-merking"
 
-#: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
+#: includes/class-wc-post-types.php:125 includes/class-wc-post-types.php:127
 msgid "Shipping Classes"
 msgstr "Sendingarflokkar"
 
-#: includes/class-wc-post-types.php:127
+#: includes/class-wc-post-types.php:128
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 msgid "Shipping Class"
 msgstr "Sendingarflokkur"
 
-#: includes/class-wc-post-types.php:128
+#: includes/class-wc-post-types.php:129
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "Sendingarflokkur"
 
-#: includes/class-wc-post-types.php:129
+#: includes/class-wc-post-types.php:130
 msgid "Search Shipping Classes"
 msgstr "Leita að sendingarflokk"
 
-#: includes/class-wc-post-types.php:130
+#: includes/class-wc-post-types.php:131
 msgid "All Shipping Classes"
 msgstr "Allir Sendingarflokkar"
 
-#: includes/class-wc-post-types.php:131
+#: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class"
 msgstr "Yfirsendingarflokkur"
 
-#: includes/class-wc-post-types.php:132
+#: includes/class-wc-post-types.php:133
 msgid "Parent Shipping Class:"
 msgstr "Yfirsendingarflokkur:"
 
-#: includes/class-wc-post-types.php:133
+#: includes/class-wc-post-types.php:134
 msgid "Edit Shipping Class"
 msgstr "Breyta sendingarflokk"
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:135
 msgid "Update Shipping Class"
 msgstr "Uppfæra sendingarflokk"
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:136
 msgid "Add New Shipping Class"
 msgstr "Bæta við sendingarflokk"
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:137
 msgid "New Shipping Class Name"
 msgstr "Nafn á sendingarflokk"
 
-#: includes/class-wc-post-types.php:184
+#: includes/class-wc-post-types.php:185
 msgid "Search %s"
 msgstr "Leita  %s"
 
-#: includes/class-wc-post-types.php:185
+#: includes/class-wc-post-types.php:186
 msgid "All %s"
 msgstr "Allt %s"
 
-#: includes/class-wc-post-types.php:186
+#: includes/class-wc-post-types.php:187
 msgid "Parent %s"
 msgstr "Yfir %s"
 
-#: includes/class-wc-post-types.php:187
+#: includes/class-wc-post-types.php:188
 msgid "Parent %s:"
 msgstr "Yfir %s:"
 
-#: includes/class-wc-post-types.php:188
+#: includes/class-wc-post-types.php:189
 msgid "Edit %s"
 msgstr "Breyta %s"
 
-#: includes/class-wc-post-types.php:189
+#: includes/class-wc-post-types.php:190
 msgid "Update %s"
 msgstr "Uppfæra %s"
 
-#: includes/class-wc-post-types.php:190
+#: includes/class-wc-post-types.php:191
 msgid "Add New %s"
 msgstr "Ný %s"
 
-#: includes/class-wc-post-types.php:191
+#: includes/class-wc-post-types.php:192
 msgid "New %s"
 msgstr "Ný %s"
 
-#: includes/class-wc-post-types.php:226
+#: includes/class-wc-post-types.php:227
 #: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "vara"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:233
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "Vörur"
 
-#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:234 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5538,168 +5331,168 @@ msgstr "Vörur"
 msgid "Product"
 msgstr "Vara"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:235
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Vörur"
 
-#: includes/class-wc-post-types.php:235
+#: includes/class-wc-post-types.php:236
 msgid "Add Product"
 msgstr "Bæta við vöru"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:237
 msgid "Add New Product"
 msgstr "Bæta við nýrri vöru"
 
-#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
-#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:329 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "Breyta"
 
-#: includes/class-wc-post-types.php:238
+#: includes/class-wc-post-types.php:239
 msgid "Edit Product"
 msgstr "Breyta vöru"
 
-#: includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240
 msgid "New Product"
 msgstr "Ný vara"
 
-#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:241 includes/class-wc-post-types.php:242
 msgid "View Product"
 msgstr "Skoða vöru"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:243
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "Leita að vöru"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:244
 msgid "No Products found"
 msgstr "Engin vara fannst"
 
-#: includes/class-wc-post-types.php:244
+#: includes/class-wc-post-types.php:245
 msgid "No Products found in trash"
 msgstr "Engin vara fannst í rusli"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:246
 msgid "Parent Product"
 msgstr "Yfirvara"
 
-#: includes/class-wc-post-types.php:247
+#: includes/class-wc-post-types.php:248
 msgid "This is where you can add new products to your store."
 msgstr "Hérna getur þú bætt við nýrri vöru í verslunina."
 
-#: includes/class-wc-post-types.php:267
+#: includes/class-wc-post-types.php:268
 msgid "Variations"
 msgstr "Tilbrigði"
 
-#: includes/class-wc-post-types.php:275
+#: includes/class-wc-post-types.php:276
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "Pantanir"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:286
 msgid "Orders"
 msgstr "Pantanir"
 
-#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:287 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "Pöntun"
 
-#: includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:288
 msgid "Add Order"
 msgstr "Bæta við pöntun"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:289
 msgid "Add New Order"
 msgstr "Stofna nýja pöntun"
 
-#: includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:291
 msgid "Edit Order"
 msgstr "Breyta pöntun"
 
-#: includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292
 msgid "New Order"
 msgstr "Ný pöntun"
 
-#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:293 includes/class-wc-post-types.php:294
 msgid "View Order"
 msgstr "Skoða pöntun"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:295
 msgid "Search Orders"
 msgstr "Leita í pöntunum"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found"
 msgstr "Engin pöntun fannst "
 
-#: includes/class-wc-post-types.php:296
+#: includes/class-wc-post-types.php:297
 msgid "No Orders found in trash"
 msgstr "Engar pantanir í rusli"
 
-#: includes/class-wc-post-types.php:297
+#: includes/class-wc-post-types.php:298
 msgid "Parent Orders"
 msgstr "Yfirpantanir"
 
-#: includes/class-wc-post-types.php:300
+#: includes/class-wc-post-types.php:301
 msgid "This is where store orders are stored."
 msgstr "Hérna eru pantanir vistaðar."
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:324
 msgid "Coupons"
 msgstr "Afsláttarkóðar"
 
-#: includes/class-wc-post-types.php:324 templates/cart/cart.php:119
+#: includes/class-wc-post-types.php:325 templates/cart/cart.php:119
 msgid "Coupon"
 msgstr "Afsláttarmiði"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:326
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Afsláttarmiðar"
 
-#: includes/class-wc-post-types.php:326
+#: includes/class-wc-post-types.php:327
 msgid "Add Coupon"
 msgstr "Bæta við afsláttarmiða"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:328
 msgid "Add New Coupon"
 msgstr "Bæta við nýjum afsláttarmiða"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:330
 msgid "Edit Coupon"
 msgstr "Breyta afsláttarmiða"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:331
 msgid "New Coupon"
 msgstr "Nýr afsláttarmiði"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:332
 msgid "View Coupons"
 msgstr "Skoða afsláttarmiða"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:333
 msgid "View Coupon"
 msgstr "Skoða afsláttarmiða"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:334
 msgid "Search Coupons"
 msgstr "Leita að afsláttarmiða"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found"
 msgstr "Engir afsláttarmiðar fundust"
 
-#: includes/class-wc-post-types.php:335
+#: includes/class-wc-post-types.php:336
 msgid "No Coupons found in trash"
 msgstr "Engir afsláttarmiðar í rusli"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:337
 msgid "Parent Coupon"
 msgstr "Yfirafsláttarmiði"
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:339
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "Hérna getur þú bætt við nýjum afsláttarmiða sem viðskiptavinir geta notað í versluninni."
@@ -5771,21 +5564,21 @@ msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
 msgstr "Þín {site_title} pöntun síðan {order_date} er fullkláruð - sæktu skrárnar þínar"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:146
-#: includes/emails/class-wc-email-new-order.php:133
+#: includes/emails/class-wc-email-customer-completed-order.php:147
+#: includes/emails/class-wc-email-new-order.php:134
 msgid "Subject"
 msgstr "Fyrirsögn"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:153
-#: includes/emails/class-wc-email-new-order.php:140
+#: includes/emails/class-wc-email-customer-completed-order.php:154
+#: includes/emails/class-wc-email-new-order.php:141
 msgid "Email Heading"
 msgstr "Fyrrisögn meginmáls tölvupósts"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:160
+#: includes/emails/class-wc-email-customer-completed-order.php:161
 msgid "Subject (downloadable)"
 msgstr "Fyrirsögn (niðuarhalanlegt)"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:167
+#: includes/emails/class-wc-email-customer-completed-order.php:168
 msgid "Email Heading (downloadable)"
 msgstr "Fyrrisögn meginmáls tölvupósts (niðurhalanlegt)"
 
@@ -5815,11 +5608,11 @@ msgstr "Pöntun þín frá {site_title} þann {order_date}"
 msgid "Order {order_number} details"
 msgstr "Upplýsingar um pöntun {order_number} "
 
-#: includes/emails/class-wc-email-customer-invoice.php:160
+#: includes/emails/class-wc-email-customer-invoice.php:161
 msgid "Email subject (paid)"
 msgstr "Fyrirsögn tölvupósts (greitt)"
 
-#: includes/emails/class-wc-email-customer-invoice.php:167
+#: includes/emails/class-wc-email-customer-invoice.php:168
 msgid "Email heading (paid)"
 msgstr "Fyrirsögn meginmáls tölvupósts (greitt)"
 
@@ -5909,23 +5702,23 @@ msgstr "Ný pöntun viðskiptavinar"
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
 msgstr "[{site_title}] Ný pöntun frá viðskiptavini ({order_number}) - {order_date}"
 
-#: includes/emails/class-wc-email-new-order.php:126
+#: includes/emails/class-wc-email-new-order.php:127
 msgid "Recipient(s)"
 msgstr "Móttakandi(endur)"
 
-#: includes/emails/class-wc-email-new-order.php:128
+#: includes/emails/class-wc-email-new-order.php:129
 msgid ""
 "Enter recipients (comma separated) for this email. Defaults to "
 "<code>%s</code>."
 msgstr "Sláðu inn móttakendur (notaðu kommu á milli) fyrir þennan tölvupóst.  Sjálfgefið <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:135
+#: includes/emails/class-wc-email-new-order.php:136
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr "Þetta stýrir fyrirsögn tölvupóstsins.  Skildu eftir autt til að nota sjálfgefna fyrirsögn:  <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:142
+#: includes/emails/class-wc-email-new-order.php:143
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
@@ -6405,10 +6198,8 @@ msgid "Enable logging"
 msgstr "Virkja kladda"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:237
-msgid ""
-"Log PayPal events, such as IPN requests, inside "
-"<code>woocommerce/logs/paypal-%s.txt</code>"
-msgstr "Skrá PayPal atburði, svo sem IPN beiðnir, í skrá  <code>woocommerce/logs/paypal-%s.txt</code>"
+msgid "Log PayPal events, such as IPN requests, inside <code>%s</code>"
+msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:370
 msgid "Shipping via"
@@ -6857,6 +6648,12 @@ msgstr "Sendingarkostnaður uppfærður."
 msgid "Invalid order. If you have an account please log in and try again."
 msgstr "Ógild pöntun. Ef þú ert með reikning, vinsamlegast skráðu þig inn og reyndu aftur."
 
+#: includes/shortcodes/class-wc-shortcode-checkout.php:91
+#: includes/shortcodes/class-wc-shortcode-my-account.php:111
+#: templates/checkout/thankyou.php:30
+msgid "My Account"
+msgstr "Mín síða"
+
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
@@ -7090,62 +6887,66 @@ msgid "New Zealand Dollar"
 msgstr "Nýsjálenskur dalur"
 
 #: includes/wc-core-functions.php:193
+msgid "Paraguayan Guaraní"
+msgstr ""
+
+#: includes/wc-core-functions.php:194
 msgid "Philippine Pesos"
 msgstr "Filippeyskur pesi"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Polish Zloty"
 msgstr "Pólskt slot"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Pounds Sterling"
 msgstr "Sterlingspund"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Romanian Leu"
 msgstr "Rúmversk lei"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Russian Ruble"
 msgstr "Rússnesk rúbla"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "Singapore Dollar"
 msgstr "Singapúrskur dalur"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "South African rand"
 msgstr "Suður-afrískt rand"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swedish Krona"
 msgstr "Sænsk króna"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Swiss Franc"
 msgstr "Svissneskur franki"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Taiwan New Dollars"
 msgstr "Tævanskur dalur"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Thai Baht"
 msgstr "Tælenskt bat"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "Turkish Lira"
 msgstr "Tyrknesk líra"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "US Dollars"
 msgstr "Bandaríkjadalur"
 
-#: includes/wc-core-functions.php:206
+#: includes/wc-core-functions.php:207
 msgid "Vietnamese Dong"
 msgstr "Víetnam Dong"
 
-#: includes/wc-core-functions.php:207
+#: includes/wc-core-functions.php:208
 msgid "Egyptian Pound"
 msgstr ""
 
@@ -7179,7 +6980,7 @@ msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr ""
 
-#: includes/wc-product-functions.php:234
+#: includes/wc-product-functions.php:235
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "Óflokkað"
@@ -7231,41 +7032,41 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr "Heim"
 
-#: includes/wc-template-functions.php:1558
+#: includes/wc-template-functions.php:1549
 msgid "Order Again"
 msgstr "Panta aftur"
 
-#: includes/wc-template-functions.php:1653
+#: includes/wc-template-functions.php:1644
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "Veldu land&hellip;"
 
-#: includes/wc-template-functions.php:1660
+#: includes/wc-template-functions.php:1651
 msgid "Update country"
 msgstr "Uppfæra land"
 
-#: includes/wc-template-functions.php:1710
+#: includes/wc-template-functions.php:1701
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "Velja ríki&hellip;"
 
-#: includes/wc-template-functions.php:1851
+#: includes/wc-template-functions.php:1842
 msgid "Search for:"
 msgstr "Leita eftir:"
 
-#: includes/wc-template-functions.php:1852
+#: includes/wc-template-functions.php:1843
 msgid "Search for products"
 msgstr "Leita að vörum"
 
-#: includes/wc-template-functions.php:1853
+#: includes/wc-template-functions.php:1844
 msgid "Search"
 msgstr "Leita"
 
-#: includes/wc-term-functions.php:135
+#: includes/wc-term-functions.php:146
 msgid "Select a category"
 msgstr "Veldu flokk"
 
-#: includes/wc-term-functions.php:139
+#: includes/wc-term-functions.php:149
 msgid "Uncategorized"
 msgstr "Óflokkað"
 
@@ -7428,6 +7229,11 @@ msgstr "Raða eftir"
 #: includes/widgets/class-wc-widget-product-categories.php:38
 msgid "Category Order"
 msgstr "Röðun vöruflokka"
+
+#: includes/widgets/class-wc-widget-product-categories.php:39
+#: templates/single-product-reviews.php:62
+msgid "Name"
+msgstr "Nafn"
 
 #: includes/widgets/class-wc-widget-product-categories.php:45
 msgid "Show as dropdown"
@@ -7708,6 +7514,10 @@ msgstr "Ríki / hérað"
 msgid "City"
 msgstr "Borg/bær"
 
+#: templates/cart/shipping-calculator.php:80
+msgid "Postcode / Zip"
+msgstr "Póstnúmer"
+
 #: templates/cart/shipping-calculator.php:85
 msgid "Update Totals"
 msgstr "Uppfæra samtölu"
@@ -7971,13 +7781,13 @@ msgstr "Til að endurstilla lykilorð, þá skaltu fara á eftirfarandi vefsló�
 msgid "Click here to reset your password"
 msgstr "Smelltu hér til að endurstilla lykilorð"
 
-#: templates/emails/email-addresses.php:18
-#: templates/emails/plain/email-addresses.php:12
+#: templates/emails/email-addresses.php:20
+#: templates/emails/plain/email-addresses.php:14
 msgid "Billing address"
 msgstr "Heimilisfang greiðanda"
 
-#: templates/emails/email-addresses.php:28
-#: templates/emails/plain/email-addresses.php:17
+#: templates/emails/email-addresses.php:30
+#: templates/emails/plain/email-addresses.php:19
 msgid "Shipping address"
 msgstr "Heimilisfang móttakanda"
 
@@ -8153,23 +7963,31 @@ msgstr "Eftirnafn"
 msgid "Email address"
 msgstr "Netfang"
 
-#: templates/myaccount/form-edit-account.php:33
+#: templates/myaccount/form-edit-account.php:34
+msgid "Password (leave blank to leave unchanged)"
+msgstr "Lykilorð (skildu reitinn eftir auðan til að halda því óbreyttu)"
+
+#: templates/myaccount/form-edit-account.php:38
+msgid "Confirm new password"
+msgstr "Staðfesta nýtt lykilorð"
+
+#: templates/myaccount/form-edit-account.php:44
 msgid "Password Change"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:36
+#: templates/myaccount/form-edit-account.php:47
 msgid "Current Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:40
+#: templates/myaccount/form-edit-account.php:51
 msgid "New Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:44
+#: templates/myaccount/form-edit-account.php:55
 msgid "Confirm New Password"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:50
+#: templates/myaccount/form-edit-account.php:61
 msgid "Save changes"
 msgstr "Vista breytingar"
 

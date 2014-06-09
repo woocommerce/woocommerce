@@ -1,16 +1,16 @@
 # 
 # Translators:
-# deepinsource <deepinsource@gmail.com>, 2014
+# peng jiang <deepinsource@gmail.com>, 2014
 # tetsu <waruii@msn.com>, 2014
-# xepin <xepinchan@qq.com>, 2014
-# george_pt <xinhaozheng@gmail.com>, 2014
+# Xepin Chan <xepinchan@qq.com>, 2014
+# George Zheng <xinhaozheng@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-05-22 10:45:21+00:00\n"
-"PO-Revision-Date: 2014-05-23 08:28+0000\n"
-"Last-Translator: mikejolley <mike.jolley@me.com>\n"
+"POT-Creation-Date: 2014-06-03 15:13:58+00:00\n"
+"PO-Revision-Date: 2014-06-04 08:41+0000\n"
+"Last-Translator: Mike Jolley <mike.jolley@me.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/projects/p/woocommerce/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,52 +18,981 @@ msgstr ""
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: assets/js/admin/editor_plugin_lang.php:5
-msgid "Insert Shortcode"
-msgstr "插入短代码"
+#: i18n/countries.php:16
+msgid "Afghanistan"
+msgstr "阿富汗"
 
-#: assets/js/admin/editor_plugin_lang.php:6
-msgid "Product price/cart button"
-msgstr "产品成功添加到你的购物车。"
+#: i18n/countries.php:17
+msgid "&#197;land Islands"
+msgstr "英属维尔京群岛"
 
-#: assets/js/admin/editor_plugin_lang.php:7
-msgid "Product by SKU/ID"
-msgstr "产品编码为必填项"
+#: i18n/countries.php:18
+msgid "Albania"
+msgstr "阿尔巴尼亚"
 
-#: assets/js/admin/editor_plugin_lang.php:8
-msgid "Products by SKU/ID"
-msgstr "为产品启用编码字段"
+#: i18n/countries.php:19
+msgid "Algeria"
+msgstr "阿尔及利亚"
 
-#: assets/js/admin/editor_plugin_lang.php:9
-msgid "Product categories"
-msgstr "产品类别"
+#: i18n/countries.php:20
+msgid "Andorra"
+msgstr "安道尔"
 
-#: assets/js/admin/editor_plugin_lang.php:10
-msgid "Products by category slug"
-msgstr "商品分类小工具"
+#: i18n/countries.php:21
+msgid "Angola"
+msgstr "安哥拉"
 
-#: assets/js/admin/editor_plugin_lang.php:11
-msgid "Recent products"
-msgstr "WooCommerce 最新商品"
+#: i18n/countries.php:22
+msgid "Anguilla"
+msgstr "安圭拉"
 
-#: assets/js/admin/editor_plugin_lang.php:12
-msgid "Featured products"
-msgstr "特色产品"
+#: i18n/countries.php:23
+msgid "Antarctica"
+msgstr "南极洲"
 
-#: assets/js/admin/editor_plugin_lang.php:13
-msgid "Shop Messages"
-msgstr "商店管理"
+#: i18n/countries.php:24
+msgid "Antigua and Barbuda"
+msgstr "安提瓜和巴布达"
 
-#: assets/js/admin/editor_plugin_lang.php:14
-msgid "Order tracking"
-msgstr "订单跟踪"
+#: i18n/countries.php:25
+msgid "Argentina"
+msgstr "阿根廷"
 
-#: assets/js/admin/editor_plugin_lang.php:15
-#: includes/shortcodes/class-wc-shortcode-checkout.php:91
-#: includes/shortcodes/class-wc-shortcode-my-account.php:111
-#: templates/checkout/thankyou.php:30
-msgid "My Account"
-msgstr "我的帐户"
+#: i18n/countries.php:26
+msgid "Armenia"
+msgstr "亚美尼亚"
+
+#: i18n/countries.php:27
+msgid "Aruba"
+msgstr "阿鲁巴"
+
+#: i18n/countries.php:28
+msgid "Australia"
+msgstr "澳大利亚"
+
+#: i18n/countries.php:29
+msgid "Austria"
+msgstr "奥地利"
+
+#: i18n/countries.php:30
+msgid "Azerbaijan"
+msgstr "阿塞拜疆"
+
+#: i18n/countries.php:31
+msgid "Bahamas"
+msgstr "巴哈马"
+
+#: i18n/countries.php:32
+msgid "Bahrain"
+msgstr "巴林"
+
+#: i18n/countries.php:33
+msgid "Bangladesh"
+msgstr "孟加拉国"
+
+#: i18n/countries.php:34
+msgid "Barbados"
+msgstr "巴巴多斯"
+
+#: i18n/countries.php:35
+msgid "Belarus"
+msgstr "白俄罗斯"
+
+#: i18n/countries.php:36
+msgid "Belgium"
+msgstr "比利时"
+
+#: i18n/countries.php:37
+msgid "Belau"
+msgstr "Belau"
+
+#: i18n/countries.php:38
+msgid "Belize"
+msgstr "伯利兹"
+
+#: i18n/countries.php:39
+msgid "Benin"
+msgstr "贝宁"
+
+#: i18n/countries.php:40
+msgid "Bermuda"
+msgstr "百慕大"
+
+#: i18n/countries.php:41
+msgid "Bhutan"
+msgstr "不丹"
+
+#: i18n/countries.php:42
+msgid "Bolivia"
+msgstr "玻利维亚"
+
+#: i18n/countries.php:43
+msgid "Bonaire, Saint Eustatius and Saba"
+msgstr "Bonaire, Saint Eustatius and Saba"
+
+#: i18n/countries.php:44
+msgid "Bosnia and Herzegovina"
+msgstr "波斯尼亚和黑塞哥维那"
+
+#: i18n/countries.php:45
+msgid "Botswana"
+msgstr "博茨瓦纳"
+
+#: i18n/countries.php:46
+msgid "Bouvet Island"
+msgstr "圣诞岛"
+
+#: i18n/countries.php:47
+msgid "Brazil"
+msgstr "巴西"
+
+#: i18n/countries.php:48
+msgid "British Indian Ocean Territory"
+msgstr "英属印度洋领地"
+
+#: i18n/countries.php:49
+msgid "British Virgin Islands"
+msgstr "英属维尔京群岛"
+
+#: i18n/countries.php:50
+msgid "Brunei"
+msgstr "文莱"
+
+#: i18n/countries.php:51
+msgid "Bulgaria"
+msgstr "保加利亚"
+
+#: i18n/countries.php:52
+msgid "Burkina Faso"
+msgstr "布基纳法索"
+
+#: i18n/countries.php:53
+msgid "Burundi"
+msgstr "布隆迪"
+
+#: i18n/countries.php:54
+msgid "Cambodia"
+msgstr "柬埔寨"
+
+#: i18n/countries.php:55
+msgid "Cameroon"
+msgstr "喀麦隆"
+
+#: i18n/countries.php:56
+msgid "Canada"
+msgstr "加拿大"
+
+#: i18n/countries.php:57
+msgid "Cape Verde"
+msgstr "佛得角"
+
+#: i18n/countries.php:58
+msgid "Cayman Islands"
+msgstr "开曼群岛"
+
+#: i18n/countries.php:59
+msgid "Central African Republic"
+msgstr "中非共和国"
+
+#: i18n/countries.php:60
+msgid "Chad"
+msgstr "乍得"
+
+#: i18n/countries.php:61
+msgid "Chile"
+msgstr "智利"
+
+#: i18n/countries.php:62
+msgid "China"
+msgstr "中国"
+
+#: i18n/countries.php:63
+msgid "Christmas Island"
+msgstr "圣诞岛"
+
+#: i18n/countries.php:64
+msgid "Cocos (Keeling) Islands"
+msgstr "科科斯（基林）群岛"
+
+#: i18n/countries.php:65
+msgid "Colombia"
+msgstr "哥伦比亚"
+
+#: i18n/countries.php:66
+msgid "Comoros"
+msgstr "科摩罗"
+
+#: i18n/countries.php:67
+msgid "Congo (Brazzaville)"
+msgstr "刚果（布）"
+
+#: i18n/countries.php:68
+msgid "Congo (Kinshasa)"
+msgstr "刚果（金）"
+
+#: i18n/countries.php:69
+msgid "Cook Islands"
+msgstr "库克群岛"
+
+#: i18n/countries.php:70
+msgid "Costa Rica"
+msgstr "哥斯达黎加"
+
+#: i18n/countries.php:71
+msgid "Croatia"
+msgstr "克罗地亚"
+
+#: i18n/countries.php:72
+msgid "Cuba"
+msgstr "古巴"
+
+#: i18n/countries.php:73
+msgid "Cura&Ccedil;ao"
+msgstr "Cura&Ccedil;ao"
+
+#: i18n/countries.php:74
+msgid "Cyprus"
+msgstr "塞浦路斯"
+
+#: i18n/countries.php:75
+msgid "Czech Republic"
+msgstr "捷克共和国"
+
+#: i18n/countries.php:76
+msgid "Denmark"
+msgstr "丹麦"
+
+#: i18n/countries.php:77
+msgid "Djibouti"
+msgstr "吉布提"
+
+#: i18n/countries.php:78
+msgid "Dominica"
+msgstr "多米尼克"
+
+#: i18n/countries.php:79
+msgid "Dominican Republic"
+msgstr "多米尼加共和国"
+
+#: i18n/countries.php:80
+msgid "Ecuador"
+msgstr "厄瓜多尔"
+
+#: i18n/countries.php:81
+msgid "Egypt"
+msgstr "埃及"
+
+#: i18n/countries.php:82
+msgid "El Salvador"
+msgstr "萨尔瓦多"
+
+#: i18n/countries.php:83
+msgid "Equatorial Guinea"
+msgstr "赤道几内亚"
+
+#: i18n/countries.php:84
+msgid "Eritrea"
+msgstr "厄立特里亚"
+
+#: i18n/countries.php:85
+msgid "Estonia"
+msgstr "爱沙尼亚"
+
+#: i18n/countries.php:86
+msgid "Ethiopia"
+msgstr "埃塞俄比亚"
+
+#: i18n/countries.php:87
+msgid "Falkland Islands"
+msgstr "福克兰群岛"
+
+#: i18n/countries.php:88
+msgid "Faroe Islands"
+msgstr "法罗群岛"
+
+#: i18n/countries.php:89
+msgid "Fiji"
+msgstr "斐"
+
+#: i18n/countries.php:90
+msgid "Finland"
+msgstr "芬兰"
+
+#: i18n/countries.php:91
+msgid "France"
+msgstr "法国"
+
+#: i18n/countries.php:92
+msgid "French Guiana"
+msgstr "法属圭亚那"
+
+#: i18n/countries.php:93
+msgid "French Polynesia"
+msgstr "法属波利尼西亚"
+
+#: i18n/countries.php:94
+msgid "French Southern Territories"
+msgstr "法国南部领土"
+
+#: i18n/countries.php:95
+msgid "Gabon"
+msgstr "加蓬"
+
+#: i18n/countries.php:96
+msgid "Gambia"
+msgstr "冈比亚"
+
+#: i18n/countries.php:97 i18n/states/US.php:23
+msgid "Georgia"
+msgstr "格鲁吉亚"
+
+#: i18n/countries.php:98
+msgid "Germany"
+msgstr "德国"
+
+#: i18n/countries.php:99
+msgid "Ghana"
+msgstr "加纳"
+
+#: i18n/countries.php:100
+msgid "Gibraltar"
+msgstr "直布罗陀"
+
+#: i18n/countries.php:101
+msgid "Greece"
+msgstr "希腊"
+
+#: i18n/countries.php:102
+msgid "Greenland"
+msgstr "格陵兰"
+
+#: i18n/countries.php:103
+msgid "Grenada"
+msgstr "格林纳达"
+
+#: i18n/countries.php:104
+msgid "Guadeloupe"
+msgstr "瓜德罗普岛"
+
+#: i18n/countries.php:105
+msgid "Guatemala"
+msgstr "危地马拉"
+
+#: i18n/countries.php:106
+msgid "Guernsey"
+msgstr "格恩西"
+
+#: i18n/countries.php:107
+msgid "Guinea"
+msgstr "几内亚"
+
+#: i18n/countries.php:108
+msgid "Guinea-Bissau"
+msgstr "几内亚比绍"
+
+#: i18n/countries.php:109
+msgid "Guyana"
+msgstr "圭亚那"
+
+#: i18n/countries.php:110
+msgid "Haiti"
+msgstr "海地"
+
+#: i18n/countries.php:111
+msgid "Heard Island and McDonald Islands"
+msgstr "Heard Island and McDonald Islands"
+
+#: i18n/countries.php:112
+msgid "Honduras"
+msgstr "洪都拉斯"
+
+#: i18n/countries.php:113
+msgid "Hong Kong"
+msgstr "香港特别行政区，中国"
+
+#: i18n/countries.php:114
+msgid "Hungary"
+msgstr "匈牙利"
+
+#: i18n/countries.php:115
+msgid "Iceland"
+msgstr "冰岛"
+
+#: i18n/countries.php:116
+msgid "India"
+msgstr "印度"
+
+#: i18n/countries.php:117
+msgid "Indonesia"
+msgstr "印尼"
+
+#: i18n/countries.php:118
+msgid "Iran"
+msgstr "伊朗"
+
+#: i18n/countries.php:119
+msgid "Iraq"
+msgstr "伊拉克"
+
+#: i18n/countries.php:120
+msgid "Republic of Ireland"
+msgstr "爱尔兰共和国"
+
+#: i18n/countries.php:121
+msgid "Isle of Man"
+msgstr "马恩岛"
+
+#: i18n/countries.php:122
+msgid "Israel"
+msgstr "以色列"
+
+#: i18n/countries.php:123
+msgid "Italy"
+msgstr "意大利"
+
+#: i18n/countries.php:124
+msgid "Ivory Coast"
+msgstr "象牙海岸"
+
+#: i18n/countries.php:125
+msgid "Jamaica"
+msgstr "牙买加"
+
+#: i18n/countries.php:126
+msgid "Japan"
+msgstr "日本"
+
+#: i18n/countries.php:127
+msgid "Jersey"
+msgstr "新泽西"
+
+#: i18n/countries.php:128
+msgid "Jordan"
+msgstr "约旦"
+
+#: i18n/countries.php:129
+msgid "Kazakhstan"
+msgstr "哈萨克斯坦"
+
+#: i18n/countries.php:130
+msgid "Kenya"
+msgstr "肯尼亚"
+
+#: i18n/countries.php:131
+msgid "Kiribati"
+msgstr "基里巴斯"
+
+#: i18n/countries.php:132
+msgid "Kuwait"
+msgstr "科威特"
+
+#: i18n/countries.php:133
+msgid "Kyrgyzstan"
+msgstr "吉尔吉斯斯坦"
+
+#: i18n/countries.php:134
+msgid "Laos"
+msgstr "老挝"
+
+#: i18n/countries.php:135
+msgid "Latvia"
+msgstr "拉脱维亚"
+
+#: i18n/countries.php:136
+msgid "Lebanon"
+msgstr "黎巴嫩"
+
+#: i18n/countries.php:137
+msgid "Lesotho"
+msgstr "莱索托"
+
+#: i18n/countries.php:138
+msgid "Liberia"
+msgstr "利比里亚"
+
+#: i18n/countries.php:139
+msgid "Libya"
+msgstr "利比亚"
+
+#: i18n/countries.php:140
+msgid "Liechtenstein"
+msgstr "列支敦士登"
+
+#: i18n/countries.php:141
+msgid "Lithuania"
+msgstr "立陶宛"
+
+#: i18n/countries.php:142
+msgid "Luxembourg"
+msgstr "卢森堡"
+
+#: i18n/countries.php:143
+msgid "Macao S.A.R., China"
+msgstr "澳门特别行政区，中国"
+
+#: i18n/countries.php:144
+msgid "Macedonia"
+msgstr "马其顿"
+
+#: i18n/countries.php:145
+msgid "Madagascar"
+msgstr "马达加斯加"
+
+#: i18n/countries.php:146
+msgid "Malawi"
+msgstr "马拉维"
+
+#: i18n/countries.php:147
+msgid "Malaysia"
+msgstr "马来西亚"
+
+#: i18n/countries.php:148
+msgid "Maldives"
+msgstr "马尔代夫"
+
+#: i18n/countries.php:149
+msgid "Mali"
+msgstr "马里"
+
+#: i18n/countries.php:150
+msgid "Malta"
+msgstr "马耳他"
+
+#: i18n/countries.php:151
+msgid "Marshall Islands"
+msgstr "马绍尔群岛"
+
+#: i18n/countries.php:152
+msgid "Martinique"
+msgstr "马提尼克"
+
+#: i18n/countries.php:153
+msgid "Mauritania"
+msgstr "毛里塔尼亚"
+
+#: i18n/countries.php:154
+msgid "Mauritius"
+msgstr "毛里求斯"
+
+#: i18n/countries.php:155
+msgid "Mayotte"
+msgstr "马约特岛"
+
+#: i18n/countries.php:156
+msgid "Mexico"
+msgstr "墨西哥"
+
+#: i18n/countries.php:157
+msgid "Micronesia"
+msgstr "密克罗尼西亚"
+
+#: i18n/countries.php:158
+msgid "Moldova"
+msgstr "摩尔多瓦"
+
+#: i18n/countries.php:159
+msgid "Monaco"
+msgstr "摩纳哥"
+
+#: i18n/countries.php:160
+msgid "Mongolia"
+msgstr "蒙古"
+
+#: i18n/countries.php:161
+msgid "Montenegro"
+msgstr "黑山"
+
+#: i18n/countries.php:162
+msgid "Montserrat"
+msgstr "蒙特塞拉特"
+
+#: i18n/countries.php:163
+msgid "Morocco"
+msgstr "摩洛哥"
+
+#: i18n/countries.php:164
+msgid "Mozambique"
+msgstr "莫桑比克"
+
+#: i18n/countries.php:165
+msgid "Myanmar"
+msgstr "缅甸"
+
+#: i18n/countries.php:166
+msgid "Namibia"
+msgstr "纳米比亚"
+
+#: i18n/countries.php:167
+msgid "Nauru"
+msgstr "瑙鲁"
+
+#: i18n/countries.php:168
+msgid "Nepal"
+msgstr "尼泊尔"
+
+#: i18n/countries.php:169
+msgid "Netherlands"
+msgstr "荷兰"
+
+#: i18n/countries.php:170
+msgid "Netherlands Antilles"
+msgstr "荷属安的列斯"
+
+#: i18n/countries.php:171
+msgid "New Caledonia"
+msgstr "新喀里多尼亚"
+
+#: i18n/countries.php:172
+msgid "New Zealand"
+msgstr "新西兰"
+
+#: i18n/countries.php:173
+msgid "Nicaragua"
+msgstr "尼加拉瓜"
+
+#: i18n/countries.php:174
+msgid "Niger"
+msgstr "尼日尔"
+
+#: i18n/countries.php:175
+msgid "Nigeria"
+msgstr "尼日利亚"
+
+#: i18n/countries.php:176
+msgid "Niue"
+msgstr "纽埃"
+
+#: i18n/countries.php:177
+msgid "Norfolk Island"
+msgstr "诺福克岛"
+
+#: i18n/countries.php:178
+msgid "North Korea"
+msgstr "北朝鲜"
+
+#: i18n/countries.php:179
+msgid "Norway"
+msgstr "挪威"
+
+#: i18n/countries.php:180
+msgid "Oman"
+msgstr "阿曼"
+
+#: i18n/countries.php:181
+msgid "Pakistan"
+msgstr "巴基斯坦"
+
+#: i18n/countries.php:182
+msgid "Palestinian Territory"
+msgstr "巴勒斯坦领土"
+
+#: i18n/countries.php:183
+msgid "Panama"
+msgstr "巴拿马"
+
+#: i18n/countries.php:184
+msgid "Papua New Guinea"
+msgstr "巴布亚新几内亚"
+
+#: i18n/countries.php:185
+msgid "Paraguay"
+msgstr "巴拉圭"
+
+#: i18n/countries.php:186
+msgid "Peru"
+msgstr "秘鲁"
+
+#: i18n/countries.php:187
+msgid "Philippines"
+msgstr "菲律宾"
+
+#: i18n/countries.php:188
+msgid "Pitcairn"
+msgstr "皮特凯恩"
+
+#: i18n/countries.php:189
+msgid "Poland"
+msgstr "波兰"
+
+#: i18n/countries.php:190
+msgid "Portugal"
+msgstr "葡萄牙"
+
+#: i18n/countries.php:191
+msgid "Qatar"
+msgstr "卡塔尔"
+
+#: i18n/countries.php:192
+msgid "Reunion"
+msgstr "留尼旺"
+
+#: i18n/countries.php:193
+msgid "Romania"
+msgstr "罗马尼亚"
+
+#: i18n/countries.php:194
+msgid "Russia"
+msgstr "俄罗斯"
+
+#: i18n/countries.php:195
+msgid "Rwanda"
+msgstr "卢旺达"
+
+#: i18n/countries.php:196
+msgid "Saint Barth&eacute;lemy"
+msgstr "Saint Barth&eacute;lemy"
+
+#: i18n/countries.php:197
+msgid "Saint Helena"
+msgstr "圣赫勒拿"
+
+#: i18n/countries.php:198
+msgid "Saint Kitts and Nevis"
+msgstr "圣基茨和尼维斯"
+
+#: i18n/countries.php:199
+msgid "Saint Lucia"
+msgstr "圣卢西亚"
+
+#: i18n/countries.php:200
+msgid "Saint Martin (French part)"
+msgstr "圣马丁（法国部分）"
+
+#: i18n/countries.php:201
+msgid "Saint Martin (Dutch part)"
+msgstr "圣马丁（法国部分）"
+
+#: i18n/countries.php:202
+msgid "Saint Pierre and Miquelon"
+msgstr "圣皮埃尔和密克隆"
+
+#: i18n/countries.php:203
+msgid "Saint Vincent and the Grenadines"
+msgstr "圣文森特和格林纳丁斯"
+
+#: i18n/countries.php:204
+msgid "San Marino"
+msgstr "圣马力诺"
+
+#: i18n/countries.php:205
+msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+msgstr "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+
+#: i18n/countries.php:206
+msgid "Saudi Arabia"
+msgstr "沙特阿拉伯"
+
+#: i18n/countries.php:207
+msgid "Senegal"
+msgstr "塞内加尔"
+
+#: i18n/countries.php:208
+msgid "Serbia"
+msgstr "塞尔维亚"
+
+#: i18n/countries.php:209
+msgid "Seychelles"
+msgstr "塞舌尔"
+
+#: i18n/countries.php:210
+msgid "Sierra Leone"
+msgstr "塞拉利昂"
+
+#: i18n/countries.php:211
+msgid "Singapore"
+msgstr "新加坡"
+
+#: i18n/countries.php:212
+msgid "Slovakia"
+msgstr "斯洛伐克"
+
+#: i18n/countries.php:213
+msgid "Slovenia"
+msgstr "斯洛文尼亚"
+
+#: i18n/countries.php:214
+msgid "Solomon Islands"
+msgstr "所罗门群岛"
+
+#: i18n/countries.php:215
+msgid "Somalia"
+msgstr "索马里"
+
+#: i18n/countries.php:216
+msgid "South Africa"
+msgstr "南非"
+
+#: i18n/countries.php:217
+msgid "South Georgia/Sandwich Islands"
+msgstr "南乔治亚/南桑威奇群岛"
+
+#: i18n/countries.php:218
+msgid "South Korea"
+msgstr "韩国"
+
+#: i18n/countries.php:219
+msgid "South Sudan"
+msgstr "南非"
+
+#: i18n/countries.php:220
+msgid "Spain"
+msgstr "西班牙"
+
+#: i18n/countries.php:221
+msgid "Sri Lanka"
+msgstr "斯里兰卡"
+
+#: i18n/countries.php:222
+msgid "Sudan"
+msgstr "苏丹"
+
+#: i18n/countries.php:223
+msgid "Suriname"
+msgstr "苏里南"
+
+#: i18n/countries.php:224
+msgid "Svalbard and Jan Mayen"
+msgstr "斯瓦尔巴岛和扬马延岛"
+
+#: i18n/countries.php:225
+msgid "Swaziland"
+msgstr "斯威士兰"
+
+#: i18n/countries.php:226
+msgid "Sweden"
+msgstr "瑞典"
+
+#: i18n/countries.php:227
+msgid "Switzerland"
+msgstr "瑞士"
+
+#: i18n/countries.php:228
+msgid "Syria"
+msgstr "叙利亚"
+
+#: i18n/countries.php:229
+msgid "Taiwan"
+msgstr "台湾"
+
+#: i18n/countries.php:230
+msgid "Tajikistan"
+msgstr "塔吉克斯坦"
+
+#: i18n/countries.php:231
+msgid "Tanzania"
+msgstr "坦桑尼亚"
+
+#: i18n/countries.php:232
+msgid "Thailand"
+msgstr "泰国"
+
+#: i18n/countries.php:233
+msgid "Timor-Leste"
+msgstr "东帝汶"
+
+#: i18n/countries.php:234
+msgid "Togo"
+msgstr "多哥"
+
+#: i18n/countries.php:235
+msgid "Tokelau"
+msgstr "托克劳"
+
+#: i18n/countries.php:236
+msgid "Tonga"
+msgstr "汤加"
+
+#: i18n/countries.php:237
+msgid "Trinidad and Tobago"
+msgstr "特里尼达和多巴哥"
+
+#: i18n/countries.php:238
+msgid "Tunisia"
+msgstr "突尼斯"
+
+#: i18n/countries.php:239
+msgid "Turkey"
+msgstr "土耳其"
+
+#: i18n/countries.php:240
+msgid "Turkmenistan"
+msgstr "土库曼斯坦"
+
+#: i18n/countries.php:241
+msgid "Turks and Caicos Islands"
+msgstr "特克斯和凯科斯群岛"
+
+#: i18n/countries.php:242
+msgid "Tuvalu"
+msgstr "图瓦卢"
+
+#: i18n/countries.php:243
+msgid "Uganda"
+msgstr "乌干达"
+
+#: i18n/countries.php:244
+msgid "Ukraine"
+msgstr "乌克兰"
+
+#: i18n/countries.php:245
+msgid "United Arab Emirates"
+msgstr "阿拉伯联合酋长国"
+
+#: i18n/countries.php:246
+msgid "United Kingdom (UK)"
+msgstr "United Kingdom (UK)"
+
+#: i18n/countries.php:247
+msgid "United States (US)"
+msgstr "United States (US)"
+
+#: i18n/countries.php:248
+msgid "Uruguay"
+msgstr "乌拉圭"
+
+#: i18n/countries.php:249
+msgid "Uzbekistan"
+msgstr "乌兹别克斯坦"
+
+#: i18n/countries.php:250
+msgid "Vanuatu"
+msgstr "瓦努阿图"
+
+#: i18n/countries.php:251
+msgid "Vatican"
+msgstr "梵帝冈"
+
+#: i18n/countries.php:252
+msgid "Venezuela"
+msgstr "委内瑞拉"
+
+#: i18n/countries.php:253
+msgid "Vietnam"
+msgstr "越南"
+
+#: i18n/countries.php:254
+msgid "Wallis and Futuna"
+msgstr "瓦利斯群岛和富图纳群岛"
+
+#: i18n/countries.php:255
+msgid "Western Sahara"
+msgstr "西撒哈拉"
+
+#: i18n/countries.php:256
+msgid "Western Samoa"
+msgstr "美属萨摩亚"
+
+#: i18n/countries.php:257
+msgid "Yemen"
+msgstr "也门"
+
+#: i18n/countries.php:258
+msgid "Zambia"
+msgstr "赞比亚"
+
+#: i18n/countries.php:259
+msgid "Zimbabwe"
+msgstr "津巴布韦"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
@@ -2902,10 +3831,6 @@ msgstr "哥伦比亚特区"
 msgid "Florida"
 msgstr "佛罗里达"
 
-#: i18n/states/US.php:23 includes/class-wc-countries.php:118
-msgid "Georgia"
-msgstr "格鲁吉亚"
-
 #: i18n/states/US.php:24
 msgid "Hawaii"
 msgstr "夏威夷"
@@ -3162,9 +4087,9 @@ msgstr "退款"
 msgid "cancelled"
 msgstr "已取消"
 
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/emails/class-wc-email-customer-completed-order.php:140
-#: includes/emails/class-wc-email-new-order.php:120
+#: includes/abstracts/abstract-wc-email.php:573
+#: includes/emails/class-wc-email-customer-completed-order.php:141
+#: includes/emails/class-wc-email-new-order.php:121
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:52
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:122
@@ -3175,130 +4100,130 @@ msgstr "已取消"
 msgid "Enable/Disable"
 msgstr "启用/禁用"
 
-#: includes/abstracts/abstract-wc-email.php:572
-#: includes/emails/class-wc-email-customer-completed-order.php:142
-#: includes/emails/class-wc-email-new-order.php:122
+#: includes/abstracts/abstract-wc-email.php:575
+#: includes/emails/class-wc-email-customer-completed-order.php:143
+#: includes/emails/class-wc-email-new-order.php:123
 msgid "Enable this email notification"
 msgstr "启用此送货方法"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/emails/class-wc-email-customer-invoice.php:146
+#: includes/abstracts/abstract-wc-email.php:579
+#: includes/emails/class-wc-email-customer-invoice.php:147
 msgid "Email subject"
 msgstr "Email标题"
 
-#: includes/abstracts/abstract-wc-email.php:578
-#: includes/abstracts/abstract-wc-email.php:585
-#: includes/emails/class-wc-email-customer-completed-order.php:148
-#: includes/emails/class-wc-email-customer-completed-order.php:155
-#: includes/emails/class-wc-email-customer-completed-order.php:162
-#: includes/emails/class-wc-email-customer-completed-order.php:169
-#: includes/emails/class-wc-email-customer-invoice.php:148
-#: includes/emails/class-wc-email-customer-invoice.php:155
-#: includes/emails/class-wc-email-customer-invoice.php:162
-#: includes/emails/class-wc-email-customer-invoice.php:169
+#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:588
+#: includes/emails/class-wc-email-customer-completed-order.php:149
+#: includes/emails/class-wc-email-customer-completed-order.php:156
+#: includes/emails/class-wc-email-customer-completed-order.php:163
+#: includes/emails/class-wc-email-customer-completed-order.php:170
+#: includes/emails/class-wc-email-customer-invoice.php:149
+#: includes/emails/class-wc-email-customer-invoice.php:156
+#: includes/emails/class-wc-email-customer-invoice.php:163
+#: includes/emails/class-wc-email-customer-invoice.php:170
 msgid "Defaults to <code>%s</code>"
 msgstr "默认的 <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:583
-#: includes/emails/class-wc-email-customer-invoice.php:153
+#: includes/abstracts/abstract-wc-email.php:586
+#: includes/emails/class-wc-email-customer-invoice.php:154
 msgid "Email heading"
 msgstr "Email heading"
 
-#: includes/abstracts/abstract-wc-email.php:590
-#: includes/emails/class-wc-email-customer-completed-order.php:174
-#: includes/emails/class-wc-email-customer-invoice.php:174
-#: includes/emails/class-wc-email-new-order.php:147
+#: includes/abstracts/abstract-wc-email.php:593
+#: includes/emails/class-wc-email-customer-completed-order.php:175
+#: includes/emails/class-wc-email-customer-invoice.php:175
+#: includes/emails/class-wc-email-new-order.php:148
 msgid "Email type"
 msgstr "E-mail类型"
 
-#: includes/abstracts/abstract-wc-email.php:592
-#: includes/emails/class-wc-email-customer-completed-order.php:176
-#: includes/emails/class-wc-email-customer-invoice.php:176
-#: includes/emails/class-wc-email-new-order.php:149
+#: includes/abstracts/abstract-wc-email.php:595
+#: includes/emails/class-wc-email-customer-completed-order.php:177
+#: includes/emails/class-wc-email-customer-invoice.php:177
+#: includes/emails/class-wc-email-new-order.php:150
 msgid "Choose which format of email to send."
 msgstr "选择发送电子邮件格式."
 
-#: includes/abstracts/abstract-wc-email.php:596
-#: includes/emails/class-wc-email-customer-completed-order.php:180
-#: includes/emails/class-wc-email-customer-invoice.php:180
-#: includes/emails/class-wc-email-new-order.php:153
-msgid "Plain text"
-msgstr "以纯文本粘贴"
-
-#: includes/abstracts/abstract-wc-email.php:597
+#: includes/abstracts/abstract-wc-email.php:599
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
-msgid "HTML"
-msgstr "编辑 HTML 源码"
+msgid "Plain text"
+msgstr "以纯文本粘贴"
 
-#: includes/abstracts/abstract-wc-email.php:598
+#: includes/abstracts/abstract-wc-email.php:600
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
+msgid "HTML"
+msgstr "编辑 HTML 源码"
+
+#: includes/abstracts/abstract-wc-email.php:601
+#: includes/emails/class-wc-email-customer-completed-order.php:183
+#: includes/emails/class-wc-email-customer-invoice.php:183
+#: includes/emails/class-wc-email-new-order.php:156
 msgid "Multipart"
 msgstr "多媒体部分"
 
-#: includes/abstracts/abstract-wc-email.php:634
-#: includes/abstracts/abstract-wc-email.php:655
+#: includes/abstracts/abstract-wc-email.php:637
+#: includes/abstracts/abstract-wc-email.php:658
 msgid "Could not write to template file."
 msgstr "无法写入模板文件."
 
-#: includes/abstracts/abstract-wc-email.php:686
+#: includes/abstracts/abstract-wc-email.php:689
 msgid "Template file copied to theme."
 msgstr "模板文件已拷贝到主题."
 
-#: includes/abstracts/abstract-wc-email.php:695
+#: includes/abstracts/abstract-wc-email.php:698
 msgid "Template file deleted from theme."
 msgstr "模板文件已从主题中删除."
 
-#: includes/abstracts/abstract-wc-email.php:703
+#: includes/abstracts/abstract-wc-email.php:706
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "设置"
 
-#: includes/abstracts/abstract-wc-email.php:715
+#: includes/abstracts/abstract-wc-email.php:718
 msgid "HTML template"
 msgstr "HTML模板"
 
-#: includes/abstracts/abstract-wc-email.php:716
+#: includes/abstracts/abstract-wc-email.php:719
 msgid "Plain text template"
 msgstr "以纯文本粘贴"
 
-#: includes/abstracts/abstract-wc-email.php:737
+#: includes/abstracts/abstract-wc-email.php:740
 msgid "Delete template file"
 msgstr "删除模板文件"
 
-#: includes/abstracts/abstract-wc-email.php:740
+#: includes/abstracts/abstract-wc-email.php:743
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "此模板已被你的主题覆盖,在 <code>%s</code>查找."
 
-#: includes/abstracts/abstract-wc-email.php:755
+#: includes/abstracts/abstract-wc-email.php:758
 msgid "Copy file to theme"
 msgstr "复制到一个新的草稿"
 
-#: includes/abstracts/abstract-wc-email.php:758
+#: includes/abstracts/abstract-wc-email.php:761
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "修改或编辑这个电子邮件模板复制<code>%s</code> 到:<code>%s</code>."
 
-#: includes/abstracts/abstract-wc-email.php:769
+#: includes/abstracts/abstract-wc-email.php:772
 msgid "File was not found."
 msgstr "文件找不到了。"
 
-#: includes/abstracts/abstract-wc-email.php:794
+#: includes/abstracts/abstract-wc-email.php:797
 msgid "View template"
 msgstr "查看模板"
 
-#: includes/abstracts/abstract-wc-email.php:795
+#: includes/abstracts/abstract-wc-email.php:798
 msgid "Hide template"
 msgstr "隐藏模板"
 
-#: includes/abstracts/abstract-wc-email.php:806
+#: includes/abstracts/abstract-wc-email.php:809
 msgid "Are you sure you want to delete this template file?"
 msgstr "确定删除此模板?"
 
@@ -3453,7 +4378,7 @@ msgid "You do not have permission to create coupons"
 msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:201
-#: includes/api/class-wc-api-customers.php:332
+#: includes/api/class-wc-api-customers.php:337
 #: includes/api/class-wc-api-server.php:423
 msgid "Missing parameter %s"
 msgstr "缺少参数"
@@ -3472,36 +4397,36 @@ msgstr ""
 msgid "Failed to update coupon"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:249
-#: includes/api/class-wc-api-customers.php:252
+#: includes/api/class-wc-api-customers.php:254
+#: includes/api/class-wc-api-customers.php:257
 msgid "Invalid customer Email"
 msgstr "无效的客户邮箱"
 
-#: includes/api/class-wc-api-customers.php:270
+#: includes/api/class-wc-api-customers.php:275
 msgid "You do not have permission to read the customers count"
 msgstr "你无权读取客户数量"
 
-#: includes/api/class-wc-api-customers.php:327
+#: includes/api/class-wc-api-customers.php:332
 msgid "You do not have permission to create this customer"
 msgstr "你无权创建客户"
 
-#: includes/api/class-wc-api-customers.php:630
+#: includes/api/class-wc-api-customers.php:665
 msgid "Invalid customer ID"
 msgstr "无效客户ID"
 
-#: includes/api/class-wc-api-customers.php:637
+#: includes/api/class-wc-api-customers.php:672
 msgid "Invalid customer"
 msgstr "无效客户"
 
-#: includes/api/class-wc-api-customers.php:645
+#: includes/api/class-wc-api-customers.php:680
 msgid "You do not have permission to read this customer"
 msgstr "你无权获取此客户信息"
 
-#: includes/api/class-wc-api-customers.php:651
+#: includes/api/class-wc-api-customers.php:686
 msgid "You do not have permission to edit this customer"
 msgstr "你无权编辑此客户信息"
 
-#: includes/api/class-wc-api-customers.php:657
+#: includes/api/class-wc-api-customers.php:692
 msgid "You do not have permission to delete this customer"
 msgstr "你无权删除此客户"
 
@@ -3550,23 +4475,23 @@ msgstr "你无权编辑%s"
 msgid "You do not have permission to delete this %s"
 msgstr "你无权删除%s"
 
-#: includes/api/class-wc-api-resource.php:308
+#: includes/api/class-wc-api-resource.php:314
 msgid "Permanently deleted customer"
 msgstr "永久删除客户"
 
-#: includes/api/class-wc-api-resource.php:310
+#: includes/api/class-wc-api-resource.php:316
 msgid "The customer cannot be deleted"
 msgstr "该客户不能删除"
 
-#: includes/api/class-wc-api-resource.php:319
+#: includes/api/class-wc-api-resource.php:325
 msgid "This %s cannot be deleted"
 msgstr "不能删除%s"
 
-#: includes/api/class-wc-api-resource.php:322
+#: includes/api/class-wc-api-resource.php:328
 msgid "Permanently deleted %s"
 msgstr "永久删除"
 
-#: includes/api/class-wc-api-resource.php:328
+#: includes/api/class-wc-api-resource.php:334
 msgid "Deleted %s"
 msgstr "删除"
 
@@ -3586,76 +4511,7 @@ msgstr "The handler for the route is invalid"
 msgid "No route was found matching the URL and request method"
 msgstr "No route was found matching the URL and request method"
 
-#: includes/class-wc-ajax.php:164
-msgid "Sorry, your session has expired."
-msgstr "对不起，你的会话已过期。"
-
-#: includes/class-wc-ajax.php:164
-msgid "Return to homepage"
-msgstr "返回首页"
-
-#: includes/class-wc-ajax.php:318 includes/class-wc-ajax.php:351
-#: includes/class-wc-ajax.php:376
-msgid "You do not have sufficient permissions to access this page."
-msgstr "你没有足够的权限访问此页面。"
-
-#: includes/class-wc-ajax.php:322 includes/class-wc-ajax.php:355
-#: includes/class-wc-ajax.php:380
-msgid "You have taken too long. Please go back and retry."
-msgstr "你已经获取太久，请返回并重试。"
-
-#: includes/class-wc-ajax.php:612
-msgid "Same as parent"
-msgstr "与父级相同"
-
-#: includes/class-wc-ajax.php:613
-msgid "Standard"
-msgstr "标准"
-
-#: includes/class-wc-ajax.php:888
-msgid "File %d"
-msgstr "文件 %d"
-
-#: includes/class-wc-ajax.php:1086 includes/class-wc-ajax.php:1087
-#: includes/class-wc-order.php:1592
-msgid "Item #%s stock reduced from %s to %s."
-msgstr "#%s 库存从 %s 减少到 %s."
-
-#: includes/class-wc-ajax.php:1095
-msgid ""
-"No products had their stock reduced - they may not have stock management "
-"enabled."
-msgstr "没有产品库存减少 - 他们可能没有启用库存管理。"
-
-#: includes/class-wc-ajax.php:1136 includes/class-wc-ajax.php:1137
-msgid "Item #%s stock increased from %s to %s."
-msgstr "#%s 的库存从 %s 恢复到 %s."
-
-#: includes/class-wc-ajax.php:1144
-msgid ""
-"No products had their stock increased - they may not have stock management "
-"enabled."
-msgstr "没有产品库存增加 - 他们可能没有启用库存管理。"
-
-#: includes/class-wc-ajax.php:1161
-#: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:62
-msgid "Name"
-msgstr "名称"
-
-#: includes/class-wc-ajax.php:1161
-msgid "Value"
-msgstr "值(s)"
-
-#: includes/class-wc-ajax.php:1384
-msgid "Delete note"
-msgstr "删除注释"
-
-#: includes/class-wc-ajax.php:1532
-msgid "Guest"
-msgstr "访客"
-
-#: includes/class-wc-cache-helper.php:105
+#: includes/class-wc-cache-helper.php:106
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
@@ -3710,7 +4566,7 @@ msgid ""
 msgstr "你能购买的数量不能超过&quot;%s&quot; 因为我们的库存不足, (库存为%s)."
 
 #: includes/class-wc-cart.php:835 includes/class-wc-cart.php:854
-#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:188
 #: includes/wc-cart-functions.php:96 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "查看购物车"
@@ -3779,20 +4635,20 @@ msgid ""
 " to homepage</a>"
 msgstr "抱歉，会话过期。<a href=\"%s\" class=\"wc-backward\">返回到首页</a>"
 
-#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:84
 msgid "is a required field."
 msgstr "为必填项"
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:95
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "请输入一个有效的邮政编码。"
 
-#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:104
 msgid "is not a valid phone number."
 msgstr "无效电话号码"
 
-#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:111
 msgid "is not a valid email address."
 msgstr "无效email 地址。"
 
@@ -3818,1112 +4674,45 @@ msgstr "无效的送货方式。"
 msgid "Invalid payment method."
 msgstr "无效的支付方式。"
 
-#: includes/class-wc-comments.php:109
+#: includes/class-wc-comments.php:111
 msgid "Please rate the product."
 msgstr "请对产品评分。"
 
-#: includes/class-wc-countries.php:37
-msgid "Afghanistan"
-msgstr "阿富汗"
-
-#: includes/class-wc-countries.php:38
-msgid "&#197;land Islands"
-msgstr "英属维尔京群岛"
-
-#: includes/class-wc-countries.php:39
-msgid "Albania"
-msgstr "阿尔巴尼亚"
-
-#: includes/class-wc-countries.php:40
-msgid "Algeria"
-msgstr "阿尔及利亚"
-
-#: includes/class-wc-countries.php:41
-msgid "Andorra"
-msgstr "安道尔"
-
-#: includes/class-wc-countries.php:42
-msgid "Angola"
-msgstr "安哥拉"
-
-#: includes/class-wc-countries.php:43
-msgid "Anguilla"
-msgstr "安圭拉"
-
-#: includes/class-wc-countries.php:44
-msgid "Antarctica"
-msgstr "南极洲"
-
-#: includes/class-wc-countries.php:45
-msgid "Antigua and Barbuda"
-msgstr "安提瓜和巴布达"
-
-#: includes/class-wc-countries.php:46
-msgid "Argentina"
-msgstr "阿根廷"
-
-#: includes/class-wc-countries.php:47
-msgid "Armenia"
-msgstr "亚美尼亚"
-
-#: includes/class-wc-countries.php:48
-msgid "Aruba"
-msgstr "阿鲁巴"
-
-#: includes/class-wc-countries.php:49
-msgid "Australia"
-msgstr "澳大利亚"
-
-#: includes/class-wc-countries.php:50
-msgid "Austria"
-msgstr "奥地利"
-
-#: includes/class-wc-countries.php:51
-msgid "Azerbaijan"
-msgstr "阿塞拜疆"
-
-#: includes/class-wc-countries.php:52
-msgid "Bahamas"
-msgstr "巴哈马"
-
-#: includes/class-wc-countries.php:53
-msgid "Bahrain"
-msgstr "巴林"
-
-#: includes/class-wc-countries.php:54
-msgid "Bangladesh"
-msgstr "孟加拉国"
-
-#: includes/class-wc-countries.php:55
-msgid "Barbados"
-msgstr "巴巴多斯"
-
-#: includes/class-wc-countries.php:56
-msgid "Belarus"
-msgstr "白俄罗斯"
-
-#: includes/class-wc-countries.php:57
-msgid "Belgium"
-msgstr "比利时"
-
-#: includes/class-wc-countries.php:58
-msgid "Belau"
-msgstr "Belau"
-
-#: includes/class-wc-countries.php:59
-msgid "Belize"
-msgstr "伯利兹"
-
-#: includes/class-wc-countries.php:60
-msgid "Benin"
-msgstr "贝宁"
-
-#: includes/class-wc-countries.php:61
-msgid "Bermuda"
-msgstr "百慕大"
-
-#: includes/class-wc-countries.php:62
-msgid "Bhutan"
-msgstr "不丹"
-
-#: includes/class-wc-countries.php:63
-msgid "Bolivia"
-msgstr "玻利维亚"
-
-#: includes/class-wc-countries.php:64
-msgid "Bonaire, Saint Eustatius and Saba"
-msgstr "Bonaire, Saint Eustatius and Saba"
-
-#: includes/class-wc-countries.php:65
-msgid "Bosnia and Herzegovina"
-msgstr "波斯尼亚和黑塞哥维那"
-
-#: includes/class-wc-countries.php:66
-msgid "Botswana"
-msgstr "博茨瓦纳"
-
-#: includes/class-wc-countries.php:67
-msgid "Bouvet Island"
-msgstr "圣诞岛"
-
-#: includes/class-wc-countries.php:68
-msgid "Brazil"
-msgstr "巴西"
-
-#: includes/class-wc-countries.php:69
-msgid "British Indian Ocean Territory"
-msgstr "英属印度洋领地"
-
-#: includes/class-wc-countries.php:70
-msgid "British Virgin Islands"
-msgstr "英属维尔京群岛"
-
-#: includes/class-wc-countries.php:71
-msgid "Brunei"
-msgstr "文莱"
-
-#: includes/class-wc-countries.php:72
-msgid "Bulgaria"
-msgstr "保加利亚"
-
-#: includes/class-wc-countries.php:73
-msgid "Burkina Faso"
-msgstr "布基纳法索"
-
-#: includes/class-wc-countries.php:74
-msgid "Burundi"
-msgstr "布隆迪"
-
-#: includes/class-wc-countries.php:75
-msgid "Cambodia"
-msgstr "柬埔寨"
-
-#: includes/class-wc-countries.php:76
-msgid "Cameroon"
-msgstr "喀麦隆"
-
-#: includes/class-wc-countries.php:77
-msgid "Canada"
-msgstr "加拿大"
-
-#: includes/class-wc-countries.php:78
-msgid "Cape Verde"
-msgstr "佛得角"
-
-#: includes/class-wc-countries.php:79
-msgid "Cayman Islands"
-msgstr "开曼群岛"
-
-#: includes/class-wc-countries.php:80
-msgid "Central African Republic"
-msgstr "中非共和国"
-
-#: includes/class-wc-countries.php:81
-msgid "Chad"
-msgstr "乍得"
-
-#: includes/class-wc-countries.php:82
-msgid "Chile"
-msgstr "智利"
-
-#: includes/class-wc-countries.php:83
-msgid "China"
-msgstr "中国"
-
-#: includes/class-wc-countries.php:84
-msgid "Christmas Island"
-msgstr "圣诞岛"
-
-#: includes/class-wc-countries.php:85
-msgid "Cocos (Keeling) Islands"
-msgstr "科科斯（基林）群岛"
-
-#: includes/class-wc-countries.php:86
-msgid "Colombia"
-msgstr "哥伦比亚"
-
-#: includes/class-wc-countries.php:87
-msgid "Comoros"
-msgstr "科摩罗"
-
-#: includes/class-wc-countries.php:88
-msgid "Congo (Brazzaville)"
-msgstr "刚果（布）"
-
-#: includes/class-wc-countries.php:89
-msgid "Congo (Kinshasa)"
-msgstr "刚果（金）"
-
-#: includes/class-wc-countries.php:90
-msgid "Cook Islands"
-msgstr "库克群岛"
-
-#: includes/class-wc-countries.php:91
-msgid "Costa Rica"
-msgstr "哥斯达黎加"
-
-#: includes/class-wc-countries.php:92
-msgid "Croatia"
-msgstr "克罗地亚"
-
-#: includes/class-wc-countries.php:93
-msgid "Cuba"
-msgstr "古巴"
-
-#: includes/class-wc-countries.php:94
-msgid "Cura&Ccedil;ao"
-msgstr "Cura&Ccedil;ao"
-
-#: includes/class-wc-countries.php:95
-msgid "Cyprus"
-msgstr "塞浦路斯"
-
-#: includes/class-wc-countries.php:96
-msgid "Czech Republic"
-msgstr "捷克共和国"
-
-#: includes/class-wc-countries.php:97
-msgid "Denmark"
-msgstr "丹麦"
-
-#: includes/class-wc-countries.php:98
-msgid "Djibouti"
-msgstr "吉布提"
-
-#: includes/class-wc-countries.php:99
-msgid "Dominica"
-msgstr "多米尼克"
-
-#: includes/class-wc-countries.php:100
-msgid "Dominican Republic"
-msgstr "多米尼加共和国"
-
-#: includes/class-wc-countries.php:101
-msgid "Ecuador"
-msgstr "厄瓜多尔"
-
-#: includes/class-wc-countries.php:102
-msgid "Egypt"
-msgstr "埃及"
-
-#: includes/class-wc-countries.php:103
-msgid "El Salvador"
-msgstr "萨尔瓦多"
-
-#: includes/class-wc-countries.php:104
-msgid "Equatorial Guinea"
-msgstr "赤道几内亚"
-
-#: includes/class-wc-countries.php:105
-msgid "Eritrea"
-msgstr "厄立特里亚"
-
-#: includes/class-wc-countries.php:106
-msgid "Estonia"
-msgstr "爱沙尼亚"
-
-#: includes/class-wc-countries.php:107
-msgid "Ethiopia"
-msgstr "埃塞俄比亚"
-
-#: includes/class-wc-countries.php:108
-msgid "Falkland Islands"
-msgstr "福克兰群岛"
-
-#: includes/class-wc-countries.php:109
-msgid "Faroe Islands"
-msgstr "法罗群岛"
-
-#: includes/class-wc-countries.php:110
-msgid "Fiji"
-msgstr "斐"
-
-#: includes/class-wc-countries.php:111
-msgid "Finland"
-msgstr "芬兰"
-
-#: includes/class-wc-countries.php:112
-msgid "France"
-msgstr "法国"
-
-#: includes/class-wc-countries.php:113
-msgid "French Guiana"
-msgstr "法属圭亚那"
-
-#: includes/class-wc-countries.php:114
-msgid "French Polynesia"
-msgstr "法属波利尼西亚"
-
-#: includes/class-wc-countries.php:115
-msgid "French Southern Territories"
-msgstr "法国南部领土"
-
-#: includes/class-wc-countries.php:116
-msgid "Gabon"
-msgstr "加蓬"
-
-#: includes/class-wc-countries.php:117
-msgid "Gambia"
-msgstr "冈比亚"
-
-#: includes/class-wc-countries.php:119
-msgid "Germany"
-msgstr "德国"
-
-#: includes/class-wc-countries.php:120
-msgid "Ghana"
-msgstr "加纳"
-
-#: includes/class-wc-countries.php:121
-msgid "Gibraltar"
-msgstr "直布罗陀"
-
-#: includes/class-wc-countries.php:122
-msgid "Greece"
-msgstr "希腊"
-
-#: includes/class-wc-countries.php:123
-msgid "Greenland"
-msgstr "格陵兰"
-
-#: includes/class-wc-countries.php:124
-msgid "Grenada"
-msgstr "格林纳达"
-
-#: includes/class-wc-countries.php:125
-msgid "Guadeloupe"
-msgstr "瓜德罗普岛"
-
-#: includes/class-wc-countries.php:126
-msgid "Guatemala"
-msgstr "危地马拉"
-
-#: includes/class-wc-countries.php:127
-msgid "Guernsey"
-msgstr "格恩西"
-
-#: includes/class-wc-countries.php:128
-msgid "Guinea"
-msgstr "几内亚"
-
-#: includes/class-wc-countries.php:129
-msgid "Guinea-Bissau"
-msgstr "几内亚比绍"
-
-#: includes/class-wc-countries.php:130
-msgid "Guyana"
-msgstr "圭亚那"
-
-#: includes/class-wc-countries.php:131
-msgid "Haiti"
-msgstr "海地"
-
-#: includes/class-wc-countries.php:132
-msgid "Heard Island and McDonald Islands"
-msgstr "Heard Island and McDonald Islands"
-
-#: includes/class-wc-countries.php:133
-msgid "Honduras"
-msgstr "洪都拉斯"
-
-#: includes/class-wc-countries.php:134
-msgid "Hong Kong"
-msgstr "香港特别行政区，中国"
-
-#: includes/class-wc-countries.php:135
-msgid "Hungary"
-msgstr "匈牙利"
-
-#: includes/class-wc-countries.php:136
-msgid "Iceland"
-msgstr "冰岛"
-
-#: includes/class-wc-countries.php:137
-msgid "India"
-msgstr "印度"
-
-#: includes/class-wc-countries.php:138
-msgid "Indonesia"
-msgstr "印尼"
-
-#: includes/class-wc-countries.php:139
-msgid "Iran"
-msgstr "伊朗"
-
-#: includes/class-wc-countries.php:140
-msgid "Iraq"
-msgstr "伊拉克"
-
-#: includes/class-wc-countries.php:141
-msgid "Republic of Ireland"
-msgstr "爱尔兰共和国"
-
-#: includes/class-wc-countries.php:142
-msgid "Isle of Man"
-msgstr "马恩岛"
-
-#: includes/class-wc-countries.php:143
-msgid "Israel"
-msgstr "以色列"
-
-#: includes/class-wc-countries.php:144
-msgid "Italy"
-msgstr "意大利"
-
-#: includes/class-wc-countries.php:145
-msgid "Ivory Coast"
-msgstr "象牙海岸"
-
-#: includes/class-wc-countries.php:146
-msgid "Jamaica"
-msgstr "牙买加"
-
-#: includes/class-wc-countries.php:147
-msgid "Japan"
-msgstr "日本"
-
-#: includes/class-wc-countries.php:148
-msgid "Jersey"
-msgstr "新泽西"
-
-#: includes/class-wc-countries.php:149
-msgid "Jordan"
-msgstr "约旦"
-
-#: includes/class-wc-countries.php:150
-msgid "Kazakhstan"
-msgstr "哈萨克斯坦"
-
-#: includes/class-wc-countries.php:151
-msgid "Kenya"
-msgstr "肯尼亚"
-
-#: includes/class-wc-countries.php:152
-msgid "Kiribati"
-msgstr "基里巴斯"
-
-#: includes/class-wc-countries.php:153
-msgid "Kuwait"
-msgstr "科威特"
-
-#: includes/class-wc-countries.php:154
-msgid "Kyrgyzstan"
-msgstr "吉尔吉斯斯坦"
-
-#: includes/class-wc-countries.php:155
-msgid "Laos"
-msgstr "老挝"
-
-#: includes/class-wc-countries.php:156
-msgid "Latvia"
-msgstr "拉脱维亚"
-
-#: includes/class-wc-countries.php:157
-msgid "Lebanon"
-msgstr "黎巴嫩"
-
-#: includes/class-wc-countries.php:158
-msgid "Lesotho"
-msgstr "莱索托"
-
-#: includes/class-wc-countries.php:159
-msgid "Liberia"
-msgstr "利比里亚"
-
-#: includes/class-wc-countries.php:160
-msgid "Libya"
-msgstr "利比亚"
-
-#: includes/class-wc-countries.php:161
-msgid "Liechtenstein"
-msgstr "列支敦士登"
-
-#: includes/class-wc-countries.php:162
-msgid "Lithuania"
-msgstr "立陶宛"
-
-#: includes/class-wc-countries.php:163
-msgid "Luxembourg"
-msgstr "卢森堡"
-
-#: includes/class-wc-countries.php:164
-msgid "Macao S.A.R., China"
-msgstr "澳门特别行政区，中国"
-
-#: includes/class-wc-countries.php:165
-msgid "Macedonia"
-msgstr "马其顿"
-
-#: includes/class-wc-countries.php:166
-msgid "Madagascar"
-msgstr "马达加斯加"
-
-#: includes/class-wc-countries.php:167
-msgid "Malawi"
-msgstr "马拉维"
-
-#: includes/class-wc-countries.php:168
-msgid "Malaysia"
-msgstr "马来西亚"
-
-#: includes/class-wc-countries.php:169
-msgid "Maldives"
-msgstr "马尔代夫"
-
-#: includes/class-wc-countries.php:170
-msgid "Mali"
-msgstr "马里"
-
-#: includes/class-wc-countries.php:171
-msgid "Malta"
-msgstr "马耳他"
-
-#: includes/class-wc-countries.php:172
-msgid "Marshall Islands"
-msgstr "马绍尔群岛"
-
-#: includes/class-wc-countries.php:173
-msgid "Martinique"
-msgstr "马提尼克"
-
-#: includes/class-wc-countries.php:174
-msgid "Mauritania"
-msgstr "毛里塔尼亚"
-
-#: includes/class-wc-countries.php:175
-msgid "Mauritius"
-msgstr "毛里求斯"
-
-#: includes/class-wc-countries.php:176
-msgid "Mayotte"
-msgstr "马约特岛"
-
-#: includes/class-wc-countries.php:177
-msgid "Mexico"
-msgstr "墨西哥"
-
-#: includes/class-wc-countries.php:178
-msgid "Micronesia"
-msgstr "密克罗尼西亚"
-
-#: includes/class-wc-countries.php:179
-msgid "Moldova"
-msgstr "摩尔多瓦"
-
-#: includes/class-wc-countries.php:180
-msgid "Monaco"
-msgstr "摩纳哥"
-
-#: includes/class-wc-countries.php:181
-msgid "Mongolia"
-msgstr "蒙古"
-
-#: includes/class-wc-countries.php:182
-msgid "Montenegro"
-msgstr "黑山"
-
-#: includes/class-wc-countries.php:183
-msgid "Montserrat"
-msgstr "蒙特塞拉特"
-
-#: includes/class-wc-countries.php:184
-msgid "Morocco"
-msgstr "摩洛哥"
-
-#: includes/class-wc-countries.php:185
-msgid "Mozambique"
-msgstr "莫桑比克"
-
-#: includes/class-wc-countries.php:186
-msgid "Myanmar"
-msgstr "缅甸"
-
-#: includes/class-wc-countries.php:187
-msgid "Namibia"
-msgstr "纳米比亚"
-
-#: includes/class-wc-countries.php:188
-msgid "Nauru"
-msgstr "瑙鲁"
-
-#: includes/class-wc-countries.php:189
-msgid "Nepal"
-msgstr "尼泊尔"
-
-#: includes/class-wc-countries.php:190
-msgid "Netherlands"
-msgstr "荷兰"
-
-#: includes/class-wc-countries.php:191
-msgid "Netherlands Antilles"
-msgstr "荷属安的列斯"
-
-#: includes/class-wc-countries.php:192
-msgid "New Caledonia"
-msgstr "新喀里多尼亚"
-
-#: includes/class-wc-countries.php:193
-msgid "New Zealand"
-msgstr "新西兰"
-
-#: includes/class-wc-countries.php:194
-msgid "Nicaragua"
-msgstr "尼加拉瓜"
-
-#: includes/class-wc-countries.php:195
-msgid "Niger"
-msgstr "尼日尔"
-
-#: includes/class-wc-countries.php:196
-msgid "Nigeria"
-msgstr "尼日利亚"
-
-#: includes/class-wc-countries.php:197
-msgid "Niue"
-msgstr "纽埃"
-
-#: includes/class-wc-countries.php:198
-msgid "Norfolk Island"
-msgstr "诺福克岛"
-
-#: includes/class-wc-countries.php:199
-msgid "North Korea"
-msgstr "北朝鲜"
-
-#: includes/class-wc-countries.php:200
-msgid "Norway"
-msgstr "挪威"
-
-#: includes/class-wc-countries.php:201
-msgid "Oman"
-msgstr "阿曼"
-
-#: includes/class-wc-countries.php:202
-msgid "Pakistan"
-msgstr "巴基斯坦"
-
-#: includes/class-wc-countries.php:203
-msgid "Palestinian Territory"
-msgstr "巴勒斯坦领土"
-
-#: includes/class-wc-countries.php:204
-msgid "Panama"
-msgstr "巴拿马"
-
-#: includes/class-wc-countries.php:205
-msgid "Papua New Guinea"
-msgstr "巴布亚新几内亚"
-
-#: includes/class-wc-countries.php:206
-msgid "Paraguay"
-msgstr "巴拉圭"
-
-#: includes/class-wc-countries.php:207
-msgid "Peru"
-msgstr "秘鲁"
-
-#: includes/class-wc-countries.php:208
-msgid "Philippines"
-msgstr "菲律宾"
-
-#: includes/class-wc-countries.php:209
-msgid "Pitcairn"
-msgstr "皮特凯恩"
-
-#: includes/class-wc-countries.php:210
-msgid "Poland"
-msgstr "波兰"
-
-#: includes/class-wc-countries.php:211
-msgid "Portugal"
-msgstr "葡萄牙"
-
-#: includes/class-wc-countries.php:212
-msgid "Qatar"
-msgstr "卡塔尔"
-
-#: includes/class-wc-countries.php:213
-msgid "Reunion"
-msgstr "留尼旺"
-
-#: includes/class-wc-countries.php:214
-msgid "Romania"
-msgstr "罗马尼亚"
-
-#: includes/class-wc-countries.php:215
-msgid "Russia"
-msgstr "俄罗斯"
-
-#: includes/class-wc-countries.php:216
-msgid "Rwanda"
-msgstr "卢旺达"
-
-#: includes/class-wc-countries.php:217
-msgid "Saint Barth&eacute;lemy"
-msgstr "Saint Barth&eacute;lemy"
-
-#: includes/class-wc-countries.php:218
-msgid "Saint Helena"
-msgstr "圣赫勒拿"
-
-#: includes/class-wc-countries.php:219
-msgid "Saint Kitts and Nevis"
-msgstr "圣基茨和尼维斯"
-
-#: includes/class-wc-countries.php:220
-msgid "Saint Lucia"
-msgstr "圣卢西亚"
-
-#: includes/class-wc-countries.php:221
-msgid "Saint Martin (French part)"
-msgstr "圣马丁（法国部分）"
-
-#: includes/class-wc-countries.php:222
-msgid "Saint Martin (Dutch part)"
-msgstr "圣马丁（法国部分）"
-
-#: includes/class-wc-countries.php:223
-msgid "Saint Pierre and Miquelon"
-msgstr "圣皮埃尔和密克隆"
-
-#: includes/class-wc-countries.php:224
-msgid "Saint Vincent and the Grenadines"
-msgstr "圣文森特和格林纳丁斯"
-
-#: includes/class-wc-countries.php:225
-msgid "San Marino"
-msgstr "圣马力诺"
-
-#: includes/class-wc-countries.php:226
-msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-msgstr "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-
-#: includes/class-wc-countries.php:227
-msgid "Saudi Arabia"
-msgstr "沙特阿拉伯"
-
-#: includes/class-wc-countries.php:228
-msgid "Senegal"
-msgstr "塞内加尔"
-
-#: includes/class-wc-countries.php:229
-msgid "Serbia"
-msgstr "塞尔维亚"
-
-#: includes/class-wc-countries.php:230
-msgid "Seychelles"
-msgstr "塞舌尔"
-
-#: includes/class-wc-countries.php:231
-msgid "Sierra Leone"
-msgstr "塞拉利昂"
-
-#: includes/class-wc-countries.php:232
-msgid "Singapore"
-msgstr "新加坡"
-
-#: includes/class-wc-countries.php:233
-msgid "Slovakia"
-msgstr "斯洛伐克"
-
-#: includes/class-wc-countries.php:234
-msgid "Slovenia"
-msgstr "斯洛文尼亚"
-
-#: includes/class-wc-countries.php:235
-msgid "Solomon Islands"
-msgstr "所罗门群岛"
-
-#: includes/class-wc-countries.php:236
-msgid "Somalia"
-msgstr "索马里"
-
-#: includes/class-wc-countries.php:237
-msgid "South Africa"
-msgstr "南非"
-
-#: includes/class-wc-countries.php:238
-msgid "South Georgia/Sandwich Islands"
-msgstr "南乔治亚/南桑威奇群岛"
-
-#: includes/class-wc-countries.php:239
-msgid "South Korea"
-msgstr "韩国"
-
-#: includes/class-wc-countries.php:240
-msgid "South Sudan"
-msgstr "南非"
-
-#: includes/class-wc-countries.php:241
-msgid "Spain"
-msgstr "西班牙"
-
-#: includes/class-wc-countries.php:242
-msgid "Sri Lanka"
-msgstr "斯里兰卡"
-
-#: includes/class-wc-countries.php:243
-msgid "Sudan"
-msgstr "苏丹"
-
-#: includes/class-wc-countries.php:244
-msgid "Suriname"
-msgstr "苏里南"
-
-#: includes/class-wc-countries.php:245
-msgid "Svalbard and Jan Mayen"
-msgstr "斯瓦尔巴岛和扬马延岛"
-
-#: includes/class-wc-countries.php:246
-msgid "Swaziland"
-msgstr "斯威士兰"
-
-#: includes/class-wc-countries.php:247
-msgid "Sweden"
-msgstr "瑞典"
-
-#: includes/class-wc-countries.php:248
-msgid "Switzerland"
-msgstr "瑞士"
-
-#: includes/class-wc-countries.php:249
-msgid "Syria"
-msgstr "叙利亚"
-
-#: includes/class-wc-countries.php:250
-msgid "Taiwan"
-msgstr "台湾"
-
-#: includes/class-wc-countries.php:251
-msgid "Tajikistan"
-msgstr "塔吉克斯坦"
-
-#: includes/class-wc-countries.php:252
-msgid "Tanzania"
-msgstr "坦桑尼亚"
-
-#: includes/class-wc-countries.php:253
-msgid "Thailand"
-msgstr "泰国"
-
-#: includes/class-wc-countries.php:254
-msgid "Timor-Leste"
-msgstr "东帝汶"
-
-#: includes/class-wc-countries.php:255
-msgid "Togo"
-msgstr "多哥"
-
-#: includes/class-wc-countries.php:256
-msgid "Tokelau"
-msgstr "托克劳"
-
-#: includes/class-wc-countries.php:257
-msgid "Tonga"
-msgstr "汤加"
-
-#: includes/class-wc-countries.php:258
-msgid "Trinidad and Tobago"
-msgstr "特里尼达和多巴哥"
-
-#: includes/class-wc-countries.php:259
-msgid "Tunisia"
-msgstr "突尼斯"
-
-#: includes/class-wc-countries.php:260
-msgid "Turkey"
-msgstr "土耳其"
-
-#: includes/class-wc-countries.php:261
-msgid "Turkmenistan"
-msgstr "土库曼斯坦"
-
-#: includes/class-wc-countries.php:262
-msgid "Turks and Caicos Islands"
-msgstr "特克斯和凯科斯群岛"
-
-#: includes/class-wc-countries.php:263
-msgid "Tuvalu"
-msgstr "图瓦卢"
-
-#: includes/class-wc-countries.php:264
-msgid "Uganda"
-msgstr "乌干达"
-
-#: includes/class-wc-countries.php:265
-msgid "Ukraine"
-msgstr "乌克兰"
-
-#: includes/class-wc-countries.php:266
-msgid "United Arab Emirates"
-msgstr "阿拉伯联合酋长国"
-
-#: includes/class-wc-countries.php:267
-msgid "United Kingdom (UK)"
-msgstr "United Kingdom (UK)"
-
-#: includes/class-wc-countries.php:268
-msgid "United States (US)"
-msgstr "United States (US)"
-
 #: includes/class-wc-countries.php:269
-msgid "Uruguay"
-msgstr "乌拉圭"
-
-#: includes/class-wc-countries.php:270
-msgid "Uzbekistan"
-msgstr "乌兹别克斯坦"
-
-#: includes/class-wc-countries.php:271
-msgid "Vanuatu"
-msgstr "瓦努阿图"
-
-#: includes/class-wc-countries.php:272
-msgid "Vatican"
-msgstr "梵帝冈"
-
-#: includes/class-wc-countries.php:273
-msgid "Venezuela"
-msgstr "委内瑞拉"
-
-#: includes/class-wc-countries.php:274
-msgid "Vietnam"
-msgstr "越南"
-
-#: includes/class-wc-countries.php:275
-msgid "Wallis and Futuna"
-msgstr "瓦利斯群岛和富图纳群岛"
-
-#: includes/class-wc-countries.php:276
-msgid "Western Sahara"
-msgstr "西撒哈拉"
-
-#: includes/class-wc-countries.php:277
-msgid "Western Samoa"
-msgstr "美属萨摩亚"
-
-#: includes/class-wc-countries.php:278
-msgid "Yemen"
-msgstr "也门"
-
-#: includes/class-wc-countries.php:279
-msgid "Zambia"
-msgstr "赞比亚"
-
-#: includes/class-wc-countries.php:280
-msgid "Zimbabwe"
-msgstr "津巴布韦"
-
-#: includes/class-wc-countries.php:484
 msgid "to the"
 msgstr "to the"
 
-#: includes/class-wc-countries.php:485
+#: includes/class-wc-countries.php:270
 msgid "to"
 msgstr "to"
 
-#: includes/class-wc-countries.php:498
+#: includes/class-wc-countries.php:282
 msgid "the"
 msgstr "the"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "VAT"
 msgstr "增值税"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "Tax"
 msgstr "税"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. VAT)"
 msgstr "(包含. 增值税)"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. tax)"
 msgstr "(包含.税)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. VAT)"
 msgstr "(不含. 增值税)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. tax)"
 msgstr "(税前)"
-
-#: includes/class-wc-countries.php:730
-msgid "Country"
-msgstr "国家"
-
-#: includes/class-wc-countries.php:735
-msgid "First Name"
-msgstr "名"
-
-#: includes/class-wc-countries.php:740
-msgid "Last Name"
-msgstr "姓"
-
-#: includes/class-wc-countries.php:746
-msgid "Company Name"
-msgstr "公司名称"
-
-#: includes/class-wc-countries.php:750
-msgid "Address"
-msgstr "地址"
-
-#: includes/class-wc-countries.php:751
-msgctxt "placeholder"
-msgid "Street address"
-msgstr "编辑地址"
-
-#: includes/class-wc-countries.php:756
-msgctxt "placeholder"
-msgid "Apartment, suite, unit etc. (optional)"
-msgstr "Apartment, suite, unit etc. (optional)"
-
-#: includes/class-wc-countries.php:761 includes/class-wc-countries.php:762
-msgid "Town / City"
-msgstr "镇/市"
-
-#: includes/class-wc-countries.php:768 includes/class-wc-countries.php:769
-msgid "State / County"
-msgstr "地区/县"
-
-#: includes/class-wc-countries.php:775 includes/class-wc-countries.php:776
-#: templates/cart/shipping-calculator.php:80
-msgid "Postcode / Zip"
-msgstr "邮政编码"
-
-#: includes/class-wc-countries.php:838
-msgid "District"
-msgstr "地区"
-
-#: includes/class-wc-countries.php:845 includes/class-wc-countries.php:861
-#: includes/class-wc-countries.php:881 includes/class-wc-countries.php:942
-#: includes/class-wc-countries.php:961 includes/class-wc-countries.php:966
-#: includes/class-wc-countries.php:978 includes/class-wc-countries.php:1028
-#: includes/class-wc-countries.php:1052 includes/class-wc-countries.php:1093
-msgid "Province"
-msgstr "省"
-
-#: includes/class-wc-countries.php:867
-msgid "Canton"
-msgstr "Canton"
-
-#: includes/class-wc-countries.php:876 includes/class-wc-countries.php:1034
-msgid "Municipality"
-msgstr "市"
-
-#: includes/class-wc-countries.php:929
-msgid "Town / District"
-msgstr "镇/街道"
-
-#: includes/class-wc-countries.php:932
-msgid "Region"
-msgstr "地区"
-
-#: includes/class-wc-countries.php:937 includes/class-wc-countries.php:1068
-msgid "County"
-msgstr "县"
-
-#: includes/class-wc-countries.php:1057
-msgid "Zip"
-msgstr "邮政编码"
-
-#: includes/class-wc-countries.php:1060
-msgid "State"
-msgstr "地区"
-
-#: includes/class-wc-countries.php:1065
-msgid "Postcode"
-msgstr "邮编"
-
-#: includes/class-wc-countries.php:1173
-msgid "Email Address"
-msgstr "Email 地址"
-
-#: includes/class-wc-countries.php:1179
-msgid "Phone"
-msgstr "电话"
 
 #: includes/class-wc-coupon.php:578
 msgid "Coupon code applied successfully."
@@ -4987,67 +4776,67 @@ msgstr "对不起,此优惠券对所售商品无效."
 msgid "Please enter a coupon code."
 msgstr "请输入站点名称。"
 
-#: includes/class-wc-download-handler.php:37
+#: includes/class-wc-download-handler.php:42
 msgid "Invalid email address."
 msgstr "无效email 地址。"
 
-#: includes/class-wc-download-handler.php:37
-#: includes/class-wc-download-handler.php:62
-#: includes/class-wc-download-handler.php:83
-#: includes/class-wc-download-handler.php:90
+#: includes/class-wc-download-handler.php:42
+#: includes/class-wc-download-handler.php:67
+#: includes/class-wc-download-handler.php:88
 #: includes/class-wc-download-handler.php:95
-#: includes/class-wc-download-handler.php:99
-#: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:100
+#: includes/class-wc-download-handler.php:104
+#: includes/class-wc-download-handler.php:148
+#: includes/class-wc-download-handler.php:309
 msgid "Go to homepage"
 msgstr "回到首页"
 
-#: includes/class-wc-download-handler.php:62
+#: includes/class-wc-download-handler.php:67
 msgid "Invalid download."
 msgstr "无效的下载。"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "You must be logged in to download files."
 msgstr "你必须登录才能下载此文件"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:27
 #: templates/myaccount/form-login.php:46
 msgid "Login"
 msgstr "登录"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "Log in to Download Files"
 msgstr "登陆账户以下载文件"
 
-#: includes/class-wc-download-handler.php:77
+#: includes/class-wc-download-handler.php:82
 msgid "This is not your download link."
 msgstr "这不是你的下载链接。"
 
-#: includes/class-wc-download-handler.php:83
+#: includes/class-wc-download-handler.php:88
 msgid "Product no longer exists."
 msgstr "产品不再存在"
 
-#: includes/class-wc-download-handler.php:90
-#: includes/class-wc-form-handler.php:546
+#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-form-handler.php:541
 #: includes/shortcodes/class-wc-shortcode-checkout.php:172
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
 msgstr "无效订单。"
 
-#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-download-handler.php:100
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "对不起，你已经达到这个文件的​​下载限制"
 
-#: includes/class-wc-download-handler.php:99
+#: includes/class-wc-download-handler.php:104
 msgid "Sorry, this download has expired"
 msgstr "对不起，此下载已失效"
 
-#: includes/class-wc-download-handler.php:143
+#: includes/class-wc-download-handler.php:148
 msgid "No file defined"
 msgstr "无效的文件类型"
 
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:309
 msgid "File not found"
 msgstr "文件无法找到"
 
@@ -5089,149 +4878,149 @@ msgstr "产品缺货"
 msgid "%s units of %s have been backordered in order %s."
 msgstr "%s 个 %s 因缺货而延期交付订单 %s."
 
-#: includes/class-wc-form-handler.php:129
+#: includes/class-wc-form-handler.php:125
 msgid "Address changed successfully."
 msgstr "地址变更成功。"
 
-#: includes/class-wc-form-handler.php:178
+#: includes/class-wc-form-handler.php:174
 msgid "Please enter your name."
 msgstr "请输入你的名字"
 
-#: includes/class-wc-form-handler.php:182 includes/wc-user-functions.php:48
+#: includes/class-wc-form-handler.php:178 includes/wc-user-functions.php:48
 msgid "Please provide a valid email address."
 msgstr "请提供有效的邮箱地址"
 
-#: includes/class-wc-form-handler.php:184
+#: includes/class-wc-form-handler.php:180
 msgid "This email address is already registered."
 msgstr "此邮箱已被注册过。"
 
-#: includes/class-wc-form-handler.php:188
+#: includes/class-wc-form-handler.php:184
 msgid "Your current password is incorrect."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:193
+#: includes/class-wc-form-handler.php:189
 msgid "Please fill out all password fields."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:197
+#: includes/class-wc-form-handler.php:193
 msgid "Please enter your current password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:197
 msgid "Please re-enter your password."
 msgstr "请再次输入你的密码"
 
-#: includes/class-wc-form-handler.php:205
-#: includes/class-wc-form-handler.php:836
+#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:831
 msgid "Passwords do not match."
 msgstr "密码不匹配."
 
-#: includes/class-wc-form-handler.php:227
+#: includes/class-wc-form-handler.php:223
 msgid "Account details changed successfully."
 msgstr "账户信息更改成功。"
 
-#: includes/class-wc-form-handler.php:355
+#: includes/class-wc-form-handler.php:350
 msgid "Payment method added."
 msgstr "新的支付方式已添加"
 
-#: includes/class-wc-form-handler.php:388
-#: includes/class-wc-form-handler.php:447
+#: includes/class-wc-form-handler.php:383
+#: includes/class-wc-form-handler.php:442
 msgid "Cart updated."
 msgstr "购物车已更新。"
 
-#: includes/class-wc-form-handler.php:423
+#: includes/class-wc-form-handler.php:418
 msgid "You can only have 1 %s in your cart."
 msgstr "你只能有 1 %s在购物车。"
 
-#: includes/class-wc-form-handler.php:513
+#: includes/class-wc-form-handler.php:508
 msgid "The cart has been filled with the items from your previous order."
 msgstr "你的购物车里累计数量已满。"
 
-#: includes/class-wc-form-handler.php:536
+#: includes/class-wc-form-handler.php:531
 msgid "Order cancelled by customer."
 msgstr "订单已被客户取消。"
 
-#: includes/class-wc-form-handler.php:539
+#: includes/class-wc-form-handler.php:534
 msgid "Your order was cancelled."
 msgstr "你的订单已被取消。"
 
-#: includes/class-wc-form-handler.php:544
+#: includes/class-wc-form-handler.php:539
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr "无法取消订单。如果你需要帮助，请联系我们。"
 
-#: includes/class-wc-form-handler.php:584
-#: includes/class-wc-form-handler.php:644
+#: includes/class-wc-form-handler.php:579
+#: includes/class-wc-form-handler.php:639
 msgid "Please choose product options&hellip;"
 msgstr "请选择产品选项&hellip;"
 
-#: includes/class-wc-form-handler.php:678
+#: includes/class-wc-form-handler.php:673
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "请选择您要购买的数量&hellip;"
 
-#: includes/class-wc-form-handler.php:685
+#: includes/class-wc-form-handler.php:680
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "请选择商品添加到购物车&hellip;"
 
-#: includes/class-wc-form-handler.php:745
-#: includes/class-wc-form-handler.php:749
-#: includes/class-wc-form-handler.php:753
-#: includes/class-wc-form-handler.php:762
-#: includes/class-wc-form-handler.php:888
+#: includes/class-wc-form-handler.php:740
+#: includes/class-wc-form-handler.php:744
+#: includes/class-wc-form-handler.php:748
+#: includes/class-wc-form-handler.php:757
+#: includes/class-wc-form-handler.php:883
 msgid "Error"
 msgstr "错误"
 
-#: includes/class-wc-form-handler.php:749
+#: includes/class-wc-form-handler.php:744
 msgid "Username is required."
 msgstr "用户名为必填。"
 
-#: includes/class-wc-form-handler.php:753
+#: includes/class-wc-form-handler.php:748
 msgid "Password is required."
 msgstr "密码为必填。"
 
-#: includes/class-wc-form-handler.php:762
+#: includes/class-wc-form-handler.php:757
 msgid "A user could not be found with this email address."
 msgstr "该邮箱末注册过账户"
 
-#: includes/class-wc-form-handler.php:787
+#: includes/class-wc-form-handler.php:782
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "当前登陆 <strong>%s</strong>"
 
-#: includes/class-wc-form-handler.php:831
+#: includes/class-wc-form-handler.php:826
 msgid "Please enter your password."
 msgstr "请输入你的密码。"
 
-#: includes/class-wc-form-handler.php:904 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:899 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr "错误"
 
-#: includes/class-wc-form-handler.php:904
+#: includes/class-wc-form-handler.php:899
 msgid "Anti-spam field was filled in."
 msgstr "验证码字段已填写。"
 
-#: includes/class-wc-frontend-scripts.php:123
+#: includes/class-wc-frontend-scripts.php:149
 msgid "Please select a rating"
 msgstr "显示链接评级"
 
-#: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1603
+#: includes/class-wc-frontend-scripts.php:168
+#: includes/wc-template-functions.php:1594
 msgid "required"
 msgstr "(必填)"
 
-#: includes/class-wc-frontend-scripts.php:164
+#: includes/class-wc-frontend-scripts.php:196
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "很抱歉,没有商品符合您的选择条件,请尝试其它搜选条件."
 
-#: includes/class-wc-frontend-scripts.php:165
+#: includes/class-wc-frontend-scripts.php:197
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "抱歉,该商品已下架,请选择其它"
 
-#: includes/class-wc-frontend-scripts.php:170
+#: includes/class-wc-frontend-scripts.php:204
 msgid "Select an option&hellip;"
 msgstr "选择一个选项&hellip;"
 
@@ -5256,7 +5045,7 @@ msgid "Cart"
 msgstr "购物车"
 
 #: includes/class-wc-install.php:227
-msgctxt "Paeg slug"
+msgctxt "Page slug"
 msgid "checkout"
 msgstr "结算"
 
@@ -5328,204 +5117,208 @@ msgstr "WooCommerce"
 msgid "Order status changed from %s to %s."
 msgstr "订单状态从%s改为 %s."
 
+#: includes/class-wc-order.php:1592
+msgid "Item #%s stock reduced from %s to %s."
+msgstr "#%s 库存从 %s 减少到 %s."
+
 #: includes/class-wc-order.php:1602
 msgid "Order item stock reduced successfully."
 msgstr "订单库存减少成功."
 
-#: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
+#: includes/class-wc-post-types.php:56 includes/class-wc-post-types.php:58
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
 msgstr "产品类别"
 
-#: includes/class-wc-post-types.php:58
+#: includes/class-wc-post-types.php:59
 msgid "Product Category"
 msgstr "商品分类"
 
-#: includes/class-wc-post-types.php:59
+#: includes/class-wc-post-types.php:60
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr "分类"
 
-#: includes/class-wc-post-types.php:60
+#: includes/class-wc-post-types.php:61
 msgid "Search Product Categories"
 msgstr "查找商品分类"
 
-#: includes/class-wc-post-types.php:61
+#: includes/class-wc-post-types.php:62
 msgid "All Product Categories"
 msgstr "所有商品分类"
 
-#: includes/class-wc-post-types.php:62
+#: includes/class-wc-post-types.php:63
 msgid "Parent Product Category"
 msgstr "Parent Product Category"
 
-#: includes/class-wc-post-types.php:63
+#: includes/class-wc-post-types.php:64
 msgid "Parent Product Category:"
 msgstr "Parent Product Category:"
 
-#: includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:65
 msgid "Edit Product Category"
 msgstr "编辑商品分类"
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:66
 msgid "Update Product Category"
 msgstr "更新商品分类"
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:67
 msgid "Add New Product Category"
 msgstr "添加新商品分类"
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:68
 msgid "New Product Category Name"
 msgstr "新商品分类名称"
 
-#: includes/class-wc-post-types.php:78
+#: includes/class-wc-post-types.php:79
 #: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "商品分类"
 
-#: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
+#: includes/class-wc-post-types.php:91 includes/class-wc-post-types.php:93
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
 msgstr "产品标签"
 
-#: includes/class-wc-post-types.php:93
+#: includes/class-wc-post-types.php:94
 msgid "Product Tag"
 msgstr "商品标签"
 
-#: includes/class-wc-post-types.php:94
+#: includes/class-wc-post-types.php:95
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "标签"
 
-#: includes/class-wc-post-types.php:95
+#: includes/class-wc-post-types.php:96
 msgid "Search Product Tags"
 msgstr "查找商品标签"
 
-#: includes/class-wc-post-types.php:96
+#: includes/class-wc-post-types.php:97
 msgid "All Product Tags"
 msgstr "所有商品标签"
 
-#: includes/class-wc-post-types.php:97
+#: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag"
 msgstr "Parent Product Tag"
 
-#: includes/class-wc-post-types.php:98
+#: includes/class-wc-post-types.php:99
 msgid "Parent Product Tag:"
 msgstr "商品父标签"
 
-#: includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:100
 msgid "Edit Product Tag"
 msgstr "编辑商品标签"
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:101
 msgid "Update Product Tag"
 msgstr "更新商品标签"
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:102
 msgid "Add New Product Tag"
 msgstr "添加新的商品标签"
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:103
 msgid "New Product Tag Name"
 msgstr "新商品标签"
 
-#: includes/class-wc-post-types.php:113
+#: includes/class-wc-post-types.php:114
 #: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "商品标签"
 
-#: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
+#: includes/class-wc-post-types.php:125 includes/class-wc-post-types.php:127
 msgid "Shipping Classes"
 msgstr "配送类型"
 
-#: includes/class-wc-post-types.php:127
+#: includes/class-wc-post-types.php:128
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 msgid "Shipping Class"
 msgstr "配送类型"
 
-#: includes/class-wc-post-types.php:128
+#: includes/class-wc-post-types.php:129
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "配送类型"
 
-#: includes/class-wc-post-types.php:129
+#: includes/class-wc-post-types.php:130
 msgid "Search Shipping Classes"
 msgstr "搜索配送类型"
 
-#: includes/class-wc-post-types.php:130
+#: includes/class-wc-post-types.php:131
 msgid "All Shipping Classes"
 msgstr "全部配送类型"
 
-#: includes/class-wc-post-types.php:131
+#: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class"
 msgstr "父级配送类型"
 
-#: includes/class-wc-post-types.php:132
+#: includes/class-wc-post-types.php:133
 msgid "Parent Shipping Class:"
 msgstr "父级配送类型："
 
-#: includes/class-wc-post-types.php:133
+#: includes/class-wc-post-types.php:134
 msgid "Edit Shipping Class"
 msgstr "编辑配送类型"
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:135
 msgid "Update Shipping Class"
 msgstr "更新配送类型"
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:136
 msgid "Add New Shipping Class"
 msgstr "添加新的配送类型"
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:137
 msgid "New Shipping Class Name"
 msgstr "新配送类型名称"
 
-#: includes/class-wc-post-types.php:184
+#: includes/class-wc-post-types.php:185
 msgid "Search %s"
 msgstr "搜索 %s"
 
-#: includes/class-wc-post-types.php:185
+#: includes/class-wc-post-types.php:186
 msgid "All %s"
 msgstr "所有 %s"
 
-#: includes/class-wc-post-types.php:186
+#: includes/class-wc-post-types.php:187
 msgid "Parent %s"
 msgstr "上级 %s"
 
-#: includes/class-wc-post-types.php:187
+#: includes/class-wc-post-types.php:188
 msgid "Parent %s:"
 msgstr "上级 %s:"
 
-#: includes/class-wc-post-types.php:188
+#: includes/class-wc-post-types.php:189
 msgid "Edit %s"
 msgstr "编辑 %s"
 
-#: includes/class-wc-post-types.php:189
+#: includes/class-wc-post-types.php:190
 msgid "Update %s"
 msgstr "更新 %s"
 
-#: includes/class-wc-post-types.php:190
+#: includes/class-wc-post-types.php:191
 msgid "Add New %s"
 msgstr "添加新的 %s"
 
-#: includes/class-wc-post-types.php:191
+#: includes/class-wc-post-types.php:192
 msgid "New %s"
 msgstr "新的 %s"
 
-#: includes/class-wc-post-types.php:226
+#: includes/class-wc-post-types.php:227
 #: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "商品"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:233
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "商品"
 
-#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:234 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5536,168 +5329,168 @@ msgstr "商品"
 msgid "Product"
 msgstr "商品"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:235
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "商品"
 
-#: includes/class-wc-post-types.php:235
+#: includes/class-wc-post-types.php:236
 msgid "Add Product"
 msgstr "添加商品"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:237
 msgid "Add New Product"
 msgstr "添加新商品"
 
-#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
-#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:329 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "编辑"
 
-#: includes/class-wc-post-types.php:238
+#: includes/class-wc-post-types.php:239
 msgid "Edit Product"
 msgstr "编辑商品"
 
-#: includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240
 msgid "New Product"
 msgstr "新建商品"
 
-#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:241 includes/class-wc-post-types.php:242
 msgid "View Product"
 msgstr "查看商品"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:243
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "查找商品"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:244
 msgid "No Products found"
 msgstr "没找到商品"
 
-#: includes/class-wc-post-types.php:244
+#: includes/class-wc-post-types.php:245
 msgid "No Products found in trash"
 msgstr "垃圾箱里没有商品"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:246
 msgid "Parent Product"
 msgstr "Parent Product"
 
-#: includes/class-wc-post-types.php:247
+#: includes/class-wc-post-types.php:248
 msgid "This is where you can add new products to your store."
 msgstr "在这里为你的商店添加新商品"
 
-#: includes/class-wc-post-types.php:267
+#: includes/class-wc-post-types.php:268
 msgid "Variations"
 msgstr "变量"
 
-#: includes/class-wc-post-types.php:275
+#: includes/class-wc-post-types.php:276
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "订单"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:286
 msgid "Orders"
 msgstr "订单"
 
-#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:287 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "订单"
 
-#: includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:288
 msgid "Add Order"
 msgstr "添加订单"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:289
 msgid "Add New Order"
 msgstr "新添订单"
 
-#: includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:291
 msgid "Edit Order"
 msgstr "编辑订单"
 
-#: includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292
 msgid "New Order"
 msgstr "新订单"
 
-#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:293 includes/class-wc-post-types.php:294
 msgid "View Order"
 msgstr "查看订单"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:295
 msgid "Search Orders"
 msgstr "查找订单"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found"
 msgstr "没有找到订单"
 
-#: includes/class-wc-post-types.php:296
+#: includes/class-wc-post-types.php:297
 msgid "No Orders found in trash"
 msgstr "垃圾箱里没有订单"
 
-#: includes/class-wc-post-types.php:297
+#: includes/class-wc-post-types.php:298
 msgid "Parent Orders"
 msgstr "Parent Orders"
 
-#: includes/class-wc-post-types.php:300
+#: includes/class-wc-post-types.php:301
 msgid "This is where store orders are stored."
 msgstr "这里保存商店订单"
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:324
 msgid "Coupons"
 msgstr "优惠券"
 
-#: includes/class-wc-post-types.php:324 templates/cart/cart.php:119
+#: includes/class-wc-post-types.php:325 templates/cart/cart.php:119
 msgid "Coupon"
 msgstr "优惠券"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:326
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "优惠券"
 
-#: includes/class-wc-post-types.php:326
+#: includes/class-wc-post-types.php:327
 msgid "Add Coupon"
 msgstr "添加优惠券"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:328
 msgid "Add New Coupon"
 msgstr "添加新优惠券"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:330
 msgid "Edit Coupon"
 msgstr "编辑优惠券"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:331
 msgid "New Coupon"
 msgstr "新建优惠券"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:332
 msgid "View Coupons"
 msgstr "查看优惠券"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:333
 msgid "View Coupon"
 msgstr "查看优惠券"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:334
 msgid "Search Coupons"
 msgstr "搜索优惠券"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found"
 msgstr "没有找到优惠券"
 
-#: includes/class-wc-post-types.php:335
+#: includes/class-wc-post-types.php:336
 msgid "No Coupons found in trash"
 msgstr "No Coupons found in trash"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:337
 msgid "Parent Coupon"
 msgstr "Parent Coupon"
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:339
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "在这里添加让客户使用的优惠券"
@@ -5769,21 +5562,21 @@ msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
 msgstr "你{order_date}日在{site_title}下的订单已完成 - 下载文件"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:146
-#: includes/emails/class-wc-email-new-order.php:133
+#: includes/emails/class-wc-email-customer-completed-order.php:147
+#: includes/emails/class-wc-email-new-order.php:134
 msgid "Subject"
 msgstr "主题"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:153
-#: includes/emails/class-wc-email-new-order.php:140
+#: includes/emails/class-wc-email-customer-completed-order.php:154
+#: includes/emails/class-wc-email-new-order.php:141
 msgid "Email Heading"
 msgstr "Email账单"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:160
+#: includes/emails/class-wc-email-customer-completed-order.php:161
 msgid "Subject (downloadable)"
 msgstr "按标题"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:167
+#: includes/emails/class-wc-email-customer-completed-order.php:168
 msgid "Email Heading (downloadable)"
 msgstr "电子邮件地址："
 
@@ -5813,11 +5606,11 @@ msgstr "你{order_date}日在{site_title}的订单"
 msgid "Order {order_number} details"
 msgstr "新添订单"
 
-#: includes/emails/class-wc-email-customer-invoice.php:160
+#: includes/emails/class-wc-email-customer-invoice.php:161
 msgid "Email subject (paid)"
 msgstr "按标题"
 
-#: includes/emails/class-wc-email-customer-invoice.php:167
+#: includes/emails/class-wc-email-customer-invoice.php:168
 msgid "Email heading (paid)"
 msgstr "电子邮件地址："
 
@@ -5907,23 +5700,23 @@ msgstr "新客户订单"
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
 msgstr "[{site_title}] 新订单  ({order_number}) - {order_date}"
 
-#: includes/emails/class-wc-email-new-order.php:126
+#: includes/emails/class-wc-email-new-order.php:127
 msgid "Recipient(s)"
 msgstr "电子邮件收件人选项"
 
-#: includes/emails/class-wc-email-new-order.php:128
+#: includes/emails/class-wc-email-new-order.php:129
 msgid ""
 "Enter recipients (comma separated) for this email. Defaults to "
 "<code>%s</code>."
 msgstr "输入此邮件的收件人(用逗号隔开),默认<code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:135
+#: includes/emails/class-wc-email-new-order.php:136
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr "此控制邮件的主题行,留空将使用默认的主题:<code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:142
+#: includes/emails/class-wc-email-new-order.php:143
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
@@ -6403,10 +6196,8 @@ msgid "Enable logging"
 msgstr "启用日志记录"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:237
-msgid ""
-"Log PayPal events, such as IPN requests, inside "
-"<code>woocommerce/logs/paypal-%s.txt</code>"
-msgstr "记录贝宝事件，例如IPN请求，在 <code>woocommerce/logs/paypal-%s.txt</code>中。"
+msgid "Log PayPal events, such as IPN requests, inside <code>%s</code>"
+msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:370
 msgid "Shipping via"
@@ -6855,6 +6646,12 @@ msgstr "运费已更新。"
 msgid "Invalid order. If you have an account please log in and try again."
 msgstr "无效订单。请登陆账户后尝试。   "
 
+#: includes/shortcodes/class-wc-shortcode-checkout.php:91
+#: includes/shortcodes/class-wc-shortcode-my-account.php:111
+#: templates/checkout/thankyou.php:30
+msgid "My Account"
+msgstr "我的帐户"
+
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
@@ -7088,62 +6885,66 @@ msgid "New Zealand Dollar"
 msgstr "新西兰元 (&#36;)"
 
 #: includes/wc-core-functions.php:193
+msgid "Paraguayan Guaraní"
+msgstr ""
+
+#: includes/wc-core-functions.php:194
 msgid "Philippine Pesos"
 msgstr "菲律宾比索"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Polish Zloty"
 msgstr "波兰兹罗提"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Pounds Sterling"
 msgstr "英镑 (&pound;)"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Romanian Leu"
 msgstr "罗马尼亚"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Russian Ruble"
 msgstr "Russian Ruble"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "Singapore Dollar"
 msgstr "新加坡元(&#36;)"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "South African rand"
 msgstr "南非兰特 (R)"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swedish Krona"
 msgstr "瑞典克郎"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Swiss Franc"
 msgstr "瑞士法郎"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Taiwan New Dollars"
 msgstr "新台币"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Thai Baht"
 msgstr "泰铢"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "Turkish Lira"
 msgstr "土耳其里拉 (TL)"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "US Dollars"
 msgstr "美元 (&#36;)"
 
-#: includes/wc-core-functions.php:206
+#: includes/wc-core-functions.php:207
 msgid "Vietnamese Dong"
 msgstr "Vietnamese Dong"
 
-#: includes/wc-core-functions.php:207
+#: includes/wc-core-functions.php:208
 msgid "Egyptian Pound"
 msgstr ""
 
@@ -7177,7 +6978,7 @@ msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr ""
 
-#: includes/wc-product-functions.php:234
+#: includes/wc-product-functions.php:235
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "未分类"
@@ -7229,41 +7030,41 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr "首页"
 
-#: includes/wc-template-functions.php:1558
+#: includes/wc-template-functions.php:1549
 msgid "Order Again"
 msgstr "再订货"
 
-#: includes/wc-template-functions.php:1653
+#: includes/wc-template-functions.php:1644
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "选择国家&hellip;"
 
-#: includes/wc-template-functions.php:1660
+#: includes/wc-template-functions.php:1651
 msgid "Update country"
 msgstr "%d 个插件更新"
 
-#: includes/wc-template-functions.php:1710
+#: includes/wc-template-functions.php:1701
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "选择地区&hellip;"
 
-#: includes/wc-template-functions.php:1851
+#: includes/wc-template-functions.php:1842
 msgid "Search for:"
 msgstr "搜索："
 
-#: includes/wc-template-functions.php:1852
+#: includes/wc-template-functions.php:1843
 msgid "Search for products"
 msgstr "搜索产品"
 
-#: includes/wc-template-functions.php:1853
+#: includes/wc-template-functions.php:1844
 msgid "Search"
 msgstr "搜索"
 
-#: includes/wc-term-functions.php:135
+#: includes/wc-term-functions.php:146
 msgid "Select a category"
 msgstr "选择一个类别"
 
-#: includes/wc-term-functions.php:139
+#: includes/wc-term-functions.php:149
 msgid "Uncategorized"
 msgstr "未分类"
 
@@ -7426,6 +7227,11 @@ msgstr "排序方式为："
 #: includes/widgets/class-wc-widget-product-categories.php:38
 msgid "Category Order"
 msgstr "类别排序"
+
+#: includes/widgets/class-wc-widget-product-categories.php:39
+#: templates/single-product-reviews.php:62
+msgid "Name"
+msgstr "名称"
 
 #: includes/widgets/class-wc-widget-product-categories.php:45
 msgid "Show as dropdown"
@@ -7706,6 +7512,10 @@ msgstr "地区/县"
 msgid "City"
 msgstr "城市"
 
+#: templates/cart/shipping-calculator.php:80
+msgid "Postcode / Zip"
+msgstr "邮政编码"
+
 #: templates/cart/shipping-calculator.php:85
 msgid "Update Totals"
 msgstr "更新总计"
@@ -7969,13 +7779,13 @@ msgstr "要重置您的密码，请打开下面的链接："
 msgid "Click here to reset your password"
 msgstr "点这里输入你的代码"
 
-#: templates/emails/email-addresses.php:18
-#: templates/emails/plain/email-addresses.php:12
+#: templates/emails/email-addresses.php:20
+#: templates/emails/plain/email-addresses.php:14
 msgid "Billing address"
 msgstr "账单地址"
 
-#: templates/emails/email-addresses.php:28
-#: templates/emails/plain/email-addresses.php:17
+#: templates/emails/email-addresses.php:30
+#: templates/emails/plain/email-addresses.php:19
 msgid "Shipping address"
 msgstr "送货地址"
 
@@ -8151,23 +7961,31 @@ msgstr "名"
 msgid "Email address"
 msgstr "电邮地址"
 
-#: templates/myaccount/form-edit-account.php:33
+#: templates/myaccount/form-edit-account.php:34
+msgid "Password (leave blank to leave unchanged)"
+msgstr "密码(不修改请放空)"
+
+#: templates/myaccount/form-edit-account.php:38
+msgid "Confirm new password"
+msgstr "确认新密码"
+
+#: templates/myaccount/form-edit-account.php:44
 msgid "Password Change"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:36
+#: templates/myaccount/form-edit-account.php:47
 msgid "Current Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:40
+#: templates/myaccount/form-edit-account.php:51
 msgid "New Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:44
+#: templates/myaccount/form-edit-account.php:55
 msgid "Confirm New Password"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:50
+#: templates/myaccount/form-edit-account.php:61
 msgid "Save changes"
 msgstr "保存"
 

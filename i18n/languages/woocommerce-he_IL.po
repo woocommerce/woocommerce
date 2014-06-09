@@ -1,19 +1,20 @@
 # 
 # Translators:
-# arielk <relklik@gmail.com>, 2014
+# Ariel Klikstein <relklik@gmail.com>, 2014
+# hannit <hannit@codeart.co.il>, 2014
 # joelbal <jbalbachan@gmail.com>, 2014
-# josh_marom <josh@josh.co.il>, 2014
+# Josh Marom <josh@josh.co.il>, 2014
 # roidayan <roi.dayan@gmail.com>, 2014
-# ronshe <ronny.sherer@gmail.com>, 2014
-# shoresh319, 2014
+# Ronny Sherer <ronny.sherer@gmail.com>, 2014
+# Seggev Shoresh, 2014
 # Yakir Gottesman <yakir@go-press.co.il>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-05-22 10:45:21+00:00\n"
-"PO-Revision-Date: 2014-05-28 11:32+0000\n"
-"Last-Translator: shoresh319\n"
+"POT-Creation-Date: 2014-06-03 15:13:58+00:00\n"
+"PO-Revision-Date: 2014-06-05 18:21+0000\n"
+"Last-Translator: hannit <hannit@codeart.co.il>\n"
 "Language-Team: Hebrew (Israel) (http://www.transifex.com/projects/p/woocommerce/language/he_IL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,52 +22,981 @@ msgstr ""
 "Language: he_IL\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: assets/js/admin/editor_plugin_lang.php:5
-msgid "Insert Shortcode"
-msgstr "הכנס shortcode"
+#: i18n/countries.php:16
+msgid "Afghanistan"
+msgstr "Afghanistan"
 
-#: assets/js/admin/editor_plugin_lang.php:6
-msgid "Product price/cart button"
-msgstr "מחיר מוצר/כפתור סל הקניות"
+#: i18n/countries.php:17
+msgid "&#197;land Islands"
+msgstr "&#197;land Islands"
 
-#: assets/js/admin/editor_plugin_lang.php:7
-msgid "Product by SKU/ID"
-msgstr "מוצר לפי מק&quot;ט/מזהה"
+#: i18n/countries.php:18
+msgid "Albania"
+msgstr "Albania"
 
-#: assets/js/admin/editor_plugin_lang.php:8
-msgid "Products by SKU/ID"
-msgstr "מוצרים לפי מק&quot;ט/מזהה"
+#: i18n/countries.php:19
+msgid "Algeria"
+msgstr "Algeria"
 
-#: assets/js/admin/editor_plugin_lang.php:9
-msgid "Product categories"
-msgstr "קטגוריות מוצר"
+#: i18n/countries.php:20
+msgid "Andorra"
+msgstr "Andorra"
 
-#: assets/js/admin/editor_plugin_lang.php:10
-msgid "Products by category slug"
-msgstr "מוצרים לפי כתובת קטגוריה"
+#: i18n/countries.php:21
+msgid "Angola"
+msgstr "Angola"
 
-#: assets/js/admin/editor_plugin_lang.php:11
-msgid "Recent products"
-msgstr "מוצרים אחרונים"
+#: i18n/countries.php:22
+msgid "Anguilla"
+msgstr "Anguilla"
 
-#: assets/js/admin/editor_plugin_lang.php:12
-msgid "Featured products"
-msgstr "מוצרים מומלצים"
+#: i18n/countries.php:23
+msgid "Antarctica"
+msgstr "Antarctica"
 
-#: assets/js/admin/editor_plugin_lang.php:13
-msgid "Shop Messages"
-msgstr "הודעות החנות"
+#: i18n/countries.php:24
+msgid "Antigua and Barbuda"
+msgstr "Antigua and Barbuda"
 
-#: assets/js/admin/editor_plugin_lang.php:14
-msgid "Order tracking"
-msgstr "מעקב הזמנה"
+#: i18n/countries.php:25
+msgid "Argentina"
+msgstr "Argentina"
 
-#: assets/js/admin/editor_plugin_lang.php:15
-#: includes/shortcodes/class-wc-shortcode-checkout.php:91
-#: includes/shortcodes/class-wc-shortcode-my-account.php:111
-#: templates/checkout/thankyou.php:30
-msgid "My Account"
-msgstr "החשבון שלי"
+#: i18n/countries.php:26
+msgid "Armenia"
+msgstr "Armenia"
+
+#: i18n/countries.php:27
+msgid "Aruba"
+msgstr "Aruba"
+
+#: i18n/countries.php:28
+msgid "Australia"
+msgstr "Australia"
+
+#: i18n/countries.php:29
+msgid "Austria"
+msgstr "Austria"
+
+#: i18n/countries.php:30
+msgid "Azerbaijan"
+msgstr "Azerbaijan"
+
+#: i18n/countries.php:31
+msgid "Bahamas"
+msgstr "איי בהאמה"
+
+#: i18n/countries.php:32
+msgid "Bahrain"
+msgstr "בחריין"
+
+#: i18n/countries.php:33
+msgid "Bangladesh"
+msgstr ""
+
+#: i18n/countries.php:34
+msgid "Barbados"
+msgstr "ברבדוס"
+
+#: i18n/countries.php:35
+msgid "Belarus"
+msgstr "בלרוס"
+
+#: i18n/countries.php:36
+msgid "Belgium"
+msgstr "בלגיה"
+
+#: i18n/countries.php:37
+msgid "Belau"
+msgstr ""
+
+#: i18n/countries.php:38
+msgid "Belize"
+msgstr "בליז"
+
+#: i18n/countries.php:39
+msgid "Benin"
+msgstr "בנין"
+
+#: i18n/countries.php:40
+msgid "Bermuda"
+msgstr "ברמודה"
+
+#: i18n/countries.php:41
+msgid "Bhutan"
+msgstr "בהוטן"
+
+#: i18n/countries.php:42
+msgid "Bolivia"
+msgstr "בוליביה"
+
+#: i18n/countries.php:43
+msgid "Bonaire, Saint Eustatius and Saba"
+msgstr ""
+
+#: i18n/countries.php:44
+msgid "Bosnia and Herzegovina"
+msgstr "בוסניה והרצגובינה"
+
+#: i18n/countries.php:45
+msgid "Botswana"
+msgstr "בוטסואנה"
+
+#: i18n/countries.php:46
+msgid "Bouvet Island"
+msgstr ""
+
+#: i18n/countries.php:47
+msgid "Brazil"
+msgstr "ברזיל"
+
+#: i18n/countries.php:48
+msgid "British Indian Ocean Territory"
+msgstr "הטריטוריה הבריטית באוקינוס ההודי"
+
+#: i18n/countries.php:49
+msgid "British Virgin Islands"
+msgstr "איי בתולה בריטית"
+
+#: i18n/countries.php:50
+msgid "Brunei"
+msgstr "ברוניי"
+
+#: i18n/countries.php:51
+msgid "Bulgaria"
+msgstr "בולגריה"
+
+#: i18n/countries.php:52
+msgid "Burkina Faso"
+msgstr "בורקינה פאסו"
+
+#: i18n/countries.php:53
+msgid "Burundi"
+msgstr "בורונדי"
+
+#: i18n/countries.php:54
+msgid "Cambodia"
+msgstr "קמבודיה"
+
+#: i18n/countries.php:55
+msgid "Cameroon"
+msgstr "קמרון"
+
+#: i18n/countries.php:56
+msgid "Canada"
+msgstr "קנדה"
+
+#: i18n/countries.php:57
+msgid "Cape Verde"
+msgstr "קייפ ורדה"
+
+#: i18n/countries.php:58
+msgid "Cayman Islands"
+msgstr "איי קיימן"
+
+#: i18n/countries.php:59
+msgid "Central African Republic"
+msgstr "הרפובליקה המרכז אפריקנית"
+
+#: i18n/countries.php:60
+msgid "Chad"
+msgstr "צ'אד"
+
+#: i18n/countries.php:61
+msgid "Chile"
+msgstr "צ'ילה"
+
+#: i18n/countries.php:62
+msgid "China"
+msgstr "סין"
+
+#: i18n/countries.php:63
+msgid "Christmas Island"
+msgstr "אי חג המולד"
+
+#: i18n/countries.php:64
+msgid "Cocos (Keeling) Islands"
+msgstr ""
+
+#: i18n/countries.php:65
+msgid "Colombia"
+msgstr "קולומביה"
+
+#: i18n/countries.php:66
+msgid "Comoros"
+msgstr "איי קומורו"
+
+#: i18n/countries.php:67
+msgid "Congo (Brazzaville)"
+msgstr "קונגו (ברזוויל)"
+
+#: i18n/countries.php:68
+msgid "Congo (Kinshasa)"
+msgstr "קונגו (קינשאסה)"
+
+#: i18n/countries.php:69
+msgid "Cook Islands"
+msgstr "איי קוק"
+
+#: i18n/countries.php:70
+msgid "Costa Rica"
+msgstr "קוסטה ריקה"
+
+#: i18n/countries.php:71
+msgid "Croatia"
+msgstr "קרואטיה"
+
+#: i18n/countries.php:72
+msgid "Cuba"
+msgstr "תת-מחוז קובה"
+
+#: i18n/countries.php:73
+msgid "Cura&Ccedil;ao"
+msgstr "קוראסאו"
+
+#: i18n/countries.php:74
+msgid "Cyprus"
+msgstr "קפריסין"
+
+#: i18n/countries.php:75
+msgid "Czech Republic"
+msgstr "הרפובליקה הצ'כיה"
+
+#: i18n/countries.php:76
+msgid "Denmark"
+msgstr "דנמרק"
+
+#: i18n/countries.php:77
+msgid "Djibouti"
+msgstr "ג'יבוטי"
+
+#: i18n/countries.php:78
+msgid "Dominica"
+msgstr "דומיניקה"
+
+#: i18n/countries.php:79
+msgid "Dominican Republic"
+msgstr "הרפובליקה הדומיניקנית"
+
+#: i18n/countries.php:80
+msgid "Ecuador"
+msgstr "אקוודור"
+
+#: i18n/countries.php:81
+msgid "Egypt"
+msgstr "מצרים"
+
+#: i18n/countries.php:82
+msgid "El Salvador"
+msgstr "אל סלוודור"
+
+#: i18n/countries.php:83
+msgid "Equatorial Guinea"
+msgstr "גינאה המשוונית"
+
+#: i18n/countries.php:84
+msgid "Eritrea"
+msgstr "אריתריאה"
+
+#: i18n/countries.php:85
+msgid "Estonia"
+msgstr "אסטוניה"
+
+#: i18n/countries.php:86
+msgid "Ethiopia"
+msgstr "אתיופיה"
+
+#: i18n/countries.php:87
+msgid "Falkland Islands"
+msgstr "איי פוקלנד"
+
+#: i18n/countries.php:88
+msgid "Faroe Islands"
+msgstr "איי פארו"
+
+#: i18n/countries.php:89
+msgid "Fiji"
+msgstr "פיג'י"
+
+#: i18n/countries.php:90
+msgid "Finland"
+msgstr "פינלנד"
+
+#: i18n/countries.php:91
+msgid "France"
+msgstr "צרפת"
+
+#: i18n/countries.php:92
+msgid "French Guiana"
+msgstr "גיאנה הצרפתית"
+
+#: i18n/countries.php:93
+msgid "French Polynesia"
+msgstr "פולינזיה הצרפתית"
+
+#: i18n/countries.php:94
+msgid "French Southern Territories"
+msgstr "הטריטוריות הדרומיות של צרפת"
+
+#: i18n/countries.php:95
+msgid "Gabon"
+msgstr "גאבון"
+
+#: i18n/countries.php:96
+msgid "Gambia"
+msgstr "גמביה"
+
+#: i18n/countries.php:97 i18n/states/US.php:23
+msgid "Georgia"
+msgstr ""
+
+#: i18n/countries.php:98
+msgid "Germany"
+msgstr "גרמניה"
+
+#: i18n/countries.php:99
+msgid "Ghana"
+msgstr "גאנה"
+
+#: i18n/countries.php:100
+msgid "Gibraltar"
+msgstr "גיברלטר"
+
+#: i18n/countries.php:101
+msgid "Greece"
+msgstr "יוון"
+
+#: i18n/countries.php:102
+msgid "Greenland"
+msgstr "גרינלנד"
+
+#: i18n/countries.php:103
+msgid "Grenada"
+msgstr "גרנדה"
+
+#: i18n/countries.php:104
+msgid "Guadeloupe"
+msgstr "גואדאלופ"
+
+#: i18n/countries.php:105
+msgid "Guatemala"
+msgstr "גוואטמלה"
+
+#: i18n/countries.php:106
+msgid "Guernsey"
+msgstr "גרנזי"
+
+#: i18n/countries.php:107
+msgid "Guinea"
+msgstr "גינאה"
+
+#: i18n/countries.php:108
+msgid "Guinea-Bissau"
+msgstr "גינאה ביסאו"
+
+#: i18n/countries.php:109
+msgid "Guyana"
+msgstr "גיאנה"
+
+#: i18n/countries.php:110
+msgid "Haiti"
+msgstr "האיטי"
+
+#: i18n/countries.php:111
+msgid "Heard Island and McDonald Islands"
+msgstr "האי הרד ואיי מקדונלד"
+
+#: i18n/countries.php:112
+msgid "Honduras"
+msgstr "הונדורס"
+
+#: i18n/countries.php:113
+msgid "Hong Kong"
+msgstr "הונג קונג"
+
+#: i18n/countries.php:114
+msgid "Hungary"
+msgstr "הונגריה"
+
+#: i18n/countries.php:115
+msgid "Iceland"
+msgstr "איסלנד"
+
+#: i18n/countries.php:116
+msgid "India"
+msgstr "הודו"
+
+#: i18n/countries.php:117
+msgid "Indonesia"
+msgstr "אינדונזיה"
+
+#: i18n/countries.php:118
+msgid "Iran"
+msgstr "איראן"
+
+#: i18n/countries.php:119
+msgid "Iraq"
+msgstr "עירק"
+
+#: i18n/countries.php:120
+msgid "Republic of Ireland"
+msgstr "רפובליקה של אירלנד"
+
+#: i18n/countries.php:121
+msgid "Isle of Man"
+msgstr "האי מאן"
+
+#: i18n/countries.php:122
+msgid "Israel"
+msgstr "ישראל"
+
+#: i18n/countries.php:123
+msgid "Italy"
+msgstr "איטליה"
+
+#: i18n/countries.php:124
+msgid "Ivory Coast"
+msgstr "חוף שנהב"
+
+#: i18n/countries.php:125
+msgid "Jamaica"
+msgstr "ג'מאיקה"
+
+#: i18n/countries.php:126
+msgid "Japan"
+msgstr "יפן"
+
+#: i18n/countries.php:127
+msgid "Jersey"
+msgstr "ג'רזי"
+
+#: i18n/countries.php:128
+msgid "Jordan"
+msgstr "ירדן"
+
+#: i18n/countries.php:129
+msgid "Kazakhstan"
+msgstr "קזחסטן"
+
+#: i18n/countries.php:130
+msgid "Kenya"
+msgstr "קניה"
+
+#: i18n/countries.php:131
+msgid "Kiribati"
+msgstr "קיריבטי"
+
+#: i18n/countries.php:132
+msgid "Kuwait"
+msgstr "כווית"
+
+#: i18n/countries.php:133
+msgid "Kyrgyzstan"
+msgstr "קירגיסטן"
+
+#: i18n/countries.php:134
+msgid "Laos"
+msgstr "לאוס"
+
+#: i18n/countries.php:135
+msgid "Latvia"
+msgstr "לטביה"
+
+#: i18n/countries.php:136
+msgid "Lebanon"
+msgstr "לבנון"
+
+#: i18n/countries.php:137
+msgid "Lesotho"
+msgstr "לסוטו"
+
+#: i18n/countries.php:138
+msgid "Liberia"
+msgstr "ליבריה"
+
+#: i18n/countries.php:139
+msgid "Libya"
+msgstr "לוב"
+
+#: i18n/countries.php:140
+msgid "Liechtenstein"
+msgstr "ליכטנשטיין"
+
+#: i18n/countries.php:141
+msgid "Lithuania"
+msgstr ""
+
+#: i18n/countries.php:142
+msgid "Luxembourg"
+msgstr "לוקסמבורג"
+
+#: i18n/countries.php:143
+msgid "Macao S.A.R., China"
+msgstr "מקאו SAR, סין"
+
+#: i18n/countries.php:144
+msgid "Macedonia"
+msgstr "מקדוניה"
+
+#: i18n/countries.php:145
+msgid "Madagascar"
+msgstr "מדגסקר"
+
+#: i18n/countries.php:146
+msgid "Malawi"
+msgstr "מלאווי"
+
+#: i18n/countries.php:147
+msgid "Malaysia"
+msgstr "מלזיה"
+
+#: i18n/countries.php:148
+msgid "Maldives"
+msgstr "האיים המלדיביים"
+
+#: i18n/countries.php:149
+msgid "Mali"
+msgstr "מאלי"
+
+#: i18n/countries.php:150
+msgid "Malta"
+msgstr "מאלטה"
+
+#: i18n/countries.php:151
+msgid "Marshall Islands"
+msgstr "איי מרשל"
+
+#: i18n/countries.php:152
+msgid "Martinique"
+msgstr "מרטיניק"
+
+#: i18n/countries.php:153
+msgid "Mauritania"
+msgstr "מאוריטניה"
+
+#: i18n/countries.php:154
+msgid "Mauritius"
+msgstr "מאוריציוס"
+
+#: i18n/countries.php:155
+msgid "Mayotte"
+msgstr "מאיוט"
+
+#: i18n/countries.php:156
+msgid "Mexico"
+msgstr "מקסיקו"
+
+#: i18n/countries.php:157
+msgid "Micronesia"
+msgstr "מיקרונזיה"
+
+#: i18n/countries.php:158
+msgid "Moldova"
+msgstr "מולדובה"
+
+#: i18n/countries.php:159
+msgid "Monaco"
+msgstr "מונאקו"
+
+#: i18n/countries.php:160
+msgid "Mongolia"
+msgstr "מונגוליה"
+
+#: i18n/countries.php:161
+msgid "Montenegro"
+msgstr "מונטנגרו"
+
+#: i18n/countries.php:162
+msgid "Montserrat"
+msgstr "מונסראט"
+
+#: i18n/countries.php:163
+msgid "Morocco"
+msgstr "מרוקו"
+
+#: i18n/countries.php:164
+msgid "Mozambique"
+msgstr "מוזמביק"
+
+#: i18n/countries.php:165
+msgid "Myanmar"
+msgstr ""
+
+#: i18n/countries.php:166
+msgid "Namibia"
+msgstr "נמיביה"
+
+#: i18n/countries.php:167
+msgid "Nauru"
+msgstr ""
+
+#: i18n/countries.php:168
+msgid "Nepal"
+msgstr "נפאל"
+
+#: i18n/countries.php:169
+msgid "Netherlands"
+msgstr "הולנד"
+
+#: i18n/countries.php:170
+msgid "Netherlands Antilles"
+msgstr "האנטילים ההולנדיים"
+
+#: i18n/countries.php:171
+msgid "New Caledonia"
+msgstr "קלדוניה החדשה"
+
+#: i18n/countries.php:172
+msgid "New Zealand"
+msgstr "ניו זילנד"
+
+#: i18n/countries.php:173
+msgid "Nicaragua"
+msgstr "ניקרגוואה"
+
+#: i18n/countries.php:174
+msgid "Niger"
+msgstr "ניז'ר"
+
+#: i18n/countries.php:175
+msgid "Nigeria"
+msgstr "ניגריה"
+
+#: i18n/countries.php:176
+msgid "Niue"
+msgstr ""
+
+#: i18n/countries.php:177
+msgid "Norfolk Island"
+msgstr "האי נורפולק"
+
+#: i18n/countries.php:178
+msgid "North Korea"
+msgstr "צפון קוריאה"
+
+#: i18n/countries.php:179
+msgid "Norway"
+msgstr "נורווגיה"
+
+#: i18n/countries.php:180
+msgid "Oman"
+msgstr "עומאן"
+
+#: i18n/countries.php:181
+msgid "Pakistan"
+msgstr "פקיסטן"
+
+#: i18n/countries.php:182
+msgid "Palestinian Territory"
+msgstr "השטחים הפלשתינים"
+
+#: i18n/countries.php:183
+msgid "Panama"
+msgstr "פנמה"
+
+#: i18n/countries.php:184
+msgid "Papua New Guinea"
+msgstr "פפואה-גינאה החדשה"
+
+#: i18n/countries.php:185
+msgid "Paraguay"
+msgstr "פרגוואי"
+
+#: i18n/countries.php:186
+msgid "Peru"
+msgstr "פרו"
+
+#: i18n/countries.php:187
+msgid "Philippines"
+msgstr "פיליפינים"
+
+#: i18n/countries.php:188
+msgid "Pitcairn"
+msgstr "פיטקרן"
+
+#: i18n/countries.php:189
+msgid "Poland"
+msgstr "פולין"
+
+#: i18n/countries.php:190
+msgid "Portugal"
+msgstr "פורטוגל"
+
+#: i18n/countries.php:191
+msgid "Qatar"
+msgstr "קטר"
+
+#: i18n/countries.php:192
+msgid "Reunion"
+msgstr "ראוניון"
+
+#: i18n/countries.php:193
+msgid "Romania"
+msgstr "רומניה"
+
+#: i18n/countries.php:194
+msgid "Russia"
+msgstr "רוסיה"
+
+#: i18n/countries.php:195
+msgid "Rwanda"
+msgstr "רואנדה"
+
+#: i18n/countries.php:196
+msgid "Saint Barth&eacute;lemy"
+msgstr "סנט ברתלמי"
+
+#: i18n/countries.php:197
+msgid "Saint Helena"
+msgstr "סנט הלנה"
+
+#: i18n/countries.php:198
+msgid "Saint Kitts and Nevis"
+msgstr "סנט קיטס ונוויס"
+
+#: i18n/countries.php:199
+msgid "Saint Lucia"
+msgstr "סנט לוצ'יה"
+
+#: i18n/countries.php:200
+msgid "Saint Martin (French part)"
+msgstr "סנט מרטין (חלק צרפתי)"
+
+#: i18n/countries.php:201
+msgid "Saint Martin (Dutch part)"
+msgstr "סנט מרטין (חלק הולנדי)"
+
+#: i18n/countries.php:202
+msgid "Saint Pierre and Miquelon"
+msgstr "סנט פייר ומיקלון"
+
+#: i18n/countries.php:203
+msgid "Saint Vincent and the Grenadines"
+msgstr "סנט וינסנט והגרנדינים"
+
+#: i18n/countries.php:204
+msgid "San Marino"
+msgstr "סן מרינו"
+
+#: i18n/countries.php:205
+msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+msgstr ""
+
+#: i18n/countries.php:206
+msgid "Saudi Arabia"
+msgstr "ערב הסעודית"
+
+#: i18n/countries.php:207
+msgid "Senegal"
+msgstr "סנגל"
+
+#: i18n/countries.php:208
+msgid "Serbia"
+msgstr "סרביה"
+
+#: i18n/countries.php:209
+msgid "Seychelles"
+msgstr "איי סיישל"
+
+#: i18n/countries.php:210
+msgid "Sierra Leone"
+msgstr "סיירה ליאון"
+
+#: i18n/countries.php:211
+msgid "Singapore"
+msgstr "סינגפור"
+
+#: i18n/countries.php:212
+msgid "Slovakia"
+msgstr "סלובקיה"
+
+#: i18n/countries.php:213
+msgid "Slovenia"
+msgstr ""
+
+#: i18n/countries.php:214
+msgid "Solomon Islands"
+msgstr "איי שלמה"
+
+#: i18n/countries.php:215
+msgid "Somalia"
+msgstr "סומליה"
+
+#: i18n/countries.php:216
+msgid "South Africa"
+msgstr "דרום אפריקה"
+
+#: i18n/countries.php:217
+msgid "South Georgia/Sandwich Islands"
+msgstr "ג'ורג'יה הדרומית / איים סנדוויץ'"
+
+#: i18n/countries.php:218
+msgid "South Korea"
+msgstr "דרום קוריאה"
+
+#: i18n/countries.php:219
+msgid "South Sudan"
+msgstr "דרום סודן"
+
+#: i18n/countries.php:220
+msgid "Spain"
+msgstr "ספרד"
+
+#: i18n/countries.php:221
+msgid "Sri Lanka"
+msgstr "סרי לנקה"
+
+#: i18n/countries.php:222
+msgid "Sudan"
+msgstr "סודן"
+
+#: i18n/countries.php:223
+msgid "Suriname"
+msgstr "סורינם"
+
+#: i18n/countries.php:224
+msgid "Svalbard and Jan Mayen"
+msgstr ""
+
+#: i18n/countries.php:225
+msgid "Swaziland"
+msgstr "סווזילנד"
+
+#: i18n/countries.php:226
+msgid "Sweden"
+msgstr "שודיה"
+
+#: i18n/countries.php:227
+msgid "Switzerland"
+msgstr "שוויץ"
+
+#: i18n/countries.php:228
+msgid "Syria"
+msgstr "סוריה"
+
+#: i18n/countries.php:229
+msgid "Taiwan"
+msgstr "טייוואן"
+
+#: i18n/countries.php:230
+msgid "Tajikistan"
+msgstr "טג'יקיסטן"
+
+#: i18n/countries.php:231
+msgid "Tanzania"
+msgstr "טנזניה"
+
+#: i18n/countries.php:232
+msgid "Thailand"
+msgstr "תאילנד"
+
+#: i18n/countries.php:233
+msgid "Timor-Leste"
+msgstr "מזרח טימור"
+
+#: i18n/countries.php:234
+msgid "Togo"
+msgstr "טוגו"
+
+#: i18n/countries.php:235
+msgid "Tokelau"
+msgstr "טוקלאו"
+
+#: i18n/countries.php:236
+msgid "Tonga"
+msgstr "טונגה"
+
+#: i18n/countries.php:237
+msgid "Trinidad and Tobago"
+msgstr ""
+
+#: i18n/countries.php:238
+msgid "Tunisia"
+msgstr "טוניסיה"
+
+#: i18n/countries.php:239
+msgid "Turkey"
+msgstr "טורקיה"
+
+#: i18n/countries.php:240
+msgid "Turkmenistan"
+msgstr "טורקמניסטן"
+
+#: i18n/countries.php:241
+msgid "Turks and Caicos Islands"
+msgstr "איי טורקס וקייקוס"
+
+#: i18n/countries.php:242
+msgid "Tuvalu"
+msgstr "טובאלו"
+
+#: i18n/countries.php:243
+msgid "Uganda"
+msgstr "אוגנדה"
+
+#: i18n/countries.php:244
+msgid "Ukraine"
+msgstr "אוקראינה"
+
+#: i18n/countries.php:245
+msgid "United Arab Emirates"
+msgstr "איחוד האמירויות"
+
+#: i18n/countries.php:246
+msgid "United Kingdom (UK)"
+msgstr "United Kingdom (UK)"
+
+#: i18n/countries.php:247
+msgid "United States (US)"
+msgstr "United States (US)"
+
+#: i18n/countries.php:248
+msgid "Uruguay"
+msgstr "אורוגוואי"
+
+#: i18n/countries.php:249
+msgid "Uzbekistan"
+msgstr "אוזבקיסטן"
+
+#: i18n/countries.php:250
+msgid "Vanuatu"
+msgstr "ונאוטו"
+
+#: i18n/countries.php:251
+msgid "Vatican"
+msgstr "הוותיקן"
+
+#: i18n/countries.php:252
+msgid "Venezuela"
+msgstr "ונצואלה"
+
+#: i18n/countries.php:253
+msgid "Vietnam"
+msgstr "ויטנאם"
+
+#: i18n/countries.php:254
+msgid "Wallis and Futuna"
+msgstr "איי ווליס ופוטונה"
+
+#: i18n/countries.php:255
+msgid "Western Sahara"
+msgstr "מערב הסהרה"
+
+#: i18n/countries.php:256
+msgid "Western Samoa"
+msgstr "סמואה המערבית"
+
+#: i18n/countries.php:257
+msgid "Yemen"
+msgstr "תימן"
+
+#: i18n/countries.php:258
+msgid "Zambia"
+msgstr "זמביה"
+
+#: i18n/countries.php:259
+msgid "Zimbabwe"
+msgstr "זימבבואה"
 
 #: i18n/states/AU.php:13
 msgid "Australian Capital Territory"
@@ -102,27 +1032,27 @@ msgstr "מערב אוסטרליה"
 
 #: i18n/states/BD.php:13
 msgid "Bagerhat"
-msgstr "בג'ראט"
+msgstr ""
 
 #: i18n/states/BD.php:14
 msgid "Bandarban"
-msgstr "בנדרבן"
+msgstr ""
 
 #: i18n/states/BD.php:15
 msgid "Barguna"
-msgstr "בארגונה"
+msgstr ""
 
 #: i18n/states/BD.php:16
 msgid "Barisal"
-msgstr "באריסל"
+msgstr ""
 
 #: i18n/states/BD.php:17
 msgid "Bhola"
-msgstr "בולה"
+msgstr ""
 
 #: i18n/states/BD.php:18
 msgid "Bogra"
-msgstr "בוגרה"
+msgstr ""
 
 #: i18n/states/BD.php:19
 msgid "Brahmanbaria"
@@ -130,51 +1060,51 @@ msgstr ""
 
 #: i18n/states/BD.php:20
 msgid "Chandpur"
-msgstr "צ'אנדפור"
+msgstr ""
 
 #: i18n/states/BD.php:21
 msgid "Chittagong"
-msgstr "צ'יטגונג"
+msgstr ""
 
 #: i18n/states/BD.php:22
 msgid "Chuadanga"
-msgstr "צ'ואדנגה"
+msgstr ""
 
 #: i18n/states/BD.php:23
 msgid "Comilla"
-msgstr "קומילה"
+msgstr ""
 
 #: i18n/states/BD.php:24
 msgid "Cox's Bazar"
-msgstr "קוקס בזאר"
+msgstr ""
 
 #: i18n/states/BD.php:25
 msgid "Dhaka"
-msgstr "דאקה"
+msgstr ""
 
 #: i18n/states/BD.php:26
 msgid "Dinajpur"
-msgstr ""
+msgstr "Dinajpur"
 
 #: i18n/states/BD.php:27
 msgid "Faridpur "
-msgstr "פארידפור"
+msgstr ""
 
 #: i18n/states/BD.php:28
 msgid "Feni"
-msgstr "פני"
+msgstr ""
 
 #: i18n/states/BD.php:29
 msgid "Gaibandha"
-msgstr "גאיבנדה"
+msgstr ""
 
 #: i18n/states/BD.php:30
 msgid "Gazipur"
-msgstr "גזיפור"
+msgstr ""
 
 #: i18n/states/BD.php:31
 msgid "Gopalganj"
-msgstr ""
+msgstr "Gopalganj"
 
 #: i18n/states/BD.php:32
 msgid "Habiganj"
@@ -182,235 +1112,235 @@ msgstr ""
 
 #: i18n/states/BD.php:33
 msgid "Jamalpur"
-msgstr "ג'מלפור"
+msgstr ""
 
 #: i18n/states/BD.php:34
 msgid "Jessore"
-msgstr "ג'סורה"
+msgstr ""
 
 #: i18n/states/BD.php:35
 msgid "Jhalokati"
-msgstr ""
+msgstr "Jhalokati"
 
 #: i18n/states/BD.php:36
 msgid "Jhenaidah"
-msgstr ""
+msgstr "Jhenaidah"
 
 #: i18n/states/BD.php:37
 msgid "Joypurhat"
-msgstr "ג'איפורהאט"
+msgstr ""
 
 #: i18n/states/BD.php:38
 msgid "Khagrachhari"
-msgstr ""
+msgstr "Khagrachhari"
 
 #: i18n/states/BD.php:39
 msgid "Khulna"
-msgstr ""
+msgstr "Khulna"
 
 #: i18n/states/BD.php:40
 msgid "Kishoreganj"
-msgstr ""
+msgstr "Kishoreganj"
 
 #: i18n/states/BD.php:41
 msgid "Kurigram"
-msgstr "קוריגראם"
+msgstr ""
 
 #: i18n/states/BD.php:42
 msgid "Kushtia"
-msgstr "קושטיה"
+msgstr ""
 
 #: i18n/states/BD.php:43
 msgid "Lakshmipur"
-msgstr "לקשמיפור"
+msgstr ""
 
 #: i18n/states/BD.php:44
 msgid "Lalmonirhat"
-msgstr "לאלמונירהאט"
+msgstr ""
 
 #: i18n/states/BD.php:45
 msgid "Madaripur"
-msgstr "מדריפור"
+msgstr ""
 
 #: i18n/states/BD.php:46
 msgid "Magura"
-msgstr ""
+msgstr "Magura"
 
 #: i18n/states/BD.php:47
 msgid "Manikganj "
-msgstr "מניקגאנג'"
+msgstr ""
 
 #: i18n/states/BD.php:48
 msgid "Meherpur"
-msgstr "מהרפור"
+msgstr ""
 
 #: i18n/states/BD.php:49
 msgid "Moulvibazar"
-msgstr ""
+msgstr "Moulvibazar"
 
 #: i18n/states/BD.php:50
 msgid "Munshiganj"
-msgstr "מונשיגאנג'"
+msgstr ""
 
 #: i18n/states/BD.php:51
 msgid "Mymensingh"
-msgstr "מימנסינג"
+msgstr ""
 
 #: i18n/states/BD.php:52
 msgid "Naogaon"
-msgstr "נאוגאון"
+msgstr ""
 
 #: i18n/states/BD.php:53
 msgid "Narail"
-msgstr "נראיל"
+msgstr ""
 
 #: i18n/states/BD.php:54
 msgid "Narayanganj"
-msgstr "נאראיאנגנג'"
+msgstr ""
 
 #: i18n/states/BD.php:55
 msgid "Narsingdi"
-msgstr "נרשינגדי"
+msgstr ""
 
 #: i18n/states/BD.php:56
 msgid "Natore"
-msgstr ""
+msgstr "Natore"
 
 #: i18n/states/BD.php:57
 msgid "Nawabganj"
-msgstr ""
+msgstr "Nawabganj"
 
 #: i18n/states/BD.php:58
 msgid "Netrakona"
-msgstr ""
+msgstr "Netrakona"
 
 #: i18n/states/BD.php:59
 msgid "Nilphamari"
-msgstr "נילפמארי"
+msgstr ""
 
 #: i18n/states/BD.php:60
 msgid "Noakhali"
-msgstr "נואחלי"
+msgstr ""
 
 #: i18n/states/BD.php:61
 msgid "Pabna"
-msgstr "פבנה"
+msgstr ""
 
 #: i18n/states/BD.php:62
 msgid "Panchagarh"
-msgstr "פנצ'גר"
+msgstr ""
 
 #: i18n/states/BD.php:63
 msgid "Patuakhali"
-msgstr ""
+msgstr "Patuakhali"
 
 #: i18n/states/BD.php:64
 msgid "Pirojpur"
-msgstr "פירוז'פור"
+msgstr ""
 
 #: i18n/states/BD.php:65
 msgid "Rajbari"
-msgstr "ראג'בארי"
+msgstr ""
 
 #: i18n/states/BD.php:66
 msgid "Rajshahi"
-msgstr ""
+msgstr "Rajshahi"
 
 #: i18n/states/BD.php:67
 msgid "Rangamati"
-msgstr "רנגמטי"
+msgstr ""
 
 #: i18n/states/BD.php:68
 msgid "Rangpur"
-msgstr "ראנגפור"
+msgstr ""
 
 #: i18n/states/BD.php:69
 msgid "Satkhira"
-msgstr "סטקירה"
+msgstr ""
 
 #: i18n/states/BD.php:70
 msgid "Shariatpur"
-msgstr "שאריאטפור"
+msgstr ""
 
 #: i18n/states/BD.php:71
 msgid "Sherpur"
-msgstr "שרפור"
+msgstr ""
 
 #: i18n/states/BD.php:72
 msgid "Sirajganj"
-msgstr ""
+msgstr "Sirajganj"
 
 #: i18n/states/BD.php:73
 msgid "Sunamganj"
-msgstr "סונאמגאנג'"
+msgstr ""
 
 #: i18n/states/BD.php:74
 msgid "Sylhet"
-msgstr "סילהט"
+msgstr ""
 
 #: i18n/states/BD.php:75
 msgid "Tangail"
-msgstr "טנגאלי"
+msgstr ""
 
 #: i18n/states/BD.php:76
 msgid "Thakurgaon"
-msgstr "תאקורגאון"
+msgstr ""
 
 #: i18n/states/BG.php:13
 msgid "Blagoevgrad"
-msgstr "בלגואבגרד"
+msgstr ""
 
 #: i18n/states/BG.php:14
 msgid "Burgas"
-msgstr "בורגס"
+msgstr ""
 
 #: i18n/states/BG.php:15
 msgid "Dobrich"
-msgstr "דובריץ'"
+msgstr ""
 
 #: i18n/states/BG.php:16
 msgid "Gabrovo"
-msgstr "גברובו"
+msgstr ""
 
 #: i18n/states/BG.php:17
 msgid "Haskovo"
-msgstr "חאסקובו"
+msgstr ""
 
 #: i18n/states/BG.php:18
 msgid "Kardzhali"
-msgstr "קרדז'אלי"
+msgstr ""
 
 #: i18n/states/BG.php:19
 msgid "Kyustendil"
-msgstr "קיוסטנדיל"
+msgstr ""
 
 #: i18n/states/BG.php:20
 msgid "Lovech"
-msgstr "לובץ'"
+msgstr ""
 
 #: i18n/states/BG.php:21 i18n/states/US.php:39
 msgid "Montana"
-msgstr "מונטנה"
+msgstr ""
 
 #: i18n/states/BG.php:22
 msgid "Pazardzhik"
-msgstr "פאזארדז'יק"
+msgstr ""
 
 #: i18n/states/BG.php:23
 msgid "Pernik"
-msgstr "פרניק"
+msgstr ""
 
 #: i18n/states/BG.php:24
 msgid "Pleven"
-msgstr "פלבן"
+msgstr ""
 
 #: i18n/states/BG.php:25
 msgid "Plovdiv"
-msgstr "פלובדיב"
+msgstr ""
 
 #: i18n/states/BG.php:26
 msgid "Razgrad"
-msgstr "ראזגרד"
+msgstr ""
 
 #: i18n/states/BG.php:27
 msgid "Ruse"
@@ -418,55 +1348,55 @@ msgstr ""
 
 #: i18n/states/BG.php:28
 msgid "Shumen"
-msgstr "שומן"
+msgstr ""
 
 #: i18n/states/BG.php:29
 msgid "Silistra"
-msgstr "סיליסטרה"
+msgstr ""
 
 #: i18n/states/BG.php:30
 msgid "Sliven"
-msgstr "סליבן"
+msgstr ""
 
 #: i18n/states/BG.php:31
 msgid "Smolyan"
-msgstr "סמוליאן"
+msgstr ""
 
 #: i18n/states/BG.php:32
 msgid "Sofia"
-msgstr "סופיה"
+msgstr ""
 
 #: i18n/states/BG.php:33
 msgid "Sofia-Grad"
-msgstr "סופיה"
+msgstr ""
 
 #: i18n/states/BG.php:34
 msgid "Stara Zagora"
-msgstr "סטארה זאגורה"
+msgstr ""
 
 #: i18n/states/BG.php:35
 msgid "Targovishte"
-msgstr "טרגובישטה"
+msgstr ""
 
 #: i18n/states/BG.php:36
 msgid "Varna"
-msgstr "וארנה"
+msgstr ""
 
 #: i18n/states/BG.php:37
 msgid "Veliko Tarnovo"
-msgstr "וליקו טרנובו"
+msgstr ""
 
 #: i18n/states/BG.php:38
 msgid "Vidin"
-msgstr "וידין"
+msgstr ""
 
 #: i18n/states/BG.php:39
 msgid "Vratsa"
-msgstr "וראצה"
+msgstr ""
 
 #: i18n/states/BG.php:40
 msgid "Yambol"
-msgstr "ימבול"
+msgstr ""
 
 #: i18n/states/BR.php:13
 msgid "Acre"
@@ -478,7 +1408,7 @@ msgstr "אלגואס"
 
 #: i18n/states/BR.php:15
 msgid "Amap&aacute;"
-msgstr "אמאפה"
+msgstr ""
 
 #: i18n/states/BR.php:16 i18n/states/PE.php:15
 msgid "Amazonas"
@@ -490,831 +1420,831 @@ msgstr "באהיה"
 
 #: i18n/states/BR.php:18
 msgid "Cear&aacute;"
-msgstr "סיארה"
+msgstr ""
 
 #: i18n/states/BR.php:19
 msgid "Distrito Federal"
-msgstr "מחוז פדרלי"
+msgstr ""
 
 #: i18n/states/BR.php:20
 msgid "Esp&iacute;rito Santo"
-msgstr "אספיריטו סנטו"
+msgstr ""
 
 #: i18n/states/BR.php:21
 msgid "Goi&aacute;s"
-msgstr "גויאס"
+msgstr ""
 
 #: i18n/states/BR.php:22
 msgid "Maranh&atilde;o"
-msgstr "רניאו"
+msgstr ""
 
 #: i18n/states/BR.php:23
 msgid "Mato Grosso"
-msgstr "מאטו גרוסו"
+msgstr ""
 
 #: i18n/states/BR.php:24
 msgid "Mato Grosso do Sul"
-msgstr "מאטו גרוסו דו סול"
+msgstr ""
 
 #: i18n/states/BR.php:25
 msgid "Minas Gerais"
-msgstr "Minas Gerais"
+msgstr ""
 
 #: i18n/states/BR.php:26
 msgid "Par&aacute;"
-msgstr "פארה"
+msgstr ""
 
 #: i18n/states/BR.php:27
 msgid "Para&iacute;ba"
-msgstr "פאראיבה"
+msgstr ""
 
 #: i18n/states/BR.php:28
 msgid "Paran&aacute;"
-msgstr "פרנה"
+msgstr ""
 
 #: i18n/states/BR.php:29
 msgid "Pernambuco"
-msgstr "פרנמבוקו"
+msgstr ""
 
 #: i18n/states/BR.php:30
 msgid "Piau&iacute;"
-msgstr "פיאאוי"
+msgstr ""
 
 #: i18n/states/BR.php:31
 msgid "Rio de Janeiro"
-msgstr "ריו דה ז'נרו"
+msgstr ""
 
 #: i18n/states/BR.php:32
 msgid "Rio Grande do Norte"
-msgstr "ריו גרנדה דו נורטה"
+msgstr ""
 
 #: i18n/states/BR.php:33
 msgid "Rio Grande do Sul"
-msgstr "ריו גרנדה דו סול"
+msgstr ""
 
 #: i18n/states/BR.php:34
 msgid "Rond&ocirc;nia"
-msgstr "רונדוניה"
+msgstr ""
 
 #: i18n/states/BR.php:35
 msgid "Roraima"
-msgstr "רוריימה"
+msgstr ""
 
 #: i18n/states/BR.php:36
 msgid "Santa Catarina"
-msgstr "סנטה קטרינה"
+msgstr ""
 
 #: i18n/states/BR.php:37
 msgid "S&atilde;o Paulo"
-msgstr "סאו פאולו"
+msgstr ""
 
 #: i18n/states/BR.php:38
 msgid "Sergipe"
-msgstr "סרגיפה"
+msgstr ""
 
 #: i18n/states/BR.php:39
 msgid "Tocantins"
-msgstr "טוקנטינס"
+msgstr ""
 
 #: i18n/states/CA.php:13
 msgid "Alberta"
-msgstr "אלברטה"
+msgstr ""
 
 #: i18n/states/CA.php:14
 msgid "British Columbia"
-msgstr "קולומביה הבריטית"
+msgstr ""
 
 #: i18n/states/CA.php:15
 msgid "Manitoba"
-msgstr "מניטובה"
+msgstr ""
 
 #: i18n/states/CA.php:16
 msgid "New Brunswick"
-msgstr "ניו ברונסוויק"
+msgstr ""
 
 #: i18n/states/CA.php:17
 msgid "Newfoundland"
-msgstr "ניופאונדלנד"
+msgstr ""
 
 #: i18n/states/CA.php:18
 msgid "Northwest Territories"
-msgstr "טריטוריות הצפון מערביים"
+msgstr ""
 
 #: i18n/states/CA.php:19
 msgid "Nova Scotia"
-msgstr "נובה סקוטיה"
+msgstr ""
 
 #: i18n/states/CA.php:20
 msgid "Nunavut"
-msgstr "נונאווט"
+msgstr ""
 
 #: i18n/states/CA.php:21
 msgid "Ontario"
-msgstr "אונטריו"
+msgstr ""
 
 #: i18n/states/CA.php:22
 msgid "Prince Edward Island"
-msgstr "אי נסיך אדוארד"
+msgstr ""
 
 #: i18n/states/CA.php:23
 msgid "Quebec"
-msgstr "קוויבק"
+msgstr ""
 
 #: i18n/states/CA.php:24
 msgid "Saskatchewan"
-msgstr "ססקצ'ואן"
+msgstr ""
 
 #: i18n/states/CA.php:25
 msgid "Yukon Territory"
-msgstr "טריטוריה של יוקון"
+msgstr ""
 
 #: i18n/states/CN.php:13
 msgid "Yunnan / &#20113;&#21335;"
-msgstr "יונאן / 云南"
+msgstr ""
 
 #: i18n/states/CN.php:14
 msgid "Beijing / &#21271;&#20140;"
-msgstr "בייג'ינג / 北京"
+msgstr ""
 
 #: i18n/states/CN.php:15
 msgid "Tianjin / &#22825;&#27941;"
-msgstr "טיאנג'ין / 天津"
+msgstr ""
 
 #: i18n/states/CN.php:16
 msgid "Hebei / &#27827;&#21271;"
-msgstr "הביי / 河北"
+msgstr ""
 
 #: i18n/states/CN.php:17
 msgid "Shanxi / &#23665;&#35199;"
-msgstr "שאנשים / 山西"
+msgstr ""
 
 #: i18n/states/CN.php:18
 msgid "Inner Mongolia / &#20839;&#33945;&#21476;"
-msgstr "מונגוליה פנימית / 内蒙古"
+msgstr ""
 
 #: i18n/states/CN.php:19
 msgid "Liaoning / &#36797;&#23425;"
-msgstr "ליאונינג / 辽宁"
+msgstr ""
 
 #: i18n/states/CN.php:20
 msgid "Jilin / &#21513;&#26519;"
-msgstr "ג'ילין / 吉林"
+msgstr ""
 
 #: i18n/states/CN.php:21
 msgid "Heilongjiang / &#40657;&#40857;&#27743;"
-msgstr "Heilongjiang / 黑龙江"
+msgstr ""
 
 #: i18n/states/CN.php:22
 msgid "Shanghai / &#19978;&#28023;"
-msgstr "שנחאי / 上海"
+msgstr ""
 
 #: i18n/states/CN.php:23
 msgid "Jiangsu / &#27743;&#33487;"
-msgstr "Jiangsu / 江苏"
+msgstr ""
 
 #: i18n/states/CN.php:24
 msgid "Zhejiang / &#27993;&#27743;"
-msgstr "Zhejiang / 浙江"
+msgstr ""
 
 #: i18n/states/CN.php:25
 msgid "Anhui / &#23433;&#24509;"
-msgstr "Anhui / 安徽"
+msgstr ""
 
 #: i18n/states/CN.php:26
 msgid "Fujian / &#31119;&#24314;"
-msgstr "Fujian / 福建"
+msgstr ""
 
 #: i18n/states/CN.php:27
 msgid "Jiangxi / &#27743;&#35199;"
-msgstr "יאנגשי / 江西"
+msgstr ""
 
 #: i18n/states/CN.php:28
 msgid "Shandong / &#23665;&#19996;"
-msgstr "אנדונג / 山东"
+msgstr ""
 
 #: i18n/states/CN.php:29
 msgid "Henan / &#27827;&#21335;"
-msgstr "הנאן / 河南"
+msgstr ""
 
 #: i18n/states/CN.php:30
 msgid "Hubei / &#28246;&#21271;"
-msgstr "הוביי / 湖北"
+msgstr ""
 
 #: i18n/states/CN.php:31
 msgid "Hunan / &#28246;&#21335;"
-msgstr "הונאן / 湖南"
+msgstr ""
 
 #: i18n/states/CN.php:32
 msgid "Guangdong / &#24191;&#19996;"
-msgstr "גואנגדונג / 广东"
+msgstr ""
 
 #: i18n/states/CN.php:33
 msgid "Guangxi Zhuang / &#24191;&#35199;&#22766;&#26063;"
-msgstr "גואנגשי ג'ואנג / 广西 壮族"
+msgstr ""
 
 #: i18n/states/CN.php:34
 msgid "Hainan / &#28023;&#21335;"
-msgstr "האינאן / 海南"
+msgstr ""
 
 #: i18n/states/CN.php:35
 msgid "Chongqing / &#37325;&#24198;"
-msgstr "צ'ונגצ'ינג / 重庆"
+msgstr ""
 
 #: i18n/states/CN.php:36
 msgid "Sichuan / &#22235;&#24029;"
-msgstr "סיצ'ואן / 四川"
+msgstr ""
 
 #: i18n/states/CN.php:37
 msgid "Guizhou / &#36149;&#24030;"
-msgstr "Guizhou / 贵州"
+msgstr ""
 
 #: i18n/states/CN.php:38
 msgid "Shaanxi / &#38485;&#35199;"
-msgstr "שאאנשי / 陕西"
+msgstr ""
 
 #: i18n/states/CN.php:39
 msgid "Gansu / &#29976;&#32899;"
-msgstr "גאנסו / 甘肃"
+msgstr ""
 
 #: i18n/states/CN.php:40
 msgid "Qinghai / &#38738;&#28023;"
-msgstr "צ'ינגהאי / 青海"
+msgstr ""
 
 #: i18n/states/CN.php:41
 msgid "Ningxia Hui / &#23425;&#22799;"
-msgstr "נינג הואי / 宁夏"
+msgstr ""
 
 #: i18n/states/CN.php:42
 msgid "Macau / &#28595;&#38376;"
-msgstr "מקאו / 澳门"
+msgstr ""
 
 #: i18n/states/CN.php:43
 msgid "Tibet / &#35199;&#34255;"
-msgstr "טיבט / 西藏"
+msgstr ""
 
 #: i18n/states/CN.php:44
 msgid "Xinjiang / &#26032;&#30086;"
-msgstr "שינג'יאנג / 新疆"
+msgstr ""
 
 #: i18n/states/ES.php:13
 msgid "A Coru&ntilde;a"
-msgstr "א קורוניה"
+msgstr ""
 
 #: i18n/states/ES.php:14
 msgid "Araba/&Aacute;lava"
-msgstr "אראבה/אלאבה"
+msgstr ""
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
-msgstr "אלבסטה"
+msgstr ""
 
 #: i18n/states/ES.php:16
 msgid "Alicante"
-msgstr "אליקנטה"
+msgstr ""
 
 #: i18n/states/ES.php:17
 msgid "Almer&iacute;a"
-msgstr "אלמריה"
+msgstr ""
 
 #: i18n/states/ES.php:18
 msgid "Asturias"
-msgstr "אסטוריאס"
+msgstr ""
 
 #: i18n/states/ES.php:19
 msgid "&Aacute;vila"
-msgstr "אווילה"
+msgstr ""
 
 #: i18n/states/ES.php:20
 msgid "Badajoz"
-msgstr "בדחוס"
+msgstr ""
 
 #: i18n/states/ES.php:21
 msgid "Baleares"
-msgstr "האיים הבלאריים"
+msgstr ""
 
 #: i18n/states/ES.php:22
 msgid "Barcelona"
-msgstr "ברצלונה"
+msgstr ""
 
 #: i18n/states/ES.php:23
 msgid "Burgos"
-msgstr "בורגוס"
+msgstr ""
 
 #: i18n/states/ES.php:24
 msgid "C&aacute;ceres"
-msgstr "קסרס"
+msgstr ""
 
 #: i18n/states/ES.php:25
 msgid "C&aacute;diz"
-msgstr "קדיס"
+msgstr ""
 
 #: i18n/states/ES.php:26
 msgid "Cantabria"
-msgstr "קנטבריה"
+msgstr ""
 
 #: i18n/states/ES.php:27
 msgid "Castell&oacute;n"
-msgstr "קאסטיון"
+msgstr ""
 
 #: i18n/states/ES.php:28
 msgid "Ceuta"
-msgstr "סאוטה"
+msgstr ""
 
 #: i18n/states/ES.php:29
 msgid "Ciudad Real"
-msgstr "סיודאד ריאל"
+msgstr ""
 
 #: i18n/states/ES.php:30
 msgid "C&oacute;rdoba"
-msgstr "ב"
+msgstr ""
 
 #: i18n/states/ES.php:31
 msgid "Cuenca"
-msgstr "קואנקה"
+msgstr ""
 
 #: i18n/states/ES.php:32
 msgid "Girona"
-msgstr "גירונה"
+msgstr ""
 
 #: i18n/states/ES.php:33
 msgid "Granada"
-msgstr "גרנדה"
+msgstr ""
 
 #: i18n/states/ES.php:34
 msgid "Guadalajara"
-msgstr "גואדלחרה"
+msgstr ""
 
 #: i18n/states/ES.php:35
 msgid "Gipuzkoa"
-msgstr "גיפוזקואה"
+msgstr ""
 
 #: i18n/states/ES.php:36
 msgid "Huelva"
-msgstr "הואלבה"
+msgstr ""
 
 #: i18n/states/ES.php:37
 msgid "Huesca"
-msgstr "הואסקה"
+msgstr ""
 
 #: i18n/states/ES.php:38
 msgid "Ja&eacute;n"
-msgstr "חאאן"
+msgstr ""
 
 #: i18n/states/ES.php:39
 msgid "La Rioja"
-msgstr "לה ריוחה"
+msgstr ""
 
 #: i18n/states/ES.php:40
 msgid "Las Palmas"
-msgstr "לאס פאלמאס"
+msgstr ""
 
 #: i18n/states/ES.php:41
 msgid "Le&oacute;n"
-msgstr "לאון"
+msgstr ""
 
 #: i18n/states/ES.php:42
 msgid "Lleida"
-msgstr "ליידה"
+msgstr ""
 
 #: i18n/states/ES.php:43
 msgid "Lugo"
-msgstr "לוגו"
+msgstr ""
 
 #: i18n/states/ES.php:44
 msgid "Madrid"
-msgstr "מדריד"
+msgstr ""
 
 #: i18n/states/ES.php:45
 msgid "M&aacute;laga"
-msgstr "מאלגה"
+msgstr ""
 
 #: i18n/states/ES.php:46
 msgid "Melilla"
-msgstr "מלייה"
+msgstr ""
 
 #: i18n/states/ES.php:47
 msgid "Murcia"
-msgstr "מורסיה"
+msgstr ""
 
 #: i18n/states/ES.php:48
 msgid "Navarra"
-msgstr "נווארה"
+msgstr ""
 
 #: i18n/states/ES.php:49
 msgid "Ourense"
-msgstr "אורנסה"
+msgstr ""
 
 #: i18n/states/ES.php:50
 msgid "Palencia"
-msgstr "פלנסיה"
+msgstr ""
 
 #: i18n/states/ES.php:51
 msgid "Pontevedra"
-msgstr "פונטוודרה"
+msgstr ""
 
 #: i18n/states/ES.php:52
 msgid "Salamanca"
-msgstr "סלמנקה"
+msgstr ""
 
 #: i18n/states/ES.php:53
 msgid "Santa Cruz de Tenerife"
-msgstr "סנטה קרוז דה טנריף"
+msgstr ""
 
 #: i18n/states/ES.php:54
 msgid "Segovia"
-msgstr "סגוביה"
+msgstr ""
 
 #: i18n/states/ES.php:55
 msgid "Sevilla"
-msgstr "סביליה"
+msgstr ""
 
 #: i18n/states/ES.php:56
 msgid "Soria"
-msgstr "סוׂרִיה"
+msgstr ""
 
 #: i18n/states/ES.php:57
 msgid "Tarragona"
-msgstr "טרגונה"
+msgstr ""
 
 #: i18n/states/ES.php:58
 msgid "Teruel"
-msgstr "טרואל"
+msgstr ""
 
 #: i18n/states/ES.php:59
 msgid "Toledo"
-msgstr "טולדו"
+msgstr ""
 
 #: i18n/states/ES.php:60
 msgid "Valencia"
-msgstr "ולנסיה"
+msgstr ""
 
 #: i18n/states/ES.php:61
 msgid "Valladolid"
-msgstr "ויאדוליד"
+msgstr ""
 
 #: i18n/states/ES.php:62
 msgid "Bizkaia"
-msgstr "ויזקאיה"
+msgstr ""
 
 #: i18n/states/ES.php:63
 msgid "Zamora"
-msgstr "זאמורה"
+msgstr ""
 
 #: i18n/states/ES.php:64
 msgid "Zaragoza"
-msgstr "סראגוסה"
+msgstr ""
 
 #: i18n/states/HK.php:13
 msgid "Hong Kong Island"
-msgstr "אי הונג קונג"
+msgstr ""
 
 #: i18n/states/HK.php:14
 msgid "Kowloon"
-msgstr "קאולון"
+msgstr ""
 
 #: i18n/states/HK.php:15
 msgid "New Territories"
-msgstr "שטחים חדשים"
+msgstr ""
 
 #: i18n/states/HU.php:13
 msgid "Bács-Kiskun"
-msgstr "Bács-Kiskun"
+msgstr ""
 
 #: i18n/states/HU.php:14
 msgid "Békés"
-msgstr "קש"
+msgstr ""
 
 #: i18n/states/HU.php:15
 msgid "Baranya"
-msgstr "ארניה"
+msgstr ""
 
 #: i18n/states/HU.php:16
 msgid "Borsod-Abaúj-Zemplén"
-msgstr "Borsod-Abaúj-Zemplén"
+msgstr ""
 
 #: i18n/states/HU.php:17
 msgid "Budapest"
-msgstr "בודפשט"
+msgstr ""
 
 #: i18n/states/HU.php:18
 msgid "Csongrád"
-msgstr "קסונגראד"
+msgstr ""
 
 #: i18n/states/HU.php:19
 msgid "Fejér"
-msgstr "Fejér"
+msgstr ""
 
 #: i18n/states/HU.php:20
 msgid "Győr-Moson-Sopron"
-msgstr "Győr-Moson-שופרון"
+msgstr ""
 
 #: i18n/states/HU.php:21
 msgid "Hajdú-Bihar"
-msgstr "היידו-ביהאר"
+msgstr ""
 
 #: i18n/states/HU.php:22
 msgid "Heves"
-msgstr "הווס"
+msgstr ""
 
 #: i18n/states/HU.php:23
 msgid "Jász-Nagykun-Szolnok"
-msgstr "Jász-Nagykun-ז'ולנוק"
+msgstr ""
 
 #: i18n/states/HU.php:24
 msgid "Komárom-Esztergom"
-msgstr "קומרום-Esztergom"
+msgstr ""
 
 #: i18n/states/HU.php:25
 msgid "Nógrád"
-msgstr "נוגראד"
+msgstr ""
 
 #: i18n/states/HU.php:26
 msgid "Pest"
-msgstr "טרדן"
+msgstr ""
 
 #: i18n/states/HU.php:27
 msgid "Somogy"
-msgstr "סומוגי"
+msgstr ""
 
 #: i18n/states/HU.php:28
 msgid "Szabolcs-Szatmár-Bereg"
-msgstr "Szabolcs-Szatmár-Bereg"
+msgstr ""
 
 #: i18n/states/HU.php:29
 msgid "Tolna"
-msgstr "טול"
+msgstr ""
 
 #: i18n/states/HU.php:30
 msgid "Vas"
-msgstr "Vas"
+msgstr ""
 
 #: i18n/states/HU.php:31
 msgid "Veszprém"
-msgstr "Veszprém"
+msgstr ""
 
 #: i18n/states/HU.php:32
 msgid "Zala"
-msgstr "זלה"
+msgstr ""
 
 #: i18n/states/HZ.php:13 i18n/states/NZ.php:14
 msgid "Auckland"
-msgstr "אוקלנד"
+msgstr ""
 
 #: i18n/states/HZ.php:14 i18n/states/NZ.php:16
 msgid "Bay of Plenty"
-msgstr "מפרץ עושר"
+msgstr ""
 
 #: i18n/states/HZ.php:15 i18n/states/NZ.php:25
 msgid "Canterbury"
-msgstr "קנטרברי"
+msgstr ""
 
 #: i18n/states/HZ.php:16 i18n/states/NZ.php:18
 msgid "Hawke&rsquo;s Bay"
-msgstr "הוקס ביי"
+msgstr ""
 
 #: i18n/states/HZ.php:17 i18n/states/NZ.php:19
 msgid "Manawatu-Wanganui"
-msgstr "Manawatu-Wanganui"
+msgstr ""
 
 #: i18n/states/HZ.php:18 i18n/states/NZ.php:22
 msgid "Marlborough"
-msgstr "מרלבורו"
+msgstr ""
 
 #: i18n/states/HZ.php:19 i18n/states/NZ.php:21
 msgid "Nelson"
-msgstr "נלסון"
+msgstr ""
 
 #: i18n/states/HZ.php:20 i18n/states/NZ.php:13
 msgid "Northland"
-msgstr "נורת'לנד"
+msgstr ""
 
 #: i18n/states/HZ.php:21 i18n/states/NZ.php:26
 msgid "Otago"
-msgstr "אוטאגו"
+msgstr ""
 
 #: i18n/states/HZ.php:22 i18n/states/NZ.php:27
 msgid "Southland"
-msgstr "Southland"
+msgstr ""
 
 #: i18n/states/HZ.php:23 i18n/states/NZ.php:17
 msgid "Taranaki"
-msgstr "טראנאקי"
+msgstr ""
 
 #: i18n/states/HZ.php:24 i18n/states/NZ.php:23
 msgid "Tasman"
-msgstr "טסמן"
+msgstr ""
 
 #: i18n/states/HZ.php:25 i18n/states/NZ.php:15
 msgid "Waikato"
-msgstr "Waikato"
+msgstr ""
 
 #: i18n/states/HZ.php:26 i18n/states/NZ.php:20
 msgid "Wellington"
-msgstr "וולינגטון"
+msgstr ""
 
 #: i18n/states/HZ.php:27 i18n/states/NZ.php:24
 msgid "West Coast"
-msgstr "החוף המערבי"
+msgstr ""
 
 #: i18n/states/ID.php:13
 msgid "Daerah Istimewa Aceh"
-msgstr "Daerah Istimewa אצ'ה"
+msgstr ""
 
 #: i18n/states/ID.php:14
 msgid "Sumatera Utara"
-msgstr "סומטרה אוטרה"
+msgstr ""
 
 #: i18n/states/ID.php:15
 msgid "Sumatera Barat"
-msgstr "סומטרה בראט"
+msgstr ""
 
 #: i18n/states/ID.php:16
 msgid "Riau"
-msgstr "Riau"
+msgstr ""
 
 #: i18n/states/ID.php:17
 msgid "Kepulauan Riau"
-msgstr "קפולאון קיאו"
+msgstr ""
 
 #: i18n/states/ID.php:18
 msgid "Jambi"
-msgstr "ג'מבי"
+msgstr ""
 
 #: i18n/states/ID.php:19
 msgid "Sumatera Selatan"
-msgstr "דרום סומטרה"
+msgstr ""
 
 #: i18n/states/ID.php:20
 msgid "Bangka Belitung"
-msgstr "באנגקה ליטונג"
+msgstr ""
 
 #: i18n/states/ID.php:21
 msgid "Bengkulu"
-msgstr "נגקולו"
+msgstr ""
 
 #: i18n/states/ID.php:22
 msgid "Lampung"
-msgstr "Lampung"
+msgstr ""
 
 #: i18n/states/ID.php:23
 msgid "DKI Jakarta"
-msgstr "DKI ג'קרטה"
+msgstr ""
 
 #: i18n/states/ID.php:24
 msgid "Jawa Barat"
-msgstr "Jawa Barat"
+msgstr ""
 
 #: i18n/states/ID.php:25
 msgid "Banten"
-msgstr "נטן"
+msgstr ""
 
 #: i18n/states/ID.php:26
 msgid "Jawa Tengah"
-msgstr "ג'אווה טנגה"
+msgstr ""
 
 #: i18n/states/ID.php:27
 msgid "Jawa Timur"
-msgstr "ג'אווה טימור"
+msgstr ""
 
 #: i18n/states/ID.php:28
 msgid "Daerah Istimewa Yogyakarta"
-msgstr "Daerah Istimewa יוגיאקרטה"
+msgstr ""
 
 #: i18n/states/ID.php:29
 msgid "Bali"
-msgstr "באלי"
+msgstr ""
 
 #: i18n/states/ID.php:30
 msgid "Nusa Tenggara Barat"
-msgstr "נוסה טנגרה בראט"
+msgstr ""
 
 #: i18n/states/ID.php:31
 msgid "Nusa Tenggara Timur"
-msgstr "נוסה טנגרה טימור"
+msgstr ""
 
 #: i18n/states/ID.php:32
 msgid "Kalimantan Barat"
-msgstr "קלימנטן בארט"
+msgstr ""
 
 #: i18n/states/ID.php:33
 msgid "Kalimantan Tengah"
-msgstr "קלימנטן טנגה"
+msgstr ""
 
 #: i18n/states/ID.php:34
 msgid "Kalimantan Timur"
-msgstr "קלימנטן טימור"
+msgstr ""
 
 #: i18n/states/ID.php:35
 msgid "Kalimantan Selatan"
-msgstr "קלימנטאן סלטאן"
+msgstr ""
 
 #: i18n/states/ID.php:36
 msgid "Kalimantan Utara"
-msgstr "קלימנטן אוטרה"
+msgstr ""
 
 #: i18n/states/ID.php:37
 msgid "Sulawesi Utara"
-msgstr "סולאווסי אוטרה"
+msgstr ""
 
 #: i18n/states/ID.php:38
 msgid "Sulawesi Tengah"
-msgstr "מרכז סולאווסי"
+msgstr ""
 
 #: i18n/states/ID.php:39
 msgid "Sulawesi Tenggara"
-msgstr "סולאווסי טנגארה"
+msgstr ""
 
 #: i18n/states/ID.php:40
 msgid "Sulawesi Barat"
-msgstr "סלווזי בראט"
+msgstr ""
 
 #: i18n/states/ID.php:41
 msgid "Sulawesi Selatan"
-msgstr "סולווזי סלטאן"
+msgstr ""
 
 #: i18n/states/ID.php:42
 msgid "Gorontalo"
-msgstr "גורונטלו"
+msgstr ""
 
 #: i18n/states/ID.php:43
 msgid "Maluku"
-msgstr "אלוקו"
+msgstr ""
 
 #: i18n/states/ID.php:44
 msgid "Maluku Utara"
-msgstr "צפון מלוקו"
+msgstr ""
 
 #: i18n/states/ID.php:45
 msgid "Papua"
-msgstr "פפואה"
+msgstr ""
 
 #: i18n/states/ID.php:46
 msgid "Papua Barat"
-msgstr "פפואה ראט"
+msgstr ""
 
 #: i18n/states/IN.php:13
 msgid "Andra Pradesh"
-msgstr "אנדרה פראדש"
+msgstr ""
 
 #: i18n/states/IN.php:14
 msgid "Arunachal Pradesh"
-msgstr "ארונצ'אל פראדש"
+msgstr ""
 
 #: i18n/states/IN.php:15
 msgid "Assam"
-msgstr "אסאם"
+msgstr ""
 
 #: i18n/states/IN.php:16
 msgid "Bihar"
-msgstr "ביהאר"
+msgstr ""
 
 #: i18n/states/IN.php:17
 msgid "Chhattisgarh"
-msgstr "צ'האטיסגאר"
+msgstr ""
 
 #: i18n/states/IN.php:18
 msgid "Goa"
-msgstr "גואה"
+msgstr ""
 
 #: i18n/states/IN.php:19
 msgid "Gujarat"
-msgstr "גוג'ראט"
+msgstr ""
 
 #: i18n/states/IN.php:20
 msgid "Haryana"
-msgstr "הריאנה"
+msgstr ""
 
 #: i18n/states/IN.php:21
 msgid "Himachal Pradesh"
-msgstr "הימצ'אל פראדש"
+msgstr ""
 
 #: i18n/states/IN.php:22
 msgid "Jammu and Kashmir"
-msgstr "ג'אמו וקשמיר"
+msgstr ""
 
 #: i18n/states/IN.php:23
 msgid "Jharkhand"
-msgstr "Jharkhand"
+msgstr ""
 
 #: i18n/states/IN.php:24
 msgid "Karnataka"
-msgstr "קרנטקה"
+msgstr ""
 
 #: i18n/states/IN.php:25
 msgid "Kerala"
-msgstr "קראלה"
+msgstr ""
 
 #: i18n/states/IN.php:26
 msgid "Madhya Pradesh"
-msgstr "פרדש"
+msgstr ""
 
 #: i18n/states/IN.php:27
 msgid "Maharashtra"
-msgstr "מהרשטרה"
+msgstr ""
 
 #: i18n/states/IN.php:28
 msgid "Manipur"
-msgstr "מאניפור"
+msgstr ""
 
 #: i18n/states/IN.php:29
 msgid "Meghalaya"
@@ -1322,35 +2252,35 @@ msgstr "Meghalaya"
 
 #: i18n/states/IN.php:30
 msgid "Mizoram"
-msgstr "מיזורם"
+msgstr ""
 
 #: i18n/states/IN.php:31
 msgid "Nagaland"
-msgstr "Nagaland"
+msgstr ""
 
 #: i18n/states/IN.php:32
 msgid "Orissa"
-msgstr "אוריסה"
+msgstr ""
 
 #: i18n/states/IN.php:33
 msgid "Punjab"
-msgstr "פנג'אב"
+msgstr ""
 
 #: i18n/states/IN.php:34
 msgid "Rajasthan"
-msgstr "רג'סטאן"
+msgstr ""
 
 #: i18n/states/IN.php:35
 msgid "Sikkim"
-msgstr "סיקים"
+msgstr ""
 
 #: i18n/states/IN.php:36
 msgid "Tamil Nadu"
-msgstr "טמיל נאדו"
+msgstr ""
 
 #: i18n/states/IN.php:37
 msgid "Tripura"
-msgstr "טריפורה"
+msgstr ""
 
 #: i18n/states/IN.php:38
 msgid "Uttarakhand"
@@ -1358,15 +2288,15 @@ msgstr ""
 
 #: i18n/states/IN.php:39
 msgid "Uttar Pradesh"
-msgstr "אוטר פראדש"
+msgstr ""
 
 #: i18n/states/IN.php:40
 msgid "West Bengal"
-msgstr "המערב בנגל"
+msgstr ""
 
 #: i18n/states/IN.php:41
 msgid "Andaman and Nicobar Islands"
-msgstr "אנדמן וניקובר איי"
+msgstr ""
 
 #: i18n/states/IN.php:42
 msgid "Chandigarh"
@@ -1374,95 +2304,95 @@ msgstr "Chandigarh"
 
 #: i18n/states/IN.php:43
 msgid "Dadar and Nagar Haveli"
-msgstr "Dadar וניגר הבלי"
+msgstr ""
 
 #: i18n/states/IN.php:44
 msgid "Daman and Diu"
-msgstr "דאמאן ודיו"
+msgstr ""
 
 #: i18n/states/IN.php:45
 msgid "Delhi"
-msgstr "דלהי"
+msgstr ""
 
 #: i18n/states/IN.php:46
 msgid "Lakshadeep"
-msgstr "Lakshadeep"
+msgstr ""
 
 #: i18n/states/IN.php:47
 msgid "Pondicherry (Puducherry)"
-msgstr "פונדיצ'רי (Puducherry)"
+msgstr ""
 
 #: i18n/states/IT.php:13
 msgid "Agrigento"
-msgstr "אגריג'נטו"
+msgstr ""
 
 #: i18n/states/IT.php:14
 msgid "Alessandria"
-msgstr "אלסנדריה"
+msgstr ""
 
 #: i18n/states/IT.php:15
 msgid "Ancona"
-msgstr "אנקונה"
+msgstr ""
 
 #: i18n/states/IT.php:16
 msgid "Aosta"
-msgstr "אאוסטה"
+msgstr ""
 
 #: i18n/states/IT.php:17
 msgid "Arezzo"
-msgstr "ארזו"
+msgstr ""
 
 #: i18n/states/IT.php:18
 msgid "Ascoli Piceno"
-msgstr "אסקולי פיסנו"
+msgstr ""
 
 #: i18n/states/IT.php:19
 msgid "Asti"
-msgstr "אסטי"
+msgstr ""
 
 #: i18n/states/IT.php:20
 msgid "Avellino"
-msgstr "אבלינו"
+msgstr ""
 
 #: i18n/states/IT.php:21
 msgid "Bari"
-msgstr "בארי"
+msgstr ""
 
 #: i18n/states/IT.php:22
 msgid "Barletta-Andria-Trani"
-msgstr "ברלטה-אנדריה-טראני"
+msgstr ""
 
 #: i18n/states/IT.php:23
 msgid "Belluno"
-msgstr "בלונו"
+msgstr ""
 
 #: i18n/states/IT.php:24
 msgid "Benevento"
-msgstr "נוונטו"
+msgstr ""
 
 #: i18n/states/IT.php:25
 msgid "Bergamo"
-msgstr "ברגמו"
+msgstr ""
 
 #: i18n/states/IT.php:26
 msgid "Biella"
-msgstr "ביאלה"
+msgstr ""
 
 #: i18n/states/IT.php:27
 msgid "Bologna"
-msgstr "בולוניה"
+msgstr ""
 
 #: i18n/states/IT.php:28
 msgid "Bolzano"
-msgstr "בּוׂלְצָנוׂ"
+msgstr ""
 
 #: i18n/states/IT.php:29
 msgid "Brescia"
-msgstr "בְּרֶשִיָה"
+msgstr ""
 
 #: i18n/states/IT.php:30
 msgid "Brindisi"
-msgstr "ברינדיזי"
+msgstr ""
 
 #: i18n/states/IT.php:31
 msgid "Cagliari"
@@ -1470,127 +2400,127 @@ msgstr "Cagliari"
 
 #: i18n/states/IT.php:32
 msgid "Caltanissetta"
-msgstr "קלטניסטה"
+msgstr ""
 
 #: i18n/states/IT.php:33
 msgid "Campobasso"
-msgstr "קמפובאסו"
+msgstr ""
 
 #: i18n/states/IT.php:34
 msgid "Carbonia-Iglesias"
-msgstr "קרבוניה איגלסיס"
+msgstr ""
 
 #: i18n/states/IT.php:35
 msgid "Caserta"
-msgstr "קאזרטה"
+msgstr ""
 
 #: i18n/states/IT.php:36
 msgid "Catania"
-msgstr "קטאניה"
+msgstr ""
 
 #: i18n/states/IT.php:37
 msgid "Catanzaro"
-msgstr "קטנזארו"
+msgstr ""
 
 #: i18n/states/IT.php:38
 msgid "Chieti"
-msgstr "קיאטי"
+msgstr ""
 
 #: i18n/states/IT.php:39
 msgid "Como"
-msgstr "קומו"
+msgstr ""
 
 #: i18n/states/IT.php:40
 msgid "Cosenza"
-msgstr "קוזנצה"
+msgstr ""
 
 #: i18n/states/IT.php:41
 msgid "Cremona"
-msgstr "קרמונה"
+msgstr ""
 
 #: i18n/states/IT.php:42
 msgid "Crotone"
-msgstr "קרוטונה"
+msgstr ""
 
 #: i18n/states/IT.php:43
 msgid "Cuneo"
-msgstr "קונאו"
+msgstr ""
 
 #: i18n/states/IT.php:44
 msgid "Enna"
-msgstr "אנה"
+msgstr ""
 
 #: i18n/states/IT.php:45
 msgid "Fermo"
-msgstr "פרמו"
+msgstr ""
 
 #: i18n/states/IT.php:46
 msgid "Ferrara"
-msgstr "פרארה"
+msgstr ""
 
 #: i18n/states/IT.php:47
 msgid "Firenze"
-msgstr "פירנצה"
+msgstr ""
 
 #: i18n/states/IT.php:48
 msgid "Foggia"
-msgstr "פוג'יה"
+msgstr ""
 
 #: i18n/states/IT.php:49
 msgid "Forlì-Cesena"
-msgstr "פורלי-צסנה"
+msgstr ""
 
 #: i18n/states/IT.php:50
 msgid "Frosinone"
-msgstr "פרוסינונה"
+msgstr ""
 
 #: i18n/states/IT.php:51
 msgid "Genova"
-msgstr "גנואה"
+msgstr ""
 
 #: i18n/states/IT.php:52
 msgid "Gorizia"
-msgstr "גוריציה"
+msgstr ""
 
 #: i18n/states/IT.php:53
 msgid "Grosseto"
-msgstr "גרוסטו"
+msgstr ""
 
 #: i18n/states/IT.php:54
 msgid "Imperia"
-msgstr "אימפריה"
+msgstr ""
 
 #: i18n/states/IT.php:55
 msgid "Isernia"
-msgstr "איסרניה"
+msgstr ""
 
 #: i18n/states/IT.php:56
 msgid "La Spezia"
-msgstr "לה ספציה"
+msgstr ""
 
 #: i18n/states/IT.php:57
 msgid "L&apos;Aquila"
-msgstr "ל'אקווילה"
+msgstr ""
 
 #: i18n/states/IT.php:58
 msgid "Latina"
-msgstr "לטינה"
+msgstr ""
 
 #: i18n/states/IT.php:59
 msgid "Lecce"
-msgstr "לצ'ה"
+msgstr ""
 
 #: i18n/states/IT.php:60
 msgid "Lecco"
-msgstr "לקו"
+msgstr ""
 
 #: i18n/states/IT.php:61
 msgid "Livorno"
-msgstr "ליבורנו"
+msgstr ""
 
 #: i18n/states/IT.php:62
 msgid "Lodi"
-msgstr "לודי"
+msgstr ""
 
 #: i18n/states/IT.php:63
 msgid "Lucca"
@@ -1606,147 +2536,147 @@ msgstr "Mantova"
 
 #: i18n/states/IT.php:66
 msgid "Massa-Carrara"
-msgstr ""
+msgstr "Massa-Carrara"
 
 #: i18n/states/IT.php:67
 msgid "Matera"
-msgstr ""
+msgstr "Matera"
 
 #: i18n/states/IT.php:68
 msgid "Messina"
-msgstr ""
+msgstr "Messina"
 
 #: i18n/states/IT.php:69
 msgid "Milano"
-msgstr ""
+msgstr "Milano"
 
 #: i18n/states/IT.php:70
 msgid "Modena"
-msgstr ""
+msgstr "Modena"
 
 #: i18n/states/IT.php:71
 msgid "Monza e della Brianza"
-msgstr ""
+msgstr "Monza e della Brianza"
 
 #: i18n/states/IT.php:72
 msgid "Napoli"
-msgstr "נאפולי"
+msgstr ""
 
 #: i18n/states/IT.php:73
 msgid "Novara"
-msgstr "נובארה"
+msgstr ""
 
 #: i18n/states/IT.php:74
 msgid "Nuoro"
-msgstr "נואורו"
+msgstr ""
 
 #: i18n/states/IT.php:75
 msgid "Olbia-Tempio"
-msgstr "אולביה-טמפיו"
+msgstr ""
 
 #: i18n/states/IT.php:76
 msgid "Oristano"
-msgstr "אוריסטאנו"
+msgstr ""
 
 #: i18n/states/IT.php:77
 msgid "Padova"
-msgstr "פדובה"
+msgstr ""
 
 #: i18n/states/IT.php:78
 msgid "Palermo"
-msgstr "פאלרמו"
+msgstr ""
 
 #: i18n/states/IT.php:79
 msgid "Parma"
-msgstr "פארמה"
+msgstr ""
 
 #: i18n/states/IT.php:80
 msgid "Pavia"
-msgstr "פאביה"
+msgstr ""
 
 #: i18n/states/IT.php:81
 msgid "Perugia"
-msgstr "פרוג'ה"
+msgstr ""
 
 #: i18n/states/IT.php:82
 msgid "Pesaro e Urbino"
-msgstr "פזארו אה אורבינו"
+msgstr ""
 
 #: i18n/states/IT.php:83
 msgid "Pescara"
-msgstr "פסקארה"
+msgstr ""
 
 #: i18n/states/IT.php:84
 msgid "Piacenza"
-msgstr "פיאצ'נזה"
+msgstr ""
 
 #: i18n/states/IT.php:85
 msgid "Pisa"
-msgstr "פיזה"
+msgstr ""
 
 #: i18n/states/IT.php:86
 msgid "Pistoia"
-msgstr "פיסטויה"
+msgstr ""
 
 #: i18n/states/IT.php:87
 msgid "Pordenone"
-msgstr "פורדנונה"
+msgstr ""
 
 #: i18n/states/IT.php:88
 msgid "Potenza"
-msgstr "פוטנצה"
+msgstr ""
 
 #: i18n/states/IT.php:89
 msgid "Prato"
-msgstr "פראטו"
+msgstr ""
 
 #: i18n/states/IT.php:90
 msgid "Ragusa"
-msgstr "רגוזה"
+msgstr ""
 
 #: i18n/states/IT.php:91
 msgid "Ravenna"
-msgstr "רוונה"
+msgstr ""
 
 #: i18n/states/IT.php:92
 msgid "Reggio Calabria"
-msgstr "רג'יו קלבריה"
+msgstr ""
 
 #: i18n/states/IT.php:93
 msgid "Reggio Emilia"
-msgstr "רג'יו אמיליה"
+msgstr ""
 
 #: i18n/states/IT.php:94
 msgid "Rieti"
-msgstr "ריאטי"
+msgstr ""
 
 #: i18n/states/IT.php:95
 msgid "Rimini"
-msgstr "רימיני"
+msgstr ""
 
 #: i18n/states/IT.php:96
 msgid "Roma"
-msgstr "רומא"
+msgstr ""
 
 #: i18n/states/IT.php:97
 msgid "Rovigo"
-msgstr "רוביגו"
+msgstr ""
 
 #: i18n/states/IT.php:98
 msgid "Salerno"
-msgstr "סלרנו"
+msgstr ""
 
 #: i18n/states/IT.php:99
 msgid "Medio Campidano"
-msgstr "מדיו קמפידנו"
+msgstr ""
 
 #: i18n/states/IT.php:100
 msgid "Sassari"
-msgstr "ססארי"
+msgstr ""
 
 #: i18n/states/IT.php:101
 msgid "Savona"
-msgstr "סבונה"
+msgstr ""
 
 #: i18n/states/IT.php:102
 msgid "Siena"
@@ -1754,175 +2684,175 @@ msgstr "Siena"
 
 #: i18n/states/IT.php:103
 msgid "Siracusa"
-msgstr "סירקוזה"
+msgstr ""
 
 #: i18n/states/IT.php:104
 msgid "Sondrio"
-msgstr "סונדריו"
+msgstr ""
 
 #: i18n/states/IT.php:105
 msgid "Taranto"
-msgstr "טרנטו"
+msgstr ""
 
 #: i18n/states/IT.php:106
 msgid "Teramo"
-msgstr "טראמו"
+msgstr ""
 
 #: i18n/states/IT.php:107
 msgid "Terni"
-msgstr "טרני"
+msgstr ""
 
 #: i18n/states/IT.php:108
 msgid "Torino"
-msgstr "טורינו"
+msgstr "Torino"
 
 #: i18n/states/IT.php:109
 msgid "Ogliastra"
-msgstr "אוגליאסטרה"
+msgstr ""
 
 #: i18n/states/IT.php:110
 msgid "Trapani"
-msgstr "טראפאני"
+msgstr ""
 
 #: i18n/states/IT.php:111
 msgid "Trento"
-msgstr "טרנטו"
+msgstr ""
 
 #: i18n/states/IT.php:112
 msgid "Treviso"
-msgstr "טרוויזו"
+msgstr ""
 
 #: i18n/states/IT.php:113
 msgid "Trieste"
-msgstr "טריאסטה"
+msgstr ""
 
 #: i18n/states/IT.php:114
 msgid "Udine"
-msgstr "אודינה"
+msgstr ""
 
 #: i18n/states/IT.php:115
 msgid "Varese"
-msgstr "וארזה"
+msgstr ""
 
 #: i18n/states/IT.php:116
 msgid "Venezia"
-msgstr "ונציה"
+msgstr ""
 
 #: i18n/states/IT.php:117
 msgid "Verbano-Cusio-Ossola"
-msgstr "ורבאנו-קוציו-אוסולה"
+msgstr ""
 
 #: i18n/states/IT.php:118
 msgid "Vercelli"
-msgstr "ורצ'לי"
+msgstr ""
 
 #: i18n/states/IT.php:119
 msgid "Verona"
-msgstr "ורונה"
+msgstr "Verona"
 
 #: i18n/states/IT.php:120
 msgid "Vibo Valentia"
-msgstr "ויבו ולנטיה"
+msgstr ""
 
 #: i18n/states/IT.php:121
 msgid "Vicenza"
-msgstr "ויצ'נזה"
+msgstr ""
 
 #: i18n/states/IT.php:122
 msgid "Viterbo"
-msgstr "ויטרבו"
+msgstr ""
 
 #: i18n/states/JP.php:13
 msgid "Hokkaido"
-msgstr "הוקאידו"
+msgstr ""
 
 #: i18n/states/JP.php:14
 msgid "Aomori"
-msgstr "אומורי"
+msgstr ""
 
 #: i18n/states/JP.php:15
 msgid "Iwate"
-msgstr "איווטה"
+msgstr ""
 
 #: i18n/states/JP.php:16
 msgid "Miyagi"
-msgstr "מיאגי"
+msgstr ""
 
 #: i18n/states/JP.php:17
 msgid "Akita"
-msgstr "אקיטה"
+msgstr ""
 
 #: i18n/states/JP.php:18
 msgid "Yamagata"
-msgstr "יאמאגטה"
+msgstr ""
 
 #: i18n/states/JP.php:19
 msgid "Fukushima"
-msgstr "פוקושימה"
+msgstr ""
 
 #: i18n/states/JP.php:20
 msgid "Ibaraki"
-msgstr "איבראקי"
+msgstr ""
 
 #: i18n/states/JP.php:21
 msgid "Tochigi"
-msgstr "טוצ'יגי"
+msgstr ""
 
 #: i18n/states/JP.php:22
 msgid "Gunma"
-msgstr "גאנמה"
+msgstr ""
 
 #: i18n/states/JP.php:23
 msgid "Saitama"
-msgstr "סאיטמה"
+msgstr ""
 
 #: i18n/states/JP.php:24
 msgid "Chiba"
-msgstr "צ'יבה"
+msgstr ""
 
 #: i18n/states/JP.php:25
 msgid "Tokyo"
-msgstr "טוקיו"
+msgstr "Tokyo"
 
 #: i18n/states/JP.php:26
 msgid "Kanagawa"
-msgstr "קאנאגאווה"
+msgstr ""
 
 #: i18n/states/JP.php:27
 msgid "Niigata"
-msgstr "נייגטה"
+msgstr ""
 
 #: i18n/states/JP.php:28
 msgid "Toyama"
-msgstr "טויאמה"
+msgstr ""
 
 #: i18n/states/JP.php:29
 msgid "Ishikawa"
-msgstr "אישיקאווה"
+msgstr ""
 
 #: i18n/states/JP.php:30
 msgid "Fukui"
-msgstr "פוקוי"
+msgstr ""
 
 #: i18n/states/JP.php:31
 msgid "Yamanashi"
-msgstr "יאמאנאשי"
+msgstr ""
 
 #: i18n/states/JP.php:32
 msgid "Nagano"
-msgstr "נאגאנו"
+msgstr ""
 
 #: i18n/states/JP.php:33
 msgid "Gifu"
-msgstr "גיפו"
+msgstr ""
 
 #: i18n/states/JP.php:34
 msgid "Shizuoka"
-msgstr "שיזואוקה"
+msgstr ""
 
 #: i18n/states/JP.php:35
 msgid "Aichi"
-msgstr "אייצ'י"
+msgstr ""
 
 #: i18n/states/JP.php:36
 msgid "Mie"
@@ -1930,95 +2860,95 @@ msgstr ""
 
 #: i18n/states/JP.php:37
 msgid "Shiga"
-msgstr "שיגה"
+msgstr ""
 
 #: i18n/states/JP.php:38
 msgid "Kyouto"
-msgstr "קיוטו"
+msgstr ""
 
 #: i18n/states/JP.php:39
 msgid "Osaka"
-msgstr "אוסקה"
+msgstr ""
 
 #: i18n/states/JP.php:40
 msgid "Hyougo"
-msgstr "היוגו"
+msgstr ""
 
 #: i18n/states/JP.php:41
 msgid "Nara"
-msgstr "נארה"
+msgstr ""
 
 #: i18n/states/JP.php:42
 msgid "Wakayama"
-msgstr "וואקאיאמה"
+msgstr ""
 
 #: i18n/states/JP.php:43
 msgid "Tottori"
-msgstr "טוטורי"
+msgstr "Tottori"
 
 #: i18n/states/JP.php:44
 msgid "Shimane"
-msgstr "שימאנה"
+msgstr ""
 
 #: i18n/states/JP.php:45
 msgid "Okayama"
-msgstr "אוקיאמה"
+msgstr "Okayama"
 
 #: i18n/states/JP.php:46
 msgid "Hiroshima"
-msgstr "הירושימה"
+msgstr "Hiroshima"
 
 #: i18n/states/JP.php:47
 msgid "Yamaguchi"
-msgstr "יאמגוצ'י"
+msgstr ""
 
 #: i18n/states/JP.php:48
 msgid "Tokushima"
-msgstr "טוקושימה"
+msgstr "Tokushima"
 
 #: i18n/states/JP.php:49
 msgid "Kagawa"
-msgstr "קגאווה"
+msgstr ""
 
 #: i18n/states/JP.php:50
 msgid "Ehime"
-msgstr "אהימה"
+msgstr ""
 
 #: i18n/states/JP.php:51
 msgid "Kochi"
-msgstr "קוצ'י"
+msgstr ""
 
 #: i18n/states/JP.php:52
 msgid "Fukuoka"
-msgstr "פוקוקה"
+msgstr "Fukuoka"
 
 #: i18n/states/JP.php:53
 msgid "Saga"
-msgstr "סאגה"
+msgstr ""
 
 #: i18n/states/JP.php:54
 msgid "Nagasaki"
-msgstr "נגסאקי"
+msgstr "Nagasaki"
 
 #: i18n/states/JP.php:55
 msgid "Kumamoto"
-msgstr "קומהמוטו"
+msgstr "Kumamoto"
 
 #: i18n/states/JP.php:56
 msgid "Oita"
-msgstr "אויטה"
+msgstr "Oita"
 
 #: i18n/states/JP.php:57
 msgid "Miyazaki"
-msgstr "מיהזקאי"
+msgstr "Miyazaki"
 
 #: i18n/states/JP.php:58
 msgid "Kagoshima"
-msgstr "קאגושימה"
+msgstr "Kagoshima"
 
 #: i18n/states/JP.php:59
 msgid "Okinawa"
-msgstr "אוקינאווה"
+msgstr "Okinawa"
 
 #: i18n/states/MY.php:13
 msgid "Johor"
@@ -2026,11 +2956,11 @@ msgstr "Johor"
 
 #: i18n/states/MY.php:14
 msgid "Kedah"
-msgstr "קדה"
+msgstr ""
 
 #: i18n/states/MY.php:15
 msgid "Kelantan"
-msgstr "קלנטאן"
+msgstr ""
 
 #: i18n/states/MY.php:16
 msgid "Melaka"
@@ -2038,7 +2968,7 @@ msgstr "Melaka"
 
 #: i18n/states/MY.php:17
 msgid "Negeri Sembilan"
-msgstr "ניגרי סמבילאן"
+msgstr ""
 
 #: i18n/states/MY.php:18
 msgid "Pahang"
@@ -2046,19 +2976,19 @@ msgstr "Pahang"
 
 #: i18n/states/MY.php:19
 msgid "Perak"
-msgstr "פראק"
+msgstr ""
 
 #: i18n/states/MY.php:20
 msgid "Perlis"
-msgstr "פרליס"
+msgstr ""
 
 #: i18n/states/MY.php:21
 msgid "Pulau Pinang"
-msgstr "פולאו פיננג"
+msgstr ""
 
 #: i18n/states/MY.php:22
 msgid "Sabah"
-msgstr "סבאח"
+msgstr ""
 
 #: i18n/states/MY.php:23
 msgid "Sarawak"
@@ -2066,7 +2996,7 @@ msgstr "Sarawak"
 
 #: i18n/states/MY.php:24
 msgid "Selangor"
-msgstr "סלנגור"
+msgstr ""
 
 #: i18n/states/MY.php:25
 msgid "Terengganu"
@@ -2074,11 +3004,11 @@ msgstr "Terengganu"
 
 #: i18n/states/MY.php:26
 msgid "W.P. Kuala Lumpur"
-msgstr "WP קואלה לומפור"
+msgstr ""
 
 #: i18n/states/MY.php:27
 msgid "W.P. Labuan"
-msgstr "לבואן WP"
+msgstr ""
 
 #: i18n/states/MY.php:28
 msgid "W.P. Putrajaya"
@@ -2086,352 +3016,352 @@ msgstr "WP Putrajaya"
 
 #: i18n/states/PE.php:13
 msgid "El Callao"
-msgstr "קלאו"
+msgstr ""
 
 #: i18n/states/PE.php:14
 msgid "Municipalidad Metropolitana de Lima"
-msgstr ""
+msgstr "Municipalidad Metropolitana de Lima"
 
 #: i18n/states/PE.php:16
 msgid "Ancash"
-msgstr "אנקש"
+msgstr ""
 
 #: i18n/states/PE.php:17
 msgid "Apur&iacute;mac"
-msgstr "אפורימק"
+msgstr ""
 
 #: i18n/states/PE.php:18
 msgid "Arequipa"
-msgstr "ארקיפה"
+msgstr ""
 
 #: i18n/states/PE.php:19
 msgid "Ayacucho"
-msgstr "אייקוצ'ו"
+msgstr ""
 
 #: i18n/states/PE.php:20
 msgid "Cajamarca"
-msgstr "קחמרקה"
+msgstr ""
 
 #: i18n/states/PE.php:21
 msgid "Cusco"
-msgstr "קוסקו"
+msgstr ""
 
 #: i18n/states/PE.php:22
 msgid "Huancavelica"
-msgstr "הואנקווליקה"
+msgstr ""
 
 #: i18n/states/PE.php:23
 msgid "Hu&aacute;nuco"
-msgstr "הואנוקו"
+msgstr ""
 
 #: i18n/states/PE.php:24
 msgid "Ica"
-msgstr "איקה"
+msgstr ""
 
 #: i18n/states/PE.php:25
 msgid "Jun&iacute;n"
-msgstr "ג'ונין"
+msgstr ""
 
 #: i18n/states/PE.php:26
 msgid "La Libertad"
-msgstr "לה ליברטד"
+msgstr ""
 
 #: i18n/states/PE.php:27
 msgid "Lambayeque"
-msgstr "לאמבאייק"
+msgstr ""
 
 #: i18n/states/PE.php:28
 msgid "Lima"
-msgstr "לימה"
+msgstr ""
 
 #: i18n/states/PE.php:29
 msgid "Loreto"
-msgstr "לורטו"
+msgstr ""
 
 #: i18n/states/PE.php:30
 msgid "Madre de Dios"
-msgstr "מדרה דה דיוס"
+msgstr ""
 
 #: i18n/states/PE.php:31
 msgid "Moquegua"
-msgstr ""
+msgstr "Moquegua"
 
 #: i18n/states/PE.php:32
 msgid "Pasco"
-msgstr "פסקו"
+msgstr ""
 
 #: i18n/states/PE.php:33
 msgid "Piura"
-msgstr "פיורה"
+msgstr ""
 
 #: i18n/states/PE.php:34
 msgid "Puno"
-msgstr "פונו"
+msgstr ""
 
 #: i18n/states/PE.php:35
 msgid "San Mart&iacute;n"
-msgstr "סן מרטין"
+msgstr ""
 
 #: i18n/states/PE.php:36
 msgid "Tacna"
-msgstr "טקנהטקנה"
+msgstr ""
 
 #: i18n/states/PE.php:37
 msgid "Tumbes"
-msgstr "טומבס"
+msgstr ""
 
 #: i18n/states/PE.php:38
 msgid "Ucayali"
-msgstr "אוקאיאלי"
+msgstr ""
 
 #: i18n/states/TH.php:13
 msgid ""
 "Amnat Charoen "
 "(&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;&#3636;&#3597;)"
-msgstr "אמנט הקרון (อำนาจเจริญ)"
+msgstr ""
 
 #: i18n/states/TH.php:14
 msgid "Ang Thong (&#3629;&#3656;&#3634;&#3591;&#3607;&#3629;&#3591;)"
-msgstr "אנג תונג (อ่างทอง)"
+msgstr ""
 
 #: i18n/states/TH.php:15
 msgid ""
 "Ayutthaya "
 "(&#3614;&#3619;&#3632;&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3629;&#3618;&#3640;&#3608;&#3618;&#3634;)"
-msgstr "איאטטאיה"
+msgstr ""
 
 #: i18n/states/TH.php:16
 msgid ""
 "Bangkok "
 "(&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;&#3617;&#3627;&#3634;&#3609;&#3588;&#3619;)"
-msgstr "בנגקוק (กรุงเทพ มหา น ค ร)"
+msgstr ""
 
 #: i18n/states/TH.php:17
 msgid "Bueng Kan (&#3610;&#3638;&#3591;&#3585;&#3634;&#3628;)"
-msgstr "Bueng קאן (บึงกาฬ)"
+msgstr ""
 
 #: i18n/states/TH.php:18
 msgid ""
 "Buri Ram (&#3610;&#3640;&#3619;&#3637;&#3619;&#3633;&#3617;&#3618;&#3660;)"
-msgstr "בורים רמים (บุรีรัมย์)"
+msgstr ""
 
 #: i18n/states/TH.php:19
 msgid ""
 "Chachoengsao "
 "(&#3593;&#3632;&#3648;&#3594;&#3636;&#3591;&#3648;&#3607;&#3619;&#3634;)"
-msgstr "צ'צ'ונגסאו (ฉะเชิงเทรา)"
+msgstr ""
 
 #: i18n/states/TH.php:20
 msgid "Chai Nat (&#3594;&#3633;&#3618;&#3609;&#3634;&#3607;)"
-msgstr "צ'אי יאט (ชัยนาท)"
+msgstr ""
 
 #: i18n/states/TH.php:21
 msgid "Chaiyaphum (&#3594;&#3633;&#3618;&#3616;&#3641;&#3617;&#3636;)"
-msgstr "צ'איאפום (ชัยภูมิ)"
+msgstr ""
 
 #: i18n/states/TH.php:22
 msgid "Chanthaburi (&#3592;&#3633;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "Chanthaburi (จันทบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:23
 msgid ""
 "Chiang Mai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3651;&#3627;&#3617;&#3656;)"
-msgstr "צ'יאנג מאי (เชียงใหม่)"
+msgstr ""
 
 #: i18n/states/TH.php:24
 msgid "Chiang Rai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3619;&#3634;&#3618;)"
-msgstr "צ'יאנג ראי (เชียงราย)"
+msgstr ""
 
 #: i18n/states/TH.php:25
 msgid "Chonburi (&#3594;&#3621;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "Chonburi (ชลบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:26
 msgid "Chumphon (&#3594;&#3640;&#3617;&#3614;&#3619;)"
-msgstr "צ'ומפון (ชุมพร)"
+msgstr ""
 
 #: i18n/states/TH.php:27
 msgid ""
 "Kalasin (&#3585;&#3634;&#3628;&#3626;&#3636;&#3609;&#3608;&#3640;&#3660;)"
-msgstr "Kalasin (กาฬสินธุ์)"
+msgstr ""
 
 #: i18n/states/TH.php:28
 msgid ""
 "Kamphaeng Phet "
 "(&#3585;&#3635;&#3649;&#3614;&#3591;&#3648;&#3614;&#3594;&#3619;)"
-msgstr "קאמפאנג פט (กำแพงเพชร)"
+msgstr ""
 
 #: i18n/states/TH.php:29
 msgid ""
 "Kanchanaburi "
 "(&#3585;&#3634;&#3597;&#3592;&#3609;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "קנצ'נבורי (กาญจนบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:30
 msgid "Khon Kaen (&#3586;&#3629;&#3609;&#3649;&#3585;&#3656;&#3609;)"
-msgstr "Khon Kaen (ขอนแก่น)"
+msgstr ""
 
 #: i18n/states/TH.php:31
 msgid "Krabi (&#3585;&#3619;&#3632;&#3610;&#3637;&#3656;)"
-msgstr "קראבי (กระบี่)"
+msgstr ""
 
 #: i18n/states/TH.php:32
 msgid "Lampang (&#3621;&#3635;&#3611;&#3634;&#3591;)"
-msgstr "Lampang (ลำปาง)"
+msgstr ""
 
 #: i18n/states/TH.php:33
 msgid "Lamphun (&#3621;&#3635;&#3614;&#3641;&#3609;)"
-msgstr "אמפון (ลำพูน)"
+msgstr ""
 
 #: i18n/states/TH.php:34
 msgid "Loei (&#3648;&#3621;&#3618;)"
-msgstr "Loei (เลย)"
+msgstr ""
 
 #: i18n/states/TH.php:35
 msgid "Lopburi (&#3621;&#3614;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "Lopburi (ลพบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:36
 msgid ""
 "Mae Hong Son "
 "(&#3649;&#3617;&#3656;&#3630;&#3656;&#3629;&#3591;&#3626;&#3629;&#3609;)"
-msgstr "מיי הונג סון (แม่ฮ่องสอน)"
+msgstr ""
 
 #: i18n/states/TH.php:37
 msgid ""
 "Maha Sarakham "
 "(&#3617;&#3627;&#3634;&#3626;&#3634;&#3619;&#3588;&#3634;&#3617;)"
-msgstr "מהא סאראקאם (มหาสารคาม)"
+msgstr ""
 
 #: i18n/states/TH.php:38
 msgid "Mukdahan (&#3617;&#3640;&#3585;&#3604;&#3634;&#3627;&#3634;&#3619;)"
-msgstr "וקדאהן (มุกดาหาร)"
+msgstr ""
 
 #: i18n/states/TH.php:39
 msgid "Nakhon Nayok (&#3609;&#3588;&#3619;&#3609;&#3634;&#3618;&#3585;)"
-msgstr "נקון נאיוק (นครนายก)"
+msgstr ""
 
 #: i18n/states/TH.php:40
 msgid "Nakhon Pathom (&#3609;&#3588;&#3619;&#3611;&#3600;&#3617;)"
-msgstr "נקון פאתום (นครปฐม)"
+msgstr ""
 
 #: i18n/states/TH.php:41
 msgid "Nakhon Phanom (&#3609;&#3588;&#3619;&#3614;&#3609;&#3617;)"
-msgstr "תיחון פנום (นครพนม)"
+msgstr ""
 
 #: i18n/states/TH.php:42
 msgid ""
 "Nakhon Ratchasima "
 "(&#3609;&#3588;&#3619;&#3619;&#3634;&#3594;&#3626;&#3637;&#3617;&#3634;)"
-msgstr "Nakhon Ratchasima (นครราชสีมา)"
+msgstr ""
 
 #: i18n/states/TH.php:43
 msgid ""
 "Nakhon Sawan "
 "(&#3609;&#3588;&#3619;&#3626;&#3623;&#3619;&#3619;&#3588;&#3660;)"
-msgstr "תיחון סאוואן (นครสวรรค์)"
+msgstr ""
 
 #: i18n/states/TH.php:44
 msgid ""
 "Nakhon Si Thammarat "
 "(&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3608;&#3619;&#3619;&#3617;&#3619;&#3634;&#3594;)"
-msgstr "תיחון סי טמאראת (นคร ศรี ธรรม ร & # 3634; ช)"
+msgstr ""
 
 #: i18n/states/TH.php:45
 msgid "Nan (&#3609;&#3656;&#3634;&#3609;)"
-msgstr "נאן (น่าน)"
+msgstr ""
 
 #: i18n/states/TH.php:46
 msgid "Narathiwat (&#3609;&#3619;&#3634;&#3608;&#3636;&#3623;&#3634;&#3626;)"
-msgstr "נרתיוואט (นราธิวาส)"
+msgstr ""
 
 #: i18n/states/TH.php:47
 msgid ""
 "Nong Bua Lam Phu "
 "(&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;&#3635;&#3616;&#3641;)"
-msgstr "נונג בא פו (หนองบัวลำภู)"
+msgstr ""
 
 #: i18n/states/TH.php:48
 msgid "Nong Khai (&#3627;&#3609;&#3629;&#3591;&#3588;&#3634;&#3618;)"
-msgstr "נונג חאי (หนองคาย)"
+msgstr ""
 
 #: i18n/states/TH.php:49
 msgid "Nonthaburi (&#3609;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "נונטבורי (นนทบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:50
 msgid ""
 "Pathum Thani (&#3611;&#3607;&#3640;&#3617;&#3608;&#3634;&#3609;&#3637;)"
-msgstr "Pathum Thani (ปทุมธานี)"
+msgstr ""
 
 #: i18n/states/TH.php:51
 msgid "Pattani (&#3611;&#3633;&#3605;&#3605;&#3634;&#3609;&#3637;)"
-msgstr "פאתני (ปัตตานี)"
+msgstr ""
 
 #: i18n/states/TH.php:52
 msgid "Phang Nga (&#3614;&#3633;&#3591;&#3591;&#3634;)"
-msgstr "Phang Nga (พังงา)"
+msgstr ""
 
 #: i18n/states/TH.php:53
 msgid "Phatthalung (&#3614;&#3633;&#3607;&#3621;&#3640;&#3591;)"
-msgstr "פאתאלונג (พัทลุง)"
+msgstr ""
 
 #: i18n/states/TH.php:54
 msgid "Phayao (&#3614;&#3632;&#3648;&#3618;&#3634;)"
-msgstr "פאיאו (พะเยา)"
+msgstr ""
 
 #: i18n/states/TH.php:55
 msgid ""
 "Phetchabun (&#3648;&#3614;&#3594;&#3619;&#3610;&#3641;&#3619;&#3603;&#3660;)"
-msgstr "פטצ'בון (เพชรบูรณ์)"
+msgstr ""
 
 #: i18n/states/TH.php:56
 msgid "Phetchaburi (&#3648;&#3614;&#3594;&#3619;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "Phetchaburi (เพชรบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:57
 msgid "Phichit (&#3614;&#3636;&#3592;&#3636;&#3605;&#3619;)"
-msgstr "פיצ'יט (พิจิตร)"
+msgstr ""
 
 #: i18n/states/TH.php:58
 msgid "Phitsanulok (&#3614;&#3636;&#3625;&#3603;&#3640;&#3650;&#3621;&#3585;)"
-msgstr "Phitsanulok (พิษณุโลก)"
+msgstr ""
 
 #: i18n/states/TH.php:59
 msgid "Phrae (&#3649;&#3614;&#3619;&#3656;)"
-msgstr "פראה (แพร่)"
+msgstr ""
 
 #: i18n/states/TH.php:60
 msgid "Phuket (&#3616;&#3641;&#3648;&#3585;&#3655;&#3605;)"
-msgstr "פוקט (ภูเก็ต)"
+msgstr ""
 
 #: i18n/states/TH.php:61
 msgid ""
 "Prachin Buri "
 "(&#3611;&#3619;&#3634;&#3592;&#3637;&#3609;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "פרצ'ינבורי (ปราจีนบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:62
 msgid ""
 "Prachuap Khiri Khan "
 "(&#3611;&#3619;&#3632;&#3592;&#3623;&#3610;&#3588;&#3637;&#3619;&#3637;&#3586;&#3633;&#3609;&#3608;&#3660;)"
-msgstr "פראצ'ואפ קהירי קהאן"
+msgstr ""
 
 #: i18n/states/TH.php:63
 msgid "Ranong (&#3619;&#3632;&#3609;&#3629;&#3591;)"
-msgstr "Ranong (ระนอง)"
+msgstr ""
 
 #: i18n/states/TH.php:64
 msgid "Ratchaburi (&#3619;&#3634;&#3594;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "ראטצ'אבורי (ราชบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:65
 msgid "Rayong (&#3619;&#3632;&#3618;&#3629;&#3591;)"
-msgstr "ראיונג (ระยอง)"
+msgstr ""
 
 #: i18n/states/TH.php:66
 msgid "Roi Et (&#3619;&#3657;&#3629;&#3618;&#3648;&#3629;&#3655;&#3604;)"
-msgstr "הרועים Et (ร้อยเอ็ด)"
+msgstr ""
 
 #: i18n/states/TH.php:67
 msgid "Sa Kaeo (&#3626;&#3619;&#3632;&#3649;&#3585;&#3657;&#3623;)"
@@ -2439,7 +3369,7 @@ msgstr "Sa Kaeo (สระแก้ว)"
 
 #: i18n/states/TH.php:68
 msgid "Sakon Nakhon (&#3626;&#3585;&#3621;&#3609;&#3588;&#3619;)"
-msgstr "סקון יחנון (สกลนคร)"
+msgstr ""
 
 #: i18n/states/TH.php:69
 msgid ""
@@ -2461,201 +3391,201 @@ msgstr "Samut Songkhram (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588
 
 #: i18n/states/TH.php:72
 msgid "Saraburi (&#3626;&#3619;&#3632;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "סרבורי (สระบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:73
 msgid "Satun (&#3626;&#3605;&#3641;&#3621;)"
-msgstr "סטון (สตูล)"
+msgstr ""
 
 #: i18n/states/TH.php:74
 msgid ""
 "Sing Buri (&#3626;&#3636;&#3591;&#3627;&#3660;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "סינג בורי (สิงห์บุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:75
 msgid "Sisaket (&#3624;&#3619;&#3637;&#3626;&#3632;&#3648;&#3585;&#3625;)"
-msgstr "Sisaket (ศรีสะเกษ)"
+msgstr ""
 
 #: i18n/states/TH.php:76
 msgid "Songkhla (&#3626;&#3591;&#3586;&#3621;&#3634;)"
-msgstr "סונגקלה (สงขลา)"
+msgstr ""
 
 #: i18n/states/TH.php:77
 msgid "Sukhothai (&#3626;&#3640;&#3650;&#3586;&#3607;&#3633;&#3618;)"
-msgstr "סוקוטאי (สุโขทัย)"
+msgstr ""
 
 #: i18n/states/TH.php:78
 msgid ""
 "Suphan Buri "
 "(&#3626;&#3640;&#3614;&#3619;&#3619;&#3603;&#3610;&#3640;&#3619;&#3637;)"
-msgstr "סופאנבורי (สุพรรณบุรี)"
+msgstr ""
 
 #: i18n/states/TH.php:79
 msgid ""
 "Surat Thani "
 "(&#3626;&#3640;&#3619;&#3634;&#3625;&#3598;&#3619;&#3660;&#3608;&#3634;&#3609;&#3637;)"
-msgstr "סוראט תאנה (สุราษฎร์ธานี ;)"
+msgstr ""
 
 #: i18n/states/TH.php:80
 msgid "Surin (&#3626;&#3640;&#3619;&#3636;&#3609;&#3607;&#3619;&#3660;)"
-msgstr "סורין (สุรินทร์)"
+msgstr ""
 
 #: i18n/states/TH.php:81
 msgid "Tak (&#3605;&#3634;&#3585;)"
-msgstr "טאק (ตาก)"
+msgstr ""
 
 #: i18n/states/TH.php:82
 msgid "Trang (&#3605;&#3619;&#3633;&#3591;)"
-msgstr "טראנג (ตรัง)"
+msgstr ""
 
 #: i18n/states/TH.php:83
 msgid "Trat (&#3605;&#3619;&#3634;&#3604;)"
-msgstr "טראט (ตราด)"
+msgstr ""
 
 #: i18n/states/TH.php:84
 msgid ""
 "Ubon Ratchathani "
 "(&#3629;&#3640;&#3610;&#3621;&#3619;&#3634;&#3594;&#3608;&#3634;&#3609;&#3637;)"
-msgstr "Ubon Ratchathani (อุบลราชธานี)"
+msgstr ""
 
 #: i18n/states/TH.php:85
 msgid "Udon Thani (&#3629;&#3640;&#3604;&#3619;&#3608;&#3634;&#3609;&#3637;)"
-msgstr "אודון תאנה (อุดรธานี)"
+msgstr ""
 
 #: i18n/states/TH.php:86
 msgid ""
 "Uthai Thani "
 "(&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)"
-msgstr "אוטאי תאנה (อุทัยธานี)"
+msgstr ""
 
 #: i18n/states/TH.php:87
 msgid ""
 "Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)"
-msgstr "אוטרדיט (อุตรดิตถ์)"
+msgstr ""
 
 #: i18n/states/TH.php:88
 msgid "Yala (&#3618;&#3632;&#3621;&#3634;)"
-msgstr "Yala (ยะลา)"
+msgstr ""
 
 #: i18n/states/TH.php:89
 msgid "Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)"
-msgstr "יאסוטון (ยโสธร)"
+msgstr ""
 
 #: i18n/states/TR.php:13
 msgid "Adana"
-msgstr "אדנה"
+msgstr ""
 
 #: i18n/states/TR.php:14
 msgid "Ad&#305;yaman"
-msgstr "אדיאמן"
+msgstr ""
 
 #: i18n/states/TR.php:15
 msgid "Afyon"
-msgstr "אפיון"
+msgstr ""
 
 #: i18n/states/TR.php:16
 msgid "A&#287;r&#305;"
-msgstr "אגרי"
+msgstr ""
 
 #: i18n/states/TR.php:17
 msgid "Amasya"
-msgstr "אמסיה"
+msgstr ""
 
 #: i18n/states/TR.php:18
 msgid "Ankara"
-msgstr "אנקארה"
+msgstr ""
 
 #: i18n/states/TR.php:19
 msgid "Antalya"
-msgstr "אנטליה"
+msgstr ""
 
 #: i18n/states/TR.php:20
 msgid "Artvin"
-msgstr "ארטווין"
+msgstr ""
 
 #: i18n/states/TR.php:21
 msgid "Ayd&#305;n"
-msgstr "איידין"
+msgstr ""
 
 #: i18n/states/TR.php:22
 msgid "Bal&#305;kesir"
-msgstr "באליקסיר"
+msgstr ""
 
 #: i18n/states/TR.php:23
 msgid "Bilecik"
-msgstr "בילסיק"
+msgstr ""
 
 #: i18n/states/TR.php:24
 msgid "Bing&#246;l"
-msgstr "בינגול"
+msgstr ""
 
 #: i18n/states/TR.php:25
 msgid "Bitlis"
-msgstr "ביטליס"
+msgstr ""
 
 #: i18n/states/TR.php:26
 msgid "Bolu"
-msgstr "בולו"
+msgstr ""
 
 #: i18n/states/TR.php:27
 msgid "Burdur"
-msgstr "בורדור"
+msgstr ""
 
 #: i18n/states/TR.php:28
 msgid "Bursa"
-msgstr "בורסה"
+msgstr ""
 
 #: i18n/states/TR.php:29
 msgid "&#199;anakkale"
-msgstr "צ'נקלה"
+msgstr ""
 
 #: i18n/states/TR.php:30
 msgid "&#199;ank&#305;r&#305;"
-msgstr "קנקירי"
+msgstr ""
 
 #: i18n/states/TR.php:31
 msgid "&#199;orum"
-msgstr "צורום"
+msgstr ""
 
 #: i18n/states/TR.php:32
 msgid "Denizli"
-msgstr "דניזלי"
+msgstr ""
 
 #: i18n/states/TR.php:33
 msgid "Diyarbak&#305;r"
-msgstr "דיארבקיר"
+msgstr ""
 
 #: i18n/states/TR.php:34
 msgid "Edirne"
-msgstr "אדירנה"
+msgstr ""
 
 #: i18n/states/TR.php:35
 msgid "Elaz&#305;&#287;"
-msgstr "אלאזיג"
+msgstr ""
 
 #: i18n/states/TR.php:36
 msgid "Erzincan"
-msgstr "ארזינקאן"
+msgstr ""
 
 #: i18n/states/TR.php:37
 msgid "Erzurum"
-msgstr "ארזורום"
+msgstr ""
 
 #: i18n/states/TR.php:38
 msgid "Eski&#351;ehir"
-msgstr "אסקישהיר"
+msgstr ""
 
 #: i18n/states/TR.php:39
 msgid "Gaziantep"
-msgstr "גזיאנטפ"
+msgstr ""
 
 #: i18n/states/TR.php:40
 msgid "Giresun"
-msgstr "גירסון"
+msgstr ""
 
 #: i18n/states/TR.php:41
 msgid "G&#252;m&#252;&#351;hane"
-msgstr "גומושנה"
+msgstr ""
 
 #: i18n/states/TR.php:42
 msgid "Hakkari"
@@ -2671,11 +3601,11 @@ msgstr "אספרטה"
 
 #: i18n/states/TR.php:45
 msgid "&#304;&#231;el"
-msgstr "איצ'ל (מרסין)"
+msgstr ""
 
 #: i18n/states/TR.php:46
 msgid "&#304;stanbul"
-msgstr "איסטנבול"
+msgstr ""
 
 #: i18n/states/TR.php:47
 msgid "&#304;zmir"
@@ -2691,43 +3621,43 @@ msgstr "קסטמונו"
 
 #: i18n/states/TR.php:50
 msgid "Kayseri"
-msgstr "קייסרי"
+msgstr ""
 
 #: i18n/states/TR.php:51
 msgid "K&#305;rklareli"
-msgstr "קירקלרלי"
+msgstr ""
 
 #: i18n/states/TR.php:52
 msgid "K&#305;r&#351;ehir"
-msgstr "קירסהיר"
+msgstr ""
 
 #: i18n/states/TR.php:53
 msgid "Kocaeli"
-msgstr "קוג'אלי"
+msgstr ""
 
 #: i18n/states/TR.php:54
 msgid "Konya"
-msgstr "קוניה"
+msgstr ""
 
 #: i18n/states/TR.php:55
 msgid "K&#252;tahya"
-msgstr "קוטאיה"
+msgstr ""
 
 #: i18n/states/TR.php:56
 msgid "Malatya"
-msgstr "מלטיה"
+msgstr ""
 
 #: i18n/states/TR.php:57
 msgid "Manisa"
-msgstr "מניסה"
+msgstr ""
 
 #: i18n/states/TR.php:58
 msgid "Kahramanmara&#351;"
-msgstr "קהרמאנמרש"
+msgstr ""
 
 #: i18n/states/TR.php:59
 msgid "Mardin"
-msgstr "מרדין"
+msgstr ""
 
 #: i18n/states/TR.php:60
 msgid "Mu&#287;la"
@@ -2735,67 +3665,67 @@ msgstr "Mu&#287;la"
 
 #: i18n/states/TR.php:61
 msgid "Mu&#351;"
-msgstr "מוס"
+msgstr ""
 
 #: i18n/states/TR.php:62
 msgid "Nev&#351;ehir"
-msgstr "נבסהיר"
+msgstr ""
 
 #: i18n/states/TR.php:63
 msgid "Ni&#287;de"
-msgstr "ניגדה"
+msgstr ""
 
 #: i18n/states/TR.php:64
 msgid "Ordu"
-msgstr "אורדו"
+msgstr ""
 
 #: i18n/states/TR.php:65
 msgid "Rize"
-msgstr ""
+msgstr "Rize"
 
 #: i18n/states/TR.php:66
 msgid "Sakarya"
-msgstr "סקריה"
+msgstr ""
 
 #: i18n/states/TR.php:67
 msgid "Samsun"
-msgstr "סמסון"
+msgstr ""
 
 #: i18n/states/TR.php:68
 msgid "Siirt"
-msgstr ""
+msgstr "Siirt"
 
 #: i18n/states/TR.php:69
 msgid "Sinop"
-msgstr "סינופ"
+msgstr ""
 
 #: i18n/states/TR.php:70
 msgid "Sivas"
-msgstr "סיווס"
+msgstr ""
 
 #: i18n/states/TR.php:71
 msgid "Tekirda&#287;"
-msgstr "טקירדא"
+msgstr ""
 
 #: i18n/states/TR.php:72
 msgid "Tokat"
-msgstr "טוקאט"
+msgstr ""
 
 #: i18n/states/TR.php:73
 msgid "Trabzon"
-msgstr "טרבזון"
+msgstr ""
 
 #: i18n/states/TR.php:74
 msgid "Tunceli"
-msgstr "טונסלי"
+msgstr ""
 
 #: i18n/states/TR.php:75
 msgid "&#350;anl&#305;urfa"
-msgstr "אורפה"
+msgstr ""
 
 #: i18n/states/TR.php:76
 msgid "U&#351;ak"
-msgstr "אוסאק"
+msgstr ""
 
 #: i18n/states/TR.php:77
 msgid "Van"
@@ -2803,311 +3733,307 @@ msgstr ""
 
 #: i18n/states/TR.php:78
 msgid "Yozgat"
-msgstr "יוזגט"
+msgstr ""
 
 #: i18n/states/TR.php:79
 msgid "Zonguldak"
-msgstr "זונגולדאק"
+msgstr ""
 
 #: i18n/states/TR.php:80
 msgid "Aksaray"
-msgstr "אקסראי"
+msgstr ""
 
 #: i18n/states/TR.php:81
 msgid "Bayburt"
-msgstr "בייבורט"
+msgstr ""
 
 #: i18n/states/TR.php:82
 msgid "Karaman"
-msgstr "קרמאן"
+msgstr ""
 
 #: i18n/states/TR.php:83
 msgid "K&#305;r&#305;kkale"
-msgstr "קיריקאלה"
+msgstr ""
 
 #: i18n/states/TR.php:84
 msgid "Batman"
-msgstr "באטמן"
+msgstr ""
 
 #: i18n/states/TR.php:85
 msgid "&#350;&#305;rnak"
-msgstr "סירנאק"
+msgstr ""
 
 #: i18n/states/TR.php:86
 msgid "Bart&#305;n"
-msgstr "ברטין"
+msgstr ""
 
 #: i18n/states/TR.php:87
 msgid "Ardahan"
-msgstr "ארדהאן"
+msgstr ""
 
 #: i18n/states/TR.php:88
 msgid "I&#287;d&#305;r"
-msgstr "איגדיר"
+msgstr ""
 
 #: i18n/states/TR.php:89
 msgid "Yalova"
-msgstr "יאלובה"
+msgstr ""
 
 #: i18n/states/TR.php:90
 msgid "Karab&#252;k"
-msgstr "קרבוק"
+msgstr ""
 
 #: i18n/states/TR.php:91
 msgid "Kilis"
-msgstr "קיליס"
+msgstr ""
 
 #: i18n/states/TR.php:92
 msgid "Osmaniye"
-msgstr ""
+msgstr "Osmaniye"
 
 #: i18n/states/TR.php:93
 msgid "D&#252;zce"
-msgstr "דוצ'ה"
+msgstr ""
 
 #: i18n/states/US.php:13
 msgid "Alabama"
-msgstr "אלבמה"
+msgstr ""
 
 #: i18n/states/US.php:14
 msgid "Alaska"
-msgstr "אלסקה"
+msgstr ""
 
 #: i18n/states/US.php:15
 msgid "Arizona"
-msgstr "אריזונה"
+msgstr ""
 
 #: i18n/states/US.php:16
 msgid "Arkansas"
-msgstr "ארקנסו"
+msgstr ""
 
 #: i18n/states/US.php:17
 msgid "California"
-msgstr "קליפורניה"
+msgstr ""
 
 #: i18n/states/US.php:18
 msgid "Colorado"
-msgstr "קולורדו"
+msgstr ""
 
 #: i18n/states/US.php:19
 msgid "Connecticut"
-msgstr "קונטיקט"
+msgstr ""
 
 #: i18n/states/US.php:20
 msgid "Delaware"
-msgstr "דלוור"
+msgstr ""
 
 #: i18n/states/US.php:21
 msgid "District Of Columbia"
-msgstr "מחוז קולומביה"
+msgstr ""
 
 #: i18n/states/US.php:22
 msgid "Florida"
-msgstr "פלורידה"
-
-#: i18n/states/US.php:23 includes/class-wc-countries.php:118
-msgid "Georgia"
-msgstr "Georgia"
+msgstr ""
 
 #: i18n/states/US.php:24
 msgid "Hawaii"
-msgstr "הוואי"
+msgstr ""
 
 #: i18n/states/US.php:25
 msgid "Idaho"
-msgstr "איידהו"
+msgstr ""
 
 #: i18n/states/US.php:26
 msgid "Illinois"
-msgstr "אילינוי"
+msgstr ""
 
 #: i18n/states/US.php:27
 msgid "Indiana"
-msgstr "אינדיאנה"
+msgstr ""
 
 #: i18n/states/US.php:28
 msgid "Iowa"
-msgstr "איווה"
+msgstr ""
 
 #: i18n/states/US.php:29
 msgid "Kansas"
-msgstr "קנזס"
+msgstr ""
 
 #: i18n/states/US.php:30
 msgid "Kentucky"
-msgstr "קנטאקי"
+msgstr ""
 
 #: i18n/states/US.php:31
 msgid "Louisiana"
-msgstr "לואיזיאנה"
+msgstr ""
 
 #: i18n/states/US.php:32
 msgid "Maine"
-msgstr "מיין."
+msgstr ""
 
 #: i18n/states/US.php:33
 msgid "Maryland"
-msgstr "מרילנד"
+msgstr ""
 
 #: i18n/states/US.php:34
 msgid "Massachusetts"
-msgstr "מסצ'וסטס"
+msgstr ""
 
 #: i18n/states/US.php:35
 msgid "Michigan"
-msgstr "מישיגן"
+msgstr ""
 
 #: i18n/states/US.php:36
 msgid "Minnesota"
-msgstr "מינסוטה"
+msgstr ""
 
 #: i18n/states/US.php:37
 msgid "Mississippi"
-msgstr "מיסיסיפי"
+msgstr ""
 
 #: i18n/states/US.php:38
 msgid "Missouri"
-msgstr "מיזורי"
+msgstr ""
 
 #: i18n/states/US.php:40
 msgid "Nebraska"
-msgstr "נברסקה"
+msgstr ""
 
 #: i18n/states/US.php:41
 msgid "Nevada"
-msgstr "נבאדה"
+msgstr ""
 
 #: i18n/states/US.php:42
 msgid "New Hampshire"
-msgstr "ניו המפשייר"
+msgstr ""
 
 #: i18n/states/US.php:43
 msgid "New Jersey"
-msgstr "ניו ג'רזי"
+msgstr ""
 
 #: i18n/states/US.php:44
 msgid "New Mexico"
-msgstr "ניו מקסיקו"
+msgstr ""
 
 #: i18n/states/US.php:45
 msgid "New York"
-msgstr "ניו יורק"
+msgstr ""
 
 #: i18n/states/US.php:46
 msgid "North Carolina"
-msgstr "צפון קרוליינה"
+msgstr ""
 
 #: i18n/states/US.php:47
 msgid "North Dakota"
-msgstr "צפון דקוטה"
+msgstr ""
 
 #: i18n/states/US.php:48
 msgid "Ohio"
-msgstr "אוהיו"
+msgstr ""
 
 #: i18n/states/US.php:49
 msgid "Oklahoma"
-msgstr "אוקלהומה"
+msgstr ""
 
 #: i18n/states/US.php:50
 msgid "Oregon"
-msgstr "אורגון"
+msgstr ""
 
 #: i18n/states/US.php:51
 msgid "Pennsylvania"
-msgstr "פנסילבניה"
+msgstr ""
 
 #: i18n/states/US.php:52
 msgid "Rhode Island"
-msgstr "רוד איילנד"
+msgstr ""
 
 #: i18n/states/US.php:53
 msgid "South Carolina"
-msgstr "דרום קרוליינה"
+msgstr ""
 
 #: i18n/states/US.php:54
 msgid "South Dakota"
-msgstr "דרום דקוטה"
+msgstr ""
 
 #: i18n/states/US.php:55
 msgid "Tennessee"
-msgstr "טנסי"
+msgstr ""
 
 #: i18n/states/US.php:56
 msgid "Texas"
-msgstr "טקסס"
+msgstr ""
 
 #: i18n/states/US.php:57
 msgid "Utah"
-msgstr "יוטה"
+msgstr ""
 
 #: i18n/states/US.php:58
 msgid "Vermont"
-msgstr "רמונט"
+msgstr ""
 
 #: i18n/states/US.php:59
 msgid "Virginia"
-msgstr "וירג'יניה"
+msgstr ""
 
 #: i18n/states/US.php:60
 msgid "Washington"
-msgstr "וושינגטון"
+msgstr ""
 
 #: i18n/states/US.php:61
 msgid "West Virginia"
-msgstr "מערב וירג'יניה"
+msgstr ""
 
 #: i18n/states/US.php:62
 msgid "Wisconsin"
-msgstr "ויסקונסין"
+msgstr ""
 
 #: i18n/states/US.php:63
 msgid "Wyoming"
-msgstr "ויומינג"
+msgstr ""
 
 #: i18n/states/US.php:64
 msgid "Armed Forces (AA)"
-msgstr "כוחות מזוינים (AA)"
+msgstr ""
 
 #: i18n/states/US.php:65
 msgid "Armed Forces (AE)"
-msgstr "כוחות מזוינים (AE)"
+msgstr ""
 
 #: i18n/states/US.php:66
 msgid "Armed Forces (AP)"
-msgstr "כוחות מזוינים (AP)"
+msgstr ""
 
 #: i18n/states/US.php:67
 msgid "American Samoa"
-msgstr "סמואה האמריקנית"
+msgstr ""
 
 #: i18n/states/US.php:68
 msgid "Guam"
-msgstr "גואם"
+msgstr ""
 
 #: i18n/states/US.php:69
 msgid "Northern Mariana Islands"
-msgstr "אי מריאנה הצפוניים"
+msgstr ""
 
 #: i18n/states/US.php:70
 msgid "Puerto Rico"
-msgstr "פורטו ריקו"
+msgstr ""
 
 #: i18n/states/US.php:71
 msgid "US Minor Outlying Islands"
-msgstr "איים קטנים מרוחקים בארצות הברית"
+msgstr ""
 
 #: i18n/states/US.php:72
 msgid "US Virgin Islands"
-msgstr "איי הבתולה ארצות הברית"
+msgstr ""
 
 #: i18n/states/ZA.php:13
 msgid "Eastern Cape"
-msgstr "מחוז כף מזרחית"
+msgstr ""
 
 #: i18n/states/ZA.php:14
 msgid "Free State"
-msgstr "מדינה חופשיה"
+msgstr ""
 
 #: i18n/states/ZA.php:15
 msgid "Gauteng"
@@ -3115,11 +4041,11 @@ msgstr "Gauteng"
 
 #: i18n/states/ZA.php:16
 msgid "KwaZulu-Natal"
-msgstr "קוואזולו נטאל"
+msgstr ""
 
 #: i18n/states/ZA.php:17
 msgid "Limpopo"
-msgstr "לימפופו"
+msgstr ""
 
 #: i18n/states/ZA.php:18
 msgid "Mpumalanga"
@@ -3127,15 +4053,15 @@ msgstr "Mpumalanga"
 
 #: i18n/states/ZA.php:19
 msgid "Northern Cape"
-msgstr "כף הצפונית"
+msgstr ""
 
 #: i18n/states/ZA.php:20
 msgid "North West"
-msgstr "צפון מערב"
+msgstr ""
 
 #: i18n/states/ZA.php:21
 msgid "Western Cape"
-msgstr "כף מערבית"
+msgstr ""
 
 #: i18n/strings.php:16
 msgid "pending"
@@ -3165,9 +4091,9 @@ msgstr "הוחזר"
 msgid "cancelled"
 msgstr "בוטל"
 
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/emails/class-wc-email-customer-completed-order.php:140
-#: includes/emails/class-wc-email-new-order.php:120
+#: includes/abstracts/abstract-wc-email.php:573
+#: includes/emails/class-wc-email-customer-completed-order.php:141
+#: includes/emails/class-wc-email-new-order.php:121
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:52
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:122
@@ -3178,130 +4104,130 @@ msgstr "בוטל"
 msgid "Enable/Disable"
 msgstr "הפעלה/כיבוי"
 
-#: includes/abstracts/abstract-wc-email.php:572
-#: includes/emails/class-wc-email-customer-completed-order.php:142
-#: includes/emails/class-wc-email-new-order.php:122
+#: includes/abstracts/abstract-wc-email.php:575
+#: includes/emails/class-wc-email-customer-completed-order.php:143
+#: includes/emails/class-wc-email-new-order.php:123
 msgid "Enable this email notification"
 msgstr "להפעיל התראות אימייל"
 
-#: includes/abstracts/abstract-wc-email.php:576
-#: includes/emails/class-wc-email-customer-invoice.php:146
+#: includes/abstracts/abstract-wc-email.php:579
+#: includes/emails/class-wc-email-customer-invoice.php:147
 msgid "Email subject"
 msgstr "כותרת אימייל"
 
-#: includes/abstracts/abstract-wc-email.php:578
-#: includes/abstracts/abstract-wc-email.php:585
-#: includes/emails/class-wc-email-customer-completed-order.php:148
-#: includes/emails/class-wc-email-customer-completed-order.php:155
-#: includes/emails/class-wc-email-customer-completed-order.php:162
-#: includes/emails/class-wc-email-customer-completed-order.php:169
-#: includes/emails/class-wc-email-customer-invoice.php:148
-#: includes/emails/class-wc-email-customer-invoice.php:155
-#: includes/emails/class-wc-email-customer-invoice.php:162
-#: includes/emails/class-wc-email-customer-invoice.php:169
+#: includes/abstracts/abstract-wc-email.php:581
+#: includes/abstracts/abstract-wc-email.php:588
+#: includes/emails/class-wc-email-customer-completed-order.php:149
+#: includes/emails/class-wc-email-customer-completed-order.php:156
+#: includes/emails/class-wc-email-customer-completed-order.php:163
+#: includes/emails/class-wc-email-customer-completed-order.php:170
+#: includes/emails/class-wc-email-customer-invoice.php:149
+#: includes/emails/class-wc-email-customer-invoice.php:156
+#: includes/emails/class-wc-email-customer-invoice.php:163
+#: includes/emails/class-wc-email-customer-invoice.php:170
 msgid "Defaults to <code>%s</code>"
 msgstr "ברירת המחדל היא <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:583
-#: includes/emails/class-wc-email-customer-invoice.php:153
+#: includes/abstracts/abstract-wc-email.php:586
+#: includes/emails/class-wc-email-customer-invoice.php:154
 msgid "Email heading"
 msgstr "כותרת האימייל"
 
-#: includes/abstracts/abstract-wc-email.php:590
-#: includes/emails/class-wc-email-customer-completed-order.php:174
-#: includes/emails/class-wc-email-customer-invoice.php:174
-#: includes/emails/class-wc-email-new-order.php:147
+#: includes/abstracts/abstract-wc-email.php:593
+#: includes/emails/class-wc-email-customer-completed-order.php:175
+#: includes/emails/class-wc-email-customer-invoice.php:175
+#: includes/emails/class-wc-email-new-order.php:148
 msgid "Email type"
 msgstr "סוג אימייל"
 
-#: includes/abstracts/abstract-wc-email.php:592
-#: includes/emails/class-wc-email-customer-completed-order.php:176
-#: includes/emails/class-wc-email-customer-invoice.php:176
-#: includes/emails/class-wc-email-new-order.php:149
+#: includes/abstracts/abstract-wc-email.php:595
+#: includes/emails/class-wc-email-customer-completed-order.php:177
+#: includes/emails/class-wc-email-customer-invoice.php:177
+#: includes/emails/class-wc-email-new-order.php:150
 msgid "Choose which format of email to send."
 msgstr "בחר סוג אימייל לשליחה"
 
-#: includes/abstracts/abstract-wc-email.php:596
-#: includes/emails/class-wc-email-customer-completed-order.php:180
-#: includes/emails/class-wc-email-customer-invoice.php:180
-#: includes/emails/class-wc-email-new-order.php:153
-msgid "Plain text"
-msgstr "טקסט פשוט"
-
-#: includes/abstracts/abstract-wc-email.php:597
+#: includes/abstracts/abstract-wc-email.php:599
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:181
 #: includes/emails/class-wc-email-new-order.php:154
-msgid "HTML"
-msgstr "HTML"
+msgid "Plain text"
+msgstr "טקסט פשוט"
 
-#: includes/abstracts/abstract-wc-email.php:598
+#: includes/abstracts/abstract-wc-email.php:600
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:182
 #: includes/emails/class-wc-email-new-order.php:155
+msgid "HTML"
+msgstr "HTML"
+
+#: includes/abstracts/abstract-wc-email.php:601
+#: includes/emails/class-wc-email-customer-completed-order.php:183
+#: includes/emails/class-wc-email-customer-invoice.php:183
+#: includes/emails/class-wc-email-new-order.php:156
 msgid "Multipart"
 msgstr "Multipart"
 
-#: includes/abstracts/abstract-wc-email.php:634
-#: includes/abstracts/abstract-wc-email.php:655
+#: includes/abstracts/abstract-wc-email.php:637
+#: includes/abstracts/abstract-wc-email.php:658
 msgid "Could not write to template file."
 msgstr "הכתיבה לקובץ התבנית לא עברה בהצלחה"
 
-#: includes/abstracts/abstract-wc-email.php:686
+#: includes/abstracts/abstract-wc-email.php:689
 msgid "Template file copied to theme."
 msgstr "קובץ התבנית הועתק לערכת הנושא."
 
-#: includes/abstracts/abstract-wc-email.php:695
+#: includes/abstracts/abstract-wc-email.php:698
 msgid "Template file deleted from theme."
 msgstr "קובץ התבנית נמחק מערכת הנושא."
 
-#: includes/abstracts/abstract-wc-email.php:703
+#: includes/abstracts/abstract-wc-email.php:706
 #: includes/abstracts/abstract-wc-integration.php:30
 #: includes/abstracts/abstract-wc-settings-api.php:39 woocommerce.php:181
 msgid "Settings"
 msgstr "הגדרות"
 
-#: includes/abstracts/abstract-wc-email.php:715
+#: includes/abstracts/abstract-wc-email.php:718
 msgid "HTML template"
 msgstr "תבנית HTML"
 
-#: includes/abstracts/abstract-wc-email.php:716
+#: includes/abstracts/abstract-wc-email.php:719
 msgid "Plain text template"
 msgstr "תבנית טקסט פשוט"
 
-#: includes/abstracts/abstract-wc-email.php:737
+#: includes/abstracts/abstract-wc-email.php:740
 msgid "Delete template file"
 msgstr "מחק קובץ תבנית"
 
-#: includes/abstracts/abstract-wc-email.php:740
+#: includes/abstracts/abstract-wc-email.php:743
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr "קובץ התבנית זה נדרס על ידי ערכת הנושא שלך וניתן למצוא אותו ב: <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:755
+#: includes/abstracts/abstract-wc-email.php:758
 msgid "Copy file to theme"
 msgstr "העתק קובץ לערכת הנושא"
 
-#: includes/abstracts/abstract-wc-email.php:758
+#: includes/abstracts/abstract-wc-email.php:761
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr "כדי לדרוס את תבנית האי-מייל הזו ולערוך אותה, העתק את <code>%s</code> לתיקיית ערכת הנושא שלך: <code>%s</code>"
 
-#: includes/abstracts/abstract-wc-email.php:769
+#: includes/abstracts/abstract-wc-email.php:772
 msgid "File was not found."
 msgstr "הקובץ לא נמצא."
 
-#: includes/abstracts/abstract-wc-email.php:794
+#: includes/abstracts/abstract-wc-email.php:797
 msgid "View template"
 msgstr "צפה בתבנית"
 
-#: includes/abstracts/abstract-wc-email.php:795
+#: includes/abstracts/abstract-wc-email.php:798
 msgid "Hide template"
 msgstr "הסתר תבנית"
 
-#: includes/abstracts/abstract-wc-email.php:806
+#: includes/abstracts/abstract-wc-email.php:809
 msgid "Are you sure you want to delete this template file?"
 msgstr "האם אתה בטוח שברצונך למחוק את קובץ התבנית הזה?"
 
@@ -3456,7 +4382,7 @@ msgid "You do not have permission to create coupons"
 msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:201
-#: includes/api/class-wc-api-customers.php:332
+#: includes/api/class-wc-api-customers.php:337
 #: includes/api/class-wc-api-server.php:423
 msgid "Missing parameter %s"
 msgstr "פרמטר %s חסר"
@@ -3475,36 +4401,36 @@ msgstr ""
 msgid "Failed to update coupon"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:249
-#: includes/api/class-wc-api-customers.php:252
+#: includes/api/class-wc-api-customers.php:254
+#: includes/api/class-wc-api-customers.php:257
 msgid "Invalid customer Email"
 msgstr "אימייל לקוח לא חוקי"
 
-#: includes/api/class-wc-api-customers.php:270
+#: includes/api/class-wc-api-customers.php:275
 msgid "You do not have permission to read the customers count"
 msgstr "אין לך הרשאה לקרוא את ספירת הלקוחות"
 
-#: includes/api/class-wc-api-customers.php:327
+#: includes/api/class-wc-api-customers.php:332
 msgid "You do not have permission to create this customer"
 msgstr "אין לך הרשאה ליצור לקוח זה"
 
-#: includes/api/class-wc-api-customers.php:630
+#: includes/api/class-wc-api-customers.php:665
 msgid "Invalid customer ID"
 msgstr "מזהה לקוח לא תקין"
 
-#: includes/api/class-wc-api-customers.php:637
+#: includes/api/class-wc-api-customers.php:672
 msgid "Invalid customer"
 msgstr "לקוח לא תקין"
 
-#: includes/api/class-wc-api-customers.php:645
+#: includes/api/class-wc-api-customers.php:680
 msgid "You do not have permission to read this customer"
 msgstr "אין לך הרשאות מתאימות לצפות בעמוד הזה."
 
-#: includes/api/class-wc-api-customers.php:651
+#: includes/api/class-wc-api-customers.php:686
 msgid "You do not have permission to edit this customer"
 msgstr "אין לך הרשאה לערוך את העמוד הזה"
 
-#: includes/api/class-wc-api-customers.php:657
+#: includes/api/class-wc-api-customers.php:692
 msgid "You do not have permission to delete this customer"
 msgstr "אין לך הרשאות למחוק את העמוד הזה"
 
@@ -3553,23 +4479,23 @@ msgstr "אין לך הרשאה לערוך %s זה"
 msgid "You do not have permission to delete this %s"
 msgstr "אין לך הרשאה למחוק %s זה"
 
-#: includes/api/class-wc-api-resource.php:308
+#: includes/api/class-wc-api-resource.php:314
 msgid "Permanently deleted customer"
 msgstr "לקוח נמחק לצמיתות"
 
-#: includes/api/class-wc-api-resource.php:310
+#: includes/api/class-wc-api-resource.php:316
 msgid "The customer cannot be deleted"
 msgstr "לא ניתן למחוק את הלקוח"
 
-#: includes/api/class-wc-api-resource.php:319
+#: includes/api/class-wc-api-resource.php:325
 msgid "This %s cannot be deleted"
 msgstr "לא ניתן למחוק %s זה"
 
-#: includes/api/class-wc-api-resource.php:322
+#: includes/api/class-wc-api-resource.php:328
 msgid "Permanently deleted %s"
 msgstr "%s נמחק לצמיתות"
 
-#: includes/api/class-wc-api-resource.php:328
+#: includes/api/class-wc-api-resource.php:334
 msgid "Deleted %s"
 msgstr "%s נמחק"
 
@@ -3589,76 +4515,7 @@ msgstr ""
 msgid "No route was found matching the URL and request method"
 msgstr "לא נמצא נתיב אשר תואם את הURL ושיטת הבקשה"
 
-#: includes/class-wc-ajax.php:164
-msgid "Sorry, your session has expired."
-msgstr "אנו מצטערים, אך פג תוקף החיבור שלך."
-
-#: includes/class-wc-ajax.php:164
-msgid "Return to homepage"
-msgstr "חזרה לדף הבית"
-
-#: includes/class-wc-ajax.php:318 includes/class-wc-ajax.php:351
-#: includes/class-wc-ajax.php:376
-msgid "You do not have sufficient permissions to access this page."
-msgstr "אין לך הרשאות מתאימות לצפות בעמוד הזה."
-
-#: includes/class-wc-ajax.php:322 includes/class-wc-ajax.php:355
-#: includes/class-wc-ajax.php:380
-msgid "You have taken too long. Please go back and retry."
-msgstr "לקח לך יותר מידי זמן. אנא חזור אחורה ונסה שנית."
-
-#: includes/class-wc-ajax.php:612
-msgid "Same as parent"
-msgstr "בדיוק כמו האב"
-
-#: includes/class-wc-ajax.php:613
-msgid "Standard"
-msgstr "סטנטדרטי"
-
-#: includes/class-wc-ajax.php:888
-msgid "File %d"
-msgstr "קובץ %d"
-
-#: includes/class-wc-ajax.php:1086 includes/class-wc-ajax.php:1087
-#: includes/class-wc-order.php:1592
-msgid "Item #%s stock reduced from %s to %s."
-msgstr "המלאי של פריט מספר %s ירד מ%s ל %s"
-
-#: includes/class-wc-ajax.php:1095
-msgid ""
-"No products had their stock reduced - they may not have stock management "
-"enabled."
-msgstr "אין מוצרי המניות שלהם היו מופחתים - הם לא יכולים להיות מניית ניהול פעיל."
-
-#: includes/class-wc-ajax.php:1136 includes/class-wc-ajax.php:1137
-msgid "Item #%s stock increased from %s to %s."
-msgstr "המלאי של #%s עלה מ %s ל %s"
-
-#: includes/class-wc-ajax.php:1144
-msgid ""
-"No products had their stock increased - they may not have stock management "
-"enabled."
-msgstr "לאף מוצר לא הוגדל המלאי - ייתכן כי לא אופשר להם ניהול מלאי."
-
-#: includes/class-wc-ajax.php:1161
-#: includes/widgets/class-wc-widget-product-categories.php:39
-#: templates/single-product-reviews.php:62
-msgid "Name"
-msgstr "שם"
-
-#: includes/class-wc-ajax.php:1161
-msgid "Value"
-msgstr "ערך"
-
-#: includes/class-wc-ajax.php:1384
-msgid "Delete note"
-msgstr "מחק הערה"
-
-#: includes/class-wc-ajax.php:1532
-msgid "Guest"
-msgstr "אורח"
-
-#: includes/class-wc-cache-helper.php:105
+#: includes/class-wc-cache-helper.php:106
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
@@ -3713,7 +4570,7 @@ msgid ""
 msgstr "לא ניתן להוסיף כמות זו של &quote;%s&quote; לסל הקניות - לא נותר מספיר במלאי (נותר %s)."
 
 #: includes/class-wc-cart.php:835 includes/class-wc-cart.php:854
-#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:157
+#: includes/class-wc-cart.php:867 includes/class-wc-frontend-scripts.php:188
 #: includes/wc-cart-functions.php:96 templates/cart/mini-cart.php:64
 msgid "View Cart"
 msgstr "הצג עגלת קניות"
@@ -3782,20 +4639,20 @@ msgid ""
 " to homepage</a>"
 msgstr "אנו מצטערים, אך פג תוקף החיבור שלך. <a href=\"%s\" class=\"wc-backward\">חזור אל דף הבית</a>"
 
-#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:88
+#: includes/class-wc-checkout.php:500 includes/class-wc-form-handler.php:84
 msgid "is a required field."
 msgstr "שדה חובה."
 
-#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:512 includes/class-wc-form-handler.php:95
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr "אנא הכנס מיקוד חוקי."
 
-#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:521 includes/class-wc-form-handler.php:104
 msgid "is not a valid phone number."
 msgstr "אינו מספר תקני."
 
-#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:527 includes/class-wc-form-handler.php:111
 msgid "is not a valid email address."
 msgstr "כתובת האימייל אינה תקנית."
 
@@ -3821,1112 +4678,45 @@ msgstr "צורת המשלוח אינה תקנית."
 msgid "Invalid payment method."
 msgstr "צורת התשלום אינה תקנית."
 
-#: includes/class-wc-comments.php:109
+#: includes/class-wc-comments.php:111
 msgid "Please rate the product."
 msgstr "אנא דרג את המוצר."
 
-#: includes/class-wc-countries.php:37
-msgid "Afghanistan"
-msgstr "אפגניסטן"
-
-#: includes/class-wc-countries.php:38
-msgid "&#197;land Islands"
-msgstr "איי אולנד"
-
-#: includes/class-wc-countries.php:39
-msgid "Albania"
-msgstr "אלבניה"
-
-#: includes/class-wc-countries.php:40
-msgid "Algeria"
-msgstr "אלג'יריה"
-
-#: includes/class-wc-countries.php:41
-msgid "Andorra"
-msgstr "אנדורה"
-
-#: includes/class-wc-countries.php:42
-msgid "Angola"
-msgstr "אנגולה"
-
-#: includes/class-wc-countries.php:43
-msgid "Anguilla"
-msgstr "אנגווילה"
-
-#: includes/class-wc-countries.php:44
-msgid "Antarctica"
-msgstr "אנטרקטיקה"
-
-#: includes/class-wc-countries.php:45
-msgid "Antigua and Barbuda"
-msgstr "אנטיגואה וברבודה"
-
-#: includes/class-wc-countries.php:46
-msgid "Argentina"
-msgstr "ארגנטינה"
-
-#: includes/class-wc-countries.php:47
-msgid "Armenia"
-msgstr "ארמניה"
-
-#: includes/class-wc-countries.php:48
-msgid "Aruba"
-msgstr "ארובה"
-
-#: includes/class-wc-countries.php:49
-msgid "Australia"
-msgstr "אוסטרליה"
-
-#: includes/class-wc-countries.php:50
-msgid "Austria"
-msgstr "אוסטריה"
-
-#: includes/class-wc-countries.php:51
-msgid "Azerbaijan"
-msgstr "אזרבייג'ן"
-
-#: includes/class-wc-countries.php:52
-msgid "Bahamas"
-msgstr "איי בהאמה"
-
-#: includes/class-wc-countries.php:53
-msgid "Bahrain"
-msgstr "בחריין"
-
-#: includes/class-wc-countries.php:54
-msgid "Bangladesh"
-msgstr "בנגלדש"
-
-#: includes/class-wc-countries.php:55
-msgid "Barbados"
-msgstr "ברבדוס"
-
-#: includes/class-wc-countries.php:56
-msgid "Belarus"
-msgstr "בלרוס"
-
-#: includes/class-wc-countries.php:57
-msgid "Belgium"
-msgstr "בלגיה"
-
-#: includes/class-wc-countries.php:58
-msgid "Belau"
-msgstr "Belau"
-
-#: includes/class-wc-countries.php:59
-msgid "Belize"
-msgstr "בליז"
-
-#: includes/class-wc-countries.php:60
-msgid "Benin"
-msgstr "בנין"
-
-#: includes/class-wc-countries.php:61
-msgid "Bermuda"
-msgstr "ברמודה"
-
-#: includes/class-wc-countries.php:62
-msgid "Bhutan"
-msgstr "בהוטן"
-
-#: includes/class-wc-countries.php:63
-msgid "Bolivia"
-msgstr "בוליביה"
-
-#: includes/class-wc-countries.php:64
-msgid "Bonaire, Saint Eustatius and Saba"
-msgstr ""
-
-#: includes/class-wc-countries.php:65
-msgid "Bosnia and Herzegovina"
-msgstr ""
-
-#: includes/class-wc-countries.php:66
-msgid "Botswana"
-msgstr "בוטסואנה"
-
-#: includes/class-wc-countries.php:67
-msgid "Bouvet Island"
-msgstr "האי בובה"
-
-#: includes/class-wc-countries.php:68
-msgid "Brazil"
-msgstr "ברזיל"
-
-#: includes/class-wc-countries.php:69
-msgid "British Indian Ocean Territory"
-msgstr "הטריטוריה הבריטית באוקינוס ההודי"
-
-#: includes/class-wc-countries.php:70
-msgid "British Virgin Islands"
-msgstr "איי בתולה בריטית"
-
-#: includes/class-wc-countries.php:71
-msgid "Brunei"
-msgstr "ברוניי"
-
-#: includes/class-wc-countries.php:72
-msgid "Bulgaria"
-msgstr "בולגריה"
-
-#: includes/class-wc-countries.php:73
-msgid "Burkina Faso"
-msgstr "בורקינה פאסו"
-
-#: includes/class-wc-countries.php:74
-msgid "Burundi"
-msgstr "בורונדי"
-
-#: includes/class-wc-countries.php:75
-msgid "Cambodia"
-msgstr "קמבודיה"
-
-#: includes/class-wc-countries.php:76
-msgid "Cameroon"
-msgstr "קמרון"
-
-#: includes/class-wc-countries.php:77
-msgid "Canada"
-msgstr "קנדה"
-
-#: includes/class-wc-countries.php:78
-msgid "Cape Verde"
-msgstr "קייפ ורדה"
-
-#: includes/class-wc-countries.php:79
-msgid "Cayman Islands"
-msgstr "איי קיימן"
-
-#: includes/class-wc-countries.php:80
-msgid "Central African Republic"
-msgstr "הרפובליקה המרכז אפריקנית"
-
-#: includes/class-wc-countries.php:81
-msgid "Chad"
-msgstr "צ'אד"
-
-#: includes/class-wc-countries.php:82
-msgid "Chile"
-msgstr "צ'ילה"
-
-#: includes/class-wc-countries.php:83
-msgid "China"
-msgstr "סין"
-
-#: includes/class-wc-countries.php:84
-msgid "Christmas Island"
-msgstr "אי חג המולד"
-
-#: includes/class-wc-countries.php:85
-msgid "Cocos (Keeling) Islands"
-msgstr "איי קוקוס (קילינג)"
-
-#: includes/class-wc-countries.php:86
-msgid "Colombia"
-msgstr "קולומביה"
-
-#: includes/class-wc-countries.php:87
-msgid "Comoros"
-msgstr "איי קומורו"
-
-#: includes/class-wc-countries.php:88
-msgid "Congo (Brazzaville)"
-msgstr "קונגו (ברזוויל)"
-
-#: includes/class-wc-countries.php:89
-msgid "Congo (Kinshasa)"
-msgstr "קונגו (קינשאסה)"
-
-#: includes/class-wc-countries.php:90
-msgid "Cook Islands"
-msgstr "איי קוק"
-
-#: includes/class-wc-countries.php:91
-msgid "Costa Rica"
-msgstr "קוסטה ריקה"
-
-#: includes/class-wc-countries.php:92
-msgid "Croatia"
-msgstr "קרואטיה"
-
-#: includes/class-wc-countries.php:93
-msgid "Cuba"
-msgstr "תת-מחוז קובה"
-
-#: includes/class-wc-countries.php:94
-msgid "Cura&Ccedil;ao"
-msgstr "קוראסאו"
-
-#: includes/class-wc-countries.php:95
-msgid "Cyprus"
-msgstr "קפריסין"
-
-#: includes/class-wc-countries.php:96
-msgid "Czech Republic"
-msgstr "הרפובליקה הצ'כיה"
-
-#: includes/class-wc-countries.php:97
-msgid "Denmark"
-msgstr "דנמרק"
-
-#: includes/class-wc-countries.php:98
-msgid "Djibouti"
-msgstr "ג'יבוטי"
-
-#: includes/class-wc-countries.php:99
-msgid "Dominica"
-msgstr "דומיניקה"
-
-#: includes/class-wc-countries.php:100
-msgid "Dominican Republic"
-msgstr "הרפובליקה הדומיניקנית"
-
-#: includes/class-wc-countries.php:101
-msgid "Ecuador"
-msgstr "אקוודור"
-
-#: includes/class-wc-countries.php:102
-msgid "Egypt"
-msgstr "מצרים"
-
-#: includes/class-wc-countries.php:103
-msgid "El Salvador"
-msgstr "אל סלוודור"
-
-#: includes/class-wc-countries.php:104
-msgid "Equatorial Guinea"
-msgstr "גינאה המשוונית"
-
-#: includes/class-wc-countries.php:105
-msgid "Eritrea"
-msgstr "אריתריאה"
-
-#: includes/class-wc-countries.php:106
-msgid "Estonia"
-msgstr "אסטוניה"
-
-#: includes/class-wc-countries.php:107
-msgid "Ethiopia"
-msgstr "אתיופיה"
-
-#: includes/class-wc-countries.php:108
-msgid "Falkland Islands"
-msgstr "איי פוקלנד"
-
-#: includes/class-wc-countries.php:109
-msgid "Faroe Islands"
-msgstr "איי פארו"
-
-#: includes/class-wc-countries.php:110
-msgid "Fiji"
-msgstr "פיג'י"
-
-#: includes/class-wc-countries.php:111
-msgid "Finland"
-msgstr "פינלנד"
-
-#: includes/class-wc-countries.php:112
-msgid "France"
-msgstr "צרפת"
-
-#: includes/class-wc-countries.php:113
-msgid "French Guiana"
-msgstr "גיאנה הצרפתית"
-
-#: includes/class-wc-countries.php:114
-msgid "French Polynesia"
-msgstr "פולינזיה הצרפתית"
-
-#: includes/class-wc-countries.php:115
-msgid "French Southern Territories"
-msgstr "הטריטוריות הדרומיות של צרפת"
-
-#: includes/class-wc-countries.php:116
-msgid "Gabon"
-msgstr "גאבון"
-
-#: includes/class-wc-countries.php:117
-msgid "Gambia"
-msgstr "גמביה"
-
-#: includes/class-wc-countries.php:119
-msgid "Germany"
-msgstr "גרמניה"
-
-#: includes/class-wc-countries.php:120
-msgid "Ghana"
-msgstr "גאנה"
-
-#: includes/class-wc-countries.php:121
-msgid "Gibraltar"
-msgstr "גיברלטר"
-
-#: includes/class-wc-countries.php:122
-msgid "Greece"
-msgstr "יוון"
-
-#: includes/class-wc-countries.php:123
-msgid "Greenland"
-msgstr "גרינלנד"
-
-#: includes/class-wc-countries.php:124
-msgid "Grenada"
-msgstr "גרנדה"
-
-#: includes/class-wc-countries.php:125
-msgid "Guadeloupe"
-msgstr "גואדאלופ"
-
-#: includes/class-wc-countries.php:126
-msgid "Guatemala"
-msgstr "גוואטמלה"
-
-#: includes/class-wc-countries.php:127
-msgid "Guernsey"
-msgstr "גרנזי"
-
-#: includes/class-wc-countries.php:128
-msgid "Guinea"
-msgstr "גינאה"
-
-#: includes/class-wc-countries.php:129
-msgid "Guinea-Bissau"
-msgstr "גינאה ביסאו"
-
-#: includes/class-wc-countries.php:130
-msgid "Guyana"
-msgstr "גיאנה"
-
-#: includes/class-wc-countries.php:131
-msgid "Haiti"
-msgstr "האיטי"
-
-#: includes/class-wc-countries.php:132
-msgid "Heard Island and McDonald Islands"
-msgstr "האי הרד ואיי מקדונלד"
-
-#: includes/class-wc-countries.php:133
-msgid "Honduras"
-msgstr "הונדורס"
-
-#: includes/class-wc-countries.php:134
-msgid "Hong Kong"
-msgstr "הונג קונג"
-
-#: includes/class-wc-countries.php:135
-msgid "Hungary"
-msgstr "הונגריה"
-
-#: includes/class-wc-countries.php:136
-msgid "Iceland"
-msgstr "איסלנד"
-
-#: includes/class-wc-countries.php:137
-msgid "India"
-msgstr "הודו"
-
-#: includes/class-wc-countries.php:138
-msgid "Indonesia"
-msgstr "אינדונזיה"
-
-#: includes/class-wc-countries.php:139
-msgid "Iran"
-msgstr "איראן"
-
-#: includes/class-wc-countries.php:140
-msgid "Iraq"
-msgstr "עירק"
-
-#: includes/class-wc-countries.php:141
-msgid "Republic of Ireland"
-msgstr "רפובליקה של אירלנד"
-
-#: includes/class-wc-countries.php:142
-msgid "Isle of Man"
-msgstr "האי מאן"
-
-#: includes/class-wc-countries.php:143
-msgid "Israel"
-msgstr "ישראל"
-
-#: includes/class-wc-countries.php:144
-msgid "Italy"
-msgstr "איטליה"
-
-#: includes/class-wc-countries.php:145
-msgid "Ivory Coast"
-msgstr "חוף שנהב"
-
-#: includes/class-wc-countries.php:146
-msgid "Jamaica"
-msgstr "ג'מייקה"
-
-#: includes/class-wc-countries.php:147
-msgid "Japan"
-msgstr "יפן"
-
-#: includes/class-wc-countries.php:148
-msgid "Jersey"
-msgstr "ג'רזי"
-
-#: includes/class-wc-countries.php:149
-msgid "Jordan"
-msgstr "ירדן"
-
-#: includes/class-wc-countries.php:150
-msgid "Kazakhstan"
-msgstr "קזחסטן"
-
-#: includes/class-wc-countries.php:151
-msgid "Kenya"
-msgstr "קניה"
-
-#: includes/class-wc-countries.php:152
-msgid "Kiribati"
-msgstr "קיריבטי"
-
-#: includes/class-wc-countries.php:153
-msgid "Kuwait"
-msgstr "כוויית"
-
-#: includes/class-wc-countries.php:154
-msgid "Kyrgyzstan"
-msgstr "קירגיסטן"
-
-#: includes/class-wc-countries.php:155
-msgid "Laos"
-msgstr "לאוס"
-
-#: includes/class-wc-countries.php:156
-msgid "Latvia"
-msgstr "לטביה"
-
-#: includes/class-wc-countries.php:157
-msgid "Lebanon"
-msgstr "לבנון"
-
-#: includes/class-wc-countries.php:158
-msgid "Lesotho"
-msgstr "לסוטו"
-
-#: includes/class-wc-countries.php:159
-msgid "Liberia"
-msgstr "ליבריה"
-
-#: includes/class-wc-countries.php:160
-msgid "Libya"
-msgstr "לוב"
-
-#: includes/class-wc-countries.php:161
-msgid "Liechtenstein"
-msgstr "ליכטנשטיין"
-
-#: includes/class-wc-countries.php:162
-msgid "Lithuania"
-msgstr "ליטא"
-
-#: includes/class-wc-countries.php:163
-msgid "Luxembourg"
-msgstr "לוקסמבורג"
-
-#: includes/class-wc-countries.php:164
-msgid "Macao S.A.R., China"
-msgstr "מקאו SAR, סין"
-
-#: includes/class-wc-countries.php:165
-msgid "Macedonia"
-msgstr "מקדוניה"
-
-#: includes/class-wc-countries.php:166
-msgid "Madagascar"
-msgstr "מדגסקר"
-
-#: includes/class-wc-countries.php:167
-msgid "Malawi"
-msgstr "מלאווי"
-
-#: includes/class-wc-countries.php:168
-msgid "Malaysia"
-msgstr "מלזיה"
-
-#: includes/class-wc-countries.php:169
-msgid "Maldives"
-msgstr "האיים המלדיביים"
-
-#: includes/class-wc-countries.php:170
-msgid "Mali"
-msgstr "מאלי"
-
-#: includes/class-wc-countries.php:171
-msgid "Malta"
-msgstr "מלטה"
-
-#: includes/class-wc-countries.php:172
-msgid "Marshall Islands"
-msgstr "איי מרשל"
-
-#: includes/class-wc-countries.php:173
-msgid "Martinique"
-msgstr "מרטיניק"
-
-#: includes/class-wc-countries.php:174
-msgid "Mauritania"
-msgstr "מאוריטניה"
-
-#: includes/class-wc-countries.php:175
-msgid "Mauritius"
-msgstr "מאוריציוס"
-
-#: includes/class-wc-countries.php:176
-msgid "Mayotte"
-msgstr "מאיוט"
-
-#: includes/class-wc-countries.php:177
-msgid "Mexico"
-msgstr "מקסיקו"
-
-#: includes/class-wc-countries.php:178
-msgid "Micronesia"
-msgstr "מיקרונזיה"
-
-#: includes/class-wc-countries.php:179
-msgid "Moldova"
-msgstr "מולדובה"
-
-#: includes/class-wc-countries.php:180
-msgid "Monaco"
-msgstr "מונקו"
-
-#: includes/class-wc-countries.php:181
-msgid "Mongolia"
-msgstr "מונגוליה"
-
-#: includes/class-wc-countries.php:182
-msgid "Montenegro"
-msgstr "מונטנגרו"
-
-#: includes/class-wc-countries.php:183
-msgid "Montserrat"
-msgstr "מונסראט"
-
-#: includes/class-wc-countries.php:184
-msgid "Morocco"
-msgstr "מרוקו"
-
-#: includes/class-wc-countries.php:185
-msgid "Mozambique"
-msgstr "מוזמביק"
-
-#: includes/class-wc-countries.php:186
-msgid "Myanmar"
-msgstr "מיאנמר"
-
-#: includes/class-wc-countries.php:187
-msgid "Namibia"
-msgstr "נמיביה"
-
-#: includes/class-wc-countries.php:188
-msgid "Nauru"
-msgstr "נאורו"
-
-#: includes/class-wc-countries.php:189
-msgid "Nepal"
-msgstr "נפאל"
-
-#: includes/class-wc-countries.php:190
-msgid "Netherlands"
-msgstr "הולנד"
-
-#: includes/class-wc-countries.php:191
-msgid "Netherlands Antilles"
-msgstr "האנטילים ההולנדיים"
-
-#: includes/class-wc-countries.php:192
-msgid "New Caledonia"
-msgstr "קלדוניה החדשה"
-
-#: includes/class-wc-countries.php:193
-msgid "New Zealand"
-msgstr "ניו זילנד"
-
-#: includes/class-wc-countries.php:194
-msgid "Nicaragua"
-msgstr "ניקרגוואה"
-
-#: includes/class-wc-countries.php:195
-msgid "Niger"
-msgstr "ניז'ר"
-
-#: includes/class-wc-countries.php:196
-msgid "Nigeria"
-msgstr "ניגריה"
-
-#: includes/class-wc-countries.php:197
-msgid "Niue"
-msgstr "נואי"
-
-#: includes/class-wc-countries.php:198
-msgid "Norfolk Island"
-msgstr "האי נורפולק"
-
-#: includes/class-wc-countries.php:199
-msgid "North Korea"
-msgstr "צפון קוריאה"
-
-#: includes/class-wc-countries.php:200
-msgid "Norway"
-msgstr "נורווגיה"
-
-#: includes/class-wc-countries.php:201
-msgid "Oman"
-msgstr "עומאן"
-
-#: includes/class-wc-countries.php:202
-msgid "Pakistan"
-msgstr "פקיסטן"
-
-#: includes/class-wc-countries.php:203
-msgid "Palestinian Territory"
-msgstr "השטחים הפלשתינים"
-
-#: includes/class-wc-countries.php:204
-msgid "Panama"
-msgstr "פנמה"
-
-#: includes/class-wc-countries.php:205
-msgid "Papua New Guinea"
-msgstr "פפואה-גינאה החדשה"
-
-#: includes/class-wc-countries.php:206
-msgid "Paraguay"
-msgstr "פרגוואי"
-
-#: includes/class-wc-countries.php:207
-msgid "Peru"
-msgstr "פרו"
-
-#: includes/class-wc-countries.php:208
-msgid "Philippines"
-msgstr "הפיליפינים"
-
-#: includes/class-wc-countries.php:209
-msgid "Pitcairn"
-msgstr "פיטקרן"
-
-#: includes/class-wc-countries.php:210
-msgid "Poland"
-msgstr "פולין"
-
-#: includes/class-wc-countries.php:211
-msgid "Portugal"
-msgstr "פורטוגל"
-
-#: includes/class-wc-countries.php:212
-msgid "Qatar"
-msgstr "קטר"
-
-#: includes/class-wc-countries.php:213
-msgid "Reunion"
-msgstr "ראוניון"
-
-#: includes/class-wc-countries.php:214
-msgid "Romania"
-msgstr "רומניה"
-
-#: includes/class-wc-countries.php:215
-msgid "Russia"
-msgstr "רוסיה"
-
-#: includes/class-wc-countries.php:216
-msgid "Rwanda"
-msgstr "רואנדה"
-
-#: includes/class-wc-countries.php:217
-msgid "Saint Barth&eacute;lemy"
-msgstr "סנט ברתלמי"
-
-#: includes/class-wc-countries.php:218
-msgid "Saint Helena"
-msgstr "סנט הלנה"
-
-#: includes/class-wc-countries.php:219
-msgid "Saint Kitts and Nevis"
-msgstr "סנט קיטס ונוויס"
-
-#: includes/class-wc-countries.php:220
-msgid "Saint Lucia"
-msgstr "סנט לוצ'יה"
-
-#: includes/class-wc-countries.php:221
-msgid "Saint Martin (French part)"
-msgstr "סנט מרטין (חלק צרפתי)"
-
-#: includes/class-wc-countries.php:222
-msgid "Saint Martin (Dutch part)"
-msgstr "סנט מרטין (חלק הולנדי)"
-
-#: includes/class-wc-countries.php:223
-msgid "Saint Pierre and Miquelon"
-msgstr "סנט פייר ומיקלון"
-
-#: includes/class-wc-countries.php:224
-msgid "Saint Vincent and the Grenadines"
-msgstr "סנט וינסנט והגרנדינים"
-
-#: includes/class-wc-countries.php:225
-msgid "San Marino"
-msgstr "סן מרינו"
-
-#: includes/class-wc-countries.php:226
-msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-msgstr "סאו טומה ופרינסיפה"
-
-#: includes/class-wc-countries.php:227
-msgid "Saudi Arabia"
-msgstr "ערב הסעודית"
-
-#: includes/class-wc-countries.php:228
-msgid "Senegal"
-msgstr "סנגל"
-
-#: includes/class-wc-countries.php:229
-msgid "Serbia"
-msgstr "סרביה"
-
-#: includes/class-wc-countries.php:230
-msgid "Seychelles"
-msgstr "איי סיישל"
-
-#: includes/class-wc-countries.php:231
-msgid "Sierra Leone"
-msgstr "סיירה ליאון"
-
-#: includes/class-wc-countries.php:232
-msgid "Singapore"
-msgstr "סינגפור"
-
-#: includes/class-wc-countries.php:233
-msgid "Slovakia"
-msgstr "סלובקיה"
-
-#: includes/class-wc-countries.php:234
-msgid "Slovenia"
-msgstr "סלובניה"
-
-#: includes/class-wc-countries.php:235
-msgid "Solomon Islands"
-msgstr "איי שלמה"
-
-#: includes/class-wc-countries.php:236
-msgid "Somalia"
-msgstr "סומליה"
-
-#: includes/class-wc-countries.php:237
-msgid "South Africa"
-msgstr "דרום אפריקה"
-
-#: includes/class-wc-countries.php:238
-msgid "South Georgia/Sandwich Islands"
-msgstr "ג'ורג'יה הדרומית / איים סנדוויץ'"
-
-#: includes/class-wc-countries.php:239
-msgid "South Korea"
-msgstr "דרום קוריאה"
-
-#: includes/class-wc-countries.php:240
-msgid "South Sudan"
-msgstr "דרום סודן"
-
-#: includes/class-wc-countries.php:241
-msgid "Spain"
-msgstr "ספרד"
-
-#: includes/class-wc-countries.php:242
-msgid "Sri Lanka"
-msgstr "סרי לנקה"
-
-#: includes/class-wc-countries.php:243
-msgid "Sudan"
-msgstr "סודן"
-
-#: includes/class-wc-countries.php:244
-msgid "Suriname"
-msgstr "סורינם"
-
-#: includes/class-wc-countries.php:245
-msgid "Svalbard and Jan Mayen"
-msgstr "איי סבלברד ויאן מאיין"
-
-#: includes/class-wc-countries.php:246
-msgid "Swaziland"
-msgstr "סווזילנד"
-
-#: includes/class-wc-countries.php:247
-msgid "Sweden"
-msgstr "שוודיה"
-
-#: includes/class-wc-countries.php:248
-msgid "Switzerland"
-msgstr "שוויץ"
-
-#: includes/class-wc-countries.php:249
-msgid "Syria"
-msgstr "סוריה"
-
-#: includes/class-wc-countries.php:250
-msgid "Taiwan"
-msgstr "טייוואן"
-
-#: includes/class-wc-countries.php:251
-msgid "Tajikistan"
-msgstr "טג'יקיסטן"
-
-#: includes/class-wc-countries.php:252
-msgid "Tanzania"
-msgstr "טנזניה"
-
-#: includes/class-wc-countries.php:253
-msgid "Thailand"
-msgstr "תאילנד"
-
-#: includes/class-wc-countries.php:254
-msgid "Timor-Leste"
-msgstr "מזרח טימור"
-
-#: includes/class-wc-countries.php:255
-msgid "Togo"
-msgstr "טוגו"
-
-#: includes/class-wc-countries.php:256
-msgid "Tokelau"
-msgstr "טוקלאו"
-
-#: includes/class-wc-countries.php:257
-msgid "Tonga"
-msgstr "טונגה"
-
-#: includes/class-wc-countries.php:258
-msgid "Trinidad and Tobago"
-msgstr "טרינידד וטובגו"
-
-#: includes/class-wc-countries.php:259
-msgid "Tunisia"
-msgstr "טוניסיה"
-
-#: includes/class-wc-countries.php:260
-msgid "Turkey"
-msgstr "טורקיה"
-
-#: includes/class-wc-countries.php:261
-msgid "Turkmenistan"
-msgstr "טורקמניסטן"
-
-#: includes/class-wc-countries.php:262
-msgid "Turks and Caicos Islands"
-msgstr "איי טורקס וקייקוס"
-
-#: includes/class-wc-countries.php:263
-msgid "Tuvalu"
-msgstr "טובאלו"
-
-#: includes/class-wc-countries.php:264
-msgid "Uganda"
-msgstr "אוגנדה"
-
-#: includes/class-wc-countries.php:265
-msgid "Ukraine"
-msgstr "אוקראינה"
-
-#: includes/class-wc-countries.php:266
-msgid "United Arab Emirates"
-msgstr "איחוד האמירויות"
-
-#: includes/class-wc-countries.php:267
-msgid "United Kingdom (UK)"
-msgstr "אנגליה"
-
-#: includes/class-wc-countries.php:268
-msgid "United States (US)"
-msgstr "ארה\"ב"
-
 #: includes/class-wc-countries.php:269
-msgid "Uruguay"
-msgstr "אורוגוואי"
-
-#: includes/class-wc-countries.php:270
-msgid "Uzbekistan"
-msgstr "אוזבקיסטן"
-
-#: includes/class-wc-countries.php:271
-msgid "Vanuatu"
-msgstr "ונאוטו"
-
-#: includes/class-wc-countries.php:272
-msgid "Vatican"
-msgstr "הוותיקן"
-
-#: includes/class-wc-countries.php:273
-msgid "Venezuela"
-msgstr "ונצואלה"
-
-#: includes/class-wc-countries.php:274
-msgid "Vietnam"
-msgstr "ויטנאם"
-
-#: includes/class-wc-countries.php:275
-msgid "Wallis and Futuna"
-msgstr "איי ווליס ופוטונה"
-
-#: includes/class-wc-countries.php:276
-msgid "Western Sahara"
-msgstr "מערב הסהרה"
-
-#: includes/class-wc-countries.php:277
-msgid "Western Samoa"
-msgstr "סמואה המערבית"
-
-#: includes/class-wc-countries.php:278
-msgid "Yemen"
-msgstr "תימן"
-
-#: includes/class-wc-countries.php:279
-msgid "Zambia"
-msgstr "זמביה"
-
-#: includes/class-wc-countries.php:280
-msgid "Zimbabwe"
-msgstr "זימבבואה"
-
-#: includes/class-wc-countries.php:484
 msgid "to the"
 msgstr "כדי"
 
-#: includes/class-wc-countries.php:485
+#: includes/class-wc-countries.php:270
 msgid "to"
 msgstr "אל"
 
-#: includes/class-wc-countries.php:498
+#: includes/class-wc-countries.php:282
 msgid "the"
 msgstr "ה-"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "VAT"
 msgstr "מע&quot;מ"
 
-#: includes/class-wc-countries.php:510
+#: includes/class-wc-countries.php:294
 msgid "Tax"
 msgstr "מיסים"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. VAT)"
 msgstr "(כולל מע&quot;מ)"
 
-#: includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:306
 msgid "(incl. tax)"
 msgstr "(כולל מיסים)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. VAT)"
 msgstr "(לא כולל מע&quot;מ)"
 
-#: includes/class-wc-countries.php:536
+#: includes/class-wc-countries.php:318
 msgid "(ex. tax)"
 msgstr "(לא כולל מיסים)"
-
-#: includes/class-wc-countries.php:730
-msgid "Country"
-msgstr "ארץ"
-
-#: includes/class-wc-countries.php:735
-msgid "First Name"
-msgstr "שם פרטי"
-
-#: includes/class-wc-countries.php:740
-msgid "Last Name"
-msgstr "שם משפחה"
-
-#: includes/class-wc-countries.php:746
-msgid "Company Name"
-msgstr "שם חברה"
-
-#: includes/class-wc-countries.php:750
-msgid "Address"
-msgstr "כתובת"
-
-#: includes/class-wc-countries.php:751
-msgctxt "placeholder"
-msgid "Street address"
-msgstr "רחוב ומס' בית"
-
-#: includes/class-wc-countries.php:756
-msgctxt "placeholder"
-msgid "Apartment, suite, unit etc. (optional)"
-msgstr "דירה, קומה כניסה וכו' (לא חובה)"
-
-#: includes/class-wc-countries.php:761 includes/class-wc-countries.php:762
-msgid "Town / City"
-msgstr "עיר"
-
-#: includes/class-wc-countries.php:768 includes/class-wc-countries.php:769
-msgid "State / County"
-msgstr "מדינה / ארץ"
-
-#: includes/class-wc-countries.php:775 includes/class-wc-countries.php:776
-#: templates/cart/shipping-calculator.php:80
-msgid "Postcode / Zip"
-msgstr "מיקוד"
-
-#: includes/class-wc-countries.php:838
-msgid "District"
-msgstr "מחוז"
-
-#: includes/class-wc-countries.php:845 includes/class-wc-countries.php:861
-#: includes/class-wc-countries.php:881 includes/class-wc-countries.php:942
-#: includes/class-wc-countries.php:961 includes/class-wc-countries.php:966
-#: includes/class-wc-countries.php:978 includes/class-wc-countries.php:1028
-#: includes/class-wc-countries.php:1052 includes/class-wc-countries.php:1093
-msgid "Province"
-msgstr "מחוז"
-
-#: includes/class-wc-countries.php:867
-msgid "Canton"
-msgstr "קנטון"
-
-#: includes/class-wc-countries.php:876 includes/class-wc-countries.php:1034
-msgid "Municipality"
-msgstr "רשות מקומית"
-
-#: includes/class-wc-countries.php:929
-msgid "Town / District"
-msgstr "עיירה / רובע"
-
-#: includes/class-wc-countries.php:932
-msgid "Region"
-msgstr "אזור"
-
-#: includes/class-wc-countries.php:937 includes/class-wc-countries.php:1068
-msgid "County"
-msgstr "ארץ"
-
-#: includes/class-wc-countries.php:1057
-msgid "Zip"
-msgstr "מיקוד"
-
-#: includes/class-wc-countries.php:1060
-msgid "State"
-msgstr "מדינה"
-
-#: includes/class-wc-countries.php:1065
-msgid "Postcode"
-msgstr "תא דואר"
-
-#: includes/class-wc-countries.php:1173
-msgid "Email Address"
-msgstr "כתובת אימייל"
-
-#: includes/class-wc-countries.php:1179
-msgid "Phone"
-msgstr "טלפון"
 
 #: includes/class-wc-coupon.php:578
 msgid "Coupon code applied successfully."
@@ -4990,67 +4780,67 @@ msgstr "לא ניתן לממש את הקופון הזה למוצרים במבצ�
 msgid "Please enter a coupon code."
 msgstr "יש להזין קוד קופון."
 
-#: includes/class-wc-download-handler.php:37
+#: includes/class-wc-download-handler.php:42
 msgid "Invalid email address."
 msgstr "כתובת מייל לא תקנית."
 
-#: includes/class-wc-download-handler.php:37
-#: includes/class-wc-download-handler.php:62
-#: includes/class-wc-download-handler.php:83
-#: includes/class-wc-download-handler.php:90
+#: includes/class-wc-download-handler.php:42
+#: includes/class-wc-download-handler.php:67
+#: includes/class-wc-download-handler.php:88
 #: includes/class-wc-download-handler.php:95
-#: includes/class-wc-download-handler.php:99
-#: includes/class-wc-download-handler.php:143
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:100
+#: includes/class-wc-download-handler.php:104
+#: includes/class-wc-download-handler.php:148
+#: includes/class-wc-download-handler.php:309
 msgid "Go to homepage"
 msgstr "לעבור אל דף הבית"
 
-#: includes/class-wc-download-handler.php:62
+#: includes/class-wc-download-handler.php:67
 msgid "Invalid download."
 msgstr "הורדה לא תקנית."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "You must be logged in to download files."
 msgstr "אתה חייב להיות מחובר כדי להוריד קבצים."
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 #: templates/global/form-login.php:35 templates/myaccount/form-login.php:27
 #: templates/myaccount/form-login.php:46
 msgid "Login"
 msgstr "התחבר"
 
-#: includes/class-wc-download-handler.php:75
+#: includes/class-wc-download-handler.php:80
 msgid "Log in to Download Files"
 msgstr "התחבר כדי להוריד קבצים"
 
-#: includes/class-wc-download-handler.php:77
+#: includes/class-wc-download-handler.php:82
 msgid "This is not your download link."
 msgstr "זה לא הקישור להורדה שלך."
 
-#: includes/class-wc-download-handler.php:83
+#: includes/class-wc-download-handler.php:88
 msgid "Product no longer exists."
 msgstr "מוצר אינו קיים עוד."
 
-#: includes/class-wc-download-handler.php:90
-#: includes/class-wc-form-handler.php:546
+#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-form-handler.php:541
 #: includes/shortcodes/class-wc-shortcode-checkout.php:172
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
 msgstr "מפתח לא תקין"
 
-#: includes/class-wc-download-handler.php:95
+#: includes/class-wc-download-handler.php:100
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "סליחה, יש לך הגיע למגבלת ההורדה שלך לקובץ זה"
 
-#: includes/class-wc-download-handler.php:99
+#: includes/class-wc-download-handler.php:104
 msgid "Sorry, this download has expired"
 msgstr "סליחה, פג תוקף להורדה זו "
 
-#: includes/class-wc-download-handler.php:143
+#: includes/class-wc-download-handler.php:148
 msgid "No file defined"
 msgstr "לא הוגדר קובץ"
 
-#: includes/class-wc-download-handler.php:304
+#: includes/class-wc-download-handler.php:309
 msgid "File not found"
 msgstr "קובץ לא נמצא"
 
@@ -5092,149 +4882,149 @@ msgstr "הזמנת מוצר מראש"
 msgid "%s units of %s have been backordered in order %s."
 msgstr "%s יחידות של %s הוחזרו בהזמנה %s."
 
-#: includes/class-wc-form-handler.php:129
+#: includes/class-wc-form-handler.php:125
 msgid "Address changed successfully."
 msgstr "הכתובה שונתה בהצלחה."
 
-#: includes/class-wc-form-handler.php:178
+#: includes/class-wc-form-handler.php:174
 msgid "Please enter your name."
 msgstr "אנא הזן את שמך"
 
-#: includes/class-wc-form-handler.php:182 includes/wc-user-functions.php:48
+#: includes/class-wc-form-handler.php:178 includes/wc-user-functions.php:48
 msgid "Please provide a valid email address."
 msgstr "אנא הזן כתובת מייל תקנית."
 
-#: includes/class-wc-form-handler.php:184
+#: includes/class-wc-form-handler.php:180
 msgid "This email address is already registered."
 msgstr "כתובת אימייל זו כבר רשומה."
 
-#: includes/class-wc-form-handler.php:188
+#: includes/class-wc-form-handler.php:184
 msgid "Your current password is incorrect."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:193
+#: includes/class-wc-form-handler.php:189
 msgid "Please fill out all password fields."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:197
+#: includes/class-wc-form-handler.php:193
 msgid "Please enter your current password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:197
 msgid "Please re-enter your password."
 msgstr "אנא הזן סיסמא בשנית."
 
-#: includes/class-wc-form-handler.php:205
-#: includes/class-wc-form-handler.php:836
+#: includes/class-wc-form-handler.php:201
+#: includes/class-wc-form-handler.php:831
 msgid "Passwords do not match."
 msgstr "לא נמצאה התאמה בין הסיסמאות."
 
-#: includes/class-wc-form-handler.php:227
+#: includes/class-wc-form-handler.php:223
 msgid "Account details changed successfully."
 msgstr "פרטי החשבון שונו בהצלחה."
 
-#: includes/class-wc-form-handler.php:355
+#: includes/class-wc-form-handler.php:350
 msgid "Payment method added."
 msgstr "נוספה אפשרות תשלום."
 
-#: includes/class-wc-form-handler.php:388
-#: includes/class-wc-form-handler.php:447
+#: includes/class-wc-form-handler.php:383
+#: includes/class-wc-form-handler.php:442
 msgid "Cart updated."
 msgstr "סל הקניות עודכן."
 
-#: includes/class-wc-form-handler.php:423
+#: includes/class-wc-form-handler.php:418
 msgid "You can only have 1 %s in your cart."
 msgstr "יכול להיות רק %s 1 בסל הקניות שלך"
 
-#: includes/class-wc-form-handler.php:513
+#: includes/class-wc-form-handler.php:508
 msgid "The cart has been filled with the items from your previous order."
 msgstr "סל הקניות כבר מלא בפריטים מההזמנה הקודמת שלך."
 
-#: includes/class-wc-form-handler.php:536
+#: includes/class-wc-form-handler.php:531
 msgid "Order cancelled by customer."
 msgstr "הזמנה בוטלה על ידי לקוח."
 
-#: includes/class-wc-form-handler.php:539
+#: includes/class-wc-form-handler.php:534
 msgid "Your order was cancelled."
 msgstr "ההזמנה שלך בוטלה."
 
-#: includes/class-wc-form-handler.php:544
+#: includes/class-wc-form-handler.php:539
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr "ההזמנה שלך כבר לא ניתנת לביטול. אנא צור קשר במידה ואתה זקוק לסיוע נוסף."
 
-#: includes/class-wc-form-handler.php:584
-#: includes/class-wc-form-handler.php:644
+#: includes/class-wc-form-handler.php:579
+#: includes/class-wc-form-handler.php:639
 msgid "Please choose product options&hellip;"
 msgstr "בחר אפשרויות מוצר&hellip;"
 
-#: includes/class-wc-form-handler.php:678
+#: includes/class-wc-form-handler.php:673
 msgid ""
 "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr "נא לבחור את כמות הפריטים שברצונך להוסיף לעגלת הקניות שלך&hellip;"
 
-#: includes/class-wc-form-handler.php:685
+#: includes/class-wc-form-handler.php:680
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr "אנא בחר במוצר שברצונך להוסיף לעגלת הקניות שלך&hellip;"
 
-#: includes/class-wc-form-handler.php:745
-#: includes/class-wc-form-handler.php:749
-#: includes/class-wc-form-handler.php:753
-#: includes/class-wc-form-handler.php:762
-#: includes/class-wc-form-handler.php:888
+#: includes/class-wc-form-handler.php:740
+#: includes/class-wc-form-handler.php:744
+#: includes/class-wc-form-handler.php:748
+#: includes/class-wc-form-handler.php:757
+#: includes/class-wc-form-handler.php:883
 msgid "Error"
 msgstr "שגיאה"
 
-#: includes/class-wc-form-handler.php:749
+#: includes/class-wc-form-handler.php:744
 msgid "Username is required."
 msgstr "נדרש שם משתמש."
 
-#: includes/class-wc-form-handler.php:753
+#: includes/class-wc-form-handler.php:748
 msgid "Password is required."
 msgstr "נדרשת סיסמא."
 
-#: includes/class-wc-form-handler.php:762
+#: includes/class-wc-form-handler.php:757
 msgid "A user could not be found with this email address."
 msgstr "לא נמצא משתמש עם כתובת אימייל זו."
 
-#: includes/class-wc-form-handler.php:787
+#: includes/class-wc-form-handler.php:782
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr "אתה מחובר כרגע בתור <strong>%s</strong>"
 
-#: includes/class-wc-form-handler.php:831
+#: includes/class-wc-form-handler.php:826
 msgid "Please enter your password."
 msgstr "אנא הזן את הסיסמא שלך."
 
-#: includes/class-wc-form-handler.php:904 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:899 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr "שגיאה"
 
-#: includes/class-wc-form-handler.php:904
+#: includes/class-wc-form-handler.php:899
 msgid "Anti-spam field was filled in."
 msgstr "התחום אנטי ספאם היה מלא פנימה"
 
-#: includes/class-wc-frontend-scripts.php:123
+#: includes/class-wc-frontend-scripts.php:149
 msgid "Please select a rating"
 msgstr "בחר דירוג"
 
-#: includes/class-wc-frontend-scripts.php:140
-#: includes/wc-template-functions.php:1603
+#: includes/class-wc-frontend-scripts.php:168
+#: includes/wc-template-functions.php:1594
 msgid "required"
 msgstr "נדרש"
 
-#: includes/class-wc-frontend-scripts.php:164
+#: includes/class-wc-frontend-scripts.php:196
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr "אנו מתנצלים, אך לא נמצאו מוצרים שעונים על הבחירה שלך. אנא בחר קומבינציה אחרת."
 
-#: includes/class-wc-frontend-scripts.php:165
+#: includes/class-wc-frontend-scripts.php:197
 msgid ""
 "Sorry, this product is unavailable. Please choose a different combination."
 msgstr "מצטערים, מוצר זה אינו זמין כרגע. אנא בחר שילוב אחר."
 
-#: includes/class-wc-frontend-scripts.php:170
+#: includes/class-wc-frontend-scripts.php:204
 msgid "Select an option&hellip;"
 msgstr "בחר אפשרות&hellip;"
 
@@ -5259,7 +5049,7 @@ msgid "Cart"
 msgstr "סל הקניות"
 
 #: includes/class-wc-install.php:227
-msgctxt "Paeg slug"
+msgctxt "Page slug"
 msgid "checkout"
 msgstr "לתשלום"
 
@@ -5331,204 +5121,208 @@ msgstr "WooCommerce"
 msgid "Order status changed from %s to %s."
 msgstr "מצב ההזמנה שונה מ%s ל%s"
 
+#: includes/class-wc-order.php:1592
+msgid "Item #%s stock reduced from %s to %s."
+msgstr "המלאי של פריט מספר %s ירד מ%s ל %s"
+
 #: includes/class-wc-order.php:1602
 msgid "Order item stock reduced successfully."
 msgstr "כמות הפריט במלאי הופחתה בהצלחה."
 
-#: includes/class-wc-post-types.php:55 includes/class-wc-post-types.php:57
+#: includes/class-wc-post-types.php:56 includes/class-wc-post-types.php:58
 #: includes/widgets/class-wc-widget-product-categories.php:30
 msgid "Product Categories"
 msgstr "קטגוריות המוצרים"
 
-#: includes/class-wc-post-types.php:58
+#: includes/class-wc-post-types.php:59
 msgid "Product Category"
 msgstr "קטגוריית מוצר"
 
-#: includes/class-wc-post-types.php:59
+#: includes/class-wc-post-types.php:60
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr "קטגוריות"
 
-#: includes/class-wc-post-types.php:60
+#: includes/class-wc-post-types.php:61
 msgid "Search Product Categories"
 msgstr "חיפוש קטגוריות מוצר"
 
-#: includes/class-wc-post-types.php:61
+#: includes/class-wc-post-types.php:62
 msgid "All Product Categories"
 msgstr "כל קטגוריות המוצרים"
 
-#: includes/class-wc-post-types.php:62
+#: includes/class-wc-post-types.php:63
 msgid "Parent Product Category"
 msgstr "קטגוריית מוצר אב"
 
-#: includes/class-wc-post-types.php:63
+#: includes/class-wc-post-types.php:64
 msgid "Parent Product Category:"
 msgstr "קטגוריית מוצר אב:"
 
-#: includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:65
 msgid "Edit Product Category"
 msgstr "עריכת קטגוריית מוצר"
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:66
 msgid "Update Product Category"
 msgstr "עדכון קטגוריית מוצר"
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:67
 msgid "Add New Product Category"
 msgstr "הוסף קטגוריית מוצר חדשה"
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:68
 msgid "New Product Category Name"
 msgstr "שם קטגוריית המוצר החדשה"
 
-#: includes/class-wc-post-types.php:78
+#: includes/class-wc-post-types.php:79
 #: includes/updates/woocommerce-update-2.0.php:44
 msgctxt "slug"
 msgid "product-category"
 msgstr "product-category"
 
-#: includes/class-wc-post-types.php:90 includes/class-wc-post-types.php:92
+#: includes/class-wc-post-types.php:91 includes/class-wc-post-types.php:93
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:27
 msgid "Product Tags"
 msgstr "תגיות מוצרים"
 
-#: includes/class-wc-post-types.php:93
+#: includes/class-wc-post-types.php:94
 msgid "Product Tag"
 msgstr "תגית המוצר"
 
-#: includes/class-wc-post-types.php:94
+#: includes/class-wc-post-types.php:95
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "תגיות"
 
-#: includes/class-wc-post-types.php:95
+#: includes/class-wc-post-types.php:96
 msgid "Search Product Tags"
 msgstr "חיפוש תגיות מוצר"
 
-#: includes/class-wc-post-types.php:96
+#: includes/class-wc-post-types.php:97
 msgid "All Product Tags"
 msgstr "כל תגיות המוצרים"
 
-#: includes/class-wc-post-types.php:97
+#: includes/class-wc-post-types.php:98
 msgid "Parent Product Tag"
 msgstr "תגית מוצר אב"
 
-#: includes/class-wc-post-types.php:98
+#: includes/class-wc-post-types.php:99
 msgid "Parent Product Tag:"
 msgstr "תגית מוצר אב:"
 
-#: includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:100
 msgid "Edit Product Tag"
 msgstr "עריכת תגית מוצר"
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:101
 msgid "Update Product Tag"
 msgstr "עדכון תגית מוצר"
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:102
 msgid "Add New Product Tag"
 msgstr "הוסף תגית מוצר חדשה"
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:103
 msgid "New Product Tag Name"
 msgstr "שם תגית המוצר החדשה"
 
-#: includes/class-wc-post-types.php:113
+#: includes/class-wc-post-types.php:114
 #: includes/updates/woocommerce-update-2.0.php:45
 msgctxt "slug"
 msgid "product-tag"
 msgstr "product-tag"
 
-#: includes/class-wc-post-types.php:124 includes/class-wc-post-types.php:126
+#: includes/class-wc-post-types.php:125 includes/class-wc-post-types.php:127
 msgid "Shipping Classes"
 msgstr "סוגי משלוח"
 
-#: includes/class-wc-post-types.php:127
+#: includes/class-wc-post-types.php:128
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:547
 msgid "Shipping Class"
 msgstr "סוג משלוח"
 
-#: includes/class-wc-post-types.php:128
+#: includes/class-wc-post-types.php:129
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "סוגי משלוח"
 
-#: includes/class-wc-post-types.php:129
+#: includes/class-wc-post-types.php:130
 msgid "Search Shipping Classes"
 msgstr "חיפוש סוגי משלוח"
 
-#: includes/class-wc-post-types.php:130
+#: includes/class-wc-post-types.php:131
 msgid "All Shipping Classes"
 msgstr "כל סוגי המשלוח"
 
-#: includes/class-wc-post-types.php:131
+#: includes/class-wc-post-types.php:132
 msgid "Parent Shipping Class"
 msgstr "סוג משלוח אב"
 
-#: includes/class-wc-post-types.php:132
+#: includes/class-wc-post-types.php:133
 msgid "Parent Shipping Class:"
 msgstr "סוג משלוח אב:"
 
-#: includes/class-wc-post-types.php:133
+#: includes/class-wc-post-types.php:134
 msgid "Edit Shipping Class"
 msgstr "עריכת סוג המשלוח"
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:135
 msgid "Update Shipping Class"
 msgstr "עדכון סוג משלוח"
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:136
 msgid "Add New Shipping Class"
 msgstr "סוג משלוח חדש"
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:137
 msgid "New Shipping Class Name"
 msgstr "שם סוג המשלוח החדש"
 
-#: includes/class-wc-post-types.php:184
+#: includes/class-wc-post-types.php:185
 msgid "Search %s"
 msgstr "חיפוש %s"
 
-#: includes/class-wc-post-types.php:185
+#: includes/class-wc-post-types.php:186
 msgid "All %s"
 msgstr "כל ה%s"
 
-#: includes/class-wc-post-types.php:186
+#: includes/class-wc-post-types.php:187
 msgid "Parent %s"
 msgstr "%s אב"
 
-#: includes/class-wc-post-types.php:187
+#: includes/class-wc-post-types.php:188
 msgid "Parent %s:"
 msgstr "%s אב:"
 
-#: includes/class-wc-post-types.php:188
+#: includes/class-wc-post-types.php:189
 msgid "Edit %s"
 msgstr "ערוך %s"
 
-#: includes/class-wc-post-types.php:189
+#: includes/class-wc-post-types.php:190
 msgid "Update %s"
 msgstr "עדכן %s"
 
-#: includes/class-wc-post-types.php:190
+#: includes/class-wc-post-types.php:191
 msgid "Add New %s"
 msgstr "הוסף %s חדש"
 
-#: includes/class-wc-post-types.php:191
+#: includes/class-wc-post-types.php:192
 msgid "New %s"
 msgstr "%s חדש"
 
-#: includes/class-wc-post-types.php:226
+#: includes/class-wc-post-types.php:227
 #: includes/updates/woocommerce-update-2.0.php:53
 msgctxt "slug"
 msgid "product"
 msgstr "מוצר"
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:233
 #: includes/widgets/class-wc-widget-products.php:27
 msgid "Products"
 msgstr "מוצרים"
 
-#: includes/class-wc-post-types.php:233 templates/cart/cart.php:27
+#: includes/class-wc-post-types.php:234 templates/cart/cart.php:27
 #: templates/checkout/form-pay.php:19 templates/checkout/review-order.php:18
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:23
@@ -5539,168 +5333,168 @@ msgstr "מוצרים"
 msgid "Product"
 msgstr "מוצר"
 
-#: includes/class-wc-post-types.php:234
+#: includes/class-wc-post-types.php:235
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "מוצרים"
 
-#: includes/class-wc-post-types.php:235
+#: includes/class-wc-post-types.php:236
 msgid "Add Product"
 msgstr "הוסף מוצר"
 
-#: includes/class-wc-post-types.php:236
+#: includes/class-wc-post-types.php:237
 msgid "Add New Product"
 msgstr "הוסף מוצר חדש"
 
-#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:289
-#: includes/class-wc-post-types.php:328 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:238 includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:329 templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr "עריכה"
 
-#: includes/class-wc-post-types.php:238
+#: includes/class-wc-post-types.php:239
 msgid "Edit Product"
 msgstr "עריכת מוצר"
 
-#: includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:240
 msgid "New Product"
 msgstr "מוצר חדש"
 
-#: includes/class-wc-post-types.php:240 includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:241 includes/class-wc-post-types.php:242
 msgid "View Product"
 msgstr "הצג מוצר"
 
-#: includes/class-wc-post-types.php:242
+#: includes/class-wc-post-types.php:243
 #: includes/widgets/class-wc-widget-product-search.php:27
 msgid "Search Products"
 msgstr "חיפוש מוצרים"
 
-#: includes/class-wc-post-types.php:243
+#: includes/class-wc-post-types.php:244
 msgid "No Products found"
 msgstr "לא נמצאו מוצרים"
 
-#: includes/class-wc-post-types.php:244
+#: includes/class-wc-post-types.php:245
 msgid "No Products found in trash"
 msgstr "לא נמצאו מוצרים באשפה"
 
-#: includes/class-wc-post-types.php:245
+#: includes/class-wc-post-types.php:246
 msgid "Parent Product"
 msgstr "מוצר אב"
 
-#: includes/class-wc-post-types.php:247
+#: includes/class-wc-post-types.php:248
 msgid "This is where you can add new products to your store."
 msgstr "כאן אתה יכול להוסיף מוצרים לחנות שלך."
 
-#: includes/class-wc-post-types.php:267
+#: includes/class-wc-post-types.php:268
 msgid "Variations"
 msgstr "וריאציות"
 
-#: includes/class-wc-post-types.php:275
+#: includes/class-wc-post-types.php:276
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr "הזמנות"
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:286
 msgid "Orders"
 msgstr "הזמנות"
 
-#: includes/class-wc-post-types.php:286 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:287 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr "הזמנה"
 
-#: includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:288
 msgid "Add Order"
 msgstr "הוסף הזמנה"
 
-#: includes/class-wc-post-types.php:288
+#: includes/class-wc-post-types.php:289
 msgid "Add New Order"
 msgstr "הוסף הזמנה חדשה"
 
-#: includes/class-wc-post-types.php:290
+#: includes/class-wc-post-types.php:291
 msgid "Edit Order"
 msgstr "עריכת הזמנה"
 
-#: includes/class-wc-post-types.php:291
+#: includes/class-wc-post-types.php:292
 msgid "New Order"
 msgstr "הזמנה חדשה"
 
-#: includes/class-wc-post-types.php:292 includes/class-wc-post-types.php:293
+#: includes/class-wc-post-types.php:293 includes/class-wc-post-types.php:294
 msgid "View Order"
 msgstr "הצגת הזמנה"
 
-#: includes/class-wc-post-types.php:294
+#: includes/class-wc-post-types.php:295
 msgid "Search Orders"
 msgstr "חיפוש הזמנות"
 
-#: includes/class-wc-post-types.php:295
+#: includes/class-wc-post-types.php:296
 msgid "No Orders found"
 msgstr "לא נמצאו הזמנות"
 
-#: includes/class-wc-post-types.php:296
+#: includes/class-wc-post-types.php:297
 msgid "No Orders found in trash"
 msgstr "לא נמצאו הזמנות באשפה"
 
-#: includes/class-wc-post-types.php:297
+#: includes/class-wc-post-types.php:298
 msgid "Parent Orders"
 msgstr "הזמנת אב"
 
-#: includes/class-wc-post-types.php:300
+#: includes/class-wc-post-types.php:301
 msgid "This is where store orders are stored."
 msgstr "כאן מאוחסנים הזמנות החנות."
 
-#: includes/class-wc-post-types.php:323
+#: includes/class-wc-post-types.php:324
 msgid "Coupons"
 msgstr "קופונים"
 
-#: includes/class-wc-post-types.php:324 templates/cart/cart.php:119
+#: includes/class-wc-post-types.php:325 templates/cart/cart.php:119
 msgid "Coupon"
 msgstr "קופון"
 
-#: includes/class-wc-post-types.php:325
+#: includes/class-wc-post-types.php:326
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "קופונים"
 
-#: includes/class-wc-post-types.php:326
+#: includes/class-wc-post-types.php:327
 msgid "Add Coupon"
 msgstr "הוספת קופון"
 
-#: includes/class-wc-post-types.php:327
+#: includes/class-wc-post-types.php:328
 msgid "Add New Coupon"
 msgstr "הוספת קופון חדש"
 
-#: includes/class-wc-post-types.php:329
+#: includes/class-wc-post-types.php:330
 msgid "Edit Coupon"
 msgstr "עריכת קופון"
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:331
 msgid "New Coupon"
 msgstr "קופון חדש"
 
-#: includes/class-wc-post-types.php:331
+#: includes/class-wc-post-types.php:332
 msgid "View Coupons"
 msgstr "צפייה בקופונים"
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:333
 msgid "View Coupon"
 msgstr "הצג קופון"
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:334
 msgid "Search Coupons"
 msgstr "חיפוש קופונים"
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:335
 msgid "No Coupons found"
 msgstr "לא נמצאו קופונים"
 
-#: includes/class-wc-post-types.php:335
+#: includes/class-wc-post-types.php:336
 msgid "No Coupons found in trash"
 msgstr "לא נמצאו קופונים באשפה"
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:337
 msgid "Parent Coupon"
 msgstr "קופון אב"
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:339
 msgid ""
 "This is where you can add new coupons that customers can use in your store."
 msgstr "כאן אתה יכול ליצור קופונים שלקוחות ישתמשו בהם בחנות שלך."
@@ -5772,21 +5566,21 @@ msgid ""
 "Your {site_title} order from {order_date} is complete - download your files"
 msgstr "הזמנתך מ- {site_title} מתאריך {order_date} הושלמה - הורד את הקבצים שלך"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:146
-#: includes/emails/class-wc-email-new-order.php:133
+#: includes/emails/class-wc-email-customer-completed-order.php:147
+#: includes/emails/class-wc-email-new-order.php:134
 msgid "Subject"
 msgstr "נושא"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:153
-#: includes/emails/class-wc-email-new-order.php:140
+#: includes/emails/class-wc-email-customer-completed-order.php:154
+#: includes/emails/class-wc-email-new-order.php:141
 msgid "Email Heading"
 msgstr "כותרת אימייל"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:160
+#: includes/emails/class-wc-email-customer-completed-order.php:161
 msgid "Subject (downloadable)"
 msgstr "נושא (להורדה)"
 
-#: includes/emails/class-wc-email-customer-completed-order.php:167
+#: includes/emails/class-wc-email-customer-completed-order.php:168
 msgid "Email Heading (downloadable)"
 msgstr "כותרת מייל (להורדה)"
 
@@ -5816,11 +5610,11 @@ msgstr "הזמנתך מ- {site_title} מתאריך {order_date}"
 msgid "Order {order_number} details"
 msgstr "פרטי הזמנה מספר {order_number}"
 
-#: includes/emails/class-wc-email-customer-invoice.php:160
+#: includes/emails/class-wc-email-customer-invoice.php:161
 msgid "Email subject (paid)"
 msgstr "נושא הדואר אלקטרוני (בתשלום)"
 
-#: includes/emails/class-wc-email-customer-invoice.php:167
+#: includes/emails/class-wc-email-customer-invoice.php:168
 msgid "Email heading (paid)"
 msgstr "אימייל כותרת (בתשלום)"
 
@@ -5910,23 +5704,23 @@ msgstr "הזמנת לקוח חדש"
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
 msgstr "[{site_title}] הזמנת לקוח חדש ({order_number}) - {order_date}"
 
-#: includes/emails/class-wc-email-new-order.php:126
+#: includes/emails/class-wc-email-new-order.php:127
 msgid "Recipient(s)"
 msgstr "נמען(ים)"
 
-#: includes/emails/class-wc-email-new-order.php:128
+#: includes/emails/class-wc-email-new-order.php:129
 msgid ""
 "Enter recipients (comma separated) for this email. Defaults to "
 "<code>%s</code>."
 msgstr "כתוב נמענים (מופרדים בפסיקים) למייל זה. ברירת המחדל היא <code>%s</code>"
 
-#: includes/emails/class-wc-email-new-order.php:135
+#: includes/emails/class-wc-email-new-order.php:136
 msgid ""
 "This controls the email subject line. Leave blank to use the default "
 "subject: <code>%s</code>."
 msgstr "זה קובע את שורת הנושא של האימייל. השאר ריק כדי להשתמש בברירת המחדל: <code>%s</code>."
 
-#: includes/emails/class-wc-email-new-order.php:142
+#: includes/emails/class-wc-email-new-order.php:143
 msgid ""
 "This controls the main heading contained within the email notification. "
 "Leave blank to use the default heading: <code>%s</code>."
@@ -6406,10 +6200,8 @@ msgid "Enable logging"
 msgstr "לאפשר רישום"
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:237
-msgid ""
-"Log PayPal events, such as IPN requests, inside "
-"<code>woocommerce/logs/paypal-%s.txt</code>"
-msgstr "תעד אירועי PayPal, כגון בקשות IPN, בתוך <code>woocommerce/logs/paypal-%s.txt</code>"
+msgid "Log PayPal events, such as IPN requests, inside <code>%s</code>"
+msgstr ""
 
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:370
 msgid "Shipping via"
@@ -6858,6 +6650,12 @@ msgstr "עלות משלוח עודכנה."
 msgid "Invalid order. If you have an account please log in and try again."
 msgstr "הזמנה לא תקינה. אם יש לך חשבון יש להתחבר ולנסות שוב."
 
+#: includes/shortcodes/class-wc-shortcode-checkout.php:91
+#: includes/shortcodes/class-wc-shortcode-my-account.php:111
+#: templates/checkout/thankyou.php:30
+msgid "My Account"
+msgstr "החשבון שלי"
+
 #: includes/shortcodes/class-wc-shortcode-checkout.php:113
 #: includes/shortcodes/class-wc-shortcode-checkout.php:164
 msgid ""
@@ -6996,7 +6794,7 @@ msgstr "דולר אוסטרלי"
 
 #: includes/wc-core-functions.php:169
 msgid "Bangladeshi Taka"
-msgstr "טאקה בנגלדשי"
+msgstr ""
 
 #: includes/wc-core-functions.php:170
 msgid "Brazilian Real"
@@ -7091,62 +6889,66 @@ msgid "New Zealand Dollar"
 msgstr "דולר ניו זילנד"
 
 #: includes/wc-core-functions.php:193
+msgid "Paraguayan Guaraní"
+msgstr ""
+
+#: includes/wc-core-functions.php:194
 msgid "Philippine Pesos"
 msgstr "פזו פיליפיני"
 
-#: includes/wc-core-functions.php:194
+#: includes/wc-core-functions.php:195
 msgid "Polish Zloty"
 msgstr "הזלוטי פולני"
 
-#: includes/wc-core-functions.php:195
+#: includes/wc-core-functions.php:196
 msgid "Pounds Sterling"
 msgstr "פאונד סטרלינג"
 
-#: includes/wc-core-functions.php:196
+#: includes/wc-core-functions.php:197
 msgid "Romanian Leu"
 msgstr "לאו רומני"
 
-#: includes/wc-core-functions.php:197
+#: includes/wc-core-functions.php:198
 msgid "Russian Ruble"
 msgstr "רובל רוסי"
 
-#: includes/wc-core-functions.php:198
+#: includes/wc-core-functions.php:199
 msgid "Singapore Dollar"
 msgstr "דולר סינגפורי"
 
-#: includes/wc-core-functions.php:199
+#: includes/wc-core-functions.php:200
 msgid "South African rand"
 msgstr "ראנד הדרום האפריקאי"
 
-#: includes/wc-core-functions.php:200
+#: includes/wc-core-functions.php:201
 msgid "Swedish Krona"
 msgstr "כתר שבדי"
 
-#: includes/wc-core-functions.php:201
+#: includes/wc-core-functions.php:202
 msgid "Swiss Franc"
 msgstr "פרנק שויצרי"
 
-#: includes/wc-core-functions.php:202
+#: includes/wc-core-functions.php:203
 msgid "Taiwan New Dollars"
 msgstr "חדש הדולר טייוואני"
 
-#: includes/wc-core-functions.php:203
+#: includes/wc-core-functions.php:204
 msgid "Thai Baht"
 msgstr "בהט התאילנדי"
 
-#: includes/wc-core-functions.php:204
+#: includes/wc-core-functions.php:205
 msgid "Turkish Lira"
 msgstr "לירה טורקית"
 
-#: includes/wc-core-functions.php:205
+#: includes/wc-core-functions.php:206
 msgid "US Dollars"
 msgstr "דולר ארצות הברית"
 
-#: includes/wc-core-functions.php:206
+#: includes/wc-core-functions.php:207
 msgid "Vietnamese Dong"
 msgstr "דונג ויאטנמי"
 
-#: includes/wc-core-functions.php:207
+#: includes/wc-core-functions.php:208
 msgid "Egyptian Pound"
 msgstr ""
 
@@ -7180,7 +6982,7 @@ msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr "משלוח"
 
-#: includes/wc-product-functions.php:234
+#: includes/wc-product-functions.php:235
 msgctxt "slug"
 msgid "uncategorized"
 msgstr "uncategorized"
@@ -7232,41 +7034,41 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr "עמוד הבית"
 
-#: includes/wc-template-functions.php:1558
+#: includes/wc-template-functions.php:1549
 msgid "Order Again"
 msgstr "הזמן שוב"
 
-#: includes/wc-template-functions.php:1653
+#: includes/wc-template-functions.php:1644
 #: templates/cart/shipping-calculator.php:28
 msgid "Select a country&hellip;"
 msgstr "בחירת ארץ&hellip;"
 
-#: includes/wc-template-functions.php:1660
+#: includes/wc-template-functions.php:1651
 msgid "Update country"
 msgstr "עדכן ארץ"
 
-#: includes/wc-template-functions.php:1710
+#: includes/wc-template-functions.php:1701
 #: templates/cart/shipping-calculator.php:52
 msgid "Select a state&hellip;"
 msgstr "בחר מדינה&hellip;"
 
-#: includes/wc-template-functions.php:1851
+#: includes/wc-template-functions.php:1842
 msgid "Search for:"
 msgstr "חיפוש עבור:"
 
-#: includes/wc-template-functions.php:1852
+#: includes/wc-template-functions.php:1843
 msgid "Search for products"
 msgstr "חיפוש מוצרים"
 
-#: includes/wc-template-functions.php:1853
+#: includes/wc-template-functions.php:1844
 msgid "Search"
 msgstr "חיפוש"
 
-#: includes/wc-term-functions.php:135
+#: includes/wc-term-functions.php:146
 msgid "Select a category"
 msgstr "בחר קטגוריה"
 
-#: includes/wc-term-functions.php:139
+#: includes/wc-term-functions.php:149
 msgid "Uncategorized"
 msgstr "לא מקוטלג"
 
@@ -7429,6 +7231,11 @@ msgstr "מיון"
 #: includes/widgets/class-wc-widget-product-categories.php:38
 msgid "Category Order"
 msgstr "סדר קטגוריות"
+
+#: includes/widgets/class-wc-widget-product-categories.php:39
+#: templates/single-product-reviews.php:62
+msgid "Name"
+msgstr "שם"
 
 #: includes/widgets/class-wc-widget-product-categories.php:45
 msgid "Show as dropdown"
@@ -7709,6 +7516,10 @@ msgstr "ארץ / מדינה"
 msgid "City"
 msgstr "עיר"
 
+#: templates/cart/shipping-calculator.php:80
+msgid "Postcode / Zip"
+msgstr "מיקוד"
+
 #: templates/cart/shipping-calculator.php:85
 msgid "Update Totals"
 msgstr "עדכן סכום"
@@ -7972,13 +7783,13 @@ msgstr "כדי לאפס את הסיסמא שלך, בקר בכתובת הבאה:"
 msgid "Click here to reset your password"
 msgstr "לחץ כאן כדי לאפס את הסיסמא שלך"
 
-#: templates/emails/email-addresses.php:18
-#: templates/emails/plain/email-addresses.php:12
+#: templates/emails/email-addresses.php:20
+#: templates/emails/plain/email-addresses.php:14
 msgid "Billing address"
 msgstr "כתובת חיוב"
 
-#: templates/emails/email-addresses.php:28
-#: templates/emails/plain/email-addresses.php:17
+#: templates/emails/email-addresses.php:30
+#: templates/emails/plain/email-addresses.php:19
 msgid "Shipping address"
 msgstr "כתובת משלוח"
 
@@ -8154,23 +7965,31 @@ msgstr "שם משפחה"
 msgid "Email address"
 msgstr "כתובת אימייל"
 
-#: templates/myaccount/form-edit-account.php:33
+#: templates/myaccount/form-edit-account.php:34
+msgid "Password (leave blank to leave unchanged)"
+msgstr "סיסמא (השאר ריק כדי להשאיר ללא שינוי)"
+
+#: templates/myaccount/form-edit-account.php:38
+msgid "Confirm new password"
+msgstr "וידוא סיסמא חדשה"
+
+#: templates/myaccount/form-edit-account.php:44
 msgid "Password Change"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:36
+#: templates/myaccount/form-edit-account.php:47
 msgid "Current Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:40
+#: templates/myaccount/form-edit-account.php:51
 msgid "New Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:44
+#: templates/myaccount/form-edit-account.php:55
 msgid "Confirm New Password"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:50
+#: templates/myaccount/form-edit-account.php:61
 msgid "Save changes"
 msgstr "שמור שינויים"
 
