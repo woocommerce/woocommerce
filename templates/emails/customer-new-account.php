@@ -10,11 +10,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <?php 
-	/**
- 	 * woocommerce_email_header hook
- 	 *
- 	 * @hooked WC_Emails::email_header
- 	 */
+	/** This action is documented in templates/emails/customer-invoice.php */
 	do_action( 'woocommerce_email_header', $email_heading ); 
 ?>
 
@@ -29,10 +25,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 <p><?php printf( __( 'You can access your account area to view your orders and change your password here: %s.', 'woocommerce' ), get_permalink( wc_get_page_id( 'myaccount' ) ) ); ?></p>
 
 <?php 
-	/**
- 	 * woocommerce_email_footer hook
- 	 *
- 	 * @hooked WC_Emails::email_footer
- 	 */
+	/** This action is documented in templates/emails/customer-invoice.php */
 	do_action( 'woocommerce_email_footer' ); 
 ?>

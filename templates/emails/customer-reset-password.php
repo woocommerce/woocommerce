@@ -10,11 +10,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <?php 
-	/**
- 	 * woocommerce_email_header hook
- 	 *
- 	 * @hooked WC_Emails::email_header
- 	 */
+	/** This action is documented in templates/emails/customer-invoice.php */
 	do_action( 'woocommerce_email_header', $email_heading ); 
 ?>
 
@@ -29,10 +25,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 <p></p>
 
 <?php 
-	/**
- 	 * woocommerce_email_footer hook
- 	 *
- 	 * @hooked WC_Emails::email_footer
- 	 */
+	/** This action is documented in templates/emails/customer-invoice.php */
 	do_action( 'woocommerce_email_footer' ); 
 ?>

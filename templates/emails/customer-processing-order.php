@@ -10,24 +10,14 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <?php 
-	/**
- 	 * woocommerce_email_header hook
- 	 *
- 	 * @hooked WC_Emails::email_header
- 	 */
+	/** This action is documented in templates/emails/customer-invoice.php */
 	do_action('woocommerce_email_header', $email_heading); 
 ?>
 
 <p><?php _e( "Your order has been received and is now being processed. Your order details are shown below for your reference:", 'woocommerce' ); ?></p>
 
 <?php 
-	/**
-	 * woocommerce_email_before_order_table hook
-	 * 
-	 * @hooked WC_Gateway_BACS::email_instructions
-	 * @hooked WC_Gateway_Cheque::email_instructions
-	 * @hooked WC_Gateway_COD::email_instructions
-	 */
+	/** This action is documented in templates/emails/customer-invoice.php */
 	do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text ); 
 ?>
 
@@ -61,18 +51,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 </table>
 
 <?php 
-	/**
-	 * woocommerce_email_after_order_table hook
-	 */
+	/** This action is documented in templates/emails/customer-invoice.php */
 	do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text ); 
 ?>
 
 <?php 
-	/**
-	 * woocommerce_email_order_meta hook
-	 *
-	 * @hooked WC_Emails::order_meta
-	 */
+	/** This action is documented in templates/emails/customer-invoice.php */
 	do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text ); 
 ?>
 
@@ -88,10 +72,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 <?php wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) ); ?>
 
 <?php 
-	/**
- 	 * woocommerce_email_footer hook
- 	 *
- 	 * @hooked WC_Emails::email_footer
- 	 */
+	/** This action is documented in templates/emails/customer-invoice.php */
 	do_action( 'woocommerce_email_footer' ); 
 ?>
