@@ -262,4 +262,15 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		</fieldset>
 		<?php
 	}
+
+	/**
+	 * Override this method from a gateway class to return the name of the
+	 * field that the transaction id is stored in.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_transaction_id_field_name() {
+		return '';
+	}
 }
