@@ -48,7 +48,7 @@ class WC_Comments {
 	 * @return array
 	 */
 	public static function exclude_order_comments( $clauses ) {
-		global $wpdb, $typenow, $pagenow;
+		global $wpdb, $typenow;
 
 		if ( is_admin() && $typenow == 'shop_order' && current_user_can( 'manage_woocommerce' ) )
 			return $clauses; // Don't hide when viewing orders in admin

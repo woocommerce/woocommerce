@@ -24,7 +24,7 @@ class WC_Admin_Attributes {
  	 * The added attributes are stored in the database and can be used for layered navigation.
 	 */
 	public static function output() {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
 		// Action to perform: add, edit, delete or none
 		$action = '';

@@ -95,7 +95,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 		 * @return void
 		 */
 		function import( $file ) {
-			global $woocommerce, $wpdb;
+			global $wpdb;
 
 			$this->imported = $this->skipped = 0;
 

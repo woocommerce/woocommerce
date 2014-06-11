@@ -670,7 +670,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public function layered_nav_query( $filtered_posts ) {
-		global $_chosen_attributes, $wp_query;
+		global $_chosen_attributes;
 
 		if ( sizeof( $_chosen_attributes ) > 0 ) {
 

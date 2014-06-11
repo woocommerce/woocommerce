@@ -171,7 +171,7 @@ class WC_Admin_Post_Types {
 	 * @param  string $column
 	 */
 	public function render_product_columns( $column ) {
-		global $post, $woocommerce, $the_product;
+		global $post;
 
 		if ( empty( $the_product ) || $the_product->id != $post->ID ) {
 			$the_product = get_product( $post );
@@ -469,15 +469,6 @@ class WC_Admin_Post_Types {
 				else
 					echo '<span class="na">&ndash;</span>';
 
-			break;
-			case 'billing_address' :
-				if ( $the_order->get_formatted_billing_address() )
-					echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_billing_address() ) . '&z=16' ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_billing_address() ) ) .'</a>';
-				else
-					echo '&ndash;';
-
-				if ( $the_order->payment_method_title )
-					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
 			break;
 			case 'order_items' :
 

@@ -294,8 +294,6 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
  * @param string $attachments (default: "")
  */
 function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
-	global $woocommerce;
-
 	$mailer = WC()->mailer();
 
 	$mailer->send( $to, $subject, $message, $headers, $attachments );
@@ -458,8 +456,6 @@ add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
  * @return string
  */
 function wc_ms_protect_download_rewite_rules( $rewrite ) {
-	global $wp_rewrite;
-
 	if ( ! is_multisite() || 'redirect' == get_option( 'woocommerce_file_download_method' ) ) {
 		return $rewrite;
 	}

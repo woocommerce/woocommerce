@@ -21,7 +21,7 @@ class WC_Meta_Box_Product_Data {
 	 * Output the metabox
 	 */
 	public static function output( $post ) {
-		global $post, $wpdb, $thepostid;
+		global $post, $thepostid;
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 

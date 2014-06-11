@@ -366,8 +366,6 @@ class WC_Order {
 	 * @return string
 	 */
 	public function get_item_count( $type = '' ) {
-		global $wpdb;
-
 		if ( empty( $type ) ) {
 			$type = array( 'line_item' );
 		}
@@ -1398,9 +1396,10 @@ class WC_Order {
 	 * Finally, record the date of payment
 	 *
 	 * @access public
+	 * @param $transaction_id string Optional transaction id to store in post meta
 	 * @return void
 	 */
-	public function payment_complete() {
+	public function payment_complete( $transaction_id = '' ) {
 
 		do_action( 'woocommerce_pre_payment_complete', $this->id );
 
@@ -1440,6 +1439,10 @@ class WC_Order {
 			$this->update_status( $new_order_status );
 
 			add_post_meta( $this->id, '_paid_date', current_time('mysql'), true );
+
+			if ( ! empty( $transaction_id ) ) {
+				add_post_meta( $this->id, '_transaction_id', $transaction_id );
+			}
 
 			$this_order = array(
 				'ID' => $this->id,

@@ -18,7 +18,7 @@ class WC_Meta_Box_Order_Items {
 	 * Output the metabox
 	 */
 	public static function output( $post ) {
-		global $wpdb, $thepostid, $theorder, $woocommerce;
+		global $thepostid, $theorder;
 
 		if ( ! is_object( $theorder ) )
 			$theorder = new WC_Order( $thepostid );

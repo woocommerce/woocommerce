@@ -30,7 +30,7 @@ class WC_Shortcode_My_Account {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce, $wp;
+		global $wp;
 
 		// Check cart class is loaded or abort
 		if ( is_null( WC()->cart ) ) {

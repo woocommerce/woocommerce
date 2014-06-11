@@ -40,8 +40,6 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 	 * Output the report
 	 */
 	public function output_report() {
-		global $woocommerce, $wpdb, $wp_locale;
-
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
@@ -65,8 +63,6 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 	 * @return string
 	 */
 	public function get_main_chart() {
-		global $wpdb;
-
 		$tax_rows = $this->get_order_report_data( array(
 			'data' => array(
 				'_order_tax' => array(

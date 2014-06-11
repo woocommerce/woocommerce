@@ -487,7 +487,7 @@ function wc_track_product_view() {
 	if ( ! is_singular( 'product' ) )
 		return;
 
-	global $post, $product;
+	global $post;
 
 	if ( empty( $_COOKIE['woocommerce_recently_viewed'] ) )
 		$viewed_products = array();
