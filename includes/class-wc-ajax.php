@@ -318,11 +318,11 @@ class WC_AJAX {
 	 */
 	public static function feature_product() {
 		if ( ! current_user_can( 'edit_products' ) ) {
-			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ), '', 403 );
 		}
 
 		if ( ! check_admin_referer( 'woocommerce-feature-product' ) ) {
-			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
+			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ), '', 403 );
 		}
 
 		$post_id = ! empty( $_GET['product_id'] ) ? (int) $_GET['product_id'] : '';
@@ -351,11 +351,11 @@ class WC_AJAX {
 	 */
 	public static function mark_order_complete() {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ), '', 403 );
 		}
 
 		if ( ! check_admin_referer( 'woocommerce-mark-order-complete' ) ) {
-			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
+			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ), '', 403 );
 		}
 
 		$order_id = isset( $_GET['order_id'] ) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
@@ -376,11 +376,11 @@ class WC_AJAX {
 	 */
 	public static function mark_order_processing() {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ), '', 403 );
 		}
 
 		if ( ! check_admin_referer( 'woocommerce-mark-order-processing' ) ) {
-			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
+			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ), '', 403 );
 		}
 
 		$order_id = isset( $_GET['order_id'] ) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
