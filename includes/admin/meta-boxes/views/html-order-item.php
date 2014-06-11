@@ -39,6 +39,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<div class="view">
 			<?php
+				global $wpdb;
+
 				if ( $metadata = $order->has_meta( $item_id ) ) {
 					echo '<table cellspacing="0" class="display_meta">';
 					foreach ( $metadata as $meta ) {
@@ -60,6 +62,24 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						// Skip serialised meta
 						if ( is_serialized( $meta['meta_value'] ) ) {
 							continue;
+						}
+
+						// Get attribute data
+						if ( taxonomy_exists( $meta['meta_key'] ) ) {
+							$term           = get_term_by( 'slug', $meta['meta_value'], $meta['meta_key'] );
+							$attribute_name = str_replace( 'pa_', '', wc_clean( $meta['meta_key'] ) );
+							$attribute      = $wpdb->get_var(
+								$wpdb->prepare( "
+										SELECT attribute_label
+										FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+										WHERE attribute_name = %s;
+									",
+									$attribute_name
+								)
+							);
+
+							$meta['meta_key']   = ( ! is_wp_error( $attribute ) && $attribute ) ? $attribute : $attribute_name;
+							$meta['meta_value'] = ( ! is_wp_error( $term ) && $term->name ) ? $term->name : $meta['meta_value'];
 						}
 
 						echo '<tr><th>' . wp_kses_post( urldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( urldecode( $meta['meta_value'] ) ) ) . '</td></tr>';
