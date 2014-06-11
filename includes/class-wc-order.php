@@ -34,48 +34,220 @@ class WC_Order {
 		}
 	}
 
+	/**
+	 * Remove all line items (products, coupons, shipping, taxes) from the order.
+	 */
+	public function remove_order_items() {
+		global $wpdb;
 
-
-	public function set_address( $address_data, $type = 'billing' ) {
-		update_post_meta( $order_id, '_' . $type . '_address', $postvalue );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d )", $order_id ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) );
 	}
 
+	/**
+	 * Set the payment method for the order
+	 * @param WC_Payment_Gateway
+	 */
 	public function set_payment_method( $payment_method ) {
-
-	}
-
-	public function add_item( $item_name, $meta = array() ) {
-		$item_id = wc_add_order_item( $this->id, array(
-	 		'order_item_name' 		=> $item_name,
-	 		'order_item_type' 		=> 'line_item'
-	 	) );
-
-	 	if ( $item_id ) {
-			wc_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $values['quantity'] ) );
-
-			foreach ( $meta as $key => $value ) {
-				wc_add_order_item_meta( $item_id, $key, $value );
-			}
+		if ( is_object( $payment_method ) ) {
+			update_post_meta( $this->id, '_payment_method', $payment_method->id );
+			update_post_meta( $this->id, '_payment_method_title', $payment_method->get_title() );
 		}
 	}
 
-	public function add_fee() {
+	/**
+	 * Set the customer address
+	 * @param array $address Address data
+	 * @param string $type billing or shipping
+	 */
+	public function set_address( $address, $type = 'billing' ) {
+		foreach( $address as $key => $value ) {
+			update_post_meta( $this->id, "_{$type}_" . $key, $value );
+		}
+	}	
 
+	/**
+	 * Add a product line item to the order
+	 * @param WC_Product $item
+	 * @param int $qty Line item quantity
+	 * @param  array args
+	 * @return int|bool Item ID or false
+	 */
+	public function add_product( $product, $qty = 1, $args = array() ) {
+		$default_args = array(
+			'variation' => array(),
+			'totals'    => array()
+		);
+
+		$args    = wp_parse_args( $args, $default_args );
+	   	$item_id = wc_add_order_item( $this->id, array(
+			'order_item_name' => $product->get_title(),
+			'order_item_type' => 'line_item'
+	 	) );
+
+	 	if ( ! $item_id ) {
+	 		return false;
+	 	}
+
+	 	wc_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $qty ) );
+	 	wc_add_order_item_meta( $item_id, '_tax_class', $product->get_tax_class() );
+	 	wc_add_order_item_meta( $item_id, '_product_id', $product->id );
+	 	wc_add_order_item_meta( $item_id, '_variation_id', isset( $product->variation_id ) ? $product->variation_id : 0 );
+	 		
+	 	// Add totals
+	 	foreach ( $args['totals'] as $key => $value ) {
+	 		if ( ! in_array( $key, array( 'subtotal', 'subtotal_tax', 'total', 'tax' ) ) ) {
+	 			continue;
+	 		}
+	 		wc_add_order_item_meta( $item_id, '_line_' . $key, 	wc_format_decimal( $value ) );
+	 	}
+
+	 	// Add variation meta
+	 	foreach ( $args['variation'] as $key => $value ) {
+	 		wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
+	 	}
+
+	 	// Backorders
+	 	if ( $product->backorders_require_notification() && $product->is_on_backorder( $qty ) ) {
+	 		wc_add_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $qty - max( 0, $product->get_total_stock() ) );
+		 }
+
+		return $item_id;
 	}
 
-	public function add_tax() {
+	/**
+	 * Add coupon code to the order
+	 * @param string  $code
+	 * @param float $discount_amount
+	 * @return int|bool Item ID or false
+	 */
+	public function add_coupon( $code, $discount_amount = 0 ) {
+		$item_id = wc_add_order_item( $this->id, array(
+			'order_item_name' => $code,
+			'order_item_type' => 'coupon'
+	 	) );
 
+	 	if ( ! $item_id ) {
+	 		return false;
+	 	}
+
+	 	wc_add_order_item_meta( $item_id, 'discount_amount', $discount_amount );
+
+		do_action( 'woocommerce_order_add_coupon', $this->id, $item_id, $code, $discount_amount );
+
+		return $item_id;
 	}
 
-	public function add_shipping() {
+	/**
+	 * Add a tax row to the order
+	 * @param int tax_rate_id
+	 * @return int|bool Item ID or false
+	 */
+	public function add_tax( $tax_rate_id, $tax_amount = 0, $shipping_tax_amount = 0 ) {
+		$code = WC()->cart->tax->get_rate_code( $tax_rate_id );
 
+		if ( ! $code ) {
+			return false;
+		}
+			
+		$item_id = wc_add_order_item( $this->id, array(
+			'order_item_name' => $code,
+			'order_item_type' => 'tax'
+	 	) );
+
+	 	if ( ! $item_id ) {
+ 			return false;
+ 		}
+
+ 		wc_add_order_item_meta( $item_id, 'rate_id', $tax_rate_id );
+ 		wc_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
+	 	wc_add_order_item_meta( $item_id, 'compound', WC()->cart->tax->is_compound( $key ) ? 1 : 0 );
+	 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( $tax_amount ) );
+	 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( $shipping_tax_amount ) );
+
+	 	do_action( 'woocommerce_order_add_tax', $this->id, $item_id, $tax_rate_id, $tax_amount, $shipping_tax_amount );
+
+		return $item_id;
 	}
 
+	/**
+	 * Add a shipping row to the order
+	 * @param WC_Shipping_Rate shipping_rate
+	 * @return int|bool Item ID or false
+	 */
+	public function add_shipping( $shipping_rate ) {
+		$item_id = wc_add_order_item( $this->id, array(
+	 		'order_item_name' 		=> $shipping_rate->label,
+	 		'order_item_type' 		=> 'shipping'
+	 	) );
 
+		if ( ! $item_id ) {
+ 			return false;
+ 		}
 
+		wc_add_order_item_meta( $item_id, 'method_id', $shipping_rate->id );
+ 		wc_add_order_item_meta( $item_id, 'cost', wc_format_decimal( $shipping_rate->cost ) );
 
+ 		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $shipping_rate );
 
+ 		return $item_id;
+	}
 
+	/**
+	 * Add a fee to the order
+	 * @param object $fee
+	 * @return int|bool Item ID or false
+	 */
+	public function add_fee( $fee ) {
+		$item_id = wc_add_order_item( $this->id, array(
+			'order_item_name' => $fee->name,
+			'order_item_type' => 'fee'
+	 	) );
+
+	 	if ( ! $item_id ) {
+ 			return false;
+ 		}
+
+	 	if ( $fee->taxable ) {
+	 		wc_add_order_item_meta( $item_id, '_tax_class', $fee->tax_class );
+	 	} else {
+	 		wc_add_order_item_meta( $item_id, '_tax_class', '0' );
+	 	}
+
+	 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $fee->amount ) );
+		wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $fee->tax ) );
+
+		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $fee );
+
+		return $item_id;
+	}
+
+	/**
+	 * Set an order total
+	 * @param float $amount
+	 * @param string $total_type
+	 */
+	public function set_total( $amount, $total_type = 'total' ) {
+		if ( ! in_array( $total_type, array( 'shipping', 'order_discount', 'tax', 'shipping_tax', 'total', 'cart_discount' ) ) ) {
+			return false;
+		}
+		switch ( $total_type ) {
+			case 'total' :
+				$key    = '_order_total';
+				$amount = wc_format_decimal( $amount, get_option( 'woocommerce_price_num_decimals' ) );
+			break;
+			case 'order_discount' :
+			case 'cart_discount' :
+				$key    = '_' . $total_type;
+				$amount = wc_format_decimal( $amount );
+			break;
+			default :
+				$key    = '_order_' . $total_type;
+				$amount = wc_format_decimal( $amount );
+			break;
+		}
+		update_post_meta( $this->id, $key, $amount );
+	}
 
 	/**
 	 * Gets an order from the database.
@@ -94,7 +266,6 @@ class WC_Order {
 		}
 		return false;
 	}
-
 
 	/**
 	 * Populates an order from the loaded post data.
@@ -1394,6 +1565,9 @@ class WC_Order {
 
 					// Record the completed date of the order
 					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
+
+					// Update reports
+					wc_delete_shop_order_transients( $this->id );
 				break;
 				case 'processing' :
 				case 'on-hold' :
@@ -1402,15 +1576,19 @@ class WC_Order {
 
 					// Increase coupon usage counts
 					$this->increase_coupon_usage_counts();
+
+					// Update reports
+					wc_delete_shop_order_transients( $this->id );
 				break;
 				case 'cancelled' :
 					// If the order is cancelled, restore used coupons
 					$this->decrease_coupon_usage_counts();
+
+					// Update reports
+					wc_delete_shop_order_transients( $this->id );
 				break;
 			}
 		}
-
-		wc_delete_shop_order_transients( $this->id );
 	}
 
 

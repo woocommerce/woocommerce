@@ -1371,7 +1371,7 @@ class WC_Cart {
 
 			$needs_shipping_address = false;
 
-			if ( WC()->cart->needs_shipping() === true && ! WC()->cart->ship_to_billing_address_only() ) {
+			if ( $this->needs_shipping() === true && ! $this->ship_to_billing_address_only() ) {
 				$needs_shipping_address = true;
 			}
 
@@ -1659,6 +1659,15 @@ class WC_Cart {
 		 */
 		public function get_applied_coupons() {
 			return $this->applied_coupons;
+		}
+
+		/**
+		 * Get the discount amount for a used coupon
+		 * @param  string $code coupon code
+		 * @return float discount amount
+		 */
+		public function get_coupon_discount_amount( $code ) {
+			return isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
 		}
 
 		/**
@@ -2073,6 +2082,24 @@ class WC_Cart {
 			$cart_total_tax = wc_round_tax_total( $this->tax_total + $this->shipping_tax_total );
 
 			return apply_filters( 'woocommerce_get_cart_tax', $cart_total_tax ? wc_price( $cart_total_tax ) : '' );
+		}
+
+		/**
+		 * Get a tax amount
+		 * @param  string $tax_rate_id
+		 * @return float amount
+		 */
+		public function get_tax_amount( $tax_rate_id ) {
+			return isset( $this->taxes[ $tax_rate_id ] ) ? $this->taxes[ $tax_rate_id ] : 0;
+		}
+
+		/**
+		 * Get a tax amount
+		 * @param  string $tax_rate_id
+		 * @return float amount
+		 */
+		public function get_shipping_tax_amount( $tax_rate_id ) {
+			return isset( $this->shipping_taxes[ $tax_rate_id ] ) ? $this->shipping_taxes[ $tax_rate_id ] : 0;
 		}
 
 		/**
