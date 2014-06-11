@@ -325,7 +325,7 @@ class WC_Admin_Taxonomies {
 			// Ref: http://core.trac.wordpress.org/ticket/23605
 			$image = str_replace( ' ', '%20', $image );
 
-			$columns .= '<img src="' . esc_url( $image ) . '" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
+			$columns .= '<img src="' . esc_url( $image ) . '" alt="' . __( 'Thumbnail', 'woocommerce' ) . '" class="wp-post-image" height="48" width="48" />';
 
 		}
 
@@ -342,7 +342,7 @@ class WC_Admin_Taxonomies {
 			$args['checked_ontop'] = false;
 		}
 		return $args;
-	}	
+	}
 }
 
 new WC_Admin_Taxonomies();
