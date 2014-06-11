@@ -18,32 +18,33 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		</div>
 	</td>
 
-	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) :
+		$tax_classes         = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
+		$classes_options     = array();
+		$classes_options[''] = __( 'Standard', 'woocommerce' );
+		$tax_class           = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : '';
 
+		if ( $tax_classes ) {
+			foreach ( $tax_classes as $class ) {
+				$classes_options[ sanitize_title( $class ) ] = $class;
+			}
+		}
+	?>
 	<td class="tax_class" width="1%">
 		<div class="view">
 			<?php
-				$item_value = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : '';
+				$item_value = isset( $classes_options[ $tax_class ] ) ? esc_attr( $classes_options[ $tax_class ] ) : '';
 				echo $item_value ? $item_value : __( 'Standard', 'woocommerce' );
 			?>
 		</div>
 		<div class="edit" style="display:none">
 			<select class="tax_class" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" title="<?php _e( 'Tax class', 'woocommerce' ); ?>">
-				<?php $tax_class = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : ''; ?>
 				<option value="0" <?php selected( 0, $tax_class ) ?>><?php _e( 'N/A', 'woocommerce' ); ?></option>
 				<optgroup label="<?php _e( 'Taxable', 'woocommerce' ); ?>">
 					<?php
-					$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
-
-					$classes_options = array();
-					$classes_options[''] = __( 'Standard', 'woocommerce' );
-
-					if ( $tax_classes )
-						foreach ( $tax_classes as $class )
-							$classes_options[ sanitize_title( $class ) ] = $class;
-
-					foreach ( $classes_options as $value => $name )
-						echo '<option value="' . esc_attr( $value ) . '" ' . selected( $value, $tax_class, false ) . '>'. esc_html( $name ) . '</option>';
+						foreach ( $classes_options as $value => $name ) {
+							echo '<option value="' . esc_attr( $value ) . '" ' . selected( $value, $tax_class, false ) . '>'. esc_html( $name ) . '</option>';
+						}
 					?>
 				</optgroup>
 			</select>
