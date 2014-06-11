@@ -85,7 +85,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							);
 
 							$meta['meta_key']   = ( ! is_wp_error( $attribute ) && $attribute ) ? $attribute : $attribute_name;
-							$meta['meta_value'] = ( ! is_wp_error( $term ) && $term->name ) ? $term->name : $meta['meta_value'];
+							$meta['meta_value'] = ( isset( $term->name ) ) ? $term->name : $meta['meta_value'];
 						}
 
 						echo '<tr><th>' . wp_kses_post( urldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( urldecode( $meta['meta_value'] ) ) ) . '</td></tr>';
