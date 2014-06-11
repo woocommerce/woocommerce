@@ -65,7 +65,7 @@ function wc_create_order( $args ) {
 		$order_data['ID'] = $args['order_id'];
 	} else {
 		$updating                    = false;
-		$order_data['post_type']     = $args['shop_order'];
+		$order_data['post_type']     = 'shop_order';
 		$order_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
 		$order_data['ping_status']   = 'closed';
 		$order_data['post_author']   = 1;
