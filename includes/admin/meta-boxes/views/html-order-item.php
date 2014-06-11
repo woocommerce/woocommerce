@@ -151,9 +151,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$classes_options     = array();
 		$classes_options[''] = __( 'Standard', 'woocommerce' );
 
-		if ( $tax_classes )
-			foreach ( $tax_classes as $class )
+		if ( $tax_classes ) {
+			foreach ( $tax_classes as $class ) {
 				$classes_options[ sanitize_title( $class ) ] = $class;
+			}
+		}
 		?>
 		<td class="tax_class" width="1%">
 			<div class="view">
