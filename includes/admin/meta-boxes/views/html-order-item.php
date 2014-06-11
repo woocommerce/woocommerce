@@ -1,7 +1,10 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 ?>
-<tr class="item <?php if ( ! empty( $class ) ) echo $class; ?>" data-order_item_id="<?php echo $item_id; ?>">
+
+<tr class="item <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_item_id="<?php echo $item_id; ?>">
 	<td class="check-column"><input type="checkbox" /></td>
 	<td class="thumb">
 		<?php if ( $_product ) : ?>
@@ -9,14 +12,17 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 				echo '<strong>' . __( 'Product ID:', 'woocommerce' ) . '</strong> ' . absint( $item['product_id'] );
 
-				if ( $item['variation_id'] )
+				if ( $item['variation_id'] ) {
 					echo '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . absint( $item['variation_id'] );
+				}
 
-				if ( $_product && $_product->get_sku() )
+				if ( $_product && $_product->get_sku() ) {
 					echo '<br/><strong>' . __( 'Product SKU:', 'woocommerce' ).'</strong> ' . esc_html( $_product->get_sku() );
+				}
 
-				if ( $_product && isset( $_product->variation_data ) )
+				if ( $_product && isset( $_product->variation_data ) ) {
 					echo '<br/>' . wc_get_formatted_variation( $_product->variation_data, true );
+				}
 
 			?>"><?php echo $_product->get_image( 'shop_thumbnail', array( 'title' => '' ) ); ?></a>
 		<?php else : ?>
@@ -25,10 +31,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	</td>
 	<td class="name">
 
-		<?php if ( $_product && $_product->get_sku() ) echo esc_html( $_product->get_sku() ) . ' &ndash; '; ?>
+		<?php echo ( $_product && $_product->get_sku() ) ? esc_html( $_product->get_sku() ) . ' &ndash; ' : ''; ?>
 
 		<?php if ( $_product ) : ?>
-			<a target="_blank" href="<?php echo esc_url( admin_url( 'post.php?post='. absint( $_product->id ) .'&action=edit' ) ); ?>">
+			<a target="_blank" href="<?php echo esc_url( admin_url( 'post.php?post=' . absint( $_product->id ) . '&action=edit' ) ); ?>">
 				<?php echo esc_html( $item['name'] ); ?>
 			</a>
 		<?php else : ?>
@@ -140,7 +146,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php do_action( 'woocommerce_admin_order_item_values', $_product, $item, absint( $item_id ) ); ?>
 
-	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) :
+	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
 		$tax_classes         = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
 		$classes_options     = array();
 		$classes_options[''] = __( 'Standard', 'woocommerce' );
@@ -167,12 +173,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				</select>
 			</div>
 		</td>
-		<?php
-	endif; ?>
+	<?php endif; ?>
 
 	<td class="quantity" width="1%">
 		<div class="view">
-			<?php if ( isset( $item['qty'] ) ) echo esc_html( $item['qty'] ); ?>
+			<?php echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : ''; ?>
 		</div>
 		<div class="edit" style="display:none">
 			<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="4" class="quantity" />
@@ -183,35 +188,39 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<div class="view">
 			<?php
 				if ( isset( $item['line_total'] ) ) {
-					if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] != $item['line_total'] ) echo '<del>' . wc_price( $item['line_subtotal'] ) . '</del> ';
+					if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] != $item['line_total'] ) {
+						echo '<del>' . wc_price( $item['line_subtotal'] ) . '</del> ';
+					}
 
 					echo wc_price( $item['line_total'] );
 				}
 			?>
 		</div>
 		<div class="edit" style="display:none">
-			<span class="subtotal"><label><?php _e( 'Subtotal', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php if ( isset( $item['line_subtotal'] ) ) echo esc_attr( wc_format_localized_price( $item['line_subtotal'] ) ); ?>" class="line_subtotal wc_input_price" /></label></span>
+			<span class="subtotal"><label><?php _e( 'Subtotal', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_localized_price( $item['line_subtotal'] ) ) : ''; ?>" class="line_subtotal wc_input_price" /></label></span>
 
-			<label><?php _e( 'Total', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( wc_format_localized_price( $item['line_total'] ) ); ?>" class="line_total wc_input_price" /></label>
+			<label><?php _e( 'Total', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_total'] ) ) ? esc_attr( wc_format_localized_price( $item['line_total'] ) ) : ''; ?>" class="line_total wc_input_price" /></label>
 		</div>
 	</td>
 
-	<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
 
 	<td class="line_tax" width="1%">
 		<div class="view">
 			<?php
 				if ( isset( $item['line_tax'] ) ) {
-					if ( isset( $item['line_subtotal_tax'] ) && $item['line_subtotal_tax'] != $item['line_tax'] ) echo '<del>' . wc_price( wc_round_tax_total( $item['line_subtotal_tax'] ) ) . '</del> ';
+					if ( isset( $item['line_subtotal_tax'] ) && $item['line_subtotal_tax'] != $item['line_tax'] ) {
+						echo '<del>' . wc_price( wc_round_tax_total( $item['line_subtotal_tax'] ) ) . '</del> ';
+					}
 
 					echo wc_price( wc_round_tax_total( $item['line_tax'] ) );
 				}
 			?>
 		</div>
 		<div class="edit" style="display:none">
-			<span class="subtotal"><input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php if ( isset( $item['line_subtotal_tax'] ) ) echo esc_attr( wc_format_localized_price( $item['line_subtotal_tax'] ) ); ?>" class="line_subtotal_tax wc_input_price" /></span>
+			<span class="subtotal"><input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_subtotal_tax'] ) ) ? esc_attr( wc_format_localized_price( $item['line_subtotal_tax'] ) ) : ''; ?>" class="line_subtotal_tax wc_input_price" /></span>
 
-			<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( wc_format_localized_price( $item['line_tax'] ) ); ?>" class="line_tax wc_input_price" />
+			<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_tax'] ) ) ? esc_attr( wc_format_localized_price( $item['line_tax'] ) ) : ''; ?>" class="line_tax wc_input_price" />
 		</div>
 	</td>
 
