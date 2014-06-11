@@ -741,7 +741,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					if ( $posted['payment_status'] == 'completed' ) {
 						$order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );
-						$txn_id = ( ! empty( $posted['txn_id'] ) ) ? wc_clean( $posted['txn_id'] : '';
+						$txn_id = ( ! empty( $posted['txn_id'] ) ) ? wc_clean( $posted['txn_id'] ) : '';
 						$order->payment_complete( $txn_id );
 					} else {
 						$order->update_status( 'on-hold', sprintf( __( 'Payment pending: %s', 'woocommerce' ), $posted['pending_reason'] ) );
@@ -879,7 +879,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 						// Store PP Details
 						$order->add_order_note( __( 'PDT payment completed', 'woocommerce' ) );
-						$txn_id = ( ! empty( $posted['tx'] ) ) ? wc_clean( $posted['tx'] : '';
+						$txn_id = ( ! empty( $posted['tx'] ) ) ? wc_clean( $posted['tx'] ) : '';
 						$order->payment_complete( $txn_id );
 						return true;
 					}
