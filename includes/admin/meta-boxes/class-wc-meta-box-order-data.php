@@ -207,6 +207,10 @@ class WC_Meta_Box_Order_Data {
 								if ( $payment_method )
 									echo '<p><strong>' . __( 'Payment Method', 'woocommerce' ) . ':</strong> ' . ( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) ) . '</p>';
 
+								if ( $transaction_id = get_post_meta( $order->id, '_transaction_id', true ) ) {
+									echo '<p><strong>' . __( 'Payment Transaction ID', 'woocommerce' ) . ':</strong> ' . esc_html( $transaction_id ) .  '</p>';
+								}
+
 							echo '</div>';
 
 							// Display form
