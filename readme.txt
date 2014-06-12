@@ -165,7 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Country class return methods.
 * Localisation - Egypptian currency.
 * Localisation - Address format of Taiwan.
-* Localisation - Removed language files from core to made the package lighter (see anguage pack downloader feature).
+* Localisation - Removed language files from core to made the package lighter (see language pack downloader feature).
 
 = 2.1.11 - 09/06/2014 =
 * Fix - Plain text email display of customer address.

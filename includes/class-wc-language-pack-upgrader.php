@@ -36,11 +36,10 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @return string
 	 */
-	public function get_language() {
+	public static function get_language() {
 		if ( defined( 'WPLANG' ) && '' != WPLANG ) {
 			return WPLANG;
 		}
-
 		return 'en';
 	}
 
