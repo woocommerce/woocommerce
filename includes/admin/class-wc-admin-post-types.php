@@ -30,7 +30,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'manage_edit-product_columns', array( $this, 'product_columns' ) );
 		add_filter( 'manage_edit-shop_coupon_columns', array( $this, 'shop_coupon_columns' ) );
 		add_filter( 'manage_edit-shop_order_columns', array( $this, 'shop_order_columns' ) );
-		
+
 		add_action( 'manage_product_posts_custom_column', array( $this, 'render_product_columns' ), 2 );
 		add_action( 'manage_shop_coupon_posts_custom_column', array( $this, 'render_shop_coupon_columns' ), 2 );
 		add_action( 'manage_shop_order_posts_custom_column', array( $this, 'render_shop_order_columns' ), 2 );
@@ -51,7 +51,7 @@ class WC_Admin_Post_Types {
 		add_action( 'load-edit.php', array( $this, 'bulk_action' ) );
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
 
-		// Order Search 
+		// Order Search
 		add_filter( 'get_search_query', array( $this, 'shop_order_search_label' ) );
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
 		add_action( 'parse_query', array( $this, 'shop_order_search_custom_fields' ) );
@@ -472,7 +472,7 @@ class WC_Admin_Post_Types {
 			break;
 			case 'order_items' :
 
-				printf( '<a href="#" class="show_order_items">' . _n( '%d item', '%d items', sizeof( $the_order->get_items() ), 'woocommerce' ) . '</a>', sizeof( $the_order->get_items() ) );
+				printf( '<a href="#" class="show_order_items">' . _n( '%d item', '%d items', $the_order->get_item_count(), 'woocommerce' ) . '</a>', $the_order->get_item_count() );
 
 				if ( sizeof( $the_order->get_items() ) > 0 ) {
 
@@ -676,7 +676,7 @@ class WC_Admin_Post_Types {
 		unset( $columns['comments'] );
 
 		return wp_parse_args( $custom, $columns );
-	}		
+	}
 
 	/**
 	 * Remove edit from the bulk actions.
@@ -2044,7 +2044,7 @@ class WC_Admin_Post_Types {
 				}
 			}
 		}
-	}	
+	}
 }
 
 endif;
