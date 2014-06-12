@@ -144,7 +144,7 @@ class WC_Order {
 	 * @return int|bool Item ID or false
 	 */
 	public function add_tax( $tax_rate_id, $tax_amount = 0, $shipping_tax_amount = 0 ) {
-		$code = WC()->cart->tax->get_rate_code( $tax_rate_id );
+		$code = WC_Tax::get_rate_code( $tax_rate_id );
 
 		if ( ! $code ) {
 			return false;
@@ -160,8 +160,8 @@ class WC_Order {
  		}
 
  		wc_add_order_item_meta( $item_id, 'rate_id', $tax_rate_id );
- 		wc_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
-	 	wc_add_order_item_meta( $item_id, 'compound', WC()->cart->tax->is_compound( $key ) ? 1 : 0 );
+ 		wc_add_order_item_meta( $item_id, 'label', WC_Tax::get_rate_label( $key ) );
+	 	wc_add_order_item_meta( $item_id, 'compound', WC_Tax::is_compound( $key ) ? 1 : 0 );
 	 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( $tax_amount ) );
 	 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( $shipping_tax_amount ) );
 

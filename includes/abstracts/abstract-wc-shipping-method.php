@@ -95,7 +95,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		// This saves shipping methods having to do complex tax calculations
 		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && $this->is_taxable() ) {
 
-			$_tax 	= new WC_Tax();
 			$taxes 	= array();
 
 			switch ( $calc_tax ) {
@@ -114,8 +113,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 							$_product = $cart[	$cost_key ]['data'];
 
-							$rates = $_tax->get_shipping_tax_rates( $_product->get_tax_class() );
-							$item_taxes = $_tax->calc_shipping_tax( $amount, $rates );
+							$rates = WC_Tax::get_shipping_tax_rates( $_product->get_tax_class() );
+							$item_taxes = WC_Tax::calc_shipping_tax( $amount, $rates );
 
 							// Sum the item taxes
 							foreach ( array_keys( $taxes + $item_taxes ) as $key )
@@ -126,8 +125,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 						// Add any cost for the order - order costs are in the key 'order'
 						if ( isset( $cost['order'] ) ) {
 
-							$rates = $_tax->get_shipping_tax_rates();
-							$item_taxes = $_tax->calc_shipping_tax( $cost['order'], $rates );
+							$rates = WC_Tax::get_shipping_tax_rates();
+							$item_taxes = WC_Tax::calc_shipping_tax( $cost['order'], $rates );
 
 							// Sum the item taxes
 							foreach ( array_keys( $taxes + $item_taxes ) as $key )
@@ -140,8 +139,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 				default :
 
-					$rates = $_tax->get_shipping_tax_rates();
-					$taxes = $_tax->calc_shipping_tax( $total_cost, $rates );
+					$rates = WC_Tax::get_shipping_tax_rates();
+					$taxes = WC_Tax::calc_shipping_tax( $total_cost, $rates );
 
 				break;
 

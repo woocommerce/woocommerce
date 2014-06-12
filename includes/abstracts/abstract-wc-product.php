@@ -786,8 +786,6 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_including_tax( $qty = 1, $price = '' ) {
-		$_tax  = new WC_Tax();
-
 		if ( ! $price ) {
 			$price = $this->get_price();
 		}
@@ -796,26 +794,26 @@ class WC_Product {
 
 			if ( get_option('woocommerce_prices_include_tax') === 'no' ) {
 
-				$tax_rates  = $_tax->get_rates( $this->get_tax_class() );
-				$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, false );
-				$tax_amount = $_tax->get_tax_total( $taxes );
+				$tax_rates  = WC_Tax::get_rates( $this->get_tax_class() );
+				$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
+				$tax_amount = WC_Tax::get_tax_total( $taxes );
 				$price      = round( $price * $qty + $tax_amount, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 			} else {
 
-				$tax_rates      = $_tax->get_rates( $this->get_tax_class() );
-				$base_tax_rates = $_tax->get_shop_base_rate( $this->tax_class );
+				$tax_rates      = WC_Tax::get_rates( $this->get_tax_class() );
+				$base_tax_rates = WC_Tax::get_shop_base_rate( $this->tax_class );
 
 				if ( ! empty( WC()->customer ) && WC()->customer->is_vat_exempt() ) {
 
-					$base_taxes 		= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
+					$base_taxes 		= WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
 					$base_tax_amount	= array_sum( $base_taxes );
 					$price      		= round( $price * $qty - $base_tax_amount, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 				} elseif ( $tax_rates !== $base_tax_rates ) {
 
-					$base_taxes			= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
-					$modded_taxes		= $_tax->calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
+					$base_taxes			= WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
+					$modded_taxes		= WC_Tax::calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
 					$price      		= round( ( $price * $qty ) - array_sum( $base_taxes ) + array_sum( $modded_taxes ), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 				} else {
@@ -848,12 +846,9 @@ class WC_Product {
 		}
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax') === 'yes' ) {
-
-			$_tax       = new WC_Tax();
-			$tax_rates  = $_tax->get_shop_base_rate( $this->tax_class );
-			$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, true );
-			$price      = $_tax->round( $price * $qty - array_sum( $taxes ) );
-
+			$tax_rates  = WC_Tax::get_shop_base_rate( $this->tax_class );
+			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
+			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
 		} else {
 			$price = $price * $qty;
 		}

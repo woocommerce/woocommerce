@@ -1195,7 +1195,6 @@ class WC_AJAX {
 
 		self::json_headers();
 
-		$tax      = new WC_Tax();
 		$taxes    = $tax_rows = $item_taxes = $shipping_taxes = array();
 		$order_id = absint( $_POST['order_id'] );
 		$order    = new WC_Order( $order_id );
@@ -1232,7 +1231,7 @@ class WC_AJAX {
 				// Only calc if taxable
 				if ( 'taxable' == $item_tax_status ) {
 
-					$tax_rates = $tax->find_rates( array(
+					$tax_rates = WC_Tax::find_rates( array(
 						'country'   => $country,
 						'state'     => $state,
 						'postcode'  => $postcode,
@@ -1240,8 +1239,8 @@ class WC_AJAX {
 						'tax_class' => $tax_class
 					) );
 
-					$line_subtotal_taxes = $tax->calc_tax( $line_subtotal, $tax_rates, false );
-					$line_taxes          = $tax->calc_tax( $line_total, $tax_rates, false );
+					$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal, $tax_rates, false );
+					$line_taxes          = WC_Tax::calc_tax( $line_total, $tax_rates, false );
 					$line_subtotal_tax   = array_sum( $line_subtotal_taxes );
 					$line_tax            = array_sum( $line_taxes );
 
@@ -1272,7 +1271,7 @@ class WC_AJAX {
 		// Now calculate shipping tax
 		$matched_tax_rates = array();
 
-		$tax_rates = $tax->find_rates( array(
+		$tax_rates = WC_Tax::find_rates( array(
 			'country'   => $country,
 			'state'     => $state,
 			'postcode'  => $postcode,
@@ -1288,8 +1287,8 @@ class WC_AJAX {
 			}
 		}
 
-		$shipping_taxes = $tax->calc_shipping_tax( $shipping, $matched_tax_rates );
-		$shipping_tax   = $tax->round( array_sum( $shipping_taxes ) );
+		$shipping_taxes = WC_Tax::calc_shipping_tax( $shipping, $matched_tax_rates );
+		$shipping_tax   = WC_Tax::round( array_sum( $shipping_taxes ) );
 
 		// Remove old tax rows
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax' )", $order_id ) );
@@ -1320,8 +1319,8 @@ class WC_AJAX {
 			$item                        = array();
 			$item['rate_id']             = $key;
 			$item['name']                = $tax_codes[ $key ];
-			$item['label']               = $tax->get_rate_label( $key );
-			$item['compound']            = $tax->is_compound( $key ) ? 1 : 0;
+			$item['label']               = WC_Tax::get_rate_label( $key );
+			$item['compound']            = WC_Tax::is_compound( $key ) ? 1 : 0;
 			$item['tax_amount']          = wc_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
 			$item['shipping_tax_amount'] = wc_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
 
