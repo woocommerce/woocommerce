@@ -485,7 +485,7 @@ class WC_Admin_Settings {
 
 	            	$disabled_attr = '';
 	            	$disabled_message = '';
-	            	
+
 	            	if ( has_filter( 'woocommerce_get_image_size_' . $image_size ) ) {
 	            		$disabled_attr = 'disabled="disabled"';
 	            		$disabled_message = "<p><small>" . __( 'The settings of this image size have been disabled because its values are being overwritten by a filter.', 'woocommerce' ) . "</small></p>";
@@ -545,7 +545,7 @@ class WC_Admin_Settings {
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 							<?php echo $tip; ?>
 						</th>
-	                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
+	                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="chosen_select">
 				        	<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 				        </select> <?php echo $description; ?>
 	               		</td>
@@ -569,7 +569,7 @@ class WC_Admin_Settings {
 							<?php echo $tip; ?>
 						</th>
 	                    <td class="forminp">
-		                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
+		                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="chosen_select">
 					        	<?php
 					        		if ( $countries )
 					        			foreach ( $countries as $key => $val )

@@ -179,7 +179,7 @@ class WC_Meta_Box_Order_Data {
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 					</div>
 					<div class="order_data_column">
-						<h4><?php _e( 'Billing Details', 'woocommerce' ); ?> <a class="edit_address" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="Edit" width="14" /></a></h4>
+						<h4><?php _e( 'Billing Details', 'woocommerce' ); ?> <a class="edit_address" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="<?php _e( 'Edit', 'woocommerce' ); ?>" width="14" /></a></h4>
 						<?php
 							// Display values
 							echo '<div class="address">';
@@ -258,7 +258,7 @@ class WC_Meta_Box_Order_Data {
 					</div>
 					<div class="order_data_column">
 
-						<h4><?php _e( 'Shipping Details', 'woocommerce' ); ?> <a class="edit_address" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="Edit" width="14" /></a></h4>
+						<h4><?php _e( 'Shipping Details', 'woocommerce' ); ?> <a class="edit_address" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="<?php _e( 'Edit', 'woocommerce' ); ?>" width="14" /></a></h4>
 						<?php
 							// Display values
 							echo '<div class="address">';
