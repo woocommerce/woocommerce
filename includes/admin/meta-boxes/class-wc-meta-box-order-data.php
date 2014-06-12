@@ -7,18 +7,31 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/Meta Boxes
- * @version     2.1.0
+ * @version     2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * WC_Meta_Box_Order_Data
  */
 class WC_Meta_Box_Order_Data {
 
-	private static $billing_fields;
-	private static $shipping_fields;
+	/**
+	 * Billing fields
+	 *
+	 * @var array
+	 */
+	private static $billing_fields = array();
+
+	/**
+	 * Shipping fields
+	 *
+	 * @var array
+	 */
+	private static $shipping_fields = array();
 
 	/**
 	 * Init billing and shipping fields we display + save
@@ -27,89 +40,89 @@ class WC_Meta_Box_Order_Data {
 		self::$billing_fields = apply_filters( 'woocommerce_admin_billing_fields', array(
 			'first_name' => array(
 				'label' => __( 'First Name', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'last_name' => array(
 				'label' => __( 'Last Name', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'company' => array(
 				'label' => __( 'Company', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'address_1' => array(
 				'label' => __( 'Address 1', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'address_2' => array(
 				'label' => __( 'Address 2', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'city' => array(
 				'label' => __( 'City', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'postcode' => array(
 				'label' => __( 'Postcode', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'country' => array(
-				'label' => __( 'Country', 'woocommerce' ),
-				'show'	=> false,
-				'type'	=> 'select',
+				'label'   => __( 'Country', 'woocommerce' ),
+				'show'    => false,
+				'type'    => 'select',
 				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries()
-				),
+			),
 			'state' => array(
 				'label' => __( 'State/County', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'email' => array(
 				'label' => __( 'Email', 'woocommerce' ),
-				),
+			),
 			'phone' => array(
 				'label' => __( 'Phone', 'woocommerce' ),
-				),
+			),
 		) );
 
 		self::$shipping_fields = apply_filters( 'woocommerce_admin_shipping_fields', array(
 			'first_name' => array(
 				'label' => __( 'First Name', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'last_name' => array(
 				'label' => __( 'Last Name', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'company' => array(
 				'label' => __( 'Company', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'address_1' => array(
 				'label' => __( 'Address 1', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'address_2' => array(
 				'label' => __( 'Address 2', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'city' => array(
 				'label' => __( 'City', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'postcode' => array(
 				'label' => __( 'Postcode', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 			'country' => array(
-				'label' => __( 'Country', 'woocommerce' ),
-				'show'	=> false,
-				'type'	=> 'select',
+				'label'   => __( 'Country', 'woocommerce' ),
+				'show'    => false,
+				'type'    => 'select',
 				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries()
-				),
+			),
 			'state' => array(
 				'label' => __( 'State/County', 'woocommerce' ),
-				'show'	=> false
-				),
+				'show'  => false
+			),
 		) );
 	}
 
@@ -119,8 +132,9 @@ class WC_Meta_Box_Order_Data {
 	public static function output( $post ) {
 		global $theorder;
 
-		if ( ! is_object( $theorder ) )
+		if ( ! is_object( $theorder ) ) {
 			$theorder = new WC_Order( $post->ID );
+		}
 
 		$order = $theorder;
 
@@ -141,8 +155,9 @@ class WC_Meta_Box_Order_Data {
 
 					echo __( 'Order number', 'woocommerce' ) . ' ' . esc_html( $order->get_order_number() ) . '. ';
 
-					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) )
+					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) ) {
 						echo __( 'Customer IP:', 'woocommerce' ) . ' ' . esc_html( $ip_address );
+					}
 				?></p>
 
 				<div class="order_data_column_container">
@@ -184,39 +199,50 @@ class WC_Meta_Box_Order_Data {
 							// Display values
 							echo '<div class="address">';
 
-								if ( $order->get_formatted_billing_address() )
+								if ( $order->get_formatted_billing_address() ) {
 									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
-								else
+								} else {
 									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
+								}
 
 								foreach ( self::$billing_fields as $key => $field ) {
-									if ( isset( $field['show'] ) && $field['show'] === false )
+									if ( isset( $field['show'] ) && false === $field['show'] ) {
 										continue;
+									}
 
 									$field_name = 'billing_' . $key;
 
-									if ( $order->$field_name )
+									if ( $order->$field_name ) {
 										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
+									}
 								}
 
-								if ( WC()->payment_gateways() )
+								if ( WC()->payment_gateways() ) {
 									$payment_gateways = WC()->payment_gateways->payment_gateways();
+								}
 
 								$payment_method = ! empty( $order->payment_method ) ? $order->payment_method : '';
 
-								if ( $payment_method )
+								if ( $payment_method ) {
 									echo '<p><strong>' . __( 'Payment Method', 'woocommerce' ) . ':</strong> ' . ( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) ) . '</p>';
+								}
+
+								if ( $transaction_id = get_post_meta( $order->id, '_transaction_id', true ) ) {
+									echo '<p><strong>' . __( 'Payment Transaction ID', 'woocommerce' ) . ':</strong> ' . esc_html( $transaction_id ) . '</p>';
+								}
 
 							echo '</div>';
 
 							// Display form
-							echo '<div class="edit_address"><p><button class="button load_customer_billing">'.__( 'Load billing address', 'woocommerce' ).'</button></p>';
+							echo '<div class="edit_address"><p><button class="button load_customer_billing">' . __( 'Load billing address', 'woocommerce' ) . '</button></p>';
 
 							foreach ( self::$billing_fields as $key => $field ) {
-								if ( ! isset( $field['type'] ) )
+								if ( ! isset( $field['type'] ) ) {
 									$field['type'] = 'text';
+								}
+
 								switch ( $field['type'] ) {
-									case "select" :
+									case 'select' :
 										woocommerce_wp_select( array( 'id' => '_billing_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
 									break;
 									default :
@@ -236,8 +262,9 @@ class WC_Meta_Box_Order_Data {
 										foreach ( $payment_gateways as $gateway ) {
 											if ( $gateway->enabled == "yes" ) {
 												echo '<option value="' . esc_attr( $gateway->id ) . '" ' . selected( $payment_method, $gateway->id, false ) . '>' . esc_html( $gateway->get_title() ) . '</option>';
-												if ( $payment_method == $gateway->id )
+												if ( $payment_method == $gateway->id ) {
 													$found_method = true;
+												}
 											}
 										}
 
@@ -263,43 +290,53 @@ class WC_Meta_Box_Order_Data {
 							// Display values
 							echo '<div class="address">';
 
-								if ( $order->get_formatted_shipping_address() )
+								if ( $order->get_formatted_shipping_address() ) {
 									echo '<p><strong>' . __( 'Address', 'woocommerce' ) . ':</strong>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
-								else
+								} else {
 									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
-
-								if ( self::$shipping_fields ) foreach ( self::$shipping_fields as $key => $field ) {
-									if ( isset( $field['show'] ) && $field['show'] === false )
-										continue;
-
-									$field_name = 'shipping_' . $key;
-
-									if ( ! empty( $order->$field_name ) )
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
 								}
 
-								if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) == 'yes' ) && $post->post_excerpt )
+								if ( self::$shipping_fields ) {
+									foreach ( self::$shipping_fields as $key => $field ) {
+										if ( isset( $field['show'] ) && false === $field['show'] ) {
+											continue;
+										}
+
+										$field_name = 'shipping_' . $key;
+
+										if ( ! empty( $order->$field_name ) ) {
+											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
+										}
+									}
+								}
+
+								if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $post->post_excerpt ) {
 									echo '<p><strong>' . __( 'Customer Note', 'woocommerce' ) . ':</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
+								}
 
 							echo '</div>';
 
 							// Display form
-							echo '<div class="edit_address"><p><button class="button load_customer_shipping">' . __( 'Load shipping address', 'woocommerce' ) . '</button> <button class="button billing-same-as-shipping">'. __( 'Copy from billing', 'woocommerce' ) . '</button></p>';
+							echo '<div class="edit_address"><p><button class="button load_customer_shipping">' . __( 'Load shipping address', 'woocommerce' ) . '</button> <button class="button billing-same-as-shipping">' . __( 'Copy from billing', 'woocommerce' ) . '</button></p>';
 
-							if ( self::$shipping_fields ) foreach ( self::$shipping_fields as $key => $field ) {
-								if ( ! isset( $field['type'] ) )
-									$field['type'] = 'text';
-								switch ( $field['type'] ) {
-									case "select" :
-										woocommerce_wp_select( array( 'id' => '_shipping_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
-									break;
-									default :
-										woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
-									break;
+							if ( self::$shipping_fields ) {
+								foreach ( self::$shipping_fields as $key => $field ) {
+									if ( ! isset( $field['type'] ) ) {
+										$field['type'] = 'text';
+									}
+
+									switch ( $field['type'] ) {
+										case 'select' :
+											woocommerce_wp_select( array( 'id' => '_shipping_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
+										break;
+										default :
+											woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
+										break;
+									}
 								}
 							}
 
-							if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) == 'yes' ) ) {
+							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
 								?>
 								<p class="form-field form-field-wide"><label for="excerpt"><?php _e( 'Customer Note:', 'woocommerce' ) ?></label>
 								<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e( 'Customer\'s notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea></p>
@@ -319,25 +356,25 @@ class WC_Meta_Box_Order_Data {
 
 		// Ajax Chosen Customer Selectors JS
 		wc_enqueue_js( "
-			jQuery('select.ajax_chosen_select_customer').ajaxChosen({
-			    method: 		'GET',
-			    url: 			'" . admin_url('admin-ajax.php') . "',
-			    dataType: 		'json',
-			    afterTypeDelay: 100,
-			    minTermLength: 	1,
-			    data:		{
-			    	action: 	'woocommerce_json_search_customers',
-					security: 	'" . wp_create_nonce("search-customers") . "'
-			    }
-			}, function (data) {
+			jQuery( 'select.ajax_chosen_select_customer' ).ajaxChosen({
+				method:         'GET',
+				url:            '" . admin_url( 'admin-ajax.php' ) . "',
+				dataType:       'json',
+				afterTypeDelay: 100,
+				minTermLength:  1,
+				data:           {
+					action:   'woocommerce_json_search_customers',
+					security: '" . wp_create_nonce( 'search-customers' ) . "'
+				}
+			}, function ( data ) {
 
 				var terms = {};
 
-			    $.each(data, function (i, val) {
-			        terms[i] = val;
-			    });
+				$.each( data, function ( i, val ) {
+					terms[i] = val;
+				});
 
-			    return terms;
+				return terms;
 			});
 		" );
 	}
@@ -356,23 +393,28 @@ class WC_Meta_Box_Order_Data {
 		// Update meta
 		update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
 
-		if ( self::$billing_fields )
-			foreach ( self::$billing_fields as $key => $field )
+		if ( self::$billing_fields ) {
+			foreach ( self::$billing_fields as $key => $field ) {
 				update_post_meta( $post_id, '_billing_' . $key, wc_clean( $_POST[ '_billing_' . $key ] ) );
+			}
+		}
 
-		if ( self::$shipping_fields )
-			foreach ( self::$shipping_fields as $key => $field )
+		if ( self::$shipping_fields ) {
+			foreach ( self::$shipping_fields as $key => $field ) {
 				update_post_meta( $post_id, '_shipping_' . $key, wc_clean( $_POST[ '_shipping_' . $key ] ) );
+			}
+		}
 
 		// Payment method handling
 		if ( get_post_meta( $post_id, '_payment_method', true ) !== stripslashes( $_POST['_payment_method'] ) ) {
 
-			$methods 				= WC()->payment_gateways->payment_gateways();
-			$payment_method 		= wc_clean( $_POST['_payment_method'] );
-			$payment_method_title 	= $payment_method;
+			$methods              = WC()->payment_gateways->payment_gateways();
+			$payment_method       = wc_clean( $_POST['_payment_method'] );
+			$payment_method_title = $payment_method;
 
-			if ( isset( $methods) && isset( $methods[ $payment_method ] ) )
+			if ( isset( $methods) && isset( $methods[ $payment_method ] ) ) {
 				$payment_method_title = $methods[ $payment_method ]->get_title();
+			}
 
 			update_post_meta( $post_id, '_payment_method', $payment_method );
 			update_post_meta( $post_id, '_payment_method_title', $payment_method_title );
