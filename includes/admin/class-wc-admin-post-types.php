@@ -483,7 +483,7 @@ class WC_Admin_Post_Types {
 						$item_meta      = new WC_Order_Item_Meta( $item['item_meta'] );
 						$item_meta_html = $item_meta->display( true, true );
 						?>
-						<tr>
+						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item ); ?>">
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
 							<td class="name">
 								<?php if ( wc_product_sku_enabled() && $_product && $_product->get_sku() ) echo $_product->get_sku() . ' - '; ?><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>
