@@ -472,7 +472,7 @@ class WC_Admin_Post_Types {
 			break;
 			case 'order_items' :
 
-				echo '<a href="#" class="show_order_items">' . apply_filters( 'woocommerce_order_item_count', sprintf( _n( '%d item', '%d items', $the_order->get_item_count(), 'woocommerce' ), $the_order->get_item_count() ), $the_order ) . '</a>';
+				echo '<a href="#" class="show_order_items">' . apply_filters( 'woocommerce_admin_order_item_count', sprintf( _n( '%d item', '%d items', $the_order->get_item_count(), 'woocommerce' ), $the_order->get_item_count() ), $the_order ) . '</a>';
 
 				if ( sizeof( $the_order->get_items() ) > 0 ) {
 
