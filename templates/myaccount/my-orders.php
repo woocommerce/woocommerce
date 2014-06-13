@@ -40,6 +40,7 @@ if ( $customer_orders ) : ?>
 		<tbody><?php
 			foreach ( $customer_orders as $customer_order ) {
 				$order = get_order();
+
 				$order->populate( $customer_order );
 				$item_count = $order->get_item_count();
 
