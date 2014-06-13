@@ -413,7 +413,7 @@ class WC_Emails {
 		else
 			$title = sprintf(__( 'Product #%s - %s', 'woocommerce' ), $product->id, get_the_title($product->id)) . $sku;
 
-		$order = new WC_Order( $order_id );
+		$order = get_order( $order_id );
 		$message = sprintf(__( '%s units of %s have been backordered in order %s.', 'woocommerce' ), $quantity, $title, $order->get_order_number() );
 
 		//	CC, BCC, additional headers

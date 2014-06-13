@@ -119,7 +119,7 @@ function wc_clear_cart_after_payment() {
 			$order_key = '';
 
 		if ( $order_id > 0 ) {
-			$order = new WC_Order( $order_id );
+			$order = get_order( $order_id );
 
 			if ( $order->order_key == $order_key ) {
 				WC()->cart->empty_cart();
@@ -130,7 +130,7 @@ function wc_clear_cart_after_payment() {
 
 	if ( WC()->session->order_awaiting_payment > 0 ) {
 
-		$order = new WC_Order( WC()->session->order_awaiting_payment );
+		$order = get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order->id > 0 ) {
 			// If the order has not failed, or is not pending, the order must have gone through

@@ -106,7 +106,7 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		$order = new WC_Order( $id );
+		$order = get_order( $id );
 
 		$order_post = get_post( $id );
 
@@ -275,7 +275,7 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		$order = new WC_Order( $id );
+		$order = get_order( $id );
 
 		if ( ! empty( $data['status'] ) ) {
 

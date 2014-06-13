@@ -59,7 +59,7 @@ class WC_Shortcode_Order_Tracking {
 
 			} else {
 
-				$order = new WC_Order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
+				$order = get_order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
 
 				if ( $order->id && $order_email ) {
 
