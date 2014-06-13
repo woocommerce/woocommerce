@@ -93,14 +93,12 @@ class WC_Order {
 	 	wc_add_order_item_meta( $item_id, '_tax_class', $product->get_tax_class() );
 	 	wc_add_order_item_meta( $item_id, '_product_id', $product->id );
 	 	wc_add_order_item_meta( $item_id, '_variation_id', isset( $product->variation_id ) ? $product->variation_id : 0 );
-	 		
-	 	// Add totals
-	 	foreach ( $args['totals'] as $key => $value ) {
-	 		if ( ! in_array( $key, array( 'subtotal', 'subtotal_tax', 'total', 'tax' ) ) ) {
-	 			continue;
-	 		}
-	 		wc_add_order_item_meta( $item_id, '_line_' . $key, 	wc_format_decimal( $value ) );
-	 	}
+	 	
+	 	// Set line item totals, either passed in or from the product
+	 	wc_add_order_item_meta( $item_id, '_line_subtotal' . $key, wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax() ) );
+	 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax' . $key, wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
+	 	wc_add_order_item_meta( $item_id, '_line_total' . $key, wc_format_decimal( isset( $args['totals']['total'] ) ? $args['total']['subtotal_tax'] : $product->get_price_excluding_tax() ) );
+	 	wc_add_order_item_meta( $item_id, '_line_tax' . $key, wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
 
 	 	// Add variation meta
 	 	foreach ( $args['variation'] as $key => $value ) {
