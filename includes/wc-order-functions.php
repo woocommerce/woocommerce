@@ -32,6 +32,17 @@ function wc_get_order_statuses() {
 }
 
 /**
+ * Main function for returning orders, uses the WC_Order_Factory class.
+ *
+ * @param mixed $the_order Post object or post ID of the order.
+ * @param array $args (default: array()) Contains all arguments to be used to get this order.
+ * @return WC_Order
+ */
+function get_order( $the_order = false, $args = array() ) {
+	return WC()->order_factory->get_order( $the_order, $args );
+}
+
+/**
  * Get the nice name for an orer status
  * @param  string $status
  * @return string
