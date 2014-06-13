@@ -37,11 +37,16 @@ class WC_Order {
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 */
-	public function remove_order_items() {
+	public function remove_order_items( $type = null ) {
 		global $wpdb;
 
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d )", $order_id ) );
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) );
+		if ( $type ) {
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s )", $order_id, $type ) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $order_id, $type ) );
+		} else {
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d )", $order_id ) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) );
+		}
 	}
 
 	/**
@@ -95,10 +100,10 @@ class WC_Order {
 	 	wc_add_order_item_meta( $item_id, '_variation_id', isset( $product->variation_id ) ? $product->variation_id : 0 );
 	 	
 	 	// Set line item totals, either passed in or from the product
-	 	wc_add_order_item_meta( $item_id, '_line_subtotal' . $key, wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax( $qty ) ) );
-	 	wc_add_order_item_meta( $item_id, '_line_total' . $key, wc_format_decimal( isset( $args['totals']['total'] ) ? $args['total']['subtotal_tax'] : $product->get_price_excluding_tax( $qty ) ) );
-	 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax' . $key, wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
-	 	wc_add_order_item_meta( $item_id, '_line_tax' . $key, wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
+	 	wc_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax( $qty ) ) );
+	 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( isset( $args['totals']['total'] ) ? $args['total']['subtotal_tax'] : $product->get_price_excluding_tax( $qty ) ) );
+	 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
+	 	wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
 
 	 	// Add variation meta
 	 	foreach ( $args['variation'] as $key => $value ) {
@@ -190,6 +195,9 @@ class WC_Order {
 
  		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $shipping_rate );
 
+ 		// Update total
+ 		$this->set_total( $this->order_shipping + wc_format_decimal( $shipping_rate->cost ), 'shipping' );
+
  		return $item_id;
 	}
 
@@ -247,6 +255,139 @@ class WC_Order {
 			break;
 		}
 		update_post_meta( $this->id, $key, $amount );
+	}
+
+	/**
+	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
+	 *
+	 * Will use the base country unless customer addresses are set.
+	 * 
+	 * @return bool success or fail
+	 */
+	public function calculate_taxes() {
+		$shipping_tax_total = 0;
+		$tax_total          = 0;
+		$taxes              = array();
+		$tax_based_on       = get_option( 'woocommerce_tax_based_on' );
+		
+		if ( 'base' === $tax_based_on ) {
+			$default  = get_option( 'woocommerce_default_country' );
+			$postcode = '';
+			$city     = '';
+	    	if ( strstr( $default, ':' ) ) {
+	    		list( $country, $state ) = explode( ':', $default );
+	    	} else {
+				$country = $default;
+				$state   = '';
+	    	}
+		} elseif ( 'billing' === $tax_based_on ) {
+			$country 	= $this->billing_country;
+			$state 		= $this->billing_state;
+			$postcode   = $this->billing_postcode;
+			$city   	= $this->billing_city;
+		} else {
+			$country 	= $this->shipping_country;
+			$state 		= $this->shipping_state;
+			$postcode   = $this->shipping_postcode;
+			$city   	= $this->shipping_city;
+		}
+
+		// Get items
+		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			$product           = $this->get_product_from_item( $item );
+			$line_total        = isset( $item['line_total'] ) ? $item['line_total'] : 0;
+			$line_subtotal     = isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0;
+			$tax_class         = $item['tax_class'];
+			$item_tax_status   = $product ? $product->get_tax_status() : 'taxable';
+
+			if ( '0' !== $tax_class && 'taxable' === $item_tax_status ) {
+				$tax_rates = WC_Tax::find_rates( array(
+					'country'   => $country,
+					'state'     => $state,
+					'postcode'  => $postcode,
+					'city'      => $city,
+					'tax_class' => $tax_class
+				) );
+				$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal, $tax_rates, false );
+				$line_taxes          = WC_Tax::calc_tax( $line_total, $tax_rates, false );
+				$line_subtotal_tax   = max( 0, array_sum( $line_subtotal_taxes ) );
+				$line_tax            = max( 0, array_sum( $line_taxes ) );
+				$tax_total           += $line_tax;
+
+				wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $line_subtotal_tax ) );
+	 			wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax ) );
+
+				// Sum the item taxes
+				foreach ( array_keys( $taxes + $line_taxes ) as $key ) {
+					$taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+				}
+			}
+		}
+
+		// Now calculate shipping tax
+		$matched_tax_rates = array();
+		$tax_rates         = WC_Tax::find_rates( array(
+			'country'   => $country,
+			'state'     => $state,
+			'postcode'  => $postcode,
+			'city'      => $city,
+			'tax_class' => ''
+		) );
+
+		if ( $tax_rates ) {
+			foreach ( $tax_rates as $key => $rate ) {
+				if ( isset( $rate['shipping'] ) && 'yes' === $rate['shipping'] ) {
+					$matched_tax_rates[ $key ] = $rate;
+				}
+			}
+		}
+
+		$shipping_taxes     = WC_Tax::calc_shipping_tax( $this->order_shipping, $matched_tax_rates );
+		$shipping_tax_total = WC_Tax::round( array_sum( $shipping_taxes ) );
+
+		// Save tax totals
+		$this->set_total( $shipping_tax_total, 'shipping_tax' );
+		$this->set_total( $tax_total, 'tax' );
+
+		// Tax rows
+		$this->remove_order_items( 'tax' );
+
+		// Now merge to keep tax rows
+		foreach ( array_keys( $taxes + $shipping_taxes ) as $tax_rate_id ) {
+			$this->add_tax( $tax_rate_id, isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0, isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
+	 * 
+	 * @return $total calculated grand total
+	 */
+	public function calculate_totals() {
+		$cart_subtotal  = 0;
+		$cart_total     = 0;
+		$fee_total      = 0;
+
+		$this->calculate_taxes();
+
+		foreach ( $this->get_items() as $item ) {
+			$cart_subtotal += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
+			$cart_total    += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
+		}
+
+		foreach ( $this->get_fees() as $item ) {
+			$fee_total += $item['line_total'];
+		}
+
+		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() - $this->get_order_discount() + $this->get_cart_tax() + $this->get_shipping_tax(), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
+
+		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
+		$this->set_total( $shipping_total, 'shipping' );
+		$this->set_total( $grand_total, 'total' );
+
+		return $grand_total;
 	}
 
 	/**
