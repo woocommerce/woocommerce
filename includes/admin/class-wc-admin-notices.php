@@ -130,8 +130,8 @@ class WC_Admin_Notices {
 			}
 
 			if ( $theme_file ) {
-				$core_version  = $status->get_file_version( WC()->plugin_path() . '/templates/' . $file );
-				$theme_version = $status->get_file_version( $theme_file );
+				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
+				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
 				if ( $core_version && $theme_version && version_compare( $theme_version, $core_version, '<' ) ) {
 					$outdated = true;
