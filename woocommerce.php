@@ -287,6 +287,7 @@ final class WooCommerce {
 
 		// Include abstract classes
 		include_once( 'includes/abstracts/abstract-wc-product.php' );			// Products
+		include_once( 'includes/abstracts/abstract-wc-order.php' );				// Orders
 		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
 		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
 		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' ); 	// A Payment gateway
