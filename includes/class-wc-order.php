@@ -293,7 +293,7 @@ class WC_Order {
 		}
 
 		// Get items
-		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$product           = $this->get_product_from_item( $item );
 			$line_total        = isset( $item['line_total'] ) ? $item['line_total'] : 0;
 			$line_subtotal     = isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0;
@@ -384,7 +384,6 @@ class WC_Order {
 		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() - $this->get_order_discount() + $this->get_cart_tax() + $this->get_shipping_tax(), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
-		$this->set_total( $shipping_total, 'shipping' );
 		$this->set_total( $grand_total, 'total' );
 
 		return $grand_total;

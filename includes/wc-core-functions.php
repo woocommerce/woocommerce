@@ -49,7 +49,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  * 
  * @return WC_Order on success, WP_Error on failure
  */
-function wc_create_order( $args ) {
+function wc_create_order( $args = array() ) {
 	$default_args = array(
 		'status'        => '',
 		'customer_id'   => null,
