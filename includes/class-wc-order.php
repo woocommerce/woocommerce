@@ -108,7 +108,9 @@ class WC_Order {
 	 	// Backorders
 	 	if ( $product->backorders_require_notification() && $product->is_on_backorder( $qty ) ) {
 	 		wc_add_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $qty - max( 0, $product->get_total_stock() ) );
-		 }
+		}
+
+		do_action( 'woocommerce_order_add_product', $this->id, $item_id, $product, $qty, $args );
 
 		return $item_id;
 	}
