@@ -41,11 +41,11 @@ class WC_Order {
 		global $wpdb;
 
 		if ( $type ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s )", $order_id, $type ) );
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $order_id, $type ) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s )", $this->id, $type ) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->id, $type ) );
 		} else {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d )", $order_id ) );
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d )", $this->id ) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $this->id ) );
 		}
 	}
 
@@ -165,8 +165,8 @@ class WC_Order {
  		}
 
  		wc_add_order_item_meta( $item_id, 'rate_id', $tax_rate_id );
- 		wc_add_order_item_meta( $item_id, 'label', WC_Tax::get_rate_label( $key ) );
-	 	wc_add_order_item_meta( $item_id, 'compound', WC_Tax::is_compound( $key ) ? 1 : 0 );
+ 		wc_add_order_item_meta( $item_id, 'label', WC_Tax::get_rate_label( $tax_rate_id ) );
+	 	wc_add_order_item_meta( $item_id, 'compound', WC_Tax::is_compound( $tax_rate_id ) ? 1 : 0 );
 	 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( $tax_amount ) );
 	 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( $shipping_tax_amount ) );
 
@@ -354,7 +354,7 @@ class WC_Order {
 
 		// Now merge to keep tax rows
 		foreach ( array_keys( $taxes + $shipping_taxes ) as $tax_rate_id ) {
-			$this->add_tax( $tax_rate_id, isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0, isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
+			$this->add_tax( $tax_rate_id, isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0, isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 		}
 
 		return true;
@@ -1284,7 +1284,7 @@ class WC_Order {
 	 * @return WC_Product
 	 */
 	public function get_product_from_item( $item ) {
-		$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
+		$_product = get_product( ! empty( $item['variation_id'] ) ? $item['variation_id'] : $item['product_id'] );
 
 		return apply_filters( 'woocommerce_get_product_from_item', $_product, $item, $this );
 	}

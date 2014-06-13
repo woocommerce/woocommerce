@@ -33,7 +33,7 @@ class WC_Tax {
 	 */
 	public static function calc_tax( $price, $rates, $price_includes_tax = false, $suppress_rounding = false ) {
 		// Work in pence to X precision
-		$price = self::$precision( $price );
+		$price = self::precision( $price );
 
 		if ( $price_includes_tax )
 			$taxes = self::calc_inclusive_tax( $price, $rates );
@@ -47,7 +47,7 @@ class WC_Tax {
 
 		// Remove precision
 		$price     = self::remove_precision( $price );
-		$taxes     = array_map( array( $this, 'remove_precision' ), $taxes );
+		$taxes     = array_map( array( __CLASS__, 'remove_precision' ), $taxes );
 
 		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $suppress_rounding );
 	}
@@ -528,7 +528,7 @@ class WC_Tax {
 		if ( ! $rate_name )
 			$rate_name = WC()->countries->tax_or_vat();
 
-		return apply_filters( 'woocommerce_rate_label', $rate_name, $key, $this );
+		return apply_filters( 'woocommerce_rate_label', $rate_name, $key );
 	}
 
 	/**
@@ -554,7 +554,7 @@ class WC_Tax {
 		$code[] = $rate->tax_rate_name ? $rate->tax_rate_name : 'TAX';
 		$code[] = absint( $rate->tax_rate_priority );
 
-		return apply_filters( 'woocommerce_rate_code', strtoupper( implode( '-', array_filter( $code ) ) ), $key, $this );
+		return apply_filters( 'woocommerce_rate_code', strtoupper( implode( '-', array_filter( $code ) ) ), $key );
 	}
 
 	/**
@@ -564,7 +564,7 @@ class WC_Tax {
 	 * @return  float
 	 */
 	public static function get_tax_total( $taxes ) {
-		return array_sum( array_map( array( $this, 'round' ), $taxes ) );
+		return array_sum( array_map( array( __CLASS__, 'round' ), $taxes ) );
 	}
 }
 WC_Tax::init();
