@@ -39,11 +39,8 @@ class WC_Order_Factory {
 		}
 
 		if ( 'shop_order' == $post_type ) {
-			// For now this is the only order type, this conditional needs to be extended over time
+			$classname = 'WC_Order';
 			$order_type = 'simple';
-
-			// Create a WC coding standards compliant class name e.g. WC_Order_Type_Class instead of WC_order_type-class
-			$classname = 'WC_Order_' . implode( '_', array_map( 'ucfirst', explode( '-', $order_type ) ) );
 		} else {
 			$classname = false;
 			$order_type = false;
@@ -53,7 +50,7 @@ class WC_Order_Factory {
 		$classname = apply_filters( 'woocommerce_order_class', $classname, $order_type, $post_type, $order_id );
 
 		if ( ! class_exists( $classname ) )
-			$classname = 'WC_Order_Simple';
+			$classname = 'WC_Order';
 
 		return new $classname( $the_order, $args );
 	}
