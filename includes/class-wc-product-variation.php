@@ -255,7 +255,7 @@ class WC_Product_Variation extends WC_Product {
 		else
 			$purchasable = parent::is_purchasable();
 
-		return $purchasable;
+		return apply_filters( 'woocommerce_variation_is_purchasable', $purchasable, $this->variation_id, $this->id );
 	}
 
 	/**
