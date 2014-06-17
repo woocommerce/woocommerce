@@ -119,8 +119,8 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 				</tr>
 			</thead>
 			<?php if ( $tax_rows ) :
-				$gross = array_sum( wp_list_pluck( (array) $tax_rows, 'total_sales' ) ) - array_sum( wp_list_pluck( (array) $tax_rows, 'total_shipping' ) );
-				$total_tax = array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) - array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) );
+				$gross     = array_sum( wp_list_pluck( (array) $tax_rows, 'total_sales' ) ) - array_sum( wp_list_pluck( (array) $tax_rows, 'total_shipping' ) );
+				$total_tax = array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) );
 				?>
 				<tfoot>
 					<tr>
