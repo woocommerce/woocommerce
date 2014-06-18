@@ -1185,7 +1185,6 @@ class WC_AJAX {
 
 		self::json_headers();
 
-		$tax      = new WC_Tax();
 		$taxes    = $tax_rows = $item_taxes = $shipping_taxes = array();
 		$order_id = absint( $_POST['order_id'] );
 		$order    = new WC_Order( $order_id );
@@ -1200,16 +1199,11 @@ class WC_AJAX {
 		// Calculate sales tax first
 		if ( sizeof( $items ) > 0 ) {
 			foreach( $items as $item_id => $item ) {
-
 				$item_id       = absint( $item_id );
 				$line_subtotal = isset( $item['line_subtotal'] ) ? wc_format_decimal( $item['line_subtotal'] ) : 0;
 				$line_total    = wc_format_decimal( $item['line_total'] );
 				$tax_class     = sanitize_text_field( $item['tax_class'] );
 				$product_id    = $order->get_item_meta( $item_id, '_product_id', true );
-
-				if ( ! $item_id || '0' == $tax_class ) {
-					continue;
-				}
 
 				// Get product details
 				if ( get_post_type( $product_id ) == 'product' ) {
@@ -1219,10 +1213,8 @@ class WC_AJAX {
 					$item_tax_status = 'taxable';
 				}
 
-				// Only calc if taxable
-				if ( 'taxable' == $item_tax_status ) {
-
-					$tax_rates = $tax->find_rates( array(
+				if ( '0' !== $tax_class && 'taxable' === $item_tax_status ) {
+					$tax_rates = WC_Tax::find_rates( array(
 						'country'   => $country,
 						'state'     => $state,
 						'postcode'  => $postcode,
@@ -1230,18 +1222,10 @@ class WC_AJAX {
 						'tax_class' => $tax_class
 					) );
 
-					$line_subtotal_taxes = $tax->calc_tax( $line_subtotal, $tax_rates, false );
-					$line_taxes          = $tax->calc_tax( $line_total, $tax_rates, false );
-					$line_subtotal_tax   = array_sum( $line_subtotal_taxes );
-					$line_tax            = array_sum( $line_taxes );
-
-					if ( $line_subtotal_tax < 0 ) {
-						$line_subtotal_tax = 0;
-					}
-
-					if ( $line_tax < 0 ) {
-						$line_tax = 0;
-					}
+					$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal, $tax_rates, false );
+					$line_taxes          = WC_Tax::calc_tax( $line_total, $tax_rates, false );
+					$line_subtotal_tax   = max( 0, array_sum( $line_subtotal_taxes ) );
+					$line_tax            = max( 0, array_sum( $line_taxes ) );
 
 					$item_taxes[ $item_id ] = array(
 						'line_subtotal_tax' => wc_format_localized_price( $line_subtotal_tax ),
@@ -1255,14 +1239,13 @@ class WC_AJAX {
 						$taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
 					}
 				}
-
 			}
 		}
 
 		// Now calculate shipping tax
 		$matched_tax_rates = array();
 
-		$tax_rates = $tax->find_rates( array(
+		$tax_rates = WC_Tax::find_rates( array(
 			'country'   => $country,
 			'state'     => $state,
 			'postcode'  => $postcode,
@@ -1278,62 +1261,20 @@ class WC_AJAX {
 			}
 		}
 
-		$shipping_taxes = $tax->calc_shipping_tax( $shipping, $matched_tax_rates );
-		$shipping_tax   = $tax->round( array_sum( $shipping_taxes ) );
+		$shipping_taxes = WC_Tax::calc_shipping_tax( $shipping, $matched_tax_rates );
+		$shipping_tax   = WC_Tax::round( array_sum( $shipping_taxes ) );
 
 		// Remove old tax rows
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax' )", $order_id ) );
+		$order->remove_order_items( 'tax' );
 
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax'", $order_id ) );
-
-		// Get tax rates
-		$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
-
-		$tax_codes = array();
-
-		foreach( $rates as $rate ) {
-			$code = array();
-
-			$code[] = $rate->tax_rate_country;
-			$code[] = $rate->tax_rate_state;
-			$code[] = $rate->tax_rate_name ? sanitize_title( $rate->tax_rate_name ) : 'TAX';
-			$code[] = absint( $rate->tax_rate_priority );
-
-			$tax_codes[ $rate->tax_rate_id ] = strtoupper( implode( '-', array_filter( $code ) ) );
+		// Add tax rows
+		foreach ( array_keys( $taxes + $shipping_taxes ) as $tax_rate_id ) {
+			$order->add_tax( $tax_rate_id, isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0, isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 		}
 
-		// Now merge to keep tax rows
 		ob_start();
 
-		foreach ( array_keys( $taxes + $shipping_taxes ) as $key ) {
-
-			$item                        = array();
-			$item['rate_id']             = $key;
-			$item['name']                = $tax_codes[ $key ];
-			$item['label']               = $tax->get_rate_label( $key );
-			$item['compound']            = $tax->is_compound( $key ) ? 1 : 0;
-			$item['tax_amount']          = wc_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
-			$item['shipping_tax_amount'] = wc_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
-
-			if ( ! $item['label'] ) {
-				$item['label'] = WC()->countries->tax_or_vat();
-			}
-
-			// Add line item
-			$item_id = wc_add_order_item( $order_id, array(
-				'order_item_name' => $item['name'],
-				'order_item_type' => 'tax'
-			) );
-
-			// Add line item meta
-			if ( $item_id ) {
-				wc_add_order_item_meta( $item_id, 'rate_id', $item['rate_id'] );
-				wc_add_order_item_meta( $item_id, 'label', $item['label'] );
-				wc_add_order_item_meta( $item_id, 'compound', $item['compound'] );
-				wc_add_order_item_meta( $item_id, 'tax_amount', $item['tax_amount'] );
-				wc_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
-			}
-
+		foreach ( $order->get_taxes() as $item_id => $item ) {
 			include( 'admin/meta-boxes/views/html-order-tax.php' );
 		}
 

@@ -451,7 +451,6 @@ jQuery( function($){
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-
 				if ( response ) {
 					$items.each( function() {
 						var $row = $(this);

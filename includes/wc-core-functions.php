@@ -43,6 +43,87 @@ add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
 
 /**
+ * Create a new order programmatically
+ *
+ * Returns a new order object on success which can then be used to add additonal data.
+ * 
+ * @return WC_Order on success, WP_Error on failure
+ */
+function wc_create_order( $args = array() ) {
+	$default_args = array(
+		'status'        => '',
+		'customer_id'   => null,
+		'customer_note' => null,
+		'order_id'      => 0
+	);
+
+	$args       = wp_parse_args( $args, $default_args );
+	$order_data = array();
+
+	if ( $args['order_id'] > 0 ) {
+		$updating         = true;
+		$order_data['ID'] = $args['order_id'];
+	} else {
+		$updating                    = false;
+		$order_data['post_type']     = 'shop_order';
+		$order_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
+		$order_data['ping_status']   = 'closed';
+		$order_data['post_author']   = 1;
+		$order_data['post_password'] = uniqid( 'order_' );
+		$order_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+	}
+
+	if ( $args['status'] ) {
+		if ( ! in_array( 'wc-' . $args['status'], array_keys( wc_get_order_statuses() ) ) ) {
+			return new WP_Error( __( 'Invalid order status', 'woocommerce' ) );
+		}
+		$order_data['post_status']  = 'wc-' . $args['status'];
+	}
+
+	if ( ! is_null( $args['customer_note'] ) ) {
+		$order_data['post_excerpt'] = $args['customer_note'];
+	}
+
+	if ( $updating ) {
+		$order_id = wp_update_post( $order_data );
+	} else {
+		$order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', $order_data ), true );
+	}
+
+	if ( is_wp_error( $order_id ) ) {
+		return $order_id;
+	}
+
+	// Default order meta data.
+	if ( ! $updating ) {
+		update_post_meta( $order_id, '_order_key', 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
+		update_post_meta( $order_id, '_order_currency', get_woocommerce_currency() );
+		update_post_meta( $order_id, '_prices_include_tax', get_option( 'woocommerce_prices_include_tax' ) );
+		update_post_meta( $order_id, '_customer_ip_address', isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
+		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
+		update_post_meta( $order_id, '_customer_user', 0 );
+	}
+
+	if ( is_numeric( $args['customer_id'] ) ) {
+		update_post_meta( $order_id, '_customer_user', $args['customer_id'] );
+	}
+		
+	return new WC_Order( $order_id );
+}
+
+/**
+ * Update an order. Uses wc_create_order.
+ * @param  array $args
+ * @return WC_Error | WC_Order
+ */
+function wc_update_order( $args ) {
+	if ( ! $args['order_id'] ) {
+		return new WP_Error( __( 'Invalid order ID', 'woocommerce' ) );
+	}
+	return wc_create_order( $args );
+}
+
+/**
  * Get template part (for templates like the shop-loop).
  *
  * @access public
