@@ -23,6 +23,9 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 // Load border setting
 $rounded_corners = apply_filters( 'woocommerce_email_rounded_corners', '6px' );
 
+// Load font size setting
+$font_size_base = floatval( apply_filters( 'woocommerce_email_font_size_base', '1' ) );
+
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline. !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 $wrapper = "
 	background-color: " . esc_attr( $bg ) . ";
@@ -62,7 +65,7 @@ $body_content = "
 $body_content_inner = "
 	color: $text_lighter_20;
 	font-family:Arial;
-	font-size:14px;
+	font-size:" . $font_size_base * 14 . "px;
 	line-height:150%;
 	text-align:left;
 ";
@@ -73,7 +76,7 @@ $header_content_h1 = "
 	text-shadow: 0 1px 0 $base_lighter_20;
 	display:block;
 	font-family:Arial;
-	font-size:30px;
+	font-size:" . $font_size_base * 30 . "px;
 	font-weight:bold;
 	text-align:left;
 	line-height: 150%;
