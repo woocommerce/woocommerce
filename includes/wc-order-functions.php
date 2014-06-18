@@ -363,3 +363,11 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 
 	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
 }
+
+/**
+ * See if we only ship to billing addresses
+ * @return bool
+ */
+function wc_ship_to_billing_address_only() {
+	return 'billing_only' === get_option( 'woocommerce_ship_to_destination' );
+}
