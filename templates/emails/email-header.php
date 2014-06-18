@@ -26,6 +26,9 @@ $rounded_corners = apply_filters( 'woocommerce_email_rounded_corners', '6px' );
 // Load font size setting
 $font_size_base = floatval( apply_filters( 'woocommerce_email_font_size_base', '1' ) );
 
+// Load header image
+$header_img = apply_filters( 'woocommerce_email_header_image', get_option( 'woocommerce_email_header_image' ) );
+
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline. !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 $wrapper = "
 	background-color: " . esc_attr( $bg ) . ";
@@ -94,8 +97,8 @@ $header_content_h1 = "
             	<tr>
                 	<td align="center" valign="top">
                 		<?php
-                			if ( $img = get_option( 'woocommerce_email_header_image' ) ) {
-                				echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . get_bloginfo( 'name' ) . '" /></p>';
+                			if ( $header_img ) {
+                				echo '<p style="margin-top:0;"><img src="' . esc_url( $header_img ) . '" alt="' . get_bloginfo( 'name' ) . '" /></p>';
                 			}
                 		?>
                     	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_container" style="<?php echo $template_container; ?>">
