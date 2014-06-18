@@ -20,6 +20,9 @@ $bg_darker_10    = wc_hex_darker( $bg, 10 );
 $base_lighter_20 = wc_hex_lighter( $base, 20 );
 $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
+// Load border setting
+$rounded_corners = apply_filters( 'woocommerce_email_rounded_corners', '6px' );
+
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline. !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 $wrapper = "
 	background-color: " . esc_attr( $bg ) . ";
@@ -31,20 +34,20 @@ $wrapper = "
 $template_container = "
 	-webkit-box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
 	box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
-	-webkit-border-radius:6px !important;
-	border-radius:6px !important;
+	-webkit-border-radius:" . $rounded_corners . " !important;
+	border-radius:" . $rounded_corners . " !important;
 	background-color: " . esc_attr( $body ) . ";
 	border: 1px solid $bg_darker_10;
-	-webkit-border-radius:6px !important;
-	border-radius:6px !important;
+	-webkit-border-radius:" . $rounded_corners . " !important;
+	border-radius:" . $rounded_corners . " !important;
 ";
 $template_header = "
 	background-color: " . esc_attr( $base ) .";
 	color: $base_text;
-	-webkit-border-top-left-radius:6px !important;
-	-webkit-border-top-right-radius:6px !important;
-	border-top-left-radius:6px !important;
-	border-top-right-radius:6px !important;
+	-webkit-border-top-left-radius:" . $rounded_corners . " !important;
+	-webkit-border-top-right-radius:" . $rounded_corners . " !important;
+	border-top-left-radius:" . $rounded_corners . " !important;
+	border-top-right-radius:" . $rounded_corners . " !important;
 	border-bottom: 0;
 	font-family:Arial;
 	font-weight:bold;
@@ -53,8 +56,8 @@ $template_header = "
 ";
 $body_content = "
 	background-color: " . esc_attr( $body ) . ";
-	-webkit-border-radius:6px !important;
-	border-radius:6px !important;
+	-webkit-border-radius:" . $rounded_corners . " !important;
+	border-radius:" . $rounded_corners . " !important;
 ";
 $body_content_inner = "
 	color: $text_lighter_20;
