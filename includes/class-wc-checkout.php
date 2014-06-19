@@ -34,20 +34,19 @@ class WC_Checkout {
 	private $customer_id;
 
 	/**
-	 * @var WooCommerce The single instance of the class
+	 * @var WC_Checkout The single instance of the class
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
 
 	/**
-	 * Main WooCommerce Instance
+	 * Main WC_Checkout Instance
 	 *
-	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
+	 * Ensures only one instance of WC_Checkout is loaded or can be loaded.
 	 *
 	 * @since 2.1
 	 * @static
-	 * @see WC()
-	 * @return Main WooCommerce instance
+	 * @return WC_Checkout Main instance
 	 */
 	public static function instance() {
 		if ( is_null( self::$_instance ) )
