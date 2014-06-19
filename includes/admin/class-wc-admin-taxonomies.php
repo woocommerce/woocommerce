@@ -254,13 +254,13 @@ class WC_Admin_Taxonomies {
 	 * @return void
 	 */
 	public function save_category_fields( $term_id, $tt_id, $taxonomy ) {
-		if ( isset( $_POST['display_type'] ) )
+		if ( isset( $_POST['display_type'] ) ) {
 			update_woocommerce_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) );
+		}
 
-		if ( isset( $_POST['product_cat_thumbnail_id'] ) )
+		if ( isset( $_POST['product_cat_thumbnail_id'] ) ) {
 			update_woocommerce_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
-
-		delete_transient( 'wc_term_counts' );
+		}
 	}
 
 	/**
