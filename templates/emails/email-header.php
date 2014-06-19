@@ -28,7 +28,10 @@ $font_size_base  = floatval( apply_filters( 'woocommerce_email_font_size_base', 
 $font_family     = apply_filters( 'woocommerce_email_font_family', '"Helvetica Neue", "Helvetica", Arial, sans-serif' );
 
 // Load header image
-$header_img = apply_filters( 'woocommerce_email_header_image', get_option( 'woocommerce_email_header_image' ) );
+$header_img      = apply_filters( 'woocommerce_email_header_image', get_option( 'woocommerce_email_header_image' ) );
+
+// Load width
+$width           = floatval( apply_filters( 'woocommerce_email_width', get_option( 600 ) ) );
 
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline. !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 $wrapper = "
@@ -102,11 +105,11 @@ $header_content_h1 = "
                 				echo '<p style="margin-top:0;"><img src="' . esc_url( $header_img ) . '" alt="' . get_bloginfo( 'name' ) . '" /></p>';
                 			}
                 		?>
-                    	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_container" style="<?php echo $template_container; ?>">
+                    	<table border="0" cellpadding="0" cellspacing="0" width="<?php echo $width; ?>" id="template_container" style="<?php echo $template_container; ?>">
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- Header -->
-                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_header" style="<?php echo $template_header; ?>" bgcolor="<?php echo $base; ?>">
+                                	<table border="0" cellpadding="0" cellspacing="0" width="<?php echo $width; ?>" id="template_header" style="<?php echo $template_header; ?>" bgcolor="<?php echo $base; ?>">
                                         <tr>
                                             <td>
                                             	<h1 style="<?php echo $header_content_h1; ?>"><?php echo $email_heading; ?></h1>
@@ -120,7 +123,7 @@ $header_content_h1 = "
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- Body -->
-                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_body">
+                                	<table border="0" cellpadding="0" cellspacing="0" width="<?php echo $width; ?>" id="template_body">
                                     	<tr>
                                             <td valign="top" style="<?php echo $body_content; ?>">
                                                 <!-- Content -->
