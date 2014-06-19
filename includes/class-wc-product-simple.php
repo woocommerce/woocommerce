@@ -92,6 +92,8 @@ class WC_Product_Simple extends WC_Product {
 			}
 		}
 
-		wc_delete_product_transients( $this->id );
+		delete_transient( 'wc_products_onsale' );
+
+		do_action( 'woocommerce_grouped_product_sync', $this->id, $children_by_price );
 	}
 }
