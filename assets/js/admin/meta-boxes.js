@@ -1147,8 +1147,23 @@ jQuery( function($){
 
 	// STOCK OPTIONS
 	$('input#_manage_stock').change(function(){
-		if ($(this).is(':checked')) $('div.stock_fields').show();
-		else $('div.stock_fields').hide();
+		if ( $(this).is(':checked') ) {
+			$('div.stock_fields').show();
+		} else {
+			$('div.stock_fields').hide();
+		}
+
+		var product_type = $('select#product-type').val();
+
+		if ( product_type == 'variable' ) {
+			if ( $(this).is(':checked') ) {
+				$('p._stock_status_field').show();
+			} else {
+				$('p._stock_status_field').hide();
+			}
+		} else {
+			$('p._stock_status_field').show();
+		}
 	}).change();
 
 
