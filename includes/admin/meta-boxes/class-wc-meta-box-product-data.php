@@ -963,7 +963,11 @@ class WC_Meta_Box_Product_Data {
 		if ( isset( $_POST['_tax_class'] ) ) update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
 		if ( isset( $_POST['_visibility'] ) ) update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
 		if ( isset( $_POST['_purchase_note'] ) ) update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
-		update_post_meta( $post_id, '_featured', isset( $_POST['_featured'] ) ? 'yes' : 'no' );
+			
+		// Featured
+		if ( update_post_meta( $post_id, '_featured', isset( $_POST['_featured'] ) ? 'yes' : 'no' ) ) {
+			delete_transient( 'wc_featured_products' );
+		}
 
 		// Dimensions
 		if ( $is_virtual == 'no' ) {
@@ -1189,9 +1193,6 @@ class WC_Meta_Box_Product_Data {
 							update_post_meta( $clear_id, '_price', $child_price );
 						}
 					}
-
-					// Clear cache/transients
-					wc_delete_product_transients( $clear_id );
 				}
 			}
 		}

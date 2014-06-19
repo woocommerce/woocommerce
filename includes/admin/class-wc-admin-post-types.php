@@ -856,9 +856,9 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( isset( $_REQUEST['_featured'] ) ) {
-			update_post_meta( $post_id, '_featured', 'yes' );
-		} else {
-			update_post_meta( $post_id, '_featured', 'no' );
+			if ( update_post_meta( $post_id, '_featured', isset( $_REQUEST['_featured'] ) ? 'yes' : 'no' ) ) {
+				delete_transient( 'wc_featured_products' );
+			}
 		}
 
 		if ( isset( $_REQUEST['_tax_status'] ) ) {
@@ -974,7 +974,9 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_featured'] ) ) {
-			update_post_meta( $post_id, '_featured', stripslashes( $_REQUEST['_featured'] ) );
+			if ( update_post_meta( $post_id, '_featured', stripslashes( $_REQUEST['_featured'] ) ) ) {
+				delete_transient( 'wc_featured_products' );
+			}
 		}
 
 		// Sold Individually
@@ -1762,7 +1764,6 @@ class WC_Admin_Post_Types {
 				}
 
 				delete_transient( 'woocommerce_processing_order_count' );
-				delete_transient( 'wc_term_counts' );
 			}
 
 		}
@@ -1791,7 +1792,6 @@ class WC_Admin_Post_Types {
 				}
 
 				delete_transient( 'woocommerce_processing_order_count' );
-				delete_transient( 'wc_term_counts' );
 			}
 
 		}

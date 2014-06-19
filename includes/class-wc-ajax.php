@@ -339,7 +339,7 @@ class WC_AJAX {
 			update_post_meta( $post_id, '_featured', 'yes' );
 		}
 
-		wc_delete_product_transients();
+		delete_transient( 'wc_featured_products' );
 
 		wp_safe_redirect( remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) );
 
@@ -819,7 +819,7 @@ class WC_AJAX {
 			}
 		}
 
-		wc_delete_product_transients( $post_id );
+		delete_transient( 'wc_product_children_ids_' . $post_id );
 
 		echo $added;
 
