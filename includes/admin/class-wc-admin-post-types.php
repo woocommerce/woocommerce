@@ -852,7 +852,9 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( isset( $_REQUEST['_visibility'] ) ) {
-			update_post_meta( $post_id, '_visibility', wc_clean( $_REQUEST['_visibility'] ) );
+			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_REQUEST['_visibility'] ) ) ) {
+				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_REQUEST['_visibility'] ) );
+			}
 		}
 
 		if ( isset( $_REQUEST['_featured'] ) ) {
@@ -970,7 +972,9 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_visibility'] ) ) {
-			update_post_meta( $post_id, '_visibility', stripslashes( $_REQUEST['_visibility'] ) );
+			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_REQUEST['_visibility'] ) ) ) {
+				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_REQUEST['_visibility'] ) );
+			}
 		}
 
 		if ( ! empty( $_REQUEST['_featured'] ) ) {

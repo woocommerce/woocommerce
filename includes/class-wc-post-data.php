@@ -23,12 +23,51 @@ class WC_Post_Data {
 	 * Hook in methods
 	 */
 	public static function init() {
+		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
+
+		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
+		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
+		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
+
 		add_action( 'edit_term', array( __CLASS__, 'edit_term' ), 10, 3 );
 		add_action( 'edited_term', array( __CLASS__, 'edited_term' ), 10, 3 );
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
 		add_action( 'pre_post_update', array( __CLASS__, 'pre_post_update' ) );
+	}
+
+	/**
+	 * Delete transients when terms are set
+	 */
+	public static function set_object_terms( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+		foreach ( array_merge( $tt_ids, $old_tt_ids ) as $id ) {
+			delete_transient( 'wc_ln_count_' . md5( sanitize_key( $taxonomy ) . sanitize_key( $id ) ) );
+		}
+	}
+
+	/**
+	 * When a post status changes
+	 */
+	public function transition_post_status( $new_status, $old_status, $post ) {
+		if ( ( 'publish' === $new_status || 'publish' === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ) ) ) {
+			self::delete_product_query_transients();
+		}
+	}
+
+	/**
+	 * Delete product view transients when needed e.g. when post status changes, or visibility/stock status is modified.
+	 */
+	public static function delete_product_query_transients() {
+		global $wpdb;
+
+		if ( wp_using_ext_object_cache() ) {
+			wp_cache_flush(); // There isn't a reliable method of looking up the names, so flush the cache.
+			return;
+		}
+
+		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_uf\_pid\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_uf\_pid\_%')" );
+		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_products\_will\_display\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_products\_will\_display\_%')" );
 	}
 
 	/**
@@ -151,7 +190,9 @@ class WC_Post_Data {
 	 */
 	public static function pre_post_update( $post_id ) {
 		if ( isset( $_POST['_visibility'] ) ) {
-			update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
+			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_POST['_visibility'] ) ) ) {
+				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_POST['_visibility'] ) );
+			}
 		}
 		if ( isset( $_POST['_stock_status'] ) ) {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );

@@ -84,23 +84,11 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		return;
 	}
 
-	$post_id = absint( $post_id );
-
 	// Clear core transients
 	$transients_to_clear = array(
-		'wc\_products\_onsale',
-		'wc\_hidden\_product\_ids',
-		'wc\_hidden\_product\_ids\_search',
-		'wc\_attribute\_taxonomies',
-		'wc\_term\_counts',
-		'wc\_featured\_products'
+		'wc_products_onsale',
+		'wc_featured_products'
 	);
-
-	// Clear transients for which we don't have the name
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_uf\_pid\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_uf\_pid\_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_ln\_count\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_ln\_count\_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_ship\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_ship\_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('\_transient\_wc\_products\_will\_display\_%') OR `option_name` LIKE ('\_transient\_timeout\_wc\_products\_will\_display\_%')" );
 
 	// Clear product specific transients
 	$post_transient_names = array(
@@ -116,7 +104,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		}
 	} else {
 		foreach( $post_transient_names as $transient ) {
-			$transient = str_replace('_', '\_', $transient);
+			$transient = str_replace( '_', '\_', $transient );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '\_transient\_' . $transient . '%', '\_transient\_timeout\_' . $transient . '%' ) );
 		}
 	}
@@ -380,8 +368,6 @@ function wc_scheduled_sales() {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
 
-			wc_delete_product_transients( $product_id );
-
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -391,12 +377,14 @@ function wc_scheduled_sales() {
 
 				// Grouped products need syncing via a function
 				$this_product = get_product( $product_id );
-				if ( $this_product->is_type( 'simple' ) )
-					$this_product->grouped_product_sync();
 
-				wc_delete_product_transients( $parent );
+				if ( $this_product->is_type( 'simple' ) ) {
+					$this_product->grouped_product_sync();
+				}
 			}
 		}
+
+		delete_transient( 'wc_products_onsale' );
 	}
 
 	// Sales which are due to end
@@ -421,8 +409,6 @@ function wc_scheduled_sales() {
 			update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			update_post_meta( $product_id, '_sale_price_dates_to', '' );
 
-			wc_delete_product_transients( $product_id );
-
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -432,12 +418,13 @@ function wc_scheduled_sales() {
 
 				// Grouped products need syncing via a function
 				$this_product = get_product( $product_id );
-				if ( $this_product->is_type( 'simple' ) )
+				if ( $this_product->is_type( 'simple' ) ) {
 					$this_product->grouped_product_sync();
-
-				wc_delete_product_transients( $parent );
+				}
 			}
 		}
+
+		delete_transient( 'wc_products_onsale' );
 	}
 }
 add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
@@ -450,8 +437,9 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
-	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) )
+	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
 		$attr['src'] = wc_placeholder_img_src();
+	}
 
 	return $attr;
 }
