@@ -58,24 +58,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				</td>
 				<td class="data" rowspan="2">
 					<table cellspacing="0" cellpadding="0" class="data_table">
-						<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
-							<tr>
-								<td>
-									<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-									<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
-								</td>
-								<td>
-									<label><?php _e( 'Allow Backorders?', 'woocommerce' ); ?></label>
-									<select name="variable_backorders[<?php echo $loop; ?>]">
-										<option value="parent" <?php selected( is_null( $_backorders ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
-										<?php
-										foreach ( $parent_data['backorder_options'] as $key => $value )
-											echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
-									?></select>
-								</td>
-							</tr>
-						<?php endif; ?>
-
 						<tr class="variable_pricing">
 							<td>
 								<label><?php echo __( 'Regular Price:', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')'; ?></label>
@@ -97,6 +79,36 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 							</td>
 						</tr>
+
+						<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
+							<tr class="show_if_variation_manage_stock">
+								<td>
+									<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
+									<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
+								</td>
+								<td>
+									<label><?php _e( 'Allow Backorders?', 'woocommerce' ); ?></label>
+									<select name="variable_backorders[<?php echo $loop; ?>]">
+										<option value="parent" <?php selected( is_null( $_backorders ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
+										<?php
+										foreach ( $parent_data['backorder_options'] as $key => $value )
+											echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
+									?></select>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<label><?php _e( 'Stock status', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ); ?>" href="#">[?]</a></label>
+									<select name="variable_stock_status[<?php echo $loop; ?>]">
+										<?php
+											foreach ( $parent_data['stock_status_options'] as $key => $value ) {
+												echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
+											}
+										?>
+									</select>
+								</td>
+							</tr>
+						<?php endif; ?>
 
 						<?php if ( wc_product_weight_enabled() || wc_product_dimensions_enabled() ) : ?>
 							<tr>
@@ -220,6 +232,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 					<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php checked( isset( $_downloadable ) ? $_downloadable : '', 'yes' ); ?> /> <?php _e( 'Downloadable', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>" href="#">[?]</a></label>
 
 					<label><input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo $loop; ?>]" <?php checked( isset( $_virtual ) ? $_virtual : '', 'yes' ); ?> /> <?php _e( 'Virtual', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce' ); ?>" href="#">[?]</a></label>
+
+					<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
+
+						<label><input type="checkbox" class="checkbox variable_manage_stock" name="variable_manage_stock[<?php echo $loop; ?>]" <?php checked( isset( $_manage_stock ) ? $_manage_stock : '', 'yes' ); ?> /> <?php _e( 'Manage stock?', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enable this option to enable stock management at variation level', 'woocommerce' ); ?>" href="#">[?]</a></label>
+
+					<?php endif; ?>
 
 					<?php do_action( 'woocommerce_variation_options', $loop, $variation_data, $variation ); ?>
 				</td>
