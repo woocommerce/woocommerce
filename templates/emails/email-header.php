@@ -23,8 +23,9 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 // Load border setting
 $rounded_corners = apply_filters( 'woocommerce_email_rounded_corners', '6px' );
 
-// Load font size setting
-$font_size_base = floatval( apply_filters( 'woocommerce_email_font_size_base', '1' ) );
+// Load font settings
+$font_size_base  = floatval( apply_filters( 'woocommerce_email_font_size_base', '1' ) );
+$font_family     = apply_filters( 'woocommerce_email_font_family', '"Helvetica Neue", "Helvetica", Arial, sans-serif' );
 
 // Load header image
 $header_img = apply_filters( 'woocommerce_email_header_image', get_option( 'woocommerce_email_header_image' ) );
@@ -55,7 +56,7 @@ $template_header = "
 	border-top-left-radius:" . $rounded_corners . " !important;
 	border-top-right-radius:" . $rounded_corners . " !important;
 	border-bottom: 0;
-	font-family:Arial;
+	font-family:" . $font_family . ";
 	font-weight:bold;
 	line-height:100%;
 	vertical-align:middle;
@@ -67,7 +68,7 @@ $body_content = "
 ";
 $body_content_inner = "
 	color: $text_lighter_20;
-	font-family:Arial;
+	font-family:" . $font_family . ";
 	font-size:" . $font_size_base * 14 . "px;
 	line-height:150%;
 	text-align:left;
@@ -78,7 +79,7 @@ $header_content_h1 = "
 	padding: 28px 24px;
 	text-shadow: 0 1px 0 $base_lighter_20;
 	display:block;
-	font-family:Arial;
+	font-family:" . $font_family . ";
 	font-size:" . $font_size_base * 30 . "px;
 	font-weight:bold;
 	text-align:left;
