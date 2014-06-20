@@ -84,33 +84,36 @@ class WC_Form_Handler {
 				wc_add_notice( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
 
-			// Validation rules
-			if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
-				foreach ( $field['validate'] as $rule ) {
-					switch ( $rule ) {
-						case 'postcode' :
-							$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
+			if ( ! empty( $this->posted[ $key ] ) ) {
 
-							if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) {
-								wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
-							} else {
-								$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
-							}
-						break;
-						case 'phone' :
-							$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
+				// Validation rules
+				if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
+					foreach ( $field['validate'] as $rule ) {
+						switch ( $rule ) {
+							case 'postcode' :
+								$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
 
-							if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
-								wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
-							}
-						break;
-						case 'email' :
-							$_POST[ $key ] = strtolower( $_POST[ $key ] );
+								if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) {
+									wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
+								} else {
+									$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
+								}
+							break;
+							case 'phone' :
+								$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
 
-							if ( ! is_email( $_POST[ $key ] ) ) {
-								wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
-							}
-						break;
+								if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
+									wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
+								}
+							break;
+							case 'email' :
+								$_POST[ $key ] = strtolower( $_POST[ $key ] );
+
+								if ( ! is_email( $_POST[ $key ] ) ) {
+									wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
+								}
+							break;
+						}
 					}
 				}
 			}
