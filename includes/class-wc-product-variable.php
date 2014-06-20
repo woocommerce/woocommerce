@@ -97,35 +97,40 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array of children ids
 	 */
 	public function get_children( $visible_only = false ) {
+		$variable = $visible_only ? 'visible_children' : 'children';
 
-		if ( ! is_array( $this->children ) ) {
-			$this->children = array();
-
-			$transient_name = 'wc_product_children_ids_' . $this->id;
+		if ( ! is_array( $this->$variable ) ) {
+			$this->$variable = array();
+			$transient_name  = 'wc_product_' . $variable . '_ids_' . $this->id;
 
         	if ( false === ( $this->children = get_transient( $transient_name ) ) ) {
-		        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=product_variation&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
+		        $args = array(
+					'post_parent' => $this->id,
+					'post_type'   => 'product_variation',
+					'orderby'     => 'menu_order',
+					'order'       => 'ASC',
+					'fields'      => 'ids',
+					'post_status' => 'any',
+					'numberposts' => -1
+		        );
 
-				set_transient( $transient_name, $this->children, YEAR_IN_SECONDS );
-			}
-		}
-
-		if ( $visible_only ) {
-			$children = array();
-			foreach ( $this->children as $child_id ) {
-				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-					$stock = get_post_meta( $child_id, '_stock', true );
-					if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-						continue;
-					}
+				if ( $visible_only && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+					$args['meta_query'] = array(
+						array(
+							'key'     => '_stock_status',
+							'value'   => 'instock',
+							'compare' => '='
+					    )
+					);
 				}
-				$children[] = $child_id;
+
+				$this->$variable = get_posts( $args );
+
+				set_transient( $transient_name, $this->$variable, YEAR_IN_SECONDS );
 			}
-		} else {
-			$children = $this->children;
 		}
 
-		return $children;
+		return $this->$variable;
 	}
 
 
