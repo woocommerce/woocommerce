@@ -35,11 +35,21 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 			<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) : ?>
 
-				<?php do_action( 'woocommerce_review_order_before_shipping' ); ?>
+				<?php 
+					/**
+					 * woocommerce_review_order_before_shipping hook
+					 */
+					do_action( 'woocommerce_review_order_before_shipping' ); 
+				?>
 
 				<?php wc_cart_totals_shipping_html(); ?>
 
-				<?php do_action( 'woocommerce_review_order_after_shipping' ); ?>
+				<?php 
+					/**
+					 * woocommerce_review_order_after_shipping hook
+					 */
+					do_action( 'woocommerce_review_order_after_shipping' ); 
+				?>
 
 			<?php endif; ?>
 
@@ -73,18 +83,31 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				</tr>
 			<?php endforeach; ?>
 
-			<?php do_action( 'woocommerce_review_order_before_order_total' ); ?>
+			<?php 
+				/**
+				 * woocommerce_review_order_before_order_total hook
+				 */
+				do_action( 'woocommerce_review_order_before_order_total' ); 
+			?>
 
 			<tr class="order-total">
 				<th><?php _e( 'Order Total', 'woocommerce' ); ?></th>
 				<td><?php wc_cart_totals_order_total_html(); ?></td>
 			</tr>
 
-			<?php do_action( 'woocommerce_review_order_after_order_total' ); ?>
+			<?php 
+				/**
+				 * woocommerce_review_order_after_order_total hook
+				 */
+				do_action( 'woocommerce_review_order_after_order_total' ); 
+			?>
 
 		</tfoot>
 		<tbody>
 			<?php
+				/**
+				 * woocommerce_review_order_before_cart_contents hook
+				 */
 				do_action( 'woocommerce_review_order_before_cart_contents' );
 
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -106,12 +129,20 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 					}
 				}
 
+				/**
+				 * woocommerce_review_order_after_cart_contents hook
+				 */
 				do_action( 'woocommerce_review_order_after_cart_contents' );
 			?>
 		</tbody>
 	</table>
 
-	<?php do_action( 'woocommerce_review_order_before_payment' ); ?>
+	<?php 
+		/**
+		 * woocommerce_review_order_before_payment hook
+		 */
+		do_action( 'woocommerce_review_order_before_payment' ); 
+	?>
 
 	<div id="payment">
 		<?php if ( WC()->cart->needs_payment() ) : ?>
@@ -164,7 +195,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 			<?php wp_nonce_field( 'woocommerce-process_checkout' ); ?>
 
-			<?php do_action( 'woocommerce_review_order_before_submit' ); ?>
+			<?php 
+				/**
+				 * woocommerce_review_order_before_submit hook
+				 */
+				do_action( 'woocommerce_review_order_before_submit' ); 
+			?>
 
 			<?php
 			$order_button_text = apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) );
@@ -181,7 +217,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				</p>
 			<?php } ?>
 
-			<?php do_action( 'woocommerce_review_order_after_submit' ); ?>
+			<?php 
+				/**
+				 * woocommerce_review_order_after_submit hook
+				 */
+				do_action( 'woocommerce_review_order_after_submit' ); 
+			?>
 
 		</div>
 
@@ -189,6 +230,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	</div>
 
-	<?php do_action( 'woocommerce_review_order_after_payment' ); ?>
+	<?php 
+		/**
+		 * woocommerce_review_order_after_payment hook
+		 */
+		do_action( 'woocommerce_review_order_after_payment' ); 
+	?>
 
 <?php if ( ! is_ajax() ) : ?></div><?php endif; ?>

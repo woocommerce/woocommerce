@@ -15,7 +15,12 @@ if ( get_option( 'woocommerce_enable_shipping_calc' ) === 'no' || ! WC()->cart->
 	return;
 ?>
 
-<?php do_action( 'woocommerce_before_shipping_calculator' ); ?>
+<?php 
+	/**
+	 * woocommerce_before_shipping_calculator hook
+	 */
+	do_action( 'woocommerce_before_shipping_calculator' ); 
+?>
 
 <form class="shipping_calculator" action="<?php echo esc_url( WC()->cart->get_cart_url() ); ?>" method="post">
 
@@ -88,4 +93,9 @@ if ( get_option( 'woocommerce_enable_shipping_calc' ) === 'no' || ! WC()->cart->
 	</section>
 </form>
 
-<?php do_action( 'woocommerce_after_shipping_calculator' ); ?>
+<?php 
+	/**
+	 * woocommerce_after_shipping_calculator hook
+	 */
+	do_action( 'woocommerce_after_shipping_calculator' ); 
+?>

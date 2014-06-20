@@ -32,7 +32,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<div class="shipping_address">
 
-			<?php do_action( 'woocommerce_before_checkout_shipping_form', $checkout ); ?>
+			<?php 
+				/**
+				 * woocommerce_before_checkout_shipping_form hook
+				 */
+				do_action( 'woocommerce_before_checkout_shipping_form', $checkout ); 
+			?>
 
 			<?php foreach ( $checkout->checkout_fields['shipping'] as $key => $field ) : ?>
 
@@ -40,13 +45,23 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 			<?php endforeach; ?>
 
-			<?php do_action( 'woocommerce_after_checkout_shipping_form', $checkout ); ?>
+			<?php 
+				/**
+				 * woocommerce_after_checkout_shipping_form hook
+				 */
+				do_action( 'woocommerce_after_checkout_shipping_form', $checkout ); 
+			?>
 
 		</div>
 
 	<?php endif; ?>
 
-	<?php do_action( 'woocommerce_before_order_notes', $checkout ); ?>
+	<?php 
+		/**
+		 * woocommerce_before_order_notes hook
+		 */
+		do_action( 'woocommerce_before_order_notes', $checkout ); 
+	?>
 
 	<?php if ( apply_filters( 'woocommerce_enable_order_notes_field', get_option( 'woocommerce_enable_order_comments', 'yes' ) === 'yes' ) ) : ?>
 
@@ -64,5 +79,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php endif; ?>
 
-	<?php do_action( 'woocommerce_after_order_notes', $checkout ); ?>
+	<?php 
+		/**
+		 * woocommerce_after_order_notes hook
+		 */
+		do_action( 'woocommerce_after_order_notes', $checkout ); 
+	?>
 </div>

@@ -9,11 +9,17 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
-<?php do_action( 'woocommerce_email_header', $email_heading ); ?>
+<?php
+	/** This action is documented in templates/emails/customer-invoice.php */
+	do_action( 'woocommerce_email_header', $email_heading ); 
+?>
 
 <p><?php printf( __( "Hi there. Your recent order on %s has been completed. Your order details are shown below for your reference:", 'woocommerce' ), get_option( 'blogname' ) ); ?></p>
 
-<?php do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text ); ?>
+<?php 
+	/** This action is documented in templates/emails/customer-invoice.php */
+	do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text ); 
+?>
 
 <h2><?php echo __( 'Order:', 'woocommerce' ) . ' ' . $order->get_order_number(); ?></h2>
 
@@ -44,9 +50,15 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	</tfoot>
 </table>
 
-<?php do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text ); ?>
+<?php
+	/** This action is documented in templates/emails/customer-invoice.php */
+	do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text ); 
+?>
 
-<?php do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text ); ?>
+<?php 
+	/** This action is documented in templates/emails/customer-invoice.php */
+	do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text ); 
+?>
 
 <h2><?php _e( 'Customer details', 'woocommerce' ); ?></h2>
 
@@ -59,4 +71,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <?php wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) ); ?>
 
-<?php do_action( 'woocommerce_email_footer' ); ?>
+<?php 
+	/**
+ 	 * woocommerce_email_footer hook
+ 	 *
+ 	 * @hooked WC_Emails::email_footer
+ 	 */
+	do_action( 'woocommerce_email_footer' ); 
+?>

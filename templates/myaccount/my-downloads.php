@@ -21,6 +21,9 @@ if ( $downloads = WC()->customer->get_downloadable_products() ) : ?>
 		<?php foreach ( $downloads as $download ) : ?>
 			<li>
 				<?php
+					/**
+					 * woocommerce_available_download_start hook
+					 */
 					do_action( 'woocommerce_available_download_start', $download );
 
 					if ( is_numeric( $download['downloads_remaining'] ) )
@@ -28,6 +31,9 @@ if ( $downloads = WC()->customer->get_downloadable_products() ) : ?>
 
 					echo apply_filters( 'woocommerce_available_download_link', '<a href="' . esc_url( $download['download_url'] ) . '">' . $download['download_name'] . '</a>', $download );
 
+					/**
+					 * woocommerce_available_download_end hook
+					 */
 					do_action( 'woocommerce_available_download_end', $download );
 				?>
 			</li>

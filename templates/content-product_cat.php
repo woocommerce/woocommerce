@@ -31,7 +31,12 @@ $woocommerce_loop['loop']++;
 		echo ' last';
 	?>">
 
-	<?php do_action( 'woocommerce_before_subcategory', $category ); ?>
+	<?php 
+		/**
+		 * woocommerce_before_subcategory hook
+		 */
+		do_action( 'woocommerce_before_subcategory', $category ); 
+	?>
 
 	<a href="<?php echo get_term_link( $category->slug, 'product_cat' ); ?>">
 
@@ -62,6 +67,11 @@ $woocommerce_loop['loop']++;
 
 	</a>
 
-	<?php do_action( 'woocommerce_after_subcategory', $category ); ?>
+	<?php 
+		/**
+			 * woocommerce_after_subcategory hook
+			 */
+		do_action( 'woocommerce_after_subcategory', $category ); 
+	?>
 
 </li>

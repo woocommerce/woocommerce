@@ -11,7 +11,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 ?>
 <div class="cart_totals <?php if ( WC()->customer->has_calculated_shipping() ) echo 'calculated_shipping'; ?>">
 
-	<?php do_action( 'woocommerce_before_cart_totals' ); ?>
+	<?php 
+		/**
+		 * woocommerce_before_cart_totals hook
+		 */
+		do_action( 'woocommerce_before_cart_totals' ); 
+	?>
 
 	<h2><?php _e( 'Cart Totals', 'woocommerce' ); ?></h2>
 
@@ -31,11 +36,21 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) : ?>
 
-			<?php do_action( 'woocommerce_cart_totals_before_shipping' ); ?>
+			<?php 
+				/**
+				 * woocommerce_cart_totals_before_shipping hook
+				 */
+				do_action( 'woocommerce_cart_totals_before_shipping' ); 
+			?>
 
 			<?php wc_cart_totals_shipping_html(); ?>
 
-			<?php do_action( 'woocommerce_cart_totals_after_shipping' ); ?>
+			<?php 
+				/**
+				 * woocommerce_cart_totals_after_shipping hook
+				 */
+				do_action( 'woocommerce_cart_totals_after_shipping' ); 
+			?>
 
 		<?php endif; ?>
 
@@ -69,14 +84,24 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			</tr>
 		<?php endforeach; ?>
 
-		<?php do_action( 'woocommerce_cart_totals_before_order_total' ); ?>
+		<?php 
+			/**
+			 * woocommerce_cart_totals_before_order_total hook
+			 */
+			do_action( 'woocommerce_cart_totals_before_order_total' ); 
+		?>
 
 		<tr class="order-total">
 			<th><?php _e( 'Order Total', 'woocommerce' ); ?></th>
 			<td><?php wc_cart_totals_order_total_html(); ?></td>
 		</tr>
 
-		<?php do_action( 'woocommerce_cart_totals_after_order_total' ); ?>
+		<?php 
+			/**
+			 * woocommerce_cart_totals_after_order_total hook
+			 */
+			do_action( 'woocommerce_cart_totals_after_order_total' ); 
+		?>
 
 	</table>
 
@@ -92,6 +117,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		?></small></p>
 	<?php endif; ?>
 
-	<?php do_action( 'woocommerce_after_cart_totals' ); ?>
+	<?php 
+		/**
+		 * woocommerce_after_cart_totals hook
+		 */
+		do_action( 'woocommerce_after_cart_totals' ); 
+	?>
 
 </div>

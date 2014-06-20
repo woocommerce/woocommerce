@@ -27,7 +27,12 @@ wc_print_notices(); ?>
 	?>
 </p>
 
-<?php do_action( 'woocommerce_before_my_account' ); ?>
+<?php 
+	/**
+	 * woocommerce_before_my_account hook
+	 */
+	do_action( 'woocommerce_before_my_account' ); 
+?>
 
 <?php wc_get_template( 'myaccount/my-downloads.php' ); ?>
 
@@ -35,4 +40,9 @@ wc_print_notices(); ?>
 
 <?php wc_get_template( 'myaccount/my-address.php' ); ?>
 
-<?php do_action( 'woocommerce_after_my_account' ); ?>
+<?php 
+	/**
+	 * woocommerce_after_my_account hook
+	 */
+	do_action( 'woocommerce_after_my_account' ); 
+?>

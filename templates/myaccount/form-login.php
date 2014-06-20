@@ -14,7 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php wc_print_notices(); ?>
 
-<?php do_action( 'woocommerce_before_customer_login_form' ); ?>
+<?php 
+	/**
+	 * woocommerce_before_customer_login_form hook
+	 */
+	do_action( 'woocommerce_before_customer_login_form' ); 
+?>
 
 <?php if ( get_option( 'woocommerce_enable_myaccount_registration' ) === 'yes' ) : ?>
 
@@ -28,7 +33,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<form method="post" class="login">
 
-			<?php do_action( 'woocommerce_login_form_start' ); ?>
+			<?php 
+				/**
+				 * woocommerce_login_form_start hook
+				 */
+				do_action( 'woocommerce_login_form_start' ); 
+			?>
 
 			<p class="form-row form-row-wide">
 				<label for="username"><?php _e( 'Username or email address', 'woocommerce' ); ?> <span class="required">*</span></label>
@@ -39,7 +49,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<input class="input-text" type="password" name="password" id="password" />
 			</p>
 
-			<?php do_action( 'woocommerce_login_form' ); ?>
+			<?php 
+				/**
+				 * woocommerce_login_form hook
+				 */
+				do_action( 'woocommerce_login_form' ); 
+			?>
 
 			<p class="form-row">
 				<?php wp_nonce_field( 'woocommerce-login' ); ?>
@@ -52,7 +67,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<a href="<?php echo esc_url( wc_lostpassword_url() ); ?>"><?php _e( 'Lost your password?', 'woocommerce' ); ?></a>
 			</p>
 
-			<?php do_action( 'woocommerce_login_form_end' ); ?>
+			<?php 
+				/**
+				 * woocommerce_login_form_end hook
+				 */
+				do_action( 'woocommerce_login_form_end' ); 
+			?>
 
 		</form>
 
@@ -66,7 +86,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<form method="post" class="register">
 
-			<?php do_action( 'woocommerce_register_form_start' ); ?>
+			<?php 
+				/**
+				 * woocommerce_register_form_start hook
+				 */
+				do_action( 'woocommerce_register_form_start' ); 
+			?>
 
 			<?php if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) : ?>
 
@@ -94,15 +119,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<!-- Spam Trap -->
 			<div style="<?php echo ( ( is_rtl() ) ? 'right' : 'left' ); ?>: -999em; position: absolute;"><label for="trap"><?php _e( 'Anti-spam', 'woocommerce' ); ?></label><input type="text" name="email_2" id="trap" tabindex="-1" /></div>
 
-			<?php do_action( 'woocommerce_register_form' ); ?>
-			<?php do_action( 'register_form' ); ?>
+			<?php 
+				/**
+				 * woocommerce_register_form hook
+				 */
+				do_action( 'woocommerce_register_form' ); 
+			?>
+			<?php 
+				/**
+				 * register_form hook
+				 */
+				do_action( 'register_form' ); 
+			?>
 
 			<p class="form-row">
 				<?php wp_nonce_field( 'woocommerce-register', 'register' ); ?>
 				<input type="submit" class="button" name="register" value="<?php _e( 'Register', 'woocommerce' ); ?>" />
 			</p>
 
-			<?php do_action( 'woocommerce_register_form_end' ); ?>
+			<?php 
+				/**
+				 * woocommerce_register_form_end hook
+				 */
+				do_action( 'woocommerce_register_form_end' ); 
+			?>
 
 		</form>
 
@@ -111,4 +151,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_after_customer_login_form' ); ?>
+<?php 
+	/**
+	 * woocommerce_after_customer_login_form hook
+	 */
+	do_action( 'woocommerce_after_customer_login_form' ); 
+?>

@@ -15,11 +15,13 @@ if ( $order->has_status( 'pending' ) )
 
 echo "****************************************************\n\n";
 
+/** This action is documented in templates/emails/customer-invoice.php */
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text );
 
 echo sprintf( __( 'Order number: %s', 'woocommerce'), $order->get_order_number() ) . "\n";
 echo sprintf( __( 'Order date: %s', 'woocommerce'), date_i18n( wc_date_format(), strtotime( $order->order_date ) ) ) . "\n";
 
+/** This action is documented in templates/emails/customer-invoice.php */
 do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text );
 
 echo "\n";
@@ -46,6 +48,7 @@ if ( $totals = $order->get_order_item_totals() ) {
 
 echo "\n****************************************************\n\n";
 
+/** This action is documented in templates/emails/customer-invoice.php */
 do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
 
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );
