@@ -960,11 +960,6 @@ class WC_Countries {
 						'label'    => __( 'Province', 'woocommerce' ),
 					)
 				),
-				'JP' => array(
-					'state'		=> array(
-						'label'    => __( 'Province', 'woocommerce' )
-					)
-				),
 				'KR' => array(
 					'state'		=> array(
 						'required' => false
