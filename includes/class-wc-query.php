@@ -701,7 +701,7 @@ class WC_Query {
 									array(
 										'taxonomy' 	=> $attribute,
 										'terms' 	=> $value,
-										'field' 	=> 'id'
+										'field' 	=> 'term_id'
 									)
 								)
 							)
