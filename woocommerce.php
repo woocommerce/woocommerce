@@ -494,7 +494,7 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function template_path() {
-		return apply_filters( 'WC_TEMPLATE_PATH', 'woocommerce/' );
+		return apply_filters( 'woocommerce_template_path', 'woocommerce/' );
 	}
 
 	/**
