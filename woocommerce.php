@@ -157,8 +157,8 @@ final class WooCommerce {
 		}
 		else switch( $key ) {
 			case 'template_url':
-				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'WC_TEMPLATE_PATH constant' );
-				return WC_TEMPLATE_PATH;
+				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'Use WC()->template_path()' );
+				return $this->template_path();
 			case 'messages':
 				_deprecated_argument( 'Woocommerce->messages', '2.1', 'Use wc_get_notices' );
 				return wc_get_notices( 'success' );
@@ -231,6 +231,10 @@ final class WooCommerce {
 		define( 'WC_VERSION', $this->version );
 		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compat
 
+		/**
+		 * @deprecated 2.2 
+		 * @deprecated Use WC()->template_path()
+		 */
 		if ( ! defined( 'WC_TEMPLATE_PATH' ) ) {
 			define( 'WC_TEMPLATE_PATH', $this->template_path() );
 		}
