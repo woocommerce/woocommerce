@@ -126,7 +126,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_sku() {
-		return $this->sku;
+		return apply_filters( 'woocommerce_get_sku', $this->sku, $this );
 	}
 
 	/**
