@@ -364,7 +364,7 @@ class WC_Product_Variation extends WC_Product {
 		if ( ! is_null( $amount ) && $this->managing_stock() ) {
 
 			// Ensure key exists
-			add_post_meta( $this->variation_id, '_stock', 0 );
+			add_post_meta( $this->variation_id, '_stock', 0, true );
 
 			// Update stock in DB directly
 			switch ( $mode ) {
