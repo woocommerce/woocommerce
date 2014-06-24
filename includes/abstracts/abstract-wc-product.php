@@ -106,9 +106,10 @@ class WC_Product {
 		if ( ! isset( $this->product_image_gallery ) ) {
 			// Backwards compat
 			$attachment_ids = get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
-			$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
+			$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id( $this->id ) ) );
 			$this->product_image_gallery = implode( ',', $attachment_ids );
 		}
+
 		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( (array) explode( ',', $this->product_image_gallery ) ), $this );
 	}
 
@@ -165,7 +166,7 @@ class WC_Product {
 	/**
 	 * Set stock level of the product.
 	 *
-	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues). 
+	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 * We cannot rely on the original loaded value in case another order was made since then.
 	 *
 	 * @param int $amount (default: null)
@@ -207,7 +208,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Reduce stock level of the product. 
+	 * Reduce stock level of the product.
 	 *
 	 * @param int $amount (default: 1) Amount to reduce by.
 	 * @return int new stock level
@@ -223,7 +224,7 @@ class WC_Product {
 	 * @return int new stock level
 	 */
 	public function increase_stock( $amount = 1 ) {
-		return $this->set_stock( $amount, 'add' );		
+		return $this->set_stock( $amount, 'add' );
 	}
 
 	/**
