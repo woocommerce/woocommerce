@@ -1152,18 +1152,6 @@ jQuery( function($){
 		} else {
 			$('div.stock_fields').hide();
 		}
-
-		var product_type = $('select#product-type').val();
-
-		if ( product_type == 'variable' ) {
-			if ( $(this).is(':checked') ) {
-				$('p._stock_status_field').show();
-			} else {
-				$('p._stock_status_field').hide();
-			}
-		} else {
-			$('p._stock_status_field').show();
-		}
 	}).change();
 
 
