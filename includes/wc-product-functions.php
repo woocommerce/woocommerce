@@ -29,11 +29,10 @@ function get_product( $the_product = false, $args = array() ) {
  */
 function wc_update_product_stock( $product_id, $new_stock_level ) {
 	$product = get_product( $product_id );
-
-	if ( $product->is_type( 'variation' ) )
-		$product->set_stock( $new_stock_level, true );
-	else
+	
+	if ( $product->get_stock_quantity() !== $new_stock_level ) {
 		$product->set_stock( $new_stock_level );
+	}
 }
 
 /**
@@ -44,7 +43,7 @@ function wc_update_product_stock( $product_id, $new_stock_level ) {
  */
 function wc_update_product_stock_status( $product_id, $status ) {
 	$product = get_product( $product_id );
-	$product-> set_stock_status( $status );
+	$product->set_stock_status( $status );
 }
 
 /**
