@@ -31,9 +31,10 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function register_routes( $routes ) {
 
-		# GET /products
+		# GET/POST /products
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_products' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'get_products' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_product' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /products/count
@@ -142,6 +143,57 @@ class WC_API_Products extends WC_API_Resource {
 		$query = $this->query_products( $filter );
 
 		return array( 'count' => (int) $query->found_posts );
+	}
+
+	/**
+	 * Create a new product
+	 *
+	 * @since 2.2
+	 * @param array $data posted data
+	 * @return array
+	 */
+	public function create_product( $data ) {
+
+		// Check permisions
+		if ( ! current_user_can( 'publish_products' ) ) {
+			return new WP_Error( 'woocommerce_api_user_cannot_create_product', __( 'You do not have permission to create products', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		// Check if product title is specified
+		if ( ! isset( $data['title'] ) ) {
+			return new WP_Error( 'woocommerce_api_missing_product_title', sprintf( __( 'Missing parameter %s' ), 'title' ), array( 'status' => 400 ) );
+		}
+
+		// Check product type
+		if ( ! isset( $data['type'] ) ) {
+			$data['type'] = 'simple';
+		}
+
+		// Validate the product type
+		if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_product_types() ) ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_product_type', sprintf( __( 'Invalid product type - the product type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_product_types() ) ) ), array( 'status' => 400 ) );
+		}
+
+		$new_product = array(
+			'post_title'   => wc_clean( $data['title'] ),
+			'post_status'  => ( isset( $data['status'] ) ? wc_clean( $data['status'] ) : 'publish' ),
+			'post_type'    => 'product',
+			'post_excerpt' => ( isset( $data['short_description'] ) ? wc_clean( $data['short_description'] ) : '' ),
+			'post_content' => ( isset( $data['description'] ) ? wc_clean( $data['description'] ) : '' ),
+			'post_author'  => get_current_user_id(),
+		);
+
+		error_log( print_r( $new_product, true ) );
+
+		$id = wp_insert_post( $new_product, true );
+
+		if ( is_wp_error( $id ) ) {
+			return new WP_Error( 'woocommerce_api_cannot_create_product', $id->get_error_message(), array( 'status' => 400 ) );
+		}
+
+		$this->server->send_status( 201 );
+
+		return $this->get_product( $id );
 	}
 
 	/**
