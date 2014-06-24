@@ -45,7 +45,7 @@ class WC_API_Products extends WC_API_Resource {
 		# GET/PUT/DELETE /products/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product' ), WC_API_Server::READABLE ),
-			array( array( $this, 'edit_product' ), WC_API_Server::EDITABLE ),
+			array( array( $this, 'edit_product' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
 			array( array( $this, 'delete_product' ), WC_API_Server::DELETABLE ),
 		);
 
@@ -227,6 +227,26 @@ class WC_API_Products extends WC_API_Resource {
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
+
+		// Product name.
+		if ( isset( $data['title'] ) ) {
+			wp_update_post( array( 'ID' => $id, 'post_title' => wc_clean( $data['title'] ) ) );
+		}
+
+		// Product status.
+		if ( isset( $data['status'] ) ) {
+			wp_update_post( array( 'ID' => $id, 'post_status' => wc_clean( $data['status'] ) ) );
+		}
+
+		// Product short description.
+		if ( isset( $data['short_description'] ) ) {
+			wp_update_post( array( 'ID' => $id, 'post_excerpt' => wc_clean( $data['short_description'] ) ) );
+		}
+
+		// Product description.
+		if ( isset( $data['description'] ) ) {
+			wp_update_post( array( 'ID' => $id, 'post_content' => wc_clean( $data['description'] ) ) );
 		}
 
 		// Check for featured/gallery images, upload it and set it
