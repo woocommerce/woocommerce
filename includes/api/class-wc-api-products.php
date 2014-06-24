@@ -200,6 +200,12 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
+		// Save product meta fields
+		$meta = save_product_meta( $id, $data );
+		if ( is_wp_error( $meta ) ) {
+			return $meta;
+		}
+
 		$this->server->send_status( 201 );
 
 		return $this->get_product( $id );
@@ -447,6 +453,163 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return $variations;
+	}
+
+	/**
+	 * Save product meta
+	 *
+	 * @since 2.2
+	 * @param int $id
+	 * @param array $data
+	 * @return bool|WP_Error
+	 */
+	public function save_product_meta( $id, $data ) {
+		// Product Type
+		if ( isset( $data['type'] ) ) {
+			wp_set_object_terms( $post_id, wc_clean( $data['type'] ), 'product_type' );
+		}
+
+		// Downloadable
+		if ( isset( $data['downloadable'] ) ) {
+			if ( $data['downloadable'] === true ) {
+				update_post_meta( $post_id, '_downloadable', 'yes' );
+			} else {
+				update_post_meta( $post_id, '_downloadable', 'no' );
+			}
+		}
+
+		// Virtual
+		if ( isset( $data['virtual'] ) ) {
+			if ( $data['virtual'] === true ) {
+				update_post_meta( $post_id, '_virtual', 'yes' );
+			} else {
+				update_post_meta( $post_id, '_virtual', 'no' );
+			}
+		}
+
+		// Regular Price
+		if ( isset( $data['regular_price'] ) ) {
+			update_post_meta( $post_id, '_regular_price', ( $data['regular_price'] === '' ) ? '' : wc_format_decimal( $data['regular_price'] ) );
+		}
+
+		// Sale Price
+		if ( isset( $data['sale_price'] ) ) {
+			update_post_meta( $post_id, '_sale_price', ( $data['sale_price'] === '' ? '' : wc_format_decimal( $data['sale_price'] ) ) );
+		}
+
+		// Tax status
+		if ( isset( $data['tax_status'] ) ) {
+			update_post_meta( $post_id, '_tax_status', wc_clean( $data['tax_status'] ) );
+		}
+
+		// Tax Class
+		if ( isset( $data['tax_class'] ) ) {
+			update_post_meta( $post_id, '_tax_class', wc_clean( $data['tax_class'] ) );
+		}
+
+		// Catalog Visibility
+		if ( isset( $data['catalog_visibility'] ) ) {
+			update_post_meta( $post_id, '_visibility', wc_clean( $data['catalog_visibility'] ) );
+		}
+
+		// Purchase Note
+		if ( isset( $data['purchase_note'] ) ) {
+			update_post_meta( $post_id, '_purchase_note', wc_clean( $data['purchase_note'] ) );
+		}
+
+		// Featured Product
+		if ( isset( $data['featured'] ) ) {
+			if ( $data['featured'] === true ) {
+				update_post_meta( $post_id, '_featured', 'yes' );
+			} else {
+				update_post_meta( $post_id, '_featured', 'no' );
+			}
+		}
+
+		// Weight
+		if ( isset( $data['weight'] ) ) {
+			update_post_meta( $post_id, '_weight', ( $data['weight'] === '' ) ? '' : wc_format_decimal( $data['weight'] ) );
+		}
+
+		// Product dimensions
+		if ( isset( $data['dimensions'] ) ) {
+			// Height
+			if ( isset( $data['dimensions']['height'] ) ) {
+				update_post_meta( $post_id, '_height', ( $data['dimensions']['height'] === '' ) ? '' : wc_format_decimal( $data['dimensions']['height'] ) );
+			}
+
+			// Width
+			if ( isset( $data['dimensions']['width'] ) ) {
+				update_post_meta( $post_id, '_width', ( $data['dimensions']['width'] === '' ) ? '' : wc_format_decimal($data['dimensions']['width'] ) );
+			}
+
+			// Length
+			if ( isset( $data['dimensions']['length'] ) ) {
+				update_post_meta( $post_id, '_length', ( $data['dimensions']['length'] === '' ) ? '' : wc_format_decimal( $data['dimensions']['length'] ) );
+			}
+		}
+
+		// Shipping class
+		if ( isset( $data['shipping_class'] ) ) {
+			wp_set_object_terms( $post_id, wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
+		}
+
+		// SKU
+		if ( isset( $data['sku'] ) ) {
+			$sku_found = $wpdb->get_var( $wpdb->prepare("
+					SELECT $wpdb->posts.ID
+					FROM $wpdb->posts
+					LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+					WHERE $wpdb->posts.post_type = 'product'
+					AND $wpdb->posts.post_status = 'publish'
+					AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
+					AND $wpdb->posts.ID <> %s
+				 ", wc_clean( $data['sku'], $post_id ) ) );
+
+			if ( $sku_found ) {
+				return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
+			}
+			update_post_meta( $post_id, '_sku', wc_clean( $data['sku'] ) );
+		}
+
+		// Attributes
+		if ( isset( $data['attributes'] ) ) {
+			$attributes = array();
+			$attribute_taxonomies = wc_get_attribute_taxonomies();
+			foreach ( $data['attributes'] as $attribute ) {
+				// TODO
+			}
+		}
+
+		// Sale Price Date From
+		if ( isset( $data['sale_price_dates_from'] ) ) {
+			update_post_meta( $post_id, '_sale_price_dates_from', strtotime( $data['sale_price_dates_from'] ) );
+		}
+
+		// Sale Price Date To
+		if ( isset( $data['sale_price_dates_to'] ) ) {
+			update_post_meta( $post_id, '_sale_price_dates_to', strtotime( $data['sale_price_dates_to'] ) );
+		}
+
+		// Sold Individually
+		if ( isset( $data['sold_individually'] ) ) {
+			if ( wc_clean( $data['sold_individually'] ) === true ) {
+				update_post_meta( $post_id, '_sold_individually', 'yes' );
+			} else {
+				update_post_meta( $post_id, '_sold_individually', '' );
+			}
+		}
+
+		// Manage stock
+		if ( isset( $data['managing_stock'] ) ) {
+			if ( wc_clean( $data['managing_stock'] ) === true ) {
+				update_post_meta( $post_id, '_manage_stock', 'yes' );
+			} else {
+				update_post_meta( $post_id, '_manage_stock', 'no' );
+			}
+		}
+
+		return true;
 	}
 
 	/**
