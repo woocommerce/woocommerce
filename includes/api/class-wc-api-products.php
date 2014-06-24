@@ -20,9 +20,9 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Register the routes for this class
 	 *
-	 * GET /products
+	 * GET/POST /products
 	 * GET /products/count
-	 * GET /products/<id>
+	 * GET/DELETE /products/<id>
 	 * GET /products/<id>/reviews
 	 *
 	 * @since 2.1
@@ -42,9 +42,10 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_products_count' ), WC_API_Server::READABLE ),
 		);
 
-		# GET /products/<id>
+		# GET/DELETE /products/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_product' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'get_product' ), WC_API_Server::READABLE ),
+			array( array( $this, 'delete_product' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /products/<id>/reviews
@@ -232,7 +233,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Delete a product
 	 *
-	 * @TODO enable along with PUT/POST in 2.2
+	 * @since 2.2
 	 * @param int $id the product ID
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array
@@ -241,8 +242,9 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'product', 'delete' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		return $this->delete( $id, 'product', ( 'true' === $force ) );
 	}
