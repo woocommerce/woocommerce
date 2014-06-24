@@ -183,12 +183,21 @@ class WC_API_Products extends WC_API_Resource {
 			'post_author'  => get_current_user_id(),
 		);
 
-		error_log( print_r( $new_product, true ) );
-
+		// Attempts to create the new product
 		$id = wp_insert_post( $new_product, true );
 
+		// Checks for an error in the product creation
 		if ( is_wp_error( $id ) ) {
 			return new WP_Error( 'woocommerce_api_cannot_create_product', $id->get_error_message(), array( 'status' => 400 ) );
+		}
+
+		// Check for featured/gallery images, upload it and set it
+		if ( isset( $data['images'] ) ) {
+			$images = $this->save_product_images( $data['images'] );
+
+			if ( is_wp_error( $images ) ) {
+				return $images;
+			}
 		}
 
 		$this->server->send_status( 201 );
@@ -514,6 +523,117 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return $images;
+	}
+
+	/**
+	 * Save product images
+	 *
+	 * @since 2.2
+	 * @param array $images
+	 * @return void|WP_Error
+	 */
+	protected function save_product_images( $images ) {
+		$gallery_ids = array();
+
+		foreach ( $images as $image ) {
+			if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
+				$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+				if ( is_wp_error( $upload ) ) {
+					return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
+				}
+				$attachment_id = $this->get_product_image_attachment_id( $upload, $id );
+				set_post_thumbnail( $id, $attachment_id );
+			} else if ( isset( $image['src'] ) ) {
+				$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+				if ( is_wp_error( $upload ) ) {
+					return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
+				}
+				$attachment_id = $this->get_product_image_attachment_id( $upload, $id );
+				$gallery_ids[] = $attachment_id;
+			}
+		}
+	}
+
+	/**
+	 * Upload image from URL
+	 *
+	 * @since 2.2
+	 * @param string $image_url
+	 * @return integer attachment id
+	 */
+	public function upload_product_image( $image_url ) {
+		$file_name 		= basename( current( explode( '?', $image_url ) ) );
+		$wp_filetype 	= wp_check_filetype( $file_name, null );
+		$parsed_url 	= @parse_url( $image_url );
+
+		// Check parsed URL
+		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s' ), $image_url ), array( 'status' => 400 ) );
+		}
+
+		// Ensure url is valid
+		$image_url = str_replace( ' ', '%20', $image_url );
+
+		// Get the file
+		$response = wp_remote_get( $image_url, array(
+			'timeout' => 10
+		) );
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s' ), $image_url ), array( 'status' => 400 ) );
+		}
+
+		// Ensure we have a file name and type
+		if ( ! $wp_filetype['type'] ) {
+			$headers = wp_remote_retrieve_headers( $response );
+			if ( isset( $headers['content-disposition'] ) && strstr( $headers['content-disposition'], 'filename=' ) ) {
+				$disposition = end( explode( 'filename=', $headers['content-disposition'] ) );
+				$disposition = sanitize_file_name( $disposition );
+				$file_name   = $disposition;
+			} elseif ( isset( $headers['content-type'] ) && strstr( $headers['content-type'], 'image/' ) ) {
+				$file_name = 'image.' . str_replace( 'image/', '', $headers['content-type'] );
+			}
+			unset( $headers );
+		}
+
+		// Upload the file
+		$upload = wp_upload_bits( $file_name, '', wp_remote_retrieve_body( $response ) );
+
+		if ( $upload['error'] ) {
+			return new WP_Error( 'woocommerce_api_product_image_upload_error', $upload['error'], array( 'status' => 400 ) );
+		}
+
+		// Get filesize
+		$filesize = filesize( $upload['file'] );
+
+		if ( 0 == $filesize ) {
+			@unlink( $upload['file'] );
+			unset( $upload );
+			return new WP_Error( 'woocommerce_api_product_image_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		unset( $response );
+
+		return $upload;
+	}
+
+	/**
+	 * Get product image attachment ID
+	 *
+	 * @since 2.2
+	 * @param array $upload
+	 * @param int $post_id
+	 * @return int
+	 */
+	protected function get_product_image_attachment_id( $upload, $post_id ) {
+		$info = wp_check_filetype( $upload['file'] );
+		$attachment = array(
+			'guid' => $upload['url'],
+			'post_mime_type' => $info['type'],
+		);
+		$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $post_id );
+
+		return $attachment_id;
 	}
 
 	/**
