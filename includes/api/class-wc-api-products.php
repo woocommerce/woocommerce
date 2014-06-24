@@ -615,9 +615,90 @@ class WC_API_Products extends WC_API_Resource {
 		if ( isset( $data['attributes'] ) ) {
 			$attributes = array();
 			$attribute_taxonomies = wc_get_attribute_taxonomies();
+
 			foreach ( $data['attributes'] as $attribute ) {
-				// TODO
+				$is_taxonomy = 0;
+				$taxonomy    = null;
+
+
+				if ( ! isset( $attribute['name'] ) ) {
+					continue;
+				}
+
+				foreach ( $attribute_taxonomies as $key => $tax ) {
+					if ( $attribute['name'] == $tax->attribute_label ) {
+						$is_taxonomy = 1;
+						$taxonomy    = 'pa_' . $tax->attribute_name;
+
+						break;
+					}
+				}
+
+				if ( $is_taxonomy ) {
+
+					if ( isset( $attribute['options'] ) ) {
+						// Select based attributes - Format values (posted values are slugs)
+						if ( is_array( $attribute['options'] ) ) {
+							$values = array_map( 'sanitize_title', $attribute['options'] );
+
+						// Text based attributes - Posted values are term names - don't change to slugs
+						} else {
+							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute['options'] ) ) );
+						}
+
+						$values = array_filter( $values, 'strlen' );
+					} else {
+						$values = array();
+					}
+
+					// Update post terms
+					if ( taxonomy_exists( $taxonomy ) ) {
+						wp_set_object_terms( $id, $values, $taxonomy );
+					}
+
+					if ( $values ) {
+						// Add attribute to array, but don't set values
+						$attributes[ $taxonomy ] = array(
+							'name'         => $taxonomy,
+							'value'        => '',
+							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+							'is_visible'   => ( isset( $attribute['position'] ) && $attribute['position'] ) ? 1 : 0,
+							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
+							'is_taxonomy'  => $is_taxonomy
+						);
+					}
+
+				} elseif ( isset( $attribute['options'] ) ) {
+					// Array based
+					if ( is_array( $attribute['options'] ) ) {
+						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', $attribute['options'] ) );
+
+					// Text based, separate by pipe
+					} else {
+						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, $attribute['options'] ) ) );
+					}
+
+					// Custom attribute - Add attribute to array and set the values
+					$attributes[ sanitize_title( $attribute['name'] ) ] = array(
+						'name'         => wc_clean( $attribute['name'] ),
+						'value'        => $values,
+						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+						'is_visible'   => ( isset( $attribute['position'] ) && $attribute['position'] ) ? 1 : 0,
+						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
+						'is_taxonomy'  => $is_taxonomy
+					);
+				}
 			}
+
+			if ( ! function_exists( 'attributes_cmp' ) ) {
+				function attributes_cmp( $a, $b ) {
+					if ( $a['position'] == $b['position'] ) return 0;
+					return ( $a['position'] < $b['position'] ) ? -1 : 1;
+				}
+			}
+			uasort( $attributes, 'attributes_cmp' );
+
+			update_post_meta( $id, '_product_attributes', $attributes );
 		}
 
 		// Sale Price Date From
