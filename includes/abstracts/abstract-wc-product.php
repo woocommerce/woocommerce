@@ -1217,8 +1217,8 @@ class WC_Product {
 
 		// when query is OR - need to check against excluded ids again
 		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $this->id ) ) {
-			$query['where'] .= " {$andor} ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) )";
-			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
+			$query['where'] .= " {$andor} ( ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) )";
+			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
 		}
 
 		$query['orderby']  = " ORDER BY RAND()";
