@@ -96,13 +96,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 									?></select>
 								</td>
 							</tr>
-							<tr>
+							<tr class="">
 								<td colspan="2">
 									<label><?php _e( 'Stock status', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 									<select name="variable_stock_status[<?php echo $loop; ?>]">
 										<?php
 											foreach ( $parent_data['stock_status_options'] as $key => $value ) {
-												echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
+												echo '<option value="' . esc_attr( $key === $_stock_status ? '' : $key ) . '" ' . selected( $key === $_stock_status, true, false ) . '>' . esc_html( $value ) . '</option>';
 											}
 										?>
 									</select>
