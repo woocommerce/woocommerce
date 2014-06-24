@@ -14,6 +14,9 @@ $base = get_option( 'woocommerce_email_base_color' );
 
 $base_lighter_40 = wc_hex_lighter( $base, 40 );
 
+// Load width
+$width           = floatval( apply_filters( 'woocommerce_email_width', get_option( 600 ) ) );
+
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline.
 $template_footer = "
 	border-top:0;
@@ -43,7 +46,7 @@ $credit = "
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- Footer -->
-                                	<table border="0" cellpadding="10" cellspacing="0" width="600" id="template_footer" style="<?php echo $template_footer; ?>">
+                                	<table border="0" cellpadding="10" cellspacing="0" width="<?php echo $width; ?>" id="template_footer" style="<?php echo $template_footer; ?>">
                                     	<tr>
                                         	<td valign="top">
                                                 <table border="0" cellpadding="10" cellspacing="0" width="100%">
