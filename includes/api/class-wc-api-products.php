@@ -533,23 +533,20 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return void|WP_Error
 	 */
 	protected function save_product_images( $images ) {
-		$gallery_ids = array();
-
 		foreach ( $images as $image ) {
 			if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
 				$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
 				if ( is_wp_error( $upload ) ) {
 					return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
 				}
-				$attachment_id = $this->get_product_image_attachment_id( $upload, $id );
+				$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
 				set_post_thumbnail( $id, $attachment_id );
 			} else if ( isset( $image['src'] ) ) {
 				$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
 				if ( is_wp_error( $upload ) ) {
 					return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
 				}
-				$attachment_id = $this->get_product_image_attachment_id( $upload, $id );
-				$gallery_ids[] = $attachment_id;
+				$this->set_product_image_as_attachment( $upload, $id );
 			}
 		}
 	}
@@ -618,14 +615,14 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Get product image attachment ID
+	 * Get product image as attachment
 	 *
 	 * @since 2.2
 	 * @param array $upload
 	 * @param int $post_id
 	 * @return int
 	 */
-	protected function get_product_image_attachment_id( $upload, $post_id ) {
+	protected function set_product_image_as_attachment( $upload, $post_id ) {
 		$info = wp_check_filetype( $upload['file'] );
 		$attachment = array(
 			'guid' => $upload['url'],
