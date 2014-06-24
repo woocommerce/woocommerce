@@ -22,7 +22,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * GET/POST /products
 	 * GET /products/count
-	 * GET/DELETE /products/<id>
+	 * GET/PUT/DELETE /products/<id>
 	 * GET /products/<id>/reviews
 	 *
 	 * @since 2.1
@@ -42,9 +42,10 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_products_count' ), WC_API_Server::READABLE ),
 		);
 
-		# GET/DELETE /products/<id>
+		# GET/PUT/DELETE /products/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product' ), WC_API_Server::EDITABLE ),
 			array( array( $this, 'delete_product' ), WC_API_Server::DELETABLE ),
 		);
 
@@ -194,7 +195,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Check for featured/gallery images, upload it and set it
 		if ( isset( $data['images'] ) ) {
-			$images = $this->save_product_images( $data['images'] );
+			$images = $this->save_product_images( $id, $data['images'] );
 
 			if ( is_wp_error( $images ) ) {
 				return $images;
@@ -224,8 +225,24 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'product', 'edit' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
+
+		// Check for featured/gallery images, upload it and set it
+		if ( isset( $data['images'] ) ) {
+			$images = $this->save_product_images( $id, $data['images'] );
+
+			if ( is_wp_error( $images ) ) {
+				return $images;
+			}
+		}
+
+		// Save product meta fields
+		$meta = $this->save_product_meta( $id, $data );
+		if ( is_wp_error( $meta ) ) {
+			return $meta;
+		}
 
 		return $this->get_product( $id );
 	}
@@ -695,9 +712,10 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param array $images
+	 * @param int $id
 	 * @return void|WP_Error
 	 */
-	protected function save_product_images( $images ) {
+	protected function save_product_images( $id, $images ) {
 		foreach ( $images as $image ) {
 			if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
 				$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
