@@ -202,7 +202,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// Save product meta fields
-		$meta = save_product_meta( $id, $data );
+		$meta = $this->save_product_meta( $id, $data );
 		if ( is_wp_error( $meta ) ) {
 			return $meta;
 		}
