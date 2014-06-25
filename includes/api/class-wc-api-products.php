@@ -915,6 +915,18 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
+		// Product categories
+		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
+			$terms = array_map( 'wc_clean', $data['categories'] );
+			wp_set_object_terms( $id, $terms, 'product_cat' );
+		}
+
+		// Product tags
+		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
+			$terms = array_map( 'wc_clean', $data['tags'] );
+			wp_set_object_terms( $id, $terms, 'product_tag' );
+		}
+
 		// Downloadable
 		if ( isset( $data['downloadable'] ) ) {
 			$is_downloadable = ( true === $data['downloadable'] ) ? 'yes' : 'no';
