@@ -507,7 +507,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param array $data
 	 * @return bool|WP_Error
 	 */
-	public function save_product_meta( $id, $data ) {
+	protected function save_product_meta( $id, $data ) {
 		// Product Type
 		$product_type = null;
 		if ( isset( $data['type'] ) ) {
@@ -927,10 +927,10 @@ class WC_API_Products extends WC_API_Resource {
 		if ( 'yes' == $is_downloadable ) {
 
 			// file paths will be stored in an array keyed off md5(file path)
-			if ( isset( $data['download_files'] ) && is_array( $data['download_files'] ) ) {
+			if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
 				$files = array();
 
-				foreach ( $data['download_files'] as $key => $file ) {
+				foreach ( $data['downloads'] as $key => $file ) {
 					if ( ! isset( $file['url'] ) ) {
 						continue;
 					}
