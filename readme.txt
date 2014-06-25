@@ -133,6 +133,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Allow backorders to be configured at variation level.
 * Feature - Protect admins from shop manager users.
 * Feature - Ability to add custom quantity using add_to_cart shortcode.
+* Fix - Allow endpoint use on the front page.
 * Tweak - Recalculate the cart totals, in the event a user registers during checkout and in doing so qualifies for any discounts.
 * Tweak - Use `woocommerce_valid_order_statuses_for_payment` in `pay_action` too.
 * Tweak - Added the possibility to translate the edit-address endpoint slug.
