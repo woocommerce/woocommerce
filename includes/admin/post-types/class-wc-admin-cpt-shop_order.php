@@ -152,7 +152,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 			break;
 			case 'order_items' :
 
-				printf( '<a href="#" class="show_order_items">' . _n( '%d item', '%d items', sizeof( $the_order->get_items() ), 'woocommerce' ) . '</a>', sizeof( $the_order->get_items() ) );
+				echo '<a href="#" class="show_order_items">' . apply_filters( 'woocommerce_admin_order_item_count', sprintf( _n( '%d item', '%d items', $the_order->get_item_count(), 'woocommerce' ), $the_order->get_item_count() ), $the_order ) . '</a>';
 
 				if ( sizeof( $the_order->get_items() ) > 0 ) {
 
@@ -163,7 +163,7 @@ class WC_Admin_CPT_Shop_Order extends WC_Admin_CPT {
 						$item_meta      = new WC_Order_Item_Meta( $item['item_meta'] );
 						$item_meta_html = $item_meta->display( true, true );
 						?>
-						<tr>
+						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item ); ?>">
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
 							<td class="name">
 								<?php if ( wc_product_sku_enabled() && $_product && $_product->get_sku() ) echo $_product->get_sku() . ' - '; ?><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>
