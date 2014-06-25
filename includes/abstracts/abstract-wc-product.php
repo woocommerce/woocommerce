@@ -136,7 +136,7 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_stock_quantity() {
-		return $this->managing_stock() ? apply_filters( 'woocommerce_stock_amount', $this->stock ) : '';
+		return $this->managing_stock() ? wc_stock_amount( $this->stock ) : '';
 	}
 
 	/**

@@ -54,20 +54,20 @@ class WC_Product_Variable extends WC_Product {
         	$transient_name = 'wc_product_total_stock_' . $this->id;
 
         	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
-		        $this->total_stock = max( 0, intval( $this->stock ) );
+		        $this->total_stock = max( 0, wc_stock_amount( $this->stock ) );
 
 				if ( sizeof( $this->get_children() ) > 0 ) {
 					foreach ( $this->get_children() as $child_id ) {
 						if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
 							$stock = get_post_meta( $child_id, '_stock', true );
-							$this->total_stock += max( 0, intval( $stock ) );
+							$this->total_stock += max( 0, wc_stock_amount( $stock ) );
 						}
 					}
 				}
 				set_transient( $transient_name, $this->total_stock, YEAR_IN_SECONDS );
 			}
 		}
-		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
+		return wc_stock_amount( $this->total_stock );
     }
 
 	/**

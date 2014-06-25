@@ -916,7 +916,7 @@ class WC_Admin_Post_Types {
 		if ( ! $product->is_type('grouped') ) {
 			if ( isset( $_REQUEST['_manage_stock'] ) ) {
 				update_post_meta( $post_id, '_manage_stock', 'yes' );
-				wc_update_product_stock( $post_id, intval( $_REQUEST['_stock'] ) );
+				wc_update_product_stock( $post_id, wc_stock_amount( $_REQUEST['_stock'] ) );
 			} else {
 				update_post_meta( $post_id, '_manage_stock', 'no' );
 				wc_update_product_stock( $post_id, 0 );
@@ -1104,7 +1104,7 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['change_stock'] ) ) {
 				update_post_meta( $post_id, '_manage_stock', 'yes' );
-				wc_update_product_stock( $post_id, intval( $_REQUEST['_stock'] ) );
+				wc_update_product_stock( $post_id, wc_stock_amount( $_REQUEST['_stock'] ) );
 			}
 
 			if ( ! empty( $_REQUEST['_manage_stock'] ) ) {

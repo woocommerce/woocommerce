@@ -64,7 +64,7 @@ class WC_Product_Grouped extends WC_Product {
 						$stock = get_post_meta( $child_id, '_stock', true );
 
 						if ( $stock != '' ) {
-							$this->total_stock += intval( $stock );
+							$this->total_stock += wc_stock_amount( $stock );
 						}
 					}
 				}
@@ -73,7 +73,7 @@ class WC_Product_Grouped extends WC_Product {
 			}
 		}
 
-		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
+		return wc_stock_amount( $this->total_stock );
     }
 
 	/**

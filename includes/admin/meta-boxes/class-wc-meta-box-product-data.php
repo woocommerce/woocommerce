@@ -1247,7 +1247,7 @@ class WC_Meta_Box_Product_Data {
 			}
 
 			if ( ! empty( $_POST['_manage_stock'] ) ) {
-				wc_update_product_stock( $post_id, intval( $_POST['_stock'] ) );
+				wc_update_product_stock( $post_id, wc_stock_amount( $_POST['_stock'] ) );
 			} else {
 				update_post_meta( $post_id, '_stock', '' );
 			}
@@ -1459,7 +1459,7 @@ class WC_Meta_Box_Product_Data {
 					} else {
 						delete_post_meta( $variation_id, '_backorders' );
 					}
-					wc_update_product_stock( $variation_id, intval( $variable_stock[ $i ] ) );
+					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );
 					delete_post_meta( $variation_id, '_stock' );
