@@ -249,6 +249,11 @@ class WC_API_Products extends WC_API_Resource {
 			wp_update_post( array( 'ID' => $id, 'post_content' => wc_clean( $data['description'] ) ) );
 		}
 
+		// Validate the product type
+		if ( isset( $data['type'] ) && ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_product_types() ) ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_product_type', sprintf( __( 'Invalid product type - the product type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_product_types() ) ) ), array( 'status' => 400 ) );
+		}
+
 		// Check for featured/gallery images, upload it and set it
 		if ( isset( $data['images'] ) ) {
 			$images = $this->save_product_images( $id, $data['images'] );
@@ -504,8 +509,16 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function save_product_meta( $id, $data ) {
 		// Product Type
+		$product_type = null;
 		if ( isset( $data['type'] ) ) {
-			wp_set_object_terms( $id, wc_clean( $data['type'] ), 'product_type' );
+			$product_type = wc_clean( $data['type'] );
+			wp_set_object_terms( $id, $product_type, 'product_type' );
+		} else {
+			$_product_type = get_the_terms( $id, 'product_type' );
+			if ( is_array( $_product_type ) ) {
+				$_product_type = current( $_product_type );
+				$product_type = $_product_type->slug;
+			}
 		}
 
 		// Downloadable
@@ -524,16 +537,6 @@ class WC_API_Products extends WC_API_Resource {
 			} else {
 				update_post_meta( $id, '_virtual', 'no' );
 			}
-		}
-
-		// Regular Price
-		if ( isset( $data['regular_price'] ) ) {
-			update_post_meta( $id, '_regular_price', ( $data['regular_price'] === '' ) ? '' : wc_format_decimal( $data['regular_price'] ) );
-		}
-
-		// Sale Price
-		if ( isset( $data['sale_price'] ) ) {
-			update_post_meta( $id, '_sale_price', ( $data['sale_price'] === '' ? '' : wc_format_decimal( $data['sale_price'] ) ) );
 		}
 
 		// Tax status
@@ -701,14 +704,70 @@ class WC_API_Products extends WC_API_Resource {
 			update_post_meta( $id, '_product_attributes', $attributes );
 		}
 
-		// Sale Price Date From
-		if ( isset( $data['sale_price_dates_from'] ) ) {
-			update_post_meta( $id, '_sale_price_dates_from', strtotime( $data['sale_price_dates_from'] ) );
-		}
+		// Sales and prices
+		if ( in_array( $product_type, array( 'variable', 'grouped' ) ) ) {
 
-		// Sale Price Date To
-		if ( isset( $data['sale_price_dates_to'] ) ) {
-			update_post_meta( $id, '_sale_price_dates_to', strtotime( $data['sale_price_dates_to'] ) );
+			// Variable and grouped products have no prices
+			update_post_meta( $id, '_regular_price', '' );
+			update_post_meta( $id, '_sale_price', '' );
+			update_post_meta( $id, '_sale_price_dates_from', '' );
+			update_post_meta( $id, '_sale_price_dates_to', '' );
+			update_post_meta( $id, '_price', '' );
+
+		} else {
+
+			// Regular Price
+			if ( isset( $data['regular_price'] ) ) {
+				$regular_price = ( $data['regular_price'] === '' ) ? '' : wc_format_decimal( $data['regular_price'] );
+				update_post_meta( $id, '_regular_price', $regular_price );
+			} else {
+				$regular_price = get_post_meta( $id, '_regular_price', true );
+			}
+
+			// Sale Price
+			if ( isset( $data['sale_price'] ) ) {
+				$sale_price = ( $data['sale_price'] === '' ? '' : wc_format_decimal( $data['sale_price'] ) );
+				update_post_meta( $id, '_sale_price', $sale_price );
+			} else {
+				$sale_price = get_post_meta( $id, '_sale_price', true );
+			}
+
+			$date_from = isset( $data['sale_price_dates_from'] ) ? $data['sale_price_dates_from'] : get_post_meta( $id, '_sale_price_dates_from', true );
+			$date_to = isset( $data['sale_price_dates_to'] ) ? $data['sale_price_dates_to'] : get_post_meta( $id, '_sale_price_dates_to', true );
+
+			// Dates
+			if ( $date_from ) {
+				update_post_meta( $id, '_sale_price_dates_from', strtotime( $date_from ) );
+			} else {
+				update_post_meta( $id, '_sale_price_dates_from', '' );
+			}
+
+			if ( $date_to ) {
+				update_post_meta( $id, '_sale_price_dates_to', strtotime( $date_to ) );
+			} else {
+				update_post_meta( $id, '_sale_price_dates_to', '' );
+			}
+
+			if ( $date_to && ! $date_from ) {
+				update_post_meta( $id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+			}
+
+			// Update price if on sale
+			if ( $sale_price !== '' && $date_to == '' && $date_from == '' ) {
+				update_post_meta( $id, '_price', wc_format_decimal( $sale_price ) );
+			} else {
+				update_post_meta( $id, '_price', $regular_price );
+			}
+
+			if ( $sale_price !== '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				update_post_meta( $id, '_price', wc_format_decimal( $sale_price ) );
+			}
+
+			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				update_post_meta( $id, '_price', $regular_price );
+				update_post_meta( $id, '_sale_price_dates_from', '' );
+				update_post_meta( $id, '_sale_price_dates_to', '' );
+			}
 		}
 
 		// Sold Individually
@@ -903,16 +962,16 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param array $upload
-	 * @param int $post_id
+	 * @param int $id
 	 * @return int
 	 */
-	protected function set_product_image_as_attachment( $upload, $post_id ) {
+	protected function set_product_image_as_attachment( $upload, $id ) {
 		$info = wp_check_filetype( $upload['file'] );
 		$attachment = array(
 			'guid' => $upload['url'],
 			'post_mime_type' => $info['type'],
 		);
-		$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $post_id );
+		$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );
 
 		return $attachment_id;
 	}
