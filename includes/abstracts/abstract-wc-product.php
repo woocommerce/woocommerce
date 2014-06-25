@@ -452,7 +452,7 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_parent() {
-		return apply_filters('woocommerce_product_parent', $this->post->post_parent, $this);
+		return apply_filters( 'woocommerce_product_parent', absint( $this->post->post_parent ), $this );
 	}
 
 	/**
