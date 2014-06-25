@@ -84,7 +84,7 @@ class WC_Form_Handler {
 				wc_add_notice( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
 
-			if ( ! empty( $this->posted[ $key ] ) ) {
+			if ( ! empty( $_POST[ $key ] ) ) {
 
 				// Validation rules
 				if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
