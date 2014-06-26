@@ -217,6 +217,8 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
+		do_action( 'woocommerce_api_create_product', $id, $data );
+
 		// Clear cache/transients
 		wc_delete_product_transients( $id );
 
@@ -289,6 +291,8 @@ class WC_API_Products extends WC_API_Resource {
 				return $variations;
 			}
 		}
+
+		do_action( 'woocommerce_api_edit_product', $id, $data );
 
 		// Clear cache/transients
 		wc_delete_product_transients( $id );
@@ -946,6 +950,9 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $id, '_button_text', wc_clean( $data['button_text'] ) );
 			}
 		}
+
+		// Do action for product type
+		do_action( 'woocommerce_api_process_product_meta_' . $product_type, $id, $data );
 
 		return true;
 	}
