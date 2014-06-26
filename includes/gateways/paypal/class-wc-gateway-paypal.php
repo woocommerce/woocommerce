@@ -234,7 +234,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'type'        => 'checkbox',
 				'label'       => __( 'Enable logging', 'woocommerce' ),
 				'default'     => 'no',
-				'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/paypal-%s.txt</code>', 'woocommerce' ), sanitize_file_name( wp_hash( 'paypal' ) ) ),
+				'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'paypal' ) )
 			)
 		);
 	}
@@ -298,14 +298,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'page_style'    => $this->page_style,
 				'paymentaction' => $this->paymentaction,
 				'bn'            => 'WooThemes_Cart',
-				
+
 				// Order key + ID
 				'invoice'       => $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
 				'custom'        => serialize( array( $order_id, $order->order_key ) ),
-				
+
 				// IPN
 				'notify_url'    => $this->notify_url,
-				
+
 				// Billing Address info
 				'first_name'    => $order->billing_first_name,
 				'last_name'     => $order->billing_last_name,
@@ -674,7 +674,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				case 'pending' :
 
 					// Check order not already completed
-					if ( $order->status == 'completed' ) {
+					if ( $order->has_status( 'completed' ) ) {
 						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Aborting, Order #' . $order->id . ' is already complete.' );
 						}
@@ -729,9 +729,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					if ( ! empty( $posted['payer_email'] ) ) {
 						update_post_meta( $order->id, 'Payer PayPal address', wc_clean( $posted['payer_email'] ) );
 					}
-					if ( ! empty( $posted['txn_id'] ) ) {
-						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['txn_id'] ) );
-					}
 					if ( ! empty( $posted['first_name'] ) ) {
 						update_post_meta( $order->id, 'Payer first name', wc_clean( $posted['first_name'] ) );
 					}
@@ -744,7 +741,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					if ( $posted['payment_status'] == 'completed' ) {
 						$order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );
-						$order->payment_complete();
+						$txn_id = ( ! empty( $posted['txn_id'] ) ) ? wc_clean( $posted['txn_id'] ) : '';
+						$order->payment_complete( $txn_id );
 					} else {
 						$order->update_status( 'on-hold', sprintf( __( 'Payment pending: %s', 'woocommerce' ), $posted['pending_reason'] ) );
 					}
@@ -769,7 +767,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						// Mark order as refunded
 						$order->update_status( 'refunded', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
-						$this->send_ipn_email_notification( 
+						$this->send_ipn_email_notification(
 							sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ),
 							sprintf( __( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 						);
@@ -781,16 +779,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					// Mark order as refunded
 					$order->update_status( 'on-hold', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
-					$this->send_ipn_email_notification( 
+					$this->send_ipn_email_notification(
 						sprintf( __( 'Payment for order %s reversed', 'woocommerce' ), $order->get_order_number() ),
 						sprintf(__( 'Order %s has been marked on-hold due to a reversal - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 					);
 
 				break;
 				case 'canceled_reversal' :
-					$this->send_ipn_email_notification( 
-						sprintf( __( 'Reversal cancelled for order %s', 'woocommerce' ), $order->get_order_number() ), 
-						sprintf( __( 'Order %s has had a reversal cancelled. Please check the status of payment and update the order status accordingly.', 'woocommerce' ), $order->get_order_number() ) 
+					$this->send_ipn_email_notification(
+						sprintf( __( 'Reversal cancelled for order %s', 'woocommerce' ), $order->get_order_number() ),
+						sprintf( __( 'Order %s has had a reversal cancelled. Please check the status of payment and update the order status accordingly.', 'woocommerce' ), $order->get_order_number() )
 					);
 				break;
 				default :
@@ -827,7 +825,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$order = $this->get_paypal_order( $posted['cm'] );
 
-			if ( 'pending' != $order->status ) {
+			if ( ! $order->has_status( 'pending' ) ) {
 				return false;
 			}
 
@@ -880,10 +878,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					} else {
 
 						// Store PP Details
-						update_post_meta( $order->id, 'Transaction ID', wc_clean( $posted['tx'] ) );
-
 						$order->add_order_note( __( 'PDT payment completed', 'woocommerce' ) );
-						$order->payment_complete();
+						$txn_id = ( ! empty( $posted['tx'] ) ) ? wc_clean( $posted['tx'] ) : '';
+						$order->payment_complete( $txn_id );
 						return true;
 					}
 
@@ -946,7 +943,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		$states = WC()->countries->get_states( $cc );
-		
+
 		if ( isset( $states[ $state ] ) ) {
 			return $states[ $state ];
 		}

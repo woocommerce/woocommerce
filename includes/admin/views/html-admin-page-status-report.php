@@ -100,10 +100,11 @@
 		<tr>
 			<td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
 			<td><?php
-				if ( @fopen( WC()->plugin_path() . '/logs/paypal.txt', 'a' ) )
-					echo '<mark class="yes">' . __( 'Log directory is writable.', 'woocommerce' ) . '</mark>';
-				else
-					echo '<mark class="error">' . __( 'Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce' ) . '</mark>';
+				if ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ) {
+					printf( '<mark class="yes">' . __( 'Log directory (%s) is writable.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
+				} else {
+					printf( '<mark class="error">' . __( 'Log directory (<code>%s</code>) is not writable. To allow logging, make this writable or define a custom <code>WC_LOG_DIR</code>.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
+				}
 			?></td>
 		</tr>
 		<tr>
@@ -364,16 +365,6 @@
 
 	<tbody>
 		<tr>
-			<td><?php _e( 'Order Statuses', 'woocommerce' ); ?>:</td>
-			<td><?php
-				$display_terms = array();
-				$terms = get_terms( 'shop_order_status', array( 'hide_empty' => 0 ) );
-				foreach ( $terms as $term )
-					$display_terms[] = $term->name . ' (' . $term->slug . ')';
-				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
-			?></td>
-		</tr>
-		<tr>
 			<td><?php _e( 'Product Types', 'woocommerce' ); ?>:</td>
 			<td><?php
 				$display_terms = array();
@@ -453,59 +444,61 @@
 	</thead>
 
 	<tbody>
-		<tr>
-			<?php
+		<?php
 
-				$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
-				$scanned_files  = array();
-				$found_files    = array();
+			$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
+			$scanned_files  = array();
+			$found_files    = array();
 
-				foreach ( $template_paths as $plugin_name => $template_path ) {
-					$scanned_files[ $plugin_name ] = $this->scan_template_files( $template_path );
-				}
+			foreach ( $template_paths as $plugin_name => $template_path ) {
+				$scanned_files[ $plugin_name ] = WC_Admin_Status::scan_template_files( $template_path );
+			}
 
-				foreach ( $scanned_files as $plugin_name => $files ) {
-					foreach ( $files as $file ) {
-						if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
-							$theme_file = get_stylesheet_directory() . '/' . $file;
-						} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
-							$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
-						} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
-							$theme_file = get_template_directory() . '/' . $file;
-						} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
-							$theme_file = get_template_directory() . '/woocommerce/' . $file;
+			foreach ( $scanned_files as $plugin_name => $files ) {
+				foreach ( $files as $file ) {
+					if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
+						$theme_file = get_stylesheet_directory() . '/' . $file;
+					} elseif ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $file ) ) {
+						$theme_file = get_stylesheet_directory() . '/woocommerce/' . $file;
+					} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
+						$theme_file = get_template_directory() . '/' . $file;
+					} elseif( file_exists( get_template_directory() . '/woocommerce/' . $file ) ) {
+						$theme_file = get_template_directory() . '/woocommerce/' . $file;
+					} else {
+						$theme_file = false;
+					}
+
+					if ( $theme_file ) {
+						$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
+						$theme_version = WC_Admin_Status::get_file_version( $theme_file );
+
+						if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
+							$found_files[ $plugin_name ][] = sprintf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), basename( $theme_file ), $theme_version ? $theme_version : '-', $core_version );
 						} else {
-							$theme_file = false;
-						}
-
-						if ( $theme_file ) {
-							$core_version  = $this->get_file_version( WC()->plugin_path() . '/templates/' . $file );
-							$theme_version = $this->get_file_version( $theme_file );
-
-							if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
-								$found_files[ $plugin_name ][] = sprintf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), basename( $theme_file ), $theme_version ? $theme_version : '-', $core_version );
-							} else {
-								$found_files[ $plugin_name ][] = sprintf( '<code>%s</code>', basename( $theme_file ) );
-							}
+							$found_files[ $plugin_name ][] = sprintf( '<code>%s</code>', basename( $theme_file ) );
 						}
 					}
 				}
+			}
 
-				if ( $found_files ) {
-					foreach ( $found_files as $plugin_name => $found_plugin_files ) {
-						?>
+			if ( $found_files ) {
+				foreach ( $found_files as $plugin_name => $found_plugin_files ) {
+					?>
+					<tr>
 						<td><?php _e( 'Template Overrides', 'woocommerce' ); ?> (<?php echo $plugin_name; ?>):</td>
 						<td><?php echo implode( ', <br/>', $found_plugin_files ); ?></td>
-						<?php
-					}
-				} else {
-					?>
-					<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
-					<td><?php _e( 'No overrides present in theme.', 'woocommerce' ); ?></td>
+					</tr>
 					<?php
 				}
-			?>
-		</tr>
+			} else {
+				?>
+				<tr>
+					<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
+					<td><?php _e( 'No overrides present in theme.', 'woocommerce' ); ?></td>
+				</tr>
+				<?php
+			}
+		?>
 	</tbody>
 
 </table>

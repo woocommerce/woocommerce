@@ -76,7 +76,7 @@ $order = new WC_Order( $order_id );
 				</tr>
 				<?php
 
-				if ( in_array( $order->status, array( 'processing', 'completed' ) ) && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) {
+				if ( $order->has_status( array( 'completed', 'processing' ) ) && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) {
 					?>
 					<tr class="product-purchase-note">
 						<td colspan="3"><?php echo wpautop( do_shortcode( $purchase_note ) ); ?></td>
@@ -106,7 +106,7 @@ $order = new WC_Order( $order_id );
 ?>
 </dl>
 
-<?php if ( ! wc_ship_to_billing_address_only() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
+<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
 
 <div class="col2-set addresses">
 
@@ -123,7 +123,7 @@ $order = new WC_Order( $order_id );
 			?>
 		</p></address>
 
-<?php if ( ! wc_ship_to_billing_address_only() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
+<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
 
 	</div><!-- /.col-1 -->
 

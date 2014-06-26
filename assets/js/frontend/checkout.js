@@ -1,7 +1,7 @@
 jQuery( function( $ ) {
 
-	$.blockUI.defaults.overlayCSS.cursor = 'default'; 
-	
+	$.blockUI.defaults.overlayCSS.cursor = 'default';
+
 	// wc_checkout_params is required to continue, ensure the object exists
 	if ( typeof wc_checkout_params === 'undefined' )
 		return false;
@@ -187,7 +187,7 @@ jQuery( function( $ ) {
 
 	/* Update totals/taxes/shipping */
 	// Inputs/selects which update totals instantly
-	.on( 'input change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select', function() {
+	.on( 'input change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type=radio]', function() {
 		clearTimeout( updateTimer );
 		dirtyInput = false;
 		$( 'body' ).trigger( 'update_checkout' );

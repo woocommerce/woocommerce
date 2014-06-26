@@ -196,8 +196,6 @@ add_filter( 'wp_nav_menu_objects',  'wc_nav_menu_item_classes', 2, 20 );
  * @return string
  */
 function wc_list_pages( $pages ) {
-    global $post;
-
     if (is_woocommerce()) {
         $pages = str_replace( 'current_page_parent', '', $pages); // remove current_page_parent class from any item
         $shop_page = 'page-item-' . wc_get_page_id('shop'); // find shop_page_id through woocommerce options

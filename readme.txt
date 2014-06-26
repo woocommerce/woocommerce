@@ -1,10 +1,10 @@
 === WooCommerce - excelling eCommerce ===
-Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
+Contributors: woothemes, mikejolley, jameskoster
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 3.9
-Stable tag: 2.1.9
+Stable tag: 2.1.10
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -127,11 +127,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.2.0 =
+* Feature - Language pack downloader. po and mo files removed from core (too heavy).
 * Feature - Added used payment gateway to view orders screens.
 * Feature - API: Lookup customers by email endpoint.
 * Feature - Allow backorders to be configured at variation level.
 * Feature - Protect admins from shop manager users.
 * Feature - Ability to add custom quantity using add_to_cart shortcode.
+* Fix - Allow endpoint use on the front page.
 * Tweak - Recalculate the cart totals, in the event a user registers during checkout and in doing so qualifies for any discounts.
 * Tweak - Use `woocommerce_valid_order_statuses_for_payment` in `pay_action` too.
 * Tweak - Added the possibility to translate the edit-address endpoint slug.
@@ -140,6 +142,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Clear and wipe session data on logout and end of checkout for guests.
 * Tweak - Load archive-product.php for other product taxonomies.
 * Tweak - Disable image size settings if filters are being used.
+* Tweak - Hide the shipping address when local pickup is used.
 * Dev - Added description parameter to the woocommerce_form_field function.
 * Dev - Introduce `woocommerce_valid_order_statuses_for_payment_complete` filter.
 * Dev - Introduce `woocommerce_thankyou_order_received_text` filter.
@@ -151,11 +154,41 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Add new 'wc_admin_reports_path' filter to reports.
 * Dev - Add user ID to shipping packages.
 * Dev - Added product id parameter to related posts filters.
+* Dev - WC_LOG_DIR constant for defining the log directory.
+* Dev - Moved default logging directory 1 level above WordPress, rather than in the plugin folder.
+* Dev - Added log viewer in System Status.
+* Dev - Made stateless classes static to allow unhooking of methods.
+* Dev - Introduces the wc_get_log_file_path() function.
+* Dev - Introduces the WC_Order::needs_shipping_address() method.
+* Refactor - Changed the method in which order statuses are stored. Previously, order status was a taxonomy. This caused issues when unique term slugs differed from what we were expecting, and also added additonal overhead to order queries in reports. https://github.com/woothemes/woocommerce/issues/3064 Order status is now stored as post status - several new post statuses have been added. Order class variables are backwards compatible. The only thing to note (for devs) is that any query must use the order status instead of 'publish' when getting orders and querying by post_status. THe shop_order_status has also been removed.
 * Refactor - Update stock amounts with DB queries.
 * Refactor - Simplified attribute name sanitisation which maintains UTF8 char integrity.
 * Refactor - Country class return methods.
 * Localisation - Egypptian currency.
 * Localisation - Address format of Taiwan.
+* Localisation - Removed language files from core to made the package lighter (see language pack downloader feature).
+
+= 2.1.11 - 09/06/2014 =
+* Fix - Plain text email display of customer address.
+* Fix - Saving tax rates threw notices (missing git cherry pick).
+
+= 2.1.10 - 03/06/2014 =
+* Fix - Removed unecessary localization from edit account.
+* Fix - Admin welcome screen css.
+* Fix - Fixed my account setting values to wrong user submitted strings.
+* Fix - Menu order terms were coming back empty.
+* Fix - Fix notice that occurs from external function call.
+* Fix - Addons page, reference new json API endpoint.
+* Fix - Notices when rendering WooCommerce Shop as Front Page.
+* Fix - Prevent undefined notice for Layered Nav title.
+* Fix - state_province is not required for mijireh any longer.
+* Fix - Fix coupon limit checks and enhance to check ID by provided email (if logged out).
+* Fix - Danish krone symbol.
+* Fix - check for the existence of the cart during the is_available().
+* Fix - Fixes performance degradation on large wp_options tables.
+* Fix - improved the shortcodes button for support WordPress 3.9.
+* Tweak - Stronger session ID generation.
+* Dev - Add action hooks when saving tax rates.
 
 = 2.1.9 - 14/05/2014 =
 * Fix - fix case-insensitive matching for coupon posts with uppercase chars.

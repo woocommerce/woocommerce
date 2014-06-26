@@ -47,8 +47,6 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      * Initialise Gateway Settings Form Fields
      */
     public function init_form_fields() {
-    	global $woocommerce;
-
     	$shipping_methods = array();
 
     	if ( is_admin() )

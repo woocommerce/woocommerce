@@ -30,7 +30,7 @@ class WC_Shortcode_My_Account {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce, $wp;
+		global $wp;
 
 		// Check cart class is loaded or abort
 		if ( is_null( WC()->cart ) ) {
@@ -112,8 +112,12 @@ class WC_Shortcode_My_Account {
 			return;
 		}
 
+		// Backwards compatibility
+		$status       = new stdClass();
+		$status->name = wc_get_order_status_name( $order->get_status() );
+
 		wc_get_template( 'myaccount/view-order.php', array(
-	        'status'    => get_term_by( 'slug', $order->status, 'shop_order_status' ),
+	        'status'    => $status, // @deprecated 2.2
 	        'order'     => new WC_Order( $order_id ),
 	        'order_id'  => $order_id
 	    ) );

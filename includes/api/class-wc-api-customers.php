@@ -83,6 +83,11 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'get_customer_orders' ), WC_API_SERVER::READABLE ),
 		);
 
+		# GET /customers/<id>/downloads
+		$routes[ $this->base . '/(?P<id>\d+)/downloads' ] = array(
+			array( array( $this, 'get_customer_downloads' ), WC_API_SERVER::READABLE ),
+		);
+
 		return $routes;
 	}
 
@@ -189,7 +194,7 @@ class WC_API_Customers extends WC_API_Resource {
 						WHERE meta.meta_key = '_customer_user'
 						AND   meta.meta_value = {$customer->ID}
 						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status = 'publish'
+						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
 					" );
 
 		$customer_data = array(
@@ -439,7 +444,7 @@ class WC_API_Customers extends WC_API_Resource {
 						WHERE meta.meta_key = '_customer_user'
 						AND   meta.meta_value = '%s'
 						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status = 'publish'
+						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
 					", $id ) );
 
 		if ( empty( $order_ids ) ) {
@@ -453,6 +458,30 @@ class WC_API_Customers extends WC_API_Resource {
 		}
 
 		return array( 'orders' => apply_filters( 'woocommerce_api_customer_orders_response', $orders, $id, $fields, $order_ids, $this->server ) );
+	}
+
+	/**
+	 * Get the available downloads for a customer
+	 *
+	 * @since 2.2
+	 * @param int $id the customer ID
+	 * @param string $fields fields to include in response
+	 * @return array
+	 */
+	public function get_customer_downloads( $id, $fields = null ) {
+		$id = $this->validate_request( $id, 'customer', 'read' );
+
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+
+		$downloads = wc_get_customer_available_downloads( $id );
+
+		if ( empty( $downloads ) ) {
+			return array( 'downloads' => array() );
+		}
+
+		return array( 'downloads' => apply_filters( 'woocommerce_api_customer_downloads_response', $downloads, $id, $fields, $this->server ) );
 	}
 
 	/**
@@ -592,19 +621,23 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Wrapper for @see get_avatar() which doesn't simply return
 	 * the URL so we need to pluck it from the HTML img tag
 	 *
+	 * Kudos to https://github.com/WP-API/WP-API for offering a better solution
+	 *
 	 * @since 2.1
 	 * @param string $email the customer's email
 	 * @return string the URL to the customer's avatar
 	 */
 	private function get_avatar_url( $email ) {
+		$avatar_html = get_avatar( $email );
 
-		$dom = new DOMDocument();
+		// Get the URL of the avatar from the provided HTML
+		preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
 
-		$dom->loadHTML( get_avatar( $email ) );
+		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
+			return esc_url_raw( $matches[1] );
+		}
 
-		$url = $dom->getElementsByTagName( 'img' )->item( 0 )->getAttribute( 'src' );
-
-		return ( ! empty( $url ) ) ? $url : null;
+		return null;
 	}
 
 	/**

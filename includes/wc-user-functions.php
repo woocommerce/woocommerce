@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version 	2.1.0
+ * @version 	2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -144,7 +144,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 	$customer_orders = get_posts( array(
 		'numberposts' => -1,
 		'post_type'   => 'shop_order',
-		'post_status' => 'publish',
+		'post_status' => array_keys( wc_get_order_statuses() ),
 		'fields'      => 'ids',
 		'meta_query' => array(
 			array(
@@ -159,22 +159,23 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 		),
 	) );
 
-	$linked = 0;
+	$linked   = 0;
 	$complete = 0;
 
 	if ( $customer_orders )
 		foreach ( $customer_orders as $order_id ) {
 			update_post_meta( $order_id, '_customer_user', $customer->ID );
 
-			$order_status = wp_get_post_terms( $order_id, 'shop_order_status' );
+			$order_status = get_post_status( $order_id );
 
 			if ( $order_status ) {
 				$order_status = current( $order_status );
 				$order_status = sanitize_title( $order_status->slug );
 			}
 
-			if ( $order_status == 'completed' )
+			if ( $order_status === 'completed' ) {
 				$complete ++;
+			}
 
 			$linked ++;
 		}
@@ -239,18 +240,15 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		return false;
 	}
 
-	$completed  = get_term_by( 'slug', 'completed', 'shop_order_status' );
-	$processing = get_term_by( 'slug', 'processing', 'shop_order_status' );
-
 	return $wpdb->get_var(
 		$wpdb->prepare( "
 			SELECT COUNT( DISTINCT order_items.order_item_id )
 			FROM {$wpdb->prefix}woocommerce_order_items as order_items
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
 			LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON order_items.order_id = rel.object_ID
+			LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
 			WHERE
-				rel.term_taxonomy_id IN ( %d, %d ) AND
+				posts.post_status IN ( 'wc-completed', 'wc-processing' ) AND
 				itemmeta.meta_value  = %s AND
 				itemmeta.meta_key    IN ( '_variation_id', '_product_id' ) AND
 				postmeta.meta_key    IN ( '_billing_email', '_customer_user' ) AND
@@ -261,7 +259,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 						postmeta.meta_value > 0
 					)
 				)
-			", $completed->term_taxonomy_id, $processing->term_taxonomy_id, $product_id, $user_id
+			", $product_id, $user_id
 		)
 	);
 }
@@ -349,7 +347,7 @@ add_filter( 'editable_roles', 'wc_modify_editable_roles' );
  * Modify capabiltiies to prevent non-admin users editing admin users
  *
  * $args[0] will be the user being edited in this case.
- * 
+ *
  * @param  array $caps Array of caps
  * @param  string $cap Name of the cap we are checking
  * @param  int $user_id ID of the user being checked against
@@ -377,3 +375,92 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 	return $caps;
 }
 add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
+
+/**
+ * Get customer available downloads
+ *
+ * @param int $customer_id Customer/User ID
+ * @return array
+ */
+function wc_get_customer_available_downloads( $customer_id ) {
+	global $wpdb;
+
+	$downloads   = array();
+	$_product    = null;
+	$order       = null;
+	$file_number = 0;
+
+	// Get results from valid orders only
+	$results = $wpdb->get_results( $wpdb->prepare( "
+		SELECT permissions.*
+		FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
+		LEFT JOIN {$wpdb->posts} as posts ON permissions.order_id = posts.ID
+		WHERE user_id = %d
+		AND permissions.order_id > 0
+		AND posts.post_status = 'publish'
+		AND
+			(
+				permissions.downloads_remaining > 0
+				OR
+				permissions.downloads_remaining = ''
+			)
+		AND
+			(
+				permissions.access_expires IS NULL
+				OR
+				permissions.access_expires >= %s
+			)
+		GROUP BY permissions.download_id
+		ORDER BY permissions.order_id, permissions.product_id, permissions.permission_id;
+		", $customer_id, date( 'Y-m-d', current_time( 'timestamp' ) ) ) );
+
+	if ( $results ) {
+		foreach ( $results as $result ) {
+			if ( ! $order || $order->id != $result->order_id ) {
+				// new order
+				$order    = new WC_Order( $result->order_id );
+				$_product = null;
+			}
+
+			// Downloads permitted?
+			if ( ! $order->is_download_permitted() ) {
+				continue;
+			}
+
+			if ( ! $_product || $_product->id != $result->product_id ) {
+				// new product
+				$file_number = 0;
+				$_product    = get_product( $result->product_id );
+			}
+
+			// Check product exists and has the file
+			if ( ! $_product || ! $_product->exists() || ! $_product->has_file( $result->download_id ) ) {
+				continue;
+			}
+
+			$download_file = $_product->get_file( $result->download_id );
+			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
+			$download_name = apply_filters(
+				'woocommerce_downloadable_product_name',
+				$_product->get_title() . ' &ndash; ' . $download_file['name'],
+				$_product,
+				$result->download_id,
+				$file_number
+			);
+
+			$downloads[] = array(
+				'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/', 'http' ) ),
+				'download_id'         => $result->download_id,
+				'product_id'          => $result->product_id,
+				'download_name'       => $download_name,
+				'order_id'            => $order->id,
+				'order_key'           => $order->order_key,
+				'downloads_remaining' => $result->downloads_remaining
+			);
+
+			$file_number++;
+		}
+	}
+
+	return $downloads;
+}

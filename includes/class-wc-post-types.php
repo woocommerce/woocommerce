@@ -1,4 +1,5 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -9,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Registers post types and taxonomies
  *
  * @class 		WC_Post_types
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
@@ -17,11 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Post_types {
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct() {
+	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_post_types' ), 5 );
+		add_action( 'init', array( __CLASS__, 'register_post_status' ), 10 );
 	}
 
 	/**
@@ -148,20 +150,7 @@ class WC_Post_types {
 	        ) )
 	    );
 
-	    register_taxonomy( 'shop_order_status',
-	        apply_filters( 'woocommerce_taxonomy_objects_shop_order_status', array('shop_order') ),
-	        apply_filters( 'woocommerce_taxonomy_args_shop_order_status', array(
-	            'hierarchical' 			=> false,
-	            'update_count_callback' => '_update_post_term_count',
-	            'show_ui' 				=> false,
-	            'show_in_nav_menus' 	=> false,
-	            'query_var' 			=> is_admin(),
-	            'rewrite' 				=> false,
-	            'public'                => false
-	        ) )
-	    );
-
-	    global $wc_product_attributes, $woocommerce;
+	    global $wc_product_attributes;
 
 	    $wc_product_attributes = array();
 
@@ -208,7 +197,7 @@ class WC_Post_types {
 				    );
 		    	}
 		    }
-			
+
 			do_action( 'woocommerce_after_register_taxonomy' );
 		}
 	}
@@ -260,6 +249,10 @@ class WC_Post_types {
 				)
 			)
 		);
+
+		if ( preg_match( '/\/(.+)(\/%product_cat%)$/' , $product_permalink, $matches ) ) {
+			add_rewrite_rule( '^' . $matches[1] . '/.+?/[^/]+/([^/]+)/?$', 'index.php?attachment=$matches[1]', 'top' );
+		}
 
 		register_post_type( "product_variation",
 			apply_filters( 'woocommerce_register_post_type_product_variation',
@@ -354,6 +347,68 @@ class WC_Post_types {
 			);
 		}
 	}
+
+	/**
+	 * Register our custom post statuses, used for order status
+	 */
+	public static function register_post_status() {
+		register_post_status( 'wc-pending', array(
+			'label'                     => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'Pending payment <span class="count">(%s)</span>', 'Pending payment <span class="count">(%s)</span>', 'woocommerce' )
+		) );
+		register_post_status( 'wc-processing', array(
+			'label'                     => _x( 'Processing', 'Order status', 'woocommerce' ),
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'Processing <span class="count">(%s)</span>', 'Processing <span class="count">(%s)</span>', 'woocommerce' )
+		) );
+		register_post_status( 'wc-on-hold', array(
+			'label'                     => _x( 'On hold', 'Order status', 'woocommerce' ),
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'On hold <span class="count">(%s)</span>', 'On hold <span class="count">(%s)</span>', 'woocommerce' )
+		) );
+		register_post_status( 'wc-completed', array(
+			'label'                     => _x( 'Completed', 'Order status', 'woocommerce' ),
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'Completed <span class="count">(%s)</span>', 'Completed <span class="count">(%s)</span>', 'woocommerce' )
+		) );
+		register_post_status( 'wc-cancelled', array(
+			'label'                     => _x( 'Cancelled', 'Order status', 'woocommerce' ),
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'Cancelled <span class="count">(%s)</span>', 'Cancelled <span class="count">(%s)</span>', 'woocommerce' )
+		) );
+		register_post_status( 'wc-refunded', array(
+			'label'                     => _x( 'Refunded', 'Order status', 'woocommerce' ),
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'Refunded <span class="count">(%s)</span>', 'Refunded <span class="count">(%s)</span>', 'woocommerce' )
+		) );
+		register_post_status( 'wc-failed', array(
+			'label'                     => _x( 'Failed', 'Order status', 'woocommerce' ),
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>', 'woocommerce' )
+		) );
+	}
 }
 
-new WC_Post_types();
+WC_Post_types::init();

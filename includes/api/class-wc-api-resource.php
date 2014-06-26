@@ -156,7 +156,13 @@ class WC_API_Resource {
 			$args['order'] = $request_args['order'];
 			unset( $request_args['order'] );
 		}
-		
+
+		// allow post status change
+		if ( ! empty( $request_args['post_status'] ) ) {
+			$args['post_status'] = $request_args['post_status'];
+			unset( $request_args['post_status'] );
+		}
+
 		// resource page
 		$args['paged'] = ( isset( $request_args['page'] ) ) ? absint( $request_args['page'] ) : 1;
 

@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Handle frontend forms
  *
  * @class 		WC_Form_Handler
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes/
  * @category	Class
  * @author 		WooThemes
@@ -16,33 +16,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Form_Handler {
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct() {
-		add_action( 'template_redirect', array( $this, 'save_address' ) );
-		add_action( 'template_redirect', array( $this, 'save_account_details' ) );
-
-		add_action( 'init', array( $this, 'checkout_action' ), 20 );
-		add_action( 'init', array( $this, 'process_login' ) );
-		add_action( 'init', array( $this, 'process_registration' ) );
-		add_action( 'init', array( $this, 'process_reset_password' ) );
-
-		add_action( 'init', array( $this, 'cancel_order' ) );
-		add_action( 'init', array( $this, 'order_again' ) );
-
-		add_action( 'init', array( $this, 'update_cart_action' ) );
-		add_action( 'init', array( $this, 'add_to_cart_action' ) );
-
-		add_action( 'wp', array( $this, 'pay_action' ), 20 );
-		add_action( 'wp', array( $this, 'add_payment_method_action' ), 20 );
+	public static function init() {
+		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
+		add_action( 'init', array( __CLASS__, 'checkout_action' ), 20 );
+		add_action( 'init', array( __CLASS__, 'process_login' ) );
+		add_action( 'init', array( __CLASS__, 'process_registration' ) );
+		add_action( 'init', array( __CLASS__, 'process_reset_password' ) );
+		add_action( 'init', array( __CLASS__, 'cancel_order' ) );
+		add_action( 'init', array( __CLASS__, 'order_again' ) );
+		add_action( 'init', array( __CLASS__, 'update_cart_action' ) );
+		add_action( 'init', array( __CLASS__, 'add_to_cart_action' ) );
+		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
+		add_action( 'wp', array( __CLASS__, 'add_payment_method_action' ), 20 );
 	}
 
 	/**
 	 * Save and and update a billing or shipping address if the
 	 * form was submitted through the user account page.
 	 */
-	public function save_address() {
-		global $woocommerce, $wp;
+	public static function save_address() {
+		global $wp;
 
 		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
 			return;
@@ -88,33 +84,36 @@ class WC_Form_Handler {
 				wc_add_notice( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
 
-			// Validation rules
-			if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
-				foreach ( $field['validate'] as $rule ) {
-					switch ( $rule ) {
-						case 'postcode' :
-							$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
+			if ( ! empty( $_POST[ $key ] ) ) {
 
-							if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) {
-								wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
-							} else {
-								$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
-							}
-						break;
-						case 'phone' :
-							$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
+				// Validation rules
+				if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
+					foreach ( $field['validate'] as $rule ) {
+						switch ( $rule ) {
+							case 'postcode' :
+								$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
 
-							if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
-								wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
-							}
-						break;
-						case 'email' :
-							$_POST[ $key ] = strtolower( $_POST[ $key ] );
+								if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) {
+									wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
+								} else {
+									$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
+								}
+							break;
+							case 'phone' :
+								$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
 
-							if ( ! is_email( $_POST[ $key ] ) ) {
-								wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
-							}
-						break;
+								if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
+									wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
+								}
+							break;
+							case 'email' :
+								$_POST[ $key ] = strtolower( $_POST[ $key ] );
+
+								if ( ! is_email( $_POST[ $key ] ) ) {
+									wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
+								}
+							break;
+						}
 					}
 				}
 			}
@@ -138,7 +137,7 @@ class WC_Form_Handler {
 	/**
 	 * Save the password/account details and redirect back to the my account page.
 	 */
-	public function save_account_details() {
+	public static function save_account_details() {
 
 		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
 			return;
@@ -236,7 +235,7 @@ class WC_Form_Handler {
 	/**
 	 * Process the checkout form.
 	 */
-	public function checkout_action() {
+	public static function checkout_action() {
 		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) {
 
 			if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
@@ -248,15 +247,14 @@ class WC_Form_Handler {
 				define( 'WOOCOMMERCE_CHECKOUT', true );
 			}
 
-			$woocommerce_checkout = WC()->checkout();
-			$woocommerce_checkout->process_checkout();
+			WC()->checkout()->process_checkout();
 		}
 	}
 
 	/**
 	 * Process the pay form.
 	 */
-	public function pay_action() {
+	public static function pay_action() {
 		global $wp;
 
 		if ( isset( $_POST['woocommerce_pay'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-pay' ) ) {
@@ -270,7 +268,7 @@ class WC_Form_Handler {
 
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, $valid_order_statuses ) ) {
+			if ( $order->id == $order_id && $order->order_key == $order_key && $order->has_status( $valid_order_statuses ) ) {
 
 				// Set customer location to order location
 				if ( $order->billing_country ) {
@@ -332,9 +330,7 @@ class WC_Form_Handler {
 	/**
 	 * Process the add payment method form.
 	 */
-	public function add_payment_method_action() {
-		global $wp;
-
+	public static function add_payment_method_action() {
 		if ( isset( $_POST['woocommerce_add_payment_method'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
 
 			ob_start();
@@ -366,7 +362,7 @@ class WC_Form_Handler {
 	/**
 	 * Remove from cart/update.
 	 */
-	public function update_cart_action() {
+	public static function update_cart_action() {
 
 		// Add Discount
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
@@ -455,7 +451,7 @@ class WC_Form_Handler {
 	/**
 	 * Place a previous order again.
 	 */
-	public function order_again() {
+	public static function order_again() {
 
 		// Nothing to do
 		if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-order_again' ) ) {
@@ -472,7 +468,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( 'completed' != $order->status ) {
+		if ( ! $order->has_status( 'completed' ) ) {
 			return;
 		}
 
@@ -518,17 +514,17 @@ class WC_Form_Handler {
 	/**
 	 * Cancel a pending order.
 	 */
-	public function cancel_order() {
+	public static function cancel_order() {
 		if ( isset( $_GET['cancel_order'] ) && isset( $_GET['order'] ) && isset( $_GET['order_id'] ) ) {
 
 			$order_key        = $_GET['order'];
 			$order_id         = absint( $_GET['order_id'] );
 			$order            = new WC_Order( $order_id );
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
-			$order_can_cancel = in_array( $order->status, apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
+			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
 			$redirect         = $_GET['redirect'];
 
-			if ( $order->status == 'cancelled' ) {
+			if ( $order->has_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
 			} elseif ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
 
@@ -560,7 +556,7 @@ class WC_Form_Handler {
 	 *
 	 * @param bool $url (default: false)
 	 */
-	public function add_to_cart_action( $url = false ) {
+	public static function add_to_cart_action( $url = false ) {
 		if ( empty( $_REQUEST['add-to-cart'] ) || ! is_numeric( $_REQUEST['add-to-cart'] ) ) {
 			return;
 		}
@@ -730,7 +726,7 @@ class WC_Form_Handler {
 	/**
 	 * Process the login form.
 	 */
-	public function process_login() {
+	public static function process_login() {
 		if ( ! empty( $_POST['login'] ) && ! empty( $_POST['_wpnonce'] ) ) {
 
 			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-login' );
@@ -801,7 +797,7 @@ class WC_Form_Handler {
 	/**
 	 * Handle reset password form
 	 */
-	public function process_reset_password() {
+	public static function process_reset_password() {
 		if ( ! isset( $_POST['wc_reset_password'] ) ) {
 			return;
 		}
@@ -862,7 +858,7 @@ class WC_Form_Handler {
 	/**
 	 * Process the registration form.
 	 */
-	public function process_registration() {
+	public static function process_registration() {
 		if ( ! empty( $_POST['register'] ) ) {
 
 			wp_verify_nonce( $_POST['register'], 'woocommerce-register' );
@@ -927,4 +923,4 @@ class WC_Form_Handler {
 	}
 }
 
-new WC_Form_Handler();
+WC_Form_Handler::init();

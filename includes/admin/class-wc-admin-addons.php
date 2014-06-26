@@ -10,8 +10,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if ( ! class_exists( 'WC_Admin_Addons' ) ) :
-
 /**
  * WC_Admin_Addons Class
  */
@@ -20,7 +18,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles output of the reports page in admin.
 	 */
-	public function output() {
+	public static function output() {
 
 		if ( false === ( $addons = get_transient( 'woocommerce_addons_data' ) ) ) {
 			$addons_json = wp_remote_get( 'http://d3t0oesq8995hv.cloudfront.net/woocommerce-addons.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
@@ -37,7 +35,3 @@ class WC_Admin_Addons {
 		include_once( 'views/html-admin-page-addons.php' );
 	}
 }
-
-endif;
-
-return new WC_Admin_Addons();

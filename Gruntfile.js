@@ -107,18 +107,6 @@ module.exports = function( grunt ){
 				stdout: true,
 				stderr: true
 			},
-			txpull: {
-				command: [
-					'cd i18n',
-					'tx pull -a -f',
-				].join( '&&' )
-			},
-			generatemos: {
-				command: [
-					'cd i18n/languages',
-					'for i in *.po; do msgfmt $i -o ${i%%.*}.mo; done'
-				].join( '&&' )
-			},
 			generatepot: {
 				command: [
 					'cd i18n/makepot/',
@@ -193,13 +181,11 @@ module.exports = function( grunt ){
 
 	grunt.registerTask( 'dev', [
 		'default',
-		'shell:txpull',
-		'shell:generatemos'
+		'pot'
 	]);
 
 	grunt.registerTask( 'deploy', [ 
 		'clean:deploy', 
 		'copy:deploy'
 	]);
-
 };

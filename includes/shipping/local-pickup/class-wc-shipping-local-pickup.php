@@ -123,7 +123,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 * @return void
 	 */
 	function admin_options() {
-		global $woocommerce; ?>
+		?>
 		<h3><?php echo $this->method_title; ?></h3>
 		<p><?php _e( 'Local pickup is a simple method which allows the customer to pick up their order themselves.', 'woocommerce' ); ?></p>
 		<table class="form-table">

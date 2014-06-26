@@ -13,6 +13,35 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
+ * Get all order statuses
+ *
+ * @since 2.2
+ * @return array
+ */
+function wc_get_order_statuses() {
+	$order_statuses = array(
+		'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+		'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
+		'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
+		'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
+		'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
+		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
+		'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
+	);
+	return apply_filters( 'wc_order_statuses', $order_statuses );
+}
+
+/**
+ * Get the nice name for an orer status
+ * @param  string $status
+ * @return string
+ */
+function wc_get_order_status_name( $status ) {
+	$statuses = wc_get_order_statuses();
+	return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
+}
+
+/**
  * Finds an Order ID based on an order key.
  *
  * @access public
@@ -108,7 +137,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 
 	$order = new WC_Order( $order_id );
 
-	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
+	if ( $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
 	}
 
@@ -276,14 +305,8 @@ function wc_cancel_unpaid_orders() {
 	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
 		SELECT posts.ID
 		FROM {$wpdb->posts} AS posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
 		WHERE 	posts.post_type   = 'shop_order'
-		AND 	posts.post_status = 'publish'
-		AND 	tax.taxonomy      = 'shop_order_status'
-		AND		term.slug	      = 'pending'
+		AND 	posts.post_status = 'wc-pending'
 		AND 	posts.post_modified < %s
 	", $date ) );
 
@@ -309,22 +332,8 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
  * @return int
  */
 function wc_processing_order_count() {
-	if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
-		$order_statuses = get_terms( 'shop_order_status' );
-		$order_count    = false;
-		if ( is_array( $order_statuses ) ) {
-			foreach ( $order_statuses as $status ) {
-					if ( $status->slug === 'processing' ) {
-							$order_count += $status->count;
-							break;
-					}
-			}
-			$order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
-			set_transient( 'woocommerce_processing_order_count', $order_count, YEAR_IN_SECONDS );
-		}
-	}
-
-	return $order_count;
+	$count = wp_count_posts( 'shop_order', 'readable' );
+	return isset( $count->processing ) ? $count->processing : 0;
 }
 
 /**
@@ -333,14 +342,7 @@ function wc_processing_order_count() {
  * @param int $post_id (default: 0)
  */
 function wc_delete_shop_order_transients( $post_id = 0 ) {
-	global $wpdb;
-
 	$post_id = absint( $post_id );
-
-	// Clear core transients
-	$transients_to_clear = array(
-		'woocommerce_processing_order_count'
-	);
 
 	// Clear report transients
 	$reports = WC_Admin_Reports::get_reports();
@@ -360,4 +362,12 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	}
 
 	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
+}
+
+/**
+ * See if we only ship to billing addresses
+ * @return bool
+ */
+function wc_ship_to_billing_address_only() {
+	return 'billing_only' === get_option( 'woocommerce_ship_to_destination' );
 }

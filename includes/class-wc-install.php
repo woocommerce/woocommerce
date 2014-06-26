@@ -112,10 +112,10 @@ class WC_Install {
 		wc_delete_product_transients();
 
 		// Queue upgrades
-		$current_version = get_option( 'woocommerce_version', null );
+		$current_version    = get_option( 'woocommerce_version', null );
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 
-		if ( version_compare( $current_db_version, '2.1.0', '<' ) && null !== $current_db_version ) {
+		if ( version_compare( $current_db_version, '2.2.0', '<' ) && null !== $current_db_version ) {
 			update_option( '_wc_needs_update', 1 );
 		} else {
 			update_option( 'woocommerce_db_version', WC()->version );
@@ -176,6 +176,11 @@ class WC_Install {
 			update_option( 'woocommerce_db_version', '2.1.0' );
 		}
 
+		if ( version_compare( $current_db_version, '2.2.0', '<' ) || WC_VERSION == '2.2-bleeding' ) {
+			include( 'updates/woocommerce-update-2.2.php' );
+			update_option( 'woocommerce_db_version', '2.2.0' );
+		}
+
 		update_option( 'woocommerce_db_version', WC()->version );
 	}
 
@@ -224,7 +229,7 @@ class WC_Install {
 				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
 			),
 			'checkout' => array(
-				'name'    => _x( 'checkout', 'Paeg slug', 'woocommerce' ),
+				'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
 				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
 			),
@@ -254,15 +259,6 @@ class WC_Install {
 				'grouped',
 				'variable',
 				'external'
-			),
-			'shop_order_status' => array(
-				'pending',
-				'failed',
-				'on-hold',
-				'processing',
-				'completed',
-				'refunded',
-				'cancelled'
 			)
 		);
 
@@ -325,7 +321,7 @@ class WC_Install {
 	 * @return void
 	 */
 	private function create_tables() {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
 		$wpdb->hide_errors();
 
@@ -608,12 +604,12 @@ class WC_Install {
 				'content' 	=> ''
 			),
 			array(
-				'base' 		=> WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
+				'base' 		=> WC_LOG_DIR,
 				'file' 		=> '.htaccess',
 				'content' 	=> 'deny from all'
 			),
 			array(
-				'base' 		=> WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
+				'base' 		=> WC_LOG_DIR,
 				'file' 		=> 'index.html',
 				'content' 	=> ''
 			)
@@ -685,7 +681,7 @@ class WC_Install {
 				if ( preg_match( $regexp, $response['body'], $matches ) ) {
 					$version        = trim( $matches[1] );
 					$notices        = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
-					
+
 					if ( version_compare( WC_VERSION, $version, '<' ) ) {
 
 						$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';

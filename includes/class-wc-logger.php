@@ -34,8 +34,9 @@ class WC_Logger {
 	 * @return void
 	 */
 	public function __destruct() {
-		foreach ( $this->_handles as $handle )
+		foreach ( $this->_handles as $handle ) {
 	       @fclose( escapeshellarg( $handle ) );
+		}
 	}
 
 
@@ -47,12 +48,13 @@ class WC_Logger {
 	 * @return bool success
 	 */
 	private function open( $handle ) {
-
-		if ( isset( $this->_handles[ $handle ] ) )
+		if ( isset( $this->_handles[ $handle ] ) ) {
 			return true;
+		}
 
-		if ( $this->_handles[ $handle ] = @fopen( WC()->plugin_path() . '/logs/' . $this->file_name( $handle ) . '.txt', 'a' ) )
+		if ( $this->_handles[ $handle ] = @fopen( wc_get_log_file_path( $handle ), 'a' ) ) {
 			return true;
+		}
 
 		return false;
 	}
@@ -68,7 +70,7 @@ class WC_Logger {
 	 */
 	public function add( $handle, $message ) {
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
-			$time = date_i18n( 'm-d-Y @ H:i:s -' ); //Grab Time
+			$time = date_i18n( 'm-d-Y @ H:i:s -' ); // Grab Time
 			@fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
 		}
 	}
@@ -82,21 +84,9 @@ class WC_Logger {
 	 * @return void
 	 */
 	public function clear( $handle ) {
-
-		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) )
+		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
 			@ftruncate( $this->_handles[ $handle ], 0 );
-	}
-
-
-	/**
-	 * file_name function.
-	 *
-	 * @access private
-	 * @param mixed $handle
-	 * @return string
-	 */
-	private function file_name( $handle ) {
-		return $handle . '-' . sanitize_file_name( wp_hash( $handle ) );
+		}
 	}
 
 }

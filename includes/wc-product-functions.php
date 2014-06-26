@@ -82,25 +82,13 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	if ( wp_using_ext_object_cache() ) {
 		wp_cache_flush(); // There isn't a reliable method of looking up the names, so flush the cache.
 		return;
-	} 
-
-	$post_id = absint( $post_id );
+	}
 
 	// Clear core transients
 	$transients_to_clear = array(
 		'wc_products_onsale',
-		'wc_hidden_product_ids',
-		'wc_hidden_product_ids_search',
-		'wc_attribute_taxonomies',
-		'wc_term_counts',
 		'wc_featured_products'
 	);
-
-	// Clear transients for which we don't have the name
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%') OR `option_name` LIKE ('_transient_timeout_wc_uf_pid_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%') OR `option_name` LIKE ('_transient_timeout_wc_ln_count_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%') OR `option_name` LIKE ('_transient_timeout_wc_ship_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_products_will_display_%') OR `option_name` LIKE ('_transient_timeout_wc_products_will_display_%')" );
 
 	// Clear product specific transients
 	$post_transient_names = array(
@@ -116,7 +104,8 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		}
 	} else {
 		foreach( $post_transient_names as $transient ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '_transient_' . $transient . '%', '_transient_timeout_' . $transient . '%' ) );
+			$transient = str_replace( '_', '\_', $transient );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '\_transient\_' . $transient . '%', '\_transient\_timeout\_' . $transient . '%' ) );
 		}
 	}
 
@@ -290,7 +279,7 @@ function wc_placeholder_img_src() {
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="Placeholder" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />' );
+	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
 }
 
 /**
@@ -379,8 +368,6 @@ function wc_scheduled_sales() {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
 
-			wc_delete_product_transients( $product_id );
-
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -390,12 +377,14 @@ function wc_scheduled_sales() {
 
 				// Grouped products need syncing via a function
 				$this_product = get_product( $product_id );
-				if ( $this_product->is_type( 'simple' ) )
-					$this_product->grouped_product_sync();
 
-				wc_delete_product_transients( $parent );
+				if ( $this_product->is_type( 'simple' ) ) {
+					$this_product->grouped_product_sync();
+				}
 			}
 		}
+
+		delete_transient( 'wc_products_onsale' );
 	}
 
 	// Sales which are due to end
@@ -420,8 +409,6 @@ function wc_scheduled_sales() {
 			update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			update_post_meta( $product_id, '_sale_price_dates_to', '' );
 
-			wc_delete_product_transients( $product_id );
-
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -431,12 +418,13 @@ function wc_scheduled_sales() {
 
 				// Grouped products need syncing via a function
 				$this_product = get_product( $product_id );
-				if ( $this_product->is_type( 'simple' ) )
+				if ( $this_product->is_type( 'simple' ) ) {
 					$this_product->grouped_product_sync();
-
-				wc_delete_product_transients( $parent );
+				}
 			}
 		}
+
+		delete_transient( 'wc_products_onsale' );
 	}
 }
 add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
@@ -449,8 +437,9 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
-	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) )
+	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
 		$attr['src'] = wc_placeholder_img_src();
+	}
 
 	return $attr;
 }
@@ -486,7 +475,7 @@ function wc_track_product_view() {
 	if ( ! is_singular( 'product' ) )
 		return;
 
-	global $post, $product;
+	global $post;
 
 	if ( empty( $_COOKIE['woocommerce_recently_viewed'] ) )
 		$viewed_products = array();

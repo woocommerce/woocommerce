@@ -36,7 +36,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * get_cached_widget function.
 	 */
 	function get_cached_widget( $args ) {
-		$cache = wp_cache_get( $this->widget_id, 'widget' );
+		$cache = wp_cache_get( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
 
 		if ( ! is_array( $cache ) )
 			$cache = array();
@@ -55,7 +55,7 @@ abstract class WC_Widget extends WP_Widget {
 	public function cache_widget( $args, $content ) {
 		$cache[ $args['widget_id'] ] = $content;
 
-		wp_cache_set( $this->widget_id, $cache, 'widget' );
+		wp_cache_set( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), $cache, 'widget' );
 	}
 
 	/**
@@ -63,7 +63,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * @return [type]
 	 */
 	public function flush_widget_cache() {
-		wp_cache_delete( $this->widget_id, 'widget' );
+		wp_cache_delete( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
 	}
 
 	/**

@@ -31,7 +31,7 @@ class WC_Shortcode_Checkout {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce, $wp;
+		global $wp;
 
 		// Check cart class is loaded or abort
 		if ( is_null( WC()->cart ) ) {
@@ -46,10 +46,11 @@ class WC_Shortcode_Checkout {
 			$order_id             = absint( $_GET['order'] );
 			$order                = new WC_Order( $order_id );
 
-			if ( $order->status == 'pending' )
+			if ( $order->has_status( 'pending' ) ) {
 				$wp->query_vars['order-pay'] = absint( $_GET['order'] );
-			else
+			} else {
 				$wp->query_vars['order-received'] = absint( $_GET['order'] );
+			}
 		}
 
 		// Handle checkout actions
@@ -94,7 +95,7 @@ class WC_Shortcode_Checkout {
 
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				if ( in_array( $order->status, $valid_order_statuses ) ) {
+				if ( $order->has_status( $valid_order_statuses ) ) {
 
 					// Set customer location to order location
 					if ( $order->billing_country )
@@ -107,10 +108,7 @@ class WC_Shortcode_Checkout {
 					wc_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
 
 				} else {
-
-					$status = get_term_by('slug', $order->status, 'shop_order_status');
-
-					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
 
 			} else {
@@ -126,7 +124,7 @@ class WC_Shortcode_Checkout {
 
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				if ( in_array( $order->status, $valid_order_statuses ) ) {
+				if ( $order->has_status( $valid_order_statuses ) ) {
 
 					?>
 					<ul class="order_details">
@@ -158,10 +156,7 @@ class WC_Shortcode_Checkout {
 					<?php
 
 				} else {
-
-					$status = get_term_by('slug', $order->status, 'shop_order_status');
-
-					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
 
 			} else {

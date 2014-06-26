@@ -8,7 +8,7 @@
 			</tr>
 		</thead>
 		<tbody class="tools">
-			<?php foreach( $tools as $action => $tool ) { ?>
+			<?php foreach ( $tools as $action => $tool ) : ?>
 				<tr>
 					<td><?php echo esc_html( $tool['name'] ); ?></td>
 					<td>
@@ -18,7 +18,7 @@
 						</p>
 					</td>
 				</tr>
-			<?php } ?>
+			<?php endforeach; ?>
 			<tr>
 				<td><?php _e( 'Shipping Debug Mode', 'woocommerce' ); ?></td>
 	 			<td>

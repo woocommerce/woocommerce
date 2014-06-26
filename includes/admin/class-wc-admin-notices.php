@@ -67,6 +67,10 @@ class WC_Admin_Notices {
 			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 			add_action( 'admin_notices', array( $this, 'template_file_check_notice' ) );
 		}
+
+		if ( in_array( 'translation_upgrade', $notices ) ) {
+			add_action( 'admin_notices', array( $this, 'translation_upgrade_notice' ) );
+		}
 	}
 
 	/**
@@ -92,6 +96,17 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Show the translation upgrade notice
+	 */
+	public function translation_upgrade_notice() {
+		$screen = get_current_screen();
+
+		if ( 'update-core' !== $screen->id ) {
+			include( 'views/html-notice-translation-upgrade.php' );
+		}
+	}
+
+	/**
 	 * Show a notice highlighting bad template files
 	 */
 	public function template_file_check_notice() {
@@ -99,8 +114,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		$status         = include( 'class-wc-admin-status.php' );
-		$core_templates = $status->scan_template_files( WC()->plugin_path() . '/templates' );
+		$core_templates = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates' );
 		$outdated       = false;
 
 		foreach ( $core_templates as $file ) {
@@ -116,8 +130,8 @@ class WC_Admin_Notices {
 			}
 
 			if ( $theme_file ) {
-				$core_version  = $status->get_file_version( WC()->plugin_path() . '/templates/' . $file );
-				$theme_version = $status->get_file_version( $theme_file );
+				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
+				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
 				if ( $core_version && $theme_version && version_compare( $theme_version, $core_version, '<' ) ) {
 					$outdated = true;

@@ -56,15 +56,24 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 				break;
 		}
 	} elseif ( ! empty( $args['orderby'] ) && $args['orderby'] === 'menu_order' ) {
-		// wp_get_post_terms doens't let us use custom sort order
-		$args['include']    = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
-		$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
-		$args['hide_empty'] = 0;
-		$args['fields']     = 'names';
-
-		unset( $args['orderby'] );
+		// wp_get_post_terms doesn't let us use custom sort order
+		$args['include'] = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
 		
-		$terms              = get_terms( $taxonomy, $args );
+		if ( empty( $args['include'] ) ) {
+			$terms = array();
+		} else {
+			// This isn't needed for get_terms
+			unset( $args['orderby'] );
+
+			// Set args for get_terms
+			$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
+			$args['hide_empty'] = isset( $args['hide_empty'] ) ? $args['hide_empty'] : 0;
+			$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
+
+			// Ensure slugs is valid for get_terms - slugs isn't supported
+			$args['fields']     = $args['fields'] === 'slugs' ? 'id=>slug' : $args['fields'];
+			$terms              = get_terms( $taxonomy, $args );
+		}
 	} else {
 		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 	}
@@ -97,7 +106,7 @@ function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
  * @return string
  */
 function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchical = 1, $deprecated_show_uncategorized = 1, $deprecated_orderby = '' ) {
-	global $wp_query, $woocommerce;
+	global $wp_query;
 
 	if ( ! is_array( $args ) ) {
 		_deprecated_argument( 'wc_product_dropdown_categories()', '2.1', 'show_counts, hierarchical, show_uncategorized and orderby arguments are invalid - pass a single array of values instead.' );
@@ -108,14 +117,15 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		$args['orderby']            = $deprecated_orderby;
 	}
 
-	$defaults = array(
+	$current_product_cat = isset( $wp_query->query['product_cat'] ) ? $wp_query->query['product_cat'] : '';
+	$defaults            = array(
 		'pad_counts'         => 1,
 		'show_counts'        => 1,
 		'hierarchical'       => 1,
 		'hide_empty'         => 1,
 		'show_uncategorized' => 1,
 		'orderby'            => 'name',
-		'selected'           => isset( $wp_query->query['product_cat'] ) ? $wp_query->query['product_cat'] : '',
+		'selected'           => $current_product_cat,
 		'menu_order'         => false
 	);
 
@@ -126,19 +136,19 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		$args['orderby']    = 'name';
 	}
 
-	$terms = get_terms( 'product_cat', $args );
+	$terms = get_terms( 'product_cat', apply_filters( 'wc_product_dropdown_categories_get_terms_args', $args ) );
 
-	if ( ! $terms )
+	if ( ! $terms ) {
 		return;
+	}
 
 	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
-	$output .= '<option value="" ' .  selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '', false ) . '>' . __( 'Select a category', 'woocommerce' ) . '</option>';
+	$output .= '<option value="" ' .  selected( $current_product_cat, '', false ) . '>' . __( 'Select a category', 'woocommerce' ) . '</option>';
 	$output .= wc_walk_category_dropdown_tree( $terms, 0, $args );
-
-	if ( $args['show_uncategorized'] )
-		$output .= '<option value="0" ' . selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '0', false ) . '>' . __( 'Uncategorized', 'woocommerce' ) . '</option>';
-
-	$output .="</select>";
+	if ( $args['show_uncategorized'] ) {
+		$output .= '<option value="0" ' . selected( $current_product_cat, '0', false ) . '>' . __( 'Uncategorized', 'woocommerce' ) . '</option>';
+	}
+	$output .= "</select>";
 
 	echo $output;
 }
@@ -149,20 +159,20 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
  * @return mixed
  */
 function wc_walk_category_dropdown_tree() {
-	global $woocommerce;
-
-	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) )
+	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) ) {
 		include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
+	}
 
 	$args = func_get_args();
 
 	// the user's options are the third parameter
-	if ( empty( $args[2]['walker']) || !is_a($args[2]['walker'], 'Walker' ) )
+	if ( empty( $args[2]['walker']) || !is_a($args[2]['walker'], 'Walker' ) ) {
 		$walker = new WC_Product_Cat_Dropdown_Walker;
-	else
+	} else {
 		$walker = $args[2]['walker'];
+	}
 
-	return call_user_func_array(array( &$walker, 'walk' ), $args );
+	return call_user_func_array( array( &$walker, 'walk' ), $args );
 }
 
 /**
@@ -334,7 +344,7 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
  * @return array
  */
 function wc_terms_clauses( $clauses, $taxonomies, $args ) {
-	global $wpdb, $woocommerce;
+	global $wpdb;
 
 	// No sorting when menu_order is false
 	if ( isset( $args['menu_order'] ) && $args['menu_order'] == false ) {
@@ -487,6 +497,8 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		// Update the count
 		update_woocommerce_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
 	}
+
+	delete_transient( 'wc_term_counts' );
 }
 
 /**
@@ -515,8 +527,6 @@ function wc_recount_after_stock_change( $product_id ) {
 
 		_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
 	}
-
-	delete_transient( 'wc_term_counts' );
 }
 add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_change' );
 

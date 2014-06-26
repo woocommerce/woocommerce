@@ -98,7 +98,7 @@ class WC_Query {
 	 */
 	public function add_endpoints() {
 		foreach ( $this->query_vars as $key => $var )
-			add_rewrite_endpoint( $var, EP_PAGES );
+			add_rewrite_endpoint( $var, EP_ROOT | EP_PAGES );
 	}
 
 	/**
@@ -150,9 +150,22 @@ class WC_Query {
 	 */
 	public function pre_get_posts( $q ) {
 		// We only want to affect the main query
-		if ( ! $q->is_main_query() )
+		if ( ! $q->is_main_query() ) {
 			return;
+		}
 
+		// Fix for endpoints on the homepage
+		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') != $q->get('page_id') ) {
+			$_query = wp_parse_args( $q->query );
+			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
+				$q->is_page     = true;
+				$q->is_home     = false;
+				$q->is_singular = true;
+
+				$q->set( 'page_id', get_option('page_on_front') );
+			}
+		}
+		
 		// When orderby is set, WordPress shows posts. Get around that here.
 		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') == wc_get_page_id('shop') ) {
 			$_query = wp_parse_args( $q->query );
@@ -200,12 +213,9 @@ class WC_Query {
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
 
-		} else {
-
-			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
-		    if 	( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) )
-		   		return;
-
+		// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
+		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
+			return;
 		}
 
 		$this->product_query( $q );
@@ -670,7 +680,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public function layered_nav_query( $filtered_posts ) {
-		global $_chosen_attributes, $wp_query;
+		global $_chosen_attributes;
 
 		if ( sizeof( $_chosen_attributes ) > 0 ) {
 
@@ -701,7 +711,7 @@ class WC_Query {
 									array(
 										'taxonomy' 	=> $attribute,
 										'terms' 	=> $value,
-										'field' 	=> 'id'
+										'field' 	=> 'term_id'
 									)
 								)
 							)

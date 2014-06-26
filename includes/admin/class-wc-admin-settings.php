@@ -48,7 +48,7 @@ class WC_Admin_Settings {
 	 * Save the settings
 	 */
 	public static function save() {
-		global $current_section, $current_tab;
+		global $current_tab;
 
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) )
 	    		die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
@@ -59,7 +59,6 @@ class WC_Admin_Settings {
 	    do_action( 'woocommerce_update_options' );
 
     	// Clear any unwanted data
-		wc_delete_product_transients();
 		delete_transient( 'woocommerce_cache_excluded_uris' );
 
 		self::add_message( __( 'Your settings have been saved.', 'woocommerce' ) );
@@ -485,7 +484,7 @@ class WC_Admin_Settings {
 
 	            	$disabled_attr = '';
 	            	$disabled_message = '';
-	            	
+
 	            	if ( has_filter( 'woocommerce_get_image_size_' . $image_size ) ) {
 	            		$disabled_attr = 'disabled="disabled"';
 	            		$disabled_message = "<p><small>" . __( 'The settings of this image size have been disabled because its values are being overwritten by a filter.', 'woocommerce' ) . "</small></p>";
@@ -545,7 +544,7 @@ class WC_Admin_Settings {
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 							<?php echo $tip; ?>
 						</th>
-	                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
+	                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="chosen_select">
 				        	<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 				        </select> <?php echo $description; ?>
 	               		</td>
@@ -569,7 +568,7 @@ class WC_Admin_Settings {
 							<?php echo $tip; ?>
 						</th>
 	                    <td class="forminp">
-		                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
+		                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="chosen_select">
 					        	<?php
 					        		if ( $countries )
 					        			foreach ( $countries as $key => $val )
@@ -598,46 +597,41 @@ class WC_Admin_Settings {
 	 * @return bool
 	 */
 	public static function save_fields( $options ) {
-	    if ( empty( $_POST ) )
+	    if ( empty( $_POST ) ) {
 	    	return false;
+	    }
 
 	    // Options to update will be stored here
 	    $update_options = array();
 
 	    // Loop options and get values to save
 	    foreach ( $options as $value ) {
-
-	    	if ( ! isset( $value['id'] ) )
+	    	if ( ! isset( $value['id'] ) || ! isset( $value['type'] ) ) {
 	    		continue;
+	    	}
 
-	    	$type = isset( $value['type'] ) ? sanitize_title( $value['type'] ) : '';
+			// Get posted value
+			if ( strstr( $value['id'], '[' ) ) {
+				parse_str( $value['id'], $option_name_array );
 
-	    	// Get the option name
-	    	$option_value = null;
+				$option_name  = current( array_keys( $option_name_array ) );
+				$setting_name = key( $option_name_array[ $option_name ] );
 
-	    	switch ( $type ) {
+		    	$option_value = isset( $_POST[ $option_name ][ $setting_name ] ) ? stripslashes_deep( $_POST[ $option_name ][ $setting_name ] ) : null;
+			} else {
+				$option_name  = $value['id'];
+				$setting_name = '';
+				$option_value = isset( $_POST[ $value['id'] ] ) ? stripslashes_deep( $_POST[ $value['id'] ] ) : null;
+			}
 
-		    	// Standard types
+			// Format value
+	    	switch ( sanitize_title( $value['type'] ) ) {
 		    	case "checkbox" :
-
-		    		if ( isset( $_POST[ $value['id'] ] ) ) {
-		    			$option_value = 'yes';
-		            } else {
-		            	$option_value = 'no';
-		            }
-
+		    		$option_value = is_null( $option_value ) ? 'no' : 'yes';
 		    	break;
-
 		    	case "textarea" :
-
-			    	if ( isset( $_POST[$value['id']] ) ) {
-			    		$option_value = wp_kses_post( trim( stripslashes( $_POST[ $value['id'] ] ) ) );
-		            } else {
-		                $option_value = '';
-		            }
-
+			    	$option_value = wp_kses_post( trim( $option_value ) );
 		    	break;
-
 		    	case "text" :
 		    	case 'email':
 	            case 'number':
@@ -647,119 +641,63 @@ class WC_Admin_Settings {
 		    	case "single_select_page" :
 		    	case "single_select_country" :
 		    	case 'radio' :
-
-		    		if ( $value['id'] == 'woocommerce_price_thousand_sep' || $value['id'] == 'woocommerce_price_decimal_sep' ) {
-
-						// price separators get a special treatment as they should allow a spaces (don't trim)
-						if ( isset( $_POST[ $value['id'] ] )  ) {
-							$option_value = wp_kses_post( stripslashes( $_POST[ $value['id'] ] ) );
-						} else {
-			            	$option_value = '';
-			            }
+		    		if ( in_array( $value['id'], array( 'woocommerce_price_thousand_sep', 'woocommerce_price_decimal_sep' ) ) ) {
+		    			$option_value = wp_kses_post( $option_value );
 
 		    		} elseif ( $value['id'] == 'woocommerce_price_num_decimals' ) {
-
-						// price separators get a special treatment as they should allow a spaces (don't trim)
-						if ( isset( $_POST[ $value['id'] ] )  ) {
-							$option_value = absint( $_POST[ $value['id'] ] );
-						} else {
-			               $option_value = 2;
-			            }
+						$option_value = is_null( $option_value ) ? 2 : absint( $option_value );
 
 		    		} elseif ( $value['id'] == 'woocommerce_hold_stock_minutes' ) {
-
-		    			// Allow > 0 or set to ''
-			            if ( ! empty( $_POST[ $value['id'] ] )  ) {
-							$option_value = absint( $_POST[ $value['id'] ] );
-						} else {
-			            	$option_value = '';
-			            }
+			        	$option_value = ! empty( $option_value ) ? absint( $option_value ) : ''; // Allow > 0 or set to ''
 
 			            wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 
-			            if ( $option_value != '' )
+			            if ( $option_value !== '' ) {
 			            	wp_schedule_single_event( time() + ( absint( $option_value ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
-
-			        } else {
-
-				       if ( isset( $_POST[$value['id']] ) ) {
-			            	$option_value = wc_clean( stripslashes( $_POST[ $value['id'] ] ) );
-			            } else {
-			                $option_value = '';
 			            }
 
+			        } else {
+				    	$option_value = wc_clean( $option_value );
 			        }
-
 		    	break;
-
-		    	// Special types
 		    	case "multiselect" :
 		    	case "multi_select_countries" :
-
-		    		// Get countries array
-					if ( isset( $_POST[ $value['id'] ] ) )
-						$selected_countries = array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $value['id'] ] ) );
-					else
-						$selected_countries = array();
-
-					$option_value = $selected_countries;
-
+					$option_value = array_filter( array_map( 'wc_clean', (array) $option_value ) );
 		    	break;
-
 		    	case "image_width" :
-
-			    	if ( isset( $_POST[$value['id'] ]['width'] ) ) {
-
-		              	$update_options[ $value['id'] ]['width']  = wc_clean( stripslashes( $_POST[ $value['id'] ]['width'] ) );
-		              	$update_options[ $value['id'] ]['height'] = wc_clean( stripslashes( $_POST[ $value['id'] ]['height'] ) );
-
-						if ( isset( $_POST[ $value['id'] ]['crop'] ) )
-							$update_options[ $value['id'] ]['crop'] = 1;
-						else
-							$update_options[ $value['id'] ]['crop'] = 0;
-
+			    	if ( isset( $option_value['width'] ) ) {
+						$update_options[ $value['id'] ]['width']  = wc_clean( $option_value['width'] );
+						$update_options[ $value['id'] ]['height'] = wc_clean( $option_value['height'] );
+						$update_options[ $value['id'] ]['crop']   = isset( $option_value['crop'] ) ? 1 : 0;
 		            } else {
-		            	$update_options[ $value['id'] ]['width'] 	= $value['default']['width'];
-		            	$update_options[ $value['id'] ]['height'] 	= $value['default']['height'];
-		            	$update_options[ $value['id'] ]['crop'] 	= $value['default']['crop'];
+						$update_options[ $value['id'] ]['width']  = $value['default']['width'];
+						$update_options[ $value['id'] ]['height'] = $value['default']['height'];
+						$update_options[ $value['id'] ]['crop']   = $value['default']['crop'];
 		            }
-
 		    	break;
-
-		    	// Custom handling
 		    	default :
-
-		    		do_action( 'woocommerce_update_option_' . $type, $value );
-
+		    		do_action( 'woocommerce_update_option_' . sanitize_title( $value['type'] ), $value );
 		    	break;
-
 	    	}
 
 	    	if ( ! is_null( $option_value ) ) {
 		    	// Check if option is an array
-				if ( strstr( $value['id'], '[' ) ) {
-
-					parse_str( $value['id'], $option_array );
-
-		    		// Option name is first key
-		    		$option_name = current( array_keys( $option_array ) );
-
+		    	if ( $option_name && $setting_name ) {
 		    		// Get old option value
-		    		if ( ! isset( $update_options[ $option_name ] ) )
-		    			 $update_options[ $option_name ] = get_option( $option_name, array() );
+		    		if ( ! isset( $update_options[ $option_name ] ) ) {
+		    			$update_options[ $option_name ] = get_option( $option_name, array() );
+		    		}
 
-		    		if ( ! is_array( $update_options[ $option_name ] ) )
+		    		if ( ! is_array( $update_options[ $option_name ] ) ) {
 		    			$update_options[ $option_name ] = array();
+		    		}
 
-		    		// Set keys and value
-		    		$key = key( $option_array[ $option_name ] );
-
-		    		$update_options[ $option_name ][ $key ] = $option_value;
-
-				// Single value
-				} else {
-					$update_options[ $value['id'] ] = $option_value;
-				}
+		    		$update_options[ $option_name ][ $setting_name ] = $option_value;
+		    	
+		    	// Single value
+		    	} else {
+		    		$update_options[ $option_name ] = $option_value;
+		    	}
 			}
 
 	    	// Custom handling
@@ -767,8 +705,9 @@ class WC_Admin_Settings {
 	    }
 
 	    // Now save the options
-	    foreach( $update_options as $name => $value )
+	    foreach( $update_options as $name => $value ) {
 	    	update_option( $name, $value );
+	    }
 
 	    return true;
 	}

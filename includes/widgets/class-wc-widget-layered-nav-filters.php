@@ -41,7 +41,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {
-		global $_chosen_attributes, $woocommerce;
+		global $_chosen_attributes;
 
 		extract( $args );
 

@@ -23,8 +23,6 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * @access public
 	 */
 	function __construct(){
-		global $status, $page;
-
 		parent::__construct( array(
 			'singular'  => __( 'Customer', 'woocommerce' ),
 			'plural'    => __( 'Customers', 'woocommerce' ),
@@ -115,16 +113,11 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 						LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 						LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
-						LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-						LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-						LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 
 						WHERE 	meta.meta_key 		= '_customer_user'
 						AND 	meta.meta_value 	= $user->ID
 						AND 	posts.post_type 	= 'shop_order'
-						AND 	posts.post_status 	= 'publish'
-						AND 	tax.taxonomy		= 'shop_order_status'
-						AND		term.slug			IN ( 'completed' )
+						AND 	posts.post_status 	= 'wc-completed'
 						AND     meta2.meta_key 		= '_order_total'
 					" );
 
@@ -140,15 +133,10 @@ class WC_Report_Customer_List extends WP_List_Table {
 						FROM $wpdb->posts as posts
 
 						LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-						LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-						LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-						LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 
 						WHERE 	meta.meta_key 		= '_customer_user'
 						AND 	posts.post_type 	= 'shop_order'
-						AND 	posts.post_status 	= 'publish'
-						AND 	tax.taxonomy		= 'shop_order_status'
-						AND		term.slug			IN ( 'completed' )
+						AND 	posts.post_status 	= 'wc-completed'
 						AND 	meta_value 			= $user->ID
 					" );
 
@@ -164,6 +152,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 					'post_type'      => 'shop_order',
 					'orderby'        => 'date',
 					'order'          => 'desc',
+					'post_status'    => array_keys( wc_get_order_statuses() ),
 					'meta_query' => array(
 						array(
 							'key'     => '_customer_user',
@@ -202,6 +191,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 						$order_ids = get_posts( array(
 							'posts_per_page' => 1,
 							'post_type'      => 'shop_order',
+							'post_status'    => array_keys( wc_get_order_statuses() ),
 							'meta_query' => array(
 								array(
 									'key'     => '_customer_user',
