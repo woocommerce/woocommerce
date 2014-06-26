@@ -10,7 +10,9 @@
  * @since       2.1
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class WC_API_Products extends WC_API_Resource {
 
@@ -69,8 +71,9 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function get_products( $fields = null, $type = null, $filter = array(), $page = 1 ) {
 
-		if ( ! empty( $type ) )
+		if ( ! empty( $type ) ) {
 			$filter['type'] = $type;
+		}
 
 		$filter['page'] = $page;
 
@@ -78,10 +81,11 @@ class WC_API_Products extends WC_API_Resource {
 
 		$products = array();
 
-		foreach( $query->posts as $product_id ) {
+		foreach ( $query->posts as $product_id ) {
 
-			if ( ! $this->is_readable( $product_id ) )
+			if ( ! $this->is_readable( $product_id ) ) {
 				continue;
+			}
 
 			$products[] = current( $this->get_product( $product_id, $fields ) );
 		}
@@ -103,8 +107,9 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'product', 'read' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		$product = get_product( $id );
 
@@ -136,11 +141,13 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function get_products_count( $type = null, $filter = array() ) {
 
-		if ( ! empty( $type ) )
+		if ( ! empty( $type ) ) {
 			$filter['type'] = $type;
+		}
 
-		if ( ! current_user_can( 'read_private_products' ) )
+		if ( ! current_user_can( 'read_private_products' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_read_products_count', __( 'You do not have permission to read the products count', 'woocommerce' ), array( 'status' => 401 ) );
+		}
 
 		$query = $this->query_products( $filter );
 
@@ -230,7 +237,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Edit a product
 	 *
-	 * @TODO implement in 2.2
+	 * @since 2.2
 	 * @param int $id the product ID
 	 * @param array $data
 	 * @return array
@@ -331,8 +338,9 @@ class WC_API_Products extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'product', 'read' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		$args = array(
 			'post_id' => $id,
@@ -484,8 +492,9 @@ class WC_API_Products extends WC_API_Resource {
 
 			$variation = $product->get_child( $child_id );
 
-			if ( ! $variation->exists() )
+			if ( ! $variation->exists() ) {
 				continue;
+			}
 
 			$variations[] = array(
 				'id'                => $variation->get_variation_id(),
@@ -1344,7 +1353,8 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Get attribute taxonomy by label.
 	 *
-	 * @param  string $label
+	 * @since 2.2
+	 * @param string $label
 	 * @return stdClass
 	 */
 	private function get_attribute_taxonomy_by_label( $label ) {
@@ -1402,13 +1412,15 @@ class WC_API_Products extends WC_API_Resource {
 
 			$attachment_post = get_post( $attachment_id );
 
-			if ( is_null( $attachment_post ) )
+			if ( is_null( $attachment_post ) ) {
 				continue;
+			}
 
 			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
 
-			if ( ! is_array( $attachment ) )
+			if ( ! is_array( $attachment ) ) {
 				continue;
+			}
 
 			$images[] = array(
 				'id'         => (int) $attachment_id,
@@ -1450,16 +1462,20 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $images as $image ) {
 			if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
 				$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+
 				if ( is_wp_error( $upload ) ) {
 					return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
 				}
+
 				$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
 				set_post_thumbnail( $id, $attachment_id );
 			} else if ( isset( $image['src'] ) ) {
 				$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+
 				if ( is_wp_error( $upload ) ) {
 					return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
 				}
+
 				$this->set_product_image_as_attachment( $upload, $id );
 			}
 		}
@@ -1575,10 +1591,11 @@ class WC_API_Products extends WC_API_Resource {
 			foreach ( $product->get_attributes() as $attribute ) {
 
 				// taxonomy-based attributes are comma-separated, others are pipe (|) separated
-				if ( $attribute['is_taxonomy'] )
+				if ( $attribute['is_taxonomy'] ) {
 					$options = explode( ',', $product->get_attribute( $attribute['name'] ) );
-				else
+				} else {
 					$options = explode( '|', $product->get_attribute( $attribute['name'] ) );
+				}
 
 				$attributes[] = array(
 					'name'      => ucwords( str_replace( 'pa_', '', $attribute['name'] ) ),
