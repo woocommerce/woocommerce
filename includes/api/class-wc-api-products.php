@@ -593,10 +593,22 @@ class WC_API_Products extends WC_API_Resource {
 
 		// SKU
 		if ( isset( $data['sku'] ) ) {
-			$sku = $this->save_product_sku( $id, $data['sku'] );
+			$sku     = get_post_meta( $id, '_sku', true );
+			$new_sku = wc_clean( $data['sku'] );
 
-			if ( is_wp_error( $sku ) ) {
-				return $sku;
+			if ( '' == $new_sku ) {
+				update_post_meta( $id, '_sku', '' );
+			} elseif ( $new_sku !== $sku ) {
+				if ( ! empty( $new_sku ) ) {
+					$unique_sku = wp_product_has_unique_sku( $id, $new_sku );
+					if ( ! $unique_sku ) {
+						return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
+					} else {
+						update_post_meta( $id, '_sku', $new_sku );
+					}
+				} else {
+					update_post_meta( $id, '_sku', '' );
+				}
 			}
 		}
 
@@ -1022,10 +1034,22 @@ class WC_API_Products extends WC_API_Resource {
 
 			// SKU
 			if ( isset( $variation['sku'] ) ) {
-				$sku = $this->save_product_sku( $variation_id, $variation['sku'] );
+				$sku     = get_post_meta( $variation_id, '_sku', true );
+				$new_sku = wc_clean( $variation['sku'] );
 
-				if ( is_wp_error( $sku ) ) {
-					return $sku;
+				if ( '' == $new_sku ) {
+					update_post_meta( $variation_id, '_sku', '' );
+				} elseif ( $new_sku !== $sku ) {
+					if ( ! empty( $new_sku ) ) {
+						$unique_sku = wp_product_has_unique_sku( $variation_id, $new_sku );
+						if ( ! $unique_sku ) {
+							return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
+						} else {
+							update_post_meta( $variation_id, '_sku', $new_sku );
+						}
+					} else {
+						update_post_meta( $variation_id, '_sku', '' );
+					}
 				}
 			}
 
@@ -1238,33 +1262,6 @@ class WC_API_Products extends WC_API_Resource {
 			update_post_meta( $id, '_default_attributes', $default_attributes );
 		}
 
-		return true;
-	}
-
-	/**
-	 * Save product SKU.
-	 *
-	 * @version 2.2
-	 * @param int $id
-	 * @param string $sku
-	 * @return bool|WP_Error
-	 */
-	private function save_product_sku( $id, $sku ) {
-		$sku_found = $wpdb->get_var( $wpdb->prepare( "
-				SELECT $wpdb->posts.ID
-				FROM $wpdb->posts
-				LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-				WHERE $wpdb->posts.post_type = 'product'
-				AND $wpdb->posts.post_status = 'publish'
-				AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
-				AND $wpdb->posts.ID <> %s
-			 ", wc_clean( $sku, $id ) ) );
-
-		if ( $sku_found ) {
-			return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
-		}
-
-		update_post_meta( $id, '_sku', wc_clean( $sku ) );
 		return true;
 	}
 

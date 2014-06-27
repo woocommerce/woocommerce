@@ -817,16 +817,8 @@ class WC_Admin_Post_Types {
 
 			if ( $new_sku !== $sku ) {
 				if ( ! empty( $new_sku ) ) {
-						$sku_exists = $wpdb->get_var( $wpdb->prepare("
-							SELECT $wpdb->posts.ID
-							FROM $wpdb->posts
-							LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-							WHERE $wpdb->posts.post_type = 'product'
-							AND $wpdb->posts.post_status = 'publish'
-							AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
-						 ", $new_sku ) );
-
-					if ( ! $sku_exists ) {
+					$unique_sku = wp_product_has_unique_sku( $post_id, $new_sku );
+					if ( $unique_sku ) {
 						update_post_meta( $post_id, '_sku', $new_sku );
 					}
 				} else {
