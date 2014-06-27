@@ -602,3 +602,13 @@ function wc_remove_order_notes_from_wp_count_comments( $stats, $post_id ) {
 }
 
 add_filter( 'wp_count_comments', 'wc_remove_order_notes_from_wp_count_comments', 10, 2 );
+
+/**
+ * WooCommerce Core Supported Themes
+ *
+ * @since 2.2
+ * @return array
+ */
+function wc_get_core_supported_themes() {
+	return array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+}

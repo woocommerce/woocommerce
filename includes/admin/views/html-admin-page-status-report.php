@@ -382,15 +382,15 @@
 		</tr>
 	</thead>
 
-        <?php
-        $active_theme = wp_get_theme();
-        if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
+		<?php
+		$active_theme = wp_get_theme();
+		if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
 
 			$theme_dir = substr( strtolower( str_replace( ' ','', $active_theme->Name ) ), 0, 45 );
 
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) :
 
-        		$theme_changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
+				$theme_changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
 				$cl_lines  = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
 				if ( ! empty( $cl_lines ) ) :
 
@@ -414,27 +414,37 @@
 		endif;
 		?>
 	<tbody>
-            <tr>
-                <td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
-                <td><?php
+			<tr>
+				<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
+				<td><?php
 					echo $active_theme->Name;
-                ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
-                <td><?php
+				?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
+				<td><?php
 					echo $active_theme->Version;
 
 					if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) )
 						echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
-                ?></td>
-            </tr>
-            <tr>
-                <td><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
-                <td><?php
+				?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
+				<td><?php
 					echo $active_theme->{'Author URI'};
-                ?></td>
-            </tr>
+				?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
+				<td><?php
+					if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
+						echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
+					} else {
+						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
+					}
+				?></td>
+			</tr>
 	</tbody>
 
 	<thead>
