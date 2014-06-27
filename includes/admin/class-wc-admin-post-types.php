@@ -817,7 +817,7 @@ class WC_Admin_Post_Types {
 
 			if ( $new_sku !== $sku ) {
 				if ( ! empty( $new_sku ) ) {
-					$unique_sku = wp_product_has_unique_sku( $post_id, $new_sku );
+					$unique_sku = wc_product_has_unique_sku( $post_id, $new_sku );
 					if ( $unique_sku ) {
 						update_post_meta( $post_id, '_sku', $new_sku );
 					}

@@ -1056,7 +1056,7 @@ class WC_Meta_Box_Product_Data {
 			update_post_meta( $post_id, '_sku', '' );
 		} elseif ( $new_sku !== $sku ) {
 			if ( ! empty( $new_sku ) ) {
-				$unique_sku = wp_product_has_unique_sku( $post_id, $new_sku );
+				$unique_sku = wc_product_has_unique_sku( $post_id, $new_sku );
 				if ( ! $unique_sku ) {
 					WC_Admin_Meta_Boxes::add_error( __( 'Product SKU must be unique.', 'woocommerce' ) );
 				} else {
@@ -1495,7 +1495,7 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_sku', '' );
 				} elseif ( $new_sku !== $sku ) {
 					if ( ! empty( $new_sku ) ) {
-						$unique_sku = wp_product_has_unique_sku( $variation_id, $new_sku );
+						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
 							WC_Admin_Meta_Boxes::add_error( __( 'Variation SKU must be unique.', 'woocommerce' ) );
 						} else {

@@ -600,7 +600,7 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $id, '_sku', '' );
 			} elseif ( $new_sku !== $sku ) {
 				if ( ! empty( $new_sku ) ) {
-					$unique_sku = wp_product_has_unique_sku( $id, $new_sku );
+					$unique_sku = wc_product_has_unique_sku( $id, $new_sku );
 					if ( ! $unique_sku ) {
 						return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
 					} else {
@@ -1041,7 +1041,7 @@ class WC_API_Products extends WC_API_Resource {
 					update_post_meta( $variation_id, '_sku', '' );
 				} elseif ( $new_sku !== $sku ) {
 					if ( ! empty( $new_sku ) ) {
-						$unique_sku = wp_product_has_unique_sku( $variation_id, $new_sku );
+						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
 							return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
 						} else {

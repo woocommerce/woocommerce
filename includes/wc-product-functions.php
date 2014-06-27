@@ -516,7 +516,7 @@ function wc_get_product_types() {
  * @param string $sku
  * @return bool
  */
-function wp_product_has_unique_sku( $product_id, $sku ) {
+function wc_product_has_unique_sku( $product_id, $sku ) {
 	global $wpdb;
 
 	$sku_found = $wpdb->get_var( $wpdb->prepare( "
