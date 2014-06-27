@@ -136,7 +136,7 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_stock_quantity() {
-		return $this->managing_stock() ? apply_filters( 'woocommerce_stock_amount', $this->stock ) : '';
+		return $this->managing_stock() ? wc_stock_amount( $this->stock ) : '';
 	}
 
 	/**
@@ -152,7 +152,7 @@ class WC_Product {
 	/**
 	 * Check if the stock status needs changing
 	 */
-	private function check_stock_status() {
+	protected function check_stock_status() {
 		// Update stock status
 		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			$this->set_stock_status( 'outofstock' );
@@ -193,9 +193,6 @@ class WC_Product {
 			// Clear caches
 			wp_cache_delete( $this->id, 'post_meta' );
 
-			// Clear total stock transient
-			delete_transient( 'wc_product_total_stock_' . $this->id );
-
 			// Stock status
 			$this->check_stock_status();
 
@@ -235,6 +232,13 @@ class WC_Product {
 	public function set_stock_status( $status ) {
 		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
 
+		// Sanity check
+		if ( $this->managing_stock() ) {
+			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				$status = 'outofstock';
+			}
+		}
+		
 		if ( update_post_meta( $this->id, '_stock_status', $status ) ) {
 			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
 		}
@@ -502,30 +506,12 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		if ( $this->managing_stock() ) {
-
-			if ( $this->backorders_allowed() ) {
-				return true;
-			} else {
-				if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-					return false;
-				} else {
-					if ( $this->stock_status === 'instock' ) {
-						return true;
-					} else {
-						return false;
-					}
-				}
-			}
-
+		if ( $this->managing_stock() && $this->backorders_allowed() ) {
+			return true;
+		} elseif ( $this->managing_stock() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			return false;
 		} else {
-
-			if ( $this->stock_status === 'instock' ) {
-				return true;
-			} else {
-				return false;
-			}
-
+			return $this->stock_status === 'instock';
 		}
 	}
 

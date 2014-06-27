@@ -50,7 +50,7 @@ jQuery( function ( $ ) {
 				'fadeOut': 50
 			});
 
-			$( 'input.variable_is_downloadable, input.variable_is_virtual' ).change();
+			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
 
 			$( '.woocommerce_variations' ).unblock();
 			$( '#variable_product_options' ).trigger( 'woocommerce_variations_added' );
@@ -178,6 +178,11 @@ jQuery( function ( $ ) {
 				checkbox.attr( 'checked', ! checkbox.attr( 'checked' ) );
 				$( 'input.variable_is_virtual' ).change();
 			break;
+			case 'toggle_manage_stock' :
+				checkbox = $('input[name^="variable_manage_stock"]');
+				checkbox.attr( 'checked', ! checkbox.attr( 'checked' ) );
+				$( 'input.variable_manage_stock' ).change();
+			break;
 			case 'delete_all' :
 				answer = window.confirm( woocommerce_admin_meta_boxes_variations.i18n_delete_all_variations );
 
@@ -271,26 +276,30 @@ jQuery( function ( $ ) {
 	});
 
 	$( '#variable_product_options' ).on( 'change', 'input.variable_is_downloadable', function () {
-
 		$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_downloadable' ).hide();
 
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_downloadable' ).show();
 		}
-
 	});
 
 	$( '#variable_product_options' ).on( 'change', 'input.variable_is_virtual', function () {
-
 		$( this ).closest( '.woocommerce_variation' ).find( '.hide_if_variation_virtual' ).show();
 
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( '.woocommerce_variation' ).find( '.hide_if_variation_virtual' ).hide();
 		}
-
 	});
 
-	$( 'input.variable_is_downloadable, input.variable_is_virtual' ).change();
+	$( '#variable_product_options' ).on( 'change', 'input.variable_manage_stock', function () {
+		$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).hide();
+
+		if ( $( this ).is( ':checked' ) ) {
+			$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).show();
+		}
+	});
+
+	$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
 
 	// Ordering
 	$( '#variable_product_options' ).on( 'woocommerce_variations_added', function () {

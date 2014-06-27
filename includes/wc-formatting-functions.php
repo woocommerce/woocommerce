@@ -267,6 +267,15 @@ function wc_array_overlay( $a1, $a2 ) {
 }
 
 /**
+ * Formats a stock amount by running it through a filter
+ * @param  int|float $amount
+ * @return int|float
+ */
+function wc_stock_amount( $amount ) {
+	return apply_filters( 'woocommerce_stock_amount', $amount );
+}
+
+/**
  * Get the price format depending on the currency position
  *
  * @return string

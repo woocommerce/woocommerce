@@ -627,7 +627,7 @@ class WC_Query {
 	public function stock_status_meta_query( $status = 'instock' ) {
 		$meta_query = array();
 		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
-			 $meta_query = array(
+			$meta_query = array(
 		        'key' 		=> '_stock_status',
 				'value' 	=> $status,
 				'compare' 	=> '='
