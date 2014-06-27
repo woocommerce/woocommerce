@@ -564,14 +564,15 @@ class WC_Product {
 	 * @access public
 	 * @return string
 	 */
-	public function get_availability() {
+	public function get_availability( $quantity = 1 ) {
 
 		$availability = $class = "";
 
 		if ( $this->managing_stock() ) {
+
 			if ( $this->is_in_stock() ) {
 
-				if ( $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				if ( $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) && $this->get_total_stock() >= $quantity ) {
 
 					$format_option = get_option( 'woocommerce_stock_format' );
 
