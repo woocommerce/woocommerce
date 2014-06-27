@@ -527,8 +527,8 @@ class WC_Countries {
 			),
 			'state'              => array(
 				'type'        => 'state',
-				'label'       => __( 'State / County', 'woocommerce' ),
-				'placeholder' => __( 'State / County', 'woocommerce' ),
+				'label'       => __( 'State / Country', 'woocommerce' ),
+				'placeholder' => __( 'State / Country', 'woocommerce' ),
 				'required'    => true,
 				'class'       => array( 'form-row-first', 'address-field' ),
 				'validate'    => array( 'state' )
@@ -696,7 +696,7 @@ class WC_Countries {
 				),
 				'HU' => array(
 					'state' => array(
-					    'label'         => __( 'County', 'woocommerce' ),
+					    'label'         => __( 'Country', 'woocommerce' ),
 					)
 				),
 				'ID' => array(
@@ -827,7 +827,7 @@ class WC_Countries {
 						'label' 		=> __( 'Postcode', 'woocommerce' ),
 					),
 					'state'		=> array(
-						'label' 		=> __( 'County', 'woocommerce' ),
+						'label' 		=> __( 'Country', 'woocommerce' ),
 						'required' 		=> false
 					)
 				),
