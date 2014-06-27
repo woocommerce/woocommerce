@@ -438,7 +438,7 @@
 			<tr>
 				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
 				<td><?php
-					if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+					if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
 						echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
