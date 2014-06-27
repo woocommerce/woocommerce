@@ -1056,20 +1056,9 @@ class WC_Meta_Box_Product_Data {
 			update_post_meta( $post_id, '_sku', '' );
 		} elseif ( $new_sku !== $sku ) {
 			if ( ! empty( $new_sku ) ) {
-				if (
-					$wpdb->get_var( $wpdb->prepare("
-						SELECT $wpdb->posts.ID
-						FROM $wpdb->posts
-						LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-						WHERE $wpdb->posts.post_type = 'product'
-						AND $wpdb->posts.post_status = 'publish'
-						AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
-						AND $wpdb->postmeta.post_id <> $post_id LIMIT 1
-					 ", $new_sku ) )
-					) {
-
+				$unique_sku = wc_product_has_unique_sku( $post_id, $new_sku );
+				if ( ! $unique_sku ) {
 					WC_Admin_Meta_Boxes::add_error( __( 'Product SKU must be unique.', 'woocommerce' ) );
-
 				} else {
 					update_post_meta( $post_id, '_sku', $new_sku );
 				}
@@ -1506,20 +1495,9 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_sku', '' );
 				} elseif ( $new_sku !== $sku ) {
 					if ( ! empty( $new_sku ) ) {
-						if (
-							$wpdb->get_var( $wpdb->prepare( "
-								SELECT $wpdb->posts.ID
-								FROM $wpdb->posts
-								LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-								WHERE $wpdb->posts.post_type IN ('product', 'product_variation')
-								AND $wpdb->posts.post_status = 'publish'
-								AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
-								AND $wpdb->postmeta.post_id <> %d LIMIT 1
-							 ", $new_sku, $variation_id ) )
-							) {
-
+						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
+						if ( ! $unique_sku ) {
 							WC_Admin_Meta_Boxes::add_error( __( 'Variation SKU must be unique.', 'woocommerce' ) );
-
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
