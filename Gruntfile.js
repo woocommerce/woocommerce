@@ -113,6 +113,9 @@ module.exports = function( grunt ){
 					'tx pull -a -f',
 				].join( '&&' )
 			},
+			txpush: {
+				command: 'tx pull -a -f' // push the resources/pot files
+			},
 			generatemos: {
 				command: [
 					'cd i18n/languages',
@@ -186,8 +189,13 @@ module.exports = function( grunt ){
 		'shell:generatepot'
 	]);
 
+	grunt.registerTask( 'pot_push', [
+		'pot',
+		'txpush'
+	]);
+
 	grunt.registerTask( 'docs', [
-		'clean:apigen', 
+		'clean:apigen',
 		'shell:apigen'
 	]);
 
@@ -197,8 +205,8 @@ module.exports = function( grunt ){
 		'shell:generatemos'
 	]);
 
-	grunt.registerTask( 'deploy', [ 
-		'clean:deploy', 
+	grunt.registerTask( 'deploy', [
+		'clean:deploy',
 		'copy:deploy'
 	]);
 
