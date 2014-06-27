@@ -1,0 +1,14 @@
+[main]
+host = https://www.transifex.com
+
+[woocommerce.woocommerce-admin-pot]
+file_filter = i18n/languages/woocommerce-admin-<lang>.po
+source_file = i18n/languages/woocommerce-admin.pot
+source_lang = en
+type = PO
+
+[woocommerce.woocommerce-pot]
+file_filter = i18n/languages/woocommerce-<lang>.po
+source_file = i18n/languages/woocommerce.pot
+source_lang = en
+type = PO
