@@ -255,9 +255,9 @@ class WC_Meta_Box_Product_Data {
 						$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 						$classes_options = array();
 						$classes_options[''] = __( 'Standard', 'woocommerce' );
-			    		if ( $tax_classes )
-			    			foreach ( $tax_classes as $class )
-			    				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
+						if ( $tax_classes )
+							foreach ( $tax_classes as $class )
+								$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
 
 						woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
 
@@ -309,9 +309,9 @@ class WC_Meta_Box_Product_Data {
 					'instock' => __( 'In stock', 'woocommerce' ),
 					'outofstock' => __( 'Out of stock', 'woocommerce' )
 				), 'desc_tip' => true, 'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ) ) );
-				
+
 				do_action('woocommerce_product_options_stock_status');
-				
+
 				echo '</div>';
 
 				echo '<div class="options_group show_if_simple show_if_variable">';
@@ -322,7 +322,7 @@ class WC_Meta_Box_Product_Data {
 				do_action('woocommerce_product_options_sold_individually');
 
 				echo '</div>';
-				
+
 				do_action( 'woocommerce_product_options_inventory_product_data' );
 				?>
 
@@ -398,30 +398,30 @@ class WC_Meta_Box_Product_Data {
 
 						// Taxonomies
 						if ( $attribute_taxonomies ) {
-					    	foreach ( $attribute_taxonomies as $tax ) {
+							foreach ( $attribute_taxonomies as $tax ) {
 
-					    		// Get name of taxonomy we're now outputting (pa_xxx)
-					    		$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
+								// Get name of taxonomy we're now outputting (pa_xxx)
+								$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
 
-					    		// Ensure it exists
-					    		if ( ! taxonomy_exists( $attribute_taxonomy_name ) )
-					    			continue;
+								// Ensure it exists
+								if ( ! taxonomy_exists( $attribute_taxonomy_name ) )
+									continue;
 
-					    		$i++;
+								$i++;
 
-					    		// Get product data values for current taxonomy - this contains ordering and visibility data
-					    		if ( isset( $attributes[ sanitize_title( $attribute_taxonomy_name ) ] ) )
-					    			$attribute = $attributes[ sanitize_title( $attribute_taxonomy_name ) ];
+								// Get product data values for current taxonomy - this contains ordering and visibility data
+								if ( isset( $attributes[ sanitize_title( $attribute_taxonomy_name ) ] ) )
+									$attribute = $attributes[ sanitize_title( $attribute_taxonomy_name ) ];
 
-					    		$position = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
+								$position = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
 
-					    		// Get terms of this taxonomy associated with current product
-					    		$post_terms = wp_get_post_terms( $thepostid, $attribute_taxonomy_name );
+								// Get terms of this taxonomy associated with current product
+								$post_terms = wp_get_post_terms( $thepostid, $attribute_taxonomy_name );
 
-					    		// Any set?
-					    		$has_terms = ( is_wp_error( $post_terms ) || ! $post_terms || sizeof( $post_terms ) == 0 ) ? 0 : 1;
-					    		?>
-					    		<div class="woocommerce_attribute wc-metabox closed taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if ( ! $has_terms ) echo 'style="display:none"'; ?>>
+								// Any set?
+								$has_terms = ( is_wp_error( $post_terms ) || ! $post_terms || sizeof( $post_terms ) == 0 ) ? 0 : 1;
+								?>
+								<div class="woocommerce_attribute wc-metabox closed taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if ( ! $has_terms ) echo 'style="display:none"'; ?>>
 									<h3>
 										<button type="button" class="remove_row button"><?php _e( 'Remove', 'woocommerce' ); ?></button>
 										<div class="handlediv" title="<?php _e( 'Click to toggle', 'woocommerce' ); ?>"></div>
@@ -443,11 +443,11 @@ class WC_Meta_Box_Product_Data {
 													<?php if ( $tax->attribute_type == "select" ) : ?>
 														<select multiple="multiple" data-placeholder="<?php _e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values" name="attribute_values[<?php echo $i; ?>][]">
 															<?php
-								        					$all_terms = get_terms( $attribute_taxonomy_name, 'orderby=name&hide_empty=0' );
-							        						if ( $all_terms ) {
-								        						foreach ( $all_terms as $term ) {
-								        							$has_term = has_term( (int) $term->term_id, $attribute_taxonomy_name, $thepostid ) ? 1 : 0;
-								        							echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $has_term, 1, false ) . '>' . $term->name . '</option>';
+															$all_terms = get_terms( $attribute_taxonomy_name, 'orderby=name&hide_empty=0' );
+															if ( $all_terms ) {
+																foreach ( $all_terms as $term ) {
+																	$has_term = has_term( (int) $term->term_id, $attribute_taxonomy_name, $thepostid ) ? 1 : 0;
+																	echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $has_term, 1, false ) . '>' . $term->name . '</option>';
 																}
 															}
 															?>
@@ -502,9 +502,9 @@ class WC_Meta_Box_Product_Data {
 										</tbody>
 									</table>
 								</div>
-					    		<?php
-					    	}
-					    }
+								<?php
+							}
+						}
 
 						// Custom Attributes
 						if ( ! empty( $attributes ) ) foreach ( $attributes as $attribute ) {
@@ -513,9 +513,9 @@ class WC_Meta_Box_Product_Data {
 
 							$i++;
 
-				    		$position = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
+							$position = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
 							?>
-				    		<div class="woocommerce_attribute wc-metabox closed" rel="<?php echo $position; ?>">
+							<div class="woocommerce_attribute wc-metabox closed" rel="<?php echo $position; ?>">
 								<h3>
 									<button type="button" class="remove_row button"><?php _e( 'Remove', 'woocommerce' ); ?></button>
 									<div class="handlediv" title="<?php _e( 'Click to toggle', 'woocommerce' ); ?>"></div>
@@ -561,12 +561,12 @@ class WC_Meta_Box_Product_Data {
 						<option value=""><?php _e( 'Custom product attribute', 'woocommerce' ); ?></option>
 						<?php
 							if ( $attribute_taxonomies ) {
-						    	foreach ( $attribute_taxonomies as $tax ) {
-						    		$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
-						    		$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
-						    		echo '<option value="' . esc_attr( $attribute_taxonomy_name ) . '">' . esc_html( $label ) . '</option>';
-						    	}
-						    }
+								foreach ( $attribute_taxonomies as $tax ) {
+									$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
+									$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
+									echo '<option value="' . esc_attr( $attribute_taxonomy_name ) . '">' . esc_html( $label ) . '</option>';
+								}
+							}
 						?>
 					</select>
 
@@ -733,7 +733,7 @@ class WC_Meta_Box_Product_Data {
 				$tax_class_options[ sanitize_title( $class ) ] = esc_attr( $class );
 			}
 		}
-		
+
 		$backorder_options = array(
 			'no'     => __( 'Do not allow', 'woocommerce' ),
 			'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
@@ -744,7 +744,7 @@ class WC_Meta_Box_Product_Data {
 			'instock'    => __( 'In stock', 'woocommerce' ),
 			'outofstock' => __( 'Out of stock', 'woocommerce' )
 		);
-		
+
 		?>
 		<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
 
@@ -870,7 +870,7 @@ class WC_Meta_Box_Product_Data {
 						foreach ( $variation_fields as $field ) {
 							$$field = isset( $variation_data[ $field ][0] ) ? maybe_unserialize( $variation_data[ $field ][0] ) : '';
 						}
-						
+
 						$_backorders = isset( $variation_data['_backorders'][0] ) ? $variation_data['_backorders'][0] : null;
 						$_tax_class  = isset( $variation_data['_tax_class'][0] ) ? $variation_data['_tax_class'][0] : null;
 						$image_id    = absint( $_thumbnail_id );
@@ -971,7 +971,7 @@ class WC_Meta_Box_Product_Data {
 		if ( isset( $_POST['_tax_status'] ) ) update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
 		if ( isset( $_POST['_tax_class'] ) ) update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
 		if ( isset( $_POST['_purchase_note'] ) ) update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
-			
+
 		// Featured
 		if ( update_post_meta( $post_id, '_featured', isset( $_POST['_featured'] ) ? 'yes' : 'no' ) ) {
 			delete_transient( 'wc_featured_products' );
@@ -1014,12 +1014,12 @@ class WC_Meta_Box_Product_Data {
 				if (
 					$wpdb->get_var( $wpdb->prepare("
 						SELECT $wpdb->posts.ID
-					    FROM $wpdb->posts
-					    LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-					    WHERE $wpdb->posts.post_type = 'product'
-					    AND $wpdb->posts.post_status = 'publish'
-					    AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
-					    AND $wpdb->postmeta.post_id <> $post_id LIMIT 1
+						FROM $wpdb->posts
+						LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+						WHERE $wpdb->posts.post_type = 'product'
+						AND $wpdb->posts.post_status = 'publish'
+						AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
+						AND $wpdb->postmeta.post_id <> $post_id LIMIT 1
 					 ", $new_sku ) )
 					) {
 
@@ -1063,61 +1063,61 @@ class WC_Meta_Box_Product_Data {
 
 					if ( isset( $attribute_values[ $i ] ) ) {
 
-				 		// Select based attributes - Format values (posted values are slugs)
-				 		if ( is_array( $attribute_values[ $i ] ) ) {
-					 		$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
+						// Select based attributes - Format values (posted values are slugs)
+						if ( is_array( $attribute_values[ $i ] ) ) {
+							$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
 
-					 	// Text based attributes - Posted values are term names - don't change to slugs
-					 	} else {
-					 		$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
-					 	}
+						// Text based attributes - Posted values are term names - don't change to slugs
+						} else {
+							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
+						}
 
-					 	// Remove empty items in the array
-					 	$values = array_filter( $values, 'strlen' );
+						// Remove empty items in the array
+						$values = array_filter( $values, 'strlen' );
 
-				 	} else {
-				 		$values = array();
-				 	}
+					} else {
+						$values = array();
+					}
 
-			 		// Update post terms
-			 		if ( taxonomy_exists( $attribute_names[ $i ] ) )
-			 			wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
+					// Update post terms
+					if ( taxonomy_exists( $attribute_names[ $i ] ) )
+						wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
 
-			 		if ( $values ) {
-				 		// Add attribute to array, but don't set values
-				 		$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-					 		'name' 			=> wc_clean( $attribute_names[ $i ] ),
-					 		'value' 		=> '',
-					 		'position' 		=> $attribute_position[ $i ],
-					 		'is_visible' 	=> $is_visible,
-					 		'is_variation' 	=> $is_variation,
-					 		'is_taxonomy' 	=> $is_taxonomy
-					 	);
-				 	}
+					if ( $values ) {
+						// Add attribute to array, but don't set values
+						$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
+							'name' 			=> wc_clean( $attribute_names[ $i ] ),
+							'value' 		=> '',
+							'position' 		=> $attribute_position[ $i ],
+							'is_visible' 	=> $is_visible,
+							'is_variation' 	=> $is_variation,
+							'is_taxonomy' 	=> $is_taxonomy
+						);
+					}
 
-			 	} elseif ( isset( $attribute_values[ $i ] ) ) {
+				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
-			 		// Text based, separate by pipe
-			 		$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
+					// Text based, separate by pipe
+					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
 
-			 		// Custom attribute - Add attribute to array and set the values
-				 	$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
-				 		'name' 			=> wc_clean( $attribute_names[ $i ] ),
-				 		'value' 		=> $values,
-				 		'position' 		=> $attribute_position[ $i ],
-				 		'is_visible' 	=> $is_visible,
-				 		'is_variation' 	=> $is_variation,
-				 		'is_taxonomy' 	=> $is_taxonomy
-				 	);
-			 	}
+					// Custom attribute - Add attribute to array and set the values
+					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
+						'name' 			=> wc_clean( $attribute_names[ $i ] ),
+						'value' 		=> $values,
+						'position' 		=> $attribute_position[ $i ],
+						'is_visible' 	=> $is_visible,
+						'is_variation' 	=> $is_variation,
+						'is_taxonomy' 	=> $is_taxonomy
+					);
+				}
 
 			 }
 		}
 
 		if ( ! function_exists( 'attributes_cmp' ) ) {
 			function attributes_cmp( $a, $b ) {
-			    if ( $a['position'] == $b['position'] ) return 0;
-			    return ( $a['position'] < $b['position'] ) ? -1 : 1;
+				if ( $a['position'] == $b['position'] ) return 0;
+				return ( $a['position'] < $b['position'] ) ? -1 : 1;
 			}
 		}
 		uasort( $attributes, 'attributes_cmp' );
@@ -1368,7 +1368,7 @@ class WC_Meta_Box_Product_Data {
 			$variable_menu_order            = $_POST['variation_menu_order'];
 			$variable_sale_price_dates_from = $_POST['variable_sale_price_dates_from'];
 			$variable_sale_price_dates_to   = $_POST['variable_sale_price_dates_to'];
-			
+
 			$variable_weight                = isset( $_POST['variable_weight'] ) ? $_POST['variable_weight'] : array();
 			$variable_length                = isset( $_POST['variable_length'] ) ? $_POST['variable_length'] : array();
 			$variable_width                 = isset( $_POST['variable_width'] ) ? $_POST['variable_width'] : array();
@@ -1376,7 +1376,7 @@ class WC_Meta_Box_Product_Data {
 			$variable_enabled               = isset( $_POST['variable_enabled'] ) ? $_POST['variable_enabled'] : array();
 			$variable_is_virtual            = isset( $_POST['variable_is_virtual'] ) ? $_POST['variable_is_virtual'] : array();
 			$variable_is_downloadable       = isset( $_POST['variable_is_downloadable'] ) ? $_POST['variable_is_downloadable'] : array();
-			
+
 			$variable_manage_stock          = isset( $_POST['variable_manage_stock'] ) ? $_POST['variable_manage_stock'] : array();
 			$variable_stock                 = isset( $_POST['variable_stock'] ) ? $_POST['variable_stock'] : array();
 			$variable_backorders            = isset( $_POST['variable_backorders'] ) ? $_POST['variable_backorders'] : array();
@@ -1391,13 +1391,13 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				$variation_id         = absint( $variable_post_id[ $i ] );
-				
+
 				// Checkboxes
 				$is_virtual           = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
 				$is_downloadable      = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
 				$post_status          = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
 				$manage_stock         = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
-				
+
 				// Generate a useful post title
 				$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), absint( $variation_id ), esc_html( get_the_title( $post_id ) ) );
 
@@ -1431,8 +1431,37 @@ class WC_Meta_Box_Product_Data {
 					continue;
 				}
 
+				// Unique SKU
+				$sku     = get_post_meta( $variation_id, '_sku', true );
+				$new_sku = wc_clean( stripslashes( $variable_sku[ $i ] ) );
+
+				if ( $new_sku == '' ) {
+					update_post_meta( $variation_id, '_sku', '' );
+				} elseif ( $new_sku !== $sku ) {
+					if ( ! empty( $new_sku ) ) {
+						if (
+							$wpdb->get_var( $wpdb->prepare( "
+								SELECT $wpdb->posts.ID
+								FROM $wpdb->posts
+								LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+								WHERE $wpdb->posts.post_type IN ('product', 'product_variation')
+								AND $wpdb->posts.post_status = 'publish'
+								AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
+								AND $wpdb->postmeta.post_id <> %d LIMIT 1
+							 ", $new_sku, $variation_id ) )
+							) {
+
+							WC_Admin_Meta_Boxes::add_error( __( 'Variation SKU must be unique.', 'woocommerce' ) );
+
+						} else {
+							update_post_meta( $variation_id, '_sku', $new_sku );
+						}
+					} else {
+						update_post_meta( $variation_id, '_sku', '' );
+					}
+				}
+
 				// Update post meta
-				update_post_meta( $variation_id, '_sku', wc_clean( $variable_sku[ $i ] ) );
 				update_post_meta( $variation_id, '_thumbnail_id', absint( $upload_image_id[ $i ] ) );
 				update_post_meta( $variation_id, '_virtual', wc_clean( $is_virtual ) );
 				update_post_meta( $variation_id, '_downloadable', wc_clean( $is_downloadable ) );
