@@ -293,19 +293,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'charset'       => 'UTF-8',
 				'rm'            => is_ssl() ? 2 : 1,
 				'upload'        => 1,
-				'return'        => esc_url( add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ) ),
-				'cancel_return' => esc_url( $order->get_cancel_order_url() ),
+				'return'        => urlencode( esc_url( add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ) ) ),
+				'cancel_return' => urlencode( esc_url( $order->get_cancel_order_url() ) ),
 				'page_style'    => $this->page_style,
 				'paymentaction' => $this->paymentaction,
 				'bn'            => 'WooThemes_Cart',
-				
+
 				// Order key + ID
 				'invoice'       => $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
 				'custom'        => serialize( array( $order_id, $order->order_key ) ),
-				
+
 				// IPN
 				'notify_url'    => $this->notify_url,
-				
+
 				// Billing Address info
 				'first_name'    => $order->billing_first_name,
 				'last_name'     => $order->billing_last_name,
@@ -949,7 +949,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		$states = WC()->countries->get_states( $cc );
-		
+
 		if ( isset( $states[ $state ] ) ) {
 			return $states[ $state ];
 		}
