@@ -140,12 +140,6 @@ class WC_Meta_Box_Order_Data {
 
 		self::init_address_fields();
 
-		if ( WC()->payment_gateways() ) {
-			$payment_gateways = WC()->payment_gateways->payment_gateways();
-		}
-
-		$payment_method = ! empty( $order->payment_method ) ? $order->payment_method : '';
-
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
 		<style type="text/css">
@@ -156,24 +150,13 @@ class WC_Meta_Box_Order_Data {
 			<input name="post_status" type="hidden" value="publish" />
 			<div id="order_data" class="panel">
 
-				<h2><?php printf( __( 'Order %s details', 'woocommerce' ), esc_html( $order->get_order_number() ) ); ?></h2>
+				<h2><?php _e( 'Order Details', 'woocommerce' ); ?></h2>
 				<p class="order_number"><?php
 
-					if ( $payment_method ) {
-						printf( __( 'Payment via %s', 'woocommerce' ), ( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) ) );
-
-						if ( $transaction_id = get_post_meta( $order->id, '_transaction_id', true ) ) {
-								if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $transaction_id ) ) ) {
-								echo ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
-							} else {
-								echo ' (' . esc_html( $transaction_id ) . ')';
-							}
-						}
-						echo '. ';
-					}
+					echo __( 'Order number', 'woocommerce' ) . ' ' . esc_html( $order->get_order_number() ) . '. ';
 
 					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) ) {
-						echo __( 'Customer IP', 'woocommerce' ) . ': ' . esc_html( $ip_address );
+						echo __( 'Customer IP:', 'woocommerce' ) . ' ' . esc_html( $ip_address );
 					}
 				?></p>
 
@@ -234,6 +217,20 @@ class WC_Meta_Box_Order_Data {
 									}
 								}
 
+								if ( WC()->payment_gateways() ) {
+									$payment_gateways = WC()->payment_gateways->payment_gateways();
+								}
+
+								$payment_method = ! empty( $order->payment_method ) ? $order->payment_method : '';
+
+								if ( $payment_method ) {
+									echo '<p><strong>' . __( 'Payment Method', 'woocommerce' ) . ':</strong> ' . ( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) ) . '</p>';
+								}
+
+								if ( $transaction_id = get_post_meta( $order->id, '_transaction_id', true ) ) {
+									echo '<p><strong>' . __( 'Payment Transaction ID', 'woocommerce' ) . ':</strong> ' . esc_html( $transaction_id ) . '</p>';
+								}
+
 							echo '</div>';
 
 							// Display form
@@ -280,8 +277,6 @@ class WC_Meta_Box_Order_Data {
 								</select>
 							</p>
 							<?php
-
-							woocommerce_wp_text_input( array( 'id' => '_transaction_id', 'label' => __( 'Transaction ID', 'woocommerce' ) ) );
 
 							echo '</div>';
 
@@ -408,10 +403,6 @@ class WC_Meta_Box_Order_Data {
 			foreach ( self::$shipping_fields as $key => $field ) {
 				update_post_meta( $post_id, '_shipping_' . $key, wc_clean( $_POST[ '_shipping_' . $key ] ) );
 			}
-		}
-
-		if ( isset( $_POST['_transaction_id'] ) ) {
-			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST[ '_transaction_id' ] ) );
 		}
 
 		// Payment method handling

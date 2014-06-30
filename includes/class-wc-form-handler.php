@@ -84,36 +84,33 @@ class WC_Form_Handler {
 				wc_add_notice( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
 
-			if ( ! empty( $_POST[ $key ] ) ) {
+			// Validation rules
+			if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
+				foreach ( $field['validate'] as $rule ) {
+					switch ( $rule ) {
+						case 'postcode' :
+							$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
 
-				// Validation rules
-				if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
-					foreach ( $field['validate'] as $rule ) {
-						switch ( $rule ) {
-							case 'postcode' :
-								$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
+							if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) {
+								wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
+							} else {
+								$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
+							}
+						break;
+						case 'phone' :
+							$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
 
-								if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) {
-									wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
-								} else {
-									$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
-								}
-							break;
-							case 'phone' :
-								$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
+							if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
+								wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
+							}
+						break;
+						case 'email' :
+							$_POST[ $key ] = strtolower( $_POST[ $key ] );
 
-								if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
-									wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
-								}
-							break;
-							case 'email' :
-								$_POST[ $key ] = strtolower( $_POST[ $key ] );
-
-								if ( ! is_email( $_POST[ $key ] ) ) {
-									wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
-								}
-							break;
-						}
+							if ( ! is_email( $_POST[ $key ] ) ) {
+								wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
+							}
+						break;
 					}
 				}
 			}
@@ -406,7 +403,7 @@ class WC_Form_Handler {
 					}
 
 					// Sanitize
-					$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', wc_stock_amount( preg_replace( "/[^0-9\.]/", '', $cart_totals[ $cart_item_key ]['qty'] ) ), $cart_item_key );
+					$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', apply_filters( 'woocommerce_stock_amount', preg_replace( "/[^0-9\.]/", '', $cart_totals[ $cart_item_key ]['qty'] ) ), $cart_item_key );
 
 					if ( '' === $quantity || $quantity == $values['quantity'] )
 						continue;
@@ -571,7 +568,7 @@ class WC_Form_Handler {
 		if ( 'variable' === $add_to_cart_handler ) {
 
 			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
-			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
+			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
 			$all_variations_set = true;
 			$variations         = array();
 
@@ -686,7 +683,7 @@ class WC_Form_Handler {
 		// Simple Products
 		} else {
 
-			$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
+			$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
 
 			// Add to cart validation
 			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );

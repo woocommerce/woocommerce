@@ -34,19 +34,20 @@ class WC_Shipping {
 	var $packages					= array();
 
 	/**
-	 * @var WC_Shipping The single instance of the class
+	 * @var WooCommerce The single instance of the class
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
 
 	/**
-	 * Main WC_Shipping Instance
+	 * Main WooCommerce Instance
 	 *
-	 * Ensures only one instance of WC_Shipping is loaded or can be loaded.
+	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
 	 *
 	 * @since 2.1
 	 * @static
-	 * @return WC_Shipping Main instance
+	 * @see WC()
+	 * @return Main WooCommerce instance
 	 */
 	public static function instance() {
 		if ( is_null( self::$_instance ) )

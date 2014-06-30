@@ -87,13 +87,11 @@ $header_content_h1 = "
         	<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
             	<tr>
                 	<td align="center" valign="top">
-						<div id="template_header_image">
-	                		<?php
-	                			if ( $img = get_option( 'woocommerce_email_header_image' ) ) {
-	                				echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . get_bloginfo( 'name' ) . '" /></p>';
-	                			}
-	                		?>
-						</div>
+                		<?php
+                			if ( $img = get_option( 'woocommerce_email_header_image' ) ) {
+                				echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . get_bloginfo( 'name' ) . '" /></p>';
+                			}
+                		?>
                     	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_container" style="<?php echo $template_container; ?>">
                         	<tr>
                             	<td align="center" valign="top">

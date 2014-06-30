@@ -72,9 +72,19 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Output headers for JSON requests
+	 */
+	private static function json_headers() {
+		header( 'Content-Type: application/json; charset=utf-8' );
+	}
+
+
+	/**
 	 * Get a refreshed cart fragment
 	 */
 	public static function get_refreshed_fragments() {
+
+		self::json_headers();
 
 		// Get mini cart
 		ob_start();
@@ -92,8 +102,9 @@ class WC_AJAX {
 			'cart_hash' => WC()->cart->get_cart() ? md5( json_encode( WC()->cart->get_cart() ) ) : ''
 		);
 
-		wp_send_json( $data );
+		echo json_encode( $data );
 
+		die();
 	}
 
 	/**
@@ -259,7 +270,7 @@ class WC_AJAX {
 	 */
 	public static function add_to_cart() {
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
-		$quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( $_POST['quantity'] );
+		$quantity          = empty( $_POST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_POST['quantity'] );
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) ) {
@@ -275,14 +286,15 @@ class WC_AJAX {
 
 		} else {
 
+			self::json_headers();
+
 			// If there was an error adding to the cart, redirect to the product page to show any errors
 			$data = array(
 				'error' => true,
 				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id )
 			);
 
-			wp_send_json( $data );
-
+			echo json_encode( $data );
 		}
 
 		die();
@@ -391,6 +403,8 @@ class WC_AJAX {
 
 		check_ajax_referer( 'add-attribute', 'security' );
 
+		self::json_headers();
+
 		$taxonomy = esc_attr( $_POST['taxonomy'] );
 		$term     = stripslashes( $_POST['term'] );
 
@@ -399,15 +413,15 @@ class WC_AJAX {
 			$result = wp_insert_term( $term, $taxonomy );
 
 			if ( is_wp_error( $result ) ) {
-				wp_send_json( array(
+				echo json_encode( array(
 					'error' => $result->get_error_message()
-				) );
+				));
 			} else {
-				wp_send_json( array(
+				echo json_encode( array(
 					'term_id' => $result['term_id'],
 					'name'    => $term,
 					'slug'    => sanitize_title( $term ),
-				) );
+				));
 			}
 		}
 
@@ -679,7 +693,7 @@ class WC_AJAX {
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
 			if ( $attribute['is_taxonomy'] ) {
-				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'names' ) );
+				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'slugs' ) );
 			} else {
 				$options = explode( WC_DELIMITER, $attribute['value'] );
 			}
@@ -892,6 +906,8 @@ class WC_AJAX {
 
 		check_ajax_referer( 'get-customer-details', 'security' );
 
+		self::json_headers();
+
 		$user_id      = (int) trim(stripslashes($_POST['user_id']));
 		$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
 
@@ -911,8 +927,10 @@ class WC_AJAX {
 
 		$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer_data );
 
-		wp_send_json( $customer_data );
+		echo json_encode( $customer_data );
 
+		// Quit out
+		die();
 	}
 
 	/**
@@ -1165,7 +1183,7 @@ class WC_AJAX {
 
 		check_ajax_referer( 'calc-totals', 'security' );
 
-		$tax      = new WC_Tax();
+		self::json_headers();
 
 		$taxes    = $tax_rows = $item_taxes = $shipping_taxes = array();
 		$order_id = absint( $_POST['order_id'] );
@@ -1262,13 +1280,16 @@ class WC_AJAX {
 
 		$tax_row_html = ob_get_clean();
 
-		wp_send_json( array(
+		// Return
+		echo json_encode( array(
 			'item_tax'     => $item_tax,
 			'item_taxes'   => $item_taxes,
 			'shipping_tax' => $shipping_tax,
 			'tax_row_html' => $tax_row_html
 		) );
 
+		// Quit out
+		die();
 	}
 
 	/**
@@ -1328,6 +1349,8 @@ class WC_AJAX {
 	public static function json_search_products( $x = '', $post_types = array('product') ) {
 
 		check_ajax_referer( 'search-products', 'security' );
+
+		self::json_headers();
 
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1409,8 +1432,9 @@ class WC_AJAX {
 
 		$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products );
 
-		wp_send_json( $found_products );
+		echo json_encode( $found_products );
 
+		die();
 	}
 
 	/**
@@ -1430,6 +1454,8 @@ class WC_AJAX {
 	public static function json_search_customers() {
 
 		check_ajax_referer( 'search-customers', 'security' );
+
+		self::json_headers();
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1460,8 +1486,8 @@ class WC_AJAX {
 			}
 		}
 
-		wp_send_json( $found_customers );
-
+		echo json_encode( $found_customers );
+		die();
 	}
 
 	/**
@@ -1499,8 +1525,8 @@ class WC_AJAX {
 			}
 		}
 
-		wp_send_json( $found_products );
-
+		echo json_encode( $found_products );
+		die();
 	}
 
 	/**
@@ -1557,6 +1583,8 @@ class WC_AJAX {
 		if ( ! $post = get_post( $_POST['id'] ) ) {
 			die(-1);
 		}
+
+		self::json_headers();
 
 		$previd  = isset( $_POST['previd'] ) ? $_POST['previd'] : false;
 		$nextid  = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
@@ -1623,8 +1651,7 @@ class WC_AJAX {
 
 		}
 
-		wp_send_json( $new_pos );
-
+		die( json_encode( $new_pos ) );
 	}
 }
 

@@ -725,7 +725,7 @@ class WC_Countries {
 				),
 				'JP' => array(
 					'state'		=> array(
-						'label'    => __( 'Prefecture', 'woocommerce' )
+						'label'    => __( 'Province', 'woocommerce' )
 					)
 				),
 				'KR' => array(

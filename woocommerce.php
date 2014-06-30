@@ -157,8 +157,8 @@ final class WooCommerce {
 		}
 		else switch( $key ) {
 			case 'template_url':
-				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'Use WC()->template_path()' );
-				return $this->template_path();
+				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'WC_TEMPLATE_PATH constant' );
+				return WC_TEMPLATE_PATH;
 			case 'messages':
 				_deprecated_argument( 'Woocommerce->messages', '2.1', 'Use wc_get_notices' );
 				return wc_get_notices( 'success' );
@@ -229,19 +229,27 @@ final class WooCommerce {
 	private function define_constants() {
 		define( 'WC_PLUGIN_FILE', __FILE__ );
 		define( 'WC_VERSION', $this->version );
-		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compatibility
+		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compat
+
+		if ( ! defined( 'WC_TEMPLATE_PATH' ) ) {
+			define( 'WC_TEMPLATE_PATH', $this->template_path() );
+		}
 
 		if ( ! defined( 'WC_ROUNDING_PRECISION' ) ) {
 			define( 'WC_ROUNDING_PRECISION', 4 );
 		}
+
 		if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) ) {
 			// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
 			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 );
 		}
+
 		if ( ! defined( 'WC_DELIMITER' ) ) {
 			define( 'WC_DELIMITER', '|' );
 		}
+
 		if ( ! defined( 'WC_LOG_DIR' ) ) {
+			// Absolute path to the folder for logs. Defaults to 1 level above WordPress.
 			define( 'WC_LOG_DIR', dirname( ABSPATH ) . '/wc-logs/' );
 		}
 	}
@@ -423,18 +431,14 @@ final class WooCommerce {
 	 * Ensure theme and server variable compatibility and setup image sizes..
 	 */
 	public function setup_environment() {
-		/**
-		 * @deprecated 2.2 Use WC()->template_path()
-		 */
-		if ( ! defined( 'WC_TEMPLATE_PATH' ) ) {
-			define( 'WC_TEMPLATE_PATH', $this->template_path() );
-		}
-
 		// Post thumbnail support
-		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
-			add_theme_support( 'post-thumbnails' );	
+		if ( ! current_theme_supports( 'post-thumbnails', 'product' ) ) {
+			add_theme_support( 'post-thumbnails' );
+			remove_post_type_support( 'post', 'thumbnail' );
+			remove_post_type_support( 'page', 'thumbnail' );
+		} else {
+			add_post_type_support( 'product', 'thumbnail' );
 		}
-		add_post_type_support( 'product', 'thumbnail' );
 
 		// Add image sizes
 		$shop_thumbnail = wc_get_image_size( 'shop_thumbnail' );
@@ -494,7 +498,7 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function template_path() {
-		return apply_filters( 'woocommerce_template_path', 'woocommerce/' );
+		return apply_filters( 'WC_TEMPLATE_PATH', 'woocommerce/' );
 	}
 
 	/**

@@ -17,43 +17,40 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/** @var string Payment method ID. */
-	public $id;
+	var $id;
 
 	/** @var string Set if the place order button should be renamed on selection. */
-	public $order_button_text;
+	var $order_button_text;
 
 	/** @var string Payment method title. */
-	public $title;
+	var $title;
 
 	/** @var string Chosen payment method id. */
-	public $chosen;
+	var $chosen;
 
 	/** @var bool True if the gateway shows fields on the checkout. */
-	public $has_fields;
+	var $has_fields;
 
 	/** @var array Array of countries this gateway is allowed for. */
-	public $countries;
+	var $countries;
 
 	/** @var string Available for all counties or specific. */
-	public $availability;
+	var $availability;
 
 	/** @var string 'yes' if the method is enabled. */
-	public $enabled;
+	var $enabled;
 
 	/** @var string Icon for the gateway. */
-	public $icon;
+	var $icon;
 
 	/** @var string Description for the gateway. */
-	public $description;
+	var $description;
 
 	/** @var array Array of supported features such as 'default_credit_card_form' */
-	public $supports		= array( 'products' );
+	var $supports		= array( 'products' );
 
 	/** @var int Maximum transaction amount, zero does not define a maximum */
 	public $max_amount = 0;
-
-	/** @var string Optional URL to view a transaction */
-	public $view_transaction_url = '';
 
 	/**
 	 * Get the return url (thank you page)
@@ -75,19 +72,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 		return apply_filters( 'woocommerce_get_return_url', $return_url );
 	}
-
-	/**
-	 * Get a link to the transaction on the 3rd party gateway size (if applicable)
-	 * @param  string $transaction_id
-	 * @return string
-	 */
-	public function get_transaction_url( $transaction_id ) {
-		$return_url = '';
-		if ( ! empty( $this->view_transaction_url ) && ! empty( $transaction_id ) ) {
-			$return_url = sprintf( $this->view_transaction_url, $transaction_id );
-		}
-		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $transaction_id, $this );
-	} 
 
 	/**
 	 * Get the order total in checkout and pay_for_order.

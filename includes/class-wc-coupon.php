@@ -351,24 +351,6 @@ class WC_Coupon {
 				}
 			}
 
-			// Exclude Sale Items check for product coupons - valid if a non-sale item is present
-			if ( 'yes' === $this->exclude_sale_items && in_array( $this->type, array( 'fixed_product', 'percent_product' ) ) ) {
-				$valid_for_cart      = false;
-				$product_ids_on_sale = wc_get_product_ids_on_sale();
-				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-						if ( sizeof( array_intersect( array( absint( $cart_item['product_id'] ), absint( $cart_item['variation_id'] ), $cart_item['data']->get_parent() ), $product_ids_on_sale ) ) === 0 ) {
-							// not on sale
-							$valid_for_cart = true;
-						}
-					}
-				}
-				if ( ! $valid_for_cart ) {
-					$valid = false;
-					$error_code = self::E_WC_COUPON_NOT_VALID_SALE_ITEMS;
-				}
-			}
-
 			// Cart discounts cannot be added if non-eligble product is found in cart
 			if ( $this->type != 'fixed_product' && $this->type != 'percent_product' ) {
 
