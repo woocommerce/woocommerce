@@ -1551,12 +1551,31 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return int
 	 */
 	protected function set_product_image_as_attachment( $upload, $id ) {
-		$info = wp_check_filetype( $upload['file'] );
+		$info    = wp_check_filetype( $upload['file'] );
+		$title   = '';
+		$content = '';
+
+		if ( $image_meta = @wp_read_image_metadata( $upload['file'] ) ) {
+			if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
+				$title = $image_meta['title'];
+			}
+			if ( trim( $image_meta['caption'] ) ) {
+				$content = $image_meta['caption'];
+			}
+		}
+
 		$attachment = array(
-			'guid' => $upload['url'],
 			'post_mime_type' => $info['type'],
+			'guid'           => $upload['url'],
+			'post_parent'    => $id,
+			'post_title'     => $title,
+			'post_content'   => $content
 		);
+
 		$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );
+		if ( ! is_wp_error( $attachment_id ) ) {
+			wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
+		}
 
 		return $attachment_id;
 	}
