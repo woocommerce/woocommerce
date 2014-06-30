@@ -49,7 +49,7 @@ class WC_Post_Data {
 	/**
 	 * When a post status changes
 	 */
-	public static function transition_post_status( $new_status, $old_status, $post ) {
+	public function transition_post_status( $new_status, $old_status, $post ) {
 		if ( ( 'publish' === $new_status || 'publish' === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ) ) ) {
 			self::delete_product_query_transients();
 		}

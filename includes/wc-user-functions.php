@@ -449,7 +449,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			);
 
 			$downloads[] = array(
-				'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/' ) ),
+				'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/', 'http' ) ),
 				'download_id'         => $result->download_id,
 				'product_id'          => $result->product_id,
 				'download_name'       => $download_name,

@@ -57,7 +57,7 @@ class WC_Admin_Notices {
 		if ( in_array( 'theme_support', $notices ) && ! current_theme_supports( 'woocommerce' ) ) {
 			$template = get_option( 'template' );
 
-			if ( ! in_array( $template, wc_get_core_supported_themes() ) ) {
+			if ( ! in_array( $template, array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 				wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 				add_action( 'admin_notices', array( $this, 'theme_check_notice' ) );
 			}

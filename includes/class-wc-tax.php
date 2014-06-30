@@ -257,7 +257,7 @@ class WC_Tax {
 						AND (
 							locations2.location_type = 'city' AND locations2.location_code = %s
 							OR 0 = (
-								SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
+								SELECT COUNT(*) FROM wp_woocommerce_tax_rate_locations as sublocations
 								WHERE sublocations.location_type = 'city'
 								AND sublocations.tax_rate_id = tax_rates.tax_rate_id
 							)
@@ -267,7 +267,7 @@ class WC_Tax {
 						locations.location_type = 'city'
 						AND locations.location_code = %s
 						AND 0 = (
-								SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
+								SELECT COUNT(*) FROM wp_woocommerce_tax_rate_locations as sublocations
 								WHERE sublocations.location_type = 'postcode'
 								AND sublocations.tax_rate_id = tax_rates.tax_rate_id
 							)

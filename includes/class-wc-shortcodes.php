@@ -194,12 +194,7 @@ class WC_Shortcodes {
 		woocommerce_reset_loop();
 		wp_reset_postdata();
 
-		$return = '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
-
-		// Remove ordering query arguments
-		WC()->query->remove_ordering_args();
-
-		return $return;
+		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
 	}
 
 

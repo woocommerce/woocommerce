@@ -56,7 +56,7 @@ class WC_Query {
 			add_action( 'init', array( $this, 'get_errors' ) );
 			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
-			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+			add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
 			add_action( 'wp', array( $this, 'remove_product_query' ) );
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
@@ -98,7 +98,7 @@ class WC_Query {
 	 */
 	public function add_endpoints() {
 		foreach ( $this->query_vars as $key => $var )
-			add_rewrite_endpoint( $var, EP_ROOT | EP_PAGES );
+			add_rewrite_endpoint( $var, EP_PAGES );
 	}
 
 	/**
@@ -150,22 +150,9 @@ class WC_Query {
 	 */
 	public function pre_get_posts( $q ) {
 		// We only want to affect the main query
-		if ( ! $q->is_main_query() ) {
+		if ( ! $q->is_main_query() )
 			return;
-		}
 
-		// Fix for endpoints on the homepage
-		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') != $q->get('page_id') ) {
-			$_query = wp_parse_args( $q->query );
-			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
-				$q->is_page     = true;
-				$q->is_home     = false;
-				$q->is_singular = true;
-
-				$q->set( 'page_id', get_option('page_on_front') );
-			}
-		}
-		
 		// When orderby is set, WordPress shows posts. Get around that here.
 		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') == wc_get_page_id('shop') ) {
 			$_query = wp_parse_args( $q->query );
@@ -213,9 +200,12 @@ class WC_Query {
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
 
-		// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
-		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
-			return;
+		} else {
+
+			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
+		    if 	( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) )
+		   		return;
+
 		}
 
 		$this->product_query( $q );
@@ -395,7 +385,7 @@ class WC_Query {
 	 * @return void
 	 */
 	public function remove_product_query() {
-		remove_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+		remove_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 	}
 
 	/**
@@ -627,7 +617,7 @@ class WC_Query {
 	public function stock_status_meta_query( $status = 'instock' ) {
 		$meta_query = array();
 		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
-			$meta_query = array(
+			 $meta_query = array(
 		        'key' 		=> '_stock_status',
 				'value' 	=> $status,
 				'compare' 	=> '='
@@ -711,7 +701,7 @@ class WC_Query {
 									array(
 										'taxonomy' 	=> $attribute,
 										'terms' 	=> $value,
-										'field' 	=> 'term_id'
+										'field' 	=> 'id'
 									)
 								)
 							)

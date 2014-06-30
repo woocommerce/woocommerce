@@ -22,8 +22,9 @@ class WC_Product_Variable extends WC_Product {
 	public $total_stock;
 
 	/**
-	 * Constructor
+	 * __construct function.
 	 *
+	 * @access public
 	 * @param mixed $product
 	 */
 	public function __construct( $product ) {
@@ -50,24 +51,28 @@ class WC_Product_Variable extends WC_Product {
      * @return int
      */
     public function get_total_stock() {
+
         if ( empty( $this->total_stock ) ) {
+
         	$transient_name = 'wc_product_total_stock_' . $this->id;
 
         	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
-		        $this->total_stock = max( 0, wc_stock_amount( $this->stock ) );
+		        $this->total_stock = $this->stock;
 
 				if ( sizeof( $this->get_children() ) > 0 ) {
-					foreach ( $this->get_children() as $child_id ) {
-						if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-							$stock = get_post_meta( $child_id, '_stock', true );
-							$this->total_stock += max( 0, wc_stock_amount( $stock ) );
+					foreach ($this->get_children() as $child_id) {
+						$stock = get_post_meta( $child_id, '_stock', true );
+
+						if ( $stock != '' ) {
+							$this->total_stock += intval( $stock );
 						}
 					}
 				}
+
 				set_transient( $transient_name, $this->total_stock, YEAR_IN_SECONDS );
 			}
 		}
-		return wc_stock_amount( $this->total_stock );
+		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
     }
 
 	/**
@@ -77,48 +82,12 @@ class WC_Product_Variable extends WC_Product {
 	 * @param string $mode can be set, add, or subtract
 	 * @return int Stock
 	 */
-	public function set_stock( $amount = null, $mode = 'set' ) {
+	function set_stock( $amount = null, $mode = 'set' ) {
+		// Empty total stock so its refreshed
 		$this->total_stock = '';
-		delete_transient( 'wc_product_total_stock_' . $this->id );
+
+		// Call parent set_stock
 		return parent::set_stock( $amount, $mode );
-	}
-
-	/**
-	 * Performed after a stock level change at product level
-	 */
-	protected function check_stock_status() {
-		$set_child_stock_status = '';
-
-		if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$set_child_stock_status = 'outofstock';
-		} elseif ( $this->backorders_allowed() || $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$set_child_stock_status = 'instock';
-		}
-
-		if ( $set_child_stock_status ) {
-			foreach ( $this->get_children() as $child_id ) {
-				if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
-					wc_update_product_stock_status( $child_id, $set_child_stock_status );
-				}
-			}
-
-			// Children statuses changed, so sync self
-			self::sync_stock_status( $this->id );
-		}
-	}
-
-	/**
-	 * set_stock_status function.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function set_stock_status( $status ) {
-		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
-
-		if ( update_post_meta( $this->id, '_stock_status', $status ) ) {
-			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
-		}
 	}
 
 	/**
@@ -128,22 +97,14 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array of children ids
 	 */
 	public function get_children( $visible_only = false ) {
+
 		if ( ! is_array( $this->children ) ) {
 			$this->children = array();
+
 			$transient_name = 'wc_product_children_ids_' . $this->id;
 
         	if ( false === ( $this->children = get_transient( $transient_name ) ) ) {
-		        $args = array(
-					'post_parent' => $this->id,
-					'post_type'   => 'product_variation',
-					'orderby'     => 'menu_order',
-					'order'       => 'ASC',
-					'fields'      => 'ids',
-					'post_status' => 'any',
-					'numberposts' => -1
-		        );
-
-				$this->children = get_posts( $args );
+		        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=product_variation&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
 
 				set_transient( $transient_name, $this->children, YEAR_IN_SECONDS );
 			}
@@ -151,14 +112,14 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( $visible_only ) {
 			$children = array();
-			foreach( $this->children as $child_id ) {
-				if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-					if ( 'instock' === get_post_meta( $child_id, '_stock_status', true ) ) {
-						$children[] = $child_id;
+			foreach ( $this->children as $child_id ) {
+				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+					$stock = get_post_meta( $child_id, '_stock', true );
+					if ( $stock !== "" && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+						continue;
 					}
-				} elseif ( $this->is_in_stock() ) {
-					$children[] = $child_id;
 				}
+				$children[] = $child_id;
 			}
 		} else {
 			$children = $this->children;
@@ -430,51 +391,49 @@ class WC_Product_Variable extends WC_Product {
 
 			$variation = $this->get_child( $child_id );
 
-			if ( empty( $variation->variation_id ) || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
-				continue;
+			if ( ! empty( $variation->variation_id ) ) {
+				$variation_attributes 	= $variation->get_variation_attributes();
+				$availability 			= $variation->get_availability();
+				$availability_html 		= empty( $availability['availability'] ) ? '' : apply_filters( 'woocommerce_stock_html', '<p class="stock ' . esc_attr( $availability['class'] ) . '">'. wp_kses_post( $availability['availability'] ).'</p>', wp_kses_post( $availability['availability'] ) );
+
+				if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
+					$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
+
+					$attachment    = wp_get_attachment_image_src( $attachment_id, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' )  );
+					$image         = $attachment ? current( $attachment ) : '';
+
+					$attachment    = wp_get_attachment_image_src( $attachment_id, 'full'  );
+					$image_link    = $attachment ? current( $attachment ) : '';
+
+					$image_title   = get_the_title( $attachment_id );
+					$image_alt     = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+				} else {
+					$image = $image_link = $image_title = $image_alt = '';
+				}
+
+				$available_variations[] = apply_filters( 'woocommerce_available_variation', array(
+					'variation_id'         => $child_id,
+					'variation_is_visible' => $variation->variation_is_visible(),
+					'is_purchasable'       => $variation->is_purchasable(),
+					'attributes'           => $variation_attributes,
+					'image_src'            => $image,
+					'image_link'           => $image_link,
+					'image_title'          => $image_title,
+					'image_alt'            => $image_alt,
+					'price_html'           => $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+					'availability_html'    => $availability_html,
+					'sku'                  => $variation->get_sku(),
+					'weight'               => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
+					'dimensions'           => $variation->get_dimensions(),
+					'min_qty'              => 1,
+					'max_qty'              => $variation->backorders_allowed() ? '' : $variation->stock,
+					'backorders_allowed'   => $variation->backorders_allowed(),
+					'is_in_stock'          => $variation->is_in_stock(),
+					'is_downloadable'      => $variation->is_downloadable() ,
+					'is_virtual'           => $variation->is_virtual(),
+					'is_sold_individually' => $variation->is_sold_individually() ? 'yes' : 'no',
+				), $this, $variation );
 			}
-				
-			$variation_attributes 	= $variation->get_variation_attributes();
-			$availability 			= $variation->get_availability();
-			$availability_html 		= empty( $availability['availability'] ) ? '' : apply_filters( 'woocommerce_stock_html', '<p class="stock ' . esc_attr( $availability['class'] ) . '">'. wp_kses_post( $availability['availability'] ).'</p>', wp_kses_post( $availability['availability'] ) );
-
-			if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
-				$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
-
-				$attachment    = wp_get_attachment_image_src( $attachment_id, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' )  );
-				$image         = $attachment ? current( $attachment ) : '';
-
-				$attachment    = wp_get_attachment_image_src( $attachment_id, 'full'  );
-				$image_link    = $attachment ? current( $attachment ) : '';
-
-				$image_title   = get_the_title( $attachment_id );
-				$image_alt     = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
-			} else {
-				$image = $image_link = $image_title = $image_alt = '';
-			}
-
-			$available_variations[] = apply_filters( 'woocommerce_available_variation', array(
-				'variation_id'         => $child_id,
-				'variation_is_visible' => $variation->variation_is_visible(),
-				'is_purchasable'       => $variation->is_purchasable(),
-				'attributes'           => $variation_attributes,
-				'image_src'            => $image,
-				'image_link'           => $image_link,
-				'image_title'          => $image_title,
-				'image_alt'            => $image_alt,
-				'price_html'           => $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
-				'availability_html'    => $availability_html,
-				'sku'                  => $variation->get_sku(),
-				'weight'               => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
-				'dimensions'           => $variation->get_dimensions(),
-				'min_qty'              => 1,
-				'max_qty'              => $variation->backorders_allowed() ? '' : $variation->stock,
-				'backorders_allowed'   => $variation->backorders_allowed(),
-				'is_in_stock'          => $variation->is_in_stock(),
-				'is_downloadable'      => $variation->is_downloadable() ,
-				'is_virtual'           => $variation->is_virtual(),
-				'is_sold_individually' => $variation->is_sold_individually() ? 'yes' : 'no',
-			), $this, $variation );
 		}
 
 		return $available_variations;
@@ -503,33 +462,6 @@ class WC_Product_Variable extends WC_Product {
 			$this->$min_price_key        = get_post_meta( $product_id, '_' . $min_price_key, true );
 			$this->$max_price_key        = get_post_meta( $product_id, '_' . $max_price_key, true );
 		}
-	}
-
-	/**
-	 * Sync variable product stock status with children
-	 * @param  int $product_id
-	 */
-	public static function sync_stock_status( $product_id ) {
-		$children = get_posts( array(
-			'post_parent' 	=> $product_id,
-			'posts_per_page'=> -1,
-			'post_type' 	=> 'product_variation',
-			'fields' 		=> 'ids',
-			'post_status'	=> 'publish'
-		) );
-
-		$stock_status = 'outofstock';
-		
-		foreach ( $children as $child_id ) {
-			$child_stock_status = get_post_meta( $child_id, '_stock_status', true );
-			$child_stock_status = $child_stock_status ? $child_stock_status : 'instock';
-			if ( 'instock' === $child_stock_status ) {
-				$stock_status = 'instock';
-				break;
-			}
-		}
-
-		wc_update_product_stock_status( $product_id, $stock_status );
 	}
 
 	/**

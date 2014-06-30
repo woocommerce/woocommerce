@@ -16,19 +16,20 @@ class WC_Payment_Gateways {
 	var $payment_gateways;
 
 	/**
-	 * @var WC_Payment_Gateways The single instance of the class
+	 * @var WooCommerce The single instance of the class
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
 
 	/**
-	 * Main WC_Payment_Gateways Instance
+	 * Main WooCommerce Instance
 	 *
-	 * Ensures only one instance of WC_Payment_Gateways is loaded or can be loaded.
+	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
 	 *
 	 * @since 2.1
 	 * @static
-	 * @return WC_Payment_Gateways Main instance
+	 * @see WC()
+	 * @return Main WooCommerce instance
 	 */
 	public static function instance() {
 		if ( is_null( self::$_instance ) )
