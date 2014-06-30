@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-06-03 15:13:59+00:00\n"
-"PO-Revision-Date: 2014-06-04 11:02+0000\n"
-"Last-Translator: VaporsBazar.Com <vaporsbazar@gmail.com>\n"
+"POT-Creation-Date: 2014-06-30 14:28:36+00:00\n"
+"PO-Revision-Date: 2014-06-30 14:31+0000\n"
+"Last-Translator: Mike Jolley <mike.jolley@me.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/projects/p/woocommerce/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,30 +35,26 @@ msgid ""
 " currency symbols."
 msgstr "Lütfen binlik ayırıcılar ve para birimi sembolleri olmadan parasal ondalık (% s) biçiminde girin."
 
-#: includes/admin/class-wc-admin-assets.php:110
-msgid "Please enter in country code with two capital letters."
-msgstr "Lütfen, iki büyük harfle ülke kodunu girin."
-
-#: includes/admin/class-wc-admin-assets.php:137
+#: includes/admin/class-wc-admin-assets.php:136
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
 msgstr "Seçili öğeyi kaldırmak istediğinizden emin misiniz? Eğer daha önce bu öğenin stoğunu azalttıysanız veya bu sipariş bir müşteri tarafından bildirildiyse öğrenin stoğunu el ile düzeltmeniz gerekir."
 
-#: includes/admin/class-wc-admin-assets.php:138
+#: includes/admin/class-wc-admin-assets.php:137
 msgid "Please select some items."
 msgstr "Lütfen birkaç öğe seçin."
 
-#: includes/admin/class-wc-admin-assets.php:139
+#: includes/admin/class-wc-admin-assets.php:138
 msgid "Remove this item meta?"
 msgstr "Bu öğe metasını kaldırmak istiyor musunuz?"
 
-#: includes/admin/class-wc-admin-assets.php:140
+#: includes/admin/class-wc-admin-assets.php:139
 msgid "Remove this attribute?"
 msgstr "Bu seçenegi kaldırmak istiyor musunuz?"
 
-#: includes/admin/class-wc-admin-assets.php:141
+#: includes/admin/class-wc-admin-assets.php:140
 #: includes/admin/class-wc-admin-attributes.php:239
 #: includes/admin/class-wc-admin-attributes.php:275
 #: includes/admin/class-wc-admin-attributes.php:307
@@ -69,19 +65,19 @@ msgstr "Bu seçenegi kaldırmak istiyor musunuz?"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:186
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:442
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:536
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:156
-#: includes/admin/settings/class-wc-settings-shipping.php:198
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:148
+#: includes/admin/settings/class-wc-settings-shipping.php:203
 msgid "Name"
 msgstr "İsim"
 
-#: includes/admin/class-wc-admin-assets.php:142
+#: includes/admin/class-wc-admin-assets.php:141
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:434
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:528
 #: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:6
 msgid "Remove"
 msgstr "Kaldır"
 
-#: includes/admin/class-wc-admin-assets.php:143
+#: includes/admin/class-wc-admin-assets.php:142
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:435
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:529
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:7
@@ -89,62 +85,62 @@ msgstr "Kaldır"
 msgid "Click to toggle"
 msgstr "Geçiş yapmak için tıklatın"
 
-#: includes/admin/class-wc-admin-assets.php:144
+#: includes/admin/class-wc-admin-assets.php:143
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:450
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:542
 msgid "Value(s)"
 msgstr "Değer(ler)"
 
-#: includes/admin/class-wc-admin-assets.php:145
+#: includes/admin/class-wc-admin-assets.php:144
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:543
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr "Değerleri (|) işaretiyle ayırarak metin veya seçenek girin."
 
-#: includes/admin/class-wc-admin-assets.php:146
+#: includes/admin/class-wc-admin-assets.php:145
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:493
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:548
 msgid "Visible on the product page"
 msgstr "Ürün sayfasında görünsün"
 
-#: includes/admin/class-wc-admin-assets.php:147
+#: includes/admin/class-wc-admin-assets.php:146
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:506
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:554
 msgid "Used for variations"
 msgstr "Seçenekler için kullanılsın"
 
-#: includes/admin/class-wc-admin-assets.php:148
+#: includes/admin/class-wc-admin-assets.php:147
 msgid "Enter a name for the new attribute term:"
 msgstr "Yeni seçenek kuralı için bir isim girin:"
 
-#: includes/admin/class-wc-admin-assets.php:149
+#: includes/admin/class-wc-admin-assets.php:148
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr "Sipariş öğelerine, indirimlerine ve kargoya dayalı toplamlar hesaplansın mı?"
 
-#: includes/admin/class-wc-admin-assets.php:150
+#: includes/admin/class-wc-admin-assets.php:149
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
 msgstr "Vergi satırı hesaplansın mı? Müşterinin ülkesine dayalı vergiler hesaplanacaktır. Eğer herhangi bir fatura/kargo bilgisi ayarlanamışsa mağaza temel konumu kullanılacaktır."
 
-#: includes/admin/class-wc-admin-assets.php:151
+#: includes/admin/class-wc-admin-assets.php:150
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
 msgstr "Fatura bilgileri kargo bilgilerine kopyalansın mı? Bu işlem mevcut kargo bilgilerini siler."
 
-#: includes/admin/class-wc-admin-assets.php:152
+#: includes/admin/class-wc-admin-assets.php:151
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
 msgstr "Müşterinin fatura bilgileri girmek istiyor musunuz? Bu işlem, mevcut fatura bilgilerini silecektir."
 
-#: includes/admin/class-wc-admin-assets.php:153
+#: includes/admin/class-wc-admin-assets.php:152
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
 msgstr "Müşterinin kargo bilgileri girmek istiyor musunuz? Bu işlem, mevcut kargo bilgilerini silecektir."
 
-#: includes/admin/class-wc-admin-assets.php:154
+#: includes/admin/class-wc-admin-assets.php:153
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:173
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:273
 #: includes/admin/views/html-bulk-edit-product.php:170
@@ -152,67 +148,67 @@ msgstr "Müşterinin kargo bilgileri girmek istiyor musunuz? Bu işlem, mevcut k
 msgid "Featured"
 msgstr "Nitelik"
 
-#: includes/admin/class-wc-admin-assets.php:157
+#: includes/admin/class-wc-admin-assets.php:156
 msgid "No customer selected"
 msgstr "Hiçbir müşteri seçilmedi"
 
-#: includes/admin/class-wc-admin-assets.php:183
+#: includes/admin/class-wc-admin-assets.php:182
 msgid ""
 "Could not grant access - the user may already have permission for this file "
 "or billing email is not set. Ensure the billing email is set, and the order "
 "has been saved."
 msgstr "Erişim izni verilemedi - kullanıcı belki bu dosya için zaten erişim iznine sahip veya fatura e-postası ayarlanmamış. Fatura adresinin ayarlandığından ve siparişin kaydedilmiş olduğundan emin olun."
 
-#: includes/admin/class-wc-admin-assets.php:184
+#: includes/admin/class-wc-admin-assets.php:183
 msgid "Are you sure you want to revoke access to this download?"
 msgstr "Bu indirme için erişim iznini iptal etmek istediğinizden emin misiniz?"
 
-#: includes/admin/class-wc-admin-assets.php:204
+#: includes/admin/class-wc-admin-assets.php:203
 msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
 msgstr "Tüm varyasyonları birbirine bağlamak istediğinizden emin misiniz? Bu işlem, varyasyon seçeneklerinin her olası kombinasyonu için yeni bir varyasyon oluşturur. (İşlem başına en fazla 50 varyasyon)"
 
-#: includes/admin/class-wc-admin-assets.php:205
+#: includes/admin/class-wc-admin-assets.php:204
 msgid "Enter a value"
 msgstr "Bir değer girin"
 
-#: includes/admin/class-wc-admin-assets.php:206
+#: includes/admin/class-wc-admin-assets.php:205
 msgid "Enter a value (fixed or %)"
 msgstr "Bir değer girin (sabit veya %)"
 
-#: includes/admin/class-wc-admin-assets.php:207
+#: includes/admin/class-wc-admin-assets.php:206
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr "Tüm varyasyonları silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
 
-#: includes/admin/class-wc-admin-assets.php:208
+#: includes/admin/class-wc-admin-assets.php:207
 msgid "Last warning, are you sure?"
 msgstr "Son uyarı! Emin misiniz?"
 
-#: includes/admin/class-wc-admin-assets.php:209
+#: includes/admin/class-wc-admin-assets.php:208
 #: includes/admin/class-wc-admin-taxonomies.php:123
 #: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Choose an image"
 msgstr "Bir resim seç"
 
-#: includes/admin/class-wc-admin-assets.php:210
+#: includes/admin/class-wc-admin-assets.php:209
 msgid "Set variation image"
 msgstr "Varyasyon resmi ayarla"
 
-#: includes/admin/class-wc-admin-assets.php:211
+#: includes/admin/class-wc-admin-assets.php:210
 msgid "variation added"
 msgstr "varyasyon eklendi"
 
-#: includes/admin/class-wc-admin-assets.php:212
+#: includes/admin/class-wc-admin-assets.php:211
 msgid "variations added"
 msgstr "varyasyon eklendi"
 
-#: includes/admin/class-wc-admin-assets.php:213
+#: includes/admin/class-wc-admin-assets.php:212
 msgid "No variations added"
 msgstr "Hiçbir varyasyon eklenmedi"
 
-#: includes/admin/class-wc-admin-assets.php:214
+#: includes/admin/class-wc-admin-assets.php:213
 msgid "Are you sure you want to remove this variation?"
 msgstr "Bu varyasyonu kaldırmak istediğinizden emin misiniz?"
 
@@ -376,43 +372,43 @@ msgstr "WooCommerce Son Yorumlar"
 msgid "WooCommerce Status"
 msgstr "WooCommerce Durumu"
 
-#: includes/admin/class-wc-admin-dashboard.php:136
+#: includes/admin/class-wc-admin-dashboard.php:132
 msgid "<strong>%s</strong> sales this month"
 msgstr "Bu ay <strong>%s</strong> satış yapıldı"
 
-#: includes/admin/class-wc-admin-dashboard.php:143
+#: includes/admin/class-wc-admin-dashboard.php:139
 msgid "%s top seller this month (sold %d)"
 msgstr "%s bu ayın en çok satan ürünü (%d adet satıldı)"
 
-#: includes/admin/class-wc-admin-dashboard.php:149
+#: includes/admin/class-wc-admin-dashboard.php:145
 msgid "<strong>%s order</strong> awaiting processing"
 msgid_plural "<strong>%s orders</strong> awaiting processing"
 msgstr[0] "<strong>%s sipariş</strong> işlem bekliyor"
 
-#: includes/admin/class-wc-admin-dashboard.php:154
+#: includes/admin/class-wc-admin-dashboard.php:150
 msgid "<strong>%s order</strong> on-hold"
 msgid_plural "<strong>%s orders</strong> on-hold"
 msgstr[0] "<strong>%s sipariş</strong> beklemede"
 
-#: includes/admin/class-wc-admin-dashboard.php:159
+#: includes/admin/class-wc-admin-dashboard.php:155
 msgid "<strong>%s product</strong> low in stock"
 msgid_plural "<strong>%s products</strong> low in stock"
 msgstr[0] "<strong>%s ürün</strong> düşük stoklu"
 
-#: includes/admin/class-wc-admin-dashboard.php:164
+#: includes/admin/class-wc-admin-dashboard.php:160
 msgid "<strong>%s product</strong> out of stock"
 msgid_plural "<strong>%s products</strong> out of stock"
 msgstr[0] "<strong>%s ürün</strong> stokta yok"
 
-#: includes/admin/class-wc-admin-dashboard.php:197
+#: includes/admin/class-wc-admin-dashboard.php:193
 msgid "out of 5"
 msgstr "5 üzerinden"
 
-#: includes/admin/class-wc-admin-dashboard.php:199
+#: includes/admin/class-wc-admin-dashboard.php:195
 msgid "reviewed by"
 msgstr "için yorum yapan »"
 
-#: includes/admin/class-wc-admin-dashboard.php:205
+#: includes/admin/class-wc-admin-dashboard.php:201
 msgid "There are no product reviews yet."
 msgstr "Herhangi bir ürün yorumu yok."
 
@@ -552,8 +548,8 @@ msgstr "WooCommerce Ayarları"
 #: includes/admin/class-wc-admin-menus.php:64
 #: includes/admin/class-wc-admin-welcome.php:219
 #: includes/admin/settings/class-wc-settings-checkout.php:277
-#: includes/admin/settings/class-wc-settings-shipping.php:238
-#: includes/admin/views/html-admin-page-status-report.php:276
+#: includes/admin/settings/class-wc-settings-shipping.php:243
+#: includes/admin/views/html-admin-page-status-report.php:275
 msgid "Settings"
 msgstr "Ayarlar"
 
@@ -618,7 +614,7 @@ msgstr "urun"
 #: includes/admin/class-wc-admin-taxonomies.php:88
 #: includes/admin/class-wc-admin-taxonomies.php:177
 #: includes/admin/settings/class-wc-settings-checkout.php:226
-#: includes/admin/settings/class-wc-settings-shipping.php:197
+#: includes/admin/settings/class-wc-settings-shipping.php:202
 #: includes/admin/views/html-admin-page-status-report.php:76
 msgid "Default"
 msgstr "Varsayılan"
@@ -916,7 +912,7 @@ msgstr "Müşteri Listesi"
 
 #: includes/admin/class-wc-admin-reports.php:89
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:266
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:781
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
 #: includes/admin/reports/class-wc-report-stock.php:25
 #: includes/admin/reports/class-wc-report-stock.php:26
 msgid "Stock"
@@ -964,168 +960,162 @@ msgstr "Ayarlarınız kaydedildi."
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr "Bu sayfadan giderseniz yaptığınız değişiklikler kaybolacak."
 
-#: includes/admin/class-wc-admin-settings.php:491
-msgid ""
-"The settings of this image size have been disabled because its values are "
-"being overwritten by a filter."
-msgstr "Bir filtre tarafından boyutlandırma değerlerinin üzerine yazıldığı için resim boyutlandırma ayarları devre dışı bırakıldı."
-
-#: includes/admin/class-wc-admin-settings.php:500
+#: includes/admin/class-wc-admin-settings.php:490
 msgid "Hard Crop?"
 msgstr "Kırp?"
 
-#: includes/admin/class-wc-admin-settings.php:525
+#: includes/admin/class-wc-admin-settings.php:515
 msgid "Select a page&hellip;"
 msgstr "Bir sayfa seçin&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:548
+#: includes/admin/class-wc-admin-settings.php:538
 msgid "Choose a country&hellip;"
 msgstr "Bir ülke seçin&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:572
+#: includes/admin/class-wc-admin-settings.php:562
 msgid "Choose countries&hellip;"
 msgstr "Birden fazla ülke seçin&hellip;"
 
-#: includes/admin/class-wc-admin-settings.php:578
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:464
 msgid "Select all"
 msgstr "Tümünü seç"
 
-#: includes/admin/class-wc-admin-settings.php:578
+#: includes/admin/class-wc-admin-settings.php:568
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:464
 msgid "Select none"
 msgstr "Hiçbirini seçme"
 
-#: includes/admin/class-wc-admin-status.php:51
+#: includes/admin/class-wc-admin-status.php:52
 msgid "Product Transients Cleared"
 msgstr "Ürün çerezleri temizlendi"
 
-#: includes/admin/class-wc-admin-status.php:92
+#: includes/admin/class-wc-admin-status.php:93
 msgid "%d Transients Rows Cleared"
 msgstr "%d adet süresi dolan çerez temizlendi"
 
-#: includes/admin/class-wc-admin-status.php:101
+#: includes/admin/class-wc-admin-status.php:102
 msgid "Roles successfully reset"
 msgstr "Roller başarıyla sıfırlandı"
 
-#: includes/admin/class-wc-admin-status.php:115
+#: includes/admin/class-wc-admin-status.php:116
 msgid "Terms successfully recounted"
 msgstr "Kurallar başarıyla yeniden hesaplandı"
 
-#: includes/admin/class-wc-admin-status.php:126
+#: includes/admin/class-wc-admin-status.php:127
 msgid "Sessions successfully cleared"
 msgstr "Oturumlar başarıyla temizlendi"
 
-#: includes/admin/class-wc-admin-status.php:130
+#: includes/admin/class-wc-admin-status.php:131
 msgid "All missing WooCommerce pages was installed successfully."
 msgstr "Eksik tüm WooCommerce sayfaları başarıyla yüklendi."
 
-#: includes/admin/class-wc-admin-status.php:138
+#: includes/admin/class-wc-admin-status.php:139
 msgid "Tax rates successfully deleted"
 msgstr "Vergi oranı başarıyla silindi"
 
-#: includes/admin/class-wc-admin-status.php:147
+#: includes/admin/class-wc-admin-status.php:148
 msgid "There was an error calling %s::%s"
 msgstr "Aramada bir hata var: %s::%s"
 
-#: includes/admin/class-wc-admin-status.php:150
+#: includes/admin/class-wc-admin-status.php:151
 msgid "There was an error calling %s"
 msgstr "Aramada bir hata var: %s"
 
-#: includes/admin/class-wc-admin-status.php:160
+#: includes/admin/class-wc-admin-status.php:161
 msgid "Your changes have been saved."
 msgstr "Değişiklikleriniz kaydedildi."
 
-#: includes/admin/class-wc-admin-status.php:174
+#: includes/admin/class-wc-admin-status.php:175
 msgid "WC Transients"
 msgstr "WooCommerce Çerezler"
 
-#: includes/admin/class-wc-admin-status.php:175
+#: includes/admin/class-wc-admin-status.php:176
 msgid "Clear transients"
 msgstr "Çerezleri Temizle"
 
-#: includes/admin/class-wc-admin-status.php:176
+#: includes/admin/class-wc-admin-status.php:177
 msgid "This tool will clear the product/shop transients cache."
 msgstr "Bu araç, ürün / mağaza çerezlerini temizler."
 
-#: includes/admin/class-wc-admin-status.php:179
+#: includes/admin/class-wc-admin-status.php:180
 msgid "Expired Transients"
 msgstr "Süresi Dolan Çerezler"
 
-#: includes/admin/class-wc-admin-status.php:180
+#: includes/admin/class-wc-admin-status.php:181
 msgid "Clear expired transients"
 msgstr "Süresi Dolan Çerezleri Temizle"
 
-#: includes/admin/class-wc-admin-status.php:181
+#: includes/admin/class-wc-admin-status.php:182
 msgid "This tool will clear ALL expired transients from WordPress."
 msgstr "Bu araç, süresi dolan TÜM çerezleri Wordpress'ten temizler."
 
-#: includes/admin/class-wc-admin-status.php:184
+#: includes/admin/class-wc-admin-status.php:185
 msgid "Term counts"
 msgstr "Kural Hesaplamaları"
 
-#: includes/admin/class-wc-admin-status.php:185
+#: includes/admin/class-wc-admin-status.php:186
 msgid "Recount terms"
 msgstr "Kuralları Yeniden Hesapla"
 
-#: includes/admin/class-wc-admin-status.php:186
+#: includes/admin/class-wc-admin-status.php:187
 msgid ""
 "This tool will recount product terms - useful when changing your settings in"
 " a way which hides products from the catalog."
 msgstr "Bu araç, ürün kurallarını yeniden hesaplayacaktır - ürünleri katalogtan gizleme ayarlarınızı değiştirdiğiniz zaman bir bakıma kullanışlıdır."
 
-#: includes/admin/class-wc-admin-status.php:189
+#: includes/admin/class-wc-admin-status.php:190
 msgid "Capabilities"
 msgstr "Roller"
 
-#: includes/admin/class-wc-admin-status.php:190
+#: includes/admin/class-wc-admin-status.php:191
 msgid "Reset capabilities"
 msgstr "Rolleri Sıfırla"
 
-#: includes/admin/class-wc-admin-status.php:191
+#: includes/admin/class-wc-admin-status.php:192
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr "Bu araç, yönetici, müşteri ve mağaza_yöneticisi rollerini varsayılana sıfırlar. Kullanıcılarınız hiç bir WooCommerce yönetici sayfasına erişemiyorlarsa kullanın."
 
-#: includes/admin/class-wc-admin-status.php:194
+#: includes/admin/class-wc-admin-status.php:195
 msgid "Customer Sessions"
 msgstr "Müşteri Oturumları"
 
-#: includes/admin/class-wc-admin-status.php:195
+#: includes/admin/class-wc-admin-status.php:196
 msgid "Clear all sessions"
 msgstr "Tüm Oturumları Temizle"
 
-#: includes/admin/class-wc-admin-status.php:196
+#: includes/admin/class-wc-admin-status.php:197
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
 msgstr "<strong class=\\\"red\\\">Uyarı:</strong> Bu araç, mevcut güncel sepetler de dahil olmak üzere tüm müşteri oturum bilgilerini siler."
 
-#: includes/admin/class-wc-admin-status.php:199
+#: includes/admin/class-wc-admin-status.php:200
 #: includes/admin/views/html-notice-install.php:6
 msgid "Install WooCommerce Pages"
 msgstr "WooCommerce Sayfalarını Yükle"
 
-#: includes/admin/class-wc-admin-status.php:200
+#: includes/admin/class-wc-admin-status.php:201
 msgid "Install pages"
 msgstr "Sayfaları Yükle"
 
-#: includes/admin/class-wc-admin-status.php:201
+#: includes/admin/class-wc-admin-status.php:202
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
 msgstr "<strong class=\"red\">Not:</strong> Bu araç, eksik tüm WooCommerce sayfalarını yükleyecektir. Yükleme esnasında daha önce tanımlanmış ve ayarlanmış olan sayfalar değiştirilmeyecektir."
 
-#: includes/admin/class-wc-admin-status.php:204
+#: includes/admin/class-wc-admin-status.php:205
 msgid "Delete all WooCommerce tax rates"
 msgstr "Tüm WooCommerce Vergi Oranlarını Sil"
 
-#: includes/admin/class-wc-admin-status.php:205
+#: includes/admin/class-wc-admin-status.php:206
 msgid "Delete ALL tax rates"
 msgstr "Tüm Vergi Oranlarını Sil"
 
-#: includes/admin/class-wc-admin-status.php:206
+#: includes/admin/class-wc-admin-status.php:207
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your tax"
 " rates, use with caution."
@@ -1500,7 +1490,7 @@ msgstr "Çeviri ekibimiz sayesinde WooCommerce, diğer birçok dile tercüme edi
 msgid "View %s"
 msgstr "%s Göster"
 
-#: includes/admin/class-wc-admin.php:113
+#: includes/admin/class-wc-admin.php:114
 msgid "HTML Email Template"
 msgstr "HTML E-Posta Teması"
 
@@ -1733,7 +1723,6 @@ msgstr "Görüntüle &#8220;%s&#8221;"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:341
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:300
 #: includes/admin/reports/class-wc-report-stock.php:119
-#: includes/admin/views/html-admin-page-status-logs.php:13
 msgid "View"
 msgstr "İncele"
 
@@ -1748,14 +1737,14 @@ msgstr "Harici / Bağlantılı"
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:397
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:596
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:51
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:222
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:214
 msgid "Virtual"
 msgstr "Sanal"
 
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:399
 #: includes/admin/post-types/class-wc-admin-cpt-product.php:588
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:58
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:220
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:212
 msgid "Downloadable"
 msgstr "İndirilebilir"
 
@@ -1778,10 +1767,9 @@ msgstr "Özellikli Geçiş"
 #: includes/admin/views/html-admin-page-status-report.php:38
 #: includes/admin/views/html-admin-page-status-report.php:72
 #: includes/admin/views/html-admin-page-status-report.php:97
-#: includes/admin/views/html-admin-page-status-report.php:283
+#: includes/admin/views/html-admin-page-status-report.php:282
 #: includes/admin/views/html-bulk-edit-product.php:176
 #: includes/admin/views/html-bulk-edit-product.php:213
-#: includes/admin/views/html-bulk-edit-product.php:274
 msgid "Yes"
 msgstr "Evet"
 
@@ -1789,10 +1777,9 @@ msgstr "Evet"
 #: includes/admin/views/html-admin-page-status-report.php:38
 #: includes/admin/views/html-admin-page-status-report.php:72
 #: includes/admin/views/html-admin-page-status-report.php:97
-#: includes/admin/views/html-admin-page-status-report.php:283
+#: includes/admin/views/html-admin-page-status-report.php:282
 #: includes/admin/views/html-bulk-edit-product.php:177
 #: includes/admin/views/html-bulk-edit-product.php:214
-#: includes/admin/views/html-bulk-edit-product.php:275
 msgid "No"
 msgstr "Hayır"
 
@@ -1887,9 +1874,9 @@ msgid "Show all types"
 msgstr "Tüm türleri göster"
 
 #: includes/admin/post-types/class-wc-admin-cpt-shop_order.php:91
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:758
 #: includes/admin/settings/class-wc-settings-checkout.php:229
-#: includes/admin/settings/class-wc-settings-shipping.php:200
+#: includes/admin/settings/class-wc-settings-shipping.php:205
 msgid "Status"
 msgstr "Durum"
 
@@ -2459,6 +2446,7 @@ msgstr "Miktar"
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:116
 #: includes/admin/settings/class-wc-settings-tax.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:550
+#: includes/admin/settings/class-wc-settings-tax.php:647
 msgid "Tax"
 msgstr "Vergi"
 
@@ -2528,7 +2516,7 @@ msgstr "Ekle"
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:31
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-order-totals.php:62
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:95
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:783
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:775
 #: includes/admin/settings/class-wc-settings-shipping.php:25
 #: includes/admin/settings/class-wc-settings-tax.php:266
 #: includes/admin/settings/class-wc-settings-tax.php:383
@@ -2587,7 +2575,7 @@ msgid "Downloadable products give access to a file upon purchase."
 msgstr "İndirilebilir ürünler satış konusu dosyaya erişim sağlarlar."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:90
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:780
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:772
 #: includes/admin/settings/class-wc-settings-products.php:41
 msgid "Inventory"
 msgstr "Envanter - SKU"
@@ -2644,7 +2632,7 @@ msgid "Sale Price"
 msgstr "Satış Fiyatı"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:160
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:85
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Schedule"
 msgstr "Zamanlama"
 
@@ -2653,41 +2641,41 @@ msgid "Sale Price Dates"
 msgstr "Satış Fiyatı Tarihleri"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:168
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:93
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:85
 msgctxt "placeholder"
 msgid "From&hellip;"
 msgstr "&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:169
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:97
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:89
 msgctxt "placeholder"
 msgid "To&hellip;"
 msgstr "To&hellip;"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:181
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:152
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:144
 msgid "Downloadable Files"
 msgstr "İndirilebilir Dosyalar"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:186
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:156
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:148
 msgid "This is the name of the download shown to the customer."
 msgstr "Müşteriye gösterilen indirme adıdır."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:187
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:157
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:149
 msgid "File URL"
 msgstr "Dosya Bağlantısı"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:187
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:157
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:149
 msgid ""
 "This is the URL or absolute path to the file which customers will get access"
 " to."
 msgstr "Müşterilerin erişim alacağı dosyanın tam yolu veya bağlantısıdır."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:202
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:172
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:164
 msgid "Add File"
 msgstr "Dosya Ekle"
 
@@ -2697,18 +2685,18 @@ msgstr "İndirme Sınırı"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:222
 #: includes/admin/post-types/meta-boxes/views/html-order-download-permission.php:19
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:199
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:205
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:191
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:197
 msgid "Unlimited"
 msgstr "Sınırsız"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:222
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:198
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:190
 msgid "Leave blank for unlimited re-downloads."
 msgstr "Sınırsız yeniden indirme için boş bırakın."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:228
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:791
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:783
 msgid "Download Expiry"
 msgstr "İndirme Vadesi"
 
@@ -2718,7 +2706,7 @@ msgid "Never"
 msgstr "Süresiz"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:228
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:204
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:196
 msgid ""
 "Enter the number of days before a download link expires, or leave blank."
 msgstr "İndirme bağlantısı süresi dolmadan önceki gün sayısını girin veya boş bırakın."
@@ -2770,7 +2758,7 @@ msgid "None"
 msgstr "Yok"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:257
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:738
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:737
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:27
 #: includes/admin/post-types/meta-boxes/views/html-order-fee.php:39
 #: includes/admin/post-types/meta-boxes/views/html-order-item.php:126
@@ -2826,26 +2814,22 @@ msgid ""
 msgstr "Ürün listede olsa da olmasa da önsayfadaki \"stokta\" veya \"stokta yok\" bildirimlerini kontrol eder."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:311
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:68
 msgid "Allow Backorders?"
 msgstr "Bakiye Siparişleri?"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:312
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:744
 #: includes/admin/views/html-bulk-edit-product.php:253
 #: includes/admin/views/html-quick-edit-product.php:172
 msgid "Do not allow"
 msgstr "İzin verme"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:313
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:745
 #: includes/admin/views/html-bulk-edit-product.php:254
 #: includes/admin/views/html-quick-edit-product.php:173
 msgid "Allow, but notify customer"
 msgstr "İzin ver fakat müşteriyi bilgilendir"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:314
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:746
 #: includes/admin/views/html-bulk-edit-product.php:255
 #: includes/admin/views/html-quick-edit-product.php:174
 msgid "Allow"
@@ -2867,8 +2851,8 @@ msgid ""
 msgstr "Tek bir sipariş içinde bu öğenin yalnızca bir adet satışına izin vermek için etkinleştirin"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:347
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:787
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:105
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:779
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:97
 #: includes/admin/views/html-bulk-edit-product.php:103
 #: includes/admin/views/html-quick-edit-product.php:84
 msgid "Weight"
@@ -2883,21 +2867,21 @@ msgid "Dimensions"
 msgstr "Boyutlar"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:354
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:784
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:776
 #: includes/admin/views/html-bulk-edit-product.php:143
 #: includes/admin/views/html-quick-edit-product.php:97
 msgid "Length"
 msgstr "Uzunluk"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:355
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:785
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:777
 #: includes/admin/views/html-bulk-edit-product.php:144
 #: includes/admin/views/html-quick-edit-product.php:98
 msgid "Width"
 msgstr "Genişlik"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:356
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:786
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:778
 #: includes/admin/views/html-bulk-edit-product.php:145
 #: includes/admin/views/html-quick-edit-product.php:99
 msgid "Height"
@@ -2922,12 +2906,12 @@ msgid ""
 msgstr "Kargo sınıfları, benzer ürün grupları için belirli kargo yöntemleri tarafından kullanılmaktadır."
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:393
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:755
 msgid "Close all"
 msgstr "Hepsini kapat"
 
 #: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:393
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:763
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:755
 msgid "Expand all"
 msgstr "Hepsini genişlet"
 
@@ -2976,130 +2960,130 @@ msgstr "Çapraz satış ürünleri, mevcut ürüne dayalı olarak sepet içinde 
 msgid "Choose a grouped product&hellip;"
 msgstr "Gruplandırılmış bir ürün seç&hellip;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:660
 msgid "Grouping"
 msgstr "Gruplandırma"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:661
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:660
 msgid "Set this option to make this product part of a grouped product."
 msgstr "Bu ürünü gruplandırılmış bir ürün parçası yapmak için bu seçeneği ayarlayın."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:681
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:680
 msgid "Purchase Note"
 msgstr "Satış Notu"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:681
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:680
 msgid "Enter an optional note to send the customer after purchase."
 msgstr "Satış sonrasında müşteriye göndermek için isteğe bağlı bir not girin."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:688
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:687
 msgid "Menu order"
 msgstr "Menü Düzeni"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:688
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:687
 msgid "Custom ordering position."
 msgstr "Özel sıralama düzeni."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:696
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:695
 msgid "Enable reviews"
 msgstr "Yorumları etkinleştir"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:755
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:747
 msgid ""
 "Before adding variations, add and save some attributes on the "
 "<strong>Attributes</strong> tab."
 msgstr "Varyasyon eklemeden önce <strong>Seçenekler</strong>  sekmesinde birkaç seçenek ekleyin ve kaydedin."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:757
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:749
 msgid "Learn more"
 msgstr "Daha fazla bilgi"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:757
 msgid "Choose a field to bulk edit&hellip;"
 msgstr "Toplu düzenleme için bir alan seçin&hellip;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:759
 msgid "Toggle &quot;Enabled&quot;"
 msgstr "Anahtar&quot;Etkin&quot;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:760
 msgid "Toggle &quot;Downloadable&quot;"
 msgstr "Anahtar &quot;İndirilebilir&quot;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:761
 msgid "Toggle &quot;Virtual&quot;"
 msgstr "Anahtar &quot;Sanal&quot;"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:770
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:762
 msgid "Delete all variations"
 msgstr "Tüm varyasyonları sil"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:772
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:764
 msgid "Pricing"
 msgstr "Fiyatlandırma"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:773
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:765
 msgid "Prices"
 msgstr "Fiyatlar"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:774
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:766
 msgid "Prices increase by (fixed amount or %)"
 msgstr "Fiyat artışı (sabit miktar veya % yüzdeye göre)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:775
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:767
 msgid "Prices decrease by (fixed amount or %)"
 msgstr "Fiyat düşüşü (sabit miktar veya % yüzdeye göre)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:776
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:768
 msgid "Sale prices"
 msgstr "Satış fiyatları"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:777
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:769
 msgid "Sale prices increase by (fixed amount or %)"
 msgstr "Satış fiyatı artışı (sabit miktar veya % yüzdeye göre)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:778
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:770
 msgid "Sale prices decrease by (fixed amount or %)"
 msgstr "Satış fiyatı düşüşü (sabit miktar veya % yüzdeye göre)"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:789
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:781
 msgid "Downloadable products"
 msgstr "İndirilebilir ürünler"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:790
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:782
 msgid "Download limit"
 msgstr "İndirme sınırı"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:795
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:787
 #: includes/admin/views/html-report-by-date.php:31
 msgid "Go"
 msgstr "Git"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:892
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:882
 msgid "Add Variation"
 msgstr "Varyasyon Ekle"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:894
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:884
 msgid "Link all variations"
 msgstr "Tüm varyasyonları birbirine bağla"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:896
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:886
 msgid "Defaults"
 msgstr "Varsayılanlar"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:896
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:886
 msgid "These are the attributes that will be pre-selected on the frontend."
 msgstr "Bunlar, ön sayfada önceden seçili halde olacak seçeneklerdir."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:909
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:899
 msgid "No default"
 msgstr "Varsayılan yok"
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1013
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1003
 msgid "Product SKU must be unique."
 msgstr "Ürün SKU'su benzersiz olmalıdır."
 
-#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1384
+#: includes/admin/post-types/meta-boxes/class-wc-meta-box-product-data.php:1373
 msgid "Variation #%s of %s"
 msgstr "Varyasyon #%s of %s"
 
@@ -3241,87 +3225,86 @@ msgid ""
 "blank to use the parent product's options."
 msgstr "Varyasyon düzeyinde stok yönetimini etkinleştirmek için bir miktar girin veya ebeveyn ürün tercihlerini kullanmak için boş bırakın."
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:70
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:128
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:141
-msgid "Same as parent"
-msgstr "Ebeveyn ile aynı"
-
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:81
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:73
 msgid "Regular Price:"
 msgstr "Piyasa Fiyatı:"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:82
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:74
 msgid "Variation price (required)"
 msgstr "Varyasyon fiyatı (gerekli)"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:85
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Sale Price:"
 msgstr "Satış Fiyatı"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:85
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:77
 msgid "Cancel schedule"
 msgstr "Zamanlamayı iptal et"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:92
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:84
 msgid "Sale start date:"
 msgstr "Satış başlangıç tarihi:"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:96
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:88
 msgid "Sale end date:"
 msgstr "Satış bitiş tarihi:"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:105
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:97
 msgid ""
 "Enter a weight for this variation or leave blank to use the parent product "
 "weight."
 msgstr "Bu varyasyon için bir ağırlık girin veya ebeveyn ürün ağırlığını kullanmak için boş bırakın."
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:113
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:105
 msgid "Dimensions (L&times;W&times;H)"
 msgstr "Boyutlar (U&times;G&times;Y)"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:124
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:116
 msgid "Shipping class:"
 msgstr "Kargo türü:"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:139
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:120
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:133
+msgid "Same as parent"
+msgstr "Ebeveyn ile aynı"
+
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:131
 msgid "Tax class:"
 msgstr "Vergi türü:"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:198
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:190
 msgid "Download Limit:"
 msgstr "İndirme Limiti:"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:204
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:196
 msgid "Download Expiry:"
 msgstr "İndirme Bitişi:"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:218
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:210
 #: includes/admin/settings/class-wc-settings-checkout.php:269
-#: includes/admin/settings/class-wc-settings-shipping.php:230
+#: includes/admin/settings/class-wc-settings-shipping.php:235
 #: includes/admin/views/html-admin-page-status-tools.php:26
 #: includes/admin/views/html-admin-page-status-tools.php:37
 #: includes/admin/views/html-admin-page-status-tools.php:48
 msgid "Enabled"
 msgstr "Etkin"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:220
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:212
 msgid ""
 "Enable this option if access is given to a downloadable file upon purchase "
 "of a product"
 msgstr "Bir ürünü satın alma üzerine dosyaya erişim izni verilecekse bu seçeneği etkinleştirin"
 
-#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:222
+#: includes/admin/post-types/meta-boxes/views/html-variation-admin.php:214
 msgid ""
 "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Eğer bir ürün kargolanmıyacaksa veya kargo maliyeti yoksa bu seçeneği etkinleştirin."
 
-#: includes/admin/reports/class-wc-admin-report.php:385
+#: includes/admin/reports/class-wc-admin-report.php:384
 msgid "Sold %s worth in the last %d days"
 msgstr "Son %d gün içinde %s değerinde satış yapıldı"
 
-#: includes/admin/reports/class-wc-admin-report.php:387
+#: includes/admin/reports/class-wc-admin-report.php:386
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] "Son %d gün içinde %s öğe satıldı"
@@ -3870,8 +3853,8 @@ msgid ""
 msgstr "SSL (HTTPS) üzerinden alışveriş (SSL Sertifikası gerektirir)."
 
 #: includes/admin/settings/class-wc-settings-checkout.php:99
-msgid "Force HTTP when leaving the checkout"
-msgstr "Ödeme işleminden ayrılırken HTTP'ye zorla"
+msgid "Un-force HTTPS when leaving the checkout"
+msgstr "Ödeme sayfasından ayrılırken HTTPS'ye zorlama"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid "Checkout Pages"
@@ -4084,7 +4067,7 @@ msgid "Sell to specific countries only"
 msgstr "Sadece belirli ülkelere satış yap"
 
 #: includes/admin/settings/class-wc-settings-general.php:80
-#: includes/admin/settings/class-wc-settings-shipping.php:142
+#: includes/admin/settings/class-wc-settings-shipping.php:147
 msgid "Specific Countries"
 msgstr "Sadece Belirli Ülkeler"
 
@@ -4646,60 +4629,52 @@ msgid "Shipping Destination"
 msgstr "Kargo Hedefi"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:112
-msgid "This controls which shipping address is used by default."
-msgstr "Bu, varsayılan olarak kullanılan kargo adresini kontrol eder."
+msgid "Ship to billing address by default"
+msgstr "Varsayılan olarak fatura adresine kargola"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:117
-msgid "Default to shipping address"
-msgstr "Varsayılan kargo adresi"
-
-#: includes/admin/settings/class-wc-settings-shipping.php:118
-msgid "Default to billing address"
-msgstr "Varsayılan fatura adresi"
-
-#: includes/admin/settings/class-wc-settings-shipping.php:119
+#: includes/admin/settings/class-wc-settings-shipping.php:122
 msgid "Only ship to the users billing address"
 msgstr "Kullanıcıların sadece fatura adreslerine kargola"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:127
+#: includes/admin/settings/class-wc-settings-shipping.php:132
 msgid "Restrict shipping to Location(s)"
 msgstr "Konum(lar) için Kargoyu Kısıtla"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:128
+#: includes/admin/settings/class-wc-settings-shipping.php:133
 msgid ""
 "Choose which countries you want to ship to, or choose to ship to all <a "
 "href=\"%s\">locations you sell to</a>."
 msgstr "Hangi ülkelere kargo göndermek istediğinizi seçin veya <a href=\"%s\">satış yaptığınız tüm konumlara </a>kargo göndermeyi seçin."
 
-#: includes/admin/settings/class-wc-settings-shipping.php:135
+#: includes/admin/settings/class-wc-settings-shipping.php:140
 msgid "Ship to all countries you sell to"
 msgstr "Satış yaptığınız tüm ülkelere kargo"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:136
+#: includes/admin/settings/class-wc-settings-shipping.php:141
 msgid "Ship to all countries"
 msgstr "Tüm ülkelere kargo"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:137
+#: includes/admin/settings/class-wc-settings-shipping.php:142
 msgid "Ship to specific countries only"
 msgstr "Sadece belirli ülkelere kargo"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:192
+#: includes/admin/settings/class-wc-settings-shipping.php:197
 msgid "Shipping Methods"
 msgstr "Kargo Yöntemleri"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:199
+#: includes/admin/settings/class-wc-settings-shipping.php:204
 msgid "ID"
 msgstr "Kimlik"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:209
+#: includes/admin/settings/class-wc-settings-shipping.php:214
 msgid "Automatic"
 msgstr "Otomatik"
 
-#: includes/admin/settings/class-wc-settings-shipping.php:209
+#: includes/admin/settings/class-wc-settings-shipping.php:214
 msgid "The cheapest available shipping method will be selected by default."
 msgstr "Mevcut en ucuz kargo yöntemi varsayılan olarak seçilmiş olacaktır."
 
-#: includes/admin/settings/class-wc-settings-shipping.php:210
+#: includes/admin/settings/class-wc-settings-shipping.php:215
 msgid ""
 "Drag and drop the above shipping methods to control their display order."
 msgstr "Sipariş görünümlerini kontrol etmek için yukarıdaki kargo yöntemlerini sürükleyin ve bırakın."
@@ -4999,13 +4974,23 @@ msgstr "İçe / Dışa Aktarım"
 msgid "Marketing"
 msgstr "Pazarlama"
 
-#: includes/admin/views/html-admin-page-status-logs.php:4
-msgid "Viewing %s (%s)"
-msgstr "%s (%s) görüntüleniyor"
+#: includes/admin/views/html-admin-page-addons.php:18
+msgid "Acounting"
+msgstr "Muhasebe"
 
-#: includes/admin/views/html-admin-page-status-logs.php:22
-msgid "There are currently no logs to view."
-msgstr "Görüntülenecek herhangi bir günlük bulunmuyor."
+#: includes/admin/views/html-admin-page-addons.php:19
+msgid "Free"
+msgstr "Ücretsiz"
+
+#: includes/admin/views/html-admin-page-addons.php:20
+msgid "Third-party"
+msgstr "Üçüncü parti"
+
+#: includes/admin/views/html-admin-page-addons.php:81
+msgid ""
+"Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
+" href=\"%s\">WooCommerce Extensions Catalog</a>"
+msgstr "Takip eden bağlantıya tıklayarak WooThemes.com sitesindeki WooCommerce Eklenti kataloğumuza ulaşabilirsiniz: <a href=\"%s\">WooCommerce Eklenti Kataloğu</a>"
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
@@ -5098,195 +5083,195 @@ msgid "WC Logging"
 msgstr "WooCommerce Günlüğü"
 
 #: includes/admin/views/html-admin-page-status-report.php:104
-msgid "Log directory (%s) is writable."
-msgstr "(%s) günlük dizini yazılabilir."
+msgid "Log directory is writable."
+msgstr "Kayıt dizini yazılabilir."
 
 #: includes/admin/views/html-admin-page-status-report.php:106
 msgid ""
-"Log directory (<code>%s</code>) is not writable. To allow logging, make this"
-" writable or define a custom <code>WC_LOG_DIR</code>."
-msgstr "(<code>%s</code>) günlük dizini yazılabilir değil. Günlüklemeye izin vermek vermek için bu dizini yazılabilir yapın veya <code>WC_LOG_DIR</code> şeklinde özel bir kod tanımlayın."
+"Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will"
+" not be possible."
+msgstr "Günlük dizinine (<code>woocommerce/logs/</code>) yazılamıyor. Kayıt mümkün değil."
 
-#: includes/admin/views/html-admin-page-status-report.php:111
+#: includes/admin/views/html-admin-page-status-report.php:110
 msgid "Default Timezone"
 msgstr "Varsayılan Zaman Dilimi"
 
-#: includes/admin/views/html-admin-page-status-report.php:115
+#: includes/admin/views/html-admin-page-status-report.php:114
 msgid "Default timezone is %s - it should be UTC"
 msgstr "Varsayılan zaman dilimi %s - UTC olmalıdır"
 
-#: includes/admin/views/html-admin-page-status-report.php:117
+#: includes/admin/views/html-admin-page-status-report.php:116
 msgid "Default timezone is %s"
 msgstr "Varsayılan zaman dilimi %s"
 
-#: includes/admin/views/html-admin-page-status-report.php:125
+#: includes/admin/views/html-admin-page-status-report.php:124
 msgid "fsockopen/cURL"
 msgstr "fsockopen / cURL"
 
-#: includes/admin/views/html-admin-page-status-report.php:128
+#: includes/admin/views/html-admin-page-status-report.php:127
 msgid "Your server has fsockopen and cURL enabled."
 msgstr "Sunucuda fsockopen ve cURL etkin."
 
-#: includes/admin/views/html-admin-page-status-report.php:130
+#: includes/admin/views/html-admin-page-status-report.php:129
 msgid "Your server has fsockopen enabled, cURL is disabled."
 msgstr "Sunucuda fsockopen etkin, cURL devredışı."
 
-#: includes/admin/views/html-admin-page-status-report.php:132
+#: includes/admin/views/html-admin-page-status-report.php:131
 msgid "Your server has cURL enabled, fsockopen is disabled."
 msgstr "Sunucuda cURL etkin, fsockopen devredışı."
 
-#: includes/admin/views/html-admin-page-status-report.php:136
+#: includes/admin/views/html-admin-page-status-report.php:135
 msgid ""
 "Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
 "scripts which communicate with other servers will not work. Contact your "
 "hosting provider."
 msgstr "Sunucunuzda fsockopen yok veya cURL etkin değil - PayPal IPN ile başka sunucularla iletişim halinde olan diğer komut dizileri çalışmayacaktır. Lütfen barındırma hizmeti sağlayıcınızla iletişime geçin."
 
-#: includes/admin/views/html-admin-page-status-report.php:141
+#: includes/admin/views/html-admin-page-status-report.php:140
 msgid "SOAP Client"
 msgstr "SOAP Client"
 
-#: includes/admin/views/html-admin-page-status-report.php:143
+#: includes/admin/views/html-admin-page-status-report.php:142
 msgid "Your server has the SOAP Client class enabled."
 msgstr "Sunucunuzda SOAP Client etkindir."
 
-#: includes/admin/views/html-admin-page-status-report.php:146
+#: includes/admin/views/html-admin-page-status-report.php:145
 msgid ""
 "Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled -"
 " some gateway plugins which use SOAP may not work as expected."
 msgstr "Sunucunuzda <a href=\"%s\">SOAP Client</a> sunucu sınıfı etkin değil - SOAP kullanan bazı ağ geçidi eklentileri beklendiği gibi çalışmayabilir."
 
-#: includes/admin/views/html-admin-page-status-report.php:151
+#: includes/admin/views/html-admin-page-status-report.php:150
 msgid "WP Remote Post"
 msgstr "WordPress Uzak Mesaj"
 
-#: includes/admin/views/html-admin-page-status-report.php:162
+#: includes/admin/views/html-admin-page-status-report.php:161
 msgid "wp_remote_post() was successful - PayPal IPN is working."
 msgstr "wp_remote_post() was successful - PayPal IPN çalışıyor."
 
-#: includes/admin/views/html-admin-page-status-report.php:165
+#: includes/admin/views/html-admin-page-status-report.php:164
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider. Error:"
 msgstr "wp_remote_post() başarısız. PayPal IPN sunucunuzda çalışmaz. Hosting sağlayıcınıza danışın. Error:"
 
-#: includes/admin/views/html-admin-page-status-report.php:168
+#: includes/admin/views/html-admin-page-status-report.php:167
 msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
 msgstr "wp_remote_post() başarısız. PayPal IPN sunucunuzla çalışmayabilir."
 
-#: includes/admin/views/html-admin-page-status-report.php:191
+#: includes/admin/views/html-admin-page-status-report.php:190
 msgid "Locale"
 msgstr "Yerel Ayarlar"
 
-#: includes/admin/views/html-admin-page-status-report.php:207
+#: includes/admin/views/html-admin-page-status-report.php:206
 msgid "Plugins"
 msgstr "Eklentiler"
 
-#: includes/admin/views/html-admin-page-status-report.php:213
+#: includes/admin/views/html-admin-page-status-report.php:212
 msgid "Installed Plugins"
 msgstr "Yüklü Eklentiler"
 
-#: includes/admin/views/html-admin-page-status-report.php:233
+#: includes/admin/views/html-admin-page-status-report.php:232
 msgid "Visit plugin homepage"
 msgstr "Eklenti anasayfasını ziyaret et"
 
-#: includes/admin/views/html-admin-page-status-report.php:257
-#: includes/admin/views/html-admin-page-status-report.php:439
+#: includes/admin/views/html-admin-page-status-report.php:256
+#: includes/admin/views/html-admin-page-status-report.php:438
 msgid "is available"
 msgstr "mevcut"
 
-#: includes/admin/views/html-admin-page-status-report.php:260
+#: includes/admin/views/html-admin-page-status-report.php:259
 msgid "by"
 msgstr "» Geliştirici:"
 
-#: includes/admin/views/html-admin-page-status-report.php:260
+#: includes/admin/views/html-admin-page-status-report.php:259
 msgid "version"
 msgstr "» Sürüm:"
 
-#: includes/admin/views/html-admin-page-status-report.php:282
+#: includes/admin/views/html-admin-page-status-report.php:281
 msgid "Force SSL"
 msgstr "SSL Zorlaması"
 
-#: includes/admin/views/html-admin-page-status-report.php:289
+#: includes/admin/views/html-admin-page-status-report.php:288
 msgid "WC Pages"
 msgstr "WooCommerce Sayfaları"
 
-#: includes/admin/views/html-admin-page-status-report.php:296
+#: includes/admin/views/html-admin-page-status-report.php:295
 msgctxt "Page setting"
 msgid "Shop Base"
 msgstr "Mağaza Anasayfası "
 
-#: includes/admin/views/html-admin-page-status-report.php:300
+#: includes/admin/views/html-admin-page-status-report.php:299
 msgctxt "Page setting"
 msgid "Cart"
 msgstr "Sepet"
 
-#: includes/admin/views/html-admin-page-status-report.php:304
+#: includes/admin/views/html-admin-page-status-report.php:303
 msgctxt "Page setting"
 msgid "Checkout"
 msgstr "Ödeme"
 
-#: includes/admin/views/html-admin-page-status-report.php:308
+#: includes/admin/views/html-admin-page-status-report.php:307
 msgctxt "Page setting"
 msgid "My Account"
 msgstr "Hesabım"
 
-#: includes/admin/views/html-admin-page-status-report.php:328
+#: includes/admin/views/html-admin-page-status-report.php:327
 msgid "Page not set"
 msgstr "Sayfa ayarlanmamış"
 
-#: includes/admin/views/html-admin-page-status-report.php:338
+#: includes/admin/views/html-admin-page-status-report.php:337
 msgid "Page does not exist"
 msgstr "Sayfa yok"
 
-#: includes/admin/views/html-admin-page-status-report.php:343
+#: includes/admin/views/html-admin-page-status-report.php:342
 msgid "Page does not contain the shortcode: %s"
 msgstr "Sayfa şu kısa kodu içermiyor: %s"
 
-#: includes/admin/views/html-admin-page-status-report.php:362
+#: includes/admin/views/html-admin-page-status-report.php:361
 msgid "WC Taxonomies"
 msgstr "WooCommerce Sınıflandırmaları"
 
-#: includes/admin/views/html-admin-page-status-report.php:368
+#: includes/admin/views/html-admin-page-status-report.php:367
 msgid "Order Statuses"
 msgstr "Sipariş Durumları"
 
-#: includes/admin/views/html-admin-page-status-report.php:378
+#: includes/admin/views/html-admin-page-status-report.php:377
 msgid "Product Types"
 msgstr "Ürün Çeşitleri"
 
-#: includes/admin/views/html-admin-page-status-report.php:391
+#: includes/admin/views/html-admin-page-status-report.php:390
 msgid "Theme"
 msgstr "Tema"
 
-#: includes/admin/views/html-admin-page-status-report.php:428
+#: includes/admin/views/html-admin-page-status-report.php:427
 msgid "Theme Name"
 msgstr "Tema Adı"
 
-#: includes/admin/views/html-admin-page-status-report.php:434
+#: includes/admin/views/html-admin-page-status-report.php:433
 msgid "Theme Version"
 msgstr "Tema Sürümü"
 
-#: includes/admin/views/html-admin-page-status-report.php:443
+#: includes/admin/views/html-admin-page-status-report.php:442
 msgid "Author URL"
 msgstr "Yazar Bağlantısı"
 
-#: includes/admin/views/html-admin-page-status-report.php:452
+#: includes/admin/views/html-admin-page-status-report.php:451
 msgid "Templates"
 msgstr "Temalar"
 
-#: includes/admin/views/html-admin-page-status-report.php:487
+#: includes/admin/views/html-admin-page-status-report.php:486
 msgid ""
 "<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
 "date. The core version is %s"
 msgstr "<code>%s</code> <strong style=\"color:red\">%s</strong> sürümü güncel değil. Çekirdek sürüm: %s"
 
-#: includes/admin/views/html-admin-page-status-report.php:498
-#: includes/admin/views/html-admin-page-status-report.php:504
+#: includes/admin/views/html-admin-page-status-report.php:497
+#: includes/admin/views/html-admin-page-status-report.php:503
 msgid "Template Overrides"
 msgstr "Tema Geçersiz Kılmaları"
 
-#: includes/admin/views/html-admin-page-status-report.php:505
+#: includes/admin/views/html-admin-page-status-report.php:504
 msgid "No overrides present in theme."
 msgstr "Tema içinde mevcut durumda geçersiz kılma yok."
 
@@ -5327,10 +5312,6 @@ msgstr "Eklenti > Sil yoluyla kaldırma işlemi yapıldığında bu araç tüm �
 msgid "Save Changes"
 msgstr "Değişiklikleri Kaydet"
 
-#: includes/admin/views/html-admin-page-status.php:7
-msgid "Logs"
-msgstr "Günlükler"
-
 #: includes/admin/views/html-admin-settings.php:20
 msgid "Save changes"
 msgstr "Değişiklikleri Kaydet"
@@ -5347,7 +5328,6 @@ msgstr "Değişiklikleri Kaydet"
 #: includes/admin/views/html-bulk-edit-product.php:212
 #: includes/admin/views/html-bulk-edit-product.php:231
 #: includes/admin/views/html-bulk-edit-product.php:252
-#: includes/admin/views/html-bulk-edit-product.php:273
 msgid "— No Change —"
 msgstr "— Değişiklik Yok —"
 
@@ -5407,10 +5387,6 @@ msgstr "Stok?"
 #: includes/admin/views/html-quick-edit-product.php:167
 msgid "Backorders?"
 msgstr "Bakiye Siparişleri?"
-
-#: includes/admin/views/html-bulk-edit-product.php:268
-msgid "Sold Individually?"
-msgstr "Tekil Satış?"
 
 #: includes/admin/views/html-notice-install.php:5
 msgid ""
