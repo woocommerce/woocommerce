@@ -940,7 +940,7 @@ class WC_Order {
 
 		if ( $fees = $this->get_fees() )
 			foreach( $fees as $id => $fee ) {
-				if ( $fee['line_total'] + $fee['line_tax'] == 0 ) {
+				if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', $fee['line_total'] + $fee['line_tax'] == 0, $id ) ) {
 					continue;
 				}
 
