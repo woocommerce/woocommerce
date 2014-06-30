@@ -108,3 +108,18 @@ $wpdb->query( "
 	AND	term.slug LIKE 'failed%';
 	"
 );
+
+// Update variations which manage stock
+$update_variations = $wpdb->get_col( "
+	SELECT DISTINCT posts.ID FROM {$wpdb->posts} as posts
+	LEFT OUTER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id AND postmeta.meta_key = '_stock'
+	LEFT OUTER JOIN {$wpdb->postmeta} as postmeta2 ON posts.ID = postmeta2.post_id AND postmeta2.meta_key = '_manage_stock'
+	WHERE posts.post_type = 'product_variation'
+	AND postmeta.meta_value IS NOT NULL
+	AND postmeta.meta_value != ''
+	AND postmeta2.meta_value IS NULL
+" );
+
+foreach ( $update_variations as $variation_id ) {
+	add_post_meta( $variation_id, '_manage_stock', 'yes', true );
+}

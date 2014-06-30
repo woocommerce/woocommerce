@@ -94,7 +94,7 @@ class WC_Order {
 	 		return false;
 	 	}
 
-	 	wc_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $qty ) );
+	 	wc_add_order_item_meta( $item_id, '_qty', wc_stock_amount( $qty ) );
 	 	wc_add_order_item_meta( $item_id, '_tax_class', $product->get_tax_class() );
 	 	wc_add_order_item_meta( $item_id, '_product_id', $product->id );
 	 	wc_add_order_item_meta( $item_id, '_variation_id', isset( $product->variation_id ) ? $product->variation_id : 0 );
@@ -939,7 +939,7 @@ class WC_Order {
 	 */
 	public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ( $inc_tax ) {
-			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] ) / $item['qty'];
+			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] ) / max( 1, $item['qty'] );
 		} else {
 			$price = ( $item['line_subtotal'] / $item['qty'] );
 		}
@@ -981,7 +981,7 @@ class WC_Order {
 	 */
 	public function get_item_total( $item, $inc_tax = false, $round = true ) {
 		if ( $inc_tax ) {
-			$price = ( $item['line_total'] + $item['line_tax'] ) / $item['qty'];
+			$price = ( $item['line_total'] + $item['line_tax'] ) / max( 1, $item['qty'] );
 		} else {
 			$price = $item['line_total'] / $item['qty'];
 		}
@@ -1013,7 +1013,7 @@ class WC_Order {
 	 * @return float
 	 */
 	public function get_item_tax( $item, $round = true ) {
-		$price = $item['line_tax'] / $item['qty'];
+		$price = $item['line_tax'] / max( 1, $item['qty'] );
 		$price = $round ? wc_round_tax_total( $price ) : $price;
 		return apply_filters( 'woocommerce_order_amount_item_tax', $price, $item, $round, $this );
 	}
@@ -1323,7 +1323,7 @@ class WC_Order {
 
 		if ( $fees = $this->get_fees() )
 			foreach( $fees as $id => $fee ) {
-				if ( $fee['line_total'] + $fee['line_tax'] == 0 ) {
+				if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', $fee['line_total'] + $fee['line_tax'] == 0, $id ) ) {
 					continue;
 				}
 
