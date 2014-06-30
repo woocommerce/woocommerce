@@ -88,12 +88,12 @@ function wc_delete_product_transients( $post_id = 0 ) {
 
 	// Clear core transients
 	$transients_to_clear = array(
-		'wc\_products\_onsale',
-		'wc\_hidden\_product\_ids',
-		'wc\_hidden\_product\_ids\_search',
-		'wc\_attribute\_taxonomies',
-		'wc\_term\_counts',
-		'wc\_featured\_products'
+		'wc_products_onsale',
+		'wc_hidden_product_ids',
+		'wc_hidden_product_ids_search',
+		'wc_attribute_taxonomies',
+		'wc_term_counts',
+		'wc_featured_products'
 	);
 
 	// Clear transients for which we don't have the name

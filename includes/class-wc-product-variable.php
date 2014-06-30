@@ -547,6 +547,7 @@ class WC_Product_Variable extends WC_Product {
 
 			// The VARIABLE PRODUCT price should equal the min price of any type
 			update_post_meta( $product_id, '_price', $min_price );
+			delete_transient( 'wc_products_onsale' );
 
 			do_action( 'woocommerce_variable_product_sync', $product_id, $children );
 
