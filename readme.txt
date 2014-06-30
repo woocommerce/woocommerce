@@ -132,6 +132,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - order item count fix and tr class filters.
 * Fix - Missing translations during checkout.
 * Fix - Correctly clear transients, including sale transient.
+* Tweak - woocommerce_get_order_item_totals_excl_free_fees hook.
 
 = 2.1.11 - 09/06/2014 =
 * Fix - Plain text email display of customer address.
