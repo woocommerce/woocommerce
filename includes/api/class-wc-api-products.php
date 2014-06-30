@@ -1457,40 +1457,45 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return void|WP_Error
 	 */
 	protected function save_product_images( $id, $images ) {
-		$gallery = array();
+		if ( is_array( $images ) ) {
+			$gallery = array();
 
-		foreach ( $images as $image ) {
-			if ( isset( $image['position'] ) && $image['position'] == 0 ) {
-				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+			foreach ( $images as $image ) {
+				if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
-				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-					$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
 
-					if ( is_wp_error( $upload ) ) {
-						return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
+						if ( is_wp_error( $upload ) ) {
+							return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
+						}
+
+						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
 					}
 
-					$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
-				}
+					set_post_thumbnail( $id, $attachment_id );
+				} else {
+					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
-				set_post_thumbnail( $id, $attachment_id );
-			} else {
-				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
 
-				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-					$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
-
-					if ( is_wp_error( $upload ) ) {
-						return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
+						if ( is_wp_error( $upload ) ) {
+							return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
+						}
 					}
-				}
 
-				$gallery[] = $this->set_product_image_as_attachment( $upload, $id );
+					$gallery[] = $this->set_product_image_as_attachment( $upload, $id );
+				}
 			}
-		}
 
-		if ( ! empty( $gallery ) ) {
-			update_post_meta( $id, '_product_image_gallery', implode( ',', $gallery ) );
+			if ( ! empty( $gallery ) ) {
+				update_post_meta( $id, '_product_image_gallery', implode( ',', $gallery ) );
+			}
+		} else {
+			delete_post_thumbnail( $id );
+			update_post_meta( $id, '_product_image_gallery', '' );
 		}
 	}
 
