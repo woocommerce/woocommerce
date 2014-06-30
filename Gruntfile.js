@@ -191,7 +191,7 @@ module.exports = function( grunt ){
 
 	grunt.registerTask( 'pot_push', [
 		'pot',
-		'txpush'
+		'shell:txpush'
 	]);
 
 	grunt.registerTask( 'docs', [
