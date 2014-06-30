@@ -1002,7 +1002,7 @@ class WC_API_Products extends WC_API_Resource {
 			if ( ! $variation_id ) {
 				$post_status = ( isset( $variation['visible'] ) && false === $variation['visible'] ) ? 'private' : 'publish';
 
-				$variation = array(
+				$new_variation = array(
 					'post_title'   => $variation_post_title,
 					'post_content' => '',
 					'post_status'  => $post_status,
@@ -1012,7 +1012,7 @@ class WC_API_Products extends WC_API_Resource {
 					'menu_order'   => $menu_order
 				);
 
-				$variation_id = wp_insert_post( $variation );
+				$variation_id = wp_insert_post( $new_variation );
 
 				do_action( 'woocommerce_create_product_variation', $variation_id );
 			} else {
@@ -1194,10 +1194,11 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Update taxonomies
-			if ( $variation['attributes'] ) {
+			if ( isset( $variation['attributes'] ) ) {
 				$updated_attribute_keys = array();
 
 				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
+
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
