@@ -114,7 +114,10 @@ module.exports = function( grunt ){
 				].join( '&&' )
 			},
 			txpush: {
-				command: 'tx push -s' // push the resources/pot files
+				command: [
+					'cd i18n',
+					'tx push -s', // push the resources/pot files
+				].join( '&&' )
 			},
 			generatemos: {
 				command: [
