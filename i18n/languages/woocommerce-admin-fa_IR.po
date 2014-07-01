@@ -6,8 +6,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-06-30 14:28:36+00:00\n"
-"PO-Revision-Date: 2014-06-30 14:31+0000\n"
-"Last-Translator: Mike Jolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-06-30 16:31+0000\n"
+"Last-Translator: Khalil Delavaran <khalil.delavaran@gmail.com>\n"
 "Language-Team: Persian (Iran) (http://www.transifex.com/projects/p/woocommerce/language/fa_IR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3851,7 +3851,7 @@ msgstr "اجبار سابت به استفاده از HTTPS در برگه‌ی ت
 
 #: includes/admin/settings/class-wc-settings-checkout.php:99
 msgid "Un-force HTTPS when leaving the checkout"
-msgstr ""
+msgstr "بکار نبردن HTTPS هنگامیکه برگه پرداخت ترک می شود"
 
 #: includes/admin/settings/class-wc-settings-checkout.php:109
 msgid "Checkout Pages"
@@ -4627,7 +4627,7 @@ msgstr "مقصد فرستادن"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:112
 msgid "Ship to billing address by default"
-msgstr ""
+msgstr "فرستادن به آدرس پیش پندار صورتحساب"
 
 #: includes/admin/settings/class-wc-settings-shipping.php:122
 msgid "Only ship to the users billing address"
@@ -4973,7 +4973,7 @@ msgstr "بازاریابی"
 
 #: includes/admin/views/html-admin-page-addons.php:18
 msgid "Acounting"
-msgstr ""
+msgstr "حسابداری"
 
 #: includes/admin/views/html-admin-page-addons.php:19
 msgid "Free"
@@ -4981,13 +4981,13 @@ msgstr "رایگان"
 
 #: includes/admin/views/html-admin-page-addons.php:20
 msgid "Third-party"
-msgstr ""
+msgstr "ساخته دیگران"
 
 #: includes/admin/views/html-admin-page-addons.php:81
 msgid ""
 "Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a"
 " href=\"%s\">WooCommerce Extensions Catalog</a>"
-msgstr ""
+msgstr "دفترچه ما از افزونه های ووکامرس را می توانید در WooThemes.com پیدا کنید: <a href=\"%s\">دفترچه افزونه های ووکامرس</a>"
 
 #: includes/admin/views/html-admin-page-status-report.php:2
 msgid "Please include this information when requesting support:"
@@ -5081,13 +5081,13 @@ msgstr "WC Logging"
 
 #: includes/admin/views/html-admin-page-status-report.php:104
 msgid "Log directory is writable."
-msgstr ""
+msgstr "پوشه گزارش را نوشتنی است."
 
 #: includes/admin/views/html-admin-page-status-report.php:106
 msgid ""
 "Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will"
 " not be possible."
-msgstr ""
+msgstr "پوشه گزارش (<code>woocommerce/logs/</code>) نوشتنی نیست. گزارش ها در دسترس نخواهد بود."
 
 #: includes/admin/views/html-admin-page-status-report.php:110
 msgid "Default Timezone"

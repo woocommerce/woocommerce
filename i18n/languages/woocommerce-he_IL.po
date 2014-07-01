@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
 "POT-Creation-Date: 2014-06-30 14:28:36+00:00\n"
-"PO-Revision-Date: 2014-06-30 14:31+0000\n"
-"Last-Translator: Mike Jolley <mike.jolley@me.com>\n"
+"PO-Revision-Date: 2014-06-30 18:37+0000\n"
+"Last-Translator: Seggev Shoresh\n"
 "Language-Team: Hebrew (Israel) (http://www.transifex.com/projects/p/woocommerce/language/he_IL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -103,27 +103,27 @@ msgstr "מערב אוסטרליה"
 
 #: i18n/states/BD.php:13
 msgid "Bagerhat"
-msgstr ""
+msgstr "בג'ראט"
 
 #: i18n/states/BD.php:14
 msgid "Bandarban"
-msgstr ""
+msgstr "בנדרבן"
 
 #: i18n/states/BD.php:15
 msgid "Barguna"
-msgstr ""
+msgstr "בארגונה"
 
 #: i18n/states/BD.php:16
 msgid "Barisal"
-msgstr ""
+msgstr "באריסל"
 
 #: i18n/states/BD.php:17
 msgid "Bhola"
-msgstr ""
+msgstr "בולה"
 
 #: i18n/states/BD.php:18
 msgid "Bogra"
-msgstr ""
+msgstr "בוגרה"
 
 #: i18n/states/BD.php:19
 msgid "Brahmanbaria"
@@ -131,27 +131,27 @@ msgstr ""
 
 #: i18n/states/BD.php:20
 msgid "Chandpur"
-msgstr ""
+msgstr "צ'אנדפור"
 
 #: i18n/states/BD.php:21
 msgid "Chittagong"
-msgstr ""
+msgstr "צ'יטגונג"
 
 #: i18n/states/BD.php:22
 msgid "Chuadanga"
-msgstr ""
+msgstr "צ'ואדנגה"
 
 #: i18n/states/BD.php:23
 msgid "Comilla"
-msgstr ""
+msgstr "קומילה"
 
 #: i18n/states/BD.php:24
 msgid "Cox's Bazar"
-msgstr ""
+msgstr "קוקס בזאר"
 
 #: i18n/states/BD.php:25
 msgid "Dhaka"
-msgstr ""
+msgstr "דאקה"
 
 #: i18n/states/BD.php:26
 msgid "Dinajpur"
@@ -159,19 +159,19 @@ msgstr "Dinajpur"
 
 #: i18n/states/BD.php:27
 msgid "Faridpur "
-msgstr ""
+msgstr "פארידפור"
 
 #: i18n/states/BD.php:28
 msgid "Feni"
-msgstr ""
+msgstr "פני"
 
 #: i18n/states/BD.php:29
 msgid "Gaibandha"
-msgstr ""
+msgstr "גאיבנדה"
 
 #: i18n/states/BD.php:30
 msgid "Gazipur"
-msgstr ""
+msgstr "גזיפור"
 
 #: i18n/states/BD.php:31
 msgid "Gopalganj"
@@ -183,11 +183,11 @@ msgstr ""
 
 #: i18n/states/BD.php:33
 msgid "Jamalpur"
-msgstr ""
+msgstr "ג'מלפור"
 
 #: i18n/states/BD.php:34
 msgid "Jessore"
-msgstr ""
+msgstr "ג'סורה"
 
 #: i18n/states/BD.php:35
 msgid "Jhalokati"
@@ -199,7 +199,7 @@ msgstr "Jhenaidah"
 
 #: i18n/states/BD.php:37
 msgid "Joypurhat"
-msgstr ""
+msgstr "ג'איפורהאט"
 
 #: i18n/states/BD.php:38
 msgid "Khagrachhari"
@@ -215,23 +215,23 @@ msgstr "Kishoreganj"
 
 #: i18n/states/BD.php:41
 msgid "Kurigram"
-msgstr ""
+msgstr "קוריגראם"
 
 #: i18n/states/BD.php:42
 msgid "Kushtia"
-msgstr ""
+msgstr "קושטיה"
 
 #: i18n/states/BD.php:43
 msgid "Lakshmipur"
-msgstr ""
+msgstr "לקשמיפור"
 
 #: i18n/states/BD.php:44
 msgid "Lalmonirhat"
-msgstr ""
+msgstr "לאלמונירהאט"
 
 #: i18n/states/BD.php:45
 msgid "Madaripur"
-msgstr ""
+msgstr "מדריפור"
 
 #: i18n/states/BD.php:46
 msgid "Magura"
@@ -239,11 +239,11 @@ msgstr "Magura"
 
 #: i18n/states/BD.php:47
 msgid "Manikganj "
-msgstr ""
+msgstr "מניקגאנג'"
 
 #: i18n/states/BD.php:48
 msgid "Meherpur"
-msgstr ""
+msgstr "מהרפור"
 
 #: i18n/states/BD.php:49
 msgid "Moulvibazar"
@@ -251,27 +251,27 @@ msgstr "Moulvibazar"
 
 #: i18n/states/BD.php:50
 msgid "Munshiganj"
-msgstr ""
+msgstr "מונשיגאנג'"
 
 #: i18n/states/BD.php:51
 msgid "Mymensingh"
-msgstr ""
+msgstr "מימנסינג"
 
 #: i18n/states/BD.php:52
 msgid "Naogaon"
-msgstr ""
+msgstr "נאוגאון"
 
 #: i18n/states/BD.php:53
 msgid "Narail"
-msgstr ""
+msgstr "נראיל"
 
 #: i18n/states/BD.php:54
 msgid "Narayanganj"
-msgstr ""
+msgstr "נאראיאנגנג'"
 
 #: i18n/states/BD.php:55
 msgid "Narsingdi"
-msgstr ""
+msgstr "נרשינגדי"
 
 #: i18n/states/BD.php:56
 msgid "Natore"
@@ -287,19 +287,19 @@ msgstr "Netrakona"
 
 #: i18n/states/BD.php:59
 msgid "Nilphamari"
-msgstr ""
+msgstr "נילפמארי"
 
 #: i18n/states/BD.php:60
 msgid "Noakhali"
-msgstr ""
+msgstr "נואחלי"
 
 #: i18n/states/BD.php:61
 msgid "Pabna"
-msgstr ""
+msgstr "פבנה"
 
 #: i18n/states/BD.php:62
 msgid "Panchagarh"
-msgstr ""
+msgstr "פנצ'גר"
 
 #: i18n/states/BD.php:63
 msgid "Patuakhali"
@@ -307,11 +307,11 @@ msgstr "Patuakhali"
 
 #: i18n/states/BD.php:64
 msgid "Pirojpur"
-msgstr ""
+msgstr "פירוז'פור"
 
 #: i18n/states/BD.php:65
 msgid "Rajbari"
-msgstr ""
+msgstr "ראג'בארי"
 
 #: i18n/states/BD.php:66
 msgid "Rajshahi"
@@ -319,23 +319,23 @@ msgstr "Rajshahi"
 
 #: i18n/states/BD.php:67
 msgid "Rangamati"
-msgstr ""
+msgstr "רנגמטי"
 
 #: i18n/states/BD.php:68
 msgid "Rangpur"
-msgstr ""
+msgstr "ראנגפור"
 
 #: i18n/states/BD.php:69
 msgid "Satkhira"
-msgstr ""
+msgstr "סטקירה"
 
 #: i18n/states/BD.php:70
 msgid "Shariatpur"
-msgstr ""
+msgstr "שאריאטפור"
 
 #: i18n/states/BD.php:71
 msgid "Sherpur"
-msgstr ""
+msgstr "שרפור"
 
 #: i18n/states/BD.php:72
 msgid "Sirajganj"
@@ -343,75 +343,75 @@ msgstr "Sirajganj"
 
 #: i18n/states/BD.php:73
 msgid "Sunamganj"
-msgstr ""
+msgstr "סונאמגאנג'"
 
 #: i18n/states/BD.php:74
 msgid "Sylhet"
-msgstr ""
+msgstr "סילהט"
 
 #: i18n/states/BD.php:75
 msgid "Tangail"
-msgstr ""
+msgstr "טנגאלי"
 
 #: i18n/states/BD.php:76
 msgid "Thakurgaon"
-msgstr ""
+msgstr "תאקורגאון"
 
 #: i18n/states/BG.php:13
 msgid "Blagoevgrad"
-msgstr ""
+msgstr "בלגואבגרד"
 
 #: i18n/states/BG.php:14
 msgid "Burgas"
-msgstr ""
+msgstr "בורגס"
 
 #: i18n/states/BG.php:15
 msgid "Dobrich"
-msgstr ""
+msgstr "דובריץ'"
 
 #: i18n/states/BG.php:16
 msgid "Gabrovo"
-msgstr ""
+msgstr "גברובו"
 
 #: i18n/states/BG.php:17
 msgid "Haskovo"
-msgstr ""
+msgstr "חאסקובו"
 
 #: i18n/states/BG.php:18
 msgid "Kardzhali"
-msgstr ""
+msgstr "קרדז'אלי"
 
 #: i18n/states/BG.php:19
 msgid "Kyustendil"
-msgstr ""
+msgstr "קיוסטנדיל"
 
 #: i18n/states/BG.php:20
 msgid "Lovech"
-msgstr ""
+msgstr "לובץ'"
 
 #: i18n/states/BG.php:21 i18n/states/US.php:39
 msgid "Montana"
-msgstr ""
+msgstr "מונטנה"
 
 #: i18n/states/BG.php:22
 msgid "Pazardzhik"
-msgstr ""
+msgstr "פאזארדז'יק"
 
 #: i18n/states/BG.php:23
 msgid "Pernik"
-msgstr ""
+msgstr "פרניק"
 
 #: i18n/states/BG.php:24
 msgid "Pleven"
-msgstr ""
+msgstr "פלבן"
 
 #: i18n/states/BG.php:25
 msgid "Plovdiv"
-msgstr ""
+msgstr "פלובדיב"
 
 #: i18n/states/BG.php:26
 msgid "Razgrad"
-msgstr ""
+msgstr "ראזגרד"
 
 #: i18n/states/BG.php:27
 msgid "Ruse"
@@ -419,55 +419,55 @@ msgstr ""
 
 #: i18n/states/BG.php:28
 msgid "Shumen"
-msgstr ""
+msgstr "שומן"
 
 #: i18n/states/BG.php:29
 msgid "Silistra"
-msgstr ""
+msgstr "סיליסטרה"
 
 #: i18n/states/BG.php:30
 msgid "Sliven"
-msgstr ""
+msgstr "סליבן"
 
 #: i18n/states/BG.php:31
 msgid "Smolyan"
-msgstr ""
+msgstr "סמוליאן"
 
 #: i18n/states/BG.php:32
 msgid "Sofia"
-msgstr ""
+msgstr "סופיה"
 
 #: i18n/states/BG.php:33
 msgid "Sofia-Grad"
-msgstr ""
+msgstr "סופיה"
 
 #: i18n/states/BG.php:34
 msgid "Stara Zagora"
-msgstr ""
+msgstr "סטארה זאגורה"
 
 #: i18n/states/BG.php:35
 msgid "Targovishte"
-msgstr ""
+msgstr "טרגובישטה"
 
 #: i18n/states/BG.php:36
 msgid "Varna"
-msgstr ""
+msgstr "וארנה"
 
 #: i18n/states/BG.php:37
 msgid "Veliko Tarnovo"
-msgstr ""
+msgstr "וליקו טרנובו"
 
 #: i18n/states/BG.php:38
 msgid "Vidin"
-msgstr ""
+msgstr "וידין"
 
 #: i18n/states/BG.php:39
 msgid "Vratsa"
-msgstr ""
+msgstr "וראצה"
 
 #: i18n/states/BG.php:40
 msgid "Yambol"
-msgstr ""
+msgstr "ימבול"
 
 #: i18n/states/BR.php:13
 msgid "Acre"
@@ -479,7 +479,7 @@ msgstr "אלגואס"
 
 #: i18n/states/BR.php:15
 msgid "Amap&aacute;"
-msgstr ""
+msgstr "אמאפה"
 
 #: i18n/states/BR.php:16 i18n/states/PE.php:15
 msgid "Amazonas"
@@ -495,71 +495,71 @@ msgstr "סיארה"
 
 #: i18n/states/BR.php:19
 msgid "Distrito Federal"
-msgstr ""
+msgstr "מחוז פדרלי"
 
 #: i18n/states/BR.php:20
 msgid "Esp&iacute;rito Santo"
-msgstr ""
+msgstr "אספיריטו סנטו"
 
 #: i18n/states/BR.php:21
 msgid "Goi&aacute;s"
-msgstr ""
+msgstr "גויאס"
 
 #: i18n/states/BR.php:22
 msgid "Maranh&atilde;o"
-msgstr ""
+msgstr "רניאו"
 
 #: i18n/states/BR.php:23
 msgid "Mato Grosso"
-msgstr ""
+msgstr "מאטו גרוסו"
 
 #: i18n/states/BR.php:24
 msgid "Mato Grosso do Sul"
-msgstr ""
+msgstr "מאטו גרוסו דו סול"
 
 #: i18n/states/BR.php:25
 msgid "Minas Gerais"
-msgstr ""
+msgstr "Minas Gerais"
 
 #: i18n/states/BR.php:26
 msgid "Par&aacute;"
-msgstr ""
+msgstr "פארה"
 
 #: i18n/states/BR.php:27
 msgid "Para&iacute;ba"
-msgstr ""
+msgstr "פאראיבה"
 
 #: i18n/states/BR.php:28
 msgid "Paran&aacute;"
-msgstr ""
+msgstr "פרנה"
 
 #: i18n/states/BR.php:29
 msgid "Pernambuco"
-msgstr ""
+msgstr "פרנמבוקו"
 
 #: i18n/states/BR.php:30
 msgid "Piau&iacute;"
-msgstr ""
+msgstr "פיאאוי"
 
 #: i18n/states/BR.php:31
 msgid "Rio de Janeiro"
-msgstr ""
+msgstr "ריו דה ז'נרו"
 
 #: i18n/states/BR.php:32
 msgid "Rio Grande do Norte"
-msgstr ""
+msgstr "ריו גרנדה דו נורטה"
 
 #: i18n/states/BR.php:33
 msgid "Rio Grande do Sul"
-msgstr ""
+msgstr "ריו גרנדה דו סול"
 
 #: i18n/states/BR.php:34
 msgid "Rond&ocirc;nia"
-msgstr ""
+msgstr "רונדוניה"
 
 #: i18n/states/BR.php:35
 msgid "Roraima"
-msgstr ""
+msgstr "רוריימה"
 
 #: i18n/states/BR.php:36
 msgid "Santa Catarina"
@@ -567,15 +567,15 @@ msgstr "סנטה קטרינה"
 
 #: i18n/states/BR.php:37
 msgid "S&atilde;o Paulo"
-msgstr ""
+msgstr "סאו פאולו"
 
 #: i18n/states/BR.php:38
 msgid "Sergipe"
-msgstr ""
+msgstr "סרגיפה"
 
 #: i18n/states/BR.php:39
 msgid "Tocantins"
-msgstr ""
+msgstr "טוקנטינס"
 
 #: i18n/states/CA.php:13
 msgid "Alberta"
@@ -583,39 +583,39 @@ msgstr "אלברטה"
 
 #: i18n/states/CA.php:14
 msgid "British Columbia"
-msgstr ""
+msgstr "קולומביה הבריטית"
 
 #: i18n/states/CA.php:15
 msgid "Manitoba"
-msgstr ""
+msgstr "מניטובה"
 
 #: i18n/states/CA.php:16
 msgid "New Brunswick"
-msgstr ""
+msgstr "ניו ברונסוויק"
 
 #: i18n/states/CA.php:17
 msgid "Newfoundland"
-msgstr ""
+msgstr "ניופאונדלנד"
 
 #: i18n/states/CA.php:18
 msgid "Northwest Territories"
-msgstr ""
+msgstr "טריטוריות הצפון מערביים"
 
 #: i18n/states/CA.php:19
 msgid "Nova Scotia"
-msgstr ""
+msgstr "נובה סקוטיה"
 
 #: i18n/states/CA.php:20
 msgid "Nunavut"
-msgstr ""
+msgstr "נונאווט"
 
 #: i18n/states/CA.php:21
 msgid "Ontario"
-msgstr ""
+msgstr "אונטריו"
 
 #: i18n/states/CA.php:22
 msgid "Prince Edward Island"
-msgstr ""
+msgstr "אי נסיך אדוארד"
 
 #: i18n/states/CA.php:23
 msgid "Quebec"
@@ -623,247 +623,247 @@ msgstr "קוויבק"
 
 #: i18n/states/CA.php:24
 msgid "Saskatchewan"
-msgstr ""
+msgstr "ססקצ'ואן"
 
 #: i18n/states/CA.php:25
 msgid "Yukon Territory"
-msgstr ""
+msgstr "טריטוריה של יוקון"
 
 #: i18n/states/CN.php:13
 msgid "Yunnan / &#20113;&#21335;"
-msgstr ""
+msgstr "יונאן / 云南"
 
 #: i18n/states/CN.php:14
 msgid "Beijing / &#21271;&#20140;"
-msgstr ""
+msgstr "בייג'ינג / 北京"
 
 #: i18n/states/CN.php:15
 msgid "Tianjin / &#22825;&#27941;"
-msgstr ""
+msgstr "טיאנג'ין / 天津"
 
 #: i18n/states/CN.php:16
 msgid "Hebei / &#27827;&#21271;"
-msgstr ""
+msgstr "הביי / 河北"
 
 #: i18n/states/CN.php:17
 msgid "Shanxi / &#23665;&#35199;"
-msgstr ""
+msgstr "שאנשים / 山西"
 
 #: i18n/states/CN.php:18
 msgid "Inner Mongolia / &#20839;&#33945;&#21476;"
-msgstr ""
+msgstr "מונגוליה פנימית / 内蒙古"
 
 #: i18n/states/CN.php:19
 msgid "Liaoning / &#36797;&#23425;"
-msgstr ""
+msgstr "ליאונינג / 辽宁"
 
 #: i18n/states/CN.php:20
 msgid "Jilin / &#21513;&#26519;"
-msgstr ""
+msgstr "ג'ילין / 吉林"
 
 #: i18n/states/CN.php:21
 msgid "Heilongjiang / &#40657;&#40857;&#27743;"
-msgstr ""
+msgstr "Heilongjiang / 黑龙江"
 
 #: i18n/states/CN.php:22
 msgid "Shanghai / &#19978;&#28023;"
-msgstr ""
+msgstr "שנחאי / 上海"
 
 #: i18n/states/CN.php:23
 msgid "Jiangsu / &#27743;&#33487;"
-msgstr ""
+msgstr "Jiangsu / 江苏"
 
 #: i18n/states/CN.php:24
 msgid "Zhejiang / &#27993;&#27743;"
-msgstr ""
+msgstr "Zhejiang / 浙江"
 
 #: i18n/states/CN.php:25
 msgid "Anhui / &#23433;&#24509;"
-msgstr ""
+msgstr "Anhui / 安徽"
 
 #: i18n/states/CN.php:26
 msgid "Fujian / &#31119;&#24314;"
-msgstr ""
+msgstr "Fujian / 福建"
 
 #: i18n/states/CN.php:27
 msgid "Jiangxi / &#27743;&#35199;"
-msgstr ""
+msgstr "יאנגשי / 江西"
 
 #: i18n/states/CN.php:28
 msgid "Shandong / &#23665;&#19996;"
-msgstr ""
+msgstr "אנדונג / 山东"
 
 #: i18n/states/CN.php:29
 msgid "Henan / &#27827;&#21335;"
-msgstr ""
+msgstr "הנאן / 河南"
 
 #: i18n/states/CN.php:30
 msgid "Hubei / &#28246;&#21271;"
-msgstr ""
+msgstr "הוביי / 湖北"
 
 #: i18n/states/CN.php:31
 msgid "Hunan / &#28246;&#21335;"
-msgstr ""
+msgstr "הונאן / 湖南"
 
 #: i18n/states/CN.php:32
 msgid "Guangdong / &#24191;&#19996;"
-msgstr ""
+msgstr "גואנגדונג / 广东"
 
 #: i18n/states/CN.php:33
 msgid "Guangxi Zhuang / &#24191;&#35199;&#22766;&#26063;"
-msgstr ""
+msgstr "גואנגשי ג'ואנג / 广西 壮族"
 
 #: i18n/states/CN.php:34
 msgid "Hainan / &#28023;&#21335;"
-msgstr ""
+msgstr "האינאן / 海南"
 
 #: i18n/states/CN.php:35
 msgid "Chongqing / &#37325;&#24198;"
-msgstr ""
+msgstr "צ'ונגצ'ינג / 重庆"
 
 #: i18n/states/CN.php:36
 msgid "Sichuan / &#22235;&#24029;"
-msgstr ""
+msgstr "סיצ'ואן / 四川"
 
 #: i18n/states/CN.php:37
 msgid "Guizhou / &#36149;&#24030;"
-msgstr ""
+msgstr "Guizhou / 贵州"
 
 #: i18n/states/CN.php:38
 msgid "Shaanxi / &#38485;&#35199;"
-msgstr ""
+msgstr "שאאנשי / 陕西"
 
 #: i18n/states/CN.php:39
 msgid "Gansu / &#29976;&#32899;"
-msgstr ""
+msgstr "גאנסו / 甘肃"
 
 #: i18n/states/CN.php:40
 msgid "Qinghai / &#38738;&#28023;"
-msgstr ""
+msgstr "צ'ינגהאי / 青海"
 
 #: i18n/states/CN.php:41
 msgid "Ningxia Hui / &#23425;&#22799;"
-msgstr ""
+msgstr "נינג הואי / 宁夏"
 
 #: i18n/states/CN.php:42
 msgid "Macau / &#28595;&#38376;"
-msgstr ""
+msgstr "מקאו / 澳门"
 
 #: i18n/states/CN.php:43
 msgid "Tibet / &#35199;&#34255;"
-msgstr ""
+msgstr "טיבט / 西藏"
 
 #: i18n/states/CN.php:44
 msgid "Xinjiang / &#26032;&#30086;"
-msgstr ""
+msgstr "שינג'יאנג / 新疆"
 
 #: i18n/states/ES.php:13
 msgid "A Coru&ntilde;a"
-msgstr ""
+msgstr "א קורוניה"
 
 #: i18n/states/ES.php:14
 msgid "Araba/&Aacute;lava"
-msgstr ""
+msgstr "אראבה/אלאבה"
 
 #: i18n/states/ES.php:15
 msgid "Albacete"
-msgstr ""
+msgstr "אלבסטה"
 
 #: i18n/states/ES.php:16
 msgid "Alicante"
-msgstr ""
+msgstr "אליקנטה"
 
 #: i18n/states/ES.php:17
 msgid "Almer&iacute;a"
-msgstr ""
+msgstr "אלמריה"
 
 #: i18n/states/ES.php:18
 msgid "Asturias"
-msgstr ""
+msgstr "אסטוריאס"
 
 #: i18n/states/ES.php:19
 msgid "&Aacute;vila"
-msgstr ""
+msgstr "אווילה"
 
 #: i18n/states/ES.php:20
 msgid "Badajoz"
-msgstr ""
+msgstr "בדחוס"
 
 #: i18n/states/ES.php:21
 msgid "Baleares"
-msgstr ""
+msgstr "האיים הבלאריים"
 
 #: i18n/states/ES.php:22
 msgid "Barcelona"
-msgstr ""
+msgstr "ברצלונה"
 
 #: i18n/states/ES.php:23
 msgid "Burgos"
-msgstr ""
+msgstr "בורגוס"
 
 #: i18n/states/ES.php:24
 msgid "C&aacute;ceres"
-msgstr ""
+msgstr "קסרס"
 
 #: i18n/states/ES.php:25
 msgid "C&aacute;diz"
-msgstr ""
+msgstr "קדיס"
 
 #: i18n/states/ES.php:26
 msgid "Cantabria"
-msgstr ""
+msgstr "קנטבריה"
 
 #: i18n/states/ES.php:27
 msgid "Castell&oacute;n"
-msgstr ""
+msgstr "קאסטיון"
 
 #: i18n/states/ES.php:28
 msgid "Ceuta"
-msgstr ""
+msgstr "סאוטה"
 
 #: i18n/states/ES.php:29
 msgid "Ciudad Real"
-msgstr ""
+msgstr "סיודאד ריאל"
 
 #: i18n/states/ES.php:30
 msgid "C&oacute;rdoba"
-msgstr ""
+msgstr "ב"
 
 #: i18n/states/ES.php:31
 msgid "Cuenca"
-msgstr ""
+msgstr "קואנקה"
 
 #: i18n/states/ES.php:32
 msgid "Girona"
-msgstr ""
+msgstr "גירונה"
 
 #: i18n/states/ES.php:33
 msgid "Granada"
-msgstr ""
+msgstr "גרנדה"
 
 #: i18n/states/ES.php:34
 msgid "Guadalajara"
-msgstr ""
+msgstr "גואדלחרה"
 
 #: i18n/states/ES.php:35
 msgid "Gipuzkoa"
-msgstr ""
+msgstr "גיפוזקואה"
 
 #: i18n/states/ES.php:36
 msgid "Huelva"
-msgstr ""
+msgstr "הואלבה"
 
 #: i18n/states/ES.php:37
 msgid "Huesca"
-msgstr ""
+msgstr "הואסקה"
 
 #: i18n/states/ES.php:38
 msgid "Ja&eacute;n"
-msgstr ""
+msgstr "חאאן"
 
 #: i18n/states/ES.php:39
 msgid "La Rioja"
-msgstr ""
+msgstr "לה ריוחה"
 
 #: i18n/states/ES.php:40
 msgid "Las Palmas"
@@ -871,15 +871,15 @@ msgstr "לאס פאלמאס"
 
 #: i18n/states/ES.php:41
 msgid "Le&oacute;n"
-msgstr ""
+msgstr "לאון"
 
 #: i18n/states/ES.php:42
 msgid "Lleida"
-msgstr ""
+msgstr "ליידה"
 
 #: i18n/states/ES.php:43
 msgid "Lugo"
-msgstr ""
+msgstr "לוגו"
 
 #: i18n/states/ES.php:44
 msgid "Madrid"
@@ -887,435 +887,435 @@ msgstr "מדריד"
 
 #: i18n/states/ES.php:45
 msgid "M&aacute;laga"
-msgstr ""
+msgstr "מאלגה"
 
 #: i18n/states/ES.php:46
 msgid "Melilla"
-msgstr ""
+msgstr "מלייה"
 
 #: i18n/states/ES.php:47
 msgid "Murcia"
-msgstr ""
+msgstr "מורסיה"
 
 #: i18n/states/ES.php:48
 msgid "Navarra"
-msgstr ""
+msgstr "נווארה"
 
 #: i18n/states/ES.php:49
 msgid "Ourense"
-msgstr ""
+msgstr "אורנסה"
 
 #: i18n/states/ES.php:50
 msgid "Palencia"
-msgstr ""
+msgstr "פלנסיה"
 
 #: i18n/states/ES.php:51
 msgid "Pontevedra"
-msgstr ""
+msgstr "פונטוודרה"
 
 #: i18n/states/ES.php:52
 msgid "Salamanca"
-msgstr ""
+msgstr "סלמנקה"
 
 #: i18n/states/ES.php:53
 msgid "Santa Cruz de Tenerife"
-msgstr ""
+msgstr "סנטה קרוז דה טנריף"
 
 #: i18n/states/ES.php:54
 msgid "Segovia"
-msgstr ""
+msgstr "סגוביה"
 
 #: i18n/states/ES.php:55
 msgid "Sevilla"
-msgstr ""
+msgstr "סביליה"
 
 #: i18n/states/ES.php:56
 msgid "Soria"
-msgstr ""
+msgstr "סוׂרִיה"
 
 #: i18n/states/ES.php:57
 msgid "Tarragona"
-msgstr ""
+msgstr "טרגונה"
 
 #: i18n/states/ES.php:58
 msgid "Teruel"
-msgstr ""
+msgstr "טרואל"
 
 #: i18n/states/ES.php:59
 msgid "Toledo"
-msgstr ""
+msgstr "טולדו"
 
 #: i18n/states/ES.php:60
 msgid "Valencia"
-msgstr ""
+msgstr "ולנסיה"
 
 #: i18n/states/ES.php:61
 msgid "Valladolid"
-msgstr ""
+msgstr "ויאדוליד"
 
 #: i18n/states/ES.php:62
 msgid "Bizkaia"
-msgstr ""
+msgstr "ויזקאיה"
 
 #: i18n/states/ES.php:63
 msgid "Zamora"
-msgstr ""
+msgstr "זאמורה"
 
 #: i18n/states/ES.php:64
 msgid "Zaragoza"
-msgstr ""
+msgstr "סראגוסה"
 
 #: i18n/states/HK.php:13
 msgid "Hong Kong Island"
-msgstr ""
+msgstr "אי הונג קונג"
 
 #: i18n/states/HK.php:14
 msgid "Kowloon"
-msgstr ""
+msgstr "קאולון"
 
 #: i18n/states/HK.php:15
 msgid "New Territories"
-msgstr ""
+msgstr "שטחים חדשים"
 
 #: i18n/states/HU.php:13
 msgid "Bács-Kiskun"
-msgstr ""
+msgstr "Bács-Kiskun"
 
 #: i18n/states/HU.php:14
 msgid "Békés"
-msgstr ""
+msgstr "קש"
 
 #: i18n/states/HU.php:15
 msgid "Baranya"
-msgstr ""
+msgstr "ארניה"
 
 #: i18n/states/HU.php:16
 msgid "Borsod-Abaúj-Zemplén"
-msgstr ""
+msgstr "Borsod-Abaúj-Zemplén"
 
 #: i18n/states/HU.php:17
 msgid "Budapest"
-msgstr ""
+msgstr "בודפשט"
 
 #: i18n/states/HU.php:18
 msgid "Csongrád"
-msgstr ""
+msgstr "קסונגראד"
 
 #: i18n/states/HU.php:19
 msgid "Fejér"
-msgstr ""
+msgstr "Fejér"
 
 #: i18n/states/HU.php:20
 msgid "Győr-Moson-Sopron"
-msgstr ""
+msgstr "Győr-Moson-שופרון"
 
 #: i18n/states/HU.php:21
 msgid "Hajdú-Bihar"
-msgstr ""
+msgstr "היידו-ביהאר"
 
 #: i18n/states/HU.php:22
 msgid "Heves"
-msgstr ""
+msgstr "הווס"
 
 #: i18n/states/HU.php:23
 msgid "Jász-Nagykun-Szolnok"
-msgstr ""
+msgstr "Jász-Nagykun-ז'ולנוק"
 
 #: i18n/states/HU.php:24
 msgid "Komárom-Esztergom"
-msgstr ""
+msgstr "קומרום-Esztergom"
 
 #: i18n/states/HU.php:25
 msgid "Nógrád"
-msgstr ""
+msgstr "נוגראד"
 
 #: i18n/states/HU.php:26
 msgid "Pest"
-msgstr ""
+msgstr "טרדן"
 
 #: i18n/states/HU.php:27
 msgid "Somogy"
-msgstr ""
+msgstr "סומוגי"
 
 #: i18n/states/HU.php:28
 msgid "Szabolcs-Szatmár-Bereg"
-msgstr ""
+msgstr "Szabolcs-Szatmár-Bereg"
 
 #: i18n/states/HU.php:29
 msgid "Tolna"
-msgstr ""
+msgstr "טול"
 
 #: i18n/states/HU.php:30
 msgid "Vas"
-msgstr ""
+msgstr "Vas"
 
 #: i18n/states/HU.php:31
 msgid "Veszprém"
-msgstr ""
+msgstr "Veszprém"
 
 #: i18n/states/HU.php:32
 msgid "Zala"
-msgstr ""
+msgstr "זלה"
 
 #: i18n/states/HZ.php:13 i18n/states/NZ.php:14
 msgid "Auckland"
-msgstr ""
+msgstr "אוקלנד"
 
 #: i18n/states/HZ.php:14 i18n/states/NZ.php:16
 msgid "Bay of Plenty"
-msgstr ""
+msgstr "מפרץ עושר"
 
 #: i18n/states/HZ.php:15 i18n/states/NZ.php:25
 msgid "Canterbury"
-msgstr ""
+msgstr "קנטרברי"
 
 #: i18n/states/HZ.php:16 i18n/states/NZ.php:18
 msgid "Hawke&rsquo;s Bay"
-msgstr ""
+msgstr "הוקס ביי"
 
 #: i18n/states/HZ.php:17 i18n/states/NZ.php:19
 msgid "Manawatu-Wanganui"
-msgstr ""
+msgstr "Manawatu-Wanganui"
 
 #: i18n/states/HZ.php:18 i18n/states/NZ.php:22
 msgid "Marlborough"
-msgstr ""
+msgstr "מרלבורו"
 
 #: i18n/states/HZ.php:19 i18n/states/NZ.php:21
 msgid "Nelson"
-msgstr ""
+msgstr "נלסון"
 
 #: i18n/states/HZ.php:20 i18n/states/NZ.php:13
 msgid "Northland"
-msgstr ""
+msgstr "נורת'לנד"
 
 #: i18n/states/HZ.php:21 i18n/states/NZ.php:26
 msgid "Otago"
-msgstr ""
+msgstr "אוטאגו"
 
 #: i18n/states/HZ.php:22 i18n/states/NZ.php:27
 msgid "Southland"
-msgstr ""
+msgstr "Southland"
 
 #: i18n/states/HZ.php:23 i18n/states/NZ.php:17
 msgid "Taranaki"
-msgstr ""
+msgstr "טראנאקי"
 
 #: i18n/states/HZ.php:24 i18n/states/NZ.php:23
 msgid "Tasman"
-msgstr ""
+msgstr "טסמן"
 
 #: i18n/states/HZ.php:25 i18n/states/NZ.php:15
 msgid "Waikato"
-msgstr ""
+msgstr "Waikato"
 
 #: i18n/states/HZ.php:26 i18n/states/NZ.php:20
 msgid "Wellington"
-msgstr ""
+msgstr "וולינגטון"
 
 #: i18n/states/HZ.php:27 i18n/states/NZ.php:24
 msgid "West Coast"
-msgstr ""
+msgstr "החוף המערבי"
 
 #: i18n/states/ID.php:13
 msgid "Daerah Istimewa Aceh"
-msgstr ""
+msgstr "Daerah Istimewa אצ'ה"
 
 #: i18n/states/ID.php:14
 msgid "Sumatera Utara"
-msgstr ""
+msgstr "סומטרה אוטרה"
 
 #: i18n/states/ID.php:15
 msgid "Sumatera Barat"
-msgstr ""
+msgstr "סומטרה בראט"
 
 #: i18n/states/ID.php:16
 msgid "Riau"
-msgstr ""
+msgstr "Riau"
 
 #: i18n/states/ID.php:17
 msgid "Kepulauan Riau"
-msgstr ""
+msgstr "קפולאון קיאו"
 
 #: i18n/states/ID.php:18
 msgid "Jambi"
-msgstr ""
+msgstr "ג'מבי"
 
 #: i18n/states/ID.php:19
 msgid "Sumatera Selatan"
-msgstr ""
+msgstr "דרום סומטרה"
 
 #: i18n/states/ID.php:20
 msgid "Bangka Belitung"
-msgstr ""
+msgstr "באנגקה ליטונג"
 
 #: i18n/states/ID.php:21
 msgid "Bengkulu"
-msgstr ""
+msgstr "נגקולו"
 
 #: i18n/states/ID.php:22
 msgid "Lampung"
-msgstr ""
+msgstr "Lampung"
 
 #: i18n/states/ID.php:23
 msgid "DKI Jakarta"
-msgstr ""
+msgstr "DKI ג'קרטה"
 
 #: i18n/states/ID.php:24
 msgid "Jawa Barat"
-msgstr ""
+msgstr "Jawa Barat"
 
 #: i18n/states/ID.php:25
 msgid "Banten"
-msgstr ""
+msgstr "נטן"
 
 #: i18n/states/ID.php:26
 msgid "Jawa Tengah"
-msgstr ""
+msgstr "ג'אווה טנגה"
 
 #: i18n/states/ID.php:27
 msgid "Jawa Timur"
-msgstr ""
+msgstr "ג'אווה טימור"
 
 #: i18n/states/ID.php:28
 msgid "Daerah Istimewa Yogyakarta"
-msgstr ""
+msgstr "Daerah Istimewa יוגיאקרטה"
 
 #: i18n/states/ID.php:29
 msgid "Bali"
-msgstr ""
+msgstr "באלי"
 
 #: i18n/states/ID.php:30
 msgid "Nusa Tenggara Barat"
-msgstr ""
+msgstr "נוסה טנגרה בראט"
 
 #: i18n/states/ID.php:31
 msgid "Nusa Tenggara Timur"
-msgstr ""
+msgstr "נוסה טנגרה טימור"
 
 #: i18n/states/ID.php:32
 msgid "Kalimantan Barat"
-msgstr ""
+msgstr "קלימנטן בארט"
 
 #: i18n/states/ID.php:33
 msgid "Kalimantan Tengah"
-msgstr ""
+msgstr "קלימנטן טנגה"
 
 #: i18n/states/ID.php:34
 msgid "Kalimantan Timur"
-msgstr ""
+msgstr "קלימנטן טימור"
 
 #: i18n/states/ID.php:35
 msgid "Kalimantan Selatan"
-msgstr ""
+msgstr "קלימנטאן סלטאן"
 
 #: i18n/states/ID.php:36
 msgid "Kalimantan Utara"
-msgstr ""
+msgstr "קלימנטן אוטרה"
 
 #: i18n/states/ID.php:37
 msgid "Sulawesi Utara"
-msgstr ""
+msgstr "סולאווסי אוטרה"
 
 #: i18n/states/ID.php:38
 msgid "Sulawesi Tengah"
-msgstr ""
+msgstr "מרכז סולאווסי"
 
 #: i18n/states/ID.php:39
 msgid "Sulawesi Tenggara"
-msgstr ""
+msgstr "סולאווסי טנגארה"
 
 #: i18n/states/ID.php:40
 msgid "Sulawesi Barat"
-msgstr ""
+msgstr "סלווזי בראט"
 
 #: i18n/states/ID.php:41
 msgid "Sulawesi Selatan"
-msgstr ""
+msgstr "סולווזי סלטאן"
 
 #: i18n/states/ID.php:42
 msgid "Gorontalo"
-msgstr ""
+msgstr "גורונטלו"
 
 #: i18n/states/ID.php:43
 msgid "Maluku"
-msgstr ""
+msgstr "אלוקו"
 
 #: i18n/states/ID.php:44
 msgid "Maluku Utara"
-msgstr ""
+msgstr "צפון מלוקו"
 
 #: i18n/states/ID.php:45
 msgid "Papua"
-msgstr ""
+msgstr "פפואה"
 
 #: i18n/states/ID.php:46
 msgid "Papua Barat"
-msgstr ""
+msgstr "פפואה ראט"
 
 #: i18n/states/IN.php:13
 msgid "Andra Pradesh"
-msgstr ""
+msgstr "אנדרה פראדש"
 
 #: i18n/states/IN.php:14
 msgid "Arunachal Pradesh"
-msgstr ""
+msgstr "ארונצ'אל פראדש"
 
 #: i18n/states/IN.php:15
 msgid "Assam"
-msgstr ""
+msgstr "אסאם"
 
 #: i18n/states/IN.php:16
 msgid "Bihar"
-msgstr ""
+msgstr "ביהאר"
 
 #: i18n/states/IN.php:17
 msgid "Chhattisgarh"
-msgstr ""
+msgstr "צ'האטיסגאר"
 
 #: i18n/states/IN.php:18
 msgid "Goa"
-msgstr ""
+msgstr "גואה"
 
 #: i18n/states/IN.php:19
 msgid "Gujarat"
-msgstr ""
+msgstr "גוג'ראט"
 
 #: i18n/states/IN.php:20
 msgid "Haryana"
-msgstr ""
+msgstr "הריאנה"
 
 #: i18n/states/IN.php:21
 msgid "Himachal Pradesh"
-msgstr ""
+msgstr "הימצ'אל פראדש"
 
 #: i18n/states/IN.php:22
 msgid "Jammu and Kashmir"
-msgstr ""
+msgstr "ג'אמו וקשמיר"
 
 #: i18n/states/IN.php:23
 msgid "Jharkhand"
-msgstr ""
+msgstr "Jharkhand"
 
 #: i18n/states/IN.php:24
 msgid "Karnataka"
-msgstr ""
+msgstr "קרנטקה"
 
 #: i18n/states/IN.php:25
 msgid "Kerala"
-msgstr ""
+msgstr "קראלה"
 
 #: i18n/states/IN.php:26
 msgid "Madhya Pradesh"
-msgstr ""
+msgstr "פרדש"
 
 #: i18n/states/IN.php:27
 msgid "Maharashtra"
-msgstr ""
+msgstr "מהרשטרה"
 
 #: i18n/states/IN.php:28
 msgid "Manipur"
-msgstr ""
+msgstr "מאניפור"
 
 #: i18n/states/IN.php:29
 msgid "Meghalaya"
@@ -1323,35 +1323,35 @@ msgstr "Meghalaya"
 
 #: i18n/states/IN.php:30
 msgid "Mizoram"
-msgstr ""
+msgstr "מיזורם"
 
 #: i18n/states/IN.php:31
 msgid "Nagaland"
-msgstr ""
+msgstr "Nagaland"
 
 #: i18n/states/IN.php:32
 msgid "Orissa"
-msgstr ""
+msgstr "אוריסה"
 
 #: i18n/states/IN.php:33
 msgid "Punjab"
-msgstr ""
+msgstr "פנג'אב"
 
 #: i18n/states/IN.php:34
 msgid "Rajasthan"
-msgstr ""
+msgstr "רג'סטאן"
 
 #: i18n/states/IN.php:35
 msgid "Sikkim"
-msgstr ""
+msgstr "סיקים"
 
 #: i18n/states/IN.php:36
 msgid "Tamil Nadu"
-msgstr ""
+msgstr "טמיל נאדו"
 
 #: i18n/states/IN.php:37
 msgid "Tripura"
-msgstr ""
+msgstr "טריפורה"
 
 #: i18n/states/IN.php:38
 msgid "Uttarakhand"
@@ -1359,15 +1359,15 @@ msgstr ""
 
 #: i18n/states/IN.php:39
 msgid "Uttar Pradesh"
-msgstr ""
+msgstr "אוטר פראדש"
 
 #: i18n/states/IN.php:40
 msgid "West Bengal"
-msgstr ""
+msgstr "המערב בנגל"
 
 #: i18n/states/IN.php:41
 msgid "Andaman and Nicobar Islands"
-msgstr ""
+msgstr "אנדמן וניקובר איי"
 
 #: i18n/states/IN.php:42
 msgid "Chandigarh"
@@ -1375,95 +1375,95 @@ msgstr "Chandigarh"
 
 #: i18n/states/IN.php:43
 msgid "Dadar and Nagar Haveli"
-msgstr ""
+msgstr "Dadar וניגר הבלי"
 
 #: i18n/states/IN.php:44
 msgid "Daman and Diu"
-msgstr ""
+msgstr "דאמאן ודיו"
 
 #: i18n/states/IN.php:45
 msgid "Delhi"
-msgstr ""
+msgstr "דלהי"
 
 #: i18n/states/IN.php:46
 msgid "Lakshadeep"
-msgstr ""
+msgstr "Lakshadeep"
 
 #: i18n/states/IN.php:47
 msgid "Pondicherry (Puducherry)"
-msgstr ""
+msgstr "פונדיצ'רי (Puducherry)"
 
 #: i18n/states/IT.php:13
 msgid "Agrigento"
-msgstr ""
+msgstr "אגריג'נטו"
 
 #: i18n/states/IT.php:14
 msgid "Alessandria"
-msgstr ""
+msgstr "אלסנדריה"
 
 #: i18n/states/IT.php:15
 msgid "Ancona"
-msgstr ""
+msgstr "אנקונה"
 
 #: i18n/states/IT.php:16
 msgid "Aosta"
-msgstr ""
+msgstr "אאוסטה"
 
 #: i18n/states/IT.php:17
 msgid "Arezzo"
-msgstr ""
+msgstr "ארזו"
 
 #: i18n/states/IT.php:18
 msgid "Ascoli Piceno"
-msgstr ""
+msgstr "אסקולי פיסנו"
 
 #: i18n/states/IT.php:19
 msgid "Asti"
-msgstr ""
+msgstr "אסטי"
 
 #: i18n/states/IT.php:20
 msgid "Avellino"
-msgstr ""
+msgstr "אבלינו"
 
 #: i18n/states/IT.php:21
 msgid "Bari"
-msgstr ""
+msgstr "בארי"
 
 #: i18n/states/IT.php:22
 msgid "Barletta-Andria-Trani"
-msgstr ""
+msgstr "ברלטה-אנדריה-טראני"
 
 #: i18n/states/IT.php:23
 msgid "Belluno"
-msgstr ""
+msgstr "בלונו"
 
 #: i18n/states/IT.php:24
 msgid "Benevento"
-msgstr ""
+msgstr "נוונטו"
 
 #: i18n/states/IT.php:25
 msgid "Bergamo"
-msgstr ""
+msgstr "ברגמו"
 
 #: i18n/states/IT.php:26
 msgid "Biella"
-msgstr ""
+msgstr "ביאלה"
 
 #: i18n/states/IT.php:27
 msgid "Bologna"
-msgstr ""
+msgstr "בולוניה"
 
 #: i18n/states/IT.php:28
 msgid "Bolzano"
-msgstr ""
+msgstr "בּוׂלְצָנוׂ"
 
 #: i18n/states/IT.php:29
 msgid "Brescia"
-msgstr ""
+msgstr "בְּרֶשִיָה"
 
 #: i18n/states/IT.php:30
 msgid "Brindisi"
-msgstr ""
+msgstr "ברינדיזי"
 
 #: i18n/states/IT.php:31
 msgid "Cagliari"
@@ -1471,127 +1471,127 @@ msgstr "Cagliari"
 
 #: i18n/states/IT.php:32
 msgid "Caltanissetta"
-msgstr ""
+msgstr "קלטניסטה"
 
 #: i18n/states/IT.php:33
 msgid "Campobasso"
-msgstr ""
+msgstr "קמפובאסו"
 
 #: i18n/states/IT.php:34
 msgid "Carbonia-Iglesias"
-msgstr ""
+msgstr "קרבוניה איגלסיס"
 
 #: i18n/states/IT.php:35
 msgid "Caserta"
-msgstr ""
+msgstr "קאזרטה"
 
 #: i18n/states/IT.php:36
 msgid "Catania"
-msgstr ""
+msgstr "קטאניה"
 
 #: i18n/states/IT.php:37
 msgid "Catanzaro"
-msgstr ""
+msgstr "קטנזארו"
 
 #: i18n/states/IT.php:38
 msgid "Chieti"
-msgstr ""
+msgstr "קיאטי"
 
 #: i18n/states/IT.php:39
 msgid "Como"
-msgstr ""
+msgstr "קומו"
 
 #: i18n/states/IT.php:40
 msgid "Cosenza"
-msgstr ""
+msgstr "קוזנצה"
 
 #: i18n/states/IT.php:41
 msgid "Cremona"
-msgstr ""
+msgstr "קרמונה"
 
 #: i18n/states/IT.php:42
 msgid "Crotone"
-msgstr ""
+msgstr "קרוטונה"
 
 #: i18n/states/IT.php:43
 msgid "Cuneo"
-msgstr ""
+msgstr "קונאו"
 
 #: i18n/states/IT.php:44
 msgid "Enna"
-msgstr ""
+msgstr "אנה"
 
 #: i18n/states/IT.php:45
 msgid "Fermo"
-msgstr ""
+msgstr "פרמו"
 
 #: i18n/states/IT.php:46
 msgid "Ferrara"
-msgstr ""
+msgstr "פרארה"
 
 #: i18n/states/IT.php:47
 msgid "Firenze"
-msgstr ""
+msgstr "פירנצה"
 
 #: i18n/states/IT.php:48
 msgid "Foggia"
-msgstr ""
+msgstr "פוג'יה"
 
 #: i18n/states/IT.php:49
 msgid "Forlì-Cesena"
-msgstr ""
+msgstr "פורלי-צסנה"
 
 #: i18n/states/IT.php:50
 msgid "Frosinone"
-msgstr ""
+msgstr "פרוסינונה"
 
 #: i18n/states/IT.php:51
 msgid "Genova"
-msgstr ""
+msgstr "גנואה"
 
 #: i18n/states/IT.php:52
 msgid "Gorizia"
-msgstr ""
+msgstr "גוריציה"
 
 #: i18n/states/IT.php:53
 msgid "Grosseto"
-msgstr ""
+msgstr "גרוסטו"
 
 #: i18n/states/IT.php:54
 msgid "Imperia"
-msgstr ""
+msgstr "אימפריה"
 
 #: i18n/states/IT.php:55
 msgid "Isernia"
-msgstr ""
+msgstr "איסרניה"
 
 #: i18n/states/IT.php:56
 msgid "La Spezia"
-msgstr ""
+msgstr "לה ספציה"
 
 #: i18n/states/IT.php:57
 msgid "L&apos;Aquila"
-msgstr ""
+msgstr "ל'אקווילה"
 
 #: i18n/states/IT.php:58
 msgid "Latina"
-msgstr ""
+msgstr "לטינה"
 
 #: i18n/states/IT.php:59
 msgid "Lecce"
-msgstr ""
+msgstr "לצ'ה"
 
 #: i18n/states/IT.php:60
 msgid "Lecco"
-msgstr ""
+msgstr "לקו"
 
 #: i18n/states/IT.php:61
 msgid "Livorno"
-msgstr ""
+msgstr "ליבורנו"
 
 #: i18n/states/IT.php:62
 msgid "Lodi"
-msgstr ""
+msgstr "לודי"
 
 #: i18n/states/IT.php:63
 msgid "Lucca"
@@ -1631,123 +1631,123 @@ msgstr "Monza e della Brianza"
 
 #: i18n/states/IT.php:72
 msgid "Napoli"
-msgstr ""
+msgstr "נאפולי"
 
 #: i18n/states/IT.php:73
 msgid "Novara"
-msgstr ""
+msgstr "נובארה"
 
 #: i18n/states/IT.php:74
 msgid "Nuoro"
-msgstr ""
+msgstr "נואורו"
 
 #: i18n/states/IT.php:75
 msgid "Olbia-Tempio"
-msgstr ""
+msgstr "אולביה-טמפיו"
 
 #: i18n/states/IT.php:76
 msgid "Oristano"
-msgstr ""
+msgstr "אוריסטאנו"
 
 #: i18n/states/IT.php:77
 msgid "Padova"
-msgstr ""
+msgstr "פדובה"
 
 #: i18n/states/IT.php:78
 msgid "Palermo"
-msgstr ""
+msgstr "פאלרמו"
 
 #: i18n/states/IT.php:79
 msgid "Parma"
-msgstr ""
+msgstr "פארמה"
 
 #: i18n/states/IT.php:80
 msgid "Pavia"
-msgstr ""
+msgstr "פאביה"
 
 #: i18n/states/IT.php:81
 msgid "Perugia"
-msgstr ""
+msgstr "פרוג'ה"
 
 #: i18n/states/IT.php:82
 msgid "Pesaro e Urbino"
-msgstr ""
+msgstr "פזארו אה אורבינו"
 
 #: i18n/states/IT.php:83
 msgid "Pescara"
-msgstr ""
+msgstr "פסקארה"
 
 #: i18n/states/IT.php:84
 msgid "Piacenza"
-msgstr ""
+msgstr "פיאצ'נזה"
 
 #: i18n/states/IT.php:85
 msgid "Pisa"
-msgstr ""
+msgstr "פיזה"
 
 #: i18n/states/IT.php:86
 msgid "Pistoia"
-msgstr ""
+msgstr "פיסטויה"
 
 #: i18n/states/IT.php:87
 msgid "Pordenone"
-msgstr ""
+msgstr "פורדנונה"
 
 #: i18n/states/IT.php:88
 msgid "Potenza"
-msgstr ""
+msgstr "פוטנצה"
 
 #: i18n/states/IT.php:89
 msgid "Prato"
-msgstr ""
+msgstr "פראטו"
 
 #: i18n/states/IT.php:90
 msgid "Ragusa"
-msgstr ""
+msgstr "רגוזה"
 
 #: i18n/states/IT.php:91
 msgid "Ravenna"
-msgstr ""
+msgstr "רוונה"
 
 #: i18n/states/IT.php:92
 msgid "Reggio Calabria"
-msgstr ""
+msgstr "רג'יו קלבריה"
 
 #: i18n/states/IT.php:93
 msgid "Reggio Emilia"
-msgstr ""
+msgstr "רג'יו אמיליה"
 
 #: i18n/states/IT.php:94
 msgid "Rieti"
-msgstr ""
+msgstr "ריאטי"
 
 #: i18n/states/IT.php:95
 msgid "Rimini"
-msgstr ""
+msgstr "רימיני"
 
 #: i18n/states/IT.php:96
 msgid "Roma"
-msgstr ""
+msgstr "רומא"
 
 #: i18n/states/IT.php:97
 msgid "Rovigo"
-msgstr ""
+msgstr "רוביגו"
 
 #: i18n/states/IT.php:98
 msgid "Salerno"
-msgstr ""
+msgstr "סלרנו"
 
 #: i18n/states/IT.php:99
 msgid "Medio Campidano"
-msgstr ""
+msgstr "מדיו קמפידנו"
 
 #: i18n/states/IT.php:100
 msgid "Sassari"
-msgstr ""
+msgstr "ססארי"
 
 #: i18n/states/IT.php:101
 msgid "Savona"
-msgstr ""
+msgstr "סבונה"
 
 #: i18n/states/IT.php:102
 msgid "Siena"
@@ -1755,175 +1755,175 @@ msgstr "Siena"
 
 #: i18n/states/IT.php:103
 msgid "Siracusa"
-msgstr ""
+msgstr "סירקוזה"
 
 #: i18n/states/IT.php:104
 msgid "Sondrio"
-msgstr ""
+msgstr "סונדריו"
 
 #: i18n/states/IT.php:105
 msgid "Taranto"
-msgstr ""
+msgstr "טרנטו"
 
 #: i18n/states/IT.php:106
 msgid "Teramo"
-msgstr ""
+msgstr "טראמו"
 
 #: i18n/states/IT.php:107
 msgid "Terni"
-msgstr ""
+msgstr "טרני"
 
 #: i18n/states/IT.php:108
 msgid "Torino"
-msgstr "Torino"
+msgstr "טורינו"
 
 #: i18n/states/IT.php:109
 msgid "Ogliastra"
-msgstr ""
+msgstr "אוגליאסטרה"
 
 #: i18n/states/IT.php:110
 msgid "Trapani"
-msgstr ""
+msgstr "טראפאני"
 
 #: i18n/states/IT.php:111
 msgid "Trento"
-msgstr ""
+msgstr "טרנטו"
 
 #: i18n/states/IT.php:112
 msgid "Treviso"
-msgstr ""
+msgstr "טרוויזו"
 
 #: i18n/states/IT.php:113
 msgid "Trieste"
-msgstr ""
+msgstr "טריאסטה"
 
 #: i18n/states/IT.php:114
 msgid "Udine"
-msgstr ""
+msgstr "אודינה"
 
 #: i18n/states/IT.php:115
 msgid "Varese"
-msgstr ""
+msgstr "וארזה"
 
 #: i18n/states/IT.php:116
 msgid "Venezia"
-msgstr ""
+msgstr "ונציה"
 
 #: i18n/states/IT.php:117
 msgid "Verbano-Cusio-Ossola"
-msgstr ""
+msgstr "ורבאנו-קוציו-אוסולה"
 
 #: i18n/states/IT.php:118
 msgid "Vercelli"
-msgstr ""
+msgstr "ורצ'לי"
 
 #: i18n/states/IT.php:119
 msgid "Verona"
-msgstr "Verona"
+msgstr "ורונה"
 
 #: i18n/states/IT.php:120
 msgid "Vibo Valentia"
-msgstr ""
+msgstr "ויבו ולנטיה"
 
 #: i18n/states/IT.php:121
 msgid "Vicenza"
-msgstr ""
+msgstr "ויצ'נזה"
 
 #: i18n/states/IT.php:122
 msgid "Viterbo"
-msgstr ""
+msgstr "ויטרבו"
 
 #: i18n/states/JP.php:13
 msgid "Hokkaido"
-msgstr ""
+msgstr "הוקאידו"
 
 #: i18n/states/JP.php:14
 msgid "Aomori"
-msgstr ""
+msgstr "אומורי"
 
 #: i18n/states/JP.php:15
 msgid "Iwate"
-msgstr ""
+msgstr "איווטה"
 
 #: i18n/states/JP.php:16
 msgid "Miyagi"
-msgstr ""
+msgstr "מיאגי"
 
 #: i18n/states/JP.php:17
 msgid "Akita"
-msgstr ""
+msgstr "אקיטה"
 
 #: i18n/states/JP.php:18
 msgid "Yamagata"
-msgstr ""
+msgstr "יאמאגטה"
 
 #: i18n/states/JP.php:19
 msgid "Fukushima"
-msgstr ""
+msgstr "פוקושימה"
 
 #: i18n/states/JP.php:20
 msgid "Ibaraki"
-msgstr ""
+msgstr "איבראקי"
 
 #: i18n/states/JP.php:21
 msgid "Tochigi"
-msgstr ""
+msgstr "טוצ'יגי"
 
 #: i18n/states/JP.php:22
 msgid "Gunma"
-msgstr ""
+msgstr "גאנמה"
 
 #: i18n/states/JP.php:23
 msgid "Saitama"
-msgstr ""
+msgstr "סאיטמה"
 
 #: i18n/states/JP.php:24
 msgid "Chiba"
-msgstr ""
+msgstr "צ'יבה"
 
 #: i18n/states/JP.php:25
 msgid "Tokyo"
-msgstr "Tokyo"
+msgstr "טוקיו"
 
 #: i18n/states/JP.php:26
 msgid "Kanagawa"
-msgstr ""
+msgstr "קאנאגאווה"
 
 #: i18n/states/JP.php:27
 msgid "Niigata"
-msgstr ""
+msgstr "נייגטה"
 
 #: i18n/states/JP.php:28
 msgid "Toyama"
-msgstr ""
+msgstr "טויאמה"
 
 #: i18n/states/JP.php:29
 msgid "Ishikawa"
-msgstr ""
+msgstr "אישיקאווה"
 
 #: i18n/states/JP.php:30
 msgid "Fukui"
-msgstr ""
+msgstr "פוקוי"
 
 #: i18n/states/JP.php:31
 msgid "Yamanashi"
-msgstr ""
+msgstr "יאמאנאשי"
 
 #: i18n/states/JP.php:32
 msgid "Nagano"
-msgstr ""
+msgstr "נאגאנו"
 
 #: i18n/states/JP.php:33
 msgid "Gifu"
-msgstr ""
+msgstr "גיפו"
 
 #: i18n/states/JP.php:34
 msgid "Shizuoka"
-msgstr ""
+msgstr "שיזואוקה"
 
 #: i18n/states/JP.php:35
 msgid "Aichi"
-msgstr ""
+msgstr "אייצ'י"
 
 #: i18n/states/JP.php:36
 msgid "Mie"
@@ -1931,95 +1931,95 @@ msgstr ""
 
 #: i18n/states/JP.php:37
 msgid "Shiga"
-msgstr ""
+msgstr "שיגה"
 
 #: i18n/states/JP.php:38
 msgid "Kyouto"
-msgstr ""
+msgstr "קיוטו"
 
 #: i18n/states/JP.php:39
 msgid "Osaka"
-msgstr ""
+msgstr "אוסקה"
 
 #: i18n/states/JP.php:40
 msgid "Hyougo"
-msgstr ""
+msgstr "היוגו"
 
 #: i18n/states/JP.php:41
 msgid "Nara"
-msgstr ""
+msgstr "נארה"
 
 #: i18n/states/JP.php:42
 msgid "Wakayama"
-msgstr ""
+msgstr "וואקאיאמה"
 
 #: i18n/states/JP.php:43
 msgid "Tottori"
-msgstr "Tottori"
+msgstr "טוטורי"
 
 #: i18n/states/JP.php:44
 msgid "Shimane"
-msgstr ""
+msgstr "שימאנה"
 
 #: i18n/states/JP.php:45
 msgid "Okayama"
-msgstr "Okayama"
+msgstr "אוקיאמה"
 
 #: i18n/states/JP.php:46
 msgid "Hiroshima"
-msgstr "Hiroshima"
+msgstr "הירושימה"
 
 #: i18n/states/JP.php:47
 msgid "Yamaguchi"
-msgstr ""
+msgstr "יאמגוצ'י"
 
 #: i18n/states/JP.php:48
 msgid "Tokushima"
-msgstr "Tokushima"
+msgstr "טוקושימה"
 
 #: i18n/states/JP.php:49
 msgid "Kagawa"
-msgstr ""
+msgstr "קגאווה"
 
 #: i18n/states/JP.php:50
 msgid "Ehime"
-msgstr ""
+msgstr "אהימה"
 
 #: i18n/states/JP.php:51
 msgid "Kochi"
-msgstr ""
+msgstr "קוצ'י"
 
 #: i18n/states/JP.php:52
 msgid "Fukuoka"
-msgstr "Fukuoka"
+msgstr "פוקוקה"
 
 #: i18n/states/JP.php:53
 msgid "Saga"
-msgstr ""
+msgstr "סאגה"
 
 #: i18n/states/JP.php:54
 msgid "Nagasaki"
-msgstr "Nagasaki"
+msgstr "נגסאקי"
 
 #: i18n/states/JP.php:55
 msgid "Kumamoto"
-msgstr "Kumamoto"
+msgstr "קומהמוטו"
 
 #: i18n/states/JP.php:56
 msgid "Oita"
-msgstr "Oita"
+msgstr "אויטה"
 
 #: i18n/states/JP.php:57
 msgid "Miyazaki"
-msgstr "Miyazaki"
+msgstr "מיהזקאי"
 
 #: i18n/states/JP.php:58
 msgid "Kagoshima"
-msgstr "Kagoshima"
+msgstr "קאגושימה"
 
 #: i18n/states/JP.php:59
 msgid "Okinawa"
-msgstr "Okinawa"
+msgstr "אוקינאווה"
 
 #: i18n/states/MY.php:13
 msgid "Johor"
@@ -2027,11 +2027,11 @@ msgstr "Johor"
 
 #: i18n/states/MY.php:14
 msgid "Kedah"
-msgstr ""
+msgstr "קדה"
 
 #: i18n/states/MY.php:15
 msgid "Kelantan"
-msgstr ""
+msgstr "קלנטאן"
 
 #: i18n/states/MY.php:16
 msgid "Melaka"
@@ -2039,7 +2039,7 @@ msgstr "Melaka"
 
 #: i18n/states/MY.php:17
 msgid "Negeri Sembilan"
-msgstr ""
+msgstr "ניגרי סמבילאן"
 
 #: i18n/states/MY.php:18
 msgid "Pahang"
@@ -2047,19 +2047,19 @@ msgstr "Pahang"
 
 #: i18n/states/MY.php:19
 msgid "Perak"
-msgstr ""
+msgstr "פראק"
 
 #: i18n/states/MY.php:20
 msgid "Perlis"
-msgstr ""
+msgstr "פרליס"
 
 #: i18n/states/MY.php:21
 msgid "Pulau Pinang"
-msgstr ""
+msgstr "פולאו פיננג"
 
 #: i18n/states/MY.php:22
 msgid "Sabah"
-msgstr ""
+msgstr "סבאח"
 
 #: i18n/states/MY.php:23
 msgid "Sarawak"
@@ -2067,7 +2067,7 @@ msgstr "Sarawak"
 
 #: i18n/states/MY.php:24
 msgid "Selangor"
-msgstr ""
+msgstr "סלנגור"
 
 #: i18n/states/MY.php:25
 msgid "Terengganu"
@@ -2075,11 +2075,11 @@ msgstr "Terengganu"
 
 #: i18n/states/MY.php:26
 msgid "W.P. Kuala Lumpur"
-msgstr ""
+msgstr "WP קואלה לומפור"
 
 #: i18n/states/MY.php:27
 msgid "W.P. Labuan"
-msgstr ""
+msgstr "לבואן WP"
 
 #: i18n/states/MY.php:28
 msgid "W.P. Putrajaya"
@@ -2087,7 +2087,7 @@ msgstr "WP Putrajaya"
 
 #: i18n/states/PE.php:13
 msgid "El Callao"
-msgstr ""
+msgstr "קלאו"
 
 #: i18n/states/PE.php:14
 msgid "Municipalidad Metropolitana de Lima"
@@ -2095,63 +2095,63 @@ msgstr "Municipalidad Metropolitana de Lima"
 
 #: i18n/states/PE.php:16
 msgid "Ancash"
-msgstr ""
+msgstr "אנקש"
 
 #: i18n/states/PE.php:17
 msgid "Apur&iacute;mac"
-msgstr ""
+msgstr "אפורימק"
 
 #: i18n/states/PE.php:18
 msgid "Arequipa"
-msgstr ""
+msgstr "ארקיפה"
 
 #: i18n/states/PE.php:19
 msgid "Ayacucho"
-msgstr ""
+msgstr "אייקוצ'ו"
 
 #: i18n/states/PE.php:20
 msgid "Cajamarca"
-msgstr ""
+msgstr "קחמרקה"
 
 #: i18n/states/PE.php:21
 msgid "Cusco"
-msgstr ""
+msgstr "קוסקו"
 
 #: i18n/states/PE.php:22
 msgid "Huancavelica"
-msgstr ""
+msgstr "הואנקווליקה"
 
 #: i18n/states/PE.php:23
 msgid "Hu&aacute;nuco"
-msgstr ""
+msgstr "הואנוקו"
 
 #: i18n/states/PE.php:24
 msgid "Ica"
-msgstr ""
+msgstr "איקה"
 
 #: i18n/states/PE.php:25
 msgid "Jun&iacute;n"
-msgstr ""
+msgstr "ג'ונין"
 
 #: i18n/states/PE.php:26
 msgid "La Libertad"
-msgstr ""
+msgstr "לה ליברטד"
 
 #: i18n/states/PE.php:27
 msgid "Lambayeque"
-msgstr ""
+msgstr "לאמבאייק"
 
 #: i18n/states/PE.php:28
 msgid "Lima"
-msgstr ""
+msgstr "לימה"
 
 #: i18n/states/PE.php:29
 msgid "Loreto"
-msgstr ""
+msgstr "לורטו"
 
 #: i18n/states/PE.php:30
 msgid "Madre de Dios"
-msgstr ""
+msgstr "מדרה דה דיוס"
 
 #: i18n/states/PE.php:31
 msgid "Moquegua"
@@ -2159,280 +2159,280 @@ msgstr "Moquegua"
 
 #: i18n/states/PE.php:32
 msgid "Pasco"
-msgstr ""
+msgstr "פסקו"
 
 #: i18n/states/PE.php:33
 msgid "Piura"
-msgstr ""
+msgstr "פיורה"
 
 #: i18n/states/PE.php:34
 msgid "Puno"
-msgstr ""
+msgstr "פונו"
 
 #: i18n/states/PE.php:35
 msgid "San Mart&iacute;n"
-msgstr ""
+msgstr "סן מרטין"
 
 #: i18n/states/PE.php:36
 msgid "Tacna"
-msgstr ""
+msgstr "טקנהטקנה"
 
 #: i18n/states/PE.php:37
 msgid "Tumbes"
-msgstr ""
+msgstr "טומבס"
 
 #: i18n/states/PE.php:38
 msgid "Ucayali"
-msgstr ""
+msgstr "אוקאיאלי"
 
 #: i18n/states/TH.php:13
 msgid ""
 "Amnat Charoen "
 "(&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;&#3636;&#3597;)"
-msgstr ""
+msgstr "אמנט הקרון (อำนาจเจริญ)"
 
 #: i18n/states/TH.php:14
 msgid "Ang Thong (&#3629;&#3656;&#3634;&#3591;&#3607;&#3629;&#3591;)"
-msgstr ""
+msgstr "אנג תונג (อ่างทอง)"
 
 #: i18n/states/TH.php:15
 msgid ""
 "Ayutthaya "
 "(&#3614;&#3619;&#3632;&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3629;&#3618;&#3640;&#3608;&#3618;&#3634;)"
-msgstr ""
+msgstr "איאטטאיה"
 
 #: i18n/states/TH.php:16
 msgid ""
 "Bangkok "
 "(&#3585;&#3619;&#3640;&#3591;&#3648;&#3607;&#3614;&#3617;&#3627;&#3634;&#3609;&#3588;&#3619;)"
-msgstr ""
+msgstr "בנגקוק (กรุงเทพ มหา น ค ร)"
 
 #: i18n/states/TH.php:17
 msgid "Bueng Kan (&#3610;&#3638;&#3591;&#3585;&#3634;&#3628;)"
-msgstr ""
+msgstr "Bueng קאן (บึงกาฬ)"
 
 #: i18n/states/TH.php:18
 msgid ""
 "Buri Ram (&#3610;&#3640;&#3619;&#3637;&#3619;&#3633;&#3617;&#3618;&#3660;)"
-msgstr ""
+msgstr "בורים רמים (บุรีรัมย์)"
 
 #: i18n/states/TH.php:19
 msgid ""
 "Chachoengsao "
 "(&#3593;&#3632;&#3648;&#3594;&#3636;&#3591;&#3648;&#3607;&#3619;&#3634;)"
-msgstr ""
+msgstr "צ'צ'ונגסאו (ฉะเชิงเทรา)"
 
 #: i18n/states/TH.php:20
 msgid "Chai Nat (&#3594;&#3633;&#3618;&#3609;&#3634;&#3607;)"
-msgstr ""
+msgstr "צ'אי יאט (ชัยนาท)"
 
 #: i18n/states/TH.php:21
 msgid "Chaiyaphum (&#3594;&#3633;&#3618;&#3616;&#3641;&#3617;&#3636;)"
-msgstr ""
+msgstr "צ'איאפום (ชัยภูมิ)"
 
 #: i18n/states/TH.php:22
 msgid "Chanthaburi (&#3592;&#3633;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Chanthaburi (จันทบุรี)"
 
 #: i18n/states/TH.php:23
 msgid ""
 "Chiang Mai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3651;&#3627;&#3617;&#3656;)"
-msgstr ""
+msgstr "צ'יאנג מאי (เชียงใหม่)"
 
 #: i18n/states/TH.php:24
 msgid "Chiang Rai (&#3648;&#3594;&#3637;&#3618;&#3591;&#3619;&#3634;&#3618;)"
-msgstr ""
+msgstr "צ'יאנג ראי (เชียงราย)"
 
 #: i18n/states/TH.php:25
 msgid "Chonburi (&#3594;&#3621;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Chonburi (ชลบุรี)"
 
 #: i18n/states/TH.php:26
 msgid "Chumphon (&#3594;&#3640;&#3617;&#3614;&#3619;)"
-msgstr ""
+msgstr "צ'ומפון (ชุมพร)"
 
 #: i18n/states/TH.php:27
 msgid ""
 "Kalasin (&#3585;&#3634;&#3628;&#3626;&#3636;&#3609;&#3608;&#3640;&#3660;)"
-msgstr ""
+msgstr "Kalasin (กาฬสินธุ์)"
 
 #: i18n/states/TH.php:28
 msgid ""
 "Kamphaeng Phet "
 "(&#3585;&#3635;&#3649;&#3614;&#3591;&#3648;&#3614;&#3594;&#3619;)"
-msgstr ""
+msgstr "קאמפאנג פט (กำแพงเพชร)"
 
 #: i18n/states/TH.php:29
 msgid ""
 "Kanchanaburi "
 "(&#3585;&#3634;&#3597;&#3592;&#3609;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "קנצ'נבורי (กาญจนบุรี)"
 
 #: i18n/states/TH.php:30
 msgid "Khon Kaen (&#3586;&#3629;&#3609;&#3649;&#3585;&#3656;&#3609;)"
-msgstr ""
+msgstr "Khon Kaen (ขอนแก่น)"
 
 #: i18n/states/TH.php:31
 msgid "Krabi (&#3585;&#3619;&#3632;&#3610;&#3637;&#3656;)"
-msgstr ""
+msgstr "קראבי (กระบี่)"
 
 #: i18n/states/TH.php:32
 msgid "Lampang (&#3621;&#3635;&#3611;&#3634;&#3591;)"
-msgstr ""
+msgstr "Lampang (ลำปาง)"
 
 #: i18n/states/TH.php:33
 msgid "Lamphun (&#3621;&#3635;&#3614;&#3641;&#3609;)"
-msgstr ""
+msgstr "אמפון (ลำพูน)"
 
 #: i18n/states/TH.php:34
 msgid "Loei (&#3648;&#3621;&#3618;)"
-msgstr ""
+msgstr "Loei (เลย)"
 
 #: i18n/states/TH.php:35
 msgid "Lopburi (&#3621;&#3614;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Lopburi (ลพบุรี)"
 
 #: i18n/states/TH.php:36
 msgid ""
 "Mae Hong Son "
 "(&#3649;&#3617;&#3656;&#3630;&#3656;&#3629;&#3591;&#3626;&#3629;&#3609;)"
-msgstr ""
+msgstr "מיי הונג סון (แม่ฮ่องสอน)"
 
 #: i18n/states/TH.php:37
 msgid ""
 "Maha Sarakham "
 "(&#3617;&#3627;&#3634;&#3626;&#3634;&#3619;&#3588;&#3634;&#3617;)"
-msgstr ""
+msgstr "מהא סאראקאם (มหาสารคาม)"
 
 #: i18n/states/TH.php:38
 msgid "Mukdahan (&#3617;&#3640;&#3585;&#3604;&#3634;&#3627;&#3634;&#3619;)"
-msgstr ""
+msgstr "וקדאהן (มุกดาหาร)"
 
 #: i18n/states/TH.php:39
 msgid "Nakhon Nayok (&#3609;&#3588;&#3619;&#3609;&#3634;&#3618;&#3585;)"
-msgstr ""
+msgstr "נקון נאיוק (นครนายก)"
 
 #: i18n/states/TH.php:40
 msgid "Nakhon Pathom (&#3609;&#3588;&#3619;&#3611;&#3600;&#3617;)"
-msgstr ""
+msgstr "נקון פאתום (นครปฐม)"
 
 #: i18n/states/TH.php:41
 msgid "Nakhon Phanom (&#3609;&#3588;&#3619;&#3614;&#3609;&#3617;)"
-msgstr ""
+msgstr "תיחון פנום (นครพนม)"
 
 #: i18n/states/TH.php:42
 msgid ""
 "Nakhon Ratchasima "
 "(&#3609;&#3588;&#3619;&#3619;&#3634;&#3594;&#3626;&#3637;&#3617;&#3634;)"
-msgstr ""
+msgstr "Nakhon Ratchasima (นครราชสีมา)"
 
 #: i18n/states/TH.php:43
 msgid ""
 "Nakhon Sawan "
 "(&#3609;&#3588;&#3619;&#3626;&#3623;&#3619;&#3619;&#3588;&#3660;)"
-msgstr ""
+msgstr "תיחון סאוואן (นครสวรรค์)"
 
 #: i18n/states/TH.php:44
 msgid ""
 "Nakhon Si Thammarat "
 "(&#3609;&#3588;&#3619;&#3624;&#3619;&#3637;&#3608;&#3619;&#3619;&#3617;&#3619;&#3634;&#3594;)"
-msgstr ""
+msgstr "תיחון סי טמאראת (นคร ศรี ธรรม ร & # 3634; ช)"
 
 #: i18n/states/TH.php:45
 msgid "Nan (&#3609;&#3656;&#3634;&#3609;)"
-msgstr ""
+msgstr "נאן (น่าน)"
 
 #: i18n/states/TH.php:46
 msgid "Narathiwat (&#3609;&#3619;&#3634;&#3608;&#3636;&#3623;&#3634;&#3626;)"
-msgstr ""
+msgstr "נרתיוואט (นราธิวาส)"
 
 #: i18n/states/TH.php:47
 msgid ""
 "Nong Bua Lam Phu "
 "(&#3627;&#3609;&#3629;&#3591;&#3610;&#3633;&#3623;&#3621;&#3635;&#3616;&#3641;)"
-msgstr ""
+msgstr "נונג בא פו (หนองบัวลำภู)"
 
 #: i18n/states/TH.php:48
 msgid "Nong Khai (&#3627;&#3609;&#3629;&#3591;&#3588;&#3634;&#3618;)"
-msgstr ""
+msgstr "נונג חאי (หนองคาย)"
 
 #: i18n/states/TH.php:49
 msgid "Nonthaburi (&#3609;&#3609;&#3607;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "נונטבורי (นนทบุรี)"
 
 #: i18n/states/TH.php:50
 msgid ""
 "Pathum Thani (&#3611;&#3607;&#3640;&#3617;&#3608;&#3634;&#3609;&#3637;)"
-msgstr ""
+msgstr "Pathum Thani (ปทุมธานี)"
 
 #: i18n/states/TH.php:51
 msgid "Pattani (&#3611;&#3633;&#3605;&#3605;&#3634;&#3609;&#3637;)"
-msgstr ""
+msgstr "פאתני (ปัตตานี)"
 
 #: i18n/states/TH.php:52
 msgid "Phang Nga (&#3614;&#3633;&#3591;&#3591;&#3634;)"
-msgstr ""
+msgstr "Phang Nga (พังงา)"
 
 #: i18n/states/TH.php:53
 msgid "Phatthalung (&#3614;&#3633;&#3607;&#3621;&#3640;&#3591;)"
-msgstr ""
+msgstr "פאתאלונג (พัทลุง)"
 
 #: i18n/states/TH.php:54
 msgid "Phayao (&#3614;&#3632;&#3648;&#3618;&#3634;)"
-msgstr ""
+msgstr "פאיאו (พะเยา)"
 
 #: i18n/states/TH.php:55
 msgid ""
 "Phetchabun (&#3648;&#3614;&#3594;&#3619;&#3610;&#3641;&#3619;&#3603;&#3660;)"
-msgstr ""
+msgstr "פטצ'בון (เพชรบูรณ์)"
 
 #: i18n/states/TH.php:56
 msgid "Phetchaburi (&#3648;&#3614;&#3594;&#3619;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "Phetchaburi (เพชรบุรี)"
 
 #: i18n/states/TH.php:57
 msgid "Phichit (&#3614;&#3636;&#3592;&#3636;&#3605;&#3619;)"
-msgstr ""
+msgstr "פיצ'יט (พิจิตร)"
 
 #: i18n/states/TH.php:58
 msgid "Phitsanulok (&#3614;&#3636;&#3625;&#3603;&#3640;&#3650;&#3621;&#3585;)"
-msgstr ""
+msgstr "Phitsanulok (พิษณุโลก)"
 
 #: i18n/states/TH.php:59
 msgid "Phrae (&#3649;&#3614;&#3619;&#3656;)"
-msgstr ""
+msgstr "פראה (แพร่)"
 
 #: i18n/states/TH.php:60
 msgid "Phuket (&#3616;&#3641;&#3648;&#3585;&#3655;&#3605;)"
-msgstr ""
+msgstr "פוקט (ภูเก็ต)"
 
 #: i18n/states/TH.php:61
 msgid ""
 "Prachin Buri "
 "(&#3611;&#3619;&#3634;&#3592;&#3637;&#3609;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "פרצ'ינבורי (ปราจีนบุรี)"
 
 #: i18n/states/TH.php:62
 msgid ""
 "Prachuap Khiri Khan "
 "(&#3611;&#3619;&#3632;&#3592;&#3623;&#3610;&#3588;&#3637;&#3619;&#3637;&#3586;&#3633;&#3609;&#3608;&#3660;)"
-msgstr ""
+msgstr "פראצ'ואפ קהירי קהאן"
 
 #: i18n/states/TH.php:63
 msgid "Ranong (&#3619;&#3632;&#3609;&#3629;&#3591;)"
-msgstr ""
+msgstr "Ranong (ระนอง)"
 
 #: i18n/states/TH.php:64
 msgid "Ratchaburi (&#3619;&#3634;&#3594;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "ראטצ'אבורי (ราชบุรี)"
 
 #: i18n/states/TH.php:65
 msgid "Rayong (&#3619;&#3632;&#3618;&#3629;&#3591;)"
-msgstr ""
+msgstr "ראיונג (ระยอง)"
 
 #: i18n/states/TH.php:66
 msgid "Roi Et (&#3619;&#3657;&#3629;&#3618;&#3648;&#3629;&#3655;&#3604;)"
-msgstr ""
+msgstr "הרועים Et (ร้อยเอ็ด)"
 
 #: i18n/states/TH.php:67
 msgid "Sa Kaeo (&#3626;&#3619;&#3632;&#3649;&#3585;&#3657;&#3623;)"
@@ -2440,7 +2440,7 @@ msgstr "Sa Kaeo (สระแก้ว)"
 
 #: i18n/states/TH.php:68
 msgid "Sakon Nakhon (&#3626;&#3585;&#3621;&#3609;&#3588;&#3619;)"
-msgstr ""
+msgstr "סקון יחנון (สกลนคร)"
 
 #: i18n/states/TH.php:69
 msgid ""
@@ -2462,193 +2462,193 @@ msgstr "Samut Songkhram (&#3626;&#3617;&#3640;&#3607;&#3619;&#3626;&#3591;&#3588
 
 #: i18n/states/TH.php:72
 msgid "Saraburi (&#3626;&#3619;&#3632;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "סרבורי (สระบุรี)"
 
 #: i18n/states/TH.php:73
 msgid "Satun (&#3626;&#3605;&#3641;&#3621;)"
-msgstr ""
+msgstr "סטון (สตูล)"
 
 #: i18n/states/TH.php:74
 msgid ""
 "Sing Buri (&#3626;&#3636;&#3591;&#3627;&#3660;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "סינג בורי (สิงห์บุรี)"
 
 #: i18n/states/TH.php:75
 msgid "Sisaket (&#3624;&#3619;&#3637;&#3626;&#3632;&#3648;&#3585;&#3625;)"
-msgstr ""
+msgstr "Sisaket (ศรีสะเกษ)"
 
 #: i18n/states/TH.php:76
 msgid "Songkhla (&#3626;&#3591;&#3586;&#3621;&#3634;)"
-msgstr ""
+msgstr "סונגקלה (สงขลา)"
 
 #: i18n/states/TH.php:77
 msgid "Sukhothai (&#3626;&#3640;&#3650;&#3586;&#3607;&#3633;&#3618;)"
-msgstr ""
+msgstr "סוקוטאי (สุโขทัย)"
 
 #: i18n/states/TH.php:78
 msgid ""
 "Suphan Buri "
 "(&#3626;&#3640;&#3614;&#3619;&#3619;&#3603;&#3610;&#3640;&#3619;&#3637;)"
-msgstr ""
+msgstr "סופאנבורי (สุพรรณบุรี)"
 
 #: i18n/states/TH.php:79
 msgid ""
 "Surat Thani "
 "(&#3626;&#3640;&#3619;&#3634;&#3625;&#3598;&#3619;&#3660;&#3608;&#3634;&#3609;&#3637;)"
-msgstr ""
+msgstr "סוראט תאנה (สุราษฎร์ธานี ;)"
 
 #: i18n/states/TH.php:80
 msgid "Surin (&#3626;&#3640;&#3619;&#3636;&#3609;&#3607;&#3619;&#3660;)"
-msgstr ""
+msgstr "סורין (สุรินทร์)"
 
 #: i18n/states/TH.php:81
 msgid "Tak (&#3605;&#3634;&#3585;)"
-msgstr ""
+msgstr "טאק (ตาก)"
 
 #: i18n/states/TH.php:82
 msgid "Trang (&#3605;&#3619;&#3633;&#3591;)"
-msgstr ""
+msgstr "טראנג (ตรัง)"
 
 #: i18n/states/TH.php:83
 msgid "Trat (&#3605;&#3619;&#3634;&#3604;)"
-msgstr ""
+msgstr "טראט (ตราด)"
 
 #: i18n/states/TH.php:84
 msgid ""
 "Ubon Ratchathani "
 "(&#3629;&#3640;&#3610;&#3621;&#3619;&#3634;&#3594;&#3608;&#3634;&#3609;&#3637;)"
-msgstr ""
+msgstr "Ubon Ratchathani (อุบลราชธานี)"
 
 #: i18n/states/TH.php:85
 msgid "Udon Thani (&#3629;&#3640;&#3604;&#3619;&#3608;&#3634;&#3609;&#3637;)"
-msgstr ""
+msgstr "אודון תאנה (อุดรธานี)"
 
 #: i18n/states/TH.php:86
 msgid ""
 "Uthai Thani "
 "(&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)"
-msgstr ""
+msgstr "אוטאי תאנה (อุทัยธานี)"
 
 #: i18n/states/TH.php:87
 msgid ""
 "Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)"
-msgstr ""
+msgstr "אוטרדיט (อุตรดิตถ์)"
 
 #: i18n/states/TH.php:88
 msgid "Yala (&#3618;&#3632;&#3621;&#3634;)"
-msgstr ""
+msgstr "Yala (ยะลา)"
 
 #: i18n/states/TH.php:89
 msgid "Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)"
-msgstr ""
+msgstr "יאסוטון (ยโสธร)"
 
 #: i18n/states/TR.php:13
 msgid "Adana"
-msgstr ""
+msgstr "אדנה"
 
 #: i18n/states/TR.php:14
 msgid "Ad&#305;yaman"
-msgstr ""
+msgstr "אדיאמן"
 
 #: i18n/states/TR.php:15
 msgid "Afyon"
-msgstr ""
+msgstr "אפיון"
 
 #: i18n/states/TR.php:16
 msgid "A&#287;r&#305;"
-msgstr ""
+msgstr "אגרי"
 
 #: i18n/states/TR.php:17
 msgid "Amasya"
-msgstr ""
+msgstr "אמסיה"
 
 #: i18n/states/TR.php:18
 msgid "Ankara"
-msgstr ""
+msgstr "אנקארה"
 
 #: i18n/states/TR.php:19
 msgid "Antalya"
-msgstr ""
+msgstr "אנטליה"
 
 #: i18n/states/TR.php:20
 msgid "Artvin"
-msgstr ""
+msgstr "ארטווין"
 
 #: i18n/states/TR.php:21
 msgid "Ayd&#305;n"
-msgstr ""
+msgstr "איידין"
 
 #: i18n/states/TR.php:22
 msgid "Bal&#305;kesir"
-msgstr ""
+msgstr "באליקסיר"
 
 #: i18n/states/TR.php:23
 msgid "Bilecik"
-msgstr ""
+msgstr "בילסיק"
 
 #: i18n/states/TR.php:24
 msgid "Bing&#246;l"
-msgstr ""
+msgstr "בינגול"
 
 #: i18n/states/TR.php:25
 msgid "Bitlis"
-msgstr ""
+msgstr "ביטליס"
 
 #: i18n/states/TR.php:26
 msgid "Bolu"
-msgstr ""
+msgstr "בולו"
 
 #: i18n/states/TR.php:27
 msgid "Burdur"
-msgstr ""
+msgstr "בורדור"
 
 #: i18n/states/TR.php:28
 msgid "Bursa"
-msgstr ""
+msgstr "בורסה"
 
 #: i18n/states/TR.php:29
 msgid "&#199;anakkale"
-msgstr ""
+msgstr "צ'נקלה"
 
 #: i18n/states/TR.php:30
 msgid "&#199;ank&#305;r&#305;"
-msgstr ""
+msgstr "קנקירי"
 
 #: i18n/states/TR.php:31
 msgid "&#199;orum"
-msgstr ""
+msgstr "צורום"
 
 #: i18n/states/TR.php:32
 msgid "Denizli"
-msgstr ""
+msgstr "דניזלי"
 
 #: i18n/states/TR.php:33
 msgid "Diyarbak&#305;r"
-msgstr ""
+msgstr "דיארבקיר"
 
 #: i18n/states/TR.php:34
 msgid "Edirne"
-msgstr ""
+msgstr "אדירנה"
 
 #: i18n/states/TR.php:35
 msgid "Elaz&#305;&#287;"
-msgstr ""
+msgstr "אלאזיג"
 
 #: i18n/states/TR.php:36
 msgid "Erzincan"
-msgstr ""
+msgstr "ארזינקאן"
 
 #: i18n/states/TR.php:37
 msgid "Erzurum"
-msgstr ""
+msgstr "ארזורום"
 
 #: i18n/states/TR.php:38
 msgid "Eski&#351;ehir"
-msgstr ""
+msgstr "אסקישהיר"
 
 #: i18n/states/TR.php:39
 msgid "Gaziantep"
-msgstr ""
+msgstr "גזיאנטפ"
 
 #: i18n/states/TR.php:40
 msgid "Giresun"
@@ -2656,7 +2656,7 @@ msgstr "גירסון"
 
 #: i18n/states/TR.php:41
 msgid "G&#252;m&#252;&#351;hane"
-msgstr ""
+msgstr "גומושנה"
 
 #: i18n/states/TR.php:42
 msgid "Hakkari"
@@ -2672,11 +2672,11 @@ msgstr "אספרטה"
 
 #: i18n/states/TR.php:45
 msgid "&#304;&#231;el"
-msgstr ""
+msgstr "איצ'ל (מרסין)"
 
 #: i18n/states/TR.php:46
 msgid "&#304;stanbul"
-msgstr ""
+msgstr "איסטנבול"
 
 #: i18n/states/TR.php:47
 msgid "&#304;zmir"
@@ -2692,31 +2692,31 @@ msgstr "קסטמונו"
 
 #: i18n/states/TR.php:50
 msgid "Kayseri"
-msgstr ""
+msgstr "קייסרי"
 
 #: i18n/states/TR.php:51
 msgid "K&#305;rklareli"
-msgstr ""
+msgstr "קירקלרלי"
 
 #: i18n/states/TR.php:52
 msgid "K&#305;r&#351;ehir"
-msgstr ""
+msgstr "קירסהיר"
 
 #: i18n/states/TR.php:53
 msgid "Kocaeli"
-msgstr ""
+msgstr "קוג'אלי"
 
 #: i18n/states/TR.php:54
 msgid "Konya"
-msgstr ""
+msgstr "קוניה"
 
 #: i18n/states/TR.php:55
 msgid "K&#252;tahya"
-msgstr ""
+msgstr "קוטאיה"
 
 #: i18n/states/TR.php:56
 msgid "Malatya"
-msgstr ""
+msgstr "מלטיה"
 
 #: i18n/states/TR.php:57
 msgid "Manisa"
@@ -2724,11 +2724,11 @@ msgstr "מניסה"
 
 #: i18n/states/TR.php:58
 msgid "Kahramanmara&#351;"
-msgstr ""
+msgstr "קהרמאנמרש"
 
 #: i18n/states/TR.php:59
 msgid "Mardin"
-msgstr ""
+msgstr "מרדין"
 
 #: i18n/states/TR.php:60
 msgid "Mu&#287;la"
@@ -2736,19 +2736,19 @@ msgstr "Mu&#287;la"
 
 #: i18n/states/TR.php:61
 msgid "Mu&#351;"
-msgstr ""
+msgstr "מוס"
 
 #: i18n/states/TR.php:62
 msgid "Nev&#351;ehir"
-msgstr ""
+msgstr "נבסהיר"
 
 #: i18n/states/TR.php:63
 msgid "Ni&#287;de"
-msgstr ""
+msgstr "ניגדה"
 
 #: i18n/states/TR.php:64
 msgid "Ordu"
-msgstr ""
+msgstr "אורדו"
 
 #: i18n/states/TR.php:65
 msgid "Rize"
@@ -2756,11 +2756,11 @@ msgstr "Rize"
 
 #: i18n/states/TR.php:66
 msgid "Sakarya"
-msgstr ""
+msgstr "סקריה"
 
 #: i18n/states/TR.php:67
 msgid "Samsun"
-msgstr ""
+msgstr "סמסון"
 
 #: i18n/states/TR.php:68
 msgid "Siirt"
@@ -2768,35 +2768,35 @@ msgstr "Siirt"
 
 #: i18n/states/TR.php:69
 msgid "Sinop"
-msgstr ""
+msgstr "סינופ"
 
 #: i18n/states/TR.php:70
 msgid "Sivas"
-msgstr ""
+msgstr "סיווס"
 
 #: i18n/states/TR.php:71
 msgid "Tekirda&#287;"
-msgstr ""
+msgstr "טקירדא"
 
 #: i18n/states/TR.php:72
 msgid "Tokat"
-msgstr ""
+msgstr "טוקאט"
 
 #: i18n/states/TR.php:73
 msgid "Trabzon"
-msgstr ""
+msgstr "טרבזון"
 
 #: i18n/states/TR.php:74
 msgid "Tunceli"
-msgstr ""
+msgstr "טונסלי"
 
 #: i18n/states/TR.php:75
 msgid "&#350;anl&#305;urfa"
-msgstr ""
+msgstr "אורפה"
 
 #: i18n/states/TR.php:76
 msgid "U&#351;ak"
-msgstr ""
+msgstr "אוסאק"
 
 #: i18n/states/TR.php:77
 msgid "Van"
@@ -2808,23 +2808,23 @@ msgstr "יוזגט"
 
 #: i18n/states/TR.php:79
 msgid "Zonguldak"
-msgstr ""
+msgstr "זונגולדאק"
 
 #: i18n/states/TR.php:80
 msgid "Aksaray"
-msgstr ""
+msgstr "אקסראי"
 
 #: i18n/states/TR.php:81
 msgid "Bayburt"
-msgstr ""
+msgstr "בייבורט"
 
 #: i18n/states/TR.php:82
 msgid "Karaman"
-msgstr "קאראמן"
+msgstr "קרמאן"
 
 #: i18n/states/TR.php:83
 msgid "K&#305;r&#305;kkale"
-msgstr ""
+msgstr "קיריקאלה"
 
 #: i18n/states/TR.php:84
 msgid "Batman"
@@ -2832,31 +2832,31 @@ msgstr "באטמן"
 
 #: i18n/states/TR.php:85
 msgid "&#350;&#305;rnak"
-msgstr ""
+msgstr "סירנאק"
 
 #: i18n/states/TR.php:86
 msgid "Bart&#305;n"
-msgstr ""
+msgstr "ברטין"
 
 #: i18n/states/TR.php:87
 msgid "Ardahan"
-msgstr ""
+msgstr "ארדהאן"
 
 #: i18n/states/TR.php:88
 msgid "I&#287;d&#305;r"
-msgstr ""
+msgstr "איגדיר"
 
 #: i18n/states/TR.php:89
 msgid "Yalova"
-msgstr ""
+msgstr "יאלובה"
 
 #: i18n/states/TR.php:90
 msgid "Karab&#252;k"
-msgstr ""
+msgstr "קרבוק"
 
 #: i18n/states/TR.php:91
 msgid "Kilis"
-msgstr ""
+msgstr "קיליס"
 
 #: i18n/states/TR.php:92
 msgid "Osmaniye"
@@ -2864,251 +2864,251 @@ msgstr "Osmaniye"
 
 #: i18n/states/TR.php:93
 msgid "D&#252;zce"
-msgstr ""
+msgstr "דוצ'ה"
 
 #: i18n/states/US.php:13
 msgid "Alabama"
-msgstr ""
+msgstr "אלבמה"
 
 #: i18n/states/US.php:14
 msgid "Alaska"
-msgstr ""
+msgstr "אלסקה"
 
 #: i18n/states/US.php:15
 msgid "Arizona"
-msgstr ""
+msgstr "אריזונה"
 
 #: i18n/states/US.php:16
 msgid "Arkansas"
-msgstr ""
+msgstr "ארקנסו"
 
 #: i18n/states/US.php:17
 msgid "California"
-msgstr ""
+msgstr "קליפורניה"
 
 #: i18n/states/US.php:18
 msgid "Colorado"
-msgstr ""
+msgstr "קולורדו"
 
 #: i18n/states/US.php:19
 msgid "Connecticut"
-msgstr ""
+msgstr "קונטיקט"
 
 #: i18n/states/US.php:20
 msgid "Delaware"
-msgstr ""
+msgstr "דלוור"
 
 #: i18n/states/US.php:21
 msgid "District Of Columbia"
-msgstr ""
+msgstr "מחוז קולומביה"
 
 #: i18n/states/US.php:22
 msgid "Florida"
-msgstr ""
+msgstr "פלורידה"
 
 #: i18n/states/US.php:23 includes/class-wc-countries.php:118
 msgid "Georgia"
-msgstr ""
+msgstr "Georgia"
 
 #: i18n/states/US.php:24
 msgid "Hawaii"
-msgstr ""
+msgstr "הוואי"
 
 #: i18n/states/US.php:25
 msgid "Idaho"
-msgstr ""
+msgstr "איידהו"
 
 #: i18n/states/US.php:26
 msgid "Illinois"
-msgstr ""
+msgstr "אילינוי"
 
 #: i18n/states/US.php:27
 msgid "Indiana"
-msgstr ""
+msgstr "אינדיאנה"
 
 #: i18n/states/US.php:28
 msgid "Iowa"
-msgstr ""
+msgstr "איווה"
 
 #: i18n/states/US.php:29
 msgid "Kansas"
-msgstr ""
+msgstr "קנזס"
 
 #: i18n/states/US.php:30
 msgid "Kentucky"
-msgstr ""
+msgstr "קנטאקי"
 
 #: i18n/states/US.php:31
 msgid "Louisiana"
-msgstr ""
+msgstr "לואיזיאנה"
 
 #: i18n/states/US.php:32
 msgid "Maine"
-msgstr ""
+msgstr "מיין."
 
 #: i18n/states/US.php:33
 msgid "Maryland"
-msgstr ""
+msgstr "מרילנד"
 
 #: i18n/states/US.php:34
 msgid "Massachusetts"
-msgstr ""
+msgstr "מסצ'וסטס"
 
 #: i18n/states/US.php:35
 msgid "Michigan"
-msgstr ""
+msgstr "מישיגן"
 
 #: i18n/states/US.php:36
 msgid "Minnesota"
-msgstr ""
+msgstr "מינסוטה"
 
 #: i18n/states/US.php:37
 msgid "Mississippi"
-msgstr ""
+msgstr "מיסיסיפי"
 
 #: i18n/states/US.php:38
 msgid "Missouri"
-msgstr ""
+msgstr "מיזורי"
 
 #: i18n/states/US.php:40
 msgid "Nebraska"
-msgstr ""
+msgstr "נברסקה"
 
 #: i18n/states/US.php:41
 msgid "Nevada"
-msgstr ""
+msgstr "נבאדה"
 
 #: i18n/states/US.php:42
 msgid "New Hampshire"
-msgstr ""
+msgstr "ניו המפשייר"
 
 #: i18n/states/US.php:43
 msgid "New Jersey"
-msgstr ""
+msgstr "ניו ג'רזי"
 
 #: i18n/states/US.php:44
 msgid "New Mexico"
-msgstr ""
+msgstr "ניו מקסיקו"
 
 #: i18n/states/US.php:45
 msgid "New York"
-msgstr ""
+msgstr "ניו יורק"
 
 #: i18n/states/US.php:46
 msgid "North Carolina"
-msgstr ""
+msgstr "צפון קרוליינה"
 
 #: i18n/states/US.php:47
 msgid "North Dakota"
-msgstr ""
+msgstr "צפון דקוטה"
 
 #: i18n/states/US.php:48
 msgid "Ohio"
-msgstr ""
+msgstr "אוהיו"
 
 #: i18n/states/US.php:49
 msgid "Oklahoma"
-msgstr ""
+msgstr "אוקלהומה"
 
 #: i18n/states/US.php:50
 msgid "Oregon"
-msgstr ""
+msgstr "אורגון"
 
 #: i18n/states/US.php:51
 msgid "Pennsylvania"
-msgstr ""
+msgstr "פנסילבניה"
 
 #: i18n/states/US.php:52
 msgid "Rhode Island"
-msgstr ""
+msgstr "רוד איילנד"
 
 #: i18n/states/US.php:53
 msgid "South Carolina"
-msgstr ""
+msgstr "דרום קרוליינה"
 
 #: i18n/states/US.php:54
 msgid "South Dakota"
-msgstr ""
+msgstr "דרום דקוטה"
 
 #: i18n/states/US.php:55
 msgid "Tennessee"
-msgstr ""
+msgstr "טנסי"
 
 #: i18n/states/US.php:56
 msgid "Texas"
-msgstr ""
+msgstr "טקסס"
 
 #: i18n/states/US.php:57
 msgid "Utah"
-msgstr ""
+msgstr "יוטה"
 
 #: i18n/states/US.php:58
 msgid "Vermont"
-msgstr ""
+msgstr "רמונט"
 
 #: i18n/states/US.php:59
 msgid "Virginia"
-msgstr ""
+msgstr "וירג'יניה"
 
 #: i18n/states/US.php:60
 msgid "Washington"
-msgstr ""
+msgstr "וושינגטון"
 
 #: i18n/states/US.php:61
 msgid "West Virginia"
-msgstr ""
+msgstr "מערב וירג'יניה"
 
 #: i18n/states/US.php:62
 msgid "Wisconsin"
-msgstr ""
+msgstr "ויסקונסין"
 
 #: i18n/states/US.php:63
 msgid "Wyoming"
-msgstr ""
+msgstr "ויומינג"
 
 #: i18n/states/US.php:64
 msgid "Armed Forces (AA)"
-msgstr ""
+msgstr "כוחות מזוינים (AA)"
 
 #: i18n/states/US.php:65
 msgid "Armed Forces (AE)"
-msgstr ""
+msgstr "כוחות מזוינים (AE)"
 
 #: i18n/states/US.php:66
 msgid "Armed Forces (AP)"
-msgstr ""
+msgstr "כוחות מזוינים (AP)"
 
 #: i18n/states/US.php:67
 msgid "American Samoa"
-msgstr ""
+msgstr "סמואה האמריקנית"
 
 #: i18n/states/US.php:68
 msgid "Guam"
-msgstr ""
+msgstr "גואם"
 
 #: i18n/states/US.php:69
 msgid "Northern Mariana Islands"
-msgstr ""
+msgstr "אי מריאנה הצפוניים"
 
 #: i18n/states/US.php:70
 msgid "Puerto Rico"
-msgstr ""
+msgstr "פורטו ריקו"
 
 #: i18n/states/US.php:71
 msgid "US Minor Outlying Islands"
-msgstr ""
+msgstr "איים קטנים מרוחקים בארצות הברית"
 
 #: i18n/states/US.php:72
 msgid "US Virgin Islands"
-msgstr ""
+msgstr "איי הבתולה ארצות הברית"
 
 #: i18n/states/ZA.php:13
 msgid "Eastern Cape"
-msgstr ""
+msgstr "מחוז כף מזרחית"
 
 #: i18n/states/ZA.php:14
 msgid "Free State"
-msgstr ""
+msgstr "מדינה חופשיה"
 
 #: i18n/states/ZA.php:15
 msgid "Gauteng"
@@ -3116,11 +3116,11 @@ msgstr "Gauteng"
 
 #: i18n/states/ZA.php:16
 msgid "KwaZulu-Natal"
-msgstr ""
+msgstr "קוואזולו נטאל"
 
 #: i18n/states/ZA.php:17
 msgid "Limpopo"
-msgstr ""
+msgstr "לימפופו"
 
 #: i18n/states/ZA.php:18
 msgid "Mpumalanga"
@@ -3128,15 +3128,15 @@ msgstr "Mpumalanga"
 
 #: i18n/states/ZA.php:19
 msgid "Northern Cape"
-msgstr ""
+msgstr "כף הצפונית"
 
 #: i18n/states/ZA.php:20
 msgid "North West"
-msgstr ""
+msgstr "צפון מערב"
 
 #: i18n/states/ZA.php:21
 msgid "Western Cape"
-msgstr ""
+msgstr "כף מערבית"
 
 #: i18n/strings.php:16
 msgid "pending"
@@ -3803,63 +3803,63 @@ msgstr "אנא דרג את המוצר."
 
 #: includes/class-wc-countries.php:37
 msgid "Afghanistan"
-msgstr "Afghanistan"
+msgstr "אפגניסטן"
 
 #: includes/class-wc-countries.php:38
 msgid "&#197;land Islands"
-msgstr "&#197;land Islands"
+msgstr "איי אולנד"
 
 #: includes/class-wc-countries.php:39
 msgid "Albania"
-msgstr "Albania"
+msgstr "אלבניה"
 
 #: includes/class-wc-countries.php:40
 msgid "Algeria"
-msgstr "Algeria"
+msgstr "אלג'יריה"
 
 #: includes/class-wc-countries.php:41
 msgid "Andorra"
-msgstr "Andorra"
+msgstr "אנדורה"
 
 #: includes/class-wc-countries.php:42
 msgid "Angola"
-msgstr "Angola"
+msgstr "אנגולה"
 
 #: includes/class-wc-countries.php:43
 msgid "Anguilla"
-msgstr "Anguilla"
+msgstr "אנגווילה"
 
 #: includes/class-wc-countries.php:44
 msgid "Antarctica"
-msgstr "Antarctica"
+msgstr "אנטרקטיקה"
 
 #: includes/class-wc-countries.php:45
 msgid "Antigua and Barbuda"
-msgstr "Antigua and Barbuda"
+msgstr "אנטיגואה וברבודה"
 
 #: includes/class-wc-countries.php:46
 msgid "Argentina"
-msgstr "Argentina"
+msgstr "ארגנטינה"
 
 #: includes/class-wc-countries.php:47
 msgid "Armenia"
-msgstr "Armenia"
+msgstr "ארמניה"
 
 #: includes/class-wc-countries.php:48
 msgid "Aruba"
-msgstr "Aruba"
+msgstr "ארובה"
 
 #: includes/class-wc-countries.php:49
 msgid "Australia"
-msgstr "Australia"
+msgstr "אוסטרליה"
 
 #: includes/class-wc-countries.php:50
 msgid "Austria"
-msgstr "Austria"
+msgstr "אוסטריה"
 
 #: includes/class-wc-countries.php:51
 msgid "Azerbaijan"
-msgstr "Azerbaijan"
+msgstr "אזרבייג'ן"
 
 #: includes/class-wc-countries.php:52
 msgid "Bahamas"
@@ -3887,7 +3887,7 @@ msgstr "בלגיה"
 
 #: includes/class-wc-countries.php:58
 msgid "Belau"
-msgstr ""
+msgstr "Belau"
 
 #: includes/class-wc-countries.php:59
 msgid "Belize"
@@ -3923,7 +3923,7 @@ msgstr "בוטסואנה"
 
 #: includes/class-wc-countries.php:67
 msgid "Bouvet Island"
-msgstr ""
+msgstr "האי בובה"
 
 #: includes/class-wc-countries.php:68
 msgid "Brazil"
@@ -3995,7 +3995,7 @@ msgstr "אי חג המולד"
 
 #: includes/class-wc-countries.php:85
 msgid "Cocos (Keeling) Islands"
-msgstr ""
+msgstr "איי קוקוס (קילינג)"
 
 #: includes/class-wc-countries.php:86
 msgid "Colombia"
@@ -4235,7 +4235,7 @@ msgstr "חוף שנהב"
 
 #: includes/class-wc-countries.php:146
 msgid "Jamaica"
-msgstr "ג'מאיקה"
+msgstr "ג'מייקה"
 
 #: includes/class-wc-countries.php:147
 msgid "Japan"
@@ -4263,7 +4263,7 @@ msgstr "קיריבטי"
 
 #: includes/class-wc-countries.php:153
 msgid "Kuwait"
-msgstr "כווית"
+msgstr "כוויית"
 
 #: includes/class-wc-countries.php:154
 msgid "Kyrgyzstan"
@@ -4335,7 +4335,7 @@ msgstr "מאלי"
 
 #: includes/class-wc-countries.php:171
 msgid "Malta"
-msgstr "מאלטה"
+msgstr "מלטה"
 
 #: includes/class-wc-countries.php:172
 msgid "Marshall Islands"
@@ -4371,7 +4371,7 @@ msgstr "מולדובה"
 
 #: includes/class-wc-countries.php:180
 msgid "Monaco"
-msgstr "מונאקו"
+msgstr "מונקו"
 
 #: includes/class-wc-countries.php:181
 msgid "Mongolia"
@@ -4403,7 +4403,7 @@ msgstr "נמיביה"
 
 #: includes/class-wc-countries.php:188
 msgid "Nauru"
-msgstr ""
+msgstr "נאורו"
 
 #: includes/class-wc-countries.php:189
 msgid "Nepal"
@@ -4439,7 +4439,7 @@ msgstr "ניגריה"
 
 #: includes/class-wc-countries.php:197
 msgid "Niue"
-msgstr ""
+msgstr "נואי"
 
 #: includes/class-wc-countries.php:198
 msgid "Norfolk Island"
@@ -4483,7 +4483,7 @@ msgstr "פרו"
 
 #: includes/class-wc-countries.php:208
 msgid "Philippines"
-msgstr "פיליפינים"
+msgstr "הפיליפינים"
 
 #: includes/class-wc-countries.php:209
 msgid "Pitcairn"
@@ -4555,7 +4555,7 @@ msgstr "סן מרינו"
 
 #: includes/class-wc-countries.php:226
 msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
-msgstr ""
+msgstr "סאו טומה ופרינסיפה"
 
 #: includes/class-wc-countries.php:227
 msgid "Saudi Arabia"
@@ -4587,7 +4587,7 @@ msgstr "סלובקיה"
 
 #: includes/class-wc-countries.php:234
 msgid "Slovenia"
-msgstr ""
+msgstr "סלובניה"
 
 #: includes/class-wc-countries.php:235
 msgid "Solomon Islands"
@@ -4631,7 +4631,7 @@ msgstr "סורינם"
 
 #: includes/class-wc-countries.php:245
 msgid "Svalbard and Jan Mayen"
-msgstr ""
+msgstr "איי סבלברד ויאן מאיין"
 
 #: includes/class-wc-countries.php:246
 msgid "Swaziland"
@@ -4639,7 +4639,7 @@ msgstr "סווזילנד"
 
 #: includes/class-wc-countries.php:247
 msgid "Sweden"
-msgstr "שודיה"
+msgstr "שוודיה"
 
 #: includes/class-wc-countries.php:248
 msgid "Switzerland"
@@ -4683,7 +4683,7 @@ msgstr "טונגה"
 
 #: includes/class-wc-countries.php:258
 msgid "Trinidad and Tobago"
-msgstr ""
+msgstr "טרינידד וטובגו"
 
 #: includes/class-wc-countries.php:259
 msgid "Tunisia"
@@ -4719,11 +4719,11 @@ msgstr "איחוד האמירויות"
 
 #: includes/class-wc-countries.php:267
 msgid "United Kingdom (UK)"
-msgstr "United Kingdom (UK)"
+msgstr "אנגליה"
 
 #: includes/class-wc-countries.php:268
 msgid "United States (US)"
-msgstr "United States (US)"
+msgstr "ארה\"ב"
 
 #: includes/class-wc-countries.php:269
 msgid "Uruguay"
@@ -4832,12 +4832,12 @@ msgstr "כתובת"
 #: includes/class-wc-countries.php:750
 msgctxt "placeholder"
 msgid "Street address"
-msgstr "רחוב ומס' בית"
+msgstr "כתובת"
 
 #: includes/class-wc-countries.php:755
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
-msgstr "דירה, קומה כניסה וכו' (לא חובה)"
+msgstr "דירה (לא חובה)"
 
 #: includes/class-wc-countries.php:760 includes/class-wc-countries.php:761
 msgid "Town / City"
@@ -5291,7 +5291,7 @@ msgstr "WooCommerce"
 
 #: includes/class-wc-order.php:1312
 msgid "Order status changed from %s to %s."
-msgstr "מצב ההזמנה שונה מ%s ל%s"
+msgstr "מצב ההזמנה שונה מהמצב %s למצב  %s"
 
 #: includes/class-wc-order.php:1581
 msgid "Order item stock reduced successfully."
@@ -6052,7 +6052,7 @@ msgstr "תשלום בצ'ק"
 msgid ""
 "Please send your cheque to Store Name, Store Street, Store Town, Store State"
 " / County, Store Postcode."
-msgstr "נא לשלוח את הצ'ק שלך ל\"שם החנות, רחוב החנות, עיר החנות, מדינת / מחוז החנות, מיקוד החנות\"."
+msgstr "נא לשלוח את הצ'ק שלך ל שם החנות, חנות רחוב, חנות בעיר, חנות המדינה / מחוז, חנות מיקוד."
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:114
 msgid "Awaiting cheque payment"
@@ -6970,7 +6970,7 @@ msgstr "דולר אוסטרלי"
 
 #: includes/wc-core-functions.php:169
 msgid "Bangladeshi Taka"
-msgstr ""
+msgstr "טאקה בנגלדשי"
 
 #: includes/wc-core-functions.php:170
 msgid "Brazilian Real"
