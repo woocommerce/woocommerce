@@ -1002,7 +1002,7 @@ class WC_API_Products extends WC_API_Resource {
 			if ( ! $variation_id ) {
 				$post_status = ( isset( $variation['visible'] ) && false === $variation['visible'] ) ? 'private' : 'publish';
 
-				$variation = array(
+				$new_variation = array(
 					'post_title'   => $variation_post_title,
 					'post_content' => '',
 					'post_status'  => $post_status,
@@ -1012,7 +1012,7 @@ class WC_API_Products extends WC_API_Resource {
 					'menu_order'   => $menu_order
 				);
 
-				$variation_id = wp_insert_post( $variation );
+				$variation_id = wp_insert_post( $new_variation );
 
 				do_action( 'woocommerce_create_product_variation', $variation_id );
 			} else {
@@ -1194,10 +1194,11 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Update taxonomies
-			if ( $variation['attributes'] ) {
+			if ( isset( $variation['attributes'] ) ) {
 				$updated_attribute_keys = array();
 
 				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
+
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
@@ -1456,25 +1457,45 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return void|WP_Error
 	 */
 	protected function save_product_images( $id, $images ) {
-		foreach ( $images as $image ) {
-			if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
-				$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+		if ( is_array( $images ) ) {
+			$gallery = array();
 
-				if ( is_wp_error( $upload ) ) {
-					return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
+			foreach ( $images as $image ) {
+				if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+
+					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+
+						if ( is_wp_error( $upload ) ) {
+							return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
+						}
+
+						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
+					}
+
+					set_post_thumbnail( $id, $attachment_id );
+				} else {
+					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+
+					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+
+						if ( is_wp_error( $upload ) ) {
+							return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
+						}
+					}
+
+					$gallery[] = $this->set_product_image_as_attachment( $upload, $id );
 				}
-
-				$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
-				set_post_thumbnail( $id, $attachment_id );
-			} else if ( isset( $image['src'] ) ) {
-				$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
-
-				if ( is_wp_error( $upload ) ) {
-					return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
-				}
-
-				$this->set_product_image_as_attachment( $upload, $id );
 			}
+
+			if ( ! empty( $gallery ) ) {
+				update_post_meta( $id, '_product_image_gallery', implode( ',', $gallery ) );
+			}
+		} else {
+			delete_post_thumbnail( $id );
+			update_post_meta( $id, '_product_image_gallery', '' );
 		}
 	}
 
@@ -1550,12 +1571,31 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return int
 	 */
 	protected function set_product_image_as_attachment( $upload, $id ) {
-		$info = wp_check_filetype( $upload['file'] );
+		$info    = wp_check_filetype( $upload['file'] );
+		$title   = '';
+		$content = '';
+
+		if ( $image_meta = @wp_read_image_metadata( $upload['file'] ) ) {
+			if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
+				$title = $image_meta['title'];
+			}
+			if ( trim( $image_meta['caption'] ) ) {
+				$content = $image_meta['caption'];
+			}
+		}
+
 		$attachment = array(
-			'guid' => $upload['url'],
 			'post_mime_type' => $info['type'],
+			'guid'           => $upload['url'],
+			'post_parent'    => $id,
+			'post_title'     => $title,
+			'post_content'   => $content
 		);
+
 		$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );
+		if ( ! is_wp_error( $attachment_id ) ) {
+			wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
+		}
 
 		return $attachment_id;
 	}
