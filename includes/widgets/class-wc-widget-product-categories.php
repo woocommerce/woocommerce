@@ -101,6 +101,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		if ( is_tax('product_cat') ) {
 
 			$this->current_cat   = $wp_query->queried_object;
+			$this->current_cat   = apply_filters( 'modify_wc_widget_category', $this->current_cat );
 			$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
 
 		} elseif ( is_singular('product') ) {
