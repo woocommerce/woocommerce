@@ -126,6 +126,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.1.13 - X =
+
 = 2.1.12 - 01/07/2014 =
 * Fix - Total tax should be +, not -.
 * Fix - Address format in plain text emails to use line breaks, not commas.
