@@ -30,10 +30,9 @@ function get_product( $the_product = false, $args = array() ) {
 function wc_update_product_stock( $product_id, $new_stock_level ) {
 	$product = get_product( $product_id );
 
-	if ( $product->is_type( 'variation' ) )
-		$product->set_stock( $new_stock_level, true );
-	else
+	if ( $product->get_stock_quantity() !== $new_stock_level ) {
 		$product->set_stock( $new_stock_level );
+	}
 }
 
 /**
@@ -44,7 +43,7 @@ function wc_update_product_stock( $product_id, $new_stock_level ) {
  */
 function wc_update_product_stock_status( $product_id, $status ) {
 	$product = get_product( $product_id );
-	$product-> set_stock_status( $status );
+	$product->set_stock_status( $status );
 }
 
 /**
@@ -207,55 +206,55 @@ function wc_get_featured_product_ids() {
  * @return string
  */
 function wc_product_post_type_link( $permalink, $post ) {
-    // Abort if post is not a product
-    if ( $post->post_type !== 'product' )
-    	return $permalink;
+	// Abort if post is not a product
+	if ( $post->post_type !== 'product' )
+		return $permalink;
 
-    // Abort early if the placeholder rewrite tag isn't in the generated URL
-    if ( false === strpos( $permalink, '%' ) )
-    	return $permalink;
+	// Abort early if the placeholder rewrite tag isn't in the generated URL
+	if ( false === strpos( $permalink, '%' ) )
+		return $permalink;
 
-    // Get the custom taxonomy terms in use by this post
-    $terms = get_the_terms( $post->ID, 'product_cat' );
+	// Get the custom taxonomy terms in use by this post
+	$terms = get_the_terms( $post->ID, 'product_cat' );
 
-    if ( empty( $terms ) ) {
-    	// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
-        $product_cat = _x( 'uncategorized', 'slug', 'woocommerce' );
-    } else {
-    	// Replace the placeholder rewrite tag with the first term's slug
-        $first_term = array_shift( $terms );
-        $product_cat = $first_term->slug;
-    }
+	if ( empty( $terms ) ) {
+		// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
+		$product_cat = _x( 'uncategorized', 'slug', 'woocommerce' );
+	} else {
+		// Replace the placeholder rewrite tag with the first term's slug
+		$first_term = array_shift( $terms );
+		$product_cat = $first_term->slug;
+	}
 
-    $find = array(
-    	'%year%',
-    	'%monthnum%',
-    	'%day%',
-    	'%hour%',
-    	'%minute%',
-    	'%second%',
-    	'%post_id%',
-    	'%category%',
-    	'%product_cat%'
-    );
+	$find = array(
+		'%year%',
+		'%monthnum%',
+		'%day%',
+		'%hour%',
+		'%minute%',
+		'%second%',
+		'%post_id%',
+		'%category%',
+		'%product_cat%'
+	);
 
-    $replace = array(
-    	date_i18n( 'Y', strtotime( $post->post_date ) ),
-    	date_i18n( 'm', strtotime( $post->post_date ) ),
-    	date_i18n( 'd', strtotime( $post->post_date ) ),
-    	date_i18n( 'H', strtotime( $post->post_date ) ),
-    	date_i18n( 'i', strtotime( $post->post_date ) ),
-    	date_i18n( 's', strtotime( $post->post_date ) ),
-    	$post->ID,
-    	$product_cat,
-    	$product_cat
-    );
+	$replace = array(
+		date_i18n( 'Y', strtotime( $post->post_date ) ),
+		date_i18n( 'm', strtotime( $post->post_date ) ),
+		date_i18n( 'd', strtotime( $post->post_date ) ),
+		date_i18n( 'H', strtotime( $post->post_date ) ),
+		date_i18n( 'i', strtotime( $post->post_date ) ),
+		date_i18n( 's', strtotime( $post->post_date ) ),
+		$post->ID,
+		$product_cat,
+		$product_cat
+	);
 
-    $replace = array_map( 'sanitize_title', $replace );
+	$replace = array_map( 'sanitize_title', $replace );
 
-    $permalink = str_replace( $find, $replace, $permalink );
+	$permalink = str_replace( $find, $replace, $permalink );
 
-    return $permalink;
+	return $permalink;
 }
 add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 
@@ -308,11 +307,11 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
 			}
 
 			// If this is a term slug, get the term's nice name
-            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
-            	$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
-            	if ( ! is_wp_error( $term ) && $term->name )
-            		$value = $term->name;
-            }
+			if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
+				$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
+				if ( ! is_wp_error( $term ) && $term->name )
+					$value = $term->name;
+			}
 
 			if ( $flat ) {
 				$variation_list[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . urldecode( $value );
@@ -493,3 +492,46 @@ function wc_track_product_view() {
 }
 
 add_action( 'template_redirect', 'wc_track_product_view', 20 );
+
+/**
+ * Get product types
+ *
+ * @since 2.2
+ * @return array
+ */
+function wc_get_product_types() {
+	return (array) apply_filters( 'product_type_selector', array(
+		'simple'   => __( 'Simple product', 'woocommerce' ),
+		'grouped'  => __( 'Grouped product', 'woocommerce' ),
+		'external' => __( 'External/Affiliate product', 'woocommerce' ),
+		'variable' => __( 'Variable product', 'woocommerce' )
+	) );
+}
+
+/**
+ * Check if product sku is unique.
+ *
+ * @since 2.2
+ * @param int $product_id
+ * @param string $sku
+ * @return bool
+ */
+function wc_product_has_unique_sku( $product_id, $sku ) {
+	global $wpdb;
+
+	$sku_found = $wpdb->get_var( $wpdb->prepare( "
+		SELECT $wpdb->posts.ID
+		FROM $wpdb->posts
+		LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
+		WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
+		AND $wpdb->posts.post_status = 'publish'
+		AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
+		AND $wpdb->postmeta.post_id <> %d LIMIT 1
+	 ", $sku, $product_id ) );
+
+	if ( $sku_found ) {
+		return false;
+	} else {
+		return true;
+	}
+}

@@ -94,7 +94,7 @@ class WC_Order {
 	 		return false;
 	 	}
 
-	 	wc_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $qty ) );
+	 	wc_add_order_item_meta( $item_id, '_qty', wc_stock_amount( $qty ) );
 	 	wc_add_order_item_meta( $item_id, '_tax_class', $product->get_tax_class() );
 	 	wc_add_order_item_meta( $item_id, '_product_id', $product->id );
 	 	wc_add_order_item_meta( $item_id, '_variation_id', isset( $product->variation_id ) ? $product->variation_id : 0 );
@@ -1323,7 +1323,7 @@ class WC_Order {
 
 		if ( $fees = $this->get_fees() )
 			foreach( $fees as $id => $fee ) {
-				if ( $fee['line_total'] + $fee['line_tax'] == 0 ) {
+				if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', $fee['line_total'] + $fee['line_tax'] == 0, $id ) ) {
 					continue;
 				}
 

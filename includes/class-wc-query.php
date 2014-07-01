@@ -56,7 +56,7 @@ class WC_Query {
 			add_action( 'init', array( $this, 'get_errors' ) );
 			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
-			add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
 			add_action( 'wp', array( $this, 'remove_product_query' ) );
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
@@ -395,7 +395,7 @@ class WC_Query {
 	 * @return void
 	 */
 	public function remove_product_query() {
-		remove_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+		remove_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 	}
 
 	/**
@@ -627,7 +627,7 @@ class WC_Query {
 	public function stock_status_meta_query( $status = 'instock' ) {
 		$meta_query = array();
 		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
-			 $meta_query = array(
+			$meta_query = array(
 		        'key' 		=> '_stock_status',
 				'value' 	=> $status,
 				'compare' 	=> '='

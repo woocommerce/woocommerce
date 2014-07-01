@@ -1147,8 +1147,11 @@ jQuery( function($){
 
 	// STOCK OPTIONS
 	$('input#_manage_stock').change(function(){
-		if ($(this).is(':checked')) $('div.stock_fields').show();
-		else $('div.stock_fields').hide();
+		if ( $(this).is(':checked') ) {
+			$('div.stock_fields').show();
+		} else {
+			$('div.stock_fields').hide();
+		}
 	}).change();
 
 
