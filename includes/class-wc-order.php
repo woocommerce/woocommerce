@@ -1281,8 +1281,11 @@ class WC_Order {
 	 * @return WC_Product
 	 */
 	public function get_product_from_item( $item ) {
-		$_product = get_product( ! empty( $item['variation_id'] ) ? $item['variation_id'] : $item['product_id'] );
-
+		if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
+			$_product = get_product( $item['variation_id'] );
+		} else {
+			$_product = get_product( $item['product_id'] );
+		}
 		return apply_filters( 'woocommerce_get_product_from_item', $_product, $item, $this );
 	}
 

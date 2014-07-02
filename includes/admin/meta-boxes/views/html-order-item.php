@@ -12,8 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				echo '<strong>' . __( 'Product ID:', 'woocommerce' ) . '</strong> ' . absint( $item['product_id'] );
 
-				if ( $item['variation_id'] ) {
+				if ( $item['variation_id'] && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
 					echo '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . absint( $item['variation_id'] );
+				} elseif ( $item['variation_id'] ) {
+					echo '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . absint( $item['variation_id'] ) . ' (' . __( 'No longer exists', 'woocommerce' ) . ')';
 				}
 
 				if ( $_product && $_product->get_sku() ) {
