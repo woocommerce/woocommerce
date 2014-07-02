@@ -449,10 +449,8 @@ class WC_Coupon {
 	 * @return bool
 	 */
 	public function is_valid_for_cart() {
-		if ( $this->type != 'fixed_cart' && $this->type != 'percent' )
-			return false;
-		else
-			return true;
+		$valid = $this->type != 'fixed_cart' && $this->type != 'percent' ? false : true;
+		return apply_filters( 'woocommerce_coupon_is_valid_for_cart', $valid, $this );
 	}
 
 	/**
