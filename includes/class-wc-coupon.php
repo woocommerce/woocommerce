@@ -450,9 +450,11 @@ class WC_Coupon {
 	 */
 	public function is_valid_for_cart() {
 		if ( $this->type != 'fixed_cart' && $this->type != 'percent' )
-			return false;
+			$valid = false;
 		else
-			return true;
+			$valid = true;
+			
+		return apply_filters( 'woocommerce_coupon_is_valid_for_cart', $valid, $this );
 	}
 
 	/**
@@ -462,7 +464,12 @@ class WC_Coupon {
 	 * @return boolean
 	 */
 	public function is_valid_for_product( $product ) {
+		$valid_for_check = true;
+		
 		if ( $this->type != 'fixed_product' && $this->type != 'percent_product' )
+			$valid_for_check = apply_filters( 'woocommerce_coupon_is_valid_for_product_check', false, $this );
+
+		if ( !$valid_for_check ) 
 			return false;
 
 		$valid        = false;
