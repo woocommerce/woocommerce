@@ -16,6 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <form action="" method="post">
 
+        /**
+         * woocommerce_before_myaccount_edit_inputs hook
+         */
+        <?php do_action( 'woocommerce_before_myaccount_edit_inputs' ); ?>
+
 	<p class="form-row form-row-first">
 		<label for="account_first_name"><?php _e( 'First name', 'woocommerce' ); ?> <span class="required">*</span></label>
 		<input type="text" class="input-text" name="account_first_name" id="account_first_name" value="<?php echo esc_attr( $user->first_name ); ?>" />
@@ -45,6 +50,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input type="password" class="input-text" name="password_2" id="password_2" />
 		</p>
 	</fieldset>
+
+        /**
+         * woocommerce_after_myaccount_edit_inputs hook
+         */
+        <?php do_action( 'woocommerce_after_myaccount_edit_inputs' ); ?>
+
 	<div class="clear"></div>
 
 	<p><input type="submit" class="button" name="save_account_details" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" /></p>
