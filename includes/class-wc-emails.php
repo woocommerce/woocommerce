@@ -190,7 +190,15 @@ class WC_Emails {
 		// everything else
 		$styles['width']             = 600;
 
-		return apply_filters( 'woocommerce_email_styles', $styles );
+		// give the user a chance to filter the values
+		$styles = apply_filters( 'woocommerce_email_styles', $styles );
+
+		// escape all values
+		foreach( $styles as $key => $value ) {
+			$styles[$key] = wp_kses( $value, array() );
+		}
+
+		return $styles;
 	}
 
 	/**
