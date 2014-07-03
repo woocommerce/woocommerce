@@ -264,7 +264,7 @@ class WC_Form_Handler {
 			// Pay for existing order
 			$order_key  = $_GET['key'];
 			$order_id   = absint( $wp->query_vars['order-pay'] );
-			$order      = new WC_Order( $order_id );
+			$order      = get_order( $order_id );
 
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
@@ -462,7 +462,7 @@ class WC_Form_Handler {
 		WC()->cart->empty_cart();
 
 		// Load the previous order - Stop if the order does not exist
-		$order = new WC_Order( absint( $_GET['order_again'] ) );
+		$order = get_order( absint( $_GET['order_again'] ) );
 
 		if ( empty( $order->id ) ) {
 			return;
@@ -519,7 +519,7 @@ class WC_Form_Handler {
 
 			$order_key        = $_GET['order'];
 			$order_id         = absint( $_GET['order_id'] );
-			$order            = new WC_Order( $order_id );
+			$order            = get_order( $order_id );
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
 			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
 			$redirect         = $_GET['redirect'];

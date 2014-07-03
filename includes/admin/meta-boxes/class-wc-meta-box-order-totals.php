@@ -21,7 +21,7 @@ class WC_Meta_Box_Order_Totals {
 		global $theorder, $wpdb, $post;
 
 		if ( ! is_object( $theorder ) )
-			$theorder = new WC_Order( $post->ID );
+			$theorder = get_order( $post->ID );
 
 		$order = $theorder;
 

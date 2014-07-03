@@ -351,7 +351,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$order = new WC_Order( $order_id );
+		$order = get_order( $order_id );
 		$order->update_status( 'completed' );
 
 		wp_safe_redirect( wp_get_referer() );
@@ -376,7 +376,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$order = new WC_Order( $order_id );
+		$order = get_order( $order_id );
 		$order->update_status( 'processing' );
 
 		wp_safe_redirect( wp_get_referer() );
@@ -847,7 +847,7 @@ class WC_AJAX {
 		$product_ids  = $_POST['product_ids'];
 		$loop         = intval( $_POST['loop'] );
 		$file_counter = 0;
-		$order        = new WC_Order( $order_id );
+		$order        = get_order( $order_id );
 
 		if ( ! is_array( $product_ids ) ) {
 			$product_ids = array( $product_ids );
@@ -936,7 +936,7 @@ class WC_AJAX {
 		}
 
 		$_product = get_product( $post->ID );
-		$order    = new WC_Order( $order_id );
+		$order    = get_order( $order_id );
 		$class    = 'new_row';
 
 		// Set values
@@ -996,7 +996,7 @@ class WC_AJAX {
 		check_ajax_referer( 'order-item', 'security' );
 
 		$order_id = absint( $_POST['order_id'] );
-		$order    = new WC_Order( $order_id );
+		$order    = get_order( $order_id );
 
 		// Add line item
 		$item_id = wc_add_order_item( $order_id, array(
@@ -1043,7 +1043,7 @@ class WC_AJAX {
 		$order_id       = absint( $_POST['order_id'] );
 		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
 		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
-		$order          = new WC_Order( $order_id );
+		$order          = get_order( $order_id );
 		$order_items    = $order->get_items();
 		$return         = array();
 
@@ -1089,7 +1089,7 @@ class WC_AJAX {
 		$order_id       = absint( $_POST['order_id'] );
 		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
 		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
-		$order          = new WC_Order( $order_id );
+		$order          = get_order( $order_id );
 		$order_items    = $order->get_items();
 		$return         = array();
 
@@ -1169,7 +1169,7 @@ class WC_AJAX {
 
 		$taxes    = $tax_rows = $item_taxes = $shipping_taxes = array();
 		$order_id = absint( $_POST['order_id'] );
-		$order    = new WC_Order( $order_id );
+		$order    = get_order( $order_id );
 		$country  = strtoupper( esc_attr( $_POST['country'] ) );
 		$state    = strtoupper( esc_attr( $_POST['state'] ) );
 		$postcode = strtoupper( esc_attr( $_POST['postcode'] ) );
@@ -1285,7 +1285,7 @@ class WC_AJAX {
 		$is_customer_note = $note_type == 'customer' ? 1 : 0;
 
 		if ( $post_id > 0 ) {
-			$order      = new WC_Order( $post_id );
+			$order      = get_order( $post_id );
 			$comment_id = $order->add_order_note( $note, $is_customer_note );
 
 			echo '<li rel="' . esc_attr( $comment_id ) . '" class="note ';

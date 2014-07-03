@@ -77,6 +77,11 @@ final class WooCommerce {
 	public $customer = null;
 
 	/**
+ 	 * @var WC_Order_Factory $order_factory
+ 	 */
+ 	public $order_factory = null;
+
+	/**
 	 * Main WooCommerce Instance
 	 *
 	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
@@ -279,6 +284,7 @@ final class WooCommerce {
 
 		// Include abstract classes
 		include_once( 'includes/abstracts/abstract-wc-product.php' );			// Products
+		include_once( 'includes/abstracts/abstract-wc-order.php' );				// Orders
 		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );		// Settings API (for gateways, shipping, and integrations)
 		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' );	// A Shipping method
 		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' ); 	// A Payment gateway
@@ -362,6 +368,7 @@ final class WooCommerce {
 
 		// Load class instances
 		$this->product_factory = new WC_Product_Factory();     // Product Factory to create new product instances
+		$this->order_factory   = new WC_Order_Factory();     // Order Factory to create new order instances
 		$this->countries       = new WC_Countries();			// Countries class
 		$this->integrations    = new WC_Integrations();		// Integrations class
 

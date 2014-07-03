@@ -629,7 +629,7 @@ class WC_Checkout {
 				} else {
 
 					if ( empty( $order ) )
-						$order = new WC_Order( $order_id );
+						$order = get_order( $order_id );
 
 					// No payment was required for order
 					$order->payment_complete();
