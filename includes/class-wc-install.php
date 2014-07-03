@@ -108,9 +108,6 @@ class WC_Install {
 		$this->create_files();
 		$this->create_css_from_less();
 
-		// Clear transient cache
-		wc_delete_product_transients();
-
 		// Queue upgrades
 		$current_version    = get_option( 'woocommerce_version', null );
 		$current_db_version = get_option( 'woocommerce_db_version', null );

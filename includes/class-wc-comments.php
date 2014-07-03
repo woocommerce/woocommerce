@@ -26,8 +26,7 @@ class WC_Comments {
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_rating' ), 1 );
 
 		// clear transients
-		add_action( 'wp_set_comment_status', array( __CLASS__, 'clear_transients' ) );
-		add_action( 'edit_comment', array( __CLASS__, 'clear_transients' ) );
+		add_action( 'wp_update_comment_count', array( __CLASS__, 'clear_transients' ) );
 
 		// Secure order notes
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ), 10, 1 );
@@ -121,13 +120,11 @@ class WC_Comments {
 	 */
 	public static function add_comment_rating( $comment_id ) {
 		if ( isset( $_POST['rating'] ) ) {
-
-			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 )
+			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) {
 				return;
+			}
 
 			add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
-
-			self::clear_transients( $comment_id );
 		}
 	}
 
@@ -136,13 +133,9 @@ class WC_Comments {
 	 *
 	 * @param mixed $comment_id
 	 */
-	public static function clear_transients( $comment_id ) {
-		$comment = get_comment( $comment_id );
-
-		if ( ! empty( $comment->comment_post_ID ) ) {
-			delete_transient( 'wc_average_rating_' . absint( $comment->comment_post_ID ) );
-			delete_transient( 'wc_rating_count_' . absint( $comment->comment_post_ID ) );
-		}
+	public static function clear_transients( $post_id ) {
+		delete_transient( 'wc_average_rating_' . absint( $post_id ) );
+		delete_transient( 'wc_rating_count_' . absint( $post_id ) );
 	}
 }
 
