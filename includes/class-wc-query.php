@@ -154,6 +154,19 @@ class WC_Query {
 			return;
 		}
 
+		// Fix for verbose page rules
+		if ( $GLOBALS['wp_rewrite']->use_verbose_page_rules && isset( $q->queried_object_id ) && $q->queried_object_id === wc_get_page_id('shop') ) {
+			$q->set( 'post_type', 'product' );
+			$q->set( 'page', '' );
+			$q->set( 'pagename', '' );
+
+			// Fix conditional Functions
+			$q->is_archive           = true;
+			$q->is_post_type_archive = true;
+			$q->is_singular          = false;
+			$q->is_page              = false;
+		}
+
 		// Fix for endpoints on the homepage
 		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') != $q->get('page_id') ) {
 			$_query = wp_parse_args( $q->query );
@@ -183,8 +196,9 @@ class WC_Query {
 			// This is a front-page shop
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
-			if ( isset( $q->query['paged'] ) )
+			if ( isset( $q->query['paged'] ) ) {
 				$q->set( 'paged', $q->query['paged'] );
+			}
 
 			// Define a variable so we know this is the front page shop later on
 			define( 'SHOP_IS_ON_FRONT', true );
@@ -194,7 +208,6 @@ class WC_Query {
 			global $wp_post_types;
 
 			$shop_page 	= get_post( wc_get_page_id('shop') );
-			$q->is_page = true;
 
 			$wp_post_types['product']->ID 			= $shop_page->ID;
 			$wp_post_types['product']->post_title 	= $shop_page->post_title;
@@ -203,9 +216,10 @@ class WC_Query {
 			$wp_post_types['product']->ancestors    = get_ancestors( $shop_page->ID, $shop_page->post_type );
 
 			// Fix conditional Functions like is_front_page
-			$q->is_singular = false;
+			$q->is_singular          = false;
 			$q->is_post_type_archive = true;
-			$q->is_archive = true;
+			$q->is_archive           = true;
+			$q->is_page              = true;
 
 			// Fix WP SEO
 			if ( class_exists( 'WPSEO_Meta' ) ) {
