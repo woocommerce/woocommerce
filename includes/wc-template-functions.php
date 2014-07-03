@@ -1340,7 +1340,9 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 			return true;
 		}
 
-		if ( false === ( $products_will_display = get_transient( 'wc_products_will_display_' . $parent_id ) ) ) {
+		$transient_name = 'wc_products_will_display_' . $parent_id . WC_Cache_Helper::get_transient_version( 'product_query' );
+
+		if ( false === ( $products_will_display = get_transient( $transient_name ) ) ) {
 			$has_children = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d AND taxonomy = %s", $parent_id, $taxonomy ) );
 
 			if ( $has_children ) {
@@ -1363,7 +1365,7 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 			}
 		}
 
-		set_transient( 'wc_products_will_display_' . $parent_id, $products_will_display, YEAR_IN_SECONDS );
+		set_transient( $transient_name, $products_will_display, YEAR_IN_SECONDS );
 
 		return $products_will_display;
 	}

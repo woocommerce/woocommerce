@@ -435,7 +435,7 @@ class WC_Query {
 		unset( $current_wp_query['paged'] );
 
 		// Generate a transient name based on current query
-		$transient_name = 'wc_uf_pid_' . md5( http_build_query( $current_wp_query ) );
+		$transient_name = 'wc_uf_pid_' . md5( http_build_query( $current_wp_query ) . WC_Cache_Helper::get_transient_version( 'product_query' ) );
 		$transient_name = ( is_search() ) ? $transient_name . '_s' : $transient_name;
 
 		if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
@@ -464,16 +464,18 @@ class WC_Query {
 		$this->unfiltered_product_ids = $unfiltered_product_ids;
 
 		// Also store filtered posts ids...
-		if ( sizeof( $this->post__in ) > 0 )
+		if ( sizeof( $this->post__in ) > 0 ) {
 			$this->filtered_product_ids = array_intersect( $this->unfiltered_product_ids, $this->post__in );
-		else
+		} else {
 			$this->filtered_product_ids = $this->unfiltered_product_ids;
+		}
 
 		// And filtered post ids which just take layered nav into consideration (to find max price in the price widget)
-		if ( sizeof( $this->layered_nav_post__in ) > 0 )
+		if ( sizeof( $this->layered_nav_post__in ) > 0 ) {
 			$this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
-		else
+		} else {
 			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
+		}
 	}
 
 
