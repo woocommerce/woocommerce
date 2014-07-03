@@ -2,15 +2,15 @@
 /**
  * Email Header
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates/Emails
- * @version     2.0.0
+ * @author  WooThemes
+ * @package WooCommerce/Templates/Emails
+ * @version 2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // Load colours
-$bg_darker_10 = wc_hex_darker( $styles['bg'], 10 );
+$bg_darker_10    = wc_hex_darker( $styles['bg'], 10 );
 $base_lighter_20 = wc_hex_lighter( $styles['base_color'], 20 );
 $text_lighter_20 = wc_hex_lighter( $styles['text_color'], 20 );
 
