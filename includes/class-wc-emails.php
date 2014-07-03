@@ -177,6 +177,7 @@ class WC_Emails {
 		$styles['base_color']      = get_option( 'woocommerce_email_base_color' );
 		$styles['base_text_color'] = wc_light_or_dark( $styles['base_color'], '#202020', '#ffffff' );
 		$styles['text_color']      = get_option( 'woocommerce_email_text_color' );
+		$styles['width']           = 600;
 
 		return apply_filters( 'woocommerce_email_styles', $styles );
 	}
@@ -199,7 +200,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	function email_footer() {
-		wc_get_template( 'emails/email-footer.php' );
+		wc_get_template( 'emails/email-footer.php', array( 'styles' => $this->get_styles() ) );
 	}
 
 	/**

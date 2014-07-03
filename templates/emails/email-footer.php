@@ -43,7 +43,7 @@ $credit = "
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- Footer -->
-                                	<table border="0" cellpadding="10" cellspacing="0" width="600" id="template_footer" style="<?php echo $template_footer; ?>">
+                                	<table border="0" cellpadding="10" cellspacing="0" width="<?php echo $styles['width']; ?>" id="template_footer" style="<?php echo $template_footer; ?>">
                                     	<tr>
                                         	<td valign="top">
                                                 <table border="0" cellpadding="10" cellspacing="0" width="100%">

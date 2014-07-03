@@ -88,11 +88,11 @@ $header_content_h1 = "
 	                			}
 	                		?>
 						</div>
-                    	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_container" style="<?php echo $template_container; ?>">
+                    	<table border="0" cellpadding="0" cellspacing="0" width="<?php echo $styles['width']; ?>" id="template_container" style="<?php echo $template_container; ?>">
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- Header -->
-                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_header" style="<?php echo $template_header; ?>" bgcolor="<?php echo $styles['base_color']; ?>">
+                                	<table border="0" cellpadding="0" cellspacing="0" width="<?php echo $styles['width']; ?>" id="template_header" style="<?php echo $template_header; ?>" bgcolor="<?php echo $styles['base_color']; ?>">
                                         <tr>
                                             <td>
                                             	<h1 style="<?php echo $header_content_h1; ?>"><?php echo $email_heading; ?></h1>
@@ -106,7 +106,7 @@ $header_content_h1 = "
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- Body -->
-                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_body">
+                                	<table border="0" cellpadding="0" cellspacing="0" width="<?php echo $styles['width']; ?>" id="template_body">
                                     	<tr>
                                             <td valign="top" style="<?php echo $body_content; ?>">
                                                 <!-- Content -->
