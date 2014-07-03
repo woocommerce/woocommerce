@@ -1725,13 +1725,13 @@ class WC_Admin_Post_Types {
 						}
 					}
 
-					wc_delete_product_transients();
+					if ( $parent_id = wp_get_post_parent_id( $id ) ) {
+						wc_delete_product_transients( $parent_id );
+					}
 
 				break;
 				case 'product_variation' :
-
-					wc_delete_product_transients();
-
+					wc_delete_product_transients( wp_get_post_parent_id( $id ) );
 				break;
 			}
 		}
