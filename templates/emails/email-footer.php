@@ -9,11 +9,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-// Load colours
-$base = get_option( 'woocommerce_email_base_color' );
-
-$base_lighter_40 = wc_hex_lighter( $base, 40 );
-
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline.
 $template_footer = "
 	border-top:0;
@@ -22,9 +17,9 @@ $template_footer = "
 
 $credit = "
 	border:0;
-	color: $base_lighter_40;
+	color: " . $styles['footer_text_color'] . ";
 	font-family: Arial;
-	font-size:12px;
+	font-size: " . $styles['footer_text_size'] . "px;
 	line-height:125%;
 	text-align:center;
 ";

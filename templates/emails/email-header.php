@@ -16,7 +16,7 @@ $text_lighter_20 = wc_hex_lighter( $styles['text_color'], 20 );
 
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline. !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 $wrapper = "
-	background-color: " . esc_attr( $styles['bg'] ) . ";
+	background-color: " . $styles['bg'] . ";
 	width:100%;
 	-webkit-text-size-adjust:none !important;
 	margin:0;
@@ -27,45 +27,45 @@ $template_container = "
 	box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
 	-webkit-border-radius:6px !important;
 	border-radius:6px !important;
-	background-color: " . esc_attr( $styles['body_bg'] ) . ";
+	background-color: " . $styles['body_bg'] . ";
 	border: 1px solid $bg_darker_10;
 	-webkit-border-radius:6px !important;
 	border-radius:6px !important;
 ";
 $template_header = "
-	background-color: " . esc_attr( $styles['base_color'] ) .";
+	background-color: " . $styles['base_color'] .";
 	color: " . $styles['base_text_color'] . ";
 	-webkit-border-top-left-radius:6px !important;
 	-webkit-border-top-right-radius:6px !important;
 	border-top-left-radius:6px !important;
 	border-top-right-radius:6px !important;
 	border-bottom: 0;
-	font-family:Arial;
-	font-weight:bold;
+	font-family: " . $styles['font_family'] . ";
+	font-weight: " . $styles['header_text_weight'] . ";
 	line-height:100%;
 	vertical-align:middle;
 ";
 $body_content = "
-	background-color: " . esc_attr( $styles['body_bg'] ) . ";
+	background-color: " . $styles['body_bg'] . ";
 	-webkit-border-radius:6px !important;
 	border-radius:6px !important;
 ";
 $body_content_inner = "
 	color: $text_lighter_20;
-	font-family:Arial;
-	font-size:14px;
+	font-family: " . $styles['font_family'] . ";
+	font-size: " . $styles['base_text_size'] . "px;
 	line-height:150%;
 	text-align:left;
 ";
 $header_content_h1 = "
-	color: " . esc_attr( $styles['base_text_color'] ) . ";
+	color: " . $styles['base_text_color'] . ";
 	margin:0;
 	padding: 28px 24px;
 	text-shadow: 0 1px 0 $base_lighter_20;
 	display:block;
-	font-family:Arial;
-	font-size:30px;
-	font-weight:bold;
+	font-family: " . $styles['font_family'] . ";
+	font-size: " . $styles['header_text_size'] . "px;
+	font-weight: " . $styles['header_text_weight'] . ";
 	text-align:left;
 	line-height: 150%;
 ";
