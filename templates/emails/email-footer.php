@@ -18,7 +18,7 @@ $template_footer = "
 $credit = "
 	border:0;
 	color: " . $styles['footer_text_color'] . ";
-	font-family: Arial;
+	font-family: " . $styles['font_family'] . ";
 	font-size: " . $styles['footer_text_size'] . "px;
 	line-height:125%;
 	text-align:center;

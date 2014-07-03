@@ -28,7 +28,7 @@ $template_container = "
 	-webkit-border-radius:" . $styles['border_radius'] . "px !important;
 	border-radius:" . $styles['border_radius'] . "px !important;
 	background-color: " . $styles['body_bg'] . ";
-	border: 1px solid $bg_darker_10;
+	border: 1px solid " . $bg_darker_10 . ";
 	-webkit-border-radius:" . $styles['border_radius'] . "px !important;
 	border-radius:" . $styles['border_radius'] . "px !important;
 ";
@@ -51,7 +51,7 @@ $body_content = "
 	border-radius:" . $styles['border_radius'] . "px !important;
 ";
 $body_content_inner = "
-	color: $text_lighter_20;
+	color: " . $text_lighter_20 . ";
 	font-family: " . $styles['font_family'] . ";
 	font-size: " . $styles['base_text_size'] . "px;
 	line-height:150%;
@@ -61,7 +61,7 @@ $header_content_h1 = "
 	color: " . $styles['base_text_color'] . ";
 	margin:0;
 	padding: 28px 24px;
-	text-shadow: 0 1px 0 $base_lighter_20;
+	text-shadow: 0 1px 0 " . $base_lighter_20 . ";
 	display:block;
 	font-family: " . $styles['font_family'] . ";
 	font-size: " . $styles['header_text_size'] . "px;
