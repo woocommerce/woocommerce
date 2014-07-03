@@ -114,6 +114,7 @@ class WC_Cart {
 		);
 
 		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
+		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies
 	}
 
     /**
@@ -129,6 +130,35 @@ class WC_Cart {
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1 );
     }
+
+    /**
+     * Will set cart cookies if needed, once, during WP hook
+     */
+    public function maybe_set_cart_cookies() {
+    	if ( sizeof( $this->cart_contents ) > 0 ) {
+    		$this->set_cart_cookies( true );
+    	} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
+    		$this->set_cart_cookies( false );
+    	}
+    }
+
+	/**
+	 * Set cart hash cookie and items in cart.
+	 *
+	 * @access private
+	 * @param bool $set (default: true)
+	 * @return void
+	 */
+	private function set_cart_cookies( $set = true ) {
+		if ( $set ) {
+			wc_setcookie( 'woocommerce_items_in_cart', 1 );
+			wc_setcookie( 'woocommerce_cart_hash', md5( json_encode( $this->get_cart() ) ) );
+		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
+			wc_setcookie( 'woocommerce_items_in_cart', 0, time() - 3600 );
+			wc_setcookie( 'woocommerce_cart_hash', '', time() - 3600 );
+		}
+		do_action( 'woocommerce_set_cart_cookies', $set );
+	}
 
  	/*-----------------------------------------------------------------------------------*/
 	/* Cart Session Handling */
@@ -186,8 +216,6 @@ class WC_Cart {
 			if ( $update_cart_session ) {
 				WC()->session->cart = $this->get_cart_for_session();
 			}
-
-			$this->set_cart_cookies( sizeof( $this->cart_contents ) > 0 );
 
 			// Trigger action
 			do_action( 'woocommerce_cart_loaded_from_session', $this );
@@ -891,9 +919,12 @@ class WC_Cart {
 
 			}
 
+			if ( did_action( 'wp' ) ) {
+    			$this->set_cart_cookies( sizeof( $this->cart_contents ) > 0 );
+    		}
+
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
-			$this->set_cart_cookies();
 			$this->calculate_totals();
 
 			return true;
@@ -918,25 +949,6 @@ class WC_Cart {
 			if ( $refresh_totals ) {
 				$this->calculate_totals();
 			}
-		}
-
-		/**
-		 * Set cart hash cookie and items in cart.
-		 *
-		 * @access private
-		 * @param bool $set (default: true)
-		 * @return void
-		 */
-		private function set_cart_cookies( $set = true ) {
-			if ( $set ) {
-				wc_setcookie( 'woocommerce_items_in_cart', 1 );
-				wc_setcookie( 'woocommerce_cart_hash', md5( json_encode( $this->get_cart() ) ) );
-			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
-				wc_setcookie( 'woocommerce_items_in_cart', 0, time() - 3600 );
-				wc_setcookie( 'woocommerce_cart_hash', '', time() - 3600 );
-			}
-
-			do_action( 'woocommerce_set_cart_cookies', $set );
 		}
 
     /*-----------------------------------------------------------------------------------*/
@@ -1371,7 +1383,7 @@ class WC_Cart {
 
 			$needs_shipping_address = false;
 
-			if ( WC()->cart->needs_shipping() === true && ! WC()->cart->ship_to_billing_address_only() ) {
+			if ( $this->needs_shipping() === true && ! $this->ship_to_billing_address_only() ) {
 				$needs_shipping_address = true;
 			}
 
@@ -1659,6 +1671,15 @@ class WC_Cart {
 		 */
 		public function get_applied_coupons() {
 			return $this->applied_coupons;
+		}
+
+		/**
+		 * Get the discount amount for a used coupon
+		 * @param  string $code coupon code
+		 * @return float discount amount
+		 */
+		public function get_coupon_discount_amount( $code ) {
+			return isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
 		}
 
 		/**
@@ -2073,6 +2094,24 @@ class WC_Cart {
 			$cart_total_tax = wc_round_tax_total( $this->tax_total + $this->shipping_tax_total );
 
 			return apply_filters( 'woocommerce_get_cart_tax', $cart_total_tax ? wc_price( $cart_total_tax ) : '' );
+		}
+
+		/**
+		 * Get a tax amount
+		 * @param  string $tax_rate_id
+		 * @return float amount
+		 */
+		public function get_tax_amount( $tax_rate_id ) {
+			return isset( $this->taxes[ $tax_rate_id ] ) ? $this->taxes[ $tax_rate_id ] : 0;
+		}
+
+		/**
+		 * Get a tax amount
+		 * @param  string $tax_rate_id
+		 * @return float amount
+		 */
+		public function get_shipping_tax_amount( $tax_rate_id ) {
+			return isset( $this->shipping_taxes[ $tax_rate_id ] ) ? $this->shipping_taxes[ $tax_rate_id ] : 0;
 		}
 
 		/**

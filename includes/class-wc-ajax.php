@@ -72,19 +72,9 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Output headers for JSON requests
-	 */
-	private static function json_headers() {
-		header( 'Content-Type: application/json; charset=utf-8' );
-	}
-
-
-	/**
 	 * Get a refreshed cart fragment
 	 */
 	public static function get_refreshed_fragments() {
-
-		self::json_headers();
 
 		// Get mini cart
 		ob_start();
@@ -102,9 +92,8 @@ class WC_AJAX {
 			'cart_hash' => WC()->cart->get_cart() ? md5( json_encode( WC()->cart->get_cart() ) ) : ''
 		);
 
-		echo json_encode( $data );
+		wp_send_json( $data );
 
-		die();
 	}
 
 	/**
@@ -270,7 +259,7 @@ class WC_AJAX {
 	 */
 	public static function add_to_cart() {
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
-		$quantity          = empty( $_POST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_POST['quantity'] );
+		$quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( $_POST['quantity'] );
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) ) {
@@ -286,15 +275,14 @@ class WC_AJAX {
 
 		} else {
 
-			self::json_headers();
-
 			// If there was an error adding to the cart, redirect to the product page to show any errors
 			$data = array(
 				'error' => true,
 				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id )
 			);
 
-			echo json_encode( $data );
+			wp_send_json( $data );
+
 		}
 
 		die();
@@ -339,7 +327,7 @@ class WC_AJAX {
 			update_post_meta( $post_id, '_featured', 'yes' );
 		}
 
-		wc_delete_product_transients();
+		delete_transient( 'wc_featured_products' );
 
 		wp_safe_redirect( remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) );
 
@@ -403,8 +391,6 @@ class WC_AJAX {
 
 		check_ajax_referer( 'add-attribute', 'security' );
 
-		self::json_headers();
-
 		$taxonomy = esc_attr( $_POST['taxonomy'] );
 		$term     = stripslashes( $_POST['term'] );
 
@@ -413,15 +399,15 @@ class WC_AJAX {
 			$result = wp_insert_term( $term, $taxonomy );
 
 			if ( is_wp_error( $result ) ) {
-				echo json_encode( array(
+				wp_send_json( array(
 					'error' => $result->get_error_message()
-				));
+				) );
 			} else {
-				echo json_encode( array(
+				wp_send_json( array(
 					'term_id' => $result['term_id'],
 					'name'    => $term,
 					'slug'    => sanitize_title( $term ),
-				));
+				) );
 			}
 		}
 
@@ -693,7 +679,7 @@ class WC_AJAX {
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
 			if ( $attribute['is_taxonomy'] ) {
-				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'slugs' ) );
+				$options = wc_get_product_terms( $post_id, $attribute['name'], array( 'fields' => 'names' ) );
 			} else {
 				$options = explode( WC_DELIMITER, $attribute['value'] );
 			}
@@ -819,7 +805,7 @@ class WC_AJAX {
 			}
 		}
 
-		wc_delete_product_transients( $post_id );
+		delete_transient( 'wc_product_children_ids_' . $post_id );
 
 		echo $added;
 
@@ -906,8 +892,6 @@ class WC_AJAX {
 
 		check_ajax_referer( 'get-customer-details', 'security' );
 
-		self::json_headers();
-
 		$user_id      = (int) trim(stripslashes($_POST['user_id']));
 		$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
 
@@ -927,10 +911,8 @@ class WC_AJAX {
 
 		$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer_data );
 
-		echo json_encode( $customer_data );
+		wp_send_json( $customer_data );
 
-		// Quit out
-		die();
 	}
 
 	/**
@@ -1183,9 +1165,8 @@ class WC_AJAX {
 
 		check_ajax_referer( 'calc-totals', 'security' );
 
-		self::json_headers();
-
 		$tax      = new WC_Tax();
+
 		$taxes    = $tax_rows = $item_taxes = $shipping_taxes = array();
 		$order_id = absint( $_POST['order_id'] );
 		$order    = get_order( $order_id );
@@ -1200,16 +1181,11 @@ class WC_AJAX {
 		// Calculate sales tax first
 		if ( sizeof( $items ) > 0 ) {
 			foreach( $items as $item_id => $item ) {
-
 				$item_id       = absint( $item_id );
 				$line_subtotal = isset( $item['line_subtotal'] ) ? wc_format_decimal( $item['line_subtotal'] ) : 0;
 				$line_total    = wc_format_decimal( $item['line_total'] );
 				$tax_class     = sanitize_text_field( $item['tax_class'] );
 				$product_id    = $order->get_item_meta( $item_id, '_product_id', true );
-
-				if ( ! $item_id || '0' == $tax_class ) {
-					continue;
-				}
 
 				// Get product details
 				if ( get_post_type( $product_id ) == 'product' ) {
@@ -1219,10 +1195,8 @@ class WC_AJAX {
 					$item_tax_status = 'taxable';
 				}
 
-				// Only calc if taxable
-				if ( 'taxable' == $item_tax_status ) {
-
-					$tax_rates = $tax->find_rates( array(
+				if ( '0' !== $tax_class && 'taxable' === $item_tax_status ) {
+					$tax_rates = WC_Tax::find_rates( array(
 						'country'   => $country,
 						'state'     => $state,
 						'postcode'  => $postcode,
@@ -1230,18 +1204,10 @@ class WC_AJAX {
 						'tax_class' => $tax_class
 					) );
 
-					$line_subtotal_taxes = $tax->calc_tax( $line_subtotal, $tax_rates, false );
-					$line_taxes          = $tax->calc_tax( $line_total, $tax_rates, false );
-					$line_subtotal_tax   = array_sum( $line_subtotal_taxes );
-					$line_tax            = array_sum( $line_taxes );
-
-					if ( $line_subtotal_tax < 0 ) {
-						$line_subtotal_tax = 0;
-					}
-
-					if ( $line_tax < 0 ) {
-						$line_tax = 0;
-					}
+					$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal, $tax_rates, false );
+					$line_taxes          = WC_Tax::calc_tax( $line_total, $tax_rates, false );
+					$line_subtotal_tax   = max( 0, array_sum( $line_subtotal_taxes ) );
+					$line_tax            = max( 0, array_sum( $line_taxes ) );
 
 					$item_taxes[ $item_id ] = array(
 						'line_subtotal_tax' => wc_format_localized_price( $line_subtotal_tax ),
@@ -1255,14 +1221,13 @@ class WC_AJAX {
 						$taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
 					}
 				}
-
 			}
 		}
 
 		// Now calculate shipping tax
 		$matched_tax_rates = array();
 
-		$tax_rates = $tax->find_rates( array(
+		$tax_rates = WC_Tax::find_rates( array(
 			'country'   => $country,
 			'state'     => $state,
 			'postcode'  => $postcode,
@@ -1278,77 +1243,32 @@ class WC_AJAX {
 			}
 		}
 
-		$shipping_taxes = $tax->calc_shipping_tax( $shipping, $matched_tax_rates );
-		$shipping_tax   = $tax->round( array_sum( $shipping_taxes ) );
+		$shipping_taxes = WC_Tax::calc_shipping_tax( $shipping, $matched_tax_rates );
+		$shipping_tax   = WC_Tax::round( array_sum( $shipping_taxes ) );
 
 		// Remove old tax rows
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax' )", $order_id ) );
+		$order->remove_order_items( 'tax' );
 
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax'", $order_id ) );
-
-		// Get tax rates
-		$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
-
-		$tax_codes = array();
-
-		foreach( $rates as $rate ) {
-			$code = array();
-
-			$code[] = $rate->tax_rate_country;
-			$code[] = $rate->tax_rate_state;
-			$code[] = $rate->tax_rate_name ? sanitize_title( $rate->tax_rate_name ) : 'TAX';
-			$code[] = absint( $rate->tax_rate_priority );
-
-			$tax_codes[ $rate->tax_rate_id ] = strtoupper( implode( '-', array_filter( $code ) ) );
+		// Add tax rows
+		foreach ( array_keys( $taxes + $shipping_taxes ) as $tax_rate_id ) {
+			$order->add_tax( $tax_rate_id, isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0, isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 		}
 
-		// Now merge to keep tax rows
 		ob_start();
 
-		foreach ( array_keys( $taxes + $shipping_taxes ) as $key ) {
-
-			$item                        = array();
-			$item['rate_id']             = $key;
-			$item['name']                = $tax_codes[ $key ];
-			$item['label']               = $tax->get_rate_label( $key );
-			$item['compound']            = $tax->is_compound( $key ) ? 1 : 0;
-			$item['tax_amount']          = wc_format_decimal( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
-			$item['shipping_tax_amount'] = wc_format_decimal( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
-
-			if ( ! $item['label'] ) {
-				$item['label'] = WC()->countries->tax_or_vat();
-			}
-
-			// Add line item
-			$item_id = wc_add_order_item( $order_id, array(
-				'order_item_name' => $item['name'],
-				'order_item_type' => 'tax'
-			) );
-
-			// Add line item meta
-			if ( $item_id ) {
-				wc_add_order_item_meta( $item_id, 'rate_id', $item['rate_id'] );
-				wc_add_order_item_meta( $item_id, 'label', $item['label'] );
-				wc_add_order_item_meta( $item_id, 'compound', $item['compound'] );
-				wc_add_order_item_meta( $item_id, 'tax_amount', $item['tax_amount'] );
-				wc_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
-			}
-
+		foreach ( $order->get_taxes() as $item_id => $item ) {
 			include( 'admin/meta-boxes/views/html-order-tax.php' );
 		}
 
 		$tax_row_html = ob_get_clean();
 
-		// Return
-		echo json_encode( array(
+		wp_send_json( array(
 			'item_tax'     => $item_tax,
 			'item_taxes'   => $item_taxes,
 			'shipping_tax' => $shipping_tax,
 			'tax_row_html' => $tax_row_html
 		) );
 
-		// Quit out
-		die();
 	}
 
 	/**
@@ -1408,8 +1328,6 @@ class WC_AJAX {
 	public static function json_search_products( $x = '', $post_types = array('product') ) {
 
 		check_ajax_referer( 'search-products', 'security' );
-
-		self::json_headers();
 
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1491,9 +1409,8 @@ class WC_AJAX {
 
 		$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products );
 
-		echo json_encode( $found_products );
+		wp_send_json( $found_products );
 
-		die();
 	}
 
 	/**
@@ -1513,8 +1430,6 @@ class WC_AJAX {
 	public static function json_search_customers() {
 
 		check_ajax_referer( 'search-customers', 'security' );
-
-		self::json_headers();
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1545,8 +1460,8 @@ class WC_AJAX {
 			}
 		}
 
-		echo json_encode( $found_customers );
-		die();
+		wp_send_json( $found_customers );
+
 	}
 
 	/**
@@ -1584,8 +1499,8 @@ class WC_AJAX {
 			}
 		}
 
-		echo json_encode( $found_products );
-		die();
+		wp_send_json( $found_products );
+
 	}
 
 	/**
@@ -1642,8 +1557,6 @@ class WC_AJAX {
 		if ( ! $post = get_post( $_POST['id'] ) ) {
 			die(-1);
 		}
-
-		self::json_headers();
 
 		$previd  = isset( $_POST['previd'] ) ? $_POST['previd'] : false;
 		$nextid  = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
@@ -1710,7 +1623,8 @@ class WC_AJAX {
 
 		}
 
-		die( json_encode( $new_pos ) );
+		wp_send_json( $new_pos );
+
 	}
 }
 

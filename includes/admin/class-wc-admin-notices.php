@@ -57,7 +57,7 @@ class WC_Admin_Notices {
 		if ( in_array( 'theme_support', $notices ) && ! current_theme_supports( 'woocommerce' ) ) {
 			$template = get_option( 'template' );
 
-			if ( ! in_array( $template, array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+			if ( ! in_array( $template, wc_get_core_supported_themes() ) ) {
 				wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 				add_action( 'admin_notices', array( $this, 'theme_check_notice' ) );
 			}
@@ -130,8 +130,8 @@ class WC_Admin_Notices {
 			}
 
 			if ( $theme_file ) {
-				$core_version  = $status->get_file_version( WC()->plugin_path() . '/templates/' . $file );
-				$theme_version = $status->get_file_version( $theme_file );
+				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
+				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
 				if ( $core_version && $theme_version && version_compare( $theme_version, $core_version, '<' ) ) {
 					$outdated = true;

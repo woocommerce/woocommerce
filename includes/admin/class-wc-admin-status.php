@@ -107,8 +107,6 @@ class WC_Admin_Status {
 
 					_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
 
-					delete_transient( 'wc_term_counts' );
-
 					echo '<div class="updated"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
 				break;
 				case 'clear_sessions' :

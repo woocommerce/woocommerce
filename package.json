@@ -3,6 +3,10 @@
   "title": "WooCommerce",
   "version": "2.2.0",
   "homepage": "http://www.woothemes.com/woocommerce/",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/woothemes/woocommerce.git"
+  },
   "main": "Gruntfile.js",
   "devDependencies": {
     "grunt": "~0.4.2",

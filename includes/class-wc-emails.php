@@ -37,20 +37,19 @@ class WC_Emails {
 	private $_content_type;
 
 	/**
-	 * @var WooCommerce The single instance of the class
+	 * @var WC_Emails The single instance of the class
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
 
 	/**
-	 * Main WooCommerce Instance
+	 * Main WC_Emails Instance
 	 *
-	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
+	 * Ensures only one instance of WC_Emails is loaded or can be loaded.
 	 *
 	 * @since 2.1
 	 * @static
-	 * @see WC()
-	 * @return Main WooCommerce instance
+	 * @return WC_Emails Main instance
 	 */
 	public static function instance() {
 		if ( is_null( self::$_instance ) )

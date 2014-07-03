@@ -1,5 +1,5 @@
 === WooCommerce - excelling eCommerce ===
-Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
+Contributors: woothemes, mikejolley, jameskoster
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
@@ -133,6 +133,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Allow backorders to be configured at variation level.
 * Feature - Protect admins from shop manager users.
 * Feature - Ability to add custom quantity using add_to_cart shortcode.
+* Fix - Allow endpoint use on the front page.
 * Tweak - Recalculate the cart totals, in the event a user registers during checkout and in doing so qualifies for any discounts.
 * Tweak - Use `woocommerce_valid_order_statuses_for_payment` in `pay_action` too.
 * Tweak - Added the possibility to translate the edit-address endpoint slug.
@@ -166,6 +167,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localisation - Egypptian currency.
 * Localisation - Address format of Taiwan.
 * Localisation - Removed language files from core to made the package lighter (see language pack downloader feature).
+
+= 2.1.12 - 01/07/2014 =
+* Fix - Total tax should be +, not -.
+* Fix - Address format in plain text emails to use line breaks, not commas.
+* Fix - order item count fix and tr class filters.
+* Fix - Missing translations during checkout.
+* Fix - Correctly clear transients, including sale transient.
+* Tweak - woocommerce_get_order_item_totals_excl_free_fees hook.
 
 = 2.1.11 - 09/06/2014 =
 * Fix - Plain text email display of customer address.

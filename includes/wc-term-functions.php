@@ -497,6 +497,8 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		// Update the count
 		update_woocommerce_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
 	}
+
+	delete_transient( 'wc_term_counts' );
 }
 
 /**
@@ -525,8 +527,6 @@ function wc_recount_after_stock_change( $product_id ) {
 
 		_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
 	}
-
-	delete_transient( 'wc_term_counts' );
 }
 add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_change' );
 

@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php wc_print_notices(); ?>
 
 <form action="" method="post">
+
+	<?php do_action( 'woocommerce_edit_account_form_start' ); ?>
 
 	<p class="form-row form-row-first">
 		<label for="account_first_name"><?php _e( 'First name', 'woocommerce' ); ?> <span class="required">*</span></label>
@@ -47,8 +49,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</fieldset>
 	<div class="clear"></div>
 
-	<p><input type="submit" class="button" name="save_account_details" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" /></p>
+	<?php do_action( 'woocommerce_edit_account_form' ); ?>
 
-	<?php wp_nonce_field( 'save_account_details' ); ?>
-	<input type="hidden" name="action" value="save_account_details" />
+	<p>
+		<?php wp_nonce_field( 'save_account_details' ); ?>
+		<input type="submit" class="button" name="save_account_details" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" />
+		<input type="hidden" name="action" value="save_account_details" />
+	</p>
+
+	<?php do_action( 'woocommerce_edit_account_form_end' ); ?>
+	
 </form>

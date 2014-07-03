@@ -34,20 +34,19 @@ class WC_Checkout {
 	private $customer_id;
 
 	/**
-	 * @var WooCommerce The single instance of the class
+	 * @var WC_Checkout The single instance of the class
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
 
 	/**
-	 * Main WooCommerce Instance
+	 * Main WC_Checkout Instance
 	 *
-	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
+	 * Ensures only one instance of WC_Checkout is loaded or can be loaded.
 	 *
 	 * @since 2.1
 	 * @static
-	 * @see WC()
-	 * @return Main WooCommerce instance
+	 * @return WC_Checkout Main instance
 	 */
 	public static function instance() {
 		if ( is_null( self::$_instance ) )
@@ -123,7 +122,6 @@ class WC_Checkout {
 		do_action( 'woocommerce_checkout_init', $this );
 	}
 
-
 	/**
 	 * Checkout process
 	 */
@@ -131,7 +129,6 @@ class WC_Checkout {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
 		do_action('woocommerce_check_cart_items');
 	}
-
 
 	/**
 	 * Output the billing information form
@@ -143,7 +140,6 @@ class WC_Checkout {
 		wc_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
 	}
 
-
 	/**
 	 * Output the shipping information form
 	 *
@@ -154,241 +150,183 @@ class WC_Checkout {
 		wc_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
 	}
 
-
 	/**
 	 * create_order function.
 	 * @access public
 	 * @throws Exception
-	 * @return int
+	 * @return int|WP_ERROR
 	 */
 	public function create_order() {
 		global $wpdb;
 
 		// Give plugins the opportunity to create an order themselves
-		$order_id = apply_filters( 'woocommerce_create_order', null, $this );
-
-		if ( is_numeric( $order_id ) )
+		if ( $order_id = apply_filters( 'woocommerce_create_order', null, $this ) ) {
 			return $order_id;
+		}
 
-		// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected.
-		$order_data = apply_filters( 'woocommerce_new_order_data', array(
-			'post_type' 	=> 'shop_order',
-			'post_title' 	=> sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
-			'post_status' 	=> 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' ),
-			'ping_status'	=> 'closed',
-			'post_excerpt' 	=> isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
-			'post_author' 	=> 1,
-			'post_password'	=> uniqid( 'order_' )	// Protects the post just in case
-		) );
+		try {
+			// Start transaction if available
+			$wpdb->query( 'START TRANSACTION' );
 
-		// Insert or update the post data
-		$create_new_order = true;
+			$order_data = array(
+				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
+				'customer_id'   => $this->customer_id,
+				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : ''
+			);
 
-		if ( WC()->session->order_awaiting_payment > 0 ) {
-
+			// Insert or update the post data
 			$order_id = absint( WC()->session->order_awaiting_payment );
 
 			// Resume the unpaid order if its pending
-			if ( ( $existing_order = get_post( $order_id ) ) && $existing_order->has_status( array( 'pending', 'failed' ) ) ) {
+			if ( $order_id > 0 && ( $order = new WC_Order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
 
-				// Update the existing order as we are resuming it
-				$create_new_order = false;
-				$order_data['ID'] = $order_id;
-				wp_update_post( $order_data );
+				$order_data['order_id'] = $order_id;
+				$order                  = wc_update_order( $order_data );
 
-				// Clear the old line items - we'll add these again in case they changed
-				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d )", $order_id ) );
-
-				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) );
-
-				// Trigger an action for the resumed order
-				do_action( 'woocommerce_resume_order', $order_id );
-			}
-		}
-
-		if ( $create_new_order ) {
-			$order_id = wp_insert_post( $order_data, true );
-
-			if ( is_wp_error( $order_id ) )
-				throw new Exception( 'Error: Unable to create order. Please try again.' );
-			else
-				do_action( 'woocommerce_new_order', $order_id );
-		}
-
-		// Store user data
-		if ( $this->checkout_fields['billing'] )
-			foreach ( $this->checkout_fields['billing'] as $key => $field ) {
-				update_post_meta( $order_id, '_' . $key, $this->posted[ $key ] );
-
-				if ( $this->customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
-					update_user_meta( $this->customer_id, $key, $this->posted[ $key ] );
-			}
-
-		if ( $this->checkout_fields['shipping'] && WC()->cart->needs_shipping() ) {
-			foreach ( $this->checkout_fields['shipping'] as $key => $field ) {
-				$postvalue = false;
-
-				if ( $this->posted['ship_to_different_address'] == false ) {
-					if ( isset( $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ] ) ) {
-						$postvalue = $this->posted[ str_replace( 'shipping_', 'billing_', $key ) ];
-						update_post_meta( $order_id, '_' . $key, $postvalue );
-					}
+				if ( is_wp_error( $order ) ) {
+					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 				} else {
-					$postvalue = $this->posted[ $key ];
-					update_post_meta( $order_id, '_' . $key, $postvalue );
+					$order->remove_order_items();
+					do_action( 'woocommerce_resume_order', $order_id );
 				}
 
-				// User
-				if ( $postvalue && $this->customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) )
-					update_user_meta( $this->customer_id, $key, $postvalue );
+			} else {
+
+				$order = wc_create_order( $order_data );
+
+				if ( is_wp_error( $order ) ) {
+					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				} else {
+					$order_id = $order->id;
+					do_action( 'woocommerce_new_order', $order_id );
+				}
 			}
-		}
 
-		// Save any other user meta
-		if ( $this->customer_id )
-			do_action( 'woocommerce_checkout_update_user_meta', $this->customer_id, $this->posted );
+			// Store the line items to the new/resumed order
+			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
+				$item_id = $order->add_product( 
+					$values['data'], 
+					$values['quantity'], 
+					array(
+						'variation' => $values['variation'],
+						'totals'    => array(
+							'subtotal'     => $values['line_subtotal'],
+							'subtotal_tax' => $values['line_subtotal_tax'],
+							'total'        => $values['line_total'],
+							'tax'          => $values['line_tax']
+						)
+					)
+				);
 
-		// Store the line items to the new/resumed order
-		foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
+				if ( ! $item_id ) {
+					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				}
 
-			$_product = $values['data'];
+				// Allow plugins to add order item meta
+				do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
+			}
 
-           	// Add line item
-           	$item_id = wc_add_order_item( $order_id, array(
-		 		'order_item_name' 		=> $_product->get_title(),
-		 		'order_item_type' 		=> 'line_item'
-		 	) );
+			// Store fees
+			foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
+				$item_id = $order->add_fee( $fee );
 
-		 	// Add line item meta
-		 	if ( $item_id ) {
-			 	wc_add_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $values['quantity'] ) );
-			 	wc_add_order_item_meta( $item_id, '_tax_class', $_product->get_tax_class() );
-			 	wc_add_order_item_meta( $item_id, '_product_id', $values['product_id'] );
-			 	wc_add_order_item_meta( $item_id, '_variation_id', $values['variation_id'] );
-			 	wc_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $values['line_subtotal'] ) );
-			 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $values['line_total'] ) );
-			 	wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $values['line_tax'] ) );
-			 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $values['line_subtotal_tax'] ) );
+				if ( ! $item_id ) {
+					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				}
+				
+				// Allow plugins to add order item meta to fees
+				do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
+			}
 
-			 	// Store variation data in meta so admin can view it
-				if ( $values['variation'] && is_array( $values['variation'] ) ) {
-					foreach ( $values['variation'] as $key => $value ) {
-						$key = str_replace( 'attribute_', '', $key );
-						wc_add_order_item_meta( $item_id, $key, $value );
+			// Store shipping for all packages
+			foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
+				if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
+					$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
+
+					if ( ! $item_id ) {
+						throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+					}
+						
+					// Allows plugins to add order item meta to shipping
+					do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $package_key );
+				}
+			}
+
+			// Store tax rows
+			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
+				if ( ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) ) {
+					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				}
+			}
+
+			// Store coupons
+			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+				if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ) ) ) {
+					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				}
+			}
+
+			// Billing address
+			$billing_address = array(
+				'first_name' => $this->get_posted_address_data( 'first_name' ),
+				'last_name'  => $this->get_posted_address_data( 'last_name' ),
+				'company'    => $this->get_posted_address_data( 'company' ),
+				'email'      => $this->get_posted_address_data( 'email' ),
+				'phone'      => $this->get_posted_address_data( 'phone' ),
+				'address_1'  => $this->get_posted_address_data( 'address_1' ),
+				'address_2'  => $this->get_posted_address_data( 'address_2' ),
+				'city'       => $this->get_posted_address_data( 'city' ),
+				'state'      => $this->get_posted_address_data( 'state' ),
+				'postcode'   => $this->get_posted_address_data( 'postcode' ),
+				'country'    => $this->get_posted_address_data( 'country' )
+			);
+
+			$shipping_address = array(
+				'first_name' => $this->get_posted_address_data( 'first_name', 'shipping' ),
+				'last_name'  => $this->get_posted_address_data( 'last_name', 'shipping' ),
+				'company'    => $this->get_posted_address_data( 'company', 'shipping' ),
+				'address_1'  => $this->get_posted_address_data( 'address_1', 'shipping' ),
+				'address_2'  => $this->get_posted_address_data( 'address_2', 'shipping' ),
+				'city'       => $this->get_posted_address_data( 'city', 'shipping' ),
+				'state'      => $this->get_posted_address_data( 'state', 'shipping' ),
+				'postcode'   => $this->get_posted_address_data( 'postcode', 'shipping' ),
+				'country'    => $this->get_posted_address_data( 'country', 'shipping' ),
+			);
+
+			$order->set_address( $billing_address, 'billing' );
+			$order->set_address( $shipping_address, 'shipping' );
+			$order->set_payment_method( $this->payment_method );
+			$order->set_total( WC()->cart->shipping_total, 'shipping' );
+			$order->set_total( WC()->cart->get_order_discount_total(), 'order_discount' );
+			$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
+			$order->set_total( WC()->cart->tax_total, 'tax' );
+			$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
+			$order->set_total( WC()->cart->total );
+
+			// Update user meta
+			if ( $this->customer_id ) {
+				if ( apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
+					foreach( $billing_address as $key => $value ) {
+						update_user_meta( $this->customer_id, 'billing_' . $key, $value );
+					}
+					foreach( $shipping_address as $key => $value ) {
+						update_user_meta( $this->customer_id, 'shipping_' . $key, $value );
 					}
 				}
-
-			 	// Add line item meta for backorder status
-			 	if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) ) {
-			 		wc_add_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $cart_item_key, $order_id ), $values['quantity'] - max( 0, $_product->get_total_stock() ) );
-			 	}
-
-			 	// Allow plugins to add order item meta
-			 	do_action( 'woocommerce_add_order_item_meta', $item_id, $values, $cart_item_key );
-		 	}
-		}
-
-		// Store fees
-		foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
-			$item_id = wc_add_order_item( $order_id, array(
-		 		'order_item_name' 		=> $fee->name,
-		 		'order_item_type' 		=> 'fee'
-		 	) );
-
-		 	if ( $fee->taxable )
-		 		wc_add_order_item_meta( $item_id, '_tax_class', $fee->tax_class );
-		 	else
-		 		wc_add_order_item_meta( $item_id, '_tax_class', '0' );
-
-		 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $fee->amount ) );
-			wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $fee->tax ) );
-			
-			// Allow plugins to add order item meta to fees
-			do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
-		}
-
-		// Store shipping for all packages
-		$packages = WC()->shipping->get_packages();
-
-		foreach ( $packages as $i => $package ) {
-			if ( isset( $package['rates'][ $this->shipping_methods[ $i ] ] ) ) {
-
-				$method = $package['rates'][ $this->shipping_methods[ $i ] ];
-
-				$item_id = wc_add_order_item( $order_id, array(
-			 		'order_item_name' 		=> $method->label,
-			 		'order_item_type' 		=> 'shipping'
-			 	) );
-
-				if ( $item_id ) {
-			 		wc_add_order_item_meta( $item_id, 'method_id', $method->id );
-		 			wc_add_order_item_meta( $item_id, 'cost', wc_format_decimal( $method->cost ) );
-					do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $i );
-		 		}
+				do_action( 'woocommerce_checkout_update_user_meta', $this->customer_id, $this->posted );
 			}
+
+			// Let plugins add meta
+			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
+
+			// If we got here, the order was created without problems!
+			$wpdb->query( 'COMMIT' );
+
+		} catch ( Exception $e ) {
+			// There was an error adding order data!
+			$wpdb->query( 'ROLLBACK' );
+			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
-
-		// Store tax rows
-		foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $key ) {
-			$code = WC()->cart->tax->get_rate_code( $key );
-			
-			if ( $code ) {
-				$item_id = wc_add_order_item( $order_id, array(
-			 		'order_item_name' 		=> $code,
-			 		'order_item_type' 		=> 'tax'
-			 	) );
-
-			 	// Add line item meta
-			 	if ( $item_id ) {
-			 		wc_add_order_item_meta( $item_id, 'rate_id', $key );
-			 		wc_add_order_item_meta( $item_id, 'label', WC()->cart->tax->get_rate_label( $key ) );
-				 	wc_add_order_item_meta( $item_id, 'compound', absint( WC()->cart->tax->is_compound( $key ) ? 1 : 0 ) );
-				 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( isset( WC()->cart->taxes[ $key ] ) ? WC()->cart->taxes[ $key ] : 0 ) );
-				 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( isset( WC()->cart->shipping_taxes[ $key ] ) ? WC()->cart->shipping_taxes[ $key ] : 0 ) );
-				}
-			}
-		}
-
-		// Store coupons
-		if ( $applied_coupons = WC()->cart->get_coupons() ) {
-			foreach ( $applied_coupons as $code => $coupon ) {
-
-				$item_id = wc_add_order_item( $order_id, array(
-			 		'order_item_name' 		=> $code,
-			 		'order_item_type' 		=> 'coupon'
-			 	) );
-
-			 	// Add line item meta
-			 	if ( $item_id ) {
-			 		wc_add_order_item_meta( $item_id, 'discount_amount', isset( WC()->cart->coupon_discount_amounts[ $code ] ) ? WC()->cart->coupon_discount_amounts[ $code ] : 0 );
-				}
-			}
-		}
-
-		if ( $this->payment_method ) {
-			update_post_meta( $order_id, '_payment_method', 		$this->payment_method->id );
-			update_post_meta( $order_id, '_payment_method_title', 	$this->payment_method->get_title() );
-		}
-		if ( empty( $this->posted['billing_email'] ) && is_user_logged_in() ) {
-			$current_user = wp_get_current_user();
-			update_post_meta( $order_id, '_billing_email', $current_user->user_email );
-		}
-		update_post_meta( $order_id, '_order_shipping', 		wc_format_decimal( WC()->cart->shipping_total ) );
-		update_post_meta( $order_id, '_order_discount', 		wc_format_decimal( WC()->cart->get_order_discount_total() ) );
-		update_post_meta( $order_id, '_cart_discount', 			wc_format_decimal( WC()->cart->get_cart_discount_total() ) );
-		update_post_meta( $order_id, '_order_tax', 				wc_format_decimal( WC()->cart->tax_total ) );
-		update_post_meta( $order_id, '_order_shipping_tax', 	wc_format_decimal( WC()->cart->shipping_tax_total ) );
-		update_post_meta( $order_id, '_order_total', 			wc_format_decimal( WC()->cart->total, get_option( 'woocommerce_price_num_decimals' ) ) );
-
-		update_post_meta( $order_id, '_order_key', 				'wc_' . apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
-		update_post_meta( $order_id, '_customer_user', 			absint( $this->customer_id ) );
-		update_post_meta( $order_id, '_order_currency', 		get_woocommerce_currency() );
-		update_post_meta( $order_id, '_prices_include_tax', 	get_option( 'woocommerce_prices_include_tax' ) );
-		update_post_meta( $order_id, '_customer_ip_address',	isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
-		update_post_meta( $order_id, '_customer_user_agent', 	isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
-
-		// Let plugins add meta
-		do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
 
 		return $order_id;
 	}
@@ -658,6 +596,10 @@ class WC_Checkout {
 
 				$order_id = $this->create_order();
 
+				if ( is_wp_error( $order_id ) ) {
+					throw new Exception( $order_id->get_error_message() );
+				}
+
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $this->posted );
 
 				// Process payment
@@ -717,10 +659,9 @@ class WC_Checkout {
 				}
 
 			} catch ( Exception $e ) {
-
-				if ( ! empty( $e ) )
+				if ( ! empty( $e ) ) {
 					wc_add_notice( $e->getMessage(), 'error' );
-
+				}
 			}
 
 		} // endif
@@ -746,6 +687,26 @@ class WC_Checkout {
 		}
 	}
 
+	/**
+	 * Get a posted address field after sanitization and validation.
+	 * @param string $key
+	 * @param string $type billing for shipping
+	 * @return string
+	 */
+	public function get_posted_address_data( $key, $type = 'billing' ) {
+		if ( 'billing' === $type || false === $this->posted['ship_to_different_address'] ) {
+			$return = isset( $this->posted[ 'billing_' . $key ] ) ? $this->posted[ 'billing_' . $key ] : '';
+		} else {
+			$return = isset( $this->posted[ 'shipping_' . $key ] ) ? $this->posted[ 'shipping_' . $key ] : '';
+		}
+
+		// Use logged in user's billing email if neccessary
+		if ( 'email' === $key && empty( $return ) && is_user_logged_in() ) {
+			$current_user = wp_get_current_user();
+			$return       = $current_user->user_email;
+		}
+		return $return;
+	}
 
 	/**
 	 * Gets the value either from the posted data, or from the users meta data

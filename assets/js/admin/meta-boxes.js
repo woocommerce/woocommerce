@@ -451,7 +451,6 @@ jQuery( function($){
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-
 				if ( response ) {
 					$items.each( function() {
 						var $row = $(this);
@@ -1148,8 +1147,11 @@ jQuery( function($){
 
 	// STOCK OPTIONS
 	$('input#_manage_stock').change(function(){
-		if ($(this).is(':checked')) $('div.stock_fields').show();
-		else $('div.stock_fields').hide();
+		if ( $(this).is(':checked') ) {
+			$('div.stock_fields').show();
+		} else {
+			$('div.stock_fields').hide();
+		}
 	}).change();
 
 
