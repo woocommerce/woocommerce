@@ -76,20 +76,13 @@ function wc_product_dimensions_enabled() {
  * @param int $post_id (default: 0)
  */
 function wc_delete_product_transients( $post_id = 0 ) {
-	global $wpdb;
-
-	if ( wp_using_ext_object_cache() ) {
-		wp_cache_flush(); // There isn't a reliable method of looking up the names, so flush the cache.
-		return;
-	}
-
-	// Clear core transients
+	// Core transients
 	$transients_to_clear = array(
 		'wc_products_onsale',
 		'wc_featured_products'
 	);
 
-	// Clear product specific transients
+	// Transients that include an ID
 	$post_transient_names = array(
 		'wc_product_children_ids_',
 		'wc_product_total_stock_'
@@ -98,11 +91,6 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	if ( $post_id > 0 ) {
 		foreach( $post_transient_names as $transient ) {
 			$transients_to_clear[] = $transient . $post_id;
-		}
-	} else {
-		foreach( $post_transient_names as $transient ) {
-			$transient = str_replace( '_', '\_', $transient );
-			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '\_transient\_' . $transient . '%', '\_transient\_timeout\_' . $transient . '%' ) );
 		}
 	}
 
