@@ -45,7 +45,7 @@ class WC_Cache_Helper {
 	 */
 	public static function get_transient_version( $group, $refresh = false ) {
 		$transient_name  = $group . '-transient-version';
-		$transient_value = get_transient( $key );
+		$transient_value = get_transient( $transient_name );
 
 		if ( false === $transient_value || true === $refresh ) {
 			$transient_value = time();
