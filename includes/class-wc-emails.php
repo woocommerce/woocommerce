@@ -165,6 +165,23 @@ class WC_Emails {
 	}
 
 	/**
+	* Get email styles.
+	*
+	* @access public
+	* @return string
+	*/
+	function get_styles() {
+
+		$styles['bg']              = get_option( 'woocommerce_email_background_color' );
+		$styles['body_bg']         = get_option( 'woocommerce_email_body_background_color' );
+		$styles['base_color']      = get_option( 'woocommerce_email_base_color' );
+		$styles['base_text_color'] = wc_light_or_dark( $styles['base_color'], '#202020', '#ffffff' );
+		$styles['text_color']      = get_option( 'woocommerce_email_text_color' );
+
+		return apply_filters( 'woocommerce_email_styles', $styles );
+	}
+
+	/**
 	 * Get the email header.
 	 *
 	 * @access public
@@ -172,7 +189,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	function email_header( $email_heading ) {
-		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
+		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading, 'styles' => $this->get_styles() ) );
 	}
 
 	/**

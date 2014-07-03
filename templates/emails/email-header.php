@@ -10,19 +10,13 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // Load colours
-$bg 		= get_option( 'woocommerce_email_background_color' );
-$body		= get_option( 'woocommerce_email_body_background_color' );
-$base 		= get_option( 'woocommerce_email_base_color' );
-$base_text 	= wc_light_or_dark( $base, '#202020', '#ffffff' );
-$text 		= get_option( 'woocommerce_email_text_color' );
-
-$bg_darker_10 = wc_hex_darker( $bg, 10 );
-$base_lighter_20 = wc_hex_lighter( $base, 20 );
-$text_lighter_20 = wc_hex_lighter( $text, 20 );
+$bg_darker_10 = wc_hex_darker( $styles['bg'], 10 );
+$base_lighter_20 = wc_hex_lighter( $styles['base_color'], 20 );
+$text_lighter_20 = wc_hex_lighter( $styles['text_color'], 20 );
 
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline. !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 $wrapper = "
-	background-color: " . esc_attr( $bg ) . ";
+	background-color: " . esc_attr( $styles['bg'] ) . ";
 	width:100%;
 	-webkit-text-size-adjust:none !important;
 	margin:0;
@@ -33,14 +27,14 @@ $template_container = "
 	box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
 	-webkit-border-radius:6px !important;
 	border-radius:6px !important;
-	background-color: " . esc_attr( $body ) . ";
+	background-color: " . esc_attr( $styles['body_bg'] ) . ";
 	border: 1px solid $bg_darker_10;
 	-webkit-border-radius:6px !important;
 	border-radius:6px !important;
 ";
 $template_header = "
-	background-color: " . esc_attr( $base ) .";
-	color: $base_text;
+	background-color: " . esc_attr( $styles['base_color'] ) .";
+	color: " . $styles['base_text_color'] . ";
 	-webkit-border-top-left-radius:6px !important;
 	-webkit-border-top-right-radius:6px !important;
 	border-top-left-radius:6px !important;
@@ -52,7 +46,7 @@ $template_header = "
 	vertical-align:middle;
 ";
 $body_content = "
-	background-color: " . esc_attr( $body ) . ";
+	background-color: " . esc_attr( $styles['body_bg'] ) . ";
 	-webkit-border-radius:6px !important;
 	border-radius:6px !important;
 ";
@@ -64,7 +58,7 @@ $body_content_inner = "
 	text-align:left;
 ";
 $header_content_h1 = "
-	color: " . esc_attr( $base_text ) . ";
+	color: " . esc_attr( $styles['base_text_color'] ) . ";
 	margin:0;
 	padding: 28px 24px;
 	text-shadow: 0 1px 0 $base_lighter_20;
@@ -98,7 +92,7 @@ $header_content_h1 = "
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- Header -->
-                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_header" style="<?php echo $template_header; ?>" bgcolor="<?php echo $base; ?>">
+                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_header" style="<?php echo $template_header; ?>" bgcolor="<?php echo $styles['base_color']; ?>">
                                         <tr>
                                             <td>
                                             	<h1 style="<?php echo $header_content_h1; ?>"><?php echo $email_heading; ?></h1>
