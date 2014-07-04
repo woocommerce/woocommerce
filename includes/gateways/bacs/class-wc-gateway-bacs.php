@@ -244,9 +244,13 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
     	if ( ! empty( $bacs_accounts ) ) {
 	    	foreach ( $bacs_accounts as $bacs_account ) {
-	    		echo '<ul class="order_details bacs_details">' . PHP_EOL;
-
 	    		$bacs_account = (object) $bacs_account;
+
+				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
+					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>' . PHP_EOL;
+				}
+
+	    		echo '<ul class="order_details bacs_details">' . PHP_EOL;
 
 	    		// BACS account fields shown on the thanks page and in emails
 				$account_fields = apply_filters( 'woocommerce_bacs_account_fields', array(
@@ -267,10 +271,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 						'value' => $bacs_account->bic
 					)
 				), $order_id );
-
-				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
-					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>' . PHP_EOL;
-				}
 
 	    		foreach ( $account_fields as $field_key => $field ) {
 				    if ( ! empty( $field['value'] ) ) {
