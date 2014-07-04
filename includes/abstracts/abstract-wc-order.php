@@ -1321,7 +1321,7 @@ abstract class WC_Abstract_Order {
 
 		$total_rows = array();
 
-		if ( $subtotal = $this->get_subtotal_to_display() ) {
+		if ( $subtotal = $this->get_subtotal_to_display( false, $tax_display ) ) {
 			$total_rows['cart_subtotal'] = array(
 				'label' => __( 'Cart Subtotal:', 'woocommerce' ),
 				'value'	=> $subtotal
