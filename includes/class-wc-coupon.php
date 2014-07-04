@@ -461,7 +461,7 @@ class WC_Coupon {
 	 */
 	public function is_valid_for_product( $product ) {
 		if ( $this->type != 'fixed_product' && $this->type != 'percent_product' )
-			return false;
+			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this );
 
 		$valid        = false;
 		$product_cats = wp_get_post_terms( $product->id, 'product_cat', array( "fields" => "ids" ) );
