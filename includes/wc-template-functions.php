@@ -34,7 +34,7 @@ function wc_template_redirect() {
 
 	// Logout
 	elseif ( isset( $wp->query_vars['customer-logout'] ) ) {
-		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) );
+		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( apply_filters( 'woocommerce_logout_redirect', get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) ) );
 		exit;
 	}
 
