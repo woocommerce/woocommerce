@@ -23,22 +23,22 @@ $wrapper = "
 	padding: 70px 0 70px 0;
 ";
 $template_container = "
-	-webkit-box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
-	box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
-	-webkit-border-radius:" . $styles['border_radius'] . "px !important;
-	border-radius:" . $styles['border_radius'] . "px !important;
+	-webkit-box-shadow:" . $styles['box_shadow']['offset'] . ' ' . $styles['box_shadow']['blur'] . ' ' . $styles['box_shadow']['spread'] . ' ' . $styles['box_shadow']['color'] . " !important;
+	box-shadow:" . $styles['box_shadow']['offset'] . ' ' . $styles['box_shadow']['blur'] . ' ' .  $styles['box_shadow']['spread'] . ' ' . $styles['box_shadow']['color'] . " !important;
+	-webkit-border-radius:" . $styles['border_radius'] . " !important;
+	border-radius:" . $styles['border_radius'] . " !important;
 	background-color: " . $styles['body_bg'] . ";
 	border: 1px solid " . $bg_darker_10 . ";
-	-webkit-border-radius:" . $styles['border_radius'] . "px !important;
-	border-radius:" . $styles['border_radius'] . "px !important;
+	-webkit-border-radius:" . $styles['border_radius'] . " !important;
+	border-radius:" . $styles['border_radius'] . " !important;
 ";
 $template_header = "
 	background-color: " . $styles['base_color'] .";
 	color: " . $styles['base_text_color'] . ";
-	-webkit-border-top-left-radius:" . $styles['border_radius'] . "px !important;
-	-webkit-border-top-right-radius:" . $styles['border_radius'] . "px !important;
-	border-top-left-radius:" . $styles['border_radius'] . "px !important;
-	border-top-right-radius:" . $styles['border_radius'] . "px !important;
+	-webkit-border-top-left-radius:" . $styles['border_radius'] . " !important;
+	-webkit-border-top-right-radius:" . $styles['border_radius'] . " !important;
+	border-top-left-radius:" . $styles['border_radius'] . " !important;
+	border-top-right-radius:" . $styles['border_radius'] . " !important;
 	border-bottom: 0;
 	font-family: " . $styles['font_family'] . ";
 	font-weight: " . $styles['header_text_weight'] . ";
@@ -47,13 +47,13 @@ $template_header = "
 ";
 $body_content = "
 	background-color: " . $styles['body_bg'] . ";
-	-webkit-border-radius:" . $styles['border_radius'] . "px !important;
-	border-radius:" . $styles['border_radius'] . "px !important;
+	-webkit-border-radius:" . $styles['border_radius'] . " !important;
+	border-radius:" . $styles['border_radius'] . " !important;
 ";
 $body_content_inner = "
 	color: " . $text_lighter_20 . ";
 	font-family: " . $styles['font_family'] . ";
-	font-size: " . $styles['base_text_size'] . "px;
+	font-size: " . $styles['base_text_size'] . ";
 	line-height:150%;
 	text-align:left;
 ";
@@ -64,7 +64,7 @@ $header_content_h1 = "
 	text-shadow: 0 1px 0 " . $base_lighter_20 . ";
 	display:block;
 	font-family: " . $styles['font_family'] . ";
-	font-size: " . $styles['header_text_size'] . "px;
+	font-size: " . $styles['header_text_size'] . ";
 	font-weight: " . $styles['header_text_weight'] . ";
 	text-align:left;
 	line-height: 150%;

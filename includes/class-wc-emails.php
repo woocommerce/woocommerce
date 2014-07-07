@@ -173,23 +173,23 @@ class WC_Emails {
 	function get_styles() {
 
 		// colors
-		$styles['bg']                  = get_option( 'woocommerce_email_background_color' );
-		$styles['body_bg']             = get_option( 'woocommerce_email_body_background_color' );
-		$styles['base_color']          = get_option( 'woocommerce_email_base_color' );
-		$styles['base_text_color']     = wc_light_or_dark( $styles['base_color'], '#202020', '#ffffff' );
-		$styles['text_color']          = get_option( 'woocommerce_email_text_color' );
-		$styles['footer_text_color']   = wc_hex_lighter( $styles['base_color'], 40 );
+		$styles['bg']                   = get_option( 'woocommerce_email_background_color' );
+		$styles['body_bg']              = get_option( 'woocommerce_email_body_background_color' );
+		$styles['base_color']           = get_option( 'woocommerce_email_base_color' );
+		$styles['base_text_color']      = wc_light_or_dark( $styles['base_color'], '#202020', '#ffffff' );
+		$styles['text_color']           = get_option( 'woocommerce_email_text_color' );
+		$styles['footer_text_color']    = wc_hex_lighter( $styles['base_color'], 40 );
 
 		// fonts
-		$styles['base_text_size']      = 14;
-		$styles['header_text_size']    = 30;
-		$styles['header_text_weight']  = 'bold';
-		$styles['footer_text_size']    = 12;
-		$styles['font_family']         = 'Arial';
+		$styles['base_text_size']       = '14px';
+		$styles['header_text_size']     = '30px';
+		$styles['header_text_weight']   = 'bold';
+		$styles['footer_text_size']     = '12px';
+		$styles['font_family']          = 'Arial';
 
 		// everything else
-		$styles['width']             = 600;
-		$styles['border_radius']     = 6;
+		$styles['width']                = 600;
+		$styles['border_radius']        = '6px';
 
 		// give the user a chance to filter the values
 		$styles = apply_filters( 'woocommerce_email_styles', $styles );
