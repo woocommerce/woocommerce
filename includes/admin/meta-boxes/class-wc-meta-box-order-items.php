@@ -75,29 +75,59 @@ class WC_Meta_Box_Order_Items {
 				</tbody>
 			</table>
 		</div>
+		<div class="wc-order-data-row wc-order-bulk-actions">
+			<p class="bulk_actions">
+				<select>
+					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
+					<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
+						<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?></option>
+					</optgroup>
+					<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
+						<option value="reduce_stock"><?php _e( 'Reduce Line Stock', 'woocommerce' ); ?></option>
+						<option value="increase_stock"><?php _e( 'Increase Line Stock', 'woocommerce' ); ?></option>
+					</optgroup>
+				</select>
 
-		<p class="bulk_actions">
-			<select>
-				<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-				<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
-					<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?></option>
-				</optgroup>
-				<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
-					<option value="reduce_stock"><?php _e( 'Reduce Line Stock', 'woocommerce' ); ?></option>
-					<option value="increase_stock"><?php _e( 'Increase Line Stock', 'woocommerce' ); ?></option>
-				</optgroup>
-			</select>
-
-			<button type="button" class="button do_bulk_action wc-reload" title="<?php _e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
-		</p>
-
-		<p class="add_items">
+				<button type="button" class="button do_bulk_action wc-reload" title="<?php _e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
+			</p>
+			<p class="add_items">
+				<button type="button" class="button add_line_item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
+				<button type="button" class="button refund_items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
+			</p>
+		</div>
+		<div class="wc-order-data-row wc-order-add-item" style="display:none;">
 			<select id="add_item_id" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px"></select>
-
 			<button type="button" class="button add_order_item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
 			<button type="button" class="button add_order_fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
-		</p>
-		<div class="clear"></div>
+			<button type="button" class="button cancel-action"><?php _e( 'Done', 'woocommerce' ); ?></button>
+		</div>
+		<div class="wc-order-data-row wc-order-refund-items" style="display:none;">
+			<ul>
+				<li>
+					<label><?php _e( 'Order total', 'woocommerce' ); ?>:</label>
+					<span class="total"><?php echo wc_price( $order->get_total() ); ?></span>
+				</li>
+				<li>
+					<label><?php _e( 'Amount already refunded', 'woocommerce' ); ?>:</label>
+					<span class="total">-<?php echo wc_price( 0 ); ?></span>
+				</li>
+				<li>
+					<label><?php _e( 'Total available to refund', 'woocommerce' ); ?>:</label>
+					<span class="total"><?php echo wc_price( $order->get_total() ); ?></span>
+				</li>
+				<li>
+					<label for="refund_amount"><?php _e( 'Refund amount', 'woocommerce' ); ?>:</label>
+					<input type="text" id="refund_amount" name="refund_amount" class="wc_input_price" />
+				</li>
+				<li>
+					<label for="refund_reason"><?php _e( 'Reason for refund (optional)', 'woocommerce' ); ?>:</label>
+					<input type="text" id="refund_reason" name="refund_reason" />
+				</li>
+			</ul>
+			<button type="button" class="button button-primary"><?php printf( _x( 'Refund %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0 ) . '</span>' ); ?></button>
+			<button type="button" class="button button-primary"><?php _e( 'Refund offline', 'woocommerce' ); ?></button>
+			<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
+		</div>
 		<?php
 	}
 

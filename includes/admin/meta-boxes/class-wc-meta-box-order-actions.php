@@ -33,6 +33,10 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
+					
+					<option value="refund_order"><?php _e( 'Refund this order', 'woocommerce' ); ?></option>
+					<option value="refund_order"><?php _e( 'Cancel this order', 'woocommerce' ); ?></option>
+
 					<optgroup label="<?php _e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
 						$mailer           = WC()->mailer();
@@ -48,8 +52,9 @@ class WC_Meta_Box_Order_Actions {
 						}
 						?>
 					</optgroup>
+
 					<option value="regenerate_download_permissions"><?php _e( 'Generate download permissions', 'woocommerce' ); ?></option>
-					<option value="create_credit_note"><?php _e( 'Create credit note', 'woocommerce' ); ?></option>
+					
 					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>

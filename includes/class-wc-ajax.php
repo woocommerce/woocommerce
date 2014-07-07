@@ -1025,6 +1025,10 @@ class WC_AJAX {
 
 		$order_item_ids = $_POST['order_item_ids'];
 
+		if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
+			$order_item_ids = array( $order_item_ids );
+		}
+
 		if ( sizeof( $order_item_ids ) > 0 ) {
 			foreach( $order_item_ids as $id ) {
 				wc_delete_order_item( absint( $id ) );

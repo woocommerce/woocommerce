@@ -230,8 +230,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php endif; ?>
 
-	<td>
-		<a class="edit_order_item" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="<?php _e( 'Edit', 'woocommerce' ); ?>" width="14" /></a>
+	<td class="wc-order-edit-line-item">
+		<div class="wc-order-edit-line-item-actions">
+			<a class="edit_order_item" href="#"></a><a class="delete_order_item" href="#"></a>
+		</div>
 	</td>
-
 </tr>

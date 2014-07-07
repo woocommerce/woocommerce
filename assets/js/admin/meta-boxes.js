@@ -283,6 +283,34 @@ jQuery( function($){
 		return false;
 	} );
 
+	$('#order_items_list').on( 'click', 'a.delete_order_item', function() {
+		var answer = confirm( woocommerce_admin_meta_boxes.remove_item_notice );
+
+		if ( answer ) {
+			var $item         = $(this).closest('tr.item, tr.fee');
+			var order_item_id = $item.attr( 'data-order_item_id' );
+
+			$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+
+			var data = {
+				order_item_ids: 	order_item_id,
+				action: 			'woocommerce_remove_order_item',
+				security: 			woocommerce_admin_meta_boxes.order_item_nonce
+			};
+
+			$.ajax( {
+				url: woocommerce_admin_meta_boxes.ajax_url,
+				data: data,
+				type: 'POST',
+				success: function( response ) {
+					$item.remove();
+					$('table.woocommerce_order_items').unblock();
+				}
+			} );
+		}
+		return false;
+	} );
+
 	// When the qty is changed, increase or decrease costs
 	$('#order_items_list').on( 'change', 'input.quantity', function() {
 		var $row = $(this).closest('tr.item');
@@ -522,6 +550,22 @@ jQuery( function($){
 
 		$('#woocommerce-order-totals').unblock();
 
+		return false;
+	});
+
+	$('#woocommerce-order-items button.add_line_item').click(function(){
+		$('div.wc-order-add-item').slideDown();
+		$('div.wc-order-bulk-actions').slideUp();
+		return false;
+	});
+	$('#woocommerce-order-items button.refund_items').click(function(){
+		$('div.wc-order-refund-items').slideDown();
+		$('div.wc-order-bulk-actions').slideUp();
+		return false;
+	});
+	$('#woocommerce-order-items .cancel-action').click(function(){
+		$(this).closest('div.wc-order-data-row').slideUp();
+		$('div.wc-order-bulk-actions').slideDown();
 		return false;
 	});
 
