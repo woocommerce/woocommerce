@@ -34,14 +34,14 @@ $template_container = "
 ";
 $template_header = "
 	background-color: " . $styles['base_color'] .";
-	color: " . $styles['base_text_color'] . ";
+	color: " . $styles['base_text']['color'] . ";
 	-webkit-border-top-left-radius:" . $styles['border_radius'] . " !important;
 	-webkit-border-top-right-radius:" . $styles['border_radius'] . " !important;
 	border-top-left-radius:" . $styles['border_radius'] . " !important;
 	border-top-right-radius:" . $styles['border_radius'] . " !important;
 	border-bottom: 0;
 	font-family: " . $styles['font_family'] . ";
-	font-weight: " . $styles['header_text_weight'] . ";
+	font-weight: " . $styles['header_text']['weight'] . ";
 	line-height:100%;
 	vertical-align:middle;
 ";
@@ -53,19 +53,19 @@ $body_content = "
 $body_content_inner = "
 	color: " . $text_lighter_20 . ";
 	font-family: " . $styles['font_family'] . ";
-	font-size: " . $styles['base_text_size'] . ";
+	font-size: " . $styles['base_text']['size'] . ";
 	line-height:150%;
 	text-align:left;
 ";
 $header_content_h1 = "
-	color: " . $styles['base_text_color'] . ";
+	color: " . $styles['base_text']['color'] . ";
 	margin:0;
 	padding: 28px 24px;
 	text-shadow: 0 1px 0 " . $base_lighter_20 . ";
 	display:block;
 	font-family: " . $styles['font_family'] . ";
-	font-size: " . $styles['header_text_size'] . ";
-	font-weight: " . $styles['header_text_weight'] . ";
+	font-size: " . $styles['header_text']['size'] . ";
+	font-weight: " . $styles['header_text']['weight'] . ";
 	text-align:left;
 	line-height: 150%;
 ";
