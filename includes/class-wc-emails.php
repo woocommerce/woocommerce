@@ -201,9 +201,7 @@ class WC_Emails {
 		$styles = apply_filters( 'woocommerce_email_styles', $styles );
 
 		// escape all values
-		foreach( $styles as $key => $value ) {
-			$styles[$key] = wp_kses( $value, array() );
-		}
+		array_walk_recursive( $styles, 'sanitize_text_field' );
 
 		return $styles;
 	}
