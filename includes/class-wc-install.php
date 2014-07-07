@@ -256,6 +256,9 @@ class WC_Install {
 				'grouped',
 				'variable',
 				'external'
+			),
+			'order_type' => array(
+				'simple'
 			)
 		);
 
