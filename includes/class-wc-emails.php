@@ -187,6 +187,12 @@ class WC_Emails {
 		$styles['footer_text_size']     = '12px';
 		$styles['font_family']          = 'Arial';
 
+		// box shadow
+		$styles['box_shadow']['offset'] = '0px 0px';
+		$styles['box_shadow']['blur']   = '0px';
+		$styles['box_shadow']['spread'] = '3px';
+		$styles['box_shadow']['color']  = 'rgba(0,0,0,0.025)';
+
 		// everything else
 		$styles['width']                = 600;
 		$styles['border_radius']        = '6px';
