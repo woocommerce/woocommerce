@@ -147,7 +147,7 @@ class WC_Meta_Box_Order_Totals {
 			<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 				<button type="button" class="button calc_line_taxes"><?php _e( 'Calculate Tax', 'woocommerce' ); ?></button>
 			<?php endif; ?>
-			<button type="button" class="button calc_totals button-primary"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
+			<button type="button" class="button calc_totals"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
 		</p>
 		<?php
 	}

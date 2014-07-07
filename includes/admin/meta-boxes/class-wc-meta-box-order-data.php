@@ -162,7 +162,7 @@ class WC_Meta_Box_Order_Data {
 					if ( $payment_method ) {
 						printf( __( 'Payment via %s', 'woocommerce' ), ( isset( $payment_gateways[ $payment_method ] ) ? esc_html( $payment_gateways[ $payment_method ]->get_title() ) : esc_html( $payment_method ) ) );
 
-						if ( $transaction_id = get_post_meta( $order->id, '_transaction_id', true ) ) {
+						if ( $transaction_id = $order->get_transaction_id() ) {
 								if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $transaction_id ) ) ) {
 								echo ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
 							} else {
