@@ -521,6 +521,14 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Get transaction id for the order
+	 * @return string 
+	 */
+	public function get_transaction_id() {
+		return get_post_meta( $this->id, '_transaction_id', true );
+	}
+
+	/**
 	 * Check if an order key is valid.
 	 *
 	 * @access public
@@ -1820,7 +1828,7 @@ abstract class WC_Abstract_Order {
 			add_post_meta( $this->id, '_paid_date', current_time('mysql'), true );
 
 			if ( ! empty( $transaction_id ) ) {
-				add_post_meta( $this->id, '_transaction_id', $transaction_id );
+				add_post_meta( $this->id, '_transaction_id', $transaction_id, true );
 			}
 
 			$this_order = array(
