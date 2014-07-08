@@ -37,18 +37,6 @@ class WC_Post_types {
 
 		$permalinks = get_option( 'woocommerce_permalinks' );
 
-		register_taxonomy( 'order_type',
-			apply_filters( 'woocommerce_taxonomy_objects_order_type', array( 'shop_order' ) ),
-			apply_filters( 'woocommerce_taxonomy_args_order_type', array(
-				'hierarchical'      => false,
-				'show_ui'           => false,
-				'show_in_nav_menus' => false,
-				'query_var'         => is_admin(),
-				'rewrite'           => false,
-				'public'            => false
-			) )
-		);
-
 		register_taxonomy( 'product_type',
 	        apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
 	        apply_filters( 'woocommerce_taxonomy_args_product_type', array(
