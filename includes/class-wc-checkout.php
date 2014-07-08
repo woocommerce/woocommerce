@@ -669,14 +669,19 @@ class WC_Checkout {
 		// If we reached this point then there were errors
 		if ( is_ajax() ) {
 
-			ob_start();
-			wc_print_notices();
-			$messages = ob_get_clean();
+			// only print notices if not reloading the checkout, otherwise they're lost in the page reload
+			if ( ! isset( WC()->session->reload_checkout ) ) {
+
+				ob_start();
+				wc_print_notices();
+				$messages = ob_get_clean();
+			}
+
 
 			echo '<!--WC_START-->' . json_encode(
 				array(
 					'result'	=> 'failure',
-					'messages' 	=> $messages,
+					'messages' 	=> isset( $messages ) ? $messages : '',
 					'refresh' 	=> isset( WC()->session->refresh_totals ) ? 'true' : 'false',
 					'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false'
 				)
