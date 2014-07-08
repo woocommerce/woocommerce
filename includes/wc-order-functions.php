@@ -382,3 +382,61 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 function wc_ship_to_billing_address_only() {
 	return 'billing_only' === get_option( 'woocommerce_ship_to_destination' );
 }
+
+/**
+ * Create a new order refund programmatically
+ *
+ * Returns a new refund object on success which can then be used to add additonal data.
+ *
+ * @since 2.2
+ * @param array $args
+ * @return WC_Order_Refund on success, WP_Error on failure
+ */
+function wc_create_refund( $args = array() ) {
+	$default_args = array(
+		'amount'    => '',
+		'reason'    => null,
+		'tax'       => null,
+		'order_id'  => 0,
+		'refund_id' => 0
+	);
+
+	$args        = wp_parse_args( $args, $default_args );
+	$refund_data = array();
+
+	if ( $args['refund_id'] > 0 ) {
+		$updating          = true;
+		$refund_data['ID'] = $args['refund_id'];
+	} else {
+		$updating                     = false;
+		$refund_data['post_type']     = 'shop_order';
+		$refund_data['post_status']   = 'publish';
+		$refund_data['ping_status']   = 'closed';
+		$refund_data['post_author']   = 1;
+		$refund_data['post_password'] = uniqid( 'refund_' );
+		$refund_data['post_parent']   = absint( $args['order_id'] );
+		$refund_data['post_title']    = sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+	}
+
+	if ( ! is_null( $args['reason'] ) ) {
+		$refund_data['post_excerpt'] = $args['reason'];
+	}
+
+	if ( $updating ) {
+		$refund_id = wp_update_post( $refund_data );
+	} else {
+		$refund_id = wp_insert_post( apply_filters( 'woocommerce_new_refund_data', $refund_data ), true );
+	}
+
+	if ( is_wp_error( $refund_id ) ) {
+		return $refund_id;
+	}
+
+	// Default refund meta data
+	if ( ! $updating ) {
+		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
+		update_post_meta( $refund_id, '_refund_tax', wc_format_decimal( $args['amount'] ) );
+	}
+
+	return new WC_Order_Refund( $refund_id );
+}
