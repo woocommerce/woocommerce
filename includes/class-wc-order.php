@@ -38,7 +38,13 @@ class WC_Order extends WC_Abstract_Order {
 				'post_parent'    => $this->id,
 				'posts_per_page' => -1,
 				'fields'         => 'ids',
-				'order_type'     => 'refund'
+				'tax_query'      => array(
+					array(
+						'taxonomy' => 'order_type',
+						'terms'    => 'refund',
+						'field'    => 'slug'
+					)
+				)
 			)
 		);
 
