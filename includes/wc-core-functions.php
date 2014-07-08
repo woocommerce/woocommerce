@@ -337,7 +337,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			break;
 		case 'KRW' : $currency_symbol = '&#8361;'; break;
         case 'PYG' : $currency_symbol = '&#8370;'; break;
-		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
+		case 'TRY' : $currency_symbol = '&#8378;'; break;
 		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
 		case 'ZAR' : $currency_symbol = '&#82;'; break;
 		case 'CZK' : $currency_symbol = '&#75;&#269;'; break;
