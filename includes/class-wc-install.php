@@ -258,7 +258,8 @@ class WC_Install {
 				'external'
 			),
 			'order_type' => array(
-				'simple'
+				'simple',
+				'refund'
 			)
 		);
 
