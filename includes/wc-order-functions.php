@@ -382,15 +382,3 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 function wc_ship_to_billing_address_only() {
 	return 'billing_only' === get_option( 'woocommerce_ship_to_destination' );
 }
-
-/**
- * Register order type
- *
- * @since 2.2
- * @return void
- */
-function register_order_type( $type ) {
-	if ( ! get_term_by( 'slug', sanitize_title( $type ), 'order_type' ) ) {
-		wp_insert_term( $type, 'order_type' );
-	}
-}

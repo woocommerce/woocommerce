@@ -84,9 +84,6 @@ class WC_Meta_Box_Order_Actions {
 		// Order data saved, now get it so we can manipulate status
 		$order = get_order( $post_id );
 
-		// Order type
-		wp_set_object_terms( $post_id, 'simple', 'order_type' );
-
 		// Handle button actions
 		if ( ! empty( $_POST['wc_order_action'] ) ) {
 

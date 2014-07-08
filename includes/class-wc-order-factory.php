@@ -30,28 +30,19 @@ class WC_Order_Factory {
 			$the_order = get_post( $the_order );
 		}
 
-		if ( ! $the_order ) {
+		if ( ! $the_order )
 			return false;
-		}
 
 		if ( is_object ( $the_order ) ) {
-			$order_id  = absint( $the_order->ID );
-			$post_type = $the_order->post_type;
+			$order_id = absint( $the_order->ID );
+			$post_type  = $the_order->post_type;
 		}
 
 		if ( 'shop_order' == $post_type ) {
-			$terms      = get_the_terms( $order_id, 'order_type' );
-			$order_type = ! empty( $terms ) && isset( current( $terms )->name ) ? sanitize_title( current( $terms )->name ) : 'simple';
-
-			// Create a WC coding standards compliant class name e.g. WC_Order_Type_Class instead of WC_order_type-class
-			$classname = 'WC_Order_' . implode( '_', array_map( 'ucfirst', explode( '-', $order_type ) ) );
-
-			// The default order class must be WC_Order to provide backwards compatibility
-			if ( 'WC_Order_Simple' ) {
-				$classname = 'WC_Order';
-			}
+			$classname = 'WC_Order';
+			$order_type = 'simple';
 		} else {
-			$classname  = false;
+			$classname = false;
 			$order_type = false;
 		}
 
