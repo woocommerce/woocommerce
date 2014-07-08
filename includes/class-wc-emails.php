@@ -165,6 +165,48 @@ class WC_Emails {
 	}
 
 	/**
+	* Get email styles.
+	*
+	* @access public
+	* @return string
+	*/
+	function get_styles() {
+
+		// colors
+		$styles['bg']                    = get_option( 'woocommerce_email_background_color' );
+		$styles['body_bg']               = get_option( 'woocommerce_email_body_background_color' );
+		$styles['base_color']            = get_option( 'woocommerce_email_base_color' );
+		$styles['base_text']['color']    = wc_light_or_dark( $styles['base_color'], '#202020', '#ffffff' );
+		$styles['text_color']            = get_option( 'woocommerce_email_text_color' );
+		$styles['footer_text']['color']  = wc_hex_lighter( $styles['base_color'], 40 );
+
+		// fonts
+		$styles['base_text']['size']     = '14px';
+		$styles['header_text']['size']   = '30px';
+		$styles['header_text']['weight'] = 'bold';
+		$styles['footer_text']['size']   = '12px';
+		$styles['font_family']           = 'Arial';
+
+		// box shadow
+		$styles['box_shadow']['offset']  = '0px 0px';
+		$styles['box_shadow']['blur']    = '0px';
+		$styles['box_shadow']['spread']  = '3px';
+		$styles['box_shadow']['color']   = 'rgba(0,0,0,0.025)';
+
+		// everything else
+		$styles['width']                 = 600;
+		$styles['border_radius']         = '6px';
+
+		// give the user a chance to filter the values
+		$styles = apply_filters( 'woocommerce_email_styles', $styles );
+
+		// escape all values
+		array_walk_recursive( $styles, 'sanitize_text_field' );
+
+		return $styles;
+	}
+
+	/**
 	 * Get the email header.
 	 *
 	 * @access public
@@ -172,7 +214,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	function email_header( $email_heading ) {
-		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
+		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading, 'styles' => $this->get_styles() ) );
 	}
 
 	/**
@@ -182,7 +224,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	function email_footer() {
-		wc_get_template( 'emails/email-footer.php' );
+		wc_get_template( 'emails/email-footer.php', array( 'styles' => $this->get_styles() ) );
 	}
 
 	/**

@@ -2,76 +2,69 @@
 /**
  * Email Header
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates/Emails
- * @version     2.0.0
+ * @author  WooThemes
+ * @package WooCommerce/Templates/Emails
+ * @version 2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // Load colours
-$bg 		= get_option( 'woocommerce_email_background_color' );
-$body		= get_option( 'woocommerce_email_body_background_color' );
-$base 		= get_option( 'woocommerce_email_base_color' );
-$base_text 	= wc_light_or_dark( $base, '#202020', '#ffffff' );
-$text 		= get_option( 'woocommerce_email_text_color' );
-
-$bg_darker_10 = wc_hex_darker( $bg, 10 );
-$base_lighter_20 = wc_hex_lighter( $base, 20 );
-$text_lighter_20 = wc_hex_lighter( $text, 20 );
+$bg_darker_10    = wc_hex_darker( $styles['bg'], 10 );
+$base_lighter_20 = wc_hex_lighter( $styles['base_color'], 20 );
+$text_lighter_20 = wc_hex_lighter( $styles['text_color'], 20 );
 
 // For gmail compatibility, including CSS styles in head/body are stripped out therefore styles need to be inline. These variables contain rules which are added to the template inline. !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 $wrapper = "
-	background-color: " . esc_attr( $bg ) . ";
+	background-color: " . $styles['bg'] . ";
 	width:100%;
 	-webkit-text-size-adjust:none !important;
 	margin:0;
 	padding: 70px 0 70px 0;
 ";
 $template_container = "
-	-webkit-box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
-	box-shadow:0 0 0 3px rgba(0,0,0,0.025) !important;
-	-webkit-border-radius:6px !important;
-	border-radius:6px !important;
-	background-color: " . esc_attr( $body ) . ";
-	border: 1px solid $bg_darker_10;
-	-webkit-border-radius:6px !important;
-	border-radius:6px !important;
+	box-shadow:" . $styles['box_shadow']['offset'] . ' ' . $styles['box_shadow']['blur'] . ' ' .  $styles['box_shadow']['spread'] . ' ' . $styles['box_shadow']['color'] . " !important;
+	-webkit-border-radius:" . $styles['border_radius'] . " !important;
+	border-radius:" . $styles['border_radius'] . " !important;
+	background-color: " . $styles['body_bg'] . ";
+	border: 1px solid " . $bg_darker_10 . ";
+	-webkit-border-radius:" . $styles['border_radius'] . " !important;
+	border-radius:" . $styles['border_radius'] . " !important;
 ";
 $template_header = "
-	background-color: " . esc_attr( $base ) .";
-	color: $base_text;
-	-webkit-border-top-left-radius:6px !important;
-	-webkit-border-top-right-radius:6px !important;
-	border-top-left-radius:6px !important;
-	border-top-right-radius:6px !important;
+	background-color: " . $styles['base_color'] .";
+	color: " . $styles['base_text']['color'] . ";
+	-webkit-border-top-left-radius:" . $styles['border_radius'] . " !important;
+	-webkit-border-top-right-radius:" . $styles['border_radius'] . " !important;
+	border-top-left-radius:" . $styles['border_radius'] . " !important;
+	border-top-right-radius:" . $styles['border_radius'] . " !important;
 	border-bottom: 0;
-	font-family:Arial;
-	font-weight:bold;
+	font-family: " . $styles['font_family'] . ";
+	font-weight: " . $styles['header_text']['weight'] . ";
 	line-height:100%;
 	vertical-align:middle;
 ";
 $body_content = "
-	background-color: " . esc_attr( $body ) . ";
-	-webkit-border-radius:6px !important;
-	border-radius:6px !important;
+	background-color: " . $styles['body_bg'] . ";
+	-webkit-border-radius:" . $styles['border_radius'] . " !important;
+	border-radius:" . $styles['border_radius'] . " !important;
 ";
 $body_content_inner = "
-	color: $text_lighter_20;
-	font-family:Arial;
-	font-size:14px;
+	color: " . $text_lighter_20 . ";
+	font-family: " . $styles['font_family'] . ";
+	font-size: " . $styles['base_text']['size'] . ";
 	line-height:150%;
 	text-align:left;
 ";
 $header_content_h1 = "
-	color: " . esc_attr( $base_text ) . ";
+	color: " . $styles['base_text']['color'] . ";
 	margin:0;
 	padding: 28px 24px;
-	text-shadow: 0 1px 0 $base_lighter_20;
+	text-shadow: 0 1px 0 " . $base_lighter_20 . ";
 	display:block;
-	font-family:Arial;
-	font-size:30px;
-	font-weight:bold;
+	font-family: " . $styles['font_family'] . ";
+	font-size: " . $styles['header_text']['size'] . ";
+	font-weight: " . $styles['header_text']['weight'] . ";
 	text-align:left;
 	line-height: 150%;
 ";
@@ -94,11 +87,11 @@ $header_content_h1 = "
 	                			}
 	                		?>
 						</div>
-                    	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_container" style="<?php echo $template_container; ?>">
+                    	<table border="0" cellpadding="0" cellspacing="0" width="<?php echo $styles['width']; ?>" id="template_container" style="<?php echo $template_container; ?>">
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- Header -->
-                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_header" style="<?php echo $template_header; ?>" bgcolor="<?php echo $base; ?>">
+                                	<table border="0" cellpadding="0" cellspacing="0" width="<?php echo $styles['width']; ?>" id="template_header" style="<?php echo $template_header; ?>" bgcolor="<?php echo $styles['base_color']; ?>">
                                         <tr>
                                             <td>
                                             	<h1 style="<?php echo $header_content_h1; ?>"><?php echo $email_heading; ?></h1>
@@ -112,7 +105,7 @@ $header_content_h1 = "
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- Body -->
-                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_body">
+                                	<table border="0" cellpadding="0" cellspacing="0" width="<?php echo $styles['width']; ?>" id="template_body">
                                     	<tr>
                                             <td valign="top" style="<?php echo $body_content; ?>">
                                                 <!-- Content -->
