@@ -68,7 +68,6 @@ class WC_Meta_Box_Order_Actions {
 					}
 				?></div>
 
-				<input type="hidden" name="order_type" value="simple" />
 				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php _e( 'Save Order', 'woocommerce' ); ?>" data-tip="<?php _e( 'Save/update the order', 'woocommerce' ); ?>" />
 			</li>
 
@@ -86,8 +85,7 @@ class WC_Meta_Box_Order_Actions {
 		$order = get_order( $post_id );
 
 		// Order type
-		$order_type = empty( $_POST['order_type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['order_type'] ) );
-		wp_set_object_terms( $post_id, $order_type, 'order_type' );
+		wp_set_object_terms( $post_id, 'simple', 'order_type' );
 
 		// Handle button actions
 		if ( ! empty( $_POST['wc_order_action'] ) ) {
