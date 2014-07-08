@@ -396,7 +396,7 @@ function wc_create_refund( $args = array() ) {
 	$default_args = array(
 		'amount'    => '',
 		'reason'    => null,
-		'tax'       => null,
+		'tax'       => '',
 		'order_id'  => 0,
 		'refund_id' => 0
 	);
