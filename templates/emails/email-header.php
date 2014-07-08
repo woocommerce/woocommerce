@@ -23,7 +23,6 @@ $wrapper = "
 	padding: 70px 0 70px 0;
 ";
 $template_container = "
-	-webkit-box-shadow:" . $styles['box_shadow']['offset'] . ' ' . $styles['box_shadow']['blur'] . ' ' . $styles['box_shadow']['spread'] . ' ' . $styles['box_shadow']['color'] . " !important;
 	box-shadow:" . $styles['box_shadow']['offset'] . ' ' . $styles['box_shadow']['blur'] . ' ' .  $styles['box_shadow']['spread'] . ' ' . $styles['box_shadow']['color'] . " !important;
 	-webkit-border-radius:" . $styles['border_radius'] . " !important;
 	border-radius:" . $styles['border_radius'] . " !important;
