@@ -688,6 +688,12 @@ ul.wc_coupon_list_block {
 			padding: 8px;
 			font-size: 11px;
 			text-align: left;
+			&:last-child {
+				padding-right: 12px;
+			}
+			&:first-child {
+				padding-left: 12px;
+			}
 		}
 		tbody th, td {
 			padding: 8px;
@@ -706,9 +712,15 @@ ul.wc_coupon_list_block {
 				padding: 4px;
 				color: #555;
 			}
+			&:last-child {
+				padding-right: 12px;
+			}
+			&:first-child {
+				padding-left: 12px;
+			}
 		}
 		td.check-column {
-			padding: 8px;
+			padding: 8px 8px 8px 12px;
 			width: 1%;
 		}
 		.item {

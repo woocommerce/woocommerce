@@ -249,9 +249,9 @@ jQuery( function($){
 		var $qty = $row.find('input.quantity');
 		var qty = $qty.val();
 
-		var line_subtotal 	= accounting.unformat( $row.find('input.line_subtotal').val(), woocommerce_admin.mon_decimal_point );
-		var line_total 		= accounting.unformat( $row.find('input.line_total').val(), woocommerce_admin.mon_decimal_point );
-		var line_tax 		= accounting.unformat( $row.find('input.line_tax').val(), woocommerce_admin.mon_decimal_point );
+		var line_subtotal     = accounting.unformat( $row.find('input.line_subtotal').val(), woocommerce_admin.mon_decimal_point );
+		var line_total        = accounting.unformat( $row.find('input.line_total').val(), woocommerce_admin.mon_decimal_point );
+		var line_tax          = accounting.unformat( $row.find('input.line_tax').val(), woocommerce_admin.mon_decimal_point );
 		var line_subtotal_tax = accounting.unformat( $row.find('input.line_subtotal_tax').val(), woocommerce_admin.mon_decimal_point );
 
 		if ( qty ) {
@@ -270,8 +270,21 @@ jQuery( function($){
 		$row.attr( 'data-unit_total_tax', unit_total_tax );
 	});
 
+	$('#order_items_list').on( 'init_row', 'tr.fee', function() {
+		var $row = $(this);
+
+		var line_total        = accounting.unformat( $row.find('input.line_total').val(), woocommerce_admin.mon_decimal_point );
+		var line_tax          = accounting.unformat( $row.find('input.line_tax').val(), woocommerce_admin.mon_decimal_point );
+
+		unit_total			= parseFloat( accounting.toFixed( line_total, woocommerce_admin_meta_boxes.rounding_precision ) );
+		unit_total_tax		= parseFloat( accounting.toFixed( line_tax, woocommerce_admin_meta_boxes.rounding_precision ) );
+
+		$row.attr( 'data-unit_total', unit_total );
+		$row.attr( 'data-unit_total_tax', unit_total_tax );
+	});
+
 	// When the page is loaded, store the unit costs
-	$('#order_items_list tr.item').each( function() {
+	$('#order_items_list tr.item, #order_items_list tr.fee').each( function() {
 		$(this).trigger('init_row');
 		$(this).find('.edit').hide();
 	} );
@@ -379,6 +392,32 @@ jQuery( function($){
 
 		$row.attr( 'data-unit_total_tax', value );
 	});
+
+	$('#order_items_list').on( 'change', '.wc-order-item-refund-quantity input', function() {
+		var refund_amount = 0;
+		var $items        = $('#order_items_list').find('tr.item, tr.fee');
+
+		$items.each(function() {
+			var $row       = $(this);
+			var refund_qty = $row.find( '.wc-order-item-refund-quantity input' ).val();
+			
+			if ( refund_qty ) {
+				refund_amount = parseFloat( refund_amount ) + parseFloat( refund_qty * ( $row.attr( 'data-unit_total' ) + $row.attr( 'data-unit_total_tax' ) ) );
+			}
+		} );
+
+		$('#refund_amount').val( refund_amount ).change();
+	});
+
+	$('#refund_amount').change( function() {
+		$('button .wc-order-refund-amount .amount').text( accounting.formatMoney( $(this).val(), {
+			symbol 		: woocommerce_admin_meta_boxes.currency_format_symbol,
+			decimal 	: woocommerce_admin_meta_boxes.currency_format_decimal_sep,
+			thousand	: woocommerce_admin_meta_boxes.currency_format_thousand_sep,
+			precision 	: woocommerce_admin_meta_boxes.currency_format_num_decimals,
+			format		: woocommerce_admin_meta_boxes.currency_format
+		} ) );
+	} );
 
 	// Display a total for taxes
 	$('#woocommerce-order-totals').on( 'change input', '.order_taxes_amount, .order_taxes_shipping_amount, .shipping_cost, #_order_discount', function() {
@@ -506,7 +545,6 @@ jQuery( function($){
 		return false;
 	});
 
-
 	$('button.calc_totals').click( function(){
 		// Block write panel
 		$('#woocommerce-order-totals').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
@@ -561,11 +599,15 @@ jQuery( function($){
 	$('#woocommerce-order-items button.refund_items').click(function(){
 		$('div.wc-order-refund-items').slideDown();
 		$('div.wc-order-bulk-actions').slideUp();
+		$('.wc-order-item-refund-quantity').show();
+		$('.wc-order-edit-line-item').hide();
 		return false;
 	});
 	$('#woocommerce-order-items .cancel-action').click(function(){
 		$(this).closest('div.wc-order-data-row').slideUp();
 		$('div.wc-order-bulk-actions').slideDown();
+		$('.wc-order-item-refund-quantity').hide();
+		$('.wc-order-edit-line-item').show();
 		return false;
 	});
 

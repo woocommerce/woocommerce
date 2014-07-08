@@ -46,7 +46,9 @@ class WC_Meta_Box_Order_Items {
 							<th class="line_tax"><?php _e( 'Tax', 'woocommerce' ); ?></th>
 						<?php endif; ?>
 
-						<th width="1%">&nbsp;</th>
+						<th class="wc-order-item-refund-quantity" style="display:none"><?php _e( 'Refund', 'woocommerce' ); ?></th>
+
+						<th class="wc-order-edit-line-item" width="1%">&nbsp;</th>
 					</tr>
 				</thead>
 				<tbody id="order_items_list">
@@ -80,11 +82,11 @@ class WC_Meta_Box_Order_Items {
 				<select>
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 					<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
-						<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?></option>
+						<option value="delete"><?php _e( 'Delete line item(s)', 'woocommerce' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
-						<option value="reduce_stock"><?php _e( 'Reduce Line Stock', 'woocommerce' ); ?></option>
-						<option value="increase_stock"><?php _e( 'Increase Line Stock', 'woocommerce' ); ?></option>
+						<option value="reduce_stock"><?php _e( 'Reduce line item stock', 'woocommerce' ); ?></option>
+						<option value="increase_stock"><?php _e( 'Increase line item stock', 'woocommerce' ); ?></option>
 					</optgroup>
 				</select>
 
