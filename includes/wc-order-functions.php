@@ -435,7 +435,7 @@ function wc_create_refund( $args = array() ) {
 	// Default refund meta data
 	if ( ! $updating ) {
 		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
-		update_post_meta( $refund_id, '_refund_tax', wc_format_decimal( $args['amount'] ) );
+		update_post_meta( $refund_id, '_refund_tax', wc_format_decimal( $args['tax'] ) );
 	}
 
 	return new WC_Order_Refund( $refund_id );
