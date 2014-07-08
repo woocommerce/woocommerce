@@ -106,8 +106,8 @@ class WC_Meta_Box_Order_Items {
 		<div class="wc-order-data-row wc-order-refund-items" style="display:none;">
 			<ul>
 				<li>
-					<label><?php _e( 'Order total', 'woocommerce' ); ?>:</label>
-					<span class="total"><?php echo wc_price( $order->get_total() ); ?></span>
+					<label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label>
+					<span class="checkbox"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" checked="checked" /></span>
 				</li>
 				<li>
 					<label><?php _e( 'Amount already refunded', 'woocommerce' ); ?>:</label>
@@ -119,15 +119,15 @@ class WC_Meta_Box_Order_Items {
 				</li>
 				<li>
 					<label for="refund_amount"><?php _e( 'Refund amount', 'woocommerce' ); ?>:</label>
-					<input type="text" id="refund_amount" name="refund_amount" class="wc_input_price" />
+					<input type="text" class="text" id="refund_amount" name="refund_amount" class="wc_input_price" />
 				</li>
 				<li>
 					<label for="refund_reason"><?php _e( 'Reason for refund (optional)', 'woocommerce' ); ?>:</label>
-					<input type="text" id="refund_reason" name="refund_reason" />
+					<input type="text" class="text" id="refund_reason" name="refund_reason" />
 				</li>
 			</ul>
 			<button type="button" class="button button-primary"><?php printf( _x( 'Refund %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0 ) . '</span>' ); ?></button>
-			<button type="button" class="button button-primary"><?php _e( 'Refund offline', 'woocommerce' ); ?></button>
+			<button type="button" class="button button-primary"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
 			<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 		</div>
 		<?php
