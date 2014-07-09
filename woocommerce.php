@@ -20,15 +20,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WooCommerce' ) ) :
+if ( ! class_exists( 'Woocommerce' ) ) :
 
 /**
  * Main WooCommerce Class
  *
- * @class WooCommerce
+ * @class Woocommerce
  * @version	2.1.0
  */
-final class WooCommerce {
+final class Woocommerce {
 
 	/**
 	 * @var string
@@ -439,7 +439,7 @@ final class WooCommerce {
 
 		// Post thumbnail support
 		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
-			add_theme_support( 'post-thumbnails' );	
+			add_theme_support( 'post-thumbnails' );
 		}
 		add_post_type_support( 'product', 'thumbnail' );
 
@@ -870,10 +870,10 @@ endif;
  * Returns the main instance of WC to prevent the need to use globals.
  *
  * @since  2.1
- * @return WooCommerce
+ * @return Woocommerce
  */
 function WC() {
-	return WooCommerce::instance();
+	return Woocommerce::instance();
 }
 
 // Global for backwards compatibility.
