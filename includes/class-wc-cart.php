@@ -927,7 +927,7 @@ class WC_Cart {
 
 			$this->calculate_totals();
 
-			return true;
+			return $cart_item_key;
 		}
 
 		/**
