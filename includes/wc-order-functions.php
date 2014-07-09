@@ -448,6 +448,9 @@ function wc_create_refund( $args = array() ) {
 	if ( ! $updating ) {
 		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
 		update_post_meta( $refund_id, '_refund_tax', wc_format_decimal( $args['tax'] ) );
+
+		// Set the order type.
+		wp_set_object_terms( $refund_id, 'refund', 'order_type' );
 	}
 
 	return new WC_Order_Refund( $refund_id );
