@@ -293,8 +293,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'charset'       => 'UTF-8',
 				'rm'            => is_ssl() ? 2 : 1,
 				'upload'        => 1,
-				'return'        => urlencode( esc_url( add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ) ) ),
-				'cancel_return' => urlencode( esc_url( $order->get_cancel_order_url() ) ),
+				'return'        => esc_url( add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ) ),
+				'cancel_return' => esc_url( $order->get_cancel_order_url() ),
 				'page_style'    => $this->page_style,
 				'paymentaction' => $this->paymentaction,
 				'bn'            => 'WooThemes_Cart',
@@ -320,6 +320,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			),
 			$phone_args
 		);
+
+		// Encode URLs when not using the form method
+		if ( ! $this->form_submission_method ) {
+			$paypal_args['return'] = urlencode( $paypal_args['return'] );
+			$paypal_args['cancel_return'] = urlencode( $paypal_args['cancel_return'] );
+		}
 
 		// Shipping
 		if ( 'yes' == $this->send_shipping ) {
