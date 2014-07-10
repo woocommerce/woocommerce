@@ -189,7 +189,7 @@ jQuery( function($){
 			var refund_qty = $row.find( '.wc-order-item-refund-quantity input' ).val();
 			
 			if ( refund_qty ) {
-				refund_amount = parseFloat( refund_amount ) + parseFloat( refund_qty * ( $row.attr( 'data-unit_total' ) + $row.attr( 'data-unit_total_tax' ) ) );
+				refund_amount = parseFloat( refund_amount ) + ( refund_qty * ( parseFloat( $row.attr( 'data-unit_total' ) ) + parseFloat( $row.attr( 'data-unit_total_tax' ) ) ) );
 			}
 		} );
 
