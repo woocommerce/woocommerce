@@ -115,7 +115,7 @@ class WC_Meta_Box_Order_Items {
 				</li>
 				<li>
 					<label><?php _e( 'Total available to refund', 'woocommerce' ); ?>:</label>
-					<span class="total"><?php echo wc_price( $order->get_total() ); ?></span>
+					<span class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded() ); ?></span>
 				</li>
 				<li>
 					<label for="refund_amount"><?php _e( 'Refund amount', 'woocommerce' ); ?>:</label>
