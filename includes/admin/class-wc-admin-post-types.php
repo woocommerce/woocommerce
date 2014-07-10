@@ -42,6 +42,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'shop_order_bulk_actions' ) );
 
 		add_filter( 'views_edit-product', array( $this, 'product_sorting_link' ) );
+		add_filter( 'views_edit-shop_order', array( $this, 'shop_order_edit_views' ) );
 
 		// Bulk / quick edit
 		add_action( 'bulk_edit_custom_box', array( $this, 'bulk_edit' ), 10, 2 );
@@ -55,6 +56,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'get_search_query', array( $this, 'shop_order_search_label' ) );
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
 		add_action( 'parse_query', array( $this, 'shop_order_search_custom_fields' ) );
+		add_action( 'parse_query', array( $this, 'shop_order_order_type_query' ) );
 
 		// Filters
 		add_action( 'restrict_manage_posts', array( $this, 'restrict_manage_posts' ) );
@@ -715,6 +717,24 @@ class WC_Admin_Post_Types {
 		return $views;
 	}
 
+	/**
+	 * Custom order edit views.
+	 *
+	 * @since 2.2
+	 * @param array $views
+	 * @return array
+	 */
+	public function shop_order_edit_views( $views ) {
+		$total_orders = wc_count_orders();
+
+		$class = empty( $_REQUEST['post_status'] ) && empty( $_REQUEST['show_sticky'] ) ? ' class="current"' : '';
+		$views['all'] = sprintf( '<a href="edit.php?post_type=shop_order"%s>%s</a>', $class, sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_orders, 'shop_order', 'woocommerce' ), number_format_i18n( $total_orders ) ) );
+
+		// Reve publish orders (like refunds).
+		unset( $views['publish'] );
+
+		return $views;
+	}
 
 	/**
 	 * Custom bulk edit - form
@@ -1285,6 +1305,30 @@ class WC_Admin_Post_Types {
 
 		// Search by found posts
 		$wp->query_vars['post__in'] = $post_ids;
+	}
+
+	/**
+	 * Shop order query by order_type.
+	 * Display only the order_type simple.
+	 *
+	 * @since 2.2
+	 * @param WP_Query $query
+	 * @return void
+	 */
+	public function shop_order_order_type_query( $query ) {
+		global $pagenow;
+
+		if ( 'edit.php' != $pagenow && $query->query_vars['post_type'] != 'shop_order' ) {
+			return;
+		}
+
+		$query->set( 'tax_query', array(
+			array(
+				'taxonomy' => 'order_type',
+				'terms'    => 'simple',
+				'field'    => 'slug'
+			)
+		) );
 	}
 
 	/**
