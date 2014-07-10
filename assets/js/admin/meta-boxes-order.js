@@ -672,6 +672,8 @@ jQuery( function($){
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 					$refund.remove();
 				});
+
+				$( 'form#post' ).submit();
 			}
 			return false;
 		});
