@@ -72,6 +72,7 @@ class WC_Order extends WC_Abstract_Order {
 			INNER JOIN $wpdb->term_taxonomy AS term_taxonomy ON( term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id AND term_taxonomy.taxonomy = 'order_type' )
 			INNER JOIN $wpdb->terms AS terms ON( term_taxonomy.term_id = terms.term_id AND terms.name = 'refund' )
 			WHERE postmeta.meta_key = '_refund_amount'
+			AND postmeta.post_id = posts.ID
 			GROUP BY posts.ID
 		", $this->id ) );
 
