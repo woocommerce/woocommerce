@@ -408,7 +408,6 @@ function wc_create_refund( $args = array() ) {
 	$default_args = array(
 		'amount'    => '',
 		'reason'    => null,
-		'tax'       => '',
 		'order_id'  => 0,
 		'refund_id' => 0
 	);
@@ -447,7 +446,6 @@ function wc_create_refund( $args = array() ) {
 	// Default refund meta data
 	if ( ! $updating ) {
 		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
-		update_post_meta( $refund_id, '_refund_tax', wc_format_decimal( $args['tax'] ) );
 
 		// Set the order type.
 		wp_set_object_terms( $refund_id, 'refund', 'order_type' );

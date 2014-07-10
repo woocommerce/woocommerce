@@ -1641,9 +1641,50 @@ class WC_AJAX {
 		$refund_amount = sanitize_text_field( $_POST['refund_amount'] );
 		$refund_reason = sanitize_text_field( $_POST['refund_reason'] );
 		$refund_qty    = json_decode( sanitize_text_field( stripslashes( $_POST['refund_qty'] ) ) );
-		$api_refund    = $_POST['api_refund'] ? true : false;
+		$api_refund    = $_POST['api_refund'] === 'true' ? true : false;
 
-		wp_send_json( true );
+		try {
+
+			// Validate that the refund can occur
+			$order      = get_order( $order_id );
+			$max_refund = $order->get_total() - $order->get_total_refunded();
+
+			if ( ! $refund_amount || $max_refund < $refund_amount ) {
+				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
+			}
+		
+			// Create the refund object
+			$refund = wc_create_refund( array(
+				'amount'    => $refund_amount,
+				'reason'    => $refund_reason,
+				'order_id'  => $order_id
+			) );
+
+			if ( is_wp_error( $refund ) ) {
+				throw new exception( $refund->get_error_message() );
+			}
+
+			// Refund via API
+			if ( $api_refund ) {
+				if ( WC()->payment_gateways() ) {
+					$payment_gateways = WC()->payment_gateways->payment_gateways();
+				}
+				if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
+					$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund_amount );
+
+					if ( is_wp_error( $result ) ) {
+						throw new exception( $result->get_error_message() );
+					} elseif ( ! $result ) {
+						throw new exception( __( 'Refund failed', 'woocommerce' ) );
+					}
+				}
+			}
+
+			wp_send_json( true );
+
+		} catch ( Exception $e ) {
+			wp_send_json( array( 'error' => $e->getMessage() ) );
+		}
 	}
 }
 

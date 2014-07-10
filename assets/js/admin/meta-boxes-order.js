@@ -447,8 +447,10 @@ jQuery( function($){
 				};
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 					console.log( response );
-					if ( response ) {
+					if ( response === true ) {
 						window.location.reload();
+					} else if ( response.error ) {
+						alert( response.error );
 					}
 					$('#woocommerce-order-items').unblock();
 				});
