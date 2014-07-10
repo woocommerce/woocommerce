@@ -532,6 +532,20 @@ class WC_Tax {
 	}
 
 	/**
+	 * Return a given rates percent.
+	 *
+	 * @param   int		key
+	 * @return  string
+	 */
+	public static function get_rate_percent( $key ) {
+		global $wpdb;
+
+		$tax_rate = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
+
+		return apply_filters( 'woocommerce_rate_percent', floatval( $tax_rate ) . '%', $key );
+	}
+
+	/**
 	 * Get a rates code. Code is made up of COUNTRY-STATE-NAME-Priority. E.g GB-VAT-1, US-AL-TAX-1
 	 *
 	 * @access public
