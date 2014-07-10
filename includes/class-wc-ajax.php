@@ -58,7 +58,8 @@ class WC_AJAX {
 			'json_search_customers'                            => false,
 			'term_ordering'                                    => false,
 			'product_ordering'                                 => false,
-			'refund_line_items'                                => false
+			'refund_line_items'                                => false,
+			'delete_refund'                                    => false
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -1685,6 +1686,21 @@ class WC_AJAX {
 		} catch ( Exception $e ) {
 			wp_send_json( array( 'error' => $e->getMessage() ) );
 		}
+	}
+
+	/**
+	 * Delete a refund
+	 */
+	public static function delete_refund() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		$refund_id = absint( $_POST['refund_id'] );
+		
+		if ( $refund_id && 'shop_order' === get_post_type( $refund_id ) ) {
+			wp_delete_post( $refund_id );
+		}
+
+		die();
 	}
 }
 

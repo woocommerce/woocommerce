@@ -451,8 +451,8 @@ jQuery( function($){
 						window.location.reload();
 					} else if ( response.error ) {
 						alert( response.error );
+						$('#woocommerce-order-items').unblock();
 					}
-					$('#woocommerce-order-items').unblock();
 				});
 			} else {
 				$('#woocommerce-order-items').unblock();
@@ -624,6 +624,21 @@ jQuery( function($){
 
 			$('#woocommerce-order-totals').unblock();
 
+			return false;
+		})
+		.on( 'click', '.delete_refund', function () {
+			if ( confirm( woocommerce_admin_meta_boxes.i18n_delete_refund ) ) {
+				var $refund = $(this).closest('li');
+				var data    = {
+					action: 		'woocommerce_delete_refund',
+					refund_id:		$refund.data('id'),
+					security: 		woocommerce_admin_meta_boxes.order_item_nonce,
+				};
+
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+					$refund.remove();
+				});
+			}
 			return false;
 		});
 

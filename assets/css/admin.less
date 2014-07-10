@@ -1051,7 +1051,7 @@ ul.wc_coupon_list_block {
 				width: 100%;
 			}
 		}
-		a.delete_tax_row, a.delete_total_row {
+		a.delete_tax_row, a.delete_total_row, a.delete_refund {
 			.ir;
 			display:none;
 			position: absolute;
@@ -1071,8 +1071,33 @@ ul.wc_coupon_list_block {
 			}
 		}
 		&:hover, &:focus {
-			a.delete_tax_row, a.delete_total_row {
+			a.delete_tax_row, a.delete_total_row, a.delete_refund {
 				display: block;
+			}
+		}
+	}
+	.refunds {
+		margin: 6px 0 0;
+		li.total_row {
+			padding: 9px 12px 0;
+			margin:0 -12px !important;
+			&:last-child {
+				border-bottom: 0;
+			}
+			.amount {
+				font-weight: bold;
+				margin-right: 1em;
+				float: left;
+			}
+			.date {
+				float: right;
+				color: #999;
+			}
+			p {
+				clear: both;
+				padding: 0 0 9px;
+				margin: 0;
+				overflow: hidden;
 			}
 		}
 	}
