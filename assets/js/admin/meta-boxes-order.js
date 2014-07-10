@@ -425,11 +425,36 @@ jQuery( function($){
 				format		: woocommerce_admin_meta_boxes.currency_format
 			} ) );
 		})
-		.on( 'click', 'button.do-api-refund', function() {
+		.on( 'click', 'button.do-api-refund, button.do-manual-refund', function() {
+			$('#woocommerce-order-items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 
-		})
-		.on( 'click', 'button.do-manual-refund', function() {
-
+			if ( confirm( woocommerce_admin_meta_boxes.i18n_do_refund ) ) {
+				var refund_amount = $('input#refund_amount').val();
+				var refund_reason = $('input#refund_reason').val();
+				var refund_qty    = $.map( $('input[type=number][name^=order_item_refund_qty]' ), function( item ) {
+					var result = [];
+					result.push( $(item).closest('tr.item,tr.fee').data('order_item_id'), item.value );
+					return result;
+				});
+				var data          = {
+					action:        'woocommerce_refund_line_items',
+					order_id:      woocommerce_admin_meta_boxes.post_id,
+					refund_amount: refund_amount,
+					refund_reason: refund_reason,
+					refund_qty:    JSON.stringify( refund_qty, null, '' ),
+					api_refund:    $(this).is('.do-api-refund'),
+					security:      woocommerce_admin_meta_boxes.order_item_nonce
+				};
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+					console.log( response );
+					if ( response ) {
+						window.location.reload();
+					}
+					$('#woocommerce-order-items').unblock();
+				});
+			} else {
+				$('#woocommerce-order-items').unblock();
+			}
 		});
 
 	// Display a total for taxes

@@ -126,8 +126,8 @@ class WC_Meta_Box_Order_Items {
 					<input type="text" class="text" id="refund_reason" name="refund_reason" />
 				</li>
 			</ul>
-			<button type="button" class="button button-primary"><?php printf( _x( 'Refund %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0 ) . '</span>' ); ?></button>
-			<button type="button" class="button button-primary"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
+			<button type="button" class="button button-primary do-api-refund"><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0 ) . '</span>', $order->payment_method_title ); ?></button>
+			<button type="button" class="button button-primary do-manual-refund"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
 			<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 		</div>
 		<?php

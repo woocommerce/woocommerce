@@ -24,40 +24,41 @@ class WC_AJAX {
 
 		// woocommerce_EVENT => nopriv
 		$ajax_events = array(
-			'get_refreshed_fragments'             				=> true,
-			'apply_coupon'                        				=> true,
-			'update_shipping_method'              				=> true,
-			'update_order_review'                 				=> true,
-			'add_to_cart'                         				=> true,
-			'checkout'                            				=> true,
-			'feature_product'                     				=> false,
-			'mark_order_complete'                 				=> false,
-			'mark_order_processing'               				=> false,
-			'add_new_attribute'                   				=> false,
-			'remove_variation'                    				=> false,
-			'remove_variations'                   				=> false,
-			'save_attributes'                     				=> false,
-			'add_variation'                       				=> false,
-			'link_all_variations'                 				=> false,
-			'revoke_access_to_download'           				=> false,
-			'grant_access_to_download'            				=> false,
-			'get_customer_details'                				=> false,
-			'add_order_item'                      				=> false,
-			'add_order_fee'                       				=> false,
-			'remove_order_item'                   				=> false,
-			'reduce_order_item_stock'             				=> false,
-			'increase_order_item_stock'           				=> false,
-			'add_order_item_meta'                 				=> false,
-			'remove_order_item_meta'              				=> false,
-			'calc_line_taxes'                     				=> false,
-			'add_order_note'                      				=> false,
-			'delete_order_note'                  			 	=> false,
-			'json_search_products'                				=> false,
-			'json_search_products_and_variations' 				=> false,
-			'json_search_downloadable_products_and_variations' 	=> false,
-			'json_search_customers'               				=> false,
-			'term_ordering'                       				=> false,
-			'product_ordering'                    				=> false
+			'get_refreshed_fragments'                          => true,
+			'apply_coupon'                                     => true,
+			'update_shipping_method'                           => true,
+			'update_order_review'                              => true,
+			'add_to_cart'                                      => true,
+			'checkout'                                         => true,
+			'feature_product'                                  => false,
+			'mark_order_complete'                              => false,
+			'mark_order_processing'                            => false,
+			'add_new_attribute'                                => false,
+			'remove_variation'                                 => false,
+			'remove_variations'                                => false,
+			'save_attributes'                                  => false,
+			'add_variation'                                    => false,
+			'link_all_variations'                              => false,
+			'revoke_access_to_download'                        => false,
+			'grant_access_to_download'                         => false,
+			'get_customer_details'                             => false,
+			'add_order_item'                                   => false,
+			'add_order_fee'                                    => false,
+			'remove_order_item'                                => false,
+			'reduce_order_item_stock'                          => false,
+			'increase_order_item_stock'                        => false,
+			'add_order_item_meta'                              => false,
+			'remove_order_item_meta'                           => false,
+			'calc_line_taxes'                                  => false,
+			'add_order_note'                                   => false,
+			'delete_order_note'                                => false,
+			'json_search_products'                             => false,
+			'json_search_products_and_variations'              => false,
+			'json_search_downloadable_products_and_variations' => false,
+			'json_search_customers'                            => false,
+			'term_ordering'                                    => false,
+			'product_ordering'                                 => false,
+			'refund_line_items'                                => false
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -1628,7 +1629,21 @@ class WC_AJAX {
 		}
 
 		wp_send_json( $new_pos );
+	}
 
+	/**
+	 * Handle a refund via the edit order screen
+	 */
+	public static function refund_line_items() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		$order_id      = absint( $_POST['order_id'] );
+		$refund_amount = sanitize_text_field( $_POST['refund_amount'] );
+		$refund_reason = sanitize_text_field( $_POST['refund_reason'] );
+		$refund_qty    = json_decode( sanitize_text_field( stripslashes( $_POST['refund_qty'] ) ) );
+		$api_refund    = $_POST['api_refund'] ? true : false;
+
+		wp_send_json( true );
 	}
 }
 
