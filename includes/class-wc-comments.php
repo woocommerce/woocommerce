@@ -49,7 +49,7 @@ class WC_Comments {
 	public static function exclude_order_comments( $clauses ) {
 		global $wpdb, $typenow;
 
-		if ( is_admin() && $typenow == 'shop_order' && current_user_can( 'manage_woocommerce' ) )
+		if ( is_admin() && in_array( $typenow, wc_get_order_types() ) && current_user_can( 'manage_woocommerce' ) )
 			return $clauses; // Don't hide when viewing orders in admin
 
 		if ( ! $clauses['join'] )
@@ -61,7 +61,7 @@ class WC_Comments {
 		if ( $clauses['where'] )
 			$clauses['where'] .= ' AND ';
 
-		$clauses['where'] .= " $wpdb->posts.post_type NOT IN ('shop_order') ";
+		$clauses['where'] .= " $wpdb->posts.post_type NOT IN ('" . implode( ',', wc_get_order_types() ) . "') ";
 
 		return $clauses;
 	}
@@ -93,7 +93,7 @@ class WC_Comments {
 	    if ( $where )
 	    	$where .= ' AND ';
 
-		$where .= " $wpdb->posts.post_type NOT IN ('shop_order') ";
+		$where .= " $wpdb->posts.post_type NOT IN ('" . implode( ',', wc_get_order_types() ) . "') ";
 
 	    return $where;
 	}

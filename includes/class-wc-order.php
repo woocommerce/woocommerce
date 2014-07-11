@@ -34,17 +34,10 @@ class WC_Order extends WC_Abstract_Order {
 		$refunds      = array();
 		$refund_items = get_posts(
 			array(
-				'post_type'      => 'shop_order',
+				'post_type'      => 'shop_order_refund',
 				'post_parent'    => $this->id,
 				'posts_per_page' => -1,
-				'fields'         => 'ids',
-				'tax_query'      => array(
-					array(
-						'taxonomy' => 'order_type',
-						'terms'    => 'refund',
-						'field'    => 'slug'
-					)
-				)
+				'fields'         => 'ids'
 			)
 		);
 
@@ -67,10 +60,7 @@ class WC_Order extends WC_Abstract_Order {
 		$total = $wpdb->get_var( $wpdb->prepare( "
 			SELECT SUM( postmeta.meta_value )
 			FROM $wpdb->postmeta AS postmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order' AND posts.post_parent = %d )
-			INNER JOIN $wpdb->term_relationships AS term_relationships ON ( posts.ID = term_relationships.object_id )
-			INNER JOIN $wpdb->term_taxonomy AS term_taxonomy ON( term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id AND term_taxonomy.taxonomy = 'order_type' )
-			INNER JOIN $wpdb->terms AS terms ON( term_taxonomy.term_id = terms.term_id AND terms.name = 'refund' )
+			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
 			WHERE postmeta.meta_key = '_refund_amount'
 			GROUP BY posts.ID
 		", $this->id ) );

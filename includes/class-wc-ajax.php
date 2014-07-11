@@ -1696,7 +1696,7 @@ class WC_AJAX {
 
 		$refund_id = absint( $_POST['refund_id'] );
 		
-		if ( $refund_id && 'shop_order' === get_post_type( $refund_id ) ) {
+		if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
 			wp_delete_post( $refund_id );
 		}
 

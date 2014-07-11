@@ -146,7 +146,7 @@ class WC_Post_Data {
 	 * @return null|bool
 	 */
 	public static function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
-		if ( ! empty( $meta_value ) && is_float( $meta_value ) && in_array( get_post_type( $object_id ), array( 'shop_order', 'shop_coupon', 'product', 'product_variation' ) ) ) {
+		if ( ! empty( $meta_value ) && is_float( $meta_value ) && in_array( get_post_type( $object_id ), array_merge( wc_get_order_types(), array( 'shop_coupon', 'product', 'product_variation' ) ) ) ) {
 
 			// Convert float to string
 			$meta_value = wc_float_to_string( $meta_value );

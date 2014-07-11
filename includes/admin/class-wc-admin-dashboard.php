@@ -52,7 +52,7 @@ class WC_Admin_Dashboard {
 		$query            = array();
 		$query['fields']  = "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts";
 		$query['join']    = "INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id ";
-		$query['where']   = "WHERE posts.post_type = 'shop_order' ";
+		$query['where']   = "WHERE posts.post_type IN ( '" . implode( ',', wc_get_order_types( 'reports' ) ) . "' ) ";
 		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
 		$query['where']  .= "AND postmeta.meta_key   = '_order_total' ";
 		$query['where']  .= "AND posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
@@ -67,7 +67,7 @@ class WC_Admin_Dashboard {
 		$query['join']    = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id ";
 		$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
 		$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
-		$query['where']   = "WHERE posts.post_type = 'shop_order' ";
+		$query['where']   = "WHERE posts.post_type IN ( '" . implode( ',', wc_get_order_types( 'reports' ) ) . "' ) ";
 		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
 		$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";
 		$query['where']  .= "AND order_item_meta_2.meta_key = '_product_id' ";
@@ -80,9 +80,14 @@ class WC_Admin_Dashboard {
 		$top_seller = $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) );
 
 		// Counts
-		$counts           = (array) wp_count_posts( 'shop_order' );
-		$on_hold_count    = $counts['wc-on-hold'];
-		$processing_count = $counts['wc-processing'];
+		$on_hold_count    = 0;
+		$processing_count = 0;
+
+		foreach ( wc_get_order_types( 'order-count' ) as $type ) {
+			$counts           = (array) wp_count_posts( $type );
+			$on_hold_count    += isset( $counts['wc-on-hold'] ) ? $counts['wc-on-hold'] : 0;
+			$processing_count += isset( $counts['wc-processing'] ? $counts['wc-processing'] : 0;
+		}
 
 		// Get products using a query - this is too advanced for get_posts :(
 		$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
