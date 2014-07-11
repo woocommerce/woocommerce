@@ -143,11 +143,11 @@ function wc_get_order_type( $type ) {
 /**
  * Register order type
  *
- * Wrapper for register post type, as well as a method of telling WC which 
+ * Wrapper for register post type, as well as a method of telling WC which
  * post types are types of orders, and having them treated as such.
  *
  * $args are passed to register_post_type, but there are a few specific to this function:
- * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main 
+ * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main
  * 		orders screen.
  * 		- add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
  * 		- exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
@@ -566,9 +566,6 @@ function wc_create_refund( $args = array() ) {
 	// Default refund meta data
 	if ( ! $updating ) {
 		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
-
-		// Set the order type.
-		wp_set_object_terms( $refund_id, 'refund', 'order_type' );
 	}
 
 	return new WC_Order_Refund( $refund_id );
