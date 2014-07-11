@@ -116,11 +116,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			            	<th><?php _e( 'BIC / Swift', 'woocommerce' ); ?></th>
 		    			</tr>
 		    		</thead>
-		    		<tfoot>
-		    			<tr>
-		    				<th colspan="7"><a href="#" class="add button"><?php _e( '+ Add Account', 'woocommerce' ); ?></a> <a href="#" class="remove_rows button"><?php _e( 'Remove selected account(s)', 'woocommerce' ); ?></a></th>
-		    			</tr>
-		    		</tfoot>
 		    		<tbody class="accounts">
 		            	<?php
 		            	$i = -1;
@@ -141,6 +136,11 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		            	}
 		            	?>
 		        	</tbody>
+		    		<tfoot>
+		    			<tr>
+		    				<th colspan="7"><a href="#" class="add button"><?php _e( '+ Add Account', 'woocommerce' ); ?></a> <a href="#" class="remove_rows button"><?php _e( 'Remove selected account(s)', 'woocommerce' ); ?></a></th>
+		    			</tr>
+		    		</tfoot>
 		        </table>
 		       	<script type="text/javascript">
 					jQuery(function() {

@@ -98,11 +98,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 		<div class="edit" style="display:none">
 			<table class="meta" cellspacing="0">
-				<tfoot>
-					<tr>
-						<td colspan="4"><button class="add_order_item_meta button"><?php _e( 'Add&nbsp;meta', 'woocommerce' ); ?></button></td>
-					</tr>
-				</tfoot>
 				<tbody class="meta_items">
 				<?php
 					if ( $metadata = $order->has_meta( $item_id )) {
@@ -142,6 +137,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 					}
 				?>
 				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="4"><button class="add_order_item_meta button"><?php _e( 'Add&nbsp;meta', 'woocommerce' ); ?></button></td>
+					</tr>
+				</tfoot>
 			</table>
 		</div>
 	</td>

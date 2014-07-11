@@ -193,6 +193,17 @@ class WC_Meta_Box_Product_Data {
 									<th>&nbsp;</th>
 								</tr>
 							</thead>
+							<tbody>
+								<?php
+								$downloadable_files = get_post_meta( $post->ID, '_downloadable_files', true );
+
+								if ( $downloadable_files ) {
+									foreach ( $downloadable_files as $key => $file ) {
+										include( 'views/html-product-download.php' );
+									}
+								}
+								?>
+							</tbody>
 							<tfoot>
 								<tr>
 									<th colspan="5">
@@ -208,17 +219,6 @@ class WC_Meta_Box_Product_Data {
 									</th>
 								</tr>
 							</tfoot>
-							<tbody>
-								<?php
-								$downloadable_files = get_post_meta( $post->ID, '_downloadable_files', true );
-
-								if ( $downloadable_files ) {
-									foreach ( $downloadable_files as $key => $file ) {
-										include( 'views/html-product-download.php' );
-									}
-								}
-								?>
-							</tbody>
 						</table>
 					</div>
 					<?php
