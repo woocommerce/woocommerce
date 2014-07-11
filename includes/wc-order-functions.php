@@ -573,3 +573,23 @@ function wc_create_refund( $args = array() ) {
 
 	return new WC_Order_Refund( $refund_id );
 }
+
+/**
+ * Get orders total count.
+ *
+ * @since 2.2
+ * @return int
+ */
+function wc_count_orders() {
+	$count    = 0;
+	$items    = wp_count_posts( 'shop_order' );
+	$statuses = array_keys( wc_get_order_statuses() );
+
+	foreach ( $statuses as $status ) {
+		if ( isset( $items->$status ) ) {
+			$count += $items->$status;
+		}
+	}
+
+	return $count;
+}

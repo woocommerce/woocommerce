@@ -30,7 +30,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-pending'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'pending%';
@@ -42,7 +42,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-processing'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'processing%';
@@ -54,7 +54,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-on-hold'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'on-hold%';
@@ -66,7 +66,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-completed'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'completed%';
@@ -78,7 +78,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-cancelled'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'cancelled%';
@@ -90,7 +90,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-refunded'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'refunded%';
@@ -102,7 +102,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-failed'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'failed%';
@@ -122,4 +122,18 @@ $update_variations = $wpdb->get_col( "
 
 foreach ( $update_variations as $variation_id ) {
 	add_post_meta( $variation_id, '_manage_stock', 'yes', true );
+}
+
+// Add order type for shop_order
+foreach ( array( 'simple', 'refund' ) as $term ) {
+	if ( ! get_term_by( 'slug', sanitize_title( $term ), 'order_type' ) ) {
+		wp_insert_term( $term, 'order_type' );
+	}
+}
+
+// Update order and add new order_type
+$shop_orders = $wpdb->get_results( "SELECT DISTINCT ID FROM $wpdb->posts WHERE post_type = 'shop_order' AND post_status != 'publish'" );
+
+foreach ( $shop_orders as $order ) {
+	wp_set_object_terms( $order->ID, 'simple', 'order_type' );
 }
