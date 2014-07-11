@@ -86,7 +86,7 @@ class WC_Admin_Dashboard {
 		foreach ( wc_get_order_types( 'order-count' ) as $type ) {
 			$counts           = (array) wp_count_posts( $type );
 			$on_hold_count    += isset( $counts['wc-on-hold'] ) ? $counts['wc-on-hold'] : 0;
-			$processing_count += isset( $counts['wc-processing'] ? $counts['wc-processing'] : 0;
+			$processing_count += isset( $counts['wc-processing'] ) ? $counts['wc-processing'] : 0;
 		}
 
 		// Get products using a query - this is too advanced for get_posts :(
