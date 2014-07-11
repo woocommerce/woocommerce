@@ -153,7 +153,7 @@ class WC_Meta_Box_Order_Data {
 		</style>
 		<div class="panel-wrap woocommerce">
 			<input name="post_title" type="hidden" value="<?php echo empty( $post->post_title ) ? 'Order' : esc_attr( $post->post_title ); ?>" />
-			<input name="post_status" type="hidden" value="publish" />
+			<input name="post_status" type="hidden" value="<?php echo esc_attr( $order->get_status() ); ?>" />
 			<div id="order_data" class="panel">
 
 				<h2><?php printf( __( 'Order %s details', 'woocommerce' ), esc_html( $order->get_order_number() ) ); ?></h2>
