@@ -33,7 +33,7 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-					
+
 					<option value="refund_order"><?php _e( 'Refund this order', 'woocommerce' ); ?></option>
 					<option value="refund_order"><?php _e( 'Cancel this order', 'woocommerce' ); ?></option>
 
@@ -54,7 +54,7 @@ class WC_Meta_Box_Order_Actions {
 					</optgroup>
 
 					<option value="regenerate_download_permissions"><?php _e( 'Generate download permissions', 'woocommerce' ); ?></option>
-					
+
 					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
@@ -90,9 +90,6 @@ class WC_Meta_Box_Order_Actions {
 	public static function save( $post_id, $post ) {
 		// Order data saved, now get it so we can manipulate status
 		$order = get_order( $post_id );
-
-		// Order type
-		wp_set_object_terms( $post_id, 'simple', 'order_type' );
 
 		// Handle button actions
 		if ( ! empty( $_POST['wc_order_action'] ) ) {
