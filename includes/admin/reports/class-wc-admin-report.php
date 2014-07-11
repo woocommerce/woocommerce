@@ -128,7 +128,7 @@ class WC_Admin_Report {
 		$query['join'] = implode( ' ', $joins );
 
 		$query['where']  = "
-			WHERE 	posts.post_type 	= 'shop_order'
+			WHERE 	posts.post_type 	IN ( '" . implode( ',', wc_get_order_types( 'reports' ) ) . "' )
 			AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			";
 

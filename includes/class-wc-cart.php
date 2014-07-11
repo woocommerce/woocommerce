@@ -481,7 +481,7 @@ class WC_Cart {
 
 							WHERE 	order_item_meta.meta_key   = '_qty'
 							AND 	order_item_meta2.meta_key  = %s AND order_item_meta2.meta_value  = %d
-							AND 	posts.post_type            = 'shop_order'
+							AND 	posts.post_type            IN ( '" . implode( ',', wc_get_order_types() ) . "' )
 							AND 	posts.post_status          = 'wc-pending'
 							AND		posts.ID                   != %d
 						", $key, $value, $order_id ) );

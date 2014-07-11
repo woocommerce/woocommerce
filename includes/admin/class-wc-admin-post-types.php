@@ -1524,6 +1524,7 @@ class WC_Admin_Post_Types {
 			}
 
 		} elseif ( 'shop_order' === $typenow ) {
+
 			// Filter the orders by the posted customer.
 			if ( isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
 				$vars['meta_key'] = '_customer_user';

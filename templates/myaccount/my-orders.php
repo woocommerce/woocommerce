@@ -17,7 +17,7 @@ $customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_q
 	'numberposts' => $order_count,
 	'meta_key'    => '_customer_user',
 	'meta_value'  => get_current_user_id(),
-	'post_type'   => 'shop_order',
+	'post_type'   => wc_get_order_types( 'view-orders' ),
 	'post_status' => array_keys( wc_get_order_statuses() )
 ) ) );
 

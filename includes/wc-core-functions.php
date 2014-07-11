@@ -108,9 +108,6 @@ function wc_create_order( $args = array() ) {
 		update_post_meta( $order_id, '_customer_user', $args['customer_id'] );
 	}
 
-	// Set the order type.
-	wp_set_object_terms( $order_id, 'simple', 'order_type' );
-
 	return new WC_Order( $order_id );
 }
 

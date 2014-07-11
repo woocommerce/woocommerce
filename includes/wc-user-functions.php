@@ -143,7 +143,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 
 	$customer_orders = get_posts( array(
 		'numberposts' => -1,
-		'post_type'   => 'shop_order',
+		'post_type'   => wc_get_order_types(),
 		'post_status' => array_keys( wc_get_order_statuses() ),
 		'fields'      => 'ids',
 		'meta_query' => array(

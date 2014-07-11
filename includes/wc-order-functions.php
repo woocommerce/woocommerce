@@ -69,6 +69,132 @@ function wc_get_order_id_by_order_key( $order_key ) {
 }
 
 /**
+ * Get all registered order types
+ *
+ * $for optionally define what you are getting order types for so only relevent types are returned.
+ *
+ * e.g. for 'order-meta-boxes', 'order-count'
+ *
+ * @since  2.2
+ * @param  string $for
+ * @return array
+ */
+function wc_get_order_types( $for = '' ) {
+	global $wc_order_types;
+
+	if ( ! is_array( $wc_order_types ) ) {
+		$wc_order_types = array();
+	}
+
+	$order_types = array();
+
+	switch ( $for ) {
+		case 'order-count' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_order_count'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		case 'order-meta-boxes' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( $args['add_order_meta_boxes'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		case 'view-orders' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_order_views'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		case 'reports' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_order_reports'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		default :
+			$order_types = array_keys( $wc_order_types );
+		break;
+	}
+
+	return apply_filters( 'wc_order_types', $order_types, $for );
+}
+
+/**
+ * Get an order type by post type name
+ * @param  string post type name
+ * @return bool|array of datails about the order type
+ */
+function wc_get_order_type( $type ) {
+	global $wc_order_types;
+
+	if ( isset( $wc_order_types[ $type ] ) ) {
+		return $wc_order_types[ $type ];
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Register order type
+ *
+ * Wrapper for register post type, as well as a method of telling WC which 
+ * post types are types of orders, and having them treated as such.
+ *
+ * $args are passed to register_post_type, but there are a few specific to this function:
+ * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main 
+ * 		orders screen.
+ * 		- add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
+ * 		- exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
+ * 		- exclude_from_order_views (bool) Whether or not this order type is visible by customers when
+ * 		viewing orders e.g. on the my account page.
+ * 		- exclude_from_order_reports (bool) Whether or not to exclude this type from core reports.
+ *
+ * @since  2.2
+ * @see    register_post_type for $args used in that function
+ * @param  string $type Post type. (max. 20 characters, can not contain capital letters or spaces)
+ * @param  array $args An array of arguments.
+ * @return bool Success or failure
+ */
+function wc_register_order_type( $type, $args = array() ) {
+	if ( post_type_exists( $type ) ) {
+		return false;
+	}
+
+	global $wc_order_types;
+
+	if ( ! is_array( $wc_order_types ) ) {
+		$wc_order_types = array();
+	}
+
+	// Register as a post type
+	if ( is_wp_error( register_post_type( $type, $args ) ) ) {
+		return false;
+	}
+
+	// Register for WC usage
+	$order_type_args = array(
+		'exclude_from_orders_screen' => false,
+		'add_order_meta_boxes'       => true,
+		'exclude_from_order_count'   => false,
+		'exclude_from_order_views'   => false,
+		'exclude_from_order_reports' => false,
+		'class_name'                 => 'WC_Order'
+	);
+
+	$args                    = array_intersect_key( $args, $order_type_args );
+	$args                    = wp_parse_args( $args, $order_type_args );
+	$wc_order_types[ $type ] = $args;
+
+	return true;
+}
+
+/**
  * Grant downloadable product access to the file identified by $download_id
  *
  * @access public
@@ -316,7 +442,7 @@ function wc_cancel_unpaid_orders() {
 	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
 		SELECT posts.ID
 		FROM {$wpdb->posts} AS posts
-		WHERE 	posts.post_type   = 'shop_order'
+		WHERE 	posts.post_type   IN ('" . implode( ',', wc_get_order_types() ) . "')
 		AND 	posts.post_status = 'wc-pending'
 		AND 	posts.post_modified < %s
 	", $date ) );
@@ -343,8 +469,14 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
  * @return int
  */
 function wc_processing_order_count() {
-	$count = wp_count_posts( 'shop_order', 'readable' );
-	return isset( $count->processing ) ? $count->processing : 0;
+	$count = 0;
+
+	foreach ( wc_get_order_types( 'order-count' ) as $type ) {
+		$this_count = wp_count_posts( $type, 'readable' );
+		$count      += isset( $count->processing ) ? $count->processing : 0;
+	}
+
+	return $count;
 }
 
 /**
@@ -384,102 +516,6 @@ function wc_ship_to_billing_address_only() {
 }
 
 /**
- * Get all registered order types
- *
- * $for optionally define what you are getting order types for so only relevent types are returned.
- *
- * e.g. for 'default-order-meta-boxes', 'orders-screen', 'order-count'
- *
- * @since  2.2
- * @param  string $for
- * @return array
- */
-function wc_get_order_types( $for = '' ) {
-	global $wc_order_types;
-
-	if ( ! is_array( $wc_order_types ) ) {
-		$wc_order_types = array();
-	}
-
-	switch ( $for ) {
-		case 'orders-screen' :
-			foreach ( $wc_order_types as $type => $args ) {
-				if ( ! $args['exclude_from_orders_screen'] ) {
-					$order_types[] = $type;
-				}
-			}
-		break;
-		case 'order-count' :
-			foreach ( $wc_order_types as $type => $args ) {
-				if ( ! $args['exclude_from_order_count'] ) {
-					$order_types[] = $type;
-				}
-			}
-		break;
-		case 'default-order-meta-boxes' :
-			foreach ( $wc_order_types as $type => $args ) {
-				if ( $args['add_order_meta_boxes'] ) {
-					$order_types[] = $type;
-				}
-			}
-		break;
-		default :
-			$order_types = array_keys( $wc_order_types );
-		break;
-	}
-
-	return apply_filters( 'wc_order_types', $order_types, $for );
-}
-
-/**
- * Register order type
- *
- * Wrapper for register post type, as well as a method of telling WC which 
- * post types are types of orders, and having them treated as such.
- *
- * $args are passed to register_post_type, but there are a few specific to this function:
- * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main 
- * 		orders screen.
- * 		- add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
- * 		- exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
- *
- * @since  2.2
- * @see    register_post_type for $args used in that function
- * @param  string $type Post type. (max. 20 characters, can not contain capital letters or spaces)
- * @param  array $args An array of arguments.
- * @return bool Success or failure
- */
-function wc_register_order_type( $type, $args ) {
-	if ( post_type_exists( $type ) ) {
-		return false;
-	}
-
-	global $wc_order_types;
-
-	if ( ! is_array( $wc_order_types ) ) {
-		$wc_order_types = array();
-	}
-
-	// Register as a post type
-	if ( is_wp_error( register_post_type( $type, $args ) ) ) {
-		return false;
-	}
-
-	// Register for WC usage
-	$order_type_args = array(
-		'exclude_from_orders_screen' => false,
-		'add_order_meta_boxes'       => true,
-		'exclude_from_order_count'   => false
-	);
-
-	$args                    = array_intersect( $args, $order_type_args );
-	$args                    = wp_parse_args( $args, $order_type_args );
-	$wc_order_types[ $type ] = $args;
-
-	return true;
-}
-
-/**
  * Create a new order refund programmatically
  *
  * Returns a new refund object on success which can then be used to add additonal data.
@@ -504,7 +540,7 @@ function wc_create_refund( $args = array() ) {
 		$refund_data['ID'] = $args['refund_id'];
 	} else {
 		$updating                     = false;
-		$refund_data['post_type']     = 'shop_order';
+		$refund_data['post_type']     = 'shop_order_refund';
 		$refund_data['post_status']   = 'publish';
 		$refund_data['ping_status']   = 'closed';
 		$refund_data['post_author']   = 1;

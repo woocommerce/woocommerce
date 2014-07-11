@@ -17,16 +17,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 function wc_get_screen_ids() {
 	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
-
-    return apply_filters( 'woocommerce_screen_ids', array(
+    $screen_ids   = array(
     	'toplevel_page_' . $wc_screen_id,
     	$wc_screen_id . '_page_wc-reports',
     	$wc_screen_id . '_page_wc-settings',
     	$wc_screen_id . '_page_wc-status',
         $wc_screen_id . '_page_wc-addons',
     	'product_page_product_attributes',
-    	'edit-shop_order',
-    	'shop_order',
     	'edit-product',
     	'product',
     	'edit-shop_coupon',
@@ -34,7 +31,14 @@ function wc_get_screen_ids() {
     	'edit-product_cat',
     	'edit-product_tag',
     	'edit-product_shipping_class'
-    ) );
+    );
+
+    foreach ( wc_get_order_types() as $type ) {
+        $screen_ids[] = $type;
+        $screen_ids[] = 'edit-' . $type;
+    }
+
+    return apply_filters( 'woocommerce_screen_ids', $screen_ids );
 }
 
 /**

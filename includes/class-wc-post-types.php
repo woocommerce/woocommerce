@@ -37,18 +37,6 @@ class WC_Post_types {
 
 		$permalinks = get_option( 'woocommerce_permalinks' );
 
-		register_taxonomy( 'order_type',
-			apply_filters( 'woocommerce_taxonomy_objects_order_type', array( 'shop_order' ) ),
-			apply_filters( 'woocommerce_taxonomy_args_order_type', array(
-				'hierarchical'      => false,
-				'show_ui'           => false,
-				'show_in_nav_menus' => false,
-				'query_var'         => is_admin(),
-				'rewrite'           => false,
-				'public'            => false
-			) )
-		);
-
 		register_taxonomy( 'product_type',
 	        apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
 	        apply_filters( 'woocommerce_taxonomy_args_product_type', array(
@@ -218,8 +206,9 @@ class WC_Post_types {
 	 * Register core post types
 	 */
 	public static function register_post_types() {
-		if ( post_type_exists('product') )
+		if ( post_type_exists('product') ) {
 			return;
+		}
 
 		do_action( 'woocommerce_register_post_type' );
 
@@ -317,6 +306,24 @@ class WC_Post_types {
 					'query_var' 			=> false,
 					'supports' 				=> array( 'title', 'comments', 'custom-fields' ),
 					'has_archive' 			=> false,
+				)
+			)
+		);
+
+		wc_register_order_type( 
+	    	"shop_order_refund",
+		    apply_filters( 'woocommerce_register_post_type_shop_order_refund',
+				array(
+					'label'                      => __( 'Refunds', 'woocommerce' ),
+					'capability_type'            => 'shop_order',
+					'public'                     => false,
+					'hierarchical'               => false,
+					'supports'                   => false,
+					'exclude_from_orders_screen' => false,
+					'add_order_meta_boxes'       => false,
+					'exclude_from_order_count'   => true,
+					'exclude_from_order_views'   => false,
+					'class_name'                 => 'WC_Order_Refund'
 				)
 			)
 		);
