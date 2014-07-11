@@ -283,7 +283,8 @@ class WC_Post_types {
 			$menu_name .= " <span class='awaiting-mod update-plugins count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
 		}
 
-	    register_post_type( "shop_order",
+	    wc_register_order_type( 
+	    	"shop_order",
 		    apply_filters( 'woocommerce_register_post_type_shop_order',
 				array(
 					'labels' => array(

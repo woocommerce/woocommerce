@@ -384,15 +384,99 @@ function wc_ship_to_billing_address_only() {
 }
 
 /**
+ * Get all registered order types
+ *
+ * $for optionally define what you are getting order types for so only relevent types are returned.
+ *
+ * e.g. for 'default-order-meta-boxes', 'orders-screen', 'order-count'
+ *
+ * @since  2.2
+ * @param  string $for
+ * @return array
+ */
+function wc_get_order_types( $for = '' ) {
+	global $wc_order_types;
+
+	if ( ! is_array( $wc_order_types ) ) {
+		$wc_order_types = array();
+	}
+
+	switch ( $for ) {
+		case 'orders-screen' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_orders_screen'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		case 'order-count' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_order_count'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		case 'default-order-meta-boxes' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( $args['add_order_meta_boxes'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		default :
+			$order_types = array_keys( $wc_order_types );
+		break;
+	}
+
+	return apply_filters( 'wc_order_types', $order_types, $for );
+}
+
+/**
  * Register order type
  *
- * @since 2.2
- * @return void
+ * Wrapper for register post type, as well as a method of telling WC which 
+ * post types are types of orders, and having them treated as such.
+ *
+ * $args are passed to register_post_type, but there are a few specific to this function:
+ * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main 
+ * 		orders screen.
+ * 		- add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
+ * 		- exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
+ *
+ * @since  2.2
+ * @see    register_post_type for $args used in that function
+ * @param  string $type Post type. (max. 20 characters, can not contain capital letters or spaces)
+ * @param  array $args An array of arguments.
+ * @return bool Success or failure
  */
-function register_order_type( $type ) {
-	if ( ! get_term_by( 'slug', sanitize_title( $type ), 'order_type' ) ) {
-		wp_insert_term( $type, 'order_type' );
+function wc_register_order_type( $type, $args ) {
+	if ( post_type_exists( $type ) ) {
+		return false;
 	}
+
+	global $wc_order_types;
+
+	if ( ! is_array( $wc_order_types ) ) {
+		$wc_order_types = array();
+	}
+
+	// Register as a post type
+	if ( is_wp_error( register_post_type( $type, $args ) ) ) {
+		return false;
+	}
+
+	// Register for WC usage
+	$order_type_args = array(
+		'exclude_from_orders_screen' => false,
+		'add_order_meta_boxes'       => true,
+		'exclude_from_order_count'   => false
+	);
+
+	$args                    = array_intersect( $args, $order_type_args );
+	$args                    = wp_parse_args( $args, $order_type_args );
+	$wc_order_types[ $type ] = $args;
+
+	return true;
 }
 
 /**
