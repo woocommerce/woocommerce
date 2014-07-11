@@ -115,6 +115,7 @@ class WC_Cart {
 
 		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies
+		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies
 	}
 
     /**
@@ -135,11 +136,13 @@ class WC_Cart {
      * Will set cart cookies if needed, once, during WP hook
      */
     public function maybe_set_cart_cookies() {
-    	if ( sizeof( $this->cart_contents ) > 0 ) {
-    		$this->set_cart_cookies( true );
-    	} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
-    		$this->set_cart_cookies( false );
-    	}
+    	if ( ! headers_sent() ) {
+	    	if ( sizeof( $this->cart_contents ) > 0 ) {
+	    		$this->set_cart_cookies( true );
+	    	} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
+	    		$this->set_cart_cookies( false );
+	    	}
+	    }
     }
 
 	/**
