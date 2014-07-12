@@ -22,7 +22,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * GET /orders
 	 * GET /orders/count
-	 * GET|PUT /orders/<id>
+	 * GET|PUT|DELETE /orders/<id>
 	 * GET /orders/<id>/notes
 	 *
 	 * @since 2.1
@@ -41,10 +41,11 @@ class WC_API_Orders extends WC_API_Resource {
 			array( array( $this, 'get_orders_count' ), WC_API_Server::READABLE ),
 		);
 
-		# GET|PUT /orders/<id>
+		# GET|PUT|DELETE /orders/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_order' ),  WC_API_Server::READABLE ),
 			array( array( $this, 'edit_order' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_order' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /orders/<id>/notes
@@ -288,7 +289,6 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Delete an order
 	 *
-	 * @TODO enable along with POST in 2.2
 	 * @param int $id the order ID
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array
