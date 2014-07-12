@@ -1441,18 +1441,41 @@ class WC_AJAX {
 
 		$found_customers = array( '' => $default );
 
-		add_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
-
-		$customers_query = new WP_User_Query( apply_filters( 'woocommerce_json_search_customers_query', array(
+		// we need to do three queries due to performance issues with WP
+		// see: https://core.trac.wordpress.org/ticket/24093
+		
+		// query the users table
+		$users_query = new WP_User_Query( apply_filters( 'woocommerce_pos_json_search_customers_query', array(
 			'fields'         => 'all',
 			'orderby'        => 'display_name',
 			'search'         => '*' . $term . '*',
 			'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' )
 		) ) );
 
-		remove_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
+		// query the usermeta table for first_name
+		$first_name_query = new WP_User_Query( apply_filters( 'woocommerce_pos_json_search_customers_query', array(
+			'meta_query' => array(
+				array(
+					'key'     => 'first_name',
+					'value'   => $term,
+					'compare' => 'LIKE'
+				),
+			)
+		) ) );
 
-		$customers = $customers_query->get_results();
+		// query the usermeta table for last_name
+		$last_name_query = new WP_User_Query( apply_filters( 'woocommerce_pos_json_search_customers_query', array(
+			'meta_query' => array(
+				array(
+					'key'     => 'last_name',
+					'value'   => $term,
+					'compare' => 'LIKE'
+				)
+			)
+		) ) );
+
+		// merge the results
+		$customers = array_merge( $users_query->get_results(), $first_name_query->get_results(), $last_name_query->get_results() );
 
 		if ( $customers ) {
 			foreach ( $customers as $customer ) {
@@ -1501,20 +1524,6 @@ class WC_AJAX {
 
 		wp_send_json( $found_products );
 
-	}
-
-	/**
-	 * When searching using the WP_User_Query, search names (user meta) too
-	 * @param  object $query
-	 * @return object
-	 */
-	public static function json_search_customer_name( $query ) {
-		global $wpdb;
-
-		$term = wc_clean( stripslashes( $_GET['term'] ) );
-
-		$query->query_from  .= " INNER JOIN {$wpdb->usermeta} AS user_name ON {$wpdb->users}.ID = user_name.user_id AND ( user_name.meta_key = 'first_name' OR user_name.meta_key = 'last_name' ) ";
-		$query->query_where .= $wpdb->prepare( " OR user_name.meta_value LIKE %s ", '%' . like_escape( $term ) . '%' );
 	}
 
 	/**
