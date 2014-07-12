@@ -1445,7 +1445,7 @@ class WC_AJAX {
 		// see: https://core.trac.wordpress.org/ticket/24093
 		
 		// query the users table
-		$users_query = new WP_User_Query( apply_filters( 'woocommerce_pos_json_search_customers_query', array(
+		$users_query = new WP_User_Query( apply_filters( 'woocommerce_json_search_customers_query', array(
 			'fields'         => 'all',
 			'orderby'        => 'display_name',
 			'search'         => '*' . $term . '*',
@@ -1453,7 +1453,7 @@ class WC_AJAX {
 		) ) );
 
 		// query the usermeta table for first_name
-		$first_name_query = new WP_User_Query( apply_filters( 'woocommerce_pos_json_search_customers_query', array(
+		$first_name_query = new WP_User_Query( apply_filters( 'woocommerce_json_search_customers_query', array(
 			'meta_query' => array(
 				array(
 					'key'     => 'first_name',
@@ -1464,7 +1464,7 @@ class WC_AJAX {
 		) ) );
 
 		// query the usermeta table for last_name
-		$last_name_query = new WP_User_Query( apply_filters( 'woocommerce_pos_json_search_customers_query', array(
+		$last_name_query = new WP_User_Query( apply_filters( 'woocommerce_json_search_customers_query', array(
 			'meta_query' => array(
 				array(
 					'key'     => 'last_name',
