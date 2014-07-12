@@ -1910,7 +1910,7 @@ class WC_Admin_Post_Types {
 			return;
 		}
 
-		$current_visibility = ( $current_visibility = get_post_meta( $post->ID, '_visibility', true ) ) ? $current_visibility : 'visible';
+		$current_visibility = ( $current_visibility = get_post_meta( $post->ID, '_visibility', true ) ) ? $current_visibility : apply_filters( 'woocommerce_product_visibility_default' , 'visible' );
 		$current_featured 	= ( $current_featured = get_post_meta( $post->ID, '_featured', true ) ) ? $current_featured : 'no';
 
 		$visibility_options = apply_filters( 'woocommerce_product_visibility_options', array(
