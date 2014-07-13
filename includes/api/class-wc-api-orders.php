@@ -20,7 +20,7 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Register the routes for this class
 	 *
-	 * GET /orders
+	 * GET|POST /orders
 	 * GET /orders/count
 	 * GET|PUT|DELETE /orders/<id>
 	 * GET /orders/<id>/notes
@@ -31,9 +31,10 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function register_routes( $routes ) {
 
-		# GET /orders
+		# GET|POST /orders
 		$routes[ $this->base ] = array(
 			array( array( $this, 'get_orders' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'create_order' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /orders/count
@@ -260,9 +261,313 @@ class WC_API_Orders extends WC_API_Resource {
 	}
 
 	/**
-	 * Edit an order
+	 * Create an order
 	 *
-	 * API v1 only allows updating the status of an order
+	 * @since 2.2
+	 * @param array $data raw order data
+	 * @return array
+	 */
+	public function create_order( $data ) {
+
+		// permission check
+		if ( ! current_user_can( 'publish_shop_orders' ) ) {
+			return new WP_Error( 'woocommerce_api_user_cannot_create_order', __( 'You do not have permission to create orders', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		// default order args, note that status is checked for validity in wc_create_order()
+		$default_order_args = array(
+			'status'        => isset( $data['status'] ) ? $data['status'] : '',
+			'customer_note' => isset( $data['customer_note'] ) ? $data['customer_note'] : null,
+		);
+
+		// if creating order for existing customer
+		if ( ! empty( $data['customer_id'] ) ) {
+
+			// make sure customer exists
+			if ( false === get_user_by( 'id', $data['customer_id'] ) ) {
+				return new WP_Error( 'woocommerce_api_invalid_customer_id', __( 'Customer ID is invalid', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			$default_order_args['customer_id'] = $data['customer_id'];
+		}
+
+		// create the pending order
+		$order = wc_create_order( $default_order_args );
+
+		if ( is_wp_error( $order ) ) {
+			return new WP_Error( 'woocommerce_api_cannot_create_order', sprintf( __( 'Cannot create order: %s', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), array( 'status' => 400 ) );
+		}
+
+		$address_fields = array(
+			'first_name',
+			'last_name',
+			'company',
+			'email',
+			'phone',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'country',
+		);
+
+		$billing_address = $shipping_address = array();
+
+		// billing address
+		if ( isset( $data['billing_address'] ) && is_array( $data['billing_address'] ) ) {
+
+			foreach ( $address_fields as $field ) {
+
+				if ( isset( $data['billing_address'][ $field ] ) ) {
+					$billing_address[ $field ] = wc_clean( $data['billing_address'][ $field ] );
+				}
+			}
+
+			unset( $address_fields['email'] );
+			unset( $address_fields['phone'] );
+		}
+
+		// shipping address
+		if ( isset( $data['shipping_address'] ) && is_array( $data['shipping_address'] ) ) {
+
+			foreach ( $address_fields as $field ) {
+
+				if ( isset( $data['shipping_address'][ $field ] ) ) {
+					$shipping_address[ $field ] = wc_clean( $data['shipping_address'][ $field ] );
+				}
+			}
+		}
+
+		$order->set_address( $billing_address, 'billing' );
+		$order->set_address( $shipping_address, 'shipping' );
+
+		// update user meta
+		if ( $order->get_user_id() ) {
+				foreach( $billing_address as $key => $value ) {
+					update_user_meta( $order->get_user_id(), 'billing_' . $key, $value );
+				}
+				foreach( $shipping_address as $key => $value ) {
+					update_user_meta( $order->get_user_id(), 'shipping_' . $key, $value );
+				}
+		}
+
+		// set line items
+		if ( isset( $data['line_items'] ) && is_array( $data['line_items'] ) ) {
+
+			foreach ( $data['line_items'] as $item ) {
+
+				$product = get_product( $item['product_id'] );
+
+				// must be a valid WC_Product
+				if ( ! is_object( $product ) ) {
+					return new WP_Error( 'woocommerce_api_invalid_product_id', __( 'Product ID is invalid', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				// quantity must be positive integer
+				if ( ! isset( $item['quantity'] ) || 0 === absint( $item['quantity'] ) ) {
+					return new WP_Error( 'woocommerce_api_invalid_product_quantity', __( 'Product quantity is required and must be a positive integer', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				$item_args = array();
+
+				// variations must each have a key & value
+				if ( isset( $item['variations'] ) && is_array( $item['variations'] ) ) {
+					foreach ( $item['variations'] as $key => $value ) {
+						if ( ! $key || ! $value ) {
+							return new WP_Error( 'woocommerce_api_invalid_variation', __( 'The product variation is invalid', 'woocommerce' ), array( 'status' => 400 ) );
+						}
+					}
+					$item_args['variation'] = $item['variations'];
+				}
+
+				// total
+				if ( isset( $item['total'] ) ) {
+					$item_args['totals']['line_total'] = $item['total'];
+				}
+
+				// total tax
+				if ( isset( $item['total_tax'] ) ) {
+					$item_args['totals']['line_tax'] = $item['total_tax'];
+				}
+
+				// subtotal
+				if ( isset( $item['subtotal'] ) ) {
+					$item_args['totals']['line_subtotal'] = $item['subtotal'];
+				}
+
+				// subtotal tax
+				if ( isset( $item['subtotal_tax'] ) ) {
+					$item_args['totals']['line_subtotal_tax'] = $item['subtotal_tax'];
+				}
+
+				$item_id = $order->add_product( $product, $item['quantity'], $item_args );
+
+				if ( ! $item_id ) {
+					return new WP_Error( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+			}
+		}
+
+		// set shipping
+		if ( isset( $data['shipping_lines'] ) && is_array( $data['shipping_lines'] ) ) {
+
+			foreach ( $data['shipping_lines'] as $shipping ) {
+
+				// method ID and title are required
+				if ( empty( $shipping['method_id'] ) || empty( $shipping['method_title'] ) ) {
+					return new WP_Error( 'woocommerce_invalid_shipping_line_item', __( 'Shipping method ID and Title are required', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				// total must be a positive float
+				if ( empty( $shipping['total'] ) || floatval( $shipping['total'] ) < 0 ) {
+					return new WP_Error( 'woocommerce_invalid_shipping_line_total', __( 'Shipping total is required and must be a positive amount', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				$rate = new WC_Shipping_Rate( $shipping['method_id'], $shipping['method_title'], floatval( $shipping['total'] ), array(), $shipping['method_id'] );
+
+				$item_id = $order->add_shipping( $rate );
+
+				if ( ! $item_id ) {
+					return new WP_Error( 'woocommerce_cannot_create_shipping_line_item', __( 'Cannot create shipping line item, try again', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+			}
+		}
+
+		// set fees
+		if ( isset( $data['fee_lines'] ) && is_array( $data['fee_lines'] ) ) {
+
+			foreach ( $data['fee_lines'] as $fee ) {
+
+				// fee title is required
+				if ( empty( $fee['title'] ) ) {
+					return new WP_Error( 'woocommerce_invalid_fee_line_item', __( 'Fee title is required', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				// fee amount is required and must be positive float
+				if ( empty( $fee['total'] ) || floatval( $fee['total'] ) < 0 ) {
+					return new WP_Error( 'woocommerce_invalid_fee_line_total', __( 'Fee total is required and must be a positive amount', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				$order_fee         = new stdClass();
+				$order_fee->id     = sanitize_title( $fee['title'] );
+				$order_fee->name   = $fee['title'];
+				$order_fee->amount = floatval( $fee['total'] );
+
+				// if taxable, tax class and total are required
+				if ( isset( $fee['taxable'] ) && 'true' === $fee['taxable'] ) {
+
+					if ( empty( $fee['tax_class'] ) ) {
+						return new WP_Error( 'woocommerce_invalid_fee_line_item', __( 'Fee tax class is required when fee is taxable', 'woocommerce' ), array( 'status' => 400 ) );
+					}
+
+					if ( empty( $fee['total_tax'] ) || floatval( $fee['total_tax'] ) < 0 ) {
+						return new WP_Error( 'woocommerce_invalid_fee_line_total', __( 'Fee tax total is required and must be a positive amount when fee is taxable', 'woocommerce' ), array( 'status' => 400 ) );
+					}
+
+					$order_fee->taxable   = true;
+					$order_fee->tax_class = $fee['tax_class'];
+					$order_fee->tax       = floatval( $fee['total_tax'] );
+				}
+
+				$item_id = $order->add_fee( $order_fee );
+
+				if ( ! $item_id ) {
+					return new WP_Error( 'woocommerce_cannot_create_fee_line_item', __( 'Cannot create fee line item, try again', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+			}
+		}
+
+		// set coupons
+		if ( isset( $data['coupon_lines'] ) && is_array( $data['coupon_lines'] ) ) {
+
+			foreach ( $data['coupon_lines'] as $coupon ) {
+
+				// coupon code is required
+				if ( empty( $coupon['code'] ) ) {
+					return new WP_Error( 'woocommerce_invalid_coupon_line_item', __( 'Coupon code is required', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				// coupon discount amount is required and must be positive float
+				if ( empty( $coupon['amount'] ) || floatval( $coupon['amount'] ) < 0 ) {
+					return new WP_Error( 'woocommerce_invalid_coupon_line_total', __( 'Coupon discount total is required and must be a positive amount', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				$item_id = $order->add_coupon( $coupon['code'], floatval( $coupon['amount'] ) );
+
+				if ( ! $item_id ) {
+					return new WP_Error( 'woocommerce_cannot_create_coupon_line_item', __( 'Cannot create coupon line item, try again', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+			}
+		}
+
+		// calculate totals and set them
+		$order->calculate_totals();
+
+		// if taxes are provided, override the calculated totals and set them
+		if ( isset( $data['tax_lines'] ) && is_array( $data['tax_lines'] ) ) {
+
+			foreach ( $data['tax_lines'] as $tax ) {
+
+				// tax id is required
+				if ( empty( $tax['id'] ) ) {
+					return new WP_Error( 'woocommerce_invalid_tax_line_item', __( 'Tax ID is required', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				// tax amount is required and must be a positive float
+				if ( empty( $tax['total'] ) || floatval( $tax['total'] ) < 0 ) {
+					return new WP_Error( 'woocommerce_invalid_tax_line_total', __( 'Tax total is required and must be a positive amount', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				// if shipping tax amount is provided, it must be a positive float
+				if ( isset( $tax['shipping_total'] ) && floatval( $tax['shipping_total'] ) < 0 ) {
+					return new WP_Error( 'woocommerce_invalid_tax_line_shipping_total', __( 'Tax shipping total must be a positive amount', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+
+				$item_id = $order->add_tax( $tax['id'], floatval( $tax['total'] ), isset( $tax['shipping_total'] ) ? floatval( $tax['shipping_total'] ) : 0 );
+
+				if ( ! $item_id ) {
+					return new WP_Error( 'woocommerce_cannot_create_tax_line_item', __( 'Cannot create tax line item, try again', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+			}
+		}
+
+		// payment method (and payment_complete() if `paid` == true)
+		if ( isset( $data['payment_details'] ) && is_array( $data['payment_details'] ) ) {
+
+			// method ID & title are required
+			if ( empty( $data['payment_details']['method_id'] ) || empty( $data['payment_details']['method_title'] ) ) {
+				return new WP_Error( 'woocommerce_invalid_payment_details', __( 'Payment method ID and title are required', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			update_post_meta( $order->id, '_payment_method', $data['payment_details']['method_id'] );
+			update_post_meta( $order->id, '_payment_method_title', $data['payment_details']['method_title'] );
+
+			// mark as paid if set
+			if ( isset( $data['payment_details']['paid'] ) && 'true' === $data['payment_details']['paid'] ) {
+				$order->payment_complete( isset( $data['payment_details']['transaction_id'] ) ? $data['payment_details']['transaction_id'] : '' );
+			}
+		}
+
+		// set order currency
+		if ( isset( $data['currency'] ) ) {
+
+			if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
+				return new WP_Error( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce'), array( 'status' => 400 ) );
+			}
+
+			update_post_meta( $order->id, '_order_currency', $data['currency'] );
+		}
+
+		// TODO: should we clients to set order meta?
+
+		$this->server->send_status( 201 );
+
+		return $this->get_order( $order->id );
+	}
+
+	/**
+	 * Edit an order
 	 *
 	 * @since 2.1
 	 * @param int $id the order ID
@@ -270,6 +575,8 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @return array
 	 */
 	public function edit_order( $id, $data ) {
+
+		// see wc_update_order()
 
 		$id = $this->validate_request( $id, 'shop_order', 'edit' );
 
