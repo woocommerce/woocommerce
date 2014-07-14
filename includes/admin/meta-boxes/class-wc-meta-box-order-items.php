@@ -57,7 +57,7 @@ class WC_Meta_Box_Order_Items {
 
 					<?php
 						// List order items
-						$order_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item', 'fee', 'shipping' ) ) );
+						$order_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item', 'fee', 'shipping', 'coupon' ) ) );
 						$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 
 						foreach ( $order_items as $item_id => $item ) {
@@ -74,6 +74,9 @@ class WC_Meta_Box_Order_Items {
 									break;
 								case 'shipping' :
 									include( 'views/html-order-shipping.php' );
+									break;
+								case 'coupon' :
+									include( 'views/html-order-coupon.php' );
 									break;
 							}
 
@@ -105,7 +108,7 @@ class WC_Meta_Box_Order_Items {
 				</li>
 				<li>
 					<span class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</span>
-					<span class="total">-<?php echo wc_price( $order->get_total() ); ?></span>
+					<span class="total"><?php echo wc_price( $order->get_total() ); ?></span>
 				</li>
 			</ul>
 		</div>
