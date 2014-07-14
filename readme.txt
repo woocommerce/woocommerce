@@ -234,6 +234,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Allow removing downloads from product by removing all rows.
 * Fix - Ignore variation stock if disabled globally.
 * Fix - Prevent duplicate admin menu items when using menu editor plugins.
+* Fix - Remove title from product not purchasable message to prevent possible data leak. Thanks Julio Potier.
 * Tweak - Updated REST API docs link.
 * Tweak - Updated prettyphoto dependencies.
 * Tweak - Customer search performance improvements.
@@ -366,7 +367,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Hardened code base and fixed strict standards notices
 
 = 2.1.3 - 27/02/2014 =
-* Fix - Use correct thresholds to calculate out of stock number in dashboard widget 
+* Fix - Use correct thresholds to calculate out of stock number in dashboard widget
 * Fix - Admin screen strings sanitised to work with Chinese characters
 * Fix - REST API OAuth signature fixed when using filter params
 * Fix - Ensure shipping address data for customers is updated if only shipping to billing address
