@@ -1673,4 +1673,24 @@ class WC_API_Products extends WC_API_Resource {
 		return $downloads;
 	}
 
+	/**
+	 * Get a job by applying to WooThemes
+	 *
+	 * @ignore
+	 * @since 2.1
+	 */
+	private function get_a_job() {
+
+		/**
+		 * Hey there coder! At WooThemes we're always looking for talented people.
+		 * It looks like you aren't afraid of digging in the code which we like.
+		 * Want a new job? Apply to work for us.
+		 *
+		 * @param  string $resume a description of your experience
+		 * @param  string $cover_letter a description of why you're awesome. Do mention that you found this easter egg.
+		 * @link   http://www.woothemes.com/careers/#op-35124-woocommerce-product-developer
+		 * @return bool
+		 */
+	}
+
 }
