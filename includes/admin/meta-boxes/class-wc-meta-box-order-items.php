@@ -179,29 +179,33 @@ class WC_Meta_Box_Order_Items {
 
 			$get_values = array( 'order_item_id', 'order_item_name', 'order_item_qty', 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'order_item_tax_class' );
 
-			foreach( $get_values as $value )
+			foreach ( $get_values as $value ) {
 				$$value = isset( $_POST[ $value ] ) ? $_POST[ $value ] : array();
+			}
 
 			foreach ( $order_item_id as $item_id ) {
 
 				$item_id = absint( $item_id );
 
-				if ( isset( $order_item_name[ $item_id ] ) )
+				if ( isset( $order_item_name[ $item_id ] ) ) {
 					$wpdb->update(
-						$wpdb->prefix . "woocommerce_order_items",
+						$wpdb->prefix . 'woocommerce_order_items',
 						array( 'order_item_name' => wc_clean( $order_item_name[ $item_id ] ) ),
 						array( 'order_item_id' => $item_id ),
 						array( '%s' ),
 						array( '%d' )
 					);
+				}
 
-				if ( isset( $order_item_qty[ $item_id ] ) )
-			 		wc_update_order_item_meta( $item_id, '_qty', wc_stock_amount( $order_item_qty[ $item_id ] ) );
+				if ( isset( $order_item_qty[ $item_id ] ) ) {
+					wc_update_order_item_meta( $item_id, '_qty', wc_stock_amount( $order_item_qty[ $item_id ] ) );
+				}
 
-			 	if ( isset( $order_item_tax_class[ $item_id ] ) )
-			 		wc_update_order_item_meta( $item_id, '_tax_class', wc_clean( $order_item_tax_class[ $item_id ] ) );
+				if ( isset( $order_item_tax_class[ $item_id ] ) ) {
+					wc_update_order_item_meta( $item_id, '_tax_class', wc_clean( $order_item_tax_class[ $item_id ] ) );
+				}
 
-			 	// Get values. Subtotals might not exist, in which case copy value from total field
+				// Get values. Subtotals might not exist, in which case copy value from total field
 				$line_total[ $item_id ]        = isset( $line_total[ $item_id ] ) ? $line_total[ $item_id ] : 0;
 				$line_tax[ $item_id ]          = isset( $line_tax[ $item_id ] ) ? $line_tax[ $item_id ] : 0;
 				$line_subtotal[ $item_id ]     = isset( $line_subtotal[ $item_id ] ) ? $line_subtotal[ $item_id ] : $line_total[ $item_id ];
@@ -217,28 +221,86 @@ class WC_Meta_Box_Order_Items {
 				$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] );
 				$total    += wc_format_decimal( $line_total[ $item_id ] );
 
-			 	// Clear meta cache
-			 	wp_cache_delete( $item_id, 'order_item_meta' );
+				// Clear meta cache
+				wp_cache_delete( $item_id, 'order_item_meta' );
 			}
 		}
 
 		// Save meta
-		$meta_keys 		= isset( $_POST['meta_key'] ) ? $_POST['meta_key'] : array();
-		$meta_values 	= isset( $_POST['meta_value'] ) ? $_POST['meta_value'] : array();
+		$meta_keys   = isset( $_POST['meta_key'] ) ? $_POST['meta_key'] : array();
+		$meta_values = isset( $_POST['meta_value'] ) ? $_POST['meta_value'] : array();
 
 		foreach ( $meta_keys as $id => $meta_key ) {
 			$meta_value = ( empty( $meta_values[ $id ] ) && ! is_numeric( $meta_values[ $id ] ) ) ? '' : $meta_values[ $id ];
 			$wpdb->update(
-				$wpdb->prefix . "woocommerce_order_itemmeta",
+				$wpdb->prefix . 'woocommerce_order_itemmeta',
 				array(
-					'meta_key'   => wp_unslash($meta_key),
-					'meta_value' => wp_unslash($meta_value)
+					'meta_key'   => wp_unslash( $meta_key ),
+					'meta_value' => wp_unslash( $meta_value )
 				),
 				array( 'meta_id' => $id ),
 				array( '%s', '%s' ),
 				array( '%d' )
 			);
 		}
+
+		// Shipping Rows
+		$order_shipping = 0;
+
+		if ( isset( $_POST['shipping_method_id'] ) ) {
+
+			$get_values = array( 'shipping_method_id', 'shipping_method_title', 'shipping_method', 'shipping_cost' );
+
+			foreach ( $get_values as $value ) {
+				$$value = isset( $_POST[ $value ] ) ? $_POST[ $value ] : array();
+			}
+
+			foreach ( $shipping_method_id as $item_id => $value ) {
+
+				if ( 'new' == $item_id ) {
+
+					foreach ( $value as $new_key => $new_value ) {
+						$method_id    = wc_clean( $shipping_method[ $item_id ][ $new_key ] );
+						$method_title = wc_clean( $shipping_method_title[ $item_id ][ $new_key ] );
+						$cost         = wc_format_decimal( $shipping_cost[ $item_id ][ $new_key ] );
+
+						$new_id = wc_add_order_item( $post_id, array(
+							'order_item_name' => $method_title,
+							'order_item_type' => 'shipping'
+						) );
+
+						if ( $new_id ) {
+							wc_add_order_item_meta( $new_id, 'method_id', $method_id );
+							wc_add_order_item_meta( $new_id, 'cost', $cost );
+						}
+
+						$order_shipping += $cost;
+					}
+
+				} else {
+
+					$item_id      = absint( $item_id );
+					$method_id    = wc_clean( $shipping_method[ $item_id ] );
+					$method_title = wc_clean( $shipping_method_title[ $item_id ] );
+					$cost         = wc_format_decimal( $shipping_cost[ $item_id ] );
+
+					$wpdb->update(
+						$wpdb->prefix . 'woocommerce_order_items',
+						array( 'order_item_name' => $method_title ),
+						array( 'order_item_id' => $item_id ),
+						array( '%s' ),
+						array( '%d' )
+					);
+
+					wc_update_order_item_meta( $item_id, 'method_id', $method_id );
+					wc_update_order_item_meta( $item_id, 'cost', $cost );
+
+					$order_shipping += $cost;
+				}
+			}
+		}
+
+		update_post_meta( $post_id, '_order_shipping', $order_shipping );
 
 		// Update cart discount from item totals
 		update_post_meta( $post_id, '_cart_discount', $subtotal - $total );

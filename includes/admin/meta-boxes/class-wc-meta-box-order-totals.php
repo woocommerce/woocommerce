@@ -27,47 +27,6 @@ class WC_Meta_Box_Order_Totals {
 
 		$data = get_post_meta( $post->ID );
 		?>
-		<div class="totals_group">
-			<h4><span class="tax_total_display inline_total"></span><?php _e( 'Shipping', 'woocommerce' ); ?></h4>
-
-			<div id="shipping_rows" class="total_rows">
-				<?php
-					if ( WC()->shipping() )
-						$shipping_methods = WC()->shipping->load_shipping_methods();
-
-					foreach ( $order->get_shipping_methods() as $item_id => $item ) {
-						$chosen_method  = $item['method_id'];
-						$shipping_title = $item['name'];
-						$shipping_cost  = $item['cost'];
-
-						include( 'views/html-order-shipping.php' );
-					}
-
-					// Pre 2.1
-					if ( isset( $data['_shipping_method'] ) ) {
-						$item_id        = '';
-						$chosen_method  = ! empty( $data['_shipping_method'][0] ) ? $data['_shipping_method'][0] : '';
-						$shipping_title = ! empty( $data['_shipping_method_title'][0] ) ? $data['_shipping_method_title'][0] : '';
-						$shipping_cost  = ! empty( $data['_order_shipping'][0] ) ? $data['_order_shipping'][0] : '';
-
-						include( 'views/html-order-shipping.php' );
-					}
-				?>
-			</div>
-
-			<h4><a href="#" class="add_total_row" data-row="<?php
-				$item_id        = '';
-				$chosen_method  = '';
-				$shipping_cost  = '';
-				$shipping_title = __( 'Shipping', 'woocommerce' );
-				ob_start();
-				include( 'views/html-order-shipping.php' );
-				echo esc_attr( ob_get_clean() );
-			?>"><?php _e( '+ Add shipping cost', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'These are the shipping and handling costs for the order.', 'woocommerce' ); ?>">[?]</span></a></a></h4>
-			<div class="clear"></div>
-
-			<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $post->ID ) ?>
-		</div>
 
 		<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 
@@ -155,8 +114,8 @@ class WC_Meta_Box_Order_Totals {
 						if ( $refund->get_refund_reason() ) {
 								echo '<p> ' . esc_html( $refund->get_refund_reason() ) . '</p>';
 						}
-							
-						echo '	
+
+						echo '
 							<a href="#" class="delete_refund">×</a>
 						</li>';
 					}
@@ -296,61 +255,6 @@ class WC_Meta_Box_Order_Totals {
 		update_post_meta( $post_id, '_order_discount', wc_format_decimal( $_POST['_order_discount'] ) );
 		update_post_meta( $post_id, '_order_total', wc_format_decimal( $_POST['_order_total'] ) );
 
-		// Shipping Rows
-		$order_shipping = 0;
-
-		if ( isset( $_POST['shipping_method_id'] ) ) {
-
-			$get_values = array( 'shipping_method_id', 'shipping_method_title', 'shipping_method', 'shipping_cost' );
-
-			foreach( $get_values as $value )
-				$$value = isset( $_POST[ $value ] ) ? $_POST[ $value ] : array();
-
-			foreach( $shipping_method_id as $item_id => $value ) {
-
-				if ( $item_id == 'new' ) {
-
-					foreach ( $value as $new_key => $new_value ) {
-						$method_id    = wc_clean( $shipping_method[ $item_id ][ $new_key ] );
-						$method_title = wc_clean( $shipping_method_title[ $item_id ][ $new_key ] );
-						$cost         = wc_format_decimal( $shipping_cost[ $item_id ][ $new_key ] );
-
-						$new_id = wc_add_order_item( $post_id, array(
-					 		'order_item_name' 		=> $method_title,
-					 		'order_item_type' 		=> 'shipping'
-					 	) );
-
-						if ( $new_id ) {
-					 		wc_add_order_item_meta( $new_id, 'method_id', $method_id );
-				 			wc_add_order_item_meta( $new_id, 'cost', $cost );
-				 		}
-
-				 		$order_shipping += $cost;
-					}
-
-				} else {
-
-					$item_id      = absint( $item_id );
-					$method_id    = wc_clean( $shipping_method[ $item_id ] );
-					$method_title = wc_clean( $shipping_method_title[ $item_id ] );
-					$cost         = wc_format_decimal( $shipping_cost[ $item_id ] );
-
-					$wpdb->update(
-						$wpdb->prefix . "woocommerce_order_items",
-						array( 'order_item_name' => $method_title ),
-						array( 'order_item_id' => $item_id ),
-						array( '%s' ),
-						array( '%d' )
-					);
-
-					wc_update_order_item_meta( $item_id, 'method_id', $method_id );
-					wc_update_order_item_meta( $item_id, 'cost', $cost );
-
-					$order_shipping += $cost;
-				}
-			}
-		}
-
 		// Delete rows
 		if ( isset( $_POST['delete_order_item_id'] ) ) {
 			$delete_ids = $_POST['delete_order_item_id'];
@@ -361,7 +265,6 @@ class WC_Meta_Box_Order_Totals {
 
 		delete_post_meta( $post_id, '_shipping_method' );
 		delete_post_meta( $post_id, '_shipping_method_title' );
-		update_post_meta( $post_id, '_order_shipping', $order_shipping );
 		add_post_meta( $post_id, '_order_currency', get_woocommerce_currency(), true );
 	}
 }
