@@ -57,7 +57,8 @@ class WC_Meta_Box_Order_Items {
 
 					<?php
 						// List order items
-						$order_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item', 'fee' ) ) );
+						$order_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item', 'fee', 'shipping' ) ) );
+						$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 
 						foreach ( $order_items as $item_id => $item ) {
 
@@ -67,10 +68,13 @@ class WC_Meta_Box_Order_Items {
 									$item_meta 	= $order->get_item_meta( $item_id );
 
 									include( 'views/html-order-item.php' );
-								break;
+									break;
 								case 'fee' :
 									include( 'views/html-order-fee.php' );
-								break;
+									break;
+								case 'shipping' :
+									include( 'views/html-order-shipping.php' );
+									break;
 							}
 
 							do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item );
