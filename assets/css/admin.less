@@ -639,6 +639,34 @@ ul.wc_coupon_list_block {
 			text-align: left;
 		}
 	}
+	.wc-order-totals {
+		ul {
+			margin: 0;
+			padding: 0;
+		}
+		.amount {
+			font-weight: bold;
+		}
+		label,
+		.label {
+			display: inline-block;
+			vertical-align: top;
+		}
+		input.text,
+		.total,
+		.checkbox {
+			font-size: 1em !important;
+			width: 10em;
+			display: inline-block;
+			margin: 0 0 0 .5em;
+			-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+			-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+			box-sizing: border-box;         /* Opera/IE 8+ */
+		}
+		.refunded-total {
+			color: #999;
+		}
+	}
 	.wc-order-refund-items {
 		ul {
 			margin: 0 0 12px;
@@ -652,22 +680,6 @@ ul.wc_coupon_list_block {
 		.cancel-action {
 			float: left;
 			margin-left: 0;
-		}
-		.amount {
-			font-weight: bold;
-		}
-		label {
-			display: inline-block;
-			vertical-align: top;
-		}
-		input.text, .total, .checkbox {
-			font-size: 1em !important;
-			width: 10em;
-			display: inline-block;
-			margin: 0 0 0 .5em;
-			-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-			-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-			box-sizing: border-box;         /* Opera/IE 8+ */
 		}
 	}
 	.add_meta {

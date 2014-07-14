@@ -20,10 +20,12 @@ class WC_Meta_Box_Order_Items {
 	public static function output( $post ) {
 		global $thepostid, $theorder;
 
-		if ( ! is_object( $theorder ) )
+		if ( ! is_object( $theorder ) ) {
 			$theorder = get_order( $thepostid );
+		}
 
 		$order = $theorder;
+		$data  = get_post_meta( $post->ID );
 		?>
 		<div class="woocommerce_order_items_wrapper">
 			<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
@@ -77,6 +79,32 @@ class WC_Meta_Box_Order_Items {
 				</tbody>
 			</table>
 		</div>
+		<div class="wc-order-data-row wc-order-totals">
+			<ul>
+				<li>
+					<span class="label"><?php _e( 'Shipping', 'woocommerce' ); ?>:</span>
+					<span class="total"><?php echo wc_price( $order->get_total_shipping() ); ?></span>
+				</li>
+				<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
+					<li>
+						<span class="label"><?php _e( 'Taxes', 'woocommerce' ); ?>:</span>
+						<span class="total"><?php echo wc_price( $order->get_total_tax() ); ?></span>
+					</li>
+				<?php endif; ?>
+				<li>
+					<span class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?>:</span>
+					<span class="total"><?php echo wc_price( $order->get_total_discount() ); ?></span>
+				</li>
+				<li>
+					<span class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</span>
+					<span class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded() ); ?></span>
+				</li>
+				<li>
+					<span class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</span>
+					<span class="total">-<?php echo wc_price( $order->get_total() ); ?></span>
+				</li>
+			</ul>
+		</div>
 		<div class="wc-order-data-row wc-order-bulk-actions">
 			<p class="bulk_actions">
 				<select>
@@ -103,7 +131,7 @@ class WC_Meta_Box_Order_Items {
 			<button type="button" class="button add_order_fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
 			<button type="button" class="button cancel-action"><?php _e( 'Done', 'woocommerce' ); ?></button>
 		</div>
-		<div class="wc-order-data-row wc-order-refund-items" style="display:none;">
+		<div class="wc-order-data-row wc-order-totals wc-order-refund-items" style="display:none;">
 			<ul>
 				<li>
 					<label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label>
