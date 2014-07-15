@@ -3298,8 +3298,8 @@ table.bar_chart {
 ----------------------------------*/
 .chosen-container-single .chosen-single {
 	height: 26px;
-  	line-height: 26px;
-  	margin-top:1px;
+	line-height: 26px;
+	margin-top:1px;
 }
 .chosen-container-single .chosen-single div b {
 	background: url('../images/chosen-sprite.png') no-repeat 0 4px !important;
@@ -3400,14 +3400,87 @@ table.bar_chart {
 	}
 
 	#woocommerce-product-data .checkbox {
-	    width: 25px;
+		width: 25px;
 	}
 }
 
 @import 'chosen.less';
 
 .chosen-container-single .chosen-single {
-  	abbr {
-  		top: 8px;
-  	}
+	abbr {
+		top: 8px;
+	}
+}
+
+/* Backbone modal dialog
+----------------------------------*/
+.wc-backbone-modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 160000;
+
+	* {
+		-webkit-box-sizing: content-box;
+		-moz-box-sizing: content-box;
+		box-sizing: content-box;
+	}
+
+	.wc-backbone-modal-content {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		height: 300px;
+		width: 400px;
+		background: #fff;
+		margin: -150px 0 0 -200px;
+	}
+}
+
+.wc-backbone-modal-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	min-height: 360px;
+	background: #000;
+	opacity: .7;
+	z-index: 159900;
+}
+
+.wc-backbone-modal-main {
+	header,
+	article {
+		display: block;
+		position: relative;
+		padding: 4px 16px;
+	}
+
+	h1 {
+		font-size: 22px;
+		font-weight: 200;
+		line-height: 45px;
+		margin: 0;
+	}
+
+	footer {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 30px;
+		z-index: 100;
+		padding: 10px 0px;
+		border: 0 solid #dfdfdf;
+		border-width: 1px 0 0 0;
+		box-shadow: 0 -4px 4px -4px rgba(0,0,0,0.1);
+	}
+
+	footer .inner {
+		padding: 0 10px;
+		text-align: right;
+	}
 }
