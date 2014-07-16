@@ -27,6 +27,7 @@
 			$( 'body' ).css({
 				'overflow': 'hidden'
 			}).append( this.$el );
+			$( 'body' ).trigger( 'wc_backbone_modal_loaded', this._target );
 		},
 		closeButton: function ( e ) {
 			e.preventDefault();
@@ -36,10 +37,11 @@
 				'overflow': 'auto'
 			});
 			this.remove();
+			$( 'body' ).trigger( 'wc_backbone_modal_removed', this._target );
 			window.WCBackbone.Modal.__instance = undefined;
 		},
 		addButton: function ( e ) {
-			$( 'body' ).trigger( 'wc_backbone_modal_response', this.getFormData() );
+			$( 'body' ).trigger( 'wc_backbone_modal_response', this._target, this.getFormData() );
 			this.closeButton( e );
 		},
 		getFormData: function () {

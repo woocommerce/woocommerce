@@ -1,5 +1,6 @@
-jQuery( function($){
-	
+/*global woocommerce_admin_meta_boxes */
+jQuery( function ( $ ) {
+
 	// run tip tip
 	function runTipTip() {
 		// remove any lingering tooltips
@@ -19,11 +20,11 @@ jQuery( function($){
 	$('#titlediv #title').keyup(function( event ) {
 		var code = event.keyCode || event.which;
 
-    	if ( code == '9' && $('#woocommerce-coupon-description').size() > 0 ) {
-    		event.stopPropagation();
-    		$('#woocommerce-coupon-description').focus();
-    		return false;
-    	}
+		if ( code == '9' && $('#woocommerce-coupon-description').size() > 0 ) {
+			event.stopPropagation();
+			$('#woocommerce-coupon-description').focus();
+			return false;
+		}
 	});
 
 	$(function(){
@@ -56,61 +57,79 @@ jQuery( function($){
 
 	// Ajax Chosen Product Selectors
 	jQuery("select.ajax_chosen_select_products").ajaxChosen({
-	    method: 	'GET',
-	    url: 		woocommerce_admin_meta_boxes.ajax_url,
-	    dataType: 	'json',
-	    afterTypeDelay: 100,
-	    data:		{
-	    	action: 		'woocommerce_json_search_products',
+		method: 	'GET',
+		url: 		woocommerce_admin_meta_boxes.ajax_url,
+		dataType: 	'json',
+		afterTypeDelay: 100,
+		data:		{
+			action: 		'woocommerce_json_search_products',
 			security: 		woocommerce_admin_meta_boxes.search_products_nonce
-	    }
+		}
 	}, function (data) {
 		var terms = {};
 
-	    $.each(data, function (i, val) {
-	        terms[i] = val;
-	    });
+		$.each(data, function (i, val) {
+			terms[i] = val;
+		});
 
-	    return terms;
+		return terms;
 	});
 
-	jQuery("select.ajax_chosen_select_products_and_variations").ajaxChosen({
-	    method: 	'GET',
-	    url: 		woocommerce_admin_meta_boxes.ajax_url,
-	    dataType: 	'json',
-	    afterTypeDelay: 100,
-	    data:		{
-	    	action: 		'woocommerce_json_search_products_and_variations',
-			security: 		woocommerce_admin_meta_boxes.search_products_nonce
-	    }
-	}, function (data) {
-		var terms = {};
+	/**
+	 * Load Chosen for select products and variations
+	 *
+	 * @return {void}
+	 */
+	function loadSelectProductAndVariation() {
+		$( 'select.ajax_chosen_select_products_and_variations' ).ajaxChosen({
+			method:         'GET',
+			url:            woocommerce_admin_meta_boxes.ajax_url,
+			dataType:       'json',
+			afterTypeDelay: 100,
+			data:           {
+				action:   'woocommerce_json_search_products_and_variations',
+				security: woocommerce_admin_meta_boxes.search_products_nonce
+			}
+		},
+		function ( data ) {
+			var terms = {};
 
-	    $.each(data, function (i, val) {
-	        terms[i] = val;
-	    });
+			$.each(data, function ( i, val ) {
+				terms[i] = val;
+			});
 
-	    return terms;
+			return terms;
+		});
+	}
+
+	// Run on document load
+	loadSelectProductAndVariation();
+
+	// Load chosen inside WC Backbone Modal
+	$( 'body' ).on( 'wc_backbone_modal_loaded', function ( e, target ) {
+		if ( '#wc-modal-add-products' === target ) {
+			loadSelectProductAndVariation();
+		}
 	});
 
 	jQuery("select.ajax_chosen_select_downloadable_products_and_variations").ajaxChosen({
-	    method: 	'GET',
-	    url: 		woocommerce_admin_meta_boxes.ajax_url,
-	    dataType: 	'json',
-	    afterTypeDelay: 100,
-	    data:		{
-	    	action: 		'woocommerce_json_search_downloadable_products_and_variations',
+		method: 	'GET',
+		url: 		woocommerce_admin_meta_boxes.ajax_url,
+		dataType: 	'json',
+		afterTypeDelay: 100,
+		data:		{
+			action: 		'woocommerce_json_search_downloadable_products_and_variations',
 			security: 		woocommerce_admin_meta_boxes.search_products_nonce
-	    }
+		}
 	}, function (data) {
 
 		var terms = {};
 
-	    $.each(data, function (i, val) {
-	        terms[i] = val;
-	    });
+		$.each(data, function (i, val) {
+			terms[i] = val;
+		});
 
-	    return terms;
+		return terms;
 	});
 
 	$( ".date-picker" ).datepicker({

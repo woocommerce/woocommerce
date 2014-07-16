@@ -133,8 +133,7 @@ class WC_Meta_Box_Order_Items {
 			</p>
 		</div>
 		<div class="wc-order-data-row wc-order-add-item" style="display:none;">
-			<select id="add_item_id" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px"></select>
-			<button type="button" class="button add_order_item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
+			<button type="button" class="button add_order_item"><?php _e( 'Add product(s)', 'woocommerce' ); ?></button>
 			<button type="button" class="button add_order_fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
 			<button type="button" class="button cancel-action"><?php _e( 'Done', 'woocommerce' ); ?></button>
 		</div>
@@ -165,6 +164,30 @@ class WC_Meta_Box_Order_Items {
 			<button type="button" class="button button-primary do-manual-refund"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
 			<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 		</div>
+
+		<script type="text/template" id="wc-modal-add-products">
+			<div class="wc-backbone-modal">
+				<div class="wc-backbone-modal-content">
+					<section class="wc-backbone-modal-main" role="main">
+						<header>
+							<h1><?php echo __( 'Add products', 'woocommerce' ); ?></h1>
+						</header>
+						<article>
+							<form>
+								<select id="add_item_id" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 96%"></select>
+							</form>
+						</article>
+						<footer>
+							<div class="inner">
+								<button id="btn-cancel" class="button button-large"><?php echo __( 'Cancel' , 'woocommerce' ); ?></button>
+								<button id="btn-ok" class="button button-primary button-large"><?php echo __( 'Add' , 'woocommerce' ); ?></button>
+							</div>
+						</footer>
+					</section>
+				</div>
+			</div>
+			<div class="wc-backbone-modal-backdrop">&nbsp;</div>
+		</script>
 		<?php
 	}
 
