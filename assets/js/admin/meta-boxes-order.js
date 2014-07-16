@@ -1,4 +1,25 @@
+/*global woocommerce_admin_meta_boxes */
 jQuery( function ( $ ) {
+
+	/**
+	 * Add order items loading block
+	 */
+	function addOrderItemsLoading() {
+		$( 'table.woocommerce_order_items' ).block({
+			message: null,
+			overlayCSS: {
+				background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+				opacity: 0.6
+			}
+		});
+	}
+
+	/**
+	 * Remove order items loading block
+	 */
+	function removeOrderItemsLoading() {
+		$( 'table.woocommerce_order_items' ).unblock();
+	}
 
 	// ORDERS
 	$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).click( function () {
@@ -62,30 +83,30 @@ jQuery( function ( $ ) {
 			$(this).hide();
 			return false;
 		})
-		.on( 'click', 'a.delete_order_item', function() {
-			var answer = confirm( woocommerce_admin_meta_boxes.remove_item_notice );
+		.on( 'click', 'a.delete_order_item', function () {
+			var answer = window.confirm( woocommerce_admin_meta_boxes.remove_item_notice );
 
 			if ( answer ) {
-				var $item         = $(this).closest('tr.item, tr.fee');
+				var $item         = $( this ).closest( 'tr.item, tr.fee, tr.shipping' );
 				var order_item_id = $item.attr( 'data-order_item_id' );
 
-				$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				addOrderItemsLoading();
 
 				var data = {
-					order_item_ids: 	order_item_id,
-					action: 			'woocommerce_remove_order_item',
-					security: 			woocommerce_admin_meta_boxes.order_item_nonce
+					order_item_ids: order_item_id,
+					action:         'woocommerce_remove_order_item',
+					security:       woocommerce_admin_meta_boxes.order_item_nonce
 				};
 
-				$.ajax( {
-					url: woocommerce_admin_meta_boxes.ajax_url,
-					data: data,
-					type: 'POST',
-					success: function( response ) {
+				$.ajax({
+					url:     woocommerce_admin_meta_boxes.ajax_url,
+					data:    data,
+					type:    'POST',
+					success: function ( response ) {
 						$item.remove();
-						$('table.woocommerce_order_items').unblock();
+						removeOrderItemsLoading();
 					}
-				} );
+				});
 			}
 			return false;
 		})
@@ -180,7 +201,7 @@ jQuery( function ( $ ) {
 				security: 	woocommerce_admin_meta_boxes.order_item_nonce
 			};
 
-			$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			addOrderItemsLoading();
 
 			$.ajax( {
 				url: woocommerce_admin_meta_boxes.ajax_url,
@@ -188,7 +209,7 @@ jQuery( function ( $ ) {
 				type: 'POST',
 				success: function( response ) {
 					$item.find('tbody.meta_items').append( response );
-					$('table.woocommerce_order_items').unblock();
+					removeOrderItemsLoading();
 				}
 			} );
 
@@ -206,7 +227,7 @@ jQuery( function ( $ ) {
 					security: 			woocommerce_admin_meta_boxes.order_item_nonce
 				};
 
-				$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				addOrderItemsLoading();
 
 				$.ajax( {
 					url: woocommerce_admin_meta_boxes.ajax_url,
@@ -214,7 +235,7 @@ jQuery( function ( $ ) {
 					type: 'POST',
 					success: function( response ) {
 						$row.hide();
-						$('table.woocommerce_order_items').unblock();
+						removeOrderItemsLoading();
 					}
 				} );
 			}
@@ -245,28 +266,45 @@ jQuery( function ( $ ) {
 			if ( window.WCBackbone.Modal.__instance === undefined ) {
 				window.WCBackbone.Modal.__instance = new WCBackbone.Modal.View({ target: '#wc-modal-add-products' });
 			}
+			return false;
 		})
-		.on( 'click', 'button.add_order_fee', function() {
-			$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+		.on( 'click', 'button.add_order_fee', function () {
+			addOrderItemsLoading();
 
 			var data = {
-				action: 		'woocommerce_add_order_fee',
-				order_id:		woocommerce_admin_meta_boxes.post_id,
-				security: 		woocommerce_admin_meta_boxes.order_item_nonce
+				action:   'woocommerce_add_order_fee',
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				security: woocommerce_admin_meta_boxes.order_item_nonce
 			};
 
-			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-				$('table.woocommerce_order_items tbody#order_items_list').append( response );
-				$('table.woocommerce_order_items').unblock();
+			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function ( response ) {
+				$( 'table.woocommerce_order_items tbody#order_items_list' ).append( response );
+				removeOrderItemsLoading();
+			});
+			return false;
+		})
+		.on( 'click', 'button.add_order_shipping', function () {
+			addOrderItemsLoading();
+
+			var data = {
+				action:   'woocommerce_add_order_shipping',
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				security: woocommerce_admin_meta_boxes.order_item_nonce
+			};
+
+			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function ( response ) {
+				$( 'table.woocommerce_order_items tbody#order_items_list' ).append( response );
+				removeOrderItemsLoading();
 			});
 			return false;
 		})
 		// Bulk actions for line items
 		.on( 'click', 'input.check-column', function() {
-			if ( $(this).is(':checked') )
+			if ( $(this).is(':checked') ) {
 				$('#woocommerce-order-items').find('.check-column input').attr('checked', 'checked');
-			else
+			} else {
 				$('#woocommerce-order-items').find('.check-column input').removeAttr('checked');
+			}
 		})
 		.on( 'click', '.do_bulk_action', function() {
 			var action = $(this).closest('.bulk_actions').find('select').val();
@@ -290,7 +328,7 @@ jQuery( function ( $ ) {
 
 				if ( answer ) {
 
-					$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+					addOrderItemsLoading();
 
 					var data = {
 						order_item_ids: 	item_ids,
@@ -306,14 +344,14 @@ jQuery( function ( $ ) {
 							$(selected_rows).each( function() {
 								$(this).closest('tr.item, tr.fee').remove();
 							} );
-							$('table.woocommerce_order_items').unblock();
+							removeOrderItemsLoading();
 						}
 					} );
 				}
 
 			} else if ( action == 'reduce_stock' ) {
 
-				$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				addOrderItemsLoading();
 
 				var quantities = {};
 
@@ -339,13 +377,13 @@ jQuery( function ( $ ) {
 					type: 'POST',
 					success: function( response ) {
 						alert( response );
-						$('table.woocommerce_order_items').unblock();
+						removeOrderItemsLoading();
 					}
 				} );
 
 			} else if ( action == 'increase_stock' ) {
 
-				$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				addOrderItemsLoading();
 
 				var quantities = {};
 
@@ -371,7 +409,7 @@ jQuery( function ( $ ) {
 					type: 'POST',
 					success: function( response ) {
 						alert( response );
-						$('table.woocommerce_order_items').unblock();
+						removeOrderItemsLoading();
 					}
 				} );
 			}
@@ -618,13 +656,7 @@ jQuery( function ( $ ) {
 
 			count = add_item_ids.length;
 
-			$( 'table.woocommerce_order_items' ).block({
-				message: null,
-				overlayCSS: {
-					background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
-					opacity: 0.6
-				}
-			});
+			addOrderItemsLoading();
 
 			$.each( add_item_ids, function( index, value ) {
 

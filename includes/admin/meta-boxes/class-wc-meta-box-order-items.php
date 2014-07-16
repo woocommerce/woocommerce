@@ -135,6 +135,7 @@ class WC_Meta_Box_Order_Items {
 		<div class="wc-order-data-row wc-order-add-item" style="display:none;">
 			<button type="button" class="button add_order_item"><?php _e( 'Add product(s)', 'woocommerce' ); ?></button>
 			<button type="button" class="button add_order_fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
+			<button type="button" class="button add_order_shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
 			<button type="button" class="button cancel-action"><?php _e( 'Done', 'woocommerce' ); ?></button>
 		</div>
 		<div class="wc-order-data-row wc-order-totals wc-order-refund-items" style="display:none;">

@@ -44,6 +44,7 @@ class WC_AJAX {
 			'get_customer_details'                             => false,
 			'add_order_item'                                   => false,
 			'add_order_fee'                                    => false,
+			'add_order_shipping'                               => false,
 			'remove_order_item'                                => false,
 			'reduce_order_item_stock'                          => false,
 			'increase_order_item_stock'                        => false,
@@ -1020,6 +1021,35 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Add order shipping cost via ajax
+	 */
+	public static function add_order_shipping() {
+
+		check_ajax_referer( 'order-item', 'security' );
+
+		$order_id         = absint( $_POST['order_id'] );
+		$order            = get_order( $order_id );
+		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+
+		// Add line item
+		$item_id = wc_add_order_item( $order_id, array(
+			'order_item_name' => '',
+			'order_item_type' => 'shipping'
+		) );
+
+		// Add line item meta
+		if ( $item_id ) {
+			wc_add_order_item_meta( $item_id, 'method_id', '' );
+			wc_add_order_item_meta( $item_id, 'cost', '' );
+		}
+
+		include( 'admin/meta-boxes/views/html-order-shipping.php' );
+
+		// Quit out
+		die();
+	}
+
+	/**
 	 * Remove an order item
 	 */
 	public static function remove_order_item() {
@@ -1653,7 +1683,7 @@ class WC_AJAX {
 			if ( ! $refund_amount || $max_refund < $refund_amount ) {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
-		
+
 			// Create the refund object
 			$refund = wc_create_refund( array(
 				'amount'    => $refund_amount,
@@ -1695,7 +1725,7 @@ class WC_AJAX {
 		check_ajax_referer( 'order-item', 'security' );
 
 		$refund_id = absint( $_POST['refund_id'] );
-		
+
 		if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
 			wp_delete_post( $refund_id );
 		}
