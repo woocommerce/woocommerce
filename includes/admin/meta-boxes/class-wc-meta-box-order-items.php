@@ -82,6 +82,12 @@ class WC_Meta_Box_Order_Items {
 
 							do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item );
 						}
+
+						if ( $refunds = $order->get_refunds() ) {
+							foreach ( $refunds as $refund ) {
+								include( 'views/html-order-refund.php' );
+							}
+						}
 					?>
 				</tbody>
 			</table>

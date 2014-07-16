@@ -66,6 +66,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php endif; ?>
 
+	<td class="wc-order-item-refund-quantity" width="1%" style="display:none"></td>
+
 	<td class="wc-order-edit-line-item">
 		<div class="wc-order-edit-line-item-actions">
 			<a class="edit_order_item" href="#"></a><a class="delete_order_item" href="#"></a>

@@ -82,29 +82,6 @@ class WC_Meta_Box_Order_Totals {
 							echo esc_attr( wc_format_localized_price( $data['_order_total'][0] ) );
 			?>" />
 		</div>
-		<?php
-		if ( $refunds = $order->get_refunds() ) {
-			?>
-			<div class="totals_group">
-				<h4><?php _e( 'Refunds', 'woocommerce' ); ?></h4>
-				<ul class="total_rows refunds"><?php
-					foreach ( $refunds as $refund ) {
-						echo '<li class="total_row" data-id="' . $refund->id . '">
-							<p>' . wc_price( '-' . $refund->get_refund_amount() ) . ' <span class="date">' . date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post_date ) ) . '</span></p>';
-
-						if ( $refund->get_refund_reason() ) {
-								echo '<p> ' . esc_html( $refund->get_refund_reason() ) . '</p>';
-						}
-
-						echo '
-							<a href="#" class="delete_refund">×</a>
-						</li>';
-					}
-				?></ul>
-			</div>
-			<?php
-		}
-		?>
 		<p class="buttons">
 			<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 				<button type="button" class="button calc_line_taxes"><?php _e( 'Calculate Tax', 'woocommerce' ); ?></button>

@@ -861,7 +861,8 @@ ul.wc_coupon_list_block {
 				}
 			}
 		}
-		.delete_order_item {
+		.delete_order_item,
+		.delete_refund {
 			.ir;
 			display: inline-block;
 			margin: 0;
@@ -1063,7 +1064,7 @@ ul.wc_coupon_list_block {
 				width: 100%;
 			}
 		}
-		a.delete_tax_row, a.delete_total_row, a.delete_refund {
+		a.delete_tax_row, a.delete_total_row {
 			.ir;
 			display:none;
 			position: absolute;
@@ -1083,7 +1084,7 @@ ul.wc_coupon_list_block {
 			}
 		}
 		&:hover, &:focus {
-			a.delete_tax_row, a.delete_total_row, a.delete_refund {
+			a.delete_tax_row, a.delete_total_row {
 				display: block;
 			}
 		}
