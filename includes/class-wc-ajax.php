@@ -1327,6 +1327,7 @@ class WC_AJAX {
 
 			// Return HTML items
 			$order = new WC_Order( $order_id );
+			$data  = get_post_meta( $order_id );
 			include( 'admin/meta-boxes/views/html-order-items.php' );
 		}
 
@@ -1342,6 +1343,7 @@ class WC_AJAX {
 		// Return HTML items
 		$order_id = absint( $_POST['order_id'] );
 		$order    = new WC_Order( $order_id );
+		$data     = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 
 		die();

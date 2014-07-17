@@ -68,31 +68,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tbody>
 	</table>
 </div>
-<div class="wc-order-data-row wc-order-totals wc-order-totals-items">
-	<ul>
-		<li>
-			<span class="label"><?php _e( 'Shipping', 'woocommerce' ); ?>:</span>
-			<span class="total"><?php echo wc_price( $order->get_total_shipping() ); ?></span>
-		</li>
+<div class="wc-order-data-row wc-order-totals-items">
+	<table class="wc-order-totals">
+		<tr>
+			<td class="label"><?php _e( 'Shipping', 'woocommerce' ); ?>:</td>
+			<td class="total"><?php echo wc_price( $order->get_total_shipping() ); ?></td>
+		</tr>
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
-			<li>
-				<span class="label"><?php _e( 'Taxes', 'woocommerce' ); ?>:</span>
-				<span class="total"><?php echo wc_price( $order->get_total_tax() ); ?></span>
-			</li>
+			<tr>
+				<td class="label"><?php _e( 'Taxes', 'woocommerce' ); ?>:</td>
+				<td class="total"><?php echo wc_price( $order->get_total_tax() ); ?></td>
+			</tr>
 		<?php endif; ?>
-		<li>
-			<span class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?>:</span>
-			<span class="total"><?php echo wc_price( $order->get_total_discount() ); ?></span>
-		</li>
-		<li>
-			<span class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</span>
-			<span class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded() ); ?></span>
-		</li>
-		<li>
-			<span class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</span>
-			<span class="total"><?php echo wc_price( $order->get_total() ); ?></span>
-		</li>
-	</ul>
+		<tr>
+			<td class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?>:</td>
+			<td class="total">
+				<div class="view"><?php echo wc_price( $order->get_total_discount() ); ?></div>
+				<div class="edit" style="display: none;">
+					<input type="text" class="wc_input_price" id="_order_discount" name="_order_discount" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $data['_order_discount'][0] ) ) ? esc_attr( wc_format_localized_price( $data['_order_discount'][0] ) ) : ''; ?>" />
+					<div class="clear"></div>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
+			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded() ); ?></td>
+		</tr>
+		<tr>
+			<td class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</td>
+			<td class="total">
+				<div class="view"><?php echo wc_price( $order->get_total() ); ?></div>
+				<div class="edit" style="display: none;">
+					<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $data['_order_total'][0] ) ) ? esc_attr( wc_format_localized_price( $data['_order_total'][0] ) ) : ''; ?>" />
+					<div class="clear"></div>
+				</div>
+			</td>
+		</tr>
+	</table>
+	<div class="clear"></div>
 </div>
 <div class="wc-order-data-row wc-order-bulk-actions">
 	<p class="bulk_actions">
@@ -122,32 +135,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<button type="button" class="button button-primary save-action"><?php _e( 'Save', 'woocommerce' ); ?></button>
 	<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total and Save', 'woocommerce' ); ?></button>
 </div>
-<div class="wc-order-data-row wc-order-totals wc-order-refund-items" style="display:none;">
-	<ul>
-		<li>
-			<label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label>
-			<span class="checkbox"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" checked="checked" /></span>
-		</li>
-		<li>
-			<label><?php _e( 'Amount already refunded', 'woocommerce' ); ?>:</label>
-			<span class="total">-<?php echo wc_price( $order->get_total_refunded() ); ?></span>
-		</li>
-		<li>
-			<label><?php _e( 'Total available to refund', 'woocommerce' ); ?>:</label>
-			<span class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded() ); ?></span>
-		</li>
-		<li>
-			<label for="refund_amount"><?php _e( 'Refund amount', 'woocommerce' ); ?>:</label>
-			<input type="text" class="text" id="refund_amount" name="refund_amount" class="wc_input_price" />
-		</li>
-		<li>
-			<label for="refund_reason"><?php _e( 'Reason for refund (optional)', 'woocommerce' ); ?>:</label>
-			<input type="text" class="text" id="refund_reason" name="refund_reason" />
-		</li>
-	</ul>
-	<button type="button" class="button button-primary do-api-refund"><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0 ) . '</span>', $order->payment_method_title ); ?></button>
-	<button type="button" class="button button-primary do-manual-refund"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
-	<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
+<div class="wc-order-data-row wc-order-refund-items" style="display:none;">
+	<table class="wc-order-totals">
+		<tr>
+			<td class="label"><label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
+			<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" checked="checked" /></td>
+		</tr>
+		<tr>
+			<td class="label"><?php _e( 'Amount already refunded', 'woocommerce' ); ?>:</td>
+			<td class="total">-<?php echo wc_price( $order->get_total_refunded() ); ?></td>
+		</tr>
+		<tr>
+			<td class="label"><?php _e( 'Total available to refund', 'woocommerce' ); ?>:</td>
+			<td class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded() ); ?></td>
+		</tr>
+		<tr>
+			<td class="label"><label for="refund_amount"><?php _e( 'Refund amount', 'woocommerce' ); ?>:</label></td>
+			<td class="total">
+				<input type="text" class="text" id="refund_amount" name="refund_amount" class="wc_input_price" />
+				<div class="clear"></div>
+			</td>
+		</tr>
+		<tr>
+			<td class="label"><label for="refund_reason"><?php _e( 'Reason for refund (optional)', 'woocommerce' ); ?>:</label></td>
+			<td class="total">
+				<input type="text" class="text" id="refund_reason" name="refund_reason" />
+				<div class="clear"></div>
+			</td>
+		</tr>
+	</table>
+	<div class="clear"></div>
+	<div class="refund-actions">
+		<button type="button" class="button button-primary do-api-refund"><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0 ) . '</span>', $order->payment_method_title ); ?></button>
+		<button type="button" class="button button-primary do-manual-refund"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
+		<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
+		<div class="clear"></div>
+	</div>
 </div>
 
 <script type="text/template" id="wc-modal-add-products">

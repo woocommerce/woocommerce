@@ -630,7 +630,9 @@ ul.wc_coupon_list_block {
 		}
 	}
 	.wc-order-add-item {
+		background: #fff;
 		vertical-align: top;
+		border-top: none;
 		.add_item_id, .chosen-container {
 			vertical-align: top;
 			.search-field input {
@@ -643,39 +645,37 @@ ul.wc_coupon_list_block {
 		}
 	}
 	.wc-order-totals {
-		ul {
-			margin: 0;
-			padding: 0;
-		}
+		float: right;
+		margin: 0;
+		padding: 0;
 		.amount {
 			font-weight: bold;
 		}
-		label,
 		.label {
-			display: inline-block;
 			vertical-align: top;
 		}
-		input.text,
-		.total,
-		.checkbox {
+		.total {
 			font-size: 1em !important;
 			width: 10em;
-			display: inline-block;
 			margin: 0 0 0 .5em;
 			-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
 			-moz-box-sizing: border-box;    /* Firefox, other Gecko */
 			box-sizing: border-box;         /* Opera/IE 8+ */
+
+			input[type="text"] {
+				width: 96%;
+				float: right;
+			}
 		}
 		.refunded-total {
 			color: #999;
 		}
 	}
-	.wc-order-refund-items {
-		ul {
-			margin: 0 0 12px;
-			padding-bottom: 5px;
-			border-bottom: 1px solid #DFDFDF;
-		}
+	.refund-actions {
+		margin-top: 5px;
+		padding-top: 12px;
+		border-top: 1px solid #DFDFDF;
+
 		.button {
 			float: right;
 			margin-left: 4px;
@@ -686,7 +686,7 @@ ul.wc_coupon_list_block {
 		}
 	}
 	.add_meta {
-		margin-left:0 !important;
+		margin-left: 0 !important;
 	}
 	h3 small {
 		color: #999;
@@ -960,7 +960,7 @@ ul.wc_coupon_list_block {
 		::-moz-placeholder { line-height: 1.4em; } /* firefox 19+ */
 		:-ms-input-placeholder { line-height: 1.4em; } /* ie */
 		input:-moz-placeholder { line-height: 1.4em; }
-		#_order_total, #_order_discount {
+		#_order_total {
 			margin: 6px 0 10px;
 		}
 	}
