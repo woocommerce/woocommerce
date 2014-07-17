@@ -267,24 +267,29 @@ jQuery( function ( $ ) {
 			return false;
 		});
 
-	$('#woocommerce-order-items')
-		.on( 'click', 'button.add_line_item', function() {
-			$('div.wc-order-add-item').slideDown();
-			$('div.wc-order-bulk-actions').slideUp();
+	$( '#woocommerce-order-items' )
+		.on( 'click', 'button.add_line_item', function () {
+			$( 'div.wc-order-add-item' ).slideDown();
+			$( 'div.wc-order-bulk-actions' ).slideUp();
+
 			return false;
 		})
-		.on( 'click', 'button.refund_items', function() {
-			$('div.wc-order-refund-items').slideDown();
-			$('div.wc-order-bulk-actions').slideUp();
-			$('.wc-order-item-refund-quantity').show();
-			$('.wc-order-edit-line-item').hide();
+		.on( 'click', 'button.refund_items', function () {
+			$( 'div.wc-order-refund-items' ).slideDown();
+			$( 'div.wc-order-bulk-actions' ).slideUp();
+			$( 'div.wc-order-totals-items' ).slideUp();
+			$( '.wc-order-item-refund-quantity' ).show();
+			$( '.wc-order-edit-line-item' ).hide();
+
 			return false;
 		})
-		.on( 'click', '.cancel-action', function() {
-			$(this).closest('div.wc-order-data-row').slideUp();
-			$('div.wc-order-bulk-actions').slideDown();
-			$('.wc-order-item-refund-quantity').hide();
-			$('.wc-order-edit-line-item').show();
+		.on( 'click', '.cancel-action', function () {
+			$( this ).closest( 'div.wc-order-data-row' ).slideUp();
+			$( 'div.wc-order-bulk-actions' ).slideDown();
+			$( 'div.wc-order-totals-items' ).slideDown();
+			$( '.wc-order-item-refund-quantity' ).hide();
+			$( '.wc-order-edit-line-item' ).show();
+
 			return false;
 		})
 		.on( 'click', 'button.add_order_item', function () {

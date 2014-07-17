@@ -92,7 +92,7 @@ class WC_Meta_Box_Order_Items {
 				</tbody>
 			</table>
 		</div>
-		<div class="wc-order-data-row wc-order-totals">
+		<div class="wc-order-data-row wc-order-totals wc-order-totals-items">
 			<ul>
 				<li>
 					<span class="label"><?php _e( 'Shipping', 'woocommerce' ); ?>:</span>
