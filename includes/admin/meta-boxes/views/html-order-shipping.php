@@ -21,18 +21,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$found_method = false;
 
 						foreach ( $shipping_methods as $method ) {
+							$method_id = isset( $item['method_id'] ) ? $item['method_id'] : '';
+							$current_method = ( 0 === strpos( $method_id, $method->id ) ) ? $method_id : $method->id;
 
-							$current_method = ( 0 === strpos( $item['method_id'], $method->id ) ) ? $item['method_id'] : $method->id;
+							echo '<option value="' . esc_attr( $current_method ) . '" ' . selected( $method_id == $current_method, true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
 
-							echo '<option value="' . esc_attr( $current_method ) . '" ' . selected( $item['method_id'] == $current_method, true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
-
-							if ( $item['method_id'] == $current_method ) {
+							if ( $method_id == $current_method ) {
 								$found_method = true;
 							}
 						}
 
-						if ( ! $found_method && ! empty( $item['method_id'] ) ) {
-							echo '<option value="' . esc_attr( $item['method_id'] ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
+						if ( ! $found_method && ! empty( $method_id ) ) {
+							echo '<option value="' . esc_attr( $method_id ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
 						} else {
 							echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
 						}
