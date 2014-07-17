@@ -70,7 +70,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="wc-order-edit-line-item">
 		<div class="wc-order-edit-line-item-actions">
-			<a class="edit_order_item" href="#"></a><a class="delete_order_item" href="#"></a>
+			<a class="edit-order-item" href="#"></a><a class="delete-order-item" href="#"></a>
 		</div>
 	</td>
 </tr>

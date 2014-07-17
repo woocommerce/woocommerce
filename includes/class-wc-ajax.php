@@ -51,6 +51,8 @@ class WC_AJAX {
 			'add_order_item_meta'                              => false,
 			'remove_order_item_meta'                           => false,
 			'calc_line_taxes'                                  => false,
+			'save_order_items'                                 => false,
+			'load_order_items'                                 => false,
 			'add_order_note'                                   => false,
 			'delete_order_note'                                => false,
 			'json_search_products'                             => false,
@@ -1305,6 +1307,44 @@ class WC_AJAX {
 			'tax_row_html' => $tax_row_html
 		) );
 
+	}
+
+	/**
+	 * Save order items via ajax
+	 */
+	public static function save_order_items() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		if ( isset( $_POST['order_id'] ) && isset( $_POST['items'] ) ) {
+			$order_id = absint( $_POST['order_id'] );
+
+			// Parse the jQuery serialized items
+			$items = array();
+			parse_str( $_POST['items'], $items );
+
+			// Save order items
+			wc_save_order_items( $order_id, $items );
+
+			// Return HTML items
+			$order = new WC_Order( $order_id );
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+		}
+
+		die();
+	}
+
+	/**
+	 * Load order items via ajax
+	 */
+	public static function load_order_items() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		// Return HTML items
+		$order_id = absint( $_POST['order_id'] );
+		$order    = new WC_Order( $order_id );
+		include( 'admin/meta-boxes/views/html-order-items.php' );
+
+		die();
 	}
 
 	/**
