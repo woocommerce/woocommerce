@@ -71,19 +71,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
 	<table class="wc-order-totals">
 		<tr>
-			<td class="label"><?php _e( 'Shipping', 'woocommerce' ); ?>:</td>
+			<td class="label"><?php _e( 'Shipping', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the shipping and handling total costs for the order.', 'woocommerce' ); ?>">[?]</span>:</td>
 			<td class="total"><?php echo wc_price( $order->get_total_shipping() ); ?></td>
 			<td width="1%"></td>
 		</tr>
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
 			<tr>
-				<td class="label"><?php _e( 'Taxes', 'woocommerce' ); ?>:</td>
+				<td class="label"><?php _e( 'Taxes', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total taxes for this order.', 'woocommerce' ); ?>">[?]</span>:</td>
 				<td class="total"><?php echo wc_price( $order->get_total_tax() ); ?></td>
 				<td width="1%"></td>
 			</tr>
 		<?php endif; ?>
 		<tr>
-			<td class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?>:</td>
+			<td class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total discount applied after tax.', 'woocommerce' ); ?>">[?]</span>:</td>
 			<td class="total">
 				<div class="view"><?php echo wc_price( $order->get_total_discount() ); ?></div>
 				<div class="edit" style="display: none;">
@@ -139,9 +139,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
 	<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 	<button type="button" class="button button-primary save-action"><?php _e( 'Save', 'woocommerce' ); ?></button>
-	<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total and Save', 'woocommerce' ); ?></button>
 </div>
-<div class="wc-order-data-row wc-order-refund-items" style="display:none;">
+<div class="wc-order-data-row wc-order-refund-items" style="display: none;">
 	<table class="wc-order-totals">
 		<tr>
 			<td class="label"><label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>

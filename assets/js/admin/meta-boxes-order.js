@@ -22,6 +22,20 @@ jQuery( function ( $ ) {
 	}
 
 	/**
+	 * Run TipTip
+	 */
+	function runTipTip() {
+		$( '#tiptip_holder' ).removeAttr( 'style' );
+		$( '#tiptip_arrow' ).removeAttr( 'style' );
+		$( '.tips' ).tipTip({
+			'attribute': 'data-tip',
+			'fadeIn': 50,
+			'fadeOut': 50,
+			'delay': 200
+		});
+	}
+
+	/**
 	 * Load order items
 	 *
 	 * @return {void}
@@ -42,6 +56,7 @@ jQuery( function ( $ ) {
 			success: function( response ) {
 				$( '#woocommerce-order-items .inside' ).empty();
 				$( '#woocommerce-order-items .inside' ).append( response );
+				runTipTip();
 				removeOrderItemsLoading();
 			}
 		});
@@ -541,6 +556,7 @@ jQuery( function ( $ ) {
 				success: function( response ) {
 					$( '#woocommerce-order-items .inside' ).empty();
 					$( '#woocommerce-order-items .inside' ).append( response );
+					runTipTip();
 					removeOrderItemsLoading();
 				}
 			});
@@ -744,16 +760,7 @@ jQuery( function ( $ ) {
 
 					if ( !--count ) {
 						$( 'select#add_item_id, #add_item_id_chosen .chosen-choices' ).css( 'border-color', '' ).val( '' );
-
-						$( '#tiptip_holder' ).removeAttr( 'style' );
-						$( '#tiptip_arrow' ).removeAttr( 'style' );
-						$( '.tips' ).tipTip({
-							'attribute': 'data-tip',
-							'fadeIn': 50,
-							'fadeOut': 50,
-							'delay': 200
-						});
-
+						runTipTip();
 						$( 'select#add_item_id' ).trigger( 'chosen:updated' );
 						removeOrderItemsLoading();
 					}
