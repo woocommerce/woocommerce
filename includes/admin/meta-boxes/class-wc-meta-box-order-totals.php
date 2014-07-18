@@ -68,20 +68,6 @@ class WC_Meta_Box_Order_Totals {
 
 		<?php endif; ?>
 
-		<div class="totals_group">
-			<h4><label for="_order_discount"><?php _e( 'Order Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total discount applied after tax.', 'woocommerce' ); ?>">[?]</span></label></h4>
-			<input type="text" class="wc_input_price" id="_order_discount" name="_order_discount" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php
-				if ( isset( $data['_order_discount'][0] ) )
-					echo esc_attr( wc_format_localized_price( $data['_order_discount'][0] ) );
-			?>" />
-		</div>
-		<div class="totals_group">
-			<h4><label for="_order_total"><?php _e( 'Order Total', 'woocommerce' ); ?></label></h4>
-			<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php
-						if ( isset( $data['_order_total'][0] ) )
-							echo esc_attr( wc_format_localized_price( $data['_order_total'][0] ) );
-			?>" />
-		</div>
 		<p class="buttons">
 			<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
 				<button type="button" class="button calc_line_taxes"><?php _e( 'Calculate Tax', 'woocommerce' ); ?></button>
@@ -210,8 +196,6 @@ class WC_Meta_Box_Order_Totals {
 		// Update totals
 		update_post_meta( $post_id, '_order_tax', wc_format_decimal( $total_tax ) );
 		update_post_meta( $post_id, '_order_shipping_tax', wc_format_decimal( $total_shipping_tax ) );
-		update_post_meta( $post_id, '_order_discount', wc_format_decimal( $_POST['_order_discount'] ) );
-		update_post_meta( $post_id, '_order_total', wc_format_decimal( $_POST['_order_total'] ) );
 
 		// Delete rows
 		if ( isset( $_POST['delete_order_item_id'] ) ) {
@@ -220,9 +204,5 @@ class WC_Meta_Box_Order_Totals {
 			foreach ( $delete_ids as $id )
 				wc_delete_order_item( absint( $id ) );
 		}
-
-		delete_post_meta( $post_id, '_shipping_method' );
-		delete_post_meta( $post_id, '_shipping_method_title' );
-		add_post_meta( $post_id, '_order_currency', get_woocommerce_currency(), true );
 	}
 }

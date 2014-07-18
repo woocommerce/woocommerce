@@ -341,4 +341,15 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Update cart discount from item totals
 	update_post_meta( $order_id, '_cart_discount', $subtotal - $total );
+
+	// Update totals
+	update_post_meta( $order_id, '_order_discount', wc_format_decimal( $items['_order_discount'] ) );
+	update_post_meta( $order_id, '_order_total', wc_format_decimal( $items['_order_total'] ) );
+
+	// Remove old values
+	delete_post_meta( $order_id, '_shipping_method' );
+	delete_post_meta( $order_id, '_shipping_method_title' );
+
+	// Set the currency
+	add_post_meta( $order_id, '_order_currency', get_woocommerce_currency(), true );
 }

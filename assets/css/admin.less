@@ -611,12 +611,6 @@ ul.wc_coupon_list_block {
 			margin: 0;
 			line-height: 2em;
 		}
-		.cancel-action,
-		.save-action,
-		.calculate-action {
-			float: left;
-			margin-right: 2px;
-		}
 	}
 	.wc-order-bulk-actions {
 		background: #fefefe;
@@ -625,7 +619,7 @@ ul.wc_coupon_list_block {
 		select {
 			vertical-align: top;
 		}
-		p.bulk_actions {
+		p.bulk-actions {
 			float: left;
 		}
 	}
@@ -642,6 +636,12 @@ ul.wc_coupon_list_block {
 		.chosen-container {
 			width: 400px !important;
 			text-align: left;
+		}
+		.cancel-action,
+		.save-action,
+		.calculate-action {
+			float: left;
+			margin-right: 2px;
 		}
 	}
 	.wc-order-totals {
@@ -845,41 +845,50 @@ ul.wc_coupon_list_block {
 				background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAARklEQVQYGWP8//8/AzGACV3Rnj17/oMwujiGQnQFMD7RChlBbsRmFcwkEO3i4sJImonIumGmg0xBFifaRKIVgj2DbAUuNgCfThpracSKqwAAAABJRU5ErkJggg==) no-repeat center;
 			}
 		}
-		.wc-order-edit-line-item-actions {
-			width: 2.5em;
-			text-align: right;
+	}
+}
+
+.wc-order-items-editable {
+	.edit-order-item {
+		.ir;
+		display: inline-block;
+		margin: 0 .5em 0 0;
+		&:before {
+			.icon;
+			content: "\e603";
+			color: #999;
 		}
-		.edit-order-item {
-			.ir;
-			display: inline-block;
-			margin: 0 .5em 0 0;
+		&:hover {
 			&:before {
-				.icon;
-				content: "\e603";
-				color: #999;
-			}
-			&:hover {
-				&:before {
-					color: #555;
-				}
+				color: #555;
 			}
 		}
-		.delete-order-item,
-		.delete_refund {
-			.ir;
-			display: inline-block;
-			margin: 0;
+	}
+	.delete-order-item,
+	.delete_refund {
+		.ir;
+		display: inline-block;
+		margin: 0;
+		&:before {
+			.icon;
+			content: "\e013";
+			color: #999;
+		}
+		&:hover {
 			&:before {
-				.icon;
-				content: "\e013";
-				color: #999;
-			}
-			&:hover {
-				&:before {
-					color: @red;
-				}
+				color: @red;
 			}
 		}
+	}
+	.wc-order-edit-line-item-actions {
+		width: 2.5em;
+		text-align: right;
+	}
+	.wc-order-totals .wc-order-edit-line-item-actions {
+		width: 1.5em;
+	}
+	.wc-order-totals .edit-order-item {
+		margin: 0;
 	}
 }
 

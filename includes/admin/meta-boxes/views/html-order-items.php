@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 ?>
-<div class="woocommerce_order_items_wrapper">
+<div class="woocommerce_order_items_wrapper wc-order-items-editable">
 	<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
 		<thead>
 			<tr>
@@ -68,16 +68,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tbody>
 	</table>
 </div>
-<div class="wc-order-data-row wc-order-totals-items">
+<div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
 	<table class="wc-order-totals">
 		<tr>
 			<td class="label"><?php _e( 'Shipping', 'woocommerce' ); ?>:</td>
 			<td class="total"><?php echo wc_price( $order->get_total_shipping() ); ?></td>
+			<td width="1%"></td>
 		</tr>
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
 			<tr>
 				<td class="label"><?php _e( 'Taxes', 'woocommerce' ); ?>:</td>
 				<td class="total"><?php echo wc_price( $order->get_total_tax() ); ?></td>
+				<td width="1%"></td>
 			</tr>
 		<?php endif; ?>
 		<tr>
@@ -89,10 +91,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="clear"></div>
 				</div>
 			</td>
+			<td><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div></td>
 		</tr>
 		<tr>
 			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
 			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded() ); ?></td>
+			<td width="1%"></td>
 		</tr>
 		<tr>
 			<td class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</td>
@@ -103,12 +107,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="clear"></div>
 				</div>
 			</td>
+			<td><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div></td>
 		</tr>
 	</table>
 	<div class="clear"></div>
 </div>
 <div class="wc-order-data-row wc-order-bulk-actions">
-	<p class="bulk_actions">
+	<p class="bulk-actions">
 		<select>
 			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 			<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
@@ -122,9 +127,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<button type="button" class="button do_bulk_action wc-reload" title="<?php _e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
 	</p>
-	<p class="add_items">
+	<p class="add-items">
 		<button type="button" class="button add-line-item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
 		<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
+		<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
 	</p>
 </div>
 <div class="wc-order-data-row wc-order-add-item" style="display:none;">
