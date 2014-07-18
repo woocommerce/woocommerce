@@ -52,6 +52,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->invoice_prefix	= $this->get_option( 'invoice_prefix', 'WC-' );
 		$this->paymentaction    = $this->get_option( 'paymentaction', 'sale' );
 		$this->identity_token   = $this->get_option( 'identity_token', '' );
+		$this->whole_order_amount		= $this->get_option( 'whole_order_amount', 'no' );
 
 		// Logs
 		if ( 'yes' == $this->debug ) {
@@ -235,7 +236,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'label'       => __( 'Enable logging', 'woocommerce' ),
 				'default'     => 'no',
 				'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'paypal' ) )
-			)
+			),
+			'whole_order_amount' => array(
+				'title'       => __( 'Send order total as a single amount', 'woocommerce' ),
+				'type'        => 'checkbox',
+				'label'       => __( 'Enable to send order total as a single amount', 'woocommerce' ),
+				'default'     => 'no',
+				'description' => __( 'Enabling this will avoid Paypal incorrect amount format errors when you need to add negative fees or taxes in your order.', 'woocommerce' ),
+			)			
 		);
 	}
 
@@ -342,7 +350,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// If prices include tax or have order discounts, send the whole order as a single item
-		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || $order->get_order_discount() > 0 || ( sizeof( $order->get_items() ) + sizeof( $order->get_fees() ) ) >= 9 ) {
+		if ( 'yes' == $this->whole_order_amount || get_option( 'woocommerce_prices_include_tax' ) == 'yes' || $order->get_order_discount() > 0 || ( sizeof( $order->get_items() ) + sizeof( $order->get_fees() ) ) >= 9 ) {
 
 			// Discount
 			$paypal_args['discount_amount_cart'] = $order->get_order_discount();
