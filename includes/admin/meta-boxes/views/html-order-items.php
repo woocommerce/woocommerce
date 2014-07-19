@@ -2,6 +2,20 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
+
+if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
+	$order_taxes         = $order->get_taxes();
+	$tax_classes         = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+	$classes_options     = array();
+	$classes_options[''] = __( 'Standard', 'woocommerce' );
+
+	if ( $tax_classes ) {
+		foreach ( $tax_classes as $class ) {
+			$classes_options[ sanitize_title( $class ) ] = $class;
+		}
+	}
+}
+
 ?>
 <div class="woocommerce_order_items_wrapper wc-order-items-editable">
 	<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
@@ -12,19 +26,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<?php do_action( 'woocommerce_admin_order_item_headers' ); ?>
 
-				<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
-					<th class="tax_class"><?php _e( 'Tax&nbsp;Class', 'woocommerce' ); ?></th>
-				<?php endif; ?>
-
 				<th class="quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
 
 				<th class="line_cost"><?php _e( 'Total', 'woocommerce' ); ?></th>
 
-				<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
-					<th class="line_tax"><?php _e( 'Tax', 'woocommerce' ); ?></th>
-				<?php endif; ?>
+				<?php
+					if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+						foreach ( $order_taxes as $tax_item ) :
+							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
+							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
+							?>
 
-				<th class="wc-order-item-refund-quantity" style="display:none"><?php _e( 'Refund', 'woocommerce' ); ?></th>
+								<th class="line_tax"><?php echo esc_attr( $tax_class_name ); ?> <span class="tips" data-tip="<?php
+									echo esc_attr( $tax_item['label'] . ' (' . $tax_item['name'] . ')' );
+								?>">[?]</span></th>
+
+							<?php
+						endforeach;
+					endif;
+				?>
+
+				<th class="wc-order-item-refund-quantity" style="display: none;"><?php _e( 'Refund', 'woocommerce' ); ?></th>
 
 				<th class="wc-order-edit-line-item" width="1%">&nbsp;</th>
 			</tr>
@@ -37,7 +59,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 
 				foreach ( $order_items as $item_id => $item ) {
-
 					switch ( $item['type'] ) {
 						case 'line_item' :
 							$_product  = $order->get_product_from_item( $item );
@@ -137,6 +158,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<button type="button" class="button add-order-item"><?php _e( 'Add product(s)', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
+	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
+		<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
+	<?php endif; ?>
 	<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 	<button type="button" class="button button-primary save-action"><?php _e( 'Save', 'woocommerce' ); ?></button>
 </div>

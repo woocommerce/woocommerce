@@ -123,6 +123,17 @@ abstract class WC_Abstract_Order {
 		wc_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
 		wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
 
+		// Save tax data - Since 2.2
+		if ( isset( $args['totals']['tax_data'] ) ) {
+			$tax_data             = array();
+			$tax_data['total']    = array_map( 'wc_format_decimal', $args['totals']['tax_data']['total'] );
+			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $args['totals']['tax_data']['subtotal'] );
+
+			wc_add_order_item_meta( $item_id, '_line_tax_data', $tax_data );
+		} else {
+			wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array(), 'subtotal' => array() ) );
+		}
+
 		// Add variation meta
 		if ( ! empty( $args['variation'] ) ) {
 			foreach ( $args['variation'] as $key => $value ) {

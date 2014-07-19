@@ -204,16 +204,17 @@ class WC_Checkout {
 
 			// Store the line items to the new/resumed order
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
-				$item_id = $order->add_product( 
-					$values['data'], 
-					$values['quantity'], 
+				$item_id = $order->add_product(
+					$values['data'],
+					$values['quantity'],
 					array(
 						'variation' => $values['variation'],
 						'totals'    => array(
 							'subtotal'     => $values['line_subtotal'],
 							'subtotal_tax' => $values['line_subtotal_tax'],
 							'total'        => $values['line_total'],
-							'tax'          => $values['line_tax']
+							'tax'          => $values['line_tax'],
+							'tax_data'     => $values['line_tax_data'] // Since 2.2
 						)
 					)
 				);
@@ -233,7 +234,7 @@ class WC_Checkout {
 				if ( ! $item_id ) {
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 				}
-				
+
 				// Allow plugins to add order item meta to fees
 				do_action( 'woocommerce_add_order_fee_meta', $order_id, $item_id, $fee, $fee_key );
 			}
@@ -246,7 +247,7 @@ class WC_Checkout {
 					if ( ! $item_id ) {
 						throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 					}
-						
+
 					// Allows plugins to add order item meta to shipping
 					do_action( 'woocommerce_add_shipping_order_item', $order_id, $item_id, $package_key );
 				}
@@ -517,7 +518,7 @@ class WC_Checkout {
 
 		if ( WC()->cart->needs_shipping() ) {
 
-			if ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) ) 
+			if ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) )
 				wc_add_notice( sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ), 'error' );
 
 			// Validate Shipping Methods
@@ -571,15 +572,15 @@ class WC_Checkout {
 
                 	// As we are now logged in, checkout will need to refresh to show logged in data
                 	WC()->session->set( 'reload_checkout', true );
-                	
+
                 	// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering
 					WC()->cart->calculate_totals();
 
                 	// Add customer info from other billing fields
                 	if ( $this->posted['billing_first_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
-                		$userdata = array( 
-							'ID'           => $this->customer_id, 
-							'first_name'   => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '', 
+                		$userdata = array(
+							'ID'           => $this->customer_id,
+							'first_name'   => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '',
 							'last_name'    => $this->posted['billing_last_name'] ? $this->posted['billing_last_name'] : '',
 							'display_name' => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : ''
                 		);

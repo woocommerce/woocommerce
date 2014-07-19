@@ -31,12 +31,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<input type="hidden" class="order_refund_id" name="order_refund_id[]" value="<?php echo esc_attr( $refund->id ); ?>" />
 	</td>
 
-	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
-
-	<td class="tax_class" width="1%"></td>
-
-	<?php endif; ?>
-
 	<td class="quantity" width="1%">1</td>
 
 	<td class="line_cost" width="1%">
