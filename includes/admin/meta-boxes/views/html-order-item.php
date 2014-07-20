@@ -178,7 +178,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php
 		if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
 			$line_tax_data = isset( $item['line_tax_data'] ) ? $item['line_tax_data'] : '';
-			$tax_data = maybe_unserialize( $line_tax_data );
+			$tax_data      = maybe_unserialize( $line_tax_data );
 
 			foreach ( $order_taxes as $tax_item ) :
 				$tax_item_id       = $tax_item['rate_id'];

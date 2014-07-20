@@ -54,11 +54,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</td>
 
-	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
+	<?php
+		if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+			$shipping_taxes = isset( $item['taxes'] ) ? $item['taxes'] : '';
+			$tax_data       = maybe_unserialize( $shipping_taxes );
 
-		<td class="line_tax" width="1%"></td>
+			foreach ( $order_taxes as $tax_item ) :
+				$tax_item_id       = $tax_item['rate_id'];
+				$tax_item_total    = isset( $tax_data[ $tax_item_id ] ) ? $tax_data[ $tax_item_id ] : '';
 
-	<?php endfor; endif; ?>
+				?>
+
+					<td class="line_tax" width="1%">
+						<div class="view">
+							<?php echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : ''; ?>
+						</div>
+						<div class="edit" style="display: none;">
+							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $tax_item_total ) ) ? esc_attr( wc_format_localized_price( $tax_item_total ) ) : ''; ?>" class="line_tax wc_input_price" />
+						</div>
+					</td>
+
+				<?php
+			endforeach;
+		endif;
+	?>
 
 	<td class="wc-order-item-refund-quantity" width="1%" style="display: none;"></td>
 

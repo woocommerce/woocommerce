@@ -224,6 +224,10 @@ abstract class WC_Abstract_Order {
 		wc_add_order_item_meta( $item_id, 'method_id', $shipping_rate->id );
 		wc_add_order_item_meta( $item_id, 'cost', wc_format_decimal( $shipping_rate->cost ) );
 
+		// Save shipping taxes - Since 2.2
+		$taxes = array_map( 'wc_format_decimal', $shipping_rate->taxes );
+		wc_add_order_item_meta( $item_id, 'taxes', $taxes );
+
 		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $shipping_rate );
 
 		// Update total
