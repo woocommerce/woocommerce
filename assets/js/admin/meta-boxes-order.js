@@ -340,12 +340,6 @@ jQuery( function ( $ ) {
 
 			return false;
 		})
-		.on( 'click', 'button.add-order-item', function () {
-			if ( window.WCBackbone.Modal.__instance === undefined ) {
-				window.WCBackbone.Modal.__instance = new WCBackbone.Modal.View({ target: '#wc-modal-add-products' });
-			}
-			return false;
-		})
 		.on( 'click', 'button.add-order-fee', function () {
 			addOrderItemsLoading();
 
@@ -563,6 +557,11 @@ jQuery( function ( $ ) {
 
 			return false;
 		});
+
+	// Backbone modal
+	$( '#woocommerce-order-items button.add-order-item' ).WCBackboneModal({
+		template: '#wc-modal-add-products'
+	});
 
 	// Refund actions
 	$( 'body' )

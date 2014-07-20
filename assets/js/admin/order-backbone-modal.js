@@ -2,13 +2,52 @@
 ( function ( $, Backbone, _ ) {
 	'use strict';
 
-	window.WCBackbone = {
-		Modal: {
-			__instance: undefined
-		}
+	/**
+	 * WooCommerce Backbone Modal plugin
+	 *
+	 * @param {object} options
+	 */
+	$.fn.WCBackboneModal = function( options ) {
+		return this.each( function () {
+			( new $.WCBackboneModal( $( this ), options ) );
+		});
 	};
 
-	window.WCBackbone.Modal.View = Backbone.View.extend({
+	/**
+	 * Initialize the Backbone Modal
+	 *
+	 * @param {object} element [description]
+	 * @param {object} options [description]
+	 */
+	$.WCBackboneModal = function( element, options ) {
+		// Set settings
+		var settings = $.extend( {}, $.WCBackboneModal.defaultOptions, options );
+
+		// Open the modal on click
+		element.on( 'click.WCBackboneModal', function () {
+			if ( settings.template ) {
+				new $.WCBackboneModal.View({
+					target: settings.template
+				});
+			}
+		});
+	};
+
+	/**
+	 * Set default options
+	 *
+	 * @type {object}
+	 */
+	$.WCBackboneModal.defaultOptions = {
+		template: '',
+	};
+
+	/**
+	 * Create the Backbone Modal
+	 *
+	 * @return {null}
+	 */
+	$.WCBackboneModal.View = Backbone.View.extend({
 		tagName: 'div',
 		id: 'wc-backbone-modal-dialog',
 		_target: undefined,
@@ -38,7 +77,6 @@
 			});
 			this.remove();
 			$( 'body' ).trigger( 'wc_backbone_modal_removed', this._target );
-			window.WCBackbone.Modal.__instance = undefined;
 		},
 		addButton: function ( e ) {
 			$( 'body' ).trigger( 'wc_backbone_modal_response', this._target, this.getFormData() );
@@ -60,4 +98,5 @@
 			return data;
 		}
 	});
+
 }( jQuery, Backbone, _ ));
