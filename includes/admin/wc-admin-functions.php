@@ -290,7 +290,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 	if ( isset( $items['shipping_method_id'] ) ) {
 
-		$get_values = array( 'shipping_method_id', 'shipping_method_title', 'shipping_method', 'shipping_cost' );
+		$get_values = array( 'shipping_method_id', 'shipping_method_title', 'shipping_method', 'shipping_cost', 'shipping_taxes' );
 
 		foreach ( $get_values as $value ) {
 			$$value = isset( $items[ $value ] ) ? $items[ $value ] : array();
@@ -304,6 +304,7 @@ function wc_save_order_items( $order_id, $items ) {
 					$method_id    = wc_clean( $shipping_method[ $item_id ][ $new_key ] );
 					$method_title = wc_clean( $shipping_method_title[ $item_id ][ $new_key ] );
 					$cost         = wc_format_decimal( $shipping_cost[ $item_id ][ $new_key ] );
+					$ship_taxes   = array_map( 'wc_format_decimal', $shipping_taxes[ $item_id ] );
 
 					$new_id = wc_add_order_item( $order_id, array(
 						'order_item_name' => $method_title,
@@ -313,6 +314,7 @@ function wc_save_order_items( $order_id, $items ) {
 					if ( $new_id ) {
 						wc_add_order_item_meta( $new_id, 'method_id', $method_id );
 						wc_add_order_item_meta( $new_id, 'cost', $cost );
+						wc_add_order_item_meta( $new_id, 'taxes', $ship_taxes );
 					}
 
 					$order_shipping += $cost;
@@ -324,6 +326,7 @@ function wc_save_order_items( $order_id, $items ) {
 				$method_id    = wc_clean( $shipping_method[ $item_id ] );
 				$method_title = wc_clean( $shipping_method_title[ $item_id ] );
 				$cost         = wc_format_decimal( $shipping_cost[ $item_id ] );
+				$ship_taxes   = array_map( 'wc_format_decimal', $shipping_taxes[ $item_id ] );
 
 				$wpdb->update(
 					$wpdb->prefix . 'woocommerce_order_items',
@@ -335,6 +338,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 				wc_update_order_item_meta( $item_id, 'method_id', $method_id );
 				wc_update_order_item_meta( $item_id, 'cost', $cost );
+				wc_update_order_item_meta( $item_id, 'taxes', $ship_taxes );
 
 				$order_shipping += $cost;
 			}
