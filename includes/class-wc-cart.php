@@ -1879,14 +1879,15 @@ class WC_Cart {
 				}
 			}
 
-			$new_fee 			= new stdClass();
-			$new_fee->id 		= $new_fee_id;
-			$new_fee->name 		= esc_attr( $name );
-			$new_fee->amount	= (float) esc_attr( $amount );
-			$new_fee->tax_class	= $tax_class;
-			$new_fee->taxable	= $taxable ? true : false;
-			$new_fee->tax		= 0;
-			$this->fees[] 		= $new_fee;
+			$new_fee            = new stdClass();
+			$new_fee->id        = $new_fee_id;
+			$new_fee->name      = esc_attr( $name );
+			$new_fee->amount    = (float) esc_attr( $amount );
+			$new_fee->tax_class = $tax_class;
+			$new_fee->taxable   = $taxable ? true : false;
+			$new_fee->tax       = 0;
+			$new_fee->tax_data  = array();
+			$this->fees[]       = $new_fee;
 		}
 
 		/**
@@ -1920,6 +1921,9 @@ class WC_Cart {
 						if ( ! empty( $fee_taxes ) ) {
 							// Set the tax total for this fee
 							$this->fees[ $fee_key ]->tax = array_sum( $fee_taxes );
+
+							// Set tax data - Since 2.2
+							$this->fees[ $fee_key ]->tax_data = $fee_taxes;
 
 							// Tax rows - merge the totals we just got
 							foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {

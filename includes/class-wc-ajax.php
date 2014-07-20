@@ -940,9 +940,10 @@ class WC_AJAX {
 			die();
 		}
 
-		$_product = get_product( $post->ID );
-		$order    = get_order( $order_id );
-		$class    = 'new_row';
+		$_product    = get_product( $post->ID );
+		$order       = get_order( $order_id );
+		$order_taxes = $order->get_taxes();
+		$class       = 'new_row';
 
 		// Set values
 		$item = array();
@@ -975,6 +976,9 @@ class WC_AJAX {
 			wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
 			wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
 
+			// Since 2.2
+			wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array(), 'subtotal' => array() ) );
+
 			// Store variation data in meta
 			if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
 				foreach ( $item['variation_data'] as $key => $value ) {
@@ -1000,8 +1004,9 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
-		$order_id = absint( $_POST['order_id'] );
-		$order    = get_order( $order_id );
+		$order_id    = absint( $_POST['order_id'] );
+		$order       = get_order( $order_id );
+		$order_taxes = $order->get_taxes();
 
 		// Add line item
 		$item_id = wc_add_order_item( $order_id, array(
@@ -1014,6 +1019,9 @@ class WC_AJAX {
 			wc_add_order_item_meta( $item_id, '_tax_class', '' );
 			wc_add_order_item_meta( $item_id, '_line_total', '' );
 			wc_add_order_item_meta( $item_id, '_line_tax', '' );
+
+			// Since 2.2
+			wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array() ) );
 		}
 
 		include( 'admin/meta-boxes/views/html-order-fee.php' );
@@ -1031,6 +1039,7 @@ class WC_AJAX {
 
 		$order_id         = absint( $_POST['order_id'] );
 		$order            = get_order( $order_id );
+		$order_taxes      = $order->get_taxes();
 		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 
 		// Add line item
@@ -1043,6 +1052,7 @@ class WC_AJAX {
 		if ( $item_id ) {
 			wc_add_order_item_meta( $item_id, 'method_id', '' );
 			wc_add_order_item_meta( $item_id, 'cost', '' );
+			wc_add_order_item_meta( $item_id, 'taxes', array() );
 		}
 
 		include( 'admin/meta-boxes/views/html-order-shipping.php' );

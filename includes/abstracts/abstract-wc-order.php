@@ -260,6 +260,10 @@ abstract class WC_Abstract_Order {
 		wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $fee->amount ) );
 		wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $fee->tax ) );
 
+		// Save tax data - Since 2.2
+		$tax_data = array_map( 'wc_format_decimal', $fee->tax_data );
+		wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $tax_data ) );
+
 		do_action( 'woocommerce_order_add_fee', $this->id, $item_id, $fee );
 
 		return $item_id;

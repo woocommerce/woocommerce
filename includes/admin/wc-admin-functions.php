@@ -297,51 +297,25 @@ function wc_save_order_items( $order_id, $items ) {
 		}
 
 		foreach ( $shipping_method_id as $item_id => $value ) {
+			$item_id      = absint( $item_id );
+			$method_id    = wc_clean( $shipping_method[ $item_id ] );
+			$method_title = wc_clean( $shipping_method_title[ $item_id ] );
+			$cost         = wc_format_decimal( $shipping_cost[ $item_id ] );
+			$ship_taxes   = isset( $shipping_taxes[ $item_id ] ) ? array_map( 'wc_format_decimal', $shipping_taxes[ $item_id ] ) : array();
 
-			if ( 'new' == $item_id ) {
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_order_items',
+				array( 'order_item_name' => $method_title ),
+				array( 'order_item_id' => $item_id ),
+				array( '%s' ),
+				array( '%d' )
+			);
 
-				foreach ( $value as $new_key => $new_value ) {
-					$method_id    = wc_clean( $shipping_method[ $item_id ][ $new_key ] );
-					$method_title = wc_clean( $shipping_method_title[ $item_id ][ $new_key ] );
-					$cost         = wc_format_decimal( $shipping_cost[ $item_id ][ $new_key ] );
-					$ship_taxes   = array_map( 'wc_format_decimal', $shipping_taxes[ $item_id ] );
+			wc_update_order_item_meta( $item_id, 'method_id', $method_id );
+			wc_update_order_item_meta( $item_id, 'cost', $cost );
+			wc_update_order_item_meta( $item_id, 'taxes', $ship_taxes );
 
-					$new_id = wc_add_order_item( $order_id, array(
-						'order_item_name' => $method_title,
-						'order_item_type' => 'shipping'
-					) );
-
-					if ( $new_id ) {
-						wc_add_order_item_meta( $new_id, 'method_id', $method_id );
-						wc_add_order_item_meta( $new_id, 'cost', $cost );
-						wc_add_order_item_meta( $new_id, 'taxes', $ship_taxes );
-					}
-
-					$order_shipping += $cost;
-				}
-
-			} else {
-
-				$item_id      = absint( $item_id );
-				$method_id    = wc_clean( $shipping_method[ $item_id ] );
-				$method_title = wc_clean( $shipping_method_title[ $item_id ] );
-				$cost         = wc_format_decimal( $shipping_cost[ $item_id ] );
-				$ship_taxes   = array_map( 'wc_format_decimal', $shipping_taxes[ $item_id ] );
-
-				$wpdb->update(
-					$wpdb->prefix . 'woocommerce_order_items',
-					array( 'order_item_name' => $method_title ),
-					array( 'order_item_id' => $item_id ),
-					array( '%s' ),
-					array( '%d' )
-				);
-
-				wc_update_order_item_meta( $item_id, 'method_id', $method_id );
-				wc_update_order_item_meta( $item_id, 'cost', $cost );
-				wc_update_order_item_meta( $item_id, 'taxes', $ship_taxes );
-
-				$order_shipping += $cost;
-			}
+			$order_shipping += $cost;
 		}
 	}
 
