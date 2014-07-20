@@ -20,12 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</td>
 
-	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
-
-	<td class="tax_class" width="1%"></td>
-
-	<?php endif; ?>
-
 	<td class="quantity" width="1%">1</td>
 
 	<td class="line_cost" width="1%">
@@ -34,11 +28,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</td>
 
-	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
+	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
 
-	<td class="line_tax" width="1%"></td>
+		<td class="line_tax" width="1%"></td>
 
-	<?php endif; ?>
+	<?php endfor; endif; ?>
+
+	<td class="wc-order-item-refund-quantity" width="1%" style="display: none;"></td>
 
 	<td class="wc-order-edit-line-item"></td>
 </tr>

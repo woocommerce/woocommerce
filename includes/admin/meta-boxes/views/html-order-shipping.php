@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="view">
 			<?php echo ! empty( $item['name'] ) ? esc_html( $item['name'] ) : __( 'Shipping', 'woocommerce' ); ?>
 		</div>
-		<div class="edit" style="display:none">
+		<div class="edit" style="display: none;">
 			<input type="text" placeholder="<?php _e( 'Shipping Name', 'woocommerce' ); ?>" name="shipping_method_title[<?php echo $item_id ? $item_id : 'new][]'; ?>]" value="<?php echo ( isset( $item['name'] ) ) ? esc_attr( $item['name'] ) : ''; ?>" />
 			<select name="shipping_method[<?php echo $item_id ? $item_id : 'new][]'; ?>]">
 				<optgroup label="<?php _e( 'Shipping Method', 'woocommerce' ); ?>">
@@ -49,24 +49,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="view">
 			<?php echo ( isset( $item['cost'] ) ) ? wc_price( wc_round_tax_total( $item['cost'] ) ) : ''; ?>
 		</div>
-		<div class="edit" style="display:none">
+		<div class="edit" style="display: none;">
 			<label><?php _e( 'Total', 'woocommerce' ); ?>: <input type="text" name="shipping_cost[<?php echo $item_id ? $item_id : 'new][]'; ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['cost'] ) ) ? esc_attr( wc_format_localized_price( $item['cost'] ) ) : ''; ?>" class="line_total wc_input_price" /></label>
 		</div>
 	</td>
 
-	<?php
-		if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
-			for ( $i = 0; $i < count( $order_taxes ); $i++ ) :
-				?>
+	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
 
-					<td class="line_tax" width="1%"></td>
+		<td class="line_tax" width="1%"></td>
 
-				<?php
-			endfor;
-		endif;
-	?>
+	<?php endfor; endif; ?>
 
-	<td class="wc-order-item-refund-quantity" width="1%" style="display:none"></td>
+	<td class="wc-order-item-refund-quantity" width="1%" style="display: none;"></td>
 
 	<td class="wc-order-edit-line-item">
 		<div class="wc-order-edit-line-item-actions">

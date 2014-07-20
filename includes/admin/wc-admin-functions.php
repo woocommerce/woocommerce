@@ -243,15 +243,20 @@ function wc_save_order_items( $order_id, $items ) {
 
 			// Get values. Subtotals might not exist, in which case copy value from total field
 			$line_total[ $item_id ]        = isset( $line_total[ $item_id ] ) ? $line_total[ $item_id ] : 0;
-			$line_tax[ $item_id ]          = isset( $line_tax[ $item_id ] ) ? $line_tax[ $item_id ] : 0;
 			$line_subtotal[ $item_id ]     = isset( $line_subtotal[ $item_id ] ) ? $line_subtotal[ $item_id ] : $line_total[ $item_id ];
+			$line_tax[ $item_id ]          = isset( $line_tax[ $item_id ] ) ? $line_tax[ $item_id ] : array();
 			$line_subtotal_tax[ $item_id ] = isset( $line_subtotal_tax[ $item_id ] ) ? $line_subtotal_tax[ $item_id ] : $line_tax[ $item_id ];
 
 			// Update values
 			wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $line_subtotal[ $item_id ] ) );
-			wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $line_subtotal_tax[ $item_id ] ) );
 			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $line_total[ $item_id ] ) );
-			wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax[ $item_id ] ) );
+			wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( array_sum( $line_subtotal_tax[ $item_id ] ) ) );
+			wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( array_sum( $line_tax[ $item_id ] ) ) );
+
+			// Save line tax data - Since 2.2
+			$tax_data_total    = array_map( 'wc_format_decimal', $line_tax[ $item_id ] );
+			$tax_data_subtotal = array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] );
+			wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $tax_data_total, 'subtotal' => $tax_data_subtotal ) );
 
 			// Total up
 			$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] );

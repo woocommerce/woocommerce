@@ -29,22 +29,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</td>
 
+	<?php
+		if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+			$line_tax_data = isset( $item['line_tax_data'] ) ? $item['line_tax_data'] : '';
+			$tax_data = maybe_unserialize( $line_tax_data );
 
+			foreach ( $order_taxes as $tax_item ) :
+				$tax_item_id       = $tax_item['rate_id'];
+				$tax_item_total    = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
 
-	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
+				?>
 
-	<td class="line_tax" width="1%">
-		<div class="view">
-			<?php echo ( isset( $item['line_tax'] ) ) ? wc_price( wc_round_tax_total( $item['line_tax'] ) ) : ''; ?>
-		</div>
-		<div class="edit" style="display:none">
-			<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_tax'] ) ) ? esc_attr( wc_format_localized_price( $item['line_tax'] ) ) : ''; ?>" class="line_tax wc_input_price" />
-		</div>
-	</td>
+					<td class="line_tax" width="1%">
+						<div class="view">
+							<?php echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : ''; ?>
+						</div>
+						<div class="edit" style="display: none;">
+							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $tax_item_total ) ) ? esc_attr( wc_format_localized_price( $tax_item_total ) ) : ''; ?>" class="line_tax wc_input_price" />
+						</div>
+					</td>
 
-	<?php endif; ?>
+				<?php
+			endforeach;
+		endif;
+	?>
 
-	<td class="wc-order-item-refund-quantity" width="1%" style="display:none">
+	<td class="wc-order-item-refund-quantity" width="1%" style="display: none;">
 		<input type="number" step="1" min="0" max="1" autocomplete="off" name="order_item_refund_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="quantity" />
 	</td>
 
