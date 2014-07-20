@@ -32,14 +32,18 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 
 				<?php
 					if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
-						foreach ( $order_taxes as $tax_item ) :
+						foreach ( $order_taxes as $tax_id => $tax_item ) :
 							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
 							?>
 
-								<th class="line_tax"><?php echo esc_attr( $tax_class_name ); ?> <span class="tips" data-tip="<?php
-									echo esc_attr( $tax_item['label'] . ' (' . $tax_item['name'] . ')' );
-								?>">[?]</span></th>
+								<th class="line_tax">
+									<span><?php echo esc_attr( $tax_class_name ); ?> </span>
+									<span class="tips" data-tip="<?php
+										echo esc_attr( $tax_item['label'] . ' (' . $tax_item['name'] . ')' );
+									?>">[?]</span>
+									<input type="hidden" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
+								</th>
 
 							<?php
 						endforeach;

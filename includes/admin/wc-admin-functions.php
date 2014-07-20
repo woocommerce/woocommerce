@@ -17,28 +17,28 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 function wc_get_screen_ids() {
 	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
-    $screen_ids   = array(
-    	'toplevel_page_' . $wc_screen_id,
-    	$wc_screen_id . '_page_wc-reports',
-    	$wc_screen_id . '_page_wc-settings',
-    	$wc_screen_id . '_page_wc-status',
-        $wc_screen_id . '_page_wc-addons',
-    	'product_page_product_attributes',
-    	'edit-product',
-    	'product',
-    	'edit-shop_coupon',
-    	'shop_coupon',
-    	'edit-product_cat',
-    	'edit-product_tag',
-    	'edit-product_shipping_class'
-    );
+	$screen_ids   = array(
+		'toplevel_page_' . $wc_screen_id,
+		$wc_screen_id . '_page_wc-reports',
+		$wc_screen_id . '_page_wc-settings',
+		$wc_screen_id . '_page_wc-status',
+		$wc_screen_id . '_page_wc-addons',
+		'product_page_product_attributes',
+		'edit-product',
+		'product',
+		'edit-shop_coupon',
+		'shop_coupon',
+		'edit-product_cat',
+		'edit-product_tag',
+		'edit-product_shipping_class'
+	);
 
-    foreach ( wc_get_order_types() as $type ) {
-        $screen_ids[] = $type;
-        $screen_ids[] = 'edit-' . $type;
-    }
+	foreach ( wc_get_order_types() as $type ) {
+		$screen_ids[] = $type;
+		$screen_ids[] = 'edit-' . $type;
+	}
 
-    return apply_filters( 'woocommerce_screen_ids', $screen_ids );
+	return apply_filters( 'woocommerce_screen_ids', $screen_ids );
 }
 
 /**
@@ -53,46 +53,46 @@ function wc_get_screen_ids() {
  * @return int page ID
  */
 function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
-    global $wpdb;
+	global $wpdb;
 
-    $option_value = get_option( $option );
+	$option_value = get_option( $option );
 
-    if ( $option_value > 0 && get_post( $option_value ) )
-        return -1;
+	if ( $option_value > 0 && get_post( $option_value ) )
+		return -1;
 
-    $page_found = null;
+	$page_found = null;
 
-    if ( strlen( $page_content ) > 0 ) {
-        // Search for an existing page with the specified page content (typically a shortcode)
-        $page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
-    } else {
-        // Search for an existing page with the specified page slug
-        $page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
-    }
+	if ( strlen( $page_content ) > 0 ) {
+		// Search for an existing page with the specified page content (typically a shortcode)
+		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
+	} else {
+		// Search for an existing page with the specified page slug
+		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
+	}
 
-    if ( $page_found ) {
-        if ( ! $option_value )
-            update_option( $option, $page_found );
+	if ( $page_found ) {
+		if ( ! $option_value )
+			update_option( $option, $page_found );
 
 		return $page_found;
-    }
+	}
 
-    $page_data = array(
-        'post_status'       => 'publish',
-        'post_type'         => 'page',
-        'post_author'       => 1,
-        'post_name'         => $slug,
-        'post_title'        => $page_title,
-        'post_content'      => $page_content,
-        'post_parent'       => $post_parent,
-        'comment_status'    => 'closed'
-    );
-    $page_id = wp_insert_post( $page_data );
+	$page_data = array(
+		'post_status'       => 'publish',
+		'post_type'         => 'page',
+		'post_author'       => 1,
+		'post_name'         => $slug,
+		'post_title'        => $page_title,
+		'post_content'      => $page_content,
+		'post_parent'       => $post_parent,
+		'comment_status'    => 'closed'
+	);
+	$page_id = wp_insert_post( $page_data );
 
-    if ( $option )
-        update_option( $option, $page_id );
+	if ( $option )
+		update_option( $option, $page_id );
 
-    return $page_id;
+	return $page_id;
 }
 
 /**
@@ -103,10 +103,10 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
  * @param array $options Opens array to output
  */
 function woocommerce_admin_fields( $options ) {
-    if ( ! class_exists( 'WC_Admin_Settings' ) )
-        include 'class-wc-admin-settings.php';
+	if ( ! class_exists( 'WC_Admin_Settings' ) )
+		include 'class-wc-admin-settings.php';
 
-    WC_Admin_Settings::output_fields( $options );
+	WC_Admin_Settings::output_fields( $options );
 }
 
 /**
@@ -117,10 +117,10 @@ function woocommerce_admin_fields( $options ) {
  * @return void
  */
 function woocommerce_update_options( $options ) {
-    if ( ! class_exists( 'WC_Admin_Settings' ) )
-        include 'class-wc-admin-settings.php';
+	if ( ! class_exists( 'WC_Admin_Settings' ) )
+		include 'class-wc-admin-settings.php';
 
-    WC_Admin_Settings::save_fields( $options );
+	WC_Admin_Settings::save_fields( $options );
 }
 
 /**
@@ -130,10 +130,10 @@ function woocommerce_update_options( $options ) {
  * @return string
  */
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
-    if ( ! class_exists( 'WC_Admin_Settings' ) )
-        include 'class-wc-admin-settings.php';
+	if ( ! class_exists( 'WC_Admin_Settings' ) )
+		include 'class-wc-admin-settings.php';
 
-    return WC_Admin_Settings::get_option( $option_name, $default );
+	return WC_Admin_Settings::get_option( $option_name, $default );
 }
 
 /**
@@ -143,30 +143,30 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
  * @return void
  */
 function woocommerce_compile_less_styles() {
-    $colors         = array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
-    $base_file      = WC()->plugin_path() . '/assets/css/woocommerce-base.less';
-    $less_file      = WC()->plugin_path() . '/assets/css/woocommerce.less';
-    $css_file       = WC()->plugin_path() . '/assets/css/woocommerce.css';
+	$colors         = array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
+	$base_file      = WC()->plugin_path() . '/assets/css/woocommerce-base.less';
+	$less_file      = WC()->plugin_path() . '/assets/css/woocommerce.less';
+	$css_file       = WC()->plugin_path() . '/assets/css/woocommerce.css';
 
-    // Write less file
-    if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
+	// Write less file
+	if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
 
-        // Colours changed - recompile less
-        if ( ! class_exists( 'lessc' ) )
-            include_once( WC()->plugin_path() . '/includes/libraries/class-lessc.php' );
-        if ( ! class_exists( 'cssmin' ) )
-            include_once( WC()->plugin_path() . '/includes/libraries/class-cssmin.php' );
+		// Colours changed - recompile less
+		if ( ! class_exists( 'lessc' ) )
+			include_once( WC()->plugin_path() . '/includes/libraries/class-lessc.php' );
+		if ( ! class_exists( 'cssmin' ) )
+			include_once( WC()->plugin_path() . '/includes/libraries/class-cssmin.php' );
 
-        try {
-            // Set default if colours not set
-            if ( ! $colors['primary'] ) $colors['primary'] = '#ad74a2';
-            if ( ! $colors['secondary'] ) $colors['secondary'] = '#f7f6f7';
-            if ( ! $colors['highlight'] ) $colors['highlight'] = '#85ad74';
-            if ( ! $colors['content_bg'] ) $colors['content_bg'] = '#ffffff';
-            if ( ! $colors['subtext'] ) $colors['subtext'] = '#777777';
+		try {
+			// Set default if colours not set
+			if ( ! $colors['primary'] ) $colors['primary'] = '#ad74a2';
+			if ( ! $colors['secondary'] ) $colors['secondary'] = '#f7f6f7';
+			if ( ! $colors['highlight'] ) $colors['highlight'] = '#85ad74';
+			if ( ! $colors['content_bg'] ) $colors['content_bg'] = '#ffffff';
+			if ( ! $colors['subtext'] ) $colors['subtext'] = '#777777';
 
-            // Write new color to base file
-            $color_rules = "
+			// Write new color to base file
+			$color_rules = "
 @primary:       " . $colors['primary'] . ";
 @primarytext:   " . wc_light_or_dark( $colors['primary'], 'desaturate(darken(@primary,50%),18%)', 'desaturate(lighten(@primary,50%),18%)' ) . ";
 
@@ -179,21 +179,21 @@ function woocommerce_compile_less_styles() {
 @contentbg:     " . $colors['content_bg'] . ";
 
 @subtext:       " . $colors['subtext'] . ";
-            ";
+			";
 
-            file_put_contents( $base_file, $color_rules );
+			file_put_contents( $base_file, $color_rules );
 
-            $less         = new lessc;
-            $compiled_css = $less->compileFile( $less_file );
-            $compiled_css = CssMin::minify( $compiled_css );
+			$less         = new lessc;
+			$compiled_css = $less->compileFile( $less_file );
+			$compiled_css = CssMin::minify( $compiled_css );
 
-            if ( $compiled_css )
-                file_put_contents( $css_file, $compiled_css );
+			if ( $compiled_css )
+				file_put_contents( $css_file, $compiled_css );
 
-        } catch ( exception $ex ) {
-            wp_die( __( 'Could not compile woocommerce.less:', 'woocommerce' ) . ' ' . $ex->getMessage() );
-        }
-    }
+		} catch ( exception $ex ) {
+			wp_die( __( 'Could not compile woocommerce.less:', 'woocommerce' ) . ' ' . $ex->getMessage() );
+		}
+	}
 }
 
 /**
@@ -210,6 +210,7 @@ function wc_save_order_items( $order_id, $items ) {
 	// Order items + fees
 	$subtotal = 0;
 	$total    = 0;
+	$taxes    = array( 'items' => array(), 'shipping' => array() );
 
 	if ( isset( $items['order_item_id'] ) ) {
 
@@ -257,6 +258,7 @@ function wc_save_order_items( $order_id, $items ) {
 			$tax_data_total    = array_map( 'wc_format_decimal', $line_tax[ $item_id ] );
 			$tax_data_subtotal = array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] );
 			wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $tax_data_total, 'subtotal' => $tax_data_subtotal ) );
+			$taxes['items'][] = $tax_data_total;
 
 			// Total up
 			$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] );
@@ -315,7 +317,55 @@ function wc_save_order_items( $order_id, $items ) {
 			wc_update_order_item_meta( $item_id, 'cost', $cost );
 			wc_update_order_item_meta( $item_id, 'taxes', $ship_taxes );
 
+			$taxes['shipping'][] = $ship_taxes;
+
 			$order_shipping += $cost;
+		}
+	}
+
+	// Taxes
+	$order_taxes        = isset( $items['order_taxes'] ) ? $items['order_taxes'] : array();
+	$taxes_items        = array();
+	$taxes_shipping     = array();
+	$total_tax          = 0;
+	$total_shipping_tax = 0;
+
+	// Sum items taxes
+	foreach ( $taxes['items'] as $rates ) {
+		foreach ( $rates as $id => $value ) {
+			if ( isset( $taxes_items[ $id ] ) ) {
+				$taxes_items[ $id ] += $value;
+			} else {
+				$taxes_items[ $id ] = $value;
+			}
+		}
+	}
+
+	// Sum shipping taxes
+	foreach ( $taxes['shipping'] as $rates ) {
+		foreach ( $rates as $id => $value ) {
+			if ( isset( $taxes_shipping[ $id ] ) ) {
+				$taxes_shipping[ $id ] += $value;
+			} else {
+				$taxes_shipping[ $id ] = $value;
+			}
+		}
+	}
+
+	// Update order taxes
+	foreach ( $order_taxes as $item_id => $rate_id ) {
+		if ( isset( $taxes_items[ $rate_id ] ) ) {
+			$_total = wc_format_decimal( $taxes_items[ $rate_id ] );
+			wc_update_order_item_meta( $item_id, 'tax_amount', $_total );
+
+			$total_tax += $_total;
+		}
+
+		if ( isset( $taxes_shipping[ $rate_id ] ) ) {
+			$_total = wc_format_decimal( $taxes_shipping[ $rate_id ] );
+			wc_update_order_item_meta( $item_id, 'shipping_tax_amount', $_total );
+
+			$total_shipping_tax += $_total;
 		}
 	}
 
@@ -328,6 +378,10 @@ function wc_save_order_items( $order_id, $items ) {
 	// Update totals
 	update_post_meta( $order_id, '_order_discount', wc_format_decimal( $items['_order_discount'] ) );
 	update_post_meta( $order_id, '_order_total', wc_format_decimal( $items['_order_total'] ) );
+
+	// Update tax
+	update_post_meta( $order_id, '_order_tax', wc_format_decimal( $total_tax ) );
+	update_post_meta( $order_id, '_order_shipping_tax', wc_format_decimal( $total_shipping_tax ) );
 
 	// Remove old values
 	delete_post_meta( $order_id, '_shipping_method' );
