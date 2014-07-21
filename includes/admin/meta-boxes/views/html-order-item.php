@@ -212,7 +212,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	?>
 
 	<td class="wc-order-item-refund-quantity" width="1%" style="display: none;">
-		<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" max="<?php echo esc_attr( $item['qty'] ); ?>" autocomplete="off" name="order_item_refund_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="quantity" />
+		<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" max="<?php echo esc_attr( $item['qty'] ); ?>" autocomplete="off" name="order_item_refund_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund-quantity" />
 	</td>
 
 	<td class="wc-order-edit-line-item">

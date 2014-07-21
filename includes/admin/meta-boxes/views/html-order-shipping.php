@@ -79,7 +79,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		endif;
 	?>
 
-	<td class="wc-order-item-refund-quantity" width="1%" style="display: none;"></td>
+	<td class="wc-order-item-refund-quantity" width="1%" style="display: none;">
+		<input type="number" step="1" min="0" max="1" autocomplete="off" name="order_item_refund_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund-quantity" />
+	</td>
 
 	<td class="wc-order-edit-line-item">
 		<div class="wc-order-edit-line-item-actions">

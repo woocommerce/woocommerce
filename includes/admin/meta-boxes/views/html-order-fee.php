@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="view">
 			<?php echo ! empty( $item['name'] ) ? esc_html( $item['name'] ) : __( 'Fee', 'woocommerce' ); ?>
 		</div>
-		<div class="edit" style="display:none">
+		<div class="edit" style="display: none;">
 			<input type="text" placeholder="<?php _e( 'Fee Name', 'woocommerce' ); ?>" name="order_item_name[<?php echo absint( $item_id ); ?>]" value="<?php echo ( isset( $item['name'] ) ) ? esc_attr( $item['name'] ) : ''; ?>" />
 			<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 		</div>
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="view">
 			<?php echo ( isset( $item['line_total'] ) ) ? wc_price( wc_round_tax_total( $item['line_total'] ) ) : ''; ?>
 		</div>
-		<div class="edit" style="display:none">
+		<div class="edit" style="display: none;">
 			<label><?php _e( 'Total', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_total'] ) ) ? esc_attr( wc_format_localized_price( $item['line_total'] ) ) : ''; ?>" class="line_total wc_input_price" /></label>
 		</div>
 	</td>
@@ -55,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	?>
 
 	<td class="wc-order-item-refund-quantity" width="1%" style="display: none;">
-		<input type="number" step="1" min="0" max="1" autocomplete="off" name="order_item_refund_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="quantity" />
+		<input type="number" step="1" min="0" max="1" autocomplete="off" name="order_item_refund_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund-quantity" />
 	</td>
 
 	<td class="wc-order-edit-line-item">

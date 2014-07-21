@@ -242,20 +242,36 @@ jQuery( function ( $ ) {
 
 			$row.attr( 'data-unit_total_tax', value );
 		})
-		.on( 'change', '#order_items_list .wc-order-item-refund-quantity input', function() {
+		.on( 'change', '#order_items_list .wc-order-item-refund-quantity input', function () {
 			var refund_amount = 0;
-			var $items        = $('#order_items_list').find('tr.item, tr.fee');
+			var $items        = $( '#order_items_list' ).find( 'tr.item, tr.fee, tr.shipping' );
 
-			$items.each(function() {
-				var $row       = $(this);
+			$items.each( function () {
+				var $row       = $( this );
 				var refund_qty = $row.find( '.wc-order-item-refund-quantity input' ).val();
 
 				if ( refund_qty ) {
-					refund_amount = parseFloat( refund_amount ) + ( refund_qty * ( parseFloat( $row.attr( 'data-unit_total' ) ) + parseFloat( $row.attr( 'data-unit_total_tax' ) ) ) );
-				}
-			} );
+					var unit_total = $( this ).find( 'input.line_total' ).val() || 0;
+					unit_total     = parseFloat( unit_total );
 
-			$('#refund_amount').val( refund_amount ).change();
+					$( this ).find( 'input.line_tax' ).each( function () {
+						var cost   = $( this ).val() || 0;
+						cost       = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
+						unit_total = unit_total + parseFloat( cost );
+					});
+
+					refund_amount = parseFloat( refund_amount ) + ( refund_qty * parseFloat( unit_total ) );
+				}
+			});
+
+			$( '#refund_amount' )
+				.val( accounting.formatNumber(
+					refund_amount,
+					woocommerce_admin_meta_boxes.currency_format_num_decimals,
+					'',
+					woocommerce_admin.mon_decimal_point
+				) )
+				.change();
 		})
 		// Add some meta to a line item
 		.on( 'click', '#order_items_list button.add_order_item_meta', function () {
