@@ -47,6 +47,7 @@ class WC_AJAX {
 			'add_order_shipping'                               => false,
 			'add_order_tax'                                    => false,
 			'remove_order_item'                                => false,
+			'remote_order_tax'                                 => false,
 			'reduce_order_item_stock'                          => false,
 			'increase_order_item_stock'                        => false,
 			'add_order_item_meta'                              => false,
@@ -1123,6 +1124,26 @@ class WC_AJAX {
 				wc_delete_order_item( absint( $id ) );
 			}
 		}
+
+		die();
+	}
+
+	/**
+	 * Remove an order tax
+	 */
+	public static function remote_order_tax() {
+
+		check_ajax_referer( 'order-item', 'security' );
+
+		$order_id = absint( $_POST['order_id'] );
+		$rate_id  = absint( $_POST['rate_id'] );
+
+		wc_delete_order_item( $rate_id );
+
+		// Return HTML items
+		$order = new WC_Order( $order_id );
+		$data  = get_post_meta( $order_id );
+		include( 'admin/meta-boxes/views/html-order-items.php' );
 
 		die();
 	}

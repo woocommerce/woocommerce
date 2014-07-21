@@ -556,6 +556,31 @@ jQuery( function ( $ ) {
 			});
 
 			return false;
+		})
+		.on( 'click', 'a.delete-order-tax', function () {
+
+			addOrderItemsLoading();
+
+			var data = {
+				action:   'woocommerce_remote_order_tax',
+				rate_id:  $( this ).attr( 'data-rate_id' ),
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				security: woocommerce_admin_meta_boxes.order_item_nonce
+			};
+
+			$.ajax({
+				url:  woocommerce_admin_meta_boxes.ajax_url,
+				data: data,
+				type: 'POST',
+				success: function( response ) {
+					$( '#woocommerce-order-items .inside' ).empty();
+					$( '#woocommerce-order-items .inside' ).append( response );
+					runTipTip();
+					removeOrderItemsLoading();
+				}
+			});
+
+			return false;
 		});
 
 	// Backbone modal
@@ -612,30 +637,6 @@ jQuery( function ( $ ) {
 
 	// Display a total for taxes
 	$('#woocommerce-order-totals')
-		.on( 'change input', '.order_taxes_amount, .order_taxes_shipping_amount, .shipping_cost, #_order_discount', function() {
-			var $this  =  $(this);
-			var fields = $this.closest('.totals_group').find('input[type=number], .wc_input_price');
-			var total  = 0;
-
-			fields.each(function(){
-				if ( $(this).val() )
-					total = total + accounting.unformat( $(this).val(), woocommerce_admin.mon_decimal_point );
-			});
-
-			if ( $this.is('.order_taxes_amount') || $this.is('.order_taxes_shipping_amount') ) {
-				total = round( total, woocommerce_admin_meta_boxes.currency_format_num_decimals, woocommerce_admin_meta_boxes.tax_rounding_mode );
-			}
-
-			var formatted_total = accounting.formatMoney( total, {
-				symbol 		: woocommerce_admin_meta_boxes.currency_format_symbol,
-				decimal 	: woocommerce_admin_meta_boxes.currency_format_decimal_sep,
-				thousand	: woocommerce_admin_meta_boxes.currency_format_thousand_sep,
-				precision 	: woocommerce_admin_meta_boxes.currency_format_num_decimals,
-				format		: woocommerce_admin_meta_boxes.currency_format
-			} );
-
-			$this.closest('.totals_group').find('span.inline_total').text( formatted_total );
-		})
 		// Calculate totals
 		.on('click', 'button.calc_line_taxes', function(){
 			// Block write panel

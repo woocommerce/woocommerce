@@ -43,6 +43,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 										echo esc_attr( $tax_item['label'] . ' (' . $tax_item['name'] . ')' );
 									?>">[?]</span>
 									<input type="hidden" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
+									<a class="delete-order-tax" href="#" data-rate_id="<?php echo $tax_id; ?>"></a>
 								</th>
 
 							<?php
