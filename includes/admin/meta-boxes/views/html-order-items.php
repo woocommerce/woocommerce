@@ -214,8 +214,65 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 					<h1><?php echo __( 'Add products', 'woocommerce' ); ?></h1>
 				</header>
 				<article>
-					<form>
-						<select id="add_item_id" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 96%"></select>
+					<form action="" method="post">
+						<select id="add_item_id" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 96%;"></select>
+					</form>
+				</article>
+				<footer>
+					<div class="inner">
+						<button id="btn-cancel" class="button button-large"><?php echo __( 'Cancel' , 'woocommerce' ); ?></button>
+						<button id="btn-ok" class="button button-primary button-large"><?php echo __( 'Add' , 'woocommerce' ); ?></button>
+					</div>
+				</footer>
+			</section>
+		</div>
+	</div>
+	<div class="wc-backbone-modal-backdrop">&nbsp;</div>
+</script>
+
+<script type="text/template" id="wc-modal-add-tax">
+	<div class="wc-backbone-modal">
+		<div class="wc-backbone-modal-content">
+			<section class="wc-backbone-modal-main" role="main">
+				<header>
+					<h1><?php echo __( 'Add tax', 'woocommerce' ); ?></h1>
+				</header>
+				<article>
+					<form action="" method="post">
+						<select id="add-order-tax" name="add_order_tax" style="width: 96%;">
+							<?php
+								$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority, tax_rate_class FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
+
+								$tax_codes = array();
+
+								foreach ( $rates as $rate ) {
+									$code = array();
+
+									$code[] = $rate->tax_rate_country;
+									$code[] = $rate->tax_rate_state;
+									$code[] = $rate->tax_rate_name ? sanitize_title( $rate->tax_rate_name ) : 'TAX';
+									$code[] = absint( $rate->tax_rate_priority );
+
+									$tax_codes[ $rate->tax_rate_class ][ $rate->tax_rate_id ] = strtoupper( implode( '-', array_filter( $code ) ) );
+								}
+
+								$tax_codes = array_reverse( $tax_codes );
+
+								foreach ( $tax_codes as $tax_class => $tax_values ) :
+									?>
+										<optgroup label="<?php echo isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax Rate', 'woocommerce' ); ?>">
+
+											<?php foreach ( $tax_values as $tax_id => $tax_code ) : ?>
+
+												<option value="<?php echo $tax_id; ?>"><?php echo esc_html( urldecode( $tax_code ) ); ?></option>
+
+											<?php endforeach; ?>
+
+										</optgroup>
+									<?php
+								endforeach;
+							?>
+						</select>
 					</form>
 				</article>
 				<footer>

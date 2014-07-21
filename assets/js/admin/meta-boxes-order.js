@@ -562,6 +562,9 @@ jQuery( function ( $ ) {
 	$( '#woocommerce-order-items button.add-order-item' ).WCBackboneModal({
 		template: '#wc-modal-add-products'
 	});
+	$( '#woocommerce-order-items button.add-order-tax' ).WCBackboneModal({
+		template: '#wc-modal-add-tax'
+	});
 
 	// Refund actions
 	$( 'body' )
@@ -744,7 +747,7 @@ jQuery( function ( $ ) {
 
 			addOrderItemsLoading();
 
-			$.each( add_item_ids, function( index, value ) {
+			$.each( add_item_ids, function ( index, value ) {
 
 				var data = {
 					action:      'woocommerce_add_order_item',
@@ -753,7 +756,7 @@ jQuery( function ( $ ) {
 					security:    woocommerce_admin_meta_boxes.order_item_nonce
 				};
 
-				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function ( response ) {
 
 					$( 'table.woocommerce_order_items tbody#order_items_list' ).append( response );
 
@@ -772,6 +775,35 @@ jQuery( function ( $ ) {
 		} else {
 			$( 'select#add_item_id, #add_item_id_chosen .chosen-choices' ).css( 'border-color', 'red' );
 		}
+	});
+
+	// Adds new tax in order items
+	$( 'body' ).on( 'wc_backbone_modal_response', function ( e, target ) {
+		if ( '#wc-modal-add-tax' !== target ) {
+			return;
+		}
+
+		addOrderItemsLoading();
+
+		var data = {
+			action:   'woocommerce_add_order_tax',
+			rate_id:  $( '#add-order-tax' ).val(),
+			order_id: woocommerce_admin_meta_boxes.post_id,
+			security: woocommerce_admin_meta_boxes.order_item_nonce
+		};
+
+		$.ajax({
+			url:  woocommerce_admin_meta_boxes.ajax_url,
+			data: data,
+			type: 'POST',
+			success: function( response ) {
+				$( '#woocommerce-order-items .inside' ).empty();
+				$( '#woocommerce-order-items .inside' ).append( response );
+				runTipTip();
+				removeOrderItemsLoading();
+			}
+		});
+
 	});
 
 	$('span.inline_total').closest('.totals_group').find('input').change();

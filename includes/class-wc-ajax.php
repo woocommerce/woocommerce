@@ -45,6 +45,7 @@ class WC_AJAX {
 			'add_order_item'                                   => false,
 			'add_order_fee'                                    => false,
 			'add_order_shipping'                               => false,
+			'add_order_tax'                                    => false,
 			'remove_order_item'                                => false,
 			'reduce_order_item_stock'                          => false,
 			'increase_order_item_stock'                        => false,
@@ -1058,6 +1059,50 @@ class WC_AJAX {
 		include( 'admin/meta-boxes/views/html-order-shipping.php' );
 
 		// Quit out
+		die();
+	}
+
+	/**
+	 * Add order tax column via ajax
+	 */
+	public static function add_order_tax() {
+		global $wpdb;
+
+		check_ajax_referer( 'order-item', 'security' );
+
+		$order_id = absint( $_POST['order_id'] );
+		$rate_id  = absint( $_POST['rate_id'] );
+
+		$rate     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $rate_id ) );
+		$label    = $rate->tax_rate_name ? $rate->tax_rate_name : WC()->countries->tax_or_vat();
+		$compound = $rate->tax_rate_compound ? 1 : 0;
+		$code     = array();
+		$code[]   = $rate->tax_rate_country;
+		$code[]   = $rate->tax_rate_state;
+		$code[]   = $rate->tax_rate_name ? $rate->tax_rate_name : 'TAX';
+		$code[]   = absint( $rate->tax_rate_priority );
+		$code     = strtoupper( implode( '-', array_filter( $code ) ) );
+
+		// Add line item
+		$new_id = wc_add_order_item( $order_id, array(
+			'order_item_name' => wc_clean( $code ),
+			'order_item_type' => 'tax'
+		) );
+
+		// Add line item meta
+		if ( $new_id ) {
+			wc_add_order_item_meta( $new_id, 'rate_id', $rate_id );
+			wc_add_order_item_meta( $new_id, 'label', $label );
+			wc_add_order_item_meta( $new_id, 'compound', $compound );
+			wc_add_order_item_meta( $new_id, 'tax_amount', wc_format_decimal( 0 ) );
+			wc_add_order_item_meta( $new_id, 'shipping_tax_amount', wc_format_decimal( 0 ) );
+		}
+
+		// Return HTML items
+		$order = new WC_Order( $order_id );
+		$data  = get_post_meta( $order_id );
+		include( 'admin/meta-boxes/views/html-order-items.php' );
+
 		die();
 	}
 
