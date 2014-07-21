@@ -30,7 +30,7 @@ class WC_Meta_Box_Product_Data {
 		$thepostid = $post->ID;
 
 		if ( $terms = wp_get_object_terms( $post->ID, 'product_type' ) ) {
-			$product_type = sanitize_title( current( $terms )->name );
+			$product_type = sanitize_title( current( $terms )->slug );
 		} else {
 			$product_type = apply_filters( 'default_product_type', 'simple' );
 		}
