@@ -65,8 +65,6 @@ class WC_Order extends WC_Abstract_Order {
 			AND postmeta.post_id = posts.ID
 		", $this->id ) );
 
-		error_log( print_r( $this->id, true ) );
-
 		return $total;
 	}
 }
