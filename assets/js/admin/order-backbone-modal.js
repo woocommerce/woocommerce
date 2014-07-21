@@ -23,14 +23,11 @@
 		// Set settings
 		var settings = $.extend( {}, $.WCBackboneModal.defaultOptions, options );
 
-		// Open the modal on click
-		element.on( 'click.WCBackboneModal', function () {
-			if ( settings.template ) {
-				new $.WCBackboneModal.View({
-					target: settings.template
-				});
-			}
-		});
+		if ( settings.template ) {
+			new $.WCBackboneModal.View({
+				target: settings.template
+			});
+		}
 	};
 
 	/**

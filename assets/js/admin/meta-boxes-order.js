@@ -356,6 +356,13 @@ jQuery( function ( $ ) {
 
 			return false;
 		})
+		.on( 'click', 'button.add-order-item', function () {
+			$( this ).WCBackboneModal({
+				template: '#wc-modal-add-products'
+			});
+
+			return false;
+		})
 		.on( 'click', 'button.add-order-fee', function () {
 			addOrderItemsLoading();
 
@@ -369,6 +376,7 @@ jQuery( function ( $ ) {
 				$( 'table.woocommerce_order_items tbody#order_items_list' ).append( response );
 				removeOrderItemsLoading();
 			});
+
 			return false;
 		})
 		.on( 'click', 'button.add-order-shipping', function () {
@@ -384,6 +392,14 @@ jQuery( function ( $ ) {
 				$( 'table.woocommerce_order_items tbody#order_items_list' ).append( response );
 				removeOrderItemsLoading();
 			});
+
+			return false;
+		})
+		.on( 'click', 'button.add-order-tax', function () {
+			$( this ).WCBackboneModal({
+				template: '#wc-modal-add-tax'
+			});
+
 			return false;
 		})
 		// Bulk actions for line items
@@ -598,14 +614,6 @@ jQuery( function ( $ ) {
 
 			return false;
 		});
-
-	// Backbone modal
-	$( '#woocommerce-order-items button.add-order-item' ).WCBackboneModal({
-		template: '#wc-modal-add-products'
-	});
-	$( '#woocommerce-order-items button.add-order-tax' ).WCBackboneModal({
-		template: '#wc-modal-add-tax'
-	});
 
 	// Refund actions
 	$( 'body' )
