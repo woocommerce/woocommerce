@@ -501,13 +501,13 @@ jQuery( function ( $ ) {
 
 				order_discount = accounting.unformat( order_discount.replace( ',', '.' ) );
 
-				$( '#order_items_list tr.item, #order_items_list tr.shipping .wc_input_price' ).each( function () {
+				$( '#order_items_list tr.shipping input.line_total' ).each( function () {
 					cost     = $( this ).val() || '0';
 					cost     = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
 					shipping = shipping + parseFloat( cost );
 				});
 
-				$( '#tax_rows' ).find( 'input[type=number], .wc_input_price' ).each( function () {
+				$( '#order_items_list input.line_tax' ).each( function () {
 					cost = $( this ).val() || '0';
 					cost = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
 					tax  = tax + parseFloat( cost );
