@@ -111,7 +111,7 @@ class WC_Coupon {
 
 			$this->id                         = absint( $coupon_data['id'] );
 			$this->type                       = esc_html( $coupon_data['type'] );
-			$this->amount                     = esc_html( ($coupon_data['amount']?:$coupon_data['coupon_amount']) ) ;
+			$this->amount                     = esc_html( ($coupon_data['amount']?$coupon_data['amount']:$coupon_data['coupon_amount']) ) ;
 			$this->coupon_amount 		  = $this->amount;
 			$this->individual_use             = esc_html( $coupon_data['individual_use'] );
 			$this->product_ids                = is_array( $coupon_data['product_ids'] ) ? $coupon_data['product_ids'] : array();
