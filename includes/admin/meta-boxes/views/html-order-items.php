@@ -44,7 +44,7 @@ $payment_gateway = wc_get_payment_gateway_by_order( $order );
 										echo esc_attr( $tax_item['name'] . ' (' . $tax_class_name . ')' );
 									?>">
 									<?php echo esc_attr( $column_label ); ?>
-									<input type="hidden" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
+									<input type="hidden" class="order-tax-id" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
 									<a class="delete-order-tax" href="#" data-rate_id="<?php echo $tax_id; ?>"></a>
 								</th>
 							<?php
