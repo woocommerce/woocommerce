@@ -324,6 +324,16 @@ jQuery( function ( $ ) {
 				} );
 			}
 			return false;
+		})
+		// Subtotal/total inputs
+		.on( 'keyup', '.woocommerce_order_items .split-input input:eq(0)', function(){
+			var $subtotal = $(this).next();
+			if ( $subtotal.val() === '' || $subtotal.is('.match-total') ) {
+				$subtotal.val( $(this).val() ).addClass('match-total');
+			}
+		})
+		.on( 'keyup', '.woocommerce_order_items .split-input input:eq(0)', function(){
+			$(this).removeClass('match-total');
 		});
 
 	$( '#woocommerce-order-items' )
@@ -600,7 +610,7 @@ jQuery( function ( $ ) {
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					security: woocommerce_admin_meta_boxes.order_item_nonce
 				};
-				
+
 				$.ajax({
 					url:  woocommerce_admin_meta_boxes.ajax_url,
 					data: data,

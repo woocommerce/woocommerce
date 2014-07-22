@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php echo ( isset( $item['cost'] ) ) ? wc_price( wc_round_tax_total( $item['cost'] ) ) : ''; ?>
 		</div>
 		<div class="edit" style="display: none;">
-			<label><?php _e( 'Total', 'woocommerce' ); ?>: <input type="text" name="shipping_cost[<?php echo $item_id; ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['cost'] ) ) ? esc_attr( wc_format_localized_price( $item['cost'] ) ) : ''; ?>" class="line_total wc_input_price" /></label>
+			<input type="text" name="shipping_cost[<?php echo $item_id; ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['cost'] ) ) ? esc_attr( wc_format_localized_price( $item['cost'] ) ) : ''; ?>" class="line_total wc_input_price" />
 		</div>
 	</td>
 

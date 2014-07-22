@@ -168,10 +168,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 			?>
 		</div>
-		<div class="edit" style="display: none;">
-			<span class="subtotal"><label><?php _e( 'Subtotal', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_localized_price( $item['line_subtotal'] ) ) : ''; ?>" class="line_subtotal wc_input_price" /></label></span>
-
-			<label><?php _e( 'Total', 'woocommerce' ); ?>: <a class="tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" href="#">[?]</a> <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_total'] ) ) ? esc_attr( wc_format_localized_price( $item['line_total'] ) ) : ''; ?>" class="line_total wc_input_price" /></label>
+		<div class="edit" style="display: block;">
+			<div class="split-input">
+				<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_total'] ) ) ? esc_attr( wc_format_localized_price( $item['line_total'] ) ) : ''; ?>" class="line_total wc_input_price tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" />
+				<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" value="<?php echo ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_localized_price( $item['line_subtotal'] ) ) : ''; ?>" class="line_subtotal wc_input_price tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" />
+			</div>
 		</div>
 	</td>
 
@@ -202,9 +203,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							?>
 						</div>
 						<div class="edit" style="display: none;">
-							<span class="subtotal"><input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $tax_item_subtotal ) ) ? esc_attr( wc_format_localized_price( $tax_item_subtotal ) ) : ''; ?>" class="line_subtotal_tax wc_input_price" /></span>
-
-							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $tax_item_total ) ) ? esc_attr( wc_format_localized_price( $tax_item_total ) ) : ''; ?>" class="line_tax wc_input_price" />
+							<div class="split-input">
+								<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $tax_item_total ) ) ? esc_attr( wc_format_localized_price( $tax_item_total ) ) : ''; ?>" class="line_tax wc_input_price tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" />
+								<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" value="<?php echo ( isset( $tax_item_subtotal ) ) ? esc_attr( wc_format_localized_price( $tax_item_subtotal ) ) : ''; ?>" class="line_subtotal_tax wc_input_price tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" />
+							</div>
 						</div>
 					</td>
 
