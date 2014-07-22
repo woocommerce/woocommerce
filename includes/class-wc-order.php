@@ -62,7 +62,7 @@ class WC_Order extends WC_Abstract_Order {
 			FROM $wpdb->postmeta AS postmeta
 			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
 			WHERE postmeta.meta_key = '_refund_amount'
-			GROUP BY posts.ID
+			AND postmeta.post_id = posts.ID
 		", $this->id ) );
 
 		return $total;

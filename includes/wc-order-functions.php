@@ -570,3 +570,18 @@ function wc_create_refund( $args = array() ) {
 
 	return new WC_Order_Refund( $refund_id );
 }
+
+/**
+ * Get tax class by tax id.
+ *
+ * @since 2.2
+ * @param int $tax_id
+ * @return string
+ */
+function wc_get_tax_class_by_tax_id( $tax_id ) {
+	global $wpdb;
+
+	$tax_class = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_class FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d", $tax_id ) );
+
+	return wc_clean( $tax_class );
+}

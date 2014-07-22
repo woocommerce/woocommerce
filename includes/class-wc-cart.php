@@ -93,7 +93,7 @@ class WC_Cart {
 		$this->dp                    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl';
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl';
-		
+
 		// Array of data the cart calculates and stores in the session with defaults
 		$this->cart_session_data = array(
 			'cart_contents_total'     => 0,
@@ -334,7 +334,7 @@ class WC_Cart {
 			// Check item stock
 			$result = $this->check_cart_item_stock();
 
-			if ( is_wp_error( $result ) ) { 
+			if ( is_wp_error( $result ) ) {
 				wc_add_notice( $result->get_error_message(), 'error' );
 			}
 		}
@@ -804,10 +804,10 @@ class WC_Cart {
 
 			// Load cart item data - may be added by other plugins
 			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id );
-			
+
 			// Generate a ID based on product ID, variation ID, variation data, and other cart item data
 			$cart_id        = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );
-			
+
 			// See if this product and its options is already in the cart
 			$cart_item_key  = $this->find_product_in_cart( $cart_id );
 
@@ -816,7 +816,7 @@ class WC_Cart {
 				$variation_id = $product_id;
 				$product_id   = wp_get_post_parent_id( $variation_id );
 			}
-			
+
 			// Get the product
 			$product_data   = get_product( $variation_id ? $variation_id : $product_id );
 
@@ -1001,7 +1001,7 @@ class WC_Cart {
 				// Prices
 				$base_price = $_product->get_price();
 				$line_price = $_product->get_price() * $values['quantity'];
-				
+
 				$line_subtotal = 0;
 				$line_subtotal_tax = 0;
 
@@ -1099,6 +1099,10 @@ class WC_Cart {
 				// Prices
 				$base_price = $_product->get_price();
 				$line_price = $_product->get_price() * $values['quantity'];
+
+				// Tax data
+				$taxes = array();
+				$discounted_taxes = array();
 
 				/**
 				 * No tax to calculate
@@ -1204,10 +1208,13 @@ class WC_Cart {
 				$this->cart_contents_total += $line_total;
 
 				// Store costs + taxes for lines
-				$this->cart_contents[ $cart_item_key ]['line_total'] 		= $line_total;
-				$this->cart_contents[ $cart_item_key ]['line_tax'] 			= $line_tax;
-				$this->cart_contents[ $cart_item_key ]['line_subtotal'] 	= $line_subtotal;
+				$this->cart_contents[ $cart_item_key ]['line_total']        = $line_total;
+				$this->cart_contents[ $cart_item_key ]['line_tax']          = $line_tax;
+				$this->cart_contents[ $cart_item_key ]['line_subtotal']     = $line_subtotal;
 				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $line_subtotal_tax;
+
+				// Store rates ID and costs - Since 2.2
+				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $taxes, 'subtotal' => $discounted_taxes );
 			}
 
 			// Only calculate the grand total + shipping if on the cart/checkout
@@ -1376,7 +1383,7 @@ class WC_Cart {
 
 		/**
 		 * Should the shipping address form be shown
-		 * 
+		 *
 		 * @return bool
 		 */
 		function needs_shipping_address() {
@@ -1523,7 +1530,7 @@ class WC_Cart {
 									$usage_count = 0;
 								}
 							}
-							
+
 							foreach ( $check_emails as $check_email ) {
 								$usage_count = $usage_count + sizeof( array_keys( $used_by, $check_email ) );
 							}
@@ -1872,14 +1879,15 @@ class WC_Cart {
 				}
 			}
 
-			$new_fee 			= new stdClass();
-			$new_fee->id 		= $new_fee_id;
-			$new_fee->name 		= esc_attr( $name );
-			$new_fee->amount	= (float) esc_attr( $amount );
-			$new_fee->tax_class	= $tax_class;
-			$new_fee->taxable	= $taxable ? true : false;
-			$new_fee->tax		= 0;
-			$this->fees[] 		= $new_fee;
+			$new_fee            = new stdClass();
+			$new_fee->id        = $new_fee_id;
+			$new_fee->name      = esc_attr( $name );
+			$new_fee->amount    = (float) esc_attr( $amount );
+			$new_fee->tax_class = $tax_class;
+			$new_fee->taxable   = $taxable ? true : false;
+			$new_fee->tax       = 0;
+			$new_fee->tax_data  = array();
+			$this->fees[]       = $new_fee;
 		}
 
 		/**
@@ -1909,10 +1917,13 @@ class WC_Cart {
 						// Get tax rates
 						$tax_rates = $this->tax->get_rates( $fee->tax_class );
 						$fee_taxes = $this->tax->calc_tax( $fee->amount, $tax_rates, false );
-						
+
 						if ( ! empty( $fee_taxes ) ) {
 							// Set the tax total for this fee
 							$this->fees[ $fee_key ]->tax = array_sum( $fee_taxes );
+
+							// Set tax data - Since 2.2
+							$this->fees[ $fee_key ]->tax_data = $fee_taxes;
 
 							// Tax rows - merge the totals we just got
 							foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {

@@ -44,12 +44,17 @@ class WC_AJAX {
 			'get_customer_details'                             => false,
 			'add_order_item'                                   => false,
 			'add_order_fee'                                    => false,
+			'add_order_shipping'                               => false,
+			'add_order_tax'                                    => false,
 			'remove_order_item'                                => false,
+			'remote_order_tax'                                 => false,
 			'reduce_order_item_stock'                          => false,
 			'increase_order_item_stock'                        => false,
 			'add_order_item_meta'                              => false,
 			'remove_order_item_meta'                           => false,
 			'calc_line_taxes'                                  => false,
+			'save_order_items'                                 => false,
+			'load_order_items'                                 => false,
 			'add_order_note'                                   => false,
 			'delete_order_note'                                => false,
 			'json_search_products'                             => false,
@@ -937,9 +942,10 @@ class WC_AJAX {
 			die();
 		}
 
-		$_product = get_product( $post->ID );
-		$order    = get_order( $order_id );
-		$class    = 'new_row';
+		$_product    = get_product( $post->ID );
+		$order       = get_order( $order_id );
+		$order_taxes = $order->get_taxes();
+		$class       = 'new_row';
 
 		// Set values
 		$item = array();
@@ -972,6 +978,9 @@ class WC_AJAX {
 			wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
 			wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
 
+			// Since 2.2
+			wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array(), 'subtotal' => array() ) );
+
 			// Store variation data in meta
 			if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
 				foreach ( $item['variation_data'] as $key => $value ) {
@@ -997,8 +1006,9 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
-		$order_id = absint( $_POST['order_id'] );
-		$order    = get_order( $order_id );
+		$order_id    = absint( $_POST['order_id'] );
+		$order       = get_order( $order_id );
+		$order_taxes = $order->get_taxes();
 
 		// Add line item
 		$item_id = wc_add_order_item( $order_id, array(
@@ -1011,11 +1021,89 @@ class WC_AJAX {
 			wc_add_order_item_meta( $item_id, '_tax_class', '' );
 			wc_add_order_item_meta( $item_id, '_line_total', '' );
 			wc_add_order_item_meta( $item_id, '_line_tax', '' );
+
+			// Since 2.2
+			wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array() ) );
 		}
 
 		include( 'admin/meta-boxes/views/html-order-fee.php' );
 
 		// Quit out
+		die();
+	}
+
+	/**
+	 * Add order shipping cost via ajax
+	 */
+	public static function add_order_shipping() {
+
+		check_ajax_referer( 'order-item', 'security' );
+
+		$order_id         = absint( $_POST['order_id'] );
+		$order            = get_order( $order_id );
+		$order_taxes      = $order->get_taxes();
+		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+
+		// Add line item
+		$item_id = wc_add_order_item( $order_id, array(
+			'order_item_name' => '',
+			'order_item_type' => 'shipping'
+		) );
+
+		// Add line item meta
+		if ( $item_id ) {
+			wc_add_order_item_meta( $item_id, 'method_id', '' );
+			wc_add_order_item_meta( $item_id, 'cost', '' );
+			wc_add_order_item_meta( $item_id, 'taxes', array() );
+		}
+
+		include( 'admin/meta-boxes/views/html-order-shipping.php' );
+
+		// Quit out
+		die();
+	}
+
+	/**
+	 * Add order tax column via ajax
+	 */
+	public static function add_order_tax() {
+		global $wpdb;
+
+		check_ajax_referer( 'order-item', 'security' );
+
+		$order_id = absint( $_POST['order_id'] );
+		$rate_id  = absint( $_POST['rate_id'] );
+
+		$rate     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $rate_id ) );
+		$label    = $rate->tax_rate_name ? $rate->tax_rate_name : WC()->countries->tax_or_vat();
+		$compound = $rate->tax_rate_compound ? 1 : 0;
+		$code     = array();
+		$code[]   = $rate->tax_rate_country;
+		$code[]   = $rate->tax_rate_state;
+		$code[]   = $rate->tax_rate_name ? $rate->tax_rate_name : 'TAX';
+		$code[]   = absint( $rate->tax_rate_priority );
+		$code     = strtoupper( implode( '-', array_filter( $code ) ) );
+
+		// Add line item
+		$new_id = wc_add_order_item( $order_id, array(
+			'order_item_name' => wc_clean( $code ),
+			'order_item_type' => 'tax'
+		) );
+
+		// Add line item meta
+		if ( $new_id ) {
+			wc_add_order_item_meta( $new_id, 'rate_id', $rate_id );
+			wc_add_order_item_meta( $new_id, 'label', $label );
+			wc_add_order_item_meta( $new_id, 'compound', $compound );
+			wc_add_order_item_meta( $new_id, 'tax_amount', wc_format_decimal( 0 ) );
+			wc_add_order_item_meta( $new_id, 'shipping_tax_amount', wc_format_decimal( 0 ) );
+		}
+
+		// Return HTML items
+		$order = new WC_Order( $order_id );
+		$data  = get_post_meta( $order_id );
+		include( 'admin/meta-boxes/views/html-order-items.php' );
+
 		die();
 	}
 
@@ -1036,6 +1124,26 @@ class WC_AJAX {
 				wc_delete_order_item( absint( $id ) );
 			}
 		}
+
+		die();
+	}
+
+	/**
+	 * Remove an order tax
+	 */
+	public static function remote_order_tax() {
+
+		check_ajax_referer( 'order-item', 'security' );
+
+		$order_id = absint( $_POST['order_id'] );
+		$rate_id  = absint( $_POST['rate_id'] );
+
+		wc_delete_order_item( $rate_id );
+
+		// Return HTML items
+		$order = new WC_Order( $order_id );
+		$data  = get_post_meta( $order_id );
+		include( 'admin/meta-boxes/views/html-order-items.php' );
 
 		die();
 	}
@@ -1275,6 +1383,46 @@ class WC_AJAX {
 			'tax_row_html' => $tax_row_html
 		) );
 
+	}
+
+	/**
+	 * Save order items via ajax
+	 */
+	public static function save_order_items() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		if ( isset( $_POST['order_id'] ) && isset( $_POST['items'] ) ) {
+			$order_id = absint( $_POST['order_id'] );
+
+			// Parse the jQuery serialized items
+			$items = array();
+			parse_str( $_POST['items'], $items );
+
+			// Save order items
+			wc_save_order_items( $order_id, $items );
+
+			// Return HTML items
+			$order = new WC_Order( $order_id );
+			$data  = get_post_meta( $order_id );
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+		}
+
+		die();
+	}
+
+	/**
+	 * Load order items via ajax
+	 */
+	public static function load_order_items() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		// Return HTML items
+		$order_id = absint( $_POST['order_id'] );
+		$order    = new WC_Order( $order_id );
+		$data     = get_post_meta( $order_id );
+		include( 'admin/meta-boxes/views/html-order-items.php' );
+
+		die();
 	}
 
 	/**
@@ -1653,7 +1801,7 @@ class WC_AJAX {
 			if ( ! $refund_amount || $max_refund < $refund_amount ) {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
-		
+
 			// Create the refund object
 			$refund = wc_create_refund( array(
 				'amount'    => $refund_amount,
@@ -1695,7 +1843,7 @@ class WC_AJAX {
 		check_ajax_referer( 'order-item', 'security' );
 
 		$refund_id = absint( $_POST['refund_id'] );
-		
+
 		if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
 			wp_delete_post( $refund_id );
 		}
