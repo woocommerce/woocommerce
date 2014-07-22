@@ -168,7 +168,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 			?>
 		</div>
-		<div class="edit" style="display: block;">
+		<div class="edit" style="display: none;">
 			<div class="split-input">
 				<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_total'] ) ) ? esc_attr( wc_format_localized_price( $item['line_total'] ) ) : ''; ?>" class="line_total wc_input_price tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" />
 				<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" value="<?php echo ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_localized_price( $item['line_subtotal'] ) ) : ''; ?>" class="line_subtotal wc_input_price tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" />
