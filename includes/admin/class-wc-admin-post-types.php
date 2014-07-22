@@ -1360,7 +1360,7 @@ class WC_Admin_Post_Types {
 		$output .= '<option value="">' . __( 'Show all product types', 'woocommerce' ) . '</option>';
 
 		foreach ( $terms as $term ) {
-			$output .= '<option value="' . sanitize_title( $term->name ) . '" ';
+			$output .= '<option value="' . sanitize_title( $term->slug ) . '" ';
 
 			if ( isset( $wp_query->query['product_type'] ) ) {
 				$output .= selected( $term->slug, $wp_query->query['product_type'], false );
@@ -1368,7 +1368,7 @@ class WC_Admin_Post_Types {
 
 			$output .= '>';
 
-			switch ( $term->name ) {
+			switch ( $term->slug ) {
 				case 'grouped' :
 					$output .= __( 'Grouped product', 'woocommerce' );
 					break;

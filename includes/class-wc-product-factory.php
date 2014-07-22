@@ -45,7 +45,7 @@ class WC_Product_Factory {
 				$product_type = 'variation';
 			} else {
 				$terms        = get_the_terms( $product_id, 'product_type' );
-				$product_type = ! empty( $terms ) && isset( current( $terms )->name ) ? sanitize_title( current( $terms )->name ) : 'simple';
+				$product_type = ! empty( $terms ) && isset( current( $terms )->slug ) ? sanitize_title( current( $terms )->slug ) : 'simple';
 			}
 
 			// Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class
