@@ -591,28 +591,28 @@ jQuery( function ( $ ) {
 			return false;
 		})
 		.on( 'click', 'a.delete-order-tax', function () {
+			if ( window.confirm( woocommerce_admin_meta_boxes.i18n_delete_tax ) ) {
+				addOrderItemsLoading();
 
-			addOrderItemsLoading();
-
-			var data = {
-				action:   'woocommerce_remote_order_tax',
-				rate_id:  $( this ).attr( 'data-rate_id' ),
-				order_id: woocommerce_admin_meta_boxes.post_id,
-				security: woocommerce_admin_meta_boxes.order_item_nonce
-			};
-
-			$.ajax({
-				url:  woocommerce_admin_meta_boxes.ajax_url,
-				data: data,
-				type: 'POST',
-				success: function( response ) {
-					$( '#woocommerce-order-items .inside' ).empty();
-					$( '#woocommerce-order-items .inside' ).append( response );
-					runTipTip();
-					removeOrderItemsLoading();
-				}
-			});
-
+				var data = {
+					action:   'woocommerce_remote_order_tax',
+					rate_id:  $( this ).attr( 'data-rate_id' ),
+					order_id: woocommerce_admin_meta_boxes.post_id,
+					security: woocommerce_admin_meta_boxes.order_item_nonce
+				};
+				
+				$.ajax({
+					url:  woocommerce_admin_meta_boxes.ajax_url,
+					data: data,
+					type: 'POST',
+					success: function( response ) {
+						$( '#woocommerce-order-items .inside' ).empty();
+						$( '#woocommerce-order-items .inside' ).append( response );
+						runTipTip();
+						removeOrderItemsLoading();
+					}
+				});
+			}
 			return false;
 		});
 
