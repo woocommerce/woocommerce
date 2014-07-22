@@ -196,6 +196,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 									}
 
 									echo wc_price( wc_round_tax_total( $tax_item_total ) );
+								} else {
+									echo '&ndash;';
 								}
 							?>
 						</div>

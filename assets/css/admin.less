@@ -606,7 +606,6 @@ ul.wc_coupon_list_block {
 		.clearfix;
 		line-height: 2em;
 		text-align: right;
-		border-top:1px solid #dfdfdf;
 		p {
 			margin: 0;
 			line-height: 2em;
@@ -733,6 +732,15 @@ ul.wc_coupon_list_block {
 			&:first-child {
 				padding-left: 12px;
 			}
+		}
+		tbody tr:last-child td {
+			border-bottom:1px solid #dfdfdf;
+		}
+		tbody tr:first-child td {
+			border-top: 8px solid #f8f8f8;
+		}
+		tbody#order_line_items tr:first-child td {
+			border-top: none;
 		}
 		td.check-column {
 			padding: 8px 8px 8px 12px;

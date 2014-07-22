@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<p><?php echo date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post_date ) ); ?></p>
 					</td>
 				</tr>
-				<?php if ( ! empty( $refund->get_refund_reason() ) ) : ?>
+				<?php if ( $refund->get_refund_reason() ) : ?>
 					<tr>
 						<th><?php _e( 'Reason', 'woocommerce' ); ?>:</th>
 						<td>

@@ -54,41 +54,44 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 				<th class="wc-order-edit-line-item" width="1%">&nbsp;</th>
 			</tr>
 		</thead>
-		<tbody id="order_items_list">
+		<tbody id="order_line_items">
+		<?php
+			$order_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
+			foreach ( $order_items as $item_id => $item ) {
+				$_product  = $order->get_product_from_item( $item );
+				$item_meta = $order->get_item_meta( $item_id );
+				
+				include( 'html-order-item.php' );
 
-			<?php
-				// List order items
-				$order_items      = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', array( 'line_item', 'fee', 'shipping', 'coupon' ) ) );
-				$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
-
-				foreach ( $order_items as $item_id => $item ) {
-					switch ( $item['type'] ) {
-						case 'line_item' :
-							$_product  = $order->get_product_from_item( $item );
-							$item_meta = $order->get_item_meta( $item_id );
-
-							include( 'html-order-item.php' );
-							break;
-						case 'fee' :
-							include( 'html-order-fee.php' );
-							break;
-						case 'shipping' :
-							include( 'html-order-shipping.php' );
-							break;
-						case 'coupon' :
-							include( 'html-order-coupon.php' );
-							break;
-					}
-
-					do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item );
+				do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item );
+			}
+		?>
+		</tbody>
+		<tbody id="order_fee_line_items">
+		<?php
+			$order_items = $order->get_items( 'fee' );
+			foreach ( $order_items as $item_id => $item ) {
+				include( 'html-order-fee.php' );
+			}
+		?>
+		</tbody>
+		<tbody id="order_shipping_line_items">
+		<?php
+			$order_items      = $order->get_items( 'shipping' );
+			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+			foreach ( $order_items as $item_id => $item ) {
+				include( 'html-order-shipping.php' );
+			}
+		?>
+		</tbody>
+		<tbody id="order_refunds">
+		<?php
+			if ( $refunds = $order->get_refunds() ) {
+				foreach ( $refunds as $refund ) {
+					include( 'html-order-refund.php' );
 				}
-
-				if ( $refunds = $order->get_refunds() ) {
-					foreach ( $refunds as $refund ) {
-						include( 'html-order-refund.php' );
-					}
-				}
-			?>
+			}
+		?>
 		</tbody>
 	</table>
 </div>
