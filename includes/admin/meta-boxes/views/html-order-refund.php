@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <tr class="refund <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_refund_id="<?php echo $refund->id; ?>">
-	<td class="check-column"><input type="checkbox" /></td>
+	<td class="check-column"></td>
 
 	<td class="thumb"><div></div></td>
 

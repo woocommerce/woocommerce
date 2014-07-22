@@ -415,9 +415,11 @@ jQuery( function ( $ ) {
 			var item_ids = [];
 
 			$(selected_rows).each( function() {
-				var $item = $(this).closest('tr.item, tr.fee');
+				var $item = $(this).closest('tr');
 
-				item_ids.push( $item.attr( 'data-order_item_id' ) );
+				if ( $item.attr( 'data-order_item_id' ) ) {
+					item_ids.push( $item.attr( 'data-order_item_id' ) );
+				}
 			} );
 
 			if ( item_ids.length == 0 ) {
@@ -445,7 +447,7 @@ jQuery( function ( $ ) {
 						type: 'POST',
 						success: function( response ) {
 							$(selected_rows).each( function() {
-								$(this).closest('tr.item, tr.fee').remove();
+								$(this).closest('tr').remove();
 							} );
 							removeOrderItemsLoading();
 						}

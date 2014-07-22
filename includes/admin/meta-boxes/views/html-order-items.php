@@ -144,7 +144,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<select>
 			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 			<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
-				<option value="delete"><?php _e( 'Delete line item(s)', 'woocommerce' ); ?></option>
+				<option value="delete"><?php _e( 'Delete selected line item(s)', 'woocommerce' ); ?></option>
 			</optgroup>
 			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
 				<option value="reduce_stock"><?php _e( 'Reduce line item stock', 'woocommerce' ); ?></option>
