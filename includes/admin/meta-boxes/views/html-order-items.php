@@ -19,6 +19,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 // Get the payment gateway
 $payment_gateway = wc_get_payment_gateway_by_order( $order );
 
+// Check if order can be edited
+$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
+
 ?>
 <div class="woocommerce_order_items_wrapper wc-order-items-editable">
 	<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
@@ -121,7 +124,7 @@ $payment_gateway = wc_get_payment_gateway_by_order( $order );
 					<div class="clear"></div>
 				</div>
 			</td>
-			<td><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div></td>
+			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
 		</tr>
 		<tr>
 			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
@@ -137,7 +140,7 @@ $payment_gateway = wc_get_payment_gateway_by_order( $order );
 					<div class="clear"></div>
 				</div>
 			</td>
-			<td><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div></td>
+			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
 		</tr>
 	</table>
 	<div class="clear"></div>
@@ -146,9 +149,11 @@ $payment_gateway = wc_get_payment_gateway_by_order( $order );
 	<p class="bulk-actions">
 		<select>
 			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-			<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
-				<option value="delete"><?php _e( 'Delete selected line item(s)', 'woocommerce' ); ?></option>
-			</optgroup>
+			<?php if ( $can_be_edited ) : ?>
+				<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
+					<option value="delete"><?php _e( 'Delete selected line item(s)', 'woocommerce' ); ?></option>
+				</optgroup>
+			<?php endif; ?>
 			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
 				<option value="reduce_stock"><?php _e( 'Reduce line item stock', 'woocommerce' ); ?></option>
 				<option value="increase_stock"><?php _e( 'Increase line item stock', 'woocommerce' ); ?></option>
@@ -158,12 +163,16 @@ $payment_gateway = wc_get_payment_gateway_by_order( $order );
 		<button type="button" class="button do_bulk_action wc-reload" title="<?php _e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
 	</p>
 	<p class="add-items">
-		<button type="button" class="button add-line-item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
-		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
+		<?php if ( $can_be_edited ) : ?>
+			<button type="button" class="button add-line-item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
+		<?php endif; ?>
+		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && $can_be_edited ) : ?>
 			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 		<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
+		<?php if ( $can_be_edited ) : ?>
 		<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
+		<?php endif; ?>
 	</p>
 </div>
 <div class="wc-order-data-row wc-order-add-item" style="display:none;">

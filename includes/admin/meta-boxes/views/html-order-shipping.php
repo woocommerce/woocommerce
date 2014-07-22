@@ -84,8 +84,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</td>
 
 	<td class="wc-order-edit-line-item">
-		<div class="wc-order-edit-line-item-actions">
-			<a class="edit-order-item" href="#"></a><a class="delete-order-item" href="#"></a>
-		</div>
+		<?php if ( $can_be_edited ) : ?>
+			<div class="wc-order-edit-line-item-actions">
+				<a class="edit-order-item" href="#"></a><a class="delete-order-item" href="#"></a>
+			</div>
+		<?php endif; ?>
 	</td>
 </tr>
