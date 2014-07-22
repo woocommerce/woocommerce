@@ -849,8 +849,36 @@ ul.wc_coupon_list_block {
 			}
 		}
 		tr.fee {
-			.thumb {
-				background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAARklEQVQYGWP8//8/AzGACV3Rnj17/oMwujiGQnQFMD7RChlBbsRmFcwkEO3i4sJImonIumGmg0xBFifaRKIVgj2DbAUuNgCfThpracSKqwAAAABJRU5ErkJggg==) no-repeat center;
+			.thumb div {
+				.ir();
+				font-size: 14px;
+				margin: 6px;
+				&:before {
+					.icon( "\e007" );
+					color: #bbbbbb;
+				}
+			}
+		}
+		tr.refund {
+			.thumb div {
+				.ir();
+				font-size: 14px;
+				margin: 6px;
+				&:before {
+					.icon( "\e014" );
+					color: #bbbbbb;
+				}
+			}
+		}
+		tr.shipping {
+			.thumb div {
+				.ir();
+				font-size: 14px;
+				margin: 6px;
+				&:before {
+					.icon( "\e01a" );
+					color: #bbbbbb;
+				}
 			}
 		}
 		th.line_tax {

@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <tr class="refund <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_refund_id="<?php echo $refund->id; ?>">
 	<td class="check-column"><input type="checkbox" /></td>
 
-	<td class="thumb"></td>
+	<td class="thumb"><div></div></td>
 
 	<td class="name">
 		<?php _e( 'Refund', 'woocommerce' ); ?>
