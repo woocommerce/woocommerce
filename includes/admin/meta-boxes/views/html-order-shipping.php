@@ -67,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					<td class="line_tax" width="1%">
 						<div class="view">
-							<?php echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : ''; ?>
+							<?php echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : '&ndash;'; ?>
 						</div>
 						<div class="edit" style="display: none;">
 							<input type="text" name="shipping_taxes[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $tax_item_total ) ) ? esc_attr( wc_format_localized_price( $tax_item_total ) ) : ''; ?>" class="line_tax wc_input_price" />
