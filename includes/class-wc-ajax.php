@@ -991,7 +991,8 @@ class WC_AJAX {
 			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 		}
 
-		$item = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
+		$item          = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
+		$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
 
 		include( 'admin/meta-boxes/views/html-order-item.php' );
 
@@ -1006,9 +1007,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
-		$order_id    = absint( $_POST['order_id'] );
-		$order       = get_order( $order_id );
-		$order_taxes = $order->get_taxes();
+		$order_id      = absint( $_POST['order_id'] );
+		$order         = get_order( $order_id );
+		$order_taxes   = $order->get_taxes();
+		$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
 
 		// Add line item
 		$item_id = wc_add_order_item( $order_id, array(
@@ -1043,6 +1045,7 @@ class WC_AJAX {
 		$order            = get_order( $order_id );
 		$order_taxes      = $order->get_taxes();
 		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+		$can_be_edited    = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
 
 		// Add line item
 		$item_id = wc_add_order_item( $order_id, array(
