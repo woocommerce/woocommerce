@@ -40,11 +40,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 								<th class="line_tax tips" data-tip="<?php
 										echo esc_attr( $tax_item['name'] . ' (' . $tax_class_name . ')' );
 									?>">
-									<span class="line_tax_wrapper">
-										<?php echo esc_attr( $column_label ); ?>
-										<input type="hidden" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
-										<a class="delete-order-tax" href="#" data-rate_id="<?php echo $tax_id; ?>"></a>
-									</span>
+									<?php echo esc_attr( $column_label ); ?>
+									<input type="hidden" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
+									<a class="delete-order-tax" href="#" data-rate_id="<?php echo $tax_id; ?>"></a>
 								</th>
 							<?php
 						endforeach;
