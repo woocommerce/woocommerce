@@ -16,6 +16,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	}
 }
 
+// Get the payment gateway
+$payment_gateway = wc_get_payment_gateway_by_order( $order );
+
 ?>
 <div class="woocommerce_order_items_wrapper wc-order-items-editable">
 	<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
@@ -60,7 +63,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 			foreach ( $order_items as $item_id => $item ) {
 				$_product  = $order->get_product_from_item( $item );
 				$item_meta = $order->get_item_meta( $item_id );
-				
+
 				include( 'html-order-item.php' );
 
 				do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item );
@@ -201,7 +204,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	</table>
 	<div class="clear"></div>
 	<div class="refund-actions">
+		<?php if ( false !== $payment_gateway && $payment_gateway->supports( 'refunds' ) ) : ?>
 		<button type="button" class="button button-primary do-api-refund"><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0 ) . '</span>', $order->payment_method_title ); ?></button>
+		<?php endif; ?>
 		<button type="button" class="button button-primary do-manual-refund"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
 		<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 		<div class="clear"></div>
