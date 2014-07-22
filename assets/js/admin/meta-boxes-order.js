@@ -1,4 +1,4 @@
-/*global woocommerce_admin_meta_boxes */
+/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting */
 jQuery( function ( $ ) {
 
 	/**
@@ -74,50 +74,7 @@ jQuery( function ( $ ) {
 		$( this ).closest( '.order_data_column' ).find( 'div.edit_address' ).show();
 	});
 
-	// When the page is loaded, store the unit costs
-	$( '#order_line_items tr, #order_fee_line_items tr' ).each( function () {
-		$( this ).trigger( 'init_row' );
-		$( this ).find( '.edit' ).hide();
-	});
-
 	$( 'body' )
-		.on( 'init_row', '#order_line_items tr.item', function () {
-			var $row = $(this);
-			var $qty = $row.find( 'input.quantity' );
-			var qty = $qty.val();
-
-			var line_subtotal     = accounting.unformat( $row.find('input.line_subtotal').val(), woocommerce_admin.mon_decimal_point );
-			var line_total        = accounting.unformat( $row.find('input.line_total').val(), woocommerce_admin.mon_decimal_point );
-			var line_tax          = accounting.unformat( $row.find('input.line_tax').val(), woocommerce_admin.mon_decimal_point );
-			var line_subtotal_tax = accounting.unformat( $row.find('input.line_subtotal_tax').val(), woocommerce_admin.mon_decimal_point );
-
-			if ( qty ) {
-				unit_subtotal     = parseFloat( accounting.toFixed( ( line_subtotal / qty ), woocommerce_admin_meta_boxes.rounding_precision ) );
-				unit_subtotal_tax = parseFloat( accounting.toFixed( ( line_subtotal_tax / qty ), woocommerce_admin_meta_boxes.rounding_precision ) );
-				unit_total        = parseFloat( accounting.toFixed( ( line_total / qty ), woocommerce_admin_meta_boxes.rounding_precision ) );
-				unit_total_tax    = parseFloat( accounting.toFixed( ( line_tax / qty ), woocommerce_admin_meta_boxes.rounding_precision ) );
-			} else {
-				unit_subtotal = unit_subtotal_tax = unit_total = unit_total_tax = 0;
-			}
-
-			$qty.attr( 'data-o_qty', qty );
-			$row.attr( 'data-unit_subtotal', unit_subtotal );
-			$row.attr( 'data-unit_subtotal_tax', unit_subtotal_tax );
-			$row.attr( 'data-unit_total', unit_total );
-			$row.attr( 'data-unit_total_tax', unit_total_tax );
-		})
-		.on( 'init_row', '#order_fee_line_items tr.fee', function () {
-			var $row = $(this);
-
-			var line_total = accounting.unformat( $row.find('input.line_total').val(), woocommerce_admin.mon_decimal_point );
-			var line_tax   = accounting.unformat( $row.find('input.line_tax').val(), woocommerce_admin.mon_decimal_point );
-
-			unit_total     = parseFloat( accounting.toFixed( line_total, woocommerce_admin_meta_boxes.rounding_precision ) );
-			unit_total_tax = parseFloat( accounting.toFixed( line_tax, woocommerce_admin_meta_boxes.rounding_precision ) );
-
-			$row.attr( 'data-unit_total', unit_total );
-			$row.attr( 'data-unit_total_tax', unit_total_tax );
-		})
 		.on( 'click', 'a.edit-order-item', function() {
 			$( this ).closest( 'tr' ).find( '.view' ).hide();
 			$( this ).closest( 'tr' ).find( '.edit' ).show();
@@ -180,67 +137,51 @@ jQuery( function ( $ ) {
 		})
 		// When the qty is changed, increase or decrease costs
 		.on( 'change', '.woocommerce_order_items input.quantity', function () {
-			var $row = $( this ).closest( 'tr.item' );
-			var qty = $( this ).val();
+			var $row          = $( this ).closest( 'tr.item' );
+			var qty           = $( this ).val();
+			var o_qty         = $( this ).attr( 'data-qty' );
+			var line_total    = $( 'input.line_total', $row );
+			var line_subtotal = $( 'input.line_subtotal', $row );
 
-			var unit_subtotal     = $row.attr( 'data-unit_subtotal' );
-			var unit_subtotal_tax = $row.attr( 'data-unit_subtotal_tax' );
-			var unit_total        = $row.attr( 'data-unit_total' );
-			var unit_total_tax    = $row.attr( 'data-unit_total_tax' );
-			var o_qty             = $( this ).attr( 'data-o_qty' );
+			// Totals
+			var unit_total = accounting.unformat( line_total.attr( 'data-total' ), woocommerce_admin.mon_decimal_point );
+			line_total.val(
+				parseFloat( accounting.formatNumber( unit_total * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+					.toString()
+					.replace( '.', woocommerce_admin.mon_decimal_point )
+			);
 
-			var subtotal  = parseFloat( accounting.formatNumber( unit_subtotal * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) );
-			var tax       = parseFloat( accounting.formatNumber( unit_subtotal_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) );
-			var total     = parseFloat( accounting.formatNumber( unit_total * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) );
-			var total_tax = parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) );
+			var unit_subtotal = accounting.unformat( line_subtotal.attr( 'data-subtotal' ), woocommerce_admin.mon_decimal_point );
+			line_subtotal.val(
+				parseFloat( accounting.formatNumber( unit_subtotal * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+					.toString()
+					.replace( '.', woocommerce_admin.mon_decimal_point )
+			);
 
-			subtotal  = subtotal.toString().replace( '.', woocommerce_admin.mon_decimal_point );
-			tax       = tax.toString().replace( '.', woocommerce_admin.mon_decimal_point );
-			total     = total.toString().replace( '.', woocommerce_admin.mon_decimal_point );
-			total_tax = total_tax.toString().replace( '.', woocommerce_admin.mon_decimal_point );
+			// Taxes
+			$( 'td.line_tax', $row ).each( function() {
+				var line_total_tax = $( 'input.line_tax', $( this ) );
+				var unit_total_tax = accounting.unformat( line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point );
+				if ( 0 < unit_total_tax ) {
+					line_total_tax.val(
+						parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+							.toString()
+							.replace( '.', woocommerce_admin.mon_decimal_point )
+					);
+				}
 
-			$row.find( 'input.line_subtotal' ).val( subtotal );
-			$row.find( 'input.line_total' ).val( total );
-			$row.find( 'input.line_subtotal_tax' ).val( tax );
-			$row.find( 'input.line_tax' ).val( total_tax );
+				var line_subtotal_tax = $( 'input.line_subtotal_tax', $( this ) );
+				var unit_subtotal_tax = accounting.unformat( line_subtotal_tax.attr( 'data-subtotal_tax' ), woocommerce_admin.mon_decimal_point );
+				if ( 0 < unit_subtotal_tax ) {
+					line_subtotal_tax.val(
+						parseFloat( accounting.formatNumber( unit_subtotal_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+							.toString()
+							.replace( '.', woocommerce_admin.mon_decimal_point )
+					);
+				}
+			});
 
 			$( this ).trigger( 'quantity_changed' );
-		})
-		// When subtotal is changed, update the unit costs
-		.on( 'change', '.woocommerce_order_items input.line_subtotal', function () {
-			var $row = $( this ).closest( 'tr.item' );
-			var $qty = $row.find( 'input.quantity' );
-			var qty = $qty.val();
-			var value = ( qty ) ? accounting.toFixed( ( $( this ).val() / qty ), woocommerce_admin_meta_boxes.rounding_precision ) : 0;
-
-			$row.attr( 'data-unit_subtotal', value );
-		})
-		// When total is changed, update the unit costs + discount amount
-		.on( 'change', '.woocommerce_order_items input.line_total', function () {
-			var $row = $( this ).closest( 'tr.item' );
-			var $qty = $row.find( 'input.quantity' );
-			var qty = $qty.val();
-			var value = ( qty ) ? accounting.toFixed( ( $( this ).val() / qty ), woocommerce_admin_meta_boxes.rounding_precision ) : 0;
-
-			$row.attr( 'data-unit_total', value );
-		})
-		// When total is changed, update the unit costs + discount amount
-		.on( 'change', '.woocommerce_order_items input.line_subtotal_tax', function () {
-			var $row = $( this ).closest( 'tr.item' );
-			var $qty = $row.find( 'input.quantity' );
-			var qty = $qty.val();
-			var value = ( qty ) ? accounting.toFixed( ( $( this ).val() / qty ), woocommerce_admin_meta_boxes.rounding_precision ) : 0;
-
-			$row.attr( 'data-unit_subtotal_tax', value );
-		})
-		// When total is changed, update the unit costs + discount amount
-		.on( 'change', '.woocommerce_order_items input.line_tax', function () {
-			var $row = $( this ).closest( 'tr.item' );
-			var $qty = $row.find( 'input.quantity' );
-			var qty = $qty.val();
-			var value = ( qty ) ? accounting.toFixed( ( $( this ).val() / qty ), woocommerce_admin_meta_boxes.rounding_precision ) : 0;
-
-			$row.attr( 'data-unit_total_tax', value );
 		})
 		.on( 'change', '.woocommerce_order_items .wc-order-item-refund-quantity input', function () {
 			var refund_amount = 0;
@@ -487,7 +428,7 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function ( response ) {
-						alert( response );
+						window.alert( response );
 						removeOrderItemsLoading();
 					}
 				} );
@@ -541,20 +482,20 @@ jQuery( function ( $ ) {
 				order_discount = accounting.unformat( order_discount.replace( ',', '.' ) );
 
 				$( '.woocommerce_order_items tr.shipping input.line_total' ).each( function () {
-					cost     = $( this ).val() || '0';
-					cost     = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
-					shipping = shipping + parseFloat( cost );
+					var cost  = $( this ).val() || '0';
+					cost      = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
+					shipping  = shipping + parseFloat( cost );
 				});
 
 				$( '.woocommerce_order_items input.line_tax' ).each( function () {
-					cost = $( this ).val() || '0';
-					cost = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
-					tax  = tax + parseFloat( cost );
+					var cost = $( this ).val() || '0';
+					cost     = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
+					tax      = tax + parseFloat( cost );
 				});
 
 				$( '.woocommerce_order_items tr.item, .woocommerce_order_items tr.fee' ).each( function () {
-					line_total  = $( this ).find( 'input.line_total' ).val() || '0';
-					line_totals = line_totals + accounting.unformat( line_total.replace( ',', '.' ) );
+					var line_total = $( this ).find( 'input.line_total' ).val() || '0';
+					line_totals    = line_totals + accounting.unformat( line_total.replace( ',', '.' ) );
 				});
 
 				// Tax
@@ -777,7 +718,7 @@ jQuery( function ( $ ) {
 
 		if ( add_item_ids ) {
 
-			count = add_item_ids.length;
+			var count = add_item_ids.length;
 
 			addOrderItemsLoading();
 
@@ -800,8 +741,6 @@ jQuery( function ( $ ) {
 						$( 'select#add_item_id' ).trigger( 'chosen:updated' );
 						removeOrderItemsLoading();
 					}
-
-					$( '#order_line_items tr.new_row' ).trigger( 'init_row' ).removeClass( 'new_row' );
 				});
 
 			});
@@ -1066,8 +1005,7 @@ jQuery( function ( $ ) {
 	});
 
 	$( '.total_rows' ).on( 'click', 'a.delete_total_row', function () {
-		$row = $( this ).closest( '.total_row' );
-
+		var $row   = $( this ).closest( '.total_row' );
 		var row_id = $row.attr( 'data-order_item_id' );
 
 		if ( row_id ) {
