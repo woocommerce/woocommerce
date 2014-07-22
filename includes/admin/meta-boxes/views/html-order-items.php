@@ -67,20 +67,20 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 			}
 		?>
 		</tbody>
-		<tbody id="order_fee_line_items">
-		<?php
-			$order_items = $order->get_items( 'fee' );
-			foreach ( $order_items as $item_id => $item ) {
-				include( 'html-order-fee.php' );
-			}
-		?>
-		</tbody>
 		<tbody id="order_shipping_line_items">
 		<?php
 			$order_items      = $order->get_items( 'shipping' );
 			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 			foreach ( $order_items as $item_id => $item ) {
 				include( 'html-order-shipping.php' );
+			}
+		?>
+		</tbody>
+		<tbody id="order_fee_line_items">
+		<?php
+			$order_items = $order->get_items( 'fee' );
+			foreach ( $order_items as $item_id => $item ) {
+				include( 'html-order-fee.php' );
 			}
 		?>
 		</tbody>
