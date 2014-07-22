@@ -797,7 +797,7 @@ class WC_Cart {
 		 * @param int $variation_id
 		 * @param array $variation attribute values
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
-		 * @return bool
+		 * @return string $cart_item_key
 		 */
 		public function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '', $cart_item_data = array() ) {
 
@@ -930,7 +930,7 @@ class WC_Cart {
 
 			$this->calculate_totals();
 
-			return true;
+			return $cart_item_key;
 		}
 
 		/**
