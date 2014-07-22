@@ -585,3 +585,28 @@ function wc_get_tax_class_by_tax_id( $tax_id ) {
 
 	return wc_clean( $tax_class );
 }
+
+/**
+ * Get payment gateway class by order data.
+ *
+ * @since 2.2
+ * @param int|WC_Order $order
+ * @return WC_Payment_Gateway|bool
+ */
+function wc_get_payment_gateway_by_order( $order ) {
+	if ( WC()->payment_gateways() ) {
+		$payment_gateways = WC()->payment_gateways->payment_gateways();
+	} else {
+		$payment_gateways = array();
+	}
+
+	if ( is_object( $order ) ) {
+		$payment_method = $order->payment_method;
+	} else {
+		$order_id       = absint( $order );
+		$order          = new WC_Order( $order_id );
+		$payment_method = $order->payment_method;
+	}
+
+	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;
+}
