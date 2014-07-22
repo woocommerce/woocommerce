@@ -766,9 +766,6 @@ ul.wc_coupon_list_block {
 				font-size: 1em;
 			}
 		}
-		th.line_tax {
-			white-space: nowrap;
-		}
 		.quantity {
 			text-align: center;
 			input {
@@ -848,18 +845,38 @@ ul.wc_coupon_list_block {
 				background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAARklEQVQYGWP8//8/AzGACV3Rnj17/oMwujiGQnQFMD7RChlBbsRmFcwkEO3i4sJImonIumGmg0xBFifaRKIVgj2DbAUuNgCfThpracSKqwAAAABJRU5ErkJggg==) no-repeat center;
 			}
 		}
-		.delete-order-tax {
-			.ir;
-			display: inline-block;
-			margin: 0;
-			&:before {
-				.icon;
-				content: "\e013";
-				color: #999;
+		th.line_tax {
+			white-space: nowrap;
+		}
+		.line_tax {
+			padding: 8px 18px 8px 8px;
+			.line_tax_wrapper {
+				position: relative;
+				display: block;
+			}
+			.delete-order-tax {
+				.ir;
+				font-size: 12px;
+				visibility: hidden;
+				float: right;
+				margin: 2px -18px 0 0;
+				&:before {
+					.icon( "\e013" );
+					color:white;
+					background-color: #000;
+					-webkit-border-radius:100%;
+					border-radius:100%;
+					border: 1px solid #000;
+					box-shadow:0 1px 2px rgba(0,0,0,0.2);
+				}
+				&:hover:before {
+					border-color: @red;
+					background-color: @red;
+				}
 			}
 			&:hover {
-				&:before {
-					color: @red;
+				.delete-order-tax {
+					visibility: visible;
 				}
 			}
 		}

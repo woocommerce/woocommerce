@@ -35,17 +35,17 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 						foreach ( $order_taxes as $tax_id => $tax_item ) :
 							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
+							$column_label   = ! empty( $tax_item['label'] ) ? $tax_item['label'] : __( 'Tax', 'woocommerce' );
 							?>
-
-								<th class="line_tax">
-									<span><?php echo esc_attr( $tax_class_name ); ?> </span>
-									<span class="tips" data-tip="<?php
-										echo esc_attr( $tax_item['label'] . ' (' . $tax_item['name'] . ')' );
-									?>">[?]</span>
-									<input type="hidden" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
-									<a class="delete-order-tax" href="#" data-rate_id="<?php echo $tax_id; ?>"></a>
+								<th class="line_tax tips" data-tip="<?php
+										echo esc_attr( $tax_item['name'] . ' (' . $tax_class_name . ')' );
+									?>">
+									<span class="line_tax_wrapper">
+										<?php echo esc_attr( $column_label ); ?>
+										<input type="hidden" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
+										<a class="delete-order-tax" href="#" data-rate_id="<?php echo $tax_id; ?>"></a>
+									</span>
 								</th>
-
 							<?php
 						endforeach;
 					endif;
@@ -155,6 +155,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	</p>
 	<p class="add-items">
 		<button type="button" class="button add-line-item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
+		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
+			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
+		<?php endif; ?>
 		<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
 		<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
 	</p>
@@ -163,9 +166,6 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<button type="button" class="button add-order-item"><?php _e( 'Add product(s)', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
-	<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
-		<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
-	<?php endif; ?>
 	<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 	<button type="button" class="button button-primary save-action"><?php _e( 'Save', 'woocommerce' ); ?></button>
 </div>
