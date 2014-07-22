@@ -141,7 +141,7 @@ function wc_get_order_type( $type ) {
 }
 
 /**
- * Register order type
+ * Register order type. Do not use before init.
  *
  * Wrapper for register post type, as well as a method of telling WC which
  * post types are types of orders, and having them treated as such.
