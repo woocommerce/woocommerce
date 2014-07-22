@@ -600,7 +600,7 @@ jQuery( function ( $ ) {
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					security: woocommerce_admin_meta_boxes.order_item_nonce
 				};
-				
+
 				$.ajax({
 					url:  woocommerce_admin_meta_boxes.ajax_url,
 					data: data,
@@ -619,7 +619,9 @@ jQuery( function ( $ ) {
 	// Refund actions
 	$( 'body' )
 		.on( 'change', '.wc-order-refund-items #refund_amount', function () {
-			$( 'button .wc-order-refund-amount .amount' ).text( accounting.formatMoney( $( this ).val(), {
+			var total = accounting.unformat( $( this ).val(), woocommerce_admin.mon_decimal_point );
+
+			$( 'button .wc-order-refund-amount .amount' ).text( accounting.formatMoney( total, {
 				symbol:    woocommerce_admin_meta_boxes.currency_format_symbol,
 				decimal:   woocommerce_admin_meta_boxes.currency_format_decimal_sep,
 				thousand:  woocommerce_admin_meta_boxes.currency_format_thousand_sep,
