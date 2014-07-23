@@ -102,6 +102,24 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 	</table>
 </div>
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
+	<?php
+		$coupons = $order->get_items( array( 'coupon' ) );
+		if ( $coupons ) {
+			?>
+			<div class="wc-used-coupons">
+				<ul class="wc_coupon_list"><?php
+					foreach ( $coupons as $item_id => $item ) {
+						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' LIMIT 1;", $item['name'] ) );
+
+						$link = $post_id ? add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) : add_query_arg( array( 's' => $item['name'], 'post_status' => 'all', 'post_type' => 'shop_coupon' ), admin_url( 'edit.php' ) );
+
+						echo '<li class="tips code" data-tip="' . esc_attr( wc_price( $item['discount_amount'] ) ) . '"><a href="' . esc_url( $link ) . '"><span>' . esc_html( $item['name'] ). '</span></a></li>';
+					}
+				?></ul>
+			</div>
+			<?php
+		}
+	?>
 	<table class="wc-order-totals">
 		<tr>
 			<td class="label"><?php _e( 'Shipping', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the shipping and handling total costs for the order.', 'woocommerce' ); ?>">[?]</span>:</td>
