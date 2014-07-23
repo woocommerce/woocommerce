@@ -615,8 +615,6 @@ function wc_create_refund( $args = array() ) {
 		}
 	}
 
-	// error_log( print_r( new WC_Order_Refund( $refund_id ), true ) );
-
 	return new WC_Order_Refund( $refund_id );
 }
 
