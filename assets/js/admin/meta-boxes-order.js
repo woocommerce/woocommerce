@@ -756,8 +756,18 @@ jQuery( function ( $ ) {
 			return;
 		}
 
-		var rate_id = $( '#add-order-tax' ).val();
-		var rates   = $( '.order-tax-id' ).map( function () {
+		var manual_rate_id = $( '#manual_tax_rate_id' ).val();
+		var rate_id        = $( 'input[name=add_order_tax]:checked' ).val();
+
+		if ( manual_rate_id ) {
+			rate_id = manual_rate_id;
+		}
+
+		if ( ! rate_id ) {
+			return false;
+		}
+
+		var rates          = $( '.order-tax-id' ).map( function () {
 				return $( this ).val();
 			}).get();
 

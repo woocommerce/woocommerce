@@ -251,44 +251,42 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header>
-					<h1><?php echo __( 'Add tax', 'woocommerce' ); ?></h1>
+					<h1><?php _e( 'Add tax', 'woocommerce' ); ?></h1>
 				</header>
 				<article>
 					<form action="" method="post">
-						<select id="add-order-tax" name="add_order_tax" style="width: 96%;">
-							<?php
-								$rates = $wpdb->get_results( "SELECT tax_rate_id, tax_rate_country, tax_rate_state, tax_rate_name, tax_rate_priority, tax_rate_class FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name" );
+						<table class="widefat">
+							<thead>
+								<tr>
+									<th>&nbsp;</th>
+									<th><?php _e( 'Rate name', 'woocommerce' ); ?></th>
+									<th><?php _e( 'Tax class', 'woocommerce' ); ?></th>
+									<th><?php _e( 'Rate code', 'woocommerce' ); ?></th>
+									<th><?php _e( 'Rate %', 'woocommerce' ); ?></th>
+								</tr>
+							</thead>
+						<?php 
+							$rates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name LIMIT 100" ); 
 
-								$tax_codes = array();
-
-								foreach ( $rates as $rate ) {
-									$code = array();
-
-									$code[] = $rate->tax_rate_country;
-									$code[] = $rate->tax_rate_state;
-									$code[] = $rate->tax_rate_name ? sanitize_title( $rate->tax_rate_name ) : 'TAX';
-									$code[] = absint( $rate->tax_rate_priority );
-
-									$tax_codes[ $rate->tax_rate_class ][ $rate->tax_rate_id ] = strtoupper( implode( '-', array_filter( $code ) ) );
-								}
-
-								$tax_codes = array_reverse( $tax_codes );
-
-								foreach ( $tax_codes as $tax_class => $tax_values ) :
-									?>
-										<optgroup label="<?php echo isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax Rate', 'woocommerce' ); ?>">
-
-											<?php foreach ( $tax_values as $tax_id => $tax_code ) : ?>
-
-												<option value="<?php echo $tax_id; ?>"><?php echo esc_html( urldecode( $tax_code ) ); ?></option>
-
-											<?php endforeach; ?>
-
-										</optgroup>
-									<?php
-								endforeach;
-							?>
-						</select>
+							foreach ( $rates as $rate ) {
+								echo '
+									<tr>
+										<td><input type="radio" id="add_order_tax_' . absint( $rate->tax_rate_id ) . '" name="add_order_tax" value="' . absint( $rate->tax_rate_id ) . '" /></td>
+										<td><label for="add_order_tax_' . absint( $rate->tax_rate_id ) . '">' . WC_Tax::get_rate_label( $rate ) . '</label></td>
+										<td>' . ( isset( $classes_options[ $rate->tax_rate_class ] ) ? $classes_options[ $rate->tax_rate_class ] : '-' ) . '</td>
+										<td>' . WC_Tax::get_rate_code( $rate ) . '</td>
+										<td>' . WC_Tax::get_rate_percent( $rate ) . '</td>
+									</tr>
+								';
+							}
+						?>
+						</table>
+						<?php if ( absint( $wpdb->get_var( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates;" ) ) > 100 ) : ?>
+							<p>
+								<label for="manual_tax_rate_id"><?php _e( 'Or, enter tax rate ID:', 'woocommerce' ); ?></label><br/>
+								<input type="number" name="manual_tax_rate_id" id="manual_tax_rate_id" step="1" placeholder="<?php _e( 'Optional', 'woocommerce' ); ?>" />
+							</p>
+						<?php endif; ?>
 					</form>
 				</article>
 				<footer>
