@@ -3337,7 +3337,6 @@ table.bar_chart {
 		position: absolute;
 		top: 50%;
 		left: 50%;
-		height: 300px;
 		width: 400px;
 		background: #fff;
 		margin: -150px 0 0 -200px;
@@ -3357,13 +3356,20 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
+	padding-bottom: 50px;
+
 	header,
 	article {
 		display: block;
 		position: relative;
 		padding: 4px 16px;
 	}
-
+	header {
+		border-bottom: 1px solid #ddd;
+	}
+	article {
+		padding: 10px 16px;
+	}
 	h1 {
 		font-size: 22px;
 		font-weight: 200;

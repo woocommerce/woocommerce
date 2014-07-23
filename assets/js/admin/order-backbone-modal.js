@@ -63,6 +63,31 @@
 			$( 'body' ).css({
 				'overflow': 'hidden'
 			}).append( this.$el );
+
+			var $content  = $( '.wc-backbone-modal-content' ).find( 'article' );
+			var content_h = $content.height();
+			var max_h     = $( window ).height() - 200;
+
+			if ( max_h > 400 ) {
+				max_h = 400;
+			}
+
+			if ( content_h > max_h ) {
+				$content.css({
+					'overflow': 'auto',
+					height: max_h + 'px'
+				});
+			} else {
+				$content.css({
+					'overflow': 'auto',
+					height: content_h
+				});
+			}
+
+			$( '.wc-backbone-modal-content' ).css({
+				'margin-top': '-' + ( $( '.wc-backbone-modal-content' ).height() / 2 ) + 'px'
+			});
+
 			$( 'body' ).trigger( 'wc_backbone_modal_loaded', this._target );
 		},
 		closeButton: function ( e ) {
