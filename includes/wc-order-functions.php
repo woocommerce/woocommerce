@@ -526,10 +526,11 @@ function wc_ship_to_billing_address_only() {
  */
 function wc_create_refund( $args = array() ) {
 	$default_args = array(
-		'amount'    => '',
-		'reason'    => null,
-		'order_id'  => 0,
-		'refund_id' => 0
+		'amount'        => '',
+		'reason'        => null,
+		'order_id'      => 0,
+		'refund_id'     => 0,
+		'line_item_qty' => array()
 	);
 
 	$args        = wp_parse_args( $args, $default_args );
@@ -562,12 +563,51 @@ function wc_create_refund( $args = array() ) {
 	if ( is_wp_error( $refund_id ) ) {
 		return $refund_id;
 	}
-
-	// Default refund meta data
+	
 	if ( ! $updating ) {
+		// Default refund meta data
 		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
-	}
 
+		// Negative line items
+		if ( sizeof( $args['line_item_qty'] ) > 0 ) {
+			$order       = get_order( $args['order_id'] );
+			$order_items = $order->get_items();
+			$refund      = get_order( $refund_id );
+			$order_taxes = array();
+			foreach ( $args['line_item_qty'] as $refund_item_id => $refund_qty ) {
+				if ( isset( $order_items[ $refund_item_id ] ) && $refund_qty ) {
+					$refund_item  = $order_items[ $refund_item_id ];
+					$product      = $order->get_product_from_item( $refund_item );
+					$qty          = $refund_item['qty'];
+
+					$args                           = array();
+					$args['totals']['subtotal']     = ( ( $refund_item['line_subtotal'] / $qty ) * $refund_qty ) * -1;
+					$args['totals']['subtotal_tax'] = ( ( $refund_item['line_subtotal_tax'] / $qty ) * $refund_qty ) * -1;
+					$args['totals']['total']        = ( ( $refund_item['line_total'] / $qty ) * $refund_qty ) * -1;
+					$args['totals']['tax']          = ( ( $refund_item['line_tax'] / $qty ) * $refund_qty ) * -1;
+					$args['totals']['tax_data']     = array( 'total' => array(), 'subtotal' => array() );
+
+					if ( isset( $refund_item['line_tax_data'] ) ) {
+						$line_tax_data = maybe_unserialize( $refund_item['line_tax_data'] );
+						foreach ( $line_tax_data['total'] as $key => $tax ) {
+							$args['totals']['tax_data']['total'][ $key ] = ( ( $tax / $qty ) * $refund_qty ) * -1;
+							$order_taxes[ $key ] += ( ( $tax / $qty ) * $refund_qty ) * -1;
+						}
+						foreach ( $line_tax_data['subtotal'] as $key => $tax ) {
+							$args['totals']['tax_data']['subtotal'][ $key ] = ( ( $tax / $qty ) * $refund_qty ) * -1;
+						}
+					}
+
+					$refund->add_product( $product, $refund_qty, $args );
+				}
+			}
+
+			// Save order tax rows
+			foreach ( $order_taxes as $tax_rate_id => $tax_amount ) {
+				$refund->add_tax( $tax_rate_id, $tax_amount );
+			}
+		}
+	}
 	return new WC_Order_Refund( $refund_id );
 }
 

@@ -1792,11 +1792,10 @@ class WC_AJAX {
 		$order_id      = absint( $_POST['order_id'] );
 		$refund_amount = sanitize_text_field( $_POST['refund_amount'] );
 		$refund_reason = sanitize_text_field( $_POST['refund_reason'] );
-		$refund_qty    = json_decode( sanitize_text_field( stripslashes( $_POST['refund_qty'] ) ) );
+		$refund_qty    = json_decode( sanitize_text_field( stripslashes( $_POST['refund_qty'] ) ), true );
 		$api_refund    = $_POST['api_refund'] === 'true' ? true : false;
 
 		try {
-
 			// Validate that the refund can occur
 			$order      = get_order( $order_id );
 			$max_refund = $order->get_total() - $order->get_total_refunded();
@@ -1807,9 +1806,10 @@ class WC_AJAX {
 
 			// Create the refund object
 			$refund = wc_create_refund( array(
-				'amount'    => $refund_amount,
-				'reason'    => $refund_reason,
-				'order_id'  => $order_id
+				'amount'        => $refund_amount,
+				'reason'        => $refund_reason,
+				'order_id'      => $order_id,
+				'line_item_qty' => $refund_qty
 			) );
 
 			if ( is_wp_error( $refund ) ) {

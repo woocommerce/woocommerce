@@ -582,10 +582,11 @@ jQuery( function ( $ ) {
 			if ( window.confirm( woocommerce_admin_meta_boxes.i18n_do_refund ) ) {
 				var refund_amount = $( 'input#refund_amount' ).val();
 				var refund_reason = $( 'input#refund_reason' ).val();
-				var refund_qty    = $.map( $( 'input[type=number][name^=order_item_refund_qty]' ), function( item ) {
-				var result        = [];
-				result.push( $( item ).closest( 'tr.item,tr.fee' ).data( 'order_item_id' ), item.value );
-					return result;
+				var refund_qty    = {};
+				$( 'input[type=number][name^=order_item_refund_qty]' ).each( function( index, item ) {
+					if ( $( item ).closest( 'tr' ).data( 'order_item_id' ) ) {
+						refund_qty[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ] = item.value;
+					}
 				});
 				var data          = {
 					action:        'woocommerce_refund_line_items',
@@ -602,6 +603,8 @@ jQuery( function ( $ ) {
 					} else if ( response.error ) {
 						window.alert( response.error );
 						removeOrderItemsLoading();
+					} else {
+						console.log(response);
 					}
 				});
 			} else {
