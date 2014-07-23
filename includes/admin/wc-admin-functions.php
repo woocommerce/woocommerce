@@ -298,7 +298,7 @@ function wc_save_order_items( $order_id, $items ) {
 			$$value = isset( $items[ $value ] ) ? $items[ $value ] : array();
 		}
 
-		foreach ( $shipping_method_id as $item_id => $value ) {
+		foreach ( $shipping_method_id as $item_id ) {
 			$item_id      = absint( $item_id );
 			$method_id    = wc_clean( $shipping_method[ $item_id ] );
 			$method_title = wc_clean( $shipping_method_title[ $item_id ] );
