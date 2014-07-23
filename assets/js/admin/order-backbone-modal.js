@@ -79,7 +79,7 @@
 				});
 			} else {
 				$content.css({
-					'overflow': 'auto',
+					'overflow': 'visible',
 					height: content_h
 				});
 			}
