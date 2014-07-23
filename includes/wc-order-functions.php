@@ -563,7 +563,7 @@ function wc_create_refund( $args = array() ) {
 	if ( is_wp_error( $refund_id ) ) {
 		return $refund_id;
 	}
-	
+
 	if ( ! $updating ) {
 		// Default refund meta data
 		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
@@ -591,7 +591,13 @@ function wc_create_refund( $args = array() ) {
 						$line_tax_data = maybe_unserialize( $refund_item['line_tax_data'] );
 						foreach ( $line_tax_data['total'] as $key => $tax ) {
 							$args['totals']['tax_data']['total'][ $key ] = ( ( $tax / $qty ) * $refund_qty ) * -1;
-							$order_taxes[ $key ] += ( ( $tax / $qty ) * $refund_qty ) * -1;
+							$tax_total = ( ( $tax / $qty ) * $refund_qty ) * -1;
+
+							if ( isset( $order_taxes[ $key ] ) ) {
+								$order_taxes[ $key ] += $tax_total;
+							} else {
+								$order_taxes[ $key ] = $tax_total;
+							}
 						}
 						foreach ( $line_tax_data['subtotal'] as $key => $tax ) {
 							$args['totals']['tax_data']['subtotal'][ $key ] = ( ( $tax / $qty ) * $refund_qty ) * -1;
@@ -608,6 +614,9 @@ function wc_create_refund( $args = array() ) {
 			}
 		}
 	}
+
+	// error_log( print_r( new WC_Order_Refund( $refund_id ), true ) );
+
 	return new WC_Order_Refund( $refund_id );
 }
 
