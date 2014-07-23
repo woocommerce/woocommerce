@@ -1214,7 +1214,7 @@ class WC_Cart {
 				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $line_subtotal_tax;
 
 				// Store rates ID and costs - Since 2.2
-				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $taxes, 'subtotal' => $discounted_taxes );
+				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $discounted_taxes, 'subtotal' => $taxes );
 			}
 
 			// Only calculate the grand total + shipping if on the cart/checkout
