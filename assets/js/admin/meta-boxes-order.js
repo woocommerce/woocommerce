@@ -759,7 +759,7 @@ jQuery( function ( $ ) {
 		var rate_id = $( '#add-order-tax' ).val();
 		var rates   = $( '.order-tax-id' ).map( function () {
 				return $( this ).val();
-			}).get().join( ', ' );
+			}).get();
 
 		// Test if already exists
 		if ( -1 === $.inArray( rate_id, rates ) ) {
