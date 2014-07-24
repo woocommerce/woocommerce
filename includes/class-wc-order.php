@@ -29,14 +29,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return array
 	 */
 	public function get_refunds() {
-		global $wpdb;
-
 		$refunds      = array();
 		$refund_items = get_posts(
 			array(
 				'post_type'      => 'shop_order_refund',
 				'post_parent'    => $this->id,
 				'posts_per_page' => -1,
+				'post_status'    => 'any',
 				'fields'         => 'ids'
 			)
 		);
