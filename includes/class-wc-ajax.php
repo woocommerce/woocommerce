@@ -1851,6 +1851,9 @@ class WC_AJAX {
 				}
 			}
 
+			// Clear transients
+			wc_delete_shop_order_transients( $order_id );
+
 			wp_send_json( true );
 
 		} catch ( Exception $e ) {
