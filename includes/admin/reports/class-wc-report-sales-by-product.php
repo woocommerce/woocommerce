@@ -72,6 +72,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				)
 			),
 			'query_type'   => 'get_var',
+			'order_types'  => wc_get_order_types( 'order-count' ),
 			'filter_range' => true
 		) ) );
 
