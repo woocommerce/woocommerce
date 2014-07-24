@@ -183,26 +183,49 @@ jQuery( function ( $ ) {
 
 			$( this ).trigger( 'quantity_changed' );
 		})
-		.on( 'change', '.woocommerce_order_items .wc-order-item-refund-quantity input', function () {
+		// When the refund qty is changed, increase or decrease costs
+		.on( 'change', '.woocommerce_order_items input.refund_order_item_qty', function () {
+			var $row              = $( this ).closest( 'tr.item' );
+			var qty               = $( this ).val();
+			var o_qty             = $row.find('input.quantity').attr( 'data-qty' );
+			var line_total        = $( 'input.line_total', $row );
+			var refund_line_total = $( 'input.refund_line_total', $row );
+
+			// Totals
+			var unit_total = accounting.unformat( line_total.attr( 'data-total' ), woocommerce_admin.mon_decimal_point );
+			refund_line_total.val(
+				parseFloat( accounting.formatNumber( unit_total * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+					.toString()
+					.replace( '.', woocommerce_admin.mon_decimal_point )
+			);
+
+			// Taxes
+			$( 'td.line_tax', $row ).each( function() {
+				var line_total_tax        = $( 'input.line_tax', $( this ) );
+				var refund_line_total_tax = $( 'input.refund_line_tax', $( this ) );
+				var unit_total_tax = accounting.unformat( line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point );
+				if ( 0 < unit_total_tax ) {
+					refund_line_total_tax.val(
+						parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+							.toString()
+							.replace( '.', woocommerce_admin.mon_decimal_point )
+					);
+				}
+			});
+
+			$( this ).trigger( 'refund_quantity_changed' );
+		})
+		.on( 'change', '.woocommerce_order_items .refund input', function () {
 			var refund_amount = 0;
 			var $items        = $( '.woocommerce_order_items' ).find( 'tr.item, tr.fee, tr.shipping' );
 
 			$items.each( function () {
-				var $row       = $( this );
-				var refund_qty = $row.find( '.wc-order-item-refund-quantity input' ).val();
+				var $row               = $( this );
+				var refund_cost_fields = $row.find( '.refund input:not(.refund_order_item_qty)' );
 
-				if ( refund_qty ) {
-					var unit_total = $( this ).find( 'input.line_total' ).val() || 0;
-					unit_total     = parseFloat( unit_total );
-
-					$( this ).find( 'input.line_tax' ).each( function () {
-						var cost   = $( this ).val() || 0;
-						cost       = accounting.unformat( cost, woocommerce_admin.mon_decimal_point );
-						unit_total = unit_total + parseFloat( cost );
-					});
-
-					refund_amount = parseFloat( refund_amount ) + ( refund_qty * parseFloat( unit_total ) );
-				}
+				refund_cost_fields.each(function( index, el ){
+					refund_amount += parseFloat( accounting.unformat( $( el ).val() || 0, woocommerce_admin.mon_decimal_point ) );
+				});
 			});
 
 			$( '#refund_amount' )

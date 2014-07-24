@@ -149,14 +149,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="quantity" width="1%">
 		<div class="view">
-			<?php echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : ''; ?>
+			<?php echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : ''; ?> (X refunded)
 		</div>
 		<div class="edit" style="display: none;">
 			<?php $item_qty = esc_attr( $item['qty'] ); ?>
 			<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo $item_qty; ?>" data-qty="<?php echo $item_qty; ?>" size="4" class="quantity" />
 		</div>
 		<div class="refund" style="display: block;">
-			<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" autocomplete="off" name="refund_order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund_order_item_qty" />
+			<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" max="<?php echo $item['qty']; ?>" autocomplete="off" name="refund_order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund_order_item_qty" />
 		</div>
 	</td>
 
