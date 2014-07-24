@@ -813,18 +813,19 @@ class WC_Cart {
 			
 			// See if this product and its options is already in the cart
 			$cart_item_key  = $this->find_product_in_cart( $cart_id );
-
-			// Ensure we don't add a variation to the cart directly by variation ID
-			if ( 'product_variation' == get_post_type( $product_id ) ) {
-				$variation_id = $product_id;
-				$product_id   = wp_get_post_parent_id( $variation_id );
-			}
 			
 			// Get the product
 			$product_data   = get_product( $variation_id ? $variation_id : $product_id );
 
 			if ( ! $product_data )
 				return false;
+
+			// Ensure we don't add a variation to the cart directly by variation ID
+			if ( $product_data->is_type( 'variation' ) ) {
+				$variation_id = $product_data->variation_id;
+				$product_id   = $product_data->id;
+				$variation    = $product_data->get_variation_attributes();
+			} 
 
 			// Force quantity to 1 if sold individually
 			if ( $product_data->is_sold_individually() )
