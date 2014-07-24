@@ -1011,22 +1011,17 @@ class WC_AJAX {
 		$order         = get_order( $order_id );
 		$order_taxes   = $order->get_taxes();
 		$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
+		$item          = array();
 
-		// Add line item
-		$item_id = wc_add_order_item( $order_id, array(
-			'order_item_name' => '',
-			'order_item_type' => 'fee'
-		) );
-
-		// Add line item meta
-		if ( $item_id ) {
-			wc_add_order_item_meta( $item_id, '_tax_class', '' );
-			wc_add_order_item_meta( $item_id, '_line_total', '' );
-			wc_add_order_item_meta( $item_id, '_line_tax', '' );
-
-			// Since 2.2
-			wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array() ) );
-		}
+		// Add new fee
+		$fee            = new stdClass();
+		$fee->name      = '';
+		$fee->tax_class = '';
+		$fee->taxable   = $fee->tax_class !== '0';
+		$fee->amount    = '';
+		$fee->tax       = '';
+		$fee->tax_data  = array();
+		$item_id        = $order->add_fee( $fee );
 
 		include( 'admin/meta-boxes/views/html-order-fee.php' );
 
@@ -1046,19 +1041,15 @@ class WC_AJAX {
 		$order_taxes      = $order->get_taxes();
 		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 		$can_be_edited    = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
+		$item             = array();
 
-		// Add line item
-		$item_id = wc_add_order_item( $order_id, array(
-			'order_item_name' => '',
-			'order_item_type' => 'shipping'
-		) );
-
-		// Add line item meta
-		if ( $item_id ) {
-			wc_add_order_item_meta( $item_id, 'method_id', '' );
-			wc_add_order_item_meta( $item_id, 'cost', '' );
-			wc_add_order_item_meta( $item_id, 'taxes', array() );
-		}
+		// Add new shipping
+		$shipping        = new stdClass();
+		$shipping->label = '';
+		$shipping->id    = '';
+		$shipping->cost  = '';
+		$shipping->taxes = array();
+		$item_id         = $order->add_shipping( $shipping );
 
 		include( 'admin/meta-boxes/views/html-order-shipping.php' );
 
