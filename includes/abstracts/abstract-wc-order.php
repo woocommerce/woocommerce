@@ -400,16 +400,66 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Update tax lines at order level by looking at the line item taxes themselves.
+	 *
+	 * @return bool success or fail
+	 */
+	public function update_taxes() {
+		$order_taxes          = array();
+		$order_shipping_taxes = array();
+
+		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
+			$line_tax_data = maybe_unserialize( $item['line_tax_data'] );
+			if ( isset( $line_tax_data['total'] ) ) {
+				foreach ( $line_tax_data['total'] as $tax_rate_id => $tax ) {
+					if ( ! isset( $order_taxes[ $tax_rate_id ] ) ) {
+						$order_taxes[ $tax_rate_id ] = 0;
+					}
+					$order_taxes[ $tax_rate_id ] += $tax;
+				}
+			}
+		}
+		foreach ( $this->get_items( array( 'shipping' ) ) as $item_id => $item ) {
+			$line_tax_data = maybe_unserialize( $item['taxes'] );
+			if ( isset( $line_tax_data['total'] ) ) {
+				foreach ( $line_tax_data['total'] as $tax_rate_id => $tax ) {
+					if ( ! isset( $order_shipping_taxes[ $tax_rate_id ] ) ) {
+						$order_shipping_taxes[ $tax_rate_id ] = 0;
+					}
+					$order_shipping_taxes[ $tax_rate_id ] += $tax;
+				}
+			}
+		}
+
+		// Remove old existing tax rows
+		$this->remove_order_items( 'tax' );
+
+		// Now merge to keep tax rows
+		foreach ( array_keys( $order_taxes + $order_shipping_taxes ) as $tax_rate_id ) {
+			$this->add_tax( $tax_rate_id, isset( $order_taxes[ $tax_rate_id ] ) ? $order_taxes[ $tax_rate_id ] : 0, isset( $order_shipping_taxes[ $tax_rate_id ] ) ? $order_shipping_taxes[ $tax_rate_id ] : 0 );
+		}
+
+		// Save tax totals
+		$this->set_total( WC_Tax::round( array_sum( $order_shipping_taxes ) ), 'shipping_tax' );
+		$this->set_total( WC_Tax::round( array_sum( $order_taxes ) ), 'tax' );
+
+		return true;
+	}
+
+	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
+	 * @param  $and_taxes bool Calc taxes if true
 	 * @return $total calculated grand total
 	 */
-	public function calculate_totals() {
+	public function calculate_totals( $and_taxes = true ) {
 		$cart_subtotal  = 0;
 		$cart_total     = 0;
 		$fee_total      = 0;
 
-		$this->calculate_taxes();
+		if ( $and_taxes ) {
+			$this->calculate_taxes();
+		}
 
 		foreach ( $this->get_items() as $item ) {
 			$cart_subtotal += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
@@ -1330,8 +1380,10 @@ abstract class WC_Abstract_Order {
 	public function get_product_from_item( $item ) {
 		if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
 			$_product = get_product( $item['variation_id'] );
-		} else {
+		} elseif ( ! empty( $item['product_id']  ) ) {
 			$_product = get_product( $item['product_id'] );
+		} else {
+			$_product = false;
 		}
 		return apply_filters( 'woocommerce_get_product_from_item', $_product, $item, $this );
 	}

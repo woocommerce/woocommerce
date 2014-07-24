@@ -605,21 +605,50 @@ jQuery( function ( $ ) {
 			if ( window.confirm( woocommerce_admin_meta_boxes.i18n_do_refund ) ) {
 				var refund_amount = $( 'input#refund_amount' ).val();
 				var refund_reason = $( 'input#refund_reason' ).val();
-				var refund_qty    = {};
-				$( 'input[type=number][name^=order_item_refund_qty]' ).each( function( index, item ) {
+				
+				// Get line item refunds
+				var line_item_qtys       = {};
+				var line_item_totals     = {};
+				var line_item_tax_totals = {};
+
+				$( '.refund input.refund_order_item_qty' ).each( function( index, item ) {
 					if ( $( item ).closest( 'tr' ).data( 'order_item_id' ) ) {
-						refund_qty[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ] = item.value;
+						if ( item.value ) {
+							line_item_qtys[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ] = item.value;
+						}
 					}
 				});
-				var data          = {
-					action:        'woocommerce_refund_line_items',
-					order_id:      woocommerce_admin_meta_boxes.post_id,
-					refund_amount: refund_amount,
-					refund_reason: refund_reason,
-					refund_qty:    JSON.stringify( refund_qty, null, '' ),
-					api_refund:    $( this ).is( '.do-api-refund' ),
-					security:      woocommerce_admin_meta_boxes.order_item_nonce
+
+				$( '.refund input.refund_line_total' ).each( function( index, item ) {
+					if ( $( item ).closest( 'tr' ).data( 'order_item_id' ) ) {
+						line_item_totals[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ] = accounting.unformat( item.value, woocommerce_admin.mon_decimal_point );
+					}
+				});
+
+				$( '.refund input.refund_line_tax' ).each( function( index, item ) {
+					if ( $( item ).closest( 'tr' ).data( 'order_item_id' ) ) {
+						var tax_id = $( item ).data( 'tax_id' );
+
+						if ( ! line_item_tax_totals[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ] ) {
+							line_item_tax_totals[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ] = {};
+						}
+
+						line_item_tax_totals[ $( item ).closest( 'tr' ).data( 'order_item_id' ) ][ tax_id ] = accounting.unformat( item.value, woocommerce_admin.mon_decimal_point );
+					}
+				});
+
+				var data = {
+					action:               'woocommerce_refund_line_items',
+					order_id:             woocommerce_admin_meta_boxes.post_id,
+					refund_amount:        refund_amount,
+					refund_reason:        refund_reason,
+					line_item_qtys:       JSON.stringify( line_item_qtys, null, '' ),
+					line_item_totals:     JSON.stringify( line_item_totals, null, '' ),
+					line_item_tax_totals: JSON.stringify( line_item_tax_totals, null, '' ),
+					api_refund:           $( this ).is( '.do-api-refund' ),
+					security:             woocommerce_admin_meta_boxes.order_item_nonce
 				};
+
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function ( response ) {
 					if ( response === true ) {
 						loadOrderItems();

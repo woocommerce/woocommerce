@@ -167,6 +167,14 @@ function wc_round_tax_total( $tax ) {
 }
 
 /**
+ * Make a refund total negative
+ * @return float
+ */
+function wc_format_refund_total( $amount ) {
+	return $amount * -1;
+}
+
+/**
  * Format decimal numbers ready for DB storage
  *
  * Sanitize, remove locale formatting, and optionally round + trim off zeros

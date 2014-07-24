@@ -79,7 +79,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<input type="text" name="shipping_taxes[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $tax_item_total ) ) ? esc_attr( wc_format_localized_price( $tax_item_total ) ) : ''; ?>" class="line_tax wc_input_price" />
 						</div>
 						<div class="refund" style="display: none;">
-							<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" class="refund_line_tax wc_input_price" />
+							<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" class="refund_line_tax wc_input_price" data-tax_id="<?php echo absint( $tax_item_id ); ?>" />
 						</div>
 					</td>
 

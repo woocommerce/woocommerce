@@ -1789,11 +1789,13 @@ class WC_AJAX {
 	public static function refund_line_items() {
 		check_ajax_referer( 'order-item', 'security' );
 
-		$order_id      = absint( $_POST['order_id'] );
-		$refund_amount = sanitize_text_field( $_POST['refund_amount'] );
-		$refund_reason = sanitize_text_field( $_POST['refund_reason'] );
-		$refund_qty    = json_decode( sanitize_text_field( stripslashes( $_POST['refund_qty'] ) ), true );
-		$api_refund    = $_POST['api_refund'] === 'true' ? true : false;
+		$order_id             = absint( $_POST['order_id'] );
+		$refund_amount        = sanitize_text_field( $_POST['refund_amount'] );
+		$refund_reason        = sanitize_text_field( $_POST['refund_reason'] );
+		$line_item_qtys       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
+		$line_item_totals     = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
+		$line_item_tax_totals = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_tax_totals'] ) ), true );
+		$api_refund           = $_POST['api_refund'] === 'true' ? true : false;
 
 		try {
 			// Validate that the refund can occur
@@ -1804,12 +1806,29 @@ class WC_AJAX {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
 
+			// Prepare line items which we are refunding
+			$line_items = array();
+			$item_ids   = array_unique( array_merge( array_keys( $line_item_qtys, $line_item_totals ) ) );
+
+			foreach ( $item_ids as $item_id ) {
+				$line_items[ $item_id ] = array( 'qty' => 0, 'refund_total' => 0, 'refund_tax' => array() );
+			}
+			foreach ( $line_item_qtys as $item_id => $qty ) {
+				$line_items[ $item_id ]['qty'] = max( $qty, 0 );
+			}
+			foreach ( $line_item_totals as $item_id => $total ) {
+				$line_items[ $item_id ]['refund_total'] = $total;
+			}
+			foreach ( $line_item_tax_totals as $item_id => $tax_totals ) {
+				$line_items[ $item_id ]['refund_tax'] = $tax_totals;
+			}
+
 			// Create the refund object
 			$refund = wc_create_refund( array(
-				'amount'        => $refund_amount,
-				'reason'        => $refund_reason,
-				'order_id'      => $order_id,
-				'line_item_qty' => $refund_qty
+				'amount'     => $refund_amount,
+				'reason'     => $refund_reason,
+				'order_id'   => $order_id,
+				'line_items' => $line_items
 			) );
 
 			if ( is_wp_error( $refund ) ) {
