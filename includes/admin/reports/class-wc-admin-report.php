@@ -47,7 +47,8 @@ class WC_Admin_Report {
 			'limit'        => '',
 			'filter_range' => false,
 			'nocache'      => false,
-			'debug'        => false
+			'debug'        => false,
+			'order_types'  => wc_get_order_types( 'reports' )
 		);
 
 		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', wp_parse_args( $args, $defaults ) );
@@ -128,7 +129,7 @@ class WC_Admin_Report {
 		$query['join'] = implode( ' ', $joins );
 
 		$query['where']  = "
-			WHERE 	posts.post_type 	IN ( '" . implode( "','", wc_get_order_types( 'reports' ) ) . "' )
+			WHERE 	posts.post_type 	IN ( '" . implode( "','", $order_types ) . "' )
 			AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			";
 
