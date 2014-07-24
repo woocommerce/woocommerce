@@ -155,6 +155,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php $item_qty = esc_attr( $item['qty'] ); ?>
 			<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo $item_qty; ?>" data-qty="<?php echo $item_qty; ?>" size="4" class="quantity" />
 		</div>
+		<div class="refund" style="display: block;">
+			<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" autocomplete="off" name="refund_order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund_order_item_qty" />
+		</div>
 	</td>
 
 	<td class="line_cost" width="1%">
@@ -177,6 +180,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_localized_price( $item['line_subtotal'] ) ) : ''; ?>
 				<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" value="<?php echo $item_subtotal; ?>" class="line_subtotal wc_input_price tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" data-subtotal="<?php echo $item_subtotal; ?>" />
 			</div>
+		</div>
+		<div class="refund" style="display: block;">
+			<input type="text" name="refund_line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" class="refund_line_total wc_input_price" />
 		</div>
 	</td>
 
@@ -215,16 +221,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" value="<?php echo $item_subtotal_tax; ?>" class="line_subtotal_tax wc_input_price tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>"data-subtotal_tax="<?php echo $item_subtotal_tax; ?>" />
 							</div>
 						</div>
+						<div class="refund" style="display: block;">
+							<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" class="refund_line_tax wc_input_price" />
+						</div>
 					</td>
 
 				<?php
 			endforeach;
 		endif;
 	?>
-
-	<td class="wc-order-item-refund-quantity" width="1%" style="display: none;">
-		<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" max="<?php echo esc_attr( $item['qty'] ); ?>" autocomplete="off" name="order_item_refund_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund-quantity" />
-	</td>
 
 	<td class="wc-order-edit-line-item">
 		<?php if ( $can_be_edited ) : ?>
