@@ -1389,7 +1389,7 @@ class WC_Order {
 
 						$_product = $this->get_product_from_item( $item );
 
-						if ( false !== $_product && ( $_product->is_downloadable() && $_product->is_virtual() ) || ! apply_filters( 'woocommerce_order_item_needs_processing', true, $_product, $this->id ) ) {
+						if ( (false !== $_product) && ! apply_filters( 'woocommerce_order_item_needs_processing', !($_product->is_downloadable() && $_product->is_virtual()), $_product, $this->id ) ) {
 							$order_needs_processing = false;
 							continue;
 						}
