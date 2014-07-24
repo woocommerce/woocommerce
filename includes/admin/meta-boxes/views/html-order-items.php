@@ -54,9 +54,7 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 						endforeach;
 					endif;
 				?>
-
-				<th class="wc-order-item-refund-quantity" style="display: none;"><?php _e( 'Refund', 'woocommerce' ); ?></th>
-
+				
 				<th class="wc-order-edit-line-item" width="1%">&nbsp;</th>
 			</tr>
 		</thead>
