@@ -54,7 +54,7 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 						endforeach;
 					endif;
 				?>
-				
+
 				<th class="wc-order-edit-line-item" width="1%">&nbsp;</th>
 			</tr>
 		</thead>
@@ -187,6 +187,7 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 		<?php endif; ?>
 		<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
 		<?php if ( $can_be_edited ) : ?>
+		<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate Tax', 'woocommerce' ); ?></button>
 		<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 	</p>
@@ -281,8 +282,8 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 									<th><?php _e( 'Rate %', 'woocommerce' ); ?></th>
 								</tr>
 							</thead>
-						<?php 
-							$rates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name LIMIT 100" ); 
+						<?php
+							$rates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name LIMIT 100" );
 
 							foreach ( $rates as $rate ) {
 								echo '
