@@ -1262,19 +1262,17 @@ class WC_AJAX {
 		$taxes          = array();
 		$shipping_taxes = array();
 
-		// Prevent undefined warnings
-		if ( ! isset ( $items['order_taxes'] ) ) {
-			$items['order_taxes'] = array();
-		}
-		if ( ! isset ( $items['line_tax'] ) ) {
-			$items['line_tax'] = array();
-		}
-		if ( ! isset ( $items['line_subtotal_tax'] ) ) {
-			$items['line_subtotal_tax'] = array();
-		}
-
 		// Parse the jQuery serialized items
 		parse_str( $_POST['items'], $items );
+
+		// Prevent undefined warnings
+		if ( ! isset( $items['line_tax'] ) ) {
+			$items['line_tax'] = array();
+		}
+		if ( ! isset( $items['line_subtotal_tax'] ) ) {
+			$items['line_subtotal_tax'] = array();
+		}
+		$items['order_taxes'] = array();
 
 		// Get items and fees taxes
 		if ( isset( $items['order_item_id'] ) ) {
