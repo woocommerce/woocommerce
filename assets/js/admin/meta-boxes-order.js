@@ -310,7 +310,7 @@ jQuery( function ( $ ) {
 			$( 'div.wc-order-refund-items' ).slideDown();
 			$( 'div.wc-order-bulk-actions' ).slideUp();
 			$( 'div.wc-order-totals-items' ).slideUp();
-			$( '.wc-order-item-refund-quantity' ).show();
+			$( '#woocommerce-order-items .refund' ).show();
 			$( '.wc-order-edit-line-item' ).hide();
 
 			return false;
@@ -319,7 +319,7 @@ jQuery( function ( $ ) {
 			$( this ).closest( 'div.wc-order-data-row' ).slideUp();
 			$( 'div.wc-order-bulk-actions' ).slideDown();
 			$( 'div.wc-order-totals-items' ).slideDown();
-			$( '.wc-order-item-refund-quantity' ).hide();
+			$( '#woocommerce-order-items .refund' ).hide();
 			$( '.wc-order-edit-line-item' ).show();
 
 			// Reload the items

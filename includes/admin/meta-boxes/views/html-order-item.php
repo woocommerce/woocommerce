@@ -149,13 +149,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="quantity" width="1%">
 		<div class="view">
-			<?php echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : ''; ?> (X refunded)
+			<?php echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : ''; ?>
 		</div>
 		<div class="edit" style="display: none;">
 			<?php $item_qty = esc_attr( $item['qty'] ); ?>
 			<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo $item_qty; ?>" data-qty="<?php echo $item_qty; ?>" size="4" class="quantity" />
 		</div>
-		<div class="refund" style="display: block;">
+		<div class="refund" style="display: none;">
 			<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" max="<?php echo $item['qty']; ?>" autocomplete="off" name="refund_order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" size="4" class="refund_order_item_qty" />
 		</div>
 	</td>
@@ -181,7 +181,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" value="<?php echo $item_subtotal; ?>" class="line_subtotal wc_input_price tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>" data-subtotal="<?php echo $item_subtotal; ?>" />
 			</div>
 		</div>
-		<div class="refund" style="display: block;">
+		<div class="refund" style="display: none;">
 			<input type="text" name="refund_line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" class="refund_line_total wc_input_price" />
 		</div>
 	</td>
@@ -221,7 +221,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" value="<?php echo $item_subtotal_tax; ?>" class="line_subtotal_tax wc_input_price tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>"data-subtotal_tax="<?php echo $item_subtotal_tax; ?>" />
 							</div>
 						</div>
-						<div class="refund" style="display: block;">
+						<div class="refund" style="display: none;">
 							<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" class="refund_line_tax wc_input_price" />
 						</div>
 					</td>
