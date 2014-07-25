@@ -687,15 +687,16 @@ jQuery( function ( $ ) {
 				});
 
 				var data = {
-					action:               'woocommerce_refund_line_items',
-					order_id:             woocommerce_admin_meta_boxes.post_id,
-					refund_amount:        refund_amount,
-					refund_reason:        refund_reason,
-					line_item_qtys:       JSON.stringify( line_item_qtys, null, '' ),
-					line_item_totals:     JSON.stringify( line_item_totals, null, '' ),
-					line_item_tax_totals: JSON.stringify( line_item_tax_totals, null, '' ),
-					api_refund:           $( this ).is( '.do-api-refund' ),
-					security:             woocommerce_admin_meta_boxes.order_item_nonce
+					action:                 'woocommerce_refund_line_items',
+					order_id:               woocommerce_admin_meta_boxes.post_id,
+					refund_amount:          refund_amount,
+					refund_reason:          refund_reason,
+					line_item_qtys:         JSON.stringify( line_item_qtys, null, '' ),
+					line_item_totals:       JSON.stringify( line_item_totals, null, '' ),
+					line_item_tax_totals:   JSON.stringify( line_item_tax_totals, null, '' ),
+					api_refund:             $( this ).is( '.do-api-refund' ),
+					restock_refunded_items: $( '#restock_refunded_items:checked' ).size() ? 'true' : 'false',
+					security:               woocommerce_admin_meta_boxes.order_item_nonce
 				};
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function ( response ) {

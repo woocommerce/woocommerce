@@ -1791,18 +1791,20 @@ class WC_AJAX {
 	public static function refund_line_items() {
 		check_ajax_referer( 'order-item', 'security' );
 
-		$order_id             = absint( $_POST['order_id'] );
-		$refund_amount        = sanitize_text_field( $_POST['refund_amount'] );
-		$refund_reason        = sanitize_text_field( $_POST['refund_reason'] );
-		$line_item_qtys       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
-		$line_item_totals     = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
-		$line_item_tax_totals = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_tax_totals'] ) ), true );
-		$api_refund           = $_POST['api_refund'] === 'true' ? true : false;
+		$order_id               = absint( $_POST['order_id'] );
+		$refund_amount          = sanitize_text_field( $_POST['refund_amount'] );
+		$refund_reason          = sanitize_text_field( $_POST['refund_reason'] );
+		$line_item_qtys         = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
+		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
+		$line_item_tax_totals   = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_tax_totals'] ) ), true );
+		$api_refund             = $_POST['api_refund'] === 'true' ? true : false;
+		$restock_refunded_items = $_POST['restock_refunded_items'] === 'true' ? true : false;
 
 		try {
 			// Validate that the refund can occur
-			$order      = get_order( $order_id );
-			$max_refund = $order->get_total() - $order->get_total_refunded();
+			$order       = get_order( $order_id );
+			$order_items = $order->get_items();
+			$max_refund  = $order->get_total() - $order->get_total_refunded();
 
 			if ( ! $refund_amount || $max_refund < $refund_amount ) {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
@@ -1817,6 +1819,18 @@ class WC_AJAX {
 			}
 			foreach ( $line_item_qtys as $item_id => $qty ) {
 				$line_items[ $item_id ]['qty'] = max( $qty, 0 );
+
+				if ( $restock_refunded_items && $qty && isset( $order_items[ $item_id ] ) ) {
+					$order_item = $order_items[ $item_id ];
+					$_product   = $order->get_product_from_item( $order_item );
+
+					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
+						$old_stock    = $_product->stock;
+						$new_quantity = $_product->increase_stock( $qty );
+
+						$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
+					}
+				}
 			}
 			foreach ( $line_item_totals as $item_id => $total ) {
 				$line_items[ $item_id ]['refund_total'] = $total;
