@@ -25,7 +25,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="line_cost" width="1%">
 		<div class="view">
-			<?php echo ( isset( $item['line_total'] ) ) ? wc_price( wc_round_tax_total( $item['line_total'] ) ) : ''; ?>
+			<?php 
+				echo ( isset( $item['line_total'] ) ) ? wc_price( wc_round_tax_total( $item['line_total'] ) ) : ''; 
+
+				if ( $refunded = $order->get_total_refunded_for_item( $item_id, 'fee' ) ) {
+					printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );
+				}
+			?>
 		</div>
 		<div class="edit" style="display: none;">
 			<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['line_total'] ) ) ? esc_attr( wc_format_localized_price( $item['line_total'] ) ) : ''; ?>" class="line_total wc_input_price" />
@@ -48,7 +54,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					<td class="line_tax" width="1%">
 						<div class="view">
-							<?php echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : '&ndash;'; ?>
+							<?php 
+								echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : '&ndash;'; 
+
+								if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'fee' ) ) {
+									printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );
+								}
+							?>
 						</div>
 						<div class="edit" style="display: none;">
 							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $tax_item_total ) ) ? esc_attr( wc_format_localized_price( $tax_item_total ) ) : ''; ?>" class="line_tax wc_input_price" />

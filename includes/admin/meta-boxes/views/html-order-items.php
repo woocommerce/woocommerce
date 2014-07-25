@@ -21,7 +21,6 @@ $payment_gateway = wc_get_payment_gateway_by_order( $order );
 
 // Check if order can be edited
 $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
-
 ?>
 <div class="woocommerce_order_items_wrapper wc-order-items-editable">
 	<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">

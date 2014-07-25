@@ -150,7 +150,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="quantity" width="1%">
 		<div class="view">
-			<?php echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : ''; ?>
+			<?php 
+				echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : '';
+
+				if ( $refunded_qty = $order->get_qty_refunded_for_item( $item_id ) ) {
+					printf( '<small class="refunded">' . __( 'Refunded %d' ) . '</small>', $refunded_qty );
+				}
+			?>
 		</div>
 		<div class="edit" style="display: none;">
 			<?php $item_qty = esc_attr( $item['qty'] ); ?>
@@ -170,6 +176,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					}
 
 					echo wc_price( $item['line_total'] );
+				}
+
+				if ( $refunded = $order->get_total_refunded_for_item( $item_id ) ) {
+					printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );
 				}
 			?>
 		</div>
@@ -196,7 +206,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$tax_item_id       = $tax_item['rate_id'];
 				$tax_item_total    = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
 				$tax_item_subtotal = isset( $tax_data['subtotal'][ $tax_item_id ] ) ? $tax_data['subtotal'][ $tax_item_id ] : '';
-
 				?>
 
 					<td class="line_tax" width="1%">
@@ -210,6 +219,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 									echo wc_price( wc_round_tax_total( $tax_item_total ) );
 								} else {
 									echo '&ndash;';
+								}
+
+								if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id ) ) {
+									printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );
 								}
 							?>
 						</div>

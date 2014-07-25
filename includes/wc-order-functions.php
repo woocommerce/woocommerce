@@ -590,7 +590,8 @@ function wc_create_refund( $args = array() ) {
 									'tax_data'     => array( 'total' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) )
 								)
 							);
-							$refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] : 0, $args );
+							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] : 0, $args );
+							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
 						case 'shipping' :
 							$shipping        = new stdClass();
@@ -599,7 +600,8 @@ function wc_create_refund( $args = array() ) {
 							$shipping->cost  = wc_format_refund_total( $refund_item['refund_total'] );
 							$shipping->taxes = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
 
-							$refund->add_shipping( $shipping );
+							$new_item_id = $refund->add_shipping( $shipping );
+							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
 						case 'fee' :
 							$fee            = new stdClass();
@@ -610,7 +612,8 @@ function wc_create_refund( $args = array() ) {
 							$fee->tax       = wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) );
 							$fee->tax_data  = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
 							
-							$refund->add_fee( $fee );
+							$new_item_id = $refund->add_fee( $fee );
+							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
 					}
 				}
