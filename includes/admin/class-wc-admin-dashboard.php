@@ -67,7 +67,7 @@ class WC_Admin_Dashboard {
 		$query['join']    = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id ";
 		$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
 		$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
-		$query['where']   = "WHERE posts.post_type IN ( '" . implode( ',', wc_get_order_types( 'reports' ) ) . "' ) ";
+		$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'order-count' ) ) . "' ) ";
 		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
 		$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";
 		$query['where']  .= "AND order_item_meta_2.meta_key = '_product_id' ";
