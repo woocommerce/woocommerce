@@ -50,8 +50,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="line_cost" width="1%">
 		<div class="view">
-			<?php 
-				echo ( isset( $item['cost'] ) ) ? wc_price( wc_round_tax_total( $item['cost'] ) ) : ''; 
+			<?php
+				echo ( isset( $item['cost'] ) ) ? wc_price( wc_round_tax_total( $item['cost'] ) ) : '';
 
 				if ( $refunded = $order->get_total_refunded_for_item( $item_id, 'shipping' ) ) {
 					printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );
@@ -79,8 +79,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					<td class="line_tax" width="1%">
 						<div class="view">
-							<?php 
-								echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : '&ndash;'; 
+							<?php
+								echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : '&ndash;';
 
 								if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' ) ) {
 									printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );

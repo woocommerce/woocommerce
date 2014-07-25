@@ -150,7 +150,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="quantity" width="1%">
 		<div class="view">
-			<?php 
+			<?php
 				echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : '';
 
 				if ( $refunded_qty = $order->get_qty_refunded_for_item( $item_id ) ) {
