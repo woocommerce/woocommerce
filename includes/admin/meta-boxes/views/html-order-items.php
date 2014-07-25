@@ -187,7 +187,7 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 		<?php endif; ?>
 		<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
 		<?php if ( $can_be_edited ) : ?>
-		<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate Tax', 'woocommerce' ); ?></button>
+		<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate Taxes', 'woocommerce' ); ?></button>
 		<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 	</p>
