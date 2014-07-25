@@ -225,7 +225,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'group_by'     => 'product_id',
 					'limit'        => 12,
 					'query_type'   => 'get_results',
-					'filter_range' => true
+					'filter_range' => true,
+					'order_types'  => wc_get_order_types( 'order-count' ),
 				) );
 
 				if ( $top_sellers ) {
