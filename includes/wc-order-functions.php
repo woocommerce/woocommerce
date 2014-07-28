@@ -579,6 +579,12 @@ function wc_create_refund( $args = array() ) {
 					if ( empty( $refund_item['qty'] ) && empty( $refund_item['refund_total'] ) && empty( $refund_item['refund_tax'] ) ) {
 						continue;
 					}
+
+					// Prevents errors when the order has no taxes
+					if ( ! isset( $refund_item['refund_tax'] ) ) {
+						$refund_item['refund_tax'] = array();
+					}
+
 					switch ( $order_items[ $refund_item_id ]['type'] ) {
 						case 'line_item' :
 							$args = array(
@@ -611,7 +617,7 @@ function wc_create_refund( $args = array() ) {
 							$fee->amount    = wc_format_refund_total( $refund_item['refund_total'] );
 							$fee->tax       = wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) );
 							$fee->tax_data  = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
-							
+
 							$new_item_id = $refund->add_fee( $fee );
 							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
