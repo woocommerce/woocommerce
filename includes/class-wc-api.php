@@ -139,6 +139,7 @@ class WC_API {
 	private function includes() {
 
 		// API server / response handlers
+		include_once( 'api/class-wc-api-exception.php' );
 		include_once( 'api/class-wc-api-server.php' );
 		include_once( 'api/interface-wc-api-handler.php' );
 		include_once( 'api/class-wc-api-json-handler.php' );
