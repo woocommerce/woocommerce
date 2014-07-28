@@ -218,6 +218,28 @@ function wc_add_order_item( $order_id, $item ) {
 }
 
 /**
+ * Update an item for an order
+ *
+ * @since 2.2
+ * @param int $item_id
+ * @param array $args either `order_item_type` or `order_item_name`
+ * @return bool true if successfully updated, false otherwise
+ */
+function wc_update_order_item( $item_id, $args ) {
+	global $wpdb;
+
+	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
+
+	if ( false === $update ) {
+		return false;
+	}
+
+	do_action( 'woocommerce_update_order_item', $item_id, $args );
+
+	return true;
+}
+
+/**
  * Delete an item from the order it belongs to based on item id
  *
  * @access public

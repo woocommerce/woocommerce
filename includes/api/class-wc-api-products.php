@@ -132,7 +132,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Get the total number of orders
+	 * Get the total number of products
 	 *
 	 * @since 2.1
 	 * @param string $type

@@ -45,7 +45,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
 /**
  * Create a new order programmatically
  *
- * Returns a new order object on success which can then be used to add additonal data.
+ * Returns a new order object on success which can then be used to add additional data.
  *
  * @return WC_Order on success, WP_Error on failure
  */
@@ -75,7 +75,7 @@ function wc_create_order( $args = array() ) {
 
 	if ( $args['status'] ) {
 		if ( ! in_array( 'wc-' . $args['status'], array_keys( wc_get_order_statuses() ) ) ) {
-			return new WP_Error( __( 'Invalid order status', 'woocommerce' ) );
+			return new WP_Error( 'woocommerce_invalid_order_status', __( 'Invalid order status', 'woocommerce' ) );
 		}
 		$order_data['post_status']  = 'wc-' . $args['status'];
 	}
