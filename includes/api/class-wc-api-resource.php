@@ -158,10 +158,19 @@ class WC_API_Resource {
 			$args['offset'] = $request_args['offset'];
 		}
 
-		// allow order change (ASC or DESC)
+		// order (ASC or DESC, ASC by default)
 		if ( ! empty( $request_args['order'] ) ) {
 			$args['order'] = $request_args['order'];
-			unset( $request_args['order'] );
+		}
+
+		// orderby
+		if ( ! empty( $request_args['orderby'] ) ) {
+			$args['orderby'] = $request_args['orderby'];
+
+			// allow sorting by meta value
+			if ( 'meta_value' === $args['orderby'] && ! empty( $request_args['orderby_meta_key'] ) ) {
+				$args['meta_key'] = $request_args['orderby_meta_key'];
+			}
 		}
 
 		// allow post status change

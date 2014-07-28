@@ -543,6 +543,17 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( ! empty( $args['order'] ) ) {
 			$query_args['order'] = $args['order'];
 		}
+
+		// orderby
+		if ( ! empty( $args['orderby'] ) ) {
+			$query_args['orderby'] = $args['orderby'];
+
+			// allow sorting by meta value
+			if ( 'meta_value' === $query_args['orderby'] && ! empty( $args['orderby_meta_key'] ) ) {
+				$query_args['meta_key'] = $args['orderby_meta_key'];
+			}
+		}
+
 		$query = new WP_User_Query( $query_args );
 
 		// helper members for pagination headers
