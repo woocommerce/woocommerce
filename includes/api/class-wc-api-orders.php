@@ -119,9 +119,9 @@ class WC_API_Orders extends WC_API_Resource {
 			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
 			'status'                    => $order->get_status(),
-			'currency'                  => $order->order_currency,
+			'currency'                  => $order->get_order_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
-			'subtotal'                  => wc_format_decimal( $this->get_order_subtotal( $order ), 2 ),
+			'subtotal'                  => wc_format_decimal( $order->get_subtotal( $order ), 2 ),
 			'total_line_items_quantity' => $order->get_item_count(),
 			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), 2 ),
 			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), 2 ),
@@ -207,7 +207,9 @@ class WC_API_Orders extends WC_API_Resource {
 		foreach ( $order->get_tax_totals() as $tax_code => $tax ) {
 
 			$order_data['tax_lines'][] = array(
-				'code'     => $tax_code,
+				'id'       => $tax->id,
+				'rate_id'  => $tax->rate_id,
+ 				'code'     => $tax_code,
 				'title'    => $tax->label,
 				'total'    => wc_format_decimal( $tax->amount, 2 ),
 				'compound' => (bool) $tax->is_compound,
