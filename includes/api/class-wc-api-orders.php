@@ -271,16 +271,110 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function create_order( $data ) {
 
-		// permission check
-		if ( ! current_user_can( 'publish_shop_orders' ) ) {
-			return new WP_Error( 'woocommerce_api_user_cannot_create_order', __( 'You do not have permission to create orders', 'woocommerce' ), array( 'status' => 401 ) );
-		}
+		$data = isset( $data['order'] ) ? $data['order'] : array();
 
-		// default order args, note that status is checked for validity in wc_create_order()
-		$default_order_args = array(
-			'status'        => isset( $data['status'] ) ? $data['status'] : '',
-			'customer_note' => isset( $data['customer_note'] ) ? $data['customer_note'] : null,
-		);
+		try {
+
+			// permission check
+			if ( ! current_user_can( 'publish_shop_orders' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_order', __( 'You do not have permission to create orders', 'woocommerce' ), 401 );
+			}
+
+			// default order args, note that status is checked for validity in wc_create_order()
+			$default_order_args = array(
+				'status'        => isset( $data['status'] ) ? $data['status'] : '',
+				'customer_note' => isset( $data['customer_note'] ) ? $data['customer_note'] : null,
+			);
+
+			// if creating order for existing customer
+			if ( ! empty( $data['customer_id'] ) ) {
+
+				// make sure customer exists
+				if ( false === get_user_by( 'id', $data['customer_id'] ) ) {
+					throw new WC_API_Exception( 'woocommerce_api_invalid_customer_id', __( 'Customer ID is invalid', 'woocommerce' ), 400 );
+				}
+
+				$default_order_args['customer_id'] = $data['customer_id'];
+			}
+
+			// create the pending order
+			$order = wc_create_order( $default_order_args );
+
+			if ( is_wp_error( $order ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_order', sprintf( __( 'Cannot create order: %s', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
+			}
+
+			// billing/shipping addresses
+			$this->set_order_addresses( $order, $data );
+
+			$lines = array(
+				'line_item' => 'line_items',
+				'shipping'  => 'shipping_lines',
+				'fee'       => 'fee_lines',
+				'coupon'    => 'coupon_lines',
+			);
+
+			foreach ( $lines as $line_type => $line ) {
+
+				if ( isset( $data[ $line ] ) && is_array( $data[ $line ] ) ) {
+
+					$set_item = "set_{$line_type}";
+
+					foreach ( $data[ $line ] as $item ) {
+
+						$this->$set_item( $order, $item, 'create' );
+					}
+				}
+			}
+
+			// calculate totals and set them
+			$order->calculate_totals();
+
+			// payment method (and payment_complete() if `paid` == true)
+			if ( isset( $data['payment_details'] ) && is_array( $data['payment_details'] ) ) {
+
+				// method ID & title are required
+				if ( empty( $data['payment_details']['method_id'] ) || empty( $data['payment_details']['method_title'] ) ) {
+					throw new WC_API_Exception( 'woocommerce_invalid_payment_details', __( 'Payment method ID and title are required', 'woocommerce' ), 400 );
+				}
+
+				update_post_meta( $order->id, '_payment_method', $data['payment_details']['method_id'] );
+				update_post_meta( $order->id, '_payment_method_title', $data['payment_details']['method_title'] );
+
+				// mark as paid if set
+				if ( isset( $data['payment_details']['paid'] ) && 'true' === $data['payment_details']['paid'] ) {
+					$order->payment_complete( isset( $data['payment_details']['transaction_id'] ) ? $data['payment_details']['transaction_id'] : '' );
+				}
+			}
+
+			// set order currency
+			if ( isset( $data['currency'] ) ) {
+
+				if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
+					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce'), 400 );
+				}
+
+				update_post_meta( $order->id, '_order_currency', $data['currency'] );
+			}
+
+			// set order number
+			if ( isset( $data['order_number'] ) ) {
+
+				update_post_meta( $order->id, '_order_number', $data['order_number'] );
+			}
+
+			// TODO: should we allow clients to set meta?
+
+			$this->server->send_status( 201 );
+
+			return $this->get_order( $order->id );
+
+		} catch ( WC_API_Exception $e ) {
+
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
 
 		// if creating order for existing customer
 		if ( ! empty( $data['customer_id'] ) ) {
