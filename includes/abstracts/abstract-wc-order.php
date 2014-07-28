@@ -546,6 +546,26 @@ abstract class WC_Abstract_Order {
 		return true;
 	}
 
+
+	/**
+	 * Calculate shipping total
+	 *
+	 * @since 2.2
+	 * @return float
+	 */
+	public function calculate_shipping() {
+
+		$shipping_total = 0;
+
+		foreach ( $this->get_shipping_methods() as $shipping ) {
+			$shipping_total += $shipping['cost'];
+		}
+
+		$this->set_total( $shipping_total, 'shipping' );
+
+		return $this->get_total_shipping();
+	}
+
 	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
@@ -559,18 +579,22 @@ abstract class WC_Abstract_Order {
 
 		$this->calculate_taxes();
 
+		// line items
 		foreach ( $this->get_items() as $item ) {
 			$cart_subtotal += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
 			$cart_total    += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
 		}
 
+		$this->calculate_shipping();
+
 		foreach ( $this->get_fees() as $item ) {
 			$fee_total += $item['line_total'];
 		}
 
+		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
+
 		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() - $this->get_order_discount() + $this->get_cart_tax() + $this->get_shipping_tax(), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
-		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
 		$this->set_total( $grand_total, 'total' );
 
 		return $grand_total;
