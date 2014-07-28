@@ -132,15 +132,8 @@ class WC_API_Server {
 			$this->method = strtoupper( $_GET['_method'] );
 		}
 
-		// determine type of request/response and load handler, JSON by default
-		if ( $this->is_json_request() )
-			$handler_class = 'WC_API_JSON_Handler';
-
-		elseif ( $this->is_xml_request() )
-			$handler_class = 'WC_API_XML_Handler';
-
-		else
-			$handler_class = apply_filters( 'woocommerce_api_default_response_handler', 'WC_API_JSON_Handler', $this->path, $this );
+		// load response handler
+		$handler_class = apply_filters( 'woocommerce_api_default_response_handler', 'WC_API_JSON_Handler', $this->path, $this );
 
 		$this->handler = new $handler_class();
 	}
@@ -727,43 +720,4 @@ class WC_API_Server {
 		return $headers;
 	}
 
-	/**
-	 * Check if the current request accepts a JSON response by checking the endpoint suffix (.json) or
-	 * the HTTP ACCEPT header
-	 *
-	 * @since 2.1
-	 * @return bool
-	 */
-	private function is_json_request() {
-
-		// check path
-		if ( false !== stripos( $this->path, '.json' ) )
-			return true;
-
-		// check ACCEPT header, only 'application/json' is acceptable, see RFC 4627
-		if ( isset( $this->headers['ACCEPT'] ) && 'application/json' == $this->headers['ACCEPT'] )
-			return true;
-
-		return false;
-	}
-
-	/**
-	 * Check if the current request accepts an XML response by checking the endpoint suffix (.xml) or
-	 * the HTTP ACCEPT header
-	 *
-	 * @since 2.1
-	 * @return bool
-	 */
-	private function is_xml_request() {
-
-		// check path
-		if ( false !== stripos( $this->path, '.xml' ) )
-			return true;
-
-		// check headers, 'application/xml' or 'text/xml' are acceptable, see RFC 2376
-		if ( isset( $this->headers['ACCEPT'] ) && ( 'application/xml' == $this->headers['ACCEPT'] || 'text/xml' == $this->headers['ACCEPT'] ) )
-			return true;
-
-		return false;
-	}
 }
