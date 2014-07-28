@@ -87,13 +87,15 @@ abstract class WC_Abstract_Order {
 		foreach( $address as $key => $value ) {
 			update_post_meta( $this->id, "_{$type}_" . $key, $value );
 		}
-	}	
+	}
 
 	/**
 	 * Add a product line item to the order
-	 * @param WC_Product $item
+	 *
+	 * @since 2.2
+	 * @param \WC_Product $product
 	 * @param int $qty Line item quantity
-	 * @param  array args
+	 * @param array $args
 	 * @return int|bool Item ID or false
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
@@ -116,7 +118,7 @@ abstract class WC_Abstract_Order {
 	 	wc_add_order_item_meta( $item_id, '_tax_class', $product->get_tax_class() );
 	 	wc_add_order_item_meta( $item_id, '_product_id', $product->id );
 	 	wc_add_order_item_meta( $item_id, '_variation_id', isset( $product->variation_id ) ? $product->variation_id : 0 );
-	 	
+
 	 	// Set line item totals, either passed in or from the product
 	 	wc_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax( $qty ) ) );
 	 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( isset( $args['totals']['total'] ) ? $args['totals']['total'] : $product->get_price_excluding_tax( $qty ) ) );
@@ -140,8 +142,9 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Add coupon code to the order
-	 * @param string  $code
-	 * @param float $discount_amount
+	 *
+	 * @param string $code
+	 * @param float|int $discount_amount
 	 * @return int|bool Item ID or false
 	 */
 	public function add_coupon( $code, $discount_amount = 0 ) {
@@ -163,6 +166,8 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Add a tax row to the order
+	 *
+	 * @since 2.2
 	 * @param int tax_rate_id
 	 * @return int|bool Item ID or false
 	 */
@@ -172,7 +177,7 @@ abstract class WC_Abstract_Order {
 		if ( ! $code ) {
 			return false;
 		}
-			
+
 		$item_id = wc_add_order_item( $this->id, array(
 			'order_item_name' => $code,
 			'order_item_type' => 'tax'
@@ -279,7 +284,7 @@ abstract class WC_Abstract_Order {
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
 	 * Will use the base country unless customer addresses are set.
-	 * 
+	 *
 	 * @return bool success or fail
 	 */
 	public function calculate_taxes() {
@@ -287,7 +292,7 @@ abstract class WC_Abstract_Order {
 		$tax_total          = 0;
 		$taxes              = array();
 		$tax_based_on       = get_option( 'woocommerce_tax_based_on' );
-		
+
 		if ( 'base' === $tax_based_on ) {
 			$default  = get_option( 'woocommerce_default_country' );
 			$postcode = '';
@@ -380,8 +385,9 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
-	 * 
-	 * @return $total calculated grand total
+	 *
+	 * @since 2.2
+	 * @return float calculated grand total
 	 */
 	public function calculate_totals() {
 		$cart_subtotal  = 0;
@@ -1700,10 +1706,10 @@ abstract class WC_Abstract_Order {
 	public function update_status( $new_status, $note = '' ) {
 		$old_status = $this->get_status();
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
-		
+
 		// Only update if they differ
 		if ( $this->id && $new_status !== $old_status ) {
-			
+
 			// Update the order
 			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
 			$this->post_status = 'wc-' . $new_status;
