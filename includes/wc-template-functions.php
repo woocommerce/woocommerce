@@ -202,8 +202,9 @@ function wc_body_class( $classes ) {
  * @return array
  */
 function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
-	if ( ! $post_id || get_post_type( $post_id ) !== 'product' )
+	if ( ! $post_id || 'product' !== get_post_type( $post_id ) ) {
 		return $classes;
+	}
 
 	$product = get_product( $post_id );
 
@@ -237,25 +238,25 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		}
 
 		// add category slugs
-		$categories = wp_get_post_terms( $product->id, "product_cat" );
+		$categories = get_the_terms( $product->id, 'product_cat' );
 		if ( ! empty( $categories ) ) {
-			foreach ($categories as $key => $value) {
-				$classes[] = "product-cat-" . $value->slug;
+			foreach ( $categories as $key => $value ) {
+				$classes[] = 'product-cat-' . $value->slug;
 			}
 		}
 
 		// add tag slugs
-		$tags = wp_get_post_terms( $product->id, "product_tag" );
+		$tags = get_the_terms( $product->id, 'product_tag' );
 		if ( ! empty( $tags ) ) {
-			foreach ($tags as $key => $value) {
-				$classes[] = "product-tag-" . $value->slug;
+			foreach ( $tags as $key => $value ) {
+				$classes[] = 'product-tag-' . $value->slug;
 			}
 		}
 
 		$classes[] = $product->stock_status;
 	}
 
-	if ( ( $key = array_search( 'hentry', $classes ) ) !== false ) {
+	if ( false !== ( $key = array_search( 'hentry', $classes ) ) ) {
 		unset( $classes[ $key ] );
 	}
 
