@@ -1,3 +1,14 @@
+<?php
+/**
+ * Admin View: Quick Edit Product
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
+
 <fieldset class="inline-edit-col-left">
 	<div id="woocommerce-fields" class="inline-edit-col">
 
@@ -173,7 +184,7 @@
 						'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
 						'yes'    => __( 'Allow', 'woocommerce' )
 					);
-					foreach ($options as $key => $value) {
+					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 					}
 				?>
