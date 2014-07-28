@@ -539,6 +539,10 @@ class WC_API_Customers extends WC_API_Resource {
 			$this->created_at_max = $this->server->parse_datetime( $args['created_at_max'] );
 		}
 
+		// order (ASC or DESC, ASC by default)
+		if ( ! empty( $args['order'] ) ) {
+			$query_args['order'] = $args['order'];
+		}
 		$query = new WP_User_Query( $query_args );
 
 		// helper members for pagination headers
