@@ -280,6 +280,8 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_order', __( 'You do not have permission to create orders', 'woocommerce' ), 401 );
 			}
 
+			$data = apply_filters( 'woocommerce_api_create_order_data', $data, $this );
+
 			// default order args, note that status is checked for validity in wc_create_order()
 			$default_order_args = array(
 				'status'        => isset( $data['status'] ) ? $data['status'] : '',
@@ -365,7 +367,12 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// TODO: should we allow clients to set meta?
 
+			// HTTP 201 Created
 			$this->server->send_status( 201 );
+
+			wc_delete_shop_order_transients( $order->id );
+
+			do_action( 'woocommerce_api_create_order', $order->id, $this );
 
 			return $this->get_order( $order->id );
 
@@ -396,6 +403,8 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( is_wp_error( $id ) ) {
 				return $id;
 			}
+
+			$data = apply_filters( 'woocommerce_api_edit_order_data', $data, $id, $this );
 
 			$order = get_order( $id );
 
@@ -508,6 +517,10 @@ class WC_API_Orders extends WC_API_Resource {
 			// update the order post to set customer note/modified date
 			wc_update_order( $order_args );
 
+			wc_delete_shop_order_transients( $order->id );
+
+			do_action( 'woocommerce_api_edit_order', $order->id, $this );
+
 			return $this->get_order( $id );
 
 		} catch ( WC_API_Exception $e ) {
@@ -526,6 +539,14 @@ class WC_API_Orders extends WC_API_Resource {
 	public function delete_order( $id, $force = false ) {
 
 		$id = $this->validate_request( $id, 'shop_order', 'delete' );
+
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+
+		wc_delete_shop_order_transients( $id );
+
+		do_action( 'woocommerce_api_delete_order', $id, $this );
 
 		return $this->delete( $id, 'order',  ( 'true' === $force ) );
 	}
