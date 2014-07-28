@@ -56,6 +56,16 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_reviews' ), WC_API_Server::READABLE ),
 		);
 
+		# GET /products/categories
+		$routes[ $this->base . '/categories' ] = array(
+			array( array( $this, 'get_product_categories' ), WC_API_Server::READABLE ),
+		);
+
+		# GET /products/categories/<id>
+		$routes[ $this->base . '/categories/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_category' ), WC_API_Server::READABLE ),
+		);
+
 		return $routes;
 	}
 
@@ -365,6 +375,70 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return array( 'product_reviews' => apply_filters( 'woocommerce_api_product_reviews_response', $reviews, $id, $fields, $comments, $this->server ) );
+	}
+
+	/**
+	 * Get a listing of product categories
+	 *
+	 * @since 2.2
+	 * @return array
+	 */
+	public function get_product_categories() {
+
+		// permissions check
+		if ( ! current_user_can( 'manage_product_terms' ) ) {
+			return new WP_Error( "woocommerce_api_user_cannot_read_product_categories", __( 'You do not have permission to read product categories', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		$product_categories = array();
+
+		$terms = get_terms( 'product_cat', array( 'hide_empty' => false, 'fields' => 'ids' ) );
+
+		foreach ( $terms as $term_id ) {
+
+			$product_categories[] = current( $this->get_product_category( $term_id ) );
+		}
+
+		return array( 'product_categories' => apply_filters( 'woocommerce_api_product_categories_response', $product_categories, $terms, $this ) );
+	}
+
+	/**
+	 * Get the product category for the given ID
+	 *
+	 * @since 2.2
+	 * @param string $id product category term ID
+	 * @return array
+	 */
+	public function get_product_category( $id ) {
+
+		$id = absint( $id );
+
+		// validate ID
+		if ( empty( $id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_product_category_id', __( 'Invalid product category ID', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		// permissions check
+		if ( ! current_user_can( 'manage_product_terms' ) ) {
+			return new WP_Error( 'woocommerce_api_user_cannot_read_product_categories', __( 'You do not have permission to read product categories', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		$term = get_term( $id, 'product_cat' );
+
+		if ( is_wp_error( $term ) || is_null( $term ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_product_category_id', __( 'A product category with the provided ID could not be found', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$product_category = array(
+			'id'          => intval( $term->term_id ),
+			'name'        => $term->name,
+			'slug'        => $term->slug,
+			'parent'      => $term->parent,
+			'description' => $term->description,
+			'count'       => intval( $term->count ),
+		);
+
+		return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $term, $id, $this ) );
 	}
 
 	/**
