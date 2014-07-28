@@ -108,12 +108,10 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 			echo $prepend;
 
-			if ( $terms = wc_get_product_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent', 'order' => 'DESC' ) ) ) {
-
+			if ( $terms = get_the_terms( $post->ID, 'product_cat' ) ) {
+				$terms     = array_values( $terms );
 				$main_term = $terms[0];
-
 				$ancestors = get_ancestors( $main_term->term_id, 'product_cat' );
-
 				$ancestors = array_reverse( $ancestors );
 
 				foreach ( $ancestors as $ancestor ) {
