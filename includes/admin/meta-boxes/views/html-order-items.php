@@ -3,6 +3,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+// Get the payment gateway
+$payment_gateway = wc_get_payment_gateway_by_order( $order );
+
+// Get line items
+$line_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
+
+// Check if order can be edited
+$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
+
 if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	$order_taxes         = $order->get_taxes();
 	$tax_classes         = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
@@ -14,13 +23,13 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 			$classes_options[ sanitize_title( $class ) ] = $class;
 		}
 	}
+
+	// Older orders won't have line taxes so we need to handle them differently :(
+	$check_item       = current( $line_items );
+	$tax_data         = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
+	$legacy_order     = ! empty( $order_taxes ) && empty( $tax_data ) && ! is_array( $tax_data );
+	$show_tax_columns = ! $legacy_order || sizeof( $order_taxes ) === 1;
 }
-
-// Get the payment gateway
-$payment_gateway = wc_get_payment_gateway_by_order( $order );
-
-// Check if order can be edited
-$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
 ?>
 <div class="woocommerce_order_items_wrapper wc-order-items-editable">
 	<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
@@ -36,7 +45,7 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 				<th class="line_cost"><?php _e( 'Total', 'woocommerce' ); ?></th>
 
 				<?php
-					if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+					if ( ! $legacy_order && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
 						foreach ( $order_taxes as $tax_id => $tax_item ) :
 							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
@@ -59,8 +68,7 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 		</thead>
 		<tbody id="order_line_items">
 		<?php
-			$order_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
-			foreach ( $order_items as $item_id => $item ) {
+			foreach ( $line_items as $item_id => $item ) {
 				$_product  = $order->get_product_from_item( $item );
 				$item_meta = $order->get_item_meta( $item_id );
 
@@ -124,11 +132,13 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 			<td width="1%"></td>
 		</tr>
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
-			<tr>
-				<td class="label"><?php _e( 'Taxes', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total taxes for this order.', 'woocommerce' ); ?>">[?]</span>:</td>
-				<td class="total"><?php echo wc_price( $order->get_total_tax() ); ?></td>
-				<td width="1%"></td>
-			</tr>
+			<?php foreach ( $order->get_tax_totals() as $code => $tax ) : ?>
+				<tr>
+					<td class="label"><?php echo $tax->label; ?>:</td>
+					<td class="total"><?php echo $tax->formatted_amount; ?></td>
+					<td width="1%"></td>
+				</tr>
+			<?php endforeach; ?>
 		<?php endif; ?>
 		<tr>
 			<td class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total discount applied after tax.', 'woocommerce' ); ?>">[?]</span>:</td>

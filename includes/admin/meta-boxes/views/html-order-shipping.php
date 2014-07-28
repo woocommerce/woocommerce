@@ -67,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</td>
 
 	<?php
-		if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+		if ( ! $legacy_order && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
 			$shipping_taxes = isset( $item['taxes'] ) ? $item['taxes'] : '';
 			$tax_data       = maybe_unserialize( $shipping_taxes );
 
