@@ -1142,6 +1142,23 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Gets order subtotal.
+	 *
+	 * @access public
+	 * @return mixed|void
+	 */
+	public function get_subtotal() {
+
+		$subtotal = 0;
+
+		foreach ( $this->get_items() as $item ) {
+			$subtotal += ( isset( $item['line_subtotal'] ) ) ? $item['line_subtotal'] : 0;
+		}
+
+		return apply_filters( 'woocommerce_order_amount_subtotal', (double) $subtotal, $this );
+	}
+
+	/**
 	 * Get item subtotal - this is the cost before discount.
 	 *
 	 * @access public
