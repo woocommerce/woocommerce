@@ -142,11 +142,6 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
 		</tr>
 		<tr>
-			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
-			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded() ); ?></td>
-			<td width="1%"></td>
-		</tr>
-		<tr>
 			<td class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</td>
 			<td class="total">
 				<div class="view"><?php echo wc_price( $order->get_total() ); ?></div>
@@ -156,6 +151,11 @@ $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be
 				</div>
 			</td>
 			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
+		</tr>
+		<tr>
+			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
+			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded() ); ?></td>
+			<td width="1%"></td>
 		</tr>
 	</table>
 	<div class="clear"></div>

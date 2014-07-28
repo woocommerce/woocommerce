@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				echo ( isset( $item['line_total'] ) ) ? wc_price( wc_round_tax_total( $item['line_total'] ) ) : '';
 
 				if ( $refunded = $order->get_total_refunded_for_item( $item_id, 'fee' ) ) {
-					printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );
+					echo '<small class="refunded">-' . wc_price( $refunded ) . '</small>';
 				}
 			?>
 		</div>
@@ -58,7 +58,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								echo ( '' != $tax_item_total ) ? wc_price( wc_round_tax_total( $tax_item_total ) ) : '&ndash;';
 
 								if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'fee' ) ) {
-									printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );
+									echo '<small class="refunded">-' . wc_price( $refunded ) . '</small>';
 								}
 							?>
 						</div>

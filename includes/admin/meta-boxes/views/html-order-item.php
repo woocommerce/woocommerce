@@ -154,7 +154,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : '';
 
 				if ( $refunded_qty = $order->get_qty_refunded_for_item( $item_id ) ) {
-					printf( '<small class="refunded">' . __( 'Refunded %d' ) . '</small>', $refunded_qty );
+					echo '<small class="refunded">-' . $refunded_qty . '</small>';
 				}
 			?>
 		</div>
@@ -179,7 +179,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 
 				if ( $refunded = $order->get_total_refunded_for_item( $item_id ) ) {
-					printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );
+					echo '<small class="refunded">-' . wc_price( $refunded ) . '</small>';
 				}
 			?>
 		</div>
@@ -222,7 +222,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								}
 
 								if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id ) ) {
-									printf( '<small class="refunded">' . __( 'Refunded %s' ) . '</small>', wc_price( $refunded ) );
+									echo '<small class="refunded">-' . wc_price( $refunded ) . '</small>';
 								}
 							?>
 						</div>

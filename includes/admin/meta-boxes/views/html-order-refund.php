@@ -9,25 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<td class="thumb"><div></div></td>
 
 	<td class="name">
-		<?php _e( 'Refund', 'woocommerce' ); ?>
-		<table class="display_meta" cellspacing="0">
-			<tbody>
-				<tr>
-					<th><?php _e( 'Date', 'woocommerce' ); ?>:</th>
-					<td>
-						<p><?php echo date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post_date ) ); ?></p>
-					</td>
-				</tr>
-				<?php if ( $refund->get_refund_reason() ) : ?>
-					<tr>
-						<th><?php _e( 'Reason', 'woocommerce' ); ?>:</th>
-						<td>
-							<p><?php echo esc_html( $refund->get_refund_reason() ); ?></p>
-						</td>
-					</tr>
-				<?php endif; ?>
-			</tbody>
-		</table>
+		<?php _e( 'Refund', 'woocommerce' ); ?> - <?php echo date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post_date ) ); ?>
+		<?php if ( $refund->get_refund_reason() ) : ?>
+			<p class="description"><?php echo esc_html( $refund->get_refund_reason() ); ?></p>
+		<?php endif; ?>
 		<input type="hidden" class="order_refund_id" name="order_refund_id[]" value="<?php echo esc_attr( $refund->id ); ?>" />
 	</td>
 
