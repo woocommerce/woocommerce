@@ -710,7 +710,7 @@ abstract class WC_Abstract_Order {
 	 * @return WP_User|false
 	 */
 	public function get_user() {
-		return $user_id = $this->get_user_id() ? get_user_by( 'id', $user_id ) : false;
+		return $this->get_user_id() ? get_user_by( 'id', $this->get_user_id() ) : false;
 	}
 
 	/**
