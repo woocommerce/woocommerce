@@ -140,6 +140,61 @@ abstract class WC_Abstract_Order {
 		return $item_id;
 	}
 
+
+	/**
+	 * Update a line item for the order
+	 *
+	 * Note this does not update order totals
+	 *
+	 * @since 2.2
+	 * @param int $item_id order item ID
+	 * @param array $args data to update
+	 * @return bool
+	 */
+	public function update_product( $item_id, $product, $args ) {
+
+		if ( ! $item_id || ! is_object( $product ) ) {
+			return false;
+		}
+
+		// quantity
+		if ( isset( $args['qty'] ) ) {
+			wc_update_order_item_meta( $item_id, '_qty', wc_stock_amount( $args['qty'] ) );
+		}
+
+		// tax class
+		if ( isset( $args['tax_class'] ) ) {
+			wc_update_order_item_meta( $item_id, '_tax_class', $args['tax_class'] );
+		}
+
+		// set item totals, either provided or from product
+		if ( isset( $args['qty'] ) ) {
+			wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax( $args['qty'] ) ) );
+			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( isset( $args['totals']['total'] ) ? $args['totals']['total'] : $product->get_price_excluding_tax( $args['qty'] ) ) );
+		}
+
+		// set item tax totals
+		wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
+		wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
+
+		// variation meta
+		if ( isset( $args['variation'] ) && is_array( $args['variation'] ) ) {
+			foreach ( $args['variation'] as $key => $value ) {
+				wc_update_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
+			}
+		}
+
+		// backorders
+		if ( isset( $args['qty'] ) && $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
+			wc_update_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ) );
+		}
+
+		do_action( 'woocommerce_order_edit_product', $this->id, $item_id, $args, $product );
+
+		return true;
+	}
+
+
 	/**
 	 * Add coupon code to the order
 	 *
@@ -162,6 +217,37 @@ abstract class WC_Abstract_Order {
 		do_action( 'woocommerce_order_add_coupon', $this->id, $item_id, $code, $discount_amount );
 
 		return $item_id;
+	}
+
+	/**
+	 * Update coupon for order
+	 *
+	 * Note this does not update order totals
+	 *
+	 * @since 2.2
+	 * @param int $item_id
+	 * @param array $args
+	 * @return bool
+	 */
+	public function update_coupon( $item_id, $args ) {
+
+		if ( ! $item_id ) {
+			return false;
+		}
+
+		// code
+		if ( isset( $args['code'] ) ) {
+			wc_update_order_item( $item_id, array( 'order_item_name' => $args['code'] ) );
+		}
+
+		// amount
+		if ( isset( $args['discount_amount'] ) ) {
+			wc_update_order_item_meta( $item_id, 'discount_amount', wc_format_decimal( $args['discount_amount'] ) );
+		}
+
+		do_action( 'woocommerce_order_update_coupon', $this->id, $item_id, $args );
+
+		return true;
 	}
 
 	/**
@@ -225,6 +311,42 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Update shipping method for order
+	 *
+	 * Note this does not update the order total
+	 *
+	 * @since 2.2
+	 * @param int $item_id
+	 * @param array $args
+	 * @return bool
+	 */
+	public function update_shipping( $item_id, $args ) {
+
+		if ( ! $item_id ) {
+			return false;
+		}
+
+		// method title
+		if ( isset( $args['method_title'] ) ) {
+			wc_update_order_item( $item_id, array( 'order_item_name' => $args['method_title'] ) );
+		}
+
+		// method ID
+		if ( isset( $args['method_id'] ) ) {
+			wc_update_order_item_meta( $item_id, 'method_id', $args['method_id'] );
+		}
+
+		// method cost
+		if ( isset( $args['cost'] ) ) {
+			wc_update_order_item_meta( $item_id, 'cost', wc_format_decimal( $args['cost'] ) );
+		}
+
+		do_action( 'woocommerce_order_update_shipping', $this->id, $item_id, $args );
+
+		return true;
+	}
+
+	/**
 	 * Add a fee to the order
 	 * @param object $fee
 	 * @return int|bool Item ID or false
@@ -251,6 +373,47 @@ abstract class WC_Abstract_Order {
 		do_action( 'woocommerce_order_add_fee', $this->id, $item_id, $fee );
 
 		return $item_id;
+	}
+
+	/**
+	 * Update fee for order
+	 *
+	 * Note this does not update order totals
+	 *
+	 * @since 2.2
+	 * @param int $item_id
+	 * @param array $args
+	 * @return bool
+	 */
+	public function update_fee( $item_id, $args ) {
+
+		if ( ! $item_id ) {
+			return false;
+		}
+
+		// name
+		if ( isset( $args['name'] ) ) {
+			wc_update_order_item( $item_id, array( 'order_item_name' => $args['name'] ) );
+		}
+
+		// tax class
+		if ( isset( $args['tax_class'] ) ) {
+			wc_update_order_item_meta( $item_id, '_tax_class', $args['tax_class'] );
+		}
+
+		// total
+		if ( isset( $args['line_total'] ) ) {
+			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $args['line_total'] ) );
+		}
+
+		// total tax
+		if ( isset( $args['line_tax'] ) ) {
+			wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $args['line_tax'] ) );
+		}
+
+		do_action( 'woocommerce_order_update_fee', $this->id, $item_id, $args );
+
+		return true;
 	}
 
 	/**
