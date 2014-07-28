@@ -549,7 +549,7 @@ class WC_API_Customers extends WC_API_Resource {
 			$query_args['orderby'] = $args['orderby'];
 
 			// allow sorting by meta value
-			if ( 'meta_value' === $query_args['orderby'] && ! empty( $args['orderby_meta_key'] ) ) {
+			if ( ! empty( $args['orderby_meta_key'] ) ) {
 				$query_args['meta_key'] = $args['orderby_meta_key'];
 			}
 		}

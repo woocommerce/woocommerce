@@ -168,7 +168,7 @@ class WC_API_Resource {
 			$args['orderby'] = $request_args['orderby'];
 
 			// allow sorting by meta value
-			if ( 'meta_value' === $args['orderby'] && ! empty( $request_args['orderby_meta_key'] ) ) {
+			if ( ! empty( $request_args['orderby_meta_key'] ) ) {
 				$args['meta_key'] = $request_args['orderby_meta_key'];
 			}
 		}
