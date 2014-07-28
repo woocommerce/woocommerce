@@ -1,3 +1,12 @@
+<?php
+/**
+ * Admin View: Page - Status Logs
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+?>
+
 <?php if ( $logs ) : ?>
 	<div id="log-viewer-select">
 		<div class="alignleft">
