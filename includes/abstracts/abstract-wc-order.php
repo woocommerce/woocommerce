@@ -1021,6 +1021,8 @@ abstract class WC_Abstract_Order {
 				$tax_totals[ $code ]->amount = 0;
 			}
 
+			$tax_totals[ $code ]->id                = $key;
+			$tax_totals[ $code ]->rate_id           = $tax['rate_id'];
 			$tax_totals[ $code ]->is_compound       = $tax[ 'compound' ];
 			$tax_totals[ $code ]->label             = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
 			$tax_totals[ $code ]->amount           += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
