@@ -3,7 +3,9 @@
  * Admin View: Report by Date (with date filters)
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 ?>
 

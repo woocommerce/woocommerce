@@ -3,7 +3,9 @@
  * Admin View: Notice - Theme Support
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 ?>
 

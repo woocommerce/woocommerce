@@ -3,7 +3,9 @@
  * Admin View: Bulk Edit Products
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 ?>
 
