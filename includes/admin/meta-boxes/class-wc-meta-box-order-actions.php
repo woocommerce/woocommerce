@@ -20,8 +20,9 @@ class WC_Meta_Box_Order_Actions {
 	public static function output( $post ) {
 		global $theorder;
 
-		if ( ! is_object( $theorder ) )
+		if ( ! is_object( $theorder ) ) {
 			$theorder = get_order( $post->ID );
+		}
 
 		$order = $theorder;
 		?>
@@ -32,12 +33,15 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
+
+					<option value="refund_order"><?php _e( 'Refund this order', 'woocommerce' ); ?></option>
+					<option value="refund_order"><?php _e( 'Cancel this order', 'woocommerce' ); ?></option>
+
 					<optgroup label="<?php _e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
-										$mailer = WC()->mailer();
-
+						$mailer           = WC()->mailer();
 						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
-						$mails = $mailer->get_emails();
+						$mails            = $mailer->get_emails();
 
 						if ( ! empty( $mails ) ) {
 							foreach ( $mails as $mail ) {
@@ -48,7 +52,9 @@ class WC_Meta_Box_Order_Actions {
 						}
 						?>
 					</optgroup>
-					<option value="regenerate_download_permissions"><?php _e( 'Generate Download Permissions', 'woocommerce' ); ?></option>
+
+					<option value="regenerate_download_permissions"><?php _e( 'Generate download permissions', 'woocommerce' ); ?></option>
+
 					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
@@ -60,10 +66,11 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide">
 				<div id="delete-action"><?php
 					if ( current_user_can( "delete_post", $post->ID ) ) {
-						if ( ! EMPTY_TRASH_DAYS )
+						if ( ! EMPTY_TRASH_DAYS ) {
 							$delete_text = __( 'Delete Permanently', 'woocommerce' );
-						else
+						} else {
 							$delete_text = __( 'Move to Trash', 'woocommerce' );
+						}
 						?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo $delete_text; ?></a><?php
 					}
 				?></div>
@@ -118,6 +125,11 @@ class WC_Meta_Box_Order_Actions {
 
 				delete_post_meta( $post_id, '_download_permissions_granted' );
 				wc_downloadable_product_permissions( $post_id );
+
+			} elseif ( $action = 'create_credit_note' ) {
+
+				wp_redirect( admin_url( 'post-new.php?post_type=wc_credit_note&order_id=' . $post_id ) );
+				exit;
 
 			} else {
 

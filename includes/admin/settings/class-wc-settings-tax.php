@@ -282,7 +282,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 					foreach ( $rates as $rate ) {
 						?>
-						<tr>
+						<tr class="tips" data-tip="<?php echo __( 'Tax rate ID', 'woocommerce' ) . ': ' . $rate->tax_rate_id; ?>">
 							<td class="sort"><input type="hidden" class="remove_tax_rate" name="remove_tax_rate[<?php echo $rate->tax_rate_id ?>]" value="0" /></td>
 
 							<td class="country" width="8%">

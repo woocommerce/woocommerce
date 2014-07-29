@@ -47,7 +47,8 @@ class WC_Admin_Report {
 			'limit'        => '',
 			'filter_range' => false,
 			'nocache'      => false,
-			'debug'        => false
+			'debug'        => false,
+			'order_types'  => wc_get_order_types( 'reports' )
 		);
 
 		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', wp_parse_args( $args, $defaults ) );
@@ -128,7 +129,7 @@ class WC_Admin_Report {
 		$query['join'] = implode( ' ', $joins );
 
 		$query['where']  = "
-			WHERE 	posts.post_type 	= 'shop_order'
+			WHERE 	posts.post_type 	IN ( '" . implode( "','", $order_types ) . "' )
 			AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			";
 
@@ -258,7 +259,7 @@ class WC_Admin_Report {
 	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
 		$prepared_data = array();
 		$time          =  '';
-		
+
 		// Ensure all days (or months) have values first in this range
 		for ( $i = 0; $i <= $interval; $i ++ ) {
 			switch ( $group_by ) {
@@ -269,7 +270,7 @@ class WC_Admin_Report {
 					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) . '000';
 				break;
 			}
-			
+
 			if ( ! isset( $prepared_data[ $time ] ) )
 				$prepared_data[ $time ] = array( esc_js( $time ), 0 );
 		}

@@ -1524,6 +1524,7 @@ class WC_Admin_Post_Types {
 			}
 
 		} elseif ( 'shop_order' === $typenow ) {
+
 			// Filter the orders by the posted customer.
 			if ( isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
 				$vars['meta_key'] = '_customer_user';
@@ -1733,6 +1734,13 @@ class WC_Admin_Post_Types {
 				case 'product_variation' :
 					wc_delete_product_transients( wp_get_post_parent_id( $id ) );
 				break;
+				case 'shop_order' :
+					$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
+
+					foreach ( $refunds as $refund ) {
+						wp_delete_post( $refund->ID, true );
+					}
+				break;
 			}
 		}
 	}
@@ -1745,6 +1753,8 @@ class WC_Admin_Post_Types {
 	 * @return void
 	 */
 	public function trash_post( $id ) {
+		global $wpdb;
+
 		if ( $id > 0 ) {
 
 			$post_type = get_post_type( $id );
@@ -1757,6 +1767,12 @@ class WC_Admin_Post_Types {
 				if ( $user_id > 0 ) {
 					update_user_meta( $user_id, '_order_count', '' );
 					update_user_meta( $user_id, '_money_spent', '' );
+				}
+
+				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
+
+				foreach ( $refunds as $refund ) {
+					$wpdb->update( $wpdb->posts, array( 'post_status' => 'trash' ), array( 'ID' => $refund->ID ) );
 				}
 
 				delete_transient( 'woocommerce_processing_order_count' );
@@ -1773,6 +1789,8 @@ class WC_Admin_Post_Types {
 	 * @return void
 	 */
 	public function untrash_post( $id ) {
+		global $wpdb;
+
 		if ( $id > 0 ) {
 
 			$post_type = get_post_type( $id );
@@ -1785,6 +1803,12 @@ class WC_Admin_Post_Types {
 				if ( $user_id > 0 ) {
 					update_user_meta( $user_id, '_order_count', '' );
 					update_user_meta( $user_id, '_money_spent', '' );
+				}
+
+				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
+
+				foreach ( $refunds as $refund ) {
+					$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-completed' ), array( 'ID' => $refund->ID ) );
 				}
 
 				delete_transient( 'woocommerce_processing_order_count' );
