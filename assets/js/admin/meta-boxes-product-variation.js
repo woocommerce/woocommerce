@@ -1,4 +1,4 @@
-/* global wp, woocommerce_admin_meta_boxes_variations */
+/* global wp, woocommerce_admin_meta_boxes_variations, woocommerce_admin, woocommerce_admin_meta_boxes, accounting */
 jQuery( function ( $ ) {
 
 	var variation_sortable_options = {
@@ -238,12 +238,13 @@ jQuery( function ( $ ) {
 				value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent ).toString();
 
 				$( ':input[name^="' + edit_field + '"]' ).each( function() {
-					var current_value = Number( $( this ).val() ), new_value;
+					var current_value = accounting.unformat( $( this ).val(), woocommerce_admin.mon_decimal_point ),
+						new_value;
 
 					if ( value.indexOf( '%' ) >= 0 ) {
-						var mod_value = Number( ( Number( current_value ) / 100 ) * Number( value.replace(/\%/, '' ) ) );
+						var mod_value = ( current_value / 100 ) * accounting.unformat( value.replace(/\%/, '' ), woocommerce_admin.mon_decimal_point );
 					} else {
-						var mod_value = Number( value );
+						var mod_value = accounting.unformat( value, woocommerce_admin.mon_decimal_point );
 					}
 
 					if ( bulk_edit.indexOf( 'increase' ) !== -1 ) {
@@ -252,7 +253,14 @@ jQuery( function ( $ ) {
 						new_value = current_value - mod_value;
 					}
 
-					$( this ).val( new_value ).change();
+					console.log( new_value );
+
+					$( this ).val( accounting.formatNumber(
+						new_value,
+						woocommerce_admin_meta_boxes.currency_format_num_decimals,
+						woocommerce_admin_meta_boxes.currency_format_thousand_sep,
+						woocommerce_admin_meta_boxes.currency_format_decimal_sep
+					) ).change();
 				});
 			break;
 			case 'variable_regular_price' :
