@@ -127,9 +127,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.2.0 =
+* Feature - Refunds system for orders.
+* Feature - New orders panel for managing line items + totals.
 * Feature - Language pack downloader. po and mo files removed from core (too heavy).
 * Feature - Added used payment gateway to view orders screens.
-* Feature - API: Lookup customers by email endpoint.
 * Feature - Allow backorders to be configured at variation level.
 * Feature - Protect admins from shop manager users.
 * Feature - Ability to add custom quantity using add_to_cart shortcode.
@@ -143,14 +144,18 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Load archive-product.php for other product taxonomies.
 * Tweak - Disable image size settings if filters are being used.
 * Tweak - Hide the shipping address when local pickup is used.
+* Dev - API Version 2 with push support.
+* Dev - API: Lookup customers by email endpoint.
+* Dev - API: Allow ordering on the resource level.
+* Dev - Customers API / Methods PUT/POST/DELETE.
+* Dev - Coupons API / Methods PUT/POST/DELETE.
+* Dev - Orders API / Methods PUT/POST/DELETE.
+* Dev - Products API / Methods PUT/POST/DELETE.
 * Dev - Added description parameter to the woocommerce_form_field function.
 * Dev - Introduce `woocommerce_valid_order_statuses_for_payment_complete` filter.
 * Dev - Introduce `woocommerce_thankyou_order_received_text` filter.
 * Dev - Introduce `woocommerce_product_backorders_allowed` filter.
 * Dev - get_user and get_user_id methods.
-* Dev - Customers API / Methods PUT/POST/DELETE.
-* Dev - Coupons API / Methods PUT/POST/DELETE.
-* Dev - REST API: Allow ordering on the resource level.
 * Dev - Add new 'wc_admin_reports_path' filter to reports.
 * Dev - Add user ID to shipping packages.
 * Dev - Added product id parameter to related posts filters.
@@ -160,6 +165,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Made stateless classes static to allow unhooking of methods.
 * Dev - Introduces the wc_get_log_file_path() function.
 * Dev - Introduces the WC_Order::needs_shipping_address() method.
+* Dev - Gateways can set transaction ID for the order.
+* Dev - Gateways can do refunds via the Payment Gateway API.
 * Refactor - Changed the method in which order statuses are stored. Previously, order status was a taxonomy. This caused issues when unique term slugs differed from what we were expecting, and also added additonal overhead to order queries in reports. https://github.com/woothemes/woocommerce/issues/3064 Order status is now stored as post status - several new post statuses have been added. Order class variables are backwards compatible. The only thing to note (for devs) is that any query must use the order status instead of 'publish' when getting orders and querying by post_status. THe shop_order_status has also been removed.
 * Refactor - Update stock amounts with DB queries.
 * Refactor - Simplified attribute name sanitisation which maintains UTF8 char integrity.
