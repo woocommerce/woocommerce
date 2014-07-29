@@ -185,6 +185,18 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$product = $order->get_product_from_item( $item );
 
+			$meta = new WC_Order_Item_Meta( $item['item_meta'], $product );
+
+			$item_meta = array();
+
+			foreach ( $meta->get_formatted() as $meta_key => $formatted_meta ) {
+				$item_meta[] = array(
+					'key' => $meta_key,
+					'label' => $formatted_meta['label'],
+					'value' => $formatted_meta['value'],
+				);
+			}
+
 			$order_data['line_items'][] = array(
 				'id'           => $item_id,
 				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
@@ -197,6 +209,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'name'         => $item['name'],
 				'product_id'   => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
 				'sku'          => is_object( $product ) ? $product->get_sku() : null,
+				'meta'         => $item_meta,
 			);
 		}
 
