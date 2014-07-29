@@ -4,10 +4,12 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 global $post, $wp_query;
 
@@ -45,14 +47,14 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		echo $prepend;
 
-		$current_term = get_term_by( 'slug', get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
+		$current_term = $wp_query->get_queried_object();
 
-		$ancestors = array_reverse( get_ancestors( $current_term->term_id, get_query_var( 'taxonomy' ) ) );
+		$ancestors = array_reverse( get_ancestors( $current_term->term_id, 'product_cat' ) );
 
 		foreach ( $ancestors as $ancestor ) {
-			$ancestor = get_term( $ancestor, get_query_var( 'taxonomy' ) );
+			$ancestor = get_term( $ancestor, 'product_cat' );
 
-			echo $before .  '<a href="' . get_term_link( $ancestor->slug, get_query_var( 'taxonomy' ) ) . '">' . esc_html( $ancestor->name ) . '</a>' . $after . $delimiter;
+			echo $before .  '<a href="' . get_term_link( $ancestor->slug, 'product_cat' ) . '">' . esc_html( $ancestor->name ) . '</a>' . $after . $delimiter;
 		}
 
 		echo $before . esc_html( $current_term->name ) . $after;
@@ -102,23 +104,22 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 	} elseif ( is_single() && ! is_attachment() ) {
 
-		if ( get_post_type() == 'product' ) {
+		if ( 'product' == get_post_type() ) {
 
 			echo $prepend;
 
-			if ( $terms = wc_get_product_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent', 'order' => 'DESC' ) ) ) {
-
+			if ( $terms = get_the_terms( $post->ID, 'product_cat' ) ) {
+				$terms     = array_values( $terms );
 				$main_term = $terms[0];
-
 				$ancestors = get_ancestors( $main_term->term_id, 'product_cat' );
-
 				$ancestors = array_reverse( $ancestors );
 
 				foreach ( $ancestors as $ancestor ) {
 					$ancestor = get_term( $ancestor, 'product_cat' );
 
-					if ( ! is_wp_error( $ancestor ) && $ancestor )
+					if ( ! is_wp_error( $ancestor ) && $ancestor ) {
 						echo $before . '<a href="' . get_term_link( $ancestor->slug, 'product_cat' ) . '">' . $ancestor->name . '</a>' . $after . $delimiter;
+					}
 				}
 
 				echo $before . '<a href="' . get_term_link( $main_term->slug, 'product_cat' ) . '">' . $main_term->name . '</a>' . $after . $delimiter;
@@ -127,11 +128,11 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 			echo $before . get_the_title() . $after;
 
-		} elseif ( get_post_type() != 'post' ) {
+		} elseif ( 'post' != get_post_type() ) {
 
 			$post_type = get_post_type_object( get_post_type() );
 			$slug = $post_type->rewrite;
-				echo $before . '<a href="' . get_post_type_archive_link( get_post_type() ) . '">' . $post_type->labels->singular_name . '</a>' . $after . $delimiter;
+			echo $before . '<a href="' . get_post_type_archive_link( get_post_type() ) . '">' . $post_type->labels->singular_name . '</a>' . $after . $delimiter;
 			echo $before . get_the_title() . $after;
 
 		} else {
@@ -150,8 +151,9 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		$post_type = get_post_type_object( get_post_type() );
 
-		if ( $post_type )
+		if ( $post_type ) {
 			echo $before . $post_type->labels->singular_name . $after;
+		}
 
 	} elseif ( is_attachment() ) {
 
@@ -179,8 +181,9 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		$breadcrumbs = array_reverse( $breadcrumbs );
 
-		foreach ( $breadcrumbs as $crumb )
+		foreach ( $breadcrumbs as $crumb ) {
 			echo $crumb . '' . $delimiter;
+		}
 
 		echo $before . get_the_title() . $after;
 
@@ -190,17 +193,18 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 	} elseif ( is_tag() ) {
 
-			echo $before . __( 'Posts tagged &ldquo;', 'woocommerce' ) . single_tag_title('', false) . '&rdquo;' . $after;
+			echo $before . __( 'Posts tagged &ldquo;', 'woocommerce' ) . single_tag_title( '', false ) . '&rdquo;' . $after;
 
 	} elseif ( is_author() ) {
 
-		$userdata = get_userdata($author);
+		$userdata = get_userdata( $author );
 		echo $before . __( 'Author:', 'woocommerce' ) . ' ' . $userdata->display_name . $after;
 
 	}
 
-	if ( get_query_var( 'paged' ) )
+	if ( get_query_var( 'paged' ) ) {
 		echo ' (' . __( 'Page', 'woocommerce' ) . ' ' . get_query_var( 'paged' ) . ')';
+	}
 
 	echo $wrap_after;
 
