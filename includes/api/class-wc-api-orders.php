@@ -49,9 +49,17 @@ class WC_API_Orders extends WC_API_Resource {
 			array( array( $this, 'delete_order' ), WC_API_Server::DELETABLE ),
 		);
 
-		# GET /orders/<id>/notes
-		$routes[ $this->base . '/(?P<id>\d+)/notes' ] = array(
+		# GET|POST /orders/<id>/notes
+		$routes[ $this->base . '/(?P<order_id>\d+)/notes' ] = array(
 			array( array( $this, 'get_order_notes' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_order_note' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
+		# GET|PUT|DELETE /orders/<order_id>/notes/<id>
+		$routes[ $this->base . '/(?P<order_id>\d+)/notes/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_order_note' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_order_note' ), WC_API_SERVER::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_order_note' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		return $routes;
@@ -981,21 +989,21 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Get the admin order notes for an order
 	 *
 	 * @since 2.1
-	 * @param int $id the order ID
-	 * @param string $fields fields to include in response
+	 * @param string $order_id order ID
+	 * @param string|null $fields fields to include in response
 	 * @return array
 	 */
-	public function get_order_notes( $id, $fields = null ) {
+	public function get_order_notes( $order_id, $fields = null ) {
 
 		// ensure ID is valid order ID
-		$id = $this->validate_request( $id, 'shop_order', 'read' );
+		$order_id = $this->validate_request( $order_id, 'shop_order', 'read' );
 
-		if ( is_wp_error( $id ) ) {
-			return $id;
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
 		}
 
 		$args = array(
-			'post_id' => $id,
+			'post_id' => $order_id,
 			'approve' => 'approve',
 			'type'    => 'order_note'
 		);
@@ -1010,15 +1018,215 @@ class WC_API_Orders extends WC_API_Resource {
 
 		foreach ( $notes as $note ) {
 
-			$order_notes[] = array(
-				'id'            => $note->comment_ID,
-				'created_at'    => $this->server->format_datetime( $note->comment_date_gmt ),
-				'note'          => $note->comment_content,
-				'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
+			$order_notes[] = current( $this->get_order_note( $order_id, $note->comment_ID ) );
+		}
+
+		return array( 'order_notes' => apply_filters( 'woocommerce_api_order_notes_response', $order_notes, $order_id, $fields, $notes, $this->server ) );
+	}
+
+	/**
+	 * Get an order note for the given order ID and ID
+	 *
+	 * @since 2.2
+	 * @param string $order_id order ID
+	 * @param string $id order note ID
+	 * @param string|null $fields fields to limit response to
+	 * @return array
+	 */
+	public function get_order_note( $order_id, $id, $fields = null ) {
+
+		// validate order ID
+		$order_id = $this->validate_request( $order_id, 'shop_order', 'read' );
+
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
+		}
+
+		$id = absint( $id );
+
+		if ( empty( $id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'Invalid order note ID', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$note = get_comment( $id );
+
+		if ( is_null( $note) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'An order note with the provided ID could not be found', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$order_note = array(
+			'id'            => $note->comment_ID,
+			'created_at'    => $this->server->format_datetime( $note->comment_date_gmt ),
+			'note'          => $note->comment_content,
+			'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
+		);
+
+		return array( 'order_note' => apply_filters( 'woocommerce_api_order_note_response', $order_note, $id, $fields, $note, $order_id, $this ) );
+	}
+
+
+	/**
+	 * Create a new order note for the given order
+	 *
+	 * @since 2.2
+	 * @param string $order_id order ID
+	 * @param array $data raw request data
+	 * @return WP_Error|array error or created note response data
+	 */
+	public function create_order_note( $order_id, $data ) {
+
+		$data = isset( $data['order_note'] ) ? $data['order_note'] : array();
+
+		// permission check
+		if ( ! current_user_can( 'publish_shop_orders' ) ) {
+			return new WP_Error( 'woocommerce_api_user_cannot_create_order_note', __( 'You do not have permission to create order notes', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		$order_id = absint( $order_id );
+
+		if ( empty( $order_id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$order = get_order( $order_id );
+
+		$data = apply_filters( 'woocommerce_api_create_order_note_data', $data, $order_id, $this );
+
+		// note content is required
+		if ( ! isset( $data['note'] ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note', __( 'Order note is required', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$is_customer_note = ( isset( $data['customer_note'] ) && true === $data['customer_note'] );
+
+		// create the note
+		$note_id = $order->add_order_note( $data['note'], $is_customer_note );
+
+		if ( ! $note_id ) {
+			return new WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		// HTTP 201 Created
+		$this->server->send_status( 201 );
+
+		do_action( 'woocommerce_api_create_order_note', $note_id, $order_id, $this );
+
+		return $this->get_order_note( $order->id, $note_id );
+	}
+
+	/**
+	 * Edit the order note
+	 *
+	 * @since 2.2
+	 * @param string $order_id order ID
+	 * @param string $id note ID
+	 * @param array $data parsed request data
+	 * @return WP_Error|array error or edited note response data
+	 */
+	public function edit_order_note( $order_id, $id, $data ) {
+
+		$data = isset( $data['order_note'] ) ? $data['order_note'] : array();
+
+		// validate order ID
+		$order_id = $this->validate_request( $order_id, 'shop_order', 'edit' );
+
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
+		}
+
+		$order = get_order( $order_id );
+
+		// validate note ID
+		$id = absint( $id );
+
+		if ( empty( $id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'Invalid order note ID', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		// ensure note ID is valid
+		$note = get_comment( $id );
+
+		if ( is_null( $note) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'An order note with the provided ID could not be found', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		// ensure note ID is associated with given order
+		if ( $note->comment_post_ID != $order->id ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'The order note ID provided is not associated with the order', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$data = apply_filters( 'woocommerce_api_edit_order_note_data', $data, $note->comment_ID, $order->id, $this );
+
+		// note content
+		if ( isset( $data['note'] ) ) {
+
+			wp_update_comment(
+				array(
+					'comment_ID'      => $note->comment_ID,
+					'comment_content' => $data['note'],
+				)
 			);
 		}
 
-		return array( 'order_notes' => apply_filters( 'woocommerce_api_order_notes_response', $order_notes, $id, $fields, $notes, $this->server ) );
+		// customer note
+		if ( isset( $data['customer_note'] ) ) {
+
+			update_comment_meta( $note->comment_ID, 'is_customer_note', true === $data['customer_note'] );
+		}
+
+		do_action( 'woocommerce_api_edit_order_note', $note->comment_ID, $order->id, $this );
+
+		return $this->get_order_note( $order->id, $note->comment_ID );
+	}
+
+	/**
+	 * Delete order note
+	 *
+	 * @since 2.2
+	 * @param string $order_id order ID
+	 * @param string $id note ID
+	 * @return WP_Error|array error or deleted message
+	 */
+	public function delete_order_note( $order_id, $id ) {
+
+		$order_id = $this->validate_request( $order_id, 'shop_order', 'delete' );
+
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
+		}
+
+		// validate note ID
+		$id = absint( $id );
+
+		if ( empty( $id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'Invalid order note ID', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		// ensure note ID is valid
+		$note = get_comment( $id );
+
+		if ( is_null( $note) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'An order note with the provided ID could not be found', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		// ensure note ID is associated with given order
+		if ( $note->comment_post_ID != $order_id ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'The order note ID provided is not associated with the order', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		// force delete since trashed order notes could not be managed through comments list table
+		$result = wp_delete_comment( $note->comment_ID, true );
+
+		if ( $result ) {
+
+			do_action( 'woocommerce_api_delete_order_note', $note->comment_ID, $order_id, $this );
+
+			return array( 'message' => __( 'Permanently deleted order note', 'woocommerce' ) );
+
+		} else {
+
+			return new WP_Error( 'woocommerce_api_cannot_delete_order_note', __( 'This order note cannot be deleted', 'woocommerce' ), array( 'status' => 500 ) );
+		}
 	}
 
 }
