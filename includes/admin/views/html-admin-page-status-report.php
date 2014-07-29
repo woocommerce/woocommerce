@@ -12,7 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="updated woocommerce-message">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a></p>
-	<div id="debug-report"><textarea readonly="readonly"></textarea></div>
+	<div id="debug-report">
+		<textarea readonly="readonly"></textarea>
+		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
+	</div>
 </div>
 <br/>
 <table class="wc_status_table widefat" cellspacing="0">
@@ -593,4 +596,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		return false;
 	});
+
+	jQuery( document ).ready( function ( $ ) {
+		$( '#copy-for-support' ).tipTip({
+			'attribute':  'data-tip',
+			'activation': 'click',
+			'fadeIn':     50,
+			'fadeOut':    50,
+			'delay':      0
+		});
+
+		$( 'body' ) .on( 'copy', '#copy-for-support', function ( e ) {
+			e.clipboardData.clearData();
+			e.clipboardData.setData( 'text/plain', $( '#debug-report textarea' ).val() );
+			e.preventDefault();
+		});
+
+	});
+
 </script>
