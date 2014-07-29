@@ -2072,7 +2072,6 @@ abstract class WC_Abstract_Order {
 	 * @return void
 	 */
 	public function payment_complete( $transaction_id = '' ) {
-
 		do_action( 'woocommerce_pre_payment_complete', $this->id );
 
 		if ( ! empty( WC()->session->order_awaiting_payment ) ) {
@@ -2087,13 +2086,13 @@ abstract class WC_Abstract_Order {
 
 			if ( sizeof( $this->get_items() ) > 0 ) {
 
-				foreach( $this->get_items() as $item ) {
+				foreach ( $this->get_items() as $item ) {
 
 					if ( $item['product_id'] > 0 ) {
 
 						$_product = $this->get_product_from_item( $item );
 
-						if ( false !== $_product && ( $_product->is_downloadable() && $_product->is_virtual() ) || ! apply_filters( 'woocommerce_order_item_needs_processing', true, $_product, $this->id ) ) {
+							if ( false !== $_product && ! apply_filters( 'woocommerce_order_item_needs_processing', ! ( $_product->is_downloadable() && $_product->is_virtual() ), $_product, $this->id ) ) {
 							$order_needs_processing = false;
 							continue;
 						}
