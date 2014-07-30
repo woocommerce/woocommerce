@@ -36,7 +36,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		$cat_obj = $wp_query->get_queried_object();
 		$this_category = get_category( $cat_obj->term_id );
 
-		if ( $this_category->parent != 0 ) {
+		if ( 0 != $this_category->parent ) {
 			$parent_category = get_category( $this_category->parent );
 			echo get_category_parents($parent_category, TRUE, $delimiter );
 		}
@@ -108,8 +108,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 			echo $prepend;
 
-			if ( $terms = wc_get_product_terms( $post->ID, 'product_cat' ) ) {
-				$terms     = array_values( $terms );
+			if ( $terms = wc_get_product_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent', 'order' => 'DESC' ) ) ) {
 				$main_term = $terms[0];
 				$ancestors = get_ancestors( $main_term->term_id, 'product_cat' );
 				$ancestors = array_reverse( $ancestors );
@@ -164,7 +163,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		echo $before . '<a href="' . get_permalink( $parent ) . '">' . $parent->post_title . '</a>' . $after . $delimiter;
 		echo $before . get_the_title() . $after;
 
-	} elseif ( is_page() && !$post->post_parent ) {
+	} elseif ( is_page() && ! $post->post_parent ) {
 
 		echo $before . get_the_title() . $after;
 
@@ -175,7 +174,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		while ( $parent_id ) {
 			$page = get_page( $parent_id );
-			$breadcrumbs[] = '<a href="' . get_permalink($page->ID) . '">' . get_the_title( $page->ID ) . '</a>';
+			$breadcrumbs[] = '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>';
 			$parent_id  = $page->post_parent;
 		}
 
