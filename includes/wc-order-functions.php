@@ -495,7 +495,7 @@ function wc_processing_order_count() {
 
 	foreach ( wc_get_order_types( 'order-count' ) as $type ) {
 		$this_count = wp_count_posts( $type, 'readable' );
-		$count      += isset( $count->processing ) ? $count->processing : 0;
+		$count      += isset( $this_count->{'wc-processing'} ) ? $this_count->{'wc-processing'} : 0;
 	}
 
 	return $count;
