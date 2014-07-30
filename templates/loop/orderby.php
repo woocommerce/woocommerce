@@ -18,7 +18,7 @@ if ( 1 == $wp_query->found_posts || ! woocommerce_products_will_display() )
 	<select name="orderby" class="orderby">
 		<?php
 			$catalog_orderby = apply_filters( 'woocommerce_catalog_orderby', array(
-				'menu_order' => __( 'Default sorting', 'woocommerce' ),
+				//'menu_order' => __( 'Default sorting', 'woocommerce' ), THIS SHOULD BE REMOVED/DEACTIVATED AS IT'S REDUNDANT & CONFUSING IN SOME INSTANCES
 				'popularity' => __( 'Sort by popularity', 'woocommerce' ),
 				'rating'     => __( 'Sort by average rating', 'woocommerce' ),
 				'date'       => __( 'Sort by newness', 'woocommerce' ),
