@@ -486,7 +486,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_product_data( $product ) {
-
+		$taxer=new WC_Tax();
 		return array(
 			'title'              => $product->get_title(),
 			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
@@ -505,6 +505,7 @@ class WC_API_Products extends WC_API_Resource {
 			'taxable'            => $product->is_taxable(),
 			'tax_status'         => $product->get_tax_status(),
 			'tax_class'          => $product->get_tax_class(),
+			'tax_info'           => $taxer->get_shop_base_rate($product->get_tax_class()),
 			'managing_stock'     => $product->managing_stock(),
 			'stock_quantity'     => (int) $product->get_stock_quantity(),
 			'in_stock'           => $product->is_in_stock(),
