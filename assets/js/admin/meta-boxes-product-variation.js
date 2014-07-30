@@ -52,6 +52,10 @@ jQuery( function ( $ ) {
 
 			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
 
+			if ( ! $( 'input#_manage_stock' ).attr( 'checked' ) ) {
+				$( '.hide_if_parent_manage_stock_is_disabled' ).hide();
+			}
+
 			$( '.woocommerce_variations' ).unblock();
 			$( '#variable_product_options' ).trigger( 'woocommerce_variations_added' );
 		});
@@ -59,6 +63,17 @@ jQuery( function ( $ ) {
 		return false;
 
 	});
+
+	$( 'body' ).on( 'change', 'input#_manage_stock', function () {
+		var fields = $( '.hide_if_parent_manage_stock_is_disabled' );
+
+		if ( $( this ).attr( 'checked' ) ) {
+			fields.show();
+			$( 'input.variable_manage_stock' ).change();
+		} else {
+			fields.hide();
+		}
+	}).change();
 
 	$( '#variable_product_options').on( 'click', 'button.link_all_variations', function () {
 
@@ -239,12 +254,13 @@ jQuery( function ( $ ) {
 
 				$( ':input[name^="' + edit_field + '"]' ).each( function() {
 					var current_value = accounting.unformat( $( this ).val(), woocommerce_admin.mon_decimal_point ),
-						new_value;
+						new_value,
+						mod_value;
 
 					if ( value.indexOf( '%' ) >= 0 ) {
-						var mod_value = ( current_value / 100 ) * accounting.unformat( value.replace(/\%/, '' ), woocommerce_admin.mon_decimal_point );
+						mod_value = ( current_value / 100 ) * accounting.unformat( value.replace( /\%/, '' ), woocommerce_admin.mon_decimal_point );
 					} else {
-						var mod_value = accounting.unformat( value, woocommerce_admin.mon_decimal_point );
+						mod_value = accounting.unformat( value, woocommerce_admin.mon_decimal_point );
 					}
 
 					if ( bulk_edit.indexOf( 'increase' ) !== -1 ) {
