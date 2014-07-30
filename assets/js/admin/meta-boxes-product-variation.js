@@ -64,7 +64,7 @@ jQuery( function ( $ ) {
 
 	});
 
-	$( 'body' ).on( 'change', 'input#_manage_stock', function () {
+	$( 'input#_manage_stock' ).on( 'change', function () {
 		var fields = $( '.hide_if_parent_manage_stock_is_disabled' );
 
 		if ( $( this ).attr( 'checked' ) ) {
