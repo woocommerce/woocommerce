@@ -1781,6 +1781,8 @@ class WC_AJAX {
 			}
 
 		}
+		
+		do_action( 'woocommerce_after_product_ordering' );
 
 		wp_send_json( $new_pos );
 	}
