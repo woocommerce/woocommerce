@@ -122,6 +122,16 @@ final class WooCommerce {
 	 * @return WooCommerce
 	 */
 	public function __construct() {
+
+        /*
+            before we fully load woocommerce, lets check if there is a request for the user to get be unlocked by All In One Security
+        */
+        if(class_exists('AIO_WP_Security')){
+            if(isset($_POST['aiowps_unlock_request']) || isset($_POST['aiowps_wp_submit_unlock_request'])){
+                return;
+            }
+        }
+
 		// Auto-load classes on demand
 		if ( function_exists( "__autoload" ) ) {
 			spl_autoload_register( "__autoload" );
