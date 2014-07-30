@@ -269,8 +269,6 @@ jQuery( function ( $ ) {
 						new_value = current_value - mod_value;
 					}
 
-					console.log( new_value );
-
 					$( this ).val( accounting.formatNumber(
 						new_value,
 						woocommerce_admin_meta_boxes.currency_format_num_decimals,
