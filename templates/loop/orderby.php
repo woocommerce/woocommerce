@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.0.0
+ * @version     2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -26,11 +26,17 @@ if ( 1 == $wp_query->found_posts || ! woocommerce_products_will_display() )
 				'price-desc' => __( 'Sort by price: high to low', 'woocommerce' )
 			) );
 
-			if ( get_option( 'woocommerce_enable_review_rating' ) === 'no' )
-				unset( $catalog_orderby['rating'] );
+			if ( ! $show_default_orderby ) {
+				unset( $catalog_orderby['menu_order'] );
+			}
 
-			foreach ( $catalog_orderby as $id => $name )
+			if ( get_option( 'woocommerce_enable_review_rating' ) === 'no' ) {
+				unset( $catalog_orderby['rating'] );
+			}
+
+			foreach ( $catalog_orderby as $id => $name ) {
 				echo '<option value="' . esc_attr( $id ) . '" ' . selected( $orderby, $id, false ) . '>' . esc_attr( $name ) . '</option>';
+			}
 		?>
 	</select>
 	<?php

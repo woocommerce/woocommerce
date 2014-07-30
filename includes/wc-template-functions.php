@@ -643,9 +643,10 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	 * @return void
 	 */
 	function woocommerce_catalog_ordering() {
-		$orderby = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$orderby              = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$show_default_orderby = 'menu_order' === apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
-		wc_get_template( 'loop/orderby.php', array( 'orderby' => $orderby ) );
+		wc_get_template( 'loop/orderby.php', array( 'orderby' => $orderby, 'show_default_orderby' => $show_default_orderby ) );
 	}
 }
 
