@@ -154,7 +154,6 @@ module.exports = function( grunt ) {
 		checktextdomain: {
 			options:{
 				text_domain: 'woocommerce',
-				correct_domain: false, //Will correct missing/variable domains
 				keywords: [
 					'__:1,2d',
 					'_e:1,2d',
