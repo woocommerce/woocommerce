@@ -244,6 +244,8 @@ class WC_Emails {
 		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
+
+		//rtl inline style
 		if (is_rtl())
 			add_filter('wp_mail', array( $this, 'inline_rtl' ) );
 
