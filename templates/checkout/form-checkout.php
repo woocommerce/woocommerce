@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.0.0
+ * @version     2.0.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -52,7 +52,11 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', WC()->cart->g
 
 	<?php endif; ?>
 
-	<?php do_action( 'woocommerce_checkout_order_review' ); ?>
+	<div id="order_review">
+
+		<?php do_action( 'woocommerce_checkout_order_review' ); ?>
+
+	</div>
 
 </form>
 
