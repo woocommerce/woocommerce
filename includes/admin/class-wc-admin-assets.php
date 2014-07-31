@@ -252,6 +252,11 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'flot-stack', WC()->plugin_url() . '/assets/js/admin/jquery.flot.stack' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 		}
 
+		// System status
+		if ( 'woocommerce_page_wc-status' === $screen->id ) {
+			wp_enqueue_script( 'zeroclipboard', WC()->plugin_url() . '/assets/js/zeroclipboard/jquery.zeroclipboard' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
+		}
+
 		// Chosen RTL
 		if ( is_rtl() ) {
 			wp_enqueue_script( 'chosen-rtl', WC()->plugin_url() . '/assets/js/chosen/chosen-rtl' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
