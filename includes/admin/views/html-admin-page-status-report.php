@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="updated woocommerce-message">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a></p>
+    <p class="clip-status"></p>
 	<div id="debug-report"><textarea readonly="readonly"></textarea></div>
 </div>
 <br/>
@@ -546,7 +547,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	};
 
 
-	jQuery('a.debug-report').click(function(){
+
+    var client = new ZeroClipboard(jQuery('a.debug-report'));
+
+    client.on( "copy", function (event) {
+        var clipboard = event.clipboardData;
+
 
 		var report = "";
 
@@ -585,12 +591,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 		} );
 
 		try {
-			jQuery("#debug-report").slideDown();
-			jQuery("#debug-report textarea").val( report ).focus().select();
-			jQuery(this).fadeOut();
+
+                clipboard.setData( "text/plain",report);
+
+                jQuery('.clip-status').html('<p><strong>text copied to clipboard! </strong></p>');
+
+                //i suppose we can keep this just in case the copy didn't work
+                jQuery("#debug-report").slideDown();
+                jQuery("#debug-report textarea").val( report ).focus().select();
+
 			return false;
 		} catch(e){ console.log( e ); }
 
 		return false;
 	});
+
+
 </script>
