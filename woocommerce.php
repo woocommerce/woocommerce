@@ -140,11 +140,11 @@ final class WooCommerce {
 
 		// Hooks
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'action_links' ) );
-		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
-		add_action( 'init', array( $this, 'init' ), 0 );
-		add_action( 'init', array( $this, 'include_template_functions' ) );
-		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
+		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
+		add_action( 'init', array( $this, 'init' ), 0 );
+		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
+		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
