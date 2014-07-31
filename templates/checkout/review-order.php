@@ -10,7 +10,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 ?>
 
-<?php if ( ! is_ajax() ) : ?><div id="order_review"><?php endif; ?>
+<?php if ( ! $is_ajax ) : ?><div id="order_review"><?php endif; ?>
 
 	<table class="shop_table">
 		<thead>
@@ -191,4 +191,4 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 	<?php do_action( 'woocommerce_review_order_after_payment' ); ?>
 
-<?php if ( ! is_ajax() ) : ?></div><?php endif; ?>
+<?php if ( ! $is_ajax ) : ?></div><?php endif; ?>

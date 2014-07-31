@@ -256,7 +256,7 @@ class WC_AJAX {
 
 		WC()->cart->calculate_totals();
 
-		do_action( 'woocommerce_checkout_order_review' ); // Display review order table
+		do_action( 'woocommerce_checkout_order_review', true ); // Display review order table
 
 		die();
 	}

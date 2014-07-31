@@ -1296,8 +1296,8 @@ if ( ! function_exists( 'woocommerce_order_review' ) ) {
 	 * @subpackage	Checkout
 	 * @return void
 	 */
-	function woocommerce_order_review() {
-		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout() ) );
+	function woocommerce_order_review( $is_ajax = false ) {
+		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout(), 'is_ajax' => $is_ajax ) );
 	}
 }
 
