@@ -387,12 +387,11 @@ class WC_Webhook {
 		if ( $log->total_comments > apply_filters( 'woocommerce_max_webhook_delivery_logs', 25 ) ) {
 			global $wpdb;
 
-			$wpdb->query(
-				$wpdb->prepare(
-					"DELETE FROM {$wpdb->comments} WHERE comment_post_ID = %d ORDER BY comment_date_gmt ASC LIMIT 1",
-					$this->id
-				)
-			);
+			$comment_id = $wpdb->get_var( $wpdb->prepare( "SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d ORDER BY comment_date_gmt ASC LIMIT 1", $this->id ) );
+
+			if ( $comment_id ) {
+				wp_delete_comment( $comment_id, true );
+			}
 		}
 	}
 
@@ -590,7 +589,7 @@ class WC_Webhook {
 
 		$args = array(
 			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
-			'body' => "webhook_id={$this->id}",
+			'body'       => "webhook_id={$this->id}",
 		);
 
 		wp_remote_post( $this->get_delivery_url(), $args );
