@@ -140,11 +140,11 @@ final class WooCommerce {
 
 		// Hooks
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'action_links' ) );
-		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
-		add_action( 'init', array( $this, 'init' ), 0 );
-		add_action( 'init', array( $this, 'include_template_functions' ) );
-		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
+		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
+		add_action( 'init', array( $this, 'init' ), 0 );
+		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
+		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
@@ -402,6 +402,9 @@ final class WooCommerce {
 			add_action( $action, array( $this, 'send_transactional_email' ), 10, 10 );
 		}
 
+		// webhooks
+		$this->load_webhooks();
+
 		// Init action
 		do_action( 'woocommerce_init' );
 	}
@@ -439,7 +442,7 @@ final class WooCommerce {
 
 		// Post thumbnail support
 		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
-			add_theme_support( 'post-thumbnails' );	
+			add_theme_support( 'post-thumbnails' );
 		}
 		add_post_type_support( 'product', 'thumbnail' );
 
@@ -545,6 +548,30 @@ final class WooCommerce {
 		$this->mailer();
 		$args = func_get_args();
 		do_action_ref_array( current_filter() . '_notification', $args );
+	}
+
+	/**
+	 * Load & enqueue active webhooks
+	 *
+	 * @since 2.2
+	 */
+	public function load_webhooks() {
+
+		$args = array(
+			'fields'      => 'ids',
+			'post_type'   => 'shop_webhook',
+			'post_status' => 'publish',
+		);
+
+		$query = new WP_Query( $args );
+
+		if ( ! empty( $query->posts ) ) {
+
+			foreach ( $query->posts as $id ) {
+				$webhook = new WC_Webhook( $id );
+				$webhook->enqueue();
+			}
+		}
 	}
 
 	/** Load Instances on demand **********************************************/

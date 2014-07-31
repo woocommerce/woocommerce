@@ -256,7 +256,7 @@ class WC_AJAX {
 
 		WC()->cart->calculate_totals();
 
-		do_action( 'woocommerce_checkout_order_review' ); // Display review order table
+		do_action( 'woocommerce_checkout_order_review', true ); // Display review order table
 
 		die();
 	}
@@ -1781,6 +1781,8 @@ class WC_AJAX {
 			}
 
 		}
+		
+		do_action( 'woocommerce_after_product_ordering' );
 
 		wp_send_json( $new_pos );
 	}

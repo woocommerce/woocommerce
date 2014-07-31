@@ -129,7 +129,7 @@ class WC_API {
 	 *
 	 * @since 2.1
 	 */
-	private function includes() {
+	public function includes() {
 
 		// API server / response handlers
 		include_once( 'api/class-wc-api-exception.php' );
@@ -147,6 +147,7 @@ class WC_API {
 		include_once( 'api/class-wc-api-coupons.php' );
 		include_once( 'api/class-wc-api-customers.php' );
 		include_once( 'api/class-wc-api-reports.php' );
+		include_once( 'api/class-wc-api-webhooks.php' );
 
 		// allow plugins to load other response handlers or resource classes
 		do_action( 'woocommerce_api_loaded' );
@@ -167,6 +168,7 @@ class WC_API {
 				'WC_API_Products',
 				'WC_API_Coupons',
 				'WC_API_Reports',
+				'WC_API_Webhooks',
 			)
 		);
 

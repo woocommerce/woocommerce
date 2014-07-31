@@ -30,7 +30,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-pending'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'pending%';
@@ -42,7 +42,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-processing'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'processing%';
@@ -54,7 +54,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-on-hold'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'on-hold%';
@@ -66,7 +66,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-completed'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'completed%';
@@ -78,7 +78,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-cancelled'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'cancelled%';
@@ -90,7 +90,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-refunded'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'refunded%';
@@ -102,7 +102,7 @@ $wpdb->query( "
 	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	SET posts.post_status = 'wc-failed'
-	WHERE posts.post_type = 'shop_order' 
+	WHERE posts.post_type = 'shop_order'
 	AND posts.post_status = 'publish'
 	AND tax.taxonomy = 'shop_order_status'
 	AND	term.slug LIKE 'failed%';
@@ -122,4 +122,43 @@ $update_variations = $wpdb->get_col( "
 
 foreach ( $update_variations as $variation_id ) {
 	add_post_meta( $variation_id, '_manage_stock', 'yes', true );
+}
+
+// add webhook capabilities to shop_manager/administrator role
+global $wp_roles;
+
+if ( class_exists( 'WP_Roles' ) ) {
+	if ( ! isset( $wp_roles ) ) {
+		$wp_roles = new WP_Roles();
+	}
+}
+
+if ( is_object( $wp_roles ) ) {
+	$webhook_capabilities = array(
+		// post type
+		'edit_shop_webhook',
+		'read_shop_webhook',
+		'delete_shop_webhook',
+		'edit_shop_webhooks',
+		'edit_others_shop_webhooks',
+		'publish_shop_webhooks',
+		'read_private_shop_webhooks',
+		'delete_shop_webhooks',
+		'delete_private_shop_webhooks',
+		'delete_published_shop_webhooks',
+		'delete_others_shop_webhooks',
+		'edit_private_shop_webhooks',
+		'edit_published_shop_webhooks',
+
+		// terms
+		'manage_shop_webhook_terms',
+		'edit_shop_webhook_terms',
+		'delete_shop_webhook_terms',
+		'assign_shop_webhook_terms'
+	);
+
+	foreach ( $webhook_capabilities as $cap ) {
+		$wp_roles->add_cap( 'shop_manager', $cap );
+		$wp_roles->add_cap( 'administrator', $cap );
+	}
 }

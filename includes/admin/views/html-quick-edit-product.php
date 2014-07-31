@@ -121,12 +121,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		    <span class="input-text-wrap">
 		    	<select class="visibility" name="_visibility">
 				<?php
-					$options = array(
+					$options = apply_filters( 'woocommerce_product_visibility_options', array(
 						'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
 						'catalog' => __( 'Catalog', 'woocommerce' ),
-						'search' => __( 'Search', 'woocommerce' ),
-						'hidden' => __( 'Hidden', 'woocommerce' )
-					);
+						'search'  => __( 'Search', 'woocommerce' ),
+						'hidden'  => __( 'Hidden', 'woocommerce' )
+					) );
 					foreach ($options as $key => $value) {
 						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';
 					}

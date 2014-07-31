@@ -109,7 +109,7 @@ class WC_Order_Item_Meta {
 
 		foreach ( (array) $this->meta as $meta_key => $meta_values ) {
 
-			if ( empty( $meta_values ) || ( ! empty( $hideprefix ) && substr( $meta_key, 0, 1 ) == $hideprefix ) ) {
+			if ( empty( $meta_values ) || ! is_array( $meta_values ) || ( ! empty( $hideprefix ) && substr( $meta_key, 0, 1 ) == $hideprefix ) ) {
 				continue;
 			}
 

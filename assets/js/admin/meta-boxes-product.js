@@ -1,4 +1,5 @@
-jQuery( function($){
+/*global woocommerce_admin_meta_boxes */
+jQuery( function( $ ){
 
 	// Scroll to first checked category - https://github.com/scribu/wp-category-checklist-tree/blob/d1c3c1f449e1144542efa17dde84a9f52ade1739/category-checklist-tree.php
 	$(function(){
@@ -85,32 +86,32 @@ jQuery( function($){
 	});
 
 	// PRODUCT TYPE SPECIFIC OPTIONS
-	$('select#product-type').change(function(){
+	$( 'select#product-type' ).change( function () {
 
 		// Get value
-		var select_val = $(this).val();
+		var select_val = $( this ).val();
 
-		if (select_val=='variable') {
-			$('input#_manage_stock').change();
-			$('input#_downloadable').prop('checked', false);
-			$('input#_virtual').removeAttr('checked');
+		if ( 'variable' !== select_val && 0 < $( '#variable_product_options input[name^=variable_sku]' ).length ) {
+			window.alert( woocommerce_admin_meta_boxes.i18n_product_type_alert );
 		}
 
-		else if (select_val=='grouped') {
-			$('input#_downloadable').prop('checked', false);
-			$('input#_virtual').removeAttr('checked');
-		}
-
-		else if (select_val=='external') {
-			$('input#_downloadable').prop('checked', false);
-			$('input#_virtual').removeAttr('checked');
+		if ( 'variable' === select_val ) {
+			$( 'input#_manage_stock' ).change();
+			$( 'input#_downloadable' ).prop( 'checked', false );
+			$( 'input#_virtual' ).removeAttr( 'checked' );
+		} else if ( 'grouped' === select_val ) {
+			$( 'input#_downloadable' ).prop( 'checked', false );
+			$( 'input#_virtual' ).removeAttr( 'checked' );
+		} else if ( 'external' === select_val ) {
+			$( 'input#_downloadable' ).prop( 'checked', false );
+			$( 'input#_virtual' ).removeAttr( 'checked' );
 		}
 
 		show_and_hide_panels();
 
-		$('ul.wc-tabs li:visible').eq(0).find('a').click();
+		$( 'ul.wc-tabs li:visible' ).eq(0).find( 'a' ).click();
 
-		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );
+		$( 'body' ).trigger( 'woocommerce-product-type-change', select_val, $( this ) );
 
 	}).change();
 
@@ -452,7 +453,7 @@ jQuery( function($){
 
 		});
 
-	});	
+	});
 
 	// Uploading files
 	var downloadable_file_frame;
@@ -645,5 +646,5 @@ jQuery( function($){
 		runTipTip();
 
 		return false;
-	});	
+	});
 });

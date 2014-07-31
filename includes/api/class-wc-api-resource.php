@@ -59,7 +59,7 @@ class WC_API_Resource {
 	 */
 	protected function validate_request( $id, $type, $context ) {
 
-		if ( 'shop_order' === $type || 'shop_coupon' === $type )
+		if ( 'shop_order' === $type || 'shop_coupon' === $type || 'shop_webhook' === $type )
 			$resource_name = str_replace( 'shop_', '', $type );
 		else
 			$resource_name = $type;
@@ -333,7 +333,7 @@ class WC_API_Resource {
 
 		} else {
 
-			// delete order/coupon/product
+			// delete order/coupon/product/webhook
 
 			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 

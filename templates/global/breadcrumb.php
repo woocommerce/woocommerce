@@ -19,7 +19,7 @@ $shop_page_id = wc_get_page_id( 'shop' );
 $shop_page    = get_post( $shop_page_id );
 
 // If permalinks contain the shop page in the URI prepend the breadcrumb with shop
-if ( $shop_page_id && $shop_page && strstr( $permalinks['product_base'], '/' . $shop_page->post_name ) && get_option( 'page_on_front' ) !== $shop_page_id ) {
+if ( $shop_page_id && $shop_page && strstr( $permalinks['product_base'], '/' . $shop_page->post_name ) && get_option( 'page_on_front' ) != $shop_page_id ) {
 	$prepend = $before . '<a href="' . get_permalink( $shop_page ) . '">' . $shop_page->post_title . '</a> ' . $after . $delimiter;
 }
 
@@ -36,7 +36,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		$cat_obj = $wp_query->get_queried_object();
 		$this_category = get_category( $cat_obj->term_id );
 
-		if ( $this_category->parent != 0 ) {
+		if ( 0 != $this_category->parent ) {
 			$parent_category = get_category( $this_category->parent );
 			echo get_category_parents($parent_category, TRUE, $delimiter );
 		}
@@ -54,7 +54,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		foreach ( $ancestors as $ancestor ) {
 			$ancestor = get_term( $ancestor, 'product_cat' );
 
-			echo $before .  '<a href="' . get_term_link( $ancestor->slug, 'product_cat' ) . '">' . esc_html( $ancestor->name ) . '</a>' . $after . $delimiter;
+			echo $before .  '<a href="' . get_term_link( $ancestor ) . '">' . esc_html( $ancestor->name ) . '</a>' . $after . $delimiter;
 		}
 
 		echo $before . esc_html( $current_term->name ) . $after;
@@ -108,8 +108,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 			echo $prepend;
 
-			if ( $terms = get_the_terms( $post->ID, 'product_cat' ) ) {
-				$terms     = array_values( $terms );
+			if ( $terms = wc_get_product_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent', 'order' => 'DESC' ) ) ) {
 				$main_term = $terms[0];
 				$ancestors = get_ancestors( $main_term->term_id, 'product_cat' );
 				$ancestors = array_reverse( $ancestors );
@@ -118,11 +117,11 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 					$ancestor = get_term( $ancestor, 'product_cat' );
 
 					if ( ! is_wp_error( $ancestor ) && $ancestor ) {
-						echo $before . '<a href="' . get_term_link( $ancestor->slug, 'product_cat' ) . '">' . $ancestor->name . '</a>' . $after . $delimiter;
+						echo $before . '<a href="' . get_term_link( $ancestor ) . '">' . $ancestor->name . '</a>' . $after . $delimiter;
 					}
 				}
 
-				echo $before . '<a href="' . get_term_link( $main_term->slug, 'product_cat' ) . '">' . $main_term->name . '</a>' . $after . $delimiter;
+				echo $before . '<a href="' . get_term_link( $main_term ) . '">' . $main_term->name . '</a>' . $after . $delimiter;
 
 			}
 
@@ -164,7 +163,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		echo $before . '<a href="' . get_permalink( $parent ) . '">' . $parent->post_title . '</a>' . $after . $delimiter;
 		echo $before . get_the_title() . $after;
 
-	} elseif ( is_page() && !$post->post_parent ) {
+	} elseif ( is_page() && ! $post->post_parent ) {
 
 		echo $before . get_the_title() . $after;
 
@@ -175,7 +174,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		while ( $parent_id ) {
 			$page = get_page( $parent_id );
-			$breadcrumbs[] = '<a href="' . get_permalink($page->ID) . '">' . get_the_title( $page->ID ) . '</a>';
+			$breadcrumbs[] = '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>';
 			$parent_id  = $page->post_parent;
 		}
 

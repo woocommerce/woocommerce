@@ -115,7 +115,7 @@ class WC_Cart {
 
 		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies
-		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies
+		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 ); // Set cookies before shutdown and ob flushing
 	}
 
     /**

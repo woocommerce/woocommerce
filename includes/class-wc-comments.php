@@ -32,6 +32,11 @@ class WC_Comments {
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ), 10, 1 );
 		add_action( 'comment_feed_join', array( __CLASS__, 'exclude_order_comments_from_feed_join' ) );
 		add_action( 'comment_feed_where', array( __CLASS__, 'exclude_order_comments_from_feed_where' ) );
+
+		// secure webhook comments
+		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_webhook_comments' ), 10, 1 );
+		add_action( 'comment_feed_join', array( __CLASS__, 'exclude_webhook_comments_from_feed_join' ) );
+		add_action( 'comment_feed_where', array( __CLASS__, 'exclude_webhook_comments_from_feed_where' ) );
 	}
 
 	/**
@@ -75,7 +80,7 @@ class WC_Comments {
 	public static function exclude_order_comments_from_feed_join( $join ) {
 		global $wpdb;
 
-	    if ( ! strstr( $join, $wpdb->posts ) ) 
+	    if ( ! strstr( $join, $wpdb->posts ) )
 	    	$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
 
 	    return $join;
@@ -96,6 +101,67 @@ class WC_Comments {
 		$where .= " $wpdb->posts.post_type NOT IN ('" . implode( ',', wc_get_order_types() ) . "') ";
 
 	    return $where;
+	}
+
+	/**
+	 * Exclude webhook comments from queries and RSS
+	 *
+	 * @since 2.2
+	 * @param array $clauses
+	 * @return array
+	 */
+	public static function exclude_webhook_comments( $clauses ) {
+		global $wpdb;
+
+		if ( ! $clauses['join'] ) {
+			$clauses['join'] = '';
+		}
+
+		if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) ) {
+			$clauses['join'] .= " LEFT JOIN $wpdb->posts ON comment_post_ID = $wpdb->posts.ID ";
+		}
+
+		if ( $clauses['where'] ) {
+			$clauses['where'] .= ' AND ';
+		}
+
+		$clauses['where'] .= " $wpdb->posts.post_type <> 'shop_webhook' ";
+
+		return $clauses;
+	}
+
+	/**
+	 * Exclude webhook comments from queries and RSS
+	 *
+	 * @since 2.2
+	 * @param string $join
+	 * @return string
+	 */
+	public static function exclude_webhook_comments_from_feed_join( $join ) {
+		global $wpdb;
+
+		if ( ! strstr( $join, $wpdb->posts ) )
+			$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+
+		return $join;
+	}
+
+	/**
+	 * Exclude webhook comments from queries and RSS
+	 *
+	 * @since 2.1
+	 * @param string $where
+	 * @return string
+	 */
+	public static function exclude_webhook_comments_from_feed_where( $where ) {
+		global $wpdb;
+
+		if ( $where )
+			$where .= ' AND ';
+
+		$where .= " $wpdb->posts.post_type <> 'shop_webhook' ";
+
+		return $where;
 	}
 
 	/**

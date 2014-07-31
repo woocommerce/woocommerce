@@ -591,6 +591,7 @@ class WC_Meta_Box_Product_Data {
 
 					<button type="button" class="button save_attributes"><?php _e( 'Save attributes', 'woocommerce' ); ?></button>
 				</p>
+				<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 			</div>
 			<div id="linked_product_data" class="panel woocommerce_options_panel">
 
