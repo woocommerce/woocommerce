@@ -69,11 +69,13 @@ class WC_Meta_Box_Order_Data {
 			'country' => array(
 				'label'   => __( 'Country', 'woocommerce' ),
 				'show'    => false,
+				'class'   => 'js_field-country select short',
 				'type'    => 'select',
 				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries()
 			),
 			'state' => array(
 				'label' => __( 'State/County', 'woocommerce' ),
+				'class'   => 'js_field-state select short',
 				'show'  => false
 			),
 			'email' => array(
@@ -117,10 +119,12 @@ class WC_Meta_Box_Order_Data {
 				'label'   => __( 'Country', 'woocommerce' ),
 				'show'    => false,
 				'type'    => 'select',
+				'class'   => 'js_field-country select short',
 				'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries()
 			),
 			'state' => array(
 				'label' => __( 'State/County', 'woocommerce' ),
+				'class'   => 'js_field-state select short',
 				'show'  => false
 			),
 		) );
@@ -243,13 +247,16 @@ class WC_Meta_Box_Order_Data {
 								if ( ! isset( $field['type'] ) ) {
 									$field['type'] = 'text';
 								}
+								if ( ! isset( $field['id'] ) ){
+									$field['id'] = '_billing_' . $key;
+								}
 
 								switch ( $field['type'] ) {
 									case 'select' :
-										woocommerce_wp_select( array( 'id' => '_billing_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
+										woocommerce_wp_select( $field );
 									break;
 									default :
-										woocommerce_wp_text_input( array( 'id' => '_billing_' . $key, 'label' => $field['label'] ) );
+										woocommerce_wp_text_input( $field );
 									break;
 								}
 							}
@@ -329,13 +336,16 @@ class WC_Meta_Box_Order_Data {
 									if ( ! isset( $field['type'] ) ) {
 										$field['type'] = 'text';
 									}
+									if ( ! isset( $field['id'] ) ){
+										$field['id'] = '_shipping_' . $key;
+									}
 
 									switch ( $field['type'] ) {
 										case 'select' :
-											woocommerce_wp_select( array( 'id' => '_shipping_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
+											woocommerce_wp_select( $field );
 										break;
 										default :
-											woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
+											woocommerce_wp_text_input( $field );
 										break;
 									}
 								}
