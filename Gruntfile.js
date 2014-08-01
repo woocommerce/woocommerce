@@ -118,7 +118,7 @@ module.exports = function( grunt ) {
 						'includes/admin/.*',
 						'apigen/.*'
 					],
-					processPot: function( pot, options ) {
+					processPot: function ( pot ) {
 						pot.headers['project-id-version'] += ' Frontend';
 						return pot;
 					}
@@ -130,7 +130,7 @@ module.exports = function( grunt ) {
 					exclude: [
 						'^(?!includes\/admin).*'
 					],
-					processPot: function( pot, options ) {
+					processPot: function ( pot ) {
 						pot.headers['project-id-version'] += ' Admin';
 						return pot;
 					}
@@ -156,7 +156,7 @@ module.exports = function( grunt ) {
 					'_nx:1,2,4c,5d',
 					'_n_noop:1,2,3d',
 					'_nx_noop:1,2,3c,4d'
-				],
+				]
 			},
 			files: {
 				src:  [
@@ -164,8 +164,8 @@ module.exports = function( grunt ) {
 					'!apigen/**', // Exclude apigen/
 					'!node_modules/**' // Exclude node_modules/
 				],
-				expand: true,
-			},
+				expand: true
+			}
 		},
 
 		shell: {
