@@ -4,7 +4,7 @@
  *
  * Gets and displays top rated products in an unordered list
  *
- * @author 		WooThemes
+ * @author 	WooThemes
  * @category 	Widgets
  * @package 	WooCommerce/Widgets
  * @version 	2.1.0
