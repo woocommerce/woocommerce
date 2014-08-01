@@ -234,5 +234,3 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		echo $after_widget;
 	}
 }
-
-register_widget( 'WC_Widget_Product_Categories' );
