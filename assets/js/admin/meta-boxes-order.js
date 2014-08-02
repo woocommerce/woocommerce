@@ -104,12 +104,15 @@ jQuery( function ( $ ) {
 				$parent = $state.parent(),
 				input_name = $state.attr( 'name' ),
 				input_id = $state.attr( 'id' ),
-				value = ! stickValue && $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : $state.val(),
+				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : $state.val(),
 				placeholder = $state.attr( 'placeholder' );
 
 			if ( stickValue ){
 				$this.data( 'woocommerce.stickState-' + country, value );
 			}
+
+			// Remove the previous Chosen DOM element
+			$parent.show().find( '.chosen-container' ).remove();
 
 			if ( states[ country ] ) {
 				var $states_select = $( '<select name="' + input_name + '" id="' + input_id + '" class="js_field-state select short" placeholder="' + placeholder + '"></select>' ),
@@ -125,14 +128,13 @@ jQuery( function ( $ ) {
 
 				$state.replaceWith( $states_select );
 
-				$states_select.show().chosen( chosen_opts ).hide();
+				$states_select.show().chosen( chosen_opts ).hide().trigger("chosen:updated");
 			} else {
-				$parent.show().find( '.chosen-container' ).remove();
 				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
 			}
 
 			$( 'body' ).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
-		} ).trigger( 'change', true );
+		} ).trigger( 'change', [ true ] );
 
 	$( 'body' )
 		.on( 'change', 'select.js_field-state', function(){
