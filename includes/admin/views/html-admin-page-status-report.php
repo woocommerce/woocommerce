@@ -471,6 +471,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo $parent_theme->{'Author URI'};
 				?></td>
 			</tr>
+			<?php endif ?>
 			<tr>
 				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
 				<td><?php
@@ -481,7 +482,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 					}
 				?></td>
 			</tr>
-			<?php endif ?>
 	</tbody>
 
 	<thead>
