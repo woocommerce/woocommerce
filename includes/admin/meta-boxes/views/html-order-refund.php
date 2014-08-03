@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</td>
 
-	<?php if ( ! $legacy_order && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
+	<?php if ( ( ! isset( $legacy_order ) || ! $legacy_order ) && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
 
 		<td class="line_tax" width="1%"></td>
 
