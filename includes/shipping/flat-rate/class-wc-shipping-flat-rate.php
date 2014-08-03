@@ -252,9 +252,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 				$extra_rate = $rate;
 
-				$extra_rate['id']		= $this->id . ':' . sanitize_title( $this_option[0] );
-				$extra_rate['label']	= $this_option[0];
-				$this_cost				= $this_option[1];
+				$extra_rate['id']    = $this->id . ':' . urldecode( sanitize_title( $this_option[0] ) );
+				$extra_rate['label'] = $this_option[0];
+				$this_cost           = $this_option[1];
+				$this_cost_percents  = '';
 
 				$pattern =
 					'/' .           // start regex
@@ -548,11 +549,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 							<th><?php _e( 'Handling Fee', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%.', 'woocommerce' ); ?>">[?]</a></th>
 						</tr>
 					</thead>
-					<tfoot>
-						<tr>
-							<th colspan="4"><a href="#" class="add button"><?php _e( 'Add Cost', 'woocommerce' ); ?></a> <a href="#" class="remove button"><?php _e( 'Delete selected costs', 'woocommerce' ); ?></a></th>
-						</tr>
-					</tfoot>
 					<tbody class="flat_rates">
 						<tr>
 							<td></td>
@@ -588,6 +584,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						}
 						?>
 					</tbody>
+					<tfoot>
+						<tr>
+							<th colspan="4"><a href="#" class="add button"><?php _e( 'Add Cost', 'woocommerce' ); ?></a> <a href="#" class="remove button"><?php _e( 'Delete selected costs', 'woocommerce' ); ?></a></th>
+						</tr>
+					</tfoot>
 				</table>
 			   	<script type="text/javascript">
 					jQuery(function() {
@@ -672,7 +673,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				}
 
 				// Add to flat rates array
-				$flat_rates[ sanitize_title($flat_rate_class[$i]) ] = array(
+				$flat_rates[ urldecode( sanitize_title( $flat_rate_class[ $i ] ) ) ] = array(
 					'cost' => $flat_rate_cost[ $i ],
 					'fee'  => $flat_rate_fee[ $i ],
 				);

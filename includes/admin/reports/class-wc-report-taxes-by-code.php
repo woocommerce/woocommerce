@@ -40,8 +40,6 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	 * Output the report
 	 */
 	public function output_report() {
-		global $woocommerce, $wpdb, $wp_locale;
-
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
@@ -91,6 +89,11 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 					'order_item_type' => 'tax',
 					'function'        => '',
 					'name'            => 'rate_id'
+				),
+				'order_id' => array(
+					'type'     => 'order_item',
+					'function' => '',
+					'name'     => 'order_id'
 				)
 			),
 			'where' => array(
@@ -122,14 +125,6 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				</tr>
 			</thead>
 			<?php if ( $tax_rows ) : ?>
-				<tfoot>
-					<tr>
-						<th scope="row" colspan="3"><?php _e( 'Total', 'woocommerce' ); ?></th>
-						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) ) ); ?></th>
-						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></th>
-						<th class="total_row"><strong><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></strong></th>
-					</tr>
-				</tfoot>
 				<tbody>
 					<?php
 					$grouped_tax_tows = array();
@@ -143,8 +138,9 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 								'shipping_tax_amount' => 0
 							);
 						}
-						
-						$grouped_tax_tows[ $tax_row->rate_id ]->total_orders ++; 
+						if ( 'shop_order' === get_post_type( $tax_row->order_id ) ) {
+							$grouped_tax_tows[ $tax_row->rate_id ]->total_orders ++; 
+						}
 						$grouped_tax_tows[ $tax_row->rate_id ]->tax_amount += wc_round_tax_total( $tax_row->tax_amount );
 						$grouped_tax_tows[ $tax_row->rate_id ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
 					}
@@ -164,6 +160,14 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 					}
 					?>
 				</tbody>
+				<tfoot>
+					<tr>
+						<th scope="row" colspan="3"><?php _e( 'Total', 'woocommerce' ); ?></th>
+						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) ) ); ?></th>
+						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></th>
+						<th class="total_row"><strong><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></strong></th>
+					</tr>
+				</tfoot>
 			<?php else : ?>
 				<tbody>
 					<tr>

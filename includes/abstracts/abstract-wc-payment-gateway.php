@@ -17,37 +17,43 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/** @var string Payment method ID. */
-	var $id;
+	public $id;
 
 	/** @var string Set if the place order button should be renamed on selection. */
-	var $order_button_text;
+	public $order_button_text;
 
 	/** @var string Payment method title. */
-	var $title;
+	public $title;
 
 	/** @var string Chosen payment method id. */
-	var $chosen;
+	public $chosen;
 
 	/** @var bool True if the gateway shows fields on the checkout. */
-	var $has_fields;
+	public $has_fields;
 
 	/** @var array Array of countries this gateway is allowed for. */
-	var $countries;
+	public $countries;
 
 	/** @var string Available for all counties or specific. */
-	var $availability;
+	public $availability;
 
 	/** @var string 'yes' if the method is enabled. */
-	var $enabled;
+	public $enabled;
 
 	/** @var string Icon for the gateway. */
-	var $icon;
+	public $icon;
 
 	/** @var string Description for the gateway. */
-	var $description;
+	public $description;
 
-	/** @var array Array of supported features such as 'default_credit_card_form' */
-	var $supports		= array( 'products' );
+	/** @var array Array of supported features such as 'default_credit_card_form', 'refunds' */
+	public $supports		= array( 'products' );
+
+	/** @var int Maximum transaction amount, zero does not define a maximum */
+	public $max_amount = 0;
+
+	/** @var string Optional URL to view a transaction */
+	public $view_transaction_url = '';
 
 	/**
 	 * Get the return url (thank you page)
@@ -71,13 +77,54 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
+	 * Get a link to the transaction on the 3rd party gateway size (if applicable)
+	 * @param  string $transaction_id
+	 * @return string
+	 */
+	public function get_transaction_url( $transaction_id ) {
+		$return_url = '';
+		if ( ! empty( $this->view_transaction_url ) && ! empty( $transaction_id ) ) {
+			$return_url = sprintf( $this->view_transaction_url, $transaction_id );
+		}
+		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $transaction_id, $this );
+	} 
+
+	/**
+	 * Get the order total in checkout and pay_for_order.
+	 *
+	 * @return bool
+	 */
+	protected function get_order_total() {
+		$total = 0;
+		$order_id = absint( get_query_var( 'order-pay' ) );
+
+		// Gets order total from "pay for order" page.
+		if ( 0 < $order_id ) {
+			$order = get_order( $order_id );
+			$total = (float) $order->get_total();
+
+		// Gets order total from cart/checkout.
+		} elseif ( 0 < WC()->cart->total ) {
+			$total = (float) WC()->cart->total;
+		}
+
+		return $total;
+	}
+
+	/**
 	 * Check If The Gateway Is Available For Use
 	 *
 	 * @access public
 	 * @return bool
 	 */
 	public function is_available() {
-		return ( $this->enabled === "yes" );
+		$is_available = ( 'yes' === $this->enabled ) ? true : false;
+
+		if ( WC()->cart && 0 < $this->get_order_total() && $this->max_amount >= $this->get_order_total() ) {
+			$is_available = false;
+		}
+
+		return $is_available;
 	}
 
 	/**
@@ -138,13 +185,34 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Process Payment
 	 *
-	 * Process the payment. Override this in your gateway.
+	 * Process the payment. Override this in your gateway. When implemented, this should 
+	 * return the success and redirect in an array. e.g.
+	 *
+	 * 		return array(
+	 *   		'result' 	=> 'success',
+	 *     		'redirect'	=> $this->get_return_url( $order )
+	 *       );
 	 *
 	 * @param int $order_id
-	 * @access public
-	 * @return void
+	 * @return array
 	 */
-	public function process_payment( $order_id ) {}
+	public function process_payment( $order_id ) { 
+		return array();
+	}
+
+	/**
+	 * Process Refund
+	 *
+	 * If the gateway declares 'refunds' support, this will allow it to refund
+	 * a passed in amount.
+	 * 
+	 * @param  int $order_id
+	 * @param  float $amount
+	 * @return  bool|wp_error True or false based on success, or a WP_Error object
+	 */
+	public function process_refund( $order_id, $amount = null ) {
+		return false;
+	}
 
 	/**
 	 * Validate Frontend Fields

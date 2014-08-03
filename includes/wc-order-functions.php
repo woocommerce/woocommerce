@@ -13,6 +13,46 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
+ * Get all order statuses
+ *
+ * @since 2.2
+ * @return array
+ */
+function wc_get_order_statuses() {
+	$order_statuses = array(
+		'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+		'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
+		'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
+		'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
+		'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
+		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
+		'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
+	);
+	return apply_filters( 'wc_order_statuses', $order_statuses );
+}
+
+/**
+ * Main function for returning orders, uses the WC_Order_Factory class.
+ *
+ * @param mixed $the_order Post object or post ID of the order.
+ * @param array $args (default: array()) Contains all arguments to be used to get this order.
+ * @return WC_Order
+ */
+function get_order( $the_order = false, $args = array() ) {
+	return WC()->order_factory->get_order( $the_order, $args );
+}
+
+/**
+ * Get the nice name for an orer status
+ * @param  string $status
+ * @return string
+ */
+function wc_get_order_status_name( $status ) {
+	$statuses = wc_get_order_statuses();
+	return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
+}
+
+/**
  * Finds an Order ID based on an order key.
  *
  * @access public
@@ -26,6 +66,132 @@ function wc_get_order_id_by_order_key( $order_key ) {
 	$order_id = $wpdb->get_var( "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_key' AND meta_value = '{$order_key}'" );
 
 	return $order_id;
+}
+
+/**
+ * Get all registered order types
+ *
+ * $for optionally define what you are getting order types for so only relevent types are returned.
+ *
+ * e.g. for 'order-meta-boxes', 'order-count'
+ *
+ * @since  2.2
+ * @param  string $for
+ * @return array
+ */
+function wc_get_order_types( $for = '' ) {
+	global $wc_order_types;
+
+	if ( ! is_array( $wc_order_types ) ) {
+		$wc_order_types = array();
+	}
+
+	$order_types = array();
+
+	switch ( $for ) {
+		case 'order-count' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_order_count'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		case 'order-meta-boxes' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( $args['add_order_meta_boxes'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		case 'view-orders' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_order_views'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		case 'reports' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_order_reports'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
+		default :
+			$order_types = array_keys( $wc_order_types );
+		break;
+	}
+
+	return apply_filters( 'wc_order_types', $order_types, $for );
+}
+
+/**
+ * Get an order type by post type name
+ * @param  string post type name
+ * @return bool|array of datails about the order type
+ */
+function wc_get_order_type( $type ) {
+	global $wc_order_types;
+
+	if ( isset( $wc_order_types[ $type ] ) ) {
+		return $wc_order_types[ $type ];
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Register order type. Do not use before init.
+ *
+ * Wrapper for register post type, as well as a method of telling WC which
+ * post types are types of orders, and having them treated as such.
+ *
+ * $args are passed to register_post_type, but there are a few specific to this function:
+ * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main
+ * 		orders screen.
+ * 		- add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
+ * 		- exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
+ * 		- exclude_from_order_views (bool) Whether or not this order type is visible by customers when
+ * 		viewing orders e.g. on the my account page.
+ * 		- exclude_from_order_reports (bool) Whether or not to exclude this type from core reports.
+ *
+ * @since  2.2
+ * @see    register_post_type for $args used in that function
+ * @param  string $type Post type. (max. 20 characters, can not contain capital letters or spaces)
+ * @param  array $args An array of arguments.
+ * @return bool Success or failure
+ */
+function wc_register_order_type( $type, $args = array() ) {
+	if ( post_type_exists( $type ) ) {
+		return false;
+	}
+
+	global $wc_order_types;
+
+	if ( ! is_array( $wc_order_types ) ) {
+		$wc_order_types = array();
+	}
+
+	// Register as a post type
+	if ( is_wp_error( register_post_type( $type, $args ) ) ) {
+		return false;
+	}
+
+	// Register for WC usage
+	$order_type_args = array(
+		'exclude_from_orders_screen' => false,
+		'add_order_meta_boxes'       => true,
+		'exclude_from_order_count'   => false,
+		'exclude_from_order_views'   => false,
+		'exclude_from_order_reports' => false,
+		'class_name'                 => 'WC_Order'
+	);
+
+	$args                    = array_intersect_key( $args, $order_type_args );
+	$args                    = wp_parse_args( $args, $order_type_args );
+	$wc_order_types[ $type ] = $args;
+
+	return true;
 }
 
 /**
@@ -106,9 +272,9 @@ function wc_downloadable_product_permissions( $order_id ) {
 		return; // Only do this once
 	}
 
-	$order = new WC_Order( $order_id );
+	$order = get_order( $order_id );
 
-	if ( $order->status == 'processing' && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
+	if ( $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
 	}
 
@@ -175,6 +341,28 @@ function wc_add_order_item( $order_id, $item ) {
 	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
 
 	return $item_id;
+}
+
+/**
+ * Update an item for an order
+ *
+ * @since 2.2
+ * @param int $item_id
+ * @param array $args either `order_item_type` or `order_item_name`
+ * @return bool true if successfully updated, false otherwise
+ */
+function wc_update_order_item( $item_id, $args ) {
+	global $wpdb;
+
+	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
+
+	if ( false === $update ) {
+		return false;
+	}
+
+	do_action( 'woocommerce_update_order_item', $item_id, $args );
+
+	return true;
 }
 
 /**
@@ -276,20 +464,14 @@ function wc_cancel_unpaid_orders() {
 	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
 		SELECT posts.ID
 		FROM {$wpdb->posts} AS posts
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
-		WHERE 	posts.post_type   = 'shop_order'
-		AND 	posts.post_status = 'publish'
-		AND 	tax.taxonomy      = 'shop_order_status'
-		AND		term.slug	      = 'pending'
+		WHERE 	posts.post_type   IN ('" . implode( ',', wc_get_order_types() ) . "')
+		AND 	posts.post_status = 'wc-pending'
 		AND 	posts.post_modified < %s
 	", $date ) );
 
 	if ( $unpaid_orders ) {
 		foreach ( $unpaid_orders as $unpaid_order ) {
-			$order = new WC_Order( $unpaid_order );
+			$order = get_order( $unpaid_order );
 
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', true, $order ) )
 				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
@@ -309,20 +491,14 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
  * @return int
  */
 function wc_processing_order_count() {
-	if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
-		$order_statuses = get_terms( 'shop_order_status' );
-			$order_count = false;
-			foreach ( $order_statuses as $status ) {
-					if( $status->slug === 'processing' ) {
-							$order_count += $status->count;
-							break;
-					}
-			}
-			$order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
-		set_transient( 'woocommerce_processing_order_count', $order_count, YEAR_IN_SECONDS );
+	$count = 0;
+
+	foreach ( wc_get_order_types( 'order-count' ) as $type ) {
+		$this_count = wp_count_posts( $type, 'readable' );
+		$count      += isset( $this_count->{'wc-processing'} ) ? $this_count->{'wc-processing'} : 0;
 	}
 
-	return $order_count;
+	return $count;
 }
 
 /**
@@ -331,14 +507,7 @@ function wc_processing_order_count() {
  * @param int $post_id (default: 0)
  */
 function wc_delete_shop_order_transients( $post_id = 0 ) {
-	global $wpdb;
-
 	$post_id = absint( $post_id );
-
-	// Clear core transients
-	$transients_to_clear = array(
-		'woocommerce_processing_order_count'
-	);
 
 	// Clear report transients
 	$reports = WC_Admin_Reports::get_reports();
@@ -349,10 +518,178 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 		}
 	}
 
+	// clear API report transient
+	$transients_to_clear[] = 'wc_admin_report';
+
 	// Clear transients where we have names
 	foreach( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
 
 	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
+}
+
+/**
+ * See if we only ship to billing addresses
+ * @return bool
+ */
+function wc_ship_to_billing_address_only() {
+	return 'billing_only' === get_option( 'woocommerce_ship_to_destination' );
+}
+
+/**
+ * Create a new order refund programmatically
+ *
+ * Returns a new refund object on success which can then be used to add additonal data.
+ *
+ * @since 2.2
+ * @param array $args
+ * @return WC_Order_Refund on success, WP_Error on failure
+ */
+function wc_create_refund( $args = array() ) {
+	$default_args = array(
+		'amount'     => '',
+		'reason'     => null,
+		'order_id'   => 0,
+		'refund_id'  => 0,
+		'line_items' => array()
+	);
+
+	$args        = wp_parse_args( $args, $default_args );
+	$refund_data = array();
+
+	if ( $args['refund_id'] > 0 ) {
+		$updating          = true;
+		$refund_data['ID'] = $args['refund_id'];
+	} else {
+		$updating                     = false;
+		$refund_data['post_type']     = 'shop_order_refund';
+		$refund_data['post_status']   = 'wc-completed';
+		$refund_data['ping_status']   = 'closed';
+		$refund_data['post_author']   = 1;
+		$refund_data['post_password'] = uniqid( 'refund_' );
+		$refund_data['post_parent']   = absint( $args['order_id'] );
+		$refund_data['post_title']    = sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+	}
+
+	if ( ! is_null( $args['reason'] ) ) {
+		$refund_data['post_excerpt'] = $args['reason'];
+	}
+
+	if ( $updating ) {
+		$refund_id = wp_update_post( $refund_data );
+	} else {
+		$refund_id = wp_insert_post( apply_filters( 'woocommerce_new_refund_data', $refund_data ), true );
+	}
+
+	if ( is_wp_error( $refund_id ) ) {
+		return $refund_id;
+	}
+
+	if ( ! $updating ) {
+		// Default refund meta data
+		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
+
+		// Negative line items
+		if ( sizeof( $args['line_items'] ) > 0 ) {
+			$order       = get_order( $args['order_id'] );
+			$order_items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
+			$refund      = get_order( $refund_id );
+
+			foreach ( $args['line_items'] as $refund_item_id => $refund_item ) {
+				if ( isset( $order_items[ $refund_item_id ] ) ) {
+					if ( empty( $refund_item['qty'] ) && empty( $refund_item['refund_total'] ) && empty( $refund_item['refund_tax'] ) ) {
+						continue;
+					}
+
+					// Prevents errors when the order has no taxes
+					if ( ! isset( $refund_item['refund_tax'] ) ) {
+						$refund_item['refund_tax'] = array();
+					}
+
+					switch ( $order_items[ $refund_item_id ]['type'] ) {
+						case 'line_item' :
+							$args = array(
+								'totals' => array(
+									'subtotal'     => wc_format_refund_total( $refund_item['refund_total'] ),
+									'total'        => wc_format_refund_total( $refund_item['refund_total'] ),
+									'subtotal_tax' => wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ),
+									'tax'          => wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ),
+									'tax_data'     => array( 'total' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) )
+								)
+							);
+							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] : 0, $args );
+							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
+						break;
+						case 'shipping' :
+							$shipping        = new stdClass();
+							$shipping->label = $order_items[ $refund_item_id ]['name'];
+							$shipping->id    = $order_items[ $refund_item_id ]['method_id'];
+							$shipping->cost  = wc_format_refund_total( $refund_item['refund_total'] );
+							$shipping->taxes = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
+
+							$new_item_id = $refund->add_shipping( $shipping );
+							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
+						break;
+						case 'fee' :
+							$fee            = new stdClass();
+							$fee->name      = $order_items[ $refund_item_id ]['name'];
+							$fee->tax_class = $order_items[ $refund_item_id ]['tax_class'];
+							$fee->taxable   = $fee->tax_class !== '0';
+							$fee->amount    = wc_format_refund_total( $refund_item['refund_total'] );
+							$fee->tax       = wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) );
+							$fee->tax_data  = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
+
+							$new_item_id = $refund->add_fee( $fee );
+							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
+						break;
+					}
+				}
+			}
+			$refund->update_taxes();
+			$refund->calculate_totals( false );
+		}
+	}
+
+	return new WC_Order_Refund( $refund_id );
+}
+
+/**
+ * Get tax class by tax id.
+ *
+ * @since 2.2
+ * @param int $tax_id
+ * @return string
+ */
+function wc_get_tax_class_by_tax_id( $tax_id ) {
+	global $wpdb;
+
+	$tax_class = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_class FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d", $tax_id ) );
+
+	return wc_clean( $tax_class );
+}
+
+/**
+ * Get payment gateway class by order data.
+ *
+ * @since 2.2
+ * @param int|WC_Order $order
+ * @return WC_Payment_Gateway|bool
+ */
+function wc_get_payment_gateway_by_order( $order ) {
+	if ( WC()->payment_gateways() ) {
+		$payment_gateways = WC()->payment_gateways->payment_gateways();
+	} else {
+		$payment_gateways = array();
+	}
+
+	if ( is_object( $order ) ) {
+		$payment_method = $order->payment_method;
+	} else {
+		$order_id       = absint( $order );
+		$order          = new WC_Order( $order_id );
+		$payment_method = $order->payment_method;
+	}
+
+	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;
 }

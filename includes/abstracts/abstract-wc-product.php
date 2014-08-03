@@ -22,21 +22,21 @@ class WC_Product {
 	public $product_type = null;
 
 	/**
-	 * __construct function.
+	 * Constructor gets the post object and sets the ID for the loaded product.
 	 *
 	 * @access public
-	 * @param mixed $product
+	 * @param int|WC_Product|WP_Post $product Product ID, post object, or product object
 	 */
 	public function __construct( $product ) {
-		if ( $product instanceof WP_Post ) {
-			$this->id   = absint( $product->ID );
-			$this->post = $product;
+		if ( is_numeric( $product ) ) {
+			$this->id   = absint( $product );
+			$this->post = get_post( $this->id );
 		} elseif ( $product instanceof WC_Product ) {
 			$this->id   = absint( $product->id );
 			$this->post = $product;
-		} else {
-			$this->id   = absint( $product );
-			$this->post = get_post( $this->id );
+		} elseif ( $product instanceof WP_Post || isset( $product->ID ) ) {
+			$this->id   = absint( $product->ID );
+			$this->post = $product;
 		}
 	}
 
@@ -106,9 +106,10 @@ class WC_Product {
 		if ( ! isset( $this->product_image_gallery ) ) {
 			// Backwards compat
 			$attachment_ids = get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
-			$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
+			$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id( $this->id ) ) );
 			$this->product_image_gallery = implode( ',', $attachment_ids );
 		}
+
 		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( (array) explode( ',', $this->product_image_gallery ) ), $this );
 	}
 
@@ -126,7 +127,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_sku() {
-		return $this->sku;
+		return apply_filters( 'woocommerce_get_sku', $this->sku, $this );
 	}
 
 	/**
@@ -136,7 +137,7 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_stock_quantity() {
-		return $this->managing_stock() ? apply_filters( 'woocommerce_stock_amount', $this->stock ) : '';
+		return $this->managing_stock() ? wc_stock_amount( $this->stock ) : '';
 	}
 
 	/**
@@ -150,62 +151,77 @@ class WC_Product {
 	}
 
 	/**
+	 * Check if the stock status needs changing
+	 */
+	protected function check_stock_status() {
+		// Update stock status
+		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			$this->set_stock_status( 'outofstock' );
+
+		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			$this->set_stock_status( 'instock' );
+		}
+	}
+
+	/**
 	 * Set stock level of the product.
 	 *
-	 * @param mixed $amount (default: null)
-	 * @return int Stock
+	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
+	 * We cannot rely on the original loaded value in case another order was made since then.
+	 *
+	 * @param int $amount (default: null)
+	 * @param string $mode can be set, add, or subtract
+	 * @return int new stock level
 	 */
-	public function set_stock( $amount = null ) {
-		if ( is_null( $amount ) ) {
-			return 0;
-		}
+	public function set_stock( $amount = null, $mode = 'set' ) {
+		global $wpdb;
 
-		if ( $this->managing_stock() ) {
+		if ( ! is_null( $amount ) && $this->managing_stock() ) {
 
-			// Update stock amount
-			$this->stock = apply_filters( 'woocommerce_stock_amount', $amount );
-
-			// Update meta
-			update_post_meta( $this->id, '_stock', $this->stock );
-
-			// Update stock status
-			if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				$this->set_stock_status( 'outofstock' );
-
-			} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				$this->set_stock_status( 'instock' );
+			// Update stock in DB directly
+			switch ( $mode ) {
+				case 'add' :
+					$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + {$amount} WHERE post_id = {$this->id} AND meta_key='_stock'" );
+				break;
+				case 'subtract' :
+					$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - {$amount} WHERE post_id = {$this->id} AND meta_key='_stock'" );
+				break;
+				default :
+					$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = {$amount} WHERE post_id = {$this->id} AND meta_key='_stock'" );
+				break;
 			}
 
-			// Clear total stock transient
-			delete_transient( 'wc_product_total_stock_' . $this->id );
+			// Clear caches
+			wp_cache_delete( $this->id, 'post_meta' );
+
+			// Stock status
+			$this->check_stock_status();
 
 			// Trigger action
 			do_action( 'woocommerce_product_set_stock', $this );
-
-			return $this->get_stock_quantity();
 		}
 
-		return 0;
+		return $this->get_stock_quantity();
 	}
 
 	/**
 	 * Reduce stock level of the product.
 	 *
-	 * @param int $by (default: 1) Amount to reduce by.
-	 * @return int Stock
+	 * @param int $amount (default: 1) Amount to reduce by.
+	 * @return int new stock level
 	 */
-	public function reduce_stock( $by = 1 ) {
-		return $this->set_stock( $this->stock - $by );
+	public function reduce_stock( $amount = 1 ) {
+		return $this->set_stock( $amount, 'subtract' );
 	}
 
 	/**
 	 * Increase stock level of the product.
 	 *
-	 * @param int $by (default: 1) Amount to increase by
-	 * @return int Stock
+	 * @param int $amount (default: 1) Amount to increase by
+	 * @return int new stock level
 	 */
-	public function increase_stock( $by = 1 ) {
-		return $this->set_stock( $this->stock + $by );
+	public function increase_stock( $amount = 1 ) {
+		return $this->set_stock( $amount, 'add' );
 	}
 
 	/**
@@ -217,6 +233,13 @@ class WC_Product {
 	public function set_stock_status( $status ) {
 		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
 
+		// Sanity check
+		if ( $this->managing_stock() ) {
+			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				$status = 'outofstock';
+			}
+		}
+		
 		if ( update_post_meta( $this->id, '_stock_status', $status ) ) {
 			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
 		}
@@ -296,10 +319,12 @@ class WC_Product {
 	 * @param string $download_id file identifier
 	 * @return array|false if not found
 	 */
-	public function get_file( $download_id ) {
+	public function get_file( $download_id = '' ) {
 		$files = $this->get_files();
 
-		if ( isset( $files[ $download_id ] ) ) {
+		if ( '' === $download_id ) {
+			$file = sizeof( $files ) ? current( $files ) : false;
+		} elseif ( isset( $files[ $download_id ] ) ) {
 			$file = $files[ $download_id ];
 		} else {
 			$file = false;
@@ -422,7 +447,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_title() {
-		return apply_filters( 'woocommerce_product_title', $this->post->post_title, $this );
+		return apply_filters( 'woocommerce_product_title', $this->post ? $this->post->post_title : '', $this );
 	}
 
 	/**
@@ -432,7 +457,7 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_parent() {
-		return apply_filters('woocommerce_product_parent', $this->post->post_parent, $this);
+		return apply_filters( 'woocommerce_product_parent', absint( $this->post->post_parent ), $this );
 	}
 
 	/**
@@ -482,30 +507,12 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		if ( $this->managing_stock() ) {
-
-			if ( $this->backorders_allowed() ) {
-				return true;
-			} else {
-				if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-					return false;
-				} else {
-					if ( $this->stock_status === 'instock' ) {
-						return true;
-					} else {
-						return false;
-					}
-				}
-			}
-
+		if ( $this->managing_stock() && $this->backorders_allowed() ) {
+			return true;
+		} elseif ( $this->managing_stock() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			return false;
 		} else {
-
-			if ( $this->stock_status === 'instock' ) {
-				return true;
-			} else {
-				return false;
-			}
-
+			return $this->stock_status === 'instock';
 		}
 	}
 
@@ -516,7 +523,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function backorders_allowed() {
-		return $this->backorders === 'yes' || $this->backorders === 'notify' ? true : false;
+		return apply_filters( 'woocommerce_product_backorders_allowed', $this->backorders === 'yes' || $this->backorders === 'notify' ? true : false, $this->id );
 	}
 
 	/**
@@ -558,50 +565,39 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_availability() {
-
 		$availability = $class = "";
 
 		if ( $this->managing_stock() ) {
 			if ( $this->is_in_stock() ) {
-
 				if ( $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 
-					$format_option = get_option( 'woocommerce_stock_format' );
-
-					switch ( $format_option ) {
+					switch ( get_option( 'woocommerce_stock_format' ) ) {
 						case 'no_amount' :
-							$format = __( 'In stock', 'woocommerce' );
+							$availability = __( 'In stock', 'woocommerce' );
 						break;
 						case 'low_amount' :
-							$low_amount = get_option( 'woocommerce_notify_low_stock_amount' );
-
-							$format = ( $this->get_total_stock() <= $low_amount ) ? __( 'Only %s left in stock', 'woocommerce' ) : __( 'In stock', 'woocommerce' );
+							$low_amount   = get_option( 'woocommerce_notify_low_stock_amount' );
+							$availability = $this->get_total_stock() <= $low_amount ? sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_total_stock() ) : __( 'In stock', 'woocommerce' );
 						break;
 						default :
-							$format = __( '%s in stock', 'woocommerce' );
+							$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_total_stock() );
 						break;
 					}
-
-					$availability = sprintf( $format, $this->stock );
 
 					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
 						$availability .= ' ' . __( '(backorders allowed)', 'woocommerce' );
 					}
 
-				} else {
-
-					if ( $this->backorders_allowed() ) {
-						if ( $this->backorders_require_notification() ) {
-							$availability = __( 'Available on backorder', 'woocommerce' );
-							$class        = 'available-on-backorder';
-						} else {
-							$availability = __( 'In stock', 'woocommerce' );
-						}
+				} elseif ( $this->backorders_allowed() ) {
+					if ( $this->backorders_require_notification() ) {
+						$availability = __( 'Available on backorder', 'woocommerce' );
+						$class        = 'available-on-backorder';
 					} else {
-						$availability = __( 'Out of stock', 'woocommerce' );
-						$class        = 'out-of-stock';
+						$availability = __( 'In stock', 'woocommerce' );
 					}
-
+				} else {
+					$availability = __( 'Out of stock', 'woocommerce' );
+					$class        = 'out-of-stock';
 				}
 
 			} elseif ( $this->backorders_allowed() ) {
@@ -766,8 +762,6 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_including_tax( $qty = 1, $price = '' ) {
-		$_tax  = new WC_Tax();
-
 		if ( ! $price ) {
 			$price = $this->get_price();
 		}
@@ -776,26 +770,26 @@ class WC_Product {
 
 			if ( get_option('woocommerce_prices_include_tax') === 'no' ) {
 
-				$tax_rates  = $_tax->get_rates( $this->get_tax_class() );
-				$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, false );
-				$tax_amount = $_tax->get_tax_total( $taxes );
+				$tax_rates  = WC_Tax::get_rates( $this->get_tax_class() );
+				$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
+				$tax_amount = WC_Tax::get_tax_total( $taxes );
 				$price      = round( $price * $qty + $tax_amount, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 			} else {
 
-				$tax_rates      = $_tax->get_rates( $this->get_tax_class() );
-				$base_tax_rates = $_tax->get_shop_base_rate( $this->tax_class );
+				$tax_rates      = WC_Tax::get_rates( $this->get_tax_class() );
+				$base_tax_rates = WC_Tax::get_shop_base_rate( $this->tax_class );
 
 				if ( ! empty( WC()->customer ) && WC()->customer->is_vat_exempt() ) {
 
-					$base_taxes 		= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
+					$base_taxes 		= WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
 					$base_tax_amount	= array_sum( $base_taxes );
 					$price      		= round( $price * $qty - $base_tax_amount, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 				} elseif ( $tax_rates !== $base_tax_rates ) {
 
-					$base_taxes			= $_tax->calc_tax( $price * $qty, $base_tax_rates, true );
-					$modded_taxes		= $_tax->calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
+					$base_taxes			= WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
+					$modded_taxes		= WC_Tax::calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
 					$price      		= round( ( $price * $qty ) - array_sum( $base_taxes ) + array_sum( $modded_taxes ), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 				} else {
@@ -828,12 +822,9 @@ class WC_Product {
 		}
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax') === 'yes' ) {
-
-			$_tax       = new WC_Tax();
-			$tax_rates  = $_tax->get_shop_base_rate( $this->tax_class );
-			$taxes      = $_tax->calc_tax( $price * $qty, $tax_rates, true );
-			$price      = $_tax->round( $price * $qty - array_sum( $taxes ) );
-
+			$tax_rates  = WC_Tax::get_shop_base_rate( $this->tax_class );
+			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
+			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
 		} else {
 			$price = $price * $qty;
 		}
@@ -1193,7 +1184,7 @@ class WC_Product {
 			$query['where'] .= " AND pm2.meta_value = 'instock'";
 		}
 
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true ) ) {
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $this->id ) ) {
 			$query['where'] .= " AND ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) )";
 			$andor = 'OR';
 		} else {
@@ -1201,16 +1192,16 @@ class WC_Product {
 		}
 
 		// when query is OR - need to check against excluded ids again
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true ) ) {
-			$query['where'] .= " {$andor} ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) )";
-			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $this->id ) ) {
+			$query['where'] .= " {$andor} ( ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) )";
+			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
 		}
 
 		$query['orderby']  = " ORDER BY RAND()";
 		$query['limits']   = " LIMIT " . absint( $limit ) . " ";
 
 		// Get the posts
-		$related_posts = $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $query ) ) );
+		$related_posts = $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id ) ) );
 
 		return $related_posts;
 	}
@@ -1346,6 +1337,21 @@ class WC_Product {
 			'product'    => $this
 		) );
 	}
+
+    /**
+     * Gets the main product image ID.
+     * @return int
+     */
+    public function get_image_id() {
+    	if ( has_post_thumbnail( $this->id ) ) {
+			$image_id = get_post_thumbnail_id( $this->id );
+		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
+			$image_id = get_post_thumbnail_id( $parent_id );
+		} else {
+			$image_id = 0;
+		}
+		return $image_id;
+    }
 
 	/**
 	 * Returns the main product image

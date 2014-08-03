@@ -47,15 +47,17 @@ class WC_Admin_Report {
 			'limit'        => '',
 			'filter_range' => false,
 			'nocache'      => false,
-			'debug'        => false
+			'debug'        => false,
+			'order_types'  => wc_get_order_types( 'reports' )
 		);
 
-		$args = wp_parse_args( $args, $defaults );
+		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', wp_parse_args( $args, $defaults ) );
 
 		extract( $args );
 
-		if ( empty( $data ) )
+		if ( empty( $data ) ) {
 			return false;
+		}
 
 		$select = array();
 
@@ -87,9 +89,6 @@ class WC_Admin_Report {
 
 		// Joins
 		$joins         = array();
-		$joins['rel']  = "LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID";
-		$joins['tax']  = "LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )";
-		$joins['term'] = "LEFT JOIN {$wpdb->terms} AS term USING( term_id )";
 
 		foreach ( $data as $key => $value ) {
 			if ( $value['type'] == 'meta' ) {
@@ -98,12 +97,12 @@ class WC_Admin_Report {
 
 			} elseif ( $value['type'] == 'order_item_meta' ) {
 
-				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
+				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
 				$joins["order_item_meta_{$key}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
 
 			} elseif ( $value['type'] == 'order_item' ) {
 
-				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
+				$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
 
 			}
 		}
@@ -117,7 +116,7 @@ class WC_Admin_Report {
 
 				if ( isset( $value['type'] ) && $value['type'] == 'order_item_meta' ) {
 
-					$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id";
+					$joins["order_items"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
 					$joins["order_item_meta_{$key}"] = "LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
 
 				} else {
@@ -130,10 +129,8 @@ class WC_Admin_Report {
 		$query['join'] = implode( ' ', $joins );
 
 		$query['where']  = "
-			WHERE 	posts.post_type 	= 'shop_order'
-			AND 	posts.post_status 	= 'publish'
-			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+			WHERE 	posts.post_type 	IN ( '" . implode( "','", $order_types ) . "' )
+			AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			";
 
 		if ( $filter_range ) {
@@ -262,7 +259,7 @@ class WC_Admin_Report {
 	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
 		$prepared_data = array();
 		$time          =  '';
-		
+
 		// Ensure all days (or months) have values first in this range
 		for ( $i = 0; $i <= $interval; $i ++ ) {
 			switch ( $group_by ) {
@@ -273,7 +270,7 @@ class WC_Admin_Report {
 					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) . '000';
 				break;
 			}
-			
+
 			if ( ! isset( $prepared_data[ $time ] ) )
 				$prepared_data[ $time ] = array( esc_js( $time ), 0 );
 		}

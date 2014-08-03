@@ -59,7 +59,7 @@ abstract class WC_Settings_API {
 
 	/**
 	 * Get the form fields after they are initialized
-	 * 
+	 *
 	 * @return array of options
 	 */
 	public function get_form_fields() {
@@ -292,7 +292,7 @@ abstract class WC_Settings_API {
     }
 
     /**
-     * Generate Password Input HTML.
+     * Generate Price Input HTML.
      *
      * @access public
      * @param mixed $key
@@ -336,7 +336,7 @@ abstract class WC_Settings_API {
     }
 
     /**
-     * Generate Password Input HTML.
+     * Generate Decimal Input HTML.
      *
      * @access public
      * @param mixed $key
@@ -641,7 +641,7 @@ abstract class WC_Settings_API {
     		} elseif ( method_exists( $this, 'validate_' . $v['type'] . '_field' ) ) {
     			$field = $this->{'validate_' . $v['type'] . '_field'}( $k );
     			$this->sanitized_fields[ $k ] = $field;
-    		
+
     		// Default to text
     		} else {
     			$field = $this->{'validate_text_field'}( $k );
@@ -671,6 +671,8 @@ abstract class WC_Settings_API {
 
     /**
      * Validate Text Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
      *
      * @param mixed $key
      * @return string
@@ -686,6 +688,8 @@ abstract class WC_Settings_API {
 
     /**
      * Validate Price Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
      *
      * @param mixed $key
      * @return string
@@ -701,10 +705,12 @@ abstract class WC_Settings_API {
     	}
 
     	return $text;
-    }   
+    }
 
     /**
-     * Validate Price Field.
+     * Validate Decimal Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
      *
      * @param mixed $key
      * @return string
@@ -720,7 +726,7 @@ abstract class WC_Settings_API {
     	}
 
     	return $text;
-    }  
+    }
 
     /**
      * Validate Password Field.

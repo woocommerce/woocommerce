@@ -1,12 +1,14 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * WC_Cache_Helper class.
  *
  * @class 		WC_Cache_Helper
- * @version		2.0.6
+ * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -14,14 +16,42 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class WC_Cache_Helper {
 
 	/**
-	 * __construct function.
-	 *
-	 * @access public
-	 * @return void
+	 * Hook in methods
 	 */
-	public function __construct() {
-		add_action( 'before_woocommerce_init', array( $this, 'init' ) );
-		add_action( 'admin_notices', array( $this, 'notices' ) );
+	public static function init() {
+		add_action( 'before_woocommerce_init', array( __CLASS__, 'prevent_caching' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
+	}
+
+	/**
+	 * Get transient version
+	 *
+	 * When using transients with unpredictable names, e.g. those containing an md5 
+	 * hash in the name, we need a way to invalidate them all at once. 
+	 *
+	 * When using default WP transients we're able to do this with a DB query to 
+	 * delete transients manually.
+	 *
+	 * With external cache however, this isn't possible. Instead, this function is used
+	 * to append a unique string (based on time()) to each transient. When transients 
+	 * are invalidated, the transient version will increment and data will be regenerated.
+	 *
+	 * Raised in issue https://github.com/woothemes/woocommerce/issues/5777
+	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/
+	 * 
+	 * @param  string  $group   Name for the group of transients we need to invalidate
+	 * @param  boolean $refresh true to force a new version
+	 * @return string transient version based on time(), 10 digits
+	 */
+	public static function get_transient_version( $group, $refresh = false ) {
+		$transient_name  = $group . '-transient-version';
+		$transient_value = get_transient( $transient_name );
+
+		if ( false === $transient_value || true === $refresh ) {
+			$transient_value = time();
+			set_transient( $transient_name, $transient_value );
+		}
+		return $transient_value;
 	}
 
 	/**
@@ -30,7 +60,7 @@ class WC_Cache_Helper {
 	 * @access public
 	 * @return void
 	 */
-	public function init() {
+	public static function prevent_caching() {
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
 
 			if ( wc_get_page_id( 'cart' ) < 1 || wc_get_page_id( 'checkout' ) < 1 || wc_get_page_id( 'myaccount' ) < 1 )
@@ -58,12 +88,13 @@ class WC_Cache_Helper {
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
 		}
 
-		if ( is_array( $wc_page_uris ) )
+		if ( is_array( $wc_page_uris ) ) {
 			foreach( $wc_page_uris as $uri )
 				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
-					$this->nocache();
+					self::nocache();
 					break;
 				}
+		}
 	}
 
 	/**
@@ -72,7 +103,7 @@ class WC_Cache_Helper {
 	 * @access private
 	 * @return void
 	 */
-	private function nocache() {
+	private static function nocache() {
 		if ( ! defined( 'DONOTCACHEPAGE' ) )
 			define( "DONOTCACHEPAGE", "true" );
 
@@ -91,9 +122,10 @@ class WC_Cache_Helper {
 	 * @access public
 	 * @return void
 	 */
-	public function notices() {
-		if ( ! function_exists( 'w3tc_pgcache_flush' ) || ! function_exists( 'w3_instance' ) )
+	public static function notices() {
+		if ( ! function_exists( 'w3tc_pgcache_flush' ) || ! function_exists( 'w3_instance' ) ) {
 			return;
+		}
 
 		$config   = w3_instance('W3_Config');
 		$enabled  = $config->get_integer( 'dbcache.enabled' );
@@ -109,4 +141,4 @@ class WC_Cache_Helper {
 	}
 }
 
-new WC_Cache_Helper();
+WC_Cache_Helper::init();

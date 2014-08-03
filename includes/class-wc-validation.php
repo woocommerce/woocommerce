@@ -78,11 +78,12 @@ class WC_Validation {
 	public static function is_GB_postcode( $toCheck ) {
 
 		// Permitted letters depend upon their position in the postcode.
+		// http://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
 		$alpha1 = "[abcdefghijklmnoprstuwyz]";                          // Character 1
 		$alpha2 = "[abcdefghklmnopqrstuvwxy]";                          // Character 2
-		$alpha3 = "[abcdefghjkstuw]";                                   // Character 3
-		$alpha4 = "[abehmnprvwxy]";                                     // Character 4
-		$alpha5 = "[abdefghjlnpqrstuwxyz]";                             // Character 5
+		$alpha3 = "[abcdefghjkpstuw]";                                  // Character 3 == ABCDEFGHJKPSTUW
+		$alpha4 = "[abehmnprvwxy]";                                     // Character 4 == ABEHMNPRVWXY
+		$alpha5 = "[abdefghjlnpqrstuwxyz]";                             // Character 5 != CIKMOV
 
 		// Expression for postcodes: AN NAA, ANN NAA, AAN NAA, and AANN NAA
 		$pcexp[0] = '/^('.$alpha1.'{1}'.$alpha2.'{0,1}[0-9]{1,2})([0-9]{1}'.$alpha5.'{2})$/';

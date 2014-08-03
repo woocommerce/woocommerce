@@ -12,8 +12,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if ( ! class_exists( 'WC_Admin_Attributes' ) ) :
-
 /**
  * WC_Admin_Attributes Class
  */
@@ -25,8 +23,8 @@ class WC_Admin_Attributes {
 	 * Shows the created attributes and lets you add new ones or edit existing ones.
  	 * The added attributes are stored in the database and can be used for layered navigation.
 	 */
-	public function output() {
-		global $wpdb, $woocommerce;
+	public static function output() {
+		global $wpdb;
 
 		// Action to perform: add, edit, delete or none
 		$action = '';
@@ -206,9 +204,9 @@ class WC_Admin_Attributes {
 
 		// Show admin interface
 		if ( ! empty( $_GET['edit'] ) )
-			$this->edit_attribute();
+			self::edit_attribute();
 		else
-			$this->add_attribute();
+			self::add_attribute();
 	}
 
 	/**
@@ -216,7 +214,7 @@ class WC_Admin_Attributes {
 	 *
 	 * Shows the interface for changing an attributes type between select and text
 	 */
-	public function edit_attribute() {
+	public static function edit_attribute() {
 		global $wpdb;
 
 		$edit = absint( $_GET['edit'] );
@@ -292,7 +290,7 @@ class WC_Admin_Attributes {
 	 *
 	 * Shows the interface for adding new attributes
 	 */
-	public function add_attribute() {
+	public static function add_attribute() {
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
@@ -424,7 +422,3 @@ class WC_Admin_Attributes {
 		<?php
 	}
 }
-
-endif;
-
-return new WC_Admin_Attributes();

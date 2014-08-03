@@ -30,7 +30,7 @@ class WC_Shortcode_My_Account {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce, $wp;
+		global $wp;
 
 		// Check cart class is loaded or abort
 		if ( is_null( WC()->cart ) ) {
@@ -41,9 +41,9 @@ class WC_Shortcode_My_Account {
 
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
-			if ( ! empty( $message ) )
-
+			if ( ! empty( $message ) ) {
 				wc_add_notice( $message );
+			}
 
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
 
@@ -67,7 +67,7 @@ class WC_Shortcode_My_Account {
 
 			} elseif ( isset( $wp->query_vars['edit-address'] ) ) {
 
-				self::edit_address( sanitize_title( $wp->query_vars['edit-address'] ) );
+				self::edit_address( wc_edit_address_i18n( sanitize_title( $wp->query_vars['edit-address'] ), true ) );
 
 			} elseif ( isset( $wp->query_vars['add-payment-method'] ) ) {
 
@@ -105,16 +105,20 @@ class WC_Shortcode_My_Account {
 	private static function view_order( $order_id ) {
 
 		$user_id      	= get_current_user_id();
-		$order 			= new WC_Order( $order_id );
+		$order 			= get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ).'" class="wc-forward">'. __( 'My Account', 'woocommerce' ) .'</a>' . '</div>';
 			return;
 		}
 
+		// Backwards compatibility
+		$status       = new stdClass();
+		$status->name = wc_get_order_status_name( $order->get_status() );
+
 		wc_get_template( 'myaccount/view-order.php', array(
-	        'status'    => get_term_by( 'slug', $order->status, 'shop_order_status' ),
-	        'order'     => new WC_Order( $order_id ),
+	        'status'    => $status, // @deprecated 2.2
+	        'order'     => get_order( $order_id ),
 	        'order_id'  => $order_id
 	    ) );
 	}

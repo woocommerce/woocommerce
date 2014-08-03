@@ -236,7 +236,7 @@ class WC_Admin_Profile {
 
 		if ( current_user_can( 'edit_user', $user_id ) ) {
 
-			$user = wp_get_current_user();
+			$user = get_userdata( $user_id );
 
 			// creating/deleting key
 			if ( isset( $_POST['woocommerce_generate_api_key'] ) ) {

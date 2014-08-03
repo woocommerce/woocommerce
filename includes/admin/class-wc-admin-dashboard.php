@@ -48,46 +48,46 @@ class WC_Admin_Dashboard {
 
 		$reports = new WC_Admin_Report();
 
-		// Get sales
-		$sales = $wpdb->get_var( "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-			LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-			WHERE 	posts.post_type 	= 'shop_order'
-			AND 	posts.post_status 	= 'publish'
-			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ( 'completed', 'processing', 'on-hold' )
-			AND 	postmeta.meta_key   = '_order_total'
-			AND 	posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "'
-			AND 	posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "'
-		" );
+		// Sales
+		$query            = array();
+		$query['fields']  = "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts";
+		$query['join']    = "INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id ";
+		$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'reports' ) ) . "' ) ";
+		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
+		$query['where']  .= "AND postmeta.meta_key   = '_order_total' ";
+		$query['where']  .= "AND posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
+		$query['where']  .= "AND posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";
+
+		$sales = $wpdb->get_var( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_sales_query', $query ) ) );
 
 		// Get top seller
-		$top_seller = $wpdb->get_row( "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id
-			FROM {$wpdb->posts} as posts
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id
-			WHERE 	posts.post_type 	= 'shop_order'
-			AND 	posts.post_status 	= 'publish'
-			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ( 'completed', 'processing', 'on-hold' )
-			AND 	order_item_meta.meta_key = '_qty'
-			AND 	order_item_meta_2.meta_key = '_product_id'
-			AND 	posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "'
-			AND 	posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "'
-			GROUP BY product_id
-			ORDER BY qty DESC
-			LIMIT   1
-		" );
+		$query            = array();
+		$query['fields']  = "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id
+			FROM {$wpdb->posts} as posts";
+		$query['join']    = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id ";
+		$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
+		$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
+		$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'order-count' ) ) . "' ) ";
+		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
+		$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";
+		$query['where']  .= "AND order_item_meta_2.meta_key = '_product_id' ";
+		$query['where']  .= "AND posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
+		$query['where']  .= "AND posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";
+		$query['groupby'] = "GROUP BY product_id";
+		$query['orderby'] = "ORDER BY qty DESC";
+		$query['limits']  = "LIMIT 1";
+
+		$top_seller = $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) );
 
 		// Counts
-		$on_hold_count      = get_term_by( 'slug', 'on-hold', 'shop_order_status' )->count;
-		$processing_count   = get_term_by( 'slug', 'processing', 'shop_order_status' )->count;
+		$on_hold_count    = 0;
+		$processing_count = 0;
+
+		foreach ( wc_get_order_types( 'order-count' ) as $type ) {
+			$counts           = (array) wp_count_posts( $type );
+			$on_hold_count    += isset( $counts['wc-on-hold'] ) ? $counts['wc-on-hold'] : 0;
+			$processing_count += isset( $counts['wc-processing'] ) ? $counts['wc-processing'] : 0;
+		}
 
 		// Get products using a query - this is too advanced for get_posts :(
 		$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
@@ -141,12 +141,12 @@ class WC_Admin_Dashboard {
 				</li>
 			<?php endif; ?>
 			<li class="processing-orders">
-				<a href="<?php echo admin_url( 'edit.php?s&post_status=all&post_type=shop_order&shop_order_status=processing' ); ?>">
+				<a href="<?php echo admin_url( 'edit.php?s&post_status=processing&post_type=shop_order' ); ?>">
 					<?php printf( _n( "<strong>%s order</strong> awaiting processing", "<strong>%s orders</strong> awaiting processing", $processing_count, 'woocommerce' ), $processing_count ); ?>
 				</a>
 			</li>
 			<li class="on-hold-orders">
-				<a href="<?php echo admin_url( 'edit.php?s&post_status=all&post_type=shop_order&shop_order_status=on-hold' ); ?>">
+				<a href="<?php echo admin_url( 'edit.php?s&post_status=on-hold&post_type=shop_order' ); ?>">
 					<?php printf( _n( "<strong>%s order</strong> on-hold", "<strong>%s orders</strong> on-hold", $on_hold_count, 'woocommerce' ), $on_hold_count ); ?>
 				</a>
 			</li>

@@ -21,8 +21,8 @@ class WC_Admin_Permalink_Settings {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
-		add_action( 'admin_init', array( $this, 'settings_init' ) );
-		add_action( 'admin_init', array( $this, 'settings_save' ) );
+		$this->settings_init();
+		$this->settings_save();
 	}
 
 	/**
@@ -154,19 +154,22 @@ class WC_Admin_Permalink_Settings {
 	 * Save the settings
 	 */
 	public function settings_save() {
-		if ( ! is_admin() )
+		if ( ! is_admin() ) {
 			return;
+		}
 
 		// We need to save the options ourselves; settings api does not trigger save for the permalinks page
 		if ( isset( $_POST['permalink_structure'] ) || isset( $_POST['category_base'] ) && isset( $_POST['product_permalink'] ) ) {
 			// Cat and tag bases
-			$woocommerce_product_category_slug = wc_clean( $_POST['woocommerce_product_category_slug'] );
-			$woocommerce_product_tag_slug = wc_clean( $_POST['woocommerce_product_tag_slug'] );
+			$woocommerce_product_category_slug  = wc_clean( $_POST['woocommerce_product_category_slug'] );
+			$woocommerce_product_tag_slug       = wc_clean( $_POST['woocommerce_product_tag_slug'] );
 			$woocommerce_product_attribute_slug = wc_clean( $_POST['woocommerce_product_attribute_slug'] );
 
 			$permalinks = get_option( 'woocommerce_permalinks' );
-			if ( ! $permalinks )
+			
+			if ( ! $permalinks ) {
 				$permalinks = array();
+			}
 
 			$permalinks['category_base'] 	= untrailingslashit( $woocommerce_product_category_slug );
 			$permalinks['tag_base'] 		= untrailingslashit( $woocommerce_product_tag_slug );
@@ -191,6 +194,13 @@ class WC_Admin_Permalink_Settings {
 			}
 
 			$permalinks['product_base'] = untrailingslashit( $product_permalink );
+
+			// Shop base may require verbose page rules if nesting pages
+			$shop_page_id   = wc_get_page_id( 'shop' );
+			$shop_permalink = ( $shop_page_id > 0 && get_page( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' );
+			if ( $shop_page_id && trim( $permalinks['product_base'], '/' ) === $shop_permalink ) {
+				$permalinks['use_verbose_page_rules'] = true;
+			}
 
 			update_option( 'woocommerce_permalinks', $permalinks );
 		}

@@ -133,7 +133,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 			array(
 				'title' 		=> __( 'Additional Tax Classes', 'woocommerce' ),
-				'desc' 		=> __( 'List additonal tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>. Tax classes can be assigned to products.', 'woocommerce' ),
+				'desc' 		=> __( 'List additional tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>. Tax classes can be assigned to products.', 'woocommerce' ),
 				'id' 		=> 'woocommerce_tax_classes',
 				'css' 		=> 'width:100%; height: 65px;',
 				'type' 		=> 'textarea',
@@ -229,7 +229,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Output tax rate tables
 	 */
 	public function output_tax_rates() {
-		global $woocommerce, $current_section, $wpdb;
+		global $current_section, $wpdb;
 
 		$page          = ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1;
 		$limit         = 100;
@@ -267,30 +267,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 				</tr>
 			</thead>
-			<tfoot>
-				<tr>
-					<th colspan="10">
-						<a href="#" class="button plus insert"><?php _e( 'Insert row', 'woocommerce' ); ?></a>
-						<a href="#" class="button minus remove_tax_rates"><?php _e( 'Remove selected row(s)', 'woocommerce' ); ?></a>
-
-						<div class="pagination">
-							<?php
-								echo str_replace( 'page-numbers', 'page-numbers button', paginate_links( array(
-									'base'      => add_query_arg( 'p', '%#%' ),
-									'type'      => 'plain',
-									'prev_text' => '&laquo;',
-									'next_text' => '&raquo;',
-									'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit ),
-									'current'   => $page
-								) ) );
-							?>
-						</div>
-
-						<a href="#" download="tax_rates.csv" class="button export"><?php _e( 'Export CSV', 'woocommerce' ); ?></a>
-						<a href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>" class="button import"><?php _e( 'Import CSV', 'woocommerce' ); ?></a>
-					</th>
-				</tr>
-			</tfoot>
 			<tbody id="rates">
 				<?php
 					$rates = $wpdb->get_results( $wpdb->prepare(
@@ -306,11 +282,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 					foreach ( $rates as $rate ) {
 						?>
-						<tr>
+						<tr class="tips" data-tip="<?php echo __( 'Tax rate ID', 'woocommerce' ) . ': ' . $rate->tax_rate_id; ?>">
 							<td class="sort"><input type="hidden" class="remove_tax_rate" name="remove_tax_rate[<?php echo $rate->tax_rate_id ?>]" value="0" /></td>
 
 							<td class="country" width="8%">
-								<input type="text" value="<?php echo esc_attr( $rate->tax_rate_country ) ?>" placeholder="*" name="tax_rate_country[<?php echo $rate->tax_rate_id ?>]" />
+								<input type="text" value="<?php echo esc_attr( $rate->tax_rate_country ) ?>" placeholder="*" name="tax_rate_country[<?php echo $rate->tax_rate_id ?>]" class="wc_input_country_iso" />
 							</td>
 
 							<td class="state" width="8%">
@@ -356,6 +332,30 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					}
 				?>
 			</tbody>
+			<tfoot>
+				<tr>
+					<th colspan="10">
+						<a href="#" class="button plus insert"><?php _e( 'Insert row', 'woocommerce' ); ?></a>
+						<a href="#" class="button minus remove_tax_rates"><?php _e( 'Remove selected row(s)', 'woocommerce' ); ?></a>
+
+						<div class="pagination">
+							<?php
+								echo str_replace( 'page-numbers', 'page-numbers button', paginate_links( array(
+									'base'      => add_query_arg( 'p', '%#%' ),
+									'type'      => 'plain',
+									'prev_text' => '&laquo;',
+									'next_text' => '&raquo;',
+									'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit ),
+									'current'   => $page
+								) ) );
+							?>
+						</div>
+
+						<a href="#" download="tax_rates.csv" class="button export"><?php _e( 'Export CSV', 'woocommerce' ); ?></a>
+						<a href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>" class="button import"><?php _e( 'Import CSV', 'woocommerce' ); ?></a>
+					</th>
+				</tr>
+			</tfoot>
 		</table>
 		<script type="text/javascript">
 			jQuery( function() {
@@ -420,7 +420,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					var code = '<tr class="new">\
 							<td class="sort">&nbsp;</td>\
 							<td class="country" width="8%">\
-								<input type="text" placeholder="*" name="tax_rate_country[new][' + size + ']" />\
+								<input type="text" placeholder="*" name="tax_rate_country[new][' + size + ']" class="wc_input_country_iso" />\
 							</td>\
 							<td class="state" width="8%">\
 								<input type="text" placeholder="*" name="tax_rate_state[new][' + size + ']" />\
@@ -555,22 +555,23 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					if ( $state == '*' )
 						$state = '';
 
-					$wpdb->insert(
-						$wpdb->prefix . "woocommerce_tax_rates",
-						array(
-							'tax_rate_country'  => $country,
-							'tax_rate_state'    => $state,
-							'tax_rate'          => $rate,
-							'tax_rate_name'     => $name,
-							'tax_rate_priority' => $priority,
-							'tax_rate_compound' => $compound,
-							'tax_rate_shipping' => $shipping,
-							'tax_rate_order'    => $i,
-							'tax_rate_class'    => sanitize_title( $current_class )
-						)
+					$_tax_rate = array(
+						'tax_rate_country'  => $country,
+						'tax_rate_state'    => $state,
+						'tax_rate'          => $rate,
+						'tax_rate_name'     => $name,
+						'tax_rate_priority' => $priority,
+						'tax_rate_compound' => $compound,
+						'tax_rate_shipping' => $shipping,
+						'tax_rate_order'    => $i,
+						'tax_rate_class'    => sanitize_title( $current_class )
 					);
 
+					$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', $_tax_rate );
+
 					$tax_rate_id = $wpdb->insert_id;
+
+					do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $_tax_rate );
 
 					if ( ! empty( $postcode ) ) {
 						$postcodes = explode( ';', $postcode );
@@ -589,7 +590,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 										if ( strlen( $i ) < strlen( $postcode_parts[0] ) )
 											$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
-										
+
 										$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 									}
 								}
@@ -625,8 +626,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				$tax_rate_id = absint( $key );
 
 				if ( $_POST['remove_tax_rate'][ $key ] == 1 ) {
+					do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
+
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
+
 					continue;
 				}
 
@@ -648,23 +652,27 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				if ( $state == '*' )
 					$state = '';
 
+				$_tax_rate = array(
+					'tax_rate_country'  => $country,
+					'tax_rate_state'    => $state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => $name,
+					'tax_rate_priority' => $priority,
+					'tax_rate_compound' => $compound,
+					'tax_rate_shipping' => $shipping,
+					'tax_rate_order'    => $i,
+					'tax_rate_class'    => sanitize_title( $current_class )
+				);
+
 				$wpdb->update(
 					$wpdb->prefix . "woocommerce_tax_rates",
+					$_tax_rate,
 					array(
-						'tax_rate_country'  => $country,
-						'tax_rate_state'    => $state,
-						'tax_rate'          => $rate,
-						'tax_rate_name'     => $name,
-						'tax_rate_priority' => $priority,
-						'tax_rate_compound' => $compound,
-						'tax_rate_shipping' => $shipping,
-						'tax_rate_order'    => $i,
-						'tax_rate_class'    => sanitize_title( $current_class )
-					),
-					array(
-						'tax_rate_id' 		=> $tax_rate_id
+						'tax_rate_id' => $tax_rate_id
 					)
 				);
+
+				do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $_tax_rate );
 
 				if ( isset( $tax_rate_postcode[ $key ] ) ) {
 					// Delete old
@@ -688,7 +696,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 									if ( strlen( $i ) < strlen( $postcode_parts[0] ) )
 										$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
-									
+
 									$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
 								}
 							}

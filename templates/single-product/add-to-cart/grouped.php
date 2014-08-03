@@ -4,12 +4,14 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @version     2.1.7
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $woocommerce, $product, $post;
+global $product, $post;
+
+$parent_product_post = $post;
 
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
@@ -55,8 +57,9 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 				endforeach;
 
 				// Reset to parent grouped product
-				wp_reset_postdata();
-				$product = get_product( $post->ID );
+				$post    = $parent_product_post;
+				$product = get_product( $parent_product_post->ID );
+				setup_postdata( $parent_product_post );
 			?>
 		</tbody>
 	</table>

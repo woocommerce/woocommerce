@@ -37,16 +37,9 @@
 
 	<wp:term><wp:term_id>17</wp:term_id><wp:term_taxonomy>pa_color</wp:term_taxonomy><wp:term_slug>black</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[Black]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>19</wp:term_id><wp:term_taxonomy>pa_color</wp:term_taxonomy><wp:term_slug>blue</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[Blue]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>12</wp:term_id><wp:term_taxonomy>shop_order_status</wp:term_taxonomy><wp:term_slug>cancelled</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[cancelled]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>10</wp:term_id><wp:term_taxonomy>shop_order_status</wp:term_taxonomy><wp:term_slug>completed</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[completed]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>5</wp:term_id><wp:term_taxonomy>product_type</wp:term_taxonomy><wp:term_slug>external</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[external]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>7</wp:term_id><wp:term_taxonomy>shop_order_status</wp:term_taxonomy><wp:term_slug>failed</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[failed]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>16</wp:term_id><wp:term_taxonomy>pa_color</wp:term_taxonomy><wp:term_slug>green</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[Green]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>3</wp:term_id><wp:term_taxonomy>product_type</wp:term_taxonomy><wp:term_slug>grouped</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[grouped]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>8</wp:term_id><wp:term_taxonomy>shop_order_status</wp:term_taxonomy><wp:term_slug>on-hold</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[on-hold]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>6</wp:term_id><wp:term_taxonomy>shop_order_status</wp:term_taxonomy><wp:term_slug>pending</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[pending]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>9</wp:term_id><wp:term_taxonomy>shop_order_status</wp:term_taxonomy><wp:term_slug>processing</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[processing]]></wp:term_name></wp:term>
-	<wp:term><wp:term_id>11</wp:term_id><wp:term_taxonomy>shop_order_status</wp:term_taxonomy><wp:term_slug>refunded</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[refunded]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>2</wp:term_id><wp:term_taxonomy>product_type</wp:term_taxonomy><wp:term_slug>simple</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[simple]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>4</wp:term_id><wp:term_taxonomy>product_type</wp:term_taxonomy><wp:term_slug>variable</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[variable]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>14</wp:term_id><wp:term_taxonomy>product_cat</wp:term_taxonomy><wp:term_slug>clothing</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[Clothing]]></wp:term_name></wp:term>

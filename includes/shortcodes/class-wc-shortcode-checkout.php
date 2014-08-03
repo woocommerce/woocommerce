@@ -31,7 +31,7 @@ class WC_Shortcode_Checkout {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce, $wp;
+		global $wp;
 
 		// Check cart class is loaded or abort
 		if ( is_null( WC()->cart ) ) {
@@ -44,12 +44,13 @@ class WC_Shortcode_Checkout {
 
 			// Get the order to work out what we are showing
 			$order_id             = absint( $_GET['order'] );
-			$order                = new WC_Order( $order_id );
+			$order                = get_order( $order_id );
 
-			if ( $order->status == 'pending' )
+			if ( $order->has_status( 'pending' ) ) {
 				$wp->query_vars['order-pay'] = absint( $_GET['order'] );
-			else
+			} else {
 				$wp->query_vars['order-received'] = absint( $_GET['order'] );
+			}
 		}
 
 		// Handle checkout actions
@@ -84,7 +85,7 @@ class WC_Shortcode_Checkout {
 
 			// Pay for existing order
 			$order_key            = $_GET[ 'key' ];
-			$order                = new WC_Order( $order_id );
+			$order                = get_order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
@@ -94,7 +95,7 @@ class WC_Shortcode_Checkout {
 
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				if ( in_array( $order->status, $valid_order_statuses ) ) {
+				if ( $order->has_status( $valid_order_statuses ) ) {
 
 					// Set customer location to order location
 					if ( $order->billing_country )
@@ -107,10 +108,7 @@ class WC_Shortcode_Checkout {
 					wc_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
 
 				} else {
-
-					$status = get_term_by('slug', $order->status, 'shop_order_status');
-
-					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
 
 			} else {
@@ -121,12 +119,12 @@ class WC_Shortcode_Checkout {
 
 			// Pay for order after checkout step
 			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
-			$order                = new WC_Order( $order_id );
+			$order                = get_order( $order_id );
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				if ( in_array( $order->status, $valid_order_statuses ) ) {
+				if ( $order->has_status( $valid_order_statuses ) ) {
 
 					?>
 					<ul class="order_details">
@@ -158,10 +156,7 @@ class WC_Shortcode_Checkout {
 					<?php
 
 				} else {
-
-					$status = get_term_by('slug', $order->status, 'shop_order_status');
-
-					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), $status->name ), 'error' );
+					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
 
 			} else {
@@ -191,7 +186,7 @@ class WC_Shortcode_Checkout {
 		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( $_GET['key'] ) );
 
 		if ( $order_id > 0 ) {
-			$order = new WC_Order( $order_id );
+			$order = get_order( $order_id );
 			if ( $order->order_key != $order_key )
 				unset( $order );
 		}

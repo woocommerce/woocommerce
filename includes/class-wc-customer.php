@@ -5,7 +5,7 @@
  * The WooCommerce customer class handles storage of the current customer's data, such as location.
  *
  * @class 		WC_Customer
- * @version		1.6.4
+ * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -22,11 +22,11 @@ class WC_Customer {
 	 * Constructor for the customer class loads the customer data.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function __construct() {
+		$this->_data = WC()->session->get( 'customer' );
 
-		if ( empty( WC()->session->customer ) ) {
+		if ( empty( $this->_data ) ) {
 
 			$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
 
@@ -53,11 +53,6 @@ class WC_Customer {
 				'is_vat_exempt' 		=> false,
 				'calculated_shipping'	=> false
 			);
-
-		} else {
-
-			$this->_data = WC()->session->customer;
-
 		}
 
 		// When leaving or ending page load, store data
@@ -68,11 +63,11 @@ class WC_Customer {
 	 * save_data function.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function save_data() {
-		if ( $this->_changed )
-			$GLOBALS['woocommerce']->session->customer = $this->_data;
+		if ( $this->_changed ) {
+			WC()->session->set( 'customer', $this->_data );
+		}
 	}
 
 	/**
@@ -89,11 +84,11 @@ class WC_Customer {
      * __get function.
      *
      * @access public
-     * @param mixed $property
-     * @return mixed|null
+     * @param string $property
+     * @return string
      */
     public function __get( $property ) {
-        return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : null;
+        return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : '';
     }
 
     /**
@@ -102,7 +97,6 @@ class WC_Customer {
      * @access public
      * @param mixed $property
      * @param mixed $value
-     * @return void
      */
     public function __set( $property, $value ) {
         $this->_data[ $property ] = $value;
@@ -119,12 +113,10 @@ class WC_Customer {
 		return ( ! empty( $this->calculated_shipping ) ) ? true : false;
 	}
 
-
 	/**
 	 * Set customer address to match shop base address.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function set_to_base() {
 		$default = apply_filters( 'woocommerce_customer_default_location', get_option('woocommerce_default_country') );
@@ -140,12 +132,10 @@ class WC_Customer {
     	$this->city     = '';
 	}
 
-
 	/**
 	 * Set customer shipping address to base address.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function set_shipping_to_base() {
 		$default = get_option('woocommerce_default_country');
@@ -160,7 +150,6 @@ class WC_Customer {
     	$this->shipping_postcode = '';
     	$this->shipping_city     = '';
 	}
-
 
 	/**
 	 * Is customer outside base country (for tax purposes)?
@@ -189,6 +178,15 @@ class WC_Customer {
 		return false;
 	}
 
+	/**
+	 * Is the user a paying customer?
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	function is_paying_customer( $user_id ) {
+		return '1' === get_user_meta( $user_id, 'paying_customer', true );
+	}
 
 	/**
 	 * Is customer VAT exempt?
@@ -200,7 +198,6 @@ class WC_Customer {
 		return ( ! empty( $this->is_vat_exempt ) ) ? true : false;
 	}
 
-
 	/**
 	 * Gets the state from the current session.
 	 *
@@ -208,9 +205,8 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_state() {
-		if ( isset( $this->state ) ) return $this->state;
+		return $this->state;
 	}
-
 
 	/**
 	 * Gets the country from the current session
@@ -219,9 +215,8 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_country() {
-		if ( isset( $this->country ) ) return $this->country;
+		return $this->country;
 	}
-
 
 	/**
 	 * Gets the postcode from the current session.
@@ -230,10 +225,8 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_postcode() {
-		if ( isset( $this->postcode ) && $this->postcode !== false )
-			return wc_format_postcode( $this->postcode, $this->get_country() );
+		return empty( $this->postcode ) ? '' : wc_format_postcode( $this->postcode, $this->get_country() );
 	}
-
 
 	/**
 	 * Get the city from the current session.
@@ -242,7 +235,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_city() {
-		if ( isset( $this->city ) ) return $this->city;
+		return $this->city;
 	}
 
 	/**
@@ -252,7 +245,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_address() {
-		if ( isset( $this->address ) ) return $this->address;
+		return $this->address;
 	}
 
 	/**
@@ -262,7 +255,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_address_2() {
-		if ( isset( $this->address_2 ) ) return $this->address_2;
+		return $this->address_2;
 	}
 
 	/**
@@ -272,7 +265,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_shipping_state() {
-		if ( isset( $this->shipping_state ) ) return $this->shipping_state;
+		return $this->shipping_state;
 	}
 
 
@@ -283,7 +276,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_shipping_country() {
-		if ( isset( $this->shipping_country ) ) return $this->shipping_country;
+		return $this->shipping_country;
 	}
 
 
@@ -294,8 +287,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_shipping_postcode() {
-		if ( isset( $this->shipping_postcode ) )
-			return wc_format_postcode( $this->shipping_postcode, $this->get_shipping_country() );
+		return empty( $this->shipping_postcode ) ? '' : wc_format_postcode( $this->shipping_postcode, $this->get_shipping_country() );
 	}
 
 
@@ -306,7 +298,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_shipping_city() {
-		if ( isset( $this->shipping_city ) ) return $this->shipping_city;
+		return $this->shipping_city;
 	}
 
 	/**
@@ -316,7 +308,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_shipping_address() {
-		if ( isset( $this->shipping_address ) ) return $this->shipping_address;
+		return $this->shipping_address;
 	}
 
 	/**
@@ -326,7 +318,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_shipping_address_2() {
-		if ( isset( $this->shipping_address_2 ) ) return $this->shipping_address_2;
+		return $this->shipping_address_2;
 	}
 
 	/**
@@ -384,58 +376,49 @@ class WC_Customer {
 	 * @param mixed $state
 	 * @param string $postcode (default: '')
 	 * @param string $city (default: '')
-	 * @return void
 	 */
 	public function set_location( $country, $state, $postcode = '', $city = '' ) {
-		$this->country = $country;
-		$this->state = $state;
+		$this->country  = $country;
+		$this->state    = $state;
 		$this->postcode = $postcode;
-		$this->city = $city;
+		$this->city     = $city;
 	}
-
 
 	/**
 	 * Sets session data for the country.
 	 *
 	 * @access public
 	 * @param mixed $country
-	 * @return void
 	 */
 	public function set_country( $country ) {
 		$this->country = $country;
 	}
-
 
 	/**
 	 * Sets session data for the state.
 	 *
 	 * @access public
 	 * @param mixed $state
-	 * @return void
 	 */
 	public function set_state( $state ) {
 		$this->state = $state;
 	}
-
 
 	/**
 	 * Sets session data for the postcode.
 	 *
 	 * @access public
 	 * @param mixed $postcode
-	 * @return void
 	 */
 	public function set_postcode( $postcode ) {
 		$this->postcode = $postcode;
 	}
-
 
 	/**
 	 * Sets session data for the city.
 	 *
 	 * @access public
 	 * @param mixed $postcode
-	 * @return void
 	 */
 	public function set_city( $city ) {
 		$this->city = $city;
@@ -446,7 +429,6 @@ class WC_Customer {
 	 *
 	 * @access public
 	 * @param mixed $address
-	 * @return void
 	 */
 	public function set_address( $address ) {
 		$this->address = $address;
@@ -457,7 +439,6 @@ class WC_Customer {
 	 *
 	 * @access public
 	 * @param mixed $address_2
-	 * @return void
 	 */
 	public function set_address_2( $address_2 ) {
 		$this->address_2 = $address_2;
@@ -471,58 +452,49 @@ class WC_Customer {
 	 * @param string $state (default: '')
 	 * @param string $postcode (default: '')
 	 * @param string $city (default: '')
-	 * @return void
 	 */
 	public function set_shipping_location( $country, $state = '', $postcode = '', $city = '' ) {
-		$this->shipping_country = $country;
-		$this->shipping_state = $state;
+		$this->shipping_country  = $country;
+		$this->shipping_state    = $state;
 		$this->shipping_postcode = $postcode;
-		$this->shipping_city = $city;
+		$this->shipping_city     = $city;
 	}
-
 
 	/**
 	 * Sets session data for the country.
 	 *
 	 * @access public
-	 * @param mixed $country
-	 * @return void
+	 * @param string $country
 	 */
 	public function set_shipping_country( $country ) {
 		$this->shipping_country = $country;
 	}
 
-
 	/**
 	 * Sets session data for the state.
 	 *
 	 * @access public
-	 * @param mixed $state
-	 * @return void
+	 * @param string $state
 	 */
 	public function set_shipping_state( $state ) {
 		$this->shipping_state = $state;
 	}
 
-
 	/**
 	 * Sets session data for the postcode.
 	 *
 	 * @access public
-	 * @param mixed $postcode
-	 * @return void
+	 * @param string $postcode
 	 */
 	public function set_shipping_postcode( $postcode ) {
 		$this->shipping_postcode = $postcode;
 	}
 
-
 	/**
 	 * Sets session data for the city.
 	 *
 	 * @access public
-	 * @param mixed $postcode
-	 * @return void
+	 * @param string $postcode
 	 */
 	public function set_shipping_city( $city ) {
 		$this->shipping_city = $city;
@@ -532,8 +504,7 @@ class WC_Customer {
 	 * Sets session data for the address.
 	 *
 	 * @access public
-	 * @param mixed $address
-	 * @return void
+	 * @param string $address
 	 */
 	public function set_shipping_address( $address ) {
 		$this->shipping_address = $address;
@@ -543,37 +514,31 @@ class WC_Customer {
 	 * Sets session data for the address_2.
 	 *
 	 * @access public
-	 * @param mixed $address_2
-	 * @return void
+	 * @param string $address_2
 	 */
 	public function set_shipping_address_2( $address_2 ) {
 		$this->shipping_address_2 = $address_2;
 	}
 
-
 	/**
 	 * Sets session data for the tax exemption.
 	 *
 	 * @access public
-	 * @param mixed $is_vat_exempt
-	 * @return void
+	 * @param bool $is_vat_exempt
 	 */
 	public function set_is_vat_exempt( $is_vat_exempt ) {
 		$this->is_vat_exempt = $is_vat_exempt;
 	}
-
 
 	/**
 	 * calculated_shipping function.
 	 *
 	 * @access public
 	 * @param mixed $calculated
-	 * @return void
 	 */
 	public function calculated_shipping( $calculated = true ) {
 		$this->calculated_shipping = $calculated;
 	}
-
 
 	/**
 	 * Gets a user's downloadable products if they are logged in.
@@ -582,86 +547,10 @@ class WC_Customer {
 	 * @return array Array of downloadable products
 	 */
 	public function get_downloadable_products() {
-		global $wpdb;
-
-		$downloads   = array();
-		$_product    = null;
-		$order       = null;
-		$file_number = 0;
+		$downloads = array();
 
 		if ( is_user_logged_in() ) {
-
-			// Get results from valid orders only
-			$results = $wpdb->get_results( $wpdb->prepare( "
-				SELECT permissions.* 
-				FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
-				LEFT JOIN {$wpdb->posts} as posts ON permissions.order_id = posts.ID
-				WHERE user_id = %s 
-				AND permissions.order_id > 0
-				AND posts.post_status = 'publish'
-				AND 
-					(
-						permissions.downloads_remaining > 0
-						OR 
-						permissions.downloads_remaining = ''
-					)
-				AND 
-					(
-						permissions.access_expires IS NULL
-						OR 
-						permissions.access_expires >= %s
-					)
-				GROUP BY permissions.download_id
-				ORDER BY permissions.order_id, permissions.product_id, permissions.download_id;
-				", get_current_user_id(), date( 'Y-m-d', current_time( 'timestamp' ) ) ) );
-
-			if ( $results ) {
-				foreach ( $results as $result ) {
-					if ( ! $order || $order->id != $result->order_id ) {
-						// new order
-						$order    = new WC_Order( $result->order_id );
-						$_product = null;
-					}
-
-					// Downloads permitted?
-					if ( ! $order->is_download_permitted() ) {
-						continue;
-					}
-
-					if ( ! $_product || $_product->id != $result->product_id ) {
-						// new product
-						$file_number = 0;
-						$_product    = get_product( $result->product_id );
-					}
-
-					// Check product exists and has the file
-					if ( ! $_product || ! $_product->exists() || ! $_product->has_file( $result->download_id ) ) {
-						continue;
-					}
-
-					$download_file = $_product->get_file( $result->download_id );
-					// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
-					$download_name = apply_filters(
-						'woocommerce_downloadable_product_name',
-						$_product->get_title() . ' &ndash; ' . $download_file['name'],
-						$_product,
-						$result->download_id,
-						$file_number
-					);
-
-					$downloads[] = array(
-						'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/', 'http' ) ),
-						'download_id'         => $result->download_id,
-						'product_id'          => $result->product_id,
-						'download_name'       => $download_name,
-						'order_id'            => $order->id,
-						'order_key'           => $order->order_key,
-						'downloads_remaining' => $result->downloads_remaining
-					);
-
-					$file_number++;
-				}
-			}
+			$downloads = wc_get_customer_available_downloads( get_current_user_id() );
 		}
 
 		return apply_filters( 'woocommerce_customer_get_downloadable_products', $downloads );

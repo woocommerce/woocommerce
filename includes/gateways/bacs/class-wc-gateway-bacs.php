@@ -116,11 +116,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			            	<th><?php _e( 'BIC / Swift', 'woocommerce' ); ?></th>
 		    			</tr>
 		    		</thead>
-		    		<tfoot>
-		    			<tr>
-		    				<th colspan="7"><a href="#" class="add button"><?php _e( '+ Add Account', 'woocommerce' ); ?></a> <a href="#" class="remove_rows button"><?php _e( 'Remove selected account(s)', 'woocommerce' ); ?></a></th>
-		    			</tr>
-		    		</tfoot>
 		    		<tbody class="accounts">
 		            	<?php
 		            	$i = -1;
@@ -141,6 +136,11 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		            	}
 		            	?>
 		        	</tbody>
+		    		<tfoot>
+		    			<tr>
+		    				<th colspan="7"><a href="#" class="add button"><?php _e( '+ Add Account', 'woocommerce' ); ?></a> <a href="#" class="remove_rows button"><?php _e( 'Remove selected account(s)', 'woocommerce' ); ?></a></th>
+		    			</tr>
+		    		</tfoot>
 		        </table>
 		       	<script type="text/javascript">
 					jQuery(function() {
@@ -222,16 +222,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      * @return void
      */
     public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-
-    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'bacs' ) {
-    		return;
-    	}
-
-		if ( $this->instructions ) {
-        	echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
-        }
-
-		$this->bank_details( $order->id );
+    	if ( ! $sent_to_admin && 'bacs' === $order->payment_method && $order->has_status( 'on-hold' ) ) {
+			if ( $this->instructions ) {
+				echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
+			}
+			$this->bank_details( $order->id );
+		}
     }
 
     /**
@@ -248,9 +244,13 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
     	if ( ! empty( $bacs_accounts ) ) {
 	    	foreach ( $bacs_accounts as $bacs_account ) {
-	    		echo '<ul class="order_details bacs_details">' . PHP_EOL;
-
 	    		$bacs_account = (object) $bacs_account;
+
+				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
+					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>' . PHP_EOL;
+				}
+
+	    		echo '<ul class="order_details bacs_details">' . PHP_EOL;
 
 	    		// BACS account fields shown on the thanks page and in emails
 				$account_fields = apply_filters( 'woocommerce_bacs_account_fields', array(
@@ -272,10 +272,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					)
 				), $order_id );
 
-				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
-					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>' . PHP_EOL;
-				}
-
 	    		foreach ( $account_fields as $field_key => $field ) {
 				    if ( ! empty( $field['value'] ) ) {
 				    	echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>' . PHP_EOL;
@@ -295,7 +291,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      */
     public function process_payment( $order_id ) {
 
-		$order = new WC_Order( $order_id );
+		$order = get_order( $order_id );
 
 		// Mark as on-hold (we're awaiting the payment)
 		$order->update_status( 'on-hold', __( 'Awaiting BACS payment', 'woocommerce' ) );

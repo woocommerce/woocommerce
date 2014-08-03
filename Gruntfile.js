@@ -89,14 +89,14 @@ module.exports = function( grunt ){
 		watch: {
 			less: {
 				files: ['<%= dirs.css %>/*.less'],
-				tasks: ['less', 'cssmin'],
+				tasks: ['less', 'cssmin']
 			},
 			js: {
 				files: [
 					'<%= dirs.js %>/admin/*js',
 					'<%= dirs.js %>/frontend/*js',
 					'!<%= dirs.js %>/admin/*.min.js',
-					'!<%= dirs.js %>/frontend/*.min.js',
+					'!<%= dirs.js %>/frontend/*.min.js'
 				],
 				tasks: ['uglify']
 			}
@@ -106,18 +106,6 @@ module.exports = function( grunt ){
 			options: {
 				stdout: true,
 				stderr: true
-			},
-			txpull: {
-				command: [
-					'cd i18n',
-					'tx pull -a -f',
-				].join( '&&' )
-			},
-			generatemos: {
-				command: [
-					'cd i18n/languages',
-					'for i in *.po; do msgfmt $i -o ${i%%.*}.mo; done'
-				].join( '&&' )
 			},
 			generatepot: {
 				command: [
@@ -152,7 +140,7 @@ module.exports = function( grunt ){
 				dest: 'deploy',
 				expand: true,
 				dot: true
-			},
+			}
 		},
 
 		clean: {
@@ -161,7 +149,7 @@ module.exports = function( grunt ){
 			},
 			deploy: {
 				src: [ 'deploy' ]
-			},
+			}
 		}
 	});
 
@@ -187,19 +175,17 @@ module.exports = function( grunt ){
 	]);
 
 	grunt.registerTask( 'docs', [
-		'clean:apigen', 
+		'clean:apigen',
 		'shell:apigen'
 	]);
 
 	grunt.registerTask( 'dev', [
 		'default',
-		'shell:txpull',
-		'shell:generatemos'
+		'pot'
 	]);
 
-	grunt.registerTask( 'deploy', [ 
-		'clean:deploy', 
+	grunt.registerTask( 'deploy', [
+		'clean:deploy',
 		'copy:deploy'
 	]);
-
 };

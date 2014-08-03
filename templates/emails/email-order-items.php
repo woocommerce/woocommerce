@@ -22,7 +22,7 @@ foreach ( $items as $item ) :
 
 			// Show title/image etc
 			if ( $show_image ) {
-				echo apply_filters( 'woocommerce_order_item_thumbnail', '<img src="' . current( wp_get_attachment_image_src( get_post_thumbnail_id( $_product->id ), 'thumbnail') ) .'" alt="' . __( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" />', $item );
+				echo apply_filters( 'woocommerce_order_item_thumbnail', '<img src="' . ( $_product->get_image_id() ? current( wp_get_attachment_image_src( $_product->get_image_id(), 'thumbnail') ) : wc_placeholder_img_src() ) .'" alt="' . __( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" />', $item );
 			}
 
 			// Product name
@@ -64,7 +64,7 @@ foreach ( $items as $item ) :
 
 	<?php if ( $show_purchase_note && is_object( $_product ) && $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) : ?>
 		<tr>
-			<td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo apply_filters( 'the_content', $purchase_note ); ?></td>
+			<td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo wpautop( do_shortcode( $purchase_note ) ); ?></td>
 		</tr>
 	<?php endif; ?>
 

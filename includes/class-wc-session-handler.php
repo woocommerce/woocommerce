@@ -28,6 +28,9 @@ class WC_Session_Handler extends WC_Session {
 	/** session expiration timestamp */
 	private $_session_expiration;
 
+	/** Bool based on whether a cookie exists **/
+	private $_has_cookie = false;
+
 	/**
 	 * Constructor for the session class.
 	 *
@@ -41,11 +44,18 @@ class WC_Session_Handler extends WC_Session {
 			$this->_customer_id        = $cookie[0];
 			$this->_session_expiration = $cookie[1];
 			$this->_session_expiring   = $cookie[2];
+			$this->_has_cookie         = true;
 
 			// Update session if its close to expiring
 			if ( time() > $this->_session_expiring ) {
 				$this->set_session_expiration();
-				update_option( '_wc_session_expires_' . $this->_customer_id, $this->_session_expiration );
+				$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
+				// Check if option exists first to avoid auloading cleaned up sessions
+				if ( false === get_option( $session_expiry_option ) ) {
+					add_option( $session_expiry_option, $this->_session_expiration, '', 'no' );
+				} else {
+					update_option( $session_expiry_option, $this->_session_expiration );
+				}
 			}
 
 		} else {
@@ -59,6 +69,10 @@ class WC_Session_Handler extends WC_Session {
     	add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
     	add_action( 'woocommerce_cleanup_sessions', array( $this, 'cleanup_sessions' ), 10 );
     	add_action( 'shutdown', array( $this, 'save_data' ), 20 );
+    	add_action( 'clear_auth_cookie', array( $this, 'destroy_session' ) );
+    	if ( ! is_user_logged_in() ) {
+    		add_action( 'woocommerce_thankyou', array( $this, 'destroy_session' ) );
+    	}
     }
 
     /**
@@ -71,13 +85,22 @@ class WC_Session_Handler extends WC_Session {
     public function set_customer_session_cookie( $set ) {
     	if ( $set ) {
 	    	// Set/renew our cookie
-	    	$to_hash      = $this->_customer_id . $this->_session_expiration;
-	    	$cookie_hash  = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
-	    	$cookie_value = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
+			$to_hash           = $this->_customer_id . $this->_session_expiration;
+			$cookie_hash       = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
+			$cookie_value      = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
+			$this->_has_cookie = true;
 
 	    	// Set the cookie
 	    	wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'wc_session_use_secure_cookie', false ) );
 	    }
+    }
+
+    /**
+     * Return true if the current user has an active session, i.e. a cookie to retrieve values
+     * @return boolean
+     */
+    public function has_session() {
+    	return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || is_user_logged_in();
     }
 
     /**
@@ -92,16 +115,21 @@ class WC_Session_Handler extends WC_Session {
     }
 
 	/**
-	 * generate_customer_id function.
+	 * Generate a unique customer ID for guests, or return user ID if logged in. 
+	 * 
+	 * Uses Portable PHP password hashing framework to generate a unique cryptographically strong ID.
 	 *
 	 * @access public
-	 * @return mixed
+	 * @return int|string
 	 */
 	public function generate_customer_id() {
-		if ( is_user_logged_in() )
+		if ( is_user_logged_in() ) {
 			return get_current_user_id();
-		else
-			return wp_generate_password( 32, false );
+		} else {
+			require_once( ABSPATH . 'wp-includes/class-phpass.php');
+			$hasher = new PasswordHash( 8, false );
+			return md5( $hasher->get_random_bytes( 32 ) );
+		}
 	}
 
 	/**
@@ -111,8 +139,9 @@ class WC_Session_Handler extends WC_Session {
 	 * @return mixed
 	 */
 	public function get_session_cookie() {
-		if ( empty( $_COOKIE[ $this->_cookie ] ) )
+		if ( empty( $_COOKIE[ $this->_cookie ] ) ) {
 			return false;
+		}
 
 		list( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) = explode( '||', $_COOKIE[ $this->_cookie ] );
 
@@ -120,8 +149,9 @@ class WC_Session_Handler extends WC_Session {
 		$to_hash = $customer_id . $session_expiration;
 		$hash    = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
 
-		if ( $hash != $cookie_hash )
+		if ( $hash != $cookie_hash ) {
 			return false;
+		}
 
 		return array( $customer_id, $session_expiration, $session_expiring, $cookie_hash );
 	}
@@ -144,10 +174,10 @@ class WC_Session_Handler extends WC_Session {
      */
     public function save_data() {
     	// Dirty if something changed - prevents saving nothing new
-    	if ( $this->_dirty ) {
+    	if ( $this->_dirty && $this->has_session() ) {
 
-    		$session_option = '_wc_session_' . $this->_customer_id;
-    		$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
+			$session_option        = '_wc_session_' . $this->_customer_id;
+			$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
 
 	    	if ( false === get_option( $session_option ) ) {
 	    		add_option( $session_option, $this->_data, '', 'no' );
@@ -157,6 +187,29 @@ class WC_Session_Handler extends WC_Session {
 	    	}
 	    }
     }
+
+    /**
+     * Destroy all session data
+     */
+    public function destroy_session() {
+		// Clear cookie
+		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'wc_session_use_secure_cookie', false ) );
+
+		// Delete session
+		$session_option        = '_wc_session_' . $this->_customer_id;
+		$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
+
+		delete_option( $session_option );
+		delete_option( $session_expiry_option );
+
+		// Clear cart
+		wc_empty_cart();
+		
+		// Clear data
+		$this->_data        = array();
+		$this->_dirty       = false;
+		$this->_customer_id = $this->generate_customer_id();
+	}
 
     /**
 	 * cleanup_sessions function.
@@ -181,8 +234,11 @@ class WC_Session_Handler extends WC_Session {
 			}
 
 			if ( ! empty( $expired_sessions ) ) {
-				$option_names = implode( "','", $expired_sessions );
-				$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('$option_names')" );
+				$expired_sessions_chunked = array_chunk( $expired_sessions, 100 );
+				foreach ( $expired_sessions_chunked as $chunk ) {
+					$option_names = implode( "','", $chunk );
+					$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('$option_names')" );
+				}
 			}
 		}
 	}

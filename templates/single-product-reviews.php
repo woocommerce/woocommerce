@@ -18,7 +18,7 @@ if ( ! comments_open() )
 	<div id="comments">
 		<h2><?php
 			if ( get_option( 'woocommerce_enable_review_rating' ) === 'yes' && ( $count = $product->get_rating_count() ) )
-				printf( _n('%s review for %s', '%s reviews for %s', $count, 'woocommerce'), $count, get_the_title() );
+				printf( _n( '%s review for %s', '%s reviews for %s', $count, 'woocommerce' ), $count, get_the_title() );
 			else
 				_e( 'Reviews', 'woocommerce' );
 		?></h2>
@@ -32,9 +32,9 @@ if ( ! comments_open() )
 			<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) :
 				echo '<nav class="woocommerce-pagination">';
 				paginate_comments_links( apply_filters( 'woocommerce_comment_pagination_args', array(
-					'prev_text' 	=> '&larr;',
-					'next_text' 	=> '&rarr;',
-					'type'			=> 'list',
+					'prev_text' => '&larr;',
+					'next_text' => '&rarr;',
+					'type'      => 'list',
 				) ) );
 				echo '</nav>';
 			endif; ?>
@@ -80,7 +80,7 @@ if ( ! comments_open() )
 						</select></p>';
 					}
 
-					$comment_form['comment_field'] .= '<p class="comment-form-comment"><label for="comment">' . __( 'Your Review', 'woocommerce' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea>' . wp_nonce_field( 'woocommerce-comment_rating', '_wpnonce', true, false ) . '</p>';
+					$comment_form['comment_field'] .= '<p class="comment-form-comment"><label for="comment">' . __( 'Your Review', 'woocommerce' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>';
 
 					comment_form( apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form ) );
 				?>

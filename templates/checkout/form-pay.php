@@ -21,6 +21,20 @@ global $woocommerce;
 				<th class="product-total"><?php _e( 'Totals', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
+		<tbody>
+			<?php
+			if ( sizeof( $order->get_items() ) > 0 ) :
+				foreach ( $order->get_items() as $item ) :
+					echo '
+						<tr>
+							<td class="product-name">' . $item['name'].'</td>
+							<td class="product-quantity">' . $item['qty'].'</td>
+							<td class="product-subtotal">' . $order->get_formatted_line_subtotal( $item ) . '</td>
+						</tr>';
+				endforeach;
+			endif;
+			?>
+		</tbody>
 		<tfoot>
 		<?php
 			if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
@@ -33,20 +47,6 @@ global $woocommerce;
 			endforeach;
 		?>
 		</tfoot>
-		<tbody>
-			<?php
-			if ( sizeof( $order->get_items() )>0 ) :
-				foreach ( $order->get_items() as $item ) :
-					echo '
-						<tr>
-							<td class="product-name">' . $item['name'].'</td>
-							<td class="product-quantity">' . $item['qty'].'</td>
-							<td class="product-subtotal">' . $order->get_formatted_line_subtotal( $item ) . '</td>
-						</tr>';
-				endforeach;
-			endif;
-			?>
-		</tbody>
 	</table>
 
 	<div id="payment">

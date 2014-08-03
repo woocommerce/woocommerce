@@ -52,18 +52,19 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	function trigger( $order_id ) {
 
 		if ( $order_id ) {
-			$this->object 		= new WC_Order( $order_id );
+			$this->object 		= get_order( $order_id );
 			$this->recipient	= $this->object->billing_email;
 
-			$this->find[] = '{order_date}';
-			$this->replace[] = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
-
-			$this->find[] = '{order_number}';
-			$this->replace[] = $this->object->get_order_number();
+			$this->find['order-date']      = '{order_date}';
+			$this->find['order-number']    = '{order_number}';
+			
+			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace['order-number'] = $this->object->get_order_number();
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() )
+		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
 			return;
+		}
 
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 	}

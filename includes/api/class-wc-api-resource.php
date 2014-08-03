@@ -59,7 +59,7 @@ class WC_API_Resource {
 	 */
 	protected function validate_request( $id, $type, $context ) {
 
-		if ( 'shop_order' === $type || 'shop_coupon' === $type )
+		if ( 'shop_order' === $type || 'shop_coupon' === $type || 'shop_webhook' === $type )
 			$resource_name = str_replace( 'shop_', '', $type );
 		else
 			$resource_name = $type;
@@ -123,33 +123,61 @@ class WC_API_Resource {
 			$args['date_query'] = array();
 
 			// resources created after specified date
-			if ( ! empty( $request_args['created_at_min'] ) )
+			if ( ! empty( $request_args['created_at_min'] ) ) {
 				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'after' => $this->server->parse_datetime( $request_args['created_at_min'] ), 'inclusive' => true );
+			}
 
 			// resources created before specified date
-			if ( ! empty( $request_args['created_at_max'] ) )
+			if ( ! empty( $request_args['created_at_max'] ) ) {
 				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'before' => $this->server->parse_datetime( $request_args['created_at_max'] ), 'inclusive' => true );
+			}
 
 			// resources updated after specified date
-			if ( ! empty( $request_args['updated_at_min'] ) )
+			if ( ! empty( $request_args['updated_at_min'] ) ) {
 				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'after' => $this->server->parse_datetime( $request_args['updated_at_min'] ), 'inclusive' => true );
+			}
 
 			// resources updated before specified date
-			if ( ! empty( $request_args['updated_at_max'] ) )
+			if ( ! empty( $request_args['updated_at_max'] ) ) {
 				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'before' => $this->server->parse_datetime( $request_args['updated_at_max'] ), 'inclusive' => true );
+			}
 		}
 
 		// search
-		if ( ! empty( $request_args['q'] ) )
+		if ( ! empty( $request_args['q'] ) ) {
 			$args['s'] = $request_args['q'];
+		}
 
 		// resources per response
-		if ( ! empty( $request_args['limit'] ) )
+		if ( ! empty( $request_args['limit'] ) ) {
 			$args['posts_per_page'] = $request_args['limit'];
+		}
 
 		// resource offset
-		if ( ! empty( $request_args['offset'] ) )
+		if ( ! empty( $request_args['offset'] ) ) {
 			$args['offset'] = $request_args['offset'];
+		}
+
+		// order (ASC or DESC, ASC by default)
+		if ( ! empty( $request_args['order'] ) ) {
+			$args['order'] = $request_args['order'];
+		}
+
+		// orderby
+		if ( ! empty( $request_args['orderby'] ) ) {
+			$args['orderby'] = $request_args['orderby'];
+
+			// allow sorting by meta value
+			if ( ! empty( $request_args['orderby_meta_key'] ) ) {
+				$args['meta_key'] = $request_args['orderby_meta_key'];
+			}
+		}
+
+		// allow post status change
+		if ( ! empty( $request_args['post_status'] ) ) {
+			$args['post_status'] = $request_args['post_status'];
+			unset( $request_args['post_status'] );
+		}
 
 		// resource page
 		$args['paged'] = ( isset( $request_args['page'] ) ) ? absint( $request_args['page'] ) : 1;
@@ -305,7 +333,7 @@ class WC_API_Resource {
 
 		} else {
 
-			// delete order/coupon/product
+			// delete order/coupon/product/webhook
 
 			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 

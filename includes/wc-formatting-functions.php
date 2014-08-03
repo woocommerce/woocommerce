@@ -15,19 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 /**
  * Sanitize taxonomy names. Slug format (no spaces, lowercase).
  *
- * Doesn't use sanitize_title as this destroys utf chars.
+ * urldecode is used to reverse munging of UTF8 characters.
  *
  * @access public
  * @param mixed $taxonomy
  * @return string
  */
 function wc_sanitize_taxonomy_name( $taxonomy ) {
-	$filtered = strtolower( remove_accents( stripslashes( strip_tags( $taxonomy ) ) ) );
-	$filtered = preg_replace( '/&.+?;/', '', $filtered ); // Kill entities
-	$filtered = str_replace( array( '.', '\'', '"' ), '', $filtered ); // Kill quotes and full stops.
-	$filtered = str_replace( array( ' ', '_' ), '-', $filtered ); // Replace spaces and underscores.
-
-	return apply_filters( 'sanitize_taxonomy_name', $filtered, $taxonomy );
+	return apply_filters( 'sanitize_taxonomy_name', urldecode( sanitize_title( $taxonomy ) ), $taxonomy );
 }
 
 /**
@@ -172,6 +167,14 @@ function wc_round_tax_total( $tax ) {
 }
 
 /**
+ * Make a refund total negative
+ * @return float
+ */
+function wc_format_refund_total( $amount ) {
+	return $amount * -1;
+}
+
+/**
  * Format decimal numbers ready for DB storage
  *
  * Sanitize, remove locale formatting, and optionally round + trim off zeros
@@ -272,6 +275,15 @@ function wc_array_overlay( $a1, $a2 ) {
 }
 
 /**
+ * Formats a stock amount by running it through a filter
+ * @param  int|float $amount
+ * @return int|float
+ */
+function wc_stock_amount( $amount ) {
+	return apply_filters( 'woocommerce_stock_amount', $amount );
+}
+
+/**
  * Get the price format depending on the currency position
  *
  * @return string
@@ -317,6 +329,13 @@ function wc_price( $price, $args = array() ) {
 	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
 	$thousands_sep   = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
 
+	if ( $price < 0 ) {
+		$price    = $price * -1;
+		$negative = true;
+	} else {
+		$negative = false;
+	}
+
 	$price           = apply_filters( 'raw_woocommerce_price', floatval( $price ) );
 	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $price, $num_decimals, $decimal_sep, $thousands_sep ), $price, $num_decimals, $decimal_sep, $thousands_sep );
 
@@ -324,13 +343,14 @@ function wc_price( $price, $args = array() ) {
 		$price = wc_trim_zeros( $price );
 	}
 
-	$return = '<span class="amount">' . sprintf( get_woocommerce_price_format(), $currency_symbol, $price ) . '</span>';
+	$formatted_price = ( $negative ? '-' : '' ) . sprintf( get_woocommerce_price_format(), $currency_symbol, $price );
+	$return          = '<span class="amount">' . $formatted_price . '</span>';
 
 	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
 		$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
-	return $return;
+	return apply_filters( 'wc_price', $return, $price, $args );
 }
 
 /**
@@ -562,10 +582,10 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
  * @return  string	formatted postcode
  */
 function wc_format_postcode( $postcode, $country ) {
-	$postcode = strtoupper(trim($postcode));
-	$postcode = trim(preg_replace('/[\s]/', '', $postcode));
+	$postcode = strtoupper( trim( $postcode ) );
+	$postcode = trim( preg_replace( '/[\s]/', '', $postcode ) );
 
-	if ( in_array( $country, array('GB', 'CA') ) ) {
+	if ( in_array( $country, array( 'GB', 'CA' ) ) ) {
 		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
 	}
 

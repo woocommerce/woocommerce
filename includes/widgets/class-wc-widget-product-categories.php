@@ -57,7 +57,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			'show_children_only' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Only show children for the current category', 'woocommerce' )
+				'label' => __( 'Only show children of the current category', 'woocommerce' )
 			)
 		);
 		parent::__construct();
@@ -75,21 +75,14 @@ class WC_Widget_Product_Categories extends WC_Widget {
 	public function widget( $args, $instance ) {
 		extract( $args );
 
-		global $wp_query, $post, $woocommerce;
+		global $wp_query, $post;
 
-		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
-		$c     = ! empty( $instance['count'] );
-		$h     = ! empty( $instance['hierarchical'] );
-		$s     = ! empty( $instance['show_children_only'] );
-		$d     = ! empty( $instance['dropdown'] );
-		$o     = $instance['orderby'] ? $instance['orderby'] : 'order';
-
-		echo $before_widget;
-
-		if ( $title ) {
-			echo $before_title . $title . $after_title;
-		}
-		
+		$title         = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
+		$c             = ! empty( $instance['count'] );
+		$h             = ! empty( $instance['hierarchical'] );
+		$s             = ! empty( $instance['show_children_only'] );
+		$d             = ! empty( $instance['dropdown'] );
+		$o             = $instance['orderby'] ? $instance['orderby'] : 'order';
 		$dropdown_args = array( 'hide_empty' => false );
 		$list_args     = array( 'show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat', 'hide_empty' => false );
 
@@ -163,16 +156,32 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				}
 			}
 
-			$include = array_merge( $top_level, $this->cat_ancestors, $siblings, $direct_children, array( $this->current_cat->term_id ) );
+			if ( $h ) {
+				$include = array_merge( $top_level, $this->cat_ancestors, $siblings, $direct_children, array( $this->current_cat->term_id ) );
+			} else {
+				$include = array_merge( $direct_children );
+			}
 			
 			$dropdown_args['include'] = implode( ',', $include );
 			$list_args['include']     = implode( ',', $include );
+
+			if ( empty( $include ) ) {
+				return;
+			}
 			
 		} elseif ( $s ) {
-			$dropdown_args['depth']    = 1;
-			$dropdown_args['child_of'] = 0;
-			$list_args['depth']        = 1;
-			$list_args['child_of']     = 0;
+			$dropdown_args['depth']        = 1;
+			$dropdown_args['child_of']     = 0;
+			$dropdown_args['hierarchical'] = 1;
+			$list_args['depth']            = 1;
+			$list_args['child_of']         = 0;
+			$list_args['hierarchical']     = 1;
+		}
+
+		echo $before_widget;
+
+		if ( $title ) {
+			echo $before_title . $title . $after_title;
 		}
 
 		// Dropdown
@@ -188,7 +197,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			$dropdown_args = wp_parse_args( $dropdown_args, $dropdown_defaults );
 
 			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
-			wc_product_dropdown_categories( $dropdown_args );
+			wc_product_dropdown_categories( apply_filters( 'woocommerce_product_categories_widget_dropdown_args', $dropdown_args ) );
 			?>
 			<script type='text/javascript'>
 			/* <![CDATA[ */

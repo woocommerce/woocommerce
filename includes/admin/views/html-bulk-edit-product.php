@@ -1,3 +1,14 @@
+<?php
+/**
+ * Admin View: Bulk Edit Products
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
+
 <fieldset class="inline-edit-col-right">
 	<div id="woocommerce-fields-bulk" class="inline-edit-col">
 
@@ -263,6 +274,24 @@
 			</label>
 
 		<?php endif; ?>
+
+		<label>
+			<span class="title"><?php esc_html_e( 'Sold Individually?', 'woocommerce' ); ?></span>
+			    <span class="input-text-wrap">
+			    	<select class="sold_individually" name="_sold_individually">
+					<?php
+					$options = array(
+						''    => __( '— No Change —', 'woocommerce' ),
+						'yes' => __( 'Yes', 'woocommerce' ),
+						'no'  => __( 'No', 'woocommerce' )
+					);
+					foreach ( $options as $key => $value ) {
+						echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
+					}
+					?>
+				</select>
+			</span>
+		</label>
 
 		<?php do_action( 'woocommerce_product_bulk_edit_end' ); ?>
 

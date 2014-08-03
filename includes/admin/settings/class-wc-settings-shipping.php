@@ -94,38 +94,33 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			),
 
 			array(
-				'title' 	=> __( 'Shipping Display Mode', 'woocommerce' ),
-				'desc' 		=> __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
-				'id' 		=> 'woocommerce_shipping_method_format',
-				'default'	=> '',
-				'type' 		=> 'radio',
+				'title'   => __( 'Shipping Display Mode', 'woocommerce' ),
+				'desc'    => __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
+				'id'      => 'woocommerce_shipping_method_format',
+				'default' => '',
+				'type'    => 'radio',
 				'options' => array(
-					''  			=> __( 'Display shipping methods with "radio" buttons', 'woocommerce' ),
-					'select'		=> __( 'Display shipping methods in a dropdown', 'woocommerce' ),
+					''       => __( 'Display shipping methods with "radio" buttons', 'woocommerce' ),
+					'select' => __( 'Display shipping methods in a dropdown', 'woocommerce' ),
 				),
-				'desc_tip'	=>  true,
-				'autoload'      => false
+				'desc_tip' =>  true,
+				'autoload' => false
 			),
 
 			array(
-				'title'           => __( 'Shipping Destination', 'woocommerce' ),
-				'desc'            => __( 'Ship to billing address by default', 'woocommerce' ),
-				'id'              => 'woocommerce_ship_to_billing',
-				'default'         => 'yes',
-				'type'            => 'checkbox',
-				'checkboxgroup'   => 'start',
+				'title'   => __( 'Shipping Destination', 'woocommerce' ),
+				'desc'    => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
+				'id'      => 'woocommerce_ship_to_destination',
+				'default' => 'shipping',
+				'type'    => 'radio',
+				'options' => array(
+					'shipping'     => __( 'Default to shipping address', 'woocommerce' ),
+					'billing'      => __( 'Default to billing address', 'woocommerce' ),
+					'billing_only' => __( 'Only ship to the users billing address', 'woocommerce' ),
+				),
 				'autoload'        => false,
+				'desc_tip'        =>  true,
 				'show_if_checked' => 'option',
-			),
-
-			array(
-				'desc'            => __( 'Only ship to the users billing address', 'woocommerce' ),
-				'id'              => 'woocommerce_ship_to_billing_address_only',
-				'default'         => 'no',
-				'type'            => 'checkbox',
-				'checkboxgroup'   => 'end',
-				'autoload'        => false,
-				'show_if_checked' => 'yes',
 			),
 
 			array(
@@ -206,15 +201,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 							<th class="settings">&nbsp;</th>
 						</tr>
 					</thead>
-					<tfoot>
-						<tr>
-							<th width="1%" class="default">
-								<input type="radio" name="default_shipping_method" value="" <?php checked( $default_shipping_method, '' ); ?> />
-							</th>
-							<th><?php _e( 'No default', 'woocommerce' ); ?></th>
-							<th colspan="3"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
-						</tr>
-					</tfoot>
 					<tbody>
 				    	<?php
 				    	foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) {
@@ -248,6 +234,15 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				    	}
 				    	?>
 					</tbody>
+					<tfoot>
+						<tr>
+							<th width="1%" class="default">
+								<input type="radio" name="default_shipping_method" value="" <?php checked( $default_shipping_method, '' ); ?> />
+							</th>
+							<th><?php _e( 'Automatic', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'The cheapest available shipping method will be selected by default.', 'woocommerce' ); ?>">[?]</a></th>
+							<th colspan="3"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
+						</tr>
+					</tfoot>
 				</table>
 			</td>
 		</tr>

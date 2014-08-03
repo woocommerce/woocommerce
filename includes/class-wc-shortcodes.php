@@ -127,18 +127,18 @@ class WC_Shortcodes {
 	public static function product_category( $atts ) {
 		global $woocommerce_loop;
 
-		if ( empty( $atts ) ) return '';
-
 		extract( shortcode_atts( array(
-			'per_page' 		=> '12',
-			'columns' 		=> '4',
-			'orderby'   	=> 'title',
-			'order'     	=> 'desc',
-			'category'		=> '',
-			'operator'      => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
-			), $atts ) );
+			'per_page' => '12',
+			'columns'  => '4',
+			'orderby'  => 'title',
+			'order'    => 'desc',
+			'category' => '',  // Slugs
+			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
+		), $atts ) );
 
-		if ( ! $category ) return '';
+		if ( ! $category ) {
+			return '';
+		}
 
 		// Default ordering args
 		$ordering_args = WC()->query->get_catalog_ordering_args( $orderby, $order );
@@ -160,7 +160,7 @@ class WC_Shortcodes {
 			'tax_query' 			=> array(
 				array(
 					'taxonomy' 		=> 'product_cat',
-					'terms' 		=> array( esc_attr( $category ) ),
+					'terms' 		=> array_map( 'sanitize_title', explode( ',', $category ) ),
 					'field' 		=> 'slug',
 					'operator' 		=> $operator
 				)
@@ -194,7 +194,12 @@ class WC_Shortcodes {
 		woocommerce_reset_loop();
 		wp_reset_postdata();
 
-		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
+		$return = '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
+
+		// Remove ordering query arguments
+		WC()->query->remove_ordering_args();
+
+		return $return;
 	}
 
 
@@ -486,6 +491,8 @@ class WC_Shortcodes {
 
 		extract( shortcode_atts( array(
 			'id'         => '',
+			'class'      => '',
+            		'quantity'   => '1',
 			'sku'        => '',
 			'style'      => 'border:4px solid #ccc; padding: 12px;',
 			'show_price' => 'true'
@@ -508,13 +515,13 @@ class WC_Shortcodes {
 
 		ob_start();
 		?>
-		<p class="product woocommerce" style="<?php echo $style; ?>">
+		<p class="product woocommerce add_to_cart_inline <?php echo $class; ?>" style="<?php echo $style; ?>">
 
 			<?php if ( $show_price == 'true' ) : ?>
 				<?php echo $product->get_price_html(); ?>
 			<?php endif; ?>
 
-			<?php woocommerce_template_loop_add_to_cart(); ?>
+			<?php woocommerce_template_loop_add_to_cart( array( "quantity" => $quantity )); ?>
 
 		</p><?php
 

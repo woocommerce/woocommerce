@@ -1,11 +1,16 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Download handler
  *
  * Handle digital downloads.
  *
  * @class 		WC_Download_Handler
- * @version		2.1.0
+ * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -13,16 +18,16 @@
 class WC_Download_Handler {
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct() {
-		add_action( 'init', array( $this, 'download_product' ) );
+	public static function init() {
+		add_action( 'init', array( __CLASS__, 'download_product' ) );
 	}
 
 	/**
 	 * Check if we need to download a file and check validity
 	 */
-	public function download_product() {
+	public static function download_product() {
 		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
 
 			global $wpdb;
@@ -34,7 +39,7 @@ class WC_Download_Handler {
 			$_product             = get_product( $product_id );
 
 			if ( ! is_email( $email) ) {
-				wp_die( __( 'Invalid email address.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+				wp_die( __( 'Invalid email address.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 403 ) );
 			}
 
 			$query = "
@@ -59,7 +64,7 @@ class WC_Download_Handler {
 			$download_result = $wpdb->get_row( $wpdb->prepare( $query, $args ) );
 
 			if ( ! $download_result ) {
-				wp_die( __( 'Invalid download.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+				wp_die( __( 'Invalid download.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 404 ) );
 			}
 
 			$download_id 			= $download_result->download_id;
@@ -72,31 +77,31 @@ class WC_Download_Handler {
 			if ( $user_id && get_option( 'woocommerce_downloads_require_login' ) == 'yes' ) {
 
 				if ( ! is_user_logged_in() ) {
-					wp_die( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ) );
+					wp_die( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), '', array( 'response' => 403 ) );
 				} elseif ( ! current_user_can( 'download_file', $download_result ) ) {
-					wp_die( __( 'This is not your download link.', 'woocommerce' ) );
+					wp_die( __( 'This is not your download link.', 'woocommerce' ), '', array( 'response' => 403 ) );
 				}
 
 			}
 
 			if ( ! get_post( $product_id ) ) {
-				wp_die( __( 'Product no longer exists.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+				wp_die( __( 'Product no longer exists.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 404 ) );
 			}
 
 			if ( $order_id ) {
-				$order = new WC_Order( $order_id );
+				$order = get_order( $order_id );
 
-				if ( ! $order->is_download_permitted() || $order->post_status != 'publish' ) {
-					wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+				if ( ! $order->is_download_permitted() || $order->post_status != 'wc-completed' ) {
+					wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 404 ) );
 				}
 			}
 
 			if ( $downloads_remaining == '0' ) {
-				wp_die( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+				wp_die( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 403 ) );
 			}
 
 			if ( $access_expires > 0 && strtotime( $access_expires) < current_time( 'timestamp' ) ) {
-				wp_die( __( 'Sorry, this download has expired', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+				wp_die( __( 'Sorry, this download has expired', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 403 ) );
 			}
 
 			if ( $downloads_remaining > 0 ) {
@@ -127,20 +132,20 @@ class WC_Download_Handler {
 			$file_path = $_product->get_file_download_path( $download_id );
 
 			// Download it!
-			$this->download( $file_path, $product_id );
+			self::download( $file_path, $product_id );
 		}
 	}
 
 	/**
 	 * Download a file - hook into init function.
 	 */
-	public function download( $file_path, $product_id ) {
-		global $wpdb, $is_IE;
+	public static function download( $file_path, $product_id ) {
+		global $is_IE;
 
 		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
 
 		if ( ! $file_path ) {
-			wp_die( __( 'No file defined', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+			wp_die( __( 'No file defined', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 404 ) );
 		}
 
 		// Redirect to the file...
@@ -150,51 +155,59 @@ class WC_Download_Handler {
 		}
 
 		// ...or serve it
-		if ( ! is_multisite() ) {
+		$remote_file      = true;
+		$parsed_file_path = parse_url( $file_path );
 
-			/*
-			 * Download file may be either http or https.
-			 * site_url() depends on whether the page containing the download (ie; My Account) is served via SSL because WC
-			 * modifies site_url() via a filter to force_ssl.
-			 * So blindly doing a str_replace is incorrect because it will fail when schemes are mismatched. This code
-			 * handles the various permutations.
-			 */
-			$scheme = parse_url( $file_path, PHP_URL_SCHEME );
+		$wp_uploads       = wp_upload_dir();
+		$wp_uploads_dir   = $wp_uploads['basedir'];
+		$wp_uploads_url   = $wp_uploads['baseurl'];
 
-			if ( $scheme ) {
-				$site_url = set_url_scheme( site_url( '' ), $scheme );
-			} else {
-				$site_url = is_ssl() ? str_replace( 'https:', 'http:', site_url() ) : site_url();
-			}
+		if ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ) ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
 
-			$file_path   = str_replace( trailingslashit( $site_url ), ABSPATH, $file_path );
+			/** This is an absolute path */
+			$remote_file  = false;
 
-		} else {
+		} elseif( strpos( $file_path, $wp_uploads_url ) !== false ) {
 
-			$network_url = is_ssl() ? str_replace( 'https:', 'http:', network_admin_url() ) : network_admin_url();
-			$upload_dir  = wp_upload_dir();
+			/** This is a local file given by URL so we need to figure out the path */
+			$remote_file  = false;
+			$file_path    = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
 
+		} elseif( is_multisite() && ( strpos( $file_path, network_site_url( '/', 'http' ) ) !== false || strpos( $file_path, network_site_url( '/', 'https' ) ) !== false ) ) {
+
+			/** This is a local file outside of wp-content so figure out the path */
+			$remote_file = false;
 			// Try to replace network url
-			$file_path   = str_replace( trailingslashit( $network_url ), ABSPATH, $file_path );
+            $file_path   = str_replace( network_site_url( '/', 'https' ), ABSPATH, $file_path );
+            $file_path   = str_replace( network_site_url( '/', 'http' ), ABSPATH, $file_path );
+            // Try to replace upload URL
+            $file_path   = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
 
-			// Now try to replace upload URL
-			$file_path   = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $file_path );
+		} elseif( strpos( $file_path, site_url( '/', 'http' ) ) !== false || strpos( $file_path, site_url( '/', 'https' ) ) !== false ) {
+
+			/** This is a local file outside of wp-content so figure out the path */
+			$remote_file = false;
+			$file_path   = str_replace( site_url( '/', 'https' ), ABSPATH, $file_path );
+			$file_path   = str_replace( site_url( '/', 'http' ), ABSPATH, $file_path );
+
+		} elseif ( file_exists( ABSPATH . $file_path ) ) {
+
+			/** Path needs an abspath to work */
+			$remote_file = false;
+			$file_path   = ABSPATH . $file_path;
 		}
 
-		// See if its local or remote
-		if ( strstr( $file_path, 'http:' ) || strstr( $file_path, 'https:' ) || strstr( $file_path, 'ftp:' ) ) {
-			$remote_file = true;
-		} else {
-			$remote_file = false;
-
+		if ( ! $remote_file ) {
 			// Remove Query String
 			if ( strstr( $file_path, '?' ) ) {
 				$file_path = current( explode( '?', $file_path ) );
 			}
 
-			$file_path   = realpath( $file_path );
+			// Run realpath
+			$file_path = realpath( $file_path );
 		}
 
+		// Get extension and type
 		$file_extension  = strtolower( substr( strrchr( $file_path, "." ), 1 ) );
 		$ctype           = "application/force-download";
 
@@ -225,16 +238,19 @@ class WC_Download_Handler {
 		/**
 		 * Prevents errors, for example: transfer closed with 3 bytes remaining to read
 		 */
-		@ob_end_clean(); // Clear the output buffer
+		if ( ob_get_length() ) {
 
-		if ( ob_get_level() ) {
+			if ( ob_get_level() ) {
 
-			$levels = ob_get_level();
+				$levels = ob_get_level();
 
-			for ( $i = 0; $i < $levels; $i++ ) {
-				@ob_end_clean(); // Zip corruption fix
+				for ( $i = 0; $i < $levels; $i++ ) {
+					ob_end_clean(); // Zip corruption fix
+				}
+
+			} else {
+				ob_end_clean(); // Clear the output buffer
 			}
-
 		}
 
 		if ( $is_IE && is_ssl() ) {
@@ -291,9 +307,9 @@ class WC_Download_Handler {
         }
 
         if ( $remote_file ) {
-        	$this->readfile_chunked( $file_path ) or header( 'Location: ' . $file_path );
+        	self::readfile_chunked( $file_path ) || header( 'Location: ' . $file_path );
         } else {
-        	$this->readfile_chunked( $file_path ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>' );
+        	self::readfile_chunked( $file_path ) || wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 404 ) );
         }
 
         exit;
@@ -308,21 +324,31 @@ class WC_Download_Handler {
 	 * @todo Meaning of the return value? Last return is status of fclose?
 	 */
 	public static function readfile_chunked( $file, $retbytes = true ) {
-
 		$chunksize = 1 * ( 1024 * 1024 );
 		$buffer = '';
 		$cnt = 0;
 
-		$handle = @fopen( $file, 'r' );
-		if ( $handle === FALSE ) {
+		if ( file_exists( $file ) ) {
+			$handle = fopen( $file, 'r' );
+			if ( $handle === FALSE ) {
+				return FALSE;
+			}
+		} elseif ( version_compare( PHP_VERSION, '5.4.0', '<' ) && ini_get( 'safe_mode' ) ) {
+			$handle = @fopen( $file, 'r' );
+			if ( $handle === FALSE ) {
+				return FALSE;
+			}
+		} else {
 			return FALSE;
 		}
 
 		while ( ! feof( $handle ) ) {
 			$buffer = fread( $handle, $chunksize );
 			echo $buffer;
-			@ob_flush();
-			@flush();
+			if ( ob_get_length() ) {
+				ob_flush();
+				flush();
+			}
 
 			if ( $retbytes ) {
 				$cnt += strlen( $buffer );
@@ -339,4 +365,4 @@ class WC_Download_Handler {
 	}
 }
 
-new WC_Download_Handler();
+WC_Download_Handler::init();

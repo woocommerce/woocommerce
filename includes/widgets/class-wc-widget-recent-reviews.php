@@ -49,7 +49,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 	 * @return void
 	 */
 	 public function widget( $args, $instance ) {
-		global $comments, $comment, $woocommerce;
+		global $comments, $comment;
 
 		if ( $this->get_cached_widget( $args ) )
 			return;

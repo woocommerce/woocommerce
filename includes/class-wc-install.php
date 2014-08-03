@@ -108,14 +108,11 @@ class WC_Install {
 		$this->create_files();
 		$this->create_css_from_less();
 
-		// Clear transient cache
-		wc_delete_product_transients();
-
 		// Queue upgrades
-		$current_version = get_option( 'woocommerce_version', null );
+		$current_version    = get_option( 'woocommerce_version', null );
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 
-		if ( version_compare( $current_db_version, '2.1.0', '<' ) && null !== $current_db_version ) {
+		if ( version_compare( $current_db_version, '2.2.0', '<' ) && null !== $current_db_version ) {
 			update_option( '_wc_needs_update', 1 );
 		} else {
 			update_option( 'woocommerce_db_version', WC()->version );
@@ -176,6 +173,11 @@ class WC_Install {
 			update_option( 'woocommerce_db_version', '2.1.0' );
 		}
 
+		if ( version_compare( $current_db_version, '2.2.0', '<' ) || WC_VERSION == '2.2-bleeding' ) {
+			include( 'updates/woocommerce-update-2.2.php' );
+			update_option( 'woocommerce_db_version', '2.2.0' );
+		}
+
 		update_option( 'woocommerce_db_version', WC()->version );
 	}
 
@@ -224,7 +226,7 @@ class WC_Install {
 				'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
 			),
 			'checkout' => array(
-				'name'    => _x( 'checkout', 'Paeg slug', 'woocommerce' ),
+				'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 				'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
 				'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
 			),
@@ -254,15 +256,6 @@ class WC_Install {
 				'grouped',
 				'variable',
 				'external'
-			),
-			'shop_order_status' => array(
-				'pending',
-				'failed',
-				'on-hold',
-				'processing',
-				'completed',
-				'refunded',
-				'cancelled'
 			)
 		);
 
@@ -325,7 +318,7 @@ class WC_Install {
 	 * @return void
 	 */
 	private function create_tables() {
-		global $wpdb, $woocommerce;
+		global $wpdb;
 
 		$wpdb->hide_errors();
 
@@ -527,7 +520,7 @@ class WC_Install {
 			'view_woocommerce_reports'
 		);
 
-		$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
+		$capability_types = array( 'product', 'shop_order', 'shop_coupon', 'shop_webhook' );
 
 		foreach ( $capability_types as $capability_type ) {
 
@@ -608,12 +601,12 @@ class WC_Install {
 				'content' 	=> ''
 			),
 			array(
-				'base' 		=> WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
+				'base' 		=> WC_LOG_DIR,
 				'file' 		=> '.htaccess',
 				'content' 	=> 'deny from all'
 			),
 			array(
-				'base' 		=> WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs',
+				'base' 		=> WC_LOG_DIR,
 				'file' 		=> 'index.html',
 				'content' 	=> ''
 			)
@@ -668,76 +661,41 @@ class WC_Install {
 	 *
 	 * @return void
 	 */
-	function in_plugin_update_message() {
-		$response = wp_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
+	function in_plugin_update_message( $args ) {
+		$transient_name = 'wc_upgrade_notice_' . $args['Version'];
 
-		if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
+		if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) {
 
-			// Output Upgrade Notice
-			$matches = null;
-			$regexp = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
+			$response = wp_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
 
-			if ( preg_match( $regexp, $response['body'], $matches ) ) {
-				$version = trim( $matches[1] );
-				$notices = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
+			if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
 
-				if ( version_compare( WC_VERSION, $version, '<' ) ) {
+				// Output Upgrade Notice
+				$matches        = null;
+				$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
+				$upgrade_notice = '';
 
-					echo '<div style="font-weight: normal; background: #cc99c2; color: #fff !important; border: 1px solid #b76ca9; padding: 9px; margin: 9px 0;">';
+				if ( preg_match( $regexp, $response['body'], $matches ) ) {
+					$version        = trim( $matches[1] );
+					$notices        = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
 
-					foreach ( $notices as $index => $line ) {
-						echo '<p style="margin: 0; font-size: 1.1em; color: #fff; text-shadow: 0 1px 1px #b574a8;">' . wp_kses_post( preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) ) . '</p>';
-					}
+					if ( version_compare( WC_VERSION, $version, '<' ) ) {
 
-					echo '</div> ';
-				}
-			}
+						$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';
 
-			// Output Changelog
-			$matches = null;
-			$regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*-(.*)=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*-(.*)=|$)~Uis';
-
-			if ( preg_match( $regexp, $response['body'], $matches ) ) {
-				$changelog = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
-
-				echo __( 'What\'s new:', 'woocommerce' ) . '<div style="font-weight: normal;">';
-
-				$ul = false;
-
-				foreach ( $changelog as $index => $line ) {
-					if ( preg_match('~^\s*\*\s*~', $line ) ) {
-						if ( ! $ul ) {
-							echo '<ul style="list-style: disc inside; margin: 9px 0 9px 20px; overflow:hidden; zoom: 1;">';
-							$ul = true;
-						}
-						
-						$line = preg_replace( '~^\s*\*\s*~', '', htmlspecialchars( $line ) );
-						
-						echo '<li style="width: 50%; margin: 0; float: left; ' . ( $index % 2 == 0 ? 'clear: left;' : '' ) . '">' . esc_html( $line ) . '</li>';
-					} else {
-
-						$version = trim( current( explode( '-', str_replace( '=', '', $line ) ) ) );
-
-						if ( version_compare( WC_VERSION, $version, '>=' ) ) {
-							break;
+						foreach ( $notices as $index => $line ) {
+							$upgrade_notice .= wp_kses_post( preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) );
 						}
 
-						if ( $ul ) {
-							echo '</ul>';
-							$ul = false;
-						}
-
-						echo '<p style="margin: 9px 0;">' . esc_html( htmlspecialchars( $line ) ) . '</p>';
+						$upgrade_notice .= '</div> ';
 					}
 				}
 
-				if ( $ul ) {
-					echo '</ul>';
-				}
-
-				echo '</div>';
+				set_transient( $transient_name, $upgrade_notice, DAY_IN_SECONDS );
 			}
 		}
+
+		echo wp_kses_post( $upgrade_notice );
 	}
 }
 

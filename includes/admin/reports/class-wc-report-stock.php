@@ -61,7 +61,7 @@ class WC_Report_Stock extends WP_List_Table {
      * @param mixed $column_name
      */
     function column_default( $item, $column_name ) {
-    	global $woocommerce, $wpdb, $product;
+    	global $product;
 
     	if ( ! $product || $product->id !== $item->id )
     		$product = get_product( $item->id );
@@ -156,7 +156,7 @@ class WC_Report_Stock extends WP_List_Table {
     public function prepare_items() {
         $this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
         $current_page          = absint( $this->get_pagenum() );
-        $per_page              = 20;
+        $per_page              = apply_filters( 'woocommerce_admin_stock_report_products_per_page', 20 );
 
         $this->get_items( $current_page, $per_page );
 
