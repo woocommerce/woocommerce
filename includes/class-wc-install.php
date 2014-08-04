@@ -520,7 +520,7 @@ class WC_Install {
 			'view_woocommerce_reports'
 		);
 
-		$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
+		$capability_types = array( 'product', 'shop_order', 'shop_coupon', 'shop_webhook' );
 
 		foreach ( $capability_types as $capability_type ) {
 

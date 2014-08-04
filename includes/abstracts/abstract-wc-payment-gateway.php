@@ -46,7 +46,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/** @var string Description for the gateway. */
 	public $description;
 
-	/** @var array Array of supported features such as 'default_credit_card_form' */
+	/** @var array Array of supported features such as 'default_credit_card_form', 'refunds' */
 	public $supports		= array( 'products' );
 
 	/** @var int Maximum transaction amount, zero does not define a maximum */
@@ -185,13 +185,34 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Process Payment
 	 *
-	 * Process the payment. Override this in your gateway.
+	 * Process the payment. Override this in your gateway. When implemented, this should 
+	 * return the success and redirect in an array. e.g.
+	 *
+	 * 		return array(
+	 *   		'result' 	=> 'success',
+	 *     		'redirect'	=> $this->get_return_url( $order )
+	 *       );
 	 *
 	 * @param int $order_id
-	 * @access public
-	 * @return void
+	 * @return array
 	 */
-	public function process_payment( $order_id ) {}
+	public function process_payment( $order_id ) { 
+		return array();
+	}
+
+	/**
+	 * Process Refund
+	 *
+	 * If the gateway declares 'refunds' support, this will allow it to refund
+	 * a passed in amount.
+	 * 
+	 * @param  int $order_id
+	 * @param  float $amount
+	 * @return  bool|wp_error True or false based on success, or a WP_Error object
+	 */
+	public function process_refund( $order_id, $amount = null ) {
+		return false;
+	}
 
 	/**
 	 * Validate Frontend Fields

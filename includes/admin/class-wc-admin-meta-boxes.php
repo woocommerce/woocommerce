@@ -40,7 +40,6 @@ class WC_Admin_Meta_Boxes {
 		 * 		Save actions - sends out other emails. Last to show latest data.
 		 */
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Items::save', 10, 2 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Totals::save', 20, 2 );
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Downloads::save', 30, 2 );
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Data::save', 40, 2 );
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Actions::save', 50, 2 );
@@ -104,12 +103,13 @@ class WC_Admin_Meta_Boxes {
 		add_meta_box( 'woocommerce-product-images', __( 'Product Gallery', 'woocommerce' ), 'WC_Meta_Box_Product_Images::output', 'product', 'side' );
 
 		// Orders
-		add_meta_box( 'woocommerce-order-data', __( 'Order Data', 'woocommerce' ), 'WC_Meta_Box_Order_Data::output', 'shop_order', 'normal', 'high' );
-		add_meta_box( 'woocommerce-order-items', __( 'Order Items', 'woocommerce' ), 'WC_Meta_Box_Order_Items::output', 'shop_order', 'normal', 'high' );
-		add_meta_box( 'woocommerce-order-totals', __( 'Order Totals', 'woocommerce' ), 'WC_Meta_Box_Order_Totals::output', 'shop_order', 'side', 'default' );
-		add_meta_box( 'woocommerce-order-notes', __( 'Order Notes', 'woocommerce' ), 'WC_Meta_Box_Order_Notes::output', 'shop_order', 'side', 'default' );
-		add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . ' <span class="tips" data-tip="' . __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) . '">[?]</span>', 'WC_Meta_Box_Order_Downloads::output', 'shop_order', 'normal', 'default' );
-		add_meta_box( 'woocommerce-order-actions', __( 'Order Actions', 'woocommerce' ), 'WC_Meta_Box_Order_Actions::output', 'shop_order', 'side', 'high' );
+		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
+			add_meta_box( 'woocommerce-order-data', __( 'Order Data', 'woocommerce' ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
+			add_meta_box( 'woocommerce-order-items', __( 'Order Items', 'woocommerce' ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
+			add_meta_box( 'woocommerce-order-notes', __( 'Order Notes', 'woocommerce' ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
+			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . ' <span class="tips" data-tip="' . __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) . '">[?]</span>', 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
+			add_meta_box( 'woocommerce-order-actions', __( 'Order Actions', 'woocommerce' ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
+		}
 
 		// Coupons
 		add_meta_box( 'woocommerce-coupon-data', __( 'Coupon Data', 'woocommerce' ), 'WC_Meta_Box_Coupon_Data::output', 'shop_coupon', 'normal', 'high' );
@@ -134,10 +134,13 @@ class WC_Admin_Meta_Boxes {
 		remove_meta_box( 'woothemes-settings', 'shop_coupon' , 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
 		remove_meta_box( 'slugdiv', 'shop_coupon' , 'normal' );
-		remove_meta_box( 'commentsdiv', 'shop_order' , 'normal' );
-		remove_meta_box( 'woothemes-settings', 'shop_order' , 'normal' );
-		remove_meta_box( 'commentstatusdiv', 'shop_order' , 'normal' );
-		remove_meta_box( 'slugdiv', 'shop_order' , 'normal' );
+
+		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
+			remove_meta_box( 'commentsdiv', $type, 'normal' );
+			remove_meta_box( 'woothemes-settings', $type, 'normal' );
+			remove_meta_box( 'commentstatusdiv', $type, 'normal' );
+			remove_meta_box( 'slugdiv', $type, 'normal' );
+		}
 	}
 
 	/**
@@ -170,11 +173,11 @@ class WC_Admin_Meta_Boxes {
 		if ( defined( 'DOING_AUTOSAVE' ) || is_int( wp_is_post_revision( $post ) ) || is_int( wp_is_post_autosave( $post ) ) ) {
 			return;
 		}
-		
+
 		// Check the nonce
 		if ( empty( $_POST['woocommerce_meta_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) ) {
 			return;
-		} 
+		}
 
 		// Check the post being saved == the $post_id to prevent triggering this call for other save_post events
 		if ( empty( $_POST['post_ID'] ) || $_POST['post_ID'] != $post_id ) {
@@ -187,11 +190,11 @@ class WC_Admin_Meta_Boxes {
 		}
 
 		// Check the post type
-		if ( ! in_array( $post->post_type, array( 'product', 'shop_order', 'shop_coupon' ) ) ) {
-			return;
+		if ( in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ) ) ) {
+			do_action( 'woocommerce_process_shop_order_meta', $post_id, $post );
+		} elseif ( in_array( $post->post_type, array( 'product', 'shop_coupon' ) ) ) {
+			do_action( 'woocommerce_process_' . $post->post_type . '_meta', $post_id, $post );
 		}
-
-		do_action( 'woocommerce_process_' . $post->post_type . '_meta', $post_id, $post );
 	}
 
 }

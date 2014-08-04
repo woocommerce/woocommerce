@@ -89,6 +89,11 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 					'order_item_type' => 'tax',
 					'function'        => '',
 					'name'            => 'rate_id'
+				),
+				'order_id' => array(
+					'type'     => 'order_item',
+					'function' => '',
+					'name'     => 'order_id'
 				)
 			),
 			'where' => array(
@@ -133,8 +138,9 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 								'shipping_tax_amount' => 0
 							);
 						}
-						
-						$grouped_tax_tows[ $tax_row->rate_id ]->total_orders ++; 
+						if ( 'shop_order' === get_post_type( $tax_row->order_id ) ) {
+							$grouped_tax_tows[ $tax_row->rate_id ]->total_orders ++; 
+						}
 						$grouped_tax_tows[ $tax_row->rate_id ]->tax_amount += wc_round_tax_total( $tax_row->tax_amount );
 						$grouped_tax_tows[ $tax_row->rate_id ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
 					}

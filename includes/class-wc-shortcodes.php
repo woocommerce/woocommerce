@@ -127,18 +127,18 @@ class WC_Shortcodes {
 	public static function product_category( $atts ) {
 		global $woocommerce_loop;
 
-		if ( empty( $atts ) ) return '';
-
 		extract( shortcode_atts( array(
-			'per_page' 		=> '12',
-			'columns' 		=> '4',
-			'orderby'   	=> 'title',
-			'order'     	=> 'desc',
-			'category'		=> '',
-			'operator'      => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
-			), $atts ) );
+			'per_page' => '12',
+			'columns'  => '4',
+			'orderby'  => 'title',
+			'order'    => 'desc',
+			'category' => '',  // Slugs
+			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
+		), $atts ) );
 
-		if ( ! $category ) return '';
+		if ( ! $category ) {
+			return '';
+		}
 
 		// Default ordering args
 		$ordering_args = WC()->query->get_catalog_ordering_args( $orderby, $order );
@@ -160,7 +160,7 @@ class WC_Shortcodes {
 			'tax_query' 			=> array(
 				array(
 					'taxonomy' 		=> 'product_cat',
-					'terms' 		=> array( esc_attr( $category ) ),
+					'terms' 		=> array_map( 'sanitize_title', explode( ',', $category ) ),
 					'field' 		=> 'slug',
 					'operator' 		=> $operator
 				)

@@ -140,11 +140,11 @@ final class WooCommerce {
 
 		// Hooks
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'action_links' ) );
-		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
-		add_action( 'init', array( $this, 'init' ), 0 );
-		add_action( 'init', array( $this, 'include_template_functions' ) );
-		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
+		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
+		add_action( 'init', array( $this, 'init' ), 0 );
+		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
+		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
@@ -210,7 +210,9 @@ final class WooCommerce {
 			$path = $this->plugin_path() . '/includes/admin/meta-boxes/';
 		} elseif ( strpos( $class, 'wc_admin' ) === 0 ) {
 			$path = $this->plugin_path() . '/includes/admin/';
-		}
+		} elseif ( strpos( $class, 'wc_widget_' ) === 0 ) {
+                        $path = $this->plugin_path() . '/includes/widgets/';
+                }
 
 		if ( $path && is_readable( $path . $file ) ) {
 			include_once( $path . $file );
@@ -343,17 +345,18 @@ final class WooCommerce {
 	 */
 	public function include_widgets() {
 		include_once( 'includes/abstracts/abstract-wc-widget.php' );
-		include_once( 'includes/widgets/class-wc-widget-cart.php' );
-		include_once( 'includes/widgets/class-wc-widget-products.php' );
-		include_once( 'includes/widgets/class-wc-widget-layered-nav.php' );
-		include_once( 'includes/widgets/class-wc-widget-layered-nav-filters.php' );
-		include_once( 'includes/widgets/class-wc-widget-price-filter.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-categories.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-search.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-tag-cloud.php' );
-		include_once( 'includes/widgets/class-wc-widget-recent-reviews.php' );
-		include_once( 'includes/widgets/class-wc-widget-recently-viewed.php' );
-		include_once( 'includes/widgets/class-wc-widget-top-rated-products.php' );
+
+	        register_widget( 'WC_Widget_Cart' );
+	        register_widget( 'WC_Widget_Products' );
+	        register_widget( 'WC_Widget_Layered_Nav' );
+	        register_widget( 'WC_Widget_Layered_Nav_Filters' );
+	        register_widget( 'WC_Widget_Price_Filter' );
+	        register_widget( 'WC_Widget_Product_Categories' );
+	        register_widget( 'WC_Widget_Product_Search' );
+	        register_widget( 'WC_Widget_Product_Tag_Cloud' );
+	        register_widget( 'WC_Widget_Recent_Reviews' );
+	        register_widget( 'WC_Widget_Recently_Viewed' );
+	        register_widget( 'WC_Widget_Top_Rated_Products' );
 	}
 
 	/**
@@ -402,6 +405,9 @@ final class WooCommerce {
 			add_action( $action, array( $this, 'send_transactional_email' ), 10, 10 );
 		}
 
+		// webhooks
+		$this->load_webhooks();
+
 		// Init action
 		do_action( 'woocommerce_init' );
 	}
@@ -439,7 +445,7 @@ final class WooCommerce {
 
 		// Post thumbnail support
 		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
-			add_theme_support( 'post-thumbnails' );	
+			add_theme_support( 'post-thumbnails' );
 		}
 		add_post_type_support( 'product', 'thumbnail' );
 
@@ -545,6 +551,30 @@ final class WooCommerce {
 		$this->mailer();
 		$args = func_get_args();
 		do_action_ref_array( current_filter() . '_notification', $args );
+	}
+
+	/**
+	 * Load & enqueue active webhooks
+	 *
+	 * @since 2.2
+	 */
+	public function load_webhooks() {
+
+		$args = array(
+			'fields'      => 'ids',
+			'post_type'   => 'shop_webhook',
+			'post_status' => 'publish',
+		);
+
+		$query = new WP_Query( $args );
+
+		if ( ! empty( $query->posts ) ) {
+
+			foreach ( $query->posts as $id ) {
+				$webhook = new WC_Webhook( $id );
+				$webhook->enqueue();
+			}
+		}
 	}
 
 	/** Load Instances on demand **********************************************/

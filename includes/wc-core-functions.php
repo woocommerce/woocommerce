@@ -45,7 +45,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
 /**
  * Create a new order programmatically
  *
- * Returns a new order object on success which can then be used to add additonal data.
+ * Returns a new order object on success which can then be used to add additional data.
  *
  * @return WC_Order on success, WP_Error on failure
  */
@@ -75,7 +75,7 @@ function wc_create_order( $args = array() ) {
 
 	if ( $args['status'] ) {
 		if ( ! in_array( 'wc-' . $args['status'], array_keys( wc_get_order_statuses() ) ) ) {
-			return new WP_Error( __( 'Invalid order status', 'woocommerce' ) );
+			return new WP_Error( 'woocommerce_invalid_order_status', __( 'Invalid order status', 'woocommerce' ) );
 		}
 		$order_data['post_status']  = 'wc-' . $args['status'];
 	}
@@ -471,7 +471,9 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
  */
 function get_woocommerce_api_url( $path ) {
 
-	$url = get_home_url( null, 'wc-api/v' . WC_API::VERSION . '/', is_ssl() ? 'https' : 'http' );
+	$version = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : WC_API::VERSION;
+
+	$url = get_home_url( null, "wc-api/v{$version}/", is_ssl() ? 'https' : 'http' );
 
 	if ( ! empty( $path ) && is_string( $path ) ) {
 		$url .= ltrim( $path, '/' );
@@ -615,3 +617,19 @@ add_filter( 'wp_count_comments', 'wc_remove_order_notes_from_wp_count_comments',
 function wc_get_core_supported_themes() {
 	return array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 }
+
+/**
+ * Wrapper function to execute the `woocommerce_deliver_webhook_async` cron
+ * hook, see WC_Webhook::process()
+ *
+ * @since 2.2
+ * @param int $webhook_id webhook ID to deliver
+ * @param mixed $arg hook argument
+ */
+function wc_deliver_webhook_async( $webhook_id, $arg ) {
+
+	$webhook = new WC_Webhook( $webhook_id );
+
+	$webhook->deliver( $arg );
+}
+add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );

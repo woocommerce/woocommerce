@@ -116,7 +116,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 						WHERE 	meta.meta_key 		= '_customer_user'
 						AND 	meta.meta_value 	= $user->ID
-						AND 	posts.post_type 	= 'shop_order'
+						AND 	posts.post_type 	IN ('" . implode( ',', wc_get_order_types( 'reports' ) ) . "')
 						AND 	posts.post_status 	= 'wc-completed'
 						AND     meta2.meta_key 		= '_order_total'
 					" );
@@ -135,7 +135,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 						LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 
 						WHERE 	meta.meta_key 		= '_customer_user'
-						AND 	posts.post_type 	= 'shop_order'
+						AND 	posts.post_type 	IN ('" . implode( ',', wc_get_order_types( 'order-count' ) ) . "')
 						AND 	posts.post_status 	= 'wc-completed'
 						AND 	meta_value 			= $user->ID
 					" );
@@ -190,7 +190,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 						$order_ids = get_posts( array(
 							'posts_per_page' => 1,
-							'post_type'      => 'shop_order',
+							'post_type'      => wc_get_order_types(),
 							'post_status'    => array_keys( wc_get_order_statuses() ),
 							'meta_query' => array(
 								array(

@@ -31,8 +31,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->liveurl              = 'https://www.paypal.com/cgi-bin/webscr';
 		$this->testurl              = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 		$this->method_title         = __( 'PayPal', 'woocommerce' );
+		$this->method_description   = __( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' );
 		$this->view_transaction_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
 		$this->notify_url           = WC()->api_request_url( 'WC_Gateway_Paypal' );
+		$this->supports 			= array(
+			'products',
+			'refunds'
+		);
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -47,11 +52,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->send_shipping	= $this->get_option( 'send_shipping' );
 		$this->address_override	= $this->get_option( 'address_override' );
 		$this->debug			= $this->get_option( 'debug' );
-		$this->form_submission_method = $this->get_option( 'form_submission_method' ) == 'yes' ? true : false;
 		$this->page_style 		= $this->get_option( 'page_style' );
 		$this->invoice_prefix	= $this->get_option( 'invoice_prefix', 'WC-' );
 		$this->paymentaction    = $this->get_option( 'paymentaction', 'sale' );
 		$this->identity_token   = $this->get_option( 'identity_token', '' );
+		$this->api_username 	= $this->get_option( 'api_username' );
+		$this->api_password 	= $this->get_option( 'api_password' );
+		$this->api_signature 	= $this->get_option( 'api_signature' );
 
 		// Logs
 		if ( 'yes' == $this->debug ) {
@@ -93,24 +100,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @since 1.0.0
 	 */
 	public function admin_options() {
-
-		?>
-		<h3><?php _e( 'PayPal standard', 'woocommerce' ); ?></h3>
-		<p><?php _e( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' ); ?></p>
-
-		<?php if ( $this->is_valid_for_use() ) : ?>
-
-			<table class="form-table">
-			<?php
-				// Generate the HTML For the settings form.
-				$this->generate_settings_html();
+		if ( $this->is_valid_for_use() ) {
+			parent::admin_options();
+		} else {
 			?>
-			</table><!--/.form-table-->
-
-		<?php else : ?>
 			<div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woocommerce' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woocommerce' ); ?></p></div>
-		<?php
-			endif;
+			<?php
+		}
 	}
 
 	/**
@@ -119,8 +115,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @access public
 	 * @return void
 	 */
-	function init_form_fields() {
-
+	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
@@ -137,7 +132,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			),
 			'description' => array(
 				'title'       => __( 'Description', 'woocommerce' ),
-				'type'        => 'textarea',
+				'type'        => 'text',
+				'desc_tip'    => true,
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
 				'default'     => __( 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account', 'woocommerce' )
 			),
@@ -149,54 +145,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'desc_tip'    => true,
 				'placeholder' => 'you@youremail.com'
 			),
-			'receiver_email' => array(
-				'title'       => __( 'Receiver Email', 'woocommerce' ),
-				'type'        => 'email',
-				'description' => __( 'If this differs from the email entered above, input your main receiver email for your PayPal account. This is used to validate IPN requests.', 'woocommerce' ),
-				'default'     => '',
-				'desc_tip'    => true,
-				'placeholder' => 'you@youremail.com'
-			),
-			'identity_token' => array(
-				'title'       => __( 'PayPal Identity Token', 'woocommerce' ),
-				'type'        => 'text',
-				'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Website Payment Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
-				'default'     => '',
-				'desc_tip'    => true,
-				'placeholder' => __( 'Optional', 'woocommerce' )
-			),
-			'invoice_prefix' => array(
-				'title'       => __( 'Invoice Prefix', 'woocommerce' ),
-				'type'        => 'text',
-				'description' => __( 'Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unique as PayPal will not allow orders with the same invoice number.', 'woocommerce' ),
-				'default'     => 'WC-',
-				'desc_tip'    => true,
-			),
-			'paymentaction' => array(
-				'title'       => __( 'Payment Action', 'woocommerce' ),
-				'type'        => 'select',
-				'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
-				'default'     => 'sale',
-				'desc_tip'    => true,
-				'options'     => array(
-					'sale'          => __( 'Capture', 'woocommerce' ),
-					'authorization' => __( 'Authorize', 'woocommerce' )
-				)
-			),
-			'form_submission_method' => array(
-				'title'       => __( 'Submission method', 'woocommerce' ),
+			'testmode' => array(
+				'title'       => __( 'PayPal sandbox', 'woocommerce' ),
 				'type'        => 'checkbox',
-				'label'       => __( 'Use form submission method.', 'woocommerce' ),
-				'description' => __( 'Enable this to post order data to PayPal via a form instead of using a redirect/querystring.', 'woocommerce' ),
-				'default'     => 'no'
+				'label'       => __( 'Enable PayPal sandbox', 'woocommerce' ),
+				'default'     => 'no',
+				'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a developer account <a href="%s">here</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
 			),
-			'page_style' => array(
-				'title'       => __( 'Page Style', 'woocommerce' ),
-				'type'        => 'text',
-				'description' => __( 'Optionally enter the name of the page style you wish to use. These are defined within your PayPal account.', 'woocommerce' ),
-				'default'     => '',
-				'desc_tip'    => true,
-				'placeholder' => __( 'Optional', 'woocommerce' )
+			'debug' => array(
+				'title'       => __( 'Debug Log', 'woocommerce' ),
+				'type'        => 'checkbox',
+				'label'       => __( 'Enable logging', 'woocommerce' ),
+				'default'     => 'no',
+				'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'paypal' ) )
 			),
 			'shipping' => array(
 				'title'       => __( 'Shipping options', 'woocommerce' ),
@@ -217,25 +178,82 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
 				'default'     => 'no'
 			),
-			'testing' => array(
-				'title'       => __( 'Gateway Testing', 'woocommerce' ),
+			'advanced' => array(
+				'title'       => __( 'Advanced options', 'woocommerce' ),
 				'type'        => 'title',
 				'description' => '',
 			),
-			'testmode' => array(
-				'title'       => __( 'PayPal sandbox', 'woocommerce' ),
-				'type'        => 'checkbox',
-				'label'       => __( 'Enable PayPal sandbox', 'woocommerce' ),
-				'default'     => 'no',
-				'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a developer account <a href="%s">here</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
+			'receiver_email' => array(
+				'title'       => __( 'Receiver Email', 'woocommerce' ),
+				'type'        => 'email',
+				'description' => __( 'If your main PayPal email differs from the PayPal email entered above, input your main receiver email for your PayPal account here. This is used to validate IPN requests.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true,
+				'placeholder' => 'you@youremail.com'
 			),
-			'debug' => array(
-				'title'       => __( 'Debug Log', 'woocommerce' ),
-				'type'        => 'checkbox',
-				'label'       => __( 'Enable logging', 'woocommerce' ),
-				'default'     => 'no',
-				'description' => sprintf( __( 'Log PayPal events, such as IPN requests, inside <code>%s</code>', 'woocommerce' ), wc_get_log_file_path( 'paypal' ) )
-			)
+			'invoice_prefix' => array(
+				'title'       => __( 'Invoice Prefix', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'Please enter a prefix for your invoice numbers. If you use your PayPal account for multiple stores ensure this prefix is unique as PayPal will not allow orders with the same invoice number.', 'woocommerce' ),
+				'default'     => 'WC-',
+				'desc_tip'    => true,
+			),
+			'paymentaction' => array(
+				'title'       => __( 'Payment Action', 'woocommerce' ),
+				'type'        => 'select',
+				'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
+				'default'     => 'sale',
+				'desc_tip'    => true,
+				'options'     => array(
+					'sale'          => __( 'Capture', 'woocommerce' ),
+					'authorization' => __( 'Authorize', 'woocommerce' )
+				)
+			),
+			'page_style' => array(
+				'title'       => __( 'Page Style', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'Optionally enter the name of the page style you wish to use. These are defined within your PayPal account.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true,
+				'placeholder' => __( 'Optional', 'woocommerce' )
+			),
+			'identity_token' => array(
+				'title'       => __( 'PayPal Identity Token', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Website Payment Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true,
+				'placeholder' => __( 'Optional', 'woocommerce' )
+			),
+			'api_details' => array(
+				'title'       => __( 'API options (for refund support)', 'woocommerce' ),
+				'type'        => 'title',
+				'description' => '',
+			),
+			'api_username' => array(
+				'title'       => __( 'API Username', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true,
+				'placeholder' => __( 'Optional', 'woocommerce' )
+			),
+			'api_password' => array(
+				'title'       => __( 'API Password', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true,
+				'placeholder' => __( 'Optional', 'woocommerce' )
+			),
+			'api_signature' => array(
+				'title'       => __( 'API Signature', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true,
+				'placeholder' => __( 'Optional', 'woocommerce' )
+			),
 		);
 	}
 
@@ -341,9 +359,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$paypal_args['no_shipping'] = 1;
 		}
 
-		// If prices include tax or have order discounts, send the whole order as a single item
-		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || $order->get_order_discount() > 0 || ( sizeof( $order->get_items() ) + sizeof( $order->get_fees() ) ) >= 9 ) {
-
+		// Try to send line items, or default to sending the order as a whole
+		if ( $line_items = $this->get_line_items( $order ) ) {
+			$paypal_args = array_merge( $paypal_args, $line_items );
+		} else {
 			// Discount
 			$paypal_args['discount_amount_cart'] = $order->get_order_discount();
 
@@ -358,9 +377,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				}
 			}
 
-			$paypal_args['item_name_1'] 	= $this->paypal_item_name( sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names ) );
-			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ) + $order->get_order_discount(), 2, '.', '' );
+			$paypal_args['item_name_1'] = $this->paypal_item_name( sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names ) );
+			$paypal_args['quantity_1']  = 1;
+			$paypal_args['amount_1']    = number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ) + $order->get_order_discount(), 2, '.', '' );
 
 			// Shipping Cost
 			// No longer using shipping_1 because
@@ -371,69 +390,91 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$paypal_args['quantity_2'] 	= '1';
 				$paypal_args['amount_2'] 	= number_format( $order->get_total_shipping() + $order->get_shipping_tax(), 2, '.', '' );
 			}
-
-		} else {
-
-			// Tax
-			$paypal_args['tax_cart'] = $order->get_total_tax();
-
-			// Cart Contents
-			$item_loop = 0;
-			if ( sizeof( $order->get_items() ) > 0 ) {
-				foreach ( $order->get_items() as $item ) {
-					if ( $item['qty'] ) {
-
-						$item_loop++;
-
-						$product = $order->get_product_from_item( $item );
-
-						$item_name 	= $item['name'];
-
-						$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
-						if ( $meta = $item_meta->display( true, true ) ) {
-							$item_name .= ' ( ' . $meta . ' )';
-						}
-
-						$paypal_args[ 'item_name_' . $item_loop ] 	= $this->paypal_item_name( $item_name );
-						$paypal_args[ 'quantity_' . $item_loop ] 	= $item['qty'];
-						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_subtotal( $item, false );
-
-						if ( $product->get_sku() ) {
-							$paypal_args[ 'item_number_' . $item_loop ] = $product->get_sku();
-						}
-					}
-				}
-			}
-
-			// Discount
-			if ( $order->get_cart_discount() > 0 ) {
-				$paypal_args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
-			}
-
-			// Fees
-			if ( sizeof( $order->get_fees() ) > 0 ) {
-				foreach ( $order->get_fees() as $item ) {
-					$item_loop++;
-
-					$paypal_args[ 'item_name_' . $item_loop ] 	= $this->paypal_item_name( $item['name'] );
-					$paypal_args[ 'quantity_' . $item_loop ] 	= 1;
-					$paypal_args[ 'amount_' . $item_loop ] 		= $item['line_total'];
-				}
-			}
-
-			// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
-			if ( $order->get_total_shipping() > 0 ) {
-				$item_loop++;
-				$paypal_args[ 'item_name_' . $item_loop ] 	= $this->paypal_item_name( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ) );
-				$paypal_args[ 'quantity_' . $item_loop ] 	= '1';
-				$paypal_args[ 'amount_' . $item_loop ] 		= number_format( $order->get_total_shipping(), 2, '.', '' );
-			}
-
 		}
 
 		$paypal_args = apply_filters( 'woocommerce_paypal_args', $paypal_args );
 
 		return $paypal_args;
+	}
+
+	/**
+	 * Get line items to send to paypal
+	 *
+	 * @param  WC_Order $order
+	 * @return array on success, or false when it is not possible to send line items
+	 */
+	private function get_line_items( $order ) {
+		// Do not send lines for tax inclusive prices
+		if ( 'yes' === get_option( 'woocommerce_calc_taxes' ) && 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) {
+			return false;
+		}
+
+		// Do not send lines when order discount is present, or too many line items in the order.
+		if ( $order->get_order_discount() > 0 || ( sizeof( $order->get_items() ) + sizeof( $order->get_fees() ) ) >= 9 ) {
+			return false;
+		}
+
+		$item_loop        = 0;
+		$args             = array();
+		$args['tax_cart'] = $order->get_total_tax();
+		
+		// Products
+		if ( sizeof( $order->get_items() ) > 0 ) {
+			foreach ( $order->get_items() as $item ) {
+				if ( ! $item['qty'] ) {
+					continue;
+				}
+				$item_loop ++;
+				$product   = $order->get_product_from_item( $item );
+				$item_name = $item['name'];
+				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+				
+				if ( $meta = $item_meta->display( true, true ) ) {
+					$item_name .= ' ( ' . $meta . ' )';
+				}
+
+				$args[ 'item_name_' . $item_loop ] = $this->paypal_item_name( $item_name );
+				$args[ 'quantity_' . $item_loop ]  = $item['qty'];
+				$args[ 'amount_' . $item_loop ]    = $order->get_item_subtotal( $item, false );
+
+				if ( $args[ 'amount_' . $item_loop ] < 0 ) {
+					return false; // Abort - negative line
+				}
+
+				if ( $product->get_sku() ) {
+					$args[ 'item_number_' . $item_loop ] = $product->get_sku();
+				}
+			}
+		}
+
+		// Discount
+		if ( $order->get_cart_discount() > 0 ) {
+			$args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
+		}
+
+		// Fees
+		if ( sizeof( $order->get_fees() ) > 0 ) {
+			foreach ( $order->get_fees() as $item ) {
+				$item_loop ++;
+				$args[ 'item_name_' . $item_loop ] = $this->paypal_item_name( $item['name'] );
+				$args[ 'quantity_' . $item_loop ]  = 1;
+				$args[ 'amount_' . $item_loop ]    = $item['line_total'];
+
+				if ( $args[ 'amount_' . $item_loop ] < 0 ) {
+					return false; // Abort - negative line
+				}
+			}
+		}
+
+		// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
+		if ( $order->get_total_shipping() > 0 ) {
+			$item_loop ++;
+			$args[ 'item_name_' . $item_loop ] = $this->paypal_item_name( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ) );
+			$args[ 'quantity_' . $item_loop ]  = '1';
+			$args[ 'amount_' . $item_loop ]    = number_format( $order->get_total_shipping(), 2, '.', '' );
+		}
+
+		return $args;
 	}
 
 	/**
@@ -443,7 +484,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param mixed $order_id
 	 * @return string
 	 */
-	function generate_paypal_form( $order_id ) {
+	public function generate_paypal_form( $order_id ) {
 
 		$order = get_order( $order_id );
 
@@ -494,7 +535,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					jQuery(".payment_buttons").hide();
 				</script>
 			</form>';
-
 	}
 
 	/**
@@ -504,36 +544,80 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param int $order_id
 	 * @return array
 	 */
-	function process_payment( $order_id ) {
+	public function process_payment( $order_id ) {
+		$order       = get_order( $order_id );
+		$paypal_args = $this->get_paypal_args( $order );
+		$paypal_args = http_build_query( $paypal_args, '', '&' );
 
-		$order = get_order( $order_id );
-
-		if ( ! $this->form_submission_method ) {
-
-			$paypal_args = $this->get_paypal_args( $order );
-
-			$paypal_args = http_build_query( $paypal_args, '', '&' );
-
-			if ( 'yes' == $this->testmode ) {
-				$paypal_adr = $this->testurl . '?test_ipn=1&';
-			} else {
-				$paypal_adr = $this->liveurl . '?';
-			}
-
-			return array(
-				'result' 	=> 'success',
-				'redirect'	=> $paypal_adr . $paypal_args
-			);
-
+		if ( 'yes' == $this->testmode ) {
+			$paypal_adr = $this->testurl . '?test_ipn=1&';
 		} else {
-
-			return array(
-				'result' 	=> 'success',
-				'redirect'	=> $order->get_checkout_payment_url( true )
-			);
-
+			$paypal_adr = $this->liveurl . '?';
 		}
 
+		return array(
+			'result' 	=> 'success',
+			'redirect'	=> $paypal_adr . $paypal_args
+		);
+	}
+
+	/**
+	 * Process a refund if supported
+	 * @param  int $order_id
+	 * @param  float $amount
+	 * @return  bool|wp_error True or false based on success, or a WP_Error object
+	 */
+	public function process_refund( $order_id, $amount = null ) {
+		$order = get_order( $order_id );
+
+		if ( ! $order || ! $order->get_transaction_id() || ! $this->api_username || ! $this->api_password || ! $this->api_password ) {
+			return false;
+		}
+
+		$post_data = array(
+			'VERSION'       => '84.0',
+			'SIGNATURE'     => $this->api_signature,
+			'USER'          => $this->api_username,
+			'PWD'           => $this->api_password,
+			'METHOD'        => 'RefundTransaction',
+			'TRANSACTIONID' => $order->get_transaction_id(),
+			'REFUNDTYPE'    => is_null( $amount ) ? 'Full' : 'Partial'
+		);
+
+		if ( ! is_null( $amount ) ) {
+			$post_data['AMT']          = number_format( $amount, 2, '.', '' );
+			$post_data['CURRENCYCODE'] = $order->get_order_currency();
+		}
+
+		$response = wp_remote_post( 'yes' === $this->testmode ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp', array(
+			'method'      => 'POST',
+			'body'        => $post_data,
+			'timeout'     => 70,
+			'sslverify'   => false,
+			'user-agent'  => 'WooCommerce',
+			'httpversion' => '1.1'
+			) 
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( empty( $response['body'] ) ) {
+			return new WP_Error( 'paypal-error', __( 'Empty Paypal response.', 'woocommerce' ) );
+		}
+
+		parse_str( $response['body'], $parsed_response );
+
+		switch ( strtolower( $parsed_response['ACK'] ) ) {
+			case 'success':
+			case 'successwithwarning':
+				$order->add_order_note( sprintf( __( 'Refunded %s - Refund ID: %s', 'woocommerce' ), $parsed_response['GROSSREFUNDAMT'], $parsed_response['REFUNDTRANSACTIONID'] ) );
+				return true;
+			break;
+		}
+
+		return false;
 	}
 
 	/**
@@ -542,7 +626,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @access public
 	 * @return void
 	 */
-	function receipt_page( $order ) {
+	public function receipt_page( $order ) {
 		echo '<p>' . __( 'Thank you - your order is now pending payment. You should be automatically redirected to PayPal to make payment.', 'woocommerce' ) . '</p>';
 
 		echo $this->generate_paypal_form( $order );
@@ -551,8 +635,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Check PayPal IPN validity
 	 **/
-	function check_ipn_request_is_valid( $ipn_response ) {
-
+	public function check_ipn_request_is_valid( $ipn_response ) {
 		// Get url
 		if ( 'yes' == $this->testmode ) {
 			$paypal_adr = $this->testurl;
@@ -615,7 +698,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @access public
 	 * @return void
 	 */
-	function check_ipn_response() {
+	public function check_ipn_response() {
 
 		@ob_clean();
 
@@ -642,7 +725,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param array $posted
 	 * @return void
 	 */
-	function successful_request( $posted ) {
+	public function successful_request( $posted ) {
 
 		$posted = stripslashes_deep( $posted );
 

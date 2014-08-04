@@ -447,7 +447,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_title() {
-		return apply_filters( 'woocommerce_product_title', $this->post->post_title, $this );
+		return apply_filters( 'woocommerce_product_title', $this->post ? $this->post->post_title : '', $this );
 	}
 
 	/**
@@ -626,34 +626,33 @@ class WC_Product {
 	}
 
 	/**
-	 * Returns whether or not the product is visible.
+	 * Returns whether or not the product is visible in the catalog.
 	 *
 	 * @access public
 	 * @return bool
 	 */
 	public function is_visible() {
-
 		$visible = true;
 
+		// Published/private
+		if ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
+			$visible = false;
+
 		// Out of stock visibility
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes' && ! $this->is_in_stock() ) {
+		} elseif ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
 			$visible = false;
 
 		// visibility setting
-		} elseif ( $this->visibility === 'hidden' ) {
+		} elseif ( 'hidden' === $this->visibility ) {
 			$visible = false;
-		} elseif ( $this->visibility === 'visible' ) {
+		} elseif ( 'visible' === $this->visibility ) {
 			$visible = true;
 
 		// Visibility in loop
-		} elseif ( $this->visibility === 'search' && is_search() ) {
-			$visible = true;
-		} elseif ( $this->visibility === 'search' && ! is_search() ) {
-			$visible = false;
-		} elseif ( $this->visibility === 'catalog' && is_search() ) {
-			$visible = false;
-		} elseif ( $this->visibility === 'catalog' && ! is_search() ) {
-			$visible = true;
+		} elseif ( is_search() ) {
+			$visible = 'search' === $this->visibility;
+		} else {
+			$visible = 'catalog' === $this->visibility;
 		}
 
 		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->id );

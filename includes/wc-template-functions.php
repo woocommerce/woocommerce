@@ -202,8 +202,9 @@ function wc_body_class( $classes ) {
  * @return array
  */
 function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
-	if ( ! $post_id || get_post_type( $post_id ) !== 'product' )
+	if ( ! $post_id || 'product' !== get_post_type( $post_id ) ) {
 		return $classes;
+	}
 
 	$product = get_product( $post_id );
 
@@ -237,25 +238,25 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		}
 
 		// add category slugs
-		$categories = wp_get_post_terms( $product->id, "product_cat" );
+		$categories = get_the_terms( $product->id, 'product_cat' );
 		if ( ! empty( $categories ) ) {
-			foreach ($categories as $key => $value) {
-				$classes[] = "product-cat-" . $value->slug;
+			foreach ( $categories as $key => $value ) {
+				$classes[] = 'product-cat-' . $value->slug;
 			}
 		}
 
 		// add tag slugs
-		$tags = wp_get_post_terms( $product->id, "product_tag" );
+		$tags = get_the_terms( $product->id, 'product_tag' );
 		if ( ! empty( $tags ) ) {
-			foreach ($tags as $key => $value) {
-				$classes[] = "product-tag-" . $value->slug;
+			foreach ( $tags as $key => $value ) {
+				$classes[] = 'product-tag-' . $value->slug;
 			}
 		}
 
 		$classes[] = $product->stock_status;
 	}
 
-	if ( ( $key = array_search( 'hentry', $classes ) ) !== false ) {
+	if ( false !== ( $key = array_search( 'hentry', $classes ) ) ) {
 		unset( $classes[ $key ] );
 	}
 
@@ -642,9 +643,32 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	 * @return void
 	 */
 	function woocommerce_catalog_ordering() {
-		$orderby = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		global $wp_query;
 
-		wc_get_template( 'loop/orderby.php', array( 'orderby' => $orderby ) );
+		if ( 1 == $wp_query->found_posts || ! woocommerce_products_will_display() ) {
+			return;
+		}
+		
+		$orderby                 = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$show_default_orderby    = 'menu_order' === apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$catalog_orderby_options = apply_filters( 'woocommerce_catalog_orderby', array(
+			'menu_order' => __( 'Default sorting', 'woocommerce' ),
+			'popularity' => __( 'Sort by popularity', 'woocommerce' ),
+			'rating'     => __( 'Sort by average rating', 'woocommerce' ),
+			'date'       => __( 'Sort by newness', 'woocommerce' ),
+			'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
+			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' )
+		) );
+
+		if ( ! $show_default_orderby ) {
+			unset( $catalog_orderby_options['menu_order'] );
+		}
+
+		if ( get_option( 'woocommerce_enable_review_rating' ) === 'no' ) {
+			unset( $catalog_orderby_options['rating'] );
+		}
+
+		wc_get_template( 'loop/orderby.php', array( 'catalog_orderby_options' => $catalog_orderby_options, 'orderby' => $orderby, 'show_default_orderby' => $show_default_orderby ) );
 	}
 }
 
@@ -1272,8 +1296,8 @@ if ( ! function_exists( 'woocommerce_order_review' ) ) {
 	 * @subpackage	Checkout
 	 * @return void
 	 */
-	function woocommerce_order_review() {
-		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout() ) );
+	function woocommerce_order_review( $is_ajax = false ) {
+		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout(), 'is_ajax' => $is_ajax ) );
 	}
 }
 

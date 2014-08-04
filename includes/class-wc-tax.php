@@ -517,38 +517,70 @@ class WC_Tax {
 	/**
 	 * Return a given rates label.
 	 *
-	 * @param   int		key
+	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format
 	 * @return  string
 	 */
-	public static function get_rate_label( $key ) {
+	public static function get_rate_label( $key_or_rate ) {
 		global $wpdb;
 
-		$rate_name = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_name FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
+		if ( is_object( $key_or_rate ) ) {
+			$key       = $key_or_rate->tax_rate_id;
+			$rate_name = $key_or_rate->tax_rate_name;
+		} else {
+			$key       = $key_or_rate;
+			$rate_name = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_name FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
+		}
 
-		if ( ! $rate_name )
+		if ( ! $rate_name ) {
 			$rate_name = WC()->countries->tax_or_vat();
+		}
 
 		return apply_filters( 'woocommerce_rate_label', $rate_name, $key );
+	}
+
+	/**
+	 * Return a given rates percent.
+	 *
+	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format
+	 * @return  string
+	 */
+	public static function get_rate_percent( $key_or_rate ) {
+		global $wpdb;
+
+		if ( is_object( $key_or_rate ) ) {
+			$key      = $key_or_rate->tax_rate_id;
+			$tax_rate = $key_or_rate->tax_rate;
+		} else {
+			$key      = $key_or_rate;
+			$tax_rate = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
+		}
+
+		return apply_filters( 'woocommerce_rate_percent', floatval( $tax_rate ) . '%', $key );
 	}
 
 	/**
 	 * Get a rates code. Code is made up of COUNTRY-STATE-NAME-Priority. E.g GB-VAT-1, US-AL-TAX-1
 	 *
 	 * @access public
-	 * @param mixed $key
+	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format
 	 * @return string
 	 */
-	public static function get_rate_code( $key ) {
+	public static function get_rate_code( $key_or_rate ) {
 		global $wpdb;
 
-		$rate = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
+		if ( is_object( $key_or_rate ) ) {
+			$key  = $key_or_rate->tax_rate_id;
+			$rate = $key_or_rate;
+		} else {
+			$key  = $key_or_rate;
+			$rate = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
+		}
 
 		if ( ! $rate ) {
 			return '';
 		}
 
-		$code = array();
-
+		$code   = array();
 		$code[] = $rate->tax_rate_country;
 		$code[] = $rate->tax_rate_state;
 		$code[] = $rate->tax_rate_name ? $rate->tax_rate_name : 'TAX';

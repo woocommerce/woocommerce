@@ -29,18 +29,24 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'type'     => 'meta',
 					'function' => 'SUM',
 					'name'     => 'total_shipping'
-				),
-				'ID' => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders'
 				)
 			),
 			'filter_range' => true
 		) );
 		$total_sales    = $order_totals->total_sales;
 		$total_shipping = $order_totals->total_shipping;
-		$total_orders   = absint( $order_totals->total_orders );
+		$total_orders   = absint( $this->get_order_report_data( array(
+			'data' => array(
+				'ID' => array(
+					'type'     => 'post_data',
+					'function' => 'COUNT',
+					'name'     => 'total_orders'
+				)
+			),
+			'query_type'   => 'get_var',
+			'filter_range' => true,
+			'order_types'  => wc_get_order_types( 'order-count' )
+		) ) );
 		$total_items    = absint( $this->get_order_report_data( array(
 			'data' => array(
 				'_qty' => array(
@@ -51,6 +57,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				)
 			),
 			'query_type' => 'get_var',
+			'order_types'  => wc_get_order_types( 'order-count' ),
 			'filter_range' => true
 		) ) );
 		// Get discount amounts in range
@@ -70,7 +77,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'operator' => '='
 				)
 			),
-			'query_type' => 'get_var',
+			'query_type'   => 'get_var',
+			'order_types'  => wc_get_order_types( 'order-count' ),
 			'filter_range' => true
 		) );
 

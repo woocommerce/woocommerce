@@ -167,6 +167,14 @@ function wc_round_tax_total( $tax ) {
 }
 
 /**
+ * Make a refund total negative
+ * @return float
+ */
+function wc_format_refund_total( $amount ) {
+	return $amount * -1;
+}
+
+/**
  * Format decimal numbers ready for DB storage
  *
  * Sanitize, remove locale formatting, and optionally round + trim off zeros
@@ -321,6 +329,13 @@ function wc_price( $price, $args = array() ) {
 	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
 	$thousands_sep   = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
 
+	if ( $price < 0 ) {
+		$price    = $price * -1;
+		$negative = true;
+	} else {
+		$negative = false;
+	}
+
 	$price           = apply_filters( 'raw_woocommerce_price', floatval( $price ) );
 	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $price, $num_decimals, $decimal_sep, $thousands_sep ), $price, $num_decimals, $decimal_sep, $thousands_sep );
 
@@ -328,7 +343,7 @@ function wc_price( $price, $args = array() ) {
 		$price = wc_trim_zeros( $price );
 	}
 
-	$formatted_price = sprintf( get_woocommerce_price_format(), $currency_symbol, $price );
+	$formatted_price = ( $negative ? '-' : '' ) . sprintf( get_woocommerce_price_format(), $currency_symbol, $price );
 	$return          = '<span class="amount">' . $formatted_price . '</span>';
 
 	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {

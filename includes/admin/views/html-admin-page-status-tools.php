@@ -1,3 +1,14 @@
+<?php
+/**
+ * Admin View: Page - Status Tools
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
+
 <form method="post" action="options.php">
 	<?php settings_fields( 'woocommerce_status_settings_fields' ); ?>
 	<?php $options = wp_parse_args( get_option( 'woocommerce_status_options', array() ), array( 'uninstall_data' => 0, 'template_debug_mode' => 0, 'shipping_debug_mode' => 0 ) ); ?>

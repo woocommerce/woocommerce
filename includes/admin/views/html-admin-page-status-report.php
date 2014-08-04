@@ -1,7 +1,21 @@
+<?php
+/**
+ * Admin View: Page - Status Report
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
+
 <div class="updated woocommerce-message">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a></p>
-	<div id="debug-report"><textarea readonly="readonly"></textarea></div>
+	<div id="debug-report">
+		<textarea readonly="readonly"></textarea>
+		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
+	</div>
 </div>
 <br/>
 <table class="wc_status_table widefat" cellspacing="0">
@@ -430,11 +444,34 @@
 				?></td>
 			</tr>
 			<tr>
-				<td><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
+				<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
 				<td><?php
 					echo $active_theme->{'Author URI'};
 				?></td>
 			</tr>
+			<tr>
+				<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
+				<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
+			</tr>
+			<?php
+			if( is_child_theme() ) :
+				$parent_theme = wp_get_theme( $active_theme->Template );
+			?>
+			<tr>
+				<td><?php _e( 'Parent Theme Name', 'woocommece' ); ?>:</td>
+				<td><?php echo $parent_theme->Name; ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
+				<td><?php echo  $parent_theme->Version; ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
+				<td><?php
+					echo $parent_theme->{'Author URI'};
+				?></td>
+			</tr>
+			<?php endif ?>
 			<tr>
 				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
 				<td><?php
@@ -582,4 +619,22 @@
 
 		return false;
 	});
+
+	jQuery( document ).ready( function ( $ ) {
+		$( '#copy-for-support' ).tipTip({
+			'attribute':  'data-tip',
+			'activation': 'click',
+			'fadeIn':     50,
+			'fadeOut':    50,
+			'delay':      0
+		});
+
+		$( 'body' ) .on( 'copy', '#copy-for-support', function ( e ) {
+			e.clipboardData.clearData();
+			e.clipboardData.setData( 'text/plain', $( '#debug-report textarea' ).val() );
+			e.preventDefault();
+		});
+
+	});
+
 </script>

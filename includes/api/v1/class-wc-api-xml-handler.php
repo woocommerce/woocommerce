@@ -8,6 +8,7 @@
  * @category    API
  * @package     WooCommerce/API
  * @since       2.1
+ * @version     2.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly

@@ -87,13 +87,15 @@ abstract class WC_Abstract_Order {
 		foreach( $address as $key => $value ) {
 			update_post_meta( $this->id, "_{$type}_" . $key, $value );
 		}
-	}	
+	}
 
 	/**
 	 * Add a product line item to the order
-	 * @param WC_Product $item
+	 *
+	 * @since 2.2
+	 * @param \WC_Product $product
 	 * @param int $qty Line item quantity
-	 * @param  array args
+	 * @param array $args
 	 * @return int|bool Item ID or false
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
@@ -103,34 +105,47 @@ abstract class WC_Abstract_Order {
 		);
 
 		$args    = wp_parse_args( $args, $default_args );
-	   	$item_id = wc_add_order_item( $this->id, array(
+		$item_id = wc_add_order_item( $this->id, array(
 			'order_item_name' => $product->get_title(),
 			'order_item_type' => 'line_item'
-	 	) );
+		) );
 
-	 	if ( ! $item_id ) {
-	 		return false;
-	 	}
+		if ( ! $item_id ) {
+			return false;
+		}
 
-	 	wc_add_order_item_meta( $item_id, '_qty', wc_stock_amount( $qty ) );
-	 	wc_add_order_item_meta( $item_id, '_tax_class', $product->get_tax_class() );
-	 	wc_add_order_item_meta( $item_id, '_product_id', $product->id );
-	 	wc_add_order_item_meta( $item_id, '_variation_id', isset( $product->variation_id ) ? $product->variation_id : 0 );
-	 	
-	 	// Set line item totals, either passed in or from the product
-	 	wc_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax( $qty ) ) );
-	 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( isset( $args['totals']['total'] ) ? $args['totals']['total'] : $product->get_price_excluding_tax( $qty ) ) );
-	 	wc_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
-	 	wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
+		wc_add_order_item_meta( $item_id, '_qty', wc_stock_amount( $qty ) );
+		wc_add_order_item_meta( $item_id, '_tax_class', $product->get_tax_class() );
+		wc_add_order_item_meta( $item_id, '_product_id', $product->id );
+		wc_add_order_item_meta( $item_id, '_variation_id', isset( $product->variation_id ) ? $product->variation_id : 0 );
 
-	 	// Add variation meta
-	 	foreach ( $args['variation'] as $key => $value ) {
-	 		wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
-	 	}
+		// Set line item totals, either passed in or from the product
+		wc_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax( $qty ) ) );
+		wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( isset( $args['totals']['total'] ) ? $args['totals']['total'] : $product->get_price_excluding_tax( $qty ) ) );
+		wc_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
+		wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
 
-	 	// Backorders
-	 	if ( $product->backorders_require_notification() && $product->is_on_backorder( $qty ) ) {
-	 		wc_add_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $qty - max( 0, $product->get_total_stock() ) );
+		// Save tax data - Since 2.2
+		if ( isset( $args['totals']['tax_data'] ) ) {
+			$tax_data             = array();
+			$tax_data['total']    = array_map( 'wc_format_decimal', $args['totals']['tax_data']['total'] );
+			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $args['totals']['tax_data']['subtotal'] );
+
+			wc_add_order_item_meta( $item_id, '_line_tax_data', $tax_data );
+		} else {
+			wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array(), 'subtotal' => array() ) );
+		}
+
+		// Add variation meta
+		if ( ! empty( $args['variation'] ) ) {
+			foreach ( $args['variation'] as $key => $value ) {
+				wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
+			}
+		}
+
+		// Backorders
+		if ( $product->backorders_require_notification() && $product->is_on_backorder( $qty ) ) {
+			wc_add_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $qty - max( 0, $product->get_total_stock() ) );
 		}
 
 		do_action( 'woocommerce_order_add_product', $this->id, $item_id, $product, $qty, $args );
@@ -138,23 +153,79 @@ abstract class WC_Abstract_Order {
 		return $item_id;
 	}
 
+
+	/**
+	 * Update a line item for the order
+	 *
+	 * Note this does not update order totals
+	 *
+	 * @since 2.2
+	 * @param int $item_id order item ID
+	 * @param array $args data to update
+	 * @return bool
+	 */
+	public function update_product( $item_id, $product, $args ) {
+
+		if ( ! $item_id || ! is_object( $product ) ) {
+			return false;
+		}
+
+		// quantity
+		if ( isset( $args['qty'] ) ) {
+			wc_update_order_item_meta( $item_id, '_qty', wc_stock_amount( $args['qty'] ) );
+		}
+
+		// tax class
+		if ( isset( $args['tax_class'] ) ) {
+			wc_update_order_item_meta( $item_id, '_tax_class', $args['tax_class'] );
+		}
+
+		// set item totals, either provided or from product
+		if ( isset( $args['qty'] ) ) {
+			wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax( $args['qty'] ) ) );
+			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( isset( $args['totals']['total'] ) ? $args['totals']['total'] : $product->get_price_excluding_tax( $args['qty'] ) ) );
+		}
+
+		// set item tax totals
+		wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
+		wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
+
+		// variation meta
+		if ( isset( $args['variation'] ) && is_array( $args['variation'] ) ) {
+			foreach ( $args['variation'] as $key => $value ) {
+				wc_update_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
+			}
+		}
+
+		// backorders
+		if ( isset( $args['qty'] ) && $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
+			wc_update_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ) );
+		}
+
+		do_action( 'woocommerce_order_edit_product', $this->id, $item_id, $args, $product );
+
+		return true;
+	}
+
+
 	/**
 	 * Add coupon code to the order
-	 * @param string  $code
-	 * @param float $discount_amount
+	 *
+	 * @param string $code
+	 * @param float|int $discount_amount
 	 * @return int|bool Item ID or false
 	 */
 	public function add_coupon( $code, $discount_amount = 0 ) {
 		$item_id = wc_add_order_item( $this->id, array(
 			'order_item_name' => $code,
 			'order_item_type' => 'coupon'
-	 	) );
+		) );
 
-	 	if ( ! $item_id ) {
-	 		return false;
-	 	}
+		if ( ! $item_id ) {
+			return false;
+		}
 
-	 	wc_add_order_item_meta( $item_id, 'discount_amount', $discount_amount );
+		wc_add_order_item_meta( $item_id, 'discount_amount', $discount_amount );
 
 		do_action( 'woocommerce_order_add_coupon', $this->id, $item_id, $code, $discount_amount );
 
@@ -162,7 +233,40 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Update coupon for order
+	 *
+	 * Note this does not update order totals
+	 *
+	 * @since 2.2
+	 * @param int $item_id
+	 * @param array $args
+	 * @return bool
+	 */
+	public function update_coupon( $item_id, $args ) {
+
+		if ( ! $item_id ) {
+			return false;
+		}
+
+		// code
+		if ( isset( $args['code'] ) ) {
+			wc_update_order_item( $item_id, array( 'order_item_name' => $args['code'] ) );
+		}
+
+		// amount
+		if ( isset( $args['discount_amount'] ) ) {
+			wc_update_order_item_meta( $item_id, 'discount_amount', wc_format_decimal( $args['discount_amount'] ) );
+		}
+
+		do_action( 'woocommerce_order_update_coupon', $this->id, $item_id, $args );
+
+		return true;
+	}
+
+	/**
 	 * Add a tax row to the order
+	 *
+	 * @since 2.2
 	 * @param int tax_rate_id
 	 * @return int|bool Item ID or false
 	 */
@@ -172,23 +276,23 @@ abstract class WC_Abstract_Order {
 		if ( ! $code ) {
 			return false;
 		}
-			
+
 		$item_id = wc_add_order_item( $this->id, array(
 			'order_item_name' => $code,
 			'order_item_type' => 'tax'
-	 	) );
+		) );
 
-	 	if ( ! $item_id ) {
- 			return false;
- 		}
+		if ( ! $item_id ) {
+			return false;
+		}
 
- 		wc_add_order_item_meta( $item_id, 'rate_id', $tax_rate_id );
- 		wc_add_order_item_meta( $item_id, 'label', WC_Tax::get_rate_label( $tax_rate_id ) );
-	 	wc_add_order_item_meta( $item_id, 'compound', WC_Tax::is_compound( $tax_rate_id ) ? 1 : 0 );
-	 	wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( $tax_amount ) );
-	 	wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( $shipping_tax_amount ) );
+		wc_add_order_item_meta( $item_id, 'rate_id', $tax_rate_id );
+		wc_add_order_item_meta( $item_id, 'label', WC_Tax::get_rate_label( $tax_rate_id ) );
+		wc_add_order_item_meta( $item_id, 'compound', WC_Tax::is_compound( $tax_rate_id ) ? 1 : 0 );
+		wc_add_order_item_meta( $item_id, 'tax_amount', wc_format_decimal( $tax_amount ) );
+		wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_format_decimal( $shipping_tax_amount ) );
 
-	 	do_action( 'woocommerce_order_add_tax', $this->id, $item_id, $tax_rate_id, $tax_amount, $shipping_tax_amount );
+		do_action( 'woocommerce_order_add_tax', $this->id, $item_id, $tax_rate_id, $tax_amount, $shipping_tax_amount );
 
 		return $item_id;
 	}
@@ -200,23 +304,63 @@ abstract class WC_Abstract_Order {
 	 */
 	public function add_shipping( $shipping_rate ) {
 		$item_id = wc_add_order_item( $this->id, array(
-	 		'order_item_name' 		=> $shipping_rate->label,
-	 		'order_item_type' 		=> 'shipping'
-	 	) );
+			'order_item_name' 		=> $shipping_rate->label,
+			'order_item_type' 		=> 'shipping'
+		) );
 
 		if ( ! $item_id ) {
- 			return false;
- 		}
+			return false;
+		}
 
 		wc_add_order_item_meta( $item_id, 'method_id', $shipping_rate->id );
- 		wc_add_order_item_meta( $item_id, 'cost', wc_format_decimal( $shipping_rate->cost ) );
+		wc_add_order_item_meta( $item_id, 'cost', wc_format_decimal( $shipping_rate->cost ) );
 
- 		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $shipping_rate );
+		// Save shipping taxes - Since 2.2
+		$taxes = array_map( 'wc_format_decimal', $shipping_rate->taxes );
+		wc_add_order_item_meta( $item_id, 'taxes', $taxes );
 
- 		// Update total
- 		$this->set_total( $this->order_shipping + wc_format_decimal( $shipping_rate->cost ), 'shipping' );
+		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $shipping_rate );
 
- 		return $item_id;
+		// Update total
+		$this->set_total( $this->order_shipping + wc_format_decimal( $shipping_rate->cost ), 'shipping' );
+
+		return $item_id;
+	}
+
+	/**
+	 * Update shipping method for order
+	 *
+	 * Note this does not update the order total
+	 *
+	 * @since 2.2
+	 * @param int $item_id
+	 * @param array $args
+	 * @return bool
+	 */
+	public function update_shipping( $item_id, $args ) {
+
+		if ( ! $item_id ) {
+			return false;
+		}
+
+		// method title
+		if ( isset( $args['method_title'] ) ) {
+			wc_update_order_item( $item_id, array( 'order_item_name' => $args['method_title'] ) );
+		}
+
+		// method ID
+		if ( isset( $args['method_id'] ) ) {
+			wc_update_order_item_meta( $item_id, 'method_id', $args['method_id'] );
+		}
+
+		// method cost
+		if ( isset( $args['cost'] ) ) {
+			wc_update_order_item_meta( $item_id, 'cost', wc_format_decimal( $args['cost'] ) );
+		}
+
+		do_action( 'woocommerce_order_update_shipping', $this->id, $item_id, $args );
+
+		return true;
 	}
 
 	/**
@@ -228,24 +372,69 @@ abstract class WC_Abstract_Order {
 		$item_id = wc_add_order_item( $this->id, array(
 			'order_item_name' => $fee->name,
 			'order_item_type' => 'fee'
-	 	) );
+		) );
 
-	 	if ( ! $item_id ) {
- 			return false;
- 		}
+		if ( ! $item_id ) {
+			return false;
+		}
 
-	 	if ( $fee->taxable ) {
-	 		wc_add_order_item_meta( $item_id, '_tax_class', $fee->tax_class );
-	 	} else {
-	 		wc_add_order_item_meta( $item_id, '_tax_class', '0' );
-	 	}
+		if ( $fee->taxable ) {
+			wc_add_order_item_meta( $item_id, '_tax_class', $fee->tax_class );
+		} else {
+			wc_add_order_item_meta( $item_id, '_tax_class', '0' );
+		}
 
-	 	wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $fee->amount ) );
+		wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( $fee->amount ) );
 		wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $fee->tax ) );
+
+		// Save tax data - Since 2.2
+		$tax_data = array_map( 'wc_format_decimal', $fee->tax_data );
+		wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $tax_data ) );
 
 		do_action( 'woocommerce_order_add_fee', $this->id, $item_id, $fee );
 
 		return $item_id;
+	}
+
+	/**
+	 * Update fee for order
+	 *
+	 * Note this does not update order totals
+	 *
+	 * @since 2.2
+	 * @param int $item_id
+	 * @param array $args
+	 * @return bool
+	 */
+	public function update_fee( $item_id, $args ) {
+
+		if ( ! $item_id ) {
+			return false;
+		}
+
+		// name
+		if ( isset( $args['name'] ) ) {
+			wc_update_order_item( $item_id, array( 'order_item_name' => $args['name'] ) );
+		}
+
+		// tax class
+		if ( isset( $args['tax_class'] ) ) {
+			wc_update_order_item_meta( $item_id, '_tax_class', $args['tax_class'] );
+		}
+
+		// total
+		if ( isset( $args['line_total'] ) ) {
+			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $args['line_total'] ) );
+		}
+
+		// total tax
+		if ( isset( $args['line_tax'] ) ) {
+			wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $args['line_tax'] ) );
+		}
+
+		do_action( 'woocommerce_order_update_fee', $this->id, $item_id, $args );
+
+		return true;
 	}
 
 	/**
@@ -279,7 +468,7 @@ abstract class WC_Abstract_Order {
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
 	 * Will use the base country unless customer addresses are set.
-	 * 
+	 *
 	 * @return bool success or fail
 	 */
 	public function calculate_taxes() {
@@ -287,17 +476,17 @@ abstract class WC_Abstract_Order {
 		$tax_total          = 0;
 		$taxes              = array();
 		$tax_based_on       = get_option( 'woocommerce_tax_based_on' );
-		
+
 		if ( 'base' === $tax_based_on ) {
 			$default  = get_option( 'woocommerce_default_country' );
 			$postcode = '';
 			$city     = '';
-	    	if ( strstr( $default, ':' ) ) {
-	    		list( $country, $state ) = explode( ':', $default );
-	    	} else {
+			if ( strstr( $default, ':' ) ) {
+				list( $country, $state ) = explode( ':', $default );
+			} else {
 				$country = $default;
 				$state   = '';
-	    	}
+			}
 		} elseif ( 'billing' === $tax_based_on ) {
 			$country 	= $this->billing_country;
 			$state 		= $this->billing_state;
@@ -333,7 +522,7 @@ abstract class WC_Abstract_Order {
 				$tax_total           += $line_tax;
 
 				wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $line_subtotal_tax ) );
-	 			wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax ) );
+				wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax ) );
 
 				// Sum the item taxes
 				foreach ( array_keys( $taxes + $line_taxes ) as $key ) {
@@ -378,30 +567,105 @@ abstract class WC_Abstract_Order {
 		return true;
 	}
 
+
+	/**
+	 * Calculate shipping total
+	 *
+	 * @since 2.2
+	 * @return float
+	 */
+	public function calculate_shipping() {
+
+		$shipping_total = 0;
+
+		foreach ( $this->get_shipping_methods() as $shipping ) {
+			$shipping_total += $shipping['cost'];
+		}
+
+		$this->set_total( $shipping_total, 'shipping' );
+
+		return $this->get_total_shipping();
+	}
+
+	/**
+	 * Update tax lines at order level by looking at the line item taxes themselves.
+	 *
+	 * @return bool success or fail
+	 */
+	public function update_taxes() {
+		$order_taxes          = array();
+		$order_shipping_taxes = array();
+
+		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
+			$line_tax_data = maybe_unserialize( $item['line_tax_data'] );
+			if ( isset( $line_tax_data['total'] ) ) {
+				foreach ( $line_tax_data['total'] as $tax_rate_id => $tax ) {
+					if ( ! isset( $order_taxes[ $tax_rate_id ] ) ) {
+						$order_taxes[ $tax_rate_id ] = 0;
+					}
+					$order_taxes[ $tax_rate_id ] += $tax;
+				}
+			}
+		}
+		foreach ( $this->get_items( array( 'shipping' ) ) as $item_id => $item ) {
+			$line_tax_data = maybe_unserialize( $item['taxes'] );
+			if ( isset( $line_tax_data['total'] ) ) {
+				foreach ( $line_tax_data['total'] as $tax_rate_id => $tax ) {
+					if ( ! isset( $order_shipping_taxes[ $tax_rate_id ] ) ) {
+						$order_shipping_taxes[ $tax_rate_id ] = 0;
+					}
+					$order_shipping_taxes[ $tax_rate_id ] += $tax;
+				}
+			}
+		}
+
+		// Remove old existing tax rows
+		$this->remove_order_items( 'tax' );
+
+		// Now merge to keep tax rows
+		foreach ( array_keys( $order_taxes + $order_shipping_taxes ) as $tax_rate_id ) {
+			$this->add_tax( $tax_rate_id, isset( $order_taxes[ $tax_rate_id ] ) ? $order_taxes[ $tax_rate_id ] : 0, isset( $order_shipping_taxes[ $tax_rate_id ] ) ? $order_shipping_taxes[ $tax_rate_id ] : 0 );
+		}
+
+		// Save tax totals
+		$this->set_total( WC_Tax::round( array_sum( $order_shipping_taxes ) ), 'shipping_tax' );
+		$this->set_total( WC_Tax::round( array_sum( $order_taxes ) ), 'tax' );
+
+		return true;
+	}
+
 	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
-	 * 
-	 * @return $total calculated grand total
+	 *
+	 * @since 2.2
+	 * @param  $and_taxes bool Calc taxes if true
+	 * @return float calculated grand total
 	 */
-	public function calculate_totals() {
+	public function calculate_totals( $and_taxes = true ) {
 		$cart_subtotal  = 0;
 		$cart_total     = 0;
 		$fee_total      = 0;
 
-		$this->calculate_taxes();
+		if ( $and_taxes ) {
+			$this->calculate_taxes();
+		}
 
+		// line items
 		foreach ( $this->get_items() as $item ) {
 			$cart_subtotal += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
 			$cart_total    += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
 		}
 
+		$this->calculate_shipping();
+
 		foreach ( $this->get_fees() as $item ) {
 			$fee_total += $item['line_total'];
 		}
 
+		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
+
 		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() - $this->get_order_discount() + $this->get_cart_tax() + $this->get_shipping_tax(), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
-		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
 		$this->set_total( $grand_total, 'total' );
 
 		return $grand_total;
@@ -517,7 +781,15 @@ abstract class WC_Abstract_Order {
 	 * @return WP_User|false
 	 */
 	public function get_user() {
-		return $user_id = $this->get_user_id() ? get_user_by( 'id', $user_id ) : false;
+		return $this->get_user_id() ? get_user_by( 'id', $this->get_user_id() ) : false;
+	}
+
+	/**
+	 * Get transaction id for the order
+	 * @return string
+	 */
+	public function get_transaction_id() {
+		return get_post_meta( $this->id, '_transaction_id', true );
 	}
 
 	/**
@@ -828,6 +1100,8 @@ abstract class WC_Abstract_Order {
 				$tax_totals[ $code ]->amount = 0;
 			}
 
+			$tax_totals[ $code ]->id                = $key;
+			$tax_totals[ $code ]->rate_id           = $tax['rate_id'];
 			$tax_totals[ $code ]->is_compound       = $tax[ 'compound' ];
 			$tax_totals[ $code ]->label             = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
 			$tax_totals[ $code ]->amount           += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
@@ -944,6 +1218,23 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_total() {
 		return apply_filters( 'woocommerce_order_amount_total', (double) $this->order_total, $this );
+	}
+
+	/**
+	 * Gets order subtotal.
+	 *
+	 * @access public
+	 * @return mixed|void
+	 */
+	public function get_subtotal() {
+
+		$subtotal = 0;
+
+		foreach ( $this->get_items() as $item ) {
+			$subtotal += ( isset( $item['line_subtotal'] ) ) ? $item['line_subtotal'] : 0;
+		}
+
+		return apply_filters( 'woocommerce_order_amount_subtotal', (double) $subtotal, $this );
 	}
 
 	/**
@@ -1301,8 +1592,10 @@ abstract class WC_Abstract_Order {
 	public function get_product_from_item( $item ) {
 		if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
 			$_product = get_product( $item['variation_id'] );
-		} else {
+		} elseif ( ! empty( $item['product_id']  ) ) {
 			$_product = get_product( $item['product_id'] );
+		} else {
+			$_product = false;
 		}
 		return apply_filters( 'woocommerce_get_product_from_item', $_product, $item, $this );
 	}
@@ -1700,10 +1993,10 @@ abstract class WC_Abstract_Order {
 	public function update_status( $new_status, $note = '' ) {
 		$old_status = $this->get_status();
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
-		
+
 		// Only update if they differ
 		if ( $this->id && $new_status !== $old_status ) {
-			
+
 			// Update the order
 			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
 			$this->post_status = 'wc-' . $new_status;
@@ -1779,7 +2072,6 @@ abstract class WC_Abstract_Order {
 	 * @return void
 	 */
 	public function payment_complete( $transaction_id = '' ) {
-
 		do_action( 'woocommerce_pre_payment_complete', $this->id );
 
 		if ( ! empty( WC()->session->order_awaiting_payment ) ) {
@@ -1794,13 +2086,13 @@ abstract class WC_Abstract_Order {
 
 			if ( sizeof( $this->get_items() ) > 0 ) {
 
-				foreach( $this->get_items() as $item ) {
+				foreach ( $this->get_items() as $item ) {
 
 					if ( $item['product_id'] > 0 ) {
 
 						$_product = $this->get_product_from_item( $item );
 
-						if ( false !== $_product && ( $_product->is_downloadable() && $_product->is_virtual() ) || ! apply_filters( 'woocommerce_order_item_needs_processing', true, $_product, $this->id ) ) {
+							if ( false !== $_product && ! apply_filters( 'woocommerce_order_item_needs_processing', ! ( $_product->is_downloadable() && $_product->is_virtual() ), $_product, $this->id ) ) {
 							$order_needs_processing = false;
 							continue;
 						}
@@ -1820,7 +2112,7 @@ abstract class WC_Abstract_Order {
 			add_post_meta( $this->id, '_paid_date', current_time('mysql'), true );
 
 			if ( ! empty( $transaction_id ) ) {
-				add_post_meta( $this->id, '_transaction_id', $transaction_id );
+				add_post_meta( $this->id, '_transaction_id', $transaction_id, true );
 			}
 
 			$this_order = array(
