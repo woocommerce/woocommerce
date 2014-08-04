@@ -210,7 +210,9 @@ final class WooCommerce {
 			$path = $this->plugin_path() . '/includes/admin/meta-boxes/';
 		} elseif ( strpos( $class, 'wc_admin' ) === 0 ) {
 			$path = $this->plugin_path() . '/includes/admin/';
-		}
+		} elseif ( strpos( $class, 'wc_widget_' ) === 0 ) {
+                        $path = $this->plugin_path() . '/includes/widgets/';
+                }
 
 		if ( $path && is_readable( $path . $file ) ) {
 			include_once( $path . $file );
@@ -343,17 +345,18 @@ final class WooCommerce {
 	 */
 	public function include_widgets() {
 		include_once( 'includes/abstracts/abstract-wc-widget.php' );
-		include_once( 'includes/widgets/class-wc-widget-cart.php' );
-		include_once( 'includes/widgets/class-wc-widget-products.php' );
-		include_once( 'includes/widgets/class-wc-widget-layered-nav.php' );
-		include_once( 'includes/widgets/class-wc-widget-layered-nav-filters.php' );
-		include_once( 'includes/widgets/class-wc-widget-price-filter.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-categories.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-search.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-tag-cloud.php' );
-		include_once( 'includes/widgets/class-wc-widget-recent-reviews.php' );
-		include_once( 'includes/widgets/class-wc-widget-recently-viewed.php' );
-		include_once( 'includes/widgets/class-wc-widget-top-rated-products.php' );
+
+	        register_widget( 'WC_Widget_Cart' );
+	        register_widget( 'WC_Widget_Products' );
+	        register_widget( 'WC_Widget_Layered_Nav' );
+	        register_widget( 'WC_Widget_Layered_Nav_Filters' );
+	        register_widget( 'WC_Widget_Price_Filter' );
+	        register_widget( 'WC_Widget_Product_Categories' );
+	        register_widget( 'WC_Widget_Product_Search' );
+	        register_widget( 'WC_Widget_Product_Tag_Cloud' );
+	        register_widget( 'WC_Widget_Recent_Reviews' );
+	        register_widget( 'WC_Widget_Recently_Viewed' );
+	        register_widget( 'WC_Widget_Top_Rated_Products' );
 	}
 
 	/**
