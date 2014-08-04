@@ -116,7 +116,7 @@ class WC_Product_Variation extends WC_Product {
 
 			// Data which must be set (not null), otherwise use parent data
 			} elseif ( in_array( $key , array( 'tax_class', 'backorders' ) ) ) {
-				$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
+				$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
 
 			// Data which is only at variation level - no inheritance
 			} elseif ( in_array( $key , array( 'price', 'regular_price', 'sale_price', 'sale_price_dates_to', 'sale_price_dates_from' ) ) ) {
