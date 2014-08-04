@@ -9,8 +9,6 @@ $who_refunded = new WP_User( $refund->post->post_author );
 
 	<td class="thumb"><div></div></td>
 
-	<?php var_dump( $who_refunded->display_name ); ?>
-
 	<td class="name">
 		<?php
 			echo esc_attr__( 'Refund', 'woocommerce' ) . ' - ' . esc_attr( date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post_date ) ) );
