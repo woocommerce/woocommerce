@@ -108,7 +108,7 @@ class WC_Admin_Assets {
 				'i18n_country_iso_error' 			=> __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
 				'i18_sale_less_than_regular_error'	=> __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 				'decimal_point'          			=> $decimal,
-				'mon_decimal_point'      			=> get_option( 'woocommerce_price_decimal_sep' )
+				'mon_decimal_point'      			=> get_option( 'woocommerce_price_decimal_sep' ),
 			);
 
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
