@@ -83,41 +83,41 @@ class WC_Admin_Assets {
 		wp_register_script( 'chosen', WC()->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array('jquery'), WC_VERSION );
 
 		// Accounting
-    	$params = array(
+		$params = array(
 			'mon_decimal_point' => get_option( 'woocommerce_price_decimal_sep' )
-    	);
+		);
 
-    	wp_localize_script( 'accounting', 'accounting_params', $params );
+		wp_localize_script( 'accounting', 'accounting_params', $params );
 
 		// WooCommerce admin pages
-	    if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
+		if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
 
-	    	wp_enqueue_script( 'woocommerce_admin' );
-	    	wp_enqueue_script( 'iris' );
-	    	wp_enqueue_script( 'ajax-chosen' );
-	    	wp_enqueue_script( 'chosen' );
-	    	wp_enqueue_script( 'jquery-ui-sortable' );
-	    	wp_enqueue_script( 'jquery-ui-autocomplete' );
+			wp_enqueue_script( 'woocommerce_admin' );
+			wp_enqueue_script( 'iris' );
+			wp_enqueue_script( 'ajax-chosen' );
+			wp_enqueue_script( 'chosen' );
+			wp_enqueue_script( 'jquery-ui-sortable' );
+			wp_enqueue_script( 'jquery-ui-autocomplete' );
 
-	    	$locale  = localeconv();
-	    	$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
+			$locale  = localeconv();
+			$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
 
-	    	$params = array(
-				'i18n_decimal_error'     			=> sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
+			$params = array(
+				'i18n_decimal_error'				=> sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
 				'i18n_mon_decimal_error' 			=> sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), get_option( 'woocommerce_price_decimal_sep' ) ),
 				'i18n_country_iso_error' 			=> __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
 				'i18_sale_less_than_regular_error'	=> __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 				'decimal_point'          			=> $decimal,
 				'mon_decimal_point'      			=> get_option( 'woocommerce_price_decimal_sep' )
-	    	);
+			);
 
-	    	wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
-	    }
+			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
+		}
 
-	    // Edit product category pages
-	    if ( in_array( $screen->id, array( 'edit-product_cat' ) ) ) {
+		// Edit product category pages
+		if ( in_array( $screen->id, array( 'edit-product_cat' ) ) ) {
 			wp_enqueue_media();
-	    }
+		}
 
 		// Products
 		if ( in_array( $screen->id, array( 'edit-product' ) ) ) {
