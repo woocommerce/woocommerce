@@ -11,6 +11,21 @@ module.exports = function( grunt ) {
 			js: 'assets/js'
 		},
 
+		// javascript linting with jshint.
+		jshint: {
+			options: {
+				jshintrc: '.jshintrc'
+			},
+			all: [
+				'Gruntfile.js',
+				'<%= dirs.js %>/admin/*.js',
+				'!<%= dirs.js %>/admin/*.min.js',
+				'!<%= dirs.js %>/admin/jquery.flot*',
+				'<%= dirs.js %>/frontend/*.js',
+				'!<%= dirs.js %>/frontend/*.min.js'
+			]
+		},
+
 		// Compile all .less files.
 		less: {
 			compile: {
@@ -29,17 +44,6 @@ module.exports = function( grunt ) {
 					dest: '<%= dirs.css %>/',
 					ext: '.css'
 				}]
-			}
-		},
-
-		// Minify all .css files.
-		cssmin: {
-			minify: {
-				expand: true,
-				cwd: '<%= dirs.css %>/',
-				src: ['*.css'],
-				dest: '<%= dirs.css %>/',
-				ext: '.css'
 			}
 		},
 
@@ -83,6 +87,17 @@ module.exports = function( grunt ) {
 					ext: '.min.js'
 				}]
 			},
+		},
+
+		// Minify all .css files.
+		cssmin: {
+			minify: {
+				expand: true,
+				cwd: '<%= dirs.css %>/',
+				src: ['*.css'],
+				dest: '<%= dirs.css %>/',
+				ext: '.css'
+			}
 		},
 
 		// Watch changes for assets
@@ -213,6 +228,7 @@ module.exports = function( grunt ) {
 
 	// Load NPM tasks to be used here
 	grunt.loadNpmTasks( 'grunt-shell' );
+	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-contrib-less' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
