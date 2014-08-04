@@ -4,8 +4,8 @@
   "version": "2.2.0",
   "homepage": "http://www.woothemes.com/woocommerce/",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/woothemes/woocommerce.git"
+    "type": "git",
+    "url": "https://github.com/woothemes/woocommerce.git"
   },
   "main": "Gruntfile.js",
   "devDependencies": {
@@ -16,7 +16,9 @@
     "grunt-shell": "~0.7.0",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-contrib-copy": "~0.5.0",
-    "grunt-contrib-clean": "~0.6.0"
+    "grunt-contrib-clean": "~0.6.0",
+    "grunt-checktextdomain": "^0.1.1",
+    "grunt-wp-i18n": "^0.4.6"
   },
   "engines": {
     "node": ">=0.8.0",
