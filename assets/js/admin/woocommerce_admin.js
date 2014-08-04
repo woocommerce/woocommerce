@@ -49,6 +49,30 @@ jQuery(function(){
 		return this;
 	});
 
+	jQuery('body').on('keyup change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
+		var sale_price_field	= jQuery(this);
+		var sale_price 			= parseInt( sale_price_field.val() );
+
+		if( sale_price_field.attr('name').indexOf('variable') != -1 ) {
+			var regular_price = parseInt( sale_price_field.parents('.variable_pricing').find('.wc_input_price[name^=variable_regular_price]').val() );
+		} else {
+			var regular_price = parseInt( jQuery('#_regular_price').val() );
+		}
+
+		if( sale_price >= regular_price ) {
+			jQuery(this).val(regular_price);
+			if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
+				var offset = jQuery(this).position();
+				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18_sale_less_than_regular_error + '</div>' );
+				jQuery('.wc_error_tip')
+					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
+					.css('top', offset.top + jQuery(this).height() )
+					.fadeIn('100');
+			}
+		}
+		return this;
+	});
+
 	jQuery('body').on('keyup change', '.wc_input_country_iso[type=text]', function(){
 		var value = jQuery(this).val();
 		var regex = new RegExp( '^([A-Z])?([A-Z])$' );
