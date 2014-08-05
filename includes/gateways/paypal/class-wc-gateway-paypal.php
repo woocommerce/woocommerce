@@ -674,7 +674,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// check to see if the request was valid
-		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && ( strcmp( $response['body'], "VERIFIED" ) == 0 ) ) {
+		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && strstr( $response['body'], 'VERIFIED' ) ) {
 			if ( 'yes' == $this->debug ) {
 				$this->log->add( 'paypal', 'Received valid response from PayPal' );
 			}
