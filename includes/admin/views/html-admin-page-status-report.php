@@ -29,35 +29,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td><?php _e( 'Home URL','woocommerce' ); ?>:</td>
-			<td><?php echo home_url(); ?></td>
+			<td><?php echo home_url(); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The URL of your site\'s homepage.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Site URL','woocommerce' ); ?>:</td>
-			<td><?php echo site_url(); ?></td>
+			<td><?php echo site_url(); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The root URL of your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WC Version','woocommerce' ); ?>:</td>
-			<td><?php echo esc_html( WC()->version ); ?></td>
+			<td><?php echo esc_html( WC()->version ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce installed on your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WC Database Version','woocommerce' ); ?>:</td>
-			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
+			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Version','woocommerce' ); ?>:</td>
-			<td><?php bloginfo('version'); ?></td>
+			<td><?php bloginfo('version'); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of WordPress installed on your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Multisite Enabled','woocommerce' ); ?>:</td>
-			<td><?php if ( is_multisite() ) echo __( 'Yes', 'woocommerce' ); else echo __( 'No', 'woocommerce' ); ?></td>
+			<td><?php if ( is_multisite() ) echo __( 'Yes', 'woocommerce' ); else echo __( 'No', 'woocommerce' ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Web Server Info','woocommerce' ); ?>:</td>
-			<td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ); ?></td>
+			<td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Information about the web server that is currently hosting your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'PHP Version','woocommerce' ); ?>:</td>
-			<td><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?></td>
+			<td><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of PHP installed on your hosting server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'MySQL Version','woocommerce' ); ?>:</td>
@@ -67,6 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				global $wpdb;
 				echo $wpdb->db_version();
 				?>
+				<?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of MySQL installed on your hosting server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?>
 			</td>
 		</tr>
 		<tr>
@@ -79,36 +80,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 				} else {
 					echo '<mark class="yes">' . size_format( $memory ) . '</mark>';
 				}
-			?></td>
+			?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Debug Mode', 'woocommerce' ); ?>:</td>
-			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
+			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Language', 'woocommerce' ); ?>:</td>
-			<td><?php if ( defined( 'WPLANG' ) && WPLANG ) echo WPLANG; else  _e( 'Default', 'woocommerce' ); ?></td>
+			<td><?php if ( defined( 'WPLANG' ) && WPLANG ) echo WPLANG; else  _e( 'Default', 'woocommerce' ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The current language used by WordPress. Default = English', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Max Upload Size','woocommerce' ); ?>:</td>
-			<td><?php echo size_format( wp_max_upload_size() ); ?></td>
+			<td><?php echo size_format( wp_max_upload_size() ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
 				<td><?php _e('PHP Post Max Size','woocommerce' ); ?>:</td>
-				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
+				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be contained in one post.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e('PHP Time Limit','woocommerce' ); ?>:</td>
-				<td><?php echo ini_get('max_execution_time'); ?></td>
+				<td><?php echo ini_get('max_execution_time'); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'PHP Max Input Vars','woocommerce' ); ?>:</td>
-				<td><?php echo ini_get('max_input_vars'); ?></td>
+				<td><?php echo ini_get('max_input_vars'); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'SUHOSIN Installed','woocommerce' ); ?>:</td>
-				<td><?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?></td>
+				<td><?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself.
+If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 		<?php endif; ?>
 		<tr>
@@ -119,7 +121,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				} else {
 					printf( '<mark class="error">' . __( 'Log directory (<code>%s</code>) is not writable. To allow logging, make this writable or define a custom <code>WC_LOG_DIR</code>.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
 				}
-			?></td>
+			?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extension can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Default Timezone','woocommerce' ); ?>:</td>
@@ -129,7 +131,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo '<mark class="error">' . sprintf( __( 'Default timezone is %s - it should be UTC', 'woocommerce' ), $default_timezone ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . sprintf( __( 'Default timezone is %s', 'woocommerce' ), $default_timezone ) . '</mark>';
-				} ?>
+				} ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The default timezone for your server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?>
 			</td>
 		</tr>
 		<?php
@@ -151,6 +153,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['fsockopen_curl']['success'] = false;
 			}
 
+			$posting['fsockopen_curl']['help'] = '<img class="help_tip" data-tip="' . esc_attr__( 'Payment gateways can use cURL to communicate with remote servers to authorize payments, other plugins may also use it when communicating with remote services.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
 			// SOAP
 			$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
 			if ( class_exists( 'SoapClient' ) ) {
@@ -160,6 +164,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['soap_client']['note'] = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
 				$posting['soap_client']['success'] = false;
 			}
+
+			$posting['soap_client']['help'] = '<img class="help_tip" data-tip="' . esc_attr__( 'Some webservices like shipping use SOAP to get information from remote servers, for example, live shipping quotes from FedEx require SOAP to be installed.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 
 			// WP Remote Post Check
 			$posting['wp_remote_post']['name'] = __( 'WP Remote Post','woocommerce');
@@ -183,6 +189,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['wp_remote_post']['success'] = false;
 			}
 
+			$posting['wp_remote_post']['help'] = '<img class="help_tip" data-tip="' . esc_attr__( 'PayPal uses this method of commnuicating when sending back transaction information.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
 			$posting = apply_filters( 'woocommerce_debug_posting', $posting );
 
 			foreach( $posting as $post ) { $mark = ( isset( $post['success'] ) && $post['success'] == true ) ? 'yes' : 'error';
@@ -193,6 +201,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<mark class="<?php echo $mark; ?>">
 							<?php echo wp_kses_data( $post['note'] ); ?>
 						</mark>
+						<?php echo $post['help']; ?>
 					</td>
 				</tr>
 				<?php
@@ -209,16 +218,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<?php
 			$locale = localeconv();
+			$locale_help = array(
+				'decimal_point'     => __( 'The character used for decimal points.', 'woocommerce' ),
+				'thousands_sep'     => __( 'The character used for a thousands separator.', 'woocommerce' ),
+				'mon_decimal_point' => __( 'The character used for decimal points in monetary values.', 'woocommerce' ),
+				'mon_thousands_sep'	=> __( 'The character used for a thousands separator in monetary values.', 'woocommerce' ),
+			);
 
 			foreach ( $locale as $key => $val )
 				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) )
-					echo '<tr><td>' . $key . ':</td><td>' . $val . '</td></tr>';
+					echo '<tr><td>' . $key . ':</td><td>' . $val . '<img class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" /></td></tr>';
 		?>
 	</tbody>
 
 	<thead>
 		<tr>
-			<th colspan="2"><?php _e( 'Plugins', 'woocommerce' ); ?></th>
+			<th colspan="2"><?php _e( 'Plugins', 'woocommerce' ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'This section displays all of the WooCommerce related plugins installed on your site. From this area, you can see the current version numbers of your software and if any of your extensions have available updates.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></th>
 		</tr>
 	</thead>
 
@@ -294,7 +309,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td><?php _e( 'Force SSL','woocommerce' ); ?>:</td>
-			<td><?php echo get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
+			<td><?php echo get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 		</tr>
 	</tbody>
 
@@ -308,20 +323,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 			$check_pages = array(
 				_x( 'Shop Base', 'Page setting', 'woocommerce' ) => array(
-						'option' => 'woocommerce_shop_page_id',
-						'shortcode' => ''
+						'option'    => 'woocommerce_shop_page_id',
+						'shortcode' => '',
+						'help'      => __( 'The URL of your WooCommerce shop\'s homepage (along with the Page ID).', 'woocommerce' ),
 					),
 				_x( 'Cart', 'Page setting', 'woocommerce' ) => array(
-						'option' => 'woocommerce_cart_page_id',
-						'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']'
+						'option'    => 'woocommerce_cart_page_id',
+						'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
+						'help'      => __( 'The URL of your WooCommerce shop\'s cart (along with the page ID).', 'woocommerce' ),
 					),
 				_x( 'Checkout', 'Page setting', 'woocommerce' ) => array(
-						'option' => 'woocommerce_checkout_page_id',
-						'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']'
+						'option'    => 'woocommerce_checkout_page_id',
+						'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
+						'help'      => __( 'The URL of your WooCommerce shop\'s checkout (along with the page ID).', 'woocommerce' ),
 					),
 				_x( 'My Account', 'Page setting', 'woocommerce' ) => array(
-						'option' => 'woocommerce_myaccount_page_id',
-						'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']'
+						'option'    => 'woocommerce_myaccount_page_id',
+						'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
+						'help'      => __( 'The URL of your WooCommerce shop\'s “My Account” Page (along with the page ID).', 'woocommerce' ),
 					)
 			);
 
@@ -364,6 +383,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				if ( ! $error ) echo '<mark class="yes">#' . absint( $page_id ) . ' - ' . str_replace( home_url(), '', get_permalink( $page_id ) ) . '</mark>';
 
+				echo '<img class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
 				echo '</td></tr>';
 
 				$alt = $alt * -1;
@@ -373,7 +394,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<thead>
 		<tr>
-			<th colspan="2"><?php _e( 'WC Taxonomies', 'woocommerce' ); ?></th>
+			<th colspan="2"><?php _e( 'WC Taxonomies', 'woocommerce' ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></th>
 		</tr>
 	</thead>
 
@@ -432,7 +453,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
 				<td><?php
 					echo $active_theme->Name;
-				?></td>
+				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The name of the current active theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
@@ -441,17 +462,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) )
 						echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
-				?></td>
+				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The installed version of the current active theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
 				<td><?php
 					echo $active_theme->{'Author URI'};
-				?></td>
+				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The developer or plugin\'s URL.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
-				<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
+				<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current theme is a child theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<?php
 			if( is_child_theme() ) :
@@ -459,17 +480,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 			<tr>
 				<td><?php _e( 'Parent Theme Name', 'woocommece' ); ?>:</td>
-				<td><?php echo $parent_theme->Name; ?></td>
+				<td><?php echo $parent_theme->Name; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The name of the parent theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
-				<td><?php echo  $parent_theme->Version; ?></td>
+				<td><?php echo  $parent_theme->Version; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The installed version of the parent theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
 				<td><?php
 					echo $parent_theme->{'Author URI'};
-				?></td>
+				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The developer or plugi\'s URL', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 			<?php endif ?>
 			<tr>
@@ -480,13 +501,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					} else {
 						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
 					}
-				?></td>
+				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declare WooCommerce support.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
 			</tr>
 	</tbody>
 
 	<thead>
 		<tr>
-			<th colspan="2"><?php _e( 'Templates', 'woocommerce' ); ?></th>
+			<th colspan="2"><?php _e( 'Templates', 'woocommerce' ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></th>
 		</tr>
 	</thead>
 
