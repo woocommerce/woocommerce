@@ -113,7 +113,7 @@ class WC_Order_Item_Meta {
 				continue;
 			}
 
-			foreach ( $meta_values as $meta_value ) {
+			foreach ( (array) $meta_values as $meta_value ) {
 
 				// Skip serialised meta
 				if ( is_serialized( $meta_value ) ) {
