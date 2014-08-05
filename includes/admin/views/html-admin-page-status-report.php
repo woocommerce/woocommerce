@@ -29,50 +29,53 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td><?php _e( 'Home URL','woocommerce' ); ?>:</td>
-			<td><?php echo home_url(); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The URL of your site\'s homepage.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The URL of your site\'s homepage.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo home_url(); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Site URL','woocommerce' ); ?>:</td>
-			<td><?php echo site_url(); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The root URL of your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The root URL of your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo site_url(); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WC Version','woocommerce' ); ?>:</td>
-			<td><?php echo esc_html( WC()->version ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce installed on your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce installed on your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo esc_html( WC()->version ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WC Database Version','woocommerce' ); ?>:</td>
-			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Version','woocommerce' ); ?>:</td>
-			<td><?php bloginfo('version'); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of WordPress installed on your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of WordPress installed on your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php bloginfo('version'); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Multisite Enabled','woocommerce' ); ?>:</td>
-			<td><?php if ( is_multisite() ) echo __( 'Yes', 'woocommerce' ); else echo __( 'No', 'woocommerce' ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php if ( is_multisite() ) echo __( 'Yes', 'woocommerce' ); else echo __( 'No', 'woocommerce' ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Web Server Info','woocommerce' ); ?>:</td>
-			<td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Information about the web server that is currently hosting your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Information about the web server that is currently hosting your site.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'PHP Version','woocommerce' ); ?>:</td>
-			<td><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of PHP installed on your hosting server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of PHP installed on your hosting server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'MySQL Version','woocommerce' ); ?>:</td>
 			<td>
 				<?php
+				echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of MySQL installed on your hosting server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
 				/** @global wpdb $wpdb */
 				global $wpdb;
 				echo $wpdb->db_version();
 				?>
-				<?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of MySQL installed on your hosting server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?>
 			</td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Memory Limit','woocommerce' ); ?>:</td>
 			<td><?php
+				echo '<img class="help_tip" data-tip="' . esc_attr__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
 				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
 
 				if ( $memory < 67108864 ) {
@@ -80,58 +83,63 @@ if ( ! defined( 'ABSPATH' ) ) {
 				} else {
 					echo '<mark class="yes">' . size_format( $memory ) . '</mark>';
 				}
-			?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Debug Mode', 'woocommerce' ); ?>:</td>
-			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Language', 'woocommerce' ); ?>:</td>
-			<td><?php if ( defined( 'WPLANG' ) && WPLANG ) echo WPLANG; else  _e( 'Default', 'woocommerce' ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The current language used by WordPress. Default = English', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The current language used by WordPress. Default = English', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php if ( defined( 'WPLANG' ) && WPLANG ) echo WPLANG; else  _e( 'Default', 'woocommerce' ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Max Upload Size','woocommerce' ); ?>:</td>
-			<td><?php echo size_format( wp_max_upload_size() ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo size_format( wp_max_upload_size() ); ?></td>
 		</tr>
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
 				<td><?php _e('PHP Post Max Size','woocommerce' ); ?>:</td>
-				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be contained in one post.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be contained in one post.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
 			</tr>
 			<tr>
 				<td><?php _e('PHP Time Limit','woocommerce' ); ?>:</td>
-				<td><?php echo ini_get('max_execution_time'); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo ini_get('max_execution_time'); ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'PHP Max Input Vars','woocommerce' ); ?>:</td>
-				<td><?php echo ini_get('max_input_vars'); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo ini_get('max_input_vars'); ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'SUHOSIN Installed','woocommerce' ); ?>:</td>
-				<td><?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself.
-If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself.
+If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?>
+					<?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?></td>
 			</tr>
 		<?php endif; ?>
 		<tr>
 			<td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
 			<td><?php
+				echo '<img class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extension can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+				
 				if ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ) {
 					printf( '<mark class="yes">' . __( 'Log directory (%s) is writable.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
 				} else {
 					printf( '<mark class="error">' . __( 'Log directory (<code>%s</code>) is not writable. To allow logging, make this writable or define a custom <code>WC_LOG_DIR</code>.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
 				}
-			?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extension can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Default Timezone','woocommerce' ); ?>:</td>
 			<td><?php
+				echo '<img class="help_tip" data-tip="' . esc_attr__( 'The default timezone for your server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
 				$default_timezone = date_default_timezone_get();
 				if ( 'UTC' !== $default_timezone ) {
 					echo '<mark class="error">' . sprintf( __( 'Default timezone is %s - it should be UTC', 'woocommerce' ), $default_timezone ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . sprintf( __( 'Default timezone is %s', 'woocommerce' ), $default_timezone ) . '</mark>';
-				} ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The default timezone for your server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?>
+				} ?>
 			</td>
 		</tr>
 		<?php
@@ -198,10 +206,10 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				<tr>
 					<td><?php echo esc_html( $post['name'] ); ?>:</td>
 					<td>
+						<?php echo $post['help']; ?>
 						<mark class="<?php echo $mark; ?>">
 							<?php echo wp_kses_data( $post['note'] ); ?>
 						</mark>
-						<?php echo $post['help']; ?>
 					</td>
 				</tr>
 				<?php
@@ -227,7 +235,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 			foreach ( $locale as $key => $val )
 				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) )
-					echo '<tr><td>' . $key . ':</td><td>' . $val . '<img class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" /></td></tr>';
+					echo '<tr><td>' . $key . ':</td><td><img class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />' . $val . '</td></tr>';
 		?>
 	</tbody>
 
@@ -309,7 +317,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 	<tbody>
 		<tr>
 			<td><?php _e( 'Force SSL','woocommerce' ); ?>:</td>
-			<td><?php echo get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
 		</tr>
 	</tbody>
 
@@ -352,6 +360,8 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 				echo '<td>' . esc_html( $page_name ) . ':</td><td>';
 
+				echo '<img class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
 				$error = false;
 
 				$page_id = get_option( $values['option'] );
@@ -382,8 +392,6 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				}
 
 				if ( ! $error ) echo '<mark class="yes">#' . absint( $page_id ) . ' - ' . str_replace( home_url(), '', get_permalink( $page_id ) ) . '</mark>';
-
-				echo '<img class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 
 				echo '</td></tr>';
 
@@ -452,27 +460,30 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			<tr>
 				<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
 				<td><?php
+					echo '<img class="help_tip" data-tip="' . esc_attr__( 'The name of the current active theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 					echo $active_theme->Name;
-				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The name of the current active theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
 				<td><?php
+					echo '<img class="help_tip" data-tip="' . esc_attr__( 'The installed version of the current active theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 					echo $active_theme->Version;
 
 					if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) )
 						echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
-				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The installed version of the current active theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
 				<td><?php
+					echo '<img class="help_tip" data-tip="' . esc_attr__( 'The developer or plugin\'s URL.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 					echo $active_theme->{'Author URI'};
-				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The developer or plugin\'s URL.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
-				<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current theme is a child theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current theme is a child theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
 			</tr>
 			<?php
 			if( is_child_theme() ) :
@@ -480,28 +491,31 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			?>
 			<tr>
 				<td><?php _e( 'Parent Theme Name', 'woocommece' ); ?>:</td>
-				<td><?php echo $parent_theme->Name; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The name of the parent theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The name of the parent theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo $parent_theme->Name; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
-				<td><?php echo  $parent_theme->Version; ?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The installed version of the parent theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The installed version of the parent theme.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo  $parent_theme->Version; ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
 				<td><?php
+					echo '<img class="help_tip" data-tip="' . esc_attr__( 'The developer or plugi\'s URL', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 					echo $parent_theme->{'Author URI'};
-				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The developer or plugi\'s URL', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				?></td>
 			</tr>
 			<?php endif ?>
 			<tr>
 				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
 				<td><?php
+					echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declare WooCommerce support.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+					
 					if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
 						echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
 					}
-				?><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declare WooCommerce support.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?></td>
+				?></td>
 			</tr>
 	</tbody>
 
