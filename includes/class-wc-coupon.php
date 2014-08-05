@@ -340,7 +340,7 @@ class WC_Coupon {
 				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 
-						$product_cats = wp_get_post_terms($cart_item['product_id'], 'product_cat', array("fields" => "ids"));
+						$product_cats = wp_get_post_terms($cart_item['product_id'], apply_filters( 'woocommerce_coupon_valid_categories', array( 'product_cat' ) ), array("fields" => "ids") );
 
 						if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 )
 							$valid_for_cart = true;
@@ -411,8 +411,8 @@ class WC_Coupon {
 					$valid_for_cart = true;
 					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-
-							$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
+                
+							$product_cats = wp_get_post_terms( $cart_item['product_id'], apply_filters( 'woocommerce_coupon_exclude_categories', array( 'product_cat' ) ), array( "fields" => "ids" ) );
 
 							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 )
 								$valid_for_cart = false;
@@ -465,7 +465,7 @@ class WC_Coupon {
 			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this );
 
 		$valid        = false;
-		$product_cats = wp_get_post_terms( $product->id, 'product_cat', array( "fields" => "ids" ) );
+		$product_cats = wp_get_post_terms( $product->id, apply_filters( 'woocommerce_coupon_valid_categories', array( 'product_cat' ) ), array( "fields" => "ids" ) );
 
 		// Specific products get the discount
 		if ( sizeof( $this->product_ids ) > 0 ) {
