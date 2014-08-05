@@ -454,7 +454,7 @@ class WC_Cart {
 				 */
 				if ( get_option( 'woocommerce_hold_stock_minutes' ) > 0 && ! $_product->backorders_allowed() ) {
 					$order_id   = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
-					$held_stock = $wpdb->get_var( 
+					$held_stock = $wpdb->get_var(
 						$wpdb->prepare( "
 							SELECT SUM( order_item_meta.meta_value ) AS held_qty
 							FROM {$wpdb->posts} AS posts
@@ -465,14 +465,14 @@ class WC_Cart {
 							AND 	order_item_meta2.meta_key  = %s AND order_item_meta2.meta_value  = %d
 							AND 	posts.post_type            IN ( '" . implode( "','", wc_get_order_types() ) . "' )
 							AND 	posts.post_status          = 'wc-pending'
-							AND		posts.ID                   != %d;", 
-							$_product->is_type( 'variation' ) && true === $_product->managing_stock() ? '_variation_id' : '_product_id', 
+							AND		posts.ID                   != %d;",
+							$_product->is_type( 'variation' ) && true === $_product->managing_stock() ? '_variation_id' : '_product_id',
 							$_product->is_type( 'variation' ) && true === $_product->managing_stock() ? $values['variation_id'] : $values['product_id'],
-							$order_id 
-						) 
+							$order_id
+						)
 					);
 
-					$not_enough_stock = false; 
+					$not_enough_stock = false;
 
 					if ( $_product->is_type( 'variation' ) && 'parent' === $_product->managing_stock() && $_product->parent->get_stock_quantity() < ( $held_stock + $check_qty ) ) {
 						$not_enough_stock = true;
@@ -846,10 +846,14 @@ class WC_Cart {
 			}
 
 			// Stock check - this time accounting for whats already in-cart
-			if ( $product_data->managing_stock() ) {
-				$product_qty_in_cart = $this->get_cart_item_quantities();
+			if ( $managing_stock = $product_data->managing_stock() ) {
+				$products_qty_in_cart = $this->get_cart_item_quantities();
 
-				$check_qty = $product_data->is_type( 'variation' ) && true === $product_data->managing_stock() ? $product_qty_in_cart[ $variation_id ] : $product_qty_in_cart[ $product_id ];
+				if ( $product_data->is_type( 'variation' ) && true === $managing_stock ) {
+					$check_qty = isset( $products_qty_in_cart[ $variation_id ] ) ? $products_qty_in_cart[ $variation_id ] : 0;
+				} else {
+					$check_qty = isset( $products_qty_in_cart[ $product_id ] ) ? $products_qty_in_cart[ $product_id ] : 0;
+				}
 
 				/**
 				 * Check stock based on all items in the cart

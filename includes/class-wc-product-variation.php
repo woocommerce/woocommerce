@@ -24,10 +24,10 @@ class WC_Product_Variation extends WC_Product {
 
 	/** @public string Stores the shipping class of the variation. */
 	public $variation_shipping_class         = false;
-	
+
 	/** @public int Stores the shipping class ID of the variation. */
 	public $variation_shipping_class_id      = false;
-	
+
 	/** @public unused vars @deprecated in 2.2 */
 	public $variation_has_sku                = true;
 	public $variation_has_length             = true;
@@ -116,7 +116,7 @@ class WC_Product_Variation extends WC_Product {
 
 			// Data which must be set (not null), otherwise use parent data
 			} elseif ( in_array( $key , array( 'tax_class', 'backorders' ) ) ) {
-				$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
+				$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
 
 			// Data which is only at variation level - no inheritance
 			} elseif ( in_array( $key , array( 'price', 'regular_price', 'sale_price', 'sale_price_dates_to', 'sale_price_dates_from' ) ) ) {
@@ -333,7 +333,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool|string Bool if managed at variation level, 'parent' if managed by the parent.
 	 */
 	public function managing_stock() {
-		if ( 'yes' === get_option( 'woocommerce_manage_stock', 'yes' ) ) {		
+		if ( 'yes' === get_option( 'woocommerce_manage_stock', 'yes' ) ) {
 			if ( 'no' === $this->manage_stock ) {
 				if ( $this->parent->managing_stock() ) {
 					return 'parent';
@@ -352,7 +352,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return int
 	 */
 	public function get_stock_quantity() {
-		return true === $this->managing_stock() ? $this->get_stock_quantity() : $this->parent->get_stock_quantity();
+		return true === $this->managing_stock() ? wc_stock_amount( $this->stock ) : $this->parent->get_stock_quantity();
 	}
 
 	/**
@@ -380,7 +380,7 @@ class WC_Product_Variation extends WC_Product {
 	/**
 	 * Set stock level of the product variation.
 	 *
-	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues). 
+	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 * We cannot rely on the original loaded value in case another order was made since then.
 	 *
 	 * @param int $amount
@@ -526,7 +526,7 @@ class WC_Product_Variation extends WC_Product {
 			return parent::is_on_backorder( $qty_in_cart );
 		} else {
 			return $this->parent->is_on_backorder( $qty_in_cart );
-		}	
+		}
 	}
 
 	/**
@@ -541,7 +541,7 @@ class WC_Product_Variation extends WC_Product {
 			return parent::has_enough_stock( $quantity );
 		} else {
 			return $this->parent->has_enough_stock( $quantity );
-		}	
+		}
 	}
 
 	/**
