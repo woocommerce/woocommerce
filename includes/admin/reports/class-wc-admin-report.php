@@ -456,6 +456,26 @@ class WC_Admin_Report {
 	}
 
 	/**
+	 * Return currency tooltip JS based on WooCommerce currency position settings.
+	 *
+	 * @return string
+	 */
+	public function get_currency_tooltip() {
+		switch( get_option( 'woocommerce_currency_pos' ) ) {
+			case 'left':
+				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '"'; break;
+			case 'left_space':
+				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . ' "'; break;
+			case 'right':
+				$currency_tooltip = 'append_tooltip: "' . get_woocommerce_currency_symbol() . '"'; break;
+			case 'right_space':
+				$currency_tooltip = 'append_tooltip: " ' . get_woocommerce_currency_symbol() . '"'; break;
+		}
+
+		return $currency_tooltip;
+	}
+
+	/**
 	 * Get the main chart
 	 * @return string
 	 */

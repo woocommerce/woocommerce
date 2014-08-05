@@ -337,7 +337,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 4, fill: false },
 							shadowSize: 0,
-							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
+							<?php echo $this->get_currency_tooltip(); ?>
 						},
 						{
 							label: "<?php echo esc_js( __( 'Shipping amount', 'woocommerce' ) ) ?>",
@@ -347,7 +347,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 4, fill: false },
 							shadowSize: 0,
-							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
+							<?php echo $this->get_currency_tooltip(); ?>
 						},
 						{
 							label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>",
@@ -357,7 +357,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 4, fill: false },
 							shadowSize: 0,
-							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
+							<?php echo $this->get_currency_tooltip(); ?>
 						}
 					];
 
