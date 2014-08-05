@@ -1,5 +1,5 @@
 /* jshint node:true */
-module.exports = function( grunt ){
+module.exports = function( grunt ) {
 	'use strict';
 
 	grunt.initConfig({
@@ -9,6 +9,21 @@ module.exports = function( grunt ){
 			fonts: 'assets/fonts',
 			images: 'assets/images',
 			js: 'assets/js'
+		},
+
+		// javascript linting with jshint.
+		jshint: {
+			options: {
+				jshintrc: '.jshintrc'
+			},
+			all: [
+				'Gruntfile.js',
+				'<%= dirs.js %>/admin/*.js',
+				'!<%= dirs.js %>/admin/*.min.js',
+				'!<%= dirs.js %>/admin/jquery.flot*',
+				'<%= dirs.js %>/frontend/*.js',
+				'!<%= dirs.js %>/frontend/*.min.js'
+			]
 		},
 
 		// Compile all .less files.
@@ -29,17 +44,6 @@ module.exports = function( grunt ){
 					dest: '<%= dirs.css %>/',
 					ext: '.css'
 				}]
-			}
-		},
-
-		// Minify all .css files.
-		cssmin: {
-			minify: {
-				expand: true,
-				cwd: '<%= dirs.css %>/',
-				src: ['*.css'],
-				dest: '<%= dirs.css %>/',
-				ext: '.css'
 			}
 		},
 
@@ -85,6 +89,17 @@ module.exports = function( grunt ){
 			},
 		},
 
+		// Minify all .css files.
+		cssmin: {
+			minify: {
+				expand: true,
+				cwd: '<%= dirs.css %>/',
+				src: ['*.css'],
+				dest: '<%= dirs.css %>/',
+				ext: '.css'
+			}
+		},
+
 		// Watch changes for assets
 		watch: {
 			less: {
@@ -102,18 +117,76 @@ module.exports = function( grunt ){
 			}
 		},
 
+		makepot: {
+			options: {
+				type: 'wp-plugin',
+				domainPath: 'i18n/languages',
+				potHeaders: {
+					'report-msgid-bugs-to': 'https://github.com/woothemes/woocommerce/issues',
+					'language-team': 'LANGUAGE <EMAIL@ADDRESS>'
+				}
+			},
+			frontend: {
+				options: {
+					potFilename: 'woocommerce.pot',
+					exclude: [
+						'includes/admin/.*',
+						'apigen/.*'
+					],
+					processPot: function ( pot ) {
+						pot.headers['project-id-version'] += ' Frontend';
+						return pot;
+					}
+				}
+			},
+			admin: {
+				options: {
+					potFilename: 'woocommerce-admin.pot',
+					exclude: [
+						'^(?!includes\/admin).*'
+					],
+					processPot: function ( pot ) {
+						pot.headers['project-id-version'] += ' Admin';
+						return pot;
+					}
+				}
+			}
+		},
+
+		checktextdomain: {
+			options:{
+				text_domain: 'woocommerce',
+				keywords: [
+					'__:1,2d',
+					'_e:1,2d',
+					'_x:1,2c,3d',
+					'esc_html__:1,2d',
+					'esc_html_e:1,2d',
+					'esc_html_x:1,2c,3d',
+					'esc_attr__:1,2d',
+					'esc_attr_e:1,2d',
+					'esc_attr_x:1,2c,3d',
+					'_ex:1,2c,3d',
+					'_n:1,2,4d',
+					'_nx:1,2,4c,5d',
+					'_n_noop:1,2,3d',
+					'_nx_noop:1,2,3c,4d'
+				]
+			},
+			files: {
+				src:  [
+					'**/*.php', // Include all files
+					'!apigen/**', // Exclude apigen/
+					'!node_modules/**' // Exclude node_modules/
+				],
+				expand: true
+			}
+		},
+
 		shell: {
 			options: {
 				stdout: true,
 				stderr: true
-			},
-			generatepot: {
-				command: [
-					'cd i18n/makepot/',
-					'sed -i "" "s/exit( \'Locked\' );/\\/\\/exit( \'Locked\' );/g" index.php',
-					'php index.php generate',
-					'sed -i "" "s/\\/\\/exit( \'Locked\' );/exit( \'Locked\' );/g" index.php',
-				].join( '&&' )
 			},
 			apigen: {
 				command: [
@@ -155,23 +228,21 @@ module.exports = function( grunt ){
 
 	// Load NPM tasks to be used here
 	grunt.loadNpmTasks( 'grunt-shell' );
+	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-contrib-less' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
+	grunt.loadNpmTasks( 'grunt-wp-i18n' );
+	grunt.loadNpmTasks( 'grunt-checktextdomain' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
 		'less',
 		'cssmin',
 		'uglify'
-	]);
-
-	// Just an alias for pot file generation
-	grunt.registerTask( 'pot', [
-		'shell:generatepot'
 	]);
 
 	grunt.registerTask( 'docs', [
@@ -181,7 +252,7 @@ module.exports = function( grunt ){
 
 	grunt.registerTask( 'dev', [
 		'default',
-		'pot'
+		'makepot'
 	]);
 
 	grunt.registerTask( 'deploy', [

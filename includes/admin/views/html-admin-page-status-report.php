@@ -444,11 +444,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 				?></td>
 			</tr>
 			<tr>
-				<td><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
+				<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
 				<td><?php
 					echo $active_theme->{'Author URI'};
 				?></td>
 			</tr>
+			<tr>
+				<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
+				<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
+			</tr>
+			<?php
+			if( is_child_theme() ) :
+				$parent_theme = wp_get_theme( $active_theme->Template );
+			?>
+			<tr>
+				<td><?php _e( 'Parent Theme Name', 'woocommece' ); ?>:</td>
+				<td><?php echo $parent_theme->Name; ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
+				<td><?php echo  $parent_theme->Version; ?></td>
+			</tr>
+			<tr>
+				<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
+				<td><?php
+					echo $parent_theme->{'Author URI'};
+				?></td>
+			</tr>
+			<?php endif ?>
 			<tr>
 				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
 				<td><?php
