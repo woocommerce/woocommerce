@@ -497,7 +497,8 @@ function wc_get_log_file_path( $handle ) {
  * Init for our rewrite rule fixes
  */
 function wc_fix_rewrite_rules_init() {
-	$permalinks = get_option( 'woocommerce_permalinks' );
+	$permalinks        = get_option( 'woocommerce_permalinks' );
+	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
 
 	if ( ! empty( $permalinks['use_verbose_page_rules'] ) ) {
 		$GLOBALS['wp_rewrite']->use_verbose_page_rules = true;
@@ -536,6 +537,28 @@ function wc_fix_rewrite_rules( $rules ) {
 	return $rules;
 }
 add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
+
+/**
+ * Prevent product attachment links from breaking when using complex rewrite structures.
+ * 
+ * @param  string $link
+ * @param  id $post_id
+ * @return string
+ */
+function wc_fix_product_attachment_link( $link, $post_id ) {
+	global $wp_rewrite;
+
+	$post = get_post( $post_id );
+	if ( 'product' === get_post_type( $post->post_parent ) ) {
+		$permalinks        = get_option( 'woocommerce_permalinks' );
+		$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+		if ( preg_match( '/\/(.+)(\/%product_cat%)$/' , $product_permalink, $matches ) ) {
+			$link = home_url( '/?attachment_id=' . $post->ID );
+		}
+	}
+	return $link;
+}
+add_filter( 'attachment_link', 'wc_fix_product_attachment_link', 10, 2 );
 
 /**
  * Protect downloads from ms-files.php in multisite
