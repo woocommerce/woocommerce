@@ -853,6 +853,21 @@ class WC_Meta_Box_Product_Data {
 						$parent_data['height'] = wc_format_localized_decimal( 0 );
 					}
 
+					foreach ( $parent_data['attributes'] as $index => $attribute ) {
+						$attribute['placeholder'] = __( 'Any', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;';
+						if ( $attribute['is_taxonomy'] ) {
+							$attribute['post_terms'] = wp_get_post_terms( $parent_data['id'], $attribute['name'] );
+						} else {
+							$attribute['options'] = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
+							$attribute['option_values'] = array_map( 'sanitize_title', $attribute['options'] );
+						}
+						$parent_data['attributes'][ $index ] = $attribute;
+					}
+
+					wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_variations_metabox', array(
+						'attributes' => json_encode( $parent_data['attributes'] ),
+					) );
+
 					// Get variations
 					$args = array(
 						'post_type'   => 'product_variation',
