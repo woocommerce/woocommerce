@@ -2,23 +2,75 @@
 jQuery( function ( $ ) {
 
 	var variation_sortable_options = {
-		items: '.woocommerce_variation',
-		cursor: 'move',
-		axis: 'y',
-		handle: 'h3',
-		scrollSensitivity: 40,
-		forcePlaceholderSize: true,
-		helper: 'clone',
-		opacity: 0.65,
-		placeholder: 'wc-metabox-sortable-placeholder',
-		start: function( event, ui ) {
-			ui.item.css( 'background-color', '#f6f6f6' );
+			items: '.woocommerce_variation',
+			cursor: 'move',
+			axis: 'y',
+			handle: 'h3',
+			scrollSensitivity: 40,
+			forcePlaceholderSize: true,
+			helper: 'clone',
+			opacity: 0.65,
+			placeholder: 'wc-metabox-sortable-placeholder',
+			start: function( event, ui ) {
+				ui.item.css( 'background-color', '#f6f6f6' );
+			},
+			stop: function ( event, ui ) {
+				ui.item.removeAttr( 'style' );
+				variation_row_indexes();
+			}
 		},
-		stop: function ( event, ui ) {
-			ui.item.removeAttr( 'style' );
-			variation_row_indexes();
-		}
-	};
+		variation_attributes = false;
+	// Check if we have the countries loaded
+	if ( ! ( typeof window.woocommerce_variations_metabox === 'undefined' || typeof window.woocommerce_variations_metabox.attributes === 'undefined' ) ) {
+		/* State/Country select boxes */
+		variation_attributes = $.parseJSON( window.woocommerce_variations_metabox.attributes.replace( /&quot;/g, '"' ) );
+	}
+
+	if ( variation_attributes ){
+
+		$.each( variation_attributes, function( k, attributes ) {
+			attributes.$options = $( '' ); // Empty jQuery Array of objects
+			console.log( attributes.is_taxonomy );
+			if ( attributes.is_taxonomy ){
+				$.each( attributes.post_terms, function( i, term ) {
+					$.merge( attributes.$options, $( '<option>' ).text( term.name ).attr( 'value', term.slug ) );
+				} );
+			} else {
+				$.each( attributes.options, function( i, opt ) {
+					$.merge( attributes.$options, $( '<option>' ).text( opt ).attr( 'value', attributes.option_values[i] ) );
+				} );
+			}
+		} );
+
+		$( '.wc_chosen_variation_name' ).each(function(){
+			var $this = $( this ),
+				attribute_name = $this.data( 'wc_attribute_name' );
+
+			$this.on({
+				'chosen:ready': function( event, opts ) {
+					opts.chosen.container.on( 'click.woocommerce', function(e){
+						e.stopPropagation();
+						e.preventDefault();
+						return false;
+					} );
+				},
+				'chosen:showing_dropdown': function( event, opts ){
+					opts.chosen.container.on( 'click.woocommerce' );
+
+					if ( ! $this.data('has_variations') ){
+						$this.append( variation_attributes[ attribute_name ].$options ).trigger( 'chosen:updated' ).data( 'has_variations', true );
+					}
+				},
+				'chosen:hiding_dropdown': function( event, opts ){
+					opts.chosen.container.on( 'click.woocommerce' );
+				}
+			})
+			.chosen({
+				placeholder_text_single: $this.attr( 'placeholder' ),
+				width: '140px'
+			});
+		});
+	}
 
 	// Add a variation
 	$( '#variable_product_options' ).on( 'click', 'button.add_variation', function () {
