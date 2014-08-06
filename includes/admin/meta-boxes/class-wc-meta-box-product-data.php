@@ -961,27 +961,19 @@ class WC_Meta_Box_Product_Data {
 							// Get current value for variation (if set)
 							$variation_selected_value = isset( $default_attributes[ sanitize_title( $attribute['name'] ) ] ) ? $default_attributes[ sanitize_title( $attribute['name'] ) ] : '';
 
-							// Name will be something like attribute_pa_color
-							echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
+							echo '<select class="wc_chosen_variation_name" data-wc_attribute_name="' . sanitize_title( $attribute['name'] ) . '" placeholder="' . esc_attr( $attribute['placeholder'] ) . '" name="default_attribute_' . sanitize_title( $attribute['name'] ) . '">';
 
-							// Get terms for attribute taxonomy or value if its a custom attribute
-							if ( $attribute['is_taxonomy'] ) {
-
-								$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
-
-								foreach ( $post_terms as $term ) {
-									echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) ) . '</option>';
+							if ( $attribute['is_taxonomy'] ){
+								foreach( $attribute['post_terms'] as $term ){
+									if ( $term->slug != $variation_selected_value ){
+										continue;
+									}
+									echo '<option selected value="' . $variation_selected_value . '">' . esc_attr( $term->name ) . '</option>';
 								}
-
 							} else {
-
-								$options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
-
-								foreach ( $options as $option ) {
-									echo '<option ' . selected( sanitize_title( $variation_selected_value ), sanitize_title( $option ), false ) . ' value="' . esc_attr( sanitize_title( $option ) ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
-								}
-
+								echo '<option selected value="' . $variation_selected_value . '">' . esc_attr( $option ) . '</option>';
 							}
+							// Dont Forget about `woocommerce_variation_option_name`
 
 							echo '</select>';
 						}
