@@ -87,7 +87,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$return_url = sprintf( $this->view_transaction_url, $transaction_id );
 		}
 		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $transaction_id, $this );
-	} 
+	}
 
 	/**
 	 * Get the order total in checkout and pay_for_order.
@@ -185,7 +185,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Process Payment
 	 *
-	 * Process the payment. Override this in your gateway. When implemented, this should 
+	 * Process the payment. Override this in your gateway. When implemented, this should
 	 * return the success and redirect in an array. e.g.
 	 *
 	 * 		return array(
@@ -196,7 +196,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @param int $order_id
 	 * @return array
 	 */
-	public function process_payment( $order_id ) { 
+	public function process_payment( $order_id ) {
 		return array();
 	}
 
@@ -205,12 +205,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 *
 	 * If the gateway declares 'refunds' support, this will allow it to refund
 	 * a passed in amount.
-	 * 
+	 *
 	 * @param  int $order_id
 	 * @param  float $amount
+	 * @param  string $reason
 	 * @return  bool|wp_error True or false based on success, or a WP_Error object
 	 */
-	public function process_refund( $order_id, $amount = null ) {
+	public function process_refund( $order_id, $amount = null, $reason = null ) {
 		return false;
 	}
 

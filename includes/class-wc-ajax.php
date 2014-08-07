@@ -1781,7 +1781,7 @@ class WC_AJAX {
 			}
 
 		}
-		
+
 		do_action( 'woocommerce_after_product_ordering' );
 
 		wp_send_json( $new_pos );
@@ -1850,7 +1850,7 @@ class WC_AJAX {
 			) );
 
 			if ( is_wp_error( $refund ) ) {
-				throw new exception( $refund->get_error_message() );
+				throw new Exception( $refund->get_error_message() );
 			}
 
 			// Refund via API
@@ -1859,12 +1859,12 @@ class WC_AJAX {
 					$payment_gateways = WC()->payment_gateways->payment_gateways();
 				}
 				if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
-					$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund_amount );
+					$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund_amount, $refund_reason );
 
 					if ( is_wp_error( $result ) ) {
-						throw new exception( $result->get_error_message() );
+						throw new Exception( $result->get_error_message() );
 					} elseif ( ! $result ) {
-						throw new exception( __( 'Refund failed', 'woocommerce' ) );
+						throw new Exception( __( 'Refund failed', 'woocommerce' ) );
 					}
 				}
 			}

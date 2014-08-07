@@ -417,7 +417,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$item_loop        = 0;
 		$args             = array();
 		$args['tax_cart'] = $order->get_total_tax();
-		
+
 		// Products
 		if ( sizeof( $order->get_items() ) > 0 ) {
 			foreach ( $order->get_items() as $item ) {
@@ -428,7 +428,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$product   = $order->get_product_from_item( $item );
 				$item_name = $item['name'];
 				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
-				
+
 				if ( $meta = $item_meta->display( true, true ) ) {
 					$item_name .= ' ( ' . $meta . ' )';
 				}
@@ -565,9 +565,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Process a refund if supported
 	 * @param  int $order_id
 	 * @param  float $amount
+	 * @param  string $reason
 	 * @return  bool|wp_error True or false based on success, or a WP_Error object
 	 */
-	public function process_refund( $order_id, $amount = null ) {
+	public function process_refund( $order_id, $amount = null, $reason = null ) {
 		$order = get_order( $order_id );
 
 		if ( ! $order || ! $order->get_transaction_id() || ! $this->api_username || ! $this->api_password || ! $this->api_password ) {
@@ -596,7 +597,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'sslverify'   => false,
 			'user-agent'  => 'WooCommerce',
 			'httpversion' => '1.1'
-			) 
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
