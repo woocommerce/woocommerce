@@ -137,6 +137,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->exclude_product_categories ),
 			'exclude_sale_items'           => $coupon->exclude_sale_items(),
 			'minimum_amount'               => wc_format_decimal( $coupon->minimum_amount, 2 ),
+			'maximum_amount'               => wc_format_decimal( $coupon->maximum_amount, 2 ),
 			'customer_emails'              => $coupon->customer_email,
 			'description'                  => $coupon_post->post_excerpt,
 		);
@@ -234,6 +235,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'exclude_product_categories' => array(),
 			'exclude_sale_items' => 'no',
 			'minimum_amount' => '',
+			'maximum_amount' => '',
 			'customer_email' => array(),
 		);
 
@@ -275,6 +277,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $coupon_data['exclude_product_categories'] ) ) );
 		update_post_meta( $id, 'exclude_sale_items', wc_clean( $coupon_data['exclude_sale_items'] ) );
 		update_post_meta( $id, 'minimum_amount', wc_format_decimal( $coupon_data['minimum_amount'] ) );
+		update_post_meta( $id, 'maximum_amount', wc_format_decimal( $coupon_data['maximum_amount'] ) );
 		update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $coupon_data['customer_email'] ) ) );
 
 		do_action( 'woocommerce_api_create_coupon', $id, $data );
@@ -391,6 +394,10 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		if ( isset( $data['minimum_amount'] ) ) {
 			update_post_meta( $id, 'minimum_amount', wc_format_decimal( $data['minimum_amount'] ) );
+		}
+
+		if ( isset( $data['maximum_amount'] ) ) {
+			update_post_meta( $id, 'maximum_amount', wc_format_decimal( $data['maximum_amount'] ) );
 		}
 
 		if ( isset( $data['customer_email'] ) ) {

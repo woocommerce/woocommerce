@@ -84,6 +84,9 @@ class WC_Meta_Box_Coupon_Data {
 				// minimum spend
 				woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum spend', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
 
+				// minimum spend
+				woocommerce_wp_text_input( array( 'id' => 'maximum_amount', 'label' => __( 'Maximum spend', 'woocommerce' ), 'placeholder' => __( 'No maximum', 'woocommerce' ), 'description' => __( 'This field allows you to set the maximum subtotal needed to use the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
+
 				// Individual use
 				woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __( 'Individual use only', 'woocommerce' ), 'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons.', 'woocommerce' ) ) );
 
@@ -243,6 +246,7 @@ class WC_Meta_Box_Coupon_Data {
 		$free_shipping          = isset( $_POST['free_shipping'] ) ? 'yes' : 'no';
 		$exclude_sale_items     = isset( $_POST['exclude_sale_items'] ) ? 'yes' : 'no';
 		$minimum_amount         = wc_format_decimal( $_POST['minimum_amount'] );
+		$maximum_amount         = wc_format_decimal( $_POST['maximum_amount'] );
 		$customer_email         = array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) );
 
 		if ( isset( $_POST['product_ids'] ) ) {
@@ -276,6 +280,7 @@ class WC_Meta_Box_Coupon_Data {
 		update_post_meta( $post_id, 'product_categories', $product_categories );
 		update_post_meta( $post_id, 'exclude_product_categories', $exclude_product_categories );
 		update_post_meta( $post_id, 'minimum_amount', $minimum_amount );
+		update_post_meta( $post_id, 'maximum_amount', $maximum_amount );
 		update_post_meta( $post_id, 'customer_email', $customer_email );
 
 		do_action( 'woocommerce_coupon_options_save', $post_id );
