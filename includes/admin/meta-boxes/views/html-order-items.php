@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+global $wpdb;
+
 // Get the payment gateway
 $payment_gateway = wc_get_payment_gateway_by_order( $order );
 
