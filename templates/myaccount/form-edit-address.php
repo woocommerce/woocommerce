@@ -30,7 +30,7 @@ get_currentuserinfo();
 
 		<h3><?php echo apply_filters( 'woocommerce_my_account_edit_address_title', $page_title ); ?></h3>
 
-		<?php do_action( 'woocommerce_before_edit_address_form', $load_address ); ?>
+		<?php do_action( "woocommerce_before_edit_address_form_{$load_address}" ); ?>
 
 		<?php foreach ( $address as $key => $field ) : ?>
 
@@ -38,7 +38,7 @@ get_currentuserinfo();
 
 		<?php endforeach; ?>
 		
-		<?php do_action( 'woocommerce_after_edit_address_form', $load_address ); ?>
+		<?php do_action( "woocommerce_after_edit_address_form_{$load_address}" ); ?>
 
 		<p>
 			<input type="submit" class="button" name="save_address" value="<?php _e( 'Save Address', 'woocommerce' ); ?>" />
