@@ -1,726 +1,444 @@
 <?php
 /**
- * WooCommerce API Customers Class
+ * WooCommerce API Client Class
  *
- * Handles requests to the /customers endpoint
- *
- * @author      WooThemes
- * @category    API
- * @package     WooCommerce/API
- * @since       2.2
+ * @author Gerhard Potgieter
+ * @since 2013.12.05
+ * @copyright Gerhard Potgieter
+ * @version 0.3.1
+ * @license GPL 3 or later http://www.gnu.org/licenses/gpl.html
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-class WC_API_Customers extends WC_API_Resource {
-
-	/** @var string $base the route base */
-	protected $base = '/customers';
-
-	/** @var string $created_at_min for date filtering */
-	private $created_at_min = null;
-
-	/** @var string $created_at_max for date filtering */
-	private $created_at_max = null;
+class WC_API_Client {
 
 	/**
-	 * Setup class, overridden to provide customer data to order response
-	 *
-	 * @since 2.1
-	 * @param WC_API_Server $server
-	 * @return WC_API_Customers
+	 * API base endpoint
 	 */
-	public function __construct( WC_API_Server $server ) {
+	const API_ENDPOINT = 'wc-api/v1/';
 
-		parent::__construct( $server );
+	/**
+	 * The HASH alorithm to use for oAuth signature, SHA256 or SHA1
+	 */
+	const HASH_ALGORITHM = 'SHA256';
 
-		// add customer data to order responses
-		add_filter( 'woocommerce_api_order_response', array( $this, 'add_customer_data' ), 10, 2 );
+	/**
+	 * The API URL
+	 * @var string
+	 */
+	private $_api_url;
 
-		// modify WP_User_Query to support created_at date filtering
-		add_action( 'pre_user_query', array( $this, 'modify_user_query' ) );
+	/**
+	 * The WooCommerce Consumer Key
+	 * @var string
+	 */
+	private $_consumer_key;
+
+	/**
+	 * The WooCommerce Consumer Secret
+	 * @var string
+	 */
+	private $_consumer_secret;
+
+	/**
+	 * If the URL is secure, used to decide if oAuth or Basic Auth must be used
+	 * @var boolean
+	 */
+	private $_is_ssl;
+
+	/**
+	 * Return the API data as an Object, set to false to keep it in JSON string format
+	 * @var boolean
+	 */
+	private $_return_as_object = true;
+
+	/**
+	 * Default contructor
+	 * @param string  $consumer_key    The consumer key
+	 * @param string  $consumer_secret The consumer secret
+	 * @param string  $store_url       The URL to the WooCommerce store
+	 * @param boolean $is_ssl          If the URL is secure or not, optional
+	 */
+	public function __construct( $consumer_key, $consumer_secret, $store_url, $is_ssl = false ) {
+		if ( ! empty( $consumer_key ) && ! empty( $consumer_secret ) && ! empty( $store_url ) ) {
+			$this->_api_url = (  rtrim($store_url,'/' ) . '/' ) . self::API_ENDPOINT;
+			$this->set_consumer_key( $consumer_key );
+			$this->set_consumer_secret( $consumer_secret );
+			$this->set_is_ssl( $is_ssl );
+		} else if ( ! isset( $consumer_key ) && ! isset( $consumer_secret ) ) {
+			throw new Exception( 'Error: __construct() - Consumer Key / Consumer Secret missing.' );
+		} else {
+			throw new Exception( 'Error: __construct() - Store URL missing.' );
+		}
 	}
 
 	/**
-	 * Register the routes for this class
-	 *
-	 * GET /customers
-	 * GET /customers/count
-	 * GET /customers/<id>
-	 * GET /customers/<id>/orders
-	 *
-	 * @since 2.2
-	 * @param array $routes
-	 * @return array
+	 * Get API Index
+	 * @return mixed|json string
 	 */
-	public function register_routes( $routes ) {
-
-		# GET/POST /customers
-		$routes[ $this->base ] = array(
-			array( array( $this, 'get_customers' ),   WC_API_SERVER::READABLE ),
-			array( array( $this, 'create_customer' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
-		);
-
-		# GET /customers/count
-		$routes[ $this->base . '/count'] = array(
-			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
-		);
-
-		# GET/PUT/DELETE /customers/<id>
-		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_customer' ),    WC_API_SERVER::READABLE ),
-			array( array( $this, 'edit_customer' ),   WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
-			array( array( $this, 'delete_customer' ), WC_API_SERVER::DELETABLE ),
-		);
-
-		# GET /customers/<email>
-		$routes[ $this->base . '/email/(?P<email>.+)' ] = array(
-			array( array( $this, 'get_customer_by_email' ), WC_API_SERVER::READABLE ),
-		);
-
-		# GET /customers/<id>/orders
-		$routes[ $this->base . '/(?P<id>\d+)/orders' ] = array(
-			array( array( $this, 'get_customer_orders' ), WC_API_SERVER::READABLE ),
-		);
-
-		# GET /customers/<id>/downloads
-		$routes[ $this->base . '/(?P<id>\d+)/downloads' ] = array(
-			array( array( $this, 'get_customer_downloads' ), WC_API_SERVER::READABLE ),
-		);
-
-		return $routes;
+	public function get_index() {
+		return $this->_make_api_call( '' );
 	}
 
 	/**
-	 * Get customer billing address fields.
-	 *
-	 * @since  2.2
-	 * @return array
+	 * Get all orders
+	 * @param  array  $params
+	 * @return mixed|jason string
 	 */
-	public function get_customer_billing_address() {
-		$billing_address = apply_filters( 'woocommerce_api_customer_billing_address', array(
-			'first_name',
-			'last_name',
-			'company',
-			'address_1',
-			'address_2',
-			'city',
-			'state',
-			'postcode',
-			'country',
-			'email',
-			'phone',
-		) );
-
-		return $billing_address;
+	public function get_orders( $params = array() ) {
+		return $this->_make_api_call( 'orders', $params );
 	}
 
 	/**
-	 * Get customer shipping address fields.
-	 *
-	 * @since  2.2
-	 * @return array
+	 * Get a single order
+	 * @param  integer $order_id
+	 * @return mixed|json string
 	 */
-	public function get_customer_shipping_address() {
-		$shipping_address = apply_filters( 'woocommerce_api_customer_shipping_address', array(
-			'first_name',
-			'last_name',
-			'company',
-			'address_1',
-			'address_2',
-			'city',
-			'state',
-			'postcode',
-			'country',
-		) );
+	public function get_order( $order_id ) {
+		return $this->_make_api_call( 'orders/' . $order_id );
+	}
 
-		return $shipping_address;
+	/**
+	 * Get the total order count
+	 * @return mixed|json string
+	 */
+	public function get_orders_count() {
+		return $this->_make_api_call( 'orders/count' );
+	}
+
+	/**
+	 * Get orders notes for an order
+	 * @param  integer $order_id
+	 * @return mixed|json string
+	 */
+	public function get_order_notes( $order_id ) {
+		return $this->_make_api_call( 'orders/' . $order_id . '/notes' );
+	}
+
+	/**
+	 * Update the order, currently only status update suported by API
+	 * @param  integer $order_id
+	 * @param  array  $data
+	 * @return mixed|json string
+	 */
+	public function update_order( $order_id, $data = array() ) {
+		return $this->_make_api_call( 'orders/' . $order_id, $data, 'POST' );
+	}
+
+	/**
+	 * Delete the order, not suported in WC 2.1, scheduled for 2.2
+	 * @param  integer $order_id
+	 * @return mixed|json string
+	 */
+	public function delete_order( $order_id ) {
+		return $this->_make_api_call( 'orders/' . $order_id, $data = array(), 'DELETE' );
+	}
+
+	/**
+	 * Get all coupons
+	 * @param  array  $params
+	 * @return mixed|json string
+	 */
+	public function get_coupons( $params = array() ) {
+		return $this->_make_api_call( 'coupons', $params );
+	}
+
+	/**
+	 * Get a single coupon
+	 * @param  integer $coupon_id
+	 * @return mixed|json string
+	 */
+	public function get_coupon( $coupon_id ) {
+		return $this->_make_api_call( 'coupons/' . $coupon_id );
+	}
+
+	/**
+	 * Get the total coupon count
+	 * @return mixed|json string
+	 */
+	public function get_coupons_count() {
+		return $this->_make_api_call( 'coupons/count' );
+	}
+
+	/**
+	 * Get a coupon by the coupon code
+	 * @param  string $coupon_code
+	 * @return mixed|json string
+	 */
+	public function get_coupon_by_code( $coupon_code ) {
+		return $this->_make_api_call( 'coupons/code/' . rawurlencode( rawurldecode( $coupon_code ) ) );
 	}
 
 	/**
 	 * Get all customers
-	 *
-	 * @since 2.1
-	 * @param array $fields
-	 * @param array $filter
-	 * @param int $page
-	 * @return array
+	 * @param  array  $params
+	 * @return mixed|json string
 	 */
-	public function get_customers( $fields = null, $filter = array(), $page = 1 ) {
-
-		$filter['page'] = $page;
-
-		$query = $this->query_customers( $filter );
-
-		$customers = array();
-
-		foreach ( $query->get_results() as $user_id ) {
-
-			if ( ! $this->is_readable( $user_id ) ) {
-				continue;
-			}
-
-			$customers[] = current( $this->get_customer( $user_id, $fields ) );
-		}
-
-		$this->server->add_pagination_headers( $query );
-
-		return array( 'customers' => $customers );
+	public function get_customers( $params = array() ) {
+		return $this->_make_api_call( 'customers', $params );
 	}
 
 	/**
-	 * Get the customer for the given ID
-	 *
-	 * @since 2.1
-	 * @param int $id the customer ID
-	 * @param string $fields
-	 * @return array
+	 * Get a single customer
+	 * @param  integer $customer_id
+	 * @return mixed|json string
 	 */
-	public function get_customer( $id, $fields = null ) {
-		global $wpdb;
-
-		$id = $this->validate_request( $id, 'customer', 'read' );
-
-		if ( is_wp_error( $id ) ) {
-			return $id;
-		}
-
-		$customer = new WP_User( $id );
-
-		// get info about user's last order
-		$last_order = $wpdb->get_row( "SELECT id, post_date_gmt
-						FROM $wpdb->posts AS posts
-						LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-						WHERE meta.meta_key = '_customer_user'
-						AND   meta.meta_value = {$customer->ID}
-						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-					" );
-
-		$customer_data = array(
-			'id'               => $customer->ID,
-			'created_at'       => $this->server->format_datetime( $customer->user_registered ),
-			'email'            => $customer->user_email,
-			'first_name'       => $customer->first_name,
-			'last_name'        => $customer->last_name,
-			'username'         => $customer->user_login,
-			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
-			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
-			'orders_count'     => (int) $customer->_order_count,
-			'total_spent'      => wc_format_decimal( $customer->_money_spent, 2 ),
-			'avatar_url'       => $this->get_avatar_url( $customer->customer_email ),
-			'billing_address'  => array(
-				'first_name' => $customer->billing_first_name,
-				'last_name'  => $customer->billing_last_name,
-				'company'    => $customer->billing_company,
-				'address_1'  => $customer->billing_address_1,
-				'address_2'  => $customer->billing_address_2,
-				'city'       => $customer->billing_city,
-				'state'      => $customer->billing_state,
-				'postcode'   => $customer->billing_postcode,
-				'country'    => $customer->billing_country,
-				'email'      => $customer->billing_email,
-				'phone'      => $customer->billing_phone,
-			),
-			'shipping_address' => array(
-				'first_name' => $customer->shipping_first_name,
-				'last_name'  => $customer->shipping_last_name,
-				'company'    => $customer->shipping_company,
-				'address_1'  => $customer->shipping_address_1,
-				'address_2'  => $customer->shipping_address_2,
-				'city'       => $customer->shipping_city,
-				'state'      => $customer->shipping_state,
-				'postcode'   => $customer->shipping_postcode,
-				'country'    => $customer->shipping_country,
-			),
-		);
-
-		return array( 'customer' => apply_filters( 'woocommerce_api_customer_response', $customer_data, $customer, $fields, $this->server ) );
+	public function get_customer( $customer_id ) {
+		return $this->_make_api_call( 'customers/' . $customer_id );
 	}
 
 	/**
-	 * Get the customer for the given email
-	 *
-	 * @since 2.1
-	 * @param string $email the customer email
-	 * @param string $fields
-	 * @return array
+	 * Get a single customer by email
+	 * @param  string $email
+	 * @return mixed|json string
 	 */
-	function get_customer_by_email( $email, $fields = null ) {
+	public function get_customer_by_email( $email ) {
+		return $this->_make_api_call( 'customers/email/' . $email );
+	}
 
-		if ( is_email( $email ) ) {
-			$customer = get_user_by( 'email', $email );
-			if ( ! is_object( $customer ) ) {
-				return new WP_Error( 'woocommerce_api_invalid_customer_email', __( 'Invalid customer Email', 'woocommerce' ), array( 'status' => 404 ) );
-			}
+	/**
+	 * Get the total customer count
+	 * @return mixed|json string
+	 */
+	public function get_customers_count() {
+		return $this->_make_api_call( 'customers/count' );
+	}
+
+	/**
+	 * Get the customer's orders
+	 * @param  integer $customer_id
+	 * @return mixed|json string
+	 */
+	public function get_customer_orders( $customer_id ) {
+		return $this->_make_api_call( 'customers/' . $customer_id . '/orders' );
+	}
+
+	/**
+	 * Get all the products
+	 * @param  array  $params
+	 * @return mixed|json string
+	 */
+	public function get_products( $params = array() ) {
+		return $this->_make_api_call( 'products', $params );
+	}
+
+	/**
+	 * Get a single product
+	 * @param  integer $product_id
+	 * @return mixed|json string
+	 */
+	public function get_product( $product_id ) {
+		return $this->_make_api_call( 'products/' . $product_id );
+	}
+
+	/**
+	 * Get the total product count
+	 * @return mixed|json string
+	 */
+	public function get_products_count() {
+		return $this->_make_api_call( 'products/count' );
+	}
+
+	/**
+	 * Get reviews for a product
+	 * @param  integer $product_id
+	 * @return mixed|json string
+	 */
+	public function get_product_reviews( $product_id ) {
+		return $this->_make_api_call( 'products/' . $product_id . '/reviews' );
+	}
+
+	/**
+	 * Get reports
+	 * @param  array  $params
+	 * @return mixed|json string
+	 */
+	public function get_reports( $params = array() ) {
+		return $this->_make_api_call( 'reports', $params );
+	}
+
+	/**
+	 * Get the sales report
+	 * @param  array  $params
+	 * @return mixed|json string
+	 */
+	public function get_sales_report( $params = array() ) {
+		return $this->_make_api_call( 'reports/sales', $params );
+	}
+
+	/**
+	 * Get the top sellers report
+	 * @param  array  $params
+	 * @return mixed|json string
+	 */
+	public function get_top_sellers_report( $params = array() ) {
+		return $this->_make_api_call( 'reports/sales/top_sellers', $params );
+	}
+
+	/**
+	 * Run a custom endpoint call, for when you extended the API with your own endpoints
+	 * @param  string $endpoint
+	 * @param  array  $params
+	 * @param  string $method
+	 * @return mixed|json string
+	 */
+	public function make_custom_endpoint_call( $endpoint, $params = array(), $method = 'GET' ) {
+		$this->_make_api_call( $endpoint, $params, $method );
+	}
+
+	/**
+	 * Set the consumer key
+	 * @param string $consumer_key
+	 */
+	public function set_consumer_key( $consumer_key ) {
+		$this->_consumer_key = $consumer_key;
+	}
+
+	/**
+	 * Set the consumer secret
+	 * @param string $consumer_secret
+	 */
+	public function set_consumer_secret( $consumer_secret ) {
+		$this->_consumer_secret = $consumer_secret;
+	}
+
+	/**
+	 * Set SSL variable
+	 * @param boolean $is_ssl
+	 */
+	public function set_is_ssl( $is_ssl ) {
+		if ( $is_ssl == '' ) {
+			if ( strtolower( substr( $this->_api_url, 0, 5 ) ) == 'https' ) {
+				$this->_is_ssl = true;
+			} else $this->_is_ssl = false;
+		} else $this->_is_ssl = $is_ssl;
+	}
+
+	/**
+	 * Set the return data as object
+	 * @param boolean $is_object
+	 */
+	public function set_return_as_object( $is_object = true ) {
+		$this->_return_as_object = $is_object;
+	}
+
+	/**
+	 * Make the call to the API
+	 * @param  string $endpoint
+	 * @param  array  $params
+	 * @param  string $method
+	 * @return mixed|json string
+	 */
+	private function _make_api_call( $endpoint, $params = array(), $method = 'GET' ) {
+		$ch = curl_init();
+
+		// Check if we must use Basic Auth or 1 legged oAuth, if SSL we use basic, if not we use OAuth 1.0a one-legged
+		if ( $this->_is_ssl ) {
+			curl_setopt( $ch, CURLOPT_USERPWD, $this->_consumer_key . ":" . $this->_consumer_secret );
 		} else {
-			return new WP_Error( 'woocommerce_api_invalid_customer_email', __( 'Invalid customer Email', 'woocommerce' ), array( 'status' => 404 ) );
+			$params['oauth_consumer_key'] = $this->_consumer_key;
+			$params['oauth_timestamp'] = time();
+			$params['oauth_nonce'] = sha1( microtime() );
+			$params['oauth_signature_method'] = 'HMAC-' . self::HASH_ALGORITHM;
+			$params['oauth_signature'] = $this->generate_oauth_signature( $params, $method, $endpoint );
 		}
 
-		return $this->get_customer( $customer->ID, $fields );
-	}
-
-	/**
-	 * Get the total number of customers
-	 *
-	 * @since 2.1
-	 * @param array $filter
-	 * @return array
-	 */
-	public function get_customers_count( $filter = array() ) {
-
-		$query = $this->query_customers( $filter );
-
-		if ( ! current_user_can( 'list_users' ) ) {
-			return new WP_Error( 'woocommerce_api_user_cannot_read_customers_count', __( 'You do not have permission to read the customers count', 'woocommerce' ), array( 'status' => 401 ) );
-		}
-
-		return array( 'count' => count( $query->get_results() ) );
-	}
-
-	/**
-	 * Add/Update customer data.
-	 *
-	 * @since 2.2
-	 * @param int $id the customer ID
-	 * @param array $data
-	 * @return void
-	 */
-	protected function update_customer_data( $id, $data ) {
-		// Customer first name.
-		if ( isset( $data['first_name'] ) ) {
-			update_user_meta( $id, 'first_name', wc_clean( $data['first_name'] ) );
-		}
-
-		// Customer last name.
-		if ( isset( $data['last_name'] ) ) {
-			update_user_meta( $id, 'last_name', wc_clean( $data['last_name'] ) );
-		}
-
-		// Customer billing address.
-		if ( isset( $data['billing_address'] ) ) {
-			foreach ( $this->get_customer_billing_address() as $address ) {
-				if ( isset( $data['billing_address'][ $address ] ) ) {
-					update_user_meta( $id, 'billing_' . $address, wc_clean( $data['billing_address'][ $address ] ) );
-				}
-			}
-		}
-
-		// Customer shipping address.
-		if ( isset( $data['shipping_address'] ) ) {
-			foreach ( $this->get_customer_shipping_address() as $address ) {
-				if ( isset( $data['shipping_address'][ $address ] ) ) {
-					update_user_meta( $id, 'shipping_' . $address, wc_clean( $data['shipping_address'][ $address ] ) );
-				}
-			}
-		}
-
-		do_action( 'woocommerce_api_update_customer_data', $id, $data );
-	}
-
-	/**
-	 * Create a customer
-	 *
-	 * @since 2.2
-	 * @param array $data
-	 * @return array
-	 */
-	public function create_customer( $data ) {
-
-		// Checks with can create new users.
-		if ( ! current_user_can( 'create_users' ) ) {
-			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', __( 'You do not have permission to create this customer', 'woocommerce' ), array( 'status' => 401 ) );
-		}
-
-		// Checks with the email is missing.
-		if ( ! isset( $data['email'] ) ) {
-			return new WP_Error( 'woocommerce_api_missing_customer_email', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'email' ), array( 'status' => 400 ) );
-		}
-
-		// Sets the username.
-		if ( ! isset( $data['username'] ) ) {
-			$data['username'] = '';
-		}
-
-		// Sets the password.
-		if ( ! isset( $data['password'] ) ) {
-			$data['password'] = wp_generate_password();
-		}
-
-		// Attempts to create the new customer
-		$id = wc_create_new_customer( $data['email'], $data['username'], $data['password'] );
-
-		// Checks for an error in the customer creation.
-		if ( is_wp_error( $id ) ) {
-			return new WP_Error( 'woocommerce_api_cannot_create_customer', $id->get_error_message(), array( 'status' => 400 ) );
-		}
-
-		// Added customer data.
-		$this->update_customer_data( $id, $data );
-
-		do_action( 'woocommerce_api_create_customer', $id, $data );
-
-		$this->server->send_status( 201 );
-
-		return $this->get_customer( $id );
-	}
-
-	/**
-	 * Edit a customer
-	 *
-	 * @since 2.2
-	 * @param int $id the customer ID
-	 * @param array $data
-	 * @return array
-	 */
-	public function edit_customer( $id, $data ) {
-
-		// Validate the customer ID.
-		$id = $this->validate_request( $id, 'customer', 'edit' );
-
-		// Return the validate error.
-		if ( is_wp_error( $id ) ) {
-			return $id;
-		}
-
-		// Customer email.
-		if ( isset( $data['email'] ) ) {
-			wp_update_user( array( 'ID' => $id, 'user_email' => sanitize_email( $data['email'] ) ) );
-		}
-
-		// Customer password.
-		if ( isset( $data['password'] ) ) {
-			wp_update_user( array( 'ID' => $id, 'user_pass' => wc_clean( $data['password'] ) ) );
-		}
-
-		// Update customer data.
-		$this->update_customer_data( $id, $data );
-
-		do_action( 'woocommerce_api_edit_customer', $id, $data );
-
-		return $this->get_customer( $id );
-	}
-
-	/**
-	 * Delete a customer
-	 *
-	 * @since 2.2
-	 * @param int $id the customer ID
-	 * @return array
-	 */
-	public function delete_customer( $id ) {
-
-		// Validate the customer ID.
-		$id = $this->validate_request( $id, 'customer', 'delete' );
-
-		// Return the validate error.
-		if ( is_wp_error( $id ) ) {
-			return $id;
-		}
-
-		return $this->delete( $id, 'customer' );
-	}
-
-	/**
-	 * Get the orders for a customer
-	 *
-	 * @since 2.1
-	 * @param int $id the customer ID
-	 * @param string $fields fields to include in response
-	 * @return array
-	 */
-	public function get_customer_orders( $id, $fields = null ) {
-		global $wpdb;
-
-		$id = $this->validate_request( $id, 'customer', 'read' );
-
-		if ( is_wp_error( $id ) ) {
-			return $id;
-		}
-
-		$order_ids = $wpdb->get_col( $wpdb->prepare( "SELECT id
-						FROM $wpdb->posts AS posts
-						LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-						WHERE meta.meta_key = '_customer_user'
-						AND   meta.meta_value = '%s'
-						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-					", $id ) );
-
-		if ( empty( $order_ids ) ) {
-			return array( 'orders' => array() );
-		}
-
-		$orders = array();
-
-		foreach ( $order_ids as $order_id ) {
-			$orders[] = current( WC()->api->WC_API_Orders->get_order( $order_id, $fields ) );
-		}
-
-		return array( 'orders' => apply_filters( 'woocommerce_api_customer_orders_response', $orders, $id, $fields, $order_ids, $this->server ) );
-	}
-
-	/**
-	 * Get the available downloads for a customer
-	 *
-	 * @since 2.2
-	 * @param int $id the customer ID
-	 * @param string $fields fields to include in response
-	 * @return array
-	 */
-	public function get_customer_downloads( $id, $fields = null ) {
-		$id = $this->validate_request( $id, 'customer', 'read' );
-
-		if ( is_wp_error( $id ) ) {
-			return $id;
-		}
-
-		$downloads = wc_get_customer_available_downloads( $id );
-
-		if ( empty( $downloads ) ) {
-			return array( 'downloads' => array() );
-		}
-
-		return array( 'downloads' => apply_filters( 'woocommerce_api_customer_downloads_response', $downloads, $id, $fields, $this->server ) );
-	}
-
-	/**
-	 * Helper method to get customer user objects
-	 *
-	 * Note that WP_User_Query does not have built-in pagination so limit & offset are used to provide limited
-	 * pagination support
-	 *
-	 * @since 2.1
-	 * @param array $args request arguments for filtering query
-	 * @return WP_User_Query
-	 */
-	private function query_customers( $args = array() ) {
-
-		// default users per page
-		$users_per_page = get_option( 'posts_per_page' );
-
-		// set base query arguments
-		$query_args = array(
-			'fields'  => 'ID',
-			'role'    => 'customer',
-			'orderby' => 'registered',
-			'number'  => $users_per_page,
-		);
-
-		// search
-		if ( ! empty( $args['q'] ) ) {
-			$query_args['search'] = $args['q'];
-		}
-
-		// limit number of users returned
-		if ( ! empty( $args['limit'] ) ) {
-
-			$query_args['number'] = absint( $args['limit'] );
-
-			$users_per_page = absint( $args['limit'] );
-		}
-
-		// page
-		$page = ( isset( $args['page'] ) ) ? absint( $args['page'] ) : 1;
-
-		// offset
-		if ( ! empty( $args['offset'] ) ) {
-			$query_args['offset'] = absint( $args['offset'] );
+		if ( isset( $params ) && is_array( $params ) ) {
+			$paramString = '?' . http_build_query( $params );
 		} else {
-			$query_args['offset'] = $users_per_page * ( $page - 1 );
+			$paramString = null;
 		}
 
-		// created date
-		if ( ! empty( $args['created_at_min'] ) ) {
-			$this->created_at_min = $this->server->parse_datetime( $args['created_at_min'] );
+		// Set up the enpoint URL
+		curl_setopt( $ch, CURLOPT_URL, $this->_api_url . $endpoint . $paramString );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 30 );
+        curl_setopt( $ch, CURLOPT_TIMEOUT, 30 );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+
+        if ( 'POST' === $method ) {
+			curl_setopt( $ch, CURLOPT_POST, true );
+			curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode( $params ) );
+    	} else if ( 'DELETE' === $method ) {
+			curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'DELETE' );
+    	}
+
+		$return = curl_exec( $ch );
+
+		$code = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+
+		if ( $this->_return_as_object ) {
+			$return = json_decode( $return );
 		}
 
-		if ( ! empty( $args['created_at_max'] ) ) {
-			$this->created_at_max = $this->server->parse_datetime( $args['created_at_max'] );
+		if ( empty( $return ) ) {
+			$return = '{"errors":[{"code":"' . $code . '","message":"cURL HTTP error ' . $code . '"}]}';
+			$return = json_decode( $return );
 		}
-
-		// order (ASC or DESC, ASC by default)
-		if ( ! empty( $args['order'] ) ) {
-			$query_args['order'] = $args['order'];
-		}
-
-		// orderby
-		if ( ! empty( $args['orderby'] ) ) {
-			$query_args['orderby'] = $args['orderby'];
-
-			// allow sorting by meta value
-			if ( ! empty( $args['orderby_meta_key'] ) ) {
-				$query_args['meta_key'] = $args['orderby_meta_key'];
-			}
-		}
-
-		$query = new WP_User_Query( $query_args );
-
-		// helper members for pagination headers
-		$query->total_pages = ceil( $query->get_total() / $users_per_page );
-		$query->page = $page;
-
-		return $query;
+		return $return;
 	}
 
 	/**
-	 * Add customer data to orders
-	 *
-	 * @since 2.1
-	 * @param $order_data
-	 * @param $order
-	 * @return array
+	 * Generate oAuth signature
+	 * @param  array  $params
+	 * @param  string $http_method
+	 * @param  string $endpoint
+	 * @return string
 	 */
-	public function add_customer_data( $order_data, $order ) {
+	public function generate_oauth_signature( $params, $http_method, $endpoint ) {
+		$base_request_uri = rawurlencode( $this->_api_url . $endpoint );
 
-		if ( 0 == $order->customer_user ) {
+		// normalize parameter key/values and sort them
+		$params = $this->normalize_parameters( $params );
+		uksort( $params, 'strcmp' );
 
-			// add customer data from order
-			$order_data['customer'] = array(
-				'id'               => 0,
-				'email'            => $order->billing_email,
-				'first_name'       => $order->billing_first_name,
-				'last_name'        => $order->billing_last_name,
-				'billing_address'  => array(
-					'first_name' => $order->billing_first_name,
-					'last_name'  => $order->billing_last_name,
-					'company'    => $order->billing_company,
-					'address_1'  => $order->billing_address_1,
-					'address_2'  => $order->billing_address_2,
-					'city'       => $order->billing_city,
-					'state'      => $order->billing_state,
-					'postcode'   => $order->billing_postcode,
-					'country'    => $order->billing_country,
-					'email'      => $order->billing_email,
-					'phone'      => $order->billing_phone,
-				),
-				'shipping_address' => array(
-					'first_name' => $order->shipping_first_name,
-					'last_name'  => $order->shipping_last_name,
-					'company'    => $order->shipping_company,
-					'address_1'  => $order->shipping_address_1,
-					'address_2'  => $order->shipping_address_2,
-					'city'       => $order->shipping_city,
-					'state'      => $order->shipping_state,
-					'postcode'   => $order->shipping_postcode,
-					'country'    => $order->shipping_country,
-				),
-			);
-
-		} else {
-
-			$order_data['customer'] = current( $this->get_customer( $order->customer_user ) );
+		// form query string
+		$query_params = array();
+		foreach ( $params as $param_key => $param_value ) {
+			$query_params[] = $param_key . '%3D' . $param_value; // join with equals sign
 		}
 
-		return $order_data;
+		$query_string = implode( '%26', $query_params ); // join with ampersand
+
+		// form string to sign (first key)
+		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
+
+		return base64_encode( hash_hmac( self::HASH_ALGORITHM, $string_to_sign, $this->_consumer_secret, true ) );
 	}
 
 	/**
-	 * Modify the WP_User_Query to support filtering on the date the customer was created
+	 * Normalize each parameter by assuming each parameter may have already been
+	 * encoded, so attempt to decode, and then re-encode according to RFC 3986
 	 *
-	 * @since 2.1
-	 * @param WP_User_Query $query
+	 * Note both the key and value is normalized so a filter param like:
+	 *
+	 * 'filter[period]' => 'week'
+	 *
+	 * is encoded to:
+	 *
+	 * 'filter%5Bperiod%5D' => 'week'
+	 *
+	 * This conforms to the OAuth 1.0a spec which indicates the entire query string
+	 * should be URL encoded
+	 *
+	 * @since 0.3.1
+	 * @see rawurlencode()
+	 * @param array $parameters un-normalized pararmeters
+	 * @return array normalized parameters
 	 */
-	public function modify_user_query( $query ) {
+	private function normalize_parameters( $parameters ) {
 
-		if ( $this->created_at_min ) {
-			$query->query_where .= sprintf( " AND user_registered >= STR_TO_DATE( '%s', '%%Y-%%m-%%d %%h:%%i:%%s' )", esc_sql( $this->created_at_min ) );
+		$normalized_parameters = array();
+
+		foreach ( $parameters as $key => $value ) {
+
+			// percent symbols (%) must be double-encoded
+			$key   = str_replace( '%', '%25', rawurlencode( rawurldecode( $key ) ) );
+			$value = str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
+
+			$normalized_parameters[ $key ] = $value;
 		}
 
-		if ( $this->created_at_max ) {
-			$query->query_where .= sprintf( " AND user_registered <= STR_TO_DATE( '%s', '%%Y-%%m-%%d %%h:%%i:%%s' )", esc_sql( $this->created_at_max ) );
-		}
-	}
-
-	/**
-	 * Wrapper for @see get_avatar() which doesn't simply return
-	 * the URL so we need to pluck it from the HTML img tag
-	 *
-	 * Kudos to https://github.com/WP-API/WP-API for offering a better solution
-	 *
-	 * @since 2.1
-	 * @param string $email the customer's email
-	 * @return string the URL to the customer's avatar
-	 */
-	private function get_avatar_url( $email ) {
-		$avatar_html = get_avatar( $email );
-
-		// Get the URL of the avatar from the provided HTML
-		preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
-
-		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-			return esc_url_raw( $matches[1] );
-		}
-
-		return null;
-	}
-
-	/**
-	 * Validate the request by checking:
-	 *
-	 * 1) the ID is a valid integer
-	 * 2) the ID returns a valid WP_User
-	 * 3) the current user has the proper permissions
-	 *
-	 * @since 2.1
-	 * @see WC_API_Resource::validate_request()
-	 * @param string|int $id the customer ID
-	 * @param string $type the request type, unused because this method overrides the parent class
-	 * @param string $context the context of the request, either `read`, `edit` or `delete`
-	 * @return int|WP_Error valid user ID or WP_Error if any of the checks fails
-	 */
-	protected function validate_request( $id, $type, $context ) {
-
-		$id = absint( $id );
-
-		// validate ID
-		if ( empty( $id ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_customer_id', __( 'Invalid customer ID', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		// non-existent IDs return a valid WP_User object with the user ID = 0
-		$customer = new WP_User( $id );
-
-		if ( 0 === $customer->ID ) {
-			return new WP_Error( 'woocommerce_api_invalid_customer', __( 'Invalid customer', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		// validate permissions
-		switch ( $context ) {
-
-			case 'read':
-				if ( ! current_user_can( 'list_users' ) ) {
-					return new WP_Error( 'woocommerce_api_user_cannot_read_customer', __( 'You do not have permission to read this customer', 'woocommerce' ), array( 'status' => 401 ) );
-				}
-				break;
-
-			case 'edit':
-				if ( ! current_user_can( 'edit_users' ) ) {
-					return new WP_Error( 'woocommerce_api_user_cannot_edit_customer', __( 'You do not have permission to edit this customer', 'woocommerce' ), array( 'status' => 401 ) );
-				}
-				break;
-
-			case 'delete':
-				if ( ! current_user_can( 'delete_users' ) ) {
-					return new WP_Error( 'woocommerce_api_user_cannot_delete_customer', __( 'You do not have permission to delete this customer', 'woocommerce' ), array( 'status' => 401 ) );
-				}
-				break;
-		}
-
-		return $id;
-	}
-
-	/**
-	 * Check if the current user can read users
-	 *
-	 * @since 2.1
-	 * @see WC_API_Resource::is_readable()
-	 * @param int|WP_Post $post unused
-	 * @return bool true if the current user can read users, false otherwise
-	 */
-	protected function is_readable( $post ) {
-
-		return current_user_can( 'list_users' );
+		return $normalized_parameters;
 	}
 
 }

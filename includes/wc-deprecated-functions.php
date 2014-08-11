@@ -399,3 +399,53 @@ function woocommerce_prepare_attachment_for_js( $response ) {
 function woocommerce_track_product_view() {
 	return wc_track_product_view();
 }
+
+/**
+ * Shop order status
+ *
+ * @since 2.2
+ * @param WP_Query $q
+ * @return void
+ */
+function wc_shop_order_status_backwards_compatibility( $q ) {
+	if ( $q->is_main_query() ) {
+		return;
+	}
+
+	if (
+		isset( $q->query_vars['post_type'] ) && 'shop_order' == $q->query_vars['post_type']
+		&& isset( $q->query_vars['post_status'] ) && 'publish' == $q->query_vars['post_status']
+	) {
+		$tax_query    = isset( $q->query_vars['tax_query'] ) ? $q->query_vars['tax_query'] : array();
+		$order_status = array();
+		$tax_key      = '';
+
+		// Look for shop_order_status taxonomy and get the terms
+		foreach ( $tax_query as $key => $tax ) {
+			if ( 'shop_order_status' == $tax['taxonomy'] ) {
+				$tax_key = $key;
+				$order_status = $tax['terms'];
+				break;
+			}
+		}
+
+		if ( $order_status ) {
+			// Remove old tax_query
+			unset( $tax_query[ $tax_key ] );
+
+			// Set the new order status
+			$order_status = is_array( $order_status ) ? 'wc-' . implode( ',wc-', $order_status ) : 'wc-' . $order_status;
+
+			$q->set( 'post_status', $order_status );
+			$q->set( 'tax_query', $tax_query );
+
+			_doing_it_wrong( 'WP_Query', sprintf( __( 'The shop_order_status taxonomy is no more in WooCommerce 2.2! You should use the new WooCommerce post_status instead, %s...', 'woocommerce' ), '<a href="http://develop.woothemes.com/woocommerce/2014/08/wc-2-2-order-statuses-plugin-compatibility/">' . __( 'read more', 'woocommerce' ) . '</a>' ), 'WooCommerce 2.2' );
+		} else {
+			$q->set( 'post_status', array_keys( wc_get_order_statuses() ) );
+
+			_doing_it_wrong( 'WP_Query', sprintf( __( 'The "publish" order status is no more in WooCommerce 2.2! You should use the new WooCommerce post_status instead, %s...', 'woocommerce' ), '<a href="http://develop.woothemes.com/woocommerce/2014/08/wc-2-2-order-statuses-plugin-compatibility/">' . __( 'read more', 'woocommerce' ) . '</a>' ), 'WooCommerce 2.2' );
+		}
+	}
+}
+
+add_action( 'pre_get_posts', 'wc_shop_order_status_backwards_compatibility' );
