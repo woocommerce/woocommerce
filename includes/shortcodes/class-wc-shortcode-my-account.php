@@ -223,24 +223,18 @@ class WC_Shortcode_My_Account {
 
 			wc_add_notice( __( 'Enter a username or e-mail address.', 'woocommerce' ), 'error' );
 
-		} elseif ( strpos( $_POST['user_login'], '@' ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
-
-			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
-
-			if ( empty( $user_data ) )
-				wc_add_notice( __( 'There is no user registered with that email address.', 'woocommerce' ), 'error' );
-
 		} else {
-
+			// Check on username first, as customers can use emails as usernames.
 			$login = trim( $_POST['user_login'] );
-
 			$user_data = get_user_by( 'login', $login );
 		}
 
-		do_action('lostpassword_post');
+		// If no user found, check if it login is emaill and lookup user based on email.
+		if ( ! $user_data && is_email( $_POST['user_login'] ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
+			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
+		}
 
-		if( wc_notice_count( 'error' ) > 0 )
-			return false;
+		do_action('lostpassword_post');
 
 		if ( ! $user_data ) {
 			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
@@ -251,7 +245,7 @@ class WC_Shortcode_My_Account {
 		$user_login = $user_data->user_login;
 		$user_email = $user_data->user_email;
 
-		do_action('retrieve_password', $user_login);
+		do_action( 'retrieve_password', $user_login );
 
 		$allow = apply_filters('allow_password_reset', true, $user_data->ID);
 
