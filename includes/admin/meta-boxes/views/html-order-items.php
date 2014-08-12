@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+global $wpdb;
+
 // Get the payment gateway
 $payment_gateway = wc_get_payment_gateway_by_order( $order );
 
@@ -10,7 +12,7 @@ $payment_gateway = wc_get_payment_gateway_by_order( $order );
 $line_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
 
 // Check if order can be edited
-$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
+$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold', 'auto-draft' ) ) );
 
 if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	$order_taxes         = $order->get_taxes();
