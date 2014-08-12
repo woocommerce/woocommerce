@@ -58,7 +58,7 @@ WordPress.org is home to many cool free extensions for WooCommerce made by other
 
 Developers can contribute to the source code on the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md).
 
-Translators can contribute new languages to WooCommerce through [Transifex](https://www.transifex.com/projects/p/woocommerce-core/).
+Translators can contribute new languages to WooCommerce through [Transifex](https://www.transifex.com/projects/p/woocommerce/).
 
 == Installation ==
 
