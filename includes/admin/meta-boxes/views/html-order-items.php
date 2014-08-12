@@ -203,7 +203,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<?php endif; ?>
 	</p>
 </div>
-<div class="wc-order-data-row wc-order-add-item" style="display:none;">
+<div class="wc-order-data-row wc-order-add-item">
 	<button type="button" class="button add-order-item"><?php _e( 'Add product(s)', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
