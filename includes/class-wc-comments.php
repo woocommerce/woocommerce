@@ -54,17 +54,21 @@ class WC_Comments {
 	public static function exclude_order_comments( $clauses ) {
 		global $wpdb, $typenow;
 
-		if ( is_admin() && in_array( $typenow, wc_get_order_types() ) && current_user_can( 'manage_woocommerce' ) )
+		if ( is_admin() && in_array( $typenow, wc_get_order_types() ) && current_user_can( 'manage_woocommerce' ) ) {
 			return $clauses; // Don't hide when viewing orders in admin
+		}
 
-		if ( ! $clauses['join'] )
+		if ( ! $clauses['join'] ) {
 			$clauses['join'] = '';
+		}
 
-		if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) )
+		if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) ) {
 			$clauses['join'] .= " LEFT JOIN $wpdb->posts ON comment_post_ID = $wpdb->posts.ID ";
+		}
 
-		if ( $clauses['where'] )
+		if ( $clauses['where'] ) {
 			$clauses['where'] .= ' AND ';
+		}
 
 		$clauses['where'] .= " $wpdb->posts.post_type NOT IN ('" . implode( "','", wc_get_order_types() ) . "') ";
 
@@ -80,10 +84,11 @@ class WC_Comments {
 	public static function exclude_order_comments_from_feed_join( $join ) {
 		global $wpdb;
 
-	    if ( ! strstr( $join, $wpdb->posts ) )
-	    	$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+		if ( ! strstr( $join, $wpdb->posts ) ) {
+			$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+		}
 
-	    return $join;
+		return $join;
 	}
 
 	/**
@@ -95,12 +100,13 @@ class WC_Comments {
 	public static function exclude_order_comments_from_feed_where( $where ) {
 		global $wpdb;
 
-	    if ( $where )
-	    	$where .= ' AND ';
+		if ( $where ) {
+			$where .= ' AND ';
+		}
 
 		$where .= " $wpdb->posts.post_type NOT IN ('" . implode( "','", wc_get_order_types() ) . "') ";
 
-	    return $where;
+		return $where;
 	}
 
 	/**
@@ -140,8 +146,9 @@ class WC_Comments {
 	public static function exclude_webhook_comments_from_feed_join( $join ) {
 		global $wpdb;
 
-		if ( ! strstr( $join, $wpdb->posts ) )
+		if ( ! strstr( $join, $wpdb->posts ) ) {
 			$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+		}
 
 		return $join;
 	}
@@ -156,8 +163,9 @@ class WC_Comments {
 	public static function exclude_webhook_comments_from_feed_where( $where ) {
 		global $wpdb;
 
-		if ( $where )
+		if ( $where ) {
 			$where .= ' AND ';
+		}
 
 		$where .= " $wpdb->posts.post_type <> 'shop_webhook' ";
 
@@ -172,7 +180,7 @@ class WC_Comments {
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in
-		if ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && $comment_data['comment_type'] === '' && get_option('woocommerce_review_rating_required') === 'yes' ) {
+		if ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && '' === $comment_data['comment_type'] && 'yes' === get_option( 'woocommerce_review_rating_required' ) ) {
 			wp_die( __( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
