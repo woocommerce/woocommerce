@@ -66,6 +66,8 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
         $page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
     }
 
+    $page_found = apply_filters( 'woocommerce_create_page_id', $page_found, $page_content, $slug );
+
     if ( $page_found ) {
         if ( ! $option_value )
             update_option( $option, $page_found );
