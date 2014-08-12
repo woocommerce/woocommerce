@@ -66,7 +66,7 @@ class WC_Comments {
 		if ( $clauses['where'] )
 			$clauses['where'] .= ' AND ';
 
-		$clauses['where'] .= " $wpdb->posts.post_type NOT IN ('" . implode( ',', wc_get_order_types() ) . "') ";
+		$clauses['where'] .= " $wpdb->posts.post_type NOT IN ('" . implode( "','", wc_get_order_types() ) . "') ";
 
 		return $clauses;
 	}
@@ -98,7 +98,7 @@ class WC_Comments {
 	    if ( $where )
 	    	$where .= ' AND ';
 
-		$where .= " $wpdb->posts.post_type NOT IN ('" . implode( ',', wc_get_order_types() ) . "') ";
+		$where .= " $wpdb->posts.post_type NOT IN ('" . implode( "','", wc_get_order_types() ) . "') ";
 
 	    return $where;
 	}
