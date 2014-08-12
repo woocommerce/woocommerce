@@ -464,7 +464,7 @@ function wc_cancel_unpaid_orders() {
 	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
 		SELECT posts.ID
 		FROM {$wpdb->posts} AS posts
-		WHERE 	posts.post_type   IN ('" . implode( ',', wc_get_order_types() ) . "')
+		WHERE 	posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
 		AND 	posts.post_status = 'wc-pending'
 		AND 	posts.post_modified < %s
 	", $date ) );
