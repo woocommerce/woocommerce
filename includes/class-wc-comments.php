@@ -33,10 +33,13 @@ class WC_Comments {
 		add_action( 'comment_feed_join', array( __CLASS__, 'exclude_order_comments_from_feed_join' ) );
 		add_action( 'comment_feed_where', array( __CLASS__, 'exclude_order_comments_from_feed_where' ) );
 
-		// secure webhook comments
+		// Secure webhook comments
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_webhook_comments' ), 10, 1 );
 		add_action( 'comment_feed_join', array( __CLASS__, 'exclude_webhook_comments_from_feed_join' ) );
 		add_action( 'comment_feed_where', array( __CLASS__, 'exclude_webhook_comments_from_feed_where' ) );
+
+		// Count comments
+		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 	}
 
 	/**
@@ -210,6 +213,53 @@ class WC_Comments {
 	public static function clear_transients( $post_id ) {
 		delete_transient( 'wc_average_rating_' . absint( $post_id ) );
 		delete_transient( 'wc_rating_count_' . absint( $post_id ) );
+	}
+
+	/**
+	 * Remove order notes from wp_count_comments()
+	 *
+	 * @since 2.2
+	 * @param object $stats
+	 * @param int $post_id
+	 * @return object
+	 */
+	public static function wp_count_comments( $stats, $post_id ) {
+		global $wpdb;
+
+		if ( 0 === $post_id ) {
+
+			$count = wp_cache_get( 'comments-0', 'counts' );
+			if ( false !== $count ) {
+				return $count;
+			}
+
+			$count = $wpdb->get_results( "SELECT comment_approved, COUNT( * ) AS num_comments FROM {$wpdb->comments} WHERE comment_type != 'order_note' GROUP BY comment_approved", ARRAY_A );
+
+			$total = 0;
+			$approved = array( '0' => 'moderated', '1' => 'approved', 'spam' => 'spam', 'trash' => 'trash', 'post-trashed' => 'post-trashed' );
+
+			foreach ( (array) $count as $row ) {
+				// Don't count post-trashed toward totals
+				if ( 'post-trashed' != $row['comment_approved'] && 'trash' != $row['comment_approved'] ) {
+					$total += $row['num_comments'];
+				}
+				if ( isset( $approved[ $row['comment_approved'] ] ) ) {
+					$stats[ $approved[ $row['comment_approved'] ] ] = $row['num_comments'];
+				}
+			}
+
+			$stats['total_comments'] = $total;
+			foreach ( $approved as $key ) {
+				if ( empty( $stats[ $key ] ) ) {
+					$stats[ $key ] = 0;
+				}
+			}
+
+			$stats = (object) $stats;
+			wp_cache_set( 'comments-0', $stats, 'counts' );
+		}
+
+		return $stats;
 	}
 }
 
