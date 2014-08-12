@@ -128,11 +128,11 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array of children ids
 	 */
 	public function get_children( $visible_only = false ) {
-		if ( ! is_array( $this->children ) ) {
-			$this->children = array();
+		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
 			$transient_name = 'wc_product_children_ids_' . $this->id;
+			$this->children = get_transient( $transient_name );
 
-        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) {
+        	if ( empty( $this->children ) ) {
 		        $args = array(
 					'post_parent' => $this->id,
 					'post_type'   => 'product_variation',
