@@ -434,9 +434,10 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 				
-			$variation_attributes 	= $variation->get_variation_attributes();
-			$availability 			= $variation->get_availability();
-			$availability_html 		= empty( $availability['availability'] ) ? '' : apply_filters( 'woocommerce_stock_html', '<p class="stock ' . esc_attr( $availability['class'] ) . '">'. wp_kses_post( $availability['availability'] ).'</p>', wp_kses_post( $availability['availability'] ) );
+			$variation_attributes = $variation->get_variation_attributes();
+			$availability         = $variation->get_availability();
+			$availability_html    = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . wp_kses_post( $availability['availability'] ) . '</p>';
+			$availability_html    = apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $variation );
 
 			if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
 				$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );

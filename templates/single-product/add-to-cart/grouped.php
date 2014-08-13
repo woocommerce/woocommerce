@@ -48,8 +48,10 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							<?php
 								echo $product->get_price_html();
 
-								if ( ( $availability = $product->get_availability() ) && $availability['availability'] )
-									echo apply_filters( 'woocommerce_stock_html', '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . esc_html( $availability['availability'] ) . '</p>', $availability['availability'] );
+								if ( $availability = $product->get_availability() ) {
+									$availability_html = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . esc_html( $availability['availability'] ) . '</p>';
+									echo apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $product );
+								}
 							?>
 						</td>
 					</tr>
