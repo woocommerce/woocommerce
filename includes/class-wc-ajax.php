@@ -614,17 +614,30 @@ class WC_AJAX {
 				}
 			}
 
+			$backorder_options = array(
+				'no'     => __( 'Do not allow', 'woocommerce' ),
+				'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
+				'yes'    => __( 'Allow', 'woocommerce' )
+			);
+
+			$stock_status_options = array(
+				'instock'    => __( 'In stock', 'woocommerce' ),
+				'outofstock' => __( 'Out of stock', 'woocommerce' )
+			);
+			
 			// Get parent data
 			$parent_data = array(
-				'id'                => $post_id,
-				'attributes'        => $attributes,
-				'tax_class_options' => $tax_class_options,
-				'sku'               => get_post_meta( $post_id, '_sku', true ),
-				'weight'            => get_post_meta( $post_id, '_weight', true ),
-				'length'            => get_post_meta( $post_id, '_length', true ),
-				'width'             => get_post_meta( $post_id, '_width', true ),
-				'height'           => get_post_meta( $post_id, '_height', true ),
-				'tax_class'        => get_post_meta( $post_id, '_tax_class', true )
+				'id'                   => $post_id,
+				'attributes'           => $attributes,
+				'tax_class_options'    => $tax_class_options,
+				'sku'                  => get_post_meta( $post_id, '_sku', true ),
+				'weight'               => get_post_meta( $post_id, '_weight', true ),
+				'length'               => get_post_meta( $post_id, '_length', true ),
+				'width'                => get_post_meta( $post_id, '_width', true ),
+				'height'               => get_post_meta( $post_id, '_height', true ),
+				'tax_class'            => get_post_meta( $post_id, '_tax_class', true ),
+				'backorder_options'    => $backorder_options,
+				'stock_status_options' => $stock_status_options
 			);
 
 			if ( ! $parent_data['weight'] ) {

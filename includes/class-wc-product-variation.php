@@ -366,13 +366,12 @@ class WC_Product_Variation extends WC_Product {
 		if ( true === $this->managing_stock() ) {
 			if ( $this->backorders_allowed() ) {
 				return true;
-			} elseif ( $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				return false;
 			} else {
 				return $this->stock_status === 'instock';
 			}
-		}
-		else {
+		} else {
 			return $this->stock_status === 'instock';
 		}
 	}
@@ -493,12 +492,47 @@ class WC_Product_Variation extends WC_Product {
 	 * @return string
 	 */
 	public function get_availability() {
-		if ( true === $this->managing_stock() ) {
-			return parent::get_availability();
-		} else {
-			return $this->parent->get_availability();
+		$availability = $class = '';
+		
+		if ( $this->managing_stock() ) {
+			if ( $this->is_in_stock() && $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				switch ( get_option( 'woocommerce_stock_format' ) ) {
+					case 'no_amount' :
+						$availability = __( 'In stock', 'woocommerce' );
+					break;
+					case 'low_amount' :
+						if ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+							$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_stock_quantity() );
+
+							if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+								$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
+							}
+						} else {
+							$availability = __( 'In stock', 'woocommerce' );
+						}
+					break;
+					default :
+						$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_stock_quantity() );
+
+						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+							$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
+						}
+					break;
+				}
+				$class        = 'in-stock';
+			} elseif ( $this->backorders_allowed() ) {
+				$availability = __( 'Available on backorder', 'woocommerce' );
+				$class        = 'available-on-backorder';
+			} else {
+				$availability = __( 'Out of stock', 'woocommerce' );
+				$class        = 'out-of-stock';
+			}
+		} elseif ( ! $this->is_in_stock() ) {
+			$availability = __( 'Out of stock', 'woocommerce' );
+			$class        = 'out-of-stock';
 		}
-	}
+		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class ), $this );
+	}	
 
 	/**
 	 * Returns whether or not the product needs to notify the customer on backorder.

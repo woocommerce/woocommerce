@@ -565,41 +565,34 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_availability() {
-		$availability = $class = "";
-
+		$availability = $class = '';
+		
 		if ( $this->managing_stock() ) {
-			if ( $this->is_in_stock() ) {
-				if ( $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-
-					switch ( get_option( 'woocommerce_stock_format' ) ) {
-						case 'no_amount' :
-							$availability = __( 'In stock', 'woocommerce' );
-						break;
-						case 'low_amount' :
-							$low_amount   = get_option( 'woocommerce_notify_low_stock_amount' );
-							$availability = $this->get_total_stock() <= $low_amount ? sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_total_stock() ) : __( 'In stock', 'woocommerce' );
-						break;
-						default :
-							$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_total_stock() );
-						break;
-					}
-
-					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-						$availability .= ' ' . __( '(backorders allowed)', 'woocommerce' );
-					}
-
-				} elseif ( $this->backorders_allowed() ) {
-					if ( $this->backorders_require_notification() ) {
-						$availability = __( 'Available on backorder', 'woocommerce' );
-						$class        = 'available-on-backorder';
-					} else {
+			if ( $this->is_in_stock() && $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				switch ( get_option( 'woocommerce_stock_format' ) ) {
+					case 'no_amount' :
 						$availability = __( 'In stock', 'woocommerce' );
-					}
-				} else {
-					$availability = __( 'Out of stock', 'woocommerce' );
-					$class        = 'out-of-stock';
-				}
+					break;
+					case 'low_amount' :
+						if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+							$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_total_stock() );
 
+							if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+								$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
+							}
+						} else {
+							$availability = __( 'In stock', 'woocommerce' );
+						}
+					break;
+					default :
+						$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_total_stock() );
+
+						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+							$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
+						}
+					break;
+				}
+				$class        = 'in-stock';
 			} elseif ( $this->backorders_allowed() ) {
 				$availability = __( 'Available on backorder', 'woocommerce' );
 				$class        = 'available-on-backorder';
@@ -611,7 +604,6 @@ class WC_Product {
 			$availability = __( 'Out of stock', 'woocommerce' );
 			$class        = 'out-of-stock';
 		}
-
 		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class ), $this );
 	}
 

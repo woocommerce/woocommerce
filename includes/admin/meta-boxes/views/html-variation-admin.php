@@ -81,7 +81,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 						</tr>
 
 						<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
-							<tr class="hide_if_parent_manage_stock_is_disabled show_if_variation_manage_stock">
+							<tr class="show_if_variation_manage_stock">
 								<td>
 									<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 									<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
@@ -96,7 +96,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 									?></select>
 								</td>
 							</tr>
-							<tr class="hide_if_parent_manage_stock_is_disabled">
+							<tr class="">
 								<td colspan="2">
 									<label><?php _e( 'Stock status', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 									<select name="variable_stock_status[<?php echo $loop; ?>]">
@@ -235,7 +235,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 					<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
 
-						<label class="hide_if_parent_manage_stock_is_disabled"><input type="checkbox" class="checkbox variable_manage_stock" name="variable_manage_stock[<?php echo $loop; ?>]" <?php checked( isset( $_manage_stock ) ? $_manage_stock : '', 'yes' ); ?> /> <?php _e( 'Manage stock?', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enable this option to enable stock management at variation level', 'woocommerce' ); ?>" href="#">[?]</a></label>
+						<label><input type="checkbox" class="checkbox variable_manage_stock" name="variable_manage_stock[<?php echo $loop; ?>]" <?php checked( isset( $_manage_stock ) ? $_manage_stock : '', 'yes' ); ?> /> <?php _e( 'Manage stock?', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enable this option to enable stock management at variation level', 'woocommerce' ); ?>" href="#">[?]</a></label>
 
 					<?php endif; ?>
 
