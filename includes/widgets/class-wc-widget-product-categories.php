@@ -204,7 +204,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				var product_cat_dropdown = document.getElementById("dropdown_product_cat");
 				function onProductCatChange() {
 					if ( product_cat_dropdown.options[product_cat_dropdown.selectedIndex].value !=='' ) {
-						location.href = "<?php echo home_url(); ?>/?product_cat="+product_cat_dropdown.options[product_cat_dropdown.selectedIndex].value;
+						location.href = "<?php echo home_url(); ?>/?product_cat="+product_cat_dropdown.options[product_cat_dropdown.selectedIndex].value+"&"+location.search.substring(1);
 					}
 				}
 				product_cat_dropdown.onchange = onProductCatChange;
