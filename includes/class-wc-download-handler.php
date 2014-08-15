@@ -89,7 +89,7 @@ class WC_Download_Handler {
 			}
 
 			if ( $order_id ) {
-				$order = get_order( $order_id );
+				$order = wc_get_order( $order_id );
 
 				if ( ! $order->is_download_permitted() || $order->post_status != 'wc-completed' ) {
 					wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 404 ) );

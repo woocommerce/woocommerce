@@ -358,7 +358,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 		$order->update_status( 'completed' );
 
 		wp_safe_redirect( wp_get_referer() );
@@ -383,7 +383,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 		$order->update_status( 'processing' );
 
 		wp_safe_redirect( wp_get_referer() );
@@ -867,7 +867,7 @@ class WC_AJAX {
 		$product_ids  = $_POST['product_ids'];
 		$loop         = intval( $_POST['loop'] );
 		$file_counter = 0;
-		$order        = get_order( $order_id );
+		$order        = wc_get_order( $order_id );
 
 		if ( ! is_array( $product_ids ) ) {
 			$product_ids = array( $product_ids );
@@ -956,7 +956,7 @@ class WC_AJAX {
 		}
 
 		$_product    = get_product( $post->ID );
-		$order       = get_order( $order_id );
+		$order       = wc_get_order( $order_id );
 		$order_taxes = $order->get_taxes();
 		$class       = 'new_row';
 
@@ -1021,7 +1021,7 @@ class WC_AJAX {
 		check_ajax_referer( 'order-item', 'security' );
 
 		$order_id      = absint( $_POST['order_id'] );
-		$order         = get_order( $order_id );
+		$order         = wc_get_order( $order_id );
 		$order_taxes   = $order->get_taxes();
 		$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
 		$item          = array();
@@ -1050,7 +1050,7 @@ class WC_AJAX {
 		check_ajax_referer( 'order-item', 'security' );
 
 		$order_id         = absint( $_POST['order_id'] );
-		$order            = get_order( $order_id );
+		$order            = wc_get_order( $order_id );
 		$order_taxes      = $order->get_taxes();
 		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
 		$can_be_edited    = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
@@ -1142,7 +1142,7 @@ class WC_AJAX {
 		$order_id       = absint( $_POST['order_id'] );
 		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
 		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
-		$order          = get_order( $order_id );
+		$order          = wc_get_order( $order_id );
 		$order_items    = $order->get_items();
 		$return         = array();
 
@@ -1188,7 +1188,7 @@ class WC_AJAX {
 		$order_id       = absint( $_POST['order_id'] );
 		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
 		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
-		$order          = get_order( $order_id );
+		$order          = wc_get_order( $order_id );
 		$order_items    = $order->get_items();
 		$return         = array();
 
@@ -1271,7 +1271,7 @@ class WC_AJAX {
 		$state          = strtoupper( esc_attr( $_POST['state'] ) );
 		$postcode       = strtoupper( esc_attr( $_POST['postcode'] ) );
 		$city           = sanitize_title( esc_attr( $_POST['city'] ) );
-		$order          = get_order( $order_id );
+		$order          = wc_get_order( $order_id );
 		$taxes          = array();
 		$shipping_taxes = array();
 
@@ -1457,7 +1457,7 @@ class WC_AJAX {
 		$is_customer_note = $note_type == 'customer' ? 1 : 0;
 
 		if ( $post_id > 0 ) {
-			$order      = get_order( $post_id );
+			$order      = wc_get_order( $post_id );
 			$comment_id = $order->add_order_note( $note, $is_customer_note );
 
 			echo '<li rel="' . esc_attr( $comment_id ) . '" class="note ';
@@ -1817,7 +1817,7 @@ class WC_AJAX {
 
 		try {
 			// Validate that the refund can occur
-			$order       = get_order( $order_id );
+			$order       = wc_get_order( $order_id );
 			$order_items = $order->get_items();
 			$max_refund  = $order->get_total() - $order->get_total_refunded();
 

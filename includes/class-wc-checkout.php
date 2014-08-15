@@ -178,7 +178,7 @@ class WC_Checkout {
 			$order_id = absint( WC()->session->order_awaiting_payment );
 
 			// Resume the unpaid order if its pending
-			if ( $order_id > 0 && ( $order = get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
+			if ( $order_id > 0 && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
 
 				$order_data['order_id'] = $order_id;
 				$order                  = wc_update_order( $order_data );
@@ -630,7 +630,7 @@ class WC_Checkout {
 				} else {
 
 					if ( empty( $order ) )
-						$order = get_order( $order_id );
+						$order = wc_get_order( $order_id );
 
 					// No payment was required for order
 					$order->payment_complete();

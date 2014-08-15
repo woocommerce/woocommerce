@@ -38,7 +38,7 @@ function wc_get_order_statuses() {
  * @param array $args (default: array()) Contains all arguments to be used to get this order.
  * @return WC_Order
  */
-function get_order( $the_order = false, $args = array() ) {
+function wc_get_order( $the_order = false, $args = array() ) {
 	return WC()->order_factory->get_order( $the_order, $args );
 }
 
@@ -272,7 +272,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 		return; // Only do this once
 	}
 
-	$order = get_order( $order_id );
+	$order = wc_get_order( $order_id );
 
 	if ( $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
@@ -471,7 +471,7 @@ function wc_cancel_unpaid_orders() {
 
 	if ( $unpaid_orders ) {
 		foreach ( $unpaid_orders as $unpaid_order ) {
-			$order = get_order( $unpaid_order );
+			$order = wc_get_order( $unpaid_order );
 
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', true, $order ) )
 				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
@@ -592,9 +592,9 @@ function wc_create_refund( $args = array() ) {
 
 		// Negative line items
 		if ( sizeof( $args['line_items'] ) > 0 ) {
-			$order       = get_order( $args['order_id'] );
+			$order       = wc_get_order( $args['order_id'] );
 			$order_items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
-			$refund      = get_order( $refund_id );
+			$refund      = wc_get_order( $refund_id );
 
 			foreach ( $args['line_items'] as $refund_item_id => $refund_item ) {
 				if ( isset( $order_items[ $refund_item_id ] ) ) {

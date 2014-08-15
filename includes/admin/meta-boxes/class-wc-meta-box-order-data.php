@@ -133,7 +133,7 @@ class WC_Meta_Box_Order_Data {
 		global $theorder;
 
 		if ( ! is_object( $theorder ) ) {
-			$theorder = get_order( $post->ID );
+			$theorder = wc_get_order( $post->ID );
 		}
 
 		$order = $theorder;
@@ -441,7 +441,7 @@ class WC_Meta_Box_Order_Data {
 		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
 
 		// Order data saved, now get it so we can manipulate status
-		$order = get_order( $post_id );
+		$order = wc_get_order( $post_id );
 
 		// Order status
 		$order->update_status( $_POST['order_status'] );
