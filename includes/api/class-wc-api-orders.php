@@ -62,9 +62,10 @@ class WC_API_Orders extends WC_API_Resource {
 			array( array( $this, 'delete_order_note' ), WC_API_SERVER::DELETABLE ),
 		);
 
-		# GET /orders/<order_id>/refunds
+		# GET|POST /orders/<order_id>/refunds
 		$routes[ $this->base . '/(?P<order_id>\d+)/refunds' ] = array(
 			array( array( $this, 'get_order_refunds' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_order_refund' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /orders/<order_id>/refunds/<id>
@@ -1363,5 +1364,51 @@ class WC_API_Orders extends WC_API_Resource {
 		return array( 'order_refund' => apply_filters( 'woocommerce_api_order_refund_response', $order_refund, $id, $fields, $refund, $order_id, $this ) );
 	}
 
+	/**
+	 * Create a new order refund for the given order
+	 *
+	 * @since 2.2
+	 * @param string $order_id order ID
+	 * @param array $data raw request data
+	 * @return WP_Error|array error or created refund response data
+	 */
+	public function create_order_refund( $order_id, $data ) {
 
+		$data = isset( $data['order_refund'] ) ? $data['order_refund'] : array();
+
+		// Permission check
+		if ( ! current_user_can( 'publish_shop_orders' ) ) {
+			return new WP_Error( 'woocommerce_api_user_cannot_create_order_refund', __( 'You do not have permission to create order refunds', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		$order_id = absint( $order_id );
+
+		if ( empty( $order_id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$data = apply_filters( 'woocommerce_api_create_order_refund_data', $data, $order_id, $this );
+
+		// Refund amount is required
+		if ( ! isset( $data['amount'] ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_note', __( 'Refund amount is required', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$data['order_id']  = $order_id;
+		$data['refund_id'] = 0;
+
+		// Create the refund
+		$refund = wc_create_refund( $data );
+
+		if ( ! $refund ) {
+			return new WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		// HTTP 201 Created
+		$this->server->send_status( 201 );
+
+		do_action( 'woocommerce_api_create_order_refund', $refund->id, $order_id, $this );
+
+		return $this->get_order_refund( $order_id, $refund->id );
+	}
 }
