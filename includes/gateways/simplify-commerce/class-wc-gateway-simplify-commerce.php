@@ -101,8 +101,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			<?php $this->generate_settings_html(); ?>
 			<script type="text/javascript">
 				jQuery( '#woocommerce_simplify_commerce_sandbox' ).change( function () {
-					var sandbox    = jQuery( '#woocommerce_simplify_commerce_sandbox_private_key, #woocommerce_simplify_commerce_sandbox_public_key' ).closest( 'tr' ),
-						production = jQuery( '#woocommerce_simplify_commerce_private_key, #woocommerce_simplify_commerce_public_key' ).closest( 'tr' );
+					var sandbox    = jQuery( '#woocommerce_simplify_commerce_sandbox_public_key, #woocommerce_simplify_commerce_sandbox_private_key' ).closest( 'tr' ),
+						production = jQuery( '#woocommerce_simplify_commerce_public_key, #woocommerce_simplify_commerce_private_key' ).closest( 'tr' );
 
 					if ( jQuery( this ).is( ':checked' ) ) {
 						sandbox.show();
@@ -193,13 +193,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				'description' => __( 'Place the payment gateway in sandbox mode using sandbox API keys (real payments will not be taken).', 'woocommerce' ),
 				'default'     => 'yes'
 			),
-			'sandbox_private_key' => array(
-				'title'       => __( 'Sandbox Private Key', 'woocommerce' ),
-				'type'        => 'text',
-				'description' => __( 'Get your API keys from your Simplfy account: Settings > API Keys.', 'woocommerce' ),
-				'default'     => '',
-				'desc_tip'    => true
-			),
 			'sandbox_public_key' => array(
 				'title'       => __( 'Sandbox Public Key', 'woocommerce' ),
 				'type'        => 'text',
@@ -207,8 +200,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				'default'     => '',
 				'desc_tip'    => true
 			),
-			'private_key' => array(
-				'title'       => __( 'Private Key', 'woocommerce' ),
+			'sandbox_private_key' => array(
+				'title'       => __( 'Sandbox Private Key', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Get your API keys from your Simplfy account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
@@ -216,6 +209,13 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			),
 			'public_key' => array(
 				'title'       => __( 'Public Key', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'Get your API keys from your Simplfy account: Settings > API Keys.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true
+			),
+			'private_key' => array(
+				'title'       => __( 'Private Key', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Get your API keys from your Simplfy account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
