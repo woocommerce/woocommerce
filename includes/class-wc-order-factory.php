@@ -18,10 +18,9 @@ class WC_Order_Factory {
 	 *
 	 * @access public
 	 * @param bool $the_order (default: false)
-	 * @param array $args (default: array())
 	 * @return WC_Order
 	 */
-	public function get_order( $the_order = false, $args = array() ) {
+	public function get_order( $the_order = false ) {
 		global $post;
 
 		if ( false === $the_order ) {
@@ -50,6 +49,6 @@ class WC_Order_Factory {
 			$classname = 'WC_Order';
 		}
 
-		return new $classname( $the_order, $args );
+		return new $classname( $the_order );
 	}
 }
