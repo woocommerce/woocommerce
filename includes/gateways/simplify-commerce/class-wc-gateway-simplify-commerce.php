@@ -24,7 +24,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		$this->method_title       = __( 'Simplify Commerce', 'woocommerce' );
 		$this->method_description = __( 'Take payments via Simplify Commerce - uses simplify.js to create card tokens and the Simplify Commerce SDK. Requires SSL when sandbox is disabled.', 'woocommerce' );
 		$this->has_fields         = true;
-		$this->icon               = apply_filters( 'woocommerce_simplify_commerce_icon', WC()->plugin_url() . '/includes/gateways/simplify-commerce/assets/images/cards.png' );
 		$this->supports           = array(
 			'subscriptions',
 			'products',
@@ -226,12 +225,14 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 * Payment form on checkout page
 	 */
 	public function payment_fields() {
-		if ( $description = $this->get_description() ) {
-			echo wpautop( wptexturize( $description ) );
-		}
+		$description = $this->get_description();
 
 		if ( 'yes' == $this->sandbox ) {
-			echo '<p>' . sprintf( __( 'TEST MODE ENABLED. Use a test card: %s', 'woocommerce' ), '<a href="https://www.simplify.com/commerce/docs/tutorial/index#testing">https://www.simplify.com/commerce/docs/tutorial/index#testing</a>' ) . '</p>';
+			$description .= ' ' . sprintf( __( 'TEST MODE ENABLED. Use a test card: %s', 'woocommerce' ), '<a href="https://www.simplify.com/commerce/docs/tutorial/index#testing">https://www.simplify.com/commerce/docs/tutorial/index#testing</a>' );
+		}
+
+		if ( $description ) {
+			echo wpautop( wptexturize( trim( $description ) ) );
 		}
 
 		$this->credit_card_form( array( 'fields_have_names' => false ) );
@@ -247,8 +248,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			return;
 		}
 
-		wp_enqueue_script( 'simplify-commerce', 'https://www.simplify.com/commerce/v1/simplify.js', array( 'jquery' ), WC_Simplify_Commerce::VERSION, true );
-		wp_enqueue_script( 'wc-simplify-commerce', plugins_url( 'assets/js/simplify-commerce.js', dirname( __FILE__ ) ), array( 'simplify-commerce', 'wc-credit-card-form' ), WC_Simplify_Commerce::VERSION, true );
+		wp_enqueue_script( 'simplify-commerce', 'https://www.simplify.com/commerce/v1/simplify.js', array( 'jquery' ), WC_VERSION, true );
+		wp_enqueue_script( 'wc-simplify-commerce', WC()->plugin_url() . '/includes/gateways/simplify-commerce/assets/js/simplify-commerce.js', array( 'simplify-commerce', 'wc-credit-card-form' ), WC_VERSION, true );
 		wp_localize_script( 'wc-simplify-commerce', 'simplfy_commerce_params', array(
 			'key'           => $this->public_key,
 			'card.number'   => __( 'Card Number', 'woocommerce' ),
@@ -338,7 +339,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 * @return bool|WP_Error
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
-
 		try {
 			$payment_id = get_post_meta( $order_id, '_transaction_id', true );
 
@@ -367,4 +367,20 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 		return false;
 	}
+
+	/**
+	 * get_icon function.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_icon() {
+		$icon  = '<img src="' . WC_HTTPS::force_https_url(  WC()->plugin_url() . '/assets/images/icons/credit-cards/visa.png' ) . '" alt="Visa" />';
+		$icon .= '<img src="' . WC_HTTPS::force_https_url(  WC()->plugin_url() . '/assets/images/icons/credit-cards/mastercard.png' ) . '" alt="Mastercard" />';
+		$icon .= '<img src="' . WC_HTTPS::force_https_url(  WC()->plugin_url() . '/assets/images/icons/credit-cards/discover.png' ) . '" alt="Discover" />';
+		$icon .= '<img src="' . WC_HTTPS::force_https_url(  WC()->plugin_url() . '/assets/images/icons/credit-cards/amex.png' ) . '" alt="Amex" />';
+		$icon .= '<img src="' . WC_HTTPS::force_https_url(  WC()->plugin_url() . '/assets/images/icons/credit-cards/jcb.png' ) . '" alt="JCB" />';
+		
+		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
+	}	
 }
