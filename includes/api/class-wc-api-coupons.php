@@ -200,7 +200,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		// Check if coupon code is specified
 		if ( ! isset( $data['code'] ) ) {
-			return new WP_Error( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s' ), 'code' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 		}
 
 		$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
@@ -215,7 +215,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		 ", $coupon_code ) );
 
 		if ( $coupon_found ) {
-			return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$defaults = array(
@@ -319,12 +319,12 @@ class WC_API_Coupons extends WC_API_Resource {
 			 ", $coupon_code, $id ) );
 
 			if ( $coupon_found ) {
-				return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			$id = wp_update_post( array( 'ID' => intval( $id ), 'post_title' => $coupon_code ) );
 			if ( 0 === $id ) {
-				return new WP_Error( 'woocommerce_api_cannot_update_coupon', __( 'Failed to update coupon', 'woocommerce'), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_api_cannot_update_coupon', __( 'Failed to update coupon', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 		}
 

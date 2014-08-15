@@ -458,7 +458,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$parent_theme = wp_get_theme( $active_theme->Template );
 			?>
 			<tr>
-				<td><?php _e( 'Parent Theme Name', 'woocommece' ); ?>:</td>
+				<td><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>
 				<td><?php echo $parent_theme->Name; ?></td>
 			</tr>
 			<tr>

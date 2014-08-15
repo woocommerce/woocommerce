@@ -180,7 +180,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Check if product title is specified
 		if ( ! isset( $data['title'] ) ) {
-			return new WP_Error( 'woocommerce_api_missing_product_title', sprintf( __( 'Missing parameter %s' ), 'title' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_missing_product_title', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'title' ), array( 'status' => 400 ) );
 		}
 
 		// Check product type
@@ -676,7 +676,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $id, $new_sku );
 					if ( ! $unique_sku ) {
-						return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
+						return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), array( 'status' => 400 ) );
 					} else {
 						update_post_meta( $id, '_sku', $new_sku );
 					}
@@ -1117,7 +1117,7 @@ class WC_API_Products extends WC_API_Resource {
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
-							return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
+							return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), array( 'status' => 400 ) );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
@@ -1587,7 +1587,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Check parsed URL
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s' ), $image_url ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 		}
 
 		// Ensure url is valid
@@ -1599,7 +1599,7 @@ class WC_API_Products extends WC_API_Resource {
 		) );
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s' ), $image_url ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 		}
 
 		// Ensure we have a file name and type
