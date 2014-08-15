@@ -7,6 +7,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  *
  * Provides WooCommerce with Mijireh Checkout integration.
  *
+ * @deprecated  2.2
+ *
  * @class 		WC_Gateway_Mijireh
  * @extends		WC_Payment_Gateway
  * @version		2.0.0
@@ -140,41 +142,13 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 			),
 			'description' => array(
 				'title'       => __( 'Description', 'woocommerce' ),
-				'type'        => 'textarea',
+				'type'        => 'text',
 				'default'     => __( 'Pay securely with your credit card.', 'woocommerce' ),
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
+				'desc_tip'    => true,
 			),
 		);
     }
-
-	/**
-	 * Admin Panel Options
-	 * - Options for bits like 'title' and availability on a country-by-country basis
-	 *
-	 * @access public
-	 * @return void
-	 */
-  	public function admin_options() {
-		?>
-		<h3><?php _e( 'Mijireh Checkout', 'woocommerce' );?></h3>
-
-		<?php if ( empty( $this->access_key ) ) : ?>
-			<div class="mijireh updated">
-				<p class="main"><strong><?php _e( 'Get started with Mijireh Checkout', 'woocommerce' ); ?></strong></p>
-				<span><a href="http://www.mijireh.com/integrations/woocommerce/">Mijireh Checkout</a> <?php _e( 'provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site. Mijireh supports a wide variety of payment gateways: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.', 'woocommerce' ); ?></span>
-
-				<p><a href="http://secure.mijireh.com/signup" target="_blank" class="button button-primary"><?php _e( 'Join for free', 'woocommerce' ); ?></a> <a href="http://www.mijireh.com/integrations/woocommerce/" target="_blank" class="button"><?php _e( 'Learn more about WooCommerce and Mijireh', 'woocommerce' ); ?></a></p>
-
-			</div>
-		<?php else : ?>
-			<p><a href="http://www.mijireh.com/integrations/woocommerce/">Mijireh Checkout</a> <?php _e( 'provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site.', 'woocommerce' ); ?></p>
-		<?php endif; ?>
-
-		<table class="form-table">
-			<?php $this->generate_settings_html(); ?>
-		</table><!--/.form-table-->
-		<?php
-  	}
 
     /**
      * Process the payment and return the result
