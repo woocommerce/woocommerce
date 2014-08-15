@@ -486,7 +486,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function generate_paypal_form( $order_id ) {
 
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		if ( 'yes' == $this->testmode ) {
 			$paypal_adr = $this->testurl . '?test_ipn=1&';
@@ -545,7 +545,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
-		$order       = get_order( $order_id );
+		$order       = wc_get_order( $order_id );
 		$paypal_args = $this->get_paypal_args( $order );
 		$paypal_args = http_build_query( $paypal_args, '', '&' );
 
@@ -569,7 +569,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return  bool|wp_error True or false based on success, or a WP_Error object
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		if ( ! $order || ! $order->get_transaction_id() || ! $this->api_username || ! $this->api_password || ! $this->api_password ) {
 			return false;
@@ -996,12 +996,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			list( $order_id, $order_key ) = $custom;
 		}
 
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		if ( ! isset( $order->id ) ) {
 			// We have an invalid $order_id, probably because invoice_prefix has changed
 			$order_id 	= wc_get_order_id_by_order_key( $order_key );
-			$order 		= get_order( $order_id );
+			$order 		= wc_get_order( $order_id );
 		}
 
 		// Validate key

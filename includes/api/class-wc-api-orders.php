@@ -116,7 +116,7 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		$order = get_order( $id );
+		$order = wc_get_order( $id );
 
 		$order_post = get_post( $id );
 
@@ -427,7 +427,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$data = apply_filters( 'woocommerce_api_edit_order_data', $data, $id, $this );
 
-			$order = get_order( $id );
+			$order = wc_get_order( $id );
 
 			$order_args = array( 'order_id' => $order->id );
 
@@ -1103,7 +1103,7 @@ class WC_API_Orders extends WC_API_Resource {
 			return new WP_Error( 'woocommerce_api_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		$data = apply_filters( 'woocommerce_api_create_order_note_data', $data, $order_id, $this );
 
@@ -1149,7 +1149,7 @@ class WC_API_Orders extends WC_API_Resource {
 			return $order_id;
 		}
 
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		// validate note ID
 		$id = absint( $id );

@@ -21,7 +21,7 @@ class WC_Meta_Box_Order_Actions {
 		global $theorder;
 
 		if ( ! is_object( $theorder ) ) {
-			$theorder = get_order( $post->ID );
+			$theorder = wc_get_order( $post->ID );
 		}
 
 		$order = $theorder;
@@ -85,7 +85,7 @@ class WC_Meta_Box_Order_Actions {
 	 */
 	public static function save( $post_id, $post ) {
 		// Order data saved, now get it so we can manipulate status
-		$order = get_order( $post_id );
+		$order = wc_get_order( $post_id );
 
 		// Handle button actions
 		if ( ! empty( $_POST['wc_order_action'] ) ) {
