@@ -200,9 +200,15 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			wc_product_dropdown_categories( apply_filters( 'woocommerce_product_categories_widget_dropdown_args', $dropdown_args ) );
 			?>
 			<script type='text/javascript'>
-        jQuery('.dropdown_product_cat').change(function() {
-          location.href = "<?php echo home_url(); ?>/?product_cat="+jQuery(this).val()+"&"+location.search.substring(1);
-        });
+			/* <![CDATA[ */
+				var product_cat_dropdown = document.getElementById("dropdown_product_cat");
+				function onProductCatChange() {
+					if ( product_cat_dropdown.options[product_cat_dropdown.selectedIndex].value !=='' ) {
+						location.href = "<?php echo home_url(); ?>/?product_cat="+product_cat_dropdown.options[product_cat_dropdown.selectedIndex].value;
+					}
+				}
+				product_cat_dropdown.onchange = onProductCatChange;
+			/* ]]> */
 			</script>
 			<?php
 

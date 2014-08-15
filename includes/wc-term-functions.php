@@ -142,7 +142,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		return;
 	}
 
-	$output  = "<select name='product_cat' class='dropdown_product_cat'>";
+	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
 	$output .= '<option value="" ' .  selected( $current_product_cat, '', false ) . '>' . __( 'Select a category', 'woocommerce' ) . '</option>';
 	$output .= wc_walk_category_dropdown_tree( $terms, 0, $args );
 	if ( $args['show_uncategorized'] ) {
