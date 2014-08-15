@@ -62,6 +62,11 @@ class WC_API_Orders extends WC_API_Resource {
 			array( array( $this, 'delete_order_note' ), WC_API_SERVER::DELETABLE ),
 		);
 
+		# GET /orders/<order_id>/refunds
+		$routes[ $this->base . '/(?P<order_id>\d+)/refunds' ] = array(
+			array( array( $this, 'get_order_refunds' ), WC_API_Server::READABLE ),
+		);
+
 		return $routes;
 	}
 
@@ -1242,6 +1247,73 @@ class WC_API_Orders extends WC_API_Resource {
 
 			return new WP_Error( 'woocommerce_api_cannot_delete_order_note', __( 'This order note cannot be deleted', 'woocommerce' ), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Get order refunds
+	 *
+	 * @since 2.2
+	 * @param string $order_id order ID
+	 * @param string|null $fields fields to include in response
+	 * @return array
+	 */
+	public function get_order_refunds( $order_id, $fields = null ) {
+
+		// Ensure ID is valid order ID
+		$order_id = $this->validate_request( $order_id, 'shop_order', 'read' );
+
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
+		}
+
+		$order    = wc_get_order( $order_id );
+		$_refunds = $order->get_refunds();
+		$refunds  = array();
+
+		foreach ( $_refunds as $refund ) {
+			$line_items = array();
+
+			// Add line items
+			foreach ( $refund->get_items( 'line_item' ) as $item_id => $item ) {
+
+				$product   = $order->get_product_from_item( $item );
+				$meta      = new WC_Order_Item_Meta( $item['item_meta'], $product );
+				$item_meta = array();
+
+				foreach ( $meta->get_formatted() as $meta_key => $formatted_meta ) {
+					$item_meta[] = array(
+						'key' => $meta_key,
+						'label' => $formatted_meta['label'],
+						'value' => $formatted_meta['value'],
+					);
+				}
+
+				$line_items[] = array(
+					'id'           => $item_id,
+					'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
+					'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], 2 ),
+					'total'        => wc_format_decimal( $order->get_line_total( $item ), 2 ),
+					'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
+					'price'        => wc_format_decimal( $order->get_item_total( $item ), 2 ),
+					'quantity'     => (int) $item['qty'],
+					'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
+					'name'         => $item['name'],
+					'product_id'   => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
+					'sku'          => is_object( $product ) ? $product->get_sku() : null,
+					'meta'         => $item_meta,
+				);
+			}
+
+			$refunds[] = array(
+				'id'         => $refund->id,
+				'date'       => $this->server->format_datetime( $refund->date ),
+				'amount'     => wc_format_decimal( $refund->get_refund_amount(), 2 ),
+				'reason'     => $refund->get_refund_reason(),
+				'line_items' => $line_items
+			);
+		}
+
+		return array( 'order_refunds' => apply_filters( 'woocommerce_api_order_refunds_response', $refunds, $order_id, $fields, $_refunds, $this->server ) );
 	}
 
 }
