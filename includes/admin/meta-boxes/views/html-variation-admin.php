@@ -89,11 +89,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<td>
 									<label><?php _e( 'Allow Backorders?', 'woocommerce' ); ?></label>
 									<select name="variable_backorders[<?php echo $loop; ?>]">
-										<option value="parent" <?php selected( is_null( $_backorders ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
 										<?php
-										foreach ( $parent_data['backorder_options'] as $key => $value )
-											echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
-									?></select>
+											foreach ( $parent_data['backorder_options'] as $key => $value ) {
+												echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
+											}
+										?>
+									</select>
 								</td>
 							</tr>
 							<tr class="">

@@ -1535,11 +1535,7 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				if ( 'yes' === $manage_stock ) {
-					if ( isset( $variable_backorders[ $i ] ) && $variable_backorders[ $i ] !== 'parent' ) {
-						update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
-					} else {
-						delete_post_meta( $variation_id, '_backorders' );
-					}
+					update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );
