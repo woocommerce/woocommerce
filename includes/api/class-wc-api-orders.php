@@ -68,9 +68,10 @@ class WC_API_Orders extends WC_API_Resource {
 			array( array( $this, 'create_order_refund' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
-		# GET /orders/<order_id>/refunds/<id>
+		# GET|PUT /orders/<order_id>/refunds/<id>
 		$routes[ $this->base . '/(?P<order_id>\d+)/refunds/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_order_refund' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_order_refund' ), WC_API_SERVER::EDITABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		return $routes;
@@ -1076,7 +1077,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$note = get_comment( $id );
 
-		if ( is_null( $note) ) {
+		if ( is_null( $note ) ) {
 			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'An order note with the provided ID could not be found', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -1391,7 +1392,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// Refund amount is required
 		if ( ! isset( $data['amount'] ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_order_note', __( 'Refund amount is required', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_invalid_order_refund', __( 'Refund amount is required', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$data['order_id']  = $order_id;
@@ -1401,13 +1402,73 @@ class WC_API_Orders extends WC_API_Resource {
 		$refund = wc_create_refund( $data );
 
 		if ( ! $refund ) {
-			return new WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again', 'woocommerce' ), array( 'status' => 500 ) );
+			return new WP_Error( 'woocommerce_api_cannot_create_order_refund', __( 'Cannot create order refund, please try again', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		// HTTP 201 Created
 		$this->server->send_status( 201 );
 
 		do_action( 'woocommerce_api_create_order_refund', $refund->id, $order_id, $this );
+
+		return $this->get_order_refund( $order_id, $refund->id );
+	}
+
+	/**
+	 * Edit an order refund
+	 *
+	 * @since 2.2
+	 * @param string $order_id order ID
+	 * @param string $id refund ID
+	 * @param array $data parsed request data
+	 * @return WP_Error|array error or edited refund response data
+	 */
+	public function edit_order_refund( $order_id, $id, $data ) {
+
+		$data = isset( $data['order_refund'] ) ? $data['order_refund'] : array();
+
+		// Validate order ID
+		$order_id = $this->validate_request( $order_id, 'shop_order', 'edit' );
+
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
+		}
+
+		// Validate refund ID
+		$id = absint( $id );
+
+		if ( empty( $id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_refund_id', __( 'Invalid order refund ID', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		// Ensure order ID is valid
+		$refund = wc_get_order( $id );
+
+		if ( ! $refund ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_refund_id', __( 'An order refund with the provided ID could not be found', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		// Ensure refund ID is associated with given order
+		if ( $refund->post->post_parent != $order_id ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_refund_id', __( 'The order refund ID provided is not associated with the order', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$data = apply_filters( 'woocommerce_api_edit_order_refund_data', $data, $refund->id, $order_id, $this );
+
+		// Update reason
+		if ( isset( $data['reason'] ) ) {
+			$updated_refund = wp_update_post( array( 'ID' => $refund->id, 'post_excerpt' => $data['reason'] ) );
+
+			if ( is_wp_error( $updated_refund ) ) {
+				return $updated_refund;
+			}
+		}
+
+		// Update refund amount
+		if ( isset( $data['amount'] ) ) {
+			update_post_meta( $refund->id, '_refund_amount', wc_format_decimal( $data['amount'] ) );
+		}
+
+		do_action( 'woocommerce_api_edit_order_refund', $refund->id, $order_id, $this );
 
 		return $this->get_order_refund( $order_id, $refund->id );
 	}
