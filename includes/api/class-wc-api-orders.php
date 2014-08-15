@@ -1372,9 +1372,10 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.2
 	 * @param string $order_id order ID
 	 * @param array $data raw request data
+	 * @param bool $api_refund do refund using a payment gateway API
 	 * @return WP_Error|array error or created refund response data
 	 */
-	public function create_order_refund( $order_id, $data ) {
+	public function create_order_refund( $order_id, $data, $api_refund = false ) {
 
 		$data = isset( $data['order_refund'] ) ? $data['order_refund'] : array();
 
@@ -1404,6 +1405,25 @@ class WC_API_Orders extends WC_API_Resource {
 
 		if ( ! $refund ) {
 			return new WP_Error( 'woocommerce_api_cannot_create_order_refund', __( 'Cannot create order refund, please try again', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		// Refund via API
+		if ( $api_refund ) {
+			if ( WC()->payment_gateways() ) {
+				$payment_gateways = WC()->payment_gateways->payment_gateways();
+			}
+
+			$order = wc_get_order( $order_id );
+
+			if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
+				$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund->get_refund_amount(), $refund->get_refund_reason() );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				} elseif ( ! $result ) {
+					return new WP_Error( 'woocommerce_api_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+			}
 		}
 
 		// HTTP 201 Created
