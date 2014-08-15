@@ -67,6 +67,11 @@ class WC_API_Orders extends WC_API_Resource {
 			array( array( $this, 'get_order_refunds' ), WC_API_Server::READABLE ),
 		);
 
+		# GET /orders/<order_id>/refunds/<id>
+		$routes[ $this->base . '/(?P<order_id>\d+)/refunds/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_order_refund' ), WC_API_Server::READABLE ),
+		);
+
 		return $routes;
 	}
 
@@ -1084,7 +1089,6 @@ class WC_API_Orders extends WC_API_Resource {
 		return array( 'order_note' => apply_filters( 'woocommerce_api_order_note_response', $order_note, $id, $fields, $note, $order_id, $this ) );
 	}
 
-
 	/**
 	 * Create a new order note for the given order
 	 *
@@ -1250,7 +1254,7 @@ class WC_API_Orders extends WC_API_Resource {
 	}
 
 	/**
-	 * Get order refunds
+	 * Get the order refunds for an order
 	 *
 	 * @since 2.2
 	 * @param string $order_id order ID
@@ -1266,54 +1270,98 @@ class WC_API_Orders extends WC_API_Resource {
 			return $order_id;
 		}
 
-		$order    = wc_get_order( $order_id );
-		$_refunds = $order->get_refunds();
-		$refunds  = array();
+		$refund_items = get_posts(
+			array(
+				'post_type'      => 'shop_order_refund',
+				'post_parent'    => $order_id,
+				'posts_per_page' => -1,
+				'post_status'    => 'any',
+				'fields'         => 'ids'
+			)
+		);
+		$order_refunds = array();
 
-		foreach ( $_refunds as $refund ) {
-			$line_items = array();
+		foreach ( $refund_items as $refund_id ) {
+			$order_refunds[] = current( $this->get_order_refund( $order_id, $refund_id ) );
+		}
 
-			// Add line items
-			foreach ( $refund->get_items( 'line_item' ) as $item_id => $item ) {
+		return array( 'order_refunds' => apply_filters( 'woocommerce_api_order_refunds_response', $order_refunds, $order_id, $fields, $refund_items, $this->server ) );
+	}
 
-				$product   = $order->get_product_from_item( $item );
-				$meta      = new WC_Order_Item_Meta( $item['item_meta'], $product );
-				$item_meta = array();
+	/**
+	 * Get an order refund for the given order ID and ID
+	 *
+	 * @since 2.2
+	 * @param string $order_id order ID
+	 * @param int $refund order refund ID
+	 * @param string|null $fields fields to limit response to
+	 * @return array
+	 */
+	public function get_order_refund( $order_id, $id, $fields = null ) {
 
-				foreach ( $meta->get_formatted() as $meta_key => $formatted_meta ) {
-					$item_meta[] = array(
-						'key' => $meta_key,
-						'label' => $formatted_meta['label'],
-						'value' => $formatted_meta['value'],
-					);
-				}
+		// Validate order ID
+		$order_id = $this->validate_request( $order_id, 'shop_order', 'read' );
 
-				$line_items[] = array(
-					'id'           => $item_id,
-					'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
-					'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], 2 ),
-					'total'        => wc_format_decimal( $order->get_line_total( $item ), 2 ),
-					'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
-					'price'        => wc_format_decimal( $order->get_item_total( $item ), 2 ),
-					'quantity'     => (int) $item['qty'],
-					'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
-					'name'         => $item['name'],
-					'product_id'   => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
-					'sku'          => is_object( $product ) ? $product->get_sku() : null,
-					'meta'         => $item_meta,
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
+		}
+
+		$id = absint( $id );
+
+		if ( empty( $id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_refund_id', __( 'Invalid order refund ID', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$order  = wc_get_order( $id );
+		$refund = wc_get_order( $id );
+
+		if ( ! $refund ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_refund_id', __( 'An order refund with the provided ID could not be found', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$line_items = array();
+
+		// Add line items
+		foreach ( $refund->get_items( 'line_item' ) as $item_id => $item ) {
+
+			$product   = $order->get_product_from_item( $item );
+			$meta      = new WC_Order_Item_Meta( $item['item_meta'], $product );
+			$item_meta = array();
+
+			foreach ( $meta->get_formatted() as $meta_key => $formatted_meta ) {
+				$item_meta[] = array(
+					'key' => $meta_key,
+					'label' => $formatted_meta['label'],
+					'value' => $formatted_meta['value'],
 				);
 			}
 
-			$refunds[] = array(
-				'id'         => $refund->id,
-				'date'       => $this->server->format_datetime( $refund->date ),
-				'amount'     => wc_format_decimal( $refund->get_refund_amount(), 2 ),
-				'reason'     => $refund->get_refund_reason(),
-				'line_items' => $line_items
+			$line_items[] = array(
+				'id'           => $item_id,
+				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
+				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], 2 ),
+				'total'        => wc_format_decimal( $order->get_line_total( $item ), 2 ),
+				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
+				'price'        => wc_format_decimal( $order->get_item_total( $item ), 2 ),
+				'quantity'     => (int) $item['qty'],
+				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
+				'name'         => $item['name'],
+				'product_id'   => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
+				'sku'          => is_object( $product ) ? $product->get_sku() : null,
+				'meta'         => $item_meta,
 			);
 		}
 
-		return array( 'order_refunds' => apply_filters( 'woocommerce_api_order_refunds_response', $refunds, $order_id, $fields, $_refunds, $this->server ) );
+		$order_refund = array(
+			'id'         => $refund->id,
+			'date'       => $this->server->format_datetime( $refund->date ),
+			'amount'     => wc_format_decimal( $refund->get_refund_amount(), 2 ),
+			'reason'     => $refund->get_refund_reason(),
+			'line_items' => $line_items
+		);
+
+		return array( 'order_refund' => apply_filters( 'woocommerce_api_order_refund_response', $order_refund, $id, $fields, $refund, $order_id, $this ) );
 	}
+
 
 }
