@@ -1,3 +1,4 @@
+/*global simplfy_commerce_params, wc_checkout_params, SimplifyCommerce */
 (function ( $ ) {
 
 	// Form handler

@@ -100,13 +100,16 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 			<script type="text/javascript">
-				jQuery('#woocommerce_simplify_commerce_sandbox').change(function(){
-					if ( jQuery(this).is(':checked') ) {
-						jQuery('#woocommerce_simplify_commerce_sandbox_private_key, #woocommerce_simplify_commerce_sandbox_public_key').closest('tr').show();
-						jQuery('#woocommerce_simplify_commerce_private_key, #woocommerce_simplify_commerce_public_key').closest('tr').hide();
+				jQuery( '#woocommerce_simplify_commerce_sandbox' ).change( function () {
+					var sandbox    = jQuery( '#woocommerce_simplify_commerce_sandbox_private_key, #woocommerce_simplify_commerce_sandbox_public_key' ).closest( 'tr' ),
+						production = jQuery( '#woocommerce_simplify_commerce_private_key, #woocommerce_simplify_commerce_public_key' ).closest( 'tr' );
+
+					if ( jQuery( this ).is( ':checked' ) ) {
+						sandbox.show();
+						production.hide();
 					} else {
-						jQuery('#woocommerce_simplify_commerce_sandbox_private_key, #woocommerce_simplify_commerce_sandbox_public_key').closest('tr').hide();
-						jQuery('#woocommerce_simplify_commerce_private_key, #woocommerce_simplify_commerce_public_key').closest('tr').show();
+						sandbox.hide();
+						production.show();
 					}
 				}).change();
 			</script>
