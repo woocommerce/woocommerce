@@ -520,9 +520,12 @@ class WC_Product_Variation extends WC_Product {
 					break;
 				}
 				$class        = 'in-stock';
-			} elseif ( $this->backorders_allowed() ) {
+			} elseif ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
 				$availability = __( 'Available on backorder', 'woocommerce' );
 				$class        = 'available-on-backorder';
+			} elseif ( $this->backorders_allowed() ) {
+				$availability = __( 'In stock', 'woocommerce' );
+				$class        = 'in-stock';
 			} else {
 				$availability = __( 'Out of stock', 'woocommerce' );
 				$class        = 'out-of-stock';
