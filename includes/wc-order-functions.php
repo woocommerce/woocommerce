@@ -38,7 +38,7 @@ function wc_get_order_statuses() {
  * @param array $args (default: array()) Contains all arguments to be used to get this order.
  * @return WC_Order
  */
-function get_order( $the_order = false, $args = array() ) {
+function wc_get_order( $the_order = false, $args = array() ) {
 	return WC()->order_factory->get_order( $the_order, $args );
 }
 
