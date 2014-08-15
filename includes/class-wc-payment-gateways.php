@@ -5,7 +5,7 @@
  * Loads payment gateways via hooks for use in the store.
  *
  * @class 		WC_Payment_Gateways
- * @version		1.6.4
+ * @version		2.2.0
  * @package		WooCommerce/Classes/Payment
  * @category	Class
  * @author 		WooThemes
@@ -85,7 +85,11 @@ class WC_Payment_Gateways {
     	}
 
     	if ( 'US' === WC()->countries->get_base_country() ) {
-    		$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
+    		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
+				$load_gateways[] = 'WC_Subscription_Gateway_Simplify_Commerce';
+			} else {
+				$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
+			}
     	}
 
     	// Filter
@@ -112,7 +116,6 @@ class WC_Payment_Gateways {
 		ksort( $this->payment_gateways );
     }
 
-
     /**
      * Get gateways.
      *
@@ -130,7 +133,6 @@ class WC_Payment_Gateways {
 
 		return $_available_gateways;
 	}
-
 
 	/**
 	 * Get available gateways.
@@ -153,7 +155,6 @@ class WC_Payment_Gateways {
 
 		return apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways );
 	}
-
 
 	/**
 	 * Save options in admin.

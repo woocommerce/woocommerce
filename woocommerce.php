@@ -200,7 +200,9 @@ final class WooCommerce {
 		$class = strtolower( $class );
 		$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
-		if ( strpos( $class, 'wc_gateway_' ) === 0 ) {
+		if ( strpos( $class, 'wc_subscription_gateway_' ) === 0 ) {
+			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 24 ) );
+		} elseif ( strpos( $class, 'wc_gateway_' ) === 0 ) {
 			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
 		} elseif ( strpos( $class, 'wc_shipping_' ) === 0 ) {
 			$path = $this->plugin_path() . '/includes/shipping/' . trailingslashit( substr( str_replace( '_', '-', $class ), 12 ) );
@@ -211,8 +213,8 @@ final class WooCommerce {
 		} elseif ( strpos( $class, 'wc_admin' ) === 0 ) {
 			$path = $this->plugin_path() . '/includes/admin/';
 		} elseif ( strpos( $class, 'wc_widget_' ) === 0 ) {
-                        $path = $this->plugin_path() . '/includes/widgets/';
-                }
+			$path = $this->plugin_path() . '/includes/widgets/';
+		}
 
 		if ( $path && is_readable( $path . $file ) ) {
 			include_once( $path . $file );
