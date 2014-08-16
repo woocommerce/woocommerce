@@ -126,7 +126,7 @@ class WC_Meta_Box_Order_Actions {
 				delete_post_meta( $post_id, '_download_permissions_granted' );
 				wc_downloadable_product_permissions( $post_id );
 
-			} elseif ( $action = 'create_credit_note' ) {
+			} elseif ( $action == 'create_credit_note' ) {
 
 				wp_redirect( admin_url( 'post-new.php?post_type=wc_credit_note&order_id=' . $post_id ) );
 				exit;
