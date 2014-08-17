@@ -8,8 +8,6 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-global $woocommerce;
 ?>
 <form id="order_review" method="post">
 
