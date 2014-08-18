@@ -9,7 +9,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $woocommerce, $product;
+global $product;
 
 if ( ! $product->is_purchasable() ) return;
 ?>

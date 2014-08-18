@@ -9,8 +9,6 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $woocommerce;
-
 $order = wc_get_order( $order_id );
 ?>
 <h2><?php _e( 'Order Details', 'woocommerce' ); ?></h2>

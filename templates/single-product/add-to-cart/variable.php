@@ -9,7 +9,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $woocommerce, $product, $post;
+global $product, $post;
 ?>
 
 <?php do_action( 'woocommerce_before_add_to_cart_form' ); ?>

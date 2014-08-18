@@ -10,8 +10,6 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-global $woocommerce;
 ?>
 
 <?php do_action( 'woocommerce_before_mini_cart' ); ?>
