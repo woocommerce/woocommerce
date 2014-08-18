@@ -1375,7 +1375,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param bool $api_refund do refund using a payment gateway API
 	 * @return WP_Error|array error or created refund response data
 	 */
-	public function create_order_refund( $order_id, $data, $api_refund = false ) {
+	public function create_order_refund( $order_id, $data, $api_refund = true ) {
 
 		$data = isset( $data['order_refund'] ) ? $data['order_refund'] : array();
 
