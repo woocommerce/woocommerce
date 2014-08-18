@@ -1288,7 +1288,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_refunds[] = current( $this->get_order_refund( $order_id, $refund_id ) );
 		}
 
-		return array( 'order_refunds' => apply_filters( 'woocommerce_api_order_refunds_response', $order_refunds, $order_id, $fields, $refund_items, $this->server ) );
+		return array( 'order_refunds' => apply_filters( 'woocommerce_api_order_refunds_response', $order_refunds, $order_id, $fields, $refund_items, $this ) );
 	}
 
 	/**
