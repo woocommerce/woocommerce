@@ -1395,6 +1395,8 @@ class WC_API_Orders extends WC_API_Resource {
 		// Refund amount is required
 		if ( ! isset( $data['amount'] ) ) {
 			return new WP_Error( 'woocommerce_api_invalid_order_refund', __( 'Refund amount is required', 'woocommerce' ), array( 'status' => 400 ) );
+		} elseif ( 0 > $data['amount'] ) {
+			return new WP_Error( 'woocommerce_api_invalid_order_refund', __( 'Refund amount must be positive', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$data['order_id']  = $order_id;
@@ -1485,7 +1487,7 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		// Update refund amount
-		if ( isset( $data['amount'] ) ) {
+		if ( isset( $data['amount'] ) && 0 < $data['amount'] ) {
 			update_post_meta( $refund->ID, '_refund_amount', wc_format_decimal( $data['amount'] ) );
 		}
 
