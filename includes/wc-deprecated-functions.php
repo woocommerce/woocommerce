@@ -101,6 +101,15 @@ function woocommerce_legacy_paypal_ipn() {
 add_action( 'init', 'woocommerce_legacy_paypal_ipn' );
 
 /**
+ * get_product soft deprecated for wc_get_product
+ *
+ * @deprecated
+ */
+function get_product( $the_product = false, $args = array() ) {
+	return wc_get_product( $the_product, $args );
+}
+
+/**
  * Cart functions (soft deprecated)
  */
 /**
