@@ -212,12 +212,14 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Handles sending password retrieval email to customer.
 	 *
+	 * Based on retrieve_password() in core wp-login.php
+	 *
 	 * @access public
 	 * @uses $wpdb WordPress Database object
 	 * @return bool True: when finish. False: on error
 	 */
 	public static function retrieve_password() {
-		global $woocommerce,$wpdb;
+		global $wpdb, $wp_hasher;
 
 		if ( empty( $_POST['user_login'] ) ) {
 
@@ -234,7 +236,7 @@ class WC_Shortcode_My_Account {
 			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
 		}
 
-		do_action('lostpassword_post');
+		do_action( 'lostpassword_post' );
 
 		if ( ! $user_data ) {
 			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
@@ -247,7 +249,7 @@ class WC_Shortcode_My_Account {
 
 		do_action( 'retrieve_password', $user_login );
 
-		$allow = apply_filters('allow_password_reset', true, $user_data->ID);
+		$allow = apply_filters( 'allow_password_reset', true, $user_data->ID );
 
 		if ( ! $allow ) {
 
@@ -262,18 +264,19 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		$key = $wpdb->get_var( $wpdb->prepare( "SELECT user_activation_key FROM $wpdb->users WHERE user_login = %s", $user_login ) );
+		$key = wp_generate_password( 20, false );
 
-		if ( empty( $key ) ) {
+		do_action( 'retrieve_password_key', $user_login, $key );
 
-			// Generate something random for a key...
-			$key = wp_generate_password( 20, false );
-
-			do_action('retrieve_password_key', $user_login, $key);
-
-			// Now insert the new md5 key into the db
-			$wpdb->update( $wpdb->users, array( 'user_activation_key' => $key ), array( 'user_login' => $user_login ) );
+		// Now insert the key, hashed, into the DB.
+		if ( empty( $wp_hasher ) ) {
+			require_once ABSPATH . 'wp-includes/class-phpass.php';
+			$wp_hasher = new PasswordHash( 8, true );
 		}
+
+		$hashed = $wp_hasher->HashPassword( $key );
+
+		$wpdb->update( $wpdb->users, array( 'user_activation_key' => $hashed ), array( 'user_login' => $user_login ) );
 
 		// Send email notification
 		$mailer = WC()->mailer();
@@ -294,7 +297,7 @@ class WC_Shortcode_My_Account {
 	 * @return object|bool User's database row on success, false for invalid keys
 	 */
 	public static function check_password_reset_key( $key, $login ) {
-		global $woocommerce,$wpdb;
+		global $wpdb;
 
 		$key = preg_replace( '/[^a-z0-9]/i', '', $key );
 

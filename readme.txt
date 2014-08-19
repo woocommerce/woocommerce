@@ -141,6 +141,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Ability to set a maximum spend for coupons.
 * Feature - Added Simplify Commerce payment gateway.
 * Fix - Allow endpoint use on the front page.
+* Fix - user_activation_key password reset code.
 * Tweak - Recalculate the cart totals, in the event a user registers during checkout and in doing so qualifies for any discounts.
 * Tweak - Use `woocommerce_valid_order_statuses_for_payment` in `pay_action` too.
 * Tweak - Added the possibility to translate the edit-address endpoint slug.
