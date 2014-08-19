@@ -397,7 +397,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 		LEFT JOIN {$wpdb->posts} as posts ON permissions.order_id = posts.ID
 		WHERE user_id = %d
 		AND permissions.order_id > 0
-		AND posts.post_status = 'publish'
+		AND posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
 		AND
 			(
 				permissions.downloads_remaining > 0
