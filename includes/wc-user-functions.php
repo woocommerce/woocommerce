@@ -439,6 +439,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			}
 
 			$download_file = $_product->get_file( $result->download_id );
+
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
@@ -449,13 +450,22 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			);
 
 			$downloads[] = array(
-				'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/' ) ),
+				'download_url'        => add_query_arg(
+					array(
+						'download_file' => $result->product_id,
+						'order'         => $result->order_key,
+						'email'         => $result->user_email,
+						'key'           => $result->download_id
+					),
+					home_url( '/' )
+				),
 				'download_id'         => $result->download_id,
 				'product_id'          => $result->product_id,
 				'download_name'       => $download_name,
 				'order_id'            => $order->id,
 				'order_key'           => $order->order_key,
-				'downloads_remaining' => $result->downloads_remaining
+				'downloads_remaining' => $result->downloads_remaining,
+				'file'                => $download_file
 			);
 
 			$file_number++;
