@@ -23,12 +23,18 @@ if ( $shop_page_id && $shop_page && strstr( $permalinks['product_base'], '/' . $
 	$prepend = $before . '<a href="' . get_permalink( $shop_page ) . '">' . $shop_page->post_title . '</a> ' . $after . $delimiter;
 }
 
-if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
+if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
 
 	echo $wrap_before;
 
 	if ( ! empty( $home ) ) {
 		echo $before . '<a class="home" href="' . apply_filters( 'woocommerce_breadcrumb_home_url', home_url() ) . '">' . $home . '</a>' . $after . $delimiter;
+	}
+
+	if( is_home() ) {
+
+		echo $before . single_post_title('', false) . $after;
+
 	}
 
 	if ( is_category() ) {
