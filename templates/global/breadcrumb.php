@@ -37,8 +37,13 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		$this_category = get_category( $cat_obj->term_id );
 
 		if ( 0 != $this_category->parent ) {
-			$parent_category = get_category( $this_category->parent );
-			echo get_category_parents($parent_category, TRUE, $delimiter );
+			$cat = get_category( $this_category->parent );
+			$cats = array();
+			while( !is_wp_error( $cat ) && $cat->parent != $cat->term_id ) {
+				array_push( $cats, '<a href="' . esc_url( get_category_link( $cat->term_id ) ) . '" title="' . esc_attr( sprintf( __( "View all posts in %s" ), $cat->name ) ) . '">' . $cat->name . '</a>' );
+				$cat = get_category( $cat->parent, 'category' );
+			}
+			echo $before . join( $after . $delimiter . $before, array_reverse( $cats ) ) . $after . $delimiter;
 		}
 
 		echo $before . single_cat_title( '', false ) . $after;
@@ -137,7 +142,12 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		} else {
 
 			$cat = current( get_the_category() );
-			echo get_category_parents( $cat, true, $delimiter );
+			$cats = array();
+			while( !is_wp_error( $cat ) && $cat->parent != $cat->term_id ) {
+				array_push( $cats, '<a href="' . esc_url( get_category_link( $cat->term_id ) ) . '" title="' . esc_attr( sprintf( __( "View all posts in %s" ), $cat->name ) ) . '">' . $cat->name . '</a>' );
+				$cat = get_category( $cat->parent, 'category' );
+			}
+			echo $before . join( $after . $delimiter . $before, array_reverse( $cats ) ) . $after . $delimiter;
 			echo $before . get_the_title() . $after;
 
 		}
@@ -159,7 +169,12 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		$parent = get_post( $post->post_parent );
 		$cat = get_the_category( $parent->ID );
 		$cat = $cat[0];
-		echo get_category_parents( $cat, true, '' . $delimiter );
+		$cats = array();
+		while( !is_wp_error( $cat ) && $cat->parent != $cat->term_id ) {
+			array_push( $cats, '<a href="' . esc_url( get_category_link( $cat->term_id ) ) . '" title="' . esc_attr( sprintf( __( "View all posts in %s" ), $cat->name ) ) . '">' . $cat->name . '</a>' );
+			$cat = get_category( $cat->parent, 'category' );
+		}
+		echo $before . join( $after . $delimiter . $before, array_reverse( $cats ) ) . $after . $delimiter;
 		echo $before . '<a href="' . get_permalink( $parent ) . '">' . $parent->post_title . '</a>' . $after . $delimiter;
 		echo $before . get_the_title() . $after;
 
