@@ -17,7 +17,7 @@
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
  * @return WC_Product
  */
-function get_product( $the_product = false, $args = array() ) {
+function wc_get_product( $the_product = false, $args = array() ) {
 	return WC()->product_factory->get_product( $the_product, $args );
 }
 
