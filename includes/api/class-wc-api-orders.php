@@ -768,7 +768,7 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 		}
 
-		$product = get_product( $item['product_id'] );
+		$product = wc_get_product( $item['product_id'] );
 
 		// must be a valid WC_Product
 		if ( ! is_object( $product ) ) {

@@ -394,7 +394,7 @@ class WC_API_Reports extends WC_API_Resource {
 
 		foreach ( $top_sellers as $top_seller ) {
 
-			$product = get_product( $top_seller->product_id );
+			$product = wc_get_product( $top_seller->product_id );
 
 			$top_sellers_data[] = array(
 				'title'      => $product->get_title(),

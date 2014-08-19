@@ -147,7 +147,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		$this->product_ids_titles = array();
 
 		foreach ( $this->product_ids as $product_id ) {
-			$product = get_product( $product_id );
+			$product = wc_get_product( $product_id );
 			if ( $product ) {
 				$this->product_ids_titles[] = $product->get_formatted_name();
 			} else {

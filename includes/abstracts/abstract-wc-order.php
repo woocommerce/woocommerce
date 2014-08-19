@@ -1591,9 +1591,9 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_product_from_item( $item ) {
 		if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
-			$_product = get_product( $item['variation_id'] );
+			$_product = wc_get_product( $item['variation_id'] );
 		} elseif ( ! empty( $item['product_id']  ) ) {
-			$_product = get_product( $item['product_id'] );
+			$_product = wc_get_product( $item['product_id'] );
 		} else {
 			$_product = false;
 		}
@@ -1872,7 +1872,7 @@ abstract class WC_Abstract_Order {
 		_deprecated_function( 'get_downloadable_file_urls', '2.1', 'get_item_downloads' );
 
 		$download_file = $variation_id > 0 ? $variation_id : $product_id;
-		$_product = get_product( $download_file );
+		$_product = wc_get_product( $download_file );
 
 		$user_email = $this->billing_email;
 
@@ -1903,7 +1903,7 @@ abstract class WC_Abstract_Order {
 		global $wpdb;
 
 		$product_id   = $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'];
-		$product      = get_product( $product_id );
+		$product      = wc_get_product( $product_id );
 		$download_ids = $wpdb->get_col( $wpdb->prepare("
 			SELECT download_id
 			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions

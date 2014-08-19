@@ -605,7 +605,7 @@ class WC_Meta_Box_Product_Data {
 						if ( $product_ids ) {
 							foreach ( $product_ids as $product_id ) {
 
-								$product = get_product( $product_id );
+								$product = wc_get_product( $product_id );
 
 								if ( $product ) {
 									echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product->get_formatted_name() ) . '</option>';
@@ -623,7 +623,7 @@ class WC_Meta_Box_Product_Data {
 						if ( $product_ids ) {
 							foreach ( $product_ids as $product_id ) {
 
-								$product = get_product( $product_id );
+								$product = wc_get_product( $product_id );
 
 								if ( $product ) {
 									echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product->get_formatted_name() ) . '</option>';

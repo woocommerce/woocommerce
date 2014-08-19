@@ -105,7 +105,7 @@ class WC_Meta_Box_Coupon_Data {
 							$product_ids = array_map( 'absint', explode( ',', $product_ids ) );
 							foreach ( $product_ids as $product_id ) {
 
-								$product = get_product( $product_id );
+								$product = wc_get_product( $product_id );
 
 								echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . wp_kses_post( $product->get_formatted_name() ) . '</option>';
 							}
@@ -124,7 +124,7 @@ class WC_Meta_Box_Coupon_Data {
 							$product_ids = array_map( 'absint', explode( ',', $product_ids ) );
 							foreach ( $product_ids as $product_id ) {
 
-								$product = get_product( $product_id );
+								$product = wc_get_product( $product_id );
 
 								echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . wp_kses_post( $product->get_formatted_name() ) . '</option>';
 							}
