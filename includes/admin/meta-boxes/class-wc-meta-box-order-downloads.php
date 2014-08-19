@@ -35,7 +35,7 @@ class WC_Meta_Box_Order_Downloads {
 					if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
 
 						if ( ! $product || $product->id != $download->product_id ) {
-							$product    = get_product( absint( $download->product_id ) );
+							$product    = wc_get_product( absint( $download->product_id ) );
 							$file_counter = 1;
 						}
 

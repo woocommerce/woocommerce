@@ -40,7 +40,7 @@ function wc_template_redirect() {
 
 	// Redirect to the product page if we have a single product
 	elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && $wp_query->post_count == 1 ) {
-		$product = get_product( $wp_query->post );
+		$product = wc_get_product( $wp_query->post );
 
 		if ( $product->is_visible() ) {
 			wp_safe_redirect( get_permalink( $product->id ), 302 );
@@ -82,7 +82,7 @@ function wc_setup_product_data( $post ) {
 	if ( empty( $post->post_type ) || ! in_array( $post->post_type, array( 'product', 'product_variation' ) ) )
 		return;
 
-	$GLOBALS['product'] = get_product( $post );
+	$GLOBALS['product'] = wc_get_product( $post );
 
 	return $GLOBALS['product'];
 }
@@ -206,7 +206,7 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		return $classes;
 	}
 
-	$product = get_product( $post_id );
+	$product = wc_get_product( $post_id );
 
 	if ( $product ) {
 		if ( $product->is_on_sale() ) {

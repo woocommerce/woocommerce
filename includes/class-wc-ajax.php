@@ -687,7 +687,7 @@ class WC_AJAX {
 		}
 
 		$variations = array();
-		$_product   = get_product( $post_id, array( 'product_type' => 'variable' ) );
+		$_product   = wc_get_product( $post_id, array( 'product_type' => 'variable' ) );
 
 		// Put variation attributes into an array
 		foreach ( $_product->get_attributes() as $attribute ) {
@@ -874,7 +874,7 @@ class WC_AJAX {
 		}
 
 		foreach ( $product_ids as $product_id ) {
-			$product = get_product( $product_id );
+			$product = wc_get_product( $product_id );
 			$files   = $product->get_files();
 
 			if ( ! $order->billing_email ) {
@@ -955,7 +955,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$_product    = get_product( $post->ID );
+		$_product    = wc_get_product( $post->ID );
 		$order       = wc_get_order( $order_id );
 		$order_taxes = $order->get_taxes();
 		$class       = 'new_row';
@@ -1305,7 +1305,7 @@ class WC_AJAX {
 
 				// Get product details
 				if ( get_post_type( $product_id ) == 'product' ) {
-					$_product        = get_product( $product_id );
+					$_product        = wc_get_product( $product_id );
 					$item_tax_status = $_product->get_tax_status();
 				} else {
 					$item_tax_status = 'taxable';
@@ -1573,7 +1573,7 @@ class WC_AJAX {
 
 		if ( $posts ) {
 			foreach ( $posts as $post ) {
-				$product = get_product( $post );
+				$product = wc_get_product( $post );
 
 				$found_products[ $post ] = $product->get_formatted_name();
 			}
@@ -1666,7 +1666,7 @@ class WC_AJAX {
 
 		if ( $posts ) {
 			foreach ( $posts as $post ) {
-				$product = get_product( $post->ID );
+				$product = wc_get_product( $post->ID );
 				$found_products[ $post->ID ] = $product->get_formatted_name();
 			}
 		}

@@ -36,7 +36,7 @@ class WC_Download_Handler {
 			$order_key            = $_GET['order'];
 			$email                = sanitize_email( str_replace( ' ', '+', $_GET['email'] ) );
 			$download_id          = isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '';
-			$_product             = get_product( $product_id );
+			$_product             = wc_get_product( $product_id );
 
 			if ( ! is_email( $email) ) {
 				wp_die( __( 'Invalid email address.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 403 ) );

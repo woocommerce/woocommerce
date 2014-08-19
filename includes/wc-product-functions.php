@@ -17,7 +17,7 @@
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
  * @return WC_Product
  */
-function get_product( $the_product = false, $args = array() ) {
+function wc_get_product( $the_product = false, $args = array() ) {
 	return WC()->product_factory->get_product( $the_product, $args );
 }
 
@@ -28,7 +28,7 @@ function get_product( $the_product = false, $args = array() ) {
  * @param  int $new_stock_level
  */
 function wc_update_product_stock( $product_id, $new_stock_level ) {
-	$product = get_product( $product_id );
+	$product = wc_get_product( $product_id );
 
 	if ( $product->get_stock_quantity() !== $new_stock_level ) {
 		$product->set_stock( $new_stock_level );
@@ -42,7 +42,7 @@ function wc_update_product_stock( $product_id, $new_stock_level ) {
  * @param  int $status
  */
 function wc_update_product_stock_status( $product_id, $status ) {
-	$product = get_product( $product_id );
+	$product = wc_get_product( $product_id );
 	$product->set_stock_status( $status );
 }
 
@@ -363,7 +363,7 @@ function wc_scheduled_sales() {
 				delete_post_meta( $parent, '_min_price_variation_id' );
 
 				// Grouped products need syncing via a function
-				$this_product = get_product( $product_id );
+				$this_product = wc_get_product( $product_id );
 
 				if ( $this_product->is_type( 'simple' ) ) {
 					$this_product->grouped_product_sync();
@@ -404,7 +404,7 @@ function wc_scheduled_sales() {
 				delete_post_meta( $parent, '_min_variation_price' );
 
 				// Grouped products need syncing via a function
-				$this_product = get_product( $product_id );
+				$this_product = wc_get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) ) {
 					$this_product->grouped_product_sync();
 				}

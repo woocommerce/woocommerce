@@ -121,7 +121,7 @@ class WC_API_Products extends WC_API_Resource {
 			return $id;
 		}
 
-		$product = get_product( $id );
+		$product = wc_get_product( $id );
 
 		// add data that applies to every product type
 		$product_data = $this->get_product_data( $product );
@@ -839,7 +839,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-		$_product = get_product( $id );
+		$_product = wc_get_product( $id );
 		if ( $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
 
 			$clear_parent_ids = array();

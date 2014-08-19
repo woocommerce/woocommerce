@@ -190,7 +190,7 @@ class WC_Cart {
 
 			if ( is_array( $cart ) ) {
 				foreach ( $cart as $key => $values ) {
-					$_product = get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
+					$_product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 
 					if ( ! empty( $_product ) && $_product->exists() && $values['quantity'] > 0 ) {
 
@@ -801,7 +801,7 @@ class WC_Cart {
 			}
 
 			// Get the product
-			$product_data   = get_product( $variation_id ? $variation_id : $product_id );
+			$product_data   = wc_get_product( $variation_id ? $variation_id : $product_id );
 
 			if ( ! $product_data )
 				return false;

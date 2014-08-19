@@ -174,7 +174,7 @@ class WC_Admin_Post_Types {
 		global $post;
 
 		if ( empty( $the_product ) || $the_product->id != $post->ID ) {
-			$the_product = get_product( $post );
+			$the_product = wc_get_product( $post );
 		}
 
 		switch ( $column ) {
@@ -787,7 +787,7 @@ class WC_Admin_Post_Types {
 		}
 
 		// Get the product and save
-		$product = get_product( $post );
+		$product = wc_get_product( $post );
 
 		if ( ! empty( $_REQUEST['woocommerce_quick_edit'] ) ) {
 			$this->quick_edit_save( $post_id, $product );
@@ -2027,7 +2027,7 @@ class WC_Admin_Post_Types {
 			$product_id = $variation_id;
 		}
 
-		$product               = get_product( $product_id );
+		$product               = wc_get_product( $product_id );
 		$existing_download_ids = array_keys( (array) $product->get_files() );
 		$updated_download_ids  = array_keys( (array) $downloadable_files );
 
