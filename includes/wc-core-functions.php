@@ -267,6 +267,7 @@ function get_woocommerce_currencies() {
 				'INR' => __( 'Indian Rupee', 'woocommerce' ),
 				'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
+				'KIP'	=> __( 'Lao Kip', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
@@ -364,6 +365,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'HRK' : $currency_symbol = 'Kn'; break;
 		case 'EGP' : $currency_symbol = 'EGP'; break;
 		case 'DOP' : $currency_symbol = 'RD&#36;'; break;
+		case 'KIP' : $currency_symbol = '&#8365;'; break;
 		default    : $currency_symbol = ''; break;
 	}
 
