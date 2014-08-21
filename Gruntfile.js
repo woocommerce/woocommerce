@@ -142,8 +142,8 @@ module.exports = function( grunt ) {
 			admin: {
 				options: {
 					potFilename: 'woocommerce-admin.pot',
-					exclude: [
-						'^(?!includes\/admin).*'
+					include: [
+						'includes/admin/.*'
 					],
 					processPot: function ( pot ) {
 						pot.headers['project-id-version'] += ' Admin';
