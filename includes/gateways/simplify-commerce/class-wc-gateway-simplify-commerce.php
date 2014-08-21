@@ -184,7 +184,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				'title'       => __( 'Description', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
-				'default'     => 'Pay with your credit card via Simplfy Commerce by Mastercard.',
+				'default'     => 'Pay with your credit card via Simplify Commerce by Mastercard.',
 				'desc_tip'    => true
 			),
 			'sandbox' => array(
@@ -197,28 +197,28 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'sandbox_public_key' => array(
 				'title'       => __( 'Sandbox Public Key', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => __( 'Get your API keys from your Simplfy account: Settings > API Keys.', 'woocommerce' ),
+				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true
 			),
 			'sandbox_private_key' => array(
 				'title'       => __( 'Sandbox Private Key', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => __( 'Get your API keys from your Simplfy account: Settings > API Keys.', 'woocommerce' ),
+				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true
 			),
 			'public_key' => array(
 				'title'       => __( 'Public Key', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => __( 'Get your API keys from your Simplfy account: Settings > API Keys.', 'woocommerce' ),
+				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true
 			),
 			'private_key' => array(
 				'title'       => __( 'Private Key', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => __( 'Get your API keys from your Simplfy account: Settings > API Keys.', 'woocommerce' ),
+				'description' => __( 'Get your API keys from your Simplify account: Settings > API Keys.', 'woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true
 			),
@@ -254,7 +254,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 		wp_enqueue_script( 'simplify-commerce', 'https://www.simplify.com/commerce/v1/simplify.js', array( 'jquery' ), WC_VERSION, true );
 		wp_enqueue_script( 'wc-simplify-commerce', WC()->plugin_url() . '/includes/gateways/simplify-commerce/assets/js/simplify-commerce.js', array( 'simplify-commerce', 'wc-credit-card-form' ), WC_VERSION, true );
-		wp_localize_script( 'wc-simplify-commerce', 'simplfy_commerce_params', array(
+		wp_localize_script( 'wc-simplify-commerce', 'Simplify_commerce_params', array(
 			'key'           => $this->public_key,
 			'card.number'   => __( 'Card Number', 'woocommerce' ),
 			'card.expMonth' => __( 'Expiry Month', 'woocommerce' ),

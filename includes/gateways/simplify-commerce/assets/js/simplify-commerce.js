@@ -1,4 +1,4 @@
-/*global simplfy_commerce_params, wc_checkout_params, SimplifyCommerce */
+/*global Simplify_commerce_params, wc_checkout_params, SimplifyCommerce */
 (function ( $ ) {
 
 	// Form handler
@@ -25,7 +25,7 @@
 				card = card.replace( /\s/g, '' );
 
 				SimplifyCommerce.generateToken({
-					key: simplfy_commerce_params.key,
+					key: Simplify_commerce_params.key,
 					card: {
 						number: card,
 						cvc: cvc,
@@ -42,7 +42,7 @@
 		return true;
 	}
 
-	// Handle simplfy response
+	// Handle Simplify response
 	function simplifyResponseHandler( data ) {
 		var $form  = $( 'form.checkout, form#order_review' ),
 			ccForm = $( '#simplify_commerce-cc-form' );
@@ -60,7 +60,7 @@
 					errorList = '';
 
 				for ( var i = 0; i < fieldErrorsLength; i++ ) {
-					errorList += '<li>' + simplfy_commerce_params[ fieldErrors[i].field ] + ' ' + simplfy_commerce_params.is_invalid  + ' - ' + fieldErrors[i].message + '.</li>';
+					errorList += '<li>' + Simplify_commerce_params[ fieldErrors[i].field ] + ' ' + Simplify_commerce_params.is_invalid  + ' - ' + fieldErrors[i].message + '.</li>';
 				}
 
 				ccForm.prepend( '<ul class="woocommerce-error">' + errorList + '</ul>' );
