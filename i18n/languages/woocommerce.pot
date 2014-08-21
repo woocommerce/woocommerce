@@ -6761,7 +6761,7 @@ msgstr ""
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:206
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:213
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:220
-msgid "Get your API keys from your Simplfy account: Settings > API Keys."
+msgid "Get your API keys from your Simplify account: Settings > API Keys."
 msgstr ""
 
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:204
