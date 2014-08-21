@@ -590,6 +590,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$post_data['CURRENCYCODE'] = $order->get_order_currency();
 		}
 
+		if ( $reason ) {
+			if ( 255 < strlen( $reason ) ) {
+				$reason = substr( $reason, 0, 252 ) . '...';
+			}
+
+			$post_data['NOTE'] = html_entity_decode( $reason, ENT_NOQUOTES, 'UTF-8' );
+		}
+
 		$response = wp_remote_post( 'yes' === $this->testmode ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp', array(
 			'method'      => 'POST',
 			'body'        => $post_data,
