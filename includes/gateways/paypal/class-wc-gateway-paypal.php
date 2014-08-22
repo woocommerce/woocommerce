@@ -32,6 +32,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->testurl              = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 		$this->method_title         = __( 'PayPal', 'woocommerce' );
 		$this->method_description   = __( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' );
+		$this->view_transaction_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
 		$this->notify_url           = WC()->api_request_url( 'WC_Gateway_Paypal' );
 		$this->supports 			= array(
 			'products',
@@ -1040,26 +1041,5 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		return $state;
-	}
-
-	/**
-	 * Get the transaction URL.
-	 *
-	 * @param  string $transaction_id
-	 *
-	 * @return string
-	 */
-	public function get_transaction_url( $transaction_id ) {
-		$return_url = '';
-
-		if ( empty( $transaction_id ) ) {
-			if ( 'yes' == $this->testmode ) {
-				$return_url = 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
-			} else {
-				$return_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $transaction_id, $this );
 	}
 }
