@@ -91,6 +91,10 @@ jQuery( function( $ ){
 		// Get value
 		var select_val = $( this ).val();
 
+		if ( 'variable' !== select_val && 0 < $( '#variable_product_options input[name^=variable_sku]' ).length ) {
+			window.alert( woocommerce_admin_meta_boxes.i18n_product_type_alert );
+		}
+
 		if ( 'variable' === select_val ) {
 			$( 'input#_manage_stock' ).change();
 			$( 'input#_downloadable' ).prop( 'checked', false );
@@ -110,12 +114,6 @@ jQuery( function( $ ){
 		$( 'body' ).trigger( 'woocommerce-product-type-change', select_val, $( this ) );
 
 	}).change();
-
-	$( 'body' ).on( 'woocommerce-product-type-change', function( e, select_val ) {
-		if ( 'variable' !== select_val && 0 < $( '#variable_product_options input[name^=variable_sku]' ).length && $( 'body' ).triggerHandler( 'woocommerce-display-product-type-alert', select_val ) !== false ) {
-			window.alert( woocommerce_admin_meta_boxes.i18n_product_type_alert );
-		}
-	});
 
 	$('input#_downloadable, input#_virtual').change(function(){
 		show_and_hide_panels();
