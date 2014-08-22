@@ -201,7 +201,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			
 			wc_enqueue_js("
 				jQuery('.dropdown_product_cat').change(function(){
-					if($(this).val() != '') {
+					if(jQuery(this).val() != '') {
 						location.href = '" . home_url() . "/?product_cat=' + jQuery(this).val();
 					}
 				});
