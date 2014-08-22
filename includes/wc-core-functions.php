@@ -265,6 +265,7 @@ function get_woocommerce_currencies() {
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'IDR' => __( 'Indonesia Rupiah', 'woocommerce' ),
 				'INR' => __( 'Indian Rupee', 'woocommerce' ),
+				'NPR' => __( 'Nepali Rupee', 'woocommerce' ),
 				'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
@@ -273,7 +274,7 @@ function get_woocommerce_currencies() {
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
 				'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
 				'NZD' => __( 'New Zealand Dollar', 'woocommerce' ),
-                'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
+                		'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 				'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
 				'PLN' => __( 'Polish Zloty', 'woocommerce' ),
 				'GBP' => __( 'Pounds Sterling', 'woocommerce' ),
@@ -339,7 +340,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = '&#1088;&#1091;&#1073;.';
 			break;
 		case 'KRW' : $currency_symbol = '&#8361;'; break;
-        case 'PYG' : $currency_symbol = '&#8370;'; break;
+        	case 'PYG' : $currency_symbol = '&#8370;'; break;
 		case 'TRY' : $currency_symbol = '&#8378;'; break;
 		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
 		case 'ZAR' : $currency_symbol = '&#82;'; break;
@@ -349,6 +350,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'HUF' : $currency_symbol = '&#70;&#116;'; break;
 		case 'IDR' : $currency_symbol = 'Rp'; break;
 		case 'INR' : $currency_symbol = 'Rs.'; break;
+		case 'NRP' : $currency_symbol = 'Rs.'; break;
 		case 'ISK' : $currency_symbol = 'Kr.'; break;
 		case 'ILS' : $currency_symbol = '&#8362;'; break;
 		case 'PHP' : $currency_symbol = '&#8369;'; break;
