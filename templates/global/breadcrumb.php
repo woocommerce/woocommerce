@@ -43,13 +43,10 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 		$this_category = get_category( $cat_obj->term_id );
 
 		if ( 0 != $this_category->parent ) {
-			$cat = get_category( $this_category->parent );
-			$cats = array();
-			while( !is_wp_error( $cat ) && $cat->parent != $cat->term_id ) {
-				array_push( $cats, '<a href="' . esc_url( get_category_link( $cat->term_id ) ) . '" title="' . esc_attr( sprintf( __( "View all posts in %s" ), $cat->name ) ) . '">' . $cat->name . '</a>' );
-				$cat = get_category( $cat->parent, 'category' );
+			$parent_category = get_category( $this_category->parent );
+			if ( ( $parents = get_category_parents( $parent_category, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
+				echo $before . $parents . $after . $delimiter;
 			}
-			echo $before . join( $after . $delimiter . $before, array_reverse( $cats ) ) . $after . $delimiter;
 		}
 
 		echo $before . single_cat_title( '', false ) . $after;
@@ -148,12 +145,9 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 		} else {
 
 			$cat = current( get_the_category() );
-			$cats = array();
-			while( !is_wp_error( $cat ) && $cat->parent != $cat->term_id ) {
-				array_push( $cats, '<a href="' . esc_url( get_category_link( $cat->term_id ) ) . '" title="' . esc_attr( sprintf( __( "View all posts in %s" ), $cat->name ) ) . '">' . $cat->name . '</a>' );
-				$cat = get_category( $cat->parent, 'category' );
+			if ( ( $parents = get_category_parents( $cat, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
+				echo $before . $parents . $after . $delimiter;
 			}
-			echo $before . join( $after . $delimiter . $before, array_reverse( $cats ) ) . $after . $delimiter;
 			echo $before . get_the_title() . $after;
 
 		}
@@ -175,12 +169,9 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 		$parent = get_post( $post->post_parent );
 		$cat = get_the_category( $parent->ID );
 		$cat = $cat[0];
-		$cats = array();
-		while( !is_wp_error( $cat ) && $cat->parent != $cat->term_id ) {
-			array_push( $cats, '<a href="' . esc_url( get_category_link( $cat->term_id ) ) . '" title="' . esc_attr( sprintf( __( "View all posts in %s" ), $cat->name ) ) . '">' . $cat->name . '</a>' );
-			$cat = get_category( $cat->parent, 'category' );
+		if ( ( $parents = get_category_parents( $cat, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
+			echo $before . $parents . $after . $delimiter;
 		}
-		echo $before . join( $after . $delimiter . $before, array_reverse( $cats ) ) . $after . $delimiter;
 		echo $before . '<a href="' . get_permalink( $parent ) . '">' . $parent->post_title . '</a>' . $after . $delimiter;
 		echo $before . get_the_title() . $after;
 
@@ -194,9 +185,9 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 		$breadcrumbs = array();
 
 		while ( $parent_id ) {
-			$page = get_page( $parent_id );
-			$breadcrumbs[] = $before . '<a href="' . get_permalink($page->ID) . '">' . get_the_title( $page->ID ) . '</a>' . $after . $delimiter;
-			$parent_id  = $page->post_parent;
+			$page          = get_page( $parent_id );
+			$breadcrumbs[] = $before . '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>' . $after . $delimiter;
+			$parent_id     = $page->post_parent;
 		}
 
 		$breadcrumbs = array_reverse( $breadcrumbs );
