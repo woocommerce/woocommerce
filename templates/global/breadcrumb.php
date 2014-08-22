@@ -35,9 +35,7 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 
 		echo $before . single_post_title('', false) . $after;
 
-	}
-
-	if ( is_category() ) {
+	} elseif ( is_category() ) {
 
 		$cat_obj = $wp_query->get_queried_object();
 		$this_category = get_category( $cat_obj->term_id );
@@ -186,14 +184,14 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 
 		while ( $parent_id ) {
 			$page          = get_page( $parent_id );
-			$breadcrumbs[] = $before . '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>' . $after . $delimiter;
+			$breadcrumbs[] = '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>';
 			$parent_id     = $page->post_parent;
 		}
 
 		$breadcrumbs = array_reverse( $breadcrumbs );
 
 		foreach ( $breadcrumbs as $crumb ) {
-			echo $crumb . '' . $delimiter;
+			echo $before . $crumb . $after . $delimiter;
 		}
 
 		echo $before . get_the_title() . $after;
