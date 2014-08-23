@@ -38,7 +38,9 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		if ( 0 != $this_category->parent ) {
 			$parent_category = get_category( $this_category->parent );
-			echo get_category_parents($parent_category, TRUE, $delimiter );
+			if ( ( $parents = get_category_parents( $parent_category, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
+				echo $before . $parents . $after . $delimiter;
+			}
 		}
 
 		echo $before . single_cat_title( '', false ) . $after;
@@ -137,7 +139,9 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		} else {
 
 			$cat = current( get_the_category() );
-			echo get_category_parents( $cat, true, $delimiter );
+			if ( ( $parents = get_category_parents( $cat, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
+				echo $before . $parents . $after . $delimiter;
+			}
 			echo $before . get_the_title() . $after;
 
 		}
@@ -159,7 +163,9 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		$parent = get_post( $post->post_parent );
 		$cat = get_the_category( $parent->ID );
 		$cat = $cat[0];
-		echo get_category_parents( $cat, true, '' . $delimiter );
+		if ( ( $parents = get_category_parents( $cat, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
+			echo $before . $parents . $after . $delimiter;
+		}
 		echo $before . '<a href="' . get_permalink( $parent ) . '">' . $parent->post_title . '</a>' . $after . $delimiter;
 		echo $before . get_the_title() . $after;
 
@@ -173,9 +179,9 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		$breadcrumbs = array();
 
 		while ( $parent_id ) {
-			$page = get_page( $parent_id );
-			$breadcrumbs[] = '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>';
-			$parent_id  = $page->post_parent;
+			$page          = get_page( $parent_id );
+			$breadcrumbs[] = $before . '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>' . $after . $delimiter;
+			$parent_id     = $page->post_parent;
 		}
 
 		$breadcrumbs = array_reverse( $breadcrumbs );
