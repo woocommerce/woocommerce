@@ -201,6 +201,7 @@ module.exports = function( grunt ) {
 				src: [
 					'**',
 					'!.*',
+					'!*.md',
 					'!.*/**',
 					'.htaccess',
 					'!Gruntfile.js',
