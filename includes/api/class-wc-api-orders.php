@@ -203,7 +203,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$item_meta = array();
 
-			$hideprefix = $filter['all_meta'] == true ? null : '_';
+			$hideprefix = $filter['all_meta'] == 'true' ? null : '_';
 
 			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
