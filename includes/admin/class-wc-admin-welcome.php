@@ -105,7 +105,7 @@ class WC_Admin_Welcome {
 				text-align: center;
 				position: absolute;
 				top: 0;
-				<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'right' : 'left'; ?>: 0;
+				<?php echo is_rtl() ? 'right' : 'left'; ?>: 0;
 				margin: 0;
 				vertical-align: middle;
 			}
@@ -127,7 +127,7 @@ class WC_Admin_Welcome {
 			.about-wrap .wc-badge {
 				position: absolute;
 				top: 0;
-				<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'left' : 'right'; ?>: 0;
+				<?php echo is_rtl() ? 'left' : 'right'; ?>: 0;
 			}
 			.about-wrap .wc-feature {
 				overflow: visible !important;
