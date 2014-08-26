@@ -119,9 +119,10 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the order ID
 	 * @param array $fields
+	 * @param array $filter
 	 * @return array
 	 */
-	public function get_order( $id, $fields = null ) {
+	public function get_order( $id, $fields = null, $filter = array() ) {
 
 		// ensure order ID is valid & user has permission to read
 		$id = $this->validate_request( $id, 'shop_order', 'read' );
@@ -202,7 +203,9 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$item_meta = array();
 
-			foreach ( $meta->get_formatted() as $meta_key => $formatted_meta ) {
+			$hideprefix = $filter['all_meta'] == 'true' ? null : '_';
+
+			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
 					'key' => $meta_key,
 					'label' => $formatted_meta['label'],
