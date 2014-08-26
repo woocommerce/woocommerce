@@ -606,16 +606,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 						jQuery.each( value_array, function( key, line ){
 							var tab = ( key == 0 ) ? 0:25;
 							temp_line = temp_line + jQuery.wc_strPad( '', tab, ' ', 'f' ) + line +'\n';
-						} );
+						});
 
 						the_value = temp_line;
 					}
 
 					report = report +''+ the_name + the_value + "\n";
-				} );
+				});
 
 			}
-		} );
+		});
 
 		try {
 			jQuery( "#debug-report" ).slideDown();
