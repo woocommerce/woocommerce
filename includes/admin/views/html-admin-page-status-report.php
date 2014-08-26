@@ -70,6 +70,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</td>
 		</tr>
 		<tr>
+			<td><?php _e( 'WP Active Plugins', 'woocommerce' ); ?>:</td>
+			<td><?php echo count( (array) get_option( 'active_plugins' ) ); ?></td>
+		</tr>
+		<tr>
 			<td><?php _e( 'WP Memory Limit','woocommerce' ); ?>:</td>
 			<td><?php
 				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
