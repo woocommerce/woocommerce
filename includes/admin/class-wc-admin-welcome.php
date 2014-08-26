@@ -415,7 +415,7 @@ class WC_Admin_Welcome {
 			return array();
 		}
 
-		set_transient( 'woocommerce_contributors', $contributors, 3600 );
+		set_transient( 'woocommerce_contributors', $contributors, HOUR_IN_SECONDS );
 
 		return $contributors;
 	}
