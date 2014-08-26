@@ -579,10 +579,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		return o;
 	};
 
-	jQuery('a.debug-report').click(function(){
-
-		var report = "";
-
 	jQuery( 'a.debug-report' ).click(function(){
 
 		var report = "";
