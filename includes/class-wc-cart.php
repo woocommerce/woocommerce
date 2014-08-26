@@ -111,6 +111,8 @@ class WC_Cart {
 			'shipping_total'          => 0,
 			'shipping_tax_total'      => 0,
 			'coupon_discount_amounts' => array(),
+			'fee_total'               => 0,
+			'fees'                    => array()
 		);
 
 		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
@@ -1876,6 +1878,9 @@ class WC_Cart {
 		 * Calculate fees
 		 */
 		public function calculate_fees() {
+			// Reset fees before calculation
+			$this->fee_total = 0;
+			$this->fees      = array();
 
 			// Fire an action where developers can add their fees
 			do_action( 'woocommerce_cart_calculate_fees', $this );

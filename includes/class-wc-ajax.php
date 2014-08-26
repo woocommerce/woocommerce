@@ -624,7 +624,7 @@ class WC_AJAX {
 				'instock'    => __( 'In stock', 'woocommerce' ),
 				'outofstock' => __( 'Out of stock', 'woocommerce' )
 			);
-			
+
 			// Get parent data
 			$parent_data = array(
 				'id'                   => $post_id,
@@ -1684,9 +1684,14 @@ class WC_AJAX {
 		global $wpdb;
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
+		if ( method_exists( $wpdb, 'esc_like' ) ) {
+			$term = $wpdb->esc_like( $term );
+		} else {
+			$term = like_escape( $term );
+		}
 
 		$query->query_from  .= " INNER JOIN {$wpdb->usermeta} AS user_name ON {$wpdb->users}.ID = user_name.user_id AND ( user_name.meta_key = 'first_name' OR user_name.meta_key = 'last_name' ) ";
-		$query->query_where .= $wpdb->prepare( " OR user_name.meta_value LIKE %s ", '%' . like_escape( $term ) . '%' );
+		$query->query_where .= $wpdb->prepare( " OR user_name.meta_value LIKE %s ", '%' . $term . '%' );
 	}
 
 	/**
