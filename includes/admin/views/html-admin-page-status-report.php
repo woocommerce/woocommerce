@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 <br/>
-<table class="wc_status_table widefat" cellspacing="0">
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 
 	<thead>
 		<tr>
@@ -555,32 +555,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 </table>
 
 <script type="text/javascript">
-	/*
-	@var i string default
-	@var l how many repeat s
-	@var s string to repeat
-	@var w where s should indent
-	*/
-	jQuery.wc_strPad = function(i,l,s,w) {
+
+	/**
+	 * wc_strPad
+	 *
+	 * @param  {var} i string default
+	 * @param  {var} l how many repeat s
+	 * @param  {var} s string to repeat
+	 * @param  {var} w where s should indent
+	 * @return {var}   string modified
+	 */
+	jQuery.wc_strPad = function( i, l, s, w ) {
 		var o = i.toString();
-		if (!s) { s = '0'; }
-		while (o.length < l) {
+		if (! s) { s = '0'; }
+		while ( o.length < l ) {
 			// empty
-			if(w == 'undefined'){
+			if ( w == 'undefined' ){
 				o = s + o;
-			}else{
+			} else {
 				o = o + s;
 			}
 		}
 		return o;
 	};
 
-
 	jQuery('a.debug-report').click(function(){
 
 		var report = "";
 
-		jQuery('.wc_status_table thead, .wc_status_table tbody').each(function(){
+	jQuery( 'a.debug-report' ).click(function(){
+
+		var report = "";
+
+		jQuery( '#status thead, #status tbody' ).each(function(){
 
 			if ( jQuery( this ).is('thead') ) {
 
@@ -588,38 +595,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			} else {
 
-				jQuery('tr', jQuery( this )).each(function(){
+				jQuery('tr', jQuery( this ) ).each(function(){
 
-					var the_name    = jQuery.wc_strPad( jQuery.trim( jQuery( this ).find('td:eq(0)').text() ), 25, ' ' );
-					var the_value   = jQuery.trim( jQuery( this ).find('td:eq(1)').text() );
+					var the_name    = jQuery.wc_strPad( jQuery.trim( jQuery( this ).find( 'td:eq(0)' ).text() ), 25, ' ' );
+					var the_value   = jQuery.trim( jQuery( this ).find( 'td:eq(1)' ).text() );
 					var value_array = the_value.split( ', ' );
 
-					if ( value_array.length > 1 ){
+					if ( value_array.length > 1 ) {
 
-						// if value have a list of plugins ','
-						// split to add new line
+						// If value have a list of plugins ','
+						// Split to add new line
 						var output = '';
 						var temp_line ='';
-						jQuery.each( value_array, function(key, line){
-							var tab = ( key == 0 )?0:25;
+						jQuery.each( value_array, function( key, line ){
+							var tab = ( key == 0 ) ? 0:25;
 							temp_line = temp_line + jQuery.wc_strPad( '', tab, ' ', 'f' ) + line +'\n';
-						});
+						} );
 
 						the_value = temp_line;
 					}
 
 					report = report +''+ the_name + the_value + "\n";
-				});
+				} );
 
 			}
 		} );
 
 		try {
-			jQuery("#debug-report").slideDown();
-			jQuery("#debug-report textarea").val( report ).focus().select();
-			jQuery(this).fadeOut();
+			jQuery( "#debug-report" ).slideDown();
+			jQuery( "#debug-report textarea" ).val( report ).focus().select();
+			jQuery( this ).fadeOut();
 			return false;
-		} catch(e){ console.log( e ); }
+		} catch( e ){
+			console.log( e );
+		}
 
 		return false;
 	});
@@ -633,7 +642,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			'delay':      0
 		});
 
-		$( 'body' ) .on( 'copy', '#copy-for-support', function ( e ) {
+		$( 'body' ).on( 'copy', '#copy-for-support', function ( e ) {
 			e.clipboardData.clearData();
 			e.clipboardData.setData( 'text/plain', $( '#debug-report textarea' ).val() );
 			e.preventDefault();
