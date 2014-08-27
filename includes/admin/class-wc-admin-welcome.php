@@ -325,7 +325,7 @@ class WC_Admin_Welcome {
 
 			<?php $this->intro(); ?>
 
-			<p class="about-description"><?php _e( 'WooCommerce has been kindly translated into several other languages thanks to our translation team. Want to see your name? <a href="https://www.transifex.com/projects/p/woocommerce/">Translate WooCommerce</a>.', 'woocommerce' ); ?></p>
+			<p class="about-description"><?php echo sprintf( __( 'WooCommerce has been kindly translated into several other languages thanks to our translation team. Want to see your name? <a href="%s">Translate WooCommerce</a>.', 'woocommerce' ), esc_url( 'https://www.transifex.com/projects/p/woocommerce/' ) ); ?></p>
 
 			<?php
 				// Have to use this to get the list until the API is open...
