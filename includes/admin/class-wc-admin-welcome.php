@@ -86,8 +86,6 @@ class WC_Admin_Welcome {
 		remove_submenu_page( 'index.php', 'wc-credits' );
 		remove_submenu_page( 'index.php', 'wc-translators' );
 
-		// Badge for welcome page
-		$badge_url = WC()->plugin_url() . '/assets/images/welcome/wc-badge.png';
 		?>
 		<style type="text/css">
 			/*<![CDATA[*/
