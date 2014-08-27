@@ -419,7 +419,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 							$theme_update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
 							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
-							set_transient( $theme_dir . '_version_data', $theme_version_data , 60*60*12 );
+							set_transient( $theme_dir . '_version_data', $theme_version_data , DAY_IN_SECONDS );
 							break;
 
 						endif;
