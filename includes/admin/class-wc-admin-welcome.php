@@ -105,7 +105,7 @@ class WC_Admin_Welcome {
 				text-align: center;
 				position: absolute;
 				top: 0;
-				<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'right' : 'left'; ?>: 0;
+				<?php echo is_rtl() ? 'right' : 'left'; ?>: 0;
 				margin: 0;
 				vertical-align: middle;
 			}
@@ -127,7 +127,7 @@ class WC_Admin_Welcome {
 			.about-wrap .wc-badge {
 				position: absolute;
 				top: 0;
-				<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'left' : 'right'; ?>: 0;
+				<?php echo is_rtl() ? 'left' : 'right'; ?>: 0;
 			}
 			.about-wrap .wc-feature {
 				overflow: visible !important;
@@ -293,7 +293,7 @@ class WC_Admin_Welcome {
 						<p><?php _e( 'The Payment Gateway API has been enhanced to support refunds and storing transaction IDs.', 'woocommerce' ); ?></p>
 					</div>
 				</div>
-			</div>			
+			</div>
 
 			<div class="return-to-dashboard">
 				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'wc-settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>
