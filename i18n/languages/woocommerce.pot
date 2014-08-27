@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.2.0-bleeding Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-08-27 17:17:09+00:00\n"
+"POT-Creation-Date: 2014-08-27 19:02:15+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4221,7 +4221,7 @@ msgstr ""
 #: deploy/includes/abstracts/abstract-wc-integration.php:30
 #: deploy/includes/abstracts/abstract-wc-settings-api.php:39
 #: deploy/includes/admin/class-wc-admin-menus.php:64
-#: deploy/includes/admin/class-wc-admin-welcome.php:222
+#: deploy/includes/admin/class-wc-admin-welcome.php:220
 #: deploy/includes/admin/settings/class-wc-settings-checkout.php:277
 #: deploy/includes/admin/settings/class-wc-settings-shipping.php:229
 #: deploy/includes/admin/views/html-admin-page-status-report.php:290
@@ -6317,161 +6317,158 @@ msgstr ""
 msgid "Welcome to WooCommerce"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:204
+#: deploy/includes/admin/class-wc-admin-welcome.php:202
 msgid "Welcome to WooCommerce %s"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:209
+#: deploy/includes/admin/class-wc-admin-welcome.php:207
 msgid "Thanks, all done!"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:211
+#: deploy/includes/admin/class-wc-admin-welcome.php:209
 msgid "Thank you for updating to the latest version!"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:213
+#: deploy/includes/admin/class-wc-admin-welcome.php:211
 msgid "Thanks for installing!"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:215
+#: deploy/includes/admin/class-wc-admin-welcome.php:213
 msgid ""
 "%s WooCommerce %s is more powerful, stable, and secure than ever before. We "
 "hope you enjoy using it."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:219
+#: deploy/includes/admin/class-wc-admin-welcome.php:217
 msgid "Version %s"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:223
+#: deploy/includes/admin/class-wc-admin-welcome.php:221
 #: deploy/woocommerce.php:187 woocommerce.php:187
 msgid "Docs"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:230
+#: deploy/includes/admin/class-wc-admin-welcome.php:228
 msgid "What's New"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:232
+#: deploy/includes/admin/class-wc-admin-welcome.php:230
 msgid "Credits"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:234
+#: deploy/includes/admin/class-wc-admin-welcome.php:232
 msgid "Translators"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:254
+#: deploy/includes/admin/class-wc-admin-welcome.php:252
 msgid "Perform partial refunds on orders"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:255
+#: deploy/includes/admin/class-wc-admin-welcome.php:253
 msgid ""
 "Store owners can now do partial refunds on orders; define the refund "
 "amount, qty, and optionally restore inventory. If the gateway supports it, "
 "the payment can be automatically refunded too!"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:259
+#: deploy/includes/admin/class-wc-admin-welcome.php:257
 msgid "Updated order totals UI"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:260
+#: deploy/includes/admin/class-wc-admin-welcome.php:258
 msgid ""
 "To support the partial refund functionality, the order items and totals "
 "panels have been combined. As a result we have a simpler, more user "
 "friendly order page."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:265
+#: deploy/includes/admin/class-wc-admin-welcome.php:263
 msgid "WooCommerce REST API version 2"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:268
+#: deploy/includes/admin/class-wc-admin-welcome.php:266
 msgid "Introducing PUT/POST/DELETE methods"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:269
+#: deploy/includes/admin/class-wc-admin-welcome.php:267
 msgid ""
 "Update, delete and create orders, customers, products and coupons via the "
 "API."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:272
+#: deploy/includes/admin/class-wc-admin-welcome.php:270
 msgid "Other enhancements"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:273
+#: deploy/includes/admin/class-wc-admin-welcome.php:271
 msgid ""
 "Resources can now be ordered by any field you define for greater control "
 "over returned results. v2 also introduces an endpoint for getting product "
 "categories from your store."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:276
+#: deploy/includes/admin/class-wc-admin-welcome.php:274
 #: deploy/includes/class-wc-post-types.php:370
 #: includes/class-wc-post-types.php:370
 msgid "Webhooks"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:277
+#: deploy/includes/admin/class-wc-admin-welcome.php:275
 msgid ""
 "Trigger webhooks during events such as when an order is created. Opens up "
 "all kinds of external integration opportunities."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:284
+#: deploy/includes/admin/class-wc-admin-welcome.php:282
 msgid "Language pack downloader"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:285
+#: deploy/includes/admin/class-wc-admin-welcome.php:283
 msgid ""
 "Due to the size of PO and MO files, we have removed them from core and "
 "included our \"Language Pack Downloader\". International users can download "
 "and update their translation files easily from the dashboard."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:288
+#: deploy/includes/admin/class-wc-admin-welcome.php:286
 msgid "Variation stock management"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:289
+#: deploy/includes/admin/class-wc-admin-welcome.php:287
 msgid ""
 "You can now set stock management options (such as backorder support) at "
 "variation level giving much greater control over stock."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:292
+#: deploy/includes/admin/class-wc-admin-welcome.php:290
 msgid "Improved Payment Gateways"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:293
+#: deploy/includes/admin/class-wc-admin-welcome.php:291
 msgid ""
 "The Payment Gateway API has been enhanced to support refunds and storing "
 "transaction IDs."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:299
+#: deploy/includes/admin/class-wc-admin-welcome.php:297
 msgid "Go to WooCommerce Settings"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:314
+#: deploy/includes/admin/class-wc-admin-welcome.php:312
 msgid ""
 "WooCommerce is developed and maintained by a worldwide team of passionate "
 "individuals and backed by an awesome developer community. Want to see your "
-"name? <a "
-"href=\"https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md\""
-">Contribute to WooCommerce</a>."
+"name? <a href=\"%s\">Contribute to WooCommerce</a>."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:330
+#: deploy/includes/admin/class-wc-admin-welcome.php:328
 msgid ""
 "WooCommerce has been kindly translated into several other languages thanks "
-"to our translation team. Want to see your name? <a "
-"href=\"https://www.transifex.com/projects/p/woocommerce/\">Translate "
+"to our translation team. Want to see your name? <a href=\"%s\">Translate "
 "WooCommerce</a>."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:379
+#: deploy/includes/admin/class-wc-admin-welcome.php:377
 msgid "View %s"
 msgstr ""
 
