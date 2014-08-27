@@ -293,6 +293,8 @@ class WC_Admin_Welcome {
 				</div>
 			</div>
 
+			<hr />
+
 			<div class="return-to-dashboard">
 				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'wc-settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>
 			</div>
