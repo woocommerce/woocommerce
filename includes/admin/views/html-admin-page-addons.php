@@ -13,8 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="icon32 icon32-posts-product" id="icon-woocommerce"><br /></div>
 	<h2>
 		<?php _e( 'WooCommerce Add-ons/Extensions', 'woocommerce' ); ?>
-		<a href="http://www.woothemes.com/product-category/woocommerce-extensions/" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
-		<a href="http://www.woothemes.com/product-category/themes/woocommerce/" class="add-new-h2"><?php _e( 'Browse themes', 'woocommerce' ); ?></a>
+		<a href="<?php echo esc_url( 'http://www.woothemes.com/product-category/woocommerce-extensions/' ); ?>" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
+		<a href="<?php echo esc_url( 'http://www.woothemes.com/product-category/themes/woocommerce/' ); ?>" class="add-new-h2"><?php _e( 'Browse themes', 'woocommerce' ); ?></a>
 	</h2>
 	<?php if ( $addons ) : ?>
 		<ul class="subsubsub">
@@ -88,8 +88,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 		</ul>
 	<?php else : ?>
-
-		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'http://www.woothemes.com/product-category/woocommerce-extensions/' ); ?></p>
-
+		<p><?php echo sprintf( __( 'Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), esc_url( 'http://www.woothemes.com/product-category/woocommerce-extensions/' ) ); ?></p>
 	<?php endif; ?>
 </div>
