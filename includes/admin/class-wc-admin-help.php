@@ -34,8 +34,8 @@ class WC_Admin_Help {
 			return;
 
 		$screen->add_help_tab( array(
-			'id'	=> 'woocommerce_docs_tab',
-			'title'	=> __( 'Documentation', 'woocommerce' ),
+			'id'		=> 'woocommerce_docs_tab',
+			'title'		=> __( 'Documentation', 'woocommerce' ),
 			'content'	=>
 
 				'<p>' . __( 'Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please read the documentation.', 'woocommerce' ) . '</p>' .
@@ -45,8 +45,8 @@ class WC_Admin_Help {
 		) );
 
 		$screen->add_help_tab( array(
-			'id'	=> 'woocommerce_support_tab',
-			'title'	=> __( 'Support', 'woocommerce' ),
+			'id'		=> 'woocommerce_support_tab',
+			'title'		=> __( 'Support', 'woocommerce' ),
 			'content'	=>
 
 				'<p>' . sprintf( __( 'After <a href="%s">reading the documentation</a>, for further assistance you can use the <a href="%s">community forum</a>, or if you have access as a WooThemes customer, <a href="%s">our support desk</a>.', 'woocommerce' ), esc_url( 'http://docs.woothemes.com/documentation/plugins/woocommerce/' ), esc_url( 'http://wordpress.org/support/plugin/woocommerce' ), esc_url( 'http://support.woothemes.com' ) ) . '</p>' .
@@ -58,8 +58,8 @@ class WC_Admin_Help {
 		) );
 
 		$screen->add_help_tab( array(
-			'id'	=> 'woocommerce_bugs_tab',
-			'title'	=> __( 'Found a bug?', 'woocommerce' ),
+			'id'		=> 'woocommerce_bugs_tab',
+			'title'		=> __( 'Found a bug?', 'woocommerce' ),
 			'content'	=>
 
 				'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. Be as descriptive as possible and please include your <a href="%s">system status report</a>.', 'woocommerce' ), esc_url( 'https://github.com/woothemes/woocommerce/issues?state=open' ), esc_url( 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md' ), admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
