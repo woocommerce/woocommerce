@@ -530,7 +530,7 @@ final class WooCommerce {
 	 */
 	public function api_request_url( $request, $ssl = null ) {
 		if ( is_null( $ssl ) ) {
-			$scheme = parse_url( get_option( 'home' ), PHP_URL_SCHEME );
+			$scheme = parse_url( home_url(), PHP_URL_SCHEME );
 		} elseif ( $ssl ) {
 			$scheme = 'https';
 		} else {
