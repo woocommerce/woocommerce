@@ -52,7 +52,7 @@ class WC_Admin_CPT_Product extends WC_Admin_CPT {
 		// Sort link
 		add_filter( 'views_edit-product', array( $this, 'default_sorting_link' ) );
 
-		// Prouct filtering
+		// Product filtering
 		add_action( 'restrict_manage_posts', array( $this, 'product_filters' ) );
 		add_filter( 'parse_query', array( $this, 'product_filters_query' ) );
 
