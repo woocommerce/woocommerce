@@ -72,10 +72,10 @@ class WC_Admin_Help {
 		$screen->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:', 'woocommerce' ) . '</strong></p>' .
 			'<p><a href="' . esc_url( 'http://www.woothemes.com/woocommerce/' ) . '" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="' . esc_url( 'http://wordpress.org/extend/plugins/woocommerce/' ) . '" target="_blank">' . __( 'Project on WordPress.org', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="' . esc_url( 'https://github.com/woothemes/woocommerce' ) . '" target="_blank">' . __( 'Project on Github', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="' . esc_url( 'http://www.woothemes.com/product-category/woocommerce-extensions/' ) . '" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="' . esc_url( 'http://www.woothemes.com/product-category/themes/woocommerce/' ) . '" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>'
+			'<p><a href="' . esc_url( 'http://wordpress.org/extend/plugins/woocommerce/' ) . '" target="_blank">' . __( 'WordPress.org Project', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . esc_url( 'https://github.com/woothemes/woocommerce' ) . '" target="_blank">' . __( 'Github Project', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . esc_url( 'http://www.woothemes.com/product-category/themes/woocommerce/' ) . '" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . esc_url( 'http://www.woothemes.com/product-category/woocommerce-extensions/' ) . '" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>'
 		);
 	}
 
