@@ -47,7 +47,7 @@ class WC_AJAX {
 			'add_order_shipping'                               => false,
 			'add_order_tax'                                    => false,
 			'remove_order_item'                                => false,
-			'remote_order_tax'                                 => false,
+			'remove_order_tax'                                 => false,
 			'reduce_order_item_stock'                          => false,
 			'increase_order_item_stock'                        => false,
 			'add_order_item_meta'                              => false,
@@ -1116,7 +1116,7 @@ class WC_AJAX {
 	/**
 	 * Remove an order tax
 	 */
-	public static function remote_order_tax() {
+	public static function remove_order_tax() {
 
 		check_ajax_referer( 'order-item', 'security' );
 
