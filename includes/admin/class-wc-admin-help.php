@@ -25,7 +25,7 @@ class WC_Admin_Help {
 	}
 
 	/**
-	 * Add help tabs
+	 * Add Contextual help tabs
 	 */
 	public function add_tabs() {
 		$screen = get_current_screen();
