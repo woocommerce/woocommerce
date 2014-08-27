@@ -309,7 +309,7 @@ class WC_Admin_Welcome {
 
 			<?php $this->intro(); ?>
 
-			<p class="about-description"><?php _e( 'WooCommerce is developed and maintained by a worldwide team of passionate individuals and backed by an awesome developer community. Want to see your name? <a href="https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md">Contribute to WooCommerce</a>.', 'woocommerce' ); ?></p>
+			<p class="about-description"><?php echo sprintf( __( 'WooCommerce is developed and maintained by a worldwide team of passionate individuals and backed by an awesome developer community. Want to see your name? <a href="%s">Contribute to WooCommerce</a>.', 'woocommerce' ), esc_url( 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md' ) ); ?></p>
 
 			<?php echo $this->contributors(); ?>
 		</div>
