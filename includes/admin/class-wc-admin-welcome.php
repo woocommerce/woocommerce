@@ -309,7 +309,7 @@ class WC_Admin_Welcome {
 
 			<?php $this->intro(); ?>
 
-			<p class="about-description"><?php _e( 'WooCommerce is developed and maintained by a worldwide team of passionate individuals and backed by an awesome developer community. Want to see your name? <a href="https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md">Contribute to WooCommerce</a>.', 'woocommerce' ); ?></p>
+			<p class="about-description"><?php printf( __( 'WooCommerce is developed and maintained by a worldwide team of passionate individuals and backed by an awesome developer community. Want to see your name? <a href="%s">Contribute to WooCommerce</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md' ); ?></p>
 
 			<?php echo $this->contributors(); ?>
 		</div>
@@ -325,7 +325,7 @@ class WC_Admin_Welcome {
 
 			<?php $this->intro(); ?>
 
-			<p class="about-description"><?php _e( 'WooCommerce has been kindly translated into several other languages thanks to our translation team. Want to see your name? <a href="https://www.transifex.com/projects/p/woocommerce/">Translate WooCommerce</a>.', 'woocommerce' ); ?></p>
+			<p class="about-description"><?php printf( __( 'WooCommerce has been kindly translated into several other languages thanks to our translation team. Want to see your name? <a href="%s">Translate WooCommerce</a>.', 'woocommerce' ), 'https://www.transifex.com/projects/p/woocommerce/' ); ?></p>
 
 			<?php
 				// Have to use this to get the list until the API is open...
