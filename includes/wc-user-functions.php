@@ -361,9 +361,7 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 		case 'promote_user' :
 		case 'delete_user' :
 		case 'delete_users' :
-			if ( ! isset( $args[0] ) ) {
-				$caps[] = 'do_not_allow';
-			} elseif ( $args[0] === $user_id ) {
+			if ( ! isset( $args[0] ) || $args[0] === $user_id ) {
 				break;
 			} else {
 				if ( user_can( $args[0], 'administrator' ) && ! current_user_can( 'administrator' ) ) {
