@@ -38,7 +38,7 @@ class WC_Product_Variation extends WC_Product {
 	public $variation_has_downloadable_files = true;
 
 	/** @private array Data which is only at variation level - no inheritance plus their default values if left blank. */
-	private $variation_level_meta_data = array(
+	protected $variation_level_meta_data = array(
 		'downloadable'          => 'no',
 		'virtual'               => 'no',
 		'manage_stock'          => 'no',
@@ -53,7 +53,7 @@ class WC_Product_Variation extends WC_Product {
 	);
 
 	/** @private array Data which can be at variation level, otherwise fallback to parent if not set. */
-	private $variation_inherited_meta_data = array(
+	protected $variation_inherited_meta_data = array(
 		'tax_class'  => '',
 		'backorders' => 'no',
 		'sku'        => '',
