@@ -88,8 +88,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 		</ul>
 	<?php else : ?>
-
 		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'http://www.woothemes.com/product-category/woocommerce-extensions/' ); ?></p>
-
 	<?php endif; ?>
 </div>
