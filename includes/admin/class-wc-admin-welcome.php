@@ -108,7 +108,7 @@ class WC_Admin_Welcome {
 				vertical-align: middle;
 			}
 			.wc-badge {
-				position: relative;;
+				position: relative;
 				background: #9c5d90;
 				text-rendering: optimizeLegibility;
 				padding-top: 150px;
