@@ -565,7 +565,7 @@ jQuery( function ( $ ) {
 				addOrderItemsLoading();
 
 				var data = {
-					action:   'woocommerce_remote_order_tax',
+					action:   'woocommerce_remove_order_tax',
 					rate_id:  $( this ).attr( 'data-rate_id' ),
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					security: woocommerce_admin_meta_boxes.order_item_nonce
