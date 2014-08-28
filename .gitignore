@@ -10,7 +10,3 @@ Thumbs.db
 sftp-config.json
 /deploy/
 /wc-apidocs/
-
-# Ignore all log files except for .htaccess
-/logs/*
-!/logs/.htaccess
