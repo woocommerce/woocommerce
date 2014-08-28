@@ -638,25 +638,6 @@ class WC_Install {
 	}
 
 	/**
-	 * Active plugins pre update option filter
-	 *
-	 * @param string $new_value
-	 * @return string
-	 */
-	function pre_update_option_active_plugins( $new_value ) {
-		$old_value = (array) get_option( 'active_plugins' );
-
-		if ( $new_value !== $old_value && in_array( W3TC_FILE, (array) $new_value ) && in_array( W3TC_FILE, (array) $old_value ) ) {
-			$this->_config->set( 'notes.plugins_updated', true );
-			try {
-				$this->_config->save();
-			} catch( Exception $ex ) {}
-		}
-
-		return $new_value;
-	}
-
-	/**
 	 * Show plugin changes. Code adapted from W3 Total Cache.
 	 *
 	 * @return void
