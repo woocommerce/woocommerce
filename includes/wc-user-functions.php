@@ -360,7 +360,6 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 		case 'remove_user' :
 		case 'promote_user' :
 		case 'delete_user' :
-		case 'delete_users' :
 			if ( ! isset( $args[0] ) ) {
 				$caps[] = 'do_not_allow';
 			} elseif ( $args[0] === $user_id ) {
