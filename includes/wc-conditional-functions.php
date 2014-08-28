@@ -182,6 +182,21 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_order_page' ) ) {
+
+	/**
+	* is_order_page - Returns true when viewing the order.
+	*
+	* @access public
+	* @return bool
+	*/
+	function is_order_page() {
+		global $wp;
+
+		return ( isset( $wp->query_vars['view-order'] ) ) ? true : false;
+	}
+}
+
 if ( ! function_exists( 'is_add_payment_method_page' ) ) {
 
 	/**
