@@ -11,6 +11,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $product, $woocommerce_loop;
 
+if ( empty( $product ) || ! $product->exists() ) {
+	return;
+}
+
 $related = $product->get_related( $posts_per_page );
 
 if ( sizeof( $related ) == 0 ) return;
