@@ -37,25 +37,29 @@ class WC_Product_Variation extends WC_Product {
 	public $variation_has_tax_class          = true;
 	public $variation_has_downloadable_files = true;
 
-	/** @private array List of meta keys which apply to variations */
-	public $variation_level_meta_keys        = array(
-		'manage_stock',
-		'stock_status',
-		'stock',
-		'backorders',
-		'sku',
-		'downloadable_files',
-		'weight',
-		'length',
-		'height',
-		'downloadable',
-		'virtual',
-		'tax_class',
-		'sale_price_dates_from',
-		'sale_price_dates_to',
-		'price',
-		'regular_price',
-		'sale_price'
+	/** @private array Data which is only at variation level - no inheritance plus their default values if left blank. */
+	private $variation_level_meta_data = array(
+		'downloadable'          => 'no',
+		'virtual'               => 'no',
+		'manage_stock'          => 'no',
+		'sale_price_dates_from' => '',
+		'sale_price_dates_to'   => '',
+		'price'                 => '',
+		'regular_price'         => '',
+		'sale_price'            => '',
+		'stock'                 => 0,
+		'stock_status'          => 'instock',
+		'downloadable_files'    => array()
+	);
+
+	/** @private array Data which can be at variation level, otherwise fallback to parent if not set. */
+	private $variation_inherited_meta_data = array(
+		'tax_class'  => '',
+		'backorders' => 'no',
+		'sku'        => '',
+		'weight'     => '',
+		'length'     => '',
+		'height'     => ''
 	);
 
 	/**
@@ -93,7 +97,9 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool
 	 */
 	public function __isset( $key ) {
-		if ( in_array( $key, $this->variation_level_meta_keys ) ) {
+		if ( in_array( $key, array_keys( $this->variation_level_meta_data ) ) ) {
+			return metadata_exists( 'post', $this->variation_id, '_' . $key );
+		} elseif ( in_array( $key, array_keys( $this->variation_inherited_meta_data ) ) ) {
 			return metadata_exists( 'post', $this->variation_id, '_' . $key ) || metadata_exists( 'post', $this->id, '_' . $key );
 		} else {
 			return metadata_exists( 'post', $this->id, '_' . $key );
@@ -108,25 +114,25 @@ class WC_Product_Variation extends WC_Product {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		if ( in_array( $key, $this->variation_level_meta_keys ) ) {
+		if ( in_array( $key, array_keys( $this->variation_level_meta_data ) ) ) {
 
-			// Get values or default if not set (no)
-			if ( in_array( $key, array( 'downloadable', 'virtual', 'manage_stock' ) ) ) {
-				$value = ( $value = get_post_meta( $this->variation_id, '_' . $key, true ) ) ? $value : 'no';
+			$value = get_post_meta( $this->variation_id, '_' . $key, true );
 
-			// Data which must be set (not null), otherwise use parent data
-			} elseif ( in_array( $key , array( 'tax_class', 'backorders' ) ) ) {
-				$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
+			if ( '' === $value ) {
+				$value = $this->variation_level_meta_data[ $key ];
+			}
 
-			// Data which is only at variation level - no inheritance
-			} elseif ( in_array( $key , array( 'price', 'regular_price', 'sale_price', 'sale_price_dates_to', 'sale_price_dates_from' ) ) ) {
-				$value = ( $value = get_post_meta( $this->variation_id, '_' . $key, true ) ) ? $value : '';
+		} elseif ( in_array( $key, array_keys( $this->variation_inherited_meta_data ) ) ) {
 
-			} elseif ( 'stock' === $key ) {
-				$value = ( $value = get_post_meta( $this->variation_id, '_stock', true ) ) ? $value : 0;
+			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
 
-			} else {
-				$value = ( $value = get_post_meta( $this->variation_id, '_' . $key, true ) ) ? $value : get_post_meta( $this->id, '_' . $key, true );
+			// Handle meta data keys which can be empty at variation level to cause inheritance
+			if ( '' === $value && in_array( $key, array( 'sku', 'weight', 'length', 'height' ) ) ) {
+				$value = get_post_meta( $this->id, '_' . $key, true );
+			}
+
+			if ( '' === $value ) {
+				$value = $this->variation_inherited_meta_data[ $key ];
 			}
 
 		} elseif ( 'variation_data' === $key ) {
@@ -493,7 +499,7 @@ class WC_Product_Variation extends WC_Product {
 	 */
 	public function get_availability() {
 		$availability = $class = '';
-		
+
 		if ( $this->managing_stock() ) {
 			if ( $this->is_in_stock() && $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				switch ( get_option( 'woocommerce_stock_format' ) ) {
@@ -535,7 +541,7 @@ class WC_Product_Variation extends WC_Product {
 			$class        = 'out-of-stock';
 		}
 		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class ), $this );
-	}	
+	}
 
 	/**
 	 * Returns whether or not the product needs to notify the customer on backorder.
