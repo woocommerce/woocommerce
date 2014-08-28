@@ -144,14 +144,14 @@ class WC_Admin_Welcome {
 			}
 			.about-wrap .feature-rest div {
 				width: 50% !important;
-				padding-<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'left' : 'right'; ?>: 100px;
+				padding-<?php echo is_rtl() ? 'left' : 'right'; ?>: 100px;
 				-moz-box-sizing: border-box;
 				box-sizing: border-box;
 				margin: 0 !important;
 			}
 			.about-wrap .feature-rest div.last-feature {
-				padding-<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'right' : 'left'; ?>: 100px;
-				padding-<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'left' : 'right'; ?>: 0;
+				padding-<?php echo is_rtl() ? 'right' : 'left'; ?>: 100px;
+				padding-<?php echo is_rtl() ? 'left' : 'right'; ?>: 0;
 			}
 			.about-wrap div.icon {
 				width: 0 !important;
@@ -169,7 +169,7 @@ class WC_Admin_Welcome {
 				position: relative;
 				text-align: center;
 				speak: none;
-				margin: <?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? '0 -100px 0 0' : '0 0 0 -100px'; ?>;
+				margin: <?php echo is_rtl() ? '0 -100px 0 0' : '0 0 0 -100px'; ?>;
 				content: "\e01d";
 				-webkit-font-smoothing: antialiased;
 				-moz-osx-font-smoothing: grayscale;
