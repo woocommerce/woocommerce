@@ -68,7 +68,6 @@ class WC_Admin_Help {
 
 		) );
 
-
 		$screen->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:', 'woocommerce' ) . '</strong></p>' .
 			'<p><a href="http://www.woothemes.com/woocommerce/" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
