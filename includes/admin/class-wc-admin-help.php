@@ -64,17 +64,17 @@ class WC_Admin_Help {
 
 				'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. Be as descriptive as possible and please include your <a href="%s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
 
-				'<p><a href="https://github.com/woothemes/woocommerce/issues?state=open" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url('admin.php?page=wc-status') . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . 'https://github.com/woothemes/woocommerce/issues?state=open' . '" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url('admin.php?page=wc-status') . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>'
 
 		) );
 
 		$screen->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:', 'woocommerce' ) . '</strong></p>' .
-			'<p><a href="http://www.woothemes.com/woocommerce/" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="http://wordpress.org/extend/plugins/woocommerce/" target="_blank">' . __( 'WordPress.org Project', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="https://github.com/woothemes/woocommerce" target="_blank">' . __( 'Github Project', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="http://www.woothemes.com/product-category/themes/woocommerce/" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="http://www.woothemes.com/product-category/woocommerce-extensions/" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>'
+			'<p><a href="' . 'http://www.woothemes.com/woocommerce/' . '" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . 'http://wordpress.org/extend/plugins/woocommerce/' . '" target="_blank">' . __( 'WordPress.org Project', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . 'https://github.com/woothemes/woocommerce' . '" target="_blank">' . __( 'Github Project', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . 'http://www.woothemes.com/product-category/themes/woocommerce/' . '" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . 'http://www.woothemes.com/product-category/woocommerce-extensions/' . '" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>'
 		);
 	}
 
