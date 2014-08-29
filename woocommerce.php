@@ -237,6 +237,7 @@ final class WooCommerce {
 	 */
 	private function define_constants() {
 		define( 'WC_PLUGIN_FILE', __FILE__ );
+		define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 		define( 'WC_VERSION', $this->version );
 		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compatibility
 
