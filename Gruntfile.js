@@ -3,6 +3,7 @@ module.exports = function( grunt ) {
 	'use strict';
 
 	grunt.initConfig({
+
 		// setting folder templates
 		dirs: {
 			css: 'assets/css',
@@ -11,7 +12,7 @@ module.exports = function( grunt ) {
 			js: 'assets/js'
 		},
 
-		// javascript linting with jshint.
+		// JavaScript linting with JSHint.
 		jshint: {
 			options: {
 				jshintrc: '.jshintrc'
@@ -100,7 +101,7 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Watch changes for assets
+		// Watch changes for assets.
 		watch: {
 			less: {
 				files: ['<%= dirs.css %>/*.less'],
@@ -117,6 +118,7 @@ module.exports = function( grunt ) {
 			}
 		},
 
+		// Generate POT files.
 		makepot: {
 			options: {
 				type: 'wp-plugin',
@@ -154,6 +156,7 @@ module.exports = function( grunt ) {
 			}
 		},
 
+		// Check textdomain errors.
 		checktextdomain: {
 			options:{
 				text_domain: 'woocommerce',
@@ -184,6 +187,7 @@ module.exports = function( grunt ) {
 			}
 		},
 
+		// Exec shell commands.
 		shell: {
 			options: {
 				stdout: true,
@@ -197,6 +201,7 @@ module.exports = function( grunt ) {
 			}
 		},
 
+		// Copy files to deploy.
 		copy: {
 			deploy: {
 				src: [
@@ -218,6 +223,7 @@ module.exports = function( grunt ) {
 			}
 		},
 
+		// Clean the directory.
 		clean: {
 			apigen: {
 				src: [ 'wc-apidocs' ]
