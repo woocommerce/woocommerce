@@ -28,7 +28,7 @@ class WC_Install {
 		add_action( 'admin_init', array( $this, 'install_actions' ) );
 		add_action( 'admin_init', array( $this, 'check_version' ), 5 );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ) );
-		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( $this, 'action_links' ) );
+		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
 	}
 
 	/**
@@ -683,17 +683,18 @@ class WC_Install {
 	}
 
 	/**
-	 * Show action links on the plugin screen
+	 * Show action links on the plugin screen.
 	 *
-	 * @param mixed $links
-	 * @return array
+	 * @access	public
+	 * @param	mixed $links Plugin Action links
+	 * @return	array
 	 */
-	public function action_links( $links ) {
-		return array_merge( array(
-			'<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
-			'<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
-			'<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
-		), $links );
+	public function plugin_action_links( $links ) {
+		$action_links = apply_filters( 'woocommerce_plugin_action_links' array(
+			'settings'	=>	'<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View this Plugin Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+		) );
+
+		return array_merge( $action_links, $links );
 	}
 }
 
