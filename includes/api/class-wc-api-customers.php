@@ -60,6 +60,11 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'get_customers' ),   WC_API_SERVER::READABLE ),
 			array( array( $this, 'create_customer' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
+		
+		# POST /customers/login
+		$routes[ $this->base . '/login' ] = array(
+			array( array( $this, 'login_customer' ),   WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		);
 
 		# GET /customers/count
 		$routes[ $this->base . '/count'] = array(
@@ -419,6 +424,44 @@ class WC_API_Customers extends WC_API_Resource {
 		}
 
 		return $this->delete( $id, 'customer' );
+	}
+	
+	/**
+	 * Login a customer
+	 *
+	 * @since 2.2
+	 * @param array $data
+	 * @return array
+	 */
+	public function login_customer( $data ) {
+
+		// Checks the username.
+		if ( ! isset( $data['username'] ) ) {
+			return new WP_Error( 'woocommerce_api_missing_customer_username', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'username' ), array( 'status' => 400 ) );
+		}
+
+		// Checks the password.
+		if ( ! isset( $data['password'] ) ) {
+			return new WP_Error( 'woocommerce_api_missing_customer_password', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'password' ), array( 'status' => 400 ) );
+		}
+
+		// Attempts to login customer
+		$credentials = array();
+		$credentials['user_login'] = $data['username'];
+		$credentials['user_password'] = $data['password'];
+		$credentials['remember'] = true;
+		$user = wp_signon( $credentials, false );
+
+		// Checks for an error in the customer login.
+		if ( is_wp_error( $user) ) {
+			return new WP_Error( 'woocommerce_api_cannot_login_customer', $user->get_error_message(), array( 'status' => 400 ) );
+		}
+
+		do_action( 'woocommerce_api_login_customer', $user );
+
+		$this->server->send_status( 201 );
+
+		return $this->get_customer( $user->ID );
 	}
 
 	/**
