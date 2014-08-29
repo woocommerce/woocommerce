@@ -691,9 +691,9 @@ class WC_Install {
 	 * @return	array
 	 */
 	public function plugin_action_links( $links ) {
-		$action_links = apply_filters( 'woocommerce_plugin_action_links', array(
+		$action_links = array(
 			'settings'	=>	'<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View this Plugin Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
-		) );
+		);
 
 		return array_merge( $action_links, $links );
 	}
