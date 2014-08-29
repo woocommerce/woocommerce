@@ -29,6 +29,7 @@ class WC_Install {
 		add_action( 'admin_init', array( $this, 'check_version' ), 5 );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
 	}
 
 	/**
@@ -695,6 +696,27 @@ class WC_Install {
 		) );
 
 		return array_merge( $action_links, $links );
+	}
+
+	/**
+	 * Show row meta on the plugin screen.
+	 *
+	 * @access	public
+	 * @param	mixed $links Plugin Row Meta
+	 * @param	mixed $file  Plugin Base file
+	 * @return	array
+	 */
+	public function plugin_row_meta( $links, $file ) {
+		if ( $file == WC_PLUGIN_BASENAME ) {
+			$row_meta = apply_filters( 'woocommerce_plugin_row_meta', array(
+				'docs'		=>	'<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View this Plugin Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
+				'support'	=>	'<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
+			) );
+
+			return array_merge( $links, $row_meta );
+		}
+
+		return (array) $links;
 	}
 }
 
