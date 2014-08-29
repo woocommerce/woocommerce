@@ -69,6 +69,7 @@ class WC_Admin_Notices {
 		}
 
 		if ( in_array( 'translation_upgrade', $notices ) ) {
+			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 			add_action( 'admin_notices', array( $this, 'translation_upgrade_notice' ) );
 		}
 
@@ -154,7 +155,7 @@ class WC_Admin_Notices {
 	 */
 	public function mijireh_notice() {
 		include( 'views/html-notice-mijireh.php' );
-	}	
+	}
 }
 
 endif;

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.2.0-bleeding Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-08-28 05:48:28+00:00\n"
+"POT-Creation-Date: 2014-08-28 22:29:33+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -338,7 +338,7 @@ msgid "Gambia"
 msgstr ""
 
 #: deploy/i18n/countries.php:97 deploy/i18n/states/US.php:23
-#: i18n/countries.php:97 i18n/states/US.php:23
+#: i18n/countries.php:97
 msgid "Georgia"
 msgstr ""
 
@@ -4305,7 +4305,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-order.php:1556
 #: includes/abstracts/abstract-wc-product.php:893
 #: includes/abstracts/abstract-wc-product.php:899
-#: includes/class-wc-cart.php:1438 includes/class-wc-product-variation.php:283
+#: includes/class-wc-cart.php:1438 includes/class-wc-product-variation.php:289
 msgid "Free!"
 msgstr ""
 
@@ -4371,28 +4371,28 @@ msgstr ""
 
 #: deploy/includes/abstracts/abstract-wc-payment-gateway.php:275
 #: deploy/includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:259
-#: includes/abstracts/abstract-wc-payment-gateway.php:275
+#: includes/abstracts/abstract-wc-payment-gateway.php:279
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:259
 msgid "Card Number"
 msgstr ""
 
 #: deploy/includes/abstracts/abstract-wc-payment-gateway.php:279
-#: includes/abstracts/abstract-wc-payment-gateway.php:279
+#: includes/abstracts/abstract-wc-payment-gateway.php:283
 msgid "Expiry (MM/YY)"
 msgstr ""
 
 #: deploy/includes/abstracts/abstract-wc-payment-gateway.php:280
-#: includes/abstracts/abstract-wc-payment-gateway.php:280
+#: includes/abstracts/abstract-wc-payment-gateway.php:284
 msgid "MM / YY"
 msgstr ""
 
 #: deploy/includes/abstracts/abstract-wc-payment-gateway.php:283
-#: includes/abstracts/abstract-wc-payment-gateway.php:283
+#: includes/abstracts/abstract-wc-payment-gateway.php:287
 msgid "Card Code"
 msgstr ""
 
 #: deploy/includes/abstracts/abstract-wc-payment-gateway.php:284
-#: includes/abstracts/abstract-wc-payment-gateway.php:284
+#: includes/abstracts/abstract-wc-payment-gateway.php:288
 msgid "CVC"
 msgstr ""
 
@@ -4402,7 +4402,7 @@ msgstr ""
 #: deploy/includes/class-wc-product-variation.php:191
 #: includes/abstracts/abstract-wc-product.php:480
 #: includes/class-wc-product-simple.php:48
-#: includes/class-wc-product-variation.php:191
+#: includes/class-wc-product-variation.php:197
 msgid "Add to cart"
 msgstr ""
 
@@ -4427,16 +4427,16 @@ msgstr ""
 #: includes/abstracts/abstract-wc-product.php:574
 #: includes/abstracts/abstract-wc-product.php:584
 #: includes/abstracts/abstract-wc-product.php:600
-#: includes/class-wc-ajax.php:624 includes/class-wc-product-variation.php:501
-#: includes/class-wc-product-variation.php:511
-#: includes/class-wc-product-variation.php:527
+#: includes/class-wc-ajax.php:624 includes/class-wc-product-variation.php:507
+#: includes/class-wc-product-variation.php:517
+#: includes/class-wc-product-variation.php:533
 msgid "In stock"
 msgstr ""
 
 #: deploy/includes/abstracts/abstract-wc-product.php:578
 #: deploy/includes/class-wc-product-variation.php:505
 #: includes/abstracts/abstract-wc-product.php:578
-#: includes/class-wc-product-variation.php:505
+#: includes/class-wc-product-variation.php:511
 msgid "Only %s left in stock"
 msgstr ""
 
@@ -4446,15 +4446,15 @@ msgstr ""
 #: deploy/includes/class-wc-product-variation.php:518
 #: includes/abstracts/abstract-wc-product.php:581
 #: includes/abstracts/abstract-wc-product.php:591
-#: includes/class-wc-product-variation.php:508
-#: includes/class-wc-product-variation.php:518
+#: includes/class-wc-product-variation.php:514
+#: includes/class-wc-product-variation.php:524
 msgid "(can be backordered)"
 msgstr ""
 
 #: deploy/includes/abstracts/abstract-wc-product.php:588
 #: deploy/includes/class-wc-product-variation.php:515
 #: includes/abstracts/abstract-wc-product.php:588
-#: includes/class-wc-product-variation.php:515
+#: includes/class-wc-product-variation.php:521
 msgid "%s in stock"
 msgstr ""
 
@@ -4462,7 +4462,7 @@ msgstr ""
 #: deploy/includes/class-wc-product-variation.php:524
 #: deploy/templates/cart/cart.php:72
 #: includes/abstracts/abstract-wc-product.php:597
-#: includes/class-wc-product-variation.php:524 templates/cart/cart.php:72
+#: includes/class-wc-product-variation.php:530 templates/cart/cart.php:72
 msgid "Available on backorder"
 msgstr ""
 
@@ -4480,8 +4480,8 @@ msgstr ""
 #: deploy/includes/class-wc-product-variation.php:534
 #: includes/abstracts/abstract-wc-product.php:603
 #: includes/abstracts/abstract-wc-product.php:607
-#: includes/class-wc-ajax.php:625 includes/class-wc-product-variation.php:530
-#: includes/class-wc-product-variation.php:534
+#: includes/class-wc-ajax.php:625 includes/class-wc-product-variation.php:536
+#: includes/class-wc-product-variation.php:540
 msgid "Out of stock"
 msgstr ""
 
@@ -5036,28 +5036,28 @@ msgstr ""
 msgid "Report a bug"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-help.php:73
+#: deploy/includes/admin/class-wc-admin-help.php:72
 msgid "For more information:"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-help.php:74
+#: deploy/includes/admin/class-wc-admin-help.php:73
 #: deploy/includes/admin/class-wc-admin-welcome.php:49
 msgid "About WooCommerce"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-help.php:75
+#: deploy/includes/admin/class-wc-admin-help.php:74
 msgid "WordPress.org Project"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-help.php:76
+#: deploy/includes/admin/class-wc-admin-help.php:75
 msgid "Github Project"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-help.php:77
+#: deploy/includes/admin/class-wc-admin-help.php:76
 msgid "Official Themes"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-help.php:78
+#: deploy/includes/admin/class-wc-admin-help.php:77
 msgid "Official Extensions"
 msgstr ""
 
@@ -6450,25 +6450,25 @@ msgid ""
 "transaction IDs."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:297
+#: deploy/includes/admin/class-wc-admin-welcome.php:299
 msgid "Go to WooCommerce Settings"
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:312
+#: deploy/includes/admin/class-wc-admin-welcome.php:314
 msgid ""
 "WooCommerce is developed and maintained by a worldwide team of passionate "
 "individuals and backed by an awesome developer community. Want to see your "
 "name? <a href=\"%s\">Contribute to WooCommerce</a>."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:328
+#: deploy/includes/admin/class-wc-admin-welcome.php:330
 msgid ""
 "WooCommerce has been kindly translated into several other languages thanks "
 "to our translation team. Want to see your name? <a href=\"%s\">Translate "
 "WooCommerce</a>."
 msgstr ""
 
-#: deploy/includes/admin/class-wc-admin-welcome.php:377
+#: deploy/includes/admin/class-wc-admin-welcome.php:379
 msgid "View %s"
 msgstr ""
 
@@ -10643,8 +10643,8 @@ msgstr ""
 #: deploy/includes/api/v1/class-wc-api-products.php:460
 #: deploy/includes/wc-product-functions.php:267
 #: deploy/templates/single-product/product-image.php:38
-#: includes/api/class-wc-api-products.php:1516
 #: includes/api/class-wc-api-products.php:1517
+#: includes/api/class-wc-api-products.php:1518
 #: includes/api/v1/class-wc-api-products.php:459
 #: includes/api/v1/class-wc-api-products.php:460
 #: includes/wc-product-functions.php:267
@@ -10653,17 +10653,17 @@ msgid "Placeholder"
 msgstr ""
 
 #: deploy/includes/api/class-wc-api-products.php:1590
-#: includes/api/class-wc-api-products.php:1590
+#: includes/api/class-wc-api-products.php:1591
 msgid "Invalid URL %s"
 msgstr ""
 
 #: deploy/includes/api/class-wc-api-products.php:1602
-#: includes/api/class-wc-api-products.php:1602
+#: includes/api/class-wc-api-products.php:1603
 msgid "Error getting remote image %s"
 msgstr ""
 
 #: deploy/includes/api/class-wc-api-products.php:1631
-#: includes/api/class-wc-api-products.php:1631
+#: includes/api/class-wc-api-products.php:1632
 msgid "Zero size file downloaded"
 msgstr ""
 
@@ -11986,7 +11986,7 @@ msgstr ""
 #: deploy/includes/class-wc-product-simple.php:48
 #: deploy/includes/class-wc-product-variation.php:191
 #: includes/class-wc-product-simple.php:48
-#: includes/class-wc-product-variation.php:191
+#: includes/class-wc-product-variation.php:197
 msgid "Read More"
 msgstr ""
 
@@ -12003,7 +12003,7 @@ msgid ""
 msgstr ""
 
 #: deploy/includes/class-wc-product-variation.php:639
-#: includes/class-wc-product-variation.php:639
+#: includes/class-wc-product-variation.php:645
 msgid "%s &ndash; %s%s"
 msgstr ""
 
@@ -14913,33 +14913,33 @@ msgstr ""
 msgid "Cost: %s"
 msgstr ""
 
-#: deploy/templates/global/breadcrumb.php:67 templates/global/breadcrumb.php:67
+#: deploy/templates/global/breadcrumb.php:67 templates/global/breadcrumb.php:71
 msgid "Products tagged &ldquo;"
 msgstr ""
 
 #: deploy/templates/global/breadcrumb.php:95
 #: deploy/templates/global/breadcrumb.php:197
-#: templates/global/breadcrumb.php:95 templates/global/breadcrumb.php:197
+#: templates/global/breadcrumb.php:99 templates/global/breadcrumb.php:201
 msgid "Search results for &ldquo;"
 msgstr ""
 
 #: deploy/templates/global/breadcrumb.php:151
-#: templates/global/breadcrumb.php:151
+#: templates/global/breadcrumb.php:155
 msgid "Error 404"
 msgstr ""
 
 #: deploy/templates/global/breadcrumb.php:201
-#: templates/global/breadcrumb.php:201
+#: templates/global/breadcrumb.php:205
 msgid "Posts tagged &ldquo;"
 msgstr ""
 
 #: deploy/templates/global/breadcrumb.php:206
-#: templates/global/breadcrumb.php:206
+#: templates/global/breadcrumb.php:210
 msgid "Author:"
 msgstr ""
 
 #: deploy/templates/global/breadcrumb.php:211
-#: templates/global/breadcrumb.php:211
+#: templates/global/breadcrumb.php:215
 msgid "Page"
 msgstr ""
 
@@ -15273,7 +15273,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: deploy/templates/single-product/related.php:36
-#: templates/single-product/related.php:36
+#: templates/single-product/related.php:40
 msgid "Related Products"
 msgstr ""
 
@@ -15758,4 +15758,9 @@ msgstr ""
 #: deploy/templates/loop/result-count.php:32 templates/loop/result-count.php:32
 msgctxt "%1$d = first, %2$d = last, %3$d = total"
 msgid "Showing %1$d&ndash;%2$d of %3$d results"
+msgstr ""
+
+#: i18n/states/US.php:23
+msgctxt "US state of Georgia"
+msgid "Georgia"
 msgstr ""
