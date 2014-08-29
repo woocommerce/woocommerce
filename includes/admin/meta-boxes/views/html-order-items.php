@@ -133,6 +133,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 			<td class="total"><?php echo wc_price( $order->get_total_shipping() ); ?></td>
 			<td width="1%"></td>
 		</tr>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $order->id ); ?>
+
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
 			<?php foreach ( $order->get_tax_totals() as $code => $tax ) : ?>
 				<tr>
@@ -142,6 +145,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 				</tr>
 			<?php endforeach; ?>
 		<?php endif; ?>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_tax', $order->id ); ?>
+
 		<tr>
 			<td class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total discount applied after tax.', 'woocommerce' ); ?>">[?]</span>:</td>
 			<td class="total">
@@ -153,6 +159,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 			</td>
 			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
 		</tr>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->id ); ?>
+
 		<tr>
 			<td class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</td>
 			<td class="total">
@@ -164,11 +173,17 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 			</td>
 			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
 		</tr>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->id ); ?>
+
 		<tr>
 			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
 			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded() ); ?></td>
 			<td width="1%"></td>
 		</tr>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->id ); ?>
+
 	</table>
 	<div class="clear"></div>
 </div>
