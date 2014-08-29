@@ -131,7 +131,8 @@ module.exports = function( grunt ) {
 					potFilename: 'woocommerce.pot',
 					exclude: [
 						'includes/admin/.*',
-						'apigen/.*'
+						'apigen/.*',
+						'deploy/.*'
 					],
 					processPot: function ( pot ) {
 						pot.headers['project-id-version'] += ' Frontend';
