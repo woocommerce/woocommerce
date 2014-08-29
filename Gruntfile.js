@@ -181,6 +181,7 @@ module.exports = function( grunt ) {
 				src:  [
 					'**/*.php', // Include all files
 					'!apigen/**', // Exclude apigen/
+					'!deploy/**', // Exclude deploy/
 					'!node_modules/**' // Exclude node_modules/
 				],
 				expand: true
