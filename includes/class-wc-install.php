@@ -21,8 +21,10 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
+		// Run this on activation.
 		register_activation_hook( WC_PLUGIN_FILE, array( $this, 'install' ) );
 
+		// Hooks
 		add_action( 'admin_init', array( $this, 'install_actions' ) );
 		add_action( 'admin_init', array( $this, 'check_version' ), 5 );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ) );
