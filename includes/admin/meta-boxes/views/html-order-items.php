@@ -196,7 +196,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && $can_be_edited ) : ?>
 			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
 		<?php endif; ?>
-		<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
+		<?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
+			<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
+		<?php endif; ?>
 		<?php if ( $can_be_edited ) : ?>
 		<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate Taxes', 'woocommerce' ); ?></button>
 		<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
@@ -210,6 +212,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 	<button type="button" class="button button-primary save-action"><?php _e( 'Save', 'woocommerce' ); ?></button>
 </div>
+<?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
 <div class="wc-order-data-row wc-order-refund-items" style="display: none;">
 	<table class="wc-order-totals">
 		<tr>
@@ -249,6 +252,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<div class="clear"></div>
 	</div>
 </div>
+<?php endif; ?>
 
 <script type="text/template" id="wc-modal-add-products">
 	<div class="wc-backbone-modal">
