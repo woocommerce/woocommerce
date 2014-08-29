@@ -117,6 +117,12 @@ jQuery(function($) {
         }
     });
 
+	var a = document.createElement('a');
+
+	if ( typeof a.download == "undefined" ) {
+		$('.export_csv').hide();
+	}
+
     // Export
     $('.export_csv').click(function(){
         var exclude_series = $(this).data( 'exclude_series' ) || '';

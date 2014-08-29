@@ -10,3 +10,4 @@ Thumbs.db
 sftp-config.json
 /deploy/
 /wc-apidocs/
+.idea
