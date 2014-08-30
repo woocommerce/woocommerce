@@ -193,10 +193,14 @@ class WC_API_Coupons extends WC_API_Resource {
 	public function create_coupon( $data ) {
 		global $wpdb;
 
+		$data = isset( $data['coupon'] ) ? $data['coupon'] : array();
+
 		// Check user permission
 		if ( ! current_user_can( 'publish_shop_coupons' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_create_coupon', __( 'You do not have permission to create coupons', 'woocommerce' ), array( 'status' => 401 ) );
 		}
+
+		$data = apply_filters( 'woocommerce_api_create_coupon_data', $data, $this );
 
 		// Check if coupon code is specified
 		if ( ! isset( $data['code'] ) ) {
@@ -219,24 +223,24 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		$defaults = array(
-			'type'	=> 'fixed_cart',
-			'amount' => 0,
-			'individual_use' => 'no',
-			'product_ids' => array(),
-			'exclude_product_ids' => array(),
-			'usage_limit'	=> '',
-			'usage_limit_per_user' => '',
-			'limit_usage_to_x_items' => '',
-			'usage_count' => '',
-			'expiry_date' => '',
-			'apply_before_tax' => 'yes',
-			'free_shipping' => 'no',
-			'product_categories' => array(),
+			'type'                       => 'fixed_cart',
+			'amount'                     => 0,
+			'individual_use'             => 'no',
+			'product_ids'                => array(),
+			'exclude_product_ids'        => array(),
+			'usage_limit'                => '',
+			'usage_limit_per_user'       => '',
+			'limit_usage_to_x_items'     => '',
+			'usage_count'                => '',
+			'expiry_date'                => '',
+			'apply_before_tax'           => 'yes',
+			'free_shipping'              => 'no',
+			'product_categories'         => array(),
 			'exclude_product_categories' => array(),
-			'exclude_sale_items' => 'no',
-			'minimum_amount' => '',
-			'maximum_amount' => '',
-			'customer_email' => array(),
+			'exclude_sale_items'         => 'no',
+			'minimum_amount'             => '',
+			'maximum_amount'             => '',
+			'customer_email'             => array(),
 		);
 
 		$coupon_data = wp_parse_args( $data, $defaults );
@@ -247,11 +251,11 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		$new_coupon = array(
-			'post_title' 	=> $coupon_code,
-			'post_content' 	=> '',
-			'post_status' 	=> 'publish',
-			'post_author' 	=> get_current_user_id(),
-			'post_type'		=> 'shop_coupon'
+			'post_title'   => $coupon_code,
+			'post_content' => '',
+			'post_status'  => 'publish',
+			'post_author'  => get_current_user_id(),
+			'post_type'    => 'shop_coupon'
 		);
 
 		$id = wp_insert_post( $new_coupon, $wp_error = false );
@@ -297,11 +301,15 @@ class WC_API_Coupons extends WC_API_Resource {
 	 */
 	public function edit_coupon( $id, $data ) {
 
+		$data = isset( $data['coupon'] ) ? $data['coupon'] : array();
+
 		$id = $this->validate_request( $id, 'shop_coupon', 'edit' );
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		$data = apply_filters( 'woocommerce_api_edit_coupon_data', $data, $id, $this );
 
 		if ( isset( $data['code'] ) ) {
 			global $wpdb;
@@ -424,6 +432,8 @@ class WC_API_Coupons extends WC_API_Resource {
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		do_action( 'woocommerce_api_delete_coupon', $id, $this );
 
 		return $this->delete( $id, 'shop_coupon', ( 'true' === $force ) );
 	}

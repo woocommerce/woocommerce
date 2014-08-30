@@ -173,10 +173,14 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function create_product( $data ) {
 
-		// Check permisions
+		$data = isset( $data['product'] ) ? $data['product'] : array();
+
+		// Check permissions
 		if ( ! current_user_can( 'publish_products' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_create_product', __( 'You do not have permission to create products', 'woocommerce' ), array( 'status' => 401 ) );
 		}
+
+		$data = apply_filters( 'woocommerce_api_create_product_data', $data, $this );
 
 		// Check if product title is specified
 		if ( ! isset( $data['title'] ) ) {
@@ -254,11 +258,15 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function edit_product( $id, $data ) {
 
+		$data = isset( $data['product'] ) ? $data['product'] : array();
+
 		$id = $this->validate_request( $id, 'product', 'edit' );
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		$data = apply_filters( 'woocommerce_api_edit_product_data', $data, $this );
 
 		// Product name.
 		if ( isset( $data['title'] ) ) {
@@ -332,6 +340,8 @@ class WC_API_Products extends WC_API_Resource {
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		do_action( 'woocommerce_api_delete_product', $id, $this );
 
 		return $this->delete( $id, 'product', ( 'true' === $force ) );
 	}
