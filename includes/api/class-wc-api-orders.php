@@ -109,7 +109,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $this->is_readable( $order_id ) )
 				continue;
 
-			$orders[] = current( $this->get_order( $order_id, $fields ) );
+			$orders[] = current( $this->get_order( $order_id, $fields, $filter ) );
 		}
 
 		$this->server->add_pagination_headers( $query );
@@ -208,7 +208,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$item_meta = array();
 
-			$hideprefix = $filter['all_meta'] == 'true' ? null : '_';
+			$hideprefix = ( isset( $filter['all_meta'] ) && $filter['all_meta'] === 'true' ) ? null : '_';
 
 			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
