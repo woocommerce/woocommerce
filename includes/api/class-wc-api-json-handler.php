@@ -22,7 +22,7 @@ class WC_API_JSON_Handler implements WC_API_Handler {
 	 */
 	public function get_content_type() {
 
-		return 'application/json; charset=' . get_option( 'blog_charset' );
+		return sprintf( '%s; charset=%s', isset( $_GET['_jsonp'] ) ? 'application/javascript' : 'application/json', get_option( 'blog_charset' ) );
 	}
 
 	/**
