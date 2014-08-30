@@ -264,7 +264,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			return new WP_Error( 'woocommerce_api_cannot_create_coupon', $id->get_error_message(), array( 'status' => 400 ) );
 		}
 
-		// Add POST Meta
+		// set coupon meta
 		update_post_meta( $id, 'discount_type', $coupon_data['type'] );
 		update_post_meta( $id, 'coupon_amount', wc_format_decimal( $coupon_data['amount'] ) );
 		update_post_meta( $id, 'individual_use', $coupon_data['individual_use'] );
@@ -384,16 +384,16 @@ class WC_API_Coupons extends WC_API_Resource {
 			update_post_meta( $id, 'apply_before_tax', wc_clean( $data['apply_before_tax'] ) );
 		}
 
-		if ( isset( $data['free_shipping'] ) ) {
-			update_post_meta( $id, 'free_shipping', wc_clean( $data['free_shipping'] ) );
+		if ( isset( $data['enable_free_shipping'] ) ) {
+			update_post_meta( $id, 'free_shipping', ( true === $data['enable_free_shipping'] ) ? 'yes' : 'no' );
 		}
 
-		if ( isset( $data['product_categories'] ) ) {
-			update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $data['product_categories'] ) ) );
+		if ( isset( $data['product_category_ids'] ) ) {
+			update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $data['product_category_ids'] ) ) );
 		}
 
-		if ( isset( $data['exclude_product_categories'] ) ) {
-			update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $data['exclude_product_categories'] ) ) );
+		if ( isset( $data['exclude_product_category_ids'] ) ) {
+			update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $data['exclude_product_category_ids'] ) ) );
 		}
 
 		if ( isset( $data['exclude_sale_items'] ) ) {
@@ -408,8 +408,8 @@ class WC_API_Coupons extends WC_API_Resource {
 			update_post_meta( $id, 'maximum_amount', wc_format_decimal( $data['maximum_amount'] ) );
 		}
 
-		if ( isset( $data['customer_email'] ) ) {
-			update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $data['customer_email'] ) ) );
+		if ( isset( $data['customer_emails'] ) ) {
+			update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $data['customer_emails'] ) ) );
 		}
 
 		do_action( 'woocommerce_api_edit_coupon', $id, $data );
