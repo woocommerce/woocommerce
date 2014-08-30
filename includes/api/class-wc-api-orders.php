@@ -429,7 +429,10 @@ class WC_API_Orders extends WC_API_Resource {
 				update_post_meta( $order->id, '_order_number', $data['order_number'] );
 			}
 
-			// TODO: should we allow clients to set meta?
+			// set order meta
+			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
+				$this->set_order_meta( $order->id, $data['order_meta'] );
+			}
 
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
@@ -578,6 +581,11 @@ class WC_API_Orders extends WC_API_Resource {
 				$order->calculate_totals();
 			}
 
+			// update order meta
+			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
+				$this->set_order_meta( $order->id, $data['order_meta'] );
+			}
+
 			// update the order post to set customer note/modified date
 			wc_update_order( $order_args );
 
@@ -708,6 +716,26 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 			foreach( $shipping_address as $key => $value ) {
 				update_user_meta( $order->get_user_id(), 'shipping_' . $key, $value );
+			}
+		}
+	}
+
+	/**
+	 * Helper method to add/update order meta, with two restrictions:
+	 *
+	 * 1) Only non-protected meta (no leading underscore) can be set
+	 * 2) Meta values must be scalar (int, string, bool)
+	 *
+	 * @since 2.2
+	 * @param int $order_id valid order ID
+	 * @param array $order_meta order meta in array( 'meta_key' => 'meta_value' ) format
+	 */
+	private function set_order_meta( $order_id, $order_meta ) {
+
+		foreach ( $order_meta as $meta_key => $meta_value ) {
+
+			if ( is_string( $meta_key) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
+				update_post_meta( $order_id, $meta_key, $meta_value );
 			}
 		}
 	}
