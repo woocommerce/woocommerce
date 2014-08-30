@@ -381,9 +381,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get a listing of product categories
 	 *
 	 * @since 2.2
+	 * @param string|null $fields fields to limit response to
 	 * @return array
 	 */
-	public function get_product_categories() {
+	public function get_product_categories( $fields = null ) {
 
 		// permissions check
 		if ( ! current_user_can( 'manage_product_terms' ) ) {
@@ -396,10 +397,10 @@ class WC_API_Products extends WC_API_Resource {
 
 		foreach ( $terms as $term_id ) {
 
-			$product_categories[] = current( $this->get_product_category( $term_id ) );
+			$product_categories[] = current( $this->get_product_category( $term_id, $fields ) );
 		}
 
-		return array( 'product_categories' => apply_filters( 'woocommerce_api_product_categories_response', $product_categories, $terms, $this ) );
+		return array( 'product_categories' => apply_filters( 'woocommerce_api_product_categories_response', $product_categories, $terms, $fields, $this ) );
 	}
 
 	/**
@@ -407,9 +408,10 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param string $id product category term ID
+	 * @param string|null $fields fields to limit response to
 	 * @return array
 	 */
-	public function get_product_category( $id ) {
+	public function get_product_category( $id, $fields = null ) {
 
 		$id = absint( $id );
 
@@ -438,7 +440,7 @@ class WC_API_Products extends WC_API_Resource {
 			'count'       => intval( $term->count ),
 		);
 
-		return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $term, $id, $this ) );
+		return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $id, $fields, $term, $this ) );
 	}
 
 	/**

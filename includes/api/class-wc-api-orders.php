@@ -1076,7 +1076,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		foreach ( $notes as $note ) {
 
-			$order_notes[] = current( $this->get_order_note( $order_id, $note->comment_ID ) );
+			$order_notes[] = current( $this->get_order_note( $order_id, $note->comment_ID, $fields ) );
 		}
 
 		return array( 'order_notes' => apply_filters( 'woocommerce_api_order_notes_response', $order_notes, $order_id, $fields, $notes, $this->server ) );
@@ -1315,7 +1315,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$order_refunds = array();
 
 		foreach ( $refund_items as $refund_id ) {
-			$order_refunds[] = current( $this->get_order_refund( $order_id, $refund_id ) );
+			$order_refunds[] = current( $this->get_order_refund( $order_id, $refund_id, $fields ) );
 		}
 
 		return array( 'order_refunds' => apply_filters( 'woocommerce_api_order_refunds_response', $order_refunds, $order_id, $fields, $refund_items, $this ) );
