@@ -38,8 +38,13 @@ class WC_API_Orders extends WC_API_Resource {
 		);
 
 		# GET /orders/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_orders_count' ), WC_API_Server::READABLE ),
+		);
+
+		# GET /orders/statuses
+		$routes[ $this->base . '/statuses' ] = array(
+			array( array( $this, 'get_order_statuses' ), WC_API_Server::READABLE ),
 		);
 
 		# GET|PUT|DELETE /orders/<id>
@@ -293,10 +298,32 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$query = $this->query_orders( $filter );
 
-		if ( ! current_user_can( 'read_private_shop_orders' ) )
+		if ( ! current_user_can( 'read_private_shop_orders' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_read_orders_count', __( 'You do not have permission to read the orders count', 'woocommerce' ), array( 'status' => 401 ) );
+		}
 
 		return array( 'count' => (int) $query->found_posts );
+	}
+
+	/**
+	 * Get a list of valid order statuses
+	 *
+	 * Note this requires no specific permissions other than being an authenticated
+	 * API user. Order statuses (particularly custom statuses) could be considered
+	 * private information which is why it's not in the API index.
+	 *
+	 * @since 2.1
+	 * @return array
+	 */
+	public function get_order_statuses() {
+
+		$order_statuses = array();
+
+		foreach ( wc_get_order_statuses() as $slug => $name ) {
+			$order_statuses[ str_replace( 'wc-', '', $slug ) ] = $name;
+		}
+
+		return array( 'order_statuses' => apply_filters( 'woocommerce_api_order_statuses_response', $order_statuses, $this ) );
 	}
 
 	/**
