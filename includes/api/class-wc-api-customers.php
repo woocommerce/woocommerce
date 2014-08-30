@@ -61,9 +61,9 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'create_customer' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 		
-		# POST /customers/login
-		$routes[ $this->base . '/login' ] = array(
-			array( array( $this, 'login_customer' ),   WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		# POST /customers/authenticate
+		$routes[ $this->base . '/authenticate' ] = array(
+			array( array( $this, 'authenticate_customer' ),   WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /customers/count
@@ -427,13 +427,13 @@ class WC_API_Customers extends WC_API_Resource {
 	}
 	
 	/**
-	 * Login a customer
+	 * Authenticate a customer
 	 *
 	 * @since 2.2
 	 * @param array $data
 	 * @return array
 	 */
-	public function login_customer( $data ) {
+	public function authenticate_customer( $data ) {
 
 		// Checks the username.
 		if ( ! isset( $data['username'] ) ) {
@@ -445,21 +445,12 @@ class WC_API_Customers extends WC_API_Resource {
 			return new WP_Error( 'woocommerce_api_missing_customer_password', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'password' ), array( 'status' => 400 ) );
 		}
 
-		// Attempts to login customer
-		$credentials = array();
-		$credentials['user_login'] = $data['username'];
-		$credentials['user_password'] = $data['password'];
-		$credentials['remember'] = true;
-		$user = wp_signon( $credentials, false );
+		$user = wp_authenticate($data['username'], $data['password'])
 
-		// Checks for an error in the customer login.
+		// Checks for an error in the customer authentication.
 		if ( is_wp_error( $user) ) {
-			return new WP_Error( 'woocommerce_api_cannot_login_customer', $user->get_error_message(), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_cannot_authenticate_customer', $user->get_error_message(), array( 'status' => 401 ) );
 		}
-
-		do_action( 'woocommerce_api_login_customer', $user );
-
-		$this->server->send_status( 201 );
 
 		return $this->get_customer( $user->ID );
 	}
