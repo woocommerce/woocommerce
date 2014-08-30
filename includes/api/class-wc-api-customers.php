@@ -539,6 +539,21 @@ class WC_API_Customers extends WC_API_Resource {
 			$this->created_at_max = $this->server->parse_datetime( $args['created_at_max'] );
 		}
 
+		// order (ASC or DESC, ASC by default)
+		if ( ! empty( $args['order'] ) ) {
+			$query_args['order'] = $args['order'];
+		}
+
+		// orderby
+		if ( ! empty( $args['orderby'] ) ) {
+			$query_args['orderby'] = $args['orderby'];
+
+			// allow sorting by meta value
+			if ( ! empty( $args['orderby_meta_key'] ) ) {
+				$query_args['meta_key'] = $args['orderby_meta_key'];
+			}
+		}
+
 		$query = new WP_User_Query( $query_args );
 
 		// helper members for pagination headers

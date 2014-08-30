@@ -565,44 +565,40 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_availability() {
-		$availability = $class = "";
-
+		$availability = $class = '';
+		
 		if ( $this->managing_stock() ) {
-			if ( $this->is_in_stock() ) {
-				if ( $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-
-					switch ( get_option( 'woocommerce_stock_format' ) ) {
-						case 'no_amount' :
-							$availability = __( 'In stock', 'woocommerce' );
-						break;
-						case 'low_amount' :
-							$low_amount   = get_option( 'woocommerce_notify_low_stock_amount' );
-							$availability = $this->get_total_stock() <= $low_amount ? sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_total_stock() ) : __( 'In stock', 'woocommerce' );
-						break;
-						default :
-							$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_total_stock() );
-						break;
-					}
-
-					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-						$availability .= ' ' . __( '(backorders allowed)', 'woocommerce' );
-					}
-
-				} elseif ( $this->backorders_allowed() ) {
-					if ( $this->backorders_require_notification() ) {
-						$availability = __( 'Available on backorder', 'woocommerce' );
-						$class        = 'available-on-backorder';
-					} else {
+			if ( $this->is_in_stock() && $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				switch ( get_option( 'woocommerce_stock_format' ) ) {
+					case 'no_amount' :
 						$availability = __( 'In stock', 'woocommerce' );
-					}
-				} else {
-					$availability = __( 'Out of stock', 'woocommerce' );
-					$class        = 'out-of-stock';
-				}
+					break;
+					case 'low_amount' :
+						if ( $this->get_total_stock() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+							$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_total_stock() );
 
-			} elseif ( $this->backorders_allowed() ) {
+							if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+								$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
+							}
+						} else {
+							$availability = __( 'In stock', 'woocommerce' );
+						}
+					break;
+					default :
+						$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_total_stock() );
+
+						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+							$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
+						}
+					break;
+				}
+				$class        = 'in-stock';
+			} elseif ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
 				$availability = __( 'Available on backorder', 'woocommerce' );
 				$class        = 'available-on-backorder';
+			} elseif ( $this->backorders_allowed() ) {
+				$availability = __( 'In stock', 'woocommerce' );
+				$class        = 'in-stock';
 			} else {
 				$availability = __( 'Out of stock', 'woocommerce' );
 				$class        = 'out-of-stock';
@@ -611,7 +607,6 @@ class WC_Product {
 			$availability = __( 'Out of stock', 'woocommerce' );
 			$class        = 'out-of-stock';
 		}
-
 		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class ), $this );
 	}
 
@@ -626,34 +621,33 @@ class WC_Product {
 	}
 
 	/**
-	 * Returns whether or not the product is visible.
+	 * Returns whether or not the product is visible in the catalog.
 	 *
 	 * @access public
 	 * @return bool
 	 */
 	public function is_visible() {
-
 		$visible = true;
 
+		// Published/private
+		if ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
+			$visible = false;
+
 		// Out of stock visibility
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes' && ! $this->is_in_stock() ) {
+		} elseif ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
 			$visible = false;
 
 		// visibility setting
-		} elseif ( $this->visibility === 'hidden' ) {
+		} elseif ( 'hidden' === $this->visibility ) {
 			$visible = false;
-		} elseif ( $this->visibility === 'visible' ) {
+		} elseif ( 'visible' === $this->visibility ) {
 			$visible = true;
 
 		// Visibility in loop
-		} elseif ( $this->visibility === 'search' && is_search() ) {
-			$visible = true;
-		} elseif ( $this->visibility === 'search' && ! is_search() ) {
-			$visible = false;
-		} elseif ( $this->visibility === 'catalog' && is_search() ) {
-			$visible = false;
-		} elseif ( $this->visibility === 'catalog' && ! is_search() ) {
-			$visible = true;
+		} elseif ( is_search() ) {
+			$visible = 'search' === $this->visibility;
+		} else {
+			$visible = 'catalog' === $this->visibility;
 		}
 
 		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->id );

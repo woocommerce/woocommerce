@@ -169,7 +169,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					$found = false;
 
-					echo '<select id="dropdown_layered_nav_' . $taxonomy_filter . '">';
+					echo '<select class="dropdown_layered_nav_' . $taxonomy_filter . '">';
 
 					echo '<option value="">' . sprintf( __( 'Any %s', 'woocommerce' ), wc_attribute_label( $taxonomy ) ) .'</option>';
 
@@ -219,9 +219,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					wc_enqueue_js("
 
-						jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
+						jQuery('.dropdown_layered_nav_$taxonomy_filter').change(function(){
 
-							location.href = '" . esc_url_raw( preg_replace( '%\/page/[0-9]+%', '', add_query_arg('filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter ) ) ) ) ) . "&filter_$taxonomy_filter=' + jQuery('#dropdown_layered_nav_$taxonomy_filter').val();
+							location.href = '" . esc_url_raw( preg_replace( '%\/page/[0-9]+%', '', add_query_arg('filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter ) ) ) ) ) . "&filter_$taxonomy_filter=' + jQuery(this).val();
 
 						});
 
@@ -383,5 +383,3 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		}
 	}
 }
-
-register_widget( 'WC_Widget_Layered_Nav' );

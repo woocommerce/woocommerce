@@ -116,7 +116,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 						WHERE 	meta.meta_key 		= '_customer_user'
 						AND 	meta.meta_value 	= $user->ID
-						AND 	posts.post_type 	IN ('" . implode( ',', wc_get_order_types( 'reports' ) ) . "')
+						AND 	posts.post_type 	IN ('" . implode( "','", wc_get_order_types( 'reports' ) ) . "')
 						AND 	posts.post_status 	= 'wc-completed'
 						AND     meta2.meta_key 		= '_order_total'
 					" );
@@ -135,7 +135,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 						LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 
 						WHERE 	meta.meta_key 		= '_customer_user'
-						AND 	posts.post_type 	IN ('" . implode( ',', wc_get_order_types( 'order-count' ) ) . "')
+						AND 	posts.post_type 	IN ('" . implode( "','", wc_get_order_types( 'order-count' ) ) . "')
 						AND 	posts.post_status 	= 'wc-completed'
 						AND 	meta_value 			= $user->ID
 					" );
@@ -163,7 +163,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 				) );
 
 				if ( $order_ids ) {
-					$order = get_order( $order_ids[0] );
+					$order = wc_get_order( $order_ids[0] );
 
 					echo '<a href="' . admin_url( 'post.php?post=' . $order->id . '&action=edit' ) . '">' . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) );
 				} else echo '-';

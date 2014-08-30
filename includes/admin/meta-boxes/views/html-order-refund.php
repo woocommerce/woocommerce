@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
+$who_refunded = new WP_User( $refund->post->post_author );
 ?>
 <tr class="refund <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_refund_id="<?php echo $refund->id; ?>">
 	<td class="check-column"></td>
@@ -9,7 +10,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<td class="thumb"><div></div></td>
 
 	<td class="name">
-		<?php _e( 'Refund', 'woocommerce' ); ?> - <?php echo date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post_date ) ); ?>
+		<?php
+			echo esc_attr__( 'Refund', 'woocommerce' ) . ' - ' . esc_attr( date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post_date ) ) );
+			if ( $who_refunded->exists() ){
+				echo ' ' . esc_attr_x( 'by', 'Ex: Refund - $date >by< $username', 'woocommerce' ) . ' ' . '<abbr class="refund_by" title="' . esc_attr__( 'ID: ', 'woocommerce' ) . absint( $who_refunded->ID ) . '">' . esc_attr( $who_refunded->display_name ) . '</abbr>' ;
+			}
+		?>
 		<?php if ( $refund->get_refund_reason() ) : ?>
 			<p class="description"><?php echo esc_html( $refund->get_refund_reason() ); ?></p>
 		<?php endif; ?>
@@ -24,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</td>
 
-	<?php if ( ! $legacy_order && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
+	<?php if ( ( ! isset( $legacy_order ) || ! $legacy_order ) && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
 
 		<td class="line_tax" width="1%"></td>
 

@@ -3,84 +3,114 @@
 /**
  * WooCommerce Admin JS
  */
-jQuery(function(){
+jQuery( function ( $ ) {
 
 	// Price input validation
-	jQuery('body').on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text], .wc_input_country_iso[type=text]', function() {
-		jQuery('.wc_error_tip').fadeOut('100', function(){ jQuery(this).remove(); } );
+	$('body').on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text], .wc_input_country_iso[type=text]', function() {
+		$('.wc_error_tip').fadeOut('100', function(){ $(this).remove(); } );
 		return this;
 	});
 
-	jQuery('body').on('keyup change', '.wc_input_price[type=text]', function(){
-		var value		= jQuery(this).val();
+	$('body').on('keyup change', '.wc_input_price[type=text]', function(){
+		var value		= $(this).val();
 		var regex		= new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.mon_decimal_point + "]+", "gi" );
 		var newvalue = value.replace( regex, '' );
 
 		if ( value !== newvalue ) {
-			jQuery(this).val( newvalue );
-			if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
-				var offset = jQuery(this).position();
-				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_mon_decimal_error + '</div>' );
-				jQuery('.wc_error_tip')
-					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
-					.css('top', offset.top + jQuery(this).height() )
+			$(this).val( newvalue );
+			if ( $(this).parent().find('.wc_error_tip').size() == 0 ) {
+				var offset = $(this).position();
+				$(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_mon_decimal_error + '</div>' );
+				$('.wc_error_tip')
+					.css('left', offset.left + $(this).width() - ( $(this).width() / 2 ) - ( $('.wc_error_tip').width() / 2 ) )
+					.css('top', offset.top + $(this).height() )
 					.fadeIn('100');
 			}
 		}
 		return this;
 	});
 
-	jQuery('body').on('keyup change', '.wc_input_decimal[type=text]', function(){
-		var value		= jQuery(this).val();
+	$('body').on('keyup change', '.wc_input_decimal[type=text]', function(){
+		var value		= $(this).val();
 		var regex		= new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.decimal_point + "]+", "gi" );
 		var newvalue = value.replace( regex, '' );
 
 		if ( value !== newvalue ) {
-			jQuery(this).val( newvalue );
-			if ( jQuery(this).parent().find('.wc_error_tip').size() == 0 ) {
-				var offset = jQuery(this).position();
-				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_decimal_error + '</div>' );
-				jQuery('.wc_error_tip')
-					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
-					.css('top', offset.top + jQuery(this).height() )
+			$(this).val( newvalue );
+			if ( $(this).parent().find('.wc_error_tip').size() === 0 ) {
+				var offset = $(this).position();
+				$(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_decimal_error + '</div>' );
+				$('.wc_error_tip')
+					.css('left', offset.left + $(this).width() - ( $(this).width() / 2 ) - ( $('.wc_error_tip').width() / 2 ) )
+					.css('top', offset.top + $(this).height() )
 					.fadeIn('100');
 			}
 		}
 		return this;
 	});
 
-	jQuery('body').on('keyup change', '.wc_input_country_iso[type=text]', function(){
-		var value = jQuery(this).val();
+	$('body').on('keyup change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function(){
+		var sale_price_field	= $(this);
+		var sale_price 			= parseInt( sale_price_field.val() );
+
+		if( sale_price_field.attr('name').indexOf('variable') !== -1 ) {
+			var regular_price = parseInt(sale_price_field.parents('.variable_pricing').find('.wc_input_price[name^=variable_regular_price]').val());
+		} else {
+			var regular_price = parseInt($('#_regular_price').val());
+		}
+
+		if( sale_price >= regular_price ) {
+			$(this).val( regular_price );
+			if ( $(this).parent().find('.wc_error_tip').size() === 0 ) {
+				var offset = $(this).position();
+				$(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18_sale_less_than_regular_error + '</div>' );
+				$('.wc_error_tip')
+					.css('left', offset.left + $(this).width() - ( $(this).width() / 2 ) - ( $('.wc_error_tip').width() / 2 ) )
+					.css('top', offset.top + $(this).height() )
+					.fadeIn('100');
+			}
+		}
+		return this;
+	});
+
+	$('body').on('keyup change', '.wc_input_country_iso[type=text]', function(){
+		var value = $(this).val();
 		var regex = new RegExp( '^([A-Z])?([A-Z])$' );
 
 		if ( ! regex.test( value ) ) {
-			jQuery(this).val( '' );
-			if ( jQuery(this).parent().find('.wc_error_tip').size() === 0 ) {
-				var offset = jQuery(this).position();
-				jQuery(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_country_iso_error + '</div>' );
-				jQuery('.wc_error_tip')
-					.css('left', offset.left + jQuery(this).width() - ( jQuery(this).width() / 2 ) - ( jQuery('.wc_error_tip').width() / 2 ) )
-					.css('top', offset.top + jQuery(this).height() )
+			$(this).val( '' );
+			if ( $(this).parent().find('.wc_error_tip').size() === 0 ) {
+				var offset = $(this).position();
+				$(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18n_country_iso_error + '</div>' );
+				$('.wc_error_tip')
+					.css('left', offset.left + $(this).width() - ( $(this).width() / 2 ) - ( $('.wc_error_tip').width() / 2 ) )
+					.css('top', offset.top + $(this).height() )
 					.fadeIn('100');
 			}
 		}
 		return this;
 	});
 
-	jQuery("body").click(function(){
-		jQuery('.wc_error_tip').fadeOut('100', function(){ jQuery(this).remove(); } );
+	$("body").click(function(){
+		$('.wc_error_tip').fadeOut('100', function(){ $(this).remove(); } );
 	});
 
 	// Tooltips
-	jQuery(".tips, .help_tip").tipTip({
+	var tiptip_args = {
 		'attribute' : 'data-tip',
 		'fadeIn' : 50,
 		'fadeOut' : 50,
 		'delay' : 200
+	};
+	$(".tips, .help_tip").tipTip( tiptip_args );
+
+	// Add tiptip to parent element for widefat tables
+	$(".parent-tips").each(function(){
+		$(this).closest( 'a, th' ).attr( 'data-tip', $(this).data( 'tip' ) ).tipTip( tiptip_args ).css( 'cursor', 'help' );
 	});
 
 	// wc_input_table tables
-	jQuery('.wc_input_table.sortable tbody').sortable({
+	$('.wc_input_table.sortable tbody').sortable({
 		items:'tr',
 		cursor:'move',
 		axis:'y',
@@ -97,13 +127,13 @@ jQuery(function(){
 		}
 	});
 
-	jQuery('.wc_input_table .remove_rows').click(function() {
-		var $tbody = jQuery(this).closest('.wc_input_table').find('tbody');
+	$('.wc_input_table .remove_rows').click(function() {
+		var $tbody = $(this).closest('.wc_input_table').find('tbody');
 		if ( $tbody.find('tr.current').size() > 0 ) {
 			$current = $tbody.find('tr.current');
 
 			$current.each(function(){
-				jQuery(this).remove();
+				$(this).remove();
 			});
 		}
 		return false;
@@ -113,44 +143,44 @@ jQuery(function(){
 	var shifted = false;
 	var hasFocus = false;
 
-	jQuery(document).bind('keyup keydown', function(e){ shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey } );
+	$(document).bind('keyup keydown', function(e){ shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey } );
 
-	jQuery('.wc_input_table').on( 'focus click', 'input', function( e ) {
+	$('.wc_input_table').on( 'focus click', 'input', function( e ) {
 
-		$this_table = jQuery(this).closest('table');
-		$this_row   = jQuery(this).closest('tr');
+		$this_table = $(this).closest('table');
+		$this_row   = $(this).closest('tr');
 
-		if ( ( e.type == 'focus' && hasFocus != $this_row.index() ) || ( e.type == 'click' && jQuery(this).is(':focus') ) ) {
+		if ( ( e.type == 'focus' && hasFocus != $this_row.index() ) || ( e.type == 'click' && $(this).is(':focus') ) ) {
 
 			hasFocus = $this_row.index();
 
 			if ( ! shifted && ! controlled ) {
-				jQuery('tr', $this_table).removeClass('current').removeClass('last_selected');
+				$('tr', $this_table).removeClass('current').removeClass('last_selected');
 				$this_row.addClass('current').addClass('last_selected');
 			} else if ( shifted ) {
-				jQuery('tr', $this_table).removeClass('current');
+				$('tr', $this_table).removeClass('current');
 				$this_row.addClass('selected_now').addClass('current');
 
-				if ( jQuery('tr.last_selected', $this_table).size() > 0 ) {
-					if ( $this_row.index() > jQuery('tr.last_selected, $this_table').index() ) {
-						jQuery('tr', $this_table).slice( jQuery('tr.last_selected', $this_table).index(), $this_row.index() ).addClass('current');
+				if ( $('tr.last_selected', $this_table).size() > 0 ) {
+					if ( $this_row.index() > $('tr.last_selected, $this_table').index() ) {
+						$('tr', $this_table).slice( $('tr.last_selected', $this_table).index(), $this_row.index() ).addClass('current');
 					} else {
-						jQuery('tr', $this_table).slice( $this_row.index(), jQuery('tr.last_selected', $this_table).index() + 1 ).addClass('current');
+						$('tr', $this_table).slice( $this_row.index(), $('tr.last_selected', $this_table).index() + 1 ).addClass('current');
 					}
 				}
 
-				jQuery('tr', $this_table).removeClass('last_selected');
+				$('tr', $this_table).removeClass('last_selected');
 				$this_row.addClass('last_selected');
 			} else {
-				jQuery('tr', $this_table).removeClass('last_selected');
-				if ( controlled && jQuery(this).closest('tr').is('.current') ) {
+				$('tr', $this_table).removeClass('last_selected');
+				if ( controlled && $(this).closest('tr').is('.current') ) {
 					$this_row.removeClass('current');
 				} else {
 					$this_row.addClass('current').addClass('last_selected');
 				}
 			}
 
-			jQuery('tr', $this_table).removeClass('selected_now');
+			$('tr', $this_table).removeClass('selected_now');
 
 		}
 	}).on( 'blur', 'input', function( e ) {
@@ -158,61 +188,61 @@ jQuery(function(){
 	});
 
 	// Additional cost tables
-	jQuery( '.woocommerce_page_wc-settings .shippingrows tbody tr:even' ).addClass( 'alternate' );
+	$( '.woocommerce_page_wc-settings .shippingrows tbody tr:even' ).addClass( 'alternate' );
 
 	// Availability inputs
-	jQuery('select.availability').change(function(){
-		if ( jQuery(this).val() == "all" ) {
-			jQuery(this).closest('tr').next('tr').hide();
+	$('select.availability').change(function(){
+		if ( $(this).val() == "all" ) {
+			$(this).closest('tr').next('tr').hide();
 		} else {
-			jQuery(this).closest('tr').next('tr').show();
+			$(this).closest('tr').next('tr').show();
 		}
 	}).change();
 
 	// Show order items on orders page
-	jQuery('body').on( 'click', '.show_order_items', function() {
-		jQuery(this).closest('td').find('table').toggle();
+	$('body').on( 'click', '.show_order_items', function() {
+		$(this).closest('td').find('table').toggle();
 		return false;
 	});
 
 	// Hidden options
-	jQuery('.hide_options_if_checked').each(function(){
+	$('.hide_options_if_checked').each(function(){
 
-		jQuery(this).find('input:eq(0)').change(function() {
+		$(this).find('input:eq(0)').change(function() {
 
-			if (jQuery(this).is(':checked')) {
-				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
+			if ($(this).is(':checked')) {
+				$(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
 			} else {
-				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
+				$(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
 			}
 
 		}).change();
 
 	});
 
-	jQuery('.show_options_if_checked').each(function(){
+	$('.show_options_if_checked').each(function(){
 
-		jQuery(this).find('input:eq(0)').change(function() {
+		$(this).find('input:eq(0)').change(function() {
 
-			if (jQuery(this).is(':checked')) {
-				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
+			if ($(this).is(':checked')) {
+				$(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
 			} else {
-				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
+				$(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
 			}
 
 		}).change();
 
 	});
 
-	jQuery('input#woocommerce_demo_store').change(function() {
-		if (jQuery(this).is(':checked')) {
-			jQuery('#woocommerce_demo_store_notice').closest('tr').show();
+	$('input#woocommerce_demo_store').change(function() {
+		if ($(this).is(':checked')) {
+			$('#woocommerce_demo_store_notice').closest('tr').show();
 		} else {
-			jQuery('#woocommerce_demo_store_notice').closest('tr').hide();
+			$('#woocommerce_demo_store_notice').closest('tr').hide();
 		}
 	}).change();
 
 	// Attribute term table
-	jQuery( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
+	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 
 });

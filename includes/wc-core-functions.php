@@ -45,7 +45,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
 /**
  * Create a new order programmatically
  *
- * Returns a new order object on success which can then be used to add additonal data.
+ * Returns a new order object on success which can then be used to add additional data.
  *
  * @return WC_Order on success, WP_Error on failure
  */
@@ -75,7 +75,7 @@ function wc_create_order( $args = array() ) {
 
 	if ( $args['status'] ) {
 		if ( ! in_array( 'wc-' . $args['status'], array_keys( wc_get_order_statuses() ) ) ) {
-			return new WP_Error( __( 'Invalid order status', 'woocommerce' ) );
+			return new WP_Error( 'woocommerce_invalid_order_status', __( 'Invalid order status', 'woocommerce' ) );
 		}
 		$order_data['post_status']  = 'wc-' . $args['status'];
 	}
@@ -179,6 +179,9 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		return;
 	}
 
+	// Allow 3rd party plugin filter template file from their plugin
+	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
+
 	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
 
 	include( $located );
@@ -262,15 +265,17 @@ function get_woocommerce_currencies() {
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'IDR' => __( 'Indonesia Rupiah', 'woocommerce' ),
 				'INR' => __( 'Indian Rupee', 'woocommerce' ),
+				'NPR' => __( 'Nepali Rupee', 'woocommerce' ),
 				'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
+				'KIP'	=> __( 'Lao Kip', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
 				'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
 				'NZD' => __( 'New Zealand Dollar', 'woocommerce' ),
-                'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
+                		'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 				'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
 				'PLN' => __( 'Polish Zloty', 'woocommerce' ),
 				'GBP' => __( 'Pounds Sterling', 'woocommerce' ),
@@ -336,8 +341,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = '&#1088;&#1091;&#1073;.';
 			break;
 		case 'KRW' : $currency_symbol = '&#8361;'; break;
-        case 'PYG' : $currency_symbol = '&#8370;'; break;
-		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
+        	case 'PYG' : $currency_symbol = '&#8370;'; break;
+		case 'TRY' : $currency_symbol = '&#8378;'; break;
 		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
 		case 'ZAR' : $currency_symbol = '&#82;'; break;
 		case 'CZK' : $currency_symbol = '&#75;&#269;'; break;
@@ -346,6 +351,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'HUF' : $currency_symbol = '&#70;&#116;'; break;
 		case 'IDR' : $currency_symbol = 'Rp'; break;
 		case 'INR' : $currency_symbol = 'Rs.'; break;
+		case 'NRP' : $currency_symbol = 'Rs.'; break;
 		case 'ISK' : $currency_symbol = 'Kr.'; break;
 		case 'ILS' : $currency_symbol = '&#8362;'; break;
 		case 'PHP' : $currency_symbol = '&#8369;'; break;
@@ -361,6 +367,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'HRK' : $currency_symbol = 'Kn'; break;
 		case 'EGP' : $currency_symbol = 'EGP'; break;
 		case 'DOP' : $currency_symbol = 'RD&#36;'; break;
+		case 'KIP' : $currency_symbol = '&#8365;'; break;
 		default    : $currency_symbol = ''; break;
 	}
 
@@ -468,7 +475,9 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
  */
 function get_woocommerce_api_url( $path ) {
 
-	$url = get_home_url( null, 'wc-api/v' . WC_API::VERSION . '/', is_ssl() ? 'https' : 'http' );
+	$version = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : WC_API::VERSION;
+
+	$url = get_home_url( null, "wc-api/v{$version}/", is_ssl() ? 'https' : 'http' );
 
 	if ( ! empty( $path ) && is_string( $path ) ) {
 		$url .= ltrim( $path, '/' );
@@ -492,7 +501,8 @@ function wc_get_log_file_path( $handle ) {
  * Init for our rewrite rule fixes
  */
 function wc_fix_rewrite_rules_init() {
-	$permalinks = get_option( 'woocommerce_permalinks' );
+	$permalinks        = get_option( 'woocommerce_permalinks' );
+	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
 
 	if ( ! empty( $permalinks['use_verbose_page_rules'] ) ) {
 		$GLOBALS['wp_rewrite']->use_verbose_page_rules = true;
@@ -533,6 +543,28 @@ function wc_fix_rewrite_rules( $rules ) {
 add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
 
 /**
+ * Prevent product attachment links from breaking when using complex rewrite structures.
+ *
+ * @param  string $link
+ * @param  id $post_id
+ * @return string
+ */
+function wc_fix_product_attachment_link( $link, $post_id ) {
+	global $wp_rewrite;
+
+	$post = get_post( $post_id );
+	if ( 'product' === get_post_type( $post->post_parent ) ) {
+		$permalinks        = get_option( 'woocommerce_permalinks' );
+		$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+		if ( preg_match( '/\/(.+)(\/%product_cat%)$/' , $product_permalink, $matches ) ) {
+			$link = home_url( '/?attachment_id=' . $post->ID );
+		}
+	}
+	return $link;
+}
+add_filter( 'attachment_link', 'wc_fix_product_attachment_link', 10, 2 );
+
+/**
  * Protect downloads from ms-files.php in multisite
  *
  * @param mixed $rewrite
@@ -555,55 +587,6 @@ function wc_ms_protect_download_rewite_rules( $rewrite ) {
 add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
 
 /**
- * Remove order notes from wp_count_comments()
- *
- * @since 2.2
- * @param object $stats
- * @param int $post_id
- * @return object
- */
-function wc_remove_order_notes_from_wp_count_comments( $stats, $post_id ) {
-	global $wpdb;
-
-	if ( 0 === $post_id ) {
-
-		$count = wp_cache_get( 'comments-0', 'counts' );
-		if ( false !== $count ) {
-			return $count;
-		}
-
-		$count = $wpdb->get_results( "SELECT comment_approved, COUNT( * ) AS num_comments FROM {$wpdb->comments} WHERE comment_type != 'order_note' GROUP BY comment_approved", ARRAY_A );
-
-		$total = 0;
-		$approved = array( '0' => 'moderated', '1' => 'approved', 'spam' => 'spam', 'trash' => 'trash', 'post-trashed' => 'post-trashed' );
-
-		foreach ( (array) $count as $row ) {
-			// Don't count post-trashed toward totals
-			if ( 'post-trashed' != $row['comment_approved'] && 'trash' != $row['comment_approved'] ) {
-				$total += $row['num_comments'];
-			}
-			if ( isset( $approved[ $row['comment_approved'] ] ) ) {
-				$stats[ $approved[ $row['comment_approved'] ] ] = $row['num_comments'];
-			}
-		}
-
-		$stats['total_comments'] = $total;
-		foreach ( $approved as $key ) {
-			if ( empty( $stats[ $key ] ) ) {
-				$stats[ $key ] = 0;
-			}
-		}
-
-		$stats = (object) $stats;
-		wp_cache_set( 'comments-0', $stats, 'counts' );
-	}
-
-	return $stats;
-}
-
-add_filter( 'wp_count_comments', 'wc_remove_order_notes_from_wp_count_comments', 10, 2 );
-
-/**
  * WooCommerce Core Supported Themes
  *
  * @since 2.2
@@ -612,3 +595,19 @@ add_filter( 'wp_count_comments', 'wc_remove_order_notes_from_wp_count_comments',
 function wc_get_core_supported_themes() {
 	return array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 }
+
+/**
+ * Wrapper function to execute the `woocommerce_deliver_webhook_async` cron
+ * hook, see WC_Webhook::process()
+ *
+ * @since 2.2
+ * @param int $webhook_id webhook ID to deliver
+ * @param mixed $arg hook argument
+ */
+function wc_deliver_webhook_async( $webhook_id, $arg ) {
+
+	$webhook = new WC_Webhook( $webhook_id );
+
+	$webhook->deliver( $arg );
+}
+add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );

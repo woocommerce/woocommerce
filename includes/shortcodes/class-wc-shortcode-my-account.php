@@ -105,7 +105,7 @@ class WC_Shortcode_My_Account {
 	private static function view_order( $order_id ) {
 
 		$user_id      	= get_current_user_id();
-		$order 			= get_order( $order_id );
+		$order 			= wc_get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ).'" class="wc-forward">'. __( 'My Account', 'woocommerce' ) .'</a>' . '</div>';
@@ -118,7 +118,7 @@ class WC_Shortcode_My_Account {
 
 		wc_get_template( 'myaccount/view-order.php', array(
 	        'status'    => $status, // @deprecated 2.2
-	        'order'     => get_order( $order_id ),
+	        'order'     => wc_get_order( $order_id ),
 	        'order_id'  => $order_id
 	    ) );
 	}
@@ -212,35 +212,31 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Handles sending password retrieval email to customer.
 	 *
+	 * Based on retrieve_password() in core wp-login.php
+	 *
 	 * @access public
 	 * @uses $wpdb WordPress Database object
 	 * @return bool True: when finish. False: on error
 	 */
 	public static function retrieve_password() {
-		global $woocommerce,$wpdb;
+		global $wpdb, $wp_hasher;
 
 		if ( empty( $_POST['user_login'] ) ) {
 
 			wc_add_notice( __( 'Enter a username or e-mail address.', 'woocommerce' ), 'error' );
 
-		} elseif ( strpos( $_POST['user_login'], '@' ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
-
-			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
-
-			if ( empty( $user_data ) )
-				wc_add_notice( __( 'There is no user registered with that email address.', 'woocommerce' ), 'error' );
-
 		} else {
-
+			// Check on username first, as customers can use emails as usernames.
 			$login = trim( $_POST['user_login'] );
-
 			$user_data = get_user_by( 'login', $login );
 		}
 
-		do_action('lostpassword_post');
+		// If no user found, check if it login is emaill and lookup user based on email.
+		if ( ! $user_data && is_email( $_POST['user_login'] ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
+			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
+		}
 
-		if( wc_notice_count( 'error' ) > 0 )
-			return false;
+		do_action( 'lostpassword_post' );
 
 		if ( ! $user_data ) {
 			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
@@ -251,9 +247,9 @@ class WC_Shortcode_My_Account {
 		$user_login = $user_data->user_login;
 		$user_email = $user_data->user_email;
 
-		do_action('retrieve_password', $user_login);
+		do_action( 'retrieve_password', $user_login );
 
-		$allow = apply_filters('allow_password_reset', true, $user_data->ID);
+		$allow = apply_filters( 'allow_password_reset', true, $user_data->ID );
 
 		if ( ! $allow ) {
 
@@ -268,18 +264,19 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		$key = $wpdb->get_var( $wpdb->prepare( "SELECT user_activation_key FROM $wpdb->users WHERE user_login = %s", $user_login ) );
+		$key = wp_generate_password( 20, false );
 
-		if ( empty( $key ) ) {
+		do_action( 'retrieve_password_key', $user_login, $key );
 
-			// Generate something random for a key...
-			$key = wp_generate_password( 20, false );
-
-			do_action('retrieve_password_key', $user_login, $key);
-
-			// Now insert the new md5 key into the db
-			$wpdb->update( $wpdb->users, array( 'user_activation_key' => $key ), array( 'user_login' => $user_login ) );
+		// Now insert the key, hashed, into the DB.
+		if ( empty( $wp_hasher ) ) {
+			require_once ABSPATH . 'wp-includes/class-phpass.php';
+			$wp_hasher = new PasswordHash( 8, true );
 		}
+
+		$hashed = $wp_hasher->HashPassword( $key );
+
+		$wpdb->update( $wpdb->users, array( 'user_activation_key' => $hashed ), array( 'user_login' => $user_login ) );
 
 		// Send email notification
 		$mailer = WC()->mailer();
@@ -300,7 +297,7 @@ class WC_Shortcode_My_Account {
 	 * @return object|bool User's database row on success, false for invalid keys
 	 */
 	public static function check_password_reset_key( $key, $login ) {
-		global $woocommerce,$wpdb;
+		global $wpdb;
 
 		$key = preg_replace( '/[^a-z0-9]/i', '', $key );
 

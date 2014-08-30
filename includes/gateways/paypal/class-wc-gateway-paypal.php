@@ -31,7 +31,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->liveurl              = 'https://www.paypal.com/cgi-bin/webscr';
 		$this->testurl              = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 		$this->method_title         = __( 'PayPal', 'woocommerce' );
-		$this->view_transaction_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
+		$this->method_description   = __( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' );
 		$this->notify_url           = WC()->api_request_url( 'WC_Gateway_Paypal' );
 		$this->supports 			= array(
 			'products',
@@ -99,24 +99,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @since 1.0.0
 	 */
 	public function admin_options() {
-
-		?>
-		<h3><?php _e( 'PayPal standard', 'woocommerce' ); ?></h3>
-		<p><?php _e( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' ); ?></p>
-
-		<?php if ( $this->is_valid_for_use() ) : ?>
-
-			<table class="form-table">
-			<?php
-				// Generate the HTML For the settings form.
-				$this->generate_settings_html();
+		if ( $this->is_valid_for_use() ) {
+			parent::admin_options();
+		} else {
 			?>
-			</table><!--/.form-table-->
-
-		<?php else : ?>
 			<div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woocommerce' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woocommerce' ); ?></p></div>
-		<?php
-			endif;
+			<?php
+		}
 	}
 
 	/**
@@ -369,9 +358,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$paypal_args['no_shipping'] = 1;
 		}
 
-		// If prices include tax or have order discounts, send the whole order as a single item
-		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || $order->get_order_discount() > 0 || ( sizeof( $order->get_items() ) + sizeof( $order->get_fees() ) ) >= 9 ) {
-
+		// Try to send line items, or default to sending the order as a whole
+		if ( $line_items = $this->get_line_items( $order ) ) {
+			$paypal_args = array_merge( $paypal_args, $line_items );
+		} else {
 			// Discount
 			$paypal_args['discount_amount_cart'] = $order->get_order_discount();
 
@@ -386,9 +376,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				}
 			}
 
-			$paypal_args['item_name_1'] 	= $this->paypal_item_name( sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names ) );
-			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ) + $order->get_order_discount(), 2, '.', '' );
+			$paypal_args['item_name_1'] = $this->paypal_item_name( sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names ) );
+			$paypal_args['quantity_1']  = 1;
+			$paypal_args['amount_1']    = number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ) + $order->get_order_discount(), 2, '.', '' );
 
 			// Shipping Cost
 			// No longer using shipping_1 because
@@ -399,69 +389,91 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$paypal_args['quantity_2'] 	= '1';
 				$paypal_args['amount_2'] 	= number_format( $order->get_total_shipping() + $order->get_shipping_tax(), 2, '.', '' );
 			}
-
-		} else {
-
-			// Tax
-			$paypal_args['tax_cart'] = $order->get_total_tax();
-
-			// Cart Contents
-			$item_loop = 0;
-			if ( sizeof( $order->get_items() ) > 0 ) {
-				foreach ( $order->get_items() as $item ) {
-					if ( $item['qty'] ) {
-
-						$item_loop++;
-
-						$product = $order->get_product_from_item( $item );
-
-						$item_name 	= $item['name'];
-
-						$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
-						if ( $meta = $item_meta->display( true, true ) ) {
-							$item_name .= ' ( ' . $meta . ' )';
-						}
-
-						$paypal_args[ 'item_name_' . $item_loop ] 	= $this->paypal_item_name( $item_name );
-						$paypal_args[ 'quantity_' . $item_loop ] 	= $item['qty'];
-						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_subtotal( $item, false );
-
-						if ( $product->get_sku() ) {
-							$paypal_args[ 'item_number_' . $item_loop ] = $product->get_sku();
-						}
-					}
-				}
-			}
-
-			// Discount
-			if ( $order->get_cart_discount() > 0 ) {
-				$paypal_args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
-			}
-
-			// Fees
-			if ( sizeof( $order->get_fees() ) > 0 ) {
-				foreach ( $order->get_fees() as $item ) {
-					$item_loop++;
-
-					$paypal_args[ 'item_name_' . $item_loop ] 	= $this->paypal_item_name( $item['name'] );
-					$paypal_args[ 'quantity_' . $item_loop ] 	= 1;
-					$paypal_args[ 'amount_' . $item_loop ] 		= $item['line_total'];
-				}
-			}
-
-			// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
-			if ( $order->get_total_shipping() > 0 ) {
-				$item_loop++;
-				$paypal_args[ 'item_name_' . $item_loop ] 	= $this->paypal_item_name( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ) );
-				$paypal_args[ 'quantity_' . $item_loop ] 	= '1';
-				$paypal_args[ 'amount_' . $item_loop ] 		= number_format( $order->get_total_shipping(), 2, '.', '' );
-			}
-
 		}
 
 		$paypal_args = apply_filters( 'woocommerce_paypal_args', $paypal_args );
 
 		return $paypal_args;
+	}
+
+	/**
+	 * Get line items to send to paypal
+	 *
+	 * @param  WC_Order $order
+	 * @return array on success, or false when it is not possible to send line items
+	 */
+	private function get_line_items( $order ) {
+		// Do not send lines for tax inclusive prices
+		if ( 'yes' === get_option( 'woocommerce_calc_taxes' ) && 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) {
+			return false;
+		}
+
+		// Do not send lines when order discount is present, or too many line items in the order.
+		if ( $order->get_order_discount() > 0 || ( sizeof( $order->get_items() ) + sizeof( $order->get_fees() ) ) >= 9 ) {
+			return false;
+		}
+
+		$item_loop        = 0;
+		$args             = array();
+		$args['tax_cart'] = $order->get_total_tax();
+
+		// Products
+		if ( sizeof( $order->get_items() ) > 0 ) {
+			foreach ( $order->get_items() as $item ) {
+				if ( ! $item['qty'] ) {
+					continue;
+				}
+				$item_loop ++;
+				$product   = $order->get_product_from_item( $item );
+				$item_name = $item['name'];
+				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+
+				if ( $meta = $item_meta->display( true, true ) ) {
+					$item_name .= ' ( ' . $meta . ' )';
+				}
+
+				$args[ 'item_name_' . $item_loop ] = $this->paypal_item_name( $item_name );
+				$args[ 'quantity_' . $item_loop ]  = $item['qty'];
+				$args[ 'amount_' . $item_loop ]    = $order->get_item_subtotal( $item, false );
+
+				if ( $args[ 'amount_' . $item_loop ] < 0 ) {
+					return false; // Abort - negative line
+				}
+
+				if ( $product->get_sku() ) {
+					$args[ 'item_number_' . $item_loop ] = $product->get_sku();
+				}
+			}
+		}
+
+		// Discount
+		if ( $order->get_cart_discount() > 0 ) {
+			$args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
+		}
+
+		// Fees
+		if ( sizeof( $order->get_fees() ) > 0 ) {
+			foreach ( $order->get_fees() as $item ) {
+				$item_loop ++;
+				$args[ 'item_name_' . $item_loop ] = $this->paypal_item_name( $item['name'] );
+				$args[ 'quantity_' . $item_loop ]  = 1;
+				$args[ 'amount_' . $item_loop ]    = $item['line_total'];
+
+				if ( $args[ 'amount_' . $item_loop ] < 0 ) {
+					return false; // Abort - negative line
+				}
+			}
+		}
+
+		// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
+		if ( $order->get_total_shipping() > 0 ) {
+			$item_loop ++;
+			$args[ 'item_name_' . $item_loop ] = $this->paypal_item_name( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ) );
+			$args[ 'quantity_' . $item_loop ]  = '1';
+			$args[ 'amount_' . $item_loop ]    = number_format( $order->get_total_shipping(), 2, '.', '' );
+		}
+
+		return $args;
 	}
 
 	/**
@@ -471,9 +483,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param mixed $order_id
 	 * @return string
 	 */
-	function generate_paypal_form( $order_id ) {
+	public function generate_paypal_form( $order_id ) {
 
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		if ( 'yes' == $this->testmode ) {
 			$paypal_adr = $this->testurl . '?test_ipn=1&';
@@ -522,7 +534,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					jQuery(".payment_buttons").hide();
 				</script>
 			</form>';
-
 	}
 
 	/**
@@ -533,7 +544,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
-		$order       = get_order( $order_id );
+		$order       = wc_get_order( $order_id );
 		$paypal_args = $this->get_paypal_args( $order );
 		$paypal_args = http_build_query( $paypal_args, '', '&' );
 
@@ -553,12 +564,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Process a refund if supported
 	 * @param  int $order_id
 	 * @param  float $amount
+	 * @param  string $reason
 	 * @return  bool|wp_error True or false based on success, or a WP_Error object
 	 */
-	public function process_refund( $order_id, $amount = null ) {
-		$order = get_order( $order_id );
+	public function process_refund( $order_id, $amount = null, $reason = '' ) {
+		$order = wc_get_order( $order_id );
 
-		if ( ! $order || ! $order->get_transaction_id() || ! $this->api_username || ! $this->api_password || ! $this->api_password ) {
+		if ( ! $order || ! $order->get_transaction_id() || ! $this->api_username || ! $this->api_password || ! $this->api_signature ) {
 			return false;
 		}
 
@@ -577,6 +589,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$post_data['CURRENCYCODE'] = $order->get_order_currency();
 		}
 
+		if ( $reason ) {
+			if ( 255 < strlen( $reason ) ) {
+				$reason = substr( $reason, 0, 252 ) . '...';
+			}
+
+			$post_data['NOTE'] = html_entity_decode( $reason, ENT_NOQUOTES, 'UTF-8' );
+		}
+
 		$response = wp_remote_post( 'yes' === $this->testmode ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp', array(
 			'method'      => 'POST',
 			'body'        => $post_data,
@@ -584,7 +604,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'sslverify'   => false,
 			'user-agent'  => 'WooCommerce',
 			'httpversion' => '1.1'
-			) 
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -614,7 +634,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @access public
 	 * @return void
 	 */
-	function receipt_page( $order ) {
+	public function receipt_page( $order ) {
 		echo '<p>' . __( 'Thank you - your order is now pending payment. You should be automatically redirected to PayPal to make payment.', 'woocommerce' ) . '</p>';
 
 		echo $this->generate_paypal_form( $order );
@@ -623,8 +643,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Check PayPal IPN validity
 	 **/
-	function check_ipn_request_is_valid( $ipn_response ) {
-
+	public function check_ipn_request_is_valid( $ipn_response ) {
 		// Get url
 		if ( 'yes' == $this->testmode ) {
 			$paypal_adr = $this->testurl;
@@ -663,7 +682,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// check to see if the request was valid
-		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && ( strcmp( $response['body'], "VERIFIED" ) == 0 ) ) {
+		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && strstr( $response['body'], 'VERIFIED' ) ) {
 			if ( 'yes' == $this->debug ) {
 				$this->log->add( 'paypal', 'Received valid response from PayPal' );
 			}
@@ -687,7 +706,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @access public
 	 * @return void
 	 */
-	function check_ipn_response() {
+	public function check_ipn_response() {
 
 		@ob_clean();
 
@@ -714,7 +733,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param array $posted
 	 * @return void
 	 */
-	function successful_request( $posted ) {
+	public function successful_request( $posted ) {
 
 		$posted = stripslashes_deep( $posted );
 
@@ -984,12 +1003,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			list( $order_id, $order_key ) = $custom;
 		}
 
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		if ( ! isset( $order->id ) ) {
 			// We have an invalid $order_id, probably because invoice_prefix has changed
 			$order_id 	= wc_get_order_id_by_order_key( $order_key );
-			$order 		= get_order( $order_id );
+			$order 		= wc_get_order( $order_id );
 		}
 
 		// Validate key
@@ -1021,5 +1040,23 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		return $state;
+	}
+
+	/**
+	 * Get the transaction URL.
+	 *
+	 * @param  WC_Order $order
+	 *
+	 * @return string
+	 */
+	public function get_transaction_url( $order ) {
+
+		if ( 'yes' == $this->testmode ) {
+			$this->view_transaction_url = 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
+		} else {
+			$this->view_transaction_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
+		}
+
+		return parent::get_transaction_url( $order );
 	}
 }

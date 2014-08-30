@@ -178,7 +178,7 @@ class WC_Query {
 				$q->set( 'page_id', get_option('page_on_front') );
 			}
 		}
-		
+
 		// When orderby is set, WordPress shows posts. Get around that here.
 		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') == wc_get_page_id('shop') ) {
 			$_query = wp_parse_args( $q->query );
@@ -335,7 +335,7 @@ class WC_Query {
 		if 	( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( get_object_taxonomies( 'product' ) ) )
 	   		return $posts;
 
-		$filtered_posts = array();
+		$filtered_posts   = array();
 		$queried_post_ids = array();
 
 		foreach ( $posts as $post ) {
@@ -346,17 +346,17 @@ class WC_Query {
 		}
 
 		$query->posts = $filtered_posts;
-		    $query->post_count = count( $filtered_posts );
+		$query->post_count = count( $filtered_posts );
 
-		    // Ensure filters are set
-		    $this->unfiltered_product_ids = $queried_post_ids;
-		    $this->filtered_product_ids = $queried_post_ids;
+		// Ensure filters are set
+		$this->unfiltered_product_ids = $queried_post_ids;
+		$this->filtered_product_ids   = $queried_post_ids;
 
-		    if ( sizeof( $this->layered_nav_post__in ) > 0 ) {
-			    $this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
-		    } else {
-			    $this->layered_nav_product_ids = $this->unfiltered_product_ids;
-		    }
+		if ( sizeof( $this->layered_nav_post__in ) > 0 ) {
+		    $this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
+		} else {
+		    $this->layered_nav_product_ids = $this->unfiltered_product_ids;
+		}
 
 		return $filtered_posts;
 	}
@@ -459,14 +459,15 @@ class WC_Query {
 				array_merge(
 					$current_wp_query,
 					array(
-						'post_type' 	=> 'product',
-						'numberposts' 	=> -1,
-						'post_status' 	=> 'publish',
-						'meta_query' 	=> $this->meta_query,
-						'fields' 		=> 'ids',
-						'no_found_rows' => true,
+						'post_type'              => 'product',
+						'numberposts'            => -1,
+						'post_status'            => 'publish',
+						'meta_query'             => $this->meta_query,
+						'fields'                 => 'ids',
+						'no_found_rows'          => true,
 						'update_post_meta_cache' => false,
-						'update_post_term_cache' => false
+						'update_post_term_cache' => false,
+						'pagename'               => ''
 					)
 				)
 			);
@@ -500,6 +501,8 @@ class WC_Query {
 	 * @return array
 	 */
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
+		global $wpdb;
+
 		// Get ordering from query string unless defined
 		if ( ! $orderby ) {
 			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
@@ -512,8 +515,7 @@ class WC_Query {
 
 		$orderby = strtolower( $orderby );
 		$order   = strtoupper( $order );
-
-		$args = array();
+		$args    = array();
 
 		// default - menu_order
 		$args['orderby']  = 'menu_order title';
@@ -529,7 +531,7 @@ class WC_Query {
 				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 			break;
 			case 'price' :
-				$args['orderby']  = 'meta_value_num';
+				$args['orderby']  = "meta_value_num {$wpdb->posts}.ID";
 				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
 			break;

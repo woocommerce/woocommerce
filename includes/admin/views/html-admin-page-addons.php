@@ -1,3 +1,14 @@
+<?php
+/**
+ * Admin View: Page - Addons
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
+
 <div class="wrap woocommerce wc_addons_wrap">
 	<div class="icon32 icon32-posts-product" id="icon-woocommerce"><br /></div>
 	<h2>
@@ -77,8 +88,6 @@
 		?>
 		</ul>
 	<?php else : ?>
-
 		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'http://www.woothemes.com/product-category/woocommerce-extensions/' ); ?></p>
-
 	<?php endif; ?>
 </div>

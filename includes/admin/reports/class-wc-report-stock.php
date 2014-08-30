@@ -64,7 +64,7 @@ class WC_Report_Stock extends WP_List_Table {
     	global $product;
 
     	if ( ! $product || $product->id !== $item->id )
-    		$product = get_product( $item->id );
+    		$product = wc_get_product( $item->id );
 
         switch( $column_name ) {
         	case 'product' :

@@ -32,6 +32,14 @@ class WC_Comments {
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ), 10, 1 );
 		add_action( 'comment_feed_join', array( __CLASS__, 'exclude_order_comments_from_feed_join' ) );
 		add_action( 'comment_feed_where', array( __CLASS__, 'exclude_order_comments_from_feed_where' ) );
+
+		// Secure webhook comments
+		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_webhook_comments' ), 10, 1 );
+		add_action( 'comment_feed_join', array( __CLASS__, 'exclude_webhook_comments_from_feed_join' ) );
+		add_action( 'comment_feed_where', array( __CLASS__, 'exclude_webhook_comments_from_feed_where' ) );
+
+		// Count comments
+		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 	}
 
 	/**
@@ -49,19 +57,23 @@ class WC_Comments {
 	public static function exclude_order_comments( $clauses ) {
 		global $wpdb, $typenow;
 
-		if ( is_admin() && in_array( $typenow, wc_get_order_types() ) && current_user_can( 'manage_woocommerce' ) )
+		if ( is_admin() && in_array( $typenow, wc_get_order_types() ) && current_user_can( 'manage_woocommerce' ) ) {
 			return $clauses; // Don't hide when viewing orders in admin
+		}
 
-		if ( ! $clauses['join'] )
+		if ( ! $clauses['join'] ) {
 			$clauses['join'] = '';
+		}
 
-		if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) )
+		if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) ) {
 			$clauses['join'] .= " LEFT JOIN $wpdb->posts ON comment_post_ID = $wpdb->posts.ID ";
+		}
 
-		if ( $clauses['where'] )
+		if ( $clauses['where'] ) {
 			$clauses['where'] .= ' AND ';
+		}
 
-		$clauses['where'] .= " $wpdb->posts.post_type NOT IN ('" . implode( ',', wc_get_order_types() ) . "') ";
+		$clauses['where'] .= " $wpdb->posts.post_type NOT IN ('" . implode( "','", wc_get_order_types() ) . "') ";
 
 		return $clauses;
 	}
@@ -75,10 +87,11 @@ class WC_Comments {
 	public static function exclude_order_comments_from_feed_join( $join ) {
 		global $wpdb;
 
-	    if ( ! strstr( $join, $wpdb->posts ) ) 
-	    	$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+		if ( ! strstr( $join, $wpdb->posts ) ) {
+			$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+		}
 
-	    return $join;
+		return $join;
 	}
 
 	/**
@@ -90,12 +103,76 @@ class WC_Comments {
 	public static function exclude_order_comments_from_feed_where( $where ) {
 		global $wpdb;
 
-	    if ( $where )
-	    	$where .= ' AND ';
+		if ( $where ) {
+			$where .= ' AND ';
+		}
 
-		$where .= " $wpdb->posts.post_type NOT IN ('" . implode( ',', wc_get_order_types() ) . "') ";
+		$where .= " $wpdb->posts.post_type NOT IN ('" . implode( "','", wc_get_order_types() ) . "') ";
 
-	    return $where;
+		return $where;
+	}
+
+	/**
+	 * Exclude webhook comments from queries and RSS
+	 *
+	 * @since 2.2
+	 * @param array $clauses
+	 * @return array
+	 */
+	public static function exclude_webhook_comments( $clauses ) {
+		global $wpdb;
+
+		if ( ! $clauses['join'] ) {
+			$clauses['join'] = '';
+		}
+
+		if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) ) {
+			$clauses['join'] .= " LEFT JOIN $wpdb->posts ON comment_post_ID = $wpdb->posts.ID ";
+		}
+
+		if ( $clauses['where'] ) {
+			$clauses['where'] .= ' AND ';
+		}
+
+		$clauses['where'] .= " $wpdb->posts.post_type <> 'shop_webhook' ";
+
+		return $clauses;
+	}
+
+	/**
+	 * Exclude webhook comments from queries and RSS
+	 *
+	 * @since 2.2
+	 * @param string $join
+	 * @return string
+	 */
+	public static function exclude_webhook_comments_from_feed_join( $join ) {
+		global $wpdb;
+
+		if ( ! strstr( $join, $wpdb->posts ) ) {
+			$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+		}
+
+		return $join;
+	}
+
+	/**
+	 * Exclude webhook comments from queries and RSS
+	 *
+	 * @since 2.1
+	 * @param string $where
+	 * @return string
+	 */
+	public static function exclude_webhook_comments_from_feed_where( $where ) {
+		global $wpdb;
+
+		if ( $where ) {
+			$where .= ' AND ';
+		}
+
+		$where .= " $wpdb->posts.post_type <> 'shop_webhook' ";
+
+		return $where;
 	}
 
 	/**
@@ -106,7 +183,7 @@ class WC_Comments {
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in
-		if ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && $comment_data['comment_type'] === '' && get_option('woocommerce_review_rating_required') === 'yes' ) {
+		if ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && '' === $comment_data['comment_type'] && 'yes' === get_option( 'woocommerce_review_rating_required' ) ) {
 			wp_die( __( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
@@ -136,6 +213,53 @@ class WC_Comments {
 	public static function clear_transients( $post_id ) {
 		delete_transient( 'wc_average_rating_' . absint( $post_id ) );
 		delete_transient( 'wc_rating_count_' . absint( $post_id ) );
+	}
+
+	/**
+	 * Remove order notes from wp_count_comments()
+	 *
+	 * @since 2.2
+	 * @param object $stats
+	 * @param int $post_id
+	 * @return object
+	 */
+	public static function wp_count_comments( $stats, $post_id ) {
+		global $wpdb;
+
+		if ( 0 === $post_id ) {
+
+			$count = wp_cache_get( 'comments-0', 'counts' );
+			if ( false !== $count ) {
+				return $count;
+			}
+
+			$count = $wpdb->get_results( "SELECT comment_approved, COUNT( * ) AS num_comments FROM {$wpdb->comments} WHERE comment_type != 'order_note' GROUP BY comment_approved", ARRAY_A );
+
+			$total = 0;
+			$approved = array( '0' => 'moderated', '1' => 'approved', 'spam' => 'spam', 'trash' => 'trash', 'post-trashed' => 'post-trashed' );
+
+			foreach ( (array) $count as $row ) {
+				// Don't count post-trashed toward totals
+				if ( 'post-trashed' != $row['comment_approved'] && 'trash' != $row['comment_approved'] ) {
+					$total += $row['num_comments'];
+				}
+				if ( isset( $approved[ $row['comment_approved'] ] ) ) {
+					$stats[ $approved[ $row['comment_approved'] ] ] = $row['num_comments'];
+				}
+			}
+
+			$stats['total_comments'] = $total;
+			foreach ( $approved as $key ) {
+				if ( empty( $stats[ $key ] ) ) {
+					$stats[ $key ] = 0;
+				}
+			}
+
+			$stats = (object) $stats;
+			wp_cache_set( 'comments-0', $stats, 'counts' );
+		}
+
+		return $stats;
 	}
 }
 

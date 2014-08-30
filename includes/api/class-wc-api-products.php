@@ -56,6 +56,16 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_reviews' ), WC_API_Server::READABLE ),
 		);
 
+		# GET /products/categories
+		$routes[ $this->base . '/categories' ] = array(
+			array( array( $this, 'get_product_categories' ), WC_API_Server::READABLE ),
+		);
+
+		# GET /products/categories/<id>
+		$routes[ $this->base . '/categories/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_category' ), WC_API_Server::READABLE ),
+		);
+
 		return $routes;
 	}
 
@@ -111,7 +121,7 @@ class WC_API_Products extends WC_API_Resource {
 			return $id;
 		}
 
-		$product = get_product( $id );
+		$product = wc_get_product( $id );
 
 		// add data that applies to every product type
 		$product_data = $this->get_product_data( $product );
@@ -132,7 +142,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Get the total number of orders
+	 * Get the total number of products
 	 *
 	 * @since 2.1
 	 * @param string $type
@@ -170,7 +180,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Check if product title is specified
 		if ( ! isset( $data['title'] ) ) {
-			return new WP_Error( 'woocommerce_api_missing_product_title', sprintf( __( 'Missing parameter %s' ), 'title' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_missing_product_title', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'title' ), array( 'status' => 400 ) );
 		}
 
 		// Check product type
@@ -365,6 +375,70 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return array( 'product_reviews' => apply_filters( 'woocommerce_api_product_reviews_response', $reviews, $id, $fields, $comments, $this->server ) );
+	}
+
+	/**
+	 * Get a listing of product categories
+	 *
+	 * @since 2.2
+	 * @return array
+	 */
+	public function get_product_categories() {
+
+		// permissions check
+		if ( ! current_user_can( 'manage_product_terms' ) ) {
+			return new WP_Error( "woocommerce_api_user_cannot_read_product_categories", __( 'You do not have permission to read product categories', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		$product_categories = array();
+
+		$terms = get_terms( 'product_cat', array( 'hide_empty' => false, 'fields' => 'ids' ) );
+
+		foreach ( $terms as $term_id ) {
+
+			$product_categories[] = current( $this->get_product_category( $term_id ) );
+		}
+
+		return array( 'product_categories' => apply_filters( 'woocommerce_api_product_categories_response', $product_categories, $terms, $this ) );
+	}
+
+	/**
+	 * Get the product category for the given ID
+	 *
+	 * @since 2.2
+	 * @param string $id product category term ID
+	 * @return array
+	 */
+	public function get_product_category( $id ) {
+
+		$id = absint( $id );
+
+		// validate ID
+		if ( empty( $id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_product_category_id', __( 'Invalid product category ID', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		// permissions check
+		if ( ! current_user_can( 'manage_product_terms' ) ) {
+			return new WP_Error( 'woocommerce_api_user_cannot_read_product_categories', __( 'You do not have permission to read product categories', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		$term = get_term( $id, 'product_cat' );
+
+		if ( is_wp_error( $term ) || is_null( $term ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_product_category_id', __( 'A product category with the provided ID could not be found', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$product_category = array(
+			'id'          => intval( $term->term_id ),
+			'name'        => $term->name,
+			'slug'        => $term->slug,
+			'parent'      => $term->parent,
+			'description' => $term->description,
+			'count'       => intval( $term->count ),
+		);
+
+		return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $term, $id, $this ) );
 	}
 
 	/**
@@ -602,7 +676,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $id, $new_sku );
 					if ( ! $unique_sku ) {
-						return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
+						return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), array( 'status' => 400 ) );
 					} else {
 						update_post_meta( $id, '_sku', $new_sku );
 					}
@@ -765,7 +839,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-		$_product = get_product( $id );
+		$_product = wc_get_product( $id );
 		if ( $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
 
 			$clear_parent_ids = array();
@@ -1043,7 +1117,7 @@ class WC_API_Products extends WC_API_Resource {
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
-							return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
+							return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), array( 'status' => 400 ) );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
@@ -1204,16 +1278,17 @@ class WC_API_Products extends WC_API_Resource {
 					}
 
 					$taxonomy = $this->get_attribute_taxonomy_by_label( $attribute['name'] );
-
 					if ( isset( $attributes[ $taxonomy ] ) ) {
 						$_attribute = $attributes[ $taxonomy ];
+					} elseif ( isset( $attributes[ strtolower( $attribute['name'] ) ] ) ) {
+						$_attribute = $attributes[ strtolower( $attribute['name'] ) ];
+					}
 
-						if ( $_attribute['is_variation'] ) {
-							$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
-							$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
-							$updated_attribute_keys[] = $attribute_key;
-							update_post_meta( $variation_id, $attribute_key, $attribute_value );
-						}
+					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
+						$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
+						$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
+						$updated_attribute_keys[] = $attribute_key;
+						update_post_meta( $variation_id, $attribute_key, $attribute_value );
 					}
 				}
 
@@ -1513,7 +1588,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Check parsed URL
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s' ), $image_url ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 		}
 
 		// Ensure url is valid
@@ -1525,7 +1600,7 @@ class WC_API_Products extends WC_API_Resource {
 		) );
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s' ), $image_url ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 		}
 
 		// Ensure we have a file name and type
@@ -1671,6 +1746,26 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return $downloads;
+	}
+
+	/**
+	 * Get a job by applying to WooThemes
+	 *
+	 * @ignore
+	 * @since 2.1
+	 */
+	private function get_a_job() {
+
+		/**
+		 * Hey there coder! At WooThemes we're always looking for talented people.
+		 * It looks like you aren't afraid of digging in the code which we like.
+		 * Want a new job? Apply to work for us.
+		 *
+		 * @param  string $resume a description of your experience
+		 * @param  string $cover_letter a description of why you're awesome. Do mention that you found this easter egg.
+		 * @link   http://www.woothemes.com/careers/#op-35124-woocommerce-product-developer
+		 * @return bool
+		 */
 	}
 
 }

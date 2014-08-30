@@ -70,9 +70,12 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
 	}
 
+	$page_found = apply_filters( 'woocommerce_create_page_id', $page_found, $slug, $page_content );
+
 	if ( $page_found ) {
-		if ( ! $option_value )
+		if ( ! $option_value ) {
 			update_option( $option, $page_found );
+		}
 
 		return $page_found;
 	}
@@ -89,8 +92,9 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 	);
 	$page_id = wp_insert_post( $page_data );
 
-	if ( $option )
+	if ( $option ) {
 		update_option( $option, $page_id );
+	}
 
 	return $page_id;
 }

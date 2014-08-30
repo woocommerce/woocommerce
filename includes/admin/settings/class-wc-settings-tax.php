@@ -267,30 +267,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 				</tr>
 			</thead>
-			<tfoot>
-				<tr>
-					<th colspan="10">
-						<a href="#" class="button plus insert"><?php _e( 'Insert row', 'woocommerce' ); ?></a>
-						<a href="#" class="button minus remove_tax_rates"><?php _e( 'Remove selected row(s)', 'woocommerce' ); ?></a>
-
-						<div class="pagination">
-							<?php
-								echo str_replace( 'page-numbers', 'page-numbers button', paginate_links( array(
-									'base'      => add_query_arg( 'p', '%#%' ),
-									'type'      => 'plain',
-									'prev_text' => '&laquo;',
-									'next_text' => '&raquo;',
-									'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit ),
-									'current'   => $page
-								) ) );
-							?>
-						</div>
-
-						<a href="#" download="tax_rates.csv" class="button export"><?php _e( 'Export CSV', 'woocommerce' ); ?></a>
-						<a href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>" class="button import"><?php _e( 'Import CSV', 'woocommerce' ); ?></a>
-					</th>
-				</tr>
-			</tfoot>
 			<tbody id="rates">
 				<?php
 					$rates = $wpdb->get_results( $wpdb->prepare(
@@ -356,6 +332,30 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					}
 				?>
 			</tbody>
+			<tfoot>
+				<tr>
+					<th colspan="10">
+						<a href="#" class="button plus insert"><?php _e( 'Insert row', 'woocommerce' ); ?></a>
+						<a href="#" class="button minus remove_tax_rates"><?php _e( 'Remove selected row(s)', 'woocommerce' ); ?></a>
+
+						<div class="pagination">
+							<?php
+								echo str_replace( 'page-numbers', 'page-numbers button', paginate_links( array(
+									'base'      => add_query_arg( 'p', '%#%' ),
+									'type'      => 'plain',
+									'prev_text' => '&laquo;',
+									'next_text' => '&raquo;',
+									'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit ),
+									'current'   => $page
+								) ) );
+							?>
+						</div>
+
+						<a href="#" download="tax_rates.csv" class="button export"><?php _e( 'Export CSV', 'woocommerce' ); ?></a>
+						<a href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>" class="button import"><?php _e( 'Import CSV', 'woocommerce' ); ?></a>
+					</th>
+				</tr>
+			</tfoot>
 		</table>
 		<script type="text/javascript">
 			jQuery( function() {

@@ -676,6 +676,7 @@ p.demo_store {
 			height: 28px;
 			float:left;
 			padding: 0;
+			margin: 0;
 			text-align: center;
 			border: 1px solid darken( @secondary, 20 );
 			border-right: 0;
@@ -1484,7 +1485,12 @@ p.demo_store {
 				img {
 					vertical-align: middle;
 					margin: -2px 0 0 .5em;
+					padding: 0;
 					position: relative;
+					box-shadow: none;
+				}
+				img + img {
+					margin-left: 2px;
 				}
 			}
 		}

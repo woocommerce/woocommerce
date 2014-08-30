@@ -89,11 +89,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 								<td>
 									<label><?php _e( 'Allow Backorders?', 'woocommerce' ); ?></label>
 									<select name="variable_backorders[<?php echo $loop; ?>]">
-										<option value="parent" <?php selected( is_null( $_backorders ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
 										<?php
-										foreach ( $parent_data['backorder_options'] as $key => $value )
-											echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
-									?></select>
+											foreach ( $parent_data['backorder_options'] as $key => $value ) {
+												echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_backorders, true, false ) . '>' . esc_html( $value ) . '</option>';
+											}
+										?>
+									</select>
 								</td>
 							</tr>
 							<tr class="">
@@ -170,21 +171,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 												<th>&nbsp;</th>
 											</tr>
 										</thead>
-										<tfoot>
-											<tr>
-												<th colspan="4">
-													<a href="#" class="button insert" data-row="<?php
-														$file = array(
-															'file' => '',
-															'name' => ''
-														);
-														ob_start();
-														include( 'html-product-variation-download.php' );
-														echo esc_attr( ob_get_clean() );
-													?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
-												</th>
-											</tr>
-										</tfoot>
 										<tbody>
 											<?php
 											if ( $_downloadable_files ) {
@@ -200,6 +186,21 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 											}
 											?>
 										</tbody>
+										<tfoot>
+											<tr>
+												<th colspan="4">
+													<a href="#" class="button insert" data-row="<?php
+														$file = array(
+															'file' => '',
+															'name' => ''
+														);
+														ob_start();
+														include( 'html-product-variation-download.php' );
+														echo esc_attr( ob_get_clean() );
+													?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
+												</th>
+											</tr>
+										</tfoot>
 									</table>
 								</div>
 							</td>

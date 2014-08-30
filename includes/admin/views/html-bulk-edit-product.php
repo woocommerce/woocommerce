@@ -1,3 +1,14 @@
+<?php
+/**
+ * Admin View: Bulk Edit Products
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
+
 <fieldset class="inline-edit-col-right">
 	<div id="woocommerce-fields-bulk" class="inline-edit-col">
 

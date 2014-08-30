@@ -21,7 +21,7 @@ class WC_Meta_Box_Order_Items {
 		global $thepostid, $theorder;
 
 		if ( ! is_object( $theorder ) ) {
-			$theorder = get_order( $thepostid );
+			$theorder = wc_get_order( $thepostid );
 		}
 
 		$order = $theorder;

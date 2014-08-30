@@ -549,11 +549,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 							<th><?php _e( 'Handling Fee', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%.', 'woocommerce' ); ?>">[?]</a></th>
 						</tr>
 					</thead>
-					<tfoot>
-						<tr>
-							<th colspan="4"><a href="#" class="add button"><?php _e( 'Add Cost', 'woocommerce' ); ?></a> <a href="#" class="remove button"><?php _e( 'Delete selected costs', 'woocommerce' ); ?></a></th>
-						</tr>
-					</tfoot>
 					<tbody class="flat_rates">
 						<tr>
 							<td></td>
@@ -589,6 +584,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						}
 						?>
 					</tbody>
+					<tfoot>
+						<tr>
+							<th colspan="4"><a href="#" class="add button"><?php _e( 'Add Cost', 'woocommerce' ); ?></a> <a href="#" class="remove button"><?php _e( 'Delete selected costs', 'woocommerce' ); ?></a></th>
+						</tr>
+					</tfoot>
 				</table>
 			   	<script type="text/javascript">
 					jQuery(function() {

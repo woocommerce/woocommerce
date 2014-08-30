@@ -35,11 +35,10 @@ function wc_get_order_statuses() {
  * Main function for returning orders, uses the WC_Order_Factory class.
  *
  * @param mixed $the_order Post object or post ID of the order.
- * @param array $args (default: array()) Contains all arguments to be used to get this order.
  * @return WC_Order
  */
-function get_order( $the_order = false, $args = array() ) {
-	return WC()->order_factory->get_order( $the_order, $args );
+function wc_get_order( $the_order = false ) {
+	return WC()->order_factory->get_order( $the_order );
 }
 
 /**
@@ -272,7 +271,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 		return; // Only do this once
 	}
 
-	$order = get_order( $order_id );
+	$order = wc_get_order( $order_id );
 
 	if ( $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
@@ -341,6 +340,28 @@ function wc_add_order_item( $order_id, $item ) {
 	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
 
 	return $item_id;
+}
+
+/**
+ * Update an item for an order
+ *
+ * @since 2.2
+ * @param int $item_id
+ * @param array $args either `order_item_type` or `order_item_name`
+ * @return bool true if successfully updated, false otherwise
+ */
+function wc_update_order_item( $item_id, $args ) {
+	global $wpdb;
+
+	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
+
+	if ( false === $update ) {
+		return false;
+	}
+
+	do_action( 'woocommerce_update_order_item', $item_id, $args );
+
+	return true;
 }
 
 /**
@@ -442,14 +463,14 @@ function wc_cancel_unpaid_orders() {
 	$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
 		SELECT posts.ID
 		FROM {$wpdb->posts} AS posts
-		WHERE 	posts.post_type   IN ('" . implode( ',', wc_get_order_types() ) . "')
+		WHERE 	posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
 		AND 	posts.post_status = 'wc-pending'
 		AND 	posts.post_modified < %s
 	", $date ) );
 
 	if ( $unpaid_orders ) {
 		foreach ( $unpaid_orders as $unpaid_order ) {
-			$order = get_order( $unpaid_order );
+			$order = wc_get_order( $unpaid_order );
 
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', true, $order ) )
 				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
@@ -473,7 +494,7 @@ function wc_processing_order_count() {
 
 	foreach ( wc_get_order_types( 'order-count' ) as $type ) {
 		$this_count = wp_count_posts( $type, 'readable' );
-		$count      += isset( $count->processing ) ? $count->processing : 0;
+		$count      += isset( $this_count->{'wc-processing'} ) ? $this_count->{'wc-processing'} : 0;
 	}
 
 	return $count;
@@ -570,9 +591,9 @@ function wc_create_refund( $args = array() ) {
 
 		// Negative line items
 		if ( sizeof( $args['line_items'] ) > 0 ) {
-			$order       = get_order( $args['order_id'] );
+			$order       = wc_get_order( $args['order_id'] );
 			$order_items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
-			$refund      = get_order( $refund_id );
+			$refund      = wc_get_order( $refund_id );
 
 			foreach ( $args['line_items'] as $refund_item_id => $refund_item ) {
 				if ( isset( $order_items[ $refund_item_id ] ) ) {
@@ -661,12 +682,9 @@ function wc_get_payment_gateway_by_order( $order ) {
 		$payment_gateways = array();
 	}
 
-	if ( is_object( $order ) ) {
-		$payment_method = $order->payment_method;
-	} else {
-		$order_id       = absint( $order );
-		$order          = new WC_Order( $order_id );
-		$payment_method = $order->payment_method;
+	if ( ! is_object( $order ) ) {
+		$order_id = absint( $order );
+		$order    = new WC_Order( $order_id );
 	}
 
 	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;

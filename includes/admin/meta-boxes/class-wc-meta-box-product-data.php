@@ -193,6 +193,17 @@ class WC_Meta_Box_Product_Data {
 									<th>&nbsp;</th>
 								</tr>
 							</thead>
+							<tbody>
+								<?php
+								$downloadable_files = get_post_meta( $post->ID, '_downloadable_files', true );
+
+								if ( $downloadable_files ) {
+									foreach ( $downloadable_files as $key => $file ) {
+										include( 'views/html-product-download.php' );
+									}
+								}
+								?>
+							</tbody>
 							<tfoot>
 								<tr>
 									<th colspan="5">
@@ -208,17 +219,6 @@ class WC_Meta_Box_Product_Data {
 									</th>
 								</tr>
 							</tfoot>
-							<tbody>
-								<?php
-								$downloadable_files = get_post_meta( $post->ID, '_downloadable_files', true );
-
-								if ( $downloadable_files ) {
-									foreach ( $downloadable_files as $key => $file ) {
-										include( 'views/html-product-download.php' );
-									}
-								}
-								?>
-							</tbody>
 						</table>
 					</div>
 					<?php
@@ -591,6 +591,7 @@ class WC_Meta_Box_Product_Data {
 
 					<button type="button" class="button save_attributes"><?php _e( 'Save attributes', 'woocommerce' ); ?></button>
 				</p>
+				<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 			</div>
 			<div id="linked_product_data" class="panel woocommerce_options_panel">
 
@@ -604,7 +605,7 @@ class WC_Meta_Box_Product_Data {
 						if ( $product_ids ) {
 							foreach ( $product_ids as $product_id ) {
 
-								$product = get_product( $product_id );
+								$product = wc_get_product( $product_id );
 
 								if ( $product ) {
 									echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product->get_formatted_name() ) . '</option>';
@@ -622,7 +623,7 @@ class WC_Meta_Box_Product_Data {
 						if ( $product_ids ) {
 							foreach ( $product_ids as $product_id ) {
 
-								$product = get_product( $product_id );
+								$product = wc_get_product( $product_id );
 
 								if ( $product ) {
 									echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product->get_formatted_name() ) . '</option>';
@@ -1449,10 +1450,11 @@ class WC_Meta_Box_Product_Data {
 				$variation_id = absint( $variable_post_id[ $i ] );
 
 				// Checkboxes
-				$is_virtual      = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
-				$is_downloadable = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
-				$post_status     = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
-				$manage_stock    = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
+				$is_virtual          = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
+				$is_downloadable     = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
+				$post_status         = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
+				$parent_manage_stock = isset( $_POST['_manage_stock'] ) ? 'yes' : 'no';
+				$manage_stock        = ( isset( $variable_manage_stock[ $i ] ) && 'yes' == $parent_manage_stock ) ? 'yes' : 'no';
 
 				// Generate a useful post title
 				$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), absint( $variation_id ), esc_html( get_the_title( $post_id ) ) );
@@ -1533,11 +1535,7 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				if ( 'yes' === $manage_stock ) {
-					if ( isset( $variable_backorders[ $i ] ) && $variable_backorders[ $i ] !== 'parent' ) {
-						update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
-					} else {
-						delete_post_meta( $variation_id, '_backorders' );
-					}
+					update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );

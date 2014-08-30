@@ -39,16 +39,16 @@ class WC_Post_types {
 		$permalinks = get_option( 'woocommerce_permalinks' );
 
 		register_taxonomy( 'product_type',
-			apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
-			apply_filters( 'woocommerce_taxonomy_args_product_type', array(
-				'hierarchical'      => false,
-				'show_ui'           => false,
-				'show_in_nav_menus' => false,
-				'query_var'         => is_admin(),
-				'rewrite'           => false,
-				'public'            => false
-			) )
-		);
+	        apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
+	        apply_filters( 'woocommerce_taxonomy_args_product_type', array(
+	            'hierarchical' 			=> false,
+	            'show_ui' 				=> false,
+	            'show_in_nav_menus' 	=> false,
+	            'query_var' 			=> is_admin(),
+	            'rewrite'				=> false,
+	            'public'                => false
+	        ) )
+	    );
 
 		register_taxonomy( 'product_cat',
 			apply_filters( 'woocommerce_taxonomy_objects_product_cat', array( 'product' ) ),
@@ -252,10 +252,6 @@ class WC_Post_types {
 			)
 		);
 
-		if ( preg_match( '/\/(.+)(\/%product_cat%)$/' , $product_permalink, $matches ) ) {
-			add_rewrite_rule( '^' . $matches[1] . '/.+?/[^/]+/([^/]+)/?$', 'index.php?attachment=$matches[1]', 'top' );
-		}
-
 		register_post_type( 'product_variation',
 			apply_filters( 'woocommerce_register_post_type_product_variation',
 				array(
@@ -367,6 +363,27 @@ class WC_Post_types {
 				)
 			);
 		}
+
+		register_post_type( 'shop_webhook',
+			apply_filters( 'woocommerce_register_post_type_shop_webhook',
+				array(
+					'label' => __( 'Webhooks', 'woocommerce' ),
+					'public'              => false,
+					'show_ui'             => false,
+					'capability_type'     => 'shop_webhook',
+					'map_meta_cap'        => true,
+					'publicly_queryable'  => false,
+					'exclude_from_search' => true,
+					'show_in_menu'        => false,
+					'hierarchical'        => false,
+					'rewrite'             => false,
+					'query_var'           => false,
+					'supports'            => false,
+					'show_in_nav_menus'   => false,
+					'show_in_admin_bar'   => false,
+				)
+			)
+		);
 	}
 
 	/**

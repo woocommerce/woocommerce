@@ -82,13 +82,14 @@
 	position: relative;
 	border-left-color: #cc99c2 !important;
 	overflow: hidden;
-	a.button-primary {
+	a.button-primary,
+	button.button-primary {
 		background: #cc99c2;
 		border-color: #b366a4;
 		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		color: #fff;
-		text-decoration: none;
+		text-decoration:none !important;
 		&:hover {
 			background: #bb77ae;
 			border-color: #aa559a;
@@ -104,6 +105,8 @@
 		opacity: 0.5;
 	}
 	.twitter-share-button {
+		margin-top: -3px;
+		margin-left: 3px;
 		vertical-align: middle;
 	}
 }
@@ -122,6 +125,15 @@ mark.amount {
 	input:invalid {
 		border: 1px solid #cc010b;
 		background: #ffebe8;
+	}
+}
+.simplify-commerce-banner {
+	overflow: hidden;
+	img {
+		float: right;
+		padding: 15px 0;
+		margin-left: 1em;
+		width: 200px;
 	}
 }
 
@@ -188,6 +200,7 @@ table.wc_status_table {
 #log-viewer {
 	textarea {
 		width: 100%;
+		resize: vertical;
 	}
 }
 
@@ -879,6 +892,11 @@ ul.wc_coupon_list_block {
 				height: 21px;
 			}
 		}
+
+		.refund_by {
+			border-bottom: 1px dotted #999;
+		}
+
 		tr.fee {
 			.thumb div {
 				.ir();
@@ -1310,11 +1328,11 @@ table.wp-list-table {
 		width: 11% !important;
 	}
 	.column-featured, .column-product_type {
-		width: 46px;
+		width: 48px;
 		text-align: left !important;
 	}
 	.column-customer_message, .column-order_notes {
-		width: 46px;
+		width: 48px;
 		text-align: center;
 		img {
 			margin: 0 auto;

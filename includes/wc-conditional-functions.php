@@ -265,7 +265,7 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 	 * @return bool
 	 */
 	function meta_is_product_attribute( $name, $value, $product_id ) {
-		$product    = get_product( $product_id );
+		$product    = wc_get_product( $product_id );
 
 		if ( $product->product_type != 'variation' ) {
 			return false;

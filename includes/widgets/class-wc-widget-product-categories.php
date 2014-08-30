@@ -198,19 +198,14 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
 			wc_product_dropdown_categories( apply_filters( 'woocommerce_product_categories_widget_dropdown_args', $dropdown_args ) );
-			?>
-			<script type='text/javascript'>
-			/* <![CDATA[ */
-				var product_cat_dropdown = document.getElementById("dropdown_product_cat");
-				function onProductCatChange() {
-					if ( product_cat_dropdown.options[product_cat_dropdown.selectedIndex].value !=='' ) {
-						location.href = "<?php echo home_url(); ?>/?product_cat="+product_cat_dropdown.options[product_cat_dropdown.selectedIndex].value;
+			
+			wc_enqueue_js("
+				jQuery('.dropdown_product_cat').change(function(){
+					if(jQuery(this).val() != '') {
+						location.href = '" . home_url() . "/?product_cat=' + jQuery(this).val();
 					}
-				}
-				product_cat_dropdown.onchange = onProductCatChange;
-			/* ]]> */
-			</script>
-			<?php
+				});
+			");
 
 		// List
 		} else {
@@ -234,5 +229,3 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		echo $after_widget;
 	}
 }
-
-register_widget( 'WC_Widget_Product_Categories' );

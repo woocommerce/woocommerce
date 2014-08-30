@@ -198,7 +198,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
  */
 function wc_paying_customer( $order_id ) {
 
-	$order = get_order( $order_id );
+	$order = wc_get_order( $order_id );
 
 	if ( $order->user_id > 0 ) {
 		update_user_meta( $order->user_id, 'paying_customer', 1 );
@@ -278,7 +278,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 		switch ( $caps[0] ) {
 			case 'view_order' :
 				$user_id = $args[1];
-				$order   = get_order( $args[2] );
+				$order   = wc_get_order( $args[2] );
 
 				if ( $user_id == $order->user_id ) {
 					$allcaps['view_order'] = true;
@@ -295,14 +295,14 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 					break;
 				}
 
-				$order = get_order( $order_id );
+				$order = wc_get_order( $order_id );
 				if ( $user_id == $order->user_id || empty( $order->user_id ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
 			break;
 			case 'order_again' :
 				$user_id = $args[1];
-				$order   = get_order( $args[2] );
+				$order   = wc_get_order( $args[2] );
 
 				if ( $user_id == $order->user_id ) {
 					$allcaps['order_again'] = true;
@@ -310,7 +310,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 			break;
 			case 'cancel_order' :
 				$user_id = $args[1];
-				$order   = get_order( $args[2] );
+				$order   = wc_get_order( $args[2] );
 
 				if ( $user_id == $order->user_id ) {
 					$allcaps['cancel_order'] = true;
@@ -361,9 +361,7 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 		case 'promote_user' :
 		case 'delete_user' :
 		case 'delete_users' :
-			if ( ! isset( $args[0] ) ) {
-				$caps[] = 'do_not_allow';
-			} elseif ( $args[0] === $user_id ) {
+			if ( ! isset( $args[0] ) || $args[0] === $user_id ) {
 				break;
 			} else {
 				if ( user_can( $args[0], 'administrator' ) && ! current_user_can( 'administrator' ) ) {
@@ -397,7 +395,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 		LEFT JOIN {$wpdb->posts} as posts ON permissions.order_id = posts.ID
 		WHERE user_id = %d
 		AND permissions.order_id > 0
-		AND posts.post_status = 'publish'
+		AND posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
 		AND
 			(
 				permissions.downloads_remaining > 0
@@ -418,7 +416,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 		foreach ( $results as $result ) {
 			if ( ! $order || $order->id != $result->order_id ) {
 				// new order
-				$order    = get_order( $result->order_id );
+				$order    = wc_get_order( $result->order_id );
 				$_product = null;
 			}
 
@@ -430,7 +428,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			if ( ! $_product || $_product->id != $result->product_id ) {
 				// new product
 				$file_number = 0;
-				$_product    = get_product( $result->product_id );
+				$_product    = wc_get_product( $result->product_id );
 			}
 
 			// Check product exists and has the file
@@ -439,6 +437,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			}
 
 			$download_file = $_product->get_file( $result->download_id );
+
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
@@ -449,13 +448,22 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			);
 
 			$downloads[] = array(
-				'download_url'        => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), home_url( '/' ) ),
+				'download_url'        => add_query_arg(
+					array(
+						'download_file' => $result->product_id,
+						'order'         => $result->order_key,
+						'email'         => $result->user_email,
+						'key'           => $result->download_id
+					),
+					home_url( '/' )
+				),
 				'download_id'         => $result->download_id,
 				'product_id'          => $result->product_id,
 				'download_name'       => $download_name,
 				'order_id'            => $order->id,
 				'order_key'           => $order->order_key,
-				'downloads_remaining' => $result->downloads_remaining
+				'downloads_remaining' => $result->downloads_remaining,
+				'file'                => $download_file
 			);
 
 			$file_number++;

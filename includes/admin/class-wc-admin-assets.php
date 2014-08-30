@@ -83,40 +83,41 @@ class WC_Admin_Assets {
 		wp_register_script( 'chosen', WC()->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array('jquery'), WC_VERSION );
 
 		// Accounting
-    	$params = array(
+		$params = array(
 			'mon_decimal_point' => get_option( 'woocommerce_price_decimal_sep' )
-    	);
+		);
 
-    	wp_localize_script( 'accounting', 'accounting_params', $params );
+		wp_localize_script( 'accounting', 'accounting_params', $params );
 
 		// WooCommerce admin pages
-	    if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
+		if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
 
-	    	wp_enqueue_script( 'woocommerce_admin' );
-	    	wp_enqueue_script( 'iris' );
-	    	wp_enqueue_script( 'ajax-chosen' );
-	    	wp_enqueue_script( 'chosen' );
-	    	wp_enqueue_script( 'jquery-ui-sortable' );
-	    	wp_enqueue_script( 'jquery-ui-autocomplete' );
+			wp_enqueue_script( 'woocommerce_admin' );
+			wp_enqueue_script( 'iris' );
+			wp_enqueue_script( 'ajax-chosen' );
+			wp_enqueue_script( 'chosen' );
+			wp_enqueue_script( 'jquery-ui-sortable' );
+			wp_enqueue_script( 'jquery-ui-autocomplete' );
 
-	    	$locale  = localeconv();
-	    	$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
+			$locale  = localeconv();
+			$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
 
-	    	$params = array(
-				'i18n_decimal_error'     => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
-				'i18n_mon_decimal_error' => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), get_option( 'woocommerce_price_decimal_sep' ) ),
-				'i18n_country_iso_error' => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
-				'decimal_point'          => $decimal,
-				'mon_decimal_point'      => get_option( 'woocommerce_price_decimal_sep' )
-	    	);
+			$params = array(
+				'i18n_decimal_error'                => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
+				'i18n_mon_decimal_error'            => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), get_option( 'woocommerce_price_decimal_sep' ) ),
+				'i18n_country_iso_error'            => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
+				'i18_sale_less_than_regular_error'  => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
+				'decimal_point'                     => $decimal,
+				'mon_decimal_point'                 => get_option( 'woocommerce_price_decimal_sep' ),
+			);
 
-	    	wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
-	    }
+			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
+		}
 
-	    // Edit product category pages
-	    if ( in_array( $screen->id, array( 'edit-product_cat' ) ) ) {
+		// Edit product category pages
+		if ( in_array( $screen->id, array( 'edit-product_cat' ) ) ) {
 			wp_enqueue_media();
-	    }
+		}
 
 		// Products
 		if ( in_array( $screen->id, array( 'edit-product' ) ) ) {
@@ -214,6 +215,7 @@ class WC_Admin_Assets {
 				'i18n_download_permission_fail' => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
 				'i18n_permission_revoke'        => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 				'i18n_tax_rate_already_exists'  => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
+				'i18n_product_type_alert'       => __( 'Your product has variations! Before changing the product type, it is a good idea to delete the variations to avoid errors in the stock reports.', 'woocommerce' )
 			);
 
 			wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
@@ -249,6 +251,11 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'flot-time', WC()->plugin_url() . '/assets/js/admin/jquery.flot.time' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 			wp_enqueue_script( 'flot-pie', WC()->plugin_url() . '/assets/js/admin/jquery.flot.pie' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 			wp_enqueue_script( 'flot-stack', WC()->plugin_url() . '/assets/js/admin/jquery.flot.stack' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
+		}
+
+		// System status
+		if ( 'woocommerce_page_wc-status' === $screen->id ) {
+			wp_enqueue_script( 'zeroclipboard', WC()->plugin_url() . '/assets/js/zeroclipboard/jquery.zeroclipboard' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 		}
 
 		// Chosen RTL

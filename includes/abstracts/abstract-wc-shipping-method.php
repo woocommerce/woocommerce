@@ -89,7 +89,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		if ( ! $id || ! $label ) return;
 
 		// Handle cost
-		$total_cost = ( is_array( $cost ) ) ? array_sum( $cost ) : $cost;
+		$total_cost = round( ( is_array( $cost ) ) ? array_sum( $cost ) : $cost, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable
 		// This saves shipping methods having to do complex tax calculations

@@ -8,8 +8,6 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-global $woocommerce;
 ?>
 <form id="order_review" method="post">
 
@@ -21,18 +19,6 @@ global $woocommerce;
 				<th class="product-total"><?php _e( 'Totals', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
-		<tfoot>
-		<?php
-			if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
-				?>
-				<tr>
-					<th scope="row" colspan="2"><?php echo $total['label']; ?></th>
-					<td class="product-total"><?php echo $total['value']; ?></td>
-				</tr>
-				<?php
-			endforeach;
-		?>
-		</tfoot>
 		<tbody>
 			<?php
 			if ( sizeof( $order->get_items() ) > 0 ) :
@@ -47,6 +33,18 @@ global $woocommerce;
 			endif;
 			?>
 		</tbody>
+		<tfoot>
+		<?php
+			if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
+				?>
+				<tr>
+					<th scope="row" colspan="2"><?php echo $total['label']; ?></th>
+					<td class="product-total"><?php echo $total['value']; ?></td>
+				</tr>
+				<?php
+			endforeach;
+		?>
+		</tfoot>
 	</table>
 
 	<div id="payment">

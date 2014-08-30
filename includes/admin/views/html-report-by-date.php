@@ -1,8 +1,14 @@
 <?php
 /**
- * HTML for a report with date filters in admin.
+ * Admin View: Report by Date (with date filters)
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 ?>
+
 <div id="poststuff" class="woocommerce-reports-wide">
 	<div class="postbox">
 		<h3 class="stats_range">

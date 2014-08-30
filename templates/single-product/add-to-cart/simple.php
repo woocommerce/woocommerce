@@ -9,17 +9,17 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $woocommerce, $product;
+global $product;
 
 if ( ! $product->is_purchasable() ) return;
 ?>
 
 <?php
 	// Availability
-	$availability = $product->get_availability();
-
-	if ( $availability['availability'] )
-		echo apply_filters( 'woocommerce_stock_html', '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . esc_html( $availability['availability'] ) . '</p>', $availability['availability'] );
+	$availability      = $product->get_availability();
+	$availability_html = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . esc_html( $availability['availability'] ) . '</p>';
+	
+	echo apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $product );
 ?>
 
 <?php if ( $product->is_in_stock() ) : ?>

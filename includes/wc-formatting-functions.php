@@ -343,13 +343,14 @@ function wc_price( $price, $args = array() ) {
 		$price = wc_trim_zeros( $price );
 	}
 
-	$return = '<span class="amount">' . ( $negative ? '-' : '' ) . sprintf( get_woocommerce_price_format(), $currency_symbol, $price ) . '</span>';
+	$formatted_price = ( $negative ? '-' : '' ) . sprintf( get_woocommerce_price_format(), $currency_symbol, $price );
+	$return          = '<span class="amount">' . $formatted_price . '</span>';
 
 	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
 		$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
-	return $return;
+	return apply_filters( 'wc_price', $return, $price, $args );
 }
 
 /**

@@ -592,6 +592,17 @@ class WC_Countries {
 						'required' => false
 					)
 				),
+				'AU' => array(
+					'city'	=> array(
+						'label' 		=> __( 'Suburb', 'woocommerce' ),
+					),
+					'postcode'	=> array(
+						'label' 		=> __( 'Postcode', 'woocommerce' ),
+					),
+					'state'		=> array(
+						'label' 		=> __( 'State', 'woocommerce' ),
+					)
+				),
 				'BD' => array(
 					'postcode' => array(
 						'required' => false

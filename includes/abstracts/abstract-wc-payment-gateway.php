@@ -78,16 +78,20 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/**
 	 * Get a link to the transaction on the 3rd party gateway size (if applicable)
-	 * @param  string $transaction_id
-	 * @return string
+	 *
+	 * @param  WC_Order $order the order object
+	 * @return string transaction URL, or empty string
 	 */
-	public function get_transaction_url( $transaction_id ) {
+	public function get_transaction_url( $order ) {
 		$return_url = '';
+		$transaction_id = $order->get_transaction_id();
+
 		if ( ! empty( $this->view_transaction_url ) && ! empty( $transaction_id ) ) {
 			$return_url = sprintf( $this->view_transaction_url, $transaction_id );
 		}
-		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $transaction_id, $this );
-	} 
+
+		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $order, $this );
+	}
 
 	/**
 	 * Get the order total in checkout and pay_for_order.
@@ -100,7 +104,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 		// Gets order total from "pay for order" page.
 		if ( 0 < $order_id ) {
-			$order = get_order( $order_id );
+			$order = wc_get_order( $order_id );
 			$total = (float) $order->get_total();
 
 		// Gets order total from cart/checkout.
@@ -120,7 +124,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public function is_available() {
 		$is_available = ( 'yes' === $this->enabled ) ? true : false;
 
-		if ( WC()->cart && 0 < $this->get_order_total() && $this->max_amount >= $this->get_order_total() ) {
+		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
 			$is_available = false;
 		}
 
@@ -164,7 +168,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_icon() {
-
 		$icon = $this->icon ? '<img src="' . WC_HTTPS::force_https_url( $this->icon ) . '" alt="' . esc_attr( $this->get_title() ) . '" />' : '';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
@@ -185,7 +188,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Process Payment
 	 *
-	 * Process the payment. Override this in your gateway. When implemented, this should 
+	 * Process the payment. Override this in your gateway. When implemented, this should
 	 * return the success and redirect in an array. e.g.
 	 *
 	 * 		return array(
@@ -196,7 +199,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @param int $order_id
 	 * @return array
 	 */
-	public function process_payment( $order_id ) { 
+	public function process_payment( $order_id ) {
 		return array();
 	}
 
@@ -205,12 +208,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 *
 	 * If the gateway declares 'refunds' support, this will allow it to refund
 	 * a passed in amount.
-	 * 
+	 *
 	 * @param  int $order_id
 	 * @param  float $amount
+	 * @param  string $reason
 	 * @return  bool|wp_error True or false based on success, or a WP_Error object
 	 */
-	public function process_refund( $order_id, $amount = null ) {
+	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		return false;
 	}
 
