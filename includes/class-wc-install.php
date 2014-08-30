@@ -130,7 +130,7 @@ class WC_Install {
 		flush_rewrite_rules();
 
 		// Redirect to welcome screen
-		set_transient( '_wc_activation_redirect', 1, 60 * 60 );
+		set_transient( '_wc_activation_redirect', 1, HOUR_IN_SECONDS );
 	}
 
 	/**
