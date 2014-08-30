@@ -64,7 +64,11 @@ class WC_API_JSON_Handler implements WC_API_Handler {
 				$data = array( array( 'code' => 'woocommerce_api_jsonp_callback_invalid', __( 'The JSONP callback function is invalid', 'woocommerce' ) ) );
 			}
 
-			return $_GET['_jsonp'] . '(' . json_encode( $data ) . ')';
+			// see http://miki.it/blog/2014/7/8/abusing-jsonp-with-rosetta-flash/
+			WC()->api->server->header( 'X-Content-Type-Options', 'nosniff' );
+
+			// Prepend '/**/' to mitigate possible JSONP Flash attacks
+			return '/**/' . $_GET['_jsonp'] . '(' . json_encode( $data ) . ')';
 		}
 
 		return json_encode( $data );
