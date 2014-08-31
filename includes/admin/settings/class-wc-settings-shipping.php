@@ -2,9 +2,9 @@
 /**
  * WooCommerce Shipping Settings
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -37,8 +37,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_sections() {
+
 		$sections = array(
-			''         => __( 'Shipping Options', 'woocommerce' )
+			'' => __( 'Shipping Options', 'woocommerce' )
 		);
 
 		// Load shipping methods so we can show any global options they may have
@@ -62,44 +63,45 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
+
 		return apply_filters('woocommerce_shipping_settings', array(
 
 			array( 'title' => __( 'Shipping Options', 'woocommerce' ), 'type' => 'title', 'id' => 'shipping_options' ),
 
 			array(
-				'title' 		=> __( 'Shipping Calculations', 'woocommerce' ),
-				'desc' 		=> __( 'Enable shipping', 'woocommerce' ),
-				'id' 		=> 'woocommerce_calc_shipping',
-				'default'	=> 'yes',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> 'start'
+				'title'         => __( 'Shipping Calculations', 'woocommerce' ),
+				'desc'          => __( 'Enable shipping', 'woocommerce' ),
+				'id'            => 'woocommerce_calc_shipping',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start'
 			),
 
 			array(
-				'desc' 		=> __( 'Enable the shipping calculator on the cart page', 'woocommerce' ),
-				'id' 		=> 'woocommerce_enable_shipping_calc',
-				'default'	=> 'yes',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> '',
+				'desc'          => __( 'Enable the shipping calculator on the cart page', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_shipping_calc',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
 				'autoload'      => false
 			),
 
 			array(
-				'desc' 		=> __( 'Hide shipping costs until an address is entered', 'woocommerce' ),
-				'id' 		=> 'woocommerce_shipping_cost_requires_address',
-				'default'	=> 'no',
-				'type' 		=> 'checkbox',
-				'checkboxgroup'		=> 'end',
+				'desc'          => __( 'Hide shipping costs until an address is entered', 'woocommerce' ),
+				'id'            => 'woocommerce_shipping_cost_requires_address',
+				'default'       => 'no',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'end',
 				'autoload'      => false
 			),
 
 			array(
-				'title'   => __( 'Shipping Display Mode', 'woocommerce' ),
-				'desc'    => __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
-				'id'      => 'woocommerce_shipping_method_format',
-				'default' => '',
-				'type'    => 'radio',
-				'options' => array(
+				'title'    => __( 'Shipping Display Mode', 'woocommerce' ),
+				'desc'     => __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
+				'id'       => 'woocommerce_shipping_method_format',
+				'default'  => '',
+				'type'     => 'radio',
+				'options'  => array(
 					''       => __( 'Display shipping methods with "radio" buttons', 'woocommerce' ),
 					'select' => __( 'Display shipping methods in a dropdown', 'woocommerce' ),
 				),
@@ -124,14 +126,14 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			),
 
 			array(
-				'title' => __( 'Restrict shipping to Location(s)', 'woocommerce' ),
-				'desc' 		=> sprintf( __( 'Choose which countries you want to ship to, or choose to ship to all <a href="%s">locations you sell to</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=general' ) ),
-				'id' 		=> 'woocommerce_ship_to_countries',
-				'default'	=> '',
-				'type' 		=> 'select',
-				'class'		=> 'chosen_select',
-				'desc_tip'	=> false,
-				'options' => array(
+				'title'    => __( 'Restrict shipping to Location(s)', 'woocommerce' ),
+				'desc'     => sprintf( __( 'Choose which countries you want to ship to, or choose to ship to all <a href="%s">locations you sell to</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=general' ) ),
+				'id'       => 'woocommerce_ship_to_countries',
+				'default'  => '',
+				'type'     => 'select',
+				'class'    => 'chosen_select',
+				'desc_tip' => false,
+				'options'  => array(
 					''         => __( 'Ship to all countries you sell to', 'woocommerce' ),
 					'all'      => __( 'Ship to all countries', 'woocommerce' ),
 					'specific' => __( 'Ship to specific countries only', 'woocommerce' )
@@ -139,16 +141,16 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			),
 
 			array(
-				'title' => __( 'Specific Countries', 'woocommerce' ),
-				'desc' 		=> '',
-				'id' 		=> 'woocommerce_specific_ship_to_countries',
-				'css' 		=> '',
-				'default'	=> '',
-				'type' 		=> 'multi_select_countries'
+				'title'   => __( 'Specific Countries', 'woocommerce' ),
+				'desc'    => '',
+				'id'      => 'woocommerce_specific_ship_to_countries',
+				'css'     => '',
+				'default' => '',
+				'type'    => 'multi_select_countries'
 			),
 
 			array(
-				'type' 		=> 'shipping_methods',
+				'type' => 'shipping_methods',
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'shipping_options' ),
@@ -166,7 +168,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$shipping_methods = WC()->shipping->load_shipping_methods();
 
 		if ( $current_section ) {
+
  			foreach ( $shipping_methods as $method ) {
+
 				if ( strtolower( get_class( $method ) ) == strtolower( $current_section ) && $method->has_settings() ) {
 					$method->admin_options();
 					break;
@@ -181,16 +185,14 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 	/**
 	 * Output shipping method settings.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function shipping_methods_setting() {
+
 		$default_shipping_method = esc_attr( get_option('woocommerce_default_shipping_method') );
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc"><?php _e( 'Shipping Methods', 'woocommerce' ) ?></th>
-		    <td class="forminp">
+			<td class="forminp">
 				<table class="wc_shipping widefat" cellspacing="0">
 					<thead>
 						<tr>
@@ -202,37 +204,38 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 						</tr>
 					</thead>
 					<tbody>
-				    	<?php
-				    	foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) {
-					    	echo '<tr>
-					    		<td width="1%" class="default">
-					    			<input type="radio" name="default_shipping_method" value="' . esc_attr( $method->id ) . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
-					    			<input type="hidden" name="method_order[]" value="' . esc_attr( $method->id ) . '" />
-					    		</td>
-				    			<td class="name">
-				    				' . $method->get_title() . '
-				    			</td>
-				    			<td class="id">
-				    				' . $method->id . '
-				    			</td>
-				    			<td class="status">';
+						<?php
+						foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) {
+							echo '<tr>
+								<td width="1%" class="default">
+									<input type="radio" name="default_shipping_method" value="' . esc_attr( $method->id ) . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
+									<input type="hidden" name="method_order[]" value="' . esc_attr( $method->id ) . '" />
+								</td>
+								<td class="name">
+									' . $method->get_title() . '
+								</td>
+								<td class="id">
+									' . $method->id . '
+								</td>
+								<td class="status">';
 
-				    		if ( $method->enabled == 'yes' )
-						        echo '<span class="status-enabled tips" data-tip="' . __ ( 'Enabled', 'woocommerce' ) . '">' . __ ( 'Enabled', 'woocommerce' ) . '</span>';
-						   	else
-						   		echo '-';
+							if ( $method->enabled == 'yes' ) {
+								echo '<span class="status-enabled tips" data-tip="' . __ ( 'Enabled', 'woocommerce' ) . '">' . __ ( 'Enabled', 'woocommerce' ) . '</span>';
+							} else {
+								echo '-';
+							}
 
-				    		echo '</td>
-				    			<td class="settings">';
+							echo '</td>
+								<td class="settings">';
 
-				    		if ( $method->has_settings ) {
-				    			echo '<a class="button" href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>';
-				    		}
+							if ( $method->has_settings ) {
+								echo '<a class="button" href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>';
+							}
 
-				    		echo '</td>
-				    		</tr>';
-				    	}
-				    	?>
+							echo '</td>
+							</tr>';
+						}
+						?>
 					</tbody>
 					<tfoot>
 						<tr>
