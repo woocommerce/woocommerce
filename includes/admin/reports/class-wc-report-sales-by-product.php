@@ -2,24 +2,26 @@
 /**
  * WC_Report_Sales_By_Product
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Reports
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Reports
  * @version     2.1.0
  */
 class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	public $chart_colours = array();
-	public $product_ids = array();
+	public $product_ids   = array();
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( isset( $_GET['product_ids'] ) && is_array( $_GET['product_ids'] ) )
+
+		if ( isset( $_GET['product_ids'] ) && is_array( $_GET['product_ids'] ) ) {
 			$this->product_ids = array_map( 'absint', $_GET['product_ids'] );
-		elseif ( isset( $_GET['product_ids'] ) )
+		} elseif ( isset( $_GET['product_ids'] ) ) {
 			$this->product_ids = array( absint( $_GET['product_ids'] ) );
+		}
 	}
 
 	/**
@@ -27,12 +29,14 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-		if ( ! $this->product_ids )
+
+		if ( ! $this->product_ids ) {
 			return array();
+		}
 
 		$legend   = array();
 
-		$total_sales 	= $this->get_order_report_data( array(
+		$total_sales = $this->get_order_report_data( array(
 			'data' => array(
 				'_line_total' => array(
 					'type'            => 'order_item_meta',
@@ -53,7 +57,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			'query_type'   => 'get_var',
 			'filter_range' => true
 		) );
-		$total_items    = absint( $this->get_order_report_data( array(
+
+		$total_items = absint( $this->get_order_report_data( array(
 			'data' => array(
 				'_qty' => array(
 					'type'            => 'order_item_meta',
@@ -81,6 +86,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			'color' => $this->chart_colours['sales_amount'],
 			'highlight_series' => 1
 		);
+
 		$legend[] = array(
 			'title' => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . $total_items . '</strong>' ),
 			'color' => $this->chart_colours['item_count'],
@@ -94,6 +100,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * Output the report
 	 */
 	public function output_report() {
+
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
@@ -118,6 +125,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * [get_chart_widgets description]
+	 *
 	 * @return array
 	 */
 	public function get_chart_widgets() {
@@ -141,13 +149,15 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Show current filters
-	 * @return void
 	 */
 	public function current_filters() {
+
 		$this->product_ids_titles = array();
 
 		foreach ( $this->product_ids as $product_id ) {
+
 			$product = wc_get_product( $product_id );
+
 			if ( $product ) {
 				$this->product_ids_titles[] = $product->get_formatted_name();
 			} else {
@@ -161,7 +171,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Product selection
-	 * @return void
 	 */
 	public function products_widget() {
 		?>
@@ -182,21 +191,21 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					jQuery(function(){
 						// Ajax Chosen Product Selectors
 						jQuery("select.ajax_chosen_select_products").ajaxChosen({
-						    method: 	'GET',
-						    url: 		'<?php echo admin_url('admin-ajax.php'); ?>',
-						    dataType: 	'json',
-						    afterTypeDelay: 100,
-						    data:		{
-						    	action: 		'woocommerce_json_search_products_and_variations',
-								security: 		'<?php echo wp_create_nonce("search-products"); ?>'
-						    }
+							method:         'GET',
+							url:            '<?php echo admin_url('admin-ajax.php'); ?>',
+							dataType:       'json',
+							afterTypeDelay: 100,
+							data: {
+								action:   'woocommerce_json_search_products_and_variations',
+								security: '<?php echo wp_create_nonce("search-products"); ?>'
+							}
 						}, function (data) {
 							var terms = {};
 
-						    jQuery.each(data, function (i, val) {
-						        terms[i] = val;
-						    });
-						    return terms;
+							jQuery.each(data, function (i, val) {
+								terms[i] = val;
+							});
+							return terms;
 						});
 					});
 				</script>
@@ -309,6 +318,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * Output an export link
 	 */
 	public function get_export_button() {
+
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
 		?>
 		<a
@@ -326,6 +336,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart
+	 *
 	 * @return string
 	 */
 	public function get_main_chart() {
@@ -471,47 +482,47 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 								legend: {
 									show: false
 								},
-							    grid: {
-							        color: '#aaa',
-							        borderColor: 'transparent',
-							        borderWidth: 0,
-							        hoverable: true
-							    },
-							    xaxes: [ {
-							    	color: '#aaa',
-							    	position: "bottom",
-							    	tickColor: 'transparent',
+								grid: {
+									color: '#aaa',
+									borderColor: 'transparent',
+									borderWidth: 0,
+									hoverable: true
+								},
+								xaxes: [ {
+									color: '#aaa',
+									position: "bottom",
+									tickColor: 'transparent',
 									mode: "time",
 									timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
 									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 									tickLength: 1,
 									minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 									font: {
-							    		color: "#aaa"
-							    	}
+										color: "#aaa"
+									}
 								} ],
-							    yaxes: [
-							    	{
-							    		min: 0,
-							    		minTickSize: 1,
-							    		tickDecimals: 0,
-							    		color: '#ecf0f1',
-							    		font: { color: "#aaa" }
-							    	},
-							    	{
-							    		position: "right",
-							    		min: 0,
-							    		tickDecimals: 2,
-							    		alignTicksWithAxis: 1,
-							    		color: 'transparent',
-							    		font: { color: "#aaa" }
-							    	}
-							    ],
-					 		}
-					 	);
+								yaxes: [
+									{
+										min: 0,
+										minTickSize: 1,
+										tickDecimals: 0,
+										color: '#ecf0f1',
+										font: { color: "#aaa" }
+									},
+									{
+										position: "right",
+										min: 0,
+										tickDecimals: 2,
+										alignTicksWithAxis: 1,
+										color: 'transparent',
+										font: { color: "#aaa" }
+									}
+								],
+							}
+						);
 
-					 	jQuery('.chart-placeholder').resize();
-					 }
+						jQuery('.chart-placeholder').resize();
+					}
 
 					drawGraph();
 
