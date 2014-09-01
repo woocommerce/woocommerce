@@ -139,7 +139,6 @@ final class WooCommerce {
 		$this->api = new WC_API();
 
 		// Hooks
-		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'action_links' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
@@ -173,20 +172,6 @@ final class WooCommerce {
 			default:
 				return false;
 		}
-	}
-
-	/**
-	 * Show action links on the plugin screen
-	 *
-	 * @param mixed $links
-	 * @return array
-	 */
-	public function action_links( $links ) {
-		return array_merge( array(
-			'<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
-			'<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
-			'<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
-		), $links );
 	}
 
 	/**
@@ -237,6 +222,7 @@ final class WooCommerce {
 	 */
 	private function define_constants() {
 		define( 'WC_PLUGIN_FILE', __FILE__ );
+		define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 		define( 'WC_VERSION', $this->version );
 		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compatibility
 

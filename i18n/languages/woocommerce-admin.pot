@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.2.0-bleeding Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-08-28 22:29:59+00:00\n"
+"POT-Creation-Date: 2014-08-29 19:08:53+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -346,7 +346,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:1956
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:214
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:293
-#: includes/admin/meta-boxes/views/html-order-items.php:180
+#: includes/admin/meta-boxes/views/html-order-items.php:195
 #: includes/admin/reports/class-wc-report-customer-list.php:181
 #: includes/admin/reports/class-wc-report-stock.php:112
 msgid "Edit"
@@ -804,7 +804,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:164
 #: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:35
-#: includes/admin/meta-boxes/views/html-order-items.php:178
+#: includes/admin/meta-boxes/views/html-order-items.php:193
 #: includes/admin/reports/class-wc-report-customer-list.php:244
 #: includes/admin/reports/class-wc-report-stock.php:145
 msgid "Actions"
@@ -1271,10 +1271,10 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:1976
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:175
-#: includes/admin/meta-boxes/views/html-order-items.php:210
-#: includes/admin/meta-boxes/views/html-order-items.php:248
-#: includes/admin/meta-boxes/views/html-order-items.php:267
-#: includes/admin/meta-boxes/views/html-order-items.php:322
+#: includes/admin/meta-boxes/views/html-order-items.php:227
+#: includes/admin/meta-boxes/views/html-order-items.php:266
+#: includes/admin/meta-boxes/views/html-order-items.php:286
+#: includes/admin/meta-boxes/views/html-order-items.php:341
 msgid "Cancel"
 msgstr ""
 
@@ -2043,7 +2043,7 @@ msgstr ""
 #: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:101
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:601
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:619
-#: includes/admin/meta-boxes/views/html-order-items.php:262
+#: includes/admin/meta-boxes/views/html-order-items.php:281
 #: includes/admin/reports/class-wc-report-sales-by-product.php:172
 msgid "Search for a product&hellip;"
 msgstr ""
@@ -2153,7 +2153,7 @@ msgid "Generate download permissions"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:59
-#: includes/admin/meta-boxes/views/html-order-items.php:190
+#: includes/admin/meta-boxes/views/html-order-items.php:205
 msgid "Apply"
 msgstr ""
 
@@ -2340,8 +2340,8 @@ msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-notes.php:71
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:578
-#: includes/admin/meta-boxes/views/html-order-items.php:268
-#: includes/admin/meta-boxes/views/html-order-items.php:323
+#: includes/admin/meta-boxes/views/html-order-items.php:287
+#: includes/admin/meta-boxes/views/html-order-items.php:342
 msgid "Add"
 msgstr ""
 
@@ -2964,129 +2964,129 @@ msgstr ""
 msgid "This is the shipping and handling total costs for the order."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:146
+#: includes/admin/meta-boxes/views/html-order-items.php:152
 msgid "Order Discount"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:146
+#: includes/admin/meta-boxes/views/html-order-items.php:152
 msgid "This is the total discount applied after tax."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:157
+#: includes/admin/meta-boxes/views/html-order-items.php:166
 msgid "Order Total"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:168
+#: includes/admin/meta-boxes/views/html-order-items.php:180
 msgid "Refunded"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:181
+#: includes/admin/meta-boxes/views/html-order-items.php:196
 msgid "Delete selected line item(s)"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:184
+#: includes/admin/meta-boxes/views/html-order-items.php:199
 msgid "Stock Actions"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:185
+#: includes/admin/meta-boxes/views/html-order-items.php:200
 msgid "Reduce line item stock"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:186
+#: includes/admin/meta-boxes/views/html-order-items.php:201
 msgid "Increase line item stock"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:194
+#: includes/admin/meta-boxes/views/html-order-items.php:209
 msgid "Add line item(s)"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:197
+#: includes/admin/meta-boxes/views/html-order-items.php:212
 msgid "Add Tax"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:199
+#: includes/admin/meta-boxes/views/html-order-items.php:215
 #: includes/admin/meta-boxes/views/html-order-refund.php:14
 msgid "Refund"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:201
+#: includes/admin/meta-boxes/views/html-order-items.php:218
 msgid "Calculate Taxes"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:202
+#: includes/admin/meta-boxes/views/html-order-items.php:219
 msgid "Calculate Total"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:207
+#: includes/admin/meta-boxes/views/html-order-items.php:224
 msgid "Add product(s)"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:208
+#: includes/admin/meta-boxes/views/html-order-items.php:225
 msgid "Add fee"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:209
+#: includes/admin/meta-boxes/views/html-order-items.php:226
 msgid "Add shipping cost"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:211
+#: includes/admin/meta-boxes/views/html-order-items.php:228
 msgid "Save"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:216
+#: includes/admin/meta-boxes/views/html-order-items.php:234
 msgid "Restock refunded items"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:220
+#: includes/admin/meta-boxes/views/html-order-items.php:238
 msgid "Amount already refunded"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:224
+#: includes/admin/meta-boxes/views/html-order-items.php:242
 msgid "Total available to refund"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:228
+#: includes/admin/meta-boxes/views/html-order-items.php:246
 msgid "Refund amount"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:235
+#: includes/admin/meta-boxes/views/html-order-items.php:253
 msgid "Reason for refund (optional)"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:247
+#: includes/admin/meta-boxes/views/html-order-items.php:265
 msgid "Refund manually"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:258
+#: includes/admin/meta-boxes/views/html-order-items.php:277
 msgid "Add products"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:282
+#: includes/admin/meta-boxes/views/html-order-items.php:301
 msgid "Add tax"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:290
+#: includes/admin/meta-boxes/views/html-order-items.php:309
 msgid "Rate name"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:291
+#: includes/admin/meta-boxes/views/html-order-items.php:310
 msgid "Tax class"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:292
+#: includes/admin/meta-boxes/views/html-order-items.php:311
 msgid "Rate code"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:293
+#: includes/admin/meta-boxes/views/html-order-items.php:312
 #: includes/admin/settings/class-wc-settings-tax.php:383
 msgid "Rate %"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:314
+#: includes/admin/meta-boxes/views/html-order-items.php:333
 msgid "Or, enter tax rate ID:"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:315
+#: includes/admin/meta-boxes/views/html-order-items.php:334
 msgid "Optional"
 msgstr ""
 
@@ -5511,7 +5511,7 @@ msgctxt "Tax status"
 msgid "None"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-order-items.php:245
+#: includes/admin/meta-boxes/views/html-order-items.php:263
 msgctxt "Refund $amount"
 msgid "Refund %s via %s"
 msgstr ""
