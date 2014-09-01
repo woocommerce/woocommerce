@@ -73,7 +73,7 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'delete_customer' ), WC_API_SERVER::DELETABLE ),
 		);
 
-		# GET /customers/<email>
+		# GET /customers/email/<email>
 		$routes[ $this->base . '/email/(?P<email>.+)' ] = array(
 			array( array( $this, 'get_customer_by_email' ), WC_API_SERVER::READABLE ),
 		);
@@ -89,52 +89,6 @@ class WC_API_Customers extends WC_API_Resource {
 		);
 
 		return $routes;
-	}
-
-	/**
-	 * Get customer billing address fields.
-	 *
-	 * @since  2.2
-	 * @return array
-	 */
-	public function get_customer_billing_address() {
-		$billing_address = apply_filters( 'woocommerce_api_customer_billing_address', array(
-			'first_name',
-			'last_name',
-			'company',
-			'address_1',
-			'address_2',
-			'city',
-			'state',
-			'postcode',
-			'country',
-			'email',
-			'phone',
-		) );
-
-		return $billing_address;
-	}
-
-	/**
-	 * Get customer shipping address fields.
-	 *
-	 * @since  2.2
-	 * @return array
-	 */
-	public function get_customer_shipping_address() {
-		$shipping_address = apply_filters( 'woocommerce_api_customer_shipping_address', array(
-			'first_name',
-			'last_name',
-			'company',
-			'address_1',
-			'address_2',
-			'city',
-			'state',
-			'postcode',
-			'country',
-		) );
-
-		return $shipping_address;
 	}
 
 	/**
@@ -246,7 +200,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @param string $fields
 	 * @return array
 	 */
-	function get_customer_by_email( $email, $fields = null ) {
+	public function get_customer_by_email( $email, $fields = null ) {
 
 		if ( is_email( $email ) ) {
 			$customer = get_user_by( 'email', $email );
@@ -276,6 +230,52 @@ class WC_API_Customers extends WC_API_Resource {
 		}
 
 		return array( 'count' => count( $query->get_results() ) );
+	}
+
+	/**
+	 * Get customer billing address fields.
+	 *
+	 * @since  2.2
+	 * @return array
+	 */
+	protected function get_customer_billing_address() {
+		$billing_address = apply_filters( 'woocommerce_api_customer_billing_address', array(
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'country',
+			'email',
+			'phone',
+		) );
+
+		return $billing_address;
+	}
+
+	/**
+	 * Get customer shipping address fields.
+	 *
+	 * @since  2.2
+	 * @return array
+	 */
+	protected function get_customer_shipping_address() {
+		$shipping_address = apply_filters( 'woocommerce_api_customer_shipping_address', array(
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'country',
+		) );
+
+		return $shipping_address;
 	}
 
 	/**
@@ -327,10 +327,14 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	public function create_customer( $data ) {
 
+		$data = isset( $data['customer'] ) ? $data['customer'] : array();
+
 		// Checks with can create new users.
 		if ( ! current_user_can( 'create_users' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_create_customer', __( 'You do not have permission to create this customer', 'woocommerce' ), array( 'status' => 401 ) );
 		}
+
+		$data = apply_filters( 'woocommerce_api_create_customer_data', $data, $this );
 
 		// Checks with the email is missing.
 		if ( ! isset( $data['email'] ) ) {
@@ -375,6 +379,8 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	public function edit_customer( $id, $data ) {
 
+		$data = isset( $data['customer'] ) ? $data['customer'] : array();
+
 		// Validate the customer ID.
 		$id = $this->validate_request( $id, 'customer', 'edit' );
 
@@ -382,6 +388,8 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		$data = apply_filters( 'woocommerce_api_edit_customer_data', $data, $this );
 
 		// Customer email.
 		if ( isset( $data['email'] ) ) {
@@ -417,6 +425,8 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		do_action( 'woocommerce_api_delete_customer', $id, $this );
 
 		return $this->delete( $id, 'customer' );
 	}
