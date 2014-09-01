@@ -9,7 +9,9 @@ global $wpdb;
 $payment_gateway = wc_get_payment_gateway_by_order( $order );
 
 // Get line items
-$line_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
+$line_items          = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
+$line_items_fee      = $order->get_items( 'fee' );
+$line_items_shipping = $order->get_items( 'shipping' );
 
 // Check if order can be edited
 $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold', 'auto-draft' ) ) );
@@ -27,8 +29,18 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	}
 
 	// Older orders won't have line taxes so we need to handle them differently :(
-	$check_item       = current( $line_items );
-	$tax_data         = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
+	$tax_data = '';
+	if ( $line_items ) {
+		$check_item = current( $line_items );
+		$tax_data   = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
+	} elseif ( $line_items_shipping ) {
+		$check_item = current( $line_items_shipping );
+		$tax_data = maybe_unserialize( isset( $check_item['taxes'] ) ? $check_item['taxes'] : '' );
+	} elseif ( $line_items_fee ) {
+		$check_item = current( $line_items_fee );
+		$tax_data   = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
+	}
+
 	$legacy_order     = ! empty( $order_taxes ) && empty( $tax_data ) && ! is_array( $tax_data );
 	$show_tax_columns = ! $legacy_order || sizeof( $order_taxes ) === 1;
 }
@@ -82,17 +94,15 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		</tbody>
 		<tbody id="order_shipping_line_items">
 		<?php
-			$order_items      = $order->get_items( 'shipping' );
 			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
-			foreach ( $order_items as $item_id => $item ) {
+			foreach ( $line_items_shipping as $item_id => $item ) {
 				include( 'html-order-shipping.php' );
 			}
 		?>
 		</tbody>
 		<tbody id="order_fee_line_items">
 		<?php
-			$order_items = $order->get_items( 'fee' );
-			foreach ( $order_items as $item_id => $item ) {
+			foreach ( $line_items_fee as $item_id => $item ) {
 				include( 'html-order-fee.php' );
 			}
 		?>
