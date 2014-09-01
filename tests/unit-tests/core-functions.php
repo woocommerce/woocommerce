@@ -1,13 +1,27 @@
 <?php
 
-class WC_Tests_Core_Functions extends WP_UnitTestCase {
+/**
+ * Test WooCommerce core functions
+ *
+ * @since 2.2
+ */
+class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
-
+	/**
+	 * Test get_woocommerce_currency()
+	 *
+	 * @since 2.2
+	 */
 	public function test_get_woocommerce_currency() {
 
 		$this->assertEquals( 'GBP', get_woocommerce_currency() );
 	}
 
+	/**
+	 * Test get_woocommerce_currencies()
+	 *
+	 * @since 2.2
+	 */
 	public function test_get_woocommerce_currencies() {
 
 		$expected_currencies = array(
@@ -33,7 +47,7 @@ class WC_Tests_Core_Functions extends WP_UnitTestCase {
 			'NPR' => __( 'Nepali Rupee', 'woocommerce' ),
 			'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
 			'JPY' => __( 'Japanese Yen', 'woocommerce' ),
-			'KIP'	=> __( 'Lao Kip', 'woocommerce' ),
+			'KIP' => __( 'Lao Kip', 'woocommerce' ),
 			'KRW' => __( 'South Korean Won', 'woocommerce' ),
 			'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 			'MXN' => __( 'Mexican Peso', 'woocommerce' ),
@@ -61,29 +75,50 @@ class WC_Tests_Core_Functions extends WP_UnitTestCase {
 		$this->assertEquals( $expected_currencies, get_woocommerce_currencies() );
 	}
 
+	/**
+	 * Test get_woocommerce_currency_symbol()
+	 *
+	 * @since 2.2
+	 */
 	public function test_get_woocommerce_currency_symbol() {
 
+		// default currency
 		$this->assertEquals( '&pound;', get_woocommerce_currency_symbol() );
+
+		// given specific currency
 		$this->assertEquals( '&#36;', get_woocommerce_currency_symbol( 'USD' ) );
+
+		// each case
+		foreach ( array_keys( get_woocommerce_currencies() ) as $currency_code ) {
+			$this->assertInternalType( 'string', get_woocommerce_currency_symbol( $currency_code ) );
+		}
 	}
 
-	public function test_get_v2_woocommerce_api_url() {
+	/**
+	 * Test get_woocommerce_api_url()
+	 *
+	 * @since 2.2
+	 */
+	public function test_get_woocommerce_api_url() {
 
-		$this->assertEquals( 'http://example.org/wc-api/v2/', get_woocommerce_api_url( '' ) );
+		// base uri
+		$this->assertEquals( 'http://example.org/wc-api/v2/', get_woocommerce_api_url( null ) );
+
+		// path
+		$this->assertEquals( 'http://example.org/wc-api/v2/orders', get_woocommerce_api_url( 'orders' ) );
 	}
 
-	public function test_get_v1_woocommerce_api_url() {
-
-		define( 'WC_API_REQUEST_VERSION', 1 );
-
-		$this->assertEquals( 'http://example.org/wc-api/v1/', get_woocommerce_api_url( '' ) );
-	}
-
+	/**
+	 * Test wc_get_core_supported_themes()
+	 *
+	 * @since 2.2
+	 */
 	public function test_wc_get_core_supported_themes() {
 
 		$expected_themes = array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 
 		$this->assertEquals( $expected_themes, wc_get_core_supported_themes() );
 	}
+
 }
 
