@@ -445,7 +445,7 @@ class WC_API_Customers extends WC_API_Resource {
 			return new WP_Error( 'woocommerce_api_missing_customer_password', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'password' ), array( 'status' => 400 ) );
 		}
 
-		$user = wp_authenticate($data['username'], $data['password'])
+		$user = wp_authenticate( $data['username'], $data['password'] );
 
 		// Checks for an error in the customer authentication.
 		if ( is_wp_error( $user) ) {
