@@ -23,8 +23,8 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 		WC()->api->includes();
 
 		// set user
-		$this->user = $this->factory->user->create_and_get( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $this->user->ID );
+		$this->user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $this->user_id );
 
 		// this isn't used, but it causes a warning unless set
 		$_SERVER['REQUEST_METHOD'] = null;
