@@ -1,13 +1,25 @@
-/nbproject/private/
-/node_modules/
+# Editors
 project.xml
 project.properties
-.DS_Store
-Thumbs.db
+/nbproject/private/
 .buildpath
 .project
 .settings*
 sftp-config.json
-/deploy/
-/wc-apidocs/
 .idea
+
+# Grunt
+/node_modules/
+/deploy/
+
+# OS X metadata
+.DS_Store
+
+# Windows junk
+Thumbs.db
+
+# ApiGen
+/wc-apidocs/
+
+# Unit tests
+/tmp
