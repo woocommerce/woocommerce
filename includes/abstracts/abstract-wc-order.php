@@ -2383,4 +2383,14 @@ abstract class WC_Abstract_Order {
 			}
 		}
 	}
+
+	/**
+	 * Checks if an order can be edited, specifically for use on the Edit Order screen
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	public function is_editable() {
+		return in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold', 'auto-draft' ) ) );
+	}
 }

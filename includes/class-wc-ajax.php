@@ -1005,7 +1005,7 @@ class WC_AJAX {
 		}
 
 		$item          = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
-		$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
+		$can_be_edited = $order->is_editable();
 
 		include( 'admin/meta-boxes/views/html-order-item.php' );
 
@@ -1023,7 +1023,7 @@ class WC_AJAX {
 		$order_id      = absint( $_POST['order_id'] );
 		$order         = wc_get_order( $order_id );
 		$order_taxes   = $order->get_taxes();
-		$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
+		$can_be_edited = $order->is_editable();
 		$item          = array();
 
 		// Add new fee
@@ -1053,7 +1053,7 @@ class WC_AJAX {
 		$order            = wc_get_order( $order_id );
 		$order_taxes      = $order->get_taxes();
 		$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
-		$can_be_edited    = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold' ) ) );
+		$can_be_edited    = $order->is_editable();
 		$item             = array();
 
 		// Add new shipping

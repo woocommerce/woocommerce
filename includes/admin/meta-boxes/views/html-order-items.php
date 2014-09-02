@@ -14,7 +14,7 @@ $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
 
 // Check if order can be edited
-$can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold', 'auto-draft' ) ) );
+$can_be_edited = $order->is_editable();
 
 if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	$order_taxes         = $order->get_taxes();
