@@ -2391,6 +2391,9 @@ abstract class WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function is_editable() {
-		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold', 'auto-draft' ) ) ), $this );
+		if ( ! isset( $this->editable ) ) {
+			$this->editable = in_array( $this->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold', 'auto-draft' ) ) );
+		}
+		return apply_filters( 'wc_order_is_editable', $this->editable, $this );
 	}
 }
