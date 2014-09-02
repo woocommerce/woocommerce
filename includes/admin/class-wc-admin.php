@@ -98,7 +98,8 @@ class WC_Admin {
 
 	/**
 	 * Preview email template
-	 * @return [type]
+	 *
+	 * @return string
 	 */
 	public function preview_emails() {
 		if ( isset( $_GET['preview_woocommerce_mail'] ) ) {

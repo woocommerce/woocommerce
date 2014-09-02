@@ -418,7 +418,7 @@ class WC_Customer {
 	 * Sets session data for the city.
 	 *
 	 * @access public
-	 * @param mixed $postcode
+	 * @param mixed $city
 	 */
 	public function set_city( $city ) {
 		$this->city = $city;
@@ -494,7 +494,7 @@ class WC_Customer {
 	 * Sets session data for the city.
 	 *
 	 * @access public
-	 * @param string $postcode
+	 * @param string $city
 	 */
 	public function set_shipping_city( $city ) {
 		$this->shipping_city = $city;
