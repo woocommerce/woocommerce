@@ -709,8 +709,8 @@ class WC_Install {
 	public function plugin_row_meta( $links, $file ) {
 		if ( $file == WC_PLUGIN_BASENAME ) {
 			$row_meta = array(
-				'docs'		=>	'<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
-				'apidocs'	=>	'<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'http://docs.woothemes.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
+				'docs'		=>	'<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View this Plugin Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
+				'apidocs'	=>	'<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'http://docs.woothemes.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View this Plugin API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
 				'support'	=>	'<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
 			);
 
