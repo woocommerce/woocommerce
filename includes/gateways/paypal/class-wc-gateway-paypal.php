@@ -1045,24 +1045,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Get the transaction URL.
 	 *
-<<<<<<< HEAD
-	 * @param  string $transaction_id
-	 *
-	 * @return string
-	 */
-	public function get_transaction_url( $transaction_id ) {
-		$return_url = '';
-
-		if ( empty( $transaction_id ) ) {
-			if ( 'yes' == $this->testmode ) {
-				$return_url = 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
-			} else {
-				$return_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $transaction_id, $this );
-=======
 	 * @param  WC_Order $order
 	 *
 	 * @return string
@@ -1076,6 +1058,5 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		return parent::get_transaction_url( $order );
->>>>>>> upstream/master
 	}
 }
