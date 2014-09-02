@@ -38,8 +38,13 @@ class WC_API_Orders extends WC_API_Resource {
 		);
 
 		# GET /orders/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_orders_count' ), WC_API_Server::READABLE ),
+		);
+
+		# GET /orders/statuses
+		$routes[ $this->base . '/statuses' ] = array(
+			array( array( $this, 'get_order_statuses' ), WC_API_Server::READABLE ),
 		);
 
 		# GET|PUT|DELETE /orders/<id>
@@ -104,7 +109,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! $this->is_readable( $order_id ) )
 				continue;
 
-			$orders[] = current( $this->get_order( $order_id, $fields ) );
+			$orders[] = current( $this->get_order( $order_id, $fields, $filter ) );
 		}
 
 		$this->server->add_pagination_headers( $query );
@@ -203,7 +208,11 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$item_meta = array();
 
+<<<<<<< HEAD
 			$hideprefix = $filter['all_meta'] == 'true' ? null : '_';
+=======
+			$hideprefix = ( isset( $filter['all_item_meta'] ) && $filter['all_item_meta'] === 'true' ) ? null : '_';
+>>>>>>> upstream/master
 
 			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
@@ -293,10 +302,32 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$query = $this->query_orders( $filter );
 
-		if ( ! current_user_can( 'read_private_shop_orders' ) )
+		if ( ! current_user_can( 'read_private_shop_orders' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_read_orders_count', __( 'You do not have permission to read the orders count', 'woocommerce' ), array( 'status' => 401 ) );
+		}
 
 		return array( 'count' => (int) $query->found_posts );
+	}
+
+	/**
+	 * Get a list of valid order statuses
+	 *
+	 * Note this requires no specific permissions other than being an authenticated
+	 * API user. Order statuses (particularly custom statuses) could be considered
+	 * private information which is why it's not in the API index.
+	 *
+	 * @since 2.1
+	 * @return array
+	 */
+	public function get_order_statuses() {
+
+		$order_statuses = array();
+
+		foreach ( wc_get_order_statuses() as $slug => $name ) {
+			$order_statuses[ str_replace( 'wc-', '', $slug ) ] = $name;
+		}
+
+		return array( 'order_statuses' => apply_filters( 'woocommerce_api_order_statuses_response', $order_statuses, $this ) );
 	}
 
 	/**
@@ -402,7 +433,10 @@ class WC_API_Orders extends WC_API_Resource {
 				update_post_meta( $order->id, '_order_number', $data['order_number'] );
 			}
 
-			// TODO: should we allow clients to set meta?
+			// set order meta
+			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
+				$this->set_order_meta( $order->id, $data['order_meta'] );
+			}
 
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
@@ -551,6 +585,11 @@ class WC_API_Orders extends WC_API_Resource {
 				$order->calculate_totals();
 			}
 
+			// update order meta
+			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
+				$this->set_order_meta( $order->id, $data['order_meta'] );
+			}
+
 			// update the order post to set customer note/modified date
 			wc_update_order( $order_args );
 
@@ -681,6 +720,26 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 			foreach( $shipping_address as $key => $value ) {
 				update_user_meta( $order->get_user_id(), 'shipping_' . $key, $value );
+			}
+		}
+	}
+
+	/**
+	 * Helper method to add/update order meta, with two restrictions:
+	 *
+	 * 1) Only non-protected meta (no leading underscore) can be set
+	 * 2) Meta values must be scalar (int, string, bool)
+	 *
+	 * @since 2.2
+	 * @param int $order_id valid order ID
+	 * @param array $order_meta order meta in array( 'meta_key' => 'meta_value' ) format
+	 */
+	private function set_order_meta( $order_id, $order_meta ) {
+
+		foreach ( $order_meta as $meta_key => $meta_value ) {
+
+			if ( is_string( $meta_key) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
+				update_post_meta( $order_id, $meta_key, $meta_value );
 			}
 		}
 	}
@@ -1049,7 +1108,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		foreach ( $notes as $note ) {
 
-			$order_notes[] = current( $this->get_order_note( $order_id, $note->comment_ID ) );
+			$order_notes[] = current( $this->get_order_note( $order_id, $note->comment_ID, $fields ) );
 		}
 
 		return array( 'order_notes' => apply_filters( 'woocommerce_api_order_notes_response', $order_notes, $order_id, $fields, $notes, $this->server ) );
@@ -1288,7 +1347,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$order_refunds = array();
 
 		foreach ( $refund_items as $refund_id ) {
-			$order_refunds[] = current( $this->get_order_refund( $order_id, $refund_id ) );
+			$order_refunds[] = current( $this->get_order_refund( $order_id, $refund_id, $fields ) );
 		}
 
 		return array( 'order_refunds' => apply_filters( 'woocommerce_api_order_refunds_response', $order_refunds, $order_id, $fields, $refund_items, $this ) );

@@ -78,15 +78,19 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/**
 	 * Get a link to the transaction on the 3rd party gateway size (if applicable)
-	 * @param  string $transaction_id
-	 * @return string
+	 *
+	 * @param  WC_Order $order the order object
+	 * @return string transaction URL, or empty string
 	 */
-	public function get_transaction_url( $transaction_id ) {
+	public function get_transaction_url( $order ) {
 		$return_url = '';
+		$transaction_id = $order->get_transaction_id();
+
 		if ( ! empty( $this->view_transaction_url ) && ! empty( $transaction_id ) ) {
 			$return_url = sprintf( $this->view_transaction_url, $transaction_id );
 		}
-		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $transaction_id, $this );
+
+		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $order, $this );
 	}
 
 	/**

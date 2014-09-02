@@ -139,7 +139,6 @@ final class WooCommerce {
 		$this->api = new WC_API();
 
 		// Hooks
-		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'action_links' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
@@ -176,20 +175,6 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Show action links on the plugin screen
-	 *
-	 * @param mixed $links
-	 * @return array
-	 */
-	public function action_links( $links ) {
-		return array_merge( array(
-			'<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
-			'<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
-			'<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
-		), $links );
-	}
-
-	/**
 	 * Auto-load WC classes on demand to reduce memory consumption.
 	 *
 	 * @param mixed $class
@@ -200,8 +185,8 @@ final class WooCommerce {
 		$class = strtolower( $class );
 		$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
-		if ( strpos( $class, 'wc_subscription_gateway_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 24 ) );
+		if ( strpos( $class, 'wc_addons_gateway_' ) === 0 ) {
+			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 18 ) );
 		} elseif ( strpos( $class, 'wc_gateway_' ) === 0 ) {
 			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
 		} elseif ( strpos( $class, 'wc_shipping_' ) === 0 ) {
@@ -237,6 +222,7 @@ final class WooCommerce {
 	 */
 	private function define_constants() {
 		define( 'WC_PLUGIN_FILE', __FILE__ );
+		define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 		define( 'WC_VERSION', $this->version );
 		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compatibility
 
@@ -530,7 +516,7 @@ final class WooCommerce {
 	 */
 	public function api_request_url( $request, $ssl = null ) {
 		if ( is_null( $ssl ) ) {
-			$scheme = parse_url( get_option( 'home' ), PHP_URL_SCHEME );
+			$scheme = parse_url( home_url(), PHP_URL_SCHEME );
 		} elseif ( $ssl ) {
 			$scheme = 'https';
 		} else {

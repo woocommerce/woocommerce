@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 <br/>
-<table class="wc_status_table widefat" cellspacing="0">
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 
 	<thead>
 		<tr>
@@ -28,39 +28,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<tbody>
 		<tr>
-			<td><?php _e( 'Home URL','woocommerce' ); ?>:</td>
+			<td><?php _e( 'Home URL', 'woocommerce' ); ?>:</td>
 			<td><?php echo home_url(); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'Site URL','woocommerce' ); ?>:</td>
+			<td><?php _e( 'Site URL', 'woocommerce' ); ?>:</td>
 			<td><?php echo site_url(); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'WC Version','woocommerce' ); ?>:</td>
+			<td><?php _e( 'WC Version', 'woocommerce' ); ?>:</td>
 			<td><?php echo esc_html( WC()->version ); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'WC Database Version','woocommerce' ); ?>:</td>
+			<td><?php _e( 'WC Database Version', 'woocommerce' ); ?>:</td>
 			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'WP Version','woocommerce' ); ?>:</td>
+			<td><?php _e( 'WP Version', 'woocommerce' ); ?>:</td>
 			<td><?php bloginfo('version'); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'WP Multisite Enabled','woocommerce' ); ?>:</td>
+			<td><?php _e( 'WP Multisite Enabled', 'woocommerce' ); ?>:</td>
 			<td><?php if ( is_multisite() ) echo __( 'Yes', 'woocommerce' ); else echo __( 'No', 'woocommerce' ); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'Web Server Info','woocommerce' ); ?>:</td>
+			<td><?php _e( 'Web Server Info', 'woocommerce' ); ?>:</td>
 			<td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'PHP Version','woocommerce' ); ?>:</td>
+			<td><?php _e( 'PHP Version', 'woocommerce' ); ?>:</td>
 			<td><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'MySQL Version','woocommerce' ); ?>:</td>
+			<td><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
 			<td>
 				<?php
 				/** @global wpdb $wpdb */
@@ -70,7 +70,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</td>
 		</tr>
 		<tr>
-			<td><?php _e( 'WP Memory Limit','woocommerce' ); ?>:</td>
+			<td><?php _e( 'WP Active Plugins', 'woocommerce' ); ?>:</td>
+			<td><?php echo count( (array) get_option( 'active_plugins' ) ); ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'WP Memory Limit', 'woocommerce' ); ?>:</td>
 			<td><?php
 				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
 
@@ -90,29 +94,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td><?php if ( defined( 'WPLANG' ) && WPLANG ) echo WPLANG; else  _e( 'Default', 'woocommerce' ); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'WP Max Upload Size','woocommerce' ); ?>:</td>
+			<td><?php _e( 'WP Max Upload Size', 'woocommerce' ); ?>:</td>
 			<td><?php echo size_format( wp_max_upload_size() ); ?></td>
 		</tr>
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
-				<td><?php _e('PHP Post Max Size','woocommerce' ); ?>:</td>
+				<td><?php _e('PHP Post Max Size', 'woocommerce' ); ?>:</td>
 				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
 			</tr>
 			<tr>
-				<td><?php _e('PHP Time Limit','woocommerce' ); ?>:</td>
+				<td><?php _e('PHP Time Limit', 'woocommerce' ); ?>:</td>
 				<td><?php echo ini_get('max_execution_time'); ?></td>
 			</tr>
 			<tr>
-				<td><?php _e( 'PHP Max Input Vars','woocommerce' ); ?>:</td>
+				<td><?php _e( 'PHP Max Input Vars', 'woocommerce' ); ?>:</td>
 				<td><?php echo ini_get('max_input_vars'); ?></td>
 			</tr>
 			<tr>
-				<td><?php _e( 'SUHOSIN Installed','woocommerce' ); ?>:</td>
+				<td><?php _e( 'SUHOSIN Installed', 'woocommerce' ); ?>:</td>
 				<td><?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?></td>
 			</tr>
 		<?php endif; ?>
 		<tr>
-			<td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
+			<td><?php _e( 'WC Logging', 'woocommerce' ); ?>:</td>
 			<td><?php
 				if ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ) {
 					printf( '<mark class="yes">' . __( 'Log directory (%s) is writable.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
@@ -122,7 +126,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'Default Timezone','woocommerce' ); ?>:</td>
+			<td><?php _e( 'Default Timezone', 'woocommerce' ); ?>:</td>
 			<td><?php
 				$default_timezone = date_default_timezone_get();
 				if ( 'UTC' !== $default_timezone ) {
@@ -139,7 +143,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$posting['fsockopen_curl']['name'] = __( 'fsockopen/cURL','woocommerce');
 			if ( function_exists( 'fsockopen' ) || function_exists( 'curl_init' ) ) {
 				if ( function_exists( 'fsockopen' ) && function_exists( 'curl_init' )) {
-					$posting['fsockopen_curl']['note'] = __('Your server has fsockopen and cURL enabled.', 'woocommerce' );
+					$posting['fsockopen_curl']['note'] = __( 'Your server has fsockopen and cURL enabled.', 'woocommerce' );
 				} elseif ( function_exists( 'fsockopen' )) {
 					$posting['fsockopen_curl']['note'] = __( 'Your server has fsockopen enabled, cURL is disabled.', 'woocommerce' );
 				} else {
@@ -154,7 +158,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			// SOAP
 			$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
 			if ( class_exists( 'SoapClient' ) ) {
-				$posting['soap_client']['note'] = __('Your server has the SOAP Client class enabled.', 'woocommerce' );
+				$posting['soap_client']['note'] = __( 'Your server has the SOAP Client class enabled.', 'woocommerce' );
 				$posting['soap_client']['success'] = true;
 			} else {
 				$posting['soap_client']['note'] = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
@@ -173,7 +177,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
 
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
-				$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
+				$posting['wp_remote_post']['note'] = __( 'wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
 				$posting['wp_remote_post']['success'] = true;
 			} elseif ( is_wp_error( $response ) ) {
 				$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce' ) . ' ' . $response->get_error_message();
@@ -260,7 +264,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 											$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 											$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
 											$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
-											set_transient( md5( $plugin ) . '_version_data', $version_data, 60*60*12 );
+											set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
 											break;
 										}
 									}
@@ -293,7 +297,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<tbody>
 		<tr>
-			<td><?php _e( 'Force SSL','woocommerce' ); ?>:</td>
+			<td><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td><?php echo get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
 		</tr>
 	</tbody>
@@ -415,7 +419,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 							$theme_update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
 							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
-							set_transient( $theme_dir . '_version_data', $theme_version_data , 60*60*12 );
+							set_transient( $theme_dir . '_version_data', $theme_version_data , DAY_IN_SECONDS );
 							break;
 
 						endif;
@@ -551,32 +555,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 </table>
 
 <script type="text/javascript">
-	/*
-	@var i string default
-	@var l how many repeat s
-	@var s string to repeat
-	@var w where s should indent
-	*/
-	jQuery.wc_strPad = function(i,l,s,w) {
+
+	/**
+	 * wc_strPad
+	 *
+	 * @param  {var} i string default
+	 * @param  {var} l how many repeat s
+	 * @param  {var} s string to repeat
+	 * @param  {var} w where s should indent
+	 * @return {var}   string modified
+	 */
+	jQuery.wc_strPad = function( i, l, s, w ) {
 		var o = i.toString();
-		if (!s) { s = '0'; }
-		while (o.length < l) {
+		if (! s) { s = '0'; }
+		while ( o.length < l ) {
 			// empty
-			if(w == 'undefined'){
+			if ( w == 'undefined' ){
 				o = s + o;
-			}else{
+			} else {
 				o = o + s;
 			}
 		}
 		return o;
 	};
 
-
-	jQuery('a.debug-report').click(function(){
+	jQuery( 'a.debug-report' ).click(function(){
 
 		var report = "";
 
-		jQuery('.wc_status_table thead, .wc_status_table tbody').each(function(){
+		jQuery( '#status thead, #status tbody' ).each(function(){
 
 			if ( jQuery( this ).is('thead') ) {
 
@@ -584,20 +591,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			} else {
 
-				jQuery('tr', jQuery( this )).each(function(){
+				jQuery('tr', jQuery( this ) ).each(function(){
 
-					var the_name    = jQuery.wc_strPad( jQuery.trim( jQuery( this ).find('td:eq(0)').text() ), 25, ' ' );
-					var the_value   = jQuery.trim( jQuery( this ).find('td:eq(1)').text() );
+					var the_name    = jQuery.wc_strPad( jQuery.trim( jQuery( this ).find( 'td:eq(0)' ).text() ), 25, ' ' );
+					var the_value   = jQuery.trim( jQuery( this ).find( 'td:eq(1)' ).text() );
 					var value_array = the_value.split( ', ' );
 
-					if ( value_array.length > 1 ){
+					if ( value_array.length > 1 ) {
 
-						// if value have a list of plugins ','
-						// split to add new line
+						// If value have a list of plugins ','
+						// Split to add new line
 						var output = '';
 						var temp_line ='';
-						jQuery.each( value_array, function(key, line){
-							var tab = ( key == 0 )?0:25;
+						jQuery.each( value_array, function( key, line ){
+							var tab = ( key == 0 ) ? 0:25;
 							temp_line = temp_line + jQuery.wc_strPad( '', tab, ' ', 'f' ) + line +'\n';
 						});
 
@@ -608,14 +615,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 				});
 
 			}
-		} );
+		});
 
 		try {
-			jQuery("#debug-report").slideDown();
-			jQuery("#debug-report textarea").val( report ).focus().select();
-			jQuery(this).fadeOut();
+			jQuery( "#debug-report" ).slideDown();
+			jQuery( "#debug-report textarea" ).val( report ).focus().select();
+			jQuery( this ).fadeOut();
 			return false;
-		} catch(e){ console.log( e ); }
+		} catch( e ){
+			console.log( e );
+		}
 
 		return false;
 	});
@@ -629,7 +638,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			'delay':      0
 		});
 
-		$( 'body' ) .on( 'copy', '#copy-for-support', function ( e ) {
+		$( 'body' ).on( 'copy', '#copy-for-support', function ( e ) {
 			e.clipboardData.clearData();
 			e.clipboardData.setData( 'text/plain', $( '#debug-report textarea' ).val() );
 			e.preventDefault();

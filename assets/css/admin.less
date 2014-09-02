@@ -89,7 +89,7 @@
 		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		color: #fff;
-		text-decoration: none;
+		text-decoration:none !important;
 		&:hover {
 			background: #bb77ae;
 			border-color: #aa559a;
@@ -105,6 +105,8 @@
 		opacity: 0.5;
 	}
 	.twitter-share-button {
+		margin-top: -3px;
+		margin-left: 3px;
 		vertical-align: middle;
 	}
 }
@@ -198,6 +200,7 @@ table.wc_status_table {
 #log-viewer {
 	textarea {
 		width: 100%;
+		resize: vertical;
 	}
 }
 

@@ -9,7 +9,9 @@ global $wpdb;
 $payment_gateway = wc_get_payment_gateway_by_order( $order );
 
 // Get line items
-$line_items = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
+$line_items          = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
+$line_items_fee      = $order->get_items( 'fee' );
+$line_items_shipping = $order->get_items( 'shipping' );
 
 // Check if order can be edited
 $can_be_edited = in_array( $order->get_status(), apply_filters( 'wc_order_can_be_edited', array( 'pending', 'on-hold', 'auto-draft' ) ) );
@@ -27,8 +29,18 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	}
 
 	// Older orders won't have line taxes so we need to handle them differently :(
-	$check_item       = current( $line_items );
-	$tax_data         = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
+	$tax_data = '';
+	if ( $line_items ) {
+		$check_item = current( $line_items );
+		$tax_data   = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
+	} elseif ( $line_items_shipping ) {
+		$check_item = current( $line_items_shipping );
+		$tax_data = maybe_unserialize( isset( $check_item['taxes'] ) ? $check_item['taxes'] : '' );
+	} elseif ( $line_items_fee ) {
+		$check_item = current( $line_items_fee );
+		$tax_data   = maybe_unserialize( isset( $check_item['line_tax_data'] ) ? $check_item['line_tax_data'] : '' );
+	}
+
 	$legacy_order     = ! empty( $order_taxes ) && empty( $tax_data ) && ! is_array( $tax_data );
 	$show_tax_columns = ! $legacy_order || sizeof( $order_taxes ) === 1;
 }
@@ -82,17 +94,15 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		</tbody>
 		<tbody id="order_shipping_line_items">
 		<?php
-			$order_items      = $order->get_items( 'shipping' );
 			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
-			foreach ( $order_items as $item_id => $item ) {
+			foreach ( $line_items_shipping as $item_id => $item ) {
 				include( 'html-order-shipping.php' );
 			}
 		?>
 		</tbody>
 		<tbody id="order_fee_line_items">
 		<?php
-			$order_items = $order->get_items( 'fee' );
-			foreach ( $order_items as $item_id => $item ) {
+			foreach ( $line_items_fee as $item_id => $item ) {
 				include( 'html-order-fee.php' );
 			}
 		?>
@@ -133,6 +143,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 			<td class="total"><?php echo wc_price( $order->get_total_shipping() ); ?></td>
 			<td width="1%"></td>
 		</tr>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $order->id ); ?>
+
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
 			<?php foreach ( $order->get_tax_totals() as $code => $tax ) : ?>
 				<tr>
@@ -142,6 +155,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 				</tr>
 			<?php endforeach; ?>
 		<?php endif; ?>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_tax', $order->id ); ?>
+
 		<tr>
 			<td class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total discount applied after tax.', 'woocommerce' ); ?>">[?]</span>:</td>
 			<td class="total">
@@ -153,6 +169,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 			</td>
 			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
 		</tr>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->id ); ?>
+
 		<tr>
 			<td class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</td>
 			<td class="total">
@@ -164,11 +183,17 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 			</td>
 			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
 		</tr>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->id ); ?>
+
 		<tr>
 			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
 			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded() ); ?></td>
 			<td width="1%"></td>
 		</tr>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->id ); ?>
+
 	</table>
 	<div class="clear"></div>
 </div>
@@ -196,7 +221,9 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && $can_be_edited ) : ?>
 			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
 		<?php endif; ?>
-		<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
+		<?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
+			<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
+		<?php endif; ?>
 		<?php if ( $can_be_edited ) : ?>
 		<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate Taxes', 'woocommerce' ); ?></button>
 		<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
@@ -210,6 +237,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 	<button type="button" class="button button-primary save-action"><?php _e( 'Save', 'woocommerce' ); ?></button>
 </div>
+<?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
 <div class="wc-order-data-row wc-order-refund-items" style="display: none;">
 	<table class="wc-order-totals">
 		<tr>
@@ -249,6 +277,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<div class="clear"></div>
 	</div>
 </div>
+<?php endif; ?>
 
 <script type="text/template" id="wc-modal-add-products">
 	<div class="wc-backbone-modal">

@@ -319,7 +319,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 			return true;
 		}
 
-		list( $resource, $event ) = explode( '.', $topic );
+		@list( $resource, $event ) = explode( '.', $topic );
 
 		if ( ! isset( $resource ) || ! isset( $event ) ) {
 			return false;
@@ -476,7 +476,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 		$id = absint( $id );
 
 		if ( empty( $id ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_webhook_delivery_id', __( 'Invalid webhook delivery ID', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_invalid_webhook_delivery_id', __( 'Invalid webhook delivery ID', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$webhook = new WC_Webhook( $webhook_id );

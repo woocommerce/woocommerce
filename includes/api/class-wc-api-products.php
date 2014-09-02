@@ -173,10 +173,14 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function create_product( $data ) {
 
-		// Check permisions
+		$data = isset( $data['product'] ) ? $data['product'] : array();
+
+		// Check permissions
 		if ( ! current_user_can( 'publish_products' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_create_product', __( 'You do not have permission to create products', 'woocommerce' ), array( 'status' => 401 ) );
 		}
+
+		$data = apply_filters( 'woocommerce_api_create_product_data', $data, $this );
 
 		// Check if product title is specified
 		if ( ! isset( $data['title'] ) ) {
@@ -254,11 +258,15 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function edit_product( $id, $data ) {
 
+		$data = isset( $data['product'] ) ? $data['product'] : array();
+
 		$id = $this->validate_request( $id, 'product', 'edit' );
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		$data = apply_filters( 'woocommerce_api_edit_product_data', $data, $this );
 
 		// Product name.
 		if ( isset( $data['title'] ) ) {
@@ -333,6 +341,8 @@ class WC_API_Products extends WC_API_Resource {
 			return $id;
 		}
 
+		do_action( 'woocommerce_api_delete_product', $id, $this );
+
 		return $this->delete( $id, 'product', ( 'true' === $force ) );
 	}
 
@@ -381,9 +391,10 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get a listing of product categories
 	 *
 	 * @since 2.2
+	 * @param string|null $fields fields to limit response to
 	 * @return array
 	 */
-	public function get_product_categories() {
+	public function get_product_categories( $fields = null ) {
 
 		// permissions check
 		if ( ! current_user_can( 'manage_product_terms' ) ) {
@@ -396,10 +407,10 @@ class WC_API_Products extends WC_API_Resource {
 
 		foreach ( $terms as $term_id ) {
 
-			$product_categories[] = current( $this->get_product_category( $term_id ) );
+			$product_categories[] = current( $this->get_product_category( $term_id, $fields ) );
 		}
 
-		return array( 'product_categories' => apply_filters( 'woocommerce_api_product_categories_response', $product_categories, $terms, $this ) );
+		return array( 'product_categories' => apply_filters( 'woocommerce_api_product_categories_response', $product_categories, $terms, $fields, $this ) );
 	}
 
 	/**
@@ -407,9 +418,10 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param string $id product category term ID
+	 * @param string|null $fields fields to limit response to
 	 * @return array
 	 */
-	public function get_product_category( $id ) {
+	public function get_product_category( $id, $fields = null ) {
 
 		$id = absint( $id );
 
@@ -438,7 +450,7 @@ class WC_API_Products extends WC_API_Resource {
 			'count'       => intval( $term->count ),
 		);
 
-		return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $term, $id, $this ) );
+		return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $id, $fields, $term, $this ) );
 	}
 
 	/**
@@ -1278,16 +1290,17 @@ class WC_API_Products extends WC_API_Resource {
 					}
 
 					$taxonomy = $this->get_attribute_taxonomy_by_label( $attribute['name'] );
-
 					if ( isset( $attributes[ $taxonomy ] ) ) {
 						$_attribute = $attributes[ $taxonomy ];
+					} elseif ( isset( $attributes[ strtolower( $attribute['name'] ) ] ) ) {
+						$_attribute = $attributes[ strtolower( $attribute['name'] ) ];
+					}
 
-						if ( $_attribute['is_variation'] ) {
-							$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
-							$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
-							$updated_attribute_keys[] = $attribute_key;
-							update_post_meta( $variation_id, $attribute_key, $attribute_value );
-						}
+					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
+						$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
+						$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
+						$updated_attribute_keys[] = $attribute_key;
+						update_post_meta( $variation_id, $attribute_key, $attribute_value );
 					}
 				}
 

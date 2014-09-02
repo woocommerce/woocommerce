@@ -6,7 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Simplify Commerce Gateway
  *
- *
  * @class 		WC_Gateway_Simplify_Commerce
  * @extends		WC_Payment_Gateway
  * @since       2.2.0
@@ -34,7 +33,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'subscription_payment_method_change',
 			'subscription_date_changes',
 			'default_credit_card_form',
-			'refunds'
+			'refunds',
+			'pre-orders'
 		);
 		$this->view_transaction_url = 'https://www.simplify.com/commerce/app#/payment/%s';
 

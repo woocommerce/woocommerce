@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-global $post, $wp_query;
+global $post, $wp_query, $author;
 
 $prepend      = '';
 $permalinks   = get_option( 'woocommerce_permalinks' );
@@ -23,7 +23,7 @@ if ( $shop_page_id && $shop_page && strstr( $permalinks['product_base'], '/' . $
 	$prepend = $before . '<a href="' . get_permalink( $shop_page ) . '">' . $shop_page->post_title . '</a> ' . $after . $delimiter;
 }
 
-if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
+if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
 
 	echo $wrap_before;
 
@@ -31,7 +31,11 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 		echo $before . '<a class="home" href="' . apply_filters( 'woocommerce_breadcrumb_home_url', home_url() ) . '">' . $home . '</a>' . $after . $delimiter;
 	}
 
-	if ( is_category() ) {
+	if( is_home() ) {
+
+		echo $before . single_post_title('', false) . $after;
+
+	} elseif ( is_category() ) {
 
 		$cat_obj = $wp_query->get_queried_object();
 		$this_category = get_category( $cat_obj->term_id );
@@ -180,14 +184,14 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		while ( $parent_id ) {
 			$page          = get_page( $parent_id );
-			$breadcrumbs[] = $before . '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>' . $after . $delimiter;
+			$breadcrumbs[] = '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>';
 			$parent_id     = $page->post_parent;
 		}
 
 		$breadcrumbs = array_reverse( $breadcrumbs );
 
 		foreach ( $breadcrumbs as $crumb ) {
-			echo $crumb . '' . $delimiter;
+			echo $before . $crumb . $after . $delimiter;
 		}
 
 		echo $before . get_the_title() . $after;

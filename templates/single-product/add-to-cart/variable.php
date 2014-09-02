@@ -35,9 +35,9 @@ global $product, $post;
 									}
 
 									// Get terms if this is a taxonomy - ordered
-									if ( taxonomy_exists( $name ) ) {
+									if ( taxonomy_exists( sanitize_title( $name ) ) ) {
 
-										$orderby = wc_attribute_orderby( $name );
+										$orderby = wc_attribute_orderby( sanitize_title( $name ) );
 
 										switch ( $orderby ) {
 											case 'name' :
@@ -51,7 +51,7 @@ global $product, $post;
 											break;
 										}
 
-										$terms = get_terms( $name, $args );
+										$terms = get_terms( sanitize_title( $name ), $args );
 
 										foreach ( $terms as $term ) {
 											if ( ! in_array( $term->slug, $options ) )

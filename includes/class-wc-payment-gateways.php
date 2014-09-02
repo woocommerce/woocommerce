@@ -65,39 +65,39 @@ class WC_Payment_Gateways {
 		$this->init();
 	}
 
-    /**
-     * Load gateways and hook in functions.
-     *
-     * @access public
-     * @return void
-     */
-    public function init() {
-    	$load_gateways = array(
-    		'WC_Gateway_BACS',
+	/**
+	 * Load gateways and hook in functions.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function init() {
+		$load_gateways = array(
+			'WC_Gateway_BACS',
 			'WC_Gateway_Cheque',
 			'WC_Gateway_COD',
 			'WC_Gateway_Paypal',
-    	);
+		);
 
-    	// Conditional loading of core gateways
-    	if ( ! class_exists( 'WC_Mijireh_Checkout' ) && ( $mijireh = get_option( 'woocommerce_mijireh_checkout_settings', false ) ) && ! empty( $mijireh['enabled'] ) && $mijireh['enabled'] === 'yes' ) {
-    		$load_gateways[] = 'WC_Gateway_Mijireh';
-    	}
+		// Conditional loading of core gateways
+		if ( ! class_exists( 'WC_Mijireh_Checkout' ) && ( $mijireh = get_option( 'woocommerce_mijireh_checkout_settings', false ) ) && ! empty( $mijireh['enabled'] ) && $mijireh['enabled'] === 'yes' ) {
+			$load_gateways[] = 'WC_Gateway_Mijireh';
+		}
 
-    	if ( 'US' === WC()->countries->get_base_country() ) {
-    		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
-				$load_gateways[] = 'WC_Subscription_Gateway_Simplify_Commerce';
+		if ( 'US' === WC()->countries->get_base_country() ) {
+			if ( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
+				$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce';
 			} else {
 				$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
 			}
-    	}
+		}
 
-    	// Filter
-    	$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
+		// Filter
+		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
 
 		// Get sort order option
-		$ordering 	= (array) get_option( 'woocommerce_gateway_order' );
-		$order_end 	= 999;
+		$ordering  = (array) get_option( 'woocommerce_gateway_order' );
+		$order_end = 999;
 
 		// Load gateways in order
 		foreach ( $load_gateways as $gateway ) {
@@ -114,15 +114,15 @@ class WC_Payment_Gateways {
 		}
 
 		ksort( $this->payment_gateways );
-    }
+	}
 
-    /**
-     * Get gateways.
-     *
-     * @access public
-     * @return array
-     */
-    public function payment_gateways() {
+	/**
+	 * Get gateways.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function payment_gateways() {
 		$_available_gateways = array();
 
 		if ( sizeof( $this->payment_gateways ) > 0 ) {
