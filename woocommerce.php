@@ -185,8 +185,8 @@ final class WooCommerce {
 		$class = strtolower( $class );
 		$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
 
-		if ( strpos( $class, 'wc_subscription_gateway_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 24 ) );
+		if ( strpos( $class, 'wc_addons_gateway_' ) === 0 ) {
+			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 18 ) );
 		} elseif ( strpos( $class, 'wc_gateway_' ) === 0 ) {
 			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
 		} elseif ( strpos( $class, 'wc_shipping_' ) === 0 ) {
