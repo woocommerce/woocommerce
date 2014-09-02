@@ -86,7 +86,7 @@ class WC_Payment_Gateways {
 
     	if ( 'US' === WC()->countries->get_base_country() ) {
     		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
-				$load_gateways[] = 'WC_Subscription_Gateway_Simplify_Commerce';
+				$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce';
 			} else {
 				$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
 			}
@@ -96,8 +96,8 @@ class WC_Payment_Gateways {
     	$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
 
 		// Get sort order option
-		$ordering 	= (array) get_option( 'woocommerce_gateway_order' );
-		$order_end 	= 999;
+		$ordering  = (array) get_option( 'woocommerce_gateway_order' );
+		$order_end = 999;
 
 		// Load gateways in order
 		foreach ( $load_gateways as $gateway ) {

@@ -6,15 +6,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Simplify Commerce Gateway for subscriptions
  *
- *
- * @class 		WC_Subscription_Gateway_Simplify_Commerce
+ * @class 		WC_Addons_Gateway_Simplify_Commerce
  * @extends		WC_Gateway_Simplify_Commerce
  * @since       2.2.0
  * @version		1.0.0
  * @package		WooCommerce/Classes/Payment
  * @author 		WooThemes
  */
-class WC_Subscription_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
+class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 	/**
 	 * Constructor
