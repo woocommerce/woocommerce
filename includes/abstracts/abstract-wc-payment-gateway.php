@@ -7,12 +7,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  *
  * Extended by individual payment gateways to handle payments.
  *
- * @class 		WC_Payment_Gateway
- * @extends		WC_Settings_API
- * @version		2.1.0
- * @package		WooCommerce/Abstracts
- * @category	Abstract Class
- * @author 		WooThemes
+ * @class       WC_Payment_Gateway
+ * @extends     WC_Settings_API
+ * @version     2.1.0
+ * @package     WooCommerce/Abstracts
+ * @category    Abstract Class
+ * @author      WooThemes
  */
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
@@ -47,7 +47,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $description;
 
 	/** @var array Array of supported features such as 'default_credit_card_form', 'refunds' */
-	public $supports		= array( 'products' );
+	public $supports = array( 'products' );
 
 	/** @var int Maximum transaction amount, zero does not define a maximum */
 	public $max_amount = 0;
@@ -58,11 +58,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Get the return url (thank you page)
 	 *
-	 * @access public
 	 * @param string $order (default: '')
 	 * @return string
 	 */
 	public function get_return_url( $order = '' ) {
+
 		if ( $order ) {
 			$return_url = $order->get_checkout_order_received_url();
 		} else {
@@ -83,6 +83,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string transaction URL, or empty string
 	 */
 	public function get_transaction_url( $order ) {
+
 		$return_url = '';
 		$transaction_id = $order->get_transaction_id();
 
@@ -99,6 +100,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool
 	 */
 	protected function get_order_total() {
+
 		$total = 0;
 		$order_id = absint( get_query_var( 'order-pay' ) );
 
@@ -116,12 +118,12 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Check If The Gateway Is Available For Use
+	 * Check if the gateway is available for use
 	 *
-	 * @access public
 	 * @return bool
 	 */
 	public function is_available() {
+
 		$is_available = ( 'yes' === $this->enabled ) ? true : false;
 
 		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
@@ -134,7 +136,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * has_fields function.
 	 *
-	 * @access public
 	 * @return bool
 	 */
 	public function has_fields() {
@@ -142,9 +143,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Return the gateways title
+	 * Return the gateway's title
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function get_title() {
@@ -152,9 +152,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Return the gateways description
+	 * Return the gateway's description
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function get_description() {
@@ -164,17 +163,17 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * get_icon function.
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function get_icon() {
+
 		$icon = $this->icon ? '<img src="' . WC_HTTPS::force_https_url( $this->icon ) . '" alt="' . esc_attr( $this->get_title() ) . '" />' : '';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
 	}
 
 	/**
-	 * Set As Current Gateway.
+	 * Set as current gateway.
 	 *
 	 * Set this as the current gateway.
 	 *
@@ -191,10 +190,10 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Process the payment. Override this in your gateway. When implemented, this should
 	 * return the success and redirect in an array. e.g.
 	 *
-	 * 		return array(
-	 *   		'result' 	=> 'success',
-	 *     		'redirect'	=> $this->get_return_url( $order )
-	 *       );
+	 *        return array(
+	 *            'result'   => 'success',
+	 *            'redirect' => $this->get_return_url( $order )
+	 *        );
 	 *
 	 * @param int $order_id
 	 * @return array
@@ -204,7 +203,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Process Refund
+	 * Process refund
 	 *
 	 * If the gateway declares 'refunds' support, this will allow it to refund
 	 * a passed in amount.
@@ -219,23 +218,18 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Validate Frontend Fields
+	 * Validate frontend fields
 	 *
 	 * Validate payment fields on the frontend.
-	 *
-	 * @access public
-	 * @return bool
 	 */
 	public function validate_fields() { return true; }
 
 	/**
 	 * If There are no payment fields show the description if set.
 	 * Override this in your gateway if you have some.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function payment_fields() {
+
 		if ( $description = $this->get_description() ) {
 			echo wpautop( wptexturize( $description ) );
 		}
@@ -251,7 +245,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Gateways should override this to declare support (or lack of support) for a feature.
 	 * For backward compatibility, gateways support 'products' by default, but nothing else.
 	 *
-	 * @access public
 	 * @param $feature string The name of a feature to test support for.
 	 * @return bool True if the gateway supports the feature, false otherwise.
 	 * @since 1.5.7
@@ -266,6 +259,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @param  array $args
 	 */
 	public function credit_card_form( $args = array(), $fields = array() ) {
+
 		wp_enqueue_script( 'wc-credit-card-form' );
 
 		$default_args = array(

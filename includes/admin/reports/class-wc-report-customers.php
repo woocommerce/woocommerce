@@ -2,17 +2,18 @@
 /**
  * WC_Report_Customers
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Reports
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Reports
  * @version     2.1.0
  */
 class WC_Report_Customers extends WC_Admin_Report {
 
 	public $chart_colours = array();
-	
+
 	/**
 	 * Get the legend for the main chart sidebar
+	 *
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -29,6 +30,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 	/**
 	 * [get_chart_widgets description]
+	 *
 	 * @return array
 	 */
 	public function get_chart_widgets() {
@@ -44,7 +46,6 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 	/**
 	 * customers_vs_guests
-	 * @return void
 	 */
 	public function customers_vs_guests() {
 
@@ -109,27 +110,27 @@ class WC_Report_Customers extends WC_Admin_Report {
 					],
 					{
 						grid: {
-				            hoverable: true
-				        },
+							hoverable: true
+						},
 						series: {
-					        pie: {
-					            show: true,
-					            radius: 1,
-					            innerRadius: 0.6,
-					            label: {
-					                show: false
-					            }
-					        },
-					        enable_tooltip: true,
-					        append_tooltip: "<?php echo ' ' . __( 'orders', 'woocommerce' ); ?>",
-					    },
-					    legend: {
-					        show: false
-					    }
-			 		}
-			 	);
+							pie: {
+								show: true,
+								radius: 1,
+								innerRadius: 0.6,
+								label: {
+									show: false
+								}
+							},
+							enable_tooltip: true,
+							append_tooltip: "<?php echo ' ' . __( 'orders', 'woocommerce' ); ?>",
+						},
+						legend: {
+							show: false
+						}
+					}
+				);
 
-			 	jQuery('.chart-placeholder.customers_vs_guests').resize();
+				jQuery('.chart-placeholder.customers_vs_guests').resize();
 			});
 		</script>
 		<?php
@@ -139,6 +140,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 	 * Output the report
 	 */
 	public function output_report() {
+
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
@@ -154,8 +156,9 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
+		}
 
 		$this->calculate_current_range( $current_range );
 
@@ -183,8 +186,9 @@ class WC_Report_Customers extends WC_Admin_Report {
 		$this->customers = $users_query->get_results();
 
 		foreach ( $this->customers as $key => $customer ) {
-			if ( strtotime( $customer->user_registered ) < $this->start_date || strtotime( $customer->user_registered ) > $this->end_date )
+			if ( strtotime( $customer->user_registered ) < $this->start_date || strtotime( $customer->user_registered ) > $this->end_date ) {
 				unset( $this->customers[ $key ] );
+			}
 		}
 
 		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
@@ -194,6 +198,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 	 * Output an export link
 	 */
 	public function get_export_button() {
+
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
 		?>
 		<a
@@ -211,6 +216,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart
+	 *
 	 * @return string
 	 */
 	public function get_main_chart() {
@@ -343,16 +349,16 @@ class WC_Report_Customers extends WC_Admin_Report {
 							legend: {
 								show: false
 							},
-						    grid: {
-						        color: '#aaa',
-						        borderColor: 'transparent',
-						        borderWidth: 0,
-						        hoverable: true
-						    },
-						    xaxes: [ {
-						    	color: '#aaa',
-						    	position: "bottom",
-						    	tickColor: 'transparent',
+							grid: {
+								color: '#aaa',
+								borderColor: 'transparent',
+								borderWidth: 0,
+								hoverable: true
+							},
+							xaxes: [ {
+								color: '#aaa',
+								position: "bottom",
+								tickColor: 'transparent',
 								mode: "time",
 								timeformat: "<?php if ( $this->chart_groupby == 'day' ) echo '%d %b'; else echo '%b'; ?>",
 								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
@@ -360,21 +366,21 @@ class WC_Report_Customers extends WC_Admin_Report {
 								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 								tickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 								font: {
-						    		color: "#aaa"
-						    	}
+									color: "#aaa"
+								}
 							} ],
-						    yaxes: [
-						    	{
-						    		min: 0,
-						    		minTickSize: 1,
-						    		tickDecimals: 0,
-						    		color: '#ecf0f1',
-						    		font: { color: "#aaa" }
-						    	}
-						    ],
-				 		}
-				 	);
-				 	jQuery('.chart-placeholder').resize();
+							yaxes: [
+								{
+									min: 0,
+									minTickSize: 1,
+									tickDecimals: 0,
+									color: '#ecf0f1',
+									font: { color: "#aaa" }
+								}
+							],
+						}
+					);
+					jQuery('.chart-placeholder').resize();
 				}
 
 				drawGraph();
