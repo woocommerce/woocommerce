@@ -101,7 +101,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	?>
 
 	<td class="wc-order-edit-line-item">
-		<?php if ( $can_be_edited ) : ?>
+		<?php if ( $order->is_editable() ) : ?>
 			<div class="wc-order-edit-line-item-actions">
 				<a class="edit-order-item" href="#"></a><a class="delete-order-item" href="#"></a>
 			</div>

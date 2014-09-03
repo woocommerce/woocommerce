@@ -13,9 +13,6 @@ $line_items          = $order->get_items( apply_filters( 'woocommerce_admin_orde
 $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
 
-// Check if order can be edited
-$can_be_edited = $order->is_editable();
-
 if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	$order_taxes         = $order->get_taxes();
 	$tax_classes         = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
@@ -167,7 +164,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 					<div class="clear"></div>
 				</div>
 			</td>
-			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
+			<td><?php if ( $order->is_editable() ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
 		</tr>
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->id ); ?>
@@ -181,7 +178,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 					<div class="clear"></div>
 				</div>
 			</td>
-			<td><?php if ( $can_be_edited ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
+			<td><?php if ( $order->is_editable() ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
 		</tr>
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->id ); ?>
@@ -201,7 +198,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<p class="bulk-actions">
 		<select>
 			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-			<?php if ( $can_be_edited ) : ?>
+			<?php if ( $order->is_editable() ) : ?>
 				<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
 					<option value="delete"><?php _e( 'Delete selected line item(s)', 'woocommerce' ); ?></option>
 				</optgroup>
@@ -215,16 +212,16 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<button type="button" class="button do_bulk_action wc-reload" title="<?php _e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
 	</p>
 	<p class="add-items">
-		<?php if ( $can_be_edited ) : ?>
+		<?php if ( $order->is_editable() ) : ?>
 			<button type="button" class="button add-line-item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
 		<?php endif; ?>
-		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && $can_be_edited ) : ?>
+		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && $order->is_editable() ) : ?>
 			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 		<?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
 			<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
 		<?php endif; ?>
-		<?php if ( $can_be_edited ) : ?>
+		<?php if ( $order->is_editable() ) : ?>
 		<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate Taxes', 'woocommerce' ); ?></button>
 		<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
 		<?php endif; ?>
