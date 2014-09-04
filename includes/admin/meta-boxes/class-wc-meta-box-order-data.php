@@ -37,7 +37,6 @@ class WC_Meta_Box_Order_Data {
 	 * Init billing and shipping fields we display + save
 	 */
 	public static function init_address_fields() {
-
 		self::$billing_fields = apply_filters( 'woocommerce_admin_billing_fields', array(
 			'first_name' => array(
 				'label' => __( 'First Name', 'woocommerce' ),
