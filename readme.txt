@@ -1,5 +1,5 @@
 === WooCommerce - excelling eCommerce ===
-Contributors: woothemes, mikejolley, jameskoster
+Contributors: woothemes, mikejolley, jameskoster, claudiosanches
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
