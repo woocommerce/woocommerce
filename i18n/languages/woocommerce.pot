@@ -4,14 +4,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.2.0-bleeding Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-09-03 15:21:49+00:00\n"
+"POT-Creation-Date: 2014-09-04 14:14:15+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
-"X-Generator: grunt-wp-i18n 0.4.6\n"
+"X-Generator: grunt-wp-i18n 0.4.7\n"
 
 #: i18n/countries.php:16
 msgid "Afghanistan"
@@ -4056,7 +4056,7 @@ msgstr ""
 msgid "Western Cape"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:573
+#: includes/abstracts/abstract-wc-email.php:553
 #: includes/emails/class-wc-email-customer-completed-order.php:141
 #: includes/emails/class-wc-email-new-order.php:121
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:66
@@ -4070,19 +4070,19 @@ msgstr ""
 msgid "Enable/Disable"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:575
+#: includes/abstracts/abstract-wc-email.php:555
 #: includes/emails/class-wc-email-customer-completed-order.php:143
 #: includes/emails/class-wc-email-new-order.php:123
 msgid "Enable this email notification"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:579
+#: includes/abstracts/abstract-wc-email.php:559
 #: includes/emails/class-wc-email-customer-invoice.php:149
 msgid "Email subject"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:581
-#: includes/abstracts/abstract-wc-email.php:588
+#: includes/abstracts/abstract-wc-email.php:561
+#: includes/abstracts/abstract-wc-email.php:568
 #: includes/emails/class-wc-email-customer-completed-order.php:149
 #: includes/emails/class-wc-email-customer-completed-order.php:156
 #: includes/emails/class-wc-email-customer-completed-order.php:163
@@ -4094,151 +4094,151 @@ msgstr ""
 msgid "Defaults to <code>%s</code>"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:586
+#: includes/abstracts/abstract-wc-email.php:566
 #: includes/emails/class-wc-email-customer-invoice.php:156
 msgid "Email heading"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:593
+#: includes/abstracts/abstract-wc-email.php:573
 #: includes/emails/class-wc-email-customer-completed-order.php:175
 #: includes/emails/class-wc-email-customer-invoice.php:177
 #: includes/emails/class-wc-email-new-order.php:148
 msgid "Email type"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:595
+#: includes/abstracts/abstract-wc-email.php:575
 #: includes/emails/class-wc-email-customer-completed-order.php:177
 #: includes/emails/class-wc-email-customer-invoice.php:179
 #: includes/emails/class-wc-email-new-order.php:150
 msgid "Choose which format of email to send."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:599
+#: includes/abstracts/abstract-wc-email.php:579
 #: includes/emails/class-wc-email-customer-completed-order.php:181
 #: includes/emails/class-wc-email-customer-invoice.php:183
 #: includes/emails/class-wc-email-new-order.php:154
 msgid "Plain text"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:600
+#: includes/abstracts/abstract-wc-email.php:580
 #: includes/emails/class-wc-email-customer-completed-order.php:182
 #: includes/emails/class-wc-email-customer-invoice.php:184
 #: includes/emails/class-wc-email-new-order.php:155
 msgid "HTML"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:601
+#: includes/abstracts/abstract-wc-email.php:581
 #: includes/emails/class-wc-email-customer-completed-order.php:183
 #: includes/emails/class-wc-email-customer-invoice.php:185
 #: includes/emails/class-wc-email-new-order.php:156
 msgid "Multipart"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:637
-#: includes/abstracts/abstract-wc-email.php:658
+#: includes/abstracts/abstract-wc-email.php:618
+#: includes/abstracts/abstract-wc-email.php:642
 msgid "Could not write to template file."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:689
+#: includes/abstracts/abstract-wc-email.php:674
 msgid "Template file copied to theme."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:698
+#: includes/abstracts/abstract-wc-email.php:685
 msgid "Template file deleted from theme."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:706
-#: includes/abstracts/abstract-wc-integration.php:30
-#: includes/abstracts/abstract-wc-settings-api.php:39
-#: includes/class-wc-install.php:695
+#: includes/abstracts/abstract-wc-email.php:693
+#: includes/abstracts/abstract-wc-integration.php:27
+#: includes/abstracts/abstract-wc-settings-api.php:38
+#: includes/class-wc-install.php:697
 msgid "Settings"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:718
+#: includes/abstracts/abstract-wc-email.php:705
 msgid "HTML template"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:719
+#: includes/abstracts/abstract-wc-email.php:706
 msgid "Plain text template"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:740
+#: includes/abstracts/abstract-wc-email.php:729
 msgid "Delete template file"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:743
+#: includes/abstracts/abstract-wc-email.php:732
 msgid ""
 "This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:758
+#: includes/abstracts/abstract-wc-email.php:745
 msgid "Copy file to theme"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:761
+#: includes/abstracts/abstract-wc-email.php:748
 msgid ""
 "To override and edit this email template copy <code>%s</code> to your theme "
 "folder: <code>%s</code>."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:772
+#: includes/abstracts/abstract-wc-email.php:757
 msgid "File was not found."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:797
+#: includes/abstracts/abstract-wc-email.php:782
 msgid "View template"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:798
+#: includes/abstracts/abstract-wc-email.php:783
 msgid "Hide template"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:809
+#: includes/abstracts/abstract-wc-email.php:794
 msgid "Are you sure you want to delete this template file?"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:148
-#: includes/abstracts/abstract-wc-order.php:202
+#: includes/abstracts/abstract-wc-order.php:162
+#: includes/abstracts/abstract-wc-order.php:217
 msgid "Backordered"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1551
+#: includes/abstracts/abstract-wc-order.php:1614
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1556
-#: includes/abstracts/abstract-wc-product.php:893
-#: includes/abstracts/abstract-wc-product.php:899
+#: includes/abstracts/abstract-wc-order.php:1619
+#: includes/abstracts/abstract-wc-product.php:883
+#: includes/abstracts/abstract-wc-product.php:889
 #: includes/class-wc-cart.php:1438 includes/class-wc-product-variation.php:289
 msgid "Free!"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1619
+#: includes/abstracts/abstract-wc-order.php:1681
 msgid "Cart Subtotal:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1626
+#: includes/abstracts/abstract-wc-order.php:1688
 msgid "Cart Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1633
+#: includes/abstracts/abstract-wc-order.php:1695
 msgid "Shipping:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1680
+#: includes/abstracts/abstract-wc-order.php:1748
 msgid "Order Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1687
+#: includes/abstracts/abstract-wc-order.php:1755
 msgid "Payment Method:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1693
+#: includes/abstracts/abstract-wc-order.php:1761
 msgid "Order Total:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1711
+#: includes/abstracts/abstract-wc-order.php:1781
 #: includes/wc-cart-functions.php:250
 msgid "(Includes %s)"
 msgstr ""
@@ -4247,100 +4247,100 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2003
+#: includes/abstracts/abstract-wc-order.php:2073
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2272
+#: includes/abstracts/abstract-wc-order.php:2336
 #: includes/class-wc-ajax.php:1161 includes/class-wc-ajax.php:1162
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2282
+#: includes/abstracts/abstract-wc-order.php:2346
 msgid "Order item stock reduced successfully."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:279
+#: includes/abstracts/abstract-wc-payment-gateway.php:273
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:259
 msgid "Card Number"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:283
+#: includes/abstracts/abstract-wc-payment-gateway.php:277
 msgid "Expiry (MM/YY)"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:284
+#: includes/abstracts/abstract-wc-payment-gateway.php:278
 msgid "MM / YY"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:287
+#: includes/abstracts/abstract-wc-payment-gateway.php:281
 msgid "Card Code"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:288
+#: includes/abstracts/abstract-wc-payment-gateway.php:282
 msgid "CVC"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:480
+#: includes/abstracts/abstract-wc-product.php:468
 #: includes/class-wc-product-simple.php:48
 #: includes/class-wc-product-variation.php:197
 msgid "Add to cart"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:490
+#: includes/abstracts/abstract-wc-product.php:477
 msgid "Read more"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:574
-#: includes/abstracts/abstract-wc-product.php:584
-#: includes/abstracts/abstract-wc-product.php:600
+#: includes/abstracts/abstract-wc-product.php:558
+#: includes/abstracts/abstract-wc-product.php:569
+#: includes/abstracts/abstract-wc-product.php:591
 #: includes/class-wc-ajax.php:624 includes/class-wc-product-variation.php:507
 #: includes/class-wc-product-variation.php:517
 #: includes/class-wc-product-variation.php:533
 msgid "In stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:578
+#: includes/abstracts/abstract-wc-product.php:563
 #: includes/class-wc-product-variation.php:511
 msgid "Only %s left in stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:581
-#: includes/abstracts/abstract-wc-product.php:591
+#: includes/abstracts/abstract-wc-product.php:566
+#: includes/abstracts/abstract-wc-product.php:577
 #: includes/class-wc-product-variation.php:514
 #: includes/class-wc-product-variation.php:524
 msgid "(can be backordered)"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:588
+#: includes/abstracts/abstract-wc-product.php:574
 #: includes/class-wc-product-variation.php:521
 msgid "%s in stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:597
+#: includes/abstracts/abstract-wc-product.php:586
 #: includes/class-wc-product-variation.php:530 templates/cart/cart.php:72
 msgid "Available on backorder"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:603
-#: includes/abstracts/abstract-wc-product.php:607
+#: includes/abstracts/abstract-wc-product.php:596
+#: includes/abstracts/abstract-wc-product.php:602
 #: includes/class-wc-ajax.php:625 includes/class-wc-product-variation.php:536
 #: includes/class-wc-product-variation.php:540
 msgid "Out of stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1025
+#: includes/abstracts/abstract-wc-product.php:1011
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1027
+#: includes/abstracts/abstract-wc-product.php:1013
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1386
+#: includes/abstracts/abstract-wc-product.php:1368
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -5526,39 +5526,39 @@ msgstr ""
 msgid "Select an option&hellip;"
 msgstr ""
 
-#: includes/class-wc-install.php:452
+#: includes/class-wc-install.php:454
 msgid "Customer"
 msgstr ""
 
-#: includes/class-wc-install.php:459
+#: includes/class-wc-install.php:461
 msgid "Shop Manager"
 msgstr ""
 
-#: includes/class-wc-install.php:695
+#: includes/class-wc-install.php:697
 msgid "View WooCommerce Settings"
 msgstr ""
 
-#: includes/class-wc-install.php:712
+#: includes/class-wc-install.php:714
 msgid "View WooCommerce Documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:712
+#: includes/class-wc-install.php:714
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:713
+#: includes/class-wc-install.php:715
 msgid "View WooCommerce API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:713
+#: includes/class-wc-install.php:715
 msgid "API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:714
+#: includes/class-wc-install.php:716
 msgid "Visit Premium Customer Support Forum"
 msgstr ""
 
-#: includes/class-wc-install.php:714
+#: includes/class-wc-install.php:716
 msgid "Premium Support"
 msgstr ""
 
@@ -8484,27 +8484,27 @@ msgstr ""
 msgid "Cost: %s"
 msgstr ""
 
-#: templates/global/breadcrumb.php:71
+#: templates/global/breadcrumb.php:72
 msgid "Products tagged &ldquo;"
 msgstr ""
 
-#: templates/global/breadcrumb.php:99 templates/global/breadcrumb.php:201
+#: templates/global/breadcrumb.php:100 templates/global/breadcrumb.php:202
 msgid "Search results for &ldquo;"
 msgstr ""
 
-#: templates/global/breadcrumb.php:155
+#: templates/global/breadcrumb.php:156
 msgid "Error 404"
 msgstr ""
 
-#: templates/global/breadcrumb.php:205
+#: templates/global/breadcrumb.php:206
 msgid "Posts tagged &ldquo;"
 msgstr ""
 
-#: templates/global/breadcrumb.php:210
+#: templates/global/breadcrumb.php:211
 msgid "Author:"
 msgstr ""
 
-#: templates/global/breadcrumb.php:215
+#: templates/global/breadcrumb.php:216
 msgid "Page"
 msgstr ""
 
@@ -8929,12 +8929,12 @@ msgctxt "US state of Georgia"
 msgid "Georgia"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:818
+#: includes/abstracts/abstract-wc-order.php:872
 msgctxt "hash before order number"
 msgid "#"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:915
+#: includes/abstracts/abstract-wc-product.php:905
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
@@ -8969,42 +8969,42 @@ msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
 msgstr ""
 
-#: includes/class-wc-install.php:223
+#: includes/class-wc-install.php:225
 msgctxt "Page slug"
 msgid "shop"
 msgstr ""
 
-#: includes/class-wc-install.php:228
+#: includes/class-wc-install.php:230
 msgctxt "Page slug"
 msgid "cart"
 msgstr ""
 
-#: includes/class-wc-install.php:233
+#: includes/class-wc-install.php:235
 msgctxt "Page slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:238
+#: includes/class-wc-install.php:240
 msgctxt "Page slug"
 msgid "my-account"
 msgstr ""
 
-#: includes/class-wc-install.php:224
+#: includes/class-wc-install.php:226
 msgctxt "Page title"
 msgid "Shop"
 msgstr ""
 
-#: includes/class-wc-install.php:229
+#: includes/class-wc-install.php:231
 msgctxt "Page title"
 msgid "Cart"
 msgstr ""
 
-#: includes/class-wc-install.php:234
+#: includes/class-wc-install.php:236
 msgctxt "Page title"
 msgid "Checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:239
+#: includes/class-wc-install.php:241
 msgctxt "Page title"
 msgid "My Account"
 msgstr ""
