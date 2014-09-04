@@ -29,6 +29,7 @@ class WC_Language_Pack_Upgrader {
 	public function __construct() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_update' ) );
 		add_filter( 'upgrader_post_install', array( $this, 'version_update' ), 999, 2 );
+		add_action( 'woocommerce_language_pack_updater_check', array( $this, 'has_available_update' ) );
 	}
 
 	/**
@@ -71,7 +72,6 @@ class WC_Language_Pack_Upgrader {
 				'autoupdate' => 1
 			);
 		}
-
 		return $data;
 	}
 
@@ -81,17 +81,16 @@ class WC_Language_Pack_Upgrader {
 	 * @return bool
 	 */
 	public function has_available_update() {
-		$version = get_option( 'woocommerce_language_pack_version', '0' );
+		$version = get_option( 'woocommerce_language_pack_version', array( '0', $this->get_language() ) );
 
-		if ( version_compare( $version, WC_VERSION, '<' ) && 'en' !== $this->get_language() ) {
-
+		if ( 'en' !== $this->get_language() && ( ! is_array( $version ) || version_compare( $version[0], WC_VERSION, '<' ) || $version[1] !== $this->get_language() ) ) {
 			if ( $this->check_if_language_pack_exists() ) {
 				$this->configure_woocommerce_upgrade_notice();
 
 				return true;
 			} else {
 				// Updated the woocommerce_language_pack_version to avoid searching translations for this release again
-				update_option( 'woocommerce_language_pack_version', WC_VERSION );
+				update_option( 'woocommerce_language_pack_version', array( WC_VERSION , $this->get_language() ) );
 			}
 		}
 
@@ -142,7 +141,7 @@ class WC_Language_Pack_Upgrader {
 				&& ( isset( $hook_extra['language_update']->slug ) && 'woocommerce' == $hook_extra['language_update']->slug )
 			) {
 				// Update the language pack version
-				update_option( 'woocommerce_language_pack_version', WC_VERSION );
+				update_option( 'woocommerce_language_pack_version', array( WC_VERSION , $this->get_language() ) );
 
 				// Remove the translation upgrade notice
 				$notices = get_option( 'woocommerce_admin_notices', array() );
