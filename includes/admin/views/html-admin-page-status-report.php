@@ -91,7 +91,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Language', 'woocommerce' ); ?>:</td>
-			<td><?php if ( defined( 'WPLANG' ) && WPLANG ) echo WPLANG; else  _e( 'Default', 'woocommerce' ); ?></td>
+			<td><?php echo get_locale(); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Max Upload Size', 'woocommerce' ); ?>:</td>

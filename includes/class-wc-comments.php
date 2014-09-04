@@ -208,7 +208,7 @@ class WC_Comments {
 	/**
 	 * Clear transients for a review.
 	 *
-	 * @param mixed $comment_id
+	 * @param mixed $post_id
 	 */
 	public static function clear_transients( $post_id ) {
 		delete_transient( 'wc_average_rating_' . absint( $post_id ) );

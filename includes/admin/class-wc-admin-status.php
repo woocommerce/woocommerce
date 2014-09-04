@@ -211,7 +211,7 @@ class WC_Admin_Status {
 			)
 		);
 
-		if ( defined( 'WPLANG' ) && '' !== WPLANG ) {
+		if ( get_locale() !== 'en_US' ) {
 			$tools['translation_upgrade'] = array(
 				'name'    => __( 'Translation Upgrade', 'woocommerce' ),
 				'button'  => __( 'Force Translation Upgrade', 'woocommerce' ),

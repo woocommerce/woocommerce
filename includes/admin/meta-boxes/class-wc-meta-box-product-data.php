@@ -4,9 +4,9 @@
  *
  * Displays the product data box, tabbed, with several panels covering price, stock etc.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Meta Boxes
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
@@ -43,9 +43,11 @@ class WC_Meta_Box_Product_Data {
 		), $product_type );
 
 		$type_box = '<label for="product-type"><select id="product-type" name="product-type"><optgroup label="' . __( 'Product Type', 'woocommerce' ) . '">';
+
 		foreach ( $product_type_selector as $value => $label ) {
 			$type_box .= '<option value="' . esc_attr( $value ) . '" ' . selected( $product_type, $value, false ) .'>' . esc_html( $label ) . '</option>';
 		}
+
 		$type_box .= '</optgroup></select></label>';
 
 		$product_type_options = apply_filters( 'product_type_options', array(
@@ -260,7 +262,9 @@ class WC_Meta_Box_Product_Data {
 						$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 						$classes_options = array();
 						$classes_options[''] = __( 'Standard', 'woocommerce' );
+
 						if ( $tax_classes ) {
+
 							foreach ( $tax_classes as $class ) {
 								$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
 							}
@@ -524,7 +528,9 @@ class WC_Meta_Box_Product_Data {
 
 						// Custom Attributes
 						if ( ! empty( $attributes ) ) {
+
 							foreach ( $attributes as $attribute ) {
+
 								if ( $attribute['is_taxonomy'] ) {
 									continue;
 								}
@@ -580,6 +586,7 @@ class WC_Meta_Box_Product_Data {
 						<option value=""><?php _e( 'Custom product attribute', 'woocommerce' ); ?></option>
 						<?php
 							if ( $attribute_taxonomies ) {
+
 								foreach ( $attribute_taxonomies as $tax ) {
 									$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
 									$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
@@ -602,7 +609,9 @@ class WC_Meta_Box_Product_Data {
 					<?php
 						$upsell_ids = get_post_meta( $post->ID, '_upsell_ids', true );
 						$product_ids = ! empty( $upsell_ids ) ? array_map( 'absint',  $upsell_ids ) : null;
+
 						if ( $product_ids ) {
+
 							foreach ( $product_ids as $product_id ) {
 
 								$product = wc_get_product( $product_id );
@@ -620,7 +629,9 @@ class WC_Meta_Box_Product_Data {
 					<?php
 						$crosssell_ids = get_post_meta( $post->ID, '_crosssell_ids', true );
 						$product_ids = ! empty( $crosssell_ids ) ? array_map( 'absint',  $crosssell_ids ) : null;
+
 						if ( $product_ids ) {
+
 							foreach ( $product_ids as $product_id ) {
 
 								$product = wc_get_product( $product_id );
@@ -646,7 +657,9 @@ class WC_Meta_Box_Product_Data {
 					if ( $grouped_term = get_term_by( 'slug', 'grouped', 'product_type' ) ) {
 
 						$posts_in = array_unique( (array) get_objects_in_term( $grouped_term->term_id, 'product_type' ) );
+
 						if ( sizeof( $posts_in ) > 0 ) {
+
 							$args = array(
 								'post_type'        => 'product',
 								'post_status'      => 'any',
@@ -657,9 +670,11 @@ class WC_Meta_Box_Product_Data {
 								'suppress_filters' => 0,
 								'include'          => $posts_in,
 							);
+
 							$grouped_products = get_posts( $args );
 
 							if ( $grouped_products ) {
+
 								foreach ( $grouped_products as $product ) {
 
 									if ( $product->ID == $post->ID ) {
@@ -740,8 +755,11 @@ class WC_Meta_Box_Product_Data {
 
 		// See if any are set
 		$variation_attribute_found = false;
+
 		if ( $attributes ) {
+
 			foreach ( $attributes as $attribute ) {
+
 				if ( isset( $attribute['is_variation'] ) ) {
 					$variation_attribute_found = true;
 					break;
@@ -753,7 +771,9 @@ class WC_Meta_Box_Product_Data {
 		$tax_classes           = array_filter( array_map('trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 		$tax_class_options     = array();
 		$tax_class_options[''] = __( 'Standard', 'woocommerce' );
+
 		if ( $tax_classes ) {
+
 			foreach ( $tax_classes as $class ) {
 				$tax_class_options[ sanitize_title( $class ) ] = esc_attr( $class );
 			}
@@ -862,19 +882,22 @@ class WC_Meta_Box_Product_Data {
 						'order'       => 'asc',
 						'post_parent' => $post->ID
 					);
+
 					$variations = get_posts( $args );
 					$loop = 0;
+
 					if ( $variations ) {
+
 						foreach ( $variations as $variation ) {
 
-							$variation_id          = absint( $variation->ID );
-							$variation_post_status = esc_attr( $variation->post_status );
-							$variation_data        = get_post_meta( $variation_id );
+							$variation_id                        = absint( $variation->ID );
+							$variation_post_status               = esc_attr( $variation->post_status );
+							$variation_data                      = get_post_meta( $variation_id );
 							$variation_data['variation_post_id'] = $variation_id;
 
 							// Grab shipping classes
 							$shipping_classes = get_the_terms( $variation_id, 'product_shipping_class' );
-							$shipping_class = ( $shipping_classes && ! is_wp_error( $shipping_classes ) ) ? current( $shipping_classes )->term_id : '';
+							$shipping_class   = ( $shipping_classes && ! is_wp_error( $shipping_classes ) ) ? current( $shipping_classes )->term_id : '';
 
 							$variation_fields = array(
 								'_sku',
@@ -936,6 +959,7 @@ class WC_Meta_Box_Product_Data {
 					<strong><?php _e( 'Defaults', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php _e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
 					<?php
 						$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
+
 						foreach ( $attributes as $attribute ) {
 
 							// Only deal with attributes that are variations
@@ -1001,15 +1025,19 @@ class WC_Meta_Box_Product_Data {
 		if ( isset( $_POST['_regular_price'] ) ) {
 			update_post_meta( $post_id, '_regular_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
 		}
+
 		if ( isset( $_POST['_sale_price'] ) ) {
 			update_post_meta( $post_id, '_sale_price', ( $_POST['_sale_price'] === '' ? '' : wc_format_decimal( $_POST['_sale_price'] ) ) );
 		}
+
 		if ( isset( $_POST['_tax_status'] ) ) {
 			update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
 		}
+
 		if ( isset( $_POST['_tax_class'] ) ) {
 			update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
 		}
+
 		if ( isset( $_POST['_purchase_note'] ) ) {
 			update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
 		}
@@ -1056,8 +1084,11 @@ class WC_Meta_Box_Product_Data {
 		if ( '' == $new_sku ) {
 			update_post_meta( $post_id, '_sku', '' );
 		} elseif ( $new_sku !== $sku ) {
+
 			if ( ! empty( $new_sku ) ) {
+
 				$unique_sku = wc_product_has_unique_sku( $post_id, $new_sku );
+
 				if ( ! $unique_sku ) {
 					WC_Admin_Meta_Boxes::add_error( __( 'Product SKU must be unique.', 'woocommerce' ) );
 				} else {
@@ -1072,6 +1103,7 @@ class WC_Meta_Box_Product_Data {
 		$attributes = array();
 
 		if ( isset( $_POST['attribute_names'] ) && isset( $_POST['attribute_values'] ) ) {
+
 			$attribute_names  = $_POST['attribute_names'];
 			$attribute_values = $_POST['attribute_values'];
 
@@ -1088,6 +1120,7 @@ class WC_Meta_Box_Product_Data {
 			$attribute_names_count = sizeof( $attribute_names );
 
 			for ( $i = 0; $i < $attribute_names_count; $i++ ) {
+
 				if ( ! $attribute_names[ $i ] ) {
 					continue;
 				}
@@ -1246,6 +1279,7 @@ class WC_Meta_Box_Product_Data {
 					) );
 
 					if ( $children_by_price ) {
+
 						foreach ( $children_by_price as $child ) {
 							$child_price = get_post_meta( $child, '_price', true );
 							update_post_meta( $clear_id, '_price', $child_price );
@@ -1312,6 +1346,7 @@ class WC_Meta_Box_Product_Data {
 			$ids     = $_POST['upsell_ids'];
 
 			foreach ( $ids as $id ) {
+
 				if ( $id && $id > 0 ) {
 					$upsells[] = $id;
 				}
@@ -1324,6 +1359,7 @@ class WC_Meta_Box_Product_Data {
 
 		// Cross sells
 		if ( isset( $_POST['crosssell_ids'] ) ) {
+
 			$crosssells = array();
 			$ids        = $_POST['crosssell_ids'];
 
@@ -1334,6 +1370,7 @@ class WC_Meta_Box_Product_Data {
 			}
 
 			update_post_meta( $post_id, '_crosssell_ids', $crosssells );
+
 		} else {
 			delete_post_meta( $post_id, '_crosssell_ids' );
 		}
@@ -1383,9 +1420,11 @@ class WC_Meta_Box_Product_Data {
 
 		// Product url
 		if ( 'external' == $product_type ) {
+
 			if ( isset( $_POST['_product_url'] ) ) {
 				update_post_meta( $post_id, '_product_url', esc_attr( $_POST['_product_url'] ) );
 			}
+
 			if ( isset( $_POST['_button_text'] ) ) {
 				update_post_meta( $post_id, '_button_text', esc_attr( $_POST['_button_text'] ) );
 			}
@@ -1496,8 +1535,10 @@ class WC_Meta_Box_Product_Data {
 				if ( '' == $new_sku ) {
 					update_post_meta( $variation_id, '_sku', '' );
 				} elseif ( $new_sku !== $sku ) {
+
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
+
 						if ( ! $unique_sku ) {
 							WC_Admin_Meta_Boxes::add_error( __( 'Variation SKU must be unique.', 'woocommerce' ) );
 						} else {
@@ -1516,12 +1557,15 @@ class WC_Meta_Box_Product_Data {
 				if ( isset( $variable_weight[ $i ] ) ) {
 					update_post_meta( $variation_id, '_weight', ( '' === $variable_weight[ $i ] ) ? '' : wc_format_decimal( $variable_weight[ $i ] ) );
 				}
+
 				if ( isset( $variable_length[ $i ] ) ) {
 					update_post_meta( $variation_id, '_length', ( '' === $variable_length[ $i ] ) ? '' : wc_format_decimal( $variable_length[ $i ] ) );
 				}
+
 				if ( isset( $variable_width[ $i ] ) ) {
 					update_post_meta( $variation_id, '_width', ( '' === $variable_width[ $i ] ) ? '' : wc_format_decimal( $variable_width[ $i ] ) );
 				}
+
 				if ( isset( $variable_height[ $i ] ) ) {
 					update_post_meta( $variation_id, '_height', ( '' === $variable_height[ $i ] ) ? '' : wc_format_decimal( $variable_height[ $i ] ) );
 				}
@@ -1592,7 +1636,9 @@ class WC_Meta_Box_Product_Data {
 					$file_url_size = sizeof( $file_urls );
 
 					for ( $ii = 0; $ii < $file_url_size; $ii ++ ) {
+
 						if ( ! empty( $file_urls[ $ii ] ) ) {
+
 							$files[ md5( $file_urls[ $ii ] ) ] = array(
 								'name' => $file_names[ $ii ],
 								'file' => $file_urls[ $ii ]
@@ -1617,6 +1663,7 @@ class WC_Meta_Box_Product_Data {
 				// Update taxonomies - don't use wc_clean as it destroys sanitized characters
 				$updated_attribute_keys = array();
 				foreach ( $attributes as $attribute ) {
+
 					if ( $attribute['is_variation'] ) {
 						$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
 						$value         = isset( $_POST[ $attribute_key ][ $i ] ) ? sanitize_title( stripslashes( $_POST[ $attribute_key ][ $i ] ) ) : '';
@@ -1643,6 +1690,7 @@ class WC_Meta_Box_Product_Data {
 		$default_attributes = array();
 
 		foreach ( $attributes as $attribute ) {
+
 			if ( $attribute['is_variation'] ) {
 
 				// Don't use wc_clean as it destroys sanitized characters

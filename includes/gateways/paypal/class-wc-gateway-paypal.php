@@ -225,9 +225,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'placeholder' => __( 'Optional', 'woocommerce' )
 			),
 			'api_details' => array(
-				'title'       => __( 'API options (for refund support)', 'woocommerce' ),
+				'title'       => __( 'API Credentials', 'woocommerce' ),
 				'type'        => 'title',
-				'description' => '',
+				'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your PayPal API Credentials %shere%s.', 'woocommerce' ), '<a href="https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#creating-classic-api-credentials">', '</a>' ),
 			),
 			'api_username' => array(
 				'title'       => __( 'API Username', 'woocommerce' ),

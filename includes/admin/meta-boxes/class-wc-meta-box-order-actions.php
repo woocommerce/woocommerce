@@ -4,9 +4,9 @@
  *
  * Functions for displaying the order actions meta box.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Meta Boxes
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
@@ -61,7 +61,9 @@ class WC_Meta_Box_Order_Actions {
 
 			<li class="wide">
 				<div id="delete-action"><?php
+
 					if ( current_user_can( "delete_post", $post->ID ) ) {
+
 						if ( ! EMPTY_TRASH_DAYS ) {
 							$delete_text = __( 'Delete Permanently', 'woocommerce' );
 						} else {
@@ -84,6 +86,7 @@ class WC_Meta_Box_Order_Actions {
 	 * Save meta box data
 	 */
 	public static function save( $post_id, $post ) {
+
 		// Order data saved, now get it so we can manipulate status
 		$order = wc_get_order( $post_id );
 

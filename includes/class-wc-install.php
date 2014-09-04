@@ -193,6 +193,7 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
+		wp_clear_scheduled_hook( 'woocommerce_language_pack_updater_check' );
 
 		$ve = get_option( 'gmt_offset' ) > 0 ? '+' : '-';
 
@@ -209,6 +210,7 @@ class WC_Install {
 		}
 
 		wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
+		wp_schedule_single_event( time(), 'woocommerce_language_pack_updater_check' );
 	}
 
 	/**

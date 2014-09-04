@@ -2,9 +2,9 @@
 /**
  * WC_Report_Taxes_By_Code
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Reports
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Reports
  * @version     2.1.0
  */
 class WC_Report_Taxes_By_Code extends WC_Admin_Report {
@@ -14,6 +14,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
+
 		$legend   = array();
 
 		return array();
@@ -23,6 +24,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	 * Output an export link
 	 */
 	public function get_export_button() {
+
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : 'last_month';
 		?>
 		<a
@@ -40,6 +42,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	 * Output the report
 	 */
 	public function output_report() {
+
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
@@ -48,8 +51,9 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : 'last_month';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = 'last_month';
+		}
 
 		$this->calculate_current_range( $current_range );
 
@@ -60,6 +64,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart
+	 *
 	 * @return string
 	 */
 	public function get_main_chart() {
@@ -130,6 +135,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 					$grouped_tax_tows = array();
 
 					foreach ( $tax_rows as $tax_row ) {
+
 						if ( ! isset( $grouped_tax_tows[ $tax_row->rate_id ] ) ) {
 							$grouped_tax_tows[ $tax_row->rate_id ] = (object) array(
 								'tax_rate'            => $tax_row->tax_rate,
@@ -138,9 +144,11 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 								'shipping_tax_amount' => 0
 							);
 						}
+
 						if ( 'shop_order' === get_post_type( $tax_row->order_id ) ) {
-							$grouped_tax_tows[ $tax_row->rate_id ]->total_orders ++; 
+							$grouped_tax_tows[ $tax_row->rate_id ]->total_orders ++;
 						}
+
 						$grouped_tax_tows[ $tax_row->rate_id ]->tax_amount += wc_round_tax_total( $tax_row->tax_amount );
 						$grouped_tax_tows[ $tax_row->rate_id ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
 					}

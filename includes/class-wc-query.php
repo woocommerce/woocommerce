@@ -117,7 +117,8 @@ class WC_Query {
 
 	/**
 	 * Get query vars
-	 * @return array()
+	 *
+	 * @return array
 	 */
 	public function get_query_vars() {
 		return $this->query_vars;

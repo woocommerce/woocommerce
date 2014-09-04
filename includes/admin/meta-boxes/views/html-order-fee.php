@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			foreach ( $order_taxes as $tax_item ) :
 				$tax_item_id       = $tax_item['rate_id'];
 				$tax_item_total    = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
-				
+
 				?>
 
 					<td class="line_tax" width="1%">
@@ -76,7 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	?>
 
 	<td class="wc-order-edit-line-item">
-		<?php if ( $can_be_edited ) : ?>
+		<?php if ( $order->is_editable() ) : ?>
 			<div class="wc-order-edit-line-item-actions">
 				<a class="edit-order-item" href="#"></a><a class="delete-order-item" href="#"></a>
 			</div>

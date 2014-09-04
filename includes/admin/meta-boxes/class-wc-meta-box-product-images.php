@@ -4,9 +4,9 @@
  *
  * Display the product images meta box.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Meta Boxes
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
@@ -36,7 +36,7 @@ class WC_Meta_Box_Product_Images {
 
 					$attachments = array_filter( explode( ',', $product_image_gallery ) );
 
-					if ( $attachments )
+					if ( $attachments ) {
 						foreach ( $attachments as $attachment_id ) {
 							echo '<li class="image" data-attachment_id="' . esc_attr( $attachment_id ) . '">
 								' . wp_get_attachment_image( $attachment_id, 'thumbnail' ) . '
@@ -45,6 +45,7 @@ class WC_Meta_Box_Product_Images {
 								</ul>
 							</li>';
 						}
+					}
 				?>
 			</ul>
 
