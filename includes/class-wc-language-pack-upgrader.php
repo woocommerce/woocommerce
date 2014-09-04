@@ -33,24 +33,12 @@ class WC_Language_Pack_Upgrader {
 	}
 
 	/**
-	 * Get WordPress language
-	 *
-	 * @return string
-	 */
-	public static function get_language() {
-		if ( defined( 'WPLANG' ) && '' != WPLANG ) {
-			return WPLANG;
-		}
-		return 'en';
-	}
-
-	/**
 	 * Get language package URI.
 	 *
 	 * @return string
 	 */
 	public function get_language_package_uri() {
-		return $this->repo . WC_VERSION . '/packages/' . $this->get_language() . '.zip';
+		return $this->repo . WC_VERSION . '/packages/' . get_locale() . '.zip';
 	}
 
 	/**
@@ -65,7 +53,7 @@ class WC_Language_Pack_Upgrader {
 			$data->translations[] = array(
 				'type'       => 'plugin',
 				'slug'       => 'woocommerce',
-				'language'   => $this->get_language(),
+				'language'   => get_locale(),
 				'version'    => WC_VERSION,
 				'updated'    => date( 'Y-m-d H:i:s' ),
 				'package'    => $this->get_language_package_uri(),
@@ -81,16 +69,16 @@ class WC_Language_Pack_Upgrader {
 	 * @return bool
 	 */
 	public function has_available_update() {
-		$version = get_option( 'woocommerce_language_pack_version', array( '0', $this->get_language() ) );
+		$version = get_option( 'woocommerce_language_pack_version', array( '0', get_locale() ) );
 
-		if ( 'en' !== $this->get_language() && ( ! is_array( $version ) || version_compare( $version[0], WC_VERSION, '<' ) || $version[1] !== $this->get_language() ) ) {
+		if ( 'en_US' !== get_locale() && ( ! is_array( $version ) || version_compare( $version[0], WC_VERSION, '<' ) || $version[1] !== get_locale() ) ) {
 			if ( $this->check_if_language_pack_exists() ) {
 				$this->configure_woocommerce_upgrade_notice();
 
 				return true;
 			} else {
 				// Updated the woocommerce_language_pack_version to avoid searching translations for this release again
-				update_option( 'woocommerce_language_pack_version', array( WC_VERSION , $this->get_language() ) );
+				update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
 			}
 		}
 
@@ -141,7 +129,7 @@ class WC_Language_Pack_Upgrader {
 				&& ( isset( $hook_extra['language_update']->slug ) && 'woocommerce' == $hook_extra['language_update']->slug )
 			) {
 				// Update the language pack version
-				update_option( 'woocommerce_language_pack_version', array( WC_VERSION , $this->get_language() ) );
+				update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
 
 				// Remove the translation upgrade notice
 				$notices = get_option( 'woocommerce_admin_notices', array() );
