@@ -124,7 +124,6 @@ module.exports = function( grunt ) {
 				type: 'wp-plugin',
 				domainPath: 'i18n/languages',
 				potHeaders: {
-					poedit: true,
 					'report-msgid-bugs-to': 'https://github.com/woothemes/woocommerce/issues',
 					'language-team': 'LANGUAGE <EMAIL@ADDRESS>'
 				}
