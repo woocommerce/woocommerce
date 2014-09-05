@@ -16,4 +16,4 @@ matrix:
 before_script:
     - bash tests/install-wp-tests.sh woocommerce_test root '' localhost $WP_VERSION
 
-script: phpunit
+script: phpunit -c phpunit.xml.dist
