@@ -248,7 +248,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 * Outputs scripts used for simplify payment
 	 */
 	public function payment_scripts() {
-		if ( ! is_checkout() ) {
+		if ( ! is_checkout() || ! $this->is_available() ) {
 			return;
 		}
 
