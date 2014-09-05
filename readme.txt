@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Load archive-product.php for other product taxonomies.
 * Tweak - Disable image size settings if filters are being used.
 * Tweak - Hide the shipping address when local pickup is used.
+* Tweak - Password protected posts are not hidden from catalog by default anymore, visibility can be set via the 'Catalog visibility' option.
 * Dev - API Version 2 with push support.
 * Dev - API: Lookup customers by email endpoint.
 * Dev - API: Allow ordering on the resource level.
