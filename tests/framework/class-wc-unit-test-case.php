@@ -23,6 +23,23 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 
 		// add custom factories
 		$this->factory = new WC_Unit_Test_Factory();
+
+		// setup mock WC session handler
+		add_filter( 'woocommerce_session_handler', array( $this, 'set_mock_session_handler' ) );
+
+		$this->setOutputCallback( array( $this, 'filter_output' ) );
+	}
+
+	/**
+	 * Mock the WC session using the abstract class as cookies are not available
+	 * during tests
+	 *
+	 * @since 2.2
+	 * @return string
+	 */
+	public function set_mock_session_handler() {
+		return 'WC_Mock_Session_Handler';
+	}
 	}
 
 	/**

@@ -85,6 +85,7 @@ class WC_Unit_Tests_Bootstrap {
 	public function includes() {
 
 		require_once( $this->tests_dir . '/framework/wc-unit-test-factory.php' );
+		require_once( $this->tests_dir . '/framework/class-wc-mock-session-handler.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-unit-test-case.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-api-unit-test-case.php' );
 	}

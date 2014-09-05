@@ -64,7 +64,7 @@ class WC_Tests_WooCommerce extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Product_Factory', $this->wc->product_factory );
 		$this->assertInstanceOf( 'WC_Order_Factory', $this->wc->order_factory );
 		$this->assertInstanceOf( 'WC_Countries', $this->wc->countries );
-		$this->assertInstanceOf( 'WC_Session_Handler', $this->wc->session );
+		$this->assertInstanceOf( 'WC_Mock_Session_Handler', $this->wc->session );
 		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 	}
