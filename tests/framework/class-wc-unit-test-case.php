@@ -77,7 +77,7 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 */
 	public static function assertNotFalse( $condition, $message = '' ) {
 
-		if ( version_compare( phpversion(), '5.2', '<' ) ) {
+		if ( version_compare( phpversion(), '5.3', '<' ) ) {
 
 			self::assertThat( $condition, self::logicalNot( self::isFalse() ), $message );
 
