@@ -4,9 +4,9 @@
  *
  * Functions for displaying the order items meta box.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
