@@ -40,6 +40,20 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	public function set_mock_session_handler() {
 		return 'WC_Mock_Session_Handler';
 	}
+
+	/**
+	 * Strip newlines and tabs when using expectedOutputString() as otherwise
+	 * the most template-related tests will fail due to indentation/alignment in
+	 * the template not matching the sample strings set in the tests
+	 *
+	 * @since 2.2
+	 */
+	public function filter_output( $output ) {
+
+		$output = preg_replace( '/[\n]+/S', '', $output );
+		$output = preg_replace( '/[\t]+/S', '', $output );
+
+		return $output;
 	}
 
 	/**
