@@ -147,7 +147,7 @@ function wc_trim_zeros( $price ) {
  * Round a tax amount
  *
  * @param mixed $tax
- * @return string
+ * @return double
  */
 function wc_round_tax_total( $tax ) {
 	$dp = (int) get_option( 'woocommerce_price_num_decimals' );

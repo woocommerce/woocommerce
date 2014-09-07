@@ -278,7 +278,7 @@ class WC_Coupon {
 	 * Check if a coupon is valid. Return a reason code if invalid. Reason codes:
 	 *
 	 * @access public
-	 * @return bool|WP_Error validity or a WP_Error if not valid
+	 * @return boolean validity or a WP_Error if not valid
 	 */
 	public function is_valid() {
 
@@ -599,7 +599,7 @@ class WC_Coupon {
 	 * Map one of the WC_Coupon message codes to a message string
 	 *
 	 * @access public
-	 * @param mixed $msg_code
+	 * @param integer $msg_code
 	 * @return string| Message/error string
 	 */
 	public function get_coupon_message( $msg_code ) {

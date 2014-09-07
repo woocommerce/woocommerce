@@ -104,6 +104,11 @@ class Simplify_AccessToken extends Simplify_Object {
         return $this;
     }
 
+    /**
+     * @param string $props
+     * @param string $context
+     * @param Simplify_Authentication $authentication
+     */
     private static function sendRequest($props, $context, $authentication){
 
         $url = Simplify_Constants::OAUTH_BASE_URL.'/'.$context;

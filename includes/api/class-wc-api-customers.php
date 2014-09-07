@@ -674,7 +674,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @see WC_API_Resource::validate_request()
-	 * @param string|int $id the customer ID
+	 * @param integer $id the customer ID
 	 * @param string $type the request type, unused because this method overrides the parent class
 	 * @param string $context the context of the request, either `read`, `edit` or `delete`
 	 * @return int|WP_Error valid user ID or WP_Error if any of the checks fails

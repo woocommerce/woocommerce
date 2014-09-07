@@ -457,7 +457,7 @@ abstract class WC_Email extends WC_Settings_API {
 	/**
 	 * Apply inline styles to dynamic content.
 	 *
-	 * @param mixed $content
+	 * @param string|null $content
 	 * @return string
 	 */
 	public function style_inline( $content ) {
@@ -521,9 +521,9 @@ abstract class WC_Email extends WC_Settings_API {
 	/**
 	 * Send the email.
 	 *
-	 * @param mixed $to
-	 * @param mixed $subject
-	 * @param mixed $message
+	 * @param string $to
+	 * @param string $subject
+	 * @param string $message
 	 * @param string $headers
 	 * @param string $attachments
 	 * @return bool
@@ -589,7 +589,7 @@ abstract class WC_Email extends WC_Settings_API {
 	 * - Saves the options to the DB
 	 *
 	 * @since 1.0.0
-	 * @return bool
+	 * @return boolean|null
 	 */
 	public function process_admin_options() {
 

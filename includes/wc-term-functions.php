@@ -100,9 +100,7 @@ function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
  * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
  * We use a custom walker, just like WordPress does
  *
- * @param int $show_counts (default: 1)
- * @param int $hierarchical (default: 1)
- * @param int $show_uncategorized (default: 1)
+ * @param int $deprecated_show_uncategorized (default: 1)
  * @return string
  */
 function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchical = 1, $deprecated_show_uncategorized = 1, $deprecated_orderby = '' ) {
@@ -198,7 +196,7 @@ add_action( 'switch_blog', 'wc_taxonomy_metadata_wpdbfix', 0 );
  * WooCommerce Term Meta API - Update term meta
  *
  * @param mixed $term_id
- * @param mixed $meta_key
+ * @param string $meta_key
  * @param mixed $meta_value
  * @param string $prev_value (default: '')
  * @return bool
@@ -237,7 +235,7 @@ function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $d
  * WooCommerce Term Meta API - Get term meta
  *
  * @param mixed $term_id
- * @param mixed $key
+ * @param string $key
  * @param bool $single (default: true)
  * @return mixed
  */

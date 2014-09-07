@@ -305,7 +305,6 @@ add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_perm
  *
  * @access public
  * @param int $order_id
- * @param array $data
  * @return mixed
  */
 function wc_add_order_item( $order_id, $item ) {

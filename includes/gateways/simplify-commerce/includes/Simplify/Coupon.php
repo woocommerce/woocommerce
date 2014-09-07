@@ -81,7 +81,7 @@ class Simplify_Coupon extends Simplify_Object {
         *     <dt><tt>offset</tt></dt>    <dd>Used in paging of the list.  This is the start offset of the page. [default: 0]  </dd>
         *     <dt><tt>sorting</tt></dt>    <dd>Allows for ascending or descending sorting of the list.  The value maps properties to the sort direction (either <tt>asc</tt> for ascending or <tt>desc</tt> for descending).  Sortable properties are: <tt> dateCreated</tt><tt> maxRedemptions</tt><tt> timesRedeemed</tt><tt> id</tt><tt> startDate</tt><tt> endDate</tt><tt> percentOff</tt><tt> couponCode</tt><tt> durationInMonths</tt><tt> amountOff</tt>.</dd></dl>
         * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
-        * @return    ResourceList a ResourceList object that holds the list of Coupon objects and the total
+        * @return    Simplify_ResourceList a ResourceList object that holds the list of Coupon objects and the total
         *            number of Coupon objects available for the given criteria.
         * @see       ResourceList
         */

@@ -372,8 +372,8 @@ class WC_Customer {
 	 * Sets session data for the location.
 	 *
 	 * @access public
-	 * @param mixed $country
-	 * @param mixed $state
+	 * @param string $country
+	 * @param string $state
 	 * @param string $postcode (default: '')
 	 * @param string $city (default: '')
 	 */
@@ -448,7 +448,7 @@ class WC_Customer {
 	 * Sets session data for the location.
 	 *
 	 * @access public
-	 * @param mixed $country
+	 * @param string $country
 	 * @param string $state (default: '')
 	 * @param string $postcode (default: '')
 	 * @param string $city (default: '')
@@ -534,7 +534,7 @@ class WC_Customer {
 	 * calculated_shipping function.
 	 *
 	 * @access public
-	 * @param mixed $calculated
+	 * @param boolean $calculated
 	 */
 	public function calculated_shipping( $calculated = true ) {
 		$this->calculated_shipping = $calculated;

@@ -1354,7 +1354,6 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param string $order_id order ID
-	 * @param int $refund order refund ID
 	 * @param string|null $fields fields to limit response to
 	 * @return array
 	 */

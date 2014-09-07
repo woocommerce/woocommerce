@@ -25,7 +25,6 @@ abstract class WC_Abstract_Order {
 	 * should be used. It is possible, but the aforementioned are preferred and are the only
 	 * methods that will be maintained going forward.
 	 *
-	 * @param string $id The order id. Default ''.
 	 */
 	public function __construct( $order = '' ) {
 
@@ -78,6 +77,7 @@ abstract class WC_Abstract_Order {
 	 * Set the payment method for the order
 	 *
 	 * @param WC_Payment_Gateway
+	 * @param WC_Payment_Gateway $payment_method
 	 */
 	public function set_payment_method( $payment_method ) {
 
@@ -227,7 +227,7 @@ abstract class WC_Abstract_Order {
 	 * Add coupon code to the order
 	 *
 	 * @param string $code
-	 * @param float|int $discount_amount
+	 * @param integer $discount_amount
 	 * @return int|bool Item ID or false
 	 */
 	public function add_coupon( $code, $discount_amount = 0 ) {
@@ -810,7 +810,6 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Checks the order status against a passed in status.
 	 *
-	 * @param mixed $type Array or string of types
 	 * @return bool
 	 */
 	public function has_status( $status ) {
@@ -2350,7 +2349,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * send_stock_notifications function.
 	 *
-	 * @param object $product
+	 * @param WC_Product $product
 	 * @param int $new_stock
 	 * @param int $qty_ordered
 	 */
@@ -2432,7 +2431,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Checks if an order needs display the shipping address, based on shipping method
 	 *
-	 * @return bool
+	 * @return boolean|null
 	 */
 	public function needs_shipping_address() {
 

@@ -21,7 +21,6 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	 * @since 2.1.0
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param object $category Category data object.
 	 * @param int $depth Depth of category in reference to parents.
 	 * @param integer $current_object_id
 	 */

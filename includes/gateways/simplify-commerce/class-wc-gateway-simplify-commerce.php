@@ -265,6 +265,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 	/**
 	 * Process the payment
+	 * @param integer $order_id
 	 */
 	public function process_payment( $order_id ) {
 		$order = new WC_Order( $order_id );

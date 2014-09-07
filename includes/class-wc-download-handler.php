@@ -138,6 +138,7 @@ class WC_Download_Handler {
 
 	/**
 	 * Download a file - hook into init function.
+	 * @param integer $product_id
 	 */
 	public static function download( $file_path, $product_id ) {
 		global $is_IE;

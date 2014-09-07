@@ -50,6 +50,10 @@ class Mijireh_Rest {
   }
 
   // $auth can be 'basic' or 'digest'
+
+  /**
+   * @param string $pass
+   */
   public function setupAuth($user, $pass, $auth = 'basic') {
     $this->curl_opts[CURLOPT_HTTPAUTH] = constant('CURLAUTH_'.strtoupper($auth));
     $this->curl_opts[CURLOPT_USERPWD] = $user . ":" . $pass;
@@ -64,6 +68,9 @@ class Mijireh_Rest {
     return $body;
   }
 
+  /**
+   * @param string $data
+   */
   public function post($url, $data, $headers=array()) {
     $data = (is_array($data)) ? http_build_query($data) : $data;
 
@@ -81,6 +88,9 @@ class Mijireh_Rest {
     return $body;
   }
 
+  /**
+   * @param string $data
+   */
   public function put($url, $data, $headers=array()) {
     $data = (is_array($data)) ? http_build_query($data) : $data;
 
@@ -125,6 +135,9 @@ class Mijireh_Rest {
     return $body;
   }
 
+  /**
+   * @return string|null
+   */
   protected function processError($body) {
     // Override this in classes that extend Mijireh_Rest.
     // The body of every erroneous (non-2xx/3xx) GET/POST/PUT/DELETE
@@ -159,6 +172,9 @@ class Mijireh_Rest {
     return $curl;
   }
 
+  /**
+   * @param resource $curl
+   */
   private function doRequest($curl) {
 
     $body = curl_exec($curl);

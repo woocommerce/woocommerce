@@ -126,7 +126,7 @@ class Simplify_HTTP
     /**
      * Handles Simplify API requests
      *
-     * @param $url
+     * @param string $url
      * @param $method
      * @param $authentication
      * @param string $payload
@@ -167,7 +167,7 @@ class Simplify_HTTP
     /**
      * Handles Simplify OAuth requests
      *
-     * @param $url
+     * @param string $url
      * @param $payload
      * @param $authentication
      * @return mixed
@@ -271,6 +271,10 @@ class Simplify_HTTP
         }
     }
 
+    /**
+     * @param string $payload
+     * @param boolean $hasPayload
+     */
     private function jwsEncode($authentication, $url, $payload, $hasPayload)
     {
         // TODO - better seeding of RNG
@@ -306,6 +310,9 @@ class Simplify_HTTP
         return $this->jwsUrlSafeEncode64($sig);
     }
 
+    /**
+     * @param string $header
+     */
     private function jwsVerifyHeader($header, $url, $publicKey) {
 
 	    $hdr = json_decode($header, true);
@@ -359,10 +366,16 @@ class Simplify_HTTP
     }
 
 
+    /**
+     * @param string $msg
+     */
     private function jwsVerifySignature($privateKey, $msg, $expectedSig) {
         return $this->jwsSign($privateKey, $msg) == $expectedSig;
     }
 
+    /**
+     * @param string $reason
+     */
     private function jwsAuthError($reason) {
         throw new Simplify_AuthenticationException("JWS authentication failure: " . $reason);
     }
@@ -395,6 +408,9 @@ class Simplify_HTTP
         return base64_decode(str_replace(array('-', '_'), array('+', '/'), $s));
     }
 
+    /**
+     * @param string $msg
+     */
     private function buildOauthError($msg, $error, $error_description){
 
         return array(

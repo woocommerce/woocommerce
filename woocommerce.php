@@ -510,7 +510,7 @@ final class WooCommerce {
 	/**
 	 * Return the WC API URL for a given request
 	 *
-	 * @param mixed $request
+	 * @param string $request
 	 * @param mixed $ssl (default: null)
 	 * @return string
 	 */
@@ -597,7 +597,7 @@ final class WooCommerce {
 	/**
 	 * Email Class.
 	 *
-	 * @return WC_Email
+	 * @return WC_Emails
 	 */
 	public function mailer() {
 		return WC_Emails::instance();

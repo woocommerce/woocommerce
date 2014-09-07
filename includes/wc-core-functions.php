@@ -114,7 +114,7 @@ function wc_create_order( $args = array() ) {
 /**
  * Update an order. Uses wc_create_order.
  * @param  array $args
- * @return WC_Error | WC_Order
+ * @return string | WC_Order
  */
 function wc_update_order( $args ) {
 	if ( ! $args['order_id'] ) {
@@ -590,7 +590,7 @@ add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
  * WooCommerce Core Supported Themes
  *
  * @since 2.2
- * @return array
+ * @return string[]
  */
 function wc_get_core_supported_themes() {
 	return array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );

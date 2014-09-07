@@ -775,7 +775,7 @@ class WC_Cart {
 		 * Add a product to the cart.
 		 *
 		 * @param string $product_id contains the id of the product to add to the cart
-		 * @param string $quantity contains the quantity of the item to add
+		 * @param integer $quantity contains the quantity of the item to add
 		 * @param int $variation_id
 		 * @param array $variation attribute values
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
@@ -1783,7 +1783,7 @@ class WC_Cart {
 		 *
 		 * @access public
 		 * @param mixed $values
-		 * @param mixed $price
+		 * @param double $price
 		 */
 		public function apply_product_discounts_after_tax( $values, $price ) {
 			if ( ! empty( $this->applied_coupons ) ) {
@@ -1807,7 +1807,7 @@ class WC_Cart {
 		 *
 		 * @access private
 		 * @param mixed $code
-		 * @param mixed $amount
+		 * @param double $amount
 		 */
 		private function increase_coupon_discount_amount( $code, $amount ) {
 			if ( empty( $this->coupon_discount_amounts[ $code ] ) )
@@ -1821,7 +1821,7 @@ class WC_Cart {
 		 *
 		 * @access private
 		 * @param mixed $code
-		 * @param mixed $amount
+		 * @param mixed $count
 		 */
 		private function increase_coupon_applied_count( $code, $count = 1 ) {
 			if ( empty( $this->coupon_applied_count[ $code ] ) )

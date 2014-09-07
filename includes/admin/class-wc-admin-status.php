@@ -240,7 +240,7 @@ class WC_Admin_Status {
 	 *
 	 * @since 2.1.1
 	 * @param string $file Path to the file
-	 * @param array $all_headers List of headers, in the format array('HeaderKey' => 'Header Name')
+	 * @return string
 	 */
 	public static function get_file_version( $file ) {
 		// We don't need to write to the file, so just open for reading.

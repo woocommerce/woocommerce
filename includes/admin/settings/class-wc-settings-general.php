@@ -266,7 +266,7 @@ class WC_Settings_General extends WC_Settings_Page {
 	 * Output a colour picker input box.
 	 *
 	 * @param mixed $name
-	 * @param mixed $id
+	 * @param string $id
 	 * @param mixed $value
 	 * @param string $desc (default: '')
 	 */
