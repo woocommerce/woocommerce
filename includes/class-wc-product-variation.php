@@ -212,11 +212,6 @@ class WC_Product_Variation extends WC_Product {
 			$visible = false;
 		}
 
-		// Out of stock visibility
-		elseif ( get_option('woocommerce_hide_out_of_stock_items') == 'yes' && ! $this->is_in_stock() ) {
-			$visible = false;
-		}
-
 		// Price not set
 		elseif ( $this->get_price() === "" ) {
 			$visible = false;
