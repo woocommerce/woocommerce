@@ -243,7 +243,10 @@
 
 					current_attr_select.find( 'option:gt(0)' ).remove();
 					current_attr_select.append( current_attr_select.data( 'attribute_options' ) );
-					current_attr_select.find( 'option:gt(0)' ).removeClass( 'active' );
+					current_attr_select.find( 'option:gt(0)' ).removeClass( 'attached' );
+
+					current_attr_select.find( 'option:gt(0)' ).removeClass( 'enabled' );
+					current_attr_select.find( 'option:gt(0)' ).removeAttr( 'disabled' );
 
 					// Get name
 					var current_attr_name = current_attr_select.attr( 'name' );
@@ -256,10 +259,17 @@
 							var attributes = variations[ num ].attributes;
 
 							for ( var attr_name in attributes ) {
+
 								if ( attributes.hasOwnProperty( attr_name ) ) {
+
 									var attr_val = attributes[ attr_name ];
 
 									if ( attr_name == current_attr_name ) {
+
+										if ( variations[ num ].variation_is_active )
+											variation_active = 'enabled';
+										else
+											variation_active = '';
 
 										if ( attr_val ) {
 
@@ -271,11 +281,11 @@
 											attr_val = attr_val.replace( /"/g, "\\\"" );
 
 											// Compare the meerkat
-											current_attr_select.find( 'option[value="' + attr_val + '"]' ).addClass( 'active' );
+											current_attr_select.find( 'option[value="' + attr_val + '"]' ).addClass( 'attached ' + variation_active );
 
 										} else {
 
-											current_attr_select.find( 'option:gt(0)' ).addClass( 'active' );
+											current_attr_select.find( 'option:gt(0)' ).addClass( 'attached ' + variation_active );
 
 										}
 									}
@@ -284,8 +294,11 @@
 						}
 					}
 
-					// Detach inactive
-					current_attr_select.find( 'option:gt(0):not(.active)' ).remove();
+					// Detach unattached
+					current_attr_select.find( 'option:gt(0):not(.attached)' ).remove();
+
+					// Grey out disabled
+					current_attr_select.find( 'option:gt(0):not(.enabled)' ).attr( 'disabled', 'disabled' );
 
 				});
 
