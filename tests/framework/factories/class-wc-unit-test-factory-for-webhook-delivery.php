@@ -1,30 +1,8 @@
 <?php
 /**
- * WC Unit Test Factory
- *
- * Provides WooCommerce-specific factories
- *
- * @since 2.2
- */
-class WC_Unit_Test_Factory extends WP_UnitTest_Factory {
-
-	/** @var \WC_Unit_Test_Factory_For_Webhook_Delivery */
-	public $webhook_delivery;
-
-	/**
-	 * Setup factories
-	 */
-	public function __construct() {
-
-		parent::__construct();
-
-		$this->webhook_delivery = new WC_Unit_Test_Factory_For_Webhook_Delivery( $this );
-	}
-}
-
-/**
  * Webhook Delivery Test Factory
  *
+ * @see \WP_UnitTest_Factory_For_Comment
  * @since 2.2
  */
 class WC_Unit_Test_Factory_For_Webhook_Delivery extends WP_UnitTest_Factory_For_Comment {

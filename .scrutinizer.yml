@@ -1,0 +1,11 @@
+filter:
+    excluded_paths:
+        - tests/*
+        - apigen/*
+        - includes/api/v1/*
+        - includes/libraries/*
+
+checks:
+    php:
+        code_rating: true
+        duplication: true
