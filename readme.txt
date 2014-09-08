@@ -99,7 +99,7 @@ For extending or theming WooCommerce, see our [codex](http://docs.woothemes.com/
 
 = Where can I get support or talk to other users? =
 
-If you get stuck, WooThemes customers can communicate with one another on the [WooThemes Community Forum](https://support.woothemes.com/hc/communities/public/topics) and non-customers can ask for help from other users on the [WordPress.org Community Forums](http://wordpress.org/support/plugin/woocommerce).
+If you get stuck you can ask for help on the [WooThemes Community Forum](https://support.woothemes.com/hc/communities/public/topics).
 
 For help with premium add-ons from WooThemes, use [our helpdesk](http://support.woothemes.com/).
 
