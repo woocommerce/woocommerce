@@ -117,9 +117,8 @@ class WC_Language_Pack_Upgrader {
 	/**
 	 * Update the language version in database
 	 *
-	 * Take advance it while downloads the package and updates the database
-	 * This ensures not generate a loop download
-	 * If installation fails you can redo it in: WooCommerce > Sistem Status > Tools > Force Translation Upgrade
+	 * This updates the database while the download the translation package and ensures that not generate download loop
+	 * If the installation fails you can redo it in: WooCommerce > Sistem Status > Tools > Force Translation Upgrade
 	 *
 	 * @param  bool   $reply   Whether to bail without returning the package (default: false)
 	 * @param  string $package Package URL
