@@ -186,15 +186,16 @@ jQuery( function ( $ ) {
 		// When the refund qty is changed, increase or decrease costs
 		.on( 'change', '.woocommerce_order_items input.refund_order_item_qty', function() {
 			var $row              = $( this ).closest( 'tr.item' );
-			var qty               = $( this ).val();
-			var o_qty             = $row.find( 'input.quantity' ).attr( 'data-qty' );
+			var qty               = $row.find( 'input.quantity' ).val();
+			var refund_qty        = $( this ).val();
 			var line_total        = $( 'input.line_total', $row );
 			var refund_line_total = $( 'input.refund_line_total', $row );
 
 			// Totals
-			var unit_total = accounting.unformat( line_total.attr( 'data-total' ), woocommerce_admin.mon_decimal_point );
+			var unit_total = accounting.unformat( line_total.attr( 'data-total' ), woocommerce_admin.mon_decimal_point ) / qty;
+
 			refund_line_total.val(
-				parseFloat( accounting.formatNumber( unit_total * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+				parseFloat( accounting.formatNumber( unit_total * refund_qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 					.toString()
 					.replace( '.', woocommerce_admin.mon_decimal_point )
 			);
@@ -203,10 +204,11 @@ jQuery( function ( $ ) {
 			$( 'td.line_tax', $row ).each( function() {
 				var line_total_tax        = $( 'input.line_tax', $( this ) );
 				var refund_line_total_tax = $( 'input.refund_line_tax', $( this ) );
-				var unit_total_tax = accounting.unformat( line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point );
+				var unit_total_tax = accounting.unformat( line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point ) / qty;
+
 				if ( 0 < unit_total_tax ) {
 					refund_line_total_tax.val(
-						parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
+						parseFloat( accounting.formatNumber( unit_total_tax * refund_qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
 					);
