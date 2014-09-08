@@ -49,11 +49,11 @@ class WC_Admin_Help {
 			'title'		=> __( 'Support', 'woocommerce' ),
 			'content'	=>
 
-				'<p>' . sprintf( __( 'After <a href="%s">reading the documentation</a>, for further assistance you can use the <a href="%s">community forum</a>, or if you have access as a WooThemes customer, <a href="%s">our support desk</a>.', 'woocommerce' ), 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'http://wordpress.org/support/plugin/woocommerce', 'http://support.woothemes.com' ) . '</p>' .
+				'<p>' . sprintf( __( 'After %sreading the documentation%s, for further assistance you can use our %scommunity forum%s if you get stuck. For help with premium add-ons from WooThemes, or if you are a WooThemes customer, you can %suse our helpdesk%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/documentation/plugins/woocommerce/">', '</a>', '<a href="https://support.woothemes.com/hc/communities/public/topics">', '</a>', '<a href="http://support.woothemes.com">', '</a>' ) . '</p>' .
 
 				'<p>' . __( 'Before asking for help we recommend checking the status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
 
-				'<p><a href="' . admin_url('admin.php?page=wc-status') . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'http://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'Community Support', 'woocommerce' ) . '</a> <a href="' . 'http://support.woothemes.com' . '" class="button">' . __( 'Customer Support', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . admin_url('admin.php?page=wc-status') . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://support.woothemes.com/hc/communities/public/topics' . '" class="button">' . __( 'WooThemes Community Support', 'woocommerce' ) . '</a> <a href="' . 'http://support.woothemes.com' . '" class="button">' . __( 'WooThemes Customer Support', 'woocommerce' ) . '</a></p>'
 
 		) );
 

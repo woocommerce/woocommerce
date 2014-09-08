@@ -7,11 +7,10 @@ If you are not a developer, please use the [WooCommerce plugin page](http://word
 ## Support
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place in the appropriate channels:
 
-* The [public support forums](http://wordpress.org/support/plugin/woocommerce) on WordPress.org, where the community can help each other out.
 * The [WooThemes premium support portal](http://support.woothemes.com/) for customers who have purchased themes or extensions.
+* [Our public HelpDesk](https://support.woothemes.com/hc/communities/public/topics) which is available for all WooCommerce users.
 
 Support requests in issues on this repository will be closed on sight.
-
 
 ## Contributing to WooCommerce
 If you have a patch, or stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md) for more information how you can do this.
