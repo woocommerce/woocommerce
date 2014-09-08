@@ -1809,11 +1809,11 @@ class WC_AJAX {
 		check_ajax_referer( 'order-item', 'security' );
 
 		$order_id               = absint( $_POST['order_id'] );
-		$refund_amount          = sanitize_text_field( $_POST['refund_amount'] );
+		$refund_amount          = wc_format_decimal( sanitize_text_field( $_POST['refund_amount'] ) );
 		$refund_reason          = sanitize_text_field( $_POST['refund_reason'] );
 		$line_item_qtys         = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
-		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
-		$line_item_tax_totals   = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_tax_totals'] ) ), true );
+		$line_item_totals       = array_map( 'wc_format_decimal', json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true ) );
+		$line_item_tax_totals   = array_map( 'wc_format_decimal', json_decode( sanitize_text_field( stripslashes( $_POST['line_item_tax_totals'] ) ), true ) );
 		$api_refund             = $_POST['api_refund'] === 'true' ? true : false;
 		$restock_refunded_items = $_POST['restock_refunded_items'] === 'true' ? true : false;
 
