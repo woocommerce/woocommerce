@@ -70,6 +70,7 @@ class Mijireh_Rest {
 
   /**
    * @param string $data
+   * @param string $url
    */
   public function post($url, $data, $headers=array()) {
     $data = (is_array($data)) ? http_build_query($data) : $data;

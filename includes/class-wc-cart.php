@@ -1821,7 +1821,7 @@ class WC_Cart {
 		 *
 		 * @access private
 		 * @param mixed $code
-		 * @param mixed $count
+		 * @param integer $count
 		 */
 		private function increase_coupon_applied_count( $code, $count = 1 ) {
 			if ( empty( $this->coupon_applied_count[ $code ] ) )

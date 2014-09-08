@@ -159,6 +159,7 @@ class Simplify_PaymentsApi
 
     /**
      * @ignore
+     * @param string $action
      */
     public function getUrl($publicKey, $action, $object)
     {
@@ -200,6 +201,7 @@ class Simplify_PaymentsApi
 
     /**
      * @ignore
+     * @param string $action
      */
     public function getMethod($action)
     {
@@ -212,6 +214,7 @@ class Simplify_PaymentsApi
     /**
      * @ignore
      * @param string $action
+     * @param Simplify_Authentication|null $authentication
      */
     private function execute($action, $object, $authentication)
     {

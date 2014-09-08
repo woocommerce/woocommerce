@@ -58,6 +58,9 @@ class Simplify_HTTP
         "get" => self::GET,
         "delete" => self::DELETE);
 
+    /**
+     * @param string $url
+     */
     private function request($url, $method, $authentication, $payload = '')
     {
         if ($authentication->publicKey == null) {
@@ -168,8 +171,8 @@ class Simplify_HTTP
      * Handles Simplify OAuth requests
      *
      * @param string $url
-     * @param $payload
-     * @param $authentication
+     * @param string $payload
+     * @param Simplify_Authentication $authentication
      * @return mixed
      * @throws Simplify_AuthenticationException
      * @throws Simplify_ObjectNotFoundException
@@ -225,6 +228,9 @@ class Simplify_HTTP
         throw new Simplify_SystemException("An unexpected error has been raised.  Looks like there's something wrong at our end." , $status, $object);
     }
 
+    /**
+     * @param Simplify_Authentication $authentication
+     */
     public function jwsDecode($authentication, $hash)
     {
         if ($authentication->publicKey == null) {
@@ -303,6 +309,9 @@ class Simplify_HTTP
         return $msg . "." . $this->jwsSign($authentication->privateKey, $msg);
     }
 
+    /**
+     * @param string $msg
+     */
     private function jwsSign($privateKey, $msg) {
         $decodedPrivateKey = $this->jwsUrlSafeDecode64($privateKey);
         $sig = hash_hmac('sha256', $msg, $decodedPrivateKey, true);
@@ -389,6 +398,9 @@ class Simplify_HTTP
         return strpos($k, "lvpb") === 0;
     }
 
+    /**
+     * @param string $s
+     */
     private function jwsUrlSafeEncode64($s) {
         return str_replace(array('+', '/', '='),
                            array('-', '_', ''),
