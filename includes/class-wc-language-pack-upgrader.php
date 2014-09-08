@@ -28,7 +28,7 @@ class WC_Language_Pack_Upgrader {
 	 */
 	public function __construct() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_update' ) );
-		add_filter( 'upgrader_post_install', array( $this, 'version_update' ), 999, 2 );
+		add_filter( 'upgrader_pre_download', array( $this, 'version_update' ), 10, 2 );
 		add_action( 'woocommerce_language_pack_updater_check', array( $this, 'has_available_update' ) );
 	}
 
@@ -117,28 +117,27 @@ class WC_Language_Pack_Upgrader {
 	/**
 	 * Update the language version in database
 	 *
-	 * @param  bool  $response   Install response (true = success, false = fail)
-	 * @param  array $hook_extra Extra arguments passed to hooked filters
+	 * Take advance it while downloads the package and updates the database
+	 * This ensures not generate a loop download
+	 * If installation fails you can redo it in: WooCommerce > Sistem Status > Tools > Force Translation Upgrade
+	 *
+	 * @param  bool   $reply   Whether to bail without returning the package (default: false)
+	 * @param  string $package Package URL
 	 *
 	 * @return bool
 	 */
-	public function version_update( $response, $hook_extra ) {
-		if ( $response ) {
-			if (
-				( isset( $hook_extra['language_update_type'] ) && 'plugin' == $hook_extra['language_update_type'] )
-				&& ( isset( $hook_extra['language_update']->slug ) && 'woocommerce' == $hook_extra['language_update']->slug )
-			) {
-				// Update the language pack version
-				update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
+	public function version_update( $reply, $package ) {
+		if ( $package === $this->get_language_package_uri() ) {
+			// Update the language pack version
+			update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
 
-				// Remove the translation upgrade notice
-				$notices = get_option( 'woocommerce_admin_notices', array() );
-				$notices = array_diff( $notices, array( 'translation_upgrade' ) );
-				update_option( 'woocommerce_admin_notices', $notices );
-			}
+			// Remove the translation upgrade notice
+			$notices = get_option( 'woocommerce_admin_notices', array() );
+			$notices = array_diff( $notices, array( 'translation_upgrade' ) );
+			update_option( 'woocommerce_admin_notices', $notices );
 		}
 
-		return $response;
+		return $reply;
 	}
 
 }
