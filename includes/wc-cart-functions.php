@@ -44,7 +44,7 @@ function wc_empty_cart() {
  * Load the cart upon login
  *
  * @param mixed $user_login
- * @param mixed $user
+ * @param integer $user
  * @return void
  */
 function wc_load_persistent_cart( $user_login, $user = 0 ) {

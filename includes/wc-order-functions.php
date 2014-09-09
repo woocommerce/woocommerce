@@ -32,6 +32,22 @@ function wc_get_order_statuses() {
 }
 
 /**
+ * Get the order status label.
+ *
+ * @since  2.2
+ * @param  string $status
+ * @return string
+ */
+function wc_get_order_status_label( $status ) {
+	$order_statuses = wc_get_order_statuses();
+
+	$status = str_replace( 'wc-', '', $status );
+	$status = isset( $order_statuses[ 'wc-' . $status ] ) ? $order_statuses[ 'wc-' . $status ] : $status;
+
+	return $status;
+}
+
+/**
  * Main function for returning orders, uses the WC_Order_Factory class.
  *
  * @param mixed $the_order Post object or post ID of the order.
@@ -305,7 +321,6 @@ add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_perm
  *
  * @access public
  * @param int $order_id
- * @param array $data
  * @return mixed
  */
 function wc_add_order_item( $order_id, $item ) {

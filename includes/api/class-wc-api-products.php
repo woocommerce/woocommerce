@@ -495,7 +495,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param WC_Product $product
-	 * @return array
+	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
 
@@ -1440,7 +1440,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param string $label
-	 * @return stdClass
+	 * @return string|null
 	 */
 	private function get_attribute_taxonomy_by_label( $label ) {
 		$taxonomy = null;
@@ -1653,7 +1653,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get product image as attachment
 	 *
 	 * @since 2.2
-	 * @param array $upload
+	 * @param integer $upload
 	 * @param int $id
 	 * @return int
 	 */

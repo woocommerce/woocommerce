@@ -331,7 +331,7 @@ class WC_Customer {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		// Check shipping method at this point to see if we need special handling
-		if ( apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) == true && sizeof( array_intersect( WC()->session->get( 'chosen_shipping_methods', array( get_option( 'woocommerce_default_shipping_method' ) ) ), apply_filters( 'woocommerce_local_pickup_methods', array( 'local_pickup' ) ) ) ) > 0 ) {
+		if ( apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) == true && WC()->cart->needs_shipping() && sizeof( array_intersect( WC()->session->get( 'chosen_shipping_methods', array( get_option( 'woocommerce_default_shipping_method' ) ) ), apply_filters( 'woocommerce_local_pickup_methods', array( 'local_pickup' ) ) ) ) > 0 ) {
 			$tax_based_on = 'base';
 		}
 
@@ -372,8 +372,8 @@ class WC_Customer {
 	 * Sets session data for the location.
 	 *
 	 * @access public
-	 * @param mixed $country
-	 * @param mixed $state
+	 * @param string $country
+	 * @param string $state
 	 * @param string $postcode (default: '')
 	 * @param string $city (default: '')
 	 */
@@ -448,7 +448,7 @@ class WC_Customer {
 	 * Sets session data for the location.
 	 *
 	 * @access public
-	 * @param mixed $country
+	 * @param string $country
 	 * @param string $state (default: '')
 	 * @param string $postcode (default: '')
 	 * @param string $city (default: '')
@@ -534,7 +534,7 @@ class WC_Customer {
 	 * calculated_shipping function.
 	 *
 	 * @access public
-	 * @param mixed $calculated
+	 * @param boolean $calculated
 	 */
 	public function calculated_shipping( $calculated = true ) {
 		$this->calculated_shipping = $calculated;

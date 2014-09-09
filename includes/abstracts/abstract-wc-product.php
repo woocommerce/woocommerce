@@ -53,7 +53,7 @@ class WC_Product {
 	/**
 	 * __get function.
 	 *
-	 * @param mixed $key
+	 * @param string $key
 	 * @return mixed
 	 */
 	public function __get( $key ) {
@@ -225,6 +225,7 @@ class WC_Product {
 	/**
 	 * set_stock_status function.
 	 *
+	 * @param string $status
 	 * @return void
 	 */
 	public function set_stock_status( $status ) {
@@ -248,7 +249,7 @@ class WC_Product {
 	 *
 	 * Backwards compat with downloadable/virtual.
 	 *
-	 * @param mixed $type Array or string of types
+	 * @param string $type Array or string of types
 	 * @return bool
 	 */
 	public function is_type( $type ) {
@@ -908,7 +909,7 @@ class WC_Product {
 	/**
 	 * Functions for getting parts of a price, in html, used by get_price_html.
 	 *
-	 * @param  mixed $from String or float to wrap with 'from' text
+	 * @param  string $from String or float to wrap with 'from' text
 	 * @param  mixed $to String or float to wrap with 'to' text
 	 * @return string
 	 */
@@ -1227,7 +1228,7 @@ class WC_Product {
 	/**
 	 * Returns whether or not the product has any attributes set.
 	 *
-	 * @return mixed
+	 * @return boolean
 	 */
 	public function has_attributes() {
 
@@ -1354,7 +1355,6 @@ class WC_Product {
 	/**
 	 * Get product name with SKU or ID. Used within admin.
 	 *
-	 * @param mixed $product
 	 * @return string Formatted product name
 	 */
 	public function get_formatted_name() {

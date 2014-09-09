@@ -342,7 +342,7 @@ class WC_Webhook {
 
 		// save request data
 		add_comment_meta( $delivery_id, '_request_method', $request['method'] );
-		add_comment_meta( $delivery_id, '_request_headers', array_merge( (array) $request['user-agent'], $request['headers'] ) );
+		add_comment_meta( $delivery_id, '_request_headers', array_merge( array( 'User-Agent' => $request['user-agent'] ), $request['headers'] ) );
 		add_comment_meta( $delivery_id, '_request_body', $request['body'] );
 
 		// parse response

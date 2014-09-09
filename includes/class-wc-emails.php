@@ -190,7 +190,7 @@ class WC_Emails {
 	 *
 	 * @access public
 	 * @param mixed $email_heading
-	 * @param mixed $message
+	 * @param string $message
 	 * @return string
 	 */
 	function wrap_message( $email_heading, $message, $plain_text = false ) {
@@ -244,7 +244,6 @@ class WC_Emails {
 	 * Prepare and send the customer invoice email on demand.
 	 *
 	 * @access public
-	 * @param mixed $pay_for_order
 	 * @return void
 	 */
 	function customer_invoice( $order ) {

@@ -46,7 +46,7 @@ function wc_get_screen_ids() {
  *
  * @access public
  * @param mixed $slug Slug for the new page
- * @param mixed $option Option name to store the page's ID
+ * @param string $option Option name to store the page's ID
  * @param string $page_title (default: '') Title for the new page
  * @param string $page_content (default: '') Content for the new page
  * @param int $post_parent (default: 0) Parent for the new page
@@ -130,7 +130,7 @@ function woocommerce_update_options( $options ) {
 /**
  * Get a setting from the settings API.
  *
- * @param mixed $option
+ * @param mixed $option_name
  * @return string
  */
 function woocommerce_settings_get_option( $option_name, $default = '' ) {

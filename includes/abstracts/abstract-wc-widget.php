@@ -54,6 +54,7 @@ abstract class WC_Widget extends WP_Widget {
 
 	/**
 	 * Cache the widget
+	 * @param string $content
 	 */
 	public function cache_widget( $args, $content ) {
 		$cache[ $args['widget_id'] ] = $content;

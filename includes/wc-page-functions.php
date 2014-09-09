@@ -39,7 +39,6 @@ function wc_get_page_id( $page ) {
  *
  * Gets the URL for an endpoint, which varies depending on permalink settings.
  *
- * @param string $page
  * @return string
  */
 function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
@@ -94,7 +93,6 @@ function wc_edit_address_i18n( $id, $flip = false ) {
  * Returns the url to the lost password endpoint url
  *
  * @access public
- * @param string $url
  * @return string
  */
 function wc_lostpassword_url() {

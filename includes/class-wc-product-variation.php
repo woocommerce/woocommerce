@@ -66,7 +66,7 @@ class WC_Product_Variation extends WC_Product {
 	 * Loads required variation data.
 	 *
 	 * @access public
-	 * @param int $variation_id ID of the variation to load
+	 * @param int $variation ID of the variation to load
 	 * @param array $args Array of the arguments containing parent product data
 	 */
 	public function __construct( $variation, $args = array() ) {
@@ -629,7 +629,6 @@ class WC_Product_Variation extends WC_Product {
 	 * Get product name with extra details such as SKU, price and attributes. Used within admin.
 	 *
 	 * @access public
-	 * @param mixed $product
 	 * @return string Formatted product name, including attributes and price
 	 */
 	public function get_formatted_name() {

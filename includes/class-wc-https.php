@@ -69,8 +69,6 @@ class WC_HTTPS {
 	/**
 	 * Force a post link to be SSL if needed
 	 *
-	 * @param  string $post_link
-	 * @param  object $post
 	 * @return string
 	 */
 	public static function force_https_page_link( $link, $page_id ) {

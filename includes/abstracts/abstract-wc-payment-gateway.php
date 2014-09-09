@@ -211,7 +211,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @param  int $order_id
 	 * @param  float $amount
 	 * @param  string $reason
-	 * @return  bool|wp_error True or false based on success, or a WP_Error object
+	 * @return  boolean True or false based on success, or a WP_Error object
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		return false;
@@ -245,7 +245,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Gateways should override this to declare support (or lack of support) for a feature.
 	 * For backward compatibility, gateways support 'products' by default, but nothing else.
 	 *
-	 * @param $feature string The name of a feature to test support for.
+	 * @param string $feature string The name of a feature to test support for.
 	 * @return bool True if the gateway supports the feature, false otherwise.
 	 * @since 1.5.7
 	 */

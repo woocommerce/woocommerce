@@ -1,10 +1,10 @@
 === WooCommerce - excelling eCommerce ===
-Contributors: woothemes, mikejolley, jameskoster
+Contributors: woothemes, mikejolley, jameskoster, claudiosanches
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
-Tested up to: 3.9
-Stable tag: 2.1.10
+Tested up to: 4.0
+Stable tag: 2.2.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -99,7 +99,7 @@ For extending or theming WooCommerce, see our [codex](http://docs.woothemes.com/
 
 = Where can I get support or talk to other users? =
 
-If you get stuck, WooThemes customers can communicate with one another on the [WooThemes Community Forum](https://support.woothemes.com/hc/communities/public/topics) and non-customers can ask for help from other users on the [WordPress.org Community Forums](http://wordpress.org/support/plugin/woocommerce).
+If you get stuck you can ask for help on the [WooThemes Community Forum](https://support.woothemes.com/hc/communities/public/topics).
 
 For help with premium add-ons from WooThemes, use [our helpdesk](http://support.woothemes.com/).
 
@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Load archive-product.php for other product taxonomies.
 * Tweak - Disable image size settings if filters are being used.
 * Tweak - Hide the shipping address when local pickup is used.
+* Tweak - Password protected posts are not hidden from catalog by default anymore, visibility can be set via the 'Catalog visibility' option.
 * Dev - API Version 2 with push support.
 * Dev - API: Lookup customers by email endpoint.
 * Dev - API: Allow ordering on the resource level.

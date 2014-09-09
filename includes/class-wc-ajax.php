@@ -1809,7 +1809,7 @@ class WC_AJAX {
 		check_ajax_referer( 'order-item', 'security' );
 
 		$order_id               = absint( $_POST['order_id'] );
-		$refund_amount          = sanitize_text_field( $_POST['refund_amount'] );
+		$refund_amount          = wc_format_decimal( sanitize_text_field( $_POST['refund_amount'] ) );
 		$refund_reason          = sanitize_text_field( $_POST['refund_reason'] );
 		$line_item_qtys         = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
 		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
@@ -1850,10 +1850,10 @@ class WC_AJAX {
 				}
 			}
 			foreach ( $line_item_totals as $item_id => $total ) {
-				$line_items[ $item_id ]['refund_total'] = $total;
+				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );
 			}
 			foreach ( $line_item_tax_totals as $item_id => $tax_totals ) {
-				$line_items[ $item_id ]['refund_tax'] = $tax_totals;
+				$line_items[ $item_id ]['refund_tax'] = array_map( 'wc_format_decimal', $tax_totals );
 			}
 
 			// Create the refund object

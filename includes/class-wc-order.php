@@ -75,7 +75,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * 
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
-	 * @return float|int
+	 * @return integer
 	 */
 	public function get_qty_refunded_for_item( $item_id, $item_type = 'line_item' ) {
 		$qty = 0;
@@ -94,7 +94,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * 
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
-	 * @return float|int
+	 * @return integer
 	 */
 	public function get_total_refunded_for_item( $item_id, $item_type = 'line_item' ) {
 		$total = 0;
@@ -121,7 +121,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  int $tax_id ID of the tax we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
-	 * @return float|int
+	 * @return integer
 	 */
 	public function get_tax_refunded_for_item( $item_id, $tax_id, $item_type = 'line_item' ) {
 		$total = 0;

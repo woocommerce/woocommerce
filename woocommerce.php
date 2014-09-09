@@ -3,11 +3,11 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.2.0-bleeding
+ * Version: 2.2.0-RC1
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.8
- * Tested up to: 3.9
+ * Tested up to: 4.0
  *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
@@ -510,7 +510,7 @@ final class WooCommerce {
 	/**
 	 * Return the WC API URL for a given request
 	 *
-	 * @param mixed $request
+	 * @param string $request
 	 * @param mixed $ssl (default: null)
 	 * @return string
 	 */
@@ -597,7 +597,7 @@ final class WooCommerce {
 	/**
 	 * Email Class.
 	 *
-	 * @return WC_Email
+	 * @return WC_Emails
 	 */
 	public function mailer() {
 		return WC_Emails::instance();

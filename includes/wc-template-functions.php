@@ -1403,7 +1403,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	 * @access public
 	 * @subpackage	Loop
 	 * @param array $args
-	 * @return bool
+	 * @return null|boolean
 	 */
 	function woocommerce_product_subcategories( $args = array() ) {
 		global $wp_query;

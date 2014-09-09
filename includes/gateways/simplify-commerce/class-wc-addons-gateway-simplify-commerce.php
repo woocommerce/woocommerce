@@ -216,7 +216,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * process_subscription_payment function.
 	 *
 	 * @param WC_order $order
-	 * @param float $amount (default: 0)
+	 * @param integer $amount (default: 0)
 	 * @return bool|WP_Error
 	 */
 	public function process_subscription_payment( $order = '', $amount = 0 ) {
@@ -318,7 +318,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * Process a pre-order payment when the pre-order is released
 	 *
 	 * @param WC_Order $order
-	 * @return void
+	 * @return wp_error|null
 	 */
 	public function process_pre_order_release_payment( $order ) {
 

@@ -252,7 +252,7 @@ class WC_Countries {
 	 * Gets an array of countries in the EU.
 	 *
 	 * @access public
-	 * @return array
+	 * @return string[]
 	 */
 	public function get_european_union_countries() {
 		return array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );

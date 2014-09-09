@@ -28,31 +28,8 @@ class WC_Tests_Webhooks extends WC_API_Unit_Test_Case {
 
 		$this->endpoint = WC()->api->WC_API_Webhooks;
 
-		$post_args = array(
-			'post_type'     => 'shop_webhook',
-			'post_status'   => 'publish',
-			'post_title' => rand_str(),
-		);
-
-		$post_id = $this->factory->post->create( $post_args );
-
-		$meta_args = array(
-			'_topic'        => 'coupon.created',
-			'_resource'     => 'coupon',
-			'_event'        => 'created',
-			'_hooks'        => array(
-				'woocommerce_process_shop_coupon_meta',
-				'woocommerce_api_create_coupon',
-			),
-			'_delivery_url' => rand_str(),
-		);
-
-		foreach ( $meta_args as $key => $value ) {
-			update_post_meta( $post_id, $key, $value );
-		}
-
 		// mock webhook
-		$this->webhook = new WC_Webhook( $post_id );
+		$this->webhook = $this->factory->webhook->create_and_get();
 
 		// mock webhook delivery
 		$this->webhook_delivery_id = $this->factory->webhook_delivery->create( array( 'comment_post_ID' => $this->webhook->id ) );

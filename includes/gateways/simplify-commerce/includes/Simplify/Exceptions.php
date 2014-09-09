@@ -122,6 +122,7 @@ class Simplify_ApiConnectionException extends Simplify_ApiException {
 
     /**
      * @ignore
+     * @param string $message
      */
     function __construct($message, $status = null, $errorData = null) {
         parent::__construct($message, $status, $errorData);
@@ -135,6 +136,7 @@ class Simplify_AuthenticationException extends Simplify_ApiException {
 
     /**
      * @ignore
+     * @param string $message
      */
     function __construct($message, $status = null, $errorData = null) {
         parent::__construct($message, $status, $errorData);
@@ -150,6 +152,7 @@ class Simplify_BadRequestException extends Simplify_ApiException {
 
     /**
      * @ignore
+     * @param string $message
      */
     function __construct($message, $status = null, $errorData = null) {
         parent::__construct($message, $status, $errorData);
@@ -258,6 +261,7 @@ class Simplify_ObjectNotFoundException extends Simplify_ApiException {
 
     /**
      * @ignore
+     * @param string $message
      */
     function __construct($message, $status = null, $errorData = null) {
         parent::__construct($message, $status, $errorData);
@@ -271,6 +275,7 @@ class Simplify_NotAllowedException extends Simplify_ApiException {
 
     /**
      * @ignore
+     * @param string $message
      */
     function __construct($message, $status = null, $errorData = null) {
         parent::__construct($message, $status, $errorData);
@@ -284,6 +289,7 @@ class Simplify_SystemException extends Simplify_ApiException {
 
     /**
      * @ignore
+     * @param string $message
      */
     function __construct($message, $status = null, $errorData = null) {
         parent::__construct($message, $status, $errorData);
