@@ -2069,7 +2069,13 @@ abstract class WC_Abstract_Order {
 			// Update the order
 			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
 			$this->post_status = 'wc-' . $new_status;
-			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), $old_status, $new_status ) ) );
+
+			// Get the order status label.
+			$order_statuses   = wc_get_order_statuses();
+			$old_status_label = isset( $order_statuses[ 'wc-' . $old_status ] ) ? strtolower( $order_statuses[ 'wc-' . $old_status ] ) : $old_status;
+			$new_status_label = isset( $order_statuses[ 'wc-' . $new_status ] ) ? strtolower( $order_statuses[ 'wc-' . $new_status ] ) : $new_status;
+
+			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), $old_status_label, $new_status_label ) ) );
 
 			// Status was changed
 			do_action( 'woocommerce_order_status_' . $new_status, $this->id );
