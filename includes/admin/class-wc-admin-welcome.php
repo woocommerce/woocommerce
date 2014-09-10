@@ -183,6 +183,7 @@ class WC_Admin_Welcome {
 				line-height: 1.4;
 			}
 			.wc-conf {
+				background-color: #00204A;
 				background-image: url(http://woothemes.wpengine.netdna-cdn.com/wp-content/uploads/2014/09/wooconf.jpg);
 				background-size: cover;
 				padding: 11px 30px 20px;
