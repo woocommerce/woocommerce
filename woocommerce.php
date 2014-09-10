@@ -236,7 +236,7 @@ final class WooCommerce {
 			define( 'WC_DELIMITER', '|' );
 		}
 		if ( ! defined( 'WC_LOG_DIR' ) ) {
-			define( 'WC_LOG_DIR', ABSPATH . '/wc-logs/' );
+			define( 'WC_LOG_DIR', ABSPATH . 'wc-logs/' );
 		}
 	}
 
