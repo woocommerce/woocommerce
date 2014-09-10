@@ -130,7 +130,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.2.0 =
+= 2.2.0 - 10/09/2014 =
 * Feature - Refunds system for orders.
 * Feature - New orders panel for managing line items + totals.
 * Feature - Language pack downloader. po and mo files removed from core (too heavy).
