@@ -1351,10 +1351,12 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_item_total( $item, $inc_tax = false, $round = true ) {
 
+		$qty = ( ! empty( $item['qty'] ) ) ? $item['qty'] : 1;
+
 		if ( $inc_tax ) {
-			$price = ( $item['line_total'] + $item['line_tax'] ) / max( 1, $item['qty'] );
+			$price = ( $item['line_total'] + $item['line_tax'] ) / max( 1, $qty );
 		} else {
-			$price = $item['line_total'] / $item['qty'];
+			$price = $item['line_total'] / $qty;
 		}
 
 		$price = $round ? round( $price, 2 ) : $price;
