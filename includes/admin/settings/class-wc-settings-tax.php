@@ -723,7 +723,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 						}
 					}
 
-					$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
+					if ( !empty( $postcode_query ) ) {
+						$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
+					}
 
 				}
 
