@@ -1493,7 +1493,7 @@ class WC_Meta_Box_Product_Data {
 				$is_downloadable     = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
 				$post_status         = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
 				$parent_manage_stock = isset( $_POST['_manage_stock'] ) ? 'yes' : 'no';
-				$manage_stock        = ( isset( $variable_manage_stock[ $i ] ) && 'yes' == $parent_manage_stock ) ? 'yes' : 'no';
+				$manage_stock        = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
 
 				// Generate a useful post title
 				$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), absint( $variation_id ), esc_html( get_the_title( $post_id ) ) );

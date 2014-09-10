@@ -130,6 +130,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.2.2 =
+* Fix - Saving of variation stock when parent stock management is disabled.
+
 = 2.2.1 - 10/09/2014 =
 * Fix - Small tweak to the installer to prevent errors caused by outdated plugins.
 * Fix - Mijireh Checkout update link.
