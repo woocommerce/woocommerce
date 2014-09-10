@@ -179,6 +179,24 @@ class WC_Admin_Welcome {
 				margin: 20px 0;
 				padding: 1px 20px 10px;
 			}
+			.changelog h4 {
+				line-height: 1.4;
+			}
+			.wc-conf {
+				background-image: url(http://woothemes.wpengine.netdna-cdn.com/wp-content/uploads/2014/09/wooconf.jpg);
+				background-size: cover;
+				padding: 11px 30px 20px;
+				color: #fff;
+				border-radius: 4px;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+			}
+			.wc-conf h3 {
+				color: #fff;
+			}
+			.wc-conf div {
+				width: 50%;
+			}
 			/*]]>*/
 		</style>
 		<?php
@@ -210,7 +228,7 @@ class WC_Admin_Welcome {
 				else
 					$message = __( 'Thanks for installing!', 'woocommerce' );
 
-				printf( __( '%s WooCommerce %s is more powerful, stable, and secure than ever before. We hope you enjoy using it.', 'woocommerce' ), $message, $major_version );
+				printf( __( '%s WooCommerce %s is more powerful, stable and secure than ever before. We hope you enjoy using it.', 'woocommerce' ), $message, $major_version );
 			?>
 		</div>
 
@@ -293,7 +311,13 @@ class WC_Admin_Welcome {
 				</div>
 			</div>
 
-			<hr />
+			<div class="changelog wc-conf">
+				<div>
+					<h3><?php _e( 'Join us at the inaugral WooCommerce Conference in San Francisco', 'woocommerce' ); ?></h3>
+					<p><?php echo sprintf( __( 'On the %s3rd and 4th%s of November 2014 WooCommerce creators WooThemes are hosting an event dedicated to store owners &amp; WordPress developers wanting to learn the art of eCommerce using WooCommerce.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
+					<p class="woocommerce-actions"><a href="http://conf.woocommerce.com/" class="button button-primary"><?php _e( 'Find out more & buy tickets', 'woocommerce' ); ?></a></p>
+				</div>
+			</div>
 
 			<div class="return-to-dashboard">
 				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'wc-settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>
