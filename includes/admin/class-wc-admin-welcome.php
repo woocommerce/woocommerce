@@ -313,7 +313,7 @@ class WC_Admin_Welcome {
 			<?php if ( strtotime( '2014/11/04' ) > current_time( 'timestamp' ) ) { ?>
 			<div class="changelog wc-conf">
 				<div>
-					<h3><?php _e( 'Join us at the inaugral WooCommerce Conference in San Francisco', 'woocommerce' ); ?></h3>
+					<h3><?php _e( 'Join us at the inaugural WooCommerce Conference in San Francisco', 'woocommerce' ); ?></h3>
 					<p><?php echo sprintf( __( 'On the %s3rd and 4th%s of November 2014 WooCommerce creators WooThemes are hosting an event dedicated to store owners &amp; WordPress developers wanting to learn the art of eCommerce using WooCommerce.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
 					<p class="woocommerce-actions"><a href="http://conf.woocommerce.com/" class="button button-primary"><?php _e( 'Find out more & buy tickets', 'woocommerce' ); ?></a></p>
 				</div>
