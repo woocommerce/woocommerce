@@ -4,14 +4,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.2.0-RC1 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-09-08 15:44:12+00:00\n"
+"POT-Creation-Date: 2014-09-10 10:42:54+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
-"X-Generator: grunt-wp-i18n 0.4.8\n"
+"X-Generator: grunt-wp-i18n 0.4.7\n"
 
 #: i18n/countries.php:16
 msgid "Afghanistan"
@@ -4203,42 +4203,42 @@ msgstr ""
 msgid "Backordered"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1613
+#: includes/abstracts/abstract-wc-order.php:1615
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1618
+#: includes/abstracts/abstract-wc-order.php:1620
 #: includes/abstracts/abstract-wc-product.php:884
 #: includes/abstracts/abstract-wc-product.php:890
 #: includes/class-wc-cart.php:1438 includes/class-wc-product-variation.php:289
 msgid "Free!"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1680
+#: includes/abstracts/abstract-wc-order.php:1682
 msgid "Cart Subtotal:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1687
+#: includes/abstracts/abstract-wc-order.php:1689
 msgid "Cart Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1694
+#: includes/abstracts/abstract-wc-order.php:1696
 msgid "Shipping:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1747
+#: includes/abstracts/abstract-wc-order.php:1749
 msgid "Order Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1754
+#: includes/abstracts/abstract-wc-order.php:1756
 msgid "Payment Method:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1760
+#: includes/abstracts/abstract-wc-order.php:1762
 msgid "Order Total:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1780
+#: includes/abstracts/abstract-wc-order.php:1782
 #: includes/wc-cart-functions.php:250
 msgid "(Includes %s)"
 msgstr ""
@@ -4247,16 +4247,16 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2072
+#: includes/abstracts/abstract-wc-order.php:2075
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2335
+#: includes/abstracts/abstract-wc-order.php:2338
 #: includes/class-wc-ajax.php:1161 includes/class-wc-ajax.php:1162
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2345
+#: includes/abstracts/abstract-wc-order.php:2348
 msgid "Order item stock reduced successfully."
 msgstr ""
 
@@ -5508,7 +5508,7 @@ msgid "Please select a rating"
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:168
-#: includes/wc-template-functions.php:1620
+#: includes/wc-template-functions.php:1621
 msgid "required"
 msgstr ""
 
@@ -7602,11 +7602,11 @@ msgid ""
 "the new WooCommerce post_status instead, <a href=\"%s\">read more...</a>"
 msgstr ""
 
-#: includes/wc-order-functions.php:475
+#: includes/wc-order-functions.php:491
 msgid "Unpaid order cancelled - time limit reached."
 msgstr ""
 
-#: includes/wc-order-functions.php:570
+#: includes/wc-order-functions.php:586
 msgid "Refund &ndash; %s"
 msgstr ""
 
@@ -7696,29 +7696,29 @@ msgstr ""
 msgid "Order Again"
 msgstr ""
 
-#: includes/wc-template-functions.php:1670
+#: includes/wc-template-functions.php:1671
 #: templates/cart/shipping-calculator.php:26
 msgid "Select a country&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1677
+#: includes/wc-template-functions.php:1678
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:1727
+#: includes/wc-template-functions.php:1728
 #: templates/cart/shipping-calculator.php:50
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1885
+#: includes/wc-template-functions.php:1886
 msgid "Search for:"
 msgstr ""
 
-#: includes/wc-template-functions.php:1886
+#: includes/wc-template-functions.php:1887
 msgid "Search for products"
 msgstr ""
 
-#: includes/wc-template-functions.php:1887
+#: includes/wc-template-functions.php:1888
 msgid "Search"
 msgstr ""
 
@@ -9112,7 +9112,7 @@ msgctxt "Tax status"
 msgid "None"
 msgstr ""
 
-#: includes/wc-core-functions.php:73 includes/wc-order-functions.php:570
+#: includes/wc-core-functions.php:73 includes/wc-order-functions.php:586
 msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr ""
