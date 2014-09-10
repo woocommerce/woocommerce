@@ -310,7 +310,7 @@ class WC_Admin_Welcome {
 					</div>
 				</div>
 			</div>
-
+			<?php if ( strtotime( '2014/11/04' ) > current_time( 'timestamp' ) ) { ?>
 			<div class="changelog wc-conf">
 				<div>
 					<h3><?php _e( 'Join us at the inaugral WooCommerce Conference in San Francisco', 'woocommerce' ); ?></h3>
@@ -318,6 +318,7 @@ class WC_Admin_Welcome {
 					<p class="woocommerce-actions"><a href="http://conf.woocommerce.com/" class="button button-primary"><?php _e( 'Find out more & buy tickets', 'woocommerce' ); ?></a></p>
 				</div>
 			</div>
+			<?php } ?>
 
 			<div class="return-to-dashboard">
 				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'wc-settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>
