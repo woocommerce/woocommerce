@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -129,6 +129,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.2.1 - 10/09/2014 =
+* Fix - Small tweak to the installer to prevent errors caused by outdated plugins.
+* Tweak - Small tweak to update notification to remind users to update old plugins prior to install.
 
 = 2.2.0 - 10/09/2014 =
 * Feature - Refunds system for orders.
@@ -990,5 +994,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 2.2.0 =
-2.2 is a major update. Test extensions and your theme prior to updating, and ensure that you keep backups. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.
+= 2.2.1 =
+2.2 is a major update. Test extensions and your theme prior to updating, ensure extensions are up to date and 2.2 compatible, and ensure that you keep backups. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.
