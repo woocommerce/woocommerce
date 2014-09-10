@@ -130,7 +130,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.2.2 =
+= 2.2.2 - 11/09/2014 =
 * Fix - Saving of variation stock when parent stock management is disabled.
 * Fix - "open_basedir restriction in effect" error caused on install when trying to create the WC logging directory.
 * Fix - For regular products, ensure stock level saves on product creation.
