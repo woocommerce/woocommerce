@@ -288,6 +288,10 @@ class WC_Install {
 		$settings = WC_Admin_Settings::get_settings_pages();
 
 		foreach ( $settings as $section ) {
+			if ( ! method_exists( $section, 'get_settings' ) ) {
+				continue;
+			}
+
 			foreach ( $section->get_settings() as $value ) {
 				if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
 					$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
