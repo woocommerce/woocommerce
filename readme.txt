@@ -132,6 +132,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.2.1 - 10/09/2014 =
 * Fix - Small tweak to the installer to prevent errors caused by outdated plugins.
+* Fix - Mijireh Checkout update link.
 * Tweak - Small tweak to update notification to remind users to update old plugins prior to install.
 
 = 2.2.0 - 10/09/2014 =
