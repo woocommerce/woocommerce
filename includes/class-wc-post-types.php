@@ -156,6 +156,9 @@ class WC_Post_types {
 		$wc_product_attributes = array();
 
 		if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
+			
+			/* This for each slows Woocommerce down because of making all taxonomys. I've got a webshop with 33,000 products and a lot of attributes, with a server load time of 6 seconds. I've recodes this area to only make taxonomys when needed. Like when viewing the Attribute page or a category. */
+			
 			foreach ( $attribute_taxonomies as $tax ) {
 				if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
 
