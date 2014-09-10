@@ -560,6 +560,8 @@ jQuery( function ( $ ) {
 				}
 			});
 
+			$( this ).trigger( 'items_saved' );
+
 			return false;
 		})
 		.on( 'click', 'a.delete-order-tax', function() {
