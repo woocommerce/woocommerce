@@ -176,6 +176,9 @@ class WC_Product {
 
 		if ( ! is_null( $amount ) && $this->managing_stock() ) {
 
+			// Ensure key exists
+			add_post_meta( $this->id, '_stock', 0, true );
+
 			// Update stock in DB directly
 			switch ( $mode ) {
 				case 'add' :
