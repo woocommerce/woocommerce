@@ -354,8 +354,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$paypal_args['state']			= $this->get_paypal_state( $order->shipping_country, $order->shipping_state );
 			$paypal_args['country']			= $order->shipping_country;
 			$paypal_args['zip']				= $order->shipping_postcode;
-		} else {
-			$paypal_args['no_shipping'] = 1;
 		}
 
 		// Try to send line items, or default to sending the order as a whole
