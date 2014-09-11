@@ -1,7 +1,6 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Variable Product Class
@@ -115,7 +114,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return void
 	 */
 	public function set_stock_status( $status ) {
-		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
+		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
 
 		if ( update_post_meta( $this->id, '_stock_status', $status ) ) {
 			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
@@ -129,11 +128,11 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array of children ids
 	 */
 	public function get_children( $visible_only = false ) {
-		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
+		if ( ! is_array( $this->children ) ) {
+			$this->children = array();
 			$transient_name = 'wc_product_children_ids_' . $this->id;
-			$this->children = get_transient( $transient_name );
 
-        	if ( empty( $this->children ) ) {
+        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) {
 		        $args = array(
 					'post_parent' => $this->id,
 					'post_type'   => 'product_variation',
@@ -168,6 +167,7 @@ class WC_Product_Variable extends WC_Product {
 		return $children;
 	}
 
+
 	/**
 	 * get_child function.
 	 *
@@ -179,8 +179,9 @@ class WC_Product_Variable extends WC_Product {
 		return get_product( $child_id, array(
 			'parent_id' => $this->id,
 			'parent' 	=> $this
-		) );
+			) );
 	}
+
 
 	/**
 	 * Returns whether or not the product has any child product.
@@ -192,6 +193,7 @@ class WC_Product_Variable extends WC_Product {
 		return sizeof( $this->get_children() ) ? true : false;
 	}
 
+
 	/**
 	 * Returns whether or not the product is on sale.
 	 *
@@ -200,12 +202,14 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function is_on_sale() {
 		if ( $this->has_child() ) {
+
 			foreach ( $this->get_children( true ) as $child_id ) {
 				$price      = get_post_meta( $child_id, '_price', true );
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
 				if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price )
 					return true;
 			}
+
 		}
 		return false;
 	}
@@ -324,6 +328,7 @@ class WC_Product_Variable extends WC_Product {
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
 
+
     /**
      * Return an array of attributes used for variations, as well as their possible values.
      *
@@ -331,18 +336,17 @@ class WC_Product_Variable extends WC_Product {
      * @return array of attributes and their available values
      */
     public function get_variation_attributes() {
+
 	    $variation_attributes = array();
 
-        if ( ! $this->has_child() ) {
+        if ( ! $this->has_child() )
         	return $variation_attributes;
-        }
 
         $attributes = $this->get_attributes();
 
         foreach ( $attributes as $attribute ) {
-            if ( ! $attribute['is_variation'] ) {
+            if ( ! $attribute['is_variation'] )
             	continue;
-            }
 
             $values = array();
             $attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
@@ -353,17 +357,14 @@ class WC_Product_Variable extends WC_Product {
 
 				if ( ! empty( $variation->variation_id ) ) {
 
-					if ( ! $variation->variation_is_visible() ) {
+					if ( ! $variation->variation_is_visible() )
 						continue; // Disabled or hidden
-					}
 
 					$child_variation_attributes = $variation->get_variation_attributes();
 
-	                foreach ( $child_variation_attributes as $name => $value ) {
-	                    if ( $name == $attribute_field_name ) {
+	                foreach ( $child_variation_attributes as $name => $value )
+	                    if ( $name == $attribute_field_name )
 	                    	$values[] = sanitize_title( $value );
-	                    }
-	                }
                 }
             }
 
@@ -433,10 +434,9 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 				
-			$variation_attributes = $variation->get_variation_attributes();
-			$availability         = $variation->get_availability();
-			$availability_html    = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . wp_kses_post( $availability['availability'] ) . '</p>';
-			$availability_html    = apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $variation );
+			$variation_attributes 	= $variation->get_variation_attributes();
+			$availability 			= $variation->get_availability();
+			$availability_html 		= empty( $availability['availability'] ) ? '' : apply_filters( 'woocommerce_stock_html', '<p class="stock ' . esc_attr( $availability['class'] ) . '">'. wp_kses_post( $availability['availability'] ).'</p>', wp_kses_post( $availability['availability'] ) );
 
 			if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
 				$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );

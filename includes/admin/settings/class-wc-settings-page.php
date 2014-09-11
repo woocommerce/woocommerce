@@ -2,9 +2,9 @@
 /**
  * WooCommerce Settings Page/Tab
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -55,17 +55,15 @@ class WC_Settings_Page {
 
 		$sections = $this->get_sections();
 
-		if ( empty( $sections ) ) {
+		if ( empty( $sections ) )
 			return;
-		}
 
 		echo '<ul class="subsubsub">';
 
 		$array_keys = array_keys( $sections );
 
-		foreach ( $sections as $id => $label ) {
+		foreach ( $sections as $id => $label )
 			echo '<li><a href="' . admin_url( 'admin.php?page=wc-settings&tab=' . $this->id . '&section=' . sanitize_title( $id ) ) . '" class="' . ( $current_section == $id ? 'current' : '' ) . '">' . $label . '</a> ' . ( end( $array_keys ) == $id ? '' : '|' ) . ' </li>';
-		}
 
 		echo '</ul><br class="clear" />';
 	}
@@ -88,9 +86,8 @@ class WC_Settings_Page {
 		$settings = $this->get_settings();
 		WC_Admin_Settings::save_fields( $settings );
 
-		if ( $current_section ) {
-			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
-		}
+		 if ( $current_section )
+	    	do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 	}
 }
 

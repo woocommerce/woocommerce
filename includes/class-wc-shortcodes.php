@@ -556,7 +556,7 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		$_product = wc_get_product( $product_data );
+		$_product = get_product( $product_data );
 
 		return esc_url( $_product->add_to_cart_url() );
 	}

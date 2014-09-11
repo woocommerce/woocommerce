@@ -121,7 +121,7 @@ class WC_API_Products extends WC_API_Resource {
 			return $id;
 		}
 
-		$product = wc_get_product( $id );
+		$product = get_product( $id );
 
 		// add data that applies to every product type
 		$product_data = $this->get_product_data( $product );
@@ -173,18 +173,14 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function create_product( $data ) {
 
-		$data = isset( $data['product'] ) ? $data['product'] : array();
-
-		// Check permissions
+		// Check permisions
 		if ( ! current_user_can( 'publish_products' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_create_product', __( 'You do not have permission to create products', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
-		$data = apply_filters( 'woocommerce_api_create_product_data', $data, $this );
-
 		// Check if product title is specified
 		if ( ! isset( $data['title'] ) ) {
-			return new WP_Error( 'woocommerce_api_missing_product_title', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'title' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_missing_product_title', sprintf( __( 'Missing parameter %s' ), 'title' ), array( 'status' => 400 ) );
 		}
 
 		// Check product type
@@ -258,15 +254,11 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function edit_product( $id, $data ) {
 
-		$data = isset( $data['product'] ) ? $data['product'] : array();
-
 		$id = $this->validate_request( $id, 'product', 'edit' );
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
-
-		$data = apply_filters( 'woocommerce_api_edit_product_data', $data, $this );
 
 		// Product name.
 		if ( isset( $data['title'] ) ) {
@@ -341,8 +333,6 @@ class WC_API_Products extends WC_API_Resource {
 			return $id;
 		}
 
-		do_action( 'woocommerce_api_delete_product', $id, $this );
-
 		return $this->delete( $id, 'product', ( 'true' === $force ) );
 	}
 
@@ -391,10 +381,9 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get a listing of product categories
 	 *
 	 * @since 2.2
-	 * @param string|null $fields fields to limit response to
 	 * @return array
 	 */
-	public function get_product_categories( $fields = null ) {
+	public function get_product_categories() {
 
 		// permissions check
 		if ( ! current_user_can( 'manage_product_terms' ) ) {
@@ -407,10 +396,10 @@ class WC_API_Products extends WC_API_Resource {
 
 		foreach ( $terms as $term_id ) {
 
-			$product_categories[] = current( $this->get_product_category( $term_id, $fields ) );
+			$product_categories[] = current( $this->get_product_category( $term_id ) );
 		}
 
-		return array( 'product_categories' => apply_filters( 'woocommerce_api_product_categories_response', $product_categories, $terms, $fields, $this ) );
+		return array( 'product_categories' => apply_filters( 'woocommerce_api_product_categories_response', $product_categories, $terms, $this ) );
 	}
 
 	/**
@@ -418,10 +407,9 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param string $id product category term ID
-	 * @param string|null $fields fields to limit response to
 	 * @return array
 	 */
-	public function get_product_category( $id, $fields = null ) {
+	public function get_product_category( $id ) {
 
 		$id = absint( $id );
 
@@ -450,7 +438,7 @@ class WC_API_Products extends WC_API_Resource {
 			'count'       => intval( $term->count ),
 		);
 
-		return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $id, $fields, $term, $this ) );
+		return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $term, $id, $this ) );
 	}
 
 	/**
@@ -495,7 +483,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param WC_Product $product
-	 * @return WC_Product
+	 * @return array
 	 */
 	private function get_product_data( $product ) {
 
@@ -688,7 +676,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $id, $new_sku );
 					if ( ! $unique_sku ) {
-						return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), array( 'status' => 400 ) );
+						return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
 					} else {
 						update_post_meta( $id, '_sku', $new_sku );
 					}
@@ -851,7 +839,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-		$_product = wc_get_product( $id );
+		$_product = get_product( $id );
 		if ( $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
 
 			$clear_parent_ids = array();
@@ -1129,7 +1117,7 @@ class WC_API_Products extends WC_API_Resource {
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
-							return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), array( 'status' => 400 ) );
+							return new WP_Error( 'woocommerce_api_product_sku_already_exists', __( 'The SKU already exists on another product' ), array( 'status' => 400 ) );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
@@ -1290,17 +1278,16 @@ class WC_API_Products extends WC_API_Resource {
 					}
 
 					$taxonomy = $this->get_attribute_taxonomy_by_label( $attribute['name'] );
+
 					if ( isset( $attributes[ $taxonomy ] ) ) {
 						$_attribute = $attributes[ $taxonomy ];
-					} elseif ( isset( $attributes[ strtolower( $attribute['name'] ) ] ) ) {
-						$_attribute = $attributes[ strtolower( $attribute['name'] ) ];
-					}
 
-					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
-						$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
-						$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
-						$updated_attribute_keys[] = $attribute_key;
-						update_post_meta( $variation_id, $attribute_key, $attribute_value );
+						if ( $_attribute['is_variation'] ) {
+							$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
+							$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
+							$updated_attribute_keys[] = $attribute_key;
+							update_post_meta( $variation_id, $attribute_key, $attribute_value );
+						}
 					}
 				}
 
@@ -1440,7 +1427,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param string $label
-	 * @return string|null
+	 * @return stdClass
 	 */
 	private function get_attribute_taxonomy_by_label( $label ) {
 		$taxonomy = null;
@@ -1600,7 +1587,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Check parsed URL
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s' ), $image_url ), array( 'status' => 400 ) );
 		}
 
 		// Ensure url is valid
@@ -1612,7 +1599,7 @@ class WC_API_Products extends WC_API_Resource {
 		) );
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return new WP_Error( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s' ), $image_url ), array( 'status' => 400 ) );
 		}
 
 		// Ensure we have a file name and type
@@ -1653,7 +1640,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get product image as attachment
 	 *
 	 * @since 2.2
-	 * @param integer $upload
+	 * @param array $upload
 	 * @param int $id
 	 * @return int
 	 */

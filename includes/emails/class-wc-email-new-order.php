@@ -59,7 +59,7 @@ class WC_Email_New_Order extends WC_Email {
 	function trigger( $order_id ) {
 
 		if ( $order_id ) {
-			$this->object 		= wc_get_order( $order_id );
+			$this->object 		= get_order( $order_id );
 
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';

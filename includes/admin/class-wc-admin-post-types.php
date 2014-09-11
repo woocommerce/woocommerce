@@ -174,7 +174,7 @@ class WC_Admin_Post_Types {
 		global $post;
 
 		if ( empty( $the_product ) || $the_product->id != $post->ID ) {
-			$the_product = wc_get_product( $post );
+			$the_product = get_product( $post );
 		}
 
 		switch ( $column ) {
@@ -439,13 +439,13 @@ class WC_Admin_Post_Types {
 		global $post, $woocommerce, $the_order;
 
 		if ( empty( $the_order ) || $the_order->id != $post->ID ) {
-			$the_order = wc_get_order( $post->ID );
+			$the_order = get_order( $post->ID );
 		}
 
 		switch ( $column ) {
 			case 'order_status' :
 
-				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_label( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
+				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
 
 			break;
 			case 'order_date' :
@@ -787,7 +787,7 @@ class WC_Admin_Post_Types {
 		}
 
 		// Get the product and save
-		$product = wc_get_product( $post );
+		$product = get_product( $post );
 
 		if ( ! empty( $_REQUEST['woocommerce_quick_edit'] ) ) {
 			$this->quick_edit_save( $post_id, $product );
@@ -803,7 +803,6 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Quick edit
-	 * @param integer $post_id
 	 */
 	private function quick_edit_save( $post_id, $product ) {
 		global $wpdb;
@@ -925,7 +924,6 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Bulk edit
-	 * @param integer $post_id
 	 */
 	public function bulk_edit_save( $post_id, $product ) {
 
@@ -1182,7 +1180,7 @@ class WC_Admin_Post_Types {
 		$post_ids = array_map( 'absint', (array) $_REQUEST['post'] );
 
 		foreach ( $post_ids as $post_id ) {
-			$order = wc_get_order( $post_id );
+			$order = get_order( $post_id );
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ) );
 			$changed++;
 		}
@@ -2029,7 +2027,7 @@ class WC_Admin_Post_Types {
 			$product_id = $variation_id;
 		}
 
-		$product               = wc_get_product( $product_id );
+		$product               = get_product( $product_id );
 		$existing_download_ids = array_keys( (array) $product->get_files() );
 		$updated_download_ids  = array_keys( (array) $downloadable_files );
 
@@ -2041,7 +2039,7 @@ class WC_Admin_Post_Types {
 			$existing_permissions = $wpdb->get_results( $wpdb->prepare( "SELECT * from {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE product_id = %d GROUP BY order_id", $product_id ) );
 
 			foreach ( $existing_permissions as $existing_permission ) {
-				$order = wc_get_order( $existing_permission->order_id );
+				$order = get_order( $existing_permission->order_id );
 
 				if ( $order->id ) {
 					// Remove permissions

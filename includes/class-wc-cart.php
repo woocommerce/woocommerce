@@ -111,8 +111,6 @@ class WC_Cart {
 			'shipping_total'          => 0,
 			'shipping_tax_total'      => 0,
 			'coupon_discount_amounts' => array(),
-			'fee_total'               => 0,
-			'fees'                    => array()
 		);
 
 		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
@@ -192,7 +190,7 @@ class WC_Cart {
 
 			if ( is_array( $cart ) ) {
 				foreach ( $cart as $key => $values ) {
-					$_product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
+					$_product = get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 
 					if ( ! empty( $_product ) && $_product->exists() && $values['quantity'] > 0 ) {
 
@@ -775,7 +773,7 @@ class WC_Cart {
 		 * Add a product to the cart.
 		 *
 		 * @param string $product_id contains the id of the product to add to the cart
-		 * @param integer $quantity contains the quantity of the item to add
+		 * @param string $quantity contains the quantity of the item to add
 		 * @param int $variation_id
 		 * @param array $variation attribute values
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
@@ -803,7 +801,7 @@ class WC_Cart {
 			}
 
 			// Get the product
-			$product_data   = wc_get_product( $variation_id ? $variation_id : $product_id );
+			$product_data   = get_product( $variation_id ? $variation_id : $product_id );
 
 			if ( ! $product_data )
 				return false;
@@ -1783,7 +1781,7 @@ class WC_Cart {
 		 *
 		 * @access public
 		 * @param mixed $values
-		 * @param double $price
+		 * @param mixed $price
 		 */
 		public function apply_product_discounts_after_tax( $values, $price ) {
 			if ( ! empty( $this->applied_coupons ) ) {
@@ -1807,7 +1805,7 @@ class WC_Cart {
 		 *
 		 * @access private
 		 * @param mixed $code
-		 * @param double $amount
+		 * @param mixed $amount
 		 */
 		private function increase_coupon_discount_amount( $code, $amount ) {
 			if ( empty( $this->coupon_discount_amounts[ $code ] ) )
@@ -1821,7 +1819,7 @@ class WC_Cart {
 		 *
 		 * @access private
 		 * @param mixed $code
-		 * @param integer $count
+		 * @param mixed $amount
 		 */
 		private function increase_coupon_applied_count( $code, $count = 1 ) {
 			if ( empty( $this->coupon_applied_count[ $code ] ) )
@@ -1878,9 +1876,6 @@ class WC_Cart {
 		 * Calculate fees
 		 */
 		public function calculate_fees() {
-			// Reset fees before calculation
-			$this->fee_total = 0;
-			$this->fees      = array();
 
 			// Fire an action where developers can add their fees
 			do_action( 'woocommerce_cart_calculate_fees', $this );
@@ -2049,18 +2044,16 @@ class WC_Cart {
 					$row_price        = $_product->get_price_excluding_tax( $quantity );
 					$product_subtotal = wc_price( $row_price );
 
-					if ( $this->prices_include_tax && $this->tax_total > 0 ) {
+					if ( $this->prices_include_tax && $this->tax_total > 0 )
 						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-					}
 
 				} else {
 
 					$row_price        = $_product->get_price_including_tax( $quantity );
 					$product_subtotal = wc_price( $row_price );
 
-					if ( ! $this->prices_include_tax && $this->tax_total > 0 ) {
+					if ( ! $this->prices_include_tax && $this->tax_total > 0 )
 						$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
-					}
 
 				}
 

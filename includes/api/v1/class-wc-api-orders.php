@@ -107,7 +107,7 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		$order = wc_get_order( $id );
+		$order = get_order( $id );
 
 		$order_post = get_post( $id );
 
@@ -275,7 +275,7 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		$order = wc_get_order( $id );
+		$order = get_order( $id );
 
 		if ( ! empty( $data['status'] ) ) {
 
@@ -356,18 +356,19 @@ class WC_API_Orders extends WC_API_Resource {
 		$query_args = array(
 			'fields'      => 'ids',
 			'post_type'   => 'shop_order',
-			'post_status' => array_keys( wc_get_order_statuses() )
+			'post_status' => 'publish',
 		);
 
 		// add status argument
 		if ( ! empty( $args['status'] ) ) {
 
-			$statuses                  = 'wc-' . str_replace( ',', ',wc-', $args['status'] );
-			$statuses                  = explode( ',', $statuses );
+			$statuses                  = explode( ',', $args['status'] );
 			$query_args['post_status'] = $statuses;
 
 			unset( $args['status'] );
 
+		} else {
+			$query_args['post_status'] = array_keys( wc_get_order_statuses() );
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );

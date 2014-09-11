@@ -2,9 +2,9 @@
 /**
  * WC_Report_Taxes_By_Date
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Reports
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Reports
  * @version     2.1.0
  */
 class WC_Report_Taxes_By_Date extends WC_Admin_Report {
@@ -14,7 +14,6 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-
 		$legend   = array();
 
 		return array();
@@ -24,7 +23,6 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 	 * Output an export link
 	 */
 	public function get_export_button() {
-
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : 'last_month';
 		?>
 		<a
@@ -42,7 +40,6 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 	 * Output the report
 	 */
 	public function output_report() {
-
 		$ranges = array(
 			'year'         => __( 'Year', 'woocommerce' ),
 			'last_month'   => __( 'Last Month', 'woocommerce' ),
@@ -51,9 +48,8 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 
 		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : 'last_month';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) )
 			$current_range = 'last_month';
-		}
 
 		$this->calculate_current_range( $current_range );
 
@@ -64,11 +60,9 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart
-	 *
 	 * @return string
 	 */
 	public function get_main_chart() {
-
 		$tax_rows = $this->get_order_report_data( array(
 			'data' => array(
 				'_order_tax' => array(

@@ -63,7 +63,7 @@ class WC_Email_Customer_Note extends WC_Email {
 
 			extract( $args );
 
-			$this->object 		= wc_get_order( $order_id );
+			$this->object 		= get_order( $order_id );
 			$this->recipient	= $this->object->billing_email;
 			$this->customer_note = $customer_note;
 

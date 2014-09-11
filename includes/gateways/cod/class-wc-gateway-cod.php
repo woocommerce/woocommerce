@@ -120,7 +120,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 			if ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
 				$order_id = absint( get_query_var( 'order-pay' ) );
-				$order    = wc_get_order( $order_id );
+				$order    = get_order( $order_id );
 
 				// Test if order needs shipping.
 				$needs_shipping = false;
@@ -198,7 +198,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      */
 	public function process_payment( $order_id ) {
 
-		$order = wc_get_order( $order_id );
+		$order = get_order( $order_id );
 
 		// Mark as processing (payment won't be taken until delivery)
 		$order->update_status( 'processing', __( 'Payment to be made upon delivery.', 'woocommerce' ) );

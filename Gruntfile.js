@@ -3,7 +3,6 @@ module.exports = function( grunt ) {
 	'use strict';
 
 	grunt.initConfig({
-
 		// setting folder templates
 		dirs: {
 			css: 'assets/css',
@@ -12,7 +11,7 @@ module.exports = function( grunt ) {
 			js: 'assets/js'
 		},
 
-		// JavaScript linting with JSHint.
+		// javascript linting with jshint.
 		jshint: {
 			options: {
 				jshintrc: '.jshintrc'
@@ -101,7 +100,7 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Watch changes for assets.
+		// Watch changes for assets
 		watch: {
 			less: {
 				files: ['<%= dirs.css %>/*.less'],
@@ -118,7 +117,6 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Generate POT files.
 		makepot: {
 			options: {
 				type: 'wp-plugin',
@@ -133,8 +131,7 @@ module.exports = function( grunt ) {
 					potFilename: 'woocommerce.pot',
 					exclude: [
 						'includes/admin/.*',
-						'apigen/.*',
-						'deploy/.*'
+						'apigen/.*'
 					],
 					processPot: function ( pot ) {
 						pot.headers['project-id-version'] += ' Frontend';
@@ -145,8 +142,8 @@ module.exports = function( grunt ) {
 			admin: {
 				options: {
 					potFilename: 'woocommerce-admin.pot',
-					include: [
-						'includes/admin/.*'
+					exclude: [
+						'^(?!includes\/admin).*'
 					],
 					processPot: function ( pot ) {
 						pot.headers['project-id-version'] += ' Admin';
@@ -156,7 +153,6 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Check textdomain errors.
 		checktextdomain: {
 			options:{
 				text_domain: 'woocommerce',
@@ -181,14 +177,12 @@ module.exports = function( grunt ) {
 				src:  [
 					'**/*.php', // Include all files
 					'!apigen/**', // Exclude apigen/
-					'!deploy/**', // Exclude deploy/
 					'!node_modules/**' // Exclude node_modules/
 				],
 				expand: true
 			}
 		},
 
-		// Exec shell commands.
 		shell: {
 			options: {
 				stdout: true,
@@ -197,18 +191,16 @@ module.exports = function( grunt ) {
 			apigen: {
 				command: [
 					'cd apigen/',
-					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/api/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"',
+					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"',
 				].join( '&&' )
 			}
 		},
 
-		// Copy files to deploy.
 		copy: {
 			deploy: {
 				src: [
 					'**',
 					'!.*',
-					'!*.md',
 					'!.*/**',
 					'.htaccess',
 					'!Gruntfile.js',
@@ -224,7 +216,6 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Clean the directory.
 		clean: {
 			apigen: {
 				src: [ 'wc-apidocs' ]

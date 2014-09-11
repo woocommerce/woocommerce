@@ -32,6 +32,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->testurl              = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 		$this->method_title         = __( 'PayPal', 'woocommerce' );
 		$this->method_description   = __( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' );
+		$this->view_transaction_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
 		$this->notify_url           = WC()->api_request_url( 'WC_Gateway_Paypal' );
 		$this->supports 			= array(
 			'products',
@@ -225,9 +226,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'placeholder' => __( 'Optional', 'woocommerce' )
 			),
 			'api_details' => array(
-				'title'       => __( 'API Credentials', 'woocommerce' ),
+				'title'       => __( 'API options (for refund support)', 'woocommerce' ),
 				'type'        => 'title',
-				'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your PayPal API Credentials %shere%s.', 'woocommerce' ), '<a href="https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#creating-classic-api-credentials">', '</a>' ),
+				'description' => '',
 			),
 			'api_username' => array(
 				'title'       => __( 'API Username', 'woocommerce' ),
@@ -416,7 +417,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$item_loop        = 0;
 		$args             = array();
 		$args['tax_cart'] = $order->get_total_tax();
-
+		
 		// Products
 		if ( sizeof( $order->get_items() ) > 0 ) {
 			foreach ( $order->get_items() as $item ) {
@@ -427,7 +428,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$product   = $order->get_product_from_item( $item );
 				$item_name = $item['name'];
 				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
-
+				
 				if ( $meta = $item_meta->display( true, true ) ) {
 					$item_name .= ' ( ' . $meta . ' )';
 				}
@@ -485,7 +486,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function generate_paypal_form( $order_id ) {
 
-		$order = wc_get_order( $order_id );
+		$order = get_order( $order_id );
 
 		if ( 'yes' == $this->testmode ) {
 			$paypal_adr = $this->testurl . '?test_ipn=1&';
@@ -544,7 +545,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
-		$order       = wc_get_order( $order_id );
+		$order       = get_order( $order_id );
 		$paypal_args = $this->get_paypal_args( $order );
 		$paypal_args = http_build_query( $paypal_args, '', '&' );
 
@@ -564,13 +565,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Process a refund if supported
 	 * @param  int $order_id
 	 * @param  float $amount
-	 * @param  string $reason
 	 * @return  bool|wp_error True or false based on success, or a WP_Error object
 	 */
-	public function process_refund( $order_id, $amount = null, $reason = '' ) {
-		$order = wc_get_order( $order_id );
+	public function process_refund( $order_id, $amount = null ) {
+		$order = get_order( $order_id );
 
-		if ( ! $order || ! $order->get_transaction_id() || ! $this->api_username || ! $this->api_password || ! $this->api_signature ) {
+		if ( ! $order || ! $order->get_transaction_id() || ! $this->api_username || ! $this->api_password || ! $this->api_password ) {
 			return false;
 		}
 
@@ -589,14 +589,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$post_data['CURRENCYCODE'] = $order->get_order_currency();
 		}
 
-		if ( $reason ) {
-			if ( 255 < strlen( $reason ) ) {
-				$reason = substr( $reason, 0, 252 ) . '...';
-			}
-
-			$post_data['NOTE'] = html_entity_decode( $reason, ENT_NOQUOTES, 'UTF-8' );
-		}
-
 		$response = wp_remote_post( 'yes' === $this->testmode ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp', array(
 			'method'      => 'POST',
 			'body'        => $post_data,
@@ -604,7 +596,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'sslverify'   => false,
 			'user-agent'  => 'WooCommerce',
 			'httpversion' => '1.1'
-			)
+			) 
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -1003,12 +995,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			list( $order_id, $order_key ) = $custom;
 		}
 
-		$order = wc_get_order( $order_id );
+		$order = get_order( $order_id );
 
 		if ( ! isset( $order->id ) ) {
 			// We have an invalid $order_id, probably because invoice_prefix has changed
 			$order_id 	= wc_get_order_id_by_order_key( $order_key );
-			$order 		= wc_get_order( $order_id );
+			$order 		= get_order( $order_id );
 		}
 
 		// Validate key
@@ -1040,23 +1032,5 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		return $state;
-	}
-
-	/**
-	 * Get the transaction URL.
-	 *
-	 * @param  WC_Order $order
-	 *
-	 * @return string
-	 */
-	public function get_transaction_url( $order ) {
-
-		if ( 'yes' == $this->testmode ) {
-			$this->view_transaction_url = 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
-		} else {
-			$this->view_transaction_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
-		}
-
-		return parent::get_transaction_url( $order );
 	}
 }

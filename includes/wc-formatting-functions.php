@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  *
  * urldecode is used to reverse munging of UTF8 characters.
  *
+ * @access public
  * @param mixed $taxonomy
  * @return string
  */
@@ -27,6 +28,7 @@ function wc_sanitize_taxonomy_name( $taxonomy ) {
 /**
  * Gets the filename part of a download URL
  *
+ * @access public
  * @param string $file_url
  * @return string
  */
@@ -42,6 +44,7 @@ function wc_get_filename_from_url( $file_url ) {
  *
  * Usage: wc_get_dimension(55, 'in');
  *
+ * @access public
  * @param mixed $dim
  * @param mixed $to_unit 'in', 'm', 'cm', 'm'
  * @return float
@@ -89,10 +92,11 @@ function wc_get_dimension( $dim, $to_unit ) {
 }
 
 /**
- * Normalise weights, unify to kg then convert to wanted unit value
+ * Normalise weights, unify to cm then convert to wanted unit value
  *
  * Usage: wc_get_weight(55, 'kg');
  *
+ * @access public
  * @param mixed $weight
  * @param mixed $to_unit 'g', 'kg', 'lbs'
  * @return float
@@ -136,6 +140,7 @@ function wc_get_weight( $weight, $to_unit ) {
 /**
  * Trim trailing zeros off prices.
  *
+ * @access public
  * @param mixed $price
  * @return string
  */
@@ -146,17 +151,16 @@ function wc_trim_zeros( $price ) {
 /**
  * Round a tax amount
  *
- * @param mixed $tax
- * @return double
+ * @access public
+ * @param mixed $price
+ * @return string
  */
 function wc_round_tax_total( $tax ) {
 	$dp = (int) get_option( 'woocommerce_price_num_decimals' );
 
-	// @codeCoverageIgnoreStart
 	if ( version_compare( phpversion(), '5.3', '<' ) ) {
 		$tax = round( $tax, $dp );
 	} else {
-		// @codeCoverageIgnoreEnd
 		$tax = round( $tax, $dp, WC_TAX_ROUNDING_MODE );
 	}
 	return $tax;
@@ -240,6 +244,7 @@ function wc_format_localized_decimal( $value ) {
 /**
  * Clean variables
  *
+ * @access public
  * @param string $var
  * @return string
  */
@@ -250,22 +255,23 @@ function wc_clean( $var ) {
 /**
  * Merge two arrays
  *
+ * @access public
  * @param array $a1
  * @param array $a2
  * @return array
  */
 function wc_array_overlay( $a1, $a2 ) {
-	foreach ( $a1 as $k => $v ) {
-		if ( ! array_key_exists( $k, $a2 ) ) {
-			continue;
-		}
-		if ( is_array( $v ) && is_array( $a2[ $k ] ) ) {
-			$a1[ $k ] = wc_array_overlay( $v, $a2[ $k ] );
-		} else {
-			$a1[ $k ] = $a2[ $k ];
-		}
-	}
-	return $a1;
+    foreach( $a1 as $k => $v ) {
+        if ( ! array_key_exists( $k, $a2 ) ) {
+        	continue;
+        }
+        if ( is_array( $v ) && is_array( $a2[ $k ] ) ) {
+            $a1[ $k ] = wc_array_overlay( $v, $a2[ $k ] );
+        } else {
+            $a1[ $k ] = $a2[ $k ];
+        }
+    }
+    return $a1;
 }
 
 /**
@@ -306,6 +312,7 @@ function get_woocommerce_price_format() {
 /**
  * Format the price with a currency symbol.
  *
+ * @access public
  * @param float $price
  * @param array $args (default: array())
  * @return string
@@ -351,30 +358,32 @@ function wc_price( $price, $args = array() ) {
  *
  * This function transforms the php.ini notation for numbers (like '2M') to an integer.
  *
+ * @access public
  * @param $size
  * @return int
  */
 function wc_let_to_num( $size ) {
-	$l   = substr( $size, -1 );
-	$ret = substr( $size, 0, -1 );
-	switch ( strtoupper( $l ) ) {
-		case 'P':
-			$ret *= 1024;
-		case 'T':
-			$ret *= 1024;
-		case 'G':
-			$ret *= 1024;
-		case 'M':
-			$ret *= 1024;
-		case 'K':
-			$ret *= 1024;
-	}
-	return $ret;
+    $l 		= substr( $size, -1 );
+    $ret 	= substr( $size, 0, -1 );
+    switch( strtoupper( $l ) ) {
+	    case 'P':
+	        $ret *= 1024;
+	    case 'T':
+	        $ret *= 1024;
+	    case 'G':
+	        $ret *= 1024;
+	    case 'M':
+	        $ret *= 1024;
+	    case 'K':
+	        $ret *= 1024;
+    }
+    return $ret;
 }
 
 /**
  * WooCommerce Date Format - Allows to change date format for everything WooCommerce
  *
+ * @access public
  * @return string
  */
 function wc_date_format() {
@@ -384,6 +393,7 @@ function wc_date_format() {
 /**
  * WooCommerce Time Format - Allows to change time format for everything WooCommerce
  *
+ * @access public
  * @return string
  */
 function wc_time_format() {
@@ -397,6 +407,7 @@ function wc_time_format() {
  * Adapted from http://www.php.net/manual/en/function.timezone-name-from-abbr.php#89155
  *
  * @since 2.1
+ * @access public
  * @return string a valid PHP timezone string for the site
  */
 function wc_timezone_string() {
@@ -441,6 +452,7 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 	/**
 	 * Hex darker/lighter/contrast functions for colours
 	 *
+	 * @access public
 	 * @param mixed $color
 	 * @return string
 	 */
@@ -461,25 +473,26 @@ if ( ! function_exists( 'wc_hex_darker' ) ) {
 	/**
 	 * Hex darker/lighter/contrast functions for colours
 	 *
+	 * @access public
 	 * @param mixed $color
 	 * @param int $factor (default: 30)
 	 * @return string
 	 */
 	function wc_hex_darker( $color, $factor = 30 ) {
-		$base  = wc_rgb_from_hex( $color );
+		$base = wc_rgb_from_hex( $color );
 		$color = '#';
 
-		foreach ( $base as $k => $v ) {
-			$amount      = $v / 100;
-			$amount      = round( $amount * $factor );
-			$new_decimal = $v - $amount;
+		foreach ($base as $k => $v) :
+	        $amount = $v / 100;
+	        $amount = round($amount * $factor);
+	        $new_decimal = $v - $amount;
 
-			$new_hex_component = dechex( $new_decimal );
-			if ( strlen( $new_hex_component ) < 2 ) {
-				$new_hex_component = "0" . $new_hex_component;
-			}
-			$color .= $new_hex_component;
-		}
+	        $new_hex_component = dechex($new_decimal);
+	        if(strlen($new_hex_component) < 2) :
+	        	$new_hex_component = "0".$new_hex_component;
+	        endif;
+	        $color .= $new_hex_component;
+		endforeach;
 
 		return $color;
 	}
@@ -490,28 +503,29 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 	/**
 	 * Hex darker/lighter/contrast functions for colours
 	 *
+	 * @access public
 	 * @param mixed $color
 	 * @param int $factor (default: 30)
 	 * @return string
 	 */
 	function wc_hex_lighter( $color, $factor = 30 ) {
-		$base  = wc_rgb_from_hex( $color );
+		$base = wc_rgb_from_hex( $color );
 		$color = '#';
 
-		foreach ( $base as $k => $v ) {
-			$amount      = 255 - $v;
-			$amount      = $amount / 100;
-			$amount      = round( $amount * $factor );
-			$new_decimal = $v + $amount;
+	    foreach ($base as $k => $v) :
+	        $amount = 255 - $v;
+	        $amount = $amount / 100;
+	        $amount = round($amount * $factor);
+	        $new_decimal = $v + $amount;
 
-			$new_hex_component = dechex( $new_decimal );
-			if ( strlen( $new_hex_component ) < 2 ) {
-				$new_hex_component = "0" . $new_hex_component;
-			}
-			$color .= $new_hex_component;
-		}
+	        $new_hex_component = dechex($new_decimal);
+	        if(strlen($new_hex_component) < 2) :
+	        	$new_hex_component = "0".$new_hex_component;
+	        endif;
+	        $color .= $new_hex_component;
+	   	endforeach;
 
-		return $color;
+	   	return $color;
 	}
 }
 
@@ -520,19 +534,19 @@ if ( ! function_exists( 'wc_light_or_dark' ) ) {
 	/**
 	 * Detect if we should use a light or dark colour on a background colour
 	 *
+	 * @access public
 	 * @param mixed $color
 	 * @param string $dark (default: '#000000')
 	 * @param string $light (default: '#FFFFFF')
 	 * @return string
 	 */
 	function wc_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
-
-		$hex = str_replace( '#', '', $color );
+	    //return ( hexdec( $color ) > 0xffffff / 2 ) ? $dark : $light;
+	    $hex = str_replace( '#', '', $color );
 
 		$c_r = hexdec( substr( $hex, 0, 2 ) );
 		$c_g = hexdec( substr( $hex, 2, 2 ) );
 		$c_b = hexdec( substr( $hex, 4, 2 ) );
-
 		$brightness = ( ( $c_r * 299 ) + ( $c_g * 587 ) + ( $c_b * 114 ) ) / 1000;
 
 		return $brightness > 155 ? $dark : $light;
@@ -544,27 +558,28 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
 	/**
 	 * Format string as hex
 	 *
+	 * @access public
 	 * @param string $hex
 	 * @return string
 	 */
 	function wc_format_hex( $hex ) {
 
-		$hex = trim( str_replace( '#', '', $hex ) );
+	    $hex = trim( str_replace( '#', '', $hex ) );
 
-		if ( strlen( $hex ) == 3 ) {
+	    if ( strlen( $hex ) == 3 ) {
 			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-		}
+	    }
 
-		return $hex ? '#' . $hex : null;
+	    if ( $hex ) return '#' . $hex;
 	}
 }
 
 /**
  * Format the postcode according to the country and length of the postcode
  *
- * @param string postcode
- * @param string country
- * @return string formatted postcode
+ * @param   string	postcode
+ * @param	string	country
+ * @return  string	formatted postcode
  */
 function wc_format_postcode( $postcode, $country ) {
 	$postcode = strtoupper( trim( $postcode ) );
@@ -580,6 +595,7 @@ function wc_format_postcode( $postcode, $country ) {
 /**
  * format_phone function.
  *
+ * @access public
  * @param mixed $tel
  * @return string
  */

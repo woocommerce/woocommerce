@@ -2,9 +2,9 @@
 /**
  * WooCommerce Integration Settings
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -21,7 +21,6 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id    = 'integration';
 		$this->label = __( 'Integration', 'woocommerce' );
 
@@ -45,9 +44,8 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 
 		$integrations = WC()->integrations->get_integrations();
 
-		if ( ! $current_section && ! empty( $integrations ) ) {
+		if ( ! $current_section && ! empty( $integrations ) )
 			$current_section = current( $integrations )->id;
-		}
 
 		foreach ( $integrations as $integration ) {
 			$title = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;

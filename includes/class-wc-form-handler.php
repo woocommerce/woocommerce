@@ -264,7 +264,7 @@ class WC_Form_Handler {
 			// Pay for existing order
 			$order_key  = $_GET['key'];
 			$order_id   = absint( $wp->query_vars['order-pay'] );
-			$order      = wc_get_order( $order_id );
+			$order      = get_order( $order_id );
 
 			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
 
@@ -462,7 +462,7 @@ class WC_Form_Handler {
 		WC()->cart->empty_cart();
 
 		// Load the previous order - Stop if the order does not exist
-		$order = wc_get_order( absint( $_GET['order_again'] ) );
+		$order = get_order( absint( $_GET['order_again'] ) );
 
 		if ( empty( $order->id ) ) {
 			return;
@@ -519,7 +519,7 @@ class WC_Form_Handler {
 
 			$order_key        = $_GET['order'];
 			$order_id         = absint( $_GET['order_id'] );
-			$order            = wc_get_order( $order_id );
+			$order            = get_order( $order_id );
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
 			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
 			$redirect         = $_GET['redirect'];
@@ -564,7 +564,7 @@ class WC_Form_Handler {
 		$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 		$was_added_to_cart   = false;
 		$added_to_cart       = array();
-		$adding_to_cart      = wc_get_product( $product_id );
+		$adding_to_cart      = get_product( $product_id );
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
 
 		// Variable product handling
@@ -582,7 +582,7 @@ class WC_Form_Handler {
 			}
 
 			$attributes = $adding_to_cart->get_attributes();
-			$variation  = wc_get_product( $variation_id );
+			$variation  = get_product( $variation_id );
 
 			// Verify all attributes
 			foreach ( $attributes as $attribute ) {

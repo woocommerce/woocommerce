@@ -2,9 +2,9 @@
 /**
  * Order Notes
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
@@ -22,9 +22,9 @@ class WC_Meta_Box_Order_Notes {
 		global $post;
 
 		$args = array(
-			'post_id'   => $post->ID,
-			'approve'   => 'approve',
-			'type'      => 'order_note'
+			'post_id' 	=> $post->ID,
+			'approve' 	=> 'approve',
+			'type' 		=> 'order_note'
 		);
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
@@ -36,9 +36,7 @@ class WC_Meta_Box_Order_Notes {
 		echo '<ul class="order_notes">';
 
 		if ( $notes ) {
-
 			foreach( $notes as $note ) {
-
 				$note_classes = get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? array( 'customer-note', 'note' ) : array( 'note' );
 
 				?>
@@ -47,14 +45,13 @@ class WC_Meta_Box_Order_Notes {
 						<?php echo wpautop( wptexturize( wp_kses_post( $note->comment_content ) ) ); ?>
 					</div>
 					<p class="meta">
-						<abbr class="exact-date" title="<?php echo $note->comment_date_gmt; ?> GMT"><?php printf( __( 'added %s ago', 'woocommerce' ), human_time_diff( strtotime( $note->comment_date_gmt ), current_time( 'timestamp', 1 ) ) ); ?></abbr>
+						<abbr class="exact-date" title="<?php echo $note->comment_date_gmt; ?> GMT"><?php printf( __( 'added on %1$s at %2$s', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $note->comment_date_gmt ) ), date_i18n( wc_time_format(), strtotime( $note->comment_date_gmt ) ) ); ?></abbr>
 						<?php if ( $note->comment_author !== __( 'WooCommerce', 'woocommerce' ) ) printf( ' ' . __( 'by %s', 'woocommerce' ), $note->comment_author ); ?>
 						<a href="#" class="delete_note"><?php _e( 'Delete note', 'woocommerce' ); ?></a>
 					</p>
 				</li>
 				<?php
 			}
-
 		} else {
 			echo '<li>' . __( 'There are no notes for this order yet.', 'woocommerce' ) . '</li>';
 		}

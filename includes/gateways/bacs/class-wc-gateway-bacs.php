@@ -291,7 +291,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
      */
     public function process_payment( $order_id ) {
 
-		$order = wc_get_order( $order_id );
+		$order = get_order( $order_id );
 
 		// Mark as on-hold (we're awaiting the payment)
 		$order->update_status( 'on-hold', __( 'Awaiting BACS payment', 'woocommerce' ) );

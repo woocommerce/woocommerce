@@ -331,7 +331,7 @@ class WC_Customer {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		// Check shipping method at this point to see if we need special handling
-		if ( apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) == true && WC()->cart->needs_shipping() && sizeof( array_intersect( WC()->session->get( 'chosen_shipping_methods', array( get_option( 'woocommerce_default_shipping_method' ) ) ), apply_filters( 'woocommerce_local_pickup_methods', array( 'local_pickup' ) ) ) ) > 0 ) {
+		if ( apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) == true && sizeof( array_intersect( WC()->session->get( 'chosen_shipping_methods', array( get_option( 'woocommerce_default_shipping_method' ) ) ), apply_filters( 'woocommerce_local_pickup_methods', array( 'local_pickup' ) ) ) ) > 0 ) {
 			$tax_based_on = 'base';
 		}
 
@@ -372,8 +372,8 @@ class WC_Customer {
 	 * Sets session data for the location.
 	 *
 	 * @access public
-	 * @param string $country
-	 * @param string $state
+	 * @param mixed $country
+	 * @param mixed $state
 	 * @param string $postcode (default: '')
 	 * @param string $city (default: '')
 	 */
@@ -418,7 +418,7 @@ class WC_Customer {
 	 * Sets session data for the city.
 	 *
 	 * @access public
-	 * @param mixed $city
+	 * @param mixed $postcode
 	 */
 	public function set_city( $city ) {
 		$this->city = $city;
@@ -448,7 +448,7 @@ class WC_Customer {
 	 * Sets session data for the location.
 	 *
 	 * @access public
-	 * @param string $country
+	 * @param mixed $country
 	 * @param string $state (default: '')
 	 * @param string $postcode (default: '')
 	 * @param string $city (default: '')
@@ -494,7 +494,7 @@ class WC_Customer {
 	 * Sets session data for the city.
 	 *
 	 * @access public
-	 * @param string $city
+	 * @param string $postcode
 	 */
 	public function set_shipping_city( $city ) {
 		$this->shipping_city = $city;
@@ -534,7 +534,7 @@ class WC_Customer {
 	 * calculated_shipping function.
 	 *
 	 * @access public
-	 * @param boolean $calculated
+	 * @param mixed $calculated
 	 */
 	public function calculated_shipping( $calculated = true ) {
 		$this->calculated_shipping = $calculated;

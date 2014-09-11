@@ -149,7 +149,7 @@ class WC_Admin_Settings {
 	/**
 	 * Get a setting from the settings API.
 	 *
-	 * @param mixed $option_name
+	 * @param mixed $option
 	 * @return string
 	 */
 	public static function get_option( $option_name, $default = '' ) {

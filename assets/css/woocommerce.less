@@ -2,9 +2,9 @@
 @import "woocommerce-base.less"; /* Contains base colours like @primary */
 
 /* Colours */
-@tertiary:       @primary;                                    /* Price slider bar / layered nav UI */
-@tertiarytext:   @primarytext;                                /* Text on tertiary colour bg */
-@quaternary:     desaturate( darken( @tertiary, 45%), 40% );  /* Price slider bg */
+@tertiary: 		@primary; 									/* Price slider bar / layered nav UI */
+@tertiarytext: 	@primarytext;								/* Text on tertiary colour bg */
+@quaternary: 	desaturate( darken( @tertiary, 45%), 40% ); /* Price slider bg */
 
 /* =Custom Font
 -------------------------------------------------------------- */
@@ -676,7 +676,6 @@ p.demo_store {
 			height: 28px;
 			float:left;
 			padding: 0;
-			margin: 0;
 			text-align: center;
 			border: 1px solid darken( @secondary, 20 );
 			border-right: 0;
@@ -879,6 +878,8 @@ p.demo_store {
 	}
 
 	.woocommerce-product-rating {
+		.clearfix;
+		
 		line-height: 2em;
 		display: block;
 
@@ -1485,12 +1486,7 @@ p.demo_store {
 				img {
 					vertical-align: middle;
 					margin: -2px 0 0 .5em;
-					padding: 0;
 					position: relative;
-					box-shadow: none;
-				}
-				img + img {
-					margin-left: 2px;
 				}
 			}
 		}

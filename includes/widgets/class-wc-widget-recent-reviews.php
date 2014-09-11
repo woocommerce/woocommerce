@@ -68,7 +68,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 			foreach ( (array) $comments as $comment ) {
 
-				$_product = wc_get_product( $comment->comment_post_ID );
+				$_product = get_product( $comment->comment_post_ID );
 
 				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 

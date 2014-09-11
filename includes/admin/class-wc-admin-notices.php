@@ -69,12 +69,7 @@ class WC_Admin_Notices {
 		}
 
 		if ( in_array( 'translation_upgrade', $notices ) ) {
-			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 			add_action( 'admin_notices', array( $this, 'translation_upgrade_notice' ) );
-		}
-
-		if ( ! class_exists( 'WC_Mijireh_Checkout' ) && ( $mijireh = get_option( 'woocommerce_mijireh_checkout_settings', false ) ) && ! empty( $mijireh['enabled'] ) && $mijireh['enabled'] === 'yes' && empty( $_GET['action'] ) ) {
-			add_action( 'admin_notices', array( $this, 'mijireh_notice' ) );
 		}
 	}
 
@@ -148,13 +143,6 @@ class WC_Admin_Notices {
 		if ( $outdated ) {
 			include( 'views/html-notice-template-check.php' );
 		}
-	}
-
-	/**
-	 * Notice to say Mijireh has been deprecated in 2.2
-	 */
-	public function mijireh_notice() {
-		include( 'views/html-notice-mijireh.php' );
 	}
 }
 

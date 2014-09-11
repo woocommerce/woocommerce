@@ -104,7 +104,7 @@ class WC_API_Products extends WC_API_Resource {
 		if ( is_wp_error( $id ) )
 			return $id;
 
-		$product = wc_get_product( $id );
+		$product = get_product( $id );
 
 		// add data that applies to every product type
 		$product_data = $this->get_product_data( $product );

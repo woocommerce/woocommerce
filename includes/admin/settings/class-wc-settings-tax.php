@@ -2,9 +2,9 @@
 /**
  * WooCommerce Tax Settings
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -36,7 +36,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_sections() {
-
 		$sections = array(
 			''         => __( 'Tax Options', 'woocommerce' ),
 			'standard' => __( 'Standard Rates', 'woocommerce' )
@@ -45,11 +44,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// Get tax classes and display as links
 		$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
 
-		if ( $tax_classes ) {
-			foreach ( $tax_classes as $class ) {
+		if ( $tax_classes )
+			foreach ( $tax_classes as $class )
 				$sections[ sanitize_title( $class ) ] = sprintf( __( '%s Rates', 'woocommerce' ), $class );
-			}
-		}
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
@@ -60,7 +57,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-
 		$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 		$classes_options = array();
 		if ( $tax_classes )
@@ -69,35 +65,35 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 		return apply_filters('woocommerce_tax_settings', array(
 
-			array( 'title' => __( 'Tax Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
+			array(	'title' => __( 'Tax Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
 
 			array(
-				'title'   => __( 'Enable Taxes', 'woocommerce' ),
-				'desc'    => __( 'Enable taxes and tax calculations', 'woocommerce' ),
-				'id'      => 'woocommerce_calc_taxes',
-				'default' => 'no',
-				'type'    => 'checkbox'
+				'title' => __( 'Enable Taxes', 'woocommerce' ),
+				'desc' 		=> __( 'Enable taxes and tax calculations', 'woocommerce' ),
+				'id' 		=> 'woocommerce_calc_taxes',
+				'default'	=> 'no',
+				'type' 		=> 'checkbox'
 			),
 
 			array(
-				'title'    => __( 'Prices Entered With Tax', 'woocommerce' ),
-				'id'       => 'woocommerce_prices_include_tax',
-				'default'  => 'no',
-				'type'     => 'radio',
-				'desc_tip' =>  __( 'This option is important as it will affect how you input prices. Changing it will not update existing products.', 'woocommerce' ),
-				'options'  => array(
+				'title' => __( 'Prices Entered With Tax', 'woocommerce' ),
+				'id' 		=> 'woocommerce_prices_include_tax',
+				'default'	=> 'no',
+				'type' 		=> 'radio',
+				'desc_tip'	=>  __( 'This option is important as it will affect how you input prices. Changing it will not update existing products.', 'woocommerce' ),
+				'options'	=> array(
 					'yes' => __( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ),
-					'no'  => __( 'No, I will enter prices exclusive of tax', 'woocommerce' )
+					'no' => __( 'No, I will enter prices exclusive of tax', 'woocommerce' )
 				),
 			),
 
 			array(
-				'title'    => __( 'Calculate Tax Based On:', 'woocommerce' ),
-				'id'       => 'woocommerce_tax_based_on',
-				'desc_tip' =>  __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
-				'default'  => 'shipping',
-				'type'     => 'select',
-				'options'  => array(
+				'title'     => __( 'Calculate Tax Based On:', 'woocommerce' ),
+				'id'        => 'woocommerce_tax_based_on',
+				'desc_tip'	=>  __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
+				'default'   => 'shipping',
+				'type'      => 'select',
+				'options'   => array(
 					'shipping' => __( 'Customer shipping address', 'woocommerce' ),
 					'billing'  => __( 'Customer billing address', 'woocommerce' ),
 					'base'     => __( 'Shop base address', 'woocommerce' )
@@ -105,43 +101,43 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Default Customer Address:', 'woocommerce' ),
-				'id'       => 'woocommerce_default_customer_address',
-				'desc_tip' =>  __( 'This option determines the customers default address (before they input their own).', 'woocommerce' ),
-				'default'  => 'base',
-				'type'     => 'select',
-				'options'  => array(
+				'title'     => __( 'Default Customer Address:', 'woocommerce' ),
+				'id'        => 'woocommerce_default_customer_address',
+				'desc_tip'	=>  __( 'This option determines the customers default address (before they input their own).', 'woocommerce' ),
+				'default'   => 'base',
+				'type'      => 'select',
+				'options'   => array(
 					''     => __( 'No address', 'woocommerce' ),
 					'base' => __( 'Shop base address', 'woocommerce' ),
 				),
 			),
 
 			array(
-				'title'    => __( 'Shipping Tax Class:', 'woocommerce' ),
-				'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
-				'id'       => 'woocommerce_shipping_tax_class',
-				'css'      => 'min-width:150px;',
-				'default'  => 'title',
-				'type'     => 'select',
-				'options'  => array( '' => __( 'Shipping tax class based on cart items', 'woocommerce' ), 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
-				'desc_tip' =>  true,
+				'title' 		=> __( 'Shipping Tax Class:', 'woocommerce' ),
+				'desc' 		=> __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
+				'id' 		=> 'woocommerce_shipping_tax_class',
+				'css' 		=> 'min-width:150px;',
+				'default'	=> 'title',
+				'type' 		=> 'select',
+				'options' 	=> array( '' => __( 'Shipping tax class based on cart items', 'woocommerce' ), 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
+				'desc_tip'	=>  true,
 			),
 
 			array(
-				'title'   => __( 'Rounding', 'woocommerce' ),
-				'desc'    => __( 'Round tax at subtotal level, instead of rounding per line', 'woocommerce' ),
-				'id'      => 'woocommerce_tax_round_at_subtotal',
-				'default' => 'no',
-				'type'    => 'checkbox',
+				'title' => __( 'Rounding', 'woocommerce' ),
+				'desc' 		=> __( 'Round tax at subtotal level, instead of rounding per line', 'woocommerce' ),
+				'id' 		=> 'woocommerce_tax_round_at_subtotal',
+				'default'	=> 'no',
+				'type' 		=> 'checkbox',
 			),
 
 			array(
-				'title'   => __( 'Additional Tax Classes', 'woocommerce' ),
-				'desc'    => __( 'List additional tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>. Tax classes can be assigned to products.', 'woocommerce' ),
-				'id'      => 'woocommerce_tax_classes',
-				'css'     => 'width:100%; height: 65px;',
-				'type'    => 'textarea',
-				'default' => sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL )
+				'title' 		=> __( 'Additional Tax Classes', 'woocommerce' ),
+				'desc' 		=> __( 'List additional tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>. Tax classes can be assigned to products.', 'woocommerce' ),
+				'id' 		=> 'woocommerce_tax_classes',
+				'css' 		=> 'width:100%; height: 65px;',
+				'type' 		=> 'textarea',
+				'default'	=> sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL )
 			),
 
 			array(
@@ -160,7 +156,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'id'      => 'woocommerce_price_display_suffix',
 				'default' => '',
 				'type'    => 'text',
-				'desc'    => __( 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: <code>{price_including_tax}, {price_excluding_tax}</code>.', 'woocommerce' ),
+				'desc' 		=> __( 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: <code>{price_including_tax}, {price_excluding_tax}</code>.', 'woocommerce' ),
 			),
 
 			array(
@@ -184,7 +180,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					'single'     => __( 'As a single total', 'woocommerce' ),
 					'itemized'   => __( 'Itemized', 'woocommerce' ),
 				),
-				'autoload' => false
+				'autoload'      => false
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'tax_options' ),
@@ -201,8 +197,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
 
 		if ( $current_section == 'standard' || in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
-			$this->output_tax_rates();
-		} else {
+ 			$this->output_tax_rates();
+ 		} else {
 			$settings = $this->get_settings();
 
 			WC_Admin_Settings::output_fields( $settings );
@@ -240,11 +236,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$tax_classes   = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
 		$current_class = '';
 
-		foreach( $tax_classes as $class ) {
-			if ( sanitize_title( $class ) == $current_section ) {
+		foreach( $tax_classes as $class )
+			if ( sanitize_title( $class ) == $current_section )
 				$current_class = $class;
-			}
-		}
 		?>
 		<h3><?php printf( __( 'Tax Rates for the "%s" Class', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
 		<p><?php printf( __( 'Define tax rates for countries and states below. <a href="%s">See here</a> for available alpha-2 country codes.', 'woocommerce' ), 'http://en.wikipedia.org/wiki/ISO_3166-1#Current_codes' ); ?></p>
@@ -327,12 +321,12 @@ class WC_Settings_Tax extends WC_Settings_Page {
 							</td>
 
 							<td class="compound" width="8%">
-								<input type="checkbox" class="checkbox" name="tax_rate_compound[<?php echo $rate->tax_rate_id ?>]" <?php checked( $rate->tax_rate_compound, '1' ); ?> />
-							</td>
+		    					<input type="checkbox" class="checkbox" name="tax_rate_compound[<?php echo $rate->tax_rate_id ?>]" <?php checked( $rate->tax_rate_compound, '1' ); ?> />
+		    				</td>
 
-							<td class="apply_to_shipping" width="8%">
-								<input type="checkbox" class="checkbox" name="tax_rate_shipping[<?php echo $rate->tax_rate_id ?>]" <?php checked($rate->tax_rate_shipping, '1' ); ?> />
-							</td>
+		    				<td class="apply_to_shipping" width="8%">
+		    					<input type="checkbox" class="checkbox" name="tax_rate_shipping[<?php echo $rate->tax_rate_id ?>]" <?php checked($rate->tax_rate_shipping, '1' ); ?> />
+		    				</td>
 						</tr>
 						<?php
 					}
@@ -447,11 +441,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 								<input type="number" step="1" min="1" value="1" name="tax_rate_priority[new][' + size + ']" />\
 							</td>\
 							<td class="compound" width="8%">\
-								<input type="checkbox" class="checkbox" name="tax_rate_compound[new][' + size + ']" />\
-							</td>\
-							<td class="apply_to_shipping" width="8%">\
-								<input type="checkbox" class="checkbox" name="tax_rate_shipping[new][' + size + ']" checked="checked" />\
-							</td>\
+		    					<input type="checkbox" class="checkbox" name="tax_rate_compound[new][' + size + ']" />\
+		    				</td>\
+		    				<td class="apply_to_shipping" width="8%">\
+		    					<input type="checkbox" class="checkbox" name="tax_rate_shipping[new][' + size + ']" checked="checked" />\
+		    				</td>\
 						</tr>';
 
 					if ( $tbody.find('tr.current').size() > 0 ) {
@@ -461,14 +455,14 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					}
 
 					jQuery( "td.country input" ).autocomplete({
-						source: availableCountries,
-						minLength: 3
-					});
+			            source: availableCountries,
+			            minLength: 3
+			        });
 
-					jQuery( "td.state input" ).autocomplete({
-						source: availableStates,
-						minLength: 3
-					});
+			        jQuery( "td.state input" ).autocomplete({
+			            source: availableStates,
+			            minLength: 3
+			        });
 
 					return false;
 				});
@@ -480,7 +474,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				var availableCountries = [<?php
 					$countries = array();
 					foreach ( WC()->countries->get_allowed_countries() as $value => $label )
-						$countries[] = '{ label: "' . esc_attr( $label ) . '", value: "' . $value . '" }';
+						$countries[] = '{ label: "' . $label . '", value: "' . $value . '" }';
 					echo implode( ', ', $countries );
 				?>];
 
@@ -488,19 +482,19 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					$countries = array();
 					foreach ( WC()->countries->get_allowed_country_states() as $value => $label )
 						foreach ( $label as $code => $state )
-							$countries[] = '{ label: "' . esc_attr( $state ) . '", value: "' . $code . '" }';
+							$countries[] = '{ label: "' . $state . '", value: "' . $code . '" }';
 					echo implode( ', ', $countries );
 				?>];
 
-				jQuery( "td.country input" ).autocomplete({
-					source: availableCountries,
-					minLength: 3
-				});
+		        jQuery( "td.country input" ).autocomplete({
+		            source: availableCountries,
+		            minLength: 3
+		        });
 
-				jQuery( "td.state input" ).autocomplete({
-					source: availableStates,
-					minLength: 3
-				});
+		        jQuery( "td.state input" ).autocomplete({
+		            source: availableStates,
+		            minLength: 3
+		        });
 			});
 		</script>
 		<?php
@@ -516,11 +510,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$tax_classes   = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
 		$current_class = '';
 
-		foreach( $tax_classes as $class ) {
-			if ( sanitize_title( $class ) == $current_section ) {
+		foreach( $tax_classes as $class )
+			if ( sanitize_title( $class ) == $current_section )
 				$current_class = $class;
-			}
-		}
 
 		// Get POST data
 		$tax_rate_country  = isset( $_POST['tax_rate_country'] ) ? $_POST['tax_rate_country'] : array();
@@ -554,17 +546,14 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					$compound = isset( $tax_rate_compound[ $key ][ $new_key ] ) ? 1 : 0;
 					$shipping = isset( $tax_rate_shipping[ $key ][ $new_key ] ) ? 1 : 0;
 
-					if ( ! $name ) {
+					if ( ! $name )
 						$name = __( 'Tax', 'woocommerce' );
-					}
 
-					if ( $country == '*' ) {
+					if ( $country == '*' )
 						$country = '';
-					}
 
-					if ( $state == '*' ) {
+					if ( $state == '*' )
 						$state = '';
-					}
 
 					$_tax_rate = array(
 						'tax_rate_country'  => $country,
@@ -590,7 +579,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 						$postcode_query = array();
 
-						foreach( $postcodes as $postcode ) {
+						foreach( $postcodes as $postcode )
 							if ( strstr( $postcode, '-' ) ) {
 								$postcode_parts = explode( '-', $postcode );
 
@@ -609,16 +598,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 								if ( $postcode )
 									$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
 							}
-						}
 
 						$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
 					}
 
 					if ( ! empty( $city ) ) {
-
 						$cities = explode( ';', $city );
 						$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
-
 						foreach( $cities as $city ) {
 							$wpdb->insert(
 							$wpdb->prefix . "woocommerce_tax_rate_locations",
@@ -657,17 +643,14 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				$compound = isset( $tax_rate_compound[ $key ] ) ? 1 : 0;
 				$shipping = isset( $tax_rate_shipping[ $key ] ) ? 1 : 0;
 
-				if ( ! $name ) {
+				if ( ! $name )
 					$name = __( 'Tax', 'woocommerce' );
-				}
 
-				if ( $country == '*' ) {
+				if ( $country == '*' )
 					$country = '';
-				}
 
-				if ( $state == '*' ) {
+				if ( $state == '*' )
 					$state = '';
-				}
 
 				$_tax_rate = array(
 					'tax_rate_country'  => $country,
@@ -702,7 +685,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 					$postcode_query = array();
 
-					foreach( $postcodes as $postcode ) {
+					foreach( $postcodes as $postcode )
 						if ( strstr( $postcode, '-' ) ) {
 							$postcode_parts = explode( '-', $postcode );
 
@@ -721,16 +704,12 @@ class WC_Settings_Tax extends WC_Settings_Page {
 							if ( $postcode )
 								$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
 						}
-					}
 
-					if ( !empty( $postcode_query ) ) {
-						$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
-					}
+					$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
 
 				}
 
 				if ( isset( $tax_rate_city[ $key ] ) ) {
-
 					// Delete old
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'city';", $tax_rate_id ) );
 
@@ -738,7 +717,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					$city   = wc_clean( $tax_rate_city[ $key ] );
 					$cities = explode( ';', $city );
 					$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
-
 					foreach( $cities as $city ) {
 						if ( $city ) {
 							$wpdb->insert(

@@ -39,7 +39,7 @@ if ( $customer_orders ) : ?>
 
 		<tbody><?php
 			foreach ( $customer_orders as $customer_order ) {
-				$order      = wc_get_order();
+				$order      = get_order();
 				$order->populate( $customer_order );
 				$item_count = $order->get_item_count();
 
@@ -53,7 +53,7 @@ if ( $customer_orders ) : ?>
 						<time datetime="<?php echo date( 'Y-m-d', strtotime( $order->order_date ) ); ?>" title="<?php echo esc_attr( strtotime( $order->order_date ) ); ?>"><?php echo date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ); ?></time>
 					</td>
 					<td class="order-status" style="text-align:left; white-space:nowrap;">
-						<?php echo wc_get_order_status_label( $order->get_status() ); ?>
+						<?php echo wc_get_order_status_name( $order->get_status() ); ?>
 					</td>
 					<td class="order-total">
 						<?php echo sprintf( _n( '%s for %s item', '%s for %s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ); ?>

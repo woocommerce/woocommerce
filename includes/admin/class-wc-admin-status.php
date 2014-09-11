@@ -211,7 +211,7 @@ class WC_Admin_Status {
 			)
 		);
 
-		if ( get_locale() !== 'en_US' ) {
+		if ( defined( 'WPLANG' ) && '' !== WPLANG ) {
 			$tools['translation_upgrade'] = array(
 				'name'    => __( 'Translation Upgrade', 'woocommerce' ),
 				'button'  => __( 'Force Translation Upgrade', 'woocommerce' ),
@@ -240,7 +240,7 @@ class WC_Admin_Status {
 	 *
 	 * @since 2.1.1
 	 * @param string $file Path to the file
-	 * @return string
+	 * @param array $all_headers List of headers, in the format array('HeaderKey' => 'Header Name')
 	 */
 	public static function get_file_version( $file ) {
 		// We don't need to write to the file, so just open for reading.

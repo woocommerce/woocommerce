@@ -23,7 +23,7 @@ GitHub is for *bug reports and contributions only* - if you have a support quest
 
 * Fork the repository on GitHub.
 * Make the changes to your forked repository.
-  * **Ensure you stick to the [WordPress Coding Standards](http://make.wordpress.org/core/handbook/coding-standards/php/).**
+  * **Ensure you stick to the [WordPress Coding Standards](http://codex.wordpress.org/WordPress_Coding_Standards).**
   * Ensure you use LF line endings - no crazy windows line endings. :)
 * When committing, reference your issue (#1234) and include a note about the fix.
 * Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository. Existing maintenance branches will be maintained of by WooCommerce developers.

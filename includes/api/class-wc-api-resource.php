@@ -34,24 +34,13 @@ class WC_API_Resource {
 		// automatically register routes for sub-classes
 		add_filter( 'woocommerce_api_endpoints', array( $this, 'register_routes' ) );
 
-		// maybe add meta to top-level resource responses
+		// remove fields from responses when requests specify certain fields
+		// note these are hooked at a later priority so data added via filters (e.g. customer data to the order response)
+		// still has the fields filtered properly
 		foreach ( array( 'order', 'coupon', 'customer', 'product', 'report' ) as $resource ) {
+
 			add_filter( "woocommerce_api_{$resource}_response", array( $this, 'maybe_add_meta' ), 15, 2 );
-		}
-
-		$response_names = array( 'order', 'coupon', 'customer', 'product', 'report',
-			'customer_orders', 'customer_downloads', 'order_note', 'order_refund',
-			'product_reviews', 'product_category'
-		);
-
-		foreach ( $response_names as $name ) {
-
-			/* remove fields from responses when requests specify certain fields
-			 * note these are hooked at a later priority so data added via
-			 * filters (e.g. customer data to the order response) still has the
-			 * fields filtered properly
-			 */
-			add_filter( "woocommerce_api_{$name}_response", array( $this, 'filter_response_fields' ), 20, 3 );
+			add_filter( "woocommerce_api_{$resource}_response", array( $this, 'filter_response_fields' ), 20, 3 );
 		}
 	}
 
@@ -273,9 +262,8 @@ class WC_API_Resource {
 	 */
 	public function filter_response_fields( $data, $resource, $fields ) {
 
-		if ( ! is_array( $data ) || empty( $fields ) ) {
+		if ( ! is_array( $data ) || empty( $fields ) )
 			return $data;
-		}
 
 		$fields = explode( ',', $fields );
 		$sub_fields = array();
@@ -329,11 +317,10 @@ class WC_API_Resource {
 	 */
 	protected function delete( $id, $type, $force = false ) {
 
-		if ( 'shop_order' === $type || 'shop_coupon' === $type ) {
+		if ( 'shop_order' === $type || 'shop_coupon' === $type )
 			$resource_name = str_replace( 'shop_', '', $type );
-		} else {
+		else
 			$resource_name = $type;
-		}
 
 		if ( 'customer' === $type ) {
 

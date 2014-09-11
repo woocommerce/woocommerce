@@ -34,7 +34,7 @@ jQuery( function( $ ) {
 			s_address,
 			s_address_2;
 
-		if ( $( '#ship-to-different-address input' ).is( ':checked' ) ) {
+		if ( $( '#ship-to-different-address input' ).is( ':checked' ) || $( '#ship-to-different-address input' ).size() === 0 ) {
 			s_country		= $( '#shipping_country' ).val();
 			s_state			= $( '#shipping_state' ).val();
 			s_postcode		= $( 'input#shipping_postcode' ).val();

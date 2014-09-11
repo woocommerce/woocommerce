@@ -2,11 +2,11 @@
 /**
  * Abstract Widget Class
  *
- * @author      WooThemes
- * @category    Widgets
- * @package     WooCommerce/Abstracts
- * @version     2.1.0
- * @extends     WP_Widget
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Abstracts
+ * @version 	2.1.0
+ * @extends 	WP_Widget
  */
 abstract class WC_Widget extends WP_Widget {
 
@@ -20,7 +20,6 @@ abstract class WC_Widget extends WP_Widget {
 	 * Constructor
 	 */
 	public function __construct() {
-
 		$widget_ops = array(
 			'classname'   => $this->widget_cssclass,
 			'description' => $this->widget_description
@@ -37,12 +36,10 @@ abstract class WC_Widget extends WP_Widget {
 	 * get_cached_widget function.
 	 */
 	function get_cached_widget( $args ) {
-
 		$cache = wp_cache_get( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
 
-		if ( ! is_array( $cache ) ) {
+		if ( ! is_array( $cache ) )
 			$cache = array();
-		}
 
 		if ( isset( $cache[ $args['widget_id'] ] ) ) {
 			echo $cache[ $args['widget_id'] ];
@@ -54,7 +51,6 @@ abstract class WC_Widget extends WP_Widget {
 
 	/**
 	 * Cache the widget
-	 * @param string $content
 	 */
 	public function cache_widget( $args, $content ) {
 		$cache[ $args['widget_id'] ] = $content;
@@ -64,8 +60,7 @@ abstract class WC_Widget extends WP_Widget {
 
 	/**
 	 * Flush the cache
-	 *
-	 * @return void
+	 * @return [type]
 	 */
 	public function flush_widget_cache() {
 		wp_cache_delete( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
@@ -75,20 +70,18 @@ abstract class WC_Widget extends WP_Widget {
 	 * update function.
 	 *
 	 * @see WP_Widget->update
+	 * @access public
 	 * @param array $new_instance
 	 * @param array $old_instance
 	 * @return array
 	 */
-	public function update( $new_instance, $old_instance ) {
-
+	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 
-		if ( ! $this->settings ) {
+		if ( ! $this->settings )
 			return $instance;
-		}
 
 		foreach ( $this->settings as $key => $setting ) {
-
 			if ( isset( $new_instance[ $key ] ) ) {
 				$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
 			} elseif ( 'checkbox' === $setting['type'] ) {
@@ -105,20 +98,20 @@ abstract class WC_Widget extends WP_Widget {
 	 * form function.
 	 *
 	 * @see WP_Widget->form
+	 * @access public
 	 * @param array $instance
+	 * @return void
 	 */
-	public function form( $instance ) {
+	function form( $instance ) {
 
-		if ( ! $this->settings ) {
+		if ( ! $this->settings )
 			return;
-		}
 
 		foreach ( $this->settings as $key => $setting ) {
 
 			$value   = isset( $instance[ $key ] ) ? $instance[ $key ] : $setting['std'];
 
 			switch ( $setting['type'] ) {
-
 				case "text" :
 					?>
 					<p>
@@ -127,7 +120,6 @@ abstract class WC_Widget extends WP_Widget {
 					</p>
 					<?php
 				break;
-
 				case "number" :
 					?>
 					<p>
@@ -136,7 +128,6 @@ abstract class WC_Widget extends WP_Widget {
 					</p>
 					<?php
 				break;
-
 				case "select" :
 					?>
 					<p>
@@ -149,7 +140,6 @@ abstract class WC_Widget extends WP_Widget {
 					</p>
 					<?php
 				break;
-
 				case "checkbox" :
 					?>
 					<p>

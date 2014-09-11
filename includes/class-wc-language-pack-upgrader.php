@@ -28,8 +28,19 @@ class WC_Language_Pack_Upgrader {
 	 */
 	public function __construct() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_update' ) );
-		add_filter( 'upgrader_pre_download', array( $this, 'version_update' ), 10, 2 );
-		add_action( 'woocommerce_language_pack_updater_check', array( $this, 'has_available_update' ) );
+		add_filter( 'upgrader_post_install', array( $this, 'version_update' ), 999, 2 );
+	}
+
+	/**
+	 * Get WordPress language
+	 *
+	 * @return string
+	 */
+	public static function get_language() {
+		if ( defined( 'WPLANG' ) && '' != WPLANG ) {
+			return WPLANG;
+		}
+		return 'en';
 	}
 
 	/**
@@ -38,7 +49,7 @@ class WC_Language_Pack_Upgrader {
 	 * @return string
 	 */
 	public function get_language_package_uri() {
-		return $this->repo . WC_VERSION . '/packages/' . get_locale() . '.zip';
+		return $this->repo . WC_VERSION . '/packages/' . $this->get_language() . '.zip';
 	}
 
 	/**
@@ -53,13 +64,14 @@ class WC_Language_Pack_Upgrader {
 			$data->translations[] = array(
 				'type'       => 'plugin',
 				'slug'       => 'woocommerce',
-				'language'   => get_locale(),
+				'language'   => $this->get_language(),
 				'version'    => WC_VERSION,
 				'updated'    => date( 'Y-m-d H:i:s' ),
 				'package'    => $this->get_language_package_uri(),
 				'autoupdate' => 1
 			);
 		}
+
 		return $data;
 	}
 
@@ -69,16 +81,17 @@ class WC_Language_Pack_Upgrader {
 	 * @return bool
 	 */
 	public function has_available_update() {
-		$version = get_option( 'woocommerce_language_pack_version', array( '0', get_locale() ) );
+		$version = get_option( 'woocommerce_language_pack_version', '0' );
 
-		if ( 'en_US' !== get_locale() && ( ! is_array( $version ) || version_compare( $version[0], WC_VERSION, '<' ) || $version[1] !== get_locale() ) ) {
+		if ( version_compare( $version, WC_VERSION, '<' ) && 'en' !== $this->get_language() ) {
+
 			if ( $this->check_if_language_pack_exists() ) {
 				$this->configure_woocommerce_upgrade_notice();
 
 				return true;
 			} else {
 				// Updated the woocommerce_language_pack_version to avoid searching translations for this release again
-				update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
+				update_option( 'woocommerce_language_pack_version', WC_VERSION );
 			}
 		}
 
@@ -117,26 +130,28 @@ class WC_Language_Pack_Upgrader {
 	/**
 	 * Update the language version in database
 	 *
-	 * This updates the database while the download the translation package and ensures that not generate download loop
-	 * If the installation fails you can redo it in: WooCommerce > Sistem Status > Tools > Force Translation Upgrade
-	 *
-	 * @param  bool   $reply   Whether to bail without returning the package (default: false)
-	 * @param  string $package Package URL
+	 * @param  bool  $response   Install response (true = success, false = fail)
+	 * @param  array $hook_extra Extra arguments passed to hooked filters
 	 *
 	 * @return bool
 	 */
-	public function version_update( $reply, $package ) {
-		if ( $package === $this->get_language_package_uri() ) {
-			// Update the language pack version
-			update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
+	public function version_update( $response, $hook_extra ) {
+		if ( $response ) {
+			if (
+				( isset( $hook_extra['language_update_type'] ) && 'plugin' == $hook_extra['language_update_type'] )
+				&& ( isset( $hook_extra['language_update']->slug ) && 'woocommerce' == $hook_extra['language_update']->slug )
+			) {
+				// Update the language pack version
+				update_option( 'woocommerce_language_pack_version', WC_VERSION );
 
-			// Remove the translation upgrade notice
-			$notices = get_option( 'woocommerce_admin_notices', array() );
-			$notices = array_diff( $notices, array( 'translation_upgrade' ) );
-			update_option( 'woocommerce_admin_notices', $notices );
+				// Remove the translation upgrade notice
+				$notices = get_option( 'woocommerce_admin_notices', array() );
+				$notices = array_diff( $notices, array( 'translation_upgrade' ) );
+				update_option( 'woocommerce_admin_notices', $notices );
+			}
 		}
 
-		return $reply;
+		return $response;
 	}
 
 }
