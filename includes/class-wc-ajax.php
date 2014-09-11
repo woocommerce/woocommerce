@@ -658,6 +658,8 @@ class WC_AJAX {
 
 			$_tax_class          = '';
 			$_downloadable_files = '';
+			$_stock_status       = '';
+			$_backorders         = '';
 			$image_id            = 0;
 			$variation           = get_post( $variation_id ); // Get the variation object
 
