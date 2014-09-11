@@ -133,6 +133,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.2.3 =
 * Fix - Order status translation in admin and account page.
 * Fix - Ensure shipping address gets displayed - fixes needs_shipping_address() method.
+* Fix - Escaping of country names in tax settings.
+* Fix - Encoding of pagination link when using default permalinks.
 * Tweak - Display of locale information on system status page.
 * Tweak - Removed postcode for Bahamas.
 
