@@ -322,6 +322,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'AUD' :
 		case 'CAD' :
 		case 'CLP' :
+		case 'COP' :
 		case 'MXN' :
 		case 'NZD' :
 		case 'HKD' :
