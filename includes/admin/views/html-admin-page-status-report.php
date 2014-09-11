@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 <br/>
-<table class="wc_status_table widefat" cellspacing="0">
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 
 	<thead>
 		<tr>
@@ -60,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of PHP installed on your hosting server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'MySQL Version','woocommerce' ); ?>:</td>
+			<td><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
 			<td>
 				<?php
 				echo '<img class="help_tip" data-tip="' . esc_attr__( 'The version of MySQL installed on your hosting server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
@@ -72,7 +72,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</td>
 		</tr>
 		<tr>
-			<td><?php _e( 'WP Memory Limit','woocommerce' ); ?>:</td>
+			<td><?php _e( 'WP Active Plugins', 'woocommerce' ); ?>:</td>
+			<td><?php echo count( (array) get_option( 'active_plugins' ) ); ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'WP Memory Limit', 'woocommerce' ); ?>:</td>
 			<td><?php
 				echo '<img class="help_tip" data-tip="' . esc_attr__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 
@@ -91,7 +95,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Language', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The current language used by WordPress. Default = English', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php if ( defined( 'WPLANG' ) && WPLANG ) echo WPLANG; else  _e( 'Default', 'woocommerce' ); ?></td>
+			<td><?php echo '<img class="help_tip" data-tip="' . esc_attr__( 'The current language used by WordPress. Default = English', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />'; ?><?php echo get_locale(); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Max Upload Size','woocommerce' ); ?>:</td>
@@ -118,10 +122,10 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			</tr>
 		<?php endif; ?>
 		<tr>
-			<td><?php _e( 'WC Logging','woocommerce' ); ?>:</td>
+			<td><?php _e( 'WC Logging', 'woocommerce' ); ?>:</td>
 			<td><?php
 				echo '<img class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extension can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
-				
+
 				if ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ) {
 					printf( '<mark class="yes">' . __( 'Log directory (%s) is writable.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
 				} else {
@@ -130,7 +134,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			?></td>
 		</tr>
 		<tr>
-			<td><?php _e( 'Default Timezone','woocommerce' ); ?>:</td>
+			<td><?php _e( 'Default Timezone', 'woocommerce' ); ?>:</td>
 			<td><?php
 				echo '<img class="help_tip" data-tip="' . esc_attr__( 'The default timezone for your server.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
 
@@ -149,7 +153,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			$posting['fsockopen_curl']['name'] = __( 'fsockopen/cURL','woocommerce');
 			if ( function_exists( 'fsockopen' ) || function_exists( 'curl_init' ) ) {
 				if ( function_exists( 'fsockopen' ) && function_exists( 'curl_init' )) {
-					$posting['fsockopen_curl']['note'] = __('Your server has fsockopen and cURL enabled.', 'woocommerce' );
+					$posting['fsockopen_curl']['note'] = __( 'Your server has fsockopen and cURL enabled.', 'woocommerce' );
 				} elseif ( function_exists( 'fsockopen' )) {
 					$posting['fsockopen_curl']['note'] = __( 'Your server has fsockopen enabled, cURL is disabled.', 'woocommerce' );
 				} else {
@@ -166,7 +170,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			// SOAP
 			$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
 			if ( class_exists( 'SoapClient' ) ) {
-				$posting['soap_client']['note'] = __('Your server has the SOAP Client class enabled.', 'woocommerce' );
+				$posting['soap_client']['note'] = __( 'Your server has the SOAP Client class enabled.', 'woocommerce' );
 				$posting['soap_client']['success'] = true;
 			} else {
 				$posting['soap_client']['note'] = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
@@ -179,15 +183,15 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			$posting['wp_remote_post']['name'] = __( 'WP Remote Post','woocommerce');
 			$request['cmd'] = '_notify-validate';
 			$params = array(
-				'sslverify' 	=> false,
-				'timeout' 		=> 60,
-				'user-agent'	=> 'WooCommerce/' . WC()->version,
-				'body'			=> $request
+				'sslverify'  => false,
+				'timeout'    => 60,
+				'user-agent' => 'WooCommerce/' . WC()->version,
+				'body'       => $request
 			);
 			$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
 
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
-				$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
+				$posting['wp_remote_post']['note'] = __( 'wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
 				$posting['wp_remote_post']['success'] = true;
 			} elseif ( is_wp_error( $response ) ) {
 				$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce' ) . ' ' . $response->get_error_message();
@@ -233,9 +237,11 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				'mon_thousands_sep'	=> __( 'The character used for a thousands separator in monetary values.', 'woocommerce' ),
 			);
 
-			foreach ( $locale as $key => $val )
-				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) )
-					echo '<tr><td>' . $key . ':</td><td><img class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />' . $val . '</td></tr>';
+			foreach ( $locale as $key => $val ) {
+				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) ) {
+					echo '<tr><td>' . $key . ':</td><td><img class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
+				}
+			}
 		?>
 	</tbody>
 
@@ -283,7 +289,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 											$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 											$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
 											$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
-											set_transient( md5( $plugin ) . '_version_data', $version_data, 60*60*12 );
+											set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
 											break;
 										}
 									}
@@ -440,11 +446,11 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					foreach ( $cl_lines as $line_num => $cl_line ) {
 						if ( preg_match( '/^[0-9]/', $cl_line ) ) :
 
-							$theme_date    		= str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
+							$theme_date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
 							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 							$theme_update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
 							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
-							set_transient( $theme_dir . '_version_data', $theme_version_data , 60*60*12 );
+							set_transient( $theme_dir . '_version_data', $theme_version_data , DAY_IN_SECONDS );
 							break;
 
 						endif;
@@ -509,7 +515,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
 				<td><?php
 					echo '<img class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declare WooCommerce support.', 'woocommerce'  ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
-					
+
 					if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
 						echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
 					} else {
@@ -555,9 +561,9 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 						$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
 						if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
-							$found_files[ $plugin_name ][] = sprintf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), basename( $theme_file ), $theme_version ? $theme_version : '-', $core_version );
+							$found_files[ $plugin_name ][] = sprintf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ), $theme_version ? $theme_version : '-', $core_version );
 						} else {
-							$found_files[ $plugin_name ][] = sprintf( '<code>%s</code>', basename( $theme_file ) );
+							$found_files[ $plugin_name ][] = sprintf( '<code>%s</code>', str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ) );
 						}
 					}
 				}
@@ -586,32 +592,35 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 </table>
 
 <script type="text/javascript">
-	/*
-	@var i string default
-	@var l how many repeat s
-	@var s string to repeat
-	@var w where s should indent
-	*/
-	jQuery.wc_strPad = function(i,l,s,w) {
+
+	/**
+	 * wc_strPad
+	 *
+	 * @param  {var} i string default
+	 * @param  {var} l how many repeat s
+	 * @param  {var} s string to repeat
+	 * @param  {var} w where s should indent
+	 * @return {var}   string modified
+	 */
+	jQuery.wc_strPad = function( i, l, s, w ) {
 		var o = i.toString();
-		if (!s) { s = '0'; }
-		while (o.length < l) {
+		if (! s) { s = '0'; }
+		while ( o.length < l ) {
 			// empty
-			if(w == 'undefined'){
+			if ( w == 'undefined' ){
 				o = s + o;
-			}else{
+			} else {
 				o = o + s;
 			}
 		}
 		return o;
 	};
 
-
-	jQuery('a.debug-report').click(function(){
+	jQuery( 'a.debug-report' ).click(function(){
 
 		var report = "";
 
-		jQuery('.wc_status_table thead, .wc_status_table tbody').each(function(){
+		jQuery( '#status thead, #status tbody' ).each(function(){
 
 			if ( jQuery( this ).is('thead') ) {
 
@@ -619,20 +628,20 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 			} else {
 
-				jQuery('tr', jQuery( this )).each(function(){
+				jQuery('tr', jQuery( this ) ).each(function(){
 
-					var the_name    = jQuery.wc_strPad( jQuery.trim( jQuery( this ).find('td:eq(0)').text() ), 25, ' ' );
-					var the_value   = jQuery.trim( jQuery( this ).find('td:eq(1)').text() );
+					var the_name    = jQuery.wc_strPad( jQuery.trim( jQuery( this ).find( 'td:eq(0)' ).text() ), 25, ' ' );
+					var the_value   = jQuery.trim( jQuery( this ).find( 'td:eq(1)' ).text() );
 					var value_array = the_value.split( ', ' );
 
-					if ( value_array.length > 1 ){
+					if ( value_array.length > 1 ) {
 
-						// if value have a list of plugins ','
-						// split to add new line
+						// If value have a list of plugins ','
+						// Split to add new line
 						var output = '';
 						var temp_line ='';
-						jQuery.each( value_array, function(key, line){
-							var tab = ( key == 0 )?0:25;
+						jQuery.each( value_array, function( key, line ){
+							var tab = ( key == 0 ) ? 0:25;
 							temp_line = temp_line + jQuery.wc_strPad( '', tab, ' ', 'f' ) + line +'\n';
 						});
 
@@ -643,14 +652,16 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				});
 
 			}
-		} );
+		});
 
 		try {
-			jQuery("#debug-report").slideDown();
-			jQuery("#debug-report textarea").val( report ).focus().select();
-			jQuery(this).fadeOut();
+			jQuery( "#debug-report" ).slideDown();
+			jQuery( "#debug-report textarea" ).val( report ).focus().select();
+			jQuery( this ).fadeOut();
 			return false;
-		} catch(e){ console.log( e ); }
+		} catch( e ){
+			console.log( e );
+		}
 
 		return false;
 	});
@@ -664,7 +675,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			'delay':      0
 		});
 
-		$( 'body' ) .on( 'copy', '#copy-for-support', function ( e ) {
+		$( 'body' ).on( 'copy', '#copy-for-support', function ( e ) {
 			e.clipboardData.clearData();
 			e.clipboardData.setData( 'text/plain', $( '#debug-report textarea' ).val() );
 			e.preventDefault();
