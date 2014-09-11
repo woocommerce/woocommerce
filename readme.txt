@@ -134,6 +134,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Order status translation in admin and account page.
 * Fix - Ensure shipping address gets displayed - fixes needs_shipping_address() method.
 * Tweak - Display of locale information on system status page.
+* Tweak - Removed postcode for Bahamas.
 
 = 2.2.2 - 11/09/2014 =
 * Fix - Saving of variation stock when parent stock management is disabled.
@@ -1005,5 +1006,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 2.2.1 =
+= 2.2.3 =
 2.2 is a major update. Test extensions and your theme prior to updating, ensure extensions are up to date and 2.2 compatible, and ensure that you keep backups. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.
