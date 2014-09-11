@@ -131,6 +131,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 * Fix - Order status translation in admin and account page.
+* Tweak - Display of locale information on system status page.
 
 = 2.2.2 - 11/09/2014 =
 * Fix - Saving of variation stock when parent stock management is disabled.

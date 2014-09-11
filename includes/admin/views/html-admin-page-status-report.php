@@ -216,7 +216,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			foreach ( $locale as $key => $val )
 				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) )
-					echo '<tr><td>' . $key . ':</td><td>' . $val . '</td></tr>';
+					echo '<tr><td>' . $key . ':</td><td>' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
 		?>
 	</tbody>
 
