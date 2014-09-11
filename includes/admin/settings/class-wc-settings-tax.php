@@ -480,7 +480,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				var availableCountries = [<?php
 					$countries = array();
 					foreach ( WC()->countries->get_allowed_countries() as $value => $label )
-						$countries[] = '{ label: "' . $label . '", value: "' . $value . '" }';
+						$countries[] = '{ label: "' . esc_attr( $label ) . '", value: "' . $value . '" }';
 					echo implode( ', ', $countries );
 				?>];
 
@@ -488,7 +488,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					$countries = array();
 					foreach ( WC()->countries->get_allowed_country_states() as $value => $label )
 						foreach ( $label as $code => $state )
-							$countries[] = '{ label: "' . $state . '", value: "' . $code . '" }';
+							$countries[] = '{ label: "' . esc_attr( $state ) . '", value: "' . $code . '" }';
 					echo implode( ', ', $countries );
 				?>];
 
