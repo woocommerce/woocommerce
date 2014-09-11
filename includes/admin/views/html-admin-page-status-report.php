@@ -524,9 +524,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
 						if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
-							$found_files[ $plugin_name ][] = sprintf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), basename( $theme_file ), $theme_version ? $theme_version : '-', $core_version );
+							$found_files[ $plugin_name ][] = sprintf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ), $theme_version ? $theme_version : '-', $core_version );
 						} else {
-							$found_files[ $plugin_name ][] = sprintf( '<code>%s</code>', basename( $theme_file ) );
+							$found_files[ $plugin_name ][] = sprintf( '<code>%s</code>', str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ) );
 						}
 					}
 				}
