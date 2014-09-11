@@ -130,7 +130,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.2.3 =
 * Fix - Order status translation in admin and account page.
+* Fix - Ensure shipping address gets displayed - fixes needs_shipping_address() method.
 * Tweak - Display of locale information on system status page.
 
 = 2.2.2 - 11/09/2014 =

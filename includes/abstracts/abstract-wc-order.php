@@ -2434,10 +2434,9 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Checks if an order needs display the shipping address, based on shipping method
 	 *
-	 * @return boolean|null
+	 * @return boolean
 	 */
 	public function needs_shipping_address() {
-
 		$hide  = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
 		$needs = false;
 
@@ -2448,6 +2447,8 @@ abstract class WC_Abstract_Order {
 				break;
 			}
 		}
+
+		return $needs;
 	}
 
 	/**
