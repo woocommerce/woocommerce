@@ -281,7 +281,7 @@ class WC_Checkout {
 			if ( $this->checkout_fields['shipping'] ) {
 				foreach ( array_keys( $this->checkout_fields['shipping'] ) as $field ) {
 					$field_name = str_replace( 'shipping_', '', $field );
-					$billing_address[ $field_name ] = $this->get_posted_address_data( $field_name, 'shipping' );
+					$shipping_address[ $field_name ] = $this->get_posted_address_data( $field_name, 'shipping' );
 				}
 			}
 
