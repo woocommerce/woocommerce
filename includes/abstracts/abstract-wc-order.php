@@ -95,7 +95,7 @@ abstract class WC_Abstract_Order {
 	 */
 	public function set_address( $address, $type = 'billing' ) {
 
-		foreach( $address as $key => $value ) {
+		foreach ( $address as $key => $value ) {
 			update_post_meta( $this->id, "_{$type}_" . $key, $value );
 		}
 	}
