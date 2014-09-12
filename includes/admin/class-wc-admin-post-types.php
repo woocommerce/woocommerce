@@ -445,7 +445,7 @@ class WC_Admin_Post_Types {
 		switch ( $column ) {
 			case 'order_status' :
 
-				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_label( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
+				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
 
 			break;
 			case 'order_date' :
