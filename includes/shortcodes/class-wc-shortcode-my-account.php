@@ -259,7 +259,7 @@ class WC_Shortcode_My_Account {
 
 		} elseif ( is_wp_error( $allow ) ) {
 
-			wc_add_notice( $allow->get_error_message, 'error' );
+			wc_add_notice( $allow->get_error_message(), 'error' );
 
 			return false;
 		}
