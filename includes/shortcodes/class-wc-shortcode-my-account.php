@@ -297,7 +297,7 @@ class WC_Shortcode_My_Account {
 	 * @return object|bool User's database row on success, false for invalid keys
 	 */
 	public static function check_password_reset_key( $key, $login ) {
-		global $wpdb;
+		global $wpdb, $wp_hasher;
 
 		$key = preg_replace( '/[^a-z0-9]/i', '', $key );
 
@@ -311,9 +311,18 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		$user = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE user_activation_key = %s AND user_login = %s", $key, $login ) );
+		$user = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE user_login = %s", $login ) );
 
-		if ( empty( $user ) ) {
+		if ( ! empty($user)) {
+			if ( empty( $wp_hasher ) ) {
+				require_once ABSPATH . 'wp-includes/class-phpass.php';
+				$wp_hasher = new PasswordHash( 8, true );
+			}
+
+			$valid = $wp_hasher->CheckPassword($key, $user->user_activation_key);
+		}
+
+		if ( empty( $user ) or ! isset($valid) or ! $valid ) {
 			wc_add_notice( __( 'Invalid key', 'woocommerce' ), 'error' );
 			return false;
 		}
