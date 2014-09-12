@@ -141,6 +141,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - In system status, show path to template file override.
 * Tweak - Dynamically get the address fields in WC_Checkout::create_order()
 * Tweak - If a refund fails, delete refund post.
+* Dev - Added woocommerce_get_settings_ID filters.
 
 = 2.2.2 - 11/09/2014 =
 * Fix - Saving of variation stock when parent stock management is disabled.

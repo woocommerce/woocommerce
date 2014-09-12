@@ -73,10 +73,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings( $current_section = '' ) {
-
 		if ( $current_section == 'inventory' ) {
 
-			return apply_filters('woocommerce_inventory_settings', array(
+			$settings = apply_filters( 'woocommerce_inventory_settings', array(
 
 				array( 'title' => __( 'Inventory Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'inventory_options' ),
 
@@ -198,7 +197,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				$woocommerce_prepend_shop_page_to_products_warning = ' <mark class="notice">' . __( 'Note: The shop page has children - child pages will not work if you enable this option.', 'woocommerce' ) . '</mark>';
 			}
 
-			return apply_filters( 'woocommerce_product_settings', array(
+			$settings = apply_filters( 'woocommerce_product_settings', array(
 
 				array( 'title' => __( 'Product Listings', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'catalog_options' ),
 
@@ -453,6 +452,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			));
 		}
+
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
 }
 
