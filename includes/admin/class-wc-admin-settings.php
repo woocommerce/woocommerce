@@ -480,7 +480,7 @@ class WC_Admin_Settings {
 	            	$size   = wc_get_image_size( $image_size );
 	            	$width  = isset( $size[ 'width' ] )     ? $size[ 'width' ]  : $value[ 'default' ][ 'width' ];
 	            	$height = isset( $size[ 'height' ] )    ? $size[ 'height' ] : $value[ 'default' ][ 'height' ];
-	            	$crop   = isset( $size[ 'height' ] )    ? $size[ 'crop' ]   : $value[ 'default' ][ 'crop' ];
+	            	$crop   = isset( $size[ 'crop' ] )      ? $size[ 'crop' ]   : $value[ 'default' ][ 'crop' ];
 
 	            	$disabled_attr = '';
 	            	$disabled_message = '';
@@ -496,7 +496,7 @@ class WC_Admin_Settings {
 
 	                    	<input name="<?php echo esc_attr( $value['id'] ); ?>[width]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo $height; ?>" />px
 
-	                    	<label><input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" <?php echo $crop; ?> /> <?php _e( 'Hard Crop?', 'woocommerce' ); ?></label>
+	                    	<label><input name="<?php echo esc_attr( $value['id'] ); ?>[crop]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-crop" type="checkbox" value="1" <?php checked( 1, $crop ); ?> /> <?php _e( 'Hard Crop?', 'woocommerce' ); ?></label>
 
 	                    	</td>
 	                </tr><?php
@@ -693,7 +693,7 @@ class WC_Admin_Settings {
 		    		}
 
 		    		$update_options[ $option_name ][ $setting_name ] = $option_value;
-		    	
+
 		    	// Single value
 		    	} else {
 		    		$update_options[ $option_name ] = $option_value;

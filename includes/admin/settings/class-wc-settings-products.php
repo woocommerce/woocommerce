@@ -374,7 +374,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'  => array(
 						'width'  => '150',
 						'height' => '150',
-						'crop'   => true
+						'crop'   => 1
 					),
 					'desc_tip' =>  true,
 				),
