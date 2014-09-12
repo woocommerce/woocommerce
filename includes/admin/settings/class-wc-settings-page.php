@@ -35,7 +35,7 @@ class WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-		return array();
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, array() );
 	}
 
 	/**

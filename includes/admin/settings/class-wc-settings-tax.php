@@ -60,14 +60,15 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-
-		$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+		$tax_classes     = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 		$classes_options = array();
-		if ( $tax_classes )
-			foreach ( $tax_classes as $class )
+		if ( $tax_classes ) {
+			foreach ( $tax_classes as $class ) {
 				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
+			}
+		}
 
-		return apply_filters('woocommerce_tax_settings', array(
+		$settings = apply_filters('woocommerce_tax_settings', array(
 
 			array( 'title' => __( 'Tax Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
 
@@ -189,7 +190,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'tax_options' ),
 
-		)); // End tax settings
+		) );
+
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
 	}
 
 	/**

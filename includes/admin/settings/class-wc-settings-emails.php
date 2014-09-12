@@ -61,8 +61,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-
-		return apply_filters('woocommerce_email_settings', array(
+		$settings = apply_filters('woocommerce_email_settings', array(
 
 			array( 'type' => 'sectionend', 'id' => 'email_recipient_options' ),
 
@@ -157,7 +156,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'email_template_options' ),
 
-		)); // End email settings
+		) );
+
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
 	}
 
 	/**

@@ -62,8 +62,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-
-		return apply_filters( 'woocommerce_payment_gateways_settings', array(
+		$settings = apply_filters( 'woocommerce_payment_gateways_settings', array(
 
 			array(	'title' => __( 'Checkout Process', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_process_options' ),
 
@@ -184,7 +183,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'payment_gateways_options' ),
 
-		)); // End payment_gateway settings
+		) );
+
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
 	}
 
 	/**

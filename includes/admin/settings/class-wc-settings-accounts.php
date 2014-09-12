@@ -36,8 +36,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-
-		return apply_filters( 'woocommerce_' . $this->id . '_settings', array(
+		$settings = apply_filters( 'woocommerce_' . $this->id . '_settings', array(
 
 			array( 'title' => __( 'Account Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'These pages need to be set so that WooCommerce knows where to send users to access account related functionality.', 'woocommerce' ), 'id' => 'account_page_options' ),
 
@@ -154,7 +153,9 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'account_registration_options'),
 
-		)); // End pages settings
+		) );
+
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
 	}
 }
 

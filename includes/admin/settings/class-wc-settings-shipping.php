@@ -64,7 +64,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 */
 	public function get_settings() {
 
-		return apply_filters('woocommerce_shipping_settings', array(
+		$settings = apply_filters('woocommerce_shipping_settings', array(
 
 			array( 'title' => __( 'Shipping Options', 'woocommerce' ), 'type' => 'title', 'id' => 'shipping_options' ),
 
@@ -155,7 +155,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'shipping_options' ),
 
-		)); // End shipping settings
+		) );
+
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
 	}
 
 	/**

@@ -49,7 +49,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')';
 		}
 
-		return apply_filters( 'woocommerce_general_settings', array(
+		$settings = apply_filters( 'woocommerce_general_settings', array(
 
 			array( 'title' => __( 'General Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'general_options' ),
 
@@ -208,7 +208,9 @@ class WC_Settings_General extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'script_styling_options' ),
 
-		) ); // End general settings
+		) );
+
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
 	}
 
 	/**
