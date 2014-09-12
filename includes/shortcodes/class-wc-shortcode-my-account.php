@@ -313,16 +313,16 @@ class WC_Shortcode_My_Account {
 
 		$user = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE user_login = %s", $login ) );
 
-		if ( ! empty($user)) {
+		if ( ! empty( $user ) ) {
 			if ( empty( $wp_hasher ) ) {
 				require_once ABSPATH . 'wp-includes/class-phpass.php';
 				$wp_hasher = new PasswordHash( 8, true );
 			}
 
-			$valid = $wp_hasher->CheckPassword($key, $user->user_activation_key);
+			$valid = $wp_hasher->CheckPassword( $key, $user->user_activation_key );
 		}
 
-		if ( empty( $user ) or ! isset($valid) or ! $valid ) {
+		if ( empty( $user ) or empty( $valid ) ) {
 			wc_add_notice( __( 'Invalid key', 'woocommerce' ), 'error' );
 			return false;
 		}
