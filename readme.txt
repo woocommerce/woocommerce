@@ -135,9 +135,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Ensure shipping address gets displayed - fixes needs_shipping_address() method.
 * Fix - Escaping of country names in tax settings.
 * Fix - Encoding of pagination link when using default permalinks.
+* Fix - NPR currency.
 * Tweak - Display of locale information on system status page.
 * Tweak - Removed postcode for Bahamas.
 * Tweak - In system status, show path to template file override.
+* Tweak - Dynamically get the address fields in WC_Checkout::create_order()
+* Tweak - If a refund fails, delete refund post.
 
 = 2.2.2 - 11/09/2014 =
 * Fix - Saving of variation stock when parent stock management is disabled.
