@@ -268,7 +268,7 @@ function get_woocommerce_currencies() {
 				'NPR' => __( 'Nepali Rupee', 'woocommerce' ),
 				'ILS' => __( 'Israeli Shekel', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
-				'KIP'	=> __( 'Lao Kip', 'woocommerce' ),
+				'KIP' => __( 'Lao Kip', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
@@ -322,6 +322,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'AUD' :
 		case 'CAD' :
 		case 'CLP' :
+		case 'COP' :
 		case 'MXN' :
 		case 'NZD' :
 		case 'HKD' :
