@@ -132,15 +132,6 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
 				break;
-				case 'translation_upgrade' :
-					// Delete language pack version
-					delete_option( 'woocommerce_language_pack_version' );
-
-					// Force WordPress find for new updates
-					set_site_transient( 'update_plugins', null );
-
-					echo '<div class="updated"><p>' . sprintf( __( 'Forced the translations upgrade successfully, please check the <a href="%s">Updates page</a>', 'woocommerce' ), add_query_arg( array( 'force-check' => '1' ), admin_url( 'update-core.php' ) ) ) . '</p></div>';
-				break;
 				default :
 					$action = esc_attr( $_GET['action'] );
 					if ( isset( $tools[ $action ]['callback'] ) ) {
@@ -156,6 +147,25 @@ class WC_Admin_Status {
 						}
 					}
 				break;
+			}
+		}
+
+		// Manual translation update messages
+		if ( isset( $_GET['translation_updated'] ) ) {
+			switch ( $_GET['translation_updated'] ) {
+				case 2 :
+					echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . __( 'Seems you don\'t have permission to do this!', 'woocommerce' ) . '</p></div>';
+					break;
+				case 3 :
+					echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . sprintf( __( 'An authentication error occurred while updating the translation. Please try again or configure your %sUpgrade Constants%s.', 'woocommerce' ), '<a href="http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants">', '</a>' ) . '</p></div>';
+					break;
+				case 4 :
+					echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . __( 'Sorry but there is no translation available for your language =/', 'woocommerce' ) . '</p></div>';
+					break;
+
+				default :
+					echo '<div class="updated"><p>' . __( 'Translations installed/updated successfully!', 'woocommerce' ) . '</p></div>';
+					break;
 			}
 		}
 
