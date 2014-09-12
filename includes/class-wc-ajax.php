@@ -1818,6 +1818,7 @@ class WC_AJAX {
 		$line_item_tax_totals   = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_tax_totals'] ) ), true );
 		$api_refund             = $_POST['api_refund'] === 'true' ? true : false;
 		$restock_refunded_items = $_POST['restock_refunded_items'] === 'true' ? true : false;
+		$refund                 = false;
 
 		try {
 			// Validate that the refund can occur
@@ -1892,6 +1893,9 @@ class WC_AJAX {
 			wp_send_json( true );
 
 		} catch ( Exception $e ) {
+			if ( $refund && is_a( $refund, 'WC_Order_Refund' ) ) {
+				wp_delete_post( $refund->id, true );
+			}
 			wp_send_json( array( 'error' => $e->getMessage() ) );
 		}
 	}
