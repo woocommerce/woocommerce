@@ -4,9 +4,9 @@
  *
  * Functions for displaying the order actions meta box.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Meta Boxes
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
@@ -21,7 +21,7 @@ class WC_Meta_Box_Order_Actions {
 		global $theorder;
 
 		if ( ! is_object( $theorder ) ) {
-			$theorder = get_order( $post->ID );
+			$theorder = wc_get_order( $post->ID );
 		}
 
 		$order = $theorder;
@@ -33,10 +33,6 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
 					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-
-					<option value="refund_order"><?php _e( 'Refund this order', 'woocommerce' ); ?></option>
-					<option value="refund_order"><?php _e( 'Cancel this order', 'woocommerce' ); ?></option>
-
 					<optgroup label="<?php _e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
 						$mailer           = WC()->mailer();
@@ -65,7 +61,9 @@ class WC_Meta_Box_Order_Actions {
 
 			<li class="wide">
 				<div id="delete-action"><?php
+
 					if ( current_user_can( "delete_post", $post->ID ) ) {
+
 						if ( ! EMPTY_TRASH_DAYS ) {
 							$delete_text = __( 'Delete Permanently', 'woocommerce' );
 						} else {
@@ -88,8 +86,9 @@ class WC_Meta_Box_Order_Actions {
 	 * Save meta box data
 	 */
 	public static function save( $post_id, $post ) {
+
 		// Order data saved, now get it so we can manipulate status
-		$order = get_order( $post_id );
+		$order = wc_get_order( $post_id );
 
 		// Handle button actions
 		if ( ! empty( $_POST['wc_order_action'] ) ) {
@@ -125,11 +124,6 @@ class WC_Meta_Box_Order_Actions {
 
 				delete_post_meta( $post_id, '_download_permissions_granted' );
 				wc_downloadable_product_permissions( $post_id );
-
-			} elseif ( $action = 'create_credit_note' ) {
-
-				wp_redirect( admin_url( 'post-new.php?post_type=wc_credit_note&order_id=' . $post_id ) );
-				exit;
 
 			} else {
 

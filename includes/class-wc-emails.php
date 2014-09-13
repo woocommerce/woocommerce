@@ -190,7 +190,7 @@ class WC_Emails {
 	 *
 	 * @access public
 	 * @param mixed $email_heading
-	 * @param mixed $message
+	 * @param string $message
 	 * @return string
 	 */
 	function wrap_message( $email_heading, $message, $plain_text = false ) {
@@ -244,7 +244,6 @@ class WC_Emails {
 	 * Prepare and send the customer invoice email on demand.
 	 *
 	 * @access public
-	 * @param mixed $pay_for_order
 	 * @return void
 	 */
 	function customer_invoice( $order ) {
@@ -412,7 +411,7 @@ class WC_Emails {
 		else
 			$title = sprintf(__( 'Product #%s - %s', 'woocommerce' ), $product->id, get_the_title($product->id)) . $sku;
 
-		$order = get_order( $order_id );
+		$order = wc_get_order( $order_id );
 		$message = sprintf(__( '%s units of %s have been backordered in order %s.', 'woocommerce' ), $quantity, $title, $order->get_order_number() );
 
 		//	CC, BCC, additional headers

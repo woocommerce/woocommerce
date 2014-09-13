@@ -2,7 +2,7 @@
 /**
  * View Order
  *
- * Shows the details of a particular order on the account page 
+ * Shows the details of a particular order on the account page
  *
  * @author    WooThemes
  * @package   WooCommerce/Templates

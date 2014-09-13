@@ -36,7 +36,7 @@ class WC_Download_Handler {
 			$order_key            = $_GET['order'];
 			$email                = sanitize_email( str_replace( ' ', '+', $_GET['email'] ) );
 			$download_id          = isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '';
-			$_product             = get_product( $product_id );
+			$_product             = wc_get_product( $product_id );
 
 			if ( ! is_email( $email) ) {
 				wp_die( __( 'Invalid email address.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 403 ) );
@@ -89,9 +89,9 @@ class WC_Download_Handler {
 			}
 
 			if ( $order_id ) {
-				$order = get_order( $order_id );
+				$order = wc_get_order( $order_id );
 
-				if ( ! $order->is_download_permitted() || $order->post_status != 'wc-completed' ) {
+				if ( ! $order->is_download_permitted() ) {
 					wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 404 ) );
 				}
 			}
@@ -138,6 +138,7 @@ class WC_Download_Handler {
 
 	/**
 	 * Download a file - hook into init function.
+	 * @param integer $product_id
 	 */
 	public static function download( $file_path, $product_id ) {
 		global $is_IE;

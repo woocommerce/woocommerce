@@ -9,9 +9,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $woocommerce;
-
-$order = get_order( $order_id );
+$order = wc_get_order( $order_id );
 ?>
 <h2><?php _e( 'Order Details', 'woocommerce' ); ?></h2>
 <table class="shop_table order_details">
@@ -117,11 +115,11 @@ $order = get_order( $order_id );
 		<header class="title">
 			<h3><?php _e( 'Billing Address', 'woocommerce' ); ?></h3>
 		</header>
-		<address><p>
+		<address>
 			<?php
 				if ( ! $order->get_formatted_billing_address() ) _e( 'N/A', 'woocommerce' ); else echo $order->get_formatted_billing_address();
 			?>
-		</p></address>
+		</address>
 
 <?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
 
@@ -132,11 +130,11 @@ $order = get_order( $order_id );
 		<header class="title">
 			<h3><?php _e( 'Shipping Address', 'woocommerce' ); ?></h3>
 		</header>
-		<address><p>
+		<address>
 			<?php
 				if ( ! $order->get_formatted_shipping_address() ) _e( 'N/A', 'woocommerce' ); else echo $order->get_formatted_shipping_address();
 			?>
-		</p></address>
+		</address>
 
 	</div><!-- /.col-2 -->
 

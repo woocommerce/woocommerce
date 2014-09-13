@@ -252,7 +252,7 @@ class WC_Countries {
 	 * Gets an array of countries in the EU.
 	 *
 	 * @access public
-	 * @return array
+	 * @return string[]
 	 */
 	public function get_european_union_countries() {
 		return array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );
@@ -560,7 +560,7 @@ class WC_Countries {
 			'postcode'	=> '#billing_postcode_field, #shipping_postcode_field',
 			'city'		=> '#billing_city_field, #shipping_city_field'
 		);
-		
+
 		return apply_filters( 'woocommerce_country_locale_field_selectors', $locale_fields );
 	}
 
@@ -592,6 +592,17 @@ class WC_Countries {
 						'required' => false
 					)
 				),
+				'AU' => array(
+					'city'	=> array(
+						'label' 		=> __( 'Suburb', 'woocommerce' ),
+					),
+					'postcode'	=> array(
+						'label' 		=> __( 'Postcode', 'woocommerce' ),
+					),
+					'state'		=> array(
+						'label' 		=> __( 'State', 'woocommerce' ),
+					)
+				),
 				'BD' => array(
 					'postcode' => array(
 						'required' => false
@@ -613,6 +624,12 @@ class WC_Countries {
 					),
 				),
 				'BO' => array(
+					'postcode' => array(
+						'required' 	=> false,
+						'hidden'	=> true
+					),
+				),
+				'BS' => array(
 					'postcode' => array(
 						'required' 	=> false,
 						'hidden'	=> true

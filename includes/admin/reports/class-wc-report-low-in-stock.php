@@ -8,27 +8,27 @@ if ( ! class_exists( 'WC_Report_Stock' ) )
 /**
  * WC_Report_Low_In_Stock
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Reports
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Reports
  * @version     2.1.0
  */
 class WC_Report_Low_In_Stock extends WC_Report_Stock {
 
-    /**
-     * No items found text
-     */
-    public function no_items() {
-        _e( 'No low in stock products found.', 'woocommerce' );
-    }
+	/**
+	 * No items found text
+	 */
+	public function no_items() {
+		_e( 'No low in stock products found.', 'woocommerce' );
+	}
 
-    /**
-     * Get Products matching stock criteria
-     *
-     * @access public
-     */
-    public function get_items( $current_page, $per_page ) {
-       	global $wpdb;
+	/**
+	 * Get Products matching stock criteria
+	 *
+	 * @access public
+	 */
+	public function get_items( $current_page, $per_page ) {
+		global $wpdb;
 
 		$this->max_items = 0;
 		$this->items     = array();
@@ -53,5 +53,5 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 
 		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT posts.ID as id, posts.post_parent as parent {$query_from} GROUP BY posts.ID ORDER BY posts.post_title DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) );
 		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" );
-    }
+	}
 }

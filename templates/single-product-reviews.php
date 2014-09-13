@@ -6,7 +6,7 @@
  * @package 	WooCommerce/Templates
  * @version     2.1.0
  */
-global $woocommerce, $product;
+global $product;
 
 if ( ! defined( 'ABSPATH' ) )
 	exit; // Exit if accessed directly

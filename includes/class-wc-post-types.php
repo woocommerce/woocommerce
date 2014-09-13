@@ -92,17 +92,20 @@ class WC_Post_types {
 				'update_count_callback' => '_wc_term_recount',
 				'label'                 => __( 'Product Tags', 'woocommerce' ),
 				'labels'                => array(
-						'name'              => __( 'Product Tags', 'woocommerce' ),
-						'singular_name'     => __( 'Product Tag', 'woocommerce' ),
-						'menu_name'         => _x( 'Tags', 'Admin menu name', 'woocommerce' ),
-						'search_items'      => __( 'Search Product Tags', 'woocommerce' ),
-						'all_items'         => __( 'All Product Tags', 'woocommerce' ),
-						'parent_item'       => __( 'Parent Product Tag', 'woocommerce' ),
-						'parent_item_colon' => __( 'Parent Product Tag:', 'woocommerce' ),
-						'edit_item'         => __( 'Edit Product Tag', 'woocommerce' ),
-						'update_item'       => __( 'Update Product Tag', 'woocommerce' ),
-						'add_new_item'      => __( 'Add New Product Tag', 'woocommerce' ),
-						'new_item_name'     => __( 'New Product Tag Name', 'woocommerce' )
+						'name'                       => __( 'Product Tags', 'woocommerce' ),
+						'singular_name'              => __( 'Product Tag', 'woocommerce' ),
+						'menu_name'                  => _x( 'Tags', 'Admin menu name', 'woocommerce' ),
+						'search_items'               => __( 'Search Product Tags', 'woocommerce' ),
+						'all_items'                  => __( 'All Product Tags', 'woocommerce' ),
+						'edit_item'                  => __( 'Edit Product Tag', 'woocommerce' ),
+						'update_item'                => __( 'Update Product Tag', 'woocommerce' ),
+						'add_new_item'               => __( 'Add New Product Tag', 'woocommerce' ),
+						'new_item_name'              => __( 'New Product Tag Name', 'woocommerce' ),
+						'popular_items'              => __( 'Popular Product Tags', 'woocommerce' ),
+						'separate_items_with_commas' => __( 'Separate Product Tags with commas', 'woocommerce'  ),
+						'add_or_remove_items'        => __( 'Add or remove Product Tags', 'woocommerce' ),
+						'choose_from_most_used'      => __( 'Choose from the most used Product tags', 'woocommerce' ),
+						'not_found'                  => __( 'No Product Tags found', 'woocommerce' ),
 					),
 				'show_ui'               => true,
 				'query_var'             => true,
@@ -251,10 +254,6 @@ class WC_Post_types {
 				)
 			)
 		);
-
-		if ( preg_match( '/\/(.+)(\/%product_cat%)$/' , $product_permalink, $matches ) ) {
-			add_rewrite_rule( '^' . $matches[1] . '/.+?/[^/]+/([^/]+)/?$', 'index.php?attachment=$matches[1]', 'top' );
-		}
 
 		register_post_type( 'product_variation',
 			apply_filters( 'woocommerce_register_post_type_product_variation',

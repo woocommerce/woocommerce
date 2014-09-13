@@ -53,7 +53,7 @@ class WC_API {
 	 * @access public
 	 * @since 2.0
 	 * @param $vars
-	 * @return array
+	 * @return string[]
 	 */
 	public function add_query_vars( $vars ) {
 		$vars[] = 'wc-api';
@@ -157,7 +157,7 @@ class WC_API {
 	 * Register available API resources
 	 *
 	 * @since 2.1
-	 * @param object $server the REST server
+	 * @param WC_API_Server $server the REST server
 	 */
 	public function register_resources( $server ) {
 

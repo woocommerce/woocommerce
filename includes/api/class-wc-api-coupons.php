@@ -137,6 +137,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->exclude_product_categories ),
 			'exclude_sale_items'           => $coupon->exclude_sale_items(),
 			'minimum_amount'               => wc_format_decimal( $coupon->minimum_amount, 2 ),
+			'maximum_amount'               => wc_format_decimal( $coupon->maximum_amount, 2 ),
 			'customer_emails'              => $coupon->customer_email,
 			'description'                  => $coupon_post->post_excerpt,
 		);
@@ -192,14 +193,18 @@ class WC_API_Coupons extends WC_API_Resource {
 	public function create_coupon( $data ) {
 		global $wpdb;
 
+		$data = isset( $data['coupon'] ) ? $data['coupon'] : array();
+
 		// Check user permission
 		if ( ! current_user_can( 'publish_shop_coupons' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_create_coupon', __( 'You do not have permission to create coupons', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
+		$data = apply_filters( 'woocommerce_api_create_coupon_data', $data, $this );
+
 		// Check if coupon code is specified
 		if ( ! isset( $data['code'] ) ) {
-			return new WP_Error( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s' ), 'code' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_missing_coupon_code', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 		}
 
 		$coupon_code = apply_filters( 'woocommerce_coupon_code', $data['code'] );
@@ -214,27 +219,28 @@ class WC_API_Coupons extends WC_API_Resource {
 		 ", $coupon_code ) );
 
 		if ( $coupon_found ) {
-			return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$defaults = array(
-			'type'	=> 'fixed_cart',
-			'amount' => 0,
-			'individual_use' => 'no',
-			'product_ids' => array(),
-			'exclude_product_ids' => array(),
-			'usage_limit'	=> '',
-			'usage_limit_per_user' => '',
-			'limit_usage_to_x_items' => '',
-			'usage_count' => '',
-			'expiry_date' => '',
-			'apply_before_tax' => 'yes',
-			'free_shipping' => 'no',
-			'product_categories' => array(),
+			'type'                       => 'fixed_cart',
+			'amount'                     => 0,
+			'individual_use'             => 'no',
+			'product_ids'                => array(),
+			'exclude_product_ids'        => array(),
+			'usage_limit'                => '',
+			'usage_limit_per_user'       => '',
+			'limit_usage_to_x_items'     => '',
+			'usage_count'                => '',
+			'expiry_date'                => '',
+			'apply_before_tax'           => 'yes',
+			'free_shipping'              => 'no',
+			'product_categories'         => array(),
 			'exclude_product_categories' => array(),
-			'exclude_sale_items' => 'no',
-			'minimum_amount' => '',
-			'customer_email' => array(),
+			'exclude_sale_items'         => 'no',
+			'minimum_amount'             => '',
+			'maximum_amount'             => '',
+			'customer_email'             => array(),
 		);
 
 		$coupon_data = wp_parse_args( $data, $defaults );
@@ -245,12 +251,13 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		$new_coupon = array(
-			'post_title' 	=> $coupon_code,
-			'post_content' 	=> '',
-			'post_status' 	=> 'publish',
-			'post_author' 	=> get_current_user_id(),
-			'post_type'		=> 'shop_coupon'
-		);
+			'post_title'   => $coupon_code,
+			'post_content' => '',
+			'post_status'  => 'publish',
+			'post_author'  => get_current_user_id(),
+			'post_type'    => 'shop_coupon',
+			'post_excerpt' => isset( $data['description'] ) ? $data['description'] : '',
+ 		);
 
 		$id = wp_insert_post( $new_coupon, $wp_error = false );
 
@@ -258,7 +265,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			return new WP_Error( 'woocommerce_api_cannot_create_coupon', $id->get_error_message(), array( 'status' => 400 ) );
 		}
 
-		// Add POST Meta
+		// set coupon meta
 		update_post_meta( $id, 'discount_type', $coupon_data['type'] );
 		update_post_meta( $id, 'coupon_amount', wc_format_decimal( $coupon_data['amount'] ) );
 		update_post_meta( $id, 'individual_use', $coupon_data['individual_use'] );
@@ -275,6 +282,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $coupon_data['exclude_product_categories'] ) ) );
 		update_post_meta( $id, 'exclude_sale_items', wc_clean( $coupon_data['exclude_sale_items'] ) );
 		update_post_meta( $id, 'minimum_amount', wc_format_decimal( $coupon_data['minimum_amount'] ) );
+		update_post_meta( $id, 'maximum_amount', wc_format_decimal( $coupon_data['maximum_amount'] ) );
 		update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $coupon_data['customer_email'] ) ) );
 
 		do_action( 'woocommerce_api_create_coupon', $id, $data );
@@ -294,11 +302,15 @@ class WC_API_Coupons extends WC_API_Resource {
 	 */
 	public function edit_coupon( $id, $data ) {
 
+		$data = isset( $data['coupon'] ) ? $data['coupon'] : array();
+
 		$id = $this->validate_request( $id, 'shop_coupon', 'edit' );
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		$data = apply_filters( 'woocommerce_api_edit_coupon_data', $data, $id, $this );
 
 		if ( isset( $data['code'] ) ) {
 			global $wpdb;
@@ -316,12 +328,12 @@ class WC_API_Coupons extends WC_API_Resource {
 			 ", $coupon_code, $id ) );
 
 			if ( $coupon_found ) {
-				return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$id = wp_update_post( array( 'ID' => intval( $id ), 'post_title' => $coupon_code ) );
+			$id = wp_update_post( array( 'ID' => intval( $id ), 'post_title' => $coupon_code, 'post_excerpt' => isset( $data['description'] ) ? $data['description'] : '' ) );
 			if ( 0 === $id ) {
-				return new WP_Error( 'woocommerce_api_cannot_update_coupon', __( 'Failed to update coupon', 'woocommerce'), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_api_cannot_update_coupon', __( 'Failed to update coupon', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -373,16 +385,16 @@ class WC_API_Coupons extends WC_API_Resource {
 			update_post_meta( $id, 'apply_before_tax', wc_clean( $data['apply_before_tax'] ) );
 		}
 
-		if ( isset( $data['free_shipping'] ) ) {
-			update_post_meta( $id, 'free_shipping', wc_clean( $data['free_shipping'] ) );
+		if ( isset( $data['enable_free_shipping'] ) ) {
+			update_post_meta( $id, 'free_shipping', ( true === $data['enable_free_shipping'] ) ? 'yes' : 'no' );
 		}
 
-		if ( isset( $data['product_categories'] ) ) {
-			update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $data['product_categories'] ) ) );
+		if ( isset( $data['product_category_ids'] ) ) {
+			update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $data['product_category_ids'] ) ) );
 		}
 
-		if ( isset( $data['exclude_product_categories'] ) ) {
-			update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $data['exclude_product_categories'] ) ) );
+		if ( isset( $data['exclude_product_category_ids'] ) ) {
+			update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $data['exclude_product_category_ids'] ) ) );
 		}
 
 		if ( isset( $data['exclude_sale_items'] ) ) {
@@ -393,8 +405,12 @@ class WC_API_Coupons extends WC_API_Resource {
 			update_post_meta( $id, 'minimum_amount', wc_format_decimal( $data['minimum_amount'] ) );
 		}
 
-		if ( isset( $data['customer_email'] ) ) {
-			update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $data['customer_email'] ) ) );
+		if ( isset( $data['maximum_amount'] ) ) {
+			update_post_meta( $id, 'maximum_amount', wc_format_decimal( $data['maximum_amount'] ) );
+		}
+
+		if ( isset( $data['customer_emails'] ) ) {
+			update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $data['customer_emails'] ) ) );
 		}
 
 		do_action( 'woocommerce_api_edit_coupon', $id, $data );
@@ -417,6 +433,8 @@ class WC_API_Coupons extends WC_API_Resource {
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		do_action( 'woocommerce_api_delete_coupon', $id, $this );
 
 		return $this->delete( $id, 'shop_coupon', ( 'true' === $force ) );
 	}

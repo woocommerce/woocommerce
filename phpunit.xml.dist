@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	verbose="true"
+	>
+	<testsuites>
+		<testsuite name="WooCommerce Test Suite">
+			<directory suffix=".php">./tests/unit-tests</directory>
+		</testsuite>
+	</testsuites>
+	<filter>
+		<blacklist>
+			<directory suffix=".php">./apigen/</directory>
+			<directory suffix=".php">./i18n/</directory>
+			<directory suffix=".php">./templates/</directory>
+			<directory suffix=".php">./tests/</directory>
+			<directory suffix=".php">./tmp/</directory>
+		</blacklist>
+	</filter>
+	<logging>
+		<log type="coverage-clover" target="./tmp/clover.xml" charset="UTF-8" />
+	</logging>
+</phpunit>

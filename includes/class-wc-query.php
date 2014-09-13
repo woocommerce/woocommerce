@@ -117,7 +117,8 @@ class WC_Query {
 
 	/**
 	 * Get query vars
-	 * @return array()
+	 *
+	 * @return array
 	 */
 	public function get_query_vars() {
 		return $this->query_vars;
@@ -178,7 +179,7 @@ class WC_Query {
 				$q->set( 'page_id', get_option('page_on_front') );
 			}
 		}
-		
+
 		// When orderby is set, WordPress shows posts. Get around that here.
 		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') == wc_get_page_id('shop') ) {
 			$_query = wp_parse_args( $q->query );
@@ -239,8 +240,6 @@ class WC_Query {
 		    add_filter( 'wp', array( $this, 'remove_posts_where' ) );
 		}
 
-		add_filter( 'posts_where', array( $this, 'exclude_protected_products' ) );
-
 		// We're on a shop page so queue the woocommerce_get_products_in_view function
 		add_action( 'wp', array( $this, 'get_products_in_view' ), 2);
 
@@ -267,18 +266,6 @@ class WC_Query {
 		    "post_title LIKE $1) OR (post_excerpt LIKE $1", $where );
 
 		return $where;
-	}
-
-	/**
-	 * Prevent password protected products appearing in the loops
-	 *
-	 * @param  string $where
-	 * @return string
-	 */
-	public function exclude_protected_products( $where ) {
-		global $wpdb;
-		$where .= " AND {$wpdb->posts}.post_password = ''";
-    	return $where;
 	}
 
 	/**
@@ -501,6 +488,8 @@ class WC_Query {
 	 * @return array
 	 */
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
+		global $wpdb;
+
 		// Get ordering from query string unless defined
 		if ( ! $orderby ) {
 			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
@@ -513,8 +502,7 @@ class WC_Query {
 
 		$orderby = strtolower( $orderby );
 		$order   = strtoupper( $order );
-
-		$args = array();
+		$args    = array();
 
 		// default - menu_order
 		$args['orderby']  = 'menu_order title';
@@ -530,7 +518,7 @@ class WC_Query {
 				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 			break;
 			case 'price' :
-				$args['orderby']  = 'meta_value_num';
+				$args['orderby']  = "meta_value_num {$wpdb->posts}.ID";
 				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
 			break;

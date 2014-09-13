@@ -4,9 +4,9 @@
  *
  * Functions for displaying the order items meta box.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Meta Boxes
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
@@ -21,7 +21,7 @@ class WC_Meta_Box_Order_Items {
 		global $thepostid, $theorder;
 
 		if ( ! is_object( $theorder ) ) {
-			$theorder = get_order( $thepostid );
+			$theorder = wc_get_order( $thepostid );
 		}
 
 		$order = $theorder;

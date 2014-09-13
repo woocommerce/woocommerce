@@ -178,7 +178,7 @@ class WC_Checkout {
 			$order_id = absint( WC()->session->order_awaiting_payment );
 
 			// Resume the unpaid order if its pending
-			if ( $order_id > 0 && ( $order = get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
+			if ( $order_id > 0 && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
 
 				$order_data['order_id'] = $order_id;
 				$order                  = wc_update_order( $order_data );
@@ -268,31 +268,22 @@ class WC_Checkout {
 			}
 
 			// Billing address
-			$billing_address = array(
-				'first_name' => $this->get_posted_address_data( 'first_name' ),
-				'last_name'  => $this->get_posted_address_data( 'last_name' ),
-				'company'    => $this->get_posted_address_data( 'company' ),
-				'email'      => $this->get_posted_address_data( 'email' ),
-				'phone'      => $this->get_posted_address_data( 'phone' ),
-				'address_1'  => $this->get_posted_address_data( 'address_1' ),
-				'address_2'  => $this->get_posted_address_data( 'address_2' ),
-				'city'       => $this->get_posted_address_data( 'city' ),
-				'state'      => $this->get_posted_address_data( 'state' ),
-				'postcode'   => $this->get_posted_address_data( 'postcode' ),
-				'country'    => $this->get_posted_address_data( 'country' )
-			);
+			$billing_address = array();
+			if ( $this->checkout_fields['billing'] ) {
+				foreach ( array_keys( $this->checkout_fields['billing'] ) as $field ) {
+					$field_name = str_replace( 'billing_', '', $field );
+					$billing_address[ $field_name ] = $this->get_posted_address_data( $field_name );
+				}
+			}
 
-			$shipping_address = array(
-				'first_name' => $this->get_posted_address_data( 'first_name', 'shipping' ),
-				'last_name'  => $this->get_posted_address_data( 'last_name', 'shipping' ),
-				'company'    => $this->get_posted_address_data( 'company', 'shipping' ),
-				'address_1'  => $this->get_posted_address_data( 'address_1', 'shipping' ),
-				'address_2'  => $this->get_posted_address_data( 'address_2', 'shipping' ),
-				'city'       => $this->get_posted_address_data( 'city', 'shipping' ),
-				'state'      => $this->get_posted_address_data( 'state', 'shipping' ),
-				'postcode'   => $this->get_posted_address_data( 'postcode', 'shipping' ),
-				'country'    => $this->get_posted_address_data( 'country', 'shipping' ),
-			);
+			// Shipping address.
+			$shipping_address = array();
+			if ( $this->checkout_fields['shipping'] ) {
+				foreach ( array_keys( $this->checkout_fields['shipping'] ) as $field ) {
+					$field_name = str_replace( 'shipping_', '', $field );
+					$shipping_address[ $field_name ] = $this->get_posted_address_data( $field_name, 'shipping' );
+				}
+			}
 
 			$order->set_address( $billing_address, 'billing' );
 			$order->set_address( $shipping_address, 'shipping' );
@@ -307,10 +298,10 @@ class WC_Checkout {
 			// Update user meta
 			if ( $this->customer_id ) {
 				if ( apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
-					foreach( $billing_address as $key => $value ) {
+					foreach ( $billing_address as $key => $value ) {
 						update_user_meta( $this->customer_id, 'billing_' . $key, $value );
 					}
-					foreach( $shipping_address as $key => $value ) {
+					foreach ( $shipping_address as $key => $value ) {
 						update_user_meta( $this->customer_id, 'shipping_' . $key, $value );
 					}
 				}
@@ -630,7 +621,7 @@ class WC_Checkout {
 				} else {
 
 					if ( empty( $order ) )
-						$order = get_order( $order_id );
+						$order = wc_get_order( $order_id );
 
 					// No payment was required for order
 					$order->payment_complete();

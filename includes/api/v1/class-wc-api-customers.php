@@ -424,13 +424,16 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	private function get_avatar_url( $email ) {
 
-		$dom = new DOMDocument();
+		$avatar_html = get_avatar( $email );
 
-		$dom->loadHTML( get_avatar( $email ) );
+		// Get the URL of the avatar from the provided HTML
+		preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
 
-		$url = $dom->getElementsByTagName( 'img' )->item( 0 )->getAttribute( 'src' );
+		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
+			return esc_url_raw( $matches[1] );
+		}
 
-		return ( ! empty( $url ) ) ? $url : null;
+		return null;
 	}
 
 	/**

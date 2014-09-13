@@ -86,8 +86,6 @@ class WC_Admin_Welcome {
 		remove_submenu_page( 'index.php', 'wc-credits' );
 		remove_submenu_page( 'index.php', 'wc-translators' );
 
-		// Badge for welcome page
-		$badge_url = WC()->plugin_url() . '/assets/images/welcome/wc-badge.png';
 		?>
 		<style type="text/css">
 			/*<![CDATA[*/
@@ -105,12 +103,12 @@ class WC_Admin_Welcome {
 				text-align: center;
 				position: absolute;
 				top: 0;
-				<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'right' : 'left'; ?>: 0;
+				<?php echo is_rtl() ? 'right' : 'left'; ?>: 0;
 				margin: 0;
 				vertical-align: middle;
 			}
 			.wc-badge {
-				position: relative;;
+				position: relative;
 				background: #9c5d90;
 				text-rendering: optimizeLegibility;
 				padding-top: 150px;
@@ -127,7 +125,7 @@ class WC_Admin_Welcome {
 			.about-wrap .wc-badge {
 				position: absolute;
 				top: 0;
-				<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'left' : 'right'; ?>: 0;
+				<?php echo is_rtl() ? 'left' : 'right'; ?>: 0;
 			}
 			.about-wrap .wc-feature {
 				overflow: visible !important;
@@ -146,14 +144,14 @@ class WC_Admin_Welcome {
 			}
 			.about-wrap .feature-rest div {
 				width: 50% !important;
-				padding-<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'left' : 'right'; ?>: 100px;
+				padding-<?php echo is_rtl() ? 'left' : 'right'; ?>: 100px;
 				-moz-box-sizing: border-box;
 				box-sizing: border-box;
 				margin: 0 !important;
 			}
 			.about-wrap .feature-rest div.last-feature {
-				padding-<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'right' : 'left'; ?>: 100px;
-				padding-<?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? 'left' : 'right'; ?>: 0;
+				padding-<?php echo is_rtl() ? 'right' : 'left'; ?>: 100px;
+				padding-<?php echo is_rtl() ? 'left' : 'right'; ?>: 0;
 			}
 			.about-wrap div.icon {
 				width: 0 !important;
@@ -171,7 +169,7 @@ class WC_Admin_Welcome {
 				position: relative;
 				text-align: center;
 				speak: none;
-				margin: <?php echo get_bloginfo( 'text_direction' ) === 'rtl' ? '0 -100px 0 0' : '0 0 0 -100px'; ?>;
+				margin: <?php echo is_rtl() ? '0 -100px 0 0' : '0 0 0 -100px'; ?>;
 				content: "\e01d";
 				-webkit-font-smoothing: antialiased;
 				-moz-osx-font-smoothing: grayscale;
@@ -180,6 +178,25 @@ class WC_Admin_Welcome {
 				background: #fff;
 				margin: 20px 0;
 				padding: 1px 20px 10px;
+			}
+			.changelog h4 {
+				line-height: 1.4;
+			}
+			.wc-conf {
+				background-color: #00204A;
+				background-image: url(http://woothemes.wpengine.netdna-cdn.com/wp-content/uploads/2014/09/wooconf.jpg);
+				background-size: cover;
+				padding: 11px 30px 20px;
+				color: #fff;
+				border-radius: 4px;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+			}
+			.wc-conf h3 {
+				color: #fff;
+			}
+			.wc-conf div {
+				width: 50%;
 			}
 			/*]]>*/
 		</style>
@@ -212,7 +229,7 @@ class WC_Admin_Welcome {
 				else
 					$message = __( 'Thanks for installing!', 'woocommerce' );
 
-				printf( __( '%s WooCommerce %s is more powerful, stable, and secure than ever before. We hope you enjoy using it.', 'woocommerce' ), $message, $major_version );
+				printf( __( '%s WooCommerce %s is more powerful, stable and secure than ever before. We hope you enjoy using it.', 'woocommerce' ), $message, $major_version );
 			?>
 		</div>
 
@@ -220,9 +237,9 @@ class WC_Admin_Welcome {
 
 		<p class="woocommerce-actions">
 			<a href="<?php echo admin_url('admin.php?page=wc-settings'); ?>" class="button button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a>
-			<a class="docs button button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'woocommerce' ) ); ?>"><?php _e( 'Docs', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'woocommerce' ) ); ?>" class="docs button button-primary"><?php _e( 'Docs', 'woocommerce' ); ?></a>
 			<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 		</p>
 
 		<h2 class="nav-tab-wrapper">
@@ -293,7 +310,16 @@ class WC_Admin_Welcome {
 						<p><?php _e( 'The Payment Gateway API has been enhanced to support refunds and storing transaction IDs.', 'woocommerce' ); ?></p>
 					</div>
 				</div>
-			</div>			
+			</div>
+			<?php if ( strtotime( '2014/11/04' ) > current_time( 'timestamp' ) ) { ?>
+			<div class="changelog wc-conf">
+				<div>
+					<h3><?php _e( 'Join us at the inaugural WooCommerce Conference in San Francisco', 'woocommerce' ); ?></h3>
+					<p><?php echo sprintf( __( 'On the %s3rd and 4th%s of November 2014 WooCommerce creators WooThemes are hosting an event dedicated to store owners &amp; WordPress developers wanting to learn the art of eCommerce using WooCommerce.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
+					<p class="woocommerce-actions"><a href="http://conf.woocommerce.com/" class="button button-primary"><?php _e( 'Find out more & buy tickets', 'woocommerce' ); ?></a></p>
+				</div>
+			</div>
+			<?php } ?>
 
 			<div class="return-to-dashboard">
 				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'wc-settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>
@@ -311,7 +337,7 @@ class WC_Admin_Welcome {
 
 			<?php $this->intro(); ?>
 
-			<p class="about-description"><?php _e( 'WooCommerce is developed and maintained by a worldwide team of passionate individuals and backed by an awesome developer community. Want to see your name? <a href="https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md">Contribute to WooCommerce</a>.', 'woocommerce' ); ?></p>
+			<p class="about-description"><?php printf( __( 'WooCommerce is developed and maintained by a worldwide team of passionate individuals and backed by an awesome developer community. Want to see your name? <a href="%s">Contribute to WooCommerce</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md' ); ?></p>
 
 			<?php echo $this->contributors(); ?>
 		</div>
@@ -327,7 +353,7 @@ class WC_Admin_Welcome {
 
 			<?php $this->intro(); ?>
 
-			<p class="about-description"><?php _e( 'WooCommerce has been kindly translated into several other languages thanks to our translation team. Want to see your name? <a href="https://www.transifex.com/projects/p/woocommerce/">Translate WooCommerce</a>.', 'woocommerce' ); ?></p>
+			<p class="about-description"><?php printf( __( 'WooCommerce has been kindly translated into several other languages thanks to our translation team. Want to see your name? <a href="%s">Translate WooCommerce</a>.', 'woocommerce' ), 'https://www.transifex.com/projects/p/woocommerce/' ); ?></p>
 
 			<?php
 				// Have to use this to get the list until the API is open...
@@ -415,7 +441,7 @@ class WC_Admin_Welcome {
 			return array();
 		}
 
-		set_transient( 'woocommerce_contributors', $contributors, 3600 );
+		set_transient( 'woocommerce_contributors', $contributors, HOUR_IN_SECONDS );
 
 		return $contributors;
 	}

@@ -132,14 +132,13 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
 				break;
-				case 'translation_upgrade' :
-					// Delete language pack version
-					delete_option( 'woocommerce_language_pack_version' );
+				case 'hide_translation_upgrade' :
+					update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
+					$notices = get_option( 'woocommerce_admin_notices', array() );
+					$notices = array_diff( $notices, array( 'translation_upgrade' ) );
+					update_option( 'woocommerce_admin_notices', $notices );
 
-					// Force WordPress find for new updates
-					set_site_transient( 'update_plugins', null );
-
-					echo '<div class="updated"><p>' . sprintf( __( 'Forced the translations upgrade successfully, please check the <a href="%s">Updates page</a>', 'woocommerce' ), add_query_arg( array( 'force-check' => '1' ), admin_url( 'update-core.php' ) ) ) . '</p></div>';
+					echo '<div class="updated"><p>' . __( 'Translation update message hidden successfully!', 'woocommerce' ) . '</p></div>';
 				break;
 				default :
 					$action = esc_attr( $_GET['action'] );
@@ -156,6 +155,28 @@ class WC_Admin_Status {
 						}
 					}
 				break;
+			}
+		}
+
+		// Manual translation update messages
+		if ( isset( $_GET['translation_updated'] ) ) {
+			switch ( $_GET['translation_updated'] ) {
+				case 2 :
+					echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . __( 'Seems you don\'t have permission to do this!', 'woocommerce' ) . '</p></div>';
+					break;
+				case 3 :
+					echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . sprintf( __( 'An authentication error occurred while updating the translation. Please try again or configure your %sUpgrade Constants%s.', 'woocommerce' ), '<a href="http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants">', '</a>' ) . '</p></div>';
+					break;
+				case 4 :
+					echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . __( 'Sorry but there is no translation available for your language =/', 'woocommerce' ) . '</p></div>';
+					break;
+
+				default :
+					// Force WordPress find for new updates and hide the WooCommerce translation update
+					set_site_transient( 'update_plugins', null );
+
+					echo '<div class="updated"><p>' . __( 'Translations installed/updated successfully!', 'woocommerce' ) . '</p></div>';
+					break;
 			}
 		}
 
@@ -211,7 +232,7 @@ class WC_Admin_Status {
 			)
 		);
 
-		if ( defined( 'WPLANG' ) && '' !== WPLANG ) {
+		if ( get_locale() !== 'en_US' ) {
 			$tools['translation_upgrade'] = array(
 				'name'    => __( 'Translation Upgrade', 'woocommerce' ),
 				'button'  => __( 'Force Translation Upgrade', 'woocommerce' ),
@@ -240,7 +261,7 @@ class WC_Admin_Status {
 	 *
 	 * @since 2.1.1
 	 * @param string $file Path to the file
-	 * @param array $all_headers List of headers, in the format array('HeaderKey' => 'Header Name')
+	 * @return string
 	 */
 	public static function get_file_version( $file ) {
 		// We don't need to write to the file, so just open for reading.

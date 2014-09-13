@@ -21,11 +21,15 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
+		// Run this on activation.
 		register_activation_hook( WC_PLUGIN_FILE, array( $this, 'install' ) );
 
+		// Hooks
 		add_action( 'admin_init', array( $this, 'install_actions' ) );
 		add_action( 'admin_init', array( $this, 'check_version' ), 5 );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ) );
+		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
 	}
 
 	/**
@@ -130,7 +134,7 @@ class WC_Install {
 		flush_rewrite_rules();
 
 		// Redirect to welcome screen
-		set_transient( '_wc_activation_redirect', 1, 60 * 60 );
+		set_transient( '_wc_activation_redirect', 1, HOUR_IN_SECONDS );
 	}
 
 	/**
@@ -189,6 +193,7 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
+		wp_clear_scheduled_hook( 'woocommerce_language_pack_updater_check' );
 
 		$ve = get_option( 'gmt_offset' ) > 0 ? '+' : '-';
 
@@ -205,6 +210,7 @@ class WC_Install {
 		}
 
 		wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
+		wp_schedule_single_event( time(), 'woocommerce_language_pack_updater_check' );
 	}
 
 	/**
@@ -282,6 +288,10 @@ class WC_Install {
 		$settings = WC_Admin_Settings::get_settings_pages();
 
 		foreach ( $settings as $section ) {
+			if ( ! method_exists( $section, 'get_settings' ) ) {
+				continue;
+			}
+
 			foreach ( $section->get_settings() as $value ) {
 				if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
 					$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
@@ -638,25 +648,6 @@ class WC_Install {
 	}
 
 	/**
-	 * Active plugins pre update option filter
-	 *
-	 * @param string $new_value
-	 * @return string
-	 */
-	function pre_update_option_active_plugins( $new_value ) {
-		$old_value = (array) get_option( 'active_plugins' );
-
-		if ( $new_value !== $old_value && in_array( W3TC_FILE, (array) $new_value ) && in_array( W3TC_FILE, (array) $old_value ) ) {
-			$this->_config->set( 'notes.plugins_updated', true );
-			try {
-				$this->_config->save();
-			} catch( Exception $ex ) {}
-		}
-
-		return $new_value;
-	}
-
-	/**
 	 * Show plugin changes. Code adapted from W3 Total Cache.
 	 *
 	 * @return void
@@ -696,6 +687,43 @@ class WC_Install {
 		}
 
 		echo wp_kses_post( $upgrade_notice );
+	}
+
+	/**
+	 * Show action links on the plugin screen.
+	 *
+	 * @access	public
+	 * @param	mixed $links Plugin Action links
+	 * @return	array
+	 */
+	public function plugin_action_links( $links ) {
+		$action_links = array(
+			'settings'	=>	'<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+		);
+
+		return array_merge( $action_links, $links );
+	}
+
+	/**
+	 * Show row meta on the plugin screen.
+	 *
+	 * @access	public
+	 * @param	mixed $links Plugin Row Meta
+	 * @param	mixed $file  Plugin Base file
+	 * @return	array
+	 */
+	public function plugin_row_meta( $links, $file ) {
+		if ( $file == WC_PLUGIN_BASENAME ) {
+			$row_meta = array(
+				'docs'		=>	'<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
+				'apidocs'	=>	'<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'http://docs.woothemes.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
+				'support'	=>	'<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
+			);
+
+			return array_merge( $links, $row_meta );
+		}
+
+		return (array) $links;
 	}
 }
 

@@ -24,6 +24,7 @@ class WC_Coupon {
 	const E_WC_COUPON_NOT_APPLICABLE                 = 109;
 	const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 110;
 	const E_WC_COUPON_PLEASE_ENTER                   = 111;
+	const E_WC_COUPON_MAX_SPEND_LIMIT_MET        		 = 112;
 	const WC_COUPON_SUCCESS                          = 200;
 	const WC_COUPON_REMOVED                          = 201;
 
@@ -81,6 +82,9 @@ class WC_Coupon {
 	/** @public string Minimum cart amount. */
 	public $minimum_amount;
 
+	/** @public string Maximum cart amount. */
+	public $maximum_amount;
+
 	/** @public string Coupon owner's email. */
 	public $customer_email;
 
@@ -127,6 +131,7 @@ class WC_Coupon {
 			$this->exclude_product_categories = is_array( $coupon_data['exclude_product_categories'] ) ? $coupon_data['exclude_product_categories'] : array();
 			$this->exclude_sale_items         = esc_html( $coupon_data['exclude_sale_items'] );
 			$this->minimum_amount             = esc_html( $coupon_data['minimum_amount'] );
+			$this->maximum_amount             = esc_html( $coupon_data['maximum_amount'] );
 			$this->customer_email             = esc_html( $coupon_data['customer_email'] );
 
 		} else {
@@ -162,6 +167,7 @@ class WC_Coupon {
 				'exclude_product_categories' => array(),
 				'exclude_sale_items'         => 'no',
 				'minimum_amount'             => '',
+				'maximum_amount'             => '',
 				'customer_email'             => array()
 			);
 
@@ -272,7 +278,7 @@ class WC_Coupon {
 	 * Check if a coupon is valid. Return a reason code if invalid. Reason codes:
 	 *
 	 * @access public
-	 * @return bool|WP_Error validity or a WP_Error if not valid
+	 * @return boolean validity or a WP_Error if not valid
 	 */
 	public function is_valid() {
 
@@ -315,6 +321,14 @@ class WC_Coupon {
 				if ( $this->minimum_amount > WC()->cart->subtotal ) {
 					$valid = false;
 					$error_code = self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET;
+				}
+			}
+
+			// Maximum spend
+			if ( $this->maximum_amount > 0 ) {
+				if ( $this->maximum_amount < WC()->cart->subtotal ) {
+					$valid = false;
+					$error_code = self::E_WC_COUPON_MAX_SPEND_LIMIT_MET;
 				}
 			}
 
@@ -585,7 +599,7 @@ class WC_Coupon {
 	 * Map one of the WC_Coupon message codes to a message string
 	 *
 	 * @access public
-	 * @param mixed $msg_code
+	 * @param integer $msg_code
 	 * @return string| Message/error string
 	 */
 	public function get_coupon_message( $msg_code ) {
@@ -641,6 +655,9 @@ class WC_Coupon {
 			break;
 			case self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET:
 				$err = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->minimum_amount ) );
+			break;
+			case self::E_WC_COUPON_MAX_SPEND_LIMIT_MET:
+				$err = sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->minimum_amount ) );
 			break;
 			case self::E_WC_COUPON_NOT_APPLICABLE:
 				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
