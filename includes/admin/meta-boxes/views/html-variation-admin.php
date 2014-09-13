@@ -17,7 +17,7 @@
 				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ][0] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ][0] : '';
 
 				// Name will be something like attribute_pa_color
-				echo '<select class="wc_chosen_variation_name" data-wc_attribute_name="' . sanitize_title( $attribute['name'] ) . '" placeholder="' . esc_attr( $attribute['placeholder'] ) . '" name="attribute_' . sanitize_title( $attribute['name'] ) . '[' . $loop . ']">';
+				echo '<select class="wc_variation_attribute" data-wc_attribute_name="' . sanitize_title( $attribute['name'] ) . '" placeholder="' . esc_attr( $attribute['placeholder'] ) . '" name="attribute_' . sanitize_title( $attribute['name'] ) . '[' . $loop . ']">';
 
 				if ( $attribute['is_taxonomy'] ){
 					foreach( $attribute['post_terms'] as $term ){

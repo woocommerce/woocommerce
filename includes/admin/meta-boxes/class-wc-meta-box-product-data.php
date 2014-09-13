@@ -825,7 +825,7 @@ class WC_Meta_Box_Product_Data {
 					// Get parent data
 					$parent_data = array(
 						'id'                   => $post->ID,
-						'attributes'           => $attributes,
+						'attributes'           => &$attributes,
 						'tax_class_options'    => $tax_class_options,
 						'sku'                  => get_post_meta( $post->ID, '_sku', true ),
 						'weight'               => wc_format_localized_decimal( get_post_meta( $post->ID, '_weight', true ) ),
@@ -853,7 +853,7 @@ class WC_Meta_Box_Product_Data {
 						$parent_data['height'] = wc_format_localized_decimal( 0 );
 					}
 
-					foreach ( $parent_data['attributes'] as $index => $attribute ) {
+					foreach ( $attributes as $index => $attribute ) {
 						$attribute['placeholder'] = __( 'Any', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;';
 						if ( $attribute['is_taxonomy'] ) {
 							$attribute['post_terms'] = wp_get_post_terms( $parent_data['id'], $attribute['name'] );
@@ -861,7 +861,7 @@ class WC_Meta_Box_Product_Data {
 							$attribute['options'] = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
 							$attribute['option_values'] = array_map( 'sanitize_title', $attribute['options'] );
 						}
-						$parent_data['attributes'][ $index ] = $attribute;
+						$attributes[ $index ] = $attribute;
 					}
 
 					wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_variations_metabox', array(
@@ -961,7 +961,7 @@ class WC_Meta_Box_Product_Data {
 							// Get current value for variation (if set)
 							$variation_selected_value = isset( $default_attributes[ sanitize_title( $attribute['name'] ) ] ) ? $default_attributes[ sanitize_title( $attribute['name'] ) ] : '';
 
-							echo '<select class="wc_chosen_variation_name" data-wc_attribute_name="' . sanitize_title( $attribute['name'] ) . '" placeholder="' . esc_attr( $attribute['placeholder'] ) . '" name="default_attribute_' . sanitize_title( $attribute['name'] ) . '">';
+							echo '<select class="wc_variation_attribute" data-wc_attribute_name="' . sanitize_title( $attribute['name'] ) . '" placeholder="' . esc_attr( $attribute['placeholder'] ) . '" name="default_attribute_' . sanitize_title( $attribute['name'] ) . '">';
 
 							if ( $attribute['is_taxonomy'] ){
 								foreach( $attribute['post_terms'] as $term ){
