@@ -163,7 +163,7 @@ class WC_Cart {
 			wc_setcookie( 'woocommerce_cart_hash', md5( json_encode( $this->get_cart() ) ) );
 		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
 			wc_setcookie( 'woocommerce_items_in_cart', 0, time() - HOUR_IN_SECONDS );
-			wc_setcookie( 'woocommerce_cart_hash', '', time() - 3600 );
+			wc_setcookie( 'woocommerce_cart_hash', '', time() - HOUR_IN_SECONDS );
 		}
 		do_action( 'woocommerce_set_cart_cookies', $set );
 	}
