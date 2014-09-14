@@ -236,6 +236,9 @@ class WC_Cart {
 
 		/**
 		 * Sets the php session data for the cart and coupons.
+		 *
+		 * @access public
+		 * @return void
 		 */
 		public function set_session() {
 			// Set cart and coupon session data
