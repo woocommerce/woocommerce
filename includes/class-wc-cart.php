@@ -135,11 +135,11 @@ class WC_Cart {
 	}
 
 	/**
-	* Will set cart cookies if needed, once, during WP hook
-	*
-	* @access public
-	* @return void
-	*/
+	 * Will set cart cookies if needed, once, during WP hook
+	 *
+	 * @access public
+	 * @return void
+	 */
 	public function maybe_set_cart_cookies() {
 		if ( ! headers_sent() ) {
 			if ( sizeof( $this->cart_contents ) > 0 ) {
