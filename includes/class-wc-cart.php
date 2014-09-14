@@ -88,7 +88,7 @@ class WC_Cart {
 	public function __construct() {
 		$this->tax                   = new WC_Tax();
 		$this->prices_include_tax    = get_option( 'woocommerce_prices_include_tax' ) == 'yes';
-		$this->round_at_subtotal     = get_option('woocommerce_tax_round_at_subtotal') == 'yes';
+		$this->round_at_subtotal     = get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes';
 		$this->tax_display_cart      = get_option( 'woocommerce_tax_display_cart' );
 		$this->dp                    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl';
