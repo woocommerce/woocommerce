@@ -399,6 +399,7 @@ class WC_Cart {
 		/**
 		 * Looks through cart items and checks the posts are not trashed or deleted.
 		 *
+		 * @access public
 		 * @return bool|WP_Error
 		 */
 		public function check_cart_item_validity() {
