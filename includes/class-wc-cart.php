@@ -120,32 +120,35 @@ class WC_Cart {
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 ); // Set cookies before shutdown and ob flushing
 	}
 
-    /**
+	/**
 	 * Loads the cart data from the PHP session during WordPress init and hooks in other methods.
-     *
-     * @access public
-     * @return void
-     */
-    public function init() {
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function init() {
 		$this->get_cart_from_session();
-
+		
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1 );
-    }
+	}
 
-    /**
-     * Will set cart cookies if needed, once, during WP hook
-     */
-    public function maybe_set_cart_cookies() {
-    	if ( ! headers_sent() ) {
-	    	if ( sizeof( $this->cart_contents ) > 0 ) {
-	    		$this->set_cart_cookies( true );
-	    	} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
-	    		$this->set_cart_cookies( false );
-	    	}
-	    }
-    }
+	/**
+	* Will set cart cookies if needed, once, during WP hook
+	* 
+	* @access public
+	* @return void
+	*/
+	public function maybe_set_cart_cookies() {
+		if ( ! headers_sent() ) {
+			if ( sizeof( $this->cart_contents ) > 0 ) {
+				$this->set_cart_cookies( true );
+			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
+				$this->set_cart_cookies( false );
+			}
+		}
+	}
 
 	/**
 	 * Set cart hash cookie and items in cart.
