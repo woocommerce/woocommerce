@@ -444,6 +444,7 @@ jQuery( function ( $ ) {
 	function variation_row_indexes() {
 		$( '.woocommerce_variations .woocommerce_variation' ).each( function ( index, el ) {
 			$( '.variation_menu_order', el ).val( parseInt( $( el ).index( '.woocommerce_variations .woocommerce_variation' ), 10 ) );
+			$( '.variation_change_signal', el ).val( 'y' );
 		});
 	}
 
