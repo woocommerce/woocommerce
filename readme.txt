@@ -142,6 +142,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Missing variables when add new product variation.
 * Fix - Number format when calculate the line items tax.
 * Fix - Language update/install in Multisites.
+* Fix - "Set product image" media gallery title in non-product post type.
 * Tweak - Display of locale information on system status page.
 * Tweak - Removed postcode for Bahamas.
 * Tweak - In system status, show path to template file override.
