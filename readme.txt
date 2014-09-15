@@ -140,11 +140,15 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Mobile checkout via PayPal when using tax inclusive prices.
 * Fix - Thumbnails "hard crop" option.
 * Fix - Missing variables when add new product variation.
+* Fix - Number format when calculate the line items tax.
+* Fix - Language update/install in Multisites.
 * Tweak - Display of locale information on system status page.
 * Tweak - Removed postcode for Bahamas.
 * Tweak - In system status, show path to template file override.
 * Tweak - Dynamically get the address fields in WC_Checkout::create_order()
 * Tweak - If a refund fails, delete refund post.
+* Tweak - Button for hide the language update message.
+* Tweak - Method for install the translations directly.
 * Dev - Added woocommerce_get_settings_ID filters.
 
 = 2.2.2 - 11/09/2014 =
