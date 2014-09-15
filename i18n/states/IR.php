@@ -2,10 +2,10 @@
 /**
  * Iran
  *
- * @author 		Khalil Delavaran
- * @category 	i18n
- * @package 	WooCommerce/i18n
- * @version     2.2.3
+ * @author    Khalil Delavaran
+ * @category  i18n
+ * @package   WooCommerce/i18n
+ * @version   2.2.3
  */
 global $states;
 
@@ -41,4 +41,4 @@ $states['IR'] = array(
 	'MKZ'  => __( 'Markazi (مرکزی)', 'woocommerce' ) ,
 	'HRZ'  => __( 'Hormozgan (هرمزگان)', 'woocommerce' ) ,
 	'ُSBN'  => __( 'Sistan and Baluchestan (سیستان و بلوچستان)', 'woocommerce' )
-	);
+);
