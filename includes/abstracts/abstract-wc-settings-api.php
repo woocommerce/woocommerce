@@ -612,8 +612,7 @@ abstract class WC_Settings_API {
 
 		$defaults = array(
 			'title'             => '',
-			'class'             => '',
-			'css'               => ''
+			'class'             => ''
 		);
 
 		$data = wp_parse_args( $data, $defaults );
