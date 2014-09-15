@@ -137,6 +137,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Encoding of pagination link when using default permalinks.
 * Fix - NPR currency.
 * Fix - Fixing "Invalid key" error when clicking link in password reset email.
+* Fix - Mobile checkout via PayPal when using tax inclusive prices.
 * Tweak - Display of locale information on system status page.
 * Tweak - Removed postcode for Bahamas.
 * Tweak - In system status, show path to template file override.
