@@ -322,7 +322,7 @@ class WC_Shortcode_My_Account {
 			$valid = $wp_hasher->CheckPassword( $key, $user->user_activation_key );
 		}
 
-		if ( empty( $user ) or empty( $valid ) ) {
+		if ( empty( $user ) || empty( $valid ) ) {
 			wc_add_notice( __( 'Invalid key', 'woocommerce' ), 'error' );
 			return false;
 		}
