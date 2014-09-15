@@ -36,9 +36,8 @@
 		?>
 		<input type="hidden" class="variable_post_id" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
 		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo $loop; ?>" />
+		<input type="hidden" class="variation_change_signal" name="variation_change_signal[<?php echo $loop; ?>]" value="n" />
 	</h3>
-	<input type="hidden" class="variation_change_signal" name="variation_change_signal[<?php echo $loop; ?>]" value="n" />
-
 	<?php
 		if ( is_ajax() ){
 			include 'html-variation-admin-form.php';
