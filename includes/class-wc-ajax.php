@@ -38,6 +38,7 @@ class WC_AJAX {
 			'remove_variations'                                => false,
 			'save_attributes'                                  => false,
 			'add_variation'                                    => false,
+			'load_variation'                                   => false,
 			'link_all_variations'                              => false,
 			'revoke_access_to_download'                        => false,
 			'grant_access_to_download'                         => false,
@@ -417,6 +418,72 @@ class WC_AJAX {
 				) );
 			}
 		}
+
+		die();
+	}
+
+	/**
+	 * Load variation via ajax function
+	 */
+	public static function load_variation() {
+
+		check_ajax_referer( 'load-variation', 'security' );
+
+		$variation = get_post( $_POST['variation_id'] );
+
+		$variation_id                        = absint( $variation->ID );
+		$variation_post_status               = esc_attr( $variation->post_status );
+		$variation_data                      = get_post_meta( $variation_id );
+		$variation_data['variation_post_id'] = $variation_id;
+
+		// Grab shipping classes
+		$shipping_classes = get_the_terms( $variation_id, 'product_shipping_class' );
+		$shipping_class   = ( $shipping_classes && ! is_wp_error( $shipping_classes ) ) ? current( $shipping_classes )->term_id : '';
+
+		$variation_fields = array(
+			'_sku',
+			'_stock',
+			'_regular_price',
+			'_sale_price',
+			'_weight',
+			'_length',
+			'_width',
+			'_height',
+			'_download_limit',
+			'_download_expiry',
+			'_downloadable_files',
+			'_downloadable',
+			'_virtual',
+			'_thumbnail_id',
+			'_sale_price_dates_from',
+			'_sale_price_dates_to',
+			'_manage_stock',
+			'_stock_status'
+		);
+
+		foreach ( $variation_fields as $field ) {
+			$$field = isset( $variation_data[ $field ][0] ) ? maybe_unserialize( $variation_data[ $field ][0] ) : '';
+		}
+
+		$_backorders = isset( $variation_data['_backorders'][0] ) ? $variation_data['_backorders'][0] : null;
+		$_tax_class  = isset( $variation_data['_tax_class'][0] ) ? $variation_data['_tax_class'][0] : null;
+		$image_id    = absint( $_thumbnail_id );
+		$image       = $image_id ? wp_get_attachment_thumb_url( $image_id ) : '';
+
+		// Locale formatting
+		$_regular_price = wc_format_localized_price( $_regular_price );
+		$_sale_price    = wc_format_localized_price( $_sale_price );
+		$_weight        = wc_format_localized_decimal( $_weight );
+		$_length        = wc_format_localized_decimal( $_length );
+		$_width         = wc_format_localized_decimal( $_width );
+		$_height        = wc_format_localized_decimal( $_height );
+
+		// Stock BW compat
+		if ( '' !== $_stock ) {
+			$_manage_stock = 'yes';
+		}
+
+		include( 'admin/meta-boxes/views/html-variation-admin-form.php' );
 
 		die();
 	}

@@ -34,9 +34,14 @@
 				echo '</select>';
 			}
 		?>
-		<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
+		<input type="hidden" class="variable_post_id" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
 		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo $loop; ?>" />
 	</h3>
+	<input type="hidden" class="variation_change_signal" name="variation_change_signal[<?php echo $loop; ?>]" value="n" />
 
-	<?php include 'html-variation-admin-form.php'; ?>
+	<?php
+		if ( is_ajax() ){
+			include 'html-variation-admin-form.php';
+		}
+	?>
 </div>

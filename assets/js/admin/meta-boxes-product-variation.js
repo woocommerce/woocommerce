@@ -72,6 +72,9 @@ jQuery( function ( $ ) {
 				},
 				'chosen:hiding_dropdown': function( event, opts ){
 					opts.chosen.container.on( 'click.woocommerce' );
+				},
+				'change': function( event ){
+					$this.parents( '.woocommerce_variation' ).eq(0).find( '.variation_change_signal' ).val( 'y' );
 				}
 			})
 			.chosen({
@@ -83,6 +86,50 @@ jQuery( function ( $ ) {
 	.find( '.woocommerce_variation, .toolbar' ).each( function(){
 		$panel.trigger( 'variation_init.woocommerce', [ $( this ) ] );
 	} );
+
+	$panel.find( '.woocommerce_variations' ).find( '.wc-metabox > h3' ).on('click', function( event ) {
+		var $this = $(this),
+			$variation = $this.parents( '.woocommerce_variation' ).eq( 0 ),
+			$signal = $variation.find( '.variation_change_signal' );
+
+		if ( $signal.val() === 'n' || $variation.find('.woocommerce_variable_attributes').length === 0 ) {
+			$variation.block({
+				message: null,
+				overlayCSS: {
+					background: '#fff url(' + woocommerce_admin_meta_boxes_variations.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+					opacity: 0.6
+				}
+			});
+
+			var data = {
+				action: 'woocommerce_load_variation',
+				post_id: woocommerce_admin_meta_boxes_variations.post_id,
+				variation_id: $variation.find('.variable_post_id').val(),
+				security: woocommerce_admin_meta_boxes_variations.load_variation_nonce
+			};
+
+			$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function ( response ) {
+				$variation.append( response );
+
+				$( '.tips' ).tipTip({
+					'attribute': 'data-tip',
+					'fadeIn': 50,
+					'fadeOut': 50
+				});
+
+				$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
+
+				if ( ! $( 'input#_manage_stock' ).attr( 'checked' ) ) {
+					$( '.hide_if_parent_manage_stock_is_disabled' ).hide();
+				}
+
+				$signal.val( 'y' );
+
+				$variation.unblock();
+			});
+		}
+		
+	});
 
 	// Add a variation
 	$( '#variable_product_options' ).on( 'click', 'button.add_variation', function () {

@@ -1469,6 +1469,7 @@ class WC_Meta_Box_Product_Data {
 			$variable_shipping_class        = $_POST['variable_shipping_class'];
 			$variable_tax_class             = isset( $_POST['variable_tax_class'] ) ? $_POST['variable_tax_class'] : array();
 			$variable_menu_order            = $_POST['variation_menu_order'];
+			$variation_change_signal            = $_POST['variation_change_signal'];
 			$variable_sale_price_dates_from = $_POST['variable_sale_price_dates_from'];
 			$variable_sale_price_dates_to   = $_POST['variable_sale_price_dates_to'];
 
@@ -1490,6 +1491,10 @@ class WC_Meta_Box_Product_Data {
 			for ( $i = 0; $i <= $max_loop; $i ++ ) {
 
 				if ( ! isset( $variable_post_id[ $i ] ) ) {
+					continue;
+				}
+
+				if ( ! isset( $variation_change_signal[ $i ] ) || ! bool_from_yn( $variation_change_signal[ $i ] ) ){
 					continue;
 				}
 

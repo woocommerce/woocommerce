@@ -136,6 +136,7 @@ class WC_Admin_Assets {
 				'ajax_url'                            => admin_url('admin-ajax.php'),
 				'woocommerce_placeholder_img_src'     => wc_placeholder_img_src(),
 				'add_variation_nonce'                 => wp_create_nonce("add-variation"),
+				'load_variation_nonce'                => wp_create_nonce("load-variation"),
 				'link_variation_nonce'                => wp_create_nonce("link-variations"),
 				'delete_variation_nonce'              => wp_create_nonce("delete-variation"),
 				'delete_variations_nonce'             => wp_create_nonce("delete-variations"),
