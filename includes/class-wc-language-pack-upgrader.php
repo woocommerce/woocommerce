@@ -30,6 +30,7 @@ class WC_Language_Pack_Upgrader {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_update' ) );
 		add_filter( 'upgrader_pre_download', array( $this, 'version_update' ), 10, 2 );
 		add_action( 'woocommerce_language_pack_updater_check', array( $this, 'has_available_update' ) );
+		add_filter( 'admin_init', array( $this, 'manual_language_update' ), 999 );
 	}
 
 	/**
@@ -60,6 +61,7 @@ class WC_Language_Pack_Upgrader {
 				'autoupdate' => 1
 			);
 		}
+
 		return $data;
 	}
 
@@ -127,16 +129,99 @@ class WC_Language_Pack_Upgrader {
 	 */
 	public function version_update( $reply, $package ) {
 		if ( $package === $this->get_language_package_uri() ) {
-			// Update the language pack version
-			update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
-
-			// Remove the translation upgrade notice
-			$notices = get_option( 'woocommerce_admin_notices', array() );
-			$notices = array_diff( $notices, array( 'translation_upgrade' ) );
-			update_option( 'woocommerce_admin_notices', $notices );
+			$this->save_language_version();
 		}
 
 		return $reply;
+	}
+
+	/**
+	 * Save language version
+	 *
+	 * @return void
+	 */
+	protected function save_language_version() {
+		// Update the language pack version
+		update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
+
+		// Remove the translation upgrade notice
+		$notices = get_option( 'woocommerce_admin_notices', array() );
+		$notices = array_diff( $notices, array( 'translation_upgrade' ) );
+		update_option( 'woocommerce_admin_notices', $notices );
+	}
+
+	/**
+	 * Manual language update
+	 *
+	 * @return void
+	 */
+	public function manual_language_update() {
+		if (
+			is_admin()
+			&& current_user_can( 'update_plugins' )
+			&& isset( $_GET['page'] )
+			&& 'wc-status' == $_GET['page']
+			&& isset( $_GET['action'] )
+			&& 'translation_upgrade' == $_GET['action']
+		) {
+
+			$url       = wp_nonce_url( admin_url( 'admin.php?page=wc-status&tab=tools&action=translation_upgrade' ), 'language_update' );
+			$tools_url = admin_url( 'admin.php?page=wc-status&tab=tools' );
+
+			if ( ! isset( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+				wp_redirect( add_query_arg( array( 'translation_updated' => 2 ), $tools_url ) );
+				exit;
+			}
+
+			if ( false === ( $creds = request_filesystem_credentials( $url, '', false, false, null ) ) ) {
+				wp_redirect( add_query_arg( array( 'translation_updated' => 3 ), $tools_url ) );
+				exit;
+			}
+
+			if ( ! WP_Filesystem( $creds ) ) {
+				request_filesystem_credentials( $url, '', true, false, null );
+
+				wp_redirect( add_query_arg( array( 'translation_updated' => 3 ), $tools_url ) );
+				exit;
+			}
+
+			// Download the language pack
+			$response = wp_remote_get( $this->get_language_package_uri(), array( 'sslverify' => false, 'timeout' => 60 ) );
+			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
+				global $wp_filesystem;
+
+				$upload_dir = wp_upload_dir();
+				$file       = trailingslashit( $upload_dir['path'] ) . get_locale() . '.zip';
+
+				// Save the zip file
+				if ( ! $wp_filesystem->put_contents( $file, $response['body'], FS_CHMOD_FILE ) ) {
+					wp_redirect( add_query_arg( array( 'translation_updated' => 3 ), $tools_url ) );
+					exit;
+				}
+
+				// Unzip the file to wp-content/languages/plugins directory
+				$dir   = trailingslashit( WP_LANG_DIR ) . 'plugins/';
+				$unzip = unzip_file( $file, $dir );
+				if ( true !== $unzip ) {
+					wp_redirect( add_query_arg( array( 'translation_updated' => 3 ), $tools_url ) );
+					exit;
+				}
+
+				// Delete the package file
+				$wp_filesystem->delete( $file );
+
+				// Update the language pack version
+				$this->save_language_version();
+
+				// Redirect and show a success message
+				wp_redirect( add_query_arg( array( 'translation_updated' => 1 ), $tools_url ) );
+				exit;
+			} else {
+				// Don't have a valid package for the current language!
+				wp_redirect( add_query_arg( array( 'translation_updated' => 4 ), $tools_url ) );
+				exit;
+			}
+		}
 	}
 
 }
