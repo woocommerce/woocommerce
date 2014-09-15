@@ -588,7 +588,6 @@ class WC_Cart {
 		/**
 		 * Gets cross sells based on the items in the cart.
 		 *
-		 * @access public
 		 * @return array cross_sells (item ids)
 		 */
 		public function get_cross_sells() {
@@ -609,7 +608,6 @@ class WC_Cart {
 		/**
 		 * Gets the url to the cart page.
 		 *
-		 * @access public
 		 * @return string url to page
 		 */
 		public function get_cart_url() {
@@ -620,7 +618,6 @@ class WC_Cart {
 		/**
 		 * Gets the url to the checkout page.
 		 *
-		 * @access public
 		 * @return string url to page
 		 */
 		public function get_checkout_url() {
@@ -639,7 +636,6 @@ class WC_Cart {
 		/**
 		 * Gets the url to remove an item from the cart.
 		 *
-		 * @access public
 		 * @param string	cart_item_key	contains the id of the cart item
 		 * @return string url to page
 		 */
@@ -651,7 +647,6 @@ class WC_Cart {
 		/**
 		 * Returns the contents of the cart in an array.
 		 *
-		 * @access public
 		 * @return array contents of the cart
 		 */
 		public function get_cart() {
@@ -661,7 +656,6 @@ class WC_Cart {
 		/**
 		 * Returns the contents of the cart in an array without the 'data' element.
 		 *
-		 * @access public
 		 * @return array contents of the cart
 		 */
 		private function get_cart_for_session() {
@@ -681,7 +675,6 @@ class WC_Cart {
 		/**
 		 * Returns the cart and shipping taxes, merged.
 		 *
-		 * @access public
 		 * @return array merged taxes
 		 */
 		public function get_taxes() {
@@ -959,8 +952,6 @@ class WC_Cart {
 
 		/**
 		 * Calculate totals for the items in the cart.
-		 *
-		 * @access public
 		 */
 		public function calculate_totals() {
 
@@ -1260,7 +1251,6 @@ class WC_Cart {
 		/**
 		 * remove_taxes function.
 		 *
-		 * @access public
 		 * @return void
 		 */
 		public function remove_taxes() {
