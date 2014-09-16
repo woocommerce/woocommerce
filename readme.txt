@@ -146,6 +146,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - "Set product image" media gallery title in non-product post type.
 * Fix - Number of processing orders in WooCommerce > Orders menu.
 * Fix - Issue that preventing cookies being set on shutdown after wp_send_json.
+* Fix - Incorrect shipping calculation because of missing width in product variation.
 * Tweak - Display of locale information on system status page.
 * Tweak - Removed postcode for Bahamas.
 * Tweak - In system status, show path to template file override.
