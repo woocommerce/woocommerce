@@ -1870,9 +1870,7 @@ class WC_Admin_Post_Types {
 	 * @return array
 	 */
 	public function media_view_strings( $strings = array(), $post = null ) {
-		$screen = get_current_screen();
-
-		if ( 'product' == $screen->id ) {
+		if ( isset( $post->post_type ) && 'product' == $post->post_type ) {
 			$strings['setFeaturedImageTitle'] = __( 'Set product image', 'woocommerce' );
 			$strings['setFeaturedImage']      = __( 'Set product image', 'woocommerce' );
 		}
