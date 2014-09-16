@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.2.0 Admin\n"
+"Project-Id-Version: WooCommerce 2.2.3 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-09-10 14:09:24+00:00\n"
+"POT-Creation-Date: 2014-09-16 12:34:12+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -129,7 +129,7 @@ msgstr ""
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:452
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:552
 #: includes/admin/meta-boxes/views/html-variation-admin.php:169
-#: includes/admin/settings/class-wc-settings-shipping.php:200
+#: includes/admin/settings/class-wc-settings-shipping.php:202
 msgid "Name"
 msgstr ""
 
@@ -205,7 +205,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:186
 #: includes/admin/class-wc-admin-post-types.php:122
-#: includes/admin/class-wc-admin-post-types.php:1954
+#: includes/admin/class-wc-admin-post-types.php:1958
 #: includes/admin/views/html-bulk-edit-product.php:181
 #: includes/admin/views/html-quick-edit-product.php:139
 msgid "Featured"
@@ -328,7 +328,7 @@ msgid "Update"
 msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:297
-#: includes/admin/class-wc-admin-menus.php:50
+#: includes/admin/class-wc-admin-menus.php:53
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:111
 msgid "Attributes"
 msgstr ""
@@ -343,7 +343,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:321
 #: includes/admin/class-wc-admin-post-types.php:211
-#: includes/admin/class-wc-admin-post-types.php:1958
+#: includes/admin/class-wc-admin-post-types.php:1962
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:215
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:294
 #: includes/admin/meta-boxes/views/html-order-items.php:202
@@ -392,7 +392,7 @@ msgid "WooCommerce Recent Reviews"
 msgstr ""
 
 #: includes/admin/class-wc-admin-dashboard.php:38
-#: includes/admin/class-wc-admin-menus.php:81
+#: includes/admin/class-wc-admin-menus.php:84
 msgid "WooCommerce Status"
 msgstr ""
 
@@ -501,7 +501,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:56
 #: includes/admin/class-wc-admin-help.php:67
-#: includes/admin/class-wc-admin-menus.php:81
+#: includes/admin/class-wc-admin-menus.php:84
 #: includes/admin/views/html-admin-page-status.php:16
 #: includes/admin/views/html-notice-template-check.php:14
 msgid "System Status"
@@ -565,28 +565,28 @@ msgstr ""
 msgid "Import <strong>tax rates</strong> to your store via a csv file."
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:57
+#: includes/admin/class-wc-admin-menus.php:60
 msgid "Reports"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:64
+#: includes/admin/class-wc-admin-menus.php:67
 msgid "WooCommerce Settings"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:64
+#: includes/admin/class-wc-admin-menus.php:67
 #: includes/admin/class-wc-admin-welcome.php:239
-#: includes/admin/settings/class-wc-settings-checkout.php:285
-#: includes/admin/settings/class-wc-settings-shipping.php:232
+#: includes/admin/settings/class-wc-settings-checkout.php:286
+#: includes/admin/settings/class-wc-settings-shipping.php:234
 #: includes/admin/views/html-admin-page-status-report.php:294
 msgid "Settings"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:89
+#: includes/admin/class-wc-admin-menus.php:92
 #: includes/admin/views/html-admin-page-addons.php:15
 msgid "WooCommerce Add-ons/Extensions"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:89
+#: includes/admin/class-wc-admin-menus.php:92
 msgid "Add-ons"
 msgstr ""
 
@@ -595,7 +595,7 @@ msgid "Product Short Description"
 msgstr ""
 
 #: includes/admin/class-wc-admin-meta-boxes.php:102
-#: includes/admin/settings/class-wc-settings-products.php:286
+#: includes/admin/settings/class-wc-settings-products.php:285
 #: includes/admin/views/html-bulk-edit-product.php:15
 #: includes/admin/views/html-quick-edit-product.php:15
 msgid "Product Data"
@@ -669,8 +669,8 @@ msgstr ""
 #: includes/admin/class-wc-admin-permalink-settings.php:113
 #: includes/admin/class-wc-admin-taxonomies.php:91
 #: includes/admin/class-wc-admin-taxonomies.php:180
-#: includes/admin/settings/class-wc-settings-checkout.php:228
-#: includes/admin/settings/class-wc-settings-shipping.php:199
+#: includes/admin/settings/class-wc-settings-checkout.php:229
+#: includes/admin/settings/class-wc-settings-shipping.php:201
 msgid "Default"
 msgstr ""
 
@@ -734,7 +734,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:124
 #: includes/admin/class-wc-admin-post-types.php:162
-#: includes/admin/reports/class-wc-report-coupon-usage.php:328
+#: includes/admin/reports/class-wc-report-coupon-usage.php:327
 #: includes/admin/reports/class-wc-report-customers.php:209
 #: includes/admin/reports/class-wc-report-sales-by-category.php:240
 #: includes/admin/reports/class-wc-report-sales-by-date.php:185
@@ -774,8 +774,8 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:156
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:810
-#: includes/admin/settings/class-wc-settings-checkout.php:231
-#: includes/admin/settings/class-wc-settings-shipping.php:202
+#: includes/admin/settings/class-wc-settings-checkout.php:232
+#: includes/admin/settings/class-wc-settings-shipping.php:204
 msgid "Status"
 msgstr ""
 
@@ -1199,76 +1199,76 @@ msgid "Remove product image"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:1858
-#: includes/admin/class-wc-admin-post-types.php:1872
-#: includes/admin/class-wc-admin-post-types.php:1873
+#: includes/admin/class-wc-admin-post-types.php:1874
+#: includes/admin/class-wc-admin-post-types.php:1875
 msgid "Set product image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1886
+#: includes/admin/class-wc-admin-post-types.php:1890
 msgid "Product name"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1889
+#: includes/admin/class-wc-admin-post-types.php:1893
 msgid "Coupon code"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1902
+#: includes/admin/class-wc-admin-post-types.php:1906
 msgid "Description (optional)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1919
+#: includes/admin/class-wc-admin-post-types.php:1923
 msgid "Insert into %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1920
+#: includes/admin/class-wc-admin-post-types.php:1924
 msgid "Uploaded to this %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1943
+#: includes/admin/class-wc-admin-post-types.php:1947
 msgid "Catalog/search"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1944
+#: includes/admin/class-wc-admin-post-types.php:1948
 #: includes/admin/views/html-bulk-edit-product.php:169
 #: includes/admin/views/html-quick-edit-product.php:126
 msgid "Catalog"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1945
+#: includes/admin/class-wc-admin-post-types.php:1949
 #: includes/admin/views/html-bulk-edit-product.php:170
 #: includes/admin/views/html-quick-edit-product.php:127
 msgid "Search"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1946
+#: includes/admin/class-wc-admin-post-types.php:1950
 #: includes/admin/views/html-bulk-edit-product.php:171
 #: includes/admin/views/html-quick-edit-product.php:128
 msgid "Hidden"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1950
+#: includes/admin/class-wc-admin-post-types.php:1954
 msgid "Catalog visibility:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1966
+#: includes/admin/class-wc-admin-post-types.php:1970
 msgid ""
 "Define the loops this product should be visible in. The product will still "
 "be accessible directly."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1972
+#: includes/admin/class-wc-admin-post-types.php:1976
 msgid "Enable this option to feature this product."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1974
+#: includes/admin/class-wc-admin-post-types.php:1978
 msgid "Featured Product"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1977
+#: includes/admin/class-wc-admin-post-types.php:1981
 msgid "OK"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1978
+#: includes/admin/class-wc-admin-post-types.php:1982
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:177
 #: includes/admin/meta-boxes/views/html-order-items.php:234
 #: includes/admin/meta-boxes/views/html-order-items.php:273
@@ -1316,8 +1316,8 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:117
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:63
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:110
-#: includes/admin/settings/class-wc-settings-tax.php:262
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:265
+#: includes/admin/settings/class-wc-settings-tax.php:392
 msgid "City"
 msgstr ""
 
@@ -1342,8 +1342,8 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-profile.php:80
 #: includes/admin/class-wc-admin-profile.php:129
-#: includes/admin/class-wc-admin-settings.php:547
-#: includes/admin/class-wc-admin-settings.php:571
+#: includes/admin/class-wc-admin-settings.php:578
+#: includes/admin/class-wc-admin-settings.php:603
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:71
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:118
 msgid "Country"
@@ -1458,46 +1458,46 @@ msgstr ""
 msgid "Taxes by date"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:54
+#: includes/admin/class-wc-admin-settings.php:57
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:64
+#: includes/admin/class-wc-admin-settings.php:68
 msgid "Your settings have been saved."
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:120
+#: includes/admin/class-wc-admin-settings.php:126
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:490
+#: includes/admin/class-wc-admin-settings.php:519
 msgid ""
 "The settings of this image size have been disabled because its values are "
 "being overwritten by a filter."
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:499
+#: includes/admin/class-wc-admin-settings.php:528
 msgid "Hard Crop?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:524
+#: includes/admin/class-wc-admin-settings.php:555
 msgid "Select a page&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:547
+#: includes/admin/class-wc-admin-settings.php:578
 msgid "Choose a country&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:571
+#: includes/admin/class-wc-admin-settings.php:603
 msgid "Choose countries&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:577
+#: includes/admin/class-wc-admin-settings.php:611
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:474
 msgid "Select all"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:577
+#: includes/admin/class-wc-admin-settings.php:611
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:474
 msgid "Select none"
 msgstr ""
@@ -1530,128 +1530,150 @@ msgstr ""
 msgid "Tax rates successfully deleted"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:142
-msgid ""
-"Forced the translations upgrade successfully, please check the <a "
-"href=\"%s\">Updates page</a>"
+#: includes/admin/class-wc-admin-status.php:141
+msgid "Translation update message hidden successfully!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:151
+#: includes/admin/class-wc-admin-status.php:150
 msgid "There was an error calling %s::%s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:154
+#: includes/admin/class-wc-admin-status.php:153
 msgid "There was an error calling %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:164
-msgid "Your changes have been saved."
+#: includes/admin/class-wc-admin-status.php:165
+#: includes/admin/class-wc-admin-status.php:168
+#: includes/admin/class-wc-admin-status.php:171
+msgid "Failed to install/update the translation:"
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:165
+msgid "Seems you don't have permission to do this!"
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:168
+msgid ""
+"An authentication error occurred while updating the translation. Please try "
+"again or configure your %sUpgrade Constants%s."
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:171
+msgid "Sorry but there is no translation available for your language =/"
 msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:178
-msgid "WC Transients"
-msgstr ""
-
-#: includes/admin/class-wc-admin-status.php:179
-msgid "Clear transients"
-msgstr ""
-
-#: includes/admin/class-wc-admin-status.php:180
-msgid "This tool will clear the product/shop transients cache."
-msgstr ""
-
-#: includes/admin/class-wc-admin-status.php:183
-msgid "Expired Transients"
-msgstr ""
-
-#: includes/admin/class-wc-admin-status.php:184
-msgid "Clear expired transients"
+msgid "Translations installed/updated successfully!"
 msgstr ""
 
 #: includes/admin/class-wc-admin-status.php:185
+msgid "Your changes have been saved."
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:199
+msgid "WC Transients"
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:200
+msgid "Clear transients"
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:201
+msgid "This tool will clear the product/shop transients cache."
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:204
+msgid "Expired Transients"
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:205
+msgid "Clear expired transients"
+msgstr ""
+
+#: includes/admin/class-wc-admin-status.php:206
 msgid "This tool will clear ALL expired transients from WordPress."
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:188
+#: includes/admin/class-wc-admin-status.php:209
 msgid "Term counts"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:189
+#: includes/admin/class-wc-admin-status.php:210
 msgid "Recount terms"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:190
+#: includes/admin/class-wc-admin-status.php:211
 msgid ""
 "This tool will recount product terms - useful when changing your settings "
 "in a way which hides products from the catalog."
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:193
+#: includes/admin/class-wc-admin-status.php:214
 msgid "Capabilities"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:194
+#: includes/admin/class-wc-admin-status.php:215
 msgid "Reset capabilities"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:195
+#: includes/admin/class-wc-admin-status.php:216
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:198
+#: includes/admin/class-wc-admin-status.php:219
 msgid "Customer Sessions"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:199
+#: includes/admin/class-wc-admin-status.php:220
 msgid "Clear all sessions"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:200
+#: includes/admin/class-wc-admin-status.php:221
 msgid ""
 "<strong class=\"red\">Warning:</strong> This tool will delete all customer "
 "session data from the database, including any current live carts."
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:203
+#: includes/admin/class-wc-admin-status.php:224
 #: includes/admin/views/html-notice-install.php:14
 msgid "Install WooCommerce Pages"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:204
+#: includes/admin/class-wc-admin-status.php:225
 msgid "Install pages"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:205
+#: includes/admin/class-wc-admin-status.php:226
 msgid ""
 "<strong class=\"red\">Note:</strong> This tool will install all the missing "
 "WooCommerce pages. Pages already defined and set up will not be replaced."
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:208
+#: includes/admin/class-wc-admin-status.php:229
 msgid "Delete all WooCommerce tax rates"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:209
+#: includes/admin/class-wc-admin-status.php:230
 msgid "Delete ALL tax rates"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:210
+#: includes/admin/class-wc-admin-status.php:231
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will delete ALL of your "
 "tax rates, use with caution."
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:216
+#: includes/admin/class-wc-admin-status.php:237
 msgid "Translation Upgrade"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:217
+#: includes/admin/class-wc-admin-status.php:238
 msgid "Force Translation Upgrade"
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:218
+#: includes/admin/class-wc-admin-status.php:239
 msgid ""
 "<strong class=\"red\">Note:</strong> This option will force the translation "
 "upgrade for your language if a translation is available."
@@ -2227,7 +2249,7 @@ msgid "h"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:186
-#: includes/admin/settings/class-wc-settings-products.php:314
+#: includes/admin/settings/class-wc-settings-products.php:313
 msgid "m"
 msgstr ""
 
@@ -2264,6 +2286,7 @@ msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:262
 #: includes/admin/meta-boxes/views/html-order-shipping.php:20
+#: includes/admin/views/html-admin-page-status-report.php:219
 msgid "N/A"
 msgstr ""
 
@@ -2382,8 +2405,8 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-order-items.php:139
 #: includes/admin/meta-boxes/views/html-order-shipping.php:14
 #: includes/admin/settings/class-wc-settings-shipping.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:272
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:275
+#: includes/admin/settings/class-wc-settings-tax.php:392
 #: includes/admin/views/html-admin-page-addons.php:25
 msgid "Shipping"
 msgstr ""
@@ -2542,15 +2565,15 @@ msgstr ""
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:264
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:773
 #: includes/admin/meta-boxes/views/html-order-items.php:20
-#: includes/admin/settings/class-wc-settings-tax.php:126
-#: includes/admin/settings/class-wc-settings-tax.php:249
+#: includes/admin/settings/class-wc-settings-tax.php:127
+#: includes/admin/settings/class-wc-settings-tax.php:252
 #: includes/admin/views/html-bulk-edit-product.php:94
 #: includes/admin/views/html-quick-edit-product.php:72
 msgid "Standard"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:273
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:392
 #: includes/admin/views/html-bulk-edit-product.php:88
 #: includes/admin/views/html-quick-edit-product.php:67
 msgid "Tax Class"
@@ -2969,8 +2992,8 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-order-items.php:63
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:124
 #: includes/admin/settings/class-wc-settings-tax.php:25
-#: includes/admin/settings/class-wc-settings-tax.php:558
-#: includes/admin/settings/class-wc-settings-tax.php:661
+#: includes/admin/settings/class-wc-settings-tax.php:561
+#: includes/admin/settings/class-wc-settings-tax.php:664
 msgid "Tax"
 msgstr ""
 
@@ -3092,7 +3115,7 @@ msgid "Rate code"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-order-items.php:319
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:392
 msgid "Rate %"
 msgstr ""
 
@@ -3210,8 +3233,8 @@ msgid "Download Expiry:"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-variation-admin.php:231
-#: includes/admin/settings/class-wc-settings-checkout.php:276
-#: includes/admin/settings/class-wc-settings-shipping.php:223
+#: includes/admin/settings/class-wc-settings-checkout.php:277
+#: includes/admin/settings/class-wc-settings-shipping.php:225
 #: includes/admin/views/html-admin-page-status-tools.php:37
 #: includes/admin/views/html-admin-page-status-tools.php:48
 #: includes/admin/views/html-admin-page-status-tools.php:59
@@ -3323,22 +3346,22 @@ msgstr ""
 msgid "Most Discount"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:331
+#: includes/admin/reports/class-wc-report-coupon-usage.php:330
 #: includes/admin/reports/class-wc-report-customers.php:212
 #: includes/admin/reports/class-wc-report-sales-by-category.php:243
 #: includes/admin/reports/class-wc-report-sales-by-date.php:189
 #: includes/admin/reports/class-wc-report-sales-by-product.php:332
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:36
 #: includes/admin/reports/class-wc-report-taxes-by-date.php:36
-#: includes/admin/settings/class-wc-settings-tax.php:360
+#: includes/admin/settings/class-wc-settings-tax.php:363
 msgid "Export CSV"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:423
+#: includes/admin/reports/class-wc-report-coupon-usage.php:422
 msgid "Number of coupons used"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:431
+#: includes/admin/reports/class-wc-report-coupon-usage.php:430
 msgid "Discount amount"
 msgstr ""
 
@@ -3637,107 +3660,107 @@ msgstr ""
 msgid "Accounts"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:42
+#: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid "Account Pages"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:42
+#: includes/admin/settings/class-wc-settings-accounts.php:41
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "access account related functionality."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:45
+#: includes/admin/settings/class-wc-settings-accounts.php:44
 msgid "My Account Page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:46
-#: includes/admin/settings/class-wc-settings-checkout.php:116
-#: includes/admin/settings/class-wc-settings-checkout.php:127
+#: includes/admin/settings/class-wc-settings-accounts.php:45
+#: includes/admin/settings/class-wc-settings-checkout.php:115
+#: includes/admin/settings/class-wc-settings-checkout.php:126
 msgid "Page contents:"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:57
+#: includes/admin/settings/class-wc-settings-accounts.php:56
 msgid "My Account Endpoints"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:57
+#: includes/admin/settings/class-wc-settings-accounts.php:56
 msgid ""
 "Endpoints are appended to your page URLs to handle specific actions on the "
 "accounts pages. They should be unique."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:60
+#: includes/admin/settings/class-wc-settings-accounts.php:59
 msgid "View Order"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:61
+#: includes/admin/settings/class-wc-settings-accounts.php:60
 msgid "Endpoint for the My Account &rarr; View Order page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:69
+#: includes/admin/settings/class-wc-settings-accounts.php:68
 msgid "Edit Account"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:70
+#: includes/admin/settings/class-wc-settings-accounts.php:69
 msgid "Endpoint for the My Account &rarr; Edit Account page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:78
+#: includes/admin/settings/class-wc-settings-accounts.php:77
 msgid "Edit Address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:79
+#: includes/admin/settings/class-wc-settings-accounts.php:78
 msgid "Endpoint for the My Account &rarr; Edit Address page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:87
+#: includes/admin/settings/class-wc-settings-accounts.php:86
 msgid "Lost Password"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:88
+#: includes/admin/settings/class-wc-settings-accounts.php:87
 msgid "Endpoint for the My Account &rarr; Lost Password page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:96
+#: includes/admin/settings/class-wc-settings-accounts.php:95
 msgid "Logout"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:97
+#: includes/admin/settings/class-wc-settings-accounts.php:96
 msgid ""
 "Endpoint for the triggering logout. You can add this to your menus via a "
 "custom link: yoursite.com/?customer-logout=true"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:106
+#: includes/admin/settings/class-wc-settings-accounts.php:105
 msgid "Registration Options"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:109
+#: includes/admin/settings/class-wc-settings-accounts.php:108
 msgid "Enable Registration"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:110
+#: includes/admin/settings/class-wc-settings-accounts.php:109
 msgid "Enable registration on the \"Checkout\" page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:119
+#: includes/admin/settings/class-wc-settings-accounts.php:118
 msgid "Enable registration on the \"My Account\" page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:128
+#: includes/admin/settings/class-wc-settings-accounts.php:127
 msgid "Display returning customer login reminder on the \"Checkout\" page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:137
+#: includes/admin/settings/class-wc-settings-accounts.php:136
 msgid "Account Creation"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:138
+#: includes/admin/settings/class-wc-settings-accounts.php:137
 msgid "Automatically generate username from customer email"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-accounts.php:147
+#: includes/admin/settings/class-wc-settings-accounts.php:146
 msgid "Automatically generate customer password"
 msgstr ""
 
@@ -3745,123 +3768,123 @@ msgstr ""
 msgid "Checkout Options"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:68
+#: includes/admin/settings/class-wc-settings-checkout.php:67
 msgid "Checkout Process"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:71
+#: includes/admin/settings/class-wc-settings-checkout.php:70
 msgid "Coupons"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:72
+#: includes/admin/settings/class-wc-settings-checkout.php:71
 msgid "Enable the use of coupons"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:76
+#: includes/admin/settings/class-wc-settings-checkout.php:75
 msgid "Coupons can be applied from the cart and checkout pages."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:82
+#: includes/admin/settings/class-wc-settings-checkout.php:81
 msgid "Enable guest checkout"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:83
+#: includes/admin/settings/class-wc-settings-checkout.php:82
 msgid "Allows customers to checkout without creating an account."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:92
+#: includes/admin/settings/class-wc-settings-checkout.php:91
 msgid "Force secure checkout"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:98
+#: includes/admin/settings/class-wc-settings-checkout.php:97
 msgid "Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:102
+#: includes/admin/settings/class-wc-settings-checkout.php:101
 msgid "Force HTTP when leaving the checkout"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:112
+#: includes/admin/settings/class-wc-settings-checkout.php:111
 msgid "Checkout Pages"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:112
+#: includes/admin/settings/class-wc-settings-checkout.php:111
 msgid ""
 "These pages need to be set so that WooCommerce knows where to send users to "
 "checkout."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:115
+#: includes/admin/settings/class-wc-settings-checkout.php:114
 msgid "Cart Page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:126
+#: includes/admin/settings/class-wc-settings-checkout.php:125
 msgid "Checkout Page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:137
+#: includes/admin/settings/class-wc-settings-checkout.php:136
 msgid "Terms and Conditions"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:138
+#: includes/admin/settings/class-wc-settings-checkout.php:137
 msgid ""
 "If you define a \"Terms\" page the customer will be asked if they accept "
 "them when checking out."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:150
+#: includes/admin/settings/class-wc-settings-checkout.php:149
 msgid "Checkout Endpoints"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:150
+#: includes/admin/settings/class-wc-settings-checkout.php:149
 msgid ""
 "Endpoints are appended to your page URLs to handle specific actions during "
 "the checkout process. They should be unique."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:153
+#: includes/admin/settings/class-wc-settings-checkout.php:152
 msgid "Pay"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:154
+#: includes/admin/settings/class-wc-settings-checkout.php:153
 msgid "Endpoint for the Checkout &rarr; Pay page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:162
+#: includes/admin/settings/class-wc-settings-checkout.php:161
 msgid "Order Received"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:163
+#: includes/admin/settings/class-wc-settings-checkout.php:162
 msgid "Endpoint for the Checkout &rarr; Order Received page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:171
+#: includes/admin/settings/class-wc-settings-checkout.php:170
 msgid "Add Payment Method"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:172
+#: includes/admin/settings/class-wc-settings-checkout.php:171
 msgid "Endpoint for the Checkout &rarr; Add Payment Method page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:181
+#: includes/admin/settings/class-wc-settings-checkout.php:180
 msgid "Payment Gateways"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:181
+#: includes/admin/settings/class-wc-settings-checkout.php:180
 msgid ""
 "Installed gateways are listed below. Drag and drop gateways to control "
 "their display order on the frontend."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:221
+#: includes/admin/settings/class-wc-settings-checkout.php:222
 msgid "Gateway Display Order"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:229
+#: includes/admin/settings/class-wc-settings-checkout.php:230
 msgid "Gateway"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:230
+#: includes/admin/settings/class-wc-settings-checkout.php:231
 msgid "Gateway ID"
 msgstr ""
 
@@ -3873,29 +3896,29 @@ msgstr ""
 msgid "Email Options"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:69
+#: includes/admin/settings/class-wc-settings-emails.php:68
 msgid "Email Sender Options"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:69
+#: includes/admin/settings/class-wc-settings-emails.php:68
 msgid ""
 "The following options affect the sender (email address and name) used in "
 "WooCommerce emails."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:72
+#: includes/admin/settings/class-wc-settings-emails.php:71
 msgid "\"From\" Name"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:82
+#: includes/admin/settings/class-wc-settings-emails.php:81
 msgid "\"From\" Email Address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:96
+#: includes/admin/settings/class-wc-settings-emails.php:95
 msgid "Email Template"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:96
+#: includes/admin/settings/class-wc-settings-emails.php:95
 msgid ""
 "This section lets you customise the WooCommerce emails. <a href=\"%s\" "
 "target=\"_blank\">Click here to preview your email template</a>. For more "
@@ -3903,61 +3926,61 @@ msgid ""
 "<code>yourtheme/woocommerce/emails/</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:99
+#: includes/admin/settings/class-wc-settings-emails.php:98
 msgid "Header Image"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:100
+#: includes/admin/settings/class-wc-settings-emails.php:99
 msgid ""
 "Enter a URL to an image you want to show in the email's header. Upload your "
 "image using the <a href=\"%s\">media uploader</a>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:109
+#: includes/admin/settings/class-wc-settings-emails.php:108
 msgid "Email Footer Text"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:110
+#: includes/admin/settings/class-wc-settings-emails.php:109
 msgid "The text to appear in the footer of WooCommerce emails."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:114
+#: includes/admin/settings/class-wc-settings-emails.php:113
 msgid "Powered by WooCommerce"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:119
+#: includes/admin/settings/class-wc-settings-emails.php:118
 msgid "Base Colour"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:120
+#: includes/admin/settings/class-wc-settings-emails.php:119
 msgid ""
 "The base colour for WooCommerce email templates. Default "
 "<code>#557da1</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:129
+#: includes/admin/settings/class-wc-settings-emails.php:128
 msgid "Background Colour"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:130
+#: includes/admin/settings/class-wc-settings-emails.php:129
 msgid ""
 "The background colour for WooCommerce email templates. Default "
 "<code>#f5f5f5</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:139
+#: includes/admin/settings/class-wc-settings-emails.php:138
 msgid "Email Body Background Colour"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:140
+#: includes/admin/settings/class-wc-settings-emails.php:139
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:149
+#: includes/admin/settings/class-wc-settings-emails.php:148
 msgid "Email Body Text Colour"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:150
+#: includes/admin/settings/class-wc-settings-emails.php:149
 msgid "The main body text colour. Default <code>#505050</code>."
 msgstr ""
 
@@ -4114,51 +4137,51 @@ msgstr ""
 msgid "This will enable a script allowing the country fields to be searchable."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:221
+#: includes/admin/settings/class-wc-settings-general.php:223
 msgid "Frontend Styles"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:251
+#: includes/admin/settings/class-wc-settings-general.php:253
 msgid "Primary"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:251
+#: includes/admin/settings/class-wc-settings-general.php:253
 msgid "Call to action buttons/price slider/layered nav UI"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:252
+#: includes/admin/settings/class-wc-settings-general.php:254
 msgid "Secondary"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:252
+#: includes/admin/settings/class-wc-settings-general.php:254
 msgid "Buttons and tabs"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:253
+#: includes/admin/settings/class-wc-settings-general.php:255
 msgid "Highlight"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:253
+#: includes/admin/settings/class-wc-settings-general.php:255
 msgid "Price labels and Sale Flashes"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:254
+#: includes/admin/settings/class-wc-settings-general.php:256
 msgid "Content"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:254
+#: includes/admin/settings/class-wc-settings-general.php:256
 msgid "Your themes page background - used for tab active states"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:255
+#: includes/admin/settings/class-wc-settings-general.php:257
 msgid "Subtext"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:255
+#: includes/admin/settings/class-wc-settings-general.php:257
 msgid "Used for certain text and asides - breadcrumbs, small text etc."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:258
+#: includes/admin/settings/class-wc-settings-general.php:260
 msgid ""
 "To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> "
 "and <code>woocommerce.css</code> need to be writable. See <a "
@@ -4166,7 +4189,7 @@ msgid ""
 "for more information."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-general.php:310
+#: includes/admin/settings/class-wc-settings-general.php:312
 msgid ""
 "Error saving the Frontend Styles, %s is not a valid color, please use only "
 "valid colors code."
@@ -4180,254 +4203,254 @@ msgstr ""
 msgid "Product Options"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:81
+#: includes/admin/settings/class-wc-settings-products.php:80
 msgid "Inventory Options"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:84
+#: includes/admin/settings/class-wc-settings-products.php:83
 msgid "Manage Stock"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:85
+#: includes/admin/settings/class-wc-settings-products.php:84
 msgid "Enable stock management"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:92
+#: includes/admin/settings/class-wc-settings-products.php:91
 msgid "Hold Stock (minutes)"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:93
+#: includes/admin/settings/class-wc-settings-products.php:92
 msgid ""
 "Hold stock (for unpaid orders) for x minutes. When this limit is reached, "
 "the pending order will be cancelled. Leave blank to disable."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:106
+#: includes/admin/settings/class-wc-settings-products.php:105
 msgid "Notifications"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:107
+#: includes/admin/settings/class-wc-settings-products.php:106
 msgid "Enable low stock notifications"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:116
+#: includes/admin/settings/class-wc-settings-products.php:115
 msgid "Enable out of stock notifications"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:125
+#: includes/admin/settings/class-wc-settings-products.php:124
 msgid "Notification Recipient"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:134
+#: includes/admin/settings/class-wc-settings-products.php:133
 msgid "Low Stock Threshold"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:148
+#: includes/admin/settings/class-wc-settings-products.php:147
 msgid "Out Of Stock Threshold"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:162
+#: includes/admin/settings/class-wc-settings-products.php:161
 msgid "Out Of Stock Visibility"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:163
+#: includes/admin/settings/class-wc-settings-products.php:162
 msgid "Hide out of stock items from the catalog"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:170
+#: includes/admin/settings/class-wc-settings-products.php:169
 msgid "Stock Display Format"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:171
+#: includes/admin/settings/class-wc-settings-products.php:170
 msgid "This controls how stock is displayed on the frontend."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:177
+#: includes/admin/settings/class-wc-settings-products.php:176
 msgid "Always show stock e.g. \"12 in stock\""
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:178
+#: includes/admin/settings/class-wc-settings-products.php:177
 msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:179
+#: includes/admin/settings/class-wc-settings-products.php:178
 msgid "Never show stock amount"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:198
+#: includes/admin/settings/class-wc-settings-products.php:197
 msgid ""
 "Note: The shop page has children - child pages will not work if you enable "
 "this option."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:203
+#: includes/admin/settings/class-wc-settings-products.php:202
 msgid "Product Listings"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:206
+#: includes/admin/settings/class-wc-settings-products.php:205
 msgid "Product Archive / Shop Page"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:207
+#: includes/admin/settings/class-wc-settings-products.php:206
 msgid ""
 "The base page can also be used in your <a href=\"%s\">product "
 "permalinks</a>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:213
+#: includes/admin/settings/class-wc-settings-products.php:212
 msgid ""
 "This sets the base page of your shop - this is where your product archive "
 "will be."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:217
+#: includes/admin/settings/class-wc-settings-products.php:216
 msgid "Shop Page Display"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:218
+#: includes/admin/settings/class-wc-settings-products.php:217
 msgid "This controls what is shown on the product archive."
+msgstr ""
+
+#: includes/admin/settings/class-wc-settings-products.php:224
+#: includes/admin/settings/class-wc-settings-products.php:240
+msgid "Show products"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:225
 #: includes/admin/settings/class-wc-settings-products.php:241
-msgid "Show products"
+msgid "Show subcategories"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-products.php:226
 #: includes/admin/settings/class-wc-settings-products.php:242
-msgid "Show subcategories"
-msgstr ""
-
-#: includes/admin/settings/class-wc-settings-products.php:227
-#: includes/admin/settings/class-wc-settings-products.php:243
 msgid "Show both"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:233
+#: includes/admin/settings/class-wc-settings-products.php:232
 msgid "Default Category Display"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:234
+#: includes/admin/settings/class-wc-settings-products.php:233
 msgid "This controls what is shown on category archives."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:249
+#: includes/admin/settings/class-wc-settings-products.php:248
 msgid "Default Product Sorting"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:250
+#: includes/admin/settings/class-wc-settings-products.php:249
 msgid "This controls the default sort order of the catalog."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:257
+#: includes/admin/settings/class-wc-settings-products.php:256
 msgid "Default sorting (custom ordering + name)"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:258
+#: includes/admin/settings/class-wc-settings-products.php:257
 msgid "Popularity (sales)"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:259
+#: includes/admin/settings/class-wc-settings-products.php:258
 msgid "Average Rating"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:260
+#: includes/admin/settings/class-wc-settings-products.php:259
 msgid "Sort by most recent"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:261
+#: includes/admin/settings/class-wc-settings-products.php:260
 msgid "Sort by price (asc)"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:262
+#: includes/admin/settings/class-wc-settings-products.php:261
 msgid "Sort by price (desc)"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:268
+#: includes/admin/settings/class-wc-settings-products.php:267
 msgid "Add to cart"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:269
+#: includes/admin/settings/class-wc-settings-products.php:268
 msgid "Redirect to the cart page after successful addition"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:277
+#: includes/admin/settings/class-wc-settings-products.php:276
 msgid "Enable AJAX add to cart buttons on archives"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:289
+#: includes/admin/settings/class-wc-settings-products.php:288
 msgid "Weight Unit"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:290
+#: includes/admin/settings/class-wc-settings-products.php:289
 msgid "This controls what unit you will define weights in."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:297
+#: includes/admin/settings/class-wc-settings-products.php:296
 msgid "kg"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:298
+#: includes/admin/settings/class-wc-settings-products.php:297
 msgid "g"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:299
+#: includes/admin/settings/class-wc-settings-products.php:298
 msgid "lbs"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:300
+#: includes/admin/settings/class-wc-settings-products.php:299
 msgid "oz"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:306
+#: includes/admin/settings/class-wc-settings-products.php:305
 msgid "Dimensions Unit"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:307
+#: includes/admin/settings/class-wc-settings-products.php:306
 msgid "This controls what unit you will define lengths in."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:315
+#: includes/admin/settings/class-wc-settings-products.php:314
 msgid "cm"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:316
+#: includes/admin/settings/class-wc-settings-products.php:315
 msgid "mm"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:317
+#: includes/admin/settings/class-wc-settings-products.php:316
 msgid "in"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:318
+#: includes/admin/settings/class-wc-settings-products.php:317
 msgid "yd"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:324
+#: includes/admin/settings/class-wc-settings-products.php:323
 msgid "Product Ratings"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:325
+#: includes/admin/settings/class-wc-settings-products.php:324
 msgid "Enable ratings on reviews"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:335
+#: includes/admin/settings/class-wc-settings-products.php:334
 msgid "Ratings are required to leave a review"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:345
+#: includes/admin/settings/class-wc-settings-products.php:344
 msgid "Show \"verified owner\" label for customer reviews"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:355
+#: includes/admin/settings/class-wc-settings-products.php:354
 msgid "Only allow reviews from \"verified owners\""
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:366
+#: includes/admin/settings/class-wc-settings-products.php:365
 msgid "Product Image Sizes"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:366
+#: includes/admin/settings/class-wc-settings-products.php:365
 msgid ""
 "These settings affect the actual dimensions of images in your catalog - the "
 "display on the front-end will still be affected by CSS styles. After "
@@ -4435,39 +4458,39 @@ msgid ""
 "thumbnails</a>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:369
+#: includes/admin/settings/class-wc-settings-products.php:368
 msgid "Catalog Images"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:370
+#: includes/admin/settings/class-wc-settings-products.php:369
 msgid "This size is usually used in product listings"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:383
+#: includes/admin/settings/class-wc-settings-products.php:382
 msgid "Single Product Image"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:384
+#: includes/admin/settings/class-wc-settings-products.php:383
 msgid "This is the size used by the main image on the product page."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:397
+#: includes/admin/settings/class-wc-settings-products.php:396
 msgid "Product Thumbnails"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:398
+#: includes/admin/settings/class-wc-settings-products.php:397
 msgid "This size is usually used for the gallery of images on the product page."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:412
+#: includes/admin/settings/class-wc-settings-products.php:411
 msgid "Downloadable Products"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:415
+#: includes/admin/settings/class-wc-settings-products.php:414
 msgid "File Download Method"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:416
+#: includes/admin/settings/class-wc-settings-products.php:415
 msgid ""
 "Forcing downloads will keep URLs hidden, but some servers may serve large "
 "files unreliably. If supported, <code>X-Accel-Redirect</code>/ "
@@ -4475,35 +4498,35 @@ msgid ""
 "requires <code>mod_xsendfile</code>)."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:424
+#: includes/admin/settings/class-wc-settings-products.php:423
 msgid "Force Downloads"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:425
+#: includes/admin/settings/class-wc-settings-products.php:424
 msgid "X-Accel-Redirect/X-Sendfile"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:426
+#: includes/admin/settings/class-wc-settings-products.php:425
 msgid "Redirect only"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:432
+#: includes/admin/settings/class-wc-settings-products.php:431
 msgid "Access Restriction"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:433
+#: includes/admin/settings/class-wc-settings-products.php:432
 msgid "Downloads require login"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:437
+#: includes/admin/settings/class-wc-settings-products.php:436
 msgid "This setting does not apply to guest purchases."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:443
+#: includes/admin/settings/class-wc-settings-products.php:442
 msgid "Grant access to downloadable products after payment"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-products.php:447
+#: includes/admin/settings/class-wc-settings-products.php:446
 msgid ""
 "Enable this option to grant access to downloads when orders are "
 "\"processing\", rather than \"completed\"."
@@ -4588,28 +4611,28 @@ msgstr ""
 msgid "Ship to specific countries only"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:194
+#: includes/admin/settings/class-wc-settings-shipping.php:196
 msgid "Shipping Methods"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:201
+#: includes/admin/settings/class-wc-settings-shipping.php:203
 msgid "ID"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:245
+#: includes/admin/settings/class-wc-settings-shipping.php:247
 msgid "Automatic"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:245
+#: includes/admin/settings/class-wc-settings-shipping.php:247
 msgid "The cheapest available shipping method will be selected by default."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:246
+#: includes/admin/settings/class-wc-settings-shipping.php:248
 msgid "Drag and drop the above shipping methods to control their display order."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:41
-#: includes/admin/settings/class-wc-settings-tax.php:72
+#: includes/admin/settings/class-wc-settings-tax.php:73
 msgid "Tax Options"
 msgstr ""
 
@@ -4621,122 +4644,122 @@ msgstr ""
 msgid "%s Rates"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:75
+#: includes/admin/settings/class-wc-settings-tax.php:76
 msgid "Enable Taxes"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:76
+#: includes/admin/settings/class-wc-settings-tax.php:77
 msgid "Enable taxes and tax calculations"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:83
+#: includes/admin/settings/class-wc-settings-tax.php:84
 msgid "Prices Entered With Tax"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:87
+#: includes/admin/settings/class-wc-settings-tax.php:88
 msgid ""
 "This option is important as it will affect how you input prices. Changing "
 "it will not update existing products."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:89
+#: includes/admin/settings/class-wc-settings-tax.php:90
 msgid "Yes, I will enter prices inclusive of tax"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:90
+#: includes/admin/settings/class-wc-settings-tax.php:91
 msgid "No, I will enter prices exclusive of tax"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:95
+#: includes/admin/settings/class-wc-settings-tax.php:96
 msgid "Calculate Tax Based On:"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:97
+#: includes/admin/settings/class-wc-settings-tax.php:98
 msgid "This option determines which address is used to calculate tax."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:101
+#: includes/admin/settings/class-wc-settings-tax.php:102
 msgid "Customer shipping address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:102
+#: includes/admin/settings/class-wc-settings-tax.php:103
 msgid "Customer billing address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:103
-#: includes/admin/settings/class-wc-settings-tax.php:115
+#: includes/admin/settings/class-wc-settings-tax.php:104
+#: includes/admin/settings/class-wc-settings-tax.php:116
 msgid "Shop base address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:108
+#: includes/admin/settings/class-wc-settings-tax.php:109
 msgid "Default Customer Address:"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:110
+#: includes/admin/settings/class-wc-settings-tax.php:111
 msgid ""
 "This option determines the customers default address (before they input "
 "their own)."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:114
+#: includes/admin/settings/class-wc-settings-tax.php:115
 msgid "No address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:120
+#: includes/admin/settings/class-wc-settings-tax.php:121
 msgid "Shipping Tax Class:"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:121
+#: includes/admin/settings/class-wc-settings-tax.php:122
 msgid ""
 "Optionally control which tax class shipping gets, or leave it so shipping "
 "tax is based on the cart items themselves."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:126
+#: includes/admin/settings/class-wc-settings-tax.php:127
 msgid "Shipping tax class based on cart items"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:131
+#: includes/admin/settings/class-wc-settings-tax.php:132
 msgid "Rounding"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:132
+#: includes/admin/settings/class-wc-settings-tax.php:133
 msgid "Round tax at subtotal level, instead of rounding per line"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:139
+#: includes/admin/settings/class-wc-settings-tax.php:140
 msgid "Additional Tax Classes"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:140
+#: includes/admin/settings/class-wc-settings-tax.php:141
 msgid ""
 "List additional tax classes below (1 per line). This is in addition to the "
 "default <code>Standard Rate</code>. Tax classes can be assigned to products."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:144
+#: includes/admin/settings/class-wc-settings-tax.php:145
 msgid "Reduced Rate%sZero Rate"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:148
+#: includes/admin/settings/class-wc-settings-tax.php:149
 msgid "Display prices in the shop:"
-msgstr ""
-
-#: includes/admin/settings/class-wc-settings-tax.php:153
-#: includes/admin/settings/class-wc-settings-tax.php:172
-msgid "Including tax"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-tax.php:154
 #: includes/admin/settings/class-wc-settings-tax.php:173
+msgid "Including tax"
+msgstr ""
+
+#: includes/admin/settings/class-wc-settings-tax.php:155
+#: includes/admin/settings/class-wc-settings-tax.php:174
 msgid "Excluding tax"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:159
+#: includes/admin/settings/class-wc-settings-tax.php:160
 msgid "Price display suffix:"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:163
+#: includes/admin/settings/class-wc-settings-tax.php:164
 msgid ""
 "Define text to show after your product prices. This could be, for example, "
 "\"inc. Vat\" to explain your pricing. You can also have prices substituted "
@@ -4744,138 +4767,138 @@ msgid ""
 "{price_excluding_tax}</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:167
+#: includes/admin/settings/class-wc-settings-tax.php:168
 msgid "Display prices during cart/checkout:"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:179
+#: includes/admin/settings/class-wc-settings-tax.php:180
 msgid "Display tax totals:"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:184
+#: includes/admin/settings/class-wc-settings-tax.php:185
 msgid "As a single total"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:185
+#: includes/admin/settings/class-wc-settings-tax.php:186
 msgid "Itemized"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:249
+#: includes/admin/settings/class-wc-settings-tax.php:252
 msgid "Tax Rates for the \"%s\" Class"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:250
+#: includes/admin/settings/class-wc-settings-tax.php:253
 msgid ""
 "Define tax rates for countries and states below. <a href=\"%s\">See "
 "here</a> for available alpha-2 country codes."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:259
 msgid "Country&nbsp;Code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:256
+#: includes/admin/settings/class-wc-settings-tax.php:259
 msgid "A 2 digit country code, e.g. US. Leave blank to apply to all."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:261
 msgid "State&nbsp;Code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:258
+#: includes/admin/settings/class-wc-settings-tax.php:261
 msgid "A 2 digit state code, e.g. AL. Leave blank to apply to all."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:263
+#: includes/admin/settings/class-wc-settings-tax.php:392
 msgid "ZIP/Postcode"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:260
+#: includes/admin/settings/class-wc-settings-tax.php:263
 msgid ""
 "Postcode for this rule. Semi-colon (;) separate multiple values. Leave "
 "blank to apply to all areas. Wildcards (*) can be used. Ranges for numeric "
 "postcodes (e.g. 12345-12350) will be expanded into individual postcodes."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:262
+#: includes/admin/settings/class-wc-settings-tax.php:265
 msgid ""
 "Cities for this rule. Semi-colon (;) separate multiple values. Leave blank "
 "to apply to all cities."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:267
 msgid "Rate&nbsp;%"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:264
+#: includes/admin/settings/class-wc-settings-tax.php:267
 msgid "Enter a tax rate (percentage) to 4 decimal places."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:266
+#: includes/admin/settings/class-wc-settings-tax.php:269
 msgid "Tax&nbsp;Name"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:266
+#: includes/admin/settings/class-wc-settings-tax.php:269
 msgid "Enter a name for this tax rate."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:268
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:271
+#: includes/admin/settings/class-wc-settings-tax.php:392
 msgid "Priority"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:268
+#: includes/admin/settings/class-wc-settings-tax.php:271
 msgid ""
 "Choose a priority for this tax rate. Only 1 matching rate per priority will "
 "be used. To define multiple tax rates for a single area you need to specify "
 "a different priority per rate."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:270
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:273
+#: includes/admin/settings/class-wc-settings-tax.php:392
 msgid "Compound"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:270
+#: includes/admin/settings/class-wc-settings-tax.php:273
 msgid ""
 "Choose whether or not this is a compound rate. Compound tax rates are "
 "applied on top of other tax rates."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:272
+#: includes/admin/settings/class-wc-settings-tax.php:275
 msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:291
+#: includes/admin/settings/class-wc-settings-tax.php:294
 msgid "Tax rate ID"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:344
+#: includes/admin/settings/class-wc-settings-tax.php:347
 msgid "Insert row"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:345
+#: includes/admin/settings/class-wc-settings-tax.php:348
 msgid "Remove selected row(s)"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:361
+#: includes/admin/settings/class-wc-settings-tax.php:364
 msgid "Import CSV"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:382
+#: includes/admin/settings/class-wc-settings-tax.php:385
 msgid "No row(s) selected"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:392
 msgid "Country Code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:392
 msgid "State Code"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-tax.php:389
+#: includes/admin/settings/class-wc-settings-tax.php:392
 msgid "Tax Name"
 msgstr ""
 
@@ -5395,14 +5418,26 @@ msgstr ""
 msgid "Theme Integration Guide"
 msgstr ""
 
-#: includes/admin/views/html-notice-translation-upgrade.php:13
+#: includes/admin/views/html-notice-translation-upgrade.php:17
 msgid ""
 "<strong>WooCommerce Translation Available</strong> &#8211; Install or "
 "update your <code>%s</code> translation to version <code>%s</code>."
 msgstr ""
 
-#: includes/admin/views/html-notice-translation-upgrade.php:14
+#: includes/admin/views/html-notice-translation-upgrade.php:21
+msgid "Update Translation"
+msgstr ""
+
+#: includes/admin/views/html-notice-translation-upgrade.php:23
 msgid "Update translation"
+msgstr ""
+
+#: includes/admin/views/html-notice-translation-upgrade.php:24
+msgid "Force Update Translation"
+msgstr ""
+
+#: includes/admin/views/html-notice-translation-upgrade.php:26
+msgid "Hide This Message"
 msgstr ""
 
 #: includes/admin/views/html-notice-update.php:13
@@ -5453,8 +5488,8 @@ msgstr ""
 msgid "http://woothemes.com"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:127
-#: includes/admin/class-wc-admin-menus.php:129
+#: includes/admin/class-wc-admin-menus.php:128
+#: includes/admin/class-wc-admin-menus.php:130
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr ""
@@ -5540,7 +5575,7 @@ msgctxt "Settings tab label"
 msgid "Checkout"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-checkout.php:81
+#: includes/admin/settings/class-wc-settings-checkout.php:80
 msgctxt "Settings group label"
 msgid "Checkout"
 msgstr ""
