@@ -1864,13 +1864,17 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Change "Featured Image" to "Product Image" throughout media modals.
+	 *
 	 * @param  array  $strings Array of strings to translate.
 	 * @param  object $post
 	 * @return array
 	 */
 	public function media_view_strings( $strings = array(), $post = null ) {
-		$strings['setFeaturedImageTitle'] = __( 'Set product image', 'woocommerce' );
-		$strings['setFeaturedImage']      = __( 'Set product image', 'woocommerce' );
+		if ( isset( $post->post_type ) && 'product' == $post->post_type ) {
+			$strings['setFeaturedImageTitle'] = __( 'Set product image', 'woocommerce' );
+			$strings['setFeaturedImage']      = __( 'Set product image', 'woocommerce' );
+		}
+
 		return $strings;
 	}
 

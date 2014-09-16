@@ -620,7 +620,7 @@ abstract class WC_Settings_API {
 		ob_start();
 		?>
 			</table>
-			<h4 class="<?php echo esc_attr( $data['class'] ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></h4>
+			<h4 class="wc-settings-sub-title <?php echo esc_attr( $data['class'] ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></h4>
 			<?php if ( ! empty( $data['description'] ) ) : ?>
 				<p><?php echo wp_kses_post( $data['description'] ); ?></p>
 			<?php endif; ?>
