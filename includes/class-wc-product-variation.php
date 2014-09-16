@@ -59,6 +59,7 @@ class WC_Product_Variation extends WC_Product {
 		'sku'        => '',
 		'weight'     => '',
 		'length'     => '',
+		'width'      => '',
 		'height'     => ''
 	);
 
