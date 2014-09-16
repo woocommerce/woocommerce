@@ -149,9 +149,27 @@ class WC_Download_Handler {
 			wp_die( __( 'No file defined', 'woocommerce' ) . ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>', '', array( 'response' => 404 ) );
 		}
 
+
 		// Redirect to the file...
 		if ( $file_download_method == "redirect" ) {
 			header( 'Location: ' . $file_path );
+			exit;
+		}
+
+		// Formulate and redirect to the NGINX secure link
+		if ( $file_download_method == "nginx_secure_link" ) {
+			$secret = get_option('woocommerce_nginx_secure_link_secret');
+			$lifetime = get_option('woocommerce_nginx_secure_link_lifetime');
+
+			$expire = time() + intval($lifetime);
+			$maybe_leading_slash = (strpos($file_path, "/") === 0) ? "" : "/";
+			$request_fingerprint = $expire . $maybe_leading_slash . $file_path . " " . $secret;
+			$hmac_base64 = base64_encode(md5($request_fingerprint, true));
+			$request_hmac = str_replace("=", "", str_replace("/", "_", str_replace("+", "-", $hmac_base64)));
+
+			$signed_request = $file_path . "?md5=" . $request_hmac . "&expires=" . $expire;
+
+			header('Location: ' . $signed_request);
 			exit;
 		}
 

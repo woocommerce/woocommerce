@@ -423,10 +423,29 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'force'     => __( 'Force Downloads', 'woocommerce' ),
 						'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
 						'redirect'  => __( 'Redirect only', 'woocommerce' ),
+ 						'nginx_secure_link'  => __( 'NGINX Secure Link', 'woocommerce' ),
 					),
 					'autoload' => false
 				),
-
+ 				array(
+ 					'title' => __( 'NGINX Secure Link', 'woocommerce' ),
+ 					'desc' 		=> __( 'Secret string from secure_link_md5', 'woocommerce' ),
+ 					'id' 		=> 'woocommerce_nginx_secure_link_secret',
+ 					'type' 		=> 'text',
+ 					'default'	=> '',
+ 					'desc_tip'	=> __( 'The secure_link_md5 in your NGINX config must be "$secure_link_expires$uri [secret]". Place the value of [secret] here.', 'woocommerce' ),
+ 					'checkboxgroup'		=> 'start',
+ 					'autoload'      => false
+ 				),
+ 				array(
+ 					'desc' 		=> __( 'Number of seconds download links stay active', 'woocommerce' ),
+ 					'id' 		=> 'woocommerce_nginx_secure_link_lifetime',
+ 					'type' 		=> 'number',
+ 					'default'	=> '',
+ 					'desc_tip'	=> __( 'How long the user\'s browser has to follow the redirect and begin downloading.', 'woocommerce' ),
+ 					'checkboxgroup'	=> 'start',
+ 					'autoload'      => false
+ 				),
 				array(
 					'title'         => __( 'Access Restriction', 'woocommerce' ),
 					'desc'          => __( 'Downloads require login', 'woocommerce' ),
