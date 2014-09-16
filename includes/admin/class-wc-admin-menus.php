@@ -123,7 +123,7 @@ class WC_Admin_Menus {
 			unset( $submenu['woocommerce'][1] );
 		}
 
-		if ( current_user_can( 'manage_woocommerce' ) ) {
+		if ( isset( $submenu['woocommerce'] ) && current_user_can( 'manage_woocommerce' ) ) {
 			foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 				if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
 
