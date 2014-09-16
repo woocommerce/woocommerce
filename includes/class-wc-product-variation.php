@@ -138,6 +138,9 @@ class WC_Product_Variation extends WC_Product {
 		} elseif ( 'variation_data' === $key ) {
 			$all_meta = get_post_meta( $this->variation_id );
 
+			// The variation data array
+			$this->variation_data = array();
+
 			// Get the variation attributes from meta
 			foreach ( $all_meta as $name => $value ) {
 				if ( ! strstr( $name, 'attribute_' ) ) {
