@@ -154,6 +154,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - If a refund fails, delete refund post.
 * Tweak - Button for hide the language update message.
 * Tweak - Method for install the translations directly.
+* Tweak - Display of h4 in settings pages.
 * Dev - Added woocommerce_get_settings_ID filters.
 
 = 2.2.2 - 11/09/2014 =
