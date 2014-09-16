@@ -140,6 +140,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Mobile checkout via PayPal when using tax inclusive prices.
 * Fix - Thumbnails "hard crop" option.
 * Fix - Missing variables when add new product variation.
+* Fix - Fixed minor XSS issue on reports screens by escaping and sanitizing 'range' GET variable.
 * Tweak - Display of locale information on system status page.
 * Tweak - Removed postcode for Bahamas.
 * Tweak - In system status, show path to template file override.
