@@ -128,7 +128,7 @@ class WC_Product_Variation extends WC_Product {
 			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
 
 			// Handle meta data keys which can be empty at variation level to cause inheritance
-			if ( '' === $value && in_array( $key, array( 'sku', 'weight', 'length', 'height' ) ) ) {
+			if ( '' === $value && in_array( $key, array( 'sku', 'weight', 'length', 'width', 'height' ) ) ) {
 				$value = get_post_meta( $this->id, '_' . $key, true );
 			}
 
