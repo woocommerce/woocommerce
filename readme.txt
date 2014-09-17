@@ -132,6 +132,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.2.4 =
 * Fix - Prevent errors when adding 'zero-rated' tax on checkout. 
+* Tweak - Improved headers sent notice to include file and line.
 
 = 2.2.3 - 16/09/2014 =
 * Fix - Order status translation in admin and account page.
