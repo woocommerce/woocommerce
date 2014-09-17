@@ -100,6 +100,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		endif;
 	?>
 
+	<?php do_action( 'woocommerce_admin_after_order_item_values', null, $item, absint( $item_id ) ); /*@@@@LOUSHOU - add columns at the end of the values list */ ?>
+
 	<td class="wc-order-edit-line-item">
 		<?php if ( $order->is_editable() ) : ?>
 			<div class="wc-order-edit-line-item-actions">

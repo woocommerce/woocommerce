@@ -170,7 +170,7 @@ class WC_Meta_Box_Order_Data {
 								echo ' (' . esc_html( $transaction_id ) . ')';
 							}
 						}
-						echo '. ';
+						echo '. ' ;
 					}
 
 					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) ) {
@@ -239,7 +239,7 @@ class WC_Meta_Box_Order_Data {
 
 							// Display form
 							echo '<div class="edit_address"><p><button class="button load_customer_billing">' . __( 'Load billing address', 'woocommerce' ) . '</button></p>';
-
+ 
 							foreach ( self::$billing_fields as $key => $field ) {
 								if ( ! isset( $field['type'] ) ) {
 									$field['type'] = 'text';
@@ -247,10 +247,12 @@ class WC_Meta_Box_Order_Data {
 
 								switch ( $field['type'] ) {
 									case 'select' :
-										woocommerce_wp_select( array( 'id' => '_billing_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
+										// allow for setting a default value programaticaly, and draw the selectbox
+										woocommerce_wp_select( array( 'id' => '_billing_' . $key, 'label' => $field['label'], 'options' => $field['options'], 'value' => isset( $field['value'] ) ? $field['value'] : '' ) );
 									break;
 									default :
-										woocommerce_wp_text_input( array( 'id' => '_billing_' . $key, 'label' => $field['label'] ) );
+										// allow for setting a default value programaticaly, and draw the textbox
+										woocommerce_wp_text_input( array( 'id' => '_billing_' . $key, 'label' => $field['label'], 'value' => isset( $field['value'] ) ? $field['value'] : '' ) );
 									break;
 								}
 							}
@@ -277,12 +279,15 @@ class WC_Meta_Box_Order_Data {
 										} else {
 											echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
 										}
-									?>
+									?> 
 								</select>
 							</p>
 							<?php
 
 							woocommerce_wp_text_input( array( 'id' => '_transaction_id', 'label' => __( 'Transaction ID', 'woocommerce' ) ) );
+
+							// allow other plugins to add their own extra billing fields at the bottom of the field list
+							do_action( 'woocommerce_admin_order_data_billing_address_fields', $order );
 
 							echo '</div>';
 
