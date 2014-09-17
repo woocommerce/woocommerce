@@ -975,20 +975,20 @@ class WC_Product {
 	/**
 	 * get_rating_count function.
 	 *
-	 * @param  int $rating Optional. Rating number to get the count for. By default
-	 *                               returns the count for all ratings.
+	 * @param  int $value Optional. Rating value to get the count for. By default
+	 *                              returns the count of all rating values.
 	 * @return int
 	 */
-	public function get_rating_count( $rating = null ) {
+	public function get_rating_count( $value = null ) {
 
-		$rating = intval( $rating );
-		$rating_suffix = $rating ? '_' . $rating : '';
+		$value = intval( $value );
+		$value_suffix = $value ? '_' . $value : '';
 
-		if ( false === ( $count = get_transient( 'wc_rating_count_' . $this->id . $rating_suffix ) ) ) {
+		if ( false === ( $count = get_transient( 'wc_rating_count_' . $this->id . $value_suffix ) ) ) {
 
 			global $wpdb;
 
-			$where_meta_value = $rating ? $wpdb->prepare( " AND meta_value = %d", $rating ) : " AND meta_value > 0";
+			$where_meta_value = $value ? $wpdb->prepare( " AND meta_value = %d", $value ) : " AND meta_value > 0";
 
 			$count = $wpdb->get_var( $wpdb->prepare("
 				SELECT COUNT(meta_value) FROM $wpdb->commentmeta
@@ -998,7 +998,7 @@ class WC_Product {
 				AND comment_approved = '1'
 			", $this->id ) . $where_meta_value );
 
-			set_transient( 'wc_rating_count_' . $this->id . $rating_suffix, $count, YEAR_IN_SECONDS );
+			set_transient( 'wc_rating_count_' . $this->id . $value_suffix, $count, YEAR_IN_SECONDS );
 		}
 
 		return $count;
