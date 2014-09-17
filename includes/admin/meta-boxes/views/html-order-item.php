@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php do_action('woocommerce_before_order_itemmeta', $item_id, $item, $_product) ?>
 
 		<div class="view">
-			<?php do_action('woocommerce_before_view_order_itemmeta', $item_id, $item, $_product) /*@@@@LOUSHOU - filter for customizing meta */ ?>
+			<?php do_action('woocommerce_before_view_order_itemmeta', $item_id, $item, $_product) /* filter for customizing meta */ ?>
 			<?php
 				global $wpdb;
 
@@ -98,10 +98,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo '</table>';
 				}
 			?>
-			<?php do_action('woocommerce_after_view_order_itemmeta', $item_id, $item, $_product) /*@@@@LOUSHOU - filter for customizing meta */ ?>
+			<?php do_action('woocommerce_after_view_order_itemmeta', $item_id, $item, $_product) /* filter for customizing meta */ ?>
 		</div>
 		<div class="edit" style="display: none;">
-			<?php do_action('woocommerce_before_edit_order_itemmeta', $item_id, $item, $_product, $order) /*@@@@LOUSHOU - filter for customizing meta */ ?>
+			<?php do_action('woocommerce_before_edit_order_itemmeta', $item_id, $item, $_product, $order) /* filter for customizing meta */ ?>
 			<table class="meta" cellspacing="0">
 				<tbody class="meta_items">
 				<?php
@@ -148,7 +148,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</tr>
 				</tfoot>
 			</table>
-			<?php do_action('woocommerce_after_edit_order_itemmeta', $item_id, $item, $_product, $order) /*@@@@LOUSHOU - filter for customizing meta */ ?>
+			<?php do_action('woocommerce_after_edit_order_itemmeta', $item_id, $item, $_product, $order) /* filter for customizing meta */ ?>
 		</div>
 	</td>
 
@@ -250,7 +250,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		endif;
 	?>
 
-	<?php do_action( 'woocommerce_admin_after_order_item_values', $_product, $item, absint( $item_id ) ); /*@@@@LOUSHOU - add columns at the end of the values list */ ?>
+	<?php do_action( 'woocommerce_admin_after_order_item_values', $_product, $item, absint( $item_id ) ); /* add columns at the end of the values list */ ?>
 
 	<td class="wc-order-edit-line-item">
 		<?php if ( $order->is_editable() ) : ?>
