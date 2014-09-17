@@ -1267,7 +1267,6 @@ class WC_Meta_Box_Product_Data {
 
 			if ( $clear_parent_ids ) {
 				foreach ( $clear_parent_ids as $clear_id ) {
-
 					$children_by_price = get_posts( array(
 						'post_parent'    => $clear_id,
 						'orderby'        => 'meta_value_num',
@@ -1279,12 +1278,13 @@ class WC_Meta_Box_Product_Data {
 					) );
 
 					if ( $children_by_price ) {
-
 						foreach ( $children_by_price as $child ) {
 							$child_price = get_post_meta( $child, '_price', true );
 							update_post_meta( $clear_id, '_price', $child_price );
 						}
 					}
+
+					wc_delete_product_transients( $clear_id );
 				}
 			}
 		}
