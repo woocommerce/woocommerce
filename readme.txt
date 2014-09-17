@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 2.2.2
+Stable tag: 2.2.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -130,20 +130,31 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.2.3 =
+= 2.2.3 - 16/09/2014 =
 * Fix - Order status translation in admin and account page.
 * Fix - Ensure shipping address gets displayed - fixes needs_shipping_address() method.
 * Fix - Escaping of country names in tax settings.
 * Fix - Encoding of pagination link when using default permalinks.
 * Fix - NPR currency.
 * Fix - Fixing "Invalid key" error when clicking link in password reset email.
+* Fix - Mobile checkout via PayPal when using tax inclusive prices.
 * Fix - Thumbnails "hard crop" option.
 * Fix - Missing variables when add new product variation.
+* Fix - Fixed minor XSS issue on reports screens by escaping and sanitizing 'range' GET variable.
+* Fix - Number format when calculate the line items tax.
+* Fix - Language update/install in Multisites.
+* Fix - "Set product image" media gallery title in non-product post type.
+* Fix - Number of processing orders in WooCommerce > Orders menu.
+* Fix - Issue that preventing cookies being set on shutdown after wp_send_json.
+* Fix - Incorrect shipping calculation because of missing width in product variation.
 * Tweak - Display of locale information on system status page.
 * Tweak - Removed postcode for Bahamas.
 * Tweak - In system status, show path to template file override.
 * Tweak - Dynamically get the address fields in WC_Checkout::create_order()
 * Tweak - If a refund fails, delete refund post.
+* Tweak - Button for hide the language update message.
+* Tweak - Method for install the translations directly.
+* Tweak - Display of h4 in settings pages.
 * Dev - Added woocommerce_get_settings_ID filters.
 
 = 2.2.2 - 11/09/2014 =

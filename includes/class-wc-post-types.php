@@ -266,12 +266,6 @@ class WC_Post_types {
 			)
 		);
 
-		$menu_name = _x( 'Orders', 'Admin menu name', 'woocommerce' );
-
-		if ( $order_count = wc_processing_order_count() ) {
-			$menu_name .= ' <span class="awaiting-mod update-plugins count-' . $order_count . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
-		}
-
 		wc_register_order_type(
 			'shop_order',
 			apply_filters( 'woocommerce_register_post_type_shop_order',
@@ -290,7 +284,7 @@ class WC_Post_types {
 							'not_found'          => __( 'No Orders found', 'woocommerce' ),
 							'not_found_in_trash' => __( 'No Orders found in trash', 'woocommerce' ),
 							'parent'             => __( 'Parent Orders', 'woocommerce' ),
-							'menu_name'          => $menu_name
+							'menu_name'          => _x( 'Orders', 'Admin menu name', 'woocommerce' )
 						),
 					'description'         => __( 'This is where store orders are stored.', 'woocommerce' ),
 					'public'              => false,

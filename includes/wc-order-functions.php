@@ -68,7 +68,7 @@ function wc_get_order_id_by_order_key( $order_key ) {
 	global $wpdb;
 
 	// Faster than get_posts()
-	$order_id = $wpdb->get_var( "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_key' AND meta_value = '{$order_key}'" );
+	$order_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_key' AND meta_value = %s", $order_key ) );
 
 	return $order_id;
 }

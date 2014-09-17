@@ -25,11 +25,11 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	 */
 	public function get_export_button() {
 
-		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : 'last_month';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : 'last_month';
 		?>
 		<a
 			href="#"
-			download="report-<?php echo $current_range; ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
 			class="export_csv"
 			data-export="table"
 		>
@@ -49,7 +49,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			'month'        => __( 'This Month', 'woocommerce' ),
 		);
 
-		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : 'last_month';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : 'last_month';
 
 		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = 'last_month';

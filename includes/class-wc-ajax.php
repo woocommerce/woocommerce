@@ -265,6 +265,8 @@ class WC_AJAX {
 	 * AJAX add to cart
 	 */
 	public static function add_to_cart() {
+		ob_start();
+
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
 		$quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( $_POST['quantity'] );
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
@@ -395,6 +397,7 @@ class WC_AJAX {
 	 * Add a new attribute via ajax function
 	 */
 	public static function add_new_attribute() {
+		ob_start();
 
 		check_ajax_referer( 'add-attribute', 'security' );
 
@@ -911,6 +914,7 @@ class WC_AJAX {
 	 * Get customer details via ajax
 	 */
 	public static function get_customer_details() {
+		ob_start();
 
 		check_ajax_referer( 'get-customer-details', 'security' );
 
@@ -1497,6 +1501,7 @@ class WC_AJAX {
 	 * @param string $post_types (default: array('product'))
 	 */
 	public static function json_search_products( $x = '', $post_types = array('product') ) {
+		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
 
@@ -1599,6 +1604,7 @@ class WC_AJAX {
 	 * Search for customers and return json
 	 */
 	public static function json_search_customers() {
+		ob_start();
 
 		check_ajax_referer( 'search-customers', 'security' );
 
@@ -1643,6 +1649,8 @@ class WC_AJAX {
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public static function json_search_downloadable_products_and_variations() {
+		ob_start();
+
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		$args = array(
@@ -1723,6 +1731,8 @@ class WC_AJAX {
 	 */
 	public static function product_ordering() {
 		global $wpdb;
+
+		ob_start();
 
 		// check permissions again and make sure we have what we need
 		if ( ! current_user_can('edit_products') || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) ) {
@@ -1808,6 +1818,8 @@ class WC_AJAX {
 	 * Handle a refund via the edit order screen
 	 */
 	public static function refund_line_items() {
+		ob_start();
+
 		check_ajax_referer( 'order-item', 'security' );
 
 		$order_id               = absint( $_POST['order_id'] );

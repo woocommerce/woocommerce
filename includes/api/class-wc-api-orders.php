@@ -349,7 +349,7 @@ class WC_API_Orders extends WC_API_Resource {
 			// default order args, note that status is checked for validity in wc_create_order()
 			$default_order_args = array(
 				'status'        => isset( $data['status'] ) ? $data['status'] : '',
-				'customer_note' => isset( $data['customer_note'] ) ? $data['customer_note'] : null,
+				'customer_note' => isset( $data['note'] ) ? $data['note'] : null,
 			);
 
 			// if creating order for existing customer
@@ -478,8 +478,8 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_args = array( 'order_id' => $order->id );
 
 			// customer note
-			if ( isset( $data['customer_note'] ) ) {
-				$order_args['customer_note'] = $data['customer_note'];
+			if ( isset( $data['note'] ) ) {
+				$order_args['customer_note'] = $data['note'];
 			}
 
 			// order status
