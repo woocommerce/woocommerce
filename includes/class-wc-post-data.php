@@ -174,6 +174,10 @@ class WC_Post_Data {
 				$order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
+			// Fix: Sometimes conflict with'pending' post_status of WordPress core
+			if ( isset( $data['post_status']) && 'pending' === $data['post_status']) {
+				$data['post_status'] = 'wc-' . $data['post_status'];
+			}
 		} 
 
 		elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
