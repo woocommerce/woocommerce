@@ -131,7 +131,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.2.4 =
-* Fix - Prevent errors when adding 'zero-rated' tax on checkout. 
+* Fix - Prevent errors when adding 'zero-rated' tax on checkout.
+* Fix - Fixed a varation product width inheritance bug.
 * Tweak - Improved headers sent notice to include file and line.
 
 = 2.2.3 - 16/09/2014 =
