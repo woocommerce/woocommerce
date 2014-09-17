@@ -2,10 +2,10 @@
 /**
  * Mexico
  *
- * @author 	David Villalpando
- * @category 	i18n
- * @package 	WooCommerce/i18n
- * @version     2.0.0
+ * @author	David Villalpando
+ * @category	i18n
+ * @package	WooCommerce/i18n
+ * @version	2.0.0
  */
 global $states;
 
