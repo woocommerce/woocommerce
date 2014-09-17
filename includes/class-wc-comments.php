@@ -211,8 +211,14 @@ class WC_Comments {
 	 * @param mixed $post_id
 	 */
 	public static function clear_transients( $post_id ) {
-		delete_transient( 'wc_average_rating_' . absint( $post_id ) );
-		delete_transient( 'wc_rating_count_' . absint( $post_id ) );
+		$post_id = absint( $post_id );
+		delete_transient( 'wc_average_rating_' . $post_id );
+		delete_transient( 'wc_rating_count_' . $post_id );
+		delete_transient( 'wc_rating_count_' . $post_id . '_1' );
+		delete_transient( 'wc_rating_count_' . $post_id . '_2' );
+		delete_transient( 'wc_rating_count_' . $post_id . '_3' );
+		delete_transient( 'wc_rating_count_' . $post_id . '_4' );
+		delete_transient( 'wc_rating_count_' . $post_id . '_5' );
 	}
 
 	/**
