@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.2.3 Frontend\n"
+"Project-Id-Version: WooCommerce 2.2.4 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-09-16 12:34:12+00:00\n"
+"POT-Creation-Date: 2014-09-18 12:40:24+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1413,7 +1413,7 @@ msgstr ""
 msgid "Cear&aacute;"
 msgstr ""
 
-#: i18n/states/BR.php:19
+#: i18n/states/BR.php:19 i18n/states/MX.php:13
 msgid "Distrito Federal"
 msgstr ""
 
@@ -3005,6 +3005,130 @@ msgstr ""
 msgid "Okinawa"
 msgstr ""
 
+#: i18n/states/MX.php:14
+msgid "Jalisco"
+msgstr ""
+
+#: i18n/states/MX.php:15
+msgid "Nuevo León"
+msgstr ""
+
+#: i18n/states/MX.php:16
+msgid "Aguascalientes"
+msgstr ""
+
+#: i18n/states/MX.php:17
+msgid "Baja California Norte"
+msgstr ""
+
+#: i18n/states/MX.php:18
+msgid "Baja California Sur"
+msgstr ""
+
+#: i18n/states/MX.php:19
+msgid "Campeche"
+msgstr ""
+
+#: i18n/states/MX.php:20
+msgid "Chiapas"
+msgstr ""
+
+#: i18n/states/MX.php:21
+msgid "Chihuahua"
+msgstr ""
+
+#: i18n/states/MX.php:22
+msgid "Coahuila"
+msgstr ""
+
+#: i18n/states/MX.php:23
+msgid "Colima"
+msgstr ""
+
+#: i18n/states/MX.php:24
+msgid "Durango"
+msgstr ""
+
+#: i18n/states/MX.php:25
+msgid "Guanajuato"
+msgstr ""
+
+#: i18n/states/MX.php:26
+msgid "Guerrero"
+msgstr ""
+
+#: i18n/states/MX.php:27
+msgid "Hidalgo"
+msgstr ""
+
+#: i18n/states/MX.php:28
+msgid "Edo. de México"
+msgstr ""
+
+#: i18n/states/MX.php:29
+msgid "Michoacán"
+msgstr ""
+
+#: i18n/states/MX.php:30
+msgid "Morelos"
+msgstr ""
+
+#: i18n/states/MX.php:31
+msgid "Nayarit"
+msgstr ""
+
+#: i18n/states/MX.php:32
+msgid "Oaxaca"
+msgstr ""
+
+#: i18n/states/MX.php:33
+msgid "Puebla"
+msgstr ""
+
+#: i18n/states/MX.php:34
+msgid "Querétaro"
+msgstr ""
+
+#: i18n/states/MX.php:35
+msgid "Quintana Roo"
+msgstr ""
+
+#: i18n/states/MX.php:36
+msgid "San Luis Potosí"
+msgstr ""
+
+#: i18n/states/MX.php:37
+msgid "Sinaloa"
+msgstr ""
+
+#: i18n/states/MX.php:38
+msgid "Sonora"
+msgstr ""
+
+#: i18n/states/MX.php:39
+msgid "Tabasco"
+msgstr ""
+
+#: i18n/states/MX.php:40
+msgid "Tamaulipas"
+msgstr ""
+
+#: i18n/states/MX.php:41
+msgid "Tlaxcala"
+msgstr ""
+
+#: i18n/states/MX.php:42
+msgid "Veracruz"
+msgstr ""
+
+#: i18n/states/MX.php:43
+msgid "Yucatán"
+msgstr ""
+
+#: i18n/states/MX.php:44
+msgid "Zacatecas"
+msgstr ""
+
 #: i18n/states/MY.php:13
 msgid "Johor"
 msgstr ""
@@ -3067,6 +3191,306 @@ msgstr ""
 
 #: i18n/states/MY.php:28
 msgid "W.P. Putrajaya"
+msgstr ""
+
+#: i18n/states/NP.php:15
+msgid "Illam"
+msgstr ""
+
+#: i18n/states/NP.php:16
+msgid "Jhapa"
+msgstr ""
+
+#: i18n/states/NP.php:17
+msgid "Panchthar"
+msgstr ""
+
+#: i18n/states/NP.php:18
+msgid "Taplejung"
+msgstr ""
+
+#: i18n/states/NP.php:21
+msgid "Bhojpur"
+msgstr ""
+
+#: i18n/states/NP.php:22
+msgid "Dhankuta"
+msgstr ""
+
+#: i18n/states/NP.php:23
+msgid "Morang"
+msgstr ""
+
+#: i18n/states/NP.php:24
+msgid "Sunsari"
+msgstr ""
+
+#: i18n/states/NP.php:25
+msgid "Sankhuwa"
+msgstr ""
+
+#: i18n/states/NP.php:26
+msgid "Terhathum"
+msgstr ""
+
+#: i18n/states/NP.php:29
+msgid "Khotang"
+msgstr ""
+
+#: i18n/states/NP.php:30
+msgid "Okhaldhunga"
+msgstr ""
+
+#: i18n/states/NP.php:31
+msgid "Saptari"
+msgstr ""
+
+#: i18n/states/NP.php:32
+msgid "Siraha"
+msgstr ""
+
+#: i18n/states/NP.php:33
+msgid "Solukhumbu"
+msgstr ""
+
+#: i18n/states/NP.php:34
+msgid "Udayapur"
+msgstr ""
+
+#: i18n/states/NP.php:37
+msgid "Dhanusa"
+msgstr ""
+
+#: i18n/states/NP.php:38
+msgid "Dolakha"
+msgstr ""
+
+#: i18n/states/NP.php:39
+msgid "Mohottari"
+msgstr ""
+
+#: i18n/states/NP.php:40
+msgid "Ramechha"
+msgstr ""
+
+#: i18n/states/NP.php:41
+msgid "Sarlahi"
+msgstr ""
+
+#: i18n/states/NP.php:42
+msgid "Sindhuli"
+msgstr ""
+
+#: i18n/states/NP.php:45
+msgid "Bhaktapur"
+msgstr ""
+
+#: i18n/states/NP.php:46
+msgid "Dhading"
+msgstr ""
+
+#: i18n/states/NP.php:47
+msgid "Kathmandu"
+msgstr ""
+
+#: i18n/states/NP.php:48
+msgid "Kavrepalanchowk"
+msgstr ""
+
+#: i18n/states/NP.php:49
+msgid "Lalitpur"
+msgstr ""
+
+#: i18n/states/NP.php:50
+msgid "Nuwakot"
+msgstr ""
+
+#: i18n/states/NP.php:51
+msgid "Rasuwa"
+msgstr ""
+
+#: i18n/states/NP.php:52
+msgid "Sindhupalchowk"
+msgstr ""
+
+#: i18n/states/NP.php:55
+msgid "Bara"
+msgstr ""
+
+#: i18n/states/NP.php:56
+msgid "Chitwan"
+msgstr ""
+
+#: i18n/states/NP.php:57
+msgid "Makwanpur"
+msgstr ""
+
+#: i18n/states/NP.php:58
+msgid "Parsa"
+msgstr ""
+
+#: i18n/states/NP.php:59
+msgid "Rautahat"
+msgstr ""
+
+#: i18n/states/NP.php:62
+msgid "Gorkha"
+msgstr ""
+
+#: i18n/states/NP.php:63
+msgid "Kaski"
+msgstr ""
+
+#: i18n/states/NP.php:64
+msgid "Lamjung"
+msgstr ""
+
+#: i18n/states/NP.php:65
+msgid "Manang"
+msgstr ""
+
+#: i18n/states/NP.php:66
+msgid "Syangja"
+msgstr ""
+
+#: i18n/states/NP.php:67
+msgid "Tanahun"
+msgstr ""
+
+#: i18n/states/NP.php:70
+msgid "Baglung"
+msgstr ""
+
+#: i18n/states/NP.php:71
+msgid "Parbat"
+msgstr ""
+
+#: i18n/states/NP.php:72
+msgid "Mustang"
+msgstr ""
+
+#: i18n/states/NP.php:73
+msgid "Myagdi"
+msgstr ""
+
+#: i18n/states/NP.php:76
+msgid "Agrghakanchi"
+msgstr ""
+
+#: i18n/states/NP.php:77
+msgid "Gulmi"
+msgstr ""
+
+#: i18n/states/NP.php:78
+msgid "Kapilbastu"
+msgstr ""
+
+#: i18n/states/NP.php:79
+msgid "Nawalparasi"
+msgstr ""
+
+#: i18n/states/NP.php:80
+msgid "Palpa"
+msgstr ""
+
+#: i18n/states/NP.php:81
+msgid "Rupandehi"
+msgstr ""
+
+#: i18n/states/NP.php:84
+msgid "Dang"
+msgstr ""
+
+#: i18n/states/NP.php:85
+msgid "Pyuthan"
+msgstr ""
+
+#: i18n/states/NP.php:86
+msgid "Rolpa"
+msgstr ""
+
+#: i18n/states/NP.php:87
+msgid "Rukum"
+msgstr ""
+
+#: i18n/states/NP.php:88
+msgid "Salyan"
+msgstr ""
+
+#: i18n/states/NP.php:91
+msgid "Banke"
+msgstr ""
+
+#: i18n/states/NP.php:92
+msgid "Bardiya"
+msgstr ""
+
+#: i18n/states/NP.php:93
+msgid "Dailekh"
+msgstr ""
+
+#: i18n/states/NP.php:94
+msgid "Jajarkot"
+msgstr ""
+
+#: i18n/states/NP.php:95
+msgid "Surkhet"
+msgstr ""
+
+#: i18n/states/NP.php:98
+msgid "Dolpa"
+msgstr ""
+
+#: i18n/states/NP.php:99
+msgid "Humla"
+msgstr ""
+
+#: i18n/states/NP.php:100
+msgid "Jumla"
+msgstr ""
+
+#: i18n/states/NP.php:101
+msgid "Kalikot"
+msgstr ""
+
+#: i18n/states/NP.php:102
+msgid "Mugu"
+msgstr ""
+
+#: i18n/states/NP.php:105
+msgid "Achham"
+msgstr ""
+
+#: i18n/states/NP.php:106
+msgid "Bajhang"
+msgstr ""
+
+#: i18n/states/NP.php:107
+msgid "Bajura"
+msgstr ""
+
+#: i18n/states/NP.php:108
+msgid "Doti"
+msgstr ""
+
+#: i18n/states/NP.php:109
+msgid "Kailali"
+msgstr ""
+
+#: i18n/states/NP.php:112
+msgid "Baitadi"
+msgstr ""
+
+#: i18n/states/NP.php:113
+msgid "Dadeldhura"
+msgstr ""
+
+#: i18n/states/NP.php:114
+msgid "Darchula"
+msgstr ""
+
+#: i18n/states/NP.php:115
+msgid "Kanchanpur"
 msgstr ""
 
 #: i18n/states/NZ.php:13
@@ -4371,16 +4795,16 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2075
+#: includes/abstracts/abstract-wc-order.php:2080
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2338
+#: includes/abstracts/abstract-wc-order.php:2343
 #: includes/class-wc-ajax.php:1167 includes/class-wc-ajax.php:1168
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2348
+#: includes/abstracts/abstract-wc-order.php:2353
 msgid "Order item stock reduced successfully."
 msgstr ""
 
@@ -4453,18 +4877,18 @@ msgstr ""
 msgid "Out of stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1015
+#: includes/abstracts/abstract-wc-product.php:1021
 #: templates/single-product/rating.php:23
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1017
+#: includes/abstracts/abstract-wc-product.php:1023
 #: templates/single-product/rating.php:25
 #: templates/single-product/review.php:27
 msgid "out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1371
+#: includes/abstracts/abstract-wc-product.php:1377
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -4873,7 +5297,7 @@ msgstr ""
 msgid "Zero size file downloaded"
 msgstr ""
 
-#: includes/api/class-wc-api-reports.php:469
+#: includes/api/class-wc-api-reports.php:471
 #: includes/api/v1/class-wc-api-reports.php:470
 msgid "You do not have permission to read this report"
 msgstr ""
@@ -9189,8 +9613,8 @@ msgstr ""
 
 #: includes/class-wc-post-types.php:220
 #: includes/updates/woocommerce-update-2.0.php:53
-#: includes/wc-core-functions.php:506 includes/wc-core-functions.php:525
-#: includes/wc-core-functions.php:559
+#: includes/wc-core-functions.php:507 includes/wc-core-functions.php:526
+#: includes/wc-core-functions.php:560
 msgctxt "slug"
 msgid "product"
 msgstr ""
