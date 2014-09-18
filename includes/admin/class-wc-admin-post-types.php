@@ -1337,13 +1337,15 @@ class WC_Admin_Post_Types {
 		switch ( $typenow ) {
 			case 'product' :
 				$this->product_filters();
-			break;
-			case 'product' :
+				break;
+			case 'shop_coupon' :
 				$this->shop_coupon_filters();
-			break;
-			case 'product' :
+				break;
+			case 'shop_order' :
 				$this->shop_order_filters();
-			break;
+				break;
+			default :
+				break;
 		}
 	}
 
