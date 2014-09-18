@@ -284,6 +284,9 @@ class WC_Meta_Box_Order_Data {
 
 							woocommerce_wp_text_input( array( 'id' => '_transaction_id', 'label' => __( 'Transaction ID', 'woocommerce' ) ) );
 
+							// allow other plugins to add their own extra billing fields at the bottom of the field list
+							do_action( 'woocommerce_admin_order_data_billing_address_fields', $order );
+
 							echo '</div>';
 
 							do_action( 'woocommerce_admin_order_data_after_billing_address', $order );
