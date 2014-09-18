@@ -214,6 +214,8 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<p class="add-items">
 		<?php if ( $order->is_editable() ) : ?>
 			<button type="button" class="button add-line-item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
+		<?php else : ?>
+			<span class="description tips" data-tip="<?php esc_attr_e( 'To edit this order change the status back to "Pending"', 'woocommerce' ); ?>"><?php _e( 'This order has been paid for and is no longer editable', 'woocommerce' ); ?></span>
 		<?php endif; ?>
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && $order->is_editable() ) : ?>
 			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>

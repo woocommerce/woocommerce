@@ -136,6 +136,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Totals in taxes by date report.
 * Tweak - Improved headers sent notice to include file and line.
 * Tweak - When updating order status, ensure its a valid WC order status.
+* Tweak - Add notice when order is no longer editable.
 * Dev - Allow getting rating count for a specific rating value #6284.
 * Localisation - Nepal States.
 * Localisation - Mexico states.
