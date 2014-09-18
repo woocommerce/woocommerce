@@ -235,6 +235,10 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
 	<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 	<button type="button" class="button button-primary save-action"><?php _e( 'Save', 'woocommerce' ); ?></button>
+	<?php
+		// allow adding custom buttons
+		do_action('woocommerce_order_item_add_line_buttons', $order, $line_items);
+	?>
 </div>
 <?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
 <div class="wc-order-data-row wc-order-refund-items" style="display: none;">
