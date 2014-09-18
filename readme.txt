@@ -133,10 +133,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.2.4 =
 * Fix - Prevent errors when adding 'zero-rated' tax on checkout.
 * Fix - Fixed a varation product width inheritance bug.
+* Fix - Totals in taxes by date report.
 * Tweak - Improved headers sent notice to include file and line.
 * Tweak - When updating order status, ensure its a valid WC order status.
 * Dev - Allow getting rating count for a specific rating value #6284.
 * Localisation - Nepal States.
+* Localisation - Mexico states.
 
 = 2.2.3 - 16/09/2014 =
 * Fix - Order status translation in admin and account page.

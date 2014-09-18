@@ -120,10 +120,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 					<th class="total_row"><?php _e( 'Net profit', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e("Total sales minus shipping and tax.", 'woocommerce'); ?>" href="#">[?]</a></th>
 				</tr>
 			</thead>
-			<?php if ( $tax_rows ) :
-				$gross     = array_sum( wp_list_pluck( (array) $tax_rows, 'total_sales' ) ) - array_sum( wp_list_pluck( (array) $tax_rows, 'total_shipping' ) );
-				$total_tax = array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) );
-				?>
+			<?php if ( $tax_rows ) : ?>
 				<tbody>
 					<?php
 					foreach ( $tax_rows as $tax_row ) {
@@ -148,6 +145,10 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 					?>
 				</tbody>
 				<tfoot>
+					<?php
+						$gross     = array_sum( wp_list_pluck( (array) $tax_rows, 'total_sales' ) ) - array_sum( wp_list_pluck( (array) $tax_rows, 'total_shipping' ) );
+						$total_tax = array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) );
+					?>
 					<tr>
 						<th scope="row"><?php _e( 'Totals', 'woocommerce' ); ?></th>
 						<th class="total_row"><?php echo array_sum( wp_list_pluck( (array) $tax_rows, 'total_orders' ) ); ?></th>
