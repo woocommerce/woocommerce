@@ -134,6 +134,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Prevent errors when adding 'zero-rated' tax on checkout.
 * Fix - Fixed a varation product width inheritance bug.
 * Fix - Totals in taxes by date report.
+* Fix - Fix the 'only 1 visible product' redirect to not trigger when paging results.
 * Tweak - Improved headers sent notice to include file and line.
 * Tweak - When updating order status, ensure its a valid WC order status.
 * Tweak - Add notice when order is no longer editable.
