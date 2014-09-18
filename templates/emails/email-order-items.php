@@ -50,6 +50,9 @@ foreach ( $items as $item ) :
 				}
 			}
 
+			// allow other plugins to add additional product information here
+			do_action( 'woocommerce_order_item_display_custom', $item_id, $item, $order );
+
 			// Variation
 			if ( $item_meta->meta ) {
 				echo '<br/><small>' . nl2br( $item_meta->display( true, true ) ) . '</small>';
