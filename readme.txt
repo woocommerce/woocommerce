@@ -130,6 +130,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Tweak load_plugin_textdomain to be relative - this falls back to WP_LANG_DIR automatically. Can prevent "open_basedir restriction in effect".
+
 = 2.2.4 - 18/09/2014 =
 * Fix - Prevent errors when adding 'zero-rated' tax on checkout.
 * Fix - Fixed a varation product width inheritance bug.
