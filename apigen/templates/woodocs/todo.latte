@@ -1,0 +1,129 @@
+{*
+ApiGen 2.8.0 - API documentation generator for PHP 5.3+
+
+Copyright (c) 2010-2011 David Grudl (http://davidgrudl.com)
+Copyright (c) 2011-2012 Jaroslav Hanslík (https://github.com/kukulich)
+Copyright (c) 2011-2012 Ondřej Nešpor (https://github.com/Andrewsville)
+Copyright (c) 2012 Olivier Laviale (https://github.com/olvlvl)
+
+For the full copyright and license information, please view
+the file LICENSE.md that was distributed with this source code.
+*}
+{layout '@layout.latte'}
+{var $active = 'todo'}
+
+{block #title}Todo{/block}
+
+{block #content}
+<div id="content">
+	<h1>{include #title}</h1>
+
+	{define #classes}
+	{foreach $items as $class}
+	<tr>
+		<td class="name" rowspan="{count($class->annotations['todo'])}"><a href="{$class|classUrl}">{$class->name}</a></td>
+		{foreach $class->annotations['todo'] as $description}
+		<td>{!$description|annotation:'todo':$class}</td>{sep}</tr><tr>{/sep}
+		{/foreach}
+	</tr>
+	{/foreach}
+	{/define}
+
+	{if $todoClasses}
+	<h2>Classes summary</h2>
+	<table class="summary table table-bordered table-striped" id="classes">
+	{include #classes, items => $todoClasses}
+	</table>
+	{/if}
+
+	{if $todoInterfaces}
+	<h2>Interfaces summary</h2>
+	<table class="summary table table-bordered table-striped" id="interfaces">
+	{include #classes, items => $todoInterfaces}
+	</table>
+	{/if}
+
+	{if $todoTraits}
+	<h2>Traits summary</h2>
+	<table class="summary table table-bordered table-striped" id="traits">
+	{include #classes, items => $todoTraits}
+	</table>
+	{/if}
+
+	{if $todoExceptions}
+	<h2>Exceptions summary</h2>
+	<table class="summary table table-bordered table-striped" id="exceptions">
+	{include #classes, items => $todoExceptions}
+	</table>
+	{/if}
+
+	{if $todoMethods}
+	<h2>Methods summary</h2>
+	<table class="summary table table-bordered table-striped" id="methods">
+	{foreach $todoMethods as $method}
+	<tr>
+		{var $count = count($method->annotations['todo'])}
+		<td class="name" rowspan="{$count}"><a href="{$method->declaringClassName|classUrl}">{$method->declaringClassName}</a></td>
+		<td class="name" rowspan="{$count}"><code><a href="{$method|methodUrl}">{$method->name}()</a></code></td>
+		{foreach $method->annotations['todo'] as $description}
+		<td>{!$description|annotation:'todo':$method}</td>{sep}</tr><tr>{/sep}
+		{/foreach}
+	</tr>
+	{/foreach}
+	</table>
+	{/if}
+
+	{if $todoConstants}
+	<h2>Constants summary</h2>
+	<table class="summary table table-bordered table-striped" id="constants">
+	{foreach $todoConstants as $constant}
+	<tr>
+		{var $count = count($constant->annotations['todo'])}
+		{if $constant->declaringClassName}
+		<td class="name" rowspan="{$count}"><a href="{$constant->declaringClassName|classUrl}">{$constant->declaringClassName}</a></td>
+		<td class="name" rowspan="{$count}"><code><a href="{$constant|constantUrl}"><b>{$constant->name}</b></a></code></td>
+		{else}
+		<td class="name" rowspan="{$count}" n:if="$namespaces || $classes || $interfaces || $traits || $exceptions"><a n:if="$constant->namespaceName" href="{$constant->namespaceName|namespaceUrl}">{$constant->namespaceName}</a></td>
+		<td n:class="name" rowspan="{$count}"><code><a href="{$constant|constantUrl}"><b>{$constant->shortName}</b></a></code></td>
+		{/if}
+		{foreach $constant->annotations['todo'] as $description}
+		<td>{!$description|annotation:'todo':$constant}</td>{sep}</tr><tr>{/sep}
+		{/foreach}
+	</tr>
+	{/foreach}
+	</table>
+	{/if}
+
+	{if $todoProperties}
+	<h2>Properties summary</h2>
+	<table class="summary table table-bordered table-striped" id="properties">
+	{foreach $todoProperties as $property}
+	<tr>
+		{var $count = count($property->annotations['todo'])}
+		<td class="name" rowspan="{$count}"><a href="{$property->declaringClassName|classUrl}">{$property->declaringClassName}</a></td>
+		<td class="name" rowspan="{$count}"><a href="{$property|propertyUrl}"><var>${$property->name}</var></a></td>
+		{foreach $property->annotations['todo'] as $description}
+		<td>{!$description|annotation:'todo':$property}</td>{sep}</tr><tr>{/sep}
+		{/foreach}
+	</tr>
+	{/foreach}
+	</table>
+	{/if}
+
+	{if $todoFunctions}
+	<h2>Functions summary</h2>
+	<table class="summary table table-bordered table-striped" id="functions">
+	{foreach $todoFunctions as $function}
+	<tr>
+		{var $count = count($function->annotations['todo'])}
+		<td class="name" rowspan="{$count}" n:if="$namespaces"><a n:if="$function->namespaceName" href="{$function->namespaceName|namespaceUrl}">{$function->namespaceName}</a></td>
+		<td class="name" rowspan="{$count}"><code><a href="{$function|functionUrl}">{$function->shortName}</a></code></td>
+		{foreach $function->annotations['todo'] as $description}
+		<td>{!$description|annotation:'todo':$function}</td>{sep}</tr><tr>{/sep}
+		{/foreach}
+	</tr>
+	{/foreach}
+	</table>
+	{/if}
+</div>
+{/block}

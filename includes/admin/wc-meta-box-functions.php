@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @return void
  */
 function woocommerce_wp_text_input( $field ) {
-	global $thepostid, $post, $woocommerce;
+	global $thepostid, $post;
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
@@ -86,7 +86,7 @@ function woocommerce_wp_hidden_input( $field ) {
  * @return void
  */
 function woocommerce_wp_textarea_input( $field ) {
-	global $thepostid, $post, $woocommerce;
+	global $thepostid, $post;
 
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder'] 	= isset( $field['placeholder'] ) ? $field['placeholder'] : '';
@@ -118,13 +118,14 @@ function woocommerce_wp_textarea_input( $field ) {
 function woocommerce_wp_checkbox( $field ) {
 	global $thepostid, $post;
 
-	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
-	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'checkbox';
+	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
+	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
-	$field['cbvalue'] 		= isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
+	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['cbvalue']       = isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
+	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="checkbox" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . ' /> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="checkbox" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . ' /> ';
 
 	if ( ! empty( $field['description'] ) ) echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 
@@ -139,7 +140,7 @@ function woocommerce_wp_checkbox( $field ) {
  * @return void
  */
 function woocommerce_wp_select( $field ) {
-	global $thepostid, $post, $woocommerce;
+	global $thepostid, $post;
 
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'select short';
@@ -176,19 +177,20 @@ function woocommerce_wp_select( $field ) {
  * @return void
  */
 function woocommerce_wp_radio( $field ) {
-	global $thepostid, $post, $woocommerce;
+	global $thepostid, $post;
 
 	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'select short';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 
 	echo '<fieldset class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><legend>' . wp_kses_post( $field['label'] ) . '</legend><ul class="wc-radios">';
 
     foreach ( $field['options'] as $key => $value ) {
 
 		echo '<li><label><input
-        		name="' . esc_attr( $field['id'] ) . '"
+        		name="' . esc_attr( $field['name'] ) . '"
         		value="' . esc_attr( $key ) . '"
         		type="radio"
         		class="' . esc_attr( $field['class'] ) . '"

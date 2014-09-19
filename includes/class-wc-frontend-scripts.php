@@ -1,16 +1,29 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
- * WC_Frontend_Scripts
+ * Handle frontend forms
+ *
+ * @class 		WC_Frontend_Scripts
+ * @version		2.2.0
+ * @package		WooCommerce/Classes/
+ * @category	Class
+ * @author 		WooThemes
  */
 class WC_Frontend_Scripts {
 
 	/**
-	 * Constructor
+	 * Hook in methods
 	 */
-	public function __construct () {
-		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
-		add_action( 'wp_print_scripts', array( $this, 'check_jquery' ), 25 );
-		add_filter( 'woocommerce_enqueue_styles', array( $this, 'backwards_compat' ) );
+	public static function init() {
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
+		add_action( 'wp_print_scripts', array( __CLASS__, 'check_jquery' ), 25 );
+		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
+		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
+		add_filter( 'woocommerce_enqueue_styles', array( __CLASS__, 'backwards_compat' ) );
 	}
 
 	/**
@@ -46,8 +59,8 @@ class WC_Frontend_Scripts {
 	 * @access public
 	 * @return void
 	 */
-	public function load_scripts() {
-		global $post, $wp;
+	public static function load_scripts() {
+		global $post;
 
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$lightbox_en          = get_option( 'woocommerce_enable_lightbox' ) == 'yes' ? true : false;
@@ -56,7 +69,7 @@ class WC_Frontend_Scripts {
 		$frontend_script_path = $assets_path . 'js/frontend/';
 
 		// Register any scripts for later use, or used as dependencies
-		wp_register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '0.9.14', true );
+		wp_register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '1.0.0', true );
 		wp_register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.60', true );
 		wp_register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.0.2', true );
 		wp_register_script( 'wc-credit-card-form', $assets_path . 'js/frontend/credit-card-form' . $suffix . '.js', array( 'jquery', 'jquery-payment' ), WC_VERSION, true );
@@ -64,6 +77,7 @@ class WC_Frontend_Scripts {
 		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+		wp_register_script( 'wc-address-i18n', $frontend_script_path . 'address-i18n' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.3.1', true );
 
 		// Queue frontend scripts conditionally
@@ -80,7 +94,14 @@ class WC_Frontend_Scripts {
 				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
 			}
 
-			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select' ), WC_VERSION, true );
+			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ), WC_VERSION, true );
+		}
+
+		if ( is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) {
+			if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) {
+				wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), WC_VERSION, true );
+				wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
+			}
 		}
 
 		if ( is_add_payment_method_page() )
@@ -88,7 +109,7 @@ class WC_Frontend_Scripts {
 
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			wp_enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.5', true );
-			wp_enqueue_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+			wp_enqueue_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery','prettyPhoto' ), WC_VERSION, true );
 			wp_enqueue_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
 		}
 
@@ -99,70 +120,94 @@ class WC_Frontend_Scripts {
 		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui' ), WC_VERSION, true );
 		wp_enqueue_script( 'wc-cart-fragments', $frontend_script_path . 'cart-fragments' . $suffix . '.js', array( 'jquery', 'jquery-cookie' ), WC_VERSION, true );
 
-		// Variables for JS scripts
-		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', array(
-			'ajax_url'        => WC()->ajax_url(),
-			'ajax_loader_url' => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-		) ) );
-
-		wp_localize_script( 'wc-single-product', 'wc_single_product_params', apply_filters( 'wc_single_product_params', array(
-			'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
-			'review_rating_required'    => get_option( 'woocommerce_review_rating_required' ),
-		) ) );
-
-		wp_localize_script( 'wc-checkout', 'wc_checkout_params', apply_filters( 'wc_checkout_params', array(
-			'ajax_url'                  => WC()->ajax_url(),
-			'ajax_loader_url'           => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-			'i18n_required_text'        => esc_attr__( 'required', 'woocommerce' ),
-			'update_order_review_nonce' => wp_create_nonce( "update-order-review" ),
-			'apply_coupon_nonce'        => wp_create_nonce( "apply-coupon" ),
-			'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
-			'checkout_url'              => add_query_arg( 'action', 'woocommerce_checkout', WC()->ajax_url() ),
-			'is_checkout'               => is_page( wc_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
-			'locale'                    => json_encode( WC()->countries->get_country_locale() ),
-			'locale_fields'             => json_encode( WC()->countries->get_country_locale_field_selectors() )
-		) ) );
-
-		wp_localize_script( 'wc-cart', 'wc_cart_params', apply_filters( 'wc_cart_params', array(
-			'ajax_url'                     => WC()->ajax_url(),
-			'ajax_loader_url'              => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-			'update_shipping_method_nonce' => wp_create_nonce( "update-shipping-method" ),
-		) ) );
-
-		wp_localize_script( 'wc-cart-fragments', 'wc_cart_fragments_params', apply_filters( 'wc_cart_fragments_params', array(
-			'ajax_url'      => WC()->ajax_url(),
-			'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' )
-		) ) );
-
-		wp_localize_script( 'wc-add-to-cart', 'wc_add_to_cart_params', apply_filters( 'wc_add_to_cart_params', array(
-			'ajax_url'                => WC()->ajax_url(),
-			'ajax_loader_url'         => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
-			'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
-			'cart_url'                => get_permalink( wc_get_page_id( 'cart' ) ),
-			'is_cart'                 => is_cart(),
-			'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' )
-		) ) );
-
-		wp_localize_script( 'wc-add-to-cart-variation', 'wc_add_to_cart_variation_params', apply_filters( 'wc_add_to_cart_variation_params', array(
-			'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
-			'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' ),
-		) ) );
-
-		wp_localize_script( 'wc-country-select', 'wc_country_select_params', apply_filters( 'wc_country_select_params', array(
-			'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
-			'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
-		) ) );
-
 		// CSS Styles
-		$enqueue_styles = $this->get_styles();
+		$enqueue_styles = self::get_styles();
 
-		if ( $enqueue_styles )
-			foreach ( $enqueue_styles as $handle => $args )
+		if ( $enqueue_styles ) {
+			foreach ( $enqueue_styles as $handle => $args ) {
 				wp_enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
+			}
+		}
 	}
 
 	/**
-	 * WC requires jQuery 1.7 since it uses functions like .on() for events.
+	 * Localize scripts only when enqueued
+	 */
+	public static function localize_printed_scripts() {
+		global $wp;
+
+		$assets_path = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
+
+		if ( wp_script_is( 'woocommerce' ) ) {
+			wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', array(
+				'ajax_url'        => WC()->ajax_url(),
+				'ajax_loader_url' => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
+			) ) );
+		}
+		if ( wp_script_is( 'wc-single-product' ) ) {
+			wp_localize_script( 'wc-single-product', 'wc_single_product_params', apply_filters( 'wc_single_product_params', array(
+				'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
+				'review_rating_required'    => get_option( 'woocommerce_review_rating_required' ),
+			) ) );
+		}
+		if ( wp_script_is( 'wc-checkout' ) ) {
+			wp_localize_script( 'wc-checkout', 'wc_checkout_params', apply_filters( 'wc_checkout_params', array(
+				'ajax_url'                  => WC()->ajax_url(),
+				'ajax_loader_url'           => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
+				'update_order_review_nonce' => wp_create_nonce( "update-order-review" ),
+				'apply_coupon_nonce'        => wp_create_nonce( "apply-coupon" ),
+				'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
+				'checkout_url'              => add_query_arg( 'action', 'woocommerce_checkout', WC()->ajax_url() ),
+				'is_checkout'               => is_page( wc_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0
+			) ) );
+		}
+		if ( wp_script_is( 'wc-address-i18n' ) || wp_script_is( 'wc-checkout' ) ) {
+			wp_localize_script( 'wc-address-i18n', 'wc_address_i18n_params', apply_filters( 'wc_address_i18n_params', array(
+				'locale'                    => json_encode( WC()->countries->get_country_locale() ),
+				'locale_fields'             => json_encode( WC()->countries->get_country_locale_field_selectors() ),
+				'i18n_required_text'        => esc_attr__( 'required', 'woocommerce' ),
+			) ) );
+		}
+		if ( wp_script_is( 'wc-cart' ) ) {
+			wp_localize_script( 'wc-cart', 'wc_cart_params', apply_filters( 'wc_cart_params', array(
+				'ajax_url'                     => WC()->ajax_url(),
+				'ajax_loader_url'              => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
+				'update_shipping_method_nonce' => wp_create_nonce( "update-shipping-method" ),
+			) ) );
+		}
+		if ( wp_script_is( 'wc-cart-fragments' ) ) {
+			wp_localize_script( 'wc-cart-fragments', 'wc_cart_fragments_params', apply_filters( 'wc_cart_fragments_params', array(
+				'ajax_url'      => WC()->ajax_url(),
+				'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' )
+			) ) );
+		}
+		if ( wp_script_is( 'wc-add-to-cart' ) ) {
+			wp_localize_script( 'wc-add-to-cart', 'wc_add_to_cart_params', apply_filters( 'wc_add_to_cart_params', array(
+				'ajax_url'                => WC()->ajax_url(),
+				'ajax_loader_url'         => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
+				'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
+				'cart_url'                => get_permalink( wc_get_page_id( 'cart' ) ),
+				'is_cart'                 => is_cart(),
+				'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' )
+			) ) );
+		}
+		if ( wp_script_is( 'wc-add-to-cart-variation' ) ) {
+			wp_localize_script( 'wc-add-to-cart-variation', 'wc_add_to_cart_variation_params', apply_filters( 'wc_add_to_cart_variation_params', array(
+				'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
+				'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' ),
+			) ) );
+		}
+
+		if ( wp_script_is( 'wc-country-select' ) || wp_script_is( 'wc-cart' ) || wp_script_is( 'wc-checkout' ) ) {
+			wp_localize_script( 'wc-country-select', 'wc_country_select_params', apply_filters( 'wc_country_select_params', array(
+				'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+				'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
+			) ) );
+		}
+	}
+
+	/**
+	 * WC requires jQuery 1.8 since it uses functions like .on() for events and .parseHTML.
 	 * If, by the time wp_print_scrips is called, jQuery is outdated (i.e not
 	 * using the version in core) we need to deregister it and register the
 	 * core version of the file.
@@ -170,13 +215,13 @@ class WC_Frontend_Scripts {
 	 * @access public
 	 * @return void
 	 */
-	public function check_jquery() {
+	public static function check_jquery() {
 		global $wp_scripts;
 
 		// Enforce minimum version of jQuery
-		if ( ! empty( $wp_scripts->registered['jquery']->ver ) && ! empty( $wp_scripts->registered['jquery']->src ) && 0 >= version_compare( $wp_scripts->registered['jquery']->ver, '1.7' ) ) {
+		if ( ! empty( $wp_scripts->registered['jquery']->ver ) && ! empty( $wp_scripts->registered['jquery']->src ) && 0 >= version_compare( $wp_scripts->registered['jquery']->ver, '1.8' ) ) {
 			wp_deregister_script( 'jquery' );
-			wp_register_script( 'jquery', '/wp-includes/js/jquery/jquery.js', array(), '1.7' );
+			wp_register_script( 'jquery', '/wp-includes/js/jquery/jquery.js', array(), '1.8' );
 			wp_enqueue_script( 'jquery' );
 		}
 	}
@@ -186,10 +231,10 @@ class WC_Frontend_Scripts {
 	 * @param  array $styles
 	 * @return array
 	 */
-	public function backwards_compat( $styles ) {
+	public static function backwards_compat( $styles ) {
 		if ( defined( 'WOOCOMMERCE_USE_CSS' ) ) {
 
-			_deprecated_function( 'WOOCOMMERCE_USE_CSS', '2.1', 'Styles should be removed using wp_deregister_style or the woocommerce_enqueue_frontend_styles filter rather than the WOOCOMMERCE_USE_CSS constant.' );
+			_deprecated_function( 'WOOCOMMERCE_USE_CSS', '2.1', 'Styles should be removed using wp_deregister_style or the woocommerce_enqueue_styles filter rather than the WOOCOMMERCE_USE_CSS constant.' );
 
 			if ( ! WOOCOMMERCE_USE_CSS )
 				return false;
@@ -199,4 +244,4 @@ class WC_Frontend_Scripts {
 	}
 }
 
-new WC_Frontend_Scripts();
+WC_Frontend_Scripts::init();

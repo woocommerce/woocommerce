@@ -59,16 +59,17 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	 */
 	function trigger( $user_login = '', $reset_key = '' ) {
 		if ( $user_login && $reset_key ) {
-			$this->object 		= get_user_by( 'login', $user_login );
-
-			$this->user_login 	= $user_login;
-			$this->reset_key		= $reset_key;
-			$this->user_email 	= stripslashes( $this->object->user_email );
-			$this->recipient	= $this->user_email;
+			$this->object     = get_user_by( 'login', $user_login );
+			
+			$this->user_login = $user_login;
+			$this->reset_key  = $reset_key;
+			$this->user_email = stripslashes( $this->object->user_email );
+			$this->recipient  = $this->user_email;
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() )
+		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
 			return;
+		}
 
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 
@@ -86,7 +87,9 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'user_login' 	=> $this->user_login,
 			'reset_key'		=> $this->reset_key,
-			'blogname'		=> $this->get_blogname()
+			'blogname'		=> $this->get_blogname(),
+			'sent_to_admin' => false,
+			'plain_text'    => false
 		) );
 		return ob_get_clean();
 	}
@@ -103,7 +106,9 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'user_login' 	=> $this->user_login,
 			'reset_key'		=> $this->reset_key,
-			'blogname'		=> $this->get_blogname()
+			'blogname'		=> $this->get_blogname(),
+			'sent_to_admin' => false,
+			'plain_text'    => true
 		) );
 		return ob_get_clean();
 	}

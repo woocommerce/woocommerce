@@ -33,8 +33,10 @@ class WC_Product_Factory {
 		if ( ! $the_product )
 			return false;
 
-		$product_id = absint( $the_product->ID );
-		$post_type  = $the_product->post_type;
+		if ( is_object ( $the_product ) ) {
+			$product_id = absint( $the_product->ID );
+			$post_type  = $the_product->post_type;
+		}
 
 		if ( in_array( $post_type, array( 'product', 'product_variation' ) ) ) {
 			if ( isset( $args['product_type'] ) ) {

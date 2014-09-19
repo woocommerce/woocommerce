@@ -5,7 +5,7 @@
  * Loads payment gateways via hooks for use in the store.
  *
  * @class 		WC_Payment_Gateways
- * @version		1.6.4
+ * @version		2.2.0
  * @package		WooCommerce/Classes/Payment
  * @category	Class
  * @author 		WooThemes
@@ -13,27 +13,27 @@
 class WC_Payment_Gateways {
 
 	/** @var array Array of payment gateway classes. */
-	var $payment_gateways;
+	public $payment_gateways;
 
 	/**
-	 * @var WooCommerce The single instance of the class
+	 * @var WC_Payment_Gateways The single instance of the class
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
 
 	/**
-	 * Main WooCommerce Instance
+	 * Main WC_Payment_Gateways Instance
 	 *
-	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
+	 * Ensures only one instance of WC_Payment_Gateways is loaded or can be loaded.
 	 *
 	 * @since 2.1
 	 * @static
-	 * @see WC()
-	 * @return Main WooCommerce instance
+	 * @return WC_Payment_Gateways Main instance
 	 */
 	public static function instance() {
-		if ( is_null( self::$_instance ) )
+		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self();
+		}
 		return self::$_instance;
 	}
 
@@ -43,7 +43,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -52,7 +52,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -65,63 +65,74 @@ class WC_Payment_Gateways {
 		$this->init();
 	}
 
-    /**
-     * Load gateways and hook in functions.
-     *
-     * @access public
-     * @return void
-     */
-    function init() {
-
-    	$load_gateways = apply_filters( 'woocommerce_payment_gateways', array(
-    		'WC_Gateway_BACS',
+	/**
+	 * Load gateways and hook in functions.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function init() {
+		$load_gateways = array(
+			'WC_Gateway_BACS',
 			'WC_Gateway_Cheque',
 			'WC_Gateway_COD',
-			'WC_Gateway_Mijireh',
-			'WC_Gateway_Paypal'
-    	) );
+			'WC_Gateway_Paypal',
+		);
 
-		// Get order option
-		$ordering 	= (array) get_option('woocommerce_gateway_order');
-		$order_end 	= 999;
+		// Conditional loading of core gateways
+		if ( ! class_exists( 'WC_Mijireh_Checkout' ) && ( $mijireh = get_option( 'woocommerce_mijireh_checkout_settings', false ) ) && ! empty( $mijireh['enabled'] ) && $mijireh['enabled'] === 'yes' ) {
+			$load_gateways[] = 'WC_Gateway_Mijireh';
+		}
+
+		if ( 'US' === WC()->countries->get_base_country() ) {
+			if ( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
+				$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce';
+			} else {
+				$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
+			}
+		}
+
+		// Filter
+		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
+
+		// Get sort order option
+		$ordering  = (array) get_option( 'woocommerce_gateway_order' );
+		$order_end = 999;
 
 		// Load gateways in order
-		foreach ($load_gateways as $gateway) :
-
+		foreach ( $load_gateways as $gateway ) {
 			$load_gateway = new $gateway();
 
-			if (isset($ordering[$load_gateway->id]) && is_numeric($ordering[$load_gateway->id])) :
+			if ( isset( $ordering[ $load_gateway->id ] ) && is_numeric( $ordering[ $load_gateway->id ] ) ) {
 				// Add in position
-				$this->payment_gateways[$ordering[$load_gateway->id]] = $load_gateway;
-			else :
+				$this->payment_gateways[ $ordering[ $load_gateway->id ] ] = $load_gateway;
+			} else {
 				// Add to end of the array
-				$this->payment_gateways[$order_end] = $load_gateway;
+				$this->payment_gateways[ $order_end ] = $load_gateway;
 				$order_end++;
-			endif;
-
-		endforeach;
+			}
+		}
 
 		ksort( $this->payment_gateways );
-    }
+	}
 
-
-    /**
-     * Get gateways.
-     *
-     * @access public
-     * @return array
-     */
-    function payment_gateways() {
-
+	/**
+	 * Get gateways.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function payment_gateways() {
 		$_available_gateways = array();
 
-		if ( sizeof( $this->payment_gateways ) > 0 )
-			foreach ( $this->payment_gateways as $gateway )
+		if ( sizeof( $this->payment_gateways ) > 0 ) {
+			foreach ( $this->payment_gateways as $gateway ) {
 				$_available_gateways[ $gateway->id ] = $gateway;
+			}
+		}
 
 		return $_available_gateways;
 	}
-
 
 	/**
 	 * Get available gateways.
@@ -129,24 +140,21 @@ class WC_Payment_Gateways {
 	 * @access public
 	 * @return array
 	 */
-	function get_available_payment_gateways() {
-
+	public function get_available_payment_gateways() {
 		$_available_gateways = array();
 
-		foreach ( $this->payment_gateways as $gateway ) :
-
+		foreach ( $this->payment_gateways as $gateway ) {
 			if ( $gateway->is_available() ) {
-				if ( ! is_add_payment_method_page() )
-					$_available_gateways[$gateway->id] = $gateway;
-				elseif( $gateway->supports( 'add_payment_method' ) )
-					$_available_gateways[$gateway->id] = $gateway;
+				if ( ! is_add_payment_method_page() ) {
+					$_available_gateways[ $gateway->id ] = $gateway;
+				} elseif( $gateway->supports( 'add_payment_method' ) ) {
+					$_available_gateways[ $gateway->id ] = $gateway;
+				}
 			}
-
-		endforeach;
+		}
 
 		return apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways );
 	}
-
 
 	/**
 	 * Save options in admin.
@@ -154,7 +162,7 @@ class WC_Payment_Gateways {
 	 * @access public
 	 * @return void
 	 */
-	function process_admin_options() {
+	public function process_admin_options() {
 
 		$default_gateway = ( isset( $_POST['default_gateway'] ) ) ? esc_attr( $_POST['default_gateway'] ) : '';
 		$gateway_order = ( isset( $_POST['gateway_order'] ) ) ? $_POST['gateway_order'] : '';

@@ -5,12 +5,10 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/System Status
- * @version     2.1.0
+ * @version     2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-if ( ! class_exists( 'WC_Admin_Status' ) ) :
 
 /**
  * WC_Admin_Status Class
@@ -20,7 +18,7 @@ class WC_Admin_Status {
 	/**
 	 * Handles output of the reports page in admin.
 	 */
-	public function output() {
+	public static function output() {
 		$current_tab = ! empty( $_REQUEST['tab'] ) ? sanitize_title( $_REQUEST['tab'] ) : 'status';
 
 		include_once( 'views/html-admin-page-status.php' );
@@ -29,29 +27,27 @@ class WC_Admin_Status {
 	/**
 	 * Handles output of report
 	 */
-	public function status_report() {
-		global $woocommerce, $wpdb;
-
+	public static function status_report() {
 		include_once( 'views/html-admin-page-status-report.php' );
 	}
 
 	/**
 	 * Handles output of tools
 	 */
-	public function status_tools() {
+	public static function status_tools() {
 		global $woocommerce, $wpdb;
 
-		$tools = $this->get_tools();
+		$tools = self::get_tools();
 
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
 
 			switch ( $_GET['action'] ) {
-				case "clear_transients" :
+				case 'clear_transients' :
 					wc_delete_product_transients();
 
 					echo '<div class="updated"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
 				break;
-				case "clear_expired_transients" :
+				case 'clear_expired_transients' :
 
 					// http://w-shadow.com/blog/2012/04/17/delete-stale-transients/
 					$rows = $wpdb->query( "
@@ -93,7 +89,7 @@ class WC_Admin_Status {
 					echo '<div class="updated"><p>' . sprintf( __( '%d Transients Rows Cleared', 'woocommerce' ), $rows + $rows2 ) . '</p></div>';
 
 				break;
-				case "reset_roles" :
+				case 'reset_roles' :
 					// Remove then re-add caps and roles
 					$installer = include( WC()->plugin_path() . '/includes/class-wc-install.php' );
 					$installer->remove_roles();
@@ -101,19 +97,19 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
 				break;
-				case "recount_terms" :
+				case 'recount_terms' :
 
 					$product_cats = get_terms( 'product_cat', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
 
-					_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
+					_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
 
 					$product_tags = get_terms( 'product_tag', array( 'hide_empty' => false, 'fields' => 'id=>parent' ) );
 
-					_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
+					_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
 
 					echo '<div class="updated"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
 				break;
-				case "clear_sessions" :
+				case 'clear_sessions' :
 
 					$wpdb->query( "
 						DELETE FROM {$wpdb->options}
@@ -124,17 +120,33 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Sessions successfully cleared', 'woocommerce' ) . '</p></div>';
 				break;
-				case "install_pages" :
+				case 'install_pages' :
 					WC_Install::create_pages();
 					echo '<div class="updated"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
-                break;
-				default:
+				break;
+				case 'delete_taxes' :
+
+					$wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_tax_rates" );
+
+					$wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_tax_rate_locations" );
+
+					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
+				break;
+				case 'hide_translation_upgrade' :
+					update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
+					$notices = get_option( 'woocommerce_admin_notices', array() );
+					$notices = array_diff( $notices, array( 'translation_upgrade' ) );
+					update_option( 'woocommerce_admin_notices', $notices );
+
+					echo '<div class="updated"><p>' . __( 'Translation update message hidden successfully!', 'woocommerce' ) . '</p></div>';
+				break;
+				default :
 					$action = esc_attr( $_GET['action'] );
-					if( isset( $tools[ $action ]['callback'] ) ) {
+					if ( isset( $tools[ $action ]['callback'] ) ) {
 						$callback = $tools[ $action ]['callback'];
 						$return = call_user_func( $callback );
-						if( $return === false ) {
-							if( is_array( $callback ) ) {
+						if ( $return === false ) {
+							if ( is_array( $callback ) ) {
 								echo '<div class="error"><p>' . sprintf( __( 'There was an error calling %s::%s', 'woocommerce' ), get_class( $callback[0] ), $callback[1] ) . '</p></div>';
 
 							} else {
@@ -145,9 +157,31 @@ class WC_Admin_Status {
 				break;
 			}
 		}
-		
-	    // Display message if settings settings have been saved
-	    if ( isset( $_REQUEST['settings-updated'] ) ) {
+
+		// Manual translation update messages
+		if ( isset( $_GET['translation_updated'] ) ) {
+			switch ( $_GET['translation_updated'] ) {
+				case 2 :
+					echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . __( 'Seems you don\'t have permission to do this!', 'woocommerce' ) . '</p></div>';
+					break;
+				case 3 :
+					echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . sprintf( __( 'An authentication error occurred while updating the translation. Please try again or configure your %sUpgrade Constants%s.', 'woocommerce' ), '<a href="http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants">', '</a>' ) . '</p></div>';
+					break;
+				case 4 :
+					echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . __( 'Sorry but there is no translation available for your language =/', 'woocommerce' ) . '</p></div>';
+					break;
+
+				default :
+					// Force WordPress find for new updates and hide the WooCommerce translation update
+					set_site_transient( 'update_plugins', null );
+
+					echo '<div class="updated"><p>' . __( 'Translations installed/updated successfully!', 'woocommerce' ) . '</p></div>';
+					break;
+			}
+		}
+
+		// Display message if settings settings have been saved
+		if ( isset( $_REQUEST['settings-updated'] ) ) {
 			echo '<div class="updated"><p>' . __( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
 		}
 
@@ -159,8 +193,8 @@ class WC_Admin_Status {
 	 *
 	 * @return array of tools
 	 */
-	public function get_tools() {
-		return apply_filters( 'woocommerce_debug_tools', array(
+	public static function get_tools() {
+		$tools = array(
 			'clear_transients' => array(
 				'name'		=> __( 'WC Transients','woocommerce'),
 				'button'	=> __('Clear transients','woocommerce'),
@@ -169,7 +203,7 @@ class WC_Admin_Status {
 			'clear_expired_transients' => array(
 				'name'		=> __( 'Expired Transients','woocommerce'),
 				'button'	=> __('Clear expired transients','woocommerce'),
-				'desc'		=> __( 'This tool will clear ALL expired transients from Wordpress.', 'woocommerce' ),
+				'desc'		=> __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'recount_terms' => array(
 				'name'		=> __('Term counts','woocommerce'),
@@ -184,31 +218,85 @@ class WC_Admin_Status {
 			'clear_sessions' => array(
 				'name'		=> __('Customer Sessions','woocommerce'),
 				'button'	=> __('Clear all sessions','woocommerce'),
-				'desc'		=> __( '<strong class="red">Warning</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+				'desc'		=> __( '<strong class="red">Warning:</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
 			),
 			'install_pages' => array(
 				'name'    => __( 'Install WooCommerce Pages', 'woocommerce' ),
 				'button'  => __( 'Install pages', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note:</strong> This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' ),
 			),
-		) );
+			'delete_taxes' => array(
+				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
+				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note:</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
+			)
+		);
+
+		if ( get_locale() !== 'en_US' ) {
+			$tools['translation_upgrade'] = array(
+				'name'    => __( 'Translation Upgrade', 'woocommerce' ),
+				'button'  => __( 'Force Translation Upgrade', 'woocommerce' ),
+				'desc'    => __( '<strong class="red">Note:</strong> This option will force the translation upgrade for your language if a translation is available.', 'woocommerce' ),
+			);
+		}
+
+		return apply_filters( 'woocommerce_debug_tools', $tools );
+	}
+
+	/**
+	 * Show the logs page
+	 */
+	public static function status_logs() {
+		$logs = self::scan_log_files();
+		if ( ! empty( $_POST['log_file'] ) && isset( $logs[ sanitize_title( $_POST['log_file'] ) ] ) ) {
+			$viewed_log = $logs[ sanitize_title( $_POST['log_file'] ) ];
+		} elseif ( $logs ) {
+			$viewed_log = current( $logs );
+		}
+		include_once( 'views/html-admin-page-status-logs.php' );
+	}
+
+	/**
+	 * Retrieve metadata from a file. Based on WP Core's get_file_data function
+	 *
+	 * @since 2.1.1
+	 * @param string $file Path to the file
+	 * @return string
+	 */
+	public static function get_file_version( $file ) {
+		// We don't need to write to the file, so just open for reading.
+		$fp = fopen( $file, 'r' );
+
+		// Pull only the first 8kiB of the file in.
+		$file_data = fread( $fp, 8192 );
+
+		// PHP will close file handle, but we are good citizens.
+		fclose( $fp );
+
+		// Make sure we catch CR-only line endings.
+		$file_data = str_replace( "\r", "\n", $file_data );
+		$version   = '';
+
+		if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] )
+			$version = _cleanup_header_comment( $match[1] );
+
+		return $version ;
 	}
 
 	/**
 	 * Scan the template files
 	 *
-	 * @access public
- 	 * @param string $template_path
- 	 * @return array
+	 * @param string $template_path
+	 * @return array
 	 */
-	public function scan_template_files( $template_path ) {
+	public static function scan_template_files( $template_path ) {
 		$files         = scandir( $template_path );
 		$result        = array();
 		if ( $files ) {
 			foreach ( $files as $key => $value ) {
 				if ( ! in_array( $value, array( ".",".." ) ) ) {
 					if ( is_dir( $template_path . DIRECTORY_SEPARATOR . $value ) ) {
-						$sub_files = $this->scan_template_files( $template_path . DIRECTORY_SEPARATOR . $value );
+						$sub_files = self::scan_template_files( $template_path . DIRECTORY_SEPARATOR . $value );
 						foreach ( $sub_files as $sub_file ) {
 							$result[] = $value . DIRECTORY_SEPARATOR . $sub_file;
 						}
@@ -220,8 +308,24 @@ class WC_Admin_Status {
 		}
 		return $result;
 	}
+
+	/**
+	 * Scan the log files
+	 *
+	 * @return array
+	 */
+	public static function scan_log_files() {
+		$files         = @scandir( WC_LOG_DIR );
+		$result        = array();
+		if ( $files ) {
+			foreach ( $files as $key => $value ) {
+				if ( ! in_array( $value, array( '.', '..' ) ) ) {
+					if ( ! is_dir( $value ) && strstr( $value, '.log' ) ) {
+						$result[ sanitize_title( $value ) ] = $value;
+					}
+				}
+			}
+		}
+		return $result;
+	}
 }
-
-endif;
-
-return new WC_Admin_Status();

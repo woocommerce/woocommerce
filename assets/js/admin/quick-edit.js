@@ -1,4 +1,4 @@
-jQuery(document).ready(function(){
+jQuery(function(){
     jQuery('#the-list').on('click', '.editinline', function(){
 
 		inlineEditPost.revert();

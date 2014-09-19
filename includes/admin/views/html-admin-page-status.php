@@ -1,9 +1,21 @@
+<?php
+/**
+ * Admin View: Page - Status
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
+
 <div class="wrap woocommerce">
 	<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
 			$tabs = array(
 				'status' => __( 'System Status', 'woocommerce' ),
 				'tools'  => __( 'Tools', 'woocommerce' ),
+				'logs'   => __( 'Logs', 'woocommerce' ),
 			);
 			foreach ( $tabs as $name => $label ) {
 				echo '<a href="' . admin_url( 'admin.php?page=wc-status&tab=' . $name ) . '" class="nav-tab ';
@@ -15,10 +27,13 @@
 	<?php
 		switch ( $current_tab ) {
 			case "tools" :
-				$this->status_tools();
+				WC_Admin_Status::status_tools();
+			break;
+			case "logs" :
+				WC_Admin_Status::status_logs();
 			break;
 			default :
-				$this->status_report();
+				WC_Admin_Status::status_report();
 			break;
 		}
 	?>

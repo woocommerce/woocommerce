@@ -55,10 +55,11 @@ function wc_attribute_label( $name ) {
 
 		$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 
-		if ( ! $label )
+		if ( ! $label ) {
 			$label = ucfirst( $name );
+		}
 	} else {
-		$label = $name;
+		$label = ucwords( str_replace( '-', ' ', $name ) );
 	}
 
 	return apply_filters( 'woocommerce_attribute_label', $label, $name );

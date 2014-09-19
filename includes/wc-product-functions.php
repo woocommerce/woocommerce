@@ -17,7 +17,7 @@
  * @param array $args (default: array()) Contains all arguments to be used to get this product.
  * @return WC_Product
  */
-function get_product( $the_product = false, $args = array() ) {
+function wc_get_product( $the_product = false, $args = array() ) {
 	return WC()->product_factory->get_product( $the_product, $args );
 }
 
@@ -28,12 +28,11 @@ function get_product( $the_product = false, $args = array() ) {
  * @param  int $new_stock_level
  */
 function wc_update_product_stock( $product_id, $new_stock_level ) {
-	$product = get_product( $product_id );
+	$product = wc_get_product( $product_id );
 
-	if ( $product->is_type( 'variation' ) )
-		$product->set_stock( $new_stock_level, true );
-	else
+	if ( $product->get_stock_quantity() !== $new_stock_level ) {
 		$product->set_stock( $new_stock_level );
+	}
 }
 
 /**
@@ -43,8 +42,8 @@ function wc_update_product_stock( $product_id, $new_stock_level ) {
  * @param  int $status
  */
 function wc_update_product_stock_status( $product_id, $status ) {
-	$product = get_product( $product_id );
-	$product-> set_stock_status( $status );
+	$product = wc_get_product( $product_id );
+	$product->set_stock_status( $status );
 }
 
 /**
@@ -77,53 +76,27 @@ function wc_product_dimensions_enabled() {
  * @param int $post_id (default: 0)
  */
 function wc_delete_product_transients( $post_id = 0 ) {
-	global $wpdb;
-
-	$post_id = absint( $post_id );
-
-	// Clear core transients
+	// Core transients
 	$transients_to_clear = array(
 		'wc_products_onsale',
-		'wc_hidden_product_ids',
-		'wc_hidden_product_ids_search',
-		'wc_attribute_taxonomies',
-		'wc_term_counts'
+		'wc_featured_products'
 	);
 
-	foreach( $transients_to_clear as $transient ) {
-		delete_transient( $transient );
-	}
-
-	// Clear transients for which we don't have the name
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%') OR `option_name` LIKE ('_transient_timeout_wc_uf_pid_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%') OR `option_name` LIKE ('_transient_timeout_wc_ln_count_%')" );
-	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%') OR `option_name` LIKE ('_transient_timeout_wc_ship_%')" );
-
-	// Clear product specific transients
-	$post_transients_to_clear = array(
+	// Transients that include an ID
+	$post_transient_names = array(
 		'wc_product_children_ids_',
-		'wc_product_total_stock_',
-		'wc_average_rating_',
-		'wc_rating_count_',
-		'woocommerce_product_type_', // No longer used
-		'wc_product_type_', // No longer used
+		'wc_product_total_stock_'
 	);
 
 	if ( $post_id > 0 ) {
-
-		foreach( $post_transients_to_clear as $transient ) {
-			delete_transient( $transient . $post_id );
-			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` = %s OR `option_name` = %s", '_transient_' . $transient . $post_id, '_transient_timeout_' . $transient . $post_id ) );
+		foreach( $post_transient_names as $transient ) {
+			$transients_to_clear[] = $transient . $post_id;
 		}
+	}
 
-		clean_post_cache( $post_id );
-
-	} else {
-
-		foreach( $post_transients_to_clear as $transient ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE %s OR `option_name` LIKE %s", '_transient_' . $transient . '%', '_transient_timeout_' . $transient . '%' ) );
-		}
-
+	// Delete transients
+	foreach( $transients_to_clear as $transient ) {
+		delete_transient( $transient );
 	}
 
 	do_action( 'woocommerce_delete_product_transients', $post_id );
@@ -160,9 +133,9 @@ function wc_get_product_ids_on_sale() {
 		GROUP BY post.ID;
 	" );
 
-	$product_ids_on_sale = array_unique( array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), wp_list_pluck( $on_sale_posts, 'post_parent' ) ) );
+	$product_ids_on_sale = array_unique( array_map( 'absint', array_merge( wp_list_pluck( $on_sale_posts, 'ID' ), array_diff( wp_list_pluck( $on_sale_posts, 'post_parent' ), array( 0 ) ) ) ) );
 
-	set_transient( 'wc_products_onsale', $product_ids_on_sale );
+	set_transient( 'wc_products_onsale', $product_ids_on_sale, YEAR_IN_SECONDS );
 
 	return $product_ids_on_sale;
 }
@@ -205,7 +178,7 @@ function wc_get_featured_product_ids() {
 	$parent_ids           = array_values( $featured );
 	$featured_product_ids = array_unique( array_merge( $product_ids, $parent_ids ) );
 
-	set_transient( 'wc_featured_products', $featured_product_ids );
+	set_transient( 'wc_featured_products', $featured_product_ids, YEAR_IN_SECONDS );
 
 	return $featured_product_ids;
 }
@@ -215,59 +188,59 @@ function wc_get_featured_product_ids() {
  *
  * @access public
  * @param string $permalink The existing permalink URL.
- * @param object $post
+ * @param WP_Post $post
  * @return string
  */
 function wc_product_post_type_link( $permalink, $post ) {
-    // Abort if post is not a product
-    if ( $post->post_type !== 'product' )
-    	return $permalink;
+	// Abort if post is not a product
+	if ( $post->post_type !== 'product' )
+		return $permalink;
 
-    // Abort early if the placeholder rewrite tag isn't in the generated URL
-    if ( false === strpos( $permalink, '%' ) )
-    	return $permalink;
+	// Abort early if the placeholder rewrite tag isn't in the generated URL
+	if ( false === strpos( $permalink, '%' ) )
+		return $permalink;
 
-    // Get the custom taxonomy terms in use by this post
-    $terms = get_the_terms( $post->ID, 'product_cat' );
+	// Get the custom taxonomy terms in use by this post
+	$terms = get_the_terms( $post->ID, 'product_cat' );
 
-    if ( empty( $terms ) ) {
-    	// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
-        $product_cat = _x( 'uncategorized', 'slug', 'woocommerce' );
-    } else {
-    	// Replace the placeholder rewrite tag with the first term's slug
-        $first_term = array_shift( $terms );
-        $product_cat = $first_term->slug;
-    }
+	if ( empty( $terms ) ) {
+		// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
+		$product_cat = _x( 'uncategorized', 'slug', 'woocommerce' );
+	} else {
+		// Replace the placeholder rewrite tag with the first term's slug
+		$first_term = array_shift( $terms );
+		$product_cat = $first_term->slug;
+	}
 
-    $find = array(
-    	'%year%',
-    	'%monthnum%',
-    	'%day%',
-    	'%hour%',
-    	'%minute%',
-    	'%second%',
-    	'%post_id%',
-    	'%category%',
-    	'%product_cat%'
-    );
+	$find = array(
+		'%year%',
+		'%monthnum%',
+		'%day%',
+		'%hour%',
+		'%minute%',
+		'%second%',
+		'%post_id%',
+		'%category%',
+		'%product_cat%'
+	);
 
-    $replace = array(
-    	date_i18n( 'Y', strtotime( $post->post_date ) ),
-    	date_i18n( 'm', strtotime( $post->post_date ) ),
-    	date_i18n( 'd', strtotime( $post->post_date ) ),
-    	date_i18n( 'H', strtotime( $post->post_date ) ),
-    	date_i18n( 'i', strtotime( $post->post_date ) ),
-    	date_i18n( 's', strtotime( $post->post_date ) ),
-    	$post->ID,
-    	$product_cat,
-    	$product_cat
-    );
+	$replace = array(
+		date_i18n( 'Y', strtotime( $post->post_date ) ),
+		date_i18n( 'm', strtotime( $post->post_date ) ),
+		date_i18n( 'd', strtotime( $post->post_date ) ),
+		date_i18n( 'H', strtotime( $post->post_date ) ),
+		date_i18n( 'i', strtotime( $post->post_date ) ),
+		date_i18n( 's', strtotime( $post->post_date ) ),
+		$post->ID,
+		$product_cat,
+		$product_cat
+	);
 
-    $replace = array_map( 'sanitize_title', $replace );
+	$replace = array_map( 'sanitize_title', $replace );
 
-    $permalink = str_replace( $find, $replace, $permalink );
+	$permalink = str_replace( $find, $replace, $permalink );
 
-    return $permalink;
+	return $permalink;
 }
 add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 
@@ -291,7 +264,7 @@ function wc_placeholder_img_src() {
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="Placeholder" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />' );
+	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
 }
 
 /**
@@ -300,50 +273,52 @@ function wc_placeholder_img( $size = 'shop_thumbnail' ) {
  * Gets a formatted version of variation data or item meta
  *
  * @access public
- * @param string $variation (default: '')
+ * @param string $variation
  * @param bool $flat (default: false)
  * @return string
  */
-function wc_get_formatted_variation( $variation = '', $flat = false ) {
+function wc_get_formatted_variation( $variation, $flat = false ) {
+	$return = '';
 	if ( is_array( $variation ) ) {
 
-		if ( ! $flat )
+		if ( ! $flat ) {
 			$return = '<dl class="variation">';
-		else
-			$return = '';
+		}
 
 		$variation_list = array();
 
 		foreach ( $variation as $name => $value ) {
-
-			if ( ! $value )
+			if ( ! $value ) {
 				continue;
+			}
 
 			// If this is a term slug, get the term's nice name
-            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
-            	$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
-            	if ( ! is_wp_error( $term ) && $term->name )
-            		$value = $term->name;
-            }
+			if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
+				$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
+				if ( ! is_wp_error( $term ) && $term->name )
+					$value = $term->name;
+			} else {
+				$value = ucwords( str_replace( '-', ' ', $value ) );
+			}
 
-			if ( $flat )
-				$variation_list[] = wc_attribute_label(str_replace('attribute_', '', $name)).': '.$value;
-			else
-				$variation_list[] = '<dt>'.wc_attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
+			if ( $flat ) {
+				$variation_list[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . urldecode( $value );
+			} else {
+				$variation_list[] = '<dt>' . wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . urldecode( $value ) . '</dd>';
+			}
 		}
 
-		if ( $flat )
+		if ( $flat ) {
 			$return .= implode( ', ', $variation_list );
-		else
+		} else {
 			$return .= implode( '', $variation_list );
+		}
 
-		if ( ! $flat )
+		if ( ! $flat ) {
 			$return .= '</dl>';
-
-		return $return;
+		}
 	}
-	
-	return '';
+	return $return;
 }
 
 /**
@@ -380,8 +355,6 @@ function wc_scheduled_sales() {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
 
-			wc_delete_product_transients( $product_id );
-
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -390,13 +363,15 @@ function wc_scheduled_sales() {
 				delete_post_meta( $parent, '_min_price_variation_id' );
 
 				// Grouped products need syncing via a function
-				$this_product = get_product( $product_id );
-				if ( $this_product->is_type( 'simple' ) )
-					$this_product->grouped_product_sync();
+				$this_product = wc_get_product( $product_id );
 
-				wc_delete_product_transients( $parent );
+				if ( $this_product->is_type( 'simple' ) ) {
+					$this_product->grouped_product_sync();
+				}
 			}
 		}
+
+		delete_transient( 'wc_products_onsale' );
 	}
 
 	// Sales which are due to end
@@ -421,8 +396,6 @@ function wc_scheduled_sales() {
 			update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			update_post_meta( $product_id, '_sale_price_dates_to', '' );
 
-			wc_delete_product_transients( $product_id );
-
 			$parent = wp_get_post_parent_id( $product_id );
 
 			// Sync parent
@@ -431,13 +404,14 @@ function wc_scheduled_sales() {
 				delete_post_meta( $parent, '_min_variation_price' );
 
 				// Grouped products need syncing via a function
-				$this_product = get_product( $product_id );
-				if ( $this_product->is_type( 'simple' ) )
+				$this_product = wc_get_product( $product_id );
+				if ( $this_product->is_type( 'simple' ) ) {
 					$this_product->grouped_product_sync();
-
-				wc_delete_product_transients( $parent );
+				}
 			}
 		}
+
+		delete_transient( 'wc_products_onsale' );
 	}
 }
 add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
@@ -450,8 +424,9 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
-	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) )
+	if ( strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
 		$attr['src'] = wc_placeholder_img_src();
+	}
 
 	return $attr;
 }
@@ -487,7 +462,7 @@ function wc_track_product_view() {
 	if ( ! is_singular( 'product' ) )
 		return;
 
-	global $post, $product;
+	global $post;
 
 	if ( empty( $_COOKIE['woocommerce_recently_viewed'] ) )
 		$viewed_products = array();
@@ -505,3 +480,46 @@ function wc_track_product_view() {
 }
 
 add_action( 'template_redirect', 'wc_track_product_view', 20 );
+
+/**
+ * Get product types
+ *
+ * @since 2.2
+ * @return array
+ */
+function wc_get_product_types() {
+	return (array) apply_filters( 'product_type_selector', array(
+		'simple'   => __( 'Simple product', 'woocommerce' ),
+		'grouped'  => __( 'Grouped product', 'woocommerce' ),
+		'external' => __( 'External/Affiliate product', 'woocommerce' ),
+		'variable' => __( 'Variable product', 'woocommerce' )
+	) );
+}
+
+/**
+ * Check if product sku is unique.
+ *
+ * @since 2.2
+ * @param int $product_id
+ * @param string $sku
+ * @return bool
+ */
+function wc_product_has_unique_sku( $product_id, $sku ) {
+	global $wpdb;
+
+	$sku_found = $wpdb->get_var( $wpdb->prepare( "
+		SELECT $wpdb->posts.ID
+		FROM $wpdb->posts
+		LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
+		WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
+		AND $wpdb->posts.post_status = 'publish'
+		AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
+		AND $wpdb->postmeta.post_id <> %d LIMIT 1
+	 ", $sku, $product_id ) );
+
+	if ( $sku_found ) {
+		return false;
+	} else {
+		return true;
+	}
+}

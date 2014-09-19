@@ -5,10 +5,12 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin
- * @version     2.1.0
+ * @version     2.2.3
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WC_Admin_Menus' ) ) :
 
@@ -27,8 +29,9 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
-		if ( apply_filters( 'woocommerce_show_addons_page', true ) )
+		if ( apply_filters( 'woocommerce_show_addons_page', true ) ) {
 			add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
+		}
 
 		add_action( 'admin_head', array( $this, 'menu_highlight' ) );
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
@@ -39,14 +42,15 @@ class WC_Admin_Menus {
 	 * Add menu items
 	 */
 	public function admin_menu() {
-		global $menu, $woocommerce;
+		global $menu;
 
-	    if ( current_user_can( 'manage_woocommerce' ) )
-	    	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
+		if ( current_user_can( 'manage_woocommerce' ) ) {
+			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
+		}
 
-	    $main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , array( $this, 'settings_page' ), null, '55.5' );
+		$main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
 
-	    add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
+		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 	}
 
 	/**
@@ -91,7 +95,6 @@ class WC_Admin_Menus {
 	/**
 	 * Highlights the correct top level admin menu item for post type add screens.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function menu_highlight() {
@@ -120,19 +123,16 @@ class WC_Admin_Menus {
 			unset( $submenu['woocommerce'][1] );
 		}
 
-		// Sort out Orders menu when on the top level
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			foreach ( $menu as $key => $menu_item ) {
-				if ( strpos( $menu_item[0], _x('Orders', 'Admin menu name', 'woocommerce') ) === 0 ) {
+		if ( isset( $submenu['woocommerce'] ) && current_user_can( 'manage_woocommerce' ) ) {
+			foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+				if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
 
-					$menu_name = _x('Orders', 'Admin menu name', 'woocommerce');
-					$menu_name_count = '';
+					$menu_name = _x( 'Orders', 'Admin menu name', 'woocommerce' );
 					if ( $order_count = wc_processing_order_count() ) {
-						$menu_name_count = " <span class='awaiting-mod update-plugins count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
+						$menu_name .= ' <span class="awaiting-mod update-plugins count-' . $order_count . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
 					}
 
-					$menu[$key][0] = $menu_name . $menu_name_count;
-					$submenu['edit.php?post_type=shop_order'][5][0] = $menu_name;
+					$submenu['woocommerce'][ $key ] [0] = $menu_name;
 					break;
 				}
 			}
@@ -156,31 +156,33 @@ class WC_Admin_Menus {
 		$woocommerce_product = array_search( 'edit.php?post_type=product', $menu_order );
 
 		// Loop through menu order and do some rearranging
-		foreach ( $menu_order as $index => $item ) :
+		foreach ( $menu_order as $index => $item ) {
 
-			if ( ( ( 'woocommerce' ) == $item ) ) :
+			if ( ( ( 'woocommerce' ) == $item ) ) {
 				$woocommerce_menu_order[] = 'separator-woocommerce';
 				$woocommerce_menu_order[] = $item;
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
 				unset( $menu_order[$woocommerce_separator] );
 				unset( $menu_order[$woocommerce_product] );
-			elseif ( !in_array( $item, array( 'separator-woocommerce' ) ) ) :
+			} elseif ( !in_array( $item, array( 'separator-woocommerce' ) ) ) {
 				$woocommerce_menu_order[] = $item;
-			endif;
+			}
 
-		endforeach;
+		}
 
 		// Return order
 		return $woocommerce_menu_order;
 	}
 
 	/**
-	 * custom_menu_order
+	 * Custom menu order
+	 *
 	 * @return bool
 	 */
 	public function custom_menu_order() {
-		if ( ! current_user_can( 'manage_woocommerce' ) )
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return false;
+		}
 		return true;
 	}
 
@@ -188,15 +190,13 @@ class WC_Admin_Menus {
 	 * Init the reports page
 	 */
 	public function reports_page() {
-		$page = include( 'class-wc-admin-reports.php' );
-		$page->output();
+		WC_Admin_Reports::output();
 	}
 
 	/**
 	 * Init the settings page
 	 */
 	public function settings_page() {
-		include_once( 'class-wc-admin-settings.php' );
 		WC_Admin_Settings::output();
 	}
 
@@ -204,24 +204,21 @@ class WC_Admin_Menus {
 	 * Init the attributes page
 	 */
 	public function attributes_page() {
-		$page = include( 'class-wc-admin-attributes.php' );
-		$page->output();
+		WC_Admin_Attributes::output();
 	}
 
 	/**
 	 * Init the status page
 	 */
 	public function status_page() {
-		$page = include( 'class-wc-admin-status.php' );
-		$page->output();
+		WC_Admin_Status::output();
 	}
 
 	/**
 	 * Init the addons page
 	 */
 	public function addons_page() {
-		$page = include( 'class-wc-admin-addons.php' );
-		$page->output();
+		WC_Admin_Addons::output();
 	}
 }
 

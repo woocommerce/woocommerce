@@ -1,17 +1,17 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WooCommerce Admin.
  *
+ * @class 		WC_Admin
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin
  * @version     2.1.0
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-if ( ! class_exists( 'WC_Admin' ) ) :
-
 class WC_Admin {
 
 	/**
@@ -21,7 +21,6 @@ class WC_Admin {
 		add_action( 'init', array( $this, 'includes' ) );
 		add_action( 'current_screen', array( $this, 'conditonal_includes' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
-		add_action( 'wp_ajax_page_slurp', array( 'WC_Gateway_Mijireh', 'page_slurp' ) );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 	}
@@ -31,30 +30,30 @@ class WC_Admin {
 	 */
 	public function includes() {
 		// Functions
-		include( 'wc-admin-functions.php' );
-		include( 'wc-meta-box-functions.php' );
+		include_once( 'wc-admin-functions.php' );
+		include_once( 'wc-meta-box-functions.php' );
 
 		// Classes
-		include( 'class-wc-admin-post-types.php' );
-		include( 'class-wc-admin-taxonomies.php' );
+		include_once( 'class-wc-admin-post-types.php' );
+		include_once( 'class-wc-admin-taxonomies.php' );
 
-		// Classes we only need if the ajax is not-ajax
+		// Classes we only need during non-ajax requests
 		if ( ! is_ajax() ) {
 			include( 'class-wc-admin-menus.php' );
 			include( 'class-wc-admin-welcome.php' );
 			include( 'class-wc-admin-notices.php' );
 			include( 'class-wc-admin-assets.php' );
-			include( 'class-wc-admin-permalink-settings.php' );
-			include( 'class-wc-admin-editor.php' );
 
 			// Help
-			if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) )
+			if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
 				include( 'class-wc-admin-help.php' );
+			}
 		}
 
 		// Importers
-		if ( defined( 'WP_LOAD_IMPORTERS' ) )
+		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
 			include( 'class-wc-admin-importers.php' );
+		}
 	}
 
 	/**
@@ -66,6 +65,9 @@ class WC_Admin {
 		switch ( $screen->id ) {
 			case 'dashboard' :
 				include( 'class-wc-admin-dashboard.php' );
+			break;
+			case 'options-permalink' :
+				include( 'class-wc-admin-permalink-settings.php' );
 			break;
 			case 'users' :
 			case 'user' :
@@ -96,12 +98,14 @@ class WC_Admin {
 
 	/**
 	 * Preview email template
-	 * @return [type]
+	 *
+	 * @return string
 	 */
 	public function preview_emails() {
 		if ( isset( $_GET['preview_woocommerce_mail'] ) ) {
-			if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'preview-mail') )
+			if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'preview-mail') ) {
 				die( 'Security check' );
+			}
 
 			global $email_heading;
 
@@ -118,7 +122,5 @@ class WC_Admin {
 		}
 	}
 }
-
-endif;
 
 return new WC_Admin();

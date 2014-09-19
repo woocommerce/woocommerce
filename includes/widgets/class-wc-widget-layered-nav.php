@@ -169,7 +169,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					$found = false;
 
-					echo '<select id="dropdown_layered_nav_' . $taxonomy_filter . '">';
+					echo '<select class="dropdown_layered_nav_' . $taxonomy_filter . '">';
 
 					echo '<option value="">' . sprintf( __( 'Any %s', 'woocommerce' ), wc_attribute_label( $taxonomy ) ) .'</option>';
 
@@ -186,7 +186,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 							$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
 
-							set_transient( $transient_name, $_products_in_term );
+							set_transient( $transient_name, $_products_in_term, YEAR_IN_SECONDS );
 						}
 
 						$option_is_set = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
@@ -219,9 +219,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					wc_enqueue_js("
 
-						jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
+						jQuery('.dropdown_layered_nav_$taxonomy_filter').change(function(){
 
-							location.href = '" . esc_url_raw( preg_replace( '%\/page/[0-9]+%', '', add_query_arg('filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter ) ) ) ) ) . "&filter_$taxonomy_filter=' + jQuery('#dropdown_layered_nav_$taxonomy_filter').val();
+							location.href = '" . esc_url_raw( preg_replace( '%\/page/[0-9]+%', '', add_query_arg('filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter ) ) ) ) ) . "&filter_$taxonomy_filter=' + jQuery(this).val();
 
 						});
 
@@ -266,15 +266,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					// If this is an OR query, show all options so search can be expanded
 					} else {
 
-						$filtered_product_ids_excluding_self = array();
-						foreach ( WC()->query->filtered_product_ids_for_taxonomy as $attribute => $ids )
-							if ( $attribute !== $taxonomy )
-								$filtered_product_ids_excluding_self = array_merge( $filtered_product_ids_excluding_self, $ids );
+							$count = sizeof( array_intersect( $_products_in_term, WC()->query->unfiltered_product_ids ) );
 
-						$count = sizeof( array_intersect( $_products_in_term, $filtered_product_ids_excluding_self ) );
-
-						if ( $count > 0 )
-							$found = true;
+							if ( $count > 0 )
+								$found = true;
 
 					}
 
@@ -328,6 +323,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					if ( isset( $_GET['max_price'] ) )
 						$link = add_query_arg( 'max_price', $_GET['max_price'], $link );
+
+					// Orderby
+					if ( isset( $_GET['orderby'] ) )
+						$link = add_query_arg( 'orderby', $_GET['orderby'], $link );
 
 					// Current Filter = this widget
 					if ( isset( $_chosen_attributes[ $taxonomy ] ) && is_array( $_chosen_attributes[ $taxonomy ]['terms'] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) ) {
@@ -384,5 +383,3 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		}
 	}
 }
-
-register_widget( 'WC_Widget_Layered_Nav' );

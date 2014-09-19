@@ -132,15 +132,8 @@ class WC_API_Server {
 			$this->method = strtoupper( $_GET['_method'] );
 		}
 
-		// determine type of request/response and load handler, JSON by default
-		if ( $this->is_json_request() )
-			$handler_class = 'WC_API_JSON_Handler';
-
-		elseif ( $this->is_xml_request() )
-			$handler_class = 'WC_API_XML_Handler';
-
-		else
-			$handler_class = apply_filters( 'woocommerce_api_default_response_handler', 'WC_API_JSON_Handler', $this->path, $this );
+		// load response handler
+		$handler_class = apply_filters( 'woocommerce_api_default_response_handler', 'WC_API_JSON_Handler', $this->path, $this );
 
 		$this->handler = new $handler_class();
 	}
@@ -313,7 +306,7 @@ class WC_API_Server {
 				break;
 
 			default:
-				return new WP_Error( 'woocommerce_api_unsupported_method', __( 'Unsupported request method' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_api_unsupported_method', __( 'Unsupported request method', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		foreach ( $this->get_routes() as $route => $handlers ) {
@@ -330,7 +323,7 @@ class WC_API_Server {
 					continue;
 
 				if ( ! is_callable( $callback ) )
-					return new WP_Error( 'woocommerce_api_invalid_handler', __( 'The handler for the route is invalid' ), array( 'status' => 500 ) );
+					return new WP_Error( 'woocommerce_api_invalid_handler', __( 'The handler for the route is invalid', 'woocommerce' ), array( 'status' => 500 ) );
 
 				$args = array_merge( $args, $this->params['GET'] );
 				if ( $method & self::METHOD_POST ) {
@@ -366,7 +359,22 @@ class WC_API_Server {
 			}
 		}
 
-		return new WP_Error( 'woocommerce_api_no_route', __( 'No route was found matching the URL and request method' ), array( 'status' => 404 ) );
+		return new WP_Error( 'woocommerce_api_no_route', __( 'No route was found matching the URL and request method', 'woocommerce' ), array( 'status' => 404 ) );
+	}
+
+	/**
+	 * urldecode deep.
+	 *
+	 * @since  2.2
+	 * @param  string/array $value Data to decode with urldecode.
+	 * @return string/array        Decoded data.
+	 */
+	protected function urldecode_deep( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( array( $this, 'urldecode_deep' ), $value );
+		} else {
+			return urldecode( $value );
+		}
 	}
 
 	/**
@@ -375,8 +383,8 @@ class WC_API_Server {
 	 * Takes a callback and a list of available params, then filters and sorts
 	 * by the parameters the method actually needs, using the Reflection API
 	 *
-	 * @since 2.1
-	 * @param array $callback the endpoint callback
+	 * @since 2.2
+	 * @param callable|array $callback the endpoint callback
 	 * @param array $provided the provided request parameters
 	 * @return array
 	 */
@@ -392,8 +400,12 @@ class WC_API_Server {
 		foreach ( $wanted as $param ) {
 			if ( isset( $provided[ $param->getName() ] ) ) {
 				// We have this parameters in the list to choose from
+				if ( 'data' == $param->getName() ) {
+					$ordered_parameters[] = $provided[ $param->getName() ];
+					continue;
+				}
 
-				$ordered_parameters[] = is_array( $provided[ $param->getName() ] ) ? array_map( 'urldecode', $provided[ $param->getName() ] ) : urldecode( $provided[ $param->getName() ] );
+				$ordered_parameters[] = $this->urldecode_deep( $provided[ $param->getName() ] );
 			}
 			elseif ( $param->isDefaultValueAvailable() ) {
 				// We don't have this parameter, but it's optional
@@ -401,7 +413,7 @@ class WC_API_Server {
 			}
 			else {
 				// We don't have this parameter and it wasn't optional, abort!
-				return new WP_Error( 'woocommerce_api_missing_callback_param', sprintf( __( 'Missing parameter %s' ), $param->getName() ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_api_missing_callback_param', sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param->getName() ), array( 'status' => 400 ) );
 			}
 		}
 		return $ordered_parameters;
@@ -425,15 +437,16 @@ class WC_API_Server {
 			'wc_version'  => WC()->version,
 			'routes'      => array(),
 			'meta'        => array(
-				'timezone'       => wc_timezone_string(),
-				'currency'       => get_woocommerce_currency(),
-				'currency_format'   => get_woocommerce_currency_symbol(),
-				'tax_included'   => ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) ),
-				'weight_unit'    => get_option( 'woocommerce_weight_unit' ),
-				'dimension_unit' => get_option( 'woocommerce_dimension_unit' ),
-				'ssl_enabled'    => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
-				'links'          => array(
-					'help'    => 'http://docs.woothemes.com/document/woocommerce-rest-api/',
+				'timezone'           => wc_timezone_string(),
+				'currency'           => get_woocommerce_currency(),
+				'currency_format'    => get_woocommerce_currency_symbol(),
+				'tax_included'       => ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) ),
+				'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
+				'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
+				'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
+				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
+				'links'              => array(
+					'help' => 'http://docs.woocommercev2.apiary.io/',
 				),
 			),
 		) );
@@ -576,7 +589,7 @@ class WC_API_Server {
 	}
 
 	/**
-	 * Returns the request URL with the page query parmeter set to the specified page
+	 * Returns the request URL with the page query parameter set to the specified page
 	 *
 	 * @since 2.1
 	 * @param int $page
@@ -590,8 +603,10 @@ class WC_API_Server {
 		// add provided page query param
 		$request = urldecode( add_query_arg( 'page', $page, $request ) );
 
-		// return full URL
-		return get_woocommerce_api_url( str_replace( '/wc-api/v1/', '', $request ) );
+		// get the home host
+		$host = parse_url( get_home_url(), PHP_URL_HOST );
+
+		return set_url_scheme( "http://{$host}{$request}" );
 	}
 
 	/**
@@ -705,43 +720,4 @@ class WC_API_Server {
 		return $headers;
 	}
 
-	/**
-	 * Check if the current request accepts a JSON response by checking the endpoint suffix (.json) or
-	 * the HTTP ACCEPT header
-	 *
-	 * @since 2.1
-	 * @return bool
-	 */
-	private function is_json_request() {
-
-		// check path
-		if ( false !== stripos( $this->path, '.json' ) )
-			return true;
-
-		// check ACCEPT header, only 'application/json' is acceptable, see RFC 4627
-		if ( isset( $this->headers['ACCEPT'] ) && 'application/json' == $this->headers['ACCEPT'] )
-			return true;
-
-		return false;
-	}
-
-	/**
-	 * Check if the current request accepts an XML response by checking the endpoint suffix (.xml) or
-	 * the HTTP ACCEPT header
-	 *
-	 * @since 2.1
-	 * @return bool
-	 */
-	private function is_xml_request() {
-
-		// check path
-		if ( false !== stripos( $this->path, '.xml' ) )
-			return true;
-
-		// check headers, 'application/xml' or 'text/xml' are acceptable, see RFC 2376
-		if ( isset( $this->headers['ACCEPT'] ) && ( 'application/xml' == $this->headers['ACCEPT'] || 'text/xml' == $this->headers['ACCEPT'] ) )
-			return true;
-
-		return false;
-	}
 }

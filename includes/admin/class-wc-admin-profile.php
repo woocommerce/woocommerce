@@ -236,7 +236,7 @@ class WC_Admin_Profile {
 
 		if ( current_user_can( 'edit_user', $user_id ) ) {
 
-			$user = wp_get_current_user();
+			$user = get_userdata( $user_id );
 
 			// creating/deleting key
 			if ( isset( $_POST['woocommerce_generate_api_key'] ) ) {
@@ -268,7 +268,14 @@ class WC_Admin_Profile {
 				// permissions
 				if ( empty( $user->woocommerce_api_key_permissions ) ) {
 
-					$permissions = ( isset( $_POST['woocommerce_api_key_permissions'] ) && ! in_array( $_POST['woocommerce_api_key_permissions'], array( 'read', 'write', 'read_write' ) ) ) ? 'read' : $_POST['woocommerce_api_key_permissions'];
+					if ( isset( $_POST['woocommerce_api_key_permissions'] ) ) {
+
+						$permissions = ( in_array( $_POST['woocommerce_api_key_permissions'], array( 'read', 'write', 'read_write' ) ) ) ? $_POST['woocommerce_api_key_permissions'] : 'read';
+
+					} else {
+
+						$permissions = 'read';
+					}
 
 					update_user_meta( $user_id, 'woocommerce_api_key_permissions', $permissions );
 

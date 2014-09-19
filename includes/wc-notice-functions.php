@@ -13,14 +13,14 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
- * Get the count of notices added, either for all notices (default) or for one particular notice type specified
- * by $notice_type.
+ * Get the count of notices added, either for all notices (default) or for one
+ * particular notice type specified by $notice_type.
  *
- * @param  string $notice_type The name of the notice type - either error, success or notice. [optional]
+ * @since 2.1
+ * @param string $notice_type The name of the notice type - either error, success or notice. [optional]
  * @return int
  */
 function wc_notice_count( $notice_type = '' ) {
-
 	$notice_count = 0;
 	$all_notices  = WC()->session->get( 'wc_notices', array() );
 
@@ -40,18 +40,34 @@ function wc_notice_count( $notice_type = '' ) {
 }
 
 /**
+ * Check if a notice has already been added
+ *
+ * @since 2.1
+ * @param string $message The text to display in the notice.
+ * @param string $notice_type The singular name of the notice type - either error, success or notice. [optional]
+ * @return bool
+ */
+function wc_has_notice( $message, $notice_type = 'success' ) {
+	$notices = WC()->session->get( 'wc_notices', array() );
+	$notices = isset( $notices[ $notice_type ] ) ? $notices[ $notice_type ] : array();
+	return array_search( $message, $notices ) !== false;
+}
+
+/**
  * Add and store a notice
  *
- * @param  string $message The text to display in the notice.
- * @param  string $notice_type The singular name of the notice type - either error, success or notice. [optional]
+ * @since 2.1
+ * @param string $message The text to display in the notice.
+ * @param string $notice_type The singular name of the notice type - either error, success or notice. [optional]
  */
 function wc_add_notice( $message, $notice_type = 'success' ) {
 
 	$notices = WC()->session->get( 'wc_notices', array() );
 
 	// Backward compatibility
-	if ( 'success' === $notice_type )
+	if ( 'success' === $notice_type ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
+	}
 
 	$notices[$notice_type][] = apply_filters( 'woocommerce_add_' . $notice_type, $message );
 
@@ -93,13 +109,15 @@ add_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
 /**
  * Print a single notice immediately
  *
- * @param  string $message The text to display in the notice.
- * @param  string $notice_type The singular name of the notice type - either error, success or notice. [optional]
+ * @since 2.1
+ * @param string $message The text to display in the notice.
+ * @param string $notice_type The singular name of the notice type - either error, success or notice. [optional]
  */
 function wc_print_notice( $message, $notice_type = 'success' ) {
 
-	if ( 'success' === $notice_type )
+	if ( 'success' === $notice_type ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
+	}
 
 	wc_get_template( "notices/{$notice_type}.php", array(
 		'messages' => array( apply_filters( 'woocommerce_add_' . $notice_type, $message ) )
@@ -108,7 +126,9 @@ function wc_print_notice( $message, $notice_type = 'success' ) {
 
 /**
  * Returns all queued notices, optionally filtered by a notice type.
- * @param  string $notice_type The singular name of the notice type - either error, success or notice. [optional]
+ *
+ * @since 2.1
+ * @param string $notice_type The singular name of the notice type - either error, success or notice. [optional]
  * @return array|mixed
  */
 function wc_get_notices( $notice_type = '' ) {

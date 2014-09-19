@@ -34,20 +34,19 @@ class WC_Shipping {
 	var $packages					= array();
 
 	/**
-	 * @var WooCommerce The single instance of the class
+	 * @var WC_Shipping The single instance of the class
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
 
 	/**
-	 * Main WooCommerce Instance
+	 * Main WC_Shipping Instance
 	 *
-	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
+	 * Ensures only one instance of WC_Shipping is loaded or can be loaded.
 	 *
 	 * @since 2.1
 	 * @static
-	 * @see WC()
-	 * @return Main WooCommerce instance
+	 * @return WC_Shipping Main instance
 	 */
 	public static function instance() {
 		if ( is_null( self::$_instance ) )
@@ -61,7 +60,7 @@ class WC_Shipping {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -70,7 +69,7 @@ class WC_Shipping {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -102,9 +101,10 @@ class WC_Shipping {
 	 * Methods are sorted into their user-defined order after being loaded.
 	 *
 	 * @access public
+	 * @param array $package
 	 * @return array
 	 */
-	public function load_shipping_methods( $package = false ) {
+	public function load_shipping_methods( $package = array() ) {
 
 		$this->unregister_shipping_methods();
 
@@ -132,6 +132,7 @@ class WC_Shipping {
 	 * Register a shipping method for use in calculations.
 	 *
 	 * @access public
+	 * @param  object|string $method Either the name of the method's class, or an instance of the method's class
 	 * @return void
 	 */
 	public function register_shipping_method( $method ) {
@@ -336,9 +337,10 @@ class WC_Shipping {
 		if ( ! $package ) return false;
 
 		// Check if we need to recalculate shipping for this package
-		$package_hash = 'wc_ship_' . md5( json_encode( $package ) );
+		$package_hash   = 'wc_ship_' . md5( json_encode( $package ) );
+		$status_options = get_option( 'woocommerce_status_options', array() );
 
-		if ( false === ( $stored_rates = get_transient( $package_hash ) ) ) {
+		if ( false === ( $stored_rates = get_transient( $package_hash ) ) || ( ! empty( $status_options['shipping_debug_mode'] ) && current_user_can( 'manage_options' ) ) ) {
 
 			// Calculate shipping method rates
 			$package['rates'] = array();

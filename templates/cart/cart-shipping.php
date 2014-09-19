@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				echo wp_kses_post( wc_cart_totals_shipping_method_label( $method ) ); ?>
 				<input type="hidden" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
 
-			<?php elseif ( get_option('woocommerce_shipping_method_format') == 'select' ) : ?>
+			<?php elseif ( get_option( 'woocommerce_shipping_method_format' ) === 'select' ) : ?>
 
 				<select name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" class="shipping_method">
 					<?php foreach ( $available_methods as $method ) : ?>
@@ -50,9 +50,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<?php elseif ( ! WC()->customer->get_shipping_state() || ! WC()->customer->get_shipping_postcode() ) : ?>
 
-			<?php if ( is_cart() ) : ?>
+			<?php if ( is_cart() && get_option( 'woocommerce_enable_shipping_calc' ) === 'yes' ) : ?>
 
-				<p><?php _e( 'No shipping methods were found; please recalculate your shipping or continue to checkout and enter your full address to see if there is shipping available to your location.', 'woocommerce' ); ?></p>
+				<p><?php _e( 'Please use the shipping calculator to see available shipping methods.', 'woocommerce' ); ?></p>
+
+			<?php elseif ( is_cart() ) : ?>
+
+				<p><?php _e( 'Please continue to the checkout and enter your full address to see if there are any available shipping methods.', 'woocommerce' ); ?></p>
 
 			<?php else : ?>
 
@@ -65,17 +69,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			<?php if ( is_cart() ) : ?>
 
 				<?php echo apply_filters( 'woocommerce_cart_no_shipping_available_html',
-					'<div class="woocommerce-error"><p>' .
-					sprintf( __( 'Sorry, shipping is unavailable %s.', 'woocommerce' ) . ' ' . __( 'If you require assistance or wish to make alternate arrangements please contact us.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->countries->countries[ WC()->customer->get_shipping_country() ] ) .
-					'</p></div>'
+					'<div class="woocommerce-info"><p>' . __( 'There doesn&lsquo;t seem to be any available shipping methods. Please double check your address, or contact us if you need any help.', 'woocommerce' ) . '</p></div>'
 				); ?>
 
 			<?php else : ?>
 
 				<?php echo apply_filters( 'woocommerce_no_shipping_available_html',
-					'<p>' .
-					sprintf( __( 'Sorry, shipping is unavailable %s.', 'woocommerce' ) . ' ' . __( 'If you require assistance or wish to make alternate arrangements please contact us.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->countries->countries[ WC()->customer->get_shipping_country() ] ) .
-					'</p>'
+					'<p>' . __( 'There doesn&lsquo;t seem to be any available shipping methods. Please double check your address, or contact us if you need any help.', 'woocommerce' ) . '</p>'
 				); ?>
 
 			<?php endif; ?>

@@ -4,12 +4,14 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @version     2.1.7
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $woocommerce, $product, $post;
+global $product, $post;
+
+$parent_product_post = $post;
 
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
@@ -18,7 +20,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 		<tbody>
 			<?php
 				foreach ( $grouped_products as $product_id ) :
-					$product = get_product( $product_id );
+					$product = wc_get_product( $product_id );
 					$post    = $product->post;
 					setup_postdata( $post );
 					?>
@@ -46,8 +48,10 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							<?php
 								echo $product->get_price_html();
 
-								if ( ( $availability = $product->get_availability() ) && $availability['availability'] )
-									echo apply_filters( 'woocommerce_stock_html', '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . esc_html( $availability['availability'] ) . '</p>', $availability['availability'] );
+								if ( $availability = $product->get_availability() ) {
+									$availability_html = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . esc_html( $availability['availability'] ) . '</p>';
+									echo apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $product );
+								}
 							?>
 						</td>
 					</tr>
@@ -55,8 +59,9 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 				endforeach;
 
 				// Reset to parent grouped product
-				wp_reset_postdata();
-				$product = get_product( $post->ID );
+				$post    = $parent_product_post;
+				$product = wc_get_product( $parent_product_post->ID );
+				setup_postdata( $parent_product_post );
 			?>
 		</tbody>
 	</table>

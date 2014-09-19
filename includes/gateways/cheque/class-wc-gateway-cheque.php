@@ -39,7 +39,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
     	add_action( 'woocommerce_thankyou_cheque', array( $this, 'thankyou_page' ) );
 
     	// Customer Emails
-    	add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 2 );
+    	add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
     }
 
     /**
@@ -92,13 +92,12 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
      * @access public
      * @param WC_Order $order
      * @param bool $sent_to_admin
+     * @param bool $plain_text
      */
-	public function email_instructions( $order, $sent_to_admin ) {
-    	if ( $sent_to_admin || $order->status !== 'on-hold' || $order->payment_method !== 'cheque' )
-    		return;
-
-		if ( $this->instructions )
-        	echo wpautop( wptexturize( $this->instructions ) );
+	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
+        if ( $this->instructions && ! $sent_to_admin && 'cheque' === $order->payment_method && $order->has_status( 'on-hold' ) ) {
+			echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
+		}
 	}
 
     /**
@@ -109,7 +108,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
      */
 	public function process_payment( $order_id ) {
 
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		// Mark as on-hold (we're awaiting the cheque)
 		$order->update_status( 'on-hold', __( 'Awaiting cheque payment', 'woocommerce' ) );

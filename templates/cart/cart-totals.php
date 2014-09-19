@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 		<?php foreach ( WC()->cart->get_coupons( 'cart' ) as $code => $coupon ) : ?>
 			<tr class="cart-discount coupon-<?php echo esc_attr( $code ); ?>">
-				<th><?php echo esc_html( $code ); ?></th>
+				<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
 				<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
 			</tr>
 		<?php endforeach; ?>
@@ -57,14 +57,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			<?php else : ?>
 				<tr class="tax-total">
 					<th><?php echo esc_html( WC()->countries->tax_or_vat() ); ?></th>
-					<td><?php echo wc_price( WC()->cart->get_taxes_total() ); ?></td>
+					<td><?php echo wc_cart_totals_taxes_total_html(); ?></td>
 				</tr>
 			<?php endif; ?>
 		<?php endif; ?>
 
 		<?php foreach ( WC()->cart->get_coupons( 'order' ) as $code => $coupon ) : ?>
 			<tr class="order-discount coupon-<?php echo esc_attr( $code ); ?>">
-				<th><?php echo esc_html( $code ); ?></th>
+				<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
 				<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
 			</tr>
 		<?php endforeach; ?>

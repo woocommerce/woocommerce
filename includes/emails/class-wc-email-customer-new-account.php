@@ -80,7 +80,9 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'user_login'         => $this->user_login,
 			'user_pass'          => $this->user_pass,
 			'blogname'           => $this->get_blogname(),
-			'password_generated' => $this->password_generated
+			'password_generated' => $this->password_generated,
+			'sent_to_admin' => false,
+			'plain_text'    => false
 		) );
 		return ob_get_clean();
 	}
@@ -98,7 +100,9 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'user_login'         => $this->user_login,
 			'user_pass'          => $this->user_pass,
 			'blogname'           => $this->get_blogname(),
-			'password_generated' => $this->password_generated
+			'password_generated' => $this->password_generated,
+			'sent_to_admin' => false,
+			'plain_text'    => true
 		) );
 		return ob_get_clean();
 	}

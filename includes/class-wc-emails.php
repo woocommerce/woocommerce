@@ -37,20 +37,19 @@ class WC_Emails {
 	private $_content_type;
 
 	/**
-	 * @var WooCommerce The single instance of the class
+	 * @var WC_Emails The single instance of the class
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
 
 	/**
-	 * Main WooCommerce Instance
+	 * Main WC_Emails Instance
 	 *
-	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
+	 * Ensures only one instance of WC_Emails is loaded or can be loaded.
 	 *
 	 * @since 2.1
 	 * @static
-	 * @see WC()
-	 * @return Main WooCommerce instance
+	 * @return WC_Emails Main instance
 	 */
 	public static function instance() {
 		if ( is_null( self::$_instance ) )
@@ -64,7 +63,7 @@ class WC_Emails {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -73,7 +72,7 @@ class WC_Emails {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?' ), '2.1' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -191,7 +190,7 @@ class WC_Emails {
 	 *
 	 * @access public
 	 * @param mixed $email_heading
-	 * @param mixed $message
+	 * @param string $message
 	 * @return string
 	 */
 	function wrap_message( $email_heading, $message, $plain_text = false ) {
@@ -245,7 +244,6 @@ class WC_Emails {
 	 * Prepare and send the customer invoice email on demand.
 	 *
 	 * @access public
-	 * @param mixed $pay_for_order
 	 * @return void
 	 */
 	function customer_invoice( $order ) {
@@ -300,13 +298,19 @@ class WC_Emails {
 
 			if ( $plain_text ) {
 
-				foreach ( $meta as $key => $value )
-					echo $key . ': ' . $value . "\n";
+				foreach ( $meta as $key => $value ) {
+					if ( $value ) {
+						echo $key . ': ' . $value . "\n";
+					}
+				}
 
 			} else {
 
-				foreach ( $meta as $key => $value )
-					echo '<p><strong>' . $key . ':</strong> ' . $value . '</p>';
+				foreach ( $meta as $key => $value ) {
+					if ( $value ) {
+						echo '<p><strong>' . $key . ':</strong> ' . $value . '</p>';
+					}
+				}
 			}
 		}
 	}
@@ -337,7 +341,7 @@ class WC_Emails {
 		$headers = apply_filters('woocommerce_email_headers', '', 'low_stock', $product);
 
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'low_stock', $product);
+		$attachments = apply_filters('woocommerce_email_attachments', array(), 'low_stock', $product);
 
 		// Send the mail
 		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
@@ -369,7 +373,7 @@ class WC_Emails {
 		$headers = apply_filters('woocommerce_email_headers', '', 'no_stock', $product);
 
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'no_stock', $product);
+		$attachments = apply_filters('woocommerce_email_attachments', array(), 'no_stock', $product);
 
 		// Send the mail
 		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
@@ -407,14 +411,14 @@ class WC_Emails {
 		else
 			$title = sprintf(__( 'Product #%s - %s', 'woocommerce' ), $product->id, get_the_title($product->id)) . $sku;
 
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 		$message = sprintf(__( '%s units of %s have been backordered in order %s.', 'woocommerce' ), $quantity, $title, $order->get_order_number() );
 
 		//	CC, BCC, additional headers
 		$headers = apply_filters('woocommerce_email_headers', '', 'backorder', $args);
 
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'backorder', $args);
+		$attachments = apply_filters('woocommerce_email_attachments', array(), 'backorder', $args);
 
 		// Send the mail
 		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );

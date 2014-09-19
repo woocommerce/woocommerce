@@ -54,22 +54,23 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	function trigger( $order ) {
 
 		if ( ! is_object( $order ) ) {
-			$order = new WC_Order( absint( $order ) );
+			$order = wc_get_order( absint( $order ) );
 		}
 
 		if ( $order ) {
 			$this->object 		= $order;
 			$this->recipient	= $this->object->billing_email;
 
-			$this->find[] = '{order_date}';
-			$this->replace[] = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
-
-			$this->find[] = '{order_number}';
-			$this->replace[] = $this->object->get_order_number();
+			$this->find['order-date']      = '{order_date}';
+			$this->find['order-number']    = '{order_number}';
+			
+			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace['order-number'] = $this->object->get_order_number();
 		}
 
-		if ( ! $this->get_recipient() )
+		if ( ! $this->get_recipient() ) {
 			return;
+		}
 
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 	}
@@ -81,10 +82,11 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @return string
 	 */
 	function get_subject() {
-		if ( $this->object->status == 'processing' || $this->object->status == 'completed' )
+		if ( $this->object->has_status( array( 'processing', 'completed' ) ) ) {
 			return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $this->subject_paid ), $this->object );
-		else
+		} else {
 			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $this->subject ), $this->object );
+		}
 	}
 
 	/**
@@ -94,10 +96,11 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	 * @return string
 	 */
 	function get_heading() {
-		if ( $this->object->status == 'processing' || $this->object->status == 'completed' )
+		if ( $this->object->has_status( array( 'completed', 'processing' ) ) ) {
 			return apply_filters( 'woocommerce_email_heading_customer_invoice_paid', $this->format_string( $this->heading_paid ), $this->object );
-		else
+		} else {
 			return apply_filters( 'woocommerce_email_heading_customer_invoice', $this->format_string( $this->heading ), $this->object );
+		}
 	}
 
 	/**
@@ -110,7 +113,9 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		ob_start();
 		wc_get_template( $this->template_html, array(
 			'order' 		=> $this->object,
-			'email_heading' => $this->get_heading()
+			'email_heading' => $this->get_heading(),
+			'sent_to_admin' => false,
+			'plain_text'    => false
 		) );
 		return ob_get_clean();
 	}
@@ -125,7 +130,9 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		ob_start();
 		wc_get_template( $this->template_plain, array(
 			'order' 		=> $this->object,
-			'email_heading' => $this->get_heading()
+			'email_heading' => $this->get_heading(),
+			'sent_to_admin' => false,
+			'plain_text'    => true
 		) );
 		return ob_get_clean();
 	}

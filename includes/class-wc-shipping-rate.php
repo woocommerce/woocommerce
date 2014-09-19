@@ -11,7 +11,9 @@
  * @author 		WooThemes
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class WC_Shipping_Rate {
 
@@ -47,8 +49,9 @@ class WC_Shipping_Rate {
 	 */
 	function get_shipping_tax() {
 		$taxes = 0;
-		if ( $this->taxes && sizeof( $this->taxes ) > 0 )
+		if ( $this->taxes && sizeof( $this->taxes ) > 0 && ! WC()->customer->is_vat_exempt() ) {
 			$taxes = array_sum( $this->taxes );
+		}
 		return $taxes;
 	}
 }

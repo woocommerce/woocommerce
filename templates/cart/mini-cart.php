@@ -10,8 +10,6 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-global $woocommerce;
 ?>
 
 <?php do_action( 'woocommerce_before_mini_cart' ); ?>
@@ -33,10 +31,13 @@ global $woocommerce;
 
 					?>
 					<li>
+					<?php if ( ! $_product->is_visible() ) { ?>
+						<?php echo str_replace( array( 'http:', 'https:' ), '', $thumbnail ) . $product_name; ?>
+					<?php } else { ?>
 						<a href="<?php echo get_permalink( $product_id ); ?>">
-							<?php echo $thumbnail . $product_name; ?>
+							<?php echo str_replace( array( 'http:', 'https:' ), '', $thumbnail ) . $product_name; ?>
 						</a>
-
+					<?php } ?>
 						<?php echo WC()->cart->get_item_data( $cart_item ); ?>
 
 						<?php echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $product_price ) . '</span>', $cart_item, $cart_item_key ); ?>

@@ -11,7 +11,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-global $woocommerce, $wp_query;
+global $wp_query;
 
 if ( ! woocommerce_products_will_display() )
 	return;
@@ -29,7 +29,7 @@ if ( ! woocommerce_products_will_display() )
 	} elseif ( $total <= $per_page || -1 == $per_page ) {
 		printf( __( 'Showing all %d results', 'woocommerce' ), $total );
 	} else {
-		printf( _x( 'Showing %1$d–%2$d of %3$d results', '%1$d = first, %2$d = last, %3$d = total', 'woocommerce' ), $first, $last, $total );
+		printf( _x( 'Showing %1$d&ndash;%2$d of %3$d results', '%1$d = first, %2$d = last, %3$d = total', 'woocommerce' ), $first, $last, $total );
 	}
 	?>
 </p>

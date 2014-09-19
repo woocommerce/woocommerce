@@ -4,27 +4,27 @@
  *
  * @author		WooThemes
  * @package		WooCommerce/Templates/Emails/Plain
- * @version		2.0.0
+ * @version		2.2.0
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 echo $email_heading . "\n\n";
 
-if ( $order->status == 'pending' )
+if ( $order->has_status( 'pending' ) )
 	echo sprintf( __( 'An order has been created for you on %s. To pay for this order please use the following link: %s', 'woocommerce' ), get_bloginfo( 'name' ), $order->get_checkout_payment_url() ) . "\n\n";
 
 echo "****************************************************\n\n";
 
-do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin = false, $plain_text = true );
+do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text );
 
 echo sprintf( __( 'Order number: %s', 'woocommerce'), $order->get_order_number() ) . "\n";
 echo sprintf( __( 'Order date: %s', 'woocommerce'), date_i18n( wc_date_format(), strtotime( $order->order_date ) ) ) . "\n";
 
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin = false, $plain_text = true );
+do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text );
 
 echo "\n";
 
-switch ( $order->status ) {
+switch ( $order->get_status() ) {
 	case "completed" :
 		echo $order->email_order_items_table( $order->is_download_permitted(), false, true, '', '', true );
 	break;
@@ -46,6 +46,6 @@ if ( $totals = $order->get_order_item_totals() ) {
 
 echo "\n****************************************************\n\n";
 
-do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin = false, $plain_text = true );
+do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
 
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );

@@ -49,7 +49,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 	 * @return void
 	 */
 	 public function widget( $args, $instance ) {
-		global $comments, $comment, $woocommerce;
+		global $comments, $comment;
 
 		if ( $this->get_cached_widget( $args ) )
 			return;
@@ -68,7 +68,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 			foreach ( (array) $comments as $comment ) {
 
-				$_product = get_product( $comment->comment_post_ID );
+				$_product = wc_get_product( $comment->comment_post_ID );
 
 				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
@@ -98,5 +98,3 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		$this->cache_widget( $args, $content );
 	}
 }
-
-register_widget( 'WC_Widget_Recent_Reviews' );

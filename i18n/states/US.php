@@ -2,9 +2,9 @@
 /**
  * United States
  *
- * @author 		WooThemes
- * @category 	i18n
- * @package 	WooCommerce/i18n
+ * @author      WooThemes
+ * @category    i18n
+ * @package     WooCommerce/i18n
  * @version     2.0.0
  */
 global $states;
@@ -20,7 +20,7 @@ $states['US'] = array(
 	'DE' => __( 'Delaware', 'woocommerce' ),
 	'DC' => __( 'District Of Columbia', 'woocommerce' ),
 	'FL' => __( 'Florida', 'woocommerce' ),
-	'GA' => __( 'Georgia', 'woocommerce' ),
+	'GA' => _x( 'Georgia', 'US state of Georgia', 'woocommerce' ),
 	'HI' => __( 'Hawaii', 'woocommerce' ),
 	'ID' => __( 'Idaho', 'woocommerce' ),
 	'IL' => __( 'Illinois', 'woocommerce' ),

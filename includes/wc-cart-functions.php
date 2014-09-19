@@ -34,25 +34,20 @@ add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_c
  * @return void
  */
 function wc_empty_cart() {
-	global $woocommerce;
-
-	if ( ! isset( WC()->cart ) || WC()->cart == '' )
+	if ( ! isset( WC()->cart ) || WC()->cart == '' ) {
 		WC()->cart = new WC_Cart();
-
+	}
 	WC()->cart->empty_cart( false );
 }
-add_action( 'wp_logout', 'wc_empty_cart' );
-
 
 /**
  * Load the cart upon login
  *
  * @param mixed $user_login
- * @param mixed $user
+ * @param integer $user
  * @return void
  */
 function wc_load_persistent_cart( $user_login, $user = 0 ) {
-	global $woocommerce;
 
 	if ( ! $user )
 		return;
@@ -70,11 +65,10 @@ add_action( 'wp_login', 'wc_load_persistent_cart', 1, 2 );
  * Add to cart messages.
  *
  * @access public
- * @param int $product_id
+ * @param int|array $product_id
  * @return void
  */
 function wc_add_to_cart_message( $product_id ) {
-	global $woocommerce;
 
 	if ( is_array( $product_id ) ) {
 
@@ -103,7 +97,7 @@ function wc_add_to_cart_message( $product_id ) {
 
 	endif;
 
-	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message ) );
+	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
 }
 
 /**
@@ -113,7 +107,7 @@ function wc_add_to_cart_message( $product_id ) {
  * @return void
  */
 function wc_clear_cart_after_payment() {
-	global $woocommerce, $wp;
+	global $wp;
 
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
@@ -125,7 +119,7 @@ function wc_clear_cart_after_payment() {
 			$order_key = '';
 
 		if ( $order_id > 0 ) {
-			$order = new WC_Order( $order_id );
+			$order = wc_get_order( $order_id );
 
 			if ( $order->order_key == $order_key ) {
 				WC()->cart->empty_cart();
@@ -136,12 +130,13 @@ function wc_clear_cart_after_payment() {
 
 	if ( WC()->session->order_awaiting_payment > 0 ) {
 
-		$order = new WC_Order( WC()->session->order_awaiting_payment );
+		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order->id > 0 ) {
 			// If the order has not failed, or is not pending, the order must have gone through
-			if ( $order->status != 'failed' && $order->status != 'pending' )
+			if ( ! $order->has_status( array( 'failed', 'pending' ) ) ) {
 				WC()->cart->empty_cart();
+			}
 		}
 	}
 }
@@ -174,25 +169,61 @@ function wc_cart_totals_shipping_html() {
 }
 
 /**
- * Get a coupon value
+ * Get taxes total
  *
  * @access public
- * @param string $code
  * @return void
  */
-function wc_cart_totals_coupon_html( $coupon ) {
+function wc_cart_totals_taxes_total_html() {
+	echo apply_filters( 'woocommerce_cart_totals_taxes_total_html', wc_price( WC()->cart->get_taxes_total() ) );
+}
+
+/**
+ * Get a coupon label
+ *
+ * @access public
+ * @param string $coupon
+ * @return void
+ */
+function wc_cart_totals_coupon_label( $coupon ) {
 	if ( is_string( $coupon ) )
 		$coupon = new WC_Coupon( $coupon );
 
+	echo apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:', 'woocommerce' ) . ' ' . $coupon->code ), $coupon );
+}
+
+/**
+ * Get a coupon value
+ *
+ * @access public
+ * @param string $coupon
+ * @return void
+ */
+function wc_cart_totals_coupon_html( $coupon ) {
+	if ( is_string( $coupon ) ) {
+		$coupon = new WC_Coupon( $coupon );
+    }
+
 	$value  = array();
 
-	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) )
-		$value[] = '-' . wc_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
+	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) ) {
+		$discount_html = '-' . wc_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
+	} else {
+		$discount_html = '';
+	}
 
-	if ( $coupon->enable_free_shipping() )
+	$value[] = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_html, $coupon );
+
+	if ( $coupon->enable_free_shipping() ) {
 		$value[] = __( 'Free shipping coupon', 'woocommerce' );
+    }
 
-	echo implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+    // get rid of empty array elements
+    $value = array_filter( $value );
+
+	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+
+	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
 }
 
 /**
@@ -205,7 +236,7 @@ function wc_cart_totals_order_total_html() {
 	echo '<strong>' . WC()->cart->get_total() . '</strong> ';
 
 	// If prices are tax inclusive, show taxes here
-	if (  WC()->cart->tax_display_cart == 'incl' ) {
+	if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && WC()->cart->tax_display_cart == 'incl' ) {
 		$tax_string_array = array();
 
 		if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
@@ -227,7 +258,9 @@ function wc_cart_totals_order_total_html() {
  * @return void
  */
 function wc_cart_totals_fee_html( $fee ) {
-	echo WC()->cart->tax_display_cart == 'excl' ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );
+	$cart_totals_fee_html = ( 'excl' == WC()->cart->tax_display_cart ) ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );
+
+	echo apply_filters( 'woocommerce_cart_totals_fee_html', $cart_totals_fee_html, $fee );
 }
 
 /**

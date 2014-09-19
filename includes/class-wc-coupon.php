@@ -24,6 +24,7 @@ class WC_Coupon {
 	const E_WC_COUPON_NOT_APPLICABLE                 = 109;
 	const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 110;
 	const E_WC_COUPON_PLEASE_ENTER                   = 111;
+	const E_WC_COUPON_MAX_SPEND_LIMIT_MET        		 = 112;
 	const WC_COUPON_SUCCESS                          = 200;
 	const WC_COUPON_REMOVED                          = 201;
 
@@ -81,6 +82,9 @@ class WC_Coupon {
 	/** @public string Minimum cart amount. */
 	public $minimum_amount;
 
+	/** @public string Maximum cart amount. */
+	public $maximum_amount;
+
 	/** @public string Coupon owner's email. */
 	public $customer_email;
 
@@ -107,11 +111,12 @@ class WC_Coupon {
 		// Coupon data lets developers create coupons through code
 		$coupon_data = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code );
 
-        if ( $coupon_data ) {
+		if ( $coupon_data ) {
 
 			$this->id                         = absint( $coupon_data['id'] );
 			$this->type                       = esc_html( $coupon_data['type'] );
-			$this->amount                     = esc_html( $coupon_data['amount'] );
+			$this->amount                     = esc_html( $coupon_data['amount'] ? $coupon_data['amount'] : $coupon_data['coupon_amount'] ) ;
+			$this->coupon_amount              = $this->amount;
 			$this->individual_use             = esc_html( $coupon_data['individual_use'] );
 			$this->product_ids                = is_array( $coupon_data['product_ids'] ) ? $coupon_data['product_ids'] : array();
 			$this->exclude_product_ids        = is_array( $coupon_data['exclude_product_ids'] ) ? $coupon_data['exclude_product_ids'] : array();
@@ -126,25 +131,26 @@ class WC_Coupon {
 			$this->exclude_product_categories = is_array( $coupon_data['exclude_product_categories'] ) ? $coupon_data['exclude_product_categories'] : array();
 			$this->exclude_sale_items         = esc_html( $coupon_data['exclude_sale_items'] );
 			$this->minimum_amount             = esc_html( $coupon_data['minimum_amount'] );
+			$this->maximum_amount             = esc_html( $coupon_data['maximum_amount'] );
 			$this->customer_email             = esc_html( $coupon_data['customer_email'] );
 
-        } else {
+		} else {
 
-            $coupon_id 	= $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'" ), $this->code ) );
+			$coupon_id 	= $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'" ), $this->code ) );
 
-            if ( ! $coupon_id )
-            	return;
+			if ( ! $coupon_id )
+				return;
 
 			$coupon             = get_post( $coupon_id );
 			$this->post_title   = apply_filters( 'woocommerce_coupon_code', $coupon->post_title );
 
-            if ( empty( $coupon ) || $this->code !== $coupon->post_title )
-            	return;
+			if ( empty( $coupon ) || $this->code !== $this->post_title )
+				return;
 
-            $this->id                   = $coupon->ID;
-            $this->coupon_custom_fields = get_post_meta( $this->id );
+			$this->id                   = $coupon->ID;
+			$this->coupon_custom_fields = get_post_meta( $this->id );
 
-            $load_data = array(
+			$load_data = array(
 				'discount_type'              => 'fixed_cart',
 				'coupon_amount'              => 0,
 				'individual_use'             => 'no',
@@ -161,26 +167,27 @@ class WC_Coupon {
 				'exclude_product_categories' => array(),
 				'exclude_sale_items'         => 'no',
 				'minimum_amount'             => '',
+				'maximum_amount'             => '',
 				'customer_email'             => array()
-            );
+			);
 
-            foreach ( $load_data as $key => $default )
-            	$this->$key = isset( $this->coupon_custom_fields[ $key ][0] ) && $this->coupon_custom_fields[ $key ][0] !== '' ? $this->coupon_custom_fields[ $key ][0] : $default;
+			foreach ( $load_data as $key => $default )
+				$this->$key = isset( $this->coupon_custom_fields[ $key ][0] ) && $this->coupon_custom_fields[ $key ][0] !== '' ? $this->coupon_custom_fields[ $key ][0] : $default;
 
-            // Alias
-            $this->type                    = $this->discount_type;
-            $this->amount                  = $this->coupon_amount;
+			// Alias
+			$this->type                    = $this->discount_type;
+			$this->amount                  = $this->coupon_amount;
 
-            // Formatting
-            $this->product_ids                = array_filter( array_map( 'trim', explode( ',', $this->product_ids ) ) );
-            $this->exclude_product_ids        = array_filter( array_map( 'trim', explode( ',', $this->exclude_product_ids ) ) );
- 			$this->expiry_date                = $this->expiry_date ? strtotime( $this->expiry_date ) : '';
-            $this->product_categories         = array_filter( array_map( 'trim', (array) maybe_unserialize( $this->product_categories ) ) );
-       		$this->exclude_product_categories = array_filter( array_map( 'trim', (array) maybe_unserialize( $this->exclude_product_categories ) ) );
+			// Formatting
+			$this->product_ids                = array_filter( array_map( 'trim', explode( ',', $this->product_ids ) ) );
+			$this->exclude_product_ids        = array_filter( array_map( 'trim', explode( ',', $this->exclude_product_ids ) ) );
+			$this->expiry_date                = $this->expiry_date ? strtotime( $this->expiry_date ) : '';
+			$this->product_categories         = array_filter( array_map( 'trim', (array) maybe_unserialize( $this->product_categories ) ) );
+			$this->exclude_product_categories = array_filter( array_map( 'trim', (array) maybe_unserialize( $this->exclude_product_categories ) ) );
 			$this->customer_email             = array_filter( array_map( 'trim', array_map( 'strtolower', (array) maybe_unserialize( $this->customer_email ) ) ) );
-        }
+		}
 
-        do_action( 'woocommerce_coupon_loaded', $this );
+		do_action( 'woocommerce_coupon_loaded', $this );
 	}
 
 
@@ -229,8 +236,9 @@ class WC_Coupon {
 		$this->usage_count++;
 		update_post_meta( $this->id, 'usage_count', $this->usage_count );
 
-		if ( $used_by )
+		if ( $used_by ) {
 			add_post_meta( $this->id, '_used_by', strtolower( $used_by ) );
+		}
 	}
 
 
@@ -249,8 +257,9 @@ class WC_Coupon {
 
 		// Delete 1 used by meta
 		$meta_id = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE meta_key = '_used_by' AND meta_value = %s AND post_id = %d LIMIT 1;", $used_by, $this->id ) );
-		if ( $meta_id )
+		if ( $meta_id ) {
 			delete_metadata_by_mid( 'post', $meta_id );
+		}
 	}
 
 	/**
@@ -269,7 +278,7 @@ class WC_Coupon {
 	 * Check if a coupon is valid. Return a reason code if invalid. Reason codes:
 	 *
 	 * @access public
-	 * @return bool|WP_Error validity or a WP_Error if not valid
+	 * @return boolean validity or a WP_Error if not valid
 	 */
 	public function is_valid() {
 
@@ -287,10 +296,10 @@ class WC_Coupon {
 				}
 			}
 
-			// Per user usage limit - check here if user is logged in (aginst user IDs)
+			// Per user usage limit - check here if user is logged in (against user IDs)
 			// Checked again for emails later on in WC_Cart::check_customer_coupons()
 			if ( $this->usage_limit_per_user > 0 && is_user_logged_in() ) {
-				$used_by     = get_post_meta( $this->id, '_used_by' );
+				$used_by     = (array) get_post_meta( $this->id, '_used_by' );
 				$usage_count = sizeof( array_keys( $used_by, get_current_user_id() ) );
 
 				if ( $usage_count >= $this->usage_limit_per_user ) {
@@ -312,6 +321,14 @@ class WC_Coupon {
 				if ( $this->minimum_amount > WC()->cart->subtotal ) {
 					$valid = false;
 					$error_code = self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET;
+				}
+			}
+
+			// Maximum spend
+			if ( $this->maximum_amount > 0 ) {
+				if ( $this->maximum_amount < WC()->cart->subtotal ) {
+					$valid = false;
+					$error_code = self::E_WC_COUPON_MAX_SPEND_LIMIT_MET;
 				}
 			}
 
@@ -346,6 +363,24 @@ class WC_Coupon {
 				if ( ! $valid_for_cart ) {
 					$valid = false;
 					$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
+				}
+			}
+
+			// Exclude Sale Items check for product coupons - valid if a non-sale item is present
+			if ( 'yes' === $this->exclude_sale_items && in_array( $this->type, array( 'fixed_product', 'percent_product' ) ) ) {
+				$valid_for_cart      = false;
+				$product_ids_on_sale = wc_get_product_ids_on_sale();
+				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+						if ( sizeof( array_intersect( array( absint( $cart_item['product_id'] ), absint( $cart_item['variation_id'] ), $cart_item['data']->get_parent() ), $product_ids_on_sale ) ) === 0 ) {
+							// not on sale
+							$valid_for_cart = true;
+						}
+					}
+				}
+				if ( ! $valid_for_cart ) {
+					$valid = false;
+					$error_code = self::E_WC_COUPON_NOT_VALID_SALE_ITEMS;
 				}
 			}
 
@@ -429,10 +464,8 @@ class WC_Coupon {
 	 * @return bool
 	 */
 	public function is_valid_for_cart() {
-		if ( $this->type != 'fixed_cart' && $this->type != 'percent' )
-			return false;
-		else
-			return true;
+		$valid = $this->type != 'fixed_cart' && $this->type != 'percent' ? false : true;
+		return apply_filters( 'woocommerce_coupon_is_valid_for_cart', $valid, $this );
 	}
 
 	/**
@@ -443,7 +476,7 @@ class WC_Coupon {
 	 */
 	public function is_valid_for_product( $product ) {
 		if ( $this->type != 'fixed_product' && $this->type != 'percent_product' )
-			return false;
+			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this );
 
 		$valid        = false;
 		$product_cats = wp_get_post_terms( $product->id, 'product_cat', array( "fields" => "ids" ) );
@@ -501,9 +534,15 @@ class WC_Coupon {
 
 			$discount = $discounting_amount < $this->amount ? $discounting_amount : $this->amount;
 
+			// If dealing with a line and not a single item, we need to multiple fixed discount by cart item qty.
+			if ( ! $single && ! is_null( $cart_item ) ) {
+				// Discount for the line.
+				$discount = $discount * $cart_item['quantity'];
+			}
+
 		} elseif ( $this->type == 'percent_product' || $this->type == 'percent' ) {
 
-			$discount = ( $discounting_amount / 100 ) * $this->amount;
+			$discount = round( ( $discounting_amount / 100 ) * $this->amount, WC()->cart->dp );
 
 		} elseif ( $this->type == 'fixed_cart' ) {
 			if ( ! is_null( $cart_item ) ) {
@@ -516,8 +555,9 @@ class WC_Coupon {
 				 */
 				$discount_percent = 0;
 
-				if ( WC()->cart->subtotal_ex_tax )
+				if ( WC()->cart->subtotal_ex_tax ) {
 					$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item['quantity'] ) / WC()->cart->subtotal_ex_tax;
+				}
 					
 				$discount = min( ( $this->amount * $discount_percent ) / $cart_item['quantity'], $discounting_amount );
 			} else {
@@ -525,6 +565,7 @@ class WC_Coupon {
 			}
 		}
 
+		// Handle the limit_usage_to_x_items option
 		if ( in_array( $this->type, array( 'percent_product', 'fixed_product' ) ) && ! is_null( $cart_item ) ) {
 			$qty = empty( $this->limit_usage_to_x_items ) ? $cart_item['quantity'] : min( $this->limit_usage_to_x_items, $cart_item['quantity'] );
 
@@ -535,7 +576,7 @@ class WC_Coupon {
 			}
 		}
 
-		return $discount;
+		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
 	}
 
 	/**
@@ -558,7 +599,7 @@ class WC_Coupon {
 	 * Map one of the WC_Coupon message codes to a message string
 	 *
 	 * @access public
-	 * @param mixed $msg_code
+	 * @param integer $msg_code
 	 * @return string| Message/error string
 	 */
 	public function get_coupon_message( $msg_code ) {
@@ -614,6 +655,9 @@ class WC_Coupon {
 			break;
 			case self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET:
 				$err = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->minimum_amount ) );
+			break;
+			case self::E_WC_COUPON_MAX_SPEND_LIMIT_MET:
+				$err = sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->minimum_amount ) );
 			break;
 			case self::E_WC_COUPON_NOT_APPLICABLE:
 				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );

@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
 
     function showTooltip(x, y, contents) {
         jQuery('<div class="chart-tooltip">' + contents + '</div>').css( {
@@ -97,6 +97,8 @@ jQuery(document).ready(function($) {
     });
 
     var dates = jQuery( ".range_datepicker" ).datepicker({
+        changeMonth: true,
+        changeYear: true,
         defaultDate: "",
         dateFormat: "yy-mm-dd",
         numberOfMonths: 1,
@@ -114,6 +116,12 @@ jQuery(document).ready(function($) {
             dates.not( this ).datepicker( "option", option, date );
         }
     });
+
+	var a = document.createElement('a');
+
+	if ( typeof a.download == "undefined" ) {
+		$('.export_csv').hide();
+	}
 
     // Export
     $('.export_csv').click(function(){

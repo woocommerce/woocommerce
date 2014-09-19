@@ -64,16 +64,16 @@ class WC_Product_Grouped extends WC_Product {
 						$stock = get_post_meta( $child_id, '_stock', true );
 
 						if ( $stock != '' ) {
-							$this->total_stock += intval( $stock );
+							$this->total_stock += wc_stock_amount( $stock );
 						}
 					}
 				}
 
-				set_transient( $transient_name, $this->total_stock );
+				set_transient( $transient_name, $this->total_stock, YEAR_IN_SECONDS );
 			}
 		}
 
-		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
+		return wc_stock_amount( $this->total_stock );
     }
 
 	/**
@@ -83,21 +83,17 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return array
 	 */
 	public function get_children() {
+		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
+        	$transient_name = 'wc_product_children_ids_' . $this->id;
+			$this->children = get_transient( $transient_name );
 
-		if ( ! is_array( $this->children ) ) {
-
-			$this->children = array();
-
-			$transient_name = 'wc_product_children_ids_' . $this->id;
-
-        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) {
+        	if ( empty( $this->children ) ) {
 
 		        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=product&orderby=menu_order&order=ASC&fields=ids&post_status=publish&numberposts=-1' );
 
-				set_transient( $transient_name, $this->children );
+				set_transient( $transient_name, $this->children, YEAR_IN_SECONDS );
 			}
 		}
-
 		return (array) $this->children;
 	}
 
@@ -154,7 +150,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * Returns false if the product cannot be bought.
 	 *
 	 * @access public
-	 * @return cool
+	 * @return bool
 	 */
 	public function is_purchasable() {
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );

@@ -1,0 +1,23 @@
+language: php
+
+matrix:
+  include:
+    - php: '5.5'
+      env: WP_VERSION=latest WP_MULTISITE=1
+    - php: '5.4'
+      env: WP_VERSION=3.8 WP_MULTISITE=0
+    - php: '5.3'
+      env: WP_VERSION=latest WP_MULTISITE=0
+    - php: '5.3'
+      env: WP_VERSION=3.8 WP_MULTISITE=1
+    - php: '5.2'
+      env: WP_VERSION=latest WP_MULTISITE=0
+
+before_script:
+    - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+    - bash tests/bin/travis.sh before
+
+script: phpunit -c phpunit.xml.dist
+
+after_script:
+    - bash tests/bin/travis.sh after

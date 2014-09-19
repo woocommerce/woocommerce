@@ -30,15 +30,20 @@ class WC_Shortcode_My_Account {
 	 * @return void
 	 */
 	public static function output( $atts ) {
-		global $woocommerce, $wp;
+		global $wp;
+
+		// Check cart class is loaded or abort
+		if ( is_null( WC()->cart ) ) {
+			return;
+		}
 
 		if ( ! is_user_logged_in() ) {
 
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
-			if ( ! empty( $message ) )
-
+			if ( ! empty( $message ) ) {
 				wc_add_notice( $message );
+			}
 
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
 
@@ -62,7 +67,7 @@ class WC_Shortcode_My_Account {
 
 			} elseif ( isset( $wp->query_vars['edit-address'] ) ) {
 
-				self::edit_address( sanitize_title( $wp->query_vars['edit-address'] ) );
+				self::edit_address( wc_edit_address_i18n( sanitize_title( $wp->query_vars['edit-address'] ), true ) );
 
 			} elseif ( isset( $wp->query_vars['add-payment-method'] ) ) {
 
@@ -100,40 +105,22 @@ class WC_Shortcode_My_Account {
 	private static function view_order( $order_id ) {
 
 		$user_id      	= get_current_user_id();
-		$order 			= new WC_Order( $order_id );
+		$order 			= wc_get_order( $order_id );
 
-		if ( !current_user_can( 'view_order', $order_id ) ) {
+		if ( ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ).'" class="wc-forward">'. __( 'My Account', 'woocommerce' ) .'</a>' . '</div>';
 			return;
 		}
 
-		$status = get_term_by( 'slug', $order->status, 'shop_order_status' );
+		// Backwards compatibility
+		$status       = new stdClass();
+		$status->name = wc_get_order_status_name( $order->get_status() );
 
-		echo '<p class="order-info">' . sprintf( __( 'Order <mark class="order-number">%s</mark> was placed on <mark class="order-date">%s</mark> and is currently <mark class="order-status">%s</mark>.', 'woocommerce' ), $order->get_order_number(), date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ), __( $status->name, 'woocommerce' ) ) . '</p>';
-
-		if ( $notes = $order->get_customer_order_notes() ) :
-			?>
-			<h2><?php _e( 'Order Updates', 'woocommerce' ); ?></h2>
-			<ol class="commentlist notes">
-				<?php foreach ( $notes as $note ) : ?>
-				<li class="comment note">
-					<div class="comment_container">
-						<div class="comment-text">
-							<p class="meta"><?php echo date_i18n(__( 'l jS \o\f F Y, h:ia', 'woocommerce' ), strtotime($note->comment_date)); ?></p>
-							<div class="description">
-								<?php echo wpautop( wptexturize( $note->comment_content ) ); ?>
-							</div>
-			  				<div class="clear"></div>
-			  			</div>
-						<div class="clear"></div>
-					</div>
-				</li>
-				<?php endforeach; ?>
-			</ol>
-			<?php
-		endif;
-
-		do_action( 'woocommerce_view_order', $order_id );
+		wc_get_template( 'myaccount/view-order.php', array(
+	        'status'    => $status, // @deprecated 2.2
+	        'order'     => wc_get_order( $order_id ),
+	        'order_id'  => $order_id
+	    ) );
 	}
 
 	/**
@@ -161,6 +148,7 @@ class WC_Shortcode_My_Account {
 
 		// Enqueue scripts
 		wp_enqueue_script( 'wc-country-select' );
+		wp_enqueue_script( 'wc-address-i18n' );
 
 		// Prepare values
 		foreach ( $address as $key => $field ) {
@@ -204,7 +192,7 @@ class WC_Shortcode_My_Account {
 		$args = array( 'form' => 'lost_password' );
 
 		// process reset key / login from email confirmation link
-		if( isset( $_GET['key'] ) && isset( $_GET['login'] ) ) {
+		if ( isset( $_GET['key'] ) && isset( $_GET['login'] ) ) {
 
 			$user = self::check_password_reset_key( $_GET['key'], $_GET['login'] );
 
@@ -214,6 +202,8 @@ class WC_Shortcode_My_Account {
 				$args['key'] = esc_attr( $_GET['key'] );
 				$args['login'] = esc_attr( $_GET['login'] );
 			}
+		} elseif ( isset( $_GET['reset'] ) ) {
+			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 		}
 
 		wc_get_template( 'myaccount/form-lost-password.php', $args );
@@ -222,35 +212,31 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Handles sending password retrieval email to customer.
 	 *
+	 * Based on retrieve_password() in core wp-login.php
+	 *
 	 * @access public
 	 * @uses $wpdb WordPress Database object
 	 * @return bool True: when finish. False: on error
 	 */
 	public static function retrieve_password() {
-		global $woocommerce,$wpdb;
+		global $wpdb, $wp_hasher;
 
 		if ( empty( $_POST['user_login'] ) ) {
 
 			wc_add_notice( __( 'Enter a username or e-mail address.', 'woocommerce' ), 'error' );
 
-		} elseif ( strpos( $_POST['user_login'], '@' ) ) {
-
-			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
-
-			if ( empty( $user_data ) )
-				wc_add_notice( __( 'There is no user registered with that email address.', 'woocommerce' ), 'error' );
-
 		} else {
-
+			// Check on username first, as customers can use emails as usernames.
 			$login = trim( $_POST['user_login'] );
-
-			$user_data = get_user_by('login', $login );
+			$user_data = get_user_by( 'login', $login );
 		}
 
-		do_action('lostpassword_post');
+		// If no user found, check if it login is emaill and lookup user based on email.
+		if ( ! $user_data && is_email( $_POST['user_login'] ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
+			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
+		}
 
-		if( wc_notice_count( 'error' ) > 0 )
-			return false;
+		do_action( 'lostpassword_post' );
 
 		if ( ! $user_data ) {
 			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
@@ -261,41 +247,42 @@ class WC_Shortcode_My_Account {
 		$user_login = $user_data->user_login;
 		$user_email = $user_data->user_email;
 
-		do_action('retrieve_password', $user_login);
+		do_action( 'retrieve_password', $user_login );
 
-		$allow = apply_filters('allow_password_reset', true, $user_data->ID);
+		$allow = apply_filters( 'allow_password_reset', true, $user_data->ID );
 
 		if ( ! $allow ) {
 
-			wc_add_notice( __( 'Password reset is not allowed for this user' ), 'error' );
+			wc_add_notice( __( 'Password reset is not allowed for this user', 'woocommerce' ), 'error' );
 
 			return false;
 
 		} elseif ( is_wp_error( $allow ) ) {
 
-			wc_add_notice( $allow->get_error_message, 'error' );
+			wc_add_notice( $allow->get_error_message(), 'error' );
 
 			return false;
 		}
 
-		$key = $wpdb->get_var( $wpdb->prepare( "SELECT user_activation_key FROM $wpdb->users WHERE user_login = %s", $user_login ) );
+		$key = wp_generate_password( 20, false );
 
-		if ( empty( $key ) ) {
+		do_action( 'retrieve_password_key', $user_login, $key );
 
-			// Generate something random for a key...
-			$key = wp_generate_password( 20, false );
-
-			do_action('retrieve_password_key', $user_login, $key);
-
-			// Now insert the new md5 key into the db
-			$wpdb->update( $wpdb->users, array( 'user_activation_key' => $key ), array( 'user_login' => $user_login ) );
+		// Now insert the key, hashed, into the DB.
+		if ( empty( $wp_hasher ) ) {
+			require_once ABSPATH . 'wp-includes/class-phpass.php';
+			$wp_hasher = new PasswordHash( 8, true );
 		}
+
+		$hashed = $wp_hasher->HashPassword( $key );
+
+		$wpdb->update( $wpdb->users, array( 'user_activation_key' => $hashed ), array( 'user_login' => $user_login ) );
 
 		// Send email notification
 		$mailer = WC()->mailer();
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
-		wc_add_notice( __( 'Check your e-mail for the confirmation link.' ) );
+		wc_add_notice( __( 'Check your e-mail for the confirmation link.', 'woocommerce' ) );
 		return true;
 	}
 
@@ -310,7 +297,7 @@ class WC_Shortcode_My_Account {
 	 * @return object|bool User's database row on success, false for invalid keys
 	 */
 	public static function check_password_reset_key( $key, $login ) {
-		global $woocommerce,$wpdb;
+		global $wpdb, $wp_hasher;
 
 		$key = preg_replace( '/[^a-z0-9]/i', '', $key );
 
@@ -324,9 +311,18 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		$user = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE user_activation_key = %s AND user_login = %s", $key, $login ) );
+		$user = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE user_login = %s", $login ) );
 
-		if ( empty( $user ) ) {
+		if ( ! empty( $user ) ) {
+			if ( empty( $wp_hasher ) ) {
+				require_once ABSPATH . 'wp-includes/class-phpass.php';
+				$wp_hasher = new PasswordHash( 8, true );
+			}
+
+			$valid = $wp_hasher->CheckPassword( $key, $user->user_activation_key );
+		}
+
+		if ( empty( $user ) || empty( $valid ) ) {
 			wc_add_notice( __( 'Invalid key', 'woocommerce' ), 'error' );
 			return false;
 		}

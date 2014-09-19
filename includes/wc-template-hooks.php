@@ -12,13 +12,18 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-add_action( 'the_post', 'wc_setup_product_data' );
-add_action( 'template_redirect', 'wc_template_redirect' );
 add_filter( 'body_class', 'wc_body_class' );
 add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
+
+/** 
+ * WP Header
+ *
+ * @see  wc_products_rss_feed()
+ * @see  wc_generator_tag()
+ */
 add_action( 'wp_head', 'wc_products_rss_feed' );
-add_action( 'wp_head', 'wc_generator_tag' );
-add_action( 'wp_footer', 'wc_print_js', 25 );
+add_action( 'get_the_generator_html', 'wc_generator_tag', 10, 2 );
+add_action( 'get_the_generator_xhtml', 'wc_generator_tag', 10, 2 );
 
 /**
  * Content Wrappers
@@ -70,7 +75,6 @@ add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_desc
  */
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_result_count', 20 );
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 30 );
-add_filter( 'loop_end', 'woocommerce_reset_loop' );
 
 /**
  * Product Loop Items
@@ -177,8 +181,10 @@ add_action( 'woocommerce_cart_collaterals', 'woocommerce_cross_sell_display' );
 /**
  * Footer
  *
+ * @see  wc_print_js()
  * @see woocommerce_demo_store()
  */
+add_action( 'wp_footer', 'wc_print_js', 25 );
 add_action( 'wp_footer', 'woocommerce_demo_store' );
 
 /**
