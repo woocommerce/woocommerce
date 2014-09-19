@@ -851,7 +851,11 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( isset( $_REQUEST['_featured'] ) ) {
-			if ( update_post_meta( $post_id, '_featured', isset( $_REQUEST['_featured'] ) ? 'yes' : 'no' ) ) {
+			if ( update_post_meta( $post_id, '_featured', 'yes' ) ) {
+				delete_transient( 'wc_featured_products' );
+			}
+		} else {
+			if ( update_post_meta( $post_id, '_featured', 'no' ) ) {
 				delete_transient( 'wc_featured_products' );
 			}
 		}
