@@ -237,7 +237,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<button type="button" class="button button-primary save-action"><?php _e( 'Save', 'woocommerce' ); ?></button>
 	<?php
 		// allow adding custom buttons
-		do_action('woocommerce_order_item_add_line_buttons', $order, $line_items);
+		do_action( 'woocommerce_order_item_add_line_buttons', $order );
 	?>
 </div>
 <?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
