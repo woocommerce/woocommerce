@@ -136,6 +136,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - When manually adding items to an order, show tax columns.
 * Fix - When manually adding items to an order, include variation data.
 * Tweak - Tweak load_plugin_textdomain to be relative - this falls back to WP_LANG_DIR automatically. Can prevent "open_basedir restriction in effect".
+* Tweak - Added acceptance marks to PayPal Standard where applicable to replace generic PayPal icon.
 
 = 2.2.4 - 18/09/2014 =
 * Fix - Prevent errors when adding 'zero-rated' tax on checkout.
