@@ -10,5 +10,5 @@
  * WooCommerce Plugin Translations Supported: WP_LANG_DIR . "/woocommerce/{$textdomain}-{$locale}.mo";
  * 
  * Wanna Contribute Localisations!
- * https://www.transifex.com/projects/p/woocommerce/
+ * @link https://www.transifex.com/projects/p/woocommerce/
  */
