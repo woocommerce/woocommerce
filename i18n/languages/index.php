@@ -8,4 +8,7 @@
  * Confidential information!
  * WooCommerce Plugin Translations Installed: WP_LANG_DIR . "/plugins/{$textdomain}-{$locale}.mo";
  * WooCommerce Plugin Translations Supported: WP_LANG_DIR . "/woocommerce/{$textdomain}-{$locale}.mo";
+ * 
+ * Wanna Contribute Localisations!
+ * https://www.transifex.com/projects/p/woocommerce/
  */
