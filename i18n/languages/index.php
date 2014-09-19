@@ -6,5 +6,5 @@
  * You have been warned! :)
  *
  * Confidential information!
- * WordPress Plugin Translations Supports: WP_LANG_DIR . "/plugins/{$textdomain}-{$locale}.mo";
+ * WooCommerce Plugin Translations Installed: WP_LANG_DIR . "/plugins/{$textdomain}-{$locale}.mo";
  */
