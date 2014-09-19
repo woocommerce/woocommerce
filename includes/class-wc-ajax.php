@@ -971,7 +971,7 @@ class WC_AJAX {
 
 		$item['product_id']        = $_product->id;
 		$item['variation_id']      = isset( $_product->variation_id ) ? $_product->variation_id : '';
-		$item['variation_data']    = isset( $_product->variation_data ) ? $_product->variation_data : '';
+		$item['variation_data']    = $item['variation_id'] ? $_product->get_variation_attributes() : '';
 		$item['name']              = $_product->get_title();
 		$item['tax_class']         = $_product->get_tax_class();
 		$item['qty']               = 1;

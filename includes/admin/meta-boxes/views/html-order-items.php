@@ -56,7 +56,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 				<th class="line_cost"><?php _e( 'Total', 'woocommerce' ); ?></th>
 
 				<?php
-					if ( isset( $legacy_order ) && ! $legacy_order && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+					if ( empty( $legacy_order ) && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
 						foreach ( $order_taxes as $tax_id => $tax_item ) :
 							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );

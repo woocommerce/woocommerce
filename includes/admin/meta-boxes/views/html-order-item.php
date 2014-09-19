@@ -198,7 +198,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</td>
 
 	<?php
-		if ( isset( $legacy_order ) && ! $legacy_order && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+		if ( empty( $legacy_order ) && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
 			$line_tax_data = isset( $item['line_tax_data'] ) ? $item['line_tax_data'] : '';
 			$tax_data      = maybe_unserialize( $line_tax_data );
 
