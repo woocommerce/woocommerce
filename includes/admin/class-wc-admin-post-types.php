@@ -1012,9 +1012,9 @@ class WC_Admin_Post_Types {
 					case 3 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = $old_regular_price - ( round ( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) );
+							$new_price = max( 0, $old_regular_price - ( round ( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) ) );
 						} else {
-							$new_price = $old_regular_price - $regular_price;
+							$new_price = max( 0, $old_regular_price - $regular_price );
 						}
 						break;
 
@@ -1033,7 +1033,7 @@ class WC_Admin_Post_Types {
 			if ( ! empty( $_REQUEST['change_sale_price'] ) ) {
 
 				$change_sale_price = absint( $_REQUEST['change_sale_price'] );
-				$sale_price = esc_attr( stripslashes( $_REQUEST['_sale_price'] ) );
+				$sale_price        = esc_attr( stripslashes( $_REQUEST['_sale_price'] ) );
 
 				switch ( $change_sale_price ) {
 					case 1 :
@@ -1050,17 +1050,17 @@ class WC_Admin_Post_Types {
 					case 3 :
 						if ( strstr( $sale_price, '%' ) ) {
 							$percent = str_replace( '%', '', $sale_price ) / 100;
-							$new_price = $old_sale_price - ( $old_sale_price * $percent );
+							$new_price = max( 0, $old_sale_price - ( $old_sale_price * $percent ) );
 						} else {
-							$new_price = $old_sale_price - $sale_price;
+							$new_price = max( 0, $old_sale_price - $sale_price );
 						}
 						break;
 					case 4 :
 						if ( strstr( $sale_price, '%' ) ) {
 							$percent = str_replace( '%', '', $sale_price ) / 100;
-							$new_price = $product->regular_price - ( $product->regular_price * $percent );
+							$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
 						} else {
-							$new_price = $product->regular_price - $sale_price;
+							$new_price = max( 0, $product->regular_price - $sale_price );
 						}
 						break;
 
