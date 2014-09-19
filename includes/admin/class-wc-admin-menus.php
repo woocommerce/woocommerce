@@ -36,6 +36,9 @@ class WC_Admin_Menus {
 		add_action( 'admin_head', array( $this, 'menu_highlight' ) );
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
+
+		// Add endpoints custom URLs in Appearance > Menus > Pages
+		add_filter( 'nav_menu_items_page', array( $this, 'add_endpoints_urls' ) );
 	}
 
 	/**
@@ -219,6 +222,47 @@ class WC_Admin_Menus {
 	 */
 	public function addons_page() {
 		WC_Admin_Addons::output();
+	}
+
+	/**
+	 * Add endpoints custom URLs in Appearance > Menus > Pages box
+	 *
+	 * @param  array $posts
+	 * @return array
+	 */
+	public function add_endpoints_urls( $posts ) {
+
+		$endpoints = apply_filters( 'wc_admin_endpoints_custom_urls', wc_get_endpoints( 'myaccount' ) );
+
+		if ( ! empty( $endpoints ) ) {
+
+			$exclude = array( 'view-order', 'add-payment-method' );
+			$i = -1;
+			foreach( $endpoints as $endpoint => $value ) {
+
+				if ( in_array( $endpoint, $exclude ) ) {
+					continue;
+				}
+
+				$post_title = apply_filters( 'wc_custom_endpoint_{$endpoint}_post_title', ucfirst( str_replace( array( '-', '_' ), ' ', $value ) ) );
+				array_unshift( $posts, (object) array(
+					'ID'           => $i,
+					'object_id'    => $i,
+					'post_content' => '',
+					'post_excerpt' => '',
+					'post_parent'  => '',
+					'post_title'   => $post_title,
+					'post_type'    => 'nav_menu_item',
+					'type'         => 'custom',
+					'url'          => wc_get_endpoint_url( $value, '', get_permalink( wc_get_page_id( 'myaccount' ) ) )
+				) );
+
+				$i--;
+			}
+
+		}
+
+		return $posts;
 	}
 }
 
