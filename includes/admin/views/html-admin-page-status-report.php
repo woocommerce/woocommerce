@@ -487,60 +487,60 @@ if ( ! defined( 'ABSPATH' ) ) {
 		endif;
 		?>
 	<tbody>
-			<tr>
-				<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
-				<td><?php
-					echo $active_theme->Name;
-				?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
-				<td><?php
-					echo $active_theme->Version;
+		<tr>
+			<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
+			<td><?php
+				echo $active_theme->Name;
+			?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
+			<td><?php
+				echo $active_theme->Version;
 
-					if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) )
-						echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
-				?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
-				<td><?php
-					echo $active_theme->{'Author URI'};
-				?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
-				<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
-			</tr>
-			<?php
-			if( is_child_theme() ) :
-				$parent_theme = wp_get_theme( $active_theme->Template );
-			?>
-			<tr>
-				<td><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>
-				<td><?php echo $parent_theme->Name; ?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
-				<td><?php echo  $parent_theme->Version; ?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
-				<td><?php
-					echo $parent_theme->{'Author URI'};
-				?></td>
-			</tr>
-			<?php endif ?>
-			<tr>
-				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
-				<td><?php
-					if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
-						echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
-					} else {
-						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
-					}
-				?></td>
-			</tr>
+				if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) )
+					echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
+			?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
+			<td><?php
+				echo $active_theme->{'Author URI'};
+			?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
+			<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
+		</tr>
+		<?php
+		if( is_child_theme() ) :
+			$parent_theme = wp_get_theme( $active_theme->Template );
+		?>
+		<tr>
+			<td><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>
+			<td><?php echo $parent_theme->Name; ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
+			<td><?php echo  $parent_theme->Version; ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
+			<td><?php
+				echo $parent_theme->{'Author URI'};
+			?></td>
+		</tr>
+		<?php endif ?>
+		<tr>
+			<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
+			<td><?php
+				if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
+					echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
+				} else {
+					echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
+				}
+			?></td>
+		</tr>
 	</tbody>
 </table>
 
