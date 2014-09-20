@@ -10,7 +10,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * is_woocommerce - Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included)
