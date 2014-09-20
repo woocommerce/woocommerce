@@ -471,7 +471,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th colspan="2"><?php _e( 'Active Theme', 'woocommerce' ); ?></th>
 		</tr>
 	</tfoot>
-		<?php
+	<?php
 		$active_theme = wp_get_theme();
 		if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
 
@@ -501,7 +501,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			endif;
 
 		endif;
-		?>
+	?>
 	<tbody>
 		<tr>
 			<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
