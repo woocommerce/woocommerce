@@ -17,7 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
 	</div>
 </div>
+
 <br/>
+
 <table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
