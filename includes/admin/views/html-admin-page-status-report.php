@@ -246,7 +246,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</thead>
 	<tfoot>
 		<tr>
-			<th colspan="2"><?php _e( 'Active Plugins', 'woocommerce' ); ?></th>
+			<th colspan="2" scope="col">
+			<?php
+				$plugin_updates = get_plugin_updates();
+				if ( empty( $plugin_updates ) ) {
+					echo '<mark class="yes">' . __( 'Your plugins are all up to date.', 'woocommerce' ) . '</mark>';
+				} else {
+					echo '<mark class="error">' . __( 'Some of your plugins have new versions available. Check the ones and update them !', 'woocommerce' ) . '</mark>';
+				}
+			?>
+			</th>
 		</tr>
 	</tfoot>
 	<tbody>
