@@ -9,7 +9,6 @@
  * @package 	WooCommerce/Shortcodes/Order_Tracking
  * @version     2.0.0
  */
-
 class WC_Shortcode_Order_Tracking {
 
 	/**
