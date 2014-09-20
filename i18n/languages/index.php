@@ -4,6 +4,9 @@
  *
  * WooCommerce updates will delete all custom translation files located here.
  * You have been warned! :)
+ * 
+ * How to Avoid Overwriting of WooCommerce Plugin Translations?
+ * Keep Custom WooCommerce Translation like: WP_LANG_DIR . "/woocommerce/{$textdomain}-{$locale}.mo";
  *
  * Confidential Information!
  * WooCommerce Plugin Translations Installed: WP_LANG_DIR . "/plugins/{$textdomain}-{$locale}.mo";
