@@ -19,13 +19,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 <br/>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
-
 	<thead>
 		<tr>
-			<th colspan="2"><?php _e( 'Environment', 'woocommerce' ); ?></th>
+			<th colspan="2"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<tr>
 			<td><?php _e( 'Home URL', 'woocommerce' ); ?>:</td>
@@ -99,12 +102,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
-				<td><?php _e('PHP Post Max Size', 'woocommerce' ); ?>:</td>
-				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
+				<td><?php _e( 'PHP Post Max Size', 'woocommerce' ); ?>:</td>
+				<td><?php echo size_format( wc_let_to_num( ini_get( 'post_max_size' ) ) ); ?></td>
 			</tr>
 			<tr>
-				<td><?php _e('PHP Time Limit', 'woocommerce' ); ?>:</td>
-				<td><?php echo ini_get('max_execution_time'); ?></td>
+				<td><?php _e( 'PHP Time Limit', 'woocommerce' ); ?>:</td>
+				<td><?php echo ini_get( 'max_execution_time' ); ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'PHP Max Input Vars', 'woocommerce' ); ?>:</td>
@@ -140,14 +143,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$posting = array();
 
 			// fsockopen/cURL
-			$posting['fsockopen_curl']['name'] = __( 'fsockopen/cURL','woocommerce');
+			$posting['fsockopen_curl']['name'] = __( 'fSockopen/cURL', 'woocommerce' );
 			if ( function_exists( 'fsockopen' ) || function_exists( 'curl_init' ) ) {
-				if ( function_exists( 'fsockopen' ) && function_exists( 'curl_init' )) {
-					$posting['fsockopen_curl']['note'] = __( 'Your server has fsockopen and cURL enabled.', 'woocommerce' );
-				} elseif ( function_exists( 'fsockopen' )) {
-					$posting['fsockopen_curl']['note'] = __( 'Your server has fsockopen enabled, cURL is disabled.', 'woocommerce' );
+				if ( function_exists( 'fsockopen' ) && function_exists( 'curl_init' ) ) {
+					$posting['fsockopen_curl']['note'] = __( 'Your server has FSockopen and cURL enabled.', 'woocommerce' );
+				} elseif ( function_exists( 'fsockopen' ) ) {
+					$posting['fsockopen_curl']['note'] = __( 'Your server has FSockopen enabled, cURL is disabled.', 'woocommerce' );
 				} else {
-					$posting['fsockopen_curl']['note'] = __( 'Your server has cURL enabled, fsockopen is disabled.', 'woocommerce' );
+					$posting['fsockopen_curl']['note'] = __( 'Your server has cURL enabled, FSockopen is disabled.', 'woocommerce' );
 				}
 				$posting['fsockopen_curl']['success'] = true;
 			} else {
@@ -156,7 +159,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 
 			// SOAP
-			$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
+			$posting['soap_client']['name'] = __( 'SOAP Client', 'woocommerce' );
 			if ( class_exists( 'SoapClient' ) ) {
 				$posting['soap_client']['note'] = __( 'Your server has the SOAP Client class enabled.', 'woocommerce' );
 				$posting['soap_client']['success'] = true;
@@ -166,7 +169,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 
 			// WP Remote Post Check
-			$posting['wp_remote_post']['name'] = __( 'WP Remote Post','woocommerce');
+			$posting['wp_remote_post']['name'] = __( 'WP Remote Post', 'woocommerce');
 			$request['cmd'] = '_notify-validate';
 			$params = array(
 				'sslverify' 	=> false,
@@ -203,6 +206,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 	</tbody>
+</table>
+
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 
 	<thead>
 		<tr>
