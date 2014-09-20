@@ -450,8 +450,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td><?php
 				$display_terms = array();
 				$terms = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
-				foreach ( $terms as $term )
+				foreach ( $terms as $term ) {
 					$display_terms[] = $term->name . ' (' . $term->slug . ')';
+				}
 				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
 			?></td>
 		</tr>
