@@ -213,13 +213,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 <br />
 
 <table class="wc_status_table widefat" cellspacing="0" id="status">
-
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'Locale', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Locale', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<?php
 			$locale = localeconv();
@@ -229,6 +232,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo '<tr><td>' . $key . ':</td><td>' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
 		?>
 	</tbody>
+</table>
+
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 
 	<thead>
 		<tr>
