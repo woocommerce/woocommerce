@@ -10,14 +10,16 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Wrapper for wp_get_post_terms which supports ordering by parent.
  *
  * NOTE: At this point in time, ordering by menu_order for example isn't possible with this function. wp_get_post_terms has no
  *   filters which we can utilise to modify it's query. https://core.trac.wordpress.org/ticket/19094
- * 
+ *
  * @param  int $product_id
  * @param  string $taxonomy
  * @param  array  $args
@@ -58,7 +60,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	} elseif ( ! empty( $args['orderby'] ) && $args['orderby'] === 'menu_order' ) {
 		// wp_get_post_terms doesn't let us use custom sort order
 		$args['include'] = wp_get_post_terms( $product_id, $taxonomy, array( 'fields' => 'ids' ) );
-		
+
 		if ( empty( $args['include'] ) ) {
 			$terms = array();
 		} else {
@@ -501,11 +503,11 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 
 /**
  * Recount terms after the stock amount changes
- * @param  int $product_id 
+ * @param  int $product_id
  * @return void
  */
 function wc_recount_after_stock_change( $product_id ) {
-	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) != 'yes' ) 
+	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) != 'yes' )
 		return;
 
 	$product_terms = get_the_terms( $product_id, 'product_cat' );
