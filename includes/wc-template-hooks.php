@@ -10,12 +10,14 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 add_filter( 'body_class', 'wc_body_class' );
 add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
 
-/** 
+/**
  * WP Header
  *
  * @see  wc_products_rss_feed()
