@@ -9,7 +9,9 @@
  * @extends 	WC_Widget
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class WC_Widget_Product_Categories extends WC_Widget {
 
@@ -93,7 +95,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		} else {
 			$list_args['orderby']    = 'title';
 		}
-		
+
 		// Setup Current Category
 		$this->current_cat   = false;
 		$this->cat_ancestors = array();
@@ -113,43 +115,43 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			}
 
 		}
-		
+
 		// Show Siblings and Children Only
 		if ( $s && $this->current_cat ) {
 
 			// Top level is needed
-			$top_level = get_terms( 
-				'product_cat', 
-				array( 
-					'fields'       => 'ids', 
-					'parent'       => 0, 
-					'hierarchical' => true, 
+			$top_level = get_terms(
+				'product_cat',
+				array(
+					'fields'       => 'ids',
+					'parent'       => 0,
+					'hierarchical' => true,
 					'hide_empty'   => false
-				) 
+				)
 			);
 
 			// Direct children are wanted
-			$direct_children = get_terms( 
-				'product_cat', 
-				array( 
-					'fields'       => 'ids', 
-					'parent'       => $this->current_cat->term_id, 
-					'hierarchical' => true, 
-					'hide_empty'   => false 
-				) 
+			$direct_children = get_terms(
+				'product_cat',
+				array(
+					'fields'       => 'ids',
+					'parent'       => $this->current_cat->term_id,
+					'hierarchical' => true,
+					'hide_empty'   => false
+				)
 			);
-			
+
 			// Gather siblings of ancestors
 			$siblings  = array();
 			if ( $this->cat_ancestors ) {
 				foreach ( $this->cat_ancestors as $ancestor ) {
-					$ancestor_siblings = get_terms( 
-						'product_cat', 
-						array( 
-							'fields'       => 'ids', 
-							'parent'       => $ancestor, 
-							'hierarchical' => false, 
-							'hide_empty'   => false 
+					$ancestor_siblings = get_terms(
+						'product_cat',
+						array(
+							'fields'       => 'ids',
+							'parent'       => $ancestor,
+							'hierarchical' => false,
+							'hide_empty'   => false
 						)
 					);
 					$siblings = array_merge( $siblings, $ancestor_siblings );
@@ -161,14 +163,14 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			} else {
 				$include = array_merge( $direct_children );
 			}
-			
+
 			$dropdown_args['include'] = implode( ',', $include );
 			$list_args['include']     = implode( ',', $include );
 
 			if ( empty( $include ) ) {
 				return;
 			}
-			
+
 		} elseif ( $s ) {
 			$dropdown_args['depth']        = 1;
 			$dropdown_args['child_of']     = 0;
@@ -198,7 +200,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
 			wc_product_dropdown_categories( apply_filters( 'woocommerce_product_categories_widget_dropdown_args', $dropdown_args ) );
-			
+
 			wc_enqueue_js("
 				jQuery('.dropdown_product_cat').change(function(){
 					if(jQuery(this).val() != '') {
