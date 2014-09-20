@@ -9,7 +9,7 @@
  * Keep Custom WooCommerce Translation like: WP_LANG_DIR . "/woocommerce/{$textdomain}-{$locale}.mo";
  *
  * Confidential Information!
- * WordPress Plugin Translations Supports: WP_LANG_DIR . "/plugins/{$textdomain}-{$locale}.mo";
+ * WooCommerce Plugin Translations Installed: WP_LANG_DIR . "/plugins/{$textdomain}-{$locale}.mo";
  * 
  * Wanna Contribute Localisations!
  * @link https://www.transifex.com/projects/p/woocommerce/
