@@ -239,13 +239,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 <br />
 
 <table class="wc_status_table widefat" cellspacing="0" id="status">
-
 	<thead>
 		<tr>
-			<th colspan="2"><?php _e( 'Plugins', 'woocommerce' ); ?></th>
+			<th colspan="2"><?php _e( 'Active Plugins', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Active Plugins', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<tr>
 			<td><?php _e( 'Installed Plugins','woocommerce' ); ?>:</td>
@@ -308,26 +311,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?></td>
 		</tr>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'Settings', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Settings', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<tr>
 			<td><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td><?php echo get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
 		</tr>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'WC Pages', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'WC Pages', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<?php
 			$check_pages = array(
@@ -394,13 +413,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'WC Taxonomies', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'WC Taxonomies', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<tr>
 			<td><?php _e( 'Product Types', 'woocommerce' ); ?>:</td>
@@ -413,13 +440,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?></td>
 		</tr>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="2"><?php _e( 'Theme', 'woocommerce' ); ?></th>
+			<th colspan="2"><?php _e( 'Active Theme', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Active Theme', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 		<?php
 		$active_theme = wp_get_theme();
 		if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
@@ -507,13 +542,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 				?></td>
 			</tr>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'Templates', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Templates', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<?php
 
@@ -571,7 +614,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 	</tbody>
-
 </table>
 
 <script type="text/javascript">
