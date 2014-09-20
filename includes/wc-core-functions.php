@@ -10,7 +10,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 // Include core functions (available in both admin and frontend)
 include( 'wc-conditional-functions.php' );
