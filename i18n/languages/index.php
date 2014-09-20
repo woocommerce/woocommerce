@@ -10,7 +10,6 @@
  *
  * Confidential Information!
  * WordPress Plugin Translations Supports: WP_LANG_DIR . "/plugins/{$textdomain}-{$locale}.mo";
- * WooCommerce Plugin Translations Supported: WP_LANG_DIR . "/woocommerce/{$textdomain}-{$locale}.mo";
  * 
  * Wanna Contribute Localisations!
  * @link https://www.transifex.com/projects/p/woocommerce/
