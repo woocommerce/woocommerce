@@ -259,66 +259,73 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</tfoot>
 	<tbody>
-		<tr>
-			<td><?php _e( 'Installed Plugins','woocommerce' ); ?>:</td>
-			<td><?php
-				$active_plugins = (array) get_option( 'active_plugins', array() );
+	<?php
+		// Get only active and valid plugins
+		$active_plugins = wp_get_active_and_valid_plugins();
 
-				if ( is_multisite() )
-					$active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
+		foreach ( $active_plugins as $plugin ) {
+			$plugin_meta    = array();
+			$plugin_data    = @get_plugin_data( $plugin );
+			$dirname        = dirname( $plugin );
+			$version_string = '';
 
-				$wc_plugins = array();
-
-				foreach ( $active_plugins as $plugin ) {
-
-					$plugin_data    = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-					$dirname        = dirname( $plugin );
-					$version_string = '';
-
-					if ( ! empty( $plugin_data['Name'] ) ) {
-
-						// link the plugin name to the plugin url if available
+			if ( ! empty( $plugin_data['Name'] ) ) : ?>
+				<tr>
+					<td>
+					<?php
 						$plugin_name = $plugin_data['Name'];
 						if ( ! empty( $plugin_data['PluginURI'] ) ) {
-							$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '">' . $plugin_name . '</a>';
+							$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . esc_attr__( 'Visit plugin homepage', 'woocommerce' ) . '">' . $plugin_name . '</a>';
 						}
+						echo $plugin_name;
+					?>
+					</td>
+					<td>
+						<?php
+							if ( ! empty( $plugin_data['Author'] ) ) {
+								$author = $plugin_data['Author'];
+								if ( ! empty( $plugin_data['AuthorURI'] ) ){
+									$author = '<a href="' . $plugin_data['AuthorURI'] . '" title="' . esc_attr__( 'Visit author homepage', 'woocommerce' ) . '">' . $plugin_data['Author'] . '</a>';
+								}
+								$plugin_meta[] = sprintf( __( 'By %s', 'woocommerce' ), $author );
+							}
+							if ( ! empty( $plugin_data['Version'] ) ) {
+								$version = '<mark class="no">' . $plugin_data['Version'] . '</mark>';
+							}
+							$plugin_meta[] = sprintf( __( 'Version %s', 'woocommerce' ), $version );
 
-						if ( strstr( $dirname, 'woocommerce' ) ) {
+							if ( strstr( $dirname, 'woocommerce' ) ) {
 
-							if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
-								$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
-								$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
-								if ( ! empty( $cl_lines ) ) {
-									foreach ( $cl_lines as $line_num => $cl_line ) {
-										if ( preg_match( '/^[0-9]/', $cl_line ) ) {
+								if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
+									$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
+									$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
+									if ( ! empty( $cl_lines ) ) {
+										foreach ( $cl_lines as $line_num => $cl_line ) {
+											if ( preg_match( '/^[0-9]/', $cl_line ) ) {
 
-											$date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
-											$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
-											$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
-											$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
-											set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-											break;
+												$date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
+												$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
+												$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
+												$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
+												set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
+												break;
+											}
 										}
 									}
 								}
+
+								if ( ! empty( $version_data['version'] ) && version_compare( $version_data['version'], $plugin_data['Version'], '>' ) ) {
+									$plugin_meta[] = sprintf( __( 'Version <mark class="yes">%s</mark> is available.', 'woocommerce' ), $version_data['Version'] );
+								}
 							}
 
-							if ( ! empty( $version_data['version'] ) && version_compare( $version_data['version'], $plugin_data['Version'], '>' ) )
-								$version_string = ' &ndash; <strong style="color:red;">' . $version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
-						}
-
-						$wc_plugins[] = $plugin_name . ' ' . __( 'by', 'woocommerce' ) . ' ' . $plugin_data['Author'] . ' ' . __( 'version', 'woocommerce' ) . ' ' . $plugin_data['Version'] . $version_string;
-
-					}
-				}
-
-				if ( sizeof( $wc_plugins ) == 0 )
-					echo '-';
-				else
-					echo implode( ', <br/>', $wc_plugins );
-
-			?></td>
-		</tr>
+							echo implode( ' | ', $plugin_meta );
+						?>
+					</td>
+				</tr><?php
+			endif;
+		}
+	?>
 	</tbody>
 </table>
 
