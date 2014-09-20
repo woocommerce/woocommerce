@@ -8,7 +8,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WC_Admin_Permalink_Settings' ) ) :
 
@@ -166,7 +168,7 @@ class WC_Admin_Permalink_Settings {
 			$woocommerce_product_attribute_slug = wc_clean( $_POST['woocommerce_product_attribute_slug'] );
 
 			$permalinks = get_option( 'woocommerce_permalinks' );
-			
+
 			if ( ! $permalinks ) {
 				$permalinks = array();
 			}

@@ -1,8 +1,4 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * WooCommerce Admin.
  *
@@ -11,6 +7,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category 	Admin
  * @package 	WooCommerce/Admin
  * @version     2.1.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+/**
+ * WC_Admin class.
  */
 class WC_Admin {
 
