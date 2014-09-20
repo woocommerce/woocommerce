@@ -1,6 +1,7 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly
 }
 
 /**
@@ -432,7 +433,7 @@ class WC_Product_Variable extends WC_Product {
 			if ( empty( $variation->variation_id ) || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
 				continue;
 			}
-				
+
 			$variation_attributes = $variation->get_variation_attributes();
 			$availability         = $variation->get_availability();
 			$availability_html    = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . wp_kses_post( $availability['availability'] ) . '</p>';
@@ -519,7 +520,7 @@ class WC_Product_Variable extends WC_Product {
 		) );
 
 		$stock_status = 'outofstock';
-		
+
 		foreach ( $children as $child_id ) {
 			$child_stock_status = get_post_meta( $child_id, '_stock_status', true );
 			$child_stock_status = $child_stock_status ? $child_stock_status : 'instock';
@@ -616,7 +617,7 @@ class WC_Product_Variable extends WC_Product {
 			// The VARIABLE PRODUCT price should equal the min price of any type
 			update_post_meta( $product_id, '_price', $min_price );
 			delete_transient( 'wc_products_onsale' );
-			
+
 			do_action( 'woocommerce_variable_product_sync', $product_id, $children );
 		}
 	}
