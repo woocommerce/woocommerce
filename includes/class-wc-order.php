@@ -8,7 +8,6 @@
  * @category Class
  * @author   WooThemes
  */
-
 class WC_Order extends WC_Abstract_Order {
 
 	/**
@@ -72,7 +71,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get the refunded amount for a line item
-	 * 
+	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
 	 * @return integer
@@ -91,7 +90,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get the refunded amount for a line item
-	 * 
+	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
 	 * @return integer
@@ -117,7 +116,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get the refunded amount for a line item
-	 * 
+	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  int $tax_id ID of the tax we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
@@ -146,5 +145,5 @@ class WC_Order extends WC_Abstract_Order {
 			}
 		}
 		return $total * -1;
-	}	
+	}
 }
