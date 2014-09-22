@@ -104,8 +104,13 @@ class WC_Frontend_Scripts {
 			}
 		}
 
-		if ( is_add_payment_method_page() )
+		if ( is_add_payment_method_page() ) {
 			wp_enqueue_script( 'wc-add-payment-method', $frontend_script_path . 'add-payment-method' . $suffix . '.js', array( 'jquery', 'woocommerce' ), WC_VERSION, true );
+		}
+
+		if ( is_lost_password_page() ) {
+			wp_enqueue_script( 'wc-lost-password', $frontend_script_path . 'lost-password' . $suffix . '.js', array( 'jquery', 'woocommerce' ), WC_VERSION, true );
+		}
 
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			wp_enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.5', true );
