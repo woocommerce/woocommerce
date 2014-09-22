@@ -1,4 +1,4 @@
-@import 'mixins.less';
+@import 'mixins';
 
 @font-face {
 	font-family: 'WooCommerce';
@@ -99,7 +99,7 @@ ul.woocommerce_stats {
 				}
 
 				&:before {
-					.icon();
+					@include icon();
 					font-size: 2em;
 					position: relative;
 					width: auto;
@@ -132,7 +132,7 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 			a:before {
 				content: "\e011";
-				color: @green;
+				color: $green;
 			}
 		}
 		li.on-hold-orders {
@@ -145,13 +145,13 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 			a:before {
 				content: "\e02c";
-				color: @orange;
+				color: $orange;
 			}
 		}
 		li.out-of-stock {
 			a:before {
 				content: "\e02c";
-				color: @red;
+				color: $red;
 			}
 		}
 	}
