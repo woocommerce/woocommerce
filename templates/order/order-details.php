@@ -39,7 +39,7 @@ $order = wc_get_order( $order_id );
 							echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times; %s', $item['qty'] ) . '</strong>', $item );
 
 							// allow other plugins to add additional product information here
-							do_action( 'woocommerce_order_item_display_custom', $item_id, $item, $order );
+							do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
 							$item_meta->display();
 
@@ -57,6 +57,9 @@ $order = wc_get_order( $order_id );
 
 								echo '<br/>' . implode( '<br/>', $links );
 							}
+
+							// allow other plugins to add additional product information here
+							do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
 						?>
 					</td>
 					<td class="product-total">
