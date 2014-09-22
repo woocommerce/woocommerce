@@ -17,15 +17,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
 	</div>
 </div>
-<br/>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
 
+<br/>
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="2"><?php _e( 'Environment', 'woocommerce' ); ?></th>
+			<th colspan="2"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<tr>
 			<td><?php _e( 'Home URL', 'woocommerce' ); ?>:</td>
@@ -99,12 +104,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
-				<td><?php _e('PHP Post Max Size', 'woocommerce' ); ?>:</td>
-				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
+				<td><?php _e( 'PHP Post Max Size', 'woocommerce' ); ?>:</td>
+				<td><?php echo size_format( wc_let_to_num( ini_get( 'post_max_size' ) ) ); ?></td>
 			</tr>
 			<tr>
-				<td><?php _e('PHP Time Limit', 'woocommerce' ); ?>:</td>
-				<td><?php echo ini_get('max_execution_time'); ?></td>
+				<td><?php _e( 'PHP Time Limit', 'woocommerce' ); ?>:</td>
+				<td><?php echo ini_get( 'max_execution_time' ); ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'PHP Max Input Vars', 'woocommerce' ); ?>:</td>
@@ -140,14 +145,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$posting = array();
 
 			// fsockopen/cURL
-			$posting['fsockopen_curl']['name'] = __( 'fsockopen/cURL','woocommerce');
+			$posting['fsockopen_curl']['name'] = __( 'fSockopen/cURL', 'woocommerce' );
 			if ( function_exists( 'fsockopen' ) || function_exists( 'curl_init' ) ) {
-				if ( function_exists( 'fsockopen' ) && function_exists( 'curl_init' )) {
-					$posting['fsockopen_curl']['note'] = __( 'Your server has fsockopen and cURL enabled.', 'woocommerce' );
-				} elseif ( function_exists( 'fsockopen' )) {
-					$posting['fsockopen_curl']['note'] = __( 'Your server has fsockopen enabled, cURL is disabled.', 'woocommerce' );
+				if ( function_exists( 'fsockopen' ) && function_exists( 'curl_init' ) ) {
+					$posting['fsockopen_curl']['note'] = __( 'Your server has FSockopen and cURL enabled.', 'woocommerce' );
+				} elseif ( function_exists( 'fsockopen' ) ) {
+					$posting['fsockopen_curl']['note'] = __( 'Your server has FSockopen enabled, cURL is disabled.', 'woocommerce' );
 				} else {
-					$posting['fsockopen_curl']['note'] = __( 'Your server has cURL enabled, fsockopen is disabled.', 'woocommerce' );
+					$posting['fsockopen_curl']['note'] = __( 'Your server has cURL enabled, FSockopen is disabled.', 'woocommerce' );
 				}
 				$posting['fsockopen_curl']['success'] = true;
 			} else {
@@ -156,7 +161,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 
 			// SOAP
-			$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
+			$posting['soap_client']['name'] = __( 'SOAP Client', 'woocommerce' );
 			if ( class_exists( 'SoapClient' ) ) {
 				$posting['soap_client']['note'] = __( 'Your server has the SOAP Client class enabled.', 'woocommerce' );
 				$posting['soap_client']['success'] = true;
@@ -166,7 +171,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 
 			// WP Remote Post Check
-			$posting['wp_remote_post']['name'] = __( 'WP Remote Post','woocommerce');
+			$posting['wp_remote_post']['name'] = __( 'WP Remote Post', 'woocommerce');
 			$request['cmd'] = '_notify-validate';
 			$params = array(
 				'sslverify' 	=> false,
@@ -203,111 +208,161 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'Locale', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Locale', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<?php
 			$locale = localeconv();
 
-			foreach ( $locale as $key => $val )
-				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) )
+			foreach ( $locale as $key => $val ) {
+				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) ) {
 					echo '<tr><td>' . $key . ':</td><td>' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
+				}
+			}
 		?>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="2"><?php _e( 'Plugins', 'woocommerce' ); ?></th>
+			<th colspan="2"><?php _e( 'Active Plugins', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
-	<tbody>
+	<tfoot>
 		<tr>
-			<td><?php _e( 'Installed Plugins','woocommerce' ); ?>:</td>
-			<td><?php
-				$active_plugins = (array) get_option( 'active_plugins', array() );
+			<th colspan="2" scope="col">
+			<?php
+				$plugin_updates = get_plugin_updates();
+				if ( empty( $plugin_updates ) ) {
+					echo '<mark class="yes">' . __( 'Your plugins are all up to date.', 'woocommerce' ) . '</mark>';
+				} else {
+					echo '<mark class="error">' . __( 'Some of your plugins have new versions available. Check the ones and update them !', 'woocommerce' ) . '</mark>';
+				}
+			?>
+			</th>
+		</tr>
+	</tfoot>
+	<tbody>
+	<?php
+		// Get only active and valid plugins
+		$active_plugins = wp_get_active_and_valid_plugins();
 
-				if ( is_multisite() )
-					$active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
+		foreach ( $active_plugins as $plugin ) {
+			$plugin_meta    = array();
+			$plugin_data    = @get_plugin_data( $plugin );
+			$dirname        = dirname( $plugin );
+			$version_string = '';
 
-				$wc_plugins = array();
-
-				foreach ( $active_plugins as $plugin ) {
-
-					$plugin_data    = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-					$dirname        = dirname( $plugin );
-					$version_string = '';
-
-					if ( ! empty( $plugin_data['Name'] ) ) {
-
-						// link the plugin name to the plugin url if available
+			if ( ! empty( $plugin_data['Name'] ) ) : ?>
+				<tr>
+					<td>
+					<?php
 						$plugin_name = $plugin_data['Name'];
 						if ( ! empty( $plugin_data['PluginURI'] ) ) {
-							$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '">' . $plugin_name . '</a>';
+							$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . esc_attr__( 'Visit plugin homepage', 'woocommerce' ) . '">' . $plugin_name . '</a>';
 						}
+						echo $plugin_name;
+					?>
+					</td>
+					<td>
+						<?php
+							if ( ! empty( $plugin_data['Author'] ) ) {
+								$author = $plugin_data['Author'];
+								if ( ! empty( $plugin_data['AuthorURI'] ) ){
+									$author = '<a href="' . $plugin_data['AuthorURI'] . '" title="' . esc_attr__( 'Visit author homepage', 'woocommerce' ) . '">' . $plugin_data['Author'] . '</a>';
+								}
+								$plugin_meta[] = sprintf( __( 'By %s', 'woocommerce' ), $author );
+							}
+							if ( ! empty( $plugin_data['Version'] ) ) {
+								$version = '<mark class="no">' . $plugin_data['Version'] . '</mark>';
+							}
+							$plugin_meta[] = sprintf( __( 'Version %s', 'woocommerce' ), $version );
 
-						if ( strstr( $dirname, 'woocommerce' ) ) {
+							if ( strstr( $dirname, 'woocommerce' ) ) {
 
-							if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
-								$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
-								$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
-								if ( ! empty( $cl_lines ) ) {
-									foreach ( $cl_lines as $line_num => $cl_line ) {
-										if ( preg_match( '/^[0-9]/', $cl_line ) ) {
+								if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
+									$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
+									$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
+									if ( ! empty( $cl_lines ) ) {
+										foreach ( $cl_lines as $line_num => $cl_line ) {
+											if ( preg_match( '/^[0-9]/', $cl_line ) ) {
 
-											$date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
-											$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
-											$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
-											$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
-											set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-											break;
+												$date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
+												$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
+												$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
+												$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
+												set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
+												break;
+											}
 										}
 									}
 								}
+
+								if ( ! empty( $version_data['version'] ) && version_compare( $version_data['version'], $plugin_data['Version'], '>' ) ) {
+									$plugin_meta[] = sprintf( __( 'Version <mark class="yes">%s</mark> is available.', 'woocommerce' ), $version_data['Version'] );
+								}
 							}
 
-							if ( ! empty( $version_data['version'] ) && version_compare( $version_data['version'], $plugin_data['Version'], '>' ) )
-								$version_string = ' &ndash; <strong style="color:red;">' . $version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
-						}
-
-						$wc_plugins[] = $plugin_name . ' ' . __( 'by', 'woocommerce' ) . ' ' . $plugin_data['Author'] . ' ' . __( 'version', 'woocommerce' ) . ' ' . $plugin_data['Version'] . $version_string;
-
-					}
-				}
-
-				if ( sizeof( $wc_plugins ) == 0 )
-					echo '-';
-				else
-					echo implode( ', <br/>', $wc_plugins );
-
-			?></td>
-		</tr>
+							echo implode( ' | ', $plugin_meta );
+						?>
+					</td>
+				</tr><?php
+			endif;
+		}
+	?>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'Settings', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Settings', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<tr>
 			<td><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td><?php echo get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
 		</tr>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'WC Pages', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'WC Pages', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<?php
 			$check_pages = array(
@@ -374,33 +429,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'WC Taxonomies', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'WC Taxonomies', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<tr>
 			<td><?php _e( 'Product Types', 'woocommerce' ); ?>:</td>
 			<td><?php
 				$display_terms = array();
 				$terms = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
-				foreach ( $terms as $term )
+				foreach ( $terms as $term ) {
 					$display_terms[] = $term->name . ' (' . $term->slug . ')';
+				}
 				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
 			?></td>
 		</tr>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="2"><?php _e( 'Theme', 'woocommerce' ); ?></th>
+			<th colspan="2"><?php _e( 'Active Theme', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
-		<?php
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Active Theme', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
+	<?php
 		$active_theme = wp_get_theme();
 		if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
 
@@ -430,70 +502,78 @@ if ( ! defined( 'ABSPATH' ) ) {
 			endif;
 
 		endif;
-		?>
+	?>
 	<tbody>
-			<tr>
-				<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
-				<td><?php
-					echo $active_theme->Name;
-				?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
-				<td><?php
-					echo $active_theme->Version;
+		<tr>
+			<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
+			<td><?php
+				echo $active_theme->Name;
+			?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
+			<td><?php
+				echo $active_theme->Version;
 
-					if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) )
-						echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
-				?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
-				<td><?php
-					echo $active_theme->{'Author URI'};
-				?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
-				<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
-			</tr>
-			<?php
-			if( is_child_theme() ) :
-				$parent_theme = wp_get_theme( $active_theme->Template );
-			?>
-			<tr>
-				<td><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>
-				<td><?php echo $parent_theme->Name; ?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
-				<td><?php echo  $parent_theme->Version; ?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
-				<td><?php
-					echo $parent_theme->{'Author URI'};
-				?></td>
-			</tr>
-			<?php endif ?>
-			<tr>
-				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
-				<td><?php
-					if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
-						echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
-					} else {
-						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
-					}
-				?></td>
-			</tr>
+				if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) )
+					echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
+			?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
+			<td><?php
+				echo $active_theme->{'Author URI'};
+			?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
+			<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
+		</tr>
+		<?php
+		if( is_child_theme() ) :
+			$parent_theme = wp_get_theme( $active_theme->Template );
+		?>
+		<tr>
+			<td><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>
+			<td><?php echo $parent_theme->Name; ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
+			<td><?php echo  $parent_theme->Version; ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
+			<td><?php
+				echo $parent_theme->{'Author URI'};
+			?></td>
+		</tr>
+		<?php endif ?>
+		<tr>
+			<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
+			<td><?php
+				if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
+					echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
+				} else {
+					echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
+				}
+			?></td>
+		</tr>
 	</tbody>
+</table>
 
+<br />
+
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="2"><?php _e( 'Templates', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
+	<tfoot>
+		<tr>
+			<th colspan="2"><?php _e( 'Templates', 'woocommerce' ); ?></th>
+		</tr>
+	</tfoot>
 	<tbody>
 		<?php
 
@@ -551,7 +631,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 	</tbody>
-
 </table>
 
 <script type="text/javascript">
