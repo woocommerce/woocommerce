@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Order_Data
+ * WC_Meta_Box_Order_Data Class
  */
 class WC_Meta_Box_Order_Data {
 

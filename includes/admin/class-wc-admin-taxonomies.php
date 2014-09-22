@@ -1,8 +1,4 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Handles taxonomies in admin
  *
@@ -11,6 +7,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package		WooCommerce/Admin
  * @category	Class
  * @author 		WooThemes
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+/**
+ * WC_Admin_Taxonomies class.
  */
 class WC_Admin_Taxonomies {
 

@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Mijireh Checkout Gateway
@@ -222,7 +224,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		$billing->country 			= $wc_order->billing_country;
 		$billing->company 			= $wc_order->billing_company;
 		$billing->phone 			= $wc_order->billing_phone;
-		
+
 		if ( $billing->validate() ) {
 			$mj_order->set_billing_address( $billing );
 		}
@@ -238,7 +240,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 		$shipping->zip_code 		= $wc_order->shipping_postcode;
 		$shipping->country 			= $wc_order->shipping_country;
 		$shipping->company 			= $wc_order->shipping_company;
-		
+
 		if ( $shipping->validate() ) {
 			$mj_order->set_shipping_address( $shipping );
 		}

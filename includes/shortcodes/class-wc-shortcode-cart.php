@@ -17,7 +17,7 @@ class WC_Shortcode_Cart {
 	 * @param array $atts
 	 */
 	public static function output( $atts ) {
-		
+
 		// Check cart class is loaded or abort
 		if ( is_null( WC()->cart ) ) {
 			return;
