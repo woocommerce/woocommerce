@@ -7,9 +7,12 @@
  * @version     2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 $order = wc_get_order( $order_id );
+
 ?>
 <h2><?php _e( 'Order Details', 'woocommerce' ); ?></h2>
 <table class="shop_table order_details">

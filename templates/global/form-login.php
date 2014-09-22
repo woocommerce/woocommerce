@@ -7,10 +7,14 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
-if ( is_user_logged_in() ) 
+if ( is_user_logged_in() ) {
 	return;
+}
+
 ?>
 <form method="post" class="login" <?php if ( $hidden ) echo 'style="display:none;"'; ?>>
 

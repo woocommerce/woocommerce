@@ -8,11 +8,14 @@
  */
 global $product;
 
-if ( ! defined( 'ABSPATH' ) )
+if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
+}
 
-if ( ! comments_open() )
+if ( ! comments_open() ) {
 	return;
+}
+
 ?>
 <div id="reviews">
 	<div id="comments">

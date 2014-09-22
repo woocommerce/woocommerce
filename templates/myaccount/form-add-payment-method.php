@@ -8,8 +8,9 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit; // Exit if accessed directly
 }
+
 ?>
 <form id="add_payment_method" method="post">
 	<div id="payment">

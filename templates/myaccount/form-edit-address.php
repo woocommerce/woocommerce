@@ -8,7 +8,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly
 }
 
 global $current_user;
@@ -16,6 +16,7 @@ global $current_user;
 $page_title = ( $load_address === 'billing' ) ? __( 'Billing Address', 'woocommerce' ) : __( 'Shipping Address', 'woocommerce' );
 
 get_currentuserinfo();
+
 ?>
 
 <?php wc_print_notices(); ?>
@@ -37,7 +38,7 @@ get_currentuserinfo();
 			<?php woocommerce_form_field( $key, $field, ! empty( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : $field['value'] ); ?>
 
 		<?php endforeach; ?>
-		
+
 		<?php do_action( "woocommerce_after_edit_address_form_{$load_address}" ); ?>
 
 		<p>
