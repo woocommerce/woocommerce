@@ -226,18 +226,10 @@ class WC_Emails {
 		// Set content type
 		$this->_content_type = $content_type;
 
-		// Filters for the email
-		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
-		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
-		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
-
 		// Send
-		wp_mail( $to, $subject, $message, $headers, $attachments );
+		$email = new WC_Email();
+		$email->send( $to, $subject, $message, $headers, $attachments );
 
-		// Unhook filters
-		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
-		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
-		remove_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 	}
 
 	/**
