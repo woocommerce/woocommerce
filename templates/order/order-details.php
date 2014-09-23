@@ -23,7 +23,7 @@ $order = wc_get_order( $order_id );
 		<?php
 		if ( sizeof( $order->get_items() ) > 0 ) {
 
-			foreach( $order->get_items() as $item ) {
+			foreach( $order->get_items() as $item_id => $item ) {
 				$_product     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
 				$item_meta    = new WC_Order_Item_Meta( $item['item_meta'], $_product );
 
@@ -37,6 +37,9 @@ $order = wc_get_order( $order_id );
 								echo apply_filters( 'woocommerce_order_item_name', sprintf( '<a href="%s">%s</a>', get_permalink( $item['product_id'] ), $item['name'] ), $item );
 
 							echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times; %s', $item['qty'] ) . '</strong>', $item );
+
+							// allow other plugins to add additional product information here
+							do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
 							$item_meta->display();
 
@@ -54,6 +57,9 @@ $order = wc_get_order( $order_id );
 
 								echo '<br/>' . implode( '<br/>', $links );
 							}
+
+							// allow other plugins to add additional product information here
+							do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
 						?>
 					</td>
 					<td class="product-total">
