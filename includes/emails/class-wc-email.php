@@ -5,18 +5,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Abstract Email Class
+ * Email Class
  *
  * WooCommerce Email Class which is extended by specific email template classes to add emails to WooCommerce
  *
  * @class       WC_Email
  * @version     2.0.0
- * @package     WooCommerce/Abstracts
+ * @package     WooCommerce/Classes/Emails
  * @author      WooThemes
- * @category    Abstract Class
  * @extends     WC_Settings_API
  */
-abstract class WC_Email extends WC_Settings_API {
+class WC_Email extends WC_Settings_API {
 
 	/** @var string Payment method ID. */
 	public $id;
