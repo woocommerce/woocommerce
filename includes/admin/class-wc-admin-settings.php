@@ -239,36 +239,7 @@ class WC_Admin_Settings {
 			}
 
 			// Description handling
-			if ( true === $value['desc_tip'] ) {
-				$description = '';
-				$tip = $value['desc'];
-			} elseif ( ! empty( $value['desc_tip'] ) ) {
-				$description = $value['desc'];
-				$tip = $value['desc_tip'];
-			} elseif ( ! empty( $value['desc'] ) ) {
-				$description = $value['desc'];
-				$tip = '';
-			} else {
-				$description = $tip = '';
-			}
-
-			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ) ) ) {
-				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
-			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ) ) ) {
-				$description =  wp_kses_post( $description );
-			} elseif ( $description ) {
-				$description = '<span class="description">' . wp_kses_post( $description ) . '</span>';
-			}
-
-			if ( $tip && in_array( $value['type'], array( 'checkbox' ) ) ) {
-
-				$tip = '<p class="description">' . $tip . '</p>';
-
-			} elseif ( $tip ) {
-
-				$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
-
-			}
+			extract( self::get_description_tip( $value ) );
 
 			// Switch based on type
 			switch ( $value['type'] ) {
@@ -619,6 +590,53 @@ class WC_Admin_Settings {
 					break;
 			}
 		}
+	}
+	
+	/**
+	 * Helper function to get the formated description and tip HTML for a 
+	 * given form field. Plugins can call this when implementing their own custom
+	 * settings types.
+	 * 
+	 * @param array $value The form field value array
+	 * @returns array The description and tip as a 2 element array
+	 */
+	public static function get_description_tip( $value ) {
+
+		if ( true === $value['desc_tip'] ) {
+			$description = '';
+			$tip = $value['desc'];
+		} elseif ( ! empty( $value['desc_tip'] ) ) {
+			$description = $value['desc'];
+			$tip = $value['desc_tip'];
+		} elseif ( ! empty( $value['desc'] ) ) {
+			$description = $value['desc'];
+			$tip = '';
+		} else {
+			$description = $tip = '';
+		}
+
+		if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ) ) ) {
+			$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
+		} elseif ( $description && in_array( $value['type'], array( 'checkbox' ) ) ) {
+			$description =  wp_kses_post( $description );
+		} elseif ( $description ) {
+			$description = '<span class="description">' . wp_kses_post( $description ) . '</span>';
+		}
+
+		if ( $tip && in_array( $value['type'], array( 'checkbox' ) ) ) {
+
+			$tip = '<p class="description">' . $tip . '</p>';
+
+		} elseif ( $tip ) {
+
+			$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
+		}
+
+		return array(
+			'description'	=> $description,
+			'tip'			=> $tip
+		);
 	}
 
 	/**
