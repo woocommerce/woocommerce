@@ -7,7 +7,10 @@
  * @version     1.6.4
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 ?>
 <form id="order_review" method="post">
 
@@ -85,9 +88,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			<?php wp_nonce_field( 'woocommerce-pay' ); ?>
 			<?php
 				$pay_order_button_text = apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) );
-				
+
 				echo apply_filters( 'woocommerce_pay_order_button_html', '<input type="submit" class="button alt" id="place_order" value="' . esc_attr( $pay_order_button_text ) . '" data-value="' . esc_attr( $pay_order_button_text ) . '" />' );
-			?>			
+			?>
 			<input type="hidden" name="woocommerce_pay" value="1" />
 		</div>
 

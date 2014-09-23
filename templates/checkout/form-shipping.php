@@ -7,7 +7,10 @@
  * @version     2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 ?>
 <div class="woocommerce-shipping-fields">
 	<?php if ( WC()->cart->needs_shipping_address() === true ) : ?>

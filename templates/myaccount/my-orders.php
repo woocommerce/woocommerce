@@ -10,7 +10,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit; // Exit if accessed directly
 }
 
 $customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_query', array(
