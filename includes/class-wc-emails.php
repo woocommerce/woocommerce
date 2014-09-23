@@ -105,7 +105,7 @@ class WC_Emails {
 	 */
 	function init() {
 		// Include email classes
-		include_once( 'abstracts/abstract-wc-email.php' );
+		include_once( 'emails/class-wc-email.php' );
 
 		$this->emails['WC_Email_New_Order']                 = include( 'emails/class-wc-email-new-order.php' );
 		$this->emails['WC_Email_Customer_Processing_Order'] = include( 'emails/class-wc-email-customer-processing-order.php' );
