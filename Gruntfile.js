@@ -2,6 +2,9 @@
 module.exports = function( grunt ) {
 	'use strict';
 
+	// Load all grunt tasks matching the `grunt-*` pattern
+	require( 'load-grunt-tasks' )( grunt );
+
 	grunt.initConfig({
 
 		// setting folder templates
@@ -226,18 +229,6 @@ module.exports = function( grunt ) {
 			}
 		}
 	});
-
-	// Load NPM tasks to be used here
-	grunt.loadNpmTasks( 'grunt-shell' );
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
-	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
-	grunt.loadNpmTasks( 'grunt-contrib-sass' );
-	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
-	grunt.loadNpmTasks( 'grunt-contrib-watch' );
-	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-contrib-clean' );
-	grunt.loadNpmTasks( 'grunt-wp-i18n' );
-	grunt.loadNpmTasks( 'grunt-checktextdomain' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
