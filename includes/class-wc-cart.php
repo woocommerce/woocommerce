@@ -818,7 +818,7 @@ class WC_Cart {
 
 			// Force quantity to 1 if sold individually
 			if ( $product_data->is_sold_individually() ) {
-				$quantity = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $product_id, $variation_id, $cart_item_data );
+				$quantity = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product_id, $variation_id, $cart_item_data );
 			}
 
 			// Check product is_purchasable
