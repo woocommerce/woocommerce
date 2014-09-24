@@ -469,7 +469,7 @@ class WC_Product_Variable extends WC_Product {
 				'weight'               => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
 				'dimensions'           => $variation->get_dimensions(),
 				'min_qty'              => 1,
-				'max_qty'              => $variation->backorders_allowed() ? '' : $variation->stock,
+				'max_qty'              => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
 				'backorders_allowed'   => $variation->backorders_allowed(),
 				'is_in_stock'          => $variation->is_in_stock(),
 				'is_downloadable'      => $variation->is_downloadable() ,
