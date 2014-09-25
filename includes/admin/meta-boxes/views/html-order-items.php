@@ -224,9 +224,13 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
 			<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
 		<?php endif; ?>
+		<?php
+			// allow adding custom buttons
+			do_action( 'woocommerce_order_item_add_action_buttons', $order );
+		?>
 		<?php if ( $order->is_editable() ) : ?>
-		<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate Taxes', 'woocommerce' ); ?></button>
-		<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
+			<button type="button" class="button button-primary calculate-tax-action"><?php _e( 'Calculate Taxes', 'woocommerce' ); ?></button>
+			<button type="button" class="button button-primary calculate-action"><?php _e( 'Calculate Total', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 	</p>
 </div>
