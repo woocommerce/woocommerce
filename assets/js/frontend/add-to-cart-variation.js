@@ -259,7 +259,9 @@
 							var attributes = variations[ num ].attributes;
 
 							for ( var attr_name in attributes ) {
+
 								if ( attributes.hasOwnProperty( attr_name ) ) {
+
 									var attr_val = attributes[ attr_name ];
 
 									if ( attr_name == current_attr_name ) {

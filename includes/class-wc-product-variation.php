@@ -193,7 +193,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @access public
 	 * @return string
