@@ -357,12 +357,16 @@ class WC_Admin_Post_Types {
 				$post_type_object = get_post_type_object( $post->post_type );
 				$can_edit_post = current_user_can( $post_type_object->cap->edit_post, $post->ID );
 
-				echo '<div class="tips" data-tip="' . __( 'Edit coupon', 'woocommerce' ) . '"><a href="' . esc_attr( $edit_link ) . '"><span>' . esc_html( $title ). '</span></a></div>';
+				echo '<a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ). '</a>';
 
 				_post_states( $post );
 
 				// Get actions
 				$actions = array();
+
+				if ( current_user_can( $post_type_object->cap->edit_post, $post->ID ) ) {
+					$actions['edit'] = '<a href="' . admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=edit', $post->ID ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
+				}
 
 				if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
 					if ( 'trash' == $post->post_status )
