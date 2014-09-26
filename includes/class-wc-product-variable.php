@@ -430,7 +430,13 @@ class WC_Product_Variable extends WC_Product {
 
 			$variation = $this->get_child( $child_id );
 
+			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked
 			if ( empty( $variation->variation_id ) || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
+				continue;
+			}
+
+			// Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price)
+			if ( apply_filters( 'woocommerce_hide_invisible_variations', false, $this->id ) && ! $variation->variation_is_visible() ) {
 				continue;
 			}
 
@@ -457,6 +463,7 @@ class WC_Product_Variable extends WC_Product {
 			$available_variations[] = apply_filters( 'woocommerce_available_variation', array(
 				'variation_id'         => $child_id,
 				'variation_is_visible' => $variation->variation_is_visible(),
+				'variation_is_active'  => $variation->variation_is_active(),
 				'is_purchasable'       => $variation->is_purchasable(),
 				'attributes'           => $variation_attributes,
 				'image_src'            => $image,

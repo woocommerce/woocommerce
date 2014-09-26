@@ -205,7 +205,9 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Checks if this particular variation is visible (variations with no price, or out of stock, can be hidden)
+	 * Checks if this particular variation is visible. Invisible variations are enabled and can be selected, but no price / stock info is displayed.
+	 * Instead, a suitable 'unavailable' message is displayed.
+	 * Invisible by default: Disabled variations and variations with an empty price.
 	 *
 	 * @return bool
 	 */
@@ -214,11 +216,6 @@ class WC_Product_Variation extends WC_Product {
 
 		// Published == enabled checkbox
 		if ( get_post_status( $this->variation_id ) != 'publish' ) {
-			$visible = false;
-		}
-
-		// Out of stock visibility
-		elseif ( get_option('woocommerce_hide_out_of_stock_items') == 'yes' && ! $this->is_in_stock() ) {
 			$visible = false;
 		}
 
@@ -231,7 +228,19 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Controls whether this particular variation will appear greyed-out (inactive) or not (active).
+	 * Used by extensions to make incompatible variations appear greyed-out, etc.
+	 * Other possible uses: prevent out-of-stock variations from being selected.
+	 *
+	 * @return bool
+	 */
+	public function variation_is_active() {
+		return apply_filters( 'woocommerce_variation_is_active', true, $this->variation_id, $this->id );
+	}
+
+	/**
 	 * Returns false if the product cannot be bought.
+	 * Override abstract method so that: i) Disabled variations are not be purchasable by admins. ii) Enabled variations are not purchasable if the parent product is not purchasable.
 	 *
 	 * @access public
 	 * @return bool
