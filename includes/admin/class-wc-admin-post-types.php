@@ -357,7 +357,7 @@ class WC_Admin_Post_Types {
 				$post_type_object = get_post_type_object( $post->post_type );
 				$can_edit_post = current_user_can( $post_type_object->cap->edit_post, $post->ID );
 
-				echo '<div class="code tips" data-tip="' . __( 'Edit coupon', 'woocommerce' ) . '"><a href="' . esc_attr( $edit_link ) . '"><span>' . esc_html( $title ). '</span></a></div>';
+				echo '<div class="tips" data-tip="' . __( 'Edit coupon', 'woocommerce' ) . '"><a href="' . esc_attr( $edit_link ) . '"><span>' . esc_html( $title ). '</span></a></div>';
 
 				_post_states( $post );
 
