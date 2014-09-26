@@ -132,6 +132,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.3.0 =
 * Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
+* Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
+* Tweak - Double the default product image dimensions.
 
 = 2.2.5 =
 * Fix - Filters in admin screen for coupons and orders.
