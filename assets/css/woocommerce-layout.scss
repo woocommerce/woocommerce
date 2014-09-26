@@ -75,6 +75,8 @@
 
 	.related, .upsells.products {
 		@include clearfix();
+		clear: both;
+
 		ul.products, ul {
 			float:none;
 			li.product {
