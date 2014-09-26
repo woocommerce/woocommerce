@@ -72,6 +72,9 @@ module.exports = function( grunt ) {
 		// Compile all .scss files.
 		sass: {
 			compile: {
+				options: {
+					sourcemap: 'none'
+				},
 				files: [{
 					expand: true,
 					cwd: '<%= dirs.css %>/',
@@ -241,9 +244,13 @@ module.exports = function( grunt ) {
 
 	// Register tasks
 	grunt.registerTask( 'default', [
-		'sass',
-		'cssmin',
+		'css',
 		'uglify'
+	]);
+
+	grunt.registerTask( 'css', [
+		'sass',
+		'cssmin'
 	]);
 
 	grunt.registerTask( 'docs', [
