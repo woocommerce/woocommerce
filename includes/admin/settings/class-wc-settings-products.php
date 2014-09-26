@@ -373,8 +373,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'      => '',
 					'type'     => 'image_width',
 					'default'  => array(
-						'width'  => '150',
-						'height' => '150',
+						'width'  => '300',
+						'height' => '300',
 						'crop'   => 1
 					),
 					'desc_tip' =>  true,
@@ -387,8 +387,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'      => '',
 					'type'     => 'image_width',
 					'default'  => array(
-						'width'  => '300',
-						'height' => '300',
+						'width'  => '600',
+						'height' => '600',
 						'crop'   => 1
 					),
 					'desc_tip' =>  true,
@@ -401,8 +401,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'      => '',
 					'type'     => 'image_width',
 					'default'  => array(
-						'width'  => '90',
-						'height' => '90',
+						'width'  => '180',
+						'height' => '180',
 						'crop'   => 1
 					),
 					'desc_tip' =>  true,
