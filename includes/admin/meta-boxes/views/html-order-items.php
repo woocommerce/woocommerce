@@ -361,3 +361,5 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	</div>
 	<div class="wc-backbone-modal-backdrop">&nbsp;</div>
 </script>
+
+<?php do_action( 'woocommerce_order_items_extra_modals', $order ) ?>
