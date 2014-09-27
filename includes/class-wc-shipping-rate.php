@@ -52,6 +52,6 @@ class WC_Shipping_Rate {
 		if ( $this->taxes && sizeof( $this->taxes ) > 0 && ! WC()->customer->is_vat_exempt() ) {
 			$taxes = array_sum( $this->taxes );
 		}
-		return $taxes;
+		return apply_filters( 'woocommerce_get_shipping_tax', $taxes, $this );
 	}
 }
