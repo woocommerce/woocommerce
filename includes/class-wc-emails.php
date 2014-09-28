@@ -210,6 +210,20 @@ class WC_Emails {
 	}
 
 	/**
+	 * Replace message inline style for rtl languages sites in the woocommerce mail template.
+	 *
+	 * @access public
+	 * @param mixed $mail
+	 * @return mixed
+	 */
+	function inline_rtl( $mail ){
+		$search  = array( "text-align:left", "text-align: left" , "direction: ltr", "direction:ltr" );
+		$replace = array("text-align:right", "text-align: right", "direction: rtl", "direction:rtl" );
+		$mail['message'] = str_replace( $search, $replace, $mail['message'] );
+		return $mail;
+	}
+
+	/**
 	 * Send the email.
 	 *
 	 * @access public
@@ -231,6 +245,10 @@ class WC_Emails {
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
+		//rtl inline style
+		if (is_rtl())
+			add_filter('wp_mail', array( $this, 'inline_rtl' ) );
+
 		// Send
 		wp_mail( $to, $subject, $message, $headers, $attachments );
 
@@ -238,6 +256,8 @@ class WC_Emails {
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		remove_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
+		if (is_rtl())
+			remove_filter('wp_mail', array( $this, 'inline_rtl' ) );
 	}
 
 	/**
@@ -344,7 +364,7 @@ class WC_Emails {
 		$attachments = apply_filters('woocommerce_email_attachments', array(), 'low_stock', $product);
 
 		// Send the mail
-		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
+		$this->send( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments);
 	}
 
 	/**
@@ -376,7 +396,7 @@ class WC_Emails {
 		$attachments = apply_filters('woocommerce_email_attachments', array(), 'no_stock', $product);
 
 		// Send the mail
-		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
+		$this->send( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments);
 	}
 
 	/**
@@ -421,7 +441,7 @@ class WC_Emails {
 		$attachments = apply_filters('woocommerce_email_attachments', array(), 'backorder', $args);
 
 		// Send the mail
-		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
+		$this->send( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments);
 	}
 
 }
