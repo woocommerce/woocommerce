@@ -935,7 +935,7 @@ class WC_AJAX {
 			$type_to_load . '_phone'      => get_user_meta( $user_id, $type_to_load . '_phone', true ),
 		);
 
-		$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer_data, $type_to_load );
+		$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer_data, $user_id, $type_to_load );
 
 		wp_send_json( $customer_data );
 
