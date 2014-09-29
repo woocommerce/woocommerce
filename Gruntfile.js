@@ -27,27 +27,6 @@ module.exports = function( grunt ) {
 			]
 		},
 
-		// Compile all .less files.
-		less: {
-			compile: {
-				options: {
-					// These paths are searched for @imports
-					paths: ['<%= dirs.css %>/']
-				},
-				files: [{
-					expand: true,
-					cwd: '<%= dirs.css %>/',
-					src: [
-						'*.less',
-						'!woocommerce-base.less',
-						'!mixins.less'
-					],
-					dest: '<%= dirs.css %>/',
-					ext: '.css'
-				}]
-			}
-		},
-
 		// Minify .js files.
 		uglify: {
 			options: {
@@ -73,7 +52,7 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/admin/jquery.flot.pie.min.js': ['<%= dirs.js %>/admin/jquery.flot.pie.js'],
 					'<%= dirs.js %>/admin/jquery.flot.resize.min.js': ['<%= dirs.js %>/admin/jquery.flot.resize.js'],
 					'<%= dirs.js %>/admin/jquery.flot.stack.min.js': ['<%= dirs.js %>/admin/jquery.flot.stack.js'],
-					'<%= dirs.js %>/admin/jquery.flot.time.min.js': ['<%= dirs.js %>/admin/jquery.flot.time.js'],
+					'<%= dirs.js %>/admin/jquery.flot.time.min.js': ['<%= dirs.js %>/admin/jquery.flot.time.js']
 				}
 			},
 			frontend: {
@@ -87,7 +66,23 @@ module.exports = function( grunt ) {
 					dest: '<%= dirs.js %>/frontend/',
 					ext: '.min.js'
 				}]
-			},
+			}
+		},
+
+		// Compile all .scss files.
+		sass: {
+			compile: {
+				options: {
+					sourcemap: 'none'
+				},
+				files: [{
+					expand: true,
+					cwd: '<%= dirs.css %>/',
+					src: ['*.scss'],
+					dest: '<%= dirs.css %>/',
+					ext: '.css'
+				}]
+			}
 		},
 
 		// Minify all .css files.
@@ -103,9 +98,9 @@ module.exports = function( grunt ) {
 
 		// Watch changes for assets.
 		watch: {
-			less: {
-				files: ['<%= dirs.css %>/*.less'],
-				tasks: ['less', 'cssmin']
+			css: {
+				files: ['<%= dirs.css %>/*.scss'],
+				tasks: ['sass', 'cssmin']
 			},
 			js: {
 				files: [
@@ -197,7 +192,7 @@ module.exports = function( grunt ) {
 			apigen: {
 				command: [
 					'cd apigen/',
-					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/api/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"',
+					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/api/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"'
 				].join( '&&' )
 			}
 		},
@@ -238,9 +233,9 @@ module.exports = function( grunt ) {
 	// Load NPM tasks to be used here
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
-	grunt.loadNpmTasks( 'grunt-contrib-less' );
-	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
+	grunt.loadNpmTasks( 'grunt-contrib-sass' );
+	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
@@ -249,9 +244,13 @@ module.exports = function( grunt ) {
 
 	// Register tasks
 	grunt.registerTask( 'default', [
-		'less',
-		'cssmin',
+		'css',
 		'uglify'
+	]);
+
+	grunt.registerTask( 'css', [
+		'sass',
+		'cssmin'
 	]);
 
 	grunt.registerTask( 'docs', [

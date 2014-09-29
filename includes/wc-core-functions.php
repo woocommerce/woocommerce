@@ -10,7 +10,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 // Include core functions (available in both admin and frontend)
 include( 'wc-conditional-functions.php' );
@@ -463,7 +465,8 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
 		setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-		trigger_error( "Cookie cannot be set - headers already sent", E_USER_NOTICE );
+		headers_sent( $file, $line );
+		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE );
 	}
 }
 

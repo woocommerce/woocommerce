@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -130,6 +130,32 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.3.0 =
+* Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
+* Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
+* Tweak - Double the default product image dimensions.
+
+= 2.2.5 =
+* Fix - Filters in admin screen for coupons and orders.
+* Fix - When bulk editing, don't allow sale price to be negative.
+* Fix - When manually adding items to an order, show tax columns.
+* Fix - When manually adding items to an order, include variation data.
+* Fix - Prevent errors when constructing WC_Order without an ID.
+* Tweak - Tweak load_plugin_textdomain to be relative - this falls back to WP_LANG_DIR automatically. Can prevent "open_basedir restriction in effect".
+* Tweak - Added acceptance marks to PayPal Standard where applicable to replace generic PayPal icon.
+
+= 2.2.4 - 18/09/2014 =
+* Fix - Prevent errors when adding 'zero-rated' tax on checkout.
+* Fix - Fixed a varation product width inheritance bug.
+* Fix - Totals in taxes by date report.
+* Fix - Fix the 'only 1 visible product' redirect to not trigger when paging results.
+* Tweak - Improved headers sent notice to include file and line.
+* Tweak - When updating order status, ensure its a valid WC order status.
+* Tweak - Add notice when order is no longer editable.
+* Dev - Allow getting rating count for a specific rating value #6284.
+* Localisation - Nepal States.
+* Localisation - Mexico states.
+
 = 2.2.3 - 16/09/2014 =
 * Fix - Order status translation in admin and account page.
 * Fix - Ensure shipping address gets displayed - fixes needs_shipping_address() method.
@@ -189,6 +215,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Disable image size settings if filters are being used.
 * Tweak - Hide the shipping address when local pickup is used.
 * Tweak - Password protected posts are not hidden from catalog by default anymore, visibility can be set via the 'Catalog visibility' option.
+* Tweak - Removed the shortcode button in favor to [WooCommerce Shortcodes](https://wordpress.org/plugins/woocommerce-shortcodes/)
 * Dev - API Version 2 with push support.
 * Dev - API: Lookup customers by email endpoint.
 * Dev - API: Allow ordering on the resource level.
@@ -1027,5 +1054,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 2.2.3 =
+= 2.2.4 =
 2.2 is a major update. Test extensions and your theme prior to updating, ensure extensions are up to date and 2.2 compatible, and ensure that you keep backups. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.

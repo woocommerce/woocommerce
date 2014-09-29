@@ -9,7 +9,9 @@
  * @extends 	WC_Widget
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class WC_Widget_Recently_Viewed extends WC_Widget {
 

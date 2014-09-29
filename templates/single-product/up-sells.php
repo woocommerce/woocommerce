@@ -7,13 +7,17 @@
  * @version     1.6.4
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 global $product, $woocommerce_loop;
 
 $upsells = $product->get_upsells();
 
-if ( sizeof( $upsells ) == 0 ) return;
+if ( sizeof( $upsells ) == 0 ) {
+	return;
+}
 
 $meta_query = WC()->query->get_meta_query();
 

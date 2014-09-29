@@ -1,5 +1,9 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 ?>
 <div class="wc-metabox closed">
 	<h3 class="fixed">

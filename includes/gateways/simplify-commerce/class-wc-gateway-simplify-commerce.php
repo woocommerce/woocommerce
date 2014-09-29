@@ -1,4 +1,5 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -268,7 +269,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 * @param integer $order_id
 	 */
 	public function process_payment( $order_id ) {
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 		$token = isset( $_POST['simplify_token'] ) ? wc_clean( $_POST['simplify_token'] ) : '';
 
 		try {

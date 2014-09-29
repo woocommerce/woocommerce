@@ -1,7 +1,9 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
+
 ?>
 <tr class="fee <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_item_id="<?php echo $item_id; ?>">
 	<td class="check-column"><input type="checkbox" /></td>
@@ -42,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</td>
 
 	<?php
-		if ( isset( $legacy_order ) && ! $legacy_order && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+		if ( empty( $legacy_order ) && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
 			$line_tax_data = isset( $item['line_tax_data'] ) ? $item['line_tax_data'] : '';
 			$tax_data      = maybe_unserialize( $line_tax_data );
 

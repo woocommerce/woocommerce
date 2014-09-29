@@ -8,7 +8,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 
@@ -355,12 +357,16 @@ class WC_Admin_Post_Types {
 				$post_type_object = get_post_type_object( $post->post_type );
 				$can_edit_post = current_user_can( $post_type_object->cap->edit_post, $post->ID );
 
-				echo '<div class="code tips" data-tip="' . __( 'Edit coupon', 'woocommerce' ) . '"><a href="' . esc_attr( $edit_link ) . '"><span>' . esc_html( $title ). '</span></a></div>';
+				echo '<a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ). '</a>';
 
 				_post_states( $post );
 
 				// Get actions
 				$actions = array();
+
+				if ( current_user_can( $post_type_object->cap->edit_post, $post->ID ) ) {
+					$actions['edit'] = '<a href="' . admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=edit', $post->ID ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
+				}
 
 				if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
 					if ( 'trash' == $post->post_status )
@@ -851,7 +857,11 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( isset( $_REQUEST['_featured'] ) ) {
-			if ( update_post_meta( $post_id, '_featured', isset( $_REQUEST['_featured'] ) ? 'yes' : 'no' ) ) {
+			if ( update_post_meta( $post_id, '_featured', 'yes' ) ) {
+				delete_transient( 'wc_featured_products' );
+			}
+		} else {
+			if ( update_post_meta( $post_id, '_featured', 'no' ) ) {
 				delete_transient( 'wc_featured_products' );
 			}
 		}
@@ -1012,9 +1022,9 @@ class WC_Admin_Post_Types {
 					case 3 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = $old_regular_price - ( round ( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) );
+							$new_price = max( 0, $old_regular_price - ( round ( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) ) );
 						} else {
-							$new_price = $old_regular_price - $regular_price;
+							$new_price = max( 0, $old_regular_price - $regular_price );
 						}
 						break;
 
@@ -1033,7 +1043,7 @@ class WC_Admin_Post_Types {
 			if ( ! empty( $_REQUEST['change_sale_price'] ) ) {
 
 				$change_sale_price = absint( $_REQUEST['change_sale_price'] );
-				$sale_price = esc_attr( stripslashes( $_REQUEST['_sale_price'] ) );
+				$sale_price        = esc_attr( stripslashes( $_REQUEST['_sale_price'] ) );
 
 				switch ( $change_sale_price ) {
 					case 1 :
@@ -1050,17 +1060,17 @@ class WC_Admin_Post_Types {
 					case 3 :
 						if ( strstr( $sale_price, '%' ) ) {
 							$percent = str_replace( '%', '', $sale_price ) / 100;
-							$new_price = $old_sale_price - ( $old_sale_price * $percent );
+							$new_price = max( 0, $old_sale_price - ( $old_sale_price * $percent ) );
 						} else {
-							$new_price = $old_sale_price - $sale_price;
+							$new_price = max( 0, $old_sale_price - $sale_price );
 						}
 						break;
 					case 4 :
 						if ( strstr( $sale_price, '%' ) ) {
 							$percent = str_replace( '%', '', $sale_price ) / 100;
-							$new_price = $product->regular_price - ( $product->regular_price * $percent );
+							$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
 						} else {
-							$new_price = $product->regular_price - $sale_price;
+							$new_price = max( 0, $product->regular_price - $sale_price );
 						}
 						break;
 
@@ -1337,13 +1347,15 @@ class WC_Admin_Post_Types {
 		switch ( $typenow ) {
 			case 'product' :
 				$this->product_filters();
-			break;
-			case 'product' :
+				break;
+			case 'shop_coupon' :
 				$this->shop_coupon_filters();
-			break;
-			case 'product' :
+				break;
+			case 'shop_order' :
 				$this->shop_order_filters();
-			break;
+				break;
+			default :
+				break;
 		}
 	}
 

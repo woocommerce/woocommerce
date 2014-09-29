@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * PayPal Standard Payment Gateway
@@ -25,7 +27,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 		$this->id                   = 'paypal';
-		$this->icon                 = apply_filters( 'woocommerce_paypal_icon', WC()->plugin_url() . '/assets/images/icons/paypal.png' );
 		$this->has_fields           = false;
 		$this->order_button_text    = __( 'Proceed to PayPal', 'woocommerce' );
 		$this->liveurl              = 'https://www.paypal.com/cgi-bin/webscr';
@@ -76,6 +77,92 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = false;
 		}
+	}
+
+	/**
+	 * get_icon function.
+	 *
+	 * @return string
+	 */
+	public function get_icon() {
+		$link = null;
+		switch ( WC()->countries->get_base_country() ) {
+			case 'US' :
+			case 'NZ' :
+			case 'CZ' :
+			case 'HU' :
+			case 'MY' :
+				$icon = 'https://www.paypalobjects.com/webstatic/mktg/logo/AM_mc_vs_dc_ae.jpg';
+			break;
+			case 'TR' :
+				$icon = 'https://www.paypalobjects.com/webstatic/mktg/logo-center/logo_paypal_odeme_secenekleri.jpg';
+			break;
+			case 'GB' :
+				$icon = 'https://www.paypalobjects.com/webstatic/mktg/Logo/AM_mc_vs_ms_ae_UK.png';
+			break;
+			case 'MX' :
+				$icon = array(
+					'https://www.paypal.com/es_XC/Marketing/i/banner/paypal_visa_mastercard_amex.png',
+					'https://www.paypal.com/es_XC/Marketing/i/banner/paypal_debit_card_275x60.gif'
+				);
+				$link = 'https://www.paypal.com/mx/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
+			break;
+			case 'FR' :
+				$icon = 'https://www.paypalobjects.com/webstatic/mktg/logo-center/logo_paypal_moyens_paiement_fr.jpg';
+			break;
+			case 'AU' :
+				$icon = 'https://www.paypalobjects.com/webstatic/en_AU/mktg/logo/Solutions-graphics-1-184x80.jpg';
+			break;
+			case 'DK' :
+				$icon = 'https://www.paypalobjects.com/webstatic/mktg/logo-center/logo_PayPal_betalingsmuligheder_dk.jpg';
+			break;
+			case 'RU' :
+				$icon = 'https://www.paypalobjects.com/webstatic/ru_RU/mktg/business/pages/logo-center/AM_mc_vs_dc_ae.jpg';
+			break;
+			case 'NO' :
+				$icon = 'https://www.paypalobjects.com/webstatic/mktg/logo-center/banner_pl_just_pp_319x110.jpg';
+			break;
+			case 'CA' :
+				$icon = 'https://www.paypalobjects.com/webstatic/en_CA/mktg/logo-image/AM_mc_vs_dc_ae.jpg';
+			break;
+			case 'HK' :
+				$icon = 'https://www.paypalobjects.com/webstatic/en_HK/mktg/logo/AM_mc_vs_dc_ae.jpg';
+			break;
+			case 'SG' :
+				$icon = 'https://www.paypalobjects.com/webstatic/en_SG/mktg/Logos/AM_mc_vs_dc_ae.jpg';
+			break;
+			case 'TW' :
+				$icon = 'https://www.paypalobjects.com/webstatic/en_TW/mktg/logos/AM_mc_vs_dc_ae.jpg';
+			break;
+			case 'TH' :
+				$icon = 'https://www.paypalobjects.com/webstatic/en_TH/mktg/Logos/AM_mc_vs_dc_ae.jpg';
+			break;
+			default :
+				$icon = WC_HTTPS::force_https_url( WC()->plugin_url() . '/includes/gateways/paypal/assets/images/paypal.png' );
+				$link = null;
+			break;
+		}
+
+		if ( is_null( $link ) ) {
+			$link = 'https://www.paypal.com/' . strtolower( WC()->countries->get_base_country() ) . '/webapps/mpp/paypal-popup';
+		}
+
+		if ( is_array( $icon ) ) {
+			$icon_html = '';
+			foreach ( $icon as $i ) {
+				$icon_html .= '<img src="' . esc_attr( $i ) . '" alt="PayPal Acceptance Mark" />';
+			}
+		} else {
+			$icon_html = '<img src="' . esc_attr( apply_filters( 'woocommerce_paypal_icon', $icon ) ) . '" alt="PayPal Acceptance Mark" />';
+		}
+
+		if ( $link ) {
+			$what_is_paypal = sprintf( '<a href="%1$s" class="about_paypal" onclick="javascript:window.open(\'%1$s\',\'WIPaypal\',\'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700\'); return false;" title="' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '">' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '</a>', esc_url( $link ) );
+		} else {
+			$what_is_paypal = '';
+		}
+
+		return apply_filters( 'woocommerce_gateway_icon', $icon_html . $what_is_paypal, $this->id );
 	}
 
 	/**
@@ -134,7 +221,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'type'        => 'text',
 				'desc_tip'    => true,
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
-				'default'     => __( 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account', 'woocommerce' )
+				'default'     => __( 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account.', 'woocommerce' )
 			),
 			'email' => array(
 				'title'       => __( 'PayPal Email', 'woocommerce' ),

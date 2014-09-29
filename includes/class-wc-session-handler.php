@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Handle data for the current customers session.
@@ -115,8 +117,8 @@ class WC_Session_Handler extends WC_Session {
     }
 
 	/**
-	 * Generate a unique customer ID for guests, or return user ID if logged in. 
-	 * 
+	 * Generate a unique customer ID for guests, or return user ID if logged in.
+	 *
 	 * Uses Portable PHP password hashing framework to generate a unique cryptographically strong ID.
 	 *
 	 * @access public
@@ -204,7 +206,7 @@ class WC_Session_Handler extends WC_Session {
 
 		// Clear cart
 		wc_empty_cart();
-		
+
 		// Clear data
 		$this->_data        = array();
 		$this->_dirty       = false;

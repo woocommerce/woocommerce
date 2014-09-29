@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-foreach ( $items as $item ) :
+foreach ( $items as $item_id => $item ) :
 	$_product     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
 	$item_meta    = new WC_Order_Item_Meta( $item['item_meta'], $_product );
 	?>
@@ -29,6 +29,14 @@ foreach ( $items as $item ) :
 			// SKU
 			if ( $show_sku && is_object( $_product ) && $_product->get_sku() ) {
 				echo ' (#' . $_product->get_sku() . ')';
+			}
+
+			// allow other plugins to add additional product information here
+			do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
+
+			// Variation
+			if ( $item_meta->meta ) {
+				echo '<br/><small>' . nl2br( $item_meta->display( true, true ) ) . '</small>';
 			}
 
 			// File URLs
@@ -50,10 +58,8 @@ foreach ( $items as $item ) :
 				}
 			}
 
-			// Variation
-			if ( $item_meta->meta ) {
-				echo '<br/><small>' . nl2br( $item_meta->display( true, true ) ) . '</small>';
-			}
+			// allow other plugins to add additional product information here
+			do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
 
 		?></td>
 		<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo $item['qty'] ;?></td>

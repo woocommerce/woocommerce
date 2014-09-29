@@ -3,10 +3,10 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.2.3
+ * Version: 2.2.4
  * Author: WooThemes
  * Author URI: http://woothemes.com
- * Requires at least: 3.8
+ * Requires at least: 4.0
  * Tested up to: 4.0
  *
  * Text Domain: woocommerce
@@ -33,7 +33,7 @@ final class WooCommerce {
 	/**
 	 * @var string
 	 */
-	public $version = '2.2.3';
+	public $version = '2.2.4';
 
 	/**
 	 * @var WooCommerce The single instance of the class
@@ -408,15 +408,26 @@ final class WooCommerce {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
 		$dir    = trailingslashit( WP_LANG_DIR );
 
-		// Admin Locale
+		/**
+		 * Admin Locale. Looks in:
+		 *
+		 * 		- WP_LANG_DIR/woocommerce/woocommerce-admin-LOCALE.mo
+		 * 		- WP_LANG_DIR/plugins/woocommerce-admin-LOCALE.mo
+		 */
 		if ( is_admin() ) {
 			load_textdomain( 'woocommerce', $dir . 'woocommerce/woocommerce-admin-' . $locale . '.mo' );
 			load_textdomain( 'woocommerce', $dir . 'plugins/woocommerce-admin-' . $locale . '.mo' );
 		}
 
-		// Global + Frontend Locale
+		/**
+		 * Frontend/global Locale. Looks in:
+		 *
+		 * 		- WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
+		 * 	 	- woocommerce/i18n/languages/woocommerce-LOCALE.mo (which if not found falls back to:)
+		 * 	 	- WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
+		 */
 		load_textdomain( 'woocommerce', $dir . 'woocommerce/woocommerce-' . $locale . '.mo' );
-		load_plugin_textdomain( 'woocommerce', false, $dir . 'plugins' );
+		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
 	}
 
 	/**

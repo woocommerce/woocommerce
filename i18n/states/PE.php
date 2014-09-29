@@ -2,9 +2,9 @@
 /**
  * Peru states
  *
- * @author 		WooThemes
- * @category 	i18n
- * @package 	WooCommerce/i18n
+ * @author      WooThemes
+ * @category    i18n
+ * @package     WooCommerce/i18n
  * @version     2.1.0
  */
 global $states;

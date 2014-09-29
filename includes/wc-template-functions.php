@@ -10,7 +10,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Handle redirects before content is output - hooked into template_redirect so is_page works.
@@ -39,7 +41,7 @@ function wc_template_redirect() {
 	}
 
 	// Redirect to the product page if we have a single product
-	elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && $wp_query->post_count == 1 ) {
+	elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && $wp_query->found_posts == 1 ) {
 		$product = wc_get_product( $wp_query->post );
 
 		if ( $product->is_visible() ) {
@@ -1689,21 +1691,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 			/* Get Country */
 			$country_key = $key == 'billing_state'? 'billing_country' : 'shipping_country';
-
-			if ( isset( $_POST[ $country_key ] ) ) {
-				$current_cc = wc_clean( $_POST[ $country_key ] );
-			} elseif ( is_user_logged_in() ) {
-				$current_cc = get_user_meta( get_current_user_id() , $country_key, true );
-				if ( ! $current_cc) {
-					$current_cc = apply_filters('default_checkout_country', (WC()->customer->get_country()) ? WC()->customer->get_country() : WC()->countries->get_base_country());
-				}
-			} elseif ( $country_key == 'billing_country' ) {
-				$current_cc = apply_filters('default_checkout_country', (WC()->customer->get_country()) ? WC()->customer->get_country() : WC()->countries->get_base_country());
-			} else {
-				$current_cc = apply_filters('default_checkout_country', (WC()->customer->get_shipping_country()) ? WC()->customer->get_shipping_country() : WC()->countries->get_base_country());
-			}
-
-			$states = WC()->countries->get_states( $current_cc );
+			$current_cc  = WC()->checkout->get_value( $country_key );
+			$states      = WC()->countries->get_states( $current_cc );
 
 			if ( is_array( $states ) && empty( $states ) ) {
 

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Product Factory Class
  *

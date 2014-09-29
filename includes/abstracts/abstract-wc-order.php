@@ -2062,11 +2062,16 @@ abstract class WC_Abstract_Order {
 	 */
 	public function update_status( $new_status, $note = '' ) {
 
-		$old_status = $this->get_status();
-		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+		if ( ! $this->id ) {
+			return;
+		}
 
-		// Only update if they differ
-		if ( $this->id && $new_status !== $old_status ) {
+		// Standardise status names.
+		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+		$old_status = $this->get_status();
+
+		// Only update if they differ - and ensure post_status is a 'wc' status.
+		if ( $new_status !== $old_status || ! in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
 
 			// Update the order
 			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );

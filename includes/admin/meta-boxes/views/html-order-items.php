@@ -1,4 +1,5 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -56,7 +57,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 				<th class="line_cost"><?php _e( 'Total', 'woocommerce' ); ?></th>
 
 				<?php
-					if ( isset( $legacy_order ) && ! $legacy_order && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+					if ( empty( $legacy_order ) && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
 						foreach ( $order_taxes as $tax_id => $tax_item ) :
 							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
@@ -214,6 +215,8 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<p class="add-items">
 		<?php if ( $order->is_editable() ) : ?>
 			<button type="button" class="button add-line-item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
+		<?php else : ?>
+			<span class="description tips" data-tip="<?php esc_attr_e( 'To edit this order change the status back to "Pending"', 'woocommerce' ); ?>"><?php _e( 'This order has been paid for and is no longer editable', 'woocommerce' ); ?></span>
 		<?php endif; ?>
 		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && $order->is_editable() ) : ?>
 			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
@@ -233,6 +236,10 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
 	<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 	<button type="button" class="button button-primary save-action"><?php _e( 'Save', 'woocommerce' ); ?></button>
+	<?php
+		// allow adding custom buttons
+		do_action( 'woocommerce_order_item_add_line_buttons', $order );
+	?>
 </div>
 <?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
 <div class="wc-order-data-row wc-order-refund-items" style="display: none;">

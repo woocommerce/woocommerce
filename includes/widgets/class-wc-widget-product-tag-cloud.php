@@ -9,7 +9,9 @@
  * @extends 	WC_Widget
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 

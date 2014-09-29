@@ -6,7 +6,10 @@
  * @package 	WooCommerce/Templates/Emails/Plain
  * @version     2.0.0
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 echo $email_heading . "\n\n";
 

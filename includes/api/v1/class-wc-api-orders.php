@@ -11,7 +11,9 @@
  * @version     2.1
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class WC_API_Orders extends WC_API_Resource {
 

@@ -9,7 +9,9 @@
  * @author 		WooThemes
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class WC_Product_Cat_Dropdown_Walker extends Walker {
 
@@ -75,5 +77,5 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 			return;
 		}
 		parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );
-	}	
+	}
 }

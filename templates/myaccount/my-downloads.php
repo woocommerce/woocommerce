@@ -10,7 +10,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit; // Exit if accessed directly
 }
 
 if ( $downloads = WC()->customer->get_downloadable_products() ) : ?>

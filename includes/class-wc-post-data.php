@@ -67,8 +67,8 @@ class WC_Post_Data {
 			global $wpdb;
 
 			$wpdb->query( "
-				DELETE FROM `$wpdb->options` 
-				WHERE `option_name` LIKE ('\_transient\_wc\_uf\_pid\_%') 
+				DELETE FROM `$wpdb->options`
+				WHERE `option_name` LIKE ('\_transient\_wc\_uf\_pid\_%')
 				OR `option_name` LIKE ('\_transient\_timeout\_wc\_uf\_pid\_%')
 				OR `option_name` LIKE ('\_transient\_wc\_products\_will\_display\_%')
 				OR `option_name` LIKE ('\_transient\_timeout\_wc\_products\_will\_display\_%')
@@ -112,7 +112,7 @@ class WC_Post_Data {
 
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale
-	 * 
+	 *
 	 * @param  null $check
 	 * @param  int $object_id
 	 * @param  string $meta_key
@@ -137,7 +137,7 @@ class WC_Post_Data {
 
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale
-	 * 
+	 *
 	 * @param  null $check
 	 * @param  int $object_id
 	 * @param  string $meta_key
@@ -174,11 +174,7 @@ class WC_Post_Data {
 				$order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-			// Fix: Sometimes conflict with'pending' post_status of WordPress core
-			if ( isset( $data['post_status']) && 'pending' === $data['post_status']) {
-				$data['post_status'] = 'wc-' . $data['post_status'];
-			}
-		} 
+		}
 
 		elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
 			$product_type = stripslashes( $_POST['product-type'] );
@@ -191,7 +187,7 @@ class WC_Post_Data {
 		}
 
 		return $data;
-	}	
+	}
 
 	/**
 	 * Some functions, like the term recount, require the visibility to be set prior. Lets save that here.
@@ -207,7 +203,7 @@ class WC_Post_Data {
 		if ( isset( $_POST['_stock_status'] ) ) {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 		}
-	}	
+	}
 }
 
 WC_Post_Data::init();
