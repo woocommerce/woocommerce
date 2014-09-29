@@ -75,7 +75,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		add_action( 'woocommerce_api_wc_gateway_paypal', array( $this, 'check_ipn_response' ) );
 
 		if ( ! $this->is_valid_for_use() ) {
-			$this->enabled = false;
+			$this->enabled = 'no';
 		}
 	}
 
