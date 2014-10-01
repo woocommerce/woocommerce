@@ -1239,7 +1239,7 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
-	 * Gets shipping tax amount.
+	 * Gets cart tax amount.
 	 *
 	 * @return float
 	 */
