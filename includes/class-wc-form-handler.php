@@ -772,11 +772,11 @@ class WC_Form_Handler {
 				} else {
 
 					if ( ! empty( $_POST['redirect'] ) ) {
-						$redirect = esc_url( $_POST['redirect'] );
+						$redirect = $_POST['redirect'];
 					} elseif ( wp_get_referer() ) {
-						$redirect = esc_url( wp_get_referer() );
+						$redirect = wp_get_referer();
 					} else {
-						$redirect = esc_url( get_permalink( wc_get_page_id( 'myaccount' ) ) );
+						$redirect = get_permalink( wc_get_page_id( 'myaccount' ) );
 					}
 
 					// Feedback
