@@ -906,7 +906,9 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_html_from_text() {
-		return '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
+		$from = '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
+		
+		return apply_filters( 'woocommerce_get_price_html_from_text', $from, $this );
 	}
 
 	/**
@@ -917,7 +919,9 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_html_from_to( $from, $to ) {
-		return '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
+		$price = '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
+		
+		return apply_filters( 'woocommerce_get_price_html_from_to', $price, $this );
 	}
 
 	/**
