@@ -24,6 +24,8 @@ $who_refunded = new WP_User( $refund->post->post_author );
 		<input type="hidden" class="order_refund_id" name="order_refund_id[]" value="<?php echo esc_attr( $refund->id ); ?>" />
 	</td>
 
+	<?php do_action( 'woocommerce_admin_order_item_values', null, $refund, absint( $refund->id ) ); ?>
+
 	<td class="quantity" width="1%">&nbsp;</td>
 
 	<td class="line_cost" width="1%">
