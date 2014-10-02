@@ -105,7 +105,7 @@ class WC_Emails {
 	 */
 	function init() {
 		// Include email classes
-		include_once( 'abstracts/abstract-wc-email.php' );
+		include_once( 'emails/class-wc-email.php' );
 
 		$this->emails['WC_Email_New_Order']                 = include( 'emails/class-wc-email-new-order.php' );
 		$this->emails['WC_Email_Customer_Processing_Order'] = include( 'emails/class-wc-email-customer-processing-order.php' );
@@ -226,18 +226,10 @@ class WC_Emails {
 		// Set content type
 		$this->_content_type = $content_type;
 
-		// Filters for the email
-		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
-		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
-		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
-
 		// Send
-		wp_mail( $to, $subject, $message, $headers, $attachments );
+		$email = new WC_Email();
+		$email->send( $to, $subject, $message, $headers, $attachments );
 
-		// Unhook filters
-		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
-		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
-		remove_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 	}
 
 	/**
