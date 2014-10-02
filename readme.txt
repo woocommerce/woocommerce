@@ -137,6 +137,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added refunds to Sales by Date report.
 * Tweak - Updated prevent_caching() method to work if a cart/checkout page isn't set.
 * Tweak - When user tries to download a file and isn't logged in, send them to the account page with a notice.
+* Tweak - Logic in wc_paying_customer to only increase for 'simple' orders.
+* Tweak - Added tool to refresh stats to customer list.
 
 = 2.2.5 =
 * Fix - Filters in admin screen for coupons and orders.

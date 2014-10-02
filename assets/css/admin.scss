@@ -1117,7 +1117,7 @@ ul.wc_coupon_list_block {
 	}
 }
 .user_actions {
-	.edit, .link, .view {
+	.edit, .link, .view, .refresh {
 		@include ir();
 		padding:0 !important;
 		height: 2em !important;
@@ -1135,6 +1135,9 @@ ul.wc_coupon_list_block {
 	}
 	.view:after {
 		content: "\e010";
+	}
+	.refresh:after {
+		content: "\e031";
 	}
 }
 
