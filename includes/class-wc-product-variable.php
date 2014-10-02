@@ -166,7 +166,7 @@ class WC_Product_Variable extends WC_Product {
 			$children = $this->children;
 		}
 
-		return $children;
+		return apply_filters( 'woocommerce_get_children', $children, $this );
 	}
 
 	/**
