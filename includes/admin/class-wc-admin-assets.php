@@ -264,6 +264,8 @@ class WC_Admin_Assets {
 		if ( is_rtl() ) {
 			wp_enqueue_script( 'chosen-rtl', WC()->plugin_url() . '/assets/js/chosen/chosen-rtl' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		}
+
+		do_action( 'woocommerce_admin_js' );
 	}
 
 	/**
