@@ -136,6 +136,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Double the default product image dimensions.
 * Tweak - Added refunds to Sales by Date report.
 * Tweak - Updated prevent_caching() method to work if a cart/checkout page isn't set.
+* Tweak - When user tries to download a file and isn't logged in, send them to the account page with a notice.
 
 = 2.2.5 =
 * Fix - Filters in admin screen for coupons and orders.
