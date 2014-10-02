@@ -26,3 +26,6 @@ Thumbs.db
 
 # Unit tests
 /tmp
+
+# Logs
+/logs
