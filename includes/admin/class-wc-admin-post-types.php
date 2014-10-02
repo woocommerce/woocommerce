@@ -1286,6 +1286,24 @@ class WC_Admin_Post_Types {
 					esc_attr( $_GET['s'] )
 				)
 			),
+			$wpdb->get_col(
+				$wpdb->prepare( "
+					SELECT p1.post_id
+					FROM {$wpdb->postmeta} p1
+					INNER JOIN {$wpdb->users} u ON p1.meta_value = u.ID
+					INNER JOIN {$wpdb->usermeta} um1 ON um1.user_id = u.ID
+					INNER JOIN {$wpdb->usermeta} um2 ON um2.user_id = um1.user_id
+					WHERE
+						( p1.meta_key = '_customer_user' )
+					AND	(
+							( um1.meta_key = 'first_name' AND um2.meta_key = 'last_name' AND CONCAT(um1.meta_value, ' ', um2.meta_value) LIKE '%%%s%%' )
+						OR
+							( u.user_email LIKE '%%%s%%' )
+						)
+					",
+					esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
+				)
+			),
 			array( $search_order_id )
 		) );
 
