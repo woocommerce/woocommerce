@@ -62,38 +62,44 @@ class WC_Cache_Helper {
 	 */
 	public static function prevent_caching() {
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
-
-			if ( wc_get_page_id( 'cart' ) < 1 || wc_get_page_id( 'checkout' ) < 1 || wc_get_page_id( 'myaccount' ) < 1 )
-				return;
-
 			$wc_page_uris   = array();
 
-			// Exclude querystring when using page ID
-			$wc_page_uris[] = 'p=' . wc_get_page_id( 'cart' );
-	    	$wc_page_uris[] = 'p=' . wc_get_page_id( 'checkout' );
-	    	$wc_page_uris[] = 'p=' . wc_get_page_id( 'myaccount' );
+			// Exclude querystring when using page ID and permalinks
+			if ( ( $cart_page_id = wc_get_page_id( 'cart' ) ) && $cart_page_id > 0 ) {
+				$wc_page_uris[] = 'p=' . $cart_page_id;
+				$page           = get_post( $page );
 
-	    	// Exclude permalinks
-			$cart_page      = get_post( wc_get_page_id( 'cart' ) );
-			$checkout_page  = get_post( wc_get_page_id( 'checkout' ) );
-			$account_page   = get_post( wc_get_page_id( 'myaccount' ) );
+				if ( ! is_null( $page ) ) {
+					$wc_page_uris[] = '/' . $page->post_name;
+				}
+			}
+			if ( ( $checkout_page_id = wc_get_page_id( 'checkout' ) ) && $checkout_page_id > 0 ) {
+				$wc_page_uris[] = 'p=' . $checkout_page_id;
+				$page           = get_post( $page );
 
-			if ( ! is_null( $cart_page ) )
-				$wc_page_uris[] = '/' . $cart_page->post_name;
-	    	if ( ! is_null( $checkout_page ) )
-	    		$wc_page_uris[] = '/' . $checkout_page->post_name;
-	    	if ( ! is_null( $account_page ) )
-	    		$wc_page_uris[] = '/' . $account_page->post_name;
+				if ( ! is_null( $page ) ) {
+					$wc_page_uris[] = '/' . $page->post_name;
+				}
+			}
+			if ( ( $myaccount_page_id = wc_get_page_id( 'myaccount' ) ) && $myaccount_page_id > 0 ) {
+				$wc_page_uris[] = 'p=' . $myaccount_page_id;
+				$page           = get_post( $page );
+
+				if ( ! is_null( $page ) ) {
+					$wc_page_uris[] = '/' . $page->post_name;
+				}
+			}
 
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
 		}
 
 		if ( is_array( $wc_page_uris ) ) {
-			foreach( $wc_page_uris as $uri )
+			foreach( $wc_page_uris as $uri ) {
 				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
 					self::nocache();
 					break;
 				}
+			}
 		}
 	}
 
