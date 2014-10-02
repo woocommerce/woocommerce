@@ -67,7 +67,7 @@ class WC_Cache_Helper {
 			// Exclude querystring when using page ID and permalinks
 			if ( ( $cart_page_id = wc_get_page_id( 'cart' ) ) && $cart_page_id > 0 ) {
 				$wc_page_uris[] = 'p=' . $cart_page_id;
-				$page           = get_post( $page );
+				$page           = get_post( $cart_page_id );
 
 				if ( ! is_null( $page ) ) {
 					$wc_page_uris[] = '/' . $page->post_name;
@@ -75,7 +75,7 @@ class WC_Cache_Helper {
 			}
 			if ( ( $checkout_page_id = wc_get_page_id( 'checkout' ) ) && $checkout_page_id > 0 ) {
 				$wc_page_uris[] = 'p=' . $checkout_page_id;
-				$page           = get_post( $page );
+				$page           = get_post( $checkout_page_id );
 
 				if ( ! is_null( $page ) ) {
 					$wc_page_uris[] = '/' . $page->post_name;
@@ -83,7 +83,7 @@ class WC_Cache_Helper {
 			}
 			if ( ( $myaccount_page_id = wc_get_page_id( 'myaccount' ) ) && $myaccount_page_id > 0 ) {
 				$wc_page_uris[] = 'p=' . $myaccount_page_id;
-				$page           = get_post( $page );
+				$page           = get_post( $myaccount_page_id );
 
 				if ( ! is_null( $page ) ) {
 					$wc_page_uris[] = '/' . $page->post_name;
