@@ -6,6 +6,58 @@
 
 .woocommerce, .woocommerce-page {
 
+	table.shop_table_responsive {
+		thead {
+			display: none;
+		}
+
+		tbody {
+			tr:first-child {
+				td:first-child {
+					border-top: 0;
+				}
+			}
+		}
+
+		tr {
+			display: block;
+
+			td {
+				display: block;
+
+				&:before {
+					content: attr(data-title) ':';
+					font-weight: 700;
+				}
+			}
+
+			&:nth-child(2n) {
+				td {
+					background-color: rgba(0,0,0,0.025);
+				}
+			}
+		}
+	}
+
+	table.my_account_orders {
+		tr {
+			td {
+				&.order-actions {
+					text-align: left;
+
+					&:before {
+						display: none;
+					}
+
+					.button {
+						float: none;
+						margin: .125em .25em .125em 0;
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * General layout
 	 */
