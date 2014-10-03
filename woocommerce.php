@@ -356,6 +356,16 @@ final class WooCommerce {
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
+		// Template debug mode
+		if ( ! defined( 'WC_TEMPLATE_DEBUG_MODE' ) ) {
+			$status_options = get_option( 'woocommerce_status_options', array() );
+			if ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) {
+				define( 'WC_TEMPLATE_DEBUG_MODE', true );
+			} else {
+				define( 'WC_TEMPLATE_DEBUG_MODE', false );
+			}
+		}
+
 		// Load class instances
 		$this->product_factory = new WC_Product_Factory();                      // Product Factory to create new product instances
 		$this->order_factory   = new WC_Order_Factory();                        // Order Factory to create new order instances

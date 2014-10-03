@@ -70,8 +70,7 @@ class WC_Template_Loader {
 
 		if ( $file ) {
 			$template       = locate_template( array_unique( $find ) );
-			$status_options = get_option( 'woocommerce_status_options', array() );
-			if ( ! $template || ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) ) {
+			if ( ! $template || WC_TEMPLATE_DEBUG_MODE ) {
 				$template = WC()->plugin_path() . '/templates/' . $file;
 			}
 		}
@@ -86,19 +85,27 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function comments_template_loader( $template ) {
-		if ( get_post_type() !== 'product' )
+		if ( get_post_type() !== 'product' ) {
 			return $template;
+		}
 
-		if ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . 'single-product-reviews.php' ))
-			return get_stylesheet_directory() . '/' . WC()->template_path() . 'single-product-reviews.php';
-		elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . 'single-product-reviews.php' ))
-			return get_template_directory() . '/' . WC()->template_path() . 'single-product-reviews.php';
-		elseif ( file_exists( get_stylesheet_directory() . '/' . 'single-product-reviews.php' ))
-			return get_stylesheet_directory() . '/' . 'single-product-reviews.php';
-		elseif ( file_exists( get_template_directory() . '/' . 'single-product-reviews.php' ))
-			return get_template_directory() . '/' . 'single-product-reviews.php';
-		else
-			return WC()->plugin_path() . '/templates/single-product-reviews.php';
+		$check_dirs = array(
+			trailingslashit( get_stylesheet_directory() ) . WC()->template_path(),
+			trailingslashit( get_template_directory() ) . WC()->template_path(),
+			trailingslashit( get_stylesheet_directory() ),
+			trailingslashit( get_template_directory() ),
+			trailingslashit( WC()->plugin_path() ) . 'templates/'
+		);
+
+		if ( WC_TEMPLATE_DEBUG_MODE ) {
+			$check_dirs = array( array_pop( $check_dirs ) );
+		}
+
+		foreach ( $check_dirs as $dir ) {
+			if ( file_exists( trailingslashit( $dir ) . 'single-product-reviews.php' ) ) {
+				return trailingslashit( $dir ) . 'single-product-reviews.php';
+			}
+		}
 	}
 }
 
