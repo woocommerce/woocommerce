@@ -389,7 +389,7 @@ class WC_Post_types {
 	public static function register_post_status() {
 		register_post_status( 'wc-pending', array(
 			'label'                     => _x( 'Pending payment', 'Order status', 'woocommerce' ),
-			'public'                    => true,
+			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
@@ -397,7 +397,7 @@ class WC_Post_types {
 		) );
 		register_post_status( 'wc-processing', array(
 			'label'                     => _x( 'Processing', 'Order status', 'woocommerce' ),
-			'public'                    => true,
+			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
@@ -405,7 +405,7 @@ class WC_Post_types {
 		) );
 		register_post_status( 'wc-on-hold', array(
 			'label'                     => _x( 'On hold', 'Order status', 'woocommerce' ),
-			'public'                    => true,
+			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
@@ -413,7 +413,7 @@ class WC_Post_types {
 		) );
 		register_post_status( 'wc-completed', array(
 			'label'                     => _x( 'Completed', 'Order status', 'woocommerce' ),
-			'public'                    => true,
+			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
@@ -421,7 +421,7 @@ class WC_Post_types {
 		) );
 		register_post_status( 'wc-cancelled', array(
 			'label'                     => _x( 'Cancelled', 'Order status', 'woocommerce' ),
-			'public'                    => true,
+			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
@@ -429,7 +429,7 @@ class WC_Post_types {
 		) );
 		register_post_status( 'wc-refunded', array(
 			'label'                     => _x( 'Refunded', 'Order status', 'woocommerce' ),
-			'public'                    => true,
+			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
@@ -437,7 +437,7 @@ class WC_Post_types {
 		) );
 		register_post_status( 'wc-failed', array(
 			'label'                     => _x( 'Failed', 'Order status', 'woocommerce' ),
-			'public'                    => true,
+			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
