@@ -1550,6 +1550,11 @@ class WC_Admin_Post_Types {
 					) );
 				}
 			}
+
+			// Status
+			if ( ! isset( $vars['post_status'] ) ) {
+				$vars['post_status'] = array_keys( wc_get_order_statuses() );
+			}
 		}
 
 		return $vars;
