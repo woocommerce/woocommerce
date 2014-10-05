@@ -10,7 +10,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 // Include core functions (available in both admin and frontend)
 include( 'wc-conditional-functions.php' );
@@ -135,7 +137,7 @@ function wc_get_template_part( $slug, $name = '' ) {
 	$template = '';
 
 	// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php
-	if ( $name ) {
+	if ( $name && ! WC_TEMPLATE_DEBUG_MODE ) {
 		$template = locate_template( array( "{$slug}-{$name}.php", WC()->template_path() . "{$slug}-{$name}.php" ) );
 	}
 
@@ -145,12 +147,14 @@ function wc_get_template_part( $slug, $name = '' ) {
 	}
 
 	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php
-	if ( ! $template ) {
+	if ( ! $template && ! WC_TEMPLATE_DEBUG_MODE ) {
 		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
 	}
 
 	// Allow 3rd party plugin filter template file from their plugin
-	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
+	if ( ( ! $template && WC_TEMPLATE_DEBUG_MODE ) || $template ) {
+		$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
+	}
 
 	if ( $template ) {
 		load_template( $template, false );
@@ -222,12 +226,12 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 	);
 
 	// Get default template
-	if ( ! $template ) {
+	if ( ! $template || WC_TEMPLATE_DEBUG_MODE ) {
 		$template = $default_path . $template_name;
 	}
 
 	// Return what we found
-	return apply_filters('woocommerce_locate_template', $template, $template_name, $template_path);
+	return apply_filters( 'woocommerce_locate_template', $template, $template_name, $template_path );
 }
 
 /**
@@ -463,7 +467,8 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
 		setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-		trigger_error( "Cookie cannot be set - headers already sent", E_USER_NOTICE );
+		headers_sent( $file, $line );
+		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE );
 	}
 }
 

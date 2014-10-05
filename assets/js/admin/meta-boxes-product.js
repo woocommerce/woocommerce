@@ -588,7 +588,7 @@ jQuery( function( $ ){
 
 				$product_images.append('\
 					<li class="image" data-attachment_id="' + attachment.id + '">\
-						<img src="' + attachment.url + '" />\
+						<img src="' + attachment.sizes.thumbnail.url + '" />\
 						<ul class="actions">\
 							<li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li>\
 						</ul>\

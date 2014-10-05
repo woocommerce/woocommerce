@@ -31,8 +31,8 @@ jQuery( function ( $ ) {
 	});
 
 	$('body').on('keyup change', '.wc_input_decimal[type=text]', function(){
-		var value		= $(this).val();
-		var regex		= new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.decimal_point + "]+", "gi" );
+		var value    = $(this).val();
+		var regex    = new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.decimal_point + "]+", "gi" );
 		var newvalue = value.replace( regex, '' );
 
 		if ( value !== newvalue ) {
@@ -49,18 +49,19 @@ jQuery( function ( $ ) {
 		return this;
 	});
 
-	$('body').on('keyup change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function(){
-		var sale_price_field	= $(this);
-		var sale_price 			= parseInt( sale_price_field.val() );
+	$('body').on( 'keyup', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function(){
+		var sale_price_field = $(this);
 
 		if( sale_price_field.attr('name').indexOf('variable') !== -1 ) {
-			var regular_price = parseInt(sale_price_field.parents('.variable_pricing').find('.wc_input_price[name^=variable_regular_price]').val());
+			var regular_price_field = sale_price_field.parents('.variable_pricing').find('.wc_input_price[name^=variable_regular_price]');
 		} else {
-			var regular_price = parseInt($('#_regular_price').val());
+			var regular_price_field = $('#_regular_price');
 		}
 
+		var sale_price    = parseFloat( accounting.unformat( sale_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+		var regular_price = parseFloat( accounting.unformat( regular_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+
 		if( sale_price >= regular_price ) {
-			$(this).val( regular_price );
 			if ( $(this).parent().find('.wc_error_tip').size() === 0 ) {
 				var offset = $(this).position();
 				$(this).after( '<div class="wc_error_tip">' + woocommerce_admin.i18_sale_less_than_regular_error + '</div>' );
@@ -69,6 +70,27 @@ jQuery( function ( $ ) {
 					.css('top', offset.top + $(this).height() )
 					.fadeIn('100');
 			}
+		} else {
+			$('.wc_error_tip').fadeOut('100', function(){ $(this).remove(); } );
+		}
+		return this;
+	});
+	$('body').on( 'change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function(){
+		var sale_price_field = $(this);
+
+		if( sale_price_field.attr('name').indexOf('variable') !== -1 ) {
+			var regular_price_field = sale_price_field.parents('.variable_pricing').find('.wc_input_price[name^=variable_regular_price]');
+		} else {
+			var regular_price_field = $('#_regular_price');
+		}
+
+		var sale_price    = parseFloat( accounting.unformat( sale_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+		var regular_price = parseFloat( accounting.unformat( regular_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+
+		if( sale_price >= regular_price ) {
+			sale_price_field.val( regular_price_field.val() );
+		} else {
+			$('.wc_error_tip').fadeOut('100', function(){ $(this).remove(); } );
 		}
 		return this;
 	});

@@ -197,15 +197,15 @@ function wc_update_new_customer_past_orders( $customer_id ) {
  * @return void
  */
 function wc_paying_customer( $order_id ) {
-
 	$order = wc_get_order( $order_id );
 
-	if ( $order->user_id > 0 ) {
+	if ( $order->user_id > 0 && 'refund' !== $order->order_type ) {
 		update_user_meta( $order->user_id, 'paying_customer', 1 );
 
 		$old_spent = absint( get_user_meta( $order->user_id, '_money_spent', true ) );
 		update_user_meta( $order->user_id, '_money_spent', $old_spent + $order->order_total );
-
+	}
+	if ( $order->user_id > 0 && 'simple' === $order->order_type ) {
 		$old_count = absint( get_user_meta( $order->user_id, '_order_count', true ) );
 		update_user_meta( $order->user_id, '_order_count', $old_count + 1 );
 	}

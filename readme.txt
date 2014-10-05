@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 2.2.2
+Stable tag: 2.2.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -130,20 +130,64 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.2.3 =
+= 2.3.0 =
+* Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
+* Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
+* Tweak - Double the default product image dimensions.
+* Tweak - Added refunds to Sales by Date report.
+* Tweak - Updated prevent_caching() method to work if a cart/checkout page isn't set.
+* Tweak - When user tries to download a file and isn't logged in, send them to the account page with a notice.
+* Tweak - Logic in wc_paying_customer to only increase for 'simple' orders.
+* Tweak - Added tool to refresh stats to customer list.
+* Tweak - Recent order table on my account is responsive.
+* Dev - Made template debug mode set WC_TEMPLATE_DEBUG_MODE constant and remove all overrides for all template loading functions.
+
+= 2.2.5 =
+* Fix - Filters in admin screen for coupons and orders.
+* Fix - When bulk editing, don't allow sale price to be negative.
+* Fix - When manually adding items to an order, show tax columns.
+* Fix - When manually adding items to an order, include variation data.
+* Fix - Prevent errors when constructing WC_Order without an ID.
+* Tweak - Tweak load_plugin_textdomain to be relative - this falls back to WP_LANG_DIR automatically. Can prevent "open_basedir restriction in effect".
+* Tweak - Added acceptance marks to PayPal Standard where applicable to replace generic PayPal icon.
+
+= 2.2.4 - 18/09/2014 =
+* Fix - Prevent errors when adding 'zero-rated' tax on checkout.
+* Fix - Fixed a varation product width inheritance bug.
+* Fix - Totals in taxes by date report.
+* Fix - Fix the 'only 1 visible product' redirect to not trigger when paging results.
+* Tweak - Improved headers sent notice to include file and line.
+* Tweak - When updating order status, ensure its a valid WC order status.
+* Tweak - Add notice when order is no longer editable.
+* Dev - Allow getting rating count for a specific rating value #6284.
+* Localisation - Nepal States.
+* Localisation - Mexico states.
+
+= 2.2.3 - 16/09/2014 =
 * Fix - Order status translation in admin and account page.
 * Fix - Ensure shipping address gets displayed - fixes needs_shipping_address() method.
 * Fix - Escaping of country names in tax settings.
 * Fix - Encoding of pagination link when using default permalinks.
 * Fix - NPR currency.
 * Fix - Fixing "Invalid key" error when clicking link in password reset email.
+* Fix - Mobile checkout via PayPal when using tax inclusive prices.
 * Fix - Thumbnails "hard crop" option.
 * Fix - Missing variables when add new product variation.
+* Fix - Fixed minor XSS issue on reports screens by escaping and sanitizing 'range' GET variable.
+* Fix - Number format when calculate the line items tax.
+* Fix - Language update/install in Multisites.
+* Fix - "Set product image" media gallery title in non-product post type.
+* Fix - Number of processing orders in WooCommerce > Orders menu.
+* Fix - Issue that preventing cookies being set on shutdown after wp_send_json.
+* Fix - Incorrect shipping calculation because of missing width in product variation.
 * Tweak - Display of locale information on system status page.
 * Tweak - Removed postcode for Bahamas.
 * Tweak - In system status, show path to template file override.
 * Tweak - Dynamically get the address fields in WC_Checkout::create_order()
 * Tweak - If a refund fails, delete refund post.
+* Tweak - Button for hide the language update message.
+* Tweak - Method for install the translations directly.
+* Tweak - Display of h4 in settings pages.
 * Dev - Added woocommerce_get_settings_ID filters.
 
 = 2.2.2 - 11/09/2014 =
@@ -178,6 +222,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Disable image size settings if filters are being used.
 * Tweak - Hide the shipping address when local pickup is used.
 * Tweak - Password protected posts are not hidden from catalog by default anymore, visibility can be set via the 'Catalog visibility' option.
+* Tweak - Removed the shortcode button in favor to [WooCommerce Shortcodes](https://wordpress.org/plugins/woocommerce-shortcodes/)
 * Dev - API Version 2 with push support.
 * Dev - API: Lookup customers by email endpoint.
 * Dev - API: Allow ordering on the resource level.
@@ -1016,5 +1061,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 2.2.3 =
+= 2.2.4 =
 2.2 is a major update. Test extensions and your theme prior to updating, ensure extensions are up to date and 2.2 compatible, and ensure that you keep backups. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.

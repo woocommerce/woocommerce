@@ -8,7 +8,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WC_Settings_Tax' ) ) :
 
@@ -551,7 +553,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					$state    = strtoupper( wc_clean( $tax_rate_state[ $key ][ $new_key ] ) );
 					$postcode = wc_clean( $tax_rate_postcode[ $key ][ $new_key ] );
 					$city     = wc_clean( $tax_rate_city[ $key ][ $new_key ] );
-					$rate     = number_format( wc_clean( $tax_rate[ $key ][ $new_key ] ), 4, '.', '' );
+					$rate     = number_format( (double) wc_clean( $tax_rate[ $key ][ $new_key ] ), 4, '.', '' );
 					$name     = wc_clean( $tax_rate_name[ $key ][ $new_key ] );
 					$priority = absint( wc_clean( $tax_rate_priority[ $key ][ $new_key ] ) );
 					$compound = isset( $tax_rate_compound[ $key ][ $new_key ] ) ? 1 : 0;

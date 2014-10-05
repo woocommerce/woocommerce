@@ -12,6 +12,9 @@ sftp-config.json
 /node_modules/
 /deploy/
 
+# Sass
+.sass-cache/
+
 # OS X metadata
 .DS_Store
 
@@ -23,3 +26,6 @@ Thumbs.db
 
 # Unit tests
 /tmp
+
+# Logs
+/logs

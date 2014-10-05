@@ -8,7 +8,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WC_Admin_Assets' ) ) :
 
@@ -51,7 +53,14 @@ class WC_Admin_Assets {
 			wp_enqueue_style( 'woocommerce_admin_dashboard_styles', WC()->plugin_url() . '/assets/css/dashboard.css', array(), WC_VERSION );
 		}
 
+		/**
+		 * @deprecated 2.3
+		 */
 		do_action( 'woocommerce_admin_css' );
+
+		if ( has_action( 'woocommerce_admin_css' ) ) {
+			_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
+		}
 	}
 
 

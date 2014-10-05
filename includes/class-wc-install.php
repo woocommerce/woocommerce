@@ -8,7 +8,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WC_Install' ) ) :
 
@@ -110,7 +112,7 @@ class WC_Install {
 		$this->create_terms();
 		$this->create_cron_jobs();
 		$this->create_files();
-		$this->create_css_from_less();
+		$this->create_css_from_scss();
 
 		// Queue upgrades
 		$current_version    = get_option( 'woocommerce_version', null );
@@ -633,17 +635,17 @@ class WC_Install {
 	}
 
 	/**
-	 * Create CSS from LESS file
+	 * Create CSS from SCSS file
 	 */
-	private function create_css_from_less() {
-		// Recompile LESS styles if they are custom
+	private function create_css_from_scss() {
+		// Recompile SCSS styles if they are custom
 		$colors = get_option( 'woocommerce_frontend_css_colors' );
 
 		if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) ) {
-			if ( ! function_exists( 'woocommerce_compile_less_styles' ) ) {
+			if ( ! function_exists( 'woocommerce_compile_scss_styles' ) ) {
 				include_once( 'admin/wc-admin-functions.php' );
 			}
-			woocommerce_compile_less_styles();
+			woocommerce_compile_scss_styles();
 		}
 	}
 

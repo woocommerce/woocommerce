@@ -61,7 +61,7 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 		$url = add_query_arg( $endpoint, $value, $permalink );
 	}
 
-	return apply_filters( 'woocommerce_get_endpoint_url', $url );
+	return apply_filters( 'woocommerce_get_endpoint_url', $url, $endpoint, $value, $permalink );
 }
 
 /**

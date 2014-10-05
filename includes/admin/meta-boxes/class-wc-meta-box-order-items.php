@@ -10,8 +10,13 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
+/**
+ * WC_Meta_Box_Order_Items Class
+ */
 class WC_Meta_Box_Order_Items {
 
 	/**

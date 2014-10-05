@@ -12,7 +12,7 @@ class WC_Tax {
 
 	public static $precision;
 	public static $round_at_subtotal;
-	
+
 	/**
 	 * Load options
 	 *
@@ -242,12 +242,12 @@ class WC_Tax {
 
 			// Run the query
 			$found_rates = $wpdb->get_results( $wpdb->prepare( "
-				SELECT tax_rates.* 
+				SELECT tax_rates.*
 				FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
 				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
 				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
-				WHERE tax_rate_country IN ( %s, '' ) 
-				AND tax_rate_state IN ( %s, '' ) 
+				WHERE tax_rate_country IN ( %s, '' )
+				AND tax_rate_state IN ( %s, '' )
 				AND tax_rate_class = %s
 				AND (
 					locations.location_type IS NULL
@@ -290,7 +290,7 @@ class WC_Tax {
 				if ( in_array( $found_rate->tax_rate_priority, $found_priority ) ) {
 					continue;
 				}
-				
+
 				$matched_tax_rates[ $found_rate->tax_rate_id ] = array(
 					'rate'     => $found_rate->tax_rate,
 					'label'    => $found_rate->tax_rate_name,

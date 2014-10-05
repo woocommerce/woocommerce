@@ -361,7 +361,13 @@ jQuery( function ( $ ) {
 					edit_field = 'variable_sale_price';
 				}
 
-				value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent ).toString();
+				value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent );
+
+				if ( value == null ) {
+					return;
+				} else {
+					value = value.toString();
+				}
 
 				$( ':input[name^="' + edit_field + '"]' ).each( function() {
 					var current_value = accounting.unformat( $( this ).val(), woocommerce_admin.mon_decimal_point ),
@@ -399,7 +405,9 @@ jQuery( function ( $ ) {
 			case 'variable_download_expiry' :
 				value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value );
 
-				$( ':input[name^="' + bulk_edit + '"]').not('[name*="dates"]').val( value ).change();
+				if ( value != null ) {
+					$( ':input[name^="' + bulk_edit + '"]').not('[name*="dates"]').val( value ).change();
+				}
 			break;
 			default:
 				$( 'select#field_to_edit' ).trigger( bulk_edit );

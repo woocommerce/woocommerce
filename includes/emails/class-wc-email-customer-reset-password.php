@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WC_Email_Customer_Reset_Password' ) ) :
 
@@ -60,7 +62,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	function trigger( $user_login = '', $reset_key = '' ) {
 		if ( $user_login && $reset_key ) {
 			$this->object     = get_user_by( 'login', $user_login );
-			
+
 			$this->user_login = $user_login;
 			$this->reset_key  = $reset_key;
 			$this->user_email = stripslashes( $this->object->user_email );

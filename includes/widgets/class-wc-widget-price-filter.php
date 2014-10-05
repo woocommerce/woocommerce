@@ -11,7 +11,9 @@
  * @extends 	WC_Widget
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class WC_Widget_Price_Filter extends WC_Widget {
 
@@ -97,7 +99,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					SELECT min(meta_value + 0)
 					FROM %1$s
 					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE ( meta_key = \'%3$s\' OR meta_key = \'%4$s\' ) 
+					WHERE ( meta_key = \'%3$s\' OR meta_key = \'%4$s\' )
 					AND meta_value != ""
 				', $wpdb->posts, $wpdb->postmeta, '_price', '_min_variation_price' )
 			) );
@@ -115,7 +117,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					SELECT min(meta_value + 0)
 					FROM %1$s
 					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE ( meta_key =\'%3$s\' OR meta_key =\'%4$s\' ) 
+					WHERE ( meta_key =\'%3$s\' OR meta_key =\'%4$s\' )
 					AND meta_value != ""
 					AND (
 						%1$s.ID IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')

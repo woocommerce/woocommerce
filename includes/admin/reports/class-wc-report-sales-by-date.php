@@ -86,6 +86,18 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'filter_range' => true
 		) );
 
+		$total_refunds = $this->get_order_report_data( array(
+			'data' => array(
+				'_refund_amount' => array(
+					'type'     => 'meta',
+					'function' => 'SUM',
+					'name'     => 'total_refund'
+				)
+			),
+			'query_type'   => 'get_var',
+			'filter_range' => true
+		) );
+
 		$this->average_sales = $total_sales / ( $this->chart_interval + 1 );
 
 		switch ( $this->chart_groupby ) {
@@ -102,7 +114,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$legend[] = array(
 			'title' => sprintf( __( '%s sales in this period', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
 			'color' => $this->chart_colours['sales_amount'],
-			'highlight_series' => 5
+			'highlight_series' => 6
 		);
 
 		$legend[] = array(
@@ -126,6 +138,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$legend[] = array(
 			'title' => sprintf( __( '%s charged for shipping', 'woocommerce' ), '<strong>' . wc_price( $total_shipping ) . '</strong>' ),
 			'color' => $this->chart_colours['shipping_amount'],
+			'highlight_series' => 5
+		);
+
+		$legend[] = array(
+			'title' => sprintf( __( '%s in refunds', 'woocommerce' ), '<strong>' . wc_price( $total_refunds ) . '</strong>' ),
+			'color' => $this->chart_colours['refund_amount'],
 			'highlight_series' => 4
 		);
 
@@ -156,10 +174,11 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'order_count'  => '#b8c0c5',
 			'item_count'   => '#d4d9dc',
 			'coupon_amount' => '#e67e22',
-			'shipping_amount' => '#1abc9c'
+			'shipping_amount' => '#1abc9c',
+			'refund_amount' => '#800000'
 		);
 
-		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
 
 		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
@@ -175,11 +194,11 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	 */
 	public function get_export_button() {
 
-		$current_range = ! empty( $_GET['range'] ) ? $_GET['range'] : '7day';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
 		?>
 		<a
 			href="#"
-			download="report-<?php echo $current_range; ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php _e( 'Date', 'woocommerce' ); ?>"
@@ -291,12 +310,35 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'filter_range' => true
 		) );
 
+		$refunds = $this->get_order_report_data( array(
+			'data' => array(
+				'_refund_amount' => array(
+					'type'     => 'meta',
+					'function' => 'SUM',
+					'name'     => 'total_refund'
+				),
+				'post_date' => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_date'
+				)
+			),
+			'group_by'     => $this->group_by_query,
+			'order_by'     => 'post_date ASC',
+			'query_type'   => 'get_results',
+			'filter_range' => true
+		) );
+
+
+
 		// Prepare data for report
 		$order_counts      = $this->prepare_chart_data( $orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$order_item_counts = $this->prepare_chart_data( $order_items, 'post_date', 'order_item_count', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$order_amounts     = $this->prepare_chart_data( $orders, 'post_date', 'total_sales', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$coupon_amounts    = $this->prepare_chart_data( $coupons, 'post_date', 'discount_amount', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$shipping_amounts  = $this->prepare_chart_data( $orders, 'post_date', 'total_shipping', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$refund_amounts    = $this->prepare_chart_data( $refunds, 'post_date', 'total_refund', $this->chart_interval, $this->start_date, $this->chart_groupby );
+
 
 		// Encode in json format
 		$chart_data = json_encode( array(
@@ -304,7 +346,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'order_item_counts' => array_values( $order_item_counts ),
 			'order_amounts'     => array_values( $order_amounts ),
 			'coupon_amounts'    => array_values( $coupon_amounts ),
-			'shipping_amounts'  => array_values( $shipping_amounts )
+			'shipping_amounts'  => array_values( $shipping_amounts ),
+			'refund_amounts'    => array_values( $refund_amounts )
 		) );
 		?>
 		<div class="chart-container">
@@ -349,6 +392,16 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							data: order_data.coupon_amounts,
 							yaxis: 2,
 							color: '<?php echo $this->chart_colours['coupon_amount']; ?>',
+							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
+							lines: { show: true, lineWidth: 4, fill: false },
+							shadowSize: 0,
+							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); ?>"
+						},
+						{
+							label: "<?php echo esc_js( __( 'Refund amount', 'woocommerce' ) ) ?>",
+							data: order_data.refund_amounts,
+							yaxis: 2,
+							color: '<?php echo $this->chart_colours['refund_amount']; ?>',
 							points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 4, fill: false },
 							shadowSize: 0,

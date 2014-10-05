@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Local Delivery Shipping Method
@@ -67,7 +69,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 		if ( $this->type =='percent' ) 	$shipping_total 	= $package['contents_cost'] * ( $this->fee / 100 );
 
 		if ( $this->type == 'product' )	{
-			foreach ( WC()->cart->get_cart() as $item_id => $values ) {
+			foreach ( $package['contents'] as $item_id => $values ) {
 				$_product = $values['data'];
 
 				if ( $values['quantity'] > 0 && $_product->needs_shipping() ) {

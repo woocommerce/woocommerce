@@ -75,13 +75,16 @@ class WC_Download_Handler {
 			$access_expires 		= $download_result->access_expires;
 
 			if ( $user_id && get_option( 'woocommerce_downloads_require_login' ) == 'yes' ) {
-
 				if ( ! is_user_logged_in() ) {
-					wp_die( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), '', array( 'response' => 403 ) );
+					if ( wc_get_page_id( 'myaccount' ) ) {
+						wp_safe_redirect( add_query_arg( 'wc_error', urlencode( __( 'You must be logged in to download files.', 'woocommerce' ) ), get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
+						exit;
+					} else {
+						wp_die( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), '', array( 'response' => 403 ) );
+					}
 				} elseif ( ! current_user_can( 'download_file', $download_result ) ) {
 					wp_die( __( 'This is not your download link.', 'woocommerce' ), '', array( 'response' => 403 ) );
 				}
-
 			}
 
 			if ( ! get_post( $product_id ) ) {

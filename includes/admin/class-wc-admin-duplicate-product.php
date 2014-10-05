@@ -8,7 +8,9 @@
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( ! class_exists( 'WC_Admin_Duplicate_Product' ) ) :
 
@@ -136,11 +138,30 @@ class WC_Admin_Duplicate_Product {
 		$ping_status     		= str_replace("'", "''", $post->ping_status);
 
 		// Insert the new template in the post table
-		$wpdb->query(
-				"INSERT INTO $wpdb->posts
-				(post_author, post_date, post_date_gmt, post_content, post_content_filtered, post_title, post_excerpt,  post_status, post_type, comment_status, ping_status, post_password, to_ping, pinged, post_modified, post_modified_gmt, post_parent, menu_order, post_mime_type)
-				VALUES
-				('$new_post_author->ID', '$new_post_date', '$new_post_date_gmt', '$post_content', '$post_content_filtered', '$post_title', '$post_excerpt', '$post_status', '$new_post_type', '$comment_status', '$ping_status', '$post->post_password', '$post->to_ping', '$post->pinged', '$new_post_date', '$new_post_date_gmt', '$post_parent', '$post->menu_order', '$post->post_mime_type')");
+		$wpdb->insert(
+						$wpdb->posts,
+						array(
+								'post_author'				=> $new_post_author->ID,
+								'post_date'					=> $new_post_date,
+								'post_date_gmt'				=> $new_post_date_gmt,
+								'post_content'				=> $post_content,
+								'post_content_filtered'		=> $post_content_filtered,
+								'post_title'				=> $post_title,
+								'post_excerpt'				=> $post_excerpt,
+								'post_status'				=> $post_status,
+								'post_type'					=> $new_post_type,
+								'comment_status'			=> $comment_status,
+								'ping_status'				=> $ping_status,
+								'post_password'				=> $post->post_password,
+								'to_ping'					=> $post->to_ping,
+								'pinged'					=> $post->pinged,
+								'post_modified'				=> $new_post_date,
+								'post_modified_gmt'			=> $new_post_date_gmt,
+								'post_parent'				=> $post_parent,
+								'menu_order'				=> $post->menu_order,
+								'post_mime_type'			=> $post->post_mime_type
+							)
+					);
 
 		$new_post_id = $wpdb->insert_id;
 

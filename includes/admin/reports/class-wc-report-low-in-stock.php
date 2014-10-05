@@ -1,9 +1,12 @@
 <?php
-if ( ! defined( 'ABSPATH' ) )
-	exit; // Exit if accessed directly
 
-if ( ! class_exists( 'WC_Report_Stock' ) )
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+if ( ! class_exists( 'WC_Report_Stock' ) ) {
 	require_once( 'class-wc-report-stock.php' );
+}
 
 /**
  * WC_Report_Low_In_Stock

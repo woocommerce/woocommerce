@@ -2,9 +2,61 @@
  * This stylesheet optimises the default WooCommerce layout when viewed on smaller screens.
  */
 
-@import "mixins.less";
+@import 'mixins';
 
 .woocommerce, .woocommerce-page {
+
+	table.shop_table_responsive {
+		thead {
+			display: none;
+		}
+
+		tbody {
+			tr:first-child {
+				td:first-child {
+					border-top: 0;
+				}
+			}
+		}
+
+		tr {
+			display: block;
+
+			td {
+				display: block;
+
+				&:before {
+					content: attr(data-title) ':';
+					font-weight: 700;
+				}
+			}
+
+			&:nth-child(2n) {
+				td {
+					background-color: rgba(0,0,0,0.025);
+				}
+			}
+		}
+	}
+
+	table.my_account_orders {
+		tr {
+			td {
+				&.order-actions {
+					text-align: left;
+
+					&:before {
+						display: none;
+					}
+
+					.button {
+						float: none;
+						margin: .125em .25em .125em 0;
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * General layout
@@ -53,12 +105,12 @@
 			text-align: left;
 			.coupon {
 				float:none;
-				.clearfix;
+				@include clearfix();
 				padding-bottom:.5em;
 			}
 			input, .button, .input-text {
 				width:48%;
-				.borderbox;
+				@include borderbox();
 			}
 			.input-text + .button, .button.alt {
 				float: right;
@@ -93,7 +145,7 @@
 		#place_order {
 			float: none;
 			width:100%;
-			.borderbox;
+			@include borderbox();
 			margin-bottom:1em;
 		}
 	}

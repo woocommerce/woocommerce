@@ -18,6 +18,7 @@ $alt        = 1;
 $attributes = $product->get_attributes();
 
 ob_start();
+
 ?>
 <table class="shop_attributes">
 
@@ -64,7 +65,7 @@ ob_start();
 			?></td>
 		</tr>
 	<?php endforeach; ?>
-	
+
 </table>
 <?php
 if ( $has_row ) {

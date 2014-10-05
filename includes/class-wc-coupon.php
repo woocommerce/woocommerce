@@ -470,7 +470,7 @@ class WC_Coupon {
 
 	/**
 	 * Check if a coupon is valid for a product
-	 * 
+	 *
 	 * @param  WC_Product  $product
 	 * @return boolean
 	 */
@@ -521,7 +521,7 @@ class WC_Coupon {
 
 	/**
 	 * Get discount amount for a cart item
-	 * 
+	 *
 	 * @param  float $discounting_amount Amount the coupon is being applied to
 	 * @param  array|null $cart_item Cart item being discounted if applicable
 	 * @param  boolean $single True if discounting a single qty item, false if its the line
@@ -558,7 +558,7 @@ class WC_Coupon {
 				if ( WC()->cart->subtotal_ex_tax ) {
 					$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item['quantity'] ) / WC()->cart->subtotal_ex_tax;
 				}
-					
+
 				$discount = min( ( $this->amount * $discount_percent ) / $cart_item['quantity'], $discounting_amount );
 			} else {
 				$discount = min( $this->amount, $discounting_amount );

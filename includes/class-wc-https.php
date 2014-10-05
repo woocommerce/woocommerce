@@ -1,4 +1,5 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -19,7 +20,7 @@ class WC_HTTPS {
 	 */
 	public static function init() {
 		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) ) {
-			if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && in_array( $_REQUEST['action'], array( 'woocommerce_get_refreshed_fragments', 'woocommerce_checkout', 'woocommerce_update_order_review', 'woocommerce_update_shipping_method', 'woocommerce_apply_coupon' ) ) ) ) {
+			if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], array( 'woocommerce_get_refreshed_fragments', 'woocommerce_checkout', 'woocommerce_update_order_review', 'woocommerce_update_shipping_method', 'woocommerce_apply_coupon' ) ) ) ) {
 
 				// HTTPS urls with SSL on
 				$filters = array(

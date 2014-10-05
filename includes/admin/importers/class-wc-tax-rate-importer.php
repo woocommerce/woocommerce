@@ -8,7 +8,9 @@
  * @version     2.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 if ( class_exists( 'WP_Importer' ) ) {
 	class WC_Tax_Rate_Importer extends WP_Importer {

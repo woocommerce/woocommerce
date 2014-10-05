@@ -77,11 +77,14 @@ class WC_Shortcodes {
 	 * Cart page shortcode.
 	 *
 	 * @access public
-	 * @param mixed $atts
 	 * @return string
 	 */
-	public static function cart( $atts ) {
-		return self::shortcode_wrapper( array( 'WC_Shortcode_Cart', 'output' ), $atts );
+	public static function cart() {
+		if ( ! is_null( WC()->cart ) ) {
+			return self::shortcode_wrapper( array( 'WC_Shortcode_Cart', 'output' ) );
+		} else {
+			return '';
+		}
 	}
 
 	/**

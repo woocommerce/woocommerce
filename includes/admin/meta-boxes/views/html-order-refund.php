@@ -1,7 +1,9 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
+
 $who_refunded = new WP_User( $refund->post->post_author );
 ?>
 <tr class="refund <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_refund_id="<?php echo $refund->id; ?>">
@@ -21,6 +23,8 @@ $who_refunded = new WP_User( $refund->post->post_author );
 		<?php endif; ?>
 		<input type="hidden" class="order_refund_id" name="order_refund_id[]" value="<?php echo esc_attr( $refund->id ); ?>" />
 	</td>
+
+	<?php do_action( 'woocommerce_admin_order_item_values', null, $refund, absint( $refund->id ) ); ?>
 
 	<td class="quantity" width="1%">&nbsp;</td>
 

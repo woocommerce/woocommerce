@@ -1,8 +1,4 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Handles taxonomies in admin
  *
@@ -11,6 +7,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package		WooCommerce/Admin
  * @category	Class
  * @author 		WooThemes
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+/**
+ * WC_Admin_Taxonomies class.
  */
 class WC_Admin_Taxonomies {
 
@@ -135,7 +139,7 @@ class WC_Admin_Taxonomies {
 						attachment = file_frame.state().get('selection').first().toJSON();
 
 						jQuery('#product_cat_thumbnail_id').val( attachment.id );
-						jQuery('#product_cat_thumbnail img').attr('src', attachment.url );
+						jQuery('#product_cat_thumbnail img').attr('src', attachment.sizes.thumbnail.url );
 						jQuery('.remove_image_button').show();
 					});
 
@@ -222,7 +226,7 @@ class WC_Admin_Taxonomies {
 							attachment = file_frame.state().get('selection').first().toJSON();
 
 							jQuery('#product_cat_thumbnail_id').val( attachment.id );
-							jQuery('#product_cat_thumbnail img').attr('src', attachment.url );
+							jQuery('#product_cat_thumbnail img').attr('src', attachment.sizes.thumbnail.url );
 							jQuery('.remove_image_button').show();
 						});
 

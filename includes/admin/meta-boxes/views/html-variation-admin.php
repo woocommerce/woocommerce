@@ -1,5 +1,10 @@
-<?php ( ! defined( 'ABSPATH' ) && exit ); // Exit if accessed directly ?>
+<?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
 <div class="woocommerce_variation wc-metabox closed">
 	<h3>
 		<button type="button" class="remove_variation button" rel="<?php echo esc_attr( $variation_id ); ?>"><?php _e( 'Remove', 'woocommerce' ); ?></button>
