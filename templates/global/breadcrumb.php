@@ -184,7 +184,7 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 		$breadcrumbs = array();
 
 		while ( $parent_id ) {
-			$page          = get_page( $parent_id );
+			$page          = get_post( $parent_id );
 			$breadcrumbs[] = '<a href="' . get_permalink( $page->ID ) . '">' . get_the_title( $page->ID ) . '</a>';
 			$parent_id     = $page->post_parent;
 		}
