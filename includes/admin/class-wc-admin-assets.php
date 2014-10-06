@@ -144,6 +144,7 @@ class WC_Admin_Assets {
 				'plugin_url'                          => WC()->plugin_url(),
 				'ajax_url'                            => admin_url('admin-ajax.php'),
 				'woocommerce_placeholder_img_src'     => wc_placeholder_img_src(),
+				'bulk_action_variations_nonce'        => wp_create_nonce("bulk-action-variations"),
 				'add_variation_nonce'                 => wp_create_nonce("add-variation"),
 				'load_variation_nonce'                => wp_create_nonce("load-variation"),
 				'link_variation_nonce'                => wp_create_nonce("link-variations"),

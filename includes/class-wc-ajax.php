@@ -38,6 +38,7 @@ class WC_AJAX {
 			'remove_variations'                                => false,
 			'save_attributes'                                  => false,
 			'add_variation'                                    => false,
+			'bulk_action_variations'                           => false,
 			'load_variation'                                   => false,
 			'link_all_variations'                              => false,
 			'revoke_access_to_download'                        => false,
@@ -737,6 +738,57 @@ class WC_AJAX {
 		}
 
 		die();
+	}
+
+
+	/**
+	 * Run bulk Actions on the Variations
+	 */
+	public static function bulk_action_variations() {
+		check_ajax_referer( 'bulk-action-variations', 'security' );
+
+		$request = (object) array(
+			'post_id' => absint( $_POST['post_id'] ),
+			'bulk_action' => wp_kses( $_POST['bulk_action'], array() ),
+		);
+
+		$response = (object) array(
+			'status' => false,
+			'changed_variations' => array(),
+		);
+
+		if ( ! $request->post_id ){
+			$response->message = esc_attr__( 'Invalid product ID', 'woocommerce' );
+			exit( json_encode( $response ) );
+		}
+
+		if ( empty( $request->bulk_action ) ){
+			$response->message = esc_attr__( 'Empty bulk action is invalid', 'woocommerce' );
+			exit( json_encode( $response ) );
+		}
+
+		// Get variations
+		$variations = get_posts( array(
+			'post_type'   => 'product_variation',
+			'post_status' => array( 'private', 'publish' ),
+			'numberposts' => -1,
+			'orderby'     => 'menu_order',
+			'order'       => 'asc',
+			'post_parent' => $request->post_id
+		) );
+
+		if ( ! $variations ) {
+			$response->message = esc_attr__( 'No variations to this product', 'woocommerce' );
+			exit( json_encode( $response ) );
+		}
+
+		foreach ( $variations as $variation ) {
+			$response->changed_variations[ $variation->ID ] = apply_filters( 'woocommerce_variation_apply_bulk_action_' . $request->bulk_action, false, $request, $variation );
+		}
+
+		$response->status = true;
+
+		exit( json_encode( $response ) );
 	}
 
 	/**

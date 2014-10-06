@@ -128,7 +128,7 @@ jQuery( function ( $ ) {
 				$variation.unblock();
 			});
 		}
-		
+
 	});
 
 	// Add a variation
@@ -284,6 +284,35 @@ jQuery( function ( $ ) {
 	});
 
 	$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.bulk_edit', function ( event ) {
+		var bulk_action = $( 'select#field_to_edit' ).val(),
+			$wrapper = $( '.wc-metaboxes-wrapper' );
+
+		$wrapper.block({
+			message: null,
+			overlayCSS: {
+				background: '#fff url(' + woocommerce_admin_meta_boxes_variations.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+				opacity: 0.6
+			}
+		});
+
+		var data = {
+			action: 'woocommerce_bulk_action_variations',
+			bulk_action: bulk_action,
+			post_id: woocommerce_admin_meta_boxes_variations.post_id,
+			security: woocommerce_admin_meta_boxes_variations.bulk_action_variations_nonce
+		};
+
+		$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function ( response ) {
+			// You can use this to hook you own Bulk Action
+			$panel.trigger( 'variations_bulk_action.woocommerce', [ bulk_action, response ] );
+
+			$wrapper.unblock();
+		});
+
+
+		return;
+
+		// Old Behavior
 		var bulk_edit  = $( 'select#field_to_edit' ).val(),
 			checkbox,
 			answer,
