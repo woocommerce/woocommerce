@@ -191,7 +191,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 			// Get shop page
 			$shop_page_id = wc_get_page_id('shop');
 
-			$base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';
+			$base_slug = ($shop_page_id > 0 && get_post( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';
 
 			$woocommerce_prepend_shop_page_to_products_warning = '';
 

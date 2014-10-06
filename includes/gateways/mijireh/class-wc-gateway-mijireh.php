@@ -299,7 +299,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
     public static function page_slurp() {
     	self::init_mijireh();
 
-		$page 	= get_page( absint( $_POST['page_id'] ) );
+		$page 	= get_post( absint( $_POST['page_id'] ) );
 		$url 	= get_permalink( $page->ID );
 		$job_id = $url;
 		if ( wp_update_post( array( 'ID' => $page->ID, 'post_status' => 'publish' ) ) ) {
