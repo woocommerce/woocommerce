@@ -177,8 +177,10 @@ add_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 
  * Cart
  *
  * @see woocommerce_cross_sell_display()
+ * @see woocommerce_button_proceed_to_checkout()
  */
 add_action( 'woocommerce_cart_collaterals', 'woocommerce_cross_sell_display' );
+add_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 10 );
 
 /**
  * Footer

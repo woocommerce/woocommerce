@@ -1192,6 +1192,17 @@ p.demo_store {
 		}
 	}
 
+	.wc-proceed-to-checkout {
+		@include clearfix;
+		padding: 1em 0;
+
+		a.checkout-button {
+			display: block;
+			text-align: center;
+			margin-bottom: 1em;
+		}
+	}
+
 
 	/* =Cart Sidebar
 	-------------------------------------------------------------- */
@@ -1318,9 +1329,6 @@ p.demo_store {
 			}
 			tr td, tr th {
 				border-top: 1px solid $secondary;
-			}
-			a.button.alt {
-				display: inline-block;
 			}
 		}
 		.cross-sells {

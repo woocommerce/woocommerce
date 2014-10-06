@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @version     2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -82,6 +82,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php do_action( 'woocommerce_cart_totals_after_order_total' ); ?>
 
 	</table>
+
+	<div class="wc-proceed-to-checkout">
+
+		<?php do_action( 'woocommerce_proceed_to_checkout' ); ?>
+
+	</div>
 
 	<?php if ( WC()->cart->get_cart_tax() ) : ?>
 		<p><small><?php
