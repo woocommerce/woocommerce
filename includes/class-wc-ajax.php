@@ -784,7 +784,12 @@ class WC_AJAX {
 
 		foreach ( $variations as $variation ) {
 			// By default this apply filters will return False, as in the bulk_action has failed
-			$response->changed_variations[ $variation->ID ] = apply_filters( 'woocommerce_variation_apply_bulk_action_' . $request->bulk_action, false, $variation, $request );
+			$applied = apply_filters( 'woocommerce_variation_apply_bulk_action_' . $request->bulk_action, false, $variation, $request, $variations );
+
+			$response->changed_variations[ $variation->ID ] = $applied;
+			if ( $applied ) {
+				do_action( 'woocommerce_update_product_variation', $variation->ID );
+			}
 		}
 
 		$response->status = true;

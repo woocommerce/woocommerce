@@ -49,97 +49,96 @@ class WC_Meta_Box_Product_Variations_Bulk_Actions {
 		);
 
 		foreach ( $actions as $action ) {
-			add_filter( 'woocommerce_variation_apply_bulk_action_' . $action, array( &$this, $action ), 10, 3 );
+			add_filter( 'woocommerce_variation_apply_bulk_action_' . $action, array( &$this, $action ), 10, 4 );
 		}
 	}
 
-	public function toggle_enabled( $response, $variation, $request ){
-
-
-		return $response;
-	}
-
-	public function toggle_downloadable( $response, $variation, $request ){
+	public function toggle_enabled( $response, $variation, $request, $variations ){
+		var_dump( $variation );
 
 		return $response;
 	}
 
-	public function toggle_virtual( $response, $variation, $request ){
+	public function toggle_downloadable( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function delete_all( $response, $variation, $request ){
+	public function toggle_virtual( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_regular_price( $response, $variation, $request ){
+	public function delete_all( $response, $variation, $request, $variations ){
+		return (bool) wp_delete_post( $variation->ID, true );
+	}
+
+	public function variable_regular_price( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_regular_price_increase( $response, $variation, $request ){
+	public function variable_regular_price_increase( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_regular_price_decrease( $response, $variation, $request ){
+	public function variable_regular_price_decrease( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_sale_price( $response, $variation, $request ){
+	public function variable_sale_price( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_sale_price_increase( $response, $variation, $request ){
+	public function variable_sale_price_increase( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_sale_price_decrease( $response, $variation, $request ){
+	public function variable_sale_price_decrease( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function toggle_manage_stock( $response, $variation, $request ){
+	public function toggle_manage_stock( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_stock( $response, $variation, $request ){
+	public function variable_stock( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_length( $response, $variation, $request ){
+	public function variable_length( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_width( $response, $variation, $request ){
+	public function variable_width( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_height( $response, $variation, $request ){
+	public function variable_height( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_weight( $response, $variation, $request ){
+	public function variable_weight( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_download_limit( $response, $variation, $request ){
+	public function variable_download_limit( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
 
-	public function variable_download_expiry( $response, $variation, $request ){
+	public function variable_download_expiry( $response, $variation, $request, $variations ){
 
 		return $response;
 	}
