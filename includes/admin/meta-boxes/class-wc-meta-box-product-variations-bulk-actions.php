@@ -47,16 +47,25 @@ class WC_Meta_Box_Product_Variations_Bulk_Actions {
 			'variable_download_limit',
 			'variable_download_expiry',
 		);
+		$myself = new self;
 
 		foreach ( $actions as $action ) {
-			add_filter( 'woocommerce_variation_apply_bulk_action_' . $action, array( &$this, $action ), 10, 4 );
+			add_filter( 'woocommerce_variation_apply_bulk_action_' . $action, array( $myself, $action ), 10, 4 );
 		}
 	}
 
 	public function toggle_enabled( $response, $variation, $request, $variations ){
-		var_dump( $variation );
+		global $wpdb;
 
-		return $response;
+		$toggle = 'publish';
+		foreach ( $variations as $_variation ) {
+			if ( $_variation->post_status === 'publish' ){
+				$toggle = 'private';
+				break;
+			}
+		}
+
+		return $wpdb->update( $wpdb->posts, array( 'post_status' => $toggle ), array( 'ID' => $variation->ID ) ) !== false;
 	}
 
 	public function toggle_downloadable( $response, $variation, $request, $variations ){

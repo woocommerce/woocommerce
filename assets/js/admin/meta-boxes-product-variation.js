@@ -310,7 +310,7 @@ jQuery( function ( $ ) {
 		});
 
 
-		return;
+		// return;
 
 		// Old Behavior
 		var bulk_edit  = $( 'select#field_to_edit' ).val(),
