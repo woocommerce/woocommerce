@@ -32,6 +32,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'name'     => 'total_shipping'
 				)
 			),
+			'order_types'  => wc_get_order_types( 'sales-reports' ),
 			'filter_range' => true
 		) );
 
@@ -95,6 +96,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				)
 			),
 			'query_type'   => 'get_var',
+			'order_types'  => array( 'shop_order_refund' ),
 			'filter_range' => true
 		) );
 
@@ -136,15 +138,15 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		);
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s charged for shipping', 'woocommerce' ), '<strong>' . wc_price( $total_shipping ) . '</strong>' ),
-			'color' => $this->chart_colours['shipping_amount'],
-			'highlight_series' => 5
-		);
-
-		$legend[] = array(
 			'title' => sprintf( __( '%s in refunds', 'woocommerce' ), '<strong>' . wc_price( $total_refunds ) . '</strong>' ),
 			'color' => $this->chart_colours['refund_amount'],
 			'highlight_series' => 4
+		);
+
+		$legend[] = array(
+			'title' => sprintf( __( '%s charged for shipping', 'woocommerce' ), '<strong>' . wc_price( $total_shipping ) . '</strong>' ),
+			'color' => $this->chart_colours['shipping_amount'],
+			'highlight_series' => 5
 		);
 
 		$legend[] = array(
@@ -175,7 +177,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'item_count'   => '#d4d9dc',
 			'coupon_amount' => '#e67e22',
 			'shipping_amount' => '#1abc9c',
-			'refund_amount' => '#800000'
+			'refund_amount' => '#c0392b'
 		);
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';

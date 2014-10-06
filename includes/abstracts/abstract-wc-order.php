@@ -1487,10 +1487,7 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_order_currency() {
-
-		$currency = $this->order_currency;
-
-		return apply_filters( 'woocommerce_get_order_currency', $currency, $this );
+		return apply_filters( 'woocommerce_get_order_currency', $this->order_currency, $this );
 	}
 
 	/**
@@ -1499,8 +1496,7 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_order_total() {
-
-		$formatted_total = wc_price( $this->order_total , array('currency' => $this->get_order_currency()));
+		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_order_currency() ) );
 
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}

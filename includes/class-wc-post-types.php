@@ -308,16 +308,18 @@ class WC_Post_types {
 			'shop_order_refund',
 			apply_filters( 'woocommerce_register_post_type_shop_order_refund',
 				array(
-					'label'                      => __( 'Refunds', 'woocommerce' ),
-					'capability_type'            => 'shop_order',
-					'public'                     => false,
-					'hierarchical'               => false,
-					'supports'                   => false,
-					'exclude_from_orders_screen' => false,
-					'add_order_meta_boxes'       => false,
-					'exclude_from_order_count'   => true,
-					'exclude_from_order_views'   => false,
-					'class_name'                 => 'WC_Order_Refund'
+					'label'                            => __( 'Refunds', 'woocommerce' ),
+					'capability_type'                  => 'shop_order',
+					'public'                           => false,
+					'hierarchical'                     => false,
+					'supports'                         => false,
+					'exclude_from_orders_screen'       => false,
+					'add_order_meta_boxes'             => false,
+					'exclude_from_order_count'         => true,
+					'exclude_from_order_views'         => false,
+					'exclude_from_order_reports'       => false,
+					'exclude_from_order_sales_reports' => true,
+					'class_name'                       => 'WC_Order_Refund'
 				)
 			)
 		);

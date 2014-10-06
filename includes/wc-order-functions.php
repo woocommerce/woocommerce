@@ -124,6 +124,13 @@ function wc_get_order_types( $for = '' ) {
 				}
 			}
 		break;
+		case 'sales-reports' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_order_sales_reports'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
 		default :
 			$order_types = array_keys( $wc_order_types );
 		break;
@@ -161,6 +168,7 @@ function wc_get_order_type( $type ) {
  * 		- exclude_from_order_views (bool) Whether or not this order type is visible by customers when
  * 		viewing orders e.g. on the my account page.
  * 		- exclude_from_order_reports (bool) Whether or not to exclude this type from core reports.
+ * 		- exclude_from_order_sales_reports (bool) Whether or not to exclude this type from core sales reports.
  *
  * @since  2.2
  * @see    register_post_type for $args used in that function
@@ -186,12 +194,13 @@ function wc_register_order_type( $type, $args = array() ) {
 
 	// Register for WC usage
 	$order_type_args = array(
-		'exclude_from_orders_screen' => false,
-		'add_order_meta_boxes'       => true,
-		'exclude_from_order_count'   => false,
-		'exclude_from_order_views'   => false,
-		'exclude_from_order_reports' => false,
-		'class_name'                 => 'WC_Order'
+		'exclude_from_orders_screen'       => false,
+		'add_order_meta_boxes'             => true,
+		'exclude_from_order_count'         => false,
+		'exclude_from_order_views'         => false,
+		'exclude_from_order_reports'       => false,
+		'exclude_from_order_sales_reports' => false,
+		'class_name'                       => 'WC_Order'
 	);
 
 	$args                    = array_intersect_key( $args, $order_type_args );
@@ -596,11 +605,13 @@ function wc_create_refund( $args = array() ) {
 		// Default refund meta data
 		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
 
+		// Get refund object
+		$refund = wc_get_order( $refund_id );
+
 		// Negative line items
 		if ( sizeof( $args['line_items'] ) > 0 ) {
 			$order       = wc_get_order( $args['order_id'] );
 			$order_items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
-			$refund      = wc_get_order( $refund_id );
 
 			foreach ( $args['line_items'] as $refund_item_id => $refund_item ) {
 				if ( isset( $order_items[ $refund_item_id ] ) ) {
@@ -615,7 +626,7 @@ function wc_create_refund( $args = array() ) {
 
 					switch ( $order_items[ $refund_item_id ]['type'] ) {
 						case 'line_item' :
-							$args = array(
+							$line_item_args = array(
 								'totals' => array(
 									'subtotal'     => wc_format_refund_total( $refund_item['refund_total'] ),
 									'total'        => wc_format_refund_total( $refund_item['refund_total'] ),
@@ -624,7 +635,7 @@ function wc_create_refund( $args = array() ) {
 									'tax_data'     => array( 'total' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) )
 								)
 							);
-							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] : 0, $args );
+							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] : 0, $line_item_args );
 							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
 						case 'shipping' :
@@ -653,9 +664,16 @@ function wc_create_refund( $args = array() ) {
 				}
 			}
 			$refund->update_taxes();
-			$refund->calculate_totals( false );
 		}
+
+		$refund->calculate_totals( false );
+
+		// Set total to total refunded which may vary from order items
+		$refund->set_total( wc_format_decimal( $args['amount'] ) * -1, 'total' );
 	}
+
+	// Clear transients
+	wc_delete_shop_order_transients( $args['order_id'] );
 
 	return new WC_Order_Refund( $refund_id );
 }
