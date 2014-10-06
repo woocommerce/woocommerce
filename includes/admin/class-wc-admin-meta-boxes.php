@@ -46,6 +46,11 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Data::save', 40, 2 );
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Actions::save', 50, 2 );
 
+		// Initilize all the Bulk Action methods
+		if ( is_ajax() ){
+			add_action( 'init', 'WC_Meta_Box_Product_Variations_Bulk_Actions::init', 10 );
+		}
+
 		// Save Product Meta Boxes
 		add_action( 'woocommerce_process_product_meta', 'WC_Meta_Box_Product_Data::save', 10, 2 );
 		add_action( 'woocommerce_process_product_meta', 'WC_Meta_Box_Product_Images::save', 20, 2 );
