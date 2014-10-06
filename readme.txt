@@ -136,6 +136,21 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - When manually adding items to an order, show tax columns.
 * Fix - When manually adding items to an order, include variation data.
 * Fix - Prevent errors when constructing WC_Order without an ID.
+* Fix - Item_id notices in email templates.
+* Fix - Use variation get_stock_quantity() for variation max_qty.
+* Fix - Prevent bulk edit cancel from clearing options when bulk editing variations.
+* Fix - Use term_taxonomy_id for transient names - fixes counts in layered nav.
+* Fix - Use wc_get_order in simplify-commerce.
+* Fix - Use 'no' instead of boolean to disable PayPal gateway.
+* Fix - Do not escape redirect url in form handler - fixes malformed URLs.
+* Fix - Prevented non-existant pages from breaking cache helper.
+* Fix - Prevent sale prices showing errors in admin wrongly.
+* Fix - Prevent order statuses affecting other queries.
+* Fix - Removed deprecated get_page() functions.
+* Fix - Category archives. WP core still has issues dealing with pad_counts + parent when getting categories. Workaround by not hiding empty cats, then filtering the returned list using wp_list_filter.
+* Fix - When formatting meta data for display, suffix items to prevent issues when there are multiple values for the same meta key.
+* Fix - Unhook save_meta_boxes after first successful run to prevent race conditions.
+* Tweak - Added refunds to Sales by Date report.
 * Tweak - Tweak load_plugin_textdomain to be relative - this falls back to WP_LANG_DIR automatically. Can prevent "open_basedir restriction in effect".
 * Tweak - Added acceptance marks to PayPal Standard where applicable to replace generic PayPal icon.
 
