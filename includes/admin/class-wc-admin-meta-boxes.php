@@ -191,6 +191,9 @@ class WC_Admin_Meta_Boxes {
 			return;
 		}
 
+		// If we get here, saving will take place. Unhook self to prevent race conditions or double-saving.
+		remove_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
+
 		// Check the post type
 		if ( in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ) ) ) {
 			do_action( 'woocommerce_process_shop_order_meta', $post_id, $post );
