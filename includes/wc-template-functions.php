@@ -1456,15 +1456,15 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( http://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
 		$args = apply_filters( 'woocommerce_product_subcategories_args', array(
-			'parent'		=> $parent_id,
-			'menu_order'	=> 'ASC',
-			'hide_empty'	=> 1,
-			'hierarchical'	=> 1,
-			'taxonomy'		=> 'product_cat',
-			'pad_counts'	=> 1
+			'parent'       => $parent_id,
+			'menu_order'   => 'ASC',
+			'hide_empty'   => 0,
+			'hierarchical' => 1,
+			'taxonomy'     => 'product_cat',
+			'pad_counts'   => 1
 		) );
 
-		$product_categories     = get_categories( $args );
+		$product_categories     = wp_list_filter( get_categories( $args ), array( 'count' => 0 ), 'NOT' );
 		$product_category_found = false;
 
 		if ( $product_categories ) {
