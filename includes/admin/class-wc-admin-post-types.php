@@ -1699,11 +1699,11 @@ class WC_Admin_Post_Types {
 	 * @return void
 	 */
 	public function disable_autosave(){
-	    global $post;
+		global $post;
 
-	    if ( $post && get_post_type( $post->ID ) === 'shop_order' ) {
-	        wp_dequeue_script( 'autosave' );
-	    }
+		if ( $post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
+			wp_dequeue_script( 'autosave' );
+		}
 	}
 
 	/**
