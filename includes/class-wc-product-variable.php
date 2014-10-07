@@ -177,7 +177,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return object WC_Product or WC_Product_variation
 	 */
 	public function get_child( $child_id ) {
-		return get_product( $child_id, array(
+		return wc_get_product( $child_id, array(
 			'parent_id' => $this->id,
 			'parent' 	=> $this
 		) );
