@@ -40,7 +40,7 @@ class WC_Admin_Report {
 	public function get_order_report_data( $args = array() ) {
 		global $wpdb;
 
-		$defaults = array(
+		$default_args = array(
 			'data'         => array(),
 			'where'        => array(),
 			'where_meta'   => array(),
@@ -53,8 +53,8 @@ class WC_Admin_Report {
 			'debug'        => false,
 			'order_types'  => wc_get_order_types( 'reports' )
 		);
-
-		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', wp_parse_args( $args, $defaults ) );
+		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );
+		$args = wp_parse_args( $args, $default_args );
 
 		extract( $args );
 
@@ -68,8 +68,9 @@ class WC_Admin_Report {
 		foreach ( $data as $key => $value ) {
 			$distinct = '';
 
-			if ( isset( $value['distinct'] ) )
+			if ( isset( $value['distinct'] ) ) {
 				$distinct = 'DISTINCT';
+			}
 
 			if ( $value['type'] == 'meta' ) {
 				$get_key = "meta_{$key}.meta_value";
@@ -79,6 +80,8 @@ class WC_Admin_Report {
 				$get_key = "order_item_meta_{$key}.meta_value";
 			} elseif( $value['type'] == 'order_item' ) {
 				$get_key = "order_items.{$key}";
+			} else {
+				continue;
 			}
 
 			if ( $value['function'] ) {
