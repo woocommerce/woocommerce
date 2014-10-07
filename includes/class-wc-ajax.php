@@ -1891,6 +1891,8 @@ class WC_AJAX {
 				if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
 					$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund_amount, $refund_reason );
 
+					do_action( 'wc_refund_processed', $refund, $result );
+
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );
 					} elseif ( ! $result ) {
