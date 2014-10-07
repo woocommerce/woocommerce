@@ -59,7 +59,7 @@ class WC_Admin_Report {
 		extract( $args );
 
 		if ( empty( $data ) ) {
-			return false;
+			return '';
 		}
 
 		$query  = array();
