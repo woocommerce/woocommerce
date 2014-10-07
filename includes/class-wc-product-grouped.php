@@ -108,7 +108,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return object WC_Product or WC_Product_variation
 	 */
 	public function get_child( $child_id ) {
-		return get_product( $child_id );
+		return wc_get_product( $child_id );
 	}
 
 
