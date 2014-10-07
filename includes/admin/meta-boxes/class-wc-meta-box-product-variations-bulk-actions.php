@@ -50,104 +50,109 @@ class WC_Meta_Box_Product_Variations_Bulk_Actions {
 		$myself = new self;
 
 		foreach ( $actions as $action ) {
-			add_filter( 'woocommerce_variation_apply_bulk_action_' . $action, array( $myself, $action ), 10, 4 );
+			add_action( 'woocommerce_variations_apply_bulk_action_' . $action, array( $myself, $action ), 10, 2 );
 		}
 	}
 
-	public function toggle_enabled( $response, $variation, $request, $variations ){
+	public function toggle_enabled( $response, $variations, $request ){
 		global $wpdb;
 
+		$ids = array();
+
 		$toggle = 'publish';
-		foreach ( $variations as $_variation ) {
-			if ( $_variation->post_status === 'publish' ){
+		foreach ( $variations as $variation ) {
+			$ids[] = $variation->ID;
+			if ( $variation->post_status === 'publish' ){
 				$toggle = 'private';
-				break;
 			}
 		}
 
-		return $wpdb->update( $wpdb->posts, array( 'post_status' => $toggle ), array( 'ID' => $variation->ID ) ) !== false;
+		// Ensure that our variables are safe
+		$ids = array_filter( array_map( 'absint', $ids ) );
+
+		return $wpdb->query( "UPDATE {$wpdb->posts} SET `post_status` = 'publish' WHERE `ID` IN ( " . implode( ',' , $ids ) . " );" ) !== false;
 	}
 
-	public function toggle_downloadable( $response, $variation, $request, $variations ){
+	public function toggle_downloadable( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function toggle_virtual( $response, $variation, $request, $variations ){
+	public function toggle_virtual( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function delete_all( $response, $variation, $request, $variations ){
+	public function delete_all( $response, $variations, $request ){
 		return (bool) wp_delete_post( $variation->ID, true );
 	}
 
-	public function variable_regular_price( $response, $variation, $request, $variations ){
+	public function variable_regular_price( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_regular_price_increase( $response, $variation, $request, $variations ){
+	public function variable_regular_price_increase( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_regular_price_decrease( $response, $variation, $request, $variations ){
+	public function variable_regular_price_decrease( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_sale_price( $response, $variation, $request, $variations ){
+	public function variable_sale_price( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_sale_price_increase( $response, $variation, $request, $variations ){
+	public function variable_sale_price_increase( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_sale_price_decrease( $response, $variation, $request, $variations ){
+	public function variable_sale_price_decrease( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function toggle_manage_stock( $response, $variation, $request, $variations ){
+	public function toggle_manage_stock( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_stock( $response, $variation, $request, $variations ){
+	public function variable_stock( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_length( $response, $variation, $request, $variations ){
+	public function variable_length( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_width( $response, $variation, $request, $variations ){
+	public function variable_width( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_height( $response, $variation, $request, $variations ){
+	public function variable_height( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_weight( $response, $variation, $request, $variations ){
+	public function variable_weight( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_download_limit( $response, $variation, $request, $variations ){
+	public function variable_download_limit( $response, $variations, $request ){
 
 		return $response;
 	}
 
-	public function variable_download_expiry( $response, $variation, $request, $variations ){
+	public function variable_download_expiry( $response, $variations, $request ){
 
 		return $response;
 	}
