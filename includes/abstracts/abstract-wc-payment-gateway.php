@@ -60,10 +60,10 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Get the return url (thank you page)
 	 *
-	 * @param WC_Order $order
+	 * @param string $order (default: '')
 	 * @return string
 	 */
-	public function get_return_url( $order = null ) {
+	public function get_return_url( $order = '' ) {
 
 		if ( $order ) {
 			$return_url = $order->get_checkout_order_received_url();

@@ -1,9 +1,8 @@
 <?php
 /**
  * Admin View: Page - Addons
- *
- * @global string $view
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }

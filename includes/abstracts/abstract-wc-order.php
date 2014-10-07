@@ -5,34 +5,19 @@
  * The WooCommerce order class handles order data.
  *
  * @class       WC_Order
- * @uses        WP_Post WP Post object
  * @version     2.2.0
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
  */
+
 abstract class WC_Abstract_Order {
 
 	/** @public int Order (post) ID */
-	public $id = 0;
-
-	/** @public WP_Post Stores post data for the order */
-	public $post = null;
+	public $id;
 
 	/** @public string Order type */
 	public $order_type = null;
-
-	/** @public bool Do prices include tax? */
-	public $prices_include_tax = false;
-
-	/** @public string Display mode for taxes in cart */
-	public $tax_display_cart = false;
-
-	/** @public bool Do totals display ex tax? */
-	public $display_totals_ex_tax = false;
-
-	/** @public bool Do cart prices display ex tax? */
-	public $display_cart_ex_tax = false;
 
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
@@ -42,27 +27,30 @@ abstract class WC_Abstract_Order {
 	 *
 	 */
 	public function __construct( $order = '' ) {
-		$this->prices_include_tax    = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;
-		$this->tax_display_cart      = get_option( 'woocommerce_tax_display_cart' );
+
+		$this->prices_include_tax = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;
+		$this->tax_display_cart   = get_option( 'woocommerce_tax_display_cart' );
+
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl' ? true : false;
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl' ? true : false;
-		$this->order_type            = 'simple';
+
+		$this->order_type = 'simple';
 
 		if ( is_numeric( $order ) ) {
 
-			$this->id   = absint( $order );
+			$this->id = absint( $order );
 			$this->post = get_post( $order );
 			$this->get_order( $this->id );
 
 		} elseif ( $order instanceof WC_Order ) {
 
-			$this->id   = absint( $order->id );
+			$this->id = absint( $order->id );
 			$this->post = $order->post;
 			$this->get_order( $this->id );
 
 		} elseif ( $order instanceof WP_Post || isset( $order->ID ) ) {
 
-			$this->id   = absint( $order->ID );
+			$this->id = absint( $order->ID );
 			$this->post = $order;
 			$this->get_order( $this->id );
 		}

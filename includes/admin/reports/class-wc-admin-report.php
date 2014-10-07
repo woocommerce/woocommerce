@@ -40,7 +40,7 @@ class WC_Admin_Report {
 	public function get_order_report_data( $args = array() ) {
 		global $wpdb;
 
-		$default_args = array(
+		$defaults = array(
 			'data'         => array(),
 			'where'        => array(),
 			'where_meta'   => array(),
@@ -53,24 +53,22 @@ class WC_Admin_Report {
 			'debug'        => false,
 			'order_types'  => wc_get_order_types( 'reports' )
 		);
-		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );
-		$args = wp_parse_args( $args, $default_args );
+
+		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', wp_parse_args( $args, $defaults ) );
 
 		extract( $args );
 
 		if ( empty( $data ) ) {
-			return '';
+			return false;
 		}
 
-		$query  = array();
 		$select = array();
 
 		foreach ( $data as $key => $value ) {
 			$distinct = '';
 
-			if ( isset( $value['distinct'] ) ) {
+			if ( isset( $value['distinct'] ) )
 				$distinct = 'DISTINCT';
-			}
 
 			if ( $value['type'] == 'meta' ) {
 				$get_key = "meta_{$key}.meta_value";
@@ -80,8 +78,6 @@ class WC_Admin_Report {
 				$get_key = "order_item_meta_{$key}.meta_value";
 			} elseif( $value['type'] == 'order_item' ) {
 				$get_key = "order_items.{$key}";
-			} else {
-				continue;
 			}
 
 			if ( $value['function'] ) {
@@ -265,9 +261,7 @@ class WC_Admin_Report {
 		$cached_results = get_transient( strtolower( get_class( $this ) ) );
 
 		if ( $debug ) {
-			echo '<pre>';
-			print_r( $query );
-			echo '</pre>';
+			var_dump( $query );
 		}
 
 		if ( $debug || $nocache || false === $cached_results || ! isset( $cached_results[ $query_hash ] ) ) {

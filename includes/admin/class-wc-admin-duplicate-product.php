@@ -133,13 +133,14 @@ class WC_Admin_Duplicate_Product {
 		$post_content_filtered 	= str_replace("'", "''", $post->post_content_filtered);
 		$post_excerpt    		= str_replace("'", "''", $post->post_excerpt);
 		$post_title      		= str_replace("'", "''", $post->post_title).$suffix;
+		$post_name       		= str_replace("'", "''", $post->post_name);
 		$comment_status  		= str_replace("'", "''", $post->comment_status);
 		$ping_status     		= str_replace("'", "''", $post->ping_status);
 
 		// Insert the new template in the post table
 		$wpdb->query(
 				"INSERT INTO $wpdb->posts
-				(post_author, post_date, post_date_gmt, post_content, post_content_filtered, post_title, post_excerpt, post_status, post_type, comment_status, ping_status, post_password, to_ping, pinged, post_modified, post_modified_gmt, post_parent, menu_order, post_mime_type)
+				(post_author, post_date, post_date_gmt, post_content, post_content_filtered, post_title, post_excerpt,  post_status, post_type, comment_status, ping_status, post_password, to_ping, pinged, post_modified, post_modified_gmt, post_parent, menu_order, post_mime_type)
 				VALUES
 				('$new_post_author->ID', '$new_post_date', '$new_post_date_gmt', '$post_content', '$post_content_filtered', '$post_title', '$post_excerpt', '$post_status', '$new_post_type', '$comment_status', '$ping_status', '$post->post_password', '$post->to_ping', '$post->pinged', '$new_post_date', '$new_post_date_gmt', '$post_parent', '$post->menu_order', '$post->post_mime_type')");
 
