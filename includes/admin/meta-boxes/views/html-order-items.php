@@ -128,7 +128,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 
 						$link = $post_id ? add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) : add_query_arg( array( 's' => $item['name'], 'post_status' => 'all', 'post_type' => 'shop_coupon' ), admin_url( 'edit.php' ) );
 
-						echo '<li class="tips code" data-tip="' . esc_attr( wc_price( $item['discount_amount'] ) ) . '"><a href="' . esc_url( $link ) . '"><span>' . esc_html( $item['name'] ). '</span></a></li>';
+						echo '<li class="tips code" data-tip="' . esc_attr( wc_price( $item['discount_amount'], array( 'currency' => $order->get_order_currency() ) ) ) . '"><a href="' . esc_url( $link ) . '"><span>' . esc_html( $item['name'] ). '</span></a></li>';
 					}
 				?></ul>
 			</div>
@@ -138,7 +138,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<table class="wc-order-totals">
 		<tr>
 			<td class="label"><?php _e( 'Shipping', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the shipping and handling total costs for the order.', 'woocommerce' ); ?>">[?]</span>:</td>
-			<td class="total"><?php echo wc_price( $order->get_total_shipping() ); ?></td>
+			<td class="total"><?php echo wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
 			<td width="1%"></td>
 		</tr>
 
@@ -159,7 +159,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<tr>
 			<td class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total discount applied after tax.', 'woocommerce' ); ?>">[?]</span>:</td>
 			<td class="total">
-				<div class="view"><?php echo wc_price( $order->get_total_discount() ); ?></div>
+				<div class="view"><?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_order_currency() ) ); ?></div>
 				<div class="edit" style="display: none;">
 					<input type="text" class="wc_input_price" id="_order_discount" name="_order_discount" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $data['_order_discount'][0] ) ) ? esc_attr( wc_format_localized_price( $data['_order_discount'][0] ) ) : ''; ?>" />
 					<div class="clear"></div>
@@ -173,7 +173,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<tr>
 			<td class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</td>
 			<td class="total">
-				<div class="view"><?php echo wc_price( $order->get_total() ); ?></div>
+				<div class="view"><?php echo wc_price( $order->get_total(), array( 'currency' => $order->get_order_currency() ) ); ?></div>
 				<div class="edit" style="display: none;">
 					<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $data['_order_total'][0] ) ) ? esc_attr( wc_format_localized_price( $data['_order_total'][0] ) ) : ''; ?>" />
 					<div class="clear"></div>
@@ -186,7 +186,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 
 		<tr>
 			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
-			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded() ); ?></td>
+			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
 			<td width="1%"></td>
 		</tr>
 
@@ -254,11 +254,11 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		</tr>
 		<tr>
 			<td class="label"><?php _e( 'Amount already refunded', 'woocommerce' ); ?>:</td>
-			<td class="total">-<?php echo wc_price( $order->get_total_refunded() ); ?></td>
+			<td class="total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
 		</tr>
 		<tr>
 			<td class="label"><?php _e( 'Total available to refund', 'woocommerce' ); ?>:</td>
-			<td class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded() ); ?></td>
+			<td class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
 		</tr>
 		<tr>
 			<td class="label"><label for="refund_amount"><?php _e( 'Refund amount', 'woocommerce' ); ?>:</label></td>
@@ -278,7 +278,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<div class="clear"></div>
 	<div class="refund-actions">
 		<?php if ( false !== $payment_gateway && $payment_gateway->supports( 'refunds' ) ) : ?>
-		<button type="button" class="button button-primary do-api-refund"><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0 ) . '</span>', $order->payment_method_title ); ?></button>
+		<button type="button" class="button button-primary do-api-refund"><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0, array( 'currency' => $order->get_order_currency() ) ) . '</span>', $order->payment_method_title ); ?></button>
 		<?php endif; ?>
 		<button type="button" class="button button-primary do-manual-refund"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
 		<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
