@@ -781,7 +781,7 @@ class WC_AJAX {
 			exit( json_encode( $response ) );
 		}
 
-		$response->status = apply_filters( 'woocommerce_variations_apply_bulk_action_' . $request->bulk_action, false, $variations, $request );
+		$response = (object) apply_filters( 'woocommerce_variations_apply_bulk_action_' . $request->bulk_action, false, $variations, $request );
 
 		exit( json_encode( $response ) );
 	}

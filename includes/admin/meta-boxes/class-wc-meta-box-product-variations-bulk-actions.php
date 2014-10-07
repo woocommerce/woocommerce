@@ -50,7 +50,7 @@ class WC_Meta_Box_Product_Variations_Bulk_Actions {
 		$myself = new self;
 
 		foreach ( $actions as $action ) {
-			add_action( 'woocommerce_variations_apply_bulk_action_' . $action, array( $myself, $action ), 10, 2 );
+			add_filter( 'woocommerce_variations_apply_bulk_action_' . $action, array( $myself, $action ), 10, 2 );
 		}
 	}
 
@@ -70,7 +70,9 @@ class WC_Meta_Box_Product_Variations_Bulk_Actions {
 		// Ensure that our variables are safe
 		$ids = array_filter( array_map( 'absint', $ids ) );
 
-		return $wpdb->query( "UPDATE {$wpdb->posts} SET `post_status` = 'publish' WHERE `ID` IN ( " . implode( ',' , $ids ) . " );" ) !== false;
+		$response->status = $wpdb->query( "UPDATE {$wpdb->posts} SET `post_status` = 'publish' WHERE `ID` IN ( " . implode( ',' , $ids ) . " );" ) !== false;
+
+		return $response;
 	}
 
 	public function toggle_downloadable( $response, $variations, $request ){
