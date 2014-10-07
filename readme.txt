@@ -130,7 +130,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.2.5 =
+= 2.2.5 - 07/10/2014 =
 * Fix - Filters in admin screen for coupons and orders.
 * Fix - When bulk editing, don't allow sale price to be negative.
 * Fix - When manually adding items to an order, show tax columns.
