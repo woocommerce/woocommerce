@@ -106,11 +106,12 @@ class WC_Admin_Meta_Boxes {
 
 		// Orders
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
-			add_meta_box( 'woocommerce-order-data', __( 'Order Data', 'woocommerce' ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
-			add_meta_box( 'woocommerce-order-items', __( 'Order Items', 'woocommerce' ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
-			add_meta_box( 'woocommerce-order-notes', __( 'Order Notes', 'woocommerce' ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
+			$order_type_object = get_post_type_object( $type );
+			add_meta_box( 'woocommerce-order-data', sprintf( __( '%s Data', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
+			add_meta_box( 'woocommerce-order-items', sprintf( __( '%s Items', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
+			add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s Notes', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
 			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . ' <span class="tips" data-tip="' . __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) . '">[?]</span>', 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
-			add_meta_box( 'woocommerce-order-actions', __( 'Order Actions', 'woocommerce' ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
+			add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s Actions', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
 		}
 
 		// Coupons
