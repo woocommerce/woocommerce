@@ -261,7 +261,9 @@ class WC_Admin_Report {
 		$cached_results = get_transient( strtolower( get_class( $this ) ) );
 
 		if ( $debug ) {
-			var_dump( $query );
+			echo '<pre>';
+			print_r( $query );
+			echo '</pre>';
 		}
 
 		if ( $debug || $nocache || false === $cached_results || ! isset( $cached_results[ $query_hash ] ) ) {
