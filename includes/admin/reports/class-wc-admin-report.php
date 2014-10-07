@@ -62,6 +62,7 @@ class WC_Admin_Report {
 			return false;
 		}
 
+		$query  = array();
 		$select = array();
 
 		foreach ( $data as $key => $value ) {
