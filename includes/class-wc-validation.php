@@ -85,6 +85,8 @@ class WC_Validation {
 		$alpha4 = "[abehmnprvwxy]";                                     // Character 4 == ABEHMNPRVWXY
 		$alpha5 = "[abdefghjlnpqrstuwxyz]";                             // Character 5 != CIKMOV
 
+		$pcexp    = array();
+
 		// Expression for postcodes: AN NAA, ANN NAA, AAN NAA, and AANN NAA
 		$pcexp[0] = '/^('.$alpha1.'{1}'.$alpha2.'{0,1}[0-9]{1,2})([0-9]{1}'.$alpha5.'{2})$/';
 
