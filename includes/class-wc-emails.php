@@ -323,11 +323,11 @@ class WC_Emails {
 		$meta = array();
 		$show_fields = array();
 
-		if ($order->billing_email){
+		if ( $order->billing_email ){ 
 			$show_fields[__( 'Email:', 'woocommerce' )] = wptexturize( $order->billing_email );
 		} 
 
-		if ($order->billing_phone){
+		if ( $order->billing_phone ){
 			$show_fields[__( 'Tel:', 'woocommerce' )] = wptexturize( $order->billing_phone );
 		}
 
@@ -341,7 +341,7 @@ class WC_Emails {
 
 				echo $heading . "\n\n";
 
-				foreach ( $meta as $key => $value ) {
+				foreach ( $show_fields as $key => $value ) {
 					if ( $value ) {
 						echo $key . ': ' . $value . "\n";
 					}
@@ -351,7 +351,7 @@ class WC_Emails {
 
 				echo '<h2>' . $heading . '</h2>';
 
-				foreach ( $meta as $key => $value ) {
+				foreach ( $show_fields as $key => $value ) {
 					if ( $value ) {
 						echo '<p><strong>' . $key . ':</strong> ' . $value . '</p>';
 					}
