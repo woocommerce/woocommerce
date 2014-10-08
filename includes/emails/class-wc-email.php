@@ -17,16 +17,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Email extends WC_Settings_API {
 
-	/** @var string Payment method ID. */
+	/** @var string email method ID. */
 	public $id;
 
-	/** @var string Payment method title. */
+	/** @var string email method title. */
 	public $title;
 
 	/** @var string 'yes' if the method is enabled. */
 	public $enabled;
 
-	/** @var string Description for the gateway. */
+	/** @var string Description for the email. */
 	public $description;
 
 	/** @var string plain text template path */
