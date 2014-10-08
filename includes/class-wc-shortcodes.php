@@ -964,7 +964,7 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
+		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
 	}
 
 	/**
