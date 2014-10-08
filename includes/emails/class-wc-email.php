@@ -158,13 +158,8 @@ class WC_Email extends WC_Settings_API {
 		// For multipart messages
 		add_filter( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 
-		// For default inline styles
-		add_filter( 'woocommerce_email_style_inline_tags',    array( $this, 'style_inline_tags' ) );
-		add_filter( 'woocommerce_email_style_inline_h1_tag',  array( $this, 'style_inline_h1_tag' ) );
-		add_filter( 'woocommerce_email_style_inline_h2_tag',  array( $this, 'style_inline_h2_tag' ) );
-		add_filter( 'woocommerce_email_style_inline_h3_tag',  array( $this, 'style_inline_h3_tag' ) );
-		add_filter( 'woocommerce_email_style_inline_a_tag',   array( $this, 'style_inline_a_tag' ) );
-		add_filter( 'woocommerce_email_style_inline_img_tag', array( $this, 'style_inline_img_tag' ) );
+		// Inline CSS styles for html emails
+		add_filter( 'woocommerce_mail_content', array( $this, 'style_inline' ), 10 );
 	}
 
 	/**
@@ -309,150 +304,10 @@ class WC_Email extends WC_Settings_API {
 		if ( $this->get_email_type() == 'plain' ) {
 			$email_content = preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) );
 		} else {
-			$email_content = $this->style_inline( $this->get_content_html() );
+			$email_content = $this->get_content_html();
 		}
 
 		return wordwrap( $email_content, 70 );
-	}
-
-	/**
-	 * style_inline_tags function.
-	 *
-	 * @param array $tags
-	 * @return array
-	 */
-	public function style_inline_tags( $tags ) {
-		return array_unique( array_merge( $tags, array( 'h1', 'h2', 'h3', 'a', 'img' ) ) );
-	}
-
-	/**
-	 * style_inline_h1_tag function.
-	 *
-	 * @param array $styles
-	 * @return array
-	 */
-	public function style_inline_h1_tag( $styles ) {
-
-		$styles['color']         = get_option( 'woocommerce_email_text_color' );
-		$styles['display']       = 'block';
-		$styles['font-family']   = 'Arial';
-		$styles['font-size']     = '34px';
-		$styles['font-weight']   = 'bold';
-		$styles['margin-top']    = '10px';
-		$styles['margin-right']  = '0';
-		$styles['margin-bottom'] = '10px';
-		$styles['margin-left']   = '0';
-		$styles['text-align']    = 'left';
-		$styles['line-height']   = '150%';
-
-		return $styles;
-	}
-
-	/**
-	 * style_inline_h2_tag function.
-	 *
-	 * @param array $styles
-	 * @return array
-	 */
-	public function style_inline_h2_tag( $styles ) {
-
-		$styles['color']         = get_option( 'woocommerce_email_text_color' );
-		$styles['display']       = 'block';
-		$styles['font-family']   = 'Arial';
-		$styles['font-size']     = '30px';
-		$styles['font-weight']   = 'bold';
-		$styles['margin-top']    = '10px';
-		$styles['margin-right']  = '0';
-		$styles['margin-bottom'] = '10px';
-		$styles['margin-left']   = '0';
-		$styles['text-align']    = 'left';
-		$styles['line-height']   = '150%';
-
-		return $styles;
-	}
-
-	/**
-	 * style_inline_h3_tag function.
-	 *
-	 * @param array $styles
-	 * @return array
-	 */
-	public function style_inline_h3_tag( $styles ) {
-
-		$styles['color']         = get_option( 'woocommerce_email_text_color' );
-		$styles['display']       = 'block';
-		$styles['font-family']   = 'Arial';
-		$styles['font-size']     = '26px';
-		$styles['font-weight']   = 'bold';
-		$styles['margin-top']    = '10px';
-		$styles['margin-right']  = '0';
-		$styles['margin-bottom'] = '10px';
-		$styles['margin-left']   = '0';
-		$styles['text-align']    = 'left';
-		$styles['line-height']   = '150%';
-
-		return $styles;
-	}
-
-	/**
-	 * @param array $styles
-	 * @return array
-	 */
-	public function style_inline_a_tag( $styles ) {
-
-		$styles['color']           = get_option( 'woocommerce_email_text_color' );
-		$styles['font-weight']     = 'normal';
-		$styles['text-decoration'] = 'underline';
-
-		return $styles;
-	}
-
-	/**
-	 * style_inline_img_tag function.
-	 *
-	 * @param array $styles
-	 * @return array
-	 */
-	public function style_inline_img_tag( $styles ) {
-
-		$styles['display']         = 'inline';
-		$styles['border']          = 'none';
-		$styles['font-size']       = '14px';
-		$styles['font-weight']     = 'bold';
-		$styles['height']          = 'auto';
-		$styles['line-height']     = '100%';
-		$styles['outline']         = 'none';
-		$styles['text-decoration'] = 'none';
-		$styles['text-transform']  = 'capitalize';
-
-		return $styles;
-	}
-
-	/**
-	 * get_style_inline_tags function.
-	 *
-	 * @return array
-	 */
-	public function get_style_inline_tags() {
-		return apply_filters( 'woocommerce_email_style_inline_tags', array() );
-	}
-
-	/**
-	 * get_style_inline_for_tag function.
-	 *
-	 * @param string $tag
-	 * @return string
-	 */
-	public function get_style_inline_for_tag( $tag ) {
-
-		$styles = apply_filters( 'woocommerce_email_style_inline_' . $tag . '_tag',  array() );
-		$css = array();
-
-		foreach( $styles as $property => $value ) {
-			$css[] = $property . ':' . $value;
-		}
-
-		return implode('; ', $css);
 	}
 
 	/**
@@ -463,26 +318,18 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function style_inline( $content ) {
 
-		if ( ! class_exists( 'DOMDocument' ) ) {
-			return $content;
+		// make sure we only inline CSS for html emails
+		if ( 'text/html' ==  $this->get_content_type() ) {
+
+			// get CSS styles
+			ob_start();
+			wc_get_template( 'emails/email-styles.php' );
+			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean() );
+
+			// apply CSS styles inline for picky email clients
+			$emogrifier = new Emogrifier( $content, $css );
+			$content = $emogrifier->emogrify();
 		}
-
-		$dom = new DOMDocument();
-		libxml_use_internal_errors( true );
-		@$dom->loadHTML( $content );
-		libxml_clear_errors();
-
-		foreach( $this->get_style_inline_tags() as $tag ) {
-			$nodes = $dom->getElementsByTagName($tag);
-
-			foreach( $nodes as $node ) {
-				if ( ! $node->hasAttribute( 'style' ) ) {
-					$node->setAttribute( 'style', $this->get_style_inline_for_tag($tag) );
-				}
-			}
-		}
-
-		$content = $dom->saveHTML();
 
 		return $content;
 	}
@@ -534,6 +381,13 @@ class WC_Email extends WC_Settings_API {
 		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
+
+		/**
+		 * Filter all WooCommerce mail content
+		 *
+		 * @hooked inline_styles - 10
+		*/
+		$message = apply_filters( 'woocommerce_mail_content', $message );
 
 		$return = wp_mail( $to, $subject, $message, $headers, $attachments );
 
