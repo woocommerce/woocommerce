@@ -11,17 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-// Load colours
-$bg 		= get_option( 'woocommerce_email_background_color' );
-$body		= get_option( 'woocommerce_email_body_background_color' );
-$base 		= get_option( 'woocommerce_email_base_color' );
-$base_text 	= wc_light_or_dark( $base, '#202020', '#ffffff' );
-$text 		= get_option( 'woocommerce_email_text_color' );
-
-$bg_darker_10 = wc_hex_darker( $bg, 10 );
-$base_lighter_20 = wc_hex_lighter( $base, 20 );
-$text_lighter_20 = wc_hex_lighter( $text, 20 );
-
 ?>
 <!DOCTYPE html>
 <html>
