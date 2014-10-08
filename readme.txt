@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 2.2.5
+Stable tag: 2.2.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -129,6 +129,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.2.6 - 08/10/2014 =
+* Fix - Notices in the cache helper.
+* Fix - Prevent bulk edit from breaking sale price scheduled dates.
+* Fix - Prevent address fields being empty when editing an address within an order.
+* Tweak - Added woocommerce_product_subcategories_hide_empty filter.
+* Tweak - Added filter for shipping tax.
+* Tweak - Product attribute shortcode should return columns css class.
 
 = 2.2.5 - 07/10/2014 =
 * Fix - Filters in admin screen for coupons and orders.
