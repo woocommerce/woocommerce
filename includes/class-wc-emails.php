@@ -275,7 +275,7 @@ class WC_Emails {
 	function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
 
 		$meta = array();
-		$show_fields = apply_filters( 'woocommerce_email_order_meta_keys', array(), $sent_to_admin );
+		$show_fields = apply_filters( 'woocommerce_email_order_meta_keys', array(), $sent_to_admin, $order );
 
 		if ( $order->customer_note )
 			$meta[ __( 'Note', 'woocommerce' ) ] = wptexturize( $order->customer_note );
@@ -331,7 +331,7 @@ class WC_Emails {
 			$show_fields[__( 'Tel:', 'woocommerce' )] = wptexturize( $order->billing_phone );
 		}
 
-		$show_fields = apply_filters( 'woocommerce_email_customer_keys', $show_fields, $sent_to_admin, $order );
+		$show_fields = apply_filters( 'woocommerce_email_customer_details_keys', $show_fields, $sent_to_admin, $order );
 
 		if( $show_fields ){
 
