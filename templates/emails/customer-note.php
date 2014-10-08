@@ -56,15 +56,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text ); ?>
 
-<h2><?php _e( 'Customer details', 'woocommerce' ); ?></h2>
-
-<?php if ($order->billing_email) : ?>
-	<p><strong><?php _e( 'Email:', 'woocommerce' ); ?></strong> <?php echo $order->billing_email; ?></p>
-<?php endif; ?>
-<?php if ($order->billing_phone) : ?>
-	<p><strong><?php _e( 'Tel:', 'woocommerce' ); ?></strong> <?php echo $order->billing_phone; ?></p>
-<?php endif; ?>
-
-<?php wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) ); ?>
+<?php do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text ); ?>
 
 <?php do_action( 'woocommerce_email_footer' ); ?>

@@ -89,6 +89,8 @@ class WC_Emails {
 		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
+		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
+		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 10, 3 );
 
 		// Hooks for sending emails during store events
 		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
@@ -305,6 +307,69 @@ class WC_Emails {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Add customer details to email templates.
+	 *
+	 * @access public
+	 * @param mixed $order
+	 * @param bool $sent_to_admin (default: false)
+	 * @param bool $plain_text (default: false)
+	 * @return void
+	 */
+	function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
+
+		$meta = array();
+		$show_fields = array();
+
+		if ($order->billing_email){
+			$show_fields[__( 'Email:', 'woocommerce' )] = wptexturize( $order->billing_email );
+		} 
+
+		if ($order->billing_phone){
+			$show_fields[__( 'Tel:', 'woocommerce' )] = wptexturize( $order->billing_phone );
+		}
+
+		$show_fields = apply_filters( 'woocommerce_email_customer_keys', $show_fields, $sent_to_admin, $order );
+
+		if( $show_fields ){
+
+			$heading = $sent_to_admin ? __( 'Customer details', 'woocommerce' ) : __( 'Your details', 'woocommerce' );
+
+			if ( $plain_text ) {
+
+				echo $heading . "\n\n";
+
+				foreach ( $meta as $key => $value ) {
+					if ( $value ) {
+						echo $key . ': ' . $value . "\n";
+					}
+				}
+
+			} else {
+
+				echo '<h2>' . $heading . '</h2>';
+
+				foreach ( $meta as $key => $value ) {
+					if ( $value ) {
+						echo '<p><strong>' . $key . ':</strong> ' . $value . '</p>';
+					}
+				}
+			}
+
+		}
+
+	}
+
+	/**
+	 * Get the email addresses.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
+		wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) );
 	}
 
 	/**
