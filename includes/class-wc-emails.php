@@ -337,6 +337,8 @@ class WC_Emails {
 
 			$heading = $sent_to_admin ? __( 'Customer details', 'woocommerce' ) : __( 'Your details', 'woocommerce' );
 
+			$heading = apply_filters( 'woocommerce_email_custom_details_header', $heading, $sent_to_admin, $order );
+
 			if ( $plain_text ) {
 
 				echo $heading . "\n\n";
