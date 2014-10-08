@@ -258,7 +258,7 @@ jQuery( function ( $ ) {
 					value = value.toString();
 				}
 
-				$( ':input[name^="' + edit_field + '"]' ).each( function() {
+				$( ':input[name^="' + edit_field + '"]' ).not('[name*="dates"]').each( function() {
 					var current_value = accounting.unformat( $( this ).val(), woocommerce_admin.mon_decimal_point ),
 						new_value,
 						mod_value;
