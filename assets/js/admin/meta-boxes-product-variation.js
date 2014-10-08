@@ -1,24 +1,135 @@
 /* global wp, woocommerce_admin_meta_boxes_variations, woocommerce_admin, woocommerce_admin_meta_boxes, accounting */
 jQuery( function ( $ ) {
-
 	var variation_sortable_options = {
-		items: '.woocommerce_variation',
-		cursor: 'move',
-		axis: 'y',
-		handle: 'h3',
-		scrollSensitivity: 40,
-		forcePlaceholderSize: true,
-		helper: 'clone',
-		opacity: 0.65,
-		placeholder: 'wc-metabox-sortable-placeholder',
-		start: function( event, ui ) {
-			ui.item.css( 'background-color', '#f6f6f6' );
+			items: '.woocommerce_variation',
+			cursor: 'move',
+			axis: 'y',
+			handle: 'h3',
+			scrollSensitivity: 40,
+			forcePlaceholderSize: true,
+			helper: 'clone',
+			opacity: 0.65,
+			placeholder: 'wc-metabox-sortable-placeholder',
+			start: function( event, ui ) {
+				ui.item.css( 'background-color', '#f6f6f6' );
+			},
+			stop: function ( event, ui ) {
+				ui.item.removeAttr( 'style' );
+				variation_row_indexes();
+			}
 		},
-		stop: function ( event, ui ) {
-			ui.item.removeAttr( 'style' );
-			variation_row_indexes();
+		variation_attributes = false,
+		$panel = $( '#variable_product_options' );
+
+	// Check if we have the countries loaded
+	if ( ! ( typeof window.woocommerce_variations_metabox === 'undefined' || typeof window.woocommerce_variations_metabox.attributes === 'undefined' ) ) {
+		/* State/Country select boxes */
+		variation_attributes = $.parseJSON( window.woocommerce_variations_metabox.attributes.replace( /&quot;/g, '"' ) );
+
+		$.each( variation_attributes, function( k, attributes ) {
+			attributes.$options = $( '<option>' ); // Empty jQuery Array of objects
+			if ( attributes.is_taxonomy ){
+				$.each( attributes.post_terms, function( i, term ) {
+					$.merge( attributes.$options, $( '<option>' ).text( term.name ).attr( 'value', term.slug ) );
+				} );
+			} else {
+				$.each( attributes.options, function( i, opt ) {
+					$.merge( attributes.$options, $( '<option>' ).text( opt ).attr( 'value', attributes.option_values[i] ) );
+				} );
+			}
+		} );
+	}
+
+	$panel.on( 'woocommerce_variations_added', function(){
+		$panel.trigger( 'variation_init.woocommerce', [ $( this ) ] );
+	} )
+	.on( 'variation_init.woocommerce', function( event, $variation ){
+		if ( ! variation_attributes ){
+			return;
 		}
-	};
+
+		var $attributes = $variation.find( '.wc_variation_attribute' );
+
+		$attributes.each( function(){
+			var $this = $( this ),
+				name = $this.data( 'wc_attribute_name' ),
+				attribute = variation_attributes[ name ];
+
+			$this.on({
+				'chosen:ready': function( event, opts ) {
+					opts.chosen.container.on( 'click.woocommerce', function(e){
+						e.stopPropagation();
+						e.preventDefault();
+						return false;
+					} );
+				},
+				'chosen:showing_dropdown': function( event, opts ){
+					opts.chosen.container.on( 'click.woocommerce' );
+
+					if ( ! $variation.data('has_variations') ){
+						$this.append( attribute.$options ).trigger( 'chosen:updated' ).data( 'has_variations', true );
+					}
+				},
+				'chosen:hiding_dropdown': function( event, opts ){
+					opts.chosen.container.on( 'click.woocommerce' );
+				},
+				'change': function( event ){
+					$this.parents( '.woocommerce_variation' ).eq(0).find( '.variation_change_signal' ).val( 'y' );
+				}
+			})
+			.chosen({
+				placeholder_text_single: $this.attr( 'placeholder' ),
+				width: '140px'
+			});
+		} );
+	} )
+	.find( '.woocommerce_variation, .toolbar' ).each( function(){
+		$panel.trigger( 'variation_init.woocommerce', [ $( this ) ] );
+	} );
+
+	$panel.find( '.woocommerce_variations' ).find( '.wc-metabox > h3' ).on('click', function( event ) {
+		var $this = $(this),
+			$variation = $this.parents( '.woocommerce_variation' ).eq( 0 ),
+			$signal = $variation.find( '.variation_change_signal' );
+
+		if ( $signal.val() === 'n' || $variation.find('.woocommerce_variable_attributes').length === 0 ) {
+			$variation.block({
+				message: null,
+				overlayCSS: {
+					background: '#fff url(' + woocommerce_admin_meta_boxes_variations.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+					opacity: 0.6
+				}
+			});
+
+			var data = {
+				action: 'woocommerce_load_variation',
+				post_id: woocommerce_admin_meta_boxes_variations.post_id,
+				variation_id: $variation.find('.variable_post_id').val(),
+				security: woocommerce_admin_meta_boxes_variations.load_variation_nonce
+			};
+
+			$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function ( response ) {
+				$variation.append( response );
+
+				$( '.tips' ).tipTip({
+					'attribute': 'data-tip',
+					'fadeIn': 50,
+					'fadeOut': 50
+				});
+
+				$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
+
+				if ( ! $( 'input#_manage_stock' ).attr( 'checked' ) ) {
+					$( '.hide_if_parent_manage_stock_is_disabled' ).hide();
+				}
+
+				$signal.val( 'y' );
+
+				$variation.unblock();
+			});
+		}
+
+	});
 
 	// Add a variation
 	$( '#variable_product_options' ).on( 'click', 'button.add_variation', function () {
@@ -173,6 +284,35 @@ jQuery( function ( $ ) {
 	});
 
 	$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.bulk_edit', function ( event ) {
+		var bulk_action = $( 'select#field_to_edit' ).val(),
+			$wrapper = $( '.wc-metaboxes-wrapper' );
+
+		$wrapper.block({
+			message: null,
+			overlayCSS: {
+				background: '#fff url(' + woocommerce_admin_meta_boxes_variations.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+				opacity: 0.6
+			}
+		});
+
+		var data = {
+			action: 'woocommerce_bulk_action_variations',
+			bulk_action: bulk_action,
+			post_id: woocommerce_admin_meta_boxes_variations.post_id,
+			security: woocommerce_admin_meta_boxes_variations.bulk_action_variations_nonce
+		};
+
+		$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function ( response ) {
+			// You can use this to hook you own Bulk Action
+			$panel.trigger( 'variations_bulk_action.woocommerce', [ bulk_action, response ] );
+
+			$wrapper.unblock();
+		});
+
+
+		// return;
+
+		// Old Behavior
 		var bulk_edit  = $( 'select#field_to_edit' ).val(),
 			checkbox,
 			answer,
@@ -341,6 +481,7 @@ jQuery( function ( $ ) {
 	function variation_row_indexes() {
 		$( '.woocommerce_variations .woocommerce_variation' ).each( function ( index, el ) {
 			$( '.variation_menu_order', el ).val( parseInt( $( el ).index( '.woocommerce_variations .woocommerce_variation' ), 10 ) );
+			$( '.variation_change_signal', el ).val( 'y' );
 		});
 	}
 

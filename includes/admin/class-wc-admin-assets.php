@@ -137,14 +137,16 @@ class WC_Admin_Assets {
 		if ( in_array( $screen->id, array( 'product', 'edit-product' ) ) ) {
 			wp_enqueue_media();
 			wp_enqueue_script( 'wc-admin-product-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), WC_VERSION );
-			wp_enqueue_script( 'wc-admin-variation-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product-variation' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), WC_VERSION );
+			wp_enqueue_script( 'wc-admin-variation-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product-variation' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'underscore' ), WC_VERSION, true );
 
 			$params = array(
 				'post_id'                             => isset( $post->ID ) ? $post->ID : '',
 				'plugin_url'                          => WC()->plugin_url(),
 				'ajax_url'                            => admin_url('admin-ajax.php'),
 				'woocommerce_placeholder_img_src'     => wc_placeholder_img_src(),
+				'bulk_action_variations_nonce'        => wp_create_nonce("bulk-action-variations"),
 				'add_variation_nonce'                 => wp_create_nonce("add-variation"),
+				'load_variation_nonce'                => wp_create_nonce("load-variation"),
 				'link_variation_nonce'                => wp_create_nonce("link-variations"),
 				'delete_variation_nonce'              => wp_create_nonce("delete-variation"),
 				'delete_variations_nonce'             => wp_create_nonce("delete-variations"),
