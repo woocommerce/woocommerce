@@ -395,13 +395,13 @@ class WC_Form_Handler {
 			$cart_updated = false;
 			$cart_totals  = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
 
-			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+			if ( sizeof( WC()->cart->get_cart() ) > 0 && is_array( $cart_totals ) ) {
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 
 					$_product = $values['data'];
 
 					// Skip product if no updated quantity was posted
-					if ( ! isset( $cart_totals[ $cart_item_key ]['qty'] ) ) {
+					if ( ! isset( $cart_totals[ $cart_item_key ] ) || ! isset( $cart_totals[ $cart_item_key ]['qty'] ) ) {
 						continue;
 					}
 
