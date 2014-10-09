@@ -672,7 +672,7 @@ function wc_create_refund( $args = array() ) {
 		// Set total to total refunded which may vary from order items
 		$refund->set_total( wc_format_decimal( $args['amount'] ) * -1, 'total' );
 
-		do_action( 'wc_refund_created', $refund_id );
+		do_action( 'woocommerce_refund_created', $refund_id );
 	}
 
 	// Clear transients
