@@ -116,6 +116,11 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_New_Account']      = include( 'emails/class-wc-email-customer-new-account.php' );
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
+
+		// include css inliner
+		if ( ! class_exists( 'Emogrifier' ) ) {
+			include_once( 'libraries/class-emogrifier.php' );
+		}
 	}
 
 	/**
