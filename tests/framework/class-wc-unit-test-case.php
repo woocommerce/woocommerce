@@ -28,6 +28,10 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 		add_filter( 'woocommerce_session_handler', array( $this, 'set_mock_session_handler' ) );
 
 		$this->setOutputCallback( array( $this, 'filter_output' ) );
+
+		// register post types before each test
+		WC_Post_types::register_post_types();
+		WC_Post_types::register_taxonomies();
 	}
 
 	/**
