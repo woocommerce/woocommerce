@@ -226,8 +226,7 @@ class WC_Product_Variable extends WC_Product {
 
 		$price        = get_post_meta( $variation_id, '_regular_price', true );
 
-		if ( $display ) {
-			$variation        = $this->get_child( $variation_id );
+		if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
 			$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 			$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
 		}
