@@ -330,7 +330,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 										data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
 										color: "' . $color . '",
 										bars: { fillColor: "' . $color . '", fill: true, show: true, lineWidth: 1, align: "center", barWidth: ' . $width * 0.75 . ', stack: false },
-										prepend_tooltip: "' . get_woocommerce_currency_symbol() . '",
+										' . $this->get_currency_tooltip() . '",
 										enable_tooltip: true,
 										prepend_label: true
 									},';
