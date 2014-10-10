@@ -112,8 +112,8 @@ $wpdb->query( "
 );
 
 // Update variations which manage stock
-$update_variations = $wpdb->get_col( "
-	SELECT DISTINCT posts.ID FROM {$wpdb->posts} as posts
+$update_variations = $wpdb->get_results( "
+	SELECT DISTINCT posts.ID AS variation_id, posts.post_parent AS variation_parent FROM {$wpdb->posts} as posts
 	LEFT OUTER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id AND postmeta.meta_key = '_stock'
 	LEFT OUTER JOIN {$wpdb->postmeta} as postmeta2 ON posts.ID = postmeta2.post_id AND postmeta2.meta_key = '_manage_stock'
 	WHERE posts.post_type = 'product_variation'
@@ -122,8 +122,10 @@ $update_variations = $wpdb->get_col( "
 	AND postmeta2.meta_value IS NULL
 " );
 
-foreach ( $update_variations as $variation_id ) {
-	add_post_meta( $variation_id, '_manage_stock', 'yes', true );
+foreach ( $update_variations as $variation ) {
+	$parent_backorders = get_post_meta( $variation->variation_parent, '_backorders', true );
+	add_post_meta( $variation->variation_id, '_manage_stock', 'yes', true );
+	add_post_meta( $variation->variation_id, '_backorders', $parent_backorders ? $parent_backorders : 'no', true );
 }
 
 // add webhook capabilities to shop_manager/administrator role
