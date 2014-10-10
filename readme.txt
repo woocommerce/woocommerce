@@ -131,6 +131,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.3.0 =
+* Feature - Made tax importer expand postcode ranges.
 * Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
 * Refactor - Routing all email functionality through one send() method.
 * Refactor - Replaced existing email css inliner with Emogrifier.
