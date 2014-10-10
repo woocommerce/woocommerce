@@ -32,6 +32,10 @@ class WC_Install {
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
+
+		if ( is_multisite() ) {
+			add_filter( 'wpmu_drop_tables', array( $this, 'wpmu_drop_tables' ) );
+		}
 	}
 
 	/**
@@ -726,6 +730,25 @@ class WC_Install {
 		}
 
 		return (array) $links;
+	}
+
+	/**
+	 * Uninstall tables when MU blog is deleted.
+	 * @param  array $tables
+	 * @return array
+	 */
+	public function wpmu_drop_tables( $tables ) {
+		global $wpdb;
+
+		$tables[] = $wpdb->prefix . "woocommerce_attribute_taxonomies";
+		$tables[] = $wpdb->prefix . "woocommerce_downloadable_product_permissions";
+		$tables[] = $wpdb->prefix . "woocommerce_termmeta";
+		$tables[] = $wpdb->prefix . "woocommerce_tax_rates";
+		$tables[] = $wpdb->prefix . "woocommerce_tax_rate_locations";
+		$tables[] = $wpdb->prefix . "woocommerce_order_items";
+		$tables[] = $wpdb->prefix . "woocommerce_order_itemmeta";
+
+		return $tables;
 	}
 }
 
