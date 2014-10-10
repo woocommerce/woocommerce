@@ -133,7 +133,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.3.0 =
 * Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
 * Refactor - Routing all email functionality through one send() method.
-* Refactor - Replaced existing email css inliner with Emogrifier
+* Refactor - Replaced existing email css inliner with Emogrifier.
+* Refactor - get_product_search_form().
 * Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
 * Tweak - Double the default product image dimensions.
 * Tweak - Added refunds to Sales by Date report.
