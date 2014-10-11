@@ -173,16 +173,17 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		// Country availability
+		$countries = is_array( $this->countries ) ? $this->countries : array();
+
 		switch ( $this->availability ) {
 
 			case 'specific' :
 			case 'including' :
-				$countries = is_array( $this->countries ) ? $this->countries : array();
 				$ship_to_countries = array_intersect( $countries, array_keys( WC()->countries->get_shipping_countries() ) );
 			break;
 
 			case 'excluding' :
-				$ship_to_countries = array_diff( array_keys( WC()->countries->get_shipping_countries() ), $this->countries );
+				$ship_to_countries = array_diff( array_keys( WC()->countries->get_shipping_countries() ), $countries );
 			break;
 
 			default :
