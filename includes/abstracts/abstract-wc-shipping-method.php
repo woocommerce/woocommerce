@@ -168,7 +168,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	public function is_available( $package ) {
 
-		if ( "no" == $this->enabled ) {
+		if ( 'no' == $this->enabled ) {
 			return false;
 		}
 
@@ -177,7 +177,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 			case 'specific' :
 			case 'including' :
-				$ship_to_countries = array_intersect( $this->countries, array_keys( WC()->countries->get_shipping_countries() ) );
+				$countries = is_array( $this->countries ) ? $this->countries : array();
+				$ship_to_countries = array_intersect( $countries, array_keys( WC()->countries->get_shipping_countries() ) );
 			break;
 
 			case 'excluding' :
