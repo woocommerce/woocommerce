@@ -474,7 +474,7 @@ class WC_Coupon {
 	 * @param  WC_Product  $product
 	 * @return boolean
 	 */
-	public function is_valid_for_product( $product, $values ) {
+	public function is_valid_for_product( $product, $values = array() ) {
 		if ( $this->type != 'fixed_product' && $this->type != 'percent_product' )
 			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this, $values );
 
