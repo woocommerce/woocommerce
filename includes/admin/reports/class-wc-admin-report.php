@@ -49,7 +49,7 @@ class WC_Admin_Report {
 			'order_by'            => '',
 			'limit'               => '',
 			'filter_range'        => false,
-			'nocache'             => true,
+			'nocache'             => false,
 			'debug'               => false,
 			'order_types'         => wc_get_order_types( 'reports' ),
 			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
