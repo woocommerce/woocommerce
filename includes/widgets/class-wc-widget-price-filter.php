@@ -49,11 +49,13 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		extract( $args );
 
-		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) )
+		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
 			return;
+		}
 
-		if ( sizeof( WC()->query->unfiltered_product_ids ) == 0 )
+		if ( sizeof( WC()->query->unfiltered_product_ids ) == 0 ) {
 			return; // None shown - return
+		}
 
 		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '';
 		$max_price = isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : '';
@@ -65,20 +67,25 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		// Remember current filters/search
 		$fields = '';
 
-		if ( get_search_query() )
+		if ( get_search_query() ) {
 			$fields .= '<input type="hidden" name="s" value="' . get_search_query() . '" />';
+		}
 
-		if ( ! empty( $_GET['post_type'] ) )
+		if ( ! empty( $_GET['post_type'] ) ) {
 			$fields .= '<input type="hidden" name="post_type" value="' . esc_attr( $_GET['post_type'] ) . '" />';
+		}
 
-		if ( ! empty ( $_GET['product_cat'] ) )
+		if ( ! empty ( $_GET['product_cat'] ) ) {
 			$fields .= '<input type="hidden" name="product_cat" value="' . esc_attr( $_GET['product_cat'] ) . '" />';
+		}
 
-		if ( ! empty( $_GET['product_tag'] ) )
+		if ( ! empty( $_GET['product_tag'] ) ) {
 			$fields .= '<input type="hidden" name="product_tag" value="' . esc_attr( $_GET['product_tag'] ) . '" />';
+		}
 
-		if ( ! empty( $_GET['orderby'] ) )
+		if ( ! empty( $_GET['orderby'] ) ) {
 			$fields .= '<input type="hidden" name="orderby" value="' . esc_attr( $_GET['orderby'] ) . '" />';
+		}
 
 		if ( $_chosen_attributes ) foreach ( $_chosen_attributes as $attribute => $data ) {
 
@@ -86,8 +93,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 			$fields .= '<input type="hidden" name="' . esc_attr( $taxonomy_filter ) . '" value="' . esc_attr( implode( ',', $data['terms'] ) ) . '" />';
 
-			if ( $data['query_type'] == 'or' )
+			if ( $data['query_type'] == 'or' ) {
 				$fields .= '<input type="hidden" name="' . esc_attr( str_replace( 'pa_', 'query_type_', $attribute ) ) . '" value="or" />';
+			}
 		}
 
 		$min = $max = 0;
@@ -145,15 +153,17 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			) ) );
 		}
 
-		if ( $min == $max )
+		if ( $min == $max ) {
 			return;
+		}
 
 		echo $before_widget . $before_title . $title . $after_title;
 
-		if ( get_option( 'permalink_structure' ) == '' )
+		if ( get_option( 'permalink_structure' ) == '' ) {
 			$form_action = remove_query_arg( array( 'page', 'paged' ), add_query_arg( $wp->query_string, '', home_url( $wp->request ) ) );
-		else
+		} else {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( $wp->request ) );
+		}
 
 		echo '<form method="get" action="' . esc_attr( $form_action ) . '">
 			<div class="price_slider_wrapper">
