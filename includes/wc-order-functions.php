@@ -56,7 +56,7 @@ function wc_get_order_status_name( $status ) {
 	$status   = 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status;
 	$status   = isset( $statuses[ 'wc-' . $status ] ) ? $statuses[ 'wc-' . $status ] : $status;
 
-	return strtolower( $status );
+	return mb_strtolower( $status );
 }
 
 /**
