@@ -36,7 +36,7 @@ foreach ( $items as $item_id => $item ) :
 
 			// Variation
 			if ( $item_meta->meta ) {
-				echo '<br/><small>' . nl2br( $item_meta->display( true, true ) ) . '</small>';
+				echo '<br/><small>' . nl2br( $item_meta->display( true, true, '_', "\n" ) ) . '</small>';
 			}
 
 			// File URLs
