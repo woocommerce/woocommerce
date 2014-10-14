@@ -204,8 +204,9 @@ class WC_Product_Variable extends WC_Product {
 			foreach ( $this->get_children( true ) as $child_id ) {
 				$price      = get_post_meta( $child_id, '_price', true );
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price )
+				if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price ) {
 					return true;
+				}
 			}
 		}
 		return false;
@@ -491,8 +492,9 @@ class WC_Product_Variable extends WC_Product {
 	 * Sync variable product prices with the children lowest/highest prices.
 	 */
 	public function variable_product_sync( $product_id = '' ) {
-		if ( empty( $product_id ) )
+		if ( empty( $product_id ) ) {
 			$product_id = $this->id;
+		}
 
 		// Sync prices with children
 		self::sync( $product_id );
