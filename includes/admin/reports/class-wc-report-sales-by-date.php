@@ -16,7 +16,6 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-
 		$legend   = array();
 
 		$order_totals = $this->get_order_report_data( array(
@@ -33,6 +32,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				)
 			),
 			'order_types'  => wc_get_order_types( 'sales-reports' ),
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 			'filter_range' => true
 		) );
 
@@ -48,7 +48,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			),
 			'query_type'   => 'get_var',
 			'filter_range' => true,
-			'order_types'  => wc_get_order_types( 'order-count' )
+			'order_types'  => wc_get_order_types( 'order-count' ),
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 		) ) );
 
 		$total_items    = absint( $this->get_order_report_data( array(
@@ -60,9 +61,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'name'            => 'order_item_qty'
 				)
 			),
-			'query_type' => 'get_var',
+			'query_type'   => 'get_var',
 			'order_types'  => wc_get_order_types( 'order-count' ),
-			'filter_range' => true
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+			'filter_range' => true,
 		) ) );
 
 		// Get discount amounts in range
@@ -84,10 +86,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			),
 			'query_type'   => 'get_var',
 			'order_types'  => wc_get_order_types( 'order-count' ),
-			'filter_range' => true
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+			'filter_range' => true,
 		) );
-
-		$total_refunds = $this->get_order_report_data( array(
+		$partial_refunds = $this->get_order_report_data( array(
 			'data' => array(
 				'_refund_amount' => array(
 					'type'     => 'meta',
@@ -95,10 +97,26 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'name'     => 'total_refund'
 				)
 			),
+			'query_type'          => 'get_var',
+			'order_types'         => array( 'shop_order_refund' ),
+			'filter_range'        => true,
+			'order_status'        => false,
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),
+		) );
+		$full_refunds = $this->get_order_report_data( array(
+			'data' => array(
+				'_order_total' => array(
+					'type'     => 'meta',
+					'function' => 'SUM',
+					'name'     => 'total_sales'
+				),
+			),
 			'query_type'   => 'get_var',
-			'order_types'  => array( 'shop_order_refund' ),
+			'order_types'  => wc_get_order_types( 'sales-reports' ),
+			'order_status' => array( 'refunded' ),
 			'filter_range' => true
 		) );
+		$total_refunds = $partial_refunds + $full_refunds;
 
 		$this->average_sales = $total_sales / ( $this->chart_interval + 1 );
 
@@ -248,7 +266,9 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'group_by'     => $this->group_by_query,
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
-			'filter_range' => true
+			'filter_range' => true,
+			'order_types'  => wc_get_order_types( 'sales-reports' ),
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 		) );
 
 		// Order items
@@ -276,7 +296,9 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'group_by'     => $this->group_by_query,
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
-			'filter_range' => true
+			'filter_range' => true,
+			'order_types'  => wc_get_order_types( 'sales-reports' ),
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 		) );
 
 		// Get discount amounts in range
@@ -309,10 +331,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'group_by'     => $this->group_by_query . ', order_item_name',
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
-			'filter_range' => true
+			'filter_range' => true,
+			'order_types'  => wc_get_order_types( 'sales-reports' ),
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 		) );
 
-		$refunds = $this->get_order_report_data( array(
+		$partial_refunds = $this->get_order_report_data( array(
 			'data' => array(
 				'_refund_amount' => array(
 					'type'     => 'meta',
@@ -325,13 +349,33 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'name'     => 'post_date'
 				)
 			),
-			'group_by'     => $this->group_by_query,
+			'group_by'            => $this->group_by_query,
+			'order_by'            => 'post_date ASC',
+			'query_type'          => 'get_results',
+			'filter_range'        => true,
+			'order_status'        => false,
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),
+		) );
+		$full_refunds = $this->get_order_report_data( array(
+			'data' => array(
+				'_order_total' => array(
+					'type'     => 'meta',
+					'function' => 'SUM',
+					'name'     => 'total_refund'
+				),
+				'post_date' => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_date'
+				),
+			),
+			'group_by'       => $this->group_by_query,
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
-			'filter_range' => true
+			'filter_range' => true,
+			'order_status' => array( 'refunded' ),
 		) );
-
-
+		$refunds = array_merge($partial_refunds, $full_refunds);
 
 		// Prepare data for report
 		$order_counts      = $this->prepare_chart_data( $orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
@@ -340,7 +384,6 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$coupon_amounts    = $this->prepare_chart_data( $coupons, 'post_date', 'discount_amount', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$shipping_amounts  = $this->prepare_chart_data( $orders, 'post_date', 'total_shipping', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$refund_amounts    = $this->prepare_chart_data( $refunds, 'post_date', 'total_refund', $this->chart_interval, $this->start_date, $this->chart_groupby );
-
 
 		// Encode in json format
 		$chart_data = json_encode( array(
