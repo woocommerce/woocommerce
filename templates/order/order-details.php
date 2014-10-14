@@ -94,6 +94,16 @@ $order = wc_get_order( $order_id );
 			</tr>
 			<?php
 		endforeach;
+
+	// Check for customer note
+	if ( '' != $order->customer_note ) {
+		?>
+		<tr>
+			<th scope="row"><?php _e( 'Note:', 'woocommerce' ); ?></th>
+			<td><?php echo wptexturize( $order->customer_note ); ?></td>
+		</tr>
+	<?php
+	}
 	?>
 	</tfoot>
 </table>
