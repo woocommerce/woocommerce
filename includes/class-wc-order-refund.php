@@ -10,24 +10,25 @@
  */
 class WC_Order_Refund extends WC_Abstract_Order {
 
-	/**
-	 * Initialize the order refund.
-	 *
-	 * @param int|WC_Order_Refund $refund
-	 */
-	public function __construct( $refund ) {
-		$this->order_type = 'refund';
+	/** @public string Order type */
+	public $order_type = 'refund';
 
+	/**
+	 * Init/load the refund object. Called from the contructor.
+	 *
+	 * @param  string|int|WP_Post|WC_Order_Refund $refund Refund to init
+	 */
+	protected function init( $refund ) {
 		if ( is_numeric( $refund ) ) {
-			$this->id = absint( $refund );
+			$this->id   = absint( $refund );
 			$this->post = get_post( $refund );
 			$this->get_refund( $this->id );
 		} elseif ( $refund instanceof WC_Order_Refund ) {
-			$this->id = absint( $refund->id );
+			$this->id   = absint( $refund->id );
 			$this->post = $refund->post;
 			$this->get_refund( $this->id );
-		} elseif ( $refund instanceof WC_Order_Refund || isset( $refund->ID ) ) {
-			$this->id = absint( $refund->ID );
+		} elseif ( $refund instanceof WP_Post || isset( $refund->ID ) ) {
+			$this->id   = absint( $refund->ID );
 			$this->post = $refund;
 			$this->get_refund( $this->id );
 		}
