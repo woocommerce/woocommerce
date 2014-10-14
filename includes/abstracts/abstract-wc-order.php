@@ -1054,16 +1054,18 @@ abstract class WC_Abstract_Order {
 			$items[ $item->order_item_id ]['item_meta'] = $this->get_item_meta( $item->order_item_id );
 
 			// Expand meta data into the array
-			foreach ( $items[ $item->order_item_id ]['item_meta'] as $name => $value ) {
+			if ( $items[ $item->order_item_id ]['item_meta'] ) {
+				foreach ( $items[ $item->order_item_id ]['item_meta'] as $name => $value ) {
 
-				if ( in_array( $name, $reserved_item_meta_keys ) ) {
-					continue;
-				}
+					if ( in_array( $name, $reserved_item_meta_keys ) ) {
+						continue;
+					}
 
-				if ( '_' === substr( $name, 0, 1 ) ) {
-					$items[ $item->order_item_id ][ substr( $name, 1 ) ] = $value[0];
-				} elseif ( ! in_array( $name, $reserved_item_meta_keys ) ) {
-					$items[ $item->order_item_id ][ $name ] = $value[0];
+					if ( '_' === substr( $name, 0, 1 ) ) {
+						$items[ $item->order_item_id ][ substr( $name, 1 ) ] = $value[0];
+					} elseif ( ! in_array( $name, $reserved_item_meta_keys ) ) {
+						$items[ $item->order_item_id ][ $name ] = $value[0];
+					}
 				}
 			}
 		}
