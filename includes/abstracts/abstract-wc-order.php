@@ -20,7 +20,7 @@ abstract class WC_Abstract_Order {
 	public $post = null;
 
 	/** @public string Order type */
-	public $order_type = null;
+	public $order_type = 'simple';
 
 	/** @public bool Do prices include tax? */
 	public $prices_include_tax = false;
@@ -39,29 +39,31 @@ abstract class WC_Abstract_Order {
 	 * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory
 	 * should be used. It is possible, but the aforementioned are preferred and are the only
 	 * methods that will be maintained going forward.
-	 *
 	 */
 	public function __construct( $order = '' ) {
 		$this->prices_include_tax    = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;
 		$this->tax_display_cart      = get_option( 'woocommerce_tax_display_cart' );
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl' ? true : false;
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl' ? true : false;
-		$this->order_type            = 'simple';
 
+		$this->init( $order );
+	}
+
+	/**
+	 * Init/load the order object. Called from the contructor.
+	 *
+	 * @param  string|int|WP_POST|WC_Order $order Order to init
+	 */
+	protected function init( $order ) {
 		if ( is_numeric( $order ) ) {
-
 			$this->id   = absint( $order );
 			$this->post = get_post( $order );
 			$this->get_order( $this->id );
-
 		} elseif ( $order instanceof WC_Order ) {
-
 			$this->id   = absint( $order->id );
 			$this->post = $order->post;
 			$this->get_order( $this->id );
-
 		} elseif ( $order instanceof WP_Post || isset( $order->ID ) ) {
-
 			$this->id   = absint( $order->ID );
 			$this->post = $order;
 			$this->get_order( $this->id );
