@@ -254,21 +254,23 @@ function wc_save_order_items( $order_id, $items ) {
 			$line_tax[ $item_id ]          = isset( $line_tax[ $item_id ] ) ? $line_tax[ $item_id ] : array();
 			$line_subtotal_tax[ $item_id ] = isset( $line_subtotal_tax[ $item_id ] ) ? $line_subtotal_tax[ $item_id ] : $line_tax[ $item_id ];
 
+			// Format taxes
+			$line_taxes          = array_map( 'wc_format_decimal', $line_tax[ $item_id ] );
+			$line_subtotal_taxes = array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] );
+
 			// Update values
 			wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $line_subtotal[ $item_id ] ) );
 			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $line_total[ $item_id ] ) );
-			wc_update_order_item_meta( $item_id, '_line_subtotal_tax', array_sum( array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] ) ) );
-			wc_update_order_item_meta( $item_id, '_line_tax', array_sum( array_map( 'wc_format_decimal', $line_tax[ $item_id ] ) ) );
+			wc_update_order_item_meta( $item_id, '_line_subtotal_tax', array_sum( $line_subtotal_taxes ) );
+			wc_update_order_item_meta( $item_id, '_line_tax', array_sum( $line_taxes ) );
 
 			// Save line tax data - Since 2.2
-			$tax_data_total    = array_map( 'wc_format_decimal', $line_tax[ $item_id ] );
-			$tax_data_subtotal = array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] );
-			wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $tax_data_total, 'subtotal' => $tax_data_subtotal ) );
-			$taxes['items'][] = $tax_data_total;
+			wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $line_taxes, 'subtotal' => $line_subtotal_taxes ) );
+			$taxes['items'][] = $line_taxes;
 
 			// Total up
-			$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] );
-			$total    += wc_format_decimal( $line_total[ $item_id ] );
+			$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] ) + array_sum( $line_subtotal_taxes );
+			$total    += wc_format_decimal( $line_total[ $item_id ] ) + array_sum( $line_taxes );
 
 			// Clear meta cache
 			wp_cache_delete( $item_id, 'order_item_meta' );
