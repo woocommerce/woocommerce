@@ -1671,7 +1671,8 @@ class WC_Admin_Post_Types {
 			8 => __( 'Order submitted.', 'woocommerce' ),
 			9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
 			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
-			10 => __( 'Order draft updated.', 'woocommerce' )
+			10 => __( 'Order draft updated.', 'woocommerce' ),
+			11 => __( 'Order updated and email sent.', 'woocommerce' )
 		);
 
 		$messages['shop_coupon'] = array(

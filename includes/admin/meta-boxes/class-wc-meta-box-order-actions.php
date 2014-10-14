@@ -125,6 +125,9 @@ class WC_Meta_Box_Order_Actions {
 
 				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
 
+				// Change the post saved message
+				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
+
 			} elseif ( $action == 'regenerate_download_permissions' ) {
 
 				delete_post_meta( $post_id, '_download_permissions_granted' );
@@ -137,4 +140,21 @@ class WC_Meta_Box_Order_Actions {
 			}
 		}
 	}
+
+	/**
+	 * Set the correct message ID
+	 *
+	 * @param $location
+	 *
+	 * @since  2.3.0
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @return string
+	 */
+	public static function set_email_sent_message($location) {
+		return add_query_arg( 'message', 11, $location );
+	}
+
 }
