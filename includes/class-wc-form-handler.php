@@ -684,9 +684,9 @@ class WC_Form_Handler {
 			}
 
 		// Custom Handler
-		} elseif ( $add_to_cart_handler && has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ){
+		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ){
 			
-			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $product_id );
+			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url );
 			return;
 
 		// Simple Products
