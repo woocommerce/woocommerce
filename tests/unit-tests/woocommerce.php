@@ -49,7 +49,7 @@ class WC_Tests_WooCommerce extends WC_Unit_Test_Case {
 		$this->assertEquals( 4, WC_ROUNDING_PRECISION );
 		$this->assertContains( WC_TAX_ROUNDING_MODE, array ( 2, 1 ) );
 		$this->assertEquals( '|', WC_DELIMITER );
-		$this->assertEquals( ABSPATH . 'wc-logs/', WC_LOG_DIR );
+		$this->assertNotEquals( WC_LOG_DIR, '' );
 	}
 
 	/**
