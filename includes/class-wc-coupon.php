@@ -24,7 +24,8 @@ class WC_Coupon {
 	const E_WC_COUPON_NOT_APPLICABLE                 = 109;
 	const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 110;
 	const E_WC_COUPON_PLEASE_ENTER                   = 111;
-	const E_WC_COUPON_MAX_SPEND_LIMIT_MET        		 = 112;
+	const E_WC_COUPON_MAX_SPEND_LIMIT_MET 			 = 112;
+	const E_WC_COUPON_EXCLUDED_PRODUCTS              = 113;
 	const WC_COUPON_SUCCESS                          = 200;
 	const WC_COUPON_REMOVED                          = 201;
 
@@ -399,7 +400,7 @@ class WC_Coupon {
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
+						$error_code = self::E_WC_COUPON_EXCLUDED_PRODUCTS;
 					}
 				}
 
@@ -662,6 +663,20 @@ class WC_Coupon {
 			case self::E_WC_COUPON_NOT_APPLICABLE:
 				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
 			break;
+			case self::E_WC_COUPON_EXCLUDED_PRODUCTS:
+
+				// Store excluded products that are in cart in $products
+				$products = array();
+				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+					foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+						if ( in_array( $cart_item['product_id'], $this->exclude_product_ids ) || in_array( $cart_item['variation_id'], $this->exclude_product_ids ) || in_array( $cart_item['data']->get_parent(), $this->exclude_product_ids ) ) {
+							$products[] = $cart_item['data']->get_title();
+						}
+					}
+				}
+
+				$err = sprintf( __( 'Sorry, this coupon is not applicable to %s.', 'woocommerce' ), implode( ', ', $products ) );
+				break;
 			case self::E_WC_COUPON_NOT_VALID_SALE_ITEMS:
 				$err = __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' );
 			break;
