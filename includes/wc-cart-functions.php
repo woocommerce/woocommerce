@@ -113,30 +113,24 @@ function wc_clear_cart_after_payment() {
 
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
-		$order_id = absint( $wp->query_vars['order-received'] );
-
-		if ( isset( $_GET['key'] ) )
-			$order_key = $_GET['key'];
-		else
-			$order_key = '';
+		$order_id  = absint( $wp->query_vars['order-received'] );
+		$order_key = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 
-			if ( $order->order_key == $order_key ) {
+			if ( $order->order_key === $order_key ) {
 				WC()->cart->empty_cart();
 			}
 		}
-
 	}
 
 	if ( WC()->session->order_awaiting_payment > 0 ) {
-
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order->id > 0 ) {
 			// If the order has not failed, or is not pending, the order must have gone through
-			if ( ! $order->has_status( array( 'failed', 'pending' ) ) ) {
+			if ( ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) ) ) {
 				WC()->cart->empty_cart();
 			}
 		}
