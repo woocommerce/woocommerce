@@ -429,8 +429,9 @@ class WC_Coupon {
 
 							$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
 
-							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 )
+							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
 								$valid_for_cart = false;
+							}
 						}
 					}
 					if ( ! $valid_for_cart ) {
