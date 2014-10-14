@@ -526,12 +526,12 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// limit number of users returned
 		if ( ! empty( $args['limit'] ) ) {
-            if($args['limit'] == -1) {
-                unset($query_args['number']);
-            } else {
-                $query_args['number'] = absint($args['limit']);
-                $users_per_page = absint($args['limit']);
-            }
+			if ($args['limit'] == -1) {
+				unset( $query_args['number'] );
+			} else {
+				$query_args['number'] = absint($args['limit']);
+				$users_per_page       = absint($args['limit']);
+			}
 		}
 
 		// page
