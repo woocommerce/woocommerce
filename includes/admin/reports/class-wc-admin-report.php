@@ -40,18 +40,20 @@ class WC_Admin_Report {
 	public function get_order_report_data( $args = array() ) {
 		global $wpdb;
 
-		$defaults = array(
-			'data'         => array(),
-			'where'        => array(),
-			'where_meta'   => array(),
-			'query_type'   => 'get_row',
-			'group_by'     => '',
-			'order_by'     => '',
-			'limit'        => '',
-			'filter_range' => false,
-			'nocache'      => false,
-			'debug'        => false,
-			'order_types'  => wc_get_order_types( 'reports' )
+		$default_args = array(
+			'data'                => array(),
+			'where'               => array(),
+			'where_meta'          => array(),
+			'query_type'          => 'get_row',
+			'group_by'            => '',
+			'order_by'            => '',
+			'limit'               => '',
+			'filter_range'        => false,
+			'nocache'             => true,
+			'debug'               => false,
+			'order_types'         => wc_get_order_types( 'reports' ),
+			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
+			'parent_order_status' => false
 		);
 
 		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', wp_parse_args( $args, $defaults ) );
@@ -62,6 +64,9 @@ class WC_Admin_Report {
 			return false;
 		}
 
+		$order_status = apply_filters( 'woocommerce_reports_order_statuses', $order_status );
+
+		$query  = array();
 		$select = array();
 
 		foreach ( $data as $key => $value ) {
@@ -135,18 +140,33 @@ class WC_Admin_Report {
 			}
 		}
 
+		if ( ! empty( $parent_order_status ) ) {
+			$joins["parent"] = "LEFT JOIN {$wpdb->posts} AS parent ON posts.post_parent = parent.ID";
+		}
+
 		$query['join'] = implode( ' ', $joins );
 
 		$query['where']  = "
 			WHERE 	posts.post_type 	IN ( '" . implode( "','", $order_types ) . "' )
-			AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			";
+
+		if ( ! empty( $order_status ) ) {
+			$query['where'] .= "
+				AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", $order_status ) . "')
+			";
+		}
+
+		if ( ! empty( $parent_order_status ) ) {
+			$query['where'] .= "
+				AND 	parent.post_status 	IN ( 'wc-" . implode( "','wc-", $parent_order_status ) . "')
+			";
+		}
 
 		if ( $filter_range ) {
 
 			$query['where'] .= "
-				AND 	post_date >= '" . date('Y-m-d', $this->start_date ) . "'
-				AND 	post_date < '" . date('Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
+				AND 	posts.post_date >= '" . date('Y-m-d', $this->start_date ) . "'
+				AND 	posts.post_date < '" . date('Y-m-d', strtotime( '+1 DAY', $this->end_date ) ) . "'
 			";
 		}
 
@@ -380,7 +400,7 @@ class WC_Admin_Report {
 						'operator' => '='
 					)
 				),
-				'group_by'     => 'YEAR(post_date), MONTH(post_date), DAY(post_date)',
+				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
 				'query_type'   => 'get_results',
 				'filter_range' => false
 			) );
@@ -406,7 +426,7 @@ class WC_Admin_Report {
 						'operator' => '>'
 					)
 				),
-				'group_by'     => 'YEAR(post_date), MONTH(post_date), DAY(post_date)',
+				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
 				'query_type'   => 'get_results',
 				'filter_range' => false
 			) );
@@ -489,13 +509,13 @@ class WC_Admin_Report {
 		switch ( $this->chart_groupby ) {
 
 			case 'day' :
-				$this->group_by_query = 'YEAR(post_date), MONTH(post_date), DAY(post_date)';
+				$this->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
 				$this->chart_interval = ceil( max( 0, ( $this->end_date - $this->start_date ) / ( 60 * 60 * 24 ) ) );
 				$this->barwidth       = 60 * 60 * 24 * 1000;
 			break;
 
 			case 'month' :
-				$this->group_by_query = 'YEAR(post_date), MONTH(post_date)';
+				$this->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date)';
 				$this->chart_interval = 0;
 				$min_date             = $this->start_date;
 
