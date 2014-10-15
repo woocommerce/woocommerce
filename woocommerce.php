@@ -394,6 +394,7 @@ final class WooCommerce {
 			'woocommerce_order_status_pending_to_on-hold',
 			'woocommerce_order_status_failed_to_processing',
 			'woocommerce_order_status_failed_to_completed',
+			'woocommerce_order_status_on-hold_to_processing',
 			'woocommerce_order_status_completed',
 			'woocommerce_new_customer_note',
 			'woocommerce_created_customer'
