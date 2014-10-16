@@ -3193,10 +3193,44 @@ table.bar_chart {
 			}
 		}
 	}
-	.woocommerce_options_panel .description {
-		display: block;
-		clear: both;
-		margin-left: 0;
+	.woocommerce_options_panel {
+		.description {
+			display: block;
+			clear: both;
+			margin-left: 0;
+		}
+
+		.short,
+		input[type=email].short,
+		input[type=number].short,
+		input[type=text].short {
+			width: 100%;
+		}
+
+		.dimensions_field .wrap input {
+			width: 30%;
+		}
+	}
+
+
+	.woocommerce_variations, .woocommerce_options_panel {
+		.downloadable_files {
+			padding: 0;
+			clear: both;
+
+			label {
+				position: static;
+			}
+
+			table {
+				margin: 0 12px 24px 12px;
+				width: 94%;
+
+				.sort {
+					display: none;
+				}
+			}
+		}
 	}
 }
 
