@@ -526,10 +526,12 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// limit number of users returned
 		if ( ! empty( $args['limit'] ) ) {
-
-			$query_args['number'] = absint( $args['limit'] );
-
-			$users_per_page = absint( $args['limit'] );
+			if ( $args['limit'] == -1 ) {
+				unset( $query_args['number'] );
+			} else {
+				$query_args['number'] = absint( $args['limit'] );
+				$users_per_page       = absint( $args['limit'] );
+			}
 		}
 
 		// page
@@ -569,7 +571,7 @@ class WC_API_Customers extends WC_API_Resource {
 		$query = new WP_User_Query( $query_args );
 
 		// helper members for pagination headers
-		$query->total_pages = ceil( $query->get_total() / $users_per_page );
+		$query->total_pages = ( $args['limit'] == -1 ) ? 1 : ceil( $query->get_total() / $users_per_page );
 		$query->page = $page;
 
 		return $query;
