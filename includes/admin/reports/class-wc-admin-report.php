@@ -540,14 +540,15 @@ class WC_Admin_Report {
 	 */
 	public function get_currency_tooltip() {
 		switch( get_option( 'woocommerce_currency_pos' ) ) {
-			case 'left':
-				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '"'; break;
-			case 'left_space':
-				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '&nbsp;"'; break;
 			case 'right':
 				$currency_tooltip = 'append_tooltip: "' . get_woocommerce_currency_symbol() . '"'; break;
 			case 'right_space':
 				$currency_tooltip = 'append_tooltip: "&nbsp;' . get_woocommerce_currency_symbol() . '"'; break;
+			case 'left':
+				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '"'; break;
+			case 'left_space':
+			default:
+				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '&nbsp;"'; break;
 		}
 
 		return $currency_tooltip;
