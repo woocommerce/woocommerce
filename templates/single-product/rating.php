@@ -2,7 +2,7 @@
 /**
  * Single Product Rating
  *
- * @author 	    WooThemes
+ * @author      WooThemes
  * @package     WooCommerce/Templates
  * @version     2.2.6
  */
