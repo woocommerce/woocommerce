@@ -1083,7 +1083,17 @@ p.demo_store {
 				font-weight: normal;
 			}
 		}
-		tfoot td, tfoot th {
+		tbody {
+			tr:first-child {
+				th,
+				td {
+					border-top: 0;
+				}
+			}
+		}
+		tfoot td,
+		tfoot th,
+		tbody th {
 			font-weight:bold;
 			border-top: 1px solid rgba(0,0,0,0.1);
 		}

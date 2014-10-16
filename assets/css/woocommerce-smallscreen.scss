@@ -17,6 +17,9 @@
 					border-top: 0;
 				}
 			}
+			th {
+				display: none;
+			}
 		}
 
 		tr {
@@ -26,7 +29,7 @@
 				display: block;
 
 				&:before {
-					content: attr(data-title) ':';
+					content: attr(data-title) ': ';
 					font-weight: 700;
 				}
 			}
