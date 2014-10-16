@@ -879,6 +879,7 @@ p.demo_store {
 	}
 
 	.woocommerce-product-rating {
+		@include clearfix();
 		line-height: 2em;
 		display: block;
 
