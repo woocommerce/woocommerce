@@ -683,6 +683,12 @@ class WC_Form_Handler {
 
 			}
 
+		// Custom Handler
+		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ){
+			
+			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url );
+			return;
+
 		// Simple Products
 		} else {
 
