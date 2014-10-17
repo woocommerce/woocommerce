@@ -2137,6 +2137,10 @@ img.help_tip {
 	}
 }
 .woocommerce_options_panel {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+
 	.downloadable_files {
 		padding: 0 9px 0 162px;
 		position: relative;
@@ -2255,6 +2259,10 @@ img.help_tip {
 				margin-right: 0;
 			}
 		}
+	}
+
+	&.padded {
+		padding: 1em;
 	}
 }
 #woocommerce-product-data input.dp-applied {
