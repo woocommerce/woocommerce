@@ -486,8 +486,8 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// filter products by category
-		if( ! empty( $args['product_cat'] ) ) {
-			$query_args['product_cat'] = $args['product_cat'];
+		if ( ! empty( $args['category'] ) ) {
+			$query_args['product_cat'] = $args['category'];
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );
