@@ -4,6 +4,10 @@ $red:           #a00;
 $orange:        #ffba00;
 $blue:          #2ea2cc;
 
+/**
+ * Deprecated
+ * Fallback for bourbon equivalent
+ */
 @mixin clearfix() {
 	*zoom: 1;
 
@@ -131,6 +135,10 @@ $blue:          #2ea2cc;
 	transition: $selector $animation $duration;
 }
 
+/**
+ * Deprecated
+ * Use bourbon mixin instead `@include transform(scale(1.5));`
+ */
 @mixin scale($ratio: 1.5) {
 	-webkit-transform: scale($ratio);
 	-moz-transform: scale($ratio);
