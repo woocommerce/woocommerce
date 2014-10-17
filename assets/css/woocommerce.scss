@@ -65,11 +65,16 @@ p.demo_store {
 		font-size:.75em;
 	}
 }
+
 .wc-backward, .wc-backward a {
 	&:before {
 		@include iconbefore( "\e02f" );
 		font-size:.75em;
 	}
+}
+
+.clear {
+	clear: both;
 }
 
 /* =Main Styles (namespace to avoid conflict with common global class names)
