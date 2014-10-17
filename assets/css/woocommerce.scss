@@ -44,7 +44,7 @@ p.demo_store {
 	font-size: 1em;
 	padding: .5em 0;
 	text-align: center;
-	@include vertical_gradient( $primary, darken($primary, 10%) );
+	@include linear-gradient($primary, darken($primary, 10%));
 	border: 1px solid darken($primary, 10%);
 	color: $primarytext;
 	z-index: 99998;
@@ -86,7 +86,7 @@ p.demo_store {
 		margin: 0 0 2em !important;
 		position: relative;
 		border-radius: 4px;
-		@include vertical_gradient( lighten( $secondary, 2% ), $secondary );
+		@include linear-gradient(lighten( $secondary, 2% ), $secondary);
 		color: $secondarytext;
 		@include text_shadow( 0, 1px, 0, lighten( $secondary, 4% ) );
 		list-style:none outside !important;
@@ -267,7 +267,7 @@ p.demo_store {
 
 				li {
 					border: 1px solid darken( $secondary, 10% );
-					@include vertical_gradient( $secondary, darken( $secondary, 10% ) );
+					@include linear-gradient($secondary, darken( $secondary, 10% ));
 					display: inline-block;
 					position: relative;
 					z-index: 0;
@@ -425,7 +425,7 @@ p.demo_store {
 		left: 6px;
 		margin: 0;
 		border-radius: 20px;
-		@include vertical_gradient( lighten( $highlight, 10%), $highlight );
+		@include linear-gradient(lighten( $highlight, 10%), $highlight);
 		@include text_shadow( 0, -1px, 0, $highlight );
 		color: $highlightext;
 		-webkit-box-shadow:
@@ -575,7 +575,7 @@ p.demo_store {
 		color: $secondarytext;
 		@include darkorlighttextshadow( $secondarytext );
 		border: 1px solid darken( $secondary, 20% );
-		@include vertical_gradient( $secondary, darken( $secondary, 10% ) );
+		@include linear-gradient(lighten( $highlight, 10%), $highlight);
 		white-space: nowrap;
 		display: inline-block;
 
@@ -621,7 +621,7 @@ p.demo_store {
 		}
 
 		&:hover {
-			@include vertical_gradient( $secondary, darken( $secondary, 15% ) );
+			@include linear-gradient($secondary, darken( $secondary, 15% ));
 			text-decoration:none;
 		}
 
@@ -630,13 +630,13 @@ p.demo_store {
 		}
 
 		&.alt {
-			@include vertical_gradient( $primary, darken( $primary, 10% ) );
+			@include linear-gradient($primary, darken( $primary, 10% ));
 			border-color: darken($primary, 20%);
 			color: $primarytext;
 			@include darkorlighttextshadow( $primarytext, 0.6 );
 
 			&:hover {
-				@include vertical_gradient( $primary, darken( $primary, 15% ) );
+				@include linear-gradient($primary, darken( $primary, 15% ));
 				color:$primarytext + #111;
 				@include darkorlighttextshadow( $primarytext + #111, 0.6 );
 			}
@@ -718,7 +718,7 @@ p.demo_store {
 			color: $secondarytext;
 			@include darkorlighttextshadow( $secondarytext );
 			border: 1px solid darken( $secondary, 20% );
-			@include vertical_gradient( $secondary, darken( $secondary, 10% ) );
+			@include linear-gradient($secondary, darken( $secondary, 10% ));
 
 			-webkit-box-shadow:
 				inset 0 -1px 0 rgba(0,0,0,0.075),
@@ -734,7 +734,7 @@ p.demo_store {
 				0 1px 2px rgba(0,0,0,0.1);
 
 			&:hover {
-				@include vertical_gradient( $secondary, darken( $secondary, 15% ) );
+				@include linear-gradient($secondary, darken( $secondary, 15% ));
 			}
 		}
 
@@ -1532,7 +1532,7 @@ p.demo_store {
 			font-size: 0.92em;
 			border-radius: 2px;
 			line-height: 1.5em;
-			@include vertical_gradient( darken( $secondary, 5% ), darken( $secondary, 10% ) );
+			@include linear-gradient(darken( $secondary, 5% ), darken( $secondary, 10% ));
 			box-shadow: 0 1px 2px rgba(0,0,0,0.25);
 			color: $secondarytext;
 			@include darkorlighttextshadow( $secondarytext );
@@ -1799,7 +1799,7 @@ p.demo_store {
 			border-radius: 1em;
 			border: 1px solid darken( $tertiary, 50% );
 			cursor: pointer;
-			@include vertical_gradient( $tertiary, darken( $tertiary, 10% ));
+			@include linear-gradient($tertiary, darken( $tertiary, 10% ));
 			outline:none;
 			top: -.3em;
 			-webkit-box-shadow:
@@ -1828,7 +1828,7 @@ p.demo_store {
 		}
 		.price_slider_wrapper .ui-widget-content {
 			border-radius: 1em;
-			@include vertical_gradient( $quaternary, lighten( $quaternary, 30% ) );
+			@include linear-gradient($quaternary, lighten( $quaternary, 30% ));
 		}
 		.ui-slider-horizontal {
 			height: .5em;
