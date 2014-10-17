@@ -18,11 +18,19 @@ $blue:          #2ea2cc;
 	}
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin border_radius($radius: 4px) {
 	-webkit-border-radius:$radius;
 	border-radius:$radius;
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin border_radius_right($radius: 4px) {
 	-webkit-border-top-right-radius: $radius;
 	-webkit-border-bottom-right-radius: $radius;
@@ -30,6 +38,10 @@ $blue:          #2ea2cc;
 	border-bottom-right-radius: $radius;
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin border_radius_left($radius: 4px) {
 	-webkit-border-top-left-radius: $radius;
 	-webkit-border-bottom-left-radius: $radius;
@@ -37,6 +49,10 @@ $blue:          #2ea2cc;
 	border-bottom-left-radius: $radius;
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin border_radius_bottom($radius: 4px) {
 	-webkit-border-bottom-left-radius: $radius;
 	-webkit-border-bottom-right-radius: $radius;
@@ -44,6 +60,10 @@ $blue:          #2ea2cc;
 	border-bottom-right-radius: $radius;
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin border_radius_top($radius: 4px) {
 	-webkit-border-top-left-radius: $radius;
 	-webkit-border-top-right-radius: $radius;
@@ -51,6 +71,10 @@ $blue:          #2ea2cc;
 	border-top-right-radius: $radius;
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin opacity( $opacity: 0.75 ) {
 	filter: unquote("alpha(opacity=$opacity * 100)");
 	-moz-opacity: $opacity;
@@ -58,20 +82,36 @@ $blue:          #2ea2cc;
 	opacity: $opacity;
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin box_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_in: 3px, $shadow_color: #888) {
 	box-shadow: $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 	-webkit-box-shadow: $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin inset_box_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_in: 3px, $shadow_color: #888) {
 	box-shadow: inset $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 	-webkit-box-shadow: inset $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin text_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_color: #fff) {
 	text-shadow: $shadow_x $shadow_y $shadow_rad $shadow_color;
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin vertical_gradient($from: #000, $to: #fff) {
 	background: $from;
 	background: -webkit-gradient(linear, left top, left bottom, from($from), to($to));
@@ -80,6 +120,10 @@ $blue:          #2ea2cc;
 	background: -moz-gradient(center top, $from 0%, $to 100%);
 }
 
+/**
+ * Deprecated
+ * Vendor prefix no longer required.
+ */
 @mixin transition($selector: all, $animation: ease-in-out, $duration: .2s) {
 	-webkit-transition: $selector $animation $duration;
 	-moz-transition: $selector $animation $duration;
@@ -95,6 +139,10 @@ $blue:          #2ea2cc;
 	transform: scale($ratio);
 }
 
+/**
+ * Deprecated
+ * Use bourbon mixin instead `@include box-sizing(border-box);`
+ */
 @mixin borderbox() {
 	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
 	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
