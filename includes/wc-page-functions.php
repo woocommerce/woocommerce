@@ -65,40 +65,6 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 }
 
 /**
- * Get all endpoints
- *
- * Gets a list of all endpoints registered in WooCommerce.
- *
- * @param string $key
- * @return array
- */
-function wc_get_endpoints( $key = '' ) {
-	$endpoints = array(
-		'checkout' => array(
-			// Checkout actions
-			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
-			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
-		),
-
-		'myaccount' => array(
-			// My account actions
-			'view-order'         => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
-			'edit-account'       => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
-			'edit-address'       => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
-			'lost-password'      => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
-			'customer-logout'    => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
-			'add-payment-method' => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
-		)
-	);
-
-	if ( ! empty( $key ) && isset( $endpoints[ $key ] ) ) {
-		return $endpoints[ $key ];
-	}
-
-	return $endpoints;
-}
-
-/**
  * Get the edit address slug translation.
  *
  * @param  string  $id   Address ID.

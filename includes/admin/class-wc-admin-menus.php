@@ -38,7 +38,7 @@ class WC_Admin_Menus {
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages
-		add_filter( 'nav_menu_items_page', array( $this, 'add_endpoints_urls' ) );
+		add_action('admin_init', array( $this, 'add_nav_menu_meta_boxes' ) );
 	}
 
 	/**
@@ -225,44 +225,53 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Add endpoints custom URLs in Appearance > Menus > Pages box
+	 * Add custom nav meta box
 	 *
-	 * @param  array $posts
-	 * @return array
+	 * Adapted from http://www.johnmorrisonline.com/how-to-add-a-fully-functional-custom-meta-box-to-wordpress-navigation-menus/
 	 */
-	public function add_endpoints_urls( $posts ) {
+	public function add_nav_menu_meta_boxes() {
+		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce Endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
+	}
 
-		$endpoints = apply_filters( 'wc_admin_endpoints_custom_urls', wc_get_endpoints( 'myaccount' ) );
-
-		if ( ! empty( $endpoints ) ) {
-
-			$exclude = array( 'view-order', 'add-payment-method' );
-			$i = -1;
-			foreach( $endpoints as $endpoint => $value ) {
-
-				if ( in_array( $endpoint, $exclude ) ) {
-					continue;
-				}
-
-				$post_title = apply_filters( 'wc_custom_endpoint_{$endpoint}_post_title', ucfirst( str_replace( array( '-', '_' ), ' ', $value ) ) );
-				array_unshift( $posts, (object) array(
-					'ID'           => $i,
-					'object_id'    => $i,
-					'post_content' => '',
-					'post_excerpt' => '',
-					'post_parent'  => '',
-					'post_title'   => $post_title,
-					'post_type'    => 'nav_menu_item',
-					'type'         => 'custom',
-					'url'          => wc_get_endpoint_url( $value, '', get_permalink( wc_get_page_id( 'myaccount' ) ) )
-				) );
-
-				$i--;
-			}
-
-		}
-
-		return $posts;
+	public function nav_menu_links() {
+		$exclude = array( 'view-order', 'add-payment-method', 'order-pay', 'order-received' );
+		?>
+		<div id="posttype-woocommerce-endpoints" class="posttypediv">
+    		<div id="tabs-panel-woocommerce-endpoints" class="tabs-panel tabs-panel-active">
+    			<ul id="woocommerce-endpoints-checklist" class="categorychecklist form-no-clear">
+    				<?php
+    				$i = -1;
+    				foreach ( WC()->query->query_vars as $key => $value ) {
+    					if ( in_array( $key, $exclude ) ) {
+    						continue;
+    					}
+    					?>
+    					<li>
+    						<label class="menu-item-title">
+	    						<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $key ); ?>
+    						</label>
+	    					<input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
+	    					<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $key ); ?>" />
+	    					<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_endpoint_url( $key, '', get_permalink( wc_get_page_id( 'myaccount' ) ) ) ); ?>" />
+	    					<input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />
+	    				</li>
+	    				<?php
+	    				$i --;
+	    			}
+	    			?>
+    			</ul>
+    		</div>
+    		<p class="button-controls">
+    			<span class="list-controls">
+    				<a href="<?php echo admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ); ?>" class="select-all"><?php _e( 'Select All', 'woocommerce' ); ?></a>
+    			</span>
+    			<span class="add-to-menu">
+    				<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php _e( 'Add to Menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints">
+    				<span class="spinner"></span>
+    			</span>
+    		</p>
+    	</div>
+    	<?php
 	}
 }
 
