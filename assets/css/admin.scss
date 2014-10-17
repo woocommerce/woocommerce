@@ -2087,11 +2087,12 @@ img.help_tip {
 		visibility: hidden;
 	}
 }
-.woocommerce_options_panel .checkbox, table.woocommerce_variable_attributes .checkbox {
+.woocommerce_options_panel .checkbox, .woocommerce_variable_attributes .checkbox {
 	width: auto;
 	vertical-align: middle;
 	margin: 7px 0;
 }
+
 .woocommerce_variations, .woocommerce_options_panel {
 	.downloadable_files {
 		table {
@@ -2359,7 +2360,7 @@ img.help_tip {
 		}
 		h3 {
 			margin: 0 !important;
-			padding: 6px !important;
+			padding: .75em .75em .75em 1em !important;
 			font-size: 1em !important;
 			overflow: hidden;
 			zoom: 1;
@@ -2460,133 +2461,107 @@ img.help_tip {
 }
 
 /* Configuration */
-#variable_product_options {
-	.woocommerce_variation {
-		table {
-			background: #fafafa;
-			border-top:1px solid #eee;
-			padding: 6px;
-			td {
-				input {
-					min-width: inherit !important;
-				}
-				&.dimensions_field {
-					input {
-						width: 32%;
-						margin-right: 2%;
-					}
-					.last {
-						margin-right: 0;
-					}
-				}
-				&.options {
-					width: 150px;
-					label {
-						margin-bottom: 6px;
-					}
-				}
-				&.data {
-					padding: 0 0 0 12px;
-					table.data_table {
-						width: 100%;
-						padding: 0 12px 6px 12px;
-						background: #fff;
-						border: 1px solid #dfdfdf;
-						-moz-border-radius: 3px;
-						-webkit-border-radius: 3px;
-						-khtml-border-radius: 3px;
-						border-radius: 3px;
-						-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-						-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-						box-sizing: border-box;         /* Opera/IE 8+ */
-						td {
-							width: 50%;
-							-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-							-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-							box-sizing: border-box;         /* Opera/IE 8+ */
-						}
-					}
-					table.data_table:before {
-						content: "";
-						display: block;
-						position: absolute;
-						top: 33px;
-						left: 0;
-						margin: 0 0 0 -1px;
-						border: 7px solid #dfdfdf;
-						border-color: transparent transparent transparent #dfdfdf;
-					}
-					table.data_table:after {
-						content: "";
-						display: block;
-						position: absolute;
-						top: 34px;
-						left: 0;
-						margin: 0 0 0 -1px;
-						border: 6px solid #fafafa;
-						border-color: transparent transparent transparent #fafafa;
-					}
-				}
-				&.upload_image {
-					white-space: nowrap;
-					width: 75px;
-					img {
-						float: none;
-						width: 73px;
-						border: 1px solid #dfdfdf;
-					}
-					.button {
-						margin: 0;
-						padding: 4px 10px;
-						width: auto;
-						float: none;
-						vertical-align: middle;
-					}
-					.upload_image_button {
-						display: block;
-						position: relative;
-						.overlay {
-							display: none;
-							width: 75px;
-							height: 75px;
-							position: absolute;
-							top: 0;
-							left: 0;
-							margin: 0;
-							padding: 0;
-							opacity:0.5;
-							background: #eee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAXklEQVQYGW2OUQrAMAhDFy8+dnKnwiuh2I+aJulDZebDkfSie1b28Q7EXWrfvSm60RQnkQUC8ja7owpmL6d4GdDZ0cNNHyIhZEj4QYCxze6orsluAh8AnR0xKPR07weXJi8JGd3qqwAAAABJRU5ErkJggg==) no-repeat center center;
-						}
-					}
-					.upload_image_button:hover {
-						.overlay {
-							display: block;
-						}
-					}
-					.upload_image_button.remove .overlay {
-						background: #eee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAWElEQVQYGY2OUQ6AMAxCZdm9jSev65K3YKNm+6EFBlVEHDxJJ3Pi0C72xlBNyTs3jU7wEUTTIB51GCp2CL8HLpHEdaOLb/N2dfuq9NT0zOo/M9q6EaImsd/uViMLVuD4KAAAAABJRU5ErkJggg==) no-repeat center center;
-					}
-				}
+.woocommerce_variable_attributes {
+	background-color: #fdfdfd;
+	padding: 0 1em;
+	border-top: 1px solid #dfdfdf;
+
+	.data {
+		@include clearfix;
+	}
+
+	.upload_image_button {
+		display: block;
+		width: 48px;
+		height: 48px;
+		float: left;
+		margin-right: 20px;
+		position: relative;
+
+		img {
+			width: 100%;
+			height: auto;
+		}
+
+		&:before {
+			content: "\f317";
+			font-family: 'Dashicons';
+			display: none;
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			text-align: center;
+			line-height: 48px;
+			font-size: 2em;
+			font-weight: 400;
+			-webkit-font-smoothing: antialiased;
+		}
+
+		&:hover {
+			&:before {
+				display: block;
 			}
-			.cancel_sale_schedule, .sale_schedule {
-				float: right;
-			}
-			tr.sale_price_dates_fields {
-				td {
-					padding-right: 24px;
-					position: relative;
-					img {
-						position: absolute;
-						right: 0;
-						bottom: 0;
-						padding: 5px 0;
-						margin: 0 0 6px;
-					}
-				}
+		}
+	}
+
+	.options {
+		border: 1px solid #eee;
+		border-width: 1px 0;
+		padding: .25em 0;
+
+		label {
+			display: inline-block;
+			padding: 4px 1em 2px 0;
+		}
+
+		input[type=checkbox] {
+			margin-top: 5px;
+			margin-right: 3px;
+		}
+	}
+}
+
+.form-row {
+	label {
+		display: block;
+	}
+
+	input[type=text],
+	input[type=number],
+	select {
+		width: 100%;
+	}
+
+	&.dimensions_field {
+		input {
+			width: 25%;
+			float: left;
+			margin-right: 1%;
+
+			&:last-of-type {
+				margin-right: 0;
 			}
 		}
 	}
 }
+
+.form-row-first,
+.form-row-last {
+	width: 48%;
+	float: right;
+}
+
+.form-row-first {
+	clear: both;
+	float: left;
+}
+
+.form-row-full {
+	clear: both;
+}
+
 /* Tooltips */
 .tips {
 	cursor: help;
