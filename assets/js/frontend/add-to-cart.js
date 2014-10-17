@@ -5,7 +5,7 @@ jQuery( function( $ ) {
 		return false;
 
 	// Ajax add to cart
-	$( document ).on( 'click', '.add_to_cart_button', function() {
+	$( document ).on( 'click', '.add_to_cart_button', function(e) {
 
 		// AJAX add to cart request
 		var $thisbutton = $( this );
@@ -20,9 +20,11 @@ jQuery( function( $ ) {
 
 			var data = {
 				action: 'woocommerce_add_to_cart',
-				product_id: $thisbutton.attr( 'data-product_id' ),
-				quantity: $thisbutton.attr( 'data-quantity' )
 			};
+
+			$.each( $thisbutton.data(), function( key, value ) {
+				data[key] = value;
+			});
 
 			// Trigger event
 			$( 'body' ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
