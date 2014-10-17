@@ -485,6 +485,11 @@ class WC_API_Products extends WC_API_Resource {
 			unset( $args['type'] );
 		}
 
+		// filter products by category
+		if( ! empty( $args['product_cat'] ) ) {
+			$query_args['product_cat'] = $args['product_cat'];
+		}
+
 		$query_args = $this->merge_query_args( $query_args, $args );
 
 		return new WP_Query( $query_args );
