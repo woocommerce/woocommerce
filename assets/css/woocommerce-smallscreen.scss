@@ -116,7 +116,7 @@
 			}
 			input, .button, .input-text {
 				width:48%;
-				@include borderbox();
+				@include box-sizing(border-box);
 			}
 			.input-text + .button, .button.alt {
 				float: right;
@@ -151,7 +151,7 @@
 		#place_order {
 			float: none;
 			width:100%;
-			@include borderbox();
+			@include box-sizing(border-box);
 			margin-bottom:1em;
 		}
 	}

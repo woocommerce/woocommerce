@@ -205,7 +205,7 @@ div.pp_woocommerce {
 	div.pp_woocommerce {
 		left: 5% !important;
 		right:5% !important;
-		@include borderbox();
+		@include box-sizing(border-box);
 		width: 90% !important;
 		.pp_gallery, .pp_previous, .pp_next, .pp_expand, .pp_contract {
 			display: none !important;

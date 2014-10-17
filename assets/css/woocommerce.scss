@@ -1391,7 +1391,7 @@ p.demo_store {
 				vertical-align: middle;
 			}
 			input.input-text, textarea {
-				@include borderbox();
+				@include box-sizing(border-box);
 				width: 100%;
 				margin: 0;
 				outline: 0;
