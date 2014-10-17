@@ -277,23 +277,23 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Check if all variation attributes are defined
+	 * Check if all variation's attributes are set
 	 *
 	 * @return boolean
 	 */
-	public function is_all_defined() {
+	public function has_all_attributes_set() {
 
-		$defined = true;
+		$set = true;
 		
 		// undefined attributes have null strings as array values
 		foreach( $this->get_variation_attributes() as $att ){
 			if( ! $att ){
-				$defined = false;
+				$set = false;
 				break;
 			}
 		}
 
-		return $defined;
+		return $set;
 
 	}
 	
