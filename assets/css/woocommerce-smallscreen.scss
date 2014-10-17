@@ -2,7 +2,10 @@
  * This stylesheet optimises the default WooCommerce layout when viewed on smaller screens.
  */
 
-@import 'mixins';
+/* =Imports
+-------------------------------------------------------------- */
+@import "bourbon";
+@import "mixins";
 
 .woocommerce, .woocommerce-page {
 
