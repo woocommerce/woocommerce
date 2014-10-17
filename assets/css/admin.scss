@@ -2071,20 +2071,21 @@ img.help_tip {
 			width: 100%;
 			padding:0 !important;
 			th {
-				padding: 7px 0 7px 7px;
+				padding: 7px 0 7px 7px !important;
 			}
 			td {
 				vertical-align: middle !important;
-				padding: 4px 0 4px 7px;
+				padding: 4px 0 4px 7px !important;
 				position: relative;
 
 				&:last-child {
-					padding-right: 7px;
+					padding-right: 7px !important;
 				}
 				input.input_text {
 					width: 100%;
 					float: none;
 					margin: 1px 0;
+					min-width: 0;
 				}
 				.upload_file_button {
 					float: right;
@@ -3178,10 +3179,20 @@ table.bar_chart {
 			}
 
 			table {
+				margin: 0 12px 24px 12px;
 				width: 94%;
 
 				.sort {
 					display: none;
+				}
+			}
+		}
+
+		.woocommerce_variable_attributes {
+			.downloadable_files {
+				table {
+					margin: 0 0 1em;
+					width: 100%;
 				}
 			}
 		}
