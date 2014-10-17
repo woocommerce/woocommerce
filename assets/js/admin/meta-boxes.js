@@ -152,14 +152,14 @@ jQuery( function ( $ ) {
 		// If the user clicks on some form input inside the h3, like a select list (for variations), the box should not be toggled
 		if ($(event.target).filter(':input, option').length) return;
 
-		jQuery(this).next('.wc-metabox-content').toggle();
+		jQuery(this).next('.wc-metabox-content').stop().slideToggle();
 	})
 	.on('click', '.expand_all', function(event){
-		jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').show();
+		jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > .wc-metabox-content').show();
 		return false;
 	})
 	.on('click', '.close_all', function(event){
-		jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').hide();
+		jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > .wc-metabox-content').hide();
 		return false;
 	});
 	jQuery('.wc-metabox.closed').each(function(){

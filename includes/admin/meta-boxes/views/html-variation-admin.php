@@ -51,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</h3>
 	<div class="woocommerce_variable_attributes wc-metabox-content">
 		<div class="data">
-			<p class="form-row form-row-first">
+			<p class="form-row form-row-first upload_image">
 				<a href="#" class="upload_image_button <?php if ( $image_id > 0 ) echo 'remove'; ?>" rel="<?php echo esc_attr( $variation_id ); ?>"><img src="<?php if ( ! empty( $image ) ) echo esc_attr( $image ); else echo esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $image_id ); ?>" /></a>
 			</p>
 			<?php if ( wc_product_sku_enabled() ) : ?>
