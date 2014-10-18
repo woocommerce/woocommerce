@@ -74,8 +74,7 @@ module.exports = function( grunt ) {
 		sass: {
 			compile: {
 				options: {
-					sourcemap: 'none',
-					loadPath: require( 'node-bourbon' ).includePaths
+					sourcemap: 'none'
 				},
 				files: [{
 					expand: true,

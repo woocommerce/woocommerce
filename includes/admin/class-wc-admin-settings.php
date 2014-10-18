@@ -239,7 +239,36 @@ class WC_Admin_Settings {
 			}
 
 			// Description handling
-			extract( self::get_field_description( $value ) );
+			if ( true === $value['desc_tip'] ) {
+				$description = '';
+				$tip = $value['desc'];
+			} elseif ( ! empty( $value['desc_tip'] ) ) {
+				$description = $value['desc'];
+				$tip = $value['desc_tip'];
+			} elseif ( ! empty( $value['desc'] ) ) {
+				$description = $value['desc'];
+				$tip = '';
+			} else {
+				$description = $tip = '';
+			}
+
+			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ) ) ) {
+				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
+			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ) ) ) {
+				$description =  wp_kses_post( $description );
+			} elseif ( $description ) {
+				$description = '<span class="description">' . wp_kses_post( $description ) . '</span>';
+			}
+
+			if ( $tip && in_array( $value['type'], array( 'checkbox' ) ) ) {
+
+				$tip = '<p class="description">' . $tip . '</p>';
+
+			} elseif ( $tip ) {
+
+				$tip = '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+
+			}
 
 			// Switch based on type
 			switch ( $value['type'] ) {
@@ -289,7 +318,7 @@ class WC_Admin_Settings {
 					?><tr valign="top">
 						<th scope="row" class="titledesc">
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-							<?php echo $tooltip_html; ?>
+							<?php echo $tip; ?>
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
 							<input
@@ -313,7 +342,7 @@ class WC_Admin_Settings {
 					?><tr valign="top">
 						<th scope="row" class="titledesc">
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-							<?php echo $tooltip_html; ?>
+							<?php echo $tip; ?>
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
 							<?php echo $description; ?>
@@ -338,7 +367,7 @@ class WC_Admin_Settings {
 					?><tr valign="top">
 						<th scope="row" class="titledesc">
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-							<?php echo $tooltip_html; ?>
+							<?php echo $tip; ?>
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
 							<select
@@ -377,7 +406,7 @@ class WC_Admin_Settings {
 					?><tr valign="top">
 						<th scope="row" class="titledesc">
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-							<?php echo $tooltip_html; ?>
+							<?php echo $tip; ?>
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
 							<fieldset>
@@ -457,7 +486,7 @@ class WC_Admin_Settings {
 								<?php checked( $option_value, 'yes'); ?>
 								<?php echo implode( ' ', $custom_attributes ); ?>
 							/> <?php echo $description ?>
-						</label> <?php echo $tooltip_html; ?>
+						</label> <?php echo $tip; ?>
 					<?php
 
 					if ( ! isset( $value['checkboxgroup'] ) || 'end' == $value['checkboxgroup'] ) {
@@ -491,7 +520,7 @@ class WC_Admin_Settings {
 					}
 
 					?><tr valign="top">
-						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tooltip_html; echo $disabled_message; ?></th>
+						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tip; echo $disabled_message; ?></th>
 						<td class="forminp image_width_settings">
 
 							<input name="<?php echo esc_attr( $value['id'] ); ?>[width]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo $width; ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" <?php echo $disabled_attr; ?> id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo $height; ?>" />px
@@ -521,7 +550,7 @@ class WC_Admin_Settings {
 					}
 
 					?><tr valign="top" class="single_select_page">
-						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tooltip_html; ?></th>
+						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tip; ?></th>
 						<td class="forminp">
 							<?php echo str_replace(' id=', " data-placeholder='" . __( 'Select a page&hellip;', 'woocommerce' ) .  "' style='" . $value['css'] . "' class='" . $value['class'] . "' id=", wp_dropdown_pages( $args ) ); ?> <?php echo $description; ?>
 						</td>
@@ -544,7 +573,7 @@ class WC_Admin_Settings {
 					?><tr valign="top">
 						<th scope="row" class="titledesc">
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-							<?php echo $tooltip_html; ?>
+							<?php echo $tip; ?>
 						</th>
 						<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="chosen_select">
 							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
@@ -568,7 +597,7 @@ class WC_Admin_Settings {
 					?><tr valign="top">
 						<th scope="row" class="titledesc">
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-							<?php echo $tooltip_html; ?>
+							<?php echo $tip; ?>
 						</th>
 						<td class="forminp">
 							<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="chosen_select">
@@ -590,47 +619,6 @@ class WC_Admin_Settings {
 					break;
 			}
 		}
-	}
-
-	/**
-	 * Helper function to get the formated description and tip HTML for a
-	 * given form field. Plugins can call this when implementing their own custom
-	 * settings types.
-	 *
-	 * @param array $value The form field value array
-	 * @returns array The description and tip as a 2 element array
-	 */
-	public static function get_field_description( $value ) {
-		$description  = '';
-		$tooltip_html = '';
-
-		if ( true === $value['desc_tip'] ) {
-			$tooltip_html = $value['desc'];
-		} elseif ( ! empty( $value['desc_tip'] ) ) {
-			$description  = $value['desc'];
-			$tooltip_html = $value['desc_tip'];
-		} elseif ( ! empty( $value['desc'] ) ) {
-			$description  = $value['desc'];
-		}
-
-		if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ) ) ) {
-			$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
-		} elseif ( $description && in_array( $value['type'], array( 'checkbox' ) ) ) {
-			$description =  wp_kses_post( $description );
-		} elseif ( $description ) {
-			$description = '<span class="description">' . wp_kses_post( $description ) . '</span>';
-		}
-
-		if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ) ) ) {
-			$tooltip_html = '<p class="description">' . $tooltip_html . '</p>';
-		} elseif ( $tooltip_html ) {
-			$tooltip_html = '<img class="help_tip" data-tip="' . esc_attr( $tooltip_html ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
-		}
-
-		return array(
-			'description'  => $description,
-			'tooltip_html' => $tooltip_html
-		);
 	}
 
 	/**

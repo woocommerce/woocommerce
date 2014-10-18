@@ -2,10 +2,7 @@
  * This stylesheet optimises the default WooCommerce layout when viewed on smaller screens.
  */
 
-/* =Imports
--------------------------------------------------------------- */
-@import "bourbon";
-@import "mixins";
+@import 'mixins';
 
 .woocommerce, .woocommerce-page {
 
@@ -116,7 +113,7 @@
 			}
 			input, .button, .input-text {
 				width:48%;
-				@include box-sizing(border-box);
+				@include borderbox();
 			}
 			.input-text + .button, .button.alt {
 				float: right;
@@ -151,7 +148,7 @@
 		#place_order {
 			float: none;
 			width:100%;
-			@include box-sizing(border-box);
+			@include borderbox();
 			margin-bottom:1em;
 		}
 	}

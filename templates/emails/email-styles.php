@@ -59,7 +59,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     font-family:Arial;
     font-size:14px;
     line-height:150%;
-    text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
+    text-align:left;
 }
 h1 {
     color: <?php echo esc_attr( $base ); ?>;
@@ -70,7 +70,7 @@ h1 {
     line-height: 150%;
     margin: 10px 0;
     padding: 28px 24px;
-    text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
+    text-align: left;
     text-shadow: 0 1px 0 <?php echo $base_lighter_20; ?>;
 }
 h2 {
@@ -81,7 +81,7 @@ h2 {
     font-weight: bold;
     line-height: 150%;
     margin: 10px 0;
-    text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
+    text-align: left;
 }
 h3 {
     color: <?php echo esc_attr( $base ); ?>;
@@ -91,7 +91,7 @@ h3 {
     font-weight: bold;
     line-height: 150%;
     margin: 10px 0;
-    text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
+    text-align: left;
 }
 a {
     color: <?php echo esc_attr( $base ); ?>;

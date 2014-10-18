@@ -1741,7 +1741,7 @@ class WC_Cart {
 					$coupon = new WC_Coupon( $code );
 
 					if ( $coupon->apply_before_tax() && $coupon->is_valid() ) {
-						if ( $coupon->is_valid_for_product( $values['data'], $values ) || $coupon->is_valid_for_cart() ) {
+						if ( $coupon->is_valid_for_product( $values['data'] ) || $coupon->is_valid_for_cart() ) {
 
 							$discount_amount       = $coupon->get_discount_amount( $price, $values, $single = true );
 							$price                 = max( $price - $discount_amount, 0 );

@@ -182,13 +182,13 @@ class WC_Product {
 			// Update stock in DB directly
 			switch ( $mode ) {
 				case 'add' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
+					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %d WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
 				break;
 				case 'subtract' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
+					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %d WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
 				break;
 				default :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
+					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %d WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
 				break;
 			}
 
@@ -906,9 +906,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_html_from_text() {
-		$from = '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
-
-		return apply_filters( 'woocommerce_get_price_html_from_text', $from, $this );
+		return '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
 	}
 
 	/**
@@ -919,9 +917,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_html_from_to( $from, $to ) {
-		$price = '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
-
-		return apply_filters( 'woocommerce_get_price_html_from_to', $price, $from, $to, $this );
+		return '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
 	}
 
 	/**

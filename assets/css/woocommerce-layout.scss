@@ -1,8 +1,5 @@
-/* =Imports
--------------------------------------------------------------- */
-@import "bourbon";
-@import "mixins";
-@import "woocommerce-base"; // Contains base colours like $primary
+@import 'mixins';
+@import 'woocommerce-base'; // Contains base colours like $primary
 
 .woocommerce, .woocommerce-page {
 

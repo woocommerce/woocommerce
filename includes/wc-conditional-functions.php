@@ -199,21 +199,6 @@ if ( ! function_exists( 'is_add_payment_method_page' ) ) {
 	}
 }
 
-if ( ! function_exists( 'is_lost_password_page' ) ) {
-
-	/**
-	* is_lost_password_page - Returns true when viewing the lost password page.
-	*
-	* @access public
-	* @return bool
-	*/
-	function is_lost_password_page() {
-		global $wp;
-
-		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['lost-password'] ) ) ? true : false;
-	}
-}
-
 if ( ! function_exists( 'is_ajax' ) ) {
 
 	/**

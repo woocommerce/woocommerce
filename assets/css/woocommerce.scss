@@ -1,8 +1,5 @@
-/* =Imports
--------------------------------------------------------------- */
-@import "bourbon";
-@import "mixins";
-@import "woocommerce-base"; // Contains base colours like $primary
+@import 'mixins';
+@import 'woocommerce-base'; // Contains base colours like $primary
 
 // Colours
 $tertiary:       $primary;                                    // Price slider bar / layered nav UI
@@ -44,11 +41,11 @@ p.demo_store {
 	font-size: 1em;
 	padding: .5em 0;
 	text-align: center;
-	@include linear-gradient($primary, darken($primary, 10%));
+	@include vertical_gradient( $primary, darken($primary, 10%) );
 	border: 1px solid darken($primary, 10%);
 	color: $primarytext;
 	z-index: 99998;
-	box-shadow: inset 0 0 0 3px rgba(255,255,255,0.2);
+	@include inset_box_shadow( 0, 0, 0, 3px, rgba(255,255,255,0.2) );
 }
 
 .admin-bar { // Styles applied when the admin bar is present
@@ -65,16 +62,11 @@ p.demo_store {
 		font-size:.75em;
 	}
 }
-
 .wc-backward, .wc-backward a {
 	&:before {
 		@include iconbefore( "\e02f" );
 		font-size:.75em;
 	}
-}
-
-.clear {
-	clear: both;
 }
 
 /* =Main Styles (namespace to avoid conflict with common global class names)
@@ -85,8 +77,8 @@ p.demo_store {
 		padding: 1em 1em 1em 3.5em !important;
 		margin: 0 0 2em !important;
 		position: relative;
-		border-radius: 4px;
-		@include linear-gradient(lighten( $secondary, 2% ), $secondary);
+		@include border_radius(4px);
+		@include vertical_gradient( lighten( $secondary, 2% ), $secondary );
 		color: $secondarytext;
 		@include text_shadow( 0, 1px, 0, lighten( $secondary, 4% ) );
 		list-style:none outside !important;
@@ -118,8 +110,8 @@ p.demo_store {
 			color: #fff;
 			text-shadow:0 1px 0 rgba(0,0,0,0.2);
 			padding-top:1em;
-			border-radius: 0 0 4px 4px;
-			box-shadow: inset 0 -1px 0 0 rgba(0,0,0,0.1);
+			@include border_radius_bottom(4px);
+			@include inset_box_shadow(0,-1px,0,0,rgba(0,0,0,0.1));
 		}
 
 		.button {
@@ -222,7 +214,7 @@ p.demo_store {
 				display:block;
 				width: 100%;
 				height:auto;
-				box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+				@include box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
 				@include transition();
 			}
 			div.thumbnails {
@@ -267,11 +259,11 @@ p.demo_store {
 
 				li {
 					border: 1px solid darken( $secondary, 10% );
-					@include linear-gradient($secondary, darken( $secondary, 10% ));
+					@include vertical_gradient( $secondary, darken( $secondary, 10% ) );
 					display: inline-block;
 					position: relative;
 					z-index: 0;
-					border-radius: 4px 4px 0 0;
+					@include border_radius_top(4px);
 					box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.6);
 					margin: 0 -5px;
 					padding: 0 1em;
@@ -424,8 +416,8 @@ p.demo_store {
 		top: 6px;
 		left: 6px;
 		margin: 0;
-		border-radius: 20px;
-		@include linear-gradient(lighten( $highlight, 10%), $highlight);
+		@include border_radius(20px);
+		@include vertical_gradient( lighten( $highlight, 10%), $highlight );
 		@include text_shadow( 0, -1px, 0, $highlight );
 		color: $highlightext;
 		-webkit-box-shadow:
@@ -477,11 +469,11 @@ p.demo_store {
 				height:auto;
 				display:block;
 				margin: 0 0 8px;
-				box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+				@include box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
 				@include transition();
 			}
 			a:hover img {
-				box-shadow: 0 1px 3px 0 rgba(0,0,0,0.4);
+				@include box_shadow(0,1px,3px,0,rgba(0,0,0,0.4));
 			}
 			strong {
 				display:block;
@@ -569,13 +561,13 @@ p.demo_store {
 		padding: 6px 10px;
 		text-decoration:none;
 		font-weight:bold;
-		border-radius: 2px;
+		@include border_radius(2px);
 		left: auto;
 		text-shadow:0 1px 0 $secondary + #111;
 		color: $secondarytext;
 		@include darkorlighttextshadow( $secondarytext );
 		border: 1px solid darken( $secondary, 20% );
-		@include linear-gradient(lighten( $highlight, 10%), $highlight);
+		@include vertical_gradient( $secondary, darken( $secondary, 10% ) );
 		white-space: nowrap;
 		display: inline-block;
 
@@ -621,7 +613,7 @@ p.demo_store {
 		}
 
 		&:hover {
-			@include linear-gradient($secondary, darken( $secondary, 15% ));
+			@include vertical_gradient( $secondary, darken( $secondary, 15% ) );
 			text-decoration:none;
 		}
 
@@ -630,13 +622,13 @@ p.demo_store {
 		}
 
 		&.alt {
-			@include linear-gradient($primary, darken( $primary, 10% ));
+			@include vertical_gradient( $primary, darken( $primary, 10% ) );
 			border-color: darken($primary, 20%);
 			color: $primarytext;
 			@include darkorlighttextshadow( $primarytext, 0.6 );
 
 			&:hover {
-				@include linear-gradient($primary, darken( $primary, 15% ));
+				@include vertical_gradient( $primary, darken( $primary, 15% ) );
 				color:$primarytext + #111;
 				@include darkorlighttextshadow( $primarytext + #111, 0.6 );
 			}
@@ -688,9 +680,10 @@ p.demo_store {
 			text-align: center;
 			border: 1px solid darken( $secondary, 20% );
 			border-right: 0;
-			box-shadow: inset 0 0 2px $secondary;
+			@include border_radius_right(0);
+			@include inset_box_shadow( 0, 0, 2px, 0, $secondary );
 			font-weight:bold;
-			border-radius: 2px 0 0 2px;
+			@include border_radius_left(2px);
 			-moz-appearance: textfield; /* Hide buttons for Firefox 29 and later */
 		}
 
@@ -715,10 +708,12 @@ p.demo_store {
 			cursor: pointer;
 			line-height: 13px;
 			font-size: 12px;
+			@include border_radius(2px);
+
 			color: $secondarytext;
 			@include darkorlighttextshadow( $secondarytext );
 			border: 1px solid darken( $secondary, 20% );
-			@include linear-gradient($secondary, darken( $secondary, 10% ));
+			@include vertical_gradient( $secondary, darken( $secondary, 10% ) );
 
 			-webkit-box-shadow:
 				inset 0 -1px 0 rgba(0,0,0,0.075),
@@ -734,7 +729,7 @@ p.demo_store {
 				0 1px 2px rgba(0,0,0,0.1);
 
 			&:hover {
-				@include linear-gradient($secondary, darken( $secondary, 15% ));
+				@include vertical_gradient( $secondary, darken( $secondary, 15% ) );
 			}
 		}
 
@@ -742,13 +737,13 @@ p.demo_store {
 			top: 0;
 			right: 0;
 			border-bottom: 0;
-			border-radius: 2px 2px 0 0;
+			@include border_radius_bottom(0);
 		}
 
 		.minus {
 			bottom: 0;
 			right: 0;
-			border-radius: 0 0 2px 2px;
+			@include border_radius_top(0);
 		}
 	}
 
@@ -817,7 +812,7 @@ p.demo_store {
 					.comment-text {
 						margin: 0 0 0 50px;
 						border: 1px solid darken( $secondary, 3% );
-						border-radius: 4px;
+						@include border_radius(4px);
 						padding: 1em 1em 0;
 						@include clearfix();
 						p {
@@ -838,7 +833,7 @@ p.demo_store {
 				}
 				#respond {
 					border: 1px solid darken( $secondary, 3% );
-					border-radius: 4px;
+					@include border_radius(4px);
 					padding: 1em 1em 0;
 					margin: 20px 0 0 50px;
 				}
@@ -884,7 +879,6 @@ p.demo_store {
 	}
 
 	.woocommerce-product-rating {
-		@include clearfix();
 		line-height: 2em;
 		display: block;
 
@@ -1075,8 +1069,7 @@ p.demo_store {
 		text-align:left;
 		width: 100%;
 		border-collapse: separate;
-		border-radius: 5px;
-
+		@include border_radius(5px);
 		th {
 			font-weight:bold;
 			line-height: 18px;
@@ -1175,7 +1168,7 @@ p.demo_store {
 			width:1em;
 			text-align: center;
 			line-height: 1;
-			border-radius: 100%;
+			@include border_radius(100%);
 			color: red;
 			text-decoration: none;
 			font-weight: bold;
@@ -1192,7 +1185,7 @@ p.demo_store {
 					-moz-box-sizing:border-box;
 					box-sizing:border-box;
 
-					box-shadow: inset 0 1px 4px rgba(0,0,0,0.1);
+					@include inset_box_shadow(0, 1px, 4px, 0, rgba(0,0,0,0.1));
 
 					border: 1px solid darken( $secondary, 10% );
 					padding: 6px 6px 5px;
@@ -1242,7 +1235,7 @@ p.demo_store {
 				margin-left: 4px;
 				width: 32px;
 				height:auto;
-				box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+				@include box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
 			}
 			dl {
 				margin: 0;
@@ -1315,7 +1308,7 @@ p.demo_store {
 			}
 			table {
 				border-collapse: separate;
-				border-radius: 5px;
+				@include border_radius(5px);
 				margin: 0 0 6px;
 				padding: 0;
 				tr:first-child {
@@ -1396,7 +1389,7 @@ p.demo_store {
 				vertical-align: middle;
 			}
 			input.input-text, textarea {
-				@include box-sizing(border-box);
+				@include borderbox();
 				width: 100%;
 				margin: 0;
 				outline: 0;
@@ -1432,7 +1425,7 @@ p.demo_store {
 		padding: 20px;
 		margin: 2em 0 2em 0px;
 		text-align:left;
-		border-radius: 5px;
+		@include border_radius(5px);
 	}
 
 	ul#shipping_method {
@@ -1490,7 +1483,7 @@ p.demo_store {
 	/* Payment box - appears on checkout and page page */
 	#payment {
 		background: $secondary;
-		border-radius: 5px;
+		@include border_radius(5px);
 
 		ul.payment_methods {
 			@include clearfix();
@@ -1530,17 +1523,17 @@ p.demo_store {
 			padding: 1em 2%;
 			margin: 1em 0 1em 0;
 			font-size: 0.92em;
-			border-radius: 2px;
+			@include border_radius(2px);
 			line-height: 1.5em;
-			@include linear-gradient(darken( $secondary, 5% ), darken( $secondary, 10% ));
-			box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+			@include vertical_gradient( darken( $secondary, 5% ), darken( $secondary, 10% ) );
+			@include box_shadow(0,1px,2px,0,rgba(0,0,0,0.25));
 			color: $secondarytext;
 			@include darkorlighttextshadow( $secondarytext );
 
 			input.input-text, textarea {
 				border-color: darken( $secondary, 15% );
 				border-top-color: darken( $secondary, 20% );
-				box-shadow: 0 1px 0 0 rgba(255,255,255,0.4);
+				@include box_shadow( 0, 1px, 0, 0, rgba( 255,255,255,0.4 ) );
 			}
 			::-webkit-input-placeholder {
 				color: darken( $secondary, 20% );
@@ -1722,9 +1715,9 @@ p.demo_store {
 					text-decoration: none;
 					border: 1px solid $tertiary;
 					background: $tertiary;
-					box-shadow: inset 0 1px 1px rgba(255,255,255,0.5);
+					@include inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
 					color: $tertiarytext;
-					border-radius: 3px;
+					@include border_radius(3px);
 					&:before {
 						@include iconbefore( "\e013" );
 					}
@@ -1757,9 +1750,9 @@ p.demo_store {
 					text-decoration: none;
 					border: 1px solid $tertiary;
 					background: $tertiary;
-					box-shadow: inset 0 1px 1px rgba(255,255,255,0.5);
+					@include inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
 					color: $tertiarytext;
-					border-radius: 3px;
+					@include border_radius(3px);
 					float: left;
 					&:before {
 						@include iconbefore( "\e013" );
@@ -1796,10 +1789,10 @@ p.demo_store {
 			z-index: 2;
 			width: 0.9em;
 			height: 0.9em;
-			border-radius: 1em;
+			@include border_radius(1em);
 			border: 1px solid darken( $tertiary, 50% );
 			cursor: pointer;
-			@include linear-gradient($tertiary, darken( $tertiary, 10% ));
+			@include vertical_gradient( $tertiary, darken( $tertiary, 10% ));
 			outline:none;
 			top: -.3em;
 			-webkit-box-shadow:
@@ -1823,12 +1816,12 @@ p.demo_store {
 			display:block;
 			border: 0;
 			background: $tertiary url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAADCAYAAABS3WWCAAAAFUlEQVQIHWP4//9/PRMDA8NzEPEMADLLBU76a5idAAAAAElFTkSuQmCC) top repeat-x; /* transparent png */
-			box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5);
-			border-radius: 1em;
+			@include inset_box_shadow(0,0,0,1px,rgba(0,0,0,0.5));
+			@include border_radius(1em);
 		}
 		.price_slider_wrapper .ui-widget-content {
-			border-radius: 1em;
-			@include linear-gradient($quaternary, lighten( $quaternary, 30% ));
+			@include border_radius(1em);
+			@include vertical_gradient( $quaternary, lighten( $quaternary, 30% ) );
 		}
 		.ui-slider-horizontal {
 			height: .5em;

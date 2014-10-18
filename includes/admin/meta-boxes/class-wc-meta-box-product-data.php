@@ -82,6 +82,8 @@ class WC_Meta_Box_Product_Data {
 
 			<span class="type_box"> &mdash; <?php echo $type_box; ?></span>
 
+			<div class="wc-tabs-back"></div>
+
 			<ul class="product_data_tabs wc-tabs" style="display:none;">
 				<?php
 					$product_data_tabs = apply_filters( 'woocommerce_product_data_tabs', array(
@@ -443,84 +445,82 @@ class WC_Meta_Box_Product_Data {
 										<div class="handlediv" title="<?php _e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 										<strong class="attribute_name"><?php echo apply_filters( 'woocommerce_attribute_label', $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name, $tax->attribute_name ); ?></strong>
 									</h3>
-									<div class="woocommerce_attribute_data wc-metabox-content">
-										<table cellpadding="0" cellspacing="0">
-											<tbody>
-												<tr>
-													<td class="attribute_name">
-														<label><?php _e( 'Name', 'woocommerce' ); ?>:</label>
-														<strong><?php echo $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name; ?></strong>
+									<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">
+										<tbody>
+											<tr>
+												<td class="attribute_name">
+													<label><?php _e( 'Name', 'woocommerce' ); ?>:</label>
+													<strong><?php echo $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name; ?></strong>
 
-														<input type="hidden" name="attribute_names[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" />
-														<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
-														<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="1" />
-													</td>
-													<td rowspan="3">
-														<label><?php _e( 'Value(s)', 'woocommerce' ); ?>:</label>
-														<?php if ( 'select' == $tax->attribute_type ) : ?>
-															<select multiple="multiple" data-placeholder="<?php _e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values" name="attribute_values[<?php echo $i; ?>][]">
-																<?php
-																$all_terms = get_terms( $attribute_taxonomy_name, 'orderby=name&hide_empty=0' );
-																if ( $all_terms ) {
-																	foreach ( $all_terms as $term ) {
-																		$has_term = has_term( (int) $term->term_id, $attribute_taxonomy_name, $thepostid ) ? 1 : 0;
-																		echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $has_term, 1, false ) . '>' . $term->name . '</option>';
-																	}
+													<input type="hidden" name="attribute_names[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" />
+													<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
+													<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="1" />
+												</td>
+												<td rowspan="3">
+													<label><?php _e( 'Value(s)', 'woocommerce' ); ?>:</label>
+													<?php if ( 'select' == $tax->attribute_type ) : ?>
+														<select multiple="multiple" data-placeholder="<?php _e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values" name="attribute_values[<?php echo $i; ?>][]">
+															<?php
+															$all_terms = get_terms( $attribute_taxonomy_name, 'orderby=name&hide_empty=0' );
+															if ( $all_terms ) {
+																foreach ( $all_terms as $term ) {
+																	$has_term = has_term( (int) $term->term_id, $attribute_taxonomy_name, $thepostid ) ? 1 : 0;
+																	echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $has_term, 1, false ) . '>' . $term->name . '</option>';
 																}
-																?>
-															</select>
+															}
+															?>
+														</select>
 
-															<button class="button plus select_all_attributes"><?php _e( 'Select all', 'woocommerce' ); ?></button> <button class="button minus select_no_attributes"><?php _e( 'Select none', 'woocommerce' ); ?></button>
+														<button class="button plus select_all_attributes"><?php _e( 'Select all', 'woocommerce' ); ?></button> <button class="button minus select_no_attributes"><?php _e( 'Select none', 'woocommerce' ); ?></button>
 
-															<button class="button fr plus add_new_attribute" data-attribute="<?php echo $attribute_taxonomy_name; ?>"><?php _e( 'Add new', 'woocommerce' ); ?></button>
+														<button class="button fr plus add_new_attribute" data-attribute="<?php echo $attribute_taxonomy_name; ?>"><?php _e( 'Add new', 'woocommerce' ); ?></button>
 
-														<?php elseif ( 'text' == $tax->attribute_type ) : ?>
-															<input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php
+													<?php elseif ( 'text' == $tax->attribute_type ) : ?>
+														<input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php
 
-																// Text attributes should list terms pipe separated
-																if ( $post_terms ) {
-																	$values = array();
-																	foreach ( $post_terms as $term )
-																		$values[] = $term->name;
-																	echo esc_attr( implode( ' ' . WC_DELIMITER . ' ', $values ) );
-																}
-
-															?>" placeholder="<?php _e( 'Pipe (|) separate terms', 'woocommerce' ); ?>" />
-														<?php endif; ?>
-														<?php do_action( 'woocommerce_product_option_terms', $tax, $i ); ?>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<label><input type="checkbox" class="checkbox" <?php
-
-															if ( isset( $attribute['is_visible'] ) ) {
-																checked( $attribute['is_visible'], 1 );
-															} else {
-																checked( apply_filters( 'default_attribute_visibility', false, $tax ), true );
+															// Text attributes should list terms pipe separated
+															if ( $post_terms ) {
+																$values = array();
+																foreach ( $post_terms as $term )
+																	$values[] = $term->name;
+																echo esc_attr( implode( ' ' . WC_DELIMITER . ' ', $values ) );
 															}
 
-														?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?></label>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<div class="enable_variation show_if_variable">
-														<label><input type="checkbox" class="checkbox" <?php
+														?>" placeholder="<?php _e( 'Pipe (|) separate terms', 'woocommerce' ); ?>" />
+													<?php endif; ?>
+													<?php do_action( 'woocommerce_product_option_terms', $tax, $i ); ?>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<label><input type="checkbox" class="checkbox" <?php
 
-															if ( isset( $attribute['is_variation'] ) ) {
-																checked( $attribute['is_variation'], 1 );
-															} else {
-																checked( apply_filters( 'default_attribute_variation', false, $tax ), true );
-															}
+														if ( isset( $attribute['is_visible'] ) ) {
+															checked( $attribute['is_visible'], 1 );
+														} else {
+															checked( apply_filters( 'default_attribute_visibility', false, $tax ), true );
+														}
 
-														?> name="attribute_variation[<?php echo $i; ?>]" value="1" /> <?php _e( 'Used for variations', 'woocommerce' ); ?></label>
-														</div>
-													</td>
-												</tr>
-											</tbody>
-										</table>
-									</div>
+													?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?></label>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<div class="enable_variation show_if_variable">
+													<label><input type="checkbox" class="checkbox" <?php
+
+														if ( isset( $attribute['is_variation'] ) ) {
+															checked( $attribute['is_variation'], 1 );
+														} else {
+															checked( apply_filters( 'default_attribute_variation', false, $tax ), true );
+														}
+
+													?> name="attribute_variation[<?php echo $i; ?>]" value="1" /> <?php _e( 'Used for variations', 'woocommerce' ); ?></label>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
 								</div>
 								<?php
 							}
@@ -545,36 +545,34 @@ class WC_Meta_Box_Product_Data {
 										<div class="handlediv" title="<?php _e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 										<strong class="attribute_name"><?php echo apply_filters( 'woocommerce_attribute_label', esc_html( $attribute['name'] ), esc_html( $attribute['name'] ) ); ?></strong>
 									</h3>
-									<div class="woocommerce_attribute_data wc-metabox-content">
-										<table cellpadding="0" cellspacing="0">
-											<tbody>
-												<tr>
-													<td class="attribute_name">
-														<label><?php _e( 'Name', 'woocommerce' ); ?>:</label>
-														<input type="text" class="attribute_name" name="attribute_names[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute['name'] ); ?>" />
-														<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
-														<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="0" />
-													</td>
-													<td rowspan="3">
-														<label><?php _e( 'Value(s)', 'woocommerce' ); ?>:</label>
-														<textarea name="attribute_values[<?php echo $i; ?>]" cols="5" rows="5" placeholder="<?php _e( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ); ?>"><?php echo esc_textarea( $attribute['value'] ); ?></textarea>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<label><input type="checkbox" class="checkbox" <?php checked( $attribute['is_visible'], 1 ); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?></label>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<div class="enable_variation show_if_variable">
-														<label><input type="checkbox" class="checkbox" <?php checked( $attribute['is_variation'], 1 ); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /> <?php _e( 'Used for variations', 'woocommerce' ); ?></label>
-														</div>
-													</td>
-												</tr>
-											</tbody>
-										</table>
-									</div>
+									<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">
+										<tbody>
+											<tr>
+												<td class="attribute_name">
+													<label><?php _e( 'Name', 'woocommerce' ); ?>:</label>
+													<input type="text" class="attribute_name" name="attribute_names[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute['name'] ); ?>" />
+													<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
+													<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="0" />
+												</td>
+												<td rowspan="3">
+													<label><?php _e( 'Value(s)', 'woocommerce' ); ?>:</label>
+													<textarea name="attribute_values[<?php echo $i; ?>]" cols="5" rows="5" placeholder="<?php _e( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ); ?>"><?php echo esc_textarea( $attribute['value'] ); ?></textarea>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<label><input type="checkbox" class="checkbox" <?php checked( $attribute['is_visible'], 1 ); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /> <?php _e( 'Visible on the product page', 'woocommerce' ); ?></label>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<div class="enable_variation show_if_variable">
+													<label><input type="checkbox" class="checkbox" <?php checked( $attribute['is_variation'], 1 ); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /> <?php _e( 'Used for variations', 'woocommerce' ); ?></label>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
 								</div>
 								<?php
 							}
