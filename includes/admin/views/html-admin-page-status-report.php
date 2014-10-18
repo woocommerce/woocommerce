@@ -430,9 +430,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 			foreach ( $check_pages as $page_name => $values ) {
 
-				echo '<tr>';
-
-				echo '<td>' . esc_html( $page_name ) . ':</td>';
+				echo '<tr><td>' . esc_html( $page_name ) . ':</td>';
 				echo '<td><a href="#" class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '">[?]</a></td><td>';
 
 				$error = false;
@@ -588,7 +586,6 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					}
 				?></td>
 			</tr>
-			<tr>
 				<td><?php _e( 'Has custom.css', 'woocommerce' ); ?>:</td>
 				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme has the file custom.css.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 				<td><?php
@@ -598,6 +595,9 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 						echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>';
 					}
 				?></td>
+			</tr>
+			<tr>
+
 			</tr>
 	</tbody>
 
@@ -610,9 +610,10 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 	<tbody>
 		<?php
 
-			$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
-			$scanned_files  = array();
-			$found_files    = array();
+			$template_paths     = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
+			$scanned_files      = array();
+			$found_files        = array();
+			$outdated_templates = false;
 
 			foreach ( $template_paths as $plugin_name => $template_path ) {
 				$scanned_files[ $plugin_name ] = WC_Admin_Status::scan_template_files( $template_path );
@@ -637,6 +638,9 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 						$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
 						if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
+							if ( ! $outdated_templates ) {
+								$outdated_templates = true;
+							}
 							$found_files[ $plugin_name ][] = sprintf( __( '<code>%s</code> version <strong style="color:red">%s</strong> is out of date. The core version is %s', 'woocommerce' ), str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ), $theme_version ? $theme_version : '-', $core_version );
 						} else {
 							$found_files[ $plugin_name ][] = sprintf( '<code>%s</code>', str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ) );
@@ -661,6 +665,16 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
 					<td>&nbsp;</td>
 					<td><?php _e( 'No overrides present in theme.', 'woocommerce' ); ?></td>
+				</tr>
+				<?php
+			}
+
+			if ( true === $outdated_templates ) {
+				?>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td><a href="http://speakinginbytes.com/2014/02/woocommerce-2-1-outdated-templates/" target="_blank"><?php _e( 'Learn how to update outdated templates', 'woocommerce' ) ?></a></td>
 				</tr>
 				<?php
 			}
