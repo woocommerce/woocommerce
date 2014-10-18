@@ -181,7 +181,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				}
 				$posting['fsockopen_curl']['success'] = true;
 			} else {
-				$posting['fsockopen_curl']['note'] = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
+				$posting['fsockopen_curl']['note']    = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
 				$posting['fsockopen_curl']['success'] = false;
 			}
 
@@ -190,10 +190,10 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			// SOAP
 			$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
 			if ( class_exists( 'SoapClient' ) ) {
-				$posting['soap_client']['note'] = __( 'Your server has the SOAP Client class enabled.', 'woocommerce' );
+				$posting['soap_client']['note']    = __( 'Your server has the SOAP Client class enabled.', 'woocommerce' );
 				$posting['soap_client']['success'] = true;
 			} else {
-				$posting['soap_client']['note'] = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
+				$posting['soap_client']['note']    = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
 				$posting['soap_client']['success'] = false;
 			}
 
@@ -203,21 +203,21 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			$posting['wp_remote_post']['name'] = __( 'Remote Post','woocommerce');
 			$request['cmd'] = '_notify-validate';
 			$params = array(
-				'sslverify' 	=> false,
-				'timeout' 		=> 60,
-				'user-agent'	=> 'WooCommerce/' . WC()->version,
-				'body'			=> $request
+				'sslverify'  => false,
+				'timeout'    => 60,
+				'user-agent' => 'WooCommerce/' . WC()->version,
+				'body'       => $request
 			);
 			$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
 
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
-				$posting['wp_remote_post']['note'] = __( 'wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
+				$posting['wp_remote_post']['note']    = __( 'wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
 				$posting['wp_remote_post']['success'] = true;
 			} elseif ( is_wp_error( $response ) ) {
-				$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce' ) . ' ' . $response->get_error_message();
+				$posting['wp_remote_post']['note']    = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce' ) . ' ' . $response->get_error_message();
 				$posting['wp_remote_post']['success'] = false;
 			} else {
-				$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN may not work with your server.', 'woocommerce' );
+				$posting['wp_remote_post']['note']    = __( 'wp_remote_post() failed. PayPal IPN may not work with your server.', 'woocommerce' );
 				$posting['wp_remote_post']['success'] = false;
 			}
 
@@ -254,7 +254,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				'decimal_point'     => __( 'The character used for decimal points.', 'woocommerce' ),
 				'thousands_sep'     => __( 'The character used for a thousands separator.', 'woocommerce' ),
 				'mon_decimal_point' => __( 'The character used for decimal points in monetary values.', 'woocommerce' ),
-				'mon_thousands_sep'	=> __( 'The character used for a thousands separator in monetary values.', 'woocommerce' ),
+				'mon_thousands_sep' => __( 'The character used for a thousands separator in monetary values.', 'woocommerce' ),
 			);
 
 			foreach ( $locale as $key => $val ) {
@@ -351,22 +351,22 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 		<tr>
 			<td><?php _e( 'API Enabled', 'woocommerce' ); ?>:</td>
 			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have REST API enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-			<td><?php echo get_option( 'woocommerce_api_enabled' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
+			<td><?php echo 'yes' === get_option( 'woocommerce_api_enabled' ) ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Taxes enabled', 'woocommerce' ) ?></td>
 			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have taxes enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-			<td><?php echo 'yes' == get_option( 'woocommerce_calc_taxes' ) ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
+			<td><?php echo 'yes' === get_option( 'woocommerce_calc_taxes' ) ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Shipping enabled', 'woocommerce' ) ?></td>
 			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have shipping enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-			<td><?php echo 'yes' == get_option( 'woocommerce_calc_shipping' ) ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
+			<td><?php echo 'yes' === get_option( 'woocommerce_calc_shipping' ) ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-			<td><?php echo get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
+			<td><?php echo 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Currency', 'woocommerce' ) ?></td>
@@ -430,7 +430,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 			foreach ( $check_pages as $page_name => $values ) {
 
-				if ( $alt == 1 ) echo '<tr>'; else echo '<tr>';
+				echo '<tr>';
 
 				echo '<td>' . esc_html( $page_name ) . ':</td>';
 				echo '<td><a href="#" class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '">[?]</a></td><td>';
@@ -467,8 +467,6 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				if ( ! $error ) echo '<mark class="yes">#' . absint( $page_id ) . ' - ' . str_replace( home_url(), '', get_permalink( $page_id ) ) . '</mark>';
 
 				echo '</td></tr>';
-
-				$alt = $alt * -1;
 			}
 		?>
 	</tbody>
@@ -514,7 +512,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					foreach ( $cl_lines as $line_num => $cl_line ) {
 						if ( preg_match( '/^[0-9]/', $cl_line ) ) :
 
-							$theme_date    		= str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
+							$theme_date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
 							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 							$theme_update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
 							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
@@ -590,6 +588,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					}
 				?></td>
 			</tr>
+			<tr>
 				<td><?php _e( 'Has custom.css', 'woocommerce' ); ?>:</td>
 				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme has the file custom.css.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 				<td><?php
@@ -599,9 +598,6 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 						echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>';
 					}
 				?></td>
-			</tr>
-			<tr>
-
 			</tr>
 	</tbody>
 
