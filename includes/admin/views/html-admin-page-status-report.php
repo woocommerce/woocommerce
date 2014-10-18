@@ -80,7 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
 
 				if ( $memory < 67108864 ) {
-					echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
+					echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s" target="_blank">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . size_format( $memory ) . '</mark>';
 				}
@@ -555,7 +555,9 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			<tr>
 				<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
 				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current theme is a child theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php echo is_child_theme() ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
+				<td><?php
+					echo is_child_theme() ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark> &ndash; <mark class="error">' . sprintf( __( 'We recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'http://codex.wordpress.org/Child_Themes' ) . '</mark>';
+				?></td>
 			</tr>
 			<?php
 			if( is_child_theme() ) :
@@ -587,6 +589,19 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
 					}
 				?></td>
+			</tr>
+				<td><?php _e( 'Has custom.css', 'woocommerce' ); ?>:</td>
+				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme has the file custom.css.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+				<td><?php
+					if ( file_exists( get_template_directory( $active_theme->template ) . '/custom.css' ) ) {
+						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
+					} else {
+						echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>';
+					}
+				?></td>
+			</tr>
+			<tr>
+
 			</tr>
 	</tbody>
 
