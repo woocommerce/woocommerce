@@ -1237,7 +1237,7 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
-	 * Gets the total (product) discount amount - these are applied before tax.
+	 * Gets the total (order) discount amount - these are applied after tax.
 	 *
 	 * @return float
 	 */
