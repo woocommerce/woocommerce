@@ -53,11 +53,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php do_action( 'woocommerce_edit_account_form' ); ?>
 
 	<p>
-		<?php wp_nonce_field( 'save_account_details' ); ?>
+		<?php wp_nonce_field( 'save_account_details_' . (int) get_current_user_id() ); ?>
 		<input type="submit" class="button" name="save_account_details" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" />
 		<input type="hidden" name="action" value="save_account_details" />
 	</p>
 
-	<?php do_action( 'woocommerce_edit_account_form_end_' . (int) get_current_user_id() ); ?>
+	<?php do_action( 'woocommerce_edit_account_form_end' ); ?>
 
 </form>
