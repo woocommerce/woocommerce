@@ -58,6 +58,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<input type="hidden" name="action" value="save_account_details" />
 	</p>
 
-	<?php do_action( 'woocommerce_edit_account_form_end' ); ?>
+	<?php do_action( 'woocommerce_edit_account_form_end_' . (int) get_current_user_id() ); ?>
 
 </form>
