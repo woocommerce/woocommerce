@@ -92,11 +92,11 @@ class WC_AJAX {
 
 		// Fragments and mini cart are returned
 		$data = array(
-			'fragments' => apply_filters( 'add_to_cart_fragments', array(
+			'fragments' => apply_filters( 'woocommerce_add_to_cart_fragments', array(
 					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>'
 				)
 			),
-			'cart_hash' => apply_filters( 'add_to_cart_cart_hash', WC()->cart->get_cart() ? md5( json_encode( WC()->cart->get_cart() ) ) : '', WC()->cart->get_cart() )
+			'cart_hash' => apply_filters( 'woocommerce_add_to_cart_hash', WC()->cart->get_cart() ? md5( json_encode( WC()->cart->get_cart() ) ) : '', WC()->cart->get_cart() )
 		);
 
 		wp_send_json( $data );

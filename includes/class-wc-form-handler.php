@@ -685,7 +685,7 @@ class WC_Form_Handler {
 
 		// Custom Handler
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ){
-			
+
 			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url );
 			return;
 
@@ -711,7 +711,7 @@ class WC_Form_Handler {
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart && wc_notice_count( 'error' ) == 0 ) {
 
-			$url = apply_filters( 'add_to_cart_redirect', $url );
+			$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url );
 
 			// If has custom URL redirect there
 			if ( $url ) {
