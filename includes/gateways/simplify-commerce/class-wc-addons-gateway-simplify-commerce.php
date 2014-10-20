@@ -363,7 +363,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 			// Mark order as failed if not already set,
 			// otherwise, make sure we add the order note so we can detect when someone fails to check out multiple times
-			if ( 'failed' != $order->status ) {
+			if ( 'failed' != $order->get_status() ) {
 				$order->update_status( 'failed', $order_note );
 			} else {
 				$order->add_order_note( $order_note );
