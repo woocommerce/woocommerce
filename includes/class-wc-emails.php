@@ -333,6 +333,7 @@ class WC_Emails {
 			$title = sprintf(__( 'Product #%s - %s', 'woocommerce' ), $product->id, get_the_title($product->id)) . ' ' . $sku;
 
 		$message = $title . __( 'is low in stock.', 'woocommerce' );
+		$message = apply_filters('woocommerce_email_message_low_stock', $message, $product);
 
 		//	CC, BCC, additional headers
 		$headers = apply_filters('woocommerce_email_headers', '', 'low_stock', $product);
@@ -365,6 +366,7 @@ class WC_Emails {
 			$title = sprintf(__( 'Product #%s - %s', 'woocommerce' ), $product->id, get_the_title($product->id)) . ' ' . $sku;
 
 		$message = $title . __( 'is out of stock.', 'woocommerce' );
+		$message = apply_filters('woocommerce_email_message_no_stock', $message, $product);
 
 		//	CC, BCC, additional headers
 		$headers = apply_filters('woocommerce_email_headers', '', 'no_stock', $product);
@@ -410,6 +412,7 @@ class WC_Emails {
 
 		$order = wc_get_order( $order_id );
 		$message = sprintf(__( '%s units of %s have been backordered in order %s.', 'woocommerce' ), $quantity, $title, $order->get_order_number() );
+		$message = apply_filters('woocommerce_email_message_backorder', $message, $quantity, $title, $order, $product);
 
 		//	CC, BCC, additional headers
 		$headers = apply_filters('woocommerce_email_headers', '', 'backorder', $args);
