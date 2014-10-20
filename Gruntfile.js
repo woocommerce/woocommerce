@@ -130,8 +130,7 @@ module.exports = function( grunt ) {
 					potFilename: 'woocommerce.pot',
 					exclude: [
 						'includes/admin/.*',
-						'apigen/.*',
-						'deploy/.*'
+						'apigen/.*'
 					],
 					processPot: function ( pot ) {
 						pot.headers['project-id-version'] += ' Frontend';
@@ -178,7 +177,6 @@ module.exports = function( grunt ) {
 				src:  [
 					'**/*.php', // Include all files
 					'!apigen/**', // Exclude apigen/
-					'!deploy/**', // Exclude deploy/
 					'!node_modules/**' // Exclude node_modules/
 				],
 				expand: true
@@ -194,7 +192,7 @@ module.exports = function( grunt ) {
 			apigen: {
 				command: [
 					'cd apigen/',
-					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/api/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"'
+					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/api/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"'
 				].join( '&&' )
 			}
 		},
@@ -209,14 +207,14 @@ module.exports = function( grunt ) {
 
 	// Load NPM tasks to be used here
 	grunt.loadNpmTasks( 'grunt-shell' );
+	grunt.loadNpmTasks( 'grunt-wp-i18n' );
+	grunt.loadNpmTasks( 'grunt-checktextdomain' );
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-sass' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
-	grunt.loadNpmTasks( 'grunt-wp-i18n' );
-	grunt.loadNpmTasks( 'grunt-checktextdomain' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
