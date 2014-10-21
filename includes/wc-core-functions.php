@@ -530,9 +530,9 @@ function wc_fix_rewrite_rules( $rules ) {
 	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
 
 	// Fix the rewrite rules when the product permalink have %product_cat% flag
-	if ( preg_match( '/\/(.+)(\/%product_cat%)/' , $product_permalink, $matches ) ) {
+	if ( preg_match( '`/(?:.+)(/%product_cat%)`' , $product_permalink, $matches ) ) {
 		foreach ( $rules as $rule => $rewrite ) {
-			if ( preg_match( '/^' . $matches[1] . '\/\(/', $rule ) && preg_match( '/^(index\.php\?product_cat)(?!(.*product))/', $rewrite ) ) {
+			if ( preg_match( '/^' . $matches[0] . '\/\(/', $rule ) && preg_match( '/^(index\.php\?product_cat)(?!(.*product))/', $rewrite ) ) {
 				unset( $rules[ $rule ] );
 			}
 		}
