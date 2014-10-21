@@ -157,9 +157,6 @@ class WC_Email extends WC_Settings_API {
 
 		// For multipart messages
 		add_filter( 'phpmailer_init', array( $this, 'handle_multipart' ) );
-
-		// Inline CSS styles for html emails
-		add_filter( 'woocommerce_mail_content', array( $this, 'style_inline' ), 10 );
 	}
 
 	/**
@@ -317,7 +314,6 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function style_inline( $content ) {
-
 		// make sure we only inline CSS for html emails
 		if ( 'text/html' ==  $this->get_content_type() ) {
 
@@ -382,14 +378,8 @@ class WC_Email extends WC_Settings_API {
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
-		/**
-		 * Filter all WooCommerce mail content
-		 *
-		 * @hooked inline_styles - 10
-		*/
-		$message = apply_filters( 'woocommerce_mail_content', $message );
-
-		$return = wp_mail( $to, $subject, $message, $headers, $attachments );
+		$message = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
+		$return  = wp_mail( $to, $subject, $message, $headers, $attachments );
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
