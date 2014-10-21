@@ -130,6 +130,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.2.7 - xx/10/2014 =
+* Fix - Incorrect conversion of Unicode characters in order status names
+
 = 2.2.6 - 08/10/2014 =
 * Fix - Notices in the cache helper.
 * Fix - Prevent bulk edit from breaking sale price scheduled dates.
