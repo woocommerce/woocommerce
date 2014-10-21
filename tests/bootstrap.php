@@ -95,6 +95,9 @@ class WC_Unit_Tests_Bootstrap {
 		// test cases
 		require_once( $this->tests_dir . '/framework/class-wc-unit-test-case.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-api-unit-test-case.php' );
+
+		// Helpers
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-product.php' );
 	}
 
 	/**
