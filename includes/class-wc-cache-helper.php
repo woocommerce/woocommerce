@@ -135,7 +135,7 @@ class WC_Cache_Helper {
 
 		$config   = w3_instance('W3_Config');
 		$enabled  = $config->get_integer( 'dbcache.enabled' );
-		$settings = $config->get_array( 'dbcache.reject.sql' );
+		$settings = array_map( 'trim', $config->get_array( 'dbcache.reject.sql' ) );
 
 		if ( $enabled && ! in_array( '_wc_session_', $settings ) ) {
 			?>
