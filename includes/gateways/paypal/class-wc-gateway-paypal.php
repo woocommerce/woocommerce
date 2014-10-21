@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class 		WC_Paypal
  * @extends		WC_Gateway_Paypal
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Payment
  * @author 		WooThemes
  */
@@ -150,10 +150,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( is_array( $icon ) ) {
 			$icon_html = '';
 			foreach ( $icon as $i ) {
-				$icon_html .= '<img src="' . esc_attr( $i ) . '" alt="PayPal Acceptance Mark" />';
+				$icon_html .= '<img src="' . esc_attr( $i ) . '" alt="' . __( 'PayPal Acceptance Mark', 'woocommerce' ) . '" />';
 			}
 		} else {
-			$icon_html = '<img src="' . esc_attr( apply_filters( 'woocommerce_paypal_icon', $icon ) ) . '" alt="PayPal Acceptance Mark" />';
+			$icon_html = '<img src="' . esc_attr( apply_filters( 'woocommerce_paypal_icon', $icon ) ) . '" alt="' . __( 'PayPal Acceptance Mark', 'woocommerce' ) . '" />';
 		}
 
 		if ( $link ) {
