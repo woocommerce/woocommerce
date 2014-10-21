@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 2.2.6
+Stable tag: 2.2.7
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -129,6 +129,28 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.2.7 =
+* Fix - Fix refund date.
+* Fix - Fixed various notices.
+* Fix - Make updater set parent backorder status.
+* Fix - In the US address format, use state code rather than the full state name.
+* Fix - Use mb_strtolower to prevent issues with unicode chars.
+* Fix - Introduced the wc_strtolower() function
+* Fix - Make cart total consider taxes when saving an order.
+* Fix - Fix /shop/ base URL Non Latin issue with url decode.
+* Fix - Correct report handling for full and partial refunds.
+* Fix - Update jquery payment to prevent autocomplete issues.
+* Fix - Coupon API: Don't return current timestamp when expiry_date is not set.
+* Fix - wc_update_product_stock should update stock regardless, if the meta data doesn't currently exist.
+* Fix - Added wp_kses_post to purchase note
+* Fix - Fixed edit account page fields #6577.
+* Fix - Fix stock report queries #6565.
+* Fix - Fix error message with maximum amount in coupon class.
+* Fix - Fix nonce usage during checkout/account pages.
+* Tweak - Allow for non-integer stock quantities.
+* Tweak - Update simplify commerce to use new $order->get_status().
+* Tweak - Only show integrations subnav when there are multiple integrations.
 
 = 2.2.6 - 08/10/2014 =
 * Fix - Notices in the cache helper.
