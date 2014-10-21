@@ -148,6 +148,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fix stock report queries #6565.
 * Fix - Fix error message with maximum amount in coupon class.
 * Fix - Fix nonce usage during checkout/account pages.
+* Fix - Incorrect conversion of Unicode characters in order status names
+* Fix - Edit Account fields order
 * Tweak - Allow for non-integer stock quantities.
 * Tweak - Update simplify commerce to use new $order->get_status().
 * Tweak - Only show integrations subnav when there are multiple integrations.
@@ -157,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Prevent bulk edit from breaking sale price scheduled dates.
 * Fix - Prevent address fields being empty when editing an address within an order.
 * Fix - Removed save_post remove_action call which breaks 3rd party plugins. See ticket #6376 and #6485 for details.
+* Fix - Prevent warnings when set "Specific Countries" empty in shipping methods.
 * Tweak - Added woocommerce_product_subcategories_hide_empty filter.
 * Tweak - Added filter for shipping tax.
 * Tweak - Product attribute shortcode should return columns css class.

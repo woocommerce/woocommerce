@@ -8,8 +8,9 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit; // Exit if accessed directly
 }
+
 ?>
 
 <?php wc_print_notices(); ?>
@@ -35,6 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<fieldset>
 		<legend><?php _e( 'Password Change', 'woocommerce' ); ?></legend>
+
 		<p class="form-row form-row-wide">
 			<label for="password_current"><?php _e( 'Current Password (leave blank to leave unchanged)', 'woocommerce' ); ?></label>
 			<input type="password" class="input-text" name="password_current" id="password_current" />
