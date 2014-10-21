@@ -277,6 +277,27 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Check if all variation's attributes are set
+	 *
+	 * @return boolean
+	 */
+	public function has_all_attributes_set() {
+
+		$set = true;
+		
+		// undefined attributes have null strings as array values
+		foreach( $this->get_variation_attributes() as $att ){
+			if( ! $att ){
+				$set = false;
+				break;
+			}
+		}
+
+		return $set;
+
+	}
+	
+	/**
 	 * Get variation price HTML. Prices are not inherited from parents.
 	 *
 	 * @return string containing the formatted price
