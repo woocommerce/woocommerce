@@ -385,7 +385,7 @@ final class WooCommerce {
 		}
 
 		// Email Actions
-		$email_actions = array(
+		$email_actions = apply_filters( 'woocommerce_email_actions', array(
 			'woocommerce_low_stock',
 			'woocommerce_no_stock',
 			'woocommerce_product_on_backorder',
@@ -398,7 +398,7 @@ final class WooCommerce {
 			'woocommerce_order_status_completed',
 			'woocommerce_new_customer_note',
 			'woocommerce_created_customer'
-		);
+		) );
 
 		foreach ( $email_actions as $action ) {
 			add_action( $action, array( $this, 'send_transactional_email' ), 10, 10 );
