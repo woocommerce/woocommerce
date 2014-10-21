@@ -657,7 +657,7 @@ class WC_Coupon {
 				$err = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->minimum_amount ) );
 			break;
 			case self::E_WC_COUPON_MAX_SPEND_LIMIT_MET:
-				$err = sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->minimum_amount ) );
+				$err = sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->maximum_amount ) );
 			break;
 			case self::E_WC_COUPON_NOT_APPLICABLE:
 				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
