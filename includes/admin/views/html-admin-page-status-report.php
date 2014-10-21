@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<thead>
 		<tr>
-			<th colspan="3"><?php _e( 'WordPress', 'woocommerce' ); ?></th>
+			<th colspan="3"><?php _e( 'WordPress Environment', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
 
@@ -100,7 +100,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<thead>
 		<tr>
-			<th colspan="3"><?php _e( 'Server', 'woocommerce' ); ?></th>
+			<th colspan="3"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
 
@@ -200,28 +200,45 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			$posting['soap_client']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Some webservices like shipping use SOAP to get information from remote servers, for example, live shipping quotes from FedEx require SOAP to be installed.', 'woocommerce'  ) . '">[?]</a>';
 
 			// WP Remote Post Check
-			$posting['wp_remote_post']['name'] = __( 'Remote Post','woocommerce');
-			$request['cmd'] = '_notify-validate';
-			$params = array(
+			$posting['wp_remote_post']['name'] = __( 'Remote Post', 'woocommerce');
+			$posting['wp_remote_post']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'PayPal uses this method of commnuicating when sending back transaction information.', 'woocommerce'  ) . '">[?]</a>';
+
+			$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
 				'sslverify'  => false,
 				'timeout'    => 60,
 				'user-agent' => 'WooCommerce/' . WC()->version,
-				'body'       => $request
-			);
-			$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
+				'body'       => array(
+					'cmd'    => '_notify-validate'
+				)
+			) );
 
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				$posting['wp_remote_post']['note']    = __( 'wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
 				$posting['wp_remote_post']['success'] = true;
-			} elseif ( is_wp_error( $response ) ) {
-				$posting['wp_remote_post']['note']    = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce' ) . ' ' . $response->get_error_message();
-				$posting['wp_remote_post']['success'] = false;
 			} else {
-				$posting['wp_remote_post']['note']    = __( 'wp_remote_post() failed. PayPal IPN may not work with your server.', 'woocommerce' );
+				$posting['wp_remote_post']['note']    = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider.', 'woocommerce' ) . ' ' . $response->get_error_message();
+				if ( $response->get_error_message() ) {
+					$posting['wp_remote_post']['note'] .= ' ' . sprintf( __( 'Error: %s', 'woocommerce' ), $response->get_error_message() );
+				}
 				$posting['wp_remote_post']['success'] = false;
 			}
 
-			$posting['wp_remote_post']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'PayPal uses this method of commnuicating when sending back transaction information.', 'woocommerce'  ) . '">[?]</a>';
+			// WP Remote Get Check
+			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce');
+			$posting['wp_remote_get']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce'  ) . '">[?]</a>';
+
+			$response = wp_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+
+			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
+				$posting['wp_remote_get']['note']    = __( 'wp_remote_get() was successful - The WooCommerce plugin updater should work.', 'woocommerce' );
+				$posting['wp_remote_get']['success'] = true;
+			} else {
+				$posting['wp_remote_get']['note']    = __( 'wp_remote_get() failed. The WooCommerce plugin updater won\'t work with your server. Contact your hosting provider.', 'woocommerce' ) . ' ' . $response->get_error_message();
+				if ( $response->get_error_message() ) {
+					$posting['wp_remote_get']['note'] .= ' ' . sprintf( __( 'Error: %s', 'woocommerce' ), $response->get_error_message() );
+				}
+				$posting['wp_remote_get']['success'] = false;
+			}
 
 			$posting = apply_filters( 'woocommerce_debug_posting', $posting );
 
