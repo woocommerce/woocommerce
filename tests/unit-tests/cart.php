@@ -75,5 +75,42 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	public function test_get_cart_url() {
 	}
 
+	/**
+	 * Test add to cart simple product
+	 */
+	public function test_add_to_cart_simple() {
+
+		// Create dummy product
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Add the product to the cart
+		// Methods returns boolean on failure, string on success.
+		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1 ) );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Clean up product
+		wp_delete_post( $product->id );
+	}
+
+	/**
+	 * Test add to cart variable product
+	 */
+	public function test_add_to_cart_variable() {
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_shift( $variations );
+
+		// Add the product to the cart
+		// Methods returns boolean on failure, string on success.
+		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1, $variation['variation_id'], array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) ) );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// @todo clean up the variable product
+	}
+
 
 }
