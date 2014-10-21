@@ -65,7 +65,7 @@ $order = wc_get_order( $order_id );
 				if ( $order->has_status( array( 'completed', 'processing' ) ) && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) {
 					?>
 					<tr class="product-purchase-note">
-						<td colspan="3"><?php echo wpautop( do_shortcode( $purchase_note ) ); ?></td>
+						<td colspan="3"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); ?></td>
 					</tr>
 					<?php
 				}
