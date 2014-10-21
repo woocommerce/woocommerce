@@ -803,14 +803,13 @@ class WC_Form_Handler {
 		}
 
 		// process lost password form
-		if ( isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) ) {
-			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-lost_password' );
+		if ( isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'lost_password' ) ) {
 
 			WC_Shortcode_My_Account::retrieve_password();
 		}
 
 		// process reset password form
-		if ( isset( $_POST['password_1'] ) && isset( $_POST['password_2'] ) && isset( $_POST['reset_key'] ) && isset( $_POST['reset_login'] ) && isset( $_POST['_wpnonce'] ) ) {
+		if ( isset( $_POST['password_1'] ) && isset( $_POST['password_2'] ) && isset( $_POST['reset_key'] ) && isset( $_POST['reset_login'] ) && isset( $_POST['_wpnonce'] ) &&  wp_verify_nonce( $_POST['_wpnonce'], 'reset_password' ) ) {
 
 			// verify reset key again
 			$user = WC_Shortcode_My_Account::check_password_reset_key( $_POST['reset_key'], $_POST['reset_login'] );
@@ -820,8 +819,6 @@ class WC_Form_Handler {
 				// save these values into the form again in case of errors
 				$args['key']   = wc_clean( $_POST['reset_key'] );
 				$args['login'] = wc_clean( $_POST['reset_login'] );
-
-				wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-reset_password' );
 
 				if ( empty( $_POST['password_1'] ) || empty( $_POST['password_2'] ) ) {
 					wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
