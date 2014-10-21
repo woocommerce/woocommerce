@@ -330,7 +330,9 @@ class WC_Checkout {
 	 * @return void
 	 */
 	public function process_checkout() {
-		wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-process_checkout' );
+		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-process_checkout' ) ) {
+			return;
+		}
 
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
 			define( 'WOOCOMMERCE_CHECKOUT', true );
