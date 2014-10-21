@@ -132,6 +132,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.2.7 - xx/10/2014 =
 * Fix - Incorrect conversion of Unicode characters in order status names
+* Fix - Edit Account fields order
 
 = 2.2.6 - 08/10/2014 =
 * Fix - Notices in the cache helper.
