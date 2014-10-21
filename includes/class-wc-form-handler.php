@@ -44,11 +44,9 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || ( 'edit_address' !== $_POST[ 'action' ] ) || empty( $_POST['_wpnonce'] ) ) {
+		if ( empty( $_POST[ 'action' ] ) || ( 'edit_address' !== $_POST[ 'action' ] ) || empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' ) ) {
 			return;
 		}
-
-		wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' );
 
 		$user_id = get_current_user_id();
 
