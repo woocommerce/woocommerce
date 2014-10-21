@@ -67,6 +67,15 @@ if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] )
 
 	</a>
 
-	<?php do_action( 'woocommerce_after_shop_loop_item' ); ?>
+	<?php
+
+		/**
+		 * woocommerce_after_shop_loop_item hook
+		 *
+		 * @hooked woocommerce_template_loop_add_to_cart - 10
+		 */
+		do_action( 'woocommerce_after_shop_loop_item' ); 
+
+	?>
 
 </li>
