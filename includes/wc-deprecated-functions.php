@@ -717,13 +717,9 @@ add_action( 'pre_get_posts', 'wc_shop_order_status_backwards_compatibility' );
 
 /**
  * @since 2.3
- * @deprecated in favor to woocommerce_compile_scss_styles()
+ * @deprecated has no replacement
+ * @return void
  */
 function woocommerce_compile_less_styles() {
-	_deprecated_function( 'woocommerce_compile_less_styles', '2.3', 'woocommerce_compile_scss_styles' );
-
-	// Prevents errors if used outside of admin dashboard
-	if ( function_exists( 'woocommerce_compile_scss_styles' ) ) {
-		woocommerce_compile_scss_styles();
-	}
+	_deprecated_function( 'woocommerce_compile_less_styles', '2.3' );
 }
