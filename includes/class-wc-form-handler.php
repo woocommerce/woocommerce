@@ -856,8 +856,6 @@ class WC_Form_Handler {
 	 * Process the registration form.
 	 */
 	public static function process_registration() {
-		print_r( $_POST );
-		//die( 'Before' );
 		if ( ! empty( $_POST['register'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-register' ) ) {
 			die( 'Passed' );
 
