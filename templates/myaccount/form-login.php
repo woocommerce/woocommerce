@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @version     2.2.6
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -99,7 +99,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php do_action( 'register_form' ); ?>
 
 			<p class="form-row">
-				<?php wp_nonce_field( 'woocommerce-register', 'register' ); ?>
+				<?php wp_nonce_field( 'woocommerce-register' ); ?>
 				<input type="submit" class="button" name="register" value="<?php _e( 'Register', 'woocommerce' ); ?>" />
 			</p>
 
