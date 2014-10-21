@@ -9,18 +9,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Provides a Bank Transfer Payment Gateway. Based on code by Mike Pepper.
  *
- * @class 		WC_Gateway_BACS
- * @extends		WC_Payment_Gateway
- * @version		2.1.0
- * @package		WooCommerce/Classes/Payment
- * @author 		WooThemes
+ * @class       WC_Gateway_BACS
+ * @extends     WC_Payment_Gateway
+ * @version     2.1.0
+ * @package     WooCommerce/Classes/Payment
+ * @author      WooThemes
  */
 class WC_Gateway_BACS extends WC_Payment_Gateway {
 
-    /**
-     * Constructor for the gateway.
-     */
-    public function __construct() {
+	/**
+	 * Constructor for the gateway.
+	 */
+	public function __construct() {
 		$this->id                 = 'bacs';
 		$this->icon               = apply_filters('woocommerce_bacs_icon', '');
 		$this->has_fields         = false;
@@ -31,7 +31,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$this->init_form_fields();
 		$this->init_settings();
 
-        // Define user set variables
+		// Define user set variables
 		$this->title        = $this->get_option( 'title' );
 		$this->description  = $this->get_option( 'description' );
 		$this->instructions = $this->get_option( 'instructions', $this->description );
@@ -53,17 +53,17 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'save_account_details' ) );
-    	add_action( 'woocommerce_thankyou_bacs', array( $this, 'thankyou_page' ) );
+		add_action( 'woocommerce_thankyou_bacs', array( $this, 'thankyou_page' ) );
 
-    	// Customer Emails
-    	add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
-    }
+		// Customer Emails
+		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
+	}
 
-    /**
-     * Initialise Gateway Settings Form Fields
-     */
-    public function init_form_fields() {
-    	$this->form_fields = array(
+	/**
+	 * Initialise Gateway Settings Form Fields
+	 */
+	public function init_form_fields() {
+		$this->form_fields = array(
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
@@ -95,88 +95,88 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				'type'        => 'account_details'
 			),
 		);
-    }
+	}
 
-    /**
-     * generate_account_details_html function.
-     */
-    public function generate_account_details_html() {
-    	ob_start();
-	    ?>
-	    <tr valign="top">
-            <th scope="row" class="titledesc"><?php _e( 'Account Details', 'woocommerce' ); ?>:</th>
-            <td class="forminp" id="bacs_accounts">
-			    <table class="widefat wc_input_table sortable" cellspacing="0">
-		    		<thead>
-		    			<tr>
-		    				<th class="sort">&nbsp;</th>
-		    				<th><?php _e( 'Account Name', 'woocommerce' ); ?></th>
-			            	<th><?php _e( 'Account Number', 'woocommerce' ); ?></th>
-			            	<th><?php _e( 'Bank Name', 'woocommerce' ); ?></th>
-			            	<th><?php _e( 'Sort Code', 'woocommerce' ); ?></th>
-			            	<th><?php _e( 'IBAN', 'woocommerce' ); ?></th>
-			            	<th><?php _e( 'BIC / Swift', 'woocommerce' ); ?></th>
-		    			</tr>
-		    		</thead>
-		    		<tbody class="accounts">
-		            	<?php
-		            	$i = -1;
-		            	if ( $this->account_details ) {
-		            		foreach ( $this->account_details as $account ) {
-		                		$i++;
+	/**
+	 * generate_account_details_html function.
+	 */
+	public function generate_account_details_html() {
+		ob_start();
+		?>
+		<tr valign="top">
+			<th scope="row" class="titledesc"><?php _e( 'Account Details', 'woocommerce' ); ?>:</th>
+			<td class="forminp" id="bacs_accounts">
+				<table class="widefat wc_input_table sortable" cellspacing="0">
+					<thead>
+						<tr>
+							<th class="sort">&nbsp;</th>
+							<th><?php _e( 'Account Name', 'woocommerce' ); ?></th>
+							<th><?php _e( 'Account Number', 'woocommerce' ); ?></th>
+							<th><?php _e( 'Bank Name', 'woocommerce' ); ?></th>
+							<th><?php _e( 'Sort Code', 'woocommerce' ); ?></th>
+							<th><?php _e( 'IBAN', 'woocommerce' ); ?></th>
+							<th><?php _e( 'BIC / Swift', 'woocommerce' ); ?></th>
+						</tr>
+					</thead>
+					<tbody class="accounts">
+						<?php
+						$i = -1;
+						if ( $this->account_details ) {
+							foreach ( $this->account_details as $account ) {
+								$i++;
 
-		                		echo '<tr class="account">
-		                			<td class="sort"></td>
-		                			<td><input type="text" value="' . esc_attr( $account['account_name'] ) . '" name="bacs_account_name[' . $i . ']" /></td>
-		                			<td><input type="text" value="' . esc_attr( $account['account_number'] ) . '" name="bacs_account_number[' . $i . ']" /></td>
-		                			<td><input type="text" value="' . esc_attr( $account['bank_name'] ) . '" name="bacs_bank_name[' . $i . ']" /></td>
-		                			<td><input type="text" value="' . esc_attr( $account['sort_code'] ) . '" name="bacs_sort_code[' . $i . ']" /></td>
-		                			<td><input type="text" value="' . esc_attr( $account['iban'] ) . '" name="bacs_iban[' . $i . ']" /></td>
-		                			<td><input type="text" value="' . esc_attr( $account['bic'] ) . '" name="bacs_bic[' . $i . ']" /></td>
-			                    </tr>';
-		            		}
-		            	}
-		            	?>
-		        	</tbody>
-		    		<tfoot>
-		    			<tr>
-		    				<th colspan="7"><a href="#" class="add button"><?php _e( '+ Add Account', 'woocommerce' ); ?></a> <a href="#" class="remove_rows button"><?php _e( 'Remove selected account(s)', 'woocommerce' ); ?></a></th>
-		    			</tr>
-		    		</tfoot>
-		        </table>
-		       	<script type="text/javascript">
+								echo '<tr class="account">
+									<td class="sort"></td>
+									<td><input type="text" value="' . esc_attr( wp_unslash( $account['account_name'] ) ) . '" name="bacs_account_name[' . $i . ']" /></td>
+									<td><input type="text" value="' . esc_attr( $account['account_number'] ) . '" name="bacs_account_number[' . $i . ']" /></td>
+									<td><input type="text" value="' . esc_attr( wp_unslash( $account['bank_name'] ) ) . '" name="bacs_bank_name[' . $i . ']" /></td>
+									<td><input type="text" value="' . esc_attr( $account['sort_code'] ) . '" name="bacs_sort_code[' . $i . ']" /></td>
+									<td><input type="text" value="' . esc_attr( $account['iban'] ) . '" name="bacs_iban[' . $i . ']" /></td>
+									<td><input type="text" value="' . esc_attr( $account['bic'] ) . '" name="bacs_bic[' . $i . ']" /></td>
+								</tr>';
+							}
+						}
+						?>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th colspan="7"><a href="#" class="add button"><?php _e( '+ Add Account', 'woocommerce' ); ?></a> <a href="#" class="remove_rows button"><?php _e( 'Remove selected account(s)', 'woocommerce' ); ?></a></th>
+						</tr>
+					</tfoot>
+				</table>
+				<script type="text/javascript">
 					jQuery(function() {
 						jQuery('#bacs_accounts').on( 'click', 'a.add', function(){
 
 							var size = jQuery('#bacs_accounts tbody .account').size();
 
 							jQuery('<tr class="account">\
-		                			<td class="sort"></td>\
-		                			<td><input type="text" name="bacs_account_name[' + size + ']" /></td>\
-		                			<td><input type="text" name="bacs_account_number[' + size + ']" /></td>\
-		                			<td><input type="text" name="bacs_bank_name[' + size + ']" /></td>\
-		                			<td><input type="text" name="bacs_sort_code[' + size + ']" /></td>\
-		                			<td><input type="text" name="bacs_iban[' + size + ']" /></td>\
-		                			<td><input type="text" name="bacs_bic[' + size + ']" /></td>\
-			                    </tr>').appendTo('#bacs_accounts table tbody');
+									<td class="sort"></td>\
+									<td><input type="text" name="bacs_account_name[' + size + ']" /></td>\
+									<td><input type="text" name="bacs_account_number[' + size + ']" /></td>\
+									<td><input type="text" name="bacs_bank_name[' + size + ']" /></td>\
+									<td><input type="text" name="bacs_sort_code[' + size + ']" /></td>\
+									<td><input type="text" name="bacs_iban[' + size + ']" /></td>\
+									<td><input type="text" name="bacs_bic[' + size + ']" /></td>\
+								</tr>').appendTo('#bacs_accounts table tbody');
 
 							return false;
 						});
 					});
 				</script>
-            </td>
-	    </tr>
-        <?php
-        return ob_get_clean();
-    }
+			</td>
+		</tr>
+		<?php
+		return ob_get_clean();
+	}
 
-    /**
-     * Save account details table
-     */
-    public function save_account_details() {
-    	$accounts = array();
+	/**
+	 * Save account details table
+	 */
+	public function save_account_details() {
+		$accounts = array();
 
-    	if ( isset( $_POST['bacs_account_name'] ) ) {
+		if ( isset( $_POST['bacs_account_name'] ) ) {
 
 			$account_names   = array_map( 'wc_clean', $_POST['bacs_account_name'] );
 			$account_numbers = array_map( 'wc_clean', $_POST['bacs_account_number'] );
@@ -190,108 +190,108 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					continue;
 				}
 
-	    		$accounts[] = array(
-	    			'account_name'   => $account_names[ $i ],
+				$accounts[] = array(
+					'account_name'   => $account_names[ $i ],
 					'account_number' => $account_numbers[ $i ],
 					'bank_name'      => $bank_names[ $i ],
 					'sort_code'      => $sort_codes[ $i ],
 					'iban'           => $ibans[ $i ],
 					'bic'            => $bics[ $i ]
-	    		);
-	    	}
-    	}
+				);
+			}
+		}
 
-    	update_option( 'woocommerce_bacs_accounts', $accounts );
-    }
+		update_option( 'woocommerce_bacs_accounts', $accounts );
+	}
 
-    /**
-     * Output for the order received page.
-     */
-    public function thankyou_page( $order_id ) {
+	/**
+	 * Output for the order received page.
+	 */
+	public function thankyou_page( $order_id ) {
 		if ( $this->instructions ) {
-        	echo wpautop( wptexturize( wp_kses_post( $this->instructions ) ) );
-        }
-        $this->bank_details( $order_id );
-    }
+			echo wpautop( wptexturize( wp_kses_post( $this->instructions ) ) );
+		}
+		$this->bank_details( $order_id );
+	}
 
-    /**
-     * Add content to the WC emails.
-     *
-     * @access public
-     * @param WC_Order $order
-     * @param bool $sent_to_admin
-     * @param bool $plain_text
-     * @return void
-     */
-    public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-    	if ( ! $sent_to_admin && 'bacs' === $order->payment_method && $order->has_status( 'on-hold' ) ) {
+	/**
+	 * Add content to the WC emails.
+	 *
+	 * @access public
+	 * @param WC_Order $order
+	 * @param bool $sent_to_admin
+	 * @param bool $plain_text
+	 * @return void
+	 */
+	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
+		if ( ! $sent_to_admin && 'bacs' === $order->payment_method && $order->has_status( 'on-hold' ) ) {
 			if ( $this->instructions ) {
 				echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 			}
 			$this->bank_details( $order->id );
 		}
-    }
+	}
 
-    /**
-     * Get bank details and place into a list format
-     */
-    private function bank_details( $order_id = '' ) {
-    	if ( empty( $this->account_details ) ) {
-    		return;
-    	}
+	/**
+	 * Get bank details and place into a list format
+	 */
+	private function bank_details( $order_id = '' ) {
+		if ( empty( $this->account_details ) ) {
+			return;
+		}
 
-    	echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>' . PHP_EOL;
+		echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>' . PHP_EOL;
 
-    	$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details );
+		$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details );
 
-    	if ( ! empty( $bacs_accounts ) ) {
-	    	foreach ( $bacs_accounts as $bacs_account ) {
-	    		$bacs_account = (object) $bacs_account;
+		if ( ! empty( $bacs_accounts ) ) {
+			foreach ( $bacs_accounts as $bacs_account ) {
+				$bacs_account = (object) $bacs_account;
 
 				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
-					echo '<h3>' . implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) . '</h3>' . PHP_EOL;
+					echo '<h3>' . wp_unslash( implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) ) . '</h3>' . PHP_EOL;
 				}
 
-	    		echo '<ul class="order_details bacs_details">' . PHP_EOL;
+				echo '<ul class="order_details bacs_details">' . PHP_EOL;
 
-	    		// BACS account fields shown on the thanks page and in emails
+				// BACS account fields shown on the thanks page and in emails
 				$account_fields = apply_filters( 'woocommerce_bacs_account_fields', array(
 					'account_number'=> array(
 						'label' => __( 'Account Number', 'woocommerce' ),
 						'value' => $bacs_account->account_number
 					),
-					'sort_code'		=> array(
+					'sort_code'     => array(
 						'label' => __( 'Sort Code', 'woocommerce' ),
 						'value' => $bacs_account->sort_code
 					),
-					'iban'			=> array(
+					'iban'          => array(
 						'label' => __( 'IBAN', 'woocommerce' ),
 						'value' => $bacs_account->iban
 					),
-					'bic'			=> array(
+					'bic'           => array(
 						'label' => __( 'BIC', 'woocommerce' ),
 						'value' => $bacs_account->bic
 					)
 				), $order_id );
 
-	    		foreach ( $account_fields as $field_key => $field ) {
-				    if ( ! empty( $field['value'] ) ) {
-				    	echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>' . PHP_EOL;
-				    }
+				foreach ( $account_fields as $field_key => $field ) {
+					if ( ! empty( $field['value'] ) ) {
+						echo '<li class="' . esc_attr( $field_key ) . '">' . esc_attr( $field['label'] ) . ': <strong>' . wptexturize( $field['value'] ) . '</strong></li>' . PHP_EOL;
+					}
 				}
 
-	    		echo '</ul>';
-	    	}
-	    }
-    }
+				echo '</ul>';
+			}
+		}
+	}
 
-    /**
-     * Process the payment and return the result
-     *
-     * @param int $order_id
-     * @return array
-     */
-    public function process_payment( $order_id ) {
+	/**
+	 * Process the payment and return the result
+	 *
+	 * @param int $order_id
+	 * @return array
+	 */
+	public function process_payment( $order_id ) {
 
 		$order = wc_get_order( $order_id );
 
@@ -306,8 +306,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		// Return thankyou redirect
 		return array(
-			'result' 	=> 'success',
-			'redirect'	=> $this->get_return_url( $order )
+			'result'    => 'success',
+			'redirect'  => $this->get_return_url( $order )
 		);
-    }
+	}
 }
