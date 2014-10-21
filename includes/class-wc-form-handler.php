@@ -141,11 +141,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || ( 'save_account_details' !== $_POST[ 'action' ] ) || empty( $_POST['_wpnonce'] ) ) {
-			return;
-		}
-
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
+		if ( empty( $_POST[ 'action' ] ) || ( 'save_account_details' !== $_POST[ 'action' ] ) || empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
 			return;
 		}
 
