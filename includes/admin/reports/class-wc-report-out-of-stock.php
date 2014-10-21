@@ -43,14 +43,10 @@ class WC_Report_Out_Of_Stock extends WC_Report_Stock {
 			INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
 			INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
 			WHERE 1=1
-				AND posts.post_type IN ('product', 'product_variation')
-				AND posts.post_status = 'publish'
-				AND (
-					postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}' AND postmeta.meta_value != ''
-				)
-				AND (
-					( postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes' ) OR ( posts.post_type = 'product_variation' )
-				)
+			AND posts.post_type IN ( 'product', 'product_variation' )
+			AND posts.post_status = 'publish'
+			AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
+			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
 		";
 
 		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT posts.ID as id, posts.post_parent as parent {$query_from} GROUP BY posts.ID ORDER BY posts.post_title DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) );
