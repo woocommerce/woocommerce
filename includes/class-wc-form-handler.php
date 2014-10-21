@@ -729,9 +729,7 @@ class WC_Form_Handler {
 	 * Process the login form.
 	 */
 	public static function process_login() {
-		if ( ! empty( $_POST['login'] ) && ! empty( $_POST['_wpnonce'] ) ) {
-
-			wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-login' );
+		if ( ! empty( $_POST['login'] ) && ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-login' ) ) {
 
 			try {
 				$creds  = array();
