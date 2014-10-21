@@ -431,17 +431,17 @@
 				}
 
 				if ( variation.min_qty )
-					$single_variation_wrap.find( 'quantity input.qty' ).attr( 'min', variation.min_qty ).val( variation.min_qty );
+					$single_variation_wrap.find( '.quantity input.qty' ).attr( 'min', variation.min_qty ).val( variation.min_qty );
 				else
-					$single_variation_wrap.find( 'quantity input.qty' ).removeAttr( 'min' );
+					$single_variation_wrap.find( '.quantity input.qty' ).removeAttr( 'min' );
 
 				if ( variation.max_qty )
-					$single_variation_wrap.find( 'quantity input.qty' ).attr( 'max', variation.max_qty );
+					$single_variation_wrap.find( '.quantity input.qty' ).attr( 'max', variation.max_qty );
 				else
-					$single_variation_wrap.find( 'quantity input.qty' ).removeAttr( 'max' );
+					$single_variation_wrap.find( '.quantity input.qty' ).removeAttr( 'max' );
 
 				if ( variation.is_sold_individually === 'yes' ) {
-					$single_variation_wrap.find( 'quantity input.qty' ).val( '1' );
+					$single_variation_wrap.find( '.quantity input.qty' ).val( '1' );
 					$single_variation_wrap.find( '.quantity' ).hide();
 				}
 
