@@ -147,7 +147,9 @@ class WC_Form_Handler {
 			return;
 		}
 
-		wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-save_account_details_' . (int) get_current_user_id() );
+		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
+			return;
+		}
 
 		$update       = true;
 		$errors       = new WP_Error();
