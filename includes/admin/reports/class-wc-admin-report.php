@@ -56,7 +56,7 @@ class WC_Admin_Report {
 			'parent_order_status' => false
 		);
 
-		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', wp_parse_args( $args, $defaults ) );
+		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', wp_parse_args( $args, $default_args ) );
 
 		extract( $args );
 
