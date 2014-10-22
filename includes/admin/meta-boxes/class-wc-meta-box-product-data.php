@@ -1031,15 +1031,15 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		if ( isset( $_POST['_tax_status'] ) ) {
-			update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
+			update_post_meta( $post_id, '_tax_status', wc_clean( $_POST['_tax_status'] ) );
 		}
 
 		if ( isset( $_POST['_tax_class'] ) ) {
-			update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
+			update_post_meta( $post_id, '_tax_class', wc_clean( $_POST['_tax_class'] ) );
 		}
 
 		if ( isset( $_POST['_purchase_note'] ) ) {
-			update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
+			update_post_meta( $post_id, '_purchase_note', wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ) );
 		}
 
 		// Featured
@@ -1210,8 +1210,8 @@ class WC_Meta_Box_Product_Data {
 
 		} else {
 
-			$date_from = isset( $_POST['_sale_price_dates_from'] ) ? $_POST['_sale_price_dates_from'] : '';
-			$date_to   = isset( $_POST['_sale_price_dates_to'] ) ? $_POST['_sale_price_dates_to'] : '';
+			$date_from = isset( $_POST['_sale_price_dates_from'] ) ? wc_clean( $_POST['_sale_price_dates_from'] ) : '';
+			$date_to   = isset( $_POST['_sale_price_dates_to'] ) ? wc_clean( $_POST['_sale_price_dates_to'] ) : '';
 
 			// Dates
 			if ( $date_from ) {
@@ -1346,9 +1346,8 @@ class WC_Meta_Box_Product_Data {
 			$ids     = $_POST['upsell_ids'];
 
 			foreach ( $ids as $id ) {
-
 				if ( $id && $id > 0 ) {
-					$upsells[] = $id;
+					$upsells[] = absint( $id );
 				}
 			}
 
@@ -1365,7 +1364,7 @@ class WC_Meta_Box_Product_Data {
 
 			foreach ( $ids as $id ) {
 				if ( $id && $id > 0 ) {
-					$crosssells[] = $id;
+					$crosssells[] = absint( $id );
 				}
 			}
 
@@ -1422,11 +1421,11 @@ class WC_Meta_Box_Product_Data {
 		if ( 'external' == $product_type ) {
 
 			if ( isset( $_POST['_product_url'] ) ) {
-				update_post_meta( $post_id, '_product_url', esc_attr( $_POST['_product_url'] ) );
+				update_post_meta( $post_id, '_product_url', esc_url_raw( $_POST['_product_url'] ) );
 			}
 
 			if ( isset( $_POST['_button_text'] ) ) {
-				update_post_meta( $post_id, '_button_text', esc_attr( $_POST['_button_text'] ) );
+				update_post_meta( $post_id, '_button_text', wc_clean( $_POST['_button_text'] ) );
 			}
 		}
 
