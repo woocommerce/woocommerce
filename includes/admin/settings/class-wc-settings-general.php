@@ -178,22 +178,6 @@ class WC_Settings_General extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
 
-			array( 'title' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title', 'id' => 'script_styling_options' ),
-
-			array( 'type' => 'frontend_styles' ),
-
-			array(
-				'title'         => __( 'Scripts', 'woocommerce' ),
-				'desc'          => __( 'Enable Lightbox', 'woocommerce' ),
-				'id'            => 'woocommerce_enable_lightbox',
-				'default'       => 'yes',
-				'desc_tip'      => __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start'
-			),
-
-			array( 'type' => 'sectionend', 'id' => 'script_styling_options' ),
-
 		) );
 
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );

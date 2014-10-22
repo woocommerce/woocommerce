@@ -410,6 +410,20 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array( 'type' => 'sectionend', 'id' => 'image_options' ),
 
+				array( 'title' => __( 'Product Styles', 'woocommerce' ), 'type' => 'title', 'id' => 'product_styling_options' ),
+
+				array(
+					'title'         => __( 'Lightbox', 'woocommerce' ),
+					'desc'          => __( 'Enable Lightbox', 'woocommerce' ),
+					'id'            => 'woocommerce_enable_lightbox',
+					'default'       => 'yes',
+					'desc_tip'      => __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start'
+				),
+
+				array( 'type' => 'sectionend', 'id' => 'script_styling_options' ),
+
 				array( 'title' => __( 'Downloadable Products', 'woocommerce' ), 'type' => 'title', 'id' => 'digital_download_options' ),
 
 				array(
