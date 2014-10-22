@@ -74,8 +74,8 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
  */
 function wc_edit_address_i18n( $id, $flip = false ) {
 	$slugs = apply_filters( 'woocommerce_edit_address_slugs', array(
-		'billing'  => _x( 'billing', 'edit-address-slug', 'woocommerce' ),
-		'shipping' => _x( 'shipping', 'edit-address-slug', 'woocommerce' )
+		'billing'  => sanitize_title( _x( 'billing', 'edit-address-slug', 'woocommerce' ) ),
+		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) )
 	) );
 
 	if ( $flip ) {
