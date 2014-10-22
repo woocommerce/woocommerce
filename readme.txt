@@ -130,6 +130,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.2.8 - xx/xx/2014 =
+* Fix - Product attributes in Products API when edit or add some new attribute.
+
 = 2.2.7 - 22/10/2014 =
 * Fix - Fix refund date.
 * Fix - Fixed various notices.
