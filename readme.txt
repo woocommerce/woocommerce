@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Incorrect conversion of Unicode characters in order status names.
 * Fix - Edit Account fields order.
 * Fix - Shipping address values on checkout page.
+* Fix - Enforce slug format of translated edit-address-slugs.
 * Tweak - Allow for non-integer stock quantities.
 * Tweak - Update simplify commerce to use new $order->get_status().
 * Tweak - Only show integrations subnav when there are multiple integrations.
