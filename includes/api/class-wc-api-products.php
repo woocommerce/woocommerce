@@ -268,9 +268,14 @@ class WC_API_Products extends WC_API_Resource {
 
 		$data = apply_filters( 'woocommerce_api_edit_product_data', $data, $this );
 
-		// Product name.
+		// Product title.
 		if ( isset( $data['title'] ) ) {
 			wp_update_post( array( 'ID' => $id, 'post_title' => wc_clean( $data['title'] ) ) );
+		}
+
+		// Product name (slug).
+		if ( isset( $data['name'] ) ) {
+			wp_update_post( array( 'ID' => $id, 'post_name' => sanitize_title( $data['name'] ) ) );
 		}
 
 		// Product status.
