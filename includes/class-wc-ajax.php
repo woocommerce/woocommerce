@@ -338,7 +338,7 @@ class WC_AJAX {
 
 		delete_transient( 'wc_featured_products' );
 
-		wp_safe_redirect( remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) );
+		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=shop_order' ) );
 
 		die();
 	}
@@ -363,7 +363,7 @@ class WC_AJAX {
 		$order = wc_get_order( $order_id );
 		$order->update_status( 'completed' );
 
-		wp_safe_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
 
 		die();
 	}
@@ -388,7 +388,7 @@ class WC_AJAX {
 		$order = wc_get_order( $order_id );
 		$order->update_status( 'processing' );
 
-		wp_safe_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
 
 		die();
 	}
