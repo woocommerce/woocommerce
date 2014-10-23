@@ -290,7 +290,11 @@ jQuery( function( $ ) {
 						result = $.parseJSON( code );
 
 						if ( result.result === 'success' ) {
-							window.location = decodeURI( result.redirect );
+							if ( result.redirect.indexOf( "https://" ) != -1 || result.redirect.indexOf( "http://" ) != -1 ) {
+								window.location = result.redirect;
+							} else {
+								window.location = decodeURI( result.redirect );
+							}
 						} else if ( result.result === 'failure' ) {
 							throw 'Result failure';
 						} else {
