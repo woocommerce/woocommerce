@@ -129,6 +129,32 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Check if adding a product that is sold individually is corrected when adding multiple times
+	 *
+	 * @since 2.3
+	 */
+	public function test_add_to_cart_sold_individually() {
+		// Create dummy product
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Set sold_individually to yes
+		$product->sold_individually = 'yes';
+		update_post_meta( $product->id, '_sold_individually', 'yes' );
+
+		// Add the product twice to cart, should be corrected to 1. Methods returns boolean on failure, string on success.
+		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 2 ) );
+
+		// Check if the item is in the cart
+		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Clean up product
+		WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
 	 * Test the find_product_in_cart method
 	 *
 	 * @since 2.3
