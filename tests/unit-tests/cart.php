@@ -85,17 +85,19 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	/**
 	 * Test add to cart simple product
+	 *
+	 * @since 2.3
 	 */
 	public function test_add_to_cart_simple() {
 
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
 
-		// Add the product to the cart
-		// Methods returns boolean on failure, string on success.
+		// Add the product to the cart. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1 ) );
 
-		// @todo check if the product is actually added to cart
+		// Check if the item is in the cart
+		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
@@ -117,7 +119,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1, $variation['variation_id'], array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) ) );
 
-		// @todo check if the product is actually added to cart
+		// Check if the item is in the cart
+		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
@@ -241,6 +244,5 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Clean up product
 		WC_Helper_Product::delete_product( $product->id );
 	}
-
 
 }
