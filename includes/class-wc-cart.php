@@ -760,8 +760,9 @@ class WC_Cart {
 		public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 			$id_parts = array( $product_id );
 
-			if ( $variation_id && 0 != $variation_id )
+			if ( $variation_id && 0 != $variation_id ) {
 				$id_parts[] = $variation_id;
+			}
 
 			if ( is_array( $variation ) && ! empty( $variation ) ) {
 				$variation_key = '';
@@ -774,8 +775,12 @@ class WC_Cart {
 			if ( is_array( $cart_item_data ) && ! empty( $cart_item_data ) ) {
 				$cart_item_data_key = '';
 				foreach ( $cart_item_data as $key => $value ) {
-					if ( is_array( $value ) ) $value = http_build_query( $value );
-					$cart_item_data_key .= trim($key) . trim($value);
+
+					if ( is_array( $value ) ) {
+						$value = http_build_query( $value );
+					}
+					$cart_item_data_key .= trim( $key ) . trim( $value );
+
 				}
 				$id_parts[] = $cart_item_data_key;
 			}
