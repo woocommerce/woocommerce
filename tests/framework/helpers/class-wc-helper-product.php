@@ -45,6 +45,8 @@ class WC_Helper_Product {
 	/**
 	 * Create a dummy simple product
 	 *
+	 * @since 2.3
+	 *
 	 * @return WC_Product_Variable
 	 */
 	public static function create_variation_product() {
@@ -54,10 +56,11 @@ class WC_Helper_Product {
 		$attribute_data = self::create_attribute();
 
 		// Create the product
-		$product_id = wp_insert_post( array( 'post_title'  => 'Dummy Product',
-		                                     'post_type'   => 'product',
-		                                     'post_status' => 'publish'
-			) );
+		$product_id = wp_insert_post( array(
+			'post_title'  => 'Dummy Product',
+			'post_type'   => 'product',
+			'post_status' => 'publish'
+		) );
 
 		// Price related meta
 		update_post_meta( $product_id, '_price', '10' );
@@ -128,6 +131,8 @@ class WC_Helper_Product {
 	/**
 	 * Create a dummy attribute
 	 *
+	 * @since 2.3
+	 *
 	 * @return array
 	 */
 	public static function create_attribute() {
@@ -148,7 +153,7 @@ class WC_Helper_Product {
 		$return['attribute_id'] = $wpdb->insert_id;
 
 		// Register the taxonomy
-		$name = wc_attribute_taxonomy_name( $attribute_name );
+		$name  = wc_attribute_taxonomy_name( $attribute_name );
 		$label = $attribute_name;
 
 		// Add the term
@@ -183,6 +188,8 @@ class WC_Helper_Product {
 	 * Delete an attribute
 	 *
 	 * @param $attribute_id
+	 *
+	 * @since 2.3
 	 *
 	 * @todo clean up all term/taxonomy/etc data
 	 */
