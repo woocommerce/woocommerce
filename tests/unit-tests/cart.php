@@ -95,6 +95,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1 ) );
 
+		// @todo check if the product is actually added to cart
+
 		// Clean up the cart
 		WC()->cart->empty_cart();
 
@@ -112,9 +114,10 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$variations = $product->get_available_variations();
 		$variation  = array_shift( $variations );
 
-		// Add the product to the cart
-		// Methods returns boolean on failure, string on success.
+		// Add the product to the cart. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1, $variation['variation_id'], array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) ) );
+
+		// @todo check if the product is actually added to cart
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
