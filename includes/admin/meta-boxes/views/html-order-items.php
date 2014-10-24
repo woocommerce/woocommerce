@@ -278,7 +278,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 	<div class="clear"></div>
 	<div class="refund-actions">
 		<?php if ( false !== $payment_gateway && $payment_gateway->supports( 'refunds' ) ) : ?>
-		<button type="button" class="button button-primary do-api-refund"><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0, array( 'currency' => $order->get_order_currency() ) ) . '</span>', $order->payment_method_title ); ?></button>
+		<button type="button" class="button button-primary do-api-refund"><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0, array( 'currency' => $order->get_order_currency() ) ) . '</span>', ( ! empty( $payment_gateway->method_title ) ? $payment_gateway->method_title : $payment_gateway->get_title() ) ); ?></button>
 		<?php endif; ?>
 		<button type="button" class="button button-primary do-manual-refund"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
 		<button type="button" class="button cancel-action"><?php _e( 'Cancel', 'woocommerce' ); ?></button>

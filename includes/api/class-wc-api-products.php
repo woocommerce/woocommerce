@@ -268,9 +268,14 @@ class WC_API_Products extends WC_API_Resource {
 
 		$data = apply_filters( 'woocommerce_api_edit_product_data', $data, $this );
 
-		// Product name.
+		// Product title.
 		if ( isset( $data['title'] ) ) {
 			wp_update_post( array( 'ID' => $id, 'post_title' => wc_clean( $data['title'] ) ) );
+		}
+
+		// Product name (slug).
+		if ( isset( $data['name'] ) ) {
+			wp_update_post( array( 'ID' => $id, 'post_name' => sanitize_title( $data['name'] ) ) );
 		}
 
 		// Product status.
@@ -561,7 +566,7 @@ class WC_API_Products extends WC_API_Resource {
 			'download_limit'     => (int) $product->download_limit,
 			'download_expiry'    => (int) $product->download_expiry,
 			'download_type'      => $product->download_type,
-			'purchase_note'      => wpautop( do_shortcode( $product->purchase_note ) ),
+			'purchase_note'      => wpautop( do_shortcode( wp_kses_post( $product->purchase_note ) ) ),
 			'total_sales'        => metadata_exists( 'post', $product->id, 'total_sales' ) ? (int) get_post_meta( $product->id, 'total_sales', true ) : 0,
 			'variations'         => array(),
 			'parent'             => array(),
@@ -747,7 +752,7 @@ class WC_API_Products extends WC_API_Resource {
 							'name'         => $taxonomy,
 							'value'        => '',
 							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
-							'is_visible'   => ( isset( $attribute['position'] ) && $attribute['position'] ) ? 1 : 0,
+							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
 							'is_taxonomy'  => $is_taxonomy
 						);
@@ -768,7 +773,7 @@ class WC_API_Products extends WC_API_Resource {
 						'name'         => wc_clean( $attribute['name'] ),
 						'value'        => $values,
 						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
-						'is_visible'   => ( isset( $attribute['position'] ) && $attribute['position'] ) ? 1 : 0,
+						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
 						'is_taxonomy'  => $is_taxonomy
 					);
