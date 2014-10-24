@@ -335,7 +335,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					}
 
 					if ( $plugin_data['Network'] != false ) {
-						$network_string = ' &ndash; <stfong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
+						$network_string = ' &ndash; <strong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
 				}
 
