@@ -358,7 +358,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order_id = $order->id;
 
 		if ( 'yes' == $this->debug ) {
-			$this->log->add( 'paypal', 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
+			$this->log->add( 'paypal', 'Generating payment form for order #' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 		}
 
 		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
@@ -395,7 +395,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				'bn'            => 'WooThemes_Cart',
 
 				// Order key + ID
-				'invoice'       => $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
+				'invoice'       => $this->invoice_prefix . $order->get_order_number(),
 				'custom'        => serialize( array( $order_id, $order->order_key ) ),
 
 				// IPN
@@ -451,7 +451,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				}
 			}
 
-			$paypal_args['item_name_1'] = $this->paypal_item_name( sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names ) );
+			$paypal_args['item_name_1'] = $this->paypal_item_name( sprintf( __( 'Order #%s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names ) );
 			$paypal_args['quantity_1']  = '1';
 			$paypal_args['amount_1']    = number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ) + $order->get_order_discount(), 2, '.', '' );
 
@@ -861,7 +861,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						$order->update_status( 'refunded', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
 						$this->send_ipn_email_notification(
-							sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ),
+							sprintf( __( 'Payment for order #%s refunded/reversed', 'woocommerce' ), $order->get_order_number() ),
 							sprintf( __( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 						);
 					}
@@ -873,15 +873,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					$order->update_status( 'on-hold', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
 					$this->send_ipn_email_notification(
-						sprintf( __( 'Payment for order %s reversed', 'woocommerce' ), $order->get_order_number() ),
+						sprintf( __( 'Payment for order #%s reversed', 'woocommerce' ), $order->get_order_number() ),
 						sprintf(__( 'Order %s has been marked on-hold due to a reversal - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 					);
 
 				break;
 				case 'canceled_reversal' :
 					$this->send_ipn_email_notification(
-						sprintf( __( 'Reversal cancelled for order %s', 'woocommerce' ), $order->get_order_number() ),
-						sprintf( __( 'Order %s has had a reversal cancelled. Please check the status of payment and update the order status accordingly.', 'woocommerce' ), $order->get_order_number() )
+						sprintf( __( 'Reversal cancelled for order #%s', 'woocommerce' ), $order->get_order_number() ),
+						sprintf( __( 'Order #%s has had a reversal cancelled. Please check the status of payment and update the order status accordingly.', 'woocommerce' ), $order->get_order_number() )
 					);
 				break;
 				default :

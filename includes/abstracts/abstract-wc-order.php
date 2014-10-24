@@ -882,7 +882,7 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_order_number() {
-		return apply_filters( 'woocommerce_order_number', _x( '#', 'hash before order number', 'woocommerce' ) . $this->id, $this );
+		return apply_filters( 'woocommerce_order_number', $this->id, $this );
 	}
 
 	/**

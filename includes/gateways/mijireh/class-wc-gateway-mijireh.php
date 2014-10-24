@@ -180,7 +180,7 @@ class WC_Gateway_Mijireh extends WC_Payment_Gateway {
 				}
 			}
 
-			$mj_order->add_item( sprintf( __( 'Order %s' , 'woocommerce'), $wc_order->get_order_number() ) . " - " . implode( ', ', $item_names ), number_format( $wc_order->get_total() - round( $wc_order->get_total_shipping() + $wc_order->get_shipping_tax(), 2 ) + $wc_order->get_order_discount(), 2, '.', '' ), 1 );
+			$mj_order->add_item( sprintf( __( 'Order #%s' , 'woocommerce'), $wc_order->get_order_number() ) . " - " . implode( ', ', $item_names ), number_format( $wc_order->get_total() - round( $wc_order->get_total_shipping() + $wc_order->get_shipping_tax(), 2 ) + $wc_order->get_order_discount(), 2, '.', '' ), 1 );
 
 			if ( ( $wc_order->get_total_shipping() + $wc_order->get_shipping_tax() ) > 0 ) {
 				$mj_order->shipping 		= number_format( $wc_order->get_total_shipping() + $wc_order->get_shipping_tax(), 2, '.', '' );

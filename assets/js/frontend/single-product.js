@@ -26,7 +26,7 @@ jQuery( function( $ ) {
 			url		= window.location.href,
 			tabs	= $( this );
 
-		if ( hash.toLowerCase().indexOf( "comment-" ) >= 0 ) {
+		if ( hash.toLowerCase().indexOf( "comment-" ) >= 0 || hash == '#reviews' ) {
 			$('ul.tabs li.reviews_tab a', tabs ).click();
 
 		} else if ( url.indexOf( "comment-page-" ) > 0 || url.indexOf( "cpage=" ) > 0 ) {

@@ -37,7 +37,7 @@ if ( $order ) : ?>
 
 		<ul class="order_details">
 			<li class="order">
-				<?php _e( 'Order:', 'woocommerce' ); ?>
+				<?php _e( 'Order Number:', 'woocommerce' ); ?>
 				<strong><?php echo $order->get_order_number(); ?></strong>
 			</li>
 			<li class="date">
@@ -50,7 +50,7 @@ if ( $order ) : ?>
 			</li>
 			<?php if ( $order->payment_method_title ) : ?>
 			<li class="method">
-				<?php _e( 'Payment method:', 'woocommerce' ); ?>
+				<?php _e( 'Payment Method:', 'woocommerce' ); ?>
 				<strong><?php echo $order->payment_method_title; ?></strong>
 			</li>
 			<?php endif; ?>

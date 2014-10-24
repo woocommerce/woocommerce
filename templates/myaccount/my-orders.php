@@ -44,9 +44,9 @@ if ( $customer_orders ) : ?>
 				$item_count = $order->get_item_count();
 
 				?><tr class="order">
-					<td class="order-number" data-title="<?php _e( 'Order', 'woocommerce' ); ?>">
+					<td class="order-number" data-title="<?php _e( 'Order Number', 'woocommerce' ); ?>">
 						<a href="<?php echo $order->get_view_order_url(); ?>">
-							<?php echo $order->get_order_number(); ?>
+							#<?php echo $order->get_order_number(); ?>
 						</a>
 					</td>
 					<td class="order-date" data-title="<?php _e( 'Date', 'woocommerce' ); ?>">
