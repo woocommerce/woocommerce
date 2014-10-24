@@ -323,6 +323,72 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	}
 
-	
+	/**
+	 * Test get_total
+	 *
+	 * @since 2.3
+	 */
+	public function test_get_total() {
+
+		// Create dummy product
+		$product = WC_Helper_Product::create_simple_product();
+
+		// We need this to have the calculate_totals() method calculate totals
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		// Add product to cart
+		WC()->cart->add_to_cart( $product->id, 1 );
+
+		// Check
+		$this->assertEquals( apply_filters( 'woocommerce_cart_total', wc_price( WC()->cart->total ) ), WC()->cart->get_total() );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Clean up product
+		WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
+	 * Test get_total_ex_tax
+	 *
+	 * @since 2.3
+	 */
+	public function test_get_total_ex_tax() {
+
+		// Set calc taxes option
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Create dummy product
+		$product = WC_Helper_Product::create_simple_product();
+
+		// We need this to have the calculate_totals() method calculate totals
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		// Add product to cart
+		WC()->cart->add_to_cart( $product->id, 1 );
+
+		// Calc total
+		$total = WC()->cart->total - WC()->cart->tax_total - WC()->cart->shipping_tax_total;
+		if ( $total < 0 ) {
+			$total = 0;
+		}
+
+		// Check
+		$this->assertEquals( apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( $total ) ), WC()->cart->get_total_ex_tax() );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Clean up product
+		WC_Helper_Product::delete_product( $product->id );
+
+		// Restore option
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
 
 }
