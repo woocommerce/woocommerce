@@ -205,5 +205,39 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Test the set_quantity method
+	 *
+	 * @since 2.3
+	 */
+	public function test_set_quantity() {
+		// Create dummy product
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Add 1 product to cart
+		WC()->cart->add_to_cart( $product->id, 1 );
+
+		// Get cart id
+		$cart_id = WC()->cart->generate_cart_id( $product->id );
+
+		// Set quantity of product in cart to 2
+		$this->assertTrue( WC()->cart->set_quantity( $cart_id, 2 ) );
+
+		// Check if there are 2 items in cart now
+		$this->assertEquals( 2, WC()->cart->get_cart_contents_count() );
+
+		// Set quantity of product in cart to 0
+		$this->assertTrue( WC()->cart->set_quantity( $cart_id, 0 ) );
+
+		// Check if there are 0 items in cart now
+		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Clean up product
+		WC_Helper_Product::delete_product( $product->id );
+	}
+
 
 }
