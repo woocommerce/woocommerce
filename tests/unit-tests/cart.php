@@ -5,6 +5,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	/**
 	 * Helper method to get the checkout URL
 	 *
+	 * @since 2.3
 	 * @return string
 	 */
 	private function get_checkout_url() {
@@ -98,11 +99,13 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Clean up product
-		wp_delete_post( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
 	 * Test add to cart variable product
+	 *
+	 * @since 2.3
 	 */
 	public function test_add_to_cart_variable() {
 		$product    = WC_Helper_Product::create_variation_product();
