@@ -287,4 +287,42 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->id );
 	}
 
+	/**
+	 * Test check_cart_item_validity method
+	 *
+	 * @since 2.3
+	 */
+	public function test_check_cart_item_validity() {
+
+		// Create dummy product
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Add product to cart
+		WC()->cart->add_to_cart( $product->id, 1 );
+
+		// Check cart validity, should pass
+		$this->assertTrue( WC()->cart->check_cart_item_validity() );
+
+		// Trash product
+		wp_trash_post( $product->id );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Re-add item to cart
+		WC()->cart->add_to_cart( $product->id, 1 );
+
+		// Check cart validity, should fail
+		$this->assertIsWPError( WC()->cart->check_cart_item_validity() );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Clean up product
+		WC_Helper_Product::delete_product( $product->id );
+
+	}
+
+	
+
 }
