@@ -9,7 +9,7 @@ class WC_Helper_Product {
 		 */
 
 		// Delete the psot
-		wp_delete_post( $product_id );
+		wp_delete_post( $product_id, true );
 
 	}
 
