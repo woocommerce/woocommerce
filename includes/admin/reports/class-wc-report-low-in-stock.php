@@ -48,6 +48,7 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 			AND posts.post_status = 'publish'
 			AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
 			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
+			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$nostock}'
 			";
 
 		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT posts.ID as id, posts.post_parent as parent {$query_from} GROUP BY posts.ID ORDER BY posts.post_title DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) );
