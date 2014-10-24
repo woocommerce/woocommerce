@@ -57,7 +57,7 @@ function woocommerce_create_page( $slug, $option = '', $page_title = '', $page_c
  */
 function woocommerce_readfile_chunked( $file, $retbytes = true ) {
 	_deprecated_function( 'woocommerce_readfile_chunked', '2.1', 'WC_Download_Handler::readfile_chunked()' );
-	return WC_Download_Handler::readfile_chunked( $file, $retbytes );
+	return WC_Download_Handler::readfile_chunked( $file );
 }
 
 /**
