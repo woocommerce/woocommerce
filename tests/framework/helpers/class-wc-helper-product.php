@@ -2,18 +2,32 @@
 
 class WC_Helper_Product {
 
+	public static function delete_product( $product_id ) {
+
+		/**
+		 * @todo check for variations, attributes, etc.
+		 */
+
+		// Delete the psot
+		wp_delete_post( $product_id );
+
+	}
+
 	/**
 	 * Create simple product
+	 *
+	 * @since 2.3
 	 *
 	 * @return WC_Product_Simple
 	 */
 	public static function create_simple_product() {
 
 		// Create the product
-		$product = wp_insert_post( array( 'post_title'  => 'Dummy Product',
-		                                  'post_type'   => 'product',
-		                                  'post_status' => 'publish'
-			) );
+		$product = wp_insert_post( array(
+			'post_title'  => 'Dummy Product',
+			'post_type'   => 'product',
+			'post_status' => 'publish'
+		) );
 		update_post_meta( $product, '_price', '10' );
 		update_post_meta( $product, '_regular_price', '10' );
 		update_post_meta( $product, '_sale_price', '' );
