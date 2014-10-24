@@ -119,5 +119,34 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// @todo clean up the variable product
 	}
 
+	/**
+	 * Test the find_product_in_cart method
+	 *
+	 * @since 2.3
+	 */
+	public function test_find_product_in_cart() {
+
+		// Create dummy product
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Add product to cart
+		WC()->cart->add_to_cart( $product->id, 1 );
+
+		// Generate cart id
+		$cart_id = WC()->cart->generate_cart_id( $product->id );
+
+		// Get the product from the cart
+		$this->assertNotEquals( '', WC()->cart->find_product_in_cart( $cart_id ) );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Clean up product
+		WC_Helper_Product::delete_product( $product->id );
+
+	}
+
+
+
 
 }
