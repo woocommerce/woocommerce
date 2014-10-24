@@ -832,8 +832,13 @@ class WC_Cart {
 			// Get the product
 			$product_data   = wc_get_product( $variation_id ? $variation_id : $product_id );
 
-			if ( ! $product_data )
+			if ( ! $product_data ) {
 				return false;
+			}
+
+			if ( 'trash' == $product_data->post->post_status ) {
+				return false;
+			}
 
 			// Force quantity to 1 if sold individually
 			if ( $product_data->is_sold_individually() ) {
