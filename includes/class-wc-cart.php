@@ -336,10 +336,16 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function check_cart_items() {
+
+			// Result
+			$return = true;
+
+			// Check cart item validity
 			$result = $this->check_cart_item_validity();
 
 			if ( is_wp_error( $result ) ) {
 				wc_add_notice( $result->get_error_message(), 'error' );
+				$return = false;
 			}
 
 			// Check item stock
@@ -347,7 +353,11 @@ class WC_Cart {
 
 			if ( is_wp_error( $result ) ) {
 				wc_add_notice( $result->get_error_message(), 'error' );
+				$return = false;
 			}
+
+			return $return;
+
 		}
 
 		/**
