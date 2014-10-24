@@ -4,7 +4,7 @@ module.exports = function( grunt ) {
 
 	grunt.initConfig({
 
-		// setting folder templates
+		// Setting folder templates.
 		dirs: {
 			css: 'assets/css',
 			fonts: 'assets/fonts',
