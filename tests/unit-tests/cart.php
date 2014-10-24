@@ -133,11 +133,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		wp_trash_post( $product->id );
 
 		// Refetch product, to be sure
-		$product = wc_get_product($product->id);
+		$product = wc_get_product( $product->id );
 
 		// Add product to cart
-		$this->assertFalse(WC()->cart->add_to_cart( $product->id, 1 ));
-		
+		$this->assertFalse( WC()->cart->add_to_cart( $product->id, 1 ) );
+
 		// Clean up the cart
 		WC()->cart->empty_cart();
 
