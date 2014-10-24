@@ -149,7 +149,61 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Test the generate_cart_id method
+	 *
+	 * @since 2.3
+	 */
+	public function test_generate_cart_id() {
 
+		// Setup data
+		$product_id     = 1;
+		$variation_id   = 2;
+		$variation      = array( 'Testing' => 'yup' );
+		$cart_item_data = array(
+			'string_val' => 'The string I was talking about',
+			'array_val'  => array(
+				'this',
+				'is',
+				'an',
+				'array'
+			)
+		);
+
+		// Manually generate ID
+		$id_parts = array( $product_id );
+
+		if ( $variation_id && 0 != $variation_id ) {
+			$id_parts[] = $variation_id;
+		}
+
+		if ( is_array( $variation ) && ! empty( $variation ) ) {
+			$variation_key = '';
+			foreach ( $variation as $key => $value ) {
+				$variation_key .= trim( $key ) . trim( $value );
+			}
+			$id_parts[] = $variation_key;
+		}
+
+		if ( is_array( $cart_item_data ) && ! empty( $cart_item_data ) ) {
+			$cart_item_data_key = '';
+			foreach ( $cart_item_data as $key => $value ) {
+
+				if ( is_array( $value ) ) {
+					$value = http_build_query( $value );
+				}
+				$cart_item_data_key .= trim( $key ) . trim( $value );
+
+			}
+			$id_parts[] = $cart_item_data_key;
+		}
+
+		$manual_cart_id = md5( implode( '_', $id_parts ) );
+
+		// Assert
+		$this->assertEquals( $manual_cart_id, WC()->cart->generate_cart_id( $product_id, $variation_id, array( 'Testing' => 'yup' ), $cart_item_data ) );
+
+	}
 
 
 }
