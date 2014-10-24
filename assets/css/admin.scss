@@ -144,6 +144,7 @@ mark.amount {
 
 /* Status page */
 table.wc_status_table {
+	margin-bottom: 1em;
 	tr {
 		&:nth-child(2n) {
 			th, td {
@@ -153,12 +154,16 @@ table.wc_status_table {
 	}
 	th {
 		font-weight: bold;
+		padding: 9px;
 	}
 	td:first-child {
-		width: 20%;
+		width: 33%;
+	}
+	td.help {
+		width: 1em;
 	}
 	td {
-		padding: 6px 9px;
+		padding: 9px;
 		font-size: 1.1em;
 
 		mark {
@@ -176,6 +181,9 @@ table.wc_status_table {
 		ul {
 			margin: 0;
 		}
+	}
+	.help_tip {
+		cursor: help;
 	}
 }
 #debug-report {

@@ -19,37 +19,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 <br/>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
-
 	<thead>
 		<tr>
 			<th colspan="3"><?php _e( 'WordPress Environment', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
 	<tbody>
 		<tr>
 			<td><?php _e( 'Home URL', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The URL of your site\'s homepage.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The URL of your site\'s homepage.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo home_url(); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Site URL', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The root URL of your site.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The root URL of your site.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo site_url(); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WC Version', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce installed on your site.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce installed on your site.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo esc_html( WC()->version ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WC Database Version', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WC Logging', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extension can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extension can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php
 				if ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ) {
 					printf( '<mark class="yes">' . __( 'Log directory (%s) is writable.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
@@ -60,22 +58,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Version', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WordPress installed on your site.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WordPress installed on your site.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php bloginfo('version'); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Multisite Enabled', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php if ( is_multisite() ) echo __( 'Yes', 'woocommerce' ); else echo __( 'No', 'woocommerce' ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Active Plugins', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The number of active plugins on your website.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The number of active plugins on your website.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo count( (array) get_option( 'active_plugins' ) ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Memory Limit', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php
 				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
 
@@ -88,59 +86,59 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Debug Mode', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'WP Language', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The current language used by WordPress. Default = English', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The current language used by WordPress. Default = English', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo get_locale() ?></td>
 		</tr>
 	</tbody>
-
+</table>
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="3"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
 	<tbody>
 		<tr>
 			<td><?php _e( 'Web Server Info', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Information about the web server that is currently hosting your site.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Information about the web server that is currently hosting your site.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'PHP Version', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of PHP installed on your hosting server.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of PHP installed on your hosting server.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?></td>
 		</tr>
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
 				<td><?php _e('PHP Post Max Size', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be contained in one post.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+				<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be contained in one post.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
 			</tr>
 			<tr>
 				<td><?php _e('PHP Time Limit', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+				<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 				<td><?php echo ini_get('max_execution_time'); ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'PHP Max Input Vars', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+				<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 				<td><?php echo ini_get('max_input_vars'); ?></td>
 			</tr>
 			<tr>
 				<td><?php _e( 'SUHOSIN Installed', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself.
+				<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself.
 If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 				<td><?php echo extension_loaded( 'suhosin' ) ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' ); ?></td>
 			</tr>
 		<?php endif; ?>
 		<tr>
 			<td><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of MySQL installed on your hosting server.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of MySQL installed on your hosting server.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td>
 				<?php
 				/** @global wpdb $wpdb */
@@ -151,12 +149,12 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 		</tr>
 		<tr>
 			<td><?php _e( 'Max Upload Size', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo size_format( wp_max_upload_size() ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Default Timezone', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The default timezone for your server.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The default timezone for your server.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php
 				$default_timezone = date_default_timezone_get();
 				if ( 'UTC' !== $default_timezone ) {
@@ -257,13 +255,13 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			}
 		?>
 	</tbody>
-
+</table>
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="3"><?php _e( 'Locale', 'woocommerce' ); ?></th>
+			<th colspan="3"><?php _e( 'Server Locale', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
 	<tbody>
 		<?php
 			$locale = localeconv();
@@ -276,148 +274,143 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 			foreach ( $locale as $key => $val ) {
 				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) ) {
-					echo '<tr><td>' . $key . ':</td><td><a href="#" class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '">[?]</a></td><td>' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
+					echo '<tr><td>' . $key . ':</td><td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '">[?]</a></td><td>' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
 				}
 			}
 		?>
 	</tbody>
-
+</table>
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="3"><?php _e( 'Plugins', 'woocommerce' ); ?><?php echo ' <a href="#" class="help_tip" data-tip="' . esc_attr__( 'This section displays all of the WooCommerce related plugins installed on your site. From this area, you can see the current version numbers of your software and if any of your extensions have available updates.', 'woocommerce'  ) . '">[?]</a>'; ?></th>
+			<th colspan="3"><?php _e( 'Active Plugins', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
 	<tbody>
-		<tr>
-			<td><?php _e( 'Installed Plugins','woocommerce' ); ?>:</td>
-			<td>&nbsp;</td>
-			<td><?php
-				$active_plugins = (array) get_option( 'active_plugins', array() );
+		<?php
+		$active_plugins = (array) get_option( 'active_plugins', array() );
 
-				if ( is_multisite() )
-					$active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
+		if ( is_multisite() ) {
+			$active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
+		}
 
-				$wc_plugins = array();
+		foreach ( $active_plugins as $plugin ) {
 
-				foreach ( $active_plugins as $plugin ) {
+			$plugin_data    = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+			$dirname        = dirname( $plugin );
+			$version_string = '';
+			$network_string = '';
 
-					$plugin_data    = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-					$dirname        = dirname( $plugin );
-					$version_string = '';
-					$network_string = '';
+			if ( ! empty( $plugin_data['Name'] ) ) {
 
-					if ( ! empty( $plugin_data['Name'] ) ) {
+				// link the plugin name to the plugin url if available
+				$plugin_name = esc_html( $plugin_data['Name'] );
 
-						// link the plugin name to the plugin url if available
-						$plugin_name = $plugin_data['Name'];
-						if ( ! empty( $plugin_data['PluginURI'] ) ) {
-							$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '">' . $plugin_name . '</a>';
-						}
+				if ( ! empty( $plugin_data['PluginURI'] ) ) {
+					$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '">' . $plugin_name . '</a>';
+				}
 
-						if ( strstr( $dirname, 'woocommerce' ) ) {
+				if ( strstr( $dirname, 'woocommerce' ) ) {
 
-							if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
-								$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
-								$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
-								if ( ! empty( $cl_lines ) ) {
-									foreach ( $cl_lines as $line_num => $cl_line ) {
-										if ( preg_match( '/^[0-9]/', $cl_line ) ) {
+					if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
+						$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
+						$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
+						if ( ! empty( $cl_lines ) ) {
+							foreach ( $cl_lines as $line_num => $cl_line ) {
+								if ( preg_match( '/^[0-9]/', $cl_line ) ) {
 
-											$date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
-											$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
-											$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
-											$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
-											set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-											break;
-										}
-									}
+									$date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
+									$version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
+									$update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
+									$version_data = array( 'date' => $date , 'version' => $version , 'update' => $update , 'changelog' => $changelog );
+									set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
+									break;
 								}
 							}
-
-							if ( ! empty( $version_data['version'] ) && version_compare( $version_data['version'], $plugin_data['Version'], '>' ) ) {
-								$version_string = ' &ndash; <strong style="color:red;">' . $version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
-							}
-
-							if ( $plugin_data['Network'] != false ) {
-								$network_string = ' &ndash; <stfong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
-							}
 						}
+					}
 
-						$wc_plugins[] = $plugin_name . ' ' . __( 'by', 'woocommerce' ) . ' ' . $plugin_data['Author'] . ' ' . __( 'version', 'woocommerce' ) . ' ' . $plugin_data['Version'] . $version_string . $network_string;
+					if ( ! empty( $version_data['version'] ) && version_compare( $version_data['version'], $plugin_data['Version'], '>' ) ) {
+						$version_string = ' &ndash; <strong style="color:red;">' . esc_html( sprintf( _x( '%s is available', 'Version info', 'woocommerce' ), $version_data['version'] ) ) . '</strong>';
+					}
 
+					if ( $plugin_data['Network'] != false ) {
+						$network_string = ' &ndash; <stfong style="color:black;">' . __( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
 				}
 
-				if ( sizeof( $wc_plugins ) == 0 )
-					echo '-';
-				else
-					echo implode( ', <br/>', $wc_plugins );
-
-			?></td>
-		</tr>
+				?>
+				<tr>
+					<td><?php echo $plugin_name; ?></td>
+					<td class="help">&nbsp;</td>
+					<td><?php echo sprintf( _x( 'by %s', 'by author', 'woocommerce' ), $plugin_data['Author'] ) . ' &ndash; ' . esc_html( $plugin_data['Version'] ) . $version_string . $network_string; ?></td>
+				</tr>
+				<?php
+			}
+		}
+		?>
 	</tbody>
-
+</table>
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="3"><?php _e( 'Settings', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
 	<tbody>
 		<tr>
 			<td><?php _e( 'API Enabled', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have REST API enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have REST API enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo 'yes' === get_option( 'woocommerce_api_enabled' ) ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Taxes enabled', 'woocommerce' ) ?></td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have taxes enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have taxes enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo 'yes' === get_option( 'woocommerce_calc_taxes' ) ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Shipping enabled', 'woocommerce' ) ?></td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have shipping enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have shipping enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo 'yes' === get_option( 'woocommerce_calc_shipping' ) ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Currency', 'woocommerce' ) ?></td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'What currency prices are listed at in the catalog and which currency gateways will take payments in.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'What currency prices are listed at in the catalog and which currency gateways will take payments in.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo get_woocommerce_currency(); ?> (<?php echo get_woocommerce_currency_symbol() ?>)</td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Currency Position', 'woocommerce' ) ?></td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The position of the currency symbol.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The position of the currency symbol.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo get_option( 'woocommerce_currency_pos' ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Thousand Separator', 'woocommerce' ) ?></td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The thousand separator of displayed prices.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The thousand separator of displayed prices.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Decimal Separator', 'woocommerce' ) ?></td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The decimal separator of displayed prices.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The decimal separator of displayed prices.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES ); ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Number of Decimals', 'woocommerce' ) ?></td>
-			<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The number of decimal points shown in displayed prices.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The number of decimal points shown in displayed prices.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo get_option( 'woocommerce_price_num_decimals' ); ?></td>
 		</tr>
 	</tbody>
-
+</table>
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="3"><?php _e( 'WC Pages', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
 	<tbody>
 		<?php
 			$check_pages = array(
@@ -448,7 +441,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			foreach ( $check_pages as $page_name => $values ) {
 
 				echo '<tr><td>' . esc_html( $page_name ) . ':</td>';
-				echo '<td><a href="#" class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '">[?]</a></td><td>';
+				echo '<td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '">[?]</a></td><td>';
 
 				$error = false;
 
@@ -485,17 +478,17 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			}
 		?>
 	</tbody>
-
+</table>
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="3"><?php _e( 'WC Taxonomies', 'woocommerce' ); ?><?php echo ' <a href="#" class="help_tip" data-tip="' . esc_attr__( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) . '">[?]</a>'; ?></th>
 		</tr>
 	</thead>
-
 	<tbody>
 		<tr>
 			<td><?php _e( 'Product Types', 'woocommerce' ); ?>:</td>
-			<td>&nbsp;</td>
+			<td class="help">&nbsp;</td>
 			<td><?php
 				$display_terms = array();
 				$terms = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
@@ -505,13 +498,13 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			?></td>
 		</tr>
 	</tbody>
-
+</table>
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="3"><?php _e( 'Theme', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
-
 		<?php
 		$active_theme = wp_get_theme();
 		if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
@@ -544,86 +537,83 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 		endif;
 		?>
 	<tbody>
-			<tr>
-				<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The name of the current active theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php echo $active_theme->Name; ?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the current active theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php
-					echo $active_theme->Version;
+		<tr>
+			<td><?php _e( 'Theme Name', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The name of the current active theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td><?php echo $active_theme->Name; ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Theme Version', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the current active theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td><?php
+				echo $active_theme->Version;
 
-					if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) ) {
-						echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
-					}
-				?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The developer or plugin\'s URL.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php echo $active_theme->{'Author URI'}; ?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current theme is a child theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php
-					echo is_child_theme() ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark> &ndash; <mark class="error">' . sprintf( __( 'We recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'http://codex.wordpress.org/Child_Themes' ) . '</mark>';
-				?></td>
-			</tr>
-			<?php
-			if( is_child_theme() ) :
-				$parent_theme = wp_get_theme( $active_theme->Template );
-			?>
-			<tr>
-				<td><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The name of the parent theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php echo $parent_theme->Name; ?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the parent theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php echo  $parent_theme->Version; ?></td>
-			</tr>
-			<tr>
-				<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The developer or plugi\'s URL', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php echo $parent_theme->{'Author URI'}; ?></td>
-			</tr>
-			<?php endif ?>
-			<tr>
-				<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declare WooCommerce support.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php
-					if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
-						echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
-					} else {
-						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
-					}
-				?></td>
-			</tr>
-				<td><?php _e( 'Has custom.css', 'woocommerce' ); ?>:</td>
-				<td><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme has the file custom.css.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-				<td><?php
-					if ( file_exists( get_template_directory( $active_theme->template ) . '/custom.css' ) ) {
-						echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
-					} else {
-						echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>';
-					}
-				?></td>
-			</tr>
-			<tr>
-
-			</tr>
+				if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) ) {
+					echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
+				}
+			?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Theme Author URL', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The developer or plugin\'s URL.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td><?php echo $active_theme->{'Author URI'}; ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Is Child Theme', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current theme is a child theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td><?php
+				echo is_child_theme() ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark> &ndash; <mark class="error">' . sprintf( __( 'We recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'http://codex.wordpress.org/Child_Themes' ) . '</mark>';
+			?></td>
+		</tr>
+		<?php
+		if( is_child_theme() ) :
+			$parent_theme = wp_get_theme( $active_theme->Template );
+		?>
+		<tr>
+			<td><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The name of the parent theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td><?php echo $parent_theme->Name; ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the parent theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td><?php echo  $parent_theme->Version; ?></td>
+		</tr>
+		<tr>
+			<td><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The developer or plugi\'s URL', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td><?php echo $parent_theme->{'Author URI'}; ?></td>
+		</tr>
+		<?php endif ?>
+		<tr>
+			<td><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declare WooCommerce support.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td><?php
+				if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
+					echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
+				} else {
+					echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
+				}
+			?></td>
+		</tr>
+			<td><?php _e( 'Has custom.css', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme has the file custom.css.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td><?php
+				if ( file_exists( get_template_directory( $active_theme->template ) . '/custom.css' ) ) {
+					echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>';
+				} else {
+					echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>';
+				}
+			?></td>
+		</tr>
 	</tbody>
-
+</table>
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="3"><?php _e( 'Templates', 'woocommerce' ); ?><?php echo ' <a href="#" class="help_tip" data-tip="' . esc_attr__( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce'  ) . '">[?]</a>'; ?></th>
 		</tr>
 	</thead>
-
 	<tbody>
 		<?php
 
@@ -671,7 +661,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					?>
 					<tr>
 						<td><?php _e( 'Template Overrides', 'woocommerce' ); ?> (<?php echo $plugin_name; ?>):</td>
-						<td>&nbsp;</td>
+						<td class="help">&nbsp;</td>
 						<td><?php echo implode( ', <br/>', $found_plugin_files ); ?></td>
 					</tr>
 					<?php
@@ -680,7 +670,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				?>
 				<tr>
 					<td><?php _e( 'Template Overrides', 'woocommerce' ); ?>:</td>
-					<td>&nbsp;</td>
+					<td class="help">&nbsp;</td>
 					<td><?php _e( 'No overrides present in theme.', 'woocommerce' ); ?></td>
 				</tr>
 				<?php
@@ -690,14 +680,13 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				?>
 				<tr>
 					<td>&nbsp;</td>
-					<td>&nbsp;</td>
+					<td class="help">&nbsp;</td>
 					<td><a href="http://speakinginbytes.com/2014/02/woocommerce-2-1-outdated-templates/" target="_blank"><?php _e( 'Learn how to update outdated templates', 'woocommerce' ) ?></a></td>
 				</tr>
 				<?php
 			}
 		?>
 	</tbody>
-
 </table>
 
 <script type="text/javascript">
@@ -759,7 +748,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 						the_value = temp_line;
 					}
 
-					report = report +''+ the_name + the_value + "\n";
+					report = report + '' + the_name + ' ' + the_value + "\n";
 				});
 
 			}
