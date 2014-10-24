@@ -72,7 +72,14 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Test test_get_cart_url method
+	 *
+	 * @since 2.3
+	 */
 	public function test_get_cart_url() {
+		$cart_page_id = wc_get_page_id( 'cart' );
+		$this->assertEquals( apply_filters( 'woocommerce_get_cart_url', $cart_page_id ? get_permalink( $cart_page_id ) : '' ), WC()->cart->get_cart_url() );
 	}
 
 	/**
