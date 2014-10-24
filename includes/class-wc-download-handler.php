@@ -321,51 +321,33 @@ class WC_Download_Handler {
 
 	/**
 	 * readfile_chunked
+	 *
 	 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/
-	 * @param    string $file
-	 * @param    bool   $retbytes return bytes of file
-	 * @return bool|int
-	 * @todo Meaning of the return value? Last return is status of fclose?
+	 *
+	 * @param   string $file
+	 * @return 	bool Success or fail
 	 */
-	public static function readfile_chunked( $file, $retbytes = true ) {
+	public static function readfile_chunked( $file ) {
 		$chunksize = 1 * ( 1024 * 1024 );
-		$buffer = '';
-		$cnt = 0;
 
-		if ( file_exists( $file ) ) {
-			$handle = fopen( $file, 'r' );
-			if ( $handle === FALSE ) {
-				return FALSE;
+		if ( file_exists( $file ) || ( version_compare( PHP_VERSION, '5.4.0', '<' ) && ini_get( 'safe_mode' ) ) ) {
+			if ( ( $handle = @fopen( $file, 'r' ) ) === false ) {
+				return false;
 			}
-		} elseif ( version_compare( PHP_VERSION, '5.4.0', '<' ) && ini_get( 'safe_mode' ) ) {
-			$handle = @fopen( $file, 'r' );
-			if ( $handle === FALSE ) {
-				return FALSE;
+
+			while ( ! feof( $handle ) ) {
+				$buffer = fread( $handle, $chunksize );
+				echo $buffer;
+				if ( ob_get_length() ) {
+					ob_flush();
+					flush();
+				}
 			}
-		} else {
-			return FALSE;
+
+			return fclose( $handle );
 		}
 
-		while ( ! feof( $handle ) ) {
-			$buffer = fread( $handle, $chunksize );
-			echo $buffer;
-			if ( ob_get_length() ) {
-				ob_flush();
-				flush();
-			}
-
-			if ( $retbytes ) {
-				$cnt += strlen( $buffer );
-			}
-		}
-
-		$status = fclose( $handle );
-
-		if ( $retbytes && $status ) {
-			return $cnt;
-		}
-
-		return $status;
+		return false;
 	}
 }
 
