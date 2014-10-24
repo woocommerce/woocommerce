@@ -928,6 +928,8 @@ class WC_Cart {
 		 * @param string	cart_item_key	contains the id of the cart item
 		 * @param string	quantity		contains the quantity of the item
 		 * @param boolean 	$refresh_totals	whether or not to calculate totals after setting the new qty
+		 *
+		 * @return bool
 		 */
 		public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
 			if ( $quantity == 0 || $quantity < 0 ) {
@@ -941,6 +943,8 @@ class WC_Cart {
 			if ( $refresh_totals ) {
 				$this->calculate_totals();
 			}
+
+			return true;
 		}
 
 	/*-----------------------------------------------------------------------------------*/
