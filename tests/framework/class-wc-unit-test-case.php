@@ -72,6 +72,16 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Asserts thing is WP_Error
+	 *
+	 * @param $actual
+	 * @param string $message
+	 */
+	public function assertIsWPError( $actual, $message = '' ) {
+		$this->assertInstanceOf( 'WP_Error', $actual, $message );
+	}
+
+	/**
 	 * Backport assertNotFalse to PHPUnit 3.6.12 which only runs in PHP 5.2
 	 *
 	 * @since 2.2
