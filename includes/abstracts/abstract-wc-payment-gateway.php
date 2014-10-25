@@ -276,11 +276,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 				<input id="' . esc_attr( $this->id ) . '-card-number" class="input-text wc-credit-card-form-card-number" type="text" maxlength="20" autocomplete="off" placeholder="•••• •••• •••• ••••" name="' . ( $args['fields_have_names'] ? $this->id . '-card-number' : '' ) . '" />
 			</p>',
 			'card-expiry-field' => '<p class="form-row form-row-first">
-				<label for="' . esc_attr( $this->id ) . '-card-expiry">' . __( 'Expiry (MM/YY)', 'woocommerce' ) . ' <span class="required">*</span></label>
+				<label for="' . esc_attr( $this->id ) . '-card-expiry">' . __( 'Expiry (MM/YY)', 'woocommerce' ) . ' <span class="tips" data-tip="' . __( 'Enter the credit card expiration date stated on your card.', 'woocommerce' ) . '">[?]</span> <span class="required">*</span></label>
 				<input id="' . esc_attr( $this->id ) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry" type="text" autocomplete="off" placeholder="' . __( 'MM / YY', 'woocommerce' ) . '" name="' . ( $args['fields_have_names'] ? $this->id . '-card-expiry' : '' ) . '" />
 			</p>',
 			'card-cvc-field' => '<p class="form-row form-row-last">
-				<label for="' . esc_attr( $this->id ) . '-card-cvc">' . __( 'Card Code', 'woocommerce' ) . ' <span class="required">*</span></label>
+				<label for="' . esc_attr( $this->id ) . '-card-cvc">' . __( 'Card Code', 'woocommerce' ) . ' <span class="tips" data-tip="' . __( 'Enter the 3 digit security code from the back of the card.  For AMEX, it is the 4 digit in the front.', 'woocommerce' ) . '">[?]</span> <span class="required">*</span></label>
 				<input id="' . esc_attr( $this->id ) . '-card-cvc" class="input-text wc-credit-card-form-card-cvc" type="text" autocomplete="off" placeholder="' . __( 'CVC', 'woocommerce' ) . '" name="' . ( $args['fields_have_names'] ? $this->id . '-card-cvc' : '' ) . '" />
 			</p>'
 		);
