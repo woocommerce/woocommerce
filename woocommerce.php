@@ -453,13 +453,27 @@ final class WooCommerce {
 			define( 'WC_TEMPLATE_PATH', $this->template_path() );
 		}
 
-		// Post thumbnail support
+		$this->add_thumbnail_support();
+		$this->add_image_sizes();
+		$this->fix_server_vars();
+	}
+
+	/**
+	 * Ensure post thumbnail support is turned on
+	 */
+	private function add_thumbnail_support() {
 		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
 			add_theme_support( 'post-thumbnails' );
 		}
 		add_post_type_support( 'product', 'thumbnail' );
+	}
 
-		// Add image sizes
+	/**
+	 * Add WC Image sizes to WP
+	 *
+	 * @since 2.3
+	 */
+	private function add_image_sizes() {
 		$shop_thumbnail = wc_get_image_size( 'shop_thumbnail' );
 		$shop_catalog	= wc_get_image_size( 'shop_catalog' );
 		$shop_single	= wc_get_image_size( 'shop_single' );
@@ -467,16 +481,16 @@ final class WooCommerce {
 		add_image_size( 'shop_thumbnail', $shop_thumbnail['width'], $shop_thumbnail['height'], $shop_thumbnail['crop'] );
 		add_image_size( 'shop_catalog', $shop_catalog['width'], $shop_catalog['height'], $shop_catalog['crop'] );
 		add_image_size( 'shop_single', $shop_single['width'], $shop_single['height'], $shop_single['crop'] );
+	}
 
-		// IIS
-		if ( ! isset($_SERVER['REQUEST_URI'] ) ) {
-			$_SERVER['REQUEST_URI'] = substr( $_SERVER['PHP_SELF'], 1 );
-
-			if ( isset( $_SERVER['QUERY_STRING'] ) ) {
-				$_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
-			}
-		}
-
+	/**
+	 * Fix `$_SERVER` variables for various setups.
+	 *
+	 * Note: Removed IIS handling due to wp_fix_server_vars()
+	 *
+	 * @since 2.3
+	 */
+	private function fix_server_vars() {
 		// NGINX Proxy
 		if ( ! isset( $_SERVER['REMOTE_ADDR'] ) && isset( $_SERVER['HTTP_REMOTE_ADDR'] ) ) {
 			$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_REMOTE_ADDR'];
