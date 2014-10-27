@@ -128,11 +128,13 @@ class WC_Download_Handler {
 	 */
 	private static function check_download_login_required( $download_data ) {
 		if ( $download_data->user_id && 'yes' === get_option( 'woocommerce_downloads_require_login' ) ) {
-			if ( ! is_user_logged_in() && wc_get_page_id( 'myaccount' ) ) {
-				wp_safe_redirect( add_query_arg( 'wc_error', urlencode( __( 'You must be logged in to download files.', 'woocommerce' ) ), get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
-				exit;
-			} elseif ( ! is_user_logged_in() ) {
-				self::download_error( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), 403 );
+			if ( ! is_user_logged_in() ) {
+				if ( wc_get_page_id( 'myaccount' ) ) {
+					wp_safe_redirect( add_query_arg( 'wc_error', urlencode( __( 'You must be logged in to download files.', 'woocommerce' ) ), get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
+					exit;
+				} else {
+					self::download_error( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), 403 );
+				}
 			} elseif ( ! current_user_can( 'download_file', $download_data ) ) {
 				self::download_error( __( 'This is not your download link.', 'woocommerce' ), '', 403 );
 			}
@@ -156,7 +158,7 @@ class WC_Download_Handler {
 			array(
 				'permission_id' => absint( $download_data->permission_id ),
 			),
-			array( '%d' ),
+			array( '%d', '%s' ),
 			array( '%d' )
 		);
 	}
@@ -203,43 +205,32 @@ class WC_Download_Handler {
 	 * @return array
 	 */
 	public static function parse_file_path( $file_path ) {
-		$remote_file      = true;
+		$wp_uploads     = wp_upload_dir();
+		$wp_uploads_dir = $wp_uploads['basedir'];
+		$wp_uploads_url = $wp_uploads['baseurl'];
+
+		// Replace uploads dir, site url etc with absolute counterparts if we can
+		$replacements = array(
+			$wp_uploads_url                  => $wp_uploads_dir,
+			network_site_url( '/', 'https' ) => ABSPATH,
+			network_site_url( '/', 'http' )  => ABSPATH,
+			site_url( '/', 'https' )         => ABSPATH,
+			site_url( '/', 'http' )          => ABSPATH
+		);
+
+		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );
 		$parsed_file_path = parse_url( $file_path );
+		$remote_file      = true;
 
-		$wp_uploads       = wp_upload_dir();
-		$wp_uploads_dir   = $wp_uploads['basedir'];
-		$wp_uploads_url   = $wp_uploads['baseurl'];
-
-		if ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ) ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
-
-			/// This is an absolute path
-			$remote_file  = false;
-
-		} elseif ( strpos( $file_path, $wp_uploads_url ) !== false ) {
-
-			// This is a local file given by URL so we need to figure out the path
-			$remote_file  = false;
-			$file_path    = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
-
-		} elseif ( is_multisite() && ( strpos( $file_path, network_site_url( '/', 'http' ) ) !== false || strpos( $file_path, network_site_url( '/', 'https' ) ) !== false ) ) {
-
-			// This is a local file outside of wp-content so figure out the path
-			$remote_file = false;
-			// Try to replace network url and upload URL
-            $file_path   = str_replace( array( network_site_url( '/', 'https' ), network_site_url( '/', 'http' ) ), ABSPATH, $file_path );
-            $file_path   = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
-
-		} elseif ( strpos( $file_path, site_url( '/', 'http' ) ) !== false || strpos( $file_path, site_url( '/', 'https' ) ) !== false ) {
-
-			// This is a local file outside of wp-content so figure out the path
-			$remote_file = false;
-			$file_path   = str_replace( array( site_url( '/', 'https' ), site_url( '/', 'http' ) ), ABSPATH, $file_path );
-
-		} elseif ( file_exists( ABSPATH . $file_path ) ) {
-
-			// Path needs an abspath to work
+		// See if path needs an abspath prepended to work
+		if ( file_exists( ABSPATH . $file_path ) ) {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
+
+		// Check if we have an absolute path
+		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ) ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
+			$remote_file = false;
+			$file_path   = $parsed_file_path['path'];
 		}
 
 		return array(
@@ -258,24 +249,17 @@ class WC_Download_Handler {
 
 		extract( $parsed_file_path );
 
-		// Path fix - kudos to Jason Judge
-		if ( getcwd() ) {
-			$xsendfile_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`' , '', $file_path ), '/' );
-		}
-
 		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules() ) ) {
 			self::download_headers( $file_path, $filename );
-			header( "Content-Disposition: attachment; filename=\"" . $filename . "\";" );
-			header( "X-Sendfile: $xsendfile_path" );
+			header( "X-Sendfile: $file_path" );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'lighttpd' ) ) {
 			self::download_headers( $file_path, $filename );
-			header( "Content-Disposition: attachment; filename=\"" . $filename . "\";" );
-			header( "X-Lighttpd-Sendfile: $xsendfile_path" );
+			header( "X-Lighttpd-Sendfile: $file_path" );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'nginx' ) || stristr( getenv( 'SERVER_SOFTWARE' ), 'cherokee' ) ) {
 			self::download_headers( $file_path, $filename );
-			header( "Content-Disposition: attachment; filename=\"" . $filename . "\";" );
+			$xsendfile_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`', '', $file_path ), '/' );
 			header( "X-Accel-Redirect: /$xsendfile_path" );
 			exit;
 		}
@@ -423,7 +407,7 @@ class WC_Download_Handler {
 	 * @param array $headers
 	 * @return array
 	 */
-	public function ie_nocache_headers_fix( $headers ) {
+	public static function ie_nocache_headers_fix( $headers ) {
 		if ( is_ssl() && ! empty( $GLOBALS['is_IE'] ) ) {
 			$headers['Cache-Control'] = 'private';
 			unset( $headers['Pragma'] );
