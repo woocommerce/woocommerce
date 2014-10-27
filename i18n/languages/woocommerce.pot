@@ -2210,6 +2210,10 @@ msgid "Tamil Nadu"
 msgstr ""
 
 #: i18n/states/IN.php:37
+msgid "Telangana"
+msgstr ""
+
+#: i18n/states/IN.php:37
 msgid "Tripura"
 msgstr ""
 
