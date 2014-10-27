@@ -92,25 +92,56 @@ class WC_Download_Handler {
 	 * @param  object $download_data
 	 */
 	public static function check_current_user_can_download( $download_data ) {
-		try {
-			if ( $download_data->order_id && ( $order = wc_get_order( $download_data->order_id ) ) && ! $order->is_download_permitted() ) {
-				throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
-			} elseif ( '0' == $download_data->downloads_remaining  ) {
-				throw new Exception( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ) );
-			} elseif ( $download_data->access_expires > 0 && strtotime( $download_data->access_expires ) < current_time( 'timestamp' ) ) {
-				throw new Exception( __( 'Sorry, this download has expired', 'woocommerce' ) );
-			} elseif ( $download_data->user_id && get_option( 'woocommerce_downloads_require_login' ) === 'yes' ) {
-				if ( ! is_user_logged_in() && wc_get_page_id( 'myaccount' ) ) {
-					wp_safe_redirect( add_query_arg( 'wc_error', urlencode( __( 'You must be logged in to download files.', 'woocommerce' ) ), get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
-					exit;
-				} elseif ( ! is_user_logged_in() ) {
-					self::download_error( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), 403 );
-				} elseif ( ! current_user_can( 'download_file', $download_data ) ) {
-					throw new Exception( __( 'This is not your download link.', 'woocommerce' ) );
-				}
-			}
-		} catch ( Exception $e ) {
+		self::check_order_is_valid( $download_data );
+		self::check_downloads_remaining( $download_data );
+		self::check_download_expiry( $download_data );
+		self::check_download_login_required( $download_data );
+	}
+
+	/**
+	 * Check if an order is valid for downloading from
+	 * @param  array $download_data
+	 */
+	public static function check_order_is_valid( $download_data ) {
+		if ( $download_data->order_id && ( $order = wc_get_order( $download_data->order_id ) ) && ! $order->is_download_permitted() ) {
 			self::download_error( __( 'Invalid order.', 'woocommerce' ), '', 403 );
+		}
+	}
+
+	/**
+	 * Check if there are downloads remaining
+	 * @param  array $download_data
+	 */
+	public static function check_downloads_remaining( $download_data ) {
+		if ( '0' == $download_data->downloads_remaining  ) {
+			self::download_error( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ), '', 403 );
+		}
+	}
+
+	/**
+	 * Check if the download has expired
+	 * @param  array $download_data
+	 */
+	public static function check_download_expiry( $download_data ) {
+		if ( $download_data->access_expires > 0 && strtotime( $download_data->access_expires ) < current_time( 'timestamp' ) ) {
+			self::download_error( __( 'Sorry, this download has expired', 'woocommerce' ), '', 403 );
+		}
+	}
+
+	/**
+	 * Check if a download requires the user to login first
+	 * @param  array $download_data
+	 */
+	public static function check_download_login_required( $download_data ) {
+		if ( $download_data->user_id && 'yes' === get_option( 'woocommerce_downloads_require_login' ) ) {
+			if ( ! is_user_logged_in() && wc_get_page_id( 'myaccount' ) ) {
+				wp_safe_redirect( add_query_arg( 'wc_error', urlencode( __( 'You must be logged in to download files.', 'woocommerce' ) ), get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
+				exit;
+			} elseif ( ! is_user_logged_in() ) {
+				self::download_error( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), 403 );
+			} elseif ( ! current_user_can( 'download_file', $download_data ) ) {
+				self::download_error( __( 'This is not your download link.', 'woocommerce' ), '', 403 );
+			}
 		}
 	}
 
