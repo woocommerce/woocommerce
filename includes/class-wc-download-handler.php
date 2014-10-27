@@ -21,7 +21,9 @@ class WC_Download_Handler {
 	 * Hook in methods
 	 */
 	public static function init() {
-		add_action( 'init', array( __CLASS__, 'download_product' ) );
+		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
+			add_action( 'init', array( __CLASS__, 'download_product' ) );
+		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
 		add_action( 'woocommerce_download_file_xsendfile', array( __CLASS__, 'download_file_xsendfile' ), 10, 2 );
 		add_action( 'woocommerce_download_file_force', array( __CLASS__, 'download_file_force' ), 10, 2 );
@@ -31,39 +33,25 @@ class WC_Download_Handler {
 	 * Check if we need to download a file and check validity
 	 */
 	public static function download_product() {
-		if ( ! isset( $_GET['download_file'] ) || ! isset( $_GET['order'] ) || ! isset( $_GET['email'] ) ) {
-			return;
-		}
-
-		$product_id  = absint( $_GET['download_file'] );
-		$_product    = wc_get_product( $product_id );
-		$order_key   = wc_clean( $_GET['order'] );
-		$email       = sanitize_email( str_replace( ' ', '+', $_GET['email'] ) );
-		$download_id = wc_clean( isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '' );
-
-		if ( ! $_product || ! $_product->exists() ) {
-			self::download_error( __( 'Product no longer exists.', 'woocommerce' ), '', 403 );
-		}
-
-		if ( ! is_email( $email ) ) {
-			self::download_error( __( 'Invalid email address.', 'woocommerce' ), '', 403 );
-		}
-
+		$product_id    = absint( $_GET['download_file'] );
+		$_product      = wc_get_product( $product_id );
 		$download_data = self::get_download_data( array(
 			'product_id'  => $product_id,
-			'order_key'   => $order_key,
-			'email'       => $email,
-			'download_id' => $download_id
+			'order_key'   => wc_clean( $_GET['order'] ),
+			'email'       => sanitize_email( str_replace( ' ', '+', $_GET['email'] ) ),
+			'download_id' => wc_clean( isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '' )
 		) );
 
-		if ( ! $download_data ) {
-			self::download_error( __( 'Invalid download.', 'woocommerce' ) );
-		}
+		if ( $_product && $download_data ) {
+			self::check_current_user_can_download( $download_data );
 
-		self::check_current_user_can_download( $download_data );
-		self::count_download( $download_data );
-		do_action( 'woocommerce_download_product', $email, $order_key, $product_id, $download_data->user_id, $download_data->download_id, $download_data->order_id );
-		self::download( $_product->get_file_download_path( $download_id ), $product_id );
+			do_action( 'woocommerce_download_product', $download_data->user_email, $download_data->order_key, $download_data->product_id, $download_data->user_id, $download_data->download_id, $download_data->order_id );
+
+			self::count_download( $download_data );
+			self::download( $_product->get_file_download_path( $download_data->download_id ), $download_data->product_id );
+		} else {
+			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+		}
 	}
 
 	/**
@@ -227,28 +215,25 @@ class WC_Download_Handler {
 			/// This is an absolute path
 			$remote_file  = false;
 
-		} elseif( strpos( $file_path, $wp_uploads_url ) !== false ) {
+		} elseif ( strpos( $file_path, $wp_uploads_url ) !== false ) {
 
 			// This is a local file given by URL so we need to figure out the path
 			$remote_file  = false;
 			$file_path    = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
 
-		} elseif( is_multisite() && ( strpos( $file_path, network_site_url( '/', 'http' ) ) !== false || strpos( $file_path, network_site_url( '/', 'https' ) ) !== false ) ) {
+		} elseif ( is_multisite() && ( strpos( $file_path, network_site_url( '/', 'http' ) ) !== false || strpos( $file_path, network_site_url( '/', 'https' ) ) !== false ) ) {
 
 			// This is a local file outside of wp-content so figure out the path
 			$remote_file = false;
-			// Try to replace network url
-            $file_path   = str_replace( network_site_url( '/', 'https' ), ABSPATH, $file_path );
-            $file_path   = str_replace( network_site_url( '/', 'http' ), ABSPATH, $file_path );
-            // Try to replace upload URL
+			// Try to replace network url and upload URL
+            $file_path   = str_replace( array( network_site_url( '/', 'https' ), network_site_url( '/', 'http' ) ), ABSPATH, $file_path );
             $file_path   = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
 
-		} elseif( strpos( $file_path, site_url( '/', 'http' ) ) !== false || strpos( $file_path, site_url( '/', 'https' ) ) !== false ) {
+		} elseif ( strpos( $file_path, site_url( '/', 'http' ) ) !== false || strpos( $file_path, site_url( '/', 'https' ) ) !== false ) {
 
 			// This is a local file outside of wp-content so figure out the path
 			$remote_file = false;
-			$file_path   = str_replace( site_url( '/', 'https' ), ABSPATH, $file_path );
-			$file_path   = str_replace( site_url( '/', 'http' ), ABSPATH, $file_path );
+			$file_path   = str_replace( array( site_url( '/', 'https' ), site_url( '/', 'http' ) ), ABSPATH, $file_path );
 
 		} elseif ( file_exists( ABSPATH . $file_path ) ) {
 
