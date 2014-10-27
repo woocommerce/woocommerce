@@ -21,7 +21,9 @@ class WC_Download_Handler {
 	 * Hook in methods
 	 */
 	public static function init() {
-		add_action( 'init', array( __CLASS__, 'download_product' ) );
+		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
+			add_action( 'init', array( __CLASS__, 'download_product' ) );
+		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
 		add_action( 'woocommerce_download_file_xsendfile', array( __CLASS__, 'download_file_xsendfile' ), 10, 2 );
 		add_action( 'woocommerce_download_file_force', array( __CLASS__, 'download_file_force' ), 10, 2 );
@@ -31,39 +33,25 @@ class WC_Download_Handler {
 	 * Check if we need to download a file and check validity
 	 */
 	public static function download_product() {
-		if ( ! isset( $_GET['download_file'] ) || ! isset( $_GET['order'] ) || ! isset( $_GET['email'] ) ) {
-			return;
-		}
-
-		$product_id  = absint( $_GET['download_file'] );
-		$_product    = wc_get_product( $product_id );
-		$order_key   = wc_clean( $_GET['order'] );
-		$email       = sanitize_email( str_replace( ' ', '+', $_GET['email'] ) );
-		$download_id = wc_clean( isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '' );
-
-		if ( ! $_product || ! $_product->exists() ) {
-			self::download_error( __( 'Product no longer exists.', 'woocommerce' ), '', 403 );
-		}
-
-		if ( ! is_email( $email ) ) {
-			self::download_error( __( 'Invalid email address.', 'woocommerce' ), '', 403 );
-		}
-
+		$product_id    = absint( $_GET['download_file'] );
+		$_product      = wc_get_product( $product_id );
 		$download_data = self::get_download_data( array(
 			'product_id'  => $product_id,
-			'order_key'   => $order_key,
-			'email'       => $email,
-			'download_id' => $download_id
+			'order_key'   => wc_clean( $_GET['order'] ),
+			'email'       => sanitize_email( str_replace( ' ', '+', $_GET['email'] ) ),
+			'download_id' => wc_clean( isset( $_GET['key'] ) ? preg_replace( '/\s+/', ' ', $_GET['key'] ) : '' )
 		) );
 
-		if ( ! $download_data ) {
-			self::download_error( __( 'Invalid download.', 'woocommerce' ) );
-		}
+		if ( $_product && $download_data ) {
+			self::check_current_user_can_download( $download_data );
 
-		self::check_current_user_can_download( $download_data );
-		self::count_download( $download_data );
-		do_action( 'woocommerce_download_product', $email, $order_key, $product_id, $download_data->user_id, $download_data->download_id, $download_data->order_id );
-		self::download( $_product->get_file_download_path( $download_id ), $product_id );
+			do_action( 'woocommerce_download_product', $download_data->user_email, $download_data->order_key, $download_data->product_id, $download_data->user_id, $download_data->download_id, $download_data->order_id );
+
+			self::count_download( $download_data );
+			self::download( $_product->get_file_download_path( $download_data->download_id ), $download_data->product_id );
+		} else {
+			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+		}
 	}
 
 	/**
@@ -71,8 +59,9 @@ class WC_Download_Handler {
 	 *
 	 * @param  array  $args Contains email, order key, product id and download id
 	 * @return object
+	 * @access private
 	 */
-	public static function get_download_data( $args = array() ) {
+	private static function get_download_data( $args = array() ) {
 		global $wpdb;
 
 		$query = "SELECT * FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions ";
@@ -90,55 +79,79 @@ class WC_Download_Handler {
 	/**
 	 * Perform checks to see if the current user can download the file
 	 * @param  object $download_data
+	 * @access private
 	 */
-	public static function check_current_user_can_download( $download_data ) {
-		try {
-			if ( $download_data->order_id && ( $order = wc_get_order( $download_data->order_id ) ) && ! $order->is_download_permitted() ) {
-				throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
-			} elseif ( '0' == $download_data->downloads_remaining  ) {
-				throw new Exception( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ) );
-			} elseif ( $download_data->access_expires > 0 && strtotime( $download_data->access_expires ) < current_time( 'timestamp' ) ) {
-				throw new Exception( __( 'Sorry, this download has expired', 'woocommerce' ) );
-			} elseif ( $download_data->user_id && get_option( 'woocommerce_downloads_require_login' ) === 'yes' ) {
-				if ( ! is_user_logged_in() && wc_get_page_id( 'myaccount' ) ) {
-					wp_safe_redirect( add_query_arg( 'wc_error', urlencode( __( 'You must be logged in to download files.', 'woocommerce' ) ), get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
-					exit;
-				} elseif ( ! is_user_logged_in() ) {
-					self::download_error( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), 403 );
-				} elseif ( ! current_user_can( 'download_file', $download_data ) ) {
-					throw new Exception( __( 'This is not your download link.', 'woocommerce' ) );
-				}
-			}
-		} catch ( Exception $e ) {
+	private static function check_current_user_can_download( $download_data ) {
+		self::check_order_is_valid( $download_data );
+		self::check_downloads_remaining( $download_data );
+		self::check_download_expiry( $download_data );
+		self::check_download_login_required( $download_data );
+	}
+
+	/**
+	 * Check if an order is valid for downloading from
+	 * @param  array $download_data
+	 * @access private
+	 */
+	private static function check_order_is_valid( $download_data ) {
+		if ( $download_data->order_id && ( $order = wc_get_order( $download_data->order_id ) ) && ! $order->is_download_permitted() ) {
 			self::download_error( __( 'Invalid order.', 'woocommerce' ), '', 403 );
+		}
+	}
+
+	/**
+	 * Check if there are downloads remaining
+	 * @param  array $download_data
+	 * @access private
+	 */
+	private static function check_downloads_remaining( $download_data ) {
+		if ( '0' == $download_data->downloads_remaining  ) {
+			self::download_error( __( 'Sorry, you have reached your download limit for this file', 'woocommerce' ), '', 403 );
+		}
+	}
+
+	/**
+	 * Check if the download has expired
+	 * @param  array $download_data
+	 * @access private
+	 */
+	private static function check_download_expiry( $download_data ) {
+		if ( $download_data->access_expires > 0 && strtotime( $download_data->access_expires ) < current_time( 'timestamp' ) ) {
+			self::download_error( __( 'Sorry, this download has expired', 'woocommerce' ), '', 403 );
+		}
+	}
+
+	/**
+	 * Check if a download requires the user to login first
+	 * @param  array $download_data
+	 * @access private
+	 */
+	private static function check_download_login_required( $download_data ) {
+		if ( $download_data->user_id && 'yes' === get_option( 'woocommerce_downloads_require_login' ) ) {
+			if ( ! is_user_logged_in() && wc_get_page_id( 'myaccount' ) ) {
+				wp_safe_redirect( add_query_arg( 'wc_error', urlencode( __( 'You must be logged in to download files.', 'woocommerce' ) ), get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
+				exit;
+			} elseif ( ! is_user_logged_in() ) {
+				self::download_error( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . esc_url( wp_login_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) . '" class="wc-forward">' . __( 'Login', 'woocommerce' ) . '</a>', __( 'Log in to Download Files', 'woocommerce' ), 403 );
+			} elseif ( ! current_user_can( 'download_file', $download_data ) ) {
+				self::download_error( __( 'This is not your download link.', 'woocommerce' ), '', 403 );
+			}
 		}
 	}
 
 	/**
 	 * Log the download + increase counts
 	 * @param  object $download_data
+	 * @access private
 	 */
-	public static function count_download( $download_data ) {
+	private static function count_download( $download_data ) {
 		global $wpdb;
-
-		if ( $download_data->downloads_remaining > 0 ) {
-			$wpdb->update(
-				$wpdb->prefix . "woocommerce_downloadable_product_permissions",
-				array(
-					'downloads_remaining' => $download_data->downloads_remaining - 1,
-				),
-				array(
-					'permission_id' => absint( $download_data->permission_id ),
-				),
-				array( '%d' ),
-				array( '%d' )
-			);
-		}
 
 		$wpdb->update(
 			$wpdb->prefix . "woocommerce_downloadable_product_permissions",
 			array(
-				'download_count' => $download_data->download_count + 1,
+				'download_count'      => $download_data->download_count + 1,
+				'downloads_remaining' => $download_data->downloads_remaining > 0 ? $download_data->downloads_remaining - 1 : $download_data->downloads_remaining,
 			),
 			array(
 				'permission_id' => absint( $download_data->permission_id ),
@@ -166,6 +179,9 @@ class WC_Download_Handler {
 
 		$filename             = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
 		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method', 'force' ), $product_id );
+
+		// Add action to prevent issues in IE
+		add_action( 'nocache_headers', array( __CLASS__, 'ie_nocache_headers_fix' ) );
 
 		// Trigger download via one of the methods
 		do_action( 'woocommerce_download_file_' . $file_download_method, $file_path, $filename );
@@ -199,28 +215,25 @@ class WC_Download_Handler {
 			/// This is an absolute path
 			$remote_file  = false;
 
-		} elseif( strpos( $file_path, $wp_uploads_url ) !== false ) {
+		} elseif ( strpos( $file_path, $wp_uploads_url ) !== false ) {
 
 			// This is a local file given by URL so we need to figure out the path
 			$remote_file  = false;
 			$file_path    = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
 
-		} elseif( is_multisite() && ( strpos( $file_path, network_site_url( '/', 'http' ) ) !== false || strpos( $file_path, network_site_url( '/', 'https' ) ) !== false ) ) {
+		} elseif ( is_multisite() && ( strpos( $file_path, network_site_url( '/', 'http' ) ) !== false || strpos( $file_path, network_site_url( '/', 'https' ) ) !== false ) ) {
 
 			// This is a local file outside of wp-content so figure out the path
 			$remote_file = false;
-			// Try to replace network url
-            $file_path   = str_replace( network_site_url( '/', 'https' ), ABSPATH, $file_path );
-            $file_path   = str_replace( network_site_url( '/', 'http' ), ABSPATH, $file_path );
-            // Try to replace upload URL
+			// Try to replace network url and upload URL
+            $file_path   = str_replace( array( network_site_url( '/', 'https' ), network_site_url( '/', 'http' ) ), ABSPATH, $file_path );
             $file_path   = str_replace( $wp_uploads_url, $wp_uploads_dir, $file_path );
 
-		} elseif( strpos( $file_path, site_url( '/', 'http' ) ) !== false || strpos( $file_path, site_url( '/', 'https' ) ) !== false ) {
+		} elseif ( strpos( $file_path, site_url( '/', 'http' ) ) !== false || strpos( $file_path, site_url( '/', 'https' ) ) !== false ) {
 
 			// This is a local file outside of wp-content so figure out the path
 			$remote_file = false;
-			$file_path   = str_replace( site_url( '/', 'https' ), ABSPATH, $file_path );
-			$file_path   = str_replace( site_url( '/', 'http' ), ABSPATH, $file_path );
+			$file_path   = str_replace( array( site_url( '/', 'https' ), site_url( '/', 'http' ) ), ABSPATH, $file_path );
 
 		} elseif ( file_exists( ABSPATH . $file_path ) ) {
 
@@ -298,8 +311,9 @@ class WC_Download_Handler {
 	 * Get content type of a download
 	 * @param  string $file_path
 	 * @return string
+	 * @access private
 	 */
-	public static function get_download_content_type( $file_path ) {
+	private static function get_download_content_type( $file_path ) {
 		$file_extension  = strtolower( substr( strrchr( $file_path, "." ), 1 ) );
 		$ctype           = "application/force-download";
 
@@ -318,45 +332,12 @@ class WC_Download_Handler {
 	 * Set headers for the download
 	 * @param  string $file_path
 	 * @param  string $filename
+	 * @access private
 	 */
-	public static function download_headers( $file_path, $filename ) {
-		if ( ! ini_get('safe_mode') ) {
-			@set_time_limit(0);
-		}
-
-		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() ) {
-			@set_magic_quotes_runtime(0);
-		}
-
-		if ( function_exists( 'apache_setenv' ) ) {
-			@apache_setenv( 'no-gzip', 1 );
-		}
-
-		@session_write_close();
-		@ini_set( 'zlib.output_compression', 'Off' );
-
-		/**
-		 * Prevents errors, for example: transfer closed with 3 bytes remaining to read
-		 */
-		if ( ob_get_length() ) {
-			if ( ob_get_level() ) {
-				$levels = ob_get_level();
-
-				for ( $i = 0; $i < $levels; $i++ ) {
-					ob_end_clean(); // Zip corruption fix
-				}
-			} else {
-				ob_end_clean(); // Clear the output buffer
-			}
-		}
-
-		if ( is_ssl() && ! empty( $GLOBALS['is_IE'] ) ) {
-			// IE bug prevents download via SSL when Cache Control and Pragma no-cache headers set.
-			header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT' );
-			header( 'Cache-Control: private' );
-		} else {
-			nocache_headers();
-		}
+	private static function download_headers( $file_path, $filename ) {
+		self::check_server_config();
+		self::clean_buffers();
+		nocache_headers();
 
 		header( "X-Robots-Tag: noindex, nofollow", true );
 		header( "Content-Type: " . self::get_download_content_type( $file_path ) );
@@ -367,6 +348,43 @@ class WC_Download_Handler {
         if ( $size = @filesize( $file_path ) ) {
         	header( "Content-Length: " . $size );
         }
+	}
+
+	/**
+	 * Check and set certain server config variables to ensure downloads work as intended.
+	 */
+	private static function check_server_config() {
+		if ( ! ini_get('safe_mode') ) {
+			@set_time_limit(0);
+		}
+		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() ) {
+			@set_magic_quotes_runtime(0);
+		}
+		if ( function_exists( 'apache_setenv' ) ) {
+			@apache_setenv( 'no-gzip', 1 );
+		}
+		@ini_set( 'zlib.output_compression', 'Off' );
+		@session_write_close();
+	}
+
+	/**
+	 * Clean all output buffers
+	 *
+	 * Can prevent errors, for example: transfer closed with 3 bytes remaining to read
+	 *
+	 * @access private
+	 */
+	private static function clean_buffers() {
+		if ( ob_get_length() ) {
+			if ( ob_get_level() ) {
+				$levels = ob_get_level();
+				for ( $i = 0; $i < $levels; $i++ ) {
+					ob_end_clean();
+				}
+			} else {
+				ob_end_clean();
+			}
+		}
 	}
 
 	/**
@@ -398,12 +416,29 @@ class WC_Download_Handler {
 	}
 
 	/**
+	 * Filter headers for IE to fix issues over SSL
+	 *
+	 * IE bug prevents download via SSL when Cache Control and Pragma no-cache headers set.
+	 *
+	 * @param array $headers
+	 * @return array
+	 */
+	public function ie_nocache_headers_fix( $headers ) {
+		if ( is_ssl() && ! empty( $GLOBALS['is_IE'] ) ) {
+			$headers['Cache-Control'] = 'private';
+			unset( $headers['Pragma'] );
+		}
+		return $headers;
+	}
+
+	/**
 	 * Die with an error message if the download fails
 	 * @param  string $message
 	 * @param  string  $title
 	 * @param  integer $status
+	 * @access private
 	 */
-	public static function download_error( $message, $title = '', $status = 404 ) {
+	private static function download_error( $message, $title = '', $status = 404 ) {
 		if ( ! strstr( $message, '<a ' ) ) {
 			$message .= ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>';
 		}

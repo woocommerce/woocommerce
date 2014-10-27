@@ -133,11 +133,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		wp_trash_post( $product->id );
 
 		// Refetch product, to be sure
-		$product = wc_get_product($product->id);
+		$product = wc_get_product( $product->id );
 
 		// Add product to cart
-		$this->assertFalse(WC()->cart->add_to_cart( $product->id, 1 ));
-		
+		$this->assertFalse( WC()->cart->add_to_cart( $product->id, 1 ) );
+
 		// Clean up the cart
 		WC()->cart->empty_cart();
 
@@ -401,33 +401,5 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Restore option
 		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
-
-	/**
-	 * Test coupons_enabled method
-	 */
-	public function test_coupons_enabled() {
-		$this->assertEquals( apply_filters( 'woocommerce_coupons_enabled', get_option( 'woocommerce_enable_coupons' ) == 'yes' ), WC()->cart->coupons_enabled() );
-	}
-
-	/**
-	 * Test ship_to_billing_address_only method
-	 */
-	public function test_ship_to_billing_address_only() {
-		$this->assertEquals( wc_ship_to_billing_address_only(), WC()->cart->ship_to_billing_address_only() );
-	}
-
-	/**
-	 * Test needs_shipping_address method
-	 */
-	public function test_needs_shipping_address() {
-		$needs_shipping_address = false;
-
-		if ( WC()->cart->needs_shipping() === true && ! WC()->cart->ship_to_billing_address_only() ) {
-			$needs_shipping_address = true;
-		}
-
-		$this->assertEquals( apply_filters( 'woocommerce_cart_needs_shipping_address', $needs_shipping_address ), WC()->cart->needs_shipping_address() );
-	}
-
 
 }
