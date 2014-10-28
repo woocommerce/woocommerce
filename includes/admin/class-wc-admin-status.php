@@ -266,6 +266,11 @@ class WC_Admin_Status {
 	 * @return string
 	 */
 	public static function get_file_version( $file ) {
+		// Avoid notices if file does not exist
+		if ( ! file_exists( $file ) ) {
+			return '';
+		}
+
 		// We don't need to write to the file, so just open for reading.
 		$fp = fopen( $file, 'r' );
 
