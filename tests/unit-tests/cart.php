@@ -455,4 +455,32 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Test add_discount method
+	 */
+	public function test_add_discount_duplicate() {
+
+		// Create coupon
+		$coupon = WC_Helper_Coupon::create_coupon();
+
+		// Add coupon
+		WC()->cart->add_discount( $coupon->code );
+
+		// Add coupon again, test return statement
+		$this->assertFalse( WC()->cart->add_discount( $coupon->code ) );
+
+		// Test if total amount of coupons is 1
+		$this->assertEquals( 1, count( WC()->cart->get_applied_coupons() ) );
+
+		// Clearing WC notices
+		wc_clear_notices();
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Delete coupon
+		WC_Helper_Coupon::delete_coupon( $coupon->id );
+
+	}
+
 }
