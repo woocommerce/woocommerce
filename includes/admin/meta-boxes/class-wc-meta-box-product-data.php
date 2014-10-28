@@ -296,9 +296,17 @@ class WC_Meta_Box_Product_Data {
 					echo '<div class="stock_fields show_if_simple show_if_variable">';
 
 					// Stock
-					woocommerce_wp_text_input( array( 'id' => '_stock', 'label' => __( 'Stock Qty', 'woocommerce' ), 'desc_tip' => true, 'description' => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> 'any'
-					)  ) );
+					woocommerce_wp_text_input( array(
+						'id'                => '_stock',
+						'label'             => __( 'Stock Qty', 'woocommerce' ),
+						'desc_tip'          => true,
+						'description'       => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ),
+						'type'              => 'number',
+						'custom_attributes' => array(
+							'step' => 'any'
+						),
+						'data_type'         => 'stock'
+					) );
 
 					// Backorders?
 					woocommerce_wp_select( array( 'id' => '_backorders', 'label' => __( 'Allow Backorders?', 'woocommerce' ), 'options' => array(

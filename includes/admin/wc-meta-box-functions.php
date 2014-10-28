@@ -35,11 +35,18 @@ function woocommerce_wp_text_input( $field ) {
 		case 'price' :
 			$field['class'] .= ' wc_input_price';
 			$field['value']  = wc_format_localized_price( $field['value'] );
-		break;
+			break;
 		case 'decimal' :
 			$field['class'] .= ' wc_input_decimal';
 			$field['value']  = wc_format_localized_decimal( $field['value'] );
-		break;
+			break;
+		case 'stock' :
+			$field['class'] .= ' wc_input_stock';
+			$field['value']  = wc_stock_amount( $field['value'] );
+			break;
+
+		default :
+			break;
 	}
 
 	// Custom attribute handling
