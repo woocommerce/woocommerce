@@ -1,7 +1,19 @@
 <?php
 
+/**
+ * Class WC_Helper_Product
+ *
+ * This helper class should ONLY be used for unit tests!
+ */
 class WC_Helper_Product {
 
+	/**
+	 * Delete a product
+	 *
+	 * @param $product_id
+	 *
+	 * @todo check for variations, attributes, etc.
+	 */
 	public static function delete_product( $product_id ) {
 
 		/**
