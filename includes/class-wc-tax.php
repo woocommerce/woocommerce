@@ -576,17 +576,18 @@ class WC_Tax {
 			$rate = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
 		}
 
-		if ( ! $rate ) {
-			return '';
+		$code_string = '';
+
+		if ( null !== $rate ) {
+			$code   = array();
+			$code[] = $rate->tax_rate_country;
+			$code[] = $rate->tax_rate_state;
+			$code[] = $rate->tax_rate_name ? $rate->tax_rate_name : 'TAX';
+			$code[] = absint( $rate->tax_rate_priority );
+			$code_string = strtoupper( implode( '-', array_filter( $code ) ) );
 		}
 
-		$code   = array();
-		$code[] = $rate->tax_rate_country;
-		$code[] = $rate->tax_rate_state;
-		$code[] = $rate->tax_rate_name ? $rate->tax_rate_name : 'TAX';
-		$code[] = absint( $rate->tax_rate_priority );
-
-		return apply_filters( 'woocommerce_rate_code', strtoupper( implode( '-', array_filter( $code ) ) ), $key );
+		return apply_filters( 'woocommerce_rate_code', $code_string, $key );
 	}
 
 	/**
