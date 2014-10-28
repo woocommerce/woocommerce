@@ -1575,8 +1575,9 @@ class WC_Cart {
 		 */
 		public function add_discount( $coupon_code ) {
 			// Coupons are globally disabled
-			if ( ! $this->coupons_enabled() )
+			if ( ! $this->coupons_enabled() ) {
 				return false;
+			}
 
 			// Sanitize coupon code
 			$coupon_code = apply_filters( 'woocommerce_coupon_code', $coupon_code );
