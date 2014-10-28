@@ -23,8 +23,8 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 */
 	function test_wc_notice_count() {
 
-		// no notices
-		$this->assertEquals( 0, wc_notice_count() );
+		// no error notices
+		$this->assertEquals( 0, wc_notice_count( 'error' ) );
 
 		// single notice
 		wc_add_notice( 'Bogus Notice', 'success' );
