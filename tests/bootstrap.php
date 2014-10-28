@@ -98,6 +98,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		// Helpers
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-product.php' );
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-coupon.php' );
 	}
 
 	/**
