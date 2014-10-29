@@ -1179,7 +1179,7 @@ class WC_Meta_Box_Product_Data {
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 					// Text based, separate by pipe
-					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
+					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'trim', array_map( 'wp_kses_post', array_map( 'stripslashes', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) ) ) );
 
 					// Custom attribute - Add attribute to array and set the values
 					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
