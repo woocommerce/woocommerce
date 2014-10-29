@@ -74,7 +74,7 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/admin/jquery.flot.resize.min.js': ['<%= dirs.js %>/admin/jquery.flot.resize.js'],
 					'<%= dirs.js %>/admin/jquery.flot.stack.min.js': ['<%= dirs.js %>/admin/jquery.flot.stack.js'],
 					'<%= dirs.js %>/admin/jquery.flot.time.min.js': ['<%= dirs.js %>/admin/jquery.flot.time.js'],
-					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js'],
+					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js']
 				}
 			},
 			frontend: {
@@ -88,7 +88,7 @@ module.exports = function( grunt ) {
 					dest: '<%= dirs.js %>/frontend/',
 					ext: '.min.js'
 				}]
-			},
+			}
 		},
 
 		// Minify all .css files.
@@ -135,7 +135,9 @@ module.exports = function( grunt ) {
 					exclude: [
 						'includes/admin/.*',
 						'apigen/.*',
-						'deploy/.*'
+						'deploy/.*',
+						'tests/.*',
+						'tmp/.*'
 					],
 					processPot: function ( pot ) {
 						pot.headers['project-id-version'] += ' Frontend';
@@ -183,7 +185,9 @@ module.exports = function( grunt ) {
 					'**/*.php', // Include all files
 					'!apigen/**', // Exclude apigen/
 					'!deploy/**', // Exclude deploy/
-					'!node_modules/**' // Exclude node_modules/
+					'!node_modules/**', // Exclude node_modules/
+					'!tests/**', // Exclude tests/
+					'!tmp/**' // Exclude tmp/
 				],
 				expand: true
 			}
@@ -198,7 +202,7 @@ module.exports = function( grunt ) {
 			apigen: {
 				command: [
 					'cd apigen/',
-					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/api/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"',
+					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/api/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/deploy/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"'
 				].join( '&&' )
 			}
 		},
