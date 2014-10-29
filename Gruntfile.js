@@ -53,7 +53,7 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/admin/jquery.flot.resize.min.js': ['<%= dirs.js %>/admin/jquery.flot.resize.js'],
 					'<%= dirs.js %>/admin/jquery.flot.stack.min.js': ['<%= dirs.js %>/admin/jquery.flot.stack.js'],
 					'<%= dirs.js %>/admin/jquery.flot.time.min.js': ['<%= dirs.js %>/admin/jquery.flot.time.js'],
-					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js'],
+					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js']
 				}
 			},
 			frontend: {
@@ -130,7 +130,9 @@ module.exports = function( grunt ) {
 					potFilename: 'woocommerce.pot',
 					exclude: [
 						'includes/admin/.*',
-						'apigen/.*'
+						'apigen/.*',
+						'tests/.*',
+						'tmp/.*'
 					],
 					processPot: function ( pot ) {
 						pot.headers['project-id-version'] += ' Frontend';
@@ -177,7 +179,9 @@ module.exports = function( grunt ) {
 				src:  [
 					'**/*.php', // Include all files
 					'!apigen/**', // Exclude apigen/
-					'!node_modules/**' // Exclude node_modules/
+					'!node_modules/**', // Exclude node_modules/
+					'!tests/**', // Exclude tests/
+					'!tmp/**' // Exclude tmp/
 				],
 				expand: true
 			}
