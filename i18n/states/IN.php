@@ -34,6 +34,7 @@ $states['IN'] = array(
 	'RJ' => __( 'Rajasthan', 'woocommerce' ),
 	'SK' => __( 'Sikkim', 'woocommerce' ),
 	'TN' => __( 'Tamil Nadu', 'woocommerce' ),
+	'TS' => __( 'Telangana', 'woocommerce' ),
 	'TR' => __( 'Tripura', 'woocommerce' ),
 	'UK' => __( 'Uttarakhand', 'woocommerce' ),
 	'UP' => __( 'Uttar Pradesh', 'woocommerce' ),
