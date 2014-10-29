@@ -15,6 +15,10 @@ if ( ! WC()->cart->coupons_enabled() ) {
 	return;
 }
 
+if ( WC()->cart->total <= 0 ) {
+	return;
+}
+
 $info_message = apply_filters( 'woocommerce_checkout_coupon_message', __( 'Have a coupon?', 'woocommerce' ) . ' <a href="#" class="showcoupon">' . __( 'Click here to enter your code', 'woocommerce' ) . '</a>' );
 wc_print_notice( $info_message, 'notice' );
 ?>
