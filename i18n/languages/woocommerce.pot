@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.2.7 Frontend\n"
+"Project-Id-Version: WooCommerce 2.2.8 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-10-22 11:39:52+00:00\n"
+"POT-Creation-Date: 2014-10-29 12:16:47+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -2210,46 +2210,50 @@ msgid "Tamil Nadu"
 msgstr ""
 
 #: i18n/states/IN.php:37
-msgid "Tripura"
+msgid "Telangana"
 msgstr ""
 
 #: i18n/states/IN.php:38
-msgid "Uttarakhand"
+msgid "Tripura"
 msgstr ""
 
 #: i18n/states/IN.php:39
-msgid "Uttar Pradesh"
+msgid "Uttarakhand"
 msgstr ""
 
 #: i18n/states/IN.php:40
-msgid "West Bengal"
+msgid "Uttar Pradesh"
 msgstr ""
 
 #: i18n/states/IN.php:41
-msgid "Andaman and Nicobar Islands"
+msgid "West Bengal"
 msgstr ""
 
 #: i18n/states/IN.php:42
-msgid "Chandigarh"
+msgid "Andaman and Nicobar Islands"
 msgstr ""
 
 #: i18n/states/IN.php:43
-msgid "Dadar and Nagar Haveli"
+msgid "Chandigarh"
 msgstr ""
 
 #: i18n/states/IN.php:44
-msgid "Daman and Diu"
+msgid "Dadar and Nagar Haveli"
 msgstr ""
 
 #: i18n/states/IN.php:45
-msgid "Delhi"
+msgid "Daman and Diu"
 msgstr ""
 
 #: i18n/states/IN.php:46
-msgid "Lakshadeep"
+msgid "Delhi"
 msgstr ""
 
 #: i18n/states/IN.php:47
+msgid "Lakshadeep"
+msgstr ""
+
+#: i18n/states/IN.php:48
 msgid "Pondicherry (Puducherry)"
 msgstr ""
 
@@ -4610,7 +4614,7 @@ msgstr ""
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:68
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:54
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:126
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:207
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:199
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:171
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:77
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:66
@@ -5249,35 +5253,35 @@ msgid "You do not have permission to create products"
 msgstr ""
 
 #: includes/api/class-wc-api-products.php:197
-#: includes/api/class-wc-api-products.php:293
+#: includes/api/class-wc-api-products.php:298
 msgid "Invalid product type - the product type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:401
-#: includes/api/class-wc-api-products.php:435
+#: includes/api/class-wc-api-products.php:406
+#: includes/api/class-wc-api-products.php:440
 msgid "You do not have permission to read product categories"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:430
+#: includes/api/class-wc-api-products.php:435
 msgid "Invalid product category ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:441
+#: includes/api/class-wc-api-products.php:446
 msgid "A product category with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:691
-#: includes/api/class-wc-api-products.php:1132
+#: includes/api/class-wc-api-products.php:696
+#: includes/api/class-wc-api-products.php:1137
 msgid "The SKU already exists on another product"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1085 includes/class-wc-emails.php:334
+#: includes/api/class-wc-api-products.php:1090 includes/class-wc-emails.php:334
 #: includes/class-wc-emails.php:366 includes/class-wc-emails.php:410
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1529
-#: includes/api/class-wc-api-products.php:1530
+#: includes/api/class-wc-api-products.php:1534
+#: includes/api/class-wc-api-products.php:1535
 #: includes/api/v1/class-wc-api-products.php:461
 #: includes/api/v1/class-wc-api-products.php:462
 #: includes/wc-product-functions.php:267
@@ -5285,15 +5289,15 @@ msgstr ""
 msgid "Placeholder"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1603
+#: includes/api/class-wc-api-products.php:1608
 msgid "Invalid URL %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1615
+#: includes/api/class-wc-api-products.php:1620
 msgid "Error getting remote image %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1644
+#: includes/api/class-wc-api-products.php:1649
 msgid "Zero size file downloaded"
 msgstr ""
 
@@ -5596,20 +5600,20 @@ msgid ""
 "class=\"wc-backward\">Return to homepage</a>"
 msgstr ""
 
-#: includes/class-wc-checkout.php:426 includes/class-wc-form-handler.php:86
+#: includes/class-wc-checkout.php:426 includes/class-wc-form-handler.php:82
 msgid "is a required field."
 msgstr ""
 
-#: includes/class-wc-checkout.php:439 includes/class-wc-form-handler.php:99
+#: includes/class-wc-checkout.php:439 includes/class-wc-form-handler.php:95
 #: includes/shortcodes/class-wc-shortcode-cart.php:43
 msgid "Please enter a valid postcode/ZIP."
 msgstr ""
 
-#: includes/class-wc-checkout.php:448 includes/class-wc-form-handler.php:108
+#: includes/class-wc-checkout.php:448 includes/class-wc-form-handler.php:104
 msgid "is not a valid phone number."
 msgstr ""
 
-#: includes/class-wc-checkout.php:454 includes/class-wc-form-handler.php:115
+#: includes/class-wc-checkout.php:454 includes/class-wc-form-handler.php:111
 msgid "is not a valid email address."
 msgstr ""
 
@@ -5875,7 +5879,7 @@ msgid "Product no longer exists."
 msgstr ""
 
 #: includes/class-wc-download-handler.php:95
-#: includes/class-wc-form-handler.php:542
+#: includes/class-wc-form-handler.php:538
 #: includes/shortcodes/class-wc-shortcode-checkout.php:166
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
@@ -5930,124 +5934,124 @@ msgstr ""
 msgid "%s units of %s have been backordered in order %s."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:130
+#: includes/class-wc-form-handler.php:126
 msgid "Address changed successfully."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:177
+#: includes/class-wc-form-handler.php:173
 msgid "Please enter your name."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:181 includes/wc-user-functions.php:48
+#: includes/class-wc-form-handler.php:177 includes/wc-user-functions.php:48
 msgid "Please provide a valid email address."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:183
+#: includes/class-wc-form-handler.php:179
 msgid "This email address is already registered."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:187
+#: includes/class-wc-form-handler.php:183
 msgid "Your current password is incorrect."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:192
+#: includes/class-wc-form-handler.php:188
 msgid "Please fill out all password fields."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:196
+#: includes/class-wc-form-handler.php:192
 msgid "Please enter your current password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:200
+#: includes/class-wc-form-handler.php:196
 msgid "Please re-enter your password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:204
-#: includes/class-wc-form-handler.php:827
+#: includes/class-wc-form-handler.php:200
+#: includes/class-wc-form-handler.php:823
 msgid "Passwords do not match."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:226
+#: includes/class-wc-form-handler.php:222
 msgid "Account details changed successfully."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:351
+#: includes/class-wc-form-handler.php:347
 msgid "Payment method added."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:384
-#: includes/class-wc-form-handler.php:443
+#: includes/class-wc-form-handler.php:380
+#: includes/class-wc-form-handler.php:439
 msgid "Cart updated."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:419
+#: includes/class-wc-form-handler.php:415
 msgid "You can only have 1 %s in your cart."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:509
+#: includes/class-wc-form-handler.php:505
 msgid "The cart has been filled with the items from your previous order."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:532
+#: includes/class-wc-form-handler.php:528
 msgid "Order cancelled by customer."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:535
+#: includes/class-wc-form-handler.php:531
 msgid "Your order was cancelled."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:540
+#: includes/class-wc-form-handler.php:536
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:580
-#: includes/class-wc-form-handler.php:640
+#: includes/class-wc-form-handler.php:576
+#: includes/class-wc-form-handler.php:636
 msgid "Please choose product options&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:674
+#: includes/class-wc-form-handler.php:670
 msgid "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:681
+#: includes/class-wc-form-handler.php:677
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr ""
 
+#: includes/class-wc-form-handler.php:735
 #: includes/class-wc-form-handler.php:739
 #: includes/class-wc-form-handler.php:743
-#: includes/class-wc-form-handler.php:747
-#: includes/class-wc-form-handler.php:756
-#: includes/class-wc-form-handler.php:877
+#: includes/class-wc-form-handler.php:752
+#: includes/class-wc-form-handler.php:873
 msgid "Error"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:743
+#: includes/class-wc-form-handler.php:739
 msgid "Username is required."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:747
+#: includes/class-wc-form-handler.php:743
 msgid "Password is required."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:756
+#: includes/class-wc-form-handler.php:752
 msgid "A user could not be found with this email address."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:781
+#: includes/class-wc-form-handler.php:777
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:822
+#: includes/class-wc-form-handler.php:818
 msgid "Please enter your password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:893 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:889 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:893
+#: includes/class-wc-form-handler.php:889
 msgid "Anti-spam field was filled in."
 msgstr ""
 
@@ -6728,7 +6732,7 @@ msgstr ""
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:60
 #: includes/gateways/cod/class-wc-gateway-cod.php:68
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:139
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:213
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:205
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:178
 #: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:105
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:83
@@ -6749,7 +6753,7 @@ msgstr ""
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:76
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:62
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:141
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:215
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:207
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:180
 #: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:85
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:74
@@ -6767,7 +6771,7 @@ msgstr ""
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:67
 #: includes/gateways/cod/class-wc-gateway-cod.php:75
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:146
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:220
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:212
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:185
 #: includes/wc-template-functions.php:1006
 msgid "Description"
@@ -6963,317 +6967,297 @@ msgid "Pay securely with your credit card."
 msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:149
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:223
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:215
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:187
 msgid "This controls the description which the user sees during checkout."
 msgstr ""
 
 #: includes/gateways/mijireh/class-wc-gateway-mijireh.php:183
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:463
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:454
 msgid "Order %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:31
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:28
 msgid "Proceed to PayPal"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:34
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:216
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:31
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:208
 msgid "PayPal"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:35
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:32
 msgid ""
 "PayPal standard works by sending the user to PayPal to enter their payment "
 "information."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:160
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:156
 msgid "What is PayPal?"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:193
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:188
 msgid "Gateway Disabled"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:193
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:188
 msgid "PayPal does not support your store currency."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:209
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:201
 msgid "Enable PayPal standard"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:224
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:216
 msgid ""
 "Pay via PayPal; you can pay with your credit card if you don't have a "
 "PayPal account."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:227
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:219
 msgid "PayPal Email"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:229
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:221
 msgid ""
 "Please enter your PayPal email address; this is needed in order to take "
 "payment."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:235
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:227
 msgid "PayPal sandbox"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:237
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:229
 msgid "Enable PayPal sandbox"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:239
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:231
 msgid ""
 "PayPal sandbox can be used to test payments. Sign up for a developer "
 "account <a href=\"%s\">here</a>."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:242
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:234
 msgid "Debug Log"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:244
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:236
 msgid "Enable logging"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:246
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:238
 msgid "Log PayPal events, such as IPN requests, inside <code>%s</code>"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:249
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:241
 msgid "Shipping options"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:254
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:246
 msgid "Shipping details"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:256
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:248
 msgid "Send shipping details to PayPal instead of billing."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:257
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:249
 msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:261
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:253
 msgid "Address override"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:263
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:255
 msgid ""
 "Enable \"address_override\" to prevent address information from being "
 "changed."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:264
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:256
 msgid ""
 "PayPal verifies addresses therefore this setting can cause errors (we "
 "recommend keeping it disabled)."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:268
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:260
 msgid "Advanced options"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:273
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:265
 msgid "Receiver Email"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:275
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:267
 msgid ""
 "If your main PayPal email differs from the PayPal email entered above, "
 "input your main receiver email for your PayPal account here. This is used "
 "to validate IPN requests."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:281
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:273
 msgid "Invoice Prefix"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:283
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:275
 msgid ""
 "Please enter a prefix for your invoice numbers. If you use your PayPal "
 "account for multiple stores ensure this prefix is unique as PayPal will not "
 "allow orders with the same invoice number."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:288
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:280
 msgid "Payment Action"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:290
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:282
 msgid ""
 "Choose whether you wish to capture funds immediately or authorize payment "
 "only."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:294
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:286
 msgid "Capture"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:295
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:287
 msgid "Authorize"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:299
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:291
 msgid "Page Style"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:301
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:293
 msgid ""
 "Optionally enter the name of the page style you wish to use. These are "
 "defined within your PayPal account."
 msgstr ""
 
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:296
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:304
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:312
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:317
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:325
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:333
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:341
 msgid "Optional"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:307
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:299
 msgid "PayPal Identity Token"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:309
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:301
 msgid ""
 "Optionally enable \"Payment Data Transfer\" (Profile > Website Payment "
 "Preferences) and then copy your identity token here. This will allow "
 "payments to be verified without the need for PayPal IPN."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:315
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:307
 msgid "API Credentials"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:317
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:309
 msgid ""
 "Enter your PayPal API credentials to process refunds via PayPal. Learn how "
 "to access your PayPal API Credentials %shere%s."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:320
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:312
 msgid "API Username"
 msgstr ""
 
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:314
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:322
 #: includes/gateways/paypal/class-wc-gateway-paypal.php:330
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:338
 msgid "Get your API credentials from PayPal."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:328
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:320
 msgid "API Password"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:336
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:328
 msgid "API Signature"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:472
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:463
 msgid "Shipping via"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:560
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:551
 msgid "Shipping via %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:595
-msgid ""
-"Thank you for your order. We are now redirecting you to PayPal to make "
-"payment."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:620
-msgid "Pay via PayPal"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:620
-msgid "Cancel order &amp; restore cart"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:704
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:634
 msgid "Empty Paypal response."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:712
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:642
 msgid "Refunded %s - Refund ID: %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:727
-msgid ""
-"Thank you - your order is now pending payment. You should be automatically "
-"redirected to PayPal to make payment."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:881
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:794
 msgid "Validation error: PayPal currencies do not match (code %s)."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:892
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:805
 msgid "Validation error: PayPal amounts do not match (gross %s)."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:903
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:816
 msgid "Validation error: PayPal IPN response from a different email address (%s)."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:923
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:836
 msgid "IPN payment completed"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:927
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:840
 msgid "Payment pending: %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:940
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:948
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:960
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:853
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:861
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:873
 msgid "Payment %s via IPN."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:951
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:864
 msgid "Payment for order %s refunded/reversed"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:952
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:865
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:963
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:876
 msgid "Payment for order %s reversed"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:964
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:877
 msgid "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:970
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:883
 msgid "Reversal cancelled for order %s"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:971
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:884
 msgid ""
 "Order %s has had a reversal cancelled. Please check the status of payment "
 "and update the order status accordingly."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:1055
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:968
 msgid "Validation error: PayPal amounts do not match (amt %s)."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:1061
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:974
 msgid "PDT payment completed"
 msgstr ""
 
@@ -9628,7 +9612,7 @@ msgctxt "slug"
 msgid "uncategorized"
 msgstr ""
 
-#: includes/class-wc-post-types.php:393 includes/wc-order-functions.php:25
+#: includes/class-wc-post-types.php:393
 msgctxt "Order status"
 msgid "Pending payment"
 msgstr ""
@@ -9638,7 +9622,7 @@ msgctxt "Order status"
 msgid "Processing"
 msgstr ""
 
-#: includes/class-wc-post-types.php:409 includes/wc-order-functions.php:27
+#: includes/class-wc-post-types.php:409
 msgctxt "Order status"
 msgid "On hold"
 msgstr ""
@@ -9661,6 +9645,16 @@ msgstr ""
 #: includes/class-wc-post-types.php:441 includes/wc-order-functions.php:31
 msgctxt "Order status"
 msgid "Failed"
+msgstr ""
+
+#: includes/wc-order-functions.php:25
+msgctxt "Order status"
+msgid "Pending Payment"
+msgstr ""
+
+#: includes/wc-order-functions.php:27
+msgctxt "Order status"
+msgid "On Hold"
 msgstr ""
 
 #: includes/class-wc-product-grouped.php:192
