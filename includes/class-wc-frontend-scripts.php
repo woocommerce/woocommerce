@@ -122,6 +122,7 @@ class WC_Frontend_Scripts {
 		self::register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js' );
 		self::register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js' );
 		self::register_script( 'wc-address-i18n', $frontend_script_path . 'address-i18n' . $suffix . '.js' );
+		self::register_script( 'jquery-tiptip', $assets_path . 'js/jquery-tiptip/jquery.tipTip' . $suffix . '.js', array( 'jquery' ), '1.3' );
 
 		// Register frontend scripts conditionally
 		if ( $ajax_cart_en ) {
@@ -135,7 +136,7 @@ class WC_Frontend_Scripts {
 			wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
 		}
 		if ( is_checkout() ) {
-			self::enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ) );
+			self::enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n', 'jquery-tiptip' ) );
 		}
 		if ( is_add_payment_method_page() ) {
 			self::enqueue_script( 'wc-add-payment-method', $frontend_script_path . 'add-payment-method' . $suffix . '.js', array( 'jquery', 'woocommerce' ) );
