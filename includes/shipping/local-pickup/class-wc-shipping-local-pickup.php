@@ -87,12 +87,12 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'desc_tip'	  	=> true,
 			),
 			'codes' => array(
-				'title'			=> __( 'Zip/Post Codes', 'woocommerce' ),
-				'type' 			=> 'textarea',
-				'description'	=> __( 'What zip/post codes are available for local pickup? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
-				'default'		=> '',
-				'desc_tip'		=> true,
-				'placeholder'	=> '12345, 56789 etc'
+				'title'       => __( 'Allowed Zip/Post Codes', 'woocommerce' ),
+				'type'        => 'text',
+				'desc_tip'    => __( 'What zip/post codes are available for local pickup?', 'woocommerce' ),
+				'default'     => '',
+				'description' => __( 'Separate codes with a comma. Accepts wildcards, e.g. <code>P*</code> will match a postcode of PE30.', 'woocommerce' ),
+				'placeholder' => 'e.g. 12345, 56789'
 			),
 			'availability' => array(
 				'title'			=> __( 'Method availability', 'woocommerce' ),
