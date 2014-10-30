@@ -100,6 +100,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-product.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-coupon.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-fee.php' );
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-shipping.php' );
 	}
 
 	/**
