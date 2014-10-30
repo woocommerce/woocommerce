@@ -68,7 +68,13 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
+		update_post_meta( $coupon->id, 'discount_type', 'fixed_cart' );
 		update_post_meta( $coupon->id, 'coupon_amount', '5' );
+
+		// We need this to have the calculate_totals() method calculate totals
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
 
 		// Add product to cart
 		WC()->cart->add_to_cart( $product->id, 1 );
@@ -92,4 +98,47 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->id );
 	}
 
+	/**
+	 * Test percent cart discount method
+	 *
+	 * @since 2.3
+	 */
+	public function test_percent_cart_discount() {
+
+		// Create product
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->id, '_price', '10' );
+		update_post_meta( $product->id, '_regular_price', '10' );
+
+		// Create coupon
+		$coupon = WC_Helper_Coupon::create_coupon();
+		update_post_meta( $coupon->id, 'discount_type', 'percent' );
+		update_post_meta( $coupon->id, 'coupon_amount', '5' );
+
+		// We need this to have the calculate_totals() method calculate totals
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		// Add product to cart
+		WC()->cart->add_to_cart( $product->id, 1 );
+
+		// Add coupon
+		WC()->cart->add_discount( $coupon->code );
+
+		// Test if the cart total amount is equal 5
+		$this->assertEquals( 9.5, WC()->cart->total );
+
+		// Clearing WC notices
+		wc_clear_notices();
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Delete coupon
+		WC_Helper_Coupon::delete_coupon( $coupon->id );
+
+		// Delete product
+		WC_Helper_Product::delete_product( $product->id );
+	}
 }
