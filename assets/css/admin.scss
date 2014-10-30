@@ -2858,7 +2858,11 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 						background: #f5f5f5;
 					}
 					td.name {
-						padding-right: 0;
+						max-width: 175px;
+
+						a {
+							word-wrap: break-word;
+						}
 					}
 					td.sparkline {
 						vertical-align: middle;
