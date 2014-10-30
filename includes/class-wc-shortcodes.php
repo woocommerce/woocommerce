@@ -9,8 +9,7 @@
  * @author 		WooThemes
  */
 class WC_Shortcodes {
-
-    	/**
+	/**
 	 * Common attributes shared with product category, tag, attribute, and products listing methods
 	 * @access public
 	 * @var array
@@ -140,8 +139,8 @@ class WC_Shortcodes {
 	/**
 	 * List product(s) for the passed query.
 	 * @todo support proper pagination (since per_page is included in shortcodes)
-         * @todo Add general method for tags, categories, etc in a single shortcode in WP 4.1
-         * @link https://core.trac.wordpress.org/ticket/29642 Wordpress 4.1 nested query support
+	 * @todo Add general method for tags, categories, etc in a single shortcode in WP 4.1
+	 * @link https://core.trac.wordpress.org/ticket/29642 Wordpress 4.1 nested query support
 	 * @access public
 	 * @param WP_QUERY $products
 	 * @param array $opts
@@ -157,8 +156,7 @@ class WC_Shortcodes {
 		
 		ob_start();
 
-		if ( $products->have_posts() ) : ?>			
-			
+		if ( $products->have_posts() ) : ?>
 			<?php if ( isset($show_count) && $show_count ) : ?>
 				<?php wc_get_template( 'loop/result-count.php' , array('query' => $products)); ?>
 			<?php endif; ?>
@@ -204,8 +202,6 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_category( $atts ) {
-		global $woocommerce_loop;
-
 		$opts = shortcode_atts( self::$product_opts, $atts );
 		extract( $opts );
 
@@ -258,8 +254,6 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_tag( $atts ) {
-		global $woocommerce_loop;
-
 		$opts = shortcode_atts(self::$product_opts, $atts );
 		extract( $opts );
 		
@@ -453,8 +447,8 @@ class WC_Shortcodes {
 	 */
 	public static function products( $atts ) {
 		if ( empty( $atts ) ) return '';
-                
-                $opts = shortcode_atts( self::$product_opts, $atts );
+		
+		$opts = shortcode_atts( self::$product_opts, $atts );
 		extract( $opts );
 
 		$args = array(
@@ -491,7 +485,7 @@ class WC_Shortcodes {
 
 
 		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $opts ) );
-		
+
 		return self::product_listing($products, $opts);
 	}
 
@@ -552,7 +546,7 @@ class WC_Shortcodes {
 		extract( shortcode_atts( array(
 			'id'         => '',
 			'class'      => '',
-            		'quantity'   => '1',
+			'quantity'   => '1',
 			'sku'        => '',
 			'style'      => 'border:4px solid #ccc; padding: 12px;',
 			'show_price' => 'true'
@@ -960,12 +954,10 @@ class WC_Shortcodes {
 	 *
 	 * @access public
 	 * @param array $atts
-         * @see self::$product_opts
+	 * @see self::$product_opts
 	 * @return string
 	 */
 	public static function product_attribute( $atts ) {
-		global $woocommerce_loop;
-
 		$opts = shortcode_atts( self::$product_opts, $atts );
 		extract( $opts );
 		
