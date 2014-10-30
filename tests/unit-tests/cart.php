@@ -429,4 +429,42 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( apply_filters( 'woocommerce_cart_needs_shipping_address', $needs_shipping_address ), WC()->cart->needs_shipping_address() );
 	}
 
+	/**
+	 * Test cart fee
+	 *
+	 * @since 2.3
+	 */
+	public function test_cart_fee() {
+		// Create product
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->id, '_price', '10' );
+		update_post_meta( $product->id, '_regular_price', '10' );
+
+		// We need this to have the calculate_totals() method calculate totals
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		// Add fee
+		WC_Helper_Fee::add_cart_fee();
+
+		// Add product to cart
+		WC()->cart->add_to_cart( $product->id, 1 );
+
+		// Test if the cart total amount is equal 20
+		$this->assertEquals( 20, WC()->cart->total );
+
+		// Clearing WC notices
+		wc_clear_notices();
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Remove fee
+		WC_Helper_Fee::remove_cart_fee();
+
+		// Delete product
+		WC_Helper_Product::delete_product( $product->id );
+	}
+
 }
