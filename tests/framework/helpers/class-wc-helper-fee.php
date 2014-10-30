@@ -22,6 +22,7 @@ class WC_Helper_Fee {
 
 	/**
 	 * Add a cart simple fee without taxes
+	 * Note: need to be added before add any product in the cart
 	 *
 	 * @since 2.3
 	 */
