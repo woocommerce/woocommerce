@@ -1,0 +1,95 @@
+<?php
+
+class WC_Tests_Coupon extends WC_Unit_Test_Case {
+
+	/**
+	 * Test add_discount method
+	 *
+	 * @since 2.3
+	 */
+	public function test_add_discount() {
+
+		// Create coupon
+		$coupon = WC_Helper_Coupon::create_coupon();
+
+		// Add coupon, test return statement
+		$this->assertTrue( WC()->cart->add_discount( $coupon->code ) );
+
+		// Test if total amount of coupons is 1
+		$this->assertEquals( 1, count( WC()->cart->get_applied_coupons() ) );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Delete coupon
+		WC_Helper_Coupon::delete_coupon( $coupon->id );
+	}
+
+	/**
+	 * Test add_discount method
+	 *
+	 * @since 2.3
+	 */
+	public function test_add_discount_duplicate() {
+
+		// Create coupon
+		$coupon = WC_Helper_Coupon::create_coupon();
+
+		// Add coupon
+		WC()->cart->add_discount( $coupon->code );
+
+		// Add coupon again, test return statement
+		$this->assertFalse( WC()->cart->add_discount( $coupon->code ) );
+
+		// Test if total amount of coupons is 1
+		$this->assertEquals( 1, count( WC()->cart->get_applied_coupons() ) );
+
+		// Clearing WC notices
+		wc_clear_notices();
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Delete coupon
+		WC_Helper_Coupon::delete_coupon( $coupon->id );
+	}
+
+	/**
+	 * Test fixed cart discount method
+	 *
+	 * @since 2.3
+	 */
+	public function test_fixed_cart_discount() {
+
+		// Create product
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->id, '_price', '10' );
+		update_post_meta( $product->id, '_regular_price', '10' );
+
+		// Create coupon
+		$coupon = WC_Helper_Coupon::create_coupon();
+		update_post_meta( $coupon->id, 'coupon_amount', '5' );
+
+		// Add product to cart
+		WC()->cart->add_to_cart( $product->id, 1 );
+
+		// Add coupon
+		WC()->cart->add_discount( $coupon->code );
+
+		// Test if the cart total amount is equal 5
+		$this->assertEquals( 5, WC()->cart->total );
+
+		// Clearing WC notices
+		wc_clear_notices();
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Delete coupon
+		WC_Helper_Coupon::delete_coupon( $coupon->id );
+
+		// Delete product
+		WC_Helper_Product::delete_product( $product->id );
+	}
+
+}
