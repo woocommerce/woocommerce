@@ -330,242 +330,243 @@ class WC_Checkout {
 	 * @return void
 	 */
 	public function process_checkout() {
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-process_checkout' ) ) {
-			return;
-		}
-
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-
-		// Prevent timeout
-		@set_time_limit(0);
-
-		do_action( 'woocommerce_before_checkout_process' );
-
-		if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
-			wc_add_notice( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to homepage</a>', 'woocommerce' ), home_url() ), 'error' );
-		}
-
-		do_action( 'woocommerce_checkout_process' );
-
-		// Checkout fields (not defined in checkout_fields)
-		$this->posted['terms']                     = isset( $_POST['terms'] ) ? 1 : 0;
-		$this->posted['createaccount']             = isset( $_POST['createaccount'] ) && ! empty( $_POST['createaccount'] ) ? 1 : 0;
-		$this->posted['payment_method']            = isset( $_POST['payment_method'] ) ? stripslashes( $_POST['payment_method'] ) : '';
-		$this->posted['shipping_method']           = isset( $_POST['shipping_method'] ) ? $_POST['shipping_method'] : '';
-		$this->posted['ship_to_different_address'] = isset( $_POST['ship_to_different_address'] ) ? true : false;
-
-		if ( isset( $_POST['shiptobilling'] ) ) {
-			_deprecated_argument( 'WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. THe template files are out of date' );
-
-			$this->posted['ship_to_different_address'] = $_POST['shiptobilling'] ? false : true;
-		}
-
-		// Ship to billing only option
-		if ( WC()->cart->ship_to_billing_address_only() ) {
-			$this->posted['ship_to_different_address']  = false;
-		}
-
-		// Update customer shipping and payment method to posted method
-		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-
-		if ( isset( $this->posted['shipping_method'] ) && is_array( $this->posted['shipping_method'] ) ) {
-			foreach ( $this->posted['shipping_method'] as $i => $value ) {
-				$chosen_shipping_methods[ $i ] = wc_clean( $value );
-			}
-		}
-
-		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
-		WC()->session->set( 'chosen_payment_method', $this->posted['payment_method'] );
-
-		// Note if we skip shipping
-		$skipped_shipping = false;
-
-		// Get posted checkout_fields and do validation
-		foreach ( $this->checkout_fields as $fieldset_key => $fieldset ) {
-
-			// Skip shipping if not needed
-			if ( $fieldset_key == 'shipping' && ( $this->posted['ship_to_different_address'] == false || ! WC()->cart->needs_shipping() ) ) {
-				$skipped_shipping = true;
-				continue;
+		try {
+			if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-process_checkout' ) ) {
+				WC()->session->set( 'refresh_totals', true );
+				throw new Exception( __( 'We were unable to process your order, please try again.', 'woocommerce' ) );
 			}
 
-			// Skip account if not needed
-			if ( $fieldset_key == 'account' && ( is_user_logged_in() || ( $this->must_create_account == false && empty( $this->posted['createaccount'] ) ) ) ) {
-				continue;
+			if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+				define( 'WOOCOMMERCE_CHECKOUT', true );
 			}
 
-			foreach ( $fieldset as $key => $field ) {
+			// Prevent timeout
+			@set_time_limit(0);
 
-				if ( ! isset( $field['type'] ) ) {
-					$field['type'] = 'text';
+			do_action( 'woocommerce_before_checkout_process' );
+
+			if ( 0 === sizeof( WC()->cart->get_cart() ) ) {
+				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to homepage</a>', 'woocommerce' ), home_url() ) );
+			}
+
+			do_action( 'woocommerce_checkout_process' );
+
+			// Checkout fields (not defined in checkout_fields)
+			$this->posted['terms']                     = isset( $_POST['terms'] ) ? 1 : 0;
+			$this->posted['createaccount']             = isset( $_POST['createaccount'] ) && ! empty( $_POST['createaccount'] ) ? 1 : 0;
+			$this->posted['payment_method']            = isset( $_POST['payment_method'] ) ? stripslashes( $_POST['payment_method'] ) : '';
+			$this->posted['shipping_method']           = isset( $_POST['shipping_method'] ) ? $_POST['shipping_method'] : '';
+			$this->posted['ship_to_different_address'] = isset( $_POST['ship_to_different_address'] ) ? true : false;
+
+			if ( isset( $_POST['shiptobilling'] ) ) {
+				_deprecated_argument( 'WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. The template files are out of date' );
+
+				$this->posted['ship_to_different_address'] = $_POST['shiptobilling'] ? false : true;
+			}
+
+			// Ship to billing only option
+			if ( WC()->cart->ship_to_billing_address_only() ) {
+				$this->posted['ship_to_different_address']  = false;
+			}
+
+			// Update customer shipping and payment method to posted method
+			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+			if ( isset( $this->posted['shipping_method'] ) && is_array( $this->posted['shipping_method'] ) ) {
+				foreach ( $this->posted['shipping_method'] as $i => $value ) {
+					$chosen_shipping_methods[ $i ] = wc_clean( $value );
+				}
+			}
+
+			WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+			WC()->session->set( 'chosen_payment_method', $this->posted['payment_method'] );
+
+			// Note if we skip shipping
+			$skipped_shipping = false;
+
+			// Get posted checkout_fields and do validation
+			foreach ( $this->checkout_fields as $fieldset_key => $fieldset ) {
+
+				// Skip shipping if not needed
+				if ( $fieldset_key == 'shipping' && ( $this->posted['ship_to_different_address'] == false || ! WC()->cart->needs_shipping() ) ) {
+					$skipped_shipping = true;
+					continue;
 				}
 
-				// Get Value
-				switch ( $field['type'] ) {
-					case "checkbox" :
-						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
-					break;
-					case "multiselect" :
-						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? implode( ', ', array_map( 'wc_clean', $_POST[ $key ] ) ) : '';
-					break;
-					case "textarea" :
-						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? wp_strip_all_tags( wp_check_invalid_utf8( stripslashes( $_POST[ $key ] ) ) ) : '';
-					break;
-					default :
-						$this->posted[ $key ] = isset( $_POST[ $key ] ) ? ( is_array( $_POST[ $key ] ) ? array_map( 'wc_clean', $_POST[ $key ] ) : wc_clean( $_POST[ $key ] ) ) : '';
-					break;
+				// Skip account if not needed
+				if ( $fieldset_key == 'account' && ( is_user_logged_in() || ( $this->must_create_account == false && empty( $this->posted['createaccount'] ) ) ) ) {
+					continue;
 				}
 
-				// Hooks to allow modification of value
-				$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_' . sanitize_title( $field['type'] ) . '_field', $this->posted[ $key ] );
-				$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[ $key ] );
+				foreach ( $fieldset as $key => $field ) {
 
-				// Validation: Required fields
-				if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) {
-					wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is a required field.', 'woocommerce' ), 'error' );
-				}
+					if ( ! isset( $field['type'] ) ) {
+						$field['type'] = 'text';
+					}
 
-				if ( ! empty( $this->posted[ $key ] ) ) {
+					// Get Value
+					switch ( $field['type'] ) {
+						case "checkbox" :
+							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
+						break;
+						case "multiselect" :
+							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? implode( ', ', array_map( 'wc_clean', $_POST[ $key ] ) ) : '';
+						break;
+						case "textarea" :
+							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? wp_strip_all_tags( wp_check_invalid_utf8( stripslashes( $_POST[ $key ] ) ) ) : '';
+						break;
+						default :
+							$this->posted[ $key ] = isset( $_POST[ $key ] ) ? ( is_array( $_POST[ $key ] ) ? array_map( 'wc_clean', $_POST[ $key ] ) : wc_clean( $_POST[ $key ] ) ) : '';
+						break;
+					}
 
-					// Validation rules
-					if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
-						foreach ( $field['validate'] as $rule ) {
-							switch ( $rule ) {
-								case 'postcode' :
-									$this->posted[ $key ] = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
+					// Hooks to allow modification of value
+					$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_' . sanitize_title( $field['type'] ) . '_field', $this->posted[ $key ] );
+					$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[ $key ] );
 
-									if ( ! WC_Validation::is_postcode( $this->posted[ $key ], $_POST[ $fieldset_key . '_country' ] ) ) :
-										wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
-									else :
-										$this->posted[ $key ] = wc_format_postcode( $this->posted[ $key ], $_POST[ $fieldset_key . '_country' ] );
-									endif;
-								break;
-								case 'phone' :
-									$this->posted[ $key ] = wc_format_phone_number( $this->posted[ $key ] );
+					// Validation: Required fields
+					if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) {
+						wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is a required field.', 'woocommerce' ), 'error' );
+					}
 
-									if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) )
-										wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
-								break;
-								case 'email' :
-									$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
+					if ( ! empty( $this->posted[ $key ] ) ) {
 
-									if ( ! is_email( $this->posted[ $key ] ) )
-										wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
-								break;
-								case 'state' :
-									// Get valid states
-									$valid_states = WC()->countries->get_states( isset( $_POST[ $fieldset_key . '_country' ] ) ? $_POST[ $fieldset_key . '_country' ] : ( 'billing' === $fieldset_key ? WC()->customer->get_country() : WC()->customer->get_shipping_country() ) );
+						// Validation rules
+						if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
+							foreach ( $field['validate'] as $rule ) {
+								switch ( $rule ) {
+									case 'postcode' :
+										$this->posted[ $key ] = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
 
-									if ( ! empty( $valid_states ) && is_array( $valid_states ) ) {
-										$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );
+										if ( ! WC_Validation::is_postcode( $this->posted[ $key ], $_POST[ $fieldset_key . '_country' ] ) ) :
+											wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ), 'error' );
+										else :
+											$this->posted[ $key ] = wc_format_postcode( $this->posted[ $key ], $_POST[ $fieldset_key . '_country' ] );
+										endif;
+									break;
+									case 'phone' :
+										$this->posted[ $key ] = wc_format_phone_number( $this->posted[ $key ] );
 
-										// Convert value to key if set
-										if ( isset( $valid_state_values[ strtolower( $this->posted[ $key ] ) ] ) ) {
-											 $this->posted[ $key ] = $valid_state_values[ strtolower( $this->posted[ $key ] ) ];
+										if ( ! WC_Validation::is_phone( $this->posted[ $key ] ) )
+											wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid phone number.', 'woocommerce' ), 'error' );
+									break;
+									case 'email' :
+										$this->posted[ $key ] = strtolower( $this->posted[ $key ] );
+
+										if ( ! is_email( $this->posted[ $key ] ) )
+											wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ), 'error' );
+									break;
+									case 'state' :
+										// Get valid states
+										$valid_states = WC()->countries->get_states( isset( $_POST[ $fieldset_key . '_country' ] ) ? $_POST[ $fieldset_key . '_country' ] : ( 'billing' === $fieldset_key ? WC()->customer->get_country() : WC()->customer->get_shipping_country() ) );
+
+										if ( ! empty( $valid_states ) && is_array( $valid_states ) ) {
+											$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );
+
+											// Convert value to key if set
+											if ( isset( $valid_state_values[ strtolower( $this->posted[ $key ] ) ] ) ) {
+												 $this->posted[ $key ] = $valid_state_values[ strtolower( $this->posted[ $key ] ) ];
+											}
 										}
-									}
 
-									// Only validate if the country has specific state options
-									if ( ! empty( $valid_states ) && is_array( $valid_states ) && sizeof( $valid_states ) > 0 ) {
-										if ( ! in_array( $this->posted[ $key ], array_keys( $valid_states ) ) ) {
-											wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not valid. Please enter one of the following:', 'woocommerce' ) . ' ' . implode( ', ', $valid_states ), 'error' );
+										// Only validate if the country has specific state options
+										if ( ! empty( $valid_states ) && is_array( $valid_states ) && sizeof( $valid_states ) > 0 ) {
+											if ( ! in_array( $this->posted[ $key ], array_keys( $valid_states ) ) ) {
+												wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is not valid. Please enter one of the following:', 'woocommerce' ) . ' ' . implode( ', ', $valid_states ), 'error' );
+											}
 										}
-									}
-								break;
+									break;
+								}
 							}
 						}
 					}
 				}
 			}
-		}
-
-		// Update customer location to posted location so we can correctly check available shipping methods
-		if ( isset( $this->posted['billing_country'] ) ) {
-			WC()->customer->set_country( $this->posted['billing_country'] );
-		}
-		if ( isset( $this->posted['billing_state'] ) ) {
-			WC()->customer->set_state( $this->posted['billing_state'] );
-		}
-		if ( isset( $this->posted['billing_postcode'] ) ) {
-			WC()->customer->set_postcode( $this->posted['billing_postcode'] );
-		}
-
-		// Shipping Information
-		if ( ! $skipped_shipping ) {
-
-			// Update customer location to posted location so we can correctly check available shipping methods
-			if ( isset( $this->posted['shipping_country'] ) ) {
-				WC()->customer->set_shipping_country( $this->posted['shipping_country'] );
-			}
-			if ( isset( $this->posted['shipping_state'] ) ) {
-				WC()->customer->set_shipping_state( $this->posted['shipping_state'] );
-			}
-			if ( isset( $this->posted['shipping_postcode'] ) ) {
-				WC()->customer->set_shipping_postcode( $this->posted['shipping_postcode'] );
-			}
-
-		} else {
 
 			// Update customer location to posted location so we can correctly check available shipping methods
 			if ( isset( $this->posted['billing_country'] ) ) {
-				WC()->customer->set_shipping_country( $this->posted['billing_country'] );
+				WC()->customer->set_country( $this->posted['billing_country'] );
 			}
 			if ( isset( $this->posted['billing_state'] ) ) {
-				WC()->customer->set_shipping_state( $this->posted['billing_state'] );
+				WC()->customer->set_state( $this->posted['billing_state'] );
 			}
 			if ( isset( $this->posted['billing_postcode'] ) ) {
-				WC()->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
+				WC()->customer->set_postcode( $this->posted['billing_postcode'] );
 			}
 
-		}
+			// Shipping Information
+			if ( ! $skipped_shipping ) {
 
-		// Update cart totals now we have customer address
-		WC()->cart->calculate_totals();
+				// Update customer location to posted location so we can correctly check available shipping methods
+				if ( isset( $this->posted['shipping_country'] ) ) {
+					WC()->customer->set_shipping_country( $this->posted['shipping_country'] );
+				}
+				if ( isset( $this->posted['shipping_state'] ) ) {
+					WC()->customer->set_shipping_state( $this->posted['shipping_state'] );
+				}
+				if ( isset( $this->posted['shipping_postcode'] ) ) {
+					WC()->customer->set_shipping_postcode( $this->posted['shipping_postcode'] );
+				}
 
-		// Terms
-		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && wc_get_page_id( 'terms' ) > 0 ) {
-			wc_add_notice( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ), 'error' );
-		}
+			} else {
 
-		if ( WC()->cart->needs_shipping() ) {
+				// Update customer location to posted location so we can correctly check available shipping methods
+				if ( isset( $this->posted['billing_country'] ) ) {
+					WC()->customer->set_shipping_country( $this->posted['billing_country'] );
+				}
+				if ( isset( $this->posted['billing_state'] ) ) {
+					WC()->customer->set_shipping_state( $this->posted['billing_state'] );
+				}
+				if ( isset( $this->posted['billing_postcode'] ) ) {
+					WC()->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
+				}
 
-			if ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) ) {
-				wc_add_notice( sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ), 'error' );
 			}
 
-			// Validate Shipping Methods
-			$packages               = WC()->shipping->get_packages();
-			$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+			// Update cart totals now we have customer address
+			WC()->cart->calculate_totals();
 
-			foreach ( $packages as $i => $package ) {
-				if ( ! isset( $package['rates'][ $this->shipping_methods[ $i ] ] ) ) {
-					wc_add_notice( __( 'Invalid shipping method.', 'woocommerce' ), 'error' );
-					$this->shipping_methods[ $i ] = '';
+			// Terms
+			if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && wc_get_page_id( 'terms' ) > 0 ) {
+				wc_add_notice( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ), 'error' );
+			}
+
+			if ( WC()->cart->needs_shipping() ) {
+
+				if ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) ) {
+					wc_add_notice( sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ), 'error' );
+				}
+
+				// Validate Shipping Methods
+				$packages               = WC()->shipping->get_packages();
+				$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+				foreach ( $packages as $i => $package ) {
+					if ( ! isset( $package['rates'][ $this->shipping_methods[ $i ] ] ) ) {
+						wc_add_notice( __( 'Invalid shipping method.', 'woocommerce' ), 'error' );
+						$this->shipping_methods[ $i ] = '';
+					}
 				}
 			}
-		}
 
-		if ( WC()->cart->needs_payment() ) {
+			if ( WC()->cart->needs_payment() ) {
 
-			// Payment Method
-			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+				// Payment Method
+				$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-			if ( ! isset( $available_gateways[ $this->posted['payment_method'] ] ) ) {
-				$this->payment_method = '';
-				wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-			} else {
-				$this->payment_method = $available_gateways[ $this->posted['payment_method'] ];
-				$this->payment_method->validate_fields();
+				if ( ! isset( $available_gateways[ $this->posted['payment_method'] ] ) ) {
+					$this->payment_method = '';
+					wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
+				} else {
+					$this->payment_method = $available_gateways[ $this->posted['payment_method'] ];
+					$this->payment_method->validate_fields();
+				}
 			}
-		}
 
-		// Action after validation
-		do_action( 'woocommerce_after_checkout_validation', $this->posted );
+			// Action after validation
+			do_action( 'woocommerce_after_checkout_validation', $this->posted );
 
-		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && wc_notice_count( 'error' ) == 0 ) {
-
-			try {
+			if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && wc_notice_count( 'error' ) == 0 ) {
 
 				// Customer accounts
 				$this->customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
@@ -674,13 +675,13 @@ class WC_Checkout {
 
 				}
 
-			} catch ( Exception $e ) {
-				if ( ! empty( $e ) ) {
-					wc_add_notice( $e->getMessage(), 'error' );
-				}
 			}
 
-		} // endif
+		} catch ( Exception $e ) {
+			if ( ! empty( $e ) ) {
+				wc_add_notice( $e->getMessage(), 'error' );
+			}
+		}
 
 		// If we reached this point then there were errors
 		if ( is_ajax() ) {
@@ -691,7 +692,6 @@ class WC_Checkout {
 				wc_print_notices();
 				$messages = ob_get_clean();
 			}
-
 
 			echo '<!--WC_START-->' . json_encode(
 				array(
