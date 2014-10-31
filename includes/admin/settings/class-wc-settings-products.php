@@ -41,8 +41,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 	public function get_sections() {
 
 		$sections = array(
-			''          => __( 'Product Options', 'woocommerce' ),
-			'inventory' => __( 'Inventory', 'woocommerce' )
+			''          	=> __( 'Display', 'woocommerce' ),
+			'inventory' 	=> __( 'Inventory', 'woocommerce' ),
+			'downloadable' 	=> __( 'Downloadable Products', 'woocommerce' ),
+			'reviews' 		=> __( 'Reviews', 'woocommerce' ),
 		);
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
@@ -79,7 +81,46 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			$settings = apply_filters( 'woocommerce_inventory_settings', array(
 
-				array( 'title' => __( 'Inventory Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'inventory_options' ),
+				array( 'title' => __( 'Measurements', 'woocommerce' ), 'type' => 'title', 'id' => 'product_measurement_options' ),
+
+				array(
+					'title'    => __( 'Weight Unit', 'woocommerce' ),
+					'desc'     => __( 'This controls what unit you will define weights in.', 'woocommerce' ),
+					'id'       => 'woocommerce_weight_unit',
+					'class'    => 'chosen_select',
+					'css'      => 'min-width:300px;',
+					'default'  => 'kg',
+					'type'     => 'select',
+					'options'  => array(
+						'kg'  => __( 'kg', 'woocommerce' ),
+						'g'   => __( 'g', 'woocommerce' ),
+						'lbs' => __( 'lbs', 'woocommerce' ),
+						'oz'  => __( 'oz', 'woocommerce' ),
+					),
+					'desc_tip' =>  true,
+				),
+
+				array(
+					'title'    => __( 'Dimensions Unit', 'woocommerce' ),
+					'desc'     => __( 'This controls what unit you will define lengths in.', 'woocommerce' ),
+					'id'       => 'woocommerce_dimension_unit',
+					'class'    => 'chosen_select',
+					'css'      => 'min-width:300px;',
+					'default'  => 'cm',
+					'type'     => 'select',
+					'options'  => array(
+						'm'  => __( 'm', 'woocommerce' ),
+						'cm' => __( 'cm', 'woocommerce' ),
+						'mm' => __( 'mm', 'woocommerce' ),
+						'in' => __( 'in', 'woocommerce' ),
+						'yd' => __( 'yd', 'woocommerce' ),
+					),
+					'desc_tip' =>  true,
+				),
+
+				array( 'type' => 'sectionend', 'id' => 'product_measurement_options'),
+
+				array( 'title' => __( 'Inventory', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'product_inventory_options' ),
 
 				array(
 					'title'   => __( 'Manage Stock', 'woocommerce' ),
@@ -182,10 +223,104 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip' =>  true,
 				),
 
-				array( 'type' => 'sectionend', 'id' => 'inventory_options'),
+				array( 'type' => 'sectionend', 'id' => 'product_inventory_options'),
 
 			));
 
+		} elseif ( $current_section == 'downloadable' ) {
+			$settings = apply_filters( 'woocommerce_downloadable_products_settings', array(
+				array( 'title' => __( 'Downloadable Products', 'woocommerce' ), 'type' => 'title', 'id' => 'digital_download_options' ),
+
+				array(
+					'title'    => __( 'File Download Method', 'woocommerce' ),
+					'desc'     => __( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce' ),
+					'id'       => 'woocommerce_file_download_method',
+					'type'     => 'select',
+					'class'    => 'chosen_select',
+					'css'      => 'min-width:300px;',
+					'default'  => 'force',
+					'desc_tip' =>  true,
+					'options'  => array(
+						'force'     => __( 'Force Downloads', 'woocommerce' ),
+						'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
+						'redirect'  => __( 'Redirect only', 'woocommerce' ),
+					),
+					'autoload' => false
+				),
+
+				array(
+					'title'         => __( 'Access Restriction', 'woocommerce' ),
+					'desc'          => __( 'Downloads require login', 'woocommerce' ),
+					'id'            => 'woocommerce_downloads_require_login',
+					'type'          => 'checkbox',
+					'default'       => 'no',
+					'desc_tip'      => __( 'This setting does not apply to guest purchases.', 'woocommerce' ),
+					'checkboxgroup' => 'start',
+					'autoload'      => false
+				),
+
+				array(
+					'desc'          => __( 'Grant access to downloadable products after payment', 'woocommerce' ),
+					'id'            => 'woocommerce_downloads_grant_access_after_payment',
+					'type'          => 'checkbox',
+					'default'       => 'yes',
+					'desc_tip'      => __( 'Enable this option to grant access to downloads when orders are "processing", rather than "completed".', 'woocommerce' ),
+					'checkboxgroup' => 'end',
+					'autoload'      => false
+				),
+
+				array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
+
+			));
+
+		} elseif ( $current_section == 'reviews' ) {
+			$settings = apply_filters( 'woocommerce_reviews_settings', array(
+				array( 'title' => __( 'Reviews', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'product_rating_options' ),
+
+				array(
+					'title'           => __( 'Product Ratings', 'woocommerce' ),
+					'desc'            => __( 'Enable ratings on reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_enable_review_rating',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'start',
+					'show_if_checked' => 'option',
+					'autoload'        => false
+				),
+
+				array(
+					'desc'            => __( 'Ratings are required to leave a review', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_required',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => '',
+					'show_if_checked' => 'yes',
+					'autoload'        => false
+				),
+
+				array(
+					'desc'            => __( 'Show "verified owner" label for customer reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_verification_label',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => '',
+					'show_if_checked' => 'yes',
+					'autoload'        => false
+				),
+
+				array(
+					'desc'            => __( 'Only allow reviews from "verified owners"', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_verification_required',
+					'default'         => 'no',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'end',
+					'show_if_checked' => 'yes',
+					'autoload'        => false
+				),
+
+				array( 'type' => 'sectionend', 'id' => 'product_rating_options' ),
+
+			));
 		} else {
 
 			// Get shop page
@@ -201,10 +336,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			$settings = apply_filters( 'woocommerce_product_settings', array(
 
-				array( 'title' => __( 'Product Listings', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'catalog_options' ),
+				array( 'title' => __( 'Shop & Product Pages', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'catalog_options' ),
 
 				array(
-					'title'    => __( 'Product Archive / Shop Page', 'woocommerce' ),
+					'title'    => __( 'Shop Page', 'woocommerce' ),
 					'desc'     => '<br/>' . sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
 					'id'       => 'woocommerce_shop_page_id',
 					'type'     => 'single_select_page',
@@ -266,7 +401,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'title'         => __( 'Add to cart', 'woocommerce' ),
+					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
 					'desc'          => __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
 					'id'            => 'woocommerce_cart_redirect_after_add',
 					'default'       => 'no',
@@ -284,87 +419,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
 
-				array( 'title' => __( 'Product Data', 'woocommerce' ), 'type' => 'title', 'id' => 'product_data_options' ),
-
-				array(
-					'title'    => __( 'Weight Unit', 'woocommerce' ),
-					'desc'     => __( 'This controls what unit you will define weights in.', 'woocommerce' ),
-					'id'       => 'woocommerce_weight_unit',
-					'class'    => 'chosen_select',
-					'css'      => 'min-width:300px;',
-					'default'  => 'kg',
-					'type'     => 'select',
-					'options'  => array(
-						'kg'  => __( 'kg', 'woocommerce' ),
-						'g'   => __( 'g', 'woocommerce' ),
-						'lbs' => __( 'lbs', 'woocommerce' ),
-						'oz'  => __( 'oz', 'woocommerce' ),
-					),
-					'desc_tip' =>  true,
-				),
-
-				array(
-					'title'    => __( 'Dimensions Unit', 'woocommerce' ),
-					'desc'     => __( 'This controls what unit you will define lengths in.', 'woocommerce' ),
-					'id'       => 'woocommerce_dimension_unit',
-					'class'    => 'chosen_select',
-					'css'      => 'min-width:300px;',
-					'default'  => 'cm',
-					'type'     => 'select',
-					'options'  => array(
-						'm'  => __( 'm', 'woocommerce' ),
-						'cm' => __( 'cm', 'woocommerce' ),
-						'mm' => __( 'mm', 'woocommerce' ),
-						'in' => __( 'in', 'woocommerce' ),
-						'yd' => __( 'yd', 'woocommerce' ),
-					),
-					'desc_tip' =>  true,
-				),
-
-				array(
-					'title'           => __( 'Product Ratings', 'woocommerce' ),
-					'desc'            => __( 'Enable ratings on reviews', 'woocommerce' ),
-					'id'              => 'woocommerce_enable_review_rating',
-					'default'         => 'yes',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => 'start',
-					'show_if_checked' => 'option',
-					'autoload'        => false
-				),
-
-				array(
-					'desc'            => __( 'Ratings are required to leave a review', 'woocommerce' ),
-					'id'              => 'woocommerce_review_rating_required',
-					'default'         => 'yes',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => '',
-					'show_if_checked' => 'yes',
-					'autoload'        => false
-				),
-
-				array(
-					'desc'            => __( 'Show "verified owner" label for customer reviews', 'woocommerce' ),
-					'id'              => 'woocommerce_review_rating_verification_label',
-					'default'         => 'yes',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => '',
-					'show_if_checked' => 'yes',
-					'autoload'        => false
-				),
-
-				array(
-					'desc'            => __( 'Only allow reviews from "verified owners"', 'woocommerce' ),
-					'id'              => 'woocommerce_review_rating_verification_required',
-					'default'         => 'no',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => 'end',
-					'show_if_checked' => 'yes',
-					'autoload'        => false
-				),
-
-				array( 'type' => 'sectionend', 'id' => 'product_data_options' ),
-
-				array( 'title' => __( 'Product Image Sizes', 'woocommerce' ), 'type' => 'title','desc' => sprintf(__( 'These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/'), 'id' => 'image_options' ),
+				array( 'title' => __( 'Product Images', 'woocommerce' ), 'type' => 'title','desc' => sprintf(__( 'These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/'), 'id' => 'image_options' ),
 
 				array(
 					'title'    => __( 'Catalog Images', 'woocommerce' ),
@@ -409,48 +464,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array( 'type' => 'sectionend', 'id' => 'image_options' ),
-
-				array( 'title' => __( 'Downloadable Products', 'woocommerce' ), 'type' => 'title', 'id' => 'digital_download_options' ),
-
-				array(
-					'title'    => __( 'File Download Method', 'woocommerce' ),
-					'desc'     => __( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce' ),
-					'id'       => 'woocommerce_file_download_method',
-					'type'     => 'select',
-					'class'    => 'chosen_select',
-					'css'      => 'min-width:300px;',
-					'default'  => 'force',
-					'desc_tip' =>  true,
-					'options'  => array(
-						'force'     => __( 'Force Downloads', 'woocommerce' ),
-						'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
-						'redirect'  => __( 'Redirect only', 'woocommerce' ),
-					),
-					'autoload' => false
-				),
-
-				array(
-					'title'         => __( 'Access Restriction', 'woocommerce' ),
-					'desc'          => __( 'Downloads require login', 'woocommerce' ),
-					'id'            => 'woocommerce_downloads_require_login',
-					'type'          => 'checkbox',
-					'default'       => 'no',
-					'desc_tip'      => __( 'This setting does not apply to guest purchases.', 'woocommerce' ),
-					'checkboxgroup' => 'start',
-					'autoload'      => false
-				),
-
-				array(
-					'desc'          => __( 'Grant access to downloadable products after payment', 'woocommerce' ),
-					'id'            => 'woocommerce_downloads_grant_access_after_payment',
-					'type'          => 'checkbox',
-					'default'       => 'yes',
-					'desc_tip'      => __( 'Enable this option to grant access to downloads when orders are "processing", rather than "completed".', 'woocommerce' ),
-					'checkboxgroup' => 'end',
-					'autoload'      => false
-				),
-
-				array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
 
 			));
 		}
