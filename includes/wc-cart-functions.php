@@ -134,7 +134,7 @@ function wc_clear_cart_after_payment() {
 
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
-		if ( $order->id > 0 ) {
+		if ( $order && $order->id > 0 ) {
 			// If the order has not failed, or is not pending, the order must have gone through
 			if ( ! $order->has_status( array( 'failed', 'pending' ) ) ) {
 				WC()->cart->empty_cart();
