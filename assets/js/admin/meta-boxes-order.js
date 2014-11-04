@@ -641,7 +641,7 @@ jQuery( function ( $ ) {
 
 	// Refund actions
 	$( 'body' )
-		.on( 'change', '.wc-order-refund-items #refund_amount', function() {
+		.on( 'change keyup', '.wc-order-refund-items #refund_amount', function() {
 			var total = accounting.unformat( $( this ).val(), woocommerce_admin.mon_decimal_point );
 
 			$( 'button .wc-order-refund-amount .amount' ).text( accounting.formatMoney( total, {
