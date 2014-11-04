@@ -238,7 +238,7 @@ class WC_Admin_Post_Types {
 				echo '<div class="row-actions">';
 
 				$i = 0;
-				$action_count = sizeof($actions);
+				$action_count = sizeof( $actions );
 
 				foreach ( $actions as $action => $link ) {
 					++$i;
@@ -260,6 +260,7 @@ class WC_Admin_Post_Types {
 						<div class="length">' . $the_product->length . '</div>
 						<div class="width">' . $the_product->width . '</div>
 						<div class="height">' . $the_product->height . '</div>
+						<div class="shipping_class">' . $the_product->get_shipping_class() . '</div>
 						<div class="visibility">' . $the_product->visibility . '</div>
 						<div class="stock_status">' . $the_product->stock_status . '</div>
 						<div class="stock">' . $the_product->stock . '</div>
@@ -725,7 +726,6 @@ class WC_Admin_Post_Types {
 	/**
 	 * Custom bulk edit - form
 	 *
-	 * @access public
 	 * @param mixed $column_name
 	 * @param mixed $post_type
 	 */
@@ -734,13 +734,16 @@ class WC_Admin_Post_Types {
 			return;
 		}
 
+		$shipping_class = get_terms( 'product_shipping_class', array(
+			'hide_empty' => false,
+		) );
+
 		include( WC()->plugin_path() . '/includes/admin/views/html-bulk-edit-product.php' );
 	}
 
 	/**
 	 * Custom quick edit - form
 	 *
-	 * @access public
 	 * @param mixed $column_name
 	 * @param mixed $post_type
 	 */
@@ -748,6 +751,10 @@ class WC_Admin_Post_Types {
 		if ( 'price' != $column_name || 'product' != $post_type ) {
 			return;
 		}
+
+		$shipping_class = get_terms( 'product_shipping_class', array(
+			'hide_empty' => false,
+		) );
 
 		include( WC()->plugin_path() . '/includes/admin/views/html-quick-edit-product.php' );
 	}
@@ -848,6 +855,10 @@ class WC_Admin_Post_Types {
 
 		if ( isset( $_REQUEST['_height'] ) ) {
 			update_post_meta( $post_id, '_height', wc_clean( $_REQUEST['_height'] ) );
+		}
+
+		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
+			wp_set_object_terms( $post_id, wc_clean( $_REQUEST['_shipping_class'] ), 'product_shipping_class' );
 		}
 
 		if ( isset( $_REQUEST['_visibility'] ) ) {
@@ -973,6 +984,12 @@ class WC_Admin_Post_Types {
 
 		if ( ! empty( $_REQUEST['_stock_status'] ) ) {
 			wc_update_product_stock_status( $post_id, wc_clean( $_REQUEST['_stock_status'] ) );
+		}
+
+		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
+			$shipping_class = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
+
+			wp_set_object_terms( $post_id, $shipping_class, 'product_shipping_class' );
 		}
 
 		if ( ! empty( $_REQUEST['_visibility'] ) ) {

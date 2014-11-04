@@ -53,6 +53,8 @@ class WC_Admin_Menus {
 
 		$main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
 
+		add_submenu_page( 'edit.php?post_type=product', __( 'Shipping Classes', 'woocommerce' ), __( 'Shipping Classes', 'woocommerce' ), 'manage_product_terms', 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' );
+
 		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 	}
 
@@ -117,6 +119,11 @@ class WC_Admin_Menus {
 				if ( $screen->base == 'edit-tags' && taxonomy_is_product_attribute( $taxonomy ) ) {
 					$submenu_file = 'product_attributes';
 					$parent_file  = 'edit.php?post_type=' . esc_attr( $post_type );
+				}
+
+				// Fix the highlight of shipping classes menu
+				if ( 'product_shipping_class' == $screen->taxonomy && $parent_file == 'edit.php?post_type=product' ) {
+					$submenu_file = 'edit-tags.php?taxonomy=product_shipping_class&post_type=product';
 				}
 			}
 		}
