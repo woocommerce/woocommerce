@@ -1008,8 +1008,8 @@ class WC_Cart {
 				$this->cart_contents_count  += $values['quantity'];
 
 				// Prices
-				$base_price = $_product->get_price();
-				$line_price = $_product->get_price() * $values['quantity'];
+				$base_price = apply_filters( 'woocommerce_base_price', $_product->get_price(), $values, $cart_item_key);
+				$line_price = $base_price * $values['quantity'];
 
 				$line_subtotal = 0;
 				$line_subtotal_tax = 0;
@@ -1106,8 +1106,8 @@ class WC_Cart {
 				$_product = $values['data'];
 
 				// Prices
-				$base_price = $_product->get_price();
-				$line_price = $_product->get_price() * $values['quantity'];
+				$base_price = apply_filters( 'woocommerce_base_price', $_product->get_price(), $values, $cart_item_key);
+				$line_price = $base_price * $values['quantity'];
 
 				// Tax data
 				$taxes = array();
