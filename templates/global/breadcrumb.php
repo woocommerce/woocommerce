@@ -44,7 +44,7 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 		if ( 0 != $this_category->parent ) {
 			$parent_category = get_category( $this_category->parent );
 			if ( ( $parents = get_category_parents( $parent_category, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
-				echo $before . substr( $parents, 0, strlen($parents) - strlen($after . $delimiter . $before) ) . $after . $delimiter;
+				echo $before . substr( $parents, 0, strlen( $parents ) - strlen( $after . $delimiter . $before ) ) . $after . $delimiter;
 			}
 		}
 
@@ -145,7 +145,7 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 
 			$cat = current( get_the_category() );
 			if ( ( $parents = get_category_parents( $cat, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
-				echo $before . substr( $parents, 0, strlen($parents) - strlen($after . $delimiter . $before) ) . $after . $delimiter;
+				echo $before . substr( $parents, 0, strlen( $parents ) - strlen( $after . $delimiter . $before ) ) . $after . $delimiter;
 			}
 			echo $before . get_the_title() . $after;
 
@@ -168,7 +168,7 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 		$parent = get_post( $post->post_parent );
 		$cat = current( get_the_category( $parent->ID ) );
 		if ( ( $parents = get_category_parents( $cat, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
-			echo $before . substr( $parents, 0, strlen($parents) - strlen($after . $delimiter . $before) ) . $after . $delimiter;
+			echo $before . substr( $parents, 0, strlen( $parents ) - strlen( $after . $delimiter . $before ) ) . $after . $delimiter;
 		}
 		echo $before . '<a href="' . get_permalink( $parent ) . '">' . $parent->post_title . '</a>' . $after . $delimiter;
 		echo $before . get_the_title() . $after;
