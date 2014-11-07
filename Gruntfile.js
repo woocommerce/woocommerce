@@ -75,7 +75,7 @@ module.exports = function( grunt ) {
 			compile: {
 				options: {
 					sourcemap: 'none',
-					loadPath: require( 'node-bourbon' ).includePaths
+					loadPath: ['bower_components/bourbon/dist']
 				},
 				files: [{
 					expand: true,

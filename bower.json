@@ -1,0 +1,16 @@
+{
+  "name": "woocommerce",
+  "title": "WooCommerce",
+  "version": "2.2.8",
+  "homepage": "http://www.woothemes.com/woocommerce/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/woothemes/woocommerce.git"
+  },
+  "main": "Gruntfile.js",
+  "license": "GPL+v3",
+  "private": true,
+  "devDependencies": {
+    "bourbon": "~4.0.2"
+  }
+}
