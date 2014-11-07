@@ -12,6 +12,9 @@ sftp-config.json
 /node_modules/
 /deploy/
 
+# Bower
+/bower_components/
+
 # Sass
 .sass-cache/
 
