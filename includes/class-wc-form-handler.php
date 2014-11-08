@@ -903,7 +903,9 @@ class WC_Form_Handler {
 				return;
 			}
 
-			wc_set_customer_auth_cookie( $new_customer );
+			if ( apply_filters( 'woocommerce_registration_auth_new_customer', true, $new_customer ) ) {
+				wc_set_customer_auth_cookie( $new_customer );
+			}
 
 			// Redirect
 			if ( wp_get_referer() ) {
