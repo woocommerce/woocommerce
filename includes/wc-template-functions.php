@@ -1835,7 +1835,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				if ( $args['label'] )
 					$field .= '<label for="' . esc_attr( $args['id'] ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) .'">' . $args['label']. $required . '</label>';
 
-				$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select '.esc_attr( implode( ' ', $args['label_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . '>
+				$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select '.esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . '>
 						' . $options . '
 					</select>';
 
