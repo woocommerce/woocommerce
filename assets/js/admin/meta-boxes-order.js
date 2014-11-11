@@ -74,7 +74,78 @@ jQuery( function ( $ ) {
 		$( this ).closest( '.order_data_column' ).find( 'div.edit_address' ).show();
 	});
 
+
+	var states = null,
+		chosen_opts = {
+
+		};
+	// Check if we have the countries loaded
+	if ( ! ( typeof woocommerce_admin_meta_boxes_order === 'undefined' || typeof woocommerce_admin_meta_boxes_order.countries === 'undefined' ) ) {
+		/* State/Country select boxes */
+		states = $.parseJSON( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
+	}
+
+	$( '.js_field-country' )
+		.chosen( chosen_opts )
+		.change( function( e, stickValue ){
+			// Check for stickValue before using it
+			if ( typeof stickValue === 'undefined' ){
+				stickValue = false;
+			}
+
+			// Prevent if we don't have the metabox data
+			if ( states === null ){
+				return;
+			}
+
+			var $this = $( this ),
+				country = $this.val(),
+				$state = $this.parents( '.edit_address' ).find( '.js_field-state' ),
+				$parent = $state.parent(),
+				input_name = $state.attr( 'name' ),
+				input_id = $state.attr( 'id' ),
+				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : $state.val(),
+				placeholder = $state.attr( 'placeholder' );
+
+			if ( stickValue ){
+				$this.data( 'woocommerce.stickState-' + country, value );
+			}
+
+			// Remove the previous Chosen DOM element
+			$parent.show().find( '.chosen-container' ).remove();
+
+			if ( states[ country ] ) {
+				var $states_select = $( '<select name="' + input_name + '" id="' + input_id + '" class="js_field-state select short" placeholder="' + placeholder + '"></select>' ),
+					state = states[ country ];
+
+				$states_select.append( $( '<option value="">' + woocommerce_admin_meta_boxes_order.i18n_select_state_text + '</option>' ) );
+
+				$.each( state, function( index, name ) {
+					$states_select.append( $( '<option value="' + index + '">' + state[ index ] + '</option>' ) );
+				} );
+
+				$states_select.val( value );
+
+				$state.replaceWith( $states_select );
+
+				$states_select.show().chosen( chosen_opts ).hide().trigger("chosen:updated");
+			} else {
+				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
+			}
+
+			$( 'body' ).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
+		} ).trigger( 'change', [ true ] );
+
 	$( 'body' )
+		.on( 'change', 'select.js_field-state', function(){
+			// Here we will find if state value on a select has changed and stick it to the country data
+			var $this = $( this ),
+				state = $this.val(),
+				$country = $this.parents( '.edit_address' ).find( '.js_field-country' ),
+				country = $country.val();
+
+			$country.data( 'woocommerce.stickState-' + country, state );
+		} )
 		.on( 'click', 'a.edit-order-item', function() {
 			$( this ).closest( 'tr' ).find( '.view' ).hide();
 			$( this ).closest( 'tr' ).find( '.edit' ).show();
