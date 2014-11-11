@@ -75,6 +75,8 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 					endif;
 				?>
 
+				<?php do_action( 'woocommerce_admin_after_order_item_headers' ); /* allow addition of columns to the end of the list */ ?>
+
 				<th class="wc-order-edit-line-item" width="1%">&nbsp;</th>
 			</tr>
 		</thead>

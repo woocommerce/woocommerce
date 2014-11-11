@@ -41,6 +41,8 @@ $who_refunded = new WP_User( $refund->post->post_author );
 
 	<?php endfor; endif; ?>
 
+	<?php do_action( 'woocommerce_admin_after_order_item_values', null, $item, absint( $item_id ) ); /* add columns at the end of the values list */ ?>
+
 	<td class="wc-order-edit-line-item">
 		<div class="wc-order-edit-line-item-actions">
 			<a class="delete_refund" href="#"></a>
