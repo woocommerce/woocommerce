@@ -2221,7 +2221,7 @@ img.help_tip {
 	input[type="email"].short,
 	input[type="number"].short,
 	.short {
-		width: 25%;
+		width: 50%;
 	}
 	.sized {
 		width: auto !important;
@@ -2269,9 +2269,12 @@ img.help_tip {
 	}
 	.dimensions_field {
 		.wrap {
+			display: block;
+			width: 50%;
+
 			input {
-				margin-right: .2%;
-				width: 8.2%;
+				width: 30.75%;
+				margin-right: 3.8%;
 			}
 			.last {
 				margin-right: 0;
@@ -3189,12 +3192,9 @@ table.bar_chart {
 		.short,
 		input[type=email].short,
 		input[type=number].short,
-		input[type=text].short {
-			width: 100%;
-		}
-
-		.dimensions_field .wrap input {
-			width: 30%;
+		input[type=text].short,
+		.dimensions_field .wrap {
+			width: 80%;
 		}
 	}
 
