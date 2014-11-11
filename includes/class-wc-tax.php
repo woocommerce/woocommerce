@@ -337,12 +337,12 @@ class WC_Tax {
 			// Prices excluding tax however should just not add any taxes, as they will be added during checkout.
 			// The woocommerce_default_customer_address option (when set to base) is also used here.
 			$matched_tax_rates = get_option( 'woocommerce_prices_include_tax' ) == 'yes' || get_option( 'woocommerce_default_customer_address' ) == 'base'
-				? self::get_shop_base_rate( $tax_class )
+				? self::get_base_tax_rates( $tax_class )
 				: array();
 
 		}
 
-		return apply_filters('woocommerce_matched_rates', $matched_tax_rates, $tax_class);
+		return apply_filters( 'woocommerce_matched_rates', $matched_tax_rates, $tax_class );
 	}
 
 	/**
@@ -351,14 +351,25 @@ class WC_Tax {
 	 * @param   string	Tax Class
 	 * @return  array
 	 */
-	public static function get_shop_base_rate( $tax_class = '' ) {
-		return self::find_rates( array(
+	public static function get_base_tax_rates( $tax_class = '' ) {
+		return apply_filters( 'woocommerce_base_tax_rates', self::find_rates( array(
 			'country' 	=> WC()->countries->get_base_country(),
 			'state' 	=> WC()->countries->get_base_state(),
 			'postcode' 	=> WC()->countries->get_base_postcode(),
 			'city' 		=> WC()->countries->get_base_city(),
 			'tax_class' => $tax_class
-		) );
+		) ), $tax_class );
+	}
+
+	/**
+	 * Alias for get_base_tax_rates()
+	 *
+	 * @deprecated 2.3
+	 * @param   string	Tax Class
+	 * @return  array
+	 */
+	public static function get_shop_base_rate( $tax_class = '' ) {
+		return self::get_base_tax_rates( $tax_class );
 	}
 
 	/**
