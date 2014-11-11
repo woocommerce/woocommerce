@@ -51,6 +51,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="view">
 			<?php
+				/* filter for customizing meta */
+				do_action('woocommerce_before_view_order_itemmeta', $item_id, $item, $_product);
+
 				global $wpdb;
 
 				if ( $metadata = $order->has_meta( $item_id ) ) {
@@ -98,9 +101,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 					}
 					echo '</table>';
 				}
+
+				/* filter for customizing meta */
+				do_action('woocommerce_after_view_order_itemmeta', $item_id, $item, $_product);
 			?>
 		</div>
 		<div class="edit" style="display: none;">
+
+			<?php do_action('woocommerce_before_edit_order_itemmeta', $item_id, $item, $_product, $order) /* filter for customizing meta */ ?>
+
 			<table class="meta" cellspacing="0">
 				<tbody class="meta_items">
 				<?php
@@ -147,6 +156,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</tr>
 				</tfoot>
 			</table>
+
+			<?php do_action('woocommerce_after_edit_order_itemmeta', $item_id, $item, $_product, $order) /* filter for customizing meta */ ?>
+
 		</div>
 
 		<?php do_action( 'woocommerce_after_order_itemmeta', $item_id, $item, $_product ) ?>
