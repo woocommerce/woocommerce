@@ -1003,17 +1003,17 @@ jQuery( function ( $ ) {
 					var info = response;
 
 					if ( info ) {
-						$( 'input#_billing_first_name' ).val( info.billing_first_name );
-						$( 'input#_billing_last_name' ).val( info.billing_last_name );
-						$( 'input#_billing_company' ).val( info.billing_company );
-						$( 'input#_billing_address_1' ).val( info.billing_address_1 );
-						$( 'input#_billing_address_2' ).val( info.billing_address_2 );
-						$( 'input#_billing_city' ).val( info.billing_city );
-						$( 'input#_billing_postcode' ).val( info.billing_postcode );
-						$( '#_billing_country' ).val( info.billing_country );
-						$( 'input#_billing_state' ).val( info.billing_state );
-						$( 'input#_billing_email' ).val( info.billing_email );
-						$( 'input#_billing_phone' ).val( info.billing_phone );
+						$( 'input#_billing_first_name' ).val( info.billing_first_name ).change();
+						$( 'input#_billing_last_name' ).val( info.billing_last_name ).change();
+						$( 'input#_billing_company' ).val( info.billing_company ).change();
+						$( 'input#_billing_address_1' ).val( info.billing_address_1 ).change();
+						$( 'input#_billing_address_2' ).val( info.billing_address_2 ).change();
+						$( 'input#_billing_city' ).val( info.billing_city ).change();
+						$( 'input#_billing_postcode' ).val( info.billing_postcode ).change();
+						$( '#_billing_country' ).val( info.billing_country ).change().trigger( 'chosen:updated' );
+						$( '#_billing_state' ).val( info.billing_state ).change().trigger( 'chosen:updated' );
+						$( 'input#_billing_email' ).val( info.billing_email ).change();
+						$( 'input#_billing_phone' ).val( info.billing_phone ).change();
 					}
 
 					$( '.edit_address' ).unblock();
@@ -1057,15 +1057,15 @@ jQuery( function ( $ ) {
 					var info = response;
 
 					if ( info ) {
-						$( 'input#_shipping_first_name' ).val( info.shipping_first_name );
-						$( 'input#_shipping_last_name' ).val( info.shipping_last_name );
-						$( 'input#_shipping_company' ).val( info.shipping_company );
-						$( 'input#_shipping_address_1' ).val( info.shipping_address_1 );
-						$( 'input#_shipping_address_2' ).val( info.shipping_address_2 );
-						$( 'input#_shipping_city' ).val( info.shipping_city );
-						$( 'input#_shipping_postcode' ).val( info.shipping_postcode );
-						$( '#_shipping_country' ).val( info.shipping_country );
-						$( 'input#_shipping_state' ).val( info.shipping_state );
+						$( 'input#_shipping_first_name' ).val( info.shipping_first_name ).change();
+						$( 'input#_shipping_last_name' ).val( info.shipping_last_name ).change();
+						$( 'input#_shipping_company' ).val( info.shipping_company ).change();
+						$( 'input#_shipping_address_1' ).val( info.shipping_address_1 ).change();
+						$( 'input#_shipping_address_2' ).val( info.shipping_address_2 ).change();
+						$( 'input#_shipping_city' ).val( info.shipping_city ).change();
+						$( 'input#_shipping_postcode' ).val( info.shipping_postcode ).change();
+						$( '#_shipping_country' ).val( info.shipping_country ).change().trigger( 'chosen:updated' );
+						$( '#_shipping_state' ).val( info.shipping_state ).change().trigger( 'chosen:updated' );
 					}
 
 					$( '.edit_address' ).unblock();
@@ -1077,15 +1077,15 @@ jQuery( function ( $ ) {
 
 	$( 'button.billing-same-as-shipping' ).on( 'click', function() {
 		if ( window.confirm( woocommerce_admin_meta_boxes.copy_billing ) ) {
-			$( 'input#_shipping_first_name' ).val( $( 'input#_billing_first_name' ).val() );
-			$( 'input#_shipping_last_name' ).val( $( 'input#_billing_last_name' ).val() );
-			$( 'input#_shipping_company' ).val( $( 'input#_billing_company' ).val() );
-			$( 'input#_shipping_address_1' ).val( $( 'input#_billing_address_1' ).val() );
-			$( 'input#_shipping_address_2' ).val( $( 'input#_billing_address_2' ).val() );
-			$( 'input#_shipping_city' ).val( $( 'input#_billing_city' ).val() );
-			$( 'input#_shipping_postcode' ).val( $( 'input#_billing_postcode' ).val() );
-			$( '#_shipping_country' ).val( $( '#_billing_country' ).val() );
-			$( 'input#_shipping_state' ).val( $( 'input#_billing_state' ).val() );
+			$( 'input#_shipping_first_name' ).val( $( 'input#_billing_first_name' ).val() ).change();
+			$( 'input#_shipping_last_name' ).val( $( 'input#_billing_last_name' ).val() ).change();
+			$( 'input#_shipping_company' ).val( $( 'input#_billing_company' ).val() ).change();
+			$( 'input#_shipping_address_1' ).val( $( 'input#_billing_address_1' ).val() ).change();
+			$( 'input#_shipping_address_2' ).val( $( 'input#_billing_address_2' ).val() ).change();
+			$( 'input#_shipping_city' ).val( $( 'input#_billing_city' ).val() ).change();
+			$( 'input#_shipping_postcode' ).val( $( 'input#_billing_postcode' ).val() ).change();
+			$( '#_shipping_country' ).val( $( '#_billing_country' ).val() ).change().trigger( 'chosen:updated' );
+			$( '#_shipping_state' ).val( $( '#_billing_state' ).val() ).change().trigger( 'chosen:updated' );
 		}
 		return false;
 	});
