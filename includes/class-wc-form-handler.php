@@ -418,9 +418,9 @@ class WC_Form_Handler {
 
 					if ( $passed_validation ) {
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
+						$cart_updated = true;
 					}
 
-					$cart_updated = true;
 				}
 			}
 
