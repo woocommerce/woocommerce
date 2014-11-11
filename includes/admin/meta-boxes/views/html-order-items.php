@@ -52,8 +52,8 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 
 				<?php do_action( 'woocommerce_admin_order_item_headers' ); ?>
 
+				<th class="item_cost"><?php _e( 'Cost', 'woocommerce' ); ?></th>
 				<th class="quantity"><?php _e( 'Qty', 'woocommerce' ); ?></th>
-
 				<th class="line_cost"><?php _e( 'Total', 'woocommerce' ); ?></th>
 
 				<?php

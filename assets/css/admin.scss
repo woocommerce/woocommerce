@@ -692,7 +692,7 @@ ul.wc_coupon_list_block {
 		.center, .variation-id {
 			text-align: center;
 		}
-		.cost, .tax, .quantity, .line_cost, .line_tax, .tax_class {
+		.cost, .tax, .quantity, .line_cost, .line_tax, .tax_class, .item_cost {
 			text-align: right;
 			label {
 				white-space: nowrap;
@@ -735,6 +735,12 @@ ul.wc_coupon_list_block {
 					color: #bbb;
 					border-top: 1px dashed #ddd;
 				}
+			}
+			.view {
+				white-space: nowrap
+			}
+			del {
+				color: #ccc;
 			}
 		}
 		.quantity {

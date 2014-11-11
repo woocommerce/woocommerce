@@ -155,6 +155,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php do_action( 'woocommerce_admin_order_item_values', $_product, $item, absint( $item_id ) ); ?>
 
+	<td class="item_cost" width="1%">
+		<div class="view">
+			<?php
+				if ( isset( $item['line_total'] ) ) {
+					if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] != $item['line_total'] ) {
+						echo '<del>' . wc_price( $order->get_item_subtotal( $item, false, true ), array( 'currency' => $order->get_order_currency() ) ) . '</del> ';
+					}
+					echo wc_price( $order->get_item_total( $item, false, true ), array( 'currency' => $order->get_order_currency() ) );
+				}
+			?>
+		</div>
+	</td>
+
 	<td class="quantity" width="1%">
 		<div class="view">
 			<?php
@@ -181,7 +194,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 					if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] != $item['line_total'] ) {
 						echo '<del>' . wc_price( $item['line_subtotal'], array( 'currency' => $order->get_order_currency() ) ) . '</del> ';
 					}
-
 					echo wc_price( $item['line_total'], array( 'currency' => $order->get_order_currency() ) );
 				}
 
