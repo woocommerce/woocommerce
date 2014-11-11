@@ -419,7 +419,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
 
-				array( 'title' => __( 'Product Images', 'woocommerce' ), 'type' => 'title','desc' => sprintf(__( 'These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/'), 'id' => 'image_options' ),
+				array( 'title' => __( 'Product Images', 'woocommerce' ), 'type' => 'title','desc' => sprintf(__( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/'), 'id' => 'image_options' ),
 
 				array(
 					'title'    => __( 'Catalog Images', 'woocommerce' ),
@@ -463,7 +463,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip' =>  true,
 				),
 
-				array( 'type' => 'sectionend', 'id' => 'image_options' ),
+				array(
+					'title'         => __( 'Product Image Gallery', 'woocommerce' ),
+					'desc'          => __( 'Enable Lightbox for product images', 'woocommerce' ),
+					'id'            => 'woocommerce_enable_lightbox',
+					'default'       => 'yes',
+					'desc_tip'      => __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
+					'type'          => 'checkbox'
+				),
+
+				array( 'type' => 'sectionend', 'id' => 'image_options' )
 
 			));
 		}
