@@ -260,7 +260,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Save settings
 	 */
 	public function save() {
-		global $current_section;
+		global $current_section, $wpdb;
 
 		if ( ! $current_section ) {
 
@@ -275,6 +275,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section_class->id );
 		}
+
+		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%') OR `option_name` LIKE ('_transient_timeout_wc_ship_%')" );
 	}
 }
 
