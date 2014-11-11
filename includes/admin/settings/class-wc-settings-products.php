@@ -41,10 +41,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 	public function get_sections() {
 
 		$sections = array(
-			''          	=> __( 'Display', 'woocommerce' ),
+			''          	=> __( 'General', 'woocommerce' ),
+			'display'       => __( 'Display', 'woocommerce' ),
 			'inventory' 	=> __( 'Inventory', 'woocommerce' ),
 			'downloadable' 	=> __( 'Downloadable Products', 'woocommerce' ),
-			'reviews' 		=> __( 'Reviews', 'woocommerce' ),
 		);
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
@@ -80,45 +80,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 		if ( $current_section == 'inventory' ) {
 
 			$settings = apply_filters( 'woocommerce_inventory_settings', array(
-
-				array( 'title' => __( 'Measurements', 'woocommerce' ), 'type' => 'title', 'id' => 'product_measurement_options' ),
-
-				array(
-					'title'    => __( 'Weight Unit', 'woocommerce' ),
-					'desc'     => __( 'This controls what unit you will define weights in.', 'woocommerce' ),
-					'id'       => 'woocommerce_weight_unit',
-					'class'    => 'chosen_select',
-					'css'      => 'min-width:300px;',
-					'default'  => 'kg',
-					'type'     => 'select',
-					'options'  => array(
-						'kg'  => __( 'kg', 'woocommerce' ),
-						'g'   => __( 'g', 'woocommerce' ),
-						'lbs' => __( 'lbs', 'woocommerce' ),
-						'oz'  => __( 'oz', 'woocommerce' ),
-					),
-					'desc_tip' =>  true,
-				),
-
-				array(
-					'title'    => __( 'Dimensions Unit', 'woocommerce' ),
-					'desc'     => __( 'This controls what unit you will define lengths in.', 'woocommerce' ),
-					'id'       => 'woocommerce_dimension_unit',
-					'class'    => 'chosen_select',
-					'css'      => 'min-width:300px;',
-					'default'  => 'cm',
-					'type'     => 'select',
-					'options'  => array(
-						'm'  => __( 'm', 'woocommerce' ),
-						'cm' => __( 'cm', 'woocommerce' ),
-						'mm' => __( 'mm', 'woocommerce' ),
-						'in' => __( 'in', 'woocommerce' ),
-						'yd' => __( 'yd', 'woocommerce' ),
-					),
-					'desc_tip' =>  true,
-				),
-
-				array( 'type' => 'sectionend', 'id' => 'product_measurement_options'),
 
 				array( 'title' => __( 'Inventory', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'product_inventory_options' ),
 
@@ -273,55 +234,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			));
 
-		} elseif ( $current_section == 'reviews' ) {
-			$settings = apply_filters( 'woocommerce_reviews_settings', array(
-				array( 'title' => __( 'Reviews', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'product_rating_options' ),
-
-				array(
-					'title'           => __( 'Product Ratings', 'woocommerce' ),
-					'desc'            => __( 'Enable ratings on reviews', 'woocommerce' ),
-					'id'              => 'woocommerce_enable_review_rating',
-					'default'         => 'yes',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => 'start',
-					'show_if_checked' => 'option',
-					'autoload'        => false
-				),
-
-				array(
-					'desc'            => __( 'Ratings are required to leave a review', 'woocommerce' ),
-					'id'              => 'woocommerce_review_rating_required',
-					'default'         => 'yes',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => '',
-					'show_if_checked' => 'yes',
-					'autoload'        => false
-				),
-
-				array(
-					'desc'            => __( 'Show "verified owner" label for customer reviews', 'woocommerce' ),
-					'id'              => 'woocommerce_review_rating_verification_label',
-					'default'         => 'yes',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => '',
-					'show_if_checked' => 'yes',
-					'autoload'        => false
-				),
-
-				array(
-					'desc'            => __( 'Only allow reviews from "verified owners"', 'woocommerce' ),
-					'id'              => 'woocommerce_review_rating_verification_required',
-					'default'         => 'no',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => 'end',
-					'show_if_checked' => 'yes',
-					'autoload'        => false
-				),
-
-				array( 'type' => 'sectionend', 'id' => 'product_rating_options' ),
-
-			));
-		} else {
+		} elseif ( $current_section == 'display' ) {
 
 			// Get shop page
 			$shop_page_id = wc_get_page_id('shop');
@@ -473,6 +386,93 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array( 'type' => 'sectionend', 'id' => 'image_options' )
+
+			));
+		} else {
+			$settings = apply_filters( 'woocommerce_products_general_settings', array(
+				array( 'title' => __( 'Measurements', 'woocommerce' ), 'type' => 'title', 'id' => 'product_measurement_options' ),
+
+				array(
+					'title'    => __( 'Weight Unit', 'woocommerce' ),
+					'desc'     => __( 'This controls what unit you will define weights in.', 'woocommerce' ),
+					'id'       => 'woocommerce_weight_unit',
+					'class'    => 'chosen_select',
+					'css'      => 'min-width:300px;',
+					'default'  => 'kg',
+					'type'     => 'select',
+					'options'  => array(
+						'kg'  => __( 'kg', 'woocommerce' ),
+						'g'   => __( 'g', 'woocommerce' ),
+						'lbs' => __( 'lbs', 'woocommerce' ),
+						'oz'  => __( 'oz', 'woocommerce' ),
+					),
+					'desc_tip' =>  true,
+				),
+
+				array(
+					'title'    => __( 'Dimensions Unit', 'woocommerce' ),
+					'desc'     => __( 'This controls what unit you will define lengths in.', 'woocommerce' ),
+					'id'       => 'woocommerce_dimension_unit',
+					'class'    => 'chosen_select',
+					'css'      => 'min-width:300px;',
+					'default'  => 'cm',
+					'type'     => 'select',
+					'options'  => array(
+						'm'  => __( 'm', 'woocommerce' ),
+						'cm' => __( 'cm', 'woocommerce' ),
+						'mm' => __( 'mm', 'woocommerce' ),
+						'in' => __( 'in', 'woocommerce' ),
+						'yd' => __( 'yd', 'woocommerce' ),
+					),
+					'desc_tip' =>  true,
+				),
+
+				array( 'type' => 'sectionend', 'id' => 'product_measurement_options' ),
+
+				array( 'title' => __( 'Reviews', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'product_rating_options' ),
+
+				array(
+					'title'           => __( 'Product Ratings', 'woocommerce' ),
+					'desc'            => __( 'Enable ratings on reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_enable_review_rating',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'start',
+					'show_if_checked' => 'option',
+					'autoload'        => false
+				),
+
+				array(
+					'desc'            => __( 'Ratings are required to leave a review', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_required',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => '',
+					'show_if_checked' => 'yes',
+					'autoload'        => false
+				),
+
+				array(
+					'desc'            => __( 'Show "verified owner" label for customer reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_verification_label',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => '',
+					'show_if_checked' => 'yes',
+					'autoload'        => false
+				),
+
+				array(
+					'desc'            => __( 'Only allow reviews from "verified owners"', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_verification_required',
+					'default'         => 'no',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'end',
+					'show_if_checked' => 'yes',
+					'autoload'        => false
+				),
+
+				array( 'type' => 'sectionend', 'id' => 'product_rating_options' ),
 
 			));
 		}
