@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 echo $email_heading . "\n\n";
 
-echo srintf( __( 'The order #%d from %s has been cancelled. The order was as follow:', 'woocommerce' ), $order->id, $order->billing_first_name . ' ' . $order->billing_last_name ) . "\n\n";
+echo srintf( __( 'The order #%d from %s has been cancelled. The order was as follows:', 'woocommerce' ), $order->id, $order->billing_first_name . ' ' . $order->billing_last_name ) . "\n\n";
 
 echo "****************************************************\n\n";
 
