@@ -352,13 +352,15 @@ class WC_Tax {
 	 * @return  array
 	 */
 	public static function get_shop_base_rate( $tax_class = '' ) {
-		return self::find_rates( array(
+		$rates = self::find_rates( array(
 			'country' 	=> WC()->countries->get_base_country(),
 			'state' 	=> WC()->countries->get_base_state(),
 			'postcode' 	=> WC()->countries->get_base_postcode(),
 			'city' 		=> WC()->countries->get_base_city(),
 			'tax_class' => $tax_class
 		) );
+
+		return apply_filters('wocommerce_tax_shop_base_rates', $rates, $tax_class);
 	}
 
 	/**
