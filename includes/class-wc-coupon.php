@@ -228,7 +228,7 @@ class WC_Coupon {
 
 
 	/**
-	 * Increase usage count fo current coupon.
+	 * Increase usage count for current coupon.
 	 *
 	 * @access public
 	 * @param  string $used_by Either user ID or billing email
@@ -245,7 +245,7 @@ class WC_Coupon {
 
 
 	/**
-	 * Decrease usage count fo current coupon.
+	 * Decrease usage count for current coupon.
 	 *
 	 * @access public
 	 * @param  string $used_by Either user ID or billing email
