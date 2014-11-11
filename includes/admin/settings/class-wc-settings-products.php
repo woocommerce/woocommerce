@@ -77,7 +77,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings( $current_section = '' ) {
-		if ( $current_section == 'display' ) {
+		if ( 'display' == $current_section ) {
 
 			// Get shop page
 			$shop_page_id = wc_get_page_id('shop');
@@ -231,7 +231,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array( 'type' => 'sectionend', 'id' => 'image_options' )
 
 			));
-		} elseif ( $current_section == 'inventory' ) {
+		} elseif ( 'inventory' == $current_section ) {
 
 			$settings = apply_filters( 'woocommerce_inventory_settings', array(
 
@@ -342,7 +342,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			));
 
-		} elseif ( $current_section == 'downloadable' ) {
+		} elseif ( 'downloadable' == $current_section ) {
 			$settings = apply_filters( 'woocommerce_downloadable_products_settings', array(
 				array( 'title' => __( 'Downloadable Products', 'woocommerce' ), 'type' => 'title', 'id' => 'digital_download_options' ),
 
