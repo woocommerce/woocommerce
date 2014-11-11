@@ -2191,6 +2191,8 @@ img.help_tip {
 	.description {
 		padding: 0;
 		margin: 0 0 0 7px;
+		clear: none;
+		display: inline;
 	}
 	.description-block {
 		margin-left: 0;
@@ -3174,6 +3176,10 @@ table.bar_chart {
 
 // Small screen optimisation
 @media only screen and (max-width: 1280px) {
+	.woocommerce_options_panel .chosen-container-multi {
+		width: 80% !important;
+	}
+
 	#order_data {
 		.order_data_column {
 			width:48%;
@@ -3276,6 +3282,21 @@ table.bar_chart {
 
 	#woocommerce-product-data .checkbox {
 		width: 25px;
+	}
+}
+
+@media only screen and (max-width: 500px) {
+	.woocommerce_options_panel label,
+	.woocommerce_options_panel legend {
+		float: none;
+		width: auto;
+		display: block;
+		margin: 0;
+	}
+
+	.woocommerce_options_panel fieldset.form-field,
+	.woocommerce_options_panel p.form-field {
+		padding: 5px 20px 5px 20px !important;
 	}
 }
 
