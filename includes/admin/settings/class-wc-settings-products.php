@@ -77,7 +77,161 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings( $current_section = '' ) {
-		if ( $current_section == 'inventory' ) {
+		if ( $current_section == 'display' ) {
+
+			// Get shop page
+			$shop_page_id = wc_get_page_id('shop');
+
+			$base_slug = ($shop_page_id > 0 && get_post( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';
+
+			$woocommerce_prepend_shop_page_to_products_warning = '';
+
+			if ( $shop_page_id > 0 && sizeof(get_pages("child_of=$shop_page_id")) > 0 ) {
+				$woocommerce_prepend_shop_page_to_products_warning = ' <mark class="notice">' . __( 'Note: The shop page has children - child pages will not work if you enable this option.', 'woocommerce' ) . '</mark>';
+			}
+
+			$settings = apply_filters( 'woocommerce_product_settings', array(
+
+				array( 'title' => __( 'Shop & Product Pages', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'catalog_options' ),
+
+				array(
+					'title'    => __( 'Shop Page', 'woocommerce' ),
+					'desc'     => '<br/>' . sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
+					'id'       => 'woocommerce_shop_page_id',
+					'type'     => 'single_select_page',
+					'default'  => '',
+					'class'    => 'chosen_select_nostd',
+					'css'      => 'min-width:300px;',
+					'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
+				),
+
+				array(
+					'title'    => __( 'Shop Page Display', 'woocommerce' ),
+					'desc'     => __( 'This controls what is shown on the product archive.', 'woocommerce' ),
+					'id'       => 'woocommerce_shop_page_display',
+					'class'    => 'chosen_select',
+					'css'      => 'min-width:300px;',
+					'default'  => '',
+					'type'     => 'select',
+					'options'  => array(
+						''              => __( 'Show products', 'woocommerce' ),
+						'subcategories' => __( 'Show subcategories', 'woocommerce' ),
+						'both'          => __( 'Show both', 'woocommerce' ),
+					),
+					'desc_tip' =>  true,
+				),
+
+				array(
+					'title'    => __( 'Default Category Display', 'woocommerce' ),
+					'desc'     => __( 'This controls what is shown on category archives.', 'woocommerce' ),
+					'id'       => 'woocommerce_category_archive_display',
+					'class'    => 'chosen_select',
+					'css'      => 'min-width:300px;',
+					'default'  => '',
+					'type'     => 'select',
+					'options'  => array(
+						''              => __( 'Show products', 'woocommerce' ),
+						'subcategories' => __( 'Show subcategories', 'woocommerce' ),
+						'both'          => __( 'Show both', 'woocommerce' ),
+					),
+					'desc_tip' =>  true,
+				),
+
+				array(
+					'title'    => __( 'Default Product Sorting', 'woocommerce' ),
+					'desc'     => __( 'This controls the default sort order of the catalog.', 'woocommerce' ),
+					'id'       => 'woocommerce_default_catalog_orderby',
+					'class'    => 'chosen_select',
+					'css'      => 'min-width:300px;',
+					'default'  => 'title',
+					'type'     => 'select',
+					'options'  => apply_filters('woocommerce_default_catalog_orderby_options', array(
+						'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
+						'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
+						'rating'     => __( 'Average Rating', 'woocommerce' ),
+						'date'       => __( 'Sort by most recent', 'woocommerce' ),
+						'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
+						'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
+					)),
+					'desc_tip' =>  true,
+				),
+
+				array(
+					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
+					'desc'          => __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
+					'id'            => 'woocommerce_cart_redirect_after_add',
+					'default'       => 'no',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start'
+				),
+
+				array(
+					'desc'          => __( 'Enable AJAX add to cart buttons on archives', 'woocommerce' ),
+					'id'            => 'woocommerce_enable_ajax_add_to_cart',
+					'default'       => 'yes',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'end'
+				),
+
+				array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
+
+				array( 'title' => __( 'Product Images', 'woocommerce' ), 'type' => 'title','desc' => sprintf(__( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/'), 'id' => 'image_options' ),
+
+				array(
+					'title'    => __( 'Catalog Images', 'woocommerce' ),
+					'desc'     => __( 'This size is usually used in product listings', 'woocommerce' ),
+					'id'       => 'shop_catalog_image_size',
+					'css'      => '',
+					'type'     => 'image_width',
+					'default'  => array(
+						'width'  => '300',
+						'height' => '300',
+						'crop'   => 1
+					),
+					'desc_tip' =>  true,
+				),
+
+				array(
+					'title'    => __( 'Single Product Image', 'woocommerce' ),
+					'desc'     => __( 'This is the size used by the main image on the product page.', 'woocommerce' ),
+					'id'       => 'shop_single_image_size',
+					'css'      => '',
+					'type'     => 'image_width',
+					'default'  => array(
+						'width'  => '600',
+						'height' => '600',
+						'crop'   => 1
+					),
+					'desc_tip' =>  true,
+				),
+
+				array(
+					'title'    => __( 'Product Thumbnails', 'woocommerce' ),
+					'desc'     => __( 'This size is usually used for the gallery of images on the product page.', 'woocommerce' ),
+					'id'       => 'shop_thumbnail_image_size',
+					'css'      => '',
+					'type'     => 'image_width',
+					'default'  => array(
+						'width'  => '180',
+						'height' => '180',
+						'crop'   => 1
+					),
+					'desc_tip' =>  true,
+				),
+
+				array(
+					'title'         => __( 'Product Image Gallery', 'woocommerce' ),
+					'desc'          => __( 'Enable Lightbox for product images', 'woocommerce' ),
+					'id'            => 'woocommerce_enable_lightbox',
+					'default'       => 'yes',
+					'desc_tip'      => __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
+					'type'          => 'checkbox'
+				),
+
+				array( 'type' => 'sectionend', 'id' => 'image_options' )
+
+			));
+		} elseif ( $current_section == 'inventory' ) {
 
 			$settings = apply_filters( 'woocommerce_inventory_settings', array(
 
@@ -234,160 +388,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			));
 
-		} elseif ( $current_section == 'display' ) {
-
-			// Get shop page
-			$shop_page_id = wc_get_page_id('shop');
-
-			$base_slug = ($shop_page_id > 0 && get_post( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';
-
-			$woocommerce_prepend_shop_page_to_products_warning = '';
-
-			if ( $shop_page_id > 0 && sizeof(get_pages("child_of=$shop_page_id")) > 0 ) {
-				$woocommerce_prepend_shop_page_to_products_warning = ' <mark class="notice">' . __( 'Note: The shop page has children - child pages will not work if you enable this option.', 'woocommerce' ) . '</mark>';
-			}
-
-			$settings = apply_filters( 'woocommerce_product_settings', array(
-
-				array( 'title' => __( 'Shop & Product Pages', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'catalog_options' ),
-
-				array(
-					'title'    => __( 'Shop Page', 'woocommerce' ),
-					'desc'     => '<br/>' . sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
-					'id'       => 'woocommerce_shop_page_id',
-					'type'     => 'single_select_page',
-					'default'  => '',
-					'class'    => 'chosen_select_nostd',
-					'css'      => 'min-width:300px;',
-					'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
-				),
-
-				array(
-					'title'    => __( 'Shop Page Display', 'woocommerce' ),
-					'desc'     => __( 'This controls what is shown on the product archive.', 'woocommerce' ),
-					'id'       => 'woocommerce_shop_page_display',
-					'class'    => 'chosen_select',
-					'css'      => 'min-width:300px;',
-					'default'  => '',
-					'type'     => 'select',
-					'options'  => array(
-						''              => __( 'Show products', 'woocommerce' ),
-						'subcategories' => __( 'Show subcategories', 'woocommerce' ),
-						'both'          => __( 'Show both', 'woocommerce' ),
-					),
-					'desc_tip' =>  true,
-				),
-
-				array(
-					'title'    => __( 'Default Category Display', 'woocommerce' ),
-					'desc'     => __( 'This controls what is shown on category archives.', 'woocommerce' ),
-					'id'       => 'woocommerce_category_archive_display',
-					'class'    => 'chosen_select',
-					'css'      => 'min-width:300px;',
-					'default'  => '',
-					'type'     => 'select',
-					'options'  => array(
-						''              => __( 'Show products', 'woocommerce' ),
-						'subcategories' => __( 'Show subcategories', 'woocommerce' ),
-						'both'          => __( 'Show both', 'woocommerce' ),
-					),
-					'desc_tip' =>  true,
-				),
-
-				array(
-					'title'    => __( 'Default Product Sorting', 'woocommerce' ),
-					'desc'     => __( 'This controls the default sort order of the catalog.', 'woocommerce' ),
-					'id'       => 'woocommerce_default_catalog_orderby',
-					'class'    => 'chosen_select',
-					'css'      => 'min-width:300px;',
-					'default'  => 'title',
-					'type'     => 'select',
-					'options'  => apply_filters('woocommerce_default_catalog_orderby_options', array(
-						'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
-						'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
-						'rating'     => __( 'Average Rating', 'woocommerce' ),
-						'date'       => __( 'Sort by most recent', 'woocommerce' ),
-						'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
-						'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
-					)),
-					'desc_tip' =>  true,
-				),
-
-				array(
-					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
-					'desc'          => __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
-					'id'            => 'woocommerce_cart_redirect_after_add',
-					'default'       => 'no',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start'
-				),
-
-				array(
-					'desc'          => __( 'Enable AJAX add to cart buttons on archives', 'woocommerce' ),
-					'id'            => 'woocommerce_enable_ajax_add_to_cart',
-					'default'       => 'yes',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'end'
-				),
-
-				array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
-
-				array( 'title' => __( 'Product Images', 'woocommerce' ), 'type' => 'title','desc' => sprintf(__( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/'), 'id' => 'image_options' ),
-
-				array(
-					'title'    => __( 'Catalog Images', 'woocommerce' ),
-					'desc'     => __( 'This size is usually used in product listings', 'woocommerce' ),
-					'id'       => 'shop_catalog_image_size',
-					'css'      => '',
-					'type'     => 'image_width',
-					'default'  => array(
-						'width'  => '300',
-						'height' => '300',
-						'crop'   => 1
-					),
-					'desc_tip' =>  true,
-				),
-
-				array(
-					'title'    => __( 'Single Product Image', 'woocommerce' ),
-					'desc'     => __( 'This is the size used by the main image on the product page.', 'woocommerce' ),
-					'id'       => 'shop_single_image_size',
-					'css'      => '',
-					'type'     => 'image_width',
-					'default'  => array(
-						'width'  => '600',
-						'height' => '600',
-						'crop'   => 1
-					),
-					'desc_tip' =>  true,
-				),
-
-				array(
-					'title'    => __( 'Product Thumbnails', 'woocommerce' ),
-					'desc'     => __( 'This size is usually used for the gallery of images on the product page.', 'woocommerce' ),
-					'id'       => 'shop_thumbnail_image_size',
-					'css'      => '',
-					'type'     => 'image_width',
-					'default'  => array(
-						'width'  => '180',
-						'height' => '180',
-						'crop'   => 1
-					),
-					'desc_tip' =>  true,
-				),
-
-				array(
-					'title'         => __( 'Product Image Gallery', 'woocommerce' ),
-					'desc'          => __( 'Enable Lightbox for product images', 'woocommerce' ),
-					'id'            => 'woocommerce_enable_lightbox',
-					'default'       => 'yes',
-					'desc_tip'      => __( 'Include WooCommerce\'s lightbox. Product gallery images will open in a lightbox.', 'woocommerce' ),
-					'type'          => 'checkbox'
-				),
-
-				array( 'type' => 'sectionend', 'id' => 'image_options' )
-
-			));
 		} else {
 			$settings = apply_filters( 'woocommerce_products_general_settings', array(
 				array( 'title' => __( 'Measurements', 'woocommerce' ), 'type' => 'title', 'id' => 'product_measurement_options' ),
