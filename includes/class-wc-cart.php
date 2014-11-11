@@ -638,7 +638,7 @@ class WC_Cart {
 				// Get the checkout URL
 				$checkout_url = get_permalink( $checkout_page_id );
 
-				// Force SLL if needed
+				// Force SSL if needed
 				if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
 					$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 				}

@@ -21,7 +21,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			// Get the permalink
 			$checkout_url = get_permalink( $checkout_page_id );
 
-			// Force SLL if needed
+			// Force SSL if needed
 			if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
 				$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 			}
@@ -43,7 +43,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Get the original setting
 		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
 
-		// Force SLL checkout
+		// Force SSL checkout
 		update_option( 'woocommerce_force_ssl_checkout', 'no' );
 
 		$this->assertEquals( $this->get_checkout_url(), WC()->cart->get_checkout_url() );
@@ -63,7 +63,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Get the original setting
 		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
 
-		// Force SLL checkout
+		// Force SSL checkout
 		update_option( 'woocommerce_force_ssl_checkout', 'yes' );
 
 		$this->assertEquals( $this->get_checkout_url(), WC()->cart->get_checkout_url() );

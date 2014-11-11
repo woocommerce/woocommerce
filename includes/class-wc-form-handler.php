@@ -856,7 +856,7 @@ class WC_Form_Handler {
 	 * Process the registration form.
 	 */
 	public static function process_registration() {
-		if ( ! empty( $_POST['register'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-register' ) ) {
+		if ( ! empty( $_POST['register'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-register' ) ) {
 
 			if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 				$_username = $_POST['username'];
