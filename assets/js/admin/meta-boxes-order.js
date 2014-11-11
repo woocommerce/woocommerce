@@ -130,7 +130,7 @@ jQuery( function ( $ ) {
 
 				$states_select.show().chosen( chosen_opts ).hide().trigger("chosen:updated");
 			} else {
-				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
+				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" placeholder="' + placeholder + '" />' );
 			}
 
 			$( 'body' ).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
