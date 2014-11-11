@@ -148,14 +148,14 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'      => 'min-width:300px;',
 					'default'  => 'title',
 					'type'     => 'select',
-					'options'  => apply_filters('woocommerce_default_catalog_orderby_options', array(
+					'options'  => apply_filters( 'woocommerce_default_catalog_orderby_options', array(
 						'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
 						'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
 						'rating'     => __( 'Average Rating', 'woocommerce' ),
 						'date'       => __( 'Sort by most recent', 'woocommerce' ),
 						'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
 						'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
-					)),
+					) ),
 					'desc_tip' =>  true,
 				),
 
