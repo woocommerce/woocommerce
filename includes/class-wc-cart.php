@@ -1039,7 +1039,7 @@ class WC_Cart {
 
 					// Get base tax rates
 					if ( empty( $shop_tax_rates[ $_product->tax_class ] ) )
-						$shop_tax_rates[ $_product->tax_class ] = $this->tax->get_shop_base_rate( $_product->tax_class );
+						$shop_tax_rates[ $_product->tax_class ] = $this->tax->get_base_tax_rates( $_product->tax_class );
 
 					// Get item tax rates
 					if ( empty( $tax_rates[ $_product->get_tax_class() ] ) )
