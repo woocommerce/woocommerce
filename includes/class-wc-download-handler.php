@@ -359,15 +359,13 @@ class WC_Download_Handler {
 	 * @access private
 	 */
 	private static function clean_buffers() {
-		if ( ob_get_length() ) {
-			if ( ob_get_level() ) {
-				$levels = ob_get_level();
-				for ( $i = 0; $i < $levels; $i++ ) {
-					ob_end_clean();
-				}
-			} else {
-				ob_end_clean();
+		if ( ob_get_level() ) {
+			$levels = ob_get_level();
+			for ( $i = 0; $i < $levels; $i++ ) {
+				@ob_end_clean();
 			}
+		} else {
+			@ob_end_clean();
 		}
 	}
 
