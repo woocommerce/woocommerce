@@ -53,6 +53,10 @@ class WC_Admin_Assets {
 			wp_enqueue_style( 'woocommerce_admin_dashboard_styles', WC()->plugin_url() . '/assets/css/dashboard.css', array(), WC_VERSION );
 		}
 
+		if ( in_array( $screen->id, array( 'woocommerce_page_wc-reports' ) ) ) {
+			wp_enqueue_style( 'woocommerce_admin_print_reports_styles', WC()->plugin_url() . '/assets/css/reports-print.css', array(), WC_VERSION, 'print' );
+		}
+
 		/**
 		 * @deprecated 2.3
 		 */
