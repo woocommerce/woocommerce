@@ -2,9 +2,9 @@
 /**
  * Order details
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.2.0
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
