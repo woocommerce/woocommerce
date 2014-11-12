@@ -593,39 +593,40 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			$variations[] = array(
-				'id'                => $variation->get_variation_id(),
-				'created_at'        => $this->server->format_datetime( $variation->get_post_data()->post_date_gmt ),
-				'updated_at'        => $this->server->format_datetime( $variation->get_post_data()->post_modified_gmt ),
-				'downloadable'      => $variation->is_downloadable(),
-				'virtual'           => $variation->is_virtual(),
-				'permalink'         => $variation->get_permalink(),
-				'sku'               => $variation->get_sku(),
-				'price'             => wc_format_decimal( $variation->get_price(), 2 ),
-				'regular_price'     => wc_format_decimal( $variation->get_regular_price(), 2 ),
-				'sale_price'        => $variation->get_sale_price() ? wc_format_decimal( $variation->get_sale_price(), 2 ) : null,
-				'taxable'           => $variation->is_taxable(),
-				'tax_status'        => $variation->get_tax_status(),
-				'tax_class'         => $variation->get_tax_class(),
-				'stock_quantity'    => (int) $variation->get_stock_quantity(),
-				'in_stock'          => $variation->is_in_stock(),
-				'backordered'       => $variation->is_on_backorder(),
-				'purchaseable'      => $variation->is_purchasable(),
-				'visible'           => $variation->variation_is_visible(),
-				'on_sale'           => $variation->is_on_sale(),
-				'weight'            => $variation->get_weight() ? wc_format_decimal( $variation->get_weight(), 2 ) : null,
-				'dimensions'        => array(
-					'length' => $variation->length,
-					'width'  => $variation->width,
-					'height' => $variation->height,
-					'unit'   => get_option( 'woocommerce_dimension_unit' ),
-				),
-				'shipping_class'    => $variation->get_shipping_class(),
-				'shipping_class_id' => ( 0 !== $variation->get_shipping_class_id() ) ? $variation->get_shipping_class_id() : null,
-				'image'             => $this->get_images( $variation ),
-				'attributes'        => $this->get_attributes( $variation ),
-				'downloads'         => $this->get_downloads( $variation ),
-				'download_limit'    => (int) $product->download_limit,
-				'download_expiry'   => (int) $product->download_expiry,
+					'id'                => $variation->get_variation_id(),
+					'created_at'        => $this->server->format_datetime( $variation->get_post_data()->post_date_gmt ),
+					'updated_at'        => $this->server->format_datetime( $variation->get_post_data()->post_modified_gmt ),
+					'downloadable'      => $variation->is_downloadable(),
+					'virtual'           => $variation->is_virtual(),
+					'permalink'         => $variation->get_permalink(),
+					'sku'               => $variation->get_sku(),
+					'price'             => wc_format_decimal( $variation->get_price(), 2 ),
+					'regular_price'     => wc_format_decimal( $variation->get_regular_price(), 2 ),
+					'sale_price'        => $variation->get_sale_price() ? wc_format_decimal( $variation->get_sale_price(), 2 ) : null,
+					'taxable'           => $variation->is_taxable(),
+					'tax_status'        => $variation->get_tax_status(),
+					'tax_class'         => $variation->get_tax_class(),
+					'managing_stock'    => $variation->managing_stock(),
+					'stock_quantity'    => (int) $variation->get_stock_quantity(),
+					'in_stock'          => $variation->is_in_stock(),
+					'backordered'       => $variation->is_on_backorder(),
+					'purchaseable'      => $variation->is_purchasable(),
+					'visible'           => $variation->variation_is_visible(),
+					'on_sale'           => $variation->is_on_sale(),
+					'weight'            => $variation->get_weight() ? wc_format_decimal( $variation->get_weight(), 2 ) : null,
+					'dimensions'        => array(
+						'length' => $variation->length,
+						'width'  => $variation->width,
+						'height' => $variation->height,
+						'unit'   => get_option( 'woocommerce_dimension_unit' ),
+					),
+					'shipping_class'    => $variation->get_shipping_class(),
+					'shipping_class_id' => ( 0 !== $variation->get_shipping_class_id() ) ? $variation->get_shipping_class_id() : null,
+					'image'             => $this->get_images( $variation ),
+					'attributes'        => $this->get_attributes( $variation ),
+					'downloads'         => $this->get_downloads( $variation ),
+					'download_limit'    => (int) $product->download_limit,
+					'download_expiry'   => (int) $product->download_expiry,
 			);
 		}
 
@@ -1184,23 +1185,41 @@ class WC_API_Products extends WC_API_Resource {
 			$this->save_product_shipping_data( $variation_id, $variation );
 
 			// Stock handling
-			if ( isset( $variation['stock_quantity'] ) ) {
-				wc_update_product_stock( $variation_id, intval( $variation['stock_quantity'] ) );
+			if ( isset( $variation['manage_stock'] ) ) {
+				$manage_stock = ( true === $variation['manage_stock'] ) ? 'yes' : 'no';
+				update_post_meta( $variation_id, '_manage_stock', $is_downloadable );
+			} else {
+				$manage_stock = get_post_meta( $variation_id, '_manage_stock', true );
 			}
 
-			// Backorders
-			if ( isset( $variation['backorders'] ) ) {
-				if ( $variation['backorders'] !== 'parent' ) {
+			// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
+			if ( isset( $variation['in_stock'] ) ) {
+				$stock_status = ( true === $variation['in_stock'] ) ? 'instock' : 'outofstock';
+				wc_update_product_stock_status( $variation_id, $stock_status );
+			} else {
+				$stock_status = get_post_meta( $variation_id, '_stock_status', true );
+
+				if ( '' === $stock_status ) {
+					$stock_status = 'instock';
+				}
+			}
+
+			if ( 'yes' === $manage_stock ) {
+				if ( isset( $variation['backorders'] ) ) {
 					if ( 'notify' == $variation['backorders'] ) {
 						$backorders = 'notify';
 					} else {
 						$backorders = ( true === $variation['backorders'] ) ? 'yes' : 'no';
 					}
-
-					update_post_meta( $variation_id, '_backorders', $backorders );
 				} else {
-					delete_post_meta( $variation_id, '_backorders' );
+					$backorders = 'no';
 				}
+
+				update_post_meta( $variation_id, '_backorders', $backorders );
+				wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
+			} else {
+				delete_post_meta( $variation_id, '_backorders' );
+				delete_post_meta( $variation_id, '_stock' );
 			}
 
 			// Regular Price
