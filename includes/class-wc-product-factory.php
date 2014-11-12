@@ -27,12 +27,15 @@ class WC_Product_Factory {
 			$the_product = $post;
 		} elseif ( is_numeric( $the_product ) ) {
 			$the_product = get_post( $the_product );
+		} elseif ( $the_product instanceof WC_Product ) {
+			return $the_product;
 		}
 
-		if ( ! $the_product )
+		if ( ! $the_product ) {
 			return false;
+		}
 
-		if ( is_object ( $the_product ) ) {
+		if ( is_object( $the_product ) ) {
 			$product_id = absint( $the_product->ID );
 			$post_type  = $the_product->post_type;
 		}

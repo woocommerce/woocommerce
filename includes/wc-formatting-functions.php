@@ -589,3 +589,15 @@ function wc_format_phone_number( $tel ) {
 	$tel = str_replace( '.', '-', $tel );
 	return $tel;
 }
+
+/**
+ * Make a string lowercase.
+ * Try to use mb_strtolower() when available.
+ *
+ * @since  2.3
+ * @param  string $string
+ * @return string
+ */
+function wc_strtolower( $string ) {
+	return function_exists( 'mb_strtolower' ) ? mb_strtolower( $string ) : strtolower( $string );
+}

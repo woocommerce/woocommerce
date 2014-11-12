@@ -67,9 +67,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'TWD' => __( 'Taiwan New Dollars', 'woocommerce' ),
 			'THB' => __( 'Thai Baht', 'woocommerce' ),
 			'TRY' => __( 'Turkish Lira', 'woocommerce' ),
+			'UAH' => __( 'Ukrainian Hryvnia', 'woocommerce' ),
 			'USD' => __( 'US Dollars', 'woocommerce' ),
 			'VND' => __( 'Vietnamese Dong', 'woocommerce' ),
-			'EGP' => __( 'Egyptian Pound', 'woocommerce' ),
+			'EGP' => __( 'Egyptian Pound', 'woocommerce' )
 		);
 
 		$this->assertEquals( $expected_currencies, get_woocommerce_currencies() );

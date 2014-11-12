@@ -22,9 +22,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_get_order_statuses() {
 	$order_statuses = array(
-		'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+		'wc-pending'    => _x( 'Pending Payment', 'Order status', 'woocommerce' ),
 		'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
-		'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
+		'wc-on-hold'    => _x( 'On Hold', 'Order status', 'woocommerce' ),
 		'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
 		'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
@@ -56,7 +56,7 @@ function wc_get_order_status_name( $status ) {
 	$status   = 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status;
 	$status   = isset( $statuses[ 'wc-' . $status ] ) ? $statuses[ 'wc-' . $status ] : $status;
 
-	return strtolower( $status );
+	return $status;
 }
 
 /**
@@ -582,7 +582,7 @@ function wc_create_refund( $args = array() ) {
 		$refund_data['post_type']     = 'shop_order_refund';
 		$refund_data['post_status']   = 'wc-completed';
 		$refund_data['ping_status']   = 'closed';
-		$refund_data['post_author']   = 1;
+		$refund_data['post_author']   = get_current_user_id() ? get_current_user_id() : 1;
 		$refund_data['post_password'] = uniqid( 'refund_' );
 		$refund_data['post_parent']   = absint( $args['order_id'] );
 		$refund_data['post_title']    = sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
@@ -671,6 +671,8 @@ function wc_create_refund( $args = array() ) {
 
 		// Set total to total refunded which may vary from order items
 		$refund->set_total( wc_format_decimal( $args['amount'] ) * -1, 'total' );
+
+		do_action( 'woocommerce_refund_created', $refund_id );
 	}
 
 	// Clear transients

@@ -379,10 +379,11 @@ class WC_Countries {
 				'FR' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city_upper}\n{country}",
 				'HK' => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}",
 				'HU' => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
+				'IN' => "{company}\n{name}\n{address_1}\n{address_2}\n{city} - {postcode}\n{state}, {country}",
 				'IS' => $postcode_before_city,
 				'IT' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode}\n{city}\n{state_upper}\n{country}",
-				'JP' => "{postcode}\n{state}{city}{address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n {country}",
-				'TW' => "{postcode}\n{city}{address_2}\n{address_1}\n{company}\n{last_name} {first_name}\n {country}",
+				'JP' => "{postcode}\n{state}{city}{address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}",
+				'TW' => "{company}\n{last_name} {first_name}\n{address_1}\n{address_2}\n{state}, {city} {postcode}\n{country}",
 				'LI' => $postcode_before_city,
 				'NL' => $postcode_before_city,
 				'NZ' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
@@ -393,7 +394,7 @@ class WC_Countries {
 				'ES' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{state}\n{country}",
 				'SE' => $postcode_before_city,
 				'TR' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city} {state}\n{country}",
-				'US' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}, {state} {postcode}\n{country}",
+				'US' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}, {state_code} {postcode}\n{country}",
 				'VN' => "{name}\n{company}\n{address_1}\n{city}\n{country}",
 			));
 		endif;
@@ -450,6 +451,7 @@ class WC_Countries {
 			'{address_2_upper}'  => strtoupper( $address_2 ),
 			'{city_upper}'       => strtoupper( $city ),
 			'{state_upper}'      => strtoupper( $full_state ),
+			'{state_code}'       => strtoupper( $state ),
 			'{postcode_upper}'   => strtoupper( $postcode ),
 			'{country_upper}'    => strtoupper( $full_country ),
 		), $args ) );

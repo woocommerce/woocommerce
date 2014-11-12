@@ -1589,17 +1589,15 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 	 * @access public
 	 * @param object $order
 	 * @subpackage	Orders
-	 * @return void
 	 */
 	function woocommerce_order_again_button( $order ) {
-		if ( ! $order || ! $order->has_status( 'completed' ) ) {
+		if ( ! $order || ! $order->has_status( 'completed' ) || ! is_user_logged_in() ) {
 			return;
 		}
-		?>
-		<p class="order-again">
-			<a href="<?php echo wp_nonce_url( add_query_arg( 'order_again', $order->id ) , 'woocommerce-order_again' ); ?>" class="button"><?php _e( 'Order Again', 'woocommerce' ); ?></a>
-		</p>
-		<?php
+
+		wc_get_template( 'order/order-again.php', array(
+			'order' => $order
+		) );
 	}
 }
 
@@ -1835,7 +1833,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				if ( $args['label'] )
 					$field .= '<label for="' . esc_attr( $args['id'] ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) .'">' . $args['label']. $required . '</label>';
 
-				$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select" ' . implode( ' ', $custom_attributes ) . '>
+				$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select '.esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . '>
 						' . $options . '
 					</select>';
 
@@ -1876,35 +1874,31 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 if ( ! function_exists( 'get_product_search_form' ) ) {
 
 	/**
-	 * Output Product search forms.
+	 * Display product search form.
 	 *
-	 * @access public
+	 * Will first attempt to locate the product-searchform.php file in either the child or
+	 * the parent, then load it. If it doesn't exist, then the default search form
+	 * will be displayed.
+	 *
+	 * The default searchform uses html5.
+	 *
 	 * @subpackage	Forms
 	 * @param bool $echo (default: true)
 	 * @return string
-	 * @todo This function needs to be broken up in smaller pieces
 	 */
 	function get_product_search_form( $echo = true  ) {
-		do_action( 'get_product_search_form'  );
+		ob_start();
 
-		$search_form_template = locate_template( 'product-searchform.php' );
-		if ( '' != $search_form_template  ) {
-			require $search_form_template;
-			return;
+		do_action( 'pre_get_product_search_form'  );
+
+		wc_get_template( 'product-searchform.php' );
+
+		$form = apply_filters( 'get_product_search_form', ob_get_clean() );
+
+		if ( $echo ) {
+			echo $form;
+		} else {
+			return $form;
 		}
-
-		$form = '<form role="search" method="get" id="searchform" action="' . esc_url( home_url( '/'  ) ) . '">
-			<div>
-				<label class="screen-reader-text" for="s">' . __( 'Search for:', 'woocommerce' ) . '</label>
-				<input type="text" value="' . get_search_query() . '" name="s" id="s" placeholder="' . __( 'Search for products', 'woocommerce' ) . '" />
-				<input type="submit" id="searchsubmit" value="'. esc_attr__( 'Search', 'woocommerce' ) .'" />
-				<input type="hidden" name="post_type" value="product" />
-			</div>
-		</form>';
-
-		if ( $echo  )
-			echo apply_filters( 'get_product_search_form', $form );
-		else
-			return apply_filters( 'get_product_search_form', $form );
 	}
 }

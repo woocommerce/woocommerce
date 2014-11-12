@@ -182,13 +182,13 @@ class WC_Product {
 			// Update stock in DB directly
 			switch ( $mode ) {
 				case 'add' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %d WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
+					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
 				break;
 				case 'subtract' :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %d WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
+					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
 				break;
 				default :
-					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %d WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
+					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->id ) );
 				break;
 			}
 
@@ -627,8 +627,11 @@ class WC_Product {
 	public function is_visible() {
 		$visible = true;
 
+		if ( ! $this->post ) {
+			$visible = false;
+
 		// Published/private
-		if ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
+		} elseif ( $this->post->post_status !== 'publish' && ! current_user_can( 'edit_post', $this->id ) ) {
 			$visible = false;
 
 		// Out of stock visibility
@@ -765,7 +768,7 @@ class WC_Product {
 			} else {
 
 				$tax_rates      = WC_Tax::get_rates( $this->get_tax_class() );
-				$base_tax_rates = WC_Tax::get_shop_base_rate( $this->tax_class );
+				$base_tax_rates = WC_Tax::get_base_tax_rates( $this->tax_class );
 
 				if ( ! empty( WC()->customer ) && WC()->customer->is_vat_exempt() ) {
 
@@ -808,7 +811,7 @@ class WC_Product {
 		}
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax') === 'yes' ) {
-			$tax_rates  = WC_Tax::get_shop_base_rate( $this->tax_class );
+			$tax_rates  = WC_Tax::get_base_tax_rates( $this->tax_class );
 			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
 			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
 		} else {
@@ -906,7 +909,9 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_html_from_text() {
-		return '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
+		$from = '<span class="from">' . _x( 'From:', 'min_price', 'woocommerce' ) . ' </span>';
+
+		return apply_filters( 'woocommerce_get_price_html_from_text', $from, $this );
 	}
 
 	/**
@@ -917,7 +922,9 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_price_html_from_to( $from, $to ) {
-		return '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
+		$price = '<del>' . ( ( is_numeric( $from ) ) ? wc_price( $from ) : $from ) . '</del> <ins>' . ( ( is_numeric( $to ) ) ? wc_price( $to ) : $to ) . '</ins>';
+
+		return apply_filters( 'woocommerce_get_price_html_from_to', $price, $from, $to, $this );
 	}
 
 	/**

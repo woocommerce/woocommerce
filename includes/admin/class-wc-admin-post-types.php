@@ -238,7 +238,7 @@ class WC_Admin_Post_Types {
 				echo '<div class="row-actions">';
 
 				$i = 0;
-				$action_count = sizeof($actions);
+				$action_count = sizeof( $actions );
 
 				foreach ( $actions as $action => $link ) {
 					++$i;
@@ -260,6 +260,7 @@ class WC_Admin_Post_Types {
 						<div class="length">' . $the_product->length . '</div>
 						<div class="width">' . $the_product->width . '</div>
 						<div class="height">' . $the_product->height . '</div>
+						<div class="shipping_class">' . $the_product->get_shipping_class() . '</div>
 						<div class="visibility">' . $the_product->visibility . '</div>
 						<div class="stock_status">' . $the_product->stock_status . '</div>
 						<div class="stock">' . $the_product->stock . '</div>
@@ -588,7 +589,7 @@ class WC_Admin_Post_Types {
 					}
 				}
 
-				printf( __( '%s by %s', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '"><strong>' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
+				printf( _x( '%s by %s', 'Order number by X', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '"><strong>#' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
 
 				if ( $the_order->billing_email ) {
 					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
@@ -725,7 +726,6 @@ class WC_Admin_Post_Types {
 	/**
 	 * Custom bulk edit - form
 	 *
-	 * @access public
 	 * @param mixed $column_name
 	 * @param mixed $post_type
 	 */
@@ -734,13 +734,16 @@ class WC_Admin_Post_Types {
 			return;
 		}
 
+		$shipping_class = get_terms( 'product_shipping_class', array(
+			'hide_empty' => false,
+		) );
+
 		include( WC()->plugin_path() . '/includes/admin/views/html-bulk-edit-product.php' );
 	}
 
 	/**
 	 * Custom quick edit - form
 	 *
-	 * @access public
 	 * @param mixed $column_name
 	 * @param mixed $post_type
 	 */
@@ -748,6 +751,10 @@ class WC_Admin_Post_Types {
 		if ( 'price' != $column_name || 'product' != $post_type ) {
 			return;
 		}
+
+		$shipping_class = get_terms( 'product_shipping_class', array(
+			'hide_empty' => false,
+		) );
 
 		include( WC()->plugin_path() . '/includes/admin/views/html-quick-edit-product.php' );
 	}
@@ -850,6 +857,10 @@ class WC_Admin_Post_Types {
 			update_post_meta( $post_id, '_height', wc_clean( $_REQUEST['_height'] ) );
 		}
 
+		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
+			wp_set_object_terms( $post_id, wc_clean( $_REQUEST['_shipping_class'] ), 'product_shipping_class' );
+		}
+
 		if ( isset( $_REQUEST['_visibility'] ) ) {
 			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_REQUEST['_visibility'] ) ) ) {
 				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_REQUEST['_visibility'] ) );
@@ -912,7 +923,19 @@ class WC_Admin_Post_Types {
 
 		// Handle stock status
 		if ( isset( $_REQUEST['_stock_status'] ) ) {
-			wc_update_product_stock_status( $post_id, wc_clean( $_REQUEST['_stock_status'] ) );
+			$stock_status = wc_clean( $_REQUEST['_stock_status'] );
+
+			if ( ! $product->is_type('variable') ) {
+				foreach ( $product->get_children() as $child_id ) {
+					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
+						wc_update_product_stock_status( $child_id, $stock_status );
+					}
+				}
+
+				WC_Product_Variable::sync_stock_status( $post_id );
+			} else {
+				wc_update_product_stock_status( $post_id,$stock_status );
+			}
 		}
 
 		// Handle stock
@@ -972,7 +995,25 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_stock_status'] ) ) {
-			wc_update_product_stock_status( $post_id, wc_clean( $_REQUEST['_stock_status'] ) );
+			$stock_status = wc_clean( $_REQUEST['_stock_status'] );
+
+			if ( ! $product->is_type('variable') ) {
+				foreach ( $product->get_children() as $child_id ) {
+					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
+						wc_update_product_stock_status( $child_id, $stock_status );
+					}
+				}
+
+				WC_Product_Variable::sync_stock_status( $post_id );
+			} else {
+				wc_update_product_stock_status( $post_id,$stock_status );
+			}
+		}
+
+		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
+			$shipping_class = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
+
+			wp_set_object_terms( $post_id, $shipping_class, 'product_shipping_class' );
 		}
 
 		if ( ! empty( $_REQUEST['_visibility'] ) ) {
@@ -1671,7 +1712,8 @@ class WC_Admin_Post_Types {
 			8 => __( 'Order submitted.', 'woocommerce' ),
 			9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
 			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
-			10 => __( 'Order draft updated.', 'woocommerce' )
+			10 => __( 'Order draft updated.', 'woocommerce' ),
+			11 => __( 'Order updated and email sent.', 'woocommerce' )
 		);
 
 		$messages['shop_coupon'] = array(

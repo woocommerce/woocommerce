@@ -36,6 +36,9 @@ class WC_Admin_Menus {
 		add_action( 'admin_head', array( $this, 'menu_highlight' ) );
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
+
+		// Add endpoints custom URLs in Appearance > Menus > Pages
+		add_action('admin_init', array( $this, 'add_nav_menu_meta_boxes' ) );
 	}
 
 	/**
@@ -49,6 +52,8 @@ class WC_Admin_Menus {
 		}
 
 		$main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
+
+		add_submenu_page( 'edit.php?post_type=product', __( 'Shipping Classes', 'woocommerce' ), __( 'Shipping Classes', 'woocommerce' ), 'manage_product_terms', 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' );
 
 		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 	}
@@ -114,6 +119,11 @@ class WC_Admin_Menus {
 				if ( $screen->base == 'edit-tags' && taxonomy_is_product_attribute( $taxonomy ) ) {
 					$submenu_file = 'product_attributes';
 					$parent_file  = 'edit.php?post_type=' . esc_attr( $post_type );
+				}
+
+				// Fix the highlight of shipping classes menu
+				if ( 'product_shipping_class' == $screen->taxonomy && $parent_file == 'edit.php?post_type=product' ) {
+					$submenu_file = 'edit-tags.php?taxonomy=product_shipping_class&post_type=product';
 				}
 			}
 		}
@@ -219,6 +229,56 @@ class WC_Admin_Menus {
 	 */
 	public function addons_page() {
 		WC_Admin_Addons::output();
+	}
+
+	/**
+	 * Add custom nav meta box
+	 *
+	 * Adapted from http://www.johnmorrisonline.com/how-to-add-a-fully-functional-custom-meta-box-to-wordpress-navigation-menus/
+	 */
+	public function add_nav_menu_meta_boxes() {
+		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce Endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
+	}
+
+	public function nav_menu_links() {
+		$exclude = array( 'view-order', 'add-payment-method', 'order-pay', 'order-received' );
+		?>
+		<div id="posttype-woocommerce-endpoints" class="posttypediv">
+    		<div id="tabs-panel-woocommerce-endpoints" class="tabs-panel tabs-panel-active">
+    			<ul id="woocommerce-endpoints-checklist" class="categorychecklist form-no-clear">
+    				<?php
+    				$i = -1;
+    				foreach ( WC()->query->query_vars as $key => $value ) {
+    					if ( in_array( $key, $exclude ) ) {
+    						continue;
+    					}
+    					?>
+    					<li>
+    						<label class="menu-item-title">
+	    						<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $key ); ?>
+    						</label>
+	    					<input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
+	    					<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $key ); ?>" />
+	    					<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_endpoint_url( $key, '', get_permalink( wc_get_page_id( 'myaccount' ) ) ) ); ?>" />
+	    					<input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />
+	    				</li>
+	    				<?php
+	    				$i --;
+	    			}
+	    			?>
+    			</ul>
+    		</div>
+    		<p class="button-controls">
+    			<span class="list-controls">
+    				<a href="<?php echo admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ); ?>" class="select-all"><?php _e( 'Select All', 'woocommerce' ); ?></a>
+    			</span>
+    			<span class="add-to-menu">
+    				<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php _e( 'Add to Menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints">
+    				<span class="spinner"></span>
+    			</span>
+    		</p>
+    	</div>
+    	<?php
 	}
 }
 

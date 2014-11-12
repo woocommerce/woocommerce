@@ -224,6 +224,7 @@ class WC_Shortcode_My_Account {
 		if ( empty( $_POST['user_login'] ) ) {
 
 			wc_add_notice( __( 'Enter a username or e-mail address.', 'woocommerce' ), 'error' );
+			return false;
 
 		} else {
 			// Check on username first, as customers can use emails as usernames.
@@ -231,7 +232,7 @@ class WC_Shortcode_My_Account {
 			$user_data = get_user_by( 'login', $login );
 		}
 
-		// If no user found, check if it login is emaill and lookup user based on email.
+		// If no user found, check if it login is email and lookup user based on email.
 		if ( ! $user_data && is_email( $_POST['user_login'] ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
 			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
 		}

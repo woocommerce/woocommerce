@@ -51,10 +51,12 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 			$current_section = current( $integrations )->id;
 		}
 
-		foreach ( $integrations as $integration ) {
-			$title = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;
+		if ( sizeof( $integrations ) > 1 ) {
+			foreach ( $integrations as $integration ) {
+				$title = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;
 
-			$sections[ strtolower( $integration->id ) ] = esc_html( $title );
+				$sections[ strtolower( $integration->id ) ] = esc_html( $title );
+			}
 		}
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );

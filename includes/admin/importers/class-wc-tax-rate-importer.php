@@ -150,22 +150,37 @@ if ( class_exists( 'WP_Importer' ) ) {
 
 						$tax_rate_id = $wpdb->insert_id;
 
-						$postcode  = wc_clean( $postcode );
-						$postcodes = explode( ';', $postcode );
-						$postcodes = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
+						$postcode       = wc_clean( $postcode );
+						$postcodes      = explode( ';', $postcode );
+						$postcodes      = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
+						$postcode_query = array();
 
 						foreach( $postcodes as $postcode ) {
-
 							if ( ! empty( $postcode ) && $postcode != '*' ) {
-								$wpdb->insert(
-									$wpdb->prefix . "woocommerce_tax_rate_locations",
-									array(
-										'location_code' => $postcode,
-										'tax_rate_id'   => $tax_rate_id,
-										'location_type' => 'postcode',
-									)
-								);
+								if ( strstr( $postcode, '-' ) ) {
+									$postcode_parts = explode( '-', $postcode );
+
+									if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
+										for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
+											if ( ! $i ) {
+												continue;
+											}
+
+											if ( strlen( $i ) < strlen( $postcode_parts[0] ) ) {
+												$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
+											}
+
+											$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
+										}
+									}
+								} else {
+									$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
+								}
 							}
+						}
+
+						if ( sizeof( $postcode_query ) > 0 ) {
+							$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
 						}
 
 						$city   = wc_clean( $city );

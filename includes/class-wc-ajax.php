@@ -92,11 +92,11 @@ class WC_AJAX {
 
 		// Fragments and mini cart are returned
 		$data = array(
-			'fragments' => apply_filters( 'add_to_cart_fragments', array(
+			'fragments' => apply_filters( 'woocommerce_add_to_cart_fragments', array(
 					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>'
 				)
 			),
-			'cart_hash' => WC()->cart->get_cart() ? md5( json_encode( WC()->cart->get_cart() ) ) : ''
+			'cart_hash' => apply_filters( 'woocommerce_add_to_cart_hash', WC()->cart->get_cart() ? md5( json_encode( WC()->cart->get_cart() ) ) : '', WC()->cart->get_cart() )
 		);
 
 		wp_send_json( $data );
@@ -338,7 +338,7 @@ class WC_AJAX {
 
 		delete_transient( 'wc_featured_products' );
 
-		wp_safe_redirect( remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) );
+		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=shop_order' ) );
 
 		die();
 	}
@@ -363,7 +363,7 @@ class WC_AJAX {
 		$order = wc_get_order( $order_id );
 		$order->update_status( 'completed' );
 
-		wp_safe_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
 
 		die();
 	}
@@ -388,7 +388,7 @@ class WC_AJAX {
 		$order = wc_get_order( $order_id );
 		$order->update_status( 'processing' );
 
-		wp_safe_redirect( wp_get_referer() );
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
 
 		die();
 	}
@@ -541,7 +541,7 @@ class WC_AJAX {
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 					// Text based, separate by pipe
-					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', array_map( 'stripslashes', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) ) );
+					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'trim', array_map( 'wp_kses_post', array_map( 'stripslashes', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) ) ) );
 
 					// Custom attribute - Add attribute to array and set the values
 					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -1890,6 +1890,8 @@ class WC_AJAX {
 				}
 				if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
 					$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund_amount, $refund_reason );
+
+					do_action( 'woocommerce_refund_processed', $refund, $result );
 
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );

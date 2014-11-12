@@ -143,12 +143,12 @@ class WC_Admin_Dashboard {
 				</li>
 			<?php endif; ?>
 			<li class="processing-orders">
-				<a href="<?php echo admin_url( 'edit.php?s&post_status=processing&post_type=shop_order' ); ?>">
+				<a href="<?php echo admin_url( 'edit.php?post_status=wc-processing&post_type=shop_order' ); ?>">
 					<?php printf( _n( "<strong>%s order</strong> awaiting processing", "<strong>%s orders</strong> awaiting processing", $processing_count, 'woocommerce' ), $processing_count ); ?>
 				</a>
 			</li>
 			<li class="on-hold-orders">
-				<a href="<?php echo admin_url( 'edit.php?s&post_status=on-hold&post_type=shop_order' ); ?>">
+				<a href="<?php echo admin_url( 'edit.php?post_status=wc-on-hold&post_type=shop_order' ); ?>">
 					<?php printf( _n( "<strong>%s order</strong> on-hold", "<strong>%s orders</strong> on-hold", $on_hold_count, 'woocommerce' ), $on_hold_count ); ?>
 				</a>
 			</li>

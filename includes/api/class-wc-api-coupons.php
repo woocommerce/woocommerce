@@ -131,7 +131,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			'usage_limit_per_user'         => ( ! empty( $coupon->usage_limit_per_user ) ) ? $coupon->usage_limit_per_user : null,
 			'limit_usage_to_x_items'       => (int) $coupon->limit_usage_to_x_items,
 			'usage_count'                  => (int) $coupon->usage_count,
-			'expiry_date'                  => $this->server->format_datetime( $coupon->expiry_date ),
+			'expiry_date'                  => ( ! empty( $coupon->expiry_date ) ) ? $this->server->format_datetime( $coupon->expiry_date ) : null,
 			'apply_before_tax'             => $coupon->apply_before_tax(),
 			'enable_free_shipping'         => $coupon->enable_free_shipping(),
 			'product_category_ids'         => array_map( 'absint', (array) $coupon->product_categories ),

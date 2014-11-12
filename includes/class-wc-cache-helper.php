@@ -55,6 +55,22 @@ class WC_Cache_Helper {
 	}
 
 	/**
+	 * Get the page name/id for a WC page
+	 * @param  string $wc_page
+	 * @return array
+	 */
+	private static function get_page_uris( $wc_page ) {
+		$wc_page_uris = array();
+
+		if ( ( $page_id = wc_get_page_id( $wc_page ) ) && $page_id > 0 && ( $page = get_post( $page_id ) ) ) {
+			$wc_page_uris[] = 'p=' . $page_id;
+			$wc_page_uris[] = '/' . $page->post_name;
+		}
+
+		return $wc_page_uris;
+	}
+
+	/**
 	 * Prevent caching on dynamic pages.
 	 *
 	 * @access public
@@ -62,34 +78,7 @@ class WC_Cache_Helper {
 	 */
 	public static function prevent_caching() {
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
-			$wc_page_uris   = array();
-
-			// Exclude querystring when using page ID and permalinks
-			if ( ( $cart_page_id = wc_get_page_id( 'cart' ) ) && $cart_page_id > 0 ) {
-				$wc_page_uris[] = 'p=' . $cart_page_id;
-				$page           = get_post( $cart_page_id );
-
-				if ( ! is_null( $page ) ) {
-					$wc_page_uris[] = '/' . $page->post_name;
-				}
-			}
-			if ( ( $checkout_page_id = wc_get_page_id( 'checkout' ) ) && $checkout_page_id > 0 ) {
-				$wc_page_uris[] = 'p=' . $checkout_page_id;
-				$page           = get_post( $checkout_page_id );
-
-				if ( ! is_null( $page ) ) {
-					$wc_page_uris[] = '/' . $page->post_name;
-				}
-			}
-			if ( ( $myaccount_page_id = wc_get_page_id( 'myaccount' ) ) && $myaccount_page_id > 0 ) {
-				$wc_page_uris[] = 'p=' . $myaccount_page_id;
-				$page           = get_post( $myaccount_page_id );
-
-				if ( ! is_null( $page ) ) {
-					$wc_page_uris[] = '/' . $page->post_name;
-				}
-			}
-
+			$wc_page_uris   = array_filter( array_merge( self::get_page_uris( 'cart' ), self::get_page_uris( 'checkout' ), self::get_page_uris( 'myaccount' ) ) );
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
 		}
 
@@ -135,7 +124,7 @@ class WC_Cache_Helper {
 
 		$config   = w3_instance('W3_Config');
 		$enabled  = $config->get_integer( 'dbcache.enabled' );
-		$settings = $config->get_array( 'dbcache.reject.sql' );
+		$settings = array_map( 'trim', $config->get_array( 'dbcache.reject.sql' ) );
 
 		if ( $enabled && ! in_array( '_wc_session_', $settings ) ) {
 			?>

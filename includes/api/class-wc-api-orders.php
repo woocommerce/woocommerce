@@ -864,22 +864,22 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// total
 		if ( isset( $item['total'] ) ) {
-			$item_args['totals']['line_total'] = floatval( $item['total'] );
+			$item_args['totals']['total'] = floatval( $item['total'] );
 		}
 
 		// total tax
 		if ( isset( $item['total_tax'] ) ) {
-			$item_args['totals']['line_tax'] = floatval( $item['total_tax'] );
+			$item_args['totals']['tax'] = floatval( $item['total_tax'] );
 		}
 
 		// subtotal
 		if ( isset( $item['subtotal'] ) ) {
-			$item_args['totals']['line_subtotal'] = floatval( $item['subtotal'] );
+			$item_args['totals']['subtotal'] = floatval( $item['subtotal'] );
 		}
 
 		// subtotal tax
 		if ( isset( $item['subtotal_tax'] ) ) {
-			$item_args['totals']['line_subtotal_tax'] = floatval( $item['subtotal_tax'] );
+			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
 		}
 
 		if ( $creating ) {

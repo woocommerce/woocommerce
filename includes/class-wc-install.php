@@ -32,12 +32,15 @@ class WC_Install {
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
+
+		if ( is_multisite() ) {
+			add_filter( 'wpmu_drop_tables', array( $this, 'wpmu_drop_tables' ) );
+		}
 	}
 
 	/**
 	 * check_version function.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function check_version() {
@@ -112,7 +115,6 @@ class WC_Install {
 		$this->create_terms();
 		$this->create_cron_jobs();
 		$this->create_files();
-		$this->create_css_from_scss();
 
 		// Queue upgrades
 		$current_version    = get_option( 'woocommerce_version', null );
@@ -218,7 +220,6 @@ class WC_Install {
 	/**
 	 * Create pages that the plugin relies on, storing page id's in variables.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public static function create_pages() {
@@ -253,7 +254,6 @@ class WC_Install {
 	/**
 	 * Add the default terms for WC taxonomies - product types and order statuses. Modify this at your own risk.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	private function create_terms() {
@@ -281,9 +281,9 @@ class WC_Install {
 	 *
 	 * Sets up the default options used on the settings page
 	 *
-	 * @access public
+	 * @return void
 	 */
-	function create_options() {
+	public function create_options() {
 		// Include settings so that we can run through defaults
 		include_once( 'admin/class-wc-admin-settings.php' );
 
@@ -326,7 +326,6 @@ class WC_Install {
 	 *		woocommerce_tax_rates - Tax Rates are stored inside 2 tables making tax queries simple and efficient.
 	 *		woocommerce_tax_rate_locations - Each rate can be applied to more than one postcode/city hence the second table.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	private function create_tables() {
@@ -521,7 +520,6 @@ class WC_Install {
 	/**
 	 * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset
 	 *
-	 * @access public
 	 * @return array
 	 */
 	public function get_core_capabilities() {
@@ -566,7 +564,6 @@ class WC_Install {
 	/**
 	 * woocommerce_remove_roles function.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function remove_roles() {
@@ -635,26 +632,11 @@ class WC_Install {
 	}
 
 	/**
-	 * Create CSS from SCSS file
-	 */
-	private function create_css_from_scss() {
-		// Recompile SCSS styles if they are custom
-		$colors = get_option( 'woocommerce_frontend_css_colors' );
-
-		if ( ( ! empty( $colors['primary'] ) && ! empty( $colors['secondary'] ) && ! empty( $colors['highlight'] ) && ! empty( $colors['content_bg'] ) && ! empty( $colors['subtext'] ) ) && ( $colors['primary'] != '#ad74a2' || $colors['secondary'] != '#f7f6f7' || $colors['highlight'] != '#85ad74' || $colors['content_bg'] != '#ffffff' || $colors['subtext'] != '#777777' ) ) {
-			if ( ! function_exists( 'woocommerce_compile_scss_styles' ) ) {
-				include_once( 'admin/wc-admin-functions.php' );
-			}
-			woocommerce_compile_scss_styles();
-		}
-	}
-
-	/**
 	 * Show plugin changes. Code adapted from W3 Total Cache.
 	 *
 	 * @return void
 	 */
-	function in_plugin_update_message( $args ) {
+	public function in_plugin_update_message( $args ) {
 		$transient_name = 'wc_upgrade_notice_' . $args['Version'];
 
 		if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) {
@@ -694,7 +676,6 @@ class WC_Install {
 	/**
 	 * Show action links on the plugin screen.
 	 *
-	 * @access	public
 	 * @param	mixed $links Plugin Action links
 	 * @return	array
 	 */
@@ -709,7 +690,6 @@ class WC_Install {
 	/**
 	 * Show row meta on the plugin screen.
 	 *
-	 * @access	public
 	 * @param	mixed $links Plugin Row Meta
 	 * @param	mixed $file  Plugin Base file
 	 * @return	array
@@ -726,6 +706,25 @@ class WC_Install {
 		}
 
 		return (array) $links;
+	}
+
+	/**
+	 * Uninstall tables when MU blog is deleted.
+	 * @param  array $tables
+	 * @return array
+	 */
+	public function wpmu_drop_tables( $tables ) {
+		global $wpdb;
+
+		$tables[] = $wpdb->prefix . "woocommerce_attribute_taxonomies";
+		$tables[] = $wpdb->prefix . "woocommerce_downloadable_product_permissions";
+		$tables[] = $wpdb->prefix . "woocommerce_termmeta";
+		$tables[] = $wpdb->prefix . "woocommerce_tax_rates";
+		$tables[] = $wpdb->prefix . "woocommerce_tax_rate_locations";
+		$tables[] = $wpdb->prefix . "woocommerce_order_items";
+		$tables[] = $wpdb->prefix . "woocommerce_order_itemmeta";
+
+		return $tables;
 	}
 }
 

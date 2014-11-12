@@ -112,8 +112,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					'_line_total' => array(
 						'type'            => 'order_item_meta',
 						'order_item_type' => 'line_item',
-						'function' => '',
-						'name'     => 'order_item_amount'
+						'function'        => 'SUM',
+						'name'            => 'order_item_amount'
 					),
 					'post_date' => array(
 						'type'     => 'post_data',
@@ -121,7 +121,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 						'name'     => 'post_date'
 					),
 				),
-				'group_by'     => 'ID, product_id',
+				'group_by'     => 'ID, product_id, post_date',
 				'query_type'   => 'get_results',
 				'filter_range' => true
 			) );
@@ -329,8 +329,16 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 										label: "' . esc_js( $data['category'] ) . '",
 										data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
 										color: "' . $color . '",
-										bars: { fillColor: "' . $color . '", fill: true, show: true, lineWidth: 1, align: "center", barWidth: ' . $width * 0.75 . ', stack: false },
-										prepend_tooltip: "' . get_woocommerce_currency_symbol() . '",
+										bars: {
+											fillColor: "' . $color . '",
+											fill: true,
+											show: true,
+											lineWidth: 1,
+											align: "center",
+											barWidth: ' . $width * 0.75 . ',
+											stack: false
+										},
+										' . $this->get_currency_tooltip() . ',
 										enable_tooltip: true,
 										prepend_label: true
 									},';

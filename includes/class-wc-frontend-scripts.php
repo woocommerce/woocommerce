@@ -130,7 +130,7 @@ class WC_Frontend_Scripts {
 		if ( is_cart() ) {
 			self::enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select' ) );
 		}
-		if ( 'yes' === get_option( 'woocommerce_enable_chosen' ) && ( is_checkout() || is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) ) {
+		if ( apply_filters( 'woocommerce_chosen_country_select', true ) && ( is_checkout() || is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) ) {
 			self::enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ) );
 			wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
 		}
@@ -139,6 +139,9 @@ class WC_Frontend_Scripts {
 		}
 		if ( is_add_payment_method_page() ) {
 			self::enqueue_script( 'wc-add-payment-method', $frontend_script_path . 'add-payment-method' . $suffix . '.js', array( 'jquery', 'woocommerce' ) );
+		}
+		if ( is_lost_password_page() ) {
+			self::enqueue_script( 'wc-lost-password', $frontend_script_path . 'lost-password' . $suffix . '.js', array( 'jquery', 'woocommerce' ) );
 		}
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			self::enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.5', true );

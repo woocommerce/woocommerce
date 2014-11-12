@@ -34,9 +34,10 @@ class WC_Order_Item_Meta {
 	 * @param bool $flat (default: false)
 	 * @param bool $return (default: false)
 	 * @param string $hideprefix (default: _)
+	 * @param  string $delimiter Delimiter used to separate items when $flat is true
 	 * @return string
 	 */
-	public function display( $flat = false, $return = false, $hideprefix = '_' ) {
+	public function display( $flat = false, $return = false, $hideprefix = '_', $delimiter = ", \n" ) {
 
 		$output = '';
 
@@ -61,9 +62,9 @@ class WC_Order_Item_Meta {
 			if ( ! empty( $meta_list ) ) {
 
 				if ( $flat ) {
-					$output .= implode( ", \n", $meta_list );
+					$output .= implode( $delimiter, $meta_list );
 				} else {
-					$output .= '<dl class="variation">' . implode( '', $meta_list ). '</dl>';
+					$output .= '<dl class="variation">' . implode( '', $meta_list ) . '</dl>';
 				}
 			}
 		}

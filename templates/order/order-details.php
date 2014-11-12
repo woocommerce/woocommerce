@@ -2,9 +2,9 @@
 /**
  * Order details
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.2.0
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -74,7 +74,7 @@ $order = wc_get_order( $order_id );
 				if ( $order->has_status( array( 'completed', 'processing' ) ) && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) {
 					?>
 					<tr class="product-purchase-note">
-						<td colspan="3"><?php echo wpautop( do_shortcode( $purchase_note ) ); ?></td>
+						<td colspan="3"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); ?></td>
 					</tr>
 					<?php
 				}
@@ -94,6 +94,16 @@ $order = wc_get_order( $order_id );
 			</tr>
 			<?php
 		endforeach;
+
+	// Check for customer note
+	if ( '' != $order->customer_note ) {
+		?>
+		<tr>
+			<th scope="row"><?php _e( 'Note:', 'woocommerce' ); ?></th>
+			<td><?php echo wptexturize( $order->customer_note ); ?></td>
+		</tr>
+	<?php
+	}
 	?>
 	</tfoot>
 </table>
@@ -103,15 +113,15 @@ $order = wc_get_order( $order_id );
 <header>
 	<h2><?php _e( 'Customer details', 'woocommerce' ); ?></h2>
 </header>
-<dl class="customer_details">
+<table class="shop_table shop_table_responsive customer_details">
 <?php
-	if ( $order->billing_email ) echo '<dt>' . __( 'Email:', 'woocommerce' ) . '</dt><dd>' . $order->billing_email . '</dd>';
-	if ( $order->billing_phone ) echo '<dt>' . __( 'Telephone:', 'woocommerce' ) . '</dt><dd>' . $order->billing_phone . '</dd>';
+	if ( $order->billing_email ) echo '<tr><th>' . __( 'Email:', 'woocommerce' ) . '</th><td data-title="' . __( 'Email', 'woocommerce' ) . '">' . $order->billing_email . '</td></tr>';
+	if ( $order->billing_phone ) echo '<tr><th>' . __( 'Telephone:', 'woocommerce' ) . '</th><td data-title="' . __( 'Telephone', 'woocommerce' ) . '">' . $order->billing_phone . '</td></tr>';
 
 	// Additional customer details hook
 	do_action( 'woocommerce_order_details_after_customer_details', $order );
 ?>
-</dl>
+</table>
 
 <?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
 

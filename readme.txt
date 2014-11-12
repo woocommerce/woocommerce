@@ -44,8 +44,8 @@ Some of our popular extensions include **[Product Addons](http://www.woothemes.c
 
 Want to see more?
 
-* [View Payment Gateways](http://www.woothemes.com/product-category/woocommerce-extensions/?prod_cat%5B%5D=1023&s=&post_type=product&min_price=0&max_price=129&prod_country=0 "Payment gateways for WooCommerce from WooThemes").
-* [View Shipping Methods](http://www.woothemes.com/product-category/woocommerce-extensions/?prod_cat%5B%5D=1026&s=&post_type=product&min_price=0&max_price=129&post_type=product&prod_country=0 "Shipping methods for WooCommerce from WooThemes").
+* [View Payment Gateways](http://www.woothemes.com/product-category/woocommerce-extensions/payment-gateways/ "Payment gateways for WooCommerce from WooThemes").
+* [View Shipping Methods](http://www.woothemes.com/product-category/woocommerce-extensions/shipping-methods/ "Shipping methods for WooCommerce from WooThemes").
 * [View all extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "View all WooCommerce extensions").
 
 = Free Extensions =
@@ -131,7 +131,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.3.0 =
+* Feature - Made tax importer expand postcode ranges.
+* Feature - Print styles for reports.
 * Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
+* Refactor - Routing all email functionality through one send() method.
+* Refactor - Replaced existing email css inliner with Emogrifier.
+* Refactor - get_product_search_form().
+* Refactor - Improved the Shipping Class field in products quick edit and bulk edit.
 * Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
 * Tweak - Double the default product image dimensions.
 * Tweak - Added refunds to Sales by Date report.
@@ -140,7 +146,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Logic in wc_paying_customer to only increase for 'simple' orders.
 * Tweak - Added tool to refresh stats to customer list.
 * Tweak - Recent order table on my account is responsive.
+* Tweak - Drop WC tables in wpmu_drop_tables (for multisite).
 * Dev - Made template debug mode set WC_TEMPLATE_DEBUG_MODE constant and remove all overrides for all template loading functions.
+* Localisation - Add Ukrainian currency and symbol.
 
 = 2.2.5 - 07/10/2014 =
 * Fix - Filters in admin screen for coupons and orders.

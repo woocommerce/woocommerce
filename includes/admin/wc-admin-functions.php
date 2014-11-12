@@ -145,88 +145,6 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
 }
 
 /**
- * Generate CSS from the scss file when changing colours.
- *
- * @since 2.3
- * @return void
- */
-function woocommerce_compile_scss_styles() {
-	global $woocommerce;
-
-	$colors       = array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
-	$css_diretory = WC()->plugin_path() . '/assets/css/';
-	$base_file    = $css_diretory . '_woocommerce-base.scss';
-	$scss_file    = $css_diretory . 'woocommerce.scss';
-	$css_file     = $css_diretory . 'woocommerce.css';
-
-	// Write scss file
-	if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
-
-		// Colours changed - recompile scss
-		if ( ! class_exists( 'scssc' ) ) {
-			include_once( WC()->plugin_path() . '/includes/libraries/class-scssc.php' );
-		}
-		if ( ! class_exists( 'cssmin' ) ) {
-			include_once( WC()->plugin_path() . '/includes/libraries/class-cssmin.php' );
-		}
-
-		try {
-			// Set default if colours not set
-			if ( ! $colors['primary'] ) {
-				$colors['primary'] = '#ad74a2';
-			}
-
-			if ( ! $colors['secondary'] ) {
-				$colors['secondary'] = '#f7f6f7';
-			}
-
-			if ( ! $colors['highlight'] ) {
-				$colors['highlight'] = '#85ad74';
-			}
-
-			if ( ! $colors['content_bg'] ) {
-				$colors['content_bg'] = '#ffffff';
-			}
-
-			if ( ! $colors['subtext'] ) {
-				$colors['subtext'] = '#777777';
-			}
-
-			// Write new color to base file
-			$color_rules = '$primary:           ' . $colors['primary'] . ';
-$primarytext:       ' . wc_light_or_dark( $colors['primary'], 'desaturate(darken($primary, 50%), 18%)', 'desaturate(lighten($primary, 50%), 18%)' ) . ';
-
-$secondary:         ' . $colors['secondary'] . ';
-$secondarytext:     ' . wc_light_or_dark( $colors['secondary'], 'desaturate(darken($secondary, 60%), 18%)', 'desaturate(lighten($secondary, 60%), 18%)' ) . ';
-
-$highlight:         ' . $colors['highlight'] . ';
-$highlightext:      ' . wc_light_or_dark( $colors['highlight'], 'desaturate(darken($highlight, 60%), 18%)', 'desaturate(lighten($highlight, 60%), 18%)' ) . ';
-
-$contentbg:         ' . $colors['content_bg'] . ';
-
-$subtext:           ' . $colors['subtext'] . ';
-';
-
-			file_put_contents( $base_file, $color_rules );
-
-			$scss         = new scssc;
-			$scss->setImportPaths( $css_diretory );
-			$compiled_css = $scss->compile( trim( file_get_contents( $scss_file ) ) );
-			$compiled_css = CssMin::minify( $compiled_css );
-
-			error_log( print_r( $compiled_css, true ) );
-
-			if ( $compiled_css ) {
-				file_put_contents( $css_file, $compiled_css );
-			}
-
-		} catch ( exception $ex ) {
-			wp_die( __( 'Could not compile woocommerce.scss:', 'woocommerce' ) . ' ' . $ex->getMessage() );
-		}
-	}
-}
-
-/**
  * Save order items
  *
  * @since 2.2
@@ -278,21 +196,23 @@ function wc_save_order_items( $order_id, $items ) {
 			$line_tax[ $item_id ]          = isset( $line_tax[ $item_id ] ) ? $line_tax[ $item_id ] : array();
 			$line_subtotal_tax[ $item_id ] = isset( $line_subtotal_tax[ $item_id ] ) ? $line_subtotal_tax[ $item_id ] : $line_tax[ $item_id ];
 
+			// Format taxes
+			$line_taxes          = array_map( 'wc_format_decimal', $line_tax[ $item_id ] );
+			$line_subtotal_taxes = array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] );
+
 			// Update values
 			wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $line_subtotal[ $item_id ] ) );
 			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $line_total[ $item_id ] ) );
-			wc_update_order_item_meta( $item_id, '_line_subtotal_tax', array_sum( array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] ) ) );
-			wc_update_order_item_meta( $item_id, '_line_tax', array_sum( array_map( 'wc_format_decimal', $line_tax[ $item_id ] ) ) );
+			wc_update_order_item_meta( $item_id, '_line_subtotal_tax', array_sum( $line_subtotal_taxes ) );
+			wc_update_order_item_meta( $item_id, '_line_tax', array_sum( $line_taxes ) );
 
 			// Save line tax data - Since 2.2
-			$tax_data_total    = array_map( 'wc_format_decimal', $line_tax[ $item_id ] );
-			$tax_data_subtotal = array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] );
-			wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $tax_data_total, 'subtotal' => $tax_data_subtotal ) );
-			$taxes['items'][] = $tax_data_total;
+			wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $line_taxes, 'subtotal' => $line_subtotal_taxes ) );
+			$taxes['items'][] = $line_taxes;
 
 			// Total up
-			$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] );
-			$total    += wc_format_decimal( $line_total[ $item_id ] );
+			$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] ) + array_sum( $line_subtotal_taxes );
+			$total    += wc_format_decimal( $line_total[ $item_id ] ) + array_sum( $line_taxes );
 
 			// Clear meta cache
 			wp_cache_delete( $item_id, 'order_item_meta' );

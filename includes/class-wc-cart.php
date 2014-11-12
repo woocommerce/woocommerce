@@ -336,10 +336,16 @@ class WC_Cart {
 		 * @return void
 		 */
 		public function check_cart_items() {
+
+			// Result
+			$return = true;
+
+			// Check cart item validity
 			$result = $this->check_cart_item_validity();
 
 			if ( is_wp_error( $result ) ) {
 				wc_add_notice( $result->get_error_message(), 'error' );
+				$return = false;
 			}
 
 			// Check item stock
@@ -347,7 +353,11 @@ class WC_Cart {
 
 			if ( is_wp_error( $result ) ) {
 				wc_add_notice( $result->get_error_message(), 'error' );
+				$return = false;
 			}
+
+			return $return;
+
 		}
 
 		/**
@@ -624,12 +634,16 @@ class WC_Cart {
 			$checkout_page_id = wc_get_page_id( 'checkout' );
 			$checkout_url     = '';
 			if ( $checkout_page_id ) {
-				if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' ) {
-					$checkout_url = str_replace( 'http:', 'https:', get_permalink( $checkout_page_id ) );
-				} else {
-					$checkout_url = get_permalink( $checkout_page_id );
+
+				// Get the checkout URL
+				$checkout_url = get_permalink( $checkout_page_id );
+
+				// Force SSL if needed
+				if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
+					$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 				}
 			}
+
 			return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 		}
 
@@ -756,8 +770,9 @@ class WC_Cart {
 		public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 			$id_parts = array( $product_id );
 
-			if ( $variation_id && 0 != $variation_id )
+			if ( $variation_id && 0 != $variation_id ) {
 				$id_parts[] = $variation_id;
+			}
 
 			if ( is_array( $variation ) && ! empty( $variation ) ) {
 				$variation_key = '';
@@ -770,8 +785,12 @@ class WC_Cart {
 			if ( is_array( $cart_item_data ) && ! empty( $cart_item_data ) ) {
 				$cart_item_data_key = '';
 				foreach ( $cart_item_data as $key => $value ) {
-					if ( is_array( $value ) ) $value = http_build_query( $value );
-					$cart_item_data_key .= trim($key) . trim($value);
+
+					if ( is_array( $value ) ) {
+						$value = http_build_query( $value );
+					}
+					$cart_item_data_key .= trim( $key ) . trim( $value );
+
 				}
 				$id_parts[] = $cart_item_data_key;
 			}
@@ -813,8 +832,13 @@ class WC_Cart {
 			// Get the product
 			$product_data   = wc_get_product( $variation_id ? $variation_id : $product_id );
 
-			if ( ! $product_data )
+			if ( ! $product_data ) {
 				return false;
+			}
+
+			if ( 'trash' == $product_data->post->post_status ) {
+				return false;
+			}
 
 			// Force quantity to 1 if sold individually
 			if ( $product_data->is_sold_individually() ) {
@@ -919,6 +943,8 @@ class WC_Cart {
 		 * @param string	cart_item_key	contains the id of the cart item
 		 * @param string	quantity		contains the quantity of the item
 		 * @param boolean 	$refresh_totals	whether or not to calculate totals after setting the new qty
+		 *
+		 * @return bool
 		 */
 		public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
 			if ( $quantity == 0 || $quantity < 0 ) {
@@ -932,6 +958,8 @@ class WC_Cart {
 			if ( $refresh_totals ) {
 				$this->calculate_totals();
 			}
+
+			return true;
 		}
 
 	/*-----------------------------------------------------------------------------------*/
@@ -1011,7 +1039,7 @@ class WC_Cart {
 
 					// Get base tax rates
 					if ( empty( $shop_tax_rates[ $_product->tax_class ] ) )
-						$shop_tax_rates[ $_product->tax_class ] = $this->tax->get_shop_base_rate( $_product->tax_class );
+						$shop_tax_rates[ $_product->tax_class ] = $this->tax->get_base_tax_rates( $_product->tax_class );
 
 					// Get item tax rates
 					if ( empty( $tax_rates[ $_product->get_tax_class() ] ) )
@@ -1245,6 +1273,8 @@ class WC_Cart {
 				// Cart Discounts (after tax)
 				$this->apply_cart_discounts_after_tax();
 			}
+
+			do_action( 'woocommerce_after_calculate_totals', $this );
 
 			$this->set_session();
 		}
@@ -1547,8 +1577,9 @@ class WC_Cart {
 		 */
 		public function add_discount( $coupon_code ) {
 			// Coupons are globally disabled
-			if ( ! $this->coupons_enabled() )
+			if ( ! $this->coupons_enabled() ) {
 				return false;
+			}
 
 			// Sanitize coupon code
 			$coupon_code = apply_filters( 'woocommerce_coupon_code', $coupon_code );
@@ -1741,7 +1772,7 @@ class WC_Cart {
 					$coupon = new WC_Coupon( $code );
 
 					if ( $coupon->apply_before_tax() && $coupon->is_valid() ) {
-						if ( $coupon->is_valid_for_product( $values['data'] ) || $coupon->is_valid_for_cart() ) {
+						if ( $coupon->is_valid_for_product( $values['data'], $values ) || $coupon->is_valid_for_cart() ) {
 
 							$discount_amount       = $coupon->get_discount_amount( $price, $values, $single = true );
 							$price                 = max( $price - $discount_amount, 0 );

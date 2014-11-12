@@ -204,8 +204,9 @@ class WC_Product_Variable extends WC_Product {
 			foreach ( $this->get_children( true ) as $child_id ) {
 				$price      = get_post_meta( $child_id, '_price', true );
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price )
+				if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price ) {
 					return true;
+				}
 			}
 		}
 		return false;
@@ -226,8 +227,7 @@ class WC_Product_Variable extends WC_Product {
 
 		$price        = get_post_meta( $variation_id, '_regular_price', true );
 
-		if ( $display ) {
-			$variation        = $this->get_child( $variation_id );
+		if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
 			$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 			$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
 		}
@@ -492,8 +492,9 @@ class WC_Product_Variable extends WC_Product {
 	 * Sync variable product prices with the children lowest/highest prices.
 	 */
 	public function variable_product_sync( $product_id = '' ) {
-		if ( empty( $product_id ) )
+		if ( empty( $product_id ) ) {
 			$product_id = $this->id;
+		}
 
 		// Sync prices with children
 		self::sync( $product_id );

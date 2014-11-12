@@ -24,7 +24,9 @@ class WC_Coupon {
 	const E_WC_COUPON_NOT_APPLICABLE                 = 109;
 	const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 110;
 	const E_WC_COUPON_PLEASE_ENTER                   = 111;
-	const E_WC_COUPON_MAX_SPEND_LIMIT_MET        		 = 112;
+	const E_WC_COUPON_MAX_SPEND_LIMIT_MET 			 = 112;
+	const E_WC_COUPON_EXCLUDED_PRODUCTS              = 113;
+	const E_WC_COUPON_EXCLUDED_CATEGORIES            = 114;
 	const WC_COUPON_SUCCESS                          = 200;
 	const WC_COUPON_REMOVED                          = 201;
 
@@ -226,7 +228,7 @@ class WC_Coupon {
 
 
 	/**
-	 * Increase usage count fo current coupon.
+	 * Increase usage count for current coupon.
 	 *
 	 * @access public
 	 * @param  string $used_by Either user ID or billing email
@@ -243,7 +245,7 @@ class WC_Coupon {
 
 
 	/**
-	 * Decrease usage count fo current coupon.
+	 * Decrease usage count for current coupon.
 	 *
 	 * @access public
 	 * @param  string $used_by Either user ID or billing email
@@ -399,7 +401,7 @@ class WC_Coupon {
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
+						$error_code = self::E_WC_COUPON_EXCLUDED_PRODUCTS;
 					}
 				}
 
@@ -428,13 +430,14 @@ class WC_Coupon {
 
 							$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
 
-							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 )
+							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
 								$valid_for_cart = false;
+							}
 						}
 					}
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
+						$error_code = self::E_WC_COUPON_EXCLUDED_CATEGORIES;
 					}
 				}
 			}
@@ -474,9 +477,9 @@ class WC_Coupon {
 	 * @param  WC_Product  $product
 	 * @return boolean
 	 */
-	public function is_valid_for_product( $product ) {
+	public function is_valid_for_product( $product, $values = array() ) {
 		if ( $this->type != 'fixed_product' && $this->type != 'percent_product' )
-			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this );
+			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this, $values );
 
 		$valid        = false;
 		$product_cats = wp_get_post_terms( $product->id, 'product_cat', array( "fields" => "ids" ) );
@@ -516,7 +519,7 @@ class WC_Coupon {
 				$valid = false;
 		}
 
-		return apply_filters( 'woocommerce_coupon_is_valid_for_product', $valid, $product, $this );
+		return apply_filters( 'woocommerce_coupon_is_valid_for_product', $valid, $product, $this, $values );
 	}
 
 	/**
@@ -657,11 +660,48 @@ class WC_Coupon {
 				$err = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->minimum_amount ) );
 			break;
 			case self::E_WC_COUPON_MAX_SPEND_LIMIT_MET:
-				$err = sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->minimum_amount ) );
+				$err = sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->maximum_amount ) );
 			break;
 			case self::E_WC_COUPON_NOT_APPLICABLE:
 				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
 			break;
+			case self::E_WC_COUPON_EXCLUDED_PRODUCTS:
+
+				// Store excluded products that are in cart in $products
+				$products = array();
+				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+					foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+						if ( in_array( $cart_item['product_id'], $this->exclude_product_ids ) || in_array( $cart_item['variation_id'], $this->exclude_product_ids ) || in_array( $cart_item['data']->get_parent(), $this->exclude_product_ids ) ) {
+							$products[] = $cart_item['data']->get_title();
+						}
+					}
+				}
+
+				$err = sprintf( __( 'Sorry, this coupon is not applicable to the products: %s.', 'woocommerce' ), implode( ', ', $products ) );
+				break;
+			case self::E_WC_COUPON_EXCLUDED_CATEGORIES:
+
+				// Store excluded categories that are in cart in $categories
+				$categories = array();
+				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+
+						$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
+
+						if ( sizeof( $intersect = array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
+
+							foreach( $intersect as $cat_id) {
+								$cat = get_term( $cat_id, 'product_cat' );
+								$categories[] = $cat->name;
+							}
+
+
+						}
+					}
+				}
+
+				$err = sprintf( __( 'Sorry, this coupon is not applicable to the categories: %s.', 'woocommerce' ), implode( ', ', $categories ) );
+				break;
 			case self::E_WC_COUPON_NOT_VALID_SALE_ITEMS:
 				$err = __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' );
 			break;

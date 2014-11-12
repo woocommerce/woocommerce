@@ -2,7 +2,10 @@
  * This stylesheet optimises the default WooCommerce layout when viewed on smaller screens.
  */
 
-@import 'mixins';
+/* =Imports
+-------------------------------------------------------------- */
+@import "bourbon";
+@import "mixins";
 
 .woocommerce, .woocommerce-page {
 
@@ -17,6 +20,9 @@
 					border-top: 0;
 				}
 			}
+			th {
+				display: none;
+			}
 		}
 
 		tr {
@@ -26,7 +32,7 @@
 				display: block;
 
 				&:before {
-					content: attr(data-title) ':';
+					content: attr(data-title) ': ';
 					font-weight: 700;
 				}
 			}
@@ -110,7 +116,7 @@
 			}
 			input, .button, .input-text {
 				width:48%;
-				@include borderbox();
+				@include box-sizing(border-box);
 			}
 			.input-text + .button, .button.alt {
 				float: right;
@@ -145,7 +151,7 @@
 		#place_order {
 			float: none;
 			width:100%;
-			@include borderbox();
+			@include box-sizing(border-box);
 			margin-bottom:1em;
 		}
 	}

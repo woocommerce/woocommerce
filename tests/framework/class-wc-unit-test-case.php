@@ -28,6 +28,10 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 		add_filter( 'woocommerce_session_handler', array( $this, 'set_mock_session_handler' ) );
 
 		$this->setOutputCallback( array( $this, 'filter_output' ) );
+
+		// register post types before each test
+		WC_Post_types::register_post_types();
+		WC_Post_types::register_taxonomies();
 	}
 
 	/**
@@ -65,6 +69,16 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 */
 	public function assertNotWPError( $actual, $message = '' ) {
 		$this->assertNotInstanceOf( 'WP_Error', $actual, $message );
+	}
+
+	/**
+	 * Asserts thing is WP_Error
+	 *
+	 * @param $actual
+	 * @param string $message
+	 */
+	public function assertIsWPError( $actual, $message = '' ) {
+		$this->assertInstanceOf( 'WP_Error', $actual, $message );
 	}
 
 	/**

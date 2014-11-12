@@ -57,7 +57,7 @@ function woocommerce_create_page( $slug, $option = '', $page_title = '', $page_c
  */
 function woocommerce_readfile_chunked( $file, $retbytes = true ) {
 	_deprecated_function( 'woocommerce_readfile_chunked', '2.1', 'WC_Download_Handler::readfile_chunked()' );
-	return WC_Download_Handler::readfile_chunked( $file, $retbytes );
+	return WC_Download_Handler::readfile_chunked( $file );
 }
 
 /**
@@ -509,30 +509,26 @@ function woocommerce_list_pages( $pages ) {
 global $wc_map_deprecated_filters;
 
 $wc_map_deprecated_filters = array(
-	'woocommerce_cart_item_class'       => 'woocommerce_cart_table_item_class',
-	'woocommerce_cart_item_product_id'  => 'hook_woocommerce_in_cart_product_id',
-	'woocommerce_cart_item_thumbnail'   => 'hook_woocommerce_in_cart_product_thumbnail',
-	'woocommerce_cart_item_price'       => 'woocommerce_cart_item_price_html',
-	'woocommerce_cart_item_name'        => 'woocommerce_in_cart_product_title',
-	'woocommerce_order_item_class'      => 'woocommerce_order_table_item_class',
-	'woocommerce_order_item_name'       => 'woocommerce_order_table_product_title',
-	'woocommerce_order_amount_shipping' => 'woocommerce_order_amount_total_shipping',
-	'woocommerce_package_rates'         => 'woocommerce_available_shipping_methods'
+	'pre_get_product_search_form'       => 'get_product_search_form',
+	'woocommerce_add_to_cart_fragments' => 'add_to_cart_fragments',
+	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect'
 );
 
-foreach ( $wc_map_deprecated_filters as $new => $old )
+foreach ( $wc_map_deprecated_filters as $new => $old ) {
 	add_filter( $new, 'woocommerce_deprecated_filter_mapping' );
+}
 
 function woocommerce_deprecated_filter_mapping( $data, $arg_1 = '', $arg_2 = '', $arg_3 = '' ) {
 	global $wc_map_deprecated_filters;
 
 	$filter = current_filter();
 
-	if ( isset( $wc_map_deprecated_filters[ $filter ] ) )
+	if ( isset( $wc_map_deprecated_filters[ $filter ] ) ) {
 		if ( has_filter( $wc_map_deprecated_filters[ $filter ] ) ) {
 			$data = apply_filters( $wc_map_deprecated_filters[ $filter ], $data, $arg_1, $arg_2, $arg_3 );
-			_deprecated_function( 'The ' . $wc_map_deprecated_filters[ $filter ] . ' filter', '2.1', $filter );
+			_deprecated_function( 'The ' . $wc_map_deprecated_filters[ $filter ] . ' filter', '', $filter );
 		}
+	}
 
 	return $data;
 }
@@ -721,13 +717,9 @@ add_action( 'pre_get_posts', 'wc_shop_order_status_backwards_compatibility' );
 
 /**
  * @since 2.3
- * @deprecated in favor to woocommerce_compile_scss_styles()
+ * @deprecated has no replacement
+ * @return void
  */
 function woocommerce_compile_less_styles() {
-	_deprecated_function( 'woocommerce_compile_less_styles', '2.3', 'woocommerce_compile_scss_styles' );
-
-	// Prevents errors if used outside of admin dashboard
-	if ( function_exists( 'woocommerce_compile_scss_styles' ) ) {
-		woocommerce_compile_scss_styles();
-	}
+	_deprecated_function( 'woocommerce_compile_less_styles', '2.3' );
 }

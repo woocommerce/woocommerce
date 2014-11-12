@@ -236,7 +236,8 @@ final class WooCommerce {
 			define( 'WC_DELIMITER', '|' );
 		}
 		if ( ! defined( 'WC_LOG_DIR' ) ) {
-			define( 'WC_LOG_DIR', ABSPATH . 'wc-logs/' );
+			$upload_dir = wp_upload_dir();
+			define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		}
 	}
 
@@ -384,19 +385,22 @@ final class WooCommerce {
 		}
 
 		// Email Actions
-		$email_actions = array(
+		$email_actions = apply_filters( 'woocommerce_email_actions', array(
 			'woocommerce_low_stock',
 			'woocommerce_no_stock',
 			'woocommerce_product_on_backorder',
 			'woocommerce_order_status_pending_to_processing',
 			'woocommerce_order_status_pending_to_completed',
+			'woocommerce_order_status_pending_to_cancelled',
 			'woocommerce_order_status_pending_to_on-hold',
 			'woocommerce_order_status_failed_to_processing',
 			'woocommerce_order_status_failed_to_completed',
+			'woocommerce_order_status_on-hold_to_processing',
+			'woocommerce_order_status_on-hold_to_cancelled',
 			'woocommerce_order_status_completed',
 			'woocommerce_new_customer_note',
 			'woocommerce_created_customer'
-		);
+		) );
 
 		foreach ( $email_actions as $action ) {
 			add_action( $action, array( $this, 'send_transactional_email' ), 10, 10 );
@@ -451,13 +455,27 @@ final class WooCommerce {
 			define( 'WC_TEMPLATE_PATH', $this->template_path() );
 		}
 
-		// Post thumbnail support
+		$this->add_thumbnail_support();
+		$this->add_image_sizes();
+		$this->fix_server_vars();
+	}
+
+	/**
+	 * Ensure post thumbnail support is turned on
+	 */
+	private function add_thumbnail_support() {
 		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
 			add_theme_support( 'post-thumbnails' );
 		}
 		add_post_type_support( 'product', 'thumbnail' );
+	}
 
-		// Add image sizes
+	/**
+	 * Add WC Image sizes to WP
+	 *
+	 * @since 2.3
+	 */
+	private function add_image_sizes() {
 		$shop_thumbnail = wc_get_image_size( 'shop_thumbnail' );
 		$shop_catalog	= wc_get_image_size( 'shop_catalog' );
 		$shop_single	= wc_get_image_size( 'shop_single' );
@@ -465,16 +483,16 @@ final class WooCommerce {
 		add_image_size( 'shop_thumbnail', $shop_thumbnail['width'], $shop_thumbnail['height'], $shop_thumbnail['crop'] );
 		add_image_size( 'shop_catalog', $shop_catalog['width'], $shop_catalog['height'], $shop_catalog['crop'] );
 		add_image_size( 'shop_single', $shop_single['width'], $shop_single['height'], $shop_single['crop'] );
+	}
 
-		// IIS
-		if ( ! isset($_SERVER['REQUEST_URI'] ) ) {
-			$_SERVER['REQUEST_URI'] = substr( $_SERVER['PHP_SELF'], 1 );
-
-			if ( isset( $_SERVER['QUERY_STRING'] ) ) {
-				$_SERVER['REQUEST_URI'] .= '?' . $_SERVER['QUERY_STRING'];
-			}
-		}
-
+	/**
+	 * Fix `$_SERVER` variables for various setups.
+	 *
+	 * Note: Removed IIS handling due to wp_fix_server_vars()
+	 *
+	 * @since 2.3
+	 */
+	private function fix_server_vars() {
 		// NGINX Proxy
 		if ( ! isset( $_SERVER['REMOTE_ADDR'] ) && isset( $_SERVER['HTTP_REMOTE_ADDR'] ) ) {
 			$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_REMOTE_ADDR'];

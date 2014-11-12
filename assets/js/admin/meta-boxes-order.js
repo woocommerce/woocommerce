@@ -74,7 +74,78 @@ jQuery( function ( $ ) {
 		$( this ).closest( '.order_data_column' ).find( 'div.edit_address' ).show();
 	});
 
+
+	var states = null,
+		chosen_opts = {
+
+		};
+	// Check if we have the countries loaded
+	if ( ! ( typeof woocommerce_admin_meta_boxes_order === 'undefined' || typeof woocommerce_admin_meta_boxes_order.countries === 'undefined' ) ) {
+		/* State/Country select boxes */
+		states = $.parseJSON( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
+	}
+
+	$( '.js_field-country' )
+		.chosen( chosen_opts )
+		.change( function( e, stickValue ){
+			// Check for stickValue before using it
+			if ( typeof stickValue === 'undefined' ){
+				stickValue = false;
+			}
+
+			// Prevent if we don't have the metabox data
+			if ( states === null ){
+				return;
+			}
+
+			var $this = $( this ),
+				country = $this.val(),
+				$state = $this.parents( '.edit_address' ).find( '.js_field-state' ),
+				$parent = $state.parent(),
+				input_name = $state.attr( 'name' ),
+				input_id = $state.attr( 'id' ),
+				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : $state.val(),
+				placeholder = $state.attr( 'placeholder' );
+
+			if ( stickValue ){
+				$this.data( 'woocommerce.stickState-' + country, value );
+			}
+
+			// Remove the previous Chosen DOM element
+			$parent.show().find( '.chosen-container' ).remove();
+
+			if ( states[ country ] ) {
+				var $states_select = $( '<select name="' + input_name + '" id="' + input_id + '" class="js_field-state select short" placeholder="' + placeholder + '"></select>' ),
+					state = states[ country ];
+
+				$states_select.append( $( '<option value="">' + woocommerce_admin_meta_boxes_order.i18n_select_state_text + '</option>' ) );
+
+				$.each( state, function( index, name ) {
+					$states_select.append( $( '<option value="' + index + '">' + state[ index ] + '</option>' ) );
+				} );
+
+				$states_select.val( value );
+
+				$state.replaceWith( $states_select );
+
+				$states_select.show().chosen( chosen_opts ).hide().trigger("chosen:updated");
+			} else {
+				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" placeholder="' + placeholder + '" />' );
+			}
+
+			$( 'body' ).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
+		} ).trigger( 'change', [ true ] );
+
 	$( 'body' )
+		.on( 'change', 'select.js_field-state', function(){
+			// Here we will find if state value on a select has changed and stick it to the country data
+			var $this = $( this ),
+				state = $this.val(),
+				$country = $this.parents( '.edit_address' ).find( '.js_field-country' ),
+				country = $country.val();
+
+			$country.data( 'woocommerce.stickState-' + country, state );
+		} )
 		.on( 'click', 'a.edit-order-item', function() {
 			$( this ).closest( 'tr' ).find( '.view' ).hide();
 			$( this ).closest( 'tr' ).find( '.edit' ).show();
@@ -641,7 +712,7 @@ jQuery( function ( $ ) {
 
 	// Refund actions
 	$( 'body' )
-		.on( 'change', '.wc-order-refund-items #refund_amount', function() {
+		.on( 'change keyup', '.wc-order-refund-items #refund_amount', function() {
 			var total = accounting.unformat( $( this ).val(), woocommerce_admin.mon_decimal_point );
 
 			$( 'button .wc-order-refund-amount .amount' ).text( accounting.formatMoney( total, {
@@ -932,17 +1003,17 @@ jQuery( function ( $ ) {
 					var info = response;
 
 					if ( info ) {
-						$( 'input#_billing_first_name' ).val( info.billing_first_name );
-						$( 'input#_billing_last_name' ).val( info.billing_last_name );
-						$( 'input#_billing_company' ).val( info.billing_company );
-						$( 'input#_billing_address_1' ).val( info.billing_address_1 );
-						$( 'input#_billing_address_2' ).val( info.billing_address_2 );
-						$( 'input#_billing_city' ).val( info.billing_city );
-						$( 'input#_billing_postcode' ).val( info.billing_postcode );
-						$( '#_billing_country' ).val( info.billing_country );
-						$( 'input#_billing_state' ).val( info.billing_state );
-						$( 'input#_billing_email' ).val( info.billing_email );
-						$( 'input#_billing_phone' ).val( info.billing_phone );
+						$( 'input#_billing_first_name' ).val( info.billing_first_name ).change();
+						$( 'input#_billing_last_name' ).val( info.billing_last_name ).change();
+						$( 'input#_billing_company' ).val( info.billing_company ).change();
+						$( 'input#_billing_address_1' ).val( info.billing_address_1 ).change();
+						$( 'input#_billing_address_2' ).val( info.billing_address_2 ).change();
+						$( 'input#_billing_city' ).val( info.billing_city ).change();
+						$( 'input#_billing_postcode' ).val( info.billing_postcode ).change();
+						$( '#_billing_country' ).val( info.billing_country ).change().trigger( 'chosen:updated' );
+						$( '#_billing_state' ).val( info.billing_state ).change().trigger( 'chosen:updated' );
+						$( 'input#_billing_email' ).val( info.billing_email ).change();
+						$( 'input#_billing_phone' ).val( info.billing_phone ).change();
 					}
 
 					$( '.edit_address' ).unblock();
@@ -986,15 +1057,15 @@ jQuery( function ( $ ) {
 					var info = response;
 
 					if ( info ) {
-						$( 'input#_shipping_first_name' ).val( info.shipping_first_name );
-						$( 'input#_shipping_last_name' ).val( info.shipping_last_name );
-						$( 'input#_shipping_company' ).val( info.shipping_company );
-						$( 'input#_shipping_address_1' ).val( info.shipping_address_1 );
-						$( 'input#_shipping_address_2' ).val( info.shipping_address_2 );
-						$( 'input#_shipping_city' ).val( info.shipping_city );
-						$( 'input#_shipping_postcode' ).val( info.shipping_postcode );
-						$( '#_shipping_country' ).val( info.shipping_country );
-						$( 'input#_shipping_state' ).val( info.shipping_state );
+						$( 'input#_shipping_first_name' ).val( info.shipping_first_name ).change();
+						$( 'input#_shipping_last_name' ).val( info.shipping_last_name ).change();
+						$( 'input#_shipping_company' ).val( info.shipping_company ).change();
+						$( 'input#_shipping_address_1' ).val( info.shipping_address_1 ).change();
+						$( 'input#_shipping_address_2' ).val( info.shipping_address_2 ).change();
+						$( 'input#_shipping_city' ).val( info.shipping_city ).change();
+						$( 'input#_shipping_postcode' ).val( info.shipping_postcode ).change();
+						$( '#_shipping_country' ).val( info.shipping_country ).change().trigger( 'chosen:updated' );
+						$( '#_shipping_state' ).val( info.shipping_state ).change().trigger( 'chosen:updated' );
 					}
 
 					$( '.edit_address' ).unblock();
@@ -1006,15 +1077,15 @@ jQuery( function ( $ ) {
 
 	$( 'button.billing-same-as-shipping' ).on( 'click', function() {
 		if ( window.confirm( woocommerce_admin_meta_boxes.copy_billing ) ) {
-			$( 'input#_shipping_first_name' ).val( $( 'input#_billing_first_name' ).val() );
-			$( 'input#_shipping_last_name' ).val( $( 'input#_billing_last_name' ).val() );
-			$( 'input#_shipping_company' ).val( $( 'input#_billing_company' ).val() );
-			$( 'input#_shipping_address_1' ).val( $( 'input#_billing_address_1' ).val() );
-			$( 'input#_shipping_address_2' ).val( $( 'input#_billing_address_2' ).val() );
-			$( 'input#_shipping_city' ).val( $( 'input#_billing_city' ).val() );
-			$( 'input#_shipping_postcode' ).val( $( 'input#_billing_postcode' ).val() );
-			$( '#_shipping_country' ).val( $( '#_billing_country' ).val() );
-			$( 'input#_shipping_state' ).val( $( 'input#_billing_state' ).val() );
+			$( 'input#_shipping_first_name' ).val( $( 'input#_billing_first_name' ).val() ).change();
+			$( 'input#_shipping_last_name' ).val( $( 'input#_billing_last_name' ).val() ).change();
+			$( 'input#_shipping_company' ).val( $( 'input#_billing_company' ).val() ).change();
+			$( 'input#_shipping_address_1' ).val( $( 'input#_billing_address_1' ).val() ).change();
+			$( 'input#_shipping_address_2' ).val( $( 'input#_billing_address_2' ).val() ).change();
+			$( 'input#_shipping_city' ).val( $( 'input#_billing_city' ).val() ).change();
+			$( 'input#_shipping_postcode' ).val( $( 'input#_billing_postcode' ).val() ).change();
+			$( '#_shipping_country' ).val( $( '#_billing_country' ).val() ).change().trigger( 'chosen:updated' );
+			$( '#_shipping_state' ).val( $( '#_billing_state' ).val() ).change().trigger( 'chosen:updated' );
 		}
 		return false;
 	});

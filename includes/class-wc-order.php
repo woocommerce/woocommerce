@@ -11,17 +11,6 @@
 class WC_Order extends WC_Abstract_Order {
 
 	/**
-	 * Initialize the order refund.
-	 *
-	 * @param int|WC_Order $order
-	 */
-	public function __construct( $order = '' ) {
-		$this->order_type = 'simple';
-
-		parent::__construct( $order );
-	}
-
-	/**
 	 * Get order refunds
 	 *
 	 * @since 2.2

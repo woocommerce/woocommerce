@@ -36,7 +36,7 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * get_cached_widget function.
 	 */
-	function get_cached_widget( $args ) {
+	public function get_cached_widget( $args ) {
 
 		$cache = wp_cache_get( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
 
@@ -54,12 +54,14 @@ abstract class WC_Widget extends WP_Widget {
 
 	/**
 	 * Cache the widget
-	 * @param string $content
+	 * @param  array $args
+	 * @param  string $content
+	 * @return string the content that was cached
 	 */
 	public function cache_widget( $args, $content ) {
-		$cache[ $args['widget_id'] ] = $content;
+		wp_cache_set( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), array( $args['widget_id'] => $content ), 'widget' );
 
-		wp_cache_set( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), $cache, 'widget' );
+		return $content;
 	}
 
 	/**
@@ -69,6 +71,30 @@ abstract class WC_Widget extends WP_Widget {
 	 */
 	public function flush_widget_cache() {
 		wp_cache_delete( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
+	}
+
+	/**
+	 * Output the html at the start of a widget
+	 * @param  array $args
+	 */
+	public function widget_start( $args, $instance ) {
+		extract( $args );
+
+		if ( $title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base ) ) {
+			echo $before_widget . $before_title . $title . $after_title;
+		} else {
+			echo $before_widget;
+		}
+	}
+
+	/**
+	 * Output the html at the end of a widget
+	 * @param  array $args
+	 */
+	public function widget_end( $args ) {
+		extract( $args );
+
+		echo $after_widget;
 	}
 
 	/**
