@@ -14,6 +14,7 @@ class WC_Emails {
 
 	/**
 	 * @var array Array of email notification classes.
+	 * @access public
 	 */
 	public $emails;
 
@@ -87,6 +88,8 @@ class WC_Emails {
 		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
+		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
+		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 10, 3 );
 
 		// Hooks for sending emails during store events
 		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
@@ -253,9 +256,11 @@ class WC_Emails {
 	/**
 	 * Add order meta to email templates.
 	 *
+	 * @access public
 	 * @param mixed $order
 	 * @param bool $sent_to_admin (default: false)
 	 * @param bool $plain_text (default: false)
+	 * @return void
 	 */
 	public function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
 		$meta        = array();
@@ -293,14 +298,6 @@ class WC_Emails {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Get blog name formatted for emails
-	 * @return string
-	 */
-	private function get_blogname() {
-		return wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 	}
 
 	/**
