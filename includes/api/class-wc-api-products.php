@@ -1187,7 +1187,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Stock handling
 			if ( isset( $variation['manage_stock'] ) ) {
 				$manage_stock = ( true === $variation['manage_stock'] ) ? 'yes' : 'no';
-				update_post_meta( $variation_id, '_manage_stock', $is_downloadable );
+				update_post_meta( $variation_id, '_manage_stock', $manage_stock );
 			} else {
 				$manage_stock = get_post_meta( $variation_id, '_manage_stock', true );
 			}
