@@ -1274,6 +1274,8 @@ class WC_Cart {
 				$this->apply_cart_discounts_after_tax();
 			}
 
+			do_action( 'woocommerce_after_calculate_totals', $this );
+
 			$this->set_session();
 		}
 
