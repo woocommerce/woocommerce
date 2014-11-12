@@ -1589,17 +1589,15 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 	 * @access public
 	 * @param object $order
 	 * @subpackage	Orders
-	 * @return void
 	 */
 	function woocommerce_order_again_button( $order ) {
 		if ( ! $order || ! $order->has_status( 'completed' ) ) {
 			return;
 		}
-		?>
-		<p class="order-again">
-			<a href="<?php echo wp_nonce_url( add_query_arg( 'order_again', $order->id ) , 'woocommerce-order_again' ); ?>" class="button"><?php _e( 'Order Again', 'woocommerce' ); ?></a>
-		</p>
-		<?php
+
+		wc_get_template( 'order/order-again.php', array(
+			'order' => $order
+		) );
 	}
 }
 
