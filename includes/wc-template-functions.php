@@ -1591,7 +1591,7 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 	 * @subpackage	Orders
 	 */
 	function woocommerce_order_again_button( $order ) {
-		if ( ! $order || ! $order->has_status( 'completed' ) ) {
+		if ( ! $order || ! $order->has_status( 'completed' ) || ! is_user_logged_in() ) {
 			return;
 		}
 
