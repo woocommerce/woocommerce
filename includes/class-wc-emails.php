@@ -323,13 +323,19 @@ class WC_Emails {
 		$meta = array();
 		$show_fields = array();
 
-		if ( $order->billing_email ){ 
-			$show_fields[__( 'Email:', 'woocommerce' )] = wptexturize( $order->billing_email );
-		} 
+		if ( $order->billing_email ) { 
+			$show_fields['billing_email'] = array(
+				'label' => __( 'Email:', 'woocommerce' ),
+				'value' => wptexturize( $order->billing_email )
+			);
+	    } 
 
-		if ( $order->billing_phone ){
-			$show_fields[__( 'Tel:', 'woocommerce' )] = wptexturize( $order->billing_phone );
-		}
+	    if ( $order->billing_phone ) {
+			$show_fields['billing_phone'] = array(
+				'label' => __( 'Tel:', 'woocommerce' ),
+				'value' => wptexturize( $order->billing_phone )
+			);
+	    }
 
 		$show_fields = apply_filters( 'woocommerce_email_customer_details_keys', $show_fields, $sent_to_admin, $order );
 
@@ -343,9 +349,9 @@ class WC_Emails {
 
 				echo $heading . "\n\n";
 
-				foreach ( $show_fields as $key => $value ) {
-					if ( $value ) {
-						echo $key . ': ' . $value . "\n";
+				foreach ( $show_fields as $field ) {
+					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
+						echo $field['label'] . ': ' . $field['value'] . "\n";
 					}
 				}
 
@@ -353,9 +359,9 @@ class WC_Emails {
 
 				echo '<h2>' . $heading . '</h2>';
 
-				foreach ( $show_fields as $key => $value ) {
-					if ( $value ) {
-						echo '<p><strong>' . $key . ':</strong> ' . $value . '</p>';
+				foreach ( $show_fields as $field ) {
+					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
+						echo '<p><strong>' . $field['label'] . ':</strong> ' . $field['value'] . '</p>';
 					}
 				}
 			}
