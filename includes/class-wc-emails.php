@@ -267,7 +267,7 @@ class WC_Emails {
 			$fields['customer_note'] = array(
 				'label' => __( 'Note', 'woocommerce' ),
 				'value' => wptexturize( $order->customer_note )
-			)
+			);
 		}
 
 		$fields = apply_filters( 'woocommerce_email_order_meta_fields', $fields, $sent_to_admin, $order );
