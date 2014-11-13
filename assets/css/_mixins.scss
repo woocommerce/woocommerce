@@ -71,9 +71,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin opacity( $opacity: 0.75 ) {
-	filter: unquote("alpha(opacity=$opacity * 100)");
-	-moz-opacity: $opacity;
-	-khtml-opacity: $opacity;
 	opacity: $opacity;
 }
 
