@@ -528,15 +528,17 @@ p.demo_store {
 				display: block;
 				font-weight: normal;
 				margin-bottom: .5em;
+				font-size: .857em;
 
 				del {
-					font-size: 0.67em;
-					color: rgba(desaturate($highlight, 75%), 0.5);
-					margin: -2px 0 0 0;
+					color: inherit;
+					opacity: 0.5;
+					display: block;
 				}
 
 				ins {
 					background: none;
+					font-weight: 700;
 				}
 
 				.from {
