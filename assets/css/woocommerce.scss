@@ -1548,26 +1548,16 @@ p.demo_store {
 		.ui-slider .ui-slider-handle {
 			position: absolute;
 			z-index: 2;
-			width: 0.9em;
-			height: 0.9em;
+			width: 1em;
+			height: 1em;
+			background-color: $primary;
 			border-radius: 1em;
-			border: 1px solid darken( $primary, 50% );
-			cursor: pointer;
-			@include linear-gradient($primary, darken( $primary, 10% ));
+			cursor: ew-resize;
 			outline: none;
 			top: -.3em;
-			-webkit-box-shadow:
-				0 1px 2px rgba(0,0,0,0.3),
-				inset 0 0 0 1px rgba(255,255,255,0.65);
-			-moz-box-shadow:
-				0 1px 2px rgba(0,0,0,0.3),
-				inset 0 0 0 1px rgba(255,255,255,0.65);
-			box-shadow:
-				0 1px 2px rgba(0,0,0,0.3),
-				inset 0 0 0 1px rgba(255,255,255,0.65);
 
 			&:last-child {
-				margin-left: -1em;
+				margin-left: -.8em;
 			}
 		}
 
@@ -1577,14 +1567,14 @@ p.demo_store {
 			font-size: .7em;
 			display: block;
 			border: 0;
-			box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5);
 			border-radius: 1em;
 			background-color: $primary;
 		}
 
 		.price_slider_wrapper .ui-widget-content {
 			border-radius: 1em;
-			@include linear-gradient($primary, lighten( $primary, 30% ));
+			background-color: $primary - #444;
+			border: 0;
 		}
 
 		.ui-slider-horizontal {
