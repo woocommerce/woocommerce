@@ -300,7 +300,6 @@ class WC_Emails {
 	/**
 	 * Add customer details to email templates.
 	 *
-	 * @access public
 	 * @param mixed $order
 	 * @param bool $sent_to_admin (default: false)
 	 * @param bool $plain_text (default: false)
@@ -310,23 +309,23 @@ class WC_Emails {
 		$meta = array();
 		$show_fields = array();
 
-		if ( $order->billing_email ) { 
+		if ( $order->billing_email ) {
 			$show_fields['billing_email'] = array(
-				'label' => __( 'Email:', 'woocommerce' ),
+				'label' => __( 'Email', 'woocommerce' ),
 				'value' => wptexturize( $order->billing_email )
 			);
-	    } 
+	    }
 
 	    if ( $order->billing_phone ) {
 			$show_fields['billing_phone'] = array(
-				'label' => __( 'Tel:', 'woocommerce' ),
+				'label' => __( 'Tel', 'woocommerce' ),
 				'value' => wptexturize( $order->billing_phone )
 			);
 	    }
 
 		$show_fields = apply_filters( 'woocommerce_email_customer_details_keys', $show_fields, $sent_to_admin, $order );
 
-		if( $show_fields ){
+		if ( $show_fields ) {
 
 			$heading = $sent_to_admin ? __( 'Customer details', 'woocommerce' ) : __( 'Your details', 'woocommerce' );
 
@@ -360,13 +359,11 @@ class WC_Emails {
 	/**
 	 * Get the email addresses.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
 		wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) );
-	}	
-
+	}
 
 	/**
 	 * Get blog name formatted for emails
