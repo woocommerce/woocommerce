@@ -38,18 +38,17 @@ p.demo_store {
 	margin: 0;
 	width: 100%;
 	font-size: 1em;
-	padding: .5em 0;
+	padding: 1em 0;
 	text-align: center;
-	@include linear-gradient($primary, darken($primary, 10%));
-	border: 1px solid darken($primary, 10%);
+	background-color: $primary;
 	color: $primarytext;
 	z-index: 99998;
-	box-shadow: inset 0 0 0 3px rgba(255,255,255,0.2);
+	box-shadow: 0 1px 1em rgba(0,0,0,0.2);
 }
 
 .admin-bar { // Styles applied when the admin bar is present
 	p.demo_store {
-		top: 28px;
+		top: 32px;
 	}
 }
 
