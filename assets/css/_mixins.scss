@@ -80,7 +80,6 @@ $blue:          #2ea2cc;
  */
 @mixin box_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_in: 3px, $shadow_color: #888) {
 	box-shadow: $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
-	-webkit-box-shadow: $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 }
 
 /**
@@ -89,7 +88,6 @@ $blue:          #2ea2cc;
  */
 @mixin inset_box_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_in: 3px, $shadow_color: #888) {
 	box-shadow: inset $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
-	-webkit-box-shadow: inset $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 }
 
 /**
