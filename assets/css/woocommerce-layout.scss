@@ -12,8 +12,9 @@
 	.col2-set {
 		@include clearfix();
 		width: 100%;
+
 		.col-1 {
-			float:left;
+			float: left;
 			width: 48%;
 		}
 		.col-2 {
@@ -23,89 +24,108 @@
 	}
 
 	img {
-		height:auto;
-		max-width:100%;
+		height: auto;
+		max-width: 100%;
 	}
 
 	/* =Product Page
 	-------------------------------------------------------------- */
 
-	div.product, #content div.product {
+	div.product,
+	#content div.product {
 		div.images {
-			float:left;
+			float: left;
 			width: 48%;
 		}
+
 		div.thumbnails {
 			@include clearfix();
+
 			a {
-				float:left;
+				float: left;
 				width: 30.75%;
 				margin-right: 3.8%;
 			}
+
 			a.last {
 				margin-right: 0;
 			}
+
 			a.first {
-				clear:both;
+				clear: both;
 			}
 		}
+
 		div.summary {
 			float: right;
 			width: 48%;
 		}
+
 		/* Tabs on the product page */
 		.woocommerce-tabs {
-			clear:both;
+			clear: both;
+
 			ul.tabs {
 				@include menu();
 			}
 		}
+
 		#reviews {
 			.comment {
 				@include mediaright();
 			}
 		}
 	}
-	#quantity, #content .quantity {
+
+	#quantity,
+	#content .quantity {
 		/* Disable input[type=number] buttons until the world is ready */
-		input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
-			display:none;
+		input::-webkit-outer-spin-button,
+		input::-webkit-inner-spin-button {
+			display: none;
 		}
 	}
 
 	/* =Product Loops
 	-------------------------------------------------------------- */
 
-	.related, .upsells.products {
+	.related,
+	.upsells.products {
 		@include clearfix();
 		clear: both;
 
-		ul.products, ul {
-			float:none;
+		ul.products,
+		ul {
+			float: none;
+
 			li.product {
 				width: 48%;
+
 				img {
 					width: 100%;
-					height:auto;
+					height: auto;
 				}
 			}
 		}
 	}
 
 	ul.products {
-		clear:both;
+		clear: both;
 		@include clearfix();
+
 		li.product {
-			float:left;
+			float: left;
 			margin: 0 3.8% 2.992em 0;
 			padding: 0;
 			position: relative;
 			width: 22.05%;
 			margin-left: 0;
 		}
+
 		li.first {
-			clear:both;
+			clear: both;
 		}
+
 		li.last {
 			margin-right: 0;
 		}
@@ -114,8 +134,8 @@
 	&.columns-1 {
 		ul.products {
 			li.product {
-				width:100%;
-				margin-right:0;
+				width: 100%;
+				margin-right: 0;
 			}
 		}
 	}
@@ -123,7 +143,7 @@
 	&.columns-2 {
 		ul.products {
 			li.product {
-				width:48%;
+				width: 48%;
 			}
 		}
 	}
@@ -131,7 +151,7 @@
 	&.columns-3 {
 		ul.products {
 			li.product {
-				width:30.75%;
+				width: 30.75%;
 			}
 		}
 	}
@@ -139,7 +159,7 @@
 	&.columns-5 {
 		ul.products {
 			li.product {
-				width:16.95%;
+				width: 16.95%;
 			}
 		}
 	}
@@ -147,7 +167,7 @@
 	&.columns-6 {
 		ul.products {
 			li.product {
-				width:13.5%;
+				width: 13.5%;
 			}
 		}
 	}
@@ -168,19 +188,24 @@
 	/* =Cart Page
 	-------------------------------------------------------------- */
 
-	table.cart, #content table.cart {
+	table.cart,
+	#content table.cart {
 		img {
-			height:auto;
+			height: auto;
 		}
+
 		td.actions {
 			text-align: right;
+
 			.input-text {
-				width:80px;
+				width: 80px;
 			}
+
 			.coupon {
-				float:left;
+				float: left;
+
 				label {
-					display:none;
+					display: none;
 				}
 			}
 		}
@@ -189,34 +214,39 @@
 	.cart-collaterals {
 		@include clearfix();
 		width: 100%;
+
 		.related {
 			width: 30.75%;
-			float:left;
+			float: left;
 		}
 
 		.cross-sells {
 			width: 48%;
-			float:left;
+			float: left;
 
 			ul.products {
-				float:none;
+				float: none;
 
 				li {
 					width: 48%;
 				}
 			}
 		}
+
 		.shipping_calculator {
 			width: 48%;
 			@include clearfix();
 			clear: right;
 			float: right;
+
 			.col2-set {
-				.col-1, .col-2 {
+				.col-1,
+				.col-2 {
 					width: 47%;
 				}
 			}
 		}
+
 		.cart_totals {
 			float: right;
 			width: 48%;
@@ -226,7 +256,8 @@
 	/* =Cart Sidebar
 	-------------------------------------------------------------- */
 
-	ul.cart_list, ul.product_list_widget {
+	ul.cart_list,
+	ul.product_list_widget {
 		li {
 			@include mediaright();
 		}
@@ -238,28 +269,36 @@
 	form {
 		.form-row {
 			@include clearfix();
+
 			label {
-				display:block;
+				display: block;
+
 				&.checkbox {
 					display: inline;
 				}
 			}
+
 			select {
 				width: 100%;
 			}
+
 			.input-text {
 				@include box-sizing(border-box);
-				width:100%;
+				width: 100%;
 			}
 		}
-		.form-row-first, .form-row-last {
-			float:left;
+
+		.form-row-first,
+		.form-row-last {
+			float: left;
 			width: 47%;
 			overflow: visible;
 		}
+
 		.form-row-last {
 			float: right;
 		}
+
 		.form-row-wide {
 			clear: both;
 		}
@@ -268,13 +307,15 @@
 	#payment {
 		.form-row {
 			select {
-				width:auto;
+				width: auto;
 			}
 		}
+
 		.terms {
 			text-align: right;
 			padding: 0 1em 0;
 		}
+
 		#place_order {
 			float: right;
 		}
@@ -287,18 +328,21 @@
 	.tfwc {
 		padding: 12px 10px 0;
 		max-width: 474px;
-		margin:0 auto;
+		margin: 0 auto;
+
 		.product .entry-summary {
-			padding:0 !important;
+			padding: 0 !important;
 			margin: 0 0 1.618em !important;
 		}
+
 		div.product.hentry.has-post-thumbnail {
-			margin-top:0;
+			margin-top: 0;
 		}
+
 		.product {
 			.images {
 				img {
-					margin-bottom:1em;
+					margin-bottom: 1em;
 				}
 			}
 		}
