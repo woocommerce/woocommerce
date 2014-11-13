@@ -2,12 +2,7 @@
 -------------------------------------------------------------- */
 @import "bourbon";
 @import "mixins";
-@import "woocommerce-base"; // Contains base colours like $primary
-
-// Colours
-$tertiary:       $primary;                                    // Price slider bar / layered nav UI
-$tertiarytext:   $primarytext;                                // Text on tertiary colour bg
-$quaternary:     desaturate(darken($tertiary, 45%), 40%);  // Price slider bg
+@import "variables";
 
 /* =Custom Font
 -------------------------------------------------------------- */
@@ -629,35 +624,22 @@ p.demo_store {
 		font-family: inherit;
 		text-decoration: none;
 		overflow: visible;
-		padding: 6px 10px;
+		padding: .618em 1em;
 		text-decoration: none;
-		font-weight: bold;
-		border-radius: 2px;
+		font-weight: 700;
+		border-radius: 3px;
 		left: auto;
-		text-shadow: 0 1px 0 $secondary + #111;
 		color: $secondarytext;
-		@include darkorlighttextshadow( $secondarytext );
-		border: 1px solid darken( $secondary, 20% );
-		@include linear-gradient(lighten( $highlight, 10%), $highlight);
+		background-color: $secondary;
+		border: 0;
 		white-space: nowrap;
 		display: inline-block;
-
-		-webkit-box-shadow:
-			inset 0 -1px 0 rgba(0,0,0,0.075),
-			inset 0 1px 0 rgba(255,255,255,0.3),
-			0 1px 2px rgba(0,0,0,0.1);
-		-moz-box-shadow:
-			inset 0 -1px 0 rgba(0,0,0,0.075),
-			inset 0 1px 0 rgba(255,255,255,0.3),
-			0 1px 2px rgba(0,0,0,0.1);
-		box-shadow:
-			inset 0 -1px 0 rgba(0,0,0,0.075),
-			inset 0 1px 0 rgba(255,255,255,0.3),
-			0 1px 2px rgba(0,0,0,0.1);
+		background-image: none;
+		box-shadow: none;
+		-webkit-box-shadow: none;
 
 		&.loading {
-			color: lighten( $secondarytext, 10% );
-			border: 1px solid $secondary;
+			opacity: 0.5;
 
 			&:before {
 				content: "";
@@ -671,21 +653,18 @@ p.demo_store {
 		}
 
 		&.added {
-			&:before {
-				position: absolute;
-				height: 16px;
-				width: 16px;
-				top: 0.35em;
-				right: -26px;
-				text-indent: 0;
+			&:after {
 				font-family: 'WooCommerce';
 				content: "\e017";
+				margin-left: .53em;
 			}
 		}
 
 		&:hover {
-			@include linear-gradient($secondary, darken( $secondary, 15% ));
+			background-color: $secondary - #111;
 			text-decoration: none;
+			background-image: none;
+			color: $secondarytext;
 		}
 
 		&:active {
@@ -693,15 +672,13 @@ p.demo_store {
 		}
 
 		&.alt {
-			@include linear-gradient($primary, darken( $primary, 10% ));
-			border-color: darken($primary, 20%);
+			background-color: $primary;
 			color: $primarytext;
-			@include darkorlighttextshadow( $primarytext, 0.6 );
+			-webkit-font-smoothing: antialiased;
 
 			&:hover {
-				@include linear-gradient($primary, darken( $primary, 15% ));
-				color: $primarytext + #111;
-				@include darkorlighttextshadow( $primarytext + #111, 0.6 );
+				background-color: $primary - #111;
+				color: $primarytext;
 			}
 		}
 
@@ -1511,10 +1488,10 @@ p.demo_store {
 				a {
 					padding: 0 6px;
 					text-decoration: none;
-					border: 1px solid $tertiary;
-					background: $tertiary;
+					border: 1px solid $primary;
+					background: $primary;
 					box-shadow: inset 0 1px 1px rgba(255,255,255,0.5);
-					color: $tertiarytext;
+					color: $primarytext;
 					border-radius: 3px;
 
 					&:before {
@@ -1542,10 +1519,10 @@ p.demo_store {
 				a {
 					padding: 0 6px;
 					text-decoration: none;
-					border: 1px solid $tertiary;
-					background: $tertiary;
+					border: 1px solid $primary;
+					background: $primary;
 					box-shadow: inset 0 1px 1px rgba(255,255,255,0.5);
-					color: $tertiarytext;
+					color: $primarytext;
 					border-radius: 3px;
 					float: left;
 
@@ -1590,9 +1567,9 @@ p.demo_store {
 			width: 0.9em;
 			height: 0.9em;
 			border-radius: 1em;
-			border: 1px solid darken( $tertiary, 50% );
+			border: 1px solid darken( $primary, 50% );
 			cursor: pointer;
-			@include linear-gradient($tertiary, darken( $tertiary, 10% ));
+			@include linear-gradient($primary, darken( $primary, 10% ));
 			outline: none;
 			top: -.3em;
 			-webkit-box-shadow:
@@ -1623,7 +1600,7 @@ p.demo_store {
 
 		.price_slider_wrapper .ui-widget-content {
 			border-radius: 1em;
-			@include linear-gradient($quaternary, lighten( $quaternary, 30% ));
+			@include linear-gradient($primary, lighten( $primary, 30% ));
 		}
 
 		.ui-slider-horizontal {
