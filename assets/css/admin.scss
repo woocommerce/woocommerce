@@ -177,7 +177,7 @@ table.wc_status_table {
 	}
 
 	th {
-		font-weight: bold;
+		font-weight: 700;
 		padding: 9px;
 	}
 
@@ -714,7 +714,7 @@ ul.wc_coupon_list_block {
 		padding: 0;
 
 		.amount {
-			font-weight: bold;
+			font-weight: 700;
 		}
 
 		.label {
@@ -1669,14 +1669,14 @@ table.wp-list-table {
 	}
 
 	mark.instock {
-		font-weight: bold;
+		font-weight: 700;
 		color: $green;
 		background: transparent none;
 		line-height: 1;
 	}
 
 	mark.outofstock {
-		font-weight: bold;
+		font-weight: 700;
 		color: #aa4444;
 		background: transparent none;
 		line-height: 1;
@@ -1890,7 +1890,7 @@ table.wc_shipping {
 	}
 
 	td.name {
-		font-weight: bold;
+		font-weight: 700;
 	}
 
 	.settings {
@@ -2671,7 +2671,7 @@ img.help_tip {
 		margin: 0 0 0 -150px;
 
 		.req {
-			font-weight: bold;
+			font-weight: 700;
 			font-style: normal;
 			color: $red;
 		}
@@ -3589,7 +3589,7 @@ img.ui-datepicker-trigger {
 
 		.stat {
 			font-size: 1.5em !important;
-			font-weight: bold;
+			font-weight: 700;
 			text-align: center;
 		}
 
