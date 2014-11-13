@@ -3,6 +3,7 @@
 @import "bourbon";
 @import "mixins";
 @import "variables";
+@import "animation";
 
 /* =Custom Font
 -------------------------------------------------------------- */
@@ -612,15 +613,18 @@ p.demo_store {
 
 		&.loading {
 			opacity: 0.25;
+			padding-right: 2.618em;
 
-			&:before {
-				content: "";
+			&:after {
+				font-family: "WooCommerce";
+				content: "\e01c";
+				vertical-align: bottom;
 				position: absolute;
-				top: 0;
-				right: 0;
-				left: 0;
-				bottom: 0;
-				background: url(../images/ajax-loader.gif) center no-repeat;
+				top: .618em;
+				right: 1em;
+				-webkit-animation:spin 2s linear infinite;
+			    -moz-animation:spin 2s linear infinite;
+			    animation:spin 2s linear infinite;
 			}
 		}
 
@@ -2009,23 +2013,6 @@ p.demo_store {
 	ul.products {
 		li.product {
 			margin-top: 0 !important;
-		}
-	}
-}
-
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-	.woocommerce,
-	.woocommerce-page {
-		a.button,
-		button.button,
-		input.button,
-		#respond input#submit {
-			&.loading {
-				&:before {
-					background-image: url(../images/ajax-loader@2x.gif);
-					background-size: 16px 16px;
-				}
-			}
 		}
 	}
 }
