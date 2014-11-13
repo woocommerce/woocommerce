@@ -511,7 +511,8 @@ global $wc_map_deprecated_filters;
 $wc_map_deprecated_filters = array(
 	'pre_get_product_search_form'       => 'get_product_search_form',
 	'woocommerce_add_to_cart_fragments' => 'add_to_cart_fragments',
-	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect'
+	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect',
+	'woocommerce_email_order_meta_keys' => 'woocommerce_email_order_meta_fields'
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {

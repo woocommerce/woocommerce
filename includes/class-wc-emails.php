@@ -258,39 +258,55 @@ class WC_Emails {
 	 * @param mixed $order
 	 * @param bool $sent_to_admin (default: false)
 	 * @param bool $plain_text (default: false)
+	 * @return string
 	 */
 	public function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
-		$meta        = array();
-		$show_fields = apply_filters( 'woocommerce_email_order_meta_keys', array(), $sent_to_admin );
+		$fields = array();
 
 		if ( $order->customer_note ) {
-			$meta[ __( 'Note', 'woocommerce' ) ] = wptexturize( $order->customer_note );
+			$fields['customer_note'] = array(
+				'label' => __( 'Note', 'woocommerce' ),
+				'value' => wptexturize( $order->customer_note )
+			)
 		}
 
-		if ( $show_fields ) {
-			foreach ( $show_fields as $key => $field ) {
-				if ( is_numeric( $key ) )
-					$key = $field;
+		$fields = apply_filters( 'woocommerce_email_order_meta_fields', $fields, $sent_to_admin, $order );
 
-				$meta[ wptexturize( $key ) ] = wptexturize( get_post_meta( $order->id, $field, true ) );
+		/**
+		 * Deprecated woocommerce_email_order_meta_keys filter
+		 *
+		 * @since 2.3.0
+		 */
+		$_fields = apply_filters( 'woocommerce_email_order_meta_keys', array(), $sent_to_admin );
+
+		if ( $_fields ) {
+			foreach ( $_fields as $key => $field ) {
+				if ( is_numeric( $key ) ) {
+					$key = $field;
+				}
+
+				$fields[ $key ] = array(
+					'label' => wptexturize( $key ),
+					'value' => wptexturize( get_post_meta( $order->id, $field, true ) )
+				);
 			}
 		}
 
-		if ( sizeof( $meta ) > 0 ) {
+		if ( $fields ) {
 
 			if ( $plain_text ) {
 
-				foreach ( $meta as $key => $value ) {
-					if ( $value ) {
-						echo $key . ': ' . $value . "\n";
+				foreach ( $fields as $field ) {
+					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
+						echo $field['label'] . ': ' . $field['value'] . "\n";
 					}
 				}
 
 			} else {
 
-				foreach ( $meta as $key => $value ) {
-					if ( $value ) {
-						echo '<p><strong>' . $key . ':</strong> ' . $value . '</p>';
+				foreach ( $fields as $field ) {
+					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
+						echo '<p><strong>' . $field['label'] . ':</strong> ' . $field['value'] . '</p>';
 					}
 				}
 			}
@@ -303,29 +319,28 @@ class WC_Emails {
 	 * @param mixed $order
 	 * @param bool $sent_to_admin (default: false)
 	 * @param bool $plain_text (default: false)
+	 * @return string
 	 */
 	function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
-
-		$meta = array();
-		$show_fields = array();
+		$fields = array();
 
 		if ( $order->billing_email ) {
-			$show_fields['billing_email'] = array(
+			$fields['billing_email'] = array(
 				'label' => __( 'Email', 'woocommerce' ),
 				'value' => wptexturize( $order->billing_email )
 			);
 	    }
 
 	    if ( $order->billing_phone ) {
-			$show_fields['billing_phone'] = array(
+			$fields['billing_phone'] = array(
 				'label' => __( 'Tel', 'woocommerce' ),
 				'value' => wptexturize( $order->billing_phone )
 			);
 	    }
 
-		$show_fields = apply_filters( 'woocommerce_email_customer_details_keys', $show_fields, $sent_to_admin, $order );
+		$fields = apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order );
 
-		if ( $show_fields ) {
+		if ( $fields ) {
 
 			$heading = $sent_to_admin ? __( 'Customer details', 'woocommerce' ) : __( 'Your details', 'woocommerce' );
 
@@ -335,7 +350,7 @@ class WC_Emails {
 
 				echo $heading . "\n\n";
 
-				foreach ( $show_fields as $field ) {
+				foreach ( $fields as $field ) {
 					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
 						echo $field['label'] . ': ' . $field['value'] . "\n";
 					}
@@ -345,7 +360,7 @@ class WC_Emails {
 
 				echo '<h2>' . $heading . '</h2>';
 
-				foreach ( $show_fields as $field ) {
+				foreach ( $fields as $field ) {
 					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
 						echo '<p><strong>' . $field['label'] . ':</strong> ' . $field['value'] . '</p>';
 					}
