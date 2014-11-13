@@ -121,9 +121,6 @@ $blue:          #2ea2cc;
  */
 @mixin scale($ratio: 1.5) {
 	-webkit-transform: scale($ratio);
-	-moz-transform: scale($ratio);
-	-ms-transform: scale($ratio);
-	-o-transform: scale($ratio);
 	transform: scale($ratio);
 }
 
