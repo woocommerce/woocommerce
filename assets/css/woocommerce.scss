@@ -710,11 +710,12 @@ p.demo_store {
 	-------------------------------------------------------------- */
 
 	.quantity {
-		width: 60px;
 		position: relative;
 		margin: 0 auto;
 		overflow: hidden;
 		zoom: 1;
+		padding-right: 1.1em;
+		display: inline-block;
 
 		input.qty {
 			width: 2.618em;
@@ -756,6 +757,7 @@ p.demo_store {
 			background-color: $secondary;
 			text-shadow: none;
 			line-height: 1;
+			background-image: none;
 
 			&:hover {
 				background-color: $secondary - #111;
