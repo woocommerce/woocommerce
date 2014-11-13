@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Was a query passed? Use it, if so
-if (isset($query) && $query instanceof WP_Query) {
+if ( isset( $query ) && $query instanceof WP_Query) {
 	$wp_query = $query;
 	$custom_query = true;
 }
@@ -24,7 +24,7 @@ else {
 }
 
 // for custom query, check for existing posts
-if ( ! woocommerce_products_will_display() && ! (isset($custom_query) && $query->post_count) )
+if ( ! woocommerce_products_will_display() && ! ( isset( $custom_query ) && $query->post_count ) )
 	return;
 ?>
 <p class="woocommerce-result-count">
