@@ -233,8 +233,7 @@ p.demo_store {
 				display: block;
 				width: 100%;
 				height: auto;
-				box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-				@include transition();
+				box-shadow: none;
 			}
 
 			div.thumbnails {
