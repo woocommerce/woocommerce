@@ -118,9 +118,11 @@ class WC_Admin_Settings {
 	public static function output() {
 		global $current_section, $current_tab;
 
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
 		do_action( 'woocommerce_settings_start' );
 
-		wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings.min.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'chosen' ), WC()->version, true );
+		wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'chosen' ), WC()->version, true );
 
 		wp_localize_script( 'woocommerce_settings', 'woocommerce_settings_params', array(
 			'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' )
