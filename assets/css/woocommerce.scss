@@ -639,7 +639,7 @@ p.demo_store {
 		-webkit-box-shadow: none;
 
 		&.loading {
-			opacity: 0.5;
+			opacity: 0.25;
 
 			&:before {
 				content: "";
@@ -648,7 +648,7 @@ p.demo_store {
 				right: 0;
 				left: 0;
 				bottom: 0;
-				background: url(../images/ajax-loader.gif) center no-repeat rgba(255,255,255,0.65);
+				background: url(../images/ajax-loader.gif) center no-repeat;
 			}
 		}
 
@@ -657,6 +657,7 @@ p.demo_store {
 				font-family: 'WooCommerce';
 				content: "\e017";
 				margin-left: .53em;
+				vertical-align: bottom;
 			}
 		}
 
@@ -665,10 +666,6 @@ p.demo_store {
 			text-decoration: none;
 			background-image: none;
 			color: $secondarytext;
-		}
-
-		&:active {
-			top: 1px;
 		}
 
 		&.alt {
