@@ -189,10 +189,8 @@ class WC_Frontend_Scripts {
 
 		switch ( $handle ) {
 			case 'woocommerce' :
-				$assets_path = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 				return array(
 					'ajax_url'        => WC()->ajax_url(),
-					'ajax_loader_url' => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
 				);
 			break;
 			case 'wc-single-product' :
@@ -202,10 +200,8 @@ class WC_Frontend_Scripts {
 				);
 			break;
 			case 'wc-checkout' :
-				$assets_path = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 				return array(
 					'ajax_url'                  => WC()->ajax_url(),
-					'ajax_loader_url'           => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
 					'update_order_review_nonce' => wp_create_nonce( "update-order-review" ),
 					'apply_coupon_nonce'        => wp_create_nonce( "apply-coupon" ),
 					'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
@@ -221,10 +217,8 @@ class WC_Frontend_Scripts {
 				);
 			break;
 			case 'wc-cart' :
-				$assets_path = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 				return array(
 					'ajax_url'                     => WC()->ajax_url(),
-					'ajax_loader_url'              => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
 					'update_shipping_method_nonce' => wp_create_nonce( "update-shipping-method" ),
 				);
 			break;
@@ -235,10 +229,8 @@ class WC_Frontend_Scripts {
 				);
 			break;
 			case 'wc-add-to-cart' :
-				$assets_path = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 				return array(
 					'ajax_url'                => WC()->ajax_url(),
-					'ajax_loader_url'         => apply_filters( 'woocommerce_ajax_loader_url', $assets_path . 'images/ajax-loader@2x.gif' ),
 					'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
 					'cart_url'                => get_permalink( wc_get_page_id( 'cart' ) ),
 					'is_cart'                 => is_cart(),

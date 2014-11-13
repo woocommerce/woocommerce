@@ -26,7 +26,7 @@ jQuery( function ( $ ) {
 		$('.woocommerce_variations').block({
 			message: null,
 			overlayCSS: {
-				background: '#fff url(' + woocommerce_admin_meta_boxes_variations.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+				background: '#fff',
 				opacity: 0.6
 			}
 		});
@@ -84,7 +84,7 @@ jQuery( function ( $ ) {
 			$( '#variable_product_options' ).block({
 				message: null,
 				overlayCSS: {
-					background: '#fff url(' + woocommerce_admin_meta_boxes_variations.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+					background: '#fff',
 					opacity: 0.6
 				}
 			});
@@ -144,7 +144,7 @@ jQuery( function ( $ ) {
 				$( el ).block({
 					message: null,
 					overlayCSS: {
-						background: '#fff url(' + woocommerce_admin_meta_boxes_variations.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+						background: '#fff',
 						opacity: 0.6
 					}
 				});
@@ -212,7 +212,7 @@ jQuery( function ( $ ) {
 						$( '.woocommerce_variations .woocommerce_variation' ).block({
 							message: null,
 							overlayCSS: {
-								background: '#fff url(' + woocommerce_admin_meta_boxes_variations.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+								background: '#fff',
 								opacity: 0.6
 							}
 						});

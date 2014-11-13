@@ -26,7 +26,7 @@ jQuery( function( $ ) {
 	.find( 'input[name=payment_method]:checked' ).click();
 
 	$( '#add_payment_method' ).submit( function() {
-		$( '#add_payment_method' ).block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } });
+		$( '#add_payment_method' ).block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 	});
 
 	$( 'body' ).trigger( 'init_add_payment_method' );

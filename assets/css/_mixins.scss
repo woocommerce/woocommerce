@@ -213,3 +213,26 @@
 	margin-left: 7px;
 	content: $glyph;
 }
+
+@mixin loader() {
+	&:before {
+		height: 1em;
+		width: 1em;
+		display: block;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		margin-left: -.5em;
+		margin-top: -.5em;
+		display: block;
+		-webkit-animation: spin 2s linear infinite;
+	    -moz-animation: spin 2s linear infinite;
+	    animation: spin 2s linear infinite;
+	    font-family: "WooCommerce";
+		content: "\e01c";
+		line-height: 1;
+		text-align: center;
+		font-size: 1.618em;
+		color: rgba(#000,0.75);
+	}
+}

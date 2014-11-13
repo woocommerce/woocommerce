@@ -389,7 +389,7 @@ jQuery( function( $ ){
 	// Add a new attribute (via ajax)
 	$('.product_attributes').on('click', 'button.add_new_attribute', function() {
 
-		$('.product_attributes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+		$('.product_attributes').block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 
 		var attribute = $(this).attr('data-attribute');
 		var $wrapper = $(this).closest('.woocommerce_attribute_data');
@@ -430,7 +430,7 @@ jQuery( function( $ ){
 	// Save attributes and update variations
 	$('.save_attributes').on('click', function(){
 
-		$('.product_attributes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+		$('.product_attributes').block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 
 		var data = {
 			post_id: 		woocommerce_admin_meta_boxes.post_id,
@@ -446,7 +446,7 @@ jQuery( function( $ ){
 			this_page = this_page.replace( 'post-new.php?', 'post.php?post=' + woocommerce_admin_meta_boxes.post_id + '&action=edit&' );
 
 			// Load variations panel
-			$('#variable_product_options').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			$('#variable_product_options').block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 			$('#variable_product_options').load( this_page + ' #variable_product_options_inner', function() {
 				$('#variable_product_options').unblock();
 			} );

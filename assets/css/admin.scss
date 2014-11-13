@@ -3,6 +3,7 @@
 @import "bourbon";
 @import "mixins";
 @import "variables";
+@import "animation";
 
 
 /* =Custom Font
@@ -16,6 +17,10 @@
 		url('../fonts/WooCommerce.svg#WooCommerce') format('svg');
 	font-weight: normal;
 	font-style: normal;
+}
+
+.blockUI.blockOverlay {
+	@include loader();
 }
 
 /* Addons */

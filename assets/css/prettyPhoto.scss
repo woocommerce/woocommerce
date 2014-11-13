@@ -44,7 +44,7 @@ div.pp_woocommerce {
 	}
 
 	.pp_loaderIcon {
-		background: url(../images/ajax-loader.gif) center no-repeat;
+		@include loader();
 	}
 
 	div.ppt {

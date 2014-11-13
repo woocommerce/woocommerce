@@ -8,7 +8,7 @@ jQuery( function ( $ ) {
 		$( '#woocommerce-order-items' ).block({
 			message: null,
 			overlayCSS: {
-				background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+				background: '#fff',
 				opacity: 0.6
 			}
 		});
@@ -893,7 +893,7 @@ jQuery( function ( $ ) {
 			$( '.order_download_permissions' ).block({
 				message: null,
 				overlayCSS: {
-					background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+					background: '#fff',
 					opacity: 0.6
 				}
 			});
@@ -940,7 +940,7 @@ jQuery( function ( $ ) {
 					$( el ).block({
 						message: null,
 						overlayCSS: {
-							background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+							background: '#fff',
 							opacity: 0.6
 						}
 					});
@@ -990,7 +990,7 @@ jQuery( function ( $ ) {
 			$( this ).closest( '.edit_address' ).block({
 				message: null,
 				overlayCSS: {
-					background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+					background: '#fff',
 					opacity: 0.6
 				}
 			});
@@ -1044,7 +1044,7 @@ jQuery( function ( $ ) {
 			$( this ).closest( '.edit_address' ).block({
 				message: null,
 				overlayCSS: {
-					background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+					background: '#fff',
 					opacity: 0.6
 				}
 			});
@@ -1118,7 +1118,7 @@ jQuery( function ( $ ) {
 			$( '#woocommerce-order-notes' ).block({
 				message: null,
 				overlayCSS: {
-					background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+					background: '#fff',
 					opacity: 0.6
 				}
 			});
@@ -1146,7 +1146,7 @@ jQuery( function ( $ ) {
 			$( note ).block({
 				message: null,
 				overlayCSS: {
-					background: '#fff url(' + woocommerce_admin_meta_boxes.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center',
+					background: '#fff',
 					opacity: 0.6
 				}
 			});
