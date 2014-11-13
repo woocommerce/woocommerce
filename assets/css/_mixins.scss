@@ -103,11 +103,8 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin vertical_gradient($from: #000, $to: #fff) {
-	background: $from;
-	background: -webkit-gradient(linear, left top, left bottom, from($from), to($to));
+	background-color: $from;
 	background: -webkit-linear-gradient($from, $to);
-	background: -moz-linear-gradient(center top, $from 0%, $to 100%);
-	background: -moz-gradient(center top, $from 0%, $to 100%);
 }
 
 /**
