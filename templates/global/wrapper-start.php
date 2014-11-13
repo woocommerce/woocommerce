@@ -15,10 +15,10 @@ $template = get_option( 'template' );
 
 switch( $template ) {
 	case 'twentyeleven' :
-		echo '<div id="primary"><div id="content" role="main">';
+		echo '<div id="primary"><div id="content" role="main" class="twentyeleven">';
 		break;
 	case 'twentytwelve' :
-		echo '<div id="primary" class="site-content"><div id="content" role="main">';
+		echo '<div id="primary" class="site-content"><div id="content" role="main" class="twentytwelve">';
 		break;
 	case 'twentythirteen' :
 		echo '<div id="primary" class="site-content"><div id="content" role="main" class="entry-content twentythirteen">';

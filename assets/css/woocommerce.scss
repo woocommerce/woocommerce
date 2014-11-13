@@ -2012,6 +2012,17 @@ p.demo_store {
 	}
 } // end .woocommerce-checkout namespacing wrap
 
+/* =Twenty Eleven Specific styles
+-------------------------------------------------------------- */
+#content.twentyeleven {
+	.woocommerce-pagination {
+		a {
+			font-size: 1em;
+			line-height: 1;
+		}
+	}
+}
+
 /* =Twenty Thirteen Specific styles
 -------------------------------------------------------------- */
 .single-product {
