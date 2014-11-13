@@ -21,6 +21,7 @@
 	content: "\e03d";
 	font-size: 1.3em !important;
 }
+
 #adminmenu #menu-posts-product .menu-icon-post div.wp-menu-image:before {
 	font-family: 'WooCommerce' !important;
 	content: "\e01d";
@@ -30,9 +31,10 @@
 span.mce_woocommerce_shortcodes_button {
 	background-image: none !important;
 	@include ir();
+
 	&:before {
 		@include icon( "\e01d" );
-		font-size:.9em;
+		font-size: .9em;
 		line-height: 1.2;
 	}
 }
@@ -43,10 +45,12 @@ span.mce_woocommerce_shortcodes_button {
 	background: #d54d21;
 	padding: 1em;
 	margin: 9px 0;
+
 	a {
 		color: #fff;
 		text-decoration: underline;
 	}
+
 	&:before {
 		content: "\f348";
 		display: inline-block;
