@@ -27,8 +27,7 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius($radius: 4px) {
-	-webkit-border-radius:$radius;
-	border-radius:$radius;
+	border-radius: $radius;
 }
 
 /**
@@ -36,8 +35,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius_right($radius: 4px) {
-	-webkit-border-top-right-radius: $radius;
-	-webkit-border-bottom-right-radius: $radius;
 	border-top-right-radius: $radius;
 	border-bottom-right-radius: $radius;
 }
@@ -47,8 +44,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius_left($radius: 4px) {
-	-webkit-border-top-left-radius: $radius;
-	-webkit-border-bottom-left-radius: $radius;
 	border-top-left-radius: $radius;
 	border-bottom-left-radius: $radius;
 }
@@ -58,8 +53,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius_bottom($radius: 4px) {
-	-webkit-border-bottom-left-radius: $radius;
-	-webkit-border-bottom-right-radius: $radius;
 	border-bottom-left-radius: $radius;
 	border-bottom-right-radius: $radius;
 }
@@ -69,8 +62,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius_top($radius: 4px) {
-	-webkit-border-top-left-radius: $radius;
-	-webkit-border-top-right-radius: $radius;
 	border-top-left-radius: $radius;
 	border-top-right-radius: $radius;
 }
