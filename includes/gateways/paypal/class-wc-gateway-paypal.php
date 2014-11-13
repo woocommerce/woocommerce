@@ -496,6 +496,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$item_loop        = 0;
 		$args             = array();
 		$args['tax_cart'] = $order->get_total_tax();
+		$calculated_total = $order->get_total_tax();
 
 		// Products
 		if ( sizeof( $order->get_items() ) > 0 ) {
@@ -523,12 +524,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				if ( $product->get_sku() ) {
 					$args[ 'item_number_' . $item_loop ] = $product->get_sku();
 				}
+
+				$calculated_total += $order->get_item_subtotal( $item, false ) * $item['qty'];
 			}
 		}
 
 		// Discount
 		if ( $order->get_cart_discount() > 0 ) {
 			$args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
+
+			$calculated_total = $calculated_total - round( $order->get_cart_discount(), 2 );
 		}
 
 		// Fees
@@ -542,6 +547,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				if ( $args[ 'amount_' . $item_loop ] < 0 ) {
 					return false; // Abort - negative line
 				}
+
+				$calculated_total += $item['line_total'];
 			}
 		}
 
@@ -551,6 +558,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$args[ 'item_name_' . $item_loop ] = $this->paypal_item_name( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ) );
 			$args[ 'quantity_' . $item_loop ]  = '1';
 			$args[ 'amount_' . $item_loop ]    = number_format( $order->get_total_shipping(), 2, '.', '' );
+
+			$calculated_total += number_format( $order->get_total_shipping(), 2, '.', '' );
+		}
+
+		// Check for mismatch
+		if ( $calculated_total != $order->get_total() ) {
+			return false;
 		}
 
 		return $args;
