@@ -248,7 +248,7 @@
 				width: 100%;
 			}
 			.input-text {
-				@include borderbox();
+				@include box-sizing(border-box);
 				width:100%;
 			}
 		}
