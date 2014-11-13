@@ -19,7 +19,8 @@
 #screen-meta-links,
 .updated,
 .update-nag,
-.woocommerce-reports-wide .postbox h3.stats_range .export_csv, .woocommerce-reports-wrap .postbox h3.stats_range .export_csv,
+.woocommerce-reports-wide .postbox h3.stats_range .export_csv,
+.woocommerce-reports-wrap .postbox h3.stats_range .export_csv,
 .woocommerce-reports-wide .button,
 #wpfooter,
 .woo-nav-tab-wrapper {
@@ -30,8 +31,10 @@ h2 .nav-tab {
 	line-height: 14px;
 }
 
-.woocommerce-reports-wide .postbox h3.stats_range ul li.custom, .woocommerce-reports-wrap .postbox h3.stats_range ul li.custom,
-.woocommerce-reports-wide .postbox h3.stats_range ul li a, .woocommerce-reports-wrap .postbox h3.stats_range ul li a {
+.woocommerce-reports-wide .postbox h3.stats_range ul li.custom,
+.woocommerce-reports-wrap .postbox h3.stats_range ul li.custom,
+.woocommerce-reports-wide .postbox h3.stats_range ul li a,
+.woocommerce-reports-wrap .postbox h3.stats_range ul li a {
 	padding: 5px;
 	line-height: 14px;
 }
@@ -40,13 +43,15 @@ h2 .nav-tab {
 	margin-left: 0;
 }
 
-.woocommerce-reports-wide .postbox .chart-with-sidebar .chart-sidebar, .woocommerce-reports-wrap .postbox .chart-with-sidebar .chart-sidebar {
+.woocommerce-reports-wide .postbox .chart-with-sidebar .chart-sidebar,
+.woocommerce-reports-wrap .postbox .chart-with-sidebar .chart-sidebar {
 	margin-left: -130px;
 	width: 130px;
 	display: block;
 }
 
-.woocommerce-reports-wide .postbox .chart-with-sidebar, .woocommerce-reports-wrap .postbox .chart-with-sidebar {
+.woocommerce-reports-wide .postbox .chart-with-sidebar,
+.woocommerce-reports-wrap .postbox .chart-with-sidebar {
 	padding-left: 130px;
 }
 
