@@ -7,7 +7,8 @@
 @import "bourbon";
 @import "mixins";
 
-.woocommerce, .woocommerce-page {
+.woocommerce,
+.woocommerce-page {
 
 	table.shop_table_responsive {
 		thead {
@@ -20,6 +21,7 @@
 					border-top: 0;
 				}
 			}
+
 			th {
 				display: none;
 			}
@@ -68,9 +70,10 @@
 	 * General layout
 	 */
 	.col2-set {
-		.col-1, .col-2 {
+		.col-1,
+		.col-2 {
 			float: none;
-			width:100%;
+			width: 100%;
 		}
 	}
 
@@ -79,13 +82,14 @@
 	 */
 	ul.products {
 		li.product {
-			width:48%;
+			width: 48%;
 			float: left;
-			clear:both;
-			margin:0 0 2.992em;
+			clear: both;
+			margin: 0 0 2.992em;
+
 			&:nth-child(2n) {
 				float: right;
-				clear:none !important;
+				clear: none !important;
 			}
 		}
 	}
@@ -93,39 +97,52 @@
 	/**
 	 * Product Details
 	 */
-	div.product, #content div.product {
-		div.images, div.summary {
+	div.product,
+	#content div.product {
+		div.images,
+		div.summary {
 			float: none;
-			width:100%;
+			width: 100%;
 		}
 	}
 
 	/**
 	 * Cart
 	 */
-	table.cart, #content table.cart {
+	table.cart,
+	#content table.cart {
 		.product-thumbnail {
 			display: none;
 		}
+
 		td.actions {
 			text-align: left;
+
 			.coupon {
-				float:none;
+				float: none;
 				@include clearfix();
-				padding-bottom:.5em;
+				padding-bottom: .5em;
 			}
-			input, .button, .input-text {
-				width:48%;
+
+			input,
+			.button,
+			.input-text {
+				width: 48%;
 				@include box-sizing(border-box);
 			}
-			.input-text + .button, .button.alt {
+
+			.input-text + .button,
+			.button.alt {
 				float: right;
 			}
 		}
 	}
+
 	.cart-collaterals {
-		.cart_totals, .shipping_calculator, .cross-sells {
-			width:100%;
+		.cart_totals,
+		.shipping_calculator,
+		.cross-sells {
+			width: 100%;
 			float: none;
 			text-align: left;
 		}
@@ -146,13 +163,14 @@
 	#payment {
 		.terms {
 			text-align: left;
-			padding:0;
+			padding: 0;
 		}
+
 		#place_order {
 			float: none;
-			width:100%;
+			width: 100%;
 			@include box-sizing(border-box);
-			margin-bottom:1em;
+			margin-bottom: 1em;
 		}
 	}
 
