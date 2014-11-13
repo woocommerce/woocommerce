@@ -1713,7 +1713,6 @@ p.demo_store {
 				list-style:none;
 				a, span {
 					padding: 1px 0;
-					float:left;
 				}
 			}
 			li.chosen {
@@ -1729,13 +1728,6 @@ p.demo_store {
 						@include iconbefore( "\e013" );
 					}
 				}
-			}
-			small.count {
-				float: right;
-				margin-left: 6px;
-				font-size: 1em;
-				padding: 1px 0;
-				color: $subtext;
 			}
 		}
 	}
