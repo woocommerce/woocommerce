@@ -192,8 +192,7 @@ p.demo_store {
 	/* =Product Page
 	-------------------------------------------------------------- */
 
-	div.product,
-	#content div.product {
+	div.product {
 		margin-bottom: 0;
 		position: relative;
 
@@ -573,8 +572,7 @@ p.demo_store {
 		}
 	}
 
-	nav.woocommerce-pagination,
-	#content nav.woocommerce-pagination {
+	nav.woocommerce-pagination {
 		text-align: center;
 
 		ul {
@@ -623,8 +621,7 @@ p.demo_store {
 	a.button,
 	button.button,
 	input.button,
-	#respond input#submit,
-	#content input.button {
+	#respond input#submit {
 		font-size: 100%;
 		margin: 0;
 		line-height: 1em;
@@ -741,8 +738,7 @@ p.demo_store {
 	/* =Quantity inputs
 	-------------------------------------------------------------- */
 
-	.quantity,
-	#content .quantity {
+	.quantity {
 		width: 60px;
 		position: relative;
 		margin: 0 auto;
@@ -1267,8 +1263,7 @@ p.demo_store {
 	/* =Cart
 	-------------------------------------------------------------- */
 
-	table.cart,
-	#content table.cart {
+	table.cart {
 		.product-thumbnail {
 			min-width: 32px;
 		}
@@ -2092,8 +2087,7 @@ p.demo_store {
 		a.button,
 		button.button,
 		input.button,
-		#respond input#submit,
-		#content input.button {
+		#respond input#submit {
 			&.loading {
 				&:before {
 					background-image: url(../images/ajax-loader@2x.gif);
