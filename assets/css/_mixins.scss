@@ -112,9 +112,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin transition($selector: all, $animation: ease-in-out, $duration: .2s) {
-	-webkit-transition: $selector $animation $duration;
-	-moz-transition: $selector $animation $duration;
-	-o-transition: $selector $animation $duration;
 	transition: $selector $animation $duration;
 }
 
