@@ -951,8 +951,9 @@ class WC_Cart {
 				do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
 				unset( $this->cart_contents[ $cart_item_key ] );
 			} else {
+				$old_quantity = $this->cart_contents[ $cart_item_key ]['quantity'];
 				$this->cart_contents[ $cart_item_key ]['quantity'] = $quantity;
-				do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity );
+				do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity, $old_quantity );
 			}
 
 			if ( $refresh_totals ) {
