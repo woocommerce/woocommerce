@@ -1451,16 +1451,9 @@ p.demo_store {
 
 			li.chosen {
 				a {
-					padding: 0 6px;
-					text-decoration: none;
-					border: 1px solid $primary;
-					background: $primary;
-					box-shadow: inset 0 1px 1px rgba(255,255,255,0.5);
-					color: $primarytext;
-					border-radius: 3px;
-
 					&:before {
-						@include iconbefore( "\e013" );
+						@include dashiconbefore( "\f153" );
+						color: $red;
 					}
 				}
 			}
@@ -1482,17 +1475,9 @@ p.demo_store {
 				list-style: none;
 
 				a {
-					padding: 0 6px;
-					text-decoration: none;
-					border: 1px solid $primary;
-					background: $primary;
-					box-shadow: inset 0 1px 1px rgba(255,255,255,0.5);
-					color: $primarytext;
-					border-radius: 3px;
-					float: left;
-
 					&:before {
-						@include iconbefore( "\e013" );
+						@include dashiconbefore( "\f153" );
+						color: $red;
 					}
 				}
 			}
