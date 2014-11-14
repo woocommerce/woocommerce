@@ -157,7 +157,7 @@ class WC_Frontend_Scripts {
 		self::enqueue_script( 'wc-cart-fragments', $frontend_script_path . 'cart-fragments' . $suffix . '.js', array( 'jquery', 'jquery-cookie' ) );
 
 		// Global frontend styles
-		wp_enqueue_style( 'dashicons' );
+		wp_enqueue_style( 'dashicons', array( 'woocommerce-general' ) );
 
 		// CSS Styles
 		if ( $enqueue_styles = self::get_styles() ) {
