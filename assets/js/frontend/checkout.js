@@ -50,7 +50,13 @@ jQuery( function( $ ) {
 			s_address_2		= address_2;
 		}
 
-		$( '#order_methods, #order_review' ).block({ message: null, overlayCSS: { background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } });
+		$( '#order_methods, #order_review' ).block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
 
 		var data = {
 			action:						'woocommerce_update_order_review',
@@ -268,7 +274,13 @@ jQuery( function( $ ) {
 			var form_data = $form.data();
 
 			if ( form_data["blockUI.isBlocked"] != 1 ) {
-				$form.block({ message: null, overlayCSS: { background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } });
+				$form.block({
+					message: null,
+					overlayCSS: {
+						background: '#fff',
+						opacity: 0.6
+					}
+				});
 			}
 
 			$.ajax({
@@ -351,7 +363,13 @@ jQuery( function( $ ) {
 
 		if ( $form.is( '.processing' ) ) return false;
 
-		$form.addClass( 'processing' ).block({ message: null, overlayCSS: {background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } });
+		$form.addClass( 'processing' ).block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
 
 		var data = {
 			action:			'woocommerce_apply_coupon',

@@ -18,7 +18,13 @@ jQuery( function( $ ) {
 			shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 		} );
 
-		$( 'div.cart_totals' ).block({ message: null, overlayCSS: { background: '#fff url(' + wc_cart_params.ajax_loader_url + ') no-repeat center', backgroundSize: '16px 16px', opacity: 0.6 } });
+		$( 'div.cart_totals' ).block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
 
 		var data = {
 			action: 'woocommerce_update_shipping_method',
