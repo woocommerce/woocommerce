@@ -148,8 +148,7 @@ p.demo_store {
 	small.note {
 		display: block;
 		color: $subtext;
-		font-size: 11px;
-		line-height: 21px;
+		font-size: .857em;
 		margin-top: 10px;
 	}
 
@@ -440,7 +439,7 @@ p.demo_store {
 		font-weight: 700;
 		position: absolute;
 		text-align: center;
-		line-height: 3.236em;
+		line-height: 3.236;
 		top: -.5em;
 		left: -.5em;
 		margin: 0;
@@ -571,7 +570,7 @@ p.demo_store {
 					margin: 0;
 					text-decoration: none;
 					padding: 0;
-					line-height: 1em;
+					line-height: 1;
 					font-size: 1em;
 					font-weight: normal;
 					padding: .5em;
@@ -598,7 +597,7 @@ p.demo_store {
 	#respond input#submit {
 		font-size: 100%;
 		margin: 0;
-		line-height: 1em;
+		line-height: 1;
 		cursor: pointer;
 		position: relative;
 		font-family: inherit;
@@ -771,7 +770,6 @@ p.demo_store {
 			float: right;
 			color: $subtext;
 			font-size: 15px;
-			line-height: 21px;
 			margin: 10px 0 0 0;
 
 			a {
@@ -834,7 +832,6 @@ p.demo_store {
 						background: $secondary;
 						border: 1px solid darken( $secondary, 3% );
 						margin: 0;
-						line-height: 1;
 						box-shadow: none;
 					}
 
@@ -884,7 +881,7 @@ p.demo_store {
 		overflow: hidden;
 		position: relative;
 		height: 1em;
-		line-height: 1em;
+		line-height: 1;
 		font-size: 1em;
 		width: 5.4em;
 		font-family: 'star';
@@ -917,7 +914,7 @@ p.demo_store {
 
 	.woocommerce-product-rating {
 		@include clearfix();
-		line-height: 2em;
+		line-height: 2;
 		display: block;
 
 		.star-rating {
@@ -1083,7 +1080,7 @@ p.demo_store {
 			border-top: 0;
 			border-bottom: 1px dotted rgba(0,0,0,0.1);
 			margin: 0;
-			line-height: 1.5em;
+			line-height: 1.5;
 		}
 
 		td {
@@ -1092,7 +1089,7 @@ p.demo_store {
 			border-top: 0;
 			border-bottom: 1px dotted rgba(0,0,0,0.1);
 			margin: 0;
-			line-height: 1.5em;
+			line-height: 1.5;
 
 			p {
 				margin: 0;
@@ -1116,7 +1113,6 @@ p.demo_store {
 
 		th {
 			font-weight: 700;
-			line-height: 18px;
 			padding: 9px 12px;
 		}
 
@@ -1302,7 +1298,7 @@ p.demo_store {
 			}
 
 			label {
-				line-height: 2em;
+				line-height: 2;
 			}
 
 			label.hidden {
@@ -1337,12 +1333,12 @@ p.demo_store {
 				width: 100%;
 				margin: 0;
 				outline: 0;
-				line-height: 1em;
+				line-height: 1;
 			}
 
 			textarea {
 				height: 4em;
-				line-height: 1.5em;
+				line-height: 1.5;
 				display: block;
 				-moz-box-shadow: none;
 				-webkit-box-shadow: none;
@@ -1416,7 +1412,7 @@ p.demo_store {
 			margin-right: 2em;
 			text-transform: uppercase;
 			font-size: 0.715em;
-			line-height: 1em;
+			line-height: 1;
 			border-right: 1px dashed darken( $secondary, 10% );
 			padding-right: 2em;
 
@@ -1424,7 +1420,7 @@ p.demo_store {
 				display: block;
 				font-size: 1.4em;
 				text-transform: none;
-				line-height: 1.5em;
+				line-height: 1.5;
 			}
 
 			&:last-of-type {
@@ -1514,7 +1510,7 @@ p.demo_store {
 
 		.price_slider_amount {
 			text-align: right;
-			line-height: 2.4em;
+			line-height: 2.4;
 			font-size: 0.8751em;
 
 			.button {
@@ -1683,7 +1679,7 @@ p.demo_store {
 					padding: 6px 6px 5px;
 					margin: 0 4px 0 0;
 					outline: 0;
-					line-height: 1em;
+					line-height: 1;
 				}
 			}
 		}
@@ -1691,7 +1687,7 @@ p.demo_store {
 		input {
 			margin: 0;
 			vertical-align: middle;
-			line-height: 1em;
+			line-height: 1;
 		}
 	}
 
@@ -1810,7 +1806,6 @@ p.demo_store {
 		.create-account small {
 			font-size: 11px;
 			color: $subtext;
-			line-height: 13px;
 			font-weight: normal;
 		}
 
@@ -1839,7 +1834,7 @@ p.demo_store {
 			list-style: none outside;
 
 			li {
-				line-height: 2em;
+				line-height: 2;
 				text-align: left;
 				margin: 0;
 				font-weight: normal;
@@ -1874,7 +1869,7 @@ p.demo_store {
 			margin: 1em 0 1em 0;
 			font-size: 0.92em;
 			border-radius: 2px;
-			line-height: 1.5em;
+			line-height: 1.5;
 			background-color: darken( $secondary, 5% );
 			color: $secondarytext;
 
@@ -1937,9 +1932,8 @@ p.demo_store {
 			}
 
 			span.help {
-				font-size: 11px;
+				font-size: .857em;
 				color: $subtext;
-				line-height: 13px;
 				font-weight: normal;
 			}
 
