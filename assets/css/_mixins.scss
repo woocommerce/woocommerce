@@ -179,12 +179,12 @@
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin:0;
+	margin: 0;
 	text-indent: 0;
 	position: absolute;
-	top:0;
-	left:0;
-	width:100%;
+	top: 0;
+	left: 0;
+	width: 100%;
 	height: 100%;
 	text-align: center;
 	content: $glyph;
@@ -198,7 +198,7 @@
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin-right:7px;
+	margin-right: .618em;
 	content: $glyph;
 }
 
@@ -210,8 +210,56 @@
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin-left: 7px;
+	margin-left: .618em;
 	content: $glyph;
+}
+
+@mixin dashicon( $glyph: "\e001" ) {
+	font-family: 'Dashicons';
+	speak: none;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	margin: 0;
+	text-indent: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	content: $glyph;
+	vertical-align: top;
+}
+
+@mixin dashiconbefore( $glyph: "\f333" ) {
+	font-family: 'Dashicons';
+	speak: none;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	margin-right: .618em;
+	content: $glyph;
+	vertical-align: top;
+	display: inline-block;
+}
+
+@mixin dashiconafter( $glyph: "\f333" ) {
+	font-family: 'Dashicons';
+	speak: none;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	margin-left: .618em;
+	content: $glyph;
+	vertical-align: top;
+	display: inline-block;
 }
 
 @mixin loader() {
@@ -228,11 +276,14 @@
 		-webkit-animation: spin 2s linear infinite;
 	    -moz-animation: spin 2s linear infinite;
 	    animation: spin 2s linear infinite;
-	    font-family: "WooCommerce";
-		content: "\e01c";
+	    font-family: "Dashicons";
+		content: "\f463";
 		line-height: 1;
 		text-align: center;
-		font-size: 1.618em;
+		font-size: 2em;
 		color: rgba(#000,0.75);
+		vertical-align: top;
+		-webkit-font-smoothing: antialiased;
+		font-weight: 400;
 	}
 }
