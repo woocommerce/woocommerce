@@ -13,7 +13,7 @@ $who_refunded = new WP_User( $refund->post->post_author );
 
 	<td class="name">
 		<?php
-			echo esc_attr__( 'Refund', 'woocommerce' ) . ' - ' . esc_attr( date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post->post_date ) ) );
+			echo esc_attr__( 'Refund', 'woocommerce' ) . ' #' . absint( $refund->id ) . ' - ' . esc_attr( date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post->post_date ) ) );
 
 			if ( $who_refunded->exists() ) {
 				echo ' ' . esc_attr_x( 'by', 'Ex: Refund - $date >by< $username', 'woocommerce' ) . ' ' . '<abbr class="refund_by" title="' . esc_attr__( 'ID: ', 'woocommerce' ) . absint( $who_refunded->ID ) . '">' . esc_attr( $who_refunded->display_name ) . '</abbr>' ;
