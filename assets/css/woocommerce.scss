@@ -86,6 +86,24 @@ p.demo_store {
 		@include loader();
 	}
 
+	a.remove {
+		display: block;
+		font-size: 1.5em;
+		height: 1em;
+		width: 1em;
+		text-align: center;
+		line-height: 1;
+		border-radius: 100%;
+		color: red !important;
+		text-decoration: none;
+		font-weight: 700;
+
+		&:hover {
+			color: #fff !important;
+			background: red;
+		}
+	}
+
 	.woocommerce-message,
 	.woocommerce-error,
 	.woocommerce-info {
@@ -1276,6 +1294,20 @@ p.demo_store {
 			}
 		}
 
+		.cart_list {
+			li {
+				padding-left: 2em;
+				position: relative;
+				padding-top: 0;
+
+				a.remove {
+					position: absolute;
+					top: 0;
+					left: 0;
+				}
+			}
+		}
+
 		.buttons {
 			@include clearfix();
 		}
@@ -1639,24 +1671,6 @@ p.demo_store {
 		th,
 		td {
 			vertical-align: middle;
-		}
-
-		a.remove {
-			display: block;
-			font-size: 1.5em;
-			height: 1em;
-			width: 1em;
-			text-align: center;
-			line-height: 1;
-			border-radius: 100%;
-			color: red;
-			text-decoration: none;
-			font-weight: 700;
-		}
-
-		a.remove:hover {
-			background-color: red;
-			color: #fff;
 		}
 
 		td.actions {
