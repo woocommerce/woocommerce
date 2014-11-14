@@ -739,7 +739,6 @@ p.demo_store {
 			font-weight: 700;
 			cursor: pointer;
 			color: $secondarytext;
-			@include darkorlighttextshadow( $secondarytext );
 			border: 1px solid darken( $secondary, 20% );
 			background-color: $secondary;
 			text-shadow: none;
