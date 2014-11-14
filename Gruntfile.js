@@ -23,7 +23,9 @@ module.exports = function( grunt ) {
 				'!<%= dirs.js %>/admin/*.min.js',
 				'!<%= dirs.js %>/admin/jquery.flot*',
 				'<%= dirs.js %>/frontend/*.js',
-				'!<%= dirs.js %>/frontend/*.min.js'
+				'!<%= dirs.js %>/frontend/*.min.js',
+				'includes/gateways/simplify-commerce/assets/js/*.js',
+				'!includes/gateways/simplify-commerce/assets/js/*.min.js'
 			]
 		},
 
@@ -65,6 +67,18 @@ module.exports = function( grunt ) {
 						'!*.min.js'
 					],
 					dest: '<%= dirs.js %>/frontend/',
+					ext: '.min.js'
+				}]
+			},
+			simplify_commerce: {
+				files: [{
+					expand: true,
+					cwd: 'includes/gateways/simplify-commerce/assets/js/',
+					src: [
+						'*.js',
+						'!*.min.js'
+					],
+					dest: 'includes/gateways/simplify-commerce/assets/js/',
 					ext: '.min.js'
 				}]
 			}
