@@ -1779,7 +1779,7 @@ class WC_Cart {
 							$price                 = max( $price - $discount_amount, 0 );
 
 							if ( $add_totals ) {
-								$this->discount_cart += $discount_amount * $values['quantity'];
+								$this->discount_cart += round( $discount_amount * $values['quantity'], WC()->cart->dp );
 								$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
 								$this->increase_coupon_applied_count( $code, $values['quantity'] );
 							}

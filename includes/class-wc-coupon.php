@@ -545,7 +545,7 @@ class WC_Coupon {
 
 		} elseif ( $this->type == 'percent_product' || $this->type == 'percent' ) {
 
-			$discount = round( ( $discounting_amount / 100 ) * $this->amount, WC()->cart->dp );
+			$discount = round( ( $discounting_amount / 100 ) * $this->amount, 2 * WC()->cart->dp );
 
 		} elseif ( $this->type == 'fixed_cart' ) {
 			if ( ! is_null( $cart_item ) ) {
