@@ -978,6 +978,7 @@ class WC_Cart {
 				$this->$key = $default;
 				unset( WC()->session->$key );
 			}
+			do_action( 'woocommerce_cart_reset', $this );
 		}
 
 		/**

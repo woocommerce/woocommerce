@@ -40,6 +40,19 @@ class WC_Coupon {
 	/** @public bool Coupon exists */
 	public $exists = false;
 
+	/** @public int Remembers how many times the coupon is applied. */
+	public static $applied_to_item_count = 0;
+
+	/**
+	 * Coupon constructor. Loads coupon data.
+	 *
+	 * @access public
+	 * @param mixed $code code of the coupon to load
+	 */
+	public function __construct( $code ) {
+		$this->exists = $this->get_coupon( $code );
+	}
+
 	/**
 	 * __isset function.
 	 *
@@ -152,36 +165,34 @@ class WC_Coupon {
 
 			if ( empty( $this->$key ) ) {
 				$this->$key = $value;
+			} elseif ( in_array( $key, array( 'product_ids', 'exclude_product_ids', 'product_categories', 'exclude_product_categories', 'customer_email' ) ) ) {
+				$this->$key = $this->format_array( $this->$key );
+			} elseif ( in_array( $key, array( 'usage_limit', 'usage_limit_per_user', 'limit_usage_to_x_items', 'usage_count' ) ) ) {
+				$this->$key = absint( $this->$key );
+			} elseif( 'expiry_date' === $key ) {
+				$this->expiry_date = $this->expiry_date && ! is_numeric( $this->expiry_date ) ? strtotime( $this->expiry_date ) : $this->expiry_date;
 			}
 		}
-
-		// Format arrays
-		$this->product_ids                = is_array( $this->product_ids ) ? $this->product_ids : array_filter( array_map( 'trim', explode( ',', $this->product_ids ) ) );
-		$this->exclude_product_ids        = is_array( $this->exclude_product_ids ) ? $this->exclude_product_ids : array_filter( array_map( 'trim', explode( ',', $this->exclude_product_ids ) ) );
-		$this->product_categories         = is_array( $this->product_categories ) ? $this->product_categories : array_filter( array_map( 'trim', (array) maybe_unserialize( $this->product_categories ) ) );
-		$this->exclude_product_categories = is_array( $this->exclude_product_categories ) ? $this->exclude_product_categories : array_filter( array_map( 'trim', (array) maybe_unserialize( $this->exclude_product_categories ) ) );
-		$this->customer_email             = is_array( $this->customer_email ) ? $this->customer_email : array_filter( array_map( 'trim', array_map( 'strtolower', (array) maybe_unserialize( $this->customer_email ) ) ) );
-
-		// Format date
-		$this->expiry_date                = $this->expiry_date && ! is_numeric( $this->expiry_date ) ? strtotime( $this->expiry_date ) : $this->expiry_date;
-
-		// Int
-		$this->usage_limit                = absint( $this->usage_limit );
-		$this->usage_limit_per_user       = absint( $this->usage_limit_per_user );
-		$this->limit_usage_to_x_items     = absint( $this->limit_usage_to_x_items );
-		$this->usage_count                = absint( $this->usage_count );
 
 		do_action( 'woocommerce_coupon_loaded', $this );
 	}
 
 	/**
-	 * Coupon constructor. Loads coupon data.
-	 *
-	 * @access public
-	 * @param mixed $code code of the coupon to load
+	 * Format loaded data as array
+	 * @param  string|array $maybe_array
+	 * @return array
 	 */
-	public function __construct( $code ) {
-		$this->exists = $this->get_coupon( $code );
+	public function format_array( $maybe_array ) {
+		if ( ! is_array( $maybe_array ) ) {
+			if ( is_serialized( $maybe_array ) ) {
+				$array = maybe_unserialize( $array );
+			} else {
+				$array = explode( ',', $array );
+			}
+
+			return array_filter( array_map( 'trim', array_map( 'strtolower', $array ) ) );
+		}
+		return $maybe_array;
 	}
 
 	/**
