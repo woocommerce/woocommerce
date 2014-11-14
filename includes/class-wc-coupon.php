@@ -99,31 +99,36 @@ class WC_Coupon {
 	 * @param string $code
 	 * @return bool
 	 */
-	public function get_coupon( $code ) {
+	private function get_coupon( $code ) {
 		$this->code  = apply_filters( 'woocommerce_coupon_code', $code );
 
 		// Coupon data lets developers create coupons through code
 		if ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code ) ) {
 			$this->populate( $coupon );
 			return true;
-		} else {
-			global $wpdb;
-
-			$coupon_id = $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'" ), $this->code ) );
-
-			if ( ( $this->id = $coupon_id ) && $this->code === get_the_title( $this->id ) ) {
-				$this->populate();
-				return true;
-			}
+		} elseif ( ( $this->id = $this->get_coupon_id_from_code( $code ) ) && $this->code === get_the_title( $this->id ) ) {
+			$this->populate();
+			return true;
 		}
 
 		return false;
 	}
 
 	/**
+	 * Get a coupon ID from it's code
+	 * @param  string $code
+	 * @return int
+	 */
+	private function get_coupon_id_from_code( $code ) {
+		global $wpdb;
+
+		return absint( $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'" ), $this->code ) ) );
+	}
+
+	/**
 	 * Populates an order from the loaded post data.
 	 */
-	public function populate( $data = array() ) {
+	private function populate( $data = array() ) {
 		$defaults = array(
 			'discount_type'              => 'fixed_cart',
 			'coupon_amount'              => 0,
@@ -176,20 +181,18 @@ class WC_Coupon {
 
 	/**
 	 * Format loaded data as array
-	 * @param  string|array $maybe_array
+	 * @param  string|array $array
 	 * @return array
 	 */
-	public function format_array( $maybe_array ) {
-		if ( ! is_array( $maybe_array ) ) {
-			if ( is_serialized( $maybe_array ) ) {
+	public function format_array( $array ) {
+		if ( ! is_array( $array ) ) {
+			if ( is_serialized( $array ) ) {
 				$array = maybe_unserialize( $array );
 			} else {
 				$array = explode( ',', $array );
 			}
-
-			return array_filter( array_map( 'trim', array_map( 'strtolower', $array ) ) );
 		}
-		return $maybe_array;
+		return array_filter( array_map( 'trim', array_map( 'strtolower', $array ) ) );
 	}
 
 	/**
@@ -268,190 +271,229 @@ class WC_Coupon {
 	}
 
 	/**
-	 * is_valid function.
+	 * Ensure coupon exists or throw exception
+	 */
+	private function validate_exists() {
+		if ( ! $this->exists ) {
+			throw new Exception( self::E_WC_COUPON_NOT_EXIST );
+		}
+	}
+
+	/**
+	 * Ensure coupon usage limit is valid or throw exception
+	 */
+	private function validate_usage_limit() {
+		if ( $this->usage_limit > 0 && $this->usage_count >= $this->usage_limit ) {
+			throw new Exception( self::E_WC_COUPON_USAGE_LIMIT_REACHED );
+		}
+	}
+
+	/**
+	 * Ensure coupon user usage limit is valid or throw exception
 	 *
-	 * Check if a coupon is valid. Return a reason code if invalid. Reason codes:
+	 * Per user usage limit - check here if user is logged in (against user IDs)
+	 * Checked again for emails later on in WC_Cart::check_customer_coupons()
+	 */
+	private function validate_user_usage_limit() {
+		if ( $this->usage_limit_per_user > 0 && is_user_logged_in() && $this->id ) {
+			$used_by     = (array) get_post_meta( $this->id, '_used_by' );
+			$usage_count = sizeof( array_keys( $used_by, get_current_user_id() ) );
+
+			if ( $usage_count >= $this->usage_limit_per_user ) {
+				throw new Exception( self::E_WC_COUPON_USAGE_LIMIT_REACHED );
+			}
+		}
+	}
+
+	/**
+	 * Ensure coupon date is valid or throw exception
+	 */
+	private function validate_expiry_date() {
+		if ( $this->expiry_date && current_time( 'timestamp' ) > $this->expiry_date ) {
+			throw new Exception( $error_code = self::E_WC_COUPON_EXPIRED );
+		}
+	}
+
+	/**
+	 * Ensure coupon amount is valid or throw exception
+	 */
+	private function validate_minimum_amount() {
+		if ( $this->minimum_amount > 0 && $this->minimum_amount > WC()->cart->subtotal ) {
+			throw new Exception( self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET );
+		}
+	}
+
+	/**
+	 * Ensure coupon amount is valid or throw exception
+	 */
+	private function validate_maximum_amount() {
+		if ( $this->maximum_amount > 0 && $this->maximum_amount < WC()->cart->subtotal ) {
+			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
+		}
+	}
+
+	/**
+	 * Ensure coupon is valid for products in the cart is valid or throw exception
+	 */
+	private function validate_product_ids() {
+		if ( sizeof( $this->product_ids ) > 0 ) {
+			$valid_for_cart = false;
+			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+					if ( in_array( $cart_item['product_id'], $this->product_ids ) || in_array( $cart_item['variation_id'], $this->product_ids ) || in_array( $cart_item['data']->get_parent(), $this->product_ids ) ) {
+						$valid_for_cart = true;
+					}
+				}
+			}
+			if ( ! $valid_for_cart ) {
+				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
+			}
+		}
+	}
+
+	/**
+	 * Ensure coupon is valid for product categories in the cart is valid or throw exception
+	 */
+	private function validate_product_categories() {
+		if ( sizeof( $this->product_categories ) > 0 ) {
+			$valid_for_cart = false;
+			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+
+					$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
+
+					if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) {
+						$valid_for_cart = true;
+					}
+				}
+			}
+			if ( ! $valid_for_cart ) {
+				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
+			}
+		}
+	}
+
+	/**
+	 * Ensure coupon is valid for sale items in the cart is valid or throw exception
+	 */
+	private function validate_sale_items() {
+		if ( 'yes' === $this->exclude_sale_items && $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
+			$valid_for_cart      = false;
+			$product_ids_on_sale = wc_get_product_ids_on_sale();
+			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+					if ( sizeof( array_intersect( array( absint( $cart_item['product_id'] ), absint( $cart_item['variation_id'] ), $cart_item['data']->get_parent() ), $product_ids_on_sale ) ) === 0 ) {
+						// not on sale
+						$valid_for_cart = true;
+					}
+				}
+			}
+			if ( ! $valid_for_cart ) {
+				throw new Exception( self::E_WC_COUPON_NOT_VALID_SALE_ITEMS );
+			}
+		}
+	}
+
+	/**
+	 * Cart discounts cannot be added if non-eligble product is found in cart
+	 */
+	private function validate_cart_excluded_items() {
+		if ( ! $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
+			$this->validate_cart_excluded_product_ids();
+			$this->validate_cart_excluded_product_categories();
+			$this->validate_cart_excluded_sale_items();
+		}
+	}
+
+	/**
+	 * Exclude products from cart
+	 */
+	private function validate_cart_excluded_product_ids() {
+		// Exclude Products
+		if ( sizeof( $this->exclude_product_ids ) > 0 ) {
+			$valid_for_cart = true;
+			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+					if ( in_array( $cart_item['product_id'], $this->exclude_product_ids ) || in_array( $cart_item['variation_id'], $this->exclude_product_ids ) || in_array( $cart_item['data']->get_parent(), $this->exclude_product_ids ) ) {
+						$valid_for_cart = false;
+					}
+				}
+			}
+			if ( ! $valid_for_cart ) {
+				throw new Exception( self::E_WC_COUPON_EXCLUDED_PRODUCTS );
+			}
+		}
+	}
+
+	/**
+	 * Exclude categories from cart
+	 */
+	private function validate_cart_excluded_product_categories() {
+		if ( sizeof( $this->exclude_product_categories ) > 0 ) {
+			$valid_for_cart = true;
+			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+
+					$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
+
+					if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
+						$valid_for_cart = false;
+					}
+				}
+			}
+			if ( ! $valid_for_cart ) {
+				throw new Exception( self::E_WC_COUPON_EXCLUDED_CATEGORIES );
+			}
+		}
+	}
+
+	/**
+	 * Exclude sale items from cart
+	 */
+	private function validate_cart_excluded_sale_items() {
+		if ( $this->exclude_sale_items == 'yes' ) {
+			$valid_for_cart = true;
+			$product_ids_on_sale = wc_get_product_ids_on_sale();
+			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+					if ( in_array( $cart_item['product_id'], $product_ids_on_sale, true ) || in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) || in_array( $cart_item['data']->get_parent(), $product_ids_on_sale, true ) ) {
+						$valid_for_cart = false;
+					}
+				}
+			}
+			if ( ! $valid_for_cart ) {
+				throw new Exception( self::E_WC_COUPON_NOT_VALID_SALE_ITEMS );
+			}
+		}
+	}
+
+	/**
+	 * Check if a coupon is valid.
 	 *
-	 * @access public
-	 * @return boolean validity or a WP_Error if not valid
+	 * @return boolean validity
 	 */
 	public function is_valid() {
-		$error_code = null;
-		$valid      = true;
-		$error      = false;
+		try {
+			$this->validate_exists();
+			$this->validate_usage_limit();
+			$this->validate_user_usage_limit();
+			$this->validate_expiry_date();
+			$this->validate_minimum_amount();
+			$this->validate_maximum_amount();
+			$this->validate_product_ids();
+			$this->validate_product_categories();
+			$this->validate_sale_items();
+			$this->validate_cart_excluded_items();
 
-		if ( $this->exists ) {
-
-			// Usage Limit
-			if ( $this->usage_limit > 0 ) {
-				if ( $this->usage_count >= $this->usage_limit ) {
-					$valid = false;
-					$error_code = self::E_WC_COUPON_USAGE_LIMIT_REACHED;
-				}
+			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $this ) ) {
+				throw new Exception( self::E_WC_COUPON_INVALID_FILTERED );
 			}
-
-			// Per user usage limit - check here if user is logged in (against user IDs)
-			// Checked again for emails later on in WC_Cart::check_customer_coupons()
-			if ( $this->usage_limit_per_user > 0 && is_user_logged_in() ) {
-				$used_by     = (array) get_post_meta( $this->id, '_used_by' );
-				$usage_count = sizeof( array_keys( $used_by, get_current_user_id() ) );
-
-				if ( $usage_count >= $this->usage_limit_per_user ) {
-					$valid = false;
-					$error_code = self::E_WC_COUPON_USAGE_LIMIT_REACHED;
-				}
-			}
-
-			// Expired
-			if ( $this->expiry_date ) {
-				if ( current_time( 'timestamp' ) > $this->expiry_date ) {
-					$valid = false;
-					$error_code = self::E_WC_COUPON_EXPIRED;
-				}
-			}
-
-			// Minimum spend
-			if ( $this->minimum_amount > 0 ) {
-				if ( $this->minimum_amount > WC()->cart->subtotal ) {
-					$valid = false;
-					$error_code = self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET;
-				}
-			}
-
-			// Maximum spend
-			if ( $this->maximum_amount > 0 ) {
-				if ( $this->maximum_amount < WC()->cart->subtotal ) {
-					$valid = false;
-					$error_code = self::E_WC_COUPON_MAX_SPEND_LIMIT_MET;
-				}
-			}
-
-			// Product ids - If a product included is found in the cart then its valid
-			if ( sizeof( $this->product_ids ) > 0 ) {
-				$valid_for_cart = false;
-				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-
-						if ( in_array( $cart_item['product_id'], $this->product_ids ) || in_array( $cart_item['variation_id'], $this->product_ids ) || in_array( $cart_item['data']->get_parent(), $this->product_ids ) )
-							$valid_for_cart = true;
-					}
-				}
-				if ( ! $valid_for_cart ) {
-					$valid = false;
-					$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
-				}
-			}
-
-			// Category ids - If a product included is found in the cart then its valid
-			if ( sizeof( $this->product_categories ) > 0 ) {
-				$valid_for_cart = false;
-				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-
-						$product_cats = wp_get_post_terms($cart_item['product_id'], 'product_cat', array("fields" => "ids"));
-
-						if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 )
-							$valid_for_cart = true;
-					}
-				}
-				if ( ! $valid_for_cart ) {
-					$valid = false;
-					$error_code = self::E_WC_COUPON_NOT_APPLICABLE;
-				}
-			}
-
-			// Exclude Sale Items check for product coupons - valid if a non-sale item is present
-			if ( 'yes' === $this->exclude_sale_items && $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
-				$valid_for_cart      = false;
-				$product_ids_on_sale = wc_get_product_ids_on_sale();
-				if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-						if ( sizeof( array_intersect( array( absint( $cart_item['product_id'] ), absint( $cart_item['variation_id'] ), $cart_item['data']->get_parent() ), $product_ids_on_sale ) ) === 0 ) {
-							// not on sale
-							$valid_for_cart = true;
-						}
-					}
-				}
-				if ( ! $valid_for_cart ) {
-					$valid = false;
-					$error_code = self::E_WC_COUPON_NOT_VALID_SALE_ITEMS;
-				}
-			}
-
-			// Cart discounts cannot be added if non-eligble product is found in cart
-			if ( ! $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
-
-				// Exclude Products
-				if ( sizeof( $this->exclude_product_ids ) > 0 ) {
-					$valid_for_cart = true;
-					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-							if ( in_array( $cart_item['product_id'], $this->exclude_product_ids ) || in_array( $cart_item['variation_id'], $this->exclude_product_ids ) || in_array( $cart_item['data']->get_parent(), $this->exclude_product_ids ) ) {
-								$valid_for_cart = false;
-							}
-						}
-					}
-					if ( ! $valid_for_cart ) {
-						$valid = false;
-						$error_code = self::E_WC_COUPON_EXCLUDED_PRODUCTS;
-					}
-				}
-
-				// Exclude Sale Items
-				if ( $this->exclude_sale_items == 'yes' ) {
-					$valid_for_cart = true;
-					$product_ids_on_sale = wc_get_product_ids_on_sale();
-					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-							if ( in_array( $cart_item['product_id'], $product_ids_on_sale, true ) || in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) || in_array( $cart_item['data']->get_parent(), $product_ids_on_sale, true ) ) {
-								$valid_for_cart = false;
-							}
-						}
-					}
-					if ( ! $valid_for_cart ) {
-						$valid = false;
-						$error_code = self::E_WC_COUPON_NOT_VALID_SALE_ITEMS;
-					}
-				}
-
-				// Exclude Categories
-				if ( sizeof( $this->exclude_product_categories ) > 0 ) {
-					$valid_for_cart = true;
-					if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
-						foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-
-							$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
-
-							if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
-								$valid_for_cart = false;
-							}
-						}
-					}
-					if ( ! $valid_for_cart ) {
-						$valid = false;
-						$error_code = self::E_WC_COUPON_EXCLUDED_CATEGORIES;
-					}
-				}
-			}
-
-			$valid = apply_filters( 'woocommerce_coupon_is_valid', $valid, $this );
-
-			if ( $valid ) {
-				return true;
-			} else {
-				if ( is_null( $error_code ) )
-					$error_code = self::E_WC_COUPON_INVALID_FILTERED;
-			}
-
-		} else {
-			$error_code = self::E_WC_COUPON_NOT_EXIST;
+		} catch ( Exception $e ) {
+			$this->error_message = $this->get_coupon_error( $e->getMessage() );
+			return false;
 		}
 
-		if ( $error_code ) {
-			$this->error_message = $this->get_coupon_error( $error_code );
-		}
-
-		return false;
+		return true;
 	}
 
 	/**
