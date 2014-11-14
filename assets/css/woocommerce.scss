@@ -59,7 +59,7 @@ p.demo_store {
 .wc-forward a {
 	&:after {
 		@include dashiconafter( "\f344" );
-		font-size: .75em;
+		line-height: inherit;
 	}
 }
 
@@ -67,7 +67,7 @@ p.demo_store {
 .wc-backward a {
 	&:before {
 		@include dashiconbefore( "\f340" );
-		font-size: .75em;
+		line-height: inherit;
 	}
 }
 
