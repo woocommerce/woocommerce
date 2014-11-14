@@ -987,6 +987,7 @@ class WC_Cart {
 		public function calculate_totals() {
 
 			$this->reset();
+			$this->coupons = $this->get_coupons();
 
 			do_action( 'woocommerce_before_calculate_totals', $this );
 
@@ -1664,8 +1665,9 @@ class WC_Cart {
 					foreach ( $this->applied_coupons as $code ) {
 						$coupon = new WC_Coupon( $code );
 
-						if ( $coupon->apply_before_tax() )
+						if ( $coupon->apply_before_tax() ) {
 							$coupons[ $code ] = $coupon;
+						}
 					}
 				}
 			}
@@ -1675,8 +1677,9 @@ class WC_Cart {
 					foreach ( $this->applied_coupons as $code ) {
 						$coupon = new WC_Coupon( $code );
 
-						if ( ! $coupon->apply_before_tax() )
+						if ( ! $coupon->apply_before_tax() ) {
 							$coupons[ $code ] = $coupon;
+						}
 					}
 				}
 			}
@@ -1766,13 +1769,12 @@ class WC_Cart {
 		 * @return float price
 		 */
 		public function get_discounted_price( $values, $price, $add_totals = false ) {
-			if ( ! $price )
+			if ( ! $price ) {
 				return $price;
+			}
 
-			if ( ! empty( $this->applied_coupons ) ) {
-				foreach ( $this->applied_coupons as $code ) {
-					$coupon = new WC_Coupon( $code );
-
+			if ( ! empty( $this->coupons ) ) {
+				foreach ( $this->coupons as $code => $coupon ) {
 					if ( $coupon->apply_before_tax() && $coupon->is_valid() ) {
 						if ( $coupon->is_valid_for_product( $values['data'], $values ) || $coupon->is_valid_for_cart() ) {
 
@@ -1800,10 +1802,8 @@ class WC_Cart {
 		public function apply_cart_discounts_after_tax() {
 			$pre_discount_total = round( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp );
 
-			if ( $this->applied_coupons ) {
-				foreach ( $this->applied_coupons as $code ) {
-					$coupon = new WC_Coupon( $code );
-
+			if ( $this->coupons ) {
+				foreach ( $this->coupons as $code => $coupon ) {
 					do_action( 'woocommerce_cart_discount_after_tax_' . $coupon->type, $coupon );
 
 					if ( $coupon->is_valid() && ! $coupon->apply_before_tax() && $coupon->is_valid_for_cart() ) {
@@ -1825,10 +1825,8 @@ class WC_Cart {
 		 * @param double $price
 		 */
 		public function apply_product_discounts_after_tax( $values, $price ) {
-			if ( ! empty( $this->applied_coupons ) ) {
-				foreach ( $this->applied_coupons as $code ) {
-					$coupon = new WC_Coupon( $code );
-
+			if ( ! empty( $this->coupons ) ) {
+				foreach ( $this->coupons as $code => $coupon ) {
 					do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon, $values, $price );
 
 					if ( $coupon->is_valid() && ! $coupon->apply_before_tax() && $coupon->is_valid_for_product( $values['data'] ) ) {
@@ -1849,8 +1847,9 @@ class WC_Cart {
 		 * @param double $amount
 		 */
 		private function increase_coupon_discount_amount( $code, $amount ) {
-			if ( empty( $this->coupon_discount_amounts[ $code ] ) )
+			if ( empty( $this->coupon_discount_amounts[ $code ] ) ) {
 				$this->coupon_discount_amounts[ $code ] = 0;
+			}
 
 			$this->coupon_discount_amounts[ $code ] += $amount;
 		}
@@ -1863,8 +1862,9 @@ class WC_Cart {
 		 * @param integer $count
 		 */
 		private function increase_coupon_applied_count( $code, $count = 1 ) {
-			if ( empty( $this->coupon_applied_count[ $code ] ) )
+			if ( empty( $this->coupon_applied_count[ $code ] ) ) {
 				$this->coupon_applied_count[ $code ] = 0;
+			}
 
 			$this->coupon_applied_count[ $code ] += $count;
 		}

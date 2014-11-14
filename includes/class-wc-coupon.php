@@ -40,9 +40,6 @@ class WC_Coupon {
 	/** @public bool Coupon exists */
 	public $exists = false;
 
-	/** @public int Remembers how many times the coupon is applied. */
-	public static $applied_to_item_count = 0;
-
 	/**
 	 * Coupon constructor. Loads coupon data.
 	 *
@@ -573,7 +570,10 @@ class WC_Coupon {
 
 		// Handle the limit_usage_to_x_items option
 		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) && ! is_null( $cart_item ) ) {
-			$qty = empty( $this->limit_usage_to_x_items ) ? $cart_item['quantity'] : min( $this->limit_usage_to_x_items, $cart_item['quantity'] );
+			$qty = '' === $this->limit_usage_to_x_items ? $cart_item['quantity'] : min( $this->limit_usage_to_x_items, $cart_item['quantity'] );
+
+			// Reduce limits
+			$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $qty );
 
 			if ( $single ) {
 				$discount = ( $discount * $qty ) / $cart_item['quantity'];
