@@ -1344,12 +1344,21 @@ p.demo_store {
 				box-shadow: none;
 			}
 
-			&.validate-required.woocommerce-invalid {
+			&.woocommerce-invalid {
 				.chosen-single,
 				.chosen-drop,
 				input.input-text,
 				select {
-					border-color: #fb7f88;
+					border-color: $red;
+				}
+			}
+
+			&.woocommerce-validated {
+				.chosen-single,
+				.chosen-drop,
+				input.input-text,
+				select {
+					border-color: $green - #111;
 				}
 			}
 
