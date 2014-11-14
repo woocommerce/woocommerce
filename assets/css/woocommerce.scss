@@ -712,7 +712,6 @@ p.demo_store {
 			text-align: center;
 			border: 1px solid darken( $secondary, 20% );
 			border-right: 0;
-			box-shadow: inset 0 0 2px $secondary;
 			font-weight: 700;
 			border-radius: 2px 0 0 2px;
 			-moz-appearance: textfield; /* Hide buttons for Firefox 29 and later */
@@ -1673,9 +1672,6 @@ p.demo_store {
 					-webkit-box-sizing: border-box;
 					-moz-box-sizing: border-box;
 					box-sizing: border-box;
-
-					box-shadow: inset 0 1px 4px rgba(0,0,0,0.1);
-
 					border: 1px solid darken( $secondary, 10% );
 					padding: 6px 6px 5px;
 					margin: 0 4px 0 0;
@@ -1877,7 +1873,6 @@ p.demo_store {
 			input.input-text, textarea {
 				border-color: darken( $secondary, 15% );
 				border-top-color: darken( $secondary, 20% );
-				box-shadow: 0 1px 0 0 rgba(255,255,255,0.4);
 			}
 
 			::-webkit-input-placeholder {
