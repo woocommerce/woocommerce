@@ -810,7 +810,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					}
 
 					// Validate amount
-					if ( number_format( $order->get_total(), 2, '.', '' ) != number_format( $posted['mc_gross'] 2, '.', '' ) ) {
+					if ( number_format( $order->get_total(), 2, '.', '' ) != number_format( $posted['mc_gross'], 2, '.', '' ) ) {
 						if ( 'yes' == $this->debug ) {
 							$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
 						}
