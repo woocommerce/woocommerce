@@ -4,11 +4,11 @@
  *
  * Generates a range slider to filter products by price.
  *
- * @author 		WooThemes
- * @category 	Widgets
- * @package 	WooCommerce/Widgets
- * @version 	2.1.0
- * @extends 	WC_Widget
+ * @author   WooThemes
+ * @category Widgets
+ * @package  WooCommerce/Widgets
+ * @version  2.3.0
+ * @extends  WC_Widget
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,6 +32,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 				'label' => __( 'Title', 'woocommerce' )
 			)
 		);
+
 		parent::__construct();
 	}
 
@@ -39,15 +40,14 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	 * widget function.
 	 *
 	 * @see WP_Widget
-	 * @access public
+	 *
 	 * @param array $args
 	 * @param array $instance
+	 *
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		global $_chosen_attributes, $wpdb, $wp;
-
-		extract( $args );
 
 		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
 			return;
@@ -61,8 +61,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$max_price = isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : '';
 
 		wp_enqueue_script( 'wc-price-slider' );
-
-		$title  = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		// Remember current filters/search
 		$fields = '';
@@ -87,21 +85,22 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$fields .= '<input type="hidden" name="orderby" value="' . esc_attr( $_GET['orderby'] ) . '" />';
 		}
 
-		if ( $_chosen_attributes ) foreach ( $_chosen_attributes as $attribute => $data ) {
+		if ( $_chosen_attributes ) {
+			foreach ( $_chosen_attributes as $attribute => $data ) {
+				$taxonomy_filter = 'filter_' . str_replace( 'pa_', '', $attribute );
 
-			$taxonomy_filter = 'filter_' . str_replace( 'pa_', '', $attribute );
+				$fields .= '<input type="hidden" name="' . esc_attr( $taxonomy_filter ) . '" value="' . esc_attr( implode( ',', $data['terms'] ) ) . '" />';
 
-			$fields .= '<input type="hidden" name="' . esc_attr( $taxonomy_filter ) . '" value="' . esc_attr( implode( ',', $data['terms'] ) ) . '" />';
-
-			if ( $data['query_type'] == 'or' ) {
-				$fields .= '<input type="hidden" name="' . esc_attr( str_replace( 'pa_', 'query_type_', $attribute ) ) . '" value="or" />';
+				if ( 'or' == $data['query_type'] ) {
+					$fields .= '<input type="hidden" name="' . esc_attr( str_replace( 'pa_', 'query_type_', $attribute ) ) . '" value="or" />';
+				}
 			}
 		}
 
 		$min = $max = 0;
 		$post_min = $post_max = '';
 
-		if ( sizeof( WC()->query->layered_nav_product_ids ) === 0 ) {
+		if ( 0 === sizeof( WC()->query->layered_nav_product_ids ) ) {
 			$min = floor( $wpdb->get_var(
 				$wpdb->prepare('
 					SELECT min(meta_value + 0)
@@ -157,9 +156,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			return;
 		}
 
-		echo $before_widget . $before_title . $title . $after_title;
+		$this->widget_start( $args, $instance );
 
-		if ( get_option( 'permalink_structure' ) == '' ) {
+		if ( '' == get_option( 'permalink_structure' ) ) {
 			$form_action = remove_query_arg( array( 'page', 'paged' ), add_query_arg( $wp->query_string, '', home_url( $wp->request ) ) );
 		} else {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( $wp->request ) );
@@ -181,6 +180,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			</div>
 		</form>';
 
-		echo $after_widget;
+		$this->widget_end( $args );
 	}
 }
