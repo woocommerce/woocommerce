@@ -102,6 +102,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php wp_nonce_field( 'woocommerce-register' ); ?>
 				<input type="submit" class="button" name="register" value="<?php _e( 'Register', 'woocommerce' ); ?>" />
 			</p>
+			
+			<p class="register-form-padding">&nbsp;</p>
 
 			<?php do_action( 'woocommerce_register_form_end' ); ?>
 
