@@ -51,7 +51,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	var $has_settings       = true;
 
 	/** @var array Features this method supports. */
-	var $supports           = array();    // Features this method supports.
+	var $supports           = array();
 
 	/** @var array This is an array of rates - methods must populate this array to register shipping costs */
 	var $rates              = array();
@@ -73,7 +73,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param array $args (default: array())
 	 */
 	public function add_rate( $args = array() ) {
-
 		$defaults = array(
 			'id'        => '',          // ID for the rate
 			'label'     => '',          // Label for the rate
@@ -87,7 +86,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		extract( $args );
 
 		// Id and label are required
-		if ( ! $id || ! $label ) { return; }
+		if ( ! $id || ! $label ) {
+			return;
+		}
 
 		// Handle cost
 		$total_cost = round( ( is_array( $cost ) ) ? array_sum( $cost ) : $cost, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
@@ -157,7 +158,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function has_settings() {
-		return ( $this->has_settings );
+		return $this->has_settings;
 	}
 
 	/**
@@ -167,7 +168,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-
 		if ( 'no' == $this->enabled ) {
 			return false;
 		}
@@ -199,7 +199,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * Return the gateways title
+	 * Return the shipping method title
 	 *
 	 * @return string
 	 */
@@ -210,16 +210,17 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * get_fee function.
 	 *
-	 * @access public
 	 * @param mixed $fee
 	 * @param mixed $total
 	 * @return float
 	 */
 	public function get_fee( $fee, $total ) {
-		if ( strstr( $fee, '%' ) ) :
+		if ( strstr( $fee, '%' ) ) {
 			$fee = ( $total / 100 ) * str_replace( '%', '', $fee );
-		endif;
-		if ( ! empty( $this->minimum_fee ) && $this->minimum_fee > $fee ) { $fee = $this->minimum_fee; }
+		}
+		if ( ! empty( $this->minimum_fee ) && $this->minimum_fee > $fee ) {
+			$fee = $this->minimum_fee;
+		}
 		return $fee;
 	}
 
