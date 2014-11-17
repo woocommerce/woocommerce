@@ -230,6 +230,9 @@ class WC_Admin_Settings {
 			if ( ! isset( $value['desc_tip'] ) ) {
 				$value['desc_tip'] = false;
 			}
+			if ( ! isset( $value['placeholder'] ) ) {
+				$value['placeholder'] = '';
+			}
 
 			// Custom attribute handling
 			$custom_attributes = array();
@@ -301,6 +304,7 @@ class WC_Admin_Settings {
 								style="<?php echo esc_attr( $value['css'] ); ?>"
 								value="<?php echo esc_attr( $option_value ); ?>"
 								class="<?php echo esc_attr( $value['class'] ); ?>"
+								placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 								<?php echo implode( ' ', $custom_attributes ); ?>
 								/> <?php echo $description; ?>
 						</td>
@@ -325,6 +329,7 @@ class WC_Admin_Settings {
 								id="<?php echo esc_attr( $value['id'] ); ?>"
 								style="<?php echo esc_attr( $value['css'] ); ?>"
 								class="<?php echo esc_attr( $value['class'] ); ?>"
+								placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 								<?php echo implode( ' ', $custom_attributes ); ?>
 								><?php echo esc_textarea( $option_value );  ?></textarea>
 						</td>
