@@ -146,7 +146,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'       => 'woocommerce_default_catalog_orderby',
 					'class'    => 'chosen_select',
 					'css'      => 'min-width:300px;',
-					'default'  => 'title',
+					'default'  => 'menu_order',
 					'type'     => 'select',
 					'options'  => apply_filters( 'woocommerce_default_catalog_orderby_options', array(
 						'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
