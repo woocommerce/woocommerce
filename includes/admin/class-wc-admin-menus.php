@@ -190,10 +190,7 @@ class WC_Admin_Menus {
 	 * @return bool
 	 */
 	public function custom_menu_order() {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return false;
-		}
-		return true;
+		return current_user_can( 'manage_woocommerce' ) ? true : false;
 	}
 
 	/**
