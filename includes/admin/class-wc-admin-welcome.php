@@ -61,7 +61,7 @@ class WC_Admin_Welcome {
 	 * admin_css function.
 	 */
 	public function admin_css() {
-		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), WC_VERSION );
+		wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
 	}
 
 	/**
