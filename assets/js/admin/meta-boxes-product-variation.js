@@ -298,6 +298,25 @@ jQuery( function ( $ ) {
 					$( ':input[name^="' + bulk_edit + '"]').not('[name*="dates"]').val( value ).change();
 				}
 			break;
+			case 'variable_sale_schedule' :
+				var start = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_start );
+				var end   = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_end );
+				var set   = false;
+
+				if ( start != null && start != '' ) {
+					$('.woocommerce_variable_attributes .sale_schedule').click();
+					$( ':input[name^="variable_sale_price_dates_from"]').val( start ).change();
+					set = true;
+				}
+				if ( end != null && end != '') {
+					$('.woocommerce_variable_attributes .sale_schedule').click();
+					$( ':input[name^="variable_sale_price_dates_to"]').val( end ).change();
+					set = true;
+				}
+				if ( ! set ) {
+					$('.woocommerce_variable_attributes .cancel_sale_schedule').click();
+				}
+			break;
 			default:
 				$( 'select#field_to_edit' ).trigger( bulk_edit );
 			break;

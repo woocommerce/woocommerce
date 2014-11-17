@@ -162,7 +162,9 @@ class WC_Admin_Assets {
 				'i18n_variation_added'                => esc_js( __( "variation added", 'woocommerce' ) ),
 				'i18n_variations_added'               => esc_js( __( "variations added", 'woocommerce' ) ),
 				'i18n_no_variations_added'            => esc_js( __( "No variations added", 'woocommerce' ) ),
-				'i18n_remove_variation'               => esc_js( __( 'Are you sure you want to remove this variation?', 'woocommerce' ) )
+				'i18n_remove_variation'               => esc_js( __( 'Are you sure you want to remove this variation?', 'woocommerce' ) ),
+				'i18n_scheduled_sale_start'           => esc_js( __( 'Sale start date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
+				'i18n_scheduled_sale_end'             => esc_js( __( 'Sale end date  (YYYY-MM-DD format or leave blank)', 'woocommerce' ) )
 			);
 
 			wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );

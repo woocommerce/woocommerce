@@ -134,6 +134,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Made tax importer expand postcode ranges.
 * Feature - Print styles for reports.
 * Feature - Remove products from the cart in the widget.
+* Feature - Bulk edit sales schedule on variations.
 * Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
 * Refactor - Routing all email functionality through one send() method.
 * Refactor - Replaced existing email css inliner with Emogrifier.

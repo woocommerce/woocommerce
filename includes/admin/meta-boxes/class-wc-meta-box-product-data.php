@@ -830,6 +830,7 @@ class WC_Meta_Box_Product_Data {
 							<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
 							<option value="variable_sale_price_increase"><?php _e( 'Sale prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
 							<option value="variable_sale_price_decrease"><?php _e( 'Sale prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_schedule"><?php _e( 'Scheduled sale dates', 'woocommerce' ); ?></option>
 						</optgroup>
 						<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
 							<option value="toggle_manage_stock"><?php _e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
