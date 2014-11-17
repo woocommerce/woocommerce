@@ -296,7 +296,7 @@ class WC_Admin_Welcome {
 					</div>
 				</div>
 			</div>
-			<?php if ( strtotime( '2014/11/04' ) < current_time( 'timestamp' ) ) { ?>
+			<?php if ( strtotime( '2014/11/04' ) > current_time( 'timestamp' ) ) { ?>
 			<div class="changelog wc-conf">
 				<div>
 					<h3><?php _e( 'Join us at the inaugural WooCommerce Conference in San Francisco', 'woocommerce' ); ?></h3>
