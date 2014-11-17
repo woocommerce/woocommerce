@@ -8,6 +8,9 @@ jQuery( function( $ ) {
 	/** Cart Handling */
 	try {
 		$supports_html5_storage = ( 'sessionStorage' in window && window.sessionStorage !== null );
+
+		window.sessionStorage.setItem( 'wc', 'test' );
+		window.sessionStorage.removeItem( 'wc' );
 	} catch( err ) {
 		$supports_html5_storage = false;
 	}
