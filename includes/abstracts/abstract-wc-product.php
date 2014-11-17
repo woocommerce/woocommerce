@@ -1031,10 +1031,11 @@ class WC_Product {
 
 			$rating_html .= '</div>';
 
-			return $rating_html;
+		} else {
+			$rating_html = '<div class="star-rating not-rated"></div>';
 		}
 
-		return '';
+		return $rating_html;
 	}
 
 
