@@ -207,12 +207,13 @@ class WC_Admin_Welcome {
 
 		<div class="about-text woocommerce-about-text">
 			<?php
-				if ( ! empty( $_GET['wc-installed'] ) )
+				if ( ! empty( $_GET['wc-installed'] ) ) {
 					$message = __( 'Thanks, all done!', 'woocommerce' );
-				elseif ( ! empty( $_GET['wc-updated'] ) )
+				} elseif ( ! empty( $_GET['wc-updated'] ) ) {
 					$message = __( 'Thank you for updating to the latest version!', 'woocommerce' );
-				else
+				} else {
 					$message = __( 'Thanks for installing!', 'woocommerce' );
+				}
 
 				printf( __( '%s WooCommerce %s is more powerful, stable and secure than ever before. We hope you enjoy using it.', 'woocommerce' ), $message, $major_version );
 			?>
