@@ -44,15 +44,15 @@ class WC_Admin_Welcome {
 		switch ( $_GET['page'] ) {
 			case 'wc-about' :
 				$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-about', array( $this, 'about_screen' ) );
-				add_action( 'admin_print_styles-'. $page, array( $this, 'admin_css' ) );
+				add_action( 'admin_print_styles-' . $page, array( $this, 'admin_css' ) );
 			break;
 			case 'wc-credits' :
 				$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-credits', array( $this, 'credits_screen' ) );
-				add_action( 'admin_print_styles-'. $page, array( $this, 'admin_css' ) );
+				add_action( 'admin_print_styles-' . $page, array( $this, 'admin_css' ) );
 			break;
 			case 'wc-translators' :
 				$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-translators', array( $this, 'translators_screen' ) );
-				add_action( 'admin_print_styles-'. $page, array( $this, 'admin_css' ) );
+				add_action( 'admin_print_styles-' . $page, array( $this, 'admin_css' ) );
 			break;
 		}
 	}
@@ -296,7 +296,7 @@ class WC_Admin_Welcome {
 					</div>
 				</div>
 			</div>
-			<?php if ( strtotime( '2014/11/04' ) > current_time( 'timestamp' ) ) { ?>
+			<?php if ( strtotime( '2014/11/04' ) < current_time( 'timestamp' ) ) { ?>
 			<div class="changelog wc-conf">
 				<div>
 					<h3><?php _e( 'Join us at the inaugural WooCommerce Conference in San Francisco', 'woocommerce' ); ?></h3>
@@ -305,6 +305,8 @@ class WC_Admin_Welcome {
 				</div>
 			</div>
 			<?php } ?>
+
+			<hr />
 
 			<div class="return-to-dashboard">
 				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'wc-settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>
