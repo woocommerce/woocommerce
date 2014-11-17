@@ -6,9 +6,9 @@
  *
  * Adapted from code in EDD (Copyright (c) 2012, Pippin Williamson) and WP.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
 */
 
@@ -17,17 +17,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Welcome class.
+ * WC_Admin_Welcome class
  */
 class WC_Admin_Welcome {
 
 	private $plugin;
 
 	/**
-	 * __construct function.
-	 *
-	 * @access public
-	 * @return void
+	 * Hook in tabs.
 	 */
 	public function __construct() {
 		$this->plugin             = 'woocommerce/woocommerce.php';
@@ -38,10 +35,7 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Add admin menus/screens
-	 *
-	 * @access public
-	 * @return void
+	 * Add admin menus/screens.
 	 */
 	public function admin_menus() {
 		if ( empty( $_GET['page'] ) ) {
@@ -69,9 +63,6 @@ class WC_Admin_Welcome {
 
 	/**
 	 * admin_css function.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function admin_css() {
 		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), WC_VERSION );
@@ -79,9 +70,6 @@ class WC_Admin_Welcome {
 
 	/**
 	 * Add styles just for this page, and remove dashboard page links.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function admin_head() {
 		remove_submenu_page( 'index.php', 'wc-about' );
@@ -206,10 +194,9 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Into text/links shown on all about pages.
+	 * Intro text/links shown on all about pages.
 	 *
 	 * @access private
-	 * @return void
 	 */
 	private function intro() {
 
@@ -331,7 +318,7 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Output the credits.
+	 * Output the credits screen.
 	 */
 	public function credits_screen() {
 		?>
@@ -347,7 +334,7 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Output the translators screen
+	 * Output the translators screen.
 	 */
 	public function translators_screen() {
 		?>
@@ -386,9 +373,8 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Render Contributors List
+	 * Render Contributors List.
 	 *
-	 * @access public
 	 * @return string $contributor_list HTML formatted list of contributors.
 	 */
 	public function contributors() {
@@ -421,7 +407,6 @@ class WC_Admin_Welcome {
 	/**
 	 * Retrieve list of contributors from GitHub.
 	 *
-	 * @access public
 	 * @return mixed
 	 */
 	public function get_contributors() {
@@ -449,13 +434,13 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Sends user to the welcome page on first activation
+	 * Sends user to the welcome page on first activation.
 	 */
 	public function welcome() {
 		// Bail if no activation redirect transient is set
-	    if ( ! get_transient( '_wc_activation_redirect' ) ) {
+		if ( ! get_transient( '_wc_activation_redirect' ) ) {
 			return;
-	    }
+		}
 
 		// Delete the redirect transient
 		delete_transient( '_wc_activation_redirect' );
