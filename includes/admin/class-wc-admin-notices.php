@@ -40,7 +40,7 @@ class WC_Admin_Notices {
 	 */
 	public function add_notices() {
 		if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_needs_pages' ) == 1 ) {
-			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+			wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
 			add_action( 'admin_notices', array( $this, 'install_notice' ) );
 		}
 
@@ -60,18 +60,18 @@ class WC_Admin_Notices {
 			$template = get_option( 'template' );
 
 			if ( ! in_array( $template, wc_get_core_supported_themes() ) ) {
-				wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/styles/activation.css', array(), WC_VERSION );
+				wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
 				add_action( 'admin_notices', array( $this, 'theme_support_notice' ) );
 			}
 		}
 
 		if ( in_array( 'template_files', $notices ) ) {
-			wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/styles/activation.css', array(), WC_VERSION );
+			wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
 			add_action( 'admin_notices', array( $this, 'template_file_check_notice' ) );
 		}
 
 		if ( in_array( 'translation_upgrade', $notices ) ) {
-			wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/styles/activation.css', array(), WC_VERSION );
+			wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
 			add_action( 'admin_notices', array( $this, 'translation_upgrade_notice' ) );
 		}
 
