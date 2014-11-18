@@ -6,9 +6,9 @@
  *
  * Adapted from code in EDD (Copyright (c) 2012, Pippin Williamson) and WP.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
 */
 
@@ -17,31 +17,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Welcome class.
+ * WC_Admin_Welcome class
  */
 class WC_Admin_Welcome {
 
-	private $plugin;
-
 	/**
-	 * __construct function.
-	 *
-	 * @access public
-	 * @return void
+	 * Hook in tabs.
 	 */
 	public function __construct() {
-		$this->plugin             = 'woocommerce/woocommerce.php';
-
 		add_action( 'admin_menu', array( $this, 'admin_menus') );
 		add_action( 'admin_head', array( $this, 'admin_head' ) );
 		add_action( 'admin_init', array( $this, 'welcome'    ) );
 	}
 
 	/**
-	 * Add admin menus/screens
-	 *
-	 * @access public
-	 * @return void
+	 * Add admin menus/screens.
 	 */
 	public function admin_menus() {
 		if ( empty( $_GET['page'] ) ) {
@@ -54,34 +44,28 @@ class WC_Admin_Welcome {
 		switch ( $_GET['page'] ) {
 			case 'wc-about' :
 				$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-about', array( $this, 'about_screen' ) );
-				add_action( 'admin_print_styles-'. $page, array( $this, 'admin_css' ) );
+				add_action( 'admin_print_styles-' . $page, array( $this, 'admin_css' ) );
 			break;
 			case 'wc-credits' :
 				$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-credits', array( $this, 'credits_screen' ) );
-				add_action( 'admin_print_styles-'. $page, array( $this, 'admin_css' ) );
+				add_action( 'admin_print_styles-' . $page, array( $this, 'admin_css' ) );
 			break;
 			case 'wc-translators' :
 				$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-translators', array( $this, 'translators_screen' ) );
-				add_action( 'admin_print_styles-'. $page, array( $this, 'admin_css' ) );
+				add_action( 'admin_print_styles-' . $page, array( $this, 'admin_css' ) );
 			break;
 		}
 	}
 
 	/**
 	 * admin_css function.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function admin_css() {
-		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), WC_VERSION );
+		wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
 	}
 
 	/**
 	 * Add styles just for this page, and remove dashboard page links.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function admin_head() {
 		remove_submenu_page( 'index.php', 'wc-about' );
@@ -206,10 +190,9 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Into text/links shown on all about pages.
+	 * Intro text/links shown on all about pages.
 	 *
 	 * @access private
-	 * @return void
 	 */
 	private function intro() {
 
@@ -224,12 +207,13 @@ class WC_Admin_Welcome {
 
 		<div class="about-text woocommerce-about-text">
 			<?php
-				if ( ! empty( $_GET['wc-installed'] ) )
+				if ( ! empty( $_GET['wc-installed'] ) ) {
 					$message = __( 'Thanks, all done!', 'woocommerce' );
-				elseif ( ! empty( $_GET['wc-updated'] ) )
+				} elseif ( ! empty( $_GET['wc-updated'] ) ) {
 					$message = __( 'Thank you for updating to the latest version!', 'woocommerce' );
-				else
+				} else {
 					$message = __( 'Thanks for installing!', 'woocommerce' );
+				}
 
 				printf( __( '%s WooCommerce %s is more powerful, stable and secure than ever before. We hope you enjoy using it.', 'woocommerce' ), $message, $major_version );
 			?>
@@ -323,6 +307,8 @@ class WC_Admin_Welcome {
 			</div>
 			<?php } ?>
 
+			<hr />
+
 			<div class="return-to-dashboard">
 				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'wc-settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>
 			</div>
@@ -331,7 +317,7 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Output the credits.
+	 * Output the credits screen.
 	 */
 	public function credits_screen() {
 		?>
@@ -347,7 +333,7 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Output the translators screen
+	 * Output the translators screen.
 	 */
 	public function translators_screen() {
 		?>
@@ -386,9 +372,8 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Render Contributors List
+	 * Render Contributors List.
 	 *
-	 * @access public
 	 * @return string $contributor_list HTML formatted list of contributors.
 	 */
 	public function contributors() {
@@ -421,7 +406,6 @@ class WC_Admin_Welcome {
 	/**
 	 * Retrieve list of contributors from GitHub.
 	 *
-	 * @access public
 	 * @return mixed
 	 */
 	public function get_contributors() {
@@ -449,13 +433,13 @@ class WC_Admin_Welcome {
 	}
 
 	/**
-	 * Sends user to the welcome page on first activation
+	 * Sends user to the welcome page on first activation.
 	 */
 	public function welcome() {
 		// Bail if no activation redirect transient is set
-	    if ( ! get_transient( '_wc_activation_redirect' ) ) {
+		if ( ! get_transient( '_wc_activation_redirect' ) ) {
 			return;
-	    }
+		}
 
 		// Delete the redirect transient
 		delete_transient( '_wc_activation_redirect' );
