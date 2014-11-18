@@ -10,20 +10,7 @@
 @import "bourbon";
 @import "mixins";
 @import "variables";
-
-/**
- * Custom WooCommerce font
- */
-@font-face {
-	font-family: 'WooCommerce';
-	src: url('../fonts/WooCommerce.eot');
-	src: url('../fonts/WooCommerce.eot?#iefix') format('embedded-opentype'),
-		url('../fonts/WooCommerce.woff') format('woff'),
-		url('../fonts/WooCommerce.ttf') format('truetype'),
-		url('../fonts/WooCommerce.svg#WooCommerce') format('svg');
-	font-weight: normal;
-	font-style: normal;
-}
+@import "fonts";
 
 /**
  * Mixins
