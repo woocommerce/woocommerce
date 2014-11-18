@@ -1,12 +1,14 @@
-/* =Imports
--------------------------------------------------------------- */
+/**
+ * Imports
+ */
 @import "bourbon";
 @import "mixins";
 @import "variables";
 @import "animation";
 
-/* =Custom Font
--------------------------------------------------------------- */
+/**
+ * Custom WooCommerce font
+ */
 @font-face {
 	font-family: 'star';
 	src: url('../fonts/star.eot');
@@ -29,8 +31,9 @@
 	font-style: normal;
 }
 
-/* =Global styles/layout
--------------------------------------------------------------- */
+/**
+ * Global styles
+ */
 p.demo_store {
 	position: fixed;
 	top: 0;
@@ -47,15 +50,15 @@ p.demo_store {
 	box-shadow: 0 1px 1em rgba(0,0,0,0.2);
 }
 
-.admin-bar { // Styles applied when the admin bar is present
+.admin-bar {
 	p.demo_store {
 		top: 32px;
 	}
 }
 
-/* =Utilities
--------------------------------------------------------------- */
-.wc-forward,
+/**
+ * Utility classes
+ */
 .wc-forward a {
 	&:after {
 		@include dashiconafter( "\f344" );
@@ -75,8 +78,9 @@ p.demo_store {
 	clear: both;
 }
 
-/* =Main Styles (namespace to avoid conflict with common global class names)
--------------------------------------------------------------- */
+/**
+ * Main WooCommerce styles
+ */
 .woocommerce {
 	.blockUI.blockOverlay {
 		@include loader();
@@ -182,21 +186,19 @@ p.demo_store {
 		}
 	}
 
-	/* =Product Page
-	-------------------------------------------------------------- */
-
+	/**
+	 * Product Page
+	 */
 	div.product {
 		margin-bottom: 0;
 		position: relative;
 
-		/* Main product title */
 		.product_title {
 			clear: none;
 			margin-top: 0;
 			padding: 0;
 		}
 
-		/* Price */
 		span.price,
 		p.price {
 			color: $highlight;
@@ -213,7 +215,6 @@ p.demo_store {
 			}
 		}
 
-		/* Stock */
 		p.stock {
 			font-size: 0.92em;
 		}
@@ -226,12 +227,10 @@ p.demo_store {
 			color: red;
 		}
 
-		/* Star rating */
 		.woocommerce-product-rating{
 			margin-bottom: 1.618em;
 		}
 
-		/* Product image and thumbnail */
 		div.images {
 			margin-bottom: 2em;
 
@@ -247,12 +246,10 @@ p.demo_store {
 			}
 		}
 
-		/* Summary div (contains title, price etc) */
 		div.summary {
 			margin-bottom: 2em;
 		}
 
-		/* Social networking */
 		div.social {
 			text-align: right;
 			margin: 0 0 1em;
@@ -276,7 +273,6 @@ p.demo_store {
 			}
 		}
 
-		/* Tabs on the product page */
 		.woocommerce-tabs {
 			ul.tabs {
 				list-style: none;
@@ -373,13 +369,11 @@ p.demo_store {
 			}
 		}
 
-		/* Cart button */
 		p.cart {
 			margin-bottom: 2em;
 			@include clearfix();
 		}
 
-		/* add to cart forms */
 		form.cart {
 			margin-bottom: 2em;
 			@include clearfix();
@@ -448,7 +442,6 @@ p.demo_store {
 		}
 	}
 
-	/* Sale labels */
 	span.onsale {
 		min-height: 3.236em;
 		min-width: 3.236em;
@@ -468,9 +461,9 @@ p.demo_store {
 		-webkit-font-smoothing: antialiased;
 	}
 
-	/* =Product Loops
-	-------------------------------------------------------------- */
-
+	/**
+	 * Product loops
+	 */
 	.products ul,
 	ul.products {
 		margin: 0 0 1em;
@@ -606,9 +599,9 @@ p.demo_store {
 		}
 	}
 
-	/* =Buttons
-	-------------------------------------------------------------- */
-
+	/**
+	 * Buttons
+	 */
 	a.button,
 	button.button,
 	input.button,
@@ -716,9 +709,9 @@ p.demo_store {
 		display: inline-block;
 	}
 
-	/* =Quantity inputs
-	-------------------------------------------------------------- */
-
+	/**
+	 * Quantity inputs
+	 */
 	.quantity {
 		position: relative;
 		margin: 0 auto;
@@ -786,8 +779,9 @@ p.demo_store {
 		}
 	}
 
-	/* =Reviews/comments
-	-------------------------------------------------------------- */
+	/**
+	 * Reviews
+	 */
 	#reviews {
 		h2 small {
 			float: right;
@@ -898,7 +892,9 @@ p.demo_store {
 		}
 	}
 
-	/* Star rating */
+	/**
+	 * Star ratings
+	 */
 	.star-rating {
 		float: right;
 		overflow: hidden;
@@ -1087,9 +1083,9 @@ p.demo_store {
 		}
 	}
 
-	/* =Tables
-	-------------------------------------------------------------- */
-
+	/**
+	 * Tables
+	 */
 	table.shop_attributes {
 		border: 0;
 		border-top: 1px dotted rgba(0,0,0,0.1);
@@ -1225,9 +1221,10 @@ p.demo_store {
 		min-width: 80px;
 	}
 
-	/* =Cart Sidebar
-	-------------------------------------------------------------- */
 
+	/**
+	 * Cart sidebar
+	 */
 	ul.cart_list,
 	ul.product_list_widget {
 		list-style: none outside;
@@ -1319,9 +1316,9 @@ p.demo_store {
 		}
 	}
 
-	/* =Forms
-	-------------------------------------------------------------- */
-
+	/**
+	 * Forms
+	 */
 	form {
 		.form-row {
 			padding: 3px;
@@ -1445,9 +1442,9 @@ p.demo_store {
 		margin: 0;
 	}
 
-	/* =Order Page
-	-------------------------------------------------------------- */
-
+	/**
+	 * Order page
+	 */
 	.order_details {
 		@include clearfix();
 		margin: 0 0 1.5em;
@@ -1475,9 +1472,9 @@ p.demo_store {
 		}
 	}
 
-	/* =Layered Nav Widget
-	-------------------------------------------------------------- */
-
+	/**
+	 * Layered nav widget
+	 */
 	.widget_layered_nav {
 		ul {
 			margin: 0;
@@ -1531,9 +1528,9 @@ p.demo_store {
 		}
 	}
 
-	/* =Price Filter Widget
-	-------------------------------------------------------------- */
-
+	/**
+	 * Price filter widget
+	 */
 	.widget_price_filter {
 		.price_slider {
 			margin-bottom: 1em;
@@ -1607,10 +1604,11 @@ p.demo_store {
 			right: -1px;
 		}
 	}
-} // end .woocommerce namespacing wrap
+}
 
-/* =Account Page
--------------------------------------------------------------- */
+/**
+ * Account page
+ */
 .woocommerce-account {
 	.addresses {
 		.title {
@@ -1659,10 +1657,11 @@ p.demo_store {
 			}
 		}
 	}
-} // end .woocommerce-account namespacing wrap
+}
 
-/* =Cart Page
--------------------------------------------------------------- */
+/**
+ * Cart page
+ */
 .woocommerce-cart {
 	table.cart {
 		.product-thumbnail {
@@ -1793,10 +1792,11 @@ p.demo_store {
 			}
 		}
 	}
-} // end .woocommerce-cart namespacing wrap
+}
 
-/* =Checkout
--------------------------------------------------------------- */
+/**
+ * Checkout
+ */
 .woocommerce-checkout {
 	.checkout {
 		.col-2 {
@@ -1831,7 +1831,6 @@ p.demo_store {
 		}
 	}
 
-	/* Payment box - appears on checkout and page page */
 	#payment {
 		background: $secondary;
 		border-radius: 5px;
@@ -1981,10 +1980,11 @@ p.demo_store {
 			}
 		}
 	}
-} // end .woocommerce-checkout namespacing wrap
+}
 
-/* =Twenty Eleven Specific styles
--------------------------------------------------------------- */
+/**
+ * Twenty Eleven specific styles
+ */
 #content.twentyeleven {
 	.woocommerce-pagination {
 		a {
@@ -1994,8 +1994,9 @@ p.demo_store {
 	}
 }
 
-/* =Twenty Thirteen Specific styles
--------------------------------------------------------------- */
+/**
+ * Twenty Thirteen specific styles
+ */
 .single-product {
 	.twentythirteen {
 		.entry-summary,
@@ -2016,8 +2017,9 @@ p.demo_store {
 	}
 }
 
-/* =Twenty Fourteen Specific styles
--------------------------------------------------------------- */
+/**
+ * Twenty Fourteen specific styles
+ */
 .twentyfourteen {
 	ul.products {
 		li.product {
