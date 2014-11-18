@@ -94,10 +94,10 @@ class WC_Customer {
 	}
 
 	/**
-	 * Get default country for a customer
-	 * @return string
+	 * Get default location
+	 * @return array
 	 */
-	public function get_default_country() {
+	public function get_default_location() {
 		$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
 
 		if ( strstr( $default, ':' ) ) {
@@ -107,7 +107,20 @@ class WC_Customer {
 			$state   = '';
 		}
 
-		return $country;
+		return array(
+			'country' => $country,
+			'state'   => $state
+		);
+	}
+
+	/**
+	 * Get default country for a customer
+	 * @return string
+	 */
+	public function get_default_country() {
+		$default = $this->get_default_location();
+
+		return $default['country'];
 	}
 
 	/**
@@ -115,16 +128,9 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_default_state() {
-		$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
+		$default = $this->get_default_location();
 
-		if ( strstr( $default, ':' ) ) {
-			list( $country, $state ) = explode( ':', $default );
-		} else {
-			$country = $default;
-			$state   = '';
-		}
-
-		return $state;
+		return $default['state'];
 	}
 
 	/**
