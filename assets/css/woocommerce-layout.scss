@@ -1,14 +1,15 @@
-/* =Imports
--------------------------------------------------------------- */
+/**
+ * Imports
+ */
 @import "bourbon";
 @import "mixins";
 @import "variables";
 
 .woocommerce, .woocommerce-page {
 
-	/* =General Layout Styles
-	-------------------------------------------------------------- */
-
+	/**
+	 * General layout styles
+	 */
 	.col2-set {
 		@include clearfix();
 		width: 100%;
@@ -28,9 +29,9 @@
 		max-width: 100%;
 	}
 
-	/* =Product Page
-	-------------------------------------------------------------- */
-
+	/**
+	 * Product page
+	 */
 	div.product,
 	#content div.product {
 		div.images {
@@ -88,7 +89,6 @@
 			width: 48%;
 		}
 
-		/* Tabs on the product page */
 		.woocommerce-tabs {
 			clear: both;
 
@@ -106,16 +106,15 @@
 
 	#quantity,
 	#content .quantity {
-		/* Disable input[type=number] buttons until the world is ready */
 		input::-webkit-outer-spin-button,
 		input::-webkit-inner-spin-button {
 			display: none;
 		}
 	}
 
-	/* =Product Loops
-	-------------------------------------------------------------- */
-
+	/**
+	 * Product loops
+	 */
 	.related,
 	.upsells.products {
 		@include clearfix();
@@ -212,9 +211,9 @@
 		}
 	}
 
-	/* =Cart Page
-	-------------------------------------------------------------- */
-
+	/**
+	 * Cart page
+	 */
 	table.cart,
 	#content table.cart {
 		img {
@@ -280,9 +279,9 @@
 		}
 	}
 
-	/* =Cart Sidebar
-	-------------------------------------------------------------- */
-
+	/**
+	 * Cart sidebar
+	 */
 	ul.cart_list,
 	ul.product_list_widget {
 		li {
@@ -290,9 +289,9 @@
 		}
 	}
 
-	/* =Forms
-	-------------------------------------------------------------- */
-
+	/**
+	 * Forms
+	 */
 	form {
 		.form-row {
 			@include clearfix();
@@ -349,8 +348,9 @@
 	}
 }
 
-/* =Twenty Fourteen Specific styles
--------------------------------------------------------------- */
+/**
+ * Twenty Fourteen specific styles
+ */
 .twentyfourteen {
 	.tfwc {
 		padding: 12px 10px 0;
