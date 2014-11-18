@@ -4,6 +4,8 @@ filter:
     - apigen/*
     - includes/api/v1/*
     - includes/libraries/*
+    - includes/gateways/mijireh/includes/*
+    - includes/gateways/simplify-commerce/includes/*
 
 checks:
   php:
