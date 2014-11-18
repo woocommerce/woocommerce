@@ -1,9 +1,13 @@
-/* =Imports
--------------------------------------------------------------- */
+/**
+ * Imports
+ */
 @import "bourbon";
 @import "mixins";
 @import "variables";
 
+/**
+ * Custom WooCommerce font
+ */
 @font-face {
 	font-family: 'WooCommerce';
 	src: url('../fonts/WooCommerce.eot');
@@ -15,6 +19,9 @@
 	font-style: normal;
 }
 
+/**
+ * Styling begins
+ */
 ul.woocommerce_stats {
 	overflow: hidden;
 	zoom: 1;

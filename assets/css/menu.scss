@@ -1,10 +1,13 @@
-/* =Imports
--------------------------------------------------------------- */
+/**
+ * Imports
+ */
 @import "bourbon";
 @import "mixins";
 @import "variables";
 
-/* Icon Font */
+/**
+ * Custom WooCommerce font
+ */
 @font-face {
 	font-family: 'WooCommerce';
 	src:url('../fonts/WooCommerce.eot');
@@ -16,7 +19,6 @@
 	font-style: normal;
 }
 
-/* Menu Icons */
 #adminmenu #toplevel_page_woocommerce .menu-icon-generic div.wp-menu-image:before {
 	font-family: 'WooCommerce' !important;
 	content: "\e03d";

@@ -1,13 +1,16 @@
-/* =Imports
--------------------------------------------------------------- */
+/**
+ * Imports
+ */
 @import "bourbon";
 @import "mixins";
 @import "variables";
 @import "animation";
+@import "chosen";
 
 
-/* =Custom Font
--------------------------------------------------------------- */
+/**
+ * Custom WooCommerce font
+ */
 @font-face {
 	font-family: 'WooCommerce';
 	src: url('../fonts/WooCommerce.eot');
@@ -19,11 +22,13 @@
 	font-style: normal;
 }
 
+/**
+ * Styling begins
+ */
 .blockUI.blockOverlay {
 	@include loader();
 }
 
-/* Addons */
 .wc_addons_wrap {
 	.products {
 		overflow: hidden;
@@ -89,9 +94,6 @@
 	}
 }
 
-
-/* =Styles
--------------------------------------------------------------- */
 .woocommerce-message {
 	position: relative;
 	border-left-color: #cc99c2 !important;
@@ -168,7 +170,6 @@ mark.amount {
 	}
 }
 
-/* Status page */
 table.wc_status_table {
 	margin-bottom: 1em;
 
@@ -258,7 +259,6 @@ table.wc_status_table {
 	}
 }
 
-/* Bulk/Quick edit */
 .inline-edit-product.quick-edit-row {
 	.inline-edit-col-center,
 	.inline-edit-col-right {
@@ -293,9 +293,7 @@ table.wc_status_table {
 	}
 
 	.text {
-		-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-		-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-		box-sizing: border-box;         /* Opera/IE 8+ */
+		@include box-sizing(border-box);
 		width: 99%;
 		float: left;
 		margin: 1px 1% 1px 1px;
@@ -340,7 +338,6 @@ table.wc_status_table {
 	}
 }
 
-/* Coupon Lists */
 .column-coupon_code {
 	line-height: 2.25em;
 }
@@ -376,8 +373,6 @@ ul.wc_coupon_list_block {
 	}
 }
 
-
-/* Orders */
 .button.wc-reload {
 	@include ir();
 	padding: 0;
@@ -899,9 +894,7 @@ ul.wc_coupon_list_block {
 
 				input {
 					width: 100%;
-					-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-					-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-					box-sizing: border-box;         /* Opera/IE 8+ */
+					@include box-sizing(border-box);
 					border: 0;
 					box-shadow: none;
 					margin: 0;
@@ -1535,7 +1528,6 @@ ul.order_notes {
 	}
 }
 
-/* Product / Order list */
 table.wp-list-table {
 	.column-thumb {
 		width: 52px;
@@ -1734,7 +1726,6 @@ table.wp-list-table {
 	}
 }
 
-/* Settings */
 mark.notice {
 	background: #fff;
 	color: $red;
@@ -2122,7 +2113,6 @@ img.help_tip {
 	float: left;
 }
 
-/* Write Panels */
 #wp-excerpt-editor-container {
 	background: #fff;
 }
@@ -2295,7 +2285,6 @@ img.help_tip {
 	}
 }
 
-/* Tabs and panels */
 #woocommerce-coupon-description {
 	padding: 3px 8px;
 	font-size: 1.7em;
@@ -2816,7 +2805,9 @@ img.help_tip {
 	color: #666;
 }
 
-/* WC Metabox Panels - used for attributes, download permissions etc */
+/**
+ * WooCommerce meta boxes
+ */
 .wc-metaboxes-wrapper {
 	.toolbar {
 		margin: 0 !important;
@@ -3026,7 +3017,6 @@ img.help_tip {
 	}
 }
 
-/* Configuration */
 .woocommerce_variable_attributes {
 	background-color: #fdfdfd;
 	border-top: 1px solid #eee;
@@ -3132,7 +3122,9 @@ img.help_tip {
 	clear: both;
 }
 
-/* Tooltips */
+/**
+ * Tooltips
+ */
 .tips {
 	cursor: help;
 	text-decoration: none;
@@ -3142,7 +3134,6 @@ img.tips {
 	padding: 5px 0 0 0;
 }
 
-/* TipTip CSS - Version 1.2 (custom) */
 #tiptip_holder {
 	display: none;
 	position: absolute;
@@ -3245,7 +3236,9 @@ img.tips {
 	}
 }
 
-/* Datepicker */
+/**
+ * Date picker
+ */
 img.ui-datepicker-trigger {
 	vertical-align: middle;
 	margin-top: -1px;
@@ -3264,7 +3257,9 @@ img.ui-datepicker-trigger {
 	display: none
 }
 
-/* Reports */
+/**
+ * Reports
+ */
 .woocommerce-reports-wrap,
 .woocommerce-reports-wide {
 	&.woocommerce-reports-wrap {
@@ -3719,14 +3714,12 @@ form.report_filters {
 	}
 }
 
-/* Chart tooltips */
 .chart-tooltip {
 	position: absolute;
 	display: none;
 	line-height: 1;
 }
 
-/* Custom charts */
 table.bar_chart {
 	width: 100%;
 
@@ -3799,8 +3792,9 @@ table.bar_chart {
 	}
 }
 
-/* Chosen multiselect enhancement
-----------------------------------*/
+/**
+ * Chosen
+ */
 .chosen-container-single .chosen-single {
 	height: 26px;
 	line-height: 26px;
@@ -3842,7 +3836,15 @@ table.bar_chart {
 	}
 }
 
-// Small screen optimisation
+.chosen-container-single .chosen-single {
+	abbr {
+		top: 8px;
+	}
+}
+
+/**
+ * Small screen optimisation
+ */
 @media only screen and (max-width: 1280px) {
 	.woocommerce_options_panel .chosen-container-multi {
 		width: 80% !important;
@@ -3905,6 +3907,9 @@ table.bar_chart {
 	}
 }
 
+/**
+ * Optimisation for screens 900px and smaller
+ */
 @media only screen and (max-width: 900px) {
 
 	#woocommerce-product-data ul.product_data_tabs,
@@ -3939,6 +3944,9 @@ table.bar_chart {
 	}
 }
 
+/**
+ * Optimisation for screens 782px and smaller
+ */
 @media only screen and (max-width: 782px) {
 	#wp-excerpt-media-buttons a {
 		font-size: 16px;
@@ -3974,16 +3982,9 @@ table.bar_chart {
 	}
 }
 
-@import 'chosen';
-
-.chosen-container-single .chosen-single {
-	abbr {
-		top: 8px;
-	}
-}
-
-/* Backbone modal dialog
-----------------------------------*/
+/**
+ * Backbone modal dialog
+ */
 .wc-backbone-modal {
 	position: fixed;
 	top: 0;
