@@ -112,31 +112,11 @@ class WC_Customer {
 	}
 
 	/**
-	 * Get default location
-	 * @return array
-	 */
-	public function get_default_location() {
-		$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
-
-		if ( strstr( $default, ':' ) ) {
-			list( $country, $state ) = explode( ':', $default );
-		} else {
-			$country = $default;
-			$state   = '';
-		}
-
-		return array(
-			'country' => $country,
-			'state'   => $state
-		);
-	}
-
-	/**
 	 * Get default country for a customer
 	 * @return string
 	 */
 	public function get_default_country() {
-		$default = $this->get_default_location();
+		$default = wc_get_default_location();
 
 		return $default['country'];
 	}
@@ -146,7 +126,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_default_state() {
-		$default = $this->get_default_location();
+		$default = wc_get_default_location();
 
 		return $default['state'];
 	}
@@ -190,7 +170,7 @@ class WC_Customer {
 
 		if ( $country ) {
 
-			$default = $this->get_default_location();
+			$default = wc_get_default_location();
 
 			if ( $default['country'] !== $country ) {
 				return true;
@@ -349,7 +329,7 @@ class WC_Customer {
 
 		if ( $tax_based_on == 'base' ) {
 
-			$default = $this->get_default_location();
+			$default = wc_get_default_location();
 
 			$country  = $default['country'];
 			$state    = $default['state'];

@@ -680,3 +680,25 @@ function wc_deliver_webhook_async( $webhook_id, $arg ) {
 	$webhook->deliver( $arg );
 }
 add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
+
+/**
+ * Get the default location
+ *
+ * @since 2.3.0
+ * @return array
+ */
+function wc_get_default_location() {
+	$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
+
+	if ( strstr( $default, ':' ) ) {
+		list( $country, $state ) = explode( ':', $default );
+	} else {
+		$country = $default;
+		$state   = '';
+	}
+
+	return array(
+		'country' => $country,
+		'state'   => $state
+	);
+}

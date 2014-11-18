@@ -512,36 +512,31 @@ abstract class WC_Abstract_Order {
 	 */
 	public function calculate_taxes() {
 
-		$tax_total          = 0;
-		$taxes              = array();
-		$tax_based_on       = get_option( 'woocommerce_tax_based_on' );
+		$tax_total    = 0;
+		$taxes        = array();
+		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		if ( 'base' === $tax_based_on ) {
 
-			$default  = get_option( 'woocommerce_default_country' );
+			$default  = wc_get_default_location();
+			$country  = $default['country'];
+			$state    = $default['state'];
 			$postcode = '';
 			$city     = '';
 
-			if ( strstr( $default, ':' ) ) {
-				list( $country, $state ) = explode( ':', $default );
-			} else {
-				$country = $default;
-				$state   = '';
-			}
-
 		} elseif ( 'billing' === $tax_based_on ) {
 
-			$country 	= $this->billing_country;
-			$state 		= $this->billing_state;
-			$postcode   = $this->billing_postcode;
-			$city   	= $this->billing_city;
+			$country  = $this->billing_country;
+			$state    = $this->billing_state;
+			$postcode = $this->billing_postcode;
+			$city     = $this->billing_city;
 
 		} else {
 
-			$country 	= $this->shipping_country;
-			$state 		= $this->shipping_state;
-			$postcode   = $this->shipping_postcode;
-			$city   	= $this->shipping_city;
+			$country  = $this->shipping_country;
+			$state    = $this->shipping_state;
+			$postcode = $this->shipping_postcode;
+			$city     = $this->shipping_city;
 
 		}
 
