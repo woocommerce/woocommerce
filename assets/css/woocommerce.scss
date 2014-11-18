@@ -679,22 +679,28 @@ p.demo_store {
 				background-color: $primary - #111;
 				color: $primarytext;
 			}
+
+			&.disabled,
+			&:disabled,
+			&:disabled[disabled],
+			&.disabled:hover,
+			&:disabled:hover,
+			&:disabled[disabled]:hover {
+				background-color: $primary;
+				color: $primarytext;
+			}
 		}
 
 		&:disabled,
-		&.disabled {
-			color: lighten( $secondarytext, 30% );
-			border: 1px solid darken( $secondary, 10% );
-
-			background: $secondary;
-			-webkit-box-shadow: none;
-			-moz-box-shadow: none;
-			box-shadow: none;
-
+		&.disabled,
+		&:disabled[disabled] {
+			color: inherit;
 			cursor: not-allowed;
+			opacity: 0.5;
 
-			&:active {
-				top: 0;
+			&:hover {
+				color: inherit;
+				background-color: $secondary;
 			}
 		}
 	}
