@@ -709,6 +709,19 @@ class WC_Cart {
 		}
 
 		/**
+		 * Returns a specific itme in the cart
+		 *
+		 * @return array item data
+		 */
+		public function get_cart_item( $item_key ) {
+			if ( isset( $this->cart_contents[ $item_key ] ) ) {
+				return $this->cart_contents[ $item_key ];
+			}
+
+			return false;
+		}
+
+		/**
 		 * Returns the cart and shipping taxes, merged.
 		 *
 		 * @return array merged taxes
