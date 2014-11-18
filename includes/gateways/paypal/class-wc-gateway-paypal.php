@@ -26,8 +26,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->id                 = 'paypal';
 		$this->has_fields         = false;
 		$this->order_button_text  = __( 'Proceed to PayPal', 'woocommerce' );
-		$this->liveurl            = 'https://www.paypal.com/cgi-bin/webscr';
-		$this->testurl            = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 		$this->method_title       = __( 'PayPal', 'woocommerce' );
 		$this->method_description = __( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' );
 		$this->notify_url         = WC()->api_request_url( 'WC_Gateway_Paypal' );
@@ -56,6 +54,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->api_username 	= $this->get_option( 'api_username' );
 		$this->api_password 	= $this->get_option( 'api_password' );
 		$this->api_signature 	= $this->get_option( 'api_signature' );
+
+		if ( 'yes' == $this->testmode ) {
+			$this->endpoint = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+		} else {
+			$this->endpoint = 'https://www.paypal.com/cgi-bin/webscr';
+		}
 
 		// Actions
 		add_action( 'valid-paypal-standard-ipn-request', array( $this, 'successful_request' ) );
@@ -440,11 +444,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order       = wc_get_order( $order_id );
 		$paypal_args = $this->get_paypal_args( $order );
 		$paypal_args = http_build_query( $paypal_args, '', '&' );
+		$paypal_adr  = $this->endpoint . '?';
 
 		if ( 'yes' == $this->testmode ) {
-			$paypal_adr = $this->testurl . '?test_ipn=1&';
-		} else {
-			$paypal_adr = $this->liveurl . '?';
+			$paypal_adr .= 'test_ipn=1&';
 		}
 
 		return array(
@@ -525,14 +528,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Check PayPal IPN validity
 	 **/
 	public function check_ipn_request_is_valid( $ipn_response ) {
-		// Get url
-		if ( 'yes' == $this->testmode ) {
-			$paypal_adr = $this->testurl;
-		} else {
-			$paypal_adr = $this->liveurl;
-		}
-
-		$this->log( 'Checking IPN response is valid via ' . $paypal_adr . '...' );
+		$this->log( 'Checking IPN response is valid via ' . $this->endpoint . '...' );
 
 		// Get received values from post data
 		$validate_ipn = array( 'cmd' => '_notify-validate' );
@@ -552,7 +548,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->log->add( 'IPN Request: ' . print_r( $params, true ) );
 
 		// Post back to get a response
-		$response = wp_remote_post( $paypal_adr, $params );
+		$response = wp_remote_post( $this->endpoint, $params );
 
 		$this->log( 'IPN Response: ' . print_r( $response, true ) );
 
@@ -777,12 +773,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				case 'completed' :
 
 					// Validate transaction
-					if ( 'yes' == $this->testmode ) {
-						$paypal_adr = $this->testurl;
-					} else {
-						$paypal_adr = $this->liveurl;
-					}
-
 					$pdt = array(
 						'body' 			=> array(
 							'cmd' => '_notify-synch',
@@ -796,7 +786,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					);
 
 					// Post back to get a response
-					$response = wp_remote_post( $paypal_adr, $pdt );
+					$response = wp_remote_post( $this->endpoint, $pdt );
 
 					if ( is_wp_error( $response ) ) {
 						return false;
@@ -889,7 +879,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_transaction_url( $order ) {
-
 		if ( 'yes' == $this->testmode ) {
 			$this->view_transaction_url = 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=%s';
 		} else {
