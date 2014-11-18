@@ -94,7 +94,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$meta['meta_value'] = ( isset( $term->name ) ) ? $term->name : $meta['meta_value'];
 						}
 
-						echo '<tr><th>' . wp_kses_post( urldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( urldecode( $meta['meta_value'] ) ) ) . '</td></tr>';
+						echo '<tr><th>' . wp_kses_post( urldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( make_clickable( $meta['meta_value'] ) ) ) . '</td></tr>';
 					}
 					echo '</table>';
 				}

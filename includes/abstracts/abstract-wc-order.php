@@ -1070,7 +1070,7 @@ abstract class WC_Abstract_Order {
 					if ( '_' === substr( $name, 0, 1 ) ) {
 						$items[ $item->order_item_id ][ substr( $name, 1 ) ] = $value[0];
 					} elseif ( ! in_array( $name, $reserved_item_meta_keys ) ) {
-						$items[ $item->order_item_id ][ $name ] = $value[0];
+						$items[ $item->order_item_id ][ $name ] = make_clickable( $value[0] );
 					}
 				}
 			}
