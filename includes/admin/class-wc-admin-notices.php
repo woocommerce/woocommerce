@@ -29,7 +29,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Reset notices for themes when switched or a new version of WC is installed
+	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public function reset_admin_notices() {
 		update_option( 'woocommerce_admin_notices', array( 'template_files', 'theme_support' ) );
@@ -40,7 +40,7 @@ class WC_Admin_Notices {
 	 */
 	public function add_notices() {
 		if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_needs_pages' ) == 1 ) {
-			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+			wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
 			add_action( 'admin_notices', array( $this, 'install_notice' ) );
 		}
 
@@ -60,18 +60,18 @@ class WC_Admin_Notices {
 			$template = get_option( 'template' );
 
 			if ( ! in_array( $template, wc_get_core_supported_themes() ) ) {
-				wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
-				add_action( 'admin_notices', array( $this, 'theme_check_notice' ) );
+				wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
+				add_action( 'admin_notices', array( $this, 'theme_support_notice' ) );
 			}
 		}
 
 		if ( in_array( 'template_files', $notices ) ) {
-			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+			wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
 			add_action( 'admin_notices', array( $this, 'template_file_check_notice' ) );
 		}
 
 		if ( in_array( 'translation_upgrade', $notices ) ) {
-			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+			wp_enqueue_style( 'woocommerce-activation', WC()->plugin_url() . '/assets/css/activation.css', array(), WC_VERSION );
 			add_action( 'admin_notices', array( $this, 'translation_upgrade_notice' ) );
 		}
 
@@ -81,29 +81,29 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Show the install notices
+	 * Show the install notices.
 	 */
 	public function install_notice() {
-		// If we need to update, include a message with the update button
+		// If we need to update, include a message with the update button.
 		if ( get_option( '_wc_needs_update' ) == 1 ) {
 			include( 'views/html-notice-update.php' );
 		}
 
-		// If we have just installed, show a message with the install pages button
+		// If we have just installed, show a message with the install pages button.
 		elseif ( get_option( '_wc_needs_pages' ) == 1 ) {
 			include( 'views/html-notice-install.php' );
 		}
 	}
 
 	/**
-	 * Show the Theme Check notice
+	 * Show the Theme Support notice.
 	 */
-	public function theme_check_notice() {
+	public function theme_support_notice() {
 		include( 'views/html-notice-theme-support.php' );
 	}
 
 	/**
-	 * Show the translation upgrade notice
+	 * Show the Translation Upgrade notice.
 	 */
 	public function translation_upgrade_notice() {
 		$screen = get_current_screen();
@@ -114,7 +114,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Show a notice highlighting bad template files
+	 * Show a notice highlighting bad template files.
 	 */
 	public function template_file_check_notice() {
 		if ( isset( $_GET['page'] ) && 'wc-status' == $_GET['page'] ) {
