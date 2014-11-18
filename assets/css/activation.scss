@@ -1,7 +1,16 @@
-/* =Imports
--------------------------------------------------------------- */
+/**
+ * activation.scss
+ * Styles applied to elements displayed on activation
+ */
+
+/**
+ * Imports
+ */
 @import "bourbon";
 
+/**
+ * Styling begins
+ */
 .woocommerce-message {
 	position: relative;
 	border-left-color: #cc99c2 !important;

@@ -1,10 +1,18 @@
 /**
+ * woocommerce-layout.scss
+ * Applies layout to the default WooCommerce frontend design
+ */
+
+/**
  * Imports
  */
 @import "bourbon";
 @import "mixins";
 @import "variables";
 
+/**
+ * Styling begins
+ */
 .woocommerce, .woocommerce-page {
 
 	/**
