@@ -2,12 +2,16 @@
  * This stylesheet optimises the default WooCommerce layout when viewed on smaller screens.
  */
 
-/* =Imports
--------------------------------------------------------------- */
+/**
+ * Imports
+ */
 @import "bourbon";
 @import "mixins";
 @import "variables";
 
+/**
+ * Style begins
+ */
 .woocommerce,
 .woocommerce-page {
 
@@ -188,8 +192,9 @@
 	}
 }
 
-/* =Twenty Thirteen Specific styles
--------------------------------------------------------------- */
+/**
+ * Twenty Thirteen specific styles
+ */
 .single-product {
 	.twentythirteen {
 		.panel {
