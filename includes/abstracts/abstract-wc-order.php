@@ -512,7 +512,6 @@ abstract class WC_Abstract_Order {
 	 */
 	public function calculate_taxes() {
 
-		$shipping_tax_total = 0;
 		$tax_total          = 0;
 		$taxes              = array();
 		$tax_based_on       = get_option( 'woocommerce_tax_based_on' );
@@ -2381,14 +2380,13 @@ abstract class WC_Abstract_Order {
 		// stock status notifications
 		$notification_sent = false;
 
-		if ( 'yes' == get_option( 'woocommerce_notify_no_stock' ) && get_option('woocommerce_notify_no_stock_amount') >= $new_stock ) {
+		if ( 'yes' == get_option( 'woocommerce_notify_no_stock' ) && get_option( 'woocommerce_notify_no_stock_amount' ) >= $new_stock ) {
 			do_action( 'woocommerce_no_stock', $product );
 			$notification_sent = true;
 		}
 
-		if ( ! $notification_sent && 'yes' == get_option( 'woocommerce_notify_low_stock' ) && get_option('woocommerce_notify_low_stock_amount') >= $new_stock ) {
+		if ( ! $notification_sent && 'yes' == get_option( 'woocommerce_notify_low_stock' ) && get_option( 'woocommerce_notify_low_stock_amount' ) >= $new_stock ) {
 			do_action( 'woocommerce_low_stock', $product );
-			$notification_sent = true;
 		}
 	}
 
