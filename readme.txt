@@ -149,7 +149,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added tool to refresh stats to customer list.
 * Tweak - Recent order table on my account is responsive.
 * Tweak - Drop WC tables in wpmu_drop_tables (for multisite).
+* Tweak - Removed quantity increment/decrement buttons.
 * Dev - Made template debug mode set WC_TEMPLATE_DEBUG_MODE constant and remove all overrides for all template loading functions.
+* Dev - Switched to .scss from .less for all styles.
 * Localisation - Add Ukrainian currency and symbol.
 
 = 2.2.5 - 07/10/2014 =
