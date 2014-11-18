@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div id="message" class="updated woocommerce-message wc-connect">
-	<p><?php printf( __( '<strong>Your theme does not declare WooCommerce support</strong> &#8211; Please read our integration guide or check out our %s Storefront %s theme which is totally free to download and designed specifically for use with WooCommerce :)', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'theme-install.php?theme=highwind' ) ) . '">', '</a>' ); ?></p>
+	<p><?php printf( __( '<strong>Your theme does not declare WooCommerce support</strong> &#8211; Please read our integration guide or check out our %sStorefront%s theme which is totally free to download and designed specifically for use with WooCommerce :)', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'theme-install.php?theme=highwind' ) ) . '">', '</a>' ); ?></p>
 	<p class="submit">
 		<a href="http://woothemes.com/storefront" class="button-primary" target="_blank"><?php _e( 'Find out more about Storefront', 'woocommerce' ); ?></a>
 		<a href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/third-party-custom-theme-compatibility/', 'theme-compatibility' ) ); ?>" class="button"><?php _e( 'Theme integration guide', 'woocommerce' ); ?></a>
