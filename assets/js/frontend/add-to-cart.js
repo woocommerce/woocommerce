@@ -94,8 +94,6 @@ jQuery( function( $ ) {
 					// Cart page elements
 					$( '.shop_table.cart' ).load( this_page + ' .shop_table.cart:eq(0) > *', function() {
 
-						$( 'div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)' ).addClass( 'buttons_added' ).append( '<input type="button" value="+" id="add1" class="plus" />' ).prepend( '<input type="button" value="-" id="minus1" class="minus" />' );
-
 						$( '.shop_table.cart' ).stop( true ).css( 'opacity', '1' ).unblock();
 
 						$( 'body' ).trigger( 'cart_page_refreshed' );
