@@ -57,9 +57,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->api_signature 	= $this->get_option( 'api_signature' );
 
 		if ( 'yes' == $this->testmode ) {
-			$this->endpoint = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+			$this->endpoint        = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+			$this->refund_endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
 		} else {
-			$this->endpoint = 'https://www.paypal.com/cgi-bin/webscr';
+			$this->endpoint        = 'https://www.paypal.com/cgi-bin/webscr';
+			$this->refund_endpoint = 'https://api-3t.paypal.com/nvp';
 		}
 
 		// Actions
@@ -204,10 +206,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function paypal_item_name( $item_name ) {
-		if ( strlen( $item_name ) > 127 ) {
-			$item_name = substr( $item_name, 0, 124 ) . '...';
+		return $this->limit_string_length( $item_name, 127 );
+	}
+
+	/**
+	 * Limit the length of a string sent to paypal
+	 * @param  string  $string
+	 * @param  integer $length
+	 * @return string
+	 */
+	private function limit_string_length( $string, $length = 127 ) {
+		if ( strlen( $string ) > $length ) {
+			$item_name = substr( $string, 0, ( $length - 3 ) ) . '...';
 		}
-		return html_entity_decode( $item_name, ENT_NOQUOTES, 'UTF-8' );
+		return html_entity_decode( $string, ENT_NOQUOTES, 'UTF-8' );
 	}
 
 	/**
@@ -476,6 +488,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Can the order be refunded via paypal?
+	 * @param  WC_Order $order
+	 * @return bool
+	 */
+	public function can_refund_order( $order ) {
+		return $order && $order->get_transaction_id() && $this->api_username && $this->api_password && $this->api_signature;
+	}
+
+	/**
 	 * Process a refund if supported
 	 * @param  int $order_id
 	 * @param  float $amount
@@ -485,7 +506,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order || ! $order->get_transaction_id() || ! $this->api_username || ! $this->api_password || ! $this->api_signature ) {
+		if ( ! $this->can_refund_order( $order ) ) {
 			return false;
 		}
 
@@ -496,28 +517,26 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'PWD'           => $this->api_password,
 			'METHOD'        => 'RefundTransaction',
 			'TRANSACTIONID' => $order->get_transaction_id(),
-			'REFUNDTYPE'    => is_null( $amount ) ? 'Full' : 'Partial'
+			'NOTE'          => $this->limit_string_length( $reason, 255 )
 		);
 
 		if ( ! is_null( $amount ) ) {
 			$post_data['AMT']          = number_format( $amount, 2, '.', '' );
 			$post_data['CURRENCYCODE'] = $order->get_order_currency();
+			$post_data['REFUNDTYPE']   = 'Partial';
+		} else {
+			$post_data['REFUNDTYPE']   = 'Full';
 		}
 
-		if ( $reason ) {
-			if ( 255 < strlen( $reason ) ) {
-				$reason = substr( $reason, 0, 252 ) . '...';
-			}
-			$post_data['NOTE'] = html_entity_decode( $reason, ENT_NOQUOTES, 'UTF-8' );
-		}
-
-		$response = wp_remote_post( 'yes' === $this->testmode ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp', array(
-			'method'      => 'POST',
-			'body'        => $post_data,
-			'timeout'     => 70,
-			'sslverify'   => false,
-			'user-agent'  => 'WooCommerce',
-			'httpversion' => '1.1'
+		$response = wp_remote_post(
+			$this->refund_endpoint,
+			array(
+				'method'      => 'POST',
+				'body'        => $post_data,
+				'timeout'     => 70,
+				'sslverify'   => false,
+				'user-agent'  => 'WooCommerce',
+				'httpversion' => '1.1'
 			)
 		);
 
