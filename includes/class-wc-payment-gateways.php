@@ -79,11 +79,6 @@ class WC_Payment_Gateways {
 			'WC_Gateway_Paypal',
 		);
 
-		// Conditional loading of core gateways
-		if ( ! class_exists( 'WC_Mijireh_Checkout' ) && ( $mijireh = get_option( 'woocommerce_mijireh_checkout_settings', false ) ) && ! empty( $mijireh['enabled'] ) && $mijireh['enabled'] === 'yes' ) {
-			$load_gateways[] = 'WC_Gateway_Mijireh';
-		}
-
 		if ( 'US' === WC()->countries->get_base_country() ) {
 			if ( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
 				$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce';

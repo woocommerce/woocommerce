@@ -30,10 +30,6 @@ wp_trash_post( get_option( 'woocommerce_view_order_page_id' ) );
 wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
 wp_trash_post( get_option( 'woocommerce_logout_page_id' ) );
 
-// mijireh checkout page
-if ( $mijireh_page = get_page_by_path( 'mijireh-secure-checkout' ) )
-	wp_trash_post( $mijireh_page->ID );
-
 // Tables
 $wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
 $wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_downloadable_product_permissions" );
