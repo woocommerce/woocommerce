@@ -293,3 +293,27 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 		return ( in_array( $name, array_keys( $attributes ) ) && in_array( $value, $attributes[ $name ] ) );
 	}
 }
+
+if ( ! function_exists( 'wc_tax_enabled' ) ) {
+
+	/**
+	 * Are store-wide taxes enabled?
+	 *
+	 * @return bool
+	 */
+	function wc_tax_enabled() {
+		return get_option( 'woocommerce_calc_taxes' ) === 'yes';
+	}
+}
+
+if ( ! function_exists( 'wc_prices_include_tax' ) ) {
+
+	/**
+	 * Are prices inclusive of tax?
+	 *
+	 * @return bool
+	 */
+	function wc_prices_include_tax() {
+		return get_option( 'woocommerce_prices_include_tax' ) === 'yes';
+	}
+}
