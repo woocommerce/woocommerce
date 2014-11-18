@@ -217,7 +217,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function get_paypal_args( $order ) {
-		$this->log( 'Generating payment form for order #' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
+		$this->log( 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
 		return apply_filters( 'woocommerce_paypal_args', array_merge(
 			array(
