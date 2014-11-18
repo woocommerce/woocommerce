@@ -89,7 +89,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_icon() {
-		$link = null;
+		$link = 'https://www.paypal.com/' . strtolower( WC()->countries->get_base_country() ) . '/webapps/mpp/paypal-popup';
+
 		switch ( WC()->countries->get_base_country() ) {
 			case 'US' :
 			case 'NZ' :
@@ -143,12 +144,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			break;
 			default :
 				$icon = WC_HTTPS::force_https_url( WC()->plugin_url() . '/includes/gateways/paypal/assets/images/paypal.png' );
-				$link = null;
 			break;
-		}
-
-		if ( is_null( $link ) ) {
-			$link = 'https://www.paypal.com/' . strtolower( WC()->countries->get_base_country() ) . '/webapps/mpp/paypal-popup';
 		}
 
 		if ( is_array( $icon ) ) {
@@ -160,11 +156,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$icon_html = '<img src="' . esc_attr( apply_filters( 'woocommerce_paypal_icon', $icon ) ) . '" alt="' . __( 'PayPal Acceptance Mark', 'woocommerce' ) . '" />';
 		}
 
-		if ( $link ) {
-			$what_is_paypal = sprintf( '<a href="%1$s" class="about_paypal" onclick="javascript:window.open(\'%1$s\',\'WIPaypal\',\'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700\'); return false;" title="' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '">' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '</a>', esc_url( $link ) );
-		} else {
-			$what_is_paypal = '';
-		}
+		$what_is_paypal = sprintf( '<a href="%1$s" class="about_paypal" onclick="javascript:window.open(\'%1$s\',\'WIPaypal\',\'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700\'); return false;" title="' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '">' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '</a>', esc_url( $link ) );
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html . $what_is_paypal, $this->id );
 	}
