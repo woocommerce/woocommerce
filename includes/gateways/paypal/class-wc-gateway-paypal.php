@@ -57,11 +57,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->api_password 	= $this->get_option( 'api_password' );
 		$this->api_signature 	= $this->get_option( 'api_signature' );
 
-		// Logs
-		if ( 'yes' == $this->debug ) {
-			$this->log = new WC_Logger();
-		}
-
 		// Actions
 		add_action( 'valid-paypal-standard-ipn-request', array( $this, 'successful_request' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -72,6 +67,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
+		}
+	}
+
+	/**
+	 * Logging method
+	 * @param  string $message
+	 */
+	private function log( $message ) {
+		if ( 'yes' == $this->debug ) {
+			if ( empty( $this->log ) ) {
+				$this->log = new WC_Logger();
+			}
+			$this->log->add( 'paypal', $message );
 		}
 	}
 
@@ -357,9 +365,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$order_id = $order->id;
 
-		if ( 'yes' == $this->debug ) {
-			$this->log->add( 'paypal', 'Generating payment form for order #' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
-		}
+		$this->log( 'Generating payment form for order #' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
 		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
 			$order->billing_phone = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
@@ -672,9 +678,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$paypal_adr = $this->liveurl;
 		}
 
-		if ( 'yes' == $this->debug ) {
-			$this->log->add( 'paypal', 'Checking IPN response is valid via ' . $paypal_adr . '...' );
-		}
+		$this->log( 'Checking IPN response is valid via ' . $paypal_adr . '...' );
 
 		// Get received values from post data
 		$validate_ipn = array( 'cmd' => '_notify-validate' );
@@ -691,31 +695,24 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'user-agent'	=> 'WooCommerce/' . WC()->version
 		);
 
-		if ( 'yes' == $this->debug ) {
-			$this->log->add( 'paypal', 'IPN Request: ' . print_r( $params, true ) );
-		}
+		$this->log->add( 'IPN Request: ' . print_r( $params, true ) );
 
 		// Post back to get a response
 		$response = wp_remote_post( $paypal_adr, $params );
 
-		if ( 'yes' == $this->debug ) {
-			$this->log->add( 'paypal', 'IPN Response: ' . print_r( $response, true ) );
-		}
+		$this->log( 'IPN Response: ' . print_r( $response, true ) );
 
 		// check to see if the request was valid
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && strstr( $response['body'], 'VERIFIED' ) ) {
-			if ( 'yes' == $this->debug ) {
-				$this->log->add( 'paypal', 'Received valid response from PayPal' );
-			}
+			$this->log( 'Received valid response from PayPal' );
 
 			return true;
 		}
 
-		if ( 'yes' == $this->debug ) {
-			$this->log->add( 'paypal', 'Received invalid response from PayPal' );
-			if ( is_wp_error( $response ) ) {
-				$this->log->add( 'paypal', 'Error response: ' . $response->get_error_message() );
-			}
+		$this->log( 'Received invalid response from PayPal' );
+
+		if ( is_wp_error( $response ) ) {
+			$this->log( 'Error response: ' . $response->get_error_message() );
 		}
 
 		return false;
@@ -756,11 +753,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		// Custom holds post ID
 		if ( ! empty( $posted['invoice'] ) && ! empty( $posted['custom'] ) ) {
 
-			$order = $this->get_paypal_order( $posted['custom'], $posted['invoice'] );
-
-			if ( 'yes' == $this->debug ) {
-				$this->log->add( 'paypal', 'Found order #' . $order->id );
+			if ( ! ( $order = $this->get_paypal_order( $posted['custom'] ) ) ) {
+				exit;
 			}
+
+			$this->log( 'Found order #' . $order->id );
 
 			// Lowercase returned variables
 			$posted['payment_status'] 	= strtolower( $posted['payment_status'] );
@@ -771,9 +768,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$posted['payment_status'] = 'completed';
 			}
 
-			if ( 'yes' == $this->debug ) {
-				$this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
-			}
+			$this->log( 'Payment status: ' . $posted['payment_status'] );
 
 			// We are here so lets check status and do actions
 			switch ( $posted['payment_status'] ) {
@@ -782,9 +777,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					// Check order not already completed
 					if ( $order->has_status( 'completed' ) ) {
-						if ( 'yes' == $this->debug ) {
-							$this->log->add( 'paypal', 'Aborting, Order #' . $order->id . ' is already complete.' );
-						}
+						$this->log( 'Aborting, Order #' . $order->id . ' is already complete.' );
 						exit;
 					}
 
@@ -792,17 +785,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
 
 					if ( ! in_array( $posted['txn_type'], $accepted_types ) ) {
-						if ( 'yes' == $this->debug ) {
-							$this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
-						}
+						$this->log( 'Aborting, Invalid type:' . $posted['txn_type'] );
 						exit;
 					}
 
 					// Validate currency
 					if ( $order->get_order_currency() != $posted['mc_currency'] ) {
-						if ( 'yes' == $this->debug ) {
-							$this->log->add( 'paypal', 'Payment error: Currencies do not match (sent "' . $order->get_order_currency() . '" | returned "' . $posted['mc_currency'] . '")' );
-						}
+						$this->log( 'Payment error: Currencies do not match (sent "' . $order->get_order_currency() . '" | returned "' . $posted['mc_currency'] . '")' );
 
 						// Put this order on-hold for manual checking
 						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal currencies do not match (code %s).', 'woocommerce' ), $posted['mc_currency'] ) );
@@ -811,9 +800,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					// Validate amount
 					if ( number_format( $order->get_total(), 2, '.', '' ) != number_format( $posted['mc_gross'], 2, '.', '' ) ) {
-						if ( 'yes' == $this->debug ) {
-							$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
-						}
+						$this->log( 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
 
 						// Put this order on-hold for manual checking
 						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal amounts do not match (gross %s).', 'woocommerce' ), $posted['mc_gross'] ) );
@@ -822,9 +809,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 					// Validate Email Address
 					if ( strcasecmp( trim( $posted['receiver_email'] ), trim( $this->receiver_email ) ) != 0 ) {
-						if ( 'yes' == $this->debug ) {
-							$this->log->add( 'paypal', "IPN Response is for another one: {$posted['receiver_email']} our email is {$this->receiver_email}" );
-						}
+						$this->log( "IPN Response is for another one: {$posted['receiver_email']} our email is {$this->receiver_email}" );
 
 						// Put this order on-hold for manual checking
 						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal IPN response from a different email address (%s).', 'woocommerce' ), $posted['receiver_email'] ) );
@@ -854,9 +839,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						$order->update_status( 'on-hold', sprintf( __( 'Payment pending: %s', 'woocommerce' ), $posted['pending_reason'] ) );
 					}
 
-					if ( 'yes' == $this->debug ) {
-						$this->log->add( 'paypal', 'Payment complete.' );
-					}
+					$this->log( 'Payment complete.' );
 
 				break;
 				case 'denied' :
@@ -930,9 +913,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( ! empty( $this->identity_token ) && ! empty( $posted['cm'] ) ) {
 
-			$order = $this->get_paypal_order( $posted['cm'] );
-
-			if ( ! $order->has_status( 'pending' ) ) {
+			if ( ! ( $order = $this->get_paypal_order( $posted['cm'] ) ) || ! $order->has_status( 'pending' ) ) {
 				return false;
 			}
 
@@ -974,9 +955,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					// Validate Amount
 					if ( $order->get_total() != $posted['amt'] ) {
 
-						if ( 'yes' == $this->debug ) {
-							$this->log->add( 'paypal', 'Payment error: Amounts do not match (amt ' . $posted['amt'] . ')' );
-						}
+						$this->log( 'Payment error: Amounts do not match (amt ' . $posted['amt'] . ')' );
 
 						// Put this order on-hold for manual checking
 						$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $posted['amt'] ) );
@@ -999,40 +978,30 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * get_paypal_order function.
+	 * Get the order from the PayPal 'Custom' variable
 	 *
 	 * @param  string $custom
-	 * @param  string $invoice
-	 * @return WC_Order object
+	 * @return bool|WC_Order object
 	 */
-	private function get_paypal_order( $custom, $invoice = '' ) {
+	private function get_paypal_order( $custom ) {
 		$custom = maybe_unserialize( $custom );
 
-		// Backwards comp for IPN requests
-		if ( is_numeric( $custom ) ) {
-			$order_id  = (int) $custom;
-			$order_key = $invoice;
-		} elseif( is_string( $custom ) ) {
-			$order_id  = (int) str_replace( $this->invoice_prefix, '', $custom );
-			$order_key = $custom;
-		} else {
+		if ( is_array( $custom ) ) {
 			list( $order_id, $order_key ) = $custom;
+		} else {
+			$this->log( 'Error: Order ID and key were not found in "custom".' );
+			return false;
 		}
 
-		$order = wc_get_order( $order_id );
-
-		if ( ! isset( $order->id ) ) {
+		if ( ! $order = wc_get_order( $order_id ) ) {
 			// We have an invalid $order_id, probably because invoice_prefix has changed
 			$order_id 	= wc_get_order_id_by_order_key( $order_key );
 			$order 		= wc_get_order( $order_id );
 		}
 
-		// Validate key
-		if ( $order->order_key !== $order_key ) {
-			if ( 'yes' == $this->debug ) {
-				$this->log->add( 'paypal', 'Error: Order Key does not match invoice.' );
-			}
-			exit;
+		if ( ! $order || $order->order_key !== $order_key ) {
+			$this->log( 'Error: Order Keys do not match.' );
+			return false;
 		}
 
 		return $order;
