@@ -246,7 +246,7 @@ class WC_Meta_Box_Product_Data {
 
 				echo '</div>';
 
-				if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
+				if ( wc_tax_enabled() ) {
 
 					echo '<div class="options_group show_if_simple show_if_external show_if_variable">';
 

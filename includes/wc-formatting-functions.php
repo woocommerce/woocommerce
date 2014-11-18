@@ -341,7 +341,7 @@ function wc_price( $price, $args = array() ) {
 	$formatted_price = ( $negative ? '-' : '' ) . sprintf( get_woocommerce_price_format(), $currency_symbol, $price );
 	$return          = '<span class="amount">' . $formatted_price . '</span>';
 
-	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
+	if ( $ex_tax_label && wc_tax_enabled() ) {
 		$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 

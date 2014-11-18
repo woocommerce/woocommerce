@@ -62,7 +62,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return boolean
 	 */
 	public function is_taxable() {
-		return ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' && ! WC()->customer->is_vat_exempt() );
+		return ( wc_tax_enabled() && $this->tax_status == 'taxable' && ! WC()->customer->is_vat_exempt() );
 	}
 
 	/**

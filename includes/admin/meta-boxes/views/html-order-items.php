@@ -14,7 +14,7 @@ $line_items          = $order->get_items( apply_filters( 'woocommerce_admin_orde
 $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
 
-if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
+if ( wc_tax_enabled() ) {
 	$order_taxes         = $order->get_taxes();
 	$tax_classes         = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 	$classes_options     = array();
@@ -57,7 +57,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 				<th class="line_cost"><?php _e( 'Total', 'woocommerce' ); ?></th>
 
 				<?php
-					if ( empty( $legacy_order ) && 'yes' == get_option( 'woocommerce_calc_taxes' ) ) :
+					if ( empty( $legacy_order ) && wc_tax_enabled() ) :
 						foreach ( $order_taxes as $tax_id => $tax_item ) :
 							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
@@ -144,7 +144,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $order->id ); ?>
 
-		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) : ?>
+		<?php if ( wc_tax_enabled() ) : ?>
 			<?php foreach ( $order->get_tax_totals() as $code => $tax ) : ?>
 				<tr>
 					<td class="label"><?php echo $tax->label; ?>:</td>
@@ -218,7 +218,7 @@ if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) ) {
 		<?php else : ?>
 			<span class="description tips" data-tip="<?php esc_attr_e( 'To edit this order change the status back to "Pending"', 'woocommerce' ); ?>"><?php _e( 'This order has been paid for and is no longer editable', 'woocommerce' ); ?></span>
 		<?php endif; ?>
-		<?php if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && $order->is_editable() ) : ?>
+		<?php if ( wc_tax_enabled() && $order->is_editable() ) : ?>
 			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 		<?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>

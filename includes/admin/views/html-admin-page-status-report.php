@@ -366,7 +366,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 		<tr>
 			<td><?php _e( 'Taxes enabled', 'woocommerce' ) ?></td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have taxes enabled?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-			<td><?php echo 'yes' === get_option( 'woocommerce_calc_taxes' ) ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
+			<td><?php echo wc_tax_enabled() ? '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>' : '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td><?php _e( 'Shipping enabled', 'woocommerce' ) ?></td>

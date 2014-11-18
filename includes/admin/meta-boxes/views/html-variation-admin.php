@@ -167,7 +167,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo wp_dropdown_categories( $args );
 				?></p>
 				<p class="form-row form-row-full">
-					<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+					<?php if ( wc_tax_enabled() ) : ?>
 					<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label>
 					<select name="variable_tax_class[<?php echo $loop; ?>]">
 						<option value="parent" <?php selected( is_null( $_tax_class ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>

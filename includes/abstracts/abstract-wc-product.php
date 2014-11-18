@@ -423,7 +423,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_taxable() {
-		$taxable = $this->tax_status == 'taxable' && get_option( 'woocommerce_calc_taxes' ) == 'yes' ? true : false;
+		$taxable = $this->tax_status == 'taxable' && wc_tax_enabled() ? true : false;
 		return apply_filters( 'woocommerce_product_is_taxable', $taxable, $this );
 	}
 

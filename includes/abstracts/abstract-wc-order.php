@@ -1768,7 +1768,7 @@ abstract class WC_Abstract_Order {
 		);
 
 		// Tax for inclusive prices
-		if ( 'yes' == get_option( 'woocommerce_calc_taxes' ) && 'incl' == $tax_display ) {
+		if ( wc_tax_enabled() && 'incl' == $tax_display ) {
 
 			$tax_string_array = array();
 
