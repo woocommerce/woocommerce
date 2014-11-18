@@ -17,7 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
-	var $notify_url;
+	private $line_items = array();
+	public $notify_url  = '';
 
 	/**
 	 * Constructor for the gateway.
@@ -309,45 +310,32 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	private function get_line_item_args( $order ) {
-		$line_item_args   = array();
+		/**
+		 * Try passing a line item per product if supported
+		 */
+		if ( ( ! wc_tax_enabled() || ! wc_prices_include_tax() ) && ! $order->get_order_discount() && $this->prepare_line_items( $order ) ) {
 
-		try {
-			// Try passing a line item per product
-			if ( ! $this->prepare_line_items( $order ) ) {
-				throw new Exception;
-			}
-
-			$line_item_args             = $this->line_items;
+			$line_item_args             = $this->get_line_items();
 			$line_item_args['tax_cart'] = $order->get_total_tax();
 
 			if ( $order->get_cart_discount() > 0 ) {
 				$line_item_args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
 			}
 
-		} catch ( Exception $e ) {
-			// Pass 1 item for the order items overall
-			$this->line_items = array();
-			$item_names       = array();
+		/**
+		 * Send order as a single item
+		 *
+		 * For shipping, we longer use shipping_1 because paypal ignores it if *any* shipping rules are within paypal, and paypal ignores anything over 5 digits (999.99 is the max)
+		 */
+		} else {
 
-			if ( sizeof( $order->get_items() ) > 0 ) {
-				foreach ( $order->get_items() as $item ) {
-					$item_names[] = $item['name'] . ' x ' . $item['qty'];
-				}
-			}
+			$this->delete_line_items();
 
-			$this->add_line_item( implode( ', ', $item_names ), 1, number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ) + $order->get_order_discount(), 2, '.', '' ), $order->get_order_number() );
+			$this->add_line_item( $this->get_order_item_names( $order ), 1, number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ) + $order->get_order_discount(), 2, '.', '' ), $order->get_order_number() );
+			$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), ucwords( $order->get_shipping_method() ) ), 1, number_format( $order->get_total_shipping() + $order->get_shipping_tax(), 2, '.', '' ) );
 
-			// Shipping Cost
-			// No longer using shipping_1 because
-			//		a) paypal ignore it if *any* shipping rules are within paypal
-			//		b) paypal ignore anything over 5 digits, so 999.99 is the max
-			if ( ( $order->get_total_shipping() + $order->get_shipping_tax() ) > 0 ) {
-				$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), ucwords( $order->get_shipping_method() ) ), 1, number_format( $order->get_total_shipping() + $order->get_shipping_tax(), 2, '.', '' ) );
-			}
+			$line_item_args = $this->get_line_items();
 
-			$line_item_args = $this->line_items;
-
-			// Discount
 			if ( $order->get_order_discount() ) {
 				$line_item_args['discount_amount_cart'] = $order->get_order_discount();
 			}
@@ -357,60 +345,85 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Get order item names as a string
+	 * @param  WC_Order $order
+	 * @return string
+	 */
+	public function get_order_item_names( $order ) {
+		$item_names = array();
+
+		foreach ( $order->get_items() as $item ) {
+			$item_names[] = $item['name'] . ' x ' . $item['qty'];
+		}
+
+		return implode( ', ', $item_names );
+	}
+
+	/**
+	 * Get order item names as a string
+	 * @param  WC_Order $order
+	 * @param  array $item
+	 * @return string
+	 */
+	public function get_order_item_name( $order, $item ) {
+		$product          = $order->get_product_from_item( $item );
+		$item_name        = $item['name'];
+		$item_meta        = new WC_Order_Item_Meta( $item['item_meta'] );
+
+		if ( $meta = $item_meta->display( true, true ) ) {
+			$item_name .= ' ( ' . $meta . ' )';
+		}
+
+		return $item_name;
+	}
+
+	/**
+	 * Return all line items
+	 */
+	private function get_line_items() {
+		return $this->line_items;
+	}
+
+	/**
+	 * Remove all line items
+	 */
+	private function delete_line_items() {
+		$this->line_items = array();
+	}
+
+	/**
 	 * Get line items to send to paypal
 	 *
 	 * @param  WC_Order $order
 	 * @return bool
 	 */
 	private function prepare_line_items( $order ) {
-		// Do not send lines for tax inclusive prices and do not send lines when order discount is present
-		if ( ( 'yes' === get_option( 'woocommerce_calc_taxes' ) && 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) || $order->get_order_discount() > 0 ) {
-			return false;
-		}
-
-		$this->line_items = array();
-		$calculated_total = $order->get_total_tax() - round( $order->get_cart_discount(), 2 );
+		$this->delete_line_items();
+		$calculated_total = 0;
 
 		// Products
-		if ( sizeof( $order->get_items() ) > 0 ) {
-			foreach ( $order->get_items() as $item ) {
-				$product          = $order->get_product_from_item( $item );
-				$item_name        = $item['name'];
-				$item_meta        = new WC_Order_Item_Meta( $item['item_meta'] );
-				$calculated_total += $order->get_item_subtotal( $item, false ) * $item['qty'];
-
-				if ( $meta = $item_meta->display( true, true ) ) {
-					$item_name .= ' ( ' . $meta . ' )';
-				}
-
-				if ( ! $this->add_line_item( $item_name, $item['qty'], $order->get_item_subtotal( $item, false ), $product->get_sku() ) ) {
-					return false;
-				}
-			}
-		}
-
-		// Fees
-		if ( sizeof( $order->get_fees() ) > 0 ) {
-			foreach ( $order->get_fees() as $item ) {
+		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			if ( 'fee' === $item['type'] ) {
+				$line_item        = $this->add_line_item( $item['name'], 1, $item['line_total'] );
 				$calculated_total += $item['line_total'];
-
-				if ( ! $this->add_line_item( $item['name'], 1, $item['line_total'] ) ) {
-					return false;
-				}
+			} else {
+				$product          = $order->get_product_from_item( $item );
+				$line_item        = $this->add_line_item( $this->get_order_item_name( $order, $item ), $item['qty'], $order->get_item_subtotal( $item, false ), $product->get_sku() );
+				$calculated_total += $order->get_item_subtotal( $item, false ) * $item['qty'];
 			}
-		}
 
-		// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
-		if ( $order->get_total_shipping() > 0 ) {
-			$calculated_total += number_format( $order->get_total_shipping(), 2, '.', '' );
-
-			if ( ! $this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method(), 1, number_format( $order->get_total_shipping(), 2, '.', '' ) ) ) ) {
+			if ( ! $line_item ) {
 				return false;
 			}
 		}
 
-		// Check for mismatch
-		if ( $calculated_total != $order->get_total() ) {
+		// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
+		if ( $order->get_total_shipping() > 0 && ! $this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method(), 1, round( $order->get_total_shipping(), 2 ) ) ) ) {
+			return false;
+		}
+
+		// Check for mismatched totals
+		if ( ( $calculated_total + $order->get_total_tax() + round( $order->get_total_shipping(), 2 ) - round( $order->get_cart_discount(), 2 ) ) != $order->get_total() ) {
 			return false;
 		}
 
