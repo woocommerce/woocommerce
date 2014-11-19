@@ -17,6 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 	/**
+	 * Stores an array of rates
+	 * @var array
+	 */
+	public $flat_rates = array();
+
+	/**
 	 * __construct function.
 	 *
 	 * @access public
@@ -233,7 +239,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	/**
 	 * order_shipping function.
 	 *
-	 * @access public
 	 * @param array $package
 	 * @return float
 	 */
@@ -252,15 +257,13 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 						$cost 	= $this->flat_rates[ $shipping_class ]['cost'];
 						$fee	= $this->flat_rates[ $shipping_class ]['fee'];
 					}
-				} else {
-					// No matching classes so use defaults
-					if ( ! empty( $this->cost ) && $this->cost > $cost ) {
-						$cost 	= $this->cost;
-						$fee	= $this->fee;
-					}
+
+				// No matching classes so use defaults
+				} elseif ( $this->cost > $cost ) {
+					$cost 	= $this->cost;
+					$fee	= $this->fee;
 				}
 			}
-
 		}
 
 		// Default rates if set
