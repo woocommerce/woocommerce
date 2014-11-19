@@ -625,8 +625,6 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_visible() {
-		$visible = true;
-
 		if ( ! $this->post ) {
 			$visible = false;
 
@@ -861,7 +859,6 @@ class WC_Product {
 		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
 		$display_price         = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
 		$display_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_regular_price() ) : $this->get_price_excluding_tax( 1, $this->get_regular_price() );
-		$display_sale_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_sale_price() ) : $this->get_price_excluding_tax( 1, $this->get_sale_price() );
 
 		if ( $this->get_price() > 0 ) {
 
@@ -1356,8 +1353,6 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
-		$image = '';
-
 		if ( has_post_thumbnail( $this->id ) ) {
 			$image = get_the_post_thumbnail( $this->id, $size, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {

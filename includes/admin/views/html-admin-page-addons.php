@@ -8,6 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+$view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : '';
+
 ?>
 
 <div class="wrap woocommerce wc_addons_wrap">

@@ -24,14 +24,14 @@ class WC_Admin_Taxonomies {
 	public function __construct() {
 
 		// Category/term ordering
-		add_action( "create_term", array( $this, 'create_term' ), 5, 3 );
-		add_action( "delete_term", array( $this, 'delete_term' ), 5 );
+		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
+		add_action( 'delete_term', array( $this, 'delete_term' ), 5 );
 
 		// Add form
 		add_action( 'product_cat_add_form_fields', array( $this, 'add_category_fields' ) );
-		add_action( 'product_cat_edit_form_fields', array( $this, 'edit_category_fields' ), 10, 2 );
-		add_action( 'created_term', array( $this, 'save_category_fields' ), 10, 3 );
-		add_action( 'edit_term', array( $this, 'save_category_fields' ), 10, 3 );
+		add_action( 'product_cat_edit_form_fields', array( $this, 'edit_category_fields' ), 10 );
+		add_action( 'created_term', array( $this, 'save_category_fields' ), 10 );
+		add_action( 'edit_term', array( $this, 'save_category_fields' ), 10 );
 
 		// Add columns
 		add_filter( 'manage_edit-product_cat_columns', array( $this, 'product_cat_columns' ) );
@@ -55,8 +55,9 @@ class WC_Admin_Taxonomies {
 	 * @return void
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
-		if ( $taxonomy != 'product_cat' && ! taxonomy_is_product_attribute( $taxonomy ) )
+		if ( $taxonomy != 'product_cat' && ! taxonomy_is_product_attribute( $taxonomy ) ) {
 			return;
+		}
 
 		$meta_name = taxonomy_is_product_attribute( $taxonomy ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
 
@@ -163,19 +164,17 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Edit category thumbnail field.
 	 *
-	 * @access public
 	 * @param mixed $term Term (category) being edited
-	 * @param mixed $taxonomy Taxonomy of the term being edited
 	 */
-	public function edit_category_fields( $term, $taxonomy ) {
+	public function edit_category_fields( $term ) {
 
-		$display_type	= get_woocommerce_term_meta( $term->term_id, 'display_type', true );
-		$image 			= '';
-		$thumbnail_id 	= absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
-		if ( $thumbnail_id )
+		$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
+		$thumbnail_id = absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
+		if ( $thumbnail_id ) {
 			$image = wp_get_attachment_thumb_url( $thumbnail_id );
-		else
+		} else {
 			$image = wc_placeholder_img_src();
+		}
 		?>
 		<tr class="form-field">
 			<th scope="row" valign="top"><label><?php _e( 'Display type', 'woocommerce' ); ?></label></th>
@@ -253,11 +252,9 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @access public
 	 * @param mixed $term_id Term ID being saved
-	 * @param mixed $tt_id
-	 * @param mixed $taxonomy Taxonomy of the term being saved
 	 * @return void
 	 */
-	public function save_category_fields( $term_id, $tt_id, $taxonomy ) {
+	public function save_category_fields( $term_id ) {
 		if ( isset( $_POST['display_type'] ) ) {
 			update_woocommerce_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) );
 		}

@@ -23,13 +23,6 @@ class WC_Meta_Box_Order_Actions {
 	 * Output the metabox
 	 */
 	public static function output( $post ) {
-		global $theorder;
-
-		if ( ! is_object( $theorder ) ) {
-			$theorder = wc_get_order( $post->ID );
-		}
-
-		$order = $theorder;
 		?>
 		<ul class="order_actions submitbox">
 
@@ -67,7 +60,7 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide">
 				<div id="delete-action"><?php
 
-					if ( current_user_can( "delete_post", $post->ID ) ) {
+					if ( current_user_can( 'delete_post', $post->ID ) ) {
 
 						if ( ! EMPTY_TRASH_DAYS ) {
 							$delete_text = __( 'Delete Permanently', 'woocommerce' );
@@ -147,13 +140,12 @@ class WC_Meta_Box_Order_Actions {
 	 * @param $location
 	 *
 	 * @since  2.3.0
-	 * @access public
 	 *
 	 * @static
 	 *
 	 * @return string
 	 */
-	public static function set_email_sent_message($location) {
+	public static function set_email_sent_message( $location ) {
 		return add_query_arg( 'message', 11, $location );
 	}
 

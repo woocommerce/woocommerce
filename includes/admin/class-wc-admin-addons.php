@@ -32,8 +32,6 @@ class WC_Admin_Addons {
 			}
 		}
 
-		$view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : '';
-
 		include_once( 'views/html-admin-page-addons.php' );
 	}
 }

@@ -135,14 +135,14 @@ class WC_Admin_Post_Types {
 	 */
 	public function shop_coupon_columns( $existing_columns ) {
 		$columns                = array();
-		$columns["cb"]          = "<input type=\"checkbox\" />";
-		$columns["coupon_code"] = __( 'Code', 'woocommerce' );
-		$columns["type"]        = __( 'Coupon type', 'woocommerce' );
-		$columns["amount"]      = __( 'Coupon amount', 'woocommerce' );
-		$columns["description"] = __( 'Description', 'woocommerce' );
-		$columns["products"]    = __( 'Product IDs', 'woocommerce' );
-		$columns["usage"]       = __( 'Usage / Limit', 'woocommerce' );
-		$columns["expiry_date"] = __( 'Expiry date', 'woocommerce' );
+		$columns['cb']          = $existing_columns['cb'];
+		$columns['coupon_code'] = __( 'Code', 'woocommerce' );
+		$columns['type']        = __( 'Coupon type', 'woocommerce' );
+		$columns['amount']      = __( 'Coupon amount', 'woocommerce' );
+		$columns['description'] = __( 'Description', 'woocommerce' );
+		$columns['products']    = __( 'Product IDs', 'woocommerce' );
+		$columns['usage']       = __( 'Usage / Limit', 'woocommerce' );
+		$columns['expiry_date'] = __( 'Expiry date', 'woocommerce' );
 
 		return $columns;
 	}
@@ -154,7 +154,7 @@ class WC_Admin_Post_Types {
 	 */
 	public function shop_order_columns( $existing_columns ) {
 		$columns                     = array();
-		$columns['cb']               = '<input type="checkbox" />';
+		$columns['cb']               = $existing_columns['cb'];
 		$columns['order_status']     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
 		$columns['order_title']      = __( 'Order', 'woocommerce' );
 		$columns['order_items']      = __( 'Purchased', 'woocommerce' );
@@ -353,11 +353,10 @@ class WC_Admin_Post_Types {
 		global $post, $woocommerce;
 
 		switch ( $column ) {
-			case "coupon_code" :
-				$edit_link = get_edit_post_link( $post->ID );
-				$title = _draft_or_post_title();
+			case 'coupon_code' :
+				$edit_link        = get_edit_post_link( $post->ID );
+				$title            = _draft_or_post_title();
 				$post_type_object = get_post_type_object( $post->post_type );
-				$can_edit_post = current_user_can( $post_type_object->cap->edit_post, $post->ID );
 
 				echo '<a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ). '</a>';
 
@@ -394,46 +393,50 @@ class WC_Admin_Post_Types {
 				echo '</div>';
 
 			break;
-			case "type" :
+			case 'type' :
 				echo esc_html( wc_get_coupon_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
 			break;
-			case "amount" :
+			case 'amount' :
 				echo esc_html( get_post_meta( $post->ID, 'coupon_amount', true ) );
 			break;
-			case "products" :
+			case 'products' :
 				$product_ids = get_post_meta( $post->ID, 'product_ids', true );
 				$product_ids = $product_ids ? array_map( 'absint', explode( ',', $product_ids ) ) : array();
-				if ( sizeof( $product_ids ) > 0 )
+				if ( sizeof( $product_ids ) > 0 ) {
 					echo esc_html( implode( ', ', $product_ids ) );
-				else
+				} else {
 					echo '&ndash;';
+				}
 			break;
-			case "usage_limit" :
+			case 'usage_limit' :
 				$usage_limit = get_post_meta( $post->ID, 'usage_limit', true );
 
-				if ( $usage_limit )
+				if ( $usage_limit ) {
 					echo esc_html( $usage_limit );
-				else
+				} else {
 					echo '&ndash;';
+				}
 			break;
-			case "usage" :
+			case 'usage' :
 				$usage_count = absint( get_post_meta( $post->ID, 'usage_count', true ) );
-				$usage_limit = esc_html( get_post_meta($post->ID, 'usage_limit', true) );
+				$usage_limit = esc_html( get_post_meta( $post->ID, 'usage_limit', true ) );
 
-				if ( $usage_limit )
+				if ( $usage_limit ) {
 					printf( __( '%s / %s', 'woocommerce' ), $usage_count, $usage_limit );
-				else
+				} else {
 					printf( __( '%s / &infin;', 'woocommerce' ), $usage_count );
+				}
 			break;
-			case "expiry_date" :
+			case 'expiry_date' :
 				$expiry_date = get_post_meta($post->ID, 'expiry_date', true);
 
-				if ( $expiry_date )
+				if ( $expiry_date ) {
 					echo esc_html( date_i18n( 'F j, Y', strtotime( $expiry_date ) ) );
-				else
+				} else {
 					echo '&ndash;';
+				}
 			break;
-			case "description" :
+			case 'description' :
 				echo wp_kses_post( $post->post_excerpt );
 			break;
 		}
@@ -463,7 +466,6 @@ class WC_Admin_Post_Types {
 				} else {
 					$t_time    = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
 					$gmt_time  = strtotime( $post->post_date_gmt . ' UTC' );
-					$time_diff = current_time( 'timestamp', 1 ) - $gmt_time;
 					$h_time    = get_the_time( __( 'Y/m/d', 'woocommerce' ), $post );
 				}
 
@@ -1957,12 +1959,13 @@ class WC_Admin_Post_Types {
 	public function enter_title_here( $text, $post ) {
 		switch ( $post->post_type ) {
 			case 'product' :
-				return __( 'Product name', 'woocommerce' );
+				$text = __( 'Product name', 'woocommerce' );
 			break;
 			case 'shop_coupon' :
-				return __( 'Coupon code', 'woocommerce' );
+				$text = __( 'Coupon code', 'woocommerce' );
 			break;
 		}
+
 		return $text;
 	}
 

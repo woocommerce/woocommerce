@@ -282,7 +282,6 @@ class WC_Admin_Settings {
 				case 'password' :
 
 					$type         = $value['type'];
-					$class        = '';
 					$option_value = self::get_option( $value['id'], $value['default'] );
 
 					if ( $value['type'] == 'color' ) {
@@ -538,7 +537,6 @@ class WC_Admin_Settings {
 				// Single country selects
 				case 'single_select_country' :
 					$country_setting = (string) self::get_option( $value['id'] );
-					$countries       = WC()->countries->countries;
 
 					if ( strstr( $country_setting, ':' ) ) {
 						$country_setting = explode( ':', $country_setting );
