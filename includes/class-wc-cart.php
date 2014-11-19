@@ -668,7 +668,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_undo_url( $product_id, $quantity = 1, $variation_id = '', $variation = '' ) {
-			$cart_page_id = wc_get_page_id('cart');
+			$cart_page_id = wc_get_page_id( 'cart' );
 
 			$query_args = array(
 				'undo_item'    => $product_id,
@@ -718,7 +718,7 @@ class WC_Cart {
 				return $this->cart_contents[ $item_key ];
 			}
 
-			return false;
+			return array();
 		}
 
 		/**
