@@ -28,13 +28,9 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * Check for PayPal IPN Response
 	 */
 	public function check_response() {
-		@ob_clean();
-
 		$ipn_response = ! empty( $_POST ) ? $_POST : false;
 
 		if ( $ipn_response && $this->validate_ipn( $ipn_response ) ) {
-			header( 'HTTP/1.1 200 OK' );
-
 			do_action( "valid-paypal-standard-ipn-request", $ipn_response );
 
 			$posted = stripslashes_deep( $ipn_response );
