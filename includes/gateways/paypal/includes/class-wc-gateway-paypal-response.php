@@ -41,20 +41,22 @@ abstract class WC_Gateway_Paypal_Response {
 		$custom = maybe_unserialize( $custom );
 
 		if ( is_array( $custom ) ) {
+
 			list( $order_id, $order_key ) = $custom;
-		} else {
+
+			if ( ! $order = wc_get_order( $order_id ) ) {
+				// We have an invalid $order_id, probably because invoice_prefix has changed
+				$order_id 	= wc_get_order_id_by_order_key( $order_key );
+				$order 		= wc_get_order( $order_id );
+			}
+
+			if ( ! $order || $order->order_key !== $order_key ) {
+				$this->log( 'Error: Order Keys do not match.' );
+				return false;
+			}
+
+		} elseif ( ! $order = apply_filters( 'woocommerce_get_paypal_order', false, $custom ) ) {
 			$this->log( 'Error: Order ID and key were not found in "custom".' );
-			return false;
-		}
-
-		if ( ! $order = wc_get_order( $order_id ) ) {
-			// We have an invalid $order_id, probably because invoice_prefix has changed
-			$order_id 	= wc_get_order_id_by_order_key( $order_key );
-			$order 		= wc_get_order( $order_id );
-		}
-
-		if ( ! $order || $order->order_key !== $order_key ) {
-			$this->log( 'Error: Order Keys do not match.' );
 			return false;
 		}
 
