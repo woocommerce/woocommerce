@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Layered Navigation Fitlers Widget
  *
@@ -8,11 +13,6 @@
  * @version  2.3.0
  * @extends  WC_Widget
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 
 	/**
@@ -102,3 +102,5 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		}
 	}
 }
+
+register_widget( 'WC_Widget_Layered_Nav_Filters' );

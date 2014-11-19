@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Tag Cloud Widget
  *
@@ -8,11 +13,6 @@
  * @version  2.3.0
  * @extends  WC_Widget
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 
 	/**
@@ -73,3 +73,5 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 		return 'product_tag';
 	}
 }
+
+register_widget( 'WC_Widget_Product_Tag_Cloud' );

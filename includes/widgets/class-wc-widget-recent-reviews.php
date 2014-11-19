@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Recent Reviews Widget
  *
@@ -8,11 +13,6 @@
  * @version  2.3.0
  * @extends  WC_Widget
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 class WC_Widget_Recent_Reviews extends WC_Widget {
 
 	/**
@@ -102,3 +102,5 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		$this->cache_widget( $args, $content );
 	}
 }
+
+register_widget( 'WC_Widget_Recent_Reviews' );

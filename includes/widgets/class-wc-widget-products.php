@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * List products. One widget to rule them all.
  *
@@ -8,11 +13,6 @@
  * @version  2.3.0
  * @extends  WC_Widget
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 class WC_Widget_Products extends WC_Widget {
 
 	/**
@@ -189,3 +189,5 @@ class WC_Widget_Products extends WC_Widget {
 		echo $this->cache_widget( $args, ob_get_clean() );
 	}
 }
+
+register_widget( 'WC_Widget_Products' );

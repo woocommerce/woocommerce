@@ -122,20 +122,10 @@ final class WooCommerce {
 	 * @return WooCommerce
 	 */
 	public function __construct() {
-		// Auto-load classes on demand
-		if ( function_exists( "__autoload" ) ) {
-			spl_autoload_register( "__autoload" );
-		}
-
-		spl_autoload_register( array( $this, 'autoload' ) );
-
-		// Define constants
 		$this->define_constants();
-
-		// Include required files
 		$this->includes();
 
-		// Init API
+		// Init WC API
 		$this->api = new WC_API();
 
 		// Hooks
@@ -169,50 +159,6 @@ final class WooCommerce {
 			case 'errors':
 				_deprecated_argument( 'Woocommerce->errors', '2.1', 'Use wc_get_notices' );
 				return wc_get_notices( 'error' );
-			default:
-				return false;
-		}
-	}
-
-	/**
-	 * Auto-load WC classes on demand to reduce memory consumption.
-	 *
-	 * @param string $class
-	 */
-	public function autoload( $class ) {
-		$path  = null;
-		$class = strtolower( $class );
-		$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
-
-		if ( strpos( $class, 'wc_addons_gateway_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 18 ) );
-		} elseif ( strpos( $class, 'wc_gateway_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
-		} elseif ( strpos( $class, 'wc_shipping_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/shipping/' . trailingslashit( substr( str_replace( '_', '-', $class ), 12 ) );
-		} elseif ( strpos( $class, 'wc_shortcode_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/shortcodes/';
-		} elseif ( strpos( $class, 'wc_meta_box' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/admin/meta-boxes/';
-		} elseif ( strpos( $class, 'wc_admin' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/admin/';
-		} elseif ( strpos( $class, 'wc_widget_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/widgets/';
-		}
-
-		if ( $path && is_readable( $path . $file ) ) {
-			include_once( $path . $file );
-			return;
-		}
-
-		// Fallback
-		if ( strpos( $class, 'wc_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/';
-		}
-
-		if ( $path && is_readable( $path . $file ) ) {
-			include_once( $path . $file );
-			return;
 		}
 	}
 
@@ -245,6 +191,7 @@ final class WooCommerce {
 	 * Include required core files used in admin and on the frontend.
 	 */
 	private function includes() {
+		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
 		include_once( 'includes/class-wc-install.php' );
 		include_once( 'includes/class-wc-download-handler.php' );
@@ -333,18 +280,17 @@ final class WooCommerce {
 	 */
 	public function include_widgets() {
 		include_once( 'includes/abstracts/abstract-wc-widget.php' );
-
-		register_widget( 'WC_Widget_Cart' );
-		register_widget( 'WC_Widget_Products' );
-		register_widget( 'WC_Widget_Layered_Nav' );
-		register_widget( 'WC_Widget_Layered_Nav_Filters' );
-		register_widget( 'WC_Widget_Price_Filter' );
-		register_widget( 'WC_Widget_Product_Categories' );
-		register_widget( 'WC_Widget_Product_Search' );
-		register_widget( 'WC_Widget_Product_Tag_Cloud' );
-		register_widget( 'WC_Widget_Recent_Reviews' );
-		register_widget( 'WC_Widget_Recently_Viewed' );
-		register_widget( 'WC_Widget_Top_Rated_Products' );
+		include_once( 'includes/widgets/class-wc-widget-cart.php' );
+		include_once( 'includes/widgets/class-wc-widget-layered-nav-filters.php' );
+		include_once( 'includes/widgets/class-wc-widget-layered-nav.php' );
+		include_once( 'includes/widgets/class-wc-widget-price-filter.php' );
+		include_once( 'includes/widgets/class-wc-widget-product-categories.php' );
+		include_once( 'includes/widgets/class-wc-widget-product-search.php' );
+		include_once( 'includes/widgets/class-wc-widget-product-tag-cloud.php' );
+		include_once( 'includes/widgets/class-wc-widget-products.php' );
+		include_once( 'includes/widgets/class-wc-widget-recent-reviews.php' );
+		include_once( 'includes/widgets/class-wc-widget-recently-viewed.php' );
+		include_once( 'includes/widgets/class-wc-widget-top-rated-products.php' );
 	}
 
 	/**

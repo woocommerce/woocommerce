@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Top Rated Products Widget
  *
@@ -10,11 +15,6 @@
  * @version  2.3.0
  * @extends  WC_Widget
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 	/**
@@ -99,3 +99,5 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 		$this->cache_widget( $args, $content );
 	}
 }
+
+register_widget( 'WC_Widget_Top_Rated_Products' );

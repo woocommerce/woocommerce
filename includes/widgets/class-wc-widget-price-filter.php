@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Price Filter Widget and related functions
  *
@@ -10,11 +15,6 @@
  * @version  2.3.0
  * @extends  WC_Widget
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 class WC_Widget_Price_Filter extends WC_Widget {
 
 	/**
@@ -183,3 +183,5 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$this->widget_end( $args );
 	}
 }
+
+register_widget( 'WC_Widget_Price_Filter' );
