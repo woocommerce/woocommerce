@@ -37,10 +37,10 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 			do_action( "valid-paypal-standard-ipn-request", $ipn_response );
 
-			$posted = stripslashes_deep( $posted );
+			$posted = stripslashes_deep( $ipn_response );
 
 			// Custom holds post ID
-			if ( ! empty( $posted['custom'] ) && $order = $this->get_paypal_order( $posted['custom'] ) ) {
+			if ( ! empty( $posted['custom'] ) && ( $order = $this->get_paypal_order( $posted['custom'] ) ) ) {
 
 				// Lowercase returned variables
 				$posted['payment_status'] = strtolower( $posted['payment_status'] );
@@ -94,7 +94,6 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		// check to see if the request was valid
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && strstr( $response['body'], 'VERIFIED' ) ) {
 			$this->log( 'Received valid response from PayPal' );
-
 			return true;
 		}
 
