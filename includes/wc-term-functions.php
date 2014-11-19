@@ -513,8 +513,11 @@ function wc_recount_after_stock_change( $product_id ) {
 	$product_terms = get_the_terms( $product_id, 'product_cat' );
 
 	if ( $product_terms ) {
-		foreach ( $product_terms as $term )
+		$product_cats = array();
+
+		foreach ( $product_terms as $term ) {
 			$product_cats[ $term->term_id ] = $term->parent;
+		}
 
 		_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
 	}
@@ -522,8 +525,11 @@ function wc_recount_after_stock_change( $product_id ) {
 	$product_terms = get_the_terms( $product_id, 'product_tag' );
 
 	if ( $product_terms ) {
-		foreach ( $product_terms as $term )
+		$product_tags = array();
+
+		foreach ( $product_terms as $term ) {
 			$product_tags[ $term->term_id ] = $term->parent;
+		}
 
 		_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
 	}

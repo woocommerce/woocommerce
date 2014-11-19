@@ -308,6 +308,7 @@ class WC_Admin_Post_Types {
 				if ( ! $terms = get_the_terms( $post->ID, $column ) ) {
 					echo '<span class="na">&ndash;</span>';
 				} else {
+					$termlist = array();
 					foreach ( $terms as $term ) {
 						$termlist[] = '<a href="' . admin_url( 'edit.php?' . $column . '=' . $term->slug . '&post_type=product' ) . ' ">' . $term->name . '</a>';
 					}

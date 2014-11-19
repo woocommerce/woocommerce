@@ -125,6 +125,8 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_shipping_args( $order ) {
+		$shipping_args = array();
+
 		if ( 'yes' == $this->gateway->get_option( 'send_shipping' ) ) {
 			$shipping_args['address_override'] = $this->gateway->get_option( 'address_override' ) === 'yes' ? 1 : 0;
 			$shipping_args['no_shipping']      = 0;
@@ -142,6 +144,7 @@ class WC_Gateway_Paypal_Request {
 		} else {
 			$shipping_args['no_shipping']      = 1;
 		}
+
 		return $shipping_args;
 	}
 

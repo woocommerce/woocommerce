@@ -451,9 +451,11 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 		// Convert shorthand colors to full format, e.g. "FFF" -> "FFFFFF"
 		$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
 
+		$rgb      = array();
 		$rgb['R'] = hexdec( $color{0}.$color{1} );
 		$rgb['G'] = hexdec( $color{2}.$color{3} );
 		$rgb['B'] = hexdec( $color{4}.$color{5} );
+
 		return $rgb;
 	}
 }
