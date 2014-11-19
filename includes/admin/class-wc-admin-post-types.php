@@ -608,7 +608,7 @@ class WC_Admin_Post_Types {
 
 						if ( $the_order->has_status( array( 'pending', 'on-hold' ) ) ) {
 							$actions['processing'] = array(
-								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
+								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
 								'name' 		=> __( 'Processing', 'woocommerce' ),
 								'action' 	=> "processing"
 							);
@@ -616,7 +616,7 @@ class WC_Admin_Post_Types {
 
 						if ( $the_order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
 							$actions['complete'] = array(
-								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
+								'url' 		=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $post->ID ), 'woocommerce-mark-order-status' ),
 								'name' 		=> __( 'Complete', 'woocommerce' ),
 								'action' 	=> "complete"
 							);

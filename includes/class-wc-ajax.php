@@ -31,8 +31,7 @@ class WC_AJAX {
 			'add_to_cart'                                      => true,
 			'checkout'                                         => true,
 			'feature_product'                                  => false,
-			'mark_order_complete'                              => false,
-			'mark_order_processing'                            => false,
+			'mark_order_status'                                => false,
 			'add_new_attribute'                                => false,
 			'remove_variation'                                 => false,
 			'remove_variations'                                => false,
@@ -342,15 +341,22 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Mark an order as complete
+	 * Mark an order with a status
 	 */
-	public static function mark_order_complete() {
+	public static function mark_order_status() {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ), '', array( 'response' => 403 ) );
 		}
 
-		if ( ! check_admin_referer( 'woocommerce-mark-order-complete' ) ) {
+		if ( ! check_admin_referer( 'woocommerce-mark-order-status' ) ) {
 			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ), '', array( 'response' => 403 ) );
+		}
+
+		$status = isset( $_GET['status'] ) ? esc_attr( $_GET['status'] ) : '';
+		$order_statuses = wc_get_order_statuses();
+
+		if ( ! $status || ! isset( $order_statuses[ 'wc-' . $status ] ) ) {
+			die();
 		}
 
 		$order_id = isset( $_GET['order_id'] ) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
@@ -359,32 +365,7 @@ class WC_AJAX {
 		}
 
 		$order = wc_get_order( $order_id );
-		$order->update_status( 'completed' );
-
-		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
-
-		die();
-	}
-
-	/**
-	 * Mark an order as processing
-	 */
-	public static function mark_order_processing() {
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ), '', array( 'response' => 403 ) );
-		}
-
-		if ( ! check_admin_referer( 'woocommerce-mark-order-processing' ) ) {
-			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ), '', array( 'response' => 403 ) );
-		}
-
-		$order_id = isset( $_GET['order_id'] ) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
-		if ( ! $order_id ) {
-			die();
-		}
-
-		$order = wc_get_order( $order_id );
-		$order->update_status( 'processing' );
+		$order->update_status( $status );
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
 
