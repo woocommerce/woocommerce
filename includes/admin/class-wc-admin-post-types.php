@@ -1210,22 +1210,20 @@ class WC_Admin_Post_Types {
 		$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
 		$action = $wp_list_table->current_action();
 
-		switch ( $action ) {
-			case 'mark_completed':
-				$new_status = 'completed';
-				$report_action = 'marked_complete';
-				break;
-			case 'mark_processing':
-				$new_status = 'processing';
-				$report_action = 'marked_processing';
-				break;
-			case 'mark_on-hold' :
-				$new_status = 'on-hold';
-				$report_action = 'marked_on-hold';
-				break;
-			break;
-			default:
-				return;
+		// Bail out if this is not a status-changing action
+		if ( strpos( $action, 'mark_' ) === false ) {
+			return;
+		}
+
+		$order_statuses = wc_get_order_statuses();
+
+		$new_status    = substr( $action, 5 ); // get the status name from action
+		$report_action = 'marked_' . $new_status;
+
+		// Sanity check: bail out if this is actually not a status, or is
+		// not a registered status
+		if ( ! isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
+			return;
 		}
 
 		$changed = 0;
@@ -1252,14 +1250,26 @@ class WC_Admin_Post_Types {
 	public function bulk_admin_notices() {
 		global $post_type, $pagenow;
 
-		if ( isset( $_REQUEST['marked_complete'] ) || isset( $_REQUEST['marked_processing'] ) || isset( $_REQUEST['marked_on-hold'] ) ) {
-			$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
+		// Bail out if not on shop order list page
+		if ( 'edit.php' !== $pagenow || 'shop_order' !== $post_type ) {
+			return;
+		}
 
-			if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
+		$order_statuses = wc_get_order_statuses();
+
+		// Check if any status changes happened
+		foreach ( $order_statuses as $slug => $name ) {
+
+			if ( isset( $_REQUEST[ 'marked_' . str_replace( 'wc-', '', $slug ) ] ) ) {
+
+				$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
 				$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . $message . '</p></div>';
+
+				break;
 			}
 		}
+
 	}
 
 
