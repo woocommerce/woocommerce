@@ -133,7 +133,7 @@ final class WooCommerce {
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
-		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
+		add_action( 'widgets_init', array( $this, 'widget_includes' ) );
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
@@ -251,11 +251,8 @@ final class WooCommerce {
 	 * Include required frontend files.
 	 */
 	public function frontend_includes() {
-		// Functions
 		include_once( 'includes/wc-cart-functions.php' );
 		include_once( 'includes/wc-notice-functions.php' );
-
-		// Classes
 		include_once( 'includes/abstracts/abstract-wc-session.php' );
 		include_once( 'includes/class-wc-session-handler.php' );
 		include_once( 'includes/wc-template-hooks.php' );
@@ -281,7 +278,7 @@ final class WooCommerce {
 	/**
 	 * Include core widgets
 	 */
-	public function include_widgets() {
+	public function widget_includes() {
 		include_once( 'includes/abstracts/abstract-wc-widget.php' );
 		include_once( 'includes/widgets/class-wc-widget-cart.php' );
 		include_once( 'includes/widgets/class-wc-widget-layered-nav-filters.php' );
