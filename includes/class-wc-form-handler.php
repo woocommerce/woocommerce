@@ -828,7 +828,6 @@ class WC_Form_Handler {
 
 		// process lost password form
 		if ( isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'lost_password' ) ) {
-
 			WC_Shortcode_My_Account::retrieve_password();
 		}
 
@@ -839,19 +838,12 @@ class WC_Form_Handler {
 			$user = WC_Shortcode_My_Account::check_password_reset_key( $_POST['reset_key'], $_POST['reset_login'] );
 
 			if ( is_object( $user ) ) {
-
-				// save these values into the form again in case of errors
-				$args['key']   = wc_clean( $_POST['reset_key'] );
-				$args['login'] = wc_clean( $_POST['reset_login'] );
-
 				if ( empty( $_POST['password_1'] ) || empty( $_POST['password_2'] ) ) {
 					wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
-					$args['form'] = 'reset_password';
 				}
 
 				if ( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] ) {
 					wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
-					$args['form'] = 'reset_password';
 				}
 
 				$errors = new WP_Error();
