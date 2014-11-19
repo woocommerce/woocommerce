@@ -375,14 +375,38 @@ class WC_Form_Handler {
 		// Remove from cart
 		elseif ( ! empty( $_GET['remove_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
 
-			WC()->cart->set_quantity( $_GET['remove_item'], 0 );
+			$cart_item_key = $_GET['remove_item'];
+			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
+			$product       = wc_get_product( $cart_item['product_id'] );
 
-			wc_add_notice( __( 'Cart updated.', 'woocommerce' ) );
+			WC()->cart->set_quantity( $cart_item_key, 0 );
 
-			$referer = wp_get_referer() ? remove_query_arg( array( 'add-to-cart', 'remove_item' ), wp_get_referer() ) : WC()->cart->get_cart_url();
+			if ( $product->product_type != 'variable' ) {
+				$undo = WC()->cart->get_undo_url( $cart_item['product_id'], $cart_item['quantity'] );
+			} else {
+				$undo = WC()->cart->get_undo_url( $cart_item['product_id'], $cart_item['quantity'], $cart_item['variation_id'], $cart_item['variation'] );
+			}
+
+			wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $product->get_title(), '<a href="' . $undo . '">', '</a>' ) );
+			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item' ), wp_get_referer() ) : WC()->cart->get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
 
+		}
+
+		//Undo Cart Item
+		elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+			$product = wc_get_product( $_GET['undo_item'] );
+
+			if ( $product->product_type != 'variable' ) {
+				WC()->cart->add_to_cart( $_GET['undo_item'], $_GET['quantity'] );
+			} else {
+				WC()->cart->add_to_cart( $_GET['undo_item'], $_GET['quantity'], $_GET['variation_id'], $_GET['variation'] );
+			}
+
+			$referer  = wp_get_referer() ? remove_query_arg( array( 'undo_item', 'quantity', 'variation_id', 'variation', '_wpnonce' ), wp_get_referer() ) : WC()->cart->get_cart_url();
+			wp_safe_redirect( $referer );
+			exit;
 		}
 
 		// Update Cart - checks apply_coupon too because they are in the same form

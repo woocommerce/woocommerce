@@ -659,6 +659,28 @@ class WC_Cart {
 		}
 
 		/**
+		 * Gets the url to re-add an item into the cart.
+		 *
+		 * @param int product_id
+		 * @param int quantity
+		 * @param int variation_id
+		 * @param object variation
+		 * @return string url to page
+		 */
+		public function get_undo_url( $product_id, $quantity = 1, $variation_id = '', $variation = '' ) {
+			$cart_page_id = wc_get_page_id('cart');
+
+			$query_args = array(
+				'undo_item'    => $product_id,
+				'quantity'     => $quantity,
+				'variation'    => $variation,
+				'variation_id' => $variation_id
+			);
+
+			return apply_filters( 'woocommerce_get_undo_url', $cart_page_id ? wp_nonce_url( add_query_arg( $query_args, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) : '' );
+		}
+
+		/**
 		 * Returns the contents of the cart in an array.
 		 *
 		 * @return array contents of the cart
@@ -684,6 +706,19 @@ class WC_Cart {
 			}
 
 			return $cart_session;
+		}
+
+		/**
+		 * Returns a specific itme in the cart
+		 *
+		 * @return array item data
+		 */
+		public function get_cart_item( $item_key ) {
+			if ( isset( $this->cart_contents[ $item_key ] ) ) {
+				return $this->cart_contents[ $item_key ];
+			}
+
+			return false;
 		}
 
 		/**
