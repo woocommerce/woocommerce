@@ -164,28 +164,30 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Define constant if not already set
+	 * @param  string $name
+	 * @param  string $value
+	 */
+	private function define( $name, $value ) {
+		if ( ! defined( $name ) ) {
+			define( $name, $value );
+		}
+	}
+
+	/**
 	 * Define WC Constants
 	 */
 	private function define_constants() {
-		define( 'WC_PLUGIN_FILE', __FILE__ );
-		define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
-		define( 'WC_VERSION', $this->version );
-		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compatibility
+		$upload_dir = wp_upload_dir();
 
-		if ( ! defined( 'WC_ROUNDING_PRECISION' ) ) {
-			define( 'WC_ROUNDING_PRECISION', 4 );
-		}
-		if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) ) {
-			// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
-			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 );
-		}
-		if ( ! defined( 'WC_DELIMITER' ) ) {
-			define( 'WC_DELIMITER', '|' );
-		}
-		if ( ! defined( 'WC_LOG_DIR' ) ) {
-			$upload_dir = wp_upload_dir();
-			define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
-		}
+		$this->define( 'WC_PLUGIN_FILE', __FILE__ );
+		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+		$this->define( 'WC_VERSION', $this->version );
+		$this->define( 'WOOCOMMERCE_VERSION', $this->version );
+		$this->define( 'WC_ROUNDING_PRECISION', 4 );
+		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
+		$this->define( 'WC_DELIMITER', '|' );
+		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 	}
 
 	/**
@@ -305,13 +307,11 @@ final class WooCommerce {
 		$this->load_plugin_textdomain();
 
 		// Template debug mode
-		if ( ! defined( 'WC_TEMPLATE_DEBUG_MODE' ) ) {
-			$status_options = get_option( 'woocommerce_status_options', array() );
-			if ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) {
-				define( 'WC_TEMPLATE_DEBUG_MODE', true );
-			} else {
-				define( 'WC_TEMPLATE_DEBUG_MODE', false );
-			}
+		$status_options = get_option( 'woocommerce_status_options', array() );
+		if ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) {
+			$this->define( 'WC_TEMPLATE_DEBUG_MODE', true );
+		} else {
+			$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
 		}
 
 		// Load class instances
@@ -393,9 +393,7 @@ final class WooCommerce {
 		/**
 		 * @deprecated 2.2 Use WC()->template_path()
 		 */
-		if ( ! defined( 'WC_TEMPLATE_PATH' ) ) {
-			define( 'WC_TEMPLATE_PATH', $this->template_path() );
-		}
+		$this->define( 'WC_TEMPLATE_PATH', $this->template_path() );
 
 		$this->add_thumbnail_support();
 		$this->add_image_sizes();
