@@ -149,7 +149,8 @@ final class WooCommerce {
 		if ( method_exists( $this, $key ) ) {
 			return $this->$key();
 		}
-		else switch( $key ) {
+
+		switch( $key ) {
 			case 'template_url':
 				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'Use WC()->template_path()' );
 				return $this->template_path();
