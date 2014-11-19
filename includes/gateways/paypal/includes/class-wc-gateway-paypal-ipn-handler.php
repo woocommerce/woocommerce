@@ -19,6 +19,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	public function __construct( $sandbox = false, $receiver_email = '' ) {
 		add_action( 'woocommerce_api_wc_gateway_paypal', array( $this, 'check_response' ) );
+		add_action( 'valid-paypal-standard-ipn-request', array( $this, 'valid_response' ) );
 
 		$this->receiver_email = $receiver_email;
 		$this->sandbox        = $sandbox;
@@ -28,47 +29,49 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * Check for PayPal IPN Response
 	 */
 	public function check_response() {
-		$ipn_response = ! empty( $_POST ) ? $_POST : false;
+		if ( ! empty( $_POST ) && $this->validate_ipn() ) {
+			$posted = stripslashes_deep( $_POST );
 
-		if ( $ipn_response && $this->validate_ipn( $ipn_response ) ) {
-			do_action( "valid-paypal-standard-ipn-request", $ipn_response );
-
-			$posted = stripslashes_deep( $ipn_response );
-
-			// Custom holds post ID
-			if ( ! empty( $posted['custom'] ) && ( $order = $this->get_paypal_order( $posted['custom'] ) ) ) {
-
-				// Lowercase returned variables
-				$posted['payment_status'] = strtolower( $posted['payment_status'] );
-
-				// Sandbox fix
-				if ( 1 == $posted['test_ipn'] && 'pending' == $posted['payment_status'] ) {
-					$posted['payment_status'] = 'completed';
-				}
-
-				$this->log( 'Found order #' . $order->id );
-				$this->log( 'Payment status: ' . $posted['payment_status'] );
-
-				if ( method_exists( __CLASS__, 'payment_status_' . $posted['payment_status'] ) ) {
-					call_user_func( array( __CLASS__, 'payment_status_' . $posted['payment_status'] ), $order, $posted );
-				}
-
-				exit;
-			}
+			do_action( "valid-paypal-standard-ipn-request", $posted );
+			exit;
 		}
 
 		wp_die( "PayPal IPN Request Failure", "PayPal IPN", array( 'response' => 200 ) );
 	}
 
 	/**
+	 * There was a valid response
+	 * @param  array $posted Post data after stripslashes_deep
+	 */
+	public function valid_response( $posted ) {
+		if ( ! empty( $posted['custom'] ) && ( $order = $this->get_paypal_order( $posted['custom'] ) ) ) {
+
+			// Lowercase returned variables
+			$posted['payment_status'] = strtolower( $posted['payment_status'] );
+
+			// Sandbox fix
+			if ( 1 == $posted['test_ipn'] && 'pending' == $posted['payment_status'] ) {
+				$posted['payment_status'] = 'completed';
+			}
+
+			$this->log( 'Found order #' . $order->id );
+			$this->log( 'Payment status: ' . $posted['payment_status'] );
+
+			if ( method_exists( __CLASS__, 'payment_status_' . $posted['payment_status'] ) ) {
+				call_user_func( array( __CLASS__, 'payment_status_' . $posted['payment_status'] ), $order, $posted );
+			}
+		}
+	}
+
+	/**
 	 * Check PayPal IPN validity
 	 */
-	public function validate_ipn( $ipn_response ) {
+	public function validate_ipn() {
 		$this->log( 'Checking IPN response is valid' );
 
 		// Get received values from post data
 		$validate_ipn = array( 'cmd' => '_notify-validate' );
-		$validate_ipn += stripslashes_deep( $ipn_response );
+		$validate_ipn += stripslashes_deep( $_POST );
 
 		// Send back post vars to paypal
 		$params = array(
