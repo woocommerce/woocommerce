@@ -135,11 +135,15 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Print styles for reports.
 * Feature - Remove products from the cart in the widget.
 * Feature - Bulk edit sales schedule on variations.
+* Feature - Fresh new frontend design.
+* Feature - Undo link in message when removing products from the cart.
 * Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
 * Refactor - Routing all email functionality through one send() method.
 * Refactor - Replaced existing email css inliner with Emogrifier.
 * Refactor - get_product_search_form().
 * Refactor - Improved the Shipping Class field in products quick edit and bulk edit.
+* Refactor - Removed style settings in favour of separate plugin.
+* Refactor - Removed quantity increment/decrement buttons in favour of separate plugin.
 * Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
 * Tweak - Double the default product image dimensions.
 * Tweak - Added refunds to Sales by Date report.
@@ -150,8 +154,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Recent order table on my account is responsive.
 * Tweak - Drop WC tables in wpmu_drop_tables (for multisite).
 * Tweak - Removed quantity increment/decrement buttons.
+* Tweak - Moved 'Proceed to checkout' button on cart to beneath totals.
+* Tweak - Improved 'responsiveness' of product data tabs on add/edit product screen.
 * Dev - Made template debug mode set WC_TEMPLATE_DEBUG_MODE constant and remove all overrides for all template loading functions.
 * Dev - Switched to .scss from .less for all styles.
+* Dev - Included bourbon for scss mixins.
 * Localisation - Add Ukrainian currency and symbol.
 
 = 2.2.5 - 07/10/2014 =
