@@ -601,3 +601,17 @@ function wc_format_phone_number( $tel ) {
 function wc_strtolower( $string ) {
 	return function_exists( 'mb_strtolower' ) ? mb_strtolower( $string ) : strtolower( $string );
 }
+
+/**
+ * Trim a string and append a suffix
+ * @param  string  $string
+ * @param  integer $chars
+ * @param  string  $suffix
+ * @return string
+ */
+function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
+	if ( strlen( $string ) > $chars ) {
+		$string = substr( $string, 0, ( $chars - strlen( $suffix ) ) ) . $suffix;
+	}
+	return $string;
+}
