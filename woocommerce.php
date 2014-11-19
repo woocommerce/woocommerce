@@ -177,7 +177,7 @@ final class WooCommerce {
 	/**
 	 * Auto-load WC classes on demand to reduce memory consumption.
 	 *
-	 * @param mixed $class
+	 * @param string $class
 	 */
 	public function autoload( $class ) {
 		$path  = null;
@@ -416,31 +416,26 @@ final class WooCommerce {
 	/**
 	 * Load Localisation files.
 	 *
-	 * Note: the first-loaded translation file overrides any following ones if the same translation is present
+	 * Note: the first-loaded translation file overrides any following ones if the same translation is present.
+	 *
+	 * Admin Locales are found in:
+	 * 		- WP_LANG_DIR/woocommerce/woocommerce-admin-LOCALE.mo
+	 * 		- WP_LANG_DIR/plugins/woocommerce-admin-LOCALE.mo
+	 *
+	 * Frontend/global Locales found in:
+	 * 		- WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
+	 * 	 	- woocommerce/i18n/languages/woocommerce-LOCALE.mo (which if not found falls back to:)
+	 * 	 	- WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
-		$dir    = trailingslashit( WP_LANG_DIR );
 
-		/**
-		 * Admin Locale. Looks in:
-		 *
-		 * 		- WP_LANG_DIR/woocommerce/woocommerce-admin-LOCALE.mo
-		 * 		- WP_LANG_DIR/plugins/woocommerce-admin-LOCALE.mo
-		 */
 		if ( is_admin() ) {
-			load_textdomain( 'woocommerce', $dir . 'woocommerce/woocommerce-admin-' . $locale . '.mo' );
-			load_textdomain( 'woocommerce', $dir . 'plugins/woocommerce-admin-' . $locale . '.mo' );
+			load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-admin-' . $locale . '.mo' );
+			load_textdomain( 'woocommerce', WP_LANG_DIR . '/plugins/woocommerce-admin-' . $locale . '.mo' );
 		}
 
-		/**
-		 * Frontend/global Locale. Looks in:
-		 *
-		 * 		- WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
-		 * 	 	- woocommerce/i18n/languages/woocommerce-LOCALE.mo (which if not found falls back to:)
-		 * 	 	- WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
-		 */
-		load_textdomain( 'woocommerce', $dir . 'woocommerce/woocommerce-' . $locale . '.mo' );
+		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
 		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
 	}
 
@@ -498,13 +493,12 @@ final class WooCommerce {
 			$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_REMOTE_ADDR'];
 		}
 
-		if ( ! isset( $_SERVER['HTTPS'] ) && ! empty( $_SERVER['HTTP_HTTPS'] ) ) {
-			$_SERVER['HTTPS'] = $_SERVER['HTTP_HTTPS'];
-		}
-
-		// Support for hosts which don't use HTTPS, and use HTTP_X_FORWARDED_PROTO
-		if ( ! isset( $_SERVER['HTTPS'] ) && ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' ) {
-			$_SERVER['HTTPS'] = '1';
+		if ( ! isset( $_SERVER['HTTPS'] ) ) {
+			if ( ! empty( $_SERVER['HTTP_HTTPS'] ) ) {
+				$_SERVER['HTTPS'] = $_SERVER['HTTP_HTTPS'];
+			} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' ) {
+				$_SERVER['HTTPS'] = '1';
+			}
 		}
 	}
 
