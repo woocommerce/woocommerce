@@ -612,6 +612,229 @@ class WC_Tax {
 	}
 
 	/**
+	 * format the postcodes
+	 * @param  string $state
+	 * @return string
+	 */
+	private static function format_tax_rate_postcode( $postcode ) {
+		return strtoupper( trim( $postcode ) );
+	}
+
+	/**
+	 * format the city
+	 * @param  string $state
+	 * @return string
+	 */
+	private static function format_tax_rate_city( $city ) {
+		return strtoupper( trim( $city ) );
+	}
+
+	/**
+	 * format the state
+	 * @param  string $state
+	 * @return string
+	 */
+	private static function format_tax_rate_state( $state ) {
+		$state = strtoupper( $state );
+		return $state === '*' ? '' : $state;
+	}
+
+	/**
+	 * format the country
+	 * @param  string $state
+	 * @return string
+	 */
+	private static function format_tax_rate_country( $country ) {
+		$country = strtoupper( $country );
+		return $country === '*' ? '' : $country;
+	}
+
+	/**
+	 * format the tax rate name
+	 * @param  string $state
+	 * @return string
+	 */
+	private static function format_tax_rate_name( $name ) {
+		return $name ? $name : __( 'Tax', 'woocommerce' );
+	}
+
+	/**
+	 * format the rate
+	 * @param  string $state
+	 * @return float
+	 */
+	private static function format_tax_rate( $rate ) {
+		return number_format( (double) $rate, 4, '.', '' );
+	}
+
+	/**
+	 * format the priority
+	 * @param  string $priority
+	 * @return int
+	 */
+	private static function format_tax_rate_priority( $priority ) {
+		return absint( $priority );
+	}
+
+	/**
+	 * format the class
+	 * @param  string $class
+	 * @return string
+	 */
+	private static function format_tax_rate_class( $class ) {
+		$class = sanitize_title( $class );
+		return $class === 'standard' ? '' : $class;
+	}
+
+	/**
+	 * Prepare and format tax rate for DB insursion
+	 * @param  array $tax_rate
+	 * @return array
+	 */
+	private static function prepare_tax_rate( $tax_rate ) {
+		foreach ( $tax_rate as $key => $value ) {
+			if ( method_exists( __CLASS__, 'format_' . $key ) ) {
+				$tax_rate[ $key ] = call_user_func( array( __CLASS__, 'format_' . $key ), $value );
+			}
+		}
+		return $tax_rate;
+	}
+
+	/**
+	 * Insert a new tax rate
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 *
+	 * @param  array $tax_rate
+	 * @return  int tax rate id
+	 */
+	public static function _insert_tax_rate( $tax_rate ) {
+		global $wpdb;
+
+		$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', self::prepare_tax_rate( $tax_rate ) );
+
+		do_action( 'woocommerce_tax_rate_added', $wpdb->insert_id, $tax_rate );
+
+		return $wpdb->insert_id;
+	}
+
+	/**
+	 * Update a tax rate
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 *
+	 * @param  int $tax_rate_id
+	 * @param  array $tax_rate
+	 */
+	public static function _update_tax_rate( $tax_rate_id, $tax_rate ) {
+		global $wpdb;
+
+		$tax_rate_id = absint( $tax_rate_id );
+
+		$wpdb->update(
+			$wpdb->prefix . "woocommerce_tax_rates",
+			self::prepare_tax_rate( $tax_rate ),
+			array(
+				'tax_rate_id' => $tax_rate_id
+			)
+		);
+
+		do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $tax_rate );
+	}
+
+	/**
+	 * Delete a tax rate from the database
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 *
+	 * @param  int $tax_rate_id
+	 */
+	public static function _delete_tax_rate( $tax_rate_id ) {
+		global $wpdb;
+
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
+
+		do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
+	}
+
+	/**
+	 * Update postcodes for a tax rate in the DB
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 *
+	 * @param  int $tax_rate_id
+	 * @param  string $postcodes String of postcodes separated by ; characters
+	 * @return string
+	 */
+	public static function _update_tax_rate_postcodes( $tax_rate_id, $postcodes ) {
+		global $wpdb;
+
+		$postcodes = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_postcode' ), explode( ';', $postcodes ) ), array( '*' ) ) );
+		$postcodes = self::_get_expanded_numeric_ranges_from_array( $postcodes );
+
+		$wpdb->query(
+			$wpdb->prepare( "
+				DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'postcode';
+				", $tax_rate_id
+			)
+		);
+
+		if ( sizeof( $postcodes > 0 ) ) {
+			$sql = "( '" . implode( "', $tax_rate_id, 'postcode' ),( '", array_map( 'esc_sql', $postcodes ) ) . "', $tax_rate_id, 'postcode' )";
+
+			$wpdb->query( "
+				INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES $sql;
+				" );
+		}
+	}
+
+	/**
+	 * Update cities for a tax rate in the DB
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 *
+	 * @param  int $tax_rate_id
+	 * @param  string $cities
+	 * @return string
+	 */
+	public static function _update_tax_rate_cities( $tax_rate_id, $cities ) {
+		global $wpdb;
+
+		$cities = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_city' ), explode( ';', $cities ) ), array( '*' ) ) );
+
+		$wpdb->query(
+			$wpdb->prepare( "
+				DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'city';
+				", $tax_rate_id
+			)
+		);
+
+		if ( sizeof( $cities > 0 ) ) {
+			$sql = "( '" . implode( "', $tax_rate_id, 'city' ),( '", array_map( 'esc_sql', $cities ) ) . "', $tax_rate_id, 'city' )";
+
+			$wpdb->query( "
+				INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES $sql;
+				" );
+		}
+	}
+
+	/**
 	 * Expands ranges in an array (used for zipcodes). e.g. 101-105 would expand to 101, 102, 103, 104, 105
 	 *
 	 * Internal use only.
@@ -622,19 +845,17 @@ class WC_Tax {
 	 * @param  array  $values array of values
 	 * @return array expanded values
 	 */
-	public static function _get_expanded_numeric_ranges_from_array( $values = array() ) {
+	private static function _get_expanded_numeric_ranges_from_array( $values = array() ) {
 		$expanded = array();
 		foreach ( $values as $value ) {
 			if ( strstr( $value, '-' ) ) {
-				$parts = array_map( 'trim', explode( '-', $value ) );
+				$parts = array_map( 'absint', array_map( 'trim', explode( '-', $value ) ) );
 
-				if ( is_numeric( $parts[0] ) && is_numeric( $parts[1] ) && $parts[1] > $parts[0] ) {
-					for ( $expanded_value = $parts[0]; $expanded_value <= $parts[1]; $expanded_value ++ ) {
-						if ( strlen( $expanded_value ) < strlen( $parts[0] ) ) {
-							$expanded_value = str_pad( $expanded_value, strlen( $parts[0] ), "0", STR_PAD_LEFT );
-						}
-						$expanded[] = $expanded_value;
+				for ( $expanded_value = $parts[0]; $expanded_value <= $parts[1]; $expanded_value ++ ) {
+					if ( strlen( $expanded_value ) < strlen( $parts[0] ) ) {
+						$expanded_value = str_pad( $expanded_value, strlen( $parts[0] ), "0", STR_PAD_LEFT );
 					}
+					$expanded[] = $expanded_value;
 				}
 			} else {
 				$expanded[] = trim( $value );
