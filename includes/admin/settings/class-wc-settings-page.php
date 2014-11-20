@@ -17,10 +17,20 @@ if ( ! class_exists( 'WC_Settings_Page' ) ) :
 /**
  * WC_Settings_Page
  */
-class WC_Settings_Page {
+abstract class WC_Settings_Page {
 
 	protected $id    = '';
 	protected $label = '';
+
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
+		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
+		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
+		add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
+	}
 
 	/**
 	 * Add this page to settings
