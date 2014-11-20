@@ -523,6 +523,47 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
+	 * Insert a tax rate
+	 * @param  array $_tax_rate
+	 * @return  int tax rate id
+	 */
+	private function insert_tax_rate( $_tax_rate ) {
+		global $wpdb;
+
+		$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', $_tax_rate );
+
+		$tax_rate_id = $wpdb->insert_id;
+
+		do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $_tax_rate );
+
+		return $tax_rate_id;
+	}
+
+	/**
+	 * Update a tax rate
+	 * @param  int $tax_rate_id
+	 * @param  array $_tax_rate
+	 * @return  int tax rate id
+	 */
+	private function update_tax_rate( $tax_rate_id, $_tax_rate ) {
+		global $wpdb;
+
+		$tax_rate_id = absint( $tax_rate_id );
+
+		$wpdb->update(
+			$wpdb->prefix . "woocommerce_tax_rates",
+			$_tax_rate,
+			array(
+				'tax_rate_id' => $tax_rate_id
+			)
+		);
+
+		do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $_tax_rate );
+
+		return $tax_rate_id;
+	}
+
+	/**
 	 * Delete a tax rate from the database
 	 * @param  int $tax_rate_id
 	 */
@@ -660,17 +701,14 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save tax rates
+	 * Get a posted tax rate
+	 * @param  string $key   Key of tax rate in the post data array
+	 * @param  int $order Position/order of rate
+	 * @param  string $class Tax class for rate
+	 * @return array
 	 */
-	public function save_tax_rates() {
-		global $wpdb;
-
-		if ( empty( $_POST['tax_rate_country'] ) ) {
-			return;
-		}
-
-		$current_class = sanitize_title( $this->get_current_tax_class() );
-		$i             = 0;
+	private function get_posted_tax_rate( $key, $order, $class ) {
+		$_tax_rate     = array();
 		$tax_rate_keys = array(
 			'tax_rate_country',
 			'tax_rate_state',
@@ -679,50 +717,50 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			'tax_rate_priority'
 		);
 
+		foreach ( $tax_rate_keys as $tax_rate_key ) {
+			if ( isset( $_POST[ $tax_rate_key ] ) && isset( $_POST[ $tax_rate_key ][ $key ] ) ) {
+				$_tax_rate[ $tax_rate_key ] = wc_clean( $_POST[ $tax_rate_key ][ $key ] );
+
+				if ( method_exists( $this, 'format_' . $tax_rate_key ) ) {
+					$_tax_rate[ $tax_rate_key ] = call_user_func( array( $this, 'format_' . $tax_rate_key ), $_tax_rate[ $tax_rate_key ] );
+				}
+			}
+		}
+
+		$_tax_rate['tax_rate_compound'] = isset( $_POST['tax_rate_compound'][ $key ] ) ? 1 : 0;
+		$_tax_rate['tax_rate_shipping'] = isset( $_POST['tax_rate_shipping'][ $key ] ) ? 1 : 0;
+		$_tax_rate['tax_rate_order']    = $order;
+		$_tax_rate['tax_rate_class']    = $class;
+
+		return $_tax_rate;
+	}
+
+	/**
+	 * Save tax rates
+	 */
+	public function save_tax_rates() {
+		if ( empty( $_POST['tax_rate_country'] ) ) {
+			return;
+		}
+
+		$current_class = sanitize_title( $this->get_current_tax_class() );
+		$index         = 0;
+
 		// Loop posted fields
 		foreach ( $_POST['tax_rate_country'] as $key => $value ) {
 			$mode          = 0 === strpos( $key, 'new-' ) ? 'insert' : 'update';
-			$_tax_rate     = array();
-
-			foreach ( $tax_rate_keys as $tax_rate_key ) {
-				if ( isset( $_POST[ $tax_rate_key ] ) && isset( $_POST[ $tax_rate_key ][ $key ] ) ) {
-					$_tax_rate[ $tax_rate_key ] = wc_clean( $_POST[ $tax_rate_key ][ $key ] );
-
-					if ( method_exists( $this, 'format_' . $tax_rate_key ) ) {
-						$_tax_rate[ $tax_rate_key ] = call_user_func( array( $this, 'format_' . $tax_rate_key ), $_tax_rate[ $tax_rate_key ] );
-					}
-				}
-			}
-
-			$_tax_rate['tax_rate_compound'] = isset( $_POST['tax_rate_compound'][ $key ] ) ? 1 : 0;
-			$_tax_rate['tax_rate_shipping'] = isset( $_POST['tax_rate_shipping'][ $key ] ) ? 1 : 0;
-			$_tax_rate['tax_rate_order']    = $i ++;
-			$_tax_rate['tax_rate_class']    = $current_class;
+			$_tax_rate     = $this->get_posted_tax_rate( $key, $index ++, $current_class );
 
 			if ( 'insert' === $mode ) {
-				$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', $_tax_rate );
-
-				$tax_rate_id = $wpdb->insert_id;
-
-				do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $_tax_rate );
-
+				$tax_rate_id = $this->insert_tax_rate( $_tax_rate );
 			} else {
-				$tax_rate_id = absint( $key );
-
+				// Remove rates
 				if ( 1 == $_POST['remove_tax_rate'][ $key ] ) {
 					$this->delete_tax_rate( $tax_rate_id );
 					continue;
 				}
 
-				$wpdb->update(
-					$wpdb->prefix . "woocommerce_tax_rates",
-					$_tax_rate,
-					array(
-						'tax_rate_id' => $tax_rate_id
-					)
-				);
-
-				do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $_tax_rate );
+				$tax_rate_id = $this->update_tax_rate( $key, $_tax_rate );
 			}
 
 			if ( isset( $_POST['tax_rate_postcode'][ $key ] ) ) {
