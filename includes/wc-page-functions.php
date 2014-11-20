@@ -116,36 +116,35 @@ function wc_customer_edit_account_url() {
  * Hide menu items conditionally
  *
  * @param array $items
- * @param mixed $args
  * @return array
  */
-function wc_nav_menu_items( $items, $args ) {
+function wc_nav_menu_items( $items ) {
 	if ( ! is_user_logged_in() ) {
-
-		$hide_pages   = array();
-		$hide_pages[] = (int) wc_get_page_id( 'logout' );
-		$hide_pages   = apply_filters( 'woocommerce_logged_out_hidden_page_ids', $hide_pages );
+		$customer_logout = get_option( 'woocommerce_logout_endpoint', 'customer-logout' );
 
 		foreach ( $items as $key => $item ) {
-			if ( strstr( $item->url, 'customer-logout' ) )
+			if ( strstr( $item->url, $customer_logout ) ) {
 				unset( $items[ $key ] );
+			}
 		}
 	}
+
     return $items;
 }
-add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_items', 10, 2 );
+add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_items', 10 );
 
 
 /**
  * Fix active class in nav for shop page.
  *
  * @param array $menu_items
- * @param array $args
  * @return array
  */
-function wc_nav_menu_item_classes( $menu_items, $args ) {
+function wc_nav_menu_item_classes( $menu_items ) {
 
-	if ( ! is_woocommerce() ) return $menu_items;
+	if ( ! is_woocommerce() ) {
+		return $menu_items;
+	}
 
 	$shop_page 		= (int) wc_get_page_id('shop');
 	$page_for_posts = (int) get_option( 'page_for_posts' );
@@ -158,15 +157,17 @@ function wc_nav_menu_item_classes( $menu_items, $args ) {
 		if ( $page_for_posts == $menu_item->object_id ) {
 			$menu_items[$key]->current = false;
 
-			if ( in_array( 'current_page_parent', $classes ) )
+			if ( in_array( 'current_page_parent', $classes ) ) {
 				unset( $classes[ array_search('current_page_parent', $classes) ] );
+			}
 
-			if ( in_array( 'current-menu-item', $classes ) )
+			if ( in_array( 'current-menu-item', $classes ) ) {
 				unset( $classes[ array_search('current-menu-item', $classes) ] );
+			}
 
 		// Set active state if this is the shop page link
 		} elseif ( is_shop() && $shop_page == $menu_item->object_id ) {
-			$menu_items[$key]->current = true;
+			$menu_items[ $key ]->current = true;
 			$classes[] = 'current-menu-item';
 			$classes[] = 'current_page_item';
 
@@ -175,13 +176,13 @@ function wc_nav_menu_item_classes( $menu_items, $args ) {
 			$classes[] = 'current_page_parent';
 		}
 
-		$menu_items[$key]->classes = array_unique( $classes );
+		$menu_items[ $key ]->classes = array_unique( $classes );
 
 	}
 
 	return $menu_items;
 }
-add_filter( 'wp_nav_menu_objects',  'wc_nav_menu_item_classes', 2, 20 );
+add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_item_classes', 2 );
 
 
 /**

@@ -150,7 +150,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_order_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
-			'subtotal'                  => wc_format_decimal( $order->get_subtotal( $order ), 2 ),
+			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), 2 ),
 			'total_line_items_quantity' => $order->get_item_count(),
 			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), 2 ),
 			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), 2 ),
@@ -529,7 +529,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 							$this->set_item( $order, $line_type, $item, 'create' );
 
-						} elseif ( $this->item_is_null( $item, $line_type ) ) {
+						} elseif ( $this->item_is_null( $item ) ) {
 
 							// delete item
 							wc_delete_order_item( $item['id'] );

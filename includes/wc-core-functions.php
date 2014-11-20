@@ -569,8 +569,7 @@ function wc_get_log_file_path( $handle ) {
  * Init for our rewrite rule fixes
  */
 function wc_fix_rewrite_rules_init() {
-	$permalinks        = get_option( 'woocommerce_permalinks' );
-	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+	$permalinks = get_option( 'woocommerce_permalinks' );
 
 	if ( ! empty( $permalinks['use_verbose_page_rules'] ) ) {
 		$GLOBALS['wp_rewrite']->use_verbose_page_rules = true;

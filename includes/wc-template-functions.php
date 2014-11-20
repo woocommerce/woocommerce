@@ -614,10 +614,11 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $placeholder_width = 0, $placeholder_height = 0  ) {
 		global $post;
 
-		if ( has_post_thumbnail() )
+		if ( has_post_thumbnail() ) {
 			return get_the_post_thumbnail( $post->ID, $size );
-		elseif ( wc_placeholder_img_src() )
+		} elseif ( wc_placeholder_img_src() ) {
 			return wc_placeholder_img( $size );
+		}
 	}
 }
 

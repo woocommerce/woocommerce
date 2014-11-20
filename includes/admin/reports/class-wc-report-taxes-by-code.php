@@ -14,9 +14,6 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-
-		$legend   = array();
-
 		return array();
 	}
 

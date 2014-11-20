@@ -265,9 +265,12 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function shipping_to_prefix() {
-		$return = '';
-		if (in_array(WC()->customer->get_shipping_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __( 'to the', 'woocommerce' );
-		else $return = __( 'to', 'woocommerce' );
+		if ( in_array( WC()->customer->get_shipping_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ) ) ) {
+			$return = __( 'to the', 'woocommerce' );
+		} else {
+			$return = __( 'to', 'woocommerce' );
+		}
+
 		return apply_filters('woocommerce_countries_shipping_to_prefix', $return, WC()->customer->get_shipping_country());
 	}
 

@@ -542,11 +542,10 @@ add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_chan
  * that takes catalog visibility into account.
  *
  * @param array $terms
- * @param mixed $taxonomies
- * @param mixed $args
+ * @param string|array $taxonomies
  * @return array
  */
-function wc_change_term_counts( $terms, $taxonomies, $args ) {
+function wc_change_term_counts( $terms, $taxonomies ) {
 	if ( is_admin() || is_ajax() ) {
 		return $terms;
 	}
@@ -574,4 +573,4 @@ function wc_change_term_counts( $terms, $taxonomies, $args ) {
 
 	return $terms;
 }
-add_filter( 'get_terms', 'wc_change_term_counts', 10, 3 );
+add_filter( 'get_terms', 'wc_change_term_counts', 10, 2 );

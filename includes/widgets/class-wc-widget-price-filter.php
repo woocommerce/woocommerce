@@ -97,9 +97,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			}
 		}
 
-		$min = $max = 0;
-		$post_min = $post_max = '';
-
 		if ( 0 === sizeof( WC()->query->layered_nav_product_ids ) ) {
 			$min = floor( $wpdb->get_var(
 				$wpdb->prepare('

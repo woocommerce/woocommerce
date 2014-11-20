@@ -45,20 +45,22 @@ function wc_empty_cart() {
 /**
  * Load the cart upon login
  *
- * @param mixed $user_login
- * @param integer $user
- * @return void
+ * @param string $user_login
+ * @param WP_User $user
  */
-function wc_load_persistent_cart( $user_login, $user = 0 ) {
+function wc_load_persistent_cart( $user_login, $user ) {
 
-	if ( ! $user )
+	if ( ! $user ) {
 		return;
+	}
 
 	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true );
 
-	if ( $saved_cart )
-		if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) == 0 )
+	if ( $saved_cart ) {
+		if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) == 0 ) {
 			WC()->session->cart = $saved_cart['cart'];
+		}
+	}
 }
 add_action( 'wp_login', 'wc_load_persistent_cart', 1, 2 );
 

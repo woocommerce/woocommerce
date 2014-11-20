@@ -63,11 +63,9 @@ class WC_Webhook {
 	 *
 	 * @since 2.2
 	 * @param string $key
-	 * @return mixed|null|void value
+	 * @return mixed value
 	 */
 	public function __get( $key ) {
-
-		$value = null;
 
 		if ( 'status' === $key ) {
 			$value = $this->get_status();

@@ -429,8 +429,6 @@ class WC_Query {
 	public function get_products_in_view() {
 		global $wp_the_query;
 
-		$unfiltered_product_ids = array();
-
 		// Get main query
 		$current_wp_query = $wp_the_query->query;
 

@@ -458,18 +458,21 @@ class WC_API_Server {
 			$data = array();
 
 			$route = preg_replace( '#\(\?P(<\w+?>).*?\)#', '$1', $route );
-			$methods = array();
+
 			foreach ( self::$method_map as $name => $bitmask ) {
 				foreach ( $callbacks as $callback ) {
 					// Skip to the next route if any callback is hidden
-					if ( $callback[1] & self::HIDDEN_ENDPOINT )
+					if ( $callback[1] & self::HIDDEN_ENDPOINT ) {
 						continue 3;
+					}
 
-					if ( $callback[1] & $bitmask )
+					if ( $callback[1] & $bitmask ) {
 						$data['supports'][] = $name;
+					}
 
-					if ( $callback[1] & self::ACCEPT_DATA )
+					if ( $callback[1] & self::ACCEPT_DATA ) {
 						$data['accepts_data'] = true;
+					}
 
 					// For non-variable routes, generate links
 					if ( strpos( $route, '<' ) === false ) {
@@ -479,8 +482,10 @@ class WC_API_Server {
 					}
 				}
 			}
+
 			$available['store']['routes'][ $route ] = apply_filters( 'woocommerce_api_endpoints_description', $data );
 		}
+
 		return apply_filters( 'woocommerce_api_index', $available );
 	}
 

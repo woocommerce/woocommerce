@@ -201,10 +201,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			WC_Admin_Settings::save_fields( $settings );
 
 		} else {
-
-			// Load mailer
-			$mailer = WC()->mailer();
-
 			if ( class_exists( $current_section ) ) {
 
 				$current_section_class = new $current_section();

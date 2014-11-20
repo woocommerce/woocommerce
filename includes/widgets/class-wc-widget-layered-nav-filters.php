@@ -51,9 +51,6 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			return;
 		}
 
-		$current_term = is_tax() ? get_queried_object()->term_id : '';
-		$current_tax  = is_tax() ? get_queried_object()->taxonomy : '';
-
 		// Price
 		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : 0;
 		$max_price = isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : 0;

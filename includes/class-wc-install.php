@@ -117,7 +117,6 @@ class WC_Install {
 		$this->create_files();
 
 		// Queue upgrades
-		$current_version    = get_option( 'woocommerce_version', null );
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 
 		if ( version_compare( $current_db_version, '2.2.0', '<' ) && null !== $current_db_version ) {

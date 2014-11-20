@@ -79,15 +79,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 	public function get_settings( $current_section = '' ) {
 		if ( 'display' == $current_section ) {
 
-			// Get shop page
-			$shop_page_id 								= wc_get_page_id( 'shop' );
-			$base_slug 									= ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : 'shop';
-			$woocommerce_shop_page_children_warning 	= '';
-
-			if ( $shop_page_id > 0 && sizeof( get_pages( "child_of=$shop_page_id" ) ) > 0 ) {
-				$woocommerce_shop_page_children_warning = ' <mark class="notice">' . __( 'Note: The shop page has children - child pages will not work if you enable this option.', 'woocommerce' ) . '</mark>';
-			}
-
 			$settings = apply_filters( 'woocommerce_product_settings', array(
 
 				array(

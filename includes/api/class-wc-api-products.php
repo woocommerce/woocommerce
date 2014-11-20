@@ -1196,12 +1196,6 @@ class WC_API_Products extends WC_API_Resource {
 			if ( isset( $variation['in_stock'] ) ) {
 				$stock_status = ( true === $variation['in_stock'] ) ? 'instock' : 'outofstock';
 				wc_update_product_stock_status( $variation_id, $stock_status );
-			} else {
-				$stock_status = get_post_meta( $variation_id, '_stock_status', true );
-
-				if ( '' === $stock_status ) {
-					$stock_status = 'instock';
-				}
 			}
 
 			if ( 'yes' === $manage_stock ) {

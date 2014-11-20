@@ -62,8 +62,6 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 		return -1;
 	}
 
-	$page_found = null;
-
 	if ( strlen( $page_content ) > 0 ) {
 		// Search for an existing page with the specified page content (typically a shortcode)
 		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
