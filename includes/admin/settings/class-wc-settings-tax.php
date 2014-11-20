@@ -272,29 +272,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'postcode';", $tax_rate_id ) );
 
 		// Add changed
-		$postcodes      = array_filter( explode( ';', $postcodes ) );
+		$postcodes      = WC_Tax::_get_expanded_numeric_ranges_from_array( array_filter( explode( ';', $postcodes ) ) );
 		$postcode_query = array();
 
-		foreach( $postcodes as $postcode ) {
-			if ( strstr( $postcode, '-' ) ) {
-				$postcode_parts = explode( '-', $postcode );
-
-				if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
-					for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
-						if ( ! $i ) {
-							continue;
-						}
-
-						if ( strlen( $i ) < strlen( $postcode_parts[0] ) ) {
-							$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
-						}
-
-						$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
-					}
-				}
-			} elseif ( $postcode ) {
-				$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
-			}
+		foreach ( $postcodes as $postcode ) {
+			$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
 		}
 
 		if ( ! empty( $postcode_query ) ) {
@@ -318,7 +300,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$cities     = array_filter( explode( ';', $cities ) );
 		$city_query = array();
 
-		foreach( $cities as $city ) {
+		foreach ( $cities as $city ) {
 			$city_query[] = "( '" . esc_sql( $city ) . "', $tax_rate_id, 'city' )";
 		}
 
@@ -381,10 +363,10 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			}
 
 			if ( isset( $_POST['tax_rate_postcode'][ $key ] ) ) {
-				$this->update_tax_rate_postcodes( $tax_rate_id, $this->format_tax_rate_postcode( $_POST['tax_rate_postcode'][ $key ] ) );
+				$this->update_tax_rate_postcodes( $tax_rate_id, $this->format_tax_rate_postcode( wc_clean( $_POST['tax_rate_postcode'][ $key ] ) ) );
 			}
 			if ( isset( $_POST['tax_rate_city'][ $key ] ) ) {
-				$this->update_tax_rate_cities( $tax_rate_id, $this->format_tax_rate_city( $_POST['tax_rate_city'][ $key ] ) );
+				$this->update_tax_rate_cities( $tax_rate_id, $this->format_tax_rate_city( wc_clean( $_POST['tax_rate_city'][ $key ] ) ) );
 			}
 		}
 	}

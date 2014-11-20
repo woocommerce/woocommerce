@@ -610,5 +610,37 @@ class WC_Tax {
 	public static function get_tax_total( $taxes ) {
 		return array_sum( array_map( array( __CLASS__, 'round' ), $taxes ) );
 	}
+
+	/**
+	 * Expands ranges in an array (used for zipcodes). e.g. 101-105 would expand to 101, 102, 103, 104, 105
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 *
+	 * @param  array  $values array of values
+	 * @return array expanded values
+	 */
+	public static function _get_expanded_numeric_ranges_from_array( $values = array() ) {
+		$expanded = array();
+		foreach ( $values as $value ) {
+			if ( strstr( $value, '-' ) ) {
+				$parts = array_map( 'trim', explode( '-', $value ) );
+
+				if ( is_numeric( $parts[0] ) && is_numeric( $parts[1] ) && $parts[1] > $parts[0] ) {
+					for ( $expanded_value = $parts[0]; $expanded_value <= $parts[1]; $expanded_value ++ ) {
+						if ( strlen( $expanded_value ) < strlen( $parts[0] ) ) {
+							$expanded_value = str_pad( $expanded_value, strlen( $parts[0] ), "0", STR_PAD_LEFT );
+						}
+						$expanded[] = $expanded_value;
+					}
+				}
+			} else {
+				$expanded[] = trim( $value );
+			}
+		}
+		return array_filter( $expanded );
+	}
 }
 WC_Tax::init();
