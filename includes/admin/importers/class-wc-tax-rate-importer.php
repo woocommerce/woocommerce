@@ -149,7 +149,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 						);
 
 						$tax_rate_id    = $wpdb->insert_id;
-						$postcodes      = array_map( 'strtoupper', array_map( 'wc_clean', array_filter( explode( ';', $postcode ) ) );
+						$postcodes      = array_map( 'strtoupper', array_map( 'wc_clean', array_filter( explode( ';', $postcode ) ) ) );
 						$postcodes      = array_diff( WC_Tax::_get_expanded_numeric_ranges_from_array( array_filter( explode( ';', $postcodes ) ) ), array( '*' ) );
 						$postcode_query = array();
 
@@ -161,7 +161,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 							$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
 						}
 
-						$cities     = array_map( 'strtoupper', array_map( 'wc_clean', array_filter( explode( ';', $city ) ) );
+						$cities     = array_map( 'strtoupper', array_map( 'wc_clean', array_filter( explode( ';', $city ) ) ) );
 						$city_query = array();
 
 						foreach ( $cities as $city ) {
