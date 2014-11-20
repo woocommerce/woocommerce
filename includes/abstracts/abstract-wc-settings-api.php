@@ -2,27 +2,60 @@
 /**
  * Admin Settings API used by Shipping Methods and Payment Gateways
  *
- * @class       WC_Settings_API
- * @version     2.1.0
- * @package     WooCommerce/Abstracts
- * @category    Abstract Class
- * @author      WooThemes
+ * @class    WC_Settings_API
+ * @version  2.3.0
+ * @package  WooCommerce/Abstracts
+ * @category Abstract Class
+ * @author   WooThemes
  */
 abstract class WC_Settings_API {
 
-	/** @var string The plugin ID. Used for option names. */
+	/**
+	 * The plugin ID. Used for option names.
+	 * @var string
+	 */
 	public $plugin_id = 'woocommerce_';
 
-	/** @var array Array of setting values. */
+	/**
+	 * Method ID.
+	 * @var string
+	 */
+	public $id = '';
+
+	/**
+	 * Method title.
+	 * @var string
+	 */
+	public $method_title = '';
+
+	/**
+	 * Method description.
+	 * @var string
+	 */
+	public $method_description = '';
+
+	/**
+	 * Setting values.
+	 * @var array
+	 */
 	public $settings = array();
 
-	/** @var array Array of form option fields. */
+	/**
+	 * Form option fields.
+	 * @var array
+	 */
 	public $form_fields = array();
 
-	/** @var array Array of validation errors. */
+	/**
+	 * Validation errors.
+	 * @var array
+	 */
 	public $errors = array();
 
-	/** @var array Sanitized fields after validation. */
+	/**
+	 * Sanitized fields after validation.
+	 * @var array
+	 */
 	public $sanitized_fields = array();
 
 	/**
