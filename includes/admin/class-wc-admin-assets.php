@@ -72,7 +72,9 @@ class WC_Admin_Assets {
 	 * Enqueue scripts
 	 */
 	public function admin_scripts() {
-		global $wp_query, $post;
+		global $wp_query, $post, $current_user;
+		
+		get_currentuserinfo();
 
 		$screen       = get_current_screen();
 		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
@@ -95,6 +97,8 @@ class WC_Admin_Assets {
 
 		wp_register_script( 'chosen', WC()->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array('jquery'), WC_VERSION );
 
+		wp_register_script( 'qrcode', WC()->plugin_url() . '/assets/js/admin/jquery.qrcode.min.js', array('jquery'), WC_VERSION );
+
 		// Accounting
 		$params = array(
 			'mon_decimal_point' => get_option( 'woocommerce_price_decimal_sep' )
@@ -111,6 +115,7 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'chosen' );
 			wp_enqueue_script( 'jquery-ui-sortable' );
 			wp_enqueue_script( 'jquery-ui-autocomplete' );
+			wp_enqueue_script( 'qrcode' );
 
 			$locale  = localeconv();
 			$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
@@ -123,6 +128,13 @@ class WC_Admin_Assets {
 				'decimal_point'                     => $decimal,
 				'mon_decimal_point'                 => get_option( 'woocommerce_price_decimal_sep' ),
 			);
+
+			// If current user has generated API keys, enqueue and add to $params array
+			if ( $current_user->woocommerce_api_consumer_key ) {
+
+				$params['qrcode_key'] 		= $current_user->woocommerce_api_consumer_key . '|' .  $current_user->woocommerce_api_consumer_secret;
+
+			}
 
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
 		}
