@@ -780,25 +780,10 @@ class WC_Tax {
 	 * @return string
 	 */
 	public static function _update_tax_rate_postcodes( $tax_rate_id, $postcodes ) {
-		global $wpdb;
-
 		$postcodes = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_postcode' ), explode( ';', $postcodes ) ), array( '*' ) ) );
 		$postcodes = self::_get_expanded_numeric_ranges_from_array( $postcodes );
 
-		$wpdb->query(
-			$wpdb->prepare( "
-				DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'postcode';
-				", $tax_rate_id
-			)
-		);
-
-		if ( sizeof( $postcodes > 0 ) ) {
-			$sql = "( '" . implode( "', $tax_rate_id, 'postcode' ),( '", array_map( 'esc_sql', $postcodes ) ) . "', $tax_rate_id, 'postcode' )";
-
-			$wpdb->query( "
-				INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES $sql;
-				" );
-		}
+		self::_update_tax_rate_locations( $tax_rate_id, $postcodes, 'postcode' );
 	}
 
 	/**
@@ -814,19 +799,35 @@ class WC_Tax {
 	 * @return string
 	 */
 	public static function _update_tax_rate_cities( $tax_rate_id, $cities ) {
-		global $wpdb;
-
 		$cities = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_city' ), explode( ';', $cities ) ), array( '*' ) ) );
+
+		self::_update_tax_rate_locations( $tax_rate_id, $cities, 'city' );
+	}
+
+	/**
+	 * Updates locations (postcode and city)
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 *
+	 * @param  int $tax_rate_id
+	 * @param  string $cities
+	 * @return string
+	 */
+	private static function _update_tax_rate_locations( $tax_rate_id, $values, $type ) {
+		global $wpdb;
 
 		$wpdb->query(
 			$wpdb->prepare( "
-				DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'city';
-				", $tax_rate_id
+				DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = %s;
+				", $tax_rate_id, $type
 			)
 		);
 
-		if ( sizeof( $cities > 0 ) ) {
-			$sql = "( '" . implode( "', $tax_rate_id, 'city' ),( '", array_map( 'esc_sql', $cities ) ) . "', $tax_rate_id, 'city' )";
+		if ( sizeof( $values > 0 ) ) {
+			$sql = "( '" . implode( "', $tax_rate_id, '" . esc_sql( $type ) . "' ),( '", array_map( 'esc_sql', $values ) ) . "', $tax_rate_id, '" . esc_sql( $type ) . "' )";
 
 			$wpdb->query( "
 				INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES $sql;
