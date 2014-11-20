@@ -53,10 +53,6 @@ class WC_Gateway_Paypal_Refund {
 	 * @return array|wp_error The parsed response from paypal, or a WP_Error object
 	 */
 	public static function refund_order( $order, $amount = null, $reason = '', $sandbox = false ) {
-		if ( empty( self::$api_signature ) || empty( self::$api_username ) || empty( self::$api_password ) ) {
-			return new WP_Error( 'paypal-refunds', 'Missing API credentials' );
-		}
-
 		$response = wp_remote_post(
 			$sandbox ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp',
 			array(
