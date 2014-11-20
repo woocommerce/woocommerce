@@ -199,7 +199,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @param  string $state
 	 * @return string
 	 */
-	private function tax_rate_state( $state ) {
+	private function format_tax_rate_state( $state ) {
 		$state = strtoupper( $state );
 		return $state === '*' ? '' : $state;
 	}
@@ -209,7 +209,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @param  string $state
 	 * @return string
 	 */
-	private function tax_rate_country( $country ) {
+	private function format_tax_rate_country( $country ) {
 		$country = strtoupper( $country );
 		return $country === '*' ? '' : $country;
 	}
@@ -219,7 +219,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @param  string $state
 	 * @return string
 	 */
-	private function tax_rate_name( $name ) {
+	private function format_tax_rate_name( $name ) {
 		return $name ? $name : __( 'Tax', 'woocommerce' );
 	}
 
@@ -248,6 +248,15 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 */
 	private function format_tax_rate_postcode( $postcode ) {
 		return strtoupper( $postcode );
+	}
+
+	/**
+	 * format the priority
+	 * @param  string $priority
+	 * @return int
+	 */
+	private function format_tax_rate_priority( $priority ) {
+		return absint( $priority );
 	}
 
 	/**
@@ -338,10 +347,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		foreach ( $tax_rate_keys as $tax_rate_key ) {
 			if ( isset( $_POST[ $tax_rate_key ] ) && isset( $_POST[ $tax_rate_key ][ $key ] ) ) {
 				$_tax_rate[ $tax_rate_key ] = wc_clean( $_POST[ $tax_rate_key ][ $key ] );
-
-				if ( method_exists( $this, 'format_' . $tax_rate_key ) ) {
-					$_tax_rate[ $tax_rate_key ] = call_user_func( array( $this, 'format_' . $tax_rate_key ), $_tax_rate[ $tax_rate_key ] );
-				}
+				$_tax_rate[ $tax_rate_key ] = call_user_func( array( $this, 'format_' . $tax_rate_key ), $_tax_rate[ $tax_rate_key ] );
 			}
 		}
 
@@ -374,7 +380,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			} else {
 				// Remove rates
 				if ( 1 == $_POST['remove_tax_rate'][ $key ] ) {
-					$this->delete_tax_rate( $tax_rate_id );
+					$this->delete_tax_rate( $key );
 					continue;
 				}
 
