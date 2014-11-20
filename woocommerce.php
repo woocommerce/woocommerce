@@ -133,7 +133,6 @@ final class WooCommerce {
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
-		add_action( 'widgets_init', array( $this, 'widget_includes' ) );
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
@@ -196,6 +195,7 @@ final class WooCommerce {
 	private function includes() {
 		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
+		include_once( 'includes/wc-widget-functions.php' );
 		include_once( 'includes/class-wc-install.php' );
 		include_once( 'includes/class-wc-download-handler.php' );
 		include_once( 'includes/class-wc-comments.php' );
@@ -273,24 +273,6 @@ final class WooCommerce {
 		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 			include_once( 'includes/wc-template-functions.php' );
 		}
-	}
-
-	/**
-	 * Include core widgets
-	 */
-	public function widget_includes() {
-		include_once( 'includes/abstracts/abstract-wc-widget.php' );
-		include_once( 'includes/widgets/class-wc-widget-cart.php' );
-		include_once( 'includes/widgets/class-wc-widget-layered-nav-filters.php' );
-		include_once( 'includes/widgets/class-wc-widget-layered-nav.php' );
-		include_once( 'includes/widgets/class-wc-widget-price-filter.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-categories.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-search.php' );
-		include_once( 'includes/widgets/class-wc-widget-product-tag-cloud.php' );
-		include_once( 'includes/widgets/class-wc-widget-products.php' );
-		include_once( 'includes/widgets/class-wc-widget-recent-reviews.php' );
-		include_once( 'includes/widgets/class-wc-widget-recently-viewed.php' );
-		include_once( 'includes/widgets/class-wc-widget-top-rated-products.php' );
 	}
 
 	/**

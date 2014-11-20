@@ -189,5 +189,3 @@ class WC_Widget_Products extends WC_Widget {
 		echo $this->cache_widget( $args, ob_get_clean() );
 	}
 }
-
-register_widget( 'WC_Widget_Products' );

@@ -99,5 +99,3 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 		$this->cache_widget( $args, $content );
 	}
 }
-
-register_widget( 'WC_Widget_Top_Rated_Products' );

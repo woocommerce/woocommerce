@@ -99,5 +99,3 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		}
 	}
 }
-
-register_widget( 'WC_Widget_Layered_Nav_Filters' );
