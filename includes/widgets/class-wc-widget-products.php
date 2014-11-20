@@ -172,14 +172,14 @@ class WC_Widget_Products extends WC_Widget {
 		if ( ( $products = $this->get_products( $args, $instance ) ) && $products->have_posts() ) {
 			$this->widget_start( $args, $instance );
 
-			echo '<ul class="product_list_widget">';
+			echo apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' );
 
 			while ( $products->have_posts() ) {
 				$products->the_post();
 				wc_get_template( 'content-widget-product.php', array( 'show_rating' => false ) );
 			}
 
-			echo '</ul>';
+			echo apply_filters( 'woocommerce_after_widget_product_list', '</ul>' );
 
 			$this->widget_end( $args );
 		}
