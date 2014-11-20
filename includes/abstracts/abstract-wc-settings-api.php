@@ -35,6 +35,12 @@ abstract class WC_Settings_API {
 	public $method_description = '';
 
 	/**
+	 * 'yes' if the method is enabled
+	 * @var string
+	 */
+	public $enabled;
+
+	/**
 	 * Setting values.
 	 * @var array
 	 */
@@ -202,12 +208,12 @@ abstract class WC_Settings_API {
 	 *
 	 * Generate the HTML for the fields on the "settings" screen.
 	 *
-	 * @param bool $form_fields (default: false)
+	 * @param string $form_fields (default: array())
 	 * @since 1.0.0
 	 * @uses method_exists()
 	 * @return string the html for the settings
 	 */
-	public function generate_settings_html( $form_fields = false ) {
+	public function generate_settings_html( $form_fields = array() ) {
 
 		if ( ! $form_fields ) {
 			$form_fields = $this->get_form_fields();
@@ -670,9 +676,9 @@ abstract class WC_Settings_API {
 	 *
 	 * @since 1.0.0
 	 * @uses method_exists()
-	 * @param bool $form_fields (default: false)
+	 * @param array $form_fields (default: array())
 	 */
-	public function validate_settings_fields( $form_fields = false ) {
+	public function validate_settings_fields( $form_fields = array() ) {
 
 		if ( ! $form_fields ) {
 			$form_fields = $this->get_form_fields();
