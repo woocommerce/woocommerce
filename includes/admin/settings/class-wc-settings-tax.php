@@ -38,7 +38,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_sections() {
-
 		$sections = array(
 			''         => __( 'Tax Options', 'woocommerce' ),
 			'standard' => __( 'Standard Rates', 'woocommerce' )
@@ -238,18 +237,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Output tax rate tables
 	 */
 	public function output_tax_rates() {
-		global $current_section, $wpdb;
+		global $wpdb;
 
 		$page          = ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1;
 		$limit         = 100;
-		$tax_classes   = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
-		$current_class = '';
-
-		foreach( $tax_classes as $class ) {
-			if ( sanitize_title( $class ) == $current_section ) {
-				$current_class = $class;
-			}
-		}
+		$current_class = $this->get_current_tax_class();
 		?>
 		<h3><?php printf( __( 'Tax Rates for the "%s" Class', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
 		<p><?php printf( __( 'Define tax rates for countries and states below. <a href="%s">See here</a> for available alpha-2 country codes.', 'woocommerce' ), 'http://en.wikipedia.org/wiki/ISO_3166-1#Current_codes' ); ?></p>
@@ -431,31 +423,31 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					var code = '<tr class="new">\
 							<td class="sort">&nbsp;</td>\
 							<td class="country" width="8%">\
-								<input type="text" placeholder="*" name="tax_rate_country[new][' + size + ']" class="wc_input_country_iso" />\
+								<input type="text" placeholder="*" name="tax_rate_country[new-' + size + ']" class="wc_input_country_iso" />\
 							</td>\
 							<td class="state" width="8%">\
-								<input type="text" placeholder="*" name="tax_rate_state[new][' + size + ']" />\
+								<input type="text" placeholder="*" name="tax_rate_state[new-' + size + ']" />\
 							</td>\
 							<td class="postcode">\
-								<input type="text" placeholder="*" name="tax_rate_postcode[new][' + size + ']" />\
+								<input type="text" placeholder="*" name="tax_rate_postcode[new-' + size + ']" />\
 							</td>\
 							<td class="city">\
-								<input type="text" placeholder="*" name="tax_rate_city[new][' + size + ']" />\
+								<input type="text" placeholder="*" name="tax_rate_city[new-' + size + ']" />\
 							</td>\
 							<td class="rate" width="8%">\
-								<input type="number" step="any" min="0" placeholder="0" name="tax_rate[new][' + size + ']" />\
+								<input type="number" step="any" min="0" placeholder="0" name="tax_rate[new-' + size + ']" />\
 							</td>\
 							<td class="name" width="8%">\
-								<input type="text" name="tax_rate_name[new][' + size + ']" />\
+								<input type="text" name="tax_rate_name[new-' + size + ']" />\
 							</td>\
 							<td class="priority" width="8%">\
-								<input type="number" step="1" min="1" value="1" name="tax_rate_priority[new][' + size + ']" />\
+								<input type="number" step="1" min="1" value="1" name="tax_rate_priority[new-' + size + ']" />\
 							</td>\
 							<td class="compound" width="8%">\
-								<input type="checkbox" class="checkbox" name="tax_rate_compound[new][' + size + ']" />\
+								<input type="checkbox" class="checkbox" name="tax_rate_compound[new-' + size + ']" />\
 							</td>\
 							<td class="apply_to_shipping" width="8%">\
-								<input type="checkbox" class="checkbox" name="tax_rate_shipping[new][' + size + ']" checked="checked" />\
+								<input type="checkbox" class="checkbox" name="tax_rate_shipping[new-' + size + ']" checked="checked" />\
 							</td>\
 						</tr>';
 
@@ -512,12 +504,12 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save tax rates
+	 * Get tax class being edited
+	 * @return string
 	 */
-	public function save_tax_rates() {
-		global $wpdb, $current_section;
+	private function get_current_tax_class() {
+		global $current_section;
 
-		// Get class
 		$tax_classes   = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
 		$current_class = '';
 
@@ -527,165 +519,200 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			}
 		}
 
-		// Get POST data
-		$tax_rate_country  = isset( $_POST['tax_rate_country'] ) ? $_POST['tax_rate_country'] : array();
-		$tax_rate_state    = isset( $_POST['tax_rate_state'] ) ? $_POST['tax_rate_state'] : array();
-		$tax_rate_postcode = isset( $_POST['tax_rate_postcode'] ) ? $_POST['tax_rate_postcode'] : array();
-		$tax_rate_city     = isset( $_POST['tax_rate_city'] ) ? $_POST['tax_rate_city'] : array();
-		$tax_rate          = isset( $_POST['tax_rate'] ) ? $_POST['tax_rate'] : array();
-		$tax_rate_name     = isset( $_POST['tax_rate_name'] ) ? $_POST['tax_rate_name'] : array();
-		$tax_rate_priority = isset( $_POST['tax_rate_priority'] ) ? $_POST['tax_rate_priority'] : array();
-		$tax_rate_compound = isset( $_POST['tax_rate_compound'] ) ? $_POST['tax_rate_compound'] : array();
-		$tax_rate_shipping = isset( $_POST['tax_rate_shipping'] ) ? $_POST['tax_rate_shipping'] : array();
+		return $current_class;
+	}
 
-		$i = 0;
+	/**
+	 * Delete a tax rate from the database
+	 * @param  int $tax_rate_id
+	 */
+	private function delete_tax_rate( $tax_rate_id ) {
+		global $wpdb;
+
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
+
+		do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
+	}
+
+	/**
+	 * format the state
+	 * @param  string $state
+	 * @return string
+	 */
+	private function tax_rate_state( $state ) {
+		$state = strtoupper( $state );
+		return $state === '*' ? '' : $state;
+	}
+
+	/**
+	 * format the country
+	 * @param  string $state
+	 * @return string
+	 */
+	private function tax_rate_country( $country ) {
+		$country = strtoupper( $country );
+		return $country === '*' ? '' : $country;
+	}
+
+	/**
+	 * format the tax rate name
+	 * @param  string $state
+	 * @return string
+	 */
+	private function tax_rate_name( $name ) {
+		return $name ? $name : __( 'Tax', 'woocommerce' );
+	}
+
+	/**
+	 * format the rate
+	 * @param  string $state
+	 * @return float
+	 */
+	private function format_tax_rate( $rate ) {
+		return number_format( (double) $rate, 4, '.', '' );
+	}
+
+	/**
+	 * format the city
+	 * @param  string $state
+	 * @return string
+	 */
+	private function format_tax_rate_city( $city ) {
+		return strtoupper( $city );
+	}
+
+	/**
+	 * format the postcodes
+	 * @param  string $state
+	 * @return string
+	 */
+	private function format_tax_rate_postcode( $postcode ) {
+		return strtoupper( $postcode );
+	}
+
+	/**
+	 * Update postcodes for a tax rate in the DB
+	 * @param  int $tax_rate_id
+	 * @param  string $postcodes
+	 * @return string
+	 */
+	private function update_tax_rate_postcodes( $tax_rate_id, $postcodes ) {
+		global $wpdb;
+
+		// Delete old
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'postcode';", $tax_rate_id ) );
+
+		// Add changed
+		$postcodes      = array_filter( explode( ';', $postcodes ) );
+		$postcode_query = array();
+
+		foreach( $postcodes as $postcode ) {
+			if ( strstr( $postcode, '-' ) ) {
+				$postcode_parts = explode( '-', $postcode );
+
+				if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
+					for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
+						if ( ! $i ) {
+							continue;
+						}
+
+						if ( strlen( $i ) < strlen( $postcode_parts[0] ) ) {
+							$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
+						}
+
+						$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
+					}
+				}
+			} elseif ( $postcode ) {
+				$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
+			}
+		}
+
+		if ( ! empty( $postcode_query ) ) {
+			$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
+		}
+	}
+
+	/**
+	 * Update cities for a tax rate in the DB
+	 * @param  int $tax_rate_id
+	 * @param  string $cities
+	 * @return string
+	 */
+	private function update_tax_rate_cities( $tax_rate_id, $cities ) {
+		global $wpdb;
+
+		// Delete old
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'city';", $tax_rate_id ) );
+
+		// Add changed
+		$cities     = array_filter( explode( ';', $cities ) );
+		$city_query = array();
+
+		foreach( $cities as $city ) {
+			$city_query[] = "( '" . esc_sql( $city ) . "', $tax_rate_id, 'city' )";
+		}
+
+		if ( ! empty( $city_query ) ) {
+			$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $city_query ) );
+		}
+	}
+
+	/**
+	 * Save tax rates
+	 */
+	public function save_tax_rates() {
+		global $wpdb;
+
+		if ( empty( $_POST['tax_rate_country'] ) ) {
+			return;
+		}
+
+		$current_class = sanitize_title( $this->get_current_tax_class() );
+		$i             = 0;
+		$tax_rate_keys = array(
+			'tax_rate_country',
+			'tax_rate_state',
+			'tax_rate',
+			'tax_rate_name',
+			'tax_rate_priority'
+		);
 
 		// Loop posted fields
-		foreach ( $tax_rate_country as $key => $value ) {
+		foreach ( $_POST['tax_rate_country'] as $key => $value ) {
+			$mode          = 0 === strpos( $key, 'new-' ) ? 'insert' : 'update';
+			$_tax_rate     = array();
 
-			// new keys are inserted...
-			if ( $key == 'new' ) {
+			foreach ( $tax_rate_keys as $tax_rate_key ) {
+				if ( isset( $_POST[ $tax_rate_key ] ) && isset( $_POST[ $tax_rate_key ][ $key ] ) ) {
+					$_tax_rate[ $tax_rate_key ] = wc_clean( $_POST[ $tax_rate_key ][ $key ] );
 
-				foreach ( $value as $new_key => $new_value ) {
-
-					// Sanitize + format
-					$country  = strtoupper( wc_clean( $tax_rate_country[ $key ][ $new_key ] ) );
-					$state    = strtoupper( wc_clean( $tax_rate_state[ $key ][ $new_key ] ) );
-					$postcode = wc_clean( $tax_rate_postcode[ $key ][ $new_key ] );
-					$city     = wc_clean( $tax_rate_city[ $key ][ $new_key ] );
-					$rate     = number_format( (double) wc_clean( $tax_rate[ $key ][ $new_key ] ), 4, '.', '' );
-					$name     = wc_clean( $tax_rate_name[ $key ][ $new_key ] );
-					$priority = absint( wc_clean( $tax_rate_priority[ $key ][ $new_key ] ) );
-					$compound = isset( $tax_rate_compound[ $key ][ $new_key ] ) ? 1 : 0;
-					$shipping = isset( $tax_rate_shipping[ $key ][ $new_key ] ) ? 1 : 0;
-
-					if ( ! $name ) {
-						$name = __( 'Tax', 'woocommerce' );
+					if ( method_exists( $this, 'format_' . $tax_rate_key ) ) {
+						$_tax_rate[ $tax_rate_key ] = call_user_func( array( $this, 'format_' . $tax_rate_key ), $_tax_rate[ $tax_rate_key ] );
 					}
-
-					if ( $country == '*' ) {
-						$country = '';
-					}
-
-					if ( $state == '*' ) {
-						$state = '';
-					}
-
-					$_tax_rate = array(
-						'tax_rate_country'  => $country,
-						'tax_rate_state'    => $state,
-						'tax_rate'          => $rate,
-						'tax_rate_name'     => $name,
-						'tax_rate_priority' => $priority,
-						'tax_rate_compound' => $compound,
-						'tax_rate_shipping' => $shipping,
-						'tax_rate_order'    => $i,
-						'tax_rate_class'    => sanitize_title( $current_class )
-					);
-
-					$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', $_tax_rate );
-
-					$tax_rate_id = $wpdb->insert_id;
-
-					do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $_tax_rate );
-
-					if ( ! empty( $postcode ) ) {
-						$postcodes      = explode( ';', $postcode );
-						$postcodes      = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
-						$postcode_query = array();
-
-						foreach( $postcodes as $postcode ) {
-							if ( strstr( $postcode, '-' ) ) {
-								$postcode_parts = explode( '-', $postcode );
-
-								if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
-									for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
-										if ( ! $i ) {
-											continue;
-										}
-
-										if ( strlen( $i ) < strlen( $postcode_parts[0] ) ) {
-											$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
-										}
-
-										$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
-									}
-								}
-							} else {
-								if ( $postcode )
-									$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
-							}
-						}
-
-						$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
-					}
-
-					if ( ! empty( $city ) ) {
-
-						$cities = explode( ';', $city );
-						$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
-
-						foreach( $cities as $city ) {
-							$wpdb->insert(
-							$wpdb->prefix . "woocommerce_tax_rate_locations",
-								array(
-									'location_code' => $city,
-									'tax_rate_id'   => $tax_rate_id,
-									'location_type' => 'city',
-								)
-							);
-						}
-					}
-
-					$i++;
 				}
+			}
 
-			// ...whereas the others are updated
+			$_tax_rate['tax_rate_compound'] = isset( $_POST['tax_rate_compound'][ $key ] ) ? 1 : 0;
+			$_tax_rate['tax_rate_shipping'] = isset( $_POST['tax_rate_shipping'][ $key ] ) ? 1 : 0;
+			$_tax_rate['tax_rate_order']    = $i ++;
+			$_tax_rate['tax_rate_class']    = $current_class;
+
+			if ( 'insert' === $mode ) {
+				$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', $_tax_rate );
+
+				$tax_rate_id = $wpdb->insert_id;
+
+				do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $_tax_rate );
+
 			} else {
-
 				$tax_rate_id = absint( $key );
 
-				if ( $_POST['remove_tax_rate'][ $key ] == 1 ) {
-					do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
-
-					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
-					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
-
+				if ( 1 == $_POST['remove_tax_rate'][ $key ] ) {
+					$this->delete_tax_rate( $tax_rate_id );
 					continue;
 				}
-
-				// Sanitize + format
-				$country  = strtoupper( wc_clean( $tax_rate_country[ $key ] ) );
-				$state    = strtoupper( wc_clean( $tax_rate_state[ $key ] ) );
-				$rate     = number_format( (double) wc_clean( $tax_rate[ $key ] ), 4, '.', '' );
-				$name     = wc_clean( $tax_rate_name[ $key ] );
-				$priority = absint( wc_clean( $tax_rate_priority[ $key ] ) );
-				$compound = isset( $tax_rate_compound[ $key ] ) ? 1 : 0;
-				$shipping = isset( $tax_rate_shipping[ $key ] ) ? 1 : 0;
-
-				if ( ! $name ) {
-					$name = __( 'Tax', 'woocommerce' );
-				}
-
-				if ( $country == '*' ) {
-					$country = '';
-				}
-
-				if ( $state == '*' ) {
-					$state = '';
-				}
-
-				$_tax_rate = array(
-					'tax_rate_country'  => $country,
-					'tax_rate_state'    => $state,
-					'tax_rate'          => $rate,
-					'tax_rate_name'     => $name,
-					'tax_rate_priority' => $priority,
-					'tax_rate_compound' => $compound,
-					'tax_rate_shipping' => $shipping,
-					'tax_rate_order'    => $i,
-					'tax_rate_class'    => sanitize_title( $current_class )
-				);
 
 				$wpdb->update(
 					$wpdb->prefix . "woocommerce_tax_rates",
@@ -696,74 +723,16 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				);
 
 				do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $_tax_rate );
+			}
 
-				if ( isset( $tax_rate_postcode[ $key ] ) ) {
-					// Delete old
-					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'postcode';", $tax_rate_id ) );
-
-					// Add changed
-					$postcode  = wc_clean( $tax_rate_postcode[ $key ] );
-					$postcodes = explode( ';', $postcode );
-					$postcodes = array_map( 'strtoupper', array_map( 'wc_clean', $postcodes ) );
-
-					$postcode_query = array();
-
-					foreach( $postcodes as $postcode ) {
-						if ( strstr( $postcode, '-' ) ) {
-							$postcode_parts = explode( '-', $postcode );
-
-							if ( is_numeric( $postcode_parts[0] ) && is_numeric( $postcode_parts[1] ) && $postcode_parts[1] > $postcode_parts[0] ) {
-								for ( $i = $postcode_parts[0]; $i <= $postcode_parts[1]; $i ++ ) {
-									if ( ! $i )
-										continue;
-
-									if ( strlen( $i ) < strlen( $postcode_parts[0] ) )
-										$i = str_pad( $i, strlen( $postcode_parts[0] ), "0", STR_PAD_LEFT );
-
-									$postcode_query[] = "( '" . esc_sql( $i ) . "', $tax_rate_id, 'postcode' )";
-								}
-							}
-						} else {
-							if ( $postcode )
-								$postcode_query[] = "( '" . esc_sql( $postcode ) . "', $tax_rate_id, 'postcode' )";
-						}
-					}
-
-					if ( !empty( $postcode_query ) ) {
-						$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES " . implode( ',', $postcode_query ) );
-					}
-
-				}
-
-				if ( isset( $tax_rate_city[ $key ] ) ) {
-
-					// Delete old
-					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = 'city';", $tax_rate_id ) );
-
-					// Add changed
-					$city   = wc_clean( $tax_rate_city[ $key ] );
-					$cities = explode( ';', $city );
-					$cities = array_map( 'strtoupper', array_map( 'wc_clean', $cities ) );
-
-					foreach( $cities as $city ) {
-						if ( $city ) {
-							$wpdb->insert(
-							$wpdb->prefix . "woocommerce_tax_rate_locations",
-								array(
-									'location_code' => $city,
-									'tax_rate_id'   => $tax_rate_id,
-									'location_type' => 'city',
-								)
-							);
-						}
-					}
-				}
-
-				$i++;
+			if ( isset( $_POST['tax_rate_postcode'][ $key ] ) ) {
+				$this->update_tax_rate_postcodes( $tax_rate_id, $this->format_tax_rate_postcode( $_POST['tax_rate_postcode'][ $key ] ) );
+			}
+			if ( isset( $_POST['tax_rate_city'][ $key ] ) ) {
+				$this->update_tax_rate_cities( $tax_rate_id, $this->format_tax_rate_city( $_POST['tax_rate_city'][ $key ] ) );
 			}
 		}
 	}
-
 }
 
 endif;
