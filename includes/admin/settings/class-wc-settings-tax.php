@@ -93,7 +93,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$settings = $this->get_settings();
 			WC_Admin_Settings::save_fields( $settings );
 
-		} else {
+		} elseif ( ! empty( $_POST['tax_rate_country'] ) ) {
 			$this->save_tax_rates();
 		}
 
@@ -363,10 +363,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Save tax rates
 	 */
 	public function save_tax_rates() {
-		if ( empty( $_POST['tax_rate_country'] ) ) {
-			return;
-		}
-
 		$current_class = sanitize_title( $this->get_current_tax_class() );
 		$index         = 0;
 
@@ -377,13 +373,10 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 			if ( 'insert' === $mode ) {
 				$tax_rate_id = $this->insert_tax_rate( $_tax_rate );
+			} elseif ( 1 == $_POST['remove_tax_rate'][ $key ] ) {
+				$this->delete_tax_rate( $key );
+				continue;
 			} else {
-				// Remove rates
-				if ( 1 == $_POST['remove_tax_rate'][ $key ] ) {
-					$this->delete_tax_rate( $key );
-					continue;
-				}
-
 				$tax_rate_id = $this->update_tax_rate( $key, $_tax_rate );
 			}
 
