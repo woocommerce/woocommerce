@@ -197,22 +197,17 @@ class WC_Tax {
 	/**
 	 * Searches for all matching country/state/postcode tax rates.
 	 *
-	 * @access public
 	 * @param array $args
 	 * @return array
 	 */
 	public static function find_rates( $args = array() ) {
-		global $wpdb;
-
-		$defaults = array(
-			'country' 	=> '',
-			'state' 	=> '',
-			'city' 		=> '',
-			'postcode' 	=> '',
-			'tax_class'	=> ''
-		);
-
-		$args = wp_parse_args( $args, $defaults );
+		$args = wp_parse_args( $args, array(
+			'country'   => '',
+			'state'     => '',
+			'city'      => '',
+			'postcode'  => '',
+			'tax_class' => ''
+		) );
 
 		extract( $args, EXTR_SKIP );
 
@@ -220,28 +215,34 @@ class WC_Tax {
 			return array();
 		}
 
-		// Handle postcodes
-		$valid_postcodes 	= array( '*', strtoupper( wc_clean( $postcode ) ) );
-
-		// Work out possible valid wildcard postcodes
-		$postcode_length	= strlen( $postcode );
-		$wildcard_postcode	= strtoupper( wc_clean( $postcode ) );
-
-		for ( $i = 0; $i < $postcode_length; $i ++ ) {
-
-			$wildcard_postcode = substr( $wildcard_postcode, 0, -1 );
-
-			$valid_postcodes[] = $wildcard_postcode . '*';
-		}
-
-		// Build transient key and try to retrieve them from cache
+		$valid_postcodes     = self::_get_wildcard_postcodes( wc_clean( $postcode ) );
 		$rates_transient_key = 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, implode( ',', $valid_postcodes), $tax_class ) );
-		$matched_tax_rates = get_transient( $rates_transient_key );
+		$matched_tax_rates   = get_transient( $rates_transient_key );
 
 		if ( false === $matched_tax_rates ) {
+			$matched_tax_rates = self::get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes );
+			set_transient( $rates_transient_key, $matched_tax_rates, WEEK_IN_SECONDS );
+		}
 
-			// Run the query
-			$found_rates = $wpdb->get_results( $wpdb->prepare( "
+		return $matched_tax_rates;
+	}
+
+	/**
+	 * Loop through a set of tax rates and get the matching rates (1 per priority)
+	 *
+	 * @param  string $country
+	 * @param  string $state
+	 * @param  string $postcode
+	 * @param  string $city
+	 * @param  string $tax_class
+	 * @param  array $valid_postcodes
+	 * @return array
+	 */
+	private static function get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes ) {
+		global $wpdb;
+
+		$found_rates = $wpdb->get_results(
+			$wpdb->prepare( "
 				SELECT tax_rates.*
 				FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
 				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
@@ -281,32 +282,28 @@ class WC_Tax {
 				sanitize_title( $tax_class ),
 				strtoupper( $city ),
 				strtoupper( $city )
-			) );
+			)
+		);
 
-			$matched_tax_rates = array();
-			$found_priority    = array();
+		$matched_tax_rates = array();
+		$found_priority    = array();
 
-			foreach ( $found_rates as $found_rate ) {
-				if ( in_array( $found_rate->tax_rate_priority, $found_priority ) ) {
-					continue;
-				}
-
-				$matched_tax_rates[ $found_rate->tax_rate_id ] = array(
-					'rate'     => $found_rate->tax_rate,
-					'label'    => $found_rate->tax_rate_name,
-					'shipping' => $found_rate->tax_rate_shipping ? 'yes' : 'no',
-					'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no'
-				);
-
-				$found_priority[] = $found_rate->tax_rate_priority;
+		foreach ( $found_rates as $found_rate ) {
+			if ( in_array( $found_rate->tax_rate_priority, $found_priority ) ) {
+				continue;
 			}
 
-			$matched_tax_rates = apply_filters( 'woocommerce_matched_tax_rates', $matched_tax_rates, $country, $state, $postcode, $city, $tax_class );
+			$matched_tax_rates[ $found_rate->tax_rate_id ] = array(
+				'rate'     => $found_rate->tax_rate,
+				'label'    => $found_rate->tax_rate_name,
+				'shipping' => $found_rate->tax_rate_shipping ? 'yes' : 'no',
+				'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no'
+			);
 
-			set_transient( $rates_transient_key, $matched_tax_rates, DAY_IN_SECONDS );
+			$found_priority[] = $found_rate->tax_rate_priority;
 		}
 
-		return $matched_tax_rates;
+		return apply_filters( 'woocommerce_matched_tax_rates', $matched_tax_rates, $country, $state, $postcode, $city, $tax_class );
 	}
 
 	/**
@@ -510,8 +507,6 @@ class WC_Tax {
 
 			return $matched_tax_rates;
 		}
-
-		return array(); // return false
 	}
 
 	/**
@@ -863,6 +858,29 @@ class WC_Tax {
 			}
 		}
 		return array_filter( $expanded );
+	}
+
+	/**
+	 * Get postcode wildcards in array format
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.3.0
+	 * @access private
+	 *
+	 * @param  string  $postcode array of values
+	 * @return array Array of postcodes with wildcards
+	 */
+	private static function _get_wildcard_postcodes( $postcode ) {
+		$postcodes         = array( '*', strtoupper( $postcode ) );
+		$postcode_length   = strlen( $postcode );
+		$wildcard_postcode = strtoupper( $postcode );
+
+		for ( $i = 0; $i < $postcode_length; $i ++ ) {
+			$wildcard_postcode = substr( $wildcard_postcode, 0, -1 );
+			$postcodes[] = $wildcard_postcode . '*';
+		}
+		return $postcodes;
 	}
 }
 WC_Tax::init();
