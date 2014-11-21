@@ -732,16 +732,16 @@ class WC_Countries {
 	                    'label'         => __( 'Province', 'woocommerce' ),
 	                )
             	),
-            	'IE' => array(
+				'IE' => array(
 					'sortcode'	=> array(
 						'label'			=> __( 'Sort Code', 'woocommerce' ),
 					),
-            	),
-            	'IN' => array(
+ 				),
+				'IN' => array(
 					'sortcode'	=> array(
 						'label'			=> __( 'IFSC', 'woocommerce' ),
 					),
-            	),
+				),
 				'IS' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
