@@ -653,7 +653,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Prepare and format tax rate for DB insursion
+	 * Prepare and format tax rate for DB insertion
 	 * @param  array $tax_rate
 	 * @return array
 	 */
