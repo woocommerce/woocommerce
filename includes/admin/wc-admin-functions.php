@@ -32,7 +32,8 @@ function wc_get_screen_ids() {
 		'shop_coupon',
 		'edit-product_cat',
 		'edit-product_tag',
-		'edit-product_shipping_class'
+		'edit-product_shipping_class',
+		'profile',
 	);
 
 	foreach ( wc_get_order_types() as $type ) {

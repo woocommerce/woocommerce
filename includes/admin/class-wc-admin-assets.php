@@ -72,7 +72,9 @@ class WC_Admin_Assets {
 	 * Enqueue scripts
 	 */
 	public function admin_scripts() {
-		global $wp_query, $post;
+		global $wp_query, $post, $current_user;
+		
+		get_currentuserinfo();
 
 		$screen       = get_current_screen();
 		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
@@ -94,6 +96,8 @@ class WC_Admin_Assets {
 		wp_register_script( 'ajax-chosen', WC()->plugin_url() . '/assets/js/chosen/ajax-chosen.jquery' . $suffix . '.js', array('jquery', 'chosen'), WC_VERSION );
 
 		wp_register_script( 'chosen', WC()->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array('jquery'), WC_VERSION );
+
+		wp_register_script( 'qrcode', WC()->plugin_url() . '/assets/js/admin/jquery.qrcode.min.js', array('jquery'), WC_VERSION );
 
 		// Accounting
 		$params = array(
@@ -123,6 +127,14 @@ class WC_Admin_Assets {
 				'decimal_point'                     => $decimal,
 				'mon_decimal_point'                 => get_option( 'woocommerce_price_decimal_sep' ),
 			);
+
+			// If we're on the profile page and the current user has generated API keys, enqueue and add to $params array
+			if ( $screen->id == 'profile' && $current_user->woocommerce_api_consumer_key ) {
+
+				wp_enqueue_script( 'qrcode' );
+				$params['qrcode_key'] 		= $current_user->woocommerce_api_consumer_key . '|' .  $current_user->woocommerce_api_consumer_secret;
+
+			}
 
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
 		}

@@ -3791,6 +3791,21 @@ table.bar_chart {
 }
 
 /**
+ * Profile Page
+ */
+
+#profile-page {
+	.api-keys-wrapper {
+		float: left;
+		padding-bottom: 10px;
+	}
+	.api-keys-get-qr {
+		float: left;
+		padding-left: 10px;
+	}
+}
+
+/**
  * Chosen
  */
 .chosen-container-single .chosen-single {
