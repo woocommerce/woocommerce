@@ -417,3 +417,18 @@
 		}
 	}
 }
+
+/**
+ * Twenty Fifteen specific styles
+ */
+@media screen and (min-width: 59.6875em) {
+	.twentyfifteen {
+		.t15wc {
+			margin: 0 8.3333%;
+
+			.page-title {
+				margin-left: 0;
+			}
+		}
+	}
+}
