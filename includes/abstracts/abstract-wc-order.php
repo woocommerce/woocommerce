@@ -477,6 +477,8 @@ abstract class WC_Abstract_Order {
 	 *
 	 * @param float $amount
 	 * @param string $total_type
+	 *
+	 * @return bool
 	 */
 	public function set_total( $amount, $total_type = 'total' ) {
 
@@ -501,6 +503,8 @@ abstract class WC_Abstract_Order {
 		}
 
 		update_post_meta( $this->id, $key, $amount );
+
+		return true;
 	}
 
 	/**
