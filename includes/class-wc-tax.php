@@ -579,7 +579,7 @@ class WC_Tax {
 
 	/**
 	 * format the postcodes
-	 * @param  string $state
+	 * @param  string $postcode
 	 * @return string
 	 */
 	private static function format_tax_rate_postcode( $postcode ) {
@@ -588,7 +588,7 @@ class WC_Tax {
 
 	/**
 	 * format the city
-	 * @param  string $state
+	 * @param  string $city
 	 * @return string
 	 */
 	private static function format_tax_rate_city( $city ) {
@@ -607,7 +607,7 @@ class WC_Tax {
 
 	/**
 	 * format the country
-	 * @param  string $state
+	 * @param  string $country
 	 * @return string
 	 */
 	private static function format_tax_rate_country( $country ) {
@@ -617,7 +617,7 @@ class WC_Tax {
 
 	/**
 	 * format the tax rate name
-	 * @param  string $state
+	 * @param  string $name
 	 * @return string
 	 */
 	private static function format_tax_rate_name( $name ) {
@@ -626,7 +626,7 @@ class WC_Tax {
 
 	/**
 	 * format the rate
-	 * @param  string $state
+	 * @param  double $rate
 	 * @return float
 	 */
 	private static function format_tax_rate( $rate ) {
