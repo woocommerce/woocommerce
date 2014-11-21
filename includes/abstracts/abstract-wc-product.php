@@ -525,7 +525,7 @@ class WC_Product {
 	}
 
 	/**
-	 * is_on_backorder function.
+	 * Check if a product is on backorder
 	 *
 	 * @param int $qty_in_cart (default: 0)
 	 * @return bool
