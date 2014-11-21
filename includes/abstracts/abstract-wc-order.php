@@ -1086,6 +1086,8 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Gets order total - formatted for display.
 	 *
+	 * @param string $type
+	 *
 	 * @return string
 	 */
 	public function get_item_count( $type = '' ) {
