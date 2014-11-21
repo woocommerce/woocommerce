@@ -1909,6 +1909,8 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Generates a URL so that a customer can cancel their (unpaid - pending) order.
 	 *
+	 * @param string $redirect
+	 *
 	 * @return string
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
