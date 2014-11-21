@@ -16,7 +16,7 @@ $line_items_shipping = $order->get_items( 'shipping' );
 
 if ( wc_tax_enabled() ) {
 	$order_taxes         = $order->get_taxes();
-	$tax_classes         = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+	$tax_classes         = WC_Tax::get_tax_classes();
 	$classes_options     = array();
 	$classes_options[''] = __( 'Standard', 'woocommerce' );
 

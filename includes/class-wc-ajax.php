@@ -585,7 +585,7 @@ class WC_AJAX {
 			$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
 
 			// Get tax classes
-			$tax_classes                 = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
+			$tax_classes                 = WC_Tax::get_tax_classes();
 			$tax_class_options           = array();
 			$tax_class_options['parent'] =__( 'Same as parent', 'woocommerce' );
 			$tax_class_options['']       = __( 'Standard', 'woocommerce' );

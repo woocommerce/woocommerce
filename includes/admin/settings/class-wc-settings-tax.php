@@ -41,7 +41,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		);
 
 		// Get tax classes and display as links
-		$tax_classes = $this->get_tax_classes();
+		$tax_classes = WC_Tax::get_tax_classes();
 
 		foreach ( $tax_classes as $class ) {
 			$sections[ sanitize_title( $class ) ] = sprintf( __( '%s Rates', 'woocommerce' ), $class );
@@ -56,7 +56,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
-		$tax_classes     = $this->get_tax_classes();
+		$tax_classes     = WC_Tax::get_tax_classes();
 		$classes_options = array();
 
 		foreach ( $tax_classes as $class ) {
@@ -72,7 +72,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function output() {
 		global $current_section;
 
-		$tax_classes = $this->get_tax_classes();
+		$tax_classes = WC_Tax::get_tax_classes();
 
 		if ( $current_section == 'standard' || in_array( $current_section, array_map( 'sanitize_title', $tax_classes ) ) ) {
 			$this->output_tax_rates();
@@ -114,21 +114,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get tax classes
-	 * @return array
-	 */
-	private function get_tax_classes() {
-		return array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
-	}
-
-	/**
 	 * Get tax class being edited
 	 * @return string
 	 */
 	private function get_current_tax_class() {
 		global $current_section;
 
-		$tax_classes   = $this->get_tax_classes();
+		$tax_classes   = WC_Tax::get_tax_classes();
 		$current_class = '';
 
 		foreach( $tax_classes as $class ) {

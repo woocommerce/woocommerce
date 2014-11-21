@@ -768,6 +768,20 @@ class WC_Cart {
 			return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
 		}
 
+		/**
+		 * Get all tax classes for items in the cart
+		 * @return array
+		 */
+		public function get_cart_item_tax_classes() {
+			$found_tax_classes = array();
+
+			foreach ( WC()->cart->get_cart() as $item ) {
+				$found_tax_classes[] = $item['data']->get_tax_class();
+			}
+
+			return array_unique( $found_tax_classes );
+		}
+
 	/*-----------------------------------------------------------------------------------*/
 	/* Add to cart handling */
 	/*-----------------------------------------------------------------------------------*/
