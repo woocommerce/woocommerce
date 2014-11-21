@@ -35,8 +35,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</select>
 				</span>
 			</label>
-			<label class="alignright">
-				<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e( 'Enter price', 'woocommerce' ); ?>" value="" />
+			<label class="change-input">
+				<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php echo sprintf( __( 'Enter price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
 			</label>
 		</div>
 
@@ -60,8 +60,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</select>
 				</span>
 			</label>
-			<label class="alignright">
-				<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e( 'Enter price', 'woocommerce' ); ?>" value="" />
+			<label class="change-input">
+				<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php echo sprintf( __( 'Enter sale price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
 			</label>
 		</div>
 
@@ -127,8 +127,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</select>
 					</span>
 				</label>
-				<label class="alignright">
-					<input type="text" name="_weight" class="text weight" placeholder="0.00" value="">
+				<label class="change-input">
+					<input type="text" name="_weight" class="text weight" placeholder="<?php echo sprintf( __( '0.00 (%s)', 'woocommerce' ), get_option( 'woocommerce_weight_unit' ) ); ?>" value="">
 				</label>
 			</div>
 		<?php endif; ?>
@@ -151,11 +151,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</select>
 					</span>
 				</label>
-				<div class="alignright">
-					<input type="text" name="_length" class="text length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" value="">
-					<input type="text" name="_width" class="text width" placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" value="">
-					<input type="text" name="_height" class="text height" placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" value="">
-				</div>
+				<label class="change-input">
+					<input type="text" name="_length" class="text length" placeholder="<?php echo sprintf( __( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<input type="text" name="_width" class="text width" placeholder="<?php echo sprintf( __( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<input type="text" name="_height" class="text height" placeholder="<?php echo sprintf( __( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+				</label>
 			</div>
 		<?php endif; ?>
 
@@ -265,8 +265,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</select>
 					</span>
 				</label>
-				<label class="alignright">
-					<input type="number" name="_stock" class="text stock" placeholder="<?php _e( 'Stock Qty', 'woocommerce' ); ?>" step="any" value="">
+				<label class="change-input">
+					<input type="text" name="_stock" class="text stock" placeholder="<?php _e( 'Stock Qty', 'woocommerce' ); ?>" step="any" value="">
 				</label>
 			</div>
 
