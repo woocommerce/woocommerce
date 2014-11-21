@@ -943,7 +943,7 @@ class WC_Product {
 	}
 
 	/**
-	 * get_average_rating function.
+	 * Get the average rating of product.
 	 *
 	 * @return string
 	 */
@@ -977,7 +977,7 @@ class WC_Product {
 	}
 
 	/**
-	 * get_rating_count function.
+	 * Get the total amount (COUNT) of ratings.
 	 *
 	 * @param  int $value Optional. Rating value to get the count for. By default
 	 *                              returns the count of all rating values.
