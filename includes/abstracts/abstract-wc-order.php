@@ -2369,7 +2369,7 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
-	 * send_stock_notifications function.
+	 * Send the stock notifications
 	 *
 	 * @param WC_Product $product
 	 * @param int $new_stock
