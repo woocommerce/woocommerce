@@ -115,7 +115,6 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'chosen' );
 			wp_enqueue_script( 'jquery-ui-sortable' );
 			wp_enqueue_script( 'jquery-ui-autocomplete' );
-			wp_enqueue_script( 'qrcode' );
 
 			$locale  = localeconv();
 			$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
@@ -129,9 +128,10 @@ class WC_Admin_Assets {
 				'mon_decimal_point'                 => get_option( 'woocommerce_price_decimal_sep' ),
 			);
 
-			// If current user has generated API keys, enqueue and add to $params array
-			if ( $current_user->woocommerce_api_consumer_key ) {
+			// If we're on the profile page and the current user has generated API keys, enqueue and add to $params array
+			if ( $screen->id == 'profile' && $current_user->woocommerce_api_consumer_key ) {
 
+				wp_enqueue_script( 'qrcode' );
 				$params['qrcode_key'] 		= $current_user->woocommerce_api_consumer_key . '|' .  $current_user->woocommerce_api_consumer_secret;
 
 			}
