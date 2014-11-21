@@ -102,6 +102,13 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 */
 	public function generate_account_details_html() {
 		ob_start();
+
+		$country 	= WC()->countries->get_base_country();
+		$locale		= WC()->countries->get_country_locale();
+
+		$sortcode_label = $locale[$country]['sortcode']['label'];
+		$sortcode = $sortcode_label ? $sortcode_label : __( 'Sort Code', 'woocommerce' );
+
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc"><?php _e( 'Account Details', 'woocommerce' ); ?>:</th>
@@ -113,7 +120,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 							<th><?php _e( 'Account Name', 'woocommerce' ); ?></th>
 							<th><?php _e( 'Account Number', 'woocommerce' ); ?></th>
 							<th><?php _e( 'Bank Name', 'woocommerce' ); ?></th>
-							<th><?php _e( 'Sort Code', 'woocommerce' ); ?></th>
+							<th><?php echo $sortcode; ?></th>
 							<th><?php _e( 'IBAN', 'woocommerce' ); ?></th>
 							<th><?php _e( 'BIC / Swift', 'woocommerce' ); ?></th>
 						</tr>
@@ -240,12 +247,26 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			return;
 		}
 
+		// Get order and store in $order
+		$order 		= wc_get_order( $order_id );
+
+		// Get the order country and country $locale
+		$country 	= $order->billing_country;
+		$locale		= WC()->countries->get_country_locale();
+		
+		// Get sortcode label in the $locale array
+		$sortcode_label = $locale[$country]['sortcode']['label'];
+		
+		// If a sortcode label exists uses it, if not use Sort Code
+		$sortcode = $sortcode_label ? $sortcode_label : __( 'Sort Code', 'woocommerce' );
+
 		echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>' . PHP_EOL;
 
 		$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details );
 
 		if ( ! empty( $bacs_accounts ) ) {
 			foreach ( $bacs_accounts as $bacs_account ) {
+
 				$bacs_account = (object) $bacs_account;
 
 				if ( $bacs_account->account_name || $bacs_account->bank_name ) {
@@ -261,7 +282,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 						'value' => $bacs_account->account_number
 					),
 					'sort_code'     => array(
-						'label' => __( 'Sort Code', 'woocommerce' ),
+						'label' => $sortcode,
 						'value' => $bacs_account->sort_code
 					),
 					'iban'          => array(
