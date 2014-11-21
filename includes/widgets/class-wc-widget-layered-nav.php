@@ -414,5 +414,3 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		}
 	}
 }
-
-register_widget( 'WC_Widget_Layered_Nav' );

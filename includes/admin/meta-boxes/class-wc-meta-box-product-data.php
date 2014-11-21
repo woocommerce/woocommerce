@@ -257,8 +257,8 @@ class WC_Meta_Box_Product_Data {
 							'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
 						) ) );
 
-						$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
-						$classes_options = array();
+						$tax_classes         = WC_Tax::get_tax_classes();
+						$classes_options     = array();
 						$classes_options[''] = __( 'Standard', 'woocommerce' );
 
 						if ( $tax_classes ) {
@@ -778,7 +778,7 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Get tax classes
-		$tax_classes           = array_filter( array_map('trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+		$tax_classes           = WC_Tax::get_tax_classes();
 		$tax_class_options     = array();
 		$tax_class_options[''] = __( 'Standard', 'woocommerce' );
 

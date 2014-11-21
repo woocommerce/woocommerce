@@ -73,5 +73,3 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 		return 'product_tag';
 	}
 }
-
-register_widget( 'WC_Widget_Product_Tag_Cloud' );

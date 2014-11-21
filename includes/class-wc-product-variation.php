@@ -219,7 +219,7 @@ class WC_Product_Variation extends WC_Product {
 			$visible = false;
 		}
 
-		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id );
+		return apply_filters( 'woocommerce_variation_is_visible', $visible, $this->variation_id, $this->id, $this );
 	}
 
 	/**
@@ -230,7 +230,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool
 	 */
 	public function variation_is_active() {
-		return apply_filters( 'woocommerce_variation_is_active', true, $this->variation_id, $this->id );
+		return apply_filters( 'woocommerce_variation_is_active', true, $this );
 	}
 
 	/**
@@ -284,7 +284,7 @@ class WC_Product_Variation extends WC_Product {
 	public function has_all_attributes_set() {
 
 		$set = true;
-		
+
 		// undefined attributes have null strings as array values
 		foreach( $this->get_variation_attributes() as $att ){
 			if( ! $att ){
@@ -296,7 +296,7 @@ class WC_Product_Variation extends WC_Product {
 		return $set;
 
 	}
-	
+
 	/**
 	 * Get variation price HTML. Prices are not inherited from parents.
 	 *

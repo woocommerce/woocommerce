@@ -236,5 +236,3 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		$this->widget_end( $args );
 	}
 }
-
-register_widget( 'WC_Widget_Product_Categories' );

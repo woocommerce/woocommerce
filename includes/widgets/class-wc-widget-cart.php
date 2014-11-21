@@ -74,5 +74,3 @@ class WC_Widget_Cart extends WC_Widget {
 		$this->widget_end( $args );
 	}
 }
-
-register_widget( 'WC_Widget_Cart' );

@@ -254,12 +254,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $this->can_refund_order( $order ) ) {
+			$this->log( 'Refund Failed: No transaction ID' );
 			return false;
 		}
 
-		WC_Gateway_Paypal_Refund::$api_username  = $this->api_username;
-		WC_Gateway_Paypal_Refund::$api_password  = $this->api_password;
-		WC_Gateway_Paypal_Refund::$api_signature = $this->api_signature;
+		include_once( 'includes/class-wc-gateway-paypal-refund.php' );
+
+		WC_Gateway_Paypal_Refund::$api_username  = $this->get_option( 'api_username' );
+		WC_Gateway_Paypal_Refund::$api_password  = $this->get_option( 'api_password' );
+		WC_Gateway_Paypal_Refund::$api_signature = $this->get_option( 'api_signature' );
 
 		$result = WC_Gateway_Paypal_Refund::refund_order( $order, $amount, $reason, $this->testmode );
 
@@ -267,6 +270,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->log( 'Refund Failed: ' . $result->get_error_message() );
 			return false;
 		}
+
+		$this->log( 'Refund Result: ' . print_r( $result, true ) );
 
 		switch ( strtolower( $result['ACK'] ) ) {
 			case 'success':

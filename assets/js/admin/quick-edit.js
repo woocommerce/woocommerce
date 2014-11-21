@@ -101,15 +101,15 @@ jQuery(function( $ ) {
 	$( '#wpbody' ).on( 'click', '#doaction, #doaction2', function() {
 		$( 'input.text', '.inline-edit-row' ).val( '' );
 		$( '#woocommerce-fields select' ).prop( 'selectedIndex', 0 );
-		$( '#woocommerce-fields-bulk .inline-edit-group .alignright' ).hide();
+		$( '#woocommerce-fields-bulk .inline-edit-group .change-input' ).hide();
 	});
 
 	$( '#wpbody' ).on( 'change', '#woocommerce-fields-bulk .inline-edit-group .change_to', function() {
 
 		if ( 0 < $( this ).val() ) {
-			$( this ).closest( 'div' ).find( '.alignright' ).show();
+			$( this ).closest( 'div' ).find( '.change-input' ).show();
 		} else {
-			$( this ).closest( 'div' ).find( '.alignright' ).hide();
+			$( this ).closest( 'div' ).find( '.change-input' ).hide();
 		}
 
 	});

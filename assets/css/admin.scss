@@ -305,27 +305,34 @@ table.wc_status_table {
 	}
 
 	.inline-edit-group {
-		label,
-		div.alignright {
+		label {
 			clear: none;
 			width: 49%;
 			margin: .2em 0;
+		}
+		&.dimensions {
+			label {
+				width: 75%;
+				max-width: 75%;
+			}
 		}
 	}
 
 	.regular_price,
 	.sale_price,
 	.weight,
-	.stock {
+	.stock,
+	.length {
 		@include box-sizing(border-box);
 		width: 100%;
+		margin-left: 4.4em;
 	}
 
 	.length,
 	.width,
 	.height {
 		@include box-sizing(border-box);
-		width: 32%;
+		width: 25%;
 	}
 }
 
