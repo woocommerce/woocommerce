@@ -1147,6 +1147,8 @@ abstract class WC_Abstract_Order {
 	 * Check whether this order has a specific shipping method or not
 	 *
 	 * @param string $method_id
+	 *
+	 * @return bool
 	 */
 	public function has_shipping_method( $method_id ) {
 
