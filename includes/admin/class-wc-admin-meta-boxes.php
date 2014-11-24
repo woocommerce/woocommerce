@@ -101,7 +101,7 @@ class WC_Admin_Meta_Boxes {
 		// Products
 		add_meta_box( 'postexcerpt', __( 'Product Short Description', 'woocommerce' ), 'WC_Meta_Box_Product_Short_Description::output', 'product', 'normal' );
 		add_meta_box( 'woocommerce-product-data', __( 'Product Data', 'woocommerce' ), 'WC_Meta_Box_Product_Data::output', 'product', 'normal', 'high' );
-		add_meta_box( 'woocommerce-product-images', __( 'Product Gallery', 'woocommerce' ), 'WC_Meta_Box_Product_Images::output', 'product', 'side' );
+		add_meta_box( 'woocommerce-product-images', __( 'Product Gallery', 'woocommerce' ), 'WC_Meta_Box_Product_Images::output', 'product', 'side', 'low' );
 
 		// Orders
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
