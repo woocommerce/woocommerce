@@ -17,7 +17,9 @@ before_script:
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
 
-script: phpunit -c phpunit.xml.dist
+script: phpunit -c phpunit.xml.dist --coverage-clover=coverage.clover
 
 after_script:
   - bash tests/bin/travis.sh after
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
