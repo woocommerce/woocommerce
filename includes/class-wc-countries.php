@@ -606,10 +606,7 @@ class WC_Countries {
 					),
 					'state'		=> array(
 						'label' 		=> __( 'State', 'woocommerce' ),
-					),
-					'sortcode'	=> array(
-						'label'			=> __( 'BSB', 'woocommerce' ),
-					),
+					)
 				),
 				'BD' => array(
 					'postcode' => array(
@@ -646,10 +643,7 @@ class WC_Countries {
 				'CA' => array(
 					'state'	=> array(
 						'label'			=> __( 'Province', 'woocommerce' ),
-					),
-					'sortcode'	=> array(
-						'label'			=> __( 'Bank Transit Number', 'woocommerce' ),
-					),
+					)
 				),
 				'CH' => array(
                     'postcode_before_city' => true,
@@ -732,16 +726,6 @@ class WC_Countries {
 	                    'label'         => __( 'Province', 'woocommerce' ),
 	                )
             	),
-				'IE' => array(
-					'sortcode'	=> array(
-						'label'			=> __( 'Sort Code', 'woocommerce' ),
-					),
- 				),
-				'IN' => array(
-					'sortcode'	=> array(
-						'label'			=> __( 'IFSC', 'woocommerce' ),
-					),
-				),
 				'IS' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
@@ -759,10 +743,7 @@ class WC_Countries {
 					'state'		=> array(
 						'required' => true,
 						'label'    => __( 'Province', 'woocommerce' ),
-					),
-					'sortcode'	=> array(
-						'label'		=> __( 'Branch Sort', 'woocommerce' ),
-					),
+					)
 				),
 				'JP' => array(
 					'state'		=> array(
@@ -784,10 +765,7 @@ class WC_Countries {
 				'NZ' => array(
 					'state'		=> array(
 						'required' => false
-					),
-					'sortcode'	=> array(
-						'label'		=> __( 'Bank Code', 'woocommerce' ),
-					),
+					)
 				),
 				'NO' => array(
 					'postcode_before_city' => true,
@@ -850,10 +828,7 @@ class WC_Countries {
 					'postcode_before_city' => true,
 					'state'	=> array(
 						'required' => false
-					),
-					'sortcode'	=> array(
-						'label'			=> __( 'Bank Code', 'woocommerce' ),
-					),
+					)
 				),
 				'TR' => array(
 					'postcode_before_city' => true,
@@ -867,10 +842,7 @@ class WC_Countries {
 					),
 					'state'		=> array(
 						'label' 		=> __( 'State', 'woocommerce' ),
-					),
-					'sortcode'	=> array(
-						'label'			=> __( 'Routing Number', 'woocommerce' ),
-					),
+					)
 				),
 				'GB' => array(
 					'postcode'	=> array(
@@ -879,10 +851,7 @@ class WC_Countries {
 					'state'		=> array(
 						'label' 		=> __( 'County', 'woocommerce' ),
 						'required' 		=> false
-					),
-					'sortcode'	=> array(
-						'label'			=> __( 'Sort Code', 'woocommerce' ),
-					),
+					)
 				),
 				'VN' => array(
 					'state'		=> array(
@@ -906,10 +875,7 @@ class WC_Countries {
 				'ZA' => array(
 					'state'	=> array(
 						'label'			=> __( 'Province', 'woocommerce' ),
-					),
-					'sortcode'	=> array(
-						'label'		=> __( 'Branch Code', 'woocommerce' ),
-					),
+					)
 				),
 				'ZW' => array(
 					'postcode' => array(
@@ -926,9 +892,8 @@ class WC_Countries {
 			$this->locale['default'] = apply_filters('woocommerce_get_country_locale_default', $this->get_default_address_fields() );
 
 			// Filter default AND shop base locales to allow overides via a single function. These will be used when changing countries on the checkout
-			if ( ! isset( $this->locale[ $this->get_base_country() ] ) ) {
+			if ( ! isset( $this->locale[ $this->get_base_country() ] ) )
 				$this->locale[ $this->get_base_country() ] = $this->locale['default'];
-			}
 
 			$this->locale['default'] 					= apply_filters( 'woocommerce_get_country_locale_base', $this->locale['default'] );
 			$this->locale[ $this->get_base_country() ] 	= apply_filters( 'woocommerce_get_country_locale_base', $this->locale[ $this->get_base_country() ] );

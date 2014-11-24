@@ -17,10 +17,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Gateway_BACS extends WC_Payment_Gateway {
 
+	/** @var array Array of locales */
+	public $locale;
+
 	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
+		
 		$this->id                 = 'bacs';
 		$this->icon               = apply_filters('woocommerce_bacs_icon', '');
 		$this->has_fields         = false;
@@ -57,12 +61,14 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		// Customer Emails
 		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
+
 	}
 
 	/**
 	 * Initialise Gateway Settings Form Fields
 	 */
 	public function init_form_fields() {
+
 		$this->form_fields = array(
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
@@ -95,19 +101,21 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				'type'        => 'account_details'
 			),
 		);
+
 	}
 
 	/**
 	 * generate_account_details_html function.
 	 */
 	public function generate_account_details_html() {
+
 		ob_start();
 
 		$country 	= WC()->countries->get_base_country();
-		$locale		= WC()->countries->get_country_locale();
+		$locale		= $this->get_country_locale();
 
-		$sortcode_label = $locale[$country]['sortcode']['label'];
-		$sortcode = $sortcode_label ? $sortcode_label : __( 'Sort Code', 'woocommerce' );
+		// Get sortcode label in the $locale array and use appropriate one
+		$sortcode = isset( $locale[ $country ]['sortcode']['label'] ) ? $locale[ $country ]['sortcode']['label'] : __( 'Sort Code', 'woocommerce' );
 
 		?>
 		<tr valign="top">
@@ -175,12 +183,14 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		</tr>
 		<?php
 		return ob_get_clean();
+
 	}
 
 	/**
 	 * Save account details table
 	 */
 	public function save_account_details() {
+
 		$accounts = array();
 
 		if ( isset( $_POST['bacs_account_name'] ) ) {
@@ -209,16 +219,19 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		}
 
 		update_option( 'woocommerce_bacs_accounts', $accounts );
+
 	}
 
 	/**
 	 * Output for the order received page.
 	 */
 	public function thankyou_page( $order_id ) {
+
 		if ( $this->instructions ) {
 			echo wpautop( wptexturize( wp_kses_post( $this->instructions ) ) );
 		}
 		$this->bank_details( $order_id );
+
 	}
 
 	/**
@@ -231,18 +244,21 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
+
 		if ( ! $sent_to_admin && 'bacs' === $order->payment_method && $order->has_status( 'on-hold' ) ) {
 			if ( $this->instructions ) {
 				echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 			}
 			$this->bank_details( $order->id );
 		}
+
 	}
 
 	/**
 	 * Get bank details and place into a list format
 	 */
 	private function bank_details( $order_id = '' ) {
+
 		if ( empty( $this->account_details ) ) {
 			return;
 		}
@@ -252,13 +268,10 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		// Get the order country and country $locale
 		$country 	= $order->billing_country;
-		$locale		= WC()->countries->get_country_locale();
+		$locale		= $this->get_country_locale();
 		
-		// Get sortcode label in the $locale array
-		$sortcode_label = $locale[$country]['sortcode']['label'];
-		
-		// If a sortcode label exists uses it, if not use Sort Code
-		$sortcode = $sortcode_label ? $sortcode_label : __( 'Sort Code', 'woocommerce' );
+		// Get sortcode label in the $locale array and use appropriate one
+		$sortcode = isset( $locale[ $country ]['sortcode']['label'] ) ? $locale[ $country ]['sortcode']['label'] : __( 'Sort Code', 'woocommerce' );
 
 		echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>' . PHP_EOL;
 
@@ -304,6 +317,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				echo '</ul>';
 			}
 		}
+
 	}
 
 	/**
@@ -330,5 +344,76 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			'result'    => 'success',
 			'redirect'  => $this->get_return_url( $order )
 		);
+
+	}
+
+	/**
+	 * Get country locale if localized
+	 *
+	 * @return array
+	 */
+
+	public function get_country_locale() {
+
+		if ( ! $this->locale ) {
+
+			// Locale information to be used
+			$this->locale = apply_filters( 'woocommerce_get_bacs_locale', array(
+				'AU' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'BSB', 'woocommerce' ),
+					),
+				),
+				'CA' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'Bank Transit Number', 'woocommerce' ),
+					),
+				),
+				'GB' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'Sort Code', 'woocommerce' ),
+					),
+				),
+				'IE' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'Sort Code', 'woocommerce' ),
+					),
+ 				),
+				'IN' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'IFSC', 'woocommerce' ),
+					),
+				),
+				'IT' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'Branch Sort', 'woocommerce' ),
+					),
+				),
+				'NZ' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'Bank Code', 'woocommerce' ),
+					),
+				),
+				'SE' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'Bank Code', 'woocommerce' ),
+					),
+				),
+				'US' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'Routing Number', 'woocommerce' ),
+					),
+				),
+				'ZA' => array(
+					'sortcode'	=> array(
+						'label'		=> __( 'Branch Code', 'woocommerce' ),
+					),
+				),
+			) );
+
+		}
+
+		return $this->locale;
+
 	}
 }
