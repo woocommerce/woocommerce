@@ -94,4 +94,35 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$this->assertNotFalse( $wpdb->last_result );
 	}
+
+	/**
+	 * Test deleting a tax rate
+	 */
+	public function test__delete_tax_rate() {
+		global $wpdb;
+
+		// Define a rate
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		// Run function
+		$result = WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = $wpdb->insert_id;
+
+		// Run function
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
+
+		$this->assertNotFalse( $wpdb->last_result );
+	}
+
+
 }
