@@ -2,27 +2,374 @@
 
 class WC_Tests_Tax extends WC_Unit_Test_Case {
 
-	/** @todo
-	 * calc_tax
-	 * calc_shipping_tax
-	 * round
-	 * find_rates
-	 * find_shipping_rates
-	 * get_customer_location
-	 * get_rates
-	 * get_base_tax_rates
-	 * get_shipping_tax_rates
-	 * is_compound
-	 * get_rate_label
-	 * get_rate_percent
-	 * get_rate_code
-	 * get_tax_total
-	 * get_tax_classes
-	 * _delete_tax_rate
-	 * _update_tax_rate_postcodes
-	 * _update_tax_rate_cities
-	 * _update_tax_rate_locations
+	/**
+	 * Get rates
 	 */
+	public function test_get_rates() {
+		global $wpdb;
+
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rate_id = $wpdb->insert_id;
+
+		$tax_rates = WC_Tax::get_rates();
+
+		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+	}
+
+	/**
+	 * Get rates
+	 */
+	public function test_get_shipping_tax_rates() {
+		global $wpdb;
+
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rate_id = $wpdb->insert_id;
+
+		$tax_rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+	}
+
+	/**
+	 * Get rates
+	 */
+	public function test_get_base_tax_rates() {
+		global $wpdb;
+
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rate_id = $wpdb->insert_id;
+
+		$tax_rates = WC_Tax::get_base_tax_rates();
+
+		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+	}
+
+	/**
+	 * Find tax rates
+	 */
+	public function test_find_rates() {
+		global $wpdb;
+
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rate_id = $wpdb->insert_id;
+
+		$tax_rates = WC_Tax::find_rates( array(
+			'country'   => 'GB',
+			'state'     => 'Cambs',
+			'postcode'  => 'PE14 1XX',
+			'city'      => 'Somewhere',
+			'tax_class' => ''
+		) );
+
+		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+	}
+
+	/**
+	 * Find tax rates
+	 */
+	public function test_find_shipping_rates() {
+		global $wpdb;
+
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rate_id = $wpdb->insert_id;
+
+		$tax_rates = WC_Tax::find_shipping_rates( array(
+			'country'   => 'GB',
+			'state'     => 'Cambs',
+			'postcode'  => 'PE14 1XX',
+			'city'      => 'Somewhere',
+			'tax_class' => ''
+		) );
+
+		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+	}
+
+	/**
+	 * Test tax amounts
+	 */
+	public function test_calc_tax() {
+		global $wpdb;
+
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rate_id = $wpdb->insert_id;
+
+		$tax_rates = WC_Tax::find_rates( array(
+			'country'   => 'GB',
+			'state'     => 'Cambs',
+			'postcode'  => 'PE14 1XX',
+			'city'      => 'Somewhere',
+			'tax_class' => ''
+		) );
+
+		$calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, true, false );
+
+		$this->assertEquals( $calced_tax, array( $tax_rate_id => '1.665' ) );
+
+		$calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, false, false );
+
+		$this->assertEquals( $calced_tax, array( $tax_rate_id => '1.998' ) );
+	}
+
+	/**
+	 * Shipping tax amounts
+	 */
+	public function test_calc_shipping_tax() {
+		global $wpdb;
+
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rate_id = $wpdb->insert_id;
+
+		$tax_rates = WC_Tax::find_rates( array(
+			'country'   => 'GB',
+			'state'     => 'Cambs',
+			'postcode'  => 'PE14 1XX',
+			'city'      => 'Somewhere',
+			'tax_class' => ''
+		) );
+
+		$calced_tax = WC_Tax::calc_shipping_tax( '10', $tax_rates );
+
+		$this->assertEquals( $calced_tax, array( $tax_rate_id => '2' ) );
+	}
+
+	/**
+	 * Customer Location
+	 */
+	public function test_get_customer_location() {
+		$this->assertEquals( WC_Tax::get_customer_location(), array( 'GB', '', '', '' ) );
+	}
+
+	/**
+	 * Test rate labels
+	 */
+	public function test_get_rate_label() {
+		global $wpdb;
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "1",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$this->assertEquals( WC_Tax::get_rate_label( $wpdb->insert_id ), 'VAT' );
+	}
+
+	/**
+	 * Test rate percent
+	 */
+	public function test_get_rate_percent() {
+		global $wpdb;
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "1",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$this->assertEquals( WC_Tax::get_rate_percent( $wpdb->insert_id ), '20%' );
+	}
+
+	/**
+	 * Test rate code
+	 */
+	public function test_get_rate_code() {
+		global $wpdb;
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "1",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$this->assertEquals( WC_Tax::get_rate_code( $wpdb->insert_id ), 'GB-VAT-1' );
+	}
+
+	/**
+	 * Test is compound
+	 */
+	public function test_is_compound() {
+		global $wpdb;
+
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "1",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$this->assertTrue( WC_Tax::is_compound( $wpdb->insert_id ) );
+	}
+
+	/**
+	 * Test the rounding method
+	 */
+	public function test_round() {
+		$this->assertEquals( WC_Tax::round( '2.1234567' ), '2.1235' );
+	}
+
+	/**
+	 * Get tax totals
+	 */
+	public function test_get_tax_total() {
+		$to_total = array(
+			'1' => '1.665',
+			'2' => '2',
+		);
+
+		$this->assertEquals( WC_Tax::get_tax_total( $to_total ), '3.665' );
+	}
+
+	/**
+	 * Test getting the tax classes
+	 */
+	public function test_get_tax_classes() {
+		$tax_classes = WC_Tax::get_tax_classes();
+
+		$this->assertEquals( $tax_classes, array( 'Reduced Rate', 'Zero Rate' ) );
+	}
 
 	/**
 	 * Test Inserting a tax rate
@@ -124,5 +471,63 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$this->assertNotFalse( $wpdb->last_result );
 	}
 
+	/**
+	 * Postcode saving
+	 */
+	public function test__update_tax_rate_postcodes() {
+		global $wpdb;
 
+		$to_save = '12345;90210-90215';
+		$tax_rate          = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		// Run function
+		$result      = WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = $wpdb->insert_id;
+
+		WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $to_save );
+
+		$results = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC", $tax_rate_id ) );
+
+		$this->assertEquals( array( '12345', '90210', '90211', '90212', '90213', '90214', '90215' ), $results );
+	}
+
+	/**
+	 * City saving
+	 */
+	public function test__update_tax_rate_cities() {
+		global $wpdb;
+
+		$to_save  = 'SOMEWHERE;SOMEWHERE_ELSE';
+		$tax_rate = array(
+			'tax_rate_country'  => "GB",
+			'tax_rate_state'    => "",
+			'tax_rate'          => "20.0000",
+			'tax_rate_name'     => "VAT",
+			'tax_rate_priority' => "1",
+			'tax_rate_compound' => "0",
+			'tax_rate_shipping' => "1",
+			'tax_rate_order'    => "1",
+			'tax_rate_class'    => ""
+		);
+
+		// Run function
+		$result      = WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = $wpdb->insert_id;
+
+		WC_Tax::_update_tax_rate_cities( $tax_rate_id, $to_save );
+
+		$results = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC", $tax_rate_id ) );
+
+		$this->assertEquals( array( 'SOMEWHERE', 'SOMEWHERE_ELSE' ), $results );
+	}
 }
