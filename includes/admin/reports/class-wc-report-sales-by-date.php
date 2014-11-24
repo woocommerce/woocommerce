@@ -132,8 +132,9 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		}
 
 		$legend[] = array(
-			'title' => sprintf( __( '%s sales in this period', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
-			'color' => $this->chart_colours['sales_amount'],
+			'title'            => sprintf( __( '%s sales in this period', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
+			'placeholder'      => __( 'Sales are the sum of the order totals - this includes shipping and discounts.', 'woocommerce' ),
+			'color'            => $this->chart_colours['sales_amount'],
 			'highlight_series' => 6
 		);
 
