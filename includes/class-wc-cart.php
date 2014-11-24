@@ -1216,7 +1216,7 @@ class WC_Cart {
 					 */
 					} else {
 
-						// Work out a new base price without the shop's base tax
+						// Work out a new base price without the item tax
 						$taxes             = $this->tax->calc_tax( $line_price, $item_tax_rates, true );
 
 						// Now we have a new item price (excluding TAX)
@@ -1262,9 +1262,6 @@ class WC_Cart {
 					}
 				}
 
-				// Add any product discounts (after tax)
-				$this->apply_product_discounts_after_tax( $values, $line_total + $line_tax );
-
 				// Cart contents total is based on discounted prices and is used for the final total calculation
 				$this->cart_contents_total += $line_total;
 
@@ -1303,9 +1300,6 @@ class WC_Cart {
 					$this->remove_taxes();
 				}
 
-				// Cart Discounts (after tax)
-				$this->apply_cart_discounts_after_tax();
-
 				// Allow plugins to hook and alter totals before final total is calculated
 				do_action( 'woocommerce_calculate_totals', $this );
 
@@ -1321,9 +1315,6 @@ class WC_Cart {
 				if ( WC()->customer->is_vat_exempt() ) {
 					$this->remove_taxes();
 				}
-
-				// Cart Discounts (after tax)
-				$this->apply_cart_discounts_after_tax();
 			}
 
 			do_action( 'woocommerce_after_calculate_totals', $this );
@@ -1703,34 +1694,14 @@ class WC_Cart {
 
 		/**
 		 * Get array of applied coupon objects and codes.
-		 * @param  string Type of coupons to get. Can be 'cart' or 'order' which are before and after tax respectively.
 		 * @return array of applied coupons
 		 */
-		public function get_coupons( $type = null ) {
+		public function get_coupons( $deprecated = null ) {
 			$coupons = array();
 
-			if ( 'cart' == $type || is_null( $type ) ) {
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $code ) {
-						$coupon = new WC_Coupon( $code );
-
-						if ( $coupon->apply_before_tax() ) {
-							$coupons[ $code ] = $coupon;
-						}
-					}
-				}
-			}
-
-			if ( 'order' == $type || is_null( $type ) ) {
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $code ) {
-						$coupon = new WC_Coupon( $code );
-
-						if ( ! $coupon->apply_before_tax() ) {
-							$coupons[ $code ] = $coupon;
-						}
-					}
-				}
+			foreach ( $this->get_applied_coupons() as $code ) {
+				$coupon = new WC_Coupon( $code );
+				$coupons[ $code ] = $coupon;
 			}
 
 			return $coupons;
@@ -1756,34 +1727,11 @@ class WC_Cart {
 
 		/**
 		 * Remove coupons from the cart of a defined type. Type 1 is before tax, type 2 is after tax.
-		 *
-		 * @params string type - cart for before tax, order for after tax
 		 */
-		public function remove_coupons( $type = null ) {
-
-			if ( 'cart' == $type || 1 == $type ) {
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $code ) {
-						$coupon = new WC_Coupon( $code );
-
-						if ( $coupon->apply_before_tax() )
-							$this->remove_coupon( $code );
-					}
-				}
-			} elseif ( 'order' == $type || 2 == $type ) {
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $code ) {
-						$coupon = new WC_Coupon( $code );
-
-						if ( ! $coupon->apply_before_tax() )
-							$this->remove_coupon( $code );
-					}
-				}
-			} else {
-				$this->applied_coupons = $this->coupon_discount_amounts = $this->coupon_applied_count = array();
-				WC()->session->set( 'applied_coupons', array() );
-				WC()->session->set( 'coupon_discount_amounts', array() );
-			}
+		public function remove_coupons( $deprecated = null ) {
+			$this->applied_coupons = $this->coupon_discount_amounts = $this->coupon_applied_count = array();
+			WC()->session->set( 'applied_coupons', array() );
+			WC()->session->set( 'coupon_discount_amounts', array() );
 		}
 
 		/**
@@ -1811,7 +1759,6 @@ class WC_Cart {
 		/**
 		 * Function to apply discounts to a product and get the discounted price (before tax is applied).
 		 *
-		 * @access public
 		 * @param mixed $values
 		 * @param mixed $price
 		 * @param bool $add_totals (default: false)
@@ -1824,7 +1771,7 @@ class WC_Cart {
 
 			if ( ! empty( $this->coupons ) ) {
 				foreach ( $this->coupons as $code => $coupon ) {
-					if ( $coupon->apply_before_tax() && $coupon->is_valid() ) {
+					if ( $coupon->is_valid() ) {
 						if ( $coupon->is_valid_for_product( $values['data'], $values ) || $coupon->is_valid_for_cart() ) {
 
 							$discount_amount       = $coupon->get_discount_amount( $price, $values, $single = true );
@@ -1832,7 +1779,12 @@ class WC_Cart {
 
 							if ( $add_totals ) {
 								$this->discount_cart += $discount_amount * $values['quantity'];
+
+
 								$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
+
+
+
 								$this->increase_coupon_applied_count( $code, $values['quantity'] );
 							}
 						}
@@ -1841,51 +1793,6 @@ class WC_Cart {
 			}
 
 			return apply_filters( 'woocommerce_get_discounted_price', $price, $values, $this );
-		}
-
-		/**
-		 * Function to apply cart discounts after tax.
-		 *
-		 * @access public
-		 */
-		public function apply_cart_discounts_after_tax() {
-			$pre_discount_total = round( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp );
-
-			if ( $this->coupons ) {
-				foreach ( $this->coupons as $code => $coupon ) {
-					do_action( 'woocommerce_cart_discount_after_tax_' . $coupon->type, $coupon );
-
-					if ( $coupon->is_valid() && ! $coupon->apply_before_tax() && $coupon->is_valid_for_cart() ) {
-						$discount_amount       = $coupon->get_discount_amount( $pre_discount_total );
-						$pre_discount_total    = $pre_discount_total - $discount_amount;
-						$this->discount_total += $discount_amount;
-						$this->increase_coupon_discount_amount( $code, $discount_amount );
-						$this->increase_coupon_applied_count( $code );
-					}
-				}
-			}
-		}
-
-		/**
-		 * Function to apply product discounts after tax.
-		 *
-		 * @access public
-		 * @param mixed $values
-		 * @param double $price
-		 */
-		public function apply_product_discounts_after_tax( $values, $price ) {
-			if ( ! empty( $this->coupons ) ) {
-				foreach ( $this->coupons as $code => $coupon ) {
-					do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon, $values, $price );
-
-					if ( $coupon->is_valid() && ! $coupon->apply_before_tax() && $coupon->is_valid_for_product( $values['data'] ) ) {
-						$discount_amount       = $coupon->get_discount_amount( $price, $values );
-						$this->discount_total += $discount_amount;
-						$this->increase_coupon_discount_amount( $code, $discount_amount );
-						$this->increase_coupon_applied_count( $code, $values['quantity'] );
-					}
-				}
-			}
 		}
 
 		/**
@@ -2230,20 +2137,6 @@ class WC_Cart {
 		}
 
 		/**
-		 * Gets the order discount amount - these are applied after tax.
-		 *
-		 * @return mixed formatted price or false if there are none
-		 */
-		public function get_discounts_after_tax() {
-			if ( $this->discount_total ) {
-				$discounts_after_tax = wc_price( $this->discount_total );
-			} else {
-				$discounts_after_tax = false;
-			}
-			return apply_filters( 'woocommerce_cart_discounts_after_tax', $discounts_after_tax, $this );
-		}
-
-		/**
 		 * Gets the total discount amount - both kinds.
 		 *
 		 * @return mixed formatted price or false if there are none
@@ -2255,5 +2148,30 @@ class WC_Cart {
 				$total_discount = false;
 			}
 			return apply_filters( 'woocommerce_cart_total_discount', $total_discount, $this );
+		}
+
+
+		/**
+		 * Function to apply cart discounts after tax.
+ 		 * @deprecated Coupons can not be applied after tax
+		 */
+		public function apply_cart_discounts_after_tax( $values, $price ) {
+			_deprecated_function( 'apply_cart_discounts_after_tax', '2.3' );
+		}
+
+		/**
+		 * Function to apply product discounts after tax.
+		 * @deprecated Coupons can not be applied after tax
+		 */
+		public function apply_product_discounts_after_tax( $values, $price ) {
+			_deprecated_function( 'apply_product_discounts_after_tax', '2.3' );
+		}
+
+		/**
+		 * Gets the order discount amount - these are applied after tax.
+		 * @deprecated Coupons can not be applied after tax
+		 */
+		public function get_discounts_after_tax() {
+			_deprecated_function( 'get_discounts_after_tax', '2.3' );
 		}
 }

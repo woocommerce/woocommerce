@@ -35,7 +35,6 @@ class WC_Helper_Coupon {
 		update_post_meta( $coupon_id, 'usage_limit_per_user', '' );
 		update_post_meta( $coupon_id, 'limit_usage_to_x_items', '' );
 		update_post_meta( $coupon_id, 'expiry_date', '' );
-		update_post_meta( $coupon_id, 'apply_before_tax', 'no' );
 		update_post_meta( $coupon_id, 'free_shipping', 'no' );
 		update_post_meta( $coupon_id, 'exclude_sale_items', 'no' );
 		update_post_meta( $coupon_id, 'product_categories', array() );

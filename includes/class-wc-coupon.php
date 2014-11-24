@@ -140,7 +140,6 @@ class WC_Coupon {
 			'limit_usage_to_x_items'     => '',
 			'usage_count'                => '',
 			'expiry_date'                => '',
-			'apply_before_tax'           => 'yes',
 			'free_shipping'              => 'no',
 			'product_categories'         => array(),
 			'exclude_product_categories' => array(),
@@ -201,7 +200,7 @@ class WC_Coupon {
 	 * @return bool
 	 */
 	public function apply_before_tax() {
-		return 'yes' === $this->apply_before_tax;
+		return true;
 	}
 
 	/**
