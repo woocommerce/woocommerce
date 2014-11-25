@@ -139,25 +139,29 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Auto-load in-accessible properties on demand.
-	 *
-	 * @param mixed $key
-	 * @return mixed
-	 */
-	public function __get( $key ) {
-		if ( method_exists( $this, $key ) ) {
-			return $this->$key();
-		}
-	}
-
-	/**
 	 * Define constant if not already set
 	 * @param  string $name
-	 * @param  string $value
+	 * @param  string|bool $value
 	 */
 	private function define( $name, $value ) {
 		if ( ! defined( $name ) ) {
 			define( $name, $value );
+		}
+	}
+
+	/**
+	 * What type of request is this?
+	 * string $type ajax, frontend or admin
+	 * @return string
+	 */
+	private function is_request( $type ) {
+		switch ( $type ) {
+			case 'admin' :
+				return is_admin();
+			case 'ajax' :
+				return defined( 'DOING_AJAX' );
+			case 'frontend' :
+				return ! is_admin() || defined( 'DOING_AJAX' );
 		}
 	}
 
@@ -189,43 +193,34 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-comments.php' );
 		include_once( 'includes/class-wc-post-data.php' );
 
-		if ( is_admin() ) {
+		if ( $this->is_request( 'admin' ) ) {
 			include_once( 'includes/admin/class-wc-admin.php' );
 		}
 
-		if ( defined( 'DOING_AJAX' ) ) {
+		if ( $this->is_request( 'ajax' ) ) {
 			$this->ajax_includes();
 		}
 
-		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+		if ( $this->is_request( 'frontend' ) ) {
 			$this->frontend_includes();
 		}
 
 		// Query class
 		$this->query = include( 'includes/class-wc-query.php' );                // The main query class
 
-		// Post types
 		include_once( 'includes/class-wc-post-types.php' );                     // Registers post types
-
-		// API Class
-		include_once( 'includes/class-wc-api.php' );
-
-		// Include abstract classes
+		include_once( 'includes/class-wc-api.php' );                            // API Class
 		include_once( 'includes/abstracts/abstract-wc-product.php' );           // Products
 		include_once( 'includes/abstracts/abstract-wc-order.php' );             // Orders
 		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );      // Settings API (for gateways, shipping, and integrations)
 		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' );   // A Shipping method
 		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' );   // A Payment gateway
 		include_once( 'includes/abstracts/abstract-wc-integration.php' );       // An integration with a service
-
-		// Classes (used on all pages)
 		include_once( 'includes/class-wc-product-factory.php' );                // Product factory
 		include_once( 'includes/class-wc-countries.php' );                      // Defines countries and states
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
-
-		// Download/update languages
-		include_once( 'includes/class-wc-language-pack-upgrader.php' );
+		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
 	}
 
 	/**
@@ -258,7 +253,7 @@ final class WooCommerce {
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
 	 */
 	public function include_template_functions() {
-		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+		if ( $this->is_request( 'frontend' ) ) {
 			include_once( 'includes/wc-template-functions.php' );
 		}
 	}
@@ -288,7 +283,7 @@ final class WooCommerce {
 		$this->integrations    = new WC_Integrations();                         // Integrations class
 
 		// Classes/actions loaded for the frontend and for ajax requests
-		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+		if ( $this->is_request( 'frontend' ) ) {
 			// Session class, handles session data for users - can be overwritten if custom handler is needed
 			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
 
@@ -298,29 +293,7 @@ final class WooCommerce {
 			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
 		}
 
-		// Email Actions
-		$email_actions = apply_filters( 'woocommerce_email_actions', array(
-			'woocommerce_low_stock',
-			'woocommerce_no_stock',
-			'woocommerce_product_on_backorder',
-			'woocommerce_order_status_pending_to_processing',
-			'woocommerce_order_status_pending_to_completed',
-			'woocommerce_order_status_pending_to_cancelled',
-			'woocommerce_order_status_pending_to_on-hold',
-			'woocommerce_order_status_failed_to_processing',
-			'woocommerce_order_status_failed_to_completed',
-			'woocommerce_order_status_on-hold_to_processing',
-			'woocommerce_order_status_on-hold_to_cancelled',
-			'woocommerce_order_status_completed',
-			'woocommerce_new_customer_note',
-			'woocommerce_created_customer'
-		) );
-
-		foreach ( $email_actions as $action ) {
-			add_action( $action, array( $this, 'send_transactional_email' ), 10, 10 );
-		}
-
-		// webhooks
+		$this->init_transactional_emails();
 		$this->load_webhooks();
 
 		// Init action
@@ -344,7 +317,7 @@ final class WooCommerce {
 	public function load_plugin_textdomain() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
 
-		if ( is_admin() ) {
+		if ( $this->is_request( 'admin' ) ) {
 			load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-admin-' . $locale . '.mo' );
 			load_textdomain( 'woocommerce', WP_LANG_DIR . '/plugins/woocommerce-admin-' . $locale . '.mo' );
 		}
@@ -487,11 +460,37 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Hook in all transactional emails
+	 */
+	private function init_transactional_emails() {
+		$email_actions = apply_filters( 'woocommerce_email_actions', array(
+			'woocommerce_low_stock',
+			'woocommerce_no_stock',
+			'woocommerce_product_on_backorder',
+			'woocommerce_order_status_pending_to_processing',
+			'woocommerce_order_status_pending_to_completed',
+			'woocommerce_order_status_pending_to_cancelled',
+			'woocommerce_order_status_pending_to_on-hold',
+			'woocommerce_order_status_failed_to_processing',
+			'woocommerce_order_status_failed_to_completed',
+			'woocommerce_order_status_on-hold_to_processing',
+			'woocommerce_order_status_on-hold_to_cancelled',
+			'woocommerce_order_status_completed',
+			'woocommerce_new_customer_note',
+			'woocommerce_created_customer'
+		) );
+
+		foreach ( $email_actions as $action ) {
+			add_action( $action, array( $this, 'send_transactional_email' ), 10, 10 );
+		}
+	}
+
+	/**
 	 * Load & enqueue active webhooks
 	 *
 	 * @since 2.2
 	 */
-	public function load_webhooks() {
+	private function load_webhooks() {
 		$args = array(
 			'fields'      => 'ids',
 			'post_type'   => 'shop_webhook',

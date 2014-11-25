@@ -247,7 +247,6 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content_type() {
-
 		switch ( $this->get_email_type() ) {
 			case "html" :
 				return 'text/html';
