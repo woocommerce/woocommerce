@@ -137,6 +137,16 @@ if ( wc_tax_enabled() ) {
 	?>
 	<table class="wc-order-totals">
 		<tr>
+			<td class="label"><?php _e( 'Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total discount. Discounts are defined per line item.', 'woocommerce' ); ?>">[?]</span>:</td>
+			<td class="total">
+				<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_order_currency() ) ); ?>
+			</td>
+			<td width="1%"></td>
+		</tr>
+
+		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->id ); ?>
+
+		<tr>
 			<td class="label"><?php _e( 'Shipping', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the shipping and handling total costs for the order.', 'woocommerce' ); ?>">[?]</span>:</td>
 			<td class="total"><?php echo wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
 			<td width="1%"></td>
@@ -155,20 +165,6 @@ if ( wc_tax_enabled() ) {
 		<?php endif; ?>
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_tax', $order->id ); ?>
-
-		<tr>
-			<td class="label"><?php _e( 'Order Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the total discount applied after tax.', 'woocommerce' ); ?>">[?]</span>:</td>
-			<td class="total">
-				<div class="view"><?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_order_currency() ) ); ?></div>
-				<div class="edit" style="display: none;">
-					<input type="text" class="wc_input_price" id="_order_discount" name="_order_discount" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $data['_order_discount'][0] ) ) ? esc_attr( wc_format_localized_price( $data['_order_discount'][0] ) ) : ''; ?>" />
-					<div class="clear"></div>
-				</div>
-			</td>
-			<td><?php if ( $order->is_editable() ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
-		</tr>
-
-		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->id ); ?>
 
 		<tr>
 			<td class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</td>

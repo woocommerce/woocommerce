@@ -482,7 +482,7 @@ abstract class WC_Abstract_Order {
 	 */
 	public function set_total( $amount, $total_type = 'total' ) {
 
-		if ( ! in_array( $total_type, array( 'shipping', 'order_discount', 'tax', 'shipping_tax', 'total', 'cart_discount' ) ) ) {
+		if ( ! in_array( $total_type, array( 'shipping', 'tax', 'shipping_tax', 'total', 'cart_discount' ) ) ) {
 			return false;
 		}
 
@@ -491,7 +491,6 @@ abstract class WC_Abstract_Order {
 				$key    = '_order_total';
 				$amount = wc_format_decimal( $amount, get_option( 'woocommerce_price_num_decimals' ) );
 			break;
-			case 'order_discount' :
 			case 'cart_discount' :
 				$key    = '_' . $total_type;
 				$amount = wc_format_decimal( $amount );
@@ -722,7 +721,7 @@ abstract class WC_Abstract_Order {
 
 		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
 
-		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() - $this->get_order_discount() + $this->get_cart_tax() + $this->get_shipping_tax(), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
+		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 		$this->set_total( $grand_total, 'total' );
 
@@ -1239,9 +1238,11 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Gets the total (order) discount amount - these are applied after tax.
 	 *
+	 * @deprecated order (after tax) discounts removed in 2.3.0
 	 * @return float
 	 */
 	public function get_order_discount() {
+		_deprecated_function( 'get_order_discount', '2.3' );
 		return apply_filters( 'woocommerce_order_amount_order_discount', (double) $this->order_discount, $this );
 	}
 
@@ -1251,7 +1252,7 @@ abstract class WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_discount() {
-		return apply_filters( 'woocommerce_order_amount_total_discount', $this->get_cart_discount() + $this->get_order_discount(), $this );
+		return apply_filters( 'woocommerce_order_amount_total_discount', $this->get_cart_discount(), $this );
 	}
 
 	/**
@@ -1649,9 +1650,11 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Get cart discount (formatted).
 	 *
+	 * @deprecated order (after tax) discounts removed in 2.3.0
 	 * @return string
 	 */
 	public function get_order_discount_to_display() {
+		_deprecated_function( 'get_order_discount_to_display', '2.3' );
 		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_order_discount(), array( 'currency' => $this->get_order_currency() ) ), $this );
 	}
 
@@ -1754,13 +1757,6 @@ abstract class WC_Abstract_Order {
 					'value'	=> wc_price( $this->get_total_tax(), array('currency' => $this->get_order_currency()) )
 				);
 			}
-		}
-
-		if ( $this->get_order_discount() > 0 ) {
-			$total_rows['order_discount'] = array(
-				'label' => __( 'Order Discount:', 'woocommerce' ),
-				'value'	=> '-' . $this->get_order_discount_to_display()
-			);
 		}
 
 		if ( $this->get_total() > 0 ) {

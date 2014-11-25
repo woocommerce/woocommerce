@@ -158,7 +158,6 @@ class WC_API_Orders extends WC_API_Resource {
 			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), 2 ),
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), 2 ),
 			'cart_discount'             => wc_format_decimal( $order->get_cart_discount(), 2 ),
-			'order_discount'            => wc_format_decimal( $order->get_order_discount(), 2 ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->payment_method,

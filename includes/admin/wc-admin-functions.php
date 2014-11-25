@@ -325,7 +325,6 @@ function wc_save_order_items( $order_id, $items ) {
 	update_post_meta( $order_id, '_cart_discount', $subtotal - $total );
 
 	// Update totals
-	update_post_meta( $order_id, '_order_discount', wc_format_decimal( $items['_order_discount'] ) );
 	update_post_meta( $order_id, '_order_total', wc_format_decimal( $items['_order_total'] ) );
 
 	// Update tax

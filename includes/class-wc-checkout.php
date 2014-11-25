@@ -289,7 +289,6 @@ class WC_Checkout {
 			$order->set_address( $shipping_address, 'shipping' );
 			$order->set_payment_method( $this->payment_method );
 			$order->set_total( WC()->cart->shipping_total, 'shipping' );
-			$order->set_total( WC()->cart->get_order_discount_total(), 'order_discount' );
 			$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
 			$order->set_total( WC()->cart->tax_total, 'tax' );
 			$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
