@@ -93,9 +93,8 @@ class WC_Admin_Status {
 				break;
 				case 'reset_roles' :
 					// Remove then re-add caps and roles
-					$installer = include( WC()->plugin_path() . '/includes/class-wc-install.php' );
-					$installer->remove_roles();
-					$installer->create_roles();
+					WC_Install::remove_roles();
+					WC_Install::create_roles();
 
 					echo '<div class="updated"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
 				break;

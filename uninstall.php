@@ -9,16 +9,17 @@
  * @package 	WooCommerce/Uninstaller
  * @version     2.1.0
  */
-if( ! defined( 'WP_UNINSTALL_PLUGIN' ) )
+if( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit();
+}
 
 global $wpdb, $wp_roles;
 
 $status_options = get_option( 'woocommerce_status_options', array() );
 
 // Roles + caps
-$installer = include( 'includes/class-wc-install.php' );
-$installer->remove_roles();
+include_once( 'includes/class-wc-install.php' );
+WC_Install::remove_roles();
 
 // Pages
 wp_trash_post( get_option( 'woocommerce_shop_page_id' ) );

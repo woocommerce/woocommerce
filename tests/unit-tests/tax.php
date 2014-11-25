@@ -8,8 +8,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test_get_rates() {
 		global $wpdb;
 
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
 			'tax_rate_country'  => "GB",
@@ -38,8 +38,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test_get_shipping_tax_rates() {
 		global $wpdb;
 
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
 			'tax_rate_country'  => "GB",
@@ -68,8 +68,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test_get_base_tax_rates() {
 		global $wpdb;
 
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
 			'tax_rate_country'  => "GB",
@@ -98,8 +98,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test_find_rates() {
 		global $wpdb;
 
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
 			'tax_rate_country'  => "GB",
@@ -134,8 +134,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test_find_shipping_rates() {
 		global $wpdb;
 
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
 			'tax_rate_country'  => "GB",
@@ -170,8 +170,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test_calc_tax() {
 		global $wpdb;
 
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
 			'tax_rate_country'  => "GB",
@@ -212,8 +212,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test_calc_shipping_tax() {
 		global $wpdb;
 
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE * FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
 			'tax_rate_country'  => "GB",
