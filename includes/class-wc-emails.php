@@ -5,40 +5,17 @@
  * WooCommerce Emails Class which handles the sending on transactional emails and email templates. This class loads in available emails.
  *
  * @class 		WC_Emails
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Emails
  * @category	Class
  * @author 		WooThemes
  */
 class WC_Emails {
 
-	/**
-	 * @var array Array of email notification classes.
-	 */
+	/** @var array Array of email notification classes */
 	public $emails;
 
-	/**
-	 * @var string Stores the emailer's address.
-	 * @access private
-	 */
-	private $_from_address;
-
-	/**
-	 * @var string Stores the emailer's name.
-	 * @access private
-	 */
-	private $_from_name;
-
-	/**
-	 * @var mixed Content type for sent emails
-	 * @access private
-	 */
-	private $_content_type;
-
-	/**
-	 * @var WC_Emails The single instance of the class
-	 * @since 2.1
-	 */
+	/** @var WC_Emails The single instance of the class */
 	protected static $_instance = null;
 
 	/**
@@ -80,7 +57,6 @@ class WC_Emails {
 	 *
 	 */
 	public function __construct() {
-
 		$this->init();
 
 		// Email Header, Footer and content hooks
@@ -139,11 +115,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function get_from_name() {
-		if ( ! $this->_from_name ) {
-			$this->_from_name = get_option( 'woocommerce_email_from_name' );
-		}
-
-		return wp_specialchars_decode( $this->_from_name );
+		return wp_specialchars_decode( et_option( 'woocommerce_email_from_name' ) );
 	}
 
 	/**
@@ -152,20 +124,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function get_from_address() {
-		if ( ! $this->_from_address ) {
-			$this->_from_address = get_option( 'woocommerce_email_from_address' );
-		}
-
-		return $this->_from_address;
-	}
-
-	/**
-	 * Get the content type for the email.
-	 *
-	 * @return string
-	 */
-	public function get_content_type() {
-		return $this->_content_type;
+		return get_option( 'woocommerce_email_from_address' );
 	}
 
 	/**
@@ -217,11 +176,7 @@ class WC_Emails {
 	 * @param string $attachments (default: "")
 	 * @param string $content_type (default: "text/html")
 	 */
-	public function send( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "", $content_type = 'text/html' ) {
-
-		// Set content type
-		$this->_content_type = $content_type;
-
+	public function send( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
 		// Send
 		$email = new WC_Email();
 		$email->send( $to, $subject, $message, $headers, $attachments );
