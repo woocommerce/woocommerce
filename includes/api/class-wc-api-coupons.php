@@ -276,7 +276,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		update_post_meta( $id, 'usage_limit_per_user', absint( $coupon_data['usage_limit_per_user'] ) );
 		update_post_meta( $id, 'limit_usage_to_x_items', absint( $coupon_data['limit_usage_to_x_items'] ) );
 		update_post_meta( $id, 'usage_count', absint( $coupon_data['usage_count'] ) );
-		update_post_meta( $id, 'expiry_date', wc_clean( $coupon_data['expiry_date'] ) );
+		update_post_meta( $id, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $coupon_data['expiry_date'] ) ) );
 		update_post_meta( $id, 'apply_before_tax', wc_clean( $coupon_data['apply_before_tax'] ) );
 		update_post_meta( $id, 'free_shipping', wc_clean( $coupon_data['enable_free_shipping'] ) );
 		update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $coupon_data['product_category_ids'] ) ) );
@@ -379,7 +379,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['expiry_date'] ) ) {
-			update_post_meta( $id, 'expiry_date', wc_clean( $data['expiry_date'] ) );
+			update_post_meta( $id, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $data['expiry_date'] ) ) );
 		}
 
 		if ( isset( $data['apply_before_tax'] ) ) {
@@ -438,6 +438,21 @@ class WC_API_Coupons extends WC_API_Resource {
 		do_action( 'woocommerce_api_delete_coupon', $id, $this );
 
 		return $this->delete( $id, 'shop_coupon', ( 'true' === $force ) );
+	}
+
+	/**
+	 * expiry_date format
+	 *
+	 * @since  2.3.0
+	 * @param  string expiry_date
+	 * @return string
+	 */
+	protected function get_coupon_expiry_date( $expiry_date ) {
+		if ( '' != $expiry_date ) {
+			return date( 'Y-m-d', strtotime( $expiry_date ) );
+		}
+
+		return '';
 	}
 
 	/**
