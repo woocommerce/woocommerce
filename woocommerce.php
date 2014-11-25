@@ -148,18 +148,6 @@ final class WooCommerce {
 		if ( method_exists( $this, $key ) ) {
 			return $this->$key();
 		}
-
-		switch( $key ) {
-			case 'template_url':
-				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'Use WC()->template_path()' );
-				return $this->template_path();
-			case 'messages':
-				_deprecated_argument( 'Woocommerce->messages', '2.1', 'Use wc_get_notices' );
-				return wc_get_notices( 'success' );
-			case 'errors':
-				_deprecated_argument( 'Woocommerce->errors', '2.1', 'Use wc_get_notices' );
-				return wc_get_notices( 'error' );
-		}
 	}
 
 	/**
@@ -504,7 +492,6 @@ final class WooCommerce {
 	 * @since 2.2
 	 */
 	public function load_webhooks() {
-
 		$args = array(
 			'fields'      => 'ids',
 			'post_type'   => 'shop_webhook',
@@ -514,15 +501,12 @@ final class WooCommerce {
 		$query = new WP_Query( $args );
 
 		if ( ! empty( $query->posts ) ) {
-
 			foreach ( $query->posts as $id ) {
 				$webhook = new WC_Webhook( $id );
 				$webhook->enqueue();
 			}
 		}
 	}
-
-	/** Load Instances on demand **********************************************/
 
 	/**
 	 * Get Checkout Class.
@@ -558,284 +542,6 @@ final class WooCommerce {
 	 */
 	public function mailer() {
 		return WC_Emails::instance();
-	}
-
-	/** Deprecated methods *********************************************************/
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $image_size
-	 * @return array
-	 */
-	public function get_image_size( $image_size ) {
-		_deprecated_function( 'Woocommerce->get_image_size', '2.1', 'wc_get_image_size()' );
-		return wc_get_image_size( $image_size );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return WC_Logger
-	 */
-	public function logger() {
-		_deprecated_function( 'Woocommerce->logger', '2.1', 'new WC_Logger()' );
-		return new WC_Logger();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return WC_Validation
-	 */
-	public function validation() {
-		_deprecated_function( 'Woocommerce->validation', '2.1', 'new WC_Validation()' );
-		return new WC_Validation();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $post
-	 * @return WC_Product
-	 */
-	public function setup_product_data( $post ) {
-		_deprecated_function( 'Woocommerce->setup_product_data', '2.1', 'wc_setup_product_data' );
-		return wc_setup_product_data( $post );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $content
-	 * @return string
-	 */
-	public function force_ssl( $content ) {
-		_deprecated_function( 'Woocommerce->force_ssl', '2.1', 'WC_HTTPS::force_https_url' );
-		return WC_HTTPS::force_https_url( $content );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param int $post_id
-	 */
-	public function clear_product_transients( $post_id = 0 ) {
-		_deprecated_function( 'Woocommerce->clear_product_transients', '2.1', 'wc_delete_product_transients' );
-		wc_delete_product_transients( $post_id );
-	}
-
-	/**
-	 * @deprecated 2.1.0 Access via the WC_Inline_Javascript_Helper helper
-	 * @param $code
-	 */
-	public function add_inline_js( $code ) {
-		_deprecated_function( 'Woocommerce->add_inline_js', '2.1', 'wc_enqueue_js' );
-		wc_enqueue_js( $code );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param      $action
-	 * @param bool $referer
-	 * @param bool $echo
-	 * @return string
-	 */
-	public function nonce_field( $action, $referer = true , $echo = true ) {
-		_deprecated_function( 'Woocommerce->nonce_field', '2.1', 'wp_nonce_field' );
-		return wp_nonce_field('woocommerce-' . $action, '_wpnonce', $referer, $echo );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param        $action
-	 * @param string $url
-	 * @return string
-	 */
-	public function nonce_url( $action, $url = '' ) {
-		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'wp_nonce_url' );
-		return wp_nonce_url( $url , 'woocommerce-' . $action );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param        $action
-	 * @param string $method
-	 * @param bool   $error_message
-	 * @return bool
-	 */
-	public function verify_nonce( $action, $method = '_POST', $error_message = false ) {
-		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'wp_verify_nonce' );
-		if ( ! isset( $method[ '_wpnonce' ] ) ) {
-			return false;
-		}
-		return wp_verify_nonce( $method[ '_wpnonce' ], 'woocommerce-' . $action );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param       $function
-	 * @param array $atts
-	 * @param array $wrapper
-	 * @return string
-	 */
-	public function shortcode_wrapper( $function, $atts = array(), $wrapper = array( 'class' => 'woocommerce', 'before' => null, 'after' => null ) ) {
-		_deprecated_function( 'Woocommerce->shortcode_wrapper', '2.1', 'WC_Shortcodes::shortcode_wrapper' );
-		return WC_Shortcodes::shortcode_wrapper( $function, $atts, $wrapper );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return object
-	 */
-	public function get_attribute_taxonomies() {
-		_deprecated_function( 'Woocommerce->get_attribute_taxonomies', '2.1', 'wc_get_attribute_taxonomies' );
-		return wc_get_attribute_taxonomies();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $name
-	 * @return string
-	 */
-	public function attribute_taxonomy_name( $name ) {
-		_deprecated_function( 'Woocommerce->attribute_taxonomy_name', '2.1', 'wc_attribute_taxonomy_name' );
-		return wc_attribute_taxonomy_name( $name );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $name
-	 * @return string
-	 */
-	public function attribute_label( $name ) {
-		_deprecated_function( 'Woocommerce->attribute_label', '2.1', 'wc_attribute_label' );
-		return wc_attribute_label( $name );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $name
-	 * @return string
-	 */
-	public function attribute_orderby( $name ) {
-		_deprecated_function( 'Woocommerce->attribute_orderby', '2.1', 'wc_attribute_orderby' );
-		return wc_attribute_orderby( $name );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return array
-	 */
-	public function get_attribute_taxonomy_names() {
-		_deprecated_function( 'Woocommerce->get_attribute_taxonomy_names', '2.1', 'wc_get_attribute_taxonomy_names' );
-		return wc_get_attribute_taxonomy_names();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return array
-	 */
-	public function get_coupon_discount_types() {
-		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'wc_get_coupon_types' );
-		return wc_get_coupon_types();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param string $type
-	 * @return string
-	 */
-	public function get_coupon_discount_type( $type = '' ) {
-		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'wc_get_coupon_type' );
-		return wc_get_coupon_type( $type );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $class
-	 */
-	public function add_body_class( $class ) {
-		_deprecated_function( 'Woocommerce->add_body_class', '2.1' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $classes
-	 */
-	public function output_body_class( $classes ) {
-		_deprecated_function( 'Woocommerce->output_body_class', '2.1' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $error
-	 */
-	public function add_error( $error ) {
-		_deprecated_function( 'Woocommerce->add_error', '2.1', 'wc_add_notice' );
-		wc_add_notice( $error, 'error' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $message
-	 */
-	public function add_message( $message ) {
-		_deprecated_function( 'Woocommerce->add_message', '2.1', 'wc_add_notice' );
-		wc_add_notice( $message );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 */
-	public function clear_messages() {
-		_deprecated_function( 'Woocommerce->clear_messages', '2.1', 'wc_clear_notices' );
-		wc_clear_notices();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return int
-	 */
-	public function error_count() {
-		_deprecated_function( 'Woocommerce->error_count', '2.1', 'wc_notice_count' );
-		return wc_notice_count( 'error' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return int
-	 */
-	public function message_count() {
-		_deprecated_function( 'Woocommerce->message_count', '2.1', 'wc_notice_count' );
-		return wc_notice_count( 'message' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return mixed
-	 */
-	public function get_errors() {
-		_deprecated_function( 'Woocommerce->get_errors', '2.1', 'wc_get_notices( "error" )' );
-		return wc_get_notices( 'error' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return mixed
-	 */
-	public function get_messages() {
-		_deprecated_function( 'Woocommerce->get_messages', '2.1', 'wc_get_notices( "success" )' );
-		return wc_get_notices( 'success' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 */
-	public function show_messages() {
-		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'wc_print_notices()' );
-		wc_print_notices();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 */
-	public function set_messages() {
-		_deprecated_function( 'Woocommerce->set_messages', '2.1' );
 	}
 }
 
