@@ -563,7 +563,7 @@ class WC_Email extends WC_Settings_API {
 		 *
 		 * @param string $email The email object
 		 */
-		do_action( 'woocommerce_email_settings_after', $this );
+		do_action( 'woocommerce_email_settings_before', $this );
 		?>
 
 		<table class="form-table">
