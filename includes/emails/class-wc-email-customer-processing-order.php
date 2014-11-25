@@ -9,7 +9,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order' ) ) :
 /**
  * Customer Processing Order Email
  *
- * An email sent to the admin when a new order is received/paid for.
+ * An email sent to the customer when a new order is received/paid for.
  *
  * @class 		WC_Email_Customer_Processing_Order
  * @version		2.0.0

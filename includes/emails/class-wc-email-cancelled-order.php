@@ -9,7 +9,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order' ) ) :
 /**
  * Cancelled Order Email
  *
- * An email sent to the admin when a new order is received/paid for.
+ * An email sent to the admin when an order is cancelled.
  *
  * @class       WC_Email_Cancelled_Order
  * @version     2.2.7
