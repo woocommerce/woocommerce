@@ -511,11 +511,20 @@ class WC_Email extends WC_Settings_API {
 					if (  wp_mkdir_p( dirname( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) && ! file_exists( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) {
 
 						// Locate template file
-						$core_file		= $this->template_base . $this->$template;
-						$template_file	= apply_filters( 'woocommerce_locate_core_template', $core_file, $this->$template, $this->template_base );
+						$core_file     = $this->template_base . $this->$template;
+						$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $this->$template, $this->template_base );
 
 						// Copy template file
 						copy( $template_file, get_stylesheet_directory() . '/woocommerce/' . $this->$template );
+
+						/**
+						 * woocommerce_copy_email_template action hook
+						 *
+						 * @param string $template The copied template type
+						 * @param string $email The email object
+						 */
+						do_action( 'woocommerce_copy_email_template', $template, $this );
+
 						echo '<div class="updated fade"><p>' . __( 'Template file copied to theme.', 'woocommerce' ) . '</p></div>';
 					}
 				}
@@ -527,6 +536,15 @@ class WC_Email extends WC_Settings_API {
 
 					if ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) {
 						unlink( get_stylesheet_directory() . '/woocommerce/' . $this->$template );
+
+						/**
+						 * woocommerce_delete_email_template action hook
+						 *
+						 * @param string $template The deleted template type
+						 * @param string $email The email object
+						 */
+						do_action( 'woocommerce_delete_email_template', $template, $this->$template );
+
 						echo '<div class="updated fade"><p>' . __( 'Template file deleted from theme.', 'woocommerce' ) . '</p></div>';
 					}
 				}
@@ -539,9 +557,27 @@ class WC_Email extends WC_Settings_API {
 
 		<?php echo ( ! empty( $this->description ) ) ? wpautop( $this->description ) : ''; ?>
 
+		<?php
+		/**
+		 * woocommerce_email_settings_before action hook
+		 *
+		 * @param string $email The email object
+		 */
+		do_action( 'woocommerce_email_settings_after', $this );
+		?>
+
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 		</table>
+
+		<?php
+		/**
+		 * woocommerce_email_settings_after action hook
+		 *
+		 * @param string $email The email object
+		 */
+		do_action( 'woocommerce_email_settings_after', $this );
+		?>
 
 		<?php if ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) { ?>
 			<div id="template">
