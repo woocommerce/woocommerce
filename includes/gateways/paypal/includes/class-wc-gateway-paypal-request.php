@@ -162,8 +162,8 @@ class WC_Gateway_Paypal_Request {
 			$line_item_args             = $this->get_line_items();
 			$line_item_args['tax_cart'] = $order->get_total_tax();
 
-			if ( $order->get_cart_discount() > 0 ) {
-				$line_item_args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
+			if ( $order->get_total_discount() > 0 ) {
+				$line_item_args['discount_amount_cart'] = round( $order->get_total_discount(), 2 );
 			}
 
 		/**
@@ -262,7 +262,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Check for mismatched totals
-		if ( ( $calculated_total + $order->get_total_tax() + round( $order->get_total_shipping(), 2 ) - round( $order->get_cart_discount(), 2 ) ) != $order->get_total() ) {
+		if ( ( $calculated_total + $order->get_total_tax() + round( $order->get_total_shipping(), 2 ) - round( $order->get_total_discount(), 2 ) ) != $order->get_total() ) {
 			return false;
 		}
 

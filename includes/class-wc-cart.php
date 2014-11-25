@@ -22,6 +22,9 @@ class WC_Cart {
 	/** @var array Contains an array of coupon code discounts after they have been applied. */
 	public $coupon_discount_amounts = array();
 
+	/** @var array Contains an array of coupon code discount taxes. Used for tax incl pricing. */
+	public $coupon_discount_tax_amounts = array();
+
 	/** @var array Contains an array of coupon usage counts after they have been applied. */
 	public $coupon_applied_count = array();
 
@@ -33,9 +36,6 @@ class WC_Cart {
 
 	/** @var float The total count of the cart items. */
 	public $cart_contents_count;
-
-	/** @var float The total tax for the cart items. */
-	public $cart_contents_tax;
 
 	/** @var float Cart grand total. */
 	public $total;
@@ -55,11 +55,11 @@ class WC_Cart {
 	/** @var array An array of taxes/tax rates for the shipping. */
 	public $shipping_taxes;
 
-	/** @var float Discounts before tax. */
+	/** @var float Discounts (before tax) */
 	public $discount_cart;
 
-	/** @var float Discounts after tax. */
-	public $discount_total;
+	/** @var float Discounts (before tax) excluding tax. Used predominantly for tax inclusive prices */
+	public $discount_cart_tax;
 
 	/** @var float Total for additional fees. */
 	public $fee_total;
@@ -70,23 +70,33 @@ class WC_Cart {
 	/** @var float Shipping tax. */
 	public $shipping_tax_total;
 
-	/** @var WC_Tax */
-	public $tax;
-
-	/** @var array cart_session_data */
-	public $cart_session_data = array();
+	/** @var array cart_session_data. Array of data the cart calculates and stores in the session with defaults */
+	public $cart_session_data = array(
+		'cart_contents_total'         => 0,
+		'cart_contents_weight'        => 0,
+		'cart_contents_count'         => 0,
+		'total'                       => 0,
+		'subtotal'                    => 0,
+		'subtotal_ex_tax'             => 0,
+		'tax_total'                   => 0,
+		'taxes'                       => array(),
+		'shipping_taxes'              => array(),
+		'discount_cart'               => 0,
+		'shipping_total'              => 0,
+		'shipping_tax_total'          => 0,
+		'coupon_discount_amounts'     => array(),
+		'coupon_discount_tax_amounts' => array(),
+		'fee_total'                   => 0,
+		'fees'                        => array()
+	);
 
 	/** @var array An array of fees. */
 	public $fees = array();
 
 	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function __construct() {
-		$this->tax                   = new WC_Tax();
 		$this->prices_include_tax    = wc_prices_include_tax();
 		$this->round_at_subtotal     = get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes';
 		$this->tax_display_cart      = get_option( 'woocommerce_tax_display_cart' );
@@ -94,30 +104,24 @@ class WC_Cart {
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl';
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl';
 
-		// Array of data the cart calculates and stores in the session with defaults
-		$this->cart_session_data = array(
-			'cart_contents_total'     => 0,
-			'cart_contents_weight'    => 0,
-			'cart_contents_count'     => 0,
-			'cart_contents_tax'       => 0,
-			'total'                   => 0,
-			'subtotal'                => 0,
-			'subtotal_ex_tax'         => 0,
-			'tax_total'               => 0,
-			'taxes'                   => array(),
-			'shipping_taxes'          => array(),
-			'discount_cart'           => 0,
-			'discount_total'          => 0,
-			'shipping_total'          => 0,
-			'shipping_tax_total'      => 0,
-			'coupon_discount_amounts' => array(),
-			'fee_total'               => 0,
-			'fees'                    => array()
-		);
-
 		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 ); // Set cookies before shutdown and ob flushing
+	}
+
+	/**
+	 * Auto-load in-accessible properties on demand.
+	 *
+	 * @param mixed $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+		switch( $key ) {
+			case 'tax':
+				_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
+				$this->tax = new WC_Tax();
+				return $this->tax;
+		}
 	}
 
 	/**
@@ -247,6 +251,7 @@ class WC_Cart {
 			WC()->session->set( 'cart', $cart_session );
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
 			WC()->session->set( 'coupon_discount_amounts', $this->coupon_discount_amounts );
+			WC()->session->set( 'coupon_discount_tax_amounts', $this->coupon_discount_tax_amounts );
 
 			foreach ( $this->cart_session_data as $key => $default ) {
 				WC()->session->set( $key, $this->$key );
@@ -270,7 +275,7 @@ class WC_Cart {
 			$this->cart_contents = array();
 			$this->reset();
 
-			unset( WC()->session->order_awaiting_payment, WC()->session->applied_coupons, WC()->session->coupon_discount_amounts, WC()->session->cart );
+			unset( WC()->session->order_awaiting_payment, WC()->session->applied_coupons, WC()->session->coupon_discount_amounts, WC()->session->coupon_discount_tax_amounts, WC()->session->cart );
 
 			if ( $clear_persistent_cart && get_current_user_id() ) {
 				$this->persistent_cart_destroy();
@@ -749,7 +754,7 @@ class WC_Cart {
 
 			foreach ( $taxes as $key => $tax ) {
 
-				$code = $this->tax->get_rate_code( $key );
+				$code = WC_Tax::get_rate_code( $key );
 
 				if ( $code ) {
 					if ( ! isset( $tax_totals[ $code ] ) ) {
@@ -758,8 +763,8 @@ class WC_Cart {
 					}
 
 					$tax_totals[ $code ]->tax_rate_id       = $key;
-					$tax_totals[ $code ]->is_compound       = $this->tax->is_compound( $key );
-					$tax_totals[ $code ]->label             = $this->tax->get_rate_label( $key );
+					$tax_totals[ $code ]->is_compound       = WC_Tax::is_compound( $key );
+					$tax_totals[ $code ]->label             = WC_Tax::get_rate_label( $key );
 					$tax_totals[ $code ]->amount           += wc_round_tax_total( $tax );
 					$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
 				}
@@ -1091,11 +1096,11 @@ class WC_Cart {
 
 					// Get base tax rates
 					if ( empty( $shop_tax_rates[ $_product->tax_class ] ) )
-						$shop_tax_rates[ $_product->tax_class ] = $this->tax->get_base_tax_rates( $_product->tax_class );
+						$shop_tax_rates[ $_product->tax_class ] = WC_Tax::get_base_tax_rates( $_product->tax_class );
 
 					// Get item tax rates
 					if ( empty( $tax_rates[ $_product->get_tax_class() ] ) )
-						$tax_rates[ $_product->get_tax_class() ] = $this->tax->get_rates( $_product->get_tax_class() );
+						$tax_rates[ $_product->get_tax_class() ] = WC_Tax::get_rates( $_product->get_tax_class() );
 
 					$base_tax_rates = $shop_tax_rates[ $_product->tax_class ];
 					$item_tax_rates = $tax_rates[ $_product->get_tax_class() ];
@@ -1106,13 +1111,13 @@ class WC_Cart {
 					if ( $item_tax_rates !== $base_tax_rates ) {
 
 						// Work out a new base price without the shop's base tax
-						$taxes                 = $this->tax->calc_tax( $line_price, $base_tax_rates, true, true );
+						$taxes                 = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );
 
 						// Now we have a new item price (excluding TAX)
 						$line_subtotal         = $line_price - array_sum( $taxes );
 
 						// Now add modifed taxes
-						$tax_result            = $this->tax->calc_tax( $line_subtotal, $item_tax_rates );
+						$tax_result            = WC_Tax::calc_tax( $line_subtotal, $item_tax_rates );
 						$line_subtotal_tax     = array_sum( $tax_result );
 
 					/**
@@ -1121,7 +1126,7 @@ class WC_Cart {
 					} else {
 
 						// Calc tax normally
-						$taxes                 = $this->tax->calc_tax( $line_price, $item_tax_rates, true );
+						$taxes                 = WC_Tax::calc_tax( $line_price, $item_tax_rates, true );
 						$line_subtotal_tax     = array_sum( $taxes );
 						$line_subtotal         = $line_price - array_sum( $taxes );
 					}
@@ -1135,12 +1140,12 @@ class WC_Cart {
 
 					// Get item tax rates
 					if ( empty( $tax_rates[ $_product->get_tax_class() ] ) )
-						$tax_rates[ $_product->get_tax_class() ] = $this->tax->get_rates( $_product->get_tax_class() );
+						$tax_rates[ $_product->get_tax_class() ] = WC_Tax::get_rates( $_product->get_tax_class() );
 
 					$item_tax_rates        = $tax_rates[ $_product->get_tax_class() ];
 
 					// Base tax for line before discount - we will store this in the order data
-					$taxes                 = $this->tax->calc_tax( $line_price, $item_tax_rates );
+					$taxes                 = WC_Tax::calc_tax( $line_price, $item_tax_rates );
 					$line_subtotal_tax     = array_sum( $taxes );
 					$line_subtotal         = $line_price;
 				}
@@ -1177,7 +1182,7 @@ class WC_Cart {
 					$line_subtotal_tax     = 0;
 					$line_subtotal         = $line_price;
 					$line_tax              = 0;
-					$line_total            = $this->tax->round( $discounted_price * $values['quantity'] );
+					$line_total            = WC_Tax::round( $discounted_price * $values['quantity'] );
 
 				/**
 				 * Prices include tax
@@ -1193,13 +1198,13 @@ class WC_Cart {
 					if ( $item_tax_rates !== $base_tax_rates ) {
 
 						// Work out a new base price without the shop's base tax
-						$taxes             = $this->tax->calc_tax( $line_price, $base_tax_rates, true, true );
+						$taxes             = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );
 
 						// Now we have a new item price (excluding TAX)
 						$line_subtotal     = round( $line_price - array_sum( $taxes ), WC_ROUNDING_PRECISION );
 
 						// Now add modifed taxes
-						$taxes             = $this->tax->calc_tax( $line_subtotal, $item_tax_rates );
+						$taxes             = WC_Tax::calc_tax( $line_subtotal, $item_tax_rates );
 						$line_subtotal_tax = array_sum( $taxes );
 
 						// Adjusted price (this is the price including the new tax rate)
@@ -1207,7 +1212,7 @@ class WC_Cart {
 
 						// Apply discounts
 						$discounted_price  = $this->get_discounted_price( $values, $adjusted_price, true );
-						$discounted_taxes  = $this->tax->calc_tax( $discounted_price * $values['quantity'], $item_tax_rates, true );
+						$discounted_taxes  = WC_Tax::calc_tax( $discounted_price * $values['quantity'], $item_tax_rates, true );
 						$line_tax          = array_sum( $discounted_taxes );
 						$line_total        = ( $discounted_price * $values['quantity'] ) - $line_tax;
 
@@ -1217,7 +1222,7 @@ class WC_Cart {
 					} else {
 
 						// Work out a new base price without the item tax
-						$taxes             = $this->tax->calc_tax( $line_price, $item_tax_rates, true );
+						$taxes             = WC_Tax::calc_tax( $line_price, $item_tax_rates, true );
 
 						// Now we have a new item price (excluding TAX)
 						$line_subtotal     = $line_price - array_sum( $taxes );
@@ -1225,7 +1230,7 @@ class WC_Cart {
 
 						// Calc prices and tax (discounted)
 						$discounted_price = $this->get_discounted_price( $values, $base_price, true );
-						$discounted_taxes = $this->tax->calc_tax( $discounted_price * $values['quantity'], $item_tax_rates, true );
+						$discounted_taxes = WC_Tax::calc_tax( $discounted_price * $values['quantity'], $item_tax_rates, true );
 						$line_tax         = array_sum( $discounted_taxes );
 						$line_total       = ( $discounted_price * $values['quantity'] ) - $line_tax;
 					}
@@ -1243,7 +1248,7 @@ class WC_Cart {
 					$item_tax_rates        = $tax_rates[ $_product->get_tax_class() ];
 
 					// Work out a new base price without the shop's base tax
-					$taxes                 = $this->tax->calc_tax( $line_price, $item_tax_rates );
+					$taxes                 = WC_Tax::calc_tax( $line_price, $item_tax_rates );
 
 					// Now we have the item price (excluding TAX)
 					$line_subtotal         = $line_price;
@@ -1251,7 +1256,7 @@ class WC_Cart {
 
 					// Now calc product rates
 					$discounted_price      = $this->get_discounted_price( $values, $base_price, true );
-					$discounted_taxes      = $this->tax->calc_tax( $discounted_price * $values['quantity'], $item_tax_rates );
+					$discounted_taxes      = WC_Tax::calc_tax( $discounted_price * $values['quantity'], $item_tax_rates );
 					$discounted_tax_amount = array_sum( $discounted_taxes );
 					$line_tax              = $discounted_tax_amount;
 					$line_total            = $discounted_price * $values['quantity'];
@@ -1286,8 +1291,8 @@ class WC_Cart {
 
 				// Total up/round taxes and shipping taxes
 				if ( $this->round_at_subtotal ) {
-					$this->tax_total          = $this->tax->get_tax_total( $this->taxes );
-					$this->shipping_tax_total = $this->tax->get_tax_total( $this->shipping_taxes );
+					$this->tax_total          = WC_Tax::get_tax_total( $this->taxes );
+					$this->shipping_tax_total = WC_Tax::get_tax_total( $this->shipping_taxes );
 					$this->taxes              = array_map( array( $this->tax, 'round' ), $this->taxes );
 					$this->shipping_taxes     = array_map( array( $this->tax, 'round' ), $this->shipping_taxes );
 				} else {
@@ -1304,12 +1309,12 @@ class WC_Cart {
 				do_action( 'woocommerce_calculate_totals', $this );
 
 				// Grand Total - Discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
-				$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', round( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp ), $this ) );
+				$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', round( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp ), $this ) );
 
 			} else {
 
 				// Set tax total to sum of all tax rows
-				$this->tax_total = $this->tax->get_tax_total( $this->taxes );
+				$this->tax_total = WC_Tax::get_tax_total( $this->taxes );
 
 				// VAT exemption done at this point - so all totals are correct before exemption
 				if ( WC()->customer->is_vat_exempt() ) {
@@ -1699,6 +1704,10 @@ class WC_Cart {
 		public function get_coupons( $deprecated = null ) {
 			$coupons = array();
 
+			if ( 'order' === $deprecated ) {
+				return $coupons;
+			}
+
 			foreach ( $this->get_applied_coupons() as $code ) {
 				$coupon = new WC_Coupon( $code );
 				$coupons[ $code ] = $coupon;
@@ -1719,19 +1728,35 @@ class WC_Cart {
 		/**
 		 * Get the discount amount for a used coupon
 		 * @param  string $code coupon code
+		 * @param  bool inc or ex tax
 		 * @return float discount amount
 		 */
-		public function get_coupon_discount_amount( $code ) {
-			return isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
+		public function get_coupon_discount_amount( $code, $ex_tax = true ) {
+			if ( $ex_tax ) {
+				return isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] - $this->get_coupon_discount_tax_amount( $code ) : 0;
+			} else {
+				return isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
+			}
+		}
+
+		/**
+		 * Get the discount tax amount for a used coupon (for tax inclusive prices)
+		 * @param  string $code coupon code
+		 * @param  bool inc or ex tax
+		 * @return float discount amount
+		 */
+		public function get_coupon_discount_tax_amount( $code ) {
+			return isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0;
 		}
 
 		/**
 		 * Remove coupons from the cart of a defined type. Type 1 is before tax, type 2 is after tax.
 		 */
 		public function remove_coupons( $deprecated = null ) {
-			$this->applied_coupons = $this->coupon_discount_amounts = $this->coupon_applied_count = array();
+			$this->applied_coupons = $this->coupon_discount_amounts = $this->coupon_discount_tax_amounts = $this->coupon_applied_count = array();
 			WC()->session->set( 'applied_coupons', array() );
 			WC()->session->set( 'coupon_discount_amounts', array() );
+			WC()->session->set( 'coupon_discount_tax_amounts', array() );
 		}
 
 		/**
@@ -1770,23 +1795,29 @@ class WC_Cart {
 			}
 
 			if ( ! empty( $this->coupons ) ) {
+
+				$product = $values['data'];
+
 				foreach ( $this->coupons as $code => $coupon ) {
-					if ( $coupon->is_valid() ) {
-						if ( $coupon->is_valid_for_product( $values['data'], $values ) || $coupon->is_valid_for_cart() ) {
+					if ( $coupon->is_valid() && ( $coupon->is_valid_for_product( $product, $values ) || $coupon->is_valid_for_cart() ) ) {
+						$discount_amount = $coupon->get_discount_amount( $price, $values, $single = true );
+						$price           = max( $price - $discount_amount, 0 );
 
-							$discount_amount       = $coupon->get_discount_amount( $price, $values, $single = true );
-							$price                 = max( $price - $discount_amount, 0 );
+						// Store the totals for DISPLAY in the cart
+						if ( $add_totals ) {
+							$total_discount     = $discount_amount * $values['quantity'];
+							$total_discount_tax = 0;
 
-							if ( $add_totals ) {
-								$this->discount_cart += $discount_amount * $values['quantity'];
-
-
-								$this->increase_coupon_discount_amount( $code, $discount_amount * $values['quantity'] );
-
-
-
-								$this->increase_coupon_applied_count( $code, $values['quantity'] );
+							if ( $this->prices_include_tax ) {
+								$tax_rates           = WC_Tax::get_rates( $product->get_tax_class() );
+								$taxes               = WC_Tax::calc_tax( $discount_amount, $tax_rates, true );
+								$total_discount_tax  = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
 							}
+
+							$this->discount_cart     += $total_discount;
+							$this->discount_cart_tax += $total_discount_tax;
+							$this->increase_coupon_discount_amount( $code, $total_discount, $total_discount_tax );
+							$this->increase_coupon_applied_count( $code, $values['quantity'] );
 						}
 					}
 				}
@@ -1799,29 +1830,26 @@ class WC_Cart {
 		 * Store how much discount each coupon grants.
 		 *
 		 * @access private
-		 * @param mixed $code
+		 * @param string $code
 		 * @param double $amount
+		 * @param double $tax
 		 */
-		private function increase_coupon_discount_amount( $code, $amount ) {
-			if ( empty( $this->coupon_discount_amounts[ $code ] ) ) {
-				$this->coupon_discount_amounts[ $code ] = 0;
-			}
-
-			$this->coupon_discount_amounts[ $code ] += $amount;
+		private function increase_coupon_discount_amount( $code, $amount, $tax ) {
+			$this->coupon_discount_amounts[ $code ]     = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] + $amount : $amount;
+			$this->coupon_discount_tax_amounts[ $code ] = isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] + $tax : $tax;
 		}
 
 		/**
 		 * Store how many times each coupon is applied to cart/items
 		 *
 		 * @access private
-		 * @param mixed $code
+		 * @param string $code
 		 * @param integer $count
 		 */
 		private function increase_coupon_applied_count( $code, $count = 1 ) {
 			if ( empty( $this->coupon_applied_count[ $code ] ) ) {
 				$this->coupon_applied_count[ $code ] = 0;
 			}
-
 			$this->coupon_applied_count[ $code ] += $count;
 		}
 
@@ -1887,8 +1915,8 @@ class WC_Cart {
 
 					if ( $fee->taxable ) {
 						// Get tax rates
-						$tax_rates = $this->tax->get_rates( $fee->tax_class );
-						$fee_taxes = $this->tax->calc_tax( $fee->amount, $tax_rates, false );
+						$tax_rates = WC_Tax::get_rates( $fee->tax_class );
+						$fee_taxes = WC_Tax::calc_tax( $fee->amount, $tax_rates, false );
 
 						if ( ! empty( $fee_taxes ) ) {
 							// Set the tax total for this fee
@@ -1910,24 +1938,6 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/
 	/* Get Formatted Totals */
 	/*-----------------------------------------------------------------------------------*/
-
-		/**
-		 * Get the total of all order discounts (after tax discounts).
-		 *
-		 * @return float
-		 */
-		public function get_order_discount_total() {
-			return $this->discount_total;
-		}
-
-		/**
-		 * Get the total of all cart discounts (before tax discounts).
-		 *
-		 * @return float
-		 */
-		public function get_cart_discount_total() {
-			return $this->discount_cart;
-		}
 
 		/**
 		 * Gets the order total (after calculation).
@@ -2109,11 +2119,11 @@ class WC_Cart {
 		public function get_taxes_total( $compound = true, $display = true ) {
 			$total = 0;
 			foreach ( $this->taxes as $key => $tax ) {
-				if ( ! $compound && $this->tax->is_compound( $key ) ) continue;
+				if ( ! $compound && WC_Tax::is_compound( $key ) ) continue;
 				$total += $tax;
 			}
 			foreach ( $this->shipping_taxes as $key => $tax ) {
-				if ( ! $compound && $this->tax->is_compound( $key ) ) continue;
+				if ( ! $compound && WC_Tax::is_compound( $key ) ) continue;
 				$total += $tax;
 			}
 			if ( $display ) {
@@ -2123,11 +2133,46 @@ class WC_Cart {
 		}
 
 		/**
-		 * Gets the total (product) discount amount - these are applied before tax.
+		 * Get the total of all cart discounts
+		 *
+		 * @return float
+		 */
+		public function get_cart_discount_total() {
+			return $this->discount_cart;
+		}
+
+		/**
+		 * Get the total of all cart tax discounts (used for discounts on tax inclusive prices)
+		 *
+		 * @return float
+		 */
+		public function get_cart_discount_tax_total() {
+			return $this->discount_cart_tax;
+		}
+
+		/**
+		 * Gets the total discount amount - both kinds.
 		 *
 		 * @return mixed formatted price or false if there are none
 		 */
+		public function get_total_discount() {
+			if ( $this->discount_cart ) {
+				$total_discount = wc_price( $this->discount_cart );
+			} else {
+				$total_discount = false;
+			}
+			return apply_filters( 'woocommerce_cart_total_discount', $total_discount, $this );
+		}
+
+
+		/**
+		 * Gets the total (product) discount amount - these are applied before tax.
+		 *
+		 * @deprecated Order discounts (after tax) removed in 2.3 so multiple methods for discounts are no longer required.
+		 * @return mixed formatted price or false if there are none
+		 */
 		public function get_discounts_before_tax() {
+			_deprecated_function( 'get_discounts_before_tax', '2.3', 'get_total_discount' );
 			if ( $this->discount_cart ) {
 				$discounts_before_tax = wc_price( $this->discount_cart );
 			} else {
@@ -2137,19 +2182,15 @@ class WC_Cart {
 		}
 
 		/**
-		 * Gets the total discount amount - both kinds.
+		 * Get the total of all order discounts (after tax discounts).
 		 *
-		 * @return mixed formatted price or false if there are none
+		 * @deprecated Order discounts (after tax) removed in 2.3
+		 * @return float
 		 */
-		public function get_total_discount() {
-			if ( $this->discount_total || $this->discount_cart ) {
-				$total_discount = wc_price( $this->discount_total + $this->discount_cart );
-			} else {
-				$total_discount = false;
-			}
-			return apply_filters( 'woocommerce_cart_total_discount', $total_discount, $this );
+		public function get_order_discount_total() {
+			_deprecated_function( 'get_order_discount_total', '2.3' );
+			return 0;
 		}
-
 
 		/**
 		 * Function to apply cart discounts after tax.

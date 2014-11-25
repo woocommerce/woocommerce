@@ -155,9 +155,11 @@ function wc_save_order_items( $order_id, $items ) {
 	global $wpdb;
 
 	// Order items + fees
-	$subtotal = 0;
-	$total    = 0;
-	$taxes    = array( 'items' => array(), 'shipping' => array() );
+	$subtotal     = 0;
+	$total        = 0;
+	$subtotal_tax = 0;
+	$total_tax    = 0;
+	$taxes        = array( 'items' => array(), 'shipping' => array() );
 
 	if ( isset( $items['order_item_id'] ) ) {
 
@@ -210,8 +212,10 @@ function wc_save_order_items( $order_id, $items ) {
 			$taxes['items'][] = $line_taxes;
 
 			// Total up
-			$subtotal += wc_format_decimal( $line_subtotal[ $item_id ] ) + array_sum( $line_subtotal_taxes );
-			$total    += wc_format_decimal( $line_total[ $item_id ] ) + array_sum( $line_taxes );
+			$subtotal     += wc_format_decimal( $line_subtotal[ $item_id ] ) + array_sum( $line_subtotal_taxes );
+			$total        += wc_format_decimal( $line_total[ $item_id ] ) + array_sum( $line_taxes );
+			$subtotal_tax += array_sum( $line_subtotal_taxes );
+			$total_tax    += array_sum( $line_taxes );
 
 			// Clear meta cache
 			wp_cache_delete( $item_id, 'order_item_meta' );
@@ -323,6 +327,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Update cart discount from item totals
 	update_post_meta( $order_id, '_cart_discount', $subtotal - $total );
+	update_post_meta( $order_id, '_cart_discount_tax', $subtotal_tax - $total_tax );
 
 	// Update totals
 	update_post_meta( $order_id, '_order_total', wc_format_decimal( $items['_order_total'] ) );
