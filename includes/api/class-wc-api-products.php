@@ -219,6 +219,8 @@ class WC_API_Products extends WC_API_Resource {
 			$images = $this->save_product_images( $id, $data['images'] );
 
 			if ( is_wp_error( $images ) ) {
+				wp_delete_post( $id, true );
+
 				return $images;
 			}
 		}
@@ -226,6 +228,9 @@ class WC_API_Products extends WC_API_Resource {
 		// Save product meta fields
 		$meta = $this->save_product_meta( $id, $data );
 		if ( is_wp_error( $meta ) ) {
+			// Remove the product
+			wp_delete_post( $id, true );
+
 			return $meta;
 		}
 
