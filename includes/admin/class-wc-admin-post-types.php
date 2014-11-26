@@ -1527,7 +1527,7 @@ class WC_Admin_Post_Types {
 				$vars['meta_value'] = wc_clean( $_GET['coupon_type'] );
 			}
 
-		} elseif ( 'shop_order' === $typenow ) {
+		} elseif ( in_array( $typenow, wc_get_order_types( 'order-meta-boxes' ) ) ) {
 
 			// Filter the orders by the posted customer.
 			if ( isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
