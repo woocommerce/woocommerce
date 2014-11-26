@@ -1825,7 +1825,7 @@ class WC_Admin_Post_Types {
 
 			$post_type = get_post_type( $id );
 
-			if ( 'shop_order' == $post_type ) {
+			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
 
 				// Delete count - meta doesn't work on trashed posts
 				$user_id = get_post_meta( $id, '_customer_user', true );
@@ -1859,7 +1859,7 @@ class WC_Admin_Post_Types {
 
 			$post_type = get_post_type( $id );
 
-			if ( 'shop_order' == $post_type ) {
+			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
 
 				// Delete count - meta doesn't work on trashed posts
 				$user_id = get_post_meta( $id, '_customer_user', true );
@@ -1886,7 +1886,7 @@ class WC_Admin_Post_Types {
 	public function delete_order_items( $postid ) {
 		global $wpdb;
 
-		if ( get_post_type( $postid ) == 'shop_order' ) {
+		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
 			do_action( 'woocommerce_delete_order_items', $postid );
 
 			$wpdb->query( "
