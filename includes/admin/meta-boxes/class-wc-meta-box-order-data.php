@@ -24,14 +24,14 @@ class WC_Meta_Box_Order_Data {
 	 *
 	 * @var array
 	 */
-	private static $billing_fields = array();
+	protected static $billing_fields = array();
 
 	/**
 	 * Shipping fields
 	 *
 	 * @var array
 	 */
-	private static $shipping_fields = array();
+	protected static $shipping_fields = array();
 
 	/**
 	 * Init billing and shipping fields we display + save
