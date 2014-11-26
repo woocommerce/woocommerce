@@ -1063,7 +1063,7 @@ class WC_AJAX {
 
 		$order_id = absint( $_POST['order_id'] );
 		$rate_id  = absint( $_POST['rate_id'] );
-		$order    = new WC_Order( $order_id );
+		$order    = wc_get_order( $order_id );
 		$data     = get_post_meta( $order_id );
 
 		// Add new tax
@@ -1109,7 +1109,7 @@ class WC_AJAX {
 		wc_delete_order_item( $rate_id );
 
 		// Return HTML items
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 		$data  = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 
@@ -1375,7 +1375,7 @@ class WC_AJAX {
 		wc_save_order_items( $order_id, $items );
 
 		// Return HTML items
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 		$data  = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 
@@ -1399,7 +1399,7 @@ class WC_AJAX {
 			wc_save_order_items( $order_id, $items );
 
 			// Return HTML items
-			$order = new WC_Order( $order_id );
+			$order = wc_get_order( $order_id );
 			$data  = get_post_meta( $order_id );
 			include( 'admin/meta-boxes/views/html-order-items.php' );
 		}
@@ -1415,7 +1415,7 @@ class WC_AJAX {
 
 		// Return HTML items
 		$order_id = absint( $_POST['order_id'] );
-		$order    = new WC_Order( $order_id );
+		$order    = wc_get_order( $order_id );
 		$data     = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 
