@@ -30,6 +30,7 @@ class WC_Meta_Box_Order_Actions {
 		}
 
 		$order = $theorder;
+		$order_type_object = get_post_type_object( $post->post_type );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -78,7 +79,7 @@ class WC_Meta_Box_Order_Actions {
 					}
 				?></div>
 
-				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php _e( 'Save Order', 'woocommerce' ); ?>" data-tip="<?php _e( 'Save/update the order', 'woocommerce' ); ?>" />
+				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" />
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
