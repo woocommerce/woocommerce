@@ -70,7 +70,7 @@ class WC_Tracker {
 
 		// General site info
 		$data['url']   = home_url();
-		$data['email'] = apply_filters( 'woocommerce_tracker_admin_email', get_bloginfo( 'admin_email' ) );
+		$data['email'] = apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) );
 		$data['theme'] = $this->get_theme_info();
 
 		// Plugin info
