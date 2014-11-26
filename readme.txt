@@ -157,6 +157,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Removed quantity increment/decrement buttons.
 * Tweak - Moved 'Proceed to checkout' button on cart to beneath totals.
 * Tweak - Improved 'responsiveness' of product data tabs on add/edit product screen.
+* Tweak - Added 'stupidtable' script to allow order item sorting on the order screen (by name, cost, qty).
 * Dev - Made template debug mode set WC_TEMPLATE_DEBUG_MODE constant and remove all overrides for all template loading functions.
 * Dev - Switched to .scss from .less for all styles.
 * Dev - Included bourbon for scss mixins.

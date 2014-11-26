@@ -1163,4 +1163,6 @@ jQuery( function ( $ ) {
 
 			return false;
 		});
+
+	$('.woocommerce_order_items').stupidtable();
 });
