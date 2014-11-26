@@ -271,6 +271,12 @@ jQuery( function( $ ){
 		});
 	};
 
+	$('.product_attributes .woocommerce_attribute').each(function(index, el){
+		if ( $(el).css('display') != 'none' && $(el).is('.taxonomy') ) {
+			$('select.attribute_taxonomy').find('option[value="' + $(el).data( 'taxonomy' ) + '"]').attr('disabled','disabled');
+		}
+	});
+
 	// Add rows
 	$('button.add_attribute').on('click', function(){
 
@@ -278,7 +284,7 @@ jQuery( function( $ ){
 
 		var attribute_type = $('select.attribute_taxonomy').val();
 
-		if (!attribute_type) {
+		if ( ! attribute_type ) {
 
 			var product_type = $('select#product-type').val();
 			if (product_type!='variable') enable_variation = 'style="display:none;"'; else enable_variation = '';
@@ -327,6 +333,7 @@ jQuery( function( $ ){
 			$('.product_attributes').append( $(thisrow) );
 			$(thisrow).show().find('.woocommerce_attribute_data').show();
 			attribute_row_indexes();
+			$('select.attribute_taxonomy').find('option[value="' + attribute_type + '"]').attr('disabled','disabled');
 
 		}
 
@@ -357,6 +364,7 @@ jQuery( function( $ ){
 			if ($parent.is('.taxonomy')) {
 				$parent.find('select, input[type=text]').val('');
 				$parent.hide();
+				$('select.attribute_taxonomy').find('option[value="' + $parent.data( 'taxonomy' ) + '"]').removeAttr('disabled');
 			} else {
 				$parent.find('select, input[type=text]').val('');
 				$parent.hide();
