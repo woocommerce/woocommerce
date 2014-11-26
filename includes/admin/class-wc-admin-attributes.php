@@ -167,6 +167,8 @@ class WC_Admin_Attributes {
 						);
 					}
 
+					echo '<div class="updated fade"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p></div>';
+
 					$action_completed = true;
 				}
 
