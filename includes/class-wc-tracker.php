@@ -3,7 +3,7 @@
  * WooCommerce Tracker
  *
  * The WooCommerce tracker class adds functionality to track WooCommerce usage based on if the customer opted in.
- * No personal infomation is tracked, only setting, general product and order counts and admin email for discount code.
+ * No personal infomation is tracked, only general WooCommerce settings, general product, order and user counts and admin email for discount code.
  *
  * @class 		WC_Tracker
  * @version		2.3.0
@@ -11,6 +11,13 @@
  * @category	Class
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+if ( ! class_exists( 'WC_Tracker' ) ) :
+
 class WC_Tracker {
 
 	/**
@@ -250,7 +257,7 @@ class WC_Tracker {
 
 		$alloptions = array();
 		foreach ( (array) $alloptions_db as $o ) {
-			// We dont want to keep track of serialized data
+			// We dont want to keep track of serialized data, ie. payment gateway/shipping method settings
 			if ( ! is_serialized( $o->option_value ) ) {
 				$alloptions[ $o->option_name ] = $o->option_value;
 			}
@@ -312,11 +319,11 @@ class WC_Tracker {
 			return;
 		}
 
-		echo '<div class="updated"></p>';
-		echo  __( 'Allow WooCommerce usage tracking? Send non sensitive WooCommerce usage data to WooThemes and get 20% discount on your next WooThemes purchase.', 'woocommerce' );
-		echo '&nbsp;<a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-in' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="button-secondary">' . __( 'Allow', 'woocommerce' ) . '</a>';
-		echo '&nbsp;<a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-out' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="button-secondary">' . __( 'No, don\'t bother me again', 'woocommerce' ) . '</a>';
-		echo '</p></div>';
+		echo '<div id="message" class="updated woocommerce-message wc-connect">';
+		echo '<p>' . __( 'Allow WooCommerce usage tracking? Send non sensitive WooCommerce usage data to WooThemes and get 20% discount on your next WooThemes purchase.', 'woocommerce' ) . '</p>';
+		echo '<p class="submit"><a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-in' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="button-primary">' . __( 'Allow', 'woocommerce' ) . '</a>';
+		echo '&nbsp;<a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-out' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="skip button-primary">' . __( 'No, don\'t bother me again', 'woocommerce' ) . '</a></p>';
+		echo '</div>';
 	}
 
 	/**
@@ -342,3 +349,7 @@ class WC_Tracker {
 		}
 	}
 }
+
+endif;
+
+return new WC_Tracker;
