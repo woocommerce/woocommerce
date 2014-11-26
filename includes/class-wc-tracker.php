@@ -26,6 +26,8 @@ class WC_Tracker {
 	public function __construct() {
 		add_action( 'wp', array( $this, 'add_tracking_event_to_cron_schedule' ) );
 		add_action( 'wc_tracker_send_event', array( $this, 'send_tracking_data' ) );
+		add_action( 'admin_notices', array( $this, 'admin_optin_notice' ) );
+		add_action( 'admin_init', array( $this, 'check_optin_action' ) );
 	}
 
 	/**
@@ -291,5 +293,52 @@ class WC_Tracker {
 			}
 		}
 		return $override_data;
+	}
+
+	/**
+	 * Output admin notice to opt in or out of tracking.
+	 * @return void
+	 */
+	public function admin_optin_notice() {
+		if ( get_option( 'woocommerce_hide_tracking_notice' ) ) {
+			return;
+		}
+
+		if ( get_option( 'woocommerce_allow_tracking' ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		echo '<div class="updated"></p>';
+		echo  __( 'Allow WooCommerce usage tracking? Send non sensitive WooCommerce usage data to WooThemes and get 20% discount on your next WooThemes purchase.', 'woocommerce' );
+		echo '&nbsp;<a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-in' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="button-secondary">' . __( 'Allow', 'woocommerce' ) . '</a>';
+		echo '&nbsp;<a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-out' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="button-secondary">' . __( 'No, don\'t bother me again', 'woocommerce' ) . '</a>';
+		echo '</p></div>';
+	}
+
+	/**
+	 * Handle opt in or out actions based on notice selection
+	 * @return void
+	 */
+	public function check_optin_action() {
+		if ( ! isset( $_GET['wc_tracker'] ) || ! isset( $_GET['wc_tracker_nonce'] ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optin' ) ) {
+			return;
+		}
+
+		if ( 'opt-in' == $_GET['wc_tracker'] ) {
+			update_option( 'woocommerce_allow_tracking', true );
+			update_option( 'woocommerce_hide_tracking_notice', true );
+			$this->send_tracking_data( false );
+		} elseif ( 'opt-out' == $_GET['wc_tracker'] ) {
+			update_option( 'woocommerce_allow_tracking', false );
+			update_option( 'woocommerce_hide_tracking_notice', true );
+		}
 	}
 }
