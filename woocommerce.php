@@ -117,6 +117,17 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Auto-load in-accessible properties on demand.
+	 * @param mixed $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+		if ( in_array( $key, array( 'payment_gateways', 'shipping', 'mailer', 'checkout' ) ) ) {
+			return $this->$key();
+		}
+	}
+
+	/**
 	 * WooCommerce Constructor.
 	 * @access public
 	 * @return WooCommerce
@@ -133,6 +144,7 @@ final class WooCommerce {
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
+		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
@@ -268,14 +280,6 @@ final class WooCommerce {
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
-		// Template debug mode
-		$status_options = get_option( 'woocommerce_status_options', array() );
-		if ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) {
-			$this->define( 'WC_TEMPLATE_DEBUG_MODE', true );
-		} else {
-			$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
-		}
-
 		// Load class instances
 		$this->product_factory = new WC_Product_Factory();                      // Product Factory to create new product instances
 		$this->order_factory   = new WC_Order_Factory();                        // Order Factory to create new order instances
@@ -293,7 +297,6 @@ final class WooCommerce {
 			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
 		}
 
-		$this->init_transactional_emails();
 		$this->load_webhooks();
 
 		// Init action
@@ -387,11 +390,8 @@ final class WooCommerce {
 		}
 	}
 
-	/** Helper functions ******************************************************/
-
 	/**
 	 * Get the plugin url.
-	 *
 	 * @return string
 	 */
 	public function plugin_url() {
@@ -400,7 +400,6 @@ final class WooCommerce {
 
 	/**
 	 * Get the plugin path.
-	 *
 	 * @return string
 	 */
 	public function plugin_path() {
@@ -409,7 +408,6 @@ final class WooCommerce {
 
 	/**
 	 * Get the template path.
-	 *
 	 * @return string
 	 */
 	public function template_path() {
@@ -418,7 +416,6 @@ final class WooCommerce {
 
 	/**
 	 * Get Ajax URL.
-	 *
 	 * @return string
 	 */
 	public function ajax_url() {
@@ -449,43 +446,6 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Init the mailer and call the notifications for the current filter.
-	 *
-	 * @internal param array $args (default: array())
-	 */
-	public function send_transactional_email() {
-		$this->mailer();
-		$args = func_get_args();
-		do_action_ref_array( current_filter() . '_notification', $args );
-	}
-
-	/**
-	 * Hook in all transactional emails
-	 */
-	private function init_transactional_emails() {
-		$email_actions = apply_filters( 'woocommerce_email_actions', array(
-			'woocommerce_low_stock',
-			'woocommerce_no_stock',
-			'woocommerce_product_on_backorder',
-			'woocommerce_order_status_pending_to_processing',
-			'woocommerce_order_status_pending_to_completed',
-			'woocommerce_order_status_pending_to_cancelled',
-			'woocommerce_order_status_pending_to_on-hold',
-			'woocommerce_order_status_failed_to_processing',
-			'woocommerce_order_status_failed_to_completed',
-			'woocommerce_order_status_on-hold_to_processing',
-			'woocommerce_order_status_on-hold_to_cancelled',
-			'woocommerce_order_status_completed',
-			'woocommerce_new_customer_note',
-			'woocommerce_created_customer'
-		) );
-
-		foreach ( $email_actions as $action ) {
-			add_action( $action, array( $this, 'send_transactional_email' ), 10, 10 );
-		}
-	}
-
-	/**
 	 * Load & enqueue active webhooks
 	 *
 	 * @since 2.2
@@ -509,7 +469,6 @@ final class WooCommerce {
 
 	/**
 	 * Get Checkout Class.
-	 *
 	 * @return WC_Checkout
 	 */
 	public function checkout() {
@@ -518,7 +477,6 @@ final class WooCommerce {
 
 	/**
 	 * Get gateways class
-	 *
 	 * @return WC_Payment_Gateways
 	 */
 	public function payment_gateways() {
@@ -527,7 +485,6 @@ final class WooCommerce {
 
 	/**
 	 * Get shipping class
-	 *
 	 * @return WC_Shipping
 	 */
 	public function shipping() {
@@ -536,7 +493,6 @@ final class WooCommerce {
 
 	/**
 	 * Email Class.
-	 *
 	 * @return WC_Emails
 	 */
 	public function mailer() {
