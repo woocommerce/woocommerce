@@ -50,7 +50,7 @@ jQuery( function( $ ) {
 			s_address_2		= address_2;
 		}
 
-		$( '#order_methods, #order_review' ).block({
+		$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).block({
 			message: null,
 			overlayCSS: {
 				background: '#fff',
@@ -82,15 +82,20 @@ jQuery( function( $ ) {
 			type:		'POST',
 			url:		wc_checkout_params.ajax_url,
 			data:		data,
-			success:	function( response ) {
-				if ( response ) {
-					$( '#order_review' ).html( $.trim( response ) );
-					$( '#order_review' ).find( 'input[name=payment_method]:checked' ).trigger('click');
+			success:	function( data ) {
+				console.log( data );
+				if ( data && data.fragments ) {
+
+					$.each( data.fragments, function( key, value ) {
+						$( key ).replaceWith( value );
+						$( key ).unblock();
+					});
+
+					$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).trigger('click');
 					$( 'body' ).trigger('updated_checkout' );
 				}
 			}
 		});
-
 	}
 
 	// Event for updating the checkout
@@ -123,7 +128,6 @@ jQuery( function( $ ) {
 	}).change();
 
 	if ( wc_checkout_params.option_guest_checkout === 'yes' ) {
-
 		$( 'div.create-account' ).hide();
 
 		$( 'input#createaccount' ).change( function() {
@@ -133,7 +137,6 @@ jQuery( function( $ ) {
 				$( 'div.create-account' ).slideDown();
 			}
 		}).change();
-
 	}
 
 	$( '#order_review' )
@@ -410,5 +413,4 @@ jQuery( function( $ ) {
 	if ( wc_checkout_params.is_checkout === '1' ) {
 		$( 'body' ).trigger( 'init_checkout' );
 	}
-
 });

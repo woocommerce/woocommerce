@@ -150,6 +150,7 @@ class WC_AJAX {
 	 * AJAX update order review on checkout
 	 */
 	public static function update_order_review() {
+		ob_start();
 
 		check_ajax_referer( 'update-order-review', 'security' );
 
@@ -158,7 +159,14 @@ class WC_AJAX {
 		}
 
 		if ( 0 == sizeof( WC()->cart->get_cart() ) ) {
-			echo '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>';
+			$data = array(
+				'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
+					'.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>'
+				) )
+			);
+
+			wp_send_json( $data );
+
 			die();
 		}
 
@@ -253,7 +261,22 @@ class WC_AJAX {
 
 		WC()->cart->calculate_totals();
 
-		do_action( 'woocommerce_checkout_order_review', true ); // Display review order table
+		ob_start();
+		woocommerce_order_review();
+		$woocommerce_order_review = ob_get_clean();
+
+		ob_start();
+		woocommerce_checkout_payment();
+		$woocommerce_checkout_payment = ob_get_clean();
+
+		$data = array(
+			'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
+				'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
+				'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment
+			) )
+		);
+
+		wp_send_json( $data );
 
 		die();
 	}

@@ -152,6 +152,20 @@ class WC_Payment_Gateways {
 	}
 
 	/**
+	 * Set the current, active gateway
+	 */
+	public function set_current_gateway( $gateways ) {
+		$default = get_option( 'woocommerce_default_gateway', current( array_keys( $gateways ) ) );
+		$current = WC()->session->get( 'chosen_payment_method', $default );
+
+		if ( isset( $gateways[ $current ] ) ) {
+			$gateways[ $current ]->set_current();
+		} elseif ( isset( $gateways[ $default ] ) ) {
+			$gateways[ $default ]->set_current();
+		}
+	}
+
+	/**
 	 * Save options in admin.
 	 *
 	 * @access public
