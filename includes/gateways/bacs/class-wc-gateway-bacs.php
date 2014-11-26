@@ -357,7 +357,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		if ( ! $this->locale ) {
 
-			// Locale information to be used
+			// Locale information to be used - only those that are not 'Sort Code'
 			$this->locale = apply_filters( 'woocommerce_get_bacs_locale', array(
 				'AU' => array(
 					'sortcode'	=> array(
@@ -369,16 +369,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 						'label'		=> __( 'Bank Transit Number', 'woocommerce' ),
 					),
 				),
-				'GB' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'Sort Code', 'woocommerce' ),
-					),
-				),
-				'IE' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'Sort Code', 'woocommerce' ),
-					),
- 				),
 				'IN' => array(
 					'sortcode'	=> array(
 						'label'		=> __( 'IFSC', 'woocommerce' ),
