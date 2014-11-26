@@ -53,6 +53,41 @@ class WC_Emails {
 	}
 
 	/**
+	 * Hook in all transactional emails
+	 */
+	public static function init_transactional_emails() {
+		$email_actions = apply_filters( 'woocommerce_email_actions', array(
+			'woocommerce_low_stock',
+			'woocommerce_no_stock',
+			'woocommerce_product_on_backorder',
+			'woocommerce_order_status_pending_to_processing',
+			'woocommerce_order_status_pending_to_completed',
+			'woocommerce_order_status_pending_to_cancelled',
+			'woocommerce_order_status_pending_to_on-hold',
+			'woocommerce_order_status_failed_to_processing',
+			'woocommerce_order_status_failed_to_completed',
+			'woocommerce_order_status_on-hold_to_processing',
+			'woocommerce_order_status_on-hold_to_cancelled',
+			'woocommerce_order_status_completed',
+			'woocommerce_new_customer_note',
+			'woocommerce_created_customer'
+		) );
+
+		foreach ( $email_actions as $action ) {
+			add_action( $action, array( __CLASS__, 'send_transactional_email' ), 10, 10 );
+		}
+	}
+
+	/**
+	 * Init the mailer instance and call the notifications for the current filter.
+	 * @internal param array $args (default: array())
+	 */
+	public static function send_transactional_email() {
+		self::instance();
+		do_action_ref_array( current_filter() . '_notification', func_get_args() );
+	}
+
+	/**
 	 * Constructor for the email class hooks in all emails that can be sent.
 	 *
 	 */
@@ -276,7 +311,7 @@ class WC_Emails {
 	 * @param bool $plain_text (default: false)
 	 * @return string
 	 */
-	function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
+	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
 		$fields = array();
 
 		if ( $order->billing_email ) {
@@ -331,7 +366,7 @@ class WC_Emails {
 	 *
 	 * @return void
 	 */
-	function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
+	public function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
 		wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) );
 	}
 
