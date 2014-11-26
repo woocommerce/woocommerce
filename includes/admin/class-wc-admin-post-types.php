@@ -1340,18 +1340,12 @@ class WC_Admin_Post_Types {
 	public function restrict_manage_posts() {
 		global $typenow, $wp_query;
 
-		switch ( $typenow ) {
-			case 'product' :
-				$this->product_filters();
-				break;
-			case 'shop_coupon' :
-				$this->shop_coupon_filters();
-				break;
-			case 'shop_order' :
-				$this->shop_order_filters();
-				break;
-			default :
-				break;
+		if ( in_array( $typenow, wc_get_order_types( 'order-meta-boxes' ) ) ) {
+			$this->shop_order_filters();
+		} elseif ( 'product' == $typenow ) {
+			$this->product_filters();
+		} elseif( 'shop_coupon' == $typenow ) {
+			$this->shop_coupon_filters();
 		}
 	}
 
