@@ -60,6 +60,23 @@ class WC_Tracker {
 				return;
 			}
 		}
+
+		$params = $this->get_tracking_data();
+
+		$response = wp_remote_post( esc_url( $this->api_url ), array(
+				'method' => 'POST',
+				'timeout' => 45,
+				'redirection' => 5,
+				'httpversion' => '1.0',
+				'blocking' => true,
+				'headers' => array( 'user-agent' => 'WooCommerce/' . WC_VERSION . '; ' . esc_url( home_url( '/' ) ) ),
+				'body' => json_encode( $params ),
+				'cookies' => array()
+			)
+		);
+		if ( ! is_wp_error( $response ) && '200' == wp_remote_retrieve_response_code( $response ) ) {
+			update_option( 'woocommerce_tracker_last_send', time() );
+		}
 	}
 
 	/**
@@ -103,6 +120,8 @@ class WC_Tracker {
 
 		// Template overrides
 		$data['template_overrides'] = $this->get_all_template_overrides();
+
+		return $data;
 	}
 
 	/**
