@@ -66,6 +66,11 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_category' ), WC_API_Server::READABLE ),
 		);
 
+		# GET /products/sku/<product sku>
+		$routes[ $this->base . '/sku/(?P<sku>\d+)' ] = array(
+			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
+		);
+		
 		return $routes;
 	}
 
@@ -1806,6 +1811,70 @@ class WC_API_Products extends WC_API_Resource {
 		 * @link   http://www.woothemes.com/careers/#op-35124-woocommerce-product-developer
 		 * @return bool
 		 */
+	}
+
+	/**
+	 * Get the product for a given sku
+	 *
+	 * @since 2.2.8
+	 * @param int $sku the product sku
+	 * @param string $fields
+	 * @return array
+	 */
+	public function get_product_by_sku( $sku, $fields = null, $filter = array(), $page = 1 ) {
+
+		// get all products
+		$filter['page'] = $page;
+
+		$query = $this->query_products( $filter );
+
+		$products = array();
+
+		// itterate over product collection
+		foreach ( $query->posts as $product_id ) {
+			
+			if ( ! $this->is_readable( $product_id ) ) {
+				continue;
+			}
+
+			// temp variable to hold the current product in memory
+			$tmp_product = $this->get_product( $product_id, $fields );
+			
+			// match product sku with user defined sku
+			if( (int) $sku == (int) $tmp_product['product']['sku'] ){	
+
+				// validate the id
+				$id = $this->validate_request( $tmp_product['product']['id'], 'product', 'read' );
+
+				if ( is_wp_error($id) ) {
+					
+					$products[] = current( $id );
+				}
+
+				else {
+
+					$products[] = current( $this->get_product( $product_id, $fields ) );
+
+				}
+				
+			}
+			
+		}
+
+		// check sku was found, do not return empty results
+		switch ( sizeof($products) ) {
+			case 0 :
+				return new WP_Error( 'woocommerce_api_invalid_sku', "Error - sku {$id} not found", array( 'status' => 404 ) );
+				
+				break;
+			
+			default:
+				
+				return array( 'products' => $products );
+
+				break;
+		}
+
 	}
 
 }
