@@ -4,14 +4,14 @@
  *
  * The attributes section lets users add custom attributes to assign to products - they can also be used in the layered nav widget.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
- * @version     2.1.0
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
+ * @version     2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -23,7 +23,7 @@ class WC_Admin_Attributes {
 	 * Handles output of the attributes page in admin.
 	 *
 	 * Shows the created attributes and lets you add new ones or edit existing ones.
- 	 * The added attributes are stored in the database and can be used for layered navigation.
+	 * The added attributes are stored in the database and can be used for layered navigation.
 	 */
 	public static function output() {
 		global $wpdb;
@@ -232,8 +232,8 @@ class WC_Admin_Attributes {
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-		    <h2><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h2>
-			<form action="admin.php?page=product_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
+			<h2><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h2>
+			<form action="edit.php?post_type=product&amp;page=product_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
 				<table class="form-table">
 					<tbody>
 						<tr class="form-field form-required">
@@ -299,57 +299,57 @@ class WC_Admin_Attributes {
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-		    <h2><?php _e( 'Attributes', 'woocommerce' ) ?></h2>
-		    <br class="clear" />
-		    <div id="col-container">
-		    	<div id="col-right">
-		    		<div class="col-wrap">
-			    		<table class="widefat attributes-table wp-list-table ui-sortable" style="width:100%">
-					        <thead>
-					            <tr>
-					                <th scope="col"><?php _e( 'Name', 'woocommerce' ) ?></th>
-					                <th scope="col"><?php _e( 'Slug', 'woocommerce' ) ?></th>
-					                <th scope="col"><?php _e( 'Type', 'woocommerce' ) ?></th>
-					                <th scope="col"><?php _e( 'Order by', 'woocommerce' ) ?></th>
-					                <th scope="col" colspan="2"><?php _e( 'Terms', 'woocommerce' ) ?></th>
-					            </tr>
-					        </thead>
-					        <tbody>
-					        	<?php
-					        		$attribute_taxonomies = wc_get_attribute_taxonomies();
-					        		if ( $attribute_taxonomies ) :
-					        			foreach ($attribute_taxonomies as $tax) :
-					        				?><tr>
+			<h2><?php _e( 'Attributes', 'woocommerce' ) ?></h2>
+			<br class="clear" />
+			<div id="col-container">
+				<div id="col-right">
+					<div class="col-wrap">
+						<table class="widefat attributes-table wp-list-table ui-sortable" style="width:100%">
+							<thead>
+								<tr>
+									<th scope="col"><?php _e( 'Name', 'woocommerce' ) ?></th>
+									<th scope="col"><?php _e( 'Slug', 'woocommerce' ) ?></th>
+									<th scope="col"><?php _e( 'Type', 'woocommerce' ) ?></th>
+									<th scope="col"><?php _e( 'Order by', 'woocommerce' ) ?></th>
+									<th scope="col" colspan="2"><?php _e( 'Terms', 'woocommerce' ) ?></th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php
+									$attribute_taxonomies = wc_get_attribute_taxonomies();
+									if ( $attribute_taxonomies ) :
+										foreach ($attribute_taxonomies as $tax) :
+											?><tr>
 
-					        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a>
+												<td><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a>
 
-					        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=product_attributes') ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=product_attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
-					        					</td>
-					        					<td><?php echo esc_html( $tax->attribute_name ); ?></td>
-					        					<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?></td>
-					        					<td><?php
-						        					switch ( $tax->attribute_orderby ) {
-							        					case 'name' :
-							        						_e( 'Name', 'woocommerce' );
-							        					break;
-							        					case 'name_num' :
-							        						_e( 'Name (numeric)', 'woocommerce' );
-							        					break;
-							        					case 'id' :
-							        						_e( 'Term ID', 'woocommerce' );
-							        					break;
-							        					default:
-							        						_e( 'Custom ordering', 'woocommerce' );
-							        					break;
-						        					}
-					        					?></td>
-					        					<td class="attribute-terms"><?php
-					        						$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
+												<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes') ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
+												</td>
+												<td><?php echo esc_html( $tax->attribute_name ); ?></td>
+												<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?></td>
+												<td><?php
+													switch ( $tax->attribute_orderby ) {
+														case 'name' :
+															_e( 'Name', 'woocommerce' );
+														break;
+														case 'name_num' :
+															_e( 'Name (numeric)', 'woocommerce' );
+														break;
+														case 'id' :
+															_e( 'Term ID', 'woocommerce' );
+														break;
+														default:
+															_e( 'Custom ordering', 'woocommerce' );
+														break;
+													}
+												?></td>
+												<td class="attribute-terms"><?php
+													$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
 
-					        						if ( taxonomy_exists( $taxonomy ) ) {
-						        						$terms = get_terms( $taxonomy, 'hide_empty=0' );
+													if ( taxonomy_exists( $taxonomy ) ) {
+														$terms = get_terms( $taxonomy, 'hide_empty=0' );
 
-						        						switch ( $tax->attribute_orderby ) {
+														switch ( $tax->attribute_orderby ) {
 															case 'name_num' :
 																usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
 															break;
@@ -367,24 +367,24 @@ class WC_Admin_Attributes {
 													} else {
 														echo '<span class="na">&ndash;</span>';
 													}
-					        					?></td>
-					        					<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php _e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
-					        				</tr><?php
-					        			endforeach;
-					        		else :
-					        			?><tr><td colspan="6"><?php _e( 'No attributes currently exist.', 'woocommerce' ) ?></td></tr><?php
-					        		endif;
-					        	?>
-					        </tbody>
-					    </table>
-		    		</div>
-		    	</div>
-		    	<div id="col-left">
-		    		<div class="col-wrap">
-		    			<div class="form-wrap">
-		    				<h3><?php _e( 'Add New Attribute', 'woocommerce' ) ?></h3>
-		    				<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ) ?></p>
-		    				<form action="admin.php?page=product_attributes" method="post">
+												?></td>
+												<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php _e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
+											</tr><?php
+										endforeach;
+									else :
+										?><tr><td colspan="6"><?php _e( 'No attributes currently exist.', 'woocommerce' ) ?></td></tr><?php
+									endif;
+								?>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div id="col-left">
+					<div class="col-wrap">
+						<div class="form-wrap">
+							<h3><?php _e( 'Add New Attribute', 'woocommerce' ) ?></h3>
+							<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ) ?></p>
+							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
 								<div class="form-field">
 									<label for="attribute_label"><?php _e( 'Name', 'woocommerce' ); ?></label>
 									<input name="attribute_label" id="attribute_label" type="text" value="" />
@@ -419,19 +419,21 @@ class WC_Admin_Attributes {
 
 								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button" value="<?php _e( 'Add Attribute', 'woocommerce' ); ?>"></p>
 								<?php wp_nonce_field( 'woocommerce-add-new_attribute' ); ?>
-		    				</form>
-		    			</div>
-		    		</div>
-		    	</div>
-		    </div>
-		    <script type="text/javascript">
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<script type="text/javascript">
 			/* <![CDATA[ */
 
-				jQuery('a.delete').click(function(){
-		    		var answer = confirm ("<?php _e( 'Are you sure you want to delete this attribute?', 'woocommerce' ); ?>");
-					if (answer) return true;
+				jQuery( 'a.delete' ).click( function() {
+					var answer = confirm( "<?php _e( 'Are you sure you want to delete this attribute?', 'woocommerce' ); ?>" );
+					if ( answer ) {
+						return true;
+					}
 					return false;
-		    	});
+				});
 
 			/* ]]> */
 			</script>
