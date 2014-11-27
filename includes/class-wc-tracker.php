@@ -52,9 +52,14 @@ class WC_Tracker {
 	 * @param  boolean $check_last_send
 	 * @return void
 	 */
-	public function send_tracking_data( $check_last_send = true ) {
-		// Send a maximum of once per week by default.
-		if ( apply_filters( 'woocommerce_tracker_check_last_send', $check_last_send ) ) {
+	public function send_tracking_data( $override = false ) {
+		if ( ! apply_filters( 'woocommerce_tracker_send_override', $override ) ) {
+			// User must opt in to send
+			if ( ! get_option( 'woocommerce_allow_tracking' ) ) {
+				return;
+			}
+
+			// Send a maximum of once per week by default.
 			$last_send = $this->get_last_send_time();
 			if ( $last_send && $last_send > apply_filters( 'woocommerce_tracker_last_send_interval', strtotime( '-1 week' ) ) ) {
 				return;
@@ -361,7 +366,7 @@ class WC_Tracker {
 		if ( 'opt-in' == $_GET['wc_tracker'] ) {
 			update_option( 'woocommerce_allow_tracking', true );
 			update_option( 'woocommerce_hide_tracking_notice', true );
-			$this->send_tracking_data( false );
+			$this->send_tracking_data( true );
 		} elseif ( 'opt-out' == $_GET['wc_tracker'] ) {
 			update_option( 'woocommerce_allow_tracking', false );
 			update_option( 'woocommerce_hide_tracking_notice', true );
