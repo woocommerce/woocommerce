@@ -334,32 +334,17 @@ class WC_AJAX {
 	 * Feature a product from admin
 	 */
 	public static function feature_product() {
-		if ( ! current_user_can( 'edit_products' ) ) {
-			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ), '', array( 'response' => 403 ) );
+		if ( current_user_can( 'edit_products' ) && check_admin_referer( 'woocommerce-feature-product' ) ) {
+			$product_id = absint( $_GET['product_id'] );
+
+			if ( 'product' === get_post_type( $product_id ) ) {
+				update_post_meta( $product_id, '_featured', get_post_meta( $product_id, '_featured', true ) === 'yes' ? 'no' : 'yes' );
+
+				delete_transient( 'wc_featured_products' );
+			}
 		}
-
-		if ( ! check_admin_referer( 'woocommerce-feature-product' ) ) {
-			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ), '', array( 'response' => 403 ) );
-		}
-
-		$post_id = ! empty( $_GET['product_id'] ) ? (int) $_GET['product_id'] : '';
-
-		if ( ! $post_id || get_post_type( $post_id ) !== 'product' ) {
-			die;
-		}
-
-		$featured = get_post_meta( $post_id, '_featured', true );
-
-		if ( 'yes' === $featured ) {
-			update_post_meta( $post_id, '_featured', 'no' );
-		} else {
-			update_post_meta( $post_id, '_featured', 'yes' );
-		}
-
-		delete_transient( 'wc_featured_products' );
 
 		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=shop_order' ) );
-
 		die();
 	}
 
