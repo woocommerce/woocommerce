@@ -138,7 +138,7 @@ class WC_Tracker {
 			$theme_name = $theme_data->Name;
 			$theme_version = $theme_data->Version;
 		}
-		return array( array( 'name' => $theme_name, 'version' => $theme_version ) );
+		return array( 'name' => $theme_name, 'version' => $theme_version );
 	}
 
 	/**
