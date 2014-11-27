@@ -49,7 +49,7 @@ class WC_Tracker {
 
 	/**
 	 * Decide whether to send tracking data or not
-	 * @param  boolean $check_last_send
+	 * @param  boolean $override
 	 * @return void
 	 */
 	public function send_tracking_data( $override = false ) {
