@@ -145,7 +145,7 @@ class WC_Admin_Status {
 					update_option( 'woocommerce_allow_tracking', false );
 					update_option( 'woocommerce_hide_tracking_notice', false );
 
-					echo '<div class="updated"><p>' . __( 'Usage tracking settings reseted successfully!', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated"><p>' . __( 'Usage tracking settings successfully reset.', 'woocommerce' ) . '</p></div>';
 				break;
 				default :
 					$action = esc_attr( $_GET['action'] );
