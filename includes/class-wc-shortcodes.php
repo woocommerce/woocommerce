@@ -500,7 +500,7 @@ class WC_Shortcodes {
 		if ( ! empty( $atts['id'] ) ) {
 			$product_data = get_post( $atts['id'] );
 		} elseif ( ! empty( $atts['sku'] ) ) {
-			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
+			$product_id   = wc_get_product_id_by_sku( $atts['sku'] );
 			$product_data = get_post( $product_id );
 		} else {
 			return '';
@@ -546,7 +546,7 @@ class WC_Shortcodes {
 		if ( isset( $atts['id'] ) ) {
 			$product_data = get_post( $atts['id'] );
 		} elseif ( isset( $atts['sku'] ) ) {
-			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
+			$product_id   = wc_get_product_id_by_sku( $atts['sku'] );
 			$product_data = get_post( $product_id );
 		} else {
 			return '';
