@@ -275,6 +275,7 @@ class WC_Admin_Attributes {
 								<select name="attribute_orderby" id="attribute_orderby">
 									<option value="menu_order" <?php selected( $att_orderby, 'menu_order' ); ?>><?php _e( 'Custom ordering', 'woocommerce' ) ?></option>
 									<option value="name" <?php selected( $att_orderby, 'name' ); ?>><?php _e( 'Name', 'woocommerce' ) ?></option>
+									<option value="name_num" <?php selected( $att_orderby, 'name_num' ); ?>><?php _e( 'Name (numeric)', 'woocommerce' ) ?></option>
 									<option value="id" <?php selected( $att_orderby, 'id' ); ?>><?php _e( 'Term ID', 'woocommerce' ) ?></option>
 								</select>
 								<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
@@ -331,6 +332,9 @@ class WC_Admin_Attributes {
 							        					case 'name' :
 							        						_e( 'Name', 'woocommerce' );
 							        					break;
+							        					case 'name_num' :
+							        						_e( 'Name (numeric)', 'woocommerce' );
+							        					break;
 							        					case 'id' :
 							        						_e( 'Term ID', 'woocommerce' );
 							        					break;
@@ -340,20 +344,29 @@ class WC_Admin_Attributes {
 						        					}
 					        					?></td>
 					        					<td class="attribute-terms"><?php
-					        						if (taxonomy_exists(wc_attribute_taxonomy_name($tax->attribute_name))) :
-						        						$terms_array = array();
-						        						$terms = get_terms( wc_attribute_taxonomy_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
-						        						if ($terms) :
-							        						foreach ($terms as $term) :
-																$terms_array[] = $term->name;
-															endforeach;
-															echo implode(', ', $terms_array);
-														else :
+					        						$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
+
+					        						if ( taxonomy_exists( $taxonomy ) ) {
+						        						$terms = get_terms( $taxonomy, 'hide_empty=0' );
+
+						        						switch ( $tax->attribute_orderby ) {
+															case 'name_num' :
+																usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
+															break;
+															case 'parent' :
+																usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
+															break;
+														}
+
+														$terms_string = implode( ', ', wp_list_pluck( $terms, 'name' ) );
+														if ( $terms_string ) {
+															echo $terms_string;
+														} else {
 															echo '<span class="na">&ndash;</span>';
-														endif;
-													else :
+														}
+													} else {
 														echo '<span class="na">&ndash;</span>';
-													endif;
+													}
 					        					?></td>
 					        					<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html(wc_attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php _e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
 					        				</tr><?php
