@@ -66,6 +66,11 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_category' ), WC_API_Server::READABLE ),
 		);
 
+		# GET /products/sku/<product sku>
+		$routes[ $this->base . '/sku/(?P<sku>\w+)' ] = array(
+			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
+		);
+
 		return $routes;
 	}
 
@@ -1806,6 +1811,20 @@ class WC_API_Products extends WC_API_Resource {
 		 * @link   http://www.woothemes.com/careers/#op-35124-woocommerce-product-developer
 		 * @return bool
 		 */
+	}
+
+	/**
+	 * Get product by SKU
+	 *
+	 * @since  2.3.0
+	 * @param  int    $sku the product SKU
+	 * @param  string $fields
+	 * @return array
+	 */
+	public function get_product_by_sku( $sku, $fields = null ) {
+		$id = wc_get_product_id_by_sku( $sku );
+
+		return $this->get_product( $id, $fields );
 	}
 
 }
