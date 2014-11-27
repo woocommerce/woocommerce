@@ -63,7 +63,7 @@ class WC_Tracker {
 
 		$params = $this->get_tracking_data();
 
-		$response = wp_remote_post( esc_url( $this->api_url ), array(
+		$response = wp_remote_post( esc_url( apply_filters( 'woocommerce_tracker_api_url', $this->api_url ) ), array(
 				'method' => 'POST',
 				'timeout' => 45,
 				'redirection' => 5,
@@ -121,7 +121,7 @@ class WC_Tracker {
 		// Template overrides
 		$data['template_overrides'] = $this->get_all_template_overrides();
 
-		return $data;
+		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
 
 	/**
