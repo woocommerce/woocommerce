@@ -104,6 +104,9 @@ class WC_Tracker {
 		$data['email'] = apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) );
 		$data['theme'] = $this->get_theme_info();
 
+		// WordPress Data
+		$data['wp'] = $this->get_wordpress_data();
+
 		// Plugin info
 		$all_plugins = $this->get_all_plugins();
 		$data['active_plugins']   = $all_plugins['active_plugins'];
@@ -147,6 +150,23 @@ class WC_Tracker {
 		$theme_wc_support = ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) ? 'No' : 'Yes';
 
 		return array( 'name' => $theme_name, 'version' => $theme_version, 'child_theme' => $theme_child_theme, 'wc_support' => $theme_wc_support );
+	}
+
+	/**
+	 * Get WordPress related data.
+	 * @return array
+	 */
+	public function get_wordpress_data() {
+		$wp_data = array();
+
+		$memory = wc_let_to_num( WP_MEMORY_LIMIT );
+		$wp_data['memory_limit'] = size_format( $memory );
+		$wp_data['debug_mode'] = ( defined('WP_DEBUG') && WP_DEBUG ) ? 'Yes' : 'No';
+		$wp_data['locale'] = get_locale();
+		$wp_data['version'] = bloginfo( 'version' );
+		$wp_data['multisite'] = is_multisite() ? 'Yes' : 'No';
+
+		return $wp_data;
 	}
 
 	/**
