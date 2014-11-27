@@ -1111,7 +1111,7 @@ class WC_Cart {
 						// Now we have a new item price (excluding TAX)
 						$line_subtotal         = $line_price - array_sum( $taxes );
 
-						// Now add modifed taxes
+						// Now add modified taxes
 						$tax_result            = $this->tax->calc_tax( $line_subtotal, $item_tax_rates );
 						$line_subtotal_tax     = array_sum( $tax_result );
 
