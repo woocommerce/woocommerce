@@ -104,8 +104,11 @@ class WC_Tracker {
 		$data['email'] = apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) );
 		$data['theme'] = $this->get_theme_info();
 
-		// WordPress Data
-		$data['wp'] = $this->get_wordpress_data();
+		// WordPress Info
+		$data['wp'] = $this->get_wordpress_info();
+
+		// Server Info
+		$data['server'] = $this->get_server_info();
 
 		// Plugin info
 		$all_plugins = $this->get_all_plugins();
@@ -156,7 +159,7 @@ class WC_Tracker {
 	 * Get WordPress related data.
 	 * @return array
 	 */
-	public function get_wordpress_data() {
+	public function get_wordpress_info() {
 		$wp_data = array();
 
 		$memory = wc_let_to_num( WP_MEMORY_LIMIT );
@@ -167,6 +170,40 @@ class WC_Tracker {
 		$wp_data['multisite'] = is_multisite() ? 'Yes' : 'No';
 
 		return $wp_data;
+	}
+
+	/**
+	 * Get server related info
+	 * @return array
+	 */
+	public function get_server_info() {
+		$server_data = array();
+
+		if ( isset( $_SERVER['SERVER_SOFTWARE'] ) && ! empty( $_SERVER['SERVER_SOFTWARE'] ) ) {
+			$server_data['software'] = $_SERVER['SERVER_SOFTWARE'];
+		}
+
+		if ( function_exists( 'phpversion' ) ) {
+			$server_data['php_version'] = phpversion();
+		}
+
+		if ( function_exists( 'ini_get' ) ) {
+			$server_data['php_post_max_size'] = size_format( wc_let_to_num( ini_get( 'post_max_size' ) ) );
+			$server_data['php_time_limt'] = ini_get( 'max_execution_time' );
+			$server_data['php_max_input_vars'] = ini_get( 'max_input_vars' );
+			$server_data['php_suhosin'] = extension_loaded( 'suhosin' ) ? 'Yes' : 'No';
+		}
+
+		global $wpdb;
+		$server_data['mysql_version'] = $wpdb->db_version();
+
+		$server_data['php_max_upload_size'] = size_format( wp_max_upload_size() );
+		$server_data['php_default_timezone'] = date_default_timezone_get();
+		$server_data['php_soap'] = class_exists( 'SoapClient' ) ? 'Yes' : 'No';
+		$server_data['php_fsockopen'] = function_exists( 'fsockopen' ) ? 'Yes' : 'No';
+		$server_data['php_curl'] = function_exists( 'curl_init' ) ? 'Yes' : 'No';
+
+		return $server_data;
 	}
 
 	/**
