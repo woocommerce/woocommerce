@@ -149,10 +149,13 @@ jQuery( function ( $ ) {
 					}
 				});
 
+				var variation_ids = [];
+				variation_ids.push( variation );
+
 				var data = {
-					action: 'woocommerce_remove_variation',
-					variation_id: variation,
-					security: woocommerce_admin_meta_boxes_variations.delete_variation_nonce
+					action: 'woocommerce_remove_variations',
+					variation_ids: variation_ids,
+					security: woocommerce_admin_meta_boxes_variations.delete_variations_nonce
 				};
 
 				$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function ( response ) {

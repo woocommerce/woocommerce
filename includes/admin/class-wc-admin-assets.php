@@ -164,7 +164,6 @@ class WC_Admin_Assets {
 				'woocommerce_placeholder_img_src'     => wc_placeholder_img_src(),
 				'add_variation_nonce'                 => wp_create_nonce("add-variation"),
 				'link_variation_nonce'                => wp_create_nonce("link-variations"),
-				'delete_variation_nonce'              => wp_create_nonce("delete-variation"),
 				'delete_variations_nonce'             => wp_create_nonce("delete-variations"),
 				'i18n_link_all_variations'            => esc_js( __( 'Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run).', 'woocommerce' ) ),
 				'i18n_enter_a_value'                  => esc_js( __( 'Enter a value', 'woocommerce' ) ),

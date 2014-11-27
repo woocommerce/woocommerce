@@ -398,27 +398,9 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Delete variation via ajax function
-	 */
-	public static function remove_variation() {
-
-		check_ajax_referer( 'delete-variation', 'security' );
-
-		$variation_id = intval( $_POST['variation_id'] );
-		$variation = get_post( $variation_id );
-
-		if ( $variation && 'product_variation' == $variation->post_type ) {
-			wp_delete_post( $variation_id );
-		}
-
-		die();
-	}
-
-	/**
 	 * Delete variations via ajax function
 	 */
 	public static function remove_variations() {
-
 		check_ajax_referer( 'delete-variations', 'security' );
 
 		$variation_ids = (array) $_POST['variation_ids'];
