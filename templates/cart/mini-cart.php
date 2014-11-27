@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php if ( ! $_product->is_visible() ) : ?>
 							<?php echo str_replace( array( 'http:', 'https:' ), '', $thumbnail ) . $product_name; ?>
 						<?php else : ?>
-							<a href="<?php echo get_permalink( $product_id ); ?>">
+							<a href="<?php echo esc_url( $_product->get_permalink( $cart_item ) ); ?>">
 								<?php echo str_replace( array( 'http:', 'https:' ), '', $thumbnail ) . $product_name; ?>
 							</a>
 						<?php endif; ?>
