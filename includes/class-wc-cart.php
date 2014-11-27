@@ -1090,12 +1090,14 @@ class WC_Cart {
 				} elseif ( $this->prices_include_tax ) {
 
 					// Get base tax rates
-					if ( empty( $shop_tax_rates[ $_product->tax_class ] ) )
+					if ( empty( $shop_tax_rates[ $_product->tax_class ] ) ) {
 						$shop_tax_rates[ $_product->tax_class ] = $this->tax->get_base_tax_rates( $_product->tax_class );
+					}
 
 					// Get item tax rates
-					if ( empty( $tax_rates[ $_product->get_tax_class() ] ) )
+					if ( empty( $tax_rates[ $_product->get_tax_class() ] ) ) {
 						$tax_rates[ $_product->get_tax_class() ] = $this->tax->get_rates( $_product->get_tax_class() );
+					}
 
 					$base_tax_rates = $shop_tax_rates[ $_product->tax_class ];
 					$item_tax_rates = $tax_rates[ $_product->get_tax_class() ];
@@ -1134,8 +1136,9 @@ class WC_Cart {
 				} else {
 
 					// Get item tax rates
-					if ( empty( $tax_rates[ $_product->get_tax_class() ] ) )
+					if ( empty( $tax_rates[ $_product->get_tax_class() ] ) ) {
 						$tax_rates[ $_product->get_tax_class() ] = $this->tax->get_rates( $_product->get_tax_class() );
+					}
 
 					$item_tax_rates        = $tax_rates[ $_product->get_tax_class() ];
 
