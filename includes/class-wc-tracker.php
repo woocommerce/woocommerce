@@ -121,7 +121,7 @@ class WC_Tracker {
 		$data['shipping_methods'] = $this->get_active_shipping_methods();
 
 		// Get all WooCommerce options info
-		$data['general'] = $this->get_all_woocommerce_options_values();
+		$data['settings'] = $this->get_all_woocommerce_options_values();
 
 		// Template overrides
 		$data['template_overrides'] = $this->get_all_template_overrides();
