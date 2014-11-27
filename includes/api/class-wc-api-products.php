@@ -1824,6 +1824,10 @@ class WC_API_Products extends WC_API_Resource {
 	public function get_product_by_sku( $sku, $fields = null ) {
 		$id = wc_get_product_id_by_sku( $sku );
 
+		if ( empty( $id ) ) {
+			return new WP_Error( 'woocommerce_api_invalid_product_sku', __( 'Invalid product SKU', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
 		return $this->get_product( $id, $fields );
 	}
 
