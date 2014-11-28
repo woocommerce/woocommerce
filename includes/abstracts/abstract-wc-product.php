@@ -748,7 +748,7 @@ class WC_Product {
 	 * @return void
 	 */
 	public function adjust_price( $price ) {
-		$this->price = $this->price + $price;
+		$this->price = apply_filters( 'woocommerce_adjust_price', $this->price, $this ) + $price;
 	}
 
 	/**
