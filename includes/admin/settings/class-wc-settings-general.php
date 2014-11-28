@@ -84,24 +84,6 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title'   => __( 'Store Notice', 'woocommerce' ),
-				'desc'    => __( 'Enable site-wide store notice text', 'woocommerce' ),
-				'id'      => 'woocommerce_demo_store',
-				'default' => 'no',
-				'type'    => 'checkbox'
-			),
-
-			array(
-				'title'    => __( 'Store Notice Text', 'woocommerce' ),
-				'desc'     => '',
-				'id'       => 'woocommerce_demo_store_notice',
-				'default'  => __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
-				'type'     => 'text',
-				'css'      => 'min-width:300px;',
-				'autoload' => false
-			),
-
-			array(
 				'title'   => __( 'API', 'woocommerce' ),
 				'desc'    => __( 'Enable the REST API', 'woocommerce' ),
 				'id'      => 'woocommerce_api_enabled',

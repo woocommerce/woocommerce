@@ -256,14 +256,6 @@ jQuery( function ( $ ) {
 
 	});
 
-	$('input#woocommerce_demo_store').change(function() {
-		if ($(this).is(':checked')) {
-			$('#woocommerce_demo_store_notice').closest('tr').show();
-		} else {
-			$('#woocommerce_demo_store_notice').closest('tr').hide();
-		}
-	}).change();
-
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 
