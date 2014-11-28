@@ -439,13 +439,17 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			$alt = 1;
 
 			foreach ( $check_pages as $page_name => $values ) {
-
-				echo '<tr><td>' . esc_html( $page_name ) . ':</td>';
-				echo '<td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '">[?]</a></td><td>';
-
-				$error = false;
-
+				$error   = false;
 				$page_id = get_option( $values['option'] );
+
+				if ( $page_id ) {
+					$page_name = '<a href="' . get_edit_post_link( $page_id ) . '" title="' . sprintf( _x( 'Edit %s page', '[WC Pages links in the System Status]', 'woocommerce' ), esc_html( $page_name ) ) . '">' . esc_html( $page_name ) . '</a>';
+				} else {
+					$page_name = esc_html( $page_name );
+				}
+
+				echo '<tr><td>' . $page_name . ':</td>';
+				echo '<td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '">[?]</a></td><td>';
 
 				// Page ID check
 				if ( ! $page_id ) {
