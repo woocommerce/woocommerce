@@ -99,7 +99,7 @@ class WC_Admin_Assets {
 
 		wp_register_script( 'qrcode', WC()->plugin_url() . '/assets/js/admin/jquery.qrcode.min.js', array('jquery'), WC_VERSION );
 
-		wp_register_script( 'stupidtable', WC()->plugin_url() . '/assets/js/stupidtable/stupidtable.js', array('jquery'), WC_VERSION );
+		wp_register_script( 'stupidtable', WC()->plugin_url() . '/assets/js/stupidtable/stupidtable' . $suffix . '.js', array('jquery'), WC_VERSION );
 
 		// Accounting
 		$params = array(
