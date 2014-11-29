@@ -1145,6 +1145,7 @@ class WC_Cart {
 					// Base tax for line before discount - we will store this in the order data
 					$taxes                 = $this->tax->calc_tax( $line_price, $item_tax_rates );
 					$line_subtotal_tax     = array_sum( $taxes );
+
 					$line_subtotal         = $line_price;
 				}
 

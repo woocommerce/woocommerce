@@ -35,10 +35,11 @@ class WC_Tax {
 		// Work in pence to X precision
 		$price = self::precision( $price );
 
-		if ( $price_includes_tax )
+		if ( $price_includes_tax ) {
 			$taxes = self::calc_inclusive_tax( $price, $rates );
-		else
+		} else {
 			$taxes = self::calc_exclusive_tax( $price, $rates );
+		}
 
 		// Round to precision
 		if ( ! self::$round_at_subtotal && ! $suppress_rounding ) {
@@ -152,8 +153,9 @@ class WC_Tax {
 		// Multiple taxes
 		foreach ( $rates as $key => $rate ) {
 
-			if ( $rate['compound'] == 'yes' )
+			if ( $rate['compound'] == 'yes' ) {
 				continue;
+			}
 
 			$tax_amount = $price * ( $rate['rate'] / 100 );
 
