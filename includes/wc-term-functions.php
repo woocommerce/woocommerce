@@ -35,8 +35,9 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	}
 
 	// Support ordering by parent
-	if ( ! empty( $args['orderby'] ) && $args['orderby'] === 'parent' ) {
-		$fields = isset( $args['fields'] ) ? $args['fields'] : 'all';
+	if ( ! empty( $args['orderby'] ) && in_array( $args['orderby'], array( 'name_num', 'parent' ) ) ) {
+		$fields  = isset( $args['fields'] ) ? $args['fields'] : 'all';
+		$orderby = $args['orderby'];
 
 		// Unset for wp_get_post_terms
 		unset( $args['orderby'] );
@@ -44,7 +45,14 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 
 		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 
-		usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
+		switch ( $orderby ) {
+			case 'name_num' :
+				usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
+			break;
+			case 'parent' :
+				usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
+			break;
+		}
 
 		switch ( $fields ) {
 			case 'names' :
@@ -83,6 +91,19 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	return $terms;
 }
 
+
+/**
+ * Sort by name (numeric)
+ * @param  WP_POST object $a
+ * @param  WP_POST object $b
+ * @return int
+ */
+function _wc_get_product_terms_name_num_usort_callback( $a, $b ) {
+	if ( $a->name + 0 === $b->name + 0 ) {
+		return 0;
+	}
+	return ( $a->name + 0 < $b->name + 0 ) ? -1 : 1;
+}
 /**
  * Sort by parent
  * @param  WP_POST object $a

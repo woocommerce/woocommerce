@@ -994,13 +994,26 @@ class WC_Product {
 
 			$where_meta_value = $value ? $wpdb->prepare( " AND meta_value = %d", $value ) : " AND meta_value > 0";
 
-			$count = $wpdb->get_var( $wpdb->prepare("
-				SELECT COUNT(meta_value) FROM $wpdb->commentmeta
-				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-				WHERE meta_key = 'rating'
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-			", $this->id ) . $where_meta_value );
+			if ( get_option( 'woocommerce_enable_review_rating' ) == 'yes' && get_option( 'woocommerce_review_rating_required' ) == 'yes' ) {
+
+				$count = $wpdb->get_var( $wpdb->prepare("
+					SELECT COUNT(meta_value) FROM $wpdb->commentmeta
+					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+					WHERE meta_key = 'rating'
+					AND comment_post_ID = %d
+					AND comment_approved = '1'
+				", $this->id ) . $where_meta_value );
+
+			} else {
+
+				$count = $wpdb->get_var( $wpdb->prepare("
+					SELECT COUNT(*) FROM $wpdb->comments
+					WHERE comment_parent = 0
+					AND comment_post_ID = %d
+					AND comment_approved = '1'
+				", $this->id ) );
+
+			}
 
 			set_transient( 'wc_rating_count_' . $this->id . $value_suffix, $count, YEAR_IN_SECONDS );
 		}

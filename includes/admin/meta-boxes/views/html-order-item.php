@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php echo wc_placeholder_img( 'shop_thumbnail' ); ?>
 		<?php endif; ?>
 	</td>
-	<td class="name">
+	<td class="name" data-sort-value="<?php echo esc_attr( $item['name'] ); ?>">
 
 		<?php echo ( $_product && $_product->get_sku() ) ? esc_html( $_product->get_sku() ) . ' &ndash; ' : ''; ?>
 
@@ -155,7 +155,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php do_action( 'woocommerce_admin_order_item_values', $_product, $item, absint( $item_id ) ); ?>
 
-	<td class="item_cost" width="1%">
+	<td class="item_cost" width="1%" data-sort-value="<?php echo esc_attr( $order->get_item_subtotal( $item, false, true ) ); ?>">
 		<div class="view">
 			<?php
 				if ( isset( $item['line_total'] ) ) {
@@ -187,7 +187,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</td>
 
-	<td class="line_cost" width="1%">
+	<td class="line_cost" width="1%" data-sort-value="<?php echo esc_attr( isset( $item['line_total'] ) ? $item['line_total'] : '' ); ?>">
 		<div class="view">
 			<?php
 				if ( isset( $item['line_total'] ) ) {

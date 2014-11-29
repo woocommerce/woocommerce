@@ -441,7 +441,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			wc_delete_shop_order_transients( $order->id );
 
-			do_action( 'woocommerce_api_create_order', $order->id, $this );
+			do_action( 'woocommerce_api_create_order', $order->id, $data );
 
 			return $this->get_order( $order->id );
 
@@ -593,7 +593,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			wc_delete_shop_order_transients( $order->id );
 
-			do_action( 'woocommerce_api_edit_order', $order->id, $this );
+			do_action( 'woocommerce_api_edit_order', $order->id, $data );
 
 			return $this->get_order( $id );
 

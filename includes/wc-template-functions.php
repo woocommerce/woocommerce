@@ -110,9 +110,7 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 	/**
 	 * Reset the loop's index and columns when we're done outputting a product loop.
 	 *
-	 * @access public
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_reset_loop() {
 		global $woocommerce_loop;
@@ -291,8 +289,6 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 	 * which people can add to their themes to add basic woocommerce support
 	 * without hooks or modifying core templates.
 	 *
-	 * @access public
-	 * @return void
 	 */
 	function woocommerce_content() {
 
@@ -349,8 +345,6 @@ if ( ! function_exists( 'woocommerce_output_content_wrapper' ) ) {
 	/**
 	 * Output the start of the page wrapper.
 	 *
-	 * @access public
-	 * @return void
 	 */
 	function woocommerce_output_content_wrapper() {
 		wc_get_template( 'global/wrapper-start.php' );
@@ -361,8 +355,6 @@ if ( ! function_exists( 'woocommerce_output_content_wrapper_end' ) ) {
 	/**
 	 * Output the end of the page wrapper.
 	 *
-	 * @access public
-	 * @return void
 	 */
 	function woocommerce_output_content_wrapper_end() {
 		wc_get_template( 'global/wrapper-end.php' );
@@ -374,8 +366,6 @@ if ( ! function_exists( 'woocommerce_get_sidebar' ) ) {
 	/**
 	 * Get the shop sidebar template.
 	 *
-	 * @access public
-	 * @return void
 	 */
 	function woocommerce_get_sidebar() {
 		wc_get_template( 'global/sidebar.php' );
@@ -387,8 +377,6 @@ if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 	/**
 	 * Adds a demo store banner to the site if enabled
 	 *
-	 * @access public
-	 * @return void
 	 */
 	function woocommerce_demo_store() {
 		if ( !is_store_notice_showing() )
@@ -445,7 +433,6 @@ if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 	/**
 	 * Output the start of a product loop. By default this is a UL
 	 *
-	 * @access public
 	 * @param bool $echo
 	 * @return string
 	 */
@@ -463,7 +450,6 @@ if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 	/**
 	 * Output the end of a product loop. By default this is a UL
 	 *
-	 * @access public
 	 * @param bool $echo
 	 * @return string
 	 */
@@ -483,9 +469,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	/**
 	 * Show an archive description on taxonomy archives
 	 *
-	 * @access public
 	 * @subpackage	Archives
-	 * @return void
 	 */
 	function woocommerce_taxonomy_archive_description() {
 		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 ) {
@@ -501,9 +485,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 	/**
 	 * Show a shop page description on product archives
 	 *
-	 * @access public
 	 * @subpackage	Archives
-	 * @return void
 	 */
 	function woocommerce_product_archive_description() {
 		if ( is_post_type_archive( 'product' ) && get_query_var( 'paged' ) == 0 ) {
@@ -523,9 +505,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 	/**
 	 * Get the add to cart template for the loop.
 	 *
-	 * @access public
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_template_loop_add_to_cart( $args = array() ) {
 		wc_get_template( 'loop/add-to-cart.php' , $args );
@@ -536,9 +516,7 @@ if ( ! function_exists( 'woocommerce_template_loop_product_thumbnail' ) ) {
 	/**
 	 * Get the product thumbnail for the loop.
 	 *
-	 * @access public
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_template_loop_product_thumbnail() {
 		echo woocommerce_get_product_thumbnail();
@@ -549,9 +527,7 @@ if ( ! function_exists( 'woocommerce_template_loop_price' ) ) {
 	/**
 	 * Get the product price for the loop.
 	 *
-	 * @access public
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_template_loop_price() {
 		wc_get_template( 'loop/price.php' );
@@ -562,9 +538,7 @@ if ( ! function_exists( 'woocommerce_template_loop_rating' ) ) {
 	/**
 	 * Display the average rating in the loop
 	 *
-	 * @access public
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_template_loop_rating() {
 		wc_get_template( 'loop/rating.php' );
@@ -575,9 +549,7 @@ if ( ! function_exists( 'woocommerce_show_product_loop_sale_flash' ) ) {
 	/**
 	 * Get the sale flash for the loop.
 	 *
-	 * @access public
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_show_product_loop_sale_flash() {
 		wc_get_template( 'loop/sale-flash.php' );
@@ -619,7 +591,6 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	/**
 	 * Get the product thumbnail, or the placeholder if not set.
 	 *
-	 * @access public
 	 * @subpackage	Loop
 	 * @param string $size (default: 'shop_catalog')
 	 * @param int $placeholder_width (default: 0)
@@ -642,9 +613,7 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 	/**
 	 * Output the result count text (Showing x - x of x results).
 	 *
-	 * @access public
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_result_count() {
 		wc_get_template( 'loop/result-count.php' );
@@ -656,9 +625,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	/**
 	 * Output the product sorting options.
 	 *
-	 * @access public
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_catalog_ordering() {
 		global $wp_query;
@@ -695,9 +662,7 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 	/**
 	 * Output the pagination.
 	 *
-	 * @access public
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_pagination() {
 		wc_get_template( 'loop/pagination.php' );
@@ -711,9 +676,7 @@ if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 	/**
 	 * Output the product image before the single product summary.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_show_product_images() {
 		wc_get_template( 'single-product/product-image.php' );
@@ -724,9 +687,7 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 	/**
 	 * Output the product thumbnails.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_show_product_thumbnails() {
 		wc_get_template( 'single-product/product-thumbnails.php' );
@@ -737,9 +698,7 @@ if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
 	/**
 	 * Output the product tabs.
 	 *
-	 * @access public
 	 * @subpackage	Product/Tabs
-	 * @return void
 	 */
 	function woocommerce_output_product_data_tabs() {
 		wc_get_template( 'single-product/tabs/tabs.php' );
@@ -750,9 +709,7 @@ if ( ! function_exists( 'woocommerce_template_single_title' ) ) {
 	/**
 	 * Output the product title.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_template_single_title() {
 		wc_get_template( 'single-product/title.php' );
@@ -763,9 +720,7 @@ if ( ! function_exists( 'woocommerce_template_single_rating' ) ) {
 	/**
 	 * Output the product rating.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_template_single_rating() {
 		wc_get_template( 'single-product/rating.php' );
@@ -776,9 +731,7 @@ if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
 	/**
 	 * Output the product price.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_template_single_price() {
 		wc_get_template( 'single-product/price.php' );
@@ -789,9 +742,7 @@ if ( ! function_exists( 'woocommerce_template_single_excerpt' ) ) {
 	/**
 	 * Output the product short description (excerpt).
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_template_single_excerpt() {
 		wc_get_template( 'single-product/short-description.php' );
@@ -802,9 +753,7 @@ if ( ! function_exists( 'woocommerce_template_single_meta' ) ) {
 	/**
 	 * Output the product meta.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_template_single_meta() {
 		wc_get_template( 'single-product/meta.php' );
@@ -815,9 +764,7 @@ if ( ! function_exists( 'woocommerce_template_single_sharing' ) ) {
 	/**
 	 * Output the product sharing.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_template_single_sharing() {
 		wc_get_template( 'single-product/share.php' );
@@ -828,9 +775,7 @@ if ( ! function_exists( 'woocommerce_show_product_sale_flash' ) ) {
 	/**
 	 * Output the product sale flash.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_show_product_sale_flash() {
 		wc_get_template( 'single-product/sale-flash.php' );
@@ -842,9 +787,7 @@ if ( ! function_exists( 'woocommerce_template_single_add_to_cart' ) ) {
 	/**
 	 * Trigger the single product add to cart action.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_template_single_add_to_cart() {
 		global $product;
@@ -856,9 +799,7 @@ if ( ! function_exists( 'woocommerce_simple_add_to_cart' ) ) {
 	/**
 	 * Output the simple product add to cart area.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_simple_add_to_cart() {
 		wc_get_template( 'single-product/add-to-cart/simple.php' );
@@ -869,9 +810,7 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 	/**
 	 * Output the grouped product add to cart area.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_grouped_add_to_cart() {
 		global $product;
@@ -888,9 +827,7 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 	/**
 	 * Output the variable product add to cart area.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_variable_add_to_cart() {
 		global $product;
@@ -911,9 +848,7 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 	/**
 	 * Output the external product add to cart area.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_external_add_to_cart() {
 		global $product;
@@ -935,8 +870,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	 *
 	 * @param  array $args Args for the input
 	 * @param  WC_Product|null $product
-	 * @param  boolean $echo Whether to return or echo
-	 * @return void|string
+	 * @param  boolean $echo Whether to return or echo|string
 	 */
 	function woocommerce_quantity_input( $args = array(), $product = null, $echo = true ) {
 		if ( is_null( $product ) )
@@ -969,9 +903,7 @@ if ( ! function_exists( 'woocommerce_product_description_tab' ) ) {
 	/**
 	 * Output the description tab content.
 	 *
-	 * @access public
 	 * @subpackage	Product/Tabs
-	 * @return void
 	 */
 	function woocommerce_product_description_tab() {
 		wc_get_template( 'single-product/tabs/description.php' );
@@ -982,9 +914,7 @@ if ( ! function_exists( 'woocommerce_product_additional_information_tab' ) ) {
 	/**
 	 * Output the attributes tab content.
 	 *
-	 * @access public
 	 * @subpackage	Product/Tabs
-	 * @return void
 	 */
 	function woocommerce_product_additional_information_tab() {
 		wc_get_template( 'single-product/tabs/additional-information.php' );
@@ -995,9 +925,7 @@ if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 	/**
 	 * Output the reviews tab content.
 	 *
-	 * @access public
 	 * @subpackage	Product/Tabs
-	 * @return void
 	 */
 	function woocommerce_product_reviews_tab() {
 		wc_get_template( 'single-product/tabs/reviews.php' );
@@ -1009,7 +937,6 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 	/**
 	 * Add default product tabs to product pages.
 	 *
-	 * @access public
 	 * @param array $tabs
 	 * @return array
 	 */
@@ -1052,7 +979,6 @@ if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
 	/**
 	 * Sort tabs by priority
 	 *
-	 * @access public
 	 * @param array $tabs
 	 * @return array
 	 */
@@ -1084,9 +1010,7 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	/**
 	 * Output the Review comments template.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
@@ -1099,9 +1023,7 @@ if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
 	/**
 	 * Output the related products.
 	 *
-	 * @access public
 	 * @subpackage	Product
-	 * @return void
 	 */
 	function woocommerce_output_related_products() {
 
@@ -1120,11 +1042,9 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 	/**
 	 * Output the related products.
 	 *
-	 * @access public
 	 * @param array Provided arguments
 	 * @param bool Columns argument for backwards compat
 	 * @param bool Order by argument for backwards compat
-	 * @return void
 	 */
 	function woocommerce_related_products( $args = array(), $columns = false, $orderby = false ) {
 		if ( ! is_array( $args ) ) {
@@ -1156,11 +1076,9 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	/**
 	 * Output product up sells.
 	 *
-	 * @access public
 	 * @param int $posts_per_page (default: -1)
 	 * @param int $columns (default: 2)
 	 * @param string $orderby (default: 'rand')
-	 * @return void
 	 */
 	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 2, $orderby = 'rand' ) {
 		wc_get_template( 'single-product/up-sells.php', array(
@@ -1178,9 +1096,7 @@ if ( ! function_exists( 'woocommerce_shipping_calculator' ) ) {
 	/**
 	 * Output the cart shipping calculator.
 	 *
-	 * @access public
 	 * @subpackage	Cart
-	 * @return void
 	 */
 	function woocommerce_shipping_calculator() {
 		wc_get_template( 'cart/shipping-calculator.php' );
@@ -1192,9 +1108,7 @@ if ( ! function_exists( 'woocommerce_cart_totals' ) ) {
 	/**
 	 * Output the cart totals.
 	 *
-	 * @access public
 	 * @subpackage	Cart
-	 * @return void
 	 */
 	function woocommerce_cart_totals() {
 		wc_get_template( 'cart/cart-totals.php' );
@@ -1224,9 +1138,7 @@ if ( ! function_exists( 'woocommerce_button_proceed_to_checkout' ) ) {
 	/**
 	 * Output the proceed to checkout button.
 	 *
-	 * @access public
 	 * @subpackage	Cart
-	 * @return void
 	 */
 	function woocommerce_button_proceed_to_checkout() {
 		$checkout_url = WC()->cart->get_checkout_url();
@@ -1246,8 +1158,6 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
 	/**
 	 * Output the Mini-cart - used by cart widget
 	 *
-	 * @access public
-	 * @return void
 	 */
 	function woocommerce_mini_cart( $args = array() ) {
 
@@ -1268,9 +1178,7 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 	/**
 	 * Output the WooCommerce Login Form
 	 *
-	 * @access public
 	 * @subpackage	Forms
-	 * @return void
 	 */
 	function woocommerce_login_form( $args = array() ) {
 
@@ -1291,9 +1199,7 @@ if ( ! function_exists( 'woocommerce_checkout_login_form' ) ) {
 	/**
 	 * Output the WooCommerce Checkout Login Form
 	 *
-	 * @access public
 	 * @subpackage	Checkout
-	 * @return void
 	 */
 	function woocommerce_checkout_login_form() {
 		wc_get_template( 'checkout/form-login.php', array( 'checkout' => WC()->checkout() ) );
@@ -1305,8 +1211,6 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 	/**
 	 * Output the WooCommerce Breadcrumb
 	 *
-	 * @access public
-	 * @return void
 	 */
 	function woocommerce_breadcrumb( $args = array() ) {
 
@@ -1330,12 +1234,33 @@ if ( ! function_exists( 'woocommerce_order_review' ) ) {
 	/**
 	 * Output the Order review table for the checkout.
 	 *
-	 * @access public
 	 * @subpackage	Checkout
-	 * @return void
 	 */
-	function woocommerce_order_review( $is_ajax = false ) {
-		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout(), 'is_ajax' => $is_ajax ) );
+	function woocommerce_order_review( $deprecated = false ) {
+		wc_get_template( 'checkout/review-order.php', array( 'checkout' => WC()->checkout() ) );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
+
+	/**
+	 * Output the Payment Methods on the checkout
+	 *
+	 * @subpackage	Checkout
+	 */
+	function woocommerce_checkout_payment() {
+		if ( WC()->cart->needs_payment() ) {
+			$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+			WC()->payment_gateways()->set_current_gateway( $available_gateways );
+		} else {
+			$available_gateways = array();
+		}
+
+		wc_get_template( 'checkout/payment.php', array(
+			'checkout'           => WC()->checkout(),
+			'available_gateways' => WC()->payment_gateways()->get_available_payment_gateways(),
+			'order_button_text'  => apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) )
+		) );
 	}
 }
 
@@ -1344,9 +1269,7 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 	/**
 	 * Output the Coupon form for the checkout.
 	 *
-	 * @access public
 	 * @subpackage	Checkout
-	 * @return void
 	 */
 	function woocommerce_checkout_coupon_form() {
 		wc_get_template( 'checkout/form-coupon.php', array( 'checkout' => WC()->checkout() ) );
@@ -1358,7 +1281,6 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	/**
 	 * Check if we will be showing products or not (and not subcats only)
 	 *
-	 * @access public
 	 * @subpackage	Loop
 	 * @return bool
 	 */
@@ -1438,7 +1360,6 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	/**
 	 * Display product sub categories as thumbnails.
 	 *
-	 * @access public
 	 * @subpackage	Loop
 	 * @param array $args
 	 * @return null|boolean
@@ -1550,10 +1471,8 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	/**
 	 * Show subcategory thumbnails.
 	 *
-	 * @access public
 	 * @param mixed $category
 	 * @subpackage	Loop
-	 * @return void
 	 */
 	function woocommerce_subcategory_thumbnail( $category ) {
 		$small_thumbnail_size  	= apply_filters( 'single_product_small_thumbnail_size', 'shop_catalog' );
@@ -1582,10 +1501,8 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 	/**
 	 * Displays order details in a table.
 	 *
-	 * @access public
 	 * @param mixed $order_id
 	 * @subpackage	Orders
-	 * @return void
 	 */
 	function woocommerce_order_details_table( $order_id ) {
 		if ( ! $order_id ) return;
@@ -1602,7 +1519,6 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 	/**
 	 * Display an 'order again' button on the view order page.
 	 *
-	 * @access public
 	 * @param object $order
 	 * @subpackage	Orders
 	 */
@@ -1624,12 +1540,10 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	/**
 	 * Outputs a checkout/address form field.
 	 *
-	 * @access public
 	 * @subpackage	Forms
 	 * @param mixed $key
 	 * @param mixed $args
 	 * @param string $value (default: null)
-	 * @return void
 	 * @todo This function needs to be broken up in smaller pieces
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {

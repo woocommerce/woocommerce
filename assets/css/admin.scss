@@ -784,13 +784,22 @@ ul.wc_coupon_list_block {
 			padding: 8px;
 			font-size: 11px;
 			text-align: left;
-
+			color: #555;
+			-webkit-touch-callout: none;
+		    -webkit-user-select: none;
+		    -khtml-user-select: none;
+		    -moz-user-select: none;
+		    -ms-user-select: none;
+		    user-select: none;
 			&:last-child {
 				padding-right: 12px;
 			}
 
 			&:first-child {
 				padding-left: 12px;
+			}
+			&.sortable {
+				cursor: pointer;
 			}
 		}
 

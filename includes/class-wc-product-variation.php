@@ -171,10 +171,11 @@ class WC_Product_Variation extends WC_Product {
 	/**
 	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
 	 *
+	 * @param  $cart item array If the cart item is passed, we can get a link containing the exact attributes selected for the variation, rather than the default attributes.
 	 * @return string
 	 */
-	public function get_permalink() {
-		return add_query_arg( array_filter( $this->variation_data ), get_permalink( $this->id ) );
+	public function get_permalink( $cart_item = null ) {
+		return add_query_arg( array_filter( isset( $cart_item['variation'] ) ? $cart_item['variation'] : $this->variation_data ), get_permalink( $this->id ) );
 	}
 
 	/**

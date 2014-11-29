@@ -445,7 +445,7 @@ class WC_Meta_Box_Product_Data {
 								// Any set?
 								$has_terms = ( is_wp_error( $post_terms ) || ! $post_terms || sizeof( $post_terms ) == 0 ) ? 0 : 1;
 								?>
-								<div class="woocommerce_attribute wc-metabox closed taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if ( ! $has_terms ) echo 'style="display:none"'; ?>>
+								<div data-taxonomy="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" class="woocommerce_attribute wc-metabox closed taxonomy <?php echo esc_attr( $attribute_taxonomy_name ); ?>" rel="<?php echo $position; ?>" <?php if ( ! $has_terms ) echo 'style="display:none"'; ?>>
 									<h3>
 										<button type="button" class="remove_row button"><?php _e( 'Remove', 'woocommerce' ); ?></button>
 										<div class="handlediv" title="<?php _e( 'Click to toggle', 'woocommerce' ); ?>"></div>

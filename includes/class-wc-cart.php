@@ -709,7 +709,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Returns a specific itme in the cart
+		 * Returns a specific item in the cart
 		 *
 		 * @return array item data
 		 */

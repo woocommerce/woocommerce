@@ -150,6 +150,7 @@ class WC_AJAX {
 	 * AJAX update order review on checkout
 	 */
 	public static function update_order_review() {
+		ob_start();
 
 		check_ajax_referer( 'update-order-review', 'security' );
 
@@ -158,7 +159,14 @@ class WC_AJAX {
 		}
 
 		if ( 0 == sizeof( WC()->cart->get_cart() ) ) {
-			echo '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>';
+			$data = array(
+				'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
+					'.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>'
+				) )
+			);
+
+			wp_send_json( $data );
+
 			die();
 		}
 
@@ -253,7 +261,22 @@ class WC_AJAX {
 
 		WC()->cart->calculate_totals();
 
-		do_action( 'woocommerce_checkout_order_review', true ); // Display review order table
+		ob_start();
+		woocommerce_order_review();
+		$woocommerce_order_review = ob_get_clean();
+
+		ob_start();
+		woocommerce_checkout_payment();
+		$woocommerce_checkout_payment = ob_get_clean();
+
+		$data = array(
+			'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
+				'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
+				'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment
+			) )
+		);
+
+		wp_send_json( $data );
 
 		die();
 	}
@@ -311,32 +334,17 @@ class WC_AJAX {
 	 * Feature a product from admin
 	 */
 	public static function feature_product() {
-		if ( ! current_user_can( 'edit_products' ) ) {
-			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ), '', array( 'response' => 403 ) );
+		if ( current_user_can( 'edit_products' ) && check_admin_referer( 'woocommerce-feature-product' ) ) {
+			$product_id = absint( $_GET['product_id'] );
+
+			if ( 'product' === get_post_type( $product_id ) ) {
+				update_post_meta( $product_id, '_featured', get_post_meta( $product_id, '_featured', true ) === 'yes' ? 'no' : 'yes' );
+
+				delete_transient( 'wc_featured_products' );
+			}
 		}
-
-		if ( ! check_admin_referer( 'woocommerce-feature-product' ) ) {
-			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ), '', array( 'response' => 403 ) );
-		}
-
-		$post_id = ! empty( $_GET['product_id'] ) ? (int) $_GET['product_id'] : '';
-
-		if ( ! $post_id || get_post_type( $post_id ) !== 'product' ) {
-			die;
-		}
-
-		$featured = get_post_meta( $post_id, '_featured', true );
-
-		if ( 'yes' === $featured ) {
-			update_post_meta( $post_id, '_featured', 'no' );
-		} else {
-			update_post_meta( $post_id, '_featured', 'yes' );
-		}
-
-		delete_transient( 'wc_featured_products' );
 
 		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=shop_order' ) );
-
 		die();
 	}
 
@@ -344,31 +352,17 @@ class WC_AJAX {
 	 * Mark an order with a status
 	 */
 	public static function mark_order_status() {
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ), '', array( 'response' => 403 ) );
+		if ( current_user_can( 'edit_shop_orders' ) && check_admin_referer( 'woocommerce-mark-order-status' ) ) {
+			$status   = sanitize_text_field( $_GET['status'] );
+			$order_id = absint( $_GET['order_id'] );
+
+			if ( wc_is_order_status( 'wc-' . $status ) && $order_id ) {
+				$order = wc_get_order( $order_id );
+				$order->update_status( $status );
+			}
 		}
-
-		if ( ! check_admin_referer( 'woocommerce-mark-order-status' ) ) {
-			wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ), '', array( 'response' => 403 ) );
-		}
-
-		$status = isset( $_GET['status'] ) ? esc_attr( $_GET['status'] ) : '';
-		$order_statuses = wc_get_order_statuses();
-
-		if ( ! $status || ! isset( $order_statuses[ 'wc-' . $status ] ) ) {
-			die();
-		}
-
-		$order_id = isset( $_GET['order_id'] ) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
-		if ( ! $order_id ) {
-			die();
-		}
-
-		$order = wc_get_order( $order_id );
-		$order->update_status( $status );
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
-
 		die();
 	}
 
@@ -404,27 +398,9 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Delete variation via ajax function
-	 */
-	public static function remove_variation() {
-
-		check_ajax_referer( 'delete-variation', 'security' );
-
-		$variation_id = intval( $_POST['variation_id'] );
-		$variation = get_post( $variation_id );
-
-		if ( $variation && 'product_variation' == $variation->post_type ) {
-			wp_delete_post( $variation_id );
-		}
-
-		die();
-	}
-
-	/**
 	 * Delete variations via ajax function
 	 */
 	public static function remove_variations() {
-
 		check_ajax_referer( 'delete-variations', 'security' );
 
 		$variation_ids = (array) $_POST['variation_ids'];

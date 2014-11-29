@@ -138,6 +138,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Fresh new frontend design.
 * Feature - Undo link in message when removing products from the cart.
 * Feature - Compatibility with Twenty Fifteen default theme.
+* Feature - Added 'top freebies' to product report.
+* Feature - Added numeric sort for attributes.
 * Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
 * Refactor - Routing all email functionality through one send() method.
 * Refactor - Replaced existing email css inliner with Emogrifier.
@@ -157,9 +159,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Removed quantity increment/decrement buttons.
 * Tweak - Moved 'Proceed to checkout' button on cart to beneath totals.
 * Tweak - Improved 'responsiveness' of product data tabs on add/edit product screen.
+* Tweak - Added 'stupidtable' script to allow order item sorting on the order screen (by name, cost, qty).
+* Tweak - In the cart, add variation selected data to the permalink.
+* Dev - API - Look up product by sku.
 * Dev - Made template debug mode set WC_TEMPLATE_DEBUG_MODE constant and remove all overrides for all template loading functions.
 * Dev - Switched to .scss from .less for all styles.
 * Dev - Included bourbon for scss mixins.
+* Dev - Decoupled the order summary and payments area. Both are updated independently via ajax fragments and can be moved around via actions. TEMPLATES OVERRIDING THESE TEMPLATES WILL NEED TO UPDATE THEIR FILES.
 * Localisation - Add Ukrainian currency and symbol.
 
 = 2.2.5 - 07/10/2014 =

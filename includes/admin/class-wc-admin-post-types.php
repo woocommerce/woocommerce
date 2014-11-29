@@ -71,13 +71,10 @@ class WC_Admin_Post_Types {
 		add_action( 'before_delete_post', array( $this, 'delete_order_items' ) );
 
 		// Edit post screens
-		add_filter( 'media_view_strings', array( $this, 'media_view_strings' ), 10, 2 );
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'media_view_strings', array( $this, 'change_insert_into_post' ) );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
-
-		$this->change_featured_image_text();
 
 		// Uploads
 		add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
@@ -548,7 +545,11 @@ class WC_Admin_Post_Types {
 
 			break;
 			case 'order_total' :
-				echo esc_html( strip_tags( $the_order->get_formatted_order_total() ) );
+				if ( $the_order->get_total_refunded() > 0 ) {
+					echo '<del>' . strip_tags( $the_order->get_formatted_order_total() ) . '</del> <ins>' . wc_price( $the_order->get_total() - $the_order->get_total_refunded(), array( 'currency' => $the_order->get_order_currency() ) ) . '</ins>';
+				} else {
+					echo esc_html( strip_tags( $the_order->get_formatted_order_total() ) );
+				}
 
 				if ( $the_order->payment_method_title ) {
 					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
@@ -1912,42 +1913,6 @@ class WC_Admin_Post_Types {
 
 			do_action( 'woocommerce_deleted_order_items', $postid );
 		}
-	}
-
-	/**
-	 * Change text without slow getext filter
-	 */
-	public function change_featured_image_text() {
-		global $l10n;
-		if ( isset( $l10n['default'] ) && isset( $l10n['default']->entries ) ) {
-			foreach ( $l10n['default']->entries as $entry_key => $entries ) {
-				foreach ( $entries->translations as $key => $value ) {
-					if ( 'Featured Image' == $value ) {
-						$l10n['default']->entries[ $entry_key ]->translations[ $key ] = __( 'Product Image', 'woocommerce' );
-					} elseif ( 'Remove featured image' == $value ) {
-						$l10n['default']->entries[ $entry_key ]->translations[ $key ] = __( 'Remove product image', 'woocommerce' );
-					} elseif ( 'Set featured image' == $value ) {
-						$l10n['default']->entries[ $entry_key ]->translations[ $key ] = __( 'Set product image', 'woocommerce' );
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Change "Featured Image" to "Product Image" throughout media modals.
-	 *
-	 * @param  array  $strings Array of strings to translate.
-	 * @param  object $post
-	 * @return array
-	 */
-	public function media_view_strings( $strings = array(), $post = null ) {
-		if ( isset( $post->post_type ) && 'product' == $post->post_type ) {
-			$strings['setFeaturedImageTitle'] = __( 'Set product image', 'woocommerce' );
-			$strings['setFeaturedImage']      = __( 'Set product image', 'woocommerce' );
-		}
-
-		return $strings;
 	}
 
 	/**

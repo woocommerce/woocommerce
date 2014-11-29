@@ -523,3 +523,18 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 		return true;
 	}
 }
+
+/**
+ * Get product ID by SKU.
+ *
+ * @since  2.3.0
+ * @param  string $sku
+ * @return int
+ */
+function wc_get_product_id_by_sku( $sku ) {
+	global $wpdb;
+
+	$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $sku ) );
+
+	return ( $product_id ) ? intval( $product_id ) : 0;
+}

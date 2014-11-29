@@ -628,6 +628,7 @@ jQuery( function ( $ ) {
 					$( '#woocommerce-order-items .inside' ).append( response );
 					runTipTip();
 					removeOrderItemsLoading();
+					$('.woocommerce_order_items').stupidtable();
 				}
 			});
 
@@ -1163,4 +1164,6 @@ jQuery( function ( $ ) {
 
 			return false;
 		});
+
+	$('.woocommerce_order_items').stupidtable();
 });

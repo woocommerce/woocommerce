@@ -388,7 +388,7 @@ class WC_Form_Handler {
 			}
 
 			wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $product->get_title(), '<a href="' . $undo . '">', '</a>' ) );
-			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item' ), wp_get_referer() ) : WC()->cart->get_cart_url();
+			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : WC()->cart->get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
 
