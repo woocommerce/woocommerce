@@ -39,7 +39,7 @@ global $product, $post;
 									// Get terms if this is a taxonomy - ordered
 									if ( taxonomy_exists( sanitize_title( $name ) ) ) {
 
-										$terms = wc_get_product_terms( $post->ID, sanitize_title( $name ) );
+										$terms = wc_get_product_terms( $post->ID, sanitize_title( $name ), array( 'fields' => 'all' ) );
 
 										foreach ( $terms as $term ) {
 											if ( ! in_array( $term->slug, $options ) ) {
