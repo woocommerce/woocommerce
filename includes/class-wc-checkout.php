@@ -76,7 +76,6 @@ class WC_Checkout {
 	 * Constructor for the checkout class. Hooks in methods and defines checkout fields.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function __construct () {
 		add_action( 'woocommerce_checkout_billing', array( $this,'checkout_form_billing' ) );
