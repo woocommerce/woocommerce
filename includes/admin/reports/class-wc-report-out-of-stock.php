@@ -27,8 +27,6 @@ class WC_Report_Out_Of_Stock extends WC_Report_Stock {
 
 	/**
 	 * Get Products matching stock criteria
-	 *
-	 * @access public
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;

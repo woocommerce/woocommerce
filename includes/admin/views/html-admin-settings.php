@@ -26,12 +26,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated hook
 		?>
 
-        <p class="submit">
-        	<?php if ( ! isset( $GLOBALS['hide_save_button'] ) ) : ?>
-        		<input name="save" class="button-primary" type="submit" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" />
-        	<?php endif; ?>
-        	<input type="hidden" name="subtab" id="last_tab" />
-        	<?php wp_nonce_field( 'woocommerce-settings' ); ?>
-        </p>
+		<p class="submit">
+			<?php if ( ! isset( $GLOBALS['hide_save_button'] ) ) : ?>
+				<input name="save" class="button-primary" type="submit" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" />
+			<?php endif; ?>
+			<input type="hidden" name="subtab" id="last_tab" />
+			<?php wp_nonce_field( 'woocommerce-settings' ); ?>
+		</p>
 	</form>
 </div>

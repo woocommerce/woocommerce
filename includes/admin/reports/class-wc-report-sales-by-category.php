@@ -171,7 +171,6 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 	/**
 	 * Category selection
-	 * @return void
 	 */
 	public function category_widget() {
 

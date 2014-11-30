@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_screen_ids() {
+
 	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 	$screen_ids   = array(
 		'toplevel_page_' . $wc_screen_id,
@@ -108,6 +109,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
  * @param array $options Opens array to output
  */
 function woocommerce_admin_fields( $options ) {
+
 	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
 		include 'class-wc-admin-settings.php';
 	}
@@ -119,9 +121,9 @@ function woocommerce_admin_fields( $options ) {
  * Update all settings which are passed.
  *
  * @param array $options
- * @return void
  */
 function woocommerce_update_options( $options ) {
+
 	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
 		include 'class-wc-admin-settings.php';
 	}
@@ -136,6 +138,7 @@ function woocommerce_update_options( $options ) {
  * @return string
  */
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
+
 	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
 		include 'class-wc-admin-settings.php';
 	}
@@ -149,7 +152,6 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
  * @since 2.2
  * @param int $order_id Order ID
  * @param array $items Order items to save
- * @return void
  */
 function wc_save_order_items( $order_id, $items ) {
 	global $wpdb;
@@ -281,7 +283,9 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Sum items taxes
 	foreach ( $taxes['items'] as $rates ) {
+
 		foreach ( $rates as $id => $value ) {
+
 			if ( isset( $taxes_items[ $id ] ) ) {
 				$taxes_items[ $id ] += $value;
 			} else {
@@ -292,7 +296,9 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Sum shipping taxes
 	foreach ( $taxes['shipping'] as $rates ) {
+
 		foreach ( $rates as $id => $value ) {
+
 			if ( isset( $taxes_shipping[ $id ] ) ) {
 				$taxes_shipping[ $id ] += $value;
 			} else {
@@ -303,6 +309,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Update order taxes
 	foreach ( $order_taxes as $item_id => $rate_id ) {
+
 		if ( isset( $taxes_items[ $rate_id ] ) ) {
 			$_total = wc_format_decimal( $taxes_items[ $rate_id ] );
 			wc_update_order_item_meta( $item_id, 'tax_amount', $_total );

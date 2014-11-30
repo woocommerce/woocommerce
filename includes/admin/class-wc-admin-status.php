@@ -2,9 +2,9 @@
 /**
  * Debug/Status page
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/System Status
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/System Status
  * @version     2.2.0
  */
 
@@ -197,29 +197,29 @@ class WC_Admin_Status {
 	public static function get_tools() {
 		$tools = array(
 			'clear_transients' => array(
-				'name'		=> __( 'WC Transients','woocommerce'),
-				'button'	=> __('Clear transients','woocommerce'),
-				'desc'		=> __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
+				'name'    => __( 'WC Transients','woocommerce'),
+				'button'  => __('Clear transients','woocommerce'),
+				'desc'    => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 			),
 			'clear_expired_transients' => array(
-				'name'		=> __( 'Expired Transients','woocommerce'),
-				'button'	=> __('Clear expired transients','woocommerce'),
-				'desc'		=> __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
+				'name'    => __( 'Expired Transients','woocommerce'),
+				'button'  => __('Clear expired transients','woocommerce'),
+				'desc'    => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
 			'recount_terms' => array(
-				'name'		=> __('Term counts','woocommerce'),
-				'button'	=> __('Recount terms','woocommerce'),
-				'desc'		=> __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
+				'name'    => __('Term counts','woocommerce'),
+				'button'  => __('Recount terms','woocommerce'),
+				'desc'    => __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
 			),
 			'reset_roles' => array(
-				'name'		=> __('Capabilities','woocommerce'),
-				'button'	=> __('Reset capabilities','woocommerce'),
-				'desc'		=> __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
+				'name'    => __('Capabilities','woocommerce'),
+				'button'  => __('Reset capabilities','woocommerce'),
+				'desc'    => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 			),
 			'clear_sessions' => array(
-				'name'		=> __('Customer Sessions','woocommerce'),
-				'button'	=> __('Clear all sessions','woocommerce'),
-				'desc'		=> __( '<strong class="red">Warning:</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
+				'name'    => __('Customer Sessions','woocommerce'),
+				'button'  => __('Clear all sessions','woocommerce'),
+				'desc'    => __( '<strong class="red">Warning:</strong> This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' ),
 			),
 			'install_pages' => array(
 				'name'    => __( 'Install WooCommerce Pages', 'woocommerce' ),
@@ -248,12 +248,15 @@ class WC_Admin_Status {
 	 * Show the logs page
 	 */
 	public static function status_logs() {
+
 		$logs = self::scan_log_files();
+
 		if ( ! empty( $_POST['log_file'] ) && isset( $logs[ sanitize_title( $_POST['log_file'] ) ] ) ) {
 			$viewed_log = $logs[ sanitize_title( $_POST['log_file'] ) ];
 		} elseif ( $logs ) {
 			$viewed_log = current( $logs );
 		}
+
 		include_once( 'views/html-admin-page-status-logs.php' );
 	}
 
@@ -265,6 +268,7 @@ class WC_Admin_Status {
 	 * @return string
 	 */
 	public static function get_file_version( $file ) {
+
 		// Avoid notices if file does not exist
 		if ( ! file_exists( $file ) ) {
 			return '';
@@ -296,11 +300,16 @@ class WC_Admin_Status {
 	 * @return array
 	 */
 	public static function scan_template_files( $template_path ) {
+
 		$files         = scandir( $template_path );
 		$result        = array();
+
 		if ( $files ) {
+
 			foreach ( $files as $key => $value ) {
+
 				if ( ! in_array( $value, array( ".",".." ) ) ) {
+
 					if ( is_dir( $template_path . DIRECTORY_SEPARATOR . $value ) ) {
 						$sub_files = self::scan_template_files( $template_path . DIRECTORY_SEPARATOR . $value );
 						foreach ( $sub_files as $sub_file ) {
@@ -323,8 +332,11 @@ class WC_Admin_Status {
 	public static function scan_log_files() {
 		$files         = @scandir( WC_LOG_DIR );
 		$result        = array();
+
 		if ( $files ) {
+
 			foreach ( $files as $key => $value ) {
+
 				if ( ! in_array( $value, array( '.', '..' ) ) ) {
 					if ( ! is_dir( $value ) && strstr( $value, '.log' ) ) {
 						$result[ sanitize_title( $value ) ] = $value;

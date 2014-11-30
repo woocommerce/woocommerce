@@ -2,10 +2,10 @@
 /**
  * WooCommerce Admin.
  *
- * @class 		WC_Admin
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @class       WC_Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -64,6 +64,7 @@ class WC_Admin {
 	 * Include admin files conditionally
 	 */
 	public function conditonal_includes() {
+
 		$screen = get_current_screen();
 
 		switch ( $screen->id ) {
@@ -86,6 +87,7 @@ class WC_Admin {
 	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin
 	 */
 	public function prevent_admin_access() {
+
 		$prevent_access = false;
 
 		if ( 'yes' == get_option( 'woocommerce_lock_down_admin' ) && ! is_ajax() && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) && basename( $_SERVER["SCRIPT_FILENAME"] ) !== 'admin-post.php' ) {
@@ -106,6 +108,7 @@ class WC_Admin {
 	 * @return string
 	 */
 	public function preview_emails() {
+
 		if ( isset( $_GET['preview_woocommerce_mail'] ) ) {
 			if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'preview-mail') ) {
 				die( 'Security check' );

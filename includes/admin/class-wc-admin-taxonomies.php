@@ -2,11 +2,11 @@
 /**
  * Handles taxonomies in admin
  *
- * @class 		WC_Admin_Taxonomies
- * @version		2.1.0
- * @package		WooCommerce/Admin
- * @category	Class
- * @author 		WooThemes
+ * @class       WC_Admin_Taxonomies
+ * @version     2.1.0
+ * @package     WooCommerce/Admin
+ * @category    Class
+ * @author      WooThemes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -48,13 +48,12 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Order term when created (put in position 0).
 	 *
-	 * @access public
 	 * @param mixed $term_id
 	 * @param mixed $tt_id
 	 * @param mixed $taxonomy
-	 * @return void
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
+
 		if ( $taxonomy != 'product_cat' && ! taxonomy_is_product_attribute( $taxonomy ) ) {
 			return;
 		}
@@ -67,16 +66,15 @@ class WC_Admin_Taxonomies {
 	/**
 	 * When a term is deleted, delete its meta.
 	 *
-	 * @access public
 	 * @param mixed $term_id
-	 * @return void
 	 */
 	public function delete_term( $term_id ) {
 
 		$term_id = (int) $term_id;
 
-		if ( ! $term_id )
+		if ( ! $term_id ) {
 			return;
+		}
 
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id );
@@ -84,9 +82,6 @@ class WC_Admin_Taxonomies {
 
 	/**
 	 * Category thumbnail fields.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function add_category_fields() {
 		?>
@@ -109,14 +104,15 @@ class WC_Admin_Taxonomies {
 			</div>
 			<script type="text/javascript">
 
-				 // Only show the "remove image" button when needed
-				 if ( ! jQuery('#product_cat_thumbnail_id').val() )
-					 jQuery('.remove_image_button').hide();
+				// Only show the "remove image" button when needed
+				if ( ! jQuery('#product_cat_thumbnail_id').val() ) {
+					jQuery('.remove_image_button').hide();
+				}
 
 				// Uploading files
 				var file_frame;
 
-				jQuery(document).on( 'click', '.upload_image_button', function( event ){
+				jQuery( document ).on( 'click', '.upload_image_button', function( event ) {
 
 					event.preventDefault();
 
@@ -148,7 +144,7 @@ class WC_Admin_Taxonomies {
 					file_frame.open();
 				});
 
-				jQuery(document).on( 'click', '.remove_image_button', function( event ){
+				jQuery( document ).on( 'click', '.remove_image_button', function( event ) {
 					jQuery('#product_cat_thumbnail img').attr('src', '<?php echo wc_placeholder_img_src(); ?>');
 					jQuery('#product_cat_thumbnail_id').val('');
 					jQuery('.remove_image_button').hide();
@@ -170,6 +166,7 @@ class WC_Admin_Taxonomies {
 
 		$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
 		$thumbnail_id = absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
+
 		if ( $thumbnail_id ) {
 			$image = wp_get_attachment_thumb_url( $thumbnail_id );
 		} else {
@@ -201,7 +198,7 @@ class WC_Admin_Taxonomies {
 					// Uploading files
 					var file_frame;
 
-					jQuery(document).on( 'click', '.upload_image_button', function( event ){
+					jQuery( document ).on( 'click', '.upload_image_button', function( event ) {
 
 						event.preventDefault();
 
@@ -233,7 +230,7 @@ class WC_Admin_Taxonomies {
 						file_frame.open();
 					});
 
-					jQuery(document).on( 'click', '.remove_image_button', function( event ){
+					jQuery( document ).on( 'click', '.remove_image_button', function( event ) {
 						jQuery('#product_cat_thumbnail img').attr('src', '<?php echo wc_placeholder_img_src(); ?>');
 						jQuery('#product_cat_thumbnail_id').val('');
 						jQuery('.remove_image_button').hide();
@@ -250,9 +247,7 @@ class WC_Admin_Taxonomies {
 	/**
 	 * save_category_fields function.
 	 *
-	 * @access public
 	 * @param mixed $term_id Term ID being saved
-	 * @return void
 	 */
 	public function save_category_fields( $term_id ) {
 		if ( isset( $_POST['display_type'] ) ) {
@@ -266,9 +261,6 @@ class WC_Admin_Taxonomies {
 
 	/**
 	 * Description for product_cat page to aid users.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function product_cat_description() {
 		echo wpautop( __( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top of the page.', 'woocommerce' ) );
@@ -276,9 +268,6 @@ class WC_Admin_Taxonomies {
 
 	/**
 	 * Description for shipping class page to aid users.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function shipping_class_description() {
 		echo wpautop( __( 'Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woocommerce' ) );
@@ -287,7 +276,6 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Thumbnail column added to category admin.
 	 *
-	 * @access public
 	 * @param mixed $columns
 	 * @return array
 	 */
@@ -304,7 +292,6 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Thumbnail column value added to category admin.
 	 *
-	 * @access public
 	 * @param mixed $columns
 	 * @param mixed $column
 	 * @param mixed $id
@@ -314,13 +301,14 @@ class WC_Admin_Taxonomies {
 
 		if ( $column == 'thumb' ) {
 
-			$image 			= '';
-			$thumbnail_id 	= get_woocommerce_term_meta( $id, 'thumbnail_id', true );
+			$image          = '';
+			$thumbnail_id   = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
 
-			if ($thumbnail_id)
+			if ( $thumbnail_id ) {
 				$image = wp_get_attachment_thumb_url( $thumbnail_id );
-			else
+			} else {
 				$image = wc_placeholder_img_src();
+			}
 
 			// Prevent esc_url from breaking spaces in urls for image embeds
 			// Ref: http://core.trac.wordpress.org/ticket/23605
@@ -335,13 +323,16 @@ class WC_Admin_Taxonomies {
 
 	/**
 	 * Maintain term hierarchy when editing a product.
+	 *
 	 * @param  array $args
 	 * @return array
 	 */
 	public function disable_checked_ontop( $args ) {
+
 		if ( 'product_cat' == $args['taxonomy'] ) {
 			$args['checked_ontop'] = false;
 		}
+
 		return $args;
 	}
 }

@@ -34,6 +34,7 @@ class WC_Admin_Welcome {
 	 * Add admin menus/screens.
 	 */
 	public function admin_menus() {
+
 		if ( empty( $_GET['page'] ) ) {
 			return;
 		}
@@ -175,14 +176,13 @@ class WC_Admin_Welcome {
 
 	/**
 	 * Intro text/links shown on all about pages.
-	 *
-	 * @access private
 	 */
 	private function intro() {
 
 		// Flush after upgrades
-		if ( ! empty( $_GET['wc-updated'] ) || ! empty( $_GET['wc-installed'] ) )
+		if ( ! empty( $_GET['wc-updated'] ) || ! empty( $_GET['wc-installed'] ) ) {
 			flush_rewrite_rules();
+		}
 
 		// Drop minor version if 0
 		$major_version = substr( WC()->version, 0, 3 );
@@ -411,6 +411,7 @@ class WC_Admin_Welcome {
 	 * Sends user to the welcome page on first activation.
 	 */
 	public function welcome() {
+
 		// Bail if no activation redirect transient is set
 		if ( ! get_transient( '_wc_activation_redirect' ) ) {
 			return;

@@ -2,9 +2,9 @@
 /**
  * Load assets.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -25,7 +25,7 @@ class WC_Admin_Assets {
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-		add_action( 'admin_head', array( $this, 'product_taxonomy_styles' ) );
+		add_action( 'admin_head',            array( $this, 'product_taxonomy_styles' ) );
 	}
 
 	/**
@@ -134,7 +134,7 @@ class WC_Admin_Assets {
 			if ( $screen->id == 'profile' && $current_user->woocommerce_api_consumer_key ) {
 
 				wp_enqueue_script( 'qrcode' );
-				$params['qrcode_key'] 		= $current_user->woocommerce_api_consumer_key . '|' .  $current_user->woocommerce_api_consumer_secret;
+				$params['qrcode_key'] = $current_user->woocommerce_api_consumer_key . '|' .  $current_user->woocommerce_api_consumer_secret;
 
 			}
 
@@ -265,8 +265,8 @@ class WC_Admin_Assets {
 			$taxonomy = isset( $_GET['taxonomy'] ) ? wc_clean( $_GET['taxonomy'] ) : '';
 
 			$woocommerce_term_order_params = array(
-				'taxonomy' 			=>  $taxonomy
-			 );
+				'taxonomy' => $taxonomy
+			);
 
 			wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );
 		}
@@ -303,9 +303,6 @@ class WC_Admin_Assets {
 	 * Admin Head
 	 *
 	 * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function product_taxonomy_styles() {
 

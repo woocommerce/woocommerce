@@ -2,9 +2,9 @@
 /**
  * WooCommerce Admin Settings Class.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.2.0
  */
 
@@ -112,8 +112,6 @@ class WC_Admin_Settings {
 	 * Settings page.
 	 *
 	 * Handles the display of the main woocommerce settings page in admin.
-	 *
-	 * @return void
 	 */
 	public static function output() {
 		global $current_section, $current_tab;
@@ -766,8 +764,6 @@ class WC_Admin_Settings {
 	 * Checks which method we're using to serve downloads
 	 *
 	 * If using force or x-sendfile, this ensures the .htaccess is in place
-	 *
-	 * @return void
 	 */
 	public static function check_download_folder_protection() {
 		$upload_dir      = wp_upload_dir();
