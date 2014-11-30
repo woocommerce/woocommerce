@@ -90,6 +90,7 @@ class WC_Admin_Attributes {
 				if ( 'add' === $action && $taxonomy_exists ) {
 					$error = sprintf( __( 'Slug “%s” is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
 				}
+
 				if ( 'edit' === $action ) {
 					$old_attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
 					if ( $old_attribute_name != $attribute_name && wc_sanitize_taxonomy_name( $old_attribute_name ) != $attribute_name && $taxonomy_exists ) {
@@ -178,6 +179,7 @@ class WC_Admin_Attributes {
 
 		// Delete an attribute
 		if ( 'delete' === $action ) {
+
 			// Security check
 			$attribute_id = absint( $_GET['delete'] );
 			check_admin_referer( 'woocommerce-delete-attribute_' . $attribute_id );

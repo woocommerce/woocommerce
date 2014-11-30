@@ -20,8 +20,6 @@ class WC_Report_Most_Stocked extends WC_Report_Stock {
 
 	/**
 	 * Get Products matching stock criteria
-	 *
-	 * @access public
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;

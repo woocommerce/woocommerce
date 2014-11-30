@@ -4,9 +4,9 @@
  *
  * Sets up the write panels used by products and orders (custom post types)
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Meta Boxes
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
@@ -34,11 +34,11 @@ class WC_Admin_Meta_Boxes {
 		 * Save Order Meta Boxes
 		 *
 		 * In order:
-		 * 		Save the order items
-		 * 		Save the order totals
-		 * 		Save the order downloads
-		 * 		Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
-		 * 		Save actions - sends out other emails. Last to show latest data.
+		 *      Save the order items
+		 *      Save the order totals
+		 *      Save the order downloads
+		 *      Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
+		 *      Save actions - sends out other emails. Last to show latest data.
 		 */
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Items::save', 10, 2 );
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Downloads::save', 30, 2 );
@@ -84,9 +84,11 @@ class WC_Admin_Meta_Boxes {
 		if ( ! empty( $errors ) ) {
 
 			echo '<div id="woocommerce_errors" class="error fade">';
+
 			foreach ( $errors as $error ) {
 				echo '<p>' . esc_html( $error ) . '</p>';
 			}
+
 			echo '</div>';
 
 			// Clear

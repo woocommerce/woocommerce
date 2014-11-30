@@ -2,9 +2,9 @@
 /**
  * Setup menus in WP admin.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.2.3
  */
 
@@ -99,8 +99,6 @@ class WC_Admin_Menus {
 
 	/**
 	 * Highlights the correct top level admin menu item for post type add screens.
-	 *
-	 * @return void
 	 */
 	public function menu_highlight() {
 		global $menu, $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
@@ -241,41 +239,41 @@ class WC_Admin_Menus {
 		$exclude = array( 'view-order', 'add-payment-method', 'order-pay', 'order-received' );
 		?>
 		<div id="posttype-woocommerce-endpoints" class="posttypediv">
-    		<div id="tabs-panel-woocommerce-endpoints" class="tabs-panel tabs-panel-active">
-    			<ul id="woocommerce-endpoints-checklist" class="categorychecklist form-no-clear">
-    				<?php
-    				$i = -1;
-    				foreach ( WC()->query->query_vars as $key => $value ) {
-    					if ( in_array( $key, $exclude ) ) {
-    						continue;
-    					}
-    					?>
-    					<li>
-    						<label class="menu-item-title">
-	    						<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $key ); ?>
-    						</label>
-	    					<input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
-	    					<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $key ); ?>" />
-	    					<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_endpoint_url( $key, '', get_permalink( wc_get_page_id( 'myaccount' ) ) ) ); ?>" />
-	    					<input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />
-	    				</li>
-	    				<?php
-	    				$i --;
-	    			}
-	    			?>
-    			</ul>
-    		</div>
-    		<p class="button-controls">
-    			<span class="list-controls">
-    				<a href="<?php echo admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ); ?>" class="select-all"><?php _e( 'Select All', 'woocommerce' ); ?></a>
-    			</span>
-    			<span class="add-to-menu">
-    				<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php _e( 'Add to Menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints">
-    				<span class="spinner"></span>
-    			</span>
-    		</p>
-    	</div>
-    	<?php
+			<div id="tabs-panel-woocommerce-endpoints" class="tabs-panel tabs-panel-active">
+				<ul id="woocommerce-endpoints-checklist" class="categorychecklist form-no-clear">
+					<?php
+					$i = -1;
+					foreach ( WC()->query->query_vars as $key => $value ) {
+						if ( in_array( $key, $exclude ) ) {
+							continue;
+						}
+						?>
+						<li>
+							<label class="menu-item-title">
+								<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $key ); ?>
+							</label>
+							<input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
+							<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $key ); ?>" />
+							<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_endpoint_url( $key, '', get_permalink( wc_get_page_id( 'myaccount' ) ) ) ); ?>" />
+							<input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />
+						</li>
+						<?php
+						$i --;
+					}
+					?>
+				</ul>
+			</div>
+			<p class="button-controls">
+				<span class="list-controls">
+					<a href="<?php echo admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ); ?>" class="select-all"><?php _e( 'Select All', 'woocommerce' ); ?></a>
+				</span>
+				<span class="add-to-menu">
+					<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php _e( 'Add to Menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints">
+					<span class="spinner"></span>
+				</span>
+			</p>
+		</div>
+		<?php
 	}
 }
 
