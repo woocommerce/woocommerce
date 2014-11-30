@@ -168,7 +168,7 @@ if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_f
 		$parent = get_post( $post->post_parent );
 		$cat = get_the_category( $parent->ID );
 
-		$cat = ( ! empty( $cat ) ) ? $cat[0] : '';
+		$cat = isset( $cat[0] ) ? $cat[0] : '';
 		
 		if ( ( $parents = get_category_parents( $cat, TRUE, $after . $delimiter . $before ) ) && ! is_wp_error( $parents ) ) {
 			echo $before . rtrim( $parents, $after . $delimiter . $before ) . $after . $delimiter;
