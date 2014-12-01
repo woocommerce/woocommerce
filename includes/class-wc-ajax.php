@@ -1247,18 +1247,13 @@ class WC_AJAX {
 
 		// Get items and fees taxes
 		if ( isset( $items['order_item_id'] ) ) {
+			$line_total = $line_subtotal = $order_item_tax_class = array();
 
-			$get_values = array( 'order_item_id', 'line_subtotal', 'line_total', 'order_item_tax_class' );
-
-			foreach ( $get_values as $value ) {
-				$$value = isset( $items[ $value ] ) ? $items[ $value ] : array();
-			}
-
-			foreach ( $order_item_id as $item_id ) {
+			foreach ( $items['order_item_id'] as $item_id ) {
 				$item_id                          = absint( $item_id );
-				$line_total[ $item_id ]           = isset( $line_total[ $item_id ] ) ? wc_format_decimal( $line_total[ $item_id ] ) : 0;
-				$line_subtotal[ $item_id ]        = isset( $line_subtotal[ $item_id ] ) ? wc_format_decimal( $line_subtotal[ $item_id ] ) : $line_total[ $item_id ];
-				$order_item_tax_class[ $item_id ] = isset( $order_item_tax_class[ $item_id ] ) ? sanitize_text_field( $order_item_tax_class[ $item_id ] ) : '';
+				$line_total[ $item_id ]           = isset( $items['line_total'][ $item_id ] ) ? wc_format_decimal( $items['line_total'][ $item_id ] ) : 0;
+				$line_subtotal[ $item_id ]        = isset( $items['line_subtotal'][ $item_id ] ) ? wc_format_decimal( $items['line_subtotal'][ $item_id ] ) : $line_total[ $item_id ];
+				$order_item_tax_class[ $item_id ] = isset( $items['order_item_tax_class'][ $item_id ] ) ? sanitize_text_field( $items['order_item_tax_class'][ $item_id ] ) : '';
 				$product_id                       = $order->get_item_meta( $item_id, '_product_id', true );
 
 				// Get product details
@@ -1319,20 +1314,18 @@ class WC_AJAX {
 				}
 			}
 
-			$get_values = array( 'shipping_method_id', 'shipping_cost', 'shipping_taxes' );
+			$shipping_cost = $shipping_taxes = array();
 
-			foreach ( $get_values as $value ) {
-				$$value = isset( $items[ $value ] ) ? $items[ $value ] : array();
-			}
-
-			foreach ( $shipping_method_id as $item_id ) {
+			foreach ( $items['shipping_method_id'] as $item_id ) {
 				$item_id                   = absint( $item_id );
-				$shipping_cost[ $item_id ] = isset( $shipping_cost[ $item_id ] ) ? wc_format_decimal( $shipping_cost[ $item_id ] ) : 0;
-				$shipping_taxes            = WC_Tax::calc_shipping_tax( $shipping_cost[ $item_id ], $matched_tax_rates );
+				$shipping_cost[ $item_id ] = isset( $items['shipping_cost'][ $item_id ] ) ? wc_format_decimal( $items['shipping_cost'][ $item_id ] ) : 0;
+				$_shipping_taxes           = WC_Tax::calc_shipping_tax( $shipping_cost[ $item_id ], $matched_tax_rates );
 
 				// Set the new shipping_taxes
-				foreach ( $shipping_taxes as $_tax_id => $_tax_value ) {
+				foreach ( $_shipping_taxes as $_tax_id => $_tax_value ) {
 					$items['shipping_taxes'][ $item_id ][ $_tax_id ] = $_tax_value;
+
+					$shipping_taxes[ $_tax_id ] = isset( $shipping_taxes[ $_tax_id ] ) ? $shipping_taxes[ $_tax_id ] + $_tax_value : $_tax_value;
 				}
 			}
 		}
