@@ -24,7 +24,7 @@ class WC_Tracker {
 	 * URL to the WooThemes Tracker API endpoint
 	 * @var string
 	 */
-	public $api_url = 'http://woothemes.com/wc-api/tracker/';
+	public $api_url = 'http://tracking.woocommerce.com/wc-api/tracker/';
 
 	/**
 	 * Constructor
