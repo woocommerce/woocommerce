@@ -2664,6 +2664,16 @@ img.help_tip {
 		padding: 5px 20px 5px 162px !important; /** Padding for aligning labels left - 12px + 150 label width **/
 	}
 
+	.sale_price_dates_fields {
+		.short:first-of-type {
+			margin-bottom: 1em;
+		}
+
+		.short:nth-of-type(2) {
+			clear: left;
+		}
+	}
+
 	label,
 	legend {
 		float: left;
