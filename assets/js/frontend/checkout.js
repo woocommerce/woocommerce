@@ -83,7 +83,7 @@ jQuery( function( $ ) {
 			url:		wc_checkout_params.ajax_url,
 			data:		data,
 			success:	function( data ) {
-				console.log( data );
+				// console.log( data );
 				if ( data && data.fragments ) {
 
 					$.each( data.fragments, function( key, value ) {
