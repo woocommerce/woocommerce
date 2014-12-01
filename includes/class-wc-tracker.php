@@ -150,7 +150,7 @@ class WC_Tracker {
 			$theme_version = $theme_data->Version;
 		}
 		$theme_child_theme = is_child_theme() ? 'Yes' : 'No';
-		$theme_wc_support = ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) ? 'No' : 'Yes';
+		$theme_wc_support = ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $theme_data->template, wc_get_core_supported_themes() ) ) ? 'No' : 'Yes';
 
 		return array( 'name' => $theme_name, 'version' => $theme_version, 'child_theme' => $theme_child_theme, 'wc_support' => $theme_wc_support );
 	}
