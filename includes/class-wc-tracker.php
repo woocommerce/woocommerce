@@ -166,7 +166,7 @@ class WC_Tracker {
 		$wp_data['memory_limit'] = size_format( $memory );
 		$wp_data['debug_mode'] = ( defined('WP_DEBUG') && WP_DEBUG ) ? 'Yes' : 'No';
 		$wp_data['locale'] = get_locale();
-		$wp_data['version'] = bloginfo( 'version' );
+		$wp_data['version'] = get_bloginfo( 'version' );
 		$wp_data['multisite'] = is_multisite() ? 'Yes' : 'No';
 
 		return $wp_data;
