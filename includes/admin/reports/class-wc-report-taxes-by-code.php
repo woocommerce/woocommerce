@@ -157,8 +157,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 						$rate = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $rate_id ) );
 						?>
 						<tr>
-							<th scope="row"><?php echo $tax_row->tax_rate; ?></th>
-							<td><?php echo $rate; ?>%</td>
+							<th scope="row"><?php echo apply_filters( 'woocommerce_reports_taxes_tax_rate', $tax_row->tax_rate, $rate_id, $tax_row ); ?></th>
+							<td><?php echo apply_filters( 'woocommerce_reports_taxes_rate', $rate, $rate_id, $tax_row ); ?>%</td>
 							<td class="total_row"><?php echo $tax_row->total_orders; ?></td>
 							<td class="total_row"><?php echo wc_price( $tax_row->tax_amount ); ?></td>
 							<td class="total_row"><?php echo wc_price( $tax_row->shipping_tax_amount ); ?></td>
