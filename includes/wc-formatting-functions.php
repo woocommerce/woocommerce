@@ -183,17 +183,21 @@ function wc_format_refund_total( $amount ) {
  * @return string
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
+	$locale   = localeconv();
+	$decimals = array( get_option( 'woocommerce_price_decimal_sep' ), $locale['decimal_point'], $locale['mon_decimal_point'] );
+
 	// Remove locale from string
 	if ( ! is_float( $number ) ) {
-		$locale   = localeconv();
-		$decimals = array( get_option( 'woocommerce_price_decimal_sep' ), $locale['decimal_point'], $locale['mon_decimal_point'] );
-		$number   = wc_clean( str_replace( $decimals, '.', $number ) );
+		$number = wc_clean( str_replace( $decimals, '.', $number ) );
 	}
 
-	// DP is false - don't use number format, just return a string in our format
 	if ( $dp !== false ) {
 		$dp     = intval( $dp == "" ? get_option( 'woocommerce_price_num_decimals' ) : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
+
+	// DP is false - don't use number format, just return a string in our format
+	} elseif ( is_float( $number ) ) {
+		$number = wc_clean( str_replace( $decimals, '.', strval( $number ) ) );
 	}
 
 	if ( $trim_zeros && strstr( $number, '.' ) ) {

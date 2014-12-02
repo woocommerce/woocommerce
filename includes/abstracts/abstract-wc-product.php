@@ -1069,8 +1069,7 @@ class WC_Product {
 	/**
 	 * Returns the product categories.
 	 *
-	 * @param string $sep (default: ')
-	 * @param mixed '
+	 * @param string $sep (default: ', ')
 	 * @param string $before (default: '')
 	 * @param string $after (default: '')
 	 * @return string

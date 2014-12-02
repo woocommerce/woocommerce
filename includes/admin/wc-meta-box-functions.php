@@ -5,7 +5,7 @@
 * @author      WooThemes
 * @category    Core
 * @package     WooCommerce/Admin/Functions
-* @version     2.1.0
+* @version     2.3.0
 */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
@@ -22,6 +22,7 @@ function woocommerce_wp_text_input( $field ) {
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
@@ -56,7 +57,7 @@ function woocommerce_wp_text_input( $field ) {
 		}
 	}
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="' . esc_attr( $field['type'] ) . '" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" ' . implode( ' ', $custom_attributes ) . ' /> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="' . esc_attr( $field['type'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" ' . implode( ' ', $custom_attributes ) . ' /> ';
 
 	if ( ! empty( $field['description'] ) ) {
 
@@ -95,6 +96,7 @@ function woocommerce_wp_textarea_input( $field ) {
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
@@ -108,7 +110,7 @@ function woocommerce_wp_textarea_input( $field ) {
 		}
 	}
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><textarea class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="2" cols="20" ' . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $field['value'] ) . '</textarea> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><textarea class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '"  name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="2" cols="20" ' . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $field['value'] ) . '</textarea> ';
 
 	if ( ! empty( $field['description'] ) ) {
 
@@ -131,6 +133,7 @@ function woocommerce_wp_checkbox( $field ) {
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['cbvalue']       = isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
@@ -146,7 +149,7 @@ function woocommerce_wp_checkbox( $field ) {
 		}
 	}
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="checkbox" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . '  ' . implode( ' ', $custom_attributes ) . '/> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="checkbox" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . '  ' . implode( ' ', $custom_attributes ) . '/> ';
 
 	if ( ! empty( $field['description'] ) ) {
 
@@ -170,6 +173,7 @@ function woocommerce_wp_select( $field ) {
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
@@ -183,7 +187,7 @@ function woocommerce_wp_select( $field ) {
 		}
 	}
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['id'] ) . '" class="' . esc_attr( $field['class'] ) . '" ' . implode( ' ', $custom_attributes ) . '>';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['id'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" ' . implode( ' ', $custom_attributes ) . '>';
 
 	foreach ( $field['options'] as $key => $value ) {
 		echo '<option value="' . esc_attr( $key ) . '" ' . selected( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '>' . esc_html( $value ) . '</option>';
@@ -212,6 +216,7 @@ function woocommerce_wp_radio( $field ) {
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
@@ -225,6 +230,7 @@ function woocommerce_wp_radio( $field ) {
 				value="' . esc_attr( $key ) . '"
 				type="radio"
 				class="' . esc_attr( $field['class'] ) . '"
+				style="' . esc_attr( $field['style'] ) . '"
 				' . checked( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '
 				/> ' . esc_html( $value ) . '</label>
 		</li>';

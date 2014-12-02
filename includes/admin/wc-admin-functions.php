@@ -162,40 +162,35 @@ function wc_save_order_items( $order_id, $items ) {
 	$taxes    = array( 'items' => array(), 'shipping' => array() );
 
 	if ( isset( $items['order_item_id'] ) ) {
+		$line_total = $line_subtotal = $line_tax = $line_subtotal_tax = array();
 
-		$get_values = array( 'order_item_id', 'order_item_name', 'order_item_qty', 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'order_item_tax_class' );
-
-		foreach ( $get_values as $value ) {
-			$$value = isset( $items[ $value ] ) ? $items[ $value ] : array();
-		}
-
-		foreach ( $order_item_id as $item_id ) {
+		foreach ( $items['order_item_id'] as $item_id ) {
 
 			$item_id = absint( $item_id );
 
-			if ( isset( $order_item_name[ $item_id ] ) ) {
+			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
 				$wpdb->update(
 					$wpdb->prefix . 'woocommerce_order_items',
-					array( 'order_item_name' => wc_clean( $order_item_name[ $item_id ] ) ),
+					array( 'order_item_name' => wc_clean( $items['order_item_name'][ $item_id ] ) ),
 					array( 'order_item_id' => $item_id ),
 					array( '%s' ),
 					array( '%d' )
 				);
 			}
 
-			if ( isset( $order_item_qty[ $item_id ] ) ) {
-				wc_update_order_item_meta( $item_id, '_qty', wc_stock_amount( $order_item_qty[ $item_id ] ) );
+			if ( isset( $items['order_item_qty'][ $item_id ] ) ) {
+				wc_update_order_item_meta( $item_id, '_qty', wc_stock_amount( $items['order_item_qty'][ $item_id ] ) );
 			}
 
-			if ( isset( $order_item_tax_class[ $item_id ] ) ) {
-				wc_update_order_item_meta( $item_id, '_tax_class', wc_clean( $order_item_tax_class[ $item_id ] ) );
+			if ( isset( $items['order_item_tax_class'][ $item_id ] ) ) {
+				wc_update_order_item_meta( $item_id, '_tax_class', wc_clean( $items['order_item_tax_class'][ $item_id ] ) );
 			}
 
 			// Get values. Subtotals might not exist, in which case copy value from total field
-			$line_total[ $item_id ]        = isset( $line_total[ $item_id ] ) ? $line_total[ $item_id ] : 0;
-			$line_subtotal[ $item_id ]     = isset( $line_subtotal[ $item_id ] ) ? $line_subtotal[ $item_id ] : $line_total[ $item_id ];
-			$line_tax[ $item_id ]          = isset( $line_tax[ $item_id ] ) ? $line_tax[ $item_id ] : array();
-			$line_subtotal_tax[ $item_id ] = isset( $line_subtotal_tax[ $item_id ] ) ? $line_subtotal_tax[ $item_id ] : $line_tax[ $item_id ];
+			$line_total[ $item_id ]        = isset( $items['line_total'][ $item_id ] ) ? $items['line_total'][ $item_id ] : 0;
+			$line_subtotal[ $item_id ]     = isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ] : $line_total[ $item_id ];
+			$line_tax[ $item_id ]          = isset( $items['line_tax'][ $item_id ] ) ? $items['line_tax'][ $item_id ] : array();
+			$line_subtotal_tax[ $item_id ] = isset( $items['line_subtotal_tax'][ $item_id ] ) ? $items['line_subtotal_tax'][ $item_id ] : $line_tax[ $item_id ];
 
 			// Format taxes
 			$line_taxes          = array_map( 'wc_format_decimal', $line_tax[ $item_id ] );
@@ -243,18 +238,12 @@ function wc_save_order_items( $order_id, $items ) {
 
 	if ( isset( $items['shipping_method_id'] ) ) {
 
-		$get_values = array( 'shipping_method_id', 'shipping_method_title', 'shipping_method', 'shipping_cost', 'shipping_taxes' );
-
-		foreach ( $get_values as $value ) {
-			$$value = isset( $items[ $value ] ) ? $items[ $value ] : array();
-		}
-
-		foreach ( $shipping_method_id as $item_id ) {
+		foreach ( $items['shipping_method_id'] as $item_id ) {
 			$item_id      = absint( $item_id );
-			$method_id    = wc_clean( $shipping_method[ $item_id ] );
-			$method_title = wc_clean( $shipping_method_title[ $item_id ] );
-			$cost         = wc_format_decimal( $shipping_cost[ $item_id ] );
-			$ship_taxes   = isset( $shipping_taxes[ $item_id ] ) ? array_map( 'wc_format_decimal', $shipping_taxes[ $item_id ] ) : array();
+			$method_id    = isset( $items['shipping_method'][ $item_id ] ) ? wc_clean( $items['shipping_method'][ $item_id ] ) : '';
+			$method_title = isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( $items['shipping_method_title'][ $item_id ] ) : '';
+			$cost         = isset( $items['shipping_cost'][ $item_id ] ) ? wc_format_decimal( $items['shipping_cost'][ $item_id ] ) : '';
+			$ship_taxes   = isset( $items['shipping_taxes'][ $item_id ] ) ? array_map( 'wc_format_decimal', $items['shipping_taxes'][ $item_id ] ) : array();
 
 			$wpdb->update(
 				$wpdb->prefix . 'woocommerce_order_items',
