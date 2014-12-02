@@ -306,7 +306,7 @@ class WC_Tax {
 			set_transient( $rates_transient_key, $matched_tax_rates, DAY_IN_SECONDS );
 		}
 
-		return $matched_tax_rates;
+		return apply_filters( 'woocommerce_find_rates', $matched_tax_rates, $args );
 	}
 
 	/**
