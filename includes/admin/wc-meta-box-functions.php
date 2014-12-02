@@ -22,7 +22,7 @@ function woocommerce_wp_text_input( $field ) {
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
-	$field['style']			= isset( $field['style'] ) ? $field['style'] : '';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
@@ -96,7 +96,7 @@ function woocommerce_wp_textarea_input( $field ) {
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
-	$field['style']			= isset( $field['style'] ) ? $field['style'] : '';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
@@ -133,7 +133,7 @@ function woocommerce_wp_checkbox( $field ) {
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
-	$field['style']			= isset( $field['style'] ) ? $field['style'] : '';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['cbvalue']       = isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
@@ -173,7 +173,7 @@ function woocommerce_wp_select( $field ) {
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
-	$field['style']			= isset( $field['style'] ) ? $field['style'] : '';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
@@ -216,7 +216,7 @@ function woocommerce_wp_radio( $field ) {
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
-	$field['style']			= isset( $field['style'] ) ? $field['style'] : '';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
