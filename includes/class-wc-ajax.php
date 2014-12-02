@@ -1290,6 +1290,9 @@ class WC_AJAX {
 		}
 		$items['order_taxes'] = array();
 
+		// Action
+		$items = apply_filters( 'woocommerce_ajax_calc_line_taxes', $items, $order_id, $country, $_POST );
+
 		// Get items and fees taxes
 		if ( isset( $items['order_item_id'] ) ) {
 
