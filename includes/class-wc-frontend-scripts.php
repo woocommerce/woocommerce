@@ -161,9 +161,6 @@ class WC_Frontend_Scripts {
 			foreach ( $enqueue_styles as $handle => $args ) {
 				wp_enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
 			}
-
-			// Global frontend styles
-			wp_enqueue_style( 'dashicons', array( 'woocommerce-general' ) );
 		}
 	}
 
