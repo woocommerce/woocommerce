@@ -503,7 +503,7 @@ class WC_Email extends WC_Settings_API {
 		// Handle any actions
 		if ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) {
 
-			$template_folder = '/' . apply_filters( 'woocommerce_copy_to_theme_folder', 'woocommerce' ) . '/';
+			$template_folder = '/' . trim( apply_filters( 'woocommerce_copy_to_theme_folder', 'woocommerce' ), '/' ) . '/';
 
 			if ( ! empty( $_GET['move_template'] ) && ( $template = esc_attr( basename( $_GET['move_template'] ) ) ) ) {
 
