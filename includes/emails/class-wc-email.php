@@ -503,18 +503,20 @@ class WC_Email extends WC_Settings_API {
 		// Handle any actions
 		if ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) {
 
+			$template_folder = '/' . apply_filters( 'woocommerce_copy_to_theme_folder', 'woocommerce' ) . '/';
+
 			if ( ! empty( $_GET['move_template'] ) && ( $template = esc_attr( basename( $_GET['move_template'] ) ) ) ) {
 
 				if ( ! empty( $this->$template ) ) {
 
-					if (  wp_mkdir_p( dirname( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) && ! file_exists( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) {
+					if (  wp_mkdir_p( dirname( get_stylesheet_directory() . $template_folder . $this->$template ) ) && ! file_exists( get_stylesheet_directory() . $template_folder . $this->$template ) ) {
 
 						// Locate template file
 						$core_file     = $this->template_base . $this->$template;
 						$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $this->$template, $this->template_base );
 
 						// Copy template file
-						copy( $template_file, get_stylesheet_directory() . '/woocommerce/' . $this->$template );
+						copy( $template_file, get_stylesheet_directory() . $template_folder . $this->$template );
 
 						/**
 						 * woocommerce_copy_email_template action hook
@@ -533,8 +535,8 @@ class WC_Email extends WC_Settings_API {
 
 				if ( ! empty( $this->$template ) ) {
 
-					if ( file_exists( get_stylesheet_directory() . '/woocommerce/' . $this->$template ) ) {
-						unlink( get_stylesheet_directory() . '/woocommerce/' . $this->$template );
+					if ( file_exists( get_stylesheet_directory() . $template_folder . $this->$template ) ) {
+						unlink( get_stylesheet_directory() . $template_folder . $this->$template );
 
 						/**
 						 * woocommerce_delete_email_template action hook
