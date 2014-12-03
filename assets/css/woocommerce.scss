@@ -41,21 +41,6 @@ p.demo_store {
 /**
  * Utility classes
  */
-.wc-forward a {
-	&:after {
-		@include dashiconafter( "\f344" );
-		line-height: inherit;
-	}
-}
-
-.wc-backward,
-.wc-backward a {
-	&:before {
-		@include dashiconbefore( "\f340" );
-		line-height: inherit;
-	}
-}
-
 .clear {
 	clear: both;
 }
@@ -65,6 +50,7 @@ p.demo_store {
  */
 .woocommerce {
 	.blockUI.blockOverlay {
+		position: relative;
 		@include loader();
 	}
 
@@ -622,8 +608,8 @@ p.demo_store {
 			padding-right: 2.618em;
 
 			&:after {
-				font-family: "Dashicons";
-				content: "\f463";
+				font-family: "WooCommerce";
+				content: "\e01c";
 				vertical-align: top;
 				-webkit-font-smoothing: antialiased;
 				font-weight: 400;
@@ -1410,13 +1396,14 @@ p.demo_store {
 				a,
 				span {
 					padding: 1px 0;
+					text-decoration: none;
 				}
 			}
 
 			li.chosen {
 				a {
 					&:before {
-						@include dashiconbefore( "\f153" );
+						@include iconbefore( "\e013" );
 						color: $red;
 					}
 				}
@@ -1439,8 +1426,10 @@ p.demo_store {
 				list-style: none;
 
 				a {
+					text-decoration: none;
+
 					&:before {
-						@include dashiconbefore( "\f153" );
+						@include iconbefore( "\e013" );
 						color: $red;
 					}
 				}
