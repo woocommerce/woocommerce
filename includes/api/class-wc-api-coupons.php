@@ -132,7 +132,6 @@ class WC_API_Coupons extends WC_API_Resource {
 			'limit_usage_to_x_items'       => (int) $coupon->limit_usage_to_x_items,
 			'usage_count'                  => (int) $coupon->usage_count,
 			'expiry_date'                  => ( ! empty( $coupon->expiry_date ) ) ? $this->server->format_datetime( $coupon->expiry_date ) : null,
-			'apply_before_tax'             => $coupon->apply_before_tax(),
 			'enable_free_shipping'         => $coupon->enable_free_shipping(),
 			'product_category_ids'         => array_map( 'absint', (array) $coupon->product_categories ),
 			'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->exclude_product_categories ),
@@ -234,7 +233,6 @@ class WC_API_Coupons extends WC_API_Resource {
 			'limit_usage_to_x_items'       => '',
 			'usage_count'                  => '',
 			'expiry_date'                  => '',
-			'apply_before_tax'             => 'yes',
 			'enable_free_shipping'         => 'no',
 			'product_category_ids'         => array(),
 			'exclude_product_category_ids' => array(),
@@ -276,8 +274,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		update_post_meta( $id, 'usage_limit_per_user', absint( $coupon_data['usage_limit_per_user'] ) );
 		update_post_meta( $id, 'limit_usage_to_x_items', absint( $coupon_data['limit_usage_to_x_items'] ) );
 		update_post_meta( $id, 'usage_count', absint( $coupon_data['usage_count'] ) );
-		update_post_meta( $id, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $coupon_data['expiry_date'] ) ) );
-		update_post_meta( $id, 'apply_before_tax', wc_clean( $coupon_data['apply_before_tax'] ) );
+		update_post_meta( $id, 'expiry_date', wc_clean( $coupon_data['expiry_date'] ) );
 		update_post_meta( $id, 'free_shipping', wc_clean( $coupon_data['enable_free_shipping'] ) );
 		update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $coupon_data['product_category_ids'] ) ) );
 		update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $coupon_data['exclude_product_category_ids'] ) ) );
@@ -380,10 +377,6 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		if ( isset( $data['expiry_date'] ) ) {
 			update_post_meta( $id, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $data['expiry_date'] ) ) );
-		}
-
-		if ( isset( $data['apply_before_tax'] ) ) {
-			update_post_meta( $id, 'apply_before_tax', wc_clean( $data['apply_before_tax'] ) );
 		}
 
 		if ( isset( $data['enable_free_shipping'] ) ) {

@@ -573,9 +573,6 @@ jQuery( function ( $ ) {
 				var line_totals    = 0;
 				var tax            = 0;
 				var shipping       = 0;
-				var order_discount = $( '#_order_discount' ).val() || '0';
-
-				order_discount = accounting.unformat( order_discount.replace( ',', '.' ) );
 
 				$( '.woocommerce_order_items tr.shipping input.line_total' ).each(function() {
 					var cost  = $( this ).val() || '0';
@@ -601,7 +598,7 @@ jQuery( function ( $ ) {
 
 				// Set Total
 				$( '#_order_total' )
-					.val( accounting.formatNumber( line_totals + tax + shipping - order_discount, woocommerce_admin_meta_boxes.currency_format_num_decimals, '', woocommerce_admin.mon_decimal_point ) )
+					.val( accounting.formatNumber( line_totals + tax + shipping, woocommerce_admin_meta_boxes.currency_format_num_decimals, '', woocommerce_admin.mon_decimal_point ) )
 					.change();
 
 				$( 'button.save-action' ).click();

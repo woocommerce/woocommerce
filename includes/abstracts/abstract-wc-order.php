@@ -242,10 +242,10 @@ abstract class WC_Abstract_Order {
 	 *
 	 * @param string $code
 	 * @param integer $discount_amount
+	 * @param integer $discount_amount_tax "Discounted" tax - used for tax inclusive prices
 	 * @return int|bool Item ID or false
 	 */
-	public function add_coupon( $code, $discount_amount = 0 ) {
-
+	public function add_coupon( $code, $discount_amount = 0, $discount_amount_tax = 0 ) {
 		$item_id = wc_add_order_item( $this->id, array(
 			'order_item_name' => $code,
 			'order_item_type' => 'coupon'
@@ -256,8 +256,9 @@ abstract class WC_Abstract_Order {
 		}
 
 		wc_add_order_item_meta( $item_id, 'discount_amount', $discount_amount );
+		wc_add_order_item_meta( $item_id, 'discount_amount_tax', $discount_amount_tax );
 
-		do_action( 'woocommerce_order_add_coupon', $this->id, $item_id, $code, $discount_amount );
+		do_action( 'woocommerce_order_add_coupon', $this->id, $item_id, $code, $discount_amount, $discount_amount_tax );
 
 		return $item_id;
 	}
@@ -273,7 +274,6 @@ abstract class WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function update_coupon( $item_id, $args ) {
-
 		if ( ! $item_id ) {
 			return false;
 		}
@@ -286,6 +286,9 @@ abstract class WC_Abstract_Order {
 		// amount
 		if ( isset( $args['discount_amount'] ) ) {
 			wc_update_order_item_meta( $item_id, 'discount_amount', wc_format_decimal( $args['discount_amount'] ) );
+		}
+		if ( isset( $args['discount_amount_tax'] ) ) {
+			wc_add_order_item_meta( $item_id, 'discount_amount_tax', wc_format_decimal( $args['discount_amount_tax'] ) );
 		}
 
 		do_action( 'woocommerce_order_update_coupon', $this->id, $item_id, $args );
@@ -482,7 +485,7 @@ abstract class WC_Abstract_Order {
 	 */
 	public function set_total( $amount, $total_type = 'total' ) {
 
-		if ( ! in_array( $total_type, array( 'shipping', 'order_discount', 'tax', 'shipping_tax', 'total', 'cart_discount' ) ) ) {
+		if ( ! in_array( $total_type, array( 'shipping', 'tax', 'shipping_tax', 'total', 'cart_discount', 'cart_discount_tax' ) ) ) {
 			return false;
 		}
 
@@ -491,8 +494,8 @@ abstract class WC_Abstract_Order {
 				$key    = '_order_total';
 				$amount = wc_format_decimal( $amount, get_option( 'woocommerce_price_num_decimals' ) );
 			break;
-			case 'order_discount' :
 			case 'cart_discount' :
+			case 'cart_discount_tax' :
 				$key    = '_' . $total_type;
 				$amount = wc_format_decimal( $amount );
 			break;
@@ -699,10 +702,11 @@ abstract class WC_Abstract_Order {
 	 * @return float calculated grand total
 	 */
 	public function calculate_totals( $and_taxes = true ) {
-
-		$cart_subtotal  = 0;
-		$cart_total     = 0;
-		$fee_total      = 0;
+		$cart_subtotal     = 0;
+		$cart_total        = 0;
+		$fee_total         = 0;
+		$cart_subtotal_tax = 0;
+		$cart_total_tax    = 0;
 
 		if ( $and_taxes ) {
 			$this->calculate_taxes();
@@ -710,8 +714,10 @@ abstract class WC_Abstract_Order {
 
 		// line items
 		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
-			$cart_total    += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
+			$cart_subtotal     += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
+			$cart_total        += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
+			$cart_subtotal_tax += wc_format_decimal( isset( $item['line_subtotal_tax'] ) ? $item['line_subtotal_tax'] : 0 );
+			$cart_total_tax    += wc_format_decimal( isset( $item['line_total_tax'] ) ? $item['line_total_tax'] : 0 );
 		}
 
 		$this->calculate_shipping();
@@ -720,9 +726,10 @@ abstract class WC_Abstract_Order {
 			$fee_total += $item['line_total'];
 		}
 
-		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
+		$this->set_total( $cart_subtotal + $cart_subtotal_tax - $cart_total - $cart_total_tax, 'cart_discount' );
+		$this->set_total( $cart_subtotal_tax - $cart_total_tax, 'cart_discount_tax' );
 
-		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() - $this->get_order_discount() + $this->get_cart_tax() + $this->get_shipping_tax(), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
+		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
 
 		$this->set_total( $grand_total, 'total' );
 
@@ -1228,30 +1235,47 @@ abstract class WC_Abstract_Order {
 	/** Total Getters *******************************************************/
 
 	/**
-	 * Gets the total (product) discount amount - these are applied before tax.
-	 *
+	 * Gets the total discount amount
+	 * @param  $ex_tax Show discount excl any tax.
+	 * @return float
+	 */
+	public function get_total_discount( $ex_tax = true ) {
+		if ( $ex_tax ) {
+			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount - (double) $this->cart_discount_tax, $this );
+		} else {
+			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount, $this );
+		}
+	}
+
+	/**
+	 * Gets the discount amount
+	 * @deprecated in favour of get_total_discount() since we now only have one discount type.
 	 * @return float
 	 */
 	public function get_cart_discount() {
-		return apply_filters( 'woocommerce_order_amount_cart_discount', (double) $this->cart_discount, $this );
+		_deprecated_function( 'get_cart_discount', '2.3', 'get_total_discount' );
+		return apply_filters( 'woocommerce_order_amount_cart_discount', $this->get_total_discount(), $this );
+	}
+
+	/**
+	 * Get cart discount (formatted).
+	 *
+	 * @deprecated order (after tax) discounts removed in 2.3.0
+	 * @return string
+	 */
+	public function get_order_discount_to_display() {
+		_deprecated_function( 'get_order_discount_to_display', '2.3' );
 	}
 
 	/**
 	 * Gets the total (order) discount amount - these are applied after tax.
 	 *
+	 * @deprecated order (after tax) discounts removed in 2.3.0
 	 * @return float
 	 */
 	public function get_order_discount() {
+		_deprecated_function( 'get_order_discount', '2.3' );
 		return apply_filters( 'woocommerce_order_amount_order_discount', (double) $this->order_discount, $this );
-	}
-
-	/**
-	 * Gets the total discount amount - both kinds
-	 *
-	 * @return float
-	 */
-	public function get_total_discount() {
-		return apply_filters( 'woocommerce_order_amount_total_discount', $this->get_cart_discount() + $this->get_order_discount(), $this );
 	}
 
 	/**
@@ -1305,7 +1329,6 @@ abstract class WC_Abstract_Order {
 	 * @return mixed|void
 	 */
 	public function get_subtotal() {
-
 		$subtotal = 0;
 
 		foreach ( $this->get_items() as $item ) {
@@ -1417,28 +1440,6 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_line_tax( $item ) {
 		return apply_filters( 'woocommerce_order_amount_line_tax', wc_round_tax_total( $item['line_tax'] ), $item, $this );
-	}
-
-	/**
-	 * Gets shipping total.
-	 *
-	 * @deprecated As of 2.1, use of get_total_shipping() is preferred
-	 * @return float
-	 */
-	public function get_shipping() {
-		_deprecated_function( 'get_shipping', '2.1', 'get_total_shipping' );
-		return $this->get_total_shipping();
-	}
-
-	/**
-	 * get_order_total function. Alias for get_total()
-	 *
-	 * @deprecated As of 2.1, use of get_total() is preferred
-	 * @return float
-	 */
-	public function get_order_total() {
-		_deprecated_function( 'get_order_total', '2.1', 'get_total' );
-		return $this->get_total();
 	}
 
 	/** End Total Getters *******************************************************/
@@ -1580,7 +1581,7 @@ abstract class WC_Abstract_Order {
 			}
 
 			// Remove discounts
-			$subtotal = $subtotal - $this->get_cart_discount();
+			$subtotal = $subtotal - $this->get_total_discount();
 
 			$subtotal = wc_price( $subtotal, array('currency' => $this->get_order_currency()) );
 		}
@@ -1595,7 +1596,6 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_shipping_to_display( $tax_display = '' ) {
-
 		if ( ! $tax_display ) {
 			$tax_display = $this->tax_display_cart;
 		}
@@ -1635,26 +1635,27 @@ abstract class WC_Abstract_Order {
 		return apply_filters( 'woocommerce_order_shipping_to_display', $shipping, $this );
 	}
 
-
 	/**
-	 * Get cart discount (formatted).
-	 *
+	 * Get the discount amount (formatted).
+	 * @since  2.3.0
 	 * @return string.
 	 */
-	public function get_cart_discount_to_display() {
-		return apply_filters( 'woocommerce_order_cart_discount_to_display', wc_price( $this->get_cart_discount(), array( 'currency' => $this->get_order_currency() ) ), $this );
+	public function get_discount_to_display( $tax_display = '' ) {
+		if ( ! $tax_display ) {
+			$tax_display = $this->tax_display_cart;
+		}
+		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( $tax_display === 'excl' ), array( 'currency' => $this->get_order_currency() ) ), $this );
 	}
-
 
 	/**
 	 * Get cart discount (formatted).
-	 *
-	 * @return string
+	 * @deprecated
+	 * @return string.
 	 */
-	public function get_order_discount_to_display() {
-		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_order_discount(), array( 'currency' => $this->get_order_currency() ) ), $this );
+	public function get_cart_discount_to_display( $tax_display = '' ) {
+		_deprecated_function( 'get_cart_discount_to_display', '2.3', 'get_discount_to_display' );
+		return apply_filters( 'woocommerce_order_cart_discount_to_display', $this->get_discount_to_display(), $this );
 	}
-
 
 	/**
 	 * Get a product (either product or variation).
@@ -1696,10 +1697,10 @@ abstract class WC_Abstract_Order {
 			);
 		}
 
-		if ( $this->get_cart_discount() > 0 ) {
-			$total_rows['cart_discount'] = array(
-				'label' => __( 'Cart Discount:', 'woocommerce' ),
-				'value'	=> '-' . $this->get_cart_discount_to_display()
+		if ( $this->get_total_discount() > 0 ) {
+			$total_rows['discount'] = array(
+				'label' => __( 'Discount:', 'woocommerce' ),
+				'value'	=> '-' . $this->get_discount_to_display()
 			);
 		}
 
@@ -1754,13 +1755,6 @@ abstract class WC_Abstract_Order {
 					'value'	=> wc_price( $this->get_total_tax(), array('currency' => $this->get_order_currency()) )
 				);
 			}
-		}
-
-		if ( $this->get_order_discount() > 0 ) {
-			$total_rows['order_discount'] = array(
-				'label' => __( 'Order Discount:', 'woocommerce' ),
-				'value'	=> '-' . $this->get_order_discount_to_display()
-			);
 		}
 
 		if ( $this->get_total() > 0 ) {
@@ -1936,45 +1930,6 @@ abstract class WC_Abstract_Order {
 		$view_order_url = wc_get_endpoint_url( 'view-order', $this->id, get_permalink( wc_get_page_id( 'myaccount' ) ) );
 
 		return apply_filters( 'woocommerce_get_view_order_url', $view_order_url, $this );
-	}
-
-	/**
-	 * Gets any downloadable product file urls.
-	 *
-	 * @deprecated as of 2.1 get_item_downloads is preferred as downloads are more than just file urls
-	 * @param int $product_id product identifier
-	 * @param int $variation_id variation identifier, or null
-	 * @param array $item the item
-	 * @return array available downloadable file urls
-	 */
-	public function get_downloadable_file_urls( $product_id, $variation_id, $item ) {
-		global $wpdb;
-
-		_deprecated_function( 'get_downloadable_file_urls', '2.1', 'get_item_downloads' );
-
-		$download_file = $variation_id > 0 ? $variation_id : $product_id;
-		$_product = wc_get_product( $download_file );
-
-		$user_email = $this->billing_email;
-
-		$results = $wpdb->get_results( $wpdb->prepare("
-			SELECT download_id
-			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-			WHERE user_email = %s
-			AND order_key = %s
-			AND product_id = %s
-		", $user_email, $this->order_key, $download_file ) );
-
-		$file_urls = array();
-
-		foreach ( $results as $result ) {
-
-			if ( $_product->has_file( $result->download_id ) ) {
-				$file_urls[ $_product->get_file_download_path( $result->download_id ) ] = $this->get_download_url( $download_file, $result->download_id );
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_downloadable_file_urls', $file_urls, $product_id, $variation_id, $item );
 	}
 
 	/**

@@ -204,8 +204,8 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$value  = array();
 
-	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) ) {
-		$discount_html = '-' . wc_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
+	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->code, WC()->cart->display_cart_ex_tax ) ) {
+		$discount_html = '-' . wc_price( $amount );
 	} else {
 		$discount_html = '';
 	}

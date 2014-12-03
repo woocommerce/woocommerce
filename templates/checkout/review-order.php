@@ -51,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td><?php wc_cart_totals_subtotal_html(); ?></td>
 		</tr>
 
-		<?php foreach ( WC()->cart->get_coupons( 'cart' ) as $code => $coupon ) : ?>
+		<?php foreach ( WC()->cart->get_coupons() as $code => $coupon ) : ?>
 			<tr class="cart-discount coupon-<?php echo esc_attr( $code ); ?>">
 				<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
 				<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
@@ -90,13 +90,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</tr>
 			<?php endif; ?>
 		<?php endif; ?>
-
-		<?php foreach ( WC()->cart->get_coupons( 'order' ) as $code => $coupon ) : ?>
-			<tr class="order-discount coupon-<?php echo esc_attr( $code ); ?>">
-				<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
-				<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
-			</tr>
-		<?php endforeach; ?>
 
 		<?php do_action( 'woocommerce_review_order_before_order_total' ); ?>
 
