@@ -794,12 +794,14 @@ class WC_Cart {
 		 * @param mixed id of product to find in the cart
 		 * @return string cart item key
 		 */
-		public function find_product_in_cart( $cart_id = false ) {
-			if ( $cart_id !== false ) {
+		public function find_product_in_cart( $product_id = false ) {
+			if ( $product_id !== false ) {
 				if ( is_array( $this->cart_contents ) ) {
-					foreach ( $this->cart_contents as $cart_item_key => $cart_item ) {
-						if ( $cart_item_key == $cart_id ) {
-							return $cart_item_key;
+					foreach ( $this->cart_contents as $cart_item_key => $cart_items ) {
+						foreach ($cart_items as $cart_item) {
+							if ( $cart_item->id == $product_id ) {
+								return $cart_item_key;
+							}
 						}
 					}
 				}
