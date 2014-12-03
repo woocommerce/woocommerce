@@ -750,13 +750,13 @@ class WC_Product {
 	 */
 	public function get_price_including_tax( $qty = 1, $price = '' ) {
 
-		if ( ! $price ) {
+		if ( $price === '' ) {
 			$price = $this->get_price();
 		}
 
 		if ( $this->is_taxable() ) {
 
-			if ( get_option('woocommerce_prices_include_tax') === 'no' ) {
+			if ( get_option( 'woocommerce_prices_include_tax' ) === 'no' ) {
 
 				$tax_rates  = WC_Tax::get_rates( $this->get_tax_class() );
 				$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
@@ -804,11 +804,11 @@ class WC_Product {
 	 */
 	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
 
-		if ( ! $price ) {
+		if ( $price === '' ) {
 			$price = $this->get_price();
 		}
 
-		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax') === 'yes' ) {
+		if ( $this->is_taxable() && get_option( 'woocommerce_prices_include_tax' ) === 'yes' ) {
 			$tax_rates  = WC_Tax::get_base_tax_rates( $this->tax_class );
 			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
 			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
@@ -817,6 +817,25 @@ class WC_Product {
 		}
 
 		return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $this );
+	}
+
+	/**
+	 * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
+	 *
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @return string
+	 */
+	public function get_display_price( $price = '', $qty = 1 ) {
+
+		if ( $price === '' ) {
+			$price = $this->get_price();
+		}
+
+		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+		$display_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
+
+		return $display_price;
 	}
 
 	/**
@@ -856,9 +875,8 @@ class WC_Product {
 	 */
 	public function get_price_html( $price = '' ) {
 
-		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
-		$display_price         = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
-		$display_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_regular_price() ) : $this->get_price_excluding_tax( 1, $this->get_regular_price() );
+		$display_price         = $this->get_display_price();
+		$display_regular_price = $this->get_display_price( $this->get_regular_price() );
 
 		if ( $this->get_price() > 0 ) {
 
