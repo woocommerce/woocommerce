@@ -83,18 +83,59 @@ jQuery( function( $ ) {
 			url:		wc_checkout_params.ajax_url,
 			data:		data,
 			success:	function( data ) {
-				// console.log( data );
-				if ( data && data.fragments ) {
 
-					$.each( data.fragments, function( key, value ) {
-						$( key ).replaceWith( value );
-						$( key ).unblock();
-					});
+				// Remove old errors
+				$( '.woocommerce-error, .woocommerce-message' ).remove();
 
-					$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).trigger('click');
-					$( 'body' ).trigger('updated_checkout' );
+				// Always update the fragements
+				if ( data ) {
+
+					if ( data.fragments ) {
+
+						$.each( data.fragments, function ( key, value ) {
+							$( key ).replaceWith( value );
+							$( key ).unblock();
+						} );
+
+					}
+
 				}
+
+				// Check for error
+				if ( 'failure' == data.result ) {
+
+					var $form = $( 'form.checkout' );
+
+					if ( 'true' === data.reload ) {
+						window.location.reload();
+						return;
+					}
+
+					// Add new errors
+					if ( data.messages ) {
+						$form.prepend( data.messages );
+					} else {
+						$form.prepend( data );
+					}
+
+					// Lose focus for all fields
+					$form.find( '.input-text, select' ).blur();
+
+					// Scroll to top
+					$( 'html, body' ).animate( {
+						scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
+					}, 1000 );
+
+				}
+
+				// Trigger click event on selected payment method
+				$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).trigger( 'click' );
+
+				// Fire updated_checkout event
+				$( 'body' ).trigger( 'updated_checkout' );
+
 			}
+
 		});
 	}
 
