@@ -418,27 +418,26 @@ function wc_timezone_string() {
 
 	// adjust UTC offset from hours to seconds
 	$utc_offset *= 3600;
+	$is_dst     = date( 'I' );
 
 	// attempt to guess the timezone string from the UTC offset
-	$timezone = timezone_name_from_abbr( '', $utc_offset );
+	$timezone = timezone_name_from_abbr( '', $utc_offset, $is_dst );
 
 	// last try, guess timezone string manually
 	if ( false === $timezone ) {
-
-		$is_dst = date( 'I' );
-
 		foreach ( timezone_abbreviations_list() as $abbr ) {
 			foreach ( $abbr as $city ) {
-
 				if ( $city['dst'] == $is_dst && $city['offset'] == $utc_offset ) {
 					return $city['timezone_id'];
 				}
 			}
 		}
+
+		// fallback to UTC
+		return 'UTC';
 	}
 
-	// fallback to UTC
-	return 'UTC';
+	return $timezone;
 }
 
 if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
