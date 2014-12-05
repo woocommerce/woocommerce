@@ -61,7 +61,7 @@ foreach ( $items as $item_id => $item ) :
 	}
 
 	// Note
-	if ( $show_purchase_note && $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) {
+	if ( $show_purchase_note && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) {
 		echo "\n" . do_shortcode( wp_kses_post( $purchase_note ) );
 	}
 
