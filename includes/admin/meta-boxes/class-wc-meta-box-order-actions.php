@@ -128,8 +128,9 @@ class WC_Meta_Box_Order_Actions {
 
 			} else {
 
-				do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
-
+				if ( ! did_action( 'woocommerce_order_action_' . sanitize_title( $action ) ) ) {
+					do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
+				}
 			}
 		}
 	}
