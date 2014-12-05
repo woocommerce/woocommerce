@@ -377,7 +377,7 @@ class WC_Product_Variable extends WC_Product {
             	if ( $attribute['is_taxonomy'] ) {
 	            	$post_terms = wp_get_post_terms( $this->id, $attribute['name'] );
 					foreach ( $post_terms as $term )
-						$values[] = $term->slug;
+						$values[] = urldecode( $term->slug );
 				} else {
 					$values = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
 				}
