@@ -1210,20 +1210,24 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 
 	/**
 	 * Output the WooCommerce Breadcrumb
-	 *
 	 */
 	function woocommerce_breadcrumb( $args = array() ) {
-
-		$defaults = apply_filters( 'woocommerce_breadcrumb_defaults', array(
+		$args = wp_parse_args( $args, apply_filters( 'woocommerce_breadcrumb_defaults', array(
 			'delimiter'   => ' &#47; ',
 			'wrap_before' => '<nav class="woocommerce-breadcrumb" ' . ( is_single() ? 'itemprop="breadcrumb"' : '' ) . '>',
 			'wrap_after'  => '</nav>',
 			'before'      => '',
 			'after'       => '',
-			'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
-		) );
+			'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' )
+		) ) );
 
-		$args = wp_parse_args( $args, $defaults );
+		$breadcrumbs = new WC_Breadcrumb();
+
+		if ( $args['home'] ) {
+			$breadcrumbs->add_crumb( $args['home'], home_url() );
+		}
+
+		$args['breadcrumb'] = $breadcrumbs->generate();
 
 		wc_get_template( 'global/breadcrumb.php', $args );
 	}

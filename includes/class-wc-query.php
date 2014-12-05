@@ -68,6 +68,15 @@ class WC_Query {
 	}
 
 	/**
+	 * Get any errors from querystring
+	 */
+	public function get_errors() {
+		if ( ! empty( $_GET['wc_error'] ) && ( $error = sanitize_text_field( $_GET['wc_error'] ) ) && ! wc_has_notice( $error, 'error' ) ) {
+			wc_add_notice( $error, 'error' );
+		}
+	}
+
+	/**
 	 * Init query vars by loading options.
 	 */
 	public function init_query_vars() {
@@ -88,19 +97,50 @@ class WC_Query {
 	}
 
 	/**
-	 * Get any errors from querystring
+	 * Get page title for an endpoint
+	 * @param  string
+	 * @return string
 	 */
-	public function get_errors() {
-		if ( ! empty( $_GET['wc_error'] ) && ( $error = sanitize_text_field( $_GET['wc_error'] ) ) && ! wc_has_notice( $error, 'error' ) )
-			wc_add_notice( $error, 'error' );
+	public function get_endpoint_title( $endpoint ) {
+		global $wp;
+
+		switch ( $endpoint ) {
+			case 'order-pay' :
+				$title = __( 'Pay for Order', 'woocommerce' );
+			break;
+			case 'order-received' :
+				$title = __( 'Order Received', 'woocommerce' );
+			break;
+			case 'view-order' :
+				$order = wc_get_order( $wp->query_vars['view-order'] );
+				$title = sprintf( __( 'Order %s', 'woocommerce' ), _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() );
+			break;
+			case 'edit-account' :
+				$title = __( 'Edit Account Details', 'woocommerce' );
+			break;
+			case 'edit-address' :
+				$title = __( 'Edit Address', 'woocommerce' );
+			break;
+			case 'add-payment-method' :
+				$title = __( 'Add Payment Method', 'woocommerce' );
+			break;
+			case 'lost-password' :
+				$title = __( 'Lost Password', 'woocommerce' );
+			break;
+			default :
+				$title = '';
+			break;
+		}
+		return $title;
 	}
 
 	/**
 	 * Add endpoints for query vars
 	 */
 	public function add_endpoints() {
-		foreach ( $this->query_vars as $key => $var )
+		foreach ( $this->query_vars as $key => $var ) {
 			add_rewrite_endpoint( $var, EP_ROOT | EP_PAGES );
+		}
 	}
 
 	/**
@@ -111,8 +151,9 @@ class WC_Query {
 	 * @return array
 	 */
 	public function add_query_vars( $vars ) {
-		foreach ( $this->query_vars as $key => $var )
+		foreach ( $this->query_vars as $key => $var ) {
 			$vars[] = $key;
+		}
 
 		return $vars;
 	}
@@ -124,6 +165,21 @@ class WC_Query {
 	 */
 	public function get_query_vars() {
 		return $this->query_vars;
+	}
+
+	/**
+	 * Get query current active query var
+	 *
+	 * @return string
+	 */
+	public function get_current_endpoint() {
+		global $wp;
+		foreach ( $this->get_query_vars() as $key => $value ) {
+			if ( isset( $wp->query_vars[ $key ] ) ) {
+				return $key;
+			}
+		}
+		return '';
 	}
 
 	/**
