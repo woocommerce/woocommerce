@@ -238,6 +238,14 @@ class WC_Session_Handler extends WC_Session {
 			if ( ! empty( $expired_sessions ) ) {
 				$expired_sessions_chunked = array_chunk( $expired_sessions, 100 );
 				foreach ( $expired_sessions_chunked as $chunk ) {
+					if ( wp_using_ext_object_cache() ) {
+						// delete from object cache first, to avoid cached but deleted options
+						foreach ( $chunk as $option ) {
+							wp_cache_delete( $option, 'options' );
+						}
+					}
+
+					// delete from options table
 					$option_names = implode( "','", $chunk );
 					$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('$option_names')" );
 				}
