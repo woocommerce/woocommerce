@@ -415,7 +415,7 @@ class WC_Meta_Box_Order_Data {
 				if ( ! isset( $field['id'] ) ){
 					$field['id'] = '_shipping_' . $key;
 				}
-				update_post_meta( $post_id, $field['id'], wc_clean( $field['id'] ] ) );
+				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
 			}
 		}
 
