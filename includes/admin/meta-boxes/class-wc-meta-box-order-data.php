@@ -403,13 +403,19 @@ class WC_Meta_Box_Order_Data {
 
 		if ( self::$billing_fields ) {
 			foreach ( self::$billing_fields as $key => $field ) {
-				update_post_meta( $post_id, '_billing_' . $key, wc_clean( $_POST[ '_billing_' . $key ] ) );
+				if ( ! isset( $field['id'] ) ){
+					$field['id'] = '_billing_' . $key;
+				}
+				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
 			}
 		}
 
 		if ( self::$shipping_fields ) {
 			foreach ( self::$shipping_fields as $key => $field ) {
-				update_post_meta( $post_id, '_shipping_' . $key, wc_clean( $_POST[ '_shipping_' . $key ] ) );
+				if ( ! isset( $field['id'] ) ){
+					$field['id'] = '_shipping_' . $key;
+				}
+				update_post_meta( $post_id, $field['id'], wc_clean( $field['id'] ] ) );
 			}
 		}
 
