@@ -55,10 +55,10 @@ class WC_Cart {
 	/** @var array An array of taxes/tax rates for the shipping. */
 	public $shipping_taxes;
 
-	/** @var float Discounts (before tax) */
+	/** @var float Discount amount before tax */
 	public $discount_cart;
 
-	/** @var float Discounts (before tax) excluding tax. Used predominantly for tax inclusive prices */
+	/** @var float Discounted tax amount. Used predominantly for displaying tax inclusive prices correctly */
 	public $discount_cart_tax;
 
 	/** @var float Total for additional fees. */
