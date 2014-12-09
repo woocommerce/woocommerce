@@ -150,29 +150,28 @@ class WC_Tax {
 	private static function calc_exclusive_tax( $price, $rates ) {
 		$taxes = array();
 
-		// Multiple taxes
-		foreach ( $rates as $key => $rate ) {
+		if ( $rates ) {
+			// Multiple taxes
+			foreach ( $rates as $key => $rate ) {
 
-			if ( $rate['compound'] == 'yes' ) {
-				continue;
+				if ( $rate['compound'] == 'yes' )
+					continue;
+
+				$tax_amount = $price * ( $rate['rate'] / 100 );
+
+				// ADVANCED: Allow third parties to modify this rate
+				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
+
+				// Add rate
+				if ( ! isset( $taxes[ $key ] ) )
+					$taxes[ $key ] = $tax_amount;
+				else
+					$taxes[ $key ] += $tax_amount;
 			}
 
-			$tax_amount = $price * ( $rate['rate'] / 100 );
+			$pre_compound_total = array_sum( $taxes );
 
-			// ADVANCED: Allow third parties to modify this rate
-			$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
-
-			// Add rate
-			if ( ! isset( $taxes[ $key ] ) )
-				$taxes[ $key ] = $tax_amount;
-			else
-				$taxes[ $key ] += $tax_amount;
-		}
-
-		$pre_compound_total = array_sum( $taxes );
-
-		// Compound taxes
-		if ( $rates ) {
+			// Compound taxes
 			foreach ( $rates as $key => $rate ) {
 
 				if ( $rate['compound'] == 'no' )
