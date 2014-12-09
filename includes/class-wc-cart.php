@@ -1340,6 +1340,7 @@ class WC_Cart {
 
 			foreach ( $this->cart_contents as $cart_item_key => $item ) {
 				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
+				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => array(), 'subtotal' => array() );
 			}
 
 			// If true, zero rate is applied so '0' tax is displayed on the frontend rather than nothing.
