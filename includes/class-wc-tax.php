@@ -328,21 +328,27 @@ class WC_Tax {
 
 	/**
 	 * Get the customer tax location based on their status and the current page
+	 *
+	 * Used by get_rates(), get_shipping_rates()
+	 *
+	 * @param  $tax_class string Optional, passed to the filter for advanced tax setups.
 	 * @return array
 	 */
-	public static function get_customer_location() {
+	public static function get_tax_location( $tax_class = '' ) {
+		$location = array();
+
 		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
-			return WC()->customer->get_taxable_address();
+			$location = WC()->customer->get_taxable_address();
 		} elseif ( wc_prices_include_tax() || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
-			return array(
+			$location = array(
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),
 				WC()->countries->get_base_postcode(),
 				WC()->countries->get_base_city()
 			);
-		} else {
-			return array();
 		}
+
+		return apply_filters( 'woocommerce_get_tax_location', $location, $tax_class );
 	}
 
 	/**
@@ -352,7 +358,7 @@ class WC_Tax {
 	 */
 	public static function get_rates( $tax_class = '' ) {
 		$tax_class         = sanitize_title( $tax_class );
-		$location          = self::get_customer_location();
+		$location          = self::get_tax_location( $tax_class );
 		$matched_tax_rates = array();
 
 		if ( sizeof( $location ) === 4 ) {
@@ -409,7 +415,7 @@ class WC_Tax {
 			$tax_class = 'standard' === $shipping_tax_class ? '' : $shipping_tax_class;
 		}
 
-		$location          = self::get_customer_location();
+		$location          = self::get_tax_location( $tax_class );
 		$matched_tax_rates = array();
 
 		if ( sizeof( $location ) === 4 ) {
