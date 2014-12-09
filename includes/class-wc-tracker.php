@@ -330,24 +330,24 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public function get_all_woocommerce_options_values() {
-		global $wpdb;
-
-		$alloptions_db = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE %s",
-				'woocommerce_%'
-			)
+		return array(
+			'currency'								=> get_woocommerce_currency(),
+			'base_location'							=> WC()->countries->get_base_country(),
+			'selling_locations'						=> WC()->countries->get_allowed_countries(),
+			'api_enabled'							=> get_option( 'woocommerce_api_enabled' ),
+			'weight_unit'							=> get_option( 'woocommerce_weight_unit' ),
+			'dimension_unit'						=> get_option( 'woocommerce_dimension_unit' ),
+			'download_method'						=> get_option( 'woocommerce_file_download_method' ),
+			'download_require_login'				=> get_option( 'woocommerce_downloads_require_login' ),
+			'calc_taxes'							=> get_option( 'woocommerce_calc_taxes' ),
+			'coupons_enabled'						=> get_option( 'woocommerce_enable_coupons' ),
+			'guest_checkout'						=> get_option( 'woocommerce_enable_guest_checkout'),
+			'secure_checkout'						=> get_option( 'woocommerce_force_ssl_checkout' ),
+			'enable_signup_and_login_from_checkout'	=> get_option( 'woocommerce_enable_signup_and_login_from_checkout' ),
+			'enable_myaccount_registration'			=> get_option( 'woocommerce_enable_myaccount_registration' ),
+			'registration_generate_username'		=> get_option( 'woocommerce_registration_generate_username' ),
+			'registration_generate_password'		=> get_option( 'woocommerce_registration_generate_password' ),
 		);
-
-		$alloptions = array();
-		foreach ( (array) $alloptions_db as $o ) {
-			// We dont want to keep track of serialized data, ie. payment gateway/shipping method settings
-			if ( ! is_serialized( $o->option_value ) ) {
-				$alloptions[ $o->option_name ] = $o->option_value;
-			}
-		}
-
-		return $alloptions;
 	}
 
 	/**
