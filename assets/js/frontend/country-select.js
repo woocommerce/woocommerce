@@ -73,6 +73,10 @@ jQuery( function( $ ) {
 
 		$( 'body' ).trigger( 'country_to_state_changing', [country, $( this ).closest( 'div' )] );
 
-	}).change();
+	});
+
+	$(function() {
+		$( 'select.country_to_state, input.country_to_state' ).change();
+	});
 
 });

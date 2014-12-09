@@ -920,28 +920,7 @@ class WC_Countries {
 		$locale		= $this->get_country_locale();
 
 		if ( isset( $locale[ $country ] ) ) {
-
 			$fields = wc_array_overlay( $fields, $locale[ $country ] );
-
-			// If default country has postcode_before_city switch the fields round.
-			// This is only done at this point, not if country changes on checkout.
-			if ( isset( $locale[ $country ]['postcode_before_city'] ) ) {
-				if ( isset( $fields['postcode'] ) ) {
-					$fields['postcode']['class'] = array( 'form-row-wide', 'address-field' );
-
-					$switch_fields = array();
-
-					foreach ( $fields as $key => $value ) {
-						if ( $key == 'city' ) {
-							// Place postcode before city
-							$switch_fields['postcode'] = '';
-						}
-						$switch_fields[$key] = $value;
-					}
-
-					$fields = $switch_fields;
-				}
-			}
 		}
 
 		// Prepend field keys
