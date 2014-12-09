@@ -439,6 +439,7 @@ class WC_Query {
 
 		// Set a special variable
 		$q->set( 'wc_query', true );
+		$q->query['wc_query'] = 'product_query';
 
 		// Store variables
 		$this->post__in   = $post__in;
@@ -511,7 +512,8 @@ class WC_Query {
 						'no_found_rows'          => true,
 						'update_post_meta_cache' => false,
 						'update_post_term_cache' => false,
-						'pagename'               => ''
+						'pagename'               => '',
+						'wc_query'               => 'get_products_in_view'
 					)
 				)
 			);
@@ -781,10 +783,11 @@ class WC_Query {
 
 						if ( ! is_wp_error( $posts ) ) {
 
-							if ( sizeof( $matched_products_from_attribute ) > 0 || $filtered )
+							if ( sizeof( $matched_products_from_attribute ) > 0 || $filtered ) {
 								$matched_products_from_attribute = $data['query_type'] == 'or' ? array_merge( $posts, $matched_products_from_attribute ) : array_intersect( $posts, $matched_products_from_attribute );
-							else
+							} else {
 								$matched_products_from_attribute = $posts;
+							}
 
 							$filtered = true;
 						}
