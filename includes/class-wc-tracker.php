@@ -355,7 +355,7 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public function get_all_template_overrides() {
-		$override_data = array();
+		$override_data  = array();
 		$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 		$scanned_files  = array();
 		$found_files    = array();
