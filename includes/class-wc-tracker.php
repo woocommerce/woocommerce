@@ -297,7 +297,7 @@ class WC_Tracker {
 
 	/**
 	 * Get a list of all active payment gateways
-	 * @return void
+	 * @return array
 	 */
 	public function get_active_payment_gateways() {
 		$active_gateways = array();
@@ -312,7 +312,7 @@ class WC_Tracker {
 
 	/**
 	 * Get a list of all active shipping methods
-	 * @return void
+	 * @return array
 	 */
 	public function get_active_shipping_methods() {
 		$active_methods = array();
