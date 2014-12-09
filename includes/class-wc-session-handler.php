@@ -225,14 +225,12 @@ class WC_Session_Handler extends WC_Session {
 		if ( ! defined( 'WP_SETUP_CONFIG' ) && ! defined( 'WP_INSTALLING' ) ) {
 			$now                = time();
 			$expired_sessions   = array();
-			$wc_session_expires = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE '_wc_session_expires_%'" );
+			$wc_session_expires = $wpdb->get_col( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE '\_wc\_session\_expires\_%' AND option_value < '$now'" );
 
-			foreach ( $wc_session_expires as $wc_session_expire ) {
-				if ( $now > intval( $wc_session_expire->option_value ) ) {
-					$session_id         = substr( $wc_session_expire->option_name, 20 );
-					$expired_sessions[] = $wc_session_expire->option_name;  // Expires key
-					$expired_sessions[] = "_wc_session_$session_id"; // Session key
-				}
+			foreach ( $wc_session_expires as $option_name ) {
+				$session_id         = substr( $option_name, 20 );
+				$expired_sessions[] = $option_name;  // Expires key
+				$expired_sessions[] = "_wc_session_$session_id"; // Session key
 			}
 
 			if ( ! empty( $expired_sessions ) ) {
