@@ -428,8 +428,9 @@ class WC_Query {
 		// Ordering query vars
 		$q->set( 'orderby', $ordering['orderby'] );
 		$q->set( 'order', $ordering['order'] );
-		if ( isset( $ordering['meta_key'] ) )
+		if ( isset( $ordering['meta_key'] ) ) {
 			$q->set( 'meta_key', $ordering['meta_key'] );
+		}
 
 		// Query vars that affect posts shown
 		$q->set( 'meta_query', $meta_query );
@@ -853,39 +854,43 @@ class WC_Query {
 	 * @param array $filtered_posts
 	 * @return array
 	 */
-	public function price_filter( $filtered_posts ) {
+	public function price_filter( $filtered_posts = array() ) {
 	    global $wpdb;
 
 	    if ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) {
 
-	        $matched_products = array();
-	        $min 	= floatval( $_GET['min_price'] );
-	        $max 	= floatval( $_GET['max_price'] );
+			$matched_products = array();
+			$min              = floatval( $_GET['min_price'] );
+			$max              = floatval( $_GET['max_price'] );
 
-	        $matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare("
-	        	SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
-				INNER JOIN $wpdb->postmeta ON ID = post_id
-				WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
-			", '_price', $min, $max ), OBJECT_K ), $min, $max );
+	        $matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( '
+	        	SELECT DISTINCT ID, post_parent, post_type FROM %1$s
+				INNER JOIN %2$s ON ID = post_id
+				WHERE post_type IN ( "product", "product_variation" )
+				AND post_status = "publish"
+				AND meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) . '")
+				AND meta_value BETWEEN %3$d AND %4$d
+			', $wpdb->posts, $wpdb->postmeta, $min, $max ), OBJECT_K ), $min, $max );
 
 	        if ( $matched_products_query ) {
 	            foreach ( $matched_products_query as $product ) {
-	                if ( $product->post_type == 'product' )
+	                if ( $product->post_type == 'product' ) {
 	                    $matched_products[] = $product->ID;
-	                if ( $product->post_parent > 0 && ! in_array( $product->post_parent, $matched_products ) )
+	                }
+	                if ( $product->post_parent > 0 && ! in_array( $product->post_parent, $matched_products ) ) {
 	                    $matched_products[] = $product->post_parent;
+	                }
 	            }
 	        }
 
 	        // Filter the id's
-	        if ( sizeof( $filtered_posts ) == 0) {
-	            $filtered_posts = $matched_products;
-	            $filtered_posts[] = 0;
+	        if ( 0 === sizeof( $filtered_posts ) ) {
+				$filtered_posts = $matched_products;
 	        } else {
-	            $filtered_posts = array_intersect( $filtered_posts, $matched_products );
-	            $filtered_posts[] = 0;
-	        }
+				$filtered_posts = array_intersect( $filtered_posts, $matched_products );
 
+	        }
+	        $filtered_posts[] = 0;
 	    }
 
 	    return (array) $filtered_posts;

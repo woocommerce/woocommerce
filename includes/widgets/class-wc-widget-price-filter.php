@@ -103,16 +103,16 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					SELECT min(meta_value + 0)
 					FROM %1$s
 					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE ( meta_key = \'%3$s\' OR meta_key = \'%4$s\' )
+					WHERE meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price', '_min_variation_price' ) ) ) . '")
 					AND meta_value != ""
-				', $wpdb->posts, $wpdb->postmeta, '_price', '_min_variation_price' )
+				', $wpdb->posts, $wpdb->postmeta )
 			) );
 			$max = ceil( $wpdb->get_var(
 				$wpdb->prepare('
 					SELECT max(meta_value + 0)
 					FROM %1$s
 					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE meta_key = \'%3$s\'
+					WHERE meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) . '")
 				', $wpdb->posts, $wpdb->postmeta, '_price' )
 			) );
 		} else {
@@ -121,7 +121,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					SELECT min(meta_value + 0)
 					FROM %1$s
 					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE ( meta_key =\'%3$s\' OR meta_key =\'%4$s\' )
+					WHERE meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price', '_min_variation_price' ) ) ) . '")
 					AND meta_value != ""
 					AND (
 						%1$s.ID IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
@@ -130,14 +130,14 @@ class WC_Widget_Price_Filter extends WC_Widget {
 							AND %1$s.post_parent != 0
 						)
 					)
-				', $wpdb->posts, $wpdb->postmeta, '_price', '_min_variation_price'
+				', $wpdb->posts, $wpdb->postmeta
 			) ) );
 			$max = ceil( $wpdb->get_var(
 				$wpdb->prepare('
 					SELECT max(meta_value + 0)
 					FROM %1$s
 					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE meta_key =\'%3$s\'
+					WHERE meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) . '")
 					AND (
 						%1$s.ID IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
 						OR (
@@ -145,7 +145,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 							AND %1$s.post_parent != 0
 						)
 					)
-				', $wpdb->posts, $wpdb->postmeta, '_price'
+				', $wpdb->posts, $wpdb->postmeta
 			) ) );
 		}
 
