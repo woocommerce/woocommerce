@@ -77,9 +77,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						}
 
 						// Get attribute data
-						if ( taxonomy_exists( $meta['meta_key'] ) ) {
-							$term           = get_term_by( 'slug', $meta['meta_value'], $meta['meta_key'] );
-							$attribute_name = str_replace( 'pa_', '', wc_clean( $meta['meta_key'] ) );
+						if ( taxonomy_exists( wc_sanitize_taxonomy_name( $meta['meta_key'] ) ) ) {
+							$term           = get_term_by( 'slug', $meta['meta_value'], wc_sanitize_taxonomy_name( $meta['meta_key'] ) );
+							$attribute_name = str_replace( 'pa_', '', wc_sanitize_taxonomy_name( $meta['meta_key'] ) );
 							$attribute      = $wpdb->get_var(
 								$wpdb->prepare( "
 										SELECT attribute_label
@@ -94,7 +94,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$meta['meta_value'] = ( isset( $term->name ) ) ? $term->name : $meta['meta_value'];
 						}
 
-						echo '<tr><th>' . wp_kses_post( urldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( make_clickable( $meta['meta_value'] ) ) ) . '</td></tr>';
+						echo '<tr><th>' . wp_kses_post( rawurldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( make_clickable( rawurldecode( $meta['meta_value'] ) ) ) ) . '</td></tr>';
 					}
 					echo '</table>';
 				}
@@ -126,8 +126,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 								continue;
 							}
 
-							$meta['meta_key']   = urldecode( $meta['meta_key'] );
-							$meta['meta_value'] = esc_textarea( urldecode( $meta['meta_value'] ) ); // using a <textarea />
+							$meta['meta_key']   = rawurldecode( $meta['meta_key'] );
+							$meta['meta_value'] = esc_textarea( rawurldecode( $meta['meta_value'] ) ); // using a <textarea />
 							$meta['meta_id']    = absint( $meta['meta_id'] );
 
 							echo '<tr data-meta_id="' . esc_attr( $meta['meta_id'] ) . '">
