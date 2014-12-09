@@ -452,7 +452,7 @@ abstract class WC_Settings_API {
 	 * @since 2.3.0
 	 * @return string
 	 */
-	public function generate_colorpicker_html( $key, $data ) {
+	public function generate_color_html( $key, $data ) {
 		$field    = $this->plugin_id . $this->id . '_' . $key;
 		$defaults = array(
 			'title'             => '',
@@ -479,7 +479,7 @@ abstract class WC_Settings_API {
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
 					<div class="color_box">
 						<input class="colorpick <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
-						<div id="colorPickerDiv_<?php echo esc_attr( $field ); ?>" class="colorpickdiv"></div>
+						<div id="colorPickerDiv_<?php echo esc_attr( $field ); ?>" class="colorpickdiv" style="z-index: 100; background: #eee; border: 1px solid #ccc; position: absolute; display: none;"></div>
 					</div>
 					<?php echo $this->get_description_html( $data ); ?>
 				</fieldset>
