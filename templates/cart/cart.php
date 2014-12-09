@@ -145,8 +145,6 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 	<?php woocommerce_cart_totals(); ?>
 
-	<?php woocommerce_shipping_calculator(); ?>
-
 </div>
 
 <?php do_action( 'woocommerce_after_cart' ); ?>

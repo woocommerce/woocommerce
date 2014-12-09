@@ -97,5 +97,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				echo '<p class="woocommerce-shipping-contents"><small>' . __( 'Shipping', 'woocommerce' ) . ': ' . implode( ', ', $product_names ) . '</small></p>';
 			?>
 		<?php endif; ?>
+
+		<?php woocommerce_shipping_calculator(); ?>
 	</td>
 </tr>
