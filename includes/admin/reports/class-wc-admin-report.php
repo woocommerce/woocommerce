@@ -178,7 +178,9 @@ class WC_Admin_Report {
 
 			} elseif ( $value['type'] == 'order_item_meta' ) {
 
-				$query['where'] .= " AND order_items.order_item_type = '{$value['order_item_type']}'";
+				if ( $value['order_item_type'] ) {
+					$query['where'] .= " AND order_items.order_item_type = '{$value['order_item_type']}'";
+				}
 				$query['where'] .= " AND order_item_meta_{$key}.meta_key = '{$key}'";
 
 			}
