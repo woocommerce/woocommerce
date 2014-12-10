@@ -336,7 +336,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				'card.addressZip'     => $order->billing_postcode
 			) );
 
-			$order_complete = $this->process_order_status( $payment->id, $payment->paymentStatus, $payment->authCode );
+			$order_complete = $this->process_order_status( $order, $payment->id, $payment->paymentStatus, $payment->authCode );
 
 			if ( $order_complete ) {
 				// Return thank you page redirect
@@ -436,7 +436,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Return handler for Hosted Payments.
+	 * Return handler for Hosted Payments
 	 */
 	public function return_handler() {
 		@ob_clean();
@@ -444,11 +444,11 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 		if ( isset( $_REQUEST['reference'] ) && isset( $_REQUEST['paymentId'] ) && isset( $_REQUEST['signature'] ) ) {
 			$signature = strtoupper( md5( $_REQUEST['amount'] . $_REQUEST['reference'] . $_REQUEST['paymentId'] . $_REQUEST['paymentDate'] . $_REQUEST['paymentStatus'] . $this->private_key ) );
-			$order_id  = asbint( $_REQUEST['reference'] );
+			$order_id  = absint( $_REQUEST['reference'] );
 			$order     = wc_get_order( $order_id );
 
 			if ( $signature === $_REQUEST['signature'] ) {
-				$order_complete = $this->process_order_status( $_REQUEST['paymentId'], $_REQUEST['paymentStatus'], $_REQUEST['paymentDate'] );
+				$order_complete = $this->process_order_status( $order, $_REQUEST['paymentId'], $_REQUEST['paymentStatus'], $_REQUEST['paymentDate'] );
 
 				if ( ! $order_complete ) {
 					$order->update_status( 'failed', __( 'Payment was declined by Simplify Commerce.', 'woocommerce' ) );
@@ -464,15 +464,16 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process the order status.
+	 * Process the order status
 	 *
-	 * @param  string $payment_id
-	 * @param  string $status
-	 * @param  string $auth_code
+	 * @param  WC_Order $order
+	 * @param  string   $payment_id
+	 * @param  string   $status
+	 * @param  string   $auth_code
 	 *
 	 * @return bool
 	 */
-	public function process_order_status( $payment_id, $status, $auth_code ) {
+	public function process_order_status( $order, $payment_id, $status, $auth_code ) {
 		if ( 'APPROVED' == $status ) {
 			// Payment complete
 			$order->payment_complete( $payment_id );
