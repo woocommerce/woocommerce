@@ -245,13 +245,6 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Customer Location
-	 */
-	public function test_get_customer_location() {
-		$this->assertEquals( WC_Tax::get_customer_location(), array( 'GB', '', '', '' ) );
-	}
-
-	/**
 	 * Test rate labels
 	 */
 	public function test_get_rate_label() {
