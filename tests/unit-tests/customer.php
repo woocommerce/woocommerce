@@ -32,24 +32,27 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 
 		WC()->session->set( 'customer', $customer_data );
 
+		//Create a dummy customer to use for testing!
+		$customer = new WC_Customer();
+
 		// Create dummy product, and add it to the cart
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->id, 1 );
 
 		// Customer is going with the Local Pickup option, and the store calculates tax based on the store base location.
-		$customer = $this->helper_setup_customer( 'local_pickup', 'billing' );
+		$this->helper_setup_shipping_tax_env( 'local_pickup', 'billing' );
 		$this->assertEquals( $customer->get_taxable_address() , $base_store_address);
 		
 		// Customer is going with the Local Pickup option, and the store calculates tax based on the customer's billing address.
-		$customer = $this->helper_setup_customer( 'local_pickup', 'billing' );
+		$this->helper_setup_shipping_tax_env( 'local_pickup', 'billing' );
 		$this->assertEquals( $customer->get_taxable_address() , $base_store_address);
 		
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the customer's billing address.
-		$customer = $this->helper_setup_customer( 'free_shipping', 'billing' );
+		$this->helper_setup_shipping_tax_env( 'free_shipping', 'billing' );
 		$this->assertEquals( $customer->get_taxable_address() , $customer_address);
 
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the store base location.
-		$customer = $this->helper_setup_customer( 'free_shipping', 'base' );
+		$this->helper_setup_shipping_tax_env( 'free_shipping', 'base' );
 		$this->assertEquals( $customer->get_taxable_address() , $base_store_address);
 	}
 	/**
@@ -78,31 +81,39 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		
 		WC()->session->set( 'customer', $customer_data );
 
+		//Create a dummy customer to use for testing!
+		$customer = new WC_Customer();
+
 		// Create dummy product, and add the product to the cart.
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->id, 1 );
 
 		// Customer is going with the Local Pickup option, and the store calculates tax based on the store base location.
-		$customer = $this->helper_setup_customer( 'local_pickup', 'billing' );
-		$this->assertFalse( $customer->is_customer_outside_base() );
+		$this->helper_setup_shipping_tax_env( 'local_pickup', 'billing' );
+		$this->assertEquals( $customer->is_customer_outside_base(), false );
 		
 		// Customer is going with the Local Pickup option, and the store calculates tax based on the customer's billing address.
-		$customer = $this->helper_setup_customer( 'local_pickup', 'billing' );
-		$this->assertFalse( $customer->is_customer_outside_base() );
+		$this->helper_setup_shipping_tax_env( 'local_pickup', 'billing' );
+		$this->assertEquals( $customer->is_customer_outside_base(), false );
 		
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the customer's billing address.
-		$customer = $this->helper_setup_customer( 'free_shipping', 'billing' );
-		$this->assertTrue( $customer->is_customer_outside_base() );
+		$this->helper_setup_shipping_tax_env( 'free_shipping', 'billing' );
+		$this->assertEquals( $customer->is_customer_outside_base(), true );
 		
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the store base location.
-		$customer = $this->helper_setup_customer( 'free_shipping', 'base' );
-		$this->assertFalse( $customer->is_customer_outside_base() );
+		$this->helper_setup_shipping_tax_env( 'free_shipping', 'base' );		
+		$this->assertEquals( $customer->is_customer_outside_base(), false );
 	}
+
 	/**
 	 * Helper function for creating the customer and setting up the tax enviroment based on desired params.
+	 *
+	 * @param string $shipping_method Shipping Method slug
+	 * @param string $tax_based_on either 'base' or 'billing.' base refers to tax computed based on the shop location, 'billing' computes tax based on the customer's billing address.
+	 * @return void
 	 */
-	private function helper_setup_customer($shipping_method, $tax_based_on) {		
-		//Set up the environment for our combination
+
+	private function helper_setup_shipping_tax_env($shipping_method, $tax_based_on) {		
 
 		//Shipping Methods
 		update_option( 'woocommerce_default_shipping_method', $shipping_method );
@@ -110,9 +121,5 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 
 		//Tax "Based-on" Settings
 		update_option( 'woocommerce_tax_based_on', $tax_based_on );
-
-		$customer = new WC_Customer();
-
-		return $customer;
 	}
 }
