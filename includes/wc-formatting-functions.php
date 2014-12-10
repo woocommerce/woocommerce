@@ -420,7 +420,7 @@ function wc_timezone_string() {
 	$utc_offset *= 3600;
 
 	// attempt to guess the timezone string from the UTC offset
-	$timezone = timezone_name_from_abbr( '', $utc_offset, -1 );
+	$timezone = timezone_name_from_abbr( '', $utc_offset, 0 );
 
 	// last try, guess timezone string manually
 	if ( false === $timezone ) {
