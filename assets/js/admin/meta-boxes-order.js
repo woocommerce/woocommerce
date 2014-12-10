@@ -114,7 +114,7 @@ jQuery( function ( $ ) {
 			// Remove the previous Chosen DOM element
 			$parent.show().find( '.chosen-container' ).remove();
 
-			if ( states[ country ] ) {
+			if ( ! $.isEmptyObject( states[ country ] ) ) {
 				var $states_select = $( '<select name="' + input_name + '" id="' + input_id + '" class="js_field-state select short" placeholder="' + placeholder + '"></select>' ),
 					state = states[ country ];
 

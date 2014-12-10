@@ -2124,7 +2124,7 @@ abstract class WC_Abstract_Order {
 			unset( WC()->session->order_awaiting_payment );
 		}
 
-		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed' ), $this );
+		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this );
 
 		if ( $this->id && $this->has_status( $valid_order_statuses ) ) {
 
