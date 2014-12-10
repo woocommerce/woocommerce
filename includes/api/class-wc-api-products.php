@@ -1600,9 +1600,11 @@ class WC_API_Products extends WC_API_Resource {
 						if ( is_wp_error( $upload ) ) {
 							return new WP_Error( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), array( 'status' => 400 ) );
 						}
-					}
 
-					$gallery[] = $this->set_product_image_as_attachment( $upload, $id );
+						$gallery[] = $this->set_product_image_as_attachment( $upload, $id );
+					} else {
+						$gallery[] = $attachment_id;
+					}
 				}
 			}
 
