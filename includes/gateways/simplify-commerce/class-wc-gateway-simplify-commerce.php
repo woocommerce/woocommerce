@@ -52,8 +52,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		$this->mode            = $this->get_option( 'mode', 'standard' );
 		$this->modal_color     = $this->get_option( 'modal_color', '#a46497' );
 		$this->sandbox         = $this->get_option( 'sandbox' );
-		$this->private_key     = $this->sandbox == 'no' ? $this->get_option( 'private_key' ) : $this->get_option( 'sandbox_private_key' );
 		$this->public_key      = $this->sandbox == 'no' ? $this->get_option( 'public_key' ) : $this->get_option( 'sandbox_public_key' );
+		$this->private_key     = $this->sandbox == 'no' ? $this->get_option( 'private_key' ) : $this->get_option( 'sandbox_private_key' );
 
 		$this->init_simplify_sdk();
 
@@ -336,16 +336,9 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				'card.addressZip'     => $order->billing_postcode
 			) );
 
-			if ( 'APPROVED' == $payment->paymentStatus ) {
-				// Payment complete
-				$order->payment_complete( $payment->id );
+			$order_complete = $this->process_order_status( $payment->id, $payment->paymentStatus, $payment->authCode );
 
-				// Add order note
-				$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %s, Auth Code: %s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
-
-				// Remove cart
-				WC()->cart->empty_cart();
-
+			if ( $order_complete ) {
 				// Return thank you page redirect
 				return array(
 					'result'   => 'success',
@@ -434,18 +427,66 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		$args        = $this->get_hosted_payments_args( $order );
 		$button_args = array();
 		foreach ( $args as $key => $value ) {
-			$button_args[] = 'data-' . esc_attr( $key ) . '="' . esc_attr( $value ) . '" ';
+			$button_args[] = 'data-' . esc_attr( $key ) . '="' . esc_attr( $value ) . '"';
 		}
 
 		echo '<script type="text/javascript" src="https://www.simplify.com/commerce/simplify.pay.js"></script>
-			<button class="button alt" id="simplify-payment-button" ' . implode( '', $button_args ) . '>' . __( 'Pay Now', 'woocommerce' ) . '</button> <a class="button cancel" href="' . esc_url( $order->get_cancel_order_url() ) . '">' . __( 'Cancel order &amp; restore cart', 'woocommerce' ) . '</a>
+			<button class="button alt" id="simplify-payment-button" ' . implode( ' ', $button_args ) . '>' . __( 'Pay Now', 'woocommerce' ) . '</button> <a class="button cancel" href="' . esc_url( $order->get_cancel_order_url() ) . '">' . __( 'Cancel order &amp; restore cart', 'woocommerce' ) . '</a>
 			';
 	}
 
+	/**
+	 * Return handler for Hosted Payments.
+	 */
 	public function return_handler() {
+		@ob_clean();
+		header( 'HTTP/1.1 200 OK' );
 
+		if ( isset( $_REQUEST['reference'] ) && isset( $_REQUEST['paymentId'] ) && isset( $_REQUEST['signature'] ) ) {
+			$signature = strtoupper( md5( $_REQUEST['amount'] . $_REQUEST['reference'] . $_REQUEST['paymentId'] . $_REQUEST['paymentDate'] . $_REQUEST['paymentStatus'] . $this->private_key ) );
+			$order_id  = asbint( $_REQUEST['reference'] );
+			$order     = wc_get_order( $order_id );
 
+			if ( $signature === $_REQUEST['signature'] ) {
+				$order_complete = $this->process_order_status( $_REQUEST['paymentId'], $_REQUEST['paymentStatus'], $_REQUEST['paymentDate'] );
+
+				if ( ! $order_complete ) {
+					$order->update_status( 'failed', __( 'Payment was declined by Simplify Commerce.', 'woocommerce' ) );
+				}
+
+				wp_redirect( $this->get_return_url( $order ) );
+				exit();
+			}
+		}
+
+		wp_redirect( get_permalink( wc_get_page_id( 'cart' ) ) );
 		exit();
+	}
+
+	/**
+	 * Process the order status.
+	 *
+	 * @param  string $payment_id
+	 * @param  string $status
+	 * @param  string $auth_code
+	 *
+	 * @return bool
+	 */
+	public function process_order_status( $payment_id, $status, $auth_code ) {
+		if ( 'APPROVED' == $status ) {
+			// Payment complete
+			$order->payment_complete( $payment_id );
+
+			// Add order note
+			$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %s, Auth Code: %s)', 'woocommerce' ), $payment_id, $auth_code ) );
+
+			// Remove cart
+			WC()->cart->empty_cart();
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
