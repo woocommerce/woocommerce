@@ -557,6 +557,7 @@ class WC_API_Products extends WC_API_Resource {
 			'related_ids'        => array_map( 'absint', array_values( $product->get_related() ) ),
 			'upsell_ids'         => array_map( 'absint', $product->get_upsells() ),
 			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sells() ),
+			'parent_id'          => $product->post->post_parent,
 			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
@@ -859,6 +860,11 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $id, '_sale_price_dates_from', '' );
 				update_post_meta( $id, '_sale_price_dates_to', '' );
 			}
+		}
+
+		// Product parent ID for groups
+		if ( isset( $data['parent_id'] ) ) {
+			wp_update_post( array( 'ID' => $id, 'post_parent' => absint( $data['parent_id'] ) ) );
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
