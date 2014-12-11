@@ -8,25 +8,64 @@
 class WC_Helper_Customer {
 
 	/**
-	 * Get the the current customer's billing details from the session
+	 * Create a mock customer for testing purposes.
+	 *
+	 * @return WC_Customer
+	 */
+
+	public static function create_mock_customer() {
+		
+		$customer_data = array(
+			'country' 				=> 'US',
+			'state' 				=> 'PA',
+			'postcode' 				=> '19123',
+			'city'					=> 'Philadelphia',
+			'address' 				=> '123 South Street',
+			'address_2' 			=> 'Apt 1',
+			'shipping_country' 		=> 'US',
+			'shipping_state' 		=> 'PA',
+			'shipping_postcode' 	=> '19123',
+			'shipping_city'			=> 'Philadelphia',
+			'shipping_address'		=> '123 South Street',
+			'shipping_address_2'	=> 'Apt 1',
+			'is_vat_exempt' 		=> false,
+			'calculated_shipping'	=> false
+		);
+		
+		WC_Helper_Customer::set_customer_details( $customer_data );
+
+		return new WC_Customer();
+	}
+
+	/**
+	 * Get the expected output for the mock customer's shipping destination.
+	 *
+	 * @return array
+	 */
+
+	public static function get_expected_customer_location() {
+		return array( "US", "PA", "19123", "Philadelphia" );
+	}
+
+	/**
+	 * Get the expected output for the store's base location settings.
+	 *
+	 * @return array
+	 */
+
+	public static function get_expected_store_location() {
+		return array( "GB", "", "", "" );
+	}
+
+	/**
+	 * Get the customer's shipping and billing info from the session.
 	 *
 	 * @return array
 	 */
 
 	public static function get_customer_details() {
-		WC()->session->get( 'customer' );
+		return WC()->session->get( 'customer' );
 	}
-
-	/**
-	 * Get the store's default shipping method.
-	 *
-	 * @return string
-	 */
-
-	public static function get_default_shipping_method() {
-		get_option( 'woocommerce_default_shipping_method' );
-	}
-
 
 	/**
 	 * Get the user's chosen shipping method.
@@ -49,23 +88,13 @@ class WC_Helper_Customer {
 	}
 
 	/**
-	 * Set the the current customer's billing details in the session
+	 * Set the the current customer's billing details in the session.
 	 *
 	 * @param string $default_shipping_method Shipping Method slug
 	 */
 
 	public static function set_customer_details( $customer_details ) {
 		WC()->session->set( 'customer', $customer_details );
-	}
-
-	/**
-	 * Set the store's default shipping method.
-	 *
-	 * @param string $default_shipping_method Shipping Method slug
-	 */
-
-	public static function set_default_shipping_method( $default_shipping_method ) {
-		update_option( 'woocommerce_default_shipping_method', $default_shipping_method );
 	}
 
 	/**
