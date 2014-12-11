@@ -202,9 +202,17 @@ class WC_API_Orders extends WC_API_Resource {
 		);
 
 		// add line items
-		foreach( $order->get_items() as $item_id => $item ) {
+		foreach ( $order->get_items() as $item_id => $item ) {
 
-			$product = $order->get_product_from_item( $item );
+			$product     = $order->get_product_from_item( $item );
+			$product_id  = null;
+			$product_sku = null;
+
+			// Check if the product exists.
+			if ( is_object( $product ) ) {
+				$product_id  = ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id;
+				$product_sku = $product->get_sku();
+			}
 
 			$meta = new WC_Order_Item_Meta( $item['item_meta'], $product );
 
@@ -230,8 +238,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'quantity'     => (int) $item['qty'],
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
 				'name'         => $item['name'],
-				'product_id'   => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
-				'sku'          => is_object( $product ) ? $product->get_sku() : null,
+				'product_id'   => $product_id,
+				'sku'          => $product_sku,
 				'meta'         => $item_meta,
 			);
 		}
