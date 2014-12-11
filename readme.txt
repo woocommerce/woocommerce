@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 2.2.8
+Stable tag: 2.2.9
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -133,6 +133,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.2.9 - xx/12/2014 =
 * Fix - Processing and On-hold order links in WooCommerce Status dashboard widget.
 * Fix - Orders API when query orders with deleted products.
+* Fix - Check order exists in wc_clear_cart_after_payment().
+* Fix - move $cart_updated inside $passed_validation to prevent unnessary updates.
+* Fix - MX states keys.
+* Fix - sanitize_user correctly during registration.
+* Fix - API - Variation handling for stock data.
+* Fix - When bulk editing variable products, set the stock status for non-stock managed variations.
+* Fix - Fix coupons by date queries to prevent inflated results.
+* Fix - During refunds, correctly set shipping tax totals.
+* Fix - Ensure floats are safely converted to strings.
+* Fix - remove_taxes needs to clear line_tax_data.
+* Tweak - API - set_fee should support tax_data.
+* Tweak - Don't force tax_rate_id to an integer. Allow strings.
+* Tweak - Additonal filters inside tax class to support extensions.
+* Tweak - Allow plugins to filter the taxable location.
 
 = 2.2.8 - 29/10/2014 =
 * Fix - Image crop option.
