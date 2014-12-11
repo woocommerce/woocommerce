@@ -127,7 +127,6 @@ class WC_API_Coupons extends WC_API_Resource {
 			'limit_usage_to_x_items'       => (int) $coupon->limit_usage_to_x_items,
 			'usage_count'                  => (int) $coupon->usage_count,
 			'expiry_date'                  => $this->server->format_datetime( $coupon->expiry_date ),
-			'apply_before_tax'             => $coupon->apply_before_tax(),
 			'enable_free_shipping'         => $coupon->enable_free_shipping(),
 			'product_category_ids'         => array_map( 'absint', (array) $coupon->product_categories ),
 			'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->exclude_product_categories ),

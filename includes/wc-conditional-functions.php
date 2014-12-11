@@ -141,18 +141,27 @@ if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
 	 * @param  string $endpoint
 	 * @return bool
 	 */
-	function is_wc_endpoint_url( $endpoint ) {
+	function is_wc_endpoint_url( $endpoint = false ) {
 		global $wp;
 
 		$wc_endpoints = WC()->query->get_query_vars();
 
-		if ( ! isset( $wc_endpoints[ $endpoint ] ) ) {
-			return false;
-		} else {
-			$endpoint_var = $wc_endpoints[ $endpoint ];
-		}
+		if ( $endpoint ) {
+			if ( ! isset( $wc_endpoints[ $endpoint ] ) ) {
+				return false;
+			} else {
+				$endpoint_var = $wc_endpoints[ $endpoint ];
+			}
 
-		return isset( $wp->query_vars[ $endpoint_var ] ) ? true : false;
+			return isset( $wp->query_vars[ $endpoint_var ] );
+		} else {
+			foreach ( $wc_endpoints as $key => $value ) {
+				if ( isset( $wp->query_vars[ $key ] ) ) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 }
 

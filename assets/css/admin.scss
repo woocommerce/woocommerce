@@ -348,6 +348,30 @@ ul.wc_coupon_list,
 	clear: both;
 }
 
+ul.wc_coupon_list {
+	li {
+		margin: 0;
+
+		&.code {
+			display: inline-block;
+
+			&:after {
+				content: ", ";
+			}
+
+			&:last-of-type {
+				&:after {
+					display: none;
+				}
+			}
+
+			.tips {
+				cursor: pointer;
+			}
+		}
+	}
+}
+
 ul.wc_coupon_list_block {
 	margin: 0;
 	padding-bottom: 2px;
@@ -657,6 +681,14 @@ ul.wc_coupon_list_block {
 		p {
 			margin: 0;
 			line-height: 2em;
+		}
+
+		.wc-used-coupons {
+			text-align: left;
+
+			.tips {
+				display: inline-block;
+			}
 		}
 	}
 

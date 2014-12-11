@@ -162,23 +162,17 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 	$linked   = 0;
 	$complete = 0;
 
-	if ( $customer_orders )
+	if ( $customer_orders ) {
 		foreach ( $customer_orders as $order_id ) {
 			update_post_meta( $order_id, '_customer_user', $customer->ID );
 
-			$order_status = get_post_status( $order_id );
-
-			if ( $order_status ) {
-				$order_status = current( $order_status );
-				$order_status = sanitize_title( $order_status->slug );
-			}
-
-			if ( $order_status === 'completed' ) {
+			if ( get_post_status( $order_id ) === 'wc-completed' ) {
 				$complete ++;
 			}
 
 			$linked ++;
 		}
+	}
 
 	if ( $complete ) {
 		update_user_meta( $customer_id, 'paying_customer', 1 );

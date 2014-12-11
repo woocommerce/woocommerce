@@ -70,9 +70,6 @@ class WC_Meta_Box_Coupon_Data {
 				// Free Shipping
 				woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Allow free shipping', 'woocommerce' ), 'description' => sprintf( __( 'Check this box if the coupon grants free shipping. The <a href="%s">free shipping method</a> must be enabled and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), admin_url('admin.php?page=wc-settings&tab=shipping&section=WC_Shipping_Free_Shipping')) ) );
 
-				// Apply before tax
-				woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __( 'Apply before tax', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should be applied before calculating cart tax.', 'woocommerce' ) ) );
-
 				// Expiry date
 				woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Coupon expiry date', 'woocommerce' ), 'placeholder' => _x( 'YYYY-MM-DD', 'placeholder', 'woocommerce' ), 'description' => '', 'class' => 'date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
 
@@ -251,7 +248,6 @@ class WC_Meta_Box_Coupon_Data {
 		$limit_usage_to_x_items = empty( $_POST['limit_usage_to_x_items'] ) ? '' : absint( $_POST['limit_usage_to_x_items'] );
 		$individual_use         = isset( $_POST['individual_use'] ) ? 'yes' : 'no';
 		$expiry_date            = wc_clean( $_POST['expiry_date'] );
-		$apply_before_tax       = isset( $_POST['apply_before_tax'] ) ? 'yes' : 'no';
 		$free_shipping          = isset( $_POST['free_shipping'] ) ? 'yes' : 'no';
 		$exclude_sale_items     = isset( $_POST['exclude_sale_items'] ) ? 'yes' : 'no';
 		$minimum_amount         = wc_format_decimal( $_POST['minimum_amount'] );
@@ -283,7 +279,6 @@ class WC_Meta_Box_Coupon_Data {
 		update_post_meta( $post_id, 'usage_limit_per_user', $usage_limit_per_user );
 		update_post_meta( $post_id, 'limit_usage_to_x_items', $limit_usage_to_x_items );
 		update_post_meta( $post_id, 'expiry_date', $expiry_date );
-		update_post_meta( $post_id, 'apply_before_tax', $apply_before_tax );
 		update_post_meta( $post_id, 'free_shipping', $free_shipping );
 		update_post_meta( $post_id, 'exclude_sale_items', $exclude_sale_items );
 		update_post_meta( $post_id, 'product_categories', $product_categories );

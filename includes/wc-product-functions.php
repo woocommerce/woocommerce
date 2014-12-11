@@ -302,9 +302,9 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
 			}
 
 			if ( $flat ) {
-				$variation_list[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . urldecode( $value );
+				$variation_list[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . rawurldecode( $value );
 			} else {
-				$variation_list[] = '<dt>' . wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . urldecode( $value ) . '</dd>';
+				$variation_list[] = '<dt>' . wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . rawurldecode( $value ) . '</dd>';
 			}
 		}
 

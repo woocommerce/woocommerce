@@ -477,10 +477,11 @@ class WC_Admin_Post_Types {
 			break;
 			case 'customer_message' :
 
-				if ( $the_order->customer_message )
+				if ( $the_order->customer_message ) {
 					echo '<span class="note-on tips" data-tip="' . esc_attr( $the_order->customer_message ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
-				else
+				} else {
 					echo '<span class="na">&ndash;</span>';
+				}
 
 			break;
 			case 'order_items' :
@@ -499,7 +500,7 @@ class WC_Admin_Post_Types {
 						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item ); ?>">
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
 							<td class="name">
-								<?php if ( wc_product_sku_enabled() && $_product && $_product->get_sku() ) echo $_product->get_sku() . ' - '; ?><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>
+								<?php if ( wc_product_sku_enabled() && $_product && $_product->get_sku() ) echo $_product->get_sku() . ' - '; ?><a href="<?php echo get_edit_post_link( $_product->product_id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?></a>
 								<?php if ( $item_meta_html ) : ?>
 									<a class="tips" href="#" data-tip="<?php echo esc_attr( $item_meta_html ); ?>">[?]</a>
 								<?php endif; ?>
@@ -1399,18 +1400,12 @@ class WC_Admin_Post_Types {
 	public function restrict_manage_posts() {
 		global $typenow, $wp_query;
 
-		switch ( $typenow ) {
-			case 'product' :
-				$this->product_filters();
-				break;
-			case 'shop_coupon' :
-				$this->shop_coupon_filters();
-				break;
-			case 'shop_order' :
-				$this->shop_order_filters();
-				break;
-			default :
-				break;
+		if ( in_array( $typenow, wc_get_order_types( 'order-meta-boxes' ) ) ) {
+			$this->shop_order_filters();
+		} elseif ( 'product' == $typenow ) {
+			$this->product_filters();
+		} elseif( 'shop_coupon' == $typenow ) {
+			$this->shop_coupon_filters();
 		}
 	}
 
@@ -1593,7 +1588,7 @@ class WC_Admin_Post_Types {
 				$vars['meta_value'] = wc_clean( $_GET['coupon_type'] );
 			}
 
-		} elseif ( 'shop_order' === $typenow ) {
+		} elseif ( in_array( $typenow, wc_get_order_types( 'order-meta-boxes' ) ) ) {
 
 			// Filter the orders by the posted customer.
 			if ( isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
@@ -1830,7 +1825,7 @@ class WC_Admin_Post_Types {
 
 			$post_type = get_post_type( $id );
 
-			if ( 'shop_order' == $post_type ) {
+			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
 
 				// Delete count - meta doesn't work on trashed posts
 				$user_id = get_post_meta( $id, '_customer_user', true );
@@ -1864,7 +1859,7 @@ class WC_Admin_Post_Types {
 
 			$post_type = get_post_type( $id );
 
-			if ( 'shop_order' == $post_type ) {
+			if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
 
 				// Delete count - meta doesn't work on trashed posts
 				$user_id = get_post_meta( $id, '_customer_user', true );
@@ -1891,7 +1886,7 @@ class WC_Admin_Post_Types {
 	public function delete_order_items( $postid ) {
 		global $wpdb;
 
-		if ( get_post_type( $postid ) == 'shop_order' ) {
+		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
 			do_action( 'woocommerce_delete_order_items', $postid );
 
 			$wpdb->query( "
@@ -1947,7 +1942,7 @@ class WC_Admin_Post_Types {
 	public function change_insert_into_post( $strings ) {
 		global $post_type;
 
-		if ( in_array( $post_type, array( 'product', 'shop_order', 'shop_coupon' ) ) ) {
+		if ( in_array( $post_type, array( 'product', 'shop_coupon' ) ) || in_array( $post_type, wc_get_order_types() ) ) {
 			$obj = get_post_type_object( $post_type );
 
 			$strings['insertIntoPost']     = sprintf( __( 'Insert into %s', 'woocommerce' ), $obj->labels->singular_name );

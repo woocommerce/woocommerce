@@ -77,9 +77,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						}
 
 						// Get attribute data
-						if ( taxonomy_exists( $meta['meta_key'] ) ) {
-							$term           = get_term_by( 'slug', $meta['meta_value'], $meta['meta_key'] );
-							$attribute_name = str_replace( 'pa_', '', wc_clean( $meta['meta_key'] ) );
+						if ( taxonomy_exists( wc_sanitize_taxonomy_name( $meta['meta_key'] ) ) ) {
+							$term           = get_term_by( 'slug', $meta['meta_value'], wc_sanitize_taxonomy_name( $meta['meta_key'] ) );
+							$attribute_name = str_replace( 'pa_', '', wc_sanitize_taxonomy_name( $meta['meta_key'] ) );
 							$attribute      = $wpdb->get_var(
 								$wpdb->prepare( "
 										SELECT attribute_label
@@ -94,7 +94,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$meta['meta_value'] = ( isset( $term->name ) ) ? $term->name : $meta['meta_value'];
 						}
 
-						echo '<tr><th>' . wp_kses_post( urldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( make_clickable( $meta['meta_value'] ) ) ) . '</td></tr>';
+						echo '<tr><th>' . wp_kses_post( rawurldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( make_clickable( rawurldecode( $meta['meta_value'] ) ) ) ) . '</td></tr>';
 					}
 					echo '</table>';
 				}
@@ -126,8 +126,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 								continue;
 							}
 
-							$meta['meta_key']   = urldecode( $meta['meta_key'] );
-							$meta['meta_value'] = esc_textarea( urldecode( $meta['meta_value'] ) ); // using a <textarea />
+							$meta['meta_key']   = rawurldecode( $meta['meta_key'] );
+							$meta['meta_value'] = esc_textarea( rawurldecode( $meta['meta_value'] ) ); // using a <textarea />
 							$meta['meta_id']    = absint( $meta['meta_id'] );
 
 							echo '<tr data-meta_id="' . esc_attr( $meta['meta_id'] ) . '">
@@ -248,14 +248,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<div class="edit" style="display: none;">
 							<div class="split-input">
 								<?php $item_total_tax = ( isset( $tax_item_total ) ) ? esc_attr( wc_format_localized_price( $tax_item_total ) ) : ''; ?>
-								<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo $item_total_tax; ?>" class="line_tax wc_input_price tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" data-total_tax="<?php echo $item_total_tax; ?>" />
+								<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo $item_total_tax; ?>" class="line_tax wc_input_price tips" data-tip="<?php _e( 'After pre-tax discounts.', 'woocommerce' ); ?>" data-total_tax="<?php echo $item_total_tax; ?>" />
 
 								<?php $item_subtotal_tax = ( isset( $tax_item_subtotal ) ) ? esc_attr( wc_format_localized_price( $tax_item_subtotal ) ) : ''; ?>
-								<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" value="<?php echo $item_subtotal_tax; ?>" class="line_subtotal_tax wc_input_price tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>"data-subtotal_tax="<?php echo $item_subtotal_tax; ?>" />
+								<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" value="<?php echo $item_subtotal_tax; ?>" class="line_subtotal_tax wc_input_price tips" data-tip="<?php _e( 'Before pre-tax discounts.', 'woocommerce' ); ?>"data-subtotal_tax="<?php echo $item_subtotal_tax; ?>" />
 							</div>
 						</div>
 						<div class="refund" style="display: none;">
-							<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo absint( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" class="refund_line_tax wc_input_price" data-tax_id="<?php echo absint( $tax_item_id ); ?>" />
+							<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" class="refund_line_tax wc_input_price" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
 						</div>
 					</td>
 				<?php

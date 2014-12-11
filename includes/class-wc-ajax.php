@@ -26,6 +26,7 @@ class WC_AJAX {
 		$ajax_events = array(
 			'get_refreshed_fragments'                          => true,
 			'apply_coupon'                                     => true,
+			'remove_coupon'                                    => true,
 			'update_shipping_method'                           => true,
 			'update_order_review'                              => true,
 			'add_to_cart'                                      => true,
@@ -111,6 +112,30 @@ class WC_AJAX {
 			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 		} else {
 			wc_add_notice( WC_Coupon::get_generic_coupon_error( WC_Coupon::E_WC_COUPON_PLEASE_ENTER ), 'error' );
+		}
+
+		wc_print_notices();
+
+		die();
+	}
+
+	/**
+	 * AJAX remove coupon on cart and checkout page
+	 */
+	public static function remove_coupon() {
+
+		check_ajax_referer( 'remove-coupon', 'security' );
+
+		$coupon = wc_clean( $_POST['coupon'] );
+
+		if ( ! isset( $coupon ) || empty( $coupon ) ) {
+			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ) );
+
+		} else {
+
+			WC()->cart->remove_coupon( $coupon );
+
+			wc_add_notice( __( 'Coupon has been removed.', 'woocommerce' ) );
 		}
 
 		wc_print_notices();
@@ -1051,7 +1076,7 @@ class WC_AJAX {
 
 		$order_id = absint( $_POST['order_id'] );
 		$rate_id  = absint( $_POST['rate_id'] );
-		$order    = new WC_Order( $order_id );
+		$order    = wc_get_order( $order_id );
 		$data     = get_post_meta( $order_id );
 
 		// Add new tax
@@ -1097,7 +1122,7 @@ class WC_AJAX {
 		wc_delete_order_item( $rate_id );
 
 		// Return HTML items
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 		$data  = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 
@@ -1363,7 +1388,7 @@ class WC_AJAX {
 		wc_save_order_items( $order_id, $items );
 
 		// Return HTML items
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 		$data  = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 
@@ -1387,7 +1412,7 @@ class WC_AJAX {
 			wc_save_order_items( $order_id, $items );
 
 			// Return HTML items
-			$order = new WC_Order( $order_id );
+			$order = wc_get_order( $order_id );
 			$data  = get_post_meta( $order_id );
 			include( 'admin/meta-boxes/views/html-order-items.php' );
 		}
@@ -1403,7 +1428,7 @@ class WC_AJAX {
 
 		// Return HTML items
 		$order_id = absint( $_POST['order_id'] );
-		$order    = new WC_Order( $order_id );
+		$order    = wc_get_order( $order_id );
 		$data     = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 

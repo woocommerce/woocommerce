@@ -442,6 +442,47 @@ jQuery( function( $ ) {
 		return false;
 	});
 
+	$( '.woocommerce-checkout-review-order' ).on( 'click', '.woocommerce-remove-coupon', function( e ) {
+		e.preventDefault();
+
+		var container = $( this ).parents( '.woocommerce-checkout-review-order' ),
+			coupon = $( this ).data( 'coupon' );
+
+		container.addClass( 'processing' ).block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
+
+		var data = {
+			action:   'woocommerce_remove_coupon',
+			security: wc_checkout_params.remove_coupon_nonce,
+			coupon:   coupon
+		};
+
+		$.ajax({
+			type:    'POST',
+			url:     wc_checkout_params.ajax_url,
+			data:    data,
+			success: function( code ) {
+				$( '.woocommerce-error, .woocommerce-message' ).remove();
+				container.removeClass( 'processing' ).unblock();
+
+				if ( code ) {
+					container.before( code );
+
+					$( 'body' ).trigger( 'update_checkout' );
+
+					// remove coupon code from coupon field
+					$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
+				}
+			},
+			dataType: 'html'
+		});	
+	});
+
 	$( 'body' )
 
 	// Init trigger

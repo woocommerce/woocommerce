@@ -20,7 +20,7 @@ jQuery( function( $ ) {
 			placeholder = $statebox.attr( 'placeholder' );
 
 		if ( states[ country ] ) {
-			if ( states[ country ].length === 0 ) {
+			if ( $.isEmptyObject( states[ country ] ) ) {
 
 				$statebox.parent().hide().find( '.chosen-container' ).remove();
 				$statebox.replaceWith( '<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />' );
@@ -73,6 +73,10 @@ jQuery( function( $ ) {
 
 		$( 'body' ).trigger( 'country_to_state_changing', [country, $( this ).closest( 'div' )] );
 
-	}).change();
+	});
+
+	$(function() {
+		$( 'select.country_to_state, input.country_to_state' ).change();
+	});
 
 });

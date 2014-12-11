@@ -153,8 +153,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
 
-		// Test if the cart total amount is equal 19
-		$this->assertEquals( 19, WC()->cart->total );
+		// Test if the cart total amount is equal 19.5
+		$this->assertEquals( 19.5, WC()->cart->total );
 
 		// Clearing WC notices
 		wc_clear_notices();

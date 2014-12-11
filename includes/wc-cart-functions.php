@@ -204,8 +204,8 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$value  = array();
 
-	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) ) {
-		$discount_html = '-' . wc_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
+	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->code, WC()->cart->display_cart_ex_tax ) ) {
+		$discount_html = '-' . wc_price( $amount );
 	} else {
 		$discount_html = '';
 	}
@@ -219,7 +219,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
     // get rid of empty array elements
     $value = array_filter( $value );
 
-	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->code ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
 }

@@ -261,7 +261,7 @@ class WC_Checkout {
 
 			// Store coupons
 			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-				if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ) ) ) {
+				if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ), WC()->cart->get_coupon_discount_tax_amount( $code ) ) ) {
 					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
 				}
 			}
@@ -288,8 +288,8 @@ class WC_Checkout {
 			$order->set_address( $shipping_address, 'shipping' );
 			$order->set_payment_method( $this->payment_method );
 			$order->set_total( WC()->cart->shipping_total, 'shipping' );
-			$order->set_total( WC()->cart->get_order_discount_total(), 'order_discount' );
 			$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
+			$order->set_total( WC()->cart->get_cart_discount_tax_total(), 'cart_discount_tax' );
 			$order->set_total( WC()->cart->tax_total, 'tax' );
 			$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
 			$order->set_total( WC()->cart->total );
