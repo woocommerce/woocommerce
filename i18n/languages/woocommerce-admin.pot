@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.2.8 Admin\n"
+"Project-Id-Version: WooCommerce 2.2.9 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-10-29 12:16:47+00:00\n"
+"POT-Creation-Date: 2014-12-11 17:45:50+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -205,7 +205,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:188
 #: includes/admin/class-wc-admin-post-types.php:124
-#: includes/admin/class-wc-admin-post-types.php:1971
+#: includes/admin/class-wc-admin-post-types.php:1989
 #: includes/admin/views/html-bulk-edit-product.php:181
 #: includes/admin/views/html-quick-edit-product.php:139
 msgid "Featured"
@@ -343,9 +343,9 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:323
 #: includes/admin/class-wc-admin-post-types.php:213
-#: includes/admin/class-wc-admin-post-types.php:1975
+#: includes/admin/class-wc-admin-post-types.php:1993
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:215
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:296
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:298
 #: includes/admin/meta-boxes/views/html-order-items.php:203
 #: includes/admin/reports/class-wc-report-customer-list.php:189
 #: includes/admin/reports/class-wc-report-stock.php:126
@@ -574,7 +574,7 @@ msgid "WooCommerce Settings"
 msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:67
-#: includes/admin/class-wc-admin-welcome.php:241
+#: includes/admin/class-wc-admin-welcome.php:225
 #: includes/admin/settings/class-wc-settings-checkout.php:288
 #: includes/admin/settings/class-wc-settings-shipping.php:236
 #: includes/admin/views/html-admin-page-status-report.php:294
@@ -605,42 +605,41 @@ msgstr ""
 msgid "Product Gallery"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:109
-msgid "Order Data"
-msgstr ""
-
 #: includes/admin/class-wc-admin-meta-boxes.php:110
-msgid "Order Items"
+msgid "%s Data"
 msgstr ""
 
 #: includes/admin/class-wc-admin-meta-boxes.php:111
-#: includes/admin/class-wc-admin-post-types.php:163
-msgid "Order Notes"
+msgid "%s Items"
 msgstr ""
 
 #: includes/admin/class-wc-admin-meta-boxes.php:112
+msgid "%s Notes"
+msgstr ""
+
+#: includes/admin/class-wc-admin-meta-boxes.php:113
 msgid "Downloadable Product Permissions"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:112
+#: includes/admin/class-wc-admin-meta-boxes.php:113
 msgid ""
 "Note: Permissions for order items will automatically be granted when the "
 "order status changes to processing/completed."
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:113
-msgid "Order Actions"
+#: includes/admin/class-wc-admin-meta-boxes.php:114
+msgid "%s Actions"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:117
+#: includes/admin/class-wc-admin-meta-boxes.php:118
 msgid "Coupon Data"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:122
+#: includes/admin/class-wc-admin-meta-boxes.php:123
 msgid "Rating"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:158
+#: includes/admin/class-wc-admin-meta-boxes.php:159
 msgid "Reviews"
 msgstr ""
 
@@ -734,7 +733,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:126
 #: includes/admin/class-wc-admin-post-types.php:164
-#: includes/admin/reports/class-wc-report-coupon-usage.php:327
+#: includes/admin/reports/class-wc-report-coupon-usage.php:339
 #: includes/admin/reports/class-wc-report-customers.php:209
 #: includes/admin/reports/class-wc-report-sales-by-category.php:240
 #: includes/admin/reports/class-wc-report-sales-by-date.php:224
@@ -795,6 +794,10 @@ msgstr ""
 msgid "Customer Message"
 msgstr ""
 
+#: includes/admin/class-wc-admin-post-types.php:163
+msgid "Order Notes"
+msgstr ""
+
 #: includes/admin/class-wc-admin-post-types.php:165
 #: includes/admin/meta-boxes/views/html-order-items.php:57
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:173
@@ -802,7 +805,7 @@ msgid "Total"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:166
-#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:40
+#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:41
 #: includes/admin/meta-boxes/views/html-order-items.php:201
 #: includes/admin/reports/class-wc-report-customer-list.php:251
 #: includes/admin/reports/class-wc-report-stock.php:159
@@ -848,7 +851,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:224
 #: includes/admin/class-wc-admin-post-types.php:373
-#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:73
+#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:74
 msgid "Delete Permanently"
 msgstr ""
 
@@ -880,14 +883,14 @@ msgid "External/Affiliate"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:288
-#: includes/admin/class-wc-admin-post-types.php:1418
+#: includes/admin/class-wc-admin-post-types.php:1436
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:57
 #: includes/admin/meta-boxes/views/html-variation-admin.php:239
 msgid "Virtual"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:290
-#: includes/admin/class-wc-admin-post-types.php:1410
+#: includes/admin/class-wc-admin-post-types.php:1428
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:64
 #: includes/admin/meta-boxes/views/html-variation-admin.php:237
 msgid "Downloadable"
@@ -1028,247 +1031,247 @@ msgstr ""
 msgid "Sort Products"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1144
-#: includes/admin/class-wc-admin-post-types.php:1145
+#: includes/admin/class-wc-admin-post-types.php:1168
+#: includes/admin/class-wc-admin-post-types.php:1169
 msgid "Mark processing"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1147
-#: includes/admin/class-wc-admin-post-types.php:1148
+#: includes/admin/class-wc-admin-post-types.php:1171
+#: includes/admin/class-wc-admin-post-types.php:1172
 msgid "Mark on-hold"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1150
-#: includes/admin/class-wc-admin-post-types.php:1151
+#: includes/admin/class-wc-admin-post-types.php:1174
+#: includes/admin/class-wc-admin-post-types.php:1175
 msgid "Mark complete"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1192
+#: includes/admin/class-wc-admin-post-types.php:1216
 msgid "Order status changed by bulk edit:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1214
+#: includes/admin/class-wc-admin-post-types.php:1238
 msgid "Order status changed."
 msgid_plural "%s order statuses changed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-wc-admin-post-types.php:1370
+#: includes/admin/class-wc-admin-post-types.php:1388
 msgid "Show all product types"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1383
+#: includes/admin/class-wc-admin-post-types.php:1401
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:40
 msgid "Grouped product"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1386
+#: includes/admin/class-wc-admin-post-types.php:1404
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:41
 msgid "External/Affiliate product"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1389
+#: includes/admin/class-wc-admin-post-types.php:1407
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:42
 msgid "Variable product"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1392
+#: includes/admin/class-wc-admin-post-types.php:1410
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:39
 msgid "Simple product"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1433
+#: includes/admin/class-wc-admin-post-types.php:1451
 msgid "Show all types"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1461
-#: includes/admin/class-wc-admin-post-types.php:1483
+#: includes/admin/class-wc-admin-post-types.php:1479
+#: includes/admin/class-wc-admin-post-types.php:1501
 msgid "Show all customers"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1645
+#: includes/admin/class-wc-admin-post-types.php:1663
 msgid "Product updated. <a href=\"%s\">View Product</a>"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1646
-#: includes/admin/class-wc-admin-post-types.php:1661
-#: includes/admin/class-wc-admin-post-types.php:1676
+#: includes/admin/class-wc-admin-post-types.php:1664
+#: includes/admin/class-wc-admin-post-types.php:1679
+#: includes/admin/class-wc-admin-post-types.php:1694
 msgid "Custom field updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1647
-#: includes/admin/class-wc-admin-post-types.php:1662
-#: includes/admin/class-wc-admin-post-types.php:1677
+#: includes/admin/class-wc-admin-post-types.php:1665
+#: includes/admin/class-wc-admin-post-types.php:1680
+#: includes/admin/class-wc-admin-post-types.php:1695
 msgid "Custom field deleted."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1648
+#: includes/admin/class-wc-admin-post-types.php:1666
 msgid "Product updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1649
+#: includes/admin/class-wc-admin-post-types.php:1667
 msgid "Product restored to revision from %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1650
+#: includes/admin/class-wc-admin-post-types.php:1668
 msgid "Product published. <a href=\"%s\">View Product</a>"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1651
+#: includes/admin/class-wc-admin-post-types.php:1669
 msgid "Product saved."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1652
+#: includes/admin/class-wc-admin-post-types.php:1670
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1653
+#: includes/admin/class-wc-admin-post-types.php:1671
 msgid ""
 "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" "
 "href=\"%2$s\">Preview Product</a>"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1654
-#: includes/admin/class-wc-admin-post-types.php:1669
-#: includes/admin/class-wc-admin-post-types.php:1684
+#: includes/admin/class-wc-admin-post-types.php:1672
+#: includes/admin/class-wc-admin-post-types.php:1687
+#: includes/admin/class-wc-admin-post-types.php:1702
 msgid "M j, Y @ G:i"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1655
+#: includes/admin/class-wc-admin-post-types.php:1673
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1660
-#: includes/admin/class-wc-admin-post-types.php:1663
-#: includes/admin/class-wc-admin-post-types.php:1665
+#: includes/admin/class-wc-admin-post-types.php:1678
+#: includes/admin/class-wc-admin-post-types.php:1681
+#: includes/admin/class-wc-admin-post-types.php:1683
 msgid "Order updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1664
+#: includes/admin/class-wc-admin-post-types.php:1682
 msgid "Order restored to revision from %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1666
+#: includes/admin/class-wc-admin-post-types.php:1684
 msgid "Order saved."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1667
+#: includes/admin/class-wc-admin-post-types.php:1685
 msgid "Order submitted."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1668
+#: includes/admin/class-wc-admin-post-types.php:1686
 msgid "Order scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1670
+#: includes/admin/class-wc-admin-post-types.php:1688
 msgid "Order draft updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1675
-#: includes/admin/class-wc-admin-post-types.php:1678
-#: includes/admin/class-wc-admin-post-types.php:1680
+#: includes/admin/class-wc-admin-post-types.php:1693
+#: includes/admin/class-wc-admin-post-types.php:1696
+#: includes/admin/class-wc-admin-post-types.php:1698
 msgid "Coupon updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1679
+#: includes/admin/class-wc-admin-post-types.php:1697
 msgid "Coupon restored to revision from %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1681
+#: includes/admin/class-wc-admin-post-types.php:1699
 msgid "Coupon saved."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1682
+#: includes/admin/class-wc-admin-post-types.php:1700
 msgid "Coupon submitted."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1683
+#: includes/admin/class-wc-admin-post-types.php:1701
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1685
+#: includes/admin/class-wc-admin-post-types.php:1703
 msgid "Coupon draft updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1867
+#: includes/admin/class-wc-admin-post-types.php:1885
 msgid "Product Image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1869
+#: includes/admin/class-wc-admin-post-types.php:1887
 msgid "Remove product image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1871
-#: includes/admin/class-wc-admin-post-types.php:1887
-#: includes/admin/class-wc-admin-post-types.php:1888
+#: includes/admin/class-wc-admin-post-types.php:1889
+#: includes/admin/class-wc-admin-post-types.php:1905
+#: includes/admin/class-wc-admin-post-types.php:1906
 msgid "Set product image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1903
+#: includes/admin/class-wc-admin-post-types.php:1921
 msgid "Product name"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1906
+#: includes/admin/class-wc-admin-post-types.php:1924
 msgid "Coupon code"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1919
+#: includes/admin/class-wc-admin-post-types.php:1937
 msgid "Description (optional)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1936
+#: includes/admin/class-wc-admin-post-types.php:1954
 msgid "Insert into %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1937
+#: includes/admin/class-wc-admin-post-types.php:1955
 msgid "Uploaded to this %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1960
+#: includes/admin/class-wc-admin-post-types.php:1978
 msgid "Catalog/search"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1961
+#: includes/admin/class-wc-admin-post-types.php:1979
 #: includes/admin/views/html-bulk-edit-product.php:169
 #: includes/admin/views/html-quick-edit-product.php:126
 msgid "Catalog"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1962
+#: includes/admin/class-wc-admin-post-types.php:1980
 #: includes/admin/views/html-bulk-edit-product.php:170
 #: includes/admin/views/html-quick-edit-product.php:127
 msgid "Search"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1963
+#: includes/admin/class-wc-admin-post-types.php:1981
 #: includes/admin/views/html-bulk-edit-product.php:171
 #: includes/admin/views/html-quick-edit-product.php:128
 msgid "Hidden"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1967
+#: includes/admin/class-wc-admin-post-types.php:1985
 msgid "Catalog visibility:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1983
+#: includes/admin/class-wc-admin-post-types.php:2001
 msgid ""
 "Define the loops this product should be visible in. The product will still "
 "be accessible directly."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1989
+#: includes/admin/class-wc-admin-post-types.php:2007
 msgid "Enable this option to feature this product."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1991
+#: includes/admin/class-wc-admin-post-types.php:2009
 msgid "Featured Product"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1994
+#: includes/admin/class-wc-admin-post-types.php:2012
 msgid "OK"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1995
+#: includes/admin/class-wc-admin-post-types.php:2013
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:177
 #: includes/admin/meta-boxes/views/html-order-items.php:237
 #: includes/admin/meta-boxes/views/html-order-items.php:280
@@ -1742,170 +1745,155 @@ msgstr ""
 msgid "Welcome to WooCommerce"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:223
+#: includes/admin/class-wc-admin-welcome.php:207
 msgid "Welcome to WooCommerce %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:228
+#: includes/admin/class-wc-admin-welcome.php:212
 msgid "Thanks, all done!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:230
+#: includes/admin/class-wc-admin-welcome.php:214
 msgid "Thank you for updating to the latest version!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:232
+#: includes/admin/class-wc-admin-welcome.php:216
 msgid "Thanks for installing!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:234
+#: includes/admin/class-wc-admin-welcome.php:218
 msgid ""
 "%s WooCommerce %s is more powerful, stable and secure than ever before. We "
 "hope you enjoy using it."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:238
+#: includes/admin/class-wc-admin-welcome.php:222
 msgid "Version %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:242
+#: includes/admin/class-wc-admin-welcome.php:226
 msgid "Docs"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:249
+#: includes/admin/class-wc-admin-welcome.php:233
 msgid "What's New"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:251
+#: includes/admin/class-wc-admin-welcome.php:235
 msgid "Credits"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:253
+#: includes/admin/class-wc-admin-welcome.php:237
 msgid "Translators"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:273
+#: includes/admin/class-wc-admin-welcome.php:257
 msgid "Perform partial refunds on orders"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:274
+#: includes/admin/class-wc-admin-welcome.php:258
 msgid ""
 "Store owners can now do partial refunds on orders; define the refund "
 "amount, qty, and optionally restore inventory. If the gateway supports it, "
 "the payment can be automatically refunded too!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:278
+#: includes/admin/class-wc-admin-welcome.php:262
 msgid "Updated order totals UI"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:279
+#: includes/admin/class-wc-admin-welcome.php:263
 msgid ""
 "To support the partial refund functionality, the order items and totals "
 "panels have been combined. As a result we have a simpler, more user "
 "friendly order page."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:284
+#: includes/admin/class-wc-admin-welcome.php:268
 msgid "WooCommerce REST API version 2"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:287
+#: includes/admin/class-wc-admin-welcome.php:271
 msgid "Introducing PUT/POST/DELETE methods"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:288
+#: includes/admin/class-wc-admin-welcome.php:272
 msgid ""
 "Update, delete and create orders, customers, products and coupons via the "
 "API."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:291
+#: includes/admin/class-wc-admin-welcome.php:275
 msgid "Other enhancements"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:292
+#: includes/admin/class-wc-admin-welcome.php:276
 msgid ""
 "Resources can now be ordered by any field you define for greater control "
 "over returned results. v2 also introduces an endpoint for getting product "
 "categories from your store."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:295
+#: includes/admin/class-wc-admin-welcome.php:279
 msgid "Webhooks"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:296
+#: includes/admin/class-wc-admin-welcome.php:280
 msgid ""
 "Trigger webhooks during events such as when an order is created. Opens up "
 "all kinds of external integration opportunities."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:303
+#: includes/admin/class-wc-admin-welcome.php:287
 msgid "Language pack downloader"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:304
+#: includes/admin/class-wc-admin-welcome.php:288
 msgid ""
 "Due to the size of PO and MO files, we have removed them from core and "
 "included our \"Language Pack Downloader\". International users can download "
 "and update their translation files easily from the dashboard."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:307
+#: includes/admin/class-wc-admin-welcome.php:291
 msgid "Variation stock management"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:308
+#: includes/admin/class-wc-admin-welcome.php:292
 msgid ""
 "You can now set stock management options (such as backorder support) at "
 "variation level giving much greater control over stock."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:311
+#: includes/admin/class-wc-admin-welcome.php:295
 msgid "Improved Payment Gateways"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:312
+#: includes/admin/class-wc-admin-welcome.php:296
 msgid ""
 "The Payment Gateway API has been enhanced to support refunds and storing "
 "transaction IDs."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:319
-msgid "Join us at the inaugural WooCommerce Conference in San Francisco"
-msgstr ""
-
-#: includes/admin/class-wc-admin-welcome.php:320
-msgid ""
-"On the %s3rd and 4th%s of November 2014 WooCommerce creators WooThemes are "
-"hosting an event dedicated to store owners &amp; WordPress developers "
-"wanting to learn the art of eCommerce using WooCommerce."
-msgstr ""
-
-#: includes/admin/class-wc-admin-welcome.php:321
-msgid "Find out more & buy tickets"
-msgstr ""
-
-#: includes/admin/class-wc-admin-welcome.php:327
+#: includes/admin/class-wc-admin-welcome.php:302
 msgid "Go to WooCommerce Settings"
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:342
+#: includes/admin/class-wc-admin-welcome.php:317
 msgid ""
 "WooCommerce is developed and maintained by a worldwide team of passionate "
 "individuals and backed by an awesome developer community. Want to see your "
 "name? <a href=\"%s\">Contribute to WooCommerce</a>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:358
+#: includes/admin/class-wc-admin-welcome.php:333
 msgid ""
 "WooCommerce has been kindly translated into several other languages thanks "
 "to our translation team. Want to see your name? <a href=\"%s\">Translate "
 "WooCommerce</a>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-welcome.php:407
+#: includes/admin/class-wc-admin-welcome.php:382
 msgid "View %s"
 msgstr ""
 
@@ -2180,29 +2168,29 @@ msgid ""
 "code."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:41
+#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:42
 msgid "Resend order emails"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:57
+#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:58
 msgid "Generate download permissions"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:64
+#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:65
 #: includes/admin/meta-boxes/views/html-order-items.php:213
 msgid "Apply"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:75
+#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:76
 msgid "Move to Trash"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:81
-msgid "Save Order"
+#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:82
+msgid "Save %s"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:81
-msgid "Save/update the order"
+#: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php:82
+msgid "Save/update the %s"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:43
@@ -2267,8 +2255,8 @@ msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:221
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:223
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:302
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:304
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:306
 msgid "Address"
 msgstr ""
 
@@ -2280,52 +2268,52 @@ msgstr ""
 msgid "Load billing address"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:262
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:264
 msgid "Payment Method:"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:264
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:266
 #: includes/admin/meta-boxes/views/html-order-shipping.php:21
 #: includes/admin/views/html-admin-page-status-report.php:219
 msgid "N/A"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:278
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:280
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:282
 #: includes/admin/meta-boxes/views/html-order-shipping.php:37
 #: includes/admin/meta-boxes/views/html-order-shipping.php:39
 msgid "Other"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:287
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:289
 msgid "Transaction ID"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:296
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:298
 msgid "Shipping Details"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:304
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:306
 msgid "No shipping address set."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:322
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:324
 msgid "Customer Note"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:328
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:330
 msgid "Load shipping address"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:328
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:330
 msgid "Copy from billing"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:349
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:353
 msgid "Customer Note:"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:350
+#: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:354
 msgid "Customer's notes about the order"
 msgstr ""
 
@@ -2354,7 +2342,7 @@ msgid "Delete note"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-notes.php:61
-msgid "There are no notes for this order yet."
+msgid "There are no notes yet."
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-notes.php:67
@@ -3264,25 +3252,25 @@ msgstr ""
 msgid "Enable this option to enable stock management at variation level"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:441
+#: includes/admin/reports/class-wc-admin-report.php:443
 msgid "Sold %s worth in the last %d days"
 msgstr ""
 
-#: includes/admin/reports/class-wc-admin-report.php:443
+#: includes/admin/reports/class-wc-admin-report.php:445
 msgid "Sold 1 item in the last %d days"
 msgid_plural "Sold %d items in the last %d days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:79
+#: includes/admin/reports/class-wc-report-coupon-usage.php:91
 msgid "%s discounts in total"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:85
+#: includes/admin/reports/class-wc-report-coupon-usage.php:97
 msgid "%s coupons used in total"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:99
+#: includes/admin/reports/class-wc-report-coupon-usage.php:111
 #: includes/admin/reports/class-wc-report-customers.php:145
 #: includes/admin/reports/class-wc-report-sales-by-category.php:86
 #: includes/admin/reports/class-wc-report-sales-by-date.php:185
@@ -3292,7 +3280,7 @@ msgstr ""
 msgid "Year"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:100
+#: includes/admin/reports/class-wc-report-coupon-usage.php:112
 #: includes/admin/reports/class-wc-report-customers.php:146
 #: includes/admin/reports/class-wc-report-sales-by-category.php:87
 #: includes/admin/reports/class-wc-report-sales-by-date.php:186
@@ -3302,7 +3290,7 @@ msgstr ""
 msgid "Last Month"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:101
+#: includes/admin/reports/class-wc-report-coupon-usage.php:113
 #: includes/admin/reports/class-wc-report-customers.php:147
 #: includes/admin/reports/class-wc-report-sales-by-category.php:88
 #: includes/admin/reports/class-wc-report-sales-by-date.php:187
@@ -3312,7 +3300,7 @@ msgstr ""
 msgid "This Month"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:102
+#: includes/admin/reports/class-wc-report-coupon-usage.php:114
 #: includes/admin/reports/class-wc-report-customers.php:148
 #: includes/admin/reports/class-wc-report-sales-by-category.php:89
 #: includes/admin/reports/class-wc-report-sales-by-date.php:188
@@ -3320,42 +3308,42 @@ msgstr ""
 msgid "Last 7 Days"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:143
+#: includes/admin/reports/class-wc-report-coupon-usage.php:155
 msgid "Filter by coupon"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:171
+#: includes/admin/reports/class-wc-report-coupon-usage.php:183
 msgid "Choose coupons&hellip;"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:172
+#: includes/admin/reports/class-wc-report-coupon-usage.php:184
 msgid "All coupons"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:179
+#: includes/admin/reports/class-wc-report-coupon-usage.php:191
 #: includes/admin/reports/class-wc-report-sales-by-category.php:198
 #: includes/admin/reports/class-wc-report-sales-by-product.php:182
 msgid "Show"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:192
+#: includes/admin/reports/class-wc-report-coupon-usage.php:204
 msgid "No used coupons found"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:197
+#: includes/admin/reports/class-wc-report-coupon-usage.php:209
 msgid "Most Popular"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:239
-#: includes/admin/reports/class-wc-report-coupon-usage.php:287
+#: includes/admin/reports/class-wc-report-coupon-usage.php:251
+#: includes/admin/reports/class-wc-report-coupon-usage.php:299
 msgid "No coupons found in range"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:244
+#: includes/admin/reports/class-wc-report-coupon-usage.php:256
 msgid "Most Discount"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:330
+#: includes/admin/reports/class-wc-report-coupon-usage.php:342
 #: includes/admin/reports/class-wc-report-customers.php:212
 #: includes/admin/reports/class-wc-report-sales-by-category.php:243
 #: includes/admin/reports/class-wc-report-sales-by-date.php:228
@@ -3366,11 +3354,11 @@ msgstr ""
 msgid "Export CSV"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:422
+#: includes/admin/reports/class-wc-report-coupon-usage.php:448
 msgid "Number of coupons used"
 msgstr ""
 
-#: includes/admin/reports/class-wc-report-coupon-usage.php:430
+#: includes/admin/reports/class-wc-report-coupon-usage.php:456
 msgid "Discount amount"
 msgstr ""
 
