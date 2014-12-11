@@ -130,8 +130,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.2.9 - xx/11/2014 =
+= 2.2.9 - xx/12/2014 =
 * Fix - Processing and On-hold order links in WooCommerce Status dashboard widget.
+* Fix - Orders API when query orders with deleted products.
 
 = 2.2.8 - 29/10/2014 =
 * Fix - Image crop option.
