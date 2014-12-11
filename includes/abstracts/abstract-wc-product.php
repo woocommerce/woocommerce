@@ -57,31 +57,30 @@ class WC_Product {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
+		$this->$key = get_post_meta( $this->id, '_' . $key, true );
 
 		// Get values or default if not set
 		if ( in_array( $key, array( 'downloadable', 'virtual', 'backorders', 'manage_stock', 'featured', 'sold_individually' ) ) ) {
-			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : 'no';
+			$this->$key = $this->$key ? $this->$key : 'no';
 
 		} elseif ( in_array( $key, array( 'product_attributes', 'crosssell_ids', 'upsell_ids' ) ) ) {
-			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : array();
+			$this->$key = $this->$key ? $this->$key : array();
 
-		} elseif ( 'visibility' == $key ) {
-			$value = ( $value = get_post_meta( $this->id, '_visibility', true ) ) ? $value : 'hidden';
+		} elseif ( 'visibility' === $key ) {
+			$this->$key = $this->$key ? $this->$key : 'hidden';
 
-		} elseif ( 'stock' == $key ) {
-			$value = ( $value = get_post_meta( $this->id, '_stock', true ) ) ? $value : 0;
+		} elseif ( 'stock' === $key ) {
+			$this->$key = $this->$key ? $this->$key : 0;
 
-		} elseif ( 'stock_status' == $key ) {
-			$value = ( $value = get_post_meta( $this->id, '_stock_status', true ) ) ? $value : 'instock';
+		} elseif ( 'stock_status' === $key ) {
+			$this->$key = $this->$key ? $this->$key : 'instock';
 
-		} elseif ( 'tax_status' == $key ) {
-			$value = ( $value = get_post_meta( $this->id, '_tax_status', true ) ) ? $value : 'taxable';
+		} elseif ( 'tax_status' === $key ) {
+			$this->$key = $this->$key ? $this->$key : 'taxable';
 
-		} else {
-			$value = get_post_meta( $this->id, '_' . $key, true );
 		}
 
-		return $value;
+		return $this->$key;
 	}
 
 	/**
