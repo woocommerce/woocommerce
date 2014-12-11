@@ -50,6 +50,12 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		WC_Helper_Customer::set_chosen_shipping_methods( $original_chosen_shipping_methods );
 		WC_Helper_Customer::set_tax_based_on( $original_tax_based_on );
 		WC_Helper_Customer::set_customer_details( $original_customer_details );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Clean up product
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -98,5 +104,11 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		WC_Helper_Customer::set_chosen_shipping_methods( $original_chosen_shipping_methods );
 		WC_Helper_Customer::set_tax_based_on( $original_tax_based_on );
 		WC_Helper_Customer::set_customer_details( $original_customer_details );
+		
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Clean up product
+		WC_Helper_Product::delete_product( $product->id );
 	}
 }
