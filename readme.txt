@@ -143,6 +143,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - During refunds, correctly set shipping tax totals.
 * Fix - Ensure floats are safely converted to strings.
 * Fix - remove_taxes needs to clear line_tax_data.
+* Fix - Correctly save custom address fields in admin.
 * Tweak - API - set_fee should support tax_data.
 * Tweak - Don't force tax_rate_id to an integer. Allow strings.
 * Tweak - Additonal filters inside tax class to support extensions.
