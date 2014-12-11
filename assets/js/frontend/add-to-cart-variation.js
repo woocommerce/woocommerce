@@ -76,7 +76,9 @@
 				else
 					$variation_form.find( 'input[name=variation_id]' ).val( '' ).change();
 
-				$variation_form.trigger( 'check_variations', [ '', false ] );
+				$variation_form
+					.trigger( 'woocommerce_variation_select_change' )
+					.trigger( 'check_variations', [ '', false ] );
 
 				$( this ).blur();
 
@@ -85,7 +87,7 @@
 				}
 
 				// Custom event for when variation selection has been changed
-				$variation_form.trigger( 'woocommerce_variation_select_change' );
+				$variation_form.trigger( 'woocommerce_variation_has_changed' );
 
 			} )
 
