@@ -90,10 +90,10 @@ jQuery( function( $ ) {
 						// Form object
 						var $form = $( 'form.checkout' );
 
-						if ( data.messages ) {
-							$form.prepend( data.messages );
+						if ( response.messages ) {
+							$form.prepend( response.messages );
 						} else {
-							$form.prepend( data );
+							$form.prepend( response );
 						}
 
 						// Lose focus for all fields
@@ -105,9 +105,8 @@ jQuery( function( $ ) {
 						}, 1000 );
 
 					}
-
-
-					$( '#order_review' ).html( $.trim( response ) );
+					
+					$( '#order_review' ).html( $.trim( response.html ) );
 					$( '#order_review' ).find( 'input[name=payment_method]:checked' ).trigger( 'click' );
 					$( 'body' ).trigger( 'updated_checkout' );
 				}

@@ -256,7 +256,28 @@ class WC_AJAX {
 
 		WC()->cart->calculate_totals();
 
-		do_action( 'woocommerce_checkout_order_review', true ); // Display review order table
+		// Get the review order table
+		ob_start();
+		do_action( 'woocommerce_checkout_order_review', true );
+		$woocommerce_checkout_order_review = ob_get_clean();
+
+		// Get messages if reload checkout is not true
+		$messages = '';
+		if ( ! isset( WC()->session->reload_checkout ) ) {
+			ob_start();
+			wc_print_notices();
+			$messages = ob_get_clean();
+		}
+
+		// Setup data
+		$data = array(
+			'result'   => empty( $messages ) ? 'success' : 'failure',
+			'messages' => $messages,
+			'html'     => $woocommerce_checkout_order_review
+		);
+
+		// Send JSON
+		wp_send_json( $data );
 
 		die();
 	}
