@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.2.8 Frontend\n"
+"Project-Id-Version: WooCommerce 2.2.9 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-10-29 12:16:47+00:00\n"
+"POT-Creation-Date: 2014-12-11 17:45:50+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -3022,7 +3022,7 @@ msgid "Aguascalientes"
 msgstr ""
 
 #: i18n/states/MX.php:17
-msgid "Baja California Norte"
+msgid "Baja California"
 msgstr ""
 
 #: i18n/states/MX.php:18
@@ -4755,42 +4755,42 @@ msgstr ""
 msgid "Backordered"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1613
+#: includes/abstracts/abstract-wc-order.php:1611
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1618
+#: includes/abstracts/abstract-wc-order.php:1616
 #: includes/abstracts/abstract-wc-product.php:890
 #: includes/abstracts/abstract-wc-product.php:896
-#: includes/class-wc-cart.php:1443 includes/class-wc-product-variation.php:294
+#: includes/class-wc-cart.php:1458 includes/class-wc-product-variation.php:294
 msgid "Free!"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1680
+#: includes/abstracts/abstract-wc-order.php:1678
 msgid "Cart Subtotal:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1687
+#: includes/abstracts/abstract-wc-order.php:1685
 msgid "Cart Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1694
+#: includes/abstracts/abstract-wc-order.php:1692
 msgid "Shipping:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1747
+#: includes/abstracts/abstract-wc-order.php:1745
 msgid "Order Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1754
+#: includes/abstracts/abstract-wc-order.php:1752
 msgid "Payment Method:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1760
+#: includes/abstracts/abstract-wc-order.php:1758
 msgid "Order Total:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1780
+#: includes/abstracts/abstract-wc-order.php:1778
 #: includes/wc-cart-functions.php:252
 msgid "(Includes %s)"
 msgstr ""
@@ -4799,16 +4799,16 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2078
+#: includes/abstracts/abstract-wc-order.php:2076
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2341
+#: includes/abstracts/abstract-wc-order.php:2339
 #: includes/class-wc-ajax.php:1167 includes/class-wc-ajax.php:1168
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2351
+#: includes/abstracts/abstract-wc-order.php:2349
 msgid "Order item stock reduced successfully."
 msgstr ""
 
@@ -5047,199 +5047,199 @@ msgstr ""
 msgid "The JSONP callback function is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:304
+#: includes/api/class-wc-api-orders.php:312
 #: includes/api/v1/class-wc-api-orders.php:258
 msgid "You do not have permission to read the orders count"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:346
+#: includes/api/class-wc-api-orders.php:354
 msgid "You do not have permission to create orders"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:362
-#: includes/api/class-wc-api-orders.php:498
+#: includes/api/class-wc-api-orders.php:370
+#: includes/api/class-wc-api-orders.php:506
 msgid "Customer ID is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:372
+#: includes/api/class-wc-api-orders.php:380
 msgid "Cannot create order: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:406
+#: includes/api/class-wc-api-orders.php:414
 msgid "Payment method ID and title are required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:422
-#: includes/api/class-wc-api-orders.php:569
+#: includes/api/class-wc-api-orders.php:430
+#: includes/api/class-wc-api-orders.php:577
 msgid "Provided order currency is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:524
+#: includes/api/class-wc-api-orders.php:532
 msgid "Order item ID is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:795
+#: includes/api/class-wc-api-orders.php:803
 msgid "Order item ID provided is not associated with order"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:817
+#: includes/api/class-wc-api-orders.php:825
 msgid "Product ID is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:827
+#: includes/api/class-wc-api-orders.php:835
 msgid "Product ID provided does not match this line item"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:835
+#: includes/api/class-wc-api-orders.php:843
 msgid "Product is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:840
+#: includes/api/class-wc-api-orders.php:848
 msgid "Product quantity must be a positive float"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:845
+#: includes/api/class-wc-api-orders.php:853
 msgid "Product quantity is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:859
+#: includes/api/class-wc-api-orders.php:867
 msgid "The product variation is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:890
+#: includes/api/class-wc-api-orders.php:898
 msgid "Cannot create line item, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:898
+#: includes/api/class-wc-api-orders.php:906
 msgid "Cannot update line item, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:916
+#: includes/api/class-wc-api-orders.php:924
 msgid "Shipping total must be a positive amount"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:923
+#: includes/api/class-wc-api-orders.php:931
 msgid "Shipping method ID is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:931
+#: includes/api/class-wc-api-orders.php:939
 msgid "Cannot create shipping method, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:953
+#: includes/api/class-wc-api-orders.php:961
 msgid "Cannot update shipping method, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:973
+#: includes/api/class-wc-api-orders.php:981
 msgid "Fee title is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:985
+#: includes/api/class-wc-api-orders.php:993
 msgid "Fee tax class is required when fee is taxable"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:996
+#: includes/api/class-wc-api-orders.php:1014
 msgid "Cannot create fee, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1022
+#: includes/api/class-wc-api-orders.php:1040
 msgid "Cannot update fee, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1040
+#: includes/api/class-wc-api-orders.php:1058
 msgid "Coupon discount total must be a positive amount"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1047
+#: includes/api/class-wc-api-orders.php:1065
 msgid "Coupon code is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1053
+#: includes/api/class-wc-api-orders.php:1071
 msgid "Cannot create coupon, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1071
+#: includes/api/class-wc-api-orders.php:1089
 msgid "Cannot update coupon, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1136
-#: includes/api/class-wc-api-orders.php:1230
-#: includes/api/class-wc-api-orders.php:1289
+#: includes/api/class-wc-api-orders.php:1154
+#: includes/api/class-wc-api-orders.php:1248
+#: includes/api/class-wc-api-orders.php:1307
 msgid "Invalid order note ID"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1142
-#: includes/api/class-wc-api-orders.php:1237
-#: includes/api/class-wc-api-orders.php:1296
+#: includes/api/class-wc-api-orders.php:1160
+#: includes/api/class-wc-api-orders.php:1255
+#: includes/api/class-wc-api-orders.php:1314
 msgid "An order note with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1169
+#: includes/api/class-wc-api-orders.php:1187
 msgid "You do not have permission to create order notes"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1175
-#: includes/api/class-wc-api-orders.php:1449
+#: includes/api/class-wc-api-orders.php:1193
+#: includes/api/class-wc-api-orders.php:1467
 msgid "Order ID is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1184
+#: includes/api/class-wc-api-orders.php:1202
 msgid "Order note is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1193
+#: includes/api/class-wc-api-orders.php:1211
 msgid "Cannot create order note, please try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1242
-#: includes/api/class-wc-api-orders.php:1301
+#: includes/api/class-wc-api-orders.php:1260
+#: includes/api/class-wc-api-orders.php:1319
 msgid "The order note ID provided is not associated with the order"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1311
+#: includes/api/class-wc-api-orders.php:1329
 msgid "Permanently deleted order note"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1315
+#: includes/api/class-wc-api-orders.php:1333
 msgid "This order note cannot be deleted"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1374
-#: includes/api/class-wc-api-orders.php:1522
-#: includes/api/class-wc-api-orders.php:1578
+#: includes/api/class-wc-api-orders.php:1392
+#: includes/api/class-wc-api-orders.php:1540
+#: includes/api/class-wc-api-orders.php:1596
 msgid "Invalid order refund ID"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1381
-#: includes/api/class-wc-api-orders.php:1529
-#: includes/api/class-wc-api-orders.php:1585
+#: includes/api/class-wc-api-orders.php:1399
+#: includes/api/class-wc-api-orders.php:1547
+#: includes/api/class-wc-api-orders.php:1603
 msgid "An order refund with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1443
+#: includes/api/class-wc-api-orders.php:1461
 msgid "You do not have permission to create order refunds"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1456
+#: includes/api/class-wc-api-orders.php:1474
 msgid "Refund amount is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1458
+#: includes/api/class-wc-api-orders.php:1476
 msgid "Refund amount must be positive"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1468
+#: includes/api/class-wc-api-orders.php:1486
 msgid "Cannot create order refund, please try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1485
+#: includes/api/class-wc-api-orders.php:1503
 msgid ""
 "An error occurred while attempting to create the refund using the payment "
 "gateway API"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1534
-#: includes/api/class-wc-api-orders.php:1590
+#: includes/api/class-wc-api-orders.php:1552
+#: includes/api/class-wc-api-orders.php:1608
 msgid "The order refund ID provided is not associated with the order"
 msgstr ""
 
@@ -5270,18 +5270,18 @@ msgstr ""
 msgid "A product category with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:696
-#: includes/api/class-wc-api-products.php:1137
+#: includes/api/class-wc-api-products.php:697
+#: includes/api/class-wc-api-products.php:1138
 msgid "The SKU already exists on another product"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1090 includes/class-wc-emails.php:334
+#: includes/api/class-wc-api-products.php:1091 includes/class-wc-emails.php:334
 #: includes/class-wc-emails.php:366 includes/class-wc-emails.php:410
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1534
-#: includes/api/class-wc-api-products.php:1535
+#: includes/api/class-wc-api-products.php:1553
+#: includes/api/class-wc-api-products.php:1554
 #: includes/api/v1/class-wc-api-products.php:461
 #: includes/api/v1/class-wc-api-products.php:462
 #: includes/wc-product-functions.php:267
@@ -5289,15 +5289,15 @@ msgstr ""
 msgid "Placeholder"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1608
+#: includes/api/class-wc-api-products.php:1627
 msgid "Invalid URL %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1620
+#: includes/api/class-wc-api-products.php:1639
 msgid "Error getting remote image %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1649
+#: includes/api/class-wc-api-products.php:1668
 msgid "Zero size file downloaded"
 msgstr ""
 
@@ -5462,7 +5462,7 @@ msgid ""
 msgstr ""
 
 #: includes/class-wc-ajax.php:1215 includes/class-wc-ajax.php:1216
-#: includes/class-wc-ajax.php:1863
+#: includes/class-wc-ajax.php:1866
 msgid "Item #%s stock increased from %s to %s."
 msgstr ""
 
@@ -5482,19 +5482,19 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1472
+#: includes/class-wc-ajax.php:1475
 msgid "Delete note"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1617
+#: includes/class-wc-ajax.php:1620
 msgid "Guest"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1842
+#: includes/class-wc-ajax.php:1845
 msgid "Invalid refund amount"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1897
+#: includes/class-wc-ajax.php:1900
 msgid "Refund failed"
 msgstr ""
 
@@ -5535,33 +5535,33 @@ msgid ""
 "apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:825
+#: includes/class-wc-cart.php:839
 msgid "Sorry, this product cannot be purchased."
 msgstr ""
 
-#: includes/class-wc-cart.php:832
+#: includes/class-wc-cart.php:846
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr ""
 
-#: includes/class-wc-cart.php:837
+#: includes/class-wc-cart.php:851
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr ""
 
-#: includes/class-wc-cart.php:851 includes/class-wc-cart.php:875
+#: includes/class-wc-cart.php:865 includes/class-wc-cart.php:889
 #: includes/class-wc-frontend-scripts.php:188 includes/wc-cart-functions.php:98
 #: templates/cart/mini-cart.php:65
 msgid "View Cart"
 msgstr ""
 
-#: includes/class-wc-cart.php:852
+#: includes/class-wc-cart.php:866
 msgid "You cannot add another &quot;%s&quot; to your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:876
+#: includes/class-wc-cart.php:890
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
@@ -7942,199 +7942,199 @@ msgstr ""
 msgid "Invalid order ID"
 msgstr ""
 
-#: includes/wc-core-functions.php:251 tests/unit-tests/core-functions.php:28
+#: includes/wc-core-functions.php:251
 msgid "United Arab Emirates Dirham"
 msgstr ""
 
-#: includes/wc-core-functions.php:252 tests/unit-tests/core-functions.php:29
+#: includes/wc-core-functions.php:252
 msgid "Australian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:253 tests/unit-tests/core-functions.php:30
+#: includes/wc-core-functions.php:253
 msgid "Bangladeshi Taka"
 msgstr ""
 
-#: includes/wc-core-functions.php:254 tests/unit-tests/core-functions.php:31
+#: includes/wc-core-functions.php:254
 msgid "Brazilian Real"
 msgstr ""
 
-#: includes/wc-core-functions.php:255 tests/unit-tests/core-functions.php:32
+#: includes/wc-core-functions.php:255
 msgid "Bulgarian Lev"
 msgstr ""
 
-#: includes/wc-core-functions.php:256 tests/unit-tests/core-functions.php:33
+#: includes/wc-core-functions.php:256
 msgid "Canadian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:257 tests/unit-tests/core-functions.php:34
+#: includes/wc-core-functions.php:257
 msgid "Chilean Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:258 tests/unit-tests/core-functions.php:35
+#: includes/wc-core-functions.php:258
 msgid "Chinese Yuan"
 msgstr ""
 
-#: includes/wc-core-functions.php:259 tests/unit-tests/core-functions.php:36
+#: includes/wc-core-functions.php:259
 msgid "Colombian Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:260 tests/unit-tests/core-functions.php:37
+#: includes/wc-core-functions.php:260
 msgid "Czech Koruna"
 msgstr ""
 
-#: includes/wc-core-functions.php:261 tests/unit-tests/core-functions.php:38
+#: includes/wc-core-functions.php:261
 msgid "Danish Krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:262 tests/unit-tests/core-functions.php:39
+#: includes/wc-core-functions.php:262
 msgid "Dominican Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:263 tests/unit-tests/core-functions.php:40
+#: includes/wc-core-functions.php:263
 msgid "Euros"
 msgstr ""
 
-#: includes/wc-core-functions.php:264 tests/unit-tests/core-functions.php:41
+#: includes/wc-core-functions.php:264
 msgid "Hong Kong Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:265 tests/unit-tests/core-functions.php:42
+#: includes/wc-core-functions.php:265
 msgid "Croatia kuna"
 msgstr ""
 
-#: includes/wc-core-functions.php:266 tests/unit-tests/core-functions.php:43
+#: includes/wc-core-functions.php:266
 msgid "Hungarian Forint"
 msgstr ""
 
-#: includes/wc-core-functions.php:267 tests/unit-tests/core-functions.php:44
+#: includes/wc-core-functions.php:267
 msgid "Icelandic krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:268 tests/unit-tests/core-functions.php:45
+#: includes/wc-core-functions.php:268
 msgid "Indonesia Rupiah"
 msgstr ""
 
-#: includes/wc-core-functions.php:269 tests/unit-tests/core-functions.php:46
+#: includes/wc-core-functions.php:269
 msgid "Indian Rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:270 tests/unit-tests/core-functions.php:47
+#: includes/wc-core-functions.php:270
 msgid "Nepali Rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:271 tests/unit-tests/core-functions.php:48
+#: includes/wc-core-functions.php:271
 msgid "Israeli Shekel"
 msgstr ""
 
-#: includes/wc-core-functions.php:272 tests/unit-tests/core-functions.php:49
+#: includes/wc-core-functions.php:272
 msgid "Japanese Yen"
 msgstr ""
 
-#: includes/wc-core-functions.php:273 tests/unit-tests/core-functions.php:50
+#: includes/wc-core-functions.php:273
 msgid "Lao Kip"
 msgstr ""
 
-#: includes/wc-core-functions.php:274 tests/unit-tests/core-functions.php:51
+#: includes/wc-core-functions.php:274
 msgid "South Korean Won"
 msgstr ""
 
-#: includes/wc-core-functions.php:275 tests/unit-tests/core-functions.php:52
+#: includes/wc-core-functions.php:275
 msgid "Malaysian Ringgits"
 msgstr ""
 
-#: includes/wc-core-functions.php:276 tests/unit-tests/core-functions.php:53
+#: includes/wc-core-functions.php:276
 msgid "Mexican Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:277 tests/unit-tests/core-functions.php:54
+#: includes/wc-core-functions.php:277
 msgid "Nigerian Naira"
 msgstr ""
 
-#: includes/wc-core-functions.php:278 tests/unit-tests/core-functions.php:55
+#: includes/wc-core-functions.php:278
 msgid "Norwegian Krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:279 tests/unit-tests/core-functions.php:56
+#: includes/wc-core-functions.php:279
 msgid "New Zealand Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:280 tests/unit-tests/core-functions.php:57
+#: includes/wc-core-functions.php:280
 msgid "Paraguayan Guaraní"
 msgstr ""
 
-#: includes/wc-core-functions.php:281 tests/unit-tests/core-functions.php:58
+#: includes/wc-core-functions.php:281
 msgid "Philippine Pesos"
 msgstr ""
 
-#: includes/wc-core-functions.php:282 tests/unit-tests/core-functions.php:59
+#: includes/wc-core-functions.php:282
 msgid "Polish Zloty"
 msgstr ""
 
-#: includes/wc-core-functions.php:283 tests/unit-tests/core-functions.php:60
+#: includes/wc-core-functions.php:283
 msgid "Pounds Sterling"
 msgstr ""
 
-#: includes/wc-core-functions.php:284 tests/unit-tests/core-functions.php:61
+#: includes/wc-core-functions.php:284
 msgid "Romanian Leu"
 msgstr ""
 
-#: includes/wc-core-functions.php:285 tests/unit-tests/core-functions.php:62
+#: includes/wc-core-functions.php:285
 msgid "Russian Ruble"
 msgstr ""
 
-#: includes/wc-core-functions.php:286 tests/unit-tests/core-functions.php:63
+#: includes/wc-core-functions.php:286
 msgid "Singapore Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:287 tests/unit-tests/core-functions.php:64
+#: includes/wc-core-functions.php:287
 msgid "South African rand"
 msgstr ""
 
-#: includes/wc-core-functions.php:288 tests/unit-tests/core-functions.php:65
+#: includes/wc-core-functions.php:288
 msgid "Swedish Krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:289 tests/unit-tests/core-functions.php:66
+#: includes/wc-core-functions.php:289
 msgid "Swiss Franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:290 tests/unit-tests/core-functions.php:67
+#: includes/wc-core-functions.php:290
 msgid "Taiwan New Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:291 tests/unit-tests/core-functions.php:68
+#: includes/wc-core-functions.php:291
 msgid "Thai Baht"
 msgstr ""
 
-#: includes/wc-core-functions.php:292 tests/unit-tests/core-functions.php:69
+#: includes/wc-core-functions.php:292
 msgid "Turkish Lira"
 msgstr ""
 
-#: includes/wc-core-functions.php:293 tests/unit-tests/core-functions.php:70
+#: includes/wc-core-functions.php:293
 msgid "US Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:294 tests/unit-tests/core-functions.php:71
+#: includes/wc-core-functions.php:294
 msgid "Vietnamese Dong"
 msgstr ""
 
-#: includes/wc-core-functions.php:295 tests/unit-tests/core-functions.php:72
+#: includes/wc-core-functions.php:295
 msgid "Egyptian Pound"
 msgstr ""
 
-#: includes/wc-coupon-functions.php:24 tests/unit-tests/coupon-functions.php:17
+#: includes/wc-coupon-functions.php:24
 msgid "Cart Discount"
 msgstr ""
 
-#: includes/wc-coupon-functions.php:25 tests/unit-tests/coupon-functions.php:18
+#: includes/wc-coupon-functions.php:25
 msgid "Cart % Discount"
 msgstr ""
 
-#: includes/wc-coupon-functions.php:26 tests/unit-tests/coupon-functions.php:19
+#: includes/wc-coupon-functions.php:26
 msgid "Product Discount"
 msgstr ""
 
-#: includes/wc-coupon-functions.php:27 tests/unit-tests/coupon-functions.php:20
+#: includes/wc-coupon-functions.php:27
 msgid "Product % Discount"
 msgstr ""
 
@@ -9477,7 +9477,7 @@ msgctxt "US state of Georgia"
 msgid "Georgia"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:871
+#: includes/abstracts/abstract-wc-order.php:869
 msgctxt "hash before order number"
 msgid "#"
 msgstr ""

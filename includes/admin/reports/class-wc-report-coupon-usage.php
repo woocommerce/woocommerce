@@ -16,7 +16,6 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 * Constructor
 	 */
 	public function __construct() {
-
 		if ( isset( $_GET['coupon_codes'] ) && is_array( $_GET['coupon_codes'] ) ) {
 			$this->coupon_codes = array_filter( array_map( 'sanitize_text_field', $_GET['coupon_codes'] ) );
 		} elseif ( isset( $_GET['coupon_codes'] ) ) {
@@ -30,10 +29,9 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-
 		$legend = array();
 
-		$total_discount = $this->get_order_report_data( array(
+		$total_discount_query = array(
 			'data' => array(
 				'discount_amount' => array(
 					'type'            => 'order_item_meta',
@@ -44,19 +42,19 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			),
 			'where' => array(
 				array(
-					'type'     => 'order_item',
-					'key'      => 'order_item_name',
-					'value'    => $this->coupon_codes,
-					'operator' => 'IN'
+					'key'      => 'order_item_type',
+					'value'    => 'coupon',
+					'operator' => '='
 				)
 			),
 			'query_type'   => 'get_var',
-			'filter_range' => true
-		) );
+			'filter_range' => true,
+			'order_types'  => wc_get_order_types( 'order-count' ),
+		);
 
-		$total_coupons = absint( $this->get_order_report_data( array(
+		$total_coupons_query = array(
 			'data' => array(
-				'order_item_name' => array(
+				'order_item_id' => array(
 					'type'            => 'order_item',
 					'order_item_type' => 'coupon',
 					'function'        => 'COUNT',
@@ -65,15 +63,29 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			),
 			'where' => array(
 				array(
-					'type'     => 'order_item',
-					'key'      => 'order_item_name',
-					'value'    => $this->coupon_codes,
-					'operator' => 'IN'
+					'key'      => 'order_item_type',
+					'value'    => 'coupon',
+					'operator' => '='
 				)
 			),
 			'query_type'   => 'get_var',
-			'filter_range' => true
-		) ) );
+			'filter_range' => true,
+			'order_types'  => wc_get_order_types( 'order-count' ),
+		);
+
+		if ( $this->coupon_codes ) {
+			$coupon_code_query = array(
+				'type'     => 'order_item',
+				'key'      => 'order_item_name',
+				'value'    => $this->coupon_codes,
+				'operator' => 'IN'
+			);
+			$total_discount_query['where'][] = $coupon_code_query;
+			$total_coupons_query['where'][]  = $coupon_code_query;
+		}
+
+		$total_discount = $this->get_order_report_data( $total_discount_query );
+		$total_coupons  = absint( $this->get_order_report_data( $total_coupons_query ) );
 
 		$legend[] = array(
 			'title' => sprintf( __( '%s discounts in total', 'woocommerce' ), '<strong>' . wc_price( $total_discount ) . '</strong>' ),
@@ -341,7 +353,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		global $wp_locale;
 
 		// Get orders and dates in range - we want the SUM of order totals, COUNT of order items, COUNT of orders, and the date
-		$order_coupon_counts  = $this->get_order_report_data( array(
+		$order_coupon_counts_query = array(
 			'data' => array(
 				'order_item_name' => array(
 					'type'            => 'order_item',
@@ -357,19 +369,19 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			),
 			'where' => array(
 				array(
-					'type'     => 'order_item',
-					'key'      => 'order_item_name',
-					'value'    => $this->coupon_codes,
-					'operator' => 'IN'
+					'key'      => 'order_item_type',
+					'value'    => 'coupon',
+					'operator' => '='
 				)
 			),
 			'group_by'     => $this->group_by_query,
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
-			'filter_range' => true
-		) );
+			'filter_range' => true,
+			'order_types'  => wc_get_order_types( 'order-count' )
+		);
 
-		$order_discount_amounts = $this->get_order_report_data( array(
+		$order_discount_amounts_query = array(
 			'data' => array(
 				'discount_amount' => array(
 					'type'            => 'order_item_meta',
@@ -385,17 +397,31 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			),
 			'where' => array(
 				array(
-					'type'     => 'order_item',
-					'key'      => 'order_item_name',
-					'value'    => $this->coupon_codes,
-					'operator' => 'IN'
+					'key'      => 'order_item_type',
+					'value'    => 'coupon',
+					'operator' => '='
 				)
 			),
 			'group_by'     => $this->group_by_query . ', order_item_name',
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
-			'filter_range' => true
-		) );
+			'filter_range' => true,
+			'order_types'  => wc_get_order_types( 'order-count' )
+		);
+
+		if ( $this->coupon_codes ) {
+			$coupon_code_query = array(
+				'type'     => 'order_item',
+				'key'      => 'order_item_name',
+				'value'    => $this->coupon_codes,
+				'operator' => 'IN'
+			);
+			$order_coupon_counts_query['where'][]    = $coupon_code_query;
+			$order_discount_amounts_query['where'][] = $coupon_code_query;
+		}
+
+		$order_coupon_counts  = $this->get_order_report_data( $order_coupon_counts_query );
+		$order_discount_amounts = $this->get_order_report_data( $order_discount_amounts_query );
 
 		// Prepare data for report
 		$order_coupon_counts = $this->prepare_chart_data( $order_coupon_counts, 'post_date', 'order_coupon_count' , $this->chart_interval, $this->start_date, $this->chart_groupby );

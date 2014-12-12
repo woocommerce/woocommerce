@@ -224,24 +224,24 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		$defaults = array(
-			'type'                       => 'fixed_cart',
-			'amount'                     => 0,
-			'individual_use'             => 'no',
-			'product_ids'                => array(),
-			'exclude_product_ids'        => array(),
-			'usage_limit'                => '',
-			'usage_limit_per_user'       => '',
-			'limit_usage_to_x_items'     => '',
-			'usage_count'                => '',
-			'expiry_date'                => '',
-			'apply_before_tax'           => 'yes',
-			'free_shipping'              => 'no',
-			'product_categories'         => array(),
-			'exclude_product_categories' => array(),
-			'exclude_sale_items'         => 'no',
-			'minimum_amount'             => '',
-			'maximum_amount'             => '',
-			'customer_email'             => array(),
+			'type'                         => 'fixed_cart',
+			'amount'                       => 0,
+			'individual_use'               => 'no',
+			'product_ids'                  => array(),
+			'exclude_product_ids'          => array(),
+			'usage_limit'                  => '',
+			'usage_limit_per_user'         => '',
+			'limit_usage_to_x_items'       => '',
+			'usage_count'                  => '',
+			'expiry_date'                  => '',
+			'apply_before_tax'             => 'yes',
+			'enable_free_shipping'         => 'no',
+			'product_category_ids'         => array(),
+			'exclude_product_category_ids' => array(),
+			'exclude_sale_items'           => 'no',
+			'minimum_amount'               => '',
+			'maximum_amount'               => '',
+			'customer_emails'              => array(),
 		);
 
 		$coupon_data = wp_parse_args( $data, $defaults );
@@ -276,15 +276,15 @@ class WC_API_Coupons extends WC_API_Resource {
 		update_post_meta( $id, 'usage_limit_per_user', absint( $coupon_data['usage_limit_per_user'] ) );
 		update_post_meta( $id, 'limit_usage_to_x_items', absint( $coupon_data['limit_usage_to_x_items'] ) );
 		update_post_meta( $id, 'usage_count', absint( $coupon_data['usage_count'] ) );
-		update_post_meta( $id, 'expiry_date', wc_clean( $coupon_data['expiry_date'] ) );
+		update_post_meta( $id, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $coupon_data['expiry_date'] ) ) );
 		update_post_meta( $id, 'apply_before_tax', wc_clean( $coupon_data['apply_before_tax'] ) );
-		update_post_meta( $id, 'free_shipping', wc_clean( $coupon_data['free_shipping'] ) );
-		update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $coupon_data['product_categories'] ) ) );
-		update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $coupon_data['exclude_product_categories'] ) ) );
+		update_post_meta( $id, 'free_shipping', wc_clean( $coupon_data['enable_free_shipping'] ) );
+		update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $coupon_data['product_category_ids'] ) ) );
+		update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $coupon_data['exclude_product_category_ids'] ) ) );
 		update_post_meta( $id, 'exclude_sale_items', wc_clean( $coupon_data['exclude_sale_items'] ) );
 		update_post_meta( $id, 'minimum_amount', wc_format_decimal( $coupon_data['minimum_amount'] ) );
 		update_post_meta( $id, 'maximum_amount', wc_format_decimal( $coupon_data['maximum_amount'] ) );
-		update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $coupon_data['customer_email'] ) ) );
+		update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $coupon_data['customer_emails'] ) ) );
 
 		do_action( 'woocommerce_api_create_coupon', $id, $data );
 
@@ -379,7 +379,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['expiry_date'] ) ) {
-			update_post_meta( $id, 'expiry_date', wc_clean( $data['expiry_date'] ) );
+			update_post_meta( $id, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $data['expiry_date'] ) ) );
 		}
 
 		if ( isset( $data['apply_before_tax'] ) ) {
@@ -438,6 +438,21 @@ class WC_API_Coupons extends WC_API_Resource {
 		do_action( 'woocommerce_api_delete_coupon', $id, $this );
 
 		return $this->delete( $id, 'shop_coupon', ( 'true' === $force ) );
+	}
+
+	/**
+	 * expiry_date format
+	 *
+	 * @since  2.3.0
+	 * @param  string expiry_date
+	 * @return string
+	 */
+	protected function get_coupon_expiry_date( $expiry_date ) {
+		if ( '' != $expiry_date ) {
+			return date( 'Y-m-d', strtotime( $expiry_date ) );
+		}
+
+		return '';
 	}
 
 	/**

@@ -735,6 +735,20 @@ class WC_Cart {
 			return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
 		}
 
+		/**
+		 * Get all tax classes for items in the cart
+		 * @return array
+		 */
+		public function get_cart_item_tax_classes() {
+			$found_tax_classes = array();
+
+			foreach ( WC()->cart->get_cart() as $item ) {
+				$found_tax_classes[] = $item['data']->get_tax_class();
+			}
+
+			return array_unique( $found_tax_classes );
+		}
+
 	/*-----------------------------------------------------------------------------------*/
 	/* Add to cart handling */
 	/*-----------------------------------------------------------------------------------*/
@@ -1275,6 +1289,7 @@ class WC_Cart {
 
 			foreach ( $this->cart_contents as $cart_item_key => $item ) {
 				$this->cart_contents[ $cart_item_key ]['line_subtotal_tax'] = $this->cart_contents[ $cart_item_key ]['line_tax'] = 0;
+				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => array(), 'subtotal' => array() );
 			}
 
 			// If true, zero rate is applied so '0' tax is displayed on the frontend rather than nothing.

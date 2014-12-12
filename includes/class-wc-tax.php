@@ -306,7 +306,51 @@ class WC_Tax {
 			set_transient( $rates_transient_key, $matched_tax_rates, DAY_IN_SECONDS );
 		}
 
-		return $matched_tax_rates;
+		return apply_filters( 'woocommerce_find_rates', $matched_tax_rates, $args );
+	}
+
+	/**
+	 * Searches for all matching country/state/postcode tax rates.
+	 *
+	 * @param array $args
+	 * @return array
+	 */
+	public static function find_shipping_rates( $args = array() ) {
+		$rates          = self::find_rates( $args );
+		$shipping_rates = array();
+
+		foreach ( $rates as $key => $rate ) {
+			if ( 'yes' === $rate['shipping'] ) {
+				$shipping_rates[ $key ] = $rate;
+			}
+		}
+
+		return $shipping_rates;
+	}
+
+	/**
+	 * Get the customer tax location based on their status and the current page
+	 *
+	 * Used by get_rates(), get_shipping_rates()
+	 *
+	 * @param  $tax_class string Optional, passed to the filter for advanced tax setups.
+	 * @return array
+	 */
+	public static function get_tax_location( $tax_class = '' ) {
+		$location = array();
+
+		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
+			$location = WC()->customer->get_taxable_address();
+		} elseif ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
+			$location = array(
+				WC()->countries->get_base_country(),
+				WC()->countries->get_base_state(),
+				WC()->countries->get_base_postcode(),
+				WC()->countries->get_base_city()
+			);
+		}
+
+		return apply_filters( 'woocommerce_get_tax_location', $location, $tax_class );
 	}
 
 	/**
@@ -315,13 +359,12 @@ class WC_Tax {
 	 * @return  array
 	 */
 	public static function get_rates( $tax_class = '' ) {
+		$tax_class         = sanitize_title( $tax_class );
+		$location          = self::get_tax_location( $tax_class );
+		$matched_tax_rates = array();
 
-		$tax_class = sanitize_title( $tax_class );
-
-		/* Checkout uses customer location for the tax rates. Also, if shipping has been calculated, use the customers address. */
-		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
-
-			list( $country, $state, $postcode, $city ) = WC()->customer->get_taxable_address();
+		if ( sizeof( $location ) === 4 ) {
+			list( $country, $state, $postcode, $city ) = $location;
 
 			$matched_tax_rates = self::find_rates( array(
 				'country' 	=> $country,
@@ -330,19 +373,9 @@ class WC_Tax {
 				'city' 		=> $city,
 				'tax_class' => $tax_class
 			) );
-
-		} else {
-
-			// Prices which include tax should always use the base rate if we don't know where the user is located
-			// Prices excluding tax however should just not add any taxes, as they will be added during checkout.
-			// The woocommerce_default_customer_address option (when set to base) is also used here.
-			$matched_tax_rates = get_option( 'woocommerce_prices_include_tax' ) == 'yes' || get_option( 'woocommerce_default_customer_address' ) == 'base'
-				? self::get_shop_base_rate( $tax_class )
-				: array();
-
 		}
 
-		return apply_filters('woocommerce_matched_rates', $matched_tax_rates, $tax_class);
+		return apply_filters( 'woocommerce_matched_rates', $matched_tax_rates, $tax_class );
 	}
 
 	/**
@@ -368,97 +401,39 @@ class WC_Tax {
 	 * @return  mixed
 	 */
 	public static function get_shipping_tax_rates( $tax_class = null ) {
-
 		// See if we have an explicitly set shipping tax class
 		if ( $shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' ) ) {
 			$tax_class = $shipping_tax_class == 'standard' ? '' : $shipping_tax_class;
 		}
 
-		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
+		$location          = self::get_tax_location( $tax_class );
+		$matched_tax_rates = array();
 
-			list( $country, $state, $postcode, $city ) = WC()->customer->get_taxable_address();
+		if ( sizeof( $location ) === 4 ) {
+			list( $country, $state, $postcode, $city ) = $location;
 
-		} else {
-
-			// Prices which include tax should always use the base rate if we don't know where the user is located
-			// Prices excluding tax however should just not add any taxes, as they will be added during checkout
-			if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
-				$country 	= WC()->countries->get_base_country();
-				$state 		= WC()->countries->get_base_state();
-				$postcode   = '';
-				$city		= '';
-			} else {
-				return array();
-			}
-
-		}
-
-		// If we are here then shipping is taxable - work it out
-		if ( ! is_null( $tax_class ) ) {
-
-			$matched_tax_rates = array();
-
-			// This will be per item shipping
-			$rates = self::find_rates( array(
-				'country' 	=> $country,
-				'state' 	=> $state,
-				'postcode' 	=> $postcode,
-				'city' 		=> $city,
-				'tax_class' => $tax_class
-			) );
-
-			if ( $rates )
-				foreach ( $rates as $key => $rate )
-					if ( isset( $rate['shipping'] ) && $rate['shipping'] == 'yes' )
-						$matched_tax_rates[ $key ] = $rate;
-
-			if ( sizeof( $matched_tax_rates ) == 0 ) {
-				// Get standard rate
-				$rates = self::find_rates( array(
+			if ( ! is_null( $tax_class ) ) {
+				// This will be per item shipping
+				$matched_tax_rates = self::find_shipping_rates( array(
 					'country' 	=> $country,
 					'state' 	=> $state,
-					'city' 		=> $city,
 					'postcode' 	=> $postcode,
+					'city' 		=> $city,
+					'tax_class' => $tax_class
 				) );
 
-				if ( $rates )
-					foreach ( $rates as $key => $rate )
-						if ( isset( $rate['shipping'] ) && $rate['shipping'] == 'yes' )
-							$matched_tax_rates[ $key ] = $rate;
-			}
+			} else {
 
-			return $matched_tax_rates;
+				// This will be per order shipping - loop through the order and find the highest tax class rate
+				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes();
 
-		} else {
-
-			// This will be per order shipping - loop through the order and find the highest tax class rate
-			$found_tax_classes = array();
-			$matched_tax_rates = array();
-			$rates = false;
-
-			// Loop cart and find the highest tax band
-			if ( sizeof( WC()->cart->get_cart() ) > 0 )
-				foreach ( WC()->cart->get_cart() as $item )
-					$found_tax_classes[] = $item['data']->get_tax_class();
-
-			$found_tax_classes = array_unique( $found_tax_classes );
-
-			// If multiple classes are found, use highest
-			if ( sizeof( $found_tax_classes ) > 1 ) {
-
-				if ( in_array( '', $found_tax_classes ) ) {
-					$rates = self::find_rates( array(
-						'country' 	=> $country,
-						'state' 	=> $state,
-						'city' 		=> $city,
-						'postcode' 	=> $postcode,
-					) );
-				} else {
-					$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+				// If multiple classes are found, use highest. Don't bother with standard rate, we can get that later.
+				if ( sizeof( $cart_tax_classes ) > 1 && ! in_array( '', $cart_tax_classes ) ) {
+					$tax_classes = self::get_tax_classes();
 
 					foreach ( $tax_classes as $tax_class ) {
-						if ( in_array( $tax_class, $found_tax_classes ) ) {
-							$rates = self::find_rates( array(
+						if ( in_array( $tax_class, $cart_tax_classes ) ) {
+							$matched_tax_rates = self::find_shipping_rates( array(
 								'country' 	=> $country,
 								'state' 	=> $state,
 								'postcode' 	=> $postcode,
@@ -468,39 +443,31 @@ class WC_Tax {
 							break;
 						}
 					}
+
+				// If a single tax class is found, use it
+				} elseif ( sizeof( $cart_tax_classes ) == 1 ) {
+					$matched_tax_rates = self::find_shipping_rates( array(
+						'country' 	=> $country,
+						'state' 	=> $state,
+						'postcode' 	=> $postcode,
+						'city' 		=> $city,
+						'tax_class' => $cart_tax_classes[0]
+					) );
 				}
-
-			// If a single tax class is found, use it
-			} elseif ( sizeof( $found_tax_classes ) == 1 ) {
-
-				$rates = self::find_rates( array(
-					'country' 	=> $country,
-					'state' 	=> $state,
-					'postcode' 	=> $postcode,
-					'city' 		=> $city,
-					'tax_class' => $found_tax_classes[0]
-				) );
-
 			}
 
-			// If no class rate are found, use standard rates
-			if ( ! $rates )
-				$rates = self::find_rates( array(
+			// Get standard rate if no taxes were found
+			if ( ! sizeof( $matched_tax_rates ) ) {
+				$matched_tax_rates = self::find_shipping_rates( array(
 					'country' 	=> $country,
 					'state' 	=> $state,
 					'postcode' 	=> $postcode,
-					'city' 		=> $city,
+					'city' 		=> $city
 				) );
-
-			if ( $rates )
-				foreach ( $rates as $key => $rate )
-					if ( isset( $rate['shipping'] ) && $rate['shipping'] == 'yes' )
-						$matched_tax_rates[ $key ] = $rate;
-
-			return $matched_tax_rates;
+			}
 		}
 
-		return array(); // return false
+		return $matched_tax_rates;
 	}
 
 	/**
@@ -598,6 +565,14 @@ class WC_Tax {
 	 */
 	public static function get_tax_total( $taxes ) {
 		return array_sum( array_map( array( __CLASS__, 'round' ), $taxes ) );
+	}
+
+	/**
+	 * Get store tax classes
+	 * @return array
+	 */
+	public static function get_tax_classes() {
+		return array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 	}
 }
 WC_Tax::init();

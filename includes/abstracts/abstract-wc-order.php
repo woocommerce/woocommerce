@@ -653,10 +653,8 @@ abstract class WC_Abstract_Order {
 
 			$line_tax_data = maybe_unserialize( $item['taxes'] );
 
-			if ( isset( $line_tax_data['total'] ) ) {
-
-				foreach ( $line_tax_data['total'] as $tax_rate_id => $tax ) {
-
+			if ( isset( $line_tax_data ) ) {
+				foreach ( $line_tax_data as $tax_rate_id => $tax ) {
 					if ( ! isset( $order_shipping_taxes[ $tax_rate_id ] ) ) {
 						$order_shipping_taxes[ $tax_rate_id ] = 0;
 					}

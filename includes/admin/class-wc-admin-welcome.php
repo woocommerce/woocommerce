@@ -184,22 +184,6 @@ class WC_Admin_Welcome {
 			.changelog h4 {
 				line-height: 1.4;
 			}
-			.wc-conf {
-				background-color: #00204A;
-				background-image: url(http://woothemes.wpengine.netdna-cdn.com/wp-content/uploads/2014/09/wooconf.jpg);
-				background-size: cover;
-				padding: 11px 30px 20px;
-				color: #fff;
-				border-radius: 4px;
-				-webkit-font-smoothing: antialiased;
-				-moz-osx-font-smoothing: grayscale;
-			}
-			.wc-conf h3 {
-				color: #fff;
-			}
-			.wc-conf div {
-				width: 50%;
-			}
 			/*]]>*/
 		</style>
 		<?php
@@ -313,15 +297,6 @@ class WC_Admin_Welcome {
 					</div>
 				</div>
 			</div>
-			<?php if ( strtotime( '2014/11/04' ) > current_time( 'timestamp' ) ) { ?>
-			<div class="changelog wc-conf">
-				<div>
-					<h3><?php _e( 'Join us at the inaugural WooCommerce Conference in San Francisco', 'woocommerce' ); ?></h3>
-					<p><?php echo sprintf( __( 'On the %s3rd and 4th%s of November 2014 WooCommerce creators WooThemes are hosting an event dedicated to store owners &amp; WordPress developers wanting to learn the art of eCommerce using WooCommerce.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
-					<p class="woocommerce-actions"><a href="http://conf.woocommerce.com/" class="button button-primary"><?php _e( 'Find out more & buy tickets', 'woocommerce' ); ?></a></p>
-				</div>
-			</div>
-			<?php } ?>
 
 			<div class="return-to-dashboard">
 				<a href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'wc-settings' ), 'admin.php' ) ) ); ?>"><?php _e( 'Go to WooCommerce Settings', 'woocommerce' ); ?></a>

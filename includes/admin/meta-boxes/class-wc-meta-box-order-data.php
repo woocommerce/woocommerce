@@ -244,15 +244,17 @@ class WC_Meta_Box_Order_Data {
 								if ( ! isset( $field['type'] ) ) {
 									$field['type'] = 'text';
 								}
-
+								if ( ! isset( $field['id'] ) ){
+									$field['id'] = '_billing_' . $key;
+								}
 								switch ( $field['type'] ) {
 									case 'select' :
 										// allow for setting a default value programaticaly, and draw the selectbox
-										woocommerce_wp_select( array( 'id' => '_billing_' . $key, 'label' => $field['label'], 'options' => $field['options'], 'value' => isset( $field['value'] ) ? $field['value'] : null ) );
+										woocommerce_wp_select( $field );
 									break;
 									default :
 										// allow for setting a default value programaticaly, and draw the textbox
-										woocommerce_wp_text_input( array( 'id' => '_billing_' . $key, 'label' => $field['label'], 'value' => isset( $field['value'] ) ? $field['value'] : null ) );
+										woocommerce_wp_text_input( $field );
 									break;
 								}
 							}
@@ -332,13 +334,15 @@ class WC_Meta_Box_Order_Data {
 									if ( ! isset( $field['type'] ) ) {
 										$field['type'] = 'text';
 									}
-
+									if ( ! isset( $field['id'] ) ){
+										$field['id'] = '_shipping_' . $key;
+									}
 									switch ( $field['type'] ) {
 										case 'select' :
-											woocommerce_wp_select( array( 'id' => '_shipping_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
+											woocommerce_wp_select( $field );
 										break;
 										default :
-											woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
+											woocommerce_wp_text_input( $field );
 										break;
 									}
 								}
@@ -403,13 +407,19 @@ class WC_Meta_Box_Order_Data {
 
 		if ( self::$billing_fields ) {
 			foreach ( self::$billing_fields as $key => $field ) {
-				update_post_meta( $post_id, '_billing_' . $key, wc_clean( $_POST[ '_billing_' . $key ] ) );
+				if ( ! isset( $field['id'] ) ){
+					$field['id'] = '_billing_' . $key;
+				}
+				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
 			}
 		}
 
 		if ( self::$shipping_fields ) {
 			foreach ( self::$shipping_fields as $key => $field ) {
-				update_post_meta( $post_id, '_shipping_' . $key, wc_clean( $_POST[ '_shipping_' . $key ] ) );
+				if ( ! isset( $field['id'] ) ){
+					$field['id'] = '_shipping_' . $key;
+				}
+				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
 			}
 		}
 

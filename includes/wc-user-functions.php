@@ -65,7 +65,7 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 			return new WP_Error( 'registration-error', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
 	} else {
 
-		$username = sanitize_user( current( explode( '@', $email ) ) );
+		$username = sanitize_user( current( explode( '@', $email ) ), true );
 
 		// Ensure username is unique
 		$append     = 1;
