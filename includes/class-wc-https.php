@@ -43,7 +43,7 @@ class WC_HTTPS {
 				add_filter( 'page_link', array( __CLASS__, 'force_https_page_link' ), 10, 2 );
 				add_action( 'template_redirect', array( __CLASS__, 'force_https_template_redirect' ) );
 
-				if ( 'yes' == get_option('woocommerce_unforce_ssl_checkout') ) {
+				if ( 'yes' == get_option( 'woocommerce_unforce_ssl_checkout' ) ) {
 					add_action( 'template_redirect', array( __CLASS__, 'unforce_https_template_redirect' ) );
 				}
 			}
@@ -75,7 +75,7 @@ class WC_HTTPS {
 	public static function force_https_page_link( $link, $page_id ) {
 		if ( in_array( $page_id, array( get_option( 'woocommerce_checkout_page_id' ), get_option( 'woocommerce_myaccount_page_id' ) ) ) ) {
 			$link = str_replace( 'http:', 'https:', $link );
-		} elseif ( get_option('woocommerce_unforce_ssl_checkout') == 'yes' ) {
+		} elseif ( 'yes' == get_option( 'woocommerce_unforce_ssl_checkout' ) ) {
 			$link = str_replace( 'https:', 'http:', $link );
 		}
 		return $link;
@@ -101,6 +101,10 @@ class WC_HTTPS {
 	 * Template redirect - if we end up on a page ensure it has the correct http/https url
 	 */
 	public static function unforce_https_template_redirect() {
+		if ( function_exists( 'is_customize_preview' ) && is_customize_preview() ) {
+			return;
+		}
+
 		if ( is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
 
 			if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
