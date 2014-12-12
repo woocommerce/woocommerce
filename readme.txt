@@ -131,6 +131,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.2.9 - xx/12/2014 =
+* Add - API - parent_id for products endpoint.
 * Fix - Processing and On-hold order links in WooCommerce Status dashboard widget.
 * Fix - Orders API when query orders with deleted products.
 * Fix - Check order exists in wc_clear_cart_after_payment().
@@ -144,6 +145,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Ensure floats are safely converted to strings.
 * Fix - remove_taxes needs to clear line_tax_data.
 * Fix - Correctly save custom address fields in admin.
+* Fix - API - Fixed a bug for save multiple images from the media library in products endpoint.
+* Fix - API - Delete products when happens some error.
+* Fix - API - `enable_free_shipping`, `product_category_ids`, `exclude_product_category_ids` and `customer_emails` coupons params.
+* Fix - API - Coupons `expiry_date` format.
 * Tweak - API - set_fee should support tax_data.
 * Tweak - Don't force tax_rate_id to an integer. Allow strings.
 * Tweak - Additonal filters inside tax class to support extensions.
