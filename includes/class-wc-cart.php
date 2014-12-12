@@ -672,6 +672,22 @@ class WC_Cart {
 			return $cart_session;
 		}
 
+
+		/**
+		 * Returns a specific item in the cart
+		 *
+		 * @since 2.2.9
+		 *
+		 * @return array item data
+		 */
+	public function get_cart_item( $item_key ) {
+		if ( isset( $this->cart_contents[ $item_key ] ) ) {
+			return $this->cart_contents[ $item_key ];
+		}
+
+		return array();
+	}
+
 		/**
 		 * Returns the cart and shipping taxes, merged.
 		 *
