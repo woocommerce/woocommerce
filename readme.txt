@@ -152,7 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Force HTTP option behavior on Customizer Preview screen.
 * Tweak - API - set_fee should support tax_data.
 * Tweak - Don't force tax_rate_id to an integer. Allow strings.
-* Tweak - Additonal filters inside tax class to support extensions.
+* Tweak - Additional filters inside tax class to support extensions.
 * Tweak - Allow plugins to filter the taxable location.
 * Tweak - Added result and message keys to order_review AJAX call.
 * Tweak - Added get_cart_item to WC_Cart class.
