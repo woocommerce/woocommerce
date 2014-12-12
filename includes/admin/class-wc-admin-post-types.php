@@ -500,7 +500,11 @@ class WC_Admin_Post_Types {
 						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item ); ?>">
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
 							<td class="name">
-								<?php if ( wc_product_sku_enabled() && $_product && $_product->get_sku() ) echo $_product->get_sku() . ' - '; ?><a href="<?php echo get_edit_post_link( $_product->product_id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?></a>
+								<?php  if ( $_product ) : ?>
+									<?php echo ( wc_product_sku_enabled() && $_product->get_sku() ) ? $_product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $_product->product_id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?></a>
+								<?php else : ?>
+									<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>
+								<?php endif; ?>
 								<?php if ( $item_meta_html ) : ?>
 									<a class="tips" href="#" data-tip="<?php echo esc_attr( $item_meta_html ); ?>">[?]</a>
 								<?php endif; ?>
