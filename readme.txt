@@ -147,6 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Improved the Shipping Class field in products quick edit and bulk edit.
 * Refactor - Removed style settings in favour of separate plugin.
 * Refactor - Removed quantity increment/decrement buttons in favour of separate plugin.
+* Feature - Added link on purchased products list on orders screen.
 * Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
 * Tweak - Double the default product image dimensions.
 * Tweak - Added refunds to Sales by Date report.
