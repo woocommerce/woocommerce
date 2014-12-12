@@ -61,6 +61,9 @@ class WC_Cart {
 	/** @var float Discounted tax amount. Used predominantly for displaying tax inclusive prices correctly */
 	public $discount_cart_tax;
 
+	/** @var @deprecated 2.3 No longer used - used to be after tax discount. */
+	public $discount_total = 0;
+
 	/** @var float Total for additional fees. */
 	public $fee_total;
 
