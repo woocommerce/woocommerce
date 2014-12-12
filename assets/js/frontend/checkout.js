@@ -76,12 +76,42 @@ jQuery( function( $ ) {
 			type:		'POST',
 			url:		wc_checkout_params.ajax_url,
 			data:		data,
-			success:	function( response ) {
+			success: function ( response ) {
+
+				// Check reponse
 				if ( response ) {
+
+					// Remove old errors
+					$( '.woocommerce-error, .woocommerce-message' ).remove();
+
+					// Check the response result
+					if ( 'failure' == response.result ) {
+
+						// Form object
+						var $form = $( 'form.checkout' );
+
+						if ( data.messages ) {
+							$form.prepend( data.messages );
+						} else {
+							$form.prepend( data );
+						}
+
+						// Lose focus for all fields
+						$form.find( '.input-text, select' ).blur();
+
+						// Scroll to top
+						$( 'html, body' ).animate( {
+							scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
+						}, 1000 );
+
+					}
+
+
 					$( '#order_review' ).html( $.trim( response ) );
-					$( '#order_review' ).find( 'input[name=payment_method]:checked' ).trigger('click');
-					$( 'body' ).trigger('updated_checkout' );
+					$( '#order_review' ).find( 'input[name=payment_method]:checked' ).trigger( 'click' );
+					$( 'body' ).trigger( 'updated_checkout' );
 				}
+
 			}
 		});
 
