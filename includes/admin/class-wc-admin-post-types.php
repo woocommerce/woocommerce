@@ -32,18 +32,23 @@ class WC_Admin_Post_Types {
 		add_filter( 'manage_edit-product_columns', array( $this, 'product_columns' ) );
 		add_filter( 'manage_edit-shop_coupon_columns', array( $this, 'shop_coupon_columns' ) );
 		add_filter( 'manage_edit-shop_order_columns', array( $this, 'shop_order_columns' ) );
+		add_filter( 'manage_edit-shop_webhook_columns', array( $this, 'shop_webhook_columns' ) );
 
 		add_action( 'manage_product_posts_custom_column', array( $this, 'render_product_columns' ), 2 );
 		add_action( 'manage_shop_coupon_posts_custom_column', array( $this, 'render_shop_coupon_columns' ), 2 );
 		add_action( 'manage_shop_order_posts_custom_column', array( $this, 'render_shop_order_columns' ), 2 );
+		add_action( 'manage_shop_webhook_posts_custom_column', array( $this, 'render_shop_webhook_columns' ), 2 );
 
 		add_filter( 'manage_edit-product_sortable_columns', array( $this, 'product_sortable_columns' ) );
 		add_filter( 'manage_edit-shop_coupon_sortable_columns', array( $this, 'shop_coupon_sortable_columns' ) );
 		add_filter( 'manage_edit-shop_order_sortable_columns', array( $this, 'shop_order_sortable_columns' ) );
+		add_filter( 'manage_edit-shop_webhook_sortable_columns', array( $this, 'shop_webhook_sortable_columns' ) );
 
 		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'shop_order_bulk_actions' ) );
 
+		// Views
 		add_filter( 'views_edit-product', array( $this, 'product_sorting_link' ) );
+		add_filter( 'views_edit-shop_webhook', array( $this, 'shop_webhook_links' ) );
 
 		// Bulk / quick edit
 		add_action( 'bulk_edit_custom_box', array( $this, 'bulk_edit' ), 10, 2 );
@@ -162,6 +167,22 @@ class WC_Admin_Post_Types {
 		$columns['order_date']       = __( 'Date', 'woocommerce' );
 		$columns['order_total']      = __( 'Total', 'woocommerce' );
 		$columns['order_actions']    = __( 'Actions', 'woocommerce' );
+
+		return $columns;
+	}
+
+	/**
+	 * Define custom columns for webhooks
+	 * @param  array $existing_columns
+	 * @return array
+	 */
+	public function shop_webhook_columns( $existing_columns ) {
+		$columns                         = array();
+		$columns['cb']                   = $existing_columns['cb'];
+		$columns['webhook_name']         = __( 'Name', 'woocommerce' );
+		$columns['webhook_status']       = __( 'Status', 'woocommerce' );
+		$columns['webhook_topic']        = __( 'Topic', 'woocommerce' );
+		$columns['webhook_delivery_url'] = __( 'Delivery URL', 'woocommerce' );
 
 		return $columns;
 	}
@@ -661,6 +682,75 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
+	 * Output custom columns for webhooks
+	 * @param string $column
+	 */
+	public function render_shop_webhook_columns( $column ) {
+		global $post, $the_webhook;
+
+		if ( empty( $the_webhook ) || $the_webhook->id != $post->ID ) {
+			$the_webhook = new WC_Webhook( $post->ID );
+		}
+
+		switch ( $column ) {
+			case 'webhook_name' :
+				$edit_link        = get_edit_post_link( $the_webhook->id );
+				$title            = _draft_or_post_title();
+				$post_type_object = get_post_type_object( $post->post_type );
+
+				echo '<strong><a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ) . '</a></strong>';
+
+				// Get actions
+				$actions = array();
+
+				if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) ) {
+					$actions['edit'] = '<a href="' . admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=edit', $the_webhook->id ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
+				}
+
+				if ( current_user_can( $post_type_object->cap->delete_post, $the_webhook->id ) ) {
+
+					if ( 'trash' == $post->post_status ) {
+						$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $the_webhook->id ) ), 'untrash-post_' . $the_webhook->id ) . "'>" . __( 'Restore', 'woocommerce' ) . "</a>";
+					} elseif ( EMPTY_TRASH_DAYS ) {
+						$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $the_webhook->id ) . "'>" . __( 'Trash', 'woocommerce' ) . "</a>";
+					}
+
+					if ( 'trash' == $post->post_status || ! EMPTY_TRASH_DAYS ) {
+						$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . "' href='" . get_delete_post_link( $the_webhook->id, '', true ) . "'>" . __( 'Delete Permanently', 'woocommerce' ) . "</a>";
+					}
+				}
+
+				$actions = apply_filters( 'post_row_actions', $actions, $post );
+
+				echo '<div class="row-actions">';
+
+				$i = 0;
+				$action_count = sizeof( $actions );
+
+				foreach ( $actions as $action => $link ) {
+					++$i;
+					( $i == $action_count ) ? $sep = '' : $sep = ' | ';
+					echo "<span class='$action'>$link$sep</span>";
+				}
+				echo '</div>';
+
+				break;
+			case 'webhook_status' :
+				echo $the_webhook->get_status();
+				break;
+			case 'webhook_topic' :
+				echo $the_webhook->get_topic();
+				break;
+			case 'webhook_delivery_url' :
+				echo $the_webhook->get_delivery_url();
+				break;
+
+			default :
+				break;
+		}
+	}
+
+	/**
 	 * Make columns sortable - https://gist.github.com/906872
 	 *
 	 * @param array $columns
@@ -704,6 +794,20 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
+	 * Make columns sortable - https://gist.github.com/906872
+	 *
+	 * @param array $columns
+	 * @return array
+	 */
+	public function shop_webhook_sortable_columns( $columns ) {
+		$custom = array(
+			'webhook_name' => 'title'
+		);
+
+		return $custom;
+	}
+
+	/**
 	 * Remove edit from the bulk actions.
 	 *
 	 * @param array $actions
@@ -742,6 +846,29 @@ class WC_Admin_Post_Types {
 		return $views;
 	}
 
+	/**
+	 * Webhooks links
+	 *
+	 * @param array $views
+	 * @return array
+	 */
+	public function shop_webhook_links( $views ) {
+		$pattern = '/(shop_webhook\'>| class="current">)(.*?)(<span)/s';
+
+		if ( isset( $views['publish'] ) ) {
+			$views['publish'] = preg_replace( $pattern, '${1}' . __( 'Actived', 'woocommerce' ) . ' ${3}', $views['publish'] );
+		}
+
+		if ( isset( $views['draft'] ) ) {
+			$views['draft'] = preg_replace( $pattern, '${1}' . __( 'Paused', 'woocommerce' ) . ' ${3}', $views['draft'] );
+		}
+
+		if ( isset( $views['pending'] ) ) {
+			$views['pending'] = preg_replace( $pattern, '${1}' . __( 'Disabled', 'woocommerce' ) . ' ${3}', $views['pending'] );
+		}
+
+		return $views;
+	}
 
 	/**
 	 * Custom bulk edit - form
@@ -1285,7 +1412,6 @@ class WC_Admin_Post_Types {
 			}
 		}
 	}
-
 
 	/**
 	 * Search custom fields as well as content.
@@ -1918,6 +2044,9 @@ class WC_Admin_Post_Types {
 			break;
 			case 'shop_coupon' :
 				$text = __( 'Coupon code', 'woocommerce' );
+			break;
+			case 'shop_webhook' :
+				$text = __( 'Webhook name', 'woocommerce' );
 			break;
 		}
 
