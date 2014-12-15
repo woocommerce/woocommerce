@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.1
-Stable tag: 2.2.9
+Stable tag: 2.2.10
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -129,6 +129,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.2.10 - xx/12/2014 =
+* Fix - Stock status on quick and bulk edit.
 
 = 2.2.9 - 15/12/2014 =
 * Add - API - parent_id for products endpoint.
