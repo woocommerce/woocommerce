@@ -61,9 +61,6 @@ class WC_Cart {
 	/** @var float Discounted tax amount. Used predominantly for displaying tax inclusive prices correctly */
 	public $discount_cart_tax;
 
-	/** @var @deprecated 2.3 No longer used - used to be after tax discount. */
-	public $discount_total = 0;
-
 	/** @var float Total for additional fees. */
 	public $fee_total;
 
@@ -124,6 +121,9 @@ class WC_Cart {
 				_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
 				$this->tax = new WC_Tax();
 				return $this->tax;
+			case 'discount_total':
+				_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: http://develop.woothemes.com/woocommerce/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
+				return 0;
 		}
 	}
 
