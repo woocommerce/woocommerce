@@ -150,6 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - API - `enable_free_shipping`, `product_category_ids`, `exclude_product_category_ids` and `customer_emails` coupons params.
 * Fix - API - Coupons `expiry_date` format.
 * Fix - Force HTTP option behavior on Customizer Preview screen.
+* Fix - Cart error messages when the session is expired.
 * Tweak - API - set_fee should support tax_data.
 * Tweak - Don't force tax_rate_id to an integer. Allow strings.
 * Tweak - Additional filters inside tax class to support extensions.
