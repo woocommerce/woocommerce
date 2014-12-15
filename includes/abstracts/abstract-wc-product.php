@@ -1265,7 +1265,7 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_attributes() {
-		return (array) maybe_unserialize( $this->product_attributes );
+		return apply_filters( 'woocommerce_get_product_attributes', (array) maybe_unserialize( $this->product_attributes ) );
 	}
 
 	/**
