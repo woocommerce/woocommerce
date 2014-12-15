@@ -3,8 +3,9 @@ jQuery( function( $ ) {
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
 	// wc_checkout_params is required to continue, ensure the object exists
-	if ( typeof wc_checkout_params === 'undefined' )
+	if ( 'undefined' === typeof wc_checkout_params ) {
 		return false;
+	}
 
 	var updateTimer,
 		dirtyInput = false,
@@ -12,7 +13,9 @@ jQuery( function( $ ) {
 
 	function update_checkout() {
 
-		if ( xhr ) xhr.abort();
+		if ( xhr ) {
+			xhr.abort();
+		}
 
 		var shipping_methods = [];
 
@@ -79,7 +82,20 @@ jQuery( function( $ ) {
 			success: function ( response ) {
 
 				// Check reponse
-				if ( response ) {
+				if ( '-1' === response ) {
+					var $form = $( 'form.checkout' );
+
+					// Remove old errors
+					$( '.woocommerce-error, .woocommerce-message' ).remove();
+
+					$form.prepend( wc_checkout_params.session_expired_message );
+
+					// Scroll to top
+					$( 'html, body' ).animate( {
+						scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
+					}, 1000 );
+
+				} else if ( response ) {
 
 					// Remove old errors
 					$( '.woocommerce-error, .woocommerce-message' ).remove();

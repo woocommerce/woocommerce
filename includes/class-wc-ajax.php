@@ -161,8 +161,16 @@ class WC_AJAX {
 		}
 
 		if ( 0 == sizeof( WC()->cart->get_cart() ) ) {
-			echo '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>';
-			die();
+			ob_start();
+
+			$data = array(
+				'result'   => 'failure',
+				'messages' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>',
+				'html'     => ''
+			);
+
+			// Send JSON
+			wp_send_json( $data );
 		}
 
 		do_action( 'woocommerce_checkout_update_order_review', $_POST['post_data'] );
@@ -278,8 +286,6 @@ class WC_AJAX {
 
 		// Send JSON
 		wp_send_json( $data );
-
-		die();
 	}
 
 	/**
