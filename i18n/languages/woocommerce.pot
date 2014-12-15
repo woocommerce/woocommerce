@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.2.9 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-12-11 17:45:50+00:00\n"
+"POT-Creation-Date: 2014-12-15 11:57:41+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4762,7 +4762,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-order.php:1616
 #: includes/abstracts/abstract-wc-product.php:890
 #: includes/abstracts/abstract-wc-product.php:896
-#: includes/class-wc-cart.php:1458 includes/class-wc-product-variation.php:294
+#: includes/class-wc-cart.php:1474 includes/class-wc-product-variation.php:294
 msgid "Free!"
 msgstr ""
 
@@ -4804,7 +4804,7 @@ msgid "Order status changed from %s to %s."
 msgstr ""
 
 #: includes/abstracts/abstract-wc-order.php:2339
-#: includes/class-wc-ajax.php:1167 includes/class-wc-ajax.php:1168
+#: includes/class-wc-ajax.php:1188 includes/class-wc-ajax.php:1189
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
@@ -4846,7 +4846,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-product.php:562
 #: includes/abstracts/abstract-wc-product.php:573
 #: includes/abstracts/abstract-wc-product.php:595
-#: includes/class-wc-ajax.php:627 includes/class-wc-product-variation.php:512
+#: includes/class-wc-ajax.php:648 includes/class-wc-product-variation.php:512
 #: includes/class-wc-product-variation.php:522
 #: includes/class-wc-product-variation.php:538
 msgid "In stock"
@@ -4876,7 +4876,7 @@ msgstr ""
 
 #: includes/abstracts/abstract-wc-product.php:600
 #: includes/abstracts/abstract-wc-product.php:606
-#: includes/class-wc-ajax.php:628 includes/class-wc-product-variation.php:541
+#: includes/class-wc-ajax.php:649 includes/class-wc-product-variation.php:541
 #: includes/class-wc-product-variation.php:545
 msgid "Out of stock"
 msgstr ""
@@ -5253,35 +5253,35 @@ msgid "You do not have permission to create products"
 msgstr ""
 
 #: includes/api/class-wc-api-products.php:197
-#: includes/api/class-wc-api-products.php:298
+#: includes/api/class-wc-api-products.php:303
 msgid "Invalid product type - the product type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:406
-#: includes/api/class-wc-api-products.php:440
+#: includes/api/class-wc-api-products.php:411
+#: includes/api/class-wc-api-products.php:445
 msgid "You do not have permission to read product categories"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:435
+#: includes/api/class-wc-api-products.php:440
 msgid "Invalid product category ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:446
+#: includes/api/class-wc-api-products.php:451
 msgid "A product category with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:697
-#: includes/api/class-wc-api-products.php:1138
+#: includes/api/class-wc-api-products.php:703
+#: includes/api/class-wc-api-products.php:1149
 msgid "The SKU already exists on another product"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1091 includes/class-wc-emails.php:334
+#: includes/api/class-wc-api-products.php:1102 includes/class-wc-emails.php:334
 #: includes/class-wc-emails.php:366 includes/class-wc-emails.php:410
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1553
-#: includes/api/class-wc-api-products.php:1554
+#: includes/api/class-wc-api-products.php:1564
+#: includes/api/class-wc-api-products.php:1565
 #: includes/api/v1/class-wc-api-products.php:461
 #: includes/api/v1/class-wc-api-products.php:462
 #: includes/wc-product-functions.php:267
@@ -5289,15 +5289,15 @@ msgstr ""
 msgid "Placeholder"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1627
+#: includes/api/class-wc-api-products.php:1640
 msgid "Invalid URL %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1639
+#: includes/api/class-wc-api-products.php:1652
 msgid "Error getting remote image %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1668
+#: includes/api/class-wc-api-products.php:1681
 msgid "Zero size file downloaded"
 msgstr ""
 
@@ -5421,80 +5421,80 @@ msgstr ""
 msgid "Return to homepage"
 msgstr ""
 
-#: includes/class-wc-ajax.php:318 includes/class-wc-ajax.php:351
-#: includes/class-wc-ajax.php:376
+#: includes/class-wc-ajax.php:339 includes/class-wc-ajax.php:372
+#: includes/class-wc-ajax.php:397
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: includes/class-wc-ajax.php:322 includes/class-wc-ajax.php:355
-#: includes/class-wc-ajax.php:380
+#: includes/class-wc-ajax.php:343 includes/class-wc-ajax.php:376
+#: includes/class-wc-ajax.php:401
 msgid "You have taken too long. Please go back and retry."
 msgstr ""
 
-#: includes/class-wc-ajax.php:611
+#: includes/class-wc-ajax.php:632
 msgid "Same as parent"
 msgstr ""
 
-#: includes/class-wc-ajax.php:612
+#: includes/class-wc-ajax.php:633
 msgid "Standard"
 msgstr ""
 
-#: includes/class-wc-ajax.php:621
+#: includes/class-wc-ajax.php:642
 msgid "Do not allow"
 msgstr ""
 
-#: includes/class-wc-ajax.php:622
+#: includes/class-wc-ajax.php:643
 msgid "Allow, but notify customer"
 msgstr ""
 
-#: includes/class-wc-ajax.php:623
+#: includes/class-wc-ajax.php:644
 msgid "Allow"
 msgstr ""
 
-#: includes/class-wc-ajax.php:902
+#: includes/class-wc-ajax.php:923
 msgid "File %d"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1176
+#: includes/class-wc-ajax.php:1197
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1215 includes/class-wc-ajax.php:1216
-#: includes/class-wc-ajax.php:1866
+#: includes/class-wc-ajax.php:1236 includes/class-wc-ajax.php:1237
+#: includes/class-wc-ajax.php:1887
 msgid "Item #%s stock increased from %s to %s."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1223
+#: includes/class-wc-ajax.php:1244
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1238
+#: includes/class-wc-ajax.php:1259
 #: includes/widgets/class-wc-widget-product-categories.php:41
 #: templates/single-product-reviews.php:62
 msgid "Name"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1238
+#: includes/class-wc-ajax.php:1259
 msgid "Value"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1475
+#: includes/class-wc-ajax.php:1496
 msgid "Delete note"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1620
+#: includes/class-wc-ajax.php:1641
 msgid "Guest"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1845
+#: includes/class-wc-ajax.php:1866
 msgid "Invalid refund amount"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1900
+#: includes/class-wc-ajax.php:1921
 msgid "Refund failed"
 msgstr ""
 
@@ -5535,33 +5535,33 @@ msgid ""
 "apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:839
+#: includes/class-wc-cart.php:855
 msgid "Sorry, this product cannot be purchased."
 msgstr ""
 
-#: includes/class-wc-cart.php:846
+#: includes/class-wc-cart.php:862
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr ""
 
-#: includes/class-wc-cart.php:851
+#: includes/class-wc-cart.php:867
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr ""
 
-#: includes/class-wc-cart.php:865 includes/class-wc-cart.php:889
+#: includes/class-wc-cart.php:881 includes/class-wc-cart.php:905
 #: includes/class-wc-frontend-scripts.php:188 includes/wc-cart-functions.php:98
 #: templates/cart/mini-cart.php:65
 msgid "View Cart"
 msgstr ""
 
-#: includes/class-wc-cart.php:866
+#: includes/class-wc-cart.php:882
 msgid "You cannot add another &quot;%s&quot; to your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:890
+#: includes/class-wc-cart.php:906
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
