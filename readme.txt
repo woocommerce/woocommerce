@@ -130,7 +130,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.2.9 - xx/12/2014 =
+= 2.2.9 - 15/12/2014 =
 * Add - API - parent_id for products endpoint.
 * Fix - Processing and On-hold order links in WooCommerce Status dashboard widget.
 * Fix - Orders API when query orders with deleted products.
