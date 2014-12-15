@@ -910,7 +910,7 @@ class WC_Admin_Post_Types {
 		if ( isset( $_REQUEST['_stock_status'] ) ) {
 			$stock_status = wc_clean( $_REQUEST['_stock_status'] );
 
-			if ( ! $product->is_type('variable') ) {
+			if ( $product->is_type( 'variable' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
 					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
 						wc_update_product_stock_status( $child_id, $stock_status );
@@ -919,7 +919,7 @@ class WC_Admin_Post_Types {
 
 				WC_Product_Variable::sync_stock_status( $post_id );
 			} else {
-				wc_update_product_stock_status( $post_id,$stock_status );
+				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 		}
 
@@ -982,7 +982,7 @@ class WC_Admin_Post_Types {
 		if ( ! empty( $_REQUEST['_stock_status'] ) ) {
 			$stock_status = wc_clean( $_REQUEST['_stock_status'] );
 
-			if ( ! $product->is_type('variable') ) {
+			if ( $product->is_type( 'variable' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
 					if ( 'yes' !== get_post_meta( $child_id, '_manage_stock', true ) ) {
 						wc_update_product_stock_status( $child_id, $stock_status );
@@ -991,7 +991,7 @@ class WC_Admin_Post_Types {
 
 				WC_Product_Variable::sync_stock_status( $post_id );
 			} else {
-				wc_update_product_stock_status( $post_id,$stock_status );
+				wc_update_product_stock_status( $post_id, $stock_status );
 			}
 		}
 
