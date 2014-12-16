@@ -736,7 +736,7 @@ class WC_Admin_Post_Types {
 
 				break;
 			case 'webhook_status' :
-				echo $the_webhook->get_status();
+				echo $the_webhook->get_i18n_status();
 				break;
 			case 'webhook_topic' :
 				echo $the_webhook->get_topic();

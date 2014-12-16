@@ -630,6 +630,22 @@ class WC_Webhook {
 	}
 
 	/**
+	 * Get the webhook i18n status
+	 *
+	 * @return string
+	 */
+	public function get_i18n_status() {
+		$status   = $this->get_status();
+		$statuses = apply_filters( 'woocommerce_webhook_i18n_statuses', array(
+			'active'   => __( 'Active', 'woocommerce' ),
+			'paused'   => __( 'Paused', 'woocommerce' ),
+			'disabled' => __( 'Disabled', 'woocommerce' ),
+		) );
+
+		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
+	}
+
+	/**
 	 * Update the webhook status, see get_status() for valid statuses
 	 *
 	 * @since 2.2
