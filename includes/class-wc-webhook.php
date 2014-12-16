@@ -636,11 +636,7 @@ class WC_Webhook {
 	 */
 	public function get_i18n_status() {
 		$status   = $this->get_status();
-		$statuses = apply_filters( 'woocommerce_webhook_i18n_statuses', array(
-			'active'   => __( 'Active', 'woocommerce' ),
-			'paused'   => __( 'Paused', 'woocommerce' ),
-			'disabled' => __( 'Disabled', 'woocommerce' ),
-		) );
+		$statuses = wc_get_webhook_statuses();
 
 		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
 	}
@@ -652,26 +648,28 @@ class WC_Webhook {
 	 * @param $status
 	 */
 	public function update_status( $status ) {
+		global $wpdb;
 
 		switch ( $status ) {
 
-			case 'active':
+			case 'active' :
 				$post_status = 'publish';
 				break;
 
-			case 'paused':
+			case 'paused' :
 				$post_status = 'draft';
 				break;
 
-			case 'disabled':
+			case 'disabled' :
 				$post_status = 'pending';
 				break;
 
-			default:
+			default :
 				$post_status = 'draft';
+				break;
 		}
 
-		wp_update_post( array( 'ID' => $this->id, 'post_status' => $post_status ) );
+		$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status ), array( 'ID' => $this->id ) );
 	}
 
 	/**

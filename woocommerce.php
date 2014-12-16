@@ -200,6 +200,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
 		include_once( 'includes/wc-widget-functions.php' );
+		include_once( 'includes/wc-webhook-functions.php' );
 		include_once( 'includes/class-wc-install.php' );
 		include_once( 'includes/class-wc-download-handler.php' );
 		include_once( 'includes/class-wc-comments.php' );
