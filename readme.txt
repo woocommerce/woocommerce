@@ -130,7 +130,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.2.10 - xx/12/2014 =
+= 2.2.10 - 16/12/2014 =
 * Fix - Stock status on quick and bulk edit.
 * Fix - Incorrect clearing of error messages.
 
