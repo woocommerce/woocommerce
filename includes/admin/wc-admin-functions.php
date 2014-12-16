@@ -35,6 +35,8 @@ function wc_get_screen_ids() {
 		'edit-product_tag',
 		'edit-product_shipping_class',
 		'profile',
+		'shop_webhook',
+		'edit-shop_webhook'
 	);
 
 	foreach ( wc_get_order_types() as $type ) {
