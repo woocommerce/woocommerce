@@ -132,6 +132,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.2.10 - xx/12/2014 =
 * Fix - Stock status on quick and bulk edit.
+* Fix - Incorrect clearing of error messages.
 
 = 2.2.9 - 15/12/2014 =
 * Add - API - parent_id for products endpoint.
