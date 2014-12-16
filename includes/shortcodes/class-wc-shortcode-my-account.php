@@ -280,7 +280,7 @@ class WC_Shortcode_My_Account {
 		$wpdb->update( $wpdb->users, array( 'user_activation_key' => $hashed ), array( 'user_login' => $user_login ) );
 
 		// Send email notification
-		$mailer = WC()->mailer();
+		WC()->mailer(); // load email classes
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
 		wc_add_notice( __( 'Check your e-mail for the confirmation link.', 'woocommerce' ) );
