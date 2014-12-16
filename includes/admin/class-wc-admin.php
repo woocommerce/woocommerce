@@ -114,17 +114,25 @@ class WC_Admin {
 				die( 'Security check' );
 			}
 
-			global $email_heading;
-
-			ob_start();
-
-			include( 'views/html-email-template-preview.php' );
-
+			// load the mailer class
 			$mailer        = WC()->mailer();
-			$message       = ob_get_clean();
+
+			// get the preview email subject
 			$email_heading = __( 'HTML Email Template', 'woocommerce' );
 
-			echo $mailer->wrap_message( $email_heading, $message );
+			// get the preview email content
+			ob_start();
+			include( 'views/html-email-template-preview.php' );
+			$message       = ob_get_clean();
+
+			// create a new email
+			$email         = new WC_Email();
+
+			// wrap the content with the email template and then add styles
+			$message       = $email->style_inline( $mailer->wrap_message( $email_heading, $message ) );
+
+			// print the preview email
+			echo $message;
 			exit;
 		}
 	}
