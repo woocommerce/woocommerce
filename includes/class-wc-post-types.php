@@ -392,9 +392,9 @@ class WC_Post_types {
 					'hierarchical'        => false,
 					'rewrite'             => false,
 					'query_var'           => false,
-					'supports'            => array( 'title' ),
+					'supports'            => false,
 					'show_in_nav_menus'   => false,
-					'show_in_admin_bar'   => false,
+					'show_in_admin_bar'   => false
 				)
 			)
 		);

@@ -2045,9 +2045,6 @@ class WC_Admin_Post_Types {
 			case 'shop_coupon' :
 				$text = __( 'Coupon code', 'woocommerce' );
 			break;
-			case 'shop_webhook' :
-				$text = __( 'Webhook name', 'woocommerce' );
-			break;
 		}
 
 		return $text;
