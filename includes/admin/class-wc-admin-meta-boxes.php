@@ -130,6 +130,7 @@ class WC_Admin_Meta_Boxes {
 
 		// Webhook
 		add_meta_box( 'woocommerce-webhook-data', __( 'Webhook Data', 'woocommerce' ), 'WC_Meta_Box_Webhook_Data::output', 'shop_webhook', 'normal', 'high' );
+		add_meta_box( 'woocommerce-webhook-actions', __( 'Webhook Actions', 'woocommerce' ), 'WC_Meta_Box_Webhook_Actions::output', 'shop_webhook', 'side', 'high' );
 	}
 
 	/**

@@ -33,14 +33,13 @@ class WC_Meta_Box_Webhook_Data {
 		<div id="webhook-options" class="panel woocommerce_options_panel">
 			<div class="options_group">
 				<?php
-
 					// Name
 					woocommerce_wp_text_input( array(
 						'id'          => 'name',
 						'label'       => __( 'Name', 'woocommerce' ),
 						'description' => sprintf( __( 'Friendly name for identifying this webhook, defaults to Webhook created on %s.', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
 						'desc_tip'    => true,
-						'value'       => $webhook->get_name()
+						'value'       => ( 'auto-draft' == $post->post_status ) ? '' : $webhook->get_name()
 					) );
 				?>
 			</div>
@@ -167,10 +166,19 @@ class WC_Meta_Box_Webhook_Data {
 		$name = ! empty( $_POST['name'] ) ? $_POST['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
 		$wpdb->update( $wpdb->posts, array( 'post_title' => $name ), array( 'ID' => $post_id ) );
 
-		$status       = ! empty( $_POST['status'] ) ? wc_clean( $_POST['status'] ) : '';
-		$delivery_url = ! empty( $_POST['delivery_url'] ) ? $_POST['delivery_url'] : '';
-		$secret       = ! empty( $_POST['secret'] ) ? $_POST['secret'] : get_user_meta( get_current_user_id(), 'woocommerce_api_consumer_secret', true );
+		// Status
+		$status = ! empty( $_POST['status'] ) ? wc_clean( $_POST['status'] ) : '';
+		$webhook->update_status( $status );
 
+		// Delivery URL
+		$delivery_url = ! empty( $_POST['delivery_url'] ) ? $_POST['delivery_url'] : '';
+		$webhook->set_delivery_url( $delivery_url );
+
+		// Secret
+		$secret = ! empty( $_POST['secret'] ) ? $_POST['secret'] : get_user_meta( get_current_user_id(), 'woocommerce_api_consumer_secret', true );
+		$webhook->set_secret( $secret );
+
+		// Topic
 		if ( ! empty( $_POST['topic'] ) ) {
 			list( $resource, $event ) = explode( '.', wc_clean( $_POST['topic'] ) );
 
@@ -180,14 +188,8 @@ class WC_Meta_Box_Webhook_Data {
 				list( $resource, $event ) = explode( '.', wc_clean( $_POST['custom_topic'] ) );
 			}
 
-			$topic = $resource . '.' . $event;
+			$webhook->set_topic( $resource . '.' . $event );
 		}
-
-		// Update/Set
-		$webhook->update_status( $status );
-		$webhook->set_delivery_url( $delivery_url );
-		$webhook->set_secret( $secret );
-		$webhook->set_topic( $topic );
 
 		do_action( 'woocommerce_webhook_options_save', $post_id );
 	}
