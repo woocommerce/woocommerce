@@ -81,12 +81,12 @@ jQuery( function( $ ) {
 			data:		data,
 			success: function ( response ) {
 
+				// Remove old AJAX errors
+				$( '.woocommerce-error-ajax' ).remove();
+
 				// Check reponse
 				if ( '-1' === response ) {
 					var $form = $( 'form.checkout' );
-
-					// Remove old errors
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
 
 					$form.prepend( wc_checkout_params.session_expired_message );
 
@@ -96,9 +96,6 @@ jQuery( function( $ ) {
 					}, 1000 );
 
 				} else if ( response ) {
-
-					// Remove old errors
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
 
 					// Check the response result
 					if ( 'failure' == response.result ) {

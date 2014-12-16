@@ -274,7 +274,7 @@ class WC_AJAX {
 		if ( ! isset( WC()->session->reload_checkout ) ) {
 			ob_start();
 			wc_print_notices();
-			$messages = ob_get_clean();
+			$messages = '<div class="woocommerce-error-ajax">' . ob_get_clean() . '</div>';
 		}
 
 		// Setup data
