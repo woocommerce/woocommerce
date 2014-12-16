@@ -12,15 +12,15 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice' ) ) :
  * An email sent to the customer via admin.
  *
  * @class 		WC_Email_Customer_Invoice
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Emails
  * @author 		WooThemes
  * @extends 	WC_Email
  */
 class WC_Email_Customer_Invoice extends WC_Email {
 
-	var $find;
-	var $replace;
+	public $find;
+	public $replace;
 
 	/**
 	 * Constructor
