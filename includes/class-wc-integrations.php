@@ -5,15 +5,15 @@
  * Loads Integrations into WooCommerce.
  *
  * @class 		WC_Integrations
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Integrations
  * @category	Class
  * @author 		WooThemes
  */
 class WC_Integrations {
 
-	/** @var array Array of integration classes */
-	var $integrations = array();
+	/** Array of integration classes */
+	public $integrations = array();
 
     /**
      * __construct function.
