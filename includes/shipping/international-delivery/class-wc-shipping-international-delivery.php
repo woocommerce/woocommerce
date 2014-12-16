@@ -4,19 +4,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+if ( ! class_exists( 'WC_Shipping_International_Delivery' ) ) :
 /**
  * International Shipping Method based on Flat Rate shipping
  *
  * A simple shipping method for a flat fee per item or per order.
  *
  * @class 		WC_Shipping_International_Delivery
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
 class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 
-	var $id = 'international_delivery';
+	public $id = 'international_delivery';
 
 	/**
 	 * __construct function.
@@ -211,3 +212,5 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	}
 
 }
+
+endif;
