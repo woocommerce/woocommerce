@@ -1872,6 +1872,20 @@ class WC_Admin_Post_Types {
 			10 => __( 'Coupon draft updated.', 'woocommerce' )
 		);
 
+		$messages['shop_webhook'] = array(
+			0 => '', // Unused. Messages start at index 1.
+			1 => __( 'Webhook saved.', 'woocommerce' ),
+			2 => __( 'Custom field updated.', 'woocommerce' ),
+			3 => __( 'Custom field deleted.', 'woocommerce' ),
+			4 => __( 'Webhook saved.', 'woocommerce' ),
+			5 => '',
+			6 => __( 'Webhook saved.', 'woocommerce' ),
+			7 => __( 'Webhook saved.', 'woocommerce' ),
+			8 => __( 'Webhook saved.', 'woocommerce' ),
+			9 => '',
+			10 => __( 'Webhook saved.', 'woocommerce' )
+		);
+
 		return $messages;
 	}
 
