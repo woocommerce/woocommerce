@@ -83,8 +83,10 @@ class WC_Webhook {
 	 * @since 2.2
 	 */
 	public function enqueue() {
-		if ( is_array( $this->get_hooks() ) && ! empty( $this->get_delivery_url() ) ) {
-			foreach ( $this->get_hooks() as $hook ) {
+		$hooks = $this->get_hooks();
+
+		if ( is_array( $hooks ) && ! empty( $this->get_delivery_url() ) ) {
+			foreach ( $hooks as $hook ) {
 				add_action( $hook, array( $this, 'process' ) );
 			}
 		}
