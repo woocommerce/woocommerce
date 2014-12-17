@@ -185,7 +185,9 @@ class WC_Meta_Box_Webhook_Data {
 	private static function update_delivery_url( $webhook ) {
 		$delivery_url = ! empty( $_POST['delivery_url'] ) ? $_POST['delivery_url'] : '';
 
-		$webhook->set_delivery_url( $delivery_url );
+		if ( wc_is_valid_url( $delivery_url ) ) {
+			$webhook->set_delivery_url( $delivery_url );
+		}
 	}
 
 	/**
@@ -214,7 +216,11 @@ class WC_Meta_Box_Webhook_Data {
 				list( $resource, $event ) = explode( '.', wc_clean( $_POST['custom_topic'] ) );
 			}
 
-			$webhook->set_topic( $resource . '.' . $event );
+			$topic = $resource . '.' . $event;
+
+			if ( wc_is_webhook_valid_topic( $topic ) ) {
+				$webhook->set_topic( $topic );
+			}
 		}
 	}
 
