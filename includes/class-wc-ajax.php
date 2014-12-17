@@ -286,15 +286,28 @@ class WC_AJAX {
 
 		WC()->cart->calculate_totals();
 
+		// Get order review fragment
 		ob_start();
 		woocommerce_order_review();
 		$woocommerce_order_review = ob_get_clean();
 
+		// Get checkout payment fragement
 		ob_start();
 		woocommerce_checkout_payment();
 		$woocommerce_checkout_payment = ob_get_clean();
 
+		// Get messages if reload checkout is not true
+		$messages = '';
+		if ( ! isset( WC()->session->reload_checkout ) ) {
+			ob_start();
+			wc_print_notices();
+			$messages = ob_get_clean();
+		}
+
 		$data = array(
+			'result'    => empty( $messages ) ? 'success' : 'failure',
+			'messages'  => $messages,
+			'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false',
 			'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
 				'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
 				'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment
@@ -1063,7 +1076,7 @@ class WC_AJAX {
 
 		$order_id = absint( $_POST['order_id'] );
 		$rate_id  = absint( $_POST['rate_id'] );
-		$order    = new WC_Order( $order_id );
+		$order    = wc_get_order( $order_id );
 		$data     = get_post_meta( $order_id );
 
 		// Add new tax
@@ -1109,7 +1122,7 @@ class WC_AJAX {
 		wc_delete_order_item( $rate_id );
 
 		// Return HTML items
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 		$data  = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 
@@ -1375,7 +1388,7 @@ class WC_AJAX {
 		wc_save_order_items( $order_id, $items );
 
 		// Return HTML items
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 		$data  = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 
@@ -1399,7 +1412,7 @@ class WC_AJAX {
 			wc_save_order_items( $order_id, $items );
 
 			// Return HTML items
-			$order = new WC_Order( $order_id );
+			$order = wc_get_order( $order_id );
 			$data  = get_post_meta( $order_id );
 			include( 'admin/meta-boxes/views/html-order-items.php' );
 		}
@@ -1415,7 +1428,7 @@ class WC_AJAX {
 
 		// Return HTML items
 		$order_id = absint( $_POST['order_id'] );
-		$order    = new WC_Order( $order_id );
+		$order    = wc_get_order( $order_id );
 		$data     = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
 

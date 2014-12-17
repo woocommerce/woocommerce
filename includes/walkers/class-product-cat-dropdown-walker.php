@@ -13,10 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) ) :
+
 class WC_Product_Cat_Dropdown_Walker extends Walker {
 
-	var $tree_type = 'category';
-	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
+	public $tree_type = 'category';
+	public $db_fields = array ('parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
 
 	/**
 	 * @see Walker::start_el()
@@ -79,3 +81,5 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 		parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );
 	}
 }
+
+endif;

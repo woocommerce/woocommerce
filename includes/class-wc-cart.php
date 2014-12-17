@@ -121,6 +121,9 @@ class WC_Cart {
 				_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
 				$this->tax = new WC_Tax();
 				return $this->tax;
+			case 'discount_total':
+				_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: http://develop.woothemes.com/woocommerce/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
+				return 0;
 		}
 	}
 
@@ -1310,7 +1313,7 @@ class WC_Cart {
 				// Allow plugins to hook and alter totals before final total is calculated
 				do_action( 'woocommerce_calculate_totals', $this );
 
-				// Grand Total - Discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
+				// Grand Total - Discounted product prices, discounted tax, shipping cost + tax
 				$this->total = max( 0, apply_filters( 'woocommerce_calculated_total', round( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total + $this->fee_total, $this->dp ), $this ) );
 
 			} else {

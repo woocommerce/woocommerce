@@ -83,6 +83,26 @@
 			}
 		}
 	}
+
+	.storefront {
+		background: url(../images/storefront-bg.jpg) bottom right #f6f6f6;
+		border: 1px solid #ddd;
+		padding: 20px;
+		overflow: hidden;
+		zoom: 1;
+
+		img {
+			width: 278px;
+			height: auto;
+			float: left;
+			margin: 0 20px 0 0;
+			box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+		}
+
+		p {
+			max-width: 750px;
+		}
+	}
 }
 
 .woocommerce-message {

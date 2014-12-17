@@ -42,6 +42,10 @@ function woocommerce_wp_text_input( $field ) {
 			$field['class'] .= ' wc_input_stock';
 			$field['value']  = wc_stock_amount( $field['value'] );
 			break;
+		case 'url' :
+			$field['class'] .= ' wc_input_url';
+			$field['value']  = esc_url( $field['value'] );
+			break;
 
 		default :
 			break;

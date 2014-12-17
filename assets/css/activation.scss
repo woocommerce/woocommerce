@@ -48,7 +48,11 @@ p.woocommerce-actions,
 
 	a.skip,
 	a.docs {
-		opacity: 0.7;
+		opacity: 0.5;
+
+		&:hover, &:focus {
+			opacity: 1;
+		}
 	}
 
 	.twitter-share-button {
