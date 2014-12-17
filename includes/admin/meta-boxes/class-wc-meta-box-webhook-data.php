@@ -155,28 +155,56 @@ class WC_Meta_Box_Webhook_Data {
 	}
 
 	/**
-	 * Save meta box data
+	 * Updated the Webhook name
+	 *
+	 * @param int $post_id
 	 */
-	public static function save( $post_id ) {
+	private static function update_name( $post_id ) {
 		global $wpdb;
 
-		$webhook = new WC_Webhook( $post_id );
-
-		// Name
 		$name = ! empty( $_POST['name'] ) ? $_POST['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
 		$wpdb->update( $wpdb->posts, array( 'post_title' => $name ), array( 'ID' => $post_id ) );
+	}
 
-		// Status
-		$webhook->update_status( $_POST['status'] );
+	/**
+	 * Updated the Webhook status
+	 *
+	 * @param WC_Webhook $webhook
+	 */
+	private static function update_status( $webhook ) {
+		$status = ! empty( $_POST['status'] ) ? wc_clean( $_POST['status'] ) : '';
 
-		// Delivery URL
-		$webhook->set_delivery_url( $_POST['delivery_url'] );
+		$webhook->update_status( $status );
+	}
 
-		// Secret
+	/**
+	 * Updated the Webhook delivery URL
+	 *
+	 * @param WC_Webhook $webhook
+	 */
+	private static function update_delivery_url( $webhook ) {
+		$delivery_url = ! empty( $_POST['delivery_url'] ) ? $_POST['delivery_url'] : '';
+
+		$webhook->set_delivery_url( $delivery_url );
+	}
+
+	/**
+	 * Updated the Webhook secret
+	 *
+	 * @param WC_Webhook $webhook
+	 */
+	private static function update_secret( $webhook ) {
 		$secret = ! empty( $_POST['secret'] ) ? $_POST['secret'] : get_user_meta( get_current_user_id(), 'woocommerce_api_consumer_secret', true );
-		$webhook->set_secret( $secret );
 
-		// Topic
+		$webhook->set_secret( $secret );
+	}
+
+	/**
+	 * Updated the Webhook topic
+	 *
+	 * @param WC_Webhook $webhook
+	 */
+	private static function update_topic( $webhook ) {
 		if ( ! empty( $_POST['topic'] ) ) {
 			list( $resource, $event ) = explode( '.', wc_clean( $_POST['topic'] ) );
 
@@ -187,6 +215,59 @@ class WC_Meta_Box_Webhook_Data {
 			}
 
 			$webhook->set_topic( $resource . '.' . $event );
+		}
+	}
+
+	/**
+	 * Set Webhook post data.
+	 *
+	 * @param int $post_id
+	 */
+	private static function set_post_data( $post_id ) {
+		global $wpdb;
+
+		$password = uniqid( 'webhook_' );
+		$password = strlen( $password ) > 20 ? substr( $password, 0, 20 ) : $password;
+
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_password'  => $password,
+				'ping_status'    => 'closed',
+				'comment_status' => 'open'
+			),
+			array( 'ID' => $post_id )
+		);
+	}
+
+	/**
+	 * Save meta box data
+	 */
+	public static function save( $post_id ) {
+		$webhook = new WC_Webhook( $post_id );
+
+		// Name
+		self::update_name( $post_id );
+
+		// Status
+		self::update_status( $webhook );
+
+		// Delivery URL
+		self::update_delivery_url( $webhook );
+
+		// Secret
+		self::update_secret( $webhook );
+
+		// Topic
+		self::update_topic( $webhook );
+
+		// Webhook Created
+		if ( isset( $_POST['original_post_status'] ) && 'auto-draft' === $_POST['original_post_status'] ) {
+			// Set Post data like ping status and password
+			self::set_post_data( $post_id );
+
+			// Ping webhook
+			$webhook->deliver_ping();
 		}
 
 		do_action( 'woocommerce_webhook_options_save', $post_id );
