@@ -20,6 +20,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Meta_Box_Webhook_Data {
 
 	/**
+	 * Get the webhook topic data
+	 *
+	 * @return array
+	 */
+	private static function get_topic_data( $webhook ) {
+		$topic    = $webhook->get_topic();
+		$event    = '';
+		$resource = '';
+
+		if ( $topic ) {
+			list( $resource, $event ) = explode( '.', $topic );
+
+			if ( 'action' === $resource ) {
+				$topic = 'action';
+			} else if ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) ) {
+				$topic = 'custom';
+			}
+		}
+
+		return array(
+			'topic'    => $topic,
+			'event'    => $event,
+			'resource' => $resource
+		);
+	}
+
+	/**
 	 * Output the metabox
 	 */
 	public static function output( $post ) {
@@ -62,18 +89,7 @@ class WC_Meta_Box_Webhook_Data {
 			<div class="options_group">
 				<?php
 					// Topic
-					$topic = $webhook->get_topic();
-					$event = '';
-
-					if ( $topic ) {
-						list( $resource, $event ) = explode( '.', $topic );
-
-						if ( 'action' === $resource ) {
-							$topic = 'action';
-						} else if ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) ) {
-							$topic = 'custom';
-						}
-					}
+					$topic_data = self::get_topic_data( $webhook );
 
 					woocommerce_wp_select( array(
 						'id'          => 'topic',
@@ -97,7 +113,7 @@ class WC_Meta_Box_Webhook_Data {
 							'action'           => __( 'Action', 'woocommerce' ),
 							'custom'           => __( 'Custom', 'woocommerce' )
 						),
-						'value'       => $topic
+						'value'       => $topic_data['topic']
 					) );
 
 					// Action
@@ -106,7 +122,7 @@ class WC_Meta_Box_Webhook_Data {
 						'label'       => __( 'Action Event', 'woocommerce' ),
 						'description' => __( 'Enter the Action that will trigger this webhook.', 'woocommerce' ),
 						'desc_tip'    => true,
-						'value'       => $event
+						'value'       => $topic_data['event']
 					) );
 
 					// Custom Topic

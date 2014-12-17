@@ -4,6 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+$count_comments = wp_count_comments( $webhook->id );
+$total          = $count_comments->approved;
+
 ?>
 
 <?php echo WC_Meta_Box_Webhook_Logs::get_navigation( $total ); ?>

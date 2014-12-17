@@ -30,10 +30,8 @@ class WC_Meta_Box_Webhook_Logs {
 	public static function output( $post ) {
 		$webhook = new WC_Webhook( $post->ID );
 
-		$count_comments = wp_count_comments( $webhook->id );
-		$total          = $count_comments->approved;
-		$current        = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1;
-		$args           = array(
+		$current = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1;
+		$args    = array(
 			'post_id' => $webhook->id,
 			'status'  => 'approve',
 			'type'    => 'webhook_delivery',
