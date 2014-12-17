@@ -53,7 +53,10 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'woocommerce_process_shop_coupon_meta', 'WC_Meta_Box_Coupon_Data::save', 10, 2 );
 
 		// Save Rating Meta Boxes
-		add_action( 'comment_edit_redirect',  'WC_Meta_Box_Order_Reviews::save', 1, 2 );
+		add_action( 'comment_edit_redirect', 'WC_Meta_Box_Order_Reviews::save', 1, 2 );
+
+		// Save Webhook Meta Boxes
+		add_action( 'woocommerce_process_shop_webhook_meta', 'WC_Meta_Box_Webhook_Data::save', 10 );
 
 		// Error handling (for showing errors from meta boxes on next page load)
 		add_action( 'admin_notices', array( $this, 'output_errors' ) );
@@ -124,6 +127,11 @@ class WC_Admin_Meta_Boxes {
 				add_meta_box( 'woocommerce-rating', __( 'Rating', 'woocommerce' ), 'WC_Meta_Box_Order_Reviews::output', 'comment', 'normal', 'high' );
 			}
 		}
+
+		// Webhook
+		add_meta_box( 'woocommerce-webhook-data', __( 'Webhook Data', 'woocommerce' ), 'WC_Meta_Box_Webhook_Data::output', 'shop_webhook', 'normal', 'high' );
+		add_meta_box( 'woocommerce-webhook-actions', __( 'Webhook Actions', 'woocommerce' ), 'WC_Meta_Box_Webhook_Actions::output', 'shop_webhook', 'side', 'high' );
+		add_meta_box( 'woocommerce-webhook-logs', __( 'Webhook Logs', 'woocommerce' ), 'WC_Meta_Box_Webhook_Logs::output', 'shop_webhook', 'normal', 'low' );
 	}
 
 	/**
@@ -138,6 +146,9 @@ class WC_Admin_Meta_Boxes {
 		remove_meta_box( 'woothemes-settings', 'shop_coupon' , 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
 		remove_meta_box( 'slugdiv', 'shop_coupon' , 'normal' );
+		remove_meta_box( 'submitdiv', 'shop_webhook' , 'side' );
+		remove_meta_box( 'slugdiv', 'shop_webhook' , 'normal' );
+		remove_meta_box( 'commentstatusdiv', 'shop_webhook' , 'normal' );
 
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
 			remove_meta_box( 'commentsdiv', $type, 'normal' );
@@ -196,7 +207,7 @@ class WC_Admin_Meta_Boxes {
 		// Check the post type
 		if ( in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ) ) ) {
 			do_action( 'woocommerce_process_shop_order_meta', $post_id, $post );
-		} elseif ( in_array( $post->post_type, array( 'product', 'shop_coupon' ) ) ) {
+		} elseif ( in_array( $post->post_type, array( 'product', 'shop_coupon', 'shop_webhook' ) ) ) {
 			do_action( 'woocommerce_process_' . $post->post_type . '_meta', $post_id, $post );
 		}
 	}

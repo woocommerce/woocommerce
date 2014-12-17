@@ -196,6 +196,9 @@ class WC_Admin_Assets {
 		if ( in_array( $screen->id, array( 'shop_coupon', 'edit-shop_coupon' ) ) ) {
 			wp_enqueue_script( 'wc-admin-coupon-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-coupon' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), WC_VERSION );
 		}
+		if ( 'shop_webhook' == $screen->id ) {
+			wp_enqueue_script( 'wc-admin-webhook-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-webhook' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+		}
 		if ( in_array( str_replace( 'edit-', '', $screen->id ), array_merge( array( 'shop_coupon', 'product' ), wc_get_order_types( 'order-meta-boxes' ) ) ) ) {
 			$params = array(
 				'remove_item_notice'            => __( 'Are you sure you want to remove the selected items? If you have previously reduced this item\'s stock, or this order was submitted by a customer, you will need to manually restore the item\'s stock.', 'woocommerce' ),
@@ -224,16 +227,16 @@ class WC_Admin_Assets {
 				'no_customer_selected'          => __( 'No customer selected', 'woocommerce' ),
 				'plugin_url'                    => WC()->plugin_url(),
 				'ajax_url'                      => admin_url( 'admin-ajax.php' ),
-				'order_item_nonce'              => wp_create_nonce("order-item"),
-				'add_attribute_nonce'           => wp_create_nonce("add-attribute"),
-				'save_attributes_nonce'         => wp_create_nonce("save-attributes"),
-				'calc_totals_nonce'             => wp_create_nonce("calc-totals"),
-				'get_customer_details_nonce'    => wp_create_nonce("get-customer-details"),
-				'search_products_nonce'         => wp_create_nonce("search-products"),
-				'grant_access_nonce'            => wp_create_nonce("grant-access"),
-				'revoke_access_nonce'           => wp_create_nonce("revoke-access"),
-				'add_order_note_nonce'          => wp_create_nonce("add-order-note"),
-				'delete_order_note_nonce'       => wp_create_nonce("delete-order-note"),
+				'order_item_nonce'              => wp_create_nonce( 'order-item' ),
+				'add_attribute_nonce'           => wp_create_nonce( 'add-attribute' ),
+				'save_attributes_nonce'         => wp_create_nonce( 'save-attributes' ),
+				'calc_totals_nonce'             => wp_create_nonce( 'calc-totals' ),
+				'get_customer_details_nonce'    => wp_create_nonce( 'get-customer-details' ),
+				'search_products_nonce'         => wp_create_nonce( 'search-products' ),
+				'grant_access_nonce'            => wp_create_nonce( 'grant-access' ),
+				'revoke_access_nonce'           => wp_create_nonce( 'revoke-access' ),
+				'add_order_note_nonce'          => wp_create_nonce( 'add-order-note' ),
+				'delete_order_note_nonce'       => wp_create_nonce( 'delete-order-note' ),
 				'calendar_image'                => WC()->plugin_url().'/assets/images/calendar.png',
 				'post_id'                       => isset( $post->ID ) ? $post->ID : '',
 				'base_country'                  => WC()->countries->get_base_country(),
