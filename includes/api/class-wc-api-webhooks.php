@@ -173,12 +173,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 			$data = apply_filters( 'woocommerce_api_create_webhook_data', $data, $this );
 
 			// validate topic
-			if ( empty( $data['topic'] ) || ! $this->is_valid_topic( strtolower( $data['topic'] ) ) ) {
+			if ( empty( $data['topic'] ) || ! wc_is_webhook_valid_topic( strtolower( $data['topic'] ) ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_topic', __( 'Webhook topic is required and must be valid', 'woocommerce' ), 400 );
 			}
 
 			// validate delivery URL
-			if ( empty( $data['delivery_url'] ) || ! $this->is_valid_url( $data['delivery_url'] ) ) {
+			if ( empty( $data['delivery_url'] ) || ! wc_is_valid_url( $data['delivery_url'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_delivery_url', __( 'Webhook delivery URL must be a valid URL starting with http:// or https://', 'woocommerce' ), 400 );
 			}
 
@@ -249,7 +249,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 			// update topic
 			if ( ! empty( $data['topic'] ) ) {
 
-				if ( $this->is_valid_topic( strtolower( $data['topic'] ) ) ) {
+				if ( wc_is_webhook_valid_topic( strtolower( $data['topic'] ) ) ) {
 
 					$webhook->set_topic( $data['topic'] );
 
@@ -260,7 +260,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 
 			// update delivery URL
 			if ( ! empty( $data['delivery_url'] ) ) {
-				if ( $this->is_valid_url( $data['delivery_url'] ) ) {
+				if ( wc_is_valid_url( $data['delivery_url'] ) ) {
 
 					$webhook->set_delivery_url( $data['delivery_url'] );
 
@@ -301,63 +301,6 @@ class WC_API_Webhooks extends WC_API_Resource {
 
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
-	}
-
-
-	/**
-	 * Check if the given topic is a valid webhook topic, a topic is valid if:
-	 *
-	 * + starts with `action.woocommerce_` or `action.wc_`
-	 * + it has a valid resource & event
-	 *
-	 * @since 2.2
-	 * @param string $topic webhook topic
-	 * @return bool true if valid, false otherwise
-	 */
-	private function is_valid_topic( $topic ) {
-
-		// custom topics are prefixed with woocommerce_ or wc_ are valid
-		if ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) {
-			return true;
-		}
-
-		@list( $resource, $event ) = explode( '.', $topic );
-
-		if ( ! isset( $resource ) || ! isset( $event ) ) {
-			return false;
-		}
-
-		$valid_resources = apply_filters( 'woocommerce_valid_webhook_resources', array( 'coupon', 'customer', 'order', 'product' ) );
-		$valid_events    = apply_filters( 'woocommerce_valid_webhook_events', array( 'created', 'updated', 'deleted' ) );
-
-		if ( in_array( $resource, $valid_resources ) && in_array( $event, $valid_events ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Simple check for validating a URL, it must start with http:// or https://
-	 * and pass FILTER_VALIDATE_URL validation
-	 *
-	 * @since 2.2
-	 * @param string $url delivery URL for the webhook
-	 * @return bool true if valid, false otherwise
-	 */
-	private function is_valid_url( $url ) {
-
-		// must start with http:// or https://
-		if ( 0 !== strpos( $url, 'http://' ) && 0 !== strpos( $url, 'https://' ) ) {
-			return false;
-		}
-
-		// must pass validation
-		if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**

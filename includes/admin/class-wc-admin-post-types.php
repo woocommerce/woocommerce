@@ -1892,7 +1892,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Disable the auto-save functionality for Orders.
 	 */
-	public function disable_autosave(){
+	public function disable_autosave() {
 		global $post;
 
 		if ( $post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
