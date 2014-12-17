@@ -167,12 +167,10 @@ class WC_Meta_Box_Webhook_Data {
 		$wpdb->update( $wpdb->posts, array( 'post_title' => $name ), array( 'ID' => $post_id ) );
 
 		// Status
-		$status = ! empty( $_POST['status'] ) ? wc_clean( $_POST['status'] ) : '';
-		$webhook->update_status( $status );
+		$webhook->update_status( $_POST['status'] );
 
 		// Delivery URL
-		$delivery_url = ! empty( $_POST['delivery_url'] ) ? $_POST['delivery_url'] : '';
-		$webhook->set_delivery_url( $delivery_url );
+		$webhook->set_delivery_url( $_POST['delivery_url'] );
 
 		// Secret
 		$secret = ! empty( $_POST['secret'] ) ? $_POST['secret'] : get_user_meta( get_current_user_id(), 'woocommerce_api_consumer_secret', true );
