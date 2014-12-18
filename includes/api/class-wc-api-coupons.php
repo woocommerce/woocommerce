@@ -225,7 +225,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		$defaults = array(
 			'type'                         => 'fixed_cart',
 			'amount'                       => 0,
-			'individual_use'               => 'no',
+			'individual_use'               => false,
 			'product_ids'                  => array(),
 			'exclude_product_ids'          => array(),
 			'usage_limit'                  => '',
@@ -233,10 +233,10 @@ class WC_API_Coupons extends WC_API_Resource {
 			'limit_usage_to_x_items'       => '',
 			'usage_count'                  => '',
 			'expiry_date'                  => '',
-			'enable_free_shipping'         => 'no',
+			'enable_free_shipping'         => false,
 			'product_category_ids'         => array(),
 			'exclude_product_category_ids' => array(),
-			'exclude_sale_items'           => 'no',
+			'exclude_sale_items'           => false,
 			'minimum_amount'               => '',
 			'maximum_amount'               => '',
 			'customer_emails'              => array(),
@@ -267,7 +267,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		// set coupon meta
 		update_post_meta( $id, 'discount_type', $coupon_data['type'] );
 		update_post_meta( $id, 'coupon_amount', wc_format_decimal( $coupon_data['amount'] ) );
-		update_post_meta( $id, 'individual_use', $coupon_data['individual_use'] );
+		update_post_meta( $id, 'individual_use', ( true === $coupon_data['individual_use'] ) ? 'yes' : 'no' );
 		update_post_meta( $id, 'product_ids', implode( ',', array_filter( array_map( 'intval', $coupon_data['product_ids'] ) ) ) );
 		update_post_meta( $id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', $coupon_data['exclude_product_ids'] ) ) ) );
 		update_post_meta( $id, 'usage_limit', absint( $coupon_data['usage_limit'] ) );
@@ -275,10 +275,10 @@ class WC_API_Coupons extends WC_API_Resource {
 		update_post_meta( $id, 'limit_usage_to_x_items', absint( $coupon_data['limit_usage_to_x_items'] ) );
 		update_post_meta( $id, 'usage_count', absint( $coupon_data['usage_count'] ) );
 		update_post_meta( $id, 'expiry_date', wc_clean( $coupon_data['expiry_date'] ) );
-		update_post_meta( $id, 'free_shipping', wc_clean( $coupon_data['enable_free_shipping'] ) );
+		update_post_meta( $id, 'free_shipping', ( true === $coupon_data['enable_free_shipping'] ) ? 'yes' : 'no' );
 		update_post_meta( $id, 'product_categories', array_filter( array_map( 'intval', $coupon_data['product_category_ids'] ) ) );
 		update_post_meta( $id, 'exclude_product_categories', array_filter( array_map( 'intval', $coupon_data['exclude_product_category_ids'] ) ) );
-		update_post_meta( $id, 'exclude_sale_items', wc_clean( $coupon_data['exclude_sale_items'] ) );
+		update_post_meta( $id, 'exclude_sale_items', ( true === $coupon_data['exclude_sale_items'] ) ? 'yes' : 'no' );
 		update_post_meta( $id, 'minimum_amount', wc_format_decimal( $coupon_data['minimum_amount'] ) );
 		update_post_meta( $id, 'maximum_amount', wc_format_decimal( $coupon_data['maximum_amount'] ) );
 		update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $coupon_data['customer_emails'] ) ) );
@@ -348,7 +348,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['individual_use'] ) ) {
-			update_post_meta( $id, 'individual_use', $data['individual_use'] );
+			update_post_meta( $id, 'individual_use', ( true === $data['individual_use'] ) ? 'yes' : 'no' );
 		}
 
 		if ( isset( $data['product_ids'] ) ) {
@@ -392,7 +392,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		}
 
 		if ( isset( $data['exclude_sale_items'] ) ) {
-			update_post_meta( $id, 'exclude_sale_items', wc_clean( $data['exclude_sale_items'] ) );
+			update_post_meta( $id, 'exclude_sale_items', ( true === $data['exclude_sale_items'] ) ? 'yes' : 'no' );
 		}
 
 		if ( isset( $data['minimum_amount'] ) ) {
