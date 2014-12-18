@@ -582,7 +582,7 @@ if ( ! function_exists( 'woocommerce_get_product_schema' ) ) {
 			}
 		}
 
-		return 'http://schema.org/' . $schema;
+		return apply_filters( 'woocommerce_product_schema', 'http://schema.org/' . $schema, $schema, $product );
 	}
 }
 
