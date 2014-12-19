@@ -1850,6 +1850,8 @@ class WC_AJAX {
 						$new_quantity = $_product->increase_stock( $qty );
 
 						$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
+
+						do_action( 'woocommerce_restock_refunded_item', $_product->id, $old_stock, $new_quantity, $order );
 					}
 				}
 			}
@@ -1889,6 +1891,8 @@ class WC_AJAX {
 					}
 				}
 			}
+
+			do_action( 'woocommerce_order_refunded', $order_id, $refund->id );
 
 			// Clear transients
 			wc_delete_shop_order_transients( $order_id );
