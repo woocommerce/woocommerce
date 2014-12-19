@@ -76,12 +76,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	</table>
 
-	<div class="wc-proceed-to-checkout">
-
-		<?php do_action( 'woocommerce_proceed_to_checkout' ); ?>
-
-	</div>
-
 	<?php if ( WC()->cart->get_cart_tax() ) : ?>
 		<p><small><?php
 
@@ -93,6 +87,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		?></small></p>
 	<?php endif; ?>
+
+	<div class="wc-proceed-to-checkout">
+
+		<?php do_action( 'woocommerce_proceed_to_checkout' ); ?>
+
+	</div>
 
 	<?php do_action( 'woocommerce_after_cart_totals' ); ?>
 
