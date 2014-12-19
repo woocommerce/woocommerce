@@ -141,7 +141,7 @@ class WC_Product_Variable extends WC_Product {
 					'orderby'     => 'menu_order',
 					'order'       => 'ASC',
 					'fields'      => 'ids',
-					'post_status' => 'any',
+					'post_status' => 'publish',
 					'numberposts' => -1
 		        );
 
