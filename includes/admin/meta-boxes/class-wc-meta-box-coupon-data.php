@@ -141,7 +141,7 @@ class WC_Meta_Box_Coupon_Data {
 
 				// Categories
 				?>
-				<p class="form-field"><label for="product_ids"><?php _e( 'Product categories', 'woocommerce' ); ?></label>
+				<p class="form-field"><label for="product_categories"><?php _e( 'Product categories', 'woocommerce' ); ?></label>
 				<select id="product_categories" name="product_categories[]" class="chosen_select" multiple="multiple" data-placeholder="<?php _e( 'Any category', 'woocommerce' ); ?>">
 					<?php
 						$category_ids = (array) get_post_meta( $post->ID, 'product_categories', true );
