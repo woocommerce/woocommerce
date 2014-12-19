@@ -101,7 +101,7 @@ class WC_Admin_Importers {
 
 										// Create the taxonomy
 										if ( ! $exists_in_db ) {
-											$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $nicename, 'attribute_type' => 'select', 'attribute_orderby' => 'menu_order' ), array( '%s', '%s', '%s' ) );
+											$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $nicename, 'attribute_type' => 'select', 'attribute_orderby' => 'menu_order', 'attribute_public' => 0 ), array( '%s', '%s', '%s' ) );
 										}
 
 										// Register the taxonomy now so that the import works!

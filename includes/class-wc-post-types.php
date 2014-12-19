@@ -161,44 +161,46 @@ class WC_Post_types {
 		if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
 			foreach ( $attribute_taxonomies as $tax ) {
 				if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
-
-					$label = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
-
+					$label                          = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 					$wc_product_attributes[ $name ] = $tax;
-
-					register_taxonomy( $name,
-						apply_filters( 'woocommerce_taxonomy_objects_' . $name, array( 'product' ) ),
-						apply_filters( 'woocommerce_taxonomy_args_' . $name, array(
-							'hierarchical'          => true,
-							'update_count_callback' => '_update_post_term_count',
-							'labels'                => array(
-									'name'              => $label,
-									'singular_name'     => $label,
-									'search_items'      => sprintf( __( 'Search %s', 'woocommerce' ), $label ),
-									'all_items'         => sprintf( __( 'All %s', 'woocommerce' ), $label ),
-									'parent_item'       => sprintf( __( 'Parent %s', 'woocommerce' ), $label ),
-									'parent_item_colon' => sprintf( __( 'Parent %s:', 'woocommerce' ), $label ),
-									'edit_item'         => sprintf( __( 'Edit %s', 'woocommerce' ), $label ),
-									'update_item'       => sprintf( __( 'Update %s', 'woocommerce' ), $label ),
-									'add_new_item'      => sprintf( __( 'Add New %s', 'woocommerce' ), $label ),
-									'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label )
-								),
-							'show_ui'               => false,
-							'query_var'             => true,
-							'capabilities'          => array(
-								'manage_terms' => 'manage_product_terms',
-								'edit_terms'   => 'edit_product_terms',
-								'delete_terms' => 'delete_product_terms',
-								'assign_terms' => 'assign_product_terms',
+					$taxonomy_data                  = array(
+						'hierarchical'          => true,
+						'update_count_callback' => '_update_post_term_count',
+						'labels'                => array(
+								'name'              => $label,
+								'singular_name'     => $label,
+								'search_items'      => sprintf( __( 'Search %s', 'woocommerce' ), $label ),
+								'all_items'         => sprintf( __( 'All %s', 'woocommerce' ), $label ),
+								'parent_item'       => sprintf( __( 'Parent %s', 'woocommerce' ), $label ),
+								'parent_item_colon' => sprintf( __( 'Parent %s:', 'woocommerce' ), $label ),
+								'edit_item'         => sprintf( __( 'Edit %s', 'woocommerce' ), $label ),
+								'update_item'       => sprintf( __( 'Update %s', 'woocommerce' ), $label ),
+								'add_new_item'      => sprintf( __( 'Add New %s', 'woocommerce' ), $label ),
+								'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label )
 							),
-							'show_in_nav_menus'     => apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
-							'rewrite'               => array(
-								'slug'         => ( empty( $permalinks['attribute_base'] ) ? '' : trailingslashit( $permalinks['attribute_base'] ) ) . sanitize_title( $tax->attribute_name ),
-								'with_front'   => false,
-								'hierarchical' => true
-							),
-						) )
+						'show_ui'           => false,
+						'query_var'         => false,
+						'rewrite'           => false,
+						'sort'              => false,
+						'public'            => 1 === $tax->attribute_public,
+						'show_in_nav_menus' => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
+						'capabilities'      => array(
+							'manage_terms' => 'manage_product_terms',
+							'edit_terms'   => 'edit_product_terms',
+							'delete_terms' => 'delete_product_terms',
+							'assign_terms' => 'assign_product_terms',
+						)
 					);
+
+					if ( 1 === $tax->attribute_public ) {
+						$taxonomy_data['rewrite'] = array(
+							'slug'         => empty( $permalinks['attribute_base'] ? '' : trailingslashit( $permalinks['attribute_base'] ) ) . sanitize_title( $tax->attribute_name ),
+							'with_front'   => false,
+							'hierarchical' => true
+						);
+					}
+
+					register_taxonomy( $name, apply_filters( "woocommerce_taxonomy_objects_{$name}", array( 'product' ) ), apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data ) );
 				}
 			}
 

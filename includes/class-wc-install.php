@@ -325,6 +325,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   attribute_label longtext NULL,
   attribute_type varchar(200) NOT NULL,
   attribute_orderby varchar(200) NOT NULL,
+  attribute_public int(1) NOT NULL DEFAULT 1,
   PRIMARY KEY  (attribute_id),
   KEY attribute_name (attribute_name)
 ) $collate;
