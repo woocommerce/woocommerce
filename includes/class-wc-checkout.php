@@ -7,7 +7,7 @@
  * @class 		WC_Cart
  * @version		2.1.0
  * @package		WooCommerce/Classes
- * @category	Class
+ * @category		Class
  * @author 		WooThemes
  */
 class WC_Checkout {
@@ -300,8 +300,10 @@ class WC_Checkout {
 					foreach ( $billing_address as $key => $value ) {
 						update_user_meta( $this->customer_id, 'billing_' . $key, $value );
 					}
-					foreach ( $shipping_address as $key => $value ) {
-						update_user_meta( $this->customer_id, 'shipping_' . $key, $value );
+					if ( WC()->cart->needs_shipping() ) {
+						foreach ( $shipping_address as $key => $value ) {
+							update_user_meta( $this->customer_id, 'shipping_' . $key, $value );
+						}
 					}
 				}
 				do_action( 'woocommerce_checkout_update_user_meta', $this->customer_id, $this->posted );
