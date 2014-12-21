@@ -300,7 +300,7 @@ class WC_Checkout {
 					foreach ( $billing_address as $key => $value ) {
 						update_user_meta( $this->customer_id, 'billing_' . $key, $value );
 					}
-					if (WC()->cart->needs_shipping()) {
+					if ( WC()->cart->needs_shipping() ) {
 						foreach ( $shipping_address as $key => $value ) {
 							update_user_meta( $this->customer_id, 'shipping_' . $key, $value );
 						}
