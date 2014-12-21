@@ -163,7 +163,7 @@ class WC_Breadcrumb {
 			while ( $parent_id ) {
 				$page          = get_post( $parent_id );
 				$parent_id     = $page->post_parent;
-				$parent_crumbs = array( get_the_title( $page->ID ), get_permalink( $page->ID ) );
+				$parent_crumbs[] = array( get_the_title( $page->ID ), get_permalink( $page->ID ) );
 			}
 
 			$parent_crumbs = array_reverse( $parent_crumbs );
