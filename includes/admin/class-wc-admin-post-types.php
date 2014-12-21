@@ -102,7 +102,7 @@ class WC_Admin_Post_Types {
 	 */
 	public function product_columns( $existing_columns ) {
 
-		global $current_screen;
+		$current_screen = get_current_screen();
 
 		// Check we're on the correct post type
 		if ( 'product' != $current_screen->post_type ) {
