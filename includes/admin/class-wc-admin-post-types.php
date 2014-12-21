@@ -5,7 +5,7 @@
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @version     2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -102,6 +102,13 @@ class WC_Admin_Post_Types {
 	 */
 	public function product_columns( $existing_columns ) {
 
+		global $current_screen;
+
+		// Check we're on the correct post type
+		if ( 'product' != $current_screen->post_type ) {
+			return $existing_columns;
+		}
+
 		if ( empty( $existing_columns ) && ! is_array( $existing_columns ) ) {
 			$existing_columns = array();
 		}
@@ -129,6 +136,7 @@ class WC_Admin_Post_Types {
 		$columns['date']         = __( 'Date', 'woocommerce' );
 
 		return array_merge( $columns, $existing_columns );
+
 	}
 
 	/**
