@@ -33,6 +33,7 @@ class WC_AJAX {
 			'checkout'                                         => true,
 			'feature_product'                                  => false,
 			'mark_order_status'                                => false,
+			'add_attribute'                                    => false,
 			'add_new_attribute'                                => false,
 			'remove_variation'                                 => false,
 			'remove_variations'                                => false,
@@ -401,6 +402,41 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
+		die();
+	}
+
+	/**
+	 * Add an attribute row
+	 */
+	public static function add_attribute() {
+		ob_start();
+
+		check_ajax_referer( 'add-attribute', 'security' );
+
+		global $wc_product_attributes;
+
+		$taxonomy  = sanitize_text_field( $_POST['taxonomy'] );
+		$i         = absint( $_POST['i'] );
+		$position  = 0;
+		$attribute = array(
+			'name'         => $taxonomy,
+			'value'        => '',
+			'is_visible'   => 1,
+			'is_variation' => 0,
+			'is_taxonomy'  => $taxonomy ? 1 : 0
+		);
+
+		if ( $taxonomy ) {
+			$attribute_taxonomy = $wc_product_attributes[ $taxonomy ];
+			$metabox_class      = array();
+			$metabox_class[]    = 'taxonomy';
+			$metabox_class[]    = $taxonomy;
+			$attribute_label    = wc_attribute_label( $taxonomy );
+		} else {
+			$attribute_label          = '';
+		}
+
+		include( 'admin/meta-boxes/views/html-product-attribute.php' );
 		die();
 	}
 
