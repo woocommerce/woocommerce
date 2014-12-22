@@ -194,7 +194,7 @@ class WC_Post_types {
 
 					if ( 1 === $tax->attribute_public ) {
 						$taxonomy_data['rewrite'] = array(
-							'slug'         => empty( $permalinks['attribute_base'] ? '' : trailingslashit( $permalinks['attribute_base'] ) ) . sanitize_title( $tax->attribute_name ),
+							'slug'         => empty( $permalinks['attribute_base'] ) ? '' : trailingslashit( $permalinks['attribute_base'] ) . sanitize_title( $tax->attribute_name ),
 							'with_front'   => false,
 							'hierarchical' => true
 						);
