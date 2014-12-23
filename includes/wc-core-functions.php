@@ -681,23 +681,57 @@ function wc_deliver_webhook_async( $webhook_id, $arg ) {
 add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
 
 /**
- * Get the default location
- *
+ * Formats a string in the format COUNTRY:STATE into an array.
  * @since 2.3.0
+ * @param  string $country_string
  * @return array
  */
-function wc_get_default_location() {
-	$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
-
-	if ( strstr( $default, ':' ) ) {
-		list( $country, $state ) = explode( ':', $default );
+function wc_format_country_state_string( $country_string ) {
+	if ( strstr( $country_string, ':' ) ) {
+		list( $country, $state ) = explode( ':', $country_string );
 	} else {
-		$country = $default;
+		$country = $country_string;
 		$state   = '';
 	}
-
 	return array(
 		'country' => $country,
 		'state'   => $state
 	);
+}
+
+/**
+ * Get the store's base location.
+ * @todo should the woocommerce_default_country option be renamed to contain 'base'?
+ * @since 2.3.0
+ * @return array
+ */
+function wc_get_base_location() {
+	$default = apply_filters( 'woocommerce_get_base_location', get_option( 'woocommerce_default_country' ) );
+
+	return wc_format_country_state_string( $default );
+}
+
+/**
+ * Get the customer's default location. Filtered, and set to base location or left blank.
+ * @todo should the woocommerce_default_country option be renamed to contain 'base'?
+ * @since 2.3.0
+ * @return array
+ */
+function wc_get_customer_default_location() {
+	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
+		case 'geolocation' :
+			$location = array(
+				'country' => 'DK',
+				'state'   => ''
+			);
+		break;
+		case 'base' :
+			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+		break;
+		default :
+			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', '' ) );
+		break;
+	}
+
+	return $location;
 }
