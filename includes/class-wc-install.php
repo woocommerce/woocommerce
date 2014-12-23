@@ -160,6 +160,7 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
 		wp_clear_scheduled_hook( 'woocommerce_language_pack_updater_check' );
+		wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 
 		$ve = get_option( 'gmt_offset' ) > 0 ? '+' : '-';
 
@@ -173,6 +174,8 @@ class WC_Install {
 
 		wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_single_event( time(), 'woocommerce_language_pack_updater_check' );
+		wp_schedule_single_event( time(), 'woocommerce_geoip_updater' );
+		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
 	}
 
 	/**
