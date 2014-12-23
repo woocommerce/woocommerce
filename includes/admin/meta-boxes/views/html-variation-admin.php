@@ -79,6 +79,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php do_action( 'woocommerce_variation_options', $loop, $variation_data, $variation ); ?>
 			</p>
 
+			<div class="variable_pricing">
 				<p class="form-row form-row-first">
 					<label><?php echo __( 'Regular Price:', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')'; ?></label>
 					<input type="text" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" class="wc_input_price" placeholder="<?php _e( 'Variation price (required)', 'woocommerce' ); ?>" />
@@ -88,18 +89,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" class="wc_input_price" />
 				</p>
 
-			<div class="sale_price_dates_fields" style="display:none">
-				<p class="form-row form-row-first">
-					<label><?php _e( 'Sale start date:', 'woocommerce' ) ?></label>
-					<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_from ) ? date_i18n( 'Y-m-d', $_sale_price_dates_from ) : ''; ?>" placeholder="<?php echo _x( 'From&hellip;', 'placeholder', 'woocommerce' ) ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
-				</p>
-				<p class="form-row form-row-last">
-					<label><?php _e( 'Sale end date:', 'woocommerce' ) ?></label>
-					<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
-				</p>
+				<div class="sale_price_dates_fields" style="display: none">
+					<p class="form-row form-row-first">
+						<label><?php _e( 'Sale start date:', 'woocommerce' ); ?></label>
+						<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_from ) ? date_i18n( 'Y-m-d', $_sale_price_dates_from ) : ''; ?>" placeholder="<?php echo _x( 'From&hellip;', 'placeholder', 'woocommerce' ) ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+					</p>
+					<p class="form-row form-row-last">
+						<label><?php _e( 'Sale end date:', 'woocommerce' ); ?></label>
+						<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+					</p>
+				</div>
 			</div>
 
-			<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
+			<?php if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) : ?>
 				<div class="show_if_variation_manage_stock">
 					<p class="form-row form-row-first">
 						<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
