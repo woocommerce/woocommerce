@@ -49,6 +49,9 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 #body_content {
     background-color: <?php echo esc_attr( $body ); ?>;
 }
+#body_content table td {
+    padding: 32px;
+}
 #body_content_inner {
     color: <?php echo $text_lighter_20;?>;
     font-family: "Helvetica Neue", sans-serif;
@@ -64,7 +67,7 @@ h1 {
     font-weight: bold;
     line-height: 150%;
     margin: 10px 0;
-    padding: 28px 24px;
+    padding: 16px 32px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
     text-shadow: 0 1px 0 <?php echo $base_lighter_20; ?>;
 }
