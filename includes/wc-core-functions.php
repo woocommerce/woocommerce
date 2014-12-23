@@ -720,10 +720,12 @@ function wc_get_base_location() {
 function wc_get_customer_default_location() {
 	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
 		case 'geolocation' :
-			$location = array(
-				'country' => 'DK',
-				'state'   => ''
-			);
+			$location = WC_Geolocation::geolocate_ip( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
+
+			// Base fallback
+			if ( empty( $location['country'] ) ) {
+				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+			}
 		break;
 		case 'base' :
 			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
