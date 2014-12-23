@@ -202,6 +202,7 @@ final class WooCommerce {
 		include_once( 'includes/wc-widget-functions.php' );
 		include_once( 'includes/wc-webhook-functions.php' );
 		include_once( 'includes/class-wc-install.php' );
+		include_once( 'includes/class-wc-geolocation.php' );
 		include_once( 'includes/class-wc-download-handler.php' );
 		include_once( 'includes/class-wc-comments.php' );
 		include_once( 'includes/class-wc-post-data.php' );
