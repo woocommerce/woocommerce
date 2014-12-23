@@ -118,10 +118,8 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function get_base_country() {
-		$default = esc_attr( get_option('woocommerce_default_country') );
-		$country = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? $default : substr( $default, 0, $pos );
-
-		return apply_filters( 'woocommerce_countries_base_country', $country );
+		$default = wc_get_base_location();
+		return apply_filters( 'woocommerce_countries_base_country', $default['country'] );
 	}
 
 	/**
@@ -131,10 +129,8 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function get_base_state() {
-		$default = wc_clean( get_option( 'woocommerce_default_country' ) );
-		$state   = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? '' : substr( $default, $pos + 1 );
-
-		return apply_filters( 'woocommerce_countries_base_state', $state );
+		$default = wc_get_base_location();
+		return apply_filters( 'woocommerce_countries_base_state', $default['state'] );
 	}
 
 	/**
