@@ -57,7 +57,7 @@
 		<link>http://demo2.woothemes.com/woocommerce/product/woo-logo/t_1_front/</link>
 		<pubDate>Fri, 07 Jun 2013 10:35:28 +0000</pubDate>
 		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false">http://demo2.woothemes.com/dummydata/files/2013/06/T_1_front.jpg</guid>
+		<guid isPermaLink="false">http://demo2.woothemes.com/woocommerce/files/2013/06/T_1_front.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -88,7 +88,7 @@
 		<link>http://demo2.woothemes.com/woocommerce/product/woo-logo/t_1_back/</link>
 		<pubDate>Fri, 07 Jun 2013 10:35:39 +0000</pubDate>
 		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false">http://demo2.woothemes.com/dummydata/files/2013/06/T_1_back.jpg</guid>
+		<guid isPermaLink="false">http://demo2.woothemes.com/woocommerce/files/2013/06/T_1_back.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1638,7 +1638,7 @@
 		<link>http://demo2.woothemes.com/woocommerce/product/woo-logo/</link>
 		<pubDate>Fri, 07 Jun 2013 10:35:51 +0000</pubDate>
 		<dc:creator>wooteam</dc:creator>
-		<guid isPermaLink="false">http://demo2.woothemes.com/dummydata/?post_type=product&#038;p=15</guid>
+		<guid isPermaLink="false">http://demo2.woothemes.com/woocommerce/?post_type=product&#038;p=15</guid>
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
 		<excerpt:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></excerpt:encoded>
