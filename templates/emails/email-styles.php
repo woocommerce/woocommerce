@@ -33,9 +33,11 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     box-shadow: 0 1px 4px rgba(0,0,0,0.1) !important;
     background-color: <?php echo esc_attr( $body ); ?>;
     border: 1px solid $bg_darker_10;
+    border-radius: 3px !important;
 }
 #template_header {
     background-color: <?php echo esc_attr( $base ); ?>;
+    border-radius: 3px 3px 0 0 !important;
     color: <?php echo $base_text; ?>;
     border-bottom: 0;
     font-family: "Helvetica Neue", sans-serif;
@@ -50,13 +52,13 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     padding: 0;
 }
 #template_footer #credit {
-    padding: 0 32px 32px 32px;
+    padding: 0 48px 48px 48px;
 }
 #body_content {
     background-color: <?php echo esc_attr( $body ); ?>;
 }
 #body_content table td {
-    padding: 32px;
+    padding: 48px;
 }
 #body_content p {
     margin: 0 0 16px;
@@ -76,9 +78,10 @@ h1 {
     font-weight: 300;
     line-height: 150%;
     margin: 10px 0;
-    padding: 12px 32px;
+    padding: 24px 48px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
     text-shadow: 0 1px 0 <?php echo $base_lighter_20; ?>;
+    -webkit-font-smoothing: antialiased;
 }
 h2 {
     color: <?php echo esc_attr( $base ); ?>;
