@@ -46,11 +46,20 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 #template_header h1 {
     color: <?php echo $base_text; ?>;
 }
+#template_footer td {
+    padding: 0;
+}
+#template_footer #credit {
+    padding: 0 32px 32px 32px;
+}
 #body_content {
     background-color: <?php echo esc_attr( $body ); ?>;
 }
 #body_content table td {
     padding: 32px;
+}
+#body_content p {
+    margin: 0 0 16px;
 }
 #body_content_inner {
     color: <?php echo $text_lighter_20;?>;
@@ -78,17 +87,17 @@ h2 {
     font-size: 18px;
     font-weight: bold;
     line-height: 130%;
-    margin: 16px 0 0;
+    margin: 16px 0 8px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 h3 {
     color: <?php echo esc_attr( $base ); ?>;
     display: block;
     font-family: "Helvetica Neue", sans-serif;
-    font-size: 26px;
+    font-size: 16px;
     font-weight: bold;
-    line-height: 150%;
-    margin: 10px 0;
+    line-height: 130%;
+    margin: 16px 0 8px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 a {
