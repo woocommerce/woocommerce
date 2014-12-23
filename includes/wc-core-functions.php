@@ -720,7 +720,7 @@ function wc_get_base_location() {
 function wc_get_customer_default_location() {
 	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
 		case 'geolocation' :
-			$location = WC_Geolocation::geolocate_ip( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
+			$location = WC_Geolocation::geolocate_ip();
 
 			// Base fallback
 			if ( empty( $location['country'] ) ) {

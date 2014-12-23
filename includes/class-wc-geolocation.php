@@ -32,19 +32,96 @@ class WC_Geolocation {
 	}
 
 	/**
+	 * Get current user IP Address
+	 * @return string
+	 */
+	public static function get_ip_address() {
+		return isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
+	}
+
+	/**
+	 * Get user IP Address using a service
+	 * @return string
+	 */
+	public static function get_external_ip_address() {
+		$transient_name      = 'external_ip_address_' . self::get_ip_address();
+		$external_ip_address = get_transient( $transient_name );
+
+		if ( false === $external_ip_address ) {
+			$external_ip_address = '0.0.0.0';
+			$ip_lookup_services  = array(
+				'http://ipv4.icanhazip.com',
+				'http://api.ipify.org/',
+				'http://ipecho.net/plain',
+				'http://v4.ident.me',
+				'http://bot.whatismyipaddress.com',
+				'http://ip.appspot.com',
+			);
+
+			shuffle( $ip_lookup_services );
+
+			foreach ( $ip_lookup_services as $service ) {
+				$response = wp_remote_get( $service, array( 'timeout' => 2 ) );
+
+				if ( ! is_wp_error( $response ) && $response['body'] ) {
+					$external_ip_address = $response['body'];
+					break;
+				}
+			}
+
+			set_transient( $transient_name, $external_ip_address, WEEK_IN_SECONDS );
+		}
+
+		return $external_ip_address;
+	}
+
+	/**
+	 * Geolocate an IP address
+	 * @param  string $ip_address
+	 * @return array
+	 */
+	public static function geolocate_ip( $ip_address = '' ) {
+		$ip_address = $ip_address ? $ip_address : self::get_ip_address();
+		$database   = self::get_local_database_path();
+
+		if ( file_exists( $database ) ) {
+			$country_code = self::geolite_geolocation( $ip_address );
+		} else {
+			$country_code = self::freegeoip_geolocation( $ip_address );
+		}
+
+		if ( ! $country_code ) {
+			// May be a local environment - find external IP
+			return self::geolocate_ip( self::get_external_ip_address() );
+		}
+
+		return array(
+			'country' => $country_code,
+			'state'   => ''
+		);
+	}
+
+	/**
+	 * Path to our local db
+	 * @return string
+	 */
+	private static function get_local_database_path() {
+		$upload_dir = wp_upload_dir();
+		return $upload_dir['basedir'] . '/GeoIP.dat';
+	}
+
+	/**
 	 * Update geoip database. Adapted from https://wordpress.org/plugins/geoip-detect/.
 	 */
 	public static function update_database() {
 		require_once( ABSPATH . 'wp-admin/includes/file.php' );
 
-		$upload_dir   = wp_upload_dir();
-		$database     = $upload_dir['basedir'] . '/GeoIP.dat';
 		$tmp_database = download_url( self::GEOLITE_DB );
 		$logger       = new WC_Logger();
 
 		if ( ! is_wp_error( $tmp_database ) ) {
 			$gzhandle = @gzopen( $tmp_database, 'r' );
-			$handle   = @fopen( $database, 'w' );
+			$handle   = @fopen( self::get_local_database_path(), 'w' );
 
 			if ( $gzhandle && $handle ) {
 				while ( ( $string = gzread( $gzhandle, 4096 ) ) != false ) {
@@ -55,30 +132,10 @@ class WC_Geolocation {
 			} else {
 				$logger->add( 'geolocation', 'Unable to open database file' );
 			}
-
 			@unlink( $tmp_database );
 		} else {
 			$logger->add( 'geolocation', 'Unable to download GeoIP Database: ' . $tmp_database->get_message() );
 		}
-	}
-
-	/**
-	 * Geolocation an IP address
-	 * @param  string $ip_address
-	 * @return array
-	 */
-	public static function geolocate_ip( $ip_address ) {
-		$country_code = self::geolite_geolocation( $ip_address );
-
-		// Fallback to API
-		if ( empty( $country_code ) ) {
-			$country_code = self::freegeoip_geolocation( $ip_address );
-		}
-
-		return array(
-			'country' => $country_code,
-			'state'   => ''
-		);
 	}
 
 	/**
@@ -87,18 +144,13 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	private static function geolite_geolocation( $ip_address ) {
-		$country_code = '';
-		$upload_dir   = wp_upload_dir();
-		$database     = $upload_dir['basedir'] . '/GeoIP.dat';
-
-		if ( file_exists( $database ) ) {
-			if ( ! class_exists( 'GeoIP' ) ) {
-				include_once( 'libraries/geoip.php' );
-			}
-			$gi           = geoip_open( $database, GEOIP_STANDARD );
-			$country_code = geoip_country_code_by_addr( $gi, $ip_address );
-			geoip_close( $gi );
+		if ( ! class_exists( 'GeoIP' ) ) {
+			include_once( 'libraries/geoip.php' );
 		}
+		$database     = self::get_local_database_path();
+		$gi           = geoip_open( $database, GEOIP_STANDARD );
+		$country_code = geoip_country_code_by_addr( $gi, $ip_address );
+		geoip_close( $gi );
 
 		return $country_code;
 	}
