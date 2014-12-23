@@ -77,8 +77,8 @@ h1 {
     font-size: 30px;
     font-weight: 300;
     line-height: 150%;
-    margin: 10px 0;
-    padding: 24px 48px;
+    margin: 0;
+    padding: 36px 48px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
     text-shadow: 0 1px 0 <?php echo $base_lighter_20; ?>;
     -webkit-font-smoothing: antialiased;
