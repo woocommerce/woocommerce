@@ -31,16 +31,12 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 #template_container {
     box-shadow: 0 0 0 3px rgba(0,0,0,0.025) !important;
-    border-radius: 6px !important;
     background-color: <?php echo esc_attr( $body ); ?>;
     border: 1px solid $bg_darker_10;
-    border-radius: 6px !important;
 }
 #template_header {
     background-color: <?php echo esc_attr( $base ); ?>;
     color: <?php echo $base_text; ?>;
-    border-top-left-radius:6px !important;
-    border-top-right-radius:6px !important;
     border-bottom: 0;
     font-family: "Helvetica Neue", sans-serif;
     font-weight:bold;
@@ -52,7 +48,6 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 #body_content {
     background-color: <?php echo esc_attr( $body ); ?>;
-    border-radius:6px !important;
 }
 #body_content_inner {
     color: <?php echo $text_lighter_20;?>;
