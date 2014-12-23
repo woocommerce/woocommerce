@@ -30,7 +30,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     width: 100%;
 }
 #template_container {
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.025) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1) !important;
     background-color: <?php echo esc_attr( $body ); ?>;
     border: 1px solid $bg_darker_10;
 }
@@ -64,10 +64,10 @@ h1 {
     display: block;
     font-family: "Helvetica Neue", sans-serif;
     font-size: 30px;
-    font-weight: bold;
+    font-weight: 300;
     line-height: 150%;
     margin: 10px 0;
-    padding: 16px 32px;
+    padding: 12px 32px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
     text-shadow: 0 1px 0 <?php echo $base_lighter_20; ?>;
 }
@@ -75,10 +75,10 @@ h2 {
     color: <?php echo esc_attr( $base ); ?>;
     display: block;
     font-family: "Helvetica Neue", sans-serif;
-    font-size: 30px;
+    font-size: 18px;
     font-weight: bold;
-    line-height: 150%;
-    margin: 10px 0;
+    line-height: 130%;
+    margin: 16px 0 0;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 h3 {
