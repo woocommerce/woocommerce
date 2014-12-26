@@ -466,7 +466,7 @@ class WC_Post_types {
 	}
 
 	/**
-    * Add Testimonial Support to Jetpack Omnisearch
+    * Add Product Support to Jetpack Omnisearch
     */
     public static function support_jetpack_omnisearch() {
         if ( class_exists( 'Jetpack_Omnisearch_Posts' ) ) {
