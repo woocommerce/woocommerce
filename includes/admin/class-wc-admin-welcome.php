@@ -143,7 +143,7 @@ class WC_Admin_Welcome {
 			.about-wrap div.icon {
 				width: 0 !important;
 				padding: 0;
-				margin: 0;
+				margin: 20px 0 !important;
 			}
 			.about-wrap .feature-rest div.icon:before {
 				font-family: WooCommerce !important;
