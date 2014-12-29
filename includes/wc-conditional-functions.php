@@ -189,7 +189,7 @@ if ( ! function_exists( 'is_view_order_page' ) ) {
 	function is_view_order_page() {
 		global $wp;
 
-		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['view-order'] ) ? true : false );
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['view-order'] ) ) ? true : false;
 	}
 }
 
