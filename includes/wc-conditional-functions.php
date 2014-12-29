@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @version     2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -175,6 +175,21 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 */
 	function is_account_page() {
 		return is_page( wc_get_page_id( 'myaccount' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
+	}
+}
+
+if ( ! function_exists( 'is_view_order_page' ) ) {
+
+	/**
+	* is_view_order_page - Returns true when on the view order page.
+	*
+	* @access public
+	* @return bool
+	*/
+	function is_view_order_page() {
+		global $wp;
+
+		return ( isset( $wp->query_vars['view-order'] ) ? true : false );
 	}
 }
 
