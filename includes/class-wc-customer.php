@@ -51,14 +51,10 @@ class WC_Customer {
 		if ( empty( $this->_data ) ) {
 			// Defaults
 			$this->_data = array(
-				'country' 				=> $this->get_default_country(),
-				'state' 				=> $this->get_default_state(),
 				'postcode' 				=> '',
 				'city'					=> '',
 				'address' 				=> '',
 				'address_2' 			=> '',
-				'shipping_country' 		=> $this->get_default_country(),
-				'shipping_state' 		=> $this->get_default_state(),
 				'shipping_postcode' 	=> '',
 				'shipping_city'			=> '',
 				'shipping_address'		=> '',
@@ -66,6 +62,9 @@ class WC_Customer {
 				'is_vat_exempt' 		=> false,
 				'calculated_shipping'	=> false
 			);
+
+			$this->_data['country'] = $this->_data['shipping_country'] = $this->get_default_country();
+			$this->_data['state']   = $this->_data['shipping_state']   = $this->get_default_state();
 		}
 
 		// When leaving or ending page load, store data

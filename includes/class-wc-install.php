@@ -125,6 +125,7 @@ class WC_Install {
 
 		// Flush rules after install
 		flush_rewrite_rules();
+		delete_transient( 'wc_attribute_taxonomies' );
 
 		// Redirect to welcome screen
 		set_transient( '_wc_activation_redirect', 1, HOUR_IN_SECONDS );
