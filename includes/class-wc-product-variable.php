@@ -53,7 +53,7 @@ class WC_Product_Variable extends WC_Product {
      */
     public function get_total_stock() {
         if ( empty( $this->total_stock ) ) {
-        	$transient_name = 'wc_product_total_stock_' . $this->id;
+        	$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
         	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
 		        $this->total_stock = max( 0, wc_stock_amount( $this->stock ) );
@@ -131,7 +131,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_children( $visible_only = false ) {
 		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
-			$transient_name = 'wc_product_children_ids_' . $this->id;
+			$transient_name = 'wc_product_children_ids_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 			$this->children = get_transient( $transient_name );
 
         	if ( empty( $this->children ) ) {
