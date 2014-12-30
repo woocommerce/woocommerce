@@ -307,7 +307,7 @@ class WC_Product_Variable extends WC_Product {
 
 			// Main price
 			$prices = array( $this->get_variation_price( 'min', true ), $this->get_variation_price( 'max', true ) );
-			$price = $prices[0] !== $prices[1] ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $prices[0] ), wc_price( $prices[1] ) ) : wc_price( $prices[0] );
+			$price  = $prices[0] !== $prices[1] ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $prices[0] ), wc_price( $prices[1] ) ) : wc_price( $prices[0] );
 
 			// Sale
 			$prices = array( $this->get_variation_regular_price( 'min', true ), $this->get_variation_regular_price( 'max', true ) );
@@ -316,6 +316,9 @@ class WC_Product_Variable extends WC_Product {
 
 			if ( $price !== $saleprice ) {
 				$price = apply_filters( 'woocommerce_variable_sale_price_html', $this->get_price_html_from_to( $saleprice, $price ) . $this->get_price_suffix(), $this );
+			} elseif ( $price == 0 ) {
+				$price = __( 'Free!', 'woocommerce' );
+				$price = apply_filters( 'woocommerce_variable_free_price_html', $price, $this );
 			} else {
 				$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
 			}
