@@ -93,18 +93,22 @@ class WC_Geolocation {
 	 * @return array
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = true ) {
-		$ip_address = $ip_address ? $ip_address : self::get_ip_address();
-		$database   = self::get_local_database_path();
-
-		if ( file_exists( $database ) ) {
-			$country_code = self::geolocate_via_db( $ip_address );
+		// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview)
+		if ( ! empty( $_SERVER[ "HTTP_CF_IPCOUNTRY" ] ) ) {
+			$country_code = sanitize_text_field( strtoupper( $_SERVER["HTTP_CF_IPCOUNTRY"] ) );
 		} else {
-			$country_code = self::geolocate_via_api( $ip_address );
-		}
+			$ip_address = $ip_address ? $ip_address : self::get_ip_address();
 
-		if ( ! $country_code && $fallback ) {
-			// May be a local environment - find external IP
-			return self::geolocate_ip( self::get_external_ip_address(), false );
+			if ( file_exists( self::get_local_database_path() ) ) {
+				$country_code = self::geolocate_via_db( $ip_address );
+			} else {
+				$country_code = self::geolocate_via_api( $ip_address );
+			}
+
+			if ( ! $country_code && $fallback ) {
+				// May be a local environment - find external IP
+				return self::geolocate_ip( self::get_external_ip_address(), false );
+			}
 		}
 
 		return array(
