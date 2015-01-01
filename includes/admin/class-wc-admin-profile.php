@@ -216,8 +216,10 @@ class WC_Admin_Profile {
 							<th><label for="woocommerce_api_keys"><?php _e( 'WooCommerce API Keys', 'woocommerce' ); ?></label></th>
 							<td>
 								<?php if ( empty( $user->woocommerce_api_consumer_key ) ) : ?>
-									<input name="woocommerce_generate_api_key" type="checkbox" id="woocommerce_generate_api_key" value="0" />
-									<span class="description"><?php _e( 'Generate API Key', 'woocommerce' ); ?></span>
+									<label for="woocommerce_generate_api_key">
+										<input name="woocommerce_generate_api_key" type="checkbox" id="woocommerce_generate_api_key" value="0" />
+										<?php _e( 'Generate API Key', 'woocommerce' ); ?>
+									</label>
 								<?php else : ?>
 									<div class="api-keys-wrapper">
 										<strong><?php _e( 'Consumer Key:', 'woocommerce' ); ?></strong><br /><code id="woocommerce_api_consumer_key"><?php echo $user->woocommerce_api_consumer_key; ?></code><br/><br />
@@ -230,8 +232,10 @@ class WC_Admin_Profile {
 									<strong><?php _e( 'Permissions:', 'woocommerce' ); ?>&nbsp;</strong><span id="woocommerce_api_key_permissions"><select name="woocommerce_api_key_permissions" id="woocommerce_api_key_permissions"><?php
 										foreach ( $permissions as $permission_key => $permission_name ) { echo '<option value="' . esc_attr( $permission_key ) . '" '.selected($permission_key, $user->woocommerce_api_key_permissions, false).'>'.esc_html( $permission_name ) . '</option>';} ?>
 									</select></span><br/>
-									<input name="woocommerce_generate_api_key" type="checkbox" id="woocommerce_generate_api_key" value="0" />
-									<span class="description"><?php _e( 'Revoke API Key', 'woocommerce' ); ?></span>
+									<label for="woocommerce_generate_api_key">
+										<input name="woocommerce_generate_api_key" type="checkbox" id="woocommerce_generate_api_key" value="0" />
+										<?php _e( 'Revoke API Key', 'woocommerce' ); ?>
+									</label>
 								<?php endif; ?>
 							</td>
 						</tr>
