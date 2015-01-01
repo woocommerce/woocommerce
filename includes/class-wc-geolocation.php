@@ -156,7 +156,7 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	private static function geolocate_via_db( $ip_address ) {
-		if ( ! class_exists( 'GeoIP' ) ) {
+		if ( ! class_exists( 'GeoIP' ) && ! class_exists( 'geoiprecord' ) ) {
 			include_once( 'libraries/geoip.php' );
 		}
 		$database     = self::get_local_database_path();
