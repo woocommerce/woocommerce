@@ -19,7 +19,7 @@
 
 @-moz-keyframes modal {
 	0% {
-		-moz-transform: scale(0.8);
+		-moz-transform: scale(0.7);
 	}
 	100% {
 		-moz-transform: scale(1);
@@ -28,7 +28,7 @@
 
 @-webkit-keyframes modal {
 	0% {
-		-webkit-transform: scale(0.8);
+		-webkit-transform: scale(0.7);
 	}
 	100% {
 		-webkit-transform: scale(1);
@@ -37,8 +37,8 @@
 
 @keyframes modal {
 	0% {
-		-webkit-transform: scale(0.8);
-		transform: scale(0.8);
+		-webkit-transform: scale(0.7);
+		transform: scale(0.7);
 	}
 	100% {
 		-webkit-transform: scale(1);
