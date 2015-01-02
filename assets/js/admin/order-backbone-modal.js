@@ -49,9 +49,9 @@
 		id: 'wc-backbone-modal-dialog',
 		_target: undefined,
 		events: {
-			'click #btn-cancel': 'closeButton',
-			'click #btn-ok':     'addButton',
-			'keydown':           'keyboardActions'
+			'click .modal-close': 'closeButton',
+			'click #btn-ok':      'addButton',
+			'keydown':            'keyboardActions'
 		},
 		initialize: function ( data ) {
 			this._target = data.target;
