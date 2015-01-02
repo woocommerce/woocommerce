@@ -68,6 +68,14 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     padding: 48px;
 }
 
+#body_content table td td {
+    padding: 12px;
+}
+
+#body_content table td th {
+    padding: 12px;
+}
+
 #body_content p {
     margin: 0 0 16px;
 }
