@@ -983,7 +983,7 @@ class WC_Cart {
 
 			}
 
-			if ( did_action( 'wp' ) ) {
+			if ( did_action( 'wp' ) || defined( 'DOING_AJAX' ) ) {
 				$this->set_cart_cookies( sizeof( $this->cart_contents ) > 0 );
 			}
 
