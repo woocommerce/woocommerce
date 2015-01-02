@@ -51,11 +51,6 @@ jQuery( function ( $ ) {
 			});
 
 			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
-
-			if ( ! $( 'input#_manage_stock' ).attr( 'checked' ) ) {
-				$( '.hide_if_parent_manage_stock_is_disabled' ).hide();
-			}
-
 			$( '.woocommerce_variations' ).unblock();
 			$( '#variable_product_options' ).trigger( 'woocommerce_variations_added' );
 		});
@@ -63,17 +58,6 @@ jQuery( function ( $ ) {
 		return false;
 
 	});
-
-	$( 'input#_manage_stock' ).on( 'change', function () {
-		var fields = $( '.hide_if_parent_manage_stock_is_disabled' );
-
-		if ( $( this ).attr( 'checked' ) ) {
-			fields.show();
-			$( 'input.variable_manage_stock' ).change();
-		} else {
-			fields.hide();
-		}
-	}).change();
 
 	$( '#variable_product_options').on( 'click', 'button.link_all_variations', function () {
 

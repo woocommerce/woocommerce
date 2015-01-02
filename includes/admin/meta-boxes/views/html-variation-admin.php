@@ -102,7 +102,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 
 			<?php if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) : ?>
-				<div class="show_if_variation_manage_stock">
+				<div class="show_if_variation_manage_stock" style="display: none;">
 					<p class="form-row form-row-first">
 						<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 						<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
@@ -180,7 +180,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php endif; ?>
 				</p>
 			</div>
-			<div class="show_if_variation_downloadable" style="display:none">
+			<div class="show_if_variation_downloadable" style="display: none;">
 				<div class="form-row form-row-full downloadable_files">
 					<label><?php _e( 'Downloadable Files', 'woocommerce' ); ?>:</label>
 					<table class="widefat">
@@ -224,7 +224,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</table>
 				</div>
 			</div>
-			<div class="show_if_variation_downloadable">
+			<div class="show_if_variation_downloadable" style="display: none;">
 				<p class="form-row form-row-first">
 					<label><?php _e( 'Download Limit:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Leave blank for unlimited re-downloads.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 					<input type="number" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if ( isset( $_download_limit ) ) echo esc_attr( $_download_limit ); ?>" placeholder="<?php _e( 'Unlimited', 'woocommerce' ); ?>" step="1" min="0" />
