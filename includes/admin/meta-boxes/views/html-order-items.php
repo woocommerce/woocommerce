@@ -365,5 +365,5 @@ if ( wc_tax_enabled() ) {
 			</section>
 		</div>
 	</div>
-	<div class="wc-backbone-modal-backdrop">&nbsp;</div>
+	<div class="wc-backbone-modal-backdrop modal-close">&nbsp;</div>
 </script>
