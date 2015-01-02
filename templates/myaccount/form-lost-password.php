@@ -43,6 +43,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div class="clear"></div>
 
+	<?php do_action( 'woocommerce_lostpassword_form' ); ?>
+	<?php do_action( 'lostpassword_form' ); ?>
+
 	<p class="form-row">
 		<input type="hidden" name="wc_reset_password" value="true" />
 		<input type="submit" class="button" value="<?php echo 'lost_password' == $args['form'] ? __( 'Reset Password', 'woocommerce' ) : __( 'Save', 'woocommerce' ); ?>" />
