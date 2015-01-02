@@ -378,7 +378,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function style_inline( $content ) {
 		// make sure we only inline CSS for html emails
-		if ( 'text/html' ==  $this->get_content_type() ) {
+		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ) ) ) {
 
 			// get CSS styles
 			ob_start();
