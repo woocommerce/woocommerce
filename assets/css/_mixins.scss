@@ -127,11 +127,11 @@
 }
 
 @mixin darkorlighttextshadow($a, $opacity: .8) {
-    @if lightness($a) >= 65% {
-        @include text_shadow(0, -1px, 0, rgba(0, 0, 0, $opacity));
-    } @else {
-        @include text_shadow(0, 1px, 0, rgba(255, 255, 255, $opacity));
-    }
+	@if lightness($a) >= 65% {
+		@include text_shadow(0, -1px, 0, rgba(0, 0, 0, $opacity));
+	} @else {
+		@include text_shadow(0, 1px, 0, rgba(255, 255, 255, $opacity));
+	}
 }
 
 /**
@@ -227,12 +227,10 @@
 		margin-left: -.5em;
 		margin-top: -.5em;
 		display: block;
-		-webkit-animation: spin 1s ease-in-out infinite;
-	    -moz-animation: spin 1s ease-in-out infinite;
-	    animation: spin 1s ease-in-out infinite;
-	    content: "";
-	    background: url(../images/icons/loader.svg) center center;
-	    background-size: cover;
+		content: "";
+		@include animation( spin 1s ease-in-out infinite );
+		background: url(../images/icons/loader.svg) center center;
+		background-size: cover;
 		line-height: 1;
 		text-align: center;
 		font-size: 2em;

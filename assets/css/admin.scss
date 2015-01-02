@@ -4082,6 +4082,7 @@ table.bar_chart {
 		background: #fff;
 		margin: -150px 0 0 -250px;
 		z-index: 160000;
+		@include animation( modal .3s $ease-out-back );
 	}
 }
 
