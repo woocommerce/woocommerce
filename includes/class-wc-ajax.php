@@ -1856,6 +1856,7 @@ class WC_AJAX {
 		$api_refund             = $_POST['api_refund'] === 'true' ? true : false;
 		$restock_refunded_items = $_POST['restock_refunded_items'] === 'true' ? true : false;
 		$refund                 = false;
+		$response_data          = array();
 
 		try {
 			// Validate that the refund can occur
@@ -1928,18 +1929,24 @@ class WC_AJAX {
 				}
 			}
 
+			if ( $refund_amount == $max_refund ) {
+				$order->update_status( 'refunded' );
+				$response_data['status'] = 'fully_refunded';
+			}
+
 			do_action( 'woocommerce_order_refunded', $order_id, $refund->id );
 
 			// Clear transients
 			wc_delete_shop_order_transients( $order_id );
 
-			wp_send_json( true );
+			wp_send_json_success( $response_data );
 
 		} catch ( Exception $e ) {
 			if ( $refund && is_a( $refund, 'WC_Order_Refund' ) ) {
 				wp_delete_post( $refund->id, true );
 			}
-			wp_send_json( array( 'error' => $e->getMessage() ) );
+
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 	}
 
