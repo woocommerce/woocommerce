@@ -251,11 +251,13 @@ class WC_Countries {
 	/**
 	 * Gets an array of countries in the EU.
 	 *
+	 * MC (monaco) and IM (isle of man, part of UK) also use VAT.
+	 *
 	 * @access public
 	 * @return string[]
 	 */
 	public function get_european_union_countries() {
-		return array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );
+		return array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'HR', 'IE', 'IM', 'IT', 'LT', 'LU', 'LV', 'MC', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );
 	}
 
 	/**
