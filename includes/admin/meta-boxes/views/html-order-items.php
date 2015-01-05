@@ -250,7 +250,7 @@ if ( wc_tax_enabled() ) {
 <?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
 <div class="wc-order-data-row wc-order-refund-items" style="display: none;">
 	<table class="wc-order-totals">
-		<tr>
+		<tr style="display:none;">
 			<td class="label"><label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
 			<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" checked="checked" /></td>
 		</tr>

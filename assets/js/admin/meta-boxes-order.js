@@ -286,6 +286,18 @@ jQuery( function ( $ ) {
 				}
 			});
 
+			// Restock checkbox
+			if ( refund_qty > 0 ) {
+				$( '#restock_refunded_items' ).closest('tr').show();
+			} else {
+				$( '#restock_refunded_items' ).closest('tr').hide();
+				$('.woocommerce_order_items input.refund_order_item_qty').each(function(){
+					if ( $(this).val() > 0 ) {
+						$( '#restock_refunded_items' ).closest('tr').show();
+					}
+				});
+			}
+
 			$( this ).trigger( 'refund_quantity_changed' );
 		})
 		.on( 'change', '.woocommerce_order_items .refund input', function() {
