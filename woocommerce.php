@@ -343,8 +343,6 @@ final class WooCommerce {
 		$this->add_thumbnail_support();
 		$this->add_image_sizes();
 		$this->fix_server_vars();
-
-		var_dump(wc()->api_request_url('test'));
 	}
 
 	/**
