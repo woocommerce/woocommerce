@@ -97,8 +97,9 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function get_orders( $fields = null, $filter = array(), $status = null, $page = 1 ) {
 
-		if ( ! empty( $status ) )
+		if ( ! empty( $status ) ) {
 			$filter['status'] = $status;
+		}
 
 		$filter['page'] = $page;
 
@@ -106,10 +107,11 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$orders = array();
 
-		foreach( $query->posts as $order_id ) {
+		foreach ( $query->posts as $order_id ) {
 
-			if ( ! $this->is_readable( $order_id ) )
+			if ( ! $this->is_readable( $order_id ) ) {
 				continue;
+			}
 
 			$orders[] = current( $this->get_order( $order_id, $fields, $filter ) );
 		}
@@ -134,8 +136,9 @@ class WC_API_Orders extends WC_API_Resource {
 		// ensure order ID is valid & user has permission to read
 		$id = $this->validate_request( $id, 'shop_order', 'read' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		$order = wc_get_order( $id );
 
@@ -302,8 +305,9 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function get_orders_count( $status = null, $filter = array() ) {
 
-		if ( ! empty( $status ) )
+		if ( ! empty( $status ) ) {
 			$filter['status'] = $status;
+		}
 
 		$query = $this->query_orders( $filter );
 
@@ -720,10 +724,10 @@ class WC_API_Orders extends WC_API_Resource {
 
 		// update user meta
 		if ( $order->get_user_id() ) {
-			foreach( $billing_address as $key => $value ) {
+			foreach ( $billing_address as $key => $value ) {
 				update_user_meta( $order->get_user_id(), 'billing_' . $key, $value );
 			}
-			foreach( $shipping_address as $key => $value ) {
+			foreach ( $shipping_address as $key => $value ) {
 				update_user_meta( $order->get_user_id(), 'shipping_' . $key, $value );
 			}
 		}
@@ -1250,7 +1254,7 @@ class WC_API_Orders extends WC_API_Resource {
 		// ensure note ID is valid
 		$note = get_comment( $id );
 
-		if ( is_null( $note) ) {
+		if ( is_null( $note ) ) {
 			return new WP_Error( 'woocommerce_api_invalid_order_note_id', __( 'An order note with the provided ID could not be found', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
