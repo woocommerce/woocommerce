@@ -156,13 +156,12 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * @return array
 	 */
 	public function get_coupons_count( $filter = array() ) {
-
 		try {
-			$query = $this->query_coupons( $filter );
-
 			if ( ! current_user_can( 'read_private_shop_coupons' ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_coupons_count', __( 'You do not have permission to read the coupons count', 'woocommerce' ), 401 );
 			}
+
+			$query = $this->query_coupons( $filter );
 
 			return array( 'count' => (int) $query->found_posts );
 		} catch ( WC_API_Exception $e ) {
