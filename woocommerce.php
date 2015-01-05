@@ -343,6 +343,8 @@ final class WooCommerce {
 		$this->add_thumbnail_support();
 		$this->add_image_sizes();
 		$this->fix_server_vars();
+
+		var_dump(wc()->api_request_url('test'));
 	}
 
 	/**
@@ -440,11 +442,15 @@ final class WooCommerce {
 			$scheme = 'http';
 		}
 
-		if ( get_option( 'permalink_structure' ) ) {
-			return esc_url_raw( trailingslashit( home_url( '/wc-api/' . $request, $scheme ) ) );
+		if ( strstr( get_option( 'permalink_structure' ), '/index.php/' ) ) {
+			$api_request_url = trailingslashit( home_url( '/index.php/wc-api/' . $request, $scheme ) );
+		} elseif ( get_option( 'permalink_structure' ) ) {
+			$api_request_url = trailingslashit( home_url( '/wc-api/' . $request, $scheme ) );
 		} else {
-			return esc_url_raw( add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) ) );
+			$api_request_url = add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) );
 		}
+
+		return esc_url_raw( $api_request_url );
 	}
 
 	/**
