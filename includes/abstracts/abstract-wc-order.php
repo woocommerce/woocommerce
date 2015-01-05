@@ -1347,14 +1347,13 @@ abstract class WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
-
 		if ( $inc_tax ) {
 			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] ) / max( 1, $item['qty'] );
 		} else {
 			$price = ( $item['line_subtotal'] / $item['qty'] );
 		}
 
-		$price = $round ? round( $price, 2 ) : $price;
+		$price = $round ? number_format( (float) $price, 2, '.', '' ) : $price;
 
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', $price, $this, $item );
 	}
