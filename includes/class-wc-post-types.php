@@ -24,6 +24,7 @@ class WC_Post_types {
 		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_post_types' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_post_status' ), 10 );
+		add_action( 'init', array( __CLASS__, 'support_jetpack_omnisearch' ) );
 	}
 
 	/**
@@ -250,7 +251,7 @@ class WC_Post_types {
 					'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
 					'rewrite'             => $product_permalink ? array( 'slug' => untrailingslashit( $product_permalink ), 'with_front' => false, 'feeds' => true ) : false,
 					'query_var'           => true,
-					'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
+					'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes', 'publicize', 'wpcom-markdown' ),
 					'has_archive'         => ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop',
 					'show_in_nav_menus'   => true
 				)
@@ -463,6 +464,15 @@ class WC_Post_types {
 			'label_count'               => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>', 'woocommerce' )
 		) );
 	}
+
+	/**
+    * Add Product Support to Jetpack Omnisearch
+    */
+    public static function support_jetpack_omnisearch() {
+        if ( class_exists( 'Jetpack_Omnisearch_Posts' ) ) {
+            new Jetpack_Omnisearch_Posts( 'product' );
+        }
+    }
 }
 
 WC_Post_types::init();
