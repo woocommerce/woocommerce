@@ -756,15 +756,13 @@ class WC_Cart {
 			$tax_totals = array();
 
 			foreach ( $taxes as $key => $tax ) {
-
 				$code = WC_Tax::get_rate_code( $key );
 
-				if ( $code ) {
+				if ( $code || $key === apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) ) {
 					if ( ! isset( $tax_totals[ $code ] ) ) {
 						$tax_totals[ $code ] = new stdClass();
 						$tax_totals[ $code ]->amount = 0;
 					}
-
 					$tax_totals[ $code ]->tax_rate_id       = $key;
 					$tax_totals[ $code ]->is_compound       = WC_Tax::is_compound( $key );
 					$tax_totals[ $code ]->label             = WC_Tax::get_rate_label( $key );
