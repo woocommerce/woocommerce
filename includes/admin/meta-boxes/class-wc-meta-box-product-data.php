@@ -893,7 +893,8 @@ class WC_Meta_Box_Product_Data {
 
 		// Update post meta
 		if ( isset( $_POST['_regular_price'] ) ) {
-			update_post_meta( $post_id, '_regular_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
+			$price = trim( $_POST['_regular_price'] ) === '' ? 0 : $_POST['_regular_price'];
+			update_post_meta( $post_id, '_regular_price', $price );
 		}
 
 		if ( isset( $_POST['_sale_price'] ) ) {
