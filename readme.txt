@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Switched to .scss from .less for all styles.
 * Dev - Included bourbon for scss mixins.
 * Dev - Decoupled the order summary and payments area. Both are updated independently via ajax fragments and can be moved around via actions. TEMPLATES OVERRIDING THESE TEMPLATES WILL NEED TO UPDATE THEIR FILES.
+* Dev - Moved WC_Cart::get_cart_from_session() and dependencies to a later hook (was init, now wp_loaded).
 * Localisation - Add Ukrainian currency and symbol.
 
 = 2.2.5 - 07/10/2014 =

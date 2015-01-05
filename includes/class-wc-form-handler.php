@@ -21,16 +21,16 @@ class WC_Form_Handler {
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
-		add_action( 'init', array( __CLASS__, 'checkout_action' ), 20 );
-		add_action( 'init', array( __CLASS__, 'process_login' ), 20 );
-		add_action( 'init', array( __CLASS__, 'process_registration' ), 20 );
-		add_action( 'init', array( __CLASS__, 'process_reset_password' ), 20 );
-		add_action( 'init', array( __CLASS__, 'cancel_order' ), 20 );
-		add_action( 'init', array( __CLASS__, 'order_again' ), 20 );
-		add_action( 'init', array( __CLASS__, 'update_cart_action' ), 20 );
-		add_action( 'init', array( __CLASS__, 'add_to_cart_action' ), 20 );
-		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
-		add_action( 'wp', array( __CLASS__, 'add_payment_method_action' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'process_login' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'process_registration' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'cancel_order' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'order_again' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'pay_action' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'add_payment_method_action' ), 20 );
 	}
 
 	/**

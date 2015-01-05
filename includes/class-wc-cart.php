@@ -104,7 +104,7 @@ class WC_Cart {
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl';
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl';
 
-		add_action( 'init', array( $this, 'init' ), 5 ); // Get cart on init
+		add_action( 'wp_loaded', array( $this, 'init' ) ); // Get cart after WP and plugins are loaded.
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 ); // Set cookies before shutdown and ob flushing
 	}
@@ -116,14 +116,14 @@ class WC_Cart {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		switch( $key ) {
+		switch ( $key ) {
 			case 'tax':
 				_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
 				$this->tax = new WC_Tax();
-				return $this->tax;
+			return $this->tax;
 			case 'discount_total':
 				_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: http://develop.woothemes.com/woocommerce/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
-				return 0;
+			return 0;
 		}
 	}
 
