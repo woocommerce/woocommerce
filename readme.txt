@@ -131,6 +131,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.3.0 =
+* Feature - Option to geo-locate the customer's inital location.
+* Feature - Display taxes in store based on the customer location, rather than the shop base.
 * Feature - Made tax importer expand postcode ranges.
 * Feature - Print styles for reports.
 * Feature - Remove products from the cart in the widget.
