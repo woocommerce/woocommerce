@@ -42,8 +42,9 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
+		$customer_location = WC_Tax::get_tax_location();
 		$tax_rate = array(
-			'tax_rate_country'  => 'GB',
+			'tax_rate_country'  => $customer_location[0],
 			'tax_rate_state'    => '',
 			'tax_rate'          => '20.0000',
 			'tax_rate_name'     => 'VAT',
