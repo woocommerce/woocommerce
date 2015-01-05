@@ -32,7 +32,7 @@ class WC_Customer {
 	 *
 	 * @var array
 	 */
-	protected $_data;
+	protected $_data = array();
 
 	/**
 	 * Stores bool when data is changed
@@ -49,15 +49,12 @@ class WC_Customer {
 		$this->_data = WC()->session->get( 'customer' );
 
 		if ( empty( $this->_data ) ) {
+			// Defaults
 			$this->_data = array(
-				'country' 				=> esc_html( $this->get_default_country() ),
-				'state' 				=> '',
 				'postcode' 				=> '',
 				'city'					=> '',
 				'address' 				=> '',
 				'address_2' 			=> '',
-				'shipping_country' 		=> esc_html( $this->get_default_country() ),
-				'shipping_state' 		=> '',
 				'shipping_postcode' 	=> '',
 				'shipping_city'			=> '',
 				'shipping_address'		=> '',
@@ -65,6 +62,9 @@ class WC_Customer {
 				'is_vat_exempt' 		=> false,
 				'calculated_shipping'	=> false
 			);
+
+			$this->_data['country'] = $this->_data['shipping_country'] = $this->get_default_country();
+			$this->_data['state']   = $this->_data['shipping_state']   = $this->get_default_state();
 		}
 
 		// When leaving or ending page load, store data
@@ -116,8 +116,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_default_country() {
-		$default = wc_get_default_location();
-
+		$default = wc_get_customer_default_location();
 		return $default['country'];
 	}
 
@@ -126,8 +125,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_default_state() {
-		$default = wc_get_default_location();
-
+		$default = wc_get_customer_default_location();
 		return $default['state'];
 	}
 
@@ -170,7 +168,7 @@ class WC_Customer {
 
 		if ( $country ) {
 
-			$default = wc_get_default_location();
+			$default = wc_get_base_location();
 
 			if ( $default['country'] !== $country ) {
 				return true;
@@ -329,8 +327,7 @@ class WC_Customer {
 
 		if ( $tax_based_on == 'base' ) {
 
-			$default = wc_get_default_location();
-
+			$default  = wc_get_base_location();
 			$country  = $default['country'];
 			$state    = $default['state'];
 			$postcode = '';

@@ -337,9 +337,9 @@ class WC_Tax {
 	public static function get_tax_location( $tax_class = '' ) {
 		$location = array();
 
-		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
+		if ( ! empty( WC()->customer ) ) {
 			$location = WC()->customer->get_taxable_address();
-		} elseif ( wc_prices_include_tax() || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
+		} elseif ( wc_prices_include_tax() || 'base' === get_option( 'woocommerce_default_customer_address' ) ) {
 			$location = array(
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),

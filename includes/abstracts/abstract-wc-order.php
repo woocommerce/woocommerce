@@ -525,7 +525,7 @@ abstract class WC_Abstract_Order {
 
 		if ( 'base' === $tax_based_on ) {
 
-			$default  = wc_get_default_location();
+			$default  = wc_get_base_location();
 			$country  = $default['country'];
 			$state    = $default['state'];
 			$postcode = '';
