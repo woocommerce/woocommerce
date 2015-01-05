@@ -532,6 +532,8 @@ class WC_API_Customers extends WC_API_Resource {
 				$query_args['number'] = absint( $args['limit'] );
 				$users_per_page       = absint( $args['limit'] );
 			}
+		} else {
+			$args['limit'] = $query_args['number'];
 		}
 
 		// page
