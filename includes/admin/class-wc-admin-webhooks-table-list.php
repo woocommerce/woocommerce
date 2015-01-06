@@ -22,9 +22,6 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * Initialize the webhook table list
 	 */
 	public function __construct() {
-		global $status, $page;
-
-		// Set parent defaults
 		parent::__construct( array(
 			'singular' => __( 'webhook', 'woocommerce' ),
 			'plural'   => __( 'webhooks', 'woocommerce' ),
