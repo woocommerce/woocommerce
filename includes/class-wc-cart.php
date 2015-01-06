@@ -694,6 +694,10 @@ class WC_Cart {
 		 * @return array contents of the cart
 		 */
 		public function get_cart() {
+			if ( ! did_action( 'wp_loaded' ) ) {
+				$this->get_cart_from_session();
+				_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
+			}
 			return array_filter( (array) $this->cart_contents );
 		}
 
