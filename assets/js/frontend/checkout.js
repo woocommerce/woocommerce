@@ -161,7 +161,7 @@ jQuery( function( $ ) {
 				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field' ).addClass( 'woocommerce-validated' );
 			}
 		},
-	    update_checkout: function( e ) {
+	    update_checkout: function() {
 	    	if ( wc_checkout_form.xhr ) {
 				wc_checkout_form.xhr.abort();
 			}
@@ -235,9 +235,6 @@ jQuery( function( $ ) {
 				url:		wc_checkout_params.ajax_url,
 				data:		data,
 				success:	function( data ) {
-					// Remove old errors
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
-
 					// Always update the fragements
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
@@ -255,6 +252,8 @@ jQuery( function( $ ) {
 							window.location.reload();
 							return;
 						}
+
+						$( '.woocommerce-error, .woocommerce-message' ).remove();
 
 						// Add new errors
 						if ( data.messages ) {
