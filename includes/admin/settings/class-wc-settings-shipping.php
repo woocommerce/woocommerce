@@ -115,7 +115,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'title'   => __( 'Shipping Destination', 'woocommerce' ),
 				'desc'    => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
 				'id'      => 'woocommerce_ship_to_destination',
-				'default' => 'shipping',
+				'default' => 'billing',
 				'type'    => 'radio',
 				'options' => array(
 					'shipping'     => __( 'Default to shipping address', 'woocommerce' ),
