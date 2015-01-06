@@ -57,7 +57,7 @@ function wc_notice_count( $notice_type = '' ) {
 function wc_has_notice( $message, $notice_type = 'success' ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
 		_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
-		return;
+		return false;
 	}
 
 	$notices = WC()->session->get( 'wc_notices', array() );
