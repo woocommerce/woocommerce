@@ -4604,6 +4604,66 @@ msgstr ""
 msgid "Western Cape"
 msgstr ""
 
+#: i18n/states/CL.php:13
+msgid "Region de Tarapaca"
+msgstr ""
+
+#: i18n/states/CL.php:14
+msgid "Region de Antofagasta"
+msgstr "
+
+#: i18n/states/CL.php:15
+msgid "Region de Atacama"
+msgstr "
+
+#: i18n/states/CL.php:16
+msgid "Region de Coquimbo"
+msgstr "
+
+#: i18n/states/CL.php:17
+msgid "Region de Valparaiso"
+msgstr "
+
+#: i18n/states/CL.php:18
+msgid "Region del Libertador General Bernardo O Higgins"
+msgstr "
+
+#: i18n/states/CL.php:19
+msgid "Region del Maule"
+msgstr "
+
+#: i18n/states/CL.php:20
+msgid "Region del Bio Bio"
+msgstr "
+
+#: i18n/states/CL.php:21
+msgid "Region de la Araucania"
+msgstr "
+
+#: i18n/states/CL.php:22
+msgid "Region de Los Lagos"
+msgstr "
+
+#: i18n/states/CL.php:23
+msgid Region Aysen del General Carlos Ibanez del Campo"
+msgstr "
+
+#: i18n/states/CL.php:24
+msgid "Region de Magallanes y Antartica Chilena"
+msgstr "
+
+#: i18n/states/CL.php:25
+msgid "Region Metropolitana de Santiago"
+msgstr "
+
+#: i18n/states/CL.php:26
+msgid "Region de Los Rios"
+msgstr "
+
+#: i18n/states/CL.php:27
+msgid "Region de Arica y Parinacota"
+msgstr "
+
 #: includes/abstracts/abstract-wc-email.php:555
 #: includes/emails/class-wc-email-customer-completed-order.php:143
 #: includes/emails/class-wc-email-new-order.php:123
