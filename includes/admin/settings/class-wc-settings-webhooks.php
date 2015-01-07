@@ -53,6 +53,18 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 
 			WC_Admin_Settings::add_message( sprintf( _n( '1 webhook moved to the Trash.', '%d webhooks moved to the Trash.', $trashed, 'woocommerce' ), $trashed ) );
 		}
+
+		if ( isset( $_GET['untrashed'] ) ) {
+			$untrashed = absint( $_GET['untrashed'] );
+
+			WC_Admin_Settings::add_message( sprintf( _n( '1 webhook restored from the Trash.', '%d webhooks restored from the Trash.', $untrashed, 'woocommerce' ), $untrashed ) );
+		}
+
+		if ( isset( $_GET['deleted'] ) ) {
+			$deleted = absint( $_GET['deleted'] );
+
+			WC_Admin_Settings::add_message( sprintf( _n( '1 webhook permanently deleted.', '%d webhooks permanently deleted.', $deleted, 'woocommerce' ), $deleted ) );
+		}
 	}
 
 	/**
@@ -65,6 +77,7 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 		echo '<input type="hidden" name="page" value="wc-settings" />';
 		echo '<input type="hidden" name="tab" value="webhooks" />';
 
+		$webhooks_table_list->views();
 		$webhooks_table_list->display();
 	}
 

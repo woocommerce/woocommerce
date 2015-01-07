@@ -139,26 +139,124 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Get the status label for webhooks
+	 *
+	 * @param  string   $status_name
+	 * @param  stdClass $status
+	 *
+	 * @return array
+	 */
+	private function get_status_label( $status_name, $status ) {
+		switch ( $status_name ) {
+			case 'publish' :
+				$label = array(
+					'singular' => __( 'Actived <span class="count">(%s)</span>', 'woocommerce' ),
+					'plural'   => __( 'Actived <span class="count">(%s)</span>', 'woocommerce' ),
+					'context'  => '',
+					'domain'   => 'woocommerce',
+				);
+				break;
+			case 'draft' :
+				$label = array(
+					'singular' => __( 'Paused <span class="count">(%s)</span>', 'woocommerce' ),
+					'plural'   => __( 'Paused <span class="count">(%s)</span>', 'woocommerce' ),
+					'context'  => '',
+					'domain'   => 'woocommerce',
+				);
+				break;
+			case 'pending' :
+				$label = array(
+					'singular' => __( 'Disabled <span class="count">(%s)</span>', 'woocommerce' ),
+					'plural'   => __( 'Disabled <span class="count">(%s)</span>', 'woocommerce' ),
+					'context'  => '',
+					'domain'   => 'woocommerce',
+				);
+				break;
+
+			default:
+				$label = $status->label_count;
+				break;
+		}
+
+		return $label;
+	}
+
+	/**
+	 * Table list views
+	 *
+	 * @return array
+	 */
+	protected function get_views() {
+		$status_links    = array();
+		$num_posts       = wp_count_posts( 'shop_webhook', 'readable' );
+		$class           = '';
+		$total_posts     = array_sum( (array) $num_posts );
+		$current_user_id = get_current_user_id();
+
+		// Subtract post types that are not included in the admin all list.
+		foreach ( get_post_stati( array( 'show_in_admin_all_list' => false ) ) as $state ) {
+			$total_posts -= $num_posts->$state;
+		}
+
+		$class = empty( $class ) && empty( $_REQUEST['status'] ) ? ' class="current"' : '';
+		$status_links['all'] = "<a href='admin.php?page=wc-settings&amp;tab=webhooks'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_posts, 'posts' ), number_format_i18n( $total_posts ) ) . '</a>';
+
+		foreach ( get_post_stati( array( 'show_in_admin_status_list' => true ), 'objects' ) as $status ) {
+			$class = '';
+			$status_name = $status->name;
+
+			if ( ! in_array( $status_name, array( 'publish', 'draft', 'pending', 'trash', 'future', 'private', 'auto-draft' ) ) ) {
+				continue;
+			}
+
+			if ( empty( $num_posts->$status_name ) ) {
+				continue;
+			}
+
+			if ( isset( $_REQUEST['status'] ) && $status_name == $_REQUEST['status'] ) {
+				$class = ' class="current"';
+			}
+
+			$label = $this->get_status_label( $status_name, $status );
+
+			$status_links[ $status_name ] = "<a href='admin.php?page=wc-settings&amp;tab=webhooks&amp;status=$status_name'$class>" . sprintf( translate_nooped_plural( $label, $num_posts->$status_name ), number_format_i18n( $num_posts->$status_name ) ) . '</a>';
+		}
+
+		return $status_links;
+	}
+
+	/**
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {
-		$per_page = 5;
+		$per_page = 10;
 		$columns  = $this->get_columns();
 		$hidden   = array();
 		$sortable = $this->get_sortable_columns();
+
+		// Column headers
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
 		$current_page = $this->get_pagenum();
 
-		$webhooks = new WP_Query( array(
+		// Query args
+		$args = array(
 			'post_type'           => 'shop_webhook',
 			'posts_per_page'      => $per_page,
 			'ignore_sticky_posts' => true,
 			'paged'               => $current_page
-		) );
+		);
 
+		// Handle the status query
+		if ( ! empty( $_REQUEST['status'] ) ) {
+			$args['post_status'] = sanitize_text_field( $_REQUEST['status'] );
+		}
+
+		// Get the webhooks
+		$webhooks    = new WP_Query( $args );
 		$this->items = $webhooks->posts;
 
+		// Set the pagination
 		$this->set_pagination_args( array(
 			'total_items' => $webhooks->found_posts,
 			'per_page'    => $per_page,
