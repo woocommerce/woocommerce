@@ -27,7 +27,6 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
-		add_action( 'admin_menu', array( $this, 'webhooks_menu' ), 55 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
 		if ( apply_filters( 'woocommerce_show_addons_page', true ) ) {
@@ -76,15 +75,6 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Add webhook item
-	 */
-	public function webhooks_menu() {
-		if ( apply_filters( 'woocommerce_show_webhooks_menu', 'yes' == get_option( 'woocommerce_api_enabled' ) ) ) {
-			add_submenu_page( 'woocommerce', __( 'Webhooks', 'woocommerce' ), __( 'Webhooks', 'woocommerce' ), 'manage_woocommerce', 'edit.php?post_type=shop_webhook' );
-		}
-	}
-
-	/**
 	 * Loads gateways and shipping methods into memory for use within settings.
 	 */
 	public function settings_page_init() {
@@ -113,7 +103,7 @@ class WC_Admin_Menus {
 	public function menu_highlight() {
 		global $menu, $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
 
-		$to_highlight_types = array( 'shop_order', 'shop_coupon', 'shop_webhook' );
+		$to_highlight_types = array( 'shop_order', 'shop_coupon' );
 
 		if ( isset( $post_type ) ) {
 			if ( in_array( $post_type, $to_highlight_types ) ) {
