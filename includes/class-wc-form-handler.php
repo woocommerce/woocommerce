@@ -379,13 +379,9 @@ class WC_Form_Handler {
 			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
 			$product       = wc_get_product( $cart_item['product_id'] );
 
-			WC()->cart->set_quantity( $cart_item_key, 0 );
+			WC()->cart->remove_cart_item( $cart_item_key );
 
-			if ( $product->product_type != 'variable' ) {
-				$undo = WC()->cart->get_undo_url( $cart_item['product_id'], $cart_item['quantity'] );
-			} else {
-				$undo = WC()->cart->get_undo_url( $cart_item['product_id'], $cart_item['quantity'], $cart_item['variation_id'], $cart_item['variation'] );
-			}
+			$undo = WC()->cart->get_undo_url( $cart_item_key );
 
 			wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $product->get_title(), '<a href="' . $undo . '">', '</a>' ) );
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : WC()->cart->get_cart_url();
@@ -394,17 +390,13 @@ class WC_Form_Handler {
 
 		}
 
-		//Undo Cart Item
+		// Undo Cart Item
 		elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
-			$product = wc_get_product( $_GET['undo_item'] );
+			$cart_item_key = $_GET['undo_item'];
 
-			if ( $product->product_type != 'variable' ) {
-				WC()->cart->add_to_cart( $_GET['undo_item'], $_GET['quantity'] );
-			} else {
-				WC()->cart->add_to_cart( $_GET['undo_item'], $_GET['quantity'], $_GET['variation_id'], $_GET['variation'] );
-			}
+			WC()->cart->restore_cart_item( $cart_item_key );
 
-			$referer  = wp_get_referer() ? remove_query_arg( array( 'undo_item', 'quantity', 'variation_id', 'variation', '_wpnonce' ), wp_get_referer() ) : WC()->cart->get_cart_url();
+			$referer  = wp_get_referer() ? remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) : WC()->cart->get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
 		}
