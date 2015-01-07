@@ -87,6 +87,9 @@ class WC_Admin {
 	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin
 	 */
 	public function prevent_admin_access() {
+		if ( defined('DOING_AJAX') && DOING_AJAX ) {
+			return;
+		}
 
 		$prevent_access = false;
 
