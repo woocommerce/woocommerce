@@ -1994,6 +1994,7 @@ class WC_Admin_Post_Types {
 				}
 
 				delete_transient( 'woocommerce_processing_order_count' );
+				wc_delete_shop_order_transients( $id );
 			}
 
 		}
@@ -2028,6 +2029,7 @@ class WC_Admin_Post_Types {
 				}
 
 				delete_transient( 'woocommerce_processing_order_count' );
+				wc_delete_shop_order_transients( $id );
 			}
 		}
 	}
