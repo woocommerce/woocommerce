@@ -208,7 +208,16 @@ class WC_Meta_Box_Order_Data {
 								?>
 							</select>
 						</p>
-
+						<?php
+						$args = array('post_status' => 'all',
+							'post_type' => 'shop_order',
+							'_customer_user' => absint( $user->ID )
+						);
+						printf( '<p class="form-field form-field-wide"><a href="%s">%s &rarr;</a></p>',
+							add_query_arg( $args, admin_url('edit.php' ) ),
+							__( 'Find all customer orders', 'woocommerce')
+						);
+						?>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 					</div>
 					<div class="order_data_column">
