@@ -76,7 +76,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 		switch ( $column_name ) {
 			case 'title' :
-				$edit_link        = get_edit_post_link( $the_webhook->id );
+				$edit_link        = admin_url( 'admin.php?page=wc-settings&amp;tab=webhooks&amp;edit-webhook=' . $the_webhook->id );
 				$title            = _draft_or_post_title( $the_webhook->post_data );
 				$post_type_object = get_post_type_object( $the_webhook->post_data->post_type );
 
@@ -88,7 +88,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 				$actions['id'] = sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id );
 
 				if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) ) {
-					$actions['edit'] = '<a href="' . admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=edit', $the_webhook->id ) ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
+					$actions['edit'] = '<a href="' . esc_attr( $edit_link ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
 				}
 
 				if ( current_user_can( $post_type_object->cap->delete_post, $the_webhook->id ) ) {

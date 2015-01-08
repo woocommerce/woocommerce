@@ -63,7 +63,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
 		}
 
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, include( 'settings-tax.php' ) );
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, include( 'views/settings-tax.php' ) );
 	}
 
 	/**
@@ -110,7 +110,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$limit         = 100;
 		$current_class = $this->get_current_tax_class();
 
-		include( 'html-settings-tax.php' );
+		include( 'views/html-settings-tax.php' );
 	}
 
 	/**
