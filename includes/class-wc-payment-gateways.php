@@ -96,7 +96,7 @@ class WC_Payment_Gateways {
 
 		// Load gateways in order
 		foreach ( $load_gateways as $gateway ) {
-			$load_gateway = new $gateway();
+			$load_gateway = is_string( $gateway ) ? new $gateway() : $gateway;
 
 			if ( isset( $ordering[ $load_gateway->id ] ) && is_numeric( $ordering[ $load_gateway->id ] ) ) {
 				// Add in position
