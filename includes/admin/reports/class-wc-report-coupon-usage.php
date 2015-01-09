@@ -180,7 +180,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 						if ( $used_coupons ) :
 					?>
-						<select id="coupon_codes" name="coupon_codes" class="chosen_select" data-placeholder="<?php _e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
+						<select id="coupon_codes" name="coupon_codes" class="wc-enhanced-select" data-placeholder="<?php _e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
 							<option value=""><?php _e( 'All coupons', 'woocommerce' ); ?></option>
 							<?php
 								foreach ( $used_coupons as $coupon ) {
@@ -195,11 +195,6 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 						<input type="hidden" name="page" value="<?php if ( ! empty( $_GET['page'] ) ) echo esc_attr( $_GET['page'] ) ?>" />
 						<input type="hidden" name="tab" value="<?php if ( ! empty( $_GET['tab'] ) ) echo esc_attr( $_GET['tab'] ) ?>" />
 						<input type="hidden" name="report" value="<?php if ( ! empty( $_GET['report'] ) ) echo esc_attr( $_GET['report'] ) ?>" />
-						<script type="text/javascript">
-							jQuery(function() {
-								jQuery('select.chosen_select').chosen();
-							});
-						</script>
 					<?php else : ?>
 						<span><?php _e( 'No used coupons found', 'woocommerce' ); ?></span>
 					<?php endif; ?>
