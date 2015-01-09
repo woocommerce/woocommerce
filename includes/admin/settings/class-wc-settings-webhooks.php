@@ -76,9 +76,11 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 		}
 
 		if ( isset( $_GET['updated'] ) ) {
-			$updated = absint( $_GET['updated'] );
+			WC_Admin_Settings::add_message( __( 'Webhook updated successfully.', 'woocommerce' ) );
+		}
 
-			WC_Admin_Settings::add_message( __( 'Webhook saved successfully.', 'woocommerce' ) );
+		if ( isset( $_GET['created'] ) ) {
+			WC_Admin_Settings::add_message( __( 'Webhook created successfully.', 'woocommerce' ) );
 		}
 	}
 
@@ -86,6 +88,8 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 	 * Table list output
 	 */
 	private function table_list_output() {
+		echo '<h3>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=webhooks&create-webhook=1' ) ) . '" class="add-new-h2">' . __( 'Add Webhook', 'woocommerce' ) . '</a></h3>';
+
 		$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 		$webhooks_table_list->prepare_items();
 

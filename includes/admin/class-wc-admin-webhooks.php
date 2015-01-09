@@ -23,6 +23,7 @@ class WC_Admin_Webhooks {
 	public function __construct() {
 		// Save webhooks
 		add_action( 'admin_init', array( $this, 'save' ) );
+		add_action( 'admin_init', array( $this, 'create' ) );
 	}
 
 	/**
@@ -96,28 +97,6 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Set Webhook post data.
-	 *
-	 * @param int $webhook_id
-	 */
-	private function set_post_data( $webhook_id ) {
-		global $wpdb;
-
-		$password = uniqid( 'webhook_' );
-		$password = strlen( $password ) > 20 ? substr( $password, 0, 20 ) : $password;
-
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_password'  => $password,
-				'ping_status'    => 'closed',
-				'comment_status' => 'open'
-			),
-			array( 'ID' => $webhook_id )
-		);
-	}
-
-	/**
 	 * Save method
 	 */
 	public function save() {
@@ -150,12 +129,9 @@ class WC_Admin_Webhooks {
 			// Topic
 			$this->update_topic( $webhook );
 
-			// Webhook Created
-			if ( isset( $_POST['original_post_status'] ) && 'auto-draft' === $_POST['original_post_status'] ) {
-				// Set Post data like ping status and password
-				$this->set_post_data( $webhook->id );
-
-				// Ping webhook
+			// Ping the webhook at the first time that is activated
+			$peding_delivery = get_post_meta( $webhook->id, '_webhook_pending_delivery', true );
+			if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $peding_delivery ) {
 				$webhook->deliver_ping();
 			}
 
@@ -163,6 +139,37 @@ class WC_Admin_Webhooks {
 
 			// Redirect to webhook edit page to avoid settings save actions
 			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
+			exit();
+		}
+	}
+
+	/**
+	 * Create Webhook
+	 */
+	public function create() {
+		if ( isset( $_GET['page'] ) && 'wc-settings' == $_GET['page'] && isset( $_GET['tab'] ) && 'webhooks' == $_GET['tab'] && isset( $_GET['create-webhook'] ) ) {
+			if ( ! current_user_can( 'publish_shop_webhooks' ) ) {
+				wp_die( __( 'You don\'t have permissions to create Webhooks!', 'woocommerce' ) );
+			}
+
+			$webhook_id = wp_insert_post( array(
+				'post_type'     => 'shop_webhook',
+				'post_status'   => 'pending',
+				'ping_status'   => 'closed',
+				'post_author'   => get_current_user_id(),
+				'post_password' => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
+				'post_title'    => sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
+				'comment_status' => 'open'
+			) );
+
+			if ( is_wp_error( $webhook_id ) ) {
+				wp_die( $webhook_id->get_error_messages() );
+			}
+
+			update_post_meta( $webhook_id, '_webhook_pending_delivery', true );
+
+			// Redirect to edit page
+			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook_id . '&created=1' ) );
 			exit();
 		}
 	}
