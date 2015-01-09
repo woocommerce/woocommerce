@@ -206,13 +206,19 @@ class WC_API_Products extends WC_API_Resource {
 			if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_product_types() ) ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_type', sprintf( __( 'Invalid product type - the product type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_product_types() ) ) ), 400 );
 			}
+			
+			// enable description html tags.
+			$post_content = ( isset( $data['enable_html_description'] ) && 'true' === $data['enable_html_description'] ) ? $data['description'] : wc_clean( $data['description'] );
 
+			// enable short description html tags.
+			$post_excerpt = ( isset( $data['enable_html_short_description'] ) && 'true' === $data['enable_html_short_description'] ) ? $data['short_description'] : wc_clean( $data['short_description'] );
+			
 			$new_product = array(
 				'post_title'   => wc_clean( $data['title'] ),
 				'post_status'  => ( isset( $data['status'] ) ? wc_clean( $data['status'] ) : 'publish' ),
 				'post_type'    => 'product',
-				'post_excerpt' => ( isset( $data['short_description'] ) ? wc_clean( $data['short_description'] ) : '' ),
-				'post_content' => ( isset( $data['description'] ) ? wc_clean( $data['description'] ) : '' ),
+				'post_excerpt' => ( isset( $data['short_description'] ) ? $post_excerpt : '' ),
+				'post_content' => ( isset( $data['description'] ) ? $post_content : '' ),
 				'post_author'  => get_current_user_id(),
 			);
 
@@ -288,14 +294,20 @@ class WC_API_Products extends WC_API_Resource {
 				wp_update_post( array( 'ID' => $id, 'post_status' => wc_clean( $data['status'] ) ) );
 			}
 
+			// enable description html tags.
+			$post_content = ( isset( $data['enable_html_description'] ) && 'true' === $data['enable_html_description'] ) ? $data['description'] : wc_clean( $data['description'] );
+
+			// enable short description html tags.
+			$post_excerpt = ( isset( $data['enable_html_short_description'] ) && 'true' === $data['enable_html_short_description'] ) ? $data['short_description'] : wc_clean( $data['short_description'] );
+
 			// Product short description.
 			if ( isset( $data['short_description'] ) ) {
-				wp_update_post( array( 'ID' => $id, 'post_excerpt' => wc_clean( $data['short_description'] ) ) );
+				wp_update_post( array( 'ID' => $id, 'post_excerpt' => $post_excerpt ) );
 			}
 
 			// Product description.
 			if ( isset( $data['description'] ) ) {
-				wp_update_post( array( 'ID' => $id, 'post_content' => wc_clean( $data['description'] ) ) );
+				wp_update_post( array( 'ID' => $id, 'post_content' => $post_content ) );
 			}
 
 			// Validate the product type
