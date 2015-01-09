@@ -42,7 +42,12 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 	 */
 	public function form_method( $method ) {
 		if ( isset( $_GET['edit-webhook'] ) ) {
-			return 'post';
+			$webhook_id = absint( $_GET['edit-webhook'] );
+			$webhook    = new WC_Webhook( $webhook_id );
+
+			if ( 'trash' != $webhook->post_data->post_status ) {
+				return 'post';
+			}
 		}
 
 		return 'get';
@@ -69,6 +74,12 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 
 			WC_Admin_Settings::add_message( sprintf( _n( '1 webhook permanently deleted.', '%d webhooks permanently deleted.', $deleted, 'woocommerce' ), $deleted ) );
 		}
+
+		if ( isset( $_GET['updated'] ) ) {
+			$updated = absint( $_GET['updated'] );
+
+			WC_Admin_Settings::add_message( __( 'Webhook saved successfully.', 'woocommerce' ) );
+		}
 	}
 
 	/**
@@ -87,11 +98,10 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 
 	/**
 	 * Edit webhook output
+	 *
+	 * @param WC_Webhook $webhook
 	 */
-	private function edit_output() {
-		$webhook_id = absint( $_GET['edit-webhook'] );
-		$webhook    = new WC_Webhook( $webhook_id );
-
+	private function edit_output( $webhook ) {
 		include_once( 'views/html-webhooks-edit.php' );
 	}
 
@@ -136,10 +146,16 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 		$GLOBALS['hide_save_button'] = true;
 
 		if ( isset( $_GET['edit-webhook'] ) ) {
-			$this->edit_output();
-		} else {
-			$this->table_list_output();
+			$webhook_id = absint( $_GET['edit-webhook'] );
+			$webhook    = new WC_Webhook( $webhook_id );
+
+			if ( 'trash' != $webhook->post_data->post_status ) {
+				$this->edit_output( $webhook );
+				return;
+			}
 		}
+
+		$this->table_list_output();
 	}
 
 	/**
@@ -166,98 +182,6 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 			'topic'    => $topic,
 			'event'    => $event,
 			'resource' => $resource
-		);
-	}
-
-	/**
-	 * Updated the Webhook name
-	 *
-	 * @param int $webhook_id
-	 */
-	private function update_name( $webhook_id ) {
-		global $wpdb;
-
-		$name = ! empty( $_POST['webhook_name'] ) ? $_POST['webhook_name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
-		$wpdb->update( $wpdb->posts, array( 'post_title' => $name ), array( 'ID' => $webhook_id ) );
-	}
-
-	/**
-	 * Updated the Webhook status
-	 *
-	 * @param WC_Webhook $webhook
-	 */
-	private function update_status( $webhook ) {
-		$status = ! empty( $_POST['webhook_status'] ) ? wc_clean( $_POST['webhook_status'] ) : '';
-
-		$webhook->update_status( $status );
-	}
-
-	/**
-	 * Updated the Webhook delivery URL
-	 *
-	 * @param WC_Webhook $webhook
-	 */
-	private function update_delivery_url( $webhook ) {
-		$delivery_url = ! empty( $_POST['webhook_delivery_url'] ) ? $_POST['webhook_delivery_url'] : '';
-
-		if ( wc_is_valid_url( $delivery_url ) ) {
-			$webhook->set_delivery_url( $delivery_url );
-		}
-	}
-
-	/**
-	 * Updated the Webhook secret
-	 *
-	 * @param WC_Webhook $webhook
-	 */
-	private function update_secret( $webhook ) {
-		$secret = ! empty( $_POST['webhook_secret'] ) ? $_POST['webhook_secret'] : get_user_meta( get_current_user_id(), 'woocommerce_api_consumer_secret', true );
-
-		$webhook->set_secret( $secret );
-	}
-
-	/**
-	 * Updated the Webhook topic
-	 *
-	 * @param WC_Webhook $webhook
-	 */
-	private function update_topic( $webhook ) {
-		if ( ! empty( $_POST['webhook_topic'] ) ) {
-			list( $resource, $event ) = explode( '.', wc_clean( $_POST['webhook_topic'] ) );
-
-			if ( 'action' === $resource ) {
-				$event = ! empty( $_POST['webhook_action_event'] ) ? wc_clean( $_POST['webhook_action_event'] ) : '';
-			} else if ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) && ! empty( $_POST['webhook_custom_topic'] ) ) {
-				list( $resource, $event ) = explode( '.', wc_clean( $_POST['webhook_custom_topic'] ) );
-			}
-
-			$topic = $resource . '.' . $event;
-
-			if ( wc_is_webhook_valid_topic( $topic ) ) {
-				$webhook->set_topic( $topic );
-			}
-		}
-	}
-
-	/**
-	 * Set Webhook post data.
-	 *
-	 * @param int $webhook_id
-	 */
-	private function set_post_data( $webhook_id ) {
-		global $wpdb;
-
-		$password = uniqid( 'webhook_' );
-		$password = strlen( $password ) > 20 ? substr( $password, 0, 20 ) : $password;
-
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_password'  => $password,
-				'ping_status'    => 'closed',
-				'comment_status' => 'open'
-			),
-			array( 'ID' => $webhook_id )
 		);
 	}
 

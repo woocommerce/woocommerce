@@ -87,7 +87,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 				$actions['id'] = sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id );
 
-				if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) ) {
+				if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) && 'trash' !== $the_webhook->post_data->post_status ) {
 					$actions['edit'] = '<a href="' . esc_attr( $edit_link ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
 				}
 
