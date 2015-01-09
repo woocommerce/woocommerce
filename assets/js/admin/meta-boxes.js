@@ -48,13 +48,6 @@ jQuery( function ( $ ) {
 	});
 	$('ul.wc-tabs li:visible').eq(0).find('a').click();
 
-	// Chosen selects
-	jQuery("select.chosen_select").chosen();
-
-	jQuery("select.chosen_select_nostd").chosen({
-		allow_single_deselect: 'true'
-	});
-
 	// Ajax Chosen Product Selectors
 	jQuery("select.ajax_chosen_select_products").ajaxChosen({
 		method: 	'GET',
