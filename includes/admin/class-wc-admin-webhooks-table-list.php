@@ -252,6 +252,17 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Extra controls to be displayed between bulk actions and pagination
+	 *
+	 * @param string $which
+	 */
+	protected function extra_tablenav( $which ) {
+		if ( 'top' == $which && isset( $_GET['status'] ) && 'trash' == $_GET['status'] && current_user_can( 'delete_shop_webhooks' ) ) {
+			echo '<div class="alignleft actions"><a class="button apply" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=webhooks&status=trash&empty_trash=1' ) ) . '">' . __( 'Empty Trash' ) . '</a></div>';
+		}
+	}
+
+	/**
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {

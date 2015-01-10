@@ -244,6 +244,33 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Empty Trash
+	 */
+	public function empty_trash() {
+		if ( ! current_user_can( 'delete_shop_webhooks' ) ) {
+			wp_die( __( 'You don\'t have permissions to delete Webhooks!', 'woocommerce' ) );
+		}
+
+		$webhooks = get_posts( array(
+			'post_type'           => 'shop_webhook',
+			'ignore_sticky_posts' => true,
+			'nopaging'            => true,
+			'post_status'         => 'trash',
+			'fields'              => 'ids'
+		) );
+
+		foreach ( $webhooks as $webhook_id ) {
+			wp_delete_post( $webhook_id, true );
+		}
+
+		$qty = count( $webhooks );
+
+		// Redirect to webhooks page
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&deleted=' . $qty ) );
+		exit();
+	}
+
+	/**
 	 * Webhooks admin actions
 	 */
 	public function actions() {
@@ -259,9 +286,14 @@ class WC_Admin_Webhooks {
 				$this->create();
 			}
 
-			// Create
+			// Bulk actions
 			if ( isset( $_GET['action'] ) && isset( $_GET['webhook'] ) ) {
 				$this->bulk_actions();
+			}
+
+			// Bulk actions
+			if ( isset( $_GET['empty_trash'] ) ) {
+				$this->empty_trash();
 			}
 		}
 	}
