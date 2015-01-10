@@ -29,7 +29,7 @@ class WC_Admin_Webhooks {
 	 *
 	 * @return bool
 	 */
-	private function is_webhook_settigs_page() {
+	private function is_webhook_settings_page() {
 		return isset( $_GET['page'] ) && 'wc-settings' == $_GET['page'] && isset( $_GET['tab'] ) && 'webhooks' == $_GET['tab'];
 	}
 
@@ -247,7 +247,7 @@ class WC_Admin_Webhooks {
 	 * Webhooks admin actions
 	 */
 	public function actions() {
-		if ( $this->is_webhook_settigs_page() ) {
+		if ( $this->is_webhook_settings_page() ) {
 
 			// Save
 			if ( isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) {
