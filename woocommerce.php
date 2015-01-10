@@ -292,10 +292,13 @@ final class WooCommerce {
 		if ( $this->is_request( 'frontend' ) ) {
 			// Session class, handles session data for users - can be overwritten if custom handler is needed
 			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-
+			
+			// Cart class, the class which represents the current cart - can be overwritten if custom class is needed
+			$cart_class = apply_filters( 'woocommerce_cart_class', 'WC_Cart' );
+			
 			// Class instances
 			$this->session  = new $session_class();
-			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
+			$this->cart     = new $cart_class();                                    // Cart class, stores the cart contents
 			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
 		}
 
