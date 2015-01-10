@@ -97,6 +97,7 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 		echo '<input type="hidden" name="tab" value="webhooks" />';
 
 		$webhooks_table_list->views();
+		$webhooks_table_list->search_box( __( 'Search Webhooks', 'woocommerce' ), 'webhook' );
 		$webhooks_table_list->display();
 	}
 

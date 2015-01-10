@@ -278,6 +278,10 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			$args['post_status'] = sanitize_text_field( $_REQUEST['status'] );
 		}
 
+		if ( ! empty( $_REQUEST['s'] ) ) {
+			$args['s'] = sanitize_text_field( $_REQUEST['s'] );
+		}
+
 		// Get the webhooks
 		$webhooks    = new WP_Query( $args );
 		$this->items = $webhooks->posts;
