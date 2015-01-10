@@ -79,27 +79,35 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 				$edit_link        = admin_url( 'admin.php?page=wc-settings&amp;tab=webhooks&amp;edit-webhook=' . $the_webhook->id );
 				$title            = _draft_or_post_title( $the_webhook->post_data );
 				$post_type_object = get_post_type_object( $the_webhook->post_data->post_type );
+				$post_status      = $the_webhook->post_data->post_status;
 
-				$output = '<strong><a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ) . '</a></strong>';
+				// Title
+				$output = '<strong>';
+				if ( 'trash' == $post_status ) {
+					$output .= esc_html( $title );
+				} else {
+					$output .= '<a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ) . '</a>';
+				}
+				$output .= '</strong>';
 
 				// Get actions
 				$actions = array();
 
 				$actions['id'] = sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id );
 
-				if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) && 'trash' !== $the_webhook->post_data->post_status ) {
+				if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) && 'trash' !== $post_status ) {
 					$actions['edit'] = '<a href="' . esc_attr( $edit_link ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
 				}
 
 				if ( current_user_can( $post_type_object->cap->delete_post, $the_webhook->id ) ) {
 
-					if ( 'trash' == $the_webhook->post_data->post_status ) {
+					if ( 'trash' == $post_status ) {
 						$actions['untrash'] = '<a title="' . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . '" href="' . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $the_webhook->id ) ), 'untrash-post_' . $the_webhook->id ) . '">' . __( 'Restore', 'woocommerce' ) . '</a>';
 					} elseif ( EMPTY_TRASH_DAYS ) {
 						$actions['trash'] = '<a class="submitdelete" title="' . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . __( 'Trash', 'woocommerce' ) . '</a>';
 					}
 
-					if ( 'trash' == $the_webhook->post_data->post_status || ! EMPTY_TRASH_DAYS ) {
+					if ( 'trash' == $post_status || ! EMPTY_TRASH_DAYS ) {
 						$actions['delete'] = '<a class="submitdelete" title="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id, '', true ) . '">' . __( 'Delete Permanently', 'woocommerce' ) . '</a>';
 					}
 				}
@@ -226,10 +234,28 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Get bulk actions
+	 *
+	 * @return array
+	 */
+	protected function get_bulk_actions() {
+		if ( isset( $_GET['status'] ) && 'trash' == $_GET['status'] ) {
+			return array(
+				'untrash' => __( 'Restore', 'woocommerce' ),
+				'delete'  => __( 'Delete Permanently', 'woocommerce' )
+			);
+		}
+
+		return array(
+			'trash' => __( 'Move to Trash', 'woocommerce' )
+		);
+	}
+
+	/**
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {
-		$per_page = 10;
+		$per_page = apply_filters( 'woocommerce_webhooks_settings_posts_per_page', 10 );
 		$columns  = $this->get_columns();
 		$hidden   = array();
 		$sortable = $this->get_sortable_columns();

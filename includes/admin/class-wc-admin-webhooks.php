@@ -21,9 +21,16 @@ class WC_Admin_Webhooks {
 	 * Initialize the webhooks admin actions
 	 */
 	public function __construct() {
-		// Save webhooks
-		add_action( 'admin_init', array( $this, 'save' ) );
-		add_action( 'admin_init', array( $this, 'create' ) );
+		add_action( 'admin_init', array( $this, 'actions' ) );
+	}
+
+	/**
+	 * Check if is webhook settings page
+	 *
+	 * @return bool
+	 */
+	private function is_webhook_settigs_page() {
+		return isset( $_GET['page'] ) && 'wc-settings' == $_GET['page'] && isset( $_GET['tab'] ) && 'webhooks' == $_GET['tab'];
 	}
 
 	/**
@@ -99,78 +106,163 @@ class WC_Admin_Webhooks {
 	/**
 	 * Save method
 	 */
-	public function save() {
-		if ( isset( $_GET['page'] ) && 'wc-settings' == $_GET['page'] && isset( $_GET['tab'] ) && 'webhooks' == $_GET['tab'] && isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) {
-
-			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
-				die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
-			}
-
-			$webhook_id = absint( $_POST['webhook_id'] );
-
-			if ( ! current_user_can( 'edit_shop_webhook', $webhook_id ) ) {
-				return;
-			}
-
-			$webhook = new WC_Webhook( $webhook_id );
-
-			// Name
-			$this->update_name( $webhook->id );
-
-			// Status
-			$this->update_status( $webhook );
-
-			// Delivery URL
-			$this->update_delivery_url( $webhook );
-
-			// Secret
-			$this->update_secret( $webhook );
-
-			// Topic
-			$this->update_topic( $webhook );
-
-			// Ping the webhook at the first time that is activated
-			$peding_delivery = get_post_meta( $webhook->id, '_webhook_pending_delivery', true );
-			if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $peding_delivery ) {
-				$webhook->deliver_ping();
-			}
-
-			do_action( 'woocommerce_webhook_options_save', $webhook->id );
-
-			// Redirect to webhook edit page to avoid settings save actions
-			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
-			exit();
+	private function save() {
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
+			die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
+
+		$webhook_id = absint( $_POST['webhook_id'] );
+
+		if ( ! current_user_can( 'edit_shop_webhook', $webhook_id ) ) {
+			return;
+		}
+
+		$webhook = new WC_Webhook( $webhook_id );
+
+		// Name
+		$this->update_name( $webhook->id );
+
+		// Status
+		$this->update_status( $webhook );
+
+		// Delivery URL
+		$this->update_delivery_url( $webhook );
+
+		// Secret
+		$this->update_secret( $webhook );
+
+		// Topic
+		$this->update_topic( $webhook );
+
+		// Ping the webhook at the first time that is activated
+		$peding_delivery = get_post_meta( $webhook->id, '_webhook_pending_delivery', true );
+		if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $peding_delivery ) {
+			$webhook->deliver_ping();
+		}
+
+		do_action( 'woocommerce_webhook_options_save', $webhook->id );
+
+		// Redirect to webhook edit page to avoid settings save actions
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
+		exit();
 	}
 
 	/**
 	 * Create Webhook
 	 */
-	public function create() {
-		if ( isset( $_GET['page'] ) && 'wc-settings' == $_GET['page'] && isset( $_GET['tab'] ) && 'webhooks' == $_GET['tab'] && isset( $_GET['create-webhook'] ) ) {
-			if ( ! current_user_can( 'publish_shop_webhooks' ) ) {
-				wp_die( __( 'You don\'t have permissions to create Webhooks!', 'woocommerce' ) );
+	private function create() {
+		if ( ! current_user_can( 'publish_shop_webhooks' ) ) {
+			wp_die( __( 'You don\'t have permissions to create Webhooks!', 'woocommerce' ) );
+		}
+
+		$webhook_id = wp_insert_post( array(
+			'post_type'     => 'shop_webhook',
+			'post_status'   => 'pending',
+			'ping_status'   => 'closed',
+			'post_author'   => get_current_user_id(),
+			'post_password' => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
+			'post_title'    => sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
+			'comment_status' => 'open'
+		) );
+
+		if ( is_wp_error( $webhook_id ) ) {
+			wp_die( $webhook_id->get_error_messages() );
+		}
+
+		update_post_meta( $webhook_id, '_webhook_pending_delivery', true );
+
+		// Redirect to edit page
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook_id . '&created=1' ) );
+		exit();
+	}
+
+	/**
+	 * Bulk trash/delete
+	 *
+	 * @param array $webhooks
+	 * @param bool  $delete
+	 */
+	private function bulk_trash( $webhooks, $delete = false ) {
+		foreach ( $webhooks as $webhook_id ) {
+			if ( $delete ) {
+				wp_delete_post( $webhook_id, true );
+			} else {
+				wp_trash_post( $webhook_id );
+			}
+		}
+
+		$type   = ! EMPTY_TRASH_DAYS || $delete ? 'deleted' : 'trashed';
+		$qty    = count( $webhooks );
+		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( $_GET['status'] ) : '';
+
+		// Redirect to webhooks page
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks' . $status . '&' . $type . '=' . $qty ) );
+		exit();
+	}
+
+	/**
+	 * Bulk untrash
+	 *
+	 * @param array $webhooks
+	 */
+	private function bulk_untrash( $webhooks ) {
+		foreach ( $webhooks as $webhook_id ) {
+			wp_untrash_post( $webhook_id );
+		}
+
+		$qty = count( $webhooks );
+
+		// Redirect to webhooks page
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&status=trash&untrashed=' . $qty ) );
+		exit();
+	}
+
+	/**
+	 * Webhook bulk actions
+	 */
+	private function bulk_actions() {
+		if ( ! current_user_can( 'edit_shop_webhooks' ) ) {
+			wp_die( __( 'You don\'t have permissions to edit Webhooks!', 'woocommerce' ) );
+		}
+
+		$webhooks = array_map( 'absint', (array) $_GET['webhook'] );
+
+		switch ( $_GET['action'] ) {
+			case 'trash' :
+				$this->bulk_trash( $webhooks );
+				break;
+			case 'untrash' :
+				$this->bulk_untrash( $webhooks );
+				break;
+			case 'delete' :
+				$this->bulk_trash( $webhooks, true );
+				break;
+
+			default :
+				break;
+		}
+	}
+
+	/**
+	 * Webhooks admin actions
+	 */
+	public function actions() {
+		if ( $this->is_webhook_settigs_page() ) {
+
+			// Save
+			if ( isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) {
+				$this->save();
 			}
 
-			$webhook_id = wp_insert_post( array(
-				'post_type'     => 'shop_webhook',
-				'post_status'   => 'pending',
-				'ping_status'   => 'closed',
-				'post_author'   => get_current_user_id(),
-				'post_password' => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
-				'post_title'    => sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
-				'comment_status' => 'open'
-			) );
-
-			if ( is_wp_error( $webhook_id ) ) {
-				wp_die( $webhook_id->get_error_messages() );
+			// Create
+			if ( isset( $_GET['create-webhook'] ) ) {
+				$this->create();
 			}
 
-			update_post_meta( $webhook_id, '_webhook_pending_delivery', true );
-
-			// Redirect to edit page
-			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook_id . '&created=1' ) );
-			exit();
+			// Create
+			if ( isset( $_GET['action'] ) && isset( $_GET['webhook'] ) ) {
+				$this->bulk_actions();
+			}
 		}
 	}
 }
