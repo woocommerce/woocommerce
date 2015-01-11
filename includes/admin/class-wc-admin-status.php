@@ -46,6 +46,7 @@ class WC_Admin_Status {
 			switch ( $_GET['action'] ) {
 				case 'clear_transients' :
 					wc_delete_product_transients();
+					wc_delete_shop_order_transients();
 
 					echo '<div class="updated"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
 				break;

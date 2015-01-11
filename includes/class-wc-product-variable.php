@@ -53,7 +53,7 @@ class WC_Product_Variable extends WC_Product {
      */
     public function get_total_stock() {
         if ( empty( $this->total_stock ) ) {
-        	$transient_name = 'wc_product_total_stock_' . $this->id;
+        	$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
         	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
 		        $this->total_stock = max( 0, wc_stock_amount( $this->stock ) );
@@ -131,7 +131,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_children( $visible_only = false ) {
 		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
-			$transient_name = 'wc_product_children_ids_' . $this->id;
+			$transient_name = 'wc_product_children_ids_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 			$this->children = get_transient( $transient_name );
 
         	if ( empty( $this->children ) ) {
@@ -141,7 +141,7 @@ class WC_Product_Variable extends WC_Product {
 					'orderby'     => 'menu_order',
 					'order'       => 'ASC',
 					'fields'      => 'ids',
-					'post_status' => 'any',
+					'post_status' => 'publish',
 					'numberposts' => -1
 		        );
 
@@ -307,7 +307,7 @@ class WC_Product_Variable extends WC_Product {
 
 			// Main price
 			$prices = array( $this->get_variation_price( 'min', true ), $this->get_variation_price( 'max', true ) );
-			$price = $prices[0] !== $prices[1] ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $prices[0] ), wc_price( $prices[1] ) ) : wc_price( $prices[0] );
+			$price  = $prices[0] !== $prices[1] ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $prices[0] ), wc_price( $prices[1] ) ) : wc_price( $prices[0] );
 
 			// Sale
 			$prices = array( $this->get_variation_regular_price( 'min', true ), $this->get_variation_regular_price( 'max', true ) );
@@ -316,6 +316,9 @@ class WC_Product_Variable extends WC_Product {
 
 			if ( $price !== $saleprice ) {
 				$price = apply_filters( 'woocommerce_variable_sale_price_html', $this->get_price_html_from_to( $saleprice, $price ) . $this->get_price_suffix(), $this );
+			} elseif ( $price == 0 ) {
+				$price = __( 'Free!', 'woocommerce' );
+				$price = apply_filters( 'woocommerce_variable_free_price_html', $price, $this );
 			} else {
 				$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
 			}

@@ -286,6 +286,18 @@ jQuery( function ( $ ) {
 				}
 			});
 
+			// Restock checkbox
+			if ( refund_qty > 0 ) {
+				$( '#restock_refunded_items' ).closest('tr').show();
+			} else {
+				$( '#restock_refunded_items' ).closest('tr').hide();
+				$('.woocommerce_order_items input.refund_order_item_qty').each(function(){
+					if ( $(this).val() > 0 ) {
+						$( '#restock_refunded_items' ).closest('tr').show();
+					}
+				});
+			}
+
 			$( this ).trigger( 'refund_quantity_changed' );
 		})
 		.on( 'change', '.woocommerce_order_items .refund input', function() {
@@ -773,13 +785,16 @@ jQuery( function ( $ ) {
 				};
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-					if ( response === true ) {
+					if ( true === response.success ) {
 						loadOrderItems();
-					} else if ( response.error ) {
-						window.alert( response.error );
-						removeOrderItemsLoading();
+
+						if ( 'fully_refunded' === response.data.status ) {
+							// Redirect to same page for show the refunded status
+							window.location.href = window.location.href;
+						}
 					} else {
-						console.log(response);
+						window.alert( response.data.error );
+						removeOrderItemsLoading();
 					}
 				});
 			} else {

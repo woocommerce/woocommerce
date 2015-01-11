@@ -49,8 +49,9 @@
 		id: 'wc-backbone-modal-dialog',
 		_target: undefined,
 		events: {
-			'click #btn-cancel': 'closeButton',
-			'click #btn-ok':     'addButton',
+			'click .modal-close': 'closeButton',
+			'click #btn-ok':      'addButton',
+			'keydown':            'keyboardActions'
 		},
 		initialize: function ( data ) {
 			this._target = data.target;
@@ -118,6 +119,19 @@
 			});
 
 			return data;
+		},
+		keyboardActions: function( e ) {
+			var button = e.keyCode || e.which;
+
+			// Enter key
+			if ( 13 === button && ! ( e.target.tagName && e.target.tagName.toLowerCase() === 'input' ) ) {
+				this.addButton( e );
+			}
+
+			// ESC key
+			if ( 27 === button ) {
+				this.closeButton( e );
+			}
 		}
 	});
 

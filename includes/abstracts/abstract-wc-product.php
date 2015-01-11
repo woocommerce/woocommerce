@@ -382,7 +382,7 @@ class WC_Product {
 
 		$return = false;
 
-		if ( 'yes' == $this->sold_individually || ( ! $this->backorders_allowed() && $this->get_stock_quantity() == 1 ) ) {
+		if ( 'yes' == $this->sold_individually ) {
 			$return = true;
 		}
 
@@ -965,8 +965,9 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_average_rating() {
+		$transient_name = 'wc_average_rating_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
-		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) {
+		if ( false === ( $average_rating = get_transient( $transient_name ) ) ) {
 
 			global $wpdb;
 
@@ -987,7 +988,7 @@ class WC_Product {
 				$average_rating = number_format( $ratings / $count, 2 );
 			}
 
-			set_transient( 'wc_average_rating_' . $this->id, $average_rating, YEAR_IN_SECONDS );
+			set_transient( $transient_name, $average_rating, YEAR_IN_SECONDS );
 		}
 
 		return $average_rating;
@@ -1001,11 +1002,11 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_rating_count( $value = null ) {
+		$value          = intval( $value );
+		$value_suffix   = $value ? '_' . $value : '';
+		$transient_name = 'wc_rating_count_' . $this->id . $value_suffix . WC_Cache_Helper::get_transient_version( 'product' );
 
-		$value = intval( $value );
-		$value_suffix = $value ? '_' . $value : '';
-
-		if ( false === ( $count = get_transient( 'wc_rating_count_' . $this->id . $value_suffix ) ) ) {
+		if ( false === ( $count = get_transient( $transient_name ) ) ) {
 
 			global $wpdb;
 
@@ -1032,7 +1033,7 @@ class WC_Product {
 
 			}
 
-			set_transient( 'wc_rating_count_' . $this->id . $value_suffix, $count, YEAR_IN_SECONDS );
+			set_transient( $transient_name, $count, YEAR_IN_SECONDS );
 		}
 
 		return $count;
@@ -1265,7 +1266,7 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_attributes() {
-		return (array) maybe_unserialize( $this->product_attributes );
+		return apply_filters( 'woocommerce_get_product_attributes', (array) maybe_unserialize( $this->product_attributes ) );
 	}
 
 	/**

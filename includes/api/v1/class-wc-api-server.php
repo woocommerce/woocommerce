@@ -537,7 +537,7 @@ class WC_API_Server {
 		if ( is_a( $query, 'WP_User_Query' ) ) {
 
 			$page        = $query->page;
-			$single      = count( $query->get_results() ) > 1;
+			$single      = count( $query->get_results() ) == 1;
 			$total       = $query->get_total();
 			$total_pages = $query->total_pages;
 

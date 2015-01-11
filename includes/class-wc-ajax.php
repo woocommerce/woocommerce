@@ -33,6 +33,7 @@ class WC_AJAX {
 			'checkout'                                         => true,
 			'feature_product'                                  => false,
 			'mark_order_status'                                => false,
+			'add_attribute'                                    => false,
 			'add_new_attribute'                                => false,
 			'remove_variation'                                 => false,
 			'remove_variations'                                => false,
@@ -401,6 +402,41 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
+		die();
+	}
+
+	/**
+	 * Add an attribute row
+	 */
+	public static function add_attribute() {
+		ob_start();
+
+		check_ajax_referer( 'add-attribute', 'security' );
+
+		global $wc_product_attributes;
+
+		$taxonomy  = sanitize_text_field( $_POST['taxonomy'] );
+		$i         = absint( $_POST['i'] );
+		$position  = 0;
+		$attribute = array(
+			'name'         => $taxonomy,
+			'value'        => '',
+			'is_visible'   => 1,
+			'is_variation' => 0,
+			'is_taxonomy'  => $taxonomy ? 1 : 0
+		);
+
+		if ( $taxonomy ) {
+			$attribute_taxonomy = $wc_product_attributes[ $taxonomy ];
+			$metabox_class      = array();
+			$metabox_class[]    = 'taxonomy';
+			$metabox_class[]    = $taxonomy;
+			$attribute_label    = wc_attribute_label( $taxonomy );
+		} else {
+			$attribute_label          = '';
+		}
+
+		include( 'admin/meta-boxes/views/html-product-attribute.php' );
 		die();
 	}
 
@@ -1820,6 +1856,7 @@ class WC_AJAX {
 		$api_refund             = $_POST['api_refund'] === 'true' ? true : false;
 		$restock_refunded_items = $_POST['restock_refunded_items'] === 'true' ? true : false;
 		$refund                 = false;
+		$response_data          = array();
 
 		try {
 			// Validate that the refund can occur
@@ -1892,18 +1929,24 @@ class WC_AJAX {
 				}
 			}
 
+			if ( $refund_amount == $max_refund ) {
+				$order->update_status( 'refunded' );
+				$response_data['status'] = 'fully_refunded';
+			}
+
 			do_action( 'woocommerce_order_refunded', $order_id, $refund->id );
 
 			// Clear transients
 			wc_delete_shop_order_transients( $order_id );
 
-			wp_send_json( true );
+			wp_send_json_success( $response_data );
 
 		} catch ( Exception $e ) {
 			if ( $refund && is_a( $refund, 'WC_Order_Refund' ) ) {
 				wp_delete_post( $refund->id, true );
 			}
-			wp_send_json( array( 'error' => $e->getMessage() ) );
+
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 	}
 

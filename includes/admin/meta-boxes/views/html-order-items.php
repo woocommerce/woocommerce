@@ -250,7 +250,7 @@ if ( wc_tax_enabled() ) {
 <?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
 <div class="wc-order-data-row wc-order-refund-items" style="display: none;">
 	<table class="wc-order-totals">
-		<tr>
+		<tr style="display:none;">
 			<td class="label"><label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
 			<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" checked="checked" /></td>
 		</tr>
@@ -293,8 +293,9 @@ if ( wc_tax_enabled() ) {
 	<div class="wc-backbone-modal">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
-				<header>
-					<h1><?php echo __( 'Add products', 'woocommerce' ); ?></h1>
+				<header class="wc-backbone-modal-header">
+					<a class="modal-close modal-close-link" href="#"><span class="close-icon"><span class="screen-reader-text">Close media panel</span></span></a>
+					<h1><?php _e( 'Add products', 'woocommerce' ); ?></h1>
 				</header>
 				<article>
 					<form action="" method="post">
@@ -303,21 +304,21 @@ if ( wc_tax_enabled() ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-cancel" class="button button-large"><?php echo __( 'Cancel' , 'woocommerce' ); ?></button>
-						<button id="btn-ok" class="button button-primary button-large"><?php echo __( 'Add' , 'woocommerce' ); ?></button>
+						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Add', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>
 		</div>
 	</div>
-	<div class="wc-backbone-modal-backdrop">&nbsp;</div>
+	<div class="wc-backbone-modal-backdrop modal-close">&nbsp;</div>
 </script>
 
 <script type="text/template" id="wc-modal-add-tax">
 	<div class="wc-backbone-modal">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
-				<header>
+				<header class="wc-backbone-modal-header">
+					<a class="modal-close modal-close-link" href="#"><span class="close-icon"><span class="screen-reader-text">Close media panel</span></span></a>
 					<h1><?php _e( 'Add tax', 'woocommerce' ); ?></h1>
 				</header>
 				<article>
@@ -358,12 +359,11 @@ if ( wc_tax_enabled() ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-cancel" class="button button-large"><?php echo __( 'Cancel' , 'woocommerce' ); ?></button>
-						<button id="btn-ok" class="button button-primary button-large"><?php echo __( 'Add' , 'woocommerce' ); ?></button>
+						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Add', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>
 		</div>
 	</div>
-	<div class="wc-backbone-modal-backdrop">&nbsp;</div>
+	<div class="wc-backbone-modal-backdrop modal-close">&nbsp;</div>
 </script>

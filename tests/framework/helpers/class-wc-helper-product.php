@@ -160,6 +160,7 @@ class WC_Helper_Product {
 			'attribute_name'    => $attribute_name,
 			'attribute_type'    => 'select',
 			'attribute_orderby' => 'menu_order',
+			'attribute_public'  => 0,
 		);
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
 		$return['attribute_id'] = $wpdb->insert_id;

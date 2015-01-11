@@ -44,12 +44,13 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	array(
 		'title'    => __( 'Default Customer Address:', 'woocommerce' ),
 		'id'       => 'woocommerce_default_customer_address',
-		'desc_tip' =>  __( 'This option determines the customers default address (before they input their own).', 'woocommerce' ),
-		'default'  => 'base',
+		'desc_tip' =>  __( 'This option determines the customers default address (before they input their details).', 'woocommerce' ),
+		'default'  => 'geolocation',
 		'type'     => 'select',
 		'options'  => array(
-			''     => __( 'No address', 'woocommerce' ),
-			'base' => __( 'Shop base address', 'woocommerce' ),
+			''            => __( 'No address', 'woocommerce' ),
+			'base'        => __( 'Shop base address', 'woocommerce' ),
+			'geolocation' => __( 'Geolocate address', 'woocommerce' ),
 		),
 	),
 

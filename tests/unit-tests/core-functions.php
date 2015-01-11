@@ -124,12 +124,12 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_default_location()
+	 * Test wc_get_base_location()
 	 *
 	 * @since 2.3.0
 	 */
-	public function test_wc_get_default_location() {
-		$default = wc_get_default_location();
+	public function test_wc_get_base_location() {
+		$default = wc_get_base_location();
 
 		$this->assertEquals( 'GB', $default['country'] );
 		$this->assertEquals( '', $default['state'] );

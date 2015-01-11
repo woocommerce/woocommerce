@@ -60,7 +60,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			'count' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Show post counts', 'woocommerce' )
+				'label' => __( 'Show product counts', 'woocommerce' )
 			),
 			'hierarchical' => array(
 				'type'  => 'checkbox',

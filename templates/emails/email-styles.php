@@ -29,75 +29,107 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     -webkit-text-size-adjust: none !important;
     width: 100%;
 }
+
 #template_container {
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.025) !important;
-    border-radius: 6px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1) !important;
     background-color: <?php echo esc_attr( $body ); ?>;
     border: 1px solid $bg_darker_10;
-    border-radius: 6px !important;
+    border-radius: 3px !important;
 }
+
 #template_header {
     background-color: <?php echo esc_attr( $base ); ?>;
+    border-radius: 3px 3px 0 0 !important;
     color: <?php echo $base_text; ?>;
-    border-top-left-radius:6px !important;
-    border-top-right-radius:6px !important;
     border-bottom: 0;
-    font-family:Arial;
-    font-weight:bold;
-    line-height:100%;
-    vertical-align:middle;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    font-weight: bold;
+    line-height: 100%;
+    vertical-align: middle;
 }
+
 #template_header h1 {
     color: <?php echo $base_text; ?>;
 }
+
+#template_footer td {
+    padding: 0;
+}
+
+#template_footer #credit {
+    padding: 0 48px 48px 48px;
+}
+
 #body_content {
     background-color: <?php echo esc_attr( $body ); ?>;
-    border-radius:6px !important;
 }
+
+#body_content table td {
+    padding: 48px;
+}
+
+#body_content table td td {
+    padding: 12px;
+}
+
+#body_content table td th {
+    padding: 12px;
+}
+
+#body_content p {
+    margin: 0 0 16px;
+}
+
 #body_content_inner {
     color: <?php echo $text_lighter_20;?>;
-    font-family:Arial;
-    font-size:14px;
-    line-height:150%;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 150%;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
+
 h1 {
     color: <?php echo esc_attr( $base ); ?>;
     display: block;
-    font-family: Arial;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
     font-size: 30px;
-    font-weight: bold;
+    font-weight: 300;
     line-height: 150%;
-    margin: 10px 0;
-    padding: 28px 24px;
+    margin: 0;
+    padding: 36px 48px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
     text-shadow: 0 1px 0 <?php echo $base_lighter_20; ?>;
+    -webkit-font-smoothing: antialiased;
 }
+
 h2 {
     color: <?php echo esc_attr( $base ); ?>;
     display: block;
-    font-family: Arial;
-    font-size: 30px;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    font-size: 18px;
     font-weight: bold;
-    line-height: 150%;
-    margin: 10px 0;
+    line-height: 130%;
+    margin: 16px 0 8px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
+
 h3 {
     color: <?php echo esc_attr( $base ); ?>;
     display: block;
-    font-family: Arial;
-    font-size: 26px;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    font-size: 16px;
     font-weight: bold;
-    line-height: 150%;
-    margin: 10px 0;
+    line-height: 130%;
+    margin: 16px 0 8px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
+
 a {
     color: <?php echo esc_attr( $base ); ?>;
     font-weight: normal;
     text-decoration: underline;
 }
+
 img {
     border: non;
     display: inline;

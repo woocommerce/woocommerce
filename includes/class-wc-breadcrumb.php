@@ -15,11 +15,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Breadcrumb {
 
-	/** @var array Breadcrumb trail */
+	/**
+	 * Breadcrumb trail
+	 *
+	 * @var array
+	 */
 	private $crumbs = array();
 
 	/**
 	 * Add a crumb so we don't get lost
+	 *
 	 * @param string $name
 	 * @param string $link
 	 */
@@ -39,6 +44,7 @@ class WC_Breadcrumb {
 
 	/**
 	 * Get the breadcrumb
+	 *
 	 * @return array
 	 */
 	public function get_breadcrumb() {
@@ -47,6 +53,7 @@ class WC_Breadcrumb {
 
 	/**
 	 * Generate breadcrumb trail
+	 *
 	 * @return array of breadcrumbs
 	 */
 	public function generate() {
@@ -116,38 +123,44 @@ class WC_Breadcrumb {
 	 */
 	private function add_crumbs_attachment() {
 		global $post;
-		$this->single( $post->post_parent );
+
+		$this->add_crumbs_single( $post->post_parent, get_permalink( $post->post_parent ) );
 		$this->add_crumb( get_the_title(), get_permalink() );
 	}
 
 	/**
-	 * single post trail
-	 * @param  integer $post_id
+	 * Single post trail
+	 *
+	 * @param int    $post_id
+	 * @param string $permalink
 	 */
-	private function add_crumbs_single( $post_id = 0 ) {
-		global $post;
+	private function add_crumbs_single( $post_id = 0, $permalink = '' ) {
+		if ( ! $post_id ) {
+			global $post;
+		} else {
+			$post = get_post( $post_id );
+		}
 
-		if ( 'product' === get_post_type() ) {
+		if ( 'product' === get_post_type( $post ) ) {
 			$this->prepend_shop_page();
-
 			if ( $terms = wc_get_product_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent', 'order' => 'DESC' ) ) ) {
 				$main_term = $terms[0];
 				$this->term_ancestors( $main_term->term_id, 'product_cat' );
 				$this->add_crumb( $main_term->name, get_term_link( $main_term ) );
 			}
-		} elseif ( 'post' != get_post_type() ) {
-			$post_type = get_post_type_object( get_post_type() );
+		} elseif ( 'post' != get_post_type( $post ) ) {
+			$post_type = get_post_type_object( get_post_type( $post ) );
 			$slug      = $post_type->rewrite;
-			$this->add_crumb( $post_type->labels->singular_name, get_post_type_archive_link( get_post_type() ) );
+			$this->add_crumb( $post_type->labels->singular_name, get_post_type_archive_link( get_post_type( $post ) ) );
 		} else {
-			$cat = current( get_the_category() );
+			$cat = current( get_the_category( $post ) );
 			if ( $cat ) {
 				$this->term_ancestors( $cat->term_id, 'post_category' );
 				$this->add_crumb( $cat->name, get_term_link( $cat ) );
 			}
 		}
 
-		$this->add_crumb( get_the_title() );
+		$this->add_crumb( get_the_title( $post ), $permalink );
 	}
 
 	/**
@@ -163,7 +176,7 @@ class WC_Breadcrumb {
 			while ( $parent_id ) {
 				$page          = get_post( $parent_id );
 				$parent_id     = $page->post_parent;
-				$parent_crumbs = array( get_the_title( $page->ID ), get_permalink( $page->ID ) );
+				$parent_crumbs[] = array( get_the_title( $page->ID ), get_permalink( $page->ID ) );
 			}
 
 			$parent_crumbs = array_reverse( $parent_crumbs );
@@ -192,9 +205,10 @@ class WC_Breadcrumb {
 	 * Product tag trail
 	 */
 	private function add_crumbs_product_tag() {
-		$queried_object = $GLOBALS['wp_query']->get_queried_object();
+		$current_term = $GLOBALS['wp_query']->get_queried_object();
+
 		$this->prepend_shop_page();
-		$this->add_crumb( sprintf( __( 'Products tagged &ldquo;%s&rdquo;', 'woocommerce' ), $queried_object->name ) );
+		$this->add_crumb( sprintf( __( 'Products tagged &ldquo;%s&rdquo;', 'woocommerce' ), $current_term->name ) );
 	}
 
 	/**

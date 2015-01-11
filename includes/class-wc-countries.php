@@ -118,10 +118,8 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function get_base_country() {
-		$default = esc_attr( get_option('woocommerce_default_country') );
-		$country = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? $default : substr( $default, 0, $pos );
-
-		return apply_filters( 'woocommerce_countries_base_country', $country );
+		$default = wc_get_base_location();
+		return apply_filters( 'woocommerce_countries_base_country', $default['country'] );
 	}
 
 	/**
@@ -131,10 +129,8 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function get_base_state() {
-		$default = wc_clean( get_option( 'woocommerce_default_country' ) );
-		$state   = ( ( $pos = strrpos( $default, ':' ) ) === false ) ? '' : substr( $default, $pos + 1 );
-
-		return apply_filters( 'woocommerce_countries_base_state', $state );
+		$default = wc_get_base_location();
+		return apply_filters( 'woocommerce_countries_base_state', $default['state'] );
 	}
 
 	/**
@@ -251,11 +247,21 @@ class WC_Countries {
 	/**
 	 * Gets an array of countries in the EU.
 	 *
+	 * MC (monaco) and IM (isle of man, part of UK) also use VAT.
+	 *
 	 * @access public
+	 * @param $type Type of countries to retrieve. Blank for EU member countries. eu_vat for EU VAT countries.
 	 * @return string[]
 	 */
-	public function get_european_union_countries() {
-		return array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );
+	public function get_european_union_countries( $type = '' ) {
+		$countries = array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );
+
+		if ( 'eu_vat' === $type ) {
+			$countries[] = 'MC';
+			$countries[] = 'IM';
+		}
+
+		return $countries;
 	}
 
 	/**
@@ -294,7 +300,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function tax_or_vat() {
-		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
+		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_tax_or_vat', $return );
 	}
@@ -306,7 +312,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function inc_tax_or_vat() {
-		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
+		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_inc_tax_or_vat', $return );
 	}
@@ -318,7 +324,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function ex_tax_or_vat() {
-		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
+		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries( 'eu_vat' ) ) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_ex_tax_or_vat', $return );
 	}
@@ -373,6 +379,7 @@ class WC_Countries {
 				'BE' => $postcode_before_city,
 				'CA' => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
 				'CH' => $postcode_before_city,
+				'CL' => "{company}\n{name}\n{address_1}\n{address_2}\n{state}\n{city}",
 				'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
 				'CZ' => $postcode_before_city,
 				'DE' => $postcode_before_city,
@@ -654,10 +661,14 @@ class WC_Countries {
                 ),
 				'CL' => array(
 					'city'		=> array(
-						'required' 	=> false,
+						'required' 	=> true,
 					),
 					'state'		=> array(
-						'label'			=> __( 'Municipality', 'woocommerce' ),
+						'label'			=> __( 'Region', 'woocommerce' ),
+					'postcode' => array(
+						'required' 	=> false,
+						'hidden'	=> true	
+					)
 					)
 				),
 				'CN' => array(

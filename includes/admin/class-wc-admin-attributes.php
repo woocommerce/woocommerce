@@ -51,10 +51,11 @@ class WC_Admin_Attributes {
 			}
 
 			// Grab the submitted data
-			$attribute_label   = ( isset( $_POST['attribute_label'] ) )   ? (string) stripslashes( $_POST['attribute_label'] ) : '';
-			$attribute_name    = ( isset( $_POST['attribute_name'] ) )    ? wc_sanitize_taxonomy_name( stripslashes( (string) $_POST['attribute_name'] ) ) : '';
-			$attribute_type    = ( isset( $_POST['attribute_type'] ) )    ? (string) stripslashes( $_POST['attribute_type'] ) : '';
-			$attribute_orderby = ( isset( $_POST['attribute_orderby'] ) ) ? (string) stripslashes( $_POST['attribute_orderby'] ) : '';
+			$attribute_label   = isset( $_POST['attribute_label'] )   ? (string) stripslashes( $_POST['attribute_label'] ) : '';
+			$attribute_name    = isset( $_POST['attribute_name'] )    ? wc_sanitize_taxonomy_name( stripslashes( (string) $_POST['attribute_name'] ) ) : '';
+			$attribute_type    = isset( $_POST['attribute_type'] )    ? (string) stripslashes( $_POST['attribute_type'] ) : '';
+			$attribute_orderby = isset( $_POST['attribute_orderby'] ) ? (string) stripslashes( $_POST['attribute_orderby'] ) : '';
+			$attribute_public  = isset( $_POST['attribute_public'] )  ? 1 : 0;
 
 			// Auto-generate the label or slug if only one of both was provided
 			if ( ! $attribute_label ) {
@@ -112,6 +113,7 @@ class WC_Admin_Attributes {
 						'attribute_name'    => $attribute_name,
 						'attribute_type'    => $attribute_type,
 						'attribute_orderby' => $attribute_orderby,
+						'attribute_public'  => $attribute_public
 					);
 
 					$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
@@ -129,6 +131,7 @@ class WC_Admin_Attributes {
 						'attribute_name'    => $attribute_name,
 						'attribute_type'    => $attribute_type,
 						'attribute_orderby' => $attribute_orderby,
+						'attribute_public'  => $attribute_public
 					);
 
 					$wpdb->update( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute, array( 'attribute_id' => $attribute_id ) );
@@ -232,6 +235,7 @@ class WC_Admin_Attributes {
 		$att_label   = $attribute_to_edit->attribute_label;
 		$att_name    = $attribute_to_edit->attribute_name;
 		$att_orderby = $attribute_to_edit->attribute_orderby;
+		$att_public  = $attribute_to_edit->attribute_public;
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
@@ -255,6 +259,15 @@ class WC_Admin_Attributes {
 							<td>
 								<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
 								<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
+							</td>
+						</tr>
+						<tr class="form-field form-required">
+							<th scope="row" valign="top">
+								<label for="attribute_public"><?php _e( 'Enable Archives?', 'woocommerce' ); ?></label>
+							</th>
+							<td>
+								<input name="attribute_public" id="attribute_public" type="checkbox" value="1" <?php checked( $att_public, 1 ); ?> />
+								<p class="description"><?php _e( 'Enable this if you want this attribute to have product archives in your store.', 'woocommerce' ); ?></p>
 							</td>
 						</tr>
 						<tr class="form-field form-required">
@@ -329,7 +342,7 @@ class WC_Admin_Attributes {
 													<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e( 'Delete', 'woocommerce' ); ?></a></span></div>
 												</td>
 												<td><?php echo esc_html( $tax->attribute_name ); ?></td>
-												<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?></td>
+												<td><?php echo esc_html( ucfirst( $tax->attribute_type ) ); ?> <?php echo $tax->attribute_public ? '(' . __( 'Public', 'woocommerce' ) . ')' : ''; ?></td>
 												<td><?php
 													switch ( $tax->attribute_orderby ) {
 														case 'name' :
@@ -398,6 +411,12 @@ class WC_Admin_Attributes {
 									<label for="attribute_name"><?php _e( 'Slug', 'woocommerce' ); ?></label>
 									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="28" />
 									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
+								</div>
+
+								<div class="form-field">
+									<label for="attribute_public"><input name="attribute_public" id="attribute_public" type="checkbox" value="1" /> <?php _e( 'Enable Archives?', 'woocommerce' ); ?></label>
+
+									<p class="description"><?php _e( 'Enable this if you want this attribute to have product archives in your store.', 'woocommerce' ); ?></p>
 								</div>
 
 								<div class="form-field">

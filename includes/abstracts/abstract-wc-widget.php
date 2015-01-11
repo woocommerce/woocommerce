@@ -112,8 +112,7 @@ abstract class WC_Widget extends WP_Widget {
 	public function widget_start( $args, $instance ) {
 		echo $args['before_widget'];
 
-		$default = isset( $this->settings['title']['std'] ) ? $this->settings['title']['std'] : '';
-		if ( $title = apply_filters( 'widget_title', empty( $instance['title'] ) ? $default : $instance['title'], $instance, $this->id_base ) ) {
+		if ( $title = apply_filters( 'widget_title', empty( $instance['title'] ) ? '' : $instance['title'], $instance, $this->id_base ) ) {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 	}

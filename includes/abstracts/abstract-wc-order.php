@@ -525,7 +525,7 @@ abstract class WC_Abstract_Order {
 
 		if ( 'base' === $tax_based_on ) {
 
-			$default  = wc_get_default_location();
+			$default  = wc_get_base_location();
 			$country  = $default['country'];
 			$state    = $default['state'];
 			$postcode = '';
@@ -1347,14 +1347,13 @@ abstract class WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
-
 		if ( $inc_tax ) {
 			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] ) / max( 1, $item['qty'] );
 		} else {
 			$price = ( $item['line_subtotal'] / $item['qty'] );
 		}
 
-		$price = $round ? round( $price, 2 ) : $price;
+		$price = $round ? number_format( (float) $price, 2, '.', '' ) : $price;
 
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', $price, $this, $item );
 	}
@@ -2309,7 +2308,12 @@ abstract class WC_Abstract_Order {
 						$qty       = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $this, $item );
 						$new_stock = $_product->reduce_stock( $qty );
 
-						$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $new_stock + $qty, $new_stock) );
+						if ( isset( $item['variation_id'] ) && $item['variation_id'] ) {
+							$this->add_order_note( sprintf( __( 'Item\'s #%s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $item['variation_id'], $new_stock + $qty, $new_stock) );
+						} else {
+							$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $new_stock + $qty, $new_stock) );
+						}
+
 						$this->send_stock_notifications( $_product, $new_stock, $item['qty'] );
 					}
 

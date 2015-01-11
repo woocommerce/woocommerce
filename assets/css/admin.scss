@@ -4070,24 +4070,18 @@ table.bar_chart {
  * Backbone modal dialog
  */
 .wc-backbone-modal {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 160000;
-
 	* {
 		@include box-sizing(content-box);
 	}
 
 	.wc-backbone-modal-content {
-		position: absolute;
+		position: fixed;
 		top: 50%;
 		left: 50%;
 		width: 500px;
 		background: #fff;
 		margin: -150px 0 0 -250px;
+		z-index: 160000;
 	}
 }
 
@@ -4113,8 +4107,62 @@ table.bar_chart {
 		padding: 4px 16px;
 	}
 
-	header {
+	.wc-backbone-modal-header {
+		background: #fcfcfc;
 		border-bottom: 1px solid #ddd;
+
+		h1 {
+			font-size: 22px;
+			font-weight: 700;
+			line-height: 42px;
+			margin: 0;
+		}
+	}
+
+	.modal-close-link {
+		cursor: pointer;
+		color: #777;
+		background-color: transparent;
+		height: 50px;
+		width: 50px;
+		padding: 0;
+		position: absolute;
+		text-align: center;
+		border: 0;
+		border-left: 1px solid #ddd;
+		-webkit-transition: color .1s ease-in-out,background .1s ease-in-out;
+		transition: color .1s ease-in-out,background .1s ease-in-out;
+		top: 0;
+		right: 0;
+		text-decoration: none;
+
+		&:hover {
+			background: #ddd;
+			border-color: #ccc;
+			color: #000;
+			outline: 0;
+			text-decoration: none;
+		}
+
+		.close-icon {
+			display: block;
+			height: 15px;
+			background-image: none;
+			text-align: center;
+			margin: 14px;
+			width: 22px;
+
+			&:before {
+				content: '\f335';
+				font-size: 22px;
+				font: 400 20px/1 dashicons;
+				speak: none;
+				vertical-align: middle;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+				color: #666;
+			}
+		}
 	}
 
 	article {
@@ -4124,13 +4172,6 @@ table.bar_chart {
 			padding: 10px 0 0;
 			text-align: center;
 		}
-	}
-
-	h1 {
-		font-size: 22px;
-		font-weight: 200;
-		line-height: 45px;
-		margin: 0;
 	}
 
 	footer {

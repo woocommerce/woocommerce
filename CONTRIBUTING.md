@@ -6,10 +6,9 @@ When contributing please ensure you follow the guidelines below so that we can k
 
 __Note:__
 
-GitHub is for *bug reports and contributions only* - if you have a support question or a request for a customization don't post here. Use [WooThemes Support](http://support.woothemes.com) for customer support, [WordPress.org](http://wordpress.org/support/plugin/woocommerce) for community support, and for customisations we recommend one of the following services:
+GitHub is for *bug reports and contributions only* - if you have a support question or a request for a customization don't post here. Use [WooThemes Support](http://support.woothemes.com) for customer support, [WordPress.org](http://wordpress.org/support/plugin/woocommerce)	for community support, and for customisations we recommend one of the following services:
 
 - [Codeable](https://codeable.io/)
-- [Elto](https://www.elto.com/)
 - [Affiliated Woo Workers](http://www.woothemes.com/affiliated-woo-workers/)
 
 ## Getting Started
@@ -27,7 +26,8 @@ GitHub is for *bug reports and contributions only* - if you have a support quest
   * Ensure you use LF line endings - no crazy windows line endings. :)
 * When committing, reference your issue (#1234) and include a note about the fix.
 * Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository. Existing maintenance branches will be maintained of by WooCommerce developers.
-* Please don't modify the changelog, this will be maintained by WooCommerce developers.
+* Please **don't** modify the changelog - this will be maintained by the WooCommerce developers.
+* Please **don't** add your localizations or update the .pot files - this will be maintanied by the WooCommerce developers. To contribute to the localization of WooCommerce, please join the [WooCommerce Transifex project](https://www.transifex.com/projects/p/woocommerce/).
 
 At this point you're waiting on us to merge your pull request. We'll review all pull requests, and make suggestions and changes if necessary.
 
