@@ -508,6 +508,8 @@ class WC_API_Products extends WC_API_Resource {
 		if ( ! empty( $args['category'] ) ) {
 			$query_args['product_cat'] = $args['category'];
 		}
+		
+		$query_args = apply_filters( 'woocommerce_api_query_products_args', $query_args, $args );
 
 		$query_args = $this->merge_query_args( $query_args, $args );
 
