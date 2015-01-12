@@ -51,7 +51,8 @@ jQuery( function( $ ) {
 				        cache: true
 				    }
 				};
-				if ( $( this ).data( 'multiple' ) == 'true' ) {
+
+				if ( $( this ).data( 'multiple' ) === true ) {
 					select2_args.multiple = true;
 					select2_args.initSelection = function( element, callback ) {
 						var data     = $.parseJSON( element.attr( 'data-selected' ) );
@@ -106,7 +107,7 @@ jQuery( function( $ ) {
 				        cache: true
 				    }
 				};
-				if ( $( this ).data( 'multiple' ) == 'true' ) {
+				if ( $( this ).data( 'multiple' ) === true ) {
 					select2_args.multiple = true;
 					select2_args.initSelection = function( element, callback ) {
 						var data     = $.parseJSON( element.attr( 'data-selected' ) );
