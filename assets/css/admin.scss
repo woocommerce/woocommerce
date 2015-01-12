@@ -559,11 +559,10 @@ ul.wc_coupon_list_block {
 			clear: both;
 
 			input,
-			textarea {
-				width: 100%;
-			}
-
-			select {
+			textarea,
+			select,
+			.wc-enhanced-select,
+			.wc-customer-search {
 				width: 100%;
 			}
 		}

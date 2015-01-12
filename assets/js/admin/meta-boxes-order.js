@@ -75,10 +75,8 @@ jQuery( function ( $ ) {
 	});
 
 
-	var states = null,
-		chosen_opts = {
+	var states = null;
 
-		};
 	// Check if we have the countries loaded
 	if ( ! ( typeof woocommerce_admin_meta_boxes_order === 'undefined' || typeof woocommerce_admin_meta_boxes_order.countries === 'undefined' ) ) {
 		/* State/Country select boxes */
@@ -86,7 +84,7 @@ jQuery( function ( $ ) {
 	}
 
 	$( '.js_field-country' )
-		.chosen( chosen_opts )
+		.chosen()
 		.change( function( e, stickValue ){
 			// Check for stickValue before using it
 			if ( typeof stickValue === 'undefined' ){
@@ -936,7 +934,7 @@ jQuery( function ( $ ) {
 					buttonImageOnly: true
 				});
 
-				$( '#grant_access_id' ).val( '' ).trigger( 'chosen:updated' );
+				$( '#grant_access_id' ).val( '' ).change();
 				$( '.order_download_permissions' ).unblock();
 
 			});
@@ -1023,8 +1021,8 @@ jQuery( function ( $ ) {
 						$( 'input#_billing_address_2' ).val( info.billing_address_2 ).change();
 						$( 'input#_billing_city' ).val( info.billing_city ).change();
 						$( 'input#_billing_postcode' ).val( info.billing_postcode ).change();
-						$( '#_billing_country' ).val( info.billing_country ).change().trigger( 'chosen:updated' );
-						$( '#_billing_state' ).val( info.billing_state ).change().trigger( 'chosen:updated' );
+						$( '#_billing_country' ).val( info.billing_country ).change();
+						$( '#_billing_state' ).val( info.billing_state ).change();
 						$( 'input#_billing_email' ).val( info.billing_email ).change();
 						$( 'input#_billing_phone' ).val( info.billing_phone ).change();
 					}
@@ -1077,8 +1075,8 @@ jQuery( function ( $ ) {
 						$( 'input#_shipping_address_2' ).val( info.shipping_address_2 ).change();
 						$( 'input#_shipping_city' ).val( info.shipping_city ).change();
 						$( 'input#_shipping_postcode' ).val( info.shipping_postcode ).change();
-						$( '#_shipping_country' ).val( info.shipping_country ).change().trigger( 'chosen:updated' );
-						$( '#_shipping_state' ).val( info.shipping_state ).change().trigger( 'chosen:updated' );
+						$( '#_shipping_country' ).val( info.shipping_country ).change();
+						$( '#_shipping_state' ).val( info.shipping_state ).change();
 					}
 
 					$( '.edit_address' ).unblock();
@@ -1097,8 +1095,8 @@ jQuery( function ( $ ) {
 			$( 'input#_shipping_address_2' ).val( $( 'input#_billing_address_2' ).val() ).change();
 			$( 'input#_shipping_city' ).val( $( 'input#_billing_city' ).val() ).change();
 			$( 'input#_shipping_postcode' ).val( $( 'input#_billing_postcode' ).val() ).change();
-			$( '#_shipping_country' ).val( $( '#_billing_country' ).val() ).change().trigger( 'chosen:updated' );
-			$( '#_shipping_state' ).val( $( '#_billing_state' ).val() ).change().trigger( 'chosen:updated' );
+			$( '#_shipping_country' ).val( $( '#_billing_country' ).val() ).change();
+			$( '#_shipping_state' ).val( $( '#_billing_state' ).val() ).change();
 		}
 		return false;
 	});
