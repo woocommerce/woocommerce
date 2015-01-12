@@ -92,6 +92,7 @@ return array(
 	'paymentaction' => array(
 		'title'       => __( 'Payment Action', 'woocommerce' ),
 		'type'        => 'select',
+		'class'       => 'wc-enhanced-select',
 		'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
 		'default'     => 'sale',
 		'desc_tip'    => true,

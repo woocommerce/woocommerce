@@ -104,6 +104,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 			'type' => array(
 				'title'       => __( 'Fee Type', 'woocommerce' ),
 				'type'        => 'select',
+				'class'       => 'wc-enhanced-select',
 				'description' => __( 'How to calculate delivery charges', 'woocommerce' ),
 				'default'     => 'fixed',
 				'options'     => array(
@@ -133,8 +134,8 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 				'title'       => __( 'Method availability', 'woocommerce' ),
 				'type'        => 'select',
 				'default'     => 'all',
-					'class'       => 'availability',
-					'options'     => array(
+				'class'       => 'availability wc-enhanced-select',
+				'options'     => array(
 					'all'         => __( 'All allowed countries', 'woocommerce' ),
 					'specific'    => __( 'Specific Countries', 'woocommerce' )
 				)

@@ -338,6 +338,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc'     => __( 'This controls how stock is displayed on the frontend.', 'woocommerce' ),
 					'id'       => 'woocommerce_stock_format',
 					'css'      => 'min-width:150px;',
+					'class'    => 'wc-enhanced-select',
 					'default'  => '',
 					'type'     => 'select',
 					'options'  => array(

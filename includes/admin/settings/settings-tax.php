@@ -34,6 +34,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'desc_tip' =>  __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
 		'default'  => 'shipping',
 		'type'     => 'select',
+		'class'    => 'wc-enhanced-select',
 		'options'  => array(
 			'shipping' => __( 'Customer shipping address', 'woocommerce' ),
 			'billing'  => __( 'Customer billing address', 'woocommerce' ),
@@ -47,6 +48,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'desc_tip' =>  __( 'This option determines the customers default address (before they input their details).', 'woocommerce' ),
 		'default'  => 'geolocation',
 		'type'     => 'select',
+		'class'    => 'wc-enhanced-select',
 		'options'  => array(
 			''            => __( 'No address', 'woocommerce' ),
 			'base'        => __( 'Shop base address', 'woocommerce' ),
@@ -61,6 +63,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'css'      => 'min-width:150px;',
 		'default'  => 'title',
 		'type'     => 'select',
+		'class'    => 'wc-enhanced-select',
 		'options'  => array( '' => __( 'Shipping tax class based on cart items', 'woocommerce' ), 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
 		'desc_tip' =>  true,
 	),
@@ -87,6 +90,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'id'      => 'woocommerce_tax_display_shop',
 		'default' => 'excl',
 		'type'    => 'select',
+		'class'   => 'wc-enhanced-select',
 		'options' => array(
 			'incl'   => __( 'Including tax', 'woocommerce' ),
 			'excl'   => __( 'Excluding tax', 'woocommerce' ),
@@ -106,6 +110,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'id'      => 'woocommerce_tax_display_cart',
 		'default' => 'excl',
 		'type'    => 'select',
+		'class'   => 'wc-enhanced-select',
 		'options' => array(
 			'incl'   => __( 'Including tax', 'woocommerce' ),
 			'excl'   => __( 'Excluding tax', 'woocommerce' ),
@@ -118,6 +123,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'id'      => 'woocommerce_tax_total_display',
 		'default' => 'itemized',
 		'type'    => 'select',
+		'class'   => 'wc-enhanced-select',
 		'options' => array(
 			'single'     => __( 'As a single total', 'woocommerce' ),
 			'itemized'   => __( 'Itemized', 'woocommerce' ),
