@@ -95,15 +95,17 @@ class WC_Admin_Assets {
 		wp_register_script( 'chosen', WC()->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 
 		// Select2 is the replacement for chosen
-		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/select2/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
-		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.2' );
+		wp_register_script( 'select2', '//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js', array( 'jquery' ), '3.5.2' );
+		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
+		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
+			'ajax_url'              => admin_url( 'admin-ajax.php' ),
+			'search_products_nonce' => wp_create_nonce( 'search-products' )
+		) );
 
 		// Accounting
-		$params = array(
+		wp_localize_script( 'accounting', 'accounting_params', array(
 			'mon_decimal_point' => get_option( 'woocommerce_price_decimal_sep' )
-		);
-
-		wp_localize_script( 'accounting', 'accounting_params', $params );
+		) );
 
 		// WooCommerce admin pages
 		if ( in_array( $screen->id, wc_get_screen_ids() ) ) {

@@ -96,45 +96,34 @@ class WC_Meta_Box_Coupon_Data {
 
 				// Product ids
 				?>
-				<p class="form-field"><label for="product_ids"><?php _e( 'Products', 'woocommerce' ); ?></label>
-				<select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
-					<?php
-						$product_ids = get_post_meta( $post->ID, 'product_ids', true );
+				<p class="form-field"><label><?php _e( 'Products', 'woocommerce' ); ?></label>
+				<input type="hidden" class="wc-product-search" style="width: 50%;" name="product_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
+					$product_ids = array_filter( array_map( 'absint', explode( ',', get_post_meta( $post->ID, 'product_ids', true ) ) ) );
+					$json_ids    = array();
 
-						if ( $product_ids ) {
-							$product_ids = array_map( 'absint', explode( ',', $product_ids ) );
+					foreach ( $product_ids as $product_id ) {
+						$product = wc_get_product( $product_id );
+						$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+					}
 
-							foreach ( $product_ids as $product_id ) {
-
-								$product = wc_get_product( $product_id );
-
-								echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . wp_kses_post( $product->get_formatted_name() ) . '</option>';
-							}
-						}
-					?>
-				</select> <img class="help_tip" data-tip='<?php _e( 'Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce' ); ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
+					echo esc_attr( json_encode( $json_ids ) );
+				?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce' ); ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 				<?php
 
 				// Exclude Product ids
 				?>
-				<p class="form-field"><label for="exclude_product_ids"><?php _e( 'Exclude products', 'woocommerce' ); ?></label>
-				<select id="exclude_product_ids" name="exclude_product_ids[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product…', 'woocommerce' ); ?>">
-					<?php
-						$product_ids = get_post_meta( $post->ID, 'exclude_product_ids', true );
+				<p class="form-field"><label><?php _e( 'Exclude products', 'woocommerce' ); ?></label>
+				<input type="hidden" class="wc-product-search" style="width: 50%;" name="exclude_product_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
+					$product_ids = array_filter( array_map( 'absint', explode( ',', get_post_meta( $post->ID, 'exclude_product_ids', true ) ) ) );
+					$json_ids    = array();
 
-						if ( $product_ids ) {
+					foreach ( $product_ids as $product_id ) {
+						$product = wc_get_product( $product_id );
+						$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+					}
 
-							$product_ids = array_map( 'absint', explode( ',', $product_ids ) );
-
-							foreach ( $product_ids as $product_id ) {
-
-								$product = wc_get_product( $product_id );
-
-								echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . wp_kses_post( $product->get_formatted_name() ) . '</option>';
-							}
-						}
-					?>
-				</select> <img class="help_tip" data-tip='<?php _e( 'Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce' ); ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
+					echo esc_attr( json_encode( $json_ids ) );
+				?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce' ); ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 				<?php
 
 				echo '</div><div class="options_group">';
@@ -142,11 +131,10 @@ class WC_Meta_Box_Coupon_Data {
 				// Categories
 				?>
 				<p class="form-field"><label for="product_categories"><?php _e( 'Product categories', 'woocommerce' ); ?></label>
-				<select id="product_categories" name="product_categories[]" class="chosen_select" multiple="multiple" data-placeholder="<?php _e( 'Any category', 'woocommerce' ); ?>">
+				<select id="product_categories" name="product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php _e( 'Any category', 'woocommerce' ); ?>">
 					<?php
 						$category_ids = (array) get_post_meta( $post->ID, 'product_categories', true );
-
-						$categories = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
+						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
 						if ( $categories ) foreach ( $categories as $cat ) {
 							echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
@@ -158,11 +146,10 @@ class WC_Meta_Box_Coupon_Data {
 				// Exclude Categories
 				?>
 				<p class="form-field"><label for="exclude_product_categories"><?php _e( 'Exclude categories', 'woocommerce' ); ?></label>
-				<select id="exclude_product_categories" name="exclude_product_categories[]" class="chosen_select" multiple="multiple" data-placeholder="<?php _e( 'No categories', 'woocommerce' ); ?>">
+				<select id="exclude_product_categories" name="exclude_product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php _e( 'No categories', 'woocommerce' ); ?>">
 					<?php
 						$category_ids = (array) get_post_meta( $post->ID, 'exclude_product_categories', true );
-
-						$categories = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
+						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
 						if ( $categories ) foreach ( $categories as $cat ) {
 							echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
@@ -253,18 +240,8 @@ class WC_Meta_Box_Coupon_Data {
 		$minimum_amount         = wc_format_decimal( $_POST['minimum_amount'] );
 		$maximum_amount         = wc_format_decimal( $_POST['maximum_amount'] );
 		$customer_email         = array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) );
-
-		if ( isset( $_POST['product_ids'] ) ) {
-			$product_ids = implode( ',', array_filter( array_map( 'intval', (array) $_POST['product_ids'] ) ) );
-		} else {
-			$product_ids = '';
-		}
-
-		if ( isset( $_POST['exclude_product_ids'] ) ) {
-			$exclude_product_ids = implode( ',', array_filter( array_map( 'intval', (array) $_POST['exclude_product_ids'] ) ) );
-		} else {
-			$exclude_product_ids = '';
-		}
+		$product_ids            = implode( ',', array_filter( array_map( 'intval', explode( ',', $_POST['product_ids'] ) ) ) );
+		$exclude_product_ids    = implode( ',', array_filter( array_map( 'intval', explode( ',', $_POST['exclude_product_ids'] ) ) ) );
 
 		$product_categories         = isset( $_POST['product_categories'] ) ? array_map( 'intval', $_POST['product_categories'] ) : array();
 		$exclude_product_categories = isset( $_POST['exclude_product_categories'] ) ? array_map( 'intval', $_POST['exclude_product_categories'] ) : array();
