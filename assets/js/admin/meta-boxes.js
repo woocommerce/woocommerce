@@ -48,64 +48,6 @@ jQuery( function ( $ ) {
 	});
 	$('ul.wc-tabs li:visible').eq(0).find('a').click();
 
-
-	/**
-	 * Load Chosen for select products and variations
-	 *
-	 * @return {void}
-	 */
-	function loadSelectProductAndVariation() {
-		/*$( 'select.ajax_chosen_select_products_and_variations' ).ajaxChosen({
-			method:         'GET',
-			url:            woocommerce_admin_meta_boxes.ajax_url,
-			dataType:       'json',
-			afterTypeDelay: 100,
-			data:           {
-				action:   'woocommerce_json_search_products_and_variations',
-				security: woocommerce_admin_meta_boxes.search_products_nonce
-			}
-		},
-		function ( data ) {
-			var terms = {};
-
-			$.each(data, function ( i, val ) {
-				terms[i] = val;
-			});
-
-			return terms;
-		});*/
-	}
-
-	// Run on document load
-	//loadSelectProductAndVariation();
-
-	// Load chosen inside WC Backbone Modal
-	$( 'body' ).on( 'wc_backbone_modal_loaded', function ( e, target ) {
-		if ( '#wc-modal-add-products' === target ) {
-			loadSelectProductAndVariation();
-		}
-	});
-
-	/*jQuery("select.ajax_chosen_select_downloadable_products_and_variations").ajaxChosen({
-		method: 	'GET',
-		url: 		woocommerce_admin_meta_boxes.ajax_url,
-		dataType: 	'json',
-		afterTypeDelay: 100,
-		data:		{
-			action: 		'woocommerce_json_search_downloadable_products_and_variations',
-			security: 		woocommerce_admin_meta_boxes.search_products_nonce
-		}
-	}, function (data) {
-
-		var terms = {};
-
-		$.each(data, function (i, val) {
-			terms[i] = val;
-		});
-
-		return terms;
-	});*/
-
 	$( ".date-picker" ).datepicker({
 		dateFormat: "yy-mm-dd",
 		numberOfMonths: 1,

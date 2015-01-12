@@ -5,6 +5,19 @@ jQuery( function( $ ) {
 		return false;
 	}
 
+
+
+	/*
+	// Frontend Chosen selects
+	$( 'select.country_select, select.state_select' ).chosen( { search_contains: true } );
+
+	$( 'body' ).bind( 'country_to_state_changed', function() {
+		$( 'select.state_select' ).chosen().trigger( 'chosen:updated' );
+	});
+	 */
+
+
+
 	/* State/Country select boxes */
 	var states_json = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
 		states = $.parseJSON( states_json );

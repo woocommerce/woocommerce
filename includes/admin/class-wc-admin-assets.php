@@ -96,7 +96,7 @@ class WC_Admin_Assets {
 
 		// Select2 is the replacement for chosen
 		wp_register_script( 'select2', '//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js', array( 'jquery' ), '3.5.2' );
-		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
+		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
 		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
 			'ajax_url'               => admin_url( 'admin-ajax.php' ),
 			'search_products_nonce'  => wp_create_nonce( 'search-products' ),
