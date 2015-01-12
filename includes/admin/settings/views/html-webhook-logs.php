@@ -9,9 +9,9 @@ $total          = $count_comments->approved;
 
 ?>
 
-<?php echo WC_Meta_Box_Webhook_Logs::get_navigation( $total ); ?>
+<?php echo $this->get_logs_navigation( $total, $webhook ); ?>
 
-<table id="webhook-logs" class="widefat">
+<table id="webhook-logs-table" class="widefat">
 	<thead>
 		<tr>
 			<th><?php _e( 'Date', 'woocommerce' ); ?></th>
@@ -39,4 +39,4 @@ $total          = $count_comments->approved;
 	</tbody>
 </table>
 
-<?php echo WC_Meta_Box_Webhook_Logs::get_navigation( $total ); ?>
+<?php echo $this->get_logs_navigation( $total, $webhook ); ?>
