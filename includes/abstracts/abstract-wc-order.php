@@ -959,7 +959,7 @@ abstract class WC_Abstract_Order {
 
 		if ( ! $this->formatted_shipping_address ) {
 
-			if ( $this->shipping_address_1 ) {
+			if ( $this->shipping_address_1 || $this->shipping_address_2 ) {
 
 				// Formatted Addresses
 				$address = apply_filters( 'woocommerce_order_formatted_shipping_address', array(
@@ -990,7 +990,7 @@ abstract class WC_Abstract_Order {
 
 		if ( ! $this->shipping_address ) {
 
-			if ( $this->shipping_address_1 ) {
+			if ( $this->shipping_address_1 || $this->shipping_address_2 ) {
 
 				// Formatted Addresses
 				$address = array(
