@@ -156,7 +156,7 @@ class WC_Meta_Box_Webhook_Data {
 					woocommerce_wp_text_input( array(
 						'id'          => 'secret',
 						'label'       => __( 'Secret', 'woocommerce' ),
-						'description' => __( 'The a Secret Key is used to generate a hash of the delivered webhook and provided in the request headers. This will default to the current API user\'s consumer secret if not provided.', 'woocommerce' ),
+						'description' => __( 'The Secret Key is used to generate a hash of the delivered webhook and provided in the request headers. This will default to the current API user\'s consumer secret if not provided.', 'woocommerce' ),
 						'desc_tip'    => true,
 						'value'       => $webhook->get_secret()
 					) );
