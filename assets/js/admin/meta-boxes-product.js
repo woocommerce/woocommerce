@@ -252,9 +252,6 @@ jQuery( function( $ ){
 
 	// ATTRIBUTE TABLES
 
-	// Multiselect attributes
-	$(".product_attributes select.multiselect").chosen();
-
 	// Initial order
 	var woocommerce_attribute_items = $('.product_attributes').find('.woocommerce_attribute').get();
 
@@ -299,7 +296,7 @@ jQuery( function( $ ){
 				$wrapper.find( '.enable_variation' ).hide();
 			}
 
-			$wrapper.find( 'select.multiselect' ).chosen();
+			$('body').trigger( 'wc-enhanced-select-init' );
 			attribute_row_indexes();
 			$wrapper.unblock();
 		});
@@ -318,13 +315,13 @@ jQuery( function( $ ){
 
 	$('.product_attributes').on('click', 'button.select_all_attributes', function(){
 		$(this).closest('td').find('select option').attr("selected","selected");
-		$(this).closest('td').find('select').trigger("chosen:updated");
+		$(this).closest('td').find('select').change();
 		return false;
 	});
 
 	$('.product_attributes').on('click', 'button.select_no_attributes', function(){
 		$(this).closest('td').find('select option').removeAttr("selected");
-		$(this).closest('td').find('select').trigger("chosen:updated");
+		$(this).closest('td').find('select').change();
 		return false;
 	});
 
@@ -392,7 +389,7 @@ jQuery( function( $ ){
 				} else if ( response.slug ) {
 					// Success
 					$wrapper.find('select.attribute_values').append('<option value="' + response.slug + '" selected="selected">' + response.name + '</option>');
-					$wrapper.find('select.attribute_values').trigger("chosen:updated");
+					$wrapper.find('select.attribute_values').change();
 				}
 
 				$('.product_attributes').unblock();

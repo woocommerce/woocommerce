@@ -27,7 +27,7 @@
 						<?php if ( $attribute['is_taxonomy'] ) : ?>
 							<?php if ( 'select' === $attribute_taxonomy->attribute_type ) : ?>
 
-								<select multiple="multiple" data-placeholder="<?php _e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values" name="attribute_values[<?php echo $i; ?>][]">
+								<select multiple="multiple" data-placeholder="<?php _e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-enhanced-select" name="attribute_values[<?php echo $i; ?>][]">
 									<?php
 									$all_terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
 									if ( $all_terms ) {
