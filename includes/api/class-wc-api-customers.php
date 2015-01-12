@@ -151,6 +151,7 @@ class WC_API_Customers extends WC_API_Resource {
 						AND   meta.meta_value = {$customer->ID}
 						AND   posts.post_type = 'shop_order'
 						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
+						ORDER BY posts.ID DESC
 					" );
 
 		$customer_data = array(
@@ -162,8 +163,8 @@ class WC_API_Customers extends WC_API_Resource {
 			'username'         => $customer->user_login,
 			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
 			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
-			'orders_count'     => (int) $customer->_order_count,
-			'total_spent'      => wc_format_decimal( $customer->_money_spent, 2 ),
+			'orders_count'     => wc_get_customer_order_count( $customer->ID ),
+			'total_spent'      => wc_format_decimal( wc_get_customer_total_spent( $customer->ID ), 2 ),
 			'avatar_url'       => $this->get_avatar_url( $customer->customer_email ),
 			'billing_address'  => array(
 				'first_name' => $customer->billing_first_name,
