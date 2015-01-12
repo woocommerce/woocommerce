@@ -13,6 +13,14 @@ jQuery( function( $ ) {
 				});
 			});
 
+			$(":input.wc-enhanced-select-nostd, :input.chosen_select_nostd").each(function() {
+				$( this ).select2({
+					minimumResultsForSearch: 10,
+					allowClear:  true,
+					placeholder: $( this ).data( 'placeholder' )
+				});
+			});
+
 			// Ajax product search box
 			$(":input.wc-product-search").each(function() {
 				var select2_args = {

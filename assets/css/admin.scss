@@ -2002,6 +2002,11 @@ img.help_tip {
 	table.form-table {
 		margin: 0 0 0;
 
+		.select2-container {
+			display: block;
+			max-width: 350px;
+		}
+
 		.forminp-radio ul {
 			margin: 0;
 			li {

@@ -34,7 +34,7 @@ return array(
 	'countries' => array(
 		'title' 		=> __( 'Specific Countries', 'woocommerce' ),
 		'type' 			=> 'multiselect',
-		'class'			=> 'chosen_select',
+		'class'			=> 'wc-enhanced-select',
 		'css'			=> 'width: 450px;',
 		'default' 		=> '',
 		'options'		=> WC()->countries->get_shipping_countries(),
