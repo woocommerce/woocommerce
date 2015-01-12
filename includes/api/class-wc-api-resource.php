@@ -195,7 +195,7 @@ class WC_API_Resource {
 		// resource page
 		$args['paged'] = ( isset( $request_args['page'] ) ) ? absint( $request_args['page'] ) : 1;
 
-		$args = apply_filters( 'woocommerce_api_query_args', $args );
+		$args = apply_filters( 'woocommerce_api_query_args', $args, $request_args );
 
 		return array_merge( $base_args, $args );
 	}
