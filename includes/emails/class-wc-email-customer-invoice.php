@@ -180,7 +180,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'type' 			=> 'select',
 				'description' 	=> __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default' 		=> 'html',
-				'class'			=> 'email_type',
+				'class'			=> 'email_type wc-enhanced-select',
 				'options'		=> array(
 					'plain' 		=> __( 'Plain text', 'woocommerce' ),
 					'html' 			=> __( 'HTML', 'woocommerce' ),

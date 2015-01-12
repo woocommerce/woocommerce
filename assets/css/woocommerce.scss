@@ -1286,9 +1286,12 @@ p.demo_store {
 				box-shadow: none;
 			}
 
+			.select2-container {
+				width: 100%;
+			}
+
 			&.woocommerce-invalid {
-				.chosen-single,
-				.chosen-drop,
+				.select2-container,
 				input.input-text,
 				select {
 					border-color: $red;
@@ -1296,8 +1299,7 @@ p.demo_store {
 			}
 
 			&.woocommerce-validated {
-				.chosen-single,
-				.chosen-drop,
+				.select2-container,
 				input.input-text,
 				select {
 					border-color: $green - #111;
@@ -1514,6 +1516,10 @@ p.demo_store {
 			right: -1px;
 		}
 	}
+}
+
+.select2-results {
+	line-height: 1.5em;
 }
 
 /**

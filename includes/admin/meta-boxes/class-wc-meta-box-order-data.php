@@ -191,7 +191,7 @@ class WC_Meta_Box_Order_Data {
 						</p>
 
 						<p class="form-field form-field-wide"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?></label>
-						<select id="order_status" name="order_status" class="chosen_select">
+						<select id="order_status" name="order_status" class="wc-enhanced-select">
 							<?php
 								$statuses = wc_get_order_statuses();
 								foreach ( $statuses as $status => $status_name ) {
@@ -202,15 +202,16 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?></label>
-							<select id="customer_user" name="customer_user" class="ajax_chosen_select_customer">
-								<option value=""><?php _e( 'Guest', 'woocommerce' ) ?></option>
-								<?php
-									if ( $order->customer_user ) {
-										$user = get_user_by( 'id', $order->customer_user );
-										echo '<option value="' . esc_attr( $user->ID ) . '" ' . selected( 1, 1, false ) . '>' . esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')</option>';
-									}
-								?>
-							</select>
+							<?php
+							$user_string = '';
+							$user_id     = '';
+							if ( ! empty( $order->customer_user ) ) {
+								$user_id     = absint( $order->customer_user );
+								$user        = get_user_by( 'id', $user_id );
+								$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
+							}
+							?>
+							<input type="hidden" class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php _e( 'Guest', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
 						</p>
 
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
@@ -367,30 +368,6 @@ class WC_Meta_Box_Order_Data {
 			</div>
 		</div>
 		<?php
-
-		// Ajax Chosen Customer Selectors JS
-		wc_enqueue_js( "
-			jQuery( 'select.ajax_chosen_select_customer' ).ajaxChosen({
-				method:         'GET',
-				url:            '" . admin_url( 'admin-ajax.php' ) . "',
-				dataType:       'json',
-				afterTypeDelay: 100,
-				minTermLength:  1,
-				data:           {
-					action:   'woocommerce_json_search_customers',
-					security: '" . wp_create_nonce( 'search-customers' ) . "'
-				}
-			}, function ( data ) {
-
-				var terms = {};
-
-				$.each( data, function ( i, val ) {
-					terms[i] = val;
-				});
-
-				return terms;
-			});
-		" );
 	}
 
 	/**

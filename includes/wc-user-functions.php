@@ -465,3 +465,57 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 	return $downloads;
 }
+
+/**
+ * Get total spent by customer
+ * @param  int $user_id
+ * @return string
+ */
+function wc_get_customer_total_spent( $user_id ) {
+	if ( ! $spent = get_user_meta( $user_id, '_money_spent', true ) ) {
+		global $wpdb;
+
+		$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
+			FROM $wpdb->posts as posts
+
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+			LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
+
+			WHERE   meta.meta_key       = '_customer_user'
+			AND     meta.meta_value     = $user_id
+			AND     posts.post_type     IN ('" . implode( "','", wc_get_order_types( 'reports' ) ) . "')
+			AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
+			AND     meta2.meta_key      = '_order_total'
+		" );
+
+		update_user_meta( $user_id, '_money_spent', $spent );
+	}
+
+	return $spent;
+}
+
+/**
+ * Get total orders by customer
+ * @param  int $user_id
+ * @return int
+ */
+function wc_get_customer_order_count( $user_id ) {
+	if ( ! $count = get_user_meta( $user_id, '_order_count', true ) ) {
+		global $wpdb;
+
+		$count = $wpdb->get_var( "SELECT COUNT(*)
+			FROM $wpdb->posts as posts
+
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+
+			WHERE   meta.meta_key       = '_customer_user'
+			AND     posts.post_type     IN ('" . implode( "','", wc_get_order_types( 'order-count' ) ) . "')
+			AND     posts.post_status   IN ('" . implode( "','", array_keys( wc_get_order_statuses() ) )  . "')
+			AND     meta_value          = $user_id
+		" );
+
+		update_user_meta( $user_id, '_order_count', absint( $count ) );
+	}
+
+	return absint( $count );
+}

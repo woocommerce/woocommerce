@@ -25,7 +25,7 @@ return array(
 		'title' 		=> __( 'Availability', 'woocommerce' ),
 		'type' 			=> 'select',
 		'default' 		=> 'all',
-		'class'			=> 'availability',
+		'class'			=> 'availability wc-enhanced-select',
 		'options'		=> array(
 			'all' 		=> __( 'All allowed countries', 'woocommerce' ),
 			'specific' 	=> __( 'Specific Countries', 'woocommerce' ),
@@ -34,7 +34,7 @@ return array(
 	'countries' => array(
 		'title' 		=> __( 'Specific Countries', 'woocommerce' ),
 		'type' 			=> 'multiselect',
-		'class'			=> 'chosen_select',
+		'class'			=> 'wc-enhanced-select',
 		'css'			=> 'width: 450px;',
 		'default' 		=> '',
 		'options'		=> WC()->countries->get_shipping_countries(),
@@ -45,6 +45,7 @@ return array(
 	'tax_status' => array(
 		'title' 		=> __( 'Tax Status', 'woocommerce' ),
 		'type' 			=> 'select',
+		'class'         => 'wc-enhanced-select',
 		'default' 		=> 'taxable',
 		'options'		=> array(
 			'taxable' 	=> __( 'Taxable', 'woocommerce' ),
@@ -67,6 +68,7 @@ return array(
 	'type' => array(
 		'title' 		=> __( 'Costs Added...', 'woocommerce' ),
 		'type' 			=> 'select',
+		'class'         => 'wc-enhanced-select',
 		'default' 		=> 'order',
 		'options' 		=> array(
 			'order' 	=> __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),

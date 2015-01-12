@@ -1494,7 +1494,7 @@ class WC_Admin_Post_Types {
 	 */
 	public function shop_coupon_filters() {
 		?>
-		<select name='coupon_type' id='dropdown_shop_coupon_type'>
+		<select name="coupon_type" id="dropdown_shop_coupon_type">
 			<option value=""><?php _e( 'Show all types', 'woocommerce' ); ?></option>
 			<?php
 				$types = wc_get_coupon_types();
@@ -1508,56 +1508,24 @@ class WC_Admin_Post_Types {
 					echo '>' . esc_html__( $type, 'woocommerce' ) . '</option>';
 				}
 			?>
-			</select>
+		</select>
 		<?php
-
-		wc_enqueue_js( "
-			jQuery('select#dropdown_shop_coupon_type, select[name=m]').css('width', '150px').chosen();
-		" );
 	}
 
 	/**
 	 * Show custom filters to filter orders by status/customer.
 	 */
 	public function shop_order_filters() {
-		// Customers
+		$user_string = '';
+		$user_id     = '';
+		if ( ! empty( $_GET['_customer_user'] ) ) {
+			$user_id     = absint( $_GET['_customer_user'] );
+			$user        = get_user_by( 'id', $user_id );
+			$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
+		}
 		?>
-		<select id="dropdown_customers" name="_customer_user">
-			<option value=""><?php _e( 'Show all customers', 'woocommerce' ) ?></option>
-			<?php
-				if ( ! empty( $_GET['_customer_user'] ) ) {
-					$user = get_user_by( 'id', absint( $_GET['_customer_user'] ) );
-					echo '<option value="' . absint( $user->ID ) . '" ';
-					selected( 1, 1 );
-					echo '>' . esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')</option>';
-				}
-			?>
-		</select>
+		<input type="hidden" class="wc-customer-search" name="_customer_user" data-placeholder="<?php _e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
 		<?php
-
-		wc_enqueue_js( "
-			jQuery( 'select#dropdown_customers' ).css( 'width', '250px' ).ajaxChosen( {
-				method:         'GET',
-				url:            '" . admin_url( 'admin-ajax.php' ) . "',
-				dataType:       'json',
-				afterTypeDelay: 100,
-				minTermLength:  1,
-				data: {
-					action:     'woocommerce_json_search_customers',
-					security:   '" . wp_create_nonce( 'search-customers' ) . "',
-					default:    '" . __( 'Show all customers', 'woocommerce' ) . "'
-				}
-			}, function( data ) {
-
-				var terms = {};
-
-				$.each( data, function(i, val) {
-					terms[i] = val;
-				} );
-
-				return terms;
-			} );
-		" );
 	}
 
 	/**
@@ -1853,6 +1821,7 @@ class WC_Admin_Post_Types {
 				}
 
 				delete_transient( 'woocommerce_processing_order_count' );
+				wc_delete_shop_order_transients( $id );
 			}
 
 		}
@@ -1887,6 +1856,7 @@ class WC_Admin_Post_Types {
 				}
 
 				delete_transient( 'woocommerce_processing_order_count' );
+				wc_delete_shop_order_transients( $id );
 			}
 		}
 	}

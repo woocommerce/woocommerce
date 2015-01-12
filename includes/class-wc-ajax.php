@@ -1639,9 +1639,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$default = isset( $_GET['default'] ) ? $_GET['default'] : __( 'Guest', 'woocommerce' );
-
-		$found_customers = array( '' => $default );
+		$found_customers = array();
 
 		add_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
 

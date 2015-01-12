@@ -382,7 +382,7 @@ class WC_Product {
 
 		$return = false;
 
-		if ( 'yes' == $this->sold_individually || ( ! $this->backorders_allowed() && $this->get_stock_quantity() == 1 ) ) {
+		if ( 'yes' == $this->sold_individually ) {
 			$return = true;
 		}
 

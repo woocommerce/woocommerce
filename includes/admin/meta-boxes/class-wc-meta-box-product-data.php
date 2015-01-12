@@ -474,44 +474,30 @@ class WC_Meta_Box_Product_Data {
 				<div class="options_group">
 
 				<p class="form-field"><label for="upsell_ids"><?php _e( 'Up-Sells', 'woocommerce' ); ?></label>
-				<select id="upsell_ids" name="upsell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
-					<?php
-						$upsell_ids = get_post_meta( $post->ID, '_upsell_ids', true );
-						$product_ids = ! empty( $upsell_ids ) ? array_map( 'absint',  $upsell_ids ) : null;
+				<input type="hidden" class="wc-product-search" style="width: 50%;" id="upsell_ids" name="upsell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-multiple="true" data-selected="<?php
+					$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_upsell_ids', true ) ) );
+					$json_ids    = array();
 
-						if ( $product_ids ) {
+					foreach ( $product_ids as $product_id ) {
+						$product = wc_get_product( $product_id );
+						$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+					}
 
-							foreach ( $product_ids as $product_id ) {
-
-								$product = wc_get_product( $product_id );
-
-								if ( $product ) {
-									echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product->get_formatted_name() ) . '</option>';
-								}
-							}
-						}
-					?>
-				</select> <img class="help_tip" data-tip='<?php _e( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
+					echo esc_attr( json_encode( $json_ids ) );
+				?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 
 				<p class="form-field"><label for="crosssell_ids"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
-				<select id="crosssell_ids" name="crosssell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
-					<?php
-						$crosssell_ids = get_post_meta( $post->ID, '_crosssell_ids', true );
-						$product_ids = ! empty( $crosssell_ids ) ? array_map( 'absint',  $crosssell_ids ) : null;
+				<input type="hidden" class="wc-product-search" style="width: 50%;" id="crosssell_ids" name="crosssell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-multiple="true" data-selected="<?php
+					$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_crosssell_ids', true ) ) );
+					$json_ids    = array();
 
-						if ( $product_ids ) {
+					foreach ( $product_ids as $product_id ) {
+						$product = wc_get_product( $product_id );
+						$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+					}
 
-							foreach ( $product_ids as $product_id ) {
-
-								$product = wc_get_product( $product_id );
-
-								if ( $product ) {
-									echo '<option value="' . esc_attr( $product_id ) . '" selected="selected">' . esc_html( $product->get_formatted_name() ) . '</option>';
-								}
-							}
-						}
-					?>
-				</select> <img class="help_tip" data-tip='<?php _e( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
+					echo esc_attr( json_encode( $json_ids ) );
+				?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 
 				</div>
 
@@ -1210,39 +1196,12 @@ class WC_Meta_Box_Product_Data {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 		}
 
-		// Upsells
-		if ( isset( $_POST['upsell_ids'] ) ) {
-			$upsells = array();
-			$ids     = $_POST['upsell_ids'];
+		// Cross sells and upsells
+		$upsells    = array_filter( array_map( 'intval', explode( ',', $_POST['upsell_ids'] ) ) );
+		$crosssells = array_filter( array_map( 'intval', explode( ',', $_POST['crosssell_ids'] ) ) );
 
-			foreach ( $ids as $id ) {
-				if ( $id && $id > 0 ) {
-					$upsells[] = absint( $id );
-				}
-			}
-
-			update_post_meta( $post_id, '_upsell_ids', $upsells );
-		} else {
-			delete_post_meta( $post_id, '_upsell_ids' );
-		}
-
-		// Cross sells
-		if ( isset( $_POST['crosssell_ids'] ) ) {
-
-			$crosssells = array();
-			$ids        = $_POST['crosssell_ids'];
-
-			foreach ( $ids as $id ) {
-				if ( $id && $id > 0 ) {
-					$crosssells[] = absint( $id );
-				}
-			}
-
-			update_post_meta( $post_id, '_crosssell_ids', $crosssells );
-
-		} else {
-			delete_post_meta( $post_id, '_crosssell_ids' );
-		}
+		update_post_meta( $post_id, '_upsell_ids', $upsells );
+		update_post_meta( $post_id, '_crosssell_ids', $crosssells );
 
 		// Downloadable options
 		if ( 'yes' == $is_downloadable ) {

@@ -77,28 +77,16 @@ jQuery(window).load(function(){
 		}
 	});
 
-	// Chosen selects
-	jQuery("select.chosen_select").chosen({
-		width: '350px',
-		disable_search_threshold: 5
-	});
-
-	jQuery("select.chosen_select_nostd").chosen({
-		allow_single_deselect: 'true',
-		width: '350px',
-		disable_search_threshold: 5
-	});
-
 	// Select all/none
 	jQuery( '.woocommerce' ).on( 'click', '.select_all', function() {
 		jQuery(this).closest( 'td' ).find( 'select option' ).attr( "selected", "selected" );
-		jQuery(this).closest( 'td' ).find('select').trigger( 'chosen:updated' );
+		jQuery(this).closest( 'td' ).find('select').trigger( 'change' );
 		return false;
 	});
 
 	jQuery( '.woocommerce' ).on( 'click', '.select_none', function() {
 		jQuery(this).closest( 'td' ).find( 'select option' ).removeAttr( "selected" );
-		jQuery(this).closest( 'td' ).find('select').trigger( 'chosen:updated' );
+		jQuery(this).closest( 'td' ).find('select').trigger( 'change' );
 		return false;
 	});
 });

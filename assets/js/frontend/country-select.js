@@ -5,6 +5,23 @@ jQuery( function( $ ) {
 		return false;
 	}
 
+	// Select2 Enhancement if it exists
+	if( $().select2 ) {
+		var wc_country_select_select2 = function() {
+			$( 'select.country_select, select.state_select' ).each(function(){
+				$(this).select2({
+					minimumResultsForSearch: 10,
+					placeholder: $( this ).attr( 'placeholder' ),
+					placeholderOption: 'first'
+				});
+			});
+		};
+		wc_country_select_select2();
+		$( 'body' ).bind( 'country_to_state_changed', function() {
+			wc_country_select_select2();
+		});
+	}
+
 	/* State/Country select boxes */
 	var states_json = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
 		states = $.parseJSON( states_json );
@@ -22,7 +39,7 @@ jQuery( function( $ ) {
 		if ( states[ country ] ) {
 			if ( $.isEmptyObject( states[ country ] ) ) {
 
-				$statebox.parent().hide().find( '.chosen-container' ).remove();
+				$statebox.parent().hide().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />' );
 
 				$( 'body' ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
@@ -56,14 +73,14 @@ jQuery( function( $ ) {
 		} else {
 			if ( $statebox.is( 'select' ) ) {
 
-				$parent.show().find( '.chosen-container' ).remove();
+				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
 
 				$( 'body' ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
 
 			} else if ( $statebox.is( '.hidden' ) ) {
 
-				$parent.show().find( '.chosen-container' ).remove();
+				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
 
 				$( 'body' ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
