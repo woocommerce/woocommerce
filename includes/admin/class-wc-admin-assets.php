@@ -291,6 +291,18 @@ class WC_Admin_Assets {
 		if ( 'woocommerce_page_wc-status' === $screen->id ) {
 			wp_enqueue_script( 'zeroclipboard', WC()->plugin_url() . '/assets/js/zeroclipboard/jquery.zeroclipboard' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 		}
+
+		if ( in_array( $screen->id, array( 'user-edit', 'profile' ) ) ) {
+			wp_enqueue_script( 'wc-users', WC()->plugin_url() . '/assets/js/admin/users' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select' ), WC_VERSION, true );
+			wp_localize_script(
+				'wc-users',
+				'wc_users_params',
+				array(
+					'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+					'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
+				)
+			);
+		}
 	}
 
 	/**
