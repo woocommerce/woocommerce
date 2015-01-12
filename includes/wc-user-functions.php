@@ -473,6 +473,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
  */
 function wc_get_customer_total_spent( $user_id ) {
 	if ( ! $spent = get_user_meta( $user_id, '_money_spent', true ) ) {
+		global $wpdb;
+
 		$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
 			FROM $wpdb->posts as posts
 
@@ -499,6 +501,8 @@ function wc_get_customer_total_spent( $user_id ) {
  */
 function wc_get_customer_order_count( $user_id ) {
 	if ( ! $count = get_user_meta( $user_id, '_order_count', true ) ) {
+		global $wpdb;
+
 		$count = $wpdb->get_var( "SELECT COUNT(*)
 			FROM $wpdb->posts as posts
 
