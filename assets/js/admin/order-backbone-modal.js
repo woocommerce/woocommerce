@@ -66,7 +66,7 @@
 			}).append( this.$el );
 
 			var $content  = $( '.wc-backbone-modal-content' ).find( 'article' );
-			var content_h = $content.height();
+			var content_h = ( 0 === $content.height() ) ? 90 : $content.height();
 			var max_h     = $( window ).height() - 200;
 
 			if ( max_h > 400 ) {
@@ -102,7 +102,7 @@
 			$( 'body' ).trigger( 'wc_backbone_modal_removed', this._target );
 		},
 		addButton: function ( e ) {
-			$( 'body' ).trigger( 'wc_backbone_modal_response', this._target, this.getFormData() );
+			$( 'body' ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
 			this.closeButton( e );
 		},
 		getFormData: function () {

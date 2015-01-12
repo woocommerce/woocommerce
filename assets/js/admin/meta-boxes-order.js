@@ -991,17 +991,24 @@ jQuery( function ( $ ) {
 				}
 			},
 
-			response: function( e, target ) {
+			response: function( e, target, data ) {
 				if ( '#wc-modal-add-tax' === target ) {
-					wc_meta_boxes_order_items.backbone.add_tax();
+					var rate_id = data.add_order_tax;
+					var manual_rate_id = '';
+
+					if ( data.manual_tax_rate_id ) {
+						manual_rate_id = data.manual_tax_rate_id;
+					}
+
+					wc_meta_boxes_order_items.backbone.add_tax( rate_id, manual_rate_id );
 				}
 				if ( '#wc-modal-add-products' === target ) {
-					wc_meta_boxes_order_items.backbone.add_item();
+					wc_meta_boxes_order_items.backbone.add_item( data.add_order_items );
 				}
 			},
 
-			add_item: function() {
-				var add_item_ids = $( 'select#add_item_id' ).val();
+			add_item: function( add_item_ids ) {
+				add_item_ids = add_item_ids.split( ',' );
 
 				if ( add_item_ids ) {
 
@@ -1032,10 +1039,7 @@ jQuery( function ( $ ) {
 				}
 			},
 
-			add_tax: function() {
-				var manual_rate_id = $( '#manual_tax_rate_id' ).val();
-				var rate_id        = $( 'input[name=add_order_tax]:checked' ).val();
-
+			add_tax: function( rate_id, manual_rate_id ) {
 				if ( manual_rate_id ) {
 					rate_id = manual_rate_id;
 				}

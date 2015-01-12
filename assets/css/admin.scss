@@ -4132,3 +4132,10 @@ table.bar_chart {
 		text-align: right;
 	}
 }
+
+/**
+ * Select2
+ */
+.select2-drop {
+	z-index: 999999;
+}

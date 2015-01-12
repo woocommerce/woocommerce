@@ -299,7 +299,7 @@ if ( wc_tax_enabled() ) {
 				</header>
 				<article>
 					<form action="" method="post">
-						<input type="hidden" id="add_item_id" class="wc-product-search" style="width: 100%;" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" />
+						<input type="hidden" id="add_item_id" name="add_order_items" class="wc-product-search" style="width: 100%;" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-multiple="true" />
 					</form>
 				</article>
 				<footer>
