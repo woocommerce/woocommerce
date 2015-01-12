@@ -305,14 +305,15 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	/**
 	 * Process standard payments
 	 *
+	 * @param  WC_Order $order
+	 * @param  string   $cart_token
+	 *
 	 * @return array
 	 */
-	protected function process_standard_payments( $order ) {
-		$token = isset( $_POST['simplify_token'] ) ? wc_clean( $_POST['simplify_token'] ) : '';
-
+	protected function process_standard_payments( $order, $cart_token = '' ) {
 		try {
 
-			if ( empty( $token ) ) {
+			if ( empty( $cart_token ) ) {
 				$error_msg = __( 'Please make sure your card details have been entered correctly and that your browser supports JavaScript.', 'woocommerce' );
 
 				if ( 'yes' == $this->sandbox ) {
@@ -324,7 +325,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 			$payment = Simplify_Payment::createPayment( array(
 				'amount'              => $order->order_total * 100, // In cents
-				'token'               => $token,
+				'token'               => $cart_token,
 				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
 				'reference'           => $order->id,
@@ -384,12 +385,13 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 * @param integer $order_id
 	 */
 	public function process_payment( $order_id ) {
-		$order = wc_get_order( $order_id );
+		$cart_token = isset( $_POST['simplify_token'] ) ? wc_clean( $_POST['simplify_token'] ) : '';
+		$order      = wc_get_order( $order_id );
 
 		if ( 'hosted' == $this->mode ) {
 			return $this->process_hosted_payments( $order );
 		} else {
-			return $this->process_standard_payments( $order );
+			return $this->process_standard_payments( $order, $cart_token );
 		}
 	}
 
@@ -410,7 +412,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'receipt'      => 'false',
 			'color'        => $this->modal_color,
 			'redirect-url' => WC()->api_request_url( 'WC_Gateway_Simplify_Commerce' )
-		) );
+		), $order->id );
 
 		return $args;
 	}
