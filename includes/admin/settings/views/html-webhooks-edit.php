@@ -148,10 +148,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<td colspan="2" scope="row" style="padding-left: 0;">
 					<p class="submit">
-						<?php if ( current_user_can( 'delete_post', $webhook->id ) ) : ?>
-							<a style="color: #a00; text-decoration: none; margin-right: 10px;" href="<?php echo esc_url( get_delete_post_link( $webhook->id ) ); ?>"><?php echo ( ! EMPTY_TRASH_DAYS ) ? __( 'Delete Permanently', 'woocommerce' ) : __( 'Move to Trash', 'woocommerce' ); ?></a>
-						<?php endif; ?>
 						<input type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php _e( 'Save Webhook', 'woocommerce' ); ?>" data-tip="<?php _e( 'Save/update the Webhook', 'woocommerce' ); ?>" />
+						<?php if ( current_user_can( 'delete_post', $webhook->id ) ) : ?>
+							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( get_delete_post_link( $webhook->id ) ); ?>"><?php echo ( ! EMPTY_TRASH_DAYS ) ? __( 'Delete Permanently', 'woocommerce' ) : __( 'Move to Trash', 'woocommerce' ); ?></a>
+						<?php endif; ?>
 					</p>
 				</td>
 			</tr>
