@@ -30,7 +30,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	public function check_response() {
 		if ( ! empty( $_POST ) && $this->validate_ipn() ) {
-			$posted = stripslashes_deep( $_POST );
+			$posted = wp_unslash( $_POST );
 
 			do_action( "valid-paypal-standard-ipn-request", $posted );
 			exit;
@@ -41,7 +41,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 	/**
 	 * There was a valid response
-	 * @param  array $posted Post data after stripslashes_deep
+	 * @param  array $posted Post data after wp_unslash
 	 */
 	public function valid_response( $posted ) {
 		if ( ! empty( $posted['custom'] ) && ( $order = $this->get_paypal_order( $posted['custom'] ) ) ) {
@@ -71,7 +71,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 		// Get received values from post data
 		$validate_ipn = array( 'cmd' => '_notify-validate' );
-		$validate_ipn += stripslashes_deep( $_POST );
+		$validate_ipn += wp_unslash( $_POST );
 
 		// Send back post vars to paypal
 		$params = array(
