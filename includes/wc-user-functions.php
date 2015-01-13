@@ -462,6 +462,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				'order_id'            => $order->id,
 				'order_key'           => $order->order_key,
 				'downloads_remaining' => $result->downloads_remaining,
+				'access_expires' 	  => $result->access_expires,
 				'file'                => $download_file
 			);
 
