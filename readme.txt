@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Refactor - Removed quantity increment/decrement buttons in favour of separate plugin.
 * Feature - Added link on purchased products list on orders screen.
 * Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
+* Fix - Fix cart coupon on-sale checks for variations.
 * Tweak - Double the default product image dimensions.
 * Tweak - Added refunds to Sales by Date report.
 * Tweak - Updated prevent_caching() method to work if a cart/checkout page isn't set.
