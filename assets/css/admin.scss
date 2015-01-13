@@ -600,6 +600,12 @@ ul.wc_coupon_list_block {
 			zoom: 1;
 			padding-right: 1px;
 		}
+
+		.wc-customer-user {
+			label a {
+				float: right;
+			}
+		}
 	}
 
 	a.edit_address {

@@ -200,8 +200,19 @@ class WC_Meta_Box_Order_Data {
 							?>
 						</select></p>
 
-						<p class="form-field form-field-wide">
-							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?></label>
+						<p class="form-field form-field-wide wc-customer-user">
+							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
+								if ( ! empty( $order->customer_user ) ) {
+									$args = array( 'post_status' => 'all',
+										'post_type'      => 'shop_order',
+										'_customer_user' => absint( $order->customer_user )
+									);
+									printf( '<a href="%s">%s &rarr;</a>',
+										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
+										__( 'View other orders', 'woocommerce' )
+									);
+								}
+							?></label>
 							<?php
 							$user_string = '';
 							$user_id     = '';
@@ -213,18 +224,7 @@ class WC_Meta_Box_Order_Data {
 							?>
 							<input type="hidden" class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php _e( 'Guest', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
 						</p>
-						<?php
-						if ( $order->customer_user ) {
-							$args = array( 'post_status' => 'all',
-							'post_type' => 'shop_order',
-							'_customer_user' => absint( $user->ID )
-							);
-							printf( '<p class="form-field form-field-wide"><a href="%s">%s &rarr;</a></p>',
-								add_query_arg( $args, admin_url( 'edit.php' ) ),
-								__( 'Find all customer orders', 'woocommerce' )
-							);
-						}
-						do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
+						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 					</div>
 					<div class="order_data_column">
 						<h4><?php _e( 'Billing Details', 'woocommerce' ); ?> <a class="edit_address" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="<?php _e( 'Edit', 'woocommerce' ); ?>" width="14" /></a></h4>
