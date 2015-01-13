@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 
-<?php do_action( 'woocommerce_email_header', $email_heading ); ?>
+<?php do_action( 'woocommerce_email_header', $email_heading, 'customer_note' ); ?>
 
 <p><?php _e( "Hello, a note has just been added to your order:", 'woocommerce' ); ?></p>
 

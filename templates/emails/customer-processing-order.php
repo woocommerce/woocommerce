@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 
-<?php do_action('woocommerce_email_header', $email_heading); ?>
+<?php do_action( 'woocommerce_email_header', $email_heading, 'customer_processing_order' ); ?>
 
 <p><?php _e( "Your order has been received and is now being processed. Your order details are shown below for your reference:", 'woocommerce' ); ?></p>
 
