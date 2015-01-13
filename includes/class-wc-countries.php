@@ -865,12 +865,13 @@ class WC_Countries {
 					)
 				),
 				'VN' => array(
+					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false
 					),
 					'postcode' => array(
 						'required' 	=> false,
-						'hidden'	=> true
+						'hidden'	=> false
 					),
 					'address_2' => array(
 						'required' 	=> false,
