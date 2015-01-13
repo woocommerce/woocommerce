@@ -1,17 +1,17 @@
-# Copyright (C) 2014 WooThemes
+# Copyright (C) 2015 WooThemes
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.2.4 Frontend\n"
+"Project-Id-Version: WooCommerce 2.3-beta-1 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2014-10-02 12:55:11+00:00\n"
+"POT-Creation-Date: 2015-01-13 17:39:31+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
-"X-Generator: grunt-wp-i18n 0.4.8\n"
+"X-Generator: grunt-wp-i18n 0.4.9\n"
 
 #: i18n/countries.php:18
 msgid "Afghanistan"
@@ -2210,46 +2210,50 @@ msgid "Tamil Nadu"
 msgstr ""
 
 #: i18n/states/IN.php:37
-msgid "Tripura"
+msgid "Telangana"
 msgstr ""
 
 #: i18n/states/IN.php:38
-msgid "Uttarakhand"
+msgid "Tripura"
 msgstr ""
 
 #: i18n/states/IN.php:39
-msgid "Uttar Pradesh"
+msgid "Uttarakhand"
 msgstr ""
 
 #: i18n/states/IN.php:40
-msgid "West Bengal"
+msgid "Uttar Pradesh"
 msgstr ""
 
 #: i18n/states/IN.php:41
-msgid "Andaman and Nicobar Islands"
+msgid "West Bengal"
 msgstr ""
 
 #: i18n/states/IN.php:42
-msgid "Chandigarh"
+msgid "Andaman and Nicobar Islands"
 msgstr ""
 
 #: i18n/states/IN.php:43
-msgid "Dadar and Nagar Haveli"
+msgid "Chandigarh"
 msgstr ""
 
 #: i18n/states/IN.php:44
-msgid "Daman and Diu"
+msgid "Dadar and Nagar Haveli"
 msgstr ""
 
 #: i18n/states/IN.php:45
-msgid "Delhi"
+msgid "Daman and Diu"
 msgstr ""
 
 #: i18n/states/IN.php:46
-msgid "Lakshadeep"
+msgid "Delhi"
 msgstr ""
 
 #: i18n/states/IN.php:47
+msgid "Lakshadeep"
+msgstr ""
+
+#: i18n/states/IN.php:48
 msgid "Pondicherry (Puducherry)"
 msgstr ""
 
@@ -3018,7 +3022,7 @@ msgid "Aguascalientes"
 msgstr ""
 
 #: i18n/states/MX.php:17
-msgid "Baja California Norte"
+msgid "Baja California"
 msgstr ""
 
 #: i18n/states/MX.php:18
@@ -4604,190 +4608,53 @@ msgstr ""
 msgid "Western Cape"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:555
-#: includes/emails/class-wc-email-customer-completed-order.php:143
-#: includes/emails/class-wc-email-new-order.php:123
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:68
-#: includes/gateways/cheque/class-wc-gateway-cheque.php:54
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:126
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:207
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:171
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:77
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:66
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:51
-msgid "Enable/Disable"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:557
-#: includes/emails/class-wc-email-customer-completed-order.php:145
-#: includes/emails/class-wc-email-new-order.php:125
-msgid "Enable this email notification"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:561
-#: includes/emails/class-wc-email-customer-invoice.php:151
-msgid "Email subject"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:563
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/emails/class-wc-email-customer-completed-order.php:151
-#: includes/emails/class-wc-email-customer-completed-order.php:158
-#: includes/emails/class-wc-email-customer-completed-order.php:165
-#: includes/emails/class-wc-email-customer-completed-order.php:172
-#: includes/emails/class-wc-email-customer-invoice.php:153
-#: includes/emails/class-wc-email-customer-invoice.php:160
-#: includes/emails/class-wc-email-customer-invoice.php:167
-#: includes/emails/class-wc-email-customer-invoice.php:174
-msgid "Defaults to <code>%s</code>"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:568
-#: includes/emails/class-wc-email-customer-invoice.php:158
-msgid "Email heading"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:575
-#: includes/emails/class-wc-email-customer-completed-order.php:177
-#: includes/emails/class-wc-email-customer-invoice.php:179
-#: includes/emails/class-wc-email-new-order.php:150
-msgid "Email type"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:577
-#: includes/emails/class-wc-email-customer-completed-order.php:179
-#: includes/emails/class-wc-email-customer-invoice.php:181
-#: includes/emails/class-wc-email-new-order.php:152
-msgid "Choose which format of email to send."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:581
-#: includes/emails/class-wc-email-customer-completed-order.php:183
-#: includes/emails/class-wc-email-customer-invoice.php:185
-#: includes/emails/class-wc-email-new-order.php:156
-msgid "Plain text"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:582
-#: includes/emails/class-wc-email-customer-completed-order.php:184
-#: includes/emails/class-wc-email-customer-invoice.php:186
-#: includes/emails/class-wc-email-new-order.php:157
-msgid "HTML"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:583
-#: includes/emails/class-wc-email-customer-completed-order.php:185
-#: includes/emails/class-wc-email-customer-invoice.php:187
-#: includes/emails/class-wc-email-new-order.php:158
-msgid "Multipart"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:620
-#: includes/abstracts/abstract-wc-email.php:644
-msgid "Could not write to template file."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:676
-msgid "Template file copied to theme."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:687
-msgid "Template file deleted from theme."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:695
 #: includes/abstracts/abstract-wc-integration.php:29
-#: includes/abstracts/abstract-wc-settings-api.php:38
-#: includes/class-wc-install.php:703
+#: includes/abstracts/abstract-wc-settings-api.php:77
+#: includes/class-wc-install.php:650 includes/emails/class-wc-email.php:681
 msgid "Settings"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:707
-msgid "HTML template"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:708
-msgid "Plain text template"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:731
-msgid "Delete template file"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:734
-msgid ""
-"This template has been overridden by your theme and can be found in: "
-"<code>%s</code>."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:747
-msgid "Copy file to theme"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:750
-msgid ""
-"To override and edit this email template copy <code>%s</code> to your theme "
-"folder: <code>%s</code>."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:759
-msgid "File was not found."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:784
-msgid "View template"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:785
-msgid "Hide template"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:796
-msgid "Are you sure you want to delete this template file?"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-order.php:162
-#: includes/abstracts/abstract-wc-order.php:217
+#: includes/abstracts/abstract-wc-order.php:176
+#: includes/abstracts/abstract-wc-order.php:231
 msgid "Backordered"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1615
+#: includes/abstracts/abstract-wc-order.php:1626
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1620
-#: includes/abstracts/abstract-wc-product.php:887
-#: includes/abstracts/abstract-wc-product.php:893
-#: includes/class-wc-cart.php:1443 includes/class-wc-product-variation.php:296
+#: includes/abstracts/abstract-wc-order.php:1631
+#: includes/abstracts/abstract-wc-product.php:904
+#: includes/abstracts/abstract-wc-product.php:910
+#: includes/class-wc-cart.php:1530 includes/class-wc-product-variable.php:320
+#: includes/class-wc-product-variation.php:318
 msgid "Free!"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1682
+#: includes/abstracts/abstract-wc-order.php:1694
 msgid "Cart Subtotal:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1689
-msgid "Cart Discount:"
+#: includes/abstracts/abstract-wc-order.php:1701
+msgid "Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1696
+#: includes/abstracts/abstract-wc-order.php:1708
 msgid "Shipping:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1749
-msgid "Order Discount:"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-order.php:1756
+#: includes/abstracts/abstract-wc-order.php:1761
+#: includes/shortcodes/class-wc-shortcode-checkout.php:144
+#: templates/checkout/thankyou.php:53
 msgid "Payment Method:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1762
+#: includes/abstracts/abstract-wc-order.php:1767
 msgid "Order Total:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1782
-#: includes/wc-cart-functions.php:252
+#: includes/abstracts/abstract-wc-order.php:1787
+#: includes/wc-cart-functions.php:248
 msgid "(Includes %s)"
 msgstr ""
 
@@ -4795,100 +4662,104 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2080
+#: includes/abstracts/abstract-wc-order.php:2048
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2343
-#: includes/class-wc-ajax.php:1167 includes/class-wc-ajax.php:1168
+#: includes/abstracts/abstract-wc-order.php:2312
+msgid "Item's #%s variation #%s stock reduced from %s to %s."
+msgstr ""
+
+#: includes/abstracts/abstract-wc-order.php:2314
+#: includes/class-wc-ajax.php:1197 includes/class-wc-ajax.php:1198
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2353
+#: includes/abstracts/abstract-wc-order.php:2326
 msgid "Order item stock reduced successfully."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:275
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:260
+#: includes/abstracts/abstract-wc-payment-gateway.php:302
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:296
 msgid "Card Number"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:279
+#: includes/abstracts/abstract-wc-payment-gateway.php:306
 msgid "Expiry (MM/YY)"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:280
+#: includes/abstracts/abstract-wc-payment-gateway.php:307
 msgid "MM / YY"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:283
+#: includes/abstracts/abstract-wc-payment-gateway.php:310
 msgid "Card Code"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-payment-gateway.php:284
+#: includes/abstracts/abstract-wc-payment-gateway.php:311
 msgid "CVC"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:472
+#: includes/abstracts/abstract-wc-product.php:471
 #: includes/class-wc-product-simple.php:50
-#: includes/class-wc-product-variation.php:197
+#: includes/class-wc-product-variation.php:198
 msgid "Add to cart"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:481
+#: includes/abstracts/abstract-wc-product.php:480
 msgid "Read more"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:562
-#: includes/abstracts/abstract-wc-product.php:573
-#: includes/abstracts/abstract-wc-product.php:595
-#: includes/class-wc-ajax.php:627 includes/class-wc-product-variation.php:508
-#: includes/class-wc-product-variation.php:518
-#: includes/class-wc-product-variation.php:534
+#: includes/abstracts/abstract-wc-product.php:561
+#: includes/abstracts/abstract-wc-product.php:572
+#: includes/abstracts/abstract-wc-product.php:594
+#: includes/class-wc-ajax.php:657 includes/class-wc-product-variation.php:530
+#: includes/class-wc-product-variation.php:540
+#: includes/class-wc-product-variation.php:556
 msgid "In stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:567
-#: includes/class-wc-product-variation.php:512
+#: includes/abstracts/abstract-wc-product.php:566
+#: includes/class-wc-product-variation.php:534
 msgid "Only %s left in stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:570
-#: includes/abstracts/abstract-wc-product.php:581
-#: includes/class-wc-product-variation.php:515
-#: includes/class-wc-product-variation.php:525
+#: includes/abstracts/abstract-wc-product.php:569
+#: includes/abstracts/abstract-wc-product.php:580
+#: includes/class-wc-product-variation.php:537
+#: includes/class-wc-product-variation.php:547
 msgid "(can be backordered)"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:578
-#: includes/class-wc-product-variation.php:522
+#: includes/abstracts/abstract-wc-product.php:577
+#: includes/class-wc-product-variation.php:544
 msgid "%s in stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:590
-#: includes/class-wc-product-variation.php:531 templates/cart/cart.php:74
+#: includes/abstracts/abstract-wc-product.php:589
+#: includes/class-wc-product-variation.php:553 templates/cart/cart.php:74
 msgid "Available on backorder"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:600
-#: includes/abstracts/abstract-wc-product.php:606
-#: includes/class-wc-ajax.php:628 includes/class-wc-product-variation.php:537
-#: includes/class-wc-product-variation.php:541
+#: includes/abstracts/abstract-wc-product.php:599
+#: includes/abstracts/abstract-wc-product.php:605
+#: includes/class-wc-ajax.php:658 includes/class-wc-product-variation.php:559
+#: includes/class-wc-product-variation.php:563
 msgid "Out of stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1021
+#: includes/abstracts/abstract-wc-product.php:1056
 #: templates/single-product/rating.php:26
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1023
+#: includes/abstracts/abstract-wc-product.php:1058
 #: templates/single-product/rating.php:28
 #: templates/single-product/review.php:30
 msgid "out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1377
+#: includes/abstracts/abstract-wc-product.php:1410
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -4952,83 +4823,83 @@ msgstr ""
 msgid "The API key provided does not have write permissions"
 msgstr ""
 
-#: includes/api/class-wc-api-coupons.php:113
+#: includes/api/class-wc-api-coupons.php:115
 #: includes/api/v1/class-wc-api-coupons.php:109
 msgid "Invalid coupon ID"
 msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:161
-#: includes/api/v1/class-wc-api-coupons.php:154
+#: includes/api/v1/class-wc-api-coupons.php:153
 msgid "You do not have permission to read the coupons count"
 msgstr ""
 
-#: includes/api/class-wc-api-coupons.php:181
-#: includes/api/v1/class-wc-api-coupons.php:173
+#: includes/api/class-wc-api-coupons.php:187
+#: includes/api/v1/class-wc-api-coupons.php:172
 msgid "Invalid coupon code"
 msgstr ""
 
-#: includes/api/class-wc-api-coupons.php:201
+#: includes/api/class-wc-api-coupons.php:211
 msgid "You do not have permission to create coupons"
 msgstr ""
 
-#: includes/api/class-wc-api-coupons.php:208
-#: includes/api/class-wc-api-customers.php:343
-#: includes/api/class-wc-api-products.php:187
+#: includes/api/class-wc-api-coupons.php:218
+#: includes/api/class-wc-api-customers.php:350
+#: includes/api/class-wc-api-products.php:197
 #: includes/api/class-wc-api-server.php:418
 #: includes/api/v1/class-wc-api-server.php:407
 msgid "Missing parameter %s"
 msgstr ""
 
-#: includes/api/class-wc-api-coupons.php:223
-#: includes/api/class-wc-api-coupons.php:332
+#: includes/api/class-wc-api-coupons.php:233
+#: includes/api/class-wc-api-coupons.php:344
 msgid "The coupon code already exists"
 msgstr ""
 
-#: includes/api/class-wc-api-coupons.php:251
-#: includes/api/class-wc-api-coupons.php:344
+#: includes/api/class-wc-api-coupons.php:260
+#: includes/api/class-wc-api-coupons.php:356
 msgid "Invalid coupon type - the coupon type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-coupons.php:337
+#: includes/api/class-wc-api-coupons.php:349
 msgid "Failed to update coupon"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:210
-#: includes/api/class-wc-api-customers.php:213
+#: includes/api/class-wc-api-customers.php:211
+#: includes/api/class-wc-api-customers.php:214
 msgid "Invalid customer Email"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:231
+#: includes/api/class-wc-api-customers.php:233
 #: includes/api/v1/class-wc-api-customers.php:195
 msgid "You do not have permission to read the customers count"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:336
+#: includes/api/class-wc-api-customers.php:343
 #: includes/api/v1/class-wc-api-customers.php:211
 msgid "You do not have permission to create this customer"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:690
+#: includes/api/class-wc-api-customers.php:705
 #: includes/api/v1/class-wc-api-customers.php:461
 msgid "Invalid customer ID"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:697
+#: includes/api/class-wc-api-customers.php:712
 #: includes/api/v1/class-wc-api-customers.php:467
 msgid "Invalid customer"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:705
+#: includes/api/class-wc-api-customers.php:720
 #: includes/api/v1/class-wc-api-customers.php:474
 msgid "You do not have permission to read this customer"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:711
+#: includes/api/class-wc-api-customers.php:726
 #: includes/api/v1/class-wc-api-customers.php:479
 msgid "You do not have permission to edit this customer"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:717
+#: includes/api/class-wc-api-customers.php:732
 #: includes/api/v1/class-wc-api-customers.php:484
 msgid "You do not have permission to delete this customer"
 msgstr ""
@@ -5043,258 +4914,261 @@ msgstr ""
 msgid "The JSONP callback function is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:304
+#: includes/api/class-wc-api-orders.php:310
 #: includes/api/v1/class-wc-api-orders.php:258
 msgid "You do not have permission to read the orders count"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:346
+#: includes/api/class-wc-api-orders.php:361
 msgid "You do not have permission to create orders"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:362
-#: includes/api/class-wc-api-orders.php:498
+#: includes/api/class-wc-api-orders.php:377
+#: includes/api/class-wc-api-orders.php:513
 msgid "Customer ID is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:372
+#: includes/api/class-wc-api-orders.php:387
 msgid "Cannot create order: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:406
+#: includes/api/class-wc-api-orders.php:421
 msgid "Payment method ID and title are required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:422
-#: includes/api/class-wc-api-orders.php:569
+#: includes/api/class-wc-api-orders.php:437
+#: includes/api/class-wc-api-orders.php:584
 msgid "Provided order currency is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:524
+#: includes/api/class-wc-api-orders.php:539
 msgid "Order item ID is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:795
+#: includes/api/class-wc-api-orders.php:810
 msgid "Order item ID provided is not associated with order"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:817
+#: includes/api/class-wc-api-orders.php:832
 msgid "Product ID is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:827
+#: includes/api/class-wc-api-orders.php:842
 msgid "Product ID provided does not match this line item"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:835
+#: includes/api/class-wc-api-orders.php:850
 msgid "Product is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:840
+#: includes/api/class-wc-api-orders.php:855
 msgid "Product quantity must be a positive float"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:845
+#: includes/api/class-wc-api-orders.php:860
 msgid "Product quantity is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:859
+#: includes/api/class-wc-api-orders.php:874
 msgid "The product variation is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:890
+#: includes/api/class-wc-api-orders.php:905
 msgid "Cannot create line item, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:898
+#: includes/api/class-wc-api-orders.php:913
 msgid "Cannot update line item, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:916
+#: includes/api/class-wc-api-orders.php:931
 msgid "Shipping total must be a positive amount"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:923
+#: includes/api/class-wc-api-orders.php:938
 msgid "Shipping method ID is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:931
+#: includes/api/class-wc-api-orders.php:946
 msgid "Cannot create shipping method, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:953
+#: includes/api/class-wc-api-orders.php:968
 msgid "Cannot update shipping method, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:973
+#: includes/api/class-wc-api-orders.php:988
 msgid "Fee title is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:985
+#: includes/api/class-wc-api-orders.php:1000
 msgid "Fee tax class is required when fee is taxable"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:996
+#: includes/api/class-wc-api-orders.php:1021
 msgid "Cannot create fee, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1022
+#: includes/api/class-wc-api-orders.php:1047
 msgid "Cannot update fee, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1040
+#: includes/api/class-wc-api-orders.php:1065
 msgid "Coupon discount total must be a positive amount"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1047
+#: includes/api/class-wc-api-orders.php:1072
 msgid "Coupon code is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1053
+#: includes/api/class-wc-api-orders.php:1078
 msgid "Cannot create coupon, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1071
+#: includes/api/class-wc-api-orders.php:1096
 msgid "Cannot update coupon, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1136
-#: includes/api/class-wc-api-orders.php:1230
-#: includes/api/class-wc-api-orders.php:1289
+#: includes/api/class-wc-api-orders.php:1161
+#: includes/api/class-wc-api-orders.php:1261
+#: includes/api/class-wc-api-orders.php:1323
 msgid "Invalid order note ID"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1142
-#: includes/api/class-wc-api-orders.php:1237
-#: includes/api/class-wc-api-orders.php:1296
+#: includes/api/class-wc-api-orders.php:1167
+#: includes/api/class-wc-api-orders.php:1268
+#: includes/api/class-wc-api-orders.php:1330
 msgid "An order note with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1169
+#: includes/api/class-wc-api-orders.php:1197
 msgid "You do not have permission to create order notes"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1175
-#: includes/api/class-wc-api-orders.php:1449
+#: includes/api/class-wc-api-orders.php:1203
+#: includes/api/class-wc-api-orders.php:1486
 msgid "Order ID is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1184
+#: includes/api/class-wc-api-orders.php:1212
 msgid "Order note is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1193
+#: includes/api/class-wc-api-orders.php:1221
 msgid "Cannot create order note, please try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1242
-#: includes/api/class-wc-api-orders.php:1301
+#: includes/api/class-wc-api-orders.php:1273
+#: includes/api/class-wc-api-orders.php:1335
 msgid "The order note ID provided is not associated with the order"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1311
-msgid "Permanently deleted order note"
-msgstr ""
-
-#: includes/api/class-wc-api-orders.php:1315
+#: includes/api/class-wc-api-orders.php:1342
 msgid "This order note cannot be deleted"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1374
-#: includes/api/class-wc-api-orders.php:1522
-#: includes/api/class-wc-api-orders.php:1578
+#: includes/api/class-wc-api-orders.php:1347
+msgid "Permanently deleted order note"
+msgstr ""
+
+#: includes/api/class-wc-api-orders.php:1408
+#: includes/api/class-wc-api-orders.php:1562
+#: includes/api/class-wc-api-orders.php:1621
 msgid "Invalid order refund ID"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1381
-#: includes/api/class-wc-api-orders.php:1529
-#: includes/api/class-wc-api-orders.php:1585
+#: includes/api/class-wc-api-orders.php:1415
+#: includes/api/class-wc-api-orders.php:1569
+#: includes/api/class-wc-api-orders.php:1628
 msgid "An order refund with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1443
+#: includes/api/class-wc-api-orders.php:1480
 msgid "You do not have permission to create order refunds"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1456
+#: includes/api/class-wc-api-orders.php:1493
 msgid "Refund amount is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1458
+#: includes/api/class-wc-api-orders.php:1495
 msgid "Refund amount must be positive"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1468
+#: includes/api/class-wc-api-orders.php:1505
 msgid "Cannot create order refund, please try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1485
+#: includes/api/class-wc-api-orders.php:1522
 msgid ""
 "An error occurred while attempting to create the refund using the payment "
 "gateway API"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1534
-#: includes/api/class-wc-api-orders.php:1590
+#: includes/api/class-wc-api-orders.php:1574
+#: includes/api/class-wc-api-orders.php:1633
 msgid "The order refund ID provided is not associated with the order"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:159
+#: includes/api/class-wc-api-products.php:160
 #: includes/api/v1/class-wc-api-products.php:143
 msgid "You do not have permission to read the products count"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:180
+#: includes/api/class-wc-api-products.php:190
 msgid "You do not have permission to create products"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:197
-#: includes/api/class-wc-api-products.php:293
+#: includes/api/class-wc-api-products.php:207
+#: includes/api/class-wc-api-products.php:315
 msgid "Invalid product type - the product type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:401
-#: includes/api/class-wc-api-products.php:435
+#: includes/api/class-wc-api-products.php:415
+#: includes/api/class-wc-api-products.php:451
 msgid "You do not have permission to read product categories"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:430
+#: includes/api/class-wc-api-products.php:446
 msgid "Invalid product category ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:441
+#: includes/api/class-wc-api-products.php:457
 msgid "A product category with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:691
-#: includes/api/class-wc-api-products.php:1132
+#: includes/api/class-wc-api-products.php:717
+#: includes/api/class-wc-api-products.php:1170
 msgid "The SKU already exists on another product"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1085 includes/class-wc-emails.php:334
-#: includes/class-wc-emails.php:366 includes/class-wc-emails.php:410
+#: includes/api/class-wc-api-products.php:1123
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1529
-#: includes/api/class-wc-api-products.php:1530
+#: includes/api/class-wc-api-products.php:1583
+#: includes/api/class-wc-api-products.php:1584
 #: includes/api/v1/class-wc-api-products.php:461
 #: includes/api/v1/class-wc-api-products.php:462
-#: includes/wc-product-functions.php:267
+#: includes/wc-product-functions.php:270
 #: templates/single-product/product-image.php:40
 msgid "Placeholder"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1603
+#: includes/api/class-wc-api-products.php:1658
 msgid "Invalid URL %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1615
+#: includes/api/class-wc-api-products.php:1670
 msgid "Error getting remote image %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1644
+#: includes/api/class-wc-api-products.php:1699
 msgid "Zero size file downloaded"
+msgstr ""
+
+#: includes/api/class-wc-api-products.php:1853
+msgid "Invalid product SKU"
 msgstr ""
 
 #: includes/api/class-wc-api-reports.php:472
@@ -5327,27 +5201,27 @@ msgstr ""
 msgid "You do not have permission to delete this %s"
 msgstr ""
 
-#: includes/api/class-wc-api-resource.php:345
+#: includes/api/class-wc-api-resource.php:347
 #: includes/api/v1/class-wc-api-resource.php:305
 msgid "Permanently deleted customer"
 msgstr ""
 
-#: includes/api/class-wc-api-resource.php:347
+#: includes/api/class-wc-api-resource.php:349
 #: includes/api/v1/class-wc-api-resource.php:307
 msgid "The customer cannot be deleted"
 msgstr ""
 
-#: includes/api/class-wc-api-resource.php:356
+#: includes/api/class-wc-api-resource.php:358
 #: includes/api/v1/class-wc-api-resource.php:316
 msgid "This %s cannot be deleted"
 msgstr ""
 
-#: includes/api/class-wc-api-resource.php:359
+#: includes/api/class-wc-api-resource.php:361
 #: includes/api/v1/class-wc-api-resource.php:319
 msgid "Permanently deleted %s"
 msgstr ""
 
-#: includes/api/class-wc-api-resource.php:365
+#: includes/api/class-wc-api-resource.php:367
 #: includes/api/v1/class-wc-api-resource.php:325
 msgid "Deleted %s"
 msgstr ""
@@ -5372,266 +5246,293 @@ msgstr ""
 msgid "No route was found matching the URL and request method"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:149
+#: includes/api/class-wc-api-webhooks.php:143
 msgid "You do not have permission to read the webhooks count"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:170
+#: includes/api/class-wc-api-webhooks.php:173
 msgid "You do not have permission to create webhooks"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:177
+#: includes/api/class-wc-api-webhooks.php:180
 msgid "Webhook topic is required and must be valid"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:182
-#: includes/api/class-wc-api-webhooks.php:268
+#: includes/api/class-wc-api-webhooks.php:185
+#: includes/api/class-wc-api-webhooks.php:271
 msgid "Webhook delivery URL must be a valid URL starting with http:// or https://"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:191
+#: includes/api/class-wc-api-webhooks.php:194
 msgid "Webhook created on %s"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:197
+#: includes/api/class-wc-api-webhooks.php:200
 msgid "Cannot create webhook: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:257
+#: includes/api/class-wc-api-webhooks.php:260
 msgid "Webhook topic must be valid"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:481
+#: includes/api/class-wc-api-webhooks.php:425
 msgid "Invalid webhook delivery ID"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:489
+#: includes/api/class-wc-api-webhooks.php:433
 msgid "Invalid webhook delivery"
 msgstr ""
 
-#: includes/class-wc-ajax.php:164
+#: includes/class-wc-ajax.php:133
+msgid "Sorry there was a problem removing this coupon."
+msgstr ""
+
+#: includes/class-wc-ajax.php:139
+msgid "Coupon has been removed."
+msgstr ""
+
+#: includes/class-wc-ajax.php:190
 msgid "Sorry, your session has expired."
 msgstr ""
 
-#: includes/class-wc-ajax.php:164
+#: includes/class-wc-ajax.php:190
 msgid "Return to homepage"
 msgstr ""
 
-#: includes/class-wc-ajax.php:318 includes/class-wc-ajax.php:351
-#: includes/class-wc-ajax.php:376
-msgid "You do not have sufficient permissions to access this page."
-msgstr ""
-
-#: includes/class-wc-ajax.php:322 includes/class-wc-ajax.php:355
-#: includes/class-wc-ajax.php:380
-msgid "You have taken too long. Please go back and retry."
-msgstr ""
-
-#: includes/class-wc-ajax.php:611
+#: includes/class-wc-ajax.php:641
 msgid "Same as parent"
 msgstr ""
 
-#: includes/class-wc-ajax.php:612
+#: includes/class-wc-ajax.php:642
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:212
 msgid "Standard"
 msgstr ""
 
-#: includes/class-wc-ajax.php:621
+#: includes/class-wc-ajax.php:651
 msgid "Do not allow"
 msgstr ""
 
-#: includes/class-wc-ajax.php:622
+#: includes/class-wc-ajax.php:652
 msgid "Allow, but notify customer"
 msgstr ""
 
-#: includes/class-wc-ajax.php:623
+#: includes/class-wc-ajax.php:653
 msgid "Allow"
 msgstr ""
 
-#: includes/class-wc-ajax.php:902
+#: includes/class-wc-ajax.php:932
 msgid "File %d"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1176
+#: includes/class-wc-ajax.php:1206
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1215 includes/class-wc-ajax.php:1216
-#: includes/class-wc-ajax.php:1863
+#: includes/class-wc-ajax.php:1245 includes/class-wc-ajax.php:1246
+#: includes/class-wc-ajax.php:1888
 msgid "Item #%s stock increased from %s to %s."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1223
+#: includes/class-wc-ajax.php:1253
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1238
-#: includes/widgets/class-wc-widget-product-categories.php:41
+#: includes/class-wc-ajax.php:1268
+#: includes/widgets/class-wc-widget-product-categories.php:52
 #: templates/single-product-reviews.php:65
 msgid "Name"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1238
+#: includes/class-wc-ajax.php:1268
 msgid "Value"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1472
+#: includes/class-wc-ajax.php:1498
 msgid "Delete note"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1617
-msgid "Guest"
-msgstr ""
-
-#: includes/class-wc-ajax.php:1842
+#: includes/class-wc-ajax.php:1867
 msgid "Invalid refund amount"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1897
+#: includes/class-wc-ajax.php:1926
 msgid "Refund failed"
 msgstr ""
 
-#: includes/class-wc-cache-helper.php:137
+#: includes/class-wc-breadcrumb.php:118
+msgid "Error 404"
+msgstr ""
+
+#: includes/class-wc-breadcrumb.php:211
+msgid "Products tagged &ldquo;%s&rdquo;"
+msgstr ""
+
+#: includes/class-wc-breadcrumb.php:259
+msgid "Posts tagged &ldquo;%s&rdquo;"
+msgstr ""
+
+#: includes/class-wc-breadcrumb.php:284
+msgid "Author: %s"
+msgstr ""
+
+#: includes/class-wc-breadcrumb.php:318
+msgid "Search results for &ldquo;%s&rdquo;"
+msgstr ""
+
+#: includes/class-wc-breadcrumb.php:327
+msgid "Page %d"
+msgstr ""
+
+#: includes/class-wc-cache-helper.php:132
 msgid ""
 "In order for <strong>database caching</strong> to work with WooCommerce you "
 "must add <code>_wc_session_</code> to the \"Ignored Query Strings\" option "
 "in W3 Total Cache settings <a href=\"%s\">here</a>."
 msgstr ""
 
-#: includes/class-wc-cart.php:206
+#: includes/class-wc-cart.php:213
 msgid ""
 "%s has been removed from your cart because it can no longer be purchased. "
 "Please contact us if you need assistance."
 msgstr ""
 
-#: includes/class-wc-cart.php:413
+#: includes/class-wc-cart.php:431
 msgid "An item which is no longer available was removed from your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:444
+#: includes/class-wc-cart.php:462
 msgid ""
 "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
 "apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:458
+#: includes/class-wc-cart.php:476
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in "
 "stock). Please edit your cart and try again. We apologise for any "
 "inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:493
+#: includes/class-wc-cart.php:511
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order right "
 "now. Please try again in %d minutes or edit your cart and try again. We "
 "apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:825
+#: includes/class-wc-cart.php:699
+msgid "Get cart should not be called before the wp_loaded action."
+msgstr ""
+
+#: includes/class-wc-cart.php:909
 msgid "Sorry, this product cannot be purchased."
 msgstr ""
 
-#: includes/class-wc-cart.php:832
+#: includes/class-wc-cart.php:916
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr ""
 
-#: includes/class-wc-cart.php:837
+#: includes/class-wc-cart.php:921
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr ""
 
-#: includes/class-wc-cart.php:851 includes/class-wc-cart.php:875
-#: includes/class-wc-frontend-scripts.php:239 includes/wc-cart-functions.php:98
-#: templates/cart/mini-cart.php:68
+#: includes/class-wc-cart.php:935 includes/class-wc-cart.php:959
+#: includes/class-wc-frontend-scripts.php:238
+#: includes/wc-cart-functions.php:100 templates/cart/mini-cart.php:68
 msgid "View Cart"
 msgstr ""
 
-#: includes/class-wc-cart.php:852
+#: includes/class-wc-cart.php:936
 msgid "You cannot add another &quot;%s&quot; to your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:876
+#: includes/class-wc-cart.php:960
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
 msgstr ""
 
 #: includes/class-wc-checkout.php:63 includes/class-wc-checkout.php:72
-#: includes/class-wc-emails.php:66 includes/class-wc-emails.php:75
+#: includes/class-wc-emails.php:43 includes/class-wc-emails.php:52
 #: includes/class-wc-payment-gateways.php:46
 #: includes/class-wc-payment-gateways.php:55 includes/class-wc-shipping.php:65
 #: includes/class-wc-shipping.php:74 woocommerce.php:107 woocommerce.php:116
 msgid "Cheatin&#8217; huh?"
 msgstr ""
 
-#: includes/class-wc-checkout.php:96
+#: includes/class-wc-checkout.php:95
 msgid "Account username"
 msgstr ""
 
-#: includes/class-wc-checkout.php:105
+#: includes/class-wc-checkout.php:104
 msgid "Account password"
 msgstr ""
 
-#: includes/class-wc-checkout.php:115
+#: includes/class-wc-checkout.php:114
 msgid "Order Notes"
 msgstr ""
 
-#: includes/class-wc-checkout.php:187 includes/class-wc-checkout.php:198
-#: includes/class-wc-checkout.php:223 includes/class-wc-checkout.php:235
-#: includes/class-wc-checkout.php:248 includes/class-wc-checkout.php:259
-#: includes/class-wc-checkout.php:266
-msgid "Error: Unable to create order. Please try again."
+#: includes/class-wc-checkout.php:196 includes/class-wc-checkout.php:207
+#: includes/class-wc-checkout.php:232 includes/class-wc-checkout.php:244
+#: includes/class-wc-checkout.php:257 includes/class-wc-checkout.php:268
+#: includes/class-wc-checkout.php:275
+msgid "Error %d: Unable to create order. Please try again."
 msgstr ""
 
-#: includes/class-wc-checkout.php:344
+#: includes/class-wc-checkout.php:347
+msgid "We were unable to process your order, please try again."
+msgstr ""
+
+#: includes/class-wc-checkout.php:360
 msgid ""
 "Sorry, your session has expired. <a href=\"%s\" "
 "class=\"wc-backward\">Return to homepage</a>"
 msgstr ""
 
-#: includes/class-wc-checkout.php:424 includes/class-wc-form-handler.php:84
+#: includes/class-wc-checkout.php:440 includes/class-wc-form-handler.php:82
 msgid "is a required field."
 msgstr ""
 
-#: includes/class-wc-checkout.php:437 includes/class-wc-form-handler.php:97
+#: includes/class-wc-checkout.php:453 includes/class-wc-form-handler.php:95
 #: includes/shortcodes/class-wc-shortcode-cart.php:27
 msgid "Please enter a valid postcode/ZIP."
 msgstr ""
 
-#: includes/class-wc-checkout.php:446 includes/class-wc-form-handler.php:106
+#: includes/class-wc-checkout.php:462 includes/class-wc-form-handler.php:104
 msgid "is not a valid phone number."
 msgstr ""
 
-#: includes/class-wc-checkout.php:452 includes/class-wc-form-handler.php:113
+#: includes/class-wc-checkout.php:468 includes/class-wc-form-handler.php:111
 msgid "is not a valid email address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:470
+#: includes/class-wc-checkout.php:486
 msgid "is not valid. Please enter one of the following:"
 msgstr ""
 
-#: includes/class-wc-checkout.php:526
+#: includes/class-wc-checkout.php:542
 msgid "You must accept our Terms &amp; Conditions."
 msgstr ""
 
-#: includes/class-wc-checkout.php:532
+#: includes/class-wc-checkout.php:548
 msgid ""
 "Unfortunately <strong>we do not ship %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:541
+#: includes/class-wc-checkout.php:557
 msgid "Invalid shipping method."
 msgstr ""
 
-#: includes/class-wc-checkout.php:554
+#: includes/class-wc-checkout.php:570
 msgid "Invalid payment method."
 msgstr ""
 
@@ -5639,651 +5540,665 @@ msgstr ""
 msgid "Please rate the product."
 msgstr ""
 
-#: includes/class-wc-countries.php:269
+#: includes/class-wc-countries.php:275
 msgid "to the"
 msgstr ""
 
-#: includes/class-wc-countries.php:270
+#: includes/class-wc-countries.php:277
 msgid "to"
 msgstr ""
 
-#: includes/class-wc-countries.php:282
+#: includes/class-wc-countries.php:291
 msgid "the"
 msgstr ""
 
-#: includes/class-wc-countries.php:294
+#: includes/class-wc-countries.php:303
 msgid "VAT"
 msgstr ""
 
-#: includes/class-wc-countries.php:294
+#: includes/class-wc-countries.php:303 includes/class-wc-tax.php:631
 msgid "Tax"
 msgstr ""
 
-#: includes/class-wc-countries.php:306
+#: includes/class-wc-countries.php:315
 msgid "(incl. VAT)"
 msgstr ""
 
-#: includes/class-wc-countries.php:306
+#: includes/class-wc-countries.php:315
 msgid "(incl. tax)"
 msgstr ""
 
-#: includes/class-wc-countries.php:318
+#: includes/class-wc-countries.php:327
 msgid "(ex. VAT)"
 msgstr ""
 
-#: includes/class-wc-countries.php:318
+#: includes/class-wc-countries.php:327
 msgid "(ex. tax)"
 msgstr ""
 
-#: includes/class-wc-countries.php:492
+#: includes/class-wc-countries.php:504
 msgid "Country"
 msgstr ""
 
-#: includes/class-wc-countries.php:497
+#: includes/class-wc-countries.php:509
 msgid "First Name"
 msgstr ""
 
-#: includes/class-wc-countries.php:502
+#: includes/class-wc-countries.php:514
 msgid "Last Name"
 msgstr ""
 
-#: includes/class-wc-countries.php:508
+#: includes/class-wc-countries.php:520
 msgid "Company Name"
 msgstr ""
 
-#: includes/class-wc-countries.php:512
+#: includes/class-wc-countries.php:524
 msgid "Address"
 msgstr ""
 
-#: includes/class-wc-countries.php:523 includes/class-wc-countries.php:524
+#: includes/class-wc-countries.php:535 includes/class-wc-countries.php:536
 msgid "Town / City"
 msgstr ""
 
-#: includes/class-wc-countries.php:530 includes/class-wc-countries.php:531
+#: includes/class-wc-countries.php:542 includes/class-wc-countries.php:543
 msgid "State / County"
 msgstr ""
 
-#: includes/class-wc-countries.php:537 includes/class-wc-countries.php:538
+#: includes/class-wc-countries.php:549 includes/class-wc-countries.php:550
 #: templates/cart/shipping-calculator.php:82
 msgid "Postcode / Zip"
 msgstr ""
 
-#: includes/class-wc-countries.php:597
+#: includes/class-wc-countries.php:609
 msgid "Suburb"
 msgstr ""
 
-#: includes/class-wc-countries.php:600 includes/class-wc-countries.php:844
+#: includes/class-wc-countries.php:612 includes/class-wc-countries.php:860
 msgid "Postcode"
 msgstr ""
 
-#: includes/class-wc-countries.php:603 includes/class-wc-countries.php:839
+#: includes/class-wc-countries.php:615 includes/class-wc-countries.php:855
 msgid "State"
 msgstr ""
 
-#: includes/class-wc-countries.php:611
+#: includes/class-wc-countries.php:623
 msgid "District"
 msgstr ""
 
-#: includes/class-wc-countries.php:618 includes/class-wc-countries.php:640
-#: includes/class-wc-countries.php:660 includes/class-wc-countries.php:721
-#: includes/class-wc-countries.php:740 includes/class-wc-countries.php:757
-#: includes/class-wc-countries.php:807 includes/class-wc-countries.php:831
-#: includes/class-wc-countries.php:872
+#: includes/class-wc-countries.php:630 includes/class-wc-countries.php:652
+#: includes/class-wc-countries.php:676 includes/class-wc-countries.php:737
+#: includes/class-wc-countries.php:756 includes/class-wc-countries.php:773
+#: includes/class-wc-countries.php:823 includes/class-wc-countries.php:847
+#: includes/class-wc-countries.php:889
 msgid "Province"
 msgstr ""
 
-#: includes/class-wc-countries.php:646
+#: includes/class-wc-countries.php:658
 msgid "Canton"
 msgstr ""
 
-#: includes/class-wc-countries.php:655 includes/class-wc-countries.php:813
-msgid "Municipality"
-msgstr ""
-
-#: includes/class-wc-countries.php:708
-msgid "Town / District"
-msgstr ""
-
-#: includes/class-wc-countries.php:711
+#: includes/class-wc-countries.php:667 includes/class-wc-countries.php:727
 msgid "Region"
 msgstr ""
 
-#: includes/class-wc-countries.php:716 includes/class-wc-countries.php:847
+#: includes/class-wc-countries.php:724
+msgid "Town / District"
+msgstr ""
+
+#: includes/class-wc-countries.php:732 includes/class-wc-countries.php:863
 msgid "County"
 msgstr ""
 
-#: includes/class-wc-countries.php:745
+#: includes/class-wc-countries.php:761
 msgid "Prefecture"
 msgstr ""
 
-#: includes/class-wc-countries.php:836
+#: includes/class-wc-countries.php:829
+msgid "Municipality"
+msgstr ""
+
+#: includes/class-wc-countries.php:852
 msgid "Zip"
 msgstr ""
 
-#: includes/class-wc-countries.php:953
+#: includes/class-wc-countries.php:949
 msgid "Email Address"
 msgstr ""
 
-#: includes/class-wc-countries.php:959
+#: includes/class-wc-countries.php:955
 msgid "Phone"
 msgstr ""
 
-#: includes/class-wc-coupon.php:609
+#: includes/class-wc-coupon.php:657
 msgid "Coupon code applied successfully."
 msgstr ""
 
-#: includes/class-wc-coupon.php:612
+#: includes/class-wc-coupon.php:660
 msgid "Coupon code removed successfully."
 msgstr ""
 
-#: includes/class-wc-coupon.php:633
+#: includes/class-wc-coupon.php:678
 msgid "Coupon is not valid."
 msgstr ""
 
-#: includes/class-wc-coupon.php:636 includes/class-wc-coupon.php:689
+#: includes/class-wc-coupon.php:681 includes/class-wc-coupon.php:766
 msgid "Coupon does not exist!"
 msgstr ""
 
-#: includes/class-wc-coupon.php:639
+#: includes/class-wc-coupon.php:684
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
 msgstr ""
 
-#: includes/class-wc-coupon.php:642
+#: includes/class-wc-coupon.php:687
 msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
 msgstr ""
 
-#: includes/class-wc-coupon.php:645
+#: includes/class-wc-coupon.php:690
 msgid "Coupon code already applied!"
 msgstr ""
 
-#: includes/class-wc-coupon.php:648
+#: includes/class-wc-coupon.php:693
 msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
 msgstr ""
 
-#: includes/class-wc-coupon.php:651
+#: includes/class-wc-coupon.php:696
 msgid "Coupon usage limit has been reached."
 msgstr ""
 
-#: includes/class-wc-coupon.php:654
+#: includes/class-wc-coupon.php:699
 msgid "This coupon has expired."
 msgstr ""
 
-#: includes/class-wc-coupon.php:657
+#: includes/class-wc-coupon.php:702
 msgid "The minimum spend for this coupon is %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:660
+#: includes/class-wc-coupon.php:705
 msgid "The maximum spend for this coupon is %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:663
+#: includes/class-wc-coupon.php:708
 msgid "Sorry, this coupon is not applicable to your cart contents."
 msgstr ""
 
-#: includes/class-wc-coupon.php:666
+#: includes/class-wc-coupon.php:721
+msgid "Sorry, this coupon is not applicable to the products: %s."
+msgstr ""
+
+#: includes/class-wc-coupon.php:743
+msgid "Sorry, this coupon is not applicable to the categories: %s."
+msgstr ""
+
+#: includes/class-wc-coupon.php:746
 msgid "Sorry, this coupon is not valid for sale items."
 msgstr ""
 
-#: includes/class-wc-coupon.php:692
+#: includes/class-wc-coupon.php:769
 msgid "Please enter a coupon code."
 msgstr ""
 
-#: includes/class-wc-download-handler.php:42
-msgid "Invalid email address."
+#: includes/class-wc-download-handler.php:53
+msgid "Invalid download link."
 msgstr ""
 
-#: includes/class-wc-download-handler.php:42
-#: includes/class-wc-download-handler.php:67
-#: includes/class-wc-download-handler.php:88
-#: includes/class-wc-download-handler.php:95
-#: includes/class-wc-download-handler.php:100
-#: includes/class-wc-download-handler.php:104
-#: includes/class-wc-download-handler.php:149
-#: includes/class-wc-download-handler.php:313
-msgid "Go to homepage"
-msgstr ""
-
-#: includes/class-wc-download-handler.php:67
-msgid "Invalid download."
-msgstr ""
-
-#: includes/class-wc-download-handler.php:80
-msgid "You must be logged in to download files."
-msgstr ""
-
-#: includes/class-wc-download-handler.php:80 templates/global/form-login.php:39
-#: templates/myaccount/form-login.php:28 templates/myaccount/form-login.php:47
-msgid "Login"
-msgstr ""
-
-#: includes/class-wc-download-handler.php:80
-msgid "Log in to Download Files"
-msgstr ""
-
-#: includes/class-wc-download-handler.php:82
-msgid "This is not your download link."
-msgstr ""
-
-#: includes/class-wc-download-handler.php:88
-msgid "Product no longer exists."
-msgstr ""
-
-#: includes/class-wc-download-handler.php:95
-#: includes/class-wc-form-handler.php:542
+#: includes/class-wc-download-handler.php:98
+#: includes/class-wc-form-handler.php:562
 #: includes/shortcodes/class-wc-shortcode-checkout.php:166
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
 msgstr ""
 
-#: includes/class-wc-download-handler.php:100
+#: includes/class-wc-download-handler.php:109
 msgid "Sorry, you have reached your download limit for this file"
 msgstr ""
 
-#: includes/class-wc-download-handler.php:104
+#: includes/class-wc-download-handler.php:120
 msgid "Sorry, this download has expired"
 msgstr ""
 
-#: includes/class-wc-download-handler.php:149
+#: includes/class-wc-download-handler.php:133
+#: includes/class-wc-download-handler.php:136
+msgid "You must be logged in to download files."
+msgstr ""
+
+#: includes/class-wc-download-handler.php:136
+#: templates/global/form-login.php:39 templates/myaccount/form-login.php:28
+#: templates/myaccount/form-login.php:47
+msgid "Login"
+msgstr ""
+
+#: includes/class-wc-download-handler.php:136
+msgid "Log in to Download Files"
+msgstr ""
+
+#: includes/class-wc-download-handler.php:139
+msgid "This is not your download link."
+msgstr ""
+
+#: includes/class-wc-download-handler.php:173
 msgid "No file defined"
 msgstr ""
 
-#: includes/class-wc-download-handler.php:313
+#: includes/class-wc-download-handler.php:287
 msgid "File not found"
 msgstr ""
 
-#: includes/class-wc-emails.php:287
+#: includes/class-wc-download-handler.php:425
+msgid "Go to homepage"
+msgstr ""
+
+#: includes/class-wc-emails.php:258
 msgid "Note"
 msgstr ""
 
-#: includes/class-wc-emails.php:329
+#: includes/class-wc-emails.php:319 templates/order/order-details.php:120
+#: templates/single-product-reviews.php:67
+msgid "Email"
+msgstr ""
+
+#: includes/class-wc-emails.php:326
+msgid "Tel"
+msgstr ""
+
+#: includes/class-wc-emails.php:335
+#: templates/emails/admin-cancelled-order.php:50
+#: templates/emails/plain/admin-cancelled-order.php:39
+#: templates/order/order-details.php:116
+msgid "Customer details"
+msgstr ""
+
+#: includes/class-wc-emails.php:335
+msgid "Your details"
+msgstr ""
+
+#: includes/class-wc-emails.php:387
 msgid "Product low in stock"
 msgstr ""
 
-#: includes/class-wc-emails.php:336 includes/class-wc-emails.php:368
-#: includes/class-wc-emails.php:412
-msgid "Product #%s - %s"
-msgstr ""
-
-#: includes/class-wc-emails.php:338
-msgid "is low in stock."
-msgstr ""
-
-#: includes/class-wc-emails.php:361
-msgid "Product out of stock"
-msgstr ""
-
-#: includes/class-wc-emails.php:370
-msgid "is out of stock."
+#: includes/class-wc-emails.php:388
+msgid "%s is low in stock."
 msgstr ""
 
 #: includes/class-wc-emails.php:405
+msgid "Product out of stock"
+msgstr ""
+
+#: includes/class-wc-emails.php:406
+msgid "%s is out of stock."
+msgstr ""
+
+#: includes/class-wc-emails.php:435
 msgid "Product Backorder"
 msgstr ""
 
-#: includes/class-wc-emails.php:415
-msgid "%s units of %s have been backordered in order %s."
+#: includes/class-wc-emails.php:436
+msgid "%s units of %s have been backordered in order #%s."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:128
+#: includes/class-wc-form-handler.php:126
 msgid "Address changed successfully."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:177
+#: includes/class-wc-form-handler.php:173
 msgid "Please enter your name."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:181 includes/wc-user-functions.php:48
+#: includes/class-wc-form-handler.php:177 includes/wc-user-functions.php:48
 msgid "Please provide a valid email address."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:183
+#: includes/class-wc-form-handler.php:179
 msgid "This email address is already registered."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:187
+#: includes/class-wc-form-handler.php:183
 msgid "Your current password is incorrect."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:192
+#: includes/class-wc-form-handler.php:188
 msgid "Please fill out all password fields."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:196
+#: includes/class-wc-form-handler.php:192
 msgid "Please enter your current password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:200
+#: includes/class-wc-form-handler.php:196
 msgid "Please re-enter your password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:204
-#: includes/class-wc-form-handler.php:832
+#: includes/class-wc-form-handler.php:200
+#: includes/class-wc-form-handler.php:846
 msgid "Passwords do not match."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:226
+#: includes/class-wc-form-handler.php:222
 msgid "Account details changed successfully."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:351
+#: includes/class-wc-form-handler.php:347
 msgid "Payment method added."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:384
-#: includes/class-wc-form-handler.php:443
-msgid "Cart updated."
+#: includes/class-wc-form-handler.php:390
+msgid "%s removed. %sUndo?%s"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:419
+#: includes/class-wc-form-handler.php:439
 msgid "You can only have 1 %s in your cart."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:509
+#: includes/class-wc-form-handler.php:463
+msgid "Cart updated."
+msgstr ""
+
+#: includes/class-wc-form-handler.php:529
 msgid "The cart has been filled with the items from your previous order."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:532
+#: includes/class-wc-form-handler.php:552
 msgid "Order cancelled by customer."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:535
+#: includes/class-wc-form-handler.php:555
 msgid "Your order was cancelled."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:540
+#: includes/class-wc-form-handler.php:560
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:580
-#: includes/class-wc-form-handler.php:640
+#: includes/class-wc-form-handler.php:600
+#: includes/class-wc-form-handler.php:660
 msgid "Please choose product options&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:674
+#: includes/class-wc-form-handler.php:694
 msgid "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:681
+#: includes/class-wc-form-handler.php:701
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:741
-#: includes/class-wc-form-handler.php:745
-#: includes/class-wc-form-handler.php:749
-#: includes/class-wc-form-handler.php:758
-#: includes/class-wc-form-handler.php:884
+#: includes/class-wc-form-handler.php:765
+#: includes/class-wc-form-handler.php:769
+#: includes/class-wc-form-handler.php:773
+#: includes/class-wc-form-handler.php:782
+#: includes/class-wc-form-handler.php:895
 msgid "Error"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:745
+#: includes/class-wc-form-handler.php:769
 msgid "Username is required."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:749
+#: includes/class-wc-form-handler.php:773
 msgid "Password is required."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:758
+#: includes/class-wc-form-handler.php:782
 msgid "A user could not be found with this email address."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:783
+#: includes/class-wc-form-handler.php:807
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:827
+#: includes/class-wc-form-handler.php:842
 msgid "Please enter your password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:900 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:911 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:900
+#: includes/class-wc-form-handler.php:911
 msgid "Anti-spam field was filled in."
 msgstr ""
 
-#: includes/class-wc-frontend-scripts.php:197
+#: includes/class-wc-frontend-scripts.php:201
 msgid "Please select a rating"
 msgstr ""
 
-#: includes/class-wc-frontend-scripts.php:217
-#: includes/wc-template-functions.php:1623
+#: includes/class-wc-frontend-scripts.php:220
+#: includes/wc-template-functions.php:1582
 msgid "required"
 msgstr ""
 
-#: includes/class-wc-frontend-scripts.php:247
+#: includes/class-wc-frontend-scripts.php:246
 msgid ""
 "Sorry, no products matched your selection. Please choose a different "
 "combination."
 msgstr ""
 
-#: includes/class-wc-frontend-scripts.php:248
+#: includes/class-wc-frontend-scripts.php:247
 msgid "Sorry, this product is unavailable. Please choose a different combination."
 msgstr ""
 
-#: includes/class-wc-frontend-scripts.php:254
+#: includes/class-wc-frontend-scripts.php:253
 msgid "Select an option&hellip;"
 msgstr ""
 
-#: includes/class-wc-install.php:460
+#: includes/class-wc-install.php:423
 msgid "Customer"
 msgstr ""
 
-#: includes/class-wc-install.php:467
+#: includes/class-wc-install.php:430
 msgid "Shop Manager"
 msgstr ""
 
-#: includes/class-wc-install.php:703
+#: includes/class-wc-install.php:650
 msgid "View WooCommerce Settings"
 msgstr ""
 
-#: includes/class-wc-install.php:720
+#: includes/class-wc-install.php:666
 msgid "View WooCommerce Documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:720
+#: includes/class-wc-install.php:666
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:721
+#: includes/class-wc-install.php:667
 msgid "View WooCommerce API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:721
+#: includes/class-wc-install.php:667
 msgid "API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:722
+#: includes/class-wc-install.php:668
 msgid "Visit Premium Customer Support Forum"
 msgstr ""
 
-#: includes/class-wc-install.php:722
+#: includes/class-wc-install.php:668
 msgid "Premium Support"
 msgstr ""
 
-#: includes/class-wc-post-types.php:58 includes/class-wc-post-types.php:60
-#: includes/widgets/class-wc-widget-product-categories.php:32
+#: includes/class-wc-post-types.php:59 includes/class-wc-post-types.php:61
+#: includes/widgets/class-wc-widget-product-categories.php:43
 msgid "Product Categories"
 msgstr ""
 
-#: includes/class-wc-post-types.php:61
+#: includes/class-wc-post-types.php:62
 msgid "Product Category"
 msgstr ""
 
-#: includes/class-wc-post-types.php:63
+#: includes/class-wc-post-types.php:64
 msgid "Search Product Categories"
 msgstr ""
 
-#: includes/class-wc-post-types.php:64
+#: includes/class-wc-post-types.php:65
 msgid "All Product Categories"
 msgstr ""
 
-#: includes/class-wc-post-types.php:65
+#: includes/class-wc-post-types.php:66
 msgid "Parent Product Category"
 msgstr ""
 
-#: includes/class-wc-post-types.php:66
+#: includes/class-wc-post-types.php:67
 msgid "Parent Product Category:"
 msgstr ""
 
-#: includes/class-wc-post-types.php:67
+#: includes/class-wc-post-types.php:68
 msgid "Edit Product Category"
 msgstr ""
 
-#: includes/class-wc-post-types.php:68
+#: includes/class-wc-post-types.php:69
 msgid "Update Product Category"
 msgstr ""
 
-#: includes/class-wc-post-types.php:69
+#: includes/class-wc-post-types.php:70
 msgid "Add New Product Category"
 msgstr ""
 
-#: includes/class-wc-post-types.php:70
+#: includes/class-wc-post-types.php:71
 msgid "New Product Category Name"
 msgstr ""
 
-#: includes/class-wc-post-types.php:93 includes/class-wc-post-types.php:95
+#: includes/class-wc-post-types.php:94 includes/class-wc-post-types.php:96
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:29
 msgid "Product Tags"
 msgstr ""
 
-#: includes/class-wc-post-types.php:96
+#: includes/class-wc-post-types.php:97
 msgid "Product Tag"
 msgstr ""
 
-#: includes/class-wc-post-types.php:98
+#: includes/class-wc-post-types.php:99
 msgid "Search Product Tags"
 msgstr ""
 
-#: includes/class-wc-post-types.php:99
+#: includes/class-wc-post-types.php:100
 msgid "All Product Tags"
 msgstr ""
 
-#: includes/class-wc-post-types.php:100
+#: includes/class-wc-post-types.php:101
 msgid "Edit Product Tag"
 msgstr ""
 
-#: includes/class-wc-post-types.php:101
+#: includes/class-wc-post-types.php:102
 msgid "Update Product Tag"
 msgstr ""
 
-#: includes/class-wc-post-types.php:102
+#: includes/class-wc-post-types.php:103
 msgid "Add New Product Tag"
 msgstr ""
 
-#: includes/class-wc-post-types.php:103
+#: includes/class-wc-post-types.php:104
 msgid "New Product Tag Name"
 msgstr ""
 
-#: includes/class-wc-post-types.php:104
+#: includes/class-wc-post-types.php:105
 msgid "Popular Product Tags"
 msgstr ""
 
-#: includes/class-wc-post-types.php:105
+#: includes/class-wc-post-types.php:106
 msgid "Separate Product Tags with commas"
 msgstr ""
 
-#: includes/class-wc-post-types.php:106
+#: includes/class-wc-post-types.php:107
 msgid "Add or remove Product Tags"
 msgstr ""
 
-#: includes/class-wc-post-types.php:107
+#: includes/class-wc-post-types.php:108
 msgid "Choose from the most used Product tags"
 msgstr ""
 
-#: includes/class-wc-post-types.php:108
+#: includes/class-wc-post-types.php:109
 msgid "No Product Tags found"
 msgstr ""
 
-#: includes/class-wc-post-types.php:130 includes/class-wc-post-types.php:132
+#: includes/class-wc-post-types.php:131 includes/class-wc-post-types.php:133
 msgid "Shipping Classes"
 msgstr ""
 
-#: includes/class-wc-post-types.php:133
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:549
+#: includes/class-wc-post-types.php:134
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:16
 msgid "Shipping Class"
 msgstr ""
 
-#: includes/class-wc-post-types.php:135
+#: includes/class-wc-post-types.php:136
 msgid "Search Shipping Classes"
 msgstr ""
 
-#: includes/class-wc-post-types.php:136
+#: includes/class-wc-post-types.php:137
 msgid "All Shipping Classes"
 msgstr ""
 
-#: includes/class-wc-post-types.php:137
+#: includes/class-wc-post-types.php:138
 msgid "Parent Shipping Class"
 msgstr ""
 
-#: includes/class-wc-post-types.php:138
+#: includes/class-wc-post-types.php:139
 msgid "Parent Shipping Class:"
 msgstr ""
 
-#: includes/class-wc-post-types.php:139
+#: includes/class-wc-post-types.php:140
 msgid "Edit Shipping Class"
 msgstr ""
 
-#: includes/class-wc-post-types.php:140
+#: includes/class-wc-post-types.php:141
 msgid "Update Shipping Class"
 msgstr ""
 
-#: includes/class-wc-post-types.php:141
+#: includes/class-wc-post-types.php:142
 msgid "Add New Shipping Class"
 msgstr ""
 
-#: includes/class-wc-post-types.php:142
+#: includes/class-wc-post-types.php:143
 msgid "New Shipping Class Name"
 msgstr ""
 
-#: includes/class-wc-post-types.php:177
+#: includes/class-wc-post-types.php:173
 msgid "Search %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:178
+#: includes/class-wc-post-types.php:174
 msgid "All %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:179
+#: includes/class-wc-post-types.php:175
 msgid "Parent %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:180
+#: includes/class-wc-post-types.php:176
 msgid "Parent %s:"
 msgstr ""
 
-#: includes/class-wc-post-types.php:181
+#: includes/class-wc-post-types.php:177
 msgid "Edit %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:182
+#: includes/class-wc-post-types.php:178
 msgid "Update %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:183
+#: includes/class-wc-post-types.php:179
 msgid "Add New %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:184
+#: includes/class-wc-post-types.php:180
 msgid "New %s"
 msgstr ""
 
-#: includes/class-wc-post-types.php:226
+#: includes/class-wc-post-types.php:229
 #: includes/widgets/class-wc-widget-products.php:29
 msgid "Products"
 msgstr ""
 
-#: includes/class-wc-post-types.php:227 templates/cart/cart.php:27
-#: templates/checkout/form-pay.php:20 templates/checkout/review-order.php:21
+#: includes/class-wc-post-types.php:230 templates/cart/cart.php:27
+#: templates/checkout/form-pay.php:20 templates/checkout/review-order.php:17
+#: templates/emails/admin-cancelled-order.php:22
 #: templates/emails/admin-new-order.php:27
 #: templates/emails/customer-completed-order.php:27
 #: templates/emails/customer-invoice.php:31
@@ -6293,201 +6208,245 @@ msgstr ""
 msgid "Product"
 msgstr ""
 
-#: includes/class-wc-post-types.php:229
+#: includes/class-wc-post-types.php:232
 msgid "Add Product"
 msgstr ""
 
-#: includes/class-wc-post-types.php:230
+#: includes/class-wc-post-types.php:233
 msgid "Add New Product"
 msgstr ""
 
-#: includes/class-wc-post-types.php:231 includes/class-wc-post-types.php:278
-#: includes/class-wc-post-types.php:335 templates/myaccount/my-address.php:45
+#: includes/class-wc-post-types.php:234 includes/class-wc-post-types.php:281
+#: includes/class-wc-post-types.php:340 includes/class-wc-post-types.php:378
+#: templates/myaccount/my-address.php:45
 msgid "Edit"
 msgstr ""
 
-#: includes/class-wc-post-types.php:232
+#: includes/class-wc-post-types.php:235
 msgid "Edit Product"
 msgstr ""
 
-#: includes/class-wc-post-types.php:233
+#: includes/class-wc-post-types.php:236
 msgid "New Product"
 msgstr ""
 
-#: includes/class-wc-post-types.php:234 includes/class-wc-post-types.php:235
+#: includes/class-wc-post-types.php:237 includes/class-wc-post-types.php:238
 msgid "View Product"
 msgstr ""
 
-#: includes/class-wc-post-types.php:236
-#: includes/widgets/class-wc-widget-product-search.php:29
+#: includes/class-wc-post-types.php:239
 msgid "Search Products"
 msgstr ""
 
-#: includes/class-wc-post-types.php:237
+#: includes/class-wc-post-types.php:240
 msgid "No Products found"
 msgstr ""
 
-#: includes/class-wc-post-types.php:238
+#: includes/class-wc-post-types.php:241
 msgid "No Products found in trash"
 msgstr ""
 
-#: includes/class-wc-post-types.php:239
+#: includes/class-wc-post-types.php:242
 msgid "Parent Product"
 msgstr ""
 
-#: includes/class-wc-post-types.php:241
+#: includes/class-wc-post-types.php:244
 msgid "This is where you can add new products to your store."
 msgstr ""
 
-#: includes/class-wc-post-types.php:261
+#: includes/class-wc-post-types.php:264
 msgid "Variations"
 msgstr ""
 
-#: includes/class-wc-post-types.php:274
+#: includes/class-wc-post-types.php:277
 msgid "Orders"
 msgstr ""
 
-#: includes/class-wc-post-types.php:275 templates/myaccount/my-orders.php:32
+#: includes/class-wc-post-types.php:278 templates/myaccount/my-orders.php:32
 msgid "Order"
 msgstr ""
 
-#: includes/class-wc-post-types.php:276
+#: includes/class-wc-post-types.php:279
 msgid "Add Order"
 msgstr ""
 
-#: includes/class-wc-post-types.php:277
+#: includes/class-wc-post-types.php:280
 msgid "Add New Order"
 msgstr ""
 
-#: includes/class-wc-post-types.php:279
+#: includes/class-wc-post-types.php:282
 msgid "Edit Order"
 msgstr ""
 
-#: includes/class-wc-post-types.php:280
+#: includes/class-wc-post-types.php:283
 msgid "New Order"
 msgstr ""
 
-#: includes/class-wc-post-types.php:281 includes/class-wc-post-types.php:282
+#: includes/class-wc-post-types.php:284 includes/class-wc-post-types.php:285
 msgid "View Order"
 msgstr ""
 
-#: includes/class-wc-post-types.php:283
+#: includes/class-wc-post-types.php:286
 msgid "Search Orders"
 msgstr ""
 
-#: includes/class-wc-post-types.php:284
+#: includes/class-wc-post-types.php:287
 msgid "No Orders found"
 msgstr ""
 
-#: includes/class-wc-post-types.php:285
+#: includes/class-wc-post-types.php:288
 msgid "No Orders found in trash"
 msgstr ""
 
-#: includes/class-wc-post-types.php:286
+#: includes/class-wc-post-types.php:289
 msgid "Parent Orders"
 msgstr ""
 
-#: includes/class-wc-post-types.php:289
+#: includes/class-wc-post-types.php:292
 msgid "This is where store orders are stored."
 msgstr ""
 
-#: includes/class-wc-post-types.php:311
+#: includes/class-wc-post-types.php:314
 msgid "Refunds"
 msgstr ""
 
-#: includes/class-wc-post-types.php:330
+#: includes/class-wc-post-types.php:335
 msgid "Coupons"
 msgstr ""
 
-#: includes/class-wc-post-types.php:331 templates/cart/cart.php:119
+#: includes/class-wc-post-types.php:336 templates/cart/cart.php:119
 msgid "Coupon"
 msgstr ""
 
-#: includes/class-wc-post-types.php:333
+#: includes/class-wc-post-types.php:338
 msgid "Add Coupon"
 msgstr ""
 
-#: includes/class-wc-post-types.php:334
+#: includes/class-wc-post-types.php:339
 msgid "Add New Coupon"
 msgstr ""
 
-#: includes/class-wc-post-types.php:336
+#: includes/class-wc-post-types.php:341
 msgid "Edit Coupon"
 msgstr ""
 
-#: includes/class-wc-post-types.php:337
+#: includes/class-wc-post-types.php:342
 msgid "New Coupon"
 msgstr ""
 
-#: includes/class-wc-post-types.php:338
+#: includes/class-wc-post-types.php:343
 msgid "View Coupons"
 msgstr ""
 
-#: includes/class-wc-post-types.php:339
+#: includes/class-wc-post-types.php:344
 msgid "View Coupon"
 msgstr ""
 
-#: includes/class-wc-post-types.php:340
+#: includes/class-wc-post-types.php:345
 msgid "Search Coupons"
 msgstr ""
 
-#: includes/class-wc-post-types.php:341
+#: includes/class-wc-post-types.php:346
 msgid "No Coupons found"
 msgstr ""
 
-#: includes/class-wc-post-types.php:342
+#: includes/class-wc-post-types.php:347
 msgid "No Coupons found in trash"
 msgstr ""
 
-#: includes/class-wc-post-types.php:343
+#: includes/class-wc-post-types.php:348
 msgid "Parent Coupon"
 msgstr ""
 
-#: includes/class-wc-post-types.php:345
+#: includes/class-wc-post-types.php:350
 msgid "This is where you can add new coupons that customers can use in your store."
 msgstr ""
 
-#: includes/class-wc-post-types.php:367
+#: includes/class-wc-post-types.php:373
 msgid "Webhooks"
 msgstr ""
 
-#: includes/class-wc-post-types.php:396
+#: includes/class-wc-post-types.php:374
+msgid "Webhook"
+msgstr ""
+
+#: includes/class-wc-post-types.php:376
+msgid "Add Webhook"
+msgstr ""
+
+#: includes/class-wc-post-types.php:377
+msgid "Add New Webhook"
+msgstr ""
+
+#: includes/class-wc-post-types.php:379
+msgid "Edit Webhook"
+msgstr ""
+
+#: includes/class-wc-post-types.php:380
+msgid "New Webhook"
+msgstr ""
+
+#: includes/class-wc-post-types.php:381
+msgid "View Webhooks"
+msgstr ""
+
+#: includes/class-wc-post-types.php:382
+msgid "View Webhook"
+msgstr ""
+
+#: includes/class-wc-post-types.php:383
+msgid "Search Webhooks"
+msgstr ""
+
+#: includes/class-wc-post-types.php:384
+msgid "No Webhooks found"
+msgstr ""
+
+#: includes/class-wc-post-types.php:385
+msgid "No Webhooks found in trash"
+msgstr ""
+
+#: includes/class-wc-post-types.php:386
+msgid "Parent Webhook"
+msgstr ""
+
+#: includes/class-wc-post-types.php:416
 msgid "Pending payment <span class=\"count\">(%s)</span>"
 msgid_plural "Pending payment <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-post-types.php:404
+#: includes/class-wc-post-types.php:424
 msgid "Processing <span class=\"count\">(%s)</span>"
 msgid_plural "Processing <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-post-types.php:412
+#: includes/class-wc-post-types.php:432
 msgid "On hold <span class=\"count\">(%s)</span>"
 msgid_plural "On hold <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-post-types.php:420
+#: includes/class-wc-post-types.php:440
 msgid "Completed <span class=\"count\">(%s)</span>"
 msgid_plural "Completed <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-post-types.php:428
+#: includes/class-wc-post-types.php:448
 msgid "Cancelled <span class=\"count\">(%s)</span>"
 msgid_plural "Cancelled <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-post-types.php:436
+#: includes/class-wc-post-types.php:456
 msgid "Refunded <span class=\"count\">(%s)</span>"
 msgid_plural "Refunded <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wc-post-types.php:444
+#: includes/class-wc-post-types.php:464
 msgid "Failed <span class=\"count\">(%s)</span>"
 msgid_plural "Failed <span class=\"count\">(%s)</span>"
 msgstr[0] ""
@@ -6502,7 +6461,7 @@ msgid "View products"
 msgstr ""
 
 #: includes/class-wc-product-simple.php:50
-#: includes/class-wc-product-variation.php:197
+#: includes/class-wc-product-variation.php:198
 msgid "Read More"
 msgstr ""
 
@@ -6510,20 +6469,163 @@ msgstr ""
 msgid "Select options"
 msgstr ""
 
-#: includes/class-wc-product-variable.php:562
+#: includes/class-wc-product-variable.php:568
 msgid ""
 "This variable product has no active variations so cannot be published. "
 "Changing status to draft."
 msgstr ""
 
-#: includes/class-wc-product-variation.php:640
+#: includes/class-wc-product-variation.php:662
 msgid "%s &ndash; %s%s"
 msgstr ""
 
-#: includes/class-wc-shortcodes.php:983
+#: includes/class-wc-query.php:109
+msgid "Pay for Order"
+msgstr ""
+
+#: includes/class-wc-query.php:112
+msgid "Order Received"
+msgstr ""
+
+#: includes/class-wc-query.php:116
+msgid "Order %s"
+msgstr ""
+
+#: includes/class-wc-query.php:119
+msgid "Edit Account Details"
+msgstr ""
+
+#: includes/class-wc-query.php:122
+msgid "Edit Address"
+msgstr ""
+
+#: includes/class-wc-query.php:125
+#: templates/myaccount/form-add-payment-method.php:49
+msgid "Add Payment Method"
+msgstr ""
+
+#: includes/class-wc-query.php:128
+msgid "Lost Password"
+msgstr ""
+
+#: includes/class-wc-shortcodes.php:943
 msgid ""
 "Use $args[\"posts_per_page\"] instead. Deprecated argument will be removed "
 "in WC 2.2."
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:28
+#: includes/emails/class-wc-email-cancelled-order.php:31
+msgid "Cancelled order"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:29
+msgid ""
+"Cancelled order emails are sent when an order has been marked to cancelled "
+"from pending or on hold."
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:32
+msgid "[{site_title}] Cancelled order ({order_number})"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:117
+#: includes/emails/class-wc-email-customer-completed-order.php:143
+#: includes/emails/class-wc-email-new-order.php:123
+#: includes/emails/class-wc-email.php:461
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:74
+#: includes/gateways/cheque/class-wc-gateway-cheque.php:54
+#: includes/gateways/paypal/includes/settings-paypal.php:12
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:185
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:12
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:63
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:52
+msgid "Enable/Disable"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:119
+#: includes/emails/class-wc-email-customer-completed-order.php:145
+#: includes/emails/class-wc-email-new-order.php:125
+#: includes/emails/class-wc-email.php:463
+msgid "Enable this email notification"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:123
+#: includes/emails/class-wc-email-new-order.php:129
+msgid "Recipient(s)"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:125
+#: includes/emails/class-wc-email-new-order.php:131
+msgid ""
+"Enter recipients (comma separated) for this email. Defaults to "
+"<code>%s</code>."
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:130
+#: includes/emails/class-wc-email-customer-completed-order.php:149
+#: includes/emails/class-wc-email-new-order.php:136
+msgid "Subject"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:132
+#: includes/emails/class-wc-email-new-order.php:138
+msgid ""
+"This controls the email subject line. Leave blank to use the default "
+"subject: <code>%s</code>."
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:137
+#: includes/emails/class-wc-email-customer-completed-order.php:156
+#: includes/emails/class-wc-email-new-order.php:143
+msgid "Email Heading"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:139
+#: includes/emails/class-wc-email-new-order.php:145
+msgid ""
+"This controls the main heading contained within the email notification. "
+"Leave blank to use the default heading: <code>%s</code>."
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:144
+#: includes/emails/class-wc-email-customer-completed-order.php:177
+#: includes/emails/class-wc-email-customer-invoice.php:179
+#: includes/emails/class-wc-email-new-order.php:150
+#: includes/emails/class-wc-email.php:481
+msgid "Email type"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:146
+#: includes/emails/class-wc-email-customer-completed-order.php:179
+#: includes/emails/class-wc-email-customer-invoice.php:181
+#: includes/emails/class-wc-email-new-order.php:152
+#: includes/emails/class-wc-email.php:483
+msgid "Choose which format of email to send."
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:150
+#: includes/emails/class-wc-email-customer-completed-order.php:183
+#: includes/emails/class-wc-email-customer-invoice.php:185
+#: includes/emails/class-wc-email-new-order.php:156
+#: includes/emails/class-wc-email.php:487
+msgid "Plain text"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:151
+#: includes/emails/class-wc-email-customer-completed-order.php:184
+#: includes/emails/class-wc-email-customer-invoice.php:186
+#: includes/emails/class-wc-email-new-order.php:157
+#: includes/emails/class-wc-email.php:488
+msgid "HTML"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:152
+#: includes/emails/class-wc-email-customer-completed-order.php:185
+#: includes/emails/class-wc-email-customer-invoice.php:187
+#: includes/emails/class-wc-email-new-order.php:158
+#: includes/emails/class-wc-email.php:489
+msgid "Multipart"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-completed-order.php:28
@@ -6552,14 +6654,17 @@ msgstr ""
 msgid "Your {site_title} order from {order_date} is complete - download your files"
 msgstr ""
 
-#: includes/emails/class-wc-email-customer-completed-order.php:149
-#: includes/emails/class-wc-email-new-order.php:136
-msgid "Subject"
-msgstr ""
-
-#: includes/emails/class-wc-email-customer-completed-order.php:156
-#: includes/emails/class-wc-email-new-order.php:143
-msgid "Email Heading"
+#: includes/emails/class-wc-email-customer-completed-order.php:151
+#: includes/emails/class-wc-email-customer-completed-order.php:158
+#: includes/emails/class-wc-email-customer-completed-order.php:165
+#: includes/emails/class-wc-email-customer-completed-order.php:172
+#: includes/emails/class-wc-email-customer-invoice.php:153
+#: includes/emails/class-wc-email-customer-invoice.php:160
+#: includes/emails/class-wc-email-customer-invoice.php:167
+#: includes/emails/class-wc-email-customer-invoice.php:174
+#: includes/emails/class-wc-email.php:469
+#: includes/emails/class-wc-email.php:476
+msgid "Defaults to <code>%s</code>"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-completed-order.php:163
@@ -6594,6 +6699,16 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-invoice.php:41
 msgid "Order {order_number} details"
+msgstr ""
+
+#: includes/emails/class-wc-email-customer-invoice.php:151
+#: includes/emails/class-wc-email.php:467
+msgid "Email subject"
+msgstr ""
+
+#: includes/emails/class-wc-email-customer-invoice.php:158
+#: includes/emails/class-wc-email.php:474
+msgid "Email heading"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-invoice.php:165
@@ -6690,53 +6805,87 @@ msgstr ""
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
 msgstr ""
 
-#: includes/emails/class-wc-email-new-order.php:129
-msgid "Recipient(s)"
+#: includes/emails/class-wc-email.php:526
+#: includes/emails/class-wc-email.php:550
+msgid "Could not write to template file."
 msgstr ""
 
-#: includes/emails/class-wc-email-new-order.php:131
+#: includes/emails/class-wc-email.php:616
+msgid "Template file copied to theme."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:645
+msgid "Template file deleted from theme."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:711
+msgid "HTML template"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:712
+msgid "Plain text template"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:737
+msgid "Delete template file"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:740
 msgid ""
-"Enter recipients (comma separated) for this email. Defaults to "
+"This template has been overridden by your theme and can be found in: "
 "<code>%s</code>."
 msgstr ""
 
-#: includes/emails/class-wc-email-new-order.php:138
-msgid ""
-"This controls the email subject line. Leave blank to use the default "
-"subject: <code>%s</code>."
+#: includes/emails/class-wc-email.php:753
+msgid "Copy file to theme"
 msgstr ""
 
-#: includes/emails/class-wc-email-new-order.php:145
+#: includes/emails/class-wc-email.php:756
 msgid ""
-"This controls the main heading contained within the email notification. "
-"Leave blank to use the default heading: <code>%s</code>."
+"To override and edit this email template copy <code>%s</code> to your theme "
+"folder: <code>%s</code>."
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:27
+#: includes/emails/class-wc-email.php:765
+msgid "File was not found."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:790
+msgid "View template"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:791
+msgid "Hide template"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:802
+msgid "Are you sure you want to delete this template file?"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:31
 msgid "BACS"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:28
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:32
 msgid "Allows payments by BACS, more commonly known as direct bank/wire transfer."
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:70
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:76
 msgid "Enable Bank Transfer"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:74
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:80
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:60
 #: includes/gateways/cod/class-wc-gateway-cod.php:68
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:139
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:213
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:178
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:105
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:83
+#: includes/gateways/paypal/includes/settings-paypal.php:18
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:192
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:98
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:72
 #: includes/widgets/class-wc-widget-cart.php:32
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:30
-#: includes/widgets/class-wc-widget-layered-nav.php:72
+#: includes/widgets/class-wc-widget-layered-nav.php:82
 #: includes/widgets/class-wc-widget-price-filter.php:32
-#: includes/widgets/class-wc-widget-product-categories.php:33
+#: includes/widgets/class-wc-widget-product-categories.php:44
 #: includes/widgets/class-wc-widget-product-search.php:30
 #: includes/widgets/class-wc-widget-product-tag-cloud.php:30
 #: includes/widgets/class-wc-widget-products.php:30
@@ -6746,106 +6895,133 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:76
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:82
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:62
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:141
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:215
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:180
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:85
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:74
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:59
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:107
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:85
+#: includes/gateways/paypal/includes/settings-paypal.php:20
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:194
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:20
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:71
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:60
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:100
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:74
 msgid "This controls the title which the user sees during checkout."
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:77
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:83
 msgid "Direct Bank Transfer"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:81
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:87
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:67
 #: includes/gateways/cod/class-wc-gateway-cod.php:75
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:146
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:220
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:185
-#: includes/wc-template-functions.php:1006
+#: includes/gateways/paypal/includes/settings-paypal.php:25
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:199
+#: includes/wc-template-functions.php:949
 msgid "Description"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:83
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:89
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:69
 #: includes/gateways/cod/class-wc-gateway-cod.php:70
 msgid "Payment method description that the customer will see on your checkout."
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:84
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:90
 msgid ""
 "Make your payment directly into our bank account. Please use your Order ID "
 "as the payment reference. Your order won't be shipped until the funds have "
 "cleared in our account."
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:88
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:94
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:74
 #: includes/gateways/cod/class-wc-gateway-cod.php:82
 msgid "Instructions"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:90
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:96
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:76
 msgid "Instructions that will be added to the thank you page and emails."
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:107
-msgid "Account Details"
-msgstr ""
-
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:113
-msgid "Account Name"
-msgstr ""
-
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:114
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:260
-msgid "Account Number"
-msgstr ""
-
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:115
-msgid "Bank Name"
-msgstr ""
-
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:116
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:264
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:118
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:274
 msgid "Sort Code"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:117
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:268
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:122
+msgid "Account Details"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:128
+msgid "Account Name"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:129
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:294
+msgid "Account Number"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:130
+msgid "Bank Name"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:132
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:302
 msgid "IBAN"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:118
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:133
 msgid "BIC / Swift"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:143
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:158
 msgid "+ Add Account"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:143
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:158
 msgid "Remove selected account(s)"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:243
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:276
 msgid "Our Bank Details"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:272
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:306
 msgid "BIC"
 msgstr ""
 
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:299
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:334
 msgid "Awaiting BACS payment"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:364
+msgid "BSB"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:369
+msgid "Bank Transit Number"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:374
+msgid "IFSC"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:379
+msgid "Branch Sort"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:384
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:389
+msgid "Bank Code"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:394
+msgid "Routing Number"
+msgstr ""
+
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:399
+msgid "Branch Code"
 msgstr ""
 
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:27
@@ -6933,416 +7109,363 @@ msgstr ""
 msgid "Payment to be made upon delivery."
 msgstr ""
 
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:33
-msgid "Mijireh Checkout"
-msgstr ""
-
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:107
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:270
-msgid "Mijireh error:"
-msgstr ""
-
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:128
-msgid "Enable Mijireh Checkout"
-msgstr ""
-
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:132
-msgid "Access Key"
-msgstr ""
-
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:134
-msgid "The Mijireh access key for your store."
-msgstr ""
-
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:142
-msgid "Credit Card"
-msgstr ""
-
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:148
-msgid "Pay securely with your credit card."
-msgstr ""
-
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:149
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:223
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:187
-msgid "This controls the description which the user sees during checkout."
-msgstr ""
-
-#: includes/gateways/mijireh/class-wc-gateway-mijireh.php:183
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:463
-msgid "Order %s"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:31
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:26
 msgid "Proceed to PayPal"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:34
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:216
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:27
+#: includes/gateways/paypal/includes/settings-paypal.php:21
 msgid "PayPal"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:35
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:28
 msgid ""
 "PayPal standard works by sending the user to PayPal to enter their payment "
 "information."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:160
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:83
+msgid "PayPal Acceptance Mark"
+msgstr ""
+
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:86
 msgid "What is PayPal?"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:193
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:191
 msgid "Gateway Disabled"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:193
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:191
 msgid "PayPal does not support your store currency."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:209
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:279
+msgid "Refunded %s - Refund ID: %s"
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:132
+msgid "Validation error: PayPal currencies do not match (code %s)."
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:147
+msgid "Validation error: PayPal amounts do not match (gross %s)."
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:162
+msgid "Validation error: PayPal IPN response from a different email address (%s)."
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:185
+msgid "IPN payment completed"
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:187
+msgid "Payment pending: %s"
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:204
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:240
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:254
+msgid "Payment %s via IPN."
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:243
+msgid "Payment for order #%s refunded/reversed"
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:244
+msgid "Order %s has been marked as refunded - PayPal reason code: %s"
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:257
+msgid "Payment for order #%s reversed"
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:258
+msgid "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:268
+msgid "Reversal cancelled for order #%s"
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php:269
+msgid ""
+"Order #%s has had a reversal cancelled. Please check the status of payment "
+"and update the order status accordingly."
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-pdt-handler.php:75
+msgid "Validation error: PayPal amounts do not match (amt %s)."
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-pdt-handler.php:77
+msgid "PDT payment completed"
+msgstr ""
+
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php:179
+#: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php:260
+msgid "Shipping via %s"
+msgstr ""
+
+#: includes/gateways/paypal/includes/settings-paypal.php:14
 msgid "Enable PayPal standard"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:224
+#: includes/gateways/paypal/includes/settings-paypal.php:28
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:201
+msgid "This controls the description which the user sees during checkout."
+msgstr ""
+
+#: includes/gateways/paypal/includes/settings-paypal.php:29
 msgid ""
 "Pay via PayPal; you can pay with your credit card if you don't have a "
 "PayPal account."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:227
+#: includes/gateways/paypal/includes/settings-paypal.php:32
 msgid "PayPal Email"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:229
+#: includes/gateways/paypal/includes/settings-paypal.php:34
 msgid ""
 "Please enter your PayPal email address; this is needed in order to take "
 "payment."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:235
+#: includes/gateways/paypal/includes/settings-paypal.php:40
 msgid "PayPal sandbox"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:237
+#: includes/gateways/paypal/includes/settings-paypal.php:42
 msgid "Enable PayPal sandbox"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:239
+#: includes/gateways/paypal/includes/settings-paypal.php:44
 msgid ""
 "PayPal sandbox can be used to test payments. Sign up for a developer "
 "account <a href=\"%s\">here</a>."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:242
+#: includes/gateways/paypal/includes/settings-paypal.php:47
 msgid "Debug Log"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:244
+#: includes/gateways/paypal/includes/settings-paypal.php:49
 msgid "Enable logging"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:246
+#: includes/gateways/paypal/includes/settings-paypal.php:51
 msgid "Log PayPal events, such as IPN requests, inside <code>%s</code>"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:249
+#: includes/gateways/paypal/includes/settings-paypal.php:54
 msgid "Shipping options"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:254
+#: includes/gateways/paypal/includes/settings-paypal.php:59
 msgid "Shipping details"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:256
+#: includes/gateways/paypal/includes/settings-paypal.php:61
 msgid "Send shipping details to PayPal instead of billing."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:257
+#: includes/gateways/paypal/includes/settings-paypal.php:62
 msgid ""
 "PayPal allows us to send 1 address. If you are using PayPal for shipping "
 "labels you may prefer to send the shipping address rather than billing."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:261
+#: includes/gateways/paypal/includes/settings-paypal.php:66
 msgid "Address override"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:263
+#: includes/gateways/paypal/includes/settings-paypal.php:68
 msgid ""
 "Enable \"address_override\" to prevent address information from being "
 "changed."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:264
+#: includes/gateways/paypal/includes/settings-paypal.php:69
 msgid ""
 "PayPal verifies addresses therefore this setting can cause errors (we "
 "recommend keeping it disabled)."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:268
+#: includes/gateways/paypal/includes/settings-paypal.php:73
 msgid "Advanced options"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:273
+#: includes/gateways/paypal/includes/settings-paypal.php:78
 msgid "Receiver Email"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:275
+#: includes/gateways/paypal/includes/settings-paypal.php:80
 msgid ""
 "If your main PayPal email differs from the PayPal email entered above, "
 "input your main receiver email for your PayPal account here. This is used "
 "to validate IPN requests."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:281
+#: includes/gateways/paypal/includes/settings-paypal.php:86
 msgid "Invoice Prefix"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:283
+#: includes/gateways/paypal/includes/settings-paypal.php:88
 msgid ""
 "Please enter a prefix for your invoice numbers. If you use your PayPal "
 "account for multiple stores ensure this prefix is unique as PayPal will not "
 "allow orders with the same invoice number."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:288
+#: includes/gateways/paypal/includes/settings-paypal.php:93
 msgid "Payment Action"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:290
+#: includes/gateways/paypal/includes/settings-paypal.php:96
 msgid ""
 "Choose whether you wish to capture funds immediately or authorize payment "
 "only."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:294
+#: includes/gateways/paypal/includes/settings-paypal.php:100
 msgid "Capture"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:295
+#: includes/gateways/paypal/includes/settings-paypal.php:101
 msgid "Authorize"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:299
+#: includes/gateways/paypal/includes/settings-paypal.php:105
 msgid "Page Style"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:301
+#: includes/gateways/paypal/includes/settings-paypal.php:107
 msgid ""
 "Optionally enter the name of the page style you wish to use. These are "
 "defined within your PayPal account."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:304
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:312
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:325
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:333
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:341
+#: includes/gateways/paypal/includes/settings-paypal.php:110
+#: includes/gateways/paypal/includes/settings-paypal.php:118
+#: includes/gateways/paypal/includes/settings-paypal.php:131
+#: includes/gateways/paypal/includes/settings-paypal.php:139
+#: includes/gateways/paypal/includes/settings-paypal.php:147
 msgid "Optional"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:307
+#: includes/gateways/paypal/includes/settings-paypal.php:113
 msgid "PayPal Identity Token"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:309
+#: includes/gateways/paypal/includes/settings-paypal.php:115
 msgid ""
 "Optionally enable \"Payment Data Transfer\" (Profile > Website Payment "
 "Preferences) and then copy your identity token here. This will allow "
 "payments to be verified without the need for PayPal IPN."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:315
+#: includes/gateways/paypal/includes/settings-paypal.php:121
 msgid "API Credentials"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:317
+#: includes/gateways/paypal/includes/settings-paypal.php:123
 msgid ""
 "Enter your PayPal API credentials to process refunds via PayPal. Learn how "
 "to access your PayPal API Credentials %shere%s."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:320
+#: includes/gateways/paypal/includes/settings-paypal.php:126
 msgid "API Username"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:322
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:330
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:338
+#: includes/gateways/paypal/includes/settings-paypal.php:128
+#: includes/gateways/paypal/includes/settings-paypal.php:136
+#: includes/gateways/paypal/includes/settings-paypal.php:144
 msgid "Get your API credentials from PayPal."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:328
+#: includes/gateways/paypal/includes/settings-paypal.php:134
 msgid "API Password"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:336
+#: includes/gateways/paypal/includes/settings-paypal.php:142
 msgid "API Signature"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:472
-msgid "Shipping via"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:560
-msgid "Shipping via %s"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:595
-msgid ""
-"Thank you for your order. We are now redirecting you to PayPal to make "
-"payment."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:620
-msgid "Pay via PayPal"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:620
-msgid "Cancel order &amp; restore cart"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:704
-msgid "Empty Paypal response."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:712
-msgid "Refunded %s - Refund ID: %s"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:727
-msgid ""
-"Thank you - your order is now pending payment. You should be automatically "
-"redirected to PayPal to make payment."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:881
-msgid "Validation error: PayPal currencies do not match (code %s)."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:892
-msgid "Validation error: PayPal amounts do not match (gross %s)."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:903
-msgid "Validation error: PayPal IPN response from a different email address (%s)."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:923
-msgid "IPN payment completed"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:927
-msgid "Payment pending: %s"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:940
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:948
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:960
-msgid "Payment %s via IPN."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:951
-msgid "Payment for order %s refunded/reversed"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:952
-msgid "Order %s has been marked as refunded - PayPal reason code: %s"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:963
-msgid "Payment for order %s reversed"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:964
-msgid "Order %s has been marked on-hold due to a reversal - PayPal reason code: %s"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:970
-msgid "Reversal cancelled for order %s"
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:971
-msgid ""
-"Order %s has had a reversal cancelled. Please check the status of payment "
-"and update the order status accordingly."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:1055
-msgid "Validation error: PayPal amounts do not match (amt %s)."
-msgstr ""
-
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:1061
-msgid "PDT payment completed"
-msgstr ""
-
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:48
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:132
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:278
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:90
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:174
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:317
 msgid ""
 "Please make sure your card details have been entered correctly and that "
 "your browser supports JavaScript."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:51
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:135
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:281
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:93
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:177
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:320
 msgid ""
 "Developers: Please make sure that you're including jQuery and there are no "
 "JavaScript errors on the page."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:71
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:155
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:113
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:197
 msgid "Error creating user in Simplify Commerce."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:126
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:229
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:168
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:274
 msgid "Sorry, the minimum allowed order total is 0.50 to use this payment method."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:226
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:271
 msgid "%s - Subscription for \"%s\""
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:226
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:329
-msgid "(Order %s)"
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:271
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:374
+msgid "(Order #%s)"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:235
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:334
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:280
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:379
 msgid "Customer not found"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:258
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:357
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:306
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:303
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:402
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:485
 msgid "Simplify payment approved (ID: %s, Auth Code: %s)"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:262
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:317
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:307
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:349
 msgid "Simplify payment declined"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:264
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:319
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:309
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:351
 msgid "Payment was declined - please try another card."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:329
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:374
 msgid "%s - Pre-order for \"%s\""
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:359
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:404
 msgid "Payment was declined - the customer need to try another card."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:362
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:407
 msgid "Simplify Transaction Failed (%s)"
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:451
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:457
+msgid "Payment was declined by Simplify Commerce."
 msgstr ""
 
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:24
@@ -7355,16 +7478,16 @@ msgid ""
 "tokens and the Simplify Commerce SDK. Requires SSL when sandbox is disabled."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:87
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:91
 msgid "Simplify Commerce by Mastercard"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:92
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:96
 msgid "Getting started"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:93
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:99
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:97
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:103
 msgid ""
 "Simplify Commerce is your merchant account and payment gateway all rolled "
 "into one. Choose Simplify Commerce as your WooCommerce payment gateway to "
@@ -7372,25 +7495,25 @@ msgid ""
 "backed by MasterCard."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:95
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:99
 msgid "Sign up for Simplify Commerce"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:95
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:99
 msgid "Learn more"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:132
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:146
 msgid ""
 "Simplify Commerce Error: Simplify commerce requires PHP 5.3 and above. You "
 "are using version %s."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:137
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:151
 msgid "Simplify Commerce Error: Please enter your public and private keys"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:142
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:156
 msgid ""
 "Simplify Commerce is enabled, but the <a href=\"%s\">force SSL option</a> "
 "is disabled; your checkout may not be secure! Please enable SSL and ensure "
@@ -7398,414 +7521,478 @@ msgid ""
 "in sandbox mode."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:172
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:186
 msgid "Enable Simplify Commerce"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:181
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:195
 msgid "Credit card"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:192
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:206
+msgid "Payment Mode"
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:207
+msgid "Enable Hosted Payments"
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:209
+msgid ""
+"Standard will display the credit card fields on your store (SSL required). "
+"%1$s Hosted Payments will display a Simplify Commerce modal dialog on your "
+"store (if SSL) or will redirect the customer to Simplify Commerce hosted "
+"page (if not SSL). %1$s Note: Hosted Payments need a new API Key pair with "
+"the hosted payments flag selected. %2$sFor more details check the Simplify "
+"Commerce docs%3$s."
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:213
+msgid "Hosted Payments"
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:217
+msgid "Modal Color"
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:219
+msgid "Set the color of the buttons and titles on the modal dialog."
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:224
 msgid "Sandbox"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:193
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:225
 msgid "Enable Sandbox Mode"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:195
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:227
 msgid ""
 "Place the payment gateway in sandbox mode using sandbox API keys (real "
 "payments will not be taken)."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:199
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:231
 msgid "Sandbox Public Key"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:201
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:208
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:215
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:222
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:233
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:240
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:247
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:254
 msgid "Get your API keys from your Simplify account: Settings > API Keys."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:206
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:238
 msgid "Sandbox Private Key"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:213
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:245
 msgid "Public Key"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:220
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:252
 msgid "Private Key"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:236
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:268
 msgid "TEST MODE ENABLED. Use a test card: %s"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:261
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:297
 msgid "Expiry Month"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:262
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:298
 msgid "Expiry Year"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:263
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:299
 msgid "is invalid"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:290
-msgid "%s - Order %s"
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:329
+msgid "%s - Order #%s"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:361
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:411
+#: templates/emails/admin-new-order.php:22
+#: templates/emails/customer-completed-order.php:22
+#: templates/emails/customer-invoice.php:26
+#: templates/emails/customer-note.php:26
+#: templates/emails/customer-processing-order.php:22
+msgid "Order #%s"
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:428
+msgid ""
+"Thank you for your order, please click the button below to pay with credit "
+"card using Simplify Commerce by MasterCard."
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:437
+msgid "Pay Now"
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:437
+msgid "Cancel order &amp; restore cart"
+msgstr ""
+
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:519
 msgid "Refund was declined."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:27
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:86
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:33
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:21
 msgid "Flat Rate"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:29
+#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:35
 msgid "Flat rates let you define a standard rate per item, or per order."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:79
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:53
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:10
+msgid "Costs"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:17
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:108
+msgid "Cost"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:17
+msgid "Cost, excluding tax."
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:18
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:116
+msgid "Handling Fee"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:18
+msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:24
+msgid "Any class"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:25
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:26
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:102
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:121
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:129
+#: templates/order/order-details.php:141 templates/order/order-details.php:156
+#: templates/single-product/meta.php:26
+msgid "N/A"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:44
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:79
+msgid "Select a class&hellip;"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:58
+msgid "Add Cost"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:58
+msgid "Delete selected costs"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/html-extra-costs.php:93
+msgid "Delete the selected rates?"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:14
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:54
 msgid "Enable this shipping method"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:83
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:72
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:57
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:18
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:69
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:58
 msgid "Method Title"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:90
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:64
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:25
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:65
 msgid "Availability"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:95
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:84
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:145
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:103
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:30
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:81
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:139
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:92
 msgid "All allowed countries"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:96
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:100
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:85
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:89
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:146
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:150
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:104
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:108
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:31
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:35
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:82
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:86
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:140
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:144
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:93
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:97
 msgid "Specific Countries"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:107
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:96
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:81
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:157
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:115
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:42
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:93
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:83
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:151
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:104
 msgid "Select some countries"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:111
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:85
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:46
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:87
 msgid "Tax Status"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:115
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:89
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:51
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:92
 msgid "Taxable"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:120
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:56
 msgid "Cost per order"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:123
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:59
 msgid "Enter a cost (excluding tax) per order, e.g. 5.00. Default is 0."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:128
-msgid "Additional Rates"
-msgstr ""
-
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:130
-msgid ""
-"Optional extra shipping options with additional costs (one per line): "
-"Option Name | Additional Cost [+- Percents] | Per Cost Type (order, class, "
-"or item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>."
-msgstr ""
-
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:133
-msgid ""
-"Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
-"or item)"
-msgstr ""
-
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:136
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:64
 msgid "Additional Costs"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:138
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:66
 msgid ""
 "Additional costs can be added below - these will all be added to the "
 "per-order cost above."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:141
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:69
 msgid "Costs Added..."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:145
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:98
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:74
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:102
 msgid "Per Order - charge shipping for the entire order as a whole"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:146
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:99
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:75
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:103
 msgid "Per Item - charge shipping for each item individually"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:147
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:100
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:76
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:104
 msgid "Per Class - charge shipping for each shipping class in an order"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:154
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:120
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:83
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:124
 msgid "Minimum Handling Fee"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:157
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:122
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:86
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:126
 msgid ""
 "Enter a minimum fee amount. Fee's less than this will be increased. Leave "
 "blank to disable."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:543
-msgid "Costs"
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:91
+msgid "Add-on Rates"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:550
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:104
-msgid "Cost"
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:93
+msgid ""
+"Add-on rates are extra shipping options with additional costs (based on the "
+"flat rate)."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:550
-msgid "Cost, excluding tax."
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:96
+msgid "Rates"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:551
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:112
-msgid "Handling Fee"
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:98
+msgid ""
+"One per line: Option Name | Additional Cost [+- Percents] | Per Cost Type "
+"(order, class, or item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | "
+"order</code>."
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:551
-msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:101
+msgid ""
+"Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
+"or item)"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:557
-msgid "Any class"
-msgstr ""
-
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:558
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:559
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:104
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:117
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:125
-#: templates/order/order-details.php:129 templates/order/order-details.php:144
-#: templates/single-product/meta.php:26
-msgid "N/A"
-msgstr ""
-
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:577
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:612
-msgid "Select a class&hellip;"
-msgstr ""
-
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:591
-msgid "Add Cost"
-msgstr ""
-
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:591
-msgid "Delete selected costs"
-msgstr ""
-
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:626
-msgid "Delete the selected rates?"
-msgstr ""
-
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:27
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:75
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:135
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:26
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:72
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:131
 msgid "Free Shipping"
 msgstr ""
 
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:68
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:65
 msgid "Enable Free Shipping"
 msgstr ""
 
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:79
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:140
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:98
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:76
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:134
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:87
 msgid "Method availability"
 msgstr ""
 
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:100
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:97
 msgid "Free Shipping Requires..."
 msgstr ""
 
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:105
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:103
 msgid "A valid free shipping coupon"
 msgstr ""
 
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:106
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:104
 msgid "A minimum order amount (defined below)"
 msgstr ""
 
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:107
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:105
 msgid "A minimum order amount OR a coupon"
 msgstr ""
 
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:108
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:106
 msgid "A minimum order amount AND a coupon"
 msgstr ""
 
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:112
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:110
 msgid "Minimum Order Amount"
 msgstr ""
 
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:115
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:113
 msgid ""
 "Users will need to spend this amount to get free shipping (if enabled "
 "above)."
 msgstr ""
 
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:31
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:60
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:32
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:61
 msgid "International Delivery"
 msgstr ""
 
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:32
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:33
 msgid "International delivery based on flat rate shipping."
 msgstr ""
 
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:69
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:71
 msgid "Selected countries"
 msgstr ""
 
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:70
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:72
 msgid "Excluding selected countries"
 msgstr ""
 
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:74
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:76
 msgid "Countries"
 msgstr ""
 
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:94
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:97
 msgid "Cost Added..."
 msgstr ""
 
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:107
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:111
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50. Default is 0"
 msgstr ""
 
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:114
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:118
 msgid ""
 "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. "
 "Leave blank to disable."
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:27
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:108
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:24
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:101
 msgid "Local Delivery"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:99
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:77
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:25
+msgid "Local delivery is a simple shipping method for delivering orders locally."
+msgstr ""
+
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:92
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:66
 msgid "Enable"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:101
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:94
 msgid "Enable local delivery"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:112
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:105
 msgid "Fee Type"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:114
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:108
 msgid "How to calculate delivery charges"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:117
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:111
 msgid "Fixed amount"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:118
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:112
 msgid "Percentage of cart total"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:119
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:113
 msgid "Fixed amount per product"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:124
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:118
 msgid "Delivery Fee"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:126
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:120
 msgid ""
 "What fee do you want to charge for local delivery, disregarded if you "
 "choose free. Leave blank to disable."
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:132
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:90
-msgid "Zip/Post Codes"
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:126
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:79
+msgid "Allowed Zip/Post Codes"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:134
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:128
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:81
+msgid "What zip/post codes are available for local pickup?"
+msgstr ""
+
+#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:130
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:83
 msgid ""
-"What zip/post codes would you like to offer delivery to? Separate codes "
-"with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
+"Separate codes with a comma. Accepts wildcards, e.g. <code>P*</code> will "
+"match a postcode of PE30. Also accepts a pattern, e.g. <code>NG1___</code> "
+"would match NG1 1AA but not NG10 1AA"
 msgstr ""
 
-#: includes/shipping/local-delivery/class-wc-shipping-local-delivery.php:172
-msgid "Local delivery is a simple shipping method for delivering orders locally."
-msgstr ""
-
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:27
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:86
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:24
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:75
 msgid "Local Pickup"
 msgstr ""
 
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:79
-msgid "Enable local pickup"
-msgstr ""
-
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:92
-msgid ""
-"What zip/post codes are available for local pickup? Separate codes with a "
-"comma. Accepts wildcards, e.g. P* will match a postcode of PE30."
-msgstr ""
-
-#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:130
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:25
 msgid ""
 "Local pickup is a simple method which allows the customer to pick up their "
 "order themselves."
+msgstr ""
+
+#: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:68
+msgid "Enable local pickup"
 msgstr ""
 
 #: includes/shortcodes/class-wc-shortcode-cart.php:42
@@ -7836,11 +8023,7 @@ msgstr ""
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:131
 #: templates/checkout/thankyou.php:40
-#: templates/emails/customer-completed-order.php:22
-#: templates/emails/customer-invoice.php:26
-#: templates/emails/customer-note.php:26
-#: templates/emails/customer-processing-order.php:22
-msgid "Order:"
+msgid "Order Number:"
 msgstr ""
 
 #: includes/shortcodes/class-wc-shortcode-checkout.php:135
@@ -7853,12 +8036,7 @@ msgstr ""
 msgid "Total:"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-checkout.php:144
-#: templates/checkout/thankyou.php:53
-msgid "Payment method:"
-msgstr ""
-
-#: includes/shortcodes/class-wc-shortcode-checkout.php:229
+#: includes/shortcodes/class-wc-shortcode-checkout.php:230
 msgid ""
 "The order totals have been updated. Please confirm your order by pressing "
 "the Place Order button at the bottom of the page."
@@ -7876,37 +8054,38 @@ msgstr ""
 msgid "Enter a username or e-mail address."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:242
+#: includes/shortcodes/class-wc-shortcode-my-account.php:243
+#: includes/shortcodes/class-wc-shortcode-my-account.php:248
 msgid "Invalid username or e-mail."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:256
+#: includes/shortcodes/class-wc-shortcode-my-account.php:262
 msgid "Password reset is not allowed for this user"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:285
+#: includes/shortcodes/class-wc-shortcode-my-account.php:291
 msgid "Check your e-mail for the confirmation link."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:305
-#: includes/shortcodes/class-wc-shortcode-my-account.php:310
-#: includes/shortcodes/class-wc-shortcode-my-account.php:326
+#: includes/shortcodes/class-wc-shortcode-my-account.php:311
+#: includes/shortcodes/class-wc-shortcode-my-account.php:316
+#: includes/shortcodes/class-wc-shortcode-my-account.php:332
 msgid "Invalid key"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:363
+#: includes/shortcodes/class-wc-shortcode-my-account.php:369
 msgid "Add a new payment method."
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-order-tracking.php:53
+#: includes/shortcodes/class-wc-shortcode-order-tracking.php:51
 msgid "Please enter a valid order ID"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-order-tracking.php:57
+#: includes/shortcodes/class-wc-shortcode-order-tracking.php:55
 msgid "Please enter a valid order email"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-order-tracking.php:76
+#: includes/shortcodes/class-wc-shortcode-order-tracking.php:74
 msgid "Sorry, we could not find that order id in our database."
 msgstr ""
 
@@ -7914,35 +8093,35 @@ msgstr ""
 msgid "This product is protected and cannot be purchased."
 msgstr ""
 
-#: includes/wc-cart-functions.php:83
+#: includes/wc-cart-functions.php:85
 msgid "Added &quot;%s&quot; to your cart."
 msgstr ""
 
-#: includes/wc-cart-functions.php:83
+#: includes/wc-cart-functions.php:85
 msgid "&quot; and &quot;"
 msgstr ""
 
-#: includes/wc-cart-functions.php:86
+#: includes/wc-cart-functions.php:88
 msgid "&quot;%s&quot; was successfully added to your cart."
 msgstr ""
 
-#: includes/wc-cart-functions.php:94
+#: includes/wc-cart-functions.php:96
 msgid "Continue Shopping"
 msgstr ""
 
-#: includes/wc-cart-functions.php:194
+#: includes/wc-cart-functions.php:190
 msgid "Coupon:"
 msgstr ""
 
-#: includes/wc-cart-functions.php:220
+#: includes/wc-cart-functions.php:216
 msgid "Free shipping coupon"
 msgstr ""
 
-#: includes/wc-cart-functions.php:226
+#: includes/wc-cart-functions.php:222
 msgid "[Remove]"
 msgstr ""
 
-#: includes/wc-cart-functions.php:289
+#: includes/wc-cart-functions.php:285
 msgid "Free"
 msgstr ""
 
@@ -7958,339 +8137,341 @@ msgstr ""
 msgid "Invalid order ID"
 msgstr ""
 
-#: includes/wc-core-functions.php:251 tests/unit-tests/core-functions.php:28
+#: includes/wc-core-functions.php:253
 msgid "United Arab Emirates Dirham"
 msgstr ""
 
-#: includes/wc-core-functions.php:252 tests/unit-tests/core-functions.php:29
+#: includes/wc-core-functions.php:254
 msgid "Australian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:253 tests/unit-tests/core-functions.php:30
+#: includes/wc-core-functions.php:255
 msgid "Bangladeshi Taka"
 msgstr ""
 
-#: includes/wc-core-functions.php:254 tests/unit-tests/core-functions.php:31
+#: includes/wc-core-functions.php:256
 msgid "Brazilian Real"
 msgstr ""
 
-#: includes/wc-core-functions.php:255 tests/unit-tests/core-functions.php:32
+#: includes/wc-core-functions.php:257
 msgid "Bulgarian Lev"
 msgstr ""
 
-#: includes/wc-core-functions.php:256 tests/unit-tests/core-functions.php:33
+#: includes/wc-core-functions.php:258
 msgid "Canadian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:257 tests/unit-tests/core-functions.php:34
+#: includes/wc-core-functions.php:259
 msgid "Chilean Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:258 tests/unit-tests/core-functions.php:35
+#: includes/wc-core-functions.php:260
 msgid "Chinese Yuan"
 msgstr ""
 
-#: includes/wc-core-functions.php:259 tests/unit-tests/core-functions.php:36
+#: includes/wc-core-functions.php:261
 msgid "Colombian Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:260 tests/unit-tests/core-functions.php:37
+#: includes/wc-core-functions.php:262
 msgid "Czech Koruna"
 msgstr ""
 
-#: includes/wc-core-functions.php:261 tests/unit-tests/core-functions.php:38
+#: includes/wc-core-functions.php:263
 msgid "Danish Krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:262 tests/unit-tests/core-functions.php:39
+#: includes/wc-core-functions.php:264
 msgid "Dominican Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:263 tests/unit-tests/core-functions.php:40
+#: includes/wc-core-functions.php:265
 msgid "Euros"
 msgstr ""
 
-#: includes/wc-core-functions.php:264 tests/unit-tests/core-functions.php:41
+#: includes/wc-core-functions.php:266
 msgid "Hong Kong Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:265 tests/unit-tests/core-functions.php:42
+#: includes/wc-core-functions.php:267
 msgid "Croatia kuna"
 msgstr ""
 
-#: includes/wc-core-functions.php:266 tests/unit-tests/core-functions.php:43
+#: includes/wc-core-functions.php:268
 msgid "Hungarian Forint"
 msgstr ""
 
-#: includes/wc-core-functions.php:267 tests/unit-tests/core-functions.php:44
+#: includes/wc-core-functions.php:269
 msgid "Icelandic krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:268 tests/unit-tests/core-functions.php:45
+#: includes/wc-core-functions.php:270
 msgid "Indonesia Rupiah"
 msgstr ""
 
-#: includes/wc-core-functions.php:269 tests/unit-tests/core-functions.php:46
+#: includes/wc-core-functions.php:271
 msgid "Indian Rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:270 tests/unit-tests/core-functions.php:47
+#: includes/wc-core-functions.php:272
 msgid "Nepali Rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:271 tests/unit-tests/core-functions.php:48
+#: includes/wc-core-functions.php:273
 msgid "Israeli Shekel"
 msgstr ""
 
-#: includes/wc-core-functions.php:272 tests/unit-tests/core-functions.php:49
+#: includes/wc-core-functions.php:274
 msgid "Japanese Yen"
 msgstr ""
 
-#: includes/wc-core-functions.php:273 tests/unit-tests/core-functions.php:50
+#: includes/wc-core-functions.php:275
 msgid "Lao Kip"
 msgstr ""
 
-#: includes/wc-core-functions.php:274 tests/unit-tests/core-functions.php:51
+#: includes/wc-core-functions.php:276
 msgid "South Korean Won"
 msgstr ""
 
-#: includes/wc-core-functions.php:275 tests/unit-tests/core-functions.php:52
+#: includes/wc-core-functions.php:277
 msgid "Malaysian Ringgits"
 msgstr ""
 
-#: includes/wc-core-functions.php:276 tests/unit-tests/core-functions.php:53
+#: includes/wc-core-functions.php:278
 msgid "Mexican Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:277 tests/unit-tests/core-functions.php:54
+#: includes/wc-core-functions.php:279
 msgid "Nigerian Naira"
 msgstr ""
 
-#: includes/wc-core-functions.php:278 tests/unit-tests/core-functions.php:55
+#: includes/wc-core-functions.php:280
 msgid "Norwegian Krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:279 tests/unit-tests/core-functions.php:56
+#: includes/wc-core-functions.php:281
 msgid "New Zealand Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:280 tests/unit-tests/core-functions.php:57
+#: includes/wc-core-functions.php:282
 msgid "Paraguayan Guaraní"
 msgstr ""
 
-#: includes/wc-core-functions.php:281 tests/unit-tests/core-functions.php:58
+#: includes/wc-core-functions.php:283
 msgid "Philippine Pesos"
 msgstr ""
 
-#: includes/wc-core-functions.php:282 tests/unit-tests/core-functions.php:59
+#: includes/wc-core-functions.php:284
 msgid "Polish Zloty"
 msgstr ""
 
-#: includes/wc-core-functions.php:283 tests/unit-tests/core-functions.php:60
+#: includes/wc-core-functions.php:285
 msgid "Pounds Sterling"
 msgstr ""
 
-#: includes/wc-core-functions.php:284 tests/unit-tests/core-functions.php:61
+#: includes/wc-core-functions.php:286
 msgid "Romanian Leu"
 msgstr ""
 
-#: includes/wc-core-functions.php:285 tests/unit-tests/core-functions.php:62
+#: includes/wc-core-functions.php:287
 msgid "Russian Ruble"
 msgstr ""
 
-#: includes/wc-core-functions.php:286 tests/unit-tests/core-functions.php:63
+#: includes/wc-core-functions.php:288
 msgid "Singapore Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:287 tests/unit-tests/core-functions.php:64
+#: includes/wc-core-functions.php:289
 msgid "South African rand"
 msgstr ""
 
-#: includes/wc-core-functions.php:288 tests/unit-tests/core-functions.php:65
+#: includes/wc-core-functions.php:290
 msgid "Swedish Krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:289 tests/unit-tests/core-functions.php:66
+#: includes/wc-core-functions.php:291
 msgid "Swiss Franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:290 tests/unit-tests/core-functions.php:67
+#: includes/wc-core-functions.php:292
 msgid "Taiwan New Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:291 tests/unit-tests/core-functions.php:68
+#: includes/wc-core-functions.php:293
 msgid "Thai Baht"
 msgstr ""
 
-#: includes/wc-core-functions.php:292 tests/unit-tests/core-functions.php:69
+#: includes/wc-core-functions.php:294
 msgid "Turkish Lira"
 msgstr ""
 
-#: includes/wc-core-functions.php:293 tests/unit-tests/core-functions.php:70
+#: includes/wc-core-functions.php:295
+msgid "Ukrainian Hryvnia"
+msgstr ""
+
+#: includes/wc-core-functions.php:296
 msgid "US Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:294 tests/unit-tests/core-functions.php:71
+#: includes/wc-core-functions.php:297
 msgid "Vietnamese Dong"
 msgstr ""
 
-#: includes/wc-core-functions.php:295 tests/unit-tests/core-functions.php:72
+#: includes/wc-core-functions.php:298
 msgid "Egyptian Pound"
 msgstr ""
 
-#: includes/wc-coupon-functions.php:24 tests/unit-tests/coupon-functions.php:17
+#: includes/wc-coupon-functions.php:24
 msgid "Cart Discount"
 msgstr ""
 
-#: includes/wc-coupon-functions.php:25 tests/unit-tests/coupon-functions.php:18
+#: includes/wc-coupon-functions.php:25
 msgid "Cart % Discount"
 msgstr ""
 
-#: includes/wc-coupon-functions.php:26 tests/unit-tests/coupon-functions.php:19
+#: includes/wc-coupon-functions.php:26
 msgid "Product Discount"
 msgstr ""
 
-#: includes/wc-coupon-functions.php:27 tests/unit-tests/coupon-functions.php:20
+#: includes/wc-coupon-functions.php:27
 msgid "Product % Discount"
 msgstr ""
 
-#: includes/wc-deprecated-functions.php:711
+#: includes/wc-deprecated-functions.php:707
 msgid ""
 "The shop_order_status taxonomy is no more in WooCommerce 2.2! You should "
 "use the new WooCommerce post_status instead, <a href=\"%s\">read more...</a>"
 msgstr ""
 
-#: includes/wc-deprecated-functions.php:715
+#: includes/wc-deprecated-functions.php:711
 msgid ""
 "The \"publish\" order status is no more in WooCommerce 2.2! You should use "
 "the new WooCommerce post_status instead, <a href=\"%s\">read more...</a>"
 msgstr ""
 
-#: includes/wc-order-functions.php:483
+#: includes/wc-notice-functions.php:27 includes/wc-notice-functions.php:59
+#: includes/wc-notice-functions.php:77 includes/wc-notice-functions.php:100
+#: includes/wc-notice-functions.php:113 includes/wc-notice-functions.php:159
+msgid "This function should not be called before woocommerce_init."
+msgstr ""
+
+#: includes/wc-order-functions.php:502
 msgid "Unpaid order cancelled - time limit reached."
 msgstr ""
 
-#: includes/wc-order-functions.php:578
+#: includes/wc-order-functions.php:598
 msgid "Refund &ndash; %s"
 msgstr ""
 
-#: includes/wc-product-functions.php:492
+#: includes/wc-product-functions.php:495
 msgid "Simple product"
 msgstr ""
 
-#: includes/wc-product-functions.php:493
+#: includes/wc-product-functions.php:496
 msgid "Grouped product"
 msgstr ""
 
-#: includes/wc-product-functions.php:494
+#: includes/wc-product-functions.php:497
 msgid "External/Affiliate product"
 msgstr ""
 
-#: includes/wc-product-functions.php:495
+#: includes/wc-product-functions.php:498
 msgid "Variable product"
 msgstr ""
 
-#: includes/wc-template-functions.php:122
+#: includes/wc-template-functions.php:135
 msgid "New products"
 msgstr ""
 
-#: includes/wc-template-functions.php:130
+#: includes/wc-template-functions.php:143
 msgid "New products added to %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:138
+#: includes/wc-template-functions.php:151
 msgid "New products tagged %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:384
+#: includes/wc-template-functions.php:387
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
 msgstr ""
 
-#: includes/wc-template-functions.php:403
+#: includes/wc-template-functions.php:406
 msgid "Search Results: &ldquo;%s&rdquo;"
 msgstr ""
 
-#: includes/wc-template-functions.php:406
+#: includes/wc-template-functions.php:409
 msgid "&nbsp;&ndash; Page %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:657
+#: includes/wc-template-functions.php:640
 msgid "Default sorting"
 msgstr ""
 
-#: includes/wc-template-functions.php:658
+#: includes/wc-template-functions.php:641
 msgid "Sort by popularity"
 msgstr ""
 
-#: includes/wc-template-functions.php:659
+#: includes/wc-template-functions.php:642
 msgid "Sort by average rating"
 msgstr ""
 
-#: includes/wc-template-functions.php:660
+#: includes/wc-template-functions.php:643
 msgid "Sort by newness"
 msgstr ""
 
-#: includes/wc-template-functions.php:661
+#: includes/wc-template-functions.php:644
 msgid "Sort by price: low to high"
 msgstr ""
 
-#: includes/wc-template-functions.php:662
+#: includes/wc-template-functions.php:645
 msgid "Sort by price: high to low"
 msgstr ""
 
-#: includes/wc-template-functions.php:1015
+#: includes/wc-template-functions.php:958
 #: templates/checkout/form-shipping.php:58
 #: templates/single-product/tabs/additional-information.php:16
 msgid "Additional Information"
 msgstr ""
 
-#: includes/wc-template-functions.php:1024
+#: includes/wc-template-functions.php:967
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1115
+#: includes/wc-template-functions.php:1051
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
 msgstr ""
 
-#: includes/wc-template-functions.php:1577
-msgid "Order Again"
+#: includes/wc-template-functions.php:1147
+msgid "Proceed to Checkout"
 msgstr ""
 
-#: includes/wc-template-functions.php:1673
+#: includes/wc-template-functions.php:1266
+msgid "Place order"
+msgstr ""
+
+#: includes/wc-template-functions.php:1640
 #: templates/cart/shipping-calculator.php:30
 msgid "Select a country&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1680
+#: includes/wc-template-functions.php:1648
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:1717
+#: includes/wc-template-functions.php:1688
 #: templates/cart/shipping-calculator.php:54
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1875
-msgid "Search for:"
-msgstr ""
-
-#: includes/wc-template-functions.php:1876
-msgid "Search for products"
-msgstr ""
-
-#: includes/wc-template-functions.php:1877
-msgid "Search"
-msgstr ""
-
-#: includes/wc-term-functions.php:146
+#: includes/wc-term-functions.php:167
 msgid "Select a category"
 msgstr ""
 
-#: includes/wc-term-functions.php:149
+#: includes/wc-term-functions.php:170
 msgid "Uncategorized"
 msgstr ""
 
@@ -8316,6 +8497,18 @@ msgid ""
 "have problems."
 msgstr ""
 
+#: includes/wc-webhook-functions.php:23
+msgid "Active"
+msgstr ""
+
+#: includes/wc-webhook-functions.php:24
+msgid "Paused"
+msgstr ""
+
+#: includes/wc-webhook-functions.php:25
+msgid "Disabled"
+msgstr ""
+
 #: includes/widgets/class-wc-widget-cart.php:25
 msgid "Display the user's Cart in the sidebar."
 msgstr ""
@@ -8325,7 +8518,6 @@ msgid "WooCommerce Cart"
 msgstr ""
 
 #: includes/widgets/class-wc-widget-cart.php:31
-#: includes/widgets/class-wc-widget-cart.php:58
 msgid "Cart"
 msgstr ""
 
@@ -8345,17 +8537,17 @@ msgstr ""
 msgid "Active Filters"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav-filters.php:87
-#: includes/widgets/class-wc-widget-layered-nav-filters.php:94
-#: includes/widgets/class-wc-widget-layered-nav-filters.php:99
+#: includes/widgets/class-wc-widget-layered-nav-filters.php:81
+#: includes/widgets/class-wc-widget-layered-nav-filters.php:88
+#: includes/widgets/class-wc-widget-layered-nav-filters.php:93
 msgid "Remove filter"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav-filters.php:94
+#: includes/widgets/class-wc-widget-layered-nav-filters.php:88
 msgid "Min"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav-filters.php:99
+#: includes/widgets/class-wc-widget-layered-nav-filters.php:93
 msgid "Max"
 msgstr ""
 
@@ -8369,39 +8561,39 @@ msgstr ""
 msgid "WooCommerce Layered Nav"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav.php:71
+#: includes/widgets/class-wc-widget-layered-nav.php:81
 msgid "Filter by"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav.php:77
+#: includes/widgets/class-wc-widget-layered-nav.php:87
 msgid "Attribute"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav.php:83
+#: includes/widgets/class-wc-widget-layered-nav.php:93
 msgid "Display type"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav.php:85
+#: includes/widgets/class-wc-widget-layered-nav.php:95
 msgid "List"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav.php:86
+#: includes/widgets/class-wc-widget-layered-nav.php:96
 msgid "Dropdown"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav.php:92
+#: includes/widgets/class-wc-widget-layered-nav.php:102
 msgid "Query type"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav.php:94
+#: includes/widgets/class-wc-widget-layered-nav.php:104
 msgid "AND"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav.php:95
+#: includes/widgets/class-wc-widget-layered-nav.php:105
 msgid "OR"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-layered-nav.php:176
+#: includes/widgets/class-wc-widget-layered-nav.php:187
 msgid "Any %s"
 msgstr ""
 
@@ -8419,56 +8611,56 @@ msgstr ""
 msgid "Filter by price"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-price-filter.php:162
+#: includes/widgets/class-wc-widget-price-filter.php:168
 msgid "Min price"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-price-filter.php:163
+#: includes/widgets/class-wc-widget-price-filter.php:169
 msgid "Max price"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-price-filter.php:164
+#: includes/widgets/class-wc-widget-price-filter.php:170
 msgid "Filter"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-price-filter.php:166
+#: includes/widgets/class-wc-widget-price-filter.php:172
 msgid "Price:"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:26
+#: includes/widgets/class-wc-widget-product-categories.php:37
 msgid "A list or dropdown of product categories."
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:28
+#: includes/widgets/class-wc-widget-product-categories.php:39
 msgid "WooCommerce Product Categories"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:38
+#: includes/widgets/class-wc-widget-product-categories.php:49
 #: includes/widgets/class-wc-widget-products.php:53
 msgid "Order by"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:40
+#: includes/widgets/class-wc-widget-product-categories.php:51
 msgid "Category Order"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:47
+#: includes/widgets/class-wc-widget-product-categories.php:58
 msgid "Show as dropdown"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:52
-msgid "Show post counts"
+#: includes/widgets/class-wc-widget-product-categories.php:63
+msgid "Show product counts"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:57
+#: includes/widgets/class-wc-widget-product-categories.php:68
 msgid "Show hierarchy"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:62
+#: includes/widgets/class-wc-widget-product-categories.php:73
 msgid "Only show children of the current category"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-product-categories.php:220
+#: includes/widgets/class-wc-widget-product-categories.php:225
 msgid "No product categories exist."
 msgstr ""
 
@@ -8519,11 +8711,12 @@ msgid "On-sale Products"
 msgstr ""
 
 #: includes/widgets/class-wc-widget-products.php:55
-#: templates/myaccount/my-orders.php:33
+#: templates/myaccount/my-orders.php:33 templates/myaccount/my-orders.php:52
 msgid "Date"
 msgstr ""
 
 #: includes/widgets/class-wc-widget-products.php:56 templates/cart/cart.php:28
+#: templates/emails/admin-cancelled-order.php:24
 #: templates/emails/admin-new-order.php:29
 #: templates/emails/customer-completed-order.php:29
 #: templates/emails/customer-invoice.php:33
@@ -8640,25 +8833,26 @@ msgstr ""
 msgid "Cart Totals"
 msgstr ""
 
-#: templates/cart/cart-totals.php:24 templates/checkout/review-order.php:54
+#: templates/cart/cart-totals.php:24 templates/checkout/review-order.php:50
 msgid "Cart Subtotal"
 msgstr ""
 
-#: templates/cart/cart-totals.php:78 templates/checkout/review-order.php:108
+#: templates/cart/cart-totals.php:71 templates/checkout/review-order.php:97
 msgid "Order Total"
 msgstr ""
 
-#: templates/cart/cart-totals.php:90
+#: templates/cart/cart-totals.php:83
 msgid " (taxes estimated for %s)"
 msgstr ""
 
-#: templates/cart/cart-totals.php:93
+#: templates/cart/cart-totals.php:86
 msgid ""
 "Note: Shipping and taxes are estimated%s and will be updated during "
 "checkout based on your billing and shipping information."
 msgstr ""
 
-#: templates/cart/cart.php:29 templates/emails/admin-new-order.php:28
+#: templates/cart/cart.php:29 templates/emails/admin-cancelled-order.php:23
+#: templates/emails/admin-new-order.php:28
 #: templates/emails/customer-completed-order.php:28
 #: templates/emails/customer-invoice.php:32
 #: templates/emails/customer-note.php:32
@@ -8666,12 +8860,13 @@ msgstr ""
 msgid "Quantity"
 msgstr ""
 
-#: templates/cart/cart.php:30 templates/checkout/review-order.php:22
-#: templates/myaccount/my-orders.php:35 templates/order/order-details.php:22
+#: templates/cart/cart.php:30 templates/checkout/review-order.php:18
+#: templates/myaccount/my-orders.php:35 templates/myaccount/my-orders.php:58
+#: templates/order/order-details.php:22
 msgid "Total"
 msgstr ""
 
-#: templates/cart/cart.php:47
+#: templates/cart/cart.php:47 templates/cart/mini-cart.php:36
 msgid "Remove this item"
 msgstr ""
 
@@ -8685,10 +8880,6 @@ msgstr ""
 
 #: templates/cart/cart.php:126
 msgid "Update Cart"
-msgstr ""
-
-#: templates/cart/cart.php:126
-msgid "Proceed to Checkout"
 msgstr ""
 
 #: templates/cart/cross-sells.php:40
@@ -8735,19 +8926,19 @@ msgstr ""
 msgid "Return To Cart"
 msgstr ""
 
-#: templates/checkout/form-billing.php:18
+#: templates/checkout/form-billing.php:19
 msgid "Billing &amp; Shipping"
 msgstr ""
 
-#: templates/checkout/form-billing.php:22
+#: templates/checkout/form-billing.php:23
 msgid "Billing Details"
 msgstr ""
 
-#: templates/checkout/form-billing.php:41
+#: templates/checkout/form-billing.php:42
 msgid "Create an account?"
 msgstr ""
 
-#: templates/checkout/form-billing.php:52
+#: templates/checkout/form-billing.php:53
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
@@ -8757,7 +8948,7 @@ msgstr ""
 msgid "You must be logged in to checkout."
 msgstr ""
 
-#: templates/checkout/form-checkout.php:51
+#: templates/checkout/form-checkout.php:45
 msgid "Your order"
 msgstr ""
 
@@ -8811,18 +9002,18 @@ msgstr ""
 msgid "Ship to a different address?"
 msgstr ""
 
-#: templates/checkout/review-order.php:153
+#: templates/checkout/payment.php:26
 msgid "Please fill in your details above to see available payment methods."
 msgstr ""
 
-#: templates/checkout/review-order.php:155
+#: templates/checkout/payment.php:28
 msgid ""
 "Sorry, it seems that there are no available payment methods for your state. "
 "Please contact us if you require assistance or wish to make alternate "
 "arrangements."
 msgstr ""
 
-#: templates/checkout/review-order.php:166
+#: templates/checkout/payment.php:39
 msgid ""
 "Since your browser does not support JavaScript, or it is disabled, please "
 "ensure you click the <em>Update Totals</em> button before placing your "
@@ -8830,15 +9021,11 @@ msgid ""
 "do so."
 msgstr ""
 
-#: templates/checkout/review-order.php:166
+#: templates/checkout/payment.php:39
 msgid "Update totals"
 msgstr ""
 
-#: templates/checkout/review-order.php:173
-msgid "Place order"
-msgstr ""
-
-#: templates/checkout/review-order.php:182
+#: templates/checkout/payment.php:49
 msgid ""
 "I&rsquo;ve read and accept the <a href=\"%s\" target=\"_blank\">terms &amp; "
 "conditions</a>"
@@ -8866,45 +9053,29 @@ msgstr ""
 msgid "Thank you. Your order has been received."
 msgstr ""
 
-#: templates/emails/admin-new-order.php:18
-#: templates/emails/plain/admin-new-order.php:16
-msgid "You have received an order from %s. Their order is as follows:"
+#: templates/emails/admin-cancelled-order.php:13
+#: templates/emails/plain/admin-cancelled-order.php:13
+msgid "The order #%d from %s has been cancelled. The order was as follows:"
 msgstr ""
 
-#: templates/emails/admin-new-order.php:22
+#: templates/emails/admin-cancelled-order.php:17
 msgid "Order: %s"
 msgstr ""
 
-#: templates/emails/admin-new-order.php:55
-#: templates/emails/customer-completed-order.php:55
-#: templates/emails/customer-note.php:59
-#: templates/emails/customer-processing-order.php:55
-#: templates/emails/plain/admin-new-order.php:42
-#: templates/order/order-details.php:104
-msgid "Customer details"
-msgstr ""
-
-#: templates/emails/admin-new-order.php:58
-#: templates/emails/customer-completed-order.php:58
-#: templates/emails/customer-note.php:62
-#: templates/emails/customer-processing-order.php:58
-#: templates/emails/plain/admin-new-order.php:45
-#: templates/emails/plain/customer-completed-order.php:44
-#: templates/emails/plain/customer-note.php:52
-#: templates/emails/plain/customer-processing-order.php:44
-#: templates/order/order-details.php:108
+#: templates/emails/admin-cancelled-order.php:53
+#: templates/emails/plain/admin-cancelled-order.php:42
+#: templates/order/order-details.php:120
 msgid "Email:"
 msgstr ""
 
-#: templates/emails/admin-new-order.php:61
-#: templates/emails/customer-completed-order.php:61
-#: templates/emails/customer-note.php:65
-#: templates/emails/customer-processing-order.php:61
-#: templates/emails/plain/admin-new-order.php:48
-#: templates/emails/plain/customer-completed-order.php:47
-#: templates/emails/plain/customer-note.php:55
-#: templates/emails/plain/customer-processing-order.php:47
+#: templates/emails/admin-cancelled-order.php:56
+#: templates/emails/plain/admin-cancelled-order.php:45
 msgid "Tel:"
+msgstr ""
+
+#: templates/emails/admin-new-order.php:18
+#: templates/emails/plain/admin-new-order.php:16
+msgid "You have received an order from %s. Their order is as follows:"
 msgstr ""
 
 #: templates/emails/customer-completed-order.php:18
@@ -8992,20 +9163,21 @@ msgstr ""
 msgid "Shipping address"
 msgstr ""
 
-#: templates/emails/email-order-items.php:23
+#: templates/emails/email-order-items.php:25
 msgid "Product Image"
-msgstr ""
-
-#: templates/emails/email-order-items.php:52
-#: templates/emails/plain/email-order-items.php:47
-msgid "Download %d"
 msgstr ""
 
 #: templates/emails/email-order-items.php:54
 #: templates/emails/plain/email-order-items.php:49
+msgid "Download %d"
+msgstr ""
+
+#: templates/emails/email-order-items.php:56
+#: templates/emails/plain/email-order-items.php:51
 msgid "Download"
 msgstr ""
 
+#: templates/emails/plain/admin-cancelled-order.php:19
 #: templates/emails/plain/admin-new-order.php:22
 #: templates/emails/plain/customer-completed-order.php:22
 #: templates/emails/plain/customer-invoice.php:23
@@ -9014,10 +9186,12 @@ msgstr ""
 msgid "Order number: %s"
 msgstr ""
 
+#: templates/emails/plain/admin-cancelled-order.php:20
 #: templates/emails/plain/admin-new-order.php:23
 msgid "Order link: %s"
 msgstr ""
 
+#: templates/emails/plain/admin-cancelled-order.php:21
 #: templates/emails/plain/admin-new-order.php:24
 #: templates/emails/plain/customer-completed-order.php:23
 #: templates/emails/plain/customer-invoice.php:24
@@ -9026,50 +9200,21 @@ msgstr ""
 msgid "Order date: %s"
 msgstr ""
 
+#: templates/emails/plain/admin-cancelled-order.php:21
 #: templates/emails/plain/admin-new-order.php:24
 msgid "jS F Y"
-msgstr ""
-
-#: templates/emails/plain/customer-completed-order.php:41
-#: templates/emails/plain/customer-note.php:49
-#: templates/emails/plain/customer-processing-order.php:41
-msgid "Your details"
 msgstr ""
 
 #: templates/emails/plain/customer-new-account.php:19
 msgid "Your password is <strong>%s</strong>."
 msgstr ""
 
-#: templates/emails/plain/email-order-items.php:33
+#: templates/emails/plain/email-order-items.php:35
 msgid "Quantity: %s"
 msgstr ""
 
-#: templates/emails/plain/email-order-items.php:36
+#: templates/emails/plain/email-order-items.php:38
 msgid "Cost: %s"
-msgstr ""
-
-#: templates/global/breadcrumb.php:72
-msgid "Products tagged &ldquo;"
-msgstr ""
-
-#: templates/global/breadcrumb.php:100 templates/global/breadcrumb.php:202
-msgid "Search results for &ldquo;"
-msgstr ""
-
-#: templates/global/breadcrumb.php:156
-msgid "Error 404"
-msgstr ""
-
-#: templates/global/breadcrumb.php:206
-msgid "Posts tagged &ldquo;"
-msgstr ""
-
-#: templates/global/breadcrumb.php:211
-msgid "Author:"
-msgstr ""
-
-#: templates/global/breadcrumb.php:216
-msgid "Page"
 msgstr ""
 
 #: templates/global/form-login.php:26
@@ -9113,10 +9258,6 @@ msgid ""
 "make alternate arrangements."
 msgstr ""
 
-#: templates/myaccount/form-add-payment-method.php:49
-msgid "Add Payment Method"
-msgstr ""
-
 #: templates/myaccount/form-edit-account.php:23
 msgid "First name"
 msgstr ""
@@ -9125,39 +9266,39 @@ msgstr ""
 msgid "Last name"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:31
+#: templates/myaccount/form-edit-account.php:33
 #: templates/myaccount/form-login.php:82
 msgid "Email address"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:36
+#: templates/myaccount/form-edit-account.php:38
 msgid "Password Change"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:39
+#: templates/myaccount/form-edit-account.php:41
 msgid "Current Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:43
+#: templates/myaccount/form-edit-account.php:45
 msgid "New Password (leave blank to leave unchanged)"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:47
+#: templates/myaccount/form-edit-account.php:49
 msgid "Confirm New Password"
 msgstr ""
 
-#: templates/myaccount/form-edit-account.php:57
+#: templates/myaccount/form-edit-account.php:59
 msgid "Save changes"
 msgstr ""
 
 #: templates/myaccount/form-edit-address.php:16
 #: templates/myaccount/my-address.php:19 templates/myaccount/my-address.php:25
-#: templates/order/order-details.php:125
+#: templates/order/order-details.php:137
 msgid "Billing Address"
 msgstr ""
 
 #: templates/myaccount/form-edit-address.php:16
-#: templates/myaccount/my-address.php:20 templates/order/order-details.php:140
+#: templates/myaccount/my-address.php:20 templates/order/order-details.php:152
 msgid "Shipping Address"
 msgstr ""
 
@@ -9199,11 +9340,11 @@ msgstr ""
 msgid "Re-enter new password"
 msgstr ""
 
-#: templates/myaccount/form-lost-password.php:46
+#: templates/myaccount/form-lost-password.php:48
 msgid "Reset Password"
 msgstr ""
 
-#: templates/myaccount/form-lost-password.php:46
+#: templates/myaccount/form-lost-password.php:48
 msgid "Save"
 msgstr ""
 
@@ -9248,8 +9389,12 @@ msgstr[1] ""
 msgid "Recent Orders"
 msgstr ""
 
-#: templates/myaccount/my-orders.php:34
+#: templates/myaccount/my-orders.php:34 templates/myaccount/my-orders.php:55
 msgid "Status"
+msgstr ""
+
+#: templates/myaccount/my-orders.php:47
+msgid "Order Number"
 msgstr ""
 
 #: templates/myaccount/my-orders.php:59
@@ -9268,7 +9413,7 @@ msgstr ""
 
 #: templates/myaccount/view-order.php:20
 msgid ""
-"Order <mark class=\"order-number\">%s</mark> was placed on <mark "
+"Order #<mark class=\"order-number\">%s</mark> was placed on <mark "
 "class=\"order-date\">%s</mark> and is currently <mark "
 "class=\"order-status\">%s</mark>."
 msgstr ""
@@ -9284,8 +9429,8 @@ msgstr ""
 #: templates/order/form-tracking.php:20
 msgid ""
 "To track your order please enter your Order ID in the box below and press "
-"return. This was given to you on your receipt and in the confirmation email "
-"you should have received."
+"the \"Track\" button. This was given to you on your receipt and in the "
+"confirmation email you should have received."
 msgstr ""
 
 #: templates/order/form-tracking.php:22
@@ -9308,20 +9453,32 @@ msgstr ""
 msgid "Track"
 msgstr ""
 
+#: templates/order/order-again.php:16
+msgid "Order Again"
+msgstr ""
+
 #: templates/order/order-details.php:17
 msgid "Order Details"
 msgstr ""
 
-#: templates/order/order-details.php:58
+#: templates/order/order-details.php:59
 msgid "Download file%s"
 msgstr ""
 
-#: templates/order/order-details.php:109
+#: templates/order/order-details.php:104
+msgid "Note:"
+msgstr ""
+
+#: templates/order/order-details.php:121
 msgid "Telephone:"
 msgstr ""
 
+#: templates/order/order-details.php:121
+msgid "Telephone"
+msgstr ""
+
 #: templates/order/tracking.php:14
-msgid "Order %s which was made %s has the status &ldquo;%s&rdquo;"
+msgid "Order #%s which was made %s has the status &ldquo;%s&rdquo;"
 msgstr ""
 
 #: templates/order/tracking.php:14
@@ -9336,15 +9493,19 @@ msgstr ""
 msgid " ago"
 msgstr ""
 
-#: templates/single-product/add-to-cart/variable.php:28
+#: templates/product-searchform.php:2
+msgid "Search for:"
+msgstr ""
+
+#: templates/single-product/add-to-cart/variable.php:27
 msgid "Choose an option"
 msgstr ""
 
-#: templates/single-product/add-to-cart/variable.php:76
+#: templates/single-product/add-to-cart/variable.php:62
 msgid "Clear selection"
 msgstr ""
 
-#: templates/single-product/add-to-cart/variable.php:106
+#: templates/single-product/add-to-cart/variable.php:93
 msgid "This product is currently out of stock and unavailable."
 msgstr ""
 
@@ -9428,10 +9589,6 @@ msgstr ""
 msgid "Leave a Reply to %s"
 msgstr ""
 
-#: templates/single-product-reviews.php:67
-msgid "Email"
-msgstr ""
-
 #: templates/single-product-reviews.php:70
 msgid "Submit"
 msgstr ""
@@ -9493,205 +9650,224 @@ msgctxt "US state of Georgia"
 msgid "Georgia"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:871
-msgctxt "hash before order number"
-msgid "#"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-product.php:909
+#: includes/abstracts/abstract-wc-product.php:926
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
 
-#: includes/api/class-wc-api-webhooks.php:191
+#: includes/api/class-wc-api-webhooks.php:194
 msgctxt "Webhook created on date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr ""
 
-#: includes/class-wc-checkout.php:98
+#: includes/class-wc-checkout.php:97
 msgctxt "placeholder"
 msgid "Username"
 msgstr ""
 
-#: includes/class-wc-checkout.php:107
+#: includes/class-wc-checkout.php:106
 msgctxt "placeholder"
 msgid "Password"
 msgstr ""
 
-#: includes/class-wc-checkout.php:116
+#: includes/class-wc-checkout.php:115
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
 msgstr ""
 
-#: includes/class-wc-countries.php:513
+#: includes/class-wc-countries.php:525
 msgctxt "placeholder"
 msgid "Street address"
 msgstr ""
 
-#: includes/class-wc-countries.php:518
+#: includes/class-wc-countries.php:530
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
 msgstr ""
 
-#: includes/class-wc-install.php:227
+#: templates/product-searchform.php:3
+msgctxt "placeholder"
+msgid "Search Products&hellip;"
+msgstr ""
+
+#: includes/class-wc-install.php:190
 msgctxt "Page slug"
 msgid "shop"
 msgstr ""
 
-#: includes/class-wc-install.php:232
+#: includes/class-wc-install.php:195
 msgctxt "Page slug"
 msgid "cart"
 msgstr ""
 
-#: includes/class-wc-install.php:237
+#: includes/class-wc-install.php:200
 msgctxt "Page slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:242
+#: includes/class-wc-install.php:205
 msgctxt "Page slug"
 msgid "my-account"
 msgstr ""
 
-#: includes/class-wc-install.php:228
+#: includes/class-wc-install.php:191
 msgctxt "Page title"
 msgid "Shop"
 msgstr ""
 
-#: includes/class-wc-install.php:233
+#: includes/class-wc-install.php:196
 msgctxt "Page title"
 msgid "Cart"
 msgstr ""
 
-#: includes/class-wc-install.php:238
+#: includes/class-wc-install.php:201
 msgctxt "Page title"
 msgid "Checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:243
+#: includes/class-wc-install.php:206
 msgctxt "Page title"
 msgid "My Account"
 msgstr ""
 
-#: includes/class-wc-post-types.php:62
+#: includes/class-wc-post-types.php:63
 msgctxt "Admin menu name"
 msgid "Categories"
 msgstr ""
 
-#: includes/class-wc-post-types.php:97
+#: includes/class-wc-post-types.php:98
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr ""
 
-#: includes/class-wc-post-types.php:134
+#: includes/class-wc-post-types.php:135
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr ""
 
-#: includes/class-wc-post-types.php:228
+#: includes/class-wc-post-types.php:231
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr ""
 
-#: includes/class-wc-post-types.php:287
+#: includes/class-wc-post-types.php:290
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr ""
 
-#: includes/class-wc-post-types.php:332
+#: includes/class-wc-post-types.php:337
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr ""
 
-#: includes/class-wc-post-types.php:81
+#: includes/class-wc-post-types.php:375
+msgctxt "Admin menu name"
+msgid "Webhooks"
+msgstr ""
+
+#: includes/class-wc-post-types.php:82
 #: includes/updates/woocommerce-update-2.0.php:46
 msgctxt "slug"
 msgid "product-category"
 msgstr ""
 
-#: includes/class-wc-post-types.php:119
+#: includes/class-wc-post-types.php:120
 #: includes/updates/woocommerce-update-2.0.php:47
 msgctxt "slug"
 msgid "product-tag"
 msgstr ""
 
-#: includes/class-wc-post-types.php:220
+#: includes/class-wc-post-types.php:223
 #: includes/updates/woocommerce-update-2.0.php:55
-#: includes/wc-core-functions.php:509 includes/wc-core-functions.php:528
-#: includes/wc-core-functions.php:562
+#: includes/wc-core-functions.php:591 includes/wc-core-functions.php:626
 msgctxt "slug"
 msgid "product"
 msgstr ""
 
-#: includes/wc-product-functions.php:208
+#: includes/wc-product-functions.php:211
 msgctxt "slug"
 msgid "uncategorized"
 msgstr ""
 
-#: includes/class-wc-post-types.php:391 includes/wc-order-functions.php:25
+#: includes/class-wc-post-types.php:411
 msgctxt "Order status"
 msgid "Pending payment"
 msgstr ""
 
-#: includes/class-wc-post-types.php:399 includes/wc-order-functions.php:26
+#: includes/class-wc-post-types.php:419 includes/wc-order-functions.php:26
 msgctxt "Order status"
 msgid "Processing"
 msgstr ""
 
-#: includes/class-wc-post-types.php:407 includes/wc-order-functions.php:27
+#: includes/class-wc-post-types.php:427
 msgctxt "Order status"
 msgid "On hold"
 msgstr ""
 
-#: includes/class-wc-post-types.php:415 includes/wc-order-functions.php:28
+#: includes/class-wc-post-types.php:435 includes/wc-order-functions.php:28
 msgctxt "Order status"
 msgid "Completed"
 msgstr ""
 
-#: includes/class-wc-post-types.php:423 includes/wc-order-functions.php:29
+#: includes/class-wc-post-types.php:443 includes/wc-order-functions.php:29
 msgctxt "Order status"
 msgid "Cancelled"
 msgstr ""
 
-#: includes/class-wc-post-types.php:431 includes/wc-order-functions.php:30
+#: includes/class-wc-post-types.php:451 includes/wc-order-functions.php:30
 msgctxt "Order status"
 msgid "Refunded"
 msgstr ""
 
-#: includes/class-wc-post-types.php:439 includes/wc-order-functions.php:31
+#: includes/class-wc-post-types.php:459 includes/wc-order-functions.php:31
 msgctxt "Order status"
 msgid "Failed"
 msgstr ""
 
-#: includes/class-wc-product-grouped.php:192
+#: includes/wc-order-functions.php:25
+msgctxt "Order status"
+msgid "Pending Payment"
+msgstr ""
+
+#: includes/wc-order-functions.php:27
+msgctxt "Order status"
+msgid "On Hold"
+msgstr ""
+
+#: includes/class-wc-product-grouped.php:204
 #: includes/class-wc-product-variable.php:310
 #: includes/class-wc-product-variable.php:315
 msgctxt "Price range: from-to"
 msgid "%1$s&ndash;%2$s"
 msgstr ""
 
-#: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php:116
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:90
+#: includes/class-wc-query.php:116
+msgctxt "hash before order number"
+msgid "#"
+msgstr ""
+
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:52
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:93
 msgctxt "Tax status"
 msgid "None"
 msgstr ""
 
-#: includes/wc-core-functions.php:75 includes/wc-order-functions.php:578
+#: includes/wc-core-functions.php:75 includes/wc-order-functions.php:598
 msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr ""
 
-#: includes/wc-page-functions.php:77
+#: includes/wc-page-functions.php:93
 msgctxt "edit-address-slug"
 msgid "billing"
 msgstr ""
 
-#: includes/wc-page-functions.php:78
+#: includes/wc-page-functions.php:94
 msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr ""
 
-#: includes/wc-template-functions.php:1283
+#: includes/wc-template-functions.php:1221
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
@@ -9701,7 +9877,7 @@ msgctxt "Sorting order"
 msgid "Order"
 msgstr ""
 
-#: includes/widgets/class-wc-widget-recent-reviews.php:87
+#: includes/widgets/class-wc-widget-recent-reviews.php:88
 msgctxt "by comment author"
 msgid "by %1$s"
 msgstr ""
@@ -9714,4 +9890,14 @@ msgstr ""
 #: templates/loop/result-count.php:34
 msgctxt "%1$d = first, %2$d = last, %3$d = total"
 msgid "Showing %1$d&ndash;%2$d of %3$d results"
+msgstr ""
+
+#: templates/product-searchform.php:3
+msgctxt "label"
+msgid "Search for:"
+msgstr ""
+
+#: templates/product-searchform.php:4
+msgctxt "submit button"
+msgid "Search"
 msgstr ""
