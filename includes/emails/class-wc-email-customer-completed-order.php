@@ -26,7 +26,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 		$this->id 				= 'customer_completed_order';
 		$this->title 			= __( 'Completed order', 'woocommerce' );
-		$this->description		= __( 'Order complete emails are sent to the customer when the order is marked complete and usual indicates that the order has been shipped.', 'woocommerce' );
+		$this->description		= __( 'Order complete emails are sent to the customer when the order is marked complete and usually indicates that the order has been shipped.', 'woocommerce' );
 
 		$this->heading 			= __( 'Your order is complete', 'woocommerce' );
 		$this->subject      	= __( 'Your {site_title} order from {order_date} is complete', 'woocommerce' );
