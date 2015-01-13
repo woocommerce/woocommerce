@@ -338,7 +338,7 @@ if ( ! function_exists( 'wc_prices_include_tax' ) ) {
 	 * @return bool
 	 */
 	function wc_prices_include_tax() {
-		return get_option( 'woocommerce_prices_include_tax' ) === 'yes';
+		return wc_tax_enabled() && get_option( 'woocommerce_prices_include_tax' ) === 'yes';
 	}
 }
 
