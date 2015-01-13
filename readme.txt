@@ -143,6 +143,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added 'top freebies' to product report.
 * Feature - Added numeric sort for attributes.
 * Feature - Added support for some Jetpack features: Omnisearch, Publicize and Markdown editor.
+* Feature - UI for adding Webhooks.
+* Feature - Show Gross and Net totals in reports.
 * Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
 * Refactor - Routing all email functionality through one send() method.
 * Refactor - Replaced existing email css inliner with Emogrifier.
@@ -153,6 +155,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added link on purchased products list on orders screen.
 * Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
 * Fix - Fix cart coupon on-sale checks for variations.
+* Tweak - All frontend styles and email styles have been improved.
 * Tweak - Double the default product image dimensions.
 * Tweak - Added refunds to Sales by Date report.
 * Tweak - Updated prevent_caching() method to work if a cart/checkout page isn't set.

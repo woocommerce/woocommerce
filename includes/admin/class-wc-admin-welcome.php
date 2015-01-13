@@ -236,48 +236,53 @@ class WC_Admin_Welcome {
 			<!--<div class="changelog point-releases"></div>-->
 
 			<div class="changelog">
-				<div class="wc-feature feature-rest feature-section col three-col">
-					<div>
-						<h4><?php _e( 'Perform partial refunds on orders', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Store owners can now do partial refunds on orders; define the refund amount, qty, and optionally restore inventory. If the gateway supports it, the payment can be automatically refunded too!', 'woocommerce' ); ?></p>
-					</div>
-					<div class="icon"></div>
-					<div class="last-feature">
-						<h4><?php _e( 'Updated order totals UI', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'To support the partial refund functionality, the order items and totals panels have been combined. As a result we have a simpler, more user friendly order page.', 'woocommerce' ); ?></p>
-					</div>
-				</div>
-			</div>
-			<div class="changelog about-integrations">
-				<h3><?php _e( 'WooCommerce REST API version 2', 'woocommerce' ); ?></h3>
-				<div class="wc-feature feature-section col three-col">
-					<div>
-						<h4><?php _e( 'Introducing PUT/POST/DELETE methods', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Update, delete and create orders, customers, products and coupons via the API.', 'woocommerce' ); ?></p>
-					</div>
-					<div>
-						<h4><?php _e( 'Other enhancements', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Resources can now be ordered by any field you define for greater control over returned results. v2 also introduces an endpoint for getting product categories from your store.', 'woocommerce' ); ?></p>
-					</div>
-					<div class="last-feature">
-						<h4><?php _e( 'Webhooks', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Trigger webhooks during events such as when an order is created. Opens up all kinds of external integration opportunities.', 'woocommerce' ); ?></p>
+				<h4><?php _e( 'UI Overhaul', 'woocommerce' ); ?></h4>
+				<p><?php _e( 'We\'ve updated the user interface on both the front and backend of WooCommerce 2.3 "Handsome Hippo".', 'woocommerce' ); ?></p>
+
+				<div class="changelog about-integrations">
+					<div class="wc-feature feature-section col three-col">
+						<div>
+							<h4><?php _e( 'Frontend UI Improvements', 'woocommerce' ); ?></h4>
+							<p><?php _e( 'On the frontend there are several UX enhancements such as the undo-remove-from cart link and responsive table design as well as a fresh, modern look which meshes more fluidly with the current design trends of default WordPress themes.', 'woocommerce' ); ?></p>
+						</div>
+						<div>
+							<h4><?php _e( 'Backend UI Improvements', 'woocommerce' ); ?></h4>
+							<p><?php _e( 'On the backend, settings have been re-organised and perform better on hand-held devices for an all round improved user experience. ', 'woocommerce' ); ?></p>
+						</div>
+						<div class="last-feature">
+							<h4><?php _e( 'Webhooks UI', 'woocommerce' ); ?></h4>
+						<p><?php printf( __( 'As part of the API, we\'ve introduced a UI for the Webhook system in 2.3. This makes it easier for 3rd party apps to integrate with WooCommerce. Read more in our %sdocs%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/webhooks/">', '</a>' ); ?></p>
+						</div>
 					</div>
 				</div>
 			</div>
 			<div class="changelog">
 				<div class="feature-section col three-col">
 					<div>
-						<h4><?php _e( 'Language pack downloader', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Due to the size of PO and MO files, we have removed them from core and included our "Language Pack Downloader". International users can download and update their translation files easily from the dashboard.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Geo-locating Customer Location', 'woocommerce' ); ?></h4>
+						<p><?php printf( __( 'We have added a new option to geolocate the "Default Customer Location". Coupled with ability to show taxes in your store based on this location, you can show relevant prices store-wide. Enable this in the %ssettings%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '">', '</a>' ); ?></p>
 					</div>
 					<div>
-						<h4><?php _e( 'Variation stock management', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'You can now set stock management options (such as backorder support) at variation level giving much greater control over stock.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Color Customization', 'woocommerce' ); ?></h4>
+						<p><?php printf( __( 'If you\'re looking to customise the look and feel of the frontend in 2.3, take a look at the free %sWooCommerce Colors plugin%s. This lets you change the colors with a live preview.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-colors/">', '</a>' ); ?></p>
 					</div>
 					<div class="last-feature">
-						<h4><?php _e( 'Improved Payment Gateways', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'The Payment Gateway API has been enhanced to support refunds and storing transaction IDs.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Improved Reports', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Sales reports can now show net and gross amounts, we\'ve added a print stylesheet, and added extra data on refunds to reports.', 'woocommerce' ); ?></p>
+					</div>
+				</div>
+				<div class="feature-section col three-col">
+					<div>
+						<h4><?php _e( 'Improved Simplify Gateway', 'woocommerce' ); ?></h4>
+						<p><?php printf( __( 'The built in Simplify Commerce Gateway (available in the US) now supports %sHosted Payments%s - a PCI Compliant hosted payment platform.', 'woocommerce' ), '<a href="https://www.simplify.com/commerce/docs/tools/hosted-payments">', '</a>' ); ?></p>
+					</div>
+					<div>
+						<h4><?php _e( 'Email Template Improvements', 'woocommerce' ); ?></h4>
+						<p><?php printf( __( 'To make email customization simpler, we\'ve included a CSS Inliner in this release, some new template files for styling emails, and some additional hooks for developers. Read more on our %sdeveloper blog%s.', 'woocommerce' ), '<a href="http://develop.woothemes.com/woocommerce/2014/10/2-3-emails/">', '</a>' ); ?></p>
+					</div>
+					<div class="last-feature">
+						<h4><?php _e( 'Simplified Coupon System', 'woocommerce' ); ?></h4>
+						<p><?php printf( __( 'We have simplified the coupon system to ensure discounts are never applied to taxes, and we\'ve improved support for discounting products inclusive of tax. Read more on our %sdevelop blog%s.', 'woocommerce' ), '<a href="http://develop.woothemes.com/woocommerce/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/">', '</a>' ); ?></p>
 					</div>
 				</div>
 			</div>
