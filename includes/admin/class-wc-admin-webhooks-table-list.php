@@ -207,7 +207,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		}
 
 		$class = empty( $class ) && empty( $_REQUEST['status'] ) ? ' class="current"' : '';
-		$status_links['all'] = "<a href='admin.php?page=wc-settings&amp;tab=webhooks'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_posts, 'posts' ), number_format_i18n( $total_posts ) ) . '</a>';
+		$status_links['all'] = "<a href='admin.php?page=wc-settings&amp;tab=webhooks'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_posts, 'posts', 'woocommerce' ), number_format_i18n( $total_posts ) ) . '</a>';
 
 		foreach ( get_post_stati( array( 'show_in_admin_status_list' => true ), 'objects' ) as $status ) {
 			$class = '';
@@ -258,7 +258,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 */
 	protected function extra_tablenav( $which ) {
 		if ( 'top' == $which && isset( $_GET['status'] ) && 'trash' == $_GET['status'] && current_user_can( 'delete_shop_webhooks' ) ) {
-			echo '<div class="alignleft actions"><a class="button apply" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=webhooks&status=trash&empty_trash=1' ) ) . '">' . __( 'Empty Trash' ) . '</a></div>';
+			echo '<div class="alignleft actions"><a class="button apply" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=webhooks&status=trash&empty_trash=1' ) ) . '">' . __( 'Empty Trash', 'woocommerce' ) . '</a></div>';
 		}
 	}
 
