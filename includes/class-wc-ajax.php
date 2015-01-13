@@ -415,6 +415,7 @@ class WC_AJAX {
 
 		global $wc_product_attributes;
 
+		$thepostid = 0;
 		$taxonomy  = sanitize_text_field( $_POST['taxonomy'] );
 		$i         = absint( $_POST['i'] );
 		$position  = 0;
