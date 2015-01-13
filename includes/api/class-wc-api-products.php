@@ -654,7 +654,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.2
 	 * @param int $id
 	 * @param array $data
-	 * @return bool|WP_Error
+	 * @return bool
 	 */
 	protected function save_product_meta( $id, $data ) {
 		// Product Type
@@ -1108,7 +1108,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.2
 	 * @param int $id
 	 * @param array $data
-	 * @return bool|WP_Error
+	 * @return bool
 	 */
 	protected function save_variations( $id, $data ) {
 		global $wpdb;
@@ -1493,7 +1493,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * Get attribute taxonomy by slug.
 	 *
 	 * @since 2.2
-	 * @param string $label
+	 * @param string $slug
 	 * @return string|null
 	 */
 	private function get_attribute_taxonomy_by_slug( $slug ) {
