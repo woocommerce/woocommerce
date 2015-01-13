@@ -206,13 +206,13 @@ class WC_API_Products extends WC_API_Resource {
 			if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_product_types() ) ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_type', sprintf( __( 'Invalid product type - the product type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_product_types() ) ) ), 400 );
 			}
-			
+
 			// enable description html tags.
 			$post_content = ( isset( $data['enable_html_description'] ) && 'true' === $data['enable_html_description'] ) ? $data['description'] : wc_clean( $data['description'] );
 
 			// enable short description html tags.
 			$post_excerpt = ( isset( $data['enable_html_short_description'] ) && 'true' === $data['enable_html_short_description'] ) ? $data['short_description'] : wc_clean( $data['short_description'] );
-			
+
 			$new_product = array(
 				'post_title'   => wc_clean( $data['title'] ),
 				'post_status'  => ( isset( $data['status'] ) ? wc_clean( $data['status'] ) : 'publish' ),
@@ -729,13 +729,20 @@ class WC_API_Products extends WC_API_Resource {
 			$attributes = array();
 
 			foreach ( $data['attributes'] as $attribute ) {
-				$is_taxonomy = 0;
+				$is_taxonomy    = 0;
+				$taxonomy       = 0;
 
 				if ( ! isset( $attribute['name'] ) ) {
 					continue;
 				}
 
-				$taxonomy = $this->get_attribute_taxonomy_by_label( $attribute['name'] );
+				$attribute_slug = sanitize_title( $attribute['name'] );
+
+				if ( isset( $attribute['slug'] ) ) {
+					$taxonomy       = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
+					$attribute_slug = sanitize_title( $attribute['slug'] );
+				}
+
 				if ( $taxonomy ) {
 					$is_taxonomy = 1;
 				}
@@ -785,7 +792,7 @@ class WC_API_Products extends WC_API_Resource {
 					}
 
 					// Custom attribute - Add attribute to array and set the values
-					$attributes[ sanitize_title( $attribute['name'] ) ] = array(
+					$attributes[ $attribute_slug ] = array(
 						'name'         => wc_clean( $attribute['name'] ),
 						'value'        => $values,
 						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
@@ -1327,12 +1334,16 @@ class WC_API_Products extends WC_API_Resource {
 				$updated_attribute_keys = array();
 
 				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
+					$taxonomy = '';
 
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
 
-					$taxonomy = $this->get_attribute_taxonomy_by_label( $attribute['name'] );
+					if ( isset( $attribute['slug'] ) ) {
+						$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
+					}
+
 					if ( isset( $attributes[ $taxonomy ] ) ) {
 						$_attribute = $attributes[ $taxonomy ];
 					} elseif ( isset( $attributes[ strtolower( $attribute['name'] ) ] ) ) {
@@ -1370,7 +1381,7 @@ class WC_API_Products extends WC_API_Resource {
 					continue;
 				}
 
-				$taxonomy = $this->get_attribute_taxonomy_by_label( $default_attr['name'] );
+				$taxonomy = $this->get_attribute_taxonomy_by_slug( $default_attr['name'] );
 
 				if ( isset( $attributes[ $taxonomy ] ) ) {
 					$_attribute = $attributes[ $taxonomy ];
@@ -1479,18 +1490,18 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Get attribute taxonomy by label.
+	 * Get attribute taxonomy by slug.
 	 *
 	 * @since 2.2
 	 * @param string $label
 	 * @return string|null
 	 */
-	private function get_attribute_taxonomy_by_label( $label ) {
+	private function get_attribute_taxonomy_by_slug( $slug ) {
 		$taxonomy = null;
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
 		foreach ( $attribute_taxonomies as $key => $tax ) {
-			if ( $label == $tax->attribute_label ) {
+			if ( $slug == $tax->attribute_label ) {
 				$taxonomy = 'pa_' . $tax->attribute_name;
 
 				break;
@@ -1749,7 +1760,8 @@ class WC_API_Products extends WC_API_Resource {
 
 				// taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`
 				$attributes[] = array(
-					'name'   => ucwords( str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) ) ),
+					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $attribute_name ) ),
+					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) ),
 					'option' => $attribute,
 				);
 			}
@@ -1766,7 +1778,8 @@ class WC_API_Products extends WC_API_Resource {
 				}
 
 				$attributes[] = array(
-					'name'      => ucwords( str_replace( 'pa_', '', $attribute['name'] ) ),
+					'name'      => wc_attribute_label( $attribute['name'] ),
+					'slug'      => str_replace( 'pa_', '', $attribute['name'] ),
 					'position'  => $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],
