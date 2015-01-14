@@ -16,6 +16,9 @@ class WC_Cart {
 	/** @var array Contains an array of cart items. */
 	public $cart_contents = array();
 
+	/** @var array Contains an array of removed cart items. */
+	public $removed_cart_contents = array();
+
 	/** @var array Contains an array of coupon codes applied to the cart. */
 	public $applied_coupons = array();
 
@@ -192,8 +195,8 @@ class WC_Cart {
 				$this->$key = WC()->session->get( $key, $default );
 			}
 
-			// Load coupons
-			$this->applied_coupons = array_filter( WC()->session->get( 'applied_coupons', array() ) );
+			$this->removed_cart_contents = array_filter( WC()->session->get( 'removed_cart_contents', array() ) );
+			$this->applied_coupons       = array_filter( WC()->session->get( 'applied_coupons', array() ) );
 
 			// Load the cart
 			$cart = WC()->session->get( 'cart', array() );
@@ -255,6 +258,7 @@ class WC_Cart {
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
 			WC()->session->set( 'coupon_discount_amounts', $this->coupon_discount_amounts );
 			WC()->session->set( 'coupon_discount_tax_amounts', $this->coupon_discount_tax_amounts );
+			WC()->session->set( 'removed_cart_contents', $this->removed_cart_contents );
 
 			foreach ( $this->cart_session_data as $key => $default ) {
 				WC()->session->set( $key, $this->$key );
@@ -669,20 +673,14 @@ class WC_Cart {
 		/**
 		 * Gets the url to re-add an item into the cart.
 		 *
-		 * @param int product_id
-		 * @param int quantity
-		 * @param int variation_id
-		 * @param object variation
+		 * @param int $cart_item_key
 		 * @return string url to page
 		 */
-		public function get_undo_url( $product_id, $quantity = 1, $variation_id = '', $variation = '' ) {
+		public function get_undo_url( $cart_item_key ) {
 			$cart_page_id = wc_get_page_id( 'cart' );
 
 			$query_args = array(
-				'undo_item'    => $product_id,
-				'quantity'     => $quantity,
-				'variation'    => $variation,
-				'variation_id' => $variation_id
+				'undo_item' => $cart_item_key,
 			);
 
 			return apply_filters( 'woocommerce_get_undo_url', $cart_page_id ? wp_nonce_url( add_query_arg( $query_args, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) : '' );
@@ -994,6 +992,36 @@ class WC_Cart {
 			$this->calculate_totals();
 
 			return $cart_item_key;
+		}
+
+		public function remove_cart_item( $cart_item_key ) {
+			if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
+				$remove = $this->cart_contents[ $cart_item_key ];
+				$this->removed_cart_contents[ $cart_item_key ] = $remove;
+
+				unset( $this->cart_contents[ $cart_item_key ] );
+
+				$this->calculate_totals();
+
+				return true;
+			}
+
+			return false;
+		}
+
+		public function restore_cart_item( $cart_item_key ) {
+			if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
+				$restore = $this->removed_cart_contents[ $cart_item_key ];
+				$this->cart_contents[ $cart_item_key ] = $restore;
+
+				unset( $this->removed_cart_contents[ $cart_item_key ] );
+
+				$this->calculate_totals();
+
+				return true;
+			}
+
+			return false;
 		}
 
 		/**
