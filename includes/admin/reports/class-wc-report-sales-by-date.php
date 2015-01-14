@@ -411,6 +411,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$shipping_tax_amounts  = $this->prepare_chart_data( $orders, 'post_date', 'total_shipping_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$tax_amounts  = $this->prepare_chart_data( $orders, 'post_date', 'total_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
 
+		$net_order_amounts = array();
+
 		foreach ( $order_amounts as $order_amount_key => $order_amount_value ) {
 			$net_order_amounts[ $order_amount_key ]    = $order_amount_value;
 			$net_order_amounts[ $order_amount_key ][1] = $net_order_amounts[ $order_amount_key ][1] - $shipping_amounts[ $order_amount_key ][1] - $shipping_tax_amounts[ $order_amount_key ][1] - $tax_amounts[ $order_amount_key ][1];
