@@ -1,9 +1,14 @@
 <?php
+/**
+ * Shows an order item fee
+ *
+ * @global object $item The item being displayed
+ * @global int $item_id The id of the item being displayed
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
-
 ?>
 <tr class="fee <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_item_id="<?php echo $item_id; ?>">
 	<td class="check-column"><input type="checkbox" /></td>
