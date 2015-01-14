@@ -1,9 +1,14 @@
 <?php
+/**
+ * Shows an order item
+ *
+ * @var object $item The item being displayed
+ * @var int $item_id The id of the item being displayed
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
-
 ?>
 <tr class="item <?php echo apply_filters( 'woocommerce_admin_html_order_item_class', ( ! empty( $class ) ? $class : '' ), $item ); ?>" data-order_item_id="<?php echo $item_id; ?>">
 	<td class="check-column"><input type="checkbox" /></td>
