@@ -56,6 +56,10 @@ class WC_Admin_Notices {
 			update_option( 'woocommerce_admin_notices', $notices );
 		}
 
+		if ( ! empty( $_GET['hide_frontend_colors_notice'] ) ) {
+			delete_option( 'woocommerce_frontend_css_colors' );
+		}
+
 		if ( in_array( 'theme_support', $notices ) && ! current_theme_supports( 'woocommerce' ) ) {
 			$template = get_option( 'template' );
 
@@ -73,6 +77,10 @@ class WC_Admin_Notices {
 		if ( in_array( 'translation_upgrade', $notices ) ) {
 			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 			add_action( 'admin_notices', array( $this, 'translation_upgrade_notice' ) );
+		}
+
+		if ( $this->has_frontend_colors() ) {
+			add_action( 'admin_notices', array( $this, 'frontend_colors_notice' ) );
 		}
 	}
 
@@ -146,6 +154,41 @@ class WC_Admin_Notices {
 		if ( $outdated ) {
 			include( 'views/html-notice-template-check.php' );
 		}
+	}
+
+	/**
+	 * Checks if there is any change in woocommerce_frontend_css_colors
+	 *
+	 * @return bool
+	 */
+	public function has_frontend_colors() {
+		$styles = WC_Frontend_Scripts::get_styles();
+
+		if ( ! array_key_exists( 'woocommerce-general', $styles ) ) {
+			return false;
+		}
+
+		$colors  = get_option( 'woocommerce_frontend_css_colors' );
+		$default = array(
+			'primary'    => '#ad74a2',
+			'secondary'  => '#f7f6f7',
+			'highlight'  => '#85ad74',
+			'content_bg' => '#ffffff',
+			'subtext'    => '#777777'
+		);
+
+		if ( ! $colors || $colors === $default ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Notice to say Frontend Colors options has been deprecated in 2.3
+	 */
+	public function frontend_colors_notice() {
+		include( 'views/html-notice-frontend-colors.php' );
 	}
 }
 
