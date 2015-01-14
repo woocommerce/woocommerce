@@ -745,57 +745,51 @@ class WC_Meta_Box_Product_Data {
 					if ( $variations ) {
 
 						foreach ( $variations as $variation ) {
-
-							$variation_id                        = absint( $variation->ID );
-							$variation_post_status               = esc_attr( $variation->post_status );
-							$variation_data                      = get_post_meta( $variation_id );
-							$variation_data['variation_post_id'] = $variation_id;
-
-							// Grab shipping classes
+							$variation_id     = absint( $variation->ID );
+							$variation_meta   = get_post_meta( $variation_id );
+							$variation_data   = array();
 							$shipping_classes = get_the_terms( $variation_id, 'product_shipping_class' );
-							$shipping_class   = ( $shipping_classes && ! is_wp_error( $shipping_classes ) ) ? current( $shipping_classes )->term_id : '';
-
 							$variation_fields = array(
-								'_sku',
-								'_stock',
-								'_regular_price',
-								'_sale_price',
-								'_weight',
-								'_length',
-								'_width',
-								'_height',
-								'_download_limit',
-								'_download_expiry',
-								'_downloadable_files',
-								'_downloadable',
-								'_virtual',
-								'_thumbnail_id',
-								'_sale_price_dates_from',
-								'_sale_price_dates_to',
-								'_manage_stock',
-								'_stock_status'
+								'_sku'                   => '',
+								'_stock'                 => '',
+								'_regular_price'         => '',
+								'_sale_price'            => '',
+								'_weight'                => '',
+								'_length'                => '',
+								'_width'                 => '',
+								'_height'                => '',
+								'_download_limit'        => '',
+								'_download_expiry'       => '',
+								'_downloadable_files'    => '',
+								'_downloadable'          => '',
+								'_virtual'               => '',
+								'_thumbnail_id'          => '',
+								'_sale_price_dates_from' => '',
+								'_sale_price_dates_to'   => '',
+								'_manage_stock'          => '',
+								'_stock_status'          => '',
+								'_backorders'            => null,
+								'_tax_class'             => null
 							);
 
-							foreach ( $variation_fields as $field ) {
-								$$field = isset( $variation_data[ $field ][0] ) ? maybe_unserialize( $variation_data[ $field ][0] ) : '';
+							foreach ( $variation_fields as $field => $value ) {
+								$variation_data[ $field ] = isset( $variation_meta[ $field ][0] ) ? maybe_unserialize( $variation_meta[ $field ][0] ) : $value;
 							}
 
-							$_backorders = isset( $variation_data['_backorders'][0] ) ? $variation_data['_backorders'][0] : null;
-							$_tax_class  = isset( $variation_data['_tax_class'][0] ) ? $variation_data['_tax_class'][0] : null;
-							$image_id    = absint( $_thumbnail_id );
-							$image       = $image_id ? wp_get_attachment_thumb_url( $image_id ) : '';
-
-							// Locale formatting
-							$_regular_price = wc_format_localized_price( $_regular_price );
-							$_sale_price    = wc_format_localized_price( $_sale_price );
-							$_weight        = wc_format_localized_decimal( $_weight );
-							$_length        = wc_format_localized_decimal( $_length );
-							$_width         = wc_format_localized_decimal( $_width );
-							$_height        = wc_format_localized_decimal( $_height );
+							// Formatting
+							$variation_data['_regular_price'] = wc_format_localized_price( $variation_data['_regular_price'] );
+							$variation_data['_sale_price']    = wc_format_localized_price( $variation_data['_sale_price'] );
+							$variation_data['_weight']        = wc_format_localized_decimal( $variation_data['_weight'] );
+							$variation_data['_length']        = wc_format_localized_decimal( $variation_data['_length'] );
+							$variation_data['_width']         = wc_format_localized_decimal( $variation_data['_width'] );
+							$variation_data['_height']        = wc_format_localized_decimal( $variation_data['_height'] );
+							$variation_data['_thumbnail_id']  = absint( $variation_data['_thumbnail_id'] );
+							$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
+							$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
 
 							// Stock BW compat
-							if ( '' !== $_stock ) {
-								$_manage_stock = 'yes';
+							if ( '' !== $variation_data['_stock'] ) {
+								$variation_data['_manage_stock'] = 'yes';
 							}
 
 							include( 'views/html-variation-admin.php' );

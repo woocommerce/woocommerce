@@ -32,8 +32,9 @@ class WC_Meta_Box_Order_Downloads {
 						WHERE order_id = %d ORDER BY product_id
 					", $post->ID ) );
 
-					$product = null;
-					$loop    = 0;
+					$product      = null;
+					$loop         = 0;
+					$file_counter = 1;
 
 					if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
 

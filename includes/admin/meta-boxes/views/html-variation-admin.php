@@ -1,9 +1,16 @@
 <?php
-
+/**
+ * Outputs a variation
+ *
+ * @var int $variation_id
+ * @var WP_POST $variation
+ * @var array $variation_data array of variation data
+ */
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
+extract( $variation_data );
 ?>
 <div class="woocommerce_variation wc-metabox closed">
 	<h3>
@@ -52,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="woocommerce_variable_attributes wc-metabox-content">
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
-				<a href="#" class="upload_image_button <?php if ( $image_id > 0 ) echo 'remove'; ?>" rel="<?php echo esc_attr( $variation_id ); ?>"><img src="<?php if ( ! empty( $image ) ) echo esc_attr( $image ); else echo esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $image_id ); ?>" /></a>
+				<a href="#" class="upload_image_button <?php if ( $_thumbnail_id > 0 ) echo 'remove'; ?>" rel="<?php echo esc_attr( $variation_id ); ?>"><img src="<?php if ( ! empty( $image ) ) echo esc_attr( $image ); else echo esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $_thumbnail_id ); ?>" /></a>
 			</p>
 			<?php if ( wc_product_sku_enabled() ) : ?>
 				<p class="sku form-row form-row-last">
@@ -64,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endif; ?>
 
 			<p class="form-row form-row-full options">
-				<label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( $variation_post_status, 'publish' ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
+				<label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( $variation->post_status, 'publish' ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
 
 				<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php checked( isset( $_downloadable ) ? $_downloadable : '', 'yes' ); ?> /> <?php _e( 'Downloadable', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>" href="#">[?]</a></label>
 
