@@ -162,7 +162,7 @@ class WC_Admin_Notices {
 	 * @return bool
 	 */
 	public function has_frontend_colors() {
-		$styles = WC_Frontend_Scripts::get_styles();
+		$styles = (array) WC_Frontend_Scripts::get_styles();
 
 		if ( ! array_key_exists( 'woocommerce-general', $styles ) ) {
 			return false;
