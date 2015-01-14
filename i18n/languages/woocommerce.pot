@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.3-beta-1 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-01-14 00:07:49+00:00\n"
+"POT-Creation-Date: 2015-01-14 12:41:31+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4626,7 +4626,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-order.php:1631
 #: includes/abstracts/abstract-wc-product.php:904
 #: includes/abstracts/abstract-wc-product.php:910
-#: includes/class-wc-cart.php:1530 includes/class-wc-product-variable.php:320
+#: includes/class-wc-cart.php:1575 includes/class-wc-product-variable.php:320
 #: includes/class-wc-product-variation.php:318
 msgid "Free!"
 msgstr ""
@@ -5394,67 +5394,67 @@ msgid ""
 "in W3 Total Cache settings <a href=\"%s\">here</a>."
 msgstr ""
 
-#: includes/class-wc-cart.php:213
+#: includes/class-wc-cart.php:216
 msgid ""
 "%s has been removed from your cart because it can no longer be purchased. "
 "Please contact us if you need assistance."
 msgstr ""
 
-#: includes/class-wc-cart.php:431
+#: includes/class-wc-cart.php:435
 msgid "An item which is no longer available was removed from your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:462
+#: includes/class-wc-cart.php:466
 msgid ""
 "Sorry, \"%s\" is not in stock. Please edit your cart and try again. We "
 "apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:476
+#: includes/class-wc-cart.php:480
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in "
 "stock). Please edit your cart and try again. We apologise for any "
 "inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:511
+#: includes/class-wc-cart.php:515
 msgid ""
 "Sorry, we do not have enough \"%s\" in stock to fulfill your order right "
 "now. Please try again in %d minutes or edit your cart and try again. We "
 "apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:699
+#: includes/class-wc-cart.php:697
 msgid "Get cart should not be called before the wp_loaded action."
 msgstr ""
 
-#: includes/class-wc-cart.php:909
+#: includes/class-wc-cart.php:907
 msgid "Sorry, this product cannot be purchased."
 msgstr ""
 
-#: includes/class-wc-cart.php:916
+#: includes/class-wc-cart.php:914
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr ""
 
-#: includes/class-wc-cart.php:921
+#: includes/class-wc-cart.php:919
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr ""
 
-#: includes/class-wc-cart.php:935 includes/class-wc-cart.php:959
+#: includes/class-wc-cart.php:933 includes/class-wc-cart.php:957
 #: includes/class-wc-frontend-scripts.php:238
 #: includes/wc-cart-functions.php:100 templates/cart/mini-cart.php:68
 msgid "View Cart"
 msgstr ""
 
-#: includes/class-wc-cart.php:936
+#: includes/class-wc-cart.php:934
 msgid "You cannot add another &quot;%s&quot; to your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:960
+#: includes/class-wc-cart.php:958
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
@@ -5748,7 +5748,7 @@ msgid "Invalid download link."
 msgstr ""
 
 #: includes/class-wc-download-handler.php:98
-#: includes/class-wc-form-handler.php:562
+#: includes/class-wc-form-handler.php:554
 #: includes/shortcodes/class-wc-shortcode-checkout.php:166
 #: includes/shortcodes/class-wc-shortcode-my-account.php:111
 msgid "Invalid order."
@@ -5874,7 +5874,7 @@ msgid "Please re-enter your password."
 msgstr ""
 
 #: includes/class-wc-form-handler.php:200
-#: includes/class-wc-form-handler.php:846
+#: includes/class-wc-form-handler.php:838
 msgid "Passwords do not match."
 msgstr ""
 
@@ -5886,82 +5886,82 @@ msgstr ""
 msgid "Payment method added."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:390
+#: includes/class-wc-form-handler.php:386
 msgid "%s removed. %sUndo?%s"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:439
+#: includes/class-wc-form-handler.php:431
 msgid "You can only have 1 %s in your cart."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:463
+#: includes/class-wc-form-handler.php:455
 msgid "Cart updated."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:529
+#: includes/class-wc-form-handler.php:521
 msgid "The cart has been filled with the items from your previous order."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:552
+#: includes/class-wc-form-handler.php:544
 msgid "Order cancelled by customer."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:555
+#: includes/class-wc-form-handler.php:547
 msgid "Your order was cancelled."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:560
+#: includes/class-wc-form-handler.php:552
 msgid ""
 "Your order can no longer be cancelled. Please contact us if you need "
 "assistance."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:600
-#: includes/class-wc-form-handler.php:660
+#: includes/class-wc-form-handler.php:592
+#: includes/class-wc-form-handler.php:652
 msgid "Please choose product options&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:694
+#: includes/class-wc-form-handler.php:686
 msgid "Please choose the quantity of items you wish to add to your cart&hellip;"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:701
+#: includes/class-wc-form-handler.php:693
 msgid "Please choose a product to add to your cart&hellip;"
 msgstr ""
 
+#: includes/class-wc-form-handler.php:757
+#: includes/class-wc-form-handler.php:761
 #: includes/class-wc-form-handler.php:765
-#: includes/class-wc-form-handler.php:769
-#: includes/class-wc-form-handler.php:773
-#: includes/class-wc-form-handler.php:782
-#: includes/class-wc-form-handler.php:895
+#: includes/class-wc-form-handler.php:774
+#: includes/class-wc-form-handler.php:887
 msgid "Error"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:769
+#: includes/class-wc-form-handler.php:761
 msgid "Username is required."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:773
+#: includes/class-wc-form-handler.php:765
 msgid "Password is required."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:782
+#: includes/class-wc-form-handler.php:774
 msgid "A user could not be found with this email address."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:807
+#: includes/class-wc-form-handler.php:799
 msgid "You are now logged in as <strong>%s</strong>"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:842
+#: includes/class-wc-form-handler.php:834
 msgid "Please enter your password."
 msgstr ""
 
-#: includes/class-wc-form-handler.php:911 includes/wc-user-functions.php:112
+#: includes/class-wc-form-handler.php:903 includes/wc-user-functions.php:112
 msgid "ERROR"
 msgstr ""
 
-#: includes/class-wc-form-handler.php:911
+#: includes/class-wc-form-handler.php:903
 msgid "Anti-spam field was filled in."
 msgstr ""
 
