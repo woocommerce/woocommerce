@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.3-beta-1 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-01-13 18:28:09+00:00\n"
+"POT-Creation-Date: 2015-01-14 00:07:49+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -94,7 +94,6 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:190
 #: includes/admin/class-wc-admin-assets.php:302
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:100
 #: includes/admin/settings/views/html-webhooks-edit.php:50
 msgid "Select an option&hellip;"
 msgstr ""
@@ -142,7 +141,6 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:117
 #: includes/admin/class-wc-admin-webhooks-table-list.php:40
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:192
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:66
 #: includes/admin/meta-boxes/views/html-product-attribute.php:12
 #: includes/admin/meta-boxes/views/html-variation-admin.php:189
 #: includes/admin/settings/class-wc-settings-shipping.php:204
@@ -831,7 +829,6 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:165
 #: includes/admin/class-wc-admin-webhooks-table-list.php:41
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:665
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:80
 #: includes/admin/settings/class-wc-settings-checkout.php:234
 #: includes/admin/settings/class-wc-settings-shipping.php:206
 #: includes/admin/settings/views/html-webhook-log.php:25
@@ -1795,13 +1792,11 @@ msgid "webhooks"
 msgstr ""
 
 #: includes/admin/class-wc-admin-webhooks-table-list.php:42
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:96
 #: includes/admin/settings/views/html-webhooks-edit.php:41
 msgid "Topic"
 msgstr ""
 
 #: includes/admin/class-wc-admin-webhooks-table-list.php:43
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:144
 #: includes/admin/settings/views/html-webhooks-edit.php:93
 msgid "Delivery URL"
 msgstr ""
@@ -1837,7 +1832,6 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-webhooks.php:44
 #: includes/admin/class-wc-admin-webhooks.php:164
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:181
 msgid "Webhook created on %s"
 msgstr ""
 
@@ -3015,132 +3009,6 @@ msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-images.php:58
 msgid "Add product gallery images"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:67
-#: includes/admin/settings/views/html-webhooks-edit.php:16
-msgid ""
-"Friendly name for identifying this webhook, defaults to Webhook created on "
-"%s."
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:81
-#: includes/admin/settings/views/html-webhooks-edit.php:25
-msgid ""
-"The options are \"Active\" (delivers payload), \"Paused\" (does not "
-"deliver), or \"Disabled\" (does not deliver due delivery failures)."
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:97
-#: includes/admin/settings/views/html-webhooks-edit.php:42
-msgid "Select when the webhook will fire."
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:101
-#: includes/admin/settings/views/html-webhooks-edit.php:51
-msgid "Coupon Created"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:102
-#: includes/admin/settings/views/html-webhooks-edit.php:52
-msgid "Coupon Updated"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:103
-#: includes/admin/settings/views/html-webhooks-edit.php:53
-msgid "Coupon Deleted"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:104
-#: includes/admin/settings/views/html-webhooks-edit.php:54
-msgid "Customer Created"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:105
-#: includes/admin/settings/views/html-webhooks-edit.php:55
-msgid "Customer Updated"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:106
-#: includes/admin/settings/views/html-webhooks-edit.php:56
-msgid "Customer Deleted"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:107
-#: includes/admin/settings/views/html-webhooks-edit.php:57
-msgid "Order Created"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:108
-#: includes/admin/settings/views/html-webhooks-edit.php:58
-msgid "Order Updated"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:109
-#: includes/admin/settings/views/html-webhooks-edit.php:59
-msgid "Order Deleted"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:110
-#: includes/admin/settings/views/html-webhooks-edit.php:60
-msgid "Product Created"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:111
-#: includes/admin/settings/views/html-webhooks-edit.php:61
-msgid "Product Updated"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:112
-#: includes/admin/settings/views/html-webhooks-edit.php:62
-msgid "Product Deleted"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:113
-#: includes/admin/settings/views/html-webhooks-edit.php:63
-msgid "Action"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:114
-#: includes/admin/settings/views/html-webhooks-edit.php:64
-msgid "Custom"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:122
-#: includes/admin/settings/views/html-webhooks-edit.php:75
-msgid "Action Event"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:123
-#: includes/admin/settings/views/html-webhooks-edit.php:76
-msgid "Enter the Action that will trigger this webhook."
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:131
-#: includes/admin/settings/views/html-webhooks-edit.php:84
-msgid "Custom Topic"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:132
-#: includes/admin/settings/views/html-webhooks-edit.php:85
-msgid "Enter the Custom Topic that will trigger this webhook."
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:145
-#: includes/admin/settings/views/html-webhooks-edit.php:94
-msgid "URL where the webhook payload is delivered."
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:158
-#: includes/admin/settings/views/html-webhooks-edit.php:102
-msgid "Secret"
-msgstr ""
-
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:159
-msgid ""
-"The Secret Key is used to generate a hash of the delivered webhook and "
-"provided in the request headers. This will default to the current API "
-"user's consumer secret if not provided."
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-order-download-permission.php:10
@@ -5077,6 +4945,103 @@ msgstr ""
 msgid "Webhook Data"
 msgstr ""
 
+#: includes/admin/settings/views/html-webhooks-edit.php:16
+msgid ""
+"Friendly name for identifying this webhook, defaults to Webhook created on "
+"%s."
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:25
+msgid ""
+"The options are &quot;Active&quot; (delivers payload), &quot;Paused&quot; "
+"(does not deliver), or &quot;Disabled&quot; (does not deliver due delivery "
+"failures)."
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:42
+msgid "Select when the webhook will fire."
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:51
+msgid "Coupon Created"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:52
+msgid "Coupon Updated"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:53
+msgid "Coupon Deleted"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:54
+msgid "Customer Created"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:55
+msgid "Customer Updated"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:56
+msgid "Customer Deleted"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:57
+msgid "Order Created"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:58
+msgid "Order Updated"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:59
+msgid "Order Deleted"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:60
+msgid "Product Created"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:61
+msgid "Product Updated"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:62
+msgid "Product Deleted"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:63
+msgid "Action"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:64
+msgid "Custom"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:75
+msgid "Action Event"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:76
+msgid "Enter the Action that will trigger this webhook."
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:84
+msgid "Custom Topic"
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:85
+msgid "Enter the Custom Topic that will trigger this webhook."
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:94
+msgid "URL where the webhook payload is delivered."
+msgstr ""
+
+#: includes/admin/settings/views/html-webhooks-edit.php:102
+msgid "Secret"
+msgstr ""
+
 #: includes/admin/settings/views/html-webhooks-edit.php:103
 msgid ""
 "The a Secret Key is used to generate a hash of the delivered webhook and "
@@ -6123,8 +6088,6 @@ msgstr[1] ""
 
 #: includes/admin/class-wc-admin-webhooks.php:44
 #: includes/admin/class-wc-admin-webhooks.php:164
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:67
-#: includes/admin/meta-boxes/class-wc-meta-box-webhook-data.php:181
 #: includes/admin/settings/views/html-webhooks-edit.php:16
 msgctxt "Webhook created on date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"

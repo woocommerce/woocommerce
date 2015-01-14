@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_status"><?php _e( 'Status', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php _e( 'The options are "Active" (delivers payload), "Paused" (does not deliver), or "Disabled" (does not deliver due delivery failures).', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<img class="help_tip" data-tip="<?php _e( 'The options are &quot;Active&quot; (delivers payload), &quot;Paused&quot; (does not deliver), or &quot;Disabled&quot; (does not deliver due delivery failures).', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
 					<select name="webhook_status" id="webhook_status">
