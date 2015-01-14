@@ -1416,10 +1416,13 @@ class WC_Cart {
 			$packages[0]['destination']['address']   = WC()->customer->get_shipping_address();
 			$packages[0]['destination']['address_2'] = WC()->customer->get_shipping_address_2();
 
-			foreach ( $this->get_cart() as $item )
-				if ( $item['data']->needs_shipping() )
-					if ( isset( $item['line_total'] ) )
+			foreach ( $this->get_cart() as $item ) {
+				if ( $item['data']->needs_shipping() ) {
+					if ( isset( $item['line_total'] ) ) {
 						$packages[0]['contents_cost'] += $item['line_total'];
+					}
+				}
+			}
 
 			return apply_filters( 'woocommerce_cart_shipping_packages', $packages );
 		}
@@ -1430,8 +1433,9 @@ class WC_Cart {
 		 * @return bool whether or not the cart needs shipping
 		 */
 		public function needs_shipping() {
-			if ( get_option('woocommerce_calc_shipping') == 'no' )
+			if ( get_option( 'woocommerce_calc_shipping' ) === 'no' ) {
 				return false;
+			}
 
 			$needs_shipping = false;
 
