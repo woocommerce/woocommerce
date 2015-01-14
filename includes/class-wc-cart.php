@@ -190,14 +190,13 @@ class WC_Cart {
 		 */
 		public function get_cart_from_session() {
 
-
 			// Load cart session data from session
 			foreach ( $this->cart_session_data as $key => $default ) {
 				$this->$key = WC()->session->get( $key, $default );
 			}
 
-			// Load coupons
-			$this->applied_coupons = array_filter( WC()->session->get( 'applied_coupons', array() ) );
+			$this->removed_cart_contents = array_filter( WC()->session->get( 'removed_cart_contents', array() ) );
+			$this->applied_coupons       = array_filter( WC()->session->get( 'applied_coupons', array() ) );
 
 			// Load the cart
 			$cart = WC()->session->get( 'cart', array() );
@@ -259,6 +258,7 @@ class WC_Cart {
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
 			WC()->session->set( 'coupon_discount_amounts', $this->coupon_discount_amounts );
 			WC()->session->set( 'coupon_discount_tax_amounts', $this->coupon_discount_tax_amounts );
+			WC()->session->set( 'removed_cart_contents', $this->removed_cart_contents );
 
 			foreach ( $this->cart_session_data as $key => $default ) {
 				WC()->session->set( $key, $this->$key );
