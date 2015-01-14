@@ -673,7 +673,7 @@ class WC_Cart {
 		/**
 		 * Gets the url to re-add an item into the cart.
 		 *
-		 * @param int $cart_item_key
+		 * @param  string $cart_item_key
 		 * @return string url to page
 		 */
 		public function get_undo_url( $cart_item_key ) {
@@ -994,6 +994,13 @@ class WC_Cart {
 			return $cart_item_key;
 		}
 
+		/**
+		 * Remove a cart item
+		 *
+		 * @since  2.3.0
+		 * @param  string $cart_item_key
+		 * @return bool
+		 */
 		public function remove_cart_item( $cart_item_key ) {
 			if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
 				$remove = $this->cart_contents[ $cart_item_key ];
@@ -1009,6 +1016,12 @@ class WC_Cart {
 			return false;
 		}
 
+		/**
+		 * Restore a cart item
+		 *
+		 * @param  string $cart_item_key
+		 * @return bool
+		 */
 		public function restore_cart_item( $cart_item_key ) {
 			if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
 				$restore = $this->removed_cart_contents[ $cart_item_key ];
