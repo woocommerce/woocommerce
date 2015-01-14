@@ -17,7 +17,7 @@ class WC_Cart {
 	public $cart_contents = array();
 
 	/** @var array Contains an array of removed cart items. */
-	public $removed_card_contents = array();
+	public $removed_cart_contents = array();
 
 	/** @var array Contains an array of coupon codes applied to the cart. */
 	public $applied_coupons = array();
@@ -997,7 +997,7 @@ class WC_Cart {
 		public function remove_cart_item( $cart_item_key ) {
 			if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
 				$remove = $this->cart_contents[ $cart_item_key ];
-				$this->removed_card_contents[ $cart_item_key ] = $remove;
+				$this->removed_cart_contents[ $cart_item_key ] = $remove;
 
 				unset( $this->cart_contents[ $cart_item_key ] );
 
@@ -1010,11 +1010,11 @@ class WC_Cart {
 		}
 
 		public function restore_cart_item( $cart_item_key ) {
-			if ( isset( $this->removed_card_contents[ $cart_item_key ] ) ) {
-				$restore = $this->removed_card_contents[ $cart_item_key ];
+			if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
+				$restore = $this->removed_cart_contents[ $cart_item_key ];
 				$this->cart_contents[ $cart_item_key ] = $restore;
 
-				unset( $this->removed_card_contents[ $cart_item_key ] );
+				unset( $this->removed_cart_contents[ $cart_item_key ] );
 
 				$this->calculate_totals();
 
