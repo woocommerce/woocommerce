@@ -243,7 +243,8 @@ class WC_Admin_Settings {
 			}
 
 			// Description handling
-			extract( self::get_field_description( $value ) );
+			$field_description = self::get_field_description( $value );
+			extract( $field_description );
 
 			// Switch based on type
 			switch ( $value['type'] ) {
