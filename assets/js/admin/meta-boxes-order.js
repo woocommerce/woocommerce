@@ -789,17 +789,19 @@ jQuery( function ( $ ) {
 								.toString()
 								.replace( '.', woocommerce_admin.mon_decimal_point )
 						).change();
+					} else {
+						refund_line_total_tax.val( 0 ).change();
 					}
 				});
 
 				// Restock checkbox
 				if ( refund_qty > 0 ) {
-					$( '#restock_refunded_items' ).closest('tr').show();
+					$( '#restock_refunded_items' ).closest( 'tr' ).show();
 				} else {
-					$( '#restock_refunded_items' ).closest('tr').hide();
-					$('.woocommerce_order_items input.refund_order_item_qty').each(function(){
-						if ( $(this).val() > 0 ) {
-							$( '#restock_refunded_items' ).closest('tr').show();
+					$( '#restock_refunded_items' ).closest( 'tr' ).hide();
+					$( '.woocommerce_order_items input.refund_order_item_qty' ).each( function() {
+						if ( $( this ).val() > 0 ) {
+							$( '#restock_refunded_items' ).closest( 'tr' ).show();
 						}
 					});
 				}
