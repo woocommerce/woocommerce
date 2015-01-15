@@ -776,6 +776,13 @@ class WC_Meta_Box_Product_Data {
 								$variation_data[ $field ] = isset( $variation_meta[ $field ][0] ) ? maybe_unserialize( $variation_meta[ $field ][0] ) : $value;
 							}
 
+							// Add the variation attributes
+							foreach ( $variation_meta as $key => $value ) {
+								if ( false !== strpos( $key, 'attribute_' ) ) {
+									$variation_data[ $key ] = $value;
+								}
+							}
+
 							// Formatting
 							$variation_data['_regular_price'] = wc_format_localized_price( $variation_data['_regular_price'] );
 							$variation_data['_sale_price']    = wc_format_localized_price( $variation_data['_sale_price'] );
