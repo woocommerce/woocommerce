@@ -26,10 +26,10 @@ class WC_Admin_Attributes {
 	 * The added attributes are stored in the database and can be used for layered navigation.
 	 */
 	public static function output() {
-		global $wpdb;
+		$result = '';
+		$action = '';
 
 		// Action to perform: add, edit, delete or none
-		$action = '';
 		if ( ! empty( $_POST['add_new_attribute'] ) ) {
 			$action = 'add';
 		} elseif ( ! empty( $_POST['save_attribute'] ) && ! empty( $_GET['edit'] ) ) {
@@ -38,177 +38,20 @@ class WC_Admin_Attributes {
 			$action = 'delete';
 		}
 
-		// Add or edit an attribute
-		if ( 'add' === $action || 'edit' === $action ) {
-
-			// Security check
-			if ( 'add' === $action ) {
-				check_admin_referer( 'woocommerce-add-new_attribute' );
-			}
-			if ( 'edit' === $action ) {
-				$attribute_id = absint( $_GET['edit'] );
-				check_admin_referer( 'woocommerce-save-attribute_' . $attribute_id );
-			}
-
-			// Grab the submitted data
-			$attribute_label   = isset( $_POST['attribute_label'] )   ? (string) stripslashes( $_POST['attribute_label'] ) : '';
-			$attribute_name    = isset( $_POST['attribute_name'] )    ? wc_sanitize_taxonomy_name( stripslashes( (string) $_POST['attribute_name'] ) ) : '';
-			$attribute_type    = isset( $_POST['attribute_type'] )    ? (string) stripslashes( $_POST['attribute_type'] ) : '';
-			$attribute_orderby = isset( $_POST['attribute_orderby'] ) ? (string) stripslashes( $_POST['attribute_orderby'] ) : '';
-			$attribute_public  = isset( $_POST['attribute_public'] )  ? 1 : 0;
-
-			// Auto-generate the label or slug if only one of both was provided
-			if ( ! $attribute_label ) {
-				$attribute_label = ucfirst( $attribute_name );
-			}
-			if ( ! $attribute_name ) {
-				$attribute_name = wc_sanitize_taxonomy_name( stripslashes( $attribute_label ) );
-			}
-
-			// Forbidden attribute names
-			// http://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms
-			$reserved_terms = array(
-				'attachment', 'attachment_id', 'author', 'author_name', 'calendar', 'cat', 'category', 'category__and',
-				'category__in', 'category__not_in', 'category_name', 'comments_per_page', 'comments_popup', 'cpage', 'day',
-				'debug', 'error', 'exact', 'feed', 'hour', 'link_category', 'm', 'minute', 'monthnum', 'more', 'name',
-				'nav_menu', 'nopaging', 'offset', 'order', 'orderby', 'p', 'page', 'page_id', 'paged', 'pagename', 'pb', 'perm',
-				'post', 'post__in', 'post__not_in', 'post_format', 'post_mime_type', 'post_status', 'post_tag', 'post_type',
-				'posts', 'posts_per_archive_page', 'posts_per_page', 'preview', 'robots', 's', 'search', 'second', 'sentence',
-				'showposts', 'static', 'subpost', 'subpost_id', 'tag', 'tag__and', 'tag__in', 'tag__not_in', 'tag_id',
-				'tag_slug__and', 'tag_slug__in', 'taxonomy', 'tb', 'term', 'type', 'w', 'withcomments', 'withoutcomments', 'year',
-			);
-
-			// Error checking
-			if ( ! $attribute_name || ! $attribute_label || ! $attribute_type ) {
-				$error = __( 'Please, provide an attribute name, slug and type.', 'woocommerce' );
-			} elseif ( strlen( $attribute_name ) >= 28 ) {
-				$error = sprintf( __( 'Slug “%s” is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
-			} elseif ( in_array( $attribute_name, $reserved_terms ) ) {
-				$error = sprintf( __( 'Slug “%s” is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
-			} else {
-				$taxonomy_exists = taxonomy_exists( wc_attribute_taxonomy_name( $attribute_name ) );
-
-				if ( 'add' === $action && $taxonomy_exists ) {
-					$error = sprintf( __( 'Slug “%s” is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
-				}
-
-				if ( 'edit' === $action ) {
-					$old_attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
-					if ( $old_attribute_name != $attribute_name && wc_sanitize_taxonomy_name( $old_attribute_name ) != $attribute_name && $taxonomy_exists ) {
-						$error = sprintf( __( 'Slug “%s” is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
-					}
-				}
-			}
-
-			// Show the error message if any
-			if ( ! empty( $error ) ) {
-				echo '<div id="woocommerce_errors" class="error fade"><p>' . $error . '</p></div>';
-			} else {
-
-				// Add new attribute
-				if ( 'add' === $action ) {
-
-					$attribute = array(
-						'attribute_label'   => $attribute_label,
-						'attribute_name'    => $attribute_name,
-						'attribute_type'    => $attribute_type,
-						'attribute_orderby' => $attribute_orderby,
-						'attribute_public'  => $attribute_public
-					);
-
-					$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
-
-					do_action( 'woocommerce_attribute_added', $wpdb->insert_id, $attribute );
-
-					$action_completed = true;
-				}
-
-				// Edit existing attribute
-				if ( 'edit' === $action ) {
-
-					$attribute = array(
-						'attribute_label'   => $attribute_label,
-						'attribute_name'    => $attribute_name,
-						'attribute_type'    => $attribute_type,
-						'attribute_orderby' => $attribute_orderby,
-						'attribute_public'  => $attribute_public
-					);
-
-					$wpdb->update( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute, array( 'attribute_id' => $attribute_id ) );
-
-					do_action( 'woocommerce_attribute_updated', $attribute_id, $attribute, $old_attribute_name );
-
-					if ( $old_attribute_name != $attribute_name && ! empty( $old_attribute_name ) ) {
-						// Update taxonomies in the wp term taxonomy table
-						$wpdb->update(
-							$wpdb->term_taxonomy,
-							array( 'taxonomy' => wc_attribute_taxonomy_name( $attribute_name ) ),
-							array( 'taxonomy' => 'pa_' . $old_attribute_name )
-						);
-
-						// Update taxonomy ordering term meta
-						$wpdb->update(
-							$wpdb->prefix . 'woocommerce_termmeta',
-							array( 'meta_key' => 'order_pa_' . sanitize_title( $attribute_name ) ),
-							array( 'meta_key' => 'order_pa_' . sanitize_title( $old_attribute_name ) )
-						);
-
-						// Update product attributes which use this taxonomy
-						$old_attribute_name_length = strlen( $old_attribute_name ) + 3;
-						$attribute_name_length = strlen( $attribute_name ) + 3;
-
-						$wpdb->query( "
-							UPDATE {$wpdb->postmeta}
-							SET meta_value = REPLACE( meta_value, 's:{$old_attribute_name_length}:\"pa_{$old_attribute_name}\"', 's:{$attribute_name_length}:\"pa_{$attribute_name}\"' )
-							WHERE meta_key = '_product_attributes'"
-						);
-
-						// Update variations which use this taxonomy
-						$wpdb->update(
-							$wpdb->postmeta,
-							array( 'meta_key' => 'attribute_pa_' . sanitize_title( $attribute_name ) ),
-							array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_attribute_name ) )
-						);
-					}
-
-					echo '<div class="updated fade"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p></div>';
-
-					$action_completed = true;
-				}
-
-				flush_rewrite_rules();
-			}
+		switch ( $action ) {
+			case 'add' :
+				$result = self::process_add_attribute();
+			break;
+			case 'edit' :
+				$result = self::process_edit_attribute();
+			break;
+			case 'delete' :
+				$result = self::process_delete_attribute();
+			break;
 		}
 
-		// Delete an attribute
-		if ( 'delete' === $action ) {
-
-			// Security check
-			$attribute_id = absint( $_GET['delete'] );
-			check_admin_referer( 'woocommerce-delete-attribute_' . $attribute_id );
-
-			$attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
-
-			if ( $attribute_name && $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" ) ) {
-
-				$taxonomy = wc_attribute_taxonomy_name( $attribute_name );
-
-				if ( taxonomy_exists( $taxonomy ) ) {
-					$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
-					foreach ( $terms as $term ) {
-						wp_delete_term( $term->term_id, $taxonomy );
-					}
-				}
-
-				do_action( 'woocommerce_attribute_deleted', $attribute_id, $attribute_name, $taxonomy );
-
-				$action_completed = true;
-			}
-		}
-
-		// If an attribute was added, edited or deleted: clear cache
-		if ( ! empty( $action_completed ) ) {
-			delete_transient( 'wc_attribute_taxonomies' );
+		if ( is_wp_error( $result ) ) {
+			echo '<div id="woocommerce_errors" class="error fade"><p>' . $result->get_error_message() . '</p></div>';
 		}
 
 		// Show admin interface
@@ -217,6 +60,187 @@ class WC_Admin_Attributes {
 		} else {
 			self::add_attribute();
 		}
+	}
+
+	/**
+	 * Get and sanitize posted attribute data
+	 * @return array
+	 */
+	private static function get_posted_attribute() {
+		$attribute = array(
+			'attribute_label'   => isset( $_POST['attribute_label'] )   ? wc_clean( stripslashes( $_POST['attribute_label'] ) ) : '',
+			'attribute_name'    => isset( $_POST['attribute_name'] )    ? wc_sanitize_taxonomy_name( stripslashes( $_POST['attribute_name'] ) ) : '',
+			'attribute_type'    => isset( $_POST['attribute_type'] )    ? wc_clean( $_POST['attribute_type'] ) : 'select',
+			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( $_POST['attribute_orderby'] ) : '',
+			'attribute_public'  => isset( $_POST['attribute_public'] )  ? 1 : 0
+		);
+
+		if ( empty( $attribute['attribute_type'] ) ) {
+			$attribute['attribute_type'] = 'select';
+		}
+		if ( empty( $attribute['attribute_label'] ) ) {
+			$attribute['attribute_label'] = ucfirst( $attribute['attribute_name'] );
+		}
+		if ( empty( $attribute['attribute_label'] ) ) {
+			$attribute['attribute_name'] = wc_sanitize_taxonomy_name( $attribute['attribute_label'] );
+		}
+
+		return $attribute;
+	}
+
+	/**
+	 * See if an attribute name is valid
+	 * @param  string $attribute_name
+	 * @return bool|WP_error result
+	 */
+	private static function valid_attribute_name( $attribute_name ) {
+		// Forbidden attribute names
+		// http://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms
+		$reserved_terms = array(
+			'attachment', 'attachment_id', 'author', 'author_name', 'calendar', 'cat', 'category', 'category__and',
+			'category__in', 'category__not_in', 'category_name', 'comments_per_page', 'comments_popup', 'cpage', 'day',
+			'debug', 'error', 'exact', 'feed', 'hour', 'link_category', 'm', 'minute', 'monthnum', 'more', 'name',
+			'nav_menu', 'nopaging', 'offset', 'order', 'orderby', 'p', 'page', 'page_id', 'paged', 'pagename', 'pb', 'perm',
+			'post', 'post__in', 'post__not_in', 'post_format', 'post_mime_type', 'post_status', 'post_tag', 'post_type',
+			'posts', 'posts_per_archive_page', 'posts_per_page', 'preview', 'robots', 's', 'search', 'second', 'sentence',
+			'showposts', 'static', 'subpost', 'subpost_id', 'tag', 'tag__and', 'tag__in', 'tag__not_in', 'tag_id',
+			'tag_slug__and', 'tag_slug__in', 'taxonomy', 'tb', 'term', 'type', 'w', 'withcomments', 'withoutcomments', 'year',
+		);
+
+		if ( strlen( $attribute_name ) >= 28 ) {
+			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
+		} elseif ( in_array( $attribute_name, $reserved_terms ) ) {
+			return new WP_Error( 'error', __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Add an attribute
+	 * @return bool|WP_Error
+	 */
+	private static function process_add_attribute() {
+		global $wpdb;
+		check_admin_referer( 'woocommerce-add-new_attribute' );
+
+		$attribute = self::get_posted_attribute();
+
+		if ( empty( $attribute['attribute_name'] ) || empty( $attribute['attribute_label'] ) ) {
+			return new WP_Error( 'error', __( 'Please, provide an attribute name and slug.', 'woocommerce' ) );
+		} elseif ( ( $valid_attribute_name = self::valid_attribute_name( $attribute['attribute_name'] ) ) && is_wp_error( $valid_attribute_name ) ) {
+			return $valid_attribute_name;
+		} elseif ( $taxonomy_exists = taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) ) ) {
+			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute['attribute_name'] ) ) );
+		}
+
+		$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
+
+		do_action( 'woocommerce_attribute_added', $wpdb->insert_id, $attribute );
+
+		flush_rewrite_rules();
+		delete_transient( 'wc_attribute_taxonomies' );
+
+		return true;
+	}
+
+	/**
+	 * Edit an attribute
+	 * @return bool|WP_Error
+	 */
+	private static function process_edit_attribute() {
+		global $wpdb;
+		$attribute_id = absint( $_GET['edit'] );
+		check_admin_referer( 'woocommerce-save-attribute_' . $attribute_id );
+
+		$attribute = self::get_posted_attribute();
+
+		if ( empty( $attribute['attribute_name'] ) || empty( $attribute['attribute_label'] ) ) {
+			return new WP_Error( 'error', __( 'Please, provide an attribute name and slug.', 'woocommerce' ) );
+		} elseif ( ( $valid_attribute_name = self::valid_attribute_name( $attribute['attribute_name'] ) ) && is_wp_error( $valid_attribute_name ) ) {
+			return $valid_attribute_name;
+		}
+
+		$taxonomy_exists    = taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) );
+		$old_attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
+		if ( $old_attribute_name != $attribute['attribute_name'] && wc_sanitize_taxonomy_name( $old_attribute_name ) != $attribute['attribute_name'] && $taxonomy_exists ) {
+			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute['attribute_name'] ) ) );
+		}
+
+		$wpdb->update( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute, array( 'attribute_id' => $attribute_id ) );
+
+		do_action( 'woocommerce_attribute_updated', $attribute_id, $attribute, $old_attribute_name );
+
+		if ( $old_attribute_name != $attribute['attribute_name'] && ! empty( $old_attribute_name ) ) {
+			// Update taxonomies in the wp term taxonomy table
+			$wpdb->update(
+				$wpdb->term_taxonomy,
+				array( 'taxonomy' => wc_attribute_taxonomy_name( $attribute['attribute_name'] ) ),
+				array( 'taxonomy' => 'pa_' . $old_attribute_name )
+			);
+
+			// Update taxonomy ordering term meta
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_termmeta',
+				array( 'meta_key' => 'order_pa_' . sanitize_title( $attribute['attribute_name'] ) ),
+				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_attribute_name ) )
+			);
+
+			// Update product attributes which use this taxonomy
+			$old_attribute_name_length = strlen( $old_attribute_name ) + 3;
+			$attribute_name_length     = strlen( $attribute['attribute_name'] ) + 3;
+
+			$wpdb->query( "
+				UPDATE {$wpdb->postmeta}
+				SET meta_value = REPLACE( meta_value, 's:{$old_attribute_name_length}:\"pa_{$old_attribute_name}\"', 's:{$attribute_name_length}:\"pa_{$attribute['attribute_name']}\"' )
+				WHERE meta_key = '_product_attributes'"
+			);
+
+			// Update variations which use this taxonomy
+			$wpdb->update(
+				$wpdb->postmeta,
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $attribute['attribute_name'] ) ),
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_attribute_name ) )
+			);
+		}
+
+		echo '<div class="updated fade"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p></div>';
+
+		flush_rewrite_rules();
+		delete_transient( 'wc_attribute_taxonomies' );
+
+		return true;
+	}
+
+	/**
+	 * Delete an attribute
+	 * @return bool
+	 */
+	private static function process_delete_attribute() {
+		global $wpdb;
+		$attribute_id = absint( $_GET['delete'] );
+		check_admin_referer( 'woocommerce-delete-attribute_' . $attribute_id );
+
+		$attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
+
+		if ( $attribute_name && $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" ) ) {
+
+			$taxonomy = wc_attribute_taxonomy_name( $attribute_name );
+
+			if ( taxonomy_exists( $taxonomy ) ) {
+				$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
+				foreach ( $terms as $term ) {
+					wp_delete_term( $term->term_id, $taxonomy );
+				}
+			}
+
+			do_action( 'woocommerce_attribute_deleted', $attribute_id, $attribute_name, $taxonomy );
+			delete_transient( 'wc_attribute_taxonomies' );
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
