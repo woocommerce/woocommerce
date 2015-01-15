@@ -128,7 +128,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_weight" class="text weight" placeholder="<?php echo sprintf( __( '0.00 (%s)', 'woocommerce' ), get_option( 'woocommerce_weight_unit' ) ); ?>" value="">
+					<input type="text" name="_weight" class="text weight" placeholder="<?php echo sprintf( __( '%s (%s)', 'woocommerce' ), wc_format_localized_decimal( 0 ), get_option( 'woocommerce_weight_unit' ) ); ?>" value="">
 				</label>
 			</div>
 		<?php endif; ?>
