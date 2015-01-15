@@ -431,7 +431,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				$page_id = get_option( $values['option'] );
 
 				if ( $page_id ) {
-					$page_name = '<a href="' . get_edit_post_link( $page_id ) . '" title="' . sprintf( _x( 'Edit %s page', '[WC Pages links in the System Status]', 'woocommerce' ), esc_html( $page_name ) ) . '">' . esc_html( $page_name ) . '</a>';
+					$page_name = '<a href="' . get_edit_post_link( $page_id ) . '" title="' . sprintf( _x( 'Edit %s page', 'WC Pages links in the System Status', 'woocommerce' ), esc_html( $page_name ) ) . '">' . esc_html( $page_name ) . '</a>';
 				} else {
 					$page_name = esc_html( $page_name );
 				}

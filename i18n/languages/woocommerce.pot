@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.3-beta-1 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-01-14 12:41:31+00:00\n"
+"POT-Creation-Date: 2015-01-15 11:21:15+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -8337,13 +8337,13 @@ msgstr ""
 msgid "Product % Discount"
 msgstr ""
 
-#: includes/wc-deprecated-functions.php:707
+#: includes/wc-deprecated-functions.php:709
 msgid ""
 "The shop_order_status taxonomy is no more in WooCommerce 2.2! You should "
 "use the new WooCommerce post_status instead, <a href=\"%s\">read more...</a>"
 msgstr ""
 
-#: includes/wc-deprecated-functions.php:711
+#: includes/wc-deprecated-functions.php:713
 msgid ""
 "The \"publish\" order status is no more in WooCommerce 2.2! You should use "
 "the new WooCommerce post_status instead, <a href=\"%s\">read more...</a>"
