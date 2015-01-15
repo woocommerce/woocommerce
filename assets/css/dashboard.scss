@@ -157,14 +157,14 @@ ul.woocommerce_stats {
 		li.low-in-stock {
 			border-right: 1px solid #ececec;
 
-			a: before {
+			a:before {
 				content: "\e02c";
 				color: $orange;
 			}
 		}
 
 		li.out-of-stock {
-			a: before {
+			a:before {
 				content: "\e02c";
 				color: $red;
 			}
