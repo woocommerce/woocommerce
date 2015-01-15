@@ -321,8 +321,6 @@ function wc_price( $price, $args = array() ) {
 		'ex_tax_label' 	=> '0'
 	), $args ) );
 
-	do_action( 'before_wc_price', $price, $args );
-
 	$num_decimals    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 	$currency        = isset( $args['currency'] ) ? $args['currency'] : '';
 	$currency_symbol = get_woocommerce_currency_symbol($currency);
