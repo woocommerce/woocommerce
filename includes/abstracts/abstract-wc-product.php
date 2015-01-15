@@ -25,6 +25,7 @@ class WC_Product {
 	 * Constructor gets the post object and sets the ID for the loaded product.
 	 *
 	 * @param int|WC_Product|WP_Post $product Product ID, post object, or product object
+	 * @uses   WP_POST
 	 */
 	public function __construct( $product ) {
 

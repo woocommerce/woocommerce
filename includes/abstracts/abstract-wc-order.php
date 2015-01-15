@@ -53,6 +53,7 @@ abstract class WC_Abstract_Order {
 	 * Init/load the order object. Called from the constructor.
 	 *
 	 * @param  string|int|WP_POST|WC_Order $order Order to init
+	 * @uses   WP_POST
 	 */
 	protected function init( $order ) {
 		if ( is_numeric( $order ) ) {
