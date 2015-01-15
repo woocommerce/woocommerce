@@ -248,6 +248,10 @@ if ( wc_tax_enabled() ) {
 	?>
 </div>
 <?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
+<?php
+	// Check if our gateway supports automatic refunds
+	$gateway_supports_refunds = ( false !== $payment_gateway && $payment_gateway->supports( 'refunds' ) );
+?>
 <div class="wc-order-data-row wc-order-refund-items" style="display: none;">
 	<table class="wc-order-totals">
 		<tr style="display:none;">
@@ -276,10 +280,17 @@ if ( wc_tax_enabled() ) {
 				<div class="clear"></div>
 			</td>
 		</tr>
+        <?php if ( ! $gateway_supports_refunds ) : ?>
+        <tr>
+        	<td colspan="2">
+            	<span class="description"><?php _e( 'The payment gateway used to place this order does not support automatic refunds. You will still need to manually issue a refund through your payment gateway.', 'woocommerce' ); ?></span>
+            </td>
+        </tr>
+        <?php endif; ?>
 	</table>
 	<div class="clear"></div>
 	<div class="refund-actions">
-		<?php if ( false !== $payment_gateway && $payment_gateway->supports( 'refunds' ) ) : ?>
+		<?php if ( $gateway_supports_refunds ) : ?>
 		<button type="button" class="button button-primary do-api-refund"><?php printf( _x( 'Refund %s via %s', 'Refund $amount', 'woocommerce' ), '<span class="wc-order-refund-amount">' . wc_price( 0, array( 'currency' => $order->get_order_currency() ) ) . '</span>', ( ! empty( $payment_gateway->method_title ) ? $payment_gateway->method_title : $payment_gateway->get_title() ) ); ?></button>
 		<?php endif; ?>
 		<button type="button" class="button button-primary do-manual-refund"><?php _e( 'Refund manually', 'woocommerce' ); ?></button>
