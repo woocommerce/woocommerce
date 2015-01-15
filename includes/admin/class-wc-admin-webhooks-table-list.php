@@ -158,8 +158,8 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		switch ( $status_name ) {
 			case 'publish' :
 				$label = array(
-					'singular' => __( 'Actived <span class="count">(%s)</span>', 'woocommerce' ),
-					'plural'   => __( 'Actived <span class="count">(%s)</span>', 'woocommerce' ),
+					'singular' => __( 'Activated <span class="count">(%s)</span>', 'woocommerce' ),
+					'plural'   => __( 'Activated <span class="count">(%s)</span>', 'woocommerce' ),
 					'context'  => '',
 					'domain'   => 'woocommerce',
 				);
