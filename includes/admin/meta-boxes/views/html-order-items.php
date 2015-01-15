@@ -57,7 +57,7 @@ if ( wc_tax_enabled() ) {
 				<th class="line_cost sortable" data-sort="float"><?php _e( 'Total', 'woocommerce' ); ?></th>
 
 				<?php
-					if ( empty( $legacy_order ) && wc_tax_enabled() ) :
+					if ( empty( $legacy_order ) && ! empty( $order_taxes ) ) :
 						foreach ( $order_taxes as $tax_id => $tax_item ) :
 							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
