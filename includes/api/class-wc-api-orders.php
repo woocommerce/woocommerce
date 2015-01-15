@@ -680,7 +680,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param \WC_Order $order
 	 * @param array $data
 	 */
-	private function set_order_addresses( $order, $data ) {
+	protected function set_order_addresses( $order, $data ) {
 
 		$address_fields = array(
 			'first_name',
@@ -747,7 +747,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param int $order_id valid order ID
 	 * @param array $order_meta order meta in array( 'meta_key' => 'meta_value' ) format
 	 */
-	private function set_order_meta( $order_id, $order_meta ) {
+	protected function set_order_meta( $order_id, $order_meta ) {
 
 		foreach ( $order_meta as $meta_key => $meta_value ) {
 
@@ -766,7 +766,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param array $item item provided in the request body
 	 * @return bool true if the item resource ID is null, false otherwise
 	 */
-	private function item_is_null( $item ) {
+	protected function item_is_null( $item ) {
 
 		$keys = array( 'product_id', 'method_id', 'title', 'code' );
 
@@ -792,7 +792,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param string $action either 'create' or 'update'
 	 * @throws WC_API_Exception if item ID is not associated with order
 	 */
-	private function set_item( $order, $item_type, $item, $action ) {
+	protected function set_item( $order, $item_type, $item, $action ) {
 		global $wpdb;
 
 		$set_method = "set_{$item_type}";
@@ -823,7 +823,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param string $action 'create' to add line item or 'update' to update it
 	 * @throws WC_API_Exception invalid data, server error
 	 */
-	private function set_line_item( $order, $item, $action ) {
+	protected function set_line_item( $order, $item, $action ) {
 
 		$creating = ( 'create' === $action );
 
@@ -924,7 +924,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param string $action 'create' to add shipping or 'update' to update it
 	 * @throws WC_API_Exception invalid data, server error
 	 */
-	private function set_shipping( $order, $shipping, $action ) {
+	protected function set_shipping( $order, $shipping, $action ) {
 
 		// total must be a positive float
 		if ( isset( $shipping['total'] ) && floatval( $shipping['total'] ) < 0 ) {
@@ -979,7 +979,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param string $action 'create' to add fee or 'update' to update it
 	 * @throws WC_API_Exception invalid data, server error
 	 */
-	private function set_fee( $order, $fee, $action ) {
+	protected function set_fee( $order, $fee, $action ) {
 
 		if ( 'create' === $action ) {
 
@@ -1058,7 +1058,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param string $action 'create' to add coupon or 'update' to update it
 	 * @throws WC_API_Exception invalid data, server error
 	 */
-	private function set_coupon( $order, $coupon, $action ) {
+	protected function set_coupon( $order, $coupon, $action ) {
 
 		// coupon amount must be positive float
 		if ( isset( $coupon['amount'] ) && floatval( $coupon['amount'] ) < 0 ) {
