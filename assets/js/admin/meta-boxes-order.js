@@ -228,7 +228,7 @@ jQuery( function ( $ ) {
 	 */
 	var wc_meta_boxes_order_items = {
 		init: function() {
-			$('.woocommerce_order_items').stupidtable();
+			this.stupidtable.init();
 
 			$( '#woocommerce-order-items' )
 				.on( 'click', 'button.add-line-item', this.add_line_item )
@@ -310,6 +310,7 @@ jQuery( function ( $ ) {
 					$( '#woocommerce-order-items .inside' ).append( response );
 					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
+					wc_meta_boxes_order_items.stupidtable.init();
 				}
 			});
 		},
@@ -499,6 +500,7 @@ jQuery( function ( $ ) {
 						$( '#woocommerce-order-items .inside' ).append( response );
 						wc_meta_boxes_order.init_tiptip();
 						wc_meta_boxes_order_items.unblock();
+						wc_meta_boxes_order_items.stupidtable.init();
 					}
 				});
 			}
@@ -548,6 +550,7 @@ jQuery( function ( $ ) {
 						$( '#woocommerce-order-items .inside' ).append( response );
 						wc_meta_boxes_order.init_tiptip();
 						wc_meta_boxes_order_items.unblock();
+						wc_meta_boxes_order_items.stupidtable.init();
 					}
 				});
 			}
@@ -617,7 +620,7 @@ jQuery( function ( $ ) {
 					$( '#woocommerce-order-items .inside' ).append( response );
 					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
-					$('.woocommerce_order_items').stupidtable();
+					wc_meta_boxes_order_items.stupidtable.init();
 				}
 			});
 
@@ -1072,13 +1075,32 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items .inside' ).append( response );
 							wc_meta_boxes_order.init_tiptip();
 							wc_meta_boxes_order_items.unblock();
+							wc_meta_boxes_order_items.stupidtable.init();
 						}
 					});
 				} else {
 					window.alert( woocommerce_admin_meta_boxes.i18n_tax_rate_already_exists );
 				}
 			}
+		},
 
+		stupidtable: {
+			init: function() {
+				$( '.woocommerce_order_items' ).stupidtable().on( 'aftertablesort', this.add_arrows );
+			},
+
+			add_arrows: function( event, data ) {
+				var th    = $( this ).find( 'th' );
+				var arrow = data.direction === 'asc' ? '&uarr;' : '&darr;';
+				var index = data.column;
+
+				if ( 1 < index ) {
+					index = index - 1;
+				}
+
+				th.find( '.wc-arrow' ).remove();
+				th.eq( index ).append( '<span class="wc-arrow">' + arrow + '</span>' );
+			}
 		}
 	};
 
