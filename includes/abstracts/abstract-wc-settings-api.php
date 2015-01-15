@@ -208,7 +208,7 @@ abstract class WC_Settings_API {
 	 *
 	 * Generate the HTML for the fields on the "settings" screen.
 	 *
-	 * @param string $form_fields (default: array())
+	 * @param array $form_fields (default: array())
 	 * @since 1.0.0
 	 * @uses method_exists()
 	 * @return string the html for the settings
