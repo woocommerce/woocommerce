@@ -93,7 +93,7 @@ WooCommerce comes with some dummy data you can use to see how products look; eit
 
 = Where can I find WooCommerce documentation and user guides? =
 
-For help setting up and configuring WooCommerce please refer to our [user guide](http://docs.woothemes.com/document/woocommerce/)
+For help setting up and configuring WooCommerce please refer to our [user guide](http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/)
 
 For extending or theming WooCommerce, see our [codex](http://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/).
 
