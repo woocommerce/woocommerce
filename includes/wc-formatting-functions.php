@@ -620,3 +620,14 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
 	}
 	return $string;
 }
+
+/**
+ * Format content to display shortcodes
+ *
+ * @since  2.3.0
+ * @param  string $string
+ * @return string
+ */
+function wc_format_content( $string ) {
+	return do_shortcode( shortcode_unautop( wpautop( $string ) ) );
+}

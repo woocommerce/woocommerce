@@ -473,7 +473,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 */
 	function woocommerce_taxonomy_archive_description() {
 		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 ) {
-			$description = wpautop( do_shortcode( term_description() ) );
+			$description = wc_format_content( term_description() );
 			if ( $description ) {
 				echo '<div class="term-description">' . $description . '</div>';
 			}
@@ -491,7 +491,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		if ( is_post_type_archive( 'product' ) && get_query_var( 'paged' ) == 0 ) {
 			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
-				$description = wpautop( do_shortcode( $shop_page->post_content ) );
+				$description = wc_format_content( $shop_page->post_content );
 				if ( $description ) {
 					echo '<div class="page-description">' . $description . '</div>';
 				}
