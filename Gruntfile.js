@@ -145,7 +145,6 @@ module.exports = function( grunt ) {
 					potFilename: 'woocommerce.pot',
 					exclude: [
 						'includes/admin/.*',
-						'apigen/.*',
 						'tests/.*',
 						'tmp/.*'
 					],
@@ -193,7 +192,6 @@ module.exports = function( grunt ) {
 			files: {
 				src:  [
 					'**/*.php', // Include all files
-					'!apigen/**', // Exclude apigen/
 					'!node_modules/**', // Exclude node_modules/
 					'!tests/**', // Exclude tests/
 					'!tmp/**' // Exclude tmp/
@@ -210,8 +208,7 @@ module.exports = function( grunt ) {
 			},
 			apigen: {
 				command: [
-					'cd apigen/',
-					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/includes/libraries/*" --exclude "*/api/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"'
+					'apigen generate'
 				].join( '&&' )
 			}
 		},
