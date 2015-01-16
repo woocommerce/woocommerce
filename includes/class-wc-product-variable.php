@@ -570,6 +570,22 @@ class WC_Product_Variable extends WC_Product {
 
 		// Loop the variations
 		} else {
+
+			// Set the variable product to be virtual/downloadable if all children are virtual/downloadable
+			foreach ( array( '_downloadable', '_virtual' ) as $meta_key ) {
+
+				$all_variations_yes = true;
+
+				foreach ( $children as $child_id ) {
+					if ( 'yes' != get_post_meta( $child_id, $meta_key, true ) ) {
+						$all_variations_yes = false;
+						break;
+					}
+				}
+
+				update_post_meta( $product_id, $meta_key, ( true === $all_variations_yes ) ? 'yes' : 'no' );
+			}
+
 			// Main active prices
 			$min_price            = null;
 			$max_price            = null;
