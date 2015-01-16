@@ -1,0 +1,67 @@
+{layout '@layout.latte'}
+{var $active = 'tree'}
+
+{block title}Tree{/block}
+
+{define tree}
+<div class="tree">
+	<ul>
+		{var $level = -1}
+		{foreach $tree as $reflectionName => $reflection|noiterator}
+			{if $level === $tree->getDepth()}
+				</li>
+			{elseif $level > $tree->getDepth()}
+				{='</ul></li>'|repeat:$level - $tree->getDepth()|noescape}
+			{elseif -1 !== $level}
+				<ul>
+			{/if}
+
+			<li n:class="!$tree->hasSibling() ? last"><div class="{if $tree->hasSibling()}not{/if}last"><a href="{$reflectionName|classUrl}" n:tag-if="$reflection->documented"><span n:class="$reflection->deprecated ? deprecated, !$reflection->valid ? invalid">{$reflectionName}</span></a>
+			{var $interfaces = $reflection->ownInterfaces}
+			{if $interfaces} implements {foreach $interfaces as $interface}
+				<a href="{$interface|classUrl}" n:tag-if="$interface->documented"><span n:class="$interface->deprecated ? deprecated, !$interface->valid ? invalid">{$interface->name}</span></a>{sep}, {/sep}
+			{/foreach}{/if}
+			{var $traits = $reflection->ownTraits}
+			{if $traits}{if $interfaces}<br><span class="padding"></span>{/if} uses {foreach $traits as $trait}
+				{if is_string($trait)}
+					{$trait} (not available)
+
+				{else}
+					<a href="{$trait|classUrl}" n:tag-if="$trait->documented"><span n:class="$trait->deprecated ? deprecated, !$trait->valid ? invalid">{$trait->name}</span></a>{sep}, {/sep}
+				{/}
+			{/foreach}{/if}
+			</div>
+
+			{var $level = $tree->getDepth()}
+		{/foreach}
+		</li>
+		{='</ul></li>'|repeat:$level|noescape}
+	</ul>
+</div>
+{/define}
+
+{block content}
+<div id="content">
+	<h1>{include title}</h1>
+
+	{if $classTree->valid()}
+		<h3>Classes</h3>
+		{include tree, tree => $classTree}
+	{/if}
+
+	{if $interfaceTree->valid()}
+		<h3>Interfaces</h3>
+		{include tree, tree => $interfaceTree}
+	{/if}
+
+	{if $traitTree->valid()}
+		<h3>Traits</h3>
+		{include tree, tree => $traitTree}
+	{/if}
+
+	{if $exceptionTree->valid()}
+		<h3>Exceptions</h3>
+		{include tree, tree => $exceptionTree}
+	{/if}
+</div>
+{/block}

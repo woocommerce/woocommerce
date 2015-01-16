@@ -1,0 +1,82 @@
+{layout '@layout.latte'}
+{var $active = 'function'}
+
+{block title}{if $function->deprecated}Deprecated {/if}Function {$function->name}{/block}
+
+{block content}
+<div id="content" class="function">
+	<h1 n:class="$function->deprecated ? deprecated">Function {$function->shortName}</h1>
+
+	{if $function->valid}
+
+	<div class="description" n:if="$template->longDescription($function)">
+	{$function|longDescription|noescape}
+	</div>
+
+	<div class="info">
+		{if $function->inNamespace()}<b>Namespace:</b> {$function->namespaceName|namespaceLinks|noescape}<br>{/if}
+		{if $function->inPackage()}<b>Package:</b> {$function->packageName|packageLinks|noescape}<br>{/if}
+		{foreach $template->annotationSort($template->annotationFilter($function->annotations, array('param', 'return', 'throws'))) as $annotation => $values}
+			{foreach $values as $value}
+				<b>{$annotation|annotationBeautify}{if $value}:{/if}</b>
+				{$value|annotation:$annotation:$function|noescape}<br>
+			{/foreach}
+		{/foreach}
+		<b>Located at</b>
+		<a n:tag-if="$config->sourceCode" href="{$function|sourceUrl}" title="Go to source code">
+			{$function->fileName|relativePath}
+		</a><br>
+	</div>
+
+	{var $annotations = $function->annotations}
+
+	<table class="summary" id="parameters" n:if="$function->numberOfParameters">
+	<caption>Parameters summary</caption>
+	<tr n:foreach="$function->parameters as $parameter" id="${$parameter->name}">
+		<td class="name"><code>{$parameter->typeHint|typeLinks:$function|noescape}</code></td>
+		<td class="value"><code>{block|strip}
+			<var>{if $parameter->passedByReference}&amp; {/if}${$parameter->name}</var>{if $parameter->defaultValueAvailable} = {$parameter->defaultValueDefinition|highlightPHP:$function|noescape}{elseif $parameter->unlimited},…{/if}
+		{/block}</code></td>
+		<td>{$parameter->description|description:$function}</td>
+	</tr>
+	</table>
+
+	<table class="summary" id="returns" n:if="isset($annotations['return']) && 'void' !== $annotations['return'][0]">
+	<caption>Return value summary</caption>
+	<tr>
+		<td class="name"><code>
+			{$annotations['return'][0]|typeLinks:$function|noescape}
+		</code></td>
+		<td>
+			{$annotations['return'][0]|description:$function|noescape}
+		</td>
+	</tr>
+	</table>
+
+	<table class="summary" id="throws" n:ifset="$annotations['throws']">
+	<caption>Thrown exceptions summary</caption>
+	<tr n:foreach="$annotations['throws'] as $throws">
+		<td class="name"><code>
+			{$throws|typeLinks:$function|noescape}
+		</code></td>
+		<td>
+			{$throws|description:$function|noescape}
+		</td>
+	</tr>
+	</table>
+
+	{else}
+		<div class="invalid">
+			<p>
+				Documentation of this function could not be generated.
+			</p>
+			<p>
+				Function was originally declared in {$function->fileName|relativePath} and is invalid because of:
+			</p>
+			<ul>
+				<li n:foreach="$function->reasons as $reason">Function was redeclared in {$reason->getSender()->getFileName()|relativePath}.</li>
+			</ul>
+		</div>
+	{/if}
+</div>
+{/block}

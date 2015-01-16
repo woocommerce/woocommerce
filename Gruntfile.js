@@ -145,6 +145,7 @@ module.exports = function( grunt ) {
 					potFilename: 'woocommerce.pot',
 					exclude: [
 						'includes/admin/.*',
+						'apigen/.*',
 						'tests/.*',
 						'tmp/.*'
 					],
@@ -192,6 +193,7 @@ module.exports = function( grunt ) {
 			files: {
 				src:  [
 					'**/*.php', // Include all files
+					'!apigen/**', // Exclude apigen/
 					'!node_modules/**', // Exclude node_modules/
 					'!tests/**', // Exclude tests/
 					'!tmp/**' // Exclude tmp/

@@ -2,6 +2,8 @@ source: ./
 
 destination: wc-apidocs
 
+templateConfig: apigen/theme-woocommerce/config.neon
+
 # list of scanned file extensions (e.g. php5, phpt...)
 extensions: [php]
 
@@ -15,6 +17,7 @@ exclude:
     - tmp/
     - tests/
     - .sass-cache/
+    - apigen/
 
 # character set of source files; if you use only one across your files, we recommend you name it
 charset: [UTF-8]
@@ -32,7 +35,7 @@ baseUrl: http://docs.woothemes.com/wc-apidocs/
 templateTheme: default
 
 # generate documentation for PHP internal classes
-php: true
+php: false
 
 # generate highlighted source code for elements
 sourceCode: true

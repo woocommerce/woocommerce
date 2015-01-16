@@ -1,0 +1,36 @@
+{define elements}
+<tr n:foreach="$elements as $element">
+	<td class="name"><a href="{$element|elementUrl}" n:class="$element->deprecated ? deprecated, !$element->valid ? invalid">{if $namespace}{$element->shortName}{else}{$element->name}{/if}</a></td>
+	<td>{$element|shortDescription|noescape}</td>
+</tr>
+{/define}
+
+<table class="summary" id="classes" n:if="$classes">
+<caption>Classes summary</caption>
+{include elements, elements => $classes}
+</table>
+
+<table class="summary" id="interfaces" n:if="$interfaces">
+<caption>Interfaces summary</caption>
+{include elements, elements => $interfaces}
+</table>
+
+<table class="summary" id="traits" n:if="$traits">
+<caption>Traits summary</caption>
+{include elements, elements => $traits}
+</table>
+
+<table class="summary" id="exceptions" n:if="$exceptions">
+<caption>Exceptions summary</caption>
+{include elements, elements => $exceptions}
+</table>
+
+<table class="summary" id="constants" n:if="$constants">
+<caption>Constants summary</caption>
+{include elements, elements => $constants}
+</table>
+
+<table class="summary" id="functions" n:if="$functions">
+<caption>Functions summary</caption>
+{include elements, elements => $functions}
+</table>
