@@ -316,13 +316,14 @@ class WC_Product_Variable extends WC_Product {
 
 			if ( $price !== $saleprice ) {
 				$price = apply_filters( 'woocommerce_variable_sale_price_html', $this->get_price_html_from_to( $saleprice, $price ) . $this->get_price_suffix(), $this );
-			} elseif ( $price == 0 ) {
-				$price = __( 'Free!', 'woocommerce' );
-				$price = apply_filters( 'woocommerce_variable_free_price_html', $price, $this );
 			} else {
-				$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
+				if ( $prices[0] == 0 && $prices[1] == 0 ) {
+					$price = __( 'Free!', 'woocommerce' );
+					$price = apply_filters( 'woocommerce_variable_free_price_html', $price, $this );
+				} else {
+					$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
+				}
 			}
-
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
