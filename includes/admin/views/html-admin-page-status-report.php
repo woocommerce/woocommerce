@@ -579,7 +579,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 		<?php endif ?>
 		<tr>
 			<td data-export-label="WooCommerce Support"><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declare WooCommerce support.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php
 				if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
 					echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
