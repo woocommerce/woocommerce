@@ -4,7 +4,7 @@
  *
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.2.0
+ * @version 2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -97,16 +97,26 @@ $order = wc_get_order( $order_id );
 			<?php
 		endforeach;
 
-	// Check for customer note
-	if ( '' != $order->customer_note ) {
+		// check for refund
+		if ( $order->get_total_refunded() !== NULL ) {
+			?>
+			<tr>
+				<th scope="row"><?php _e( 'Refunded:', 'woocommerce' ); ?></th>
+				<td>-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
+			</tr>
+		<?php	
+		}
+
+		// Check for customer note
+		if ( '' != $order->customer_note ) {
+			?>
+			<tr>
+				<th scope="row"><?php _e( 'Note:', 'woocommerce' ); ?></th>
+				<td><?php echo wptexturize( $order->customer_note ); ?></td>
+			</tr>
+		<?php
+		}
 		?>
-		<tr>
-			<th scope="row"><?php _e( 'Note:', 'woocommerce' ); ?></th>
-			<td><?php echo wptexturize( $order->customer_note ); ?></td>
-		</tr>
-	<?php
-	}
-	?>
 	</tfoot>
 </table>
 
