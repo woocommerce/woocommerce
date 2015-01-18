@@ -88,17 +88,29 @@ $order = wc_get_order( $order_id );
 	</tbody>
 	<tfoot>
 	<?php
-		if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
+		$has_refund = false;
+
+		if ( $order->get_total_refunded() !== NULL ) {
+			$has_refund = true;
+		}
+
+		if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $key => $total ) :
+			$value = $total['value'];
+
+			// check for refund
+			if ( $has_refund && $key === 'order_total' ) {
+				$value = '<del>' . strip_tags( $order->get_formatted_order_total() ) . '</del> <ins>' . wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ) . '</ins>';
+			}
 			?>
 			<tr>
 				<th scope="row"><?php echo $total['label']; ?></th>
-				<td><?php echo $total['value']; ?></td>
+				<td><?php echo $value; ?></td>
 			</tr>
 			<?php
 		endforeach;
 
 		// check for refund
-		if ( $order->get_total_refunded() !== NULL ) {
+		if ( $has_refund ) {
 			?>
 			<tr>
 				<th scope="row"><?php _e( 'Refunded:', 'woocommerce' ); ?></th>
