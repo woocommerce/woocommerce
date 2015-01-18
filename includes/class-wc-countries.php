@@ -748,6 +748,16 @@ class WC_Countries {
 						'required' => false
 					)
 				),
+				'NP' => array(
+					'postcode_before_city' => true,
+					'state' => array(
+						'label' => __( 'District', 'woocommerce' ),
+					),
+					'postcode' => array(
+						'required' => false,
+						'hidden'   => false
+					)
+				),
 				'PL' => array(
 					'postcode_before_city' => true,
 					'state' => array(
