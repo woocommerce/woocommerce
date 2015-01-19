@@ -47,6 +47,7 @@ class WC_Admin_Status {
 				case 'clear_transients' :
 					wc_delete_product_transients();
 					wc_delete_shop_order_transients();
+					WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 					echo '<div class="updated"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
 				break;
