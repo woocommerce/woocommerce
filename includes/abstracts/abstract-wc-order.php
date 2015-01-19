@@ -773,8 +773,7 @@ abstract class WC_Abstract_Order {
 		$this->post_status         = $result->post_status;
 
 		// Billing email cam default to user if set
-		if ( empty( $this->billing_email ) && ! empty( $this->customer_user ) ) {
-			$user                = get_user_by( 'id', $this->customer_user );
+		if ( empty( $this->billing_email ) && ! empty( $this->customer_user ) && ( $user = get_user_by( 'id', $this->customer_user ) ) ) {
 			$this->billing_email = $user->user_email;
 		}
 	}
