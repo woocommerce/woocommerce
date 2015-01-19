@@ -431,8 +431,18 @@ ul.wc_coupon_list_block {
 	}
 }
 
-.tablenav .actions {
-	overflow: visible;
+.tablenav {
+	.actions {
+		overflow: visible;
+	}
+	.select2-container {
+		float: left;
+		max-width: 200px;
+		line-height: 1.8em;
+		font-size: 14px;
+		vertical-align: middle;
+		margin: 1px 6px 1px 1px;
+	}
 }
 
 #woocommerce-order-data {
