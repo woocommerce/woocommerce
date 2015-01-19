@@ -36,15 +36,17 @@ class WC_API_Authentication {
 	public function authenticate( $user ) {
 
 		// allow access to the index by default
-		if ( '/' === WC()->api->server->path )
-			return new WP_User(0);
+		if ( '/' === WC()->api->server->path ) {
+			return new WP_User( 0 );
+		}
 
 		try {
 
-			if ( is_ssl() )
+			if ( is_ssl() ) {
 				$user = $this->perform_ssl_authentication();
-			else
+			} else {
 				$user = $this->perform_oauth_authentication();
+			}
 
 			// check API key-specific permission
 			$this->check_api_key_permissions( $user );
@@ -165,7 +167,7 @@ class WC_API_Authentication {
 
 		$user_query = new WP_User_Query(
 			array(
-				'meta_key' => 'woocommerce_api_consumer_key',
+				'meta_key'   => 'woocommerce_api_consumer_key',
 				'meta_value' => $consumer_key,
 			)
 		);
