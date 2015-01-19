@@ -10,17 +10,17 @@
 global $states;
 
 $states['GR'] = array(
-	'GR-I' => __( 'Αττική', 'woocommerce' ),
-	'GR-A' => __( 'Ανατολική Μακεδονία και Θράκη', 'woocommerce' ),
-	'GR-B' => __( 'Κεντρική Μακεδονία', 'woocommerce' ),
-	'GR-C'  => __( 'Δυτική Μακεδονία', 'woocommerce' ),
-	'GR-D' => __( 'Ήπειρος', 'woocommerce' ),
-	'GR-E'  => __( 'Θεσσαλία', 'woocommerce' ),
-	'GR-F' => __( 'Ιόνιοι Νήσοι', 'woocommerce' ),
-	'GR-G' => __( 'Δυτική Ελλάδα', 'woocommerce' ),
-	'GR-H'  => __( 'Στερεά Ελλάδα', 'woocommerce' ),
-	'GR-J'  => __( 'Πελοπόννησος', 'woocommerce' ),
-	'GR-K' => __( 'Βόρειο Αιγαίο', 'woocommerce' ),
-	'GR-L' => __( 'Νότιο Αιγαίο', 'woocommerce' ),
-	'GR-M'  => __( 'Κρήτη', 'woocommerce' )
+	'I' => __( 'Αττική', 'woocommerce' ),
+	'A' => __( 'Ανατολική Μακεδονία και Θράκη', 'woocommerce' ),
+	'B' => __( 'Κεντρική Μακεδονία', 'woocommerce' ),
+	'C'  => __( 'Δυτική Μακεδονία', 'woocommerce' ),
+	'D' => __( 'Ήπειρος', 'woocommerce' ),
+	'E'  => __( 'Θεσσαλία', 'woocommerce' ),
+	'F' => __( 'Ιόνιοι Νήσοι', 'woocommerce' ),
+	'G' => __( 'Δυτική Ελλάδα', 'woocommerce' ),
+	'H'  => __( 'Στερεά Ελλάδα', 'woocommerce' ),
+	'J'  => __( 'Πελοπόννησος', 'woocommerce' ),
+	'K' => __( 'Βόρειο Αιγαίο', 'woocommerce' ),
+	'L' => __( 'Νότιο Αιγαίο', 'woocommerce' ),
+	'M'  => __( 'Κρήτη', 'woocommerce' )
 );
