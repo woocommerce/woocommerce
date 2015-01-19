@@ -8,7 +8,7 @@ jQuery( function( $ ) {
 	// Select2 Enhancement if it exists
 	if( $().select2 ) {
 		var wc_country_select_select2 = function() {
-			$( 'select.country_select, select.state_select' ).each(function(){
+			$( 'select.country_select:visible, select.state_select:visible' ).each(function(){
 				$(this).select2({
 					minimumResultsForSearch: 10,
 					placeholder: $( this ).attr( 'placeholder' ),
@@ -16,7 +16,9 @@ jQuery( function( $ ) {
 				});
 			});
 		};
+
 		wc_country_select_select2();
+
 		$( 'body' ).bind( 'country_to_state_changed', function() {
 			wc_country_select_select2();
 		});
@@ -93,7 +95,7 @@ jQuery( function( $ ) {
 	});
 
 	$(function() {
-		$( 'select.country_to_state, input.country_to_state' ).change();
+		$( ':input.country_to_state' ).change();
 	});
 
 });
