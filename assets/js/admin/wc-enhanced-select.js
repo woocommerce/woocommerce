@@ -1,33 +1,90 @@
 jQuery( function( $ ) {
 
-	$('body')
+	function getEnhancedSelectFormatString() {
+		var formatString = {
+			formatMatches: function( matches ) {
+				if ( 1 === matches ) {
+					return wc_select_params.i18n_matches_1;
+				}
+
+				return wc_select_params.i18n_matches_n.replace( '%qty%', matches );
+			},
+			formatNoMatches: function() {
+				return wc_select_params.i18n_no_matches;
+			},
+			formatAjaxError: function( jqXHR, textStatus, errorThrown ) {
+				return wc_select_params.i18n_ajax_error;
+			},
+			formatInputTooShort: function( input, min ) {
+				var number = min - input.length;
+
+				if ( 1 === number ) {
+					return wc_select_params.i18n_input_too_short_1
+				}
+
+				return wc_select_params.i18n_input_too_short_n.replace( '%qty%', number );
+			},
+			formatInputTooLong: function( input, max ) {
+				var number = input.length - max;
+
+				if ( 1 === number ) {
+					return wc_select_params.i18n_input_too_long_1
+				}
+
+				return wc_select_params.i18n_input_too_long_n.replace( '%qty%', number );
+			},
+			formatSelectionTooBig: function( limit ) {
+				if ( 1 === limit ) {
+					return wc_select_params.i18n_selection_too_long_1;
+				}
+
+				return wc_select_params.i18n_selection_too_long_n.replace( '%qty%', number );
+			},
+			formatLoadMore: function( pageNumber ) {
+				return wc_select_params.i18n_load_more;
+			},
+			formatSearching: function() {
+				return wc_select_params.i18n_searching;
+			}
+		};
+
+		return formatString;
+	}
+
+	$( 'body' )
 
 		.on( 'wc-enhanced-select-init', function() {
 
 			// Regular select boxes
-			$(":input.wc-enhanced-select, :input.chosen_select").each(function() {
-				$( this ).select2({
+			$( ':input.wc-enhanced-select, :input.chosen_select' ).each( function() {
+				var select2_args = $.extend({
 					minimumResultsForSearch: 10,
 					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 					placeholder: $( this ).data( 'placeholder' )
-				});
+				}, getEnhancedSelectFormatString() );
+
+				$( this ).select2( select2_args );
 			});
 
-			$(":input.wc-enhanced-select-nostd, :input.chosen_select_nostd").each(function() {
-				$( this ).select2({
+			$( ':input.wc-enhanced-select-nostd, :input.chosen_select_nostd' ).each( function() {
+				var select2_args = $.extend({
 					minimumResultsForSearch: 10,
 					allowClear:  true,
 					placeholder: $( this ).data( 'placeholder' )
-				});
+				}, getEnhancedSelectFormatString() );
+
+				$( this ).select2( select2_args );
 			});
 
 			// Ajax product search box
-			$(":input.wc-product-search").each(function() {
+			$( ':input.wc-product-search' ).each( function() {
 				var select2_args = {
 					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 					placeholder: $( this ).data( 'placeholder' ),
 					minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
-					escapeMarkup: function(m) { return m; },
+					escapeMarkup: function( m ) {
+						return m;
+					},
 					ajax: {
 				        url:         wc_enhanced_select_params.ajax_url,
 				        dataType:    'json',
@@ -35,7 +92,7 @@ jQuery( function( $ ) {
 				        data: function( term, page ) {
 				            return {
 								term:     term,
-								action:   $(this).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
+								action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
 								security: wc_enhanced_select_params.search_products_nonce
 				            };
 				        },
@@ -74,16 +131,20 @@ jQuery( function( $ ) {
 					};
 				}
 
+				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
+
 				$( this ).select2( select2_args );
 			});
 
 			// Ajax customer search boxes
-			$(":input.wc-customer-search").each(function() {
+			$( ':input.wc-customer-search' ).each( function() {
 				var select2_args = {
 					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 					placeholder: $( this ).data( 'placeholder' ),
 					minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '3',
-					escapeMarkup: function(m) { return m; },
+					escapeMarkup: function( m ) {
+						return m;
+					},
 					ajax: {
 				        url:         wc_enhanced_select_params.ajax_url,
 				        dataType:    'json',
@@ -128,6 +189,8 @@ jQuery( function( $ ) {
 						return callback( data );
 					};
 				}
+
+				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args );
 			});
