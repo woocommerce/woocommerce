@@ -146,8 +146,8 @@ html[dir="rtl"] .select2-container .select2-choice > .select2-chosen {
 
     border-radius: 3px 3px 0 0;
 
-    -webkit-box-shadow: 0 -4px 5px rgba(0, 0, 0, .15);
-            box-shadow: 0 -4px 5px rgba(0, 0, 0, .15);
+    //-webkit-box-shadow: 0 -4px 5px rgba(0, 0, 0, .15);
+    //        box-shadow: 0 -4px 5px rgba(0, 0, 0, .15);
 }
 
 .select2-drop-active {
@@ -224,7 +224,7 @@ html[dir="rtl"] .select2-container .select2-choice .select2-arrow b {
 
     white-space: nowrap;
 
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    //box-shadow: 0 1px 2px rgba(0,0,0,0.2);
     padding-bottom: 4px;
 }
 
@@ -486,8 +486,8 @@ html[dir="rtl"] .select2-container-multi .select2-choices {
     border: 1px solid #666;
     outline: none;
 
-    -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .3);
-            box-shadow: 0 0 5px rgba(0, 0, 0, .3);
+    //-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .3);
+    //        box-shadow: 0 0 5px rgba(0, 0, 0, .3);
 }
 .select2-container-multi .select2-choices li {
     float: left;
@@ -506,10 +506,7 @@ html[dir="rtl"] .select2-container-multi .select2-choices li
 .select2-container-multi .select2-choices .select2-search-field input {
     padding: 5px;
     margin: 1px 0;
-
     font-family: sans-serif;
-    font-size: 100%;
-    color: #666;
     outline: 0;
     border: 0;
     -webkit-box-shadow: none;
@@ -526,19 +523,14 @@ html[dir="rtl"] .select2-container-multi .select2-choices li
 }
 
 .select2-container-multi .select2-choices .select2-search-choice {
-    padding: 3px 5px 3px 18px;
+    padding: 5px 8px 5px 24px;
     margin: 3px 0 3px 5px;
     position: relative;
 
-    line-height: 13px;
+    line-height: 15px;
     color: #333;
     cursor: default;
-    border: 1px solid #ccc;
-
-    border-radius: 3px;
-
-    -webkit-box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
-            box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
 
     background-clip: padding-box;
 
@@ -553,7 +545,7 @@ html[dir="rtl"] .select2-container-multi .select2-choices li
 html[dir="rtl"] .select2-container-multi .select2-choices .select2-search-choice
 {
     margin: 3px 5px 3px 0;
-    padding: 3px 18px 3px 5px;
+    padding: 5px 24px 5px 8px;
 }
 .select2-container-multi .select2-choices .select2-search-choice .select2-chosen {
     cursor: default;
@@ -567,8 +559,8 @@ html[dir="rtl"] .select2-container-multi .select2-choices .select2-search-choice
     width: 12px;
     height: 13px;
     position: absolute;
-    right: 3px;
-    top: 4px;
+    right: 7px;
+    top: 6px;
 
     font-size: 1px;
     outline: none;
@@ -576,16 +568,16 @@ html[dir="rtl"] .select2-container-multi .select2-choices .select2-search-choice
 }
 html[dir="rtl"] .select2-search-choice-close {
     right: auto;
-    left: 3px;
+    left: 7px;
 }
 
 .select2-container-multi .select2-search-choice-close {
-    left: 3px;
+    left: 7px;
 }
 
 html[dir="rtl"] .select2-container-multi .select2-search-choice-close {
     left: auto;
-    right: 2px;
+    right: 7px;
 }
 
 .select2-container-multi .select2-choices .select2-search-choice .select2-search-choice-close:hover {
