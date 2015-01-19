@@ -797,7 +797,7 @@ class WC_Shortcodes {
 		if ( isset( $atts['sku'] ) ) {
 			$args['meta_query'][] = array(
 				'key'     => '_sku',
-				'value'   => $atts['sku'],
+				'value'   => sanitize_text_field( $atts['sku'] ),
 				'compare' => '='
 			);
 
@@ -805,7 +805,7 @@ class WC_Shortcodes {
 		}
 
 		if ( isset( $atts['id'] ) ) {
-			$args['p'] = $atts['id'];
+			$args['p'] = absint( $atts['id'] );
 		}
 
 		$single_product = new WP_Query( $args );
@@ -838,7 +838,7 @@ class WC_Shortcodes {
 					var $variations_form = $( '[data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>"]' ).find( 'form.variations_form' );
 
 					<?php foreach( $attributes as $attr => $value ) { ?>
-						$variations_form.find( 'select[name="<?php echo $attr; ?>"]' ).val( '<?php echo $value; ?>' );
+						$variations_form.find( 'select[name="<?php echo esc_attr( $attr ); ?>"]' ).val( '<?php echo $value; ?>' );
 					<?php } ?>
 				});
 			</script>
