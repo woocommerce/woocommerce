@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Moved WC_Cart::get_cart_from_session() and dependencies to a later hook (was init, now wp_loaded).
 * Dev - Migrated away from CHOSEN to SELECT2. Chosen is still registered in case 3rd parties try to enqueue.
 * Localisation - Add Ukrainian currency and symbol.
+* Localisation - Greece regions.
 
 = 2.2.5 - 07/10/2014 =
 * Fix - Filters in admin screen for coupons and orders.
