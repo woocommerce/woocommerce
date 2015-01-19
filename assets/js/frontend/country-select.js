@@ -12,7 +12,8 @@ jQuery( function( $ ) {
 				$(this).select2({
 					minimumResultsForSearch: 10,
 					placeholder: $( this ).attr( 'placeholder' ),
-					placeholderOption: 'first'
+					placeholderOption: 'first',
+					width: "element"
 				});
 			});
 		};
