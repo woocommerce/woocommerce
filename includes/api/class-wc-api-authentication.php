@@ -36,15 +36,17 @@ class WC_API_Authentication {
 	public function authenticate( $user ) {
 
 		// allow access to the index by default
-		if ( '/' === WC()->api->server->path )
-			return new WP_User(0);
+		if ( '/' === WC()->api->server->path ) {
+			return new WP_User( 0 );
+		}
 
 		try {
 
-			if ( is_ssl() )
+			if ( is_ssl() ) {
 				$user = $this->perform_ssl_authentication();
-			else
+			} else {
 				$user = $this->perform_oauth_authentication();
+			}
 
 			// check API key-specific permission
 			$this->check_api_key_permissions( $user );
@@ -165,7 +167,7 @@ class WC_API_Authentication {
 
 		$user_query = new WP_User_Query(
 			array(
-				'meta_key' => 'woocommerce_api_consumer_key',
+				'meta_key'   => 'woocommerce_api_consumer_key',
 				'meta_value' => $consumer_key,
 			)
 		);
@@ -188,7 +190,7 @@ class WC_API_Authentication {
 	 */
 	private function is_consumer_secret_valid( WP_User $user, $consumer_secret ) {
 
-		return $user->woocommerce_api_consumer_secret === $consumer_secret;
+		return hash_equals( $user->woocommerce_api_consumer_secret, $consumer_secret );
 	}
 
 	/**
@@ -244,7 +246,7 @@ class WC_API_Authentication {
 
 		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $user->woocommerce_api_consumer_secret, true ) );
 
-		if ( $signature !== $consumer_signature ) {
+		if ( ! hash_equals( $signature, $consumer_signature ) ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
 		}
 	}
