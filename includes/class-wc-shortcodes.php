@@ -810,11 +810,16 @@ class WC_Shortcodes {
 
 		$single_product = new WP_Query( $args );
 
+		$preselected_id = '0';
+
 		// check if sku is a variation
-		if ( isset( $atts['sku'] ) && $single_product->post->post_type === 'product_variation' ) {
+		if ( isset( $atts['sku'] ) && $single_product->have_posts() && $single_product->post->post_type === 'product_variation' ) {
 			
 			$variation = new WC_Product_Variation( $single_product->post->ID );
 			$attributes = $variation->get_variation_attributes();
+
+			// set preselected id to be used by JS to provide context
+			$preselected_id = $single_product->post->ID;
 
 			// get the parent product object
 			$args = array(
@@ -830,7 +835,7 @@ class WC_Shortcodes {
 		?>
 			<script type="text/javascript">
 				jQuery( document ).ready( function( $ ) {
-					var $variations_form = $( 'form.variations_form' );
+					var $variations_form = $( '[data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>"]' ).find( 'form.variations_form' );
 
 					<?php foreach( $attributes as $attr => $value ) { ?>
 						$variations_form.find( 'select[name="<?php echo $attr; ?>"]' ).val( '<?php echo $value; ?>' );
@@ -844,7 +849,7 @@ class WC_Shortcodes {
 
 		while ( $single_product->have_posts() ) : $single_product->the_post(); wp_enqueue_script( 'wc-single-product' ); ?>
 
-			<div class="single-product">
+			<div class="single-product" data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>">
 
 				<?php wc_get_template_part( 'content', 'single-product' ); ?>
 
