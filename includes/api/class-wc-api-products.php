@@ -1341,11 +1341,12 @@ class WC_API_Products extends WC_API_Resource {
 				$updated_attribute_keys = array();
 
 				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
-					$taxonomy = '';
-
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
+
+					$taxonomy   = sanitize_title( $attribute['name'] );
+					$_attribute = array();
 
 					if ( isset( $attribute['slug'] ) ) {
 						$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
@@ -1353,14 +1354,13 @@ class WC_API_Products extends WC_API_Resource {
 
 					if ( isset( $attributes[ $taxonomy ] ) ) {
 						$_attribute = $attributes[ $taxonomy ];
-					} elseif ( isset( $attributes[ strtolower( $attribute['name'] ) ] ) ) {
-						$_attribute = $attributes[ strtolower( $attribute['name'] ) ];
 					}
 
 					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
 						$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
 						$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
 						$updated_attribute_keys[] = $attribute_key;
+
 						update_post_meta( $variation_id, $attribute_key, $attribute_value );
 					}
 				}
