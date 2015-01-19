@@ -522,6 +522,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
+		$prices_precision = get_option( 'woocommerce_price_num_decimals' );
 
 		return array(
 			'title'              => $product->get_title(),
@@ -534,9 +535,9 @@ class WC_API_Products extends WC_API_Resource {
 			'virtual'            => $product->is_virtual(),
 			'permalink'          => $product->get_permalink(),
 			'sku'                => $product->get_sku(),
-			'price'              => wc_format_decimal( $product->get_price(), 2 ),
-			'regular_price'      => wc_format_decimal( $product->get_regular_price(), 2 ),
-			'sale_price'         => $product->get_sale_price() ? wc_format_decimal( $product->get_sale_price(), 2 ) : null,
+			'price'              => wc_format_decimal( $product->get_price(), $prices_precision ),
+			'regular_price'      => wc_format_decimal( $product->get_regular_price(), $prices_precision ),
+			'sale_price'         => $product->get_sale_price() ? wc_format_decimal( $product->get_sale_price(), $prices_precision ) : null,
 			'price_html'         => $product->get_price_html(),
 			'taxable'            => $product->is_taxable(),
 			'tax_status'         => $product->get_tax_status(),
@@ -596,8 +597,8 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_variation_data( $product ) {
-
-		$variations = array();
+		$prices_precision = get_option( 'woocommerce_price_num_decimals' );
+		$variations       = array();
 
 		foreach ( $product->get_children() as $child_id ) {
 
@@ -615,9 +616,9 @@ class WC_API_Products extends WC_API_Resource {
 					'virtual'           => $variation->is_virtual(),
 					'permalink'         => $variation->get_permalink(),
 					'sku'               => $variation->get_sku(),
-					'price'             => wc_format_decimal( $variation->get_price(), 2 ),
-					'regular_price'     => wc_format_decimal( $variation->get_regular_price(), 2 ),
-					'sale_price'        => $variation->get_sale_price() ? wc_format_decimal( $variation->get_sale_price(), 2 ) : null,
+					'price'             => wc_format_decimal( $variation->get_price(), $prices_precision ),
+					'regular_price'     => wc_format_decimal( $variation->get_regular_price(), $prices_precision ),
+					'sale_price'        => $variation->get_sale_price() ? wc_format_decimal( $variation->get_sale_price(), $prices_precision ) : null,
 					'taxable'           => $variation->is_taxable(),
 					'tax_status'        => $variation->get_tax_status(),
 					'tax_class'         => $variation->get_tax_class(),
