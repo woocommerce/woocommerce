@@ -44,7 +44,7 @@ function wc_template_redirect() {
 	elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && $wp_query->found_posts == 1 ) {
 		$product = wc_get_product( $wp_query->post );
 
-		if ( $product->is_visible() ) {
+		if ( $product && $product->is_visible() ) {
 			wp_safe_redirect( get_permalink( $product->id ), 302 );
 			exit;
 		}
