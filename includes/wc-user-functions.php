@@ -222,8 +222,11 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	$emails = array();
 
 	if ( $user_id ) {
-		$user     = get_user_by( 'id', $user_id );
-		$emails[] = $user->user_email;
+		$user = get_user_by( 'id', $user_id );
+
+		if ( isset( $user->user_email ) ) {
+			$emails[] = $user->user_email;
+		}
 	}
 
 	if ( is_email( $customer_email ) ) {
