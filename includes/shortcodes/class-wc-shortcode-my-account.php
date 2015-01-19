@@ -297,10 +297,9 @@ class WC_Shortcode_My_Account {
 	 *
 	 * @uses $wpdb WordPress Database object
 	 *
-	 * @access public
 	 * @param string $key Hash to validate sending user's password
 	 * @param string $login The user login
-	 * @return object|bool User's database row on success, false for invalid keys
+	 * @return WP_USER|bool User's database row on success, false for invalid keys
 	 */
 	public static function check_password_reset_key( $key, $login ) {
 		global $wpdb, $wp_hasher;
@@ -333,7 +332,7 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		return $user;
+		return get_userdata( $user->ID );
 	}
 
 	/**
