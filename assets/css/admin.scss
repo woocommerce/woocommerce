@@ -2011,6 +2011,7 @@ img.help_tip {
 		.select2-container {
 			display: block;
 			max-width: 350px;
+			line-height: 1.8em;
 		}
 
 		.forminp-radio ul {
@@ -2859,6 +2860,10 @@ img.help_tip {
 
 	&.padded {
 		padding: 1em;
+	}
+
+	.select2-container {
+		float: left;
 	}
 }
 
