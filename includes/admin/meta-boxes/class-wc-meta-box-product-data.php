@@ -424,19 +424,19 @@ class WC_Meta_Box_Product_Data {
 							$attribute_keys = array_keys( $attributes );
 
 							for ( $i = 0; $i < sizeof( $attribute_keys ); $i ++ ) {
-								$attribute = $attributes[ $attribute_keys[ $i ] ];
-								$position  = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
-								$taxonomy  = '';
+								$attribute     = $attributes[ $attribute_keys[ $i ] ];
+								$position      = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
+								$taxonomy      = '';
+								$metabox_class = array();
 
 								if ( $attribute['is_taxonomy'] ) {
-									$taxonomy           = $attribute['name'];
+									$taxonomy = $attribute['name'];
 
 									if ( ! taxonomy_exists( $taxonomy ) ) {
 										continue;
 									}
 
 									$attribute_taxonomy = $wc_product_attributes[ $taxonomy ];
-									$metabox_class      = array();
 									$metabox_class[]    = 'taxonomy';
 									$metabox_class[]    = $taxonomy;
 									$attribute_label    = wc_attribute_label( $taxonomy );

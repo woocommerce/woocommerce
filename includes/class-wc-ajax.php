@@ -415,11 +415,12 @@ class WC_AJAX {
 
 		global $wc_product_attributes;
 
-		$thepostid = 0;
-		$taxonomy  = sanitize_text_field( $_POST['taxonomy'] );
-		$i         = absint( $_POST['i'] );
-		$position  = 0;
-		$attribute = array(
+		$thepostid     = 0;
+		$taxonomy      = sanitize_text_field( $_POST['taxonomy'] );
+		$i             = absint( $_POST['i'] );
+		$position      = 0;
+		$metabox_class = array();
+		$attribute     = array(
 			'name'         => $taxonomy,
 			'value'        => '',
 			'is_visible'   => 1,
@@ -429,12 +430,11 @@ class WC_AJAX {
 
 		if ( $taxonomy ) {
 			$attribute_taxonomy = $wc_product_attributes[ $taxonomy ];
-			$metabox_class      = array();
 			$metabox_class[]    = 'taxonomy';
 			$metabox_class[]    = $taxonomy;
 			$attribute_label    = wc_attribute_label( $taxonomy );
 		} else {
-			$attribute_label          = '';
+			$attribute_label = '';
 		}
 
 		include( 'admin/meta-boxes/views/html-product-attribute.php' );
