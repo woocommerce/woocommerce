@@ -1388,7 +1388,11 @@ class WC_API_Products extends WC_API_Resource {
 					continue;
 				}
 
-				$taxonomy = $this->get_attribute_taxonomy_by_slug( $default_attr['name'] );
+				$taxonomy = sanitize_title( $attribute['name'] );
+
+				if ( isset( $attribute['slug'] ) ) {
+					$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
+				}
 
 				if ( isset( $attributes[ $taxonomy ] ) ) {
 					$_attribute = $attributes[ $taxonomy ];
