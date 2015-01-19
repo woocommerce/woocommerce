@@ -190,7 +190,7 @@ class WC_API_Authentication {
 	 */
 	private function is_consumer_secret_valid( WP_User $user, $consumer_secret ) {
 
-		return $user->woocommerce_api_consumer_secret === $consumer_secret;
+		return hash_equals( $user->woocommerce_api_consumer_secret, $consumer_secret );
 	}
 
 	/**
@@ -246,7 +246,7 @@ class WC_API_Authentication {
 
 		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $user->woocommerce_api_consumer_secret, true ) );
 
-		if ( $signature !== $consumer_signature ) {
+		if ( ! hash_equals( $signature, $consumer_signature ) ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
 		}
 	}
