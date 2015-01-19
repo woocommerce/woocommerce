@@ -1608,10 +1608,12 @@ class WC_Admin_Post_Types {
 				// Subtypes
 				if ( 'downloadable' == $query->query_vars['product_type'] ) {
 					$query->query_vars['product_type']  = '';
+					$query->is_tax = false;
 					$query->query_vars['meta_value']    = 'yes';
 					$query->query_vars['meta_key']      = '_downloadable';
 				} elseif ( 'virtual' == $query->query_vars['product_type'] ) {
 					$query->query_vars['product_type']  = '';
+					$query->is_tax = false;
 					$query->query_vars['meta_value']    = 'yes';
 					$query->query_vars['meta_key']      = '_virtual';
 				}
