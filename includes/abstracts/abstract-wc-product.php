@@ -5,21 +5,41 @@
  * The WooCommerce product class handles individual product data.
  *
  * @class       WC_Product
+ * @uses        WP_Post WP Post object
  * @version     2.1.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
  * @author      WooThemes
+ *
+ * @property    string $width Product width
+ * @property    string $length Product length
+ * @property    string $height Product height
+ * @property    string $weight Product weight
+ * @property    string $price product price
+ * @property    string $product_image_gallery String of image IDs in the gallery.
  */
 class WC_Product {
 
-	/** @var int The product (post) ID. */
+	/** @public int The product (post) ID. */
 	public $id;
 
-	/** @var object The actual post object. */
+	/**
+	 * @public WP_Post Stores post data for the product
+	 * @var WP_Post
+	 */
 	public $post;
 
-	/** @var string The product's type (simple, variable etc). */
+	/** @public string $product_type The product's type (simple, variable etc). */
 	public $product_type = null;
+
+	/** @protected string $dimensions String of dimensions (imploded with X) */
+	protected $dimensions = '';
+
+	/** @protected string $shipping_class Prouduct shipping class */
+	protected $shipping_class = '';
+
+	/** @protected integer $shipping_class_id ID of the shipping class this product has. */
+	protected $shipping_class_id = 0;
 
 	/**
 	 * Constructor gets the post object and sets the ID for the loaded product.
@@ -99,15 +119,6 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_gallery_attachment_ids() {
-
-		if ( ! isset( $this->product_image_gallery ) ) {
-
-			// Backwards compat
-			$attachment_ids = get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
-			$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id( $this->id ) ) );
-			$this->product_image_gallery = implode( ',', $attachment_ids );
-		}
-
 		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( (array) explode( ',', $this->product_image_gallery ) ), $this );
 	}
 
