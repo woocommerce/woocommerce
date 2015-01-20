@@ -56,28 +56,28 @@ jQuery( function( $ ) {
 		.on( 'wc-enhanced-select-init', function() {
 
 			// Regular select boxes
-			$( ':input.wc-enhanced-select, :input.chosen_select' ).each( function() {
+			$( ':input.wc-enhanced-select, :input.chosen_select' ).filter( ':not(.enhanced)' ).each( function() {
 				var select2_args = $.extend({
 					minimumResultsForSearch: 10,
 					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 					placeholder: $( this ).data( 'placeholder' )
 				}, getEnhancedSelectFormatString() );
 
-				$( this ).select2( select2_args );
+				$( this ).select2( select2_args ).addClass( 'enhanced' );
 			});
 
-			$( ':input.wc-enhanced-select-nostd, :input.chosen_select_nostd' ).each( function() {
+			$( ':input.wc-enhanced-select-nostd, :input.chosen_select_nostd' ).filter( ':not(.enhanced)' ).each( function() {
 				var select2_args = $.extend({
 					minimumResultsForSearch: 10,
 					allowClear:  true,
 					placeholder: $( this ).data( 'placeholder' )
 				}, getEnhancedSelectFormatString() );
 
-				$( this ).select2( select2_args );
+				$( this ).select2( select2_args ).addClass( 'enhanced' );
 			});
 
 			// Ajax product search box
-			$( ':input.wc-product-search' ).each( function() {
+			$( ':input.wc-product-search' ).filter( ':not(.enhanced)' ).each( function() {
 				var select2_args = {
 					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 					placeholder: $( this ).data( 'placeholder' ),
@@ -133,11 +133,11 @@ jQuery( function( $ ) {
 
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
-				$( this ).select2( select2_args );
+				$( this ).select2( select2_args ).addClass( 'enhanced' );
 			});
 
 			// Ajax customer search boxes
-			$( ':input.wc-customer-search' ).each( function() {
+			$( ':input.wc-customer-search' ).filter( ':not(.enhanced)' ).each( function() {
 				var select2_args = {
 					allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 					placeholder: $( this ).data( 'placeholder' ),
@@ -192,7 +192,7 @@ jQuery( function( $ ) {
 
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
-				$( this ).select2( select2_args );
+				$( this ).select2( select2_args ).addClass( 'enhanced' );
 			});
 		} )
 
