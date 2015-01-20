@@ -209,7 +209,6 @@ class WC_Emails {
 	 * @param mixed $message
 	 * @param string $headers (default: "Content-Type: text/html\r\n")
 	 * @param string $attachments (default: "")
-	 * @param string $content_type (default: "text/html")
 	 */
 	public function send( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
 		// Send
