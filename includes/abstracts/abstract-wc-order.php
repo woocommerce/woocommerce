@@ -11,6 +11,25 @@
  * @category    Class
  * @author      WooThemes
  * @property    string $billing_first_name The billing address first name
+ * @property    string $billing_last_name The billing address last name
+ * @property    string $billing_company The billing address company
+ * @property    string $billing_address_1 The first line of the billing address
+ * @property    string $billing_address_2 The second line of the billing address
+ * @property    string $billing_city The city of the billing address
+ * @property    string $billing_state The state of the billing address
+ * @property    string $billing_postcode The postcode of the billing address
+ * @property    string $billing_country The country of the billing address
+ * @property    string $billing_phone The billing phone number
+ * @property    string $billing_email The billing email
+ * @property    string $shipping_first_name The shipping address first name
+ * @property    string $shipping_last_name The shipping address last name
+ * @property    string $shipping_company The shipping address company
+ * @property    string $shipping_address_1 The first line of the shipping address
+ * @property    string $shipping_address_2 The second line of the shipping address
+ * @property    string $shipping_city The city of the shipping address
+ * @property    string $shipping_state The state of the shipping address
+ * @property    string $shipping_postcode The postcode of the shipping address
+ * @property    string $shipping_country The country of the shipping address
  */
 abstract class WC_Abstract_Order {
 
