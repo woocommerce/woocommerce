@@ -10,6 +10,7 @@
 class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	public $chart_colours = array();
+	private $average_sales = 0;
 
 	/**
 	 * Get the legend for the main chart sidebar
@@ -139,6 +140,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				$average_sales_title = sprintf( __( '%s average daily sales', 'woocommerce' ), '<strong>' . wc_price( $this->average_sales ) . '</strong>' );
 			break;
 			case 'month' :
+			default :
 				$average_sales_title = sprintf( __( '%s average monthly sales', 'woocommerce' ), '<strong>' . wc_price( $this->average_sales ) . '</strong>' );
 			break;
 		}
@@ -253,7 +255,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		global $wp_locale;
 
 		// Get orders and dates in range - we want the SUM of order totals, COUNT of order items, COUNT of orders, and the date
-		$orders = $this->get_order_report_data( array(
+		$orders = (array) $this->get_order_report_data( array(
 			'data' => array(
 				'_order_total' => array(
 					'type'     => 'meta',
@@ -296,7 +298,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		) );
 
 		// Order items
-		$order_items = $this->get_order_report_data( array(
+		$order_items = (array) $this->get_order_report_data( array(
 			'data' => array(
 				'_qty' => array(
 					'type'            => 'order_item_meta',
@@ -326,7 +328,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		) );
 
 		// Get discount amounts in range
-		$coupons = $this->get_order_report_data( array(
+		$coupons = (array) $this->get_order_report_data( array(
 			'data' => array(
 				'order_item_name' => array(
 					'type'     => 'order_item',
@@ -360,7 +362,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 		) );
 
-		$partial_refunds = $this->get_order_report_data( array(
+		$partial_refunds = (array) $this->get_order_report_data( array(
 			'data' => array(
 				'_refund_amount' => array(
 					'type'     => 'meta',
@@ -380,7 +382,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'order_status'        => false,
 			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),
 		) );
-		$full_refunds = $this->get_order_report_data( array(
+		$full_refunds = (array) $this->get_order_report_data( array(
 			'data' => array(
 				'_order_total' => array(
 					'type'     => 'meta',
@@ -399,17 +401,17 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'filter_range' => true,
 			'order_status' => array( 'refunded' ),
 		) );
-		$refunds = array_merge($partial_refunds, $full_refunds);
+		$refunds = array_merge( $partial_refunds, $full_refunds );
 
 		// Prepare data for report
-		$order_counts      = $this->prepare_chart_data( $orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
-		$order_item_counts = $this->prepare_chart_data( $order_items, 'post_date', 'order_item_count', $this->chart_interval, $this->start_date, $this->chart_groupby );
-		$order_amounts     = $this->prepare_chart_data( $orders, 'post_date', 'total_sales', $this->chart_interval, $this->start_date, $this->chart_groupby );
-		$coupon_amounts    = $this->prepare_chart_data( $coupons, 'post_date', 'discount_amount', $this->chart_interval, $this->start_date, $this->chart_groupby );
-		$shipping_amounts  = $this->prepare_chart_data( $orders, 'post_date', 'total_shipping', $this->chart_interval, $this->start_date, $this->chart_groupby );
-		$refund_amounts    = $this->prepare_chart_data( $refunds, 'post_date', 'total_refund', $this->chart_interval, $this->start_date, $this->chart_groupby );
-		$shipping_tax_amounts  = $this->prepare_chart_data( $orders, 'post_date', 'total_shipping_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
-		$tax_amounts  = $this->prepare_chart_data( $orders, 'post_date', 'total_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$order_counts         = $this->prepare_chart_data( $orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$order_item_counts    = $this->prepare_chart_data( $order_items, 'post_date', 'order_item_count', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$order_amounts        = $this->prepare_chart_data( $orders, 'post_date', 'total_sales', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$coupon_amounts       = $this->prepare_chart_data( $coupons, 'post_date', 'discount_amount', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$shipping_amounts     = $this->prepare_chart_data( $orders, 'post_date', 'total_shipping', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$refund_amounts       = $this->prepare_chart_data( $refunds, 'post_date', 'total_refund', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$shipping_tax_amounts = $this->prepare_chart_data( $orders, 'post_date', 'total_shipping_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$tax_amounts          = $this->prepare_chart_data( $orders, 'post_date', 'total_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
 
 		$net_order_amounts = array();
 
