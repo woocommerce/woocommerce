@@ -34,13 +34,17 @@
  * @property    string $cart_discount_tax Total amount of discount applied to taxes
  * @property    string $order_shipping Total amoount of shipping
  * @property    string $order_shipping_tax Total amoount of shipping tax
+ * @property    string $shipping_method_title < 2.1 was used for shipping method title. Now @deprecated.
  */
 abstract class WC_Abstract_Order {
 
 	/** @public int Order (post) ID */
 	public $id                          = 0;
 
-	/** @public WP_Post Stores post data for the order */
+	/**
+	 * @public WP_Post Stores post data for the order
+	 * @var WP_Post
+	 */
 	public $post                        = null;
 
 	/** @public string Order type */
@@ -65,7 +69,7 @@ abstract class WC_Abstract_Order {
 	public $prices_include_tax          = false;
 
 	/** @public string Display mode for taxes in cart */
-	public $tax_display_cart            = false;
+	public $tax_display_cart            = '';
 
 	/** @public bool Do totals display ex tax? */
 	public $display_totals_ex_tax       = false;
@@ -851,7 +855,6 @@ abstract class WC_Abstract_Order {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-
 		// Get values or default if not set
 		if ( 'completed_date' === $key ) {
 			$value = ( $value = get_post_meta( $this->id, '_completed_date', true ) ) ? $value : $this->modified_date;
@@ -969,7 +972,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Get the billing address in an array.
 	 *
-	 * @return string
+	 * @return array
 	 */
 	public function get_billing_address() {
 		if ( ! $this->billing_address ) {
@@ -987,7 +990,6 @@ abstract class WC_Abstract_Order {
 			$joined_address = array();
 
 			foreach ( $address as $part ) {
-
 				if ( ! empty( $part ) ) {
 					$joined_address[] = $part;
 				}
@@ -1501,7 +1503,6 @@ abstract class WC_Abstract_Order {
 
 		// Backwards compat < 2.1 - get shipping title stored in meta
 		if ( $this->shipping_method_title ) {
-
 			$labels[] = $this->shipping_method_title;
 		} else {
 
@@ -2292,7 +2293,7 @@ abstract class WC_Abstract_Order {
 
 				$coupon = new WC_Coupon( $code );
 
-				$used_by = $this->user_id;
+				$used_by = $this->$this->get_user_id();
 
 				if ( ! $used_by ) {
 					$used_by = $this->billing_email;
@@ -2325,7 +2326,7 @@ abstract class WC_Abstract_Order {
 
 				$coupon = new WC_Coupon( $code );
 
-				$used_by = $this->user_id;
+				$used_by = $this->$this->get_user_id();
 				if ( ! $used_by ) {
 					$used_by = $this->billing_email;
 				}
