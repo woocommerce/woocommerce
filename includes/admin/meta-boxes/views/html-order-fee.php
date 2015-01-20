@@ -27,7 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</td>
 
-	<?php do_action( 'woocommerce_admin_order_item_values', null, $item, absint( $item_id ) ); ?>
+	<?php
+		/* @var $item The item being displayed */
+		do_action( 'woocommerce_admin_order_item_values', null, $item, absint( $item_id ) );
+	?>
 
 	<td class="item_cost" width="1%">&nbsp;</td>
 	<td class="quantity" width="1%">&nbsp;</td>
