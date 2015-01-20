@@ -3,7 +3,7 @@
  * Shows an order item fee
  *
  * @var int $item_id The id of the item being displayed
- * @property $item The item being displayed
+ * @var object $item The item being displayed
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
