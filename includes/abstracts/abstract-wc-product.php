@@ -5,7 +5,7 @@
  * The WooCommerce product class handles individual product data.
  *
  * @class       WC_Product
- * @uses        WP_Post WP Post object
+ * @see         WP_Post
  * @version     2.1.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
@@ -45,10 +45,9 @@ class WC_Product {
 	 * Constructor gets the post object and sets the ID for the loaded product.
 	 *
 	 * @param int|WC_Product|WP_Post $product Product ID, post object, or product object
-	 * @uses   WP_POST
+	 * @var   WP_POST
 	 */
 	public function __construct( $product ) {
-
 		if ( is_numeric( $product ) ) {
 			$this->id   = absint( $product );
 			$this->post = get_post( $this->id );

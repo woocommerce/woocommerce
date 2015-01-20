@@ -5,7 +5,7 @@
  * The WooCommerce order class handles order data.
  *
  * @class       WC_Order
- * @uses        WP_Post WP Post object
+ * @see         WP_Post
  * @version     2.2.0
  * @package     WooCommerce/Classes
  * @category    Class
@@ -89,21 +89,22 @@ abstract class WC_Abstract_Order {
 	 * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory
 	 * should be used. It is possible, but the aforementioned are preferred and are the only
 	 * methods that will be maintained going forward.
+	 *
+	 * @param integer $order
 	 */
-	public function __construct( $order = '' ) {
+	public function __construct( $order = 0 ) {
 		$this->prices_include_tax    = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;
 		$this->tax_display_cart      = get_option( 'woocommerce_tax_display_cart' );
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl' ? true : false;
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl' ? true : false;
-
 		$this->init( $order );
 	}
 
 	/**
 	 * Init/load the order object. Called from the constructor.
 	 *
-	 * @param  string|int|WP_POST|WC_Order $order Order to init
-	 * @uses   WP_POST
+	 * @param  int|WP_POST|WC_Order $order Order to init
+	 * @var    WP_POST
 	 */
 	protected function init( $order ) {
 		if ( is_numeric( $order ) ) {
