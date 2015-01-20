@@ -104,12 +104,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="pagination">
 					<?php
 						echo str_replace( 'page-numbers', 'page-numbers button', paginate_links( array(
-							'base'      => add_query_arg( 'p', '%#%' ),
+							'base'      => esc_url_raw( add_query_arg( 'p', '%#%', remove_query_arg( 'p' ) ) ),
+							'format'    => '',
+							'add_args'  => '',
 							'type'      => 'plain',
 							'prev_text' => '&laquo;',
 							'next_text' => '&raquo;',
-							'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit ),
-							'current'   => $page
+							'current'   => $page,
+							'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit )
 						) ) );
 					?>
 				</div>
