@@ -9,18 +9,17 @@
  */
 class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
-	public $chart_colours   = array();
-	public $show_categories = array();
+	public $chart_colours         = array();
+	public $show_categories       = array();
+	private $item_sales           = array();
+	private $item_sales_and_times = array();
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-
-		if ( isset( $_GET['show_categories'] ) && is_array( $_GET['show_categories'] ) ) {
-			$this->show_categories = array_map( 'absint', $_GET['show_categories'] );
-		} elseif ( isset( $_GET['show_categories'] ) ) {
-			$this->show_categories = array( absint( $_GET['show_categories'] ) );
+		if ( isset( $_GET['show_categories'] ) ) {
+			$this->show_categories = is_array( $_GET['show_categories'] ) ? array_map( 'absint', $_GET['show_categories'] ) : array( absint( $_GET['show_categories'] ) );
 		}
 	}
 
@@ -129,17 +128,16 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			$this->item_sales           = array();
 			$this->item_sales_and_times = array();
 
-			if ( $order_items ) {
+			if ( is_array( $order_items ) ) {
 
 				foreach ( $order_items as $order_item ) {
 
 					switch ( $this->chart_groupby ) {
-
 						case 'day' :
 							$time = strtotime( date( 'Ymd', strtotime( $order_item->post_date ) ) ) * 1000;
 						break;
-
 						case 'month' :
+						default :
 							$time = strtotime( date( 'Ym', strtotime( $order_item->post_date ) ) . '01' ) * 1000;
 						break;
 					}
@@ -274,12 +272,11 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					$interval_total = 0;
 
 					switch ( $this->chart_groupby ) {
-
 						case 'day' :
 							$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $this->start_date ) ) ) * 1000;
 						break;
-
 						case 'month' :
+						default :
 							$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $this->start_date ) ) . '01' ) * 1000;
 						break;
 					}
