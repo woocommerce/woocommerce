@@ -10,6 +10,7 @@
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
+ *
  * @property    string $billing_first_name The billing address first name
  * @property    string $billing_last_name The billing address last name
  * @property    string $billing_company The billing address company
@@ -77,11 +78,11 @@ abstract class WC_Abstract_Order {
 	/** @public bool Do cart prices display ex tax? */
 	public $display_cart_ex_tax         = false;
 
-	/** @private string Formatted address. Accessed via get_formatted_billing_address() */
-	private $formatted_billing_address  = '';
+	/** @protected string Formatted address. Accessed via get_formatted_billing_address() */
+	protected $formatted_billing_address  = '';
 
-	/** @private string Formatted address. Accessed via get_formatted_shipping_address() */
-	private $formatted_shipping_address = '';
+	/** @protected string Formatted address. Accessed via get_formatted_shipping_address() */
+	protected $formatted_shipping_address = '';
 
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
