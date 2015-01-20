@@ -81,8 +81,10 @@ abstract class WC_Session {
 	 * @param mixed $value
 	 */
 	public function set( $key, $value ) {
-		$this->_data[ sanitize_key( $key ) ] = maybe_serialize( $value );
-		$this->_dirty = true;
+		if ( $value !== $this->get( $key ) ) {
+			$this->_data[ sanitize_key( $key ) ] = maybe_serialize( $value );
+			$this->_dirty = true;
+		}
 	}
 
 	/**
