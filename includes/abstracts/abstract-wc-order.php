@@ -30,29 +30,60 @@
  * @property    string $shipping_state The state of the shipping address
  * @property    string $shipping_postcode The postcode of the shipping address
  * @property    string $shipping_country The country of the shipping address
+ * @property    string $cart_discount Total amount of discount
+ * @property    string $cart_discount_tax Total amount of discount applied to taxes
+ * @property    string $order_shipping Total amoount of shipping
+ * @property    string $order_shipping_tax Total amoount of shipping tax
  */
 abstract class WC_Abstract_Order {
 
 	/** @public int Order (post) ID */
-	public $id = 0;
+	public $id                          = 0;
 
 	/** @public WP_Post Stores post data for the order */
-	public $post = null;
+	public $post                        = null;
 
 	/** @public string Order type */
-	public $order_type = 'simple';
+	public $order_type                  = 'simple';
+
+	/** @public string Order Date */
+	public $order_date                  = '';
+
+	/** @public string Order Modified Date */
+	public $modified_date               = '';
+
+	/** @public string Customer Message (excerpt) */
+	public $customer_message            = '';
+
+	/** @public string Customer Note */
+	public $customer_note               = '';
+
+	/** @public string Order Status */
+	public $post_status                 = '';
 
 	/** @public bool Do prices include tax? */
-	public $prices_include_tax = false;
+	public $prices_include_tax          = false;
 
 	/** @public string Display mode for taxes in cart */
-	public $tax_display_cart = false;
+	public $tax_display_cart            = false;
 
 	/** @public bool Do totals display ex tax? */
-	public $display_totals_ex_tax = false;
+	public $display_totals_ex_tax       = false;
 
 	/** @public bool Do cart prices display ex tax? */
-	public $display_cart_ex_tax = false;
+	public $display_cart_ex_tax         = false;
+
+	/** @private string Formatted address. Accessed via get_formatted_billing_address() */
+	private $formatted_billing_address  = '';
+
+	/** @private string Formatted address. Accessed via get_formatted_shipping_address() */
+	private $formatted_shipping_address = '';
+
+	/** @private array Array of address data. Accessed via get_billing_address() */
+	private $billing_address            = array();
+
+	/** @private array Array of address data. Accessed via get_shipping_address() */
+	private $shipping_address           = array();
 
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
@@ -914,7 +945,6 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_billing_address() {
-
 		if ( ! $this->formatted_billing_address ) {
 
 			// Formatted Addresses
@@ -942,7 +972,6 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_address() {
-
 		if ( ! $this->billing_address ) {
 
 			// Formatted Addresses
@@ -976,7 +1005,6 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_shipping_address() {
-
 		if ( ! $this->formatted_shipping_address ) {
 
 			if ( $this->shipping_address_1 || $this->shipping_address_2 ) {
@@ -1007,7 +1035,6 @@ abstract class WC_Abstract_Order {
 	 * @return array
 	 */
 	public function get_shipping_address() {
-
 		if ( ! $this->shipping_address ) {
 
 			if ( $this->shipping_address_1 || $this->shipping_address_2 ) {
@@ -2451,13 +2478,9 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Checks if an order can be edited, specifically for use on the Edit Order screen
 	 *
-	 * @access public
 	 * @return bool
 	 */
 	public function is_editable() {
-		if ( ! isset( $this->editable ) ) {
-			$this->editable = in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft' ) );
-		}
-		return apply_filters( 'wc_order_is_editable', $this->editable, $this );
+		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft' ) ), $this );
 	}
 }
