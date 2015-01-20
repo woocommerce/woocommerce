@@ -2,12 +2,13 @@
 /**
  * Shows an order item fee
  *
- * @var $item The item being displayed
  * @var $item_id The id of the item being displayed
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/** @var $item The item being displayed */
 ?>
 <tr class="fee <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_item_id="<?php echo $item_id; ?>">
 	<td class="check-column"><input type="checkbox" /></td>

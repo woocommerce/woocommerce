@@ -23,6 +23,7 @@ class WC_Admin_Status {
 	public static function output() {
 		$current_tab = ! empty( $_REQUEST['tab'] ) ? sanitize_title( $_REQUEST['tab'] ) : 'status';
 
+		/** @uses $current_tab */
 		include_once( 'views/html-admin-page-status.php' );
 	}
 
