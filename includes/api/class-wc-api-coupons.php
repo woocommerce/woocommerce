@@ -251,12 +251,13 @@ class WC_API_Coupons extends WC_API_Resource {
 				'minimum_amount'               => '',
 				'maximum_amount'               => '',
 				'customer_emails'              => array(),
+				'description'                  => ''
 			);
 
 			$coupon_data = wp_parse_args( $data, $defaults );
 
 			// Validate coupon types
-			if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_coupon_types() ) ) ) {
+			if ( ! in_array( wc_clean( $coupon_data['type'] ), array_keys( wc_get_coupon_types() ) ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_coupon_type', sprintf( __( 'Invalid coupon type - the coupon type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_coupon_types() ) ) ), 400 );
 			}
 
@@ -266,7 +267,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'post_status'  => 'publish',
 				'post_author'  => get_current_user_id(),
 				'post_type'    => 'shop_coupon',
-				'post_excerpt' => isset( $data['description'] ) ? $data['description'] : '',
+				'post_excerpt' => $coupon_data['description']
 	 		);
 
 			$id = wp_insert_post( $new_coupon, $wp_error = false );
