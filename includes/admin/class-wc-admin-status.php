@@ -133,14 +133,6 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
 				break;
-				case 'hide_translation_upgrade' :
-					update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
-					$notices = get_option( 'woocommerce_admin_notices', array() );
-					$notices = array_diff( $notices, array( 'translation_upgrade' ) );
-					update_option( 'woocommerce_admin_notices', $notices );
-
-					echo '<div class="updated"><p>' . __( 'Translation update message hidden successfully!', 'woocommerce' ) . '</p></div>';
-				break;
 				default :
 					$action = esc_attr( $_GET['action'] );
 					if ( isset( $tools[ $action ]['callback'] ) ) {

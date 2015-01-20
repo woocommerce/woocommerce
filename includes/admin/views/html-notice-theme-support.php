@@ -14,6 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<p class="submit">
 		<a href="http://woothemes.com/storefront" class="button-primary" target="_blank"><?php _e( 'Find out more about Storefront', 'woocommerce' ); ?></a>
 		<a href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/third-party-custom-theme-compatibility/', 'theme-compatibility' ) ); ?>" class="button"><?php _e( 'Theme integration guide', 'woocommerce' ); ?></a>
-		<a class="skip button" href="<?php echo esc_url( add_query_arg( 'hide_theme_support_notice', 'true' ) ); ?>"><?php _e( 'Hide this notice', 'woocommerce' ); ?></a>
+		<a class="skip button" href="<?php echo esc_url( add_query_arg( 'wc-hide-notice', 'theme_support' ) ); ?>"><?php _e( 'Hide this notice', 'woocommerce' ); ?></a>
 	</p>
 </div>

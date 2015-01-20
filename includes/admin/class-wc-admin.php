@@ -43,21 +43,21 @@ class WC_Admin {
 
 		// Classes we only need during non-ajax requests
 		if ( ! is_ajax() ) {
-			include( 'class-wc-admin-menus.php' );
-			include( 'class-wc-admin-welcome.php' );
-			include( 'class-wc-admin-notices.php' );
-			include( 'class-wc-admin-assets.php' );
-			include( 'class-wc-admin-webhooks.php' );
+			include_once( 'class-wc-admin-menus.php' );
+			include_once( 'class-wc-admin-welcome.php' );
+			include_once( 'class-wc-admin-notices.php' );
+			include_once( 'class-wc-admin-assets.php' );
+			include_once( 'class-wc-admin-webhooks.php' );
 
 			// Help
 			if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
-				include( 'class-wc-admin-help.php' );
+				include_once( 'class-wc-admin-help.php' );
 			}
 		}
 
 		// Importers
 		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
-			include( 'class-wc-admin-importers.php' );
+			include_once( 'class-wc-admin-importers.php' );
 		}
 	}
 

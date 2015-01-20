@@ -426,7 +426,7 @@ class WC_Admin_Welcome {
 		delete_transient( '_wc_activation_redirect' );
 
 		// Bail if we are waiting to install or update via the interface update/install links
-		if ( get_option( '_wc_needs_update' ) == 1 || get_option( '_wc_needs_pages' ) == 1 ) {
+		if ( WC_Admin_Notices::has_notice( 'install' ) || WC_Admin_Notices::has_notice( 'update' ) ) {
 			return;
 		}
 

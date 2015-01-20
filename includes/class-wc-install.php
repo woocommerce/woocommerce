@@ -51,23 +51,14 @@ class WC_Install {
 			self::create_pages();
 
 			// We no longer need to install pages
-			delete_option( '_wc_needs_pages' );
-			delete_transient( '_wc_activation_redirect' );
+			WC_Admin_Notices::remove_notice( 'install' );
 
 			// What's new redirect
-			wp_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
-			exit;
-
-		// Skip button
-		} elseif ( ! empty( $_GET['skip_install_woocommerce_pages'] ) ) {
-
-			// We no longer need to install pages
-			delete_option( '_wc_needs_pages' );
-			delete_transient( '_wc_activation_redirect' );
-
-			// What's new redirect
-			wp_redirect( admin_url( 'index.php?page=wc-about' ) );
-			exit;
+			if ( ! WC_Admin_Notices::has_notice( 'update' ) ) {
+				delete_transient( '_wc_activation_redirect' );
+				wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
+				exit;
+			}
 
 		// Update button
 		} elseif ( ! empty( $_GET['do_update_woocommerce'] ) ) {
@@ -75,13 +66,14 @@ class WC_Install {
 			self::update();
 
 			// Update complete
-			delete_option( '_wc_needs_pages' );
-			delete_option( '_wc_needs_update' );
-			delete_transient( '_wc_activation_redirect' );
+			WC_Admin_Notices::remove_notice( 'update' );
 
 			// What's new redirect
-			wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
-			exit;
+			if ( ! WC_Admin_Notices::has_notice( 'install' ) ) {
+				delete_transient( '_wc_activation_redirect' );
+				wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
+				exit;
+			}
 		}
 	}
 
@@ -110,7 +102,7 @@ class WC_Install {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 
 		if ( version_compare( $current_db_version, '2.2.0', '<' ) && null !== $current_db_version ) {
-			update_option( '_wc_needs_update', 1 );
+			WC_Admin_Notices::add_notice( 'update' );
 		} else {
 			update_option( 'woocommerce_db_version', WC()->version );
 		}
@@ -120,7 +112,7 @@ class WC_Install {
 
 		// Check if pages are needed
 		if ( wc_get_page_id( 'shop' ) < 1 ) {
-			update_option( '_wc_needs_pages', 1 );
+			WC_Admin_Notices::add_notice( 'install' );
 		}
 
 		// Flush rules after install
