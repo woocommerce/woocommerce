@@ -25,6 +25,7 @@ class WC_Meta_Box_Order_Actions {
 	public static function output( $post ) {
 		global $theorder;
 
+		// This is used by some callbacks attached to hooks such as woocommerce_order_actions which rely on the global to determine if actions should be displayed for certain orders.
 		if ( ! is_object( $theorder ) ) {
 			$theorder = wc_get_order( $post->ID );
 		}
