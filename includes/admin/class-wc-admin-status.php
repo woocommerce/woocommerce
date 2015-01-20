@@ -21,9 +21,6 @@ class WC_Admin_Status {
 	 * Handles output of the reports page in admin.
 	 */
 	public static function output() {
-		$current_tab = ! empty( $_REQUEST['tab'] ) ? sanitize_title( $_REQUEST['tab'] ) : 'status';
-
-		/** @uses $current_tab */
 		include_once( 'views/html-admin-page-status.php' );
 	}
 
@@ -38,7 +35,7 @@ class WC_Admin_Status {
 	 * Handles output of tools
 	 */
 	public static function status_tools() {
-		global $woocommerce, $wpdb;
+		global $wpdb;
 
 		$tools = self::get_tools();
 

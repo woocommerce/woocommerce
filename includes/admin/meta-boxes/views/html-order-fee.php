@@ -2,13 +2,11 @@
 /**
  * Shows an order item fee
  *
- * @var $item_id The id of the item being displayed
+ * @var int $item_id The id of the item being displayed
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-/** @var $item The item being displayed */
 ?>
 <tr class="fee <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_item_id="<?php echo $item_id; ?>">
 	<td class="check-column"><input type="checkbox" /></td>
@@ -17,7 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="name">
 		<div class="view">
-			<?php echo ! empty( $item['name'] ) ? esc_html( $item['name'] ) : __( 'Fee', 'woocommerce' ); ?>
+			<?php
+				/* @var $item The item being displayed */
+				echo ! empty( $item['name'] ) ? esc_html( $item['name'] ) : __( 'Fee', 'woocommerce' );
+			?>
 		</div>
 		<div class="edit" style="display: none;">
 			<input type="text" placeholder="<?php _e( 'Fee Name', 'woocommerce' ); ?>" name="order_item_name[<?php echo absint( $item_id ); ?>]" value="<?php echo ( isset( $item['name'] ) ) ? esc_attr( $item['name'] ) : ''; ?>" />
