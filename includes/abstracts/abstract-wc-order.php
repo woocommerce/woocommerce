@@ -83,12 +83,6 @@ abstract class WC_Abstract_Order {
 	/** @private string Formatted address. Accessed via get_formatted_shipping_address() */
 	private $formatted_shipping_address = '';
 
-	/** @private array Array of address data. Accessed via get_billing_address() */
-	private $billing_address            = array();
-
-	/** @private array Array of address data. Accessed via get_shipping_address() */
-	private $shipping_address           = array();
-
 	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
 	 * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory
@@ -970,38 +964,6 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the billing address in an array.
-	 *
-	 * @return array
-	 */
-	public function get_billing_address() {
-		if ( ! $this->billing_address ) {
-
-			// Formatted Addresses
-			$address = array(
-				'address_1'     => $this->billing_address_1,
-				'address_2'     => $this->billing_address_2,
-				'city'          => $this->billing_city,
-				'state'         => $this->billing_state,
-				'postcode'      => $this->billing_postcode,
-				'country'       => $this->billing_country
-			);
-
-			$joined_address = array();
-
-			foreach ( $address as $part ) {
-				if ( ! empty( $part ) ) {
-					$joined_address[] = $part;
-				}
-			}
-
-			$this->billing_address = implode( ', ', $joined_address );
-		}
-
-		return $this->billing_address;
-	}
-
-	/**
 	 * Get a formatted shipping address for the order.
 	 *
 	 * @return string
@@ -1032,39 +994,23 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the billing address in an array.
+	 * @deprecated 2.3
+	 * @return string
+	 */
+	public function get_billing_address() {
+		_deprecated_function( 'get_billing_address', '2.3', 'get_formatted_billing_address' );
+		return $this->get_formatted_billing_address();
+	}
+
+	/**
 	 * Get the shipping address in an array.
-	 *
-	 * @return array
+	 * @deprecated 2.3
+	 * @return string
 	 */
 	public function get_shipping_address() {
-		if ( ! $this->shipping_address ) {
-
-			if ( $this->shipping_address_1 || $this->shipping_address_2 ) {
-
-				// Formatted Addresses
-				$address = array(
-					'address_1'     => $this->shipping_address_1,
-					'address_2'     => $this->shipping_address_2,
-					'city'          => $this->shipping_city,
-					'state'         => $this->shipping_state,
-					'postcode'      => $this->shipping_postcode,
-					'country'       => $this->shipping_country
-				);
-
-				$joined_address = array();
-
-				foreach ( $address as $part ) {
-
-					if ( ! empty( $part ) ) {
-						$joined_address[] = $part;
-					}
-				}
-
-				$this->shipping_address = implode( ', ', $joined_address );
-			}
-		}
-
-		return $this->shipping_address;
+		_deprecated_function( 'get_shipping_address', '2.3', 'get_formatted_shipping_address' );
+		return $this->get_formatted_shipping_address();
 	}
 
 	/**
