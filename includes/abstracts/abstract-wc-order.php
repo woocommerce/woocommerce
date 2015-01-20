@@ -5,7 +5,7 @@
  * The WooCommerce order class handles order data.
  *
  * @class       WC_Order
- * @see         WP_Post
+ * @var         WP_Post
  * @version     2.2.0
  * @package     WooCommerce/Classes
  * @category    Class
@@ -43,7 +43,7 @@ abstract class WC_Abstract_Order {
 	public $id                          = 0;
 
 	/**
-	 * @public WP_Post Stores post data for the order
+	 * @public $post Stores post data
 	 * @var WP_Post
 	 */
 	public $post                        = null;
@@ -90,7 +90,7 @@ abstract class WC_Abstract_Order {
 	 * should be used. It is possible, but the aforementioned are preferred and are the only
 	 * methods that will be maintained going forward.
 	 *
-	 * @param integer $order
+	 * @param int $order
 	 */
 	public function __construct( $order = 0 ) {
 		$this->prices_include_tax    = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;

@@ -5,7 +5,7 @@
  * The WooCommerce product class handles individual product data.
  *
  * @class       WC_Product
- * @see         WP_Post
+ * @var         WP_Post
  * @version     2.1.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
@@ -21,22 +21,22 @@
 class WC_Product {
 
 	/** @public int The product (post) ID. */
-	public $id;
+	public $id                   = 0;
 
 	/**
-	 * @public WP_Post Stores post data for the product
-	 * @var WP_Post
-	 */
-	public $post;
+	* @public $post Stores post data
+	* @var WP_Post
+	*/
+	public $post                 = null;
 
 	/** @public string $product_type The product's type (simple, variable etc). */
-	public $product_type = null;
+	public $product_type         = null;
 
 	/** @protected string $dimensions String of dimensions (imploded with X) */
-	protected $dimensions = '';
+	protected $dimensions        = '';
 
 	/** @protected string $shipping_class Prouduct shipping class */
-	protected $shipping_class = '';
+	protected $shipping_class    = '';
 
 	/** @protected integer $shipping_class_id ID of the shipping class this product has. */
 	protected $shipping_class_id = 0;
@@ -53,7 +53,7 @@ class WC_Product {
 			$this->post = get_post( $this->id );
 		} elseif ( $product instanceof WC_Product ) {
 			$this->id   = absint( $product->id );
-			$this->post = $product;
+			$this->post = $product->post;
 		} elseif ( $product instanceof WP_Post || isset( $product->ID ) ) {
 			$this->id   = absint( $product->ID );
 			$this->post = $product;
