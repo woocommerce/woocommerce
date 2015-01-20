@@ -23,6 +23,12 @@ class WC_Meta_Box_Order_Actions {
 	 * Output the metabox
 	 */
 	public static function output( $post ) {
+		global $theorder;
+
+		if ( ! is_object( $theorder ) ) {
+			$theorder = wc_get_order( $post->ID );
+		}
+
 		$order_type_object = get_post_type_object( $post->post_type );
 		?>
 		<ul class="order_actions submitbox">
