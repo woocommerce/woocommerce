@@ -10,6 +10,7 @@
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
+ * @property    string $billing_first_name The billing address first name
  */
 abstract class WC_Abstract_Order {
 

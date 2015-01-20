@@ -3,6 +3,7 @@
  * Shows an order item fee
  *
  * @var int $item_id The id of the item being displayed
+ * @property $item The item being displayed
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -15,10 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="name">
 		<div class="view">
-			<?php
-				/* @var $item The item being displayed */
-				echo ! empty( $item['name'] ) ? esc_html( $item['name'] ) : __( 'Fee', 'woocommerce' );
-			?>
+			<?php echo ! empty( $item['name'] ) ? esc_html( $item['name'] ) : __( 'Fee', 'woocommerce' ); ?>
 		</div>
 		<div class="edit" style="display: none;">
 			<input type="text" placeholder="<?php _e( 'Fee Name', 'woocommerce' ); ?>" name="order_item_name[<?php echo absint( $item_id ); ?>]" value="<?php echo ( isset( $item['name'] ) ) ? esc_attr( $item['name'] ) : ''; ?>" />
@@ -27,10 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</td>
 
-	<?php
-		/* @var $item The item being displayed */
-		do_action( 'woocommerce_admin_order_item_values', null, $item, absint( $item_id ) );
-	?>
+	<?php do_action( 'woocommerce_admin_order_item_values', null, $item, absint( $item_id ) ); ?>
 
 	<td class="item_cost" width="1%">&nbsp;</td>
 	<td class="quantity" width="1%">&nbsp;</td>
