@@ -528,8 +528,8 @@ class WC_Admin_Post_Types {
 			break;
 			case 'shipping_address' :
 
-				if ( $the_order->get_formatted_shipping_address() ) {
-					echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q=' . urlencode( $the_order->get_shipping_address() ) . '&z=16' ) . '">'. esc_html( preg_replace( '#<br\s*/?>#i', ', ', $the_order->get_formatted_shipping_address() ) ) .'</a>';
+				if ( $address = $the_order->get_formatted_shipping_address() ) {
+					echo '<a target="_blank" href="' . esc_url( $the_order->get_shipping_address_map_url() ) . '">'. esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) .'</a>';
 				} else {
 					echo '&ndash;';
 				}

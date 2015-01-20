@@ -996,6 +996,24 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Get a formatted shipping address for the order.
+	 *
+	 * @return string
+	 */
+	public function get_shipping_address_map_url() {
+		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', array(
+			'address_1'     => $this->shipping_address_1,
+			'address_2'     => $this->shipping_address_2,
+			'city'          => $this->shipping_city,
+			'state'         => $this->shipping_state,
+			'postcode'      => $this->shipping_postcode,
+			'country'       => $this->shipping_country
+		), $this );
+
+		return apply_filters( 'woocommerce_shipping_address_map_url', 'http://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
+	}
+
+	/**
 	 * Get the billing address in an array.
 	 * @deprecated 2.3
 	 * @return string
