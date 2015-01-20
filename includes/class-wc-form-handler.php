@@ -865,65 +865,39 @@ class WC_Form_Handler {
 	 */
 	public static function process_registration() {
 		if ( ! empty( $_POST['register'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-register' ) ) {
-
-			if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
-				$_username = $_POST['username'];
-			} else {
-				$_username = '';
-			}
-
-			if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
-				$_password = $_POST['password'];
-			} else {
-				$_password = '';
-			}
+			$username = 'no' === get_option( 'woocommerce_registration_generate_username' ) ? $_POST['username'] : '';
+			$password = 'no' === get_option( 'woocommerce_registration_generate_password' ) ? $_POST['password'] : '';
+			$email    = $_POST['email'];
 
 			try {
-
 				$validation_error = new WP_Error();
-				$validation_error = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $_username, $_password, $_POST['email'] );
+				$validation_error = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $username, $password, $email );
 
 				if ( $validation_error->get_error_code() ) {
-					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $validation_error->get_error_message() );
+					throw new Exception( $validation_error->get_error_message() );
 				}
 
+				// Anti-spam trap
+				if ( ! empty( $_POST['email_2'] ) ) {
+					throw new Exception( __( 'Anti-spam field was filled in.', 'woocommerce' ) );
+				}
+
+				$new_customer = wc_create_new_customer( sanitize_email( $email ), wc_clean( $username ), $password );
+
+				if ( is_wp_error( $new_customer ) ) {
+					throw new Exception( $new_customer->get_error_message() );
+				}
+
+				if ( apply_filters( 'woocommerce_registration_auth_new_customer', true, $new_customer ) ) {
+					wc_set_customer_auth_cookie( $new_customer );
+				}
+
+				wp_safe_redirect( apply_filters( 'woocommerce_registration_redirect', wp_get_referer() ? wp_get_referer() : get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
+				exit;
+
 			} catch ( Exception $e ) {
-
-				wc_add_notice( $e->getMessage(), 'error' );
-				return;
-
+				wc_add_notice( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $e->getMessage(), 'error' );
 			}
-
-			$username   = ! empty( $_username ) ? wc_clean( $_username ) : '';
-			$email      = ! empty( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : '';
-			$password   = $_password;
-
-			// Anti-spam trap
-			if ( ! empty( $_POST['email_2'] ) ) {
-				wc_add_notice( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Anti-spam field was filled in.', 'woocommerce' ), 'error' );
-				return;
-			}
-
-			$new_customer = wc_create_new_customer( $email, $username, $password );
-
-			if ( is_wp_error( $new_customer ) ) {
-				wc_add_notice( $new_customer->get_error_message(), 'error' );
-				return;
-			}
-
-			if ( apply_filters( 'woocommerce_registration_auth_new_customer', true, $new_customer ) ) {
-				wc_set_customer_auth_cookie( $new_customer );
-			}
-
-			// Redirect
-			if ( wp_get_referer() ) {
-				$redirect = esc_url( wp_get_referer() );
-			} else {
-				$redirect = esc_url( get_permalink( wc_get_page_id( 'myaccount' ) ) );
-			}
-
-			wp_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ) );
-			exit;
 		}
 	}
 }
