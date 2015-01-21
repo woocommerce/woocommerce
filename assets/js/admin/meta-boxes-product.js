@@ -299,6 +299,8 @@ jQuery( function( $ ){
 			$('body').trigger( 'wc-enhanced-select-init' );
 			attribute_row_indexes();
 			$wrapper.unblock();
+
+			$('body').trigger( 'woocommerce_added_attribute' );
 		});
 
 		if ( attribute ) {
