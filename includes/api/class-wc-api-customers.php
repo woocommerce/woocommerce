@@ -497,10 +497,12 @@ class WC_API_Customers extends WC_API_Resource {
 			return $id;
 		}
 
-		$downloads = wc_get_customer_available_downloads( $id );
+		$downloads  = array();
+		$_downloads = wc_get_customer_available_downloads( $id );
 
-		if ( empty( $downloads ) ) {
-			return array( 'downloads' => array() );
+		foreach ( $_downloads as $key => $download ) {
+			$downloads[ $key ] = $download;
+			$downloads[ $key ]['access_expires'] = $this->server->format_datetime( $downloads[ $key ]['access_expires'] );
 		}
 
 		return array( 'downloads' => apply_filters( 'woocommerce_api_customer_downloads_response', $downloads, $id, $fields, $this->server ) );
