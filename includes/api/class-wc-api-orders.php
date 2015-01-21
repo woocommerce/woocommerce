@@ -19,6 +19,9 @@ class WC_API_Orders extends WC_API_Resource {
 	/** @var string $base the route base */
 	protected $base = '/orders';
 
+	/** @var string $post_type the custom post type */
+	protected $post_type = 'shop_order';
+
 	/**
 	 * Register the routes for this class
 	 *
@@ -134,7 +137,7 @@ class WC_API_Orders extends WC_API_Resource {
 	public function get_order( $id, $fields = null, $filter = array() ) {
 
 		// ensure order ID is valid & user has permission to read
-		$id = $this->validate_request( $id, 'shop_order', 'read' );
+		$id = $this->validate_request( $id, $this->post_type, 'read' );
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
@@ -482,7 +485,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$update_totals = false;
 
-			$id = $this->validate_request( $id, 'shop_order', 'edit' );
+			$id = $this->validate_request( $id, $this->post_type, 'edit' );
 
 			if ( is_wp_error( $id ) ) {
 				return $id;
@@ -627,7 +630,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function delete_order( $id, $force = false ) {
 
-		$id = $this->validate_request( $id, 'shop_order', 'delete' );
+		$id = $this->validate_request( $id, $this->post_type, 'delete' );
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
@@ -652,7 +655,7 @@ class WC_API_Orders extends WC_API_Resource {
 		// set base query arguments
 		$query_args = array(
 			'fields'      => 'ids',
-			'post_type'   => 'shop_order',
+			'post_type'   => $this->post_type,
 			'post_status' => array_keys( wc_get_order_statuses() )
 		);
 
@@ -1109,7 +1112,7 @@ class WC_API_Orders extends WC_API_Resource {
 	public function get_order_notes( $order_id, $fields = null ) {
 
 		// ensure ID is valid order ID
-		$order_id = $this->validate_request( $order_id, 'shop_order', 'read' );
+		$order_id = $this->validate_request( $order_id, $this->post_type, 'read' );
 
 		if ( is_wp_error( $order_id ) ) {
 			return $order_id;
@@ -1149,7 +1152,7 @@ class WC_API_Orders extends WC_API_Resource {
 	public function get_order_note( $order_id, $id, $fields = null ) {
 		try {
 			// Validate order ID
-			$order_id = $this->validate_request( $order_id, 'shop_order', 'read' );
+			$order_id = $this->validate_request( $order_id, $this->post_type, 'read' );
 
 			if ( is_wp_error( $order_id ) ) {
 				return $order_id;
@@ -1246,7 +1249,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$data = isset( $data['order_note'] ) ? $data['order_note'] : array();
 
 			// Validate order ID
-			$order_id = $this->validate_request( $order_id, 'shop_order', 'edit' );
+			$order_id = $this->validate_request( $order_id, $this->post_type, 'edit' );
 
 			if ( is_wp_error( $order_id ) ) {
 				return $order_id;
@@ -1310,7 +1313,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function delete_order_note( $order_id, $id ) {
 		try {
-			$order_id = $this->validate_request( $order_id, 'shop_order', 'delete' );
+			$order_id = $this->validate_request( $order_id, $this->post_type, 'delete' );
 
 			if ( is_wp_error( $order_id ) ) {
 				return $order_id;
@@ -1361,7 +1364,7 @@ class WC_API_Orders extends WC_API_Resource {
 	public function get_order_refunds( $order_id, $fields = null ) {
 
 		// Ensure ID is valid order ID
-		$order_id = $this->validate_request( $order_id, 'shop_order', 'read' );
+		$order_id = $this->validate_request( $order_id, $this->post_type, 'read' );
 
 		if ( is_wp_error( $order_id ) ) {
 			return $order_id;
@@ -1396,7 +1399,7 @@ class WC_API_Orders extends WC_API_Resource {
 	public function get_order_refund( $order_id, $id, $fields = null ) {
 		try {
 			// Validate order ID
-			$order_id = $this->validate_request( $order_id, 'shop_order', 'read' );
+			$order_id = $this->validate_request( $order_id, $this->post_type, 'read' );
 
 			if ( is_wp_error( $order_id ) ) {
 				return $order_id;
@@ -1549,7 +1552,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$data = isset( $data['order_refund'] ) ? $data['order_refund'] : array();
 
 			// Validate order ID
-			$order_id = $this->validate_request( $order_id, 'shop_order', 'edit' );
+			$order_id = $this->validate_request( $order_id, $this->post_type, 'edit' );
 
 			if ( is_wp_error( $order_id ) ) {
 				return $order_id;
@@ -1608,7 +1611,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function delete_order_refund( $order_id, $id ) {
 		try {
-			$order_id = $this->validate_request( $order_id, 'shop_order', 'delete' );
+			$order_id = $this->validate_request( $order_id, $this->post_type, 'delete' );
 
 			if ( is_wp_error( $order_id ) ) {
 				return $order_id;
