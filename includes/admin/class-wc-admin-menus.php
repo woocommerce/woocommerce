@@ -34,6 +34,7 @@ class WC_Admin_Menus {
 		}
 
 		add_action( 'admin_head', array( $this, 'menu_highlight' ) );
+		add_action( 'admin_head', array( $this, 'menu_order_count' ) );
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 
@@ -101,47 +102,45 @@ class WC_Admin_Menus {
 	 * Highlights the correct top level admin menu item for post type add screens.
 	 */
 	public function menu_highlight() {
-		global $menu, $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
+		global $parent_file, $submenu_file, $post_type;
 
-		$to_highlight_types = array( 'shop_order', 'shop_coupon' );
-
-		if ( isset( $post_type ) ) {
-			if ( in_array( $post_type, $to_highlight_types ) ) {
-				$submenu_file = 'edit.php?post_type=' . esc_attr( $post_type );
-				$parent_file  = 'woocommerce';
-			}
-
-			if ( 'product' == $post_type ) {
+		switch ( $post_type ) {
+			case 'shop_order' :
+			case 'shop_coupon' :
+				$parent_file = 'woocommerce';
+			break;
+			case 'product' :
 				$screen = get_current_screen();
 
-				if ( $screen->base == 'edit-tags' && taxonomy_is_product_attribute( $taxonomy ) ) {
+				if ( taxonomy_is_product_attribute( $screen->taxonomy ) ) {
 					$submenu_file = 'product_attributes';
-					$parent_file  = 'edit.php?post_type=' . esc_attr( $post_type );
+					$parent_file  = 'edit.php?post_type=product';
 				}
 
-				// Fix the highlight of shipping classes menu
-				if ( 'product_shipping_class' == $screen->taxonomy && $parent_file == 'edit.php?post_type=product' ) {
+				if ( 'product_shipping_class' == $screen->taxonomy ) {
 					$submenu_file = 'edit-tags.php?taxonomy=product_shipping_class&post_type=product';
 				}
-			}
+			break;
 		}
+	}
 
-		if ( isset( $submenu['woocommerce'] ) && isset( $submenu['woocommerce'][1] ) ) {
-			$submenu['woocommerce'][0] = $submenu['woocommerce'][1];
-			unset( $submenu['woocommerce'][1] );
-		}
+	/**
+	 * Adds the order processing count to the menu
+	 */
+	public function menu_order_count() {
+		global $submenu;
 
-		if ( isset( $submenu['woocommerce'] ) && current_user_can( 'manage_woocommerce' ) ) {
-			foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-				if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
+		if ( isset( $submenu['woocommerce'] ) ) {
+			// Remove 'WooCommerce' sub menu item
+			unset( $submenu['woocommerce'][0] );
 
-					$menu_name = _x( 'Orders', 'Admin menu name', 'woocommerce' );
-					if ( $order_count = wc_processing_order_count() ) {
-						$menu_name .= ' <span class="awaiting-mod update-plugins count-' . $order_count . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
+			// Add count if user has access
+			if ( current_user_can( 'manage_woocommerce' ) && ( $order_count = wc_processing_order_count() ) ) {
+				foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+					if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
+						$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . $order_count . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
+						break;
 					}
-
-					$submenu['woocommerce'][ $key ] [0] = $menu_name;
-					break;
 				}
 			}
 		}
@@ -170,8 +169,8 @@ class WC_Admin_Menus {
 				$woocommerce_menu_order[] = 'separator-woocommerce';
 				$woocommerce_menu_order[] = $item;
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
-				unset( $menu_order[$woocommerce_separator] );
-				unset( $menu_order[$woocommerce_product] );
+				unset( $menu_order[ $woocommerce_separator ] );
+				unset( $menu_order[ $woocommerce_product ] );
 			} elseif ( !in_array( $item, array( 'separator-woocommerce' ) ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
