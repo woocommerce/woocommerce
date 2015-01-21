@@ -844,7 +844,7 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( empty( $posted_fields['password_1'] . $_POST['password_2'] ) ) {
+		if ( empty( $posted_fields['password_1'] ) || empty( $_POST['password_2'] ) ) {
 			wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
 		}
 
