@@ -664,6 +664,8 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return bool
 	 */
 	protected function save_product_meta( $id, $data ) {
+		global $wpdb;
+
 		// Product Type
 		$product_type = null;
 		if ( isset( $data['type'] ) ) {
@@ -1101,6 +1103,13 @@ class WC_API_Products extends WC_API_Resource {
 			if ( isset( $data['button_text'] ) ) {
 				update_post_meta( $id, '_button_text', wc_clean( $data['button_text'] ) );
 			}
+		}
+
+		// Reviews allowed
+		if ( isset( $data['reviews_allowed'] ) ) {
+			$reviews_allowed = ( true === $data['reviews_allowed'] ) ? 'open' : 'closed';
+
+			$wpdb->update( $wpdb->posts, array( 'comment_status' => $reviews_allowed ), array( 'ID' => $id ) );
 		}
 
 		// Do action for product type
