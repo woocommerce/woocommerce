@@ -833,36 +833,35 @@ class WC_Form_Handler {
 			$posted_fields[ $field ] = $_POST[ $field ];
 		}
 
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'reset_password' ) ) {
+		if ( ! wp_verify_nonce( $posted_fields['_wpnonce'], 'reset_password' ) ) {
 			return;
 		}
 
-		$user = WC_Shortcode_My_Account::check_password_reset_key( $_POST['reset_key'], $_POST['reset_login'] );
+		$user = WC_Shortcode_My_Account::check_password_reset_key( $posted_fields['reset_key'], $posted_fields['reset_login'] );
 
-		if ( is_wp_error( $user ) ) {
-			wc_add_notice( $user->get_error_message(), 'error' );
-			return;
-		}
+		if ( $user instanceof WP_User ) {
+			if ( empty( $posted_fields['password_1'] ) ) {
+				wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
+			}
 
-		if ( empty( $posted_fields['password_1'] ) || empty( $_POST['password_2'] ) ) {
-			wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
-		}
+			if ( $posted_fields[ 'password_1' ] !== $posted_fields[ 'password_2' ] ) {
+				wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
+			}
 
-		if ( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] ) {
-			wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
-		}
+			$errors = new WP_Error();
 
-		do_action( 'validate_password_reset', new WP_Error(), $user );
+			do_action( 'validate_password_reset', $errors, $user );
 
-		wc_add_wp_error_notices( $errors );
+			wc_add_wp_error_notices( $errors );
 
-		if ( 0 === wc_notice_count( 'error' ) ) {
-			WC_Shortcode_My_Account::reset_password( $user, $_POST['password_1'] );
+			if ( 0 === wc_notice_count( 'error' ) ) {
+				WC_Shortcode_My_Account::reset_password( $user, $posted_fields['password_1'] );
 
-			do_action( 'woocommerce_customer_reset_password', $user );
+				do_action( 'woocommerce_customer_reset_password', $user );
 
-			wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login' ) ) ) );
-			exit;
+				wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login' ) ) ) );
+				exit;
+			}
 		}
 	}
 
