@@ -24,6 +24,7 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_login' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_registration' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'process_lost_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'cancel_order' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'order_again' ), 20 );
@@ -811,52 +812,57 @@ class WC_Form_Handler {
 	}
 
 	/**
+	 * Handle lost password form
+	 */
+	public static function process_lost_password() {
+		if ( isset( $_POST['wc_reset_password'] ) && isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'lost_password' ) ) {
+			WC_Shortcode_My_Account::retrieve_password();
+		}
+	}
+
+	/**
 	 * Handle reset password form
 	 */
 	public static function process_reset_password() {
-		if ( ! isset( $_POST['wc_reset_password'] ) ) {
+		$posted_fields = array( 'wc_reset_password', 'password_1', 'password_2', 'reset_key', 'reset_login', '_wpnonce' );
+
+		foreach ( $posted_fields as $field ) {
+			if ( ! isset( $_POST[ $field ] ) ) {
+				return;
+			}
+			$posted_fields[ $field ] = $_POST[ $field ];
+		}
+
+		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'reset_password' ) ) {
 			return;
 		}
 
-		// process lost password form
-		if ( isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'lost_password' ) ) {
-			WC_Shortcode_My_Account::retrieve_password();
+		$user = WC_Shortcode_My_Account::check_password_reset_key( $_POST['reset_key'], $_POST['reset_login'] );
+
+		if ( is_wp_error( $user ) ) {
+			wc_add_notice( $user->get_error_message(), 'error' );
+			return;
 		}
 
-		// process reset password form
-		if ( isset( $_POST['password_1'] ) && isset( $_POST['password_2'] ) && isset( $_POST['reset_key'] ) && isset( $_POST['reset_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'reset_password' ) ) {
+		if ( empty( $posted_fields['password_1'] . $_POST['password_2'] ) ) {
+			wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
+		}
 
-			// verify reset key again
-			$user = WC_Shortcode_My_Account::check_password_reset_key( $_POST['reset_key'], $_POST['reset_login'] );
+		if ( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] ) {
+			wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
+		}
 
-			if ( is_object( $user ) ) {
-				if ( empty( $_POST['password_1'] ) || empty( $_POST['password_2'] ) ) {
-					wc_add_notice( __( 'Please enter your password.', 'woocommerce' ), 'error' );
-				}
+		do_action( 'validate_password_reset', new WP_Error(), $user );
 
-				if ( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] ) {
-					wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
-				}
+		wc_add_wp_error_notices( $errors );
 
-				$errors = new WP_Error();
-				do_action( 'validate_password_reset', $errors, $user );
-				if ( $errors->get_error_messages() ) {
-					foreach ( $errors->get_error_messages() as $error ) {
-						wc_add_notice( $error, 'error');
-					}
-				}
+		if ( 0 === wc_notice_count( 'error' ) ) {
+			WC_Shortcode_My_Account::reset_password( $user, $_POST['password_1'] );
 
-				if ( 0 == wc_notice_count( 'error' ) ) {
+			do_action( 'woocommerce_customer_reset_password', $user );
 
-					WC_Shortcode_My_Account::reset_password( $user, $_POST['password_1'] );
-
-					do_action( 'woocommerce_customer_reset_password', $user );
-
-					wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login' ) ) ) );
-					exit;
-				}
-			}
-
+			wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login' ) ) ) );
+			exit;
 		}
 	}
 
