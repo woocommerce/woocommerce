@@ -421,10 +421,12 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				continue;
 			}
 
-			if ( ! $_product || $_product->id != $result->product_id ) {
+			$product_id = intval( $result->product_id );
+
+			if ( ! $_product || $_product->id != $product_id ) {
 				// new product
 				$file_number = 0;
-				$_product    = wc_get_product( $result->product_id );
+				$_product    = wc_get_product( $product_id );
 			}
 
 			// Check product exists and has the file
@@ -446,7 +448,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			$downloads[] = array(
 				'download_url'        => add_query_arg(
 					array(
-						'download_file' => $result->product_id,
+						'download_file' => $product_id,
 						'order'         => $result->order_key,
 						'email'         => $result->user_email,
 						'key'           => $result->download_id
@@ -454,7 +456,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 					home_url( '/' )
 				),
 				'download_id'         => $result->download_id,
-				'product_id'          => $result->product_id,
+				'product_id'          => $product_id,
 				'download_name'       => $download_name,
 				'order_id'            => $order->id,
 				'order_key'           => $order->order_key,
