@@ -1492,12 +1492,16 @@ class WC_API_Products extends WC_API_Resource {
 
 		// File paths will be stored in an array keyed off md5(file path)
 		foreach ( $downloads as $key => $file ) {
-			if ( ! isset( $file['url'] ) ) {
+			if ( isset( $file['url'] ) ) {
+				$file['file'] = $file['url'];
+			}
+
+			if ( ! isset( $file['file'] ) ) {
 				continue;
 			}
 
 			$file_name = isset( $file['name'] ) ? wc_clean( $file['name'] ) : '';
-			$file_url  = wc_clean( $file['url'] );
+			$file_url  = wc_clean( $file['file'] );
 
 			$files[ md5( $file_url ) ] = array(
 				'name' => $file_name,
