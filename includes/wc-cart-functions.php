@@ -45,20 +45,22 @@ function wc_empty_cart() {
 /**
  * Load the cart upon login
  *
- * @param mixed $user_login
- * @param integer $user
- * @return void
+ * @param string $user_login
+ * @param WP_User $user
  */
-function wc_load_persistent_cart( $user_login, $user = 0 ) {
+function wc_load_persistent_cart( $user_login, $user ) {
 
-	if ( ! $user )
+	if ( ! $user ) {
 		return;
+	}
 
 	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true );
 
-	if ( $saved_cart )
-		if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) == 0 )
+	if ( $saved_cart ) {
+		if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) == 0 ) {
 			WC()->session->cart = $saved_cart['cart'];
+		}
+	}
 }
 add_action( 'wp_login', 'wc_load_persistent_cart', 1, 2 );
 
@@ -202,8 +204,8 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$value  = array();
 
-	if ( ! empty( WC()->cart->coupon_discount_amounts[ $coupon->code ] ) ) {
-		$discount_html = '-' . wc_price( WC()->cart->coupon_discount_amounts[ $coupon->code ] );
+	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->code, WC()->cart->display_cart_ex_tax ) ) {
+		$discount_html = '-' . wc_price( $amount );
 	} else {
 		$discount_html = '';
 	}
@@ -217,7 +219,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
     // get rid of empty array elements
     $value = array_filter( $value );
 
-	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	$value = implode( ', ', $value ) . ' <a href="' . add_query_arg( 'remove_coupon', $coupon->code, defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->code ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
 }
@@ -232,7 +234,7 @@ function wc_cart_totals_order_total_html() {
 	echo '<strong>' . WC()->cart->get_total() . '</strong> ';
 
 	// If prices are tax inclusive, show taxes here
-	if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && WC()->cart->tax_display_cart == 'incl' ) {
+	if ( wc_tax_enabled() && WC()->cart->tax_display_cart == 'incl' ) {
 		$tax_string_array = array();
 
 		if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {

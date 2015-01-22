@@ -118,9 +118,21 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_core_supported_themes() {
 
-		$expected_themes = array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+		$expected_themes = array( 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 
 		$this->assertEquals( $expected_themes, wc_get_core_supported_themes() );
+	}
+
+	/**
+	 * Test wc_get_base_location()
+	 *
+	 * @since 2.3.0
+	 */
+	public function test_wc_get_base_location() {
+		$default = wc_get_base_location();
+
+		$this->assertEquals( 'GB', $default['country'] );
+		$this->assertEquals( '', $default['state'] );
 	}
 
 }

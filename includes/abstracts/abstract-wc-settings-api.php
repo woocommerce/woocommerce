@@ -2,27 +2,66 @@
 /**
  * Admin Settings API used by Shipping Methods and Payment Gateways
  *
- * @class       WC_Settings_API
- * @version     2.1.0
- * @package     WooCommerce/Abstracts
- * @category    Abstract Class
- * @author      WooThemes
+ * @class    WC_Settings_API
+ * @version  2.3.0
+ * @package  WooCommerce/Abstracts
+ * @category Abstract Class
+ * @author   WooThemes
  */
 abstract class WC_Settings_API {
 
-	/** @var string The plugin ID. Used for option names. */
+	/**
+	 * The plugin ID. Used for option names.
+	 * @var string
+	 */
 	public $plugin_id = 'woocommerce_';
 
-	/** @var array Array of setting values. */
+	/**
+	 * Method ID.
+	 * @var string
+	 */
+	public $id = '';
+
+	/**
+	 * Method title.
+	 * @var string
+	 */
+	public $method_title = '';
+
+	/**
+	 * Method description.
+	 * @var string
+	 */
+	public $method_description = '';
+
+	/**
+	 * 'yes' if the method is enabled
+	 * @var string
+	 */
+	public $enabled;
+
+	/**
+	 * Setting values.
+	 * @var array
+	 */
 	public $settings = array();
 
-	/** @var array Array of form option fields. */
+	/**
+	 * Form option fields.
+	 * @var array
+	 */
 	public $form_fields = array();
 
-	/** @var array Array of validation errors. */
+	/**
+	 * Validation errors.
+	 * @var array
+	 */
 	public $errors = array();
 
-	/** @var array Sanitized fields after validation. */
+	/**
+	 * Sanitized fields after validation.
+	 * @var array
+	 */
 	public $sanitized_fields = array();
 
 	/**
@@ -169,12 +208,12 @@ abstract class WC_Settings_API {
 	 *
 	 * Generate the HTML for the fields on the "settings" screen.
 	 *
-	 * @param bool $form_fields (default: false)
+	 * @param array $form_fields (default: array())
 	 * @since 1.0.0
 	 * @uses method_exists()
 	 * @return string the html for the settings
 	 */
-	public function generate_settings_html( $form_fields = false ) {
+	public function generate_settings_html( $form_fields = array() ) {
 
 		if ( ! $form_fields ) {
 			$form_fields = $this->get_form_fields();
@@ -403,6 +442,52 @@ abstract class WC_Settings_API {
 	public function generate_password_html( $key, $data ) {
 		$data['type'] = 'password';
 		return $this->generate_text_html( $key, $data );
+	}
+
+	/**
+	 * Generate Color Picker Input HTML.
+	 *
+	 * @param mixed $key
+	 * @param mixed $data
+	 * @since 2.3.0
+	 * @return string
+	 */
+	public function generate_color_html( $key, $data ) {
+		$field    = $this->plugin_id . $this->id . '_' . $key;
+		$defaults = array(
+			'title'             => '',
+			'disabled'          => false,
+			'class'             => '',
+			'css'               => '',
+			'placeholder'       => '',
+			'desc_tip'          => false,
+			'description'       => '',
+			'custom_attributes' => array()
+		);
+
+		$data = wp_parse_args( $data, $defaults );
+
+		ob_start();
+		?>
+		<tr valign="top">
+			<th scope="row" class="titledesc">
+				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<?php echo $this->get_tooltip_html( $data ); ?>
+			</th>
+			<td class="forminp">
+				<fieldset>
+					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
+					<div class="color_box">
+						<input class="colorpick <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+						<div id="colorPickerDiv_<?php echo esc_attr( $field ); ?>" class="colorpickdiv" style="z-index: 100; background: #eee; border: 1px solid #ccc; position: absolute; display: none;"></div>
+					</div>
+					<?php echo $this->get_description_html( $data ); ?>
+				</fieldset>
+			</td>
+		</tr>
+		<?php
+
+		return ob_get_clean();
 	}
 
 	/**
@@ -637,9 +722,9 @@ abstract class WC_Settings_API {
 	 *
 	 * @since 1.0.0
 	 * @uses method_exists()
-	 * @param bool $form_fields (default: false)
+	 * @param array $form_fields (default: array())
 	 */
-	public function validate_settings_fields( $form_fields = false ) {
+	public function validate_settings_fields( $form_fields = array() ) {
 
 		if ( ! $form_fields ) {
 			$form_fields = $this->get_form_fields();

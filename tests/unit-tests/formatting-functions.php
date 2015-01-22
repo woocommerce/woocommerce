@@ -33,59 +33,81 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_dimension()
+	 * Data provider for test_wc_get_dimension()
 	 *
-	 * @since 2.2
+	 * @since 2.2.0
 	 */
-	public function test_wc_get_dimension() {
+	public function data_provider_wc_get_dimension() {
 
 		// save default
 		$default_unit = get_option( 'woocommerce_dimension_unit' );
 
-		// cm (default unit)
-		$this->assertEquals( 10, wc_get_dimension( 10, 'cm' ) );
-		$this->assertEquals( 3.937, wc_get_dimension( 10, 'in' ) );
-		$this->assertEquals( 0.10936133, wc_get_dimension( 10, 'yd' ) );
-		$this->assertEquals( 100, wc_get_dimension( 10, 'mm' ) );
-		$this->assertEquals( 0.1, wc_get_dimension( 10, 'm' ) );
+		$cm = array(
+			array( 10, wc_get_dimension( 10, 'cm' ) ),
+			array( 3.937, wc_get_dimension( 10, 'in' ) ),
+			array( 0.10936133, wc_get_dimension( 10, 'yd' ) ),
+			array( 100, wc_get_dimension( 10, 'mm' ) ),
+			array( 0.1, wc_get_dimension( 10, 'm' ) ),
+		);
 
-		// in
 		update_option( 'woocommerce_dimension_unit', 'in' );
-		$this->assertEquals( 25.4, wc_get_dimension( 10, 'cm' ) );
-		$this->assertEquals( 10, wc_get_dimension( 10, 'in' ) );
-		$this->assertEquals( 0.2777777782, wc_get_dimension( 10, 'yd' ) );
-		$this->assertEquals( 254, wc_get_dimension( 10, 'mm' ) );
-		$this->assertEquals( 0.254, wc_get_dimension( 10, 'm' ) );
+		$in = array(
+			array( 25.4, wc_get_dimension( 10, 'cm' ) ),
+			array( 10, wc_get_dimension( 10, 'in' ) ),
+			array( 0.2777777782, wc_get_dimension( 10, 'yd' ) ),
+			array( 254, wc_get_dimension( 10, 'mm' ) ),
+			array( 0.254, wc_get_dimension( 10, 'm' ) ),
+		);
 
-		// m
 		update_option( 'woocommerce_dimension_unit', 'm' );
-		$this->assertEquals( 1000, wc_get_dimension( 10, 'cm' ) );
-		$this->assertEquals( 393.7, wc_get_dimension( 10, 'in' ) );
-		$this->assertEquals( 10.936133, wc_get_dimension( 10, 'yd' ) );
-		$this->assertEquals( 10000, wc_get_dimension( 10, 'mm' ) );
-		$this->assertEquals( 10, wc_get_dimension( 10, 'm' ) );
+		$m = array(
+			array( 1000, wc_get_dimension( 10, 'cm' ) ),
+			array( 393.7, wc_get_dimension( 10, 'in' ) ),
+			array( 10.936133, wc_get_dimension( 10, 'yd' ) ),
+			array( 10000, wc_get_dimension( 10, 'mm' ) ),
+			array( 10, wc_get_dimension( 10, 'm' ) ),
+		);
 
-		// mm
 		update_option( 'woocommerce_dimension_unit', 'mm' );
-		$this->assertEquals( 1, wc_get_dimension( 10, 'cm' ) );
-		$this->assertEquals( 0.3937, wc_get_dimension( 10, 'in' ) );
-		$this->assertEquals( 0.010936133, wc_get_dimension( 10, 'yd' ) );
-		$this->assertEquals( 10, wc_get_dimension( 10, 'mm' ) );
-		$this->assertEquals( 0.01, wc_get_dimension( 10, 'm' ) );
+		$mm = array(
+			array( 1, wc_get_dimension( 10, 'cm' ) ),
+			array( 0.3937, wc_get_dimension( 10, 'in' ) ),
+			array( 0.010936133, wc_get_dimension( 10, 'yd' ) ),
+			array( 10, wc_get_dimension( 10, 'mm' ) ),
+			array( 0.01, wc_get_dimension( 10, 'm' ) ),
+		);
 
-		// yd
 		update_option( 'woocommerce_dimension_unit', 'yd' );
-		$this->assertEquals( 914.4, wc_get_dimension( 10, 'cm' ) );
-		$this->assertEquals( 359.99928, wc_get_dimension( 10, 'in' ) );
-		$this->assertEquals( 10, wc_get_dimension( 10, 'yd' ) );
-		$this->assertEquals( 9144, wc_get_dimension( 10, 'mm' ) );
-		$this->assertEquals( 9.144, wc_get_dimension( 10, 'm' ) );
+		$yd = array(
+			array( 914.4, wc_get_dimension( 10, 'cm' ) ),
+			array( 359.99928, wc_get_dimension( 10, 'in' ) ),
+			array( 10, wc_get_dimension( 10, 'yd' ) ),
+			array( 9144, wc_get_dimension( 10, 'mm' ) ),
+			array( 9.144, wc_get_dimension( 10, 'm' ) ),
+		);
 
-		// negative
-		$this->assertEquals( 0, wc_get_dimension( -10, 'mm' ) );
+		$n = array(
+			array( 0, wc_get_dimension( -10, 'mm' ) ),
+		);
 
 		// restore default
 		update_option( 'woocommerce_dimension_unit', $default_unit );
+
+		return array_merge( $cm, $in, $m, $mm, $yd, $n );
+
+	}
+
+	/**
+	 * Test wc_get_dimension()
+	 *
+	 * @dataProvider data_provider_wc_get_dimension
+	 *
+	 * @since 2.2
+	 */
+	public function test_wc_get_dimension( $assert, $value ) {
+
+		$this->assertEquals( $assert, $value );
+
 	}
 
 	/**
@@ -423,7 +445,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// test with manually set UTC offset
 		update_option( 'gmt_offset', -4 );
-		$this->assertEquals( 'America/Boa_Vista', wc_timezone_string() );
+		$this->assertEquals( 'America/Halifax', wc_timezone_string() );
 
 		// test with invalid offset
 		update_option( 'gmt_offset', 99 );

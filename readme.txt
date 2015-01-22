@@ -1,10 +1,10 @@
 === WooCommerce - excelling eCommerce ===
-Contributors: woothemes, mikejolley, jameskoster, claudiosanches
+Contributors: woothemes, mikejolley, jameskoster, claudiosanches, barrykooij
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
-Tested up to: 4.0
-Stable tag: 2.2.5
+Tested up to: 4.1
+Stable tag: 2.2.10
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -93,7 +93,7 @@ WooCommerce comes with some dummy data you can use to see how products look; eit
 
 = Where can I find WooCommerce documentation and user guides? =
 
-For help setting up and configuring WooCommerce please refer to our [user guide](http://docs.woothemes.com/document/woocommerce/)
+For help setting up and configuring WooCommerce please refer to our [user guide](http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/)
 
 For extending or theming WooCommerce, see our [codex](http://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/).
 
@@ -131,12 +131,31 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.3.0 =
+* Feature - Option to geo-locate the customer's inital location.
+* Feature - Display taxes in store based on the customer location, rather than the shop base.
 * Feature - Made tax importer expand postcode ranges.
+* Feature - Print styles for reports.
+* Feature - Remove products from the cart in the widget.
+* Feature - Bulk edit sales schedule on variations.
+* Feature - Fresh new frontend design.
+* Feature - Undo link in message when removing products from the cart.
+* Feature - Compatibility with Twenty Fifteen default theme.
+* Feature - Added 'top freebies' to product report.
+* Feature - Added numeric sort for attributes.
+* Feature - Added support for some Jetpack features: Omnisearch, Publicize and Markdown editor.
+* Feature - UI for adding Webhooks.
+* Feature - Show Gross and Net totals in reports.
 * Refactor - Removed deprecated methods from WC_Frontend_Scripts and rewrote script registration and localization to run once.
 * Refactor - Routing all email functionality through one send() method.
 * Refactor - Replaced existing email css inliner with Emogrifier.
 * Refactor - get_product_search_form().
+* Refactor - Improved the Shipping Class field in products quick edit and bulk edit.
+* Refactor - Removed style settings in favour of separate plugin.
+* Refactor - Removed quantity increment/decrement buttons in favour of separate plugin.
+* Feature - Added link on purchased products list on orders screen.
 * Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
+* Fix - Fix cart coupon on-sale checks for variations.
+* Tweak - All frontend styles and email styles have been improved.
 * Tweak - Double the default product image dimensions.
 * Tweak - Added refunds to Sales by Date report.
 * Tweak - Updated prevent_caching() method to work if a cart/checkout page isn't set.
@@ -145,8 +164,21 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added tool to refresh stats to customer list.
 * Tweak - Recent order table on my account is responsive.
 * Tweak - Drop WC tables in wpmu_drop_tables (for multisite).
+* Tweak - Removed quantity increment/decrement buttons.
+* Tweak - Moved 'Proceed to checkout' button on cart to beneath totals.
+* Tweak - Improved 'responsiveness' of product data tabs on add/edit product screen.
+* Tweak - Added 'stupidtable' script to allow order item sorting on the order screen (by name, cost, qty).
+* Tweak - In the cart, add variation selected data to the permalink.
+* Dev - API - Look up product by sku.
+* Dev - API - New parent_id param for products API.
 * Dev - Made template debug mode set WC_TEMPLATE_DEBUG_MODE constant and remove all overrides for all template loading functions.
+* Dev - Switched to .scss from .less for all styles.
+* Dev - Included bourbon for scss mixins.
+* Dev - Decoupled the order summary and payments area. Both are updated independently via ajax fragments and can be moved around via actions. TEMPLATES OVERRIDING THESE TEMPLATES WILL NEED TO UPDATE THEIR FILES.
+* Dev - Moved WC_Cart::get_cart_from_session() and dependencies to a later hook (was init, now wp_loaded).
+* Dev - Migrated away from CHOSEN to SELECT2. Chosen is still registered in case 3rd parties try to enqueue.
 * Localisation - Add Ukrainian currency and symbol.
+* Localisation - Greece regions.
 
 = 2.2.5 - 07/10/2014 =
 * Fix - Filters in admin screen for coupons and orders.

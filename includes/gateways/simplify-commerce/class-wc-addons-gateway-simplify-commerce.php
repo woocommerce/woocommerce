@@ -31,20 +31,62 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		if ( class_exists( 'WC_Pre_Orders_Order' ) ) {
 			add_action( 'wc_pre_orders_process_pre_order_completion_payment_' . $this->id, array( $this, 'process_pre_order_release_payment' ) );
 		}
+
+		add_filter( 'woocommerce_simplify_commerce_hosted_args', array( $this, 'hosted_payment_args' ), 10, 2 );
+		add_action( 'woocommerce_api_wc_addons_gateway_simplify_commerce', array( $this, 'return_handler' ) );
+	}
+
+	/**
+	 * Hosted payment args
+	 *
+	 * @param  array $args
+	 * @param  int   $order_id
+	 *
+	 * @return array
+	 */
+	public function hosted_payment_args( $args, $order_id ) {
+		if ( ( $this->order_contains_subscription( $order_id ) ) || ( $this->order_contains_pre_order( $order_id ) && WC_Pre_Orders_Order::order_requires_payment_tokenization( $order_id ) ) ) {
+			$args['operation'] = 'create.token';
+		}
+
+		$args['redirect-url'] = WC()->api_request_url( 'WC_Addons_Gateway_Simplify_Commerce' );
+
+		return $args;
+	}
+
+	/**
+	 * Check if order contains subscriptions.
+	 *
+	 * @param  int $order_id
+	 *
+	 * @return bool
+	 */
+	protected function order_contains_subscription( $order_id ) {
+		return class_exists( 'WC_Subscriptions_Order' ) && WC_Subscriptions_Order::order_contains_subscription( $order_id );
+	}
+
+	/**
+	 * Check if order contains pre-orders.
+	 *
+	 * @param  int $order_id
+	 *
+	 * @return bool
+	 */
+	protected function order_contains_pre_order( $order_id ) {
+		return class_exists( 'WC_Pre_Orders_Order' ) && WC_Pre_Orders_Order::order_contains_pre_order( $order_id );
 	}
 
 	/**
 	 * Process the subscription
 	 *
-	 * @param int $order_id
+	 * @param WC_Order $order
+	 * @param string   $cart_token
+	 *
 	 * @return array
 	 */
-	public function process_subscription( $order_id ) {
-		$order = wc_get_order( $order_id );
-		$token = isset( $_POST['simplify_token'] ) ? wc_clean( $_POST['simplify_token'] ) : '';
-
+	protected function process_subscription( $order, $cart_token = '' ) {
 		try {
-			if ( empty( $token ) ) {
+			if ( empty( $cart_token ) ) {
 				$error_msg = __( 'Please make sure your card details have been entered correctly and that your browser supports JavaScript.', 'woocommerce' );
 
 				if ( 'yes' == $this->sandbox ) {
@@ -56,7 +98,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 			// Create customer
 			$customer = Simplify_Customer::createCustomer( array(
-				'token'     => $token,
+				'token'     => $cart_token,
 				'email'     => $order->billing_email,
 				'name'      => trim( $order->billing_first_name . ' ' . $order->billing_last_name ),
 				'reference' => $order->id
@@ -66,7 +108,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				$customer_id = wc_clean( $customer->id );
 
 				// Store the customer ID in the order
-				update_post_meta( $order_id, '_simplify_customer_id', $customer_id );
+				update_post_meta( $order->id, '_simplify_customer_id', $customer_id );
 			} else {
 				$error_msg = __( 'Error creating user in Simplify Commerce.', 'woocommerce' );
 
@@ -113,13 +155,13 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	/**
 	 * Process the pre-order
 	 *
-	 * @param int $order_id
+	 * @param WC_Order $order
+	 * @param string   $cart_token
+	 *
 	 * @return array
 	 */
-	public function process_pre_order( $order_id ) {
-		if ( WC_Pre_Orders_Order::order_requires_payment_tokenization( $order_id ) ) {
-			$order = wc_get_order( $order_id );
-			$token = isset( $_POST['simplify_token'] ) ? wc_clean( $_POST['simplify_token'] ) : '';
+	protected function process_pre_order( $order, $cart_token = '' ) {
+		if ( WC_Pre_Orders_Order::order_requires_payment_tokenization( $order->id ) ) {
 
 			try {
 				if ( $order->order_total * 100 < 50 ) {
@@ -128,7 +170,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 					throw new Simplify_ApiException( $error_msg );
 				}
 
-				if ( empty( $token ) ) {
+				if ( empty( $cart_token ) ) {
 					$error_msg = __( 'Please make sure your card details have been entered correctly and that your browser supports JavaScript.', 'woocommerce' );
 
 					if ( 'yes' == $this->sandbox ) {
@@ -140,7 +182,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 				// Create customer
 				$customer = Simplify_Customer::createCustomer( array(
-					'token'     => $token,
+					'token'     => $cart_token,
 					'email'     => $order->billing_email,
 					'name'      => trim( $order->billing_first_name . ' ' . $order->billing_last_name ),
 					'reference' => $order->id
@@ -150,7 +192,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 					$customer_id = wc_clean( $customer->id );
 
 					// Store the customer ID in the order
-					update_post_meta( $order_id, '_simplify_customer_id', $customer_id );
+					update_post_meta( $order->id, '_simplify_customer_id', $customer_id );
 				} else {
 					$error_msg = __( 'Error creating user in Simplify Commerce.', 'woocommerce' );
 
@@ -188,7 +230,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			}
 
 		} else {
-			return parent::process_payment( $order_id );
+			return parent::process_standard_payments( $order, $cart_token );
 		}
 	}
 
@@ -199,13 +241,16 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
+		$cart_token = isset( $_POST['simplify_token'] ) ? wc_clean( $_POST['simplify_token'] ) : '';
+		$order      = wc_get_order( $order_id );
+
 		// Processing subscription
-		if ( class_exists( 'WC_Subscriptions_Order' ) && WC_Subscriptions_Order::order_contains_subscription( $order_id ) ) {
-			return $this->process_subscription( $order_id );
+		if ( 'standard' == $this->mode && $this->order_contains_subscription( $order->id ) ) {
+			return $this->process_subscription( $order, $cart_token );
 
 		// Processing pre-order
-		} elseif ( class_exists( 'WC_Pre_Orders_Order' ) && WC_Pre_Orders_Order::order_contains_pre_order( $order_id ) ) {
-			return $this->process_pre_order( $order_id );
+		} elseif ( 'standard' == $this->mode && $this->order_contains_pre_order( $order->id ) ) {
+			return $this->process_pre_order( $order, $cart_token );
 
 		// Processing regular product
 		} else {
@@ -369,5 +414,49 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				$order->add_order_note( $order_note );
 			}
 		}
+	}
+
+	/**
+	 * Return handler for Hosted Payments
+	 */
+	public function return_handler() {
+		if ( ! isset( $_REQUEST['cardToken'] ) ) {
+			parent::return_handler();
+		}
+
+		@ob_clean();
+		header( 'HTTP/1.1 200 OK' );
+
+		$redirect_url = get_permalink( wc_get_page_id( 'cart' ) );
+
+		if ( isset( $_REQUEST['reference'] ) && isset( $_REQUEST['amount'] ) ) {
+			$cart_token  = $_REQUEST['cardToken'];
+			$amount      = absint( $_REQUEST['amount'] );
+			$order_id    = absint( $_REQUEST['reference'] );
+			$order       = wc_get_order( $order_id );
+			$order_total = absint( $order->order_total * 100 );
+
+			if ( $amount === $order_total ) {
+				if ( $this->order_contains_subscription( $order->id ) ) {
+					$response = $this->process_subscription( $order, $cart_token );
+				} elseif ( $this->order_contains_pre_order( $order->id ) ) {
+					$response = $this->process_pre_order( $order, $cart_token );
+				} else {
+					$response = parent::process_standard_payments( $order, $cart_token );
+				}
+
+				if ( 'success' == $response['result'] ) {
+					$redirect_url = $response['redirect'];
+				} else {
+					$order->update_status( 'failed', __( 'Payment was declined by Simplify Commerce.', 'woocommerce' ) );
+				}
+
+				wp_redirect( $redirect_url );
+				exit();
+			}
+		}
+
+		wp_redirect( $redirect_url );
+		exit();
 	}
 }

@@ -4,8 +4,14 @@ filter:
     - apigen/*
     - includes/api/v1/*
     - includes/libraries/*
+    - includes/updates/*
+    - includes/gateways/simplify-commerce/includes/*
 
 checks:
   php:
     code_rating: true
     duplication: true
+
+tools:
+  external_code_coverage:
+    timeout: 600

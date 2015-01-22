@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title><?php echo get_bloginfo( 'name' ); ?></title>
 	</head>
-    <body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
+    <body <?php echo is_rtl() ? 'rightmargin' : 'leftmargin'; ?>="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
     	<div id="wrapper">
         	<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
             	<tr>

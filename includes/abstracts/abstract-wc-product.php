@@ -5,35 +5,55 @@
  * The WooCommerce product class handles individual product data.
  *
  * @class       WC_Product
+ * @var         WP_Post
  * @version     2.1.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
  * @author      WooThemes
+ *
+ * @property    string $width Product width
+ * @property    string $length Product length
+ * @property    string $height Product height
+ * @property    string $weight Product weight
+ * @property    string $price product price
+ * @property    string $product_image_gallery String of image IDs in the gallery.
  */
 class WC_Product {
 
-	/** @var int The product (post) ID. */
-	public $id;
+	/** @public int The product (post) ID. */
+	public $id                   = 0;
 
-	/** @var object The actual post object. */
-	public $post;
+	/**
+	* @public $post Stores post data
+	* @var WP_Post
+	*/
+	public $post                 = null;
 
-	/** @var string The product's type (simple, variable etc). */
-	public $product_type = null;
+	/** @public string $product_type The product's type (simple, variable etc). */
+	public $product_type         = null;
+
+	/** @protected string $dimensions String of dimensions (imploded with X) */
+	protected $dimensions        = '';
+
+	/** @protected string $shipping_class Prouduct shipping class */
+	protected $shipping_class    = '';
+
+	/** @protected integer $shipping_class_id ID of the shipping class this product has. */
+	protected $shipping_class_id = 0;
 
 	/**
 	 * Constructor gets the post object and sets the ID for the loaded product.
 	 *
 	 * @param int|WC_Product|WP_Post $product Product ID, post object, or product object
+	 * @var   WP_POST
 	 */
 	public function __construct( $product ) {
-
 		if ( is_numeric( $product ) ) {
 			$this->id   = absint( $product );
 			$this->post = get_post( $this->id );
 		} elseif ( $product instanceof WC_Product ) {
 			$this->id   = absint( $product->id );
-			$this->post = $product;
+			$this->post = $product->post;
 		} elseif ( $product instanceof WP_Post || isset( $product->ID ) ) {
 			$this->id   = absint( $product->ID );
 			$this->post = $product;
@@ -57,31 +77,30 @@ class WC_Product {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
+		$this->$key = get_post_meta( $this->id, '_' . $key, true );
 
 		// Get values or default if not set
 		if ( in_array( $key, array( 'downloadable', 'virtual', 'backorders', 'manage_stock', 'featured', 'sold_individually' ) ) ) {
-			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : 'no';
+			$this->$key = $this->$key ? $this->$key : 'no';
 
 		} elseif ( in_array( $key, array( 'product_attributes', 'crosssell_ids', 'upsell_ids' ) ) ) {
-			$value = ( $value = get_post_meta( $this->id, '_' . $key, true ) ) ? $value : array();
+			$this->$key = $this->$key ? $this->$key : array();
 
-		} elseif ( 'visibility' == $key ) {
-			$value = ( $value = get_post_meta( $this->id, '_visibility', true ) ) ? $value : 'hidden';
+		} elseif ( 'visibility' === $key ) {
+			$this->$key = $this->$key ? $this->$key : 'hidden';
 
-		} elseif ( 'stock' == $key ) {
-			$value = ( $value = get_post_meta( $this->id, '_stock', true ) ) ? $value : 0;
+		} elseif ( 'stock' === $key ) {
+			$this->$key = $this->$key ? $this->$key : 0;
 
-		} elseif ( 'stock_status' == $key ) {
-			$value = ( $value = get_post_meta( $this->id, '_stock_status', true ) ) ? $value : 'instock';
+		} elseif ( 'stock_status' === $key ) {
+			$this->$key = $this->$key ? $this->$key : 'instock';
 
-		} elseif ( 'tax_status' == $key ) {
-			$value = ( $value = get_post_meta( $this->id, '_tax_status', true ) ) ? $value : 'taxable';
+		} elseif ( 'tax_status' === $key ) {
+			$this->$key = $this->$key ? $this->$key : 'taxable';
 
-		} else {
-			$value = get_post_meta( $this->id, '_' . $key, true );
 		}
 
-		return $value;
+		return $this->$key;
 	}
 
 	/**
@@ -99,15 +118,6 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_gallery_attachment_ids() {
-
-		if ( ! isset( $this->product_image_gallery ) ) {
-
-			// Backwards compat
-			$attachment_ids = get_posts( 'post_parent=' . $this->id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
-			$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id( $this->id ) ) );
-			$this->product_image_gallery = implode( ',', $attachment_ids );
-		}
-
 		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( (array) explode( ',', $this->product_image_gallery ) ), $this );
 	}
 
@@ -383,7 +393,7 @@ class WC_Product {
 
 		$return = false;
 
-		if ( 'yes' == $this->sold_individually || ( ! $this->backorders_allowed() && $this->get_stock_quantity() == 1 ) ) {
+		if ( 'yes' == $this->sold_individually ) {
 			$return = true;
 		}
 
@@ -423,7 +433,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_taxable() {
-		$taxable = $this->tax_status == 'taxable' && get_option( 'woocommerce_calc_taxes' ) == 'yes' ? true : false;
+		$taxable = $this->tax_status == 'taxable' && wc_tax_enabled() ? true : false;
 		return apply_filters( 'woocommerce_product_is_taxable', $taxable, $this );
 	}
 
@@ -525,7 +535,7 @@ class WC_Product {
 	}
 
 	/**
-	 * is_on_backorder function.
+	 * Check if a product is on backorder
 	 *
 	 * @param int $qty_in_cart (default: 0)
 	 * @return bool
@@ -625,8 +635,6 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_visible() {
-		$visible = true;
-
 		if ( ! $this->post ) {
 			$visible = false;
 
@@ -660,7 +668,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
-		return ( $this->get_sale_price() != $this->get_regular_price() && $this->get_sale_price() == $this->get_price() );
+		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() != $this->get_regular_price() && $this->get_sale_price() == $this->get_price() ), $this );
 	}
 
 	/**
@@ -747,18 +755,18 @@ class WC_Product {
 	/**
 	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
-	 * @param  string $price to calculdate, left blank to just use get_price()
+	 * @param  string $price to calculate, left blank to just use get_price()
 	 * @return string
 	 */
 	public function get_price_including_tax( $qty = 1, $price = '' ) {
 
-		if ( ! $price ) {
+		if ( $price === '' ) {
 			$price = $this->get_price();
 		}
 
 		if ( $this->is_taxable() ) {
 
-			if ( get_option('woocommerce_prices_include_tax') === 'no' ) {
+			if ( get_option( 'woocommerce_prices_include_tax' ) === 'no' ) {
 
 				$tax_rates  = WC_Tax::get_rates( $this->get_tax_class() );
 				$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, false );
@@ -768,7 +776,7 @@ class WC_Product {
 			} else {
 
 				$tax_rates      = WC_Tax::get_rates( $this->get_tax_class() );
-				$base_tax_rates = WC_Tax::get_shop_base_rate( $this->tax_class );
+				$base_tax_rates = WC_Tax::get_base_tax_rates( $this->tax_class );
 
 				if ( ! empty( WC()->customer ) && WC()->customer->is_vat_exempt() ) {
 
@@ -801,17 +809,17 @@ class WC_Product {
 	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
 	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
-	 * @param  string $price to calculdate, left blank to just use get_price()
+	 * @param  string $price to calculate, left blank to just use get_price()
 	 * @return string
 	 */
 	public function get_price_excluding_tax( $qty = 1, $price = '' ) {
 
-		if ( ! $price ) {
+		if ( $price === '' ) {
 			$price = $this->get_price();
 		}
 
-		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax') === 'yes' ) {
-			$tax_rates  = WC_Tax::get_shop_base_rate( $this->tax_class );
+		if ( $this->is_taxable() && get_option( 'woocommerce_prices_include_tax' ) === 'yes' ) {
+			$tax_rates  = WC_Tax::get_base_tax_rates( $this->tax_class );
 			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
 			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
 		} else {
@@ -819,6 +827,25 @@ class WC_Product {
 		}
 
 		return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $this );
+	}
+
+	/**
+	 * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
+	 *
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
+	 * @return string
+	 */
+	public function get_display_price( $price = '', $qty = 1 ) {
+
+		if ( $price === '' ) {
+			$price = $this->get_price();
+		}
+
+		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+		$display_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( $qty, $price ) : $this->get_price_excluding_tax( $qty, $price );
+
+		return $display_price;
 	}
 
 	/**
@@ -858,10 +885,8 @@ class WC_Product {
 	 */
 	public function get_price_html( $price = '' ) {
 
-		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
-		$display_price         = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
-		$display_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_regular_price() ) : $this->get_price_excluding_tax( 1, $this->get_regular_price() );
-		$display_sale_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_sale_price() ) : $this->get_price_excluding_tax( 1, $this->get_sale_price() );
+		$display_price         = $this->get_display_price();
+		$display_regular_price = $this->get_display_price( $this->get_regular_price() );
 
 		if ( $this->get_price() > 0 ) {
 
@@ -946,13 +971,14 @@ class WC_Product {
 	}
 
 	/**
-	 * get_average_rating function.
+	 * Get the average rating of product.
 	 *
 	 * @return string
 	 */
 	public function get_average_rating() {
+		$transient_name = 'wc_average_rating_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
-		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) {
+		if ( false === ( $average_rating = get_transient( $transient_name ) ) ) {
 
 			global $wpdb;
 
@@ -973,39 +999,52 @@ class WC_Product {
 				$average_rating = number_format( $ratings / $count, 2 );
 			}
 
-			set_transient( 'wc_average_rating_' . $this->id, $average_rating, YEAR_IN_SECONDS );
+			set_transient( $transient_name, $average_rating, YEAR_IN_SECONDS );
 		}
 
 		return $average_rating;
 	}
 
 	/**
-	 * get_rating_count function.
+	 * Get the total amount (COUNT) of ratings.
 	 *
 	 * @param  int $value Optional. Rating value to get the count for. By default
 	 *                              returns the count of all rating values.
 	 * @return int
 	 */
 	public function get_rating_count( $value = null ) {
+		$value          = intval( $value );
+		$value_suffix   = $value ? '_' . $value : '';
+		$transient_name = 'wc_rating_count_' . $this->id . $value_suffix . WC_Cache_Helper::get_transient_version( 'product' );
 
-		$value = intval( $value );
-		$value_suffix = $value ? '_' . $value : '';
-
-		if ( false === ( $count = get_transient( 'wc_rating_count_' . $this->id . $value_suffix ) ) ) {
+		if ( false === ( $count = get_transient( $transient_name ) ) ) {
 
 			global $wpdb;
 
 			$where_meta_value = $value ? $wpdb->prepare( " AND meta_value = %d", $value ) : " AND meta_value > 0";
 
-			$count = $wpdb->get_var( $wpdb->prepare("
-				SELECT COUNT(meta_value) FROM $wpdb->commentmeta
-				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-				WHERE meta_key = 'rating'
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-			", $this->id ) . $where_meta_value );
+			if ( get_option( 'woocommerce_enable_review_rating' ) == 'yes' && get_option( 'woocommerce_review_rating_required' ) == 'yes' ) {
 
-			set_transient( 'wc_rating_count_' . $this->id . $value_suffix, $count, YEAR_IN_SECONDS );
+				$count = $wpdb->get_var( $wpdb->prepare("
+					SELECT COUNT(meta_value) FROM $wpdb->commentmeta
+					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+					WHERE meta_key = 'rating'
+					AND comment_post_ID = %d
+					AND comment_approved = '1'
+				", $this->id ) . $where_meta_value );
+
+			} else {
+
+				$count = $wpdb->get_var( $wpdb->prepare("
+					SELECT COUNT(*) FROM $wpdb->comments
+					WHERE comment_parent = 0
+					AND comment_post_ID = %d
+					AND comment_approved = '1'
+				", $this->id ) );
+
+			}
+
+			set_transient( $transient_name, $count, YEAR_IN_SECONDS );
 		}
 
 		return $count;
@@ -1059,8 +1098,7 @@ class WC_Product {
 	/**
 	 * Returns the product categories.
 	 *
-	 * @param string $sep (default: ')
-	 * @param mixed '
+	 * @param string $sep (default: ', ')
 	 * @param string $before (default: '')
 	 * @param string $after (default: '')
 	 * @return string
@@ -1160,6 +1198,7 @@ class WC_Product {
 		$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
 
 		// Generate query
+		$query           = array();
 		$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
 		$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
 		$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
@@ -1238,7 +1277,7 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_attributes() {
-		return (array) maybe_unserialize( $this->product_attributes );
+		return apply_filters( 'woocommerce_get_product_attributes', (array) maybe_unserialize( $this->product_attributes ) );
 	}
 
 	/**
@@ -1355,8 +1394,6 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
-		$image = '';
-
 		if ( has_post_thumbnail( $this->id ) ) {
 			$image = get_the_post_thumbnail( $this->id, $size, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {

@@ -1,0 +1,111 @@
+{layout '@layout.latte'}
+{var $active = 'todo'}
+
+{block title}Todo{/block}
+
+{block content}
+<div id="content">
+	<h1>{include title}</h1>
+
+	{define classes}
+		{foreach $items as $class}
+			<tr>
+				<td class="name right">
+					<a href="{$class|classUrl}">{$class->name}</a>
+				</td>
+				<td>
+					{foreach $class->annotations['todo'] as $description}
+						{$description|annotation:'todo':$class|noescape}{sep}<hr>{/sep}
+					{/foreach}
+				</td>
+			</tr>
+		{/foreach}
+	{/define}
+
+	<table class="summary" id="classes" n:if="$todoClasses">
+		<caption>Classes summary</caption>
+		{include classes, items => $todoClasses}
+	</table>
+
+	<table class="summary" id="interfaces" n:if="$todoInterfaces">
+		<caption>Interfaces summary</caption>
+		{include classes, items => $todoInterfaces}
+	</table>
+
+	<table class="summary" id="traits" n:if="$todoTraits">
+		<caption>Traits summary</caption>
+		{include classes, items => $todoTraits}
+	</table>
+
+	<table class="summary" id="exceptions" n:if="$todoExceptions">
+		<caption>Exceptions summary</caption>
+		{include classes, items => $todoExceptions}
+	</table>
+
+	<table class="summary" id="methods" n:if="$todoMethods">
+		<caption>Methods summary</caption>
+		{foreach $todoMethods as $method}
+			<tr>
+				<td class="name"><a href="{$method->declaringClassName|classUrl}">{$method->declaringClassName}</a></td>
+				<td class="name"><code><a href="{$method|methodUrl}">{$method->name}()</a></code></td>
+				<td>
+					{foreach $method->annotations['todo'] as $description}
+						{$description|annotation:'todo':$method|noescape}{sep}<hr>{/sep}
+					{/foreach}
+				</td>
+			</tr>
+		{/foreach}
+	</table>
+
+	<table class="summary" id="constants" n:if="$todoConstants">
+		<caption>Constants summary</caption>
+		{foreach $todoConstants as $constant}
+			<tr>
+				{if $constant->declaringClassName}
+					<td class="name"><a href="{$constant->declaringClassName|classUrl}">{$constant->declaringClassName}</a></td>
+					<td class="name"><code><a href="{$constant|constantUrl}"><b>{$constant->name}</b></a></code></td>
+				{else}
+					<td class="name" n:if="$namespaces || $classes || $interfaces || $traits || $exceptions"><a n:if="$constant->namespaceName" href="{$constant->namespaceName|namespaceUrl}">{$constant->namespaceName}</a></td>
+					<td n:class="name"><code><a href="{$constant|constantUrl}"><b>{$constant->shortName}</b></a></code></td>
+				{/if}
+
+				<td>
+					{foreach $constant->annotations['todo'] as $description}
+						{$description|annotation:'todo':$constant|noescape}{sep}<hr>{/sep}
+					{/foreach}
+				</td>
+			</tr>
+		{/foreach}
+	</table>
+
+	<table class="summary" id="properties" n:if="$todoProperties">
+		<caption>Properties summary</caption>
+		{foreach $todoProperties as $property}
+			<tr>
+				<td class="name"><a href="{$property->declaringClassName|classUrl}">{$property->declaringClassName}</a></td>
+				<td class="name"><a href="{$property|propertyUrl}"><var>${$property->name}</var></a></td>
+				<td>
+					{foreach $property->annotations['todo'] as $description}
+						{$description|annotation:'todo':$property|noescape}{sep}<hr>{/sep}
+					{/foreach}
+				</td>
+			</tr>
+		{/foreach}
+	</table>
+
+	<table class="summary" id="functions" n:if="$todoFunctions">
+		<caption>Functions summary</caption>
+		{foreach $todoFunctions as $function}
+			<tr>
+				<td class="name" n:if="$namespaces"><a n:if="$function->namespaceName" href="{$function->namespaceName|namespaceUrl}">{$function->namespaceName}</a></td>
+				<td class="name"><code><a href="{$function|functionUrl}">{$function->shortName}</a></code></td>
+				<td>
+					{foreach $function->annotations['todo'] as $description}
+						{$description|annotation:'todo':$function|noescape}{sep}<hr>{/sep}
+					{/foreach}
+				</td>
+			</tr>
+		{/foreach}
+	</table>
+</div>
+{/block}

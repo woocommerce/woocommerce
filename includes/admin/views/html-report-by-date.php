@@ -46,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php if ( $legends = $this->get_chart_legend() ) : ?>
 						<ul class="chart-legend">
 							<?php foreach ( $legends as $legend ) : ?>
-								<li style="border-color: <?php echo $legend['color']; ?>" <?php if ( isset( $legend['highlight_series'] ) ) echo 'class="highlight_series" data-series="' . esc_attr( $legend['highlight_series'] ) . '"'; ?>>
+								<li style="border-color: <?php echo $legend['color']; ?>" <?php if ( isset( $legend['highlight_series'] ) ) echo 'class="highlight_series ' . ( isset( $legend['placeholder'] ) ? 'tips' : '' ) . '" data-series="' . esc_attr( $legend['highlight_series'] ) . '"'; ?> data-tip="<?php echo isset( $legend['placeholder'] ) ? $legend['placeholder'] : ''; ?>">
 									<?php echo $legend['title']; ?>
 								</li>
 							<?php endforeach; ?>

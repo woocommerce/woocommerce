@@ -86,6 +86,9 @@
 					$.uniform.update();
 				}
 
+				// Custom event for when variation selection has been changed
+				$variation_form.trigger( 'woocommerce_variation_has_changed' );
+
 			} )
 
 			// Upon gaining focus

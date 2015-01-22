@@ -1,9 +1,3 @@
-$woocommerce:   #ad74a2;
-$green:         #7ad03a;
-$red:           #a00;
-$orange:        #ffba00;
-$blue:          #2ea2cc;
-
 /**
  * Deprecated
  * Fallback for bourbon equivalent
@@ -27,8 +21,7 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius($radius: 4px) {
-	-webkit-border-radius:$radius;
-	border-radius:$radius;
+	border-radius: $radius;
 }
 
 /**
@@ -36,8 +29,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius_right($radius: 4px) {
-	-webkit-border-top-right-radius: $radius;
-	-webkit-border-bottom-right-radius: $radius;
 	border-top-right-radius: $radius;
 	border-bottom-right-radius: $radius;
 }
@@ -47,8 +38,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius_left($radius: 4px) {
-	-webkit-border-top-left-radius: $radius;
-	-webkit-border-bottom-left-radius: $radius;
 	border-top-left-radius: $radius;
 	border-bottom-left-radius: $radius;
 }
@@ -58,8 +47,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius_bottom($radius: 4px) {
-	-webkit-border-bottom-left-radius: $radius;
-	-webkit-border-bottom-right-radius: $radius;
 	border-bottom-left-radius: $radius;
 	border-bottom-right-radius: $radius;
 }
@@ -69,8 +56,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin border_radius_top($radius: 4px) {
-	-webkit-border-top-left-radius: $radius;
-	-webkit-border-top-right-radius: $radius;
 	border-top-left-radius: $radius;
 	border-top-right-radius: $radius;
 }
@@ -80,9 +65,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin opacity( $opacity: 0.75 ) {
-	filter: unquote("alpha(opacity=$opacity * 100)");
-	-moz-opacity: $opacity;
-	-khtml-opacity: $opacity;
 	opacity: $opacity;
 }
 
@@ -92,7 +74,6 @@ $blue:          #2ea2cc;
  */
 @mixin box_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_in: 3px, $shadow_color: #888) {
 	box-shadow: $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
-	-webkit-box-shadow: $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 }
 
 /**
@@ -101,7 +82,6 @@ $blue:          #2ea2cc;
  */
 @mixin inset_box_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_in: 3px, $shadow_color: #888) {
 	box-shadow: inset $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
-	-webkit-box-shadow: inset $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 }
 
 /**
@@ -117,11 +97,8 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin vertical_gradient($from: #000, $to: #fff) {
-	background: $from;
-	background: -webkit-gradient(linear, left top, left bottom, from($from), to($to));
+	background-color: $from;
 	background: -webkit-linear-gradient($from, $to);
-	background: -moz-linear-gradient(center top, $from 0%, $to 100%);
-	background: -moz-gradient(center top, $from 0%, $to 100%);
 }
 
 /**
@@ -129,9 +106,6 @@ $blue:          #2ea2cc;
  * Vendor prefix no longer required.
  */
 @mixin transition($selector: all, $animation: ease-in-out, $duration: .2s) {
-	-webkit-transition: $selector $animation $duration;
-	-moz-transition: $selector $animation $duration;
-	-o-transition: $selector $animation $duration;
 	transition: $selector $animation $duration;
 }
 
@@ -141,9 +115,6 @@ $blue:          #2ea2cc;
  */
 @mixin scale($ratio: 1.5) {
 	-webkit-transform: scale($ratio);
-	-moz-transform: scale($ratio);
-	-ms-transform: scale($ratio);
-	-o-transform: scale($ratio);
 	transform: scale($ratio);
 }
 
@@ -152,9 +123,7 @@ $blue:          #2ea2cc;
  * Use bourbon mixin instead `@include box-sizing(border-box);`
  */
 @mixin borderbox() {
-	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-	box-sizing: border-box;         /* Opera/IE 8+ */
+	box-sizing: border-box;
 }
 
 @mixin darkorlighttextshadow($a, $opacity: .8) {
@@ -210,12 +179,12 @@ $blue:          #2ea2cc;
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin:0;
+	margin: 0;
 	text-indent: 0;
 	position: absolute;
-	top:0;
-	left:0;
-	width:100%;
+	top: 0;
+	left: 0;
+	width: 100%;
 	height: 100%;
 	text-align: center;
 	content: $glyph;
@@ -229,8 +198,9 @@ $blue:          #2ea2cc;
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin-right:7px;
+	margin-right: .618em;
 	content: $glyph;
+	text-decoration: none;
 }
 
 @mixin iconafter( $glyph: "\e001" ) {
@@ -241,6 +211,31 @@ $blue:          #2ea2cc;
 	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
-	margin-left: 7px;
+	margin-left: .618em;
 	content: $glyph;
+	text-decoration: none;
+}
+
+@mixin loader() {
+	&:before {
+		height: 1em;
+		width: 1em;
+		display: block;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		margin-left: -.5em;
+		margin-top: -.5em;
+		display: block;
+		-webkit-animation: spin 1s ease-in-out infinite;
+	    -moz-animation: spin 1s ease-in-out infinite;
+	    animation: spin 1s ease-in-out infinite;
+	    content: "";
+	    background: url(../images/icons/loader.svg) center center;
+	    background-size: cover;
+		line-height: 1;
+		text-align: center;
+		font-size: 2em;
+		color: rgba(#000,0.75);
+	}
 }

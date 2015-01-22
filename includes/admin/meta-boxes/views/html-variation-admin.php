@@ -1,9 +1,16 @@
 <?php
-
+/**
+ * Outputs a variation
+ *
+ * @var int $variation_id
+ * @var WP_POST $variation
+ * @var array $variation_data array of variation data
+ */
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
+extract( $variation_data );
 ?>
 <div class="woocommerce_variation wc-metabox closed">
 	<h3>
@@ -52,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="woocommerce_variable_attributes wc-metabox-content">
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
-				<a href="#" class="upload_image_button <?php if ( $image_id > 0 ) echo 'remove'; ?>" rel="<?php echo esc_attr( $variation_id ); ?>"><img src="<?php if ( ! empty( $image ) ) echo esc_attr( $image ); else echo esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $image_id ); ?>" /></a>
+				<a href="#" class="upload_image_button <?php if ( $_thumbnail_id > 0 ) echo 'remove'; ?>" rel="<?php echo esc_attr( $variation_id ); ?>"><img src="<?php if ( ! empty( $image ) ) echo esc_attr( $image ); else echo esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $_thumbnail_id ); ?>" /></a>
 			</p>
 			<?php if ( wc_product_sku_enabled() ) : ?>
 				<p class="sku form-row form-row-last">
@@ -64,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endif; ?>
 
 			<p class="form-row form-row-full options">
-				<label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( $variation_post_status, 'publish' ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
+				<label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( $variation->post_status, 'publish' ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
 
 				<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php checked( isset( $_downloadable ) ? $_downloadable : '', 'yes' ); ?> /> <?php _e( 'Downloadable', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>" href="#">[?]</a></label>
 
@@ -79,6 +86,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php do_action( 'woocommerce_variation_options', $loop, $variation_data, $variation ); ?>
 			</p>
 
+			<div class="variable_pricing">
 				<p class="form-row form-row-first">
 					<label><?php echo __( 'Regular Price:', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')'; ?></label>
 					<input type="text" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" class="wc_input_price" placeholder="<?php _e( 'Variation price (required)', 'woocommerce' ); ?>" />
@@ -88,19 +96,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" class="wc_input_price" />
 				</p>
 
-			<div class="sale_price_dates_fields" style="display:none">
-				<p class="form-row form-row-first">
-					<label><?php _e( 'Sale start date:', 'woocommerce' ) ?></label>
-					<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_from ) ? date_i18n( 'Y-m-d', $_sale_price_dates_from ) : ''; ?>" placeholder="<?php echo _x( 'From&hellip;', 'placeholder', 'woocommerce' ) ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
-				</p>
-				<p class="form-row form-row-last">
-					<label><?php _e( 'Sale end date:', 'woocommerce' ) ?></label>
-					<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
-				</p>
+				<div class="sale_price_dates_fields" style="display: none">
+					<p class="form-row form-row-first">
+						<label><?php _e( 'Sale start date:', 'woocommerce' ); ?></label>
+						<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_from ) ? date_i18n( 'Y-m-d', $_sale_price_dates_from ) : ''; ?>" placeholder="<?php echo _x( 'From&hellip;', 'placeholder', 'woocommerce' ) ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+					</p>
+					<p class="form-row form-row-last">
+						<label><?php _e( 'Sale end date:', 'woocommerce' ); ?></label>
+						<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+					</p>
+				</div>
 			</div>
 
-			<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
-				<div class="show_if_variation_manage_stock">
+			<?php if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) : ?>
+				<div class="show_if_variation_manage_stock" style="display: none;">
 					<p class="form-row form-row-first">
 						<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 						<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
@@ -167,7 +176,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo wp_dropdown_categories( $args );
 				?></p>
 				<p class="form-row form-row-full">
-					<?php if ( get_option( 'woocommerce_calc_taxes' ) == 'yes' ) : ?>
+					<?php if ( wc_tax_enabled() ) : ?>
 					<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label>
 					<select name="variable_tax_class[<?php echo $loop; ?>]">
 						<option value="parent" <?php selected( is_null( $_tax_class ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
@@ -178,7 +187,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php endif; ?>
 				</p>
 			</div>
-			<div class="show_if_variation_downloadable" style="display:none">
+			<div class="show_if_variation_downloadable" style="display: none;">
 				<div class="form-row form-row-full downloadable_files">
 					<label><?php _e( 'Downloadable Files', 'woocommerce' ); ?>:</label>
 					<table class="widefat">
@@ -222,7 +231,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</table>
 				</div>
 			</div>
-			<div class="show_if_variation_downloadable">
+			<div class="show_if_variation_downloadable" style="display: none;">
 				<p class="form-row form-row-first">
 					<label><?php _e( 'Download Limit:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Leave blank for unlimited re-downloads.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 					<input type="number" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if ( isset( $_download_limit ) ) echo esc_attr( $_download_limit ); ?>" placeholder="<?php _e( 'Unlimited', 'woocommerce' ); ?>" step="1" min="0" />

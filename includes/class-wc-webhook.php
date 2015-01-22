@@ -63,11 +63,9 @@ class WC_Webhook {
 	 *
 	 * @since 2.2
 	 * @param string $key
-	 * @return mixed|null|void value
+	 * @return mixed value
 	 */
 	public function __get( $key ) {
-
-		$value = null;
 
 		if ( 'status' === $key ) {
 			$value = $this->get_status();
@@ -85,9 +83,13 @@ class WC_Webhook {
 	 * @since 2.2
 	 */
 	public function enqueue() {
+		$hooks = $this->get_hooks();
+		$url   = $this->get_delivery_url();
 
-		foreach ( $this->get_hooks() as $hook ) {
-			add_action( $hook, array( $this, 'process' ) );
+		if ( is_array( $hooks ) && ! empty( $url ) ) {
+			foreach ( $hooks as $hook ) {
+				add_action( $hook, array( $this, 'process' ) );
+			}
 		}
 	}
 
@@ -632,32 +634,46 @@ class WC_Webhook {
 	}
 
 	/**
+	 * Get the webhook i18n status
+	 *
+	 * @return string
+	 */
+	public function get_i18n_status() {
+		$status   = $this->get_status();
+		$statuses = wc_get_webhook_statuses();
+
+		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
+	}
+
+	/**
 	 * Update the webhook status, see get_status() for valid statuses
 	 *
 	 * @since 2.2
 	 * @param $status
 	 */
 	public function update_status( $status ) {
+		global $wpdb;
 
 		switch ( $status ) {
 
-			case 'active':
+			case 'active' :
 				$post_status = 'publish';
 				break;
 
-			case 'paused':
+			case 'paused' :
 				$post_status = 'draft';
 				break;
 
-			case 'disabled':
+			case 'disabled' :
 				$post_status = 'pending';
 				break;
 
-			default:
+			default :
 				$post_status = 'draft';
+				break;
 		}
 
-		wp_update_post( array( 'ID' => $this->id, 'post_status' => $post_status ) );
+		$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status ), array( 'ID' => $this->id ) );
 	}
 
 	/**

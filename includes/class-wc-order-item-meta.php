@@ -54,7 +54,7 @@ class WC_Order_Item_Meta {
 				} else {
 					$meta_list[] = '
 							<dt class="variation-' . sanitize_html_class( sanitize_text_field( $meta_key ) ) . '">' . wp_kses_post( $meta['label'] ) . ':</dt>
-							<dd class="variation-' . sanitize_html_class( sanitize_text_field( $meta_key ) ) . '">' . wp_kses_post( wpautop( $meta['value'] ) ) . '</dd>
+							<dd class="variation-' . sanitize_html_class( sanitize_text_field( $meta_key ) ) . '">' . wp_kses_post( wpautop( make_clickable( $meta['value'] ) ) ) . '</dd>
 						';
 				}
 			}

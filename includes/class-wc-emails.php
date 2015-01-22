@@ -5,40 +5,17 @@
  * WooCommerce Emails Class which handles the sending on transactional emails and email templates. This class loads in available emails.
  *
  * @class 		WC_Emails
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Emails
  * @category	Class
  * @author 		WooThemes
  */
 class WC_Emails {
 
-	/**
-	 * @var array Array of email notification classes.
-	 */
+	/** @var array Array of email notification classes */
 	public $emails;
 
-	/**
-	 * @var string Stores the emailer's address.
-	 * @access private
-	 */
-	private $_from_address;
-
-	/**
-	 * @var string Stores the emailer's name.
-	 * @access private
-	 */
-	private $_from_name;
-
-	/**
-	 * @var mixed Content type for sent emails
-	 * @access private
-	 */
-	private $_content_type;
-
-	/**
-	 * @var WC_Emails The single instance of the class
-	 * @since 2.1
-	 */
+	/** @var WC_Emails The single instance of the class */
 	protected static $_instance = null;
 
 	/**
@@ -76,17 +53,53 @@ class WC_Emails {
 	}
 
 	/**
+	 * Hook in all transactional emails
+	 */
+	public static function init_transactional_emails() {
+		$email_actions = apply_filters( 'woocommerce_email_actions', array(
+			'woocommerce_low_stock',
+			'woocommerce_no_stock',
+			'woocommerce_product_on_backorder',
+			'woocommerce_order_status_pending_to_processing',
+			'woocommerce_order_status_pending_to_completed',
+			'woocommerce_order_status_pending_to_cancelled',
+			'woocommerce_order_status_pending_to_on-hold',
+			'woocommerce_order_status_failed_to_processing',
+			'woocommerce_order_status_failed_to_completed',
+			'woocommerce_order_status_on-hold_to_processing',
+			'woocommerce_order_status_on-hold_to_cancelled',
+			'woocommerce_order_status_completed',
+			'woocommerce_new_customer_note',
+			'woocommerce_created_customer'
+		) );
+
+		foreach ( $email_actions as $action ) {
+			add_action( $action, array( __CLASS__, 'send_transactional_email' ), 10, 10 );
+		}
+	}
+
+	/**
+	 * Init the mailer instance and call the notifications for the current filter.
+	 * @internal param array $args (default: array())
+	 */
+	public static function send_transactional_email() {
+		self::instance();
+		do_action_ref_array( current_filter() . '_notification', func_get_args() );
+	}
+
+	/**
 	 * Constructor for the email class hooks in all emails that can be sent.
 	 *
 	 */
 	public function __construct() {
-
 		$this->init();
 
 		// Email Header, Footer and content hooks
 		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
+		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
+		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 10, 3 );
 
 		// Hooks for sending emails during store events
 		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
@@ -106,6 +119,7 @@ class WC_Emails {
 		include_once( 'emails/class-wc-email.php' );
 
 		$this->emails['WC_Email_New_Order']                 = include( 'emails/class-wc-email-new-order.php' );
+		$this->emails['WC_Email_Cancelled_Order']           = include( 'emails/class-wc-email-cancelled-order.php' );
 		$this->emails['WC_Email_Customer_Processing_Order'] = include( 'emails/class-wc-email-customer-processing-order.php' );
 		$this->emails['WC_Email_Customer_Completed_Order']  = include( 'emails/class-wc-email-customer-completed-order.php' );
 		$this->emails['WC_Email_Customer_Invoice']          = include( 'emails/class-wc-email-customer-invoice.php' );
@@ -136,11 +150,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function get_from_name() {
-		if ( ! $this->_from_name ) {
-			$this->_from_name = get_option( 'woocommerce_email_from_name' );
-		}
-
-		return wp_specialchars_decode( $this->_from_name );
+		return wp_specialchars_decode( et_option( 'woocommerce_email_from_name' ) );
 	}
 
 	/**
@@ -149,20 +159,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function get_from_address() {
-		if ( ! $this->_from_address ) {
-			$this->_from_address = get_option( 'woocommerce_email_from_address' );
-		}
-
-		return $this->_from_address;
-	}
-
-	/**
-	 * Get the content type for the email.
-	 *
-	 * @return string
-	 */
-	public function get_content_type() {
-		return $this->_content_type;
+		return get_option( 'woocommerce_email_from_address' );
 	}
 
 	/**
@@ -212,13 +209,8 @@ class WC_Emails {
 	 * @param mixed $message
 	 * @param string $headers (default: "Content-Type: text/html\r\n")
 	 * @param string $attachments (default: "")
-	 * @param string $content_type (default: "text/html")
 	 */
-	public function send( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "", $content_type = 'text/html' ) {
-
-		// Set content type
-		$this->_content_type = $content_type;
-
+	public function send( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
 		// Send
 		$email = new WC_Email();
 		$email->send( $to, $subject, $message, $headers, $attachments );
@@ -255,43 +247,126 @@ class WC_Emails {
 	 * @param mixed $order
 	 * @param bool $sent_to_admin (default: false)
 	 * @param bool $plain_text (default: false)
+	 * @return string
 	 */
 	public function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
-		$meta        = array();
-		$show_fields = apply_filters( 'woocommerce_email_order_meta_keys', array(), $sent_to_admin );
+		$fields = array();
 
 		if ( $order->customer_note ) {
-			$meta[ __( 'Note', 'woocommerce' ) ] = wptexturize( $order->customer_note );
+			$fields['customer_note'] = array(
+				'label' => __( 'Note', 'woocommerce' ),
+				'value' => wptexturize( $order->customer_note )
+			);
 		}
 
-		if ( $show_fields ) {
-			foreach ( $show_fields as $key => $field ) {
-				if ( is_numeric( $key ) )
-					$key = $field;
+		$fields = apply_filters( 'woocommerce_email_order_meta_fields', $fields, $sent_to_admin, $order );
 
-				$meta[ wptexturize( $key ) ] = wptexturize( get_post_meta( $order->id, $field, true ) );
+		/**
+		 * Deprecated woocommerce_email_order_meta_keys filter
+		 *
+		 * @since 2.3.0
+		 */
+		$_fields = apply_filters( 'woocommerce_email_order_meta_keys', array(), $sent_to_admin );
+
+		if ( $_fields ) {
+			foreach ( $_fields as $key => $field ) {
+				if ( is_numeric( $key ) ) {
+					$key = $field;
+				}
+
+				$fields[ $key ] = array(
+					'label' => wptexturize( $key ),
+					'value' => wptexturize( get_post_meta( $order->id, $field, true ) )
+				);
 			}
 		}
 
-		if ( sizeof( $meta ) > 0 ) {
+		if ( $fields ) {
 
 			if ( $plain_text ) {
 
-				foreach ( $meta as $key => $value ) {
-					if ( $value ) {
-						echo $key . ': ' . $value . "\n";
+				foreach ( $fields as $field ) {
+					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
+						echo $field['label'] . ': ' . $field['value'] . "\n";
 					}
 				}
 
 			} else {
 
-				foreach ( $meta as $key => $value ) {
-					if ( $value ) {
-						echo '<p><strong>' . $key . ':</strong> ' . $value . '</p>';
+				foreach ( $fields as $field ) {
+					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
+						echo '<p><strong>' . $field['label'] . ':</strong> ' . $field['value'] . '</p>';
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Add customer details to email templates.
+	 *
+	 * @param mixed $order
+	 * @param bool $sent_to_admin (default: false)
+	 * @param bool $plain_text (default: false)
+	 * @return string
+	 */
+	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
+		$fields = array();
+
+		if ( $order->billing_email ) {
+			$fields['billing_email'] = array(
+				'label' => __( 'Email', 'woocommerce' ),
+				'value' => wptexturize( $order->billing_email )
+			);
+	    }
+
+	    if ( $order->billing_phone ) {
+			$fields['billing_phone'] = array(
+				'label' => __( 'Tel', 'woocommerce' ),
+				'value' => wptexturize( $order->billing_phone )
+			);
+	    }
+
+		$fields = apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order );
+
+		if ( $fields ) {
+
+			$heading = $sent_to_admin ? __( 'Customer details', 'woocommerce' ) : __( 'Your details', 'woocommerce' );
+
+			$heading = apply_filters( 'woocommerce_email_custom_details_header', $heading, $sent_to_admin, $order );
+
+			if ( $plain_text ) {
+
+				echo $heading . "\n\n";
+
+				foreach ( $fields as $field ) {
+					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
+						echo $field['label'] . ': ' . $field['value'] . "\n";
+					}
+				}
+
+			} else {
+
+				echo '<h2>' . $heading . '</h2>';
+
+				foreach ( $fields as $field ) {
+					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
+						echo '<p><strong>' . $field['label'] . ':</strong> ' . $field['value'] . '</p>';
+					}
+				}
+			}
+
+		}
+
+	}
+
+	/**
+	 * Get the email addresses.
+	 *
+	 * @return void
+	 */
+	public function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
+		wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) );
 	}
 
 	/**

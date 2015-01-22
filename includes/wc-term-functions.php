@@ -35,8 +35,9 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	}
 
 	// Support ordering by parent
-	if ( ! empty( $args['orderby'] ) && $args['orderby'] === 'parent' ) {
-		$fields = isset( $args['fields'] ) ? $args['fields'] : 'all';
+	if ( ! empty( $args['orderby'] ) && in_array( $args['orderby'], array( 'name_num', 'parent' ) ) ) {
+		$fields  = isset( $args['fields'] ) ? $args['fields'] : 'all';
+		$orderby = $args['orderby'];
 
 		// Unset for wp_get_post_terms
 		unset( $args['orderby'] );
@@ -44,7 +45,14 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 
 		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 
-		usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
+		switch ( $orderby ) {
+			case 'name_num' :
+				usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
+			break;
+			case 'parent' :
+				usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
+			break;
+		}
 
 		switch ( $fields ) {
 			case 'names' :
@@ -83,6 +91,19 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	return $terms;
 }
 
+
+/**
+ * Sort by name (numeric)
+ * @param  WP_POST object $a
+ * @param  WP_POST object $b
+ * @return int
+ */
+function _wc_get_product_terms_name_num_usort_callback( $a, $b ) {
+	if ( $a->name + 0 === $b->name + 0 ) {
+		return 0;
+	}
+	return ( $a->name + 0 < $b->name + 0 ) ? -1 : 1;
+}
 /**
  * Sort by parent
  * @param  WP_POST object $a
@@ -513,8 +534,11 @@ function wc_recount_after_stock_change( $product_id ) {
 	$product_terms = get_the_terms( $product_id, 'product_cat' );
 
 	if ( $product_terms ) {
-		foreach ( $product_terms as $term )
+		$product_cats = array();
+
+		foreach ( $product_terms as $term ) {
 			$product_cats[ $term->term_id ] = $term->parent;
+		}
 
 		_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), false, false );
 	}
@@ -522,8 +546,11 @@ function wc_recount_after_stock_change( $product_id ) {
 	$product_terms = get_the_terms( $product_id, 'product_tag' );
 
 	if ( $product_terms ) {
-		foreach ( $product_terms as $term )
+		$product_tags = array();
+
+		foreach ( $product_terms as $term ) {
 			$product_tags[ $term->term_id ] = $term->parent;
+		}
 
 		_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
 	}
@@ -536,11 +563,10 @@ add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_chan
  * that takes catalog visibility into account.
  *
  * @param array $terms
- * @param mixed $taxonomies
- * @param mixed $args
+ * @param string|array $taxonomies
  * @return array
  */
-function wc_change_term_counts( $terms, $taxonomies, $args ) {
+function wc_change_term_counts( $terms, $taxonomies ) {
 	if ( is_admin() || is_ajax() ) {
 		return $terms;
 	}
@@ -568,4 +594,4 @@ function wc_change_term_counts( $terms, $taxonomies, $args ) {
 
 	return $terms;
 }
-add_filter( 'get_terms', 'wc_change_term_counts', 10, 3 );
+add_filter( 'get_terms', 'wc_change_term_counts', 10, 2 );

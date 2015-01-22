@@ -21,6 +21,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		// Clean up the cart
 		WC()->cart->empty_cart();
 
+		// Remove coupons
+		WC()->cart->remove_coupons();
+
 		// Delete coupon
 		WC_Helper_Coupon::delete_coupon( $coupon->id );
 	}
@@ -36,7 +39,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->code );
+		$this->assertTrue( WC()->cart->add_discount( $coupon->code ) );
 
 		// Add coupon again, test return statement
 		$this->assertFalse( WC()->cart->add_discount( $coupon->code ) );
@@ -49,6 +52,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
+
+		// Remove coupons
+		WC()->cart->remove_coupons();
 
 		// Delete coupon
 		WC_Helper_Coupon::delete_coupon( $coupon->id );
@@ -98,6 +104,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		// Clean up the cart
 		WC()->cart->empty_cart();
 
+		// Remove coupons
+		WC()->cart->remove_coupons();
+
 		// Delete the flat rate method
 		WC()->session->set( 'chosen_shipping_methods', array() );
 		WC_Helper_Shipping::delete_simple_flat_rate();
@@ -144,14 +153,17 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
 
-		// Test if the cart total amount is equal 19
-		$this->assertEquals( 19, WC()->cart->total );
+		// Test if the cart total amount is equal 19.5
+		$this->assertEquals( 19.5, WC()->cart->total );
 
 		// Clearing WC notices
 		wc_clear_notices();
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
+
+		// Remove coupons
+		WC()->cart->remove_coupons();
 
 		// Delete the flat rate method
 		WC()->session->set( 'chosen_shipping_methods', array() );
@@ -210,6 +222,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
+
+		// Remove coupons
+		WC()->cart->remove_coupons();
 
 		// Remove fee
 		WC_Helper_Fee::remove_cart_fee();
@@ -272,6 +287,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		// Clean up the cart
 		WC()->cart->empty_cart();
 
+		// Remove coupons
+		WC()->cart->remove_coupons();
+
 		// Remove fee
 		WC_Helper_Fee::remove_cart_fee();
 
@@ -285,4 +303,5 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		// Delete product
 		WC_Helper_Product::delete_product( $product->id );
 	}
+
 }

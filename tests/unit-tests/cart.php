@@ -21,7 +21,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			// Get the permalink
 			$checkout_url = get_permalink( $checkout_page_id );
 
-			// Force SLL if needed
+			// Force SSL if needed
 			if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
 				$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 			}
@@ -43,7 +43,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Get the original setting
 		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
 
-		// Force SLL checkout
+		// Force SSL checkout
 		update_option( 'woocommerce_force_ssl_checkout', 'no' );
 
 		$this->assertEquals( $this->get_checkout_url(), WC()->cart->get_checkout_url() );
@@ -63,7 +63,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Get the original setting
 		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
 
-		// Force SLL checkout
+		// Force SSL checkout
 		update_option( 'woocommerce_force_ssl_checkout', 'yes' );
 
 		$this->assertEquals( $this->get_checkout_url(), WC()->cart->get_checkout_url() );
@@ -508,6 +508,30 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Delete product
 		WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
+	 * Test cart coupons
+	 */
+	public function test_get_coupons() {
+
+		// Create coupon
+		$coupon = WC_Helper_Coupon::create_coupon();
+
+		// Add coupon
+		WC()->cart->add_discount( $coupon->code );
+
+		$this->assertEquals( count( WC()->cart->get_coupons() ), 1 );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+
+		// Remove coupons
+		WC()->cart->remove_coupons();
+
+		// Delete coupon
+		WC_Helper_Coupon::delete_coupon( $coupon->id );
+
 	}
 
 }

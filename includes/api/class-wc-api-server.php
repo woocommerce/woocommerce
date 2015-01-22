@@ -442,7 +442,8 @@ class WC_API_Server {
 				'timezone'           => wc_timezone_string(),
 				'currency'           => get_woocommerce_currency(),
 				'currency_format'    => get_woocommerce_currency_symbol(),
-				'tax_included'       => ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) ),
+				'price_num_decimals' => get_option( 'woocommerce_price_num_decimals' ),
+				'tax_included'       => wc_prices_include_tax(),
 				'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
 				'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
 				'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
@@ -458,18 +459,21 @@ class WC_API_Server {
 			$data = array();
 
 			$route = preg_replace( '#\(\?P(<\w+?>).*?\)#', '$1', $route );
-			$methods = array();
+
 			foreach ( self::$method_map as $name => $bitmask ) {
 				foreach ( $callbacks as $callback ) {
 					// Skip to the next route if any callback is hidden
-					if ( $callback[1] & self::HIDDEN_ENDPOINT )
+					if ( $callback[1] & self::HIDDEN_ENDPOINT ) {
 						continue 3;
+					}
 
-					if ( $callback[1] & $bitmask )
+					if ( $callback[1] & $bitmask ) {
 						$data['supports'][] = $name;
+					}
 
-					if ( $callback[1] & self::ACCEPT_DATA )
+					if ( $callback[1] & self::ACCEPT_DATA ) {
 						$data['accepts_data'] = true;
+					}
 
 					// For non-variable routes, generate links
 					if ( strpos( $route, '<' ) === false ) {
@@ -479,8 +483,10 @@ class WC_API_Server {
 					}
 				}
 			}
+
 			$available['store']['routes'][ $route ] = apply_filters( 'woocommerce_api_endpoints_description', $data );
 		}
+
 		return apply_filters( 'woocommerce_api_index', $available );
 	}
 
@@ -548,7 +554,7 @@ class WC_API_Server {
 		if ( is_a( $query, 'WP_User_Query' ) ) {
 
 			$page        = $query->page;
-			$single      = count( $query->get_results() ) > 1;
+			$single      = count( $query->get_results() ) == 1;
 			$total       = $query->get_total();
 			$total_pages = $query->total_pages;
 

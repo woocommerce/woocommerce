@@ -183,17 +183,21 @@ function wc_format_refund_total( $amount ) {
  * @return string
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
+	$locale   = localeconv();
+	$decimals = array( get_option( 'woocommerce_price_decimal_sep' ), $locale['decimal_point'], $locale['mon_decimal_point'] );
+
 	// Remove locale from string
 	if ( ! is_float( $number ) ) {
-		$locale   = localeconv();
-		$decimals = array( get_option( 'woocommerce_price_decimal_sep' ), $locale['decimal_point'], $locale['mon_decimal_point'] );
-		$number   = wc_clean( str_replace( $decimals, '.', $number ) );
+		$number = wc_clean( str_replace( $decimals, '.', $number ) );
 	}
 
-	// DP is false - don't use number format, just return a string in our format
 	if ( $dp !== false ) {
 		$dp     = intval( $dp == "" ? get_option( 'woocommerce_price_num_decimals' ) : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
+
+	// DP is false - don't use number format, just return a string in our format
+	} elseif ( is_float( $number ) ) {
+		$number = wc_clean( str_replace( $decimals, '.', strval( $number ) ) );
 	}
 
 	if ( $trim_zeros && strstr( $number, '.' ) ) {
@@ -317,7 +321,6 @@ function wc_price( $price, $args = array() ) {
 		'ex_tax_label' 	=> '0'
 	), $args ) );
 
-	$return          = '';
 	$num_decimals    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 	$currency        = isset( $args['currency'] ) ? $args['currency'] : '';
 	$currency_symbol = get_woocommerce_currency_symbol($currency);
@@ -341,7 +344,7 @@ function wc_price( $price, $args = array() ) {
 	$formatted_price = ( $negative ? '-' : '' ) . sprintf( get_woocommerce_price_format(), $currency_symbol, $price );
 	$return          = '<span class="amount">' . $formatted_price . '</span>';
 
-	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' ) {
+	if ( $ex_tax_label && wc_tax_enabled() ) {
 		$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
@@ -417,25 +420,25 @@ function wc_timezone_string() {
 	$utc_offset *= 3600;
 
 	// attempt to guess the timezone string from the UTC offset
-	$timezone = timezone_name_from_abbr( '', $utc_offset );
+	$timezone = timezone_name_from_abbr( '', $utc_offset, 0 );
 
 	// last try, guess timezone string manually
 	if ( false === $timezone ) {
-
 		$is_dst = date( 'I' );
 
 		foreach ( timezone_abbreviations_list() as $abbr ) {
 			foreach ( $abbr as $city ) {
-
 				if ( $city['dst'] == $is_dst && $city['offset'] == $utc_offset ) {
 					return $city['timezone_id'];
 				}
 			}
 		}
+
+		// fallback to UTC
+		return 'UTC';
 	}
 
-	// fallback to UTC
-	return 'UTC';
+	return $timezone;
 }
 
 if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
@@ -451,9 +454,11 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 		// Convert shorthand colors to full format, e.g. "FFF" -> "FFFFFF"
 		$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
 
+		$rgb      = array();
 		$rgb['R'] = hexdec( $color{0}.$color{1} );
 		$rgb['G'] = hexdec( $color{2}.$color{3} );
 		$rgb['B'] = hexdec( $color{4}.$color{5} );
+
 		return $rgb;
 	}
 }
@@ -600,4 +605,29 @@ function wc_format_phone_number( $tel ) {
  */
 function wc_strtolower( $string ) {
 	return function_exists( 'mb_strtolower' ) ? mb_strtolower( $string ) : strtolower( $string );
+}
+
+/**
+ * Trim a string and append a suffix
+ * @param  string  $string
+ * @param  integer $chars
+ * @param  string  $suffix
+ * @return string
+ */
+function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
+	if ( strlen( $string ) > $chars ) {
+		$string = substr( $string, 0, ( $chars - strlen( $suffix ) ) ) . $suffix;
+	}
+	return $string;
+}
+
+/**
+ * Format content to display shortcodes
+ *
+ * @since  2.3.0
+ * @param  string $string
+ * @return string
+ */
+function wc_format_content( $string ) {
+	return do_shortcode( shortcode_unautop( wpautop( $string ) ) );
 }

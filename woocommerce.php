@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.3-bleeding
+ * Version: 2.3-beta-1
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 4.0
@@ -117,25 +117,26 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Auto-load in-accessible properties on demand.
+	 * @param mixed $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+		if ( in_array( $key, array( 'payment_gateways', 'shipping', 'mailer', 'checkout' ) ) ) {
+			return $this->$key();
+		}
+	}
+
+	/**
 	 * WooCommerce Constructor.
 	 * @access public
 	 * @return WooCommerce
 	 */
 	public function __construct() {
-		// Auto-load classes on demand
-		if ( function_exists( "__autoload" ) ) {
-			spl_autoload_register( "__autoload" );
-		}
-
-		spl_autoload_register( array( $this, 'autoload' ) );
-
-		// Define constants
 		$this->define_constants();
-
-		// Include required files
 		$this->includes();
 
-		// Init API
+		// Init WC API
 		$this->api = new WC_API();
 
 		// Hooks
@@ -143,76 +144,36 @@ final class WooCommerce {
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
-		add_action( 'widgets_init', array( $this, 'include_widgets' ) );
+		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
 	}
 
 	/**
-	 * Auto-load in-accessible properties on demand.
-	 *
-	 * @param mixed $key
-	 * @return mixed
+	 * Define constant if not already set
+	 * @param  string $name
+	 * @param  string|bool $value
 	 */
-	public function __get( $key ) {
-		if ( method_exists( $this, $key ) ) {
-			return $this->$key();
-		}
-		else switch( $key ) {
-			case 'template_url':
-				_deprecated_argument( 'Woocommerce->template_url', '2.1', 'Use WC()->template_path()' );
-				return $this->template_path();
-			case 'messages':
-				_deprecated_argument( 'Woocommerce->messages', '2.1', 'Use wc_get_notices' );
-				return wc_get_notices( 'success' );
-			case 'errors':
-				_deprecated_argument( 'Woocommerce->errors', '2.1', 'Use wc_get_notices' );
-				return wc_get_notices( 'error' );
-			default:
-				return false;
+	private function define( $name, $value ) {
+		if ( ! defined( $name ) ) {
+			define( $name, $value );
 		}
 	}
 
 	/**
-	 * Auto-load WC classes on demand to reduce memory consumption.
-	 *
-	 * @param mixed $class
+	 * What type of request is this?
+	 * string $type ajax, frontend or admin
+	 * @return string
 	 */
-	public function autoload( $class ) {
-		$path  = null;
-		$class = strtolower( $class );
-		$file = 'class-' . str_replace( '_', '-', $class ) . '.php';
-
-		if ( strpos( $class, 'wc_addons_gateway_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 18 ) );
-		} elseif ( strpos( $class, 'wc_gateway_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/gateways/' . trailingslashit( substr( str_replace( '_', '-', $class ), 11 ) );
-		} elseif ( strpos( $class, 'wc_shipping_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/shipping/' . trailingslashit( substr( str_replace( '_', '-', $class ), 12 ) );
-		} elseif ( strpos( $class, 'wc_shortcode_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/shortcodes/';
-		} elseif ( strpos( $class, 'wc_meta_box' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/admin/meta-boxes/';
-		} elseif ( strpos( $class, 'wc_admin' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/admin/';
-		} elseif ( strpos( $class, 'wc_widget_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/widgets/';
-		}
-
-		if ( $path && is_readable( $path . $file ) ) {
-			include_once( $path . $file );
-			return;
-		}
-
-		// Fallback
-		if ( strpos( $class, 'wc_' ) === 0 ) {
-			$path = $this->plugin_path() . '/includes/';
-		}
-
-		if ( $path && is_readable( $path . $file ) ) {
-			include_once( $path . $file );
-			return;
+	private function is_request( $type ) {
+		switch ( $type ) {
+			case 'admin' :
+				return is_admin();
+			case 'ajax' :
+				return defined( 'DOING_AJAX' );
+			case 'frontend' :
+				return ! is_admin() || defined( 'DOING_AJAX' );
 		}
 	}
 
@@ -220,74 +181,60 @@ final class WooCommerce {
 	 * Define WC Constants
 	 */
 	private function define_constants() {
-		define( 'WC_PLUGIN_FILE', __FILE__ );
-		define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
-		define( 'WC_VERSION', $this->version );
-		define( 'WOOCOMMERCE_VERSION', WC_VERSION ); // Backwards compatibility
+		$upload_dir = wp_upload_dir();
 
-		if ( ! defined( 'WC_ROUNDING_PRECISION' ) ) {
-			define( 'WC_ROUNDING_PRECISION', 4 );
-		}
-		if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) ) {
-			// 1 = PHP_ROUND_HALF_UP, 2 = PHP_ROUND_HALF_DOWN
-			define( 'WC_TAX_ROUNDING_MODE', get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 2 : 1 );
-		}
-		if ( ! defined( 'WC_DELIMITER' ) ) {
-			define( 'WC_DELIMITER', '|' );
-		}
-		if ( ! defined( 'WC_LOG_DIR' ) ) {
-			$upload_dir = wp_upload_dir();
-			define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
-		}
+		$this->define( 'WC_PLUGIN_FILE', __FILE__ );
+		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+		$this->define( 'WC_VERSION', $this->version );
+		$this->define( 'WOOCOMMERCE_VERSION', $this->version );
+		$this->define( 'WC_ROUNDING_PRECISION', 4 );
+		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
+		$this->define( 'WC_DELIMITER', '|' );
+		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 	}
 
 	/**
 	 * Include required core files used in admin and on the frontend.
 	 */
 	private function includes() {
+		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
+		include_once( 'includes/wc-widget-functions.php' );
+		include_once( 'includes/wc-webhook-functions.php' );
 		include_once( 'includes/class-wc-install.php' );
+		include_once( 'includes/class-wc-geolocation.php' );
 		include_once( 'includes/class-wc-download-handler.php' );
 		include_once( 'includes/class-wc-comments.php' );
 		include_once( 'includes/class-wc-post-data.php' );
 
-		if ( is_admin() ) {
+		if ( $this->is_request( 'admin' ) ) {
 			include_once( 'includes/admin/class-wc-admin.php' );
 		}
 
-		if ( defined( 'DOING_AJAX' ) ) {
+		if ( $this->is_request( 'ajax' ) ) {
 			$this->ajax_includes();
 		}
 
-		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+		if ( $this->is_request( 'frontend' ) ) {
 			$this->frontend_includes();
 		}
 
 		// Query class
 		$this->query = include( 'includes/class-wc-query.php' );                // The main query class
 
-		// Post types
 		include_once( 'includes/class-wc-post-types.php' );                     // Registers post types
-
-		// API Class
-		include_once( 'includes/class-wc-api.php' );
-
-		// Include abstract classes
+		include_once( 'includes/class-wc-api.php' );                            // API Class
 		include_once( 'includes/abstracts/abstract-wc-product.php' );           // Products
 		include_once( 'includes/abstracts/abstract-wc-order.php' );             // Orders
 		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );      // Settings API (for gateways, shipping, and integrations)
 		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' );   // A Shipping method
 		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' );   // A Payment gateway
 		include_once( 'includes/abstracts/abstract-wc-integration.php' );       // An integration with a service
-
-		// Classes (used on all pages)
 		include_once( 'includes/class-wc-product-factory.php' );                // Product factory
 		include_once( 'includes/class-wc-countries.php' );                      // Defines countries and states
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
-
-		// Download/update languages
-		include_once( 'includes/class-wc-language-pack-upgrader.php' );
+		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
 	}
 
 	/**
@@ -301,11 +248,8 @@ final class WooCommerce {
 	 * Include required frontend files.
 	 */
 	public function frontend_includes() {
-		// Functions
 		include_once( 'includes/wc-cart-functions.php' );
 		include_once( 'includes/wc-notice-functions.php' );
-
-		// Classes
 		include_once( 'includes/abstracts/abstract-wc-session.php' );
 		include_once( 'includes/class-wc-session-handler.php' );
 		include_once( 'includes/wc-template-hooks.php' );
@@ -323,28 +267,9 @@ final class WooCommerce {
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
 	 */
 	public function include_template_functions() {
-		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+		if ( $this->is_request( 'frontend' ) ) {
 			include_once( 'includes/wc-template-functions.php' );
 		}
-	}
-
-	/**
-	 * Include core widgets
-	 */
-	public function include_widgets() {
-		include_once( 'includes/abstracts/abstract-wc-widget.php' );
-
-		register_widget( 'WC_Widget_Cart' );
-		register_widget( 'WC_Widget_Products' );
-		register_widget( 'WC_Widget_Layered_Nav' );
-		register_widget( 'WC_Widget_Layered_Nav_Filters' );
-		register_widget( 'WC_Widget_Price_Filter' );
-		register_widget( 'WC_Widget_Product_Categories' );
-		register_widget( 'WC_Widget_Product_Search' );
-		register_widget( 'WC_Widget_Product_Tag_Cloud' );
-		register_widget( 'WC_Widget_Recent_Reviews' );
-		register_widget( 'WC_Widget_Recently_Viewed' );
-		register_widget( 'WC_Widget_Top_Rated_Products' );
 	}
 
 	/**
@@ -357,16 +282,6 @@ final class WooCommerce {
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
-		// Template debug mode
-		if ( ! defined( 'WC_TEMPLATE_DEBUG_MODE' ) ) {
-			$status_options = get_option( 'woocommerce_status_options', array() );
-			if ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) {
-				define( 'WC_TEMPLATE_DEBUG_MODE', true );
-			} else {
-				define( 'WC_TEMPLATE_DEBUG_MODE', false );
-			}
-		}
-
 		// Load class instances
 		$this->product_factory = new WC_Product_Factory();                      // Product Factory to create new product instances
 		$this->order_factory   = new WC_Order_Factory();                        // Order Factory to create new order instances
@@ -374,7 +289,7 @@ final class WooCommerce {
 		$this->integrations    = new WC_Integrations();                         // Integrations class
 
 		// Classes/actions loaded for the frontend and for ajax requests
-		if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+		if ( $this->is_request( 'frontend' ) ) {
 			// Session class, handles session data for users - can be overwritten if custom handler is needed
 			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
 
@@ -384,27 +299,6 @@ final class WooCommerce {
 			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
 		}
 
-		// Email Actions
-		$email_actions = apply_filters( 'woocommerce_email_actions', array(
-			'woocommerce_low_stock',
-			'woocommerce_no_stock',
-			'woocommerce_product_on_backorder',
-			'woocommerce_order_status_pending_to_processing',
-			'woocommerce_order_status_pending_to_completed',
-			'woocommerce_order_status_pending_to_on-hold',
-			'woocommerce_order_status_failed_to_processing',
-			'woocommerce_order_status_failed_to_completed',
-			'woocommerce_order_status_on-hold_to_processing',
-			'woocommerce_order_status_completed',
-			'woocommerce_new_customer_note',
-			'woocommerce_created_customer'
-		) );
-
-		foreach ( $email_actions as $action ) {
-			add_action( $action, array( $this, 'send_transactional_email' ), 10, 10 );
-		}
-
-		// webhooks
 		$this->load_webhooks();
 
 		// Init action
@@ -414,31 +308,26 @@ final class WooCommerce {
 	/**
 	 * Load Localisation files.
 	 *
-	 * Note: the first-loaded translation file overrides any following ones if the same translation is present
+	 * Note: the first-loaded translation file overrides any following ones if the same translation is present.
+	 *
+	 * Admin Locales are found in:
+	 * 		- WP_LANG_DIR/woocommerce/woocommerce-admin-LOCALE.mo
+	 * 		- WP_LANG_DIR/plugins/woocommerce-admin-LOCALE.mo
+	 *
+	 * Frontend/global Locales found in:
+	 * 		- WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
+	 * 	 	- woocommerce/i18n/languages/woocommerce-LOCALE.mo (which if not found falls back to:)
+	 * 	 	- WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
-		$dir    = trailingslashit( WP_LANG_DIR );
 
-		/**
-		 * Admin Locale. Looks in:
-		 *
-		 * 		- WP_LANG_DIR/woocommerce/woocommerce-admin-LOCALE.mo
-		 * 		- WP_LANG_DIR/plugins/woocommerce-admin-LOCALE.mo
-		 */
-		if ( is_admin() ) {
-			load_textdomain( 'woocommerce', $dir . 'woocommerce/woocommerce-admin-' . $locale . '.mo' );
-			load_textdomain( 'woocommerce', $dir . 'plugins/woocommerce-admin-' . $locale . '.mo' );
+		if ( $this->is_request( 'admin' ) ) {
+			load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-admin-' . $locale . '.mo' );
+			load_textdomain( 'woocommerce', WP_LANG_DIR . '/plugins/woocommerce-admin-' . $locale . '.mo' );
 		}
 
-		/**
-		 * Frontend/global Locale. Looks in:
-		 *
-		 * 		- WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
-		 * 	 	- woocommerce/i18n/languages/woocommerce-LOCALE.mo (which if not found falls back to:)
-		 * 	 	- WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
-		 */
-		load_textdomain( 'woocommerce', $dir . 'woocommerce/woocommerce-' . $locale . '.mo' );
+		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
 		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
 	}
 
@@ -449,9 +338,7 @@ final class WooCommerce {
 		/**
 		 * @deprecated 2.2 Use WC()->template_path()
 		 */
-		if ( ! defined( 'WC_TEMPLATE_PATH' ) ) {
-			define( 'WC_TEMPLATE_PATH', $this->template_path() );
-		}
+		$this->define( 'WC_TEMPLATE_PATH', $this->template_path() );
 
 		$this->add_thumbnail_support();
 		$this->add_image_sizes();
@@ -496,21 +383,17 @@ final class WooCommerce {
 			$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_REMOTE_ADDR'];
 		}
 
-		if ( ! isset( $_SERVER['HTTPS'] ) && ! empty( $_SERVER['HTTP_HTTPS'] ) ) {
-			$_SERVER['HTTPS'] = $_SERVER['HTTP_HTTPS'];
-		}
-
-		// Support for hosts which don't use HTTPS, and use HTTP_X_FORWARDED_PROTO
-		if ( ! isset( $_SERVER['HTTPS'] ) && ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' ) {
-			$_SERVER['HTTPS'] = '1';
+		if ( ! isset( $_SERVER['HTTPS'] ) ) {
+			if ( ! empty( $_SERVER['HTTP_HTTPS'] ) ) {
+				$_SERVER['HTTPS'] = $_SERVER['HTTP_HTTPS'];
+			} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' ) {
+				$_SERVER['HTTPS'] = '1';
+			}
 		}
 	}
 
-	/** Helper functions ******************************************************/
-
 	/**
 	 * Get the plugin url.
-	 *
 	 * @return string
 	 */
 	public function plugin_url() {
@@ -519,7 +402,6 @@ final class WooCommerce {
 
 	/**
 	 * Get the plugin path.
-	 *
 	 * @return string
 	 */
 	public function plugin_path() {
@@ -528,7 +410,6 @@ final class WooCommerce {
 
 	/**
 	 * Get the template path.
-	 *
 	 * @return string
 	 */
 	public function template_path() {
@@ -537,7 +418,6 @@ final class WooCommerce {
 
 	/**
 	 * Get Ajax URL.
-	 *
 	 * @return string
 	 */
 	public function ajax_url() {
@@ -560,22 +440,15 @@ final class WooCommerce {
 			$scheme = 'http';
 		}
 
-		if ( get_option( 'permalink_structure' ) ) {
-			return esc_url_raw( trailingslashit( home_url( '/wc-api/' . $request, $scheme ) ) );
+		if ( strstr( get_option( 'permalink_structure' ), '/index.php/' ) ) {
+			$api_request_url = trailingslashit( home_url( '/index.php/wc-api/' . $request, $scheme ) );
+		} elseif ( get_option( 'permalink_structure' ) ) {
+			$api_request_url = trailingslashit( home_url( '/wc-api/' . $request, $scheme ) );
 		} else {
-			return esc_url_raw( add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) ) );
+			$api_request_url = add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) );
 		}
-	}
 
-	/**
-	 * Init the mailer and call the notifications for the current filter.
-	 *
-	 * @internal param array $args (default: array())
-	 */
-	public function send_transactional_email() {
-		$this->mailer();
-		$args = func_get_args();
-		do_action_ref_array( current_filter() . '_notification', $args );
+		return esc_url_raw( $api_request_url );
 	}
 
 	/**
@@ -583,8 +456,7 @@ final class WooCommerce {
 	 *
 	 * @since 2.2
 	 */
-	public function load_webhooks() {
-
+	private function load_webhooks() {
 		$args = array(
 			'fields'      => 'ids',
 			'post_type'   => 'shop_webhook',
@@ -594,7 +466,6 @@ final class WooCommerce {
 		$query = new WP_Query( $args );
 
 		if ( ! empty( $query->posts ) ) {
-
 			foreach ( $query->posts as $id ) {
 				$webhook = new WC_Webhook( $id );
 				$webhook->enqueue();
@@ -602,11 +473,8 @@ final class WooCommerce {
 		}
 	}
 
-	/** Load Instances on demand **********************************************/
-
 	/**
 	 * Get Checkout Class.
-	 *
 	 * @return WC_Checkout
 	 */
 	public function checkout() {
@@ -615,7 +483,6 @@ final class WooCommerce {
 
 	/**
 	 * Get gateways class
-	 *
 	 * @return WC_Payment_Gateways
 	 */
 	public function payment_gateways() {
@@ -624,7 +491,6 @@ final class WooCommerce {
 
 	/**
 	 * Get shipping class
-	 *
 	 * @return WC_Shipping
 	 */
 	public function shipping() {
@@ -633,289 +499,10 @@ final class WooCommerce {
 
 	/**
 	 * Email Class.
-	 *
 	 * @return WC_Emails
 	 */
 	public function mailer() {
 		return WC_Emails::instance();
-	}
-
-	/** Deprecated methods *********************************************************/
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $image_size
-	 * @return array
-	 */
-	public function get_image_size( $image_size ) {
-		_deprecated_function( 'Woocommerce->get_image_size', '2.1', 'wc_get_image_size()' );
-		return wc_get_image_size( $image_size );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return WC_Logger
-	 */
-	public function logger() {
-		_deprecated_function( 'Woocommerce->logger', '2.1', 'new WC_Logger()' );
-		return new WC_Logger();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return WC_Validation
-	 */
-	public function validation() {
-		_deprecated_function( 'Woocommerce->validation', '2.1', 'new WC_Validation()' );
-		return new WC_Validation();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $post
-	 * @return WC_Product
-	 */
-	public function setup_product_data( $post ) {
-		_deprecated_function( 'Woocommerce->setup_product_data', '2.1', 'wc_setup_product_data' );
-		return wc_setup_product_data( $post );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $content
-	 * @return string
-	 */
-	public function force_ssl( $content ) {
-		_deprecated_function( 'Woocommerce->force_ssl', '2.1', 'WC_HTTPS::force_https_url' );
-		return WC_HTTPS::force_https_url( $content );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param int $post_id
-	 */
-	public function clear_product_transients( $post_id = 0 ) {
-		_deprecated_function( 'Woocommerce->clear_product_transients', '2.1', 'wc_delete_product_transients' );
-		wc_delete_product_transients( $post_id );
-	}
-
-	/**
-	 * @deprecated 2.1.0 Access via the WC_Inline_Javascript_Helper helper
-	 * @param $code
-	 */
-	public function add_inline_js( $code ) {
-		_deprecated_function( 'Woocommerce->add_inline_js', '2.1', 'wc_enqueue_js' );
-		wc_enqueue_js( $code );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param      $action
-	 * @param bool $referer
-	 * @param bool $echo
-	 * @return string
-	 */
-	public function nonce_field( $action, $referer = true , $echo = true ) {
-		_deprecated_function( 'Woocommerce->nonce_field', '2.1', 'wp_nonce_field' );
-		return wp_nonce_field('woocommerce-' . $action, '_wpnonce', $referer, $echo );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param        $action
-	 * @param string $url
-	 * @return string
-	 */
-	public function nonce_url( $action, $url = '' ) {
-		_deprecated_function( 'Woocommerce->nonce_url', '2.1', 'wp_nonce_url' );
-		return wp_nonce_url( $url , 'woocommerce-' . $action );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param        $action
-	 * @param string $method
-	 * @param bool   $error_message
-	 * @return bool
-	 */
-	public function verify_nonce( $action, $method = '_POST', $error_message = false ) {
-		_deprecated_function( 'Woocommerce->verify_nonce', '2.1', 'wp_verify_nonce' );
-		if ( ! isset( $method[ '_wpnonce' ] ) ) {
-			return false;
-		}
-		return wp_verify_nonce( $method[ '_wpnonce' ], 'woocommerce-' . $action );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param       $function
-	 * @param array $atts
-	 * @param array $wrapper
-	 * @return string
-	 */
-	public function shortcode_wrapper( $function, $atts = array(), $wrapper = array( 'class' => 'woocommerce', 'before' => null, 'after' => null ) ) {
-		_deprecated_function( 'Woocommerce->shortcode_wrapper', '2.1', 'WC_Shortcodes::shortcode_wrapper' );
-		return WC_Shortcodes::shortcode_wrapper( $function, $atts, $wrapper );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return object
-	 */
-	public function get_attribute_taxonomies() {
-		_deprecated_function( 'Woocommerce->get_attribute_taxonomies', '2.1', 'wc_get_attribute_taxonomies' );
-		return wc_get_attribute_taxonomies();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $name
-	 * @return string
-	 */
-	public function attribute_taxonomy_name( $name ) {
-		_deprecated_function( 'Woocommerce->attribute_taxonomy_name', '2.1', 'wc_attribute_taxonomy_name' );
-		return wc_attribute_taxonomy_name( $name );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $name
-	 * @return string
-	 */
-	public function attribute_label( $name ) {
-		_deprecated_function( 'Woocommerce->attribute_label', '2.1', 'wc_attribute_label' );
-		return wc_attribute_label( $name );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $name
-	 * @return string
-	 */
-	public function attribute_orderby( $name ) {
-		_deprecated_function( 'Woocommerce->attribute_orderby', '2.1', 'wc_attribute_orderby' );
-		return wc_attribute_orderby( $name );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return array
-	 */
-	public function get_attribute_taxonomy_names() {
-		_deprecated_function( 'Woocommerce->get_attribute_taxonomy_names', '2.1', 'wc_get_attribute_taxonomy_names' );
-		return wc_get_attribute_taxonomy_names();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return array
-	 */
-	public function get_coupon_discount_types() {
-		_deprecated_function( 'Woocommerce->get_coupon_discount_types', '2.1', 'wc_get_coupon_types' );
-		return wc_get_coupon_types();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param string $type
-	 * @return string
-	 */
-	public function get_coupon_discount_type( $type = '' ) {
-		_deprecated_function( 'Woocommerce->get_coupon_discount_type', '2.1', 'wc_get_coupon_type' );
-		return wc_get_coupon_type( $type );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $class
-	 */
-	public function add_body_class( $class ) {
-		_deprecated_function( 'Woocommerce->add_body_class', '2.1' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $classes
-	 */
-	public function output_body_class( $classes ) {
-		_deprecated_function( 'Woocommerce->output_body_class', '2.1' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $error
-	 */
-	public function add_error( $error ) {
-		_deprecated_function( 'Woocommerce->add_error', '2.1', 'wc_add_notice' );
-		wc_add_notice( $error, 'error' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @param $message
-	 */
-	public function add_message( $message ) {
-		_deprecated_function( 'Woocommerce->add_message', '2.1', 'wc_add_notice' );
-		wc_add_notice( $message );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 */
-	public function clear_messages() {
-		_deprecated_function( 'Woocommerce->clear_messages', '2.1', 'wc_clear_notices' );
-		wc_clear_notices();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return int
-	 */
-	public function error_count() {
-		_deprecated_function( 'Woocommerce->error_count', '2.1', 'wc_notice_count' );
-		return wc_notice_count( 'error' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return int
-	 */
-	public function message_count() {
-		_deprecated_function( 'Woocommerce->message_count', '2.1', 'wc_notice_count' );
-		return wc_notice_count( 'message' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return mixed
-	 */
-	public function get_errors() {
-		_deprecated_function( 'Woocommerce->get_errors', '2.1', 'wc_get_notices( "error" )' );
-		return wc_get_notices( 'error' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 * @return mixed
-	 */
-	public function get_messages() {
-		_deprecated_function( 'Woocommerce->get_messages', '2.1', 'wc_get_notices( "success" )' );
-		return wc_get_notices( 'success' );
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 */
-	public function show_messages() {
-		_deprecated_function( 'Woocommerce->show_messages', '2.1', 'wc_print_notices()' );
-		wc_print_notices();
-	}
-
-	/**
-	 * @deprecated 2.1.0
-	 */
-	public function set_messages() {
-		_deprecated_function( 'Woocommerce->set_messages', '2.1' );
 	}
 }
 

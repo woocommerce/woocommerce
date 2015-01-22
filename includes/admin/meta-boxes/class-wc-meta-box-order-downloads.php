@@ -32,8 +32,9 @@ class WC_Meta_Box_Order_Downloads {
 						WHERE order_id = %d ORDER BY product_id
 					", $post->ID ) );
 
-					$product = null;
-					$loop    = 0;
+					$product      = null;
+					$loop         = 0;
+					$file_counter = 1;
 
 					if ( $download_permissions && sizeof( $download_permissions ) > 0 ) foreach ( $download_permissions as $download ) {
 
@@ -64,7 +65,7 @@ class WC_Meta_Box_Order_Downloads {
 
 			<div class="toolbar">
 				<p class="buttons">
-					<select name="grant_access_id" id="grant_access_id" class="ajax_chosen_select_downloadable_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a downloadable product&hellip;', 'woocommerce' ) ?>" style="width: 400px"></select>
+					<input type="hidden" id="grant_access_id" name="grant_access_id" data-multiple="true" class="wc-product-search" style="width: 400px;" data-placeholder="<?php _e( 'Search for a downloadable product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_downloadable_products_and_variations" />
 					<button type="button" class="button grant_access"><?php _e( 'Grant Access', 'woocommerce' ); ?></button>
 				</p>
 				<div class="clear"></div>

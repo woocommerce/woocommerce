@@ -10,31 +10,26 @@ if ( ! defined( 'ABSPATH' ) ) {
  * A simple shipping method allowing local delivery as a shipping method
  *
  * @class 		WC_Shipping_Local_Delivery
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
-class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
+class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 
 	/**
-	 * __construct function.
-	 *
-	 * @access public
-	 * @return void
+	 * Constructor
 	 */
-	function __construct() {
-		$this->id           = 'local_delivery';
-		$this->method_title = __( 'Local Delivery', 'woocommerce' );
+	public function __construct() {
+		$this->id                 = 'local_delivery';
+		$this->method_title       = __( 'Local Delivery', 'woocommerce' );
+		$this->method_description = __( 'Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce' );
 		$this->init();
 	}
 
 	/**
 	 * init function.
-	 *
-	 * @access public
-	 * @return void
 	 */
-	function init() {
+	public function init() {
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -55,27 +50,25 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 	/**
 	 * calculate_shipping function.
 	 *
-	 * @access public
 	 * @param array $package (default: array())
-	 * @return void
 	 */
-	function calculate_shipping( $package = array() ) {
-
+	public function calculate_shipping( $package = array() ) {
 		$shipping_total = 0;
-		$fee = ( trim( $this->fee ) == '' ) ? 0 : $this->fee;
 
-		if ( $this->type =='fixed' ) 	$shipping_total 	= $this->fee;
-
-		if ( $this->type =='percent' ) 	$shipping_total 	= $package['contents_cost'] * ( $this->fee / 100 );
-
-		if ( $this->type == 'product' )	{
-			foreach ( $package['contents'] as $item_id => $values ) {
-				$_product = $values['data'];
-
-				if ( $values['quantity'] > 0 && $_product->needs_shipping() ) {
-					$shipping_total += $this->fee * $values['quantity'];
-                }
-			}
+		switch ( $this->type ) {
+			case 'fixed' :
+				$shipping_total = $this->fee;
+			break;
+			case 'percent' :
+				$shipping_total = $package['contents_cost'] * ( $this->fee / 100 );
+			break;
+			case 'product' :
+				foreach ( $package['contents'] as $item_id => $values ) {
+					if ( $values['quantity'] > 0 && $values['data']->needs_shipping() ) {
+						$shipping_total += $this->fee * $values['quantity'];
+	                }
+				}
+			break;
 		}
 
 		$rate = array(
@@ -84,7 +77,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 			'cost'  => $shipping_total
 		);
 
-		$this->add_rate($rate);
+		$this->add_rate( $rate );
 	}
 
 	/**
@@ -93,13 +86,13 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 	 * @access public
 	 * @return void
 	 */
-	function init_form_fields() {
+	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
-				'title'       => __( 'Enable', 'woocommerce' ),
-				'type'        => 'checkbox',
-				'label'       => __( 'Enable local delivery', 'woocommerce' ),
-				'default'     => 'no'
+				'title'   => __( 'Enable', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable local delivery', 'woocommerce' ),
+				'default' => 'no'
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
@@ -111,10 +104,11 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 			'type' => array(
 				'title'       => __( 'Fee Type', 'woocommerce' ),
 				'type'        => 'select',
+				'class'       => 'wc-enhanced-select',
 				'description' => __( 'How to calculate delivery charges', 'woocommerce' ),
 				'default'     => 'fixed',
 				'options'     => array(
-					'fixed'       => __( 'Fixed amount', 'woocommerce' ),
+				'fixed'       => __( 'Fixed amount', 'woocommerce' ),
 					'percent'     => __( 'Percentage of cart total', 'woocommerce' ),
 					'product'     => __( 'Fixed amount per product', 'woocommerce' ),
 				),
@@ -129,19 +123,19 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 				'placeholder' => wc_format_localized_price( 0 )
 			),
 			'codes' => array(
-				'title'       => __( 'Zip/Post Codes', 'woocommerce' ),
-				'type'        => 'textarea',
-				'description' => __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
+				'title'       => __( 'Allowed Zip/Post Codes', 'woocommerce' ),
+				'type'        => 'text',
+				'desc_tip'    => __( 'What zip/post codes are available for local pickup?', 'woocommerce' ),
 				'default'     => '',
-				'desc_tip'    => true,
-				'placeholder' => '12345, 56789 etc'
+				'description' => __( 'Separate codes with a comma. Accepts wildcards, e.g. <code>P*</code> will match a postcode of PE30. Also accepts a pattern, e.g. <code>NG1___</code> would match NG1 1AA but not NG10 1AA', 'woocommerce' ),
+				'placeholder' => 'e.g. 12345, 56789'
 			),
 			'availability' => array(
 				'title'       => __( 'Method availability', 'woocommerce' ),
 				'type'        => 'select',
 				'default'     => 'all',
-					'class'       => 'availability',
-					'options'     => array(
+				'class'       => 'availability wc-enhanced-select',
+				'options'     => array(
 					'all'         => __( 'All allowed countries', 'woocommerce' ),
 					'specific'    => __( 'Specific Countries', 'woocommerce' )
 				)
@@ -149,7 +143,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 			'countries' => array(
 				'title'       => __( 'Specific Countries', 'woocommerce' ),
 				'type'        => 'multiselect',
-				'class'       => 'chosen_select',
+				'class'       => 'wc-enhanced-select',
 				'css'         => 'width: 450px;',
 				'default'     => '',
 				'options'     => WC()->countries->get_shipping_countries(),
@@ -159,114 +153,4 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Method {
 			)
 		);
 	}
-
-	/**
-	 * admin_options function.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function admin_options() {
-		?>
-		<h3><?php echo $this->method_title; ?></h3>
-		<p><?php _e( 'Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce' ); ?></p>
-		<table class="form-table">
-			<?php $this->generate_settings_html(); ?>
-		</table> <?php
-	}
-
-
-	/**
-	 * is_available function.
-	 *
-	 * @access public
-	 * @param array $package
-	 * @return bool
-	 */
-	function is_available( $package ) {
-
-		if ($this->enabled=="no") return false;
-
-		// If post codes are listed, let's use them.
-		$codes = '';
-		if ( $this->codes != '' ) {
-			foreach( explode( ',', $this->codes ) as $code ) {
-				$codes[] = $this->clean( $code );
-			}
-		}
-
-		if ( is_array( $codes ) ) {
-
-			$found_match = false;
-
-			if ( in_array( $this->clean( $package['destination']['postcode'] ), $codes ) ) {
-				$found_match = true;
-            }
-
-
-			// Pattern match
-			if ( ! $found_match ) {
-
-				$customer_postcode = $this->clean( $package['destination']['postcode'] );
-				foreach ($codes as $c) {
-					$pattern = '/^' . str_replace( '_', '[0-9a-zA-Z]', $c ) . '$/i';
-					if ( preg_match( $pattern, $customer_postcode ) ) {
-						$found_match = true;
-						break;
-					}
-				}
-
-			}
-
-
-			// Wildcard search
-			if ( ! $found_match ) {
-
-				$customer_postcode = $this->clean( $package['destination']['postcode'] );
-				$customer_postcode_length = strlen( $customer_postcode );
-
-				for ( $i = 0; $i <= $customer_postcode_length; $i++ ) {
-
-					if ( in_array( $customer_postcode, $codes ) ) {
-						$found_match = true;
-                    }
-
-					$customer_postcode = substr( $customer_postcode, 0, -2 ) . '*';
-				}
-			}
-
-			if ( ! $found_match ) {
-				return false;
-            }
-		}
-
-		// Either post codes not setup, or post codes are in array... so lefts check countries for backwards compatibility.
-		if ( $this->availability == 'specific' ) {
-			$ship_to_countries = $this->countries;
-		} else {
-			$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );
-        }
-
-		if (is_array($ship_to_countries)) {
-			if (!in_array( $package['destination']['country'] , $ship_to_countries)){
-				return false;
-            }
-        }
-
-		// Yay! We passed!
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
-	}
-
-
-	/**
-	 * clean function.
-	 *
-	 * @access public
-	 * @param mixed $code
-	 * @return string
-	 */
-	function clean( $code ) {
-		return str_replace( '-', '', sanitize_title( $code ) ) . ( strstr( $code, '*' ) ? '*' : '' );
-	}
-
 }

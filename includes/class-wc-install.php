@@ -5,14 +5,12 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Classes
- * @version     2.1.0
+ * @version     2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
-
-if ( ! class_exists( 'WC_Install' ) ) :
 
 /**
  * WC_Install Class
@@ -22,31 +20,23 @@ class WC_Install {
 	/**
 	 * Hook in tabs.
 	 */
-	public function __construct() {
-		// Run this on activation.
-		register_activation_hook( WC_PLUGIN_FILE, array( $this, 'install' ) );
+	public static function init() {
+		register_activation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'install' ) );
 
-		// Hooks
-		add_action( 'admin_init', array( $this, 'install_actions' ) );
-		add_action( 'admin_init', array( $this, 'check_version' ), 5 );
-		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( $this, 'in_plugin_update_message' ) );
-		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
-		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
-
-		if ( is_multisite() ) {
-			add_filter( 'wpmu_drop_tables', array( $this, 'wpmu_drop_tables' ) );
-		}
+		add_action( 'admin_init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
+		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
+		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
+		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
+		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 	}
 
 	/**
 	 * check_version function.
-	 *
-	 * @return void
 	 */
-	public function check_version() {
+	public static function check_version() {
 		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version || get_option( 'woocommerce_db_version' ) != WC()->version ) ) {
-			$this->install();
-
+			self::install();
 			do_action( 'woocommerce_updated' );
 		}
 	}
@@ -54,54 +44,46 @@ class WC_Install {
 	/**
 	 * Install actions such as installing pages when a button is clicked.
 	 */
-	public function install_actions() {
+	public static function install_actions() {
 		// Install - Add pages button
 		if ( ! empty( $_GET['install_woocommerce_pages'] ) ) {
 
 			self::create_pages();
 
 			// We no longer need to install pages
-			delete_option( '_wc_needs_pages' );
-			delete_transient( '_wc_activation_redirect' );
+			WC_Admin_Notices::remove_notice( 'install' );
 
 			// What's new redirect
-			wp_redirect( admin_url( 'index.php?page=wc-about&wc-installed=true' ) );
-			exit;
-
-		// Skip button
-		} elseif ( ! empty( $_GET['skip_install_woocommerce_pages'] ) ) {
-
-			// We no longer need to install pages
-			delete_option( '_wc_needs_pages' );
-			delete_transient( '_wc_activation_redirect' );
-
-			// What's new redirect
-			wp_redirect( admin_url( 'index.php?page=wc-about' ) );
-			exit;
+			if ( ! WC_Admin_Notices::has_notice( 'update' ) ) {
+				delete_transient( '_wc_activation_redirect' );
+				wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
+				exit;
+			}
 
 		// Update button
 		} elseif ( ! empty( $_GET['do_update_woocommerce'] ) ) {
 
-			$this->update();
+			self::update();
 
 			// Update complete
-			delete_option( '_wc_needs_pages' );
-			delete_option( '_wc_needs_update' );
-			delete_transient( '_wc_activation_redirect' );
+			WC_Admin_Notices::remove_notice( 'update' );
 
 			// What's new redirect
-			wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
-			exit;
+			if ( ! WC_Admin_Notices::has_notice( 'install' ) ) {
+				delete_transient( '_wc_activation_redirect' );
+				wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
+				exit;
+			}
 		}
 	}
 
 	/**
 	 * Install WC
 	 */
-	public function install() {
-		$this->create_options();
-		$this->create_tables();
-		$this->create_roles();
+	public static function install() {
+		self::create_options();
+		self::create_tables();
+		self::create_roles();
 
 		// Register post types
 		include_once( 'class-wc-post-types.php' );
@@ -112,16 +94,15 @@ class WC_Install {
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
 
-		$this->create_terms();
-		$this->create_cron_jobs();
-		$this->create_files();
+		self::create_terms();
+		self::create_cron_jobs();
+		self::create_files();
 
 		// Queue upgrades
-		$current_version    = get_option( 'woocommerce_version', null );
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 
 		if ( version_compare( $current_db_version, '2.2.0', '<' ) && null !== $current_db_version ) {
-			update_option( '_wc_needs_update', 1 );
+			WC_Admin_Notices::add_notice( 'update' );
 		} else {
 			update_option( 'woocommerce_db_version', WC()->version );
 		}
@@ -131,11 +112,12 @@ class WC_Install {
 
 		// Check if pages are needed
 		if ( wc_get_page_id( 'shop' ) < 1 ) {
-			update_option( '_wc_needs_pages', 1 );
+			WC_Admin_Notices::add_notice( 'install' );
 		}
 
 		// Flush rules after install
 		flush_rewrite_rules();
+		delete_transient( 'wc_attribute_taxonomies' );
 
 		// Redirect to welcome screen
 		set_transient( '_wc_activation_redirect', 1, HOUR_IN_SECONDS );
@@ -144,46 +126,20 @@ class WC_Install {
 	/**
 	 * Handle updates
 	 */
-	public function update() {
-		// Do updates
+	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
+		$db_updates         = array(
+			'2.0.0' => 'updates/woocommerce-update-2.0.php',
+			'2.0.9' => 'updates/woocommerce-update-2.0.9.php',
+			'2.1.0' => 'updates/woocommerce-update-2.1.php',
+			'2.2.0' => 'updates/woocommerce-update-2.2.php'
+		);
 
-		if ( version_compare( $current_db_version, '1.4', '<' ) ) {
-			include( 'updates/woocommerce-update-1.4.php' );
-			update_option( 'woocommerce_db_version', '1.4' );
-		}
-
-		if ( version_compare( $current_db_version, '1.5', '<' ) ) {
-			include( 'updates/woocommerce-update-1.5.php' );
-			update_option( 'woocommerce_db_version', '1.5' );
-		}
-
-		if ( version_compare( $current_db_version, '2.0', '<' ) ) {
-			include( 'updates/woocommerce-update-2.0.php' );
-			update_option( 'woocommerce_db_version', '2.0' );
-		}
-
-		if ( version_compare( $current_db_version, '2.0.9', '<' ) ) {
-			include( 'updates/woocommerce-update-2.0.9.php' );
-			update_option( 'woocommerce_db_version', '2.0.9' );
-		}
-
-		if ( version_compare( $current_db_version, '2.0.14', '<' ) ) {
-			if ( 'HU' == get_option( 'woocommerce_default_country' ) ) {
-				update_option( 'woocommerce_default_country', 'HU:BU' );
+		foreach ( $db_updates as $version => $updater ) {
+			if ( version_compare( $current_db_version, $version, '<' ) ) {
+				include( $updater );
+				update_option( 'woocommerce_db_version', $version );
 			}
-
-			update_option( 'woocommerce_db_version', '2.0.14' );
-		}
-
-		if ( version_compare( $current_db_version, '2.1.0', '<' ) || WC_VERSION == '2.1-bleeding' ) {
-			include( 'updates/woocommerce-update-2.1.php' );
-			update_option( 'woocommerce_db_version', '2.1.0' );
-		}
-
-		if ( version_compare( $current_db_version, '2.2.0', '<' ) || WC_VERSION == '2.2-bleeding' ) {
-			include( 'updates/woocommerce-update-2.2.php' );
-			update_option( 'woocommerce_db_version', '2.2.0' );
 		}
 
 		update_option( 'woocommerce_db_version', WC()->version );
@@ -192,22 +148,18 @@ class WC_Install {
 	/**
 	 * Create cron jobs (clear them first)
 	 */
-	private function create_cron_jobs() {
-		// Cron jobs
+	private static function create_cron_jobs() {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
 		wp_clear_scheduled_hook( 'woocommerce_language_pack_updater_check' );
+		wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 
 		$ve = get_option( 'gmt_offset' ) > 0 ? '+' : '-';
 
 		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . get_option( 'gmt_offset' ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
 
-		$held_duration = get_option( 'woocommerce_hold_stock_minutes', null );
-
-		if ( is_null( $held_duration ) ) {
-			$held_duration = '60';
-		}
+		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
 		if ( $held_duration != '' ) {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
@@ -215,14 +167,16 @@ class WC_Install {
 
 		wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_single_event( time(), 'woocommerce_language_pack_updater_check' );
+		wp_schedule_single_event( time(), 'woocommerce_geoip_updater' );
+		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
 	}
 
 	/**
 	 * Create pages that the plugin relies on, storing page id's in variables.
-	 *
-	 * @return void
 	 */
 	public static function create_pages() {
+		include_once( 'admin/wc-admin-functions.php' );
+
 		$pages = apply_filters( 'woocommerce_create_pages', array(
 			'shop' => array(
 				'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
@@ -252,38 +206,11 @@ class WC_Install {
 	}
 
 	/**
-	 * Add the default terms for WC taxonomies - product types and order statuses. Modify this at your own risk.
-	 *
-	 * @return void
-	 */
-	private function create_terms() {
-
-		$taxonomies = array(
-			'product_type' => array(
-				'simple',
-				'grouped',
-				'variable',
-				'external'
-			)
-		);
-
-		foreach ( $taxonomies as $taxonomy => $terms ) {
-			foreach ( $terms as $term ) {
-				if ( ! get_term_by( 'slug', sanitize_title( $term ), $taxonomy ) ) {
-					wp_insert_term( $term, $taxonomy );
-				}
-			}
-		}
-	}
-
-	/**
 	 * Default options
 	 *
 	 * Sets up the default options used on the settings page
-	 *
-	 * @return void
 	 */
-	public function create_options() {
+	private static function create_options() {
 		// Include settings so that we can run through defaults
 		include_once( 'admin/class-wc-admin-settings.php' );
 
@@ -314,6 +241,28 @@ class WC_Install {
 	}
 
 	/**
+	 * Add the default terms for WC taxonomies - product types and order statuses. Modify this at your own risk.
+	 */
+	private static function create_terms() {
+		$taxonomies = array(
+			'product_type' => array(
+				'simple',
+				'grouped',
+				'variable',
+				'external'
+			)
+		);
+
+		foreach ( $taxonomies as $taxonomy => $terms ) {
+			foreach ( $terms as $term ) {
+				if ( ! get_term_by( 'slug', sanitize_title( $term ), $taxonomy ) ) {
+					wp_insert_term( $term, $taxonomy );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Set up the database tables which the plugin needs to function.
 	 *
 	 * Tables:
@@ -328,28 +277,15 @@ class WC_Install {
 	 *
 	 * @return void
 	 */
-	private function create_tables() {
+	private static function create_tables() {
 		global $wpdb;
 
 		$wpdb->hide_errors();
 
-		$collate = '';
-
-		if ( $wpdb->has_cap( 'collation' ) ) {
-			if ( ! empty($wpdb->charset ) ) {
-				$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
-			}
-			if ( ! empty($wpdb->collate ) ) {
-				$collate .= " COLLATE $wpdb->collate";
-			}
-		}
-
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 		/**
-		 * Update schemas before DBDELTA
-		 *
-		 * Before updating, remove any primary keys which could be modified due to schema updates
+		 * Before updating with DBDELTA, remove any primary keys which could be modified due to schema updates
 		 */
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
 			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
@@ -357,162 +293,181 @@ class WC_Install {
 			}
 		}
 
-		// WooCommerce Tables
-		$woocommerce_tables = "
-	CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
-	  attribute_id bigint(20) NOT NULL auto_increment,
-	  attribute_name varchar(200) NOT NULL,
-	  attribute_label longtext NULL,
-	  attribute_type varchar(200) NOT NULL,
-	  attribute_orderby varchar(200) NOT NULL,
-	  PRIMARY KEY  (attribute_id),
-	  KEY attribute_name (attribute_name)
-	) $collate;
-	CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
-	  meta_id bigint(20) NOT NULL auto_increment,
-	  woocommerce_term_id bigint(20) NOT NULL,
-	  meta_key varchar(255) NULL,
-	  meta_value longtext NULL,
-	  PRIMARY KEY  (meta_id),
-	  KEY woocommerce_term_id (woocommerce_term_id),
-	  KEY meta_key (meta_key)
-	) $collate;
-	CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
-	  permission_id bigint(20) NOT NULL auto_increment,
-	  download_id varchar(32) NOT NULL,
-	  product_id bigint(20) NOT NULL,
-	  order_id bigint(20) NOT NULL DEFAULT 0,
-	  order_key varchar(200) NOT NULL,
-	  user_email varchar(200) NOT NULL,
-	  user_id bigint(20) NULL,
-	  downloads_remaining varchar(9) NULL,
-	  access_granted datetime NOT NULL default '0000-00-00 00:00:00',
-	  access_expires datetime NULL default null,
-	  download_count bigint(20) NOT NULL DEFAULT 0,
-	  PRIMARY KEY  (permission_id),
-	  KEY download_order_key_product (product_id,order_id,order_key,download_id),
-	  KEY download_order_product (download_id,order_id,product_id)
-	) $collate;
-	CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
-	  order_item_id bigint(20) NOT NULL auto_increment,
-	  order_item_name longtext NOT NULL,
-	  order_item_type varchar(200) NOT NULL DEFAULT '',
-	  order_id bigint(20) NOT NULL,
-	  PRIMARY KEY  (order_item_id),
-	  KEY order_id (order_id)
-	) $collate;
-	CREATE TABLE {$wpdb->prefix}woocommerce_order_itemmeta (
-	  meta_id bigint(20) NOT NULL auto_increment,
-	  order_item_id bigint(20) NOT NULL,
-	  meta_key varchar(255) NULL,
-	  meta_value longtext NULL,
-	  PRIMARY KEY  (meta_id),
-	  KEY order_item_id (order_item_id),
-	  KEY meta_key (meta_key)
-	) $collate;
-	CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
-	  tax_rate_id bigint(20) NOT NULL auto_increment,
-	  tax_rate_country varchar(200) NOT NULL DEFAULT '',
-	  tax_rate_state varchar(200) NOT NULL DEFAULT '',
-	  tax_rate varchar(200) NOT NULL DEFAULT '',
-	  tax_rate_name varchar(200) NOT NULL DEFAULT '',
-	  tax_rate_priority bigint(20) NOT NULL,
-	  tax_rate_compound int(1) NOT NULL DEFAULT 0,
-	  tax_rate_shipping int(1) NOT NULL DEFAULT 1,
-	  tax_rate_order bigint(20) NOT NULL,
-	  tax_rate_class varchar(200) NOT NULL DEFAULT '',
-	  PRIMARY KEY  (tax_rate_id),
-	  KEY tax_rate_country (tax_rate_country),
-	  KEY tax_rate_state (tax_rate_state),
-	  KEY tax_rate_class (tax_rate_class),
-	  KEY tax_rate_priority (tax_rate_priority)
-	) $collate;
-	CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
-	  location_id bigint(20) NOT NULL auto_increment,
-	  location_code varchar(255) NOT NULL,
-	  tax_rate_id bigint(20) NOT NULL,
-	  location_type varchar(40) NOT NULL,
-	  PRIMARY KEY  (location_id),
-	  KEY tax_rate_id (tax_rate_id),
-	  KEY location_type (location_type),
-	  KEY location_type_code (location_type,location_code)
-	) $collate;
-	";
-		dbDelta( $woocommerce_tables );
+		dbDelta( self::get_schema() );
+	}
+
+	/**
+	 * Get Table schema
+	 * @return string
+	 */
+	private static function get_schema() {
+		global $wpdb;
+
+		$collate = '';
+
+		if ( $wpdb->has_cap( 'collation' ) ) {
+			if ( ! empty( $wpdb->charset ) ) {
+				$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
+			}
+			if ( ! empty( $wpdb->collate ) ) {
+				$collate .= " COLLATE $wpdb->collate";
+			}
+		}
+
+		return "
+CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
+  attribute_id bigint(20) NOT NULL auto_increment,
+  attribute_name varchar(200) NOT NULL,
+  attribute_label longtext NULL,
+  attribute_type varchar(200) NOT NULL,
+  attribute_orderby varchar(200) NOT NULL,
+  attribute_public int(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY  (attribute_id),
+  KEY attribute_name (attribute_name)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  woocommerce_term_id bigint(20) NOT NULL,
+  meta_key varchar(255) NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id),
+  KEY woocommerce_term_id (woocommerce_term_id),
+  KEY meta_key (meta_key)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
+  permission_id bigint(20) NOT NULL auto_increment,
+  download_id varchar(32) NOT NULL,
+  product_id bigint(20) NOT NULL,
+  order_id bigint(20) NOT NULL DEFAULT 0,
+  order_key varchar(200) NOT NULL,
+  user_email varchar(200) NOT NULL,
+  user_id bigint(20) NULL,
+  downloads_remaining varchar(9) NULL,
+  access_granted datetime NOT NULL default '0000-00-00 00:00:00',
+  access_expires datetime NULL default null,
+  download_count bigint(20) NOT NULL DEFAULT 0,
+  PRIMARY KEY  (permission_id),
+  KEY download_order_key_product (product_id,order_id,order_key,download_id),
+  KEY download_order_product (download_id,order_id,product_id)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
+  order_item_id bigint(20) NOT NULL auto_increment,
+  order_item_name longtext NOT NULL,
+  order_item_type varchar(200) NOT NULL DEFAULT '',
+  order_id bigint(20) NOT NULL,
+  PRIMARY KEY  (order_item_id),
+  KEY order_id (order_id)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_order_itemmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  order_item_id bigint(20) NOT NULL,
+  meta_key varchar(255) NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id),
+  KEY order_item_id (order_item_id),
+  KEY meta_key (meta_key)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
+  tax_rate_id bigint(20) NOT NULL auto_increment,
+  tax_rate_country varchar(200) NOT NULL DEFAULT '',
+  tax_rate_state varchar(200) NOT NULL DEFAULT '',
+  tax_rate varchar(200) NOT NULL DEFAULT '',
+  tax_rate_name varchar(200) NOT NULL DEFAULT '',
+  tax_rate_priority bigint(20) NOT NULL,
+  tax_rate_compound int(1) NOT NULL DEFAULT 0,
+  tax_rate_shipping int(1) NOT NULL DEFAULT 1,
+  tax_rate_order bigint(20) NOT NULL,
+  tax_rate_class varchar(200) NOT NULL DEFAULT '',
+  PRIMARY KEY  (tax_rate_id),
+  KEY tax_rate_country (tax_rate_country),
+  KEY tax_rate_state (tax_rate_state),
+  KEY tax_rate_class (tax_rate_class),
+  KEY tax_rate_priority (tax_rate_priority)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
+  location_id bigint(20) NOT NULL auto_increment,
+  location_code varchar(255) NOT NULL,
+  tax_rate_id bigint(20) NOT NULL,
+  location_type varchar(40) NOT NULL,
+  PRIMARY KEY  (location_id),
+  KEY tax_rate_id (tax_rate_id),
+  KEY location_type (location_type),
+  KEY location_type_code (location_type,location_code)
+) $collate;
+		";
 	}
 
 	/**
 	 * Create roles and capabilities
 	 */
-	public function create_roles() {
+	public static function create_roles() {
 		global $wp_roles;
 
-		if ( class_exists( 'WP_Roles' ) ) {
-			if ( ! isset( $wp_roles ) ) {
-				$wp_roles = new WP_Roles();
-			}
+		if ( ! class_exists( 'WP_Roles' ) ) {
+			return;
 		}
 
-		if ( is_object( $wp_roles ) ) {
+		if ( ! isset( $wp_roles ) ) {
+			$wp_roles = new WP_Roles();
+		}
 
-			// Customer role
-			add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
-				'read' 						=> true,
-				'edit_posts' 				=> false,
-				'delete_posts' 				=> false
-			) );
+		// Customer role
+		add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
+			'read' 						=> true,
+			'edit_posts' 				=> false,
+			'delete_posts' 				=> false
+		) );
 
-			// Shop manager role
-			add_role( 'shop_manager', __( 'Shop Manager', 'woocommerce' ), array(
-				'level_9'                => true,
-				'level_8'                => true,
-				'level_7'                => true,
-				'level_6'                => true,
-				'level_5'                => true,
-				'level_4'                => true,
-				'level_3'                => true,
-				'level_2'                => true,
-				'level_1'                => true,
-				'level_0'                => true,
-				'read'                   => true,
-				'read_private_pages'     => true,
-				'read_private_posts'     => true,
-				'edit_users'             => true,
-				'edit_posts'             => true,
-				'edit_pages'             => true,
-				'edit_published_posts'   => true,
-				'edit_published_pages'   => true,
-				'edit_private_pages'     => true,
-				'edit_private_posts'     => true,
-				'edit_others_posts'      => true,
-				'edit_others_pages'      => true,
-				'publish_posts'          => true,
-				'publish_pages'          => true,
-				'delete_posts'           => true,
-				'delete_pages'           => true,
-				'delete_private_pages'   => true,
-				'delete_private_posts'   => true,
-				'delete_published_pages' => true,
-				'delete_published_posts' => true,
-				'delete_others_posts'    => true,
-				'delete_others_pages'    => true,
-				'manage_categories'      => true,
-				'manage_links'           => true,
-				'moderate_comments'      => true,
-				'unfiltered_html'        => true,
-				'upload_files'           => true,
-				'export'                 => true,
-				'import'                 => true,
-				'list_users'             => true
-			) );
+		// Shop manager role
+		add_role( 'shop_manager', __( 'Shop Manager', 'woocommerce' ), array(
+			'level_9'                => true,
+			'level_8'                => true,
+			'level_7'                => true,
+			'level_6'                => true,
+			'level_5'                => true,
+			'level_4'                => true,
+			'level_3'                => true,
+			'level_2'                => true,
+			'level_1'                => true,
+			'level_0'                => true,
+			'read'                   => true,
+			'read_private_pages'     => true,
+			'read_private_posts'     => true,
+			'edit_users'             => true,
+			'edit_posts'             => true,
+			'edit_pages'             => true,
+			'edit_published_posts'   => true,
+			'edit_published_pages'   => true,
+			'edit_private_pages'     => true,
+			'edit_private_posts'     => true,
+			'edit_others_posts'      => true,
+			'edit_others_pages'      => true,
+			'publish_posts'          => true,
+			'publish_pages'          => true,
+			'delete_posts'           => true,
+			'delete_pages'           => true,
+			'delete_private_pages'   => true,
+			'delete_private_posts'   => true,
+			'delete_published_pages' => true,
+			'delete_published_posts' => true,
+			'delete_others_posts'    => true,
+			'delete_others_pages'    => true,
+			'manage_categories'      => true,
+			'manage_links'           => true,
+			'moderate_comments'      => true,
+			'unfiltered_html'        => true,
+			'upload_files'           => true,
+			'export'                 => true,
+			'import'                 => true,
+			'list_users'             => true
+		) );
 
-			$capabilities = $this->get_core_capabilities();
+		$capabilities = self::get_core_capabilities();
 
-			foreach ( $capabilities as $cap_group ) {
-				foreach ( $cap_group as $cap ) {
-					$wp_roles->add_cap( 'shop_manager', $cap );
-					$wp_roles->add_cap( 'administrator', $cap );
-				}
+		foreach ( $capabilities as $cap_group ) {
+			foreach ( $cap_group as $cap ) {
+				$wp_roles->add_cap( 'shop_manager', $cap );
+				$wp_roles->add_cap( 'administrator', $cap );
 			}
 		}
 	}
@@ -522,7 +477,7 @@ class WC_Install {
 	 *
 	 * @return array
 	 */
-	public function get_core_capabilities() {
+	 private static function get_core_capabilities() {
 		$capabilities = array();
 
 		$capabilities['core'] = array(
@@ -563,38 +518,35 @@ class WC_Install {
 
 	/**
 	 * woocommerce_remove_roles function.
-	 *
-	 * @return void
 	 */
-	public function remove_roles() {
+	public static function remove_roles() {
 		global $wp_roles;
 
-		if ( class_exists( 'WP_Roles' ) ) {
-			if ( ! isset( $wp_roles ) ) {
-				$wp_roles = new WP_Roles();
+		if ( ! class_exists( 'WP_Roles' ) ) {
+			return;
+		}
+
+		if ( ! isset( $wp_roles ) ) {
+			$wp_roles = new WP_Roles();
+		}
+
+		$capabilities = self::get_core_capabilities();
+
+		foreach ( $capabilities as $cap_group ) {
+			foreach ( $cap_group as $cap ) {
+				$wp_roles->remove_cap( 'shop_manager', $cap );
+				$wp_roles->remove_cap( 'administrator', $cap );
 			}
 		}
 
-		if ( is_object( $wp_roles ) ) {
-
-			$capabilities = $this->get_core_capabilities();
-
-			foreach ( $capabilities as $cap_group ) {
-				foreach ( $cap_group as $cap ) {
-					$wp_roles->remove_cap( 'shop_manager', $cap );
-					$wp_roles->remove_cap( 'administrator', $cap );
-				}
-			}
-
-			remove_role( 'customer' );
-			remove_role( 'shop_manager' );
-		}
+		remove_role( 'customer' );
+		remove_role( 'shop_manager' );
 	}
 
 	/**
 	 * Create files/directories
 	 */
-	private function create_files() {
+	private static function create_files() {
 		// Install files and folders for uploading files and prevent hotlinking
 		$upload_dir =  wp_upload_dir();
 
@@ -633,39 +585,15 @@ class WC_Install {
 
 	/**
 	 * Show plugin changes. Code adapted from W3 Total Cache.
-	 *
-	 * @return void
 	 */
-	public function in_plugin_update_message( $args ) {
+	public static function in_plugin_update_message( $args ) {
 		$transient_name = 'wc_upgrade_notice_' . $args['Version'];
 
 		if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) {
-
 			$response = wp_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
 
 			if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
-
-				// Output Upgrade Notice
-				$matches        = null;
-				$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
-				$upgrade_notice = '';
-
-				if ( preg_match( $regexp, $response['body'], $matches ) ) {
-					$version        = trim( $matches[1] );
-					$notices        = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
-
-					if ( version_compare( WC_VERSION, $version, '<' ) ) {
-
-						$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';
-
-						foreach ( $notices as $index => $line ) {
-							$upgrade_notice .= wp_kses_post( preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) );
-						}
-
-						$upgrade_notice .= '</div> ';
-					}
-				}
-
+				$upgrade_notice = self::parse_update_notice( $response['body'] );
 				set_transient( $transient_name, $upgrade_notice, DAY_IN_SECONDS );
 			}
 		}
@@ -674,14 +602,44 @@ class WC_Install {
 	}
 
 	/**
+	 * Parse update notice from readme file
+	 * @param  string $content
+	 * @return string
+	 */
+	private static function parse_update_notice( $content ) {
+		// Output Upgrade Notice
+		$matches        = null;
+		$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
+		$upgrade_notice = '';
+
+		if ( preg_match( $regexp, $content, $matches ) ) {
+			$version = trim( $matches[1] );
+			$notices = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
+
+			if ( version_compare( WC_VERSION, $version, '<' ) ) {
+
+				$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';
+
+				foreach ( $notices as $index => $line ) {
+					$upgrade_notice .= wp_kses_post( preg_replace( '~\[([^\]]*)\]\(([^\)]*)\)~', '<a href="${2}">${1}</a>', $line ) );
+				}
+
+				$upgrade_notice .= '</div> ';
+			}
+		}
+
+		return wp_kses_post( $upgrade_notice );
+	}
+
+	/**
 	 * Show action links on the plugin screen.
 	 *
 	 * @param	mixed $links Plugin Action links
 	 * @return	array
 	 */
-	public function plugin_action_links( $links ) {
+	public static function plugin_action_links( $links ) {
 		$action_links = array(
-			'settings'	=>	'<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
 		);
 
 		return array_merge( $action_links, $links );
@@ -694,12 +652,12 @@ class WC_Install {
 	 * @param	mixed $file  Plugin Base file
 	 * @return	array
 	 */
-	public function plugin_row_meta( $links, $file ) {
+	public static function plugin_row_meta( $links, $file ) {
 		if ( $file == WC_PLUGIN_BASENAME ) {
 			$row_meta = array(
-				'docs'		=>	'<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
-				'apidocs'	=>	'<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'http://docs.woothemes.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
-				'support'	=>	'<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
+				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
+				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'http://docs.woothemes.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
+				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
 			);
 
 			return array_merge( $links, $row_meta );
@@ -713,7 +671,7 @@ class WC_Install {
 	 * @param  array $tables
 	 * @return array
 	 */
-	public function wpmu_drop_tables( $tables ) {
+	public static function wpmu_drop_tables( $tables ) {
 		global $wpdb;
 
 		$tables[] = $wpdb->prefix . "woocommerce_attribute_taxonomies";
@@ -728,6 +686,4 @@ class WC_Install {
 	}
 }
 
-endif;
-
-return new WC_Install();
+WC_Install::init();

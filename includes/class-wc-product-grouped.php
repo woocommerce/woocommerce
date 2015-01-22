@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Grouped products cannot be purchased - they are wrappers for other products.
  *
  * @class 		WC_Product_Grouped
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
@@ -56,13 +56,13 @@ class WC_Product_Grouped extends WC_Product {
 
         if ( empty( $this->total_stock ) ) {
 
-        	$transient_name = 'wc_product_total_stock_' . $this->id;
+        	$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
         	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
 		        $this->total_stock = $this->stock;
 
 				if ( sizeof( $this->get_children() ) > 0 ) {
-					foreach ($this->get_children() as $child_id) {
+					foreach ( $this->get_children() as $child_id ) {
 						$stock = get_post_meta( $child_id, '_stock', true );
 
 						if ( $stock != '' ) {
@@ -86,12 +86,22 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	public function get_children() {
 		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
-        	$transient_name = 'wc_product_children_ids_' . $this->id;
+        	$transient_name = 'wc_product_children_ids_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 			$this->children = get_transient( $transient_name );
 
         	if ( empty( $this->children ) ) {
 
-		        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=product&orderby=menu_order&order=ASC&fields=ids&post_status=publish&numberposts=-1' );
+        		$args = apply_filters( 'woocommerce_grouped_children_args', array(
+        			'post_parent' 	=> $this->id,
+        			'post_type'		=> 'product',
+        			'orderby'		=> 'menu_order',
+        			'order'			=> 'ASC',
+        			'fields'		=> 'ids',
+        			'post_status'	=> 'publish',
+        			'numberposts'	=> -1,
+        		) );
+
+		        $this->children = get_posts( $args );
 
 				set_transient( $transient_name, $this->children, YEAR_IN_SECONDS );
 			}
@@ -134,14 +144,16 @@ class WC_Product_Grouped extends WC_Product {
 
 			foreach ( $this->get_children() as $child_id ) {
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price !== "" && $sale_price >= 0 )
+				if ( $sale_price !== "" && $sale_price >= 0 ) {
 					return true;
+				}
 			}
 
 		} else {
 
-			if ( $this->sale_price && $this->sale_price == $this->price )
+			if ( $this->sale_price && $this->sale_price == $this->price ) {
 				return true;
+			}
 
 		}
 		return false;

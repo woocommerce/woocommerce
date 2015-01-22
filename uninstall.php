@@ -9,16 +9,17 @@
  * @package 	WooCommerce/Uninstaller
  * @version     2.1.0
  */
-if( ! defined( 'WP_UNINSTALL_PLUGIN' ) )
+if( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit();
+}
 
 global $wpdb, $wp_roles;
 
 $status_options = get_option( 'woocommerce_status_options', array() );
 
 // Roles + caps
-$installer = include( 'includes/class-wc-install.php' );
-$installer->remove_roles();
+include_once( 'includes/class-wc-install.php' );
+WC_Install::remove_roles();
 
 // Pages
 wp_trash_post( get_option( 'woocommerce_shop_page_id' ) );
@@ -29,10 +30,6 @@ wp_trash_post( get_option( 'woocommerce_edit_address_page_id' ) );
 wp_trash_post( get_option( 'woocommerce_view_order_page_id' ) );
 wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
 wp_trash_post( get_option( 'woocommerce_logout_page_id' ) );
-
-// mijireh checkout page
-if ( $mijireh_page = get_page_by_path( 'mijireh-secure-checkout' ) )
-	wp_trash_post( $mijireh_page->ID );
 
 // Tables
 $wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );

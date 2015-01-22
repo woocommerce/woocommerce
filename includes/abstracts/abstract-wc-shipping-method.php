@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Extended by shipping methods to handle shipping calculations etc.
  *
  * @class       WC_Shipping_Method
- * @version     1.6.4
+ * @version     2.3.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
  * @author      WooThemes
@@ -18,43 +18,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/** @var string Unique ID for the shipping method - must be set. */
-	var $id;
+	public $id;
 
 	/** @var int Optional instance ID. */
-	var $number;
+	public $number;
 
 	/** @var string Method title */
-	var $method_title;
+	public $method_title;
 
 	/** @var string User set title */
-	var $title;
+	public $title;
 
 	/**  @var bool True if the method is available. */
-	var $availability;
+	public $availability;
 
 	/** @var array Array of countries this method is enabled for. */
-	var $countries          = array();
+	public $countries          = array();
 
 	/** @var string If 'taxable' tax will be charged for this method (if applicable) */
-	var $tax_status         = 'taxable';
+	public $tax_status         = 'taxable';
 
 	/** @var mixed Fees for the method */
-	var $fee                = 0;
+	public $fee                = 0;
 
 	/** @var float Minimum fee for the method */
-	var $minimum_fee        = null;
+	public $minimum_fee        = null;
 
 	/** @var bool Enabled for disabled */
-	var $enabled            = false;
+	public $enabled            = false;
 
 	/** @var bool Whether the method has settings or not (In WooCommerce > Settings > Shipping) */
-	var $has_settings       = true;
+	public $has_settings       = true;
 
 	/** @var array Features this method supports. */
-	var $supports           = array();    // Features this method supports.
+	public $supports           = array();
 
 	/** @var array This is an array of rates - methods must populate this array to register shipping costs */
-	var $rates              = array();
+	public $rates              = array();
 
 	/**
 	 * Whether or not we need to calculate tax on top of the shipping rate
@@ -62,7 +62,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return boolean
 	 */
 	public function is_taxable() {
-		return ( get_option( 'woocommerce_calc_taxes' ) == 'yes' && $this->tax_status == 'taxable' && ! WC()->customer->is_vat_exempt() );
+		return ( wc_tax_enabled() && $this->tax_status == 'taxable' && ! WC()->customer->is_vat_exempt() );
 	}
 
 	/**
@@ -73,7 +73,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param array $args (default: array())
 	 */
 	public function add_rate( $args = array() ) {
-
 		$defaults = array(
 			'id'        => '',          // ID for the rate
 			'label'     => '',          // Label for the rate
@@ -87,7 +86,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		extract( $args );
 
 		// Id and label are required
-		if ( ! $id || ! $label ) { return; }
+		if ( ! $id || ! $label ) {
+			return;
+		}
 
 		// Handle cost
 		$total_cost = round( ( is_array( $cost ) ) ? array_sum( $cost ) : $cost, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
@@ -157,7 +158,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function has_settings() {
-		return ( $this->has_settings );
+		return $this->has_settings;
 	}
 
 	/**
@@ -167,7 +168,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-
 		if ( 'no' == $this->enabled ) {
 			return false;
 		}
@@ -199,7 +199,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * Return the gateways title
+	 * Return the shipping method title
 	 *
 	 * @return string
 	 */
@@ -210,16 +210,17 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * get_fee function.
 	 *
-	 * @access public
 	 * @param mixed $fee
 	 * @param mixed $total
 	 * @return float
 	 */
 	public function get_fee( $fee, $total ) {
-		if ( strstr( $fee, '%' ) ) :
+		if ( strstr( $fee, '%' ) ) {
 			$fee = ( $total / 100 ) * str_replace( '%', '', $fee );
-		endif;
-		if ( ! empty( $this->minimum_fee ) && $this->minimum_fee > $fee ) { $fee = $this->minimum_fee; }
+		}
+		if ( ! empty( $this->minimum_fee ) && $this->minimum_fee > $fee ) {
+			$fee = $this->minimum_fee;
+		}
 		return $fee;
 	}
 

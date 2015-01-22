@@ -4,9 +4,9 @@
  *
  * Sets up the write panels used by products and orders (custom post types)
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Meta Boxes
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
@@ -28,18 +28,17 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'add_meta_boxes', array( $this, 'remove_meta_boxes' ), 10 );
 		add_action( 'add_meta_boxes', array( $this, 'rename_meta_boxes' ), 20 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 30 );
-		add_action( 'add_meta_boxes', array( 'WC_Gateway_Mijireh', 'add_page_slurp_meta' ) );
 		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
 
 		/**
 		 * Save Order Meta Boxes
 		 *
 		 * In order:
-		 * 		Save the order items
-		 * 		Save the order totals
-		 * 		Save the order downloads
-		 * 		Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
-		 * 		Save actions - sends out other emails. Last to show latest data.
+		 *      Save the order items
+		 *      Save the order totals
+		 *      Save the order downloads
+		 *      Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
+		 *      Save actions - sends out other emails. Last to show latest data.
 		 */
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Items::save', 10, 2 );
 		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Downloads::save', 30, 2 );
@@ -54,7 +53,7 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'woocommerce_process_shop_coupon_meta', 'WC_Meta_Box_Coupon_Data::save', 10, 2 );
 
 		// Save Rating Meta Boxes
-		add_action( 'comment_edit_redirect',  'WC_Meta_Box_Order_Reviews::save', 1, 2 );
+		add_action( 'comment_edit_redirect', 'WC_Meta_Box_Order_Reviews::save', 1, 2 );
 
 		// Error handling (for showing errors from meta boxes on next page load)
 		add_action( 'admin_notices', array( $this, 'output_errors' ) );
@@ -85,9 +84,11 @@ class WC_Admin_Meta_Boxes {
 		if ( ! empty( $errors ) ) {
 
 			echo '<div id="woocommerce_errors" class="error fade">';
+
 			foreach ( $errors as $error ) {
 				echo '<p>' . esc_html( $error ) . '</p>';
 			}
+
 			echo '</div>';
 
 			// Clear
@@ -102,15 +103,16 @@ class WC_Admin_Meta_Boxes {
 		// Products
 		add_meta_box( 'postexcerpt', __( 'Product Short Description', 'woocommerce' ), 'WC_Meta_Box_Product_Short_Description::output', 'product', 'normal' );
 		add_meta_box( 'woocommerce-product-data', __( 'Product Data', 'woocommerce' ), 'WC_Meta_Box_Product_Data::output', 'product', 'normal', 'high' );
-		add_meta_box( 'woocommerce-product-images', __( 'Product Gallery', 'woocommerce' ), 'WC_Meta_Box_Product_Images::output', 'product', 'side' );
+		add_meta_box( 'woocommerce-product-images', __( 'Product Gallery', 'woocommerce' ), 'WC_Meta_Box_Product_Images::output', 'product', 'side', 'low' );
 
 		// Orders
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
-			add_meta_box( 'woocommerce-order-data', __( 'Order Data', 'woocommerce' ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
-			add_meta_box( 'woocommerce-order-items', __( 'Order Items', 'woocommerce' ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
-			add_meta_box( 'woocommerce-order-notes', __( 'Order Notes', 'woocommerce' ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
+			$order_type_object = get_post_type_object( $type );
+			add_meta_box( 'woocommerce-order-data', sprintf( __( '%s Data', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
+			add_meta_box( 'woocommerce-order-items', sprintf( __( '%s Items', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
+			add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s Notes', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
 			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . ' <span class="tips" data-tip="' . __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) . '">[?]</span>', 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
-			add_meta_box( 'woocommerce-order-actions', __( 'Order Actions', 'woocommerce' ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
+			add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s Actions', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
 		}
 
 		// Coupons

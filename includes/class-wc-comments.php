@@ -40,6 +40,9 @@ class WC_Comments {
 
 		// Count comments
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
+
+		// support avatars for `review` comment type
+		add_filter( 'get_avatar_comment_types', array( __CLASS__, 'add_avatar_for_review_comment_type' ) );
 	}
 
 	/**
@@ -266,6 +269,18 @@ class WC_Comments {
 		}
 
 		return $stats;
+	}
+
+	/**
+	 * Make sure WP displays avatars for comments with the `review` type
+	 *
+	 * @since 2.3
+	 * @param array $comment_types
+	 * @return array
+	 */
+	public static function add_avatar_for_review_comment_type( $comment_types ) {
+
+		return array_merge( $comment_types, array( 'review' ) );
 	}
 }
 

@@ -2,9 +2,9 @@
 /**
  * Setup menus in WP admin.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.2.3
  */
 
@@ -34,6 +34,7 @@ class WC_Admin_Menus {
 		}
 
 		add_action( 'admin_head', array( $this, 'menu_highlight' ) );
+		add_action( 'admin_head', array( $this, 'menu_order_count' ) );
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 
@@ -51,7 +52,9 @@ class WC_Admin_Menus {
 			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 		}
 
-		$main_page = add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
+		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
+
+		add_submenu_page( 'edit.php?post_type=product', __( 'Shipping Classes', 'woocommerce' ), __( 'Shipping Classes', 'woocommerce' ), 'manage_product_terms', 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' );
 
 		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 	}
@@ -97,46 +100,47 @@ class WC_Admin_Menus {
 
 	/**
 	 * Highlights the correct top level admin menu item for post type add screens.
-	 *
-	 * @return void
 	 */
 	public function menu_highlight() {
-		global $menu, $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
+		global $parent_file, $submenu_file, $post_type;
 
-		$to_highlight_types = array( 'shop_order', 'shop_coupon' );
-
-		if ( isset( $post_type ) ) {
-			if ( in_array( $post_type, $to_highlight_types ) ) {
-				$submenu_file = 'edit.php?post_type=' . esc_attr( $post_type );
-				$parent_file  = 'woocommerce';
-			}
-
-			if ( 'product' == $post_type ) {
+		switch ( $post_type ) {
+			case 'shop_order' :
+			case 'shop_coupon' :
+				$parent_file = 'woocommerce';
+			break;
+			case 'product' :
 				$screen = get_current_screen();
 
-				if ( $screen->base == 'edit-tags' && taxonomy_is_product_attribute( $taxonomy ) ) {
+				if ( taxonomy_is_product_attribute( $screen->taxonomy ) ) {
 					$submenu_file = 'product_attributes';
-					$parent_file  = 'edit.php?post_type=' . esc_attr( $post_type );
+					$parent_file  = 'edit.php?post_type=product';
 				}
-			}
+
+				if ( 'product_shipping_class' == $screen->taxonomy ) {
+					$submenu_file = 'edit-tags.php?taxonomy=product_shipping_class&post_type=product';
+				}
+			break;
 		}
+	}
 
-		if ( isset( $submenu['woocommerce'] ) && isset( $submenu['woocommerce'][1] ) ) {
-			$submenu['woocommerce'][0] = $submenu['woocommerce'][1];
-			unset( $submenu['woocommerce'][1] );
-		}
+	/**
+	 * Adds the order processing count to the menu
+	 */
+	public function menu_order_count() {
+		global $submenu;
 
-		if ( isset( $submenu['woocommerce'] ) && current_user_can( 'manage_woocommerce' ) ) {
-			foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-				if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
+		if ( isset( $submenu['woocommerce'] ) ) {
+			// Remove 'WooCommerce' sub menu item
+			unset( $submenu['woocommerce'][0] );
 
-					$menu_name = _x( 'Orders', 'Admin menu name', 'woocommerce' );
-					if ( $order_count = wc_processing_order_count() ) {
-						$menu_name .= ' <span class="awaiting-mod update-plugins count-' . $order_count . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
+			// Add count if user has access
+			if ( current_user_can( 'manage_woocommerce' ) && ( $order_count = wc_processing_order_count() ) ) {
+				foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+					if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
+						$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . $order_count . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
+						break;
 					}
-
-					$submenu['woocommerce'][ $key ] [0] = $menu_name;
-					break;
 				}
 			}
 		}
@@ -165,8 +169,8 @@ class WC_Admin_Menus {
 				$woocommerce_menu_order[] = 'separator-woocommerce';
 				$woocommerce_menu_order[] = $item;
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
-				unset( $menu_order[$woocommerce_separator] );
-				unset( $menu_order[$woocommerce_product] );
+				unset( $menu_order[ $woocommerce_separator ] );
+				unset( $menu_order[ $woocommerce_product ] );
 			} elseif ( !in_array( $item, array( 'separator-woocommerce' ) ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
@@ -183,10 +187,7 @@ class WC_Admin_Menus {
 	 * @return bool
 	 */
 	public function custom_menu_order() {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return false;
-		}
-		return true;
+		return current_user_can( 'manage_woocommerce' );
 	}
 
 	/**
@@ -237,41 +238,41 @@ class WC_Admin_Menus {
 		$exclude = array( 'view-order', 'add-payment-method', 'order-pay', 'order-received' );
 		?>
 		<div id="posttype-woocommerce-endpoints" class="posttypediv">
-    		<div id="tabs-panel-woocommerce-endpoints" class="tabs-panel tabs-panel-active">
-    			<ul id="woocommerce-endpoints-checklist" class="categorychecklist form-no-clear">
-    				<?php
-    				$i = -1;
-    				foreach ( WC()->query->query_vars as $key => $value ) {
-    					if ( in_array( $key, $exclude ) ) {
-    						continue;
-    					}
-    					?>
-    					<li>
-    						<label class="menu-item-title">
-	    						<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $key ); ?>
-    						</label>
-	    					<input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
-	    					<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $key ); ?>" />
-	    					<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_endpoint_url( $key, '', get_permalink( wc_get_page_id( 'myaccount' ) ) ) ); ?>" />
-	    					<input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />
-	    				</li>
-	    				<?php
-	    				$i --;
-	    			}
-	    			?>
-    			</ul>
-    		</div>
-    		<p class="button-controls">
-    			<span class="list-controls">
-    				<a href="<?php echo admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ); ?>" class="select-all"><?php _e( 'Select All', 'woocommerce' ); ?></a>
-    			</span>
-    			<span class="add-to-menu">
-    				<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php _e( 'Add to Menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints">
-    				<span class="spinner"></span>
-    			</span>
-    		</p>
-    	</div>
-    	<?php
+			<div id="tabs-panel-woocommerce-endpoints" class="tabs-panel tabs-panel-active">
+				<ul id="woocommerce-endpoints-checklist" class="categorychecklist form-no-clear">
+					<?php
+					$i = -1;
+					foreach ( WC()->query->query_vars as $key => $value ) {
+						if ( in_array( $key, $exclude ) ) {
+							continue;
+						}
+						?>
+						<li>
+							<label class="menu-item-title">
+								<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $key ); ?>
+							</label>
+							<input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
+							<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $key ); ?>" />
+							<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_endpoint_url( $key, '', get_permalink( wc_get_page_id( 'myaccount' ) ) ) ); ?>" />
+							<input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />
+						</li>
+						<?php
+						$i --;
+					}
+					?>
+				</ul>
+			</div>
+			<p class="button-controls">
+				<span class="list-controls">
+					<a href="<?php echo admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ); ?>" class="select-all"><?php _e( 'Select All', 'woocommerce' ); ?></a>
+				</span>
+				<span class="add-to-menu">
+					<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php _e( 'Add to Menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints">
+					<span class="spinner"></span>
+				</span>
+			</p>
+		</div>
+		<?php
 	}
 }
 

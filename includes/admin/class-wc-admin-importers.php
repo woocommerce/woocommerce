@@ -2,9 +2,9 @@
 /**
  * Setup importers for WC data.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -43,8 +43,10 @@ class WC_Admin_Importers {
 
 		if ( ! class_exists( 'WP_Importer' ) ) {
 			$class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
-			if ( file_exists( $class_wp_importer ) )
+
+			if ( file_exists( $class_wp_importer ) ) {
 				require $class_wp_importer;
+			}
 		}
 
 		// includes
@@ -60,15 +62,13 @@ class WC_Admin_Importers {
 	 *
 	 * WordPress import should work - however, it fails to import custom product attribute taxonomies.
 	 * This code grabs the file before it is imported and ensures the taxonomies are created.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function post_importer_compatibility() {
 		global $wpdb;
 
-		if ( empty( $_POST['import_id'] ) || ! class_exists( 'WXR_Parser' ) )
+		if ( empty( $_POST['import_id'] ) || ! class_exists( 'WXR_Parser' ) ) {
 			return;
+		}
 
 		$id          = (int) $_POST['import_id'];
 		$file        = get_attached_file( $id );
@@ -78,39 +78,44 @@ class WC_Admin_Importers {
 		if ( isset( $import_data['posts'] ) ) {
 			$posts = $import_data['posts'];
 
-			if ( $posts && sizeof( $posts ) > 0 ) foreach ( $posts as $post ) {
+			if ( $posts && sizeof( $posts ) > 0 ) {
 
-				if ( $post['post_type'] == 'product' ) {
+				foreach ( $posts as $post ) {
 
-					if ( $post['terms'] && sizeof( $post['terms'] ) > 0 ) {
+					if ( $post['post_type'] == 'product' ) {
 
-						foreach ( $post['terms'] as $term ) {
+						if ( $post['terms'] && sizeof( $post['terms'] ) > 0 ) {
 
-							$domain = $term['domain'];
+							foreach ( $post['terms'] as $term ) {
 
-							if ( strstr( $domain, 'pa_' ) ) {
+								$domain = $term['domain'];
 
-								// Make sure it exists!
-								if ( ! taxonomy_exists( $domain ) ) {
+								if ( strstr( $domain, 'pa_' ) ) {
 
-									$nicename = strtolower( sanitize_title( str_replace( 'pa_', '', $domain ) ) );
+									// Make sure it exists!
+									if ( ! taxonomy_exists( $domain ) ) {
 
-									$exists_in_db = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_id FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $nicename ) );
+										$nicename = strtolower( sanitize_title( str_replace( 'pa_', '', $domain ) ) );
 
-									// Create the taxonomy
-									if ( ! $exists_in_db )
-										$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $nicename, 'attribute_type' => 'select', 'attribute_orderby' => 'menu_order' ), array( '%s', '%s', '%s' ) );
+										$exists_in_db = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_id FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $nicename ) );
 
-									// Register the taxonomy now so that the import works!
-									register_taxonomy( $domain,
-								        apply_filters( 'woocommerce_taxonomy_objects_' . $domain, array('product') ),
-								        apply_filters( 'woocommerce_taxonomy_args_' . $domain, array(
-								            'hierarchical' => true,
-								            'show_ui' => false,
-								            'query_var' => true,
-								            'rewrite' => false,
-								        ) )
-								    );
+										// Create the taxonomy
+										if ( ! $exists_in_db ) {
+											$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $nicename, 'attribute_type' => 'select', 'attribute_orderby' => 'menu_order', 'attribute_public' => 0 ), array( '%s', '%s', '%s' ) );
+										}
+
+										// Register the taxonomy now so that the import works!
+										register_taxonomy(
+											$domain,
+											apply_filters( 'woocommerce_taxonomy_objects_' . $domain, array( 'product' ) ),
+											apply_filters( 'woocommerce_taxonomy_args_' . $domain, array(
+												'hierarchical' => true,
+												'show_ui' => false,
+												'query_var' => true,
+												'rewrite' => false,
+											) )
+										);
+									}
 								}
 							}
 						}

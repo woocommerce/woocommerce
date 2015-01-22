@@ -20,8 +20,6 @@ class WC_Report_Most_Stocked extends WC_Report_Stock {
 
 	/**
 	 * Get Products matching stock criteria
-	 *
-	 * @access public
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;
@@ -41,6 +39,8 @@ class WC_Report_Most_Stocked extends WC_Report_Stock {
 			AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
 			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$stock}'
 		";
+
+		$query_from = apply_filters( 'woocommerce_report_most_stocked_query_from', $query_from );
 
 		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT posts.ID as id, posts.post_parent as parent {$query_from} GROUP BY posts.ID ORDER BY CAST(postmeta.meta_value AS SIGNED) DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) );
 		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" );

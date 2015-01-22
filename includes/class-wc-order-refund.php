@@ -17,6 +17,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * Init/load the refund object. Called from the contructor.
 	 *
 	 * @param  string|int|WP_Post|WC_Order_Refund $refund Refund to init
+	 * @uses   WP_POST
 	 */
 	protected function init( $refund ) {
 		if ( is_numeric( $refund ) ) {

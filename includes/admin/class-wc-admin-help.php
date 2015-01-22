@@ -2,9 +2,9 @@
 /**
  * Add some content to the help tab.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -32,13 +32,14 @@ class WC_Admin_Help {
 	public function add_tabs() {
 		$screen = get_current_screen();
 
-		if ( ! in_array( $screen->id, wc_get_screen_ids() ) )
+		if ( ! in_array( $screen->id, wc_get_screen_ids() ) ) {
 			return;
+		}
 
 		$screen->add_help_tab( array(
-			'id'		=> 'woocommerce_docs_tab',
-			'title'		=> __( 'Documentation', 'woocommerce' ),
-			'content'	=>
+			'id'        => 'woocommerce_docs_tab',
+			'title'     => __( 'Documentation', 'woocommerce' ),
+			'content'   =>
 
 				'<p>' . __( 'Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please read the documentation.', 'woocommerce' ) . '</p>' .
 
@@ -47,22 +48,22 @@ class WC_Admin_Help {
 		) );
 
 		$screen->add_help_tab( array(
-			'id'		=> 'woocommerce_support_tab',
-			'title'		=> __( 'Support', 'woocommerce' ),
-			'content'	=>
+			'id'        => 'woocommerce_support_tab',
+			'title'     => __( 'Support', 'woocommerce' ),
+			'content'   =>
 
 				'<p>' . sprintf( __( 'After %sreading the documentation%s, for further assistance you can use our %scommunity forum%s if you get stuck. For help with premium add-ons from WooThemes, or if you are a WooThemes customer, you can %suse our helpdesk%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/documentation/plugins/woocommerce/">', '</a>', '<a href="https://support.woothemes.com/hc/communities/public/topics">', '</a>', '<a href="http://support.woothemes.com">', '</a>' ) . '</p>' .
 
 				'<p>' . __( 'Before asking for help we recommend checking the status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
 
-				'<p><a href="' . admin_url('admin.php?page=wc-status') . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://support.woothemes.com/hc/communities/public/topics' . '" class="button">' . __( 'WooThemes Community Support', 'woocommerce' ) . '</a> <a href="' . 'http://support.woothemes.com' . '" class="button">' . __( 'WooThemes Customer Support', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://support.woothemes.com/hc/communities/public/topics' . '" class="button">' . __( 'WooThemes Community Support', 'woocommerce' ) . '</a> <a href="' . 'http://support.woothemes.com' . '" class="button">' . __( 'WooThemes Customer Support', 'woocommerce' ) . '</a></p>'
 
 		) );
 
 		$screen->add_help_tab( array(
-			'id'		=> 'woocommerce_bugs_tab',
-			'title'		=> __( 'Found a bug?', 'woocommerce' ),
-			'content'	=>
+			'id'        => 'woocommerce_bugs_tab',
+			'title'     => __( 'Found a bug?', 'woocommerce' ),
+			'content'   =>
 
 				'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. Be as descriptive as possible and please include your <a href="%s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
 

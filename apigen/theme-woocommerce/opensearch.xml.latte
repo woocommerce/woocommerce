@@ -1,0 +1,11 @@
+{contentType xml}
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+<ShortName>{$config->title}</ShortName>
+<Description>{$config->title} Documentation</Description>
+<Url type="text/html" method="GET" template="http://www.google.com/cse?cx={$config->googleCseId|url}&amp;ie=UTF-8&amp;q={l}searchTerms{r}"/>
+<Image width="16" height="16">{$config->baseUrl}/favicon.ico</Image>
+<SyndicationRight>open</SyndicationRight>
+<InputEncoding>UTF-8</InputEncoding>
+<OutputEncoding>UTF-8</OutputEncoding>
+</OpenSearchDescription>

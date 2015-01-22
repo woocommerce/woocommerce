@@ -115,7 +115,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'title'   => __( 'Shipping Destination', 'woocommerce' ),
 				'desc'    => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
 				'id'      => 'woocommerce_ship_to_destination',
-				'default' => 'shipping',
+				'default' => 'billing',
 				'type'    => 'radio',
 				'options' => array(
 					'shipping'     => __( 'Default to shipping address', 'woocommerce' ),
@@ -133,7 +133,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'id'       => 'woocommerce_ship_to_countries',
 				'default'  => '',
 				'type'     => 'select',
-				'class'    => 'chosen_select',
+				'class'    => 'wc-enhanced-select',
 				'desc_tip' => false,
 				'options'  => array(
 					''         => __( 'Ship to all countries you sell to', 'woocommerce' ),
@@ -275,6 +275,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section_class->id );
 		}
+
+		// Increments the transient version to invalidate cache
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 }
 

@@ -201,15 +201,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			WC_Admin_Settings::save_fields( $settings );
 
 		} else {
-
-			// Load mailer
-			$mailer = WC()->mailer();
+			// Init email classes
+			WC()->mailer()->init();
 
 			if ( class_exists( $current_section ) ) {
 
 				$current_section_class = new $current_section();
 				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section_class->id );
-				WC()->mailer()->init();
 			} else {
 				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 			}

@@ -18,43 +18,70 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
-	/** @var string Payment method ID. */
-	public $id;
-
-	/** @var string Set if the place order button should be renamed on selection. */
+	/**
+	 * Set if the place order button should be renamed on selection
+	 * @var string
+	 */
 	public $order_button_text;
 
-	/** @var string Payment method title. */
+	/**
+	 * Payment method title
+	 * @var string
+	 */
 	public $title;
 
-	/** @var string Chosen payment method id. */
+	/**
+	 * Chosen payment method id
+	 * @var bool
+	 */
 	public $chosen;
 
-	/** @var bool True if the gateway shows fields on the checkout. */
+	/**
+	 * True if the gateway shows fields on the checkout
+	 * @var bool
+	 */
 	public $has_fields;
 
-	/** @var array Array of countries this gateway is allowed for. */
+	/**
+	 * Countries this gateway is allowed for
+	 * @var array
+	 */
 	public $countries;
 
-	/** @var string Available for all counties or specific. */
+	/**
+	 * Available for all counties or specific
+	 * @var string
+	 */
 	public $availability;
 
-	/** @var string 'yes' if the method is enabled. */
-	public $enabled;
-
-	/** @var string Icon for the gateway. */
+	/**
+	 * Icon for the gateway
+	 * @var string
+	 */
 	public $icon;
 
-	/** @var string Description for the gateway. */
+	/**
+	 * Description for the gateway
+	 * @var string
+	 */
 	public $description;
 
-	/** @var array Array of supported features such as 'default_credit_card_form', 'refunds' */
+	/**
+	 * Supported features such as 'default_credit_card_form', 'refunds'
+	 * @var array
+	 */
 	public $supports = array( 'products' );
 
-	/** @var int Maximum transaction amount, zero does not define a maximum */
+	/**
+	 * Maximum transaction amount, zero does not define a maximum
+	 * @var int
+	 */
 	public $max_amount = 0;
 
-	/** @var string Optional URL to view a transaction */
+	/**
+	 * Optional URL to view a transaction
+	 * @var string
+	 */
 	public $view_transaction_url = '';
 
 	/**
@@ -213,7 +240,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @param  int $order_id
 	 * @param  float $amount
 	 * @param  string $reason
-	 * @return  boolean True or false based on success, or a WP_Error object
+	 * @return bool|WP_Error True or false based on success, or a WP_Error object
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		return false;

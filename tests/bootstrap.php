@@ -68,8 +68,7 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WP_UNINSTALL_PLUGIN', true );
 		include( $this->plugin_dir . '/uninstall.php' );
 
-		$installer = include( $this->plugin_dir . '/includes/class-wc-install.php' );
-		$installer->install();
+		WC_Install::install();
 
 		// reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374
 		$GLOBALS['wp_roles']->reinit();
@@ -101,6 +100,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-coupon.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-fee.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-shipping.php' );
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-customer.php' );
 	}
 
 	/**

@@ -7,7 +7,7 @@
  * @class 		WC_Cart
  * @version		2.1.0
  * @package		WooCommerce/Classes
- * @category	Class
+ * @category		Class
  * @author 		WooThemes
  */
 class WC_Checkout {
@@ -76,7 +76,6 @@ class WC_Checkout {
 	 * Constructor for the checkout class. Hooks in methods and defines checkout fields.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function __construct () {
 		add_action( 'woocommerce_checkout_billing', array( $this,'checkout_form_billing' ) );
@@ -151,7 +150,17 @@ class WC_Checkout {
 	}
 
 	/**
-	 * create_order function.
+	 * Create an order.
+	 *
+	 * Error codes:
+	 * 		400 - Cannot insert order into the database
+	 * 		401 - Cannote update existing order
+	 * 		402 - Cannot create line item
+	 * 		403 - Cannot create fee item
+	 * 		404 - Cannot create shipping item
+	 * 		405 - Cannot create tax item
+	 * 		406 - Cannot create coupon item
+	 *
 	 * @access public
 	 * @throws Exception
 	 * @return int|WP_ERROR
@@ -184,7 +193,7 @@ class WC_Checkout {
 				$order                  = wc_update_order( $order_data );
 
 				if ( is_wp_error( $order ) ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 401 ) );
 				} else {
 					$order->remove_order_items();
 					do_action( 'woocommerce_resume_order', $order_id );
@@ -195,7 +204,7 @@ class WC_Checkout {
 				$order = wc_create_order( $order_data );
 
 				if ( is_wp_error( $order ) ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 400 ) );
 				} else {
 					$order_id = $order->id;
 					do_action( 'woocommerce_new_order', $order_id );
@@ -220,7 +229,7 @@ class WC_Checkout {
 				);
 
 				if ( ! $item_id ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 402 ) );
 				}
 
 				// Allow plugins to add order item meta
@@ -232,7 +241,7 @@ class WC_Checkout {
 				$item_id = $order->add_fee( $fee );
 
 				if ( ! $item_id ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 403 ) );
 				}
 
 				// Allow plugins to add order item meta to fees
@@ -245,7 +254,7 @@ class WC_Checkout {
 					$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
 
 					if ( ! $item_id ) {
-						throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+						throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 404 ) );
 					}
 
 					// Allows plugins to add order item meta to shipping
@@ -255,15 +264,15 @@ class WC_Checkout {
 
 			// Store tax rows
 			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
-				if ( ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) && 'zero-rated' !== $tax_rate_id ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				if ( $tax_rate_id && ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 405 ) );
 				}
 			}
 
 			// Store coupons
 			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-				if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ) ) ) {
-					throw new Exception( __( 'Error: Unable to create order. Please try again.', 'woocommerce' ) );
+				if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ), WC()->cart->get_coupon_discount_tax_amount( $code ) ) ) {
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 406 ) );
 				}
 			}
 
@@ -289,8 +298,8 @@ class WC_Checkout {
 			$order->set_address( $shipping_address, 'shipping' );
 			$order->set_payment_method( $this->payment_method );
 			$order->set_total( WC()->cart->shipping_total, 'shipping' );
-			$order->set_total( WC()->cart->get_order_discount_total(), 'order_discount' );
 			$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
+			$order->set_total( WC()->cart->get_cart_discount_tax_total(), 'cart_discount_tax' );
 			$order->set_total( WC()->cart->tax_total, 'tax' );
 			$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
 			$order->set_total( WC()->cart->total );
@@ -301,8 +310,10 @@ class WC_Checkout {
 					foreach ( $billing_address as $key => $value ) {
 						update_user_meta( $this->customer_id, 'billing_' . $key, $value );
 					}
-					foreach ( $shipping_address as $key => $value ) {
-						update_user_meta( $this->customer_id, 'shipping_' . $key, $value );
+					if ( WC()->cart->needs_shipping() ) {
+						foreach ( $shipping_address as $key => $value ) {
+							update_user_meta( $this->customer_id, 'shipping_' . $key, $value );
+						}
 					}
 				}
 				do_action( 'woocommerce_checkout_update_user_meta', $this->customer_id, $this->posted );

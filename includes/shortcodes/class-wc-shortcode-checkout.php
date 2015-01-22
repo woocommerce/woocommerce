@@ -205,14 +205,15 @@ class WC_Shortcode_Checkout {
 		wc_print_notices();
 
 		// Check cart has contents
-		if ( sizeof( WC()->cart->get_cart() ) == 0 )
+		if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
 			return;
+		}
+
+		// Check cart contents for errors
+		do_action( 'woocommerce_check_cart_items' );
 
 		// Calc totals
 		WC()->cart->calculate_totals();
-
-		// Check cart contents for errors
-		do_action('woocommerce_check_cart_items');
 
 		// Get checkout object
 		$checkout = WC()->checkout();

@@ -27,6 +27,9 @@ switch( $template ) {
 		echo '</div></div></div>';
 		get_sidebar( 'content' );
 		break;
+	case 'twentyfifteen' :
+		echo '</div></div>';
+		break;
 	default :
 		echo '</div></div>';
 		break;

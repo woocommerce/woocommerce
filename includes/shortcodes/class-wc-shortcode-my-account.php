@@ -224,6 +224,7 @@ class WC_Shortcode_My_Account {
 		if ( empty( $_POST['user_login'] ) ) {
 
 			wc_add_notice( __( 'Enter a username or e-mail address.', 'woocommerce' ), 'error' );
+			return false;
 
 		} else {
 			// Check on username first, as customers can use emails as usernames.
@@ -231,7 +232,7 @@ class WC_Shortcode_My_Account {
 			$user_data = get_user_by( 'login', $login );
 		}
 
-		// If no user found, check if it login is emaill and lookup user based on email.
+		// If no user found, check if it login is email and lookup user based on email.
 		if ( ! $user_data && is_email( $_POST['user_login'] ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
 			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
 		}
@@ -239,6 +240,11 @@ class WC_Shortcode_My_Account {
 		do_action( 'lostpassword_post' );
 
 		if ( ! $user_data ) {
+			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
+			return false;
+		}
+
+		if ( is_multisite() && ! is_user_member_of_blog( $user_data->id, get_current_blog_id() ) ) {
 			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
 			return false;
 		}
@@ -279,7 +285,7 @@ class WC_Shortcode_My_Account {
 		$wpdb->update( $wpdb->users, array( 'user_activation_key' => $hashed ), array( 'user_login' => $user_login ) );
 
 		// Send email notification
-		$mailer = WC()->mailer();
+		WC()->mailer(); // load email classes
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
 		wc_add_notice( __( 'Check your e-mail for the confirmation link.', 'woocommerce' ) );
@@ -291,10 +297,9 @@ class WC_Shortcode_My_Account {
 	 *
 	 * @uses $wpdb WordPress Database object
 	 *
-	 * @access public
 	 * @param string $key Hash to validate sending user's password
 	 * @param string $login The user login
-	 * @return object|bool User's database row on success, false for invalid keys
+	 * @return WP_USER|bool User's database row on success, false for invalid keys
 	 */
 	public static function check_password_reset_key( $key, $login ) {
 		global $wpdb, $wp_hasher;
@@ -327,7 +332,7 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		return $user;
+		return get_userdata( $user->ID );
 	}
 
 	/**

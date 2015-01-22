@@ -1,0 +1,8 @@
+{layout '@layout.latte'}
+{var $robots = false}
+
+{block title}File {$fileName}{/block}
+
+{block content}
+<pre><code>{$source|replaceRE:'~<span class="line">(\\s*(\\d+):\\s*)</span>([^\\n]*(?:\\n|$))~','<span id="$2" class="l"><a href="#$2">$1</a>$3</span>'|noescape}</code></pre>
+{/block}

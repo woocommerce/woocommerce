@@ -1,18 +1,18 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Recent Reviews Widget
  *
- * @author 		WooThemes
- * @category 	Widgets
- * @package 	WooCommerce/Widgets
- * @version 	2.1.0
- * @extends 	WC_Widget
+ * @author   WooThemes
+ * @category Widgets
+ * @package  WooCommerce/Widgets
+ * @version  2.3.0
+ * @extends  WC_Widget
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 class WC_Widget_Recent_Reviews extends WC_Widget {
 
 	/**
@@ -38,6 +38,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 				'label' => __( 'Number of reviews to show', 'woocommerce' )
 			)
 		);
+
 		parent::__construct();
 	}
 
@@ -45,27 +46,27 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 	 * widget function.
 	 *
 	 * @see WP_Widget
-	 * @access public
+	 *
 	 * @param array $args
 	 * @param array $instance
+	 *
 	 * @return void
 	 */
 	 public function widget( $args, $instance ) {
 		global $comments, $comment;
 
-		if ( $this->get_cached_widget( $args ) )
+		if ( $this->get_cached_widget( $args ) ) {
 			return;
+		}
 
 		ob_start();
-		extract( $args );
 
-		$title    = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
-		$number   = absint( $instance['number'] );
+		$number   = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product' ) );
 
 		if ( $comments ) {
-			echo $before_widget;
-			if ( $title ) echo $before_title . $title . $after_title;
+			$this->widget_start( $args, $instance );
+
 			echo '<ul class="product_list_widget">';
 
 			foreach ( (array) $comments as $comment ) {
@@ -80,7 +81,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 				echo $_product->get_image();
 
-				echo $_product->get_title().'</a>';
+				echo $_product->get_title() . '</a>';
 
 				echo $rating_html;
 
@@ -90,7 +91,8 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 			}
 
 			echo '</ul>';
-			echo $after_widget;
+
+			$this->widget_end( $args );
 		}
 
 		$content = ob_get_clean();

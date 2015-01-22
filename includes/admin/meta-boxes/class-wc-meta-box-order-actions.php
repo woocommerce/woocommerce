@@ -25,11 +25,12 @@ class WC_Meta_Box_Order_Actions {
 	public static function output( $post ) {
 		global $theorder;
 
+		// This is used by some callbacks attached to hooks such as woocommerce_order_actions which rely on the global to determine if actions should be displayed for certain orders.
 		if ( ! is_object( $theorder ) ) {
 			$theorder = wc_get_order( $post->ID );
 		}
 
-		$order = $theorder;
+		$order_type_object = get_post_type_object( $post->post_type );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -41,7 +42,7 @@ class WC_Meta_Box_Order_Actions {
 					<optgroup label="<?php _e( 'Resend order emails', 'woocommerce' ); ?>">
 						<?php
 						$mailer           = WC()->mailer();
-						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
+						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
 						$mails            = $mailer->get_emails();
 
 						if ( ! empty( $mails ) ) {
@@ -67,7 +68,7 @@ class WC_Meta_Box_Order_Actions {
 			<li class="wide">
 				<div id="delete-action"><?php
 
-					if ( current_user_can( "delete_post", $post->ID ) ) {
+					if ( current_user_can( 'delete_post', $post->ID ) ) {
 
 						if ( ! EMPTY_TRASH_DAYS ) {
 							$delete_text = __( 'Delete Permanently', 'woocommerce' );
@@ -78,7 +79,7 @@ class WC_Meta_Box_Order_Actions {
 					}
 				?></div>
 
-				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php _e( 'Save Order', 'woocommerce' ); ?>" data-tip="<?php _e( 'Save/update the order', 'woocommerce' ); ?>" />
+				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" />
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
@@ -135,8 +136,9 @@ class WC_Meta_Box_Order_Actions {
 
 			} else {
 
-				do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
-
+				if ( ! did_action( 'woocommerce_order_action_' . sanitize_title( $action ) ) ) {
+					do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
+				}
 			}
 		}
 	}
@@ -147,13 +149,12 @@ class WC_Meta_Box_Order_Actions {
 	 * @param $location
 	 *
 	 * @since  2.3.0
-	 * @access public
 	 *
 	 * @static
 	 *
 	 * @return string
 	 */
-	public static function set_email_sent_message($location) {
+	public static function set_email_sent_message( $location ) {
 		return add_query_arg( 'message', 11, $location );
 	}
 

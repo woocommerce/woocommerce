@@ -2,9 +2,9 @@
 /**
  * Admin Dashboard
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -54,8 +54,8 @@ class WC_Admin_Dashboard {
 		$query            = array();
 		$query['fields']  = "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts";
 		$query['join']    = "INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id ";
-		$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'reports' ) ) . "' ) ";
-		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
+		$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'sales-reports' ) ) . "' ) ";
+		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold', 'refunded' ) ) ) . "' ) ";
 		$query['where']  .= "AND postmeta.meta_key   = '_order_total' ";
 		$query['where']  .= "AND posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
 		$query['where']  .= "AND posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";
@@ -143,12 +143,12 @@ class WC_Admin_Dashboard {
 				</li>
 			<?php endif; ?>
 			<li class="processing-orders">
-				<a href="<?php echo admin_url( 'edit.php?s&post_status=processing&post_type=shop_order' ); ?>">
+				<a href="<?php echo admin_url( 'edit.php?post_status=wc-processing&post_type=shop_order' ); ?>">
 					<?php printf( _n( "<strong>%s order</strong> awaiting processing", "<strong>%s orders</strong> awaiting processing", $processing_count, 'woocommerce' ), $processing_count ); ?>
 				</a>
 			</li>
 			<li class="on-hold-orders">
-				<a href="<?php echo admin_url( 'edit.php?s&post_status=on-hold&post_type=shop_order' ); ?>">
+				<a href="<?php echo admin_url( 'edit.php?post_status=wc-on-hold&post_type=shop_order' ); ?>">
 					<?php printf( _n( "<strong>%s order</strong> on-hold", "<strong>%s orders</strong> on-hold", $on_hold_count, 'woocommerce' ), $on_hold_count ); ?>
 				</a>
 			</li>

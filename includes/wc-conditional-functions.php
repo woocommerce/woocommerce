@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Core
  * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @version     2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -141,18 +141,27 @@ if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
 	 * @param  string $endpoint
 	 * @return bool
 	 */
-	function is_wc_endpoint_url( $endpoint ) {
+	function is_wc_endpoint_url( $endpoint = false ) {
 		global $wp;
 
 		$wc_endpoints = WC()->query->get_query_vars();
 
-		if ( ! isset( $wc_endpoints[ $endpoint ] ) ) {
-			return false;
-		} else {
-			$endpoint_var = $wc_endpoints[ $endpoint ];
-		}
+		if ( $endpoint ) {
+			if ( ! isset( $wc_endpoints[ $endpoint ] ) ) {
+				return false;
+			} else {
+				$endpoint_var = $wc_endpoints[ $endpoint ];
+			}
 
-		return isset( $wp->query_vars[ $endpoint_var ] ) ? true : false;
+			return isset( $wp->query_vars[ $endpoint_var ] );
+		} else {
+			foreach ( $wc_endpoints as $key => $value ) {
+				if ( isset( $wp->query_vars[ $key ] ) ) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 }
 
@@ -166,6 +175,21 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 */
 	function is_account_page() {
 		return is_page( wc_get_page_id( 'myaccount' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
+	}
+}
+
+if ( ! function_exists( 'is_view_order_page' ) ) {
+
+	/**
+	* is_view_order_page - Returns true when on the view order page.
+	*
+	* @access public
+	* @return bool
+	*/
+	function is_view_order_page() {
+		global $wp;
+
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['view-order'] ) ) ? true : false;
 	}
 }
 
@@ -292,4 +316,83 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 
 		return ( in_array( $name, array_keys( $attributes ) ) && in_array( $value, $attributes[ $name ] ) );
 	}
+}
+
+if ( ! function_exists( 'wc_tax_enabled' ) ) {
+
+	/**
+	 * Are store-wide taxes enabled?
+	 *
+	 * @return bool
+	 */
+	function wc_tax_enabled() {
+		return get_option( 'woocommerce_calc_taxes' ) === 'yes';
+	}
+}
+
+if ( ! function_exists( 'wc_prices_include_tax' ) ) {
+
+	/**
+	 * Are prices inclusive of tax?
+	 *
+	 * @return bool
+	 */
+	function wc_prices_include_tax() {
+		return wc_tax_enabled() && get_option( 'woocommerce_prices_include_tax' ) === 'yes';
+	}
+}
+
+/**
+ * Check if the given topic is a valid webhook topic, a topic is valid if:
+ *
+ * + starts with `action.woocommerce_` or `action.wc_`
+ * + it has a valid resource & event
+ *
+ * @param string $topic webhook topic
+ * @return bool true if valid, false otherwise
+ */
+function wc_is_webhook_valid_topic( $topic ) {
+
+	// custom topics are prefixed with woocommerce_ or wc_ are valid
+	if ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) {
+		return true;
+	}
+
+	@list( $resource, $event ) = explode( '.', $topic );
+
+	if ( ! isset( $resource ) || ! isset( $event ) ) {
+		return false;
+	}
+
+	$valid_resources = apply_filters( 'woocommerce_valid_webhook_resources', array( 'coupon', 'customer', 'order', 'product' ) );
+	$valid_events    = apply_filters( 'woocommerce_valid_webhook_events', array( 'created', 'updated', 'deleted' ) );
+
+	if ( in_array( $resource, $valid_resources ) && in_array( $event, $valid_events ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+
+/**
+ * Simple check for validating a URL, it must start with http:// or https://
+ * and pass FILTER_VALIDATE_URL validation
+ *
+ * @param string $url
+ * @return bool
+ */
+function wc_is_valid_url( $url ) {
+
+	// must start with http:// or https://
+	if ( 0 !== strpos( $url, 'http://' ) && 0 !== strpos( $url, 'https://' ) ) {
+		return false;
+	}
+
+	// must pass validation
+	if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+		return false;
+	}
+
+	return true;
 }

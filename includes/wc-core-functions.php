@@ -11,7 +11,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 // Include core functions (available in both admin and frontend)
@@ -569,8 +569,7 @@ function wc_get_log_file_path( $handle ) {
  * Init for our rewrite rule fixes
  */
 function wc_fix_rewrite_rules_init() {
-	$permalinks        = get_option( 'woocommerce_permalinks' );
-	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+	$permalinks = get_option( 'woocommerce_permalinks' );
 
 	if ( ! empty( $permalinks['use_verbose_page_rules'] ) ) {
 		$GLOBALS['wp_rewrite']->use_verbose_page_rules = true;
@@ -662,7 +661,7 @@ add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
  * @return array
  */
 function wc_get_core_supported_themes() {
-	return array( 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+	return array( 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 }
 
 /**
@@ -680,3 +679,91 @@ function wc_deliver_webhook_async( $webhook_id, $arg ) {
 	$webhook->deliver( $arg );
 }
 add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
+
+/**
+ * Formats a string in the format COUNTRY:STATE into an array.
+ * @since 2.3.0
+ * @param  string $country_string
+ * @return array
+ */
+function wc_format_country_state_string( $country_string ) {
+	if ( strstr( $country_string, ':' ) ) {
+		list( $country, $state ) = explode( ':', $country_string );
+	} else {
+		$country = $country_string;
+		$state   = '';
+	}
+	return array(
+		'country' => $country,
+		'state'   => $state
+	);
+}
+
+/**
+ * Get the store's base location.
+ * @todo should the woocommerce_default_country option be renamed to contain 'base'?
+ * @since 2.3.0
+ * @return array
+ */
+function wc_get_base_location() {
+	$default = apply_filters( 'woocommerce_get_base_location', get_option( 'woocommerce_default_country' ) );
+
+	return wc_format_country_state_string( $default );
+}
+
+/**
+ * Get the customer's default location. Filtered, and set to base location or left blank.
+ * @todo should the woocommerce_default_country option be renamed to contain 'base'?
+ * @since 2.3.0
+ * @return array
+ */
+function wc_get_customer_default_location() {
+	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
+		case 'geolocation' :
+			$location = WC_Geolocation::geolocate_ip();
+
+			// Base fallback
+			if ( empty( $location['country'] ) ) {
+				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+			}
+		break;
+		case 'base' :
+			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+		break;
+		default :
+			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', '' ) );
+		break;
+	}
+
+	return $location;
+}
+
+// This function can be removed when WP 3.9.2 or greater is required
+if ( ! function_exists( 'hash_equals' ) ) :
+	/**
+	 * Compare two strings in constant time.
+	 *
+	 * This function was added in PHP 5.6.
+	 * It can leak the length of a string.
+	 *
+	 * @since 3.9.2
+	 *
+	 * @param string $a Expected string.
+	 * @param string $b Actual string.
+	 * @return bool Whether strings are equal.
+	 */
+	function hash_equals( $a, $b ) {
+		$a_length = strlen( $a );
+		if ( $a_length !== strlen( $b ) ) {
+			return false;
+		}
+		$result = 0;
+
+		// Do not attempt to "optimize" this.
+		for ( $i = 0; $i < $a_length; $i++ ) {
+			$result |= ord( $a[ $i ] ) ^ ord( $b[ $i ] );
+		}
+
+		return $result === 0;
+	}
+endif;

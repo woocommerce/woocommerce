@@ -23,7 +23,9 @@ module.exports = function( grunt ) {
 				'!<%= dirs.js %>/admin/*.min.js',
 				'!<%= dirs.js %>/admin/jquery.flot*',
 				'<%= dirs.js %>/frontend/*.js',
-				'!<%= dirs.js %>/frontend/*.min.js'
+				'!<%= dirs.js %>/frontend/*.min.js',
+				'includes/gateways/simplify-commerce/assets/js/*.js',
+				'!includes/gateways/simplify-commerce/assets/js/*.min.js'
 			]
 		},
 
@@ -53,7 +55,8 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/admin/jquery.flot.resize.min.js': ['<%= dirs.js %>/admin/jquery.flot.resize.js'],
 					'<%= dirs.js %>/admin/jquery.flot.stack.min.js': ['<%= dirs.js %>/admin/jquery.flot.stack.js'],
 					'<%= dirs.js %>/admin/jquery.flot.time.min.js': ['<%= dirs.js %>/admin/jquery.flot.time.js'],
-					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js']
+					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js'],
+					'<%= dirs.js %>/jquery-blockui/jquery.blockUI.min.js': ['<%= dirs.js %>/jquery-blockui/jquery.blockUI.js']
 				}
 			},
 			frontend: {
@@ -65,6 +68,18 @@ module.exports = function( grunt ) {
 						'!*.min.js'
 					],
 					dest: '<%= dirs.js %>/frontend/',
+					ext: '.min.js'
+				}]
+			},
+			simplify_commerce: {
+				files: [{
+					expand: true,
+					cwd: 'includes/gateways/simplify-commerce/assets/js/',
+					src: [
+						'*.js',
+						'!*.min.js'
+					],
+					dest: 'includes/gateways/simplify-commerce/assets/js/',
 					ext: '.min.js'
 				}]
 			}
@@ -195,8 +210,7 @@ module.exports = function( grunt ) {
 			},
 			apigen: {
 				command: [
-					'cd apigen/',
-					'php apigen.php --source ../ --destination ../wc-apidocs --download yes --template-config ./templates/woodocs/config.neon --title "WooCommerce" --exclude "*/mijireh/*" --exclude "*/includes/libraries/*" --exclude "*/api/*" --exclude "*/i18n/*" --exclude "*/node_modules/*" --exclude "*/apigen/*" --exclude "*/wc-apidocs/*"'
+					'apigen generate'
 				].join( '&&' )
 			}
 		},
