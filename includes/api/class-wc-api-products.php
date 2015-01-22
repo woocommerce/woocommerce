@@ -1519,7 +1519,7 @@ class WC_API_Products extends WC_API_Resource {
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
 		foreach ( $attribute_taxonomies as $key => $tax ) {
-			if ( $slug == $tax->attribute_label ) {
+			if ( $slug == $tax->attribute_name ) {
 				$taxonomy = 'pa_' . $tax->attribute_name;
 
 				break;
