@@ -142,7 +142,7 @@ function wc_get_weight( $weight, $to_unit ) {
  * @return string
  */
 function wc_trim_zeros( $price ) {
-	return preg_replace( '/' . preg_quote( get_option( 'woocommerce_price_decimal_sep' ), '/' ) . '0++$/', '', $price );
+	return preg_replace( '/' . preg_quote( wc_price_decimal_separator(), '/' ) . '0++$/', '', $price );
 }
 
 /**
@@ -184,7 +184,7 @@ function wc_format_refund_total( $amount ) {
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$locale   = localeconv();
-	$decimals = array( get_option( 'woocommerce_price_decimal_sep' ), $locale['decimal_point'], $locale['mon_decimal_point'] );
+	$decimals = array( wc_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
 	// Remove locale from string
 	if ( ! is_float( $number ) ) {
@@ -230,7 +230,7 @@ function wc_float_to_string( $float ) {
  * @return string
  */
 function wc_format_localized_price( $value ) {
-	return str_replace( '.', get_option( 'woocommerce_price_decimal_sep' ), strval( $value ) );
+	return str_replace( '.', wc_price_decimal_separator(), strval( $value ) );
 }
 
 /**
@@ -310,6 +310,26 @@ function get_woocommerce_price_format() {
 }
 
 /**
+ * Return the thousand separator for prices
+ * @since  2.3
+ * @return string
+ */
+function wc_price_thousand_separator() {
+	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
+	return $separator;
+}
+
+/**
+ * Return the decimal separator for prices
+ * @since  2.3
+ * @return string
+ */
+function wc_price_decimal_separator() {
+	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
+	return $separator ? $separator : '.';
+}
+
+/**
  * Format the price with a currency symbol.
  *
  * @param float $price
@@ -324,8 +344,8 @@ function wc_price( $price, $args = array() ) {
 	$num_decimals    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 	$currency        = isset( $args['currency'] ) ? $args['currency'] : '';
 	$currency_symbol = get_woocommerce_currency_symbol($currency);
-	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
-	$thousands_sep   = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
+	$decimal_sep     = wc_price_decimal_separator();
+	$thousands_sep   = wc_price_thousand_separator();
 
 	if ( $price < 0 ) {
 		$price    = $price * -1;
