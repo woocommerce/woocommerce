@@ -205,11 +205,12 @@ class WC_Product_Variable extends WC_Product {
 				$price      = get_post_meta( $child_id, '_price', true );
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
 				if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price ) {
-					return true;
+					$is_on_sale = true;
 				}
 			}
 		}
-		return false;
+		$is_on_sale = false;
+		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale, $this );
 	}
 
 	/**
@@ -222,14 +223,15 @@ class WC_Product_Variable extends WC_Product {
 		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_regular_price_variation_id', true );
 
 		if ( ! $variation_id ) {
-			return false;
+			$price = false;
 		}
+		else {
+			$price        = get_post_meta( $variation_id, '_regular_price', true );
 
-		$price        = get_post_meta( $variation_id, '_regular_price', true );
-
-		if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
-			$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-			$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
+			if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
+				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+				$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
+			}
 		}
 
 		return apply_filters( 'woocommerce_get_variation_regular_price', $price, $this, $min_or_max, $display );
@@ -245,15 +247,16 @@ class WC_Product_Variable extends WC_Product {
 		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_sale_price_variation_id', true );
 
 		if ( ! $variation_id ) {
-			return false;
+			$price = false;
 		}
+		else {
+			$price        = get_post_meta( $variation_id, '_sale_price', true );
 
-		$price        = get_post_meta( $variation_id, '_sale_price', true );
-
-		if ( $display ) {
-			$variation        = $this->get_child( $variation_id );
-			$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-			$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
+			if ( $display ) {
+				$variation        = $this->get_child( $variation_id );
+				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+				$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
+			}
 		}
 
 		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this, $min_or_max, $display );

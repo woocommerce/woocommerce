@@ -145,18 +145,19 @@ class WC_Product_Grouped extends WC_Product {
 			foreach ( $this->get_children() as $child_id ) {
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
 				if ( $sale_price !== "" && $sale_price >= 0 ) {
-					return true;
+					$is_on_sale = true;
 				}
 			}
 
 		} else {
 
 			if ( $this->sale_price && $this->sale_price == $this->price ) {
-				return true;
+				$is_on_sale = true;
 			}
 
 		}
-		return false;
+		$is_on_sale = false;
+		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale );
 	}
 
 
