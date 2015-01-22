@@ -547,14 +547,14 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 		</tr>
 		<tr>
 			<td data-export-label="Author URL"><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The developer or plugin\'s URL.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The theme developers URL.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo $active_theme->{'Author URI'}; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Child Theme"><?php _e( 'Child Theme', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current theme is a child theme.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php
-				echo is_child_theme() ? '<mark class="yes">' . '&#10004;' . '</mark>' : '<mark class="error">' . '&#10005; ' . sprintf( __( 'We recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'http://codex.wordpress.org/Child_Themes' ) . '</mark>';
+				echo is_child_theme() ? '<mark class="yes">' . '&#10004;' . '</mark>' : '&#10005; &ndash; ' . sprintf( __( 'If you\'re modifying WooCommerce or a parent theme you didn\'t build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'http://codex.wordpress.org/Child_Themes' );
 			?></td>
 		</tr>
 		<?php
@@ -573,7 +573,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 		</tr>
 		<tr>
 			<td data-export-label="Parent Theme Author URL"><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The developer or plugin URL', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The parent theme developers URL.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php echo $parent_theme->{'Author URI'}; ?></td>
 		</tr>
 		<?php endif ?>
