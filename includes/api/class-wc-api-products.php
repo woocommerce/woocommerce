@@ -1078,14 +1078,12 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Download limit
 			if ( isset( $data['download_limit'] ) ) {
-				$download_limit = absint( $data['download_limit'] );
-				update_post_meta( $id, '_download_limit', ( ! $download_limit ) ? '' : $download_limit );
+				update_post_meta( $id, '_download_limit', ( '' === $data['download_limit'] ) ? '' : absint( $data['download_limit'] ) );
 			}
 
 			// Download expiry
 			if ( isset( $data['download_expiry'] ) ) {
-				$download_expiry = absint( $data['download_expiry'] );
-				update_post_meta( $id, '_download_expiry', ( ! $download_expiry ) ? '' : $download_expiry );
+				update_post_meta( $id, '_download_expiry', ( '' === $data['download_expiry'] ) ? '' : absint( $data['download_expiry'] ) );
 			}
 
 			// Download type
