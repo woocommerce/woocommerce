@@ -200,6 +200,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
+		$is_on_sale = false;
 		if ( $this->has_child() ) {
 			foreach ( $this->get_children( true ) as $child_id ) {
 				$price      = get_post_meta( $child_id, '_price', true );
@@ -209,7 +210,6 @@ class WC_Product_Variable extends WC_Product {
 				}
 			}
 		}
-		$is_on_sale = false;
 		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale, $this );
 	}
 

@@ -140,6 +140,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
+		$is_on_sale = false;
 		if ( $this->has_child() ) {
 
 			foreach ( $this->get_children() as $child_id ) {
@@ -156,7 +157,6 @@ class WC_Product_Grouped extends WC_Product {
 			}
 
 		}
-		$is_on_sale = false;
 		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale );
 	}
 
