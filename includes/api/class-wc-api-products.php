@@ -1386,11 +1386,15 @@ class WC_API_Products extends WC_API_Resource {
 		// Update parent if variable so price sorting works and stays in sync with the cheapest child
 		WC_Product_Variable::sync( $id );
 
-		// Update default attribute options setting
-		if ( isset( $data['default_attribute'] ) && is_array( $data['default_attribute'] ) ) {
+		// Update default attributes options setting
+		if ( isset( $data['default_attribute'] ) ) {
+			$data['default_attributes'] = $data['default_attribute'];
+		}
+
+		if ( isset( $data['default_attributes'] ) && is_array( $data['default_attributes'] ) ) {
 			$default_attributes = array();
 
-			foreach ( $data['default_attribute'] as $default_attr_key => $default_attr ) {
+			foreach ( $data['default_attributes'] as $default_attr_key => $default_attr ) {
 				if ( ! isset( $default_attr['name'] ) ) {
 					continue;
 				}
