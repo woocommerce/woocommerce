@@ -1999,7 +1999,7 @@ abstract class WC_Abstract_Order {
 	 *
 	 * @param string $note Note to add
 	 * @param int $is_customer_note (default: 0) Is this a note for the customer?
-	 * @return id Comment ID
+	 * @return int Comment ID
 	 */
 	public function add_order_note( $note, $is_customer_note = 0 ) {
 

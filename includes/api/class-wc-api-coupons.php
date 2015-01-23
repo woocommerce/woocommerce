@@ -456,7 +456,7 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * expiry_date format
 	 *
 	 * @since  2.3.0
-	 * @param  string expiry_date
+	 * @param  string $expiry_date
 	 * @return string
 	 */
 	protected function get_coupon_expiry_date( $expiry_date ) {
