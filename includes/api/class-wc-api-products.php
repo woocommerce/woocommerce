@@ -394,7 +394,7 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $comments as $comment ) {
 
 			$reviews[] = array(
-				'id'             => $comment->comment_ID,
+				'id'             => intval( $comment->comment_ID ),
 				'created_at'     => $this->server->format_datetime( $comment->comment_date_gmt ),
 				'review'         => $comment->comment_content,
 				'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
