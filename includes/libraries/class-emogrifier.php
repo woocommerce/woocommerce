@@ -113,6 +113,8 @@ class Emogrifier {
      */
     public $preserveEncoding = FALSE;
 
+    public static $_media = '';
+
     /**
      * The constructor.
      *
@@ -172,12 +174,12 @@ class Emogrifier {
      *
      * @return void
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function clearCache($key) {
         $allowedCacheKeys = array(self::CACHE_KEY_CSS, self::CACHE_KEY_SELECTOR, self::CACHE_KEY_XPATH, self::CACHE_KEY_CSS_DECLARATION_BLOCK);
         if (!in_array($key, $allowedCacheKeys, TRUE)) {
-            throw new \InvalidArgumentException('Invalid cache key: ' . $key, 1391822035);
+            throw new InvalidArgumentException('Invalid cache key: ' . $key, 1391822035);
         }
 
         $this->caches[$key] = array();
@@ -230,15 +232,15 @@ class Emogrifier {
      *
      * @return string
      *
-     * @throws \BadMethodCallException
+     * @throws BadMethodCallException
      */
     public function emogrify() {
         if ($this->html === '') {
-            throw new \BadMethodCallException('Please set some HTML first before calling emogrify.', 1390393096);
+            throw new BadMethodCallException('Please set some HTML first before calling emogrify.', 1390393096);
         }
 
         $xmlDocument = $this->createXmlDocument();
-        $xpath = new \DOMXPath($xmlDocument);
+        $xpath = new DOMXPath($xmlDocument);
         $this->clearAllCaches();
 
         // before be begin processing the CSS file, parse the document and normalize all existing CSS attributes (changes 'DISPLAY: none' to 'display: none');
@@ -248,15 +250,9 @@ class Emogrifier {
 
         $nodesWithStyleAttributes = $xpath->query('//*[@style]');
         if ($nodesWithStyleAttributes !== FALSE) {
-            /** @var $nodeWithStyleAttribute \DOMNode */
+            /** @var $nodeWithStyleAttribute DOMNode */
             foreach ($nodesWithStyleAttributes as $node) {
-                $normalizedOriginalStyle = preg_replace_callback(
-                    '/[A-z\\-]+(?=\\:)/S',
-                    function (array $m) {
-                        return strtolower($m[0]);
-                    },
-                    $node->getAttribute('style')
-                );
+                $normalizedOriginalStyle = preg_replace_callback( '/[A-z\\-]+(?=\\:)/S', array( $this, 'strtolower' ), $node->getAttribute('style') );
 
                 // in order to not overwrite existing style attributes in the HTML, we have to save the original HTML styles
                 $nodePath = $node->getNodePath();
@@ -361,6 +357,10 @@ class Emogrifier {
         }
     }
 
+    public function strtolower(array $m) {
+        return strtolower($m[0]);
+    }
+
 
     /**
      * This method merges old or existing name/value array with new name/value array
@@ -385,10 +385,10 @@ class Emogrifier {
      * Copies the media part from CSS array parts to $xmlDocument.
      *
      * @param array $cssParts
-     * @param \DOMDocument $xmlDocument
+     * @param DOMDocument $xmlDocument
      * @return void
      */
-    public function copyCssWithMediaToStyleNode(array $cssParts, \DOMDocument $xmlDocument) {
+    public function copyCssWithMediaToStyleNode(array $cssParts, DOMDocument $xmlDocument) {
         if (isset($cssParts['media']) && $cssParts['media'] !== '') {
             $this->addStyleElementToDocument($xmlDocument, $cssParts['media']);
         }
@@ -397,10 +397,10 @@ class Emogrifier {
     /**
      * Returns CSS content.
      *
-     * @param \DOMXPath $xpath
+     * @param DOMXPath $xpath
      * @return string
      */
-    private function getCssFromAllStyleNodes(\DOMXPath $xpath) {
+    private function getCssFromAllStyleNodes(DOMXPath $xpath) {
         $styleNodes = $xpath->query('//style');
 
         if ($styleNodes === FALSE) {
@@ -408,7 +408,7 @@ class Emogrifier {
         }
 
         $css = '';
-        /** @var $styleNode \DOMNode */
+        /** @var $styleNode DOMNode */
         foreach ($styleNodes as $styleNode) {
             $css .= "\n\n" . $styleNode->nodeValue;
             $styleNode->parentNode->removeChild($styleNode);
@@ -420,11 +420,11 @@ class Emogrifier {
     /**
      * Adds a style element with $css to $document.
      *
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      * @param string $css
      * @return void
      */
-    private function addStyleElementToDocument(\DOMDocument $document, $css) {
+    private function addStyleElementToDocument(DOMDocument $document, $css) {
         $styleElement = $document->createElement('style', $css);
         $styleAttribute = $document->createAttribute('type');
         $styleAttribute->value = 'text/css';
@@ -437,10 +437,10 @@ class Emogrifier {
     /**
      * Returns the existing or creates a new head element in $document.
      *
-     * @param \DOMDocument $document
-     * @return \DOMNode the head element
+     * @param DOMDocument $document
+     * @return DOMNode the head element
      */
-    private function getOrCreateHeadElement(\DOMDocument $document) {
+    private function getOrCreateHeadElement(DOMDocument $document) {
         $head = $document->getElementsByTagName('head')->item(0);
 
         if ($head === NULL) {
@@ -473,14 +473,7 @@ class Emogrifier {
      * @return array
      */
     private function splitCssAndMediaQuery($css) {
-        $media = '';
-
-        $css = preg_replace_callback(
-            '#@media\\s+(?:only\\s)?(?:[\\s{\(]|screen|all)\\s?[^{]+{.*}\\s*}\\s*#misU',
-            function($matches) use (&$media) {
-                $media .= $matches[0];
-            }, $css
-        );
+        $css = preg_replace_callback( '#@media\\s+(?:only\\s)?(?:[\\s{\(]|screen|all)\\s?[^{]+{.*}\\s*}\\s*#misU', array( $this, '_media_concat' ), $css );
 
         // filter the CSS
         $search = array(
@@ -501,16 +494,20 @@ class Emogrifier {
         // clean CSS before output
         $css = preg_replace($search, $replace, $css);
 
-        return array('css' => $css, 'media' => $media);
+        return array('css' => $css, 'media' => self::$_media);
     }
+
+	private function _media_concat( $matches ) {
+		self::$_media .= $matches[0];
+	}
 
     /**
      * Creates a DOMDocument instance with the current HTML.
      *
-     * @return \DOMDocument
+     * @return DOMDocument
      */
     private function createXmlDocument() {
-        $xmlDocument = new \DOMDocument;
+        $xmlDocument = new DOMDocument;
         $xmlDocument->encoding = self::ENCODING;
         $xmlDocument->strictErrorChecking = FALSE;
         $xmlDocument->formatOutput = TRUE;
@@ -528,7 +525,7 @@ class Emogrifier {
      *
      * @return string the unified HTML
      *
-     * @throws \BadMethodCallException
+     * @throws BadMethodCallException
      */
     private function getUnifiedHtml() {
         if (!empty($this->unprocessableHtmlTags)) {
@@ -600,12 +597,7 @@ class Emogrifier {
      */
     private function translateCssToXpath($paramCssSelector) {
         $cssSelector = ' ' . $paramCssSelector . ' ';
-        $cssSelector = preg_replace_callback('/\s+\w+\s+/',
-            function(array $matches) {
-                return strtolower($matches[0]);
-            },
-            $cssSelector
-        );
+        $cssSelector = preg_replace_callback( '/\s+\w+\s+/', array( $this, 'strtolower' ), $cssSelector );
         $cssSelector = trim($cssSelector);
         $xpathKey = md5($cssSelector);
         if (!isset($this->caches[self::CACHE_KEY_XPATH][$xpathKey])) {
