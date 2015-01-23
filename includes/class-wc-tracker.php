@@ -13,10 +13,8 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
-
-if ( ! class_exists( 'WC_Tracker' ) ) :
 
 class WC_Tracker {
 
@@ -24,27 +22,13 @@ class WC_Tracker {
 	 * URL to the WooThemes Tracker API endpoint
 	 * @var string
 	 */
-	public $api_url = 'https://tracking.woocommerce.com/v1/';
+	private static $api_url = 'https://tracking.woocommerce.com/v1/';
 
 	/**
-	 * Constructor
-	 * @return void
+	 * Hook into cron event
 	 */
-	public function __construct() {
-		add_action( 'wp', array( $this, 'add_tracking_event_to_cron_schedule' ) );
-		add_action( 'wc_tracker_send_event', array( $this, 'send_tracking_data' ) );
-		add_action( 'admin_notices', array( $this, 'admin_optin_notice' ) );
-		add_action( 'admin_init', array( $this, 'check_optin_action' ) );
-	}
-
-	/**
-	 * Schedule daily cron to check if tracking data must be sent
-	 * @return void
-	 */
-	public function add_tracking_event_to_cron_schedule () {
-		if ( ! wp_next_scheduled( 'wc_tracker_send_event' ) ) {
-			wp_schedule_event( time(), apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'wc_tracker_send_event' );
-		}
+	public static function init() {
+		add_action( 'woocommerce_tracker_send_event', array( __CLASS__, 'send_tracking_data' ) );
 	}
 
 	/**
@@ -52,31 +36,25 @@ class WC_Tracker {
 	 * @param  boolean $override
 	 * @return void
 	 */
-	public function send_tracking_data( $override = false ) {
+	public static function send_tracking_data( $override = false ) {
 		if ( ! apply_filters( 'woocommerce_tracker_send_override', $override ) ) {
-			// User must opt in to send
-			if ( ! get_option( 'woocommerce_allow_tracking' ) ) {
-				return;
-			}
-
 			// Send a maximum of once per week by default.
-			$last_send = $this->get_last_send_time();
+			$last_send = self::get_last_send_time();
 			if ( $last_send && $last_send > apply_filters( 'woocommerce_tracker_last_send_interval', strtotime( '-1 week' ) ) ) {
 				return;
 			}
 		}
 
-		$params = $this->get_tracking_data();
-
-		$response = wp_remote_post( esc_url( apply_filters( 'woocommerce_tracker_api_url', $this->api_url ) ), array(
-				'method' => 'POST',
-				'timeout' => 45,
+		$params   = self::get_tracking_data();
+		$response = wp_remote_post( self::$api_url, array(
+				'method'      => 'POST',
+				'timeout'     => 45,
 				'redirection' => 5,
 				'httpversion' => '1.0',
-				'blocking' => true,
-				'headers' => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url( home_url( '/' ) ) ) . ';' ),
-				'body' => json_encode( $params ),
-				'cookies' => array()
+				'blocking'    => true,
+				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url( home_url( '/' ) ) ) . ';' ),
+				'body'        => json_encode( $params ),
+				'cookies'     => array()
 			)
 		);
 		if ( ! is_wp_error( $response ) && '200' == wp_remote_retrieve_response_code( $response ) ) {
@@ -88,7 +66,7 @@ class WC_Tracker {
 	 * Get the last time tracking data was sent
 	 * @return int|bool
 	 */
-	public function get_last_send_time() {
+	private static function get_last_send_time() {
 		return apply_filters( 'woocommerce_tracker_last_send_time', get_option( 'woocommerce_tracker_last_send', false ) );
 	}
 
@@ -96,41 +74,41 @@ class WC_Tracker {
 	 * Get all the tracking data
 	 * @return array
 	 */
-	public function get_tracking_data() {
-		$data = array();
+	private static function get_tracking_data() {
+		$data                       = array();
 
 		// General site info
-		$data['url']   = home_url();
-		$data['email'] = apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) );
-		$data['theme'] = $this->get_theme_info();
+		$data['url']                = home_url();
+		$data['email']              = apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) );
+		$data['theme']              = self::get_theme_info();
 
 		// WordPress Info
-		$data['wp'] = $this->get_wordpress_info();
+		$data['wp']                 = self::get_wordpress_info();
 
 		// Server Info
-		$data['server'] = $this->get_server_info();
+		$data['server']             = self::get_server_info();
 
 		// Plugin info
-		$all_plugins = $this->get_all_plugins();
-		$data['active_plugins']   = $all_plugins['active_plugins'];
-		$data['inactive_plugins'] = $all_plugins['inactive_plugins'];
+		$all_plugins                = self::get_all_plugins();
+		$data['active_plugins']     = $all_plugins['active_plugins'];
+		$data['inactive_plugins']   = $all_plugins['inactive_plugins'];
 
 		// Store count info
-		$data['users']    = $this->get_user_counts();
-		$data['products'] = $this->get_product_counts();
-		$data['orders']   = $this->get_order_counts();
+		$data['users']              = self::get_user_counts();
+		$data['products']           = self::get_product_counts();
+		$data['orders']             = self::get_order_counts();
 
 		// Payment gateway info
-		$data['gateways'] = $this->get_active_payment_gateways();
+		$data['gateways']           = self::get_active_payment_gateways();
 
 		// Shipping method info
-		$data['shipping_methods'] = $this->get_active_shipping_methods();
+		$data['shipping_methods']   = self::get_active_shipping_methods();
 
 		// Get all WooCommerce options info
-		$data['settings'] = $this->get_all_woocommerce_options_values();
+		$data['settings']           = self::get_all_woocommerce_options_values();
 
 		// Template overrides
-		$data['template_overrides'] = $this->get_all_template_overrides();
+		$data['template_overrides'] = self::get_all_template_overrides();
 
 		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
@@ -139,7 +117,7 @@ class WC_Tracker {
 	 * Get the current theme info, theme name and version
 	 * @return array
 	 */
-	public function get_theme_info() {
+	private static function get_theme_info() {
 		if ( get_bloginfo( 'version' ) < '3.4' ) {
 			$theme_data = get_theme_data( get_stylesheet_directory() . '/style.css' );
 			$theme_name = $theme_data['Name'];
@@ -159,7 +137,7 @@ class WC_Tracker {
 	 * Get WordPress related data.
 	 * @return array
 	 */
-	public function get_wordpress_info() {
+	private static function get_wordpress_info() {
 		$wp_data = array();
 
 		$memory = wc_let_to_num( WP_MEMORY_LIMIT );
@@ -176,7 +154,7 @@ class WC_Tracker {
 	 * Get server related info
 	 * @return array
 	 */
-	public function get_server_info() {
+	private static function get_server_info() {
 		$server_data = array();
 
 		if ( isset( $_SERVER['SERVER_SOFTWARE'] ) && ! empty( $_SERVER['SERVER_SOFTWARE'] ) ) {
@@ -210,7 +188,7 @@ class WC_Tracker {
 	 * Get all plugins grouped into activated or not
 	 * @return array
 	 */
-	public function get_all_plugins() {
+	private static function get_all_plugins() {
 		// Ensure get_plugins function is loaded
 		if( ! function_exists( 'get_plugins' ) ) {
 			include ABSPATH . '/wp-admin/includes/plugin.php';
@@ -252,7 +230,7 @@ class WC_Tracker {
 	 * Get user totals based on user role
 	 * @return array
 	 */
-	public function get_user_counts() {
+	private static function get_user_counts() {
 		$user_count = array();
 		$user_count_data = count_users();
 		$user_count['total'] = $user_count_data['total_users'];
@@ -269,7 +247,7 @@ class WC_Tracker {
 	 * Get product totals based on product type
 	 * @return array
 	 */
-	public function get_product_counts() {
+	private static function get_product_counts() {
 		$product_count = array();
 		$product_count_data = wp_count_posts( 'product' );
 		$product_count['total'] = $product_count_data->publish;
@@ -285,7 +263,7 @@ class WC_Tracker {
 	 * Get order counts based on order status
 	 * @return array
 	 */
-	public function get_order_counts() {
+	private static function get_order_counts() {
 		$order_count = array();
 		$order_count_data = wp_count_posts( 'shop_order' );
 
@@ -299,7 +277,7 @@ class WC_Tracker {
 	 * Get a list of all active payment gateways
 	 * @return array
 	 */
-	public function get_active_payment_gateways() {
+	private static function get_active_payment_gateways() {
 		$active_gateways = array();
 		$gateways = WC()->payment_gateways->payment_gateways();
 		foreach ( $gateways as $id => $gateway ) {
@@ -314,7 +292,7 @@ class WC_Tracker {
 	 * Get a list of all active shipping methods
 	 * @return array
 	 */
-	public function get_active_shipping_methods() {
+	private static function get_active_shipping_methods() {
 		$active_methods = array();
 		$shipping_methods = WC()->shipping->get_shipping_methods();
 		foreach ( $shipping_methods as $id => $shipping_method ) {
@@ -329,7 +307,7 @@ class WC_Tracker {
 	 * Get all options starting with woocommerce_ prefix
 	 * @return array
 	 */
-	public function get_all_woocommerce_options_values() {
+	private static function get_all_woocommerce_options_values() {
 		return array(
 			'currency'								=> get_woocommerce_currency(),
 			'base_location'							=> WC()->countries->get_base_country(),
@@ -354,7 +332,7 @@ class WC_Tracker {
 	 * Look for any template override and return filenames
 	 * @return array
 	 */
-	public function get_all_template_overrides() {
+	private static function get_all_template_overrides() {
 		$override_data  = array();
 		$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 		$scanned_files  = array();
@@ -385,55 +363,6 @@ class WC_Tracker {
 		}
 		return $override_data;
 	}
-
-	/**
-	 * Output admin notice to opt in or out of tracking.
-	 * @return void
-	 */
-	public function admin_optin_notice() {
-		if ( get_option( 'woocommerce_hide_tracking_notice' ) ) {
-			return;
-		}
-
-		if ( get_option( 'woocommerce_allow_tracking' ) ) {
-			return;
-		}
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return;
-		}
-
-		echo '<div id="message" class="updated woocommerce-message wc-connect">';
-		echo '<p>' . sprintf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information, and get 20%% discount on your next WooThemes purchase. %sFind out more%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/woocommerce-usage-tracking/">', '</a>' ) . '</p>';
-		echo '<p class="submit"><a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-in' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="button-primary">' . __( 'Allow', 'woocommerce' ) . '</a>';
-		echo '&nbsp;<a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-out' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="skip button-primary">' . __( 'No, don\'t bother me again', 'woocommerce' ) . '</a></p>';
-		echo '</div>';
-	}
-
-	/**
-	 * Handle opt in or out actions based on notice selection
-	 * @return void
-	 */
-	public function check_optin_action() {
-		if ( ! isset( $_GET['wc_tracker'] ) || ! isset( $_GET['wc_tracker_nonce'] ) ) {
-			return;
-		}
-
-		if ( ! wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optin' ) ) {
-			return;
-		}
-
-		if ( 'opt-in' == $_GET['wc_tracker'] ) {
-			update_option( 'woocommerce_allow_tracking', true );
-			update_option( 'woocommerce_hide_tracking_notice', true );
-			$this->send_tracking_data( true );
-		} elseif ( 'opt-out' == $_GET['wc_tracker'] ) {
-			update_option( 'woocommerce_allow_tracking', false );
-			update_option( 'woocommerce_hide_tracking_notice', true );
-		}
-	}
 }
 
-endif;
-
-return new WC_Tracker;
+WC_Tracker::init();

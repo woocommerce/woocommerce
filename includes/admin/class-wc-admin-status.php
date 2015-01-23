@@ -134,8 +134,8 @@ class WC_Admin_Status {
 					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
 				break;
 				case 'reset_tracking' :
-					update_option( 'woocommerce_allow_tracking', false );
-					update_option( 'woocommerce_hide_tracking_notice', false );
+					delete_option( 'woocommerce_allow_tracking' );
+					WC_Admin_Notices::add_notice( 'tracking' );
 
 					echo '<div class="updated"><p>' . __( 'Usage tracking settings successfully reset.', 'woocommerce' ) . '</p></div>';
 				break;

@@ -89,8 +89,11 @@ class WC_Install {
 		self::create_tables();
 		self::create_roles();
 
-		// Register post types
+		// Ensure needed classes are loaded
+		include_once( 'admin/class-wc-admin-notices.php' );
 		include_once( 'class-wc-post-types.php' );
+
+		// Register post types
 		WC_Post_types::register_post_types();
 		WC_Post_types::register_taxonomies();
 
@@ -125,6 +128,9 @@ class WC_Install {
 
 		// Redirect to welcome screen
 		set_transient( '_wc_activation_redirect', 1, HOUR_IN_SECONDS );
+
+		// Trigger action
+		do_action( 'woocommerce_installed' );
 	}
 
 	/**
@@ -158,6 +164,7 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
 		wp_clear_scheduled_hook( 'woocommerce_language_pack_updater_check' );
 		wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
+		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 
 		$ve = get_option( 'gmt_offset' ) > 0 ? '+' : '-';
 
@@ -173,6 +180,7 @@ class WC_Install {
 		wp_schedule_single_event( time(), 'woocommerce_language_pack_updater_check' );
 		wp_schedule_single_event( time(), 'woocommerce_geoip_updater' );
 		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
+		wp_schedule_event( time(), apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
 	}
 
 	/**

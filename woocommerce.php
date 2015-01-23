@@ -172,6 +172,8 @@ final class WooCommerce {
 				return is_admin();
 			case 'ajax' :
 				return defined( 'DOING_AJAX' );
+			case 'cron' :
+				return defined( 'DOING_CRON' );
 			case 'frontend' :
 				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' );
 		}
@@ -219,6 +221,10 @@ final class WooCommerce {
 			$this->frontend_includes();
 		}
 
+		if ( $this->is_request( 'cron' ) && get_option( 'woocommerce_allow_tracking', false ) ) {
+			include_once( 'includes/class-wc-tracker.php' );
+		}
+
 		// Query class
 		$this->query = include( 'includes/class-wc-query.php' );                // The main query class
 
@@ -235,7 +241,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
 		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
-		include_once( 'includes/class-wc-tracker.php' );						// Usage Tracker
 	}
 
 	/**
