@@ -272,6 +272,7 @@ class Emogrifier {
         $allCss .= $this->getCssFromAllStyleNodes($xpath);
 
         $cssParts = $this->splitCssAndMediaQuery($allCss);
+        self::$_media = ''; // reset
 
         $cssKey = md5($cssParts['css']);
         if (!isset($this->caches[self::CACHE_KEY_CSS][$cssKey])) {
