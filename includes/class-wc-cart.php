@@ -269,13 +269,11 @@ class WC_Cart {
 		/**
 		 * Empties the cart and optionally the persistent cart too.
 		 *
-		 * @access public
 		 * @param bool $clear_persistent_cart (default: true)
-		 * @return void
 		 */
 		public function empty_cart( $clear_persistent_cart = true ) {
 			$this->cart_contents = array();
-			$this->reset();
+			$this->reset( true );
 
 			unset( WC()->session->order_awaiting_payment, WC()->session->applied_coupons, WC()->session->coupon_discount_amounts, WC()->session->coupon_discount_tax_amounts, WC()->session->cart );
 
@@ -1063,24 +1061,23 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/
 
 		/**
-		 * Reset cart totals and clear sessions.
+		 * Reset cart totals to the defaults. Useful before running calculations.
 		 *
+		 * @param  bool  	$unset_session If true, the session data will be forced unset.
 		 * @access private
-		 * @return void
 		 */
-		private function reset() {
+		private function reset( $unset_session = false ) {
 			foreach ( $this->cart_session_data as $key => $default ) {
 				$this->$key = $default;
 				unset( WC()->session->$key );
 			}
-			do_action( 'woocommerce_cart_reset', $this );
+			do_action( 'woocommerce_cart_reset', $this, $unset_session );
 		}
 
 		/**
 		 * Calculate totals for the items in the cart.
 		 */
 		public function calculate_totals() {
-
 			$this->reset();
 			$this->coupons = $this->get_coupons();
 
