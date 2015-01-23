@@ -23,6 +23,9 @@ indent_size = 2
 [*.txt]
 trim_trailing_whitespace = false
 
+[*.neon]
+trim_trailing_whitespace = false
+
 [*.json]
 insert_final_newline = false
 indent_style = space
