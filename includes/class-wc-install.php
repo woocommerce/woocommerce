@@ -220,17 +220,10 @@ class WC_Install {
 			if ( ! method_exists( $section, 'get_settings' ) ) {
 				continue;
 			}
+			$subsections = array_unique( array_merge( array( '' ), array_keys( $section->get_sections() ) ) );
 
-			foreach ( $section->get_settings() as $value ) {
-				if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
-					$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
-					add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
-				}
-			}
-
-			// Special case to install the inventory settings.
-			if ( $section instanceof WC_Settings_Products ) {
-				foreach ( $section->get_settings( 'inventory' ) as $value ) {
+			foreach ( $subsections as $subsection ) {
+				foreach ( $section->get_settings( $subsection ) as $value ) {
 					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
 						$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
 						add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
