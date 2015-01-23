@@ -299,10 +299,9 @@ class WC_Admin_Taxonomies {
 	 */
 	public function product_cat_column( $columns, $column, $id ) {
 
-		if ( $column == 'thumb' ) {
+		if ( 'thumb' == $column ) {
 
-			$image          = '';
-			$thumbnail_id   = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
+			$thumbnail_id = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
 
 			if ( $thumbnail_id ) {
 				$image = wp_get_attachment_thumb_url( $thumbnail_id );

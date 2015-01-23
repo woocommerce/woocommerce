@@ -199,7 +199,6 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		$num_posts       = wp_count_posts( 'shop_webhook', 'readable' );
 		$class           = '';
 		$total_posts     = array_sum( (array) $num_posts );
-		$current_user_id = get_current_user_id();
 
 		// Subtract post types that are not included in the admin all list.
 		foreach ( get_post_stati( array( 'show_in_admin_all_list' => false ) ) as $state ) {

@@ -130,7 +130,7 @@ class WC_Admin_Attributes {
 			return new WP_Error( 'error', __( 'Please, provide an attribute name and slug.', 'woocommerce' ) );
 		} elseif ( ( $valid_attribute_name = self::valid_attribute_name( $attribute['attribute_name'] ) ) && is_wp_error( $valid_attribute_name ) ) {
 			return $valid_attribute_name;
-		} elseif ( $taxonomy_exists = taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) ) ) {
+		} elseif ( taxonomy_exists( wc_attribute_taxonomy_name( $attribute['attribute_name'] ) ) ) {
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), sanitize_title( $attribute['attribute_name'] ) ) );
 		}
 

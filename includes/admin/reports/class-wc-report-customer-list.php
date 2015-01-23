@@ -73,15 +73,14 @@ class WC_Report_Customer_List extends WP_List_Table {
 	/**
 	 * column_default function.
 	 *
-	 * @param mixed  $user
+	 * @param WP_User $user
 	 * @param string $column_name
-	 * @return int|string
-	 * @todo Inconsistent return types, and void return at the end. Needs a rewrite.
+	 * @return string
 	 */
 	function column_default( $user, $column_name ) {
 		global $wpdb;
 
-		switch( $column_name ) {
+		switch ( $column_name ) {
 
 			case 'customer_name' :
 				if ( $user->last_name && $user->first_name ) {
@@ -92,7 +91,6 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 			case 'username' :
 				return $user->user_login;
-			break;
 
 			case 'location' :
 
@@ -115,18 +113,15 @@ class WC_Report_Customer_List extends WP_List_Table {
 				} else {
 					return '-';
 				}
-			break;
 
 			case 'email' :
 				return '<a href="mailto:' . $user->user_email . '">' . $user->user_email . '</a>';
 
 			case 'spent' :
 				return wc_price( wc_get_customer_total_spent( $user->ID ) );
-			break;
 
 			case 'orders' :
 				return wc_get_customer_order_count( $user->ID );
-			break;
 
 			case 'last_order' :
 
@@ -148,12 +143,15 @@ class WC_Report_Customer_List extends WP_List_Table {
 				if ( $order_ids ) {
 					$order = wc_get_order( $order_ids[0] );
 
-					echo '<a href="' . admin_url( 'post.php?post=' . $order->id . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) );
-				} else echo '-';
+					return '<a href="' . admin_url( 'post.php?post=' . $order->id . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) );
+				} else {
+					return '-';
+				}
 
 			break;
 
 			case 'user_actions' :
+				ob_start();
 				?><p>
 					<?php
 						do_action( 'woocommerce_admin_user_actions_start', $user );
@@ -213,8 +211,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 						do_action( 'woocommerce_admin_user_actions_end', $user );
 					?>
 				</p><?php
-			break;
+				$user_actions = ob_get_contents();
+				ob_end_clean();
+
+				return $user_actions;
 		}
+
+		return '';
 	}
 
 	/**
