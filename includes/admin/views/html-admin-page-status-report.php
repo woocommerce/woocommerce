@@ -226,13 +226,13 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 			$posting = apply_filters( 'woocommerce_debug_posting', $posting );
 
-			foreach( $posting as $post ) {
+			foreach ( $posting as $post ) {
 				$mark = ! empty( $post['success'] ) ? 'yes' : 'error';
 				?>
 				<tr>
-					<td><?php echo esc_html( $post['name'] ); ?>:</td>
+					<td data-export-label="<?php echo esc_html( $post['name'] ); ?>"><?php echo esc_html( $post['name'] ); ?>:</td>
 					<td><?php echo isset( $post['help'] ) ? $post['help'] : ''; ?></td>
-					<td>
+					<td class="help">
 						<mark class="<?php echo $mark; ?>">
 							<?php echo ! empty( $post['success'] ) ? '&#10004' : '&#10005'; ?>
 							<?php echo ! empty( $post['note'] ) ? wp_kses_data( $post['note'] ) : ''; ?>
@@ -262,7 +262,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 			foreach ( $locale as $key => $val ) {
 				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) ) {
-					echo '<tr><td>' . $key . ':</td><td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '">[?]</a></td><td>' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
+					echo '<tr><td data-export-label="' . $key . '">' . $key . ':</td><td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '">[?]</a></td><td>' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
 				}
 			}
 		?>
@@ -436,7 +436,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					$page_name = esc_html( $page_name );
 				}
 
-				echo '<tr><td>' . $page_name . ':</td>';
+				echo '<tr><td data-export-label="' . esc_attr( $page_name ) . '">' . $page_name . ':</td>';
 				echo '<td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '">[?]</a></td><td>';
 
 				// Page ID check
@@ -484,8 +484,9 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 			<td><?php
 				$display_terms = array();
 				$terms = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
-				foreach ( $terms as $term )
+				foreach ( $terms as $term ) {
 					$display_terms[] = strtolower( $term->name ) . ' (' . $term->slug . ')';
+				}
 				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
 			?></td>
 		</tr>
@@ -499,18 +500,18 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 	</thead>
 		<?php
 		$active_theme = wp_get_theme();
-		if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) :
+		if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) {
 
 			$theme_dir = substr( strtolower( str_replace( ' ','', $active_theme->Name ) ), 0, 45 );
 
-			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) :
+			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) {
 
 				$theme_changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
 				$cl_lines  = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
-				if ( ! empty( $cl_lines ) ) :
+				if ( ! empty( $cl_lines ) ) {
 
 					foreach ( $cl_lines as $line_num => $cl_line ) {
-						if ( preg_match( '/^[0-9]/', $cl_line ) ) :
+						if ( preg_match( '/^[0-9]/', $cl_line ) ) {
 
 							$theme_date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
 							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
@@ -518,15 +519,11 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
 							set_transient( $theme_dir . '_version_data', $theme_version_data , DAY_IN_SECONDS );
 							break;
-
-						endif;
+						}
 					}
-
-				endif;
-
-			endif;
-
-		endif;
+				}
+			}
+		}
 		?>
 	<tbody>
 		<tr>
@@ -673,34 +670,13 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 <script type="text/javascript">
 
-	/**
-	 * wc_strPad
-	 *
-	 * @param  {var} i string default
-	 * @param  {var} l how many repeat s
-	 * @param  {var} s string to repeat
-	 * @param  {var} w where s should indent
-	 * @return {var}   string modified
-	 */
-	jQuery.wc_strPad = function( i, l, s, w ) {
-		var o = i.toString();
-		if (! s) { s = '0'; }
-		while ( o.length < l ) {
-			// empty
-			if ( w == 'undefined' ){
-				o = s + o;
-			} else {
-				o = o + s;
-			}
-		}
-		return o;
-	};
+	jQuery( 'a.help_tip' ).click( function() {
+		return false;
+	});
 
-	jQuery( 'a.help_tip' ).click(function() { return false; });
+	jQuery( 'a.debug-report' ).click( function() {
 
-	jQuery( 'a.debug-report' ).click(function(){
-
-		var report = "";
+		var report = '';
 
 		jQuery( '#status thead, #status tbody' ).each(function(){
 
@@ -714,7 +690,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				jQuery('tr', jQuery( this ) ).each(function(){
 
 					var label       = jQuery( this ).find( 'td:eq(0)' ).data( 'export-label' ) || jQuery( this ).find( 'td:eq(0)' ).text();
-					var the_name    = jQuery.wc_strPad( jQuery.trim( label ), 25, ' ' );
+					var the_name    = jQuery.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML
 					var the_value   = jQuery.trim( jQuery( this ).find( 'td:eq(2)' ).text() );
 					var value_array = the_value.split( ', ' );
 
@@ -725,14 +701,13 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 						var output = '';
 						var temp_line ='';
 						jQuery.each( value_array, function( key, line ){
-							var tab = ( key == 0 ) ? 0:25;
-							temp_line = temp_line + jQuery.wc_strPad( '', tab, ' ', 'f' ) + line +'\n';
+							temp_line = temp_line + line + '\n';
 						});
 
 						the_value = temp_line;
 					}
 
-					report = report + '' + the_name + ' ' + the_value + "\n";
+					report = report + '' + the_name + ': ' + the_value + "\n";
 				});
 
 			}
