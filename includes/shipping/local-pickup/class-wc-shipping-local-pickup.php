@@ -87,7 +87,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'title'    => __( 'Method availability', 'woocommerce' ),
 				'type'     => 'select',
 				'default'  => 'all',
-				'class'    => 'availability',
+				'class'    => 'availability wc-enhanced-select',
 				'options'  => array(
 					'all'      => __( 'All allowed countries', 'woocommerce' ),
 					'specific' => __( 'Specific Countries', 'woocommerce' )
@@ -96,7 +96,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 			'countries' => array(
 				'title'             => __( 'Specific Countries', 'woocommerce' ),
 				'type'              => 'multiselect',
-				'class'             => 'chosen_select',
+				'class'             => 'wc-enhanced-select',
 				'css'               => 'width: 450px;',
 				'default'           => '',
 				'options'           => WC()->countries->get_shipping_countries(),

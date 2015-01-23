@@ -171,10 +171,11 @@ class WC_Product_Variation extends WC_Product {
 	/**
 	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
 	 *
+	 * @param  $cart item array If the cart item is passed, we can get a link containing the exact attributes selected for the variation, rather than the default attributes.
 	 * @return string
 	 */
-	public function get_permalink() {
-		return add_query_arg( array_filter( $this->variation_data ), get_permalink( $this->id ) );
+	public function get_permalink( $cart_item = null ) {
+		return add_query_arg( array_filter( isset( $cart_item['variation'] ) ? $cart_item['variation'] : $this->variation_data ), get_permalink( $this->id ) );
 	}
 
 	/**
@@ -303,10 +304,10 @@ class WC_Product_Variation extends WC_Product {
 	 * @return string containing the formatted price
 	 */
 	public function get_price_html( $price = '' ) {
-		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
-		$display_price         = $tax_display_mode == 'incl' ? $this->get_price_including_tax() : $this->get_price_excluding_tax();
-		$display_regular_price = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_regular_price() ) : $this->get_price_excluding_tax( 1, $this->get_regular_price() );
-		$display_sale_price    = $tax_display_mode == 'incl' ? $this->get_price_including_tax( 1, $this->get_sale_price() ) : $this->get_price_excluding_tax( 1, $this->get_sale_price() );
+
+		$display_price         = $this->get_display_price();
+		$display_regular_price = $this->get_display_price( $this->get_regular_price() );
+		$display_sale_price    = $this->get_display_price( $this->get_sale_price() );
 
 		if ( $this->get_price() !== '' ) {
 			if ( $this->is_on_sale() ) {

@@ -142,7 +142,7 @@ function wc_get_weight( $weight, $to_unit ) {
  * @return string
  */
 function wc_trim_zeros( $price ) {
-	return preg_replace( '/' . preg_quote( get_option( 'woocommerce_price_decimal_sep' ), '/' ) . '0++$/', '', $price );
+	return preg_replace( '/' . preg_quote( wc_price_decimal_separator(), '/' ) . '0++$/', '', $price );
 }
 
 /**
@@ -183,17 +183,21 @@ function wc_format_refund_total( $amount ) {
  * @return string
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
+	$locale   = localeconv();
+	$decimals = array( wc_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
+
 	// Remove locale from string
 	if ( ! is_float( $number ) ) {
-		$locale   = localeconv();
-		$decimals = array( get_option( 'woocommerce_price_decimal_sep' ), $locale['decimal_point'], $locale['mon_decimal_point'] );
-		$number   = wc_clean( str_replace( $decimals, '.', $number ) );
+		$number = wc_clean( str_replace( $decimals, '.', $number ) );
 	}
 
-	// DP is false - don't use number format, just return a string in our format
 	if ( $dp !== false ) {
 		$dp     = intval( $dp == "" ? get_option( 'woocommerce_price_num_decimals' ) : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
+
+	// DP is false - don't use number format, just return a string in our format
+	} elseif ( is_float( $number ) ) {
+		$number = wc_clean( str_replace( $decimals, '.', strval( $number ) ) );
 	}
 
 	if ( $trim_zeros && strstr( $number, '.' ) ) {
@@ -226,7 +230,7 @@ function wc_float_to_string( $float ) {
  * @return string
  */
 function wc_format_localized_price( $value ) {
-	return str_replace( '.', get_option( 'woocommerce_price_decimal_sep' ), strval( $value ) );
+	return str_replace( '.', wc_price_decimal_separator(), strval( $value ) );
 }
 
 /**
@@ -306,6 +310,26 @@ function get_woocommerce_price_format() {
 }
 
 /**
+ * Return the thousand separator for prices
+ * @since  2.3
+ * @return string
+ */
+function wc_price_thousand_separator() {
+	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
+	return $separator;
+}
+
+/**
+ * Return the decimal separator for prices
+ * @since  2.3
+ * @return string
+ */
+function wc_price_decimal_separator() {
+	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
+	return $separator ? $separator : '.';
+}
+
+/**
  * Format the price with a currency symbol.
  *
  * @param float $price
@@ -320,8 +344,8 @@ function wc_price( $price, $args = array() ) {
 	$num_decimals    = absint( get_option( 'woocommerce_price_num_decimals' ) );
 	$currency        = isset( $args['currency'] ) ? $args['currency'] : '';
 	$currency_symbol = get_woocommerce_currency_symbol($currency);
-	$decimal_sep     = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
-	$thousands_sep   = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
+	$decimal_sep     = wc_price_decimal_separator();
+	$thousands_sep   = wc_price_thousand_separator();
 
 	if ( $price < 0 ) {
 		$price    = $price * -1;
@@ -416,25 +440,25 @@ function wc_timezone_string() {
 	$utc_offset *= 3600;
 
 	// attempt to guess the timezone string from the UTC offset
-	$timezone = timezone_name_from_abbr( '', $utc_offset );
+	$timezone = timezone_name_from_abbr( '', $utc_offset, 0 );
 
 	// last try, guess timezone string manually
 	if ( false === $timezone ) {
-
 		$is_dst = date( 'I' );
 
 		foreach ( timezone_abbreviations_list() as $abbr ) {
 			foreach ( $abbr as $city ) {
-
 				if ( $city['dst'] == $is_dst && $city['offset'] == $utc_offset ) {
 					return $city['timezone_id'];
 				}
 			}
 		}
+
+		// fallback to UTC
+		return 'UTC';
 	}
 
-	// fallback to UTC
-	return 'UTC';
+	return $timezone;
 }
 
 if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
@@ -615,4 +639,15 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
 		$string = substr( $string, 0, ( $chars - strlen( $suffix ) ) ) . $suffix;
 	}
 	return $string;
+}
+
+/**
+ * Format content to display shortcodes
+ *
+ * @since  2.3.0
+ * @param  string $string
+ * @return string
+ */
+function wc_format_content( $string ) {
+	return do_shortcode( shortcode_unautop( wpautop( $string ) ) );
 }

@@ -157,13 +157,13 @@ class WC_Gateway_Paypal_Request {
 		/**
 		 * Try passing a line item per product if supported
 		 */
-		if ( ( ! wc_tax_enabled() || ! wc_prices_include_tax() ) && ! $order->get_order_discount() && $this->prepare_line_items( $order ) ) {
+		if ( ( ! wc_tax_enabled() || ! wc_prices_include_tax() ) && $this->prepare_line_items( $order ) ) {
 
 			$line_item_args             = $this->get_line_items();
 			$line_item_args['tax_cart'] = $order->get_total_tax();
 
-			if ( $order->get_cart_discount() > 0 ) {
-				$line_item_args['discount_amount_cart'] = round( $order->get_cart_discount(), 2 );
+			if ( $order->get_total_discount() > 0 ) {
+				$line_item_args['discount_amount_cart'] = round( $order->get_total_discount(), 2 );
 			}
 
 		/**
@@ -175,14 +175,10 @@ class WC_Gateway_Paypal_Request {
 
 			$this->delete_line_items();
 
-			$this->add_line_item( $this->get_order_item_names( $order ), 1, number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ) + $order->get_order_discount(), 2, '.', '' ), $order->get_order_number() );
+			$this->add_line_item( $this->get_order_item_names( $order ), 1, number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ), 2, '.', '' ), $order->get_order_number() );
 			$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), ucwords( $order->get_shipping_method() ) ), 1, number_format( $order->get_total_shipping() + $order->get_shipping_tax(), 2, '.', '' ) );
 
 			$line_item_args = $this->get_line_items();
-
-			if ( $order->get_order_discount() ) {
-				$line_item_args['discount_amount_cart'] = $order->get_order_discount();
-			}
 		}
 
 		return $line_item_args;
@@ -266,7 +262,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Check for mismatched totals
-		if ( ( $calculated_total + $order->get_total_tax() + round( $order->get_total_shipping(), 2 ) - round( $order->get_cart_discount(), 2 ) ) != $order->get_total() ) {
+		if ( ( $calculated_total + $order->get_total_tax() + round( $order->get_total_shipping(), 2 ) - round( $order->get_total_discount(), 2 ) ) != $order->get_total() ) {
 			return false;
 		}
 

@@ -12,14 +12,14 @@ if ( ! class_exists( 'WC_Email_Customer_Note' ) ) :
  * Customer note emails are sent when you add a note to an order.
  *
  * @class 		WC_Email_Customer_Note
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Emails
  * @author 		WooThemes
  * @extends 	WC_Email
  */
 class WC_Email_Customer_Note extends WC_Email {
 
-	var $customer_note;
+	public $customer_note;
 
 	/**
 	 * Constructor

@@ -12,7 +12,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password' ) ) :
  * An email sent to the customer when they reset their password.
  *
  * @class 		WC_Email_Customer_Reset_Password
- * @version		2.0.0
+ * @version		2.3.0
  * @package		WooCommerce/Classes/Emails
  * @author 		WooThemes
  * @extends 	WC_Email
@@ -20,13 +20,13 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password' ) ) :
 class WC_Email_Customer_Reset_Password extends WC_Email {
 
 	/** @var string */
-	var $user_login;
+	public $user_login;
 
 	/** @var string */
-	var $user_email;
+	public $user_email;
 
 	/** @var string */
-	var $reset_key;
+	public $reset_key;
 
 	/**
 	 * Constructor

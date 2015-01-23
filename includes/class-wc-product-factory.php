@@ -75,6 +75,7 @@ class WC_Product_Factory {
 	/**
 	 * Get the product object
 	 * @param  mixed $the_product
+	 * @uses   WP_POST
 	 * @return WP_Post|bool false on failure
 	 */
 	private function get_product_object( $the_product ) {

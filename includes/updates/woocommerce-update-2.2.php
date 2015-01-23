@@ -128,6 +128,34 @@ foreach ( $update_variations as $variation ) {
 	add_post_meta( $variation->variation_id, '_backorders', $parent_backorders ? $parent_backorders : 'no', true );
 }
 
+// Update taxonomy names with correct sanitized names
+$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
+
+foreach ( $attribute_taxonomies as $attribute_taxonomy ) {
+	$sanitized_attribute_name = wc_sanitize_taxonomy_name( $attribute_taxonomy->attribute_name );
+	if ( $sanitized_attribute_name !== $attribute_taxonomy->attribute_name ) {
+		if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $sanitized_attribute_name ) ) ) {
+			// Update attribute
+			$wpdb->update(
+				"{$wpdb->prefix}woocommerce_attribute_taxonomies",
+				array(
+					'attribute_name' => $sanitized_attribute_name
+				),
+				array(
+					'attribute_id' => $attribute_taxonomy->attribute_id
+				)
+			);
+
+			// Update terms
+			$wpdb->update(
+				$wpdb->term_taxonomy,
+				array( 'taxonomy' => wc_attribute_taxonomy_name( $sanitized_attribute_name ) ),
+				array( 'taxonomy' => 'pa_' . $attribute_taxonomy->attribute_name )
+			);
+		}
+	}
+}
+
 // add webhook capabilities to shop_manager/administrator role
 global $wp_roles;
 

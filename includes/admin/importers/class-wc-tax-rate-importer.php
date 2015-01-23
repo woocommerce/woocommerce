@@ -104,13 +104,13 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 
 		$this->import_start();
 
+		$loop = 0;
+
 		if ( ( $handle = fopen( $file, "r" ) ) !== FALSE ) {
 
 			$header = fgetcsv( $handle, 0, $this->delimiter );
 
 			if ( 10 === sizeof( $header ) ) {
-
-				$loop = 0;
 
 				while ( ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) !== FALSE ) {
 
@@ -142,7 +142,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 
 		// Show Result
 		echo '<div class="updated settings-error below-h2"><p>
-			'.sprintf( __( 'Import complete - imported <strong>%s</strong> tax rates.', 'woocommerce' ), $loop ).'
+			' . sprintf( __( 'Import complete - imported <strong>%s</strong> tax rates.', 'woocommerce' ), $loop ) . '
 		</p></div>';
 
 		$this->import_end();

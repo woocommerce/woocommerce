@@ -2,9 +2,9 @@
 /**
  * WooCommerce Admin Settings Class.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.2.0
  */
 
@@ -40,6 +40,7 @@ class WC_Admin_Settings {
 			$settings[] = include( 'settings/class-wc-settings-accounts.php' );
 			$settings[] = include( 'settings/class-wc-settings-emails.php' );
 			$settings[] = include( 'settings/class-wc-settings-integrations.php' );
+			$settings[] = include( 'settings/class-wc-settings-webhooks.php' );
 
 			self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
 		}
@@ -112,8 +113,6 @@ class WC_Admin_Settings {
 	 * Settings page.
 	 *
 	 * Handles the display of the main woocommerce settings page in admin.
-	 *
-	 * @return void
 	 */
 	public static function output() {
 		global $current_section, $current_tab;
@@ -122,7 +121,7 @@ class WC_Admin_Settings {
 
 		do_action( 'woocommerce_settings_start' );
 
-		wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'chosen' ), WC()->version, true );
+		wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'select2' ), WC()->version, true );
 
 		wp_localize_script( 'woocommerce_settings', 'woocommerce_settings_params', array(
 			'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' )
@@ -244,7 +243,8 @@ class WC_Admin_Settings {
 			}
 
 			// Description handling
-			extract( self::get_field_description( $value ) );
+			$field_description = self::get_field_description( $value );
+			extract( $field_description );
 
 			// Switch based on type
 			switch ( $value['type'] ) {
@@ -551,7 +551,7 @@ class WC_Admin_Settings {
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 							<?php echo $tooltip_html; ?>
 						</th>
-						<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="chosen_select">
+						<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
 							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 						</select> <?php echo $description; ?>
 						</td>
@@ -576,7 +576,7 @@ class WC_Admin_Settings {
 							<?php echo $tooltip_html; ?>
 						</th>
 						<td class="forminp">
-							<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="chosen_select">
+							<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
 								<?php
 									if ( $countries ) {
 										foreach ( $countries as $key => $val ) {
@@ -667,11 +667,11 @@ class WC_Admin_Settings {
 				$option_name  = current( array_keys( $option_name_array ) );
 				$setting_name = key( $option_name_array[ $option_name ] );
 
-				$option_value = isset( $_POST[ $option_name ][ $setting_name ] ) ? stripslashes_deep( $_POST[ $option_name ][ $setting_name ] ) : null;
+				$option_value = isset( $_POST[ $option_name ][ $setting_name ] ) ? wp_unslash( $_POST[ $option_name ][ $setting_name ] ) : null;
 			} else {
 				$option_name  = $value['id'];
 				$setting_name = '';
-				$option_value = isset( $_POST[ $value['id'] ] ) ? stripslashes_deep( $_POST[ $value['id'] ] ) : null;
+				$option_value = isset( $_POST[ $value['id'] ] ) ? wp_unslash( $_POST[ $value['id'] ] ) : null;
 			}
 
 			// Format value
@@ -766,8 +766,6 @@ class WC_Admin_Settings {
 	 * Checks which method we're using to serve downloads
 	 *
 	 * If using force or x-sendfile, this ensures the .htaccess is in place
-	 *
-	 * @return void
 	 */
 	public static function check_download_folder_protection() {
 		$upload_dir      = wp_upload_dir();

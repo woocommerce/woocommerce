@@ -442,6 +442,7 @@ class WC_API_Server {
 				'timezone'           => wc_timezone_string(),
 				'currency'           => get_woocommerce_currency(),
 				'currency_format'    => get_woocommerce_currency_symbol(),
+				'price_num_decimals' => get_option( 'woocommerce_price_num_decimals' ),
 				'tax_included'       => wc_prices_include_tax(),
 				'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
 				'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
@@ -553,7 +554,7 @@ class WC_API_Server {
 		if ( is_a( $query, 'WP_User_Query' ) ) {
 
 			$page        = $query->page;
-			$single      = count( $query->get_results() ) > 1;
+			$single      = count( $query->get_results() ) == 1;
 			$total       = $query->get_total();
 			$total_pages = $query->total_pages;
 

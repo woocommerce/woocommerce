@@ -526,7 +526,9 @@ function woocommerce_deprecated_filter_mapping( $data, $arg_1 = '', $arg_2 = '',
 	if ( isset( $wc_map_deprecated_filters[ $filter ] ) ) {
 		if ( has_filter( $wc_map_deprecated_filters[ $filter ] ) ) {
 			$data = apply_filters( $wc_map_deprecated_filters[ $filter ], $data, $arg_1, $arg_2, $arg_3 );
-			_deprecated_function( 'The ' . $wc_map_deprecated_filters[ $filter ] . ' filter', '', $filter );
+			if ( ! is_ajax() ) {
+				_deprecated_function( 'The ' . $wc_map_deprecated_filters[ $filter ] . ' filter', '', $filter );
+			}
 		}
 	}
 

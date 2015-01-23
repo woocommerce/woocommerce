@@ -200,6 +200,7 @@
 	-webkit-font-smoothing: antialiased;
 	margin-right: .618em;
 	content: $glyph;
+	text-decoration: none;
 }
 
 @mixin iconafter( $glyph: "\e001" ) {
@@ -212,52 +213,7 @@
 	-webkit-font-smoothing: antialiased;
 	margin-left: .618em;
 	content: $glyph;
-}
-
-@mixin dashicon( $glyph: "\e001" ) {
-	font-family: 'Dashicons';
-	speak: none;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
-	-webkit-font-smoothing: antialiased;
-	margin: 0;
-	text-indent: 0;
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	text-align: center;
-	content: $glyph;
-	vertical-align: top;
-}
-
-@mixin dashiconbefore( $glyph: "\f333" ) {
-	font-family: 'Dashicons';
-	speak: none;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	-webkit-font-smoothing: antialiased;
-	margin-right: .618em;
-	content: $glyph;
-	vertical-align: top;
-	display: inline-block;
-}
-
-@mixin dashiconafter( $glyph: "\f333" ) {
-	font-family: 'Dashicons';
-	speak: none;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	-webkit-font-smoothing: antialiased;
-	margin-left: .618em;
-	content: $glyph;
-	vertical-align: top;
-	display: inline-block;
+	text-decoration: none;
 }
 
 @mixin loader() {
@@ -271,17 +227,15 @@
 		margin-left: -.5em;
 		margin-top: -.5em;
 		display: block;
-		-webkit-animation: spin 2s linear infinite;
-	    -moz-animation: spin 2s linear infinite;
-	    animation: spin 2s linear infinite;
-	    font-family: "Dashicons";
-		content: "\f463";
+		-webkit-animation: spin 1s ease-in-out infinite;
+	    -moz-animation: spin 1s ease-in-out infinite;
+	    animation: spin 1s ease-in-out infinite;
+	    content: "";
+	    background: url(../images/icons/loader.svg) center center;
+	    background-size: cover;
 		line-height: 1;
 		text-align: center;
 		font-size: 2em;
 		color: rgba(#000,0.75);
-		vertical-align: top;
-		-webkit-font-smoothing: antialiased;
-		font-weight: 400;
 	}
 }

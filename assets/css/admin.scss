@@ -11,6 +11,7 @@
 @import "variables";
 @import "animation";
 @import "chosen";
+@import "select2";
 @import "fonts";
 
 /**
@@ -81,6 +82,26 @@
 					background-color: #fff;
 				}
 			}
+		}
+	}
+
+	.storefront {
+		background: url(../images/storefront-bg.jpg) bottom right #f6f6f6;
+		border: 1px solid #ddd;
+		padding: 20px;
+		overflow: hidden;
+		zoom: 1;
+
+		img {
+			width: 278px;
+			height: auto;
+			float: left;
+			margin: 0 20px 0 0;
+			box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+		}
+
+		p {
+			max-width: 750px;
 		}
 	}
 }
@@ -348,6 +369,30 @@ ul.wc_coupon_list,
 	clear: both;
 }
 
+ul.wc_coupon_list {
+	li {
+		margin: 0;
+
+		&.code {
+			display: inline-block;
+
+			&:after {
+				content: ", ";
+			}
+
+			&:last-of-type {
+				&:after {
+					display: none;
+				}
+			}
+
+			.tips {
+				cursor: pointer;
+			}
+		}
+	}
+}
+
 ul.wc_coupon_list_block {
 	margin: 0;
 	padding-bottom: 2px;
@@ -386,13 +431,18 @@ ul.wc_coupon_list_block {
 	}
 }
 
-.tablenav .actions {
-	overflow: visible;
-}
-
-.alignleft.actions .chosen-container-single {
-	display: inline-block;
-	vertical-align: middle;
+.tablenav {
+	.actions {
+		overflow: visible;
+	}
+	.select2-container {
+		float: left;
+		max-width: 200px;
+		line-height: 1.8em;
+		font-size: 14px;
+		vertical-align: middle;
+		margin: 1px 6px 1px 1px;
+	}
 }
 
 #woocommerce-order-data {
@@ -479,14 +529,9 @@ ul.wc_coupon_list_block {
 				width: 100%;
 			}
 
-			#order_status_chosen {
-				.chosen-search {
-					display: none;
-				}
-			}
-
-			.chosen-container {
+			.select2-container {
 				width: 100% !important;
+				line-height: 1.8em;
 			}
 
 			.date-picker-field {
@@ -514,11 +559,10 @@ ul.wc_coupon_list_block {
 			clear: both;
 
 			input,
-			textarea {
-				width: 100%;
-			}
-
-			select {
+			textarea,
+			select,
+			.wc-enhanced-select,
+			.wc-customer-search {
 				width: 100%;
 			}
 		}
@@ -566,6 +610,12 @@ ul.wc_coupon_list_block {
 			display: none;
 			zoom: 1;
 			padding-right: 1px;
+		}
+
+		.wc-customer-user {
+			label a {
+				float: right;
+			}
 		}
 	}
 
@@ -658,6 +708,14 @@ ul.wc_coupon_list_block {
 			margin: 0;
 			line-height: 2em;
 		}
+
+		.wc-used-coupons {
+			text-align: left;
+
+			.tips {
+				display: inline-block;
+			}
+		}
 	}
 
 	.wc-order-bulk-actions {
@@ -680,14 +738,14 @@ ul.wc_coupon_list_block {
 		border-top: none;
 
 		.add_item_id,
-		.chosen-container {
+		.select2-container {
 			vertical-align: top;
 			.search-field input {
 				min-width: 100px;
 			}
 		}
 
-		.chosen-container {
+		.select2-container {
 			width: 400px !important;
 			text-align: left;
 		}
@@ -784,13 +842,22 @@ ul.wc_coupon_list_block {
 			padding: 8px;
 			font-size: 11px;
 			text-align: left;
-
+			color: #555;
+			-webkit-touch-callout: none;
+		    -webkit-user-select: none;
+		    -khtml-user-select: none;
+		    -moz-user-select: none;
+		    -ms-user-select: none;
+		    user-select: none;
 			&:last-child {
 				padding-right: 12px;
 			}
 
 			&:first-child {
 				padding-left: 12px;
+			}
+			&.sortable {
+				cursor: pointer;
 			}
 		}
 
@@ -1157,7 +1224,7 @@ ul.wc_coupon_list_block {
 		vertical-align: top;
 
 		.add_item_id,
-		.chosen-container {
+		.select2-container {
 			width: 400px !important;
 			margin-right: 9px;
 			vertical-align: top;
@@ -1952,6 +2019,12 @@ img.help_tip {
 	table.form-table {
 		margin: 0 0 0;
 
+		.select2-container {
+			display: block;
+			max-width: 350px;
+			line-height: 1.8em;
+		}
+
 		.forminp-radio ul {
 			margin: 0;
 			li {
@@ -1991,7 +2064,7 @@ img.help_tip {
 			padding-right: 24px;
 		}
 
-		.chosen-container {
+		.select2-container {
 			vertical-align: top;
 			margin-bottom: 3px;
 		}
@@ -2655,6 +2728,16 @@ img.help_tip {
 		padding: 5px 20px 5px 162px !important; /** Padding for aligning labels left - 12px + 150 label width **/
 	}
 
+	.sale_price_dates_fields {
+		.short:first-of-type {
+			margin-bottom: 1em;
+		}
+
+		.short:nth-of-type(2) {
+			clear: left;
+		}
+	}
+
 	label,
 	legend {
 		float: left;
@@ -2788,6 +2871,10 @@ img.help_tip {
 
 	&.padded {
 		padding: 1em;
+	}
+
+	.select2-container {
+		float: left;
 	}
 }
 
@@ -2958,7 +3045,7 @@ img.help_tip {
 				}
 
 				select,
-				.chosen-container  {
+				.select2-container  {
 					width: 100% !important;
 				}
 
@@ -3456,7 +3543,7 @@ img.ui-datepicker-trigger {
 				.section {
 					border-bottom: 1px solid #dfdfdf;
 
-					.chosen-container {
+					.select2-container {
 						width: 100% !important;
 					}
 
@@ -3806,63 +3893,9 @@ table.bar_chart {
 }
 
 /**
- * Chosen
- */
-.chosen-container-single .chosen-single {
-	height: 26px;
-	line-height: 26px;
-	margin-top: 1px;
-}
-
-.chosen-container-single .chosen-single div b {
-	background: url('../images/chosen-sprite.png') no-repeat 0 4px !important;
-}
-
-.chosen-container-active .chosen-single-with-drop div b {
-  background-position: -18px 2px !important;
-}
-
-.chosen-container-single .chosen-search input {
-	line-height: 13px;
-	width: 100% !important;
-	@include box-sizing(border-box);
-}
-.chosen-container .chosen-drop {
-	width: 100% !important;
-	@include box-sizing(border-box);
-}
-
-.chosen-container-multi .chosen-choices .search-field input {
-	height: 21px !important;
-}
-
-.woocommerce_options_panel .chosen-container-multi {
-	width: 50% !important;
-	float: left;
-
-	.search-field {
-		min-width: 50%;
-
-		input {
-			min-width: 100%;
-		}
-	}
-}
-
-.chosen-container-single .chosen-single {
-	abbr {
-		top: 8px;
-	}
-}
-
-/**
  * Small screen optimisation
  */
 @media only screen and (max-width: 1280px) {
-	.woocommerce_options_panel .chosen-container-multi {
-		width: 80% !important;
-	}
-
 	#order_data {
 		.order_data_column {
 			width: 48%;
@@ -3999,24 +4032,18 @@ table.bar_chart {
  * Backbone modal dialog
  */
 .wc-backbone-modal {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 160000;
-
 	* {
 		@include box-sizing(content-box);
 	}
 
 	.wc-backbone-modal-content {
-		position: absolute;
+		position: fixed;
 		top: 50%;
 		left: 50%;
 		width: 500px;
 		background: #fff;
 		margin: -150px 0 0 -250px;
+		z-index: 160000;
 	}
 }
 
@@ -4042,8 +4069,62 @@ table.bar_chart {
 		padding: 4px 16px;
 	}
 
-	header {
+	.wc-backbone-modal-header {
+		background: #fcfcfc;
 		border-bottom: 1px solid #ddd;
+
+		h1 {
+			font-size: 22px;
+			font-weight: 700;
+			line-height: 42px;
+			margin: 0;
+		}
+	}
+
+	.modal-close-link {
+		cursor: pointer;
+		color: #777;
+		background-color: transparent;
+		height: 50px;
+		width: 50px;
+		padding: 0;
+		position: absolute;
+		text-align: center;
+		border: 0;
+		border-left: 1px solid #ddd;
+		-webkit-transition: color .1s ease-in-out,background .1s ease-in-out;
+		transition: color .1s ease-in-out,background .1s ease-in-out;
+		top: 0;
+		right: 0;
+		text-decoration: none;
+
+		&:hover {
+			background: #ddd;
+			border-color: #ccc;
+			color: #000;
+			outline: 0;
+			text-decoration: none;
+		}
+
+		.close-icon {
+			display: block;
+			height: 15px;
+			background-image: none;
+			text-align: center;
+			margin: 14px;
+			width: 22px;
+
+			&:before {
+				content: '\f335';
+				font-size: 22px;
+				font: 400 20px/1 dashicons;
+				speak: none;
+				vertical-align: middle;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+				color: #666;
+			}
+		}
 	}
 
 	article {
@@ -4053,13 +4134,6 @@ table.bar_chart {
 			padding: 10px 0 0;
 			text-align: center;
 		}
-	}
-
-	h1 {
-		font-size: 22px;
-		font-weight: 200;
-		line-height: 45px;
-		margin: 0;
 	}
 
 	footer {
@@ -4079,4 +4153,11 @@ table.bar_chart {
 		padding: 0 10px;
 		text-align: right;
 	}
+}
+
+/**
+ * Select2
+ */
+.select2-drop {
+	z-index: 999999;
 }

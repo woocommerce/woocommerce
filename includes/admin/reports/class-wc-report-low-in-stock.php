@@ -27,8 +27,6 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 
 	/**
 	 * Get Products matching stock criteria
-	 *
-	 * @access public
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;
@@ -50,6 +48,8 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
 			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$nostock}'
 			";
+
+		$query_from = apply_filters( 'woocommerce_report_low_in_stock_query_from', $query_from );
 
 		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT posts.ID as id, posts.post_parent as parent {$query_from} GROUP BY posts.ID ORDER BY posts.post_title DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) );
 		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" );

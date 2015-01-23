@@ -96,7 +96,7 @@ class WC_Payment_Gateways {
 
 		// Load gateways in order
 		foreach ( $load_gateways as $gateway ) {
-			$load_gateway = new $gateway();
+			$load_gateway = is_string( $gateway ) ? new $gateway() : $gateway;
 
 			if ( isset( $ordering[ $load_gateway->id ] ) && is_numeric( $ordering[ $load_gateway->id ] ) ) {
 				// Add in position
@@ -149,6 +149,20 @@ class WC_Payment_Gateways {
 		}
 
 		return apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways );
+	}
+
+	/**
+	 * Set the current, active gateway
+	 */
+	public function set_current_gateway( $gateways ) {
+		$default = get_option( 'woocommerce_default_gateway', current( array_keys( $gateways ) ) );
+		$current = WC()->session->get( 'chosen_payment_method', $default );
+
+		if ( isset( $gateways[ $current ] ) ) {
+			$gateways[ $current ]->set_current();
+		} elseif ( isset( $gateways[ $default ] ) ) {
+			$gateways[ $default ]->set_current();
+		}
 	}
 
 	/**

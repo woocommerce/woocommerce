@@ -181,7 +181,9 @@ class WC_Admin_Report {
 
 			} elseif ( $value['type'] == 'order_item_meta' ) {
 
-				$query['where'] .= " AND order_items.order_item_type = '{$value['order_item_type']}'";
+				if ( $value['order_item_type'] ) {
+					$query['where'] .= " AND order_items.order_item_type = '{$value['order_item_type']}'";
+				}
 				$query['where'] .= " AND order_item_meta_{$key}.meta_key = '{$key}'";
 
 			}
@@ -311,20 +313,17 @@ class WC_Admin_Report {
 	 * @return string
 	 */
 	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
-
 		$prepared_data = array();
 		$time          =  '';
 
 		// Ensure all days (or months) have values first in this range
 		for ( $i = 0; $i <= $interval; $i ++ ) {
-
 			switch ( $group_by ) {
-
 				case 'day' :
 					$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) . '000';
 				break;
-
 				case 'month' :
+				default :
 					$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $start_date ) ) . '01' ) . '000';
 				break;
 			}
@@ -336,12 +335,11 @@ class WC_Admin_Report {
 
 		foreach ( $data as $d ) {
 			switch ( $group_by ) {
-
 				case 'day' :
 					$time = strtotime( date( 'Ymd', strtotime( $d->$date_key ) ) ) . '000';
 				break;
-
 				case 'month' :
+				default :
 					$time = strtotime( date( 'Ym', strtotime( $d->$date_key ) ) . '01' ) . '000';
 				break;
 			}

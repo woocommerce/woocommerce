@@ -49,8 +49,9 @@
 		id: 'wc-backbone-modal-dialog',
 		_target: undefined,
 		events: {
-			'click #btn-cancel': 'closeButton',
-			'click #btn-ok':     'addButton',
+			'click .modal-close': 'closeButton',
+			'click #btn-ok':      'addButton',
+			'keydown':            'keyboardActions'
 		},
 		initialize: function ( data ) {
 			this._target = data.target;
@@ -65,7 +66,7 @@
 			}).append( this.$el );
 
 			var $content  = $( '.wc-backbone-modal-content' ).find( 'article' );
-			var content_h = $content.height();
+			var content_h = ( 0 === $content.height() ) ? 90 : $content.height();
 			var max_h     = $( window ).height() - 200;
 
 			if ( max_h > 400 ) {
@@ -101,7 +102,7 @@
 			$( 'body' ).trigger( 'wc_backbone_modal_removed', this._target );
 		},
 		addButton: function ( e ) {
-			$( 'body' ).trigger( 'wc_backbone_modal_response', this._target, this.getFormData() );
+			$( 'body' ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
 			this.closeButton( e );
 		},
 		getFormData: function () {
@@ -118,6 +119,19 @@
 			});
 
 			return data;
+		},
+		keyboardActions: function( e ) {
+			var button = e.keyCode || e.which;
+
+			// Enter key
+			if ( 13 === button && ! ( e.target.tagName && e.target.tagName.toLowerCase() === 'input' ) ) {
+				this.addButton( e );
+			}
+
+			// ESC key
+			if ( 27 === button ) {
+				this.closeButton( e );
+			}
 		}
 	});
 

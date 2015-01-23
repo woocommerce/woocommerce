@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.3-bleeding
+ * Version: 2.3-beta-1
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 4.0
@@ -200,7 +200,9 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
 		include_once( 'includes/wc-widget-functions.php' );
+		include_once( 'includes/wc-webhook-functions.php' );
 		include_once( 'includes/class-wc-install.php' );
+		include_once( 'includes/class-wc-geolocation.php' );
 		include_once( 'includes/class-wc-download-handler.php' );
 		include_once( 'includes/class-wc-comments.php' );
 		include_once( 'includes/class-wc-post-data.php' );
@@ -439,11 +441,15 @@ final class WooCommerce {
 			$scheme = 'http';
 		}
 
-		if ( get_option( 'permalink_structure' ) ) {
-			return esc_url_raw( trailingslashit( home_url( '/wc-api/' . $request, $scheme ) ) );
+		if ( strstr( get_option( 'permalink_structure' ), '/index.php/' ) ) {
+			$api_request_url = trailingslashit( home_url( '/index.php/wc-api/' . $request, $scheme ) );
+		} elseif ( get_option( 'permalink_structure' ) ) {
+			$api_request_url = trailingslashit( home_url( '/wc-api/' . $request, $scheme ) );
 		} else {
-			return esc_url_raw( add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) ) );
+			$api_request_url = add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) );
 		}
+
+		return esc_url_raw( $api_request_url );
 	}
 
 	/**

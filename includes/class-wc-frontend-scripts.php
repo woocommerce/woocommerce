@@ -112,8 +112,25 @@ class WC_Frontend_Scripts {
 		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 		$frontend_script_path = $assets_path . 'js/frontend/';
 
-		// Register any scripts for later use, or used as dependencies
+		// Chosen is @deprecated as of 2.3 in favour of 2.3. Here for backwards compatibility.
 		self::register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
+		self::register_script( 'select2', '//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js', array( 'jquery' ), '3.5.2' );
+		wp_localize_script( 'select2', 'wc_select_params', array(
+			'i18n_matches_1'            => _x( 'One result is available, press enter to select it.', 'enhanced select', 'woocommerce' ),
+			'i18n_matches_n'            => _x( '%qty% results are available, use up and down arrow keys to navigate.', 'enhanced select', 'woocommerce' ),
+			'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
+			'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
+			'i18n_input_too_short_1'    => _x( 'Please enter 1 or more character', 'enhanced select', 'woocommerce' ),
+			'i18n_input_too_short_n'    => _x( 'Please enter %qty% or more characters', 'enhanced select', 'woocommerce' ),
+			'i18n_input_too_long_1'     => _x( 'Please delete 1 character', 'enhanced select', 'woocommerce' ),
+			'i18n_input_too_long_n'     => _x( 'Please delete %qty% characters', 'enhanced select', 'woocommerce' ),
+			'i18n_selection_too_long_1' => _x( 'You can only select 1 item', 'enhanced select', 'woocommerce' ),
+			'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
+			'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
+			'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
+		) );
+
+		// Register any scripts for later use, or used as dependencies
 		self::register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.60' );
 		self::register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.0.2' );
 		self::register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.3.1' );
@@ -130,9 +147,9 @@ class WC_Frontend_Scripts {
 		if ( is_cart() ) {
 			self::enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select' ) );
 		}
-		if ( apply_filters( 'woocommerce_chosen_country_select', true ) && ( is_checkout() || is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) ) {
-			self::enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ) );
-			wp_enqueue_style( 'woocommerce_chosen_styles', $assets_path . 'css/chosen.css' );
+		if ( is_checkout() || is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) {
+			self::enqueue_script( 'select2' );
+			wp_enqueue_style( 'select2', $assets_path . 'css/select2.css' );
 		}
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ) );
@@ -161,9 +178,6 @@ class WC_Frontend_Scripts {
 			foreach ( $enqueue_styles as $handle => $args ) {
 				wp_enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
 			}
-
-			// Global frontend styles
-			wp_enqueue_style( 'dashicons', array( 'woocommerce-general' ) );
 		}
 	}
 
@@ -205,8 +219,9 @@ class WC_Frontend_Scripts {
 			case 'wc-checkout' :
 				return array(
 					'ajax_url'                  => WC()->ajax_url(),
-					'update_order_review_nonce' => wp_create_nonce( "update-order-review" ),
-					'apply_coupon_nonce'        => wp_create_nonce( "apply-coupon" ),
+					'update_order_review_nonce' => wp_create_nonce( 'update-order-review' ),
+					'apply_coupon_nonce'        => wp_create_nonce( 'apply-coupon' ),
+					'remove_coupon_nonce'       => wp_create_nonce( 'remove-coupon' ),
 					'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
 					'checkout_url'              => add_query_arg( 'action', 'woocommerce_checkout', WC()->ajax_url() ),
 					'is_checkout'               => is_page( wc_get_page_id( 'checkout' ) ) && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0

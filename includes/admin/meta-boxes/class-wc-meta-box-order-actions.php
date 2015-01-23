@@ -23,6 +23,14 @@ class WC_Meta_Box_Order_Actions {
 	 * Output the metabox
 	 */
 	public static function output( $post ) {
+		global $theorder;
+
+		// This is used by some callbacks attached to hooks such as woocommerce_order_actions which rely on the global to determine if actions should be displayed for certain orders.
+		if ( ! is_object( $theorder ) ) {
+			$theorder = wc_get_order( $post->ID );
+		}
+
+		$order_type_object = get_post_type_object( $post->post_type );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -71,7 +79,7 @@ class WC_Meta_Box_Order_Actions {
 					}
 				?></div>
 
-				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php _e( 'Save Order', 'woocommerce' ); ?>" data-tip="<?php _e( 'Save/update the order', 'woocommerce' ); ?>" />
+				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" />
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
@@ -128,8 +136,9 @@ class WC_Meta_Box_Order_Actions {
 
 			} else {
 
-				do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
-
+				if ( ! did_action( 'woocommerce_order_action_' . sanitize_title( $action ) ) ) {
+					do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
+				}
 			}
 		}
 	}

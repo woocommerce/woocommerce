@@ -32,40 +32,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endforeach; ?>
 			<tr>
 				<td><?php _e( 'Shipping Debug Mode', 'woocommerce' ); ?></td>
-	 			<td>
-	 				<p>
+				<td>
+					<p>
 						<label><input type="checkbox" class="checkbox" name="woocommerce_status_options[shipping_debug_mode]" value="1" <?php checked( '1', $options['shipping_debug_mode'] ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
 					</p>
 					<p>
 						<span class="description"><?php _e( 'This tool will disable shipping rate caching.', 'woocommerce' ); ?></span>
-	 				</p>
-	 			</td>
-	 		</tr>
-	 		<tr>
+					</p>
+				</td>
+			</tr>
+			<tr>
 				<td><?php _e( 'Template Debug Mode', 'woocommerce' ); ?></td>
-	 			<td>
-	 				<p>
+				<td>
+					<p>
 						<label><input type="checkbox" class="checkbox" name="woocommerce_status_options[template_debug_mode]" value="1" <?php checked( '1', $options['template_debug_mode'] ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
 					</p>
 					<p>
 						<span class="description"><?php _e( 'This tool will disable template overrides for logged-in administrators for debugging purposes.', 'woocommerce' ); ?></span>
-	 				</p>
-	 			</td>
-	 		</tr>
-	 		<tr>
+					</p>
+				</td>
+			</tr>
+			<tr>
 				<td><?php _e( 'Remove post types on uninstall', 'woocommerce' ); ?></td>
-	 			<td>
-	 				<p>
+				<td>
+					<p>
 						<label><input type="checkbox" class="checkbox" name="woocommerce_status_options[uninstall_data]" value="1" <?php checked( '1', $options['uninstall_data'] ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
 					</p>
 					<p>
 						<span class="description"><?php _e( 'This tool will delete all product and order post data when uninstalling via Plugins > Delete.', 'woocommerce' ); ?></span>
-	 				</p>
-	 			</td>
-	 		</tr>
+					</p>
+				</td>
+			</tr>
 		</tbody>
 	</table>
-    <p class="submit">
-    	<input type="submit" class="button-primary" value="<?php esc_attr_e( 'Save Changes', 'woocommerce' ) ?>" />
-    </p>
+	<p class="submit">
+		<input type="submit" class="button-primary" value="<?php esc_attr_e( 'Save Changes', 'woocommerce' ) ?>" />
+	</p>
 </form>

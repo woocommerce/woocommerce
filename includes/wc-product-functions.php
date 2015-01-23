@@ -99,6 +99,9 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		delete_transient( $transient );
 	}
 
+	// Increments the transient version to invalidate cache
+	WC_Cache_Helper::get_transient_version( 'product', true );
+
 	do_action( 'woocommerce_delete_product_transients', $post_id );
 }
 
@@ -302,9 +305,9 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
 			}
 
 			if ( $flat ) {
-				$variation_list[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . urldecode( $value );
+				$variation_list[] = wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . rawurldecode( $value );
 			} else {
-				$variation_list[] = '<dt>' . wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . urldecode( $value ) . '</dd>';
+				$variation_list[] = '<dt>' . wc_attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . rawurldecode( $value ) . '</dd>';
 			}
 		}
 
@@ -522,4 +525,19 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 	} else {
 		return true;
 	}
+}
+
+/**
+ * Get product ID by SKU.
+ *
+ * @since  2.3.0
+ * @param  string $sku
+ * @return int
+ */
+function wc_get_product_id_by_sku( $sku ) {
+	global $wpdb;
+
+	$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $sku ) );
+
+	return ( $product_id ) ? intval( $product_id ) : 0;
 }

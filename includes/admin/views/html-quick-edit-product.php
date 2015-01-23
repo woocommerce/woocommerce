@@ -95,7 +95,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<label>
 					<span class="title"><?php _e( 'Weight', 'woocommerce' ); ?></span>
 					<span class="input-text-wrap">
-						<input type="text" name="_weight" class="text weight" placeholder="0.00" value="">
+						<input type="text" name="_weight" class="text weight" placeholder="<?php echo wc_format_localized_decimal( 0 ); ?>" value="">
 					</span>
 				</label>
 				<br class="clear" />
@@ -161,7 +161,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select class="stock_status" name="_stock_status">
 				<?php
 					$options = array(
-						'instock' => __( 'In stock', 'woocommerce' ),
+						'instock'    => __( 'In stock', 'woocommerce' ),
 						'outofstock' => __( 'Out of stock', 'woocommerce' )
 					);
 					foreach ( $options as $key => $value ) {

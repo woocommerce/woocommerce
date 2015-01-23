@@ -2,9 +2,9 @@
 /**
  * Admin Dashboard
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -54,8 +54,8 @@ class WC_Admin_Dashboard {
 		$query            = array();
 		$query['fields']  = "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts";
 		$query['join']    = "INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id ";
-		$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'reports' ) ) . "' ) ";
-		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
+		$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'sales-reports' ) ) . "' ) ";
+		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold', 'refunded' ) ) ) . "' ) ";
 		$query['where']  .= "AND postmeta.meta_key   = '_order_total' ";
 		$query['where']  .= "AND posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
 		$query['where']  .= "AND posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";

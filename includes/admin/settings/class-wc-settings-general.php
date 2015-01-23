@@ -65,7 +65,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'id'       => 'woocommerce_allowed_countries',
 				'default'  => 'all',
 				'type'     => 'select',
-				'class'    => 'chosen_select',
+				'class'    => 'wc-enhanced-select',
 				'css'      => 'min-width: 350px;',
 				'desc_tip' =>  true,
 				'options'  => array(
@@ -120,7 +120,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css'      => 'min-width:350px;',
 				'default'  => 'GBP',
 				'type'     => 'select',
-				'class'    => 'chosen_select',
+				'class'    => 'wc-enhanced-select',
 				'desc_tip' =>  true,
 				'options'  => $currency_code_options
 			),
@@ -130,7 +130,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'desc'     => __( 'This controls the position of the currency symbol.', 'woocommerce' ),
 				'id'       => 'woocommerce_currency_pos',
 				'css'      => 'min-width:350px;',
-				'class'    => 'chosen_select',
+				'class'    => 'wc-enhanced-select',
 				'default'  => 'left',
 				'type'     => 'select',
 				'options'  => array(

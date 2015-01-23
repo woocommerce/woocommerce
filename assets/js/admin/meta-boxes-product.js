@@ -252,9 +252,6 @@ jQuery( function( $ ){
 
 	// ATTRIBUTE TABLES
 
-	// Multiselect attributes
-	$(".product_attributes select.multiselect").chosen();
-
 	// Initial order
 	var woocommerce_attribute_items = $('.product_attributes').find('.woocommerce_attribute').get();
 
@@ -278,66 +275,40 @@ jQuery( function( $ ){
 	});
 
 	// Add rows
-	$('button.add_attribute').on('click', function(){
+	$( 'button.add_attribute' ).on('click', function(){
+		var size         = $( '.product_attributes .woocommerce_attribute' ).size();
+		var attribute    = $( 'select.attribute_taxonomy' ).val();
+		var $wrapper     = $( this ).closest( '#product_attributes' ).find( '.product_attributes' );
+		var product_type = $( 'select#product-type' ).val();
+		var data         = {
+			action : 'woocommerce_add_attribute',
+			taxonomy : attribute,
+			i : size,
+			security : woocommerce_admin_meta_boxes.add_attribute_nonce
+		};
 
-		var size = $('.product_attributes .woocommerce_attribute').size();
+		$wrapper.block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 
-		var attribute_type = $('select.attribute_taxonomy').val();
+		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+			$wrapper.append( response );
 
-		if ( ! attribute_type ) {
+			if ( product_type !== 'variable' ) {
+				$wrapper.find( '.enable_variation' ).hide();
+			}
 
-			var product_type = $('select#product-type').val();
-			if (product_type!='variable') enable_variation = 'style="display:none;"'; else enable_variation = '';
-
-			// Add custom attribute row
-			$('.product_attributes').append('<div class="woocommerce_attribute wc-metabox">\
-					<h3>\
-						<button type="button" class="remove_row button">' + woocommerce_admin_meta_boxes.remove_label + '</button>\
-						<div class="handlediv" title="' + woocommerce_admin_meta_boxes.click_to_toggle + '"></div>\
-						<strong class="attribute_name"></strong>\
-					</h3>\
-					<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data">\
-						<tbody>\
-							<tr>\
-								<td class="attribute_name">\
-									<label>' + woocommerce_admin_meta_boxes.name_label + ':</label>\
-									<input type="text" class="attribute_name" name="attribute_names[' + size + ']" />\
-									<input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" />\
-									<input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" />\
-								</td>\
-								<td rowspan="3">\
-									<label>' + woocommerce_admin_meta_boxes.values_label + ':</label>\
-									<textarea name="attribute_values[' + size + ']" cols="5" rows="5" placeholder="' + woocommerce_admin_meta_boxes.text_attribute_tip + '"></textarea>\
-								</td>\
-							</tr>\
-							<tr>\
-								<td>\
-									<label><input type="checkbox" class="checkbox" ' + ( woocommerce_admin_meta_boxes.default_attribute_visibility ? 'checked="checked"' : '' ) + ' name="attribute_visibility[' + size + ']" value="1" /> ' + woocommerce_admin_meta_boxes.visible_label + '</label>\
-								</td>\
-							</tr>\
-							<tr>\
-								<td>\
-									<div class="enable_variation show_if_variable" ' + enable_variation + '>\
-									<label><input type="checkbox" class="checkbox" ' + ( woocommerce_admin_meta_boxes.default_attribute_variation ? 'checked="checked"' : '' ) + ' name="attribute_variation[' + size + ']" value="1" /> ' + woocommerce_admin_meta_boxes.used_for_variations_label + '</label>\
-									</div>\
-								</td>\
-							</tr>\
-						</tbody>\
-					</table>\
-				</div>');
-
-		} else {
-
-			// Reveal taxonomy row
-			var thisrow = $('.product_attributes .woocommerce_attribute.' + attribute_type);
-			$('.product_attributes').append( $(thisrow) );
-			$(thisrow).show().find('.woocommerce_attribute_data').show();
+			$('body').trigger( 'wc-enhanced-select-init' );
 			attribute_row_indexes();
-			$('select.attribute_taxonomy').find('option[value="' + attribute_type + '"]').attr('disabled','disabled');
+			$wrapper.unblock();
 
+			$('body').trigger( 'woocommerce_added_attribute' );
+		});
+
+		if ( attribute ) {
+			$( 'select.attribute_taxonomy' ).find( 'option[value="' + attribute + '"]' ).attr( 'disabled','disabled' );
+			$( 'select.attribute_taxonomy' ).val( '' );
 		}
 
-		$('select.attribute_taxonomy').val('');
+		return false;
 	});
 
 	$('.product_attributes').on('blur', 'input.attribute_name', function(){
@@ -346,13 +317,13 @@ jQuery( function( $ ){
 
 	$('.product_attributes').on('click', 'button.select_all_attributes', function(){
 		$(this).closest('td').find('select option').attr("selected","selected");
-		$(this).closest('td').find('select').trigger("chosen:updated");
+		$(this).closest('td').find('select').change();
 		return false;
 	});
 
 	$('.product_attributes').on('click', 'button.select_no_attributes', function(){
 		$(this).closest('td').find('select option').removeAttr("selected");
-		$(this).closest('td').find('select').trigger("chosen:updated");
+		$(this).closest('td').find('select').change();
 		return false;
 	});
 
@@ -399,8 +370,8 @@ jQuery( function( $ ){
 
 		$('.product_attributes').block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 
-		var attribute = $(this).attr('data-attribute');
-		var $wrapper = $(this).closest('.woocommerce_attribute_data');
+		var $wrapper           = $(this).closest('.woocommerce_attribute');
+		var attribute          = $wrapper.data('taxonomy');
 		var new_attribute_name = prompt( woocommerce_admin_meta_boxes.new_attribute_prompt );
 
 		if ( new_attribute_name ) {
@@ -420,7 +391,7 @@ jQuery( function( $ ){
 				} else if ( response.slug ) {
 					// Success
 					$wrapper.find('select.attribute_values').append('<option value="' + response.slug + '" selected="selected">' + response.name + '</option>');
-					$wrapper.find('select.attribute_values').trigger("chosen:updated");
+					$wrapper.find('select.attribute_values').change();
 				}
 
 				$('.product_attributes').unblock();
@@ -432,7 +403,6 @@ jQuery( function( $ ){
 		}
 
 		return false;
-
 	});
 
 	// Save attributes and update variations

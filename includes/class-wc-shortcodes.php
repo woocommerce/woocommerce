@@ -140,6 +140,7 @@ class WC_Shortcodes {
 
 		// Default ordering args
 		$ordering_args = WC()->query->get_catalog_ordering_args( $atts['orderby'], $atts['order'] );
+		$meta_query    = WC()->query->get_meta_query();
 
 		$args = array(
 			'post_type'				=> 'product',
@@ -148,13 +149,7 @@ class WC_Shortcodes {
 			'orderby' 				=> $ordering_args['orderby'],
 			'order' 				=> $ordering_args['order'],
 			'posts_per_page' 		=> $atts['per_page'],
-			'meta_query' 			=> array(
-				array(
-					'key' 			=> '_visibility',
-					'value' 		=> array('catalog', 'visible'),
-					'compare' 		=> 'IN'
-				)
-			),
+			'meta_query' 			=> $meta_query,
 			'tax_query' 			=> array(
 				array(
 					'taxonomy' 		=> 'product_cat',
@@ -357,20 +352,16 @@ class WC_Shortcodes {
 			'order'     => 'asc'
 		), $atts );
 
+		$meta_query = WC()->query->get_meta_query();
+
 		$args = array(
-			'post_type'				=> 'product',
-			'post_status' 			=> 'publish',
-			'ignore_sticky_posts'	=> 1,
-			'orderby' 				=> $atts['orderby'],
-			'order' 				=> $atts['order'],
-			'posts_per_page' 		=> -1,
-			'meta_query' 			=> array(
-				array(
-					'key' 		=> '_visibility',
-					'value' 	=> array('catalog', 'visible'),
-					'compare' 	=> 'IN'
-				)
-			)
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => 1,
+			'orderby'             => $atts['orderby'],
+			'order'               => $atts['order'],
+			'posts_per_page'      => -1,
+			'meta_query'          => $meta_query
 		);
 
 		if ( isset( $atts['skus'] ) ) {
@@ -426,18 +417,14 @@ class WC_Shortcodes {
 			return '';
 		}
 
+		$meta_query = WC()->query->get_meta_query();
+
 		$args = array(
-			'post_type' 		=> 'product',
-			'posts_per_page' 	=> 1,
-			'no_found_rows' 	=> 1,
-			'post_status' 		=> 'publish',
-			'meta_query' 		=> array(
-				array(
-					'key' 		=> '_visibility',
-					'value' 	=> array('catalog', 'visible'),
-					'compare' 	=> 'IN'
-				)
-			)
+			'post_type'      => 'product',
+			'posts_per_page' => 1,
+			'no_found_rows'  => 1,
+			'post_status'    => 'publish',
+			'meta_query'     => $meta_query
 		);
 
 		if ( isset( $atts['sku'] ) ) {
@@ -500,7 +487,7 @@ class WC_Shortcodes {
 		if ( ! empty( $atts['id'] ) ) {
 			$product_data = get_post( $atts['id'] );
 		} elseif ( ! empty( $atts['sku'] ) ) {
-			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
+			$product_id   = wc_get_product_id_by_sku( $atts['sku'] );
 			$product_data = get_post( $product_id );
 		} else {
 			return '';
@@ -546,7 +533,7 @@ class WC_Shortcodes {
 		if ( isset( $atts['id'] ) ) {
 			$product_data = get_post( $atts['id'] );
 		} elseif ( isset( $atts['sku'] ) ) {
-			$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku'] ) );
+			$product_id   = wc_get_product_id_by_sku( $atts['sku'] );
 			$product_data = get_post( $product_id );
 		} else {
 			return '';
@@ -580,10 +567,7 @@ class WC_Shortcodes {
 		// Get products on sale
 		$product_ids_on_sale = wc_get_product_ids_on_sale();
 
-		$meta_query   = array();
-		$meta_query[] = WC()->query->visibility_meta_query();
-		$meta_query[] = WC()->query->stock_status_meta_query();
-		$meta_query   = array_filter( $meta_query );
+		$meta_query = WC()->query->get_meta_query();
 
 		$args = array(
 			'posts_per_page'	=> $atts['per_page'],
@@ -635,6 +619,8 @@ class WC_Shortcodes {
 			'columns'  => '4'
 		), $atts );
 
+		$meta_query = WC()->query->get_meta_query();
+
 		$args = array(
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
@@ -642,13 +628,7 @@ class WC_Shortcodes {
 			'posts_per_page'      => $atts['per_page'],
 			'meta_key'            => 'total_sales',
 			'orderby'             => 'meta_value_num',
-			'meta_query'          => array(
-				array(
-					'key'     => '_visibility',
-					'value'   => array( 'catalog', 'visible' ),
-					'compare' => 'IN'
-				)
-			)
+			'meta_query'          => $meta_query
 		);
 
 		ob_start();
@@ -692,20 +672,16 @@ class WC_Shortcodes {
 			'order'    => 'asc'
 		), $atts );
 
+		$meta_query = WC()->query->get_meta_query();
+
 		$args = array(
-			'post_type' 			=> 'product',
-			'post_status' 			=> 'publish',
-			'ignore_sticky_posts'   => 1,
-			'orderby' 				=> $atts['orderby'],
-			'order'					=> $atts['order'],
-			'posts_per_page' 		=> $atts['per_page'],
-			'meta_query' 			=> array(
-				array(
-					'key' 			=> '_visibility',
-					'value' 		=> array('catalog', 'visible'),
-					'compare' 		=> 'IN'
-				)
-			)
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => 1,
+			'orderby'             => $atts['orderby'],
+			'order'               => $atts['order'],
+			'posts_per_page'      => $atts['per_page'],
+			'meta_query'          => $meta_query
 		);
 
 		ob_start();
@@ -753,6 +729,12 @@ class WC_Shortcodes {
 			'order'    => 'desc'
 		), $atts );
 
+		$meta_query   = WC()->query->get_meta_query();
+		$meta_query[] = array(
+			'key'   => '_featured',
+			'value' => 'yes'
+		);
+
 		$args = array(
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
@@ -760,17 +742,7 @@ class WC_Shortcodes {
 			'posts_per_page'      => $atts['per_page'],
 			'orderby'             => $atts['orderby'],
 			'order'               => $atts['order'],
-			'meta_query'          => array(
-				array(
-					'key'     => '_visibility',
-					'value'   => array('catalog', 'visible'),
-					'compare' => 'IN'
-				),
-				array(
-					'key'   => '_featured',
-					'value' => 'yes'
-				)
-			)
+			'meta_query'          => $meta_query
 		);
 
 		ob_start();
@@ -910,7 +882,8 @@ class WC_Shortcodes {
 			'filter'    => ''
 		), $atts );
 
-		$attribute = strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] );
+		$attribute  = strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] );
+		$meta_query = WC()->query->get_meta_query();
 
 		$args = array(
 			'post_type'           => 'product',
@@ -919,13 +892,7 @@ class WC_Shortcodes {
 			'posts_per_page'      => $atts['per_page'],
 			'orderby'             => $atts['orderby'],
 			'order'               => $atts['order'],
-			'meta_query'          => array(
-				array(
-					'key'     => '_visibility',
-					'value'   => array('catalog', 'visible'),
-					'compare' => 'IN'
-				)
-			),
+			'meta_query'          => $meta_query,
 			'tax_query'           => array(
 				array(
 					'taxonomy' => $attribute,

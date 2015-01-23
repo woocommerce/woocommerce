@@ -208,7 +208,7 @@ abstract class WC_Settings_API {
 	 *
 	 * Generate the HTML for the fields on the "settings" screen.
 	 *
-	 * @param string $form_fields (default: array())
+	 * @param array $form_fields (default: array())
 	 * @since 1.0.0
 	 * @uses method_exists()
 	 * @return string the html for the settings
@@ -442,6 +442,52 @@ abstract class WC_Settings_API {
 	public function generate_password_html( $key, $data ) {
 		$data['type'] = 'password';
 		return $this->generate_text_html( $key, $data );
+	}
+
+	/**
+	 * Generate Color Picker Input HTML.
+	 *
+	 * @param mixed $key
+	 * @param mixed $data
+	 * @since 2.3.0
+	 * @return string
+	 */
+	public function generate_color_html( $key, $data ) {
+		$field    = $this->plugin_id . $this->id . '_' . $key;
+		$defaults = array(
+			'title'             => '',
+			'disabled'          => false,
+			'class'             => '',
+			'css'               => '',
+			'placeholder'       => '',
+			'desc_tip'          => false,
+			'description'       => '',
+			'custom_attributes' => array()
+		);
+
+		$data = wp_parse_args( $data, $defaults );
+
+		ob_start();
+		?>
+		<tr valign="top">
+			<th scope="row" class="titledesc">
+				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<?php echo $this->get_tooltip_html( $data ); ?>
+			</th>
+			<td class="forminp">
+				<fieldset>
+					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
+					<div class="color_box">
+						<input class="colorpick <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+						<div id="colorPickerDiv_<?php echo esc_attr( $field ); ?>" class="colorpickdiv" style="z-index: 100; background: #eee; border: 1px solid #ccc; position: absolute; display: none;"></div>
+					</div>
+					<?php echo $this->get_description_html( $data ); ?>
+				</fieldset>
+			</td>
+		</tr>
+		<?php
+
+		return ob_get_clean();
 	}
 
 	/**

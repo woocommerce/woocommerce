@@ -34,6 +34,16 @@ function wc_get_order_statuses() {
 }
 
 /**
+ * See if a string is an order status.
+ * @param  string $maybe_status Status, including any wc- prefix
+ * @return bool
+ */
+function wc_is_order_status( $maybe_status ) {
+	$order_statuses = wc_get_order_statuses();
+	return isset( $order_statuses[ $maybe_status ] );
+}
+
+/**
  * Main function for returning orders, uses the WC_Order_Factory class.
  *
  * @since  2.2

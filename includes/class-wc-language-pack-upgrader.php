@@ -94,12 +94,7 @@ class WC_Language_Pack_Upgrader {
 	 * @return void
 	 */
 	public function configure_woocommerce_upgrade_notice() {
-		$notices = get_option( 'woocommerce_admin_notices', array() );
-		if ( false === array_search( 'translation_upgrade', $notices ) ) {
-			$notices[] = 'translation_upgrade';
-
-			update_option( 'woocommerce_admin_notices', $notices );
-		}
+		WC_Admin_Notices::add_notice( 'translation_upgrade' );
 	}
 
 	/**

@@ -11,25 +11,26 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
-		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+		$customer_location = WC_Tax::get_tax_location();
+		$tax_rate          = array(
+			'tax_rate_country'  => $customer_location[0],
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
-
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rates = WC_Tax::get_rates();
 
 		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -41,25 +42,26 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
+		$customer_location = WC_Tax::get_tax_location();
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => $customer_location[0],
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
-
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rates = WC_Tax::get_shipping_tax_rates();
 
 		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -72,24 +74,24 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
-
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rates = WC_Tax::get_base_tax_rates();
 
 		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -102,20 +104,18 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
-
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rates = WC_Tax::find_rates( array(
 			'country'   => 'GB',
@@ -126,6 +126,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		) );
 
 		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -138,20 +140,18 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
-
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rates = WC_Tax::find_shipping_rates( array(
 			'country'   => 'GB',
@@ -162,6 +162,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		) );
 
 		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -174,20 +176,18 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
-
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rates = WC_Tax::find_rates( array(
 			'country'   => 'GB',
@@ -204,6 +204,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, false, false );
 
 		$this->assertEquals( $calced_tax, array( $tax_rate_id => '1.998' ) );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -216,20 +218,18 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
-
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rates = WC_Tax::find_rates( array(
 			'country'   => 'GB',
@@ -242,13 +242,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$calced_tax = WC_Tax::calc_shipping_tax( '10', $tax_rates );
 
 		$this->assertEquals( $calced_tax, array( $tax_rate_id => '2' ) );
-	}
 
-	/**
-	 * Customer Location
-	 */
-	public function test_get_customer_location() {
-		$this->assertEquals( WC_Tax::get_customer_location(), array( 'GB', '', '', '' ) );
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -258,20 +253,22 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "1",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '1',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertEquals( WC_Tax::get_rate_label( $wpdb->insert_id ), 'VAT' );
+		$this->assertEquals( WC_Tax::get_rate_label( $tax_rate_id ), 'VAT' );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -281,20 +278,22 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "1",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '1',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertEquals( WC_Tax::get_rate_percent( $wpdb->insert_id ), '20%' );
+		$this->assertEquals( WC_Tax::get_rate_percent( $tax_rate_id ), '20%' );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -304,20 +303,22 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "1",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '1',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertEquals( WC_Tax::get_rate_code( $wpdb->insert_id ), 'GB-VAT-1' );
+		$this->assertEquals( WC_Tax::get_rate_code( $tax_rate_id ), 'GB-VAT-1' );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -327,20 +328,22 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "1",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '1',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertTrue( WC_Tax::is_compound( $wpdb->insert_id ) );
+		$this->assertTrue( WC_Tax::is_compound( $tax_rate_id ) );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -379,33 +382,35 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		// Define a rate
 		$tax_rate = array(
-			'tax_rate_country'  => "gb",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20",
-			'tax_rate_name'     => "",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'gb',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20',
+			'tax_rate_name'     => '',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
 		// Run function
-		$result = WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$this->assertGreaterThan( 0, $wpdb->insert_id );
+		$this->assertGreaterThan( 0, $tax_rate_id );
 
-		$new_row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d", $wpdb->insert_id ) );
+		$new_row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d", $tax_rate_id ) );
 
-		$this->assertEquals( $new_row->tax_rate_country, "GB" );
-		$this->assertEquals( $new_row->tax_rate_state, "" );
-		$this->assertEquals( $new_row->tax_rate, "20.0000" );
-		$this->assertEquals( $new_row->tax_rate_name, "Tax" );
-		$this->assertEquals( $new_row->tax_rate_priority, "1" );
-		$this->assertEquals( $new_row->tax_rate_compound, "0" );
-		$this->assertEquals( $new_row->tax_rate_shipping, "1" );
-		$this->assertEquals( $new_row->tax_rate_order, "1" );
-		$this->assertEquals( $new_row->tax_rate_class, "" );
+		$this->assertEquals( $new_row->tax_rate_country, 'GB' );
+		$this->assertEquals( $new_row->tax_rate_state, '' );
+		$this->assertEquals( $new_row->tax_rate, '20.0000' );
+		$this->assertEquals( $new_row->tax_rate_name, 'Tax' );
+		$this->assertEquals( $new_row->tax_rate_priority, '1' );
+		$this->assertEquals( $new_row->tax_rate_compound, '0' );
+		$this->assertEquals( $new_row->tax_rate_shipping, '1' );
+		$this->assertEquals( $new_row->tax_rate_order, '1' );
+		$this->assertEquals( $new_row->tax_rate_class, '' );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -416,30 +421,31 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		// Define a rate
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
 		// Run function
-		$result = WC_Tax::_insert_tax_rate( $tax_rate );
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		// Update a rate
 		$tax_rate = array(
-			'tax_rate_country'  => "US"
+			'tax_rate_country'  => 'US'
 		);
 
 		// Run function
 		WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
 
 		$this->assertNotFalse( $wpdb->last_result );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -450,25 +456,26 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		// Define a rate
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
 		// Run function
-		$result = WC_Tax::_insert_tax_rate( $tax_rate );
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		// Run function
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 
 		$this->assertNotFalse( $wpdb->last_result );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -479,26 +486,27 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$to_save = '12345;90210-90215';
 		$tax_rate          = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
 		// Run function
-		$result      = WC_Tax::_insert_tax_rate( $tax_rate );
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $to_save );
 
 		$results = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC", $tax_rate_id ) );
 
 		$this->assertEquals( array( '12345', '90210', '90211', '90212', '90213', '90214', '90215' ), $results );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -509,25 +517,26 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$to_save  = 'SOMEWHERE;SOMEWHERE_ELSE';
 		$tax_rate = array(
-			'tax_rate_country'  => "GB",
-			'tax_rate_state'    => "",
-			'tax_rate'          => "20.0000",
-			'tax_rate_name'     => "VAT",
-			'tax_rate_priority' => "1",
-			'tax_rate_compound' => "0",
-			'tax_rate_shipping' => "1",
-			'tax_rate_order'    => "1",
-			'tax_rate_class'    => ""
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
 		);
 
 		// Run function
-		$result      = WC_Tax::_insert_tax_rate( $tax_rate );
-		$tax_rate_id = $wpdb->insert_id;
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		WC_Tax::_update_tax_rate_cities( $tax_rate_id, $to_save );
 
 		$results = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC", $tax_rate_id ) );
 
 		$this->assertEquals( array( 'SOMEWHERE', 'SOMEWHERE_ELSE' ), $results );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 }

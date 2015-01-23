@@ -2,10 +2,10 @@
 /**
  * WooCommerce Admin.
  *
- * @class 		WC_Admin
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @class       WC_Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
  */
 
@@ -43,20 +43,21 @@ class WC_Admin {
 
 		// Classes we only need during non-ajax requests
 		if ( ! is_ajax() ) {
-			include( 'class-wc-admin-menus.php' );
-			include( 'class-wc-admin-welcome.php' );
-			include( 'class-wc-admin-notices.php' );
-			include( 'class-wc-admin-assets.php' );
+			include_once( 'class-wc-admin-menus.php' );
+			include_once( 'class-wc-admin-welcome.php' );
+			include_once( 'class-wc-admin-notices.php' );
+			include_once( 'class-wc-admin-assets.php' );
+			include_once( 'class-wc-admin-webhooks.php' );
 
 			// Help
 			if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
-				include( 'class-wc-admin-help.php' );
+				include_once( 'class-wc-admin-help.php' );
 			}
 		}
 
 		// Importers
 		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
-			include( 'class-wc-admin-importers.php' );
+			include_once( 'class-wc-admin-importers.php' );
 		}
 	}
 
@@ -64,6 +65,7 @@ class WC_Admin {
 	 * Include admin files conditionally
 	 */
 	public function conditonal_includes() {
+
 		$screen = get_current_screen();
 
 		switch ( $screen->id ) {
@@ -86,6 +88,7 @@ class WC_Admin {
 	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin
 	 */
 	public function prevent_admin_access() {
+
 		$prevent_access = false;
 
 		if ( 'yes' == get_option( 'woocommerce_lock_down_admin' ) && ! is_ajax() && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) && basename( $_SERVER["SCRIPT_FILENAME"] ) !== 'admin-post.php' ) {
@@ -106,22 +109,31 @@ class WC_Admin {
 	 * @return string
 	 */
 	public function preview_emails() {
+
 		if ( isset( $_GET['preview_woocommerce_mail'] ) ) {
 			if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'preview-mail') ) {
 				die( 'Security check' );
 			}
 
-			global $email_heading;
-
-			ob_start();
-
-			include( 'views/html-email-template-preview.php' );
-
+			// load the mailer class
 			$mailer        = WC()->mailer();
-			$message       = ob_get_clean();
+
+			// get the preview email subject
 			$email_heading = __( 'HTML Email Template', 'woocommerce' );
 
-			echo $mailer->wrap_message( $email_heading, $message );
+			// get the preview email content
+			ob_start();
+			include( 'views/html-email-template-preview.php' );
+			$message       = ob_get_clean();
+
+			// create a new email
+			$email         = new WC_Email();
+
+			// wrap the content with the email template and then add styles
+			$message       = $email->style_inline( $mailer->wrap_message( $email_heading, $message ) );
+
+			// print the preview email
+			echo $message;
 			exit;
 		}
 	}

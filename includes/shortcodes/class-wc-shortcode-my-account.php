@@ -244,6 +244,11 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
+		if ( is_multisite() && ! is_user_member_of_blog( $user_data->id, get_current_blog_id() ) ) {
+			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
+			return false;
+		}
+
 		// redefining user_login ensures we return the right case in the email
 		$user_login = $user_data->user_login;
 		$user_email = $user_data->user_email;
@@ -280,7 +285,7 @@ class WC_Shortcode_My_Account {
 		$wpdb->update( $wpdb->users, array( 'user_activation_key' => $hashed ), array( 'user_login' => $user_login ) );
 
 		// Send email notification
-		$mailer = WC()->mailer();
+		WC()->mailer(); // load email classes
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
 		wc_add_notice( __( 'Check your e-mail for the confirmation link.', 'woocommerce' ) );
@@ -292,10 +297,9 @@ class WC_Shortcode_My_Account {
 	 *
 	 * @uses $wpdb WordPress Database object
 	 *
-	 * @access public
 	 * @param string $key Hash to validate sending user's password
 	 * @param string $login The user login
-	 * @return object|bool User's database row on success, false for invalid keys
+	 * @return WP_USER|bool User's database row on success, false for invalid keys
 	 */
 	public static function check_password_reset_key( $key, $login ) {
 		global $wpdb, $wp_hasher;
@@ -328,7 +332,7 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		return $user;
+		return get_userdata( $user->ID );
 	}
 
 	/**

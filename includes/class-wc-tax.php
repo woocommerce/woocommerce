@@ -35,10 +35,11 @@ class WC_Tax {
 		// Work in pence to X precision
 		$price = self::precision( $price );
 
-		if ( $price_includes_tax )
+		if ( $price_includes_tax ) {
 			$taxes = self::calc_inclusive_tax( $price, $rates );
-		else
+		} else {
 			$taxes = self::calc_exclusive_tax( $price, $rates );
+		}
 
 		// Round to precision
 		if ( ! self::$round_at_subtotal && ! $suppress_rounding ) {
@@ -149,28 +150,28 @@ class WC_Tax {
 	private static function calc_exclusive_tax( $price, $rates ) {
 		$taxes = array();
 
-		// Multiple taxes
-		foreach ( $rates as $key => $rate ) {
-
-			if ( $rate['compound'] == 'yes' )
-				continue;
-
-			$tax_amount = $price * ( $rate['rate'] / 100 );
-
-			// ADVANCED: Allow third parties to modify this rate
-			$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
-
-			// Add rate
-			if ( ! isset( $taxes[ $key ] ) )
-				$taxes[ $key ] = $tax_amount;
-			else
-				$taxes[ $key ] += $tax_amount;
-		}
-
-		$pre_compound_total = array_sum( $taxes );
-
-		// Compound taxes
 		if ( $rates ) {
+			// Multiple taxes
+			foreach ( $rates as $key => $rate ) {
+
+				if ( $rate['compound'] == 'yes' )
+					continue;
+
+				$tax_amount = $price * ( $rate['rate'] / 100 );
+
+				// ADVANCED: Allow third parties to modify this rate
+				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price );
+
+				// Add rate
+				if ( ! isset( $taxes[ $key ] ) )
+					$taxes[ $key ] = $tax_amount;
+				else
+					$taxes[ $key ] += $tax_amount;
+			}
+
+			$pre_compound_total = array_sum( $taxes );
+
+			// Compound taxes
 			foreach ( $rates as $key => $rate ) {
 
 				if ( $rate['compound'] == 'no' )
@@ -224,7 +225,7 @@ class WC_Tax {
 			set_transient( $rates_transient_key, $matched_tax_rates, WEEK_IN_SECONDS );
 		}
 
-		return $matched_tax_rates;
+		return apply_filters( 'woocommerce_find_rates', $matched_tax_rates, $args );
 	}
 
 	/**
@@ -327,21 +328,27 @@ class WC_Tax {
 
 	/**
 	 * Get the customer tax location based on their status and the current page
+	 *
+	 * Used by get_rates(), get_shipping_rates()
+	 *
+	 * @param  $tax_class string Optional, passed to the filter for advanced tax setups.
 	 * @return array
 	 */
-	public static function get_customer_location() {
-		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) || ( ! empty( WC()->customer ) && WC()->customer->has_calculated_shipping() ) ) {
-			return WC()->customer->get_taxable_address();
-		} elseif ( wc_prices_include_tax() || get_option( 'woocommerce_default_customer_address' ) == 'base' ) {
-			return array(
+	public static function get_tax_location( $tax_class = '' ) {
+		$location = array();
+
+		if ( ! empty( WC()->customer ) ) {
+			$location = WC()->customer->get_taxable_address();
+		} elseif ( wc_prices_include_tax() || 'base' === get_option( 'woocommerce_default_customer_address' ) ) {
+			$location = array(
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),
 				WC()->countries->get_base_postcode(),
 				WC()->countries->get_base_city()
 			);
-		} else {
-			return array();
 		}
+
+		return apply_filters( 'woocommerce_get_tax_location', $location, $tax_class );
 	}
 
 	/**
@@ -351,7 +358,7 @@ class WC_Tax {
 	 */
 	public static function get_rates( $tax_class = '' ) {
 		$tax_class         = sanitize_title( $tax_class );
-		$location          = self::get_customer_location();
+		$location          = self::get_tax_location( $tax_class );
 		$matched_tax_rates = array();
 
 		if ( sizeof( $location ) === 4 ) {
@@ -408,7 +415,7 @@ class WC_Tax {
 			$tax_class = 'standard' === $shipping_tax_class ? '' : $shipping_tax_class;
 		}
 
-		$location          = self::get_customer_location();
+		$location          = self::get_tax_location( $tax_class );
 		$matched_tax_rates = array();
 
 		if ( sizeof( $location ) === 4 ) {
