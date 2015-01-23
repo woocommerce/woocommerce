@@ -132,9 +132,6 @@ class WC_Cart {
 
 	/**
 	 * Loads the cart data from the PHP session during WordPress init and hooks in other methods.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function init() {
 		$this->get_cart_from_session();
@@ -146,9 +143,6 @@ class WC_Cart {
 
 	/**
 	 * Will set cart cookies if needed, once, during WP hook
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function maybe_set_cart_cookies() {
 		if ( ! headers_sent() ) {
@@ -165,7 +159,6 @@ class WC_Cart {
 	 *
 	 * @access private
 	 * @param bool $set (default: true)
-	 * @return void
 	 */
 	private function set_cart_cookies( $set = true ) {
 		if ( $set ) {
@@ -184,9 +177,6 @@ class WC_Cart {
 
 		/**
 		 * Get the cart data from the PHP session and store it in class variables.
-		 *
-		 * @access public
-		 * @return void
 		 */
 		public function get_cart_from_session() {
 
@@ -241,9 +231,6 @@ class WC_Cart {
 
 		/**
 		 * Sets the php session data for the cart and coupons.
-		 *
-		 * @access public
-		 * @return void
 		 */
 		public function set_session() {
 			// Set cart and coupon session data
@@ -290,9 +277,6 @@ class WC_Cart {
 
 		/**
 		 * Save the persistent cart when the cart is updated.
-		 *
-		 * @access public
-		 * @return void
 		 */
 		public function persistent_cart_update() {
 			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
@@ -302,9 +286,6 @@ class WC_Cart {
 
 		/**
 		 * Delete the persistent cart permanently.
-		 *
-		 * @access public
-		 * @return void
 		 */
 		public function persistent_cart_destroy() {
 			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
@@ -317,7 +298,6 @@ class WC_Cart {
 		/**
 		 * Coupons enabled function. Filterable.
 		 *
-		 * @access public
 		 * @return bool
 		 */
 		public function coupons_enabled() {
@@ -327,7 +307,6 @@ class WC_Cart {
 		/**
 		 * Get number of items in the cart.
 		 *
-		 * @access public
 		 * @return int
 		 */
 		public function get_cart_contents_count() {
@@ -336,9 +315,6 @@ class WC_Cart {
 
 		/**
 		 * Check all cart items for errors.
-		 *
-		 * @access public
-		 * @return void
 		 */
 		public function check_cart_items() {
 
@@ -367,9 +343,6 @@ class WC_Cart {
 
 		/**
 		 * Check cart coupons for errors.
-		 *
-		 * @access public
-		 * @return void
 		 */
 		public function check_cart_coupons() {
 			foreach ( $this->applied_coupons as $code ) {
@@ -391,7 +364,6 @@ class WC_Cart {
 		/**
 		 * Get cart items quantities - merged so we can do accurate stock checks on items across multiple lines.
 		 *
-		 * @access public
 		 * @return array
 		 */
 		public function get_cart_item_quantities() {
@@ -414,7 +386,6 @@ class WC_Cart {
 		/**
 		 * Looks through cart items and checks the posts are not trashed or deleted.
 		 *
-		 * @access public
 		 * @return bool|WP_Error
 		 */
 		public function check_cart_item_validity() {
@@ -435,7 +406,6 @@ class WC_Cart {
 		/**
 		 * Looks through the cart to check each item is in stock. If not, add an error.
 		 *
-		 * @access public
 		 * @return bool|WP_Error
 		 */
 		public function check_cart_item_stock() {
@@ -517,7 +487,6 @@ class WC_Cart {
 		/**
 		 * Gets and formats a list of cart item data + variations for display on the frontend.
 		 *
-		 * @access public
 		 * @param array $cart_item
 		 * @param bool $flat (default: false)
 		 * @return string
@@ -743,7 +712,6 @@ class WC_Cart {
 		/**
 		 * Get taxes, merged by code, formatted ready for output.
 		 *
-		 * @access public
 		 * @return array
 		 */
 		public function get_tax_totals() {
@@ -1369,8 +1337,6 @@ class WC_Cart {
 
 		/**
 		 * remove_taxes function.
-		 *
-		 * @return void
 		 */
 		public function remove_taxes() {
 			$this->shipping_tax_total = $this->tax_total = 0;
@@ -1404,9 +1370,6 @@ class WC_Cart {
 
 		/**
 		 * Uses the shipping class to calculate shipping then gets the totals when its finished.
-		 *
-		 * @access public
-		 * @return void
 		 */
 		public function calculate_shipping() {
 			if ( $this->needs_shipping() && $this->show_shipping() ) {
@@ -1431,7 +1394,6 @@ class WC_Cart {
 		 * through the filter and break it up.
 		 *
 		 * @since 1.5.4
-		 * @access public
 		 * @return array of cart items
 		 */
 		public function get_shipping_packages() {
@@ -1582,7 +1544,6 @@ class WC_Cart {
 		 *  1. Where a list of customer emails are set (limits coupon usage to those defined)
 		 *  2. Where a usage_limit_per_user is set (limits coupon usage to a number based on user ID and email)
 		 *
-		 * @access public
 		 * @param array $posted
 		 */
 		public function check_customer_coupons( $posted ) {
@@ -1935,7 +1896,6 @@ class WC_Cart {
 		/**
 		 * get_fees function.
 		 *
-		 * @access public
 		 * @return array
 		 */
 		public function get_fees() {
