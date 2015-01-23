@@ -119,7 +119,7 @@ class WC_Admin_Assets {
 
 		// Accounting
 		wp_localize_script( 'accounting', 'accounting_params', array(
-			'mon_decimal_point' => wc_price_decimal_separator()
+			'mon_decimal_point' => wc_get_price_decimal_separator()
 		) );
 
 		// WooCommerce admin pages
@@ -136,11 +136,11 @@ class WC_Admin_Assets {
 
 			$params = array(
 				'i18n_decimal_error'                => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
-				'i18n_mon_decimal_error'            => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_price_decimal_separator() ),
+				'i18n_mon_decimal_error'            => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
 				'i18n_country_iso_error'            => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
 				'i18_sale_less_than_regular_error'  => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 				'decimal_point'                     => $decimal,
-				'mon_decimal_point'                 => wc_price_decimal_separator()
+				'mon_decimal_point'                 => wc_get_price_decimal_separator()
 			);
 
 			// If we're on the profile page and the current user has generated API keys, enqueue and add to $params array
@@ -250,10 +250,10 @@ class WC_Admin_Assets {
 				'calendar_image'                => WC()->plugin_url().'/assets/images/calendar.png',
 				'post_id'                       => isset( $post->ID ) ? $post->ID : '',
 				'base_country'                  => WC()->countries->get_base_country(),
-				'currency_format_num_decimals'  => absint( get_option( 'woocommerce_price_num_decimals' ) ),
+				'currency_format_num_decimals'  => wc_get_price_decimals(),
 				'currency_format_symbol'        => get_woocommerce_currency_symbol(),
-				'currency_format_decimal_sep'   => esc_attr( wc_price_decimal_separator() ),
-				'currency_format_thousand_sep'  => esc_attr( wc_price_thousand_separator() ),
+				'currency_format_decimal_sep'   => esc_attr( wc_get_price_decimal_separator() ),
+				'currency_format_thousand_sep'  => esc_attr( wc_get_price_thousand_separator() ),
 				'currency_format'               => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS
 				'rounding_precision'            => WC_ROUNDING_PRECISION,
 				'tax_rounding_mode'             => WC_TAX_ROUNDING_MODE,

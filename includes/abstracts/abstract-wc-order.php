@@ -544,7 +544,7 @@ abstract class WC_Abstract_Order {
 		switch ( $total_type ) {
 			case 'total' :
 				$key    = '_order_total';
-				$amount = wc_format_decimal( $amount, get_option( 'woocommerce_price_num_decimals' ) );
+				$amount = wc_format_decimal( $amount, wc_get_price_decimals() );
 			break;
 			case 'cart_discount' :
 			case 'cart_discount_tax' :
@@ -781,7 +781,7 @@ abstract class WC_Abstract_Order {
 		$this->set_total( $cart_subtotal + $cart_subtotal_tax - $cart_total - $cart_total_tax, 'cart_discount' );
 		$this->set_total( $cart_subtotal_tax - $cart_total_tax, 'cart_discount_tax' );
 
-		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), absint( get_option( 'woocommerce_price_num_decimals' ) ) );
+		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
 
 		$this->set_total( $grand_total, 'total' );
 

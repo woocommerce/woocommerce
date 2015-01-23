@@ -103,7 +103,7 @@ class WC_Cart {
 		$this->prices_include_tax    = wc_prices_include_tax();
 		$this->round_at_subtotal     = get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes';
 		$this->tax_display_cart      = get_option( 'woocommerce_tax_display_cart' );
-		$this->dp                    = absint( get_option( 'woocommerce_price_num_decimals' ) );
+		$this->dp                    = wc_get_price_decimals();
 		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl';
 		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl';
 

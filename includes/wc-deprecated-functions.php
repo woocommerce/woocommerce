@@ -70,7 +70,7 @@ function woocommerce_readfile_chunked( $file, $retbytes = true ) {
  */
 function woocommerce_format_total( $number ) {
 	_deprecated_function( __FUNCTION__, '2.1', 'wc_format_decimal()' );
-	return wc_format_decimal( $number, get_option( 'woocommerce_price_num_decimals' ), false );
+	return wc_format_decimal( $number, wc_get_price_decimals(), false );
 }
 
 /**

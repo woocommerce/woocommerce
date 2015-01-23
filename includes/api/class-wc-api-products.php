@@ -528,7 +528,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
-		$prices_precision = get_option( 'woocommerce_price_num_decimals' );
+		$prices_precision = wc_get_price_decimals();
 
 		return array(
 			'title'              => $product->get_title(),
@@ -603,7 +603,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_variation_data( $product ) {
-		$prices_precision = get_option( 'woocommerce_price_num_decimals' );
+		$prices_precision = wc_get_price_decimals();
 		$variations       = array();
 
 		foreach ( $product->get_children() as $child_id ) {

@@ -442,7 +442,7 @@ class WC_API_Server {
 				'timezone'           => wc_timezone_string(),
 				'currency'           => get_woocommerce_currency(),
 				'currency_format'    => get_woocommerce_currency_symbol(),
-				'price_num_decimals' => get_option( 'woocommerce_price_num_decimals' ),
+				'price_num_decimals' => wc_get_price_decimals(),
 				'tax_included'       => wc_prices_include_tax(),
 				'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
 				'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),

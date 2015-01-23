@@ -1086,7 +1086,7 @@ class WC_Admin_Post_Types {
 					case 2 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) );
+							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, wc_get_price_decimals() ) );
 						} else {
 							$new_price = $old_regular_price + $regular_price;
 						}
@@ -1094,7 +1094,7 @@ class WC_Admin_Post_Types {
 					case 3 :
 						if ( strstr( $regular_price, '%' ) ) {
 							$percent = str_replace( '%', '', $regular_price ) / 100;
-							$new_price = max( 0, $old_regular_price - ( round ( $old_regular_price * $percent, absint( get_option( 'woocommerce_price_num_decimals' ) ) ) ) );
+							$new_price = max( 0, $old_regular_price - ( round ( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
 						} else {
 							$new_price = max( 0, $old_regular_price - $regular_price );
 						}
@@ -1106,7 +1106,7 @@ class WC_Admin_Post_Types {
 
 				if ( isset( $new_price ) && $new_price != $old_regular_price ) {
 					$price_changed = true;
-					$new_price = round( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
+					$new_price = round( $new_price, wc_get_price_decimals() );
 					update_post_meta( $post_id, '_regular_price', $new_price );
 					$product->regular_price = $new_price;
 				}
@@ -1152,7 +1152,7 @@ class WC_Admin_Post_Types {
 
 				if ( isset( $new_price ) && $new_price != $old_sale_price ) {
 					$price_changed = true;
-					$new_price = round( $new_price, absint( get_option( 'woocommerce_price_num_decimals' ) ) );
+					$new_price = round( $new_price, wc_get_price_decimals() );
 					update_post_meta( $post_id, '_sale_price', $new_price );
 					$product->sale_price = $new_price;
 				}

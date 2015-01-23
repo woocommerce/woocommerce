@@ -379,17 +379,17 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 		<tr>
 			<td data-export-label="Thousand Separator"><?php _e( 'Thousand Separator', 'woocommerce' ) ?></td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The thousand separator of displayed prices.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-			<td><?php echo wc_price_thousand_separator(); ?></td>
+			<td><?php echo wc_get_price_thousand_separator(); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Decimal Separator"><?php _e( 'Decimal Separator', 'woocommerce' ) ?></td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The decimal separator of displayed prices.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-			<td><?php echo wc_price_decimal_separator(); ?></td>
+			<td><?php echo wc_get_price_decimal_separator(); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Number of Decimals"><?php _e( 'Number of Decimals', 'woocommerce' ) ?></td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The number of decimal points shown in displayed prices.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
-			<td><?php echo get_option( 'woocommerce_price_num_decimals' ); ?></td>
+			<td><?php echo wc_get_price_decimals(); ?></td>
 		</tr>
 	</tbody>
 </table>
