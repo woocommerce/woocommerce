@@ -224,9 +224,8 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( ! $variation_id ) {
 			$price = false;
-		}
-		else {
-			$price        = get_post_meta( $variation_id, '_regular_price', true );
+		} else {
+			$price = get_post_meta( $variation_id, '_regular_price', true );
 
 			if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
 				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
@@ -248,9 +247,8 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( ! $variation_id ) {
 			$price = false;
-		}
-		else {
-			$price        = get_post_meta( $variation_id, '_sale_price', true );
+		} else {
+			$price = get_post_meta( $variation_id, '_sale_price', true );
 
 			if ( $display ) {
 				$variation        = $this->get_child( $variation_id );
