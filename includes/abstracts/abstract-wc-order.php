@@ -242,6 +242,7 @@ abstract class WC_Abstract_Order {
 	 * @since 2.2
 	 * @param int $item_id order item ID
 	 * @param array $args data to update
+	 * @param WC_Product $product
 	 * @return bool
 	 */
 	public function update_product( $item_id, $product, $args ) {

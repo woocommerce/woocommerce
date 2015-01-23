@@ -174,7 +174,7 @@ class WC_Product_Variable extends WC_Product {
 	 *
 	 * @access public
 	 * @param mixed $child_id
-	 * @return object WC_Product or WC_Product_variation
+	 * @return WC_Product WC_Product or WC_Product_variation
 	 */
 	public function get_child( $child_id ) {
 		return wc_get_product( $child_id, array(
