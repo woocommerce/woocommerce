@@ -404,7 +404,7 @@ class WC_Tracker {
 		}
 
 		echo '<div id="message" class="updated woocommerce-message wc-connect">';
-		echo '<p>' . __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information, and get 20% discount on your next WooThemes purchase.', 'woocommerce' ) . '</p>';
+		echo '<p>' . __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information, and get 20% discount on your next WooThemes purchase. <a href="http://docs.woothemes.com/document/woocommerce-usage-tracking/">Find out more</a>.', 'woocommerce' ) . '</p>';
 		echo '<p class="submit"><a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-in' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="button-primary">' . __( 'Allow', 'woocommerce' ) . '</a>';
 		echo '&nbsp;<a href="' . esc_url( wp_nonce_url( add_query_arg( 'wc_tracker', 'opt-out' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ) . '" class="skip button-primary">' . __( 'No, don\'t bother me again', 'woocommerce' ) . '</a></p>';
 		echo '</div>';
