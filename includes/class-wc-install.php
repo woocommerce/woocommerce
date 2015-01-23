@@ -81,6 +81,8 @@ class WC_Install {
 	 * Install WC
 	 */
 	public static function install() {
+		define( 'WC_INSTALLING', true );
+
 		self::create_options();
 		self::create_tables();
 		self::create_roles();

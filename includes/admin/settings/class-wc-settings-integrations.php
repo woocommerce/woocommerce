@@ -45,17 +45,18 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 
 		$sections = array();
 
-		$integrations = WC()->integrations->get_integrations();
+		if ( ! defined( 'WC_INSTALLING' ) ) {
+			$integrations = WC()->integrations->get_integrations();
 
-		if ( ! $current_section && ! empty( $integrations ) ) {
-			$current_section = current( $integrations )->id;
-		}
+			if ( ! $current_section && ! empty( $integrations ) ) {
+				$current_section = current( $integrations )->id;
+			}
 
-		if ( sizeof( $integrations ) > 1 ) {
-			foreach ( $integrations as $integration ) {
-				$title = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;
-
-				$sections[ strtolower( $integration->id ) ] = esc_html( $title );
+			if ( sizeof( $integrations ) > 1 ) {
+				foreach ( $integrations as $integration ) {
+					$title = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;
+					$sections[ strtolower( $integration->id ) ] = esc_html( $title );
+				}
 			}
 		}
 
