@@ -218,13 +218,8 @@ class WC_Cart {
 						} else {
 
 							// Put session data into array. Run through filter so other plugins can load their own session data
-							$this->cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', array(
-								'product_id'	=> $values['product_id'],
-								'variation_id'	=> $values['variation_id'],
-								'variation' 	=> $values['variation'],
-								'quantity' 		=> $values['quantity'],
-								'data'			=> $_product
-							), $values, $key );
+							$session_data = array_merge( $values, array( 'data' => $_product ) );
+							$this->cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
 
 						}
 					}
