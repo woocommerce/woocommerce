@@ -623,7 +623,9 @@ jQuery( function( $ ){
 
 		$image_gallery_ids.val( attachment_ids );
 
-		runTipTip();
+		// remove any lingering tooltips
+		$( '#tiptip_holder' ).removeAttr( 'style' );
+		$( '#tiptip_arrow' ).removeAttr( 'style' );
 
 		return false;
 	});
