@@ -15,8 +15,22 @@
  * @property    string $length Product length
  * @property    string $height Product height
  * @property    string $weight Product weight
- * @property    string $price product price
- * @property    string $product_image_gallery String of image IDs in the gallery.
+ * @property    string $price Product price
+ * @property    string $regular_price Product regular price
+ * @property    string $sale_price Product sale price
+ * @property    string $product_image_gallery String of image IDs in the gallery
+ * @property    string $sku Product SKU
+ * @property    string $stock Stock amount
+ * @property    string $downloadable Shows/define if the product is downloadable
+ * @property    string $virtual Shows/define if the product is virtual
+ * @property    string $sold_individually Allow one item to be bought in a single order
+ * @property    string $tax_status Tax status
+ * @property    string $tax_class Tax class
+ * @property    string $manage_stock Shows/define if can manage the product stock
+ * @property    string $stock_status Stock status
+ * @property    string $backorders Whether or not backorders are allowed
+ * @property    string $featured Featured product
+ * @property    string $visibility Product visibility
  */
 class WC_Product {
 
