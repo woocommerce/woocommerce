@@ -235,6 +235,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
 		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
+		include_once( 'includes/class-wc-tracker.php' );						// Usage Tracker
 	}
 
 	/**

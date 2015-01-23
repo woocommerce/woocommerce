@@ -133,6 +133,12 @@ class WC_Admin_Status {
 
 					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
 				break;
+				case 'reset_tracking' :
+					update_option( 'woocommerce_allow_tracking', false );
+					update_option( 'woocommerce_hide_tracking_notice', false );
+
+					echo '<div class="updated"><p>' . __( 'Usage tracking settings successfully reset.', 'woocommerce' ) . '</p></div>';
+				break;
 				default :
 					$action = esc_attr( $_GET['action'] );
 					if ( isset( $tools[ $action ]['callback'] ) ) {
@@ -222,6 +228,11 @@ class WC_Admin_Status {
 				'name'    => __( 'Delete all WooCommerce tax rates', 'woocommerce' ),
 				'button'  => __( 'Delete ALL tax rates', 'woocommerce' ),
 				'desc'    => __( '<strong class="red">Note:</strong> This option will delete ALL of your tax rates, use with caution.', 'woocommerce' ),
+			),
+			'reset_tracking' => array(
+				'name'    => __( 'Reset Usage Tracking Settings', 'woocommerce' ),
+				'button'  => __( 'Reset usage tracking settings', 'woocommerce' ),
+				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
 			)
 		);
 
