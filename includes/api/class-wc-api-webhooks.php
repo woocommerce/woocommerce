@@ -217,6 +217,8 @@ class WC_API_Webhooks extends WC_API_Resource {
 
 			do_action( 'woocommerce_api_create_webhook', $webhook->id, $this );
 
+			delete_transient( 'woocommerce_webhook_ids' );
+
 			return $this->get_webhook( $webhook->id );
 
 		} catch ( WC_API_Exception $e ) {
@@ -298,6 +300,8 @@ class WC_API_Webhooks extends WC_API_Resource {
 
 			do_action( 'woocommerce_api_edit_webhook', $webhook->id, $this );
 
+			delete_transient( 'woocommerce_webhook_ids' );
+
 			return $this->get_webhook( $id );
 
 		} catch ( WC_API_Exception $e ) {
@@ -322,6 +326,8 @@ class WC_API_Webhooks extends WC_API_Resource {
 		}
 
 		do_action( 'woocommerce_api_delete_webhook', $id, $this );
+
+		delete_transient( 'woocommerce_webhook_ids' );
 
 		// no way to manage trashed webhooks at the moment, so force delete
 		return $this->delete( $id, 'webhook', true );

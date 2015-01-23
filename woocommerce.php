@@ -457,19 +457,18 @@ final class WooCommerce {
 	 * @since 2.2
 	 */
 	private function load_webhooks() {
-		$args = array(
-			'fields'      => 'ids',
-			'post_type'   => 'shop_webhook',
-			'post_status' => 'publish',
-		);
-
-		$query = new WP_Query( $args );
-
-		if ( ! empty( $query->posts ) ) {
-			foreach ( $query->posts as $id ) {
-				$webhook = new WC_Webhook( $id );
-				$webhook->enqueue();
-			}
+		if ( false === ( $webhooks = get_transient( 'woocommerce_webhook_ids' ) ) ) {
+			$webhooks = get_posts( array(
+				'fields'         => 'ids',
+				'post_type'      => 'shop_webhook',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1
+			) );
+			set_transient( 'woocommerce_webhook_ids', $webhooks );
+		}
+		foreach ( $webhooks as $webhook_id ) {
+			$webhook = new WC_Webhook( $webhook_id );
+			$webhook->enqueue();
 		}
 	}
 

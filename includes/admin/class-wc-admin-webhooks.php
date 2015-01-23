@@ -142,6 +142,8 @@ class WC_Admin_Webhooks {
 
 		do_action( 'woocommerce_webhook_options_save', $webhook->id );
 
+		delete_transient( 'woocommerce_webhook_ids' );
+
 		// Redirect to webhook edit page to avoid settings save actions
 		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
 		exit();
@@ -170,6 +172,8 @@ class WC_Admin_Webhooks {
 		}
 
 		update_post_meta( $webhook_id, '_webhook_pending_delivery', true );
+
+		delete_transient( 'woocommerce_webhook_ids' );
 
 		// Redirect to edit page
 		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook_id . '&created=1' ) );
@@ -227,6 +231,8 @@ class WC_Admin_Webhooks {
 
 		$webhooks = array_map( 'absint', (array) $_GET['webhook'] );
 
+		delete_transient( 'woocommerce_webhook_ids' );
+
 		switch ( $_GET['action'] ) {
 			case 'trash' :
 				$this->bulk_trash( $webhooks );
@@ -237,7 +243,6 @@ class WC_Admin_Webhooks {
 			case 'delete' :
 				$this->bulk_trash( $webhooks, true );
 				break;
-
 			default :
 				break;
 		}
@@ -275,7 +280,6 @@ class WC_Admin_Webhooks {
 	 */
 	public function actions() {
 		if ( $this->is_webhook_settings_page() ) {
-
 			// Save
 			if ( isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) {
 				$this->save();
