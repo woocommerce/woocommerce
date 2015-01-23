@@ -1,7 +1,6 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -35,9 +34,6 @@ class WC_Session_Handler extends WC_Session {
 
 	/**
 	 * Constructor for the session class.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function __construct() {
 		$this->_cookie = 'wp_woocommerce_session_' . COOKIEHASH;
@@ -107,9 +103,6 @@ class WC_Session_Handler extends WC_Session {
 
     /**
      * set_session_expiration function.
-     *
-     * @access public
-     * @return void
      */
     public function set_session_expiration() {
 	    $this->_session_expiring    = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) ); // 47 Hours
@@ -121,7 +114,6 @@ class WC_Session_Handler extends WC_Session {
 	 *
 	 * Uses Portable PHP password hashing framework to generate a unique cryptographically strong ID.
 	 *
-	 * @access public
 	 * @return int|string
 	 */
 	public function generate_customer_id() {
@@ -137,8 +129,7 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * get_session_cookie function.
 	 *
-	 * @access public
-	 * @return mixed
+	 * @return bool|array
 	 */
 	public function get_session_cookie() {
 		if ( empty( $_COOKIE[ $this->_cookie ] ) ) {
@@ -161,7 +152,6 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * get_session_data function.
 	 *
-	 * @access public
 	 * @return array
 	 */
 	public function get_session_data() {
@@ -170,9 +160,6 @@ class WC_Session_Handler extends WC_Session {
 
     /**
      * save_data function.
-     *
-     * @access public
-     * @return void
      */
     public function save_data() {
     	// Dirty if something changed - prevents saving nothing new
@@ -215,9 +202,6 @@ class WC_Session_Handler extends WC_Session {
 
     /**
 	 * cleanup_sessions function.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function cleanup_sessions() {
 		global $wpdb;
