@@ -74,7 +74,7 @@ class WC_Tracker {
 				'redirection' => 5,
 				'httpversion' => '1.0',
 				'blocking' => true,
-				'headers' => array( 'user-agent' => 'WooCommerce/' . WC_VERSION . '; ' . esc_url( home_url( '/' ) ) ),
+				'headers' => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url( home_url( '/' ) ) ) . ';' ),
 				'body' => json_encode( $params ),
 				'cookies' => array()
 			)
