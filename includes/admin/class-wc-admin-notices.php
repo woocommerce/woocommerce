@@ -41,6 +41,7 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_hide_frontend_colors_notice', array( $this, 'hide_frontend_colors_notice' ) );
 		add_action( 'woocommerce_hide_install_notice', array( $this, 'hide_install_notice' ) );
 		add_action( 'woocommerce_hide_translation_upgrade_notice', array( $this, 'hide_translation_upgrade_notice' ) );
+		add_action( 'woocommerce_hide_tracking_notice', array( $this, 'hide_tracking_notice' ) );
 		add_action( 'admin_print_styles', array( $this, 'add_notices' ) );
 		add_action( 'admin_init', array( $this, 'check_optin_action' ) );
 	}
@@ -128,6 +129,13 @@ class WC_Admin_Notices {
 	 */
 	public function hide_translation_upgrade_notice() {
 		update_option( 'woocommerce_language_pack_version', array( WC_VERSION , get_locale() ) );
+	}
+
+	/**
+	 * Hide tracking notice
+	 */
+	public function hide_tracking_notice() {
+		update_option( 'woocommerce_allow_tracking', 'no' );
 	}
 
 	/**
@@ -274,7 +282,7 @@ class WC_Admin_Notices {
 			return;
 		}
 		// Enable tracking
-		update_option( 'woocommerce_allow_tracking', true );
+		update_option( 'woocommerce_allow_tracking', 'yes' );
 
 		// Remove notice
 		self::remove_notice( 'tracking' );

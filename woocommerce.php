@@ -221,7 +221,7 @@ final class WooCommerce {
 			$this->frontend_includes();
 		}
 
-		if ( $this->is_request( 'cron' ) && get_option( 'woocommerce_allow_tracking', false ) ) {
+		if ( $this->is_request( 'cron' ) && 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
 			include_once( 'includes/class-wc-tracker.php' );
 		}
 
