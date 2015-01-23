@@ -154,7 +154,9 @@ class WC_Admin_Notices {
 	 * Show the Theme Check notice
 	 */
 	public function theme_check_notice() {
-		include( 'views/html-notice-theme-support.php' );
+		if ( ! current_theme_supports( 'woocommerce' ) ) {
+			include( 'views/html-notice-theme-support.php' );
+		}
 	}
 
 	/**
