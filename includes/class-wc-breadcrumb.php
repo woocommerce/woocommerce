@@ -286,6 +286,7 @@ class WC_Breadcrumb {
 
 	/**
 	 * Add crumbs for a term
+	 * @param string $taxonomy
 	 */
 	private function term_ancestors( $term_id, $taxonomy ) {
 		$ancestors = get_ancestors( $term_id, $taxonomy );

@@ -38,7 +38,7 @@ class WC_Product_Factory {
 	/**
 	 * Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class
 	 * @param  string $product_type
-	 * @return string|bool
+	 * @return string|false
 	 */
 	private function get_classname_from_product_type( $product_type ) {
 		return $product_type ? 'WC_Product_' . implode( '_', array_map( 'ucfirst', explode( '-', $product_type ) ) ) : false;

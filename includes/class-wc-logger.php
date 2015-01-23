@@ -64,8 +64,8 @@ class WC_Logger {
 	 * Add a log entry to chosen file.
 	 *
 	 * @access public
-	 * @param mixed $handle
-	 * @param mixed $message
+	 * @param string $handle
+	 * @param string $message
 	 * @return void
 	 */
 	public function add( $handle, $message ) {

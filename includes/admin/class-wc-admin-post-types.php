@@ -848,6 +848,7 @@ class WC_Admin_Post_Types {
 	 * Quick edit
 	 *
 	 * @param integer $post_id
+	 * @param WC_Product $product
 	 */
 	private function quick_edit_save( $post_id, $product ) {
 		global $wpdb;
@@ -990,6 +991,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Bulk edit
 	 * @param integer $post_id
+	 * @param WC_Product $product
 	 */
 	public function bulk_edit_save( $post_id, $product ) {
 

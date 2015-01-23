@@ -2190,7 +2190,7 @@ class WC_Cart {
 		 * Get the total of all order discounts (after tax discounts).
 		 *
 		 * @deprecated Order discounts (after tax) removed in 2.3
-		 * @return float
+		 * @return integer
 		 */
 		public function get_order_discount_total() {
 			_deprecated_function( 'get_order_discount_total', '2.3' );
