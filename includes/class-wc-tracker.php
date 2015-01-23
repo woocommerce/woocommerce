@@ -140,7 +140,9 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public function get_theme_info() {
-		if ( get_bloginfo( 'version' ) < '3.4' ) {
+		$wp_version = get_bloginfo( 'version' );
+
+		if ( version_compare( $wp_version, '3.4', '<' ) ) {
 			$theme_data = get_theme_data( get_stylesheet_directory() . '/style.css' );
 			$theme_name = $theme_data['Name'];
 			$theme_version = $theme_data['Version'];
