@@ -155,7 +155,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return array
 	 */
 	public function get_session_data() {
-		return (array) get_option( '_wc_session_' . $this->_customer_id, array() );
+		return $this->has_session() ? (array) get_option( '_wc_session_' . $this->_customer_id, array() ) : array();
 	}
 
     /**
