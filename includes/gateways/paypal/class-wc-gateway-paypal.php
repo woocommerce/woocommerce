@@ -36,21 +36,23 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables
-		$this->title          = $this->get_option( 'title' );
-		$this->description    = $this->get_option( 'description' );
-		$this->testmode       = 'yes' === $this->get_option( 'testmode', 'no' );
-		$this->email          = $this->get_option( 'email' );
-		$this->receiver_email = $this->get_option( 'receiver_email', $this->email );
+		$this->title                        = $this->get_option( 'title' );
+		$this->description                  = $this->get_option( 'description' );
+		$this->testmode                     = 'yes' === $this->get_option( 'testmode', 'no' );
+		$this->email                        = $this->get_option( 'email' );
+		$this->receiver_email               = $this->get_option( 'receiver_email', $this->email );
+		$this->identity_token               = $this->get_option( 'identity_token' );
+		$this->payment_notification_handler = $this->get_option( 'payment_notification_handler', ( $this->identity_token ? 'PDT' : 'IPN' ) );
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
 		} else {
-			include_once( 'includes/class-wc-gateway-paypal-ipn-handler.php' );
-			$ipn_handler = new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
-
-			if ( $identity_token = $this->get_option( 'identity_token' ) ) {
+			if ( 'IPN' === $this->payment_notification_handler ) {
+				include_once( 'includes/class-wc-gateway-paypal-ipn-handler.php' );
+				$ipn_handler = new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
+			} else {
 				include_once( 'includes/class-wc-gateway-paypal-pdt-handler.php' );
 				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $identity_token );
 			}
@@ -184,6 +186,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @since 1.0.0
 	 */
 	public function admin_options() {
+		wp_enqueue_script( 'wc-paypal-settings', WC_HTTPS::force_https_url( WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-settings.js' ), array( 'jquery' ), WC_VERSION, true );
+
 		if ( $this->is_valid_for_use() ) {
 			parent::admin_options();
 		} else {
