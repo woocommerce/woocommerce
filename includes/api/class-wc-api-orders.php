@@ -1449,7 +1449,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_refund = array(
 				'id'         => $refund->id,
-				'date'       => $this->server->format_datetime( $refund->date ),
+				'created_at' => $this->server->format_datetime( $refund->date ),
 				'amount'     => wc_format_decimal( $refund->get_refund_amount(), 2 ),
 				'reason'     => $refund->get_refund_reason(),
 				'line_items' => $line_items
