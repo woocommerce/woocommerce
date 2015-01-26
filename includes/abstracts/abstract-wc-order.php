@@ -891,10 +891,10 @@ abstract class WC_Abstract_Order {
 	 * Gets the user ID associated with the order. Guests are 0.
 	 *
 	 * @since  2.2
-	 * @return int|false
+	 * @return int
 	 */
 	public function get_user_id() {
-		return $this->customer_user ? $this->customer_user : 0;
+		return $this->customer_user ? intval( $this->customer_user ) : 0;
 	}
 
 	/**
