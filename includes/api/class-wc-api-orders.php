@@ -1636,7 +1636,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			do_action( 'woocommerce_api_delete_order_refund', $refund->ID, $order_id, $this );
 
-			return $this->delete( $refund->ID, 'order', true );
+			return $this->delete( $refund->ID, 'refund', true );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
