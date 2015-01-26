@@ -1996,6 +1996,9 @@ img.help_tip {
 }
 
 .woocommerce {
+	.select2-container {
+		line-height: 1.8em;
+	}
 	#template div {
 		margin: 0;
 
@@ -2022,7 +2025,6 @@ img.help_tip {
 		.select2-container {
 			display: block;
 			max-width: 350px;
-			line-height: 1.8em;
 		}
 
 		.forminp-radio ul {
