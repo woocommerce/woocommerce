@@ -470,6 +470,11 @@ jQuery( function( $ ) {
 						$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
 					}
 				},
+				error: function ( jqXHR, textStatus, errorThrown ) {
+					if ( wc_checkout_params.debug_mode ) {
+						console.log( jqXHR.responseText );
+					}
+				},
 				dataType: 'html'
 			});
 	    }
