@@ -426,28 +426,12 @@
 		padding-left: 7.6923%;
 		padding-right: 7.6923%;
 		padding-top: 7.6923%;
+		margin-bottom: 7.6923%;
 		background: #fff;
 		box-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
 
 		.page-title {
 			margin-left: 0;
-		}
-	}
-}
-
-@media screen and (min-width: 59.6875em) {
-	.twentyfifteen {
-		.t15wc {
-			margin-left: 8.3333%;
-			margin-right: 8.3333%;
-		}
-	}
-
-	.single-product {
-		.twentyfifteen {
-			.entry-summary {
-				padding: 0 !important;
-			}
 		}
 	}
 }
@@ -458,6 +442,24 @@
 			margin-right: 7.6923%;
 			margin-left: 7.6923%;
 			margin-top: 8.3333%;
+		}
+	}
+}
+
+@media screen and (min-width: 59.6875em) {
+	.twentyfifteen {
+		.t15wc {
+			margin-left: 8.3333%;
+			margin-right: 8.3333%;
+			padding: 10%;
+		}
+	}
+
+	.single-product {
+		.twentyfifteen {
+			.entry-summary {
+				padding: 0 !important;
+			}
 		}
 	}
 }
