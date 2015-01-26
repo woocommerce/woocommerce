@@ -867,11 +867,14 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
-	 * Return the order statuses without wc- internal prefix
+	 * Return the order statuses without wc- internal prefix.
+	 *
+	 * Queries get_post_status() directly to avoid having out of date statuses, if updated elsewhere.
 	 *
 	 * @return string
 	 */
 	public function get_status() {
+		$this->post_status = get_post_status( $this->id );
 		return apply_filters( 'woocommerce_order_get_status', 'wc-' === substr( $this->post_status, 0, 3 ) ? substr( $this->post_status, 3 ) : $this->post_status, $this );
 	}
 
@@ -2044,7 +2047,6 @@ abstract class WC_Abstract_Order {
 	 * @param string $note (default: '') Optional note to add
 	 */
 	public function update_status( $new_status, $note = '' ) {
-
 		if ( ! $this->id ) {
 			return;
 		}
