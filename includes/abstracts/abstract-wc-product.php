@@ -91,30 +91,34 @@ class WC_Product {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		$this->$key = get_post_meta( $this->id, '_' . $key, true );
+		$value = get_post_meta( $this->id, '_' . $key, true );
 
 		// Get values or default if not set
 		if ( in_array( $key, array( 'downloadable', 'virtual', 'backorders', 'manage_stock', 'featured', 'sold_individually' ) ) ) {
-			$this->$key = $this->$key ? $this->$key : 'no';
+			$value = $value ? $value : 'no';
 
 		} elseif ( in_array( $key, array( 'product_attributes', 'crosssell_ids', 'upsell_ids' ) ) ) {
-			$this->$key = $this->$key ? $this->$key : array();
+			$value = $value ? $value : array();
 
 		} elseif ( 'visibility' === $key ) {
-			$this->$key = $this->$key ? $this->$key : 'hidden';
+			$value = $value ? $value : 'hidden';
 
 		} elseif ( 'stock' === $key ) {
-			$this->$key = $this->$key ? $this->$key : 0;
+			$value = $value ? $value : 0;
 
 		} elseif ( 'stock_status' === $key ) {
-			$this->$key = $this->$key ? $this->$key : 'instock';
+			$value = $value ? $value : 'instock';
 
 		} elseif ( 'tax_status' === $key ) {
-			$this->$key = $this->$key ? $this->$key : 'taxable';
+			$value = $value ? $value : 'taxable';
 
 		}
 
-		return $this->$key;
+		if ( ! empty( $value ) ) {
+			$this->$key = $value;
+		}
+
+		return $value;
 	}
 
 	/**
