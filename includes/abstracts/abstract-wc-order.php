@@ -2262,7 +2262,7 @@ abstract class WC_Abstract_Order {
 
 				$coupon = new WC_Coupon( $code );
 
-				$used_by = $this->$this->get_user_id();
+				$used_by = $this->get_user_id();
 
 				if ( ! $used_by ) {
 					$used_by = $this->billing_email;
@@ -2295,7 +2295,7 @@ abstract class WC_Abstract_Order {
 
 				$coupon = new WC_Coupon( $code );
 
-				$used_by = $this->$this->get_user_id();
+				$used_by = $this->get_user_id();
 				if ( ! $used_by ) {
 					$used_by = $this->billing_email;
 				}
