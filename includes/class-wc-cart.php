@@ -1037,7 +1037,9 @@ class WC_Cart {
 		private function reset( $unset_session = false ) {
 			foreach ( $this->cart_session_data as $key => $default ) {
 				$this->$key = $default;
-				unset( WC()->session->$key );
+				if ( $unset_session ) {
+					unset( WC()->session->$key );
+				}
 			}
 			do_action( 'woocommerce_cart_reset', $this, $unset_session );
 		}
