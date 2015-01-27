@@ -434,7 +434,7 @@ jQuery( function( $ ) {
 			return false;
 	    },
 	    remove_coupon: function( e ) {
-	    	e.preDefault();
+	    	e.preventDefault();
 
 			var container = $( this ).parents( '.woocommerce-checkout-review-order' ),
 				coupon    = $( this ).data( 'coupon' );
