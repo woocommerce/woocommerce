@@ -187,7 +187,7 @@ class WC_AJAX {
 		if ( 0 == sizeof( WC()->cart->get_cart() ) ) {
 			$data = array(
 				'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
-					'.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>'
+					'form.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>'
 				) )
 			);
 
