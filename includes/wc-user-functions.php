@@ -42,7 +42,7 @@ add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
  * @return int|WP_Error on failure, Int (user ID) on success
  */
 function wc_create_new_customer( $email, $username = '', $password = '' ) {
-	$errors = apply_fitlers( 'woocommerce_registration_errors', array(
+	$errors = apply_filters( 'woocommerce_registration_errors', array(
 		0 => __( 'Please provide a valid email address.', 'woocommerce' ),
 		1 => __( 'An account is already registered with your email address. Please login.', 'woocommerce' ),
 		2 => __( 'Please enter a valid account username.', 'woocommerce' ),
