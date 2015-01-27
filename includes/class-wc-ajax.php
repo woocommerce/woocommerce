@@ -292,7 +292,7 @@ class WC_AJAX {
 		woocommerce_order_review();
 		$woocommerce_order_review = ob_get_clean();
 
-		// Get checkout payment fragement
+		// Get checkout payment fragment
 		ob_start();
 		woocommerce_checkout_payment();
 		$woocommerce_checkout_payment = ob_get_clean();
