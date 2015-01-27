@@ -438,7 +438,6 @@ ul.wc_coupon_list_block {
 	.select2-container {
 		float: left;
 		max-width: 200px;
-		line-height: 1.8em;
 		font-size: 14px;
 		vertical-align: middle;
 		margin: 1px 6px 1px 1px;
@@ -531,7 +530,6 @@ ul.wc_coupon_list_block {
 
 			.select2-container {
 				width: 100% !important;
-				line-height: 1.8em;
 			}
 
 			.date-picker-field {
@@ -1996,9 +1994,6 @@ img.help_tip {
 }
 
 .woocommerce {
-	.select2-container {
-		line-height: 1.8em;
-	}
 	#template div {
 		margin: 0;
 
@@ -4162,4 +4157,14 @@ table.bar_chart {
  */
 .select2-drop {
 	z-index: 999999;
+}
+.select2-container-multi .select2-choices .select2-search-field input {
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+	padding: 3px 5px;
+}
+.select2-container {
+	line-height: 1.85em;
+	font-size: 14px;
 }
