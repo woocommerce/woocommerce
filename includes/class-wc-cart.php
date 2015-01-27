@@ -1643,66 +1643,58 @@ class WC_Cart {
 			// Get the coupon
 			$the_coupon = new WC_Coupon( $coupon_code );
 
-			if ( $the_coupon->id ) {
-
-				// Check it can be used with cart
-				if ( ! $the_coupon->is_valid() ) {
-					wc_add_notice( $the_coupon->get_error_message(), 'error' );
-					return false;
-				}
-
-				// Check if applied
-				if ( $this->has_discount( $coupon_code ) ) {
-					$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED );
-					return false;
-				}
-
-				// If its individual use then remove other coupons
-				if ( $the_coupon->individual_use == 'yes' ) {
-					$this->applied_coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
-				}
-
-				if ( $this->applied_coupons ) {
-					foreach ( $this->applied_coupons as $code ) {
-						$coupon = new WC_Coupon( $code );
-
-						if ( $coupon->individual_use == 'yes' && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->applied_coupons ) ) {
-
-							// Reject new coupon
-							$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
-
-							return false;
-						}
-					}
-				}
-
-				$this->applied_coupons[] = $coupon_code;
-
-				// Choose free shipping
-				if ( $the_coupon->enable_free_shipping() ) {
-					$packages = WC()->shipping->get_packages();
-					$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-
-					foreach ( $packages as $i => $package ) {
-						$chosen_shipping_methods[ $i ] = 'free_shipping';
-					}
-
-					WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
-				}
-
-				$this->calculate_totals();
-
-				$the_coupon->add_coupon_message( WC_Coupon::WC_COUPON_SUCCESS );
-
-				do_action( 'woocommerce_applied_coupon', $coupon_code );
-
-				return true;
-
-			} else {
-				$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
+			// Check it can be used with cart
+			if ( ! $the_coupon->is_valid() ) {
+				wc_add_notice( $the_coupon->get_error_message(), 'error' );
 				return false;
 			}
-			return false;
+
+			// Check if applied
+			if ( $this->has_discount( $coupon_code ) ) {
+				$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED );
+				return false;
+			}
+
+			// If its individual use then remove other coupons
+			if ( $the_coupon->individual_use == 'yes' ) {
+				$this->applied_coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
+			}
+
+			if ( $this->applied_coupons ) {
+				foreach ( $this->applied_coupons as $code ) {
+					$coupon = new WC_Coupon( $code );
+
+					if ( $coupon->individual_use == 'yes' && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->applied_coupons ) ) {
+
+						// Reject new coupon
+						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
+
+						return false;
+					}
+				}
+			}
+
+			$this->applied_coupons[] = $coupon_code;
+
+			// Choose free shipping
+			if ( $the_coupon->enable_free_shipping() ) {
+				$packages = WC()->shipping->get_packages();
+				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+				foreach ( $packages as $i => $package ) {
+					$chosen_shipping_methods[ $i ] = 'free_shipping';
+				}
+
+				WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+			}
+
+			$this->calculate_totals();
+
+			$the_coupon->add_coupon_message( WC_Coupon::WC_COUPON_SUCCESS );
+
+			do_action( 'woocommerce_applied_coupon', $coupon_code );
+
+			return true;
 		}
 
 		/**
