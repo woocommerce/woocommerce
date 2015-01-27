@@ -235,7 +235,7 @@ jQuery( function( $ ) {
 				url:		wc_checkout_params.ajax_url,
 				data:		data,
 				success:	function( data ) {
-					// Always update the fragements
+					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
 							$( key ).replaceWith( value );
