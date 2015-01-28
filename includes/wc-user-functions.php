@@ -42,78 +42,66 @@ add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
  * @return int|WP_Error on failure, Int (user ID) on success
  */
 function wc_create_new_customer( $email, $username = '', $password = '' ) {
+	$errors = apply_filters( 'woocommerce_registration_errors', array(
+		0 => __( 'Please provide a valid email address.', 'woocommerce' ),
+		1 => __( 'An account is already registered with your email address. Please login.', 'woocommerce' ),
+		2 => __( 'Please enter a valid account username.', 'woocommerce' ),
+		3 => __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ),
+		4 => __( 'Please enter an account password.', 'woocommerce' ),
+		5 => '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' )
+	) );
 
 	// Check the e-mail address
 	if ( empty( $email ) || ! is_email( $email ) ) {
-		return new WP_Error( 'registration-error', __( 'Please provide a valid email address.', 'woocommerce' ) );
+		return new WP_Error( 'registration-error', $errors[0] );
 	}
-
 	if ( email_exists( $email ) ) {
-		return new WP_Error( 'registration-error', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
+		return new WP_Error( 'registration-error', $errors[1] );
 	}
-
 	// Handle username creation
 	if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) || ! empty( $username ) ) {
-
 		$username = sanitize_user( $username );
-
 		if ( empty( $username ) || ! validate_username( $username ) ) {
-			return new WP_Error( 'registration-error', __( 'Please enter a valid account username.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error', $errors[2] );
 		}
-
 		if ( username_exists( $username ) )
-			return new WP_Error( 'registration-error', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error', $errors[3] );
 	} else {
-
 		$username = sanitize_user( current( explode( '@', $email ) ), true );
-
 		// Ensure username is unique
 		$append     = 1;
 		$o_username = $username;
-
 		while ( username_exists( $username ) ) {
 			$username = $o_username . $append;
 			$append ++;
 		}
 	}
-
 	// Handle password creation
 	if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
 		$password = wp_generate_password();
 		$password_generated = true;
-
 	} elseif ( empty( $password ) ) {
-		return new WP_Error( 'registration-error', __( 'Please enter an account password.', 'woocommerce' ) );
-
+		return new WP_Error( 'registration-error', $errors[4] );
 	} else {
 		$password_generated = false;
 	}
-
 	// WP Validation
 	$validation_errors = new WP_Error();
-
 	do_action( 'woocommerce_register_post', $username, $email, $validation_errors );
-
 	$validation_errors = apply_filters( 'woocommerce_registration_errors', $validation_errors, $username, $email );
-
 	if ( $validation_errors->get_error_code() )
 		return $validation_errors;
-
 	$new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
 		'user_login' => $username,
 		'user_pass'  => $password,
 		'user_email' => $email,
 		'role'       => 'customer'
 	) );
-
 	$customer_id = wp_insert_user( $new_customer_data );
-
 	if ( is_wp_error( $customer_id ) ) {
-		return new WP_Error( 'registration-error', '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+		return new WP_Error( 'registration-error', $errors[5] );
 	}
-
 	do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
-
 	return $customer_id;
 }
 
