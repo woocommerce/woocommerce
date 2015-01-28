@@ -22,7 +22,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	public function __construct() {
 		$this->id                 = 'local_pickup';
 		$this->method_title       = __( 'Local Pickup', 'woocommerce' );
-		$this->method_description = __( 'Local pickup is a simple method which allows the customer to pick up their order themselves.', 'woocommerce' );
+		$this->method_description = __( 'Local pickup is a simple method which allows customers to pick up orders themselves.', 'woocommerce' );
 		$this->init();
 	}
 

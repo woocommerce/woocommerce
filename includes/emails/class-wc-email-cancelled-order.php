@@ -26,7 +26,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 
         $this->id               = 'cancelled_order';
         $this->title            = __( 'Cancelled order', 'woocommerce' );
-        $this->description      = __( 'Cancelled order emails are sent when an order has been marked to cancelled from pending or on hold.', 'woocommerce' );
+        $this->description      = __( 'Cancelled order emails are sent when orders have been marked cancelled (if they were previously pending or on-hold).', 'woocommerce' );
 
         $this->heading          = __( 'Cancelled order', 'woocommerce' );
         $this->subject          = __( '[{site_title}] Cancelled order ({order_number})', 'woocommerce' );

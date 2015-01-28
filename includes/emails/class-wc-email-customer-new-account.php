@@ -33,7 +33,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 
 		$this->id 				= 'customer_new_account';
 		$this->title 			= __( 'New account', 'woocommerce' );
-		$this->description		= __( 'Customer new account emails are sent when a customer signs up via the checkout or My Account page.', 'woocommerce' );
+		$this->description		= __( 'Customer "new account" emails are sent when customers sign up via checkout or account pages.', 'woocommerce' );
 
 		$this->template_html 	= 'emails/customer-new-account.php';
 		$this->template_plain 	= 'emails/plain/customer-new-account.php';

@@ -26,7 +26,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 
 		$this->id 				= 'customer_processing_order';
 		$this->title 			= __( 'Processing order', 'woocommerce' );
-		$this->description		= __( 'This is an order notification sent to the customer after payment containing order details.', 'woocommerce' );
+		$this->description		= __( 'This is an order notification sent to customers containing their order details after payment.', 'woocommerce' );
 
 		$this->heading 			= __( 'Thank you for your order', 'woocommerce' );
 		$this->subject      	= __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );

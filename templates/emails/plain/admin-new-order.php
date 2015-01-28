@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 echo $email_heading . "\n\n";
 
-echo sprintf( __( 'You have received an order from %s. Their order is as follows:', 'woocommerce' ), $order->billing_first_name . ' ' . $order->billing_last_name ) . "\n\n";
+echo sprintf( __( 'You have received an order from %s. The order is as follows:', 'woocommerce' ), $order->billing_first_name . ' ' . $order->billing_last_name ) . "\n\n";
 
 echo "****************************************************\n\n";
 
