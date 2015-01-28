@@ -9,11 +9,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Handle comments (reviews and order notes)
  *
- * @class 		WC_Post_types
- * @version		2.2.0
- * @package		WooCommerce/Classes/Products
- * @category	Class
- * @author 		WooThemes
+ * @class    WC_Post_types
+ * @version  2.3.0
+ * @package  WooCommerce/Classes/Products
+ * @category Class
+ * @author   WooThemes
  */
 class WC_Comments {
 
@@ -190,13 +190,14 @@ class WC_Comments {
 			wp_die( __( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
+
 		return $comment_data;
 	}
 
 	/**
 	 * Rating field for comments.
 	 *
-	 * @param mixed $comment_id
+	 * @param int $comment_id
 	 */
 	public static function add_comment_rating( $comment_id ) {
 		if ( isset( $_POST['rating'] ) ) {
@@ -211,17 +212,19 @@ class WC_Comments {
 	/**
 	 * Clear transients for a review.
 	 *
-	 * @param mixed $post_id
+	 * @param int $post_id
 	 */
 	public static function clear_transients( $post_id ) {
 		$post_id = absint( $post_id );
-		delete_transient( 'wc_average_rating_' . $post_id );
-		delete_transient( 'wc_rating_count_' . $post_id );
-		delete_transient( 'wc_rating_count_' . $post_id . '_1' );
-		delete_transient( 'wc_rating_count_' . $post_id . '_2' );
-		delete_transient( 'wc_rating_count_' . $post_id . '_3' );
-		delete_transient( 'wc_rating_count_' . $post_id . '_4' );
-		delete_transient( 'wc_rating_count_' . $post_id . '_5' );
+		$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
+
+		delete_transient( 'wc_average_rating_' . $post_id . $transient_version );
+		delete_transient( 'wc_rating_count_' . $post_id . $transient_version );
+		delete_transient( 'wc_rating_count_' . $post_id . '_1' . $transient_version );
+		delete_transient( 'wc_rating_count_' . $post_id . '_2' . $transient_version );
+		delete_transient( 'wc_rating_count_' . $post_id . '_3' . $transient_version );
+		delete_transient( 'wc_rating_count_' . $post_id . '_4' . $transient_version );
+		delete_transient( 'wc_rating_count_' . $post_id . '_5' . $transient_version );
 	}
 
 	/**
@@ -279,7 +282,6 @@ class WC_Comments {
 	 * @return array
 	 */
 	public static function add_avatar_for_review_comment_type( $comment_types ) {
-
 		return array_merge( $comment_types, array( 'review' ) );
 	}
 }
