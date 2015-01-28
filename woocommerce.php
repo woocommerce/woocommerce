@@ -129,24 +129,34 @@ final class WooCommerce {
 
 	/**
 	 * WooCommerce Constructor.
-	 * @access public
-	 * @return WooCommerce
 	 */
 	public function __construct() {
 		$this->define_constants();
-		$this->includes();
+		$this->init_hooks();
+	}
 
-		// Init WC API
-		$this->api = new WC_API();
-
-		// Hooks
+	/**
+	 * Hook into actions and filters
+	 * @since  2.3
+	 */
+	public function init_hooks() {
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
+		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ), 5 );
+	}
 
-		// Loaded action
+	/**
+	 * Once we're sure all other plugins are loaded, we can include our files. This keeps some functions pluggable.
+	 * @since  2.3
+	 */
+	public function plugins_loaded() {
+		$this->includes();
+
+		$this->api = new WC_API();
+
 		do_action( 'woocommerce_loaded' );
 	}
 
