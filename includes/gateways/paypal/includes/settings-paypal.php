@@ -55,18 +55,6 @@ return array(
 		'type'        => 'title',
 		'description' => '',
 	),
-	'payment_notification_handler' => array(
-		'title'       => __( 'Payment Notification Handler', 'woocommerce' ),
-		'type'        => 'select',
-		'class'       => 'wc-enhanced-select',
-		'description' => __( 'Choose either IPN or PDT. This will be used to update orders after payment.', 'woocommerce' ),
-		'default'     => 'IPN',
-		'desc_tip'    => true,
-		'options'     => array(
-			'IPN' => __( 'PayPal IPN', 'woocommerce' ),
-			'PDT' => __( 'Payment Data Transfer (PDT)', 'woocommerce' )
-		)
-	),
 	'receiver_email' => array(
 		'title'       => __( 'Receiver Email', 'woocommerce' ),
 		'type'        => 'email',
