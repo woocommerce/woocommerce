@@ -21,8 +21,6 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public static function init() {
-		register_activation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'install' ) );
-
 		add_action( 'admin_init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
@@ -85,13 +83,14 @@ class WC_Install {
 			define( 'WC_INSTALLING', true );
 		}
 
+		// Ensure needed classes are loaded
+		WC()->includes();
+		include_once( 'class-wc-post-types.php' );
+		include_once( 'admin/class-wc-admin-notices.php' );
+
 		self::create_options();
 		self::create_tables();
 		self::create_roles();
-
-		// Ensure needed classes are loaded
-		include_once( 'admin/class-wc-admin-notices.php' );
-		include_once( 'class-wc-post-types.php' );
 
 		// Register post types
 		WC_Post_types::register_post_types();

@@ -100,7 +100,6 @@ final class WooCommerce {
 
 	/**
 	 * Cloning is forbidden.
-	 *
 	 * @since 2.1
 	 */
 	public function __clone() {
@@ -109,7 +108,6 @@ final class WooCommerce {
 
 	/**
 	 * Unserializing instances of this class is forbidden.
-	 *
 	 * @since 2.1
 	 */
 	public function __wakeup() {
@@ -132,32 +130,46 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		$this->define_constants();
+		$this->init_autoloader();
 		$this->init_hooks();
+	}
+
+	/**
+	 * Include the class autoloader
+	 * @since  2.3
+	 */
+	private function init_autoloader() {
+		include_once( 'includes/class-wc-autoloader.php' );
 	}
 
 	/**
 	 * Hook into actions and filters
 	 * @since  2.3
 	 */
-	public function init_hooks() {
+	private function init_hooks() {
+		register_activation_hook( __FILE__, array( 'WC_Install', 'install' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
-		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ), 5 );
+		add_action( 'plugins_loaded', array( $this, 'includes' ), 5 );
 	}
 
 	/**
-	 * Once we're sure all other plugins are loaded, we can include our files. This keeps some functions pluggable.
-	 * @since  2.3
+	 * Define WC Constants
 	 */
-	public function plugins_loaded() {
-		$this->includes();
+	private function define_constants() {
+		$upload_dir = wp_upload_dir();
 
-		$this->api = new WC_API();
-
-		do_action( 'woocommerce_loaded' );
+		$this->define( 'WC_PLUGIN_FILE', __FILE__ );
+		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+		$this->define( 'WC_VERSION', $this->version );
+		$this->define( 'WOOCOMMERCE_VERSION', $this->version );
+		$this->define( 'WC_ROUNDING_PRECISION', 4 );
+		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
+		$this->define( 'WC_DELIMITER', '|' );
+		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 	}
 
 	/**
@@ -190,26 +202,9 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Define WC Constants
-	 */
-	private function define_constants() {
-		$upload_dir = wp_upload_dir();
-
-		$this->define( 'WC_PLUGIN_FILE', __FILE__ );
-		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
-		$this->define( 'WC_VERSION', $this->version );
-		$this->define( 'WOOCOMMERCE_VERSION', $this->version );
-		$this->define( 'WC_ROUNDING_PRECISION', 4 );
-		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
-		$this->define( 'WC_DELIMITER', '|' );
-		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
-	}
-
-	/**
 	 * Include required core files used in admin and on the frontend.
 	 */
-	private function includes() {
-		include_once( 'includes/class-wc-autoloader.php' );
+	public function includes() {
 		include_once( 'includes/wc-core-functions.php' );
 		include_once( 'includes/wc-widget-functions.php' );
 		include_once( 'includes/wc-webhook-functions.php' );
@@ -235,11 +230,10 @@ final class WooCommerce {
 			include_once( 'includes/class-wc-tracker.php' );
 		}
 
-		// Query class
 		$this->query = include( 'includes/class-wc-query.php' );                // The main query class
+		$this->api   = include( 'includes/class-wc-api.php' );                  // API Class
 
 		include_once( 'includes/class-wc-post-types.php' );                     // Registers post types
-		include_once( 'includes/class-wc-api.php' );                            // API Class
 		include_once( 'includes/abstracts/abstract-wc-product.php' );           // Products
 		include_once( 'includes/abstracts/abstract-wc-order.php' );             // Orders
 		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );      // Settings API (for gateways, shipping, and integrations)
@@ -251,6 +245,8 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
 		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
+
+		do_action( 'woocommerce_loaded' ); // Hook once core includes are included
 	}
 
 	/**

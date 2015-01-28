@@ -11,8 +11,10 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
+
+if ( ! class_exists( 'WC_API' ) ) :
 
 class WC_API {
 
@@ -264,5 +266,8 @@ class WC_API {
 			die('1');
 		}
 	}
-
 }
+
+endif;
+
+return new WC_API();
