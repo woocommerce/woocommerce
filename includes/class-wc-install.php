@@ -84,8 +84,6 @@ class WC_Install {
 		}
 
 		// Ensure needed classes are loaded
-		WC()->includes();
-		include_once( 'class-wc-post-types.php' );
 		include_once( 'admin/class-wc-admin-notices.php' );
 
 		self::create_options();
