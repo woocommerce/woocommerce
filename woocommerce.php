@@ -130,16 +130,10 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		$this->define_constants();
-		$this->init_autoloader();
+		$this->includes();
 		$this->init_hooks();
-	}
 
-	/**
-	 * Include the class autoloader
-	 * @since  2.3
-	 */
-	private function init_autoloader() {
-		include_once( 'includes/class-wc-autoloader.php' );
+		do_action( 'woocommerce_loaded' );
 	}
 
 	/**
@@ -153,7 +147,6 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
-		add_action( 'plugins_loaded', array( $this, 'includes' ), 5 );
 	}
 
 	/**
@@ -205,6 +198,7 @@ final class WooCommerce {
 	 * Include required core files used in admin and on the frontend.
 	 */
 	public function includes() {
+		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
 		include_once( 'includes/wc-widget-functions.php' );
 		include_once( 'includes/wc-webhook-functions.php' );
@@ -245,8 +239,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
 		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
-
-		do_action( 'woocommerce_loaded' ); // Hook once core includes are included
 	}
 
 	/**
