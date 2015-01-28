@@ -53,7 +53,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			if ( $this->identity_token ) {
 				include_once( 'includes/class-wc-gateway-paypal-pdt-handler.php' );
-				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $identity_token );
+				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
 			}
 		}
 	}
