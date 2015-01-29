@@ -131,7 +131,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.2.11 - 29/01/2015 =
+* Add - URL in Usage/Limit column in Coupons table to query for orders.
 * Fix - esc_url() applied to prevent potential XSS issues.
+* Fix - "Link all variations" button.
 
 = 2.2.10 - 16/12/2014 =
 * Fix - Stock status on quick and bulk edit.
