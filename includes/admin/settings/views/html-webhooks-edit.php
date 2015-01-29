@@ -100,7 +100,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_secret"><?php _e( 'Secret', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php _e( 'The a Secret Key is used to generate a hash of the delivered webhook and provided in the request headers. This will default to the current API user\'s consumer secret if not provided.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<img class="help_tip" data-tip="<?php _e( 'The Secret Key is used to generate a hash of the delivered webhook and provided in the request headers. This will default to the current API user\'s consumer secret if not provided.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
 					<input name="webhook_secret" id="webhook_secret" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_secret() ); ?>" />

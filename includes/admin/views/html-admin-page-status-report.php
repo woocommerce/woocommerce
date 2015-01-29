@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Log Directory Writable"><?php _e( 'Log Directory Writable', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extension can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extensions can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce'  ) . '">[?]</a>'; ?></td>
 			<td><?php
 				if ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ) {
 					echo '<mark class="yes">' . '&#10004; <code>' . WC_LOG_DIR . '</code></mark> ';
