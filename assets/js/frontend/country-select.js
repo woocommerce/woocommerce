@@ -82,7 +82,7 @@ jQuery( function( $ ) {
 	var states_json = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
 		states = $.parseJSON( states_json );
 
-	$( 'select.country_to_state, input.country_to_state' ).change( function() {
+	$( 'body' ).on( 'change', 'select.country_to_state, input.country_to_state', function() {
 
 		var country = $( this ).val(),
 			$statebox = $( this ).closest( 'div' ).find( '#billing_state, #shipping_state, #calc_shipping_state' ),
