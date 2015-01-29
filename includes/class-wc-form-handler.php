@@ -580,6 +580,12 @@ class WC_Form_Handler {
 		$adding_to_cart      = wc_get_product( $product_id );
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
 
+		// Check if the product is published
+		if ( 'publish' !== $adding_to_cart->post->post_status ) {
+			wc_add_notice( __( 'Sorry, this product is unavailable.', 'woocommerce' ), 'error' );
+			return;
+		}
+
 		// Variable product handling
 		if ( 'variable' === $add_to_cart_handler ) {
 

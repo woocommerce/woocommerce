@@ -329,8 +329,9 @@ class WC_AJAX {
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
 		$quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( $_POST['quantity'] );
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+		$product_status    = get_post_status( $product_id );
 
-		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) ) {
+		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) && 'publish' === $product_status ) {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
@@ -345,7 +346,7 @@ class WC_AJAX {
 
 			// If there was an error adding to the cart, redirect to the product page to show any errors
 			$data = array(
-				'error' => true,
+				'error'       => true,
 				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id )
 			);
 
