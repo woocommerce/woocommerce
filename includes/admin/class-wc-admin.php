@@ -148,25 +148,8 @@ class WC_Admin {
 	public function admin_footer_text( $footer_text ) {
 		global $current_screen;
 
-		// list of admin pages we want this to appear on
-		$pages = array(
-			'woocommerce_page_wc-settings',
-			'edit-shop_order',
-			'shop_order',
-			'edit-shop_coupon',
-			'shop_coupon',
-			'woocommerce_page_wc-reports',
-			'woocommerce_page_wc-addons',
-			'edit-product',
-			'product',
-			'edit-product_cat',
-			'edit-product_tag',
-			'edit-product_shipping_class',
-			'product_page_product_attributes'
-		);
-
 		// check to make sure we're on a WooCommerce admin page
-		if ( isset( $current_screen->id ) && in_array( $current_screen->id, $pages ) ) {
+		if ( isset( $current_screen->id ) && in_array( $current_screen->id, wc_get_screen_ids() ) ) {
 			// change the footer text
 			$footer_text = sprintf( __( 'Please rate <strong>WooCommerce</strong> <a href="%1$s" target="_blank">&#9733;&#9733;&#9733;&#9733;&#9733;</a> on <a href="%1$s" target="_blank">WordPress.org</a> to help us keep this plugin free.  A huge thank you from WooThemes!', 'woocommerce' ), __( 'https://wordpress.org/support/view/plugin-reviews/woocommerce?filter=5', 'woocommerce' ) );
 		}
