@@ -11,7 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-do_action( 'woocommerce_review_order_before_payment' ); ?>
+?>
+
+<?php if ( ! is_ajax() ) : ?>
+	<?php do_action( 'woocommerce_review_order_before_payment' ); ?>
+<?php endif; ?>
 
 <div id="payment" class="woocommerce-checkout-payment">
 	<?php if ( WC()->cart->needs_payment() ) : ?>
@@ -58,4 +62,6 @@ do_action( 'woocommerce_review_order_before_payment' ); ?>
 	<div class="clear"></div>
 </div>
 
-<?php do_action( 'woocommerce_review_order_after_payment' ); ?>
+<?php if ( ! is_ajax() ) : ?>
+	<?php do_action( 'woocommerce_review_order_after_payment' ); ?>
+<?php endif; ?>
