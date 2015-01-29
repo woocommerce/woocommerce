@@ -715,8 +715,8 @@ class WC_Admin_Post_Types {
 		$class            = ( isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) ? 'current' : '';
 		$query_string     = remove_query_arg(array( 'orderby', 'order' ));
 		$query_string     = add_query_arg( 'orderby', urlencode('menu_order title'), $query_string );
-		$query_string     = add_query_arg( 'order', urlencode('ASC'), $query_string );
-		$views['byorder'] = '<a href="'. $query_string . '" class="' . esc_attr( $class ) . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
+		$query_string     = add_query_arg( 'order', urlencode( 'ASC' ), $query_string );
+		$views['byorder'] = '<a href="' . esc_url( $query_string ) . '" class="' . esc_attr( $class ) . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
 
 		return $views;
 	}

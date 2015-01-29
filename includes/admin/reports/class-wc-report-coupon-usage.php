@@ -244,7 +244,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					foreach ( $most_popular as $coupon ) {
 						echo '<tr class="' . ( in_array( $coupon->coupon_code, $this->coupon_codes ) ? 'active' : '' ) . '">
 							<td class="count" width="1%">' . $coupon->coupon_count . '</td>
-							<td class="name"><a href="' . add_query_arg( 'coupon_codes', $coupon->coupon_code ) . '">' . $coupon->coupon_code . '</a></td>
+							<td class="name"><a href="' . esc_url( add_query_arg( 'coupon_codes', $coupon->coupon_code ) ) . '">' . $coupon->coupon_code . '</a></td>
 						</tr>';
 					}
 				} else {
@@ -292,7 +292,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					foreach ( $most_discount as $coupon ) {
 						echo '<tr class="' . ( in_array( $coupon->coupon_code, $this->coupon_codes ) ? 'active' : '' ) . '">
 							<td class="count" width="1%">' . wc_price( $coupon->discount_amount ) . '</td>
-							<td class="name"><a href="' . add_query_arg( 'coupon_codes', $coupon->coupon_code ) . '">' . $coupon->coupon_code . '</a></td>
+							<td class="name"><a href="' . esc_url( add_query_arg( 'coupon_codes', $coupon->coupon_code ) ) . '">' . $coupon->coupon_code . '</a></td>
 						</tr>';
 					}
 				} else {

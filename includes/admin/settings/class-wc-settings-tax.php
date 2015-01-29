@@ -352,7 +352,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 						<div class="pagination">
 							<?php
 								echo str_replace( 'page-numbers', 'page-numbers button', paginate_links( array(
-									'base'      => add_query_arg( 'p', '%#%' ),
+									'base'      => esc_url_raw( add_query_arg( 'p', '%#%' ) ),
 									'type'      => 'plain',
 									'prev_text' => '&laquo;',
 									'next_text' => '&raquo;',

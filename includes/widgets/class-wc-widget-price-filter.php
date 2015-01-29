@@ -155,7 +155,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		else
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( $wp->request ) );
 
-		echo '<form method="get" action="' . esc_attr( $form_action ) . '">
+		echo '<form method="get" action="' . esc_url( $form_action ) . '">
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
 				<div class="price_slider_amount">

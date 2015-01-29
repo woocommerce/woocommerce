@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<ul>
 				<?php
 					foreach ( $ranges as $range => $name )
-						echo '<li class="' . ( $current_range == $range ? 'active' : '' ) . '"><a href="' . remove_query_arg( array( 'start_date', 'end_date' ), add_query_arg( 'range', $range ) ) . '">' . $name . '</a></li>';
+						echo '<li class="' . ( $current_range == $range ? 'active' : '' ) . '"><a href="' . esc_url( remove_query_arg( array( 'start_date', 'end_date' ), add_query_arg( 'range', $range ) ) ) . '">' . $name . '</a></li>';
 				?>
 				<li class="custom <?php echo $current_range == 'custom' ? 'active' : ''; ?>">
 					<?php _e( 'Custom:', 'woocommerce' ); ?>

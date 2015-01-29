@@ -119,7 +119,7 @@ function wc_products_rss_feed() {
 
 		$feed = get_post_type_archive_feed_link( 'product' );
 
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . __( 'New products', 'woocommerce' ) . '" href="' . esc_attr( $feed ) . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . __( 'New products', 'woocommerce' ) . '" href="' . esc_url( $feed ) . '" />';
 
 	} elseif ( is_tax( 'product_cat' ) ) {
 
@@ -127,7 +127,7 @@ function wc_products_rss_feed() {
 
 		$feed = add_query_arg('product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ));
 
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products added to %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_attr( $feed ) . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products added to %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_url( $feed ) . '" />';
 
 	} elseif ( is_tax( 'product_tag' ) ) {
 
@@ -135,7 +135,7 @@ function wc_products_rss_feed() {
 
 		$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ));
 
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_attr( $feed ) . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_url( $feed ) . '" />';
 
 	}
 }
@@ -1577,7 +1577,7 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 		}
 		?>
 		<p class="order-again">
-			<a href="<?php echo wp_nonce_url( add_query_arg( 'order_again', $order->id ) , 'woocommerce-order_again' ); ?>" class="button"><?php _e( 'Order Again', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'order_again', $order->id ) , 'woocommerce-order_again' ) ); ?>" class="button"><?php _e( 'Order Again', 'woocommerce' ); ?></a>
 		</p>
 		<?php
 	}
