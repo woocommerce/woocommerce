@@ -1730,7 +1730,7 @@ abstract class WC_Abstract_Order {
 
 		if ( $fees = $this->get_fees() )
 
-			foreach( $fees as $id => $fee ) {
+			foreach ( $fees as $id => $fee ) {
 
 				if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', $fee['line_total'] + $fee['line_tax'] == 0, $id ) ) {
 					continue;
@@ -1769,7 +1769,7 @@ abstract class WC_Abstract_Order {
 
 				$total_rows['tax'] = array(
 					'label' => WC()->countries->tax_or_vat() . ':',
-					'value'	=> wc_price( $this->get_total_tax(), array('currency' => $this->get_order_currency()) )
+					'value'	=> wc_price( $this->get_total_tax(), array( 'currency' => $this->get_order_currency() ) )
 				);
 			}
 		}

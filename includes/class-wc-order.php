@@ -59,6 +59,27 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the total tax refunded
+	 *
+	 * @since  2.3
+	 * @return float
+	 */
+	public function get_total_tax_refunded() {
+		global $wpdb;
+
+		$total = $wpdb->get_var( $wpdb->prepare( "
+			SELECT SUM( order_itemmeta.meta_value )
+			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
+			WHERE order_itemmeta.order_item_id = order_items.order_item_id
+			AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
+		", $this->id ) );
+
+		return abs( $total );
+	}
+
+	/**
 	 * Get the refunded amount for a line item
 	 *
 	 * @param  int $item_id ID of the item we're checking
@@ -134,5 +155,25 @@ class WC_Order extends WC_Abstract_Order {
 			}
 		}
 		return $total * -1;
+	}
+
+	/**
+	 * Get total tax refunded by rate ID.
+	 *
+	 * @param  int $rate_id
+	 *
+	 * @return float
+	 */
+	public function get_total_tax_refunded_by_rate_id( $rate_id ) {
+		$total = 0;
+		foreach ( $this->get_refunds() as $refund ) {
+			foreach ( $refund->get_items( 'tax' ) as $refunded_item ) {
+				if ( isset( $refunded_item['rate_id'] ) && $refunded_item['rate_id'] == $rate_id ) {
+					$total += abs( $refunded_item['tax_amount'] ) + abs( $refunded_item['shipping_tax_amount'] );
+				}
+			}
+		}
+
+		return $total;
 	}
 }

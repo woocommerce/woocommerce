@@ -27,22 +27,23 @@ $order = wc_get_order( $order_id );
 		if ( sizeof( $order->get_items() ) > 0 ) {
 
 			foreach( $order->get_items() as $item_id => $item ) {
-				$_product     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-				$item_meta    = new WC_Order_Item_Meta( $item['item_meta'], $_product );
+				$_product  = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
+				$item_meta = new WC_Order_Item_Meta( $item['item_meta'], $_product );
 
 				if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 					?>
 					<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
 						<td class="product-name">
 							<?php
-								if ( $_product && ! $_product->is_visible() )
+								if ( $_product && ! $_product->is_visible() ) {
 									echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item );
-								else
+								} else {
 									echo apply_filters( 'woocommerce_order_item_name', sprintf( '<a href="%s">%s</a>', get_permalink( $item['product_id'] ), $item['name'] ), $item );
+								}
 
 								echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times; %s', $item['qty'] ) . '</strong>', $item );
 
-								// allow other plugins to add additional product information here
+								// Allow other plugins to add additional product information here
 								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
 								$item_meta->display();
@@ -62,7 +63,7 @@ $order = wc_get_order( $order_id );
 									echo '<br/>' . implode( '<br/>', $links );
 								}
 
-								// allow other plugins to add additional product information here
+								// Allow other plugins to add additional product information here
 								do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
 							?>
 						</td>
@@ -90,45 +91,73 @@ $order = wc_get_order( $order_id );
 	<?php
 		$has_refund = false;
 
-		if ( $order->get_total_refunded() !== NULL ) {
+		if ( $total_refunded = $order->get_total_refunded() ) {
 			$has_refund = true;
 		}
 
-		if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $key => $total ) :
-			$value = $total['value'];
+		if ( $totals = $order->get_order_item_totals() ) {
+			foreach ( $totals as $key => $total ) {
+				$value = $total['value'];
 
-			// check for refund
-			if ( $has_refund && $key === 'order_total' ) {
-				$value = '<del>' . strip_tags( $order->get_formatted_order_total() ) . '</del> <ins>' . wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ) . '</ins>';
+				// Check for refund
+				if ( $has_refund && $key === 'order_total' ) {
+					$refunded_tax_del = '';
+					$refunded_tax_ins = '';
+
+					// Tax for inclusive prices
+					if ( wc_tax_enabled() && 'incl' == $order->tax_display_cart ) {
+
+						$tax_del_array = array();
+						$tax_ins_array = array();
+
+						if ( 'itemized' == get_option( 'woocommerce_tax_total_display' ) ) {
+
+							foreach ( $order->get_tax_totals() as $code => $tax ) {
+								$tax_del_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
+								$tax_ins_array[] = sprintf( '%s %s', wc_price( $tax->amount - $order->get_total_tax_refunded_by_rate_id( $tax->rate_id ), array( 'currency' => $order->get_order_currency() ) ), $tax->label );
+							}
+
+						} else {
+							$tax_del_array[] = sprintf( '%s %s', wc_price( $order->get_total_tax(), array( 'currency' => $order->get_order_currency() ) ), WC()->countries->tax_or_vat() );
+							$tax_ins_array[] = sprintf( '%s %s', wc_price( $order->get_total_tax() - $order->get_total_tax_refunded(), array( 'currency' => $order->get_order_currency() ) ), WC()->countries->tax_or_vat() );
+						}
+
+						if ( ! empty( $tax_del_array ) ) {
+							$refunded_tax_del .= ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_del_array ) );
+						}
+
+						if ( ! empty( $tax_ins_array ) ) {
+							$refunded_tax_ins .= ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_ins_array ) );
+						}
+					}
+
+					$value = '<del>' . strip_tags( $order->get_formatted_order_total() ) . $refunded_tax_del . '</del> <ins>' . wc_price( $order->get_total() - $total_refunded, array( 'currency' => $order->get_order_currency() ) ) . $refunded_tax_ins . '</ins>';
+				}
+				?>
+				<tr>
+					<th scope="row"><?php echo $total['label']; ?></th>
+					<td><?php echo $value; ?></td>
+				</tr>
+				<?php
 			}
-			?>
-			<tr>
-				<th scope="row"><?php echo $total['label']; ?></th>
-				<td><?php echo $value; ?></td>
-			</tr>
-			<?php
-		endforeach;
+		}
 
-		// check for refund
-		if ( $has_refund ) {
-			?>
+		// Check for refund
+		if ( $has_refund ) { ?>
 			<tr>
 				<th scope="row"><?php _e( 'Refunded:', 'woocommerce' ); ?></th>
-				<td>-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
+				<td>-<?php echo wc_price( $total_refunded, array( 'currency' => $order->get_order_currency() ) ); ?></td>
 			</tr>
-		<?php	
+		<?php
 		}
 
 		// Check for customer note
-		if ( '' != $order->customer_note ) {
-			?>
+		if ( '' != $order->customer_note ) { ?>
 			<tr>
 				<th scope="row"><?php _e( 'Note:', 'woocommerce' ); ?></th>
 				<td><?php echo wptexturize( $order->customer_note ); ?></td>
 			</tr>
-		<?php
-		}
-		?>
+		<?php } ?>
 	</tfoot>
 </table>
 
@@ -139,8 +168,13 @@ $order = wc_get_order( $order_id );
 </header>
 <table class="shop_table shop_table_responsive customer_details">
 <?php
-	if ( $order->billing_email ) echo '<tr><th>' . __( 'Email:', 'woocommerce' ) . '</th><td data-title="' . __( 'Email', 'woocommerce' ) . '">' . $order->billing_email . '</td></tr>';
-	if ( $order->billing_phone ) echo '<tr><th>' . __( 'Telephone:', 'woocommerce' ) . '</th><td data-title="' . __( 'Telephone', 'woocommerce' ) . '">' . $order->billing_phone . '</td></tr>';
+	if ( $order->billing_email ) {
+		echo '<tr><th>' . __( 'Email:', 'woocommerce' ) . '</th><td data-title="' . __( 'Email', 'woocommerce' ) . '">' . $order->billing_email . '</td></tr>';
+	}
+
+	if ( $order->billing_phone ) {
+		echo '<tr><th>' . __( 'Telephone:', 'woocommerce' ) . '</th><td data-title="' . __( 'Telephone', 'woocommerce' ) . '">' . $order->billing_phone . '</td></tr>';
+	}
 
 	// Additional customer details hook
 	do_action( 'woocommerce_order_details_after_customer_details', $order );
@@ -160,7 +194,11 @@ $order = wc_get_order( $order_id );
 		</header>
 		<address>
 			<?php
-				if ( ! $order->get_formatted_billing_address() ) _e( 'N/A', 'woocommerce' ); else echo $order->get_formatted_billing_address();
+				if ( ! $order->get_formatted_billing_address() ) {
+					_e( 'N/A', 'woocommerce' );
+				} else {
+					echo $order->get_formatted_billing_address();
+				}
 			?>
 		</address>
 
@@ -175,7 +213,11 @@ $order = wc_get_order( $order_id );
 		</header>
 		<address>
 			<?php
-				if ( ! $order->get_formatted_shipping_address() ) _e( 'N/A', 'woocommerce' ); else echo $order->get_formatted_shipping_address();
+				if ( ! $order->get_formatted_shipping_address() ) {
+					_e( 'N/A', 'woocommerce' );
+				} else {
+					echo $order->get_formatted_shipping_address();
+				}
 			?>
 		</address>
 
