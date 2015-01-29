@@ -87,12 +87,24 @@ class WC_Admin_Webhooks {
 	 */
 	private function update_topic( $webhook ) {
 		if ( ! empty( $_POST['webhook_topic'] ) ) {
-			list( $resource, $event ) = explode( '.', wc_clean( $_POST['webhook_topic'] ) );
 
-			if ( 'action' === $resource ) {
-				$event = ! empty( $_POST['webhook_action_event'] ) ? wc_clean( $_POST['webhook_action_event'] ) : '';
-			} else if ( ! in_array( $resource, array( 'coupon', 'customer', 'order', 'product' ) ) && ! empty( $_POST['webhook_custom_topic'] ) ) {
-				list( $resource, $event ) = explode( '.', wc_clean( $_POST['webhook_custom_topic'] ) );
+			$resource = '';
+			$event    = '';
+
+			switch ( $_POST['webhook_topic'] ) {
+				case 'custom' :
+					if ( ! empty( $_POST['webhook_custom_topic'] ) ) {
+						list( $resource, $event ) = explode( '.', wc_clean( $_POST['webhook_custom_topic'] ) );
+					}
+					break;
+				case 'action' :
+					$resource = 'action';
+					$event    = ! empty( $_POST['webhook_action_event'] ) ? wc_clean( $_POST['webhook_action_event'] ) : '';
+					break;
+
+				default :
+					list( $resource, $event ) = explode( '.', wc_clean( $_POST['webhook_topic'] ) );
+					break;
 			}
 
 			$topic = $resource . '.' . $event;
