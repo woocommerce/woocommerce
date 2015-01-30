@@ -120,8 +120,7 @@ jQuery( function( $ ) {
 				}
 
 				$statebox.html( '<option value="">' + wc_country_select_params.i18n_select_state_text + '</option>' + options );
-
-				$statebox.val( value );
+				$statebox.val( value ).change();
 
 				$( 'body' ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
 
