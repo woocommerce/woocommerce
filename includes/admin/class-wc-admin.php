@@ -6,7 +6,7 @@
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @version     2.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -152,7 +152,7 @@ class WC_Admin {
 		// Check to make sure we're on a WooCommerce admin page
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, wc_get_screen_ids() ) ) ) {
 			// Change the footer text
-			$footer_text = sprintf( __( 'Please rate <strong>WooCommerce</strong> <a href="%1$s" target="_blank">&#9733;&#9733;&#9733;&#9733;&#9733;</a> on <a href="%1$s" target="_blank">WordPress.org</a> to help us keep this plugin free. A huge thank you from WooThemes in advance!', 'woocommerce' ), 'https://wordpress.org/support/view/plugin-reviews/woocommerce?filter=5' );
+			$footer_text = sprintf( __( 'Please rate <strong>WooCommerce</strong> <a href="%1$s" target="_blank">&#9733;&#9733;&#9733;&#9733;&#9733;</a> on <a href="%1$s" target="_blank">WordPress.org</a> to help us keep this plugin free. A huge thank you from WooThemes in advance!', 'woocommerce' ), 'https://wordpress.org/support/view/plugin-reviews/woocommerce?filter=5#postform' );
 		}
 
 		return $footer_text;
