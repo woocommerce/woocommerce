@@ -123,7 +123,8 @@ class WC_Cart {
 	public function __get( $key ) {
 		switch ( $key ) {
 			case 'tax':
-				_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
+				//does not make much sense if the class itself uses $this->tax in calculate_totals() 
+				//uses _deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
 				$this->tax = new WC_Tax();
 			return $this->tax;
 			case 'discount_total':
