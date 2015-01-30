@@ -202,9 +202,9 @@ class WC_API_Products extends WC_API_Resource {
 				$data['type'] = 'simple';
 			}
 
-			// Set hidden visibility when not sent
+			// Set visible visibility when not sent
 			if ( ! isset( $data['catalog_visibility'] ) ) {
-				$data['catalog_visibility'] = 'hidden';
+				$data['catalog_visibility'] = 'visible';
 			}
 
 			// Validate the product type
