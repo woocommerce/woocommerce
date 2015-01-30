@@ -343,7 +343,7 @@ class WC_API_Reports extends WC_API_Resource {
 
 		$sales_data = array(
 			'total_sales'       => wc_format_decimal( $totals->total_sales, 2 ),
-			'net_sales'         => $totals->total_sales - $totals->total_shipping - $totals->total_tax - $totals->total_shipping_tax,
+			'net_sales'         => wc_format_decimal( $totals->total_sales - $totals->total_shipping - $totals->total_tax - $totals->total_shipping_tax, 2 ),
 			'average_sales'     => wc_format_decimal( $totals->total_sales / ( $this->report->chart_interval + 1 ), 2 ),
 			'total_orders'      => (int) $totals->order_count,
 			'total_items'       => $total_items,
