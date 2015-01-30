@@ -449,7 +449,7 @@ class WC_API_Server {
 				'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
 				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
 				'links'              => array(
-					'help' => 'http://docs.woocommercev2.apiary.io/',
+					'help' => 'http://woothemes.github.io/woocommerce-rest-api-docs/',
 				),
 			),
 		) );

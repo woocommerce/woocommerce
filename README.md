@@ -7,7 +7,7 @@ If you are not a developer, please use the [WooCommerce plugin page](http://word
 ## Documentation
 * The [WooCommerce docs site](http://docs.woothemes.com/documentation/plugins/woocommerce/)
 * [WooCommerce API Docs](http://docs.woothemes.com/wc-apidocs/)
-* [WooCommerce REST API Docs](http://docs.woocommercev2.apiary.io/)
+* [WooCommerce REST API Docs](http://woothemes.github.io/woocommerce-rest-api-docs/)
 
 ## Support
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place in the appropriate channels:
