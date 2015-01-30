@@ -2,7 +2,8 @@
 /**
  * Admin View: Page - Addons
  *
- * @global string $view
+ * @var string $view
+ * @var object $addons
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
