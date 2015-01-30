@@ -235,9 +235,6 @@ jQuery( function( $ ){
 		dateFormat: "yy-mm-dd",
 		numberOfMonths: 1,
 		showButtonPanel: true,
-		showOn: "button",
-		buttonImage: woocommerce_admin_meta_boxes.calendar_image,
-		buttonImageOnly: true,
 		onSelect: function( selectedDate ) {
 			var option = $(this).is('#_sale_price_dates_from, .sale_price_dates_from') ? "minDate" : "maxDate";
 
