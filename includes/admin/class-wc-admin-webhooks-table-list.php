@@ -35,22 +35,19 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_columns() {
-		$columns = array(
+		return array(
 			'cb'           => '<input type="checkbox" />',
 			'title'        => __( 'Name', 'woocommerce' ),
 			'status'       => __( 'Status', 'woocommerce' ),
 			'topic'        => __( 'Topic', 'woocommerce' ),
 			'delivery_url' => __( 'Delivery URL', 'woocommerce' ),
 		);
-
-		return $columns;
 	}
 
 	/**
 	 * Column cb.
 	 *
 	 * @param  WC_Post $webhook
-	 *
 	 * @return string
 	 */
 	public function column_cb( $webhook ) {
@@ -58,92 +55,98 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Webhook columns.
-	 *
-	 * @param  WC_Post $webhook
-	 * @param  string $column_name
-	 *
-	 * @return string
+	 * Get Webhook object
+	 * @param  object $webhook
+	 * @return WC_Webhook
 	 */
-	public function column_default( $webhook, $column_name ) {
+	private function get_webbook_object( $webhook ) {
 		global $the_webhook;
 
 		if ( empty( $the_webhook ) || $the_webhook->id != $webhook->ID ) {
 			$the_webhook = new WC_Webhook( $webhook->ID );
 		}
 
-		$output = '';
+		return $the_webhook;
+	}
 
-		switch ( $column_name ) {
-			case 'title' :
-				$edit_link        = admin_url( 'admin.php?page=wc-settings&amp;tab=webhooks&amp;edit-webhook=' . $the_webhook->id );
-				$title            = _draft_or_post_title( $the_webhook->post_data );
-				$post_type_object = get_post_type_object( $the_webhook->post_data->post_type );
-				$post_status      = $the_webhook->post_data->post_status;
+	/**
+	 * Return title column
+	 * @param  object $webhook
+	 * @return string
+	 */
+	public function column_title( $webhook ) {
+		$the_webhook      = $this->get_webbook_object( $webhook );
+		$edit_link        = admin_url( 'admin.php?page=wc-settings&amp;tab=webhooks&amp;edit-webhook=' . $the_webhook->id );
+		$title            = _draft_or_post_title( $the_webhook->get_post_data() );
+		$post_type_object = get_post_type_object( $the_webhook->get_post_data()->post_type );
+		$post_status      = $the_webhook->get_post_data()->post_status;
 
-				// Title
-				$output = '<strong>';
-				if ( 'trash' == $post_status ) {
-					$output .= esc_html( $title );
-				} else {
-					$output .= '<a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ) . '</a>';
-				}
-				$output .= '</strong>';
+		// Title
+		$output = '<strong>';
+		if ( 'trash' == $post_status ) {
+			$output .= esc_html( $title );
+		} else {
+			$output .= '<a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ) . '</a>';
+		}
+		$output .= '</strong>';
 
-				// Get actions
-				$actions = array();
+		// Get actions
+		$actions = array(
+			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id )
+		);
 
-				$actions['id'] = sprintf( __( 'ID: %d', 'woocommerce' ), $the_webhook->id );
-
-				if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) && 'trash' !== $post_status ) {
-					$actions['edit'] = '<a href="' . esc_attr( $edit_link ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
-				}
-
-				if ( current_user_can( $post_type_object->cap->delete_post, $the_webhook->id ) ) {
-
-					if ( 'trash' == $post_status ) {
-						$actions['untrash'] = '<a title="' . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . '" href="' . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $the_webhook->id ) ), 'untrash-post_' . $the_webhook->id ) . '">' . __( 'Restore', 'woocommerce' ) . '</a>';
-					} elseif ( EMPTY_TRASH_DAYS ) {
-						$actions['trash'] = '<a class="submitdelete" title="' . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . __( 'Trash', 'woocommerce' ) . '</a>';
-					}
-
-					if ( 'trash' == $post_status || ! EMPTY_TRASH_DAYS ) {
-						$actions['delete'] = '<a class="submitdelete" title="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id, '', true ) . '">' . __( 'Delete Permanently', 'woocommerce' ) . '</a>';
-					}
-				}
-
-				$actions = apply_filters( 'post_row_actions', $actions, $the_webhook->post_data );
-
-				$output .= '<div class="row-actions">';
-
-				$i = 0;
-				$action_count = sizeof( $actions );
-
-				foreach ( $actions as $action => $link ) {
-					++$i;
-					$sep = ( $i == $action_count ) ? '' : ' | ';
-
-					$output .= '<span class="' . $action . '">' . $link . $sep . '</span>';
-				}
-
-				$output .= '</div>';
-
-				break;
-			case 'status' :
-				$output = $the_webhook->get_i18n_status();
-				break;
-			case 'topic' :
-				$output = $the_webhook->get_topic();
-				break;
-			case 'delivery_url' :
-				$output = $the_webhook->get_delivery_url();
-				break;
-
-			default :
-				break;
+		if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) && 'trash' !== $post_status ) {
+			$actions['edit'] = '<a href="' . esc_attr( $edit_link ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
 		}
 
+		if ( current_user_can( $post_type_object->cap->delete_post, $the_webhook->id ) ) {
+			if ( 'trash' == $post_status ) {
+				$actions['untrash'] = '<a title="' . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . '" href="' . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $the_webhook->id ) ), 'untrash-post_' . $the_webhook->id ) . '">' . __( 'Restore', 'woocommerce' ) . '</a>';
+			} elseif ( EMPTY_TRASH_DAYS ) {
+				$actions['trash'] = '<a class="submitdelete" title="' . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . __( 'Trash', 'woocommerce' ) . '</a>';
+			}
+			if ( 'trash' == $post_status || ! EMPTY_TRASH_DAYS ) {
+				$actions['delete'] = '<a class="submitdelete" title="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id, '', true ) . '">' . __( 'Delete Permanently', 'woocommerce' ) . '</a>';
+			}
+		}
+
+		$actions     = apply_filters( 'post_row_actions', $actions, $the_webhook->get_post_data() );
+		$row_actions = array();
+
+		foreach ( $actions as $action => $link ) {
+			$row_actions[] = '<span class="' . esc_attr( $action ) . '">' . $link . '</span>';
+		}
+
+		$output .= '<div class="row-actions">' . implode(  ' | ', $row_actions ) . '</div>';
+
 		return $output;
+	}
+
+	/**
+	 * Return status column
+	 * @param  object $webhook
+	 * @return string
+	 */
+	public function column_status( $webhook ) {
+		return $this->get_webbook_object( $webhook )->get_i18n_status();
+	}
+
+	/**
+	 * Return topic column
+	 * @param  object $webhook
+	 * @return string
+	 */
+	public function column_topic( $webhook ) {
+		return $this->get_webbook_object( $webhook )->get_topic();
+	}
+
+	/**
+	 * Return delivery URL column
+	 * @param  object $webhook
+	 * @return string
+	 */
+	public function column_delivery_url( $webhook ) {
+		return $this->get_webbook_object( $webhook )->get_delivery_url();
 	}
 
 	/**
