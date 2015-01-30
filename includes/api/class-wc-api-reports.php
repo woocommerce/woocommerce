@@ -88,29 +88,32 @@ class WC_API_Reports extends WC_API_Resource {
 				'_order_total' => array(
 					'type'     => 'meta',
 					'function' => 'SUM',
-					'name'     => 'sales'
-				),
-				'_order_tax' => array(
-					'type'            => 'meta',
-					'function'        => 'SUM',
-					'name'            => 'tax'
-				),
-				'_order_shipping_tax' => array(
-					'type'            => 'meta',
-					'function'        => 'SUM',
-					'name'            => 'shipping_tax'
+					'name'     => 'total_sales'
 				),
 				'_order_shipping' => array(
 					'type'     => 'meta',
 					'function' => 'SUM',
-					'name'     => 'shipping'
+					'name'     => 'total_shipping'
 				),
+				'_order_tax' => array(
+					'type'            => 'meta',
+					'function'        => 'SUM',
+					'name'            => 'total_tax'
+				),
+				'_order_shipping_tax' => array(
+					'type'            => 'meta',
+					'function'        => 'SUM',
+					'name'            => 'total_shipping_tax'
+				),
+
 				'ID' => array(
 					'type'     => 'post_data',
 					'function' => 'COUNT',
 					'name'     => 'order_count'
 				)
 			),
+			'order_types'  => wc_get_order_types( 'sales-reports' ),
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 			'filter_range' => true,
 		) );
 
