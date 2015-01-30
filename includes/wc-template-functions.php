@@ -200,10 +200,6 @@ function wc_body_class( $classes ) {
 		$classes[] = 'woocommerce-page';
 	}
 
-	if ( is_store_notice_showing() ) {
-		$classes[] = 'woocommerce-demo-store';
-	}
-
 	return array_unique( $classes );
 }
 
@@ -369,24 +365,6 @@ if ( ! function_exists( 'woocommerce_get_sidebar' ) ) {
 	 */
 	function woocommerce_get_sidebar() {
 		wc_get_template( 'global/sidebar.php' );
-	}
-}
-
-if ( ! function_exists( 'woocommerce_demo_store' ) ) {
-
-	/**
-	 * Adds a demo store banner to the site if enabled
-	 *
-	 */
-	function woocommerce_demo_store() {
-		if ( !is_store_notice_showing() )
-			return;
-
-		$notice = get_option( 'woocommerce_demo_store_notice' );
-		if ( empty( $notice ) )
-			$notice = __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' );
-
-		echo apply_filters( 'woocommerce_demo_store', '<p class="demo_store">' . $notice . '</p>'  );
 	}
 }
 

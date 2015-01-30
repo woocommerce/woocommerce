@@ -191,7 +191,6 @@ add_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_ch
  * @see woocommerce_demo_store()
  */
 add_action( 'wp_footer', 'wc_print_js', 25 );
-add_action( 'wp_footer', 'woocommerce_demo_store' );
 
 /**
  * Order details
