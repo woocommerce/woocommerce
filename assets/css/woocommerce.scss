@@ -1059,9 +1059,10 @@ p.demo_store {
 			}
 		}
 
-		tbody {
+		tbody:first-child {
 			tr:first-child {
-				th {
+				th,
+				td {
 					border-top: 0;
 				}
 			}
