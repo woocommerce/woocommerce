@@ -76,8 +76,10 @@ class WC_API_Reports extends WC_API_Resource {
 		// check user permissions
 		$check = $this->validate_request();
 
-		if ( is_wp_error( $check ) )
+		// check for WP_Error
+		if ( is_wp_error( $check ) ) {
 			return $check;
+		}
 
 		// set date filtering
 		$this->setup_report( $filter );
@@ -305,8 +307,9 @@ class WC_API_Reports extends WC_API_Resource {
 
 			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $order->post_date ) ) : date( 'Y-m', strtotime( $order->post_date ) );
 
-			if ( ! isset( $period_totals[ $time ] ) )
+			if ( ! isset( $period_totals[ $time ] ) ) {
 				continue;
+			}
 
 			$period_totals[ $time ]['sales']    = wc_format_decimal( $order->total_sales, 2 );
 			$period_totals[ $time ]['orders']   = (int) $order->total_orders;
@@ -319,8 +322,9 @@ class WC_API_Reports extends WC_API_Resource {
 
 			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $order_item->post_date ) ) : date( 'Y-m', strtotime( $order_item->post_date ) );
 
-			if ( ! isset( $period_totals[ $time ] ) )
+			if ( ! isset( $period_totals[ $time ] ) ) {
 				continue;
+			}
 
 			$period_totals[ $time ]['items'] = (int) $order_item->order_item_count;
 		}
