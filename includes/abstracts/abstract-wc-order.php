@@ -5,7 +5,6 @@
  * The WooCommerce order class handles order data.
  *
  * @class       WC_Order
- * @var         WP_Post
  * @version     2.2.0
  * @package     WooCommerce/Classes
  * @category    Class
@@ -42,10 +41,7 @@ abstract class WC_Abstract_Order {
 	/** @public int Order (post) ID */
 	public $id                          = 0;
 
-	/**
-	 * @public $post Stores post data
-	 * @var WP_Post
-	 */
+	/** @var WP_Post $post */
 	public $post                        = null;
 
 	/** @public string Order type */
@@ -103,8 +99,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Init/load the order object. Called from the constructor.
 	 *
-	 * @param  int|WP_POST|WC_Order $order Order to init
-	 * @var    WP_POST
+	 * @param  int|WP_Post|WC_Order $order Order to init
 	 */
 	protected function init( $order ) {
 		if ( is_numeric( $order ) ) {
