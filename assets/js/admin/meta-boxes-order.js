@@ -1213,18 +1213,9 @@ jQuery( function ( $ ) {
 					window.alert( woocommerce_admin_meta_boxes.i18n_download_permission_fail );
 				}
 
-				$( '.date-picker' ).datepicker({
-					dateFormat:      'yy-mm-dd',
-					numberOfMonths:  1,
-					showButtonPanel: true,
-					showOn:          'button',
-					buttonImage:     woocommerce_admin_meta_boxes.calendar_image,
-					buttonImageOnly: true
-				});
-
+				$('body').trigger( 'wc-init-datepickers' );
 				$( '#grant_access_id' ).val( '' ).change();
 				$( '.order_download_permissions' ).unblock();
-
 			});
 
 			return false;

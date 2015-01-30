@@ -28,7 +28,7 @@ jQuery( function ( $ ) {
 	});
 
 	$(function(){
-		jQuery('.wc-metabox > h3').click( function(event){
+		$('.wc-metabox > h3').click( function(event){
 			$( this ).parent( '.wc-metabox' ).toggleClass( 'closed' ).toggleClass( 'open' );
 		});
 	});
@@ -48,38 +48,33 @@ jQuery( function ( $ ) {
 	});
 	$('ul.wc-tabs li:visible').eq(0).find('a').click();
 
-	$( ".date-picker" ).datepicker({
-		dateFormat: "yy-mm-dd",
-		numberOfMonths: 1,
-		showButtonPanel: true,
-		showOn: "button",
-		buttonImage: woocommerce_admin_meta_boxes.calendar_image,
-		buttonImageOnly: true
+	$('body').on( 'wc-init-datepickers', function() {
+		$( ".date-picker-field, .date-picker" ).datepicker({
+			dateFormat: "yy-mm-dd",
+			numberOfMonths: 1,
+			showButtonPanel: true,
+		});
 	});
 
-	$( ".date-picker-field" ).datepicker({
-		dateFormat: "yy-mm-dd",
-		numberOfMonths: 1,
-		showButtonPanel: true,
-	});
+	$('body').trigger( 'wc-init-datepickers' );
 
 	// META BOXES - Open/close
-	jQuery('.wc-metaboxes-wrapper').on('click', '.wc-metabox h3', function(event){
+	$('.wc-metaboxes-wrapper').on('click', '.wc-metabox h3', function(event){
 		// If the user clicks on some form input inside the h3, like a select list (for variations), the box should not be toggled
 		if ($(event.target).filter(':input, option').length) return;
 
-		jQuery(this).next('.wc-metabox-content').stop().slideToggle();
+		$(this).next('.wc-metabox-content').stop().slideToggle();
 	})
 	.on('click', '.expand_all', function(event){
-		jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > .wc-metabox-content').show();
+		$(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > .wc-metabox-content').show();
 		return false;
 	})
 	.on('click', '.close_all', function(event){
-		jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > .wc-metabox-content').hide();
+		$(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > .wc-metabox-content').hide();
 		return false;
 	});
-	jQuery('.wc-metabox.closed').each(function(){
-		jQuery(this).find('.wc-metabox-content').hide();
+	$('.wc-metabox.closed').each(function(){
+		$(this).find('.wc-metabox-content').hide();
 	});
 
 });
