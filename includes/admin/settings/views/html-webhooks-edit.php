@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<img class="help_tip" data-tip="<?php _e( 'The options are &quot;Active&quot; (delivers payload), &quot;Paused&quot; (does not deliver), or &quot;Disabled&quot; (does not deliver due delivery failures).', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
-					<select name="webhook_status" id="webhook_status">
+					<select name="webhook_status" id="webhook_status" class="wc-enhanced-select">
 						<?php
 							$statuses       = wc_get_webhook_statuses();
 							$current_status = $webhook->get_status();
@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<img class="help_tip" data-tip="<?php _e( 'Select when the webhook will fire.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
-					<select name="webhook_topic" id="webhook_topic">
+					<select name="webhook_topic" id="webhook_topic" class="wc-enhanced-select">
 						<?php
 							$topic_data = $this->get_topic_data( $webhook );
 
