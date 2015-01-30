@@ -334,19 +334,21 @@ class WC_API_Reports extends WC_API_Resource {
 
 			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $discount->post_date ) ) : date( 'Y-m', strtotime( $discount->post_date ) );
 
-			if ( ! isset( $period_totals[ $time ] ) )
+			if ( ! isset( $period_totals[ $time ] ) ) {
 				continue;
+			}
 
 			$period_totals[ $time ]['discount'] = wc_format_decimal( $discount->discount_amount, 2 );
 		}
 
 		$sales_data = array(
-			'total_sales'       => wc_format_decimal( $totals->sales, 2 ),
-			'average_sales'     => wc_format_decimal( $totals->sales / ( $this->report->chart_interval + 1 ), 2 ),
+			'total_sales'       => wc_format_decimal( $totals->total_sales, 2 ),
+			'net_sales'         => $totals->total_sales - $totals->total_shipping - $totals->total_tax - $totals->total_shipping_tax,
+			'average_sales'     => wc_format_decimal( $totals->total_sales / ( $this->report->chart_interval + 1 ), 2 ),
 			'total_orders'      => (int) $totals->order_count,
 			'total_items'       => $total_items,
-			'total_tax'         => wc_format_decimal( $totals->tax + $totals->shipping_tax, 2 ),
-			'total_shipping'    => wc_format_decimal( $totals->shipping, 2 ),
+			'total_tax'         => wc_format_decimal( $totals->total_tax + $totals->total_shipping_tax, 2 ),
+			'total_shipping'    => wc_format_decimal( $totals->total_shipping, 2 ),
 			'total_discount'    => is_null( $total_discount ) ? wc_format_decimal( 0.00, 2 ) : wc_format_decimal( $total_discount, 2 ),
 			'totals_grouped_by' => $this->report->chart_groupby,
 			'totals'            => $period_totals,
