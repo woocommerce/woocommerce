@@ -2,15 +2,17 @@
 /**
  * Admin cancelled order email (plain text)
  *
- * @author      WooThemes
- * @package     WooCommerce/Templates/Emails/Plain
- * @version     2.0.0
+ * @author  WooThemes
+ * @package WooCommerce/Templates/Emails/Plain
+ * @version 2.3.0
  */
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 echo $email_heading . "\n\n";
 
-echo srintf( __( 'The order #%d from %s has been cancelled. The order was as follows:', 'woocommerce' ), $order->id, $order->billing_first_name . ' ' . $order->billing_last_name ) . "\n\n";
+echo sprintf( __( 'The order #%d from %s has been cancelled. The order was as follows:', 'woocommerce' ), $order->id, $order->billing_first_name . ' ' . $order->billing_last_name ) . "\n\n";
 
 echo "****************************************************\n\n";
 
@@ -27,24 +29,16 @@ echo "\n" . $order->email_order_items_table( false, true, '', '', '', true );
 echo "----------\n\n";
 
 if ( $totals = $order->get_order_item_totals() ) {
-    foreach ( $totals as $total ) {
-        echo $total['label'] . "\t " . $total['value'] . "\n";
-    }
+	foreach ( $totals as $total ) {
+		echo $total['label'] . "\t " . $total['value'] . "\n";
+	}
 }
 
 echo "\n****************************************************\n\n";
 
 do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
 
-echo __( 'Customer details', 'woocommerce' ) . "\n";
-
-if ( $order->billing_email )
-    echo __( 'Email:', 'woocommerce' ); echo $order->billing_email . "\n";
-
-if ( $order->billing_phone )
-    echo __( 'Tel:', 'woocommerce' ); ?> <?php echo $order->billing_phone . "\n";
-
-wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text );
 
 echo "\n****************************************************\n\n";
 
