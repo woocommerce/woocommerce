@@ -2270,9 +2270,9 @@ abstract class WC_Abstract_Order {
 
 				$coupon->inc_usage_count( $used_by );
 			}
-		}
 
-		update_post_meta( $this->id, '_recorded_coupon_usage_counts', 'yes' );
+			update_post_meta( $this->id, '_recorded_coupon_usage_counts', 'yes' );
+		}
 	}
 
 
@@ -2302,9 +2302,9 @@ abstract class WC_Abstract_Order {
 
 				$coupon->dcr_usage_count( $used_by );
 			}
-		}
 
-		delete_post_meta( $this->id, '_recorded_coupon_usage_counts' );
+			delete_post_meta( $this->id, '_recorded_coupon_usage_counts' );
+		}
 	}
 
 

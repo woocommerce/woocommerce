@@ -230,7 +230,8 @@ class WC_Coupon {
 	 */
 	public function inc_usage_count( $used_by = '' ) {
 		if ( $this->id ) {
-			update_post_meta( $this->id, 'usage_count', ( $this->usage_count ++ ) );
+			$this->usage_count++;
+			update_post_meta( $this->id, 'usage_count', $this->usage_count );
 
 			if ( $used_by ) {
 				add_post_meta( $this->id, '_used_by', strtolower( $used_by ) );
@@ -248,8 +249,8 @@ class WC_Coupon {
 	public function dcr_usage_count( $used_by = '' ) {
 		if ( $this->id ) {
 			global $wpdb;
-
-			update_post_meta( $this->id, 'usage_count', ( $this->usage_count -- ) );
+			$this->usage_count--;
+			update_post_meta( $this->id, 'usage_count', $this->usage_count );
 
 			// Delete 1 used by meta
 			$meta_id = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE meta_key = '_used_by' AND meta_value = %s AND post_id = %d LIMIT 1;", $used_by, $this->id ) );
