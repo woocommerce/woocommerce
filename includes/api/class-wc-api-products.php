@@ -202,6 +202,11 @@ class WC_API_Products extends WC_API_Resource {
 				$data['type'] = 'simple';
 			}
 
+			// Set hidden visibility when not sent
+			if ( ! isset( $data['catalog_visibility'] ) ) {
+				$data['catalog_visibility'] = 'hidden';
+			}
+
 			// Validate the product type
 			if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_product_types() ) ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_type', sprintf( __( 'Invalid product type - the product type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_product_types() ) ) ), 400 );
