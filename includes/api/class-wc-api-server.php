@@ -426,7 +426,7 @@ class WC_API_Server {
 	 *
 	 * This endpoint describes the capabilities of the site.
 	 *
-	 * @since 2.1
+	 * @since 2.3
 	 * @return array Index entity
 	 */
 	public function get_index() {
@@ -442,6 +442,9 @@ class WC_API_Server {
 				'timezone'           => wc_timezone_string(),
 				'currency'           => get_woocommerce_currency(),
 				'currency_format'    => get_woocommerce_currency_symbol(),
+				'currency_position'	 => get_option( 'woocommerce_currency_pos' ),
+				'thousand_separator' => get_option( 'woocommerce_price_decimal_sep' ),
+				'decimal_separator'	 => get_option( 'woocommerce_price_thousand_sep' ),
 				'price_num_decimals' => wc_get_price_decimals(),
 				'tax_included'       => wc_prices_include_tax(),
 				'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
