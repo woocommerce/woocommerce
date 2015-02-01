@@ -584,6 +584,8 @@ class WC_Meta_Box_Product_Data {
 
 				echo '</div>';
 				?>
+				
+				<?php do_action( 'woocommerce_product_options_advanced' ); ?>
 
 			</div>
 
