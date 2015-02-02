@@ -11,7 +11,6 @@
 class WC_Shortcodes {
 	/**
 	 * Common attributes shared with product category, tag, attribute, and products listing methods
-	 * @access public
 	 * @var array
 	 */
 	 public static $product_atts = array(
@@ -25,7 +24,7 @@ class WC_Shortcodes {
 		'tag'        => '',  // slugs
 		'operator'   => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
 		'class'      => '', // extra output css class for theme styling
-		'show_count' => false, // include result-count output?
+		'show_count' => false, // include result-count in output?
 	);
 
 	/**
@@ -147,16 +146,15 @@ class WC_Shortcodes {
 	 */
 	public static function product_listing( $products, $atts ) {
 		global $woocommerce_loop;
-		extract( $atts );
 		
-		if ( isset( $columns ) ) {
-			$woocommerce_loop['columns'] = $columns;	
+		if ( isset( $atts['columns'] ) ) {
+			$woocommerce_loop['columns'] = $atts['columns'];	
 		}
 		
 		ob_start();
 
 		if ( $products->have_posts() ) : ?>
-			<?php if ( isset( $show_count ) && $show_count ) : ?>
+			<?php if ( isset( $atts['show_count'] ) && $atts['show_count'] ) : ?>
 				<?php wc_get_template( 'loop/result-count.php' , array( 'query' => $products ) ); ?>
 			<?php endif; ?>
 
@@ -172,13 +170,12 @@ class WC_Shortcodes {
 
 		// output class handling
 		$classes = array( 'woocommerce' );
-		if ( isset( $columns ) ) {
-			$classes[] = 'columns-' . $columns;
+		if ( isset(  $atts['columns'] ) ) {
+			$classes[] = 'columns-' . $atts['columns'];
 		}
 		
-		// any shortcode-provided classes for the output div?
-		if ( isset( $class ) && ! empty( $class ) ) {
-			$classes[] = $class;
+		if ( isset( $atts['class'] ) && ! empty( $atts['class'] ) ) {
+			$classes[] = $atts['class'];
 		}
 		
 		$output = '<div class="' . implode(' ', $classes) . '">' . ob_get_clean() . '</div>';
@@ -198,7 +195,6 @@ class WC_Shortcodes {
 	 * @return array
 	 */
 	public static function tax_query_array( $atts ) {
-		extract($atts, $atts);
 		$tax_array = array();
 		
 		$supported_tax = array(
@@ -214,12 +210,14 @@ class WC_Shortcodes {
 				'terms' => 'filter'
 			)
 		);
+		
 		foreach ( $supported_tax as $tax => $v ) {
 			if ( isset( $atts[$tax] ) && ! empty( $atts[$tax] ) ) {
-				
 				// for attributes, add "pa_" prefix if not present
 				if ( strcasecmp( $tax, 'attribute' ) === 0 ) {
-					$v['tax'] = strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] );
+					$v['tax'] = stripos( $atts['attribute'], 'pa_' ) === 0 
+						? sanitize_title( $atts['attribute'] )
+						: 'pa_' . sanitize_title( $atts['attribute'] );
 				}
 				
 				$tax_array[] = array(
@@ -291,14 +289,14 @@ class WC_Shortcodes {
 		$meta_query    = WC()->query->get_meta_query();
 		
 		$args = array(
-			'post_type'				=> 'product',
-			'post_status' 			=> 'publish',
+			'post_type'			=> 'product',
+			'post_status'			=> 'publish',
 			'ignore_sticky_posts'	=> 1,
-			'orderby' 				=> $ordering_args['orderby'],
-			'order' 				=> $ordering_args['order'],
-			'posts_per_page' 		=> $atts['per_page'],
-			'meta_query' 			=> $meta_query,
-			'tax_query'				=> self::tax_query_array( $atts ),
+			'orderby'			=> $ordering_args['orderby'],
+			'order'				=> $ordering_args['order'],
+			'posts_per_page'		=> $atts['per_page'],
+			'meta_query'			=> $meta_query,
+			'tax_query'			=> self::tax_query_array( $atts ),
 		);
 
 		if ( isset( $ordering_args['meta_key'] ) ) {
@@ -307,7 +305,7 @@ class WC_Shortcodes {
 
 		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 		
-		return self::product_listing($products, $atts);
+		return self::product_listing( $products, $atts );
 	}
 
 
