@@ -254,8 +254,8 @@ class WC_Admin_Status {
 
 		$logs = self::scan_log_files();
 
-		if ( ! empty( $_POST['log_file'] ) && isset( $logs[ sanitize_title( $_POST['log_file'] ) ] ) ) {
-			$viewed_log = $logs[ sanitize_title( $_POST['log_file'] ) ];
+		if ( ! empty( $_REQUEST['log_file'] ) && isset( $logs[ sanitize_title( $_REQUEST['log_file'] ) ] ) ) {
+			$viewed_log = $logs[ sanitize_title( $_REQUEST['log_file'] ) ];
 		} elseif ( $logs ) {
 			$viewed_log = current( $logs );
 		}
