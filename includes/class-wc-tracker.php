@@ -311,6 +311,7 @@ class WC_Tracker {
 	 */
 	private static function get_all_woocommerce_options_values() {
 		return array(
+			'version'								=> WC()->version,
 			'currency'								=> get_woocommerce_currency(),
 			'base_location'							=> WC()->countries->get_base_country(),
 			'selling_locations'						=> WC()->countries->get_allowed_countries(),
