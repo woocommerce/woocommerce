@@ -948,6 +948,8 @@ class WC_Cart {
 
 				unset( $this->cart_contents[ $cart_item_key ] );
 
+				do_action( 'woocommerce_cart_item_removed', $cart_item_key, $this );
+
 				$this->calculate_totals();
 
 				return true;
@@ -968,6 +970,8 @@ class WC_Cart {
 				$this->cart_contents[ $cart_item_key ] = $restore;
 
 				unset( $this->removed_cart_contents[ $cart_item_key ] );
+
+				do_action( 'woocommerce_cart_item_restored', $cart_item_key, $this );
 
 				$this->calculate_totals();
 
