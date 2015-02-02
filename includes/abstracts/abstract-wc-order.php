@@ -396,7 +396,7 @@ abstract class WC_Abstract_Order {
 			return false;
 		}
 
-		wc_add_order_item_meta( $item_id, 'method_id', $shipping_rate->id );
+		wc_add_order_item_meta( $item_id, 'method_id', $shipping_rate->method_id );
 		wc_add_order_item_meta( $item_id, 'cost', wc_format_decimal( $shipping_rate->cost ) );
 
 		// Save shipping taxes - Since 2.2
