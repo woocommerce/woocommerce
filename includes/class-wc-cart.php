@@ -1282,8 +1282,8 @@ class WC_Cart {
 				if ( $this->round_at_subtotal ) {
 					$this->tax_total          = WC_Tax::get_tax_total( $this->taxes );
 					$this->shipping_tax_total = WC_Tax::get_tax_total( $this->shipping_taxes );
-					$this->taxes              = array_map( array( $this->tax, 'round' ), $this->taxes );
-					$this->shipping_taxes     = array_map( array( $this->tax, 'round' ), $this->shipping_taxes );
+					$this->taxes              = array_map( array( 'WC_Tax', 'round' ), $this->taxes );
+					$this->shipping_taxes     = array_map( array( 'WC_Tax', 'round' ), $this->shipping_taxes );
 				} else {
 					$this->tax_total          = array_sum( $this->taxes );
 					$this->shipping_tax_total = array_sum( $this->shipping_taxes );
