@@ -50,21 +50,19 @@ class WC_Admin_Notices {
 	 * Reset notices for themes when switched or a new version of WC is installed
 	 */
 	public function reset_admin_notices() {
-		$show_notices = array( 'template_files' );
-
 		if ( $this->has_frontend_colors() ) {
-			$show_notices[] = 'frontend_colors';
+			self::add_notice( 'frontend_colors' );
 		}
 
 		if ( $this->has_not_confirmed_tracking() ) {
-			$show_notices[] = 'tracking';
+			self::add_notice( 'tracking' );
 		}
 
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
-			$show_notices[] = 'theme_support';
+			self::add_notice( 'theme_support' );
 		}
 
-		update_option( 'woocommerce_admin_notices', $show_notices );
+		self::add_notice( 'template_files' );
 	}
 
 	/**
