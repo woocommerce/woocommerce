@@ -462,7 +462,7 @@ jQuery( function( $ ) {
 					container.removeClass( 'processing' ).unblock();
 
 					if ( code ) {
-						container.before( code );
+						$( 'form.woocommerce-checkout' ).before( code );
 
 						$( 'body' ).trigger( 'update_checkout' );
 
