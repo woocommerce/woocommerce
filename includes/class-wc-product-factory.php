@@ -85,9 +85,7 @@ class WC_Product_Factory {
 			$the_product = get_post( $the_product );
 		} elseif ( $the_product instanceof WC_Product ) {
 			$the_product = get_post( $the_product->id );
-		} elseif ( $the_product instanceof WP_Post ) {
-			$the_product = $the_product;
-		} else {
+		} elseif ( ! ( $the_product instanceof WP_Post ) ) {
 			$the_product = false;
 		}
 
