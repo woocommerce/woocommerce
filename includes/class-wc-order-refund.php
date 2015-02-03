@@ -13,10 +13,16 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/** @public string Order type */
 	public $order_type = 'refund';
 
+	/** @var string Date */
+	public $date;
+
+	/** @var string Refund reason */
+	public $reason;
+
 	/**
 	 * Init/load the refund object. Called from the contructor.
 	 *
-	 * @param  string|int|WP_Post|WC_Order_Refund $refund Refund to init
+	 * @param  string|int|object|WC_Order_Refund $refund Refund to init
 	 * @uses   WP_POST
 	 */
 	protected function init( $refund ) {
@@ -28,7 +34,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 			$this->id   = absint( $refund->id );
 			$this->post = $refund->post;
 			$this->get_refund( $this->id );
-		} elseif ( $refund instanceof WP_Post || isset( $refund->ID ) ) {
+		} elseif ( isset( $refund->ID ) ) {
 			$this->id   = absint( $refund->ID );
 			$this->post = $refund;
 			$this->get_refund( $this->id );
