@@ -31,6 +31,9 @@ class WC_Cart {
 	/** @var array Contains an array of coupon usage counts after they have been applied. */
 	public $coupon_applied_count = array();
 
+	/** @var array Array of coupons */
+	public $coupons = array();
+
 	/** @var float The total cost of the cart items. */
 	public $cart_contents_total;
 
@@ -94,7 +97,28 @@ class WC_Cart {
 	);
 
 	/** @var array An array of fees. */
-	public $fees = array();
+	public $fees                  = array();
+
+	/** @var WC_Tax Stores tax class objected, @deprecated */
+	public $tax;
+
+	/** @var boolean Prices inc tax */
+	public $prices_include_tax;
+
+	/** @var boolean */
+	public $round_at_subtotal;
+
+	/** @var string */
+	public $tax_display_cart;
+
+	/** @var int Prices inc tax */
+	public $dp;
+
+	/** @var boolean */
+	public $display_totals_ex_tax;
+
+	/** @var boolean */
+	public $display_cart_ex_tax;
 
 	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
@@ -418,11 +442,7 @@ class WC_Cart {
 
 			// First stock check loop
 			foreach ( $this->get_cart() as $cart_item_key => $values ) {
-
 				$_product = $values['data'];
-				$key      = '_product_id';
-				$value    = $values['product_id'];
-				$in_cart  = $values['quantity'];
 
 				/**
 				 * Check stock based on stock-status
@@ -498,8 +518,6 @@ class WC_Cart {
 
 			// Variation data
 			if ( ! empty( $cart_item['data']->variation_id ) && is_array( $cart_item['variation'] ) ) {
-
-				$variation_list = array();
 
 				foreach ( $cart_item['variation'] as $name => $value ) {
 
@@ -828,7 +846,7 @@ class WC_Cart {
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
 		 * @return string $cart_item_key
 		 */
-		public function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '', $cart_item_data = array() ) {
+		public function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = array(), $cart_item_data = array() ) {
 			// Wrap in try catch so plugins can throw an exception to prevent adding to cart
 			try {
 				// Ensure we don't add a variation to the cart directly by variation ID
@@ -1056,7 +1074,6 @@ class WC_Cart {
 				$this->cart_contents_count  += $values['quantity'];
 
 				// Prices
-				$base_price = $_product->get_price();
 				$line_price = $_product->get_price() * $values['quantity'];
 
 				$line_subtotal = 0;
@@ -1172,8 +1189,6 @@ class WC_Cart {
 
 					// Discounted Price (price with any pre-tax discounts applied)
 					$discounted_price      = $this->get_discounted_price( $values, $base_price, true );
-					$discounted_tax_amount = 0;
-					$tax_amount            = 0;
 					$line_subtotal_tax     = 0;
 					$line_subtotal         = $line_price;
 					$line_tax              = 0;
@@ -1935,8 +1950,9 @@ class WC_Cart {
 		 */
 		public function get_total_ex_tax() {
 			$total = $this->total - $this->tax_total - $this->shipping_tax_total;
-			if ( $total < 0 )
+			if ( $total < 0 ) {
 				$total = 0;
+			}
 			return apply_filters( 'woocommerce_cart_total_ex_tax', wc_price( $total ) );
 		}
 
@@ -2002,10 +2018,11 @@ class WC_Cart {
 		 * @return string formatted price
 		 */
 		public function get_product_price( $_product ) {
-			if ( $this->tax_display_cart == 'excl' )
+			if ( $this->tax_display_cart == 'excl' ) {
 				$product_price = $_product->get_price_excluding_tax();
-			else
+			} else {
 				$product_price = $_product->get_price_including_tax();
+			}
 
 			return apply_filters( 'woocommerce_cart_product_price', wc_price( $product_price ), $_product );
 		}
