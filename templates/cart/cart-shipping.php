@@ -6,7 +6,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @version     2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -73,13 +73,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php if ( is_cart() ) : ?>
 
 				<?php echo apply_filters( 'woocommerce_cart_no_shipping_available_html',
-					'<div class="woocommerce-info"><p>' . __( 'There doesn&lsquo;t seem to be any available shipping methods. Please double check your address, or contact us if you need any help.', 'woocommerce' ) . '</p></div>'
+					'<div class="woocommerce-info"><p>' . __( 'There don&lsquo;t seem to be available shipping methods. Please double check your address, or contact us if you need any help.', 'woocommerce' ) . '</p></div>'
 				); ?>
 
 			<?php else : ?>
 
 				<?php echo apply_filters( 'woocommerce_no_shipping_available_html',
-					'<p>' . __( 'There doesn&lsquo;t seem to be any available shipping methods. Please double check your address, or contact us if you need any help.', 'woocommerce' ) . '</p>'
+					'<p>' . __( 'There don&lsquo;t seem to be available shipping methods. Please double check your address, or contact us if you need any help.', 'woocommerce' ) . '</p>'
 				); ?>
 
 			<?php endif; ?>
