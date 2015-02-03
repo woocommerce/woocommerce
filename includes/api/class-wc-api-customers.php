@@ -200,7 +200,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param string $email the customer email
-	 * @param string $fields
+	 * @param array $fields
 	 * @return array
 	 */
 	public function get_customer_by_email( $email, $fields = null ) {

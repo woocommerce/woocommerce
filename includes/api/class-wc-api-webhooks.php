@@ -63,7 +63,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Get all webhooks
 	 *
 	 * @since 2.2
-	 * @param string $fields
+	 * @param array $fields
 	 * @param array $filter
 	 * @param int $page
 	 * @return array

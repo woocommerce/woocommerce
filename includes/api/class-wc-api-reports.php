@@ -277,7 +277,7 @@ class WC_API_Reports extends WC_API_Resource {
 				case 'day' :
 					$time = date( 'Y-m-d', strtotime( "+{$i} DAY", $this->report->start_date ) );
 					break;
-				case 'month' :
+				default :
 					$time = date( 'Y-m', strtotime( "+{$i} MONTH", $this->report->start_date ) );
 					break;
 			}
