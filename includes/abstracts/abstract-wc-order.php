@@ -41,7 +41,7 @@ abstract class WC_Abstract_Order {
 	/** @public int Order (post) ID */
 	public $id                          = 0;
 
-	/** @var WP_Post $post */
+	/** @var $post WP_Post */
 	public $post                        = null;
 
 	/** @public string Order type */
