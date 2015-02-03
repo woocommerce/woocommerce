@@ -370,6 +370,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	/**
 	 * Process standard payments
 	 *
+	 * @param WC_Order $order
 	 * @return array
 	 */
 	protected function process_hosted_payments( $order ) {

@@ -29,6 +29,7 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Constructor
+	 * @param WC_Gateway_Paypal $gateway
 	 */
 	public function __construct( $gateway ) {
 		$this->gateway    = $gateway;

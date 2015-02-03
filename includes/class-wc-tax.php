@@ -91,6 +91,7 @@ class WC_Tax {
 	 *      return round( $in / 5, 2 ) * 5;
 	 * }
 	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
+	 * @return double
 	 */
 	public static function round( $in ) {
 		return apply_filters( 'woocommerce_tax_round', round( $in, self::$precision ), $in );
@@ -255,7 +256,7 @@ class WC_Tax {
 	 * @param  string $postcode
 	 * @param  string $city
 	 * @param  string $tax_class
-	 * @param  array $valid_postcodes
+	 * @param  string[] $valid_postcodes
 	 * @return array
 	 */
 	private static function get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes ) {
@@ -634,7 +635,7 @@ class WC_Tax {
 	/**
 	 * format the rate
 	 * @param  double $rate
-	 * @return float
+	 * @return string
 	 */
 	private static function format_tax_rate( $rate ) {
 		return number_format( (double) $rate, 4, '.', '' );
@@ -786,7 +787,7 @@ class WC_Tax {
 	 * @access private
 	 *
 	 * @param  int $tax_rate_id
-	 * @param  string $cities
+	 * @param string $type
 	 * @return string
 	 */
 	private static function _update_tax_rate_locations( $tax_rate_id, $values, $type ) {
@@ -847,7 +848,7 @@ class WC_Tax {
 	 * @access private
 	 *
 	 * @param  string  $postcode array of values
-	 * @return array Array of postcodes with wildcards
+	 * @return string[] Array of postcodes with wildcards
 	 */
 	private static function _get_wildcard_postcodes( $postcode ) {
 		$postcodes         = array( '*', strtoupper( $postcode ) );

@@ -137,7 +137,6 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Check payment amount from IPN matches the order
 	 * @param  WC_Order $order
-	 * @param  string $currency
 	 */
 	private function validate_amount( $order, $amount ) {
 		if ( number_format( $order->get_total(), 2, '.', '' ) != number_format( $amount, 2, '.', '' ) ) {
@@ -152,7 +151,6 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Check payment amount from IPN matches the order
 	 * @param  WC_Order $order
-	 * @param  string $currency
 	 */
 	private function validate_receiver_email( $order, $receiver_email ) {
 		if ( strcasecmp( trim( $receiver_email ), trim( $this->receiver_email ) ) != 0 ) {
@@ -272,6 +270,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 	/**
 	 * Save important data from the IPN to the order
+	 * @param WC_Order $order
 	 */
 	private function save_paypal_meta_data( $order, $posted ) {
 		if ( ! empty( $posted['payer_email'] ) ) {
