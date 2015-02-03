@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.1
-Stable tag: 2.2.10
+Stable tag: 2.2.11
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -186,6 +186,95 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Migrated away from CHOSEN to SELECT2. Chosen is still registered in case 3rd parties try to enqueue.
 * Localisation - Add Ukrainian currency and symbol.
 * Localisation - Greece regions.
+
+= 2.2.11 - 29/01/2015 =
+* Add - URL in Usage/Limit column in Coupons table to query for orders.
+* Fix - esc_url() applied to prevent potential XSS issues.
+* Fix - "Link all variations" button.
+
+= 2.2.10 - 16/12/2014 =
+* Fix - Stock status on quick and bulk edit.
+* Fix - Incorrect clearing of error messages.
+
+= 2.2.9 - 15/12/2014 =
+* Add - API - parent_id for products endpoint.
+* Fix - Processing and On-hold order links in WooCommerce Status dashboard widget.
+* Fix - Orders API when query orders with deleted products.
+* Fix - Check order exists in wc_clear_cart_after_payment().
+* Fix - move $cart_updated inside $passed_validation to prevent unnessary updates.
+* Fix - MX states keys.
+* Fix - sanitize_user correctly during registration.
+* Fix - API - Variation handling for stock data.
+* Fix - When bulk editing variable products, set the stock status for non-stock managed variations.
+* Fix - Fix coupons by date queries to prevent inflated results.
+* Fix - During refunds, correctly set shipping tax totals.
+* Fix - Ensure floats are safely converted to strings.
+* Fix - remove_taxes needs to clear line_tax_data.
+* Fix - Correctly save custom address fields in admin.
+* Fix - API - Fixed a bug for save multiple images from the media library in products endpoint.
+* Fix - API - Delete products when happens some error.
+* Fix - API - `enable_free_shipping`, `product_category_ids`, `exclude_product_category_ids` and `customer_emails` coupons params.
+* Fix - API - Coupons `expiry_date` format.
+* Fix - Force HTTP option behavior on Customizer Preview screen.
+* Fix - Cart error messages when the session is expired.
+* Tweak - API - set_fee should support tax_data.
+* Tweak - Don't force tax_rate_id to an integer. Allow strings.
+* Tweak - Additional filters inside tax class to support extensions.
+* Tweak - Allow plugins to filter the taxable location.
+* Tweak - Added result and message keys to order_review AJAX call.
+* Tweak - Added get_cart_item to WC_Cart class.
+
+= 2.2.8 - 29/10/2014 =
+* Fix - Image crop option.
+* Fix - Display of order note date.
+* Fix - API POST/PUT products attributes values.
+* Fix - Added fallbacks to wp_get_referer().
+* Fix - PayPal encoding for return urls.
+* Fix - Low stock report should hide no stock.
+* Fix - Fixed nonce check in form handler.
+* Fix - Notices in status report when checking if templates exist.
+* Fix - Allow to filter empty tax rate code.
+* Fix - Fixed the value format in stock field with wc_stock_amount().
+* Fix - Remove strtolower for status names and capitalize statuses.
+* Tweak - Removed unused methods from PayPal gateway.
+* Tweak - Use current user ID for refunds.
+* Tweak - Allow API edit_product method to update post_name (slug).
+
+= 2.2.7 - 22/10/2014 =
+* Fix - Fix refund date.
+* Fix - Fixed various notices.
+* Fix - Make updater set parent backorder status.
+* Fix - In the US address format, use state code rather than the full state name.
+* Fix - Use mb_strtolower to prevent issues with unicode chars.
+* Fix - Introduced the wc_strtolower() function
+* Fix - Make cart total consider taxes when saving an order.
+* Fix - Fix /shop/ base URL Non Latin issue with url decode.
+* Fix - Correct report handling for full and partial refunds.
+* Fix - Update jquery payment to prevent autocomplete issues.
+* Fix - Coupon API: Don't return current timestamp when expiry_date is not set.
+* Fix - wc_update_product_stock should update stock regardless, if the meta data doesn't currently exist.
+* Fix - Added wp_kses_post to purchase note
+* Fix - Fixed edit account page fields #6577.
+* Fix - Fix stock report queries #6565.
+* Fix - Fix error message with maximum amount in coupon class.
+* Fix - Fix nonce usage during checkout/account pages.
+* Fix - Incorrect conversion of Unicode characters in order status names.
+* Fix - Edit Account fields order.
+* Fix - Shipping address values on checkout page.
+* Fix - Enforce slug format of translated edit-address-slugs.
+* Tweak - Allow for non-integer stock quantities.
+* Tweak - Update simplify commerce to use new $order->get_status().
+* Tweak - Only show integrations subnav when there are multiple integrations.
+
+= 2.2.6 - 08/10/2014 =
+* Fix - Notices in the cache helper.
+* Fix - Prevent bulk edit from breaking sale price scheduled dates.
+* Fix - Prevent address fields being empty when editing an address within an order.
+* Fix - Removed save_post remove_action call which breaks 3rd party plugins. See ticket #6376 and #6485 for details.
+* Fix - Prevent warnings when set "Specific Countries" empty in shipping methods.
+* Tweak - Added woocommerce_product_subcategories_hide_empty filter.
+* Tweak - Added filter for shipping tax.
+* Tweak - Product attribute shortcode should return columns css class.
 
 = 2.2.5 - 07/10/2014 =
 * Fix - Filters in admin screen for coupons and orders.
@@ -1121,5 +1210,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 2.2.4 =
-2.2 is a major update. Test extensions and your theme prior to updating, ensure extensions are up to date and 2.2 compatible, and ensure that you keep backups. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.
+= 2.3.0 =
+2.3.0 is a major update so it is important that you make backups, test extensions and your theme prior to updating, and ensure extensions are 2.3 compatible. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.
