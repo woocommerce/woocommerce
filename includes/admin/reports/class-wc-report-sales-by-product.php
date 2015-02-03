@@ -9,8 +9,9 @@
  */
 class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
-	public $chart_colours = array();
-	public $product_ids   = array();
+	public $chart_colours      = array();
+	public $product_ids        = array();
+	public $product_ids_titles = array();
 
 	/**
 	 * Constructor
