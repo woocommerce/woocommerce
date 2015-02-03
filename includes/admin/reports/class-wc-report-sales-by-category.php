@@ -255,10 +255,8 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			</div>
 			<?php
 		} else {
-			$include_categories = array();
-			$chart_data         = array();
-			$chart_ticks        = array();
-			$index              = 0;
+			$chart_data = array();
+			$index      = 0;
 
 			foreach ( $this->show_categories as $category ) {
 
