@@ -46,7 +46,7 @@ class WC_Customer {
 	 *
 	 */
 	public function __construct() {
-		$this->_data = WC()->session->get( 'customer' );
+		$this->_data = (array) WC()->session->get( 'customer' );
 
 		if ( empty( $this->_data ) ) {
 			// Defaults
