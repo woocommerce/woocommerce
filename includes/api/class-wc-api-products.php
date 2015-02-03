@@ -1404,10 +1404,10 @@ class WC_API_Products extends WC_API_Resource {
 					continue;
 				}
 
-				$taxonomy = sanitize_title( $attribute['name'] );
+				$taxonomy = sanitize_title( $default_attr['name'] );
 
-				if ( isset( $attribute['slug'] ) ) {
-					$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
+				if ( isset( $default_attr['slug'] ) ) {
+					$taxonomy = $this->get_attribute_taxonomy_by_slug( $default_attr['slug'] );
 				}
 
 				if ( isset( $attributes[ $taxonomy ] ) ) {
@@ -1677,7 +1677,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param string $image_url
-	 * @return int attachment id
+	 * @return int|WP_Error attachment id
 	 */
 	public function upload_product_image( $image_url ) {
 		$file_name 		= basename( current( explode( '?', $image_url ) ) );
