@@ -1,4 +1,7 @@
-# [WooCommerce](http://www.woothemes.com/woocommerce/) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) [![Build Status](https://img.shields.io/travis/woothemes/woocommerce/master.svg?style=flat-square)](https://travis-ci.org/woothemes/woocommerce) [![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/woothemes/woocommerce.svg?style=flat-square)](https://coveralls.io/r/woothemes/woocommerce)
+# [WooCommerce](http://www.woothemes.com/woocommerce/) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
+
+[![Build Status](https://img.shields.io/travis/woothemes/woocommerce/master.svg?style=flat-square)](https://travis-ci.org/woothemes/woocommerce)
+[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/woothemes/woocommerce.svg?style=flat-square)](https://coveralls.io/r/woothemes/woocommerce)
 
 Welcome to the WooCommerce repository on GitHub. Here you can browse the source, look at open issues and keep track of development. We recommend all developers to follow the [WooCommerce development blog](http://develop.woothemes.com/woocommerce/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
