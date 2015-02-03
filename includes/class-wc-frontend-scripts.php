@@ -71,7 +71,7 @@ class WC_Frontend_Scripts {
 	 * @access private
 	 * @param  string  $handle    [description]
 	 * @param  string  $path      [description]
-	 * @param  array   $deps      [description]
+	 * @param  string[]   $deps      [description]
 	 * @param  string  $version   [description]
 	 * @param  boolean $in_footer [description]
 	 */
