@@ -584,7 +584,7 @@ class WC_Meta_Box_Product_Data {
 
 				echo '</div>';
 				?>
-				
+
 				<?php do_action( 'woocommerce_product_options_advanced' ); ?>
 
 			</div>
@@ -1160,7 +1160,6 @@ class WC_Meta_Box_Product_Data {
 
 			$manage_stock = 'no';
 			$backorders   = 'no';
-			$stock        = '';
 			$stock_status = wc_clean( $_POST['_stock_status'] );
 
 			if ( 'external' === $product_type ) {
@@ -1323,7 +1322,6 @@ class WC_Meta_Box_Product_Data {
 				$is_virtual          = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
 				$is_downloadable     = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
 				$post_status         = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
-				$parent_manage_stock = isset( $_POST['_manage_stock'] ) ? 'yes' : 'no';
 				$manage_stock        = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
 
 				// Generate a useful post title
