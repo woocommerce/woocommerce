@@ -1,24 +1,24 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Post types
  *
  * Registers post types and taxonomies
  *
- * @class 		WC_Post_types
+ * @class 		WC_Post_Types
  * @version		2.2.0
  * @package		WooCommerce/Classes/Products
  * @category	Class
  * @author 		WooThemes
  */
-class WC_Post_types {
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+class WC_Post_Types {
 
 	/**
-	 * Hook in methods
+	 * Hook in methods.
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 5 );
@@ -28,7 +28,7 @@ class WC_Post_types {
 	}
 
 	/**
-	 * Register WooCommerce taxonomies.
+	 * Register core taxonomies.
 	 */
 	public static function register_taxonomies() {
 		if ( taxonomy_exists( 'product_type' ) ) {
@@ -40,16 +40,16 @@ class WC_Post_types {
 		$permalinks = get_option( 'woocommerce_permalinks' );
 
 		register_taxonomy( 'product_type',
-	        apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
-	        apply_filters( 'woocommerce_taxonomy_args_product_type', array(
-	            'hierarchical' 			=> false,
-	            'show_ui' 				=> false,
-	            'show_in_nav_menus' 	=> false,
-	            'query_var' 			=> is_admin(),
-	            'rewrite'				=> false,
-	            'public'                => false
-	        ) )
-	    );
+			apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
+			apply_filters( 'woocommerce_taxonomy_args_product_type', array(
+				'hierarchical'      => false,
+				'show_ui'           => false,
+				'show_in_nav_menus' => false,
+				'query_var'         => is_admin(),
+				'rewrite'           => false,
+				'public'            => false
+			) )
+		);
 
 		register_taxonomy( 'product_cat',
 			apply_filters( 'woocommerce_taxonomy_objects_product_cat', array( 'product' ) ),
@@ -210,7 +210,7 @@ class WC_Post_types {
 	}
 
 	/**
-	 * Register core post types
+	 * Register core post types.
 	 */
 	public static function register_post_types() {
 		if ( post_type_exists('product') ) {
@@ -404,7 +404,7 @@ class WC_Post_types {
 	}
 
 	/**
-	 * Register our custom post statuses, used for order status
+	 * Register our custom post statuses, used for order status.
 	 */
 	public static function register_post_status() {
 		register_post_status( 'wc-pending', array(
@@ -466,13 +466,13 @@ class WC_Post_types {
 	}
 
 	/**
-    * Add Product Support to Jetpack Omnisearch
-    */
-    public static function support_jetpack_omnisearch() {
-        if ( class_exists( 'Jetpack_Omnisearch_Posts' ) ) {
-            new Jetpack_Omnisearch_Posts( 'product' );
-        }
-    }
+	 * Add Product Support to Jetpack Omnisearch.
+	 */
+	public static function support_jetpack_omnisearch() {
+		if ( class_exists( 'Jetpack_Omnisearch_Posts' ) ) {
+			new Jetpack_Omnisearch_Posts( 'product' );
+		}
+	}
 }
 
-WC_Post_types::init();
+WC_Post_Types::init();
