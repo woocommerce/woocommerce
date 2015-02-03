@@ -119,7 +119,7 @@ abstract class WC_Abstract_Order {
 			$this->id   = absint( $order->id );
 			$this->post = $order->post;
 			$this->get_order( $this->id );
-		} elseif ( isset( $order->ID ) {
+		} elseif ( isset( $order->ID ) ) {
 			$this->id   = absint( $order->ID );
 			$this->post = $order;
 			$this->get_order( $this->id );
