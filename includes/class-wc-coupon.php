@@ -9,6 +9,24 @@
  * @package		WooCommerce/Classes
  * @category	Class
  * @author		WooThemes
+ *
+ * @property    string $discount_type
+ * @property    string $coupon_amount
+ * @property    string $individual_use
+ * @property    array $product_ids
+ * @property    array $exclude_product_ids
+ * @property    string $usage_limit
+ * @property    string $usage_limit_per_user
+ * @property    string $limit_usage_to_x_items
+ * @property    string $usage_count
+ * @property    string $expiry_date
+ * @property    string $free_shipping
+ * @property    array $product_categories
+ * @property    array $exclude_product_categories
+ * @property    string $exclude_sale_items
+ * @property    string $minimum_amount
+ * @property    string $maximum_amount
+ * @property    array $customer_email
  */
 class WC_Coupon {
 
