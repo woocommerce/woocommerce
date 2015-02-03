@@ -150,7 +150,6 @@ class WC_Breadcrumb {
 			}
 		} elseif ( 'post' != get_post_type( $post ) ) {
 			$post_type = get_post_type_object( get_post_type( $post ) );
-			$slug      = $post_type->rewrite;
 			$this->add_crumb( $post_type->labels->singular_name, get_post_type_archive_link( get_post_type( $post ) ) );
 		} else {
 			$cat = current( get_the_category( $post ) );
