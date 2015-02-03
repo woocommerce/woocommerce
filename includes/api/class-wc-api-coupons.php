@@ -123,7 +123,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'type'                         => $coupon->type,
 				'created_at'                   => $this->server->format_datetime( $coupon_post->post_date_gmt ),
 				'updated_at'                   => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
-				'amount'                       => wc_format_decimal( $coupon->amount, 2 ),
+				'amount'                       => wc_format_decimal( $coupon->coupon_amount, 2 ),
 				'individual_use'               => ( 'yes' === $coupon->individual_use ),
 				'product_ids'                  => array_map( 'absint', (array) $coupon->product_ids ),
 				'exclude_product_ids'          => array_map( 'absint', (array) $coupon->exclude_product_ids ),
