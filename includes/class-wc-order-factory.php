@@ -15,9 +15,8 @@ class WC_Order_Factory {
 	/**
 	 * get_order function.
 	 *
-	 * @access public
 	 * @param bool $the_order (default: false)
-	 * @return WC_Order
+	 * @return WC_Order|bool
 	 */
 	public function get_order( $the_order = false ) {
 		global $post;
