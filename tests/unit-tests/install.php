@@ -75,7 +75,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create roles
 	 */
 	public function test_create_roles() {
-		// clean existing install first
+		// Clean existing install first
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 		}
@@ -88,7 +88,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test - remove pages
+	 * Test - remove roles
 	 */
 	public function test_remove_roles() {
 		WC_Install::remove_roles();
