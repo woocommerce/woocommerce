@@ -16,6 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
+	/** @var float Min amount to be valid */
+	public $min_amount;
+
+	/** @var string Requires option */
+	public $requires;
+
 	/**
 	 * __construct function.
 	 *

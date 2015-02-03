@@ -1322,7 +1322,6 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 
 		$parent_id             = empty( $term->term_id ) ? 0 : $term->term_id;
 		$taxonomy              = empty( $term->taxonomy ) ? '' : $term->taxonomy;
-		$products_will_display = true;
 
 		if ( ! $parent_id && ! $taxonomy ) {
 			return true;
@@ -1428,8 +1427,6 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 		if ( ! apply_filters( 'woocommerce_product_subcategories_hide_empty', false ) ) {
 			$product_categories = wp_list_filter( $product_categories, array( 'count' => 0 ), 'NOT' );
 		}
-
-		$product_category_found = false;
 
 		if ( $product_categories ) {
 			echo $before;
