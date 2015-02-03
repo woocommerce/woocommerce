@@ -189,8 +189,6 @@ class WC_Geolocation {
 				$response         = wp_remote_get( sprintf( $service_endpoint, $ip_address ), array( 'timeout' => 2 ) );
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
-					$country_code = '';
-
 					switch ( $service_name ) {
 						case 'ip-api' :
 							$data         = json_decode( $response['body'] );
