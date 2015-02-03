@@ -1,17 +1,20 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Handle frontend scripts
  *
- * @class 		WC_Frontend_Scripts
- * @version		2.3.0
- * @package		WooCommerce/Classes/
- * @category	Class
- * @author 		WooThemes
+ * @class       WC_Frontend_Scripts
+ * @version     2.3.0
+ * @package     WooCommerce/Classes/
+ * @category    Class
+ * @author      WooThemes
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_Frontend_Scripts Class
  */
 class WC_Frontend_Scripts {
 
@@ -28,7 +31,7 @@ class WC_Frontend_Scripts {
 	private static $wp_localize_scripts = array();
 
 	/**
-	 * Hook in methods
+	 * Hook in methods.
 	 */
 	public static function init() {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
@@ -37,7 +40,7 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Get styles for the frontend
+	 * Get styles for the frontend.
 	 * @access private
 	 * @return array
 	 */
@@ -65,15 +68,15 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Register a script for use
+	 * Register a script for use.
 	 *
-	 * @uses   wp_register_script()
+	 * @uses   wp_enqueue_script()
 	 * @access private
-	 * @param  string  $handle    [description]
-	 * @param  string  $path      [description]
-	 * @param  string[]   $deps      [description]
-	 * @param  string  $version   [description]
-	 * @param  boolean $in_footer [description]
+	 * @param  string   $handle    [description]
+	 * @param  string   $path      [description]
+	 * @param  string[] $deps      [description]
+	 * @param  string   $version   [description]
+	 * @param  boolean  $in_footer [description]
 	 */
 	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = true ) {
 		self::$scripts[] = $handle;
@@ -81,15 +84,15 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Register and enqueue a script for use
+	 * Register and enqueue a script for use.
 	 *
 	 * @uses   wp_enqueue_script()
 	 * @access private
-	 * @param  string  $handle    [description]
-	 * @param  string  $path      [description]
-	 * @param  string[]   $deps      [description]
-	 * @param  string  $version   [description]
-	 * @param  boolean $in_footer [description]
+	 * @param  string   $handle    [description]
+	 * @param  string   $path      [description]
+	 * @param  string[] $deps      [description]
+	 * @param  string   $version   [description]
+	 * @param  boolean  $in_footer [description]
 	 */
 	private static function enqueue_script( $handle, $path = '', $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = true ) {
 		if ( ! in_array( $handle, self::$scripts ) && $path ) {
@@ -100,8 +103,6 @@ class WC_Frontend_Scripts {
 
 	/**
 	 * Register/queue frontend scripts.
-	 *
-	 * @access public
 	 */
 	public static function load_scripts() {
 		global $post;
@@ -184,7 +185,7 @@ class WC_Frontend_Scripts {
 	/**
 	 * Localize a WC script once.
 	 * @access private
-	 * @since 2.3.0 this needs less wp_script_is() calls due to https://core.trac.wordpress.org/ticket/28404 being added in WP 4.0.
+	 * @since  2.3.0 this needs less wp_script_is() calls due to https://core.trac.wordpress.org/ticket/28404 being added in WP 4.0.
 	 * @param  string $handle
 	 */
 	private static function localize_script( $handle ) {
@@ -196,7 +197,7 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Return data for script handles
+	 * Return data for script handles.
 	 * @access private
 	 * @param  string $handle
 	 * @return array|bool
