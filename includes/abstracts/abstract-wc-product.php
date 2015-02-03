@@ -59,8 +59,7 @@ class WC_Product {
 	/**
 	 * Constructor gets the post object and sets the ID for the loaded product.
 	 *
-	 * @param int|WC_Product|WP_Post $product Product ID, post object, or product object
-	 * @var   WP_POST
+	 * @param int|WC_Product|object $product Product ID, post object, or product object
 	 */
 	public function __construct( $product ) {
 		if ( is_numeric( $product ) ) {
@@ -69,7 +68,7 @@ class WC_Product {
 		} elseif ( $product instanceof WC_Product ) {
 			$this->id   = absint( $product->id );
 			$this->post = $product->post;
-		} elseif ( $product instanceof WP_Post || isset( $product->ID ) ) {
+		} elseif ( isset( $product->ID ) ) {
 			$this->id   = absint( $product->ID );
 			$this->post = $product;
 		}

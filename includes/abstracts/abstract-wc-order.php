@@ -37,7 +37,7 @@
  * @property    string $shipping_method_title < 2.1 was used for shipping method title. Now @deprecated.
  * @property    int $customer_user User ID who the order belongs to. 0 for guests.
  * @property    string $order_key Random key/password unqique to each order.
- * @property    string $order_discount. Stored after tax discounts pre-2.3. Now @deprecated.
+ * @property    string $order_discount Stored after tax discounts pre-2.3. Now @deprecated.
  * @property    string $order_tax Stores order tax total.
  * @property    string $order_shipping_tax Stores shipping tax total.
  * @property    string $order_shipping Stores shipping total.
@@ -108,8 +108,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Init/load the order object. Called from the constructor.
 	 *
-	 * @var WP_Post
-	 * @param  int|WP_Post|WC_Order $order Order to init
+	 * @param  int|object|WC_Order $order Order to init
 	 */
 	protected function init( $order ) {
 		if ( is_numeric( $order ) ) {
@@ -120,7 +119,7 @@ abstract class WC_Abstract_Order {
 			$this->id   = absint( $order->id );
 			$this->post = $order->post;
 			$this->get_order( $this->id );
-		} elseif ( $order instanceof WP_Post || isset( $order->ID ) ) {
+		} elseif ( isset( $order->ID ) {
 			$this->id   = absint( $order->ID );
 			$this->post = $order;
 			$this->get_order( $this->id );

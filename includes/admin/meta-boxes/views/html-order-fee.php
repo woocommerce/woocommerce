@@ -2,8 +2,8 @@
 /**
  * Shows an order item fee
  *
- * @var int $item_id The id of the item being displayed
- * @var object $item The item being displayed
+ * @var $item_id int The id of the item being displayed
+ * @var $item object The item being displayed
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
