@@ -43,7 +43,10 @@
  * @property    string $order_shipping Stores shipping total.
  * @property    string $order_total Stores order total.
  * @property    string $order_currency Stores currency code used for the order.
+ * @property    string $payment_method method ID.
  * @property    string $payment_method_title Name of the payment method used.
+ * @property    string $customer_ip_address Customer IP Address
+ * @property    string $customer_user_agent Customer User agent
  */
 abstract class WC_Abstract_Order {
 
