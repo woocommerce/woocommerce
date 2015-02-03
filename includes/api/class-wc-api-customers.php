@@ -129,7 +129,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param int $id the customer ID
-	 * @param string $fields
+	 * @param array $fields
 	 * @return array
 	 */
 	public function get_customer( $id, $fields = null ) {
