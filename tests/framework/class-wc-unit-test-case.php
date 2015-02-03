@@ -29,9 +29,9 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 
 		$this->setOutputCallback( array( $this, 'filter_output' ) );
 
-		// register post types before each test
-		WC_Post_types::register_post_types();
-		WC_Post_types::register_taxonomies();
+		// Register post types before each test
+		WC_Post_Types::register_post_types();
+		WC_Post_Types::register_taxonomies();
 	}
 
 	/**
