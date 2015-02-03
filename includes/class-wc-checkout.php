@@ -27,17 +27,23 @@ class WC_Checkout {
 	/** @var object The shipping method being used. */
 	private $shipping_method;
 
-	/** @var WC_Payment_Gateway The payment gateway being used. */
+	/** @var WC_Payment_Gateway|string The payment gateway being used. */
 	private $payment_method;
 
 	/** @var int ID of customer. */
 	private $customer_id;
+
+	/** @var array Where shipping_methods are stored. */
+	public $shipping_methods;
 
 	/**
 	 * @var WC_Checkout The single instance of the class
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
+
+	/** @var Bool */
+	public $enable_guest_checkout;
 
 	/**
 	 * Main WC_Checkout Instance
@@ -561,7 +567,6 @@ class WC_Checkout {
 			}
 
 			if ( WC()->cart->needs_payment() ) {
-
 				// Payment Method
 				$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
@@ -572,6 +577,8 @@ class WC_Checkout {
 					$this->payment_method = $available_gateways[ $this->posted['payment_method'] ];
 					$this->payment_method->validate_fields();
 				}
+			} else {
+				$available_gateways = array();
 			}
 
 			// Action after validation
