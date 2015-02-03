@@ -926,8 +926,6 @@ abstract class WC_Settings_API {
 
 		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
 			$value = array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
-		} else {
-			$value = '';
 		}
 
 		return $value;
