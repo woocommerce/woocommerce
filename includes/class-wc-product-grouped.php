@@ -109,19 +109,6 @@ class WC_Product_Grouped extends WC_Product {
 		return (array) $this->children;
 	}
 
-
-	/**
-	 * get_child function.
-	 *
-	 * @access public
-	 * @param mixed $child_id
-	 * @return WC_Product WC_Product or WC_Product_variation
-	 */
-	public function get_child( $child_id ) {
-		return wc_get_product( $child_id );
-	}
-
-
 	/**
 	 * Returns whether or not the product has any child product.
 	 *
@@ -131,7 +118,6 @@ class WC_Product_Grouped extends WC_Product {
 	public function has_child() {
 		return sizeof( $this->get_children() ) ? true : false;
 	}
-
 
 	/**
 	 * Returns whether or not the product is on sale.

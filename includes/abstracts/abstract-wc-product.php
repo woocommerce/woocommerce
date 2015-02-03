@@ -419,6 +419,16 @@ class WC_Product {
 	}
 
 	/**
+	 * get_child function.
+	 *
+	 * @param mixed $child_id
+	 * @return WC_Product WC_Product or WC_Product_variation
+	 */
+	public function get_child( $child_id ) {
+		return wc_get_product( $child_id );
+	}
+
+	/**
 	 * get_children function.
 	 *
 	 * @return array
