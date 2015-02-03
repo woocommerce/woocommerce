@@ -570,7 +570,7 @@ function wc_ship_to_billing_address_only() {
  *
  * @since 2.2
  * @param array $args
- * @return WC_Order_Refund on success, WP_Error on failure
+ * @return WC_Order_Refund|WP_Error
  */
 function wc_create_refund( $args = array() ) {
 	$default_args = array(
