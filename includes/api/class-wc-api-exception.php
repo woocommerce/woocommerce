@@ -32,10 +32,8 @@ class WC_API_Exception extends Exception {
 	 * @param int $http_status_code HTTP status code to respond with
 	 */
 	public function __construct( $error_code, $error_message, $http_status_code ) {
-
 		$this->error_code = $error_code;
-
-		return parent::__construct( $error_message, $http_status_code );
+		parent::__construct( $error_message, $http_status_code );
 	}
 
 	/**
