@@ -91,8 +91,8 @@ class WC_Install {
 		self::create_roles();
 
 		// Register post types
-		WC_Post_types::register_post_types();
-		WC_Post_types::register_taxonomies();
+		WC_Post_Types::register_post_types();
+		WC_Post_Types::register_taxonomies();
 
 		// Also register endpoints - this needs to be done prior to rewrite rule flush
 		WC()->query->init_query_vars();
