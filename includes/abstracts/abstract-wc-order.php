@@ -35,6 +35,15 @@
  * @property    string $order_shipping Total amoount of shipping
  * @property    string $order_shipping_tax Total amoount of shipping tax
  * @property    string $shipping_method_title < 2.1 was used for shipping method title. Now @deprecated.
+ * @property    int $customer_user User ID who the order belongs to. 0 for guests.
+ * @property    string $order_key Random key/password unqique to each order.
+ * @property    string $order_discount. Stored after tax discounts pre-2.3. Now @deprecated.
+ * @property    string $order_tax Stores order tax total.
+ * @property    string $order_shipping_tax Stores shipping tax total.
+ * @property    string $order_shipping Stores shipping total.
+ * @property    string $order_total Stores order total.
+ * @property    string $order_currency Stores currency code used for the order.
+ * @property    string $payment_method_title Name of the payment method used.
  */
 abstract class WC_Abstract_Order {
 
@@ -99,6 +108,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Init/load the order object. Called from the constructor.
 	 *
+	 * @var WP_Post
 	 * @param  int|WP_Post|WC_Order $order Order to init
 	 */
 	protected function init( $order ) {
@@ -1650,7 +1660,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Get the discount amount (formatted).
 	 * @since  2.3.0
-	 * @return string.
+	 * @return string
 	 */
 	public function get_discount_to_display( $tax_display = '' ) {
 		if ( ! $tax_display ) {
@@ -1662,11 +1672,11 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Get cart discount (formatted).
 	 * @deprecated
-	 * @return string.
+	 * @return string
 	 */
 	public function get_cart_discount_to_display( $tax_display = '' ) {
 		_deprecated_function( 'get_cart_discount_to_display', '2.3', 'get_discount_to_display' );
-		return apply_filters( 'woocommerce_order_cart_discount_to_display', $this->get_discount_to_display(), $this );
+		return apply_filters( 'woocommerce_order_cart_discount_to_display', $this->get_discount_to_display( $tax_display ), $this );
 	}
 
 	/**
@@ -2110,9 +2120,7 @@ abstract class WC_Abstract_Order {
 	 * @param string $note (default: '') Optional note to add
 	 */
 	public function cancel_order( $note = '' ) {
-
-		unset( WC()->session->order_awaiting_payment );
-
+		WC()->session->set( 'order_awaiting_payment', false );
 		$this->update_status( 'cancelled', $note );
 	}
 
@@ -2131,9 +2139,7 @@ abstract class WC_Abstract_Order {
 
 		do_action( 'woocommerce_pre_payment_complete', $this->id );
 
-		if ( ! empty( WC()->session->order_awaiting_payment ) ) {
-			unset( WC()->session->order_awaiting_payment );
-		}
+		WC()->session->set( 'order_awaiting_payment', false );
 
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this );
 

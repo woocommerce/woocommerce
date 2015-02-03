@@ -31,6 +31,7 @@
  * @property    string $backorders Whether or not backorders are allowed
  * @property    string $featured Featured product
  * @property    string $visibility Product visibility
+ * @property    string $variation_id Variation ID when dealing with variations
  */
 class WC_Product {
 
@@ -39,7 +40,7 @@ class WC_Product {
 
 	/**
 	* @public $post Stores post data
-	* @var WP_Post
+	* @var $post WP_Post
 	*/
 	public $post                 = null;
 
