@@ -1,9 +1,11 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+/**
+ * @var object $refund The refund object.
+ */
 $who_refunded = new WP_User( $refund->post->post_author );
 ?>
 <tr class="refund <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_refund_id="<?php echo $refund->id; ?>">
