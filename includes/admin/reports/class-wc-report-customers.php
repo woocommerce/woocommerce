@@ -10,6 +10,7 @@
 class WC_Report_Customers extends WC_Admin_Report {
 
 	public $chart_colours = array();
+	public $customers = array();
 
 	/**
 	 * Get the legend for the main chart sidebar
