@@ -84,7 +84,8 @@ class WC_Emails {
 	 */
 	public static function send_transactional_email() {
 		self::instance();
-		do_action_ref_array( current_filter() . '_notification', func_get_args() );
+		$args = func_get_args();
+		do_action_ref_array( current_filter() . '_notification', $args );
 	}
 
 	/**
