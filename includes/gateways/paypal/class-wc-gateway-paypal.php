@@ -49,11 +49,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->enabled = 'no';
 		} else {
 			include_once( 'includes/class-wc-gateway-paypal-ipn-handler.php' );
-			$ipn_handler = new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
+			new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
 
 			if ( $this->identity_token ) {
 				include_once( 'includes/class-wc-gateway-paypal-pdt-handler.php' );
-				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
+				new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
 			}
 		}
 	}

@@ -355,7 +355,6 @@ function wc_price( $price, $args = array() ) {
 		'price_format'       => get_woocommerce_price_format()
 	) ) ) );
 
-	$currency_symbol = get_woocommerce_currency_symbol( $currency );
 	$negative        = $price < 0;
 	$price           = apply_filters( 'raw_woocommerce_price', floatval( $negative ? $price * -1 : $price ) );
 	$price           = apply_filters( 'formatted_woocommerce_price', number_format( $price, $decimals, $decimal_separator, $thousand_separator ), $price, $decimals, $decimal_separator, $thousand_separator );

@@ -339,8 +339,8 @@ class WC_Tracker {
 		$override_data  = array();
 		$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 		$scanned_files  = array();
-		$found_files    = array();
-		$status         = require_once( WC()->plugin_path() . '/includes/admin/class-wc-admin-status.php' );
+
+		require_once( WC()->plugin_path() . '/includes/admin/class-wc-admin-status.php' );
 
 		foreach ( $template_paths as $plugin_name => $template_path ) {
 			$scanned_files[ $plugin_name ] = WC_Admin_Status::scan_template_files( $template_path );
