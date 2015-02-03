@@ -116,7 +116,7 @@ class WC_Download_Handler {
 	 * @access private
 	 */
 	private static function check_download_expiry( $download_data ) {
-		if ( $download_data->access_expires > 0 && strtotime( $download_data->access_expires ) < current_time( 'timestamp' ) ) {
+		if ( $download_data->access_expires > 0 && strtotime( $download_data->access_expires ) < strtotime( 'midnight', current_time( 'timestamp' ) ) ) {
 			self::download_error( __( 'Sorry, this download has expired', 'woocommerce' ), '', 403 );
 		}
 	}
