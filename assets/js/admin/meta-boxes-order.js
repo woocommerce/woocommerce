@@ -250,7 +250,7 @@ jQuery( function ( $ ) {
 				// Refunds
 				.on( 'click', '.delete_refund', this.refunds.delete_refund )
 				.on( 'click', 'button.do-api-refund, button.do-manual-refund', this.refunds.do_refund )
-				.on( 'change', '.refund input', this.refunds.input_changed )
+				.on( 'change', '.refund input.refund_line_total', this.refunds.input_changed )
 				.on( 'change keyup', '.wc-order-refund-items #refund_amount', this.refunds.amount_changed )
 				.on( 'change', 'input.refund_order_item_qty', this.refunds.refund_quantity_changed )
 
@@ -775,7 +775,7 @@ jQuery( function ( $ ) {
 					parseFloat( accounting.formatNumber( unit_total * refund_qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 						.toString()
 						.replace( '.', woocommerce_admin.mon_decimal_point )
-				);
+				).change();
 
 				// Taxes
 				$( 'td.line_tax', $row ).each( function() {
