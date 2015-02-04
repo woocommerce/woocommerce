@@ -105,7 +105,7 @@ class WC_Install {
 		// Queue upgrades
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 
-		if ( version_compare( $current_db_version, '2.2.0', '<' ) && null !== $current_db_version ) {
+		if ( version_compare( $current_db_version, '2.3.0', '<' ) && null !== $current_db_version ) {
 			WC_Admin_Notices::add_notice( 'update' );
 		} else {
 			update_option( 'woocommerce_db_version', WC()->version );
@@ -139,7 +139,8 @@ class WC_Install {
 			'2.0.0' => 'updates/woocommerce-update-2.0.php',
 			'2.0.9' => 'updates/woocommerce-update-2.0.9.php',
 			'2.1.0' => 'updates/woocommerce-update-2.1.php',
-			'2.2.0' => 'updates/woocommerce-update-2.2.php'
+			'2.2.0' => 'updates/woocommerce-update-2.2.php',
+			'2.3.0' => 'updates/woocommerce-update-2.3.php'
 		);
 
 		foreach ( $db_updates as $version => $updater ) {
