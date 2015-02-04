@@ -663,7 +663,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param array $args request arguments for filtering query
 	 * @return WP_Query
 	 */
-	private function query_orders( $args ) {
+	protected function query_orders( $args ) {
 
 		// set base query arguments
 		$query_args = array(
