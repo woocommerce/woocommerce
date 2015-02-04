@@ -19,7 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Meta_Boxes {
 
-	private static $meta_box_errors = array();
+	private static $saved_meta_boxes = false;
+	private static $meta_box_errors  = array();
 
 	/**
 	 * Constructor
@@ -169,7 +170,7 @@ class WC_Admin_Meta_Boxes {
 	 */
 	public function save_meta_boxes( $post_id, $post ) {
 		// $post_id and $post are required
-		if ( empty( $post_id ) || empty( $post ) ) {
+		if ( empty( $post_id ) || empty( $post ) || self::$saved_meta_boxes ) {
 			return;
 		}
 
@@ -192,6 +193,12 @@ class WC_Admin_Meta_Boxes {
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
+
+		// We need this save event to run once to avoid potential endless loops. This would have been perfect:
+		//	remove_action( current_filter(), __METHOD__ );
+		// But cannot be used due to https://github.com/woothemes/woocommerce/issues/6485
+		// When that is patched in core we cna use the above. For now:
+		self::$saved_meta_boxes = true;
 
 		// Check the post type
 		if ( in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ) ) ) {
