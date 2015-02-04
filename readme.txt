@@ -145,7 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Print styles for reports.
 * Feature - Remove products from the cart in the widget.
 * Feature - Bulk edit sales schedule on variations.
-* Feature - Fresh new frontend design.
+* Feature - Fresh new frontend / email design.
 * Feature - Undo link in message when removing products from the cart.
 * Feature - Compatibility with Twenty Fifteen default theme.
 * Feature - Added 'top freebies' to product report.
@@ -163,7 +163,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added link on purchased products list on orders screen.
 * Fix - When 'hide out of stock products' is disabled, out of stock variations / attributes are now visible.
 * Fix - Fix cart coupon on-sale checks for variations.
-* Tweak - All frontend styles and email styles have been improved.
 * Tweak - Double the default product image dimensions.
 * Tweak - Added refunds to Sales by Date report.
 * Tweak - Updated prevent_caching() method to work if a cart/checkout page isn't set.
@@ -172,7 +171,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added tool to refresh stats to customer list.
 * Tweak - Recent order table on my account is responsive.
 * Tweak - Drop WC tables in wpmu_drop_tables (for multisite).
-* Tweak - Removed quantity increment/decrement buttons.
 * Tweak - Moved 'Proceed to checkout' button on cart to beneath totals.
 * Tweak - Improved 'responsiveness' of product data tabs on add/edit product screen.
 * Tweak - Added 'stupidtable' script to allow order item sorting on the order screen (by name, cost, qty).
