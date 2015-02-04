@@ -202,7 +202,7 @@
 						$variation_form.trigger( 'reset_image' );
 
 					if ( ! exclude ) {
-						$variation_form.find( '.single_variation_wrap' ).slideUp( 200 );
+						$variation_form.find( '.single_variation_wrap' ).slideUp( 200 ).trigger( 'hide_variation' );
 					}
 
 				}
