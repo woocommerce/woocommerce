@@ -695,6 +695,7 @@ class WC_AJAX {
 			$_stock_status       = '';
 			$_backorders         = '';
 			$image_id            = 0;
+			$_thumbnail_id       = '';
 			$variation           = get_post( $variation_id ); // Get the variation object
 
 			include( 'admin/meta-boxes/views/html-variation-admin.php' );

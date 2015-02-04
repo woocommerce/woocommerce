@@ -208,7 +208,7 @@ class WC_Form_Handler {
 		}
 
 		// Allow plugins to return their own errors.
-		do_action_ref_array( 'user_profile_update_errors', array ( &$errors, $update, &$user ) );
+		do_action_ref_array( 'user_profile_update_errors', array( &$errors, $update, &$user ) );
 
 		if ( $errors->get_error_messages() ) {
 			foreach ( $errors->get_error_messages() as $error ) {
