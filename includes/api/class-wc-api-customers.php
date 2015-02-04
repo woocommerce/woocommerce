@@ -513,8 +513,10 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * Note that WP_User_Query does not have built-in pagination so limit & offset are used to provide limited
 	 * pagination support
+	 * 
+	 * The filter for role can be either a string or an array of roles (or blank).
 	 *
-	 * @since 2.1
+	 * @since 2.3
 	 * @param array $args request arguments for filtering query
 	 * @return WP_User_Query
 	 */
@@ -530,6 +532,11 @@ class WC_API_Customers extends WC_API_Resource {
 			'orderby' => 'registered',
 			'number'  => $users_per_page,
 		);
+
+		// Custom Role
+		if ( ! empty( $args['role'] ) ) {
+			$query_args['role'] = $args['role'];
+		}
 
 		// Search
 		if ( ! empty( $args['q'] ) ) {
