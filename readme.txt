@@ -54,6 +54,10 @@ WordPress.org is home to many cool free extensions for WooCommerce made by other
 
 [Search WordPress.org for WooCommerce](http://wordpress.org/extend/plugins/search.php?q=woocommerce) to see everything that is available.
 
+= Storefront - the official WooCommerce theme =
+
+Storefront is an intuitive & flexible, free WordPress theme built by WooThemes. It offers deep integration with WooCommerce and several of the most popular WooCommerce extensions. If you're looking for a theme for your next WooCommerce project, we highly recommend you check out [Storefront](http://www.woothemes.com/storefront/) and it's own suite of [extensions](http://www.woothemes.com/product-category/storefront-extensions/)!
+
 = Get involved =
 
 Developers can contribute to the source code on the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md).
@@ -105,7 +109,7 @@ For help with premium add-ons from WooThemes, use [our helpdesk](http://support.
 
 = Will WooCommerce work with my theme? =
 
-Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](http://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help.
+Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. Please see our [codex](http://docs.woothemes.com/documentation/plugins/woocommerce/woocommerce-codex/) for help. If you're looking for a theme with built in WooCommerce integration we recommend [Storefront](http://www.woothemes.com/storefront/).
 
 = Where can I request new features, eCommerce themes and extensions? =
 
