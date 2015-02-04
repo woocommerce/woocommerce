@@ -5,7 +5,7 @@
  * The WooCommerce order class handles order data.
  *
  * @class       WC_Order
- * @version     2.2.0
+ * @version     2.3.0
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
@@ -2215,12 +2215,21 @@ abstract class WC_Abstract_Order {
 			foreach ( $this->get_items() as $item ) {
 
 				if ( $item['product_id'] > 0 ) {
+					
 					$sales = (int) get_post_meta( $item['product_id'], 'total_sales', true );
 					$sales += (int) $item['qty'];
 
 					if ( $sales ) {
 						update_post_meta( $item['product_id'], 'total_sales', $sales );
 					}
+
+					$sales_volume = get_post_meta( $item['product_id'], 'total_sales', true );
+					$sales_volume += $item['price'];
+
+					if ( $sales_volume ) {
+						update_post_meta( $item['product_id'], 'total_sales_volume', $sales_volume );
+					}
+
 				}
 			}
 		}
