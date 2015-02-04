@@ -513,12 +513,19 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * Note that WP_User_Query does not have built-in pagination so limit & offset are used to provide limited
 	 * pagination support
+	 * 
+	 * The filter for role can be either a string or an array of roles (or blank).
 	 *
-	 * @since 2.1
+	 * @since 2.3
 	 * @param array $args request arguments for filtering query
 	 * @return WP_User_Query
 	 */
 	private function query_customers( $args = array() ) {
+
+		global $wpdb;
+
+		// Blog ID
+		$blog_id = get_current_blog_id();
 
 		// default users per page
 		$users_per_page = get_option( 'posts_per_page' );
@@ -530,6 +537,25 @@ class WC_API_Customers extends WC_API_Resource {
 			'orderby' => 'registered',
 			'number'  => $users_per_page,
 		);
+
+		// Custom Role(s)
+		if ( ! empty( $args['role'] ) ) {
+			if ( is_array( $args['role'] ) ) {
+				unset( $query_args['role'] );
+				$query_args['meta_query'] = array(
+					'relation' => 'OR',
+				);
+				foreach ( $args['role'] as $role ) {
+					$query_args['meta_query'][] = array(
+						'key' => $wpdb->get_blog_prefix( $blog_id ) . 'capabilities',
+						'value' => $role,
+						'compare' => 'like'
+					);
+				}
+			} else {
+				$query_args['role'] = $args['role'];
+			}
+		}
 
 		// Search
 		if ( ! empty( $args['q'] ) ) {
