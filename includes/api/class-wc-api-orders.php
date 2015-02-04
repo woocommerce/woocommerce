@@ -471,6 +471,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 	/**
 	 * Creates new WC_Order.
+	 *
 	 * Requires a separate function for classes that extend WC_API_Orders.
 	 *
 	 * @since 2.3
@@ -1212,10 +1213,10 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_order_note', __( 'You do not have permission to create order notes', 'woocommerce' ), 401 );
 			}
 
-			$order_id = absint( $order_id );
+			$order_id = $this->validate_request( $order_id, $this->post_type, 'edit' );
 
-			if ( empty( $order_id ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ), 400 );
+			if ( is_wp_error( $order_id ) ) {
+				return $order_id;
 			}
 
 			$order = wc_get_order( $order_id );
