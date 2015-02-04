@@ -1,24 +1,24 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Comments
  *
  * Handle comments (reviews and order notes)
  *
- * @class    WC_Post_types
+ * @class    WC_Comments
  * @version  2.3.0
  * @package  WooCommerce/Classes/Products
  * @category Class
  * @author   WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class WC_Comments {
 
 	/**
-	 * Hook in methods
+	 * Hook in methods.
 	 */
 	public static function init() {
 		// Rating posts
@@ -54,7 +54,7 @@ class WC_Comments {
 	 *
 	 * The frontend view order pages get around this filter by using remove_filter('comments_clauses', array( 'WC_Comments' ,'exclude_order_comments'), 10, 1 );
 	 *
-	 * @param array $clauses
+	 * @param  array $clauses
 	 * @return array
 	 */
 	public static function exclude_order_comments( $clauses ) {
@@ -84,7 +84,7 @@ class WC_Comments {
 	/**
 	 * Exclude order comments from queries and RSS
 	 *
-	 * @param string $join
+	 * @param  string $join
 	 * @return string
 	 */
 	public static function exclude_order_comments_from_feed_join( $join ) {
@@ -100,7 +100,7 @@ class WC_Comments {
 	/**
 	 * Exclude order comments from queries and RSS
 	 *
-	 * @param string $where
+	 * @param  string $where
 	 * @return string
 	 */
 	public static function exclude_order_comments_from_feed_where( $where ) {
@@ -119,7 +119,7 @@ class WC_Comments {
 	 * Exclude webhook comments from queries and RSS
 	 *
 	 * @since 2.2
-	 * @param array $clauses
+	 * @param  array $clauses
 	 * @return array
 	 */
 	public static function exclude_webhook_comments( $clauses ) {
@@ -146,7 +146,7 @@ class WC_Comments {
 	 * Exclude webhook comments from queries and RSS
 	 *
 	 * @since 2.2
-	 * @param string $join
+	 * @param  string $join
 	 * @return string
 	 */
 	public static function exclude_webhook_comments_from_feed_join( $join ) {
@@ -163,7 +163,7 @@ class WC_Comments {
 	 * Exclude webhook comments from queries and RSS
 	 *
 	 * @since 2.1
-	 * @param string $where
+	 * @param  string $where
 	 * @return string
 	 */
 	public static function exclude_webhook_comments_from_feed_where( $where ) {
@@ -181,7 +181,7 @@ class WC_Comments {
 	/**
 	 * Validate the comment ratings.
 	 *
-	 * @param array $comment_data
+	 * @param  array $comment_data
 	 * @return array
 	 */
 	public static function check_comment_rating( $comment_data ) {
@@ -230,9 +230,9 @@ class WC_Comments {
 	/**
 	 * Remove order notes from wp_count_comments()
 	 *
-	 * @since 2.2
-	 * @param object $stats
-	 * @param int $post_id
+	 * @since  2.2
+	 * @param  object $stats
+	 * @param  int $post_id
 	 * @return object
 	 */
 	public static function wp_count_comments( $stats, $post_id ) {
@@ -277,8 +277,8 @@ class WC_Comments {
 	/**
 	 * Make sure WP displays avatars for comments with the `review` type
 	 *
-	 * @since 2.3
-	 * @param array $comment_types
+	 * @since  2.3
+	 * @param  array $comment_types
 	 * @return array
 	 */
 	public static function add_avatar_for_review_comment_type( $comment_types ) {
