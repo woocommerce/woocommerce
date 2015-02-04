@@ -38,7 +38,7 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * Mock the WC session using the abstract class as cookies are not available
 	 * during tests
 	 *
-	 * @since 2.2
+	 * @since  2.2
 	 * @return string
 	 */
 	public function set_mock_session_handler() {
@@ -64,7 +64,7 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * Asserts thing is not WP_Error
 	 *
 	 * @since 2.2
-	 * @param mixed $actual
+	 * @param mixed  $actual
 	 * @param string $message
 	 */
 	public function assertNotWPError( $actual, $message = '' ) {
@@ -74,7 +74,7 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	/**
 	 * Asserts thing is WP_Error
 	 *
-	 * @param $actual
+	 * @param mixed  $actual
 	 * @param string $message
 	 */
 	public function assertIsWPError( $actual, $message = '' ) {
@@ -84,9 +84,9 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	/**
 	 * Backport assertNotFalse to PHPUnit 3.6.12 which only runs in PHP 5.2
 	 *
-	 * @since 2.2
-	 * @param $condition
-	 * @param string $message
+	 * @since  2.2
+	 * @param  $condition
+	 * @param  string $message
 	 * @return mixed
 	 */
 	public static function assertNotFalse( $condition, $message = '' ) {
