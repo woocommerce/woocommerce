@@ -522,11 +522,6 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	private function query_customers( $args = array() ) {
 
-		global $wpdb;
-
-		// Blog ID
-		$blog_id = get_current_blog_id();
-
 		// default users per page
 		$users_per_page = get_option( 'posts_per_page' );
 
