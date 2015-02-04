@@ -147,13 +147,13 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		$legend[] = array(
 			'title'            => sprintf( __( '%s gross sales in this period', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
-			'placeholder'      => __( 'This is the sum of the order totals, including shipping and taxes.', 'woocommerce' ),
+			'placeholder'      => __( 'This is the sum of the order totals, including shipping and taxes. This does not include refunds.', 'woocommerce' ),
 			'color'            => $this->chart_colours['sales_amount'],
 			'highlight_series' => 6
 		);
 		$legend[] = array(
 			'title'            => sprintf( __( '%s net sales in this period', 'woocommerce' ), '<strong>' . wc_price( $net_sales ) . '</strong>' ),
-			'placeholder'      => __( 'This is the net sales figure excluding shipping and taxes.', 'woocommerce' ),
+			'placeholder'      => __( 'This is the net sales figure excluding shipping and taxes. This does not include refunds.', 'woocommerce' ),
 			'color'            => $this->chart_colours['net_sales_amount'],
 			'highlight_series' => 7
 		);
