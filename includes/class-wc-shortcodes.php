@@ -209,9 +209,10 @@ class WC_Shortcodes {
 			'number'     => null,
 			'orderby'    => 'name',
 			'order'      => 'ASC',
-			'columns' 	 => '4',
+			'columns'    => '4',
 			'hide_empty' => 1,
-			'parent'     => ''
+			'parent'     => '',
+			'ids'        => array()
 		), $atts );
 
 		if ( isset( $atts['ids'] ) ) {
