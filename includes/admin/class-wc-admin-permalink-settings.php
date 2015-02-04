@@ -2,14 +2,15 @@
 /**
  * Adds settings to the permalinks admin settings page.
  *
+ * @class       WC_Admin_Permalink_Settings
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @version     2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Admin_Permalink_Settings' ) ) :
@@ -28,7 +29,7 @@ class WC_Admin_Permalink_Settings {
 	}
 
 	/**
-	 * Init our settings
+	 * Init our settings.
 	 */
 	public function settings_init() {
 		// Add a section to the permalinks page
@@ -89,7 +90,7 @@ class WC_Admin_Permalink_Settings {
 	}
 
 	/**
-	 * Show the settings
+	 * Show the settings.
 	 */
 	public function settings() {
 		echo wpautop( __( 'These settings control the permalinks used for products. These settings only apply when <strong>not using "default" permalinks above</strong>.', 'woocommerce' ) );
@@ -153,7 +154,7 @@ class WC_Admin_Permalink_Settings {
 	}
 
 	/**
-	 * Save the settings
+	 * Save the settings.
 	 */
 	public function settings_save() {
 
