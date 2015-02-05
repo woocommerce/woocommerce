@@ -383,7 +383,7 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			// create the pending order
-			$order = $this->create_base_order( $default_order_args );
+			$order = $this->create_base_order( $default_order_args, $data );
 
 			if ( is_wp_error( $order ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_order', sprintf( __( 'Cannot create order: %s', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
@@ -477,7 +477,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param $args array
 	 * @return WC_Order
 	 */
-	protected function create_base_order( $args ) {
+	protected function create_base_order( $args, $data ) {
 		return wc_create_order( $args );
 	}
 
