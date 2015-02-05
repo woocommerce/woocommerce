@@ -212,7 +212,7 @@ class WC_Shortcodes {
 			'columns'    => '4',
 			'hide_empty' => 1,
 			'parent'     => '',
-			'ids'        => array()
+			'ids'        => ''
 		), $atts );
 
 		if ( isset( $atts['ids'] ) ) {
