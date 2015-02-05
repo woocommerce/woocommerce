@@ -3,7 +3,7 @@
  * Contains the query functions for WooCommerce which alter the front-end post queries and loops.
  *
  * @class 		WC_Query
- * @version		1.6.4
+ * @version		2.3.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -113,7 +113,7 @@ class WC_Query {
 			break;
 			case 'view-order' :
 				$order = wc_get_order( $wp->query_vars['view-order'] );
-				$title = sprintf( __( 'Order %s', 'woocommerce' ), _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() );
+				$title = ( $order ) ? sprintf( __( 'Order %s', 'woocommerce' ), _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() ) : '';
 			break;
 			case 'edit-account' :
 				$title = __( 'Edit Account Details', 'woocommerce' );
