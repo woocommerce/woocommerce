@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.3-rc1 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-02-03 16:25:11+00:00\n"
+"POT-Creation-Date: 2015-02-05 08:51:49+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -3609,6 +3609,10 @@ msgstr ""
 msgid "Southland"
 msgstr ""
 
+#: i18n/states/NZ.php:28
+msgid "Gisborne"
+msgstr ""
+
 #: i18n/states/PE.php:13
 msgid "El Callao"
 msgstr ""
@@ -4662,7 +4666,7 @@ msgstr ""
 
 #: includes/abstracts/abstract-wc-integration.php:29
 #: includes/abstracts/abstract-wc-settings-api.php:77
-#: includes/class-wc-install.php:644 includes/emails/class-wc-email.php:681
+#: includes/class-wc-install.php:645 includes/emails/class-wc-email.php:681
 msgid "Settings"
 msgstr ""
 
@@ -4724,7 +4728,7 @@ msgid "Item's #%s variation #%s stock reduced from %s to %s."
 msgstr ""
 
 #: includes/abstracts/abstract-wc-order.php:2334
-#: includes/class-wc-ajax.php:1198 includes/class-wc-ajax.php:1199
+#: includes/class-wc-ajax.php:1199 includes/class-wc-ajax.php:1200
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
@@ -4932,27 +4936,27 @@ msgstr ""
 msgid "You do not have permission to create this customer"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:707
+#: includes/api/class-wc-api-customers.php:714
 #: includes/api/v1/class-wc-api-customers.php:461
 msgid "Invalid customer ID"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:714
+#: includes/api/class-wc-api-customers.php:721
 #: includes/api/v1/class-wc-api-customers.php:467
 msgid "Invalid customer"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:722
+#: includes/api/class-wc-api-customers.php:729
 #: includes/api/v1/class-wc-api-customers.php:474
 msgid "You do not have permission to read this customer"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:728
+#: includes/api/class-wc-api-customers.php:735
 #: includes/api/v1/class-wc-api-customers.php:479
 msgid "You do not have permission to edit this customer"
 msgstr ""
 
-#: includes/api/class-wc-api-customers.php:734
+#: includes/api/class-wc-api-customers.php:741
 #: includes/api/v1/class-wc-api-customers.php:484
 msgid "You do not have permission to delete this customer"
 msgstr ""
@@ -4967,199 +4971,198 @@ msgstr ""
 msgid "The JSONP callback function is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:309
+#: includes/api/class-wc-api-orders.php:312
 #: includes/api/v1/class-wc-api-orders.php:258
 msgid "You do not have permission to read the orders count"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:360
+#: includes/api/class-wc-api-orders.php:363
 msgid "You do not have permission to create orders"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:376
-#: includes/api/class-wc-api-orders.php:512
+#: includes/api/class-wc-api-orders.php:379
+#: includes/api/class-wc-api-orders.php:528
 msgid "Customer ID is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:386
+#: includes/api/class-wc-api-orders.php:389
 msgid "Cannot create order: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:420
+#: includes/api/class-wc-api-orders.php:423
 msgid "Payment method ID and title are required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:436
-#: includes/api/class-wc-api-orders.php:583
+#: includes/api/class-wc-api-orders.php:439
+#: includes/api/class-wc-api-orders.php:599
 msgid "Provided order currency is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:538
+#: includes/api/class-wc-api-orders.php:554
 msgid "Order item ID is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:809
+#: includes/api/class-wc-api-orders.php:825
 msgid "Order item ID provided is not associated with order"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:831
+#: includes/api/class-wc-api-orders.php:847
 msgid "Product ID is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:841
+#: includes/api/class-wc-api-orders.php:857
 msgid "Product ID provided does not match this line item"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:849
+#: includes/api/class-wc-api-orders.php:865
 msgid "Product is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:854
+#: includes/api/class-wc-api-orders.php:870
 msgid "Product quantity must be a positive float"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:859
+#: includes/api/class-wc-api-orders.php:875
 msgid "Product quantity is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:873
+#: includes/api/class-wc-api-orders.php:889
 msgid "The product variation is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:904
+#: includes/api/class-wc-api-orders.php:920
 msgid "Cannot create line item, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:912
+#: includes/api/class-wc-api-orders.php:928
 msgid "Cannot update line item, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:930
+#: includes/api/class-wc-api-orders.php:946
 msgid "Shipping total must be a positive amount"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:937
+#: includes/api/class-wc-api-orders.php:953
 msgid "Shipping method ID is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:945
+#: includes/api/class-wc-api-orders.php:961
 msgid "Cannot create shipping method, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:967
+#: includes/api/class-wc-api-orders.php:983
 msgid "Cannot update shipping method, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:987
+#: includes/api/class-wc-api-orders.php:1003
 msgid "Fee title is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:999
+#: includes/api/class-wc-api-orders.php:1015
 msgid "Fee tax class is required when fee is taxable"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1020
+#: includes/api/class-wc-api-orders.php:1036
 msgid "Cannot create fee, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1046
+#: includes/api/class-wc-api-orders.php:1062
 msgid "Cannot update fee, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1064
+#: includes/api/class-wc-api-orders.php:1080
 msgid "Coupon discount total must be a positive amount"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1071
+#: includes/api/class-wc-api-orders.php:1087
 msgid "Coupon code is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1077
+#: includes/api/class-wc-api-orders.php:1093
 msgid "Cannot create coupon, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1095
+#: includes/api/class-wc-api-orders.php:1111
 msgid "Cannot update coupon, try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1160
-#: includes/api/class-wc-api-orders.php:1260
-#: includes/api/class-wc-api-orders.php:1322
+#: includes/api/class-wc-api-orders.php:1176
+#: includes/api/class-wc-api-orders.php:1276
+#: includes/api/class-wc-api-orders.php:1338
 msgid "Invalid order note ID"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1166
-#: includes/api/class-wc-api-orders.php:1267
-#: includes/api/class-wc-api-orders.php:1329
+#: includes/api/class-wc-api-orders.php:1182
+#: includes/api/class-wc-api-orders.php:1283
+#: includes/api/class-wc-api-orders.php:1345
 msgid "An order note with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1196
+#: includes/api/class-wc-api-orders.php:1212
 msgid "You do not have permission to create order notes"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1202
-#: includes/api/class-wc-api-orders.php:1485
-msgid "Order ID is invalid"
-msgstr ""
-
-#: includes/api/class-wc-api-orders.php:1211
+#: includes/api/class-wc-api-orders.php:1227
 msgid "Order note is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1220
+#: includes/api/class-wc-api-orders.php:1236
 msgid "Cannot create order note, please try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1272
-#: includes/api/class-wc-api-orders.php:1334
+#: includes/api/class-wc-api-orders.php:1288
+#: includes/api/class-wc-api-orders.php:1350
 msgid "The order note ID provided is not associated with the order"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1341
+#: includes/api/class-wc-api-orders.php:1357
 msgid "This order note cannot be deleted"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1346
+#: includes/api/class-wc-api-orders.php:1362
 msgid "Permanently deleted order note"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1407
-#: includes/api/class-wc-api-orders.php:1561
-#: includes/api/class-wc-api-orders.php:1620
+#: includes/api/class-wc-api-orders.php:1423
+#: includes/api/class-wc-api-orders.php:1577
+#: includes/api/class-wc-api-orders.php:1636
 msgid "Invalid order refund ID"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1414
-#: includes/api/class-wc-api-orders.php:1568
-#: includes/api/class-wc-api-orders.php:1627
+#: includes/api/class-wc-api-orders.php:1430
+#: includes/api/class-wc-api-orders.php:1584
+#: includes/api/class-wc-api-orders.php:1643
 msgid "An order refund with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1479
+#: includes/api/class-wc-api-orders.php:1495
 msgid "You do not have permission to create order refunds"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1492
+#: includes/api/class-wc-api-orders.php:1501
+msgid "Order ID is invalid"
+msgstr ""
+
+#: includes/api/class-wc-api-orders.php:1508
 msgid "Refund amount is required"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1494
+#: includes/api/class-wc-api-orders.php:1510
 msgid "Refund amount must be positive"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1504
+#: includes/api/class-wc-api-orders.php:1520
 msgid "Cannot create order refund, please try again"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1521
+#: includes/api/class-wc-api-orders.php:1537
 msgid ""
 "An error occurred while attempting to create the refund using the payment "
 "gateway API"
 msgstr ""
 
-#: includes/api/class-wc-api-orders.php:1573
-#: includes/api/class-wc-api-orders.php:1632
+#: includes/api/class-wc-api-orders.php:1589
+#: includes/api/class-wc-api-orders.php:1648
 msgid "The order refund ID provided is not associated with the order"
 msgstr ""
 
@@ -5377,46 +5380,46 @@ msgstr ""
 msgid "Allow"
 msgstr ""
 
-#: includes/class-wc-ajax.php:933
+#: includes/class-wc-ajax.php:934
 msgid "File %d"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1207
+#: includes/class-wc-ajax.php:1208
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1246 includes/class-wc-ajax.php:1247
-#: includes/class-wc-ajax.php:1889
+#: includes/class-wc-ajax.php:1247 includes/class-wc-ajax.php:1248
+#: includes/class-wc-ajax.php:1890
 msgid "Item #%s stock increased from %s to %s."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1254
+#: includes/class-wc-ajax.php:1255
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1269
+#: includes/class-wc-ajax.php:1270
 #: includes/widgets/class-wc-widget-product-categories.php:52
 #: templates/single-product-reviews.php:65
 msgid "Name"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1269
+#: includes/class-wc-ajax.php:1270
 msgid "Value"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1499
+#: includes/class-wc-ajax.php:1500
 msgid "Delete note"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1868
+#: includes/class-wc-ajax.php:1869
 msgid "Invalid refund amount"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1927
+#: includes/class-wc-ajax.php:1928
 msgid "Refund failed"
 msgstr ""
 
@@ -6042,39 +6045,39 @@ msgstr ""
 msgid "Select an option&hellip;"
 msgstr ""
 
-#: includes/class-wc-install.php:417
+#: includes/class-wc-install.php:418
 msgid "Customer"
 msgstr ""
 
-#: includes/class-wc-install.php:424
+#: includes/class-wc-install.php:425
 msgid "Shop Manager"
 msgstr ""
 
-#: includes/class-wc-install.php:644
+#: includes/class-wc-install.php:645
 msgid "View WooCommerce Settings"
 msgstr ""
 
-#: includes/class-wc-install.php:660
+#: includes/class-wc-install.php:661
 msgid "View WooCommerce Documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:660
+#: includes/class-wc-install.php:661
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:661
+#: includes/class-wc-install.php:662
 msgid "View WooCommerce API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:661
+#: includes/class-wc-install.php:662
 msgid "API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:662
+#: includes/class-wc-install.php:663
 msgid "Visit Premium Customer Support Forum"
 msgstr ""
 
-#: includes/class-wc-install.php:662
+#: includes/class-wc-install.php:663
 msgid "Premium Support"
 msgstr ""
 
@@ -6562,7 +6565,7 @@ msgstr ""
 msgid "Lost Password"
 msgstr ""
 
-#: includes/class-wc-shortcodes.php:943
+#: includes/class-wc-shortcodes.php:944
 msgid ""
 "Use $args[\"posts_per_page\"] instead. Deprecated argument will be removed "
 "in WC 2.2."
@@ -8135,7 +8138,7 @@ msgid "Please enter a valid order email"
 msgstr ""
 
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:74
-msgid "Sorry, we could not find that order id in our database."
+msgid "Sorry, we could not find that order ID in our database."
 msgstr ""
 
 #: includes/wc-cart-functions.php:27
@@ -9800,42 +9803,42 @@ msgctxt "enhanced select"
 msgid "Searching&hellip;"
 msgstr ""
 
-#: includes/class-wc-install.php:191
+#: includes/class-wc-install.php:192
 msgctxt "Page slug"
 msgid "shop"
 msgstr ""
 
-#: includes/class-wc-install.php:196
+#: includes/class-wc-install.php:197
 msgctxt "Page slug"
 msgid "cart"
 msgstr ""
 
-#: includes/class-wc-install.php:201
+#: includes/class-wc-install.php:202
 msgctxt "Page slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:206
+#: includes/class-wc-install.php:207
 msgctxt "Page slug"
 msgid "my-account"
 msgstr ""
 
-#: includes/class-wc-install.php:192
+#: includes/class-wc-install.php:193
 msgctxt "Page title"
 msgid "Shop"
 msgstr ""
 
-#: includes/class-wc-install.php:197
+#: includes/class-wc-install.php:198
 msgctxt "Page title"
 msgid "Cart"
 msgstr ""
 
-#: includes/class-wc-install.php:202
+#: includes/class-wc-install.php:203
 msgctxt "Page title"
 msgid "Checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:207
+#: includes/class-wc-install.php:208
 msgctxt "Page title"
 msgid "My Account"
 msgstr ""

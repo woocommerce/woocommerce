@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.3-rc1 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-02-03 16:25:11+00:00\n"
+"POT-Creation-Date: 2015-02-05 08:51:50+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -644,55 +644,55 @@ msgstr ""
 msgid "Add to Menu"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:104
+#: includes/admin/class-wc-admin-meta-boxes.php:105
 msgid "Product Short Description"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:105
+#: includes/admin/class-wc-admin-meta-boxes.php:106
 #: includes/admin/views/html-bulk-edit-product.php:15
 #: includes/admin/views/html-quick-edit-product.php:15
 msgid "Product Data"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:106
+#: includes/admin/class-wc-admin-meta-boxes.php:107
 msgid "Product Gallery"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:111
+#: includes/admin/class-wc-admin-meta-boxes.php:112
 msgid "%s Data"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:112
+#: includes/admin/class-wc-admin-meta-boxes.php:113
 msgid "%s Items"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:113
+#: includes/admin/class-wc-admin-meta-boxes.php:114
 msgid "%s Notes"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:114
+#: includes/admin/class-wc-admin-meta-boxes.php:115
 msgid "Downloadable Product Permissions"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:114
+#: includes/admin/class-wc-admin-meta-boxes.php:115
 msgid ""
 "Note: Permissions for order items will automatically be granted when the "
 "order status changes to processing/completed."
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:115
+#: includes/admin/class-wc-admin-meta-boxes.php:116
 msgid "%s Actions"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:119
+#: includes/admin/class-wc-admin-meta-boxes.php:120
 msgid "Coupon Data"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:124
+#: includes/admin/class-wc-admin-meta-boxes.php:125
 msgid "Rating"
 msgstr ""
 
-#: includes/admin/class-wc-admin-meta-boxes.php:160
+#: includes/admin/class-wc-admin-meta-boxes.php:161
 #: includes/admin/settings/class-wc-settings-products.php:461
 msgid "Reviews"
 msgstr ""
@@ -3661,7 +3661,9 @@ msgid "%s gross sales in this period"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:150
-msgid "This is the sum of the order totals, including shipping and taxes."
+msgid ""
+"This is the sum of the order totals, including shipping and taxes. This "
+"does not include refunds."
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:155
@@ -3669,7 +3671,9 @@ msgid "%s net sales in this period"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:156
-msgid "This is the net sales figure excluding shipping and taxes."
+msgid ""
+"This is the net sales figure excluding shipping and taxes. This does not "
+"include refunds."
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-date.php:166
