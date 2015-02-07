@@ -161,6 +161,7 @@ class WC_API_Customers extends WC_API_Resource {
 			'first_name'       => $customer->first_name,
 			'last_name'        => $customer->last_name,
 			'username'         => $customer->user_login,
+			'role'             => $customer->roles[0],
 			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
 			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
 			'orders_count'     => wc_get_customer_order_count( $customer->ID ),
@@ -514,7 +515,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 * Note that WP_User_Query does not have built-in pagination so limit & offset are used to provide limited
 	 * pagination support
 	 * 
-	 * The filter for role can be either a string or an array of roles (or blank).
+	 * The filter for role can only be a single role in a string.
 	 *
 	 * @since 2.3
 	 * @param array $args request arguments for filtering query
