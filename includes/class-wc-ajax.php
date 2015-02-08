@@ -1528,9 +1528,9 @@ class WC_AJAX {
 	/**
 	 * Search for products and echo json
 	 * @param string $x (default: '')
-	 * @param string $post_types (default: array('product'))
+	 * @param string $post_types (default: array( 'product' ))
 	 */
-	public static function json_search_products( $x = '', $post_types = array('product') ) {
+	public static function json_search_products( $x = '', $post_types = array( 'product' ) ) {
 		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
@@ -1615,18 +1615,14 @@ class WC_AJAX {
 		$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products );
 
 		wp_send_json( $found_products );
-
 	}
 
 	/**
 	 * Search for product variations and return json
-	 *
-	 * @access public
-	 * @return void
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public static function json_search_products_and_variations() {
-		self::json_search_products( '', array('product', 'product_variation') );
+		self::json_search_products( '', array( 'product', 'product_variation' ) );
 	}
 
 	/**
@@ -1665,14 +1661,10 @@ class WC_AJAX {
 		}
 
 		wp_send_json( $found_customers );
-
 	}
 
 	/**
 	 * Search for downloadable product variations and return json
-	 *
-	 * @access public
-	 * @return void
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public static function json_search_downloadable_products_and_variations() {
@@ -1706,7 +1698,6 @@ class WC_AJAX {
 		}
 
 		wp_send_json( $found_products );
-
 	}
 
 	/**
@@ -1718,6 +1709,7 @@ class WC_AJAX {
 		global $wpdb;
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
+
 		if ( method_exists( $wpdb, 'esc_like' ) ) {
 			$term = $wpdb->esc_like( $term );
 		} else {
