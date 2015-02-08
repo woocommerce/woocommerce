@@ -1626,6 +1626,43 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Search for downloadable product variations and return json
+	 * @see WC_AJAX::json_search_products()
+	 */
+	public static function json_search_downloadable_products_and_variations() {
+		ob_start();
+
+		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
+
+		$args = array(
+			'post_type'      => array( 'product', 'product_variation' ),
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+			'order'          => 'ASC',
+			'orderby'        => 'parent title',
+			'meta_query'     => array(
+				array(
+					'key'   => '_downloadable',
+					'value' => 'yes'
+				)
+			),
+			's'              => $term
+		);
+
+		$posts = get_posts( $args );
+		$found_products = array();
+
+		if ( $posts ) {
+			foreach ( $posts as $post ) {
+				$product = wc_get_product( $post->ID );
+				$found_products[ $post->ID ] = $product->get_formatted_name();
+			}
+		}
+
+		wp_send_json( $found_products );
+	}
+
+	/**
 	 * Search for customers and return json
 	 */
 	public static function json_search_customers() {
@@ -1661,43 +1698,6 @@ class WC_AJAX {
 		}
 
 		wp_send_json( $found_customers );
-	}
-
-	/**
-	 * Search for downloadable product variations and return json
-	 * @see WC_AJAX::json_search_products()
-	 */
-	public static function json_search_downloadable_products_and_variations() {
-		ob_start();
-
-		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
-
-		$args = array(
-			'post_type'      => array( 'product', 'product_variation' ),
-			'posts_per_page' => -1,
-			'post_status'    => 'publish',
-			'order'          => 'ASC',
-			'orderby'        => 'parent title',
-			'meta_query'     => array(
-				array(
-					'key'   => '_downloadable',
-					'value' => 'yes'
-				)
-			),
-			's'              => $term
-		);
-
-		$posts = get_posts( $args );
-		$found_products = array();
-
-		if ( $posts ) {
-			foreach ( $posts as $post ) {
-				$product = wc_get_product( $post->ID );
-				$found_products[ $post->ID ] = $product->get_formatted_name();
-			}
-		}
-
-		wp_send_json( $found_products );
 	}
 
 	/**
