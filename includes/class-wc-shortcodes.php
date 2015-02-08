@@ -5,10 +5,27 @@
  * @class 		WC_Shortcodes
  * @version		2.1.0
  * @package		WooCommerce/Classes
- * @category	Class
+ * @category		Class
  * @author 		WooThemes
  */
 class WC_Shortcodes {
+	/**
+	 * Common attributes shared with product category, tag, attribute, and products listing methods
+	 * @var array
+	 */
+	 public static $product_atts = array(
+		'per_page'   => '12',
+		'columns'    => '4',
+		'orderby'    => 'title',
+		'order'      => 'asc',
+		'category'   => '',  // slugs
+		'attribute'  => '',
+		'filter'     => '',  // slugs
+		'tag'        => '',  // slugs
+		'operator'   => 'IN', // Possible values are 'IN', 'NOT IN', 'AND'.
+		'class'      => '', // extra output css class for theme styling
+		'show_count' => false, // include result-count in output?
+	);
 
 	/**
 	 * Init shortcodes
@@ -20,6 +37,7 @@ class WC_Shortcodes {
 			'product_page'               => __CLASS__ . '::product_page',
 			'product_category'           => __CLASS__ . '::product_category',
 			'product_categories'         => __CLASS__ . '::product_categories',
+			'product_tag'                => __CLASS__ . '::product_tag',
 			'add_to_cart'                => __CLASS__ . '::product_add_to_cart',
 			'add_to_cart_url'            => __CLASS__ . '::product_add_to_cart_url',
 			'products'                   => __CLASS__ . '::products',
@@ -115,24 +133,114 @@ class WC_Shortcodes {
 	public static function my_account( $atts ) {
 		return self::shortcode_wrapper( array( 'WC_Shortcode_My_Account', 'output' ), $atts );
 	}
+	
+	/**
+	 * List product(s) for the passed query.
+	 * @todo support proper pagination (since per_page is included in shortcodes)
+	 * @todo refactor to use product_listing: recent/sale/best_selling/top_rated/featured products methods
+	 * @todo Add general method for tags, categories, skus, ids, etc in a single shortcode in WP 4.1
+	 * @link https://core.trac.wordpress.org/ticket/29642 Wordpress 4.1 nested query support
+	 * @param WP_QUERY $products
+	 * @param array $atts
+	 * @return string
+	 */
+	public static function product_listing( $products, $atts ) {
+		global $woocommerce_loop;
+		
+		if ( isset( $atts['columns'] ) ) {
+			$woocommerce_loop['columns'] = $atts['columns'];	
+		}
+		
+		ob_start();
 
+		if ( $products->have_posts() ) : ?>
+			<?php if ( isset( $atts['show_count'] ) && $atts['show_count'] ) : ?>
+				<?php wc_get_template( 'loop/result-count.php' , array( 'query' => $products ) ); ?>
+			<?php endif; ?>
+
+			<?php woocommerce_product_loop_start(); ?>
+
+				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
+					<?php wc_get_template_part( 'content', 'product' ); ?>
+				<?php endwhile; // end of the loop. ?>
+
+			<?php woocommerce_product_loop_end(); ?>
+
+		<?php endif;
+
+		// output class handling
+		$classes = array( 'woocommerce' );
+		if ( isset(  $atts['columns'] ) ) {
+			$classes[] = 'columns-' . $atts['columns'];
+		}
+		
+		if ( isset( $atts['class'] ) && ! empty( $atts['class'] ) ) {
+			$classes[] = $atts['class'];
+		}
+		
+		$output = '<div class="' . implode(' ', $classes) . '">' . ob_get_clean() . '</div>';
+		
+		// cleanup
+		woocommerce_reset_loop();
+		wp_reset_postdata();
+		WC()->query->remove_ordering_args();
+		
+		return $output;
+	}
+	
+	/**
+	 * build taxonomy query options based on passed attributes
+	 * 
+	 * @param array $atts
+	 * @return array
+	 */
+	public static function tax_query_array( $atts ) {
+		$tax_array = array();
+		
+		$supported_tax = array(
+			'category' => array(
+				'tax' => 'product_cat',
+				'terms' => 'category'
+			),
+			'tag' => array(
+				'tax' => 'product_tag',
+				'terms' => 'tag'
+			),
+			'attribute' => array(
+				'terms' => 'filter'
+			)
+		);
+		
+		foreach ( $supported_tax as $tax => $v ) {
+			if ( isset( $atts[$tax] ) && ! empty( $atts[$tax] ) ) {
+				// for attributes, add "pa_" prefix if not present
+				if ( strcasecmp( $tax, 'attribute' ) === 0 ) {
+					$v['tax'] = stripos( $atts['attribute'], 'pa_' ) === 0 
+						? sanitize_title( $atts['attribute'] )
+						: 'pa_' . sanitize_title( $atts['attribute'] );
+				}
+				
+				$tax_array[] = array(
+					'taxonomy' => $v['tax'],
+					'terms' => array_map ( 'sanitize_title', explode( ',', $atts[$v['terms']] ) ),
+					'field' => 'slug',
+					'operator' => $atts['operator'],
+				);
+			}
+		}
+		
+		return $tax_array;
+	}
+	
 	/**
 	 * List products in a category shortcode
 	 *
 	 * @param array $atts
+	 * @see self::$product_atts
 	 * @return string
 	 */
 	public static function product_category( $atts ) {
-		global $woocommerce_loop;
-
-		$atts = shortcode_atts( array(
-			'per_page' => '12',
-			'columns'  => '4',
-			'orderby'  => 'title',
-			'order'    => 'desc',
-			'category' => '',  // Slugs
-			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
-		), $atts );
+		$atts = shortcode_atts( self::$product_atts, $atts );
 
 		if ( ! $atts['category'] ) {
 			return '';
@@ -150,50 +258,56 @@ class WC_Shortcodes {
 			'order' 				=> $ordering_args['order'],
 			'posts_per_page' 		=> $atts['per_page'],
 			'meta_query' 			=> $meta_query,
-			'tax_query' 			=> array(
-				array(
-					'taxonomy' 		=> 'product_cat',
-					'terms' 		=> array_map( 'sanitize_title', explode( ',', $atts['category'] ) ),
-					'field' 		=> 'slug',
-					'operator' 		=> $atts['operator']
-				)
-			)
+			'tax_query' 			=> self::tax_query_array( $atts ),
 		);
 
 		if ( isset( $ordering_args['meta_key'] ) ) {
 			$args['meta_key'] = $ordering_args['meta_key'];
 		}
 
-		ob_start();
+		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
+		
+		return self::product_listing( $products, $atts );
+	}
+	
+	/**
+	 * List products in a tag shortcode
+	 *
+	 * @param array $atts
+	 * @see self::$product_atts
+	 * @return string
+	 */
+	public static function product_tag( $atts ) {
+		$atts = shortcode_atts(self::$product_atts, $atts );
+		
+		if ( ! $atts['tag']) {
+			return '';
+		}
+
+		// Default ordering args
+		$ordering_args = WC()->query->get_catalog_ordering_args( $atts['orderby'], $$atts['order'] );
+		$meta_query    = WC()->query->get_meta_query();
+		
+		$args = array(
+			'post_type'			=> 'product',
+			'post_status'			=> 'publish',
+			'ignore_sticky_posts'	=> 1,
+			'orderby'			=> $ordering_args['orderby'],
+			'order'				=> $ordering_args['order'],
+			'posts_per_page'		=> $atts['per_page'],
+			'meta_query'			=> $meta_query,
+			'tax_query'			=> self::tax_query_array( $atts ),
+		);
+
+		if ( isset( $ordering_args['meta_key'] ) ) {
+			$args['meta_key'] = $ordering_args['meta_key'];
+		}
 
 		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
-
-		$woocommerce_loop['columns'] = $atts['columns'];
-
-		if ( $products->have_posts() ) : ?>
-
-			<?php woocommerce_product_loop_start(); ?>
-
-				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-					<?php wc_get_template_part( 'content', 'product' ); ?>
-
-				<?php endwhile; // end of the loop. ?>
-
-			<?php woocommerce_product_loop_end(); ?>
-
-		<?php endif;
-
-		woocommerce_reset_loop();
-		wp_reset_postdata();
-
-		$return = '<div class="woocommerce columns-' . $atts['columns'] . '">' . ob_get_clean() . '</div>';
-
-		// Remove ordering query arguments
-		WC()->query->remove_ordering_args();
-
-		return $return;
+		
+		return self::product_listing( $products, $atts );
 	}
+
 
 
 	/**
@@ -341,17 +455,11 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function products( $atts ) {
-		global $woocommerce_loop;
-
 		if ( empty( $atts ) ) {
 			return '';
 		}
-
-		$atts = shortcode_atts( array(
-			'columns' 	=> '4',
-			'orderby'   => 'title',
-			'order'     => 'asc'
-		), $atts );
+		
+		$atts = shortcode_atts( self::$product_atts, $atts );
 
 		$meta_query = WC()->query->get_meta_query();
 
@@ -381,29 +489,10 @@ class WC_Shortcodes {
 			$args['post__in'] = $ids;
 		}
 
-		ob_start();
 
 		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
-		$woocommerce_loop['columns'] = $atts['columns'];
-
-		if ( $products->have_posts() ) : ?>
-
-			<?php woocommerce_product_loop_start(); ?>
-
-				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-					<?php wc_get_template_part( 'content', 'product' ); ?>
-
-				<?php endwhile; // end of the loop. ?>
-
-			<?php woocommerce_product_loop_end(); ?>
-
-		<?php endif;
-
-		wp_reset_postdata();
-
-		return '<div class="woocommerce columns-' . $atts['columns'] . '">' . ob_get_clean() . '</div>';
+		return self::product_listing($products, $atts);
 	}
 
 
@@ -425,7 +514,7 @@ class WC_Shortcodes {
 			'posts_per_page' => 1,
 			'no_found_rows'  => 1,
 			'post_status'    => 'publish',
-			'meta_query'     => $meta_query
+			'meta_query'     => $meta_query,
 		);
 
 		if ( isset( $atts['sku'] ) ) {
@@ -440,27 +529,9 @@ class WC_Shortcodes {
 			$args['p'] = $atts['id'];
 		}
 
-		ob_start();
-
 		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
 
-		if ( $products->have_posts() ) : ?>
-
-			<?php woocommerce_product_loop_start(); ?>
-
-				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-					<?php wc_get_template_part( 'content', 'product' ); ?>
-
-				<?php endwhile; // end of the loop. ?>
-
-			<?php woocommerce_product_loop_end(); ?>
-
-		<?php endif;
-
-		wp_reset_postdata();
-
-		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
+		return self::product_listing($products, array());
 	}
 
 	/**
@@ -869,19 +940,15 @@ class WC_Shortcodes {
 	 * Example [product_attribute attribute='color' filter='black']
 	 *
 	 * @param array $atts
+	 * @see self::$product_atts
 	 * @return string
 	 */
 	public static function product_attribute( $atts ) {
-		global $woocommerce_loop;
-
-		$atts = shortcode_atts( array(
-			'per_page'  => '12',
-			'columns'   => '4',
-			'orderby'   => 'title',
-			'order'     => 'asc',
-			'attribute' => '',
-			'filter'    => ''
-		), $atts );
+		$atts = shortcode_atts( self::$product_atts, $atts );
+		
+		if ( ! $atts['attribute'] || ! $atts['filter']) {
+			return '';
+		}
 
 		$attribute  = strstr( $atts['attribute'], 'pa_' ) ? sanitize_title( $atts['attribute'] ) : 'pa_' . sanitize_title( $atts['attribute'] );
 		$meta_query = WC()->query->get_meta_query();
@@ -894,38 +961,12 @@ class WC_Shortcodes {
 			'orderby'             => $atts['orderby'],
 			'order'               => $atts['order'],
 			'meta_query'          => $meta_query,
-			'tax_query'           => array(
-				array(
-					'taxonomy' => $attribute,
-					'terms'    => array_map( 'sanitize_title', explode( ',', $atts['filter'] ) ),
-					'field'    => 'slug'
-				)
-			)
+			'tax_query'           => self::tax_query_array( $atts ),
 		);
 
-		ob_start();
-
 		$products = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $args, $atts ) );
-
-		$woocommerce_loop['columns'] = $atts['columns'];
-
-		if ( $products->have_posts() ) : ?>
-
-			<?php woocommerce_product_loop_start(); ?>
-
-				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-					<?php wc_get_template_part( 'content', 'product' ); ?>
-
-				<?php endwhile; // end of the loop. ?>
-
-			<?php woocommerce_product_loop_end(); ?>
-
-		<?php endif;
-
-		wp_reset_postdata();
-
-		return '<div class="woocommerce columns-' . $atts['columns'] . '">' . ob_get_clean() . '</div>';
+		
+		return self::product_listing($products, $atts);
 	}
 
 	/**

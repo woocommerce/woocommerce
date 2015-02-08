@@ -13,9 +13,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-global $wp_query;
+// Was a query passed? Use it, if so
+if ( isset( $query ) && $query instanceof WP_Query ) {
+	$wp_query = $query;
+	$custom_query = true;
+}
+else {
+	global $wp_query;
+	$custom_query = false;
+}
 
-if ( ! woocommerce_products_will_display() )
+// for custom query, check for existing posts
+if ( ! woocommerce_products_will_display() && ! ( isset( $custom_query ) && $query->post_count ) )
 	return;
 ?>
 <p class="woocommerce-result-count">
@@ -24,7 +33,7 @@ if ( ! woocommerce_products_will_display() )
 	$per_page = $wp_query->get( 'posts_per_page' );
 	$total    = $wp_query->found_posts;
 	$first    = ( $per_page * $paged ) - $per_page + 1;
-	$last     = min( $total, $wp_query->get( 'posts_per_page' ) * $paged );
+	$last     = min( $total, $per_page * $paged );
 
 	if ( 1 == $total ) {
 		_e( 'Showing the single result', 'woocommerce' );
