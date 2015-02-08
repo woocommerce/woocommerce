@@ -1,19 +1,22 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * WooCommerce WC_AJAX
  *
  * AJAX Event Handler
  *
- * @class 		WC_AJAX
- * @version		2.2.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @class       WC_AJAX
+ * @version     2.3.0
+ * @package     WooCommerce/Classes
+ * @category    Class
+ * @author      WooThemes
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_AJAX Class
  */
 class WC_AJAX {
 
@@ -1524,7 +1527,6 @@ class WC_AJAX {
 
 	/**
 	 * Search for products and echo json
-	 *
 	 * @param string $x (default: '')
 	 * @param string $post_types (default: array('product'))
 	 */
@@ -1589,9 +1591,9 @@ class WC_AJAX {
 				'posts_per_page' => -1,
 				'meta_query'     => array(
 					array(
-					'key'     => '_sku',
-					'value'   => $term,
-					'compare' => 'LIKE'
+						'key'     => '_sku',
+						'value'   => $term,
+						'compare' => 'LIKE'
 					)
 				),
 				'fields'         => 'ids'
@@ -1606,7 +1608,6 @@ class WC_AJAX {
 		if ( $posts ) {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post );
-
 				$found_products[ $post ] = $product->get_formatted_name();
 			}
 		}
@@ -1761,7 +1762,7 @@ class WC_AJAX {
 		ob_start();
 
 		// check permissions again and make sure we have what we need
-		if ( ! current_user_can('edit_products') || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) ) {
+		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) ) {
 			die(-1);
 		}
 
