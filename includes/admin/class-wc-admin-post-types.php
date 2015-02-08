@@ -93,6 +93,98 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
+	 * Change messages when a post type is updated.
+	 * @param  array $messages
+	 * @return array
+	 */
+	public function post_updated_messages( $messages ) {
+		global $post, $post_ID;
+
+		$messages['product'] = array(
+			0 => '', // Unused. Messages start at index 1.
+			1 => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
+			2 => __( 'Custom field updated.', 'woocommerce' ),
+			3 => __( 'Custom field deleted.', 'woocommerce' ),
+			4 => __( 'Product updated.', 'woocommerce' ),
+			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Product restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6 => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
+			7 => __( 'Product saved.', 'woocommerce' ),
+			8 => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			9 => sprintf( __( 'Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce' ),
+			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
+			10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+		);
+
+		$messages['shop_order'] = array(
+			0 => '', // Unused. Messages start at index 1.
+			1 => __( 'Order updated.', 'woocommerce' ),
+			2 => __( 'Custom field updated.', 'woocommerce' ),
+			3 => __( 'Custom field deleted.', 'woocommerce' ),
+			4 => __( 'Order updated.', 'woocommerce' ),
+			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Order restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6 => __( 'Order updated.', 'woocommerce' ),
+			7 => __( 'Order saved.', 'woocommerce' ),
+			8 => __( 'Order submitted.', 'woocommerce' ),
+			9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
+			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
+			10 => __( 'Order draft updated.', 'woocommerce' ),
+			11 => __( 'Order updated and email sent.', 'woocommerce' )
+		);
+
+		$messages['shop_coupon'] = array(
+			0 => '', // Unused. Messages start at index 1.
+			1 => __( 'Coupon updated.', 'woocommerce' ),
+			2 => __( 'Custom field updated.', 'woocommerce' ),
+			3 => __( 'Custom field deleted.', 'woocommerce' ),
+			4 => __( 'Coupon updated.', 'woocommerce' ),
+			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Coupon restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6 => __( 'Coupon updated.', 'woocommerce' ),
+			7 => __( 'Coupon saved.', 'woocommerce' ),
+			8 => __( 'Coupon submitted.', 'woocommerce' ),
+			9 => sprintf( __( 'Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
+			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
+			10 => __( 'Coupon draft updated.', 'woocommerce' )
+		);
+
+		return $messages;
+	}
+
+	/**
+	 * Specify custom bulk actions messages for a post type.
+	 * @param  array $bulk_messages
+	 * @param  array $bulk_counts
+	 * @return array
+	 */
+	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
+
+		$bulk_messages['product'] = array(
+			'updated'   => _n( '%s product updated.', '%s products updated.', $bulk_counts['updated'] ),
+			'locked'    => _n( '%s product not updated, somebody is editing it.', '%s products not updated, somebody is editing them.', $bulk_counts['locked'] ),
+			'deleted'   => _n( '%s product permanently deleted.', '%s products permanently deleted.', $bulk_counts['deleted'] ),
+			'trashed'   => _n( '%s product moved to the Trash.', '%s products moved to the Trash.', $bulk_counts['trashed'] ),
+			'untrashed' => _n( '%s product restored from the Trash.', '%s products restored from the Trash.', $bulk_counts['untrashed'] ),
+		);
+
+		$bulk_messages['shop_order'] = array(
+			'updated'   => _n( '%s order updated.', '%s orders updated.', $bulk_counts['updated'] ),
+			'locked'    => _n( '%s order not updated, somebody is editing it.', '%s orders not updated, somebody is editing them.', $bulk_counts['locked'] ),
+			'deleted'   => _n( '%s order permanently deleted.', '%s orders permanently deleted.', $bulk_counts['deleted'] ),
+			'trashed'   => _n( '%s order moved to the Trash.', '%s orders moved to the Trash.', $bulk_counts['trashed'] ),
+			'untrashed' => _n( '%s order restored from the Trash.', '%s orders restored from the Trash.', $bulk_counts['untrashed'] ),
+		);
+
+		$bulk_messages['shop_coupon'] = array(
+			'updated'   => _n( '%s coupon updated.', '%s coupons updated.', $bulk_counts['updated'] ),
+			'locked'    => _n( '%s coupon not updated, somebody is editing it.', '%s coupons not updated, somebody is editing them.', $bulk_counts['locked'] ),
+			'deleted'   => _n( '%s coupon permanently deleted.', '%s coupons permanently deleted.', $bulk_counts['deleted'] ),
+			'trashed'   => _n( '%s coupon moved to the Trash.', '%s coupons moved to the Trash.', $bulk_counts['trashed'] ),
+			'untrashed' => _n( '%s coupon restored from the Trash.', '%s coupons restored from the Trash.', $bulk_counts['untrashed'] ),
+		);
+
+		return $bulk_messages;
+	}
+
+	/**
 	 * Define custom columns for products
 	 * @param  array $existing_columns
 	 * @return array
@@ -1669,98 +1761,6 @@ class WC_Admin_Post_Types {
 		}
 
 		return $where;
-	}
-
-	/**
-	 * Change messages when a post type is updated.
-	 * @param  array $messages
-	 * @return array
-	 */
-	public function post_updated_messages( $messages ) {
-		global $post, $post_ID;
-
-		$messages['product'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
-			2 => __( 'Custom field updated.', 'woocommerce' ),
-			3 => __( 'Custom field deleted.', 'woocommerce' ),
-			4 => __( 'Product updated.', 'woocommerce' ),
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Product restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6 => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post_ID ) ) ),
-			7 => __( 'Product saved.', 'woocommerce' ),
-			8 => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-			9 => sprintf( __( 'Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce' ),
-			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
-			10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-		);
-
-		$messages['shop_order'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => __( 'Order updated.', 'woocommerce' ),
-			2 => __( 'Custom field updated.', 'woocommerce' ),
-			3 => __( 'Custom field deleted.', 'woocommerce' ),
-			4 => __( 'Order updated.', 'woocommerce' ),
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Order restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6 => __( 'Order updated.', 'woocommerce' ),
-			7 => __( 'Order saved.', 'woocommerce' ),
-			8 => __( 'Order submitted.', 'woocommerce' ),
-			9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
-			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
-			10 => __( 'Order draft updated.', 'woocommerce' ),
-			11 => __( 'Order updated and email sent.', 'woocommerce' )
-		);
-
-		$messages['shop_coupon'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => __( 'Coupon updated.', 'woocommerce' ),
-			2 => __( 'Custom field updated.', 'woocommerce' ),
-			3 => __( 'Custom field deleted.', 'woocommerce' ),
-			4 => __( 'Coupon updated.', 'woocommerce' ),
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Coupon restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6 => __( 'Coupon updated.', 'woocommerce' ),
-			7 => __( 'Coupon saved.', 'woocommerce' ),
-			8 => __( 'Coupon submitted.', 'woocommerce' ),
-			9 => sprintf( __( 'Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
-			  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
-			10 => __( 'Coupon draft updated.', 'woocommerce' )
-		);
-
-		return $messages;
-	}
-
-	/**
-	 * Specify custom bulk actions messages for a post type.
-	 * @param  array $bulk_messages
-	 * @param  array $bulk_counts
-	 * @return array
-	 */
-	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
-
-		$bulk_messages['product'] = array(
-			'updated'   => _n( '%s product updated.', '%s products updated.', $bulk_counts['updated'] ),
-			'locked'    => _n( '%s product not updated, somebody is editing it.', '%s products not updated, somebody is editing them.', $bulk_counts['locked'] ),
-			'deleted'   => _n( '%s product permanently deleted.', '%s products permanently deleted.', $bulk_counts['deleted'] ),
-			'trashed'   => _n( '%s product moved to the Trash.', '%s products moved to the Trash.', $bulk_counts['trashed'] ),
-			'untrashed' => _n( '%s product restored from the Trash.', '%s products restored from the Trash.', $bulk_counts['untrashed'] ),
-		);
-
-		$bulk_messages['shop_order'] = array(
-			'updated'   => _n( '%s order updated.', '%s orders updated.', $bulk_counts['updated'] ),
-			'locked'    => _n( '%s order not updated, somebody is editing it.', '%s orders not updated, somebody is editing them.', $bulk_counts['locked'] ),
-			'deleted'   => _n( '%s order permanently deleted.', '%s orders permanently deleted.', $bulk_counts['deleted'] ),
-			'trashed'   => _n( '%s order moved to the Trash.', '%s orders moved to the Trash.', $bulk_counts['trashed'] ),
-			'untrashed' => _n( '%s order restored from the Trash.', '%s orders restored from the Trash.', $bulk_counts['untrashed'] ),
-		);
-
-		$bulk_messages['shop_coupon'] = array(
-			'updated'   => _n( '%s coupon updated.', '%s coupons updated.', $bulk_counts['updated'] ),
-			'locked'    => _n( '%s coupon not updated, somebody is editing it.', '%s coupons not updated, somebody is editing them.', $bulk_counts['locked'] ),
-			'deleted'   => _n( '%s coupon permanently deleted.', '%s coupons permanently deleted.', $bulk_counts['deleted'] ),
-			'trashed'   => _n( '%s coupon moved to the Trash.', '%s coupons moved to the Trash.', $bulk_counts['trashed'] ),
-			'untrashed' => _n( '%s coupon restored from the Trash.', '%s coupons restored from the Trash.', $bulk_counts['untrashed'] ),
-		);
-
-		return $bulk_messages;
 	}
 
 	/**
