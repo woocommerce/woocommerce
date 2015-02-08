@@ -26,6 +26,7 @@ class WC_Admin_Post_Types {
 	 */
 	public function __construct() {
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
+		add_filter( 'bulk_post_updated_messages', array( $this, 'bulk_post_updated_messages' ), 10, 2 );
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
 
 		// WP List table columns. Defined here so they are always available for events such as inline editing.
@@ -1672,7 +1673,6 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Change messages when a post type is updated.
-	 *
 	 * @param  array $messages
 	 * @return array
 	 */
@@ -1726,6 +1726,41 @@ class WC_Admin_Post_Types {
 		);
 
 		return $messages;
+	}
+
+	/**
+	 * Specify custom bulk actions messages for a post type.
+	 * @param  array $bulk_messages
+	 * @param  array $bulk_counts
+	 * @return array
+	 */
+	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
+
+		$bulk_messages['product'] = array(
+			'updated'   => _n( '%s product updated.', '%s products updated.', $bulk_counts['updated'] ),
+			'locked'    => _n( '%s product not updated, somebody is editing it.', '%s products not updated, somebody is editing them.', $bulk_counts['locked'] ),
+			'deleted'   => _n( '%s product permanently deleted.', '%s products permanently deleted.', $bulk_counts['deleted'] ),
+			'trashed'   => _n( '%s product moved to the Trash.', '%s products moved to the Trash.', $bulk_counts['trashed'] ),
+			'untrashed' => _n( '%s product restored from the Trash.', '%s products restored from the Trash.', $bulk_counts['untrashed'] ),
+		);
+
+		$bulk_messages['shop_order'] = array(
+			'updated'   => _n( '%s order updated.', '%s orders updated.', $bulk_counts['updated'] ),
+			'locked'    => _n( '%s order not updated, somebody is editing it.', '%s orders not updated, somebody is editing them.', $bulk_counts['locked'] ),
+			'deleted'   => _n( '%s order permanently deleted.', '%s orders permanently deleted.', $bulk_counts['deleted'] ),
+			'trashed'   => _n( '%s order moved to the Trash.', '%s orders moved to the Trash.', $bulk_counts['trashed'] ),
+			'untrashed' => _n( '%s order restored from the Trash.', '%s orders restored from the Trash.', $bulk_counts['untrashed'] ),
+		);
+
+		$bulk_messages['shop_coupon'] = array(
+			'updated'   => _n( '%s coupon updated.', '%s coupons updated.', $bulk_counts['updated'] ),
+			'locked'    => _n( '%s coupon not updated, somebody is editing it.', '%s coupons not updated, somebody is editing them.', $bulk_counts['locked'] ),
+			'deleted'   => _n( '%s coupon permanently deleted.', '%s coupons permanently deleted.', $bulk_counts['deleted'] ),
+			'trashed'   => _n( '%s coupon moved to the Trash.', '%s coupons moved to the Trash.', $bulk_counts['trashed'] ),
+			'untrashed' => _n( '%s coupon restored from the Trash.', '%s coupons restored from the Trash.', $bulk_counts['untrashed'] ),
+		);
+
+		return $bulk_messages;
 	}
 
 	/**
