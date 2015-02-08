@@ -1527,9 +1527,10 @@ class WC_AJAX {
 
 	/**
 	 * Search for products and echo json
+	 * @param string $x (default: '')
 	 * @param string $post_types (default: array( 'product' ))
 	 */
-	public static function json_search_products( $post_types = array( 'product' ) ) {
+	public static function json_search_products( $x = '', $post_types = array( 'product' ) ) {
 		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
@@ -1621,7 +1622,7 @@ class WC_AJAX {
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public static function json_search_products_and_variations() {
-		self::json_search_products( array( 'product', 'product_variation' ) );
+		self::json_search_products( '', array( 'product', 'product_variation' ) );
 	}
 
 	/**
