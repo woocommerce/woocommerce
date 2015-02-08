@@ -88,6 +88,7 @@ class WC_Admin_Post_Types {
 			include( 'class-wc-admin-duplicate-product.php' );
 		}
 
+		// Meta-Box Class
 		include_once( 'class-wc-admin-meta-boxes.php' );
 
 		// Download permissions
