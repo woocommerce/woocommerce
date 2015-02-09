@@ -1199,8 +1199,8 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Cross sells and upsells
-		$upsells    = array_filter( array_map( 'intval', explode( ',', $_POST['upsell_ids'] ) ) );
-		$crosssells = array_filter( array_map( 'intval', explode( ',', $_POST['crosssell_ids'] ) ) );
+		$upsells    = isset( $_POST['upsell_ids'] ) ? array_filter( array_map( 'intval', explode( ',', $_POST['upsell_ids'] ) ) ) : array();
+		$crosssells = isset( $_POST['crosssell_ids'] ) ? array_filter( array_map( 'intval', explode( ',', $_POST['crosssell_ids'] ) ) ) : array();
 
 		update_post_meta( $post_id, '_upsell_ids', $upsells );
 		update_post_meta( $post_id, '_crosssell_ids', $crosssells );
