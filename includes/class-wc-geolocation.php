@@ -76,7 +76,7 @@ class WC_Geolocation {
 				$response         = wp_remote_get( $service_endpoint, array( 'timeout' => 2 ) );
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
-					$external_ip_address = apply_filters( 'woocommerce_geolocation_ip_lookup_api_response', trim( $response['body'] ), $service_name );
+					$external_ip_address = apply_filters( 'woocommerce_geolocation_ip_lookup_api_response', wc_clean( $response['body'] ), $service_name );
 					break;
 				}
 			}
