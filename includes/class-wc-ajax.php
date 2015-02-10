@@ -1,19 +1,22 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * WooCommerce WC_AJAX
  *
  * AJAX Event Handler
  *
- * @class 		WC_AJAX
- * @version		2.2.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @class       WC_AJAX
+ * @version     2.3.0
+ * @package     WooCommerce/Classes
+ * @category    Class
+ * @author      WooThemes
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_AJAX Class
  */
 class WC_AJAX {
 
@@ -1524,11 +1527,10 @@ class WC_AJAX {
 
 	/**
 	 * Search for products and echo json
-	 *
 	 * @param string $x (default: '')
-	 * @param string $post_types (default: array('product'))
+	 * @param string $post_types (default: array( 'product' ))
 	 */
-	public static function json_search_products( $x = '', $post_types = array('product') ) {
+	public static function json_search_products( $x = '', $post_types = array( 'product' ) ) {
 		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
@@ -1589,9 +1591,9 @@ class WC_AJAX {
 				'posts_per_page' => -1,
 				'meta_query'     => array(
 					array(
-					'key'     => '_sku',
-					'value'   => $term,
-					'compare' => 'LIKE'
+						'key'     => '_sku',
+						'value'   => $term,
+						'compare' => 'LIKE'
 					)
 				),
 				'fields'         => 'ids'
@@ -1606,7 +1608,6 @@ class WC_AJAX {
 		if ( $posts ) {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post );
-
 				$found_products[ $post ] = $product->get_formatted_name();
 			}
 		}
@@ -1614,18 +1615,51 @@ class WC_AJAX {
 		$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products );
 
 		wp_send_json( $found_products );
-
 	}
 
 	/**
 	 * Search for product variations and return json
-	 *
-	 * @access public
-	 * @return void
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public static function json_search_products_and_variations() {
-		self::json_search_products( '', array('product', 'product_variation') );
+		self::json_search_products( '', array( 'product', 'product_variation' ) );
+	}
+
+	/**
+	 * Search for downloadable product variations and return json
+	 * @see WC_AJAX::json_search_products()
+	 */
+	public static function json_search_downloadable_products_and_variations() {
+		ob_start();
+
+		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
+
+		$args = array(
+			'post_type'      => array( 'product', 'product_variation' ),
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+			'order'          => 'ASC',
+			'orderby'        => 'parent title',
+			'meta_query'     => array(
+				array(
+					'key'   => '_downloadable',
+					'value' => 'yes'
+				)
+			),
+			's'              => $term
+		);
+
+		$posts = get_posts( $args );
+		$found_products = array();
+
+		if ( $posts ) {
+			foreach ( $posts as $post ) {
+				$product = wc_get_product( $post->ID );
+				$found_products[ $post->ID ] = $product->get_formatted_name();
+			}
+		}
+
+		wp_send_json( $found_products );
 	}
 
 	/**
@@ -1664,48 +1698,6 @@ class WC_AJAX {
 		}
 
 		wp_send_json( $found_customers );
-
-	}
-
-	/**
-	 * Search for downloadable product variations and return json
-	 *
-	 * @access public
-	 * @return void
-	 * @see WC_AJAX::json_search_products()
-	 */
-	public static function json_search_downloadable_products_and_variations() {
-		ob_start();
-
-		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
-
-		$args = array(
-			'post_type'      => array( 'product', 'product_variation' ),
-			'posts_per_page' => -1,
-			'post_status'    => 'publish',
-			'order'          => 'ASC',
-			'orderby'        => 'parent title',
-			'meta_query'     => array(
-				array(
-					'key'   => '_downloadable',
-					'value' => 'yes'
-				)
-			),
-			's'              => $term
-		);
-
-		$posts = get_posts( $args );
-		$found_products = array();
-
-		if ( $posts ) {
-			foreach ( $posts as $post ) {
-				$product = wc_get_product( $post->ID );
-				$found_products[ $post->ID ] = $product->get_formatted_name();
-			}
-		}
-
-		wp_send_json( $found_products );
-
 	}
 
 	/**
@@ -1717,6 +1709,7 @@ class WC_AJAX {
 		global $wpdb;
 
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
+
 		if ( method_exists( $wpdb, 'esc_like' ) ) {
 			$term = $wpdb->esc_like( $term );
 		} else {
@@ -1761,7 +1754,7 @@ class WC_AJAX {
 		ob_start();
 
 		// check permissions again and make sure we have what we need
-		if ( ! current_user_can('edit_products') || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) ) {
+		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) ) {
 			die(-1);
 		}
 
