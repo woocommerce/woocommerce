@@ -112,9 +112,9 @@ class WC_Admin_Assets {
 			'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
 		) );
 		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
-			'ajax_url'                         => admin_url( 'admin-ajax.php' ),
-			'search_products_nonce'            => wp_create_nonce( 'search-products' ),
-			'search_customers_nonce'           => wp_create_nonce( 'search-customers' )
+			'ajax_url'                  => admin_url( 'admin-ajax.php' ),
+			'search_products_nonce'     => wp_create_nonce( 'search-products' ),
+			'search_customers_nonce'    => wp_create_nonce( 'search-customers' )
 		) );
 
 		// Accounting
