@@ -696,7 +696,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale() {
-		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() != $this->get_regular_price() && $this->get_sale_price() == $this->get_price() ), $this );
+		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() !== $this->get_regular_price() && $this->get_sale_price() === $this->get_price() ), $this );
 	}
 
 	/**
