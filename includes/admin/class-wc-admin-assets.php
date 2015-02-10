@@ -72,7 +72,7 @@ class WC_Admin_Assets {
 	 * Enqueue scripts
 	 */
 	public function admin_scripts() {
-		global $wp_query, $post, $current_user;
+		global $wp_query, $current_user;
 
 		get_currentuserinfo();
 
@@ -171,7 +171,7 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'wc-admin-variation-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product-variation' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), WC_VERSION );
 
 			$params = array(
-				'post_id'                             => isset( $post->ID ) ? $post->ID : '',
+				'post_id'                             => get_the_ID(),
 				'plugin_url'                          => WC()->plugin_url(),
 				'ajax_url'                            => admin_url( 'admin-ajax.php' ),
 				'woocommerce_placeholder_img_src'     => wc_placeholder_img_src(),
@@ -235,6 +235,7 @@ class WC_Admin_Assets {
 				'prices_include_tax'            => esc_attr( get_option( 'woocommerce_prices_include_tax' ) ),
 				'round_at_subtotal'             => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
 				'no_customer_selected'          => __( 'No customer selected', 'woocommerce' ),
+				'post_id'                       => get_the_ID(),
 				'plugin_url'                    => WC()->plugin_url(),
 				'ajax_url'                      => admin_url( 'admin-ajax.php' ),
 				'order_item_nonce'              => wp_create_nonce( 'order-item' ),
@@ -248,7 +249,6 @@ class WC_Admin_Assets {
 				'add_order_note_nonce'          => wp_create_nonce( 'add-order-note' ),
 				'delete_order_note_nonce'       => wp_create_nonce( 'delete-order-note' ),
 				'calendar_image'                => WC()->plugin_url().'/assets/images/calendar.png',
-				'post_id'                       => isset( $post->ID ) ? $post->ID : '',
 				'base_country'                  => WC()->countries->get_base_country(),
 				'currency_format_num_decimals'  => wc_get_price_decimals(),
 				'currency_format_symbol'        => get_woocommerce_currency_symbol(),
