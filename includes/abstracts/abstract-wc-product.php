@@ -705,7 +705,7 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_weight() {
-		return ( $this->weight ) ? $this->weight : '';
+		return ( apply_filters( 'woocommerce_get_weight', $this->weight, $this ); ) ? apply_filters( 'woocommerce_get_weight', $this->weight, $this ); : '';
 	}
 
 	/**
