@@ -2041,7 +2041,7 @@ abstract class WC_Abstract_Order {
 		add_comment_meta( $comment_id, 'is_customer_note', $is_customer_note );
 
 		if ( $is_customer_note ) {
-			do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->id, 'customer_note' => $note ) );
+			do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->id, 'customer_note' => $commentdata['comment_content'] ) );
 		}
 
 		return $comment_id;
