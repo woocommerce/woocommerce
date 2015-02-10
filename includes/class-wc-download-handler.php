@@ -198,6 +198,7 @@ class WC_Download_Handler {
 	 */
 	public static function download_file_redirect( $file_path, $filename = '' ) {
 		header( 'Location: ' . $file_path );
+		exit;
 	}
 
 	/**
@@ -253,13 +254,16 @@ class WC_Download_Handler {
 		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules() ) ) {
 			self::download_headers( $file_path, $filename );
 			header( "X-Sendfile: $file_path" );
+			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'lighttpd' ) ) {
 			self::download_headers( $file_path, $filename );
 			header( "X-Lighttpd-Sendfile: $file_path" );
+			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'nginx' ) || stristr( getenv( 'SERVER_SOFTWARE' ), 'cherokee' ) ) {
 			self::download_headers( $file_path, $filename );
 			$xsendfile_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`', '', $file_path ), '/' );
 			header( "X-Accel-Redirect: /$xsendfile_path" );
+			exit;
 		}
 
 		// Fallback
