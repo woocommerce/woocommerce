@@ -35,25 +35,46 @@
  */
 class WC_Product {
 
-	/** @public int The product (post) ID. */
-	public $id                   = 0;
+	/**
+	 * The product (post) ID.
+	 *
+	 * @var int
+	 */
+	public $id = 0;
 
 	/**
-	* @public $post Stores post data
-	* @var $post WP_Post
-	*/
-	public $post                 = null;
+	 * $post Stores post data
+	 *
+	 * @var $post WP_Post
+	 */
+	public $post = null;
 
-	/** @public string $product_type The product's type (simple, variable etc). */
-	public $product_type         = null;
+	/**
+	 * The product's type (simple, variable etc)
+	 *
+	 * @var string
+	 */
+	public $product_type = null;
 
-	/** @protected string $dimensions String of dimensions (imploded with X) */
-	protected $dimensions        = '';
+	/**
+	 * String of dimensions (imploded with X)
+	 *
+	 * @var string
+	 */
+	protected $dimensions = '';
 
-	/** @protected string $shipping_class Prouduct shipping class */
+	/**
+	 * Prouduct shipping class
+	 *
+	 * @var string
+	 */
 	protected $shipping_class    = '';
 
-	/** @protected integer $shipping_class_id ID of the shipping class this product has. */
+	/**
+	 * ID of the shipping class this product has
+	 *
+	 * @var int
+	 */
 	protected $shipping_class_id = 0;
 
 	/**
@@ -1082,9 +1103,11 @@ class WC_Product {
 	 * Returns the product rating in html format.
 	 *
 	 * @param string $rating (default: '')
+	 *
 	 * @return string
 	 */
 	public function get_rating_html( $rating = null ) {
+		$rating_html = '';
 
 		if ( ! is_numeric( $rating ) ) {
 			$rating = $this->get_average_rating();
@@ -1097,11 +1120,9 @@ class WC_Product {
 			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
 
 			$rating_html .= '</div>';
-
-			return $rating_html;
 		}
 
-		return '';
+		return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
 	}
 
 
