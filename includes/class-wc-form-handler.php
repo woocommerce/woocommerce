@@ -30,8 +30,10 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'order_again' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'pay_action' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'add_payment_method_action' ), 20 );
+
+		// May need $wp global to access query vars
+		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
+		add_action( 'wp', array( __CLASS__, 'add_payment_method_action' ), 20 );
 	}
 
 	/**
