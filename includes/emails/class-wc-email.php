@@ -329,7 +329,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_option( $key, $empty_value = null ) {
-		return __( parent::get_option( $key, $empty_value ) );
+		return apply_filters( 'woocommerce_email_get_option', parent::get_option( $key, $empty_value ), $this );
 	}
 
 	/**
