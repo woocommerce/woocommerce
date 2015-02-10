@@ -64,7 +64,7 @@ jQuery( function( $ ) {
 					minimumResultsForSearch: 10,
 					placeholder: $( this ).attr( 'placeholder' ),
 					placeholderOption: 'first',
-					width: 'element'
+					width: '100%',
 				}, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args );
