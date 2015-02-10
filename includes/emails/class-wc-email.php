@@ -312,9 +312,9 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_content_type() {
 		switch ( $this->get_email_type() ) {
-			case "html" :
+			case 'html' :
 				return 'text/html';
-			case "multipart" :
+			case 'multipart' :
 				return 'multipart/alternative';
 			default :
 				return 'text/plain';
@@ -329,7 +329,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_option( $key, $empty_value = null ) {
-		return __( parent::get_option( $key, $empty_value ) );
+		return apply_filters( 'woocommerce_email_get_option', __( parent::get_option( $key, $empty_value ) ), $this );
 	}
 
 	/**
@@ -338,7 +338,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_enabled() {
-		$enabled = $this->enabled == "yes" ? true : false;
+		$enabled = $this->enabled == 'yes' ? true : false;
 
 		return apply_filters( 'woocommerce_email_enabled_' . $this->id, $enabled, $this->object );
 	}
