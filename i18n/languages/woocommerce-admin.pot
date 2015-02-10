@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.3-rc1 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-02-05 08:51:50+00:00\n"
+"POT-Creation-Date: 2015-02-10 14:45:17+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -697,29 +697,29 @@ msgstr ""
 msgid "Reviews"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:35
+#: includes/admin/class-wc-admin-permalink-settings.php:36
 msgid "Product permalink base"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:40
+#: includes/admin/class-wc-admin-permalink-settings.php:41
 msgid "Product category base"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:47
+#: includes/admin/class-wc-admin-permalink-settings.php:48
 msgid "Product tag base"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:54
+#: includes/admin/class-wc-admin-permalink-settings.php:55
 msgid "Product attribute base"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:95
+#: includes/admin/class-wc-admin-permalink-settings.php:96
 msgid ""
 "These settings control the permalinks used for products. These settings "
 "only apply when <strong>not using \"default\" permalinks above</strong>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:115
+#: includes/admin/class-wc-admin-permalink-settings.php:116
 #: includes/admin/class-wc-admin-taxonomies.php:91
 #: includes/admin/class-wc-admin-taxonomies.php:180
 #: includes/admin/settings/class-wc-settings-checkout.php:230
@@ -727,24 +727,24 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:119
+#: includes/admin/class-wc-admin-permalink-settings.php:120
 #: includes/admin/reports/class-wc-report-stock.php:153
 msgid "Product"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:124
+#: includes/admin/class-wc-admin-permalink-settings.php:125
 msgid "Shop base"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:128
+#: includes/admin/class-wc-admin-permalink-settings.php:129
 msgid "Shop base with category"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:134
+#: includes/admin/class-wc-admin-permalink-settings.php:135
 msgid "Custom Base"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:136
+#: includes/admin/class-wc-admin-permalink-settings.php:137
 msgid ""
 "Enter a custom base to use. A base <strong>must</strong> be set or "
 "WordPress will use default instead."
@@ -6168,28 +6168,28 @@ msgctxt "Admin menu name"
 msgid "Orders"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:67
+#: includes/admin/class-wc-admin-permalink-settings.php:68
 msgctxt "slug"
 msgid "product-category"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:77
+#: includes/admin/class-wc-admin-permalink-settings.php:78
 msgctxt "slug"
 msgid "product-tag"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:190
+#: includes/admin/class-wc-admin-permalink-settings.php:191
 msgctxt "slug"
 msgid "product"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:102
-#: includes/admin/class-wc-admin-permalink-settings.php:203
+#: includes/admin/class-wc-admin-permalink-settings.php:103
+#: includes/admin/class-wc-admin-permalink-settings.php:204
 msgctxt "default-slug"
 msgid "shop"
 msgstr ""
 
-#: includes/admin/class-wc-admin-permalink-settings.php:103
+#: includes/admin/class-wc-admin-permalink-settings.php:104
 msgctxt "default-slug"
 msgid "product"
 msgstr ""
