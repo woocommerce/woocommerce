@@ -103,7 +103,8 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			'group_by'     => $this->group_by_query,
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
-			'filter_range' => true
+			'filter_range' => true,
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' )
 		) );
 		?>
 		<table class="widefat">
