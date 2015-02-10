@@ -194,7 +194,12 @@ jQuery( function( $ ) {
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
 			});
-		} )
+		})
+
+		// WooCommerce Backbone Modal
+		.on( 'wc_backbone_modal_before_remove', function() {
+			$( ':input.wc-enhanced-select, :input.wc-product-search, :input.wc-customer-search' ).select2( 'close' );
+		})
 
 		.trigger( 'wc-enhanced-select-init' );
 
