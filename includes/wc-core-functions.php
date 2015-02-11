@@ -681,6 +681,21 @@ function wc_deliver_webhook_async( $webhook_id, $arg ) {
 add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
 
 /**
+ * Enables template debug mode
+ */
+function wc_template_debug_mode() {
+	if ( ! defined( 'WC_TEMPLATE_DEBUG_MODE' ) ) {
+		$status_options = get_option( 'woocommerce_status_options', array() );
+		if ( ! empty( $status_options['template_debug_mode'] ) && current_user_can( 'manage_options' ) ) {
+			define( 'WC_TEMPLATE_DEBUG_MODE', true );
+		} else {
+			define( 'WC_TEMPLATE_DEBUG_MODE', false );
+		}
+	}
+}
+add_action( 'after_setup_theme', 'wc_template_debug_mode', 20 );
+
+/**
  * Formats a string in the format COUNTRY:STATE into an array.
  * @since 2.3.0
  * @param  string $country_string
