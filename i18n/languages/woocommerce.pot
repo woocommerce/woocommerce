@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.3.0 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-02-11 12:24:04+00:00\n"
+"POT-Creation-Date: 2015-02-11 15:00:06+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4666,7 +4666,7 @@ msgstr ""
 
 #: includes/abstracts/abstract-wc-integration.php:29
 #: includes/abstracts/abstract-wc-settings-api.php:77
-#: includes/class-wc-install.php:645 includes/emails/class-wc-email.php:681
+#: includes/class-wc-install.php:642 includes/emails/class-wc-email.php:681
 msgid "Settings"
 msgstr ""
 
@@ -6045,39 +6045,39 @@ msgstr ""
 msgid "Select an option&hellip;"
 msgstr ""
 
-#: includes/class-wc-install.php:418
+#: includes/class-wc-install.php:415
 msgid "Customer"
 msgstr ""
 
-#: includes/class-wc-install.php:425
+#: includes/class-wc-install.php:422
 msgid "Shop Manager"
 msgstr ""
 
-#: includes/class-wc-install.php:645
+#: includes/class-wc-install.php:642
 msgid "View WooCommerce Settings"
 msgstr ""
 
-#: includes/class-wc-install.php:661
+#: includes/class-wc-install.php:658
 msgid "View WooCommerce Documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:661
+#: includes/class-wc-install.php:658
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:662
+#: includes/class-wc-install.php:659
 msgid "View WooCommerce API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:662
+#: includes/class-wc-install.php:659
 msgid "API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:663
+#: includes/class-wc-install.php:660
 msgid "Visit Premium Customer Support Forum"
 msgstr ""
 
-#: includes/class-wc-install.php:663
+#: includes/class-wc-install.php:660
 msgid "Premium Support"
 msgstr ""
 
@@ -9803,42 +9803,42 @@ msgctxt "enhanced select"
 msgid "Searching&hellip;"
 msgstr ""
 
-#: includes/class-wc-install.php:192
+#: includes/class-wc-install.php:189
 msgctxt "Page slug"
 msgid "shop"
 msgstr ""
 
-#: includes/class-wc-install.php:197
+#: includes/class-wc-install.php:194
 msgctxt "Page slug"
 msgid "cart"
 msgstr ""
 
-#: includes/class-wc-install.php:202
+#: includes/class-wc-install.php:199
 msgctxt "Page slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:207
+#: includes/class-wc-install.php:204
 msgctxt "Page slug"
 msgid "my-account"
 msgstr ""
 
-#: includes/class-wc-install.php:193
+#: includes/class-wc-install.php:190
 msgctxt "Page title"
 msgid "Shop"
 msgstr ""
 
-#: includes/class-wc-install.php:198
+#: includes/class-wc-install.php:195
 msgctxt "Page title"
 msgid "Cart"
 msgstr ""
 
-#: includes/class-wc-install.php:203
+#: includes/class-wc-install.php:200
 msgctxt "Page title"
 msgid "Checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:208
+#: includes/class-wc-install.php:205
 msgctxt "Page title"
 msgid "My Account"
 msgstr ""
