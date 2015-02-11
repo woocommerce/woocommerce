@@ -138,6 +138,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - When the geolocation database cannot download, ensure the correct method is used to log the error.
+
 = 2.3.0 - 11/02/2015 =
 * Feature - Option to geo-locate the customer's inital location.
 * Feature - Display taxes in store based on the customer location, rather than the shop base.

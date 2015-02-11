@@ -160,7 +160,7 @@ class WC_Geolocation {
 			}
 			@unlink( $tmp_database );
 		} else {
-			$logger->add( 'geolocation', 'Unable to download GeoIP Database: ' . $tmp_database->get_message() );
+			$logger->add( 'geolocation', 'Unable to download GeoIP Database: ' . $tmp_database->get_error_message() );
 		}
 	}
 
