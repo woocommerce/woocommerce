@@ -298,7 +298,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '">' . $plugin_name . '</a>';
 				}
 
-				if ( strstr( $dirname, 'woocommerce' ) ) {
+				if ( strstr( $dirname, 'woocommerce-' ) ) {
 
 					if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
 						$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
