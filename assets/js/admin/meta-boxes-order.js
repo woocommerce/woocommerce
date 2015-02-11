@@ -250,7 +250,7 @@ jQuery( function ( $ ) {
 				// Refunds
 				.on( 'click', '.delete_refund', this.refunds.delete_refund )
 				.on( 'click', 'button.do-api-refund, button.do-manual-refund', this.refunds.do_refund )
-				.on( 'change', '.refund input.refund_line_total', this.refunds.input_changed )
+				.on( 'change', '.refund input.refund_line_total, .refund input.refund_line_tax', this.refunds.input_changed )
 				.on( 'change keyup', '.wc-order-refund-items #refund_amount', this.refunds.amount_changed )
 				.on( 'change', 'input.refund_order_item_qty', this.refunds.refund_quantity_changed )
 
