@@ -141,6 +141,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - When the geolocation database cannot download, ensure the correct method is used to log the error.
 * Fix - Notice in woocommerce_form_field().
 * Fix - attribute_public notice before DB upgrade.
+* Fix - [products] ids and sku args.
 
 = 2.3.0 - 11/02/2015 =
 * Feature - Option to geo-locate the customer's inital location.

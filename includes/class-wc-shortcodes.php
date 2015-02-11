@@ -348,9 +348,11 @@ class WC_Shortcodes {
 		}
 
 		$atts = shortcode_atts( array(
-			'columns' 	=> '4',
-			'orderby'   => 'title',
-			'order'     => 'asc'
+			'columns' => '4',
+			'orderby' => 'title',
+			'order'   => 'asc',
+			'ids'     => '',
+			'skus'    => ''
 		), $atts );
 
 		$meta_query = WC()->query->get_meta_query();
@@ -365,7 +367,7 @@ class WC_Shortcodes {
 			'meta_query'          => $meta_query
 		);
 
-		if ( isset( $atts['skus'] ) ) {
+		if ( ! empty( $atts['skus'] ) ) {
 			$skus = explode( ',', $atts['skus'] );
 			$skus = array_map( 'trim', $skus );
 			$args['meta_query'][] = array(
@@ -375,7 +377,7 @@ class WC_Shortcodes {
 			);
 		}
 
-		if ( isset( $atts['ids'] ) ) {
+		if ( ! empty( $atts['ids'] ) ) {
 			$ids = explode( ',', $atts['ids'] );
 			$ids = array_map( 'trim', $ids );
 			$args['post__in'] = $ids;
@@ -938,9 +940,10 @@ class WC_Shortcodes {
 			'posts_per_page' => '2',
 			'columns'        => '2',
 			'orderby'        => 'rand',
+			'per_page'       => ''
 		), $atts );
 
-		if ( isset( $atts['per_page'] ) ) {
+		if ( ! empty( $atts['per_page'] ) ) {
 			_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', __( 'Use $args["posts_per_page"] instead. Deprecated argument will be removed in WC 2.2.', 'woocommerce' ) );
 			$atts['posts_per_page'] = $atts['per_page'];
 			unset( $atts['per_page'] );
