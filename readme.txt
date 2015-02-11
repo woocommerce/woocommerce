@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - API - Sales data in API now matches sales data in WooCommerce reports page.
 * Dev - API - Added 'net_sales' data to reports.
 * Dev - API - catalog_visibility is set to visible by default in products API.
+* Dev - API - Added new filter to query for specific products by ID: /products?filter[in] 
 * Dev - Made template debug mode set WC_TEMPLATE_DEBUG_MODE constant and remove all overrides for all template loading functions.
 * Dev - Switched to .scss from .less for all styles.
 * Dev - Included bourbon for scss mixins.
