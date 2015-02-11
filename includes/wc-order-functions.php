@@ -566,7 +566,7 @@ function wc_ship_to_billing_address_only() {
 /**
  * Create a new order refund programmatically
  *
- * Returns a new refund object on success which can then be used to add additonal data.
+ * Returns a new refund object on success which can then be used to add additional data.
  *
  * @since 2.2
  * @param array $args
