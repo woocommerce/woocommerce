@@ -230,7 +230,7 @@ class WC_Cart {
 							// Flag to indicate the stored cart should be update
 							$update_cart_session = true;
 							wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $_product->get_title() ), 'error' );
-							do_action( 'woocommerce_cart_item_removed_from_session', $_product, $values );
+							do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 						} else {
 
