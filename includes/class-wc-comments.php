@@ -180,7 +180,7 @@ class WC_Comments {
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in
-		if ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && '' === $comment_data['comment_type'] && 'yes' === get_option( 'woocommerce_review_rating_required' ) ) {
+		if ( 'product' === get_post_type( $_POST['comment_post_ID'] ) && empty( $_POST['rating'] ) && '' === $comment_data['comment_type'] && 'yes' === get_option( 'woocommerce_review_rating_required' ) ) {
 			wp_die( __( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
@@ -193,7 +193,7 @@ class WC_Comments {
 	 * @param int $comment_id
 	 */
 	public static function add_comment_rating( $comment_id ) {
-		if ( isset( $_POST['rating'] ) ) {
+		if ( isset( $_POST['rating'] ) && 'product' === get_post_type( $_POST['comment_post_ID'] ) ) {
 			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) {
 				return;
 			}
