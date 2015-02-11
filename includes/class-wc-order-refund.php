@@ -20,7 +20,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	public $reason;
 
 	/**
-	 * Init/load the refund object. Called from the contructor.
+	 * Init/load the refund object. Called from the constructor.
 	 *
 	 * @param  string|int|object|WC_Order_Refund $refund Refund to init
 	 * @uses   WP_POST
