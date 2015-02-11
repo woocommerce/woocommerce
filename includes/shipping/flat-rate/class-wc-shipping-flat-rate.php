@@ -208,7 +208,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$extra_cost          = $this->get_extra_cost( $this_option[1], $this_option[2], $package );
 
 			if ( is_array( $extra_rate['cost'] ) ) {
-				$extra_rate['cost']['order'] = $extra_rate['cost'] + $extra_cost;
+				$extra_rate['cost']['order'] = $extra_rate['cost']['order'] + $extra_cost;
 			} else {
 				$extra_rate['cost'] += $extra_cost;
 			}
