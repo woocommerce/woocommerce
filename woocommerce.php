@@ -26,7 +26,7 @@ if ( ! class_exists( 'WooCommerce' ) ) :
  * Main WooCommerce Class
  *
  * @class WooCommerce
- * @version	2.1.0
+ * @version	2.3.0
  */
 final class WooCommerce {
 

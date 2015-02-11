@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.8
 Tested up to: 4.1
-Stable tag: 2.2.11
+Stable tag: 2.3.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -138,7 +138,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.3.0 =
+= 2.3.0 - 11/02/2015 =
 * Feature - Option to geo-locate the customer's inital location.
 * Feature - Display taxes in store based on the customer location, rather than the shop base.
 * Feature - Made tax importer expand postcode ranges.
@@ -180,7 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - API - Sales data in API now matches sales data in WooCommerce reports page.
 * Dev - API - Added 'net_sales' data to reports.
 * Dev - API - catalog_visibility is set to visible by default in products API.
-* Dev - API - Added new filter to query for specific products by ID: /products?filter[in] 
+* Dev - API - Added new filter to query for specific products by ID: /products?filter[in]
 * Dev - Made template debug mode set WC_TEMPLATE_DEBUG_MODE constant and remove all overrides for all template loading functions.
 * Dev - Switched to .scss from .less for all styles.
 * Dev - Included bourbon for scss mixins.
