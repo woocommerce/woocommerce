@@ -99,9 +99,6 @@ class WC_Cart {
 	/** @var array An array of fees. */
 	public $fees                  = array();
 
-	/** @var WC_Tax Stores tax class objected, @deprecated */
-	public $tax;
-
 	/** @var boolean Prices inc tax */
 	public $prices_include_tax;
 
