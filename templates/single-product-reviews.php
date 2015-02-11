@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @version     2.3.2
  */
 global $product;
 
@@ -20,7 +20,7 @@ if ( ! comments_open() ) {
 <div id="reviews">
 	<div id="comments">
 		<h2><?php
-			if ( get_option( 'woocommerce_enable_review_rating' ) === 'yes' && ( $count = $product->get_rating_count() ) )
+			if ( get_option( 'woocommerce_enable_review_rating' ) === 'yes' && ( $count = $product->get_review_count() ) )
 				printf( _n( '%s review for %s', '%s reviews for %s', $count, 'woocommerce' ), $count, get_the_title() );
 			else
 				_e( 'Reviews', 'woocommerce' );

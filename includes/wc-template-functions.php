@@ -964,7 +964,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 		// Reviews tab - shows comments
 		if ( comments_open() ) {
 			$tabs['reviews'] = array(
-				'title'    => sprintf( __( 'Reviews (%d)', 'woocommerce' ), $product->get_rating_count() ),
+				'title'    => sprintf( __( 'Reviews (%d)', 'woocommerce' ), $product->get_review_count() ),
 				'priority' => 30,
 				'callback' => 'comments_template'
 			);
