@@ -81,6 +81,10 @@ abstract class WC_Session {
 	 * @param mixed $value
 	 */
 	public function set( $key, $value ) {
+		if( ! $this->has_session() ) {
+			$this->set_customer_session_cookie( true );
+		}
+
 		if ( $value !== $this->get( $key ) ) {
 			$this->_data[ sanitize_key( $key ) ] = maybe_serialize( $value );
 			$this->_dirty = true;
