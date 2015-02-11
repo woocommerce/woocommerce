@@ -112,7 +112,7 @@ $theme 	= wp_get_theme();
 
 		<p>
 			<a href="<?php echo esc_url( 'http://www.woothemes.com/storefront/' ); ?>" target="_blank" class="button">Read all about it</a>
-			<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php _e( 'Download & install', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php _e( 'Download &amp; install', 'woocommerce' ); ?></a>
 		</p>
 	</div>
 
