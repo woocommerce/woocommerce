@@ -139,6 +139,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 * Fix - Item meta removal query in order class.
+* Fix - Pass correct shipping cost to PayPal.
 
 = 2.3.1 - 11/02/2015 =
 * Fix - When the geolocation database cannot download, ensure the correct method is used to log the error.

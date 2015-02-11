@@ -258,7 +258,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
-		if ( $order->get_total_shipping() > 0 && ! $this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method(), 1, round( $order->get_total_shipping(), 2 ) ) ) ) {
+		if ( $order->get_total_shipping() > 0 && ! $this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, round( $order->get_total_shipping(), 2 ) ) ) {
 			return false;
 		}
 
