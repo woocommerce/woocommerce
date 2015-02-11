@@ -6,10 +6,10 @@
  *
  * This product uses GeoLite2 data created by MaxMind, available from http://www.maxmind.com
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Classes
- * @version     2.3.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Classes
+ * @version  2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

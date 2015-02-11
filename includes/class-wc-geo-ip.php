@@ -1551,7 +1551,7 @@ class WC_Geo_IP {
 			fseek($this->filehandle, $record_pointer, SEEK_SET);
 			$record_buf = fread($this->filehandle, FULL_RECORD_LENGTH);
 		}
-		$record = new geoiprecord;
+		$record = new WC_Geo_IP_Record();
 		$record_buf_pos = 0;
 		$char = ord(substr($record_buf, $record_buf_pos, 1));
 		$record->country_code = $this->GEOIP_COUNTRY_CODES[$char];
@@ -1720,4 +1720,19 @@ class WC_Geo_IP {
 
 		return $buf;
 	}
+}
+
+class WC_Geo_IP_Record {
+	public $country_code;
+	public $country_code3;
+	public $country_name;
+	public $region;
+	public $city;
+	public $postal_code;
+	public $latitude;
+	public $longitude;
+	public $area_code;
+	public $dma_code; # metro and dma code are the same. use metro_code
+	public $metro_code;
+	public $continent_code;
 }
