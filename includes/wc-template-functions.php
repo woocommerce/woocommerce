@@ -1781,7 +1781,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				break;
 			case 'select' :
 
-				$options = '';
+				$options = $field = '';
 
 				if ( ! empty( $args['options'] ) ) {
 					foreach ( $args['options'] as $option_key => $option_text )
