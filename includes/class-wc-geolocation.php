@@ -54,7 +54,16 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_ip_address() {
-		return isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '';
+		if ( isset( $_SERVER['X-Real-IP'] ) ) {
+			return $_SERVER['X-Real-IP'];
+		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			// Proxy servers can send through this header like this: X-Forwarded-For: client1, proxy1, proxy2
+			// Make sure we always only send through the first IP in the list which should always be the client IP.
+			return trim( current( explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
+		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			return $_SERVER['REMOTE_ADDR'];
+		}
+		return '';
 	}
 
 	/**
