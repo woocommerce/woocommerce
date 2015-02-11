@@ -170,13 +170,15 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	private static function geolocate_via_db( $ip_address ) {
-		if ( ! class_exists( 'GeoIP' ) && ! class_exists( 'geoiprecord' ) ) {
-			include_once( 'libraries/geoip.php' );
+		if ( ! class_exists( 'WC_Geo_IP' ) ) {
+			include_once( 'class-wc-geo-ip.php' );
 		}
-		$database     = self::get_local_database_path();
-		$gi           = geoip_open( $database, GEOIP_STANDARD );
-		$country_code = geoip_country_code_by_addr( $gi, $ip_address );
-		geoip_close( $gi );
+		$database = self::get_local_database_path();
+		$gi       = new WC_Geo_IP();
+
+		$gi->geoip_open( $database, 0 );
+		$country_code = $gi->geoip_country_code_by_addr( $ip_address );
+		$gi->geoip_close();
 
 		return sanitize_text_field( strtoupper( $country_code ) );
 	}
