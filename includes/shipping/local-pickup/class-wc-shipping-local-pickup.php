@@ -173,7 +173,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 			$is_available = $this->is_valid_postcode( $package['destination']['postcode'], $package['destination']['country'] );
 		}
 
-		if ( $is_available && $this->get_valid_postcodes() ) {
+		if ( $is_available ) {
 			if ( $this->availability === 'specific' ) {
 				$ship_to_countries = $this->countries;
 			} else {

@@ -143,6 +143,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - attribute_public notice before DB upgrade.
 * Fix - [products] ids and sku args.
 * Fix - Backwards compatibility for (deprecated) $tax variable in WC_Cart.
+* Fix - is_available() check in local pickup.
 
 = 2.3.0 - 11/02/2015 =
 * Feature - Option to geo-locate the customer's inital location.
