@@ -47,6 +47,7 @@ class WC_Geolocation {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
+		add_action( 'woocommerce_installed', array( __CLASS__, 'update_database' ) );
 	}
 
 	/**
