@@ -53,13 +53,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</td>
 			</tr>
 			<tr>
-				<td><?php _e( 'Remove post types on uninstall', 'woocommerce' ); ?></td>
+				<td><?php _e( 'Uninstall on Delete', 'woocommerce' ); ?></td>
 				<td>
 					<p>
 						<label><input type="checkbox" class="checkbox" name="woocommerce_status_options[uninstall_data]" value="1" <?php checked( '1', $options['uninstall_data'] ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
 					</p>
 					<p>
-						<span class="description"><?php _e( 'This tool will delete all product and order post data when uninstalling via Plugins > Delete.', 'woocommerce' ); ?></span>
+						<span class="description"><?php _e( 'This tool will delete all WooCommerce, Product and Order data when uninstalling via Plugins > Delete.', 'woocommerce' ); ?></span>
 					</p>
 				</td>
 			</tr>
