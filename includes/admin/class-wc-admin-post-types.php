@@ -29,9 +29,9 @@ class WC_Admin_Post_Types {
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
 
 		// WP List table columns. Defined here so they are always available for events such as inline editing.
-		add_filter( 'manage_edit-product_columns', array( $this, 'product_columns' ) );
-		add_filter( 'manage_edit-shop_coupon_columns', array( $this, 'shop_coupon_columns' ) );
-		add_filter( 'manage_edit-shop_order_columns', array( $this, 'shop_order_columns' ) );
+		add_filter( 'manage_product_posts_columns', array( $this, 'product_columns' ) );
+		add_filter( 'manage_shop_coupon_posts_columns', array( $this, 'shop_coupon_columns' ) );
+		add_filter( 'manage_shop_order_posts_columns', array( $this, 'shop_order_columns' ) );
 
 		add_action( 'manage_product_posts_custom_column', array( $this, 'render_product_columns' ), 2 );
 		add_action( 'manage_shop_coupon_posts_custom_column', array( $this, 'render_shop_coupon_columns' ), 2 );
@@ -97,14 +97,6 @@ class WC_Admin_Post_Types {
 	 * @return array
 	 */
 	public function product_columns( $existing_columns ) {
-
-		$current_screen = get_current_screen();
-
-		// Check we're on the correct post type
-		if ( 'product' != $current_screen->post_type ) {
-			return $existing_columns;
-		}
-
 		if ( empty( $existing_columns ) && ! is_array( $existing_columns ) ) {
 			$existing_columns = array();
 		}
