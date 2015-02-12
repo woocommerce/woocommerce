@@ -1552,7 +1552,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		);
 
 		$args = wp_parse_args( $args, $defaults );
-		$args = apply_filters( 'woocommerce_form_field_args', $key, $args, $value );
+		$args = apply_filters( 'woocommerce_form_field_args', $args, $key, $value );
 
 		if ( ( ! empty( $args['clear'] ) ) ) {
 			$after = '<div class="clear"></div>';
