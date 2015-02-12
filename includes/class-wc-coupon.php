@@ -354,7 +354,7 @@ class WC_Coupon {
 	 * Ensure coupon is valid for products in the cart is valid or throw exception
 	 */
 	private function validate_product_ids() {
-		if ( sizeof( $this->product_ids ) > 0 ) {
+		if ( sizeof( $this->product_ids ) > 0 && ! $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
 			$valid_for_cart = false;
 			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -373,7 +373,7 @@ class WC_Coupon {
 	 * Ensure coupon is valid for product categories in the cart is valid or throw exception
 	 */
 	private function validate_product_categories() {
-		if ( sizeof( $this->product_categories ) > 0 ) {
+		if ( sizeof( $this->product_categories ) > 0 && ! $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
 			$valid_for_cart = false;
 			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -543,19 +543,19 @@ class WC_Coupon {
 
 		// Specific products get the discount
 		if ( sizeof( $this->product_ids ) > 0 ) {
-
 			if ( in_array( $product->id, $this->product_ids ) || ( isset( $product->variation_id ) && in_array( $product->variation_id, $this->product_ids ) ) || in_array( $product->get_parent(), $this->product_ids ) ) {
 				$valid = true;
 			}
+		}
 
 		// Category discounts
-		} elseif ( sizeof( $this->product_categories ) > 0 ) {
-
+		if ( sizeof( $this->product_categories ) > 0 ) {
 			if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) {
 				$valid = true;
 			}
+		}
 
-		} else {
+		if ( ! sizeof( $this->product_ids ) && ! sizeof( $this->product_categories ) ) {
 			// No product ids - all items discounted
 			$valid = true;
 		}

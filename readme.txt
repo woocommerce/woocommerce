@@ -142,6 +142,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Typo in get_from_name method.
 * Fix - Fix errors during checkout when mb_convert_encoding() is not supported.
 * Fix - Change hooks used to output post columns - fixes columns after quick edit.
+* Fix - Only apply product/cat coupon checks for cart to cart coupons.
 * Tweak - Only run the uninstaller if the "Uninstall on Delete" option is checked in system status.
 
 = 2.3.2 - 12/02/2015 =
