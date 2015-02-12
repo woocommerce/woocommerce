@@ -112,7 +112,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			),
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
-			'filter_range' => true
+			'filter_range' => true,
+			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' )
 		) );
 		?>
 		<table class="widefat">
