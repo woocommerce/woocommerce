@@ -1811,10 +1811,12 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				break;
 			default :
 
-				$field = apply_filters( 'woocommerce_form_field_' . $args['type'], '', $key, $args, $value );
+				$field = '';
 
 				break;
 		}
+
+		$field = apply_filters( 'woocommerce_form_field_' . $args['type'], $field, $key, $args, $value );
 
 		if ( $args['return'] ) {
 			return $field;
