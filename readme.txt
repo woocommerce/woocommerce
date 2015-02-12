@@ -141,6 +141,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - limit_usage_to_x_items option in coupons.
 * Fix - Run coupon codes through html_entity_decode.
 * Fix - Tax by code report for refunds.
+* Fix - Auto-generation of slug when adding new attribute.
 
 = 2.3.3 - 12/02/2015 =
 * Fix - Potential notice with preg_match wildcard search, if used incorrectly.

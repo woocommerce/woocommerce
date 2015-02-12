@@ -81,7 +81,7 @@ class WC_Admin_Attributes {
 		if ( empty( $attribute['attribute_label'] ) ) {
 			$attribute['attribute_label'] = ucfirst( $attribute['attribute_name'] );
 		}
-		if ( empty( $attribute['attribute_label'] ) ) {
+		if ( empty( $attribute['attribute_name'] ) ) {
 			$attribute['attribute_name'] = wc_sanitize_taxonomy_name( $attribute['attribute_label'] );
 		}
 
