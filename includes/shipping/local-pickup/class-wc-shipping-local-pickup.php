@@ -140,7 +140,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 		// Pattern matching
 		foreach ( $codes as $c ) {
-			$pattern = '/^' . str_replace( '_', '[0-9a-zA-Z]', $c ) . '$/i';
+			$pattern = '/^' . str_replace( '_', '[0-9a-zA-Z]', preg_quote( $c ) ) . '$/i';
 			if ( preg_match( $pattern, $postcode ) ) {
 				return true;
 			}

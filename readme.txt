@@ -138,6 +138,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Potential notice with preg_match wildcard search, if used incorrectly.
+
 = 2.3.2 - 12/02/2015 =
 * Fix - Item meta removal query in order class.
 * Fix - Pass correct shipping cost to PayPal.
