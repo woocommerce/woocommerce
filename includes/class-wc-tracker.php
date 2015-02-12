@@ -43,6 +43,12 @@ class WC_Tracker {
 			if ( $last_send && $last_send > apply_filters( 'woocommerce_tracker_last_send_interval', strtotime( '-1 week' ) ) ) {
 				return;
 			}
+		} else {
+			// Make sure there is at least a 10 minute delay between override sends, we dont want duplicate calls due to double clicking links.
+			$last_send = self::get_last_send_time();
+			if ( $last_send && $last_send > strtotime( '-10 minutes' ) ) {
+				return;
+			}
 		}
 
 		$params   = self::get_tracking_data();
