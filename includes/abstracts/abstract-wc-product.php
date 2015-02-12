@@ -1072,26 +1072,13 @@ class WC_Product {
 
 			$where_meta_value = $value ? $wpdb->prepare( " AND meta_value = %d", $value ) : " AND meta_value > 0";
 
-			if ( get_option( 'woocommerce_enable_review_rating' ) == 'yes' && get_option( 'woocommerce_review_rating_required' ) == 'yes' ) {
-
-				$count = $wpdb->get_var( $wpdb->prepare("
-					SELECT COUNT(meta_value) FROM $wpdb->commentmeta
-					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-					WHERE meta_key = 'rating'
-					AND comment_post_ID = %d
-					AND comment_approved = '1'
-				", $this->id ) . $where_meta_value );
-
-			} else {
-
-				$count = $wpdb->get_var( $wpdb->prepare("
-					SELECT COUNT(*) FROM $wpdb->comments
-					WHERE comment_parent = 0
-					AND comment_post_ID = %d
-					AND comment_approved = '1'
-				", $this->id ) );
-
-			}
+			$count = $wpdb->get_var( $wpdb->prepare("
+				SELECT COUNT(meta_value) FROM $wpdb->commentmeta
+				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+				WHERE meta_key = 'rating'
+				AND comment_post_ID = %d
+				AND comment_approved = '1'
+			", $this->id ) . $where_meta_value );
 
 			set_transient( $transient_name, $count, YEAR_IN_SECONDS );
 		}
@@ -1123,6 +1110,34 @@ class WC_Product {
 		}
 
 		return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
+	}
+
+
+	/**
+	 * Get the total amount (COUNT) of reviews.
+	 *
+	 * @since 2.3.2
+	 * @return int The total numver of product reviews
+	 */
+	public function get_review_count() {
+
+		$transient_name = 'wc_review_count_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+
+		if ( false === ( $count = get_transient( $transient_name ) ) ) {
+
+			global $wpdb;
+
+			$count = $wpdb->get_var( $wpdb->prepare("
+				SELECT COUNT(*) FROM $wpdb->comments
+				WHERE comment_parent = 0
+				AND comment_post_ID = %d
+				AND comment_approved = '1'
+			", $this->id ) );
+
+			set_transient( $transient_name, $count, YEAR_IN_SECONDS );
+		}
+
+		return apply_filters( 'woocommerce_product_review_count', $count, $this );
 	}
 
 

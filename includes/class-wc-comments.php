@@ -217,6 +217,7 @@ class WC_Comments {
 		delete_transient( 'wc_rating_count_' . $post_id . '_3' . $transient_version );
 		delete_transient( 'wc_rating_count_' . $post_id . '_4' . $transient_version );
 		delete_transient( 'wc_rating_count_' . $post_id . '_5' . $transient_version );
+		delete_transient( 'wc_review_count_' . $post_id . $transient_version );
 	}
 
 	/**
