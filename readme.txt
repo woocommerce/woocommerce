@@ -138,6 +138,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - limit_usage_to_x_items option in coupons.
+
 = 2.3.3 - 12/02/2015 =
 * Fix - Potential notice with preg_match wildcard search, if used incorrectly.
 * Fix - Typo in get_from_name method.

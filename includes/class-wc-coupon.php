@@ -634,10 +634,12 @@ class WC_Coupon {
 
 		// Handle the limit_usage_to_x_items option
 		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) && ! is_null( $cart_item ) ) {
-			$qty = '' === $this->limit_usage_to_x_items ? $cart_item['quantity'] : min( $this->limit_usage_to_x_items, $cart_item['quantity'] );
-
-			// Reduce limits
-			$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $qty );
+			if ( '' === $this->limit_usage_to_x_items ) {
+				$qty = $cart_item['quantity'];
+			} else {
+				$qty                          = min( $this->limit_usage_to_x_items, $cart_item['quantity'] );
+				$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $qty );
+			}
 
 			if ( $single ) {
 				$discount = ( $discount * $qty ) / $cart_item['quantity'];
