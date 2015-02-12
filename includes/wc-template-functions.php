@@ -1527,7 +1527,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * Outputs a checkout/address form field.
 	 *
 	 * @subpackage	Forms
-	 * @param mixed $key
+	 * @param string $key
 	 * @param mixed $args
 	 * @param string $value (default: null)
 	 * @todo This function needs to be broken up in smaller pieces
@@ -1552,6 +1552,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		);
 
 		$args = wp_parse_args( $args, $defaults );
+		$args = apply_filters( 'woocommerce_form_field_args', $key, $args, $value );
 
 		if ( ( ! empty( $args['clear'] ) ) ) {
 			$after = '<div class="clear"></div>';
