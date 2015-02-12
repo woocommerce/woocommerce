@@ -352,8 +352,7 @@ class Emogrifier {
         $this->copyCssWithMediaToStyleNode($cssParts, $xmlDocument);
 
         if ($this->preserveEncoding) {
-            if ( function_exists('mb_convert_encoding') ) { return mb_convert_encoding($xmlDocument->saveHTML(), self::ENCODING, 'HTML-ENTITIES'); }
-            else { return $xmlDocument->saveHTML(); }
+            return mb_convert_encoding($xmlDocument->saveHTML(), self::ENCODING, 'HTML-ENTITIES');
         } else {
             return $xmlDocument->saveHTML();
         }
@@ -537,8 +536,7 @@ class Emogrifier {
             $bodyWithoutUnprocessableTags = $this->html;
         }
 
-        if ( function_exists('mb_convert_encoding') ) { return mb_convert_encoding($bodyWithoutUnprocessableTags, 'HTML-ENTITIES', self::ENCODING); }
-        else { return $bodyWithoutUnprocessableTags; }
+        return mb_convert_encoding($bodyWithoutUnprocessableTags, 'HTML-ENTITIES', self::ENCODING);
     }
 
     /**
