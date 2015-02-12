@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.3.1 Frontend\n"
+"Project-Id-Version: WooCommerce 2.3.2 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-02-11 18:11:19+00:00\n"
+"POT-Creation-Date: 2015-02-12 00:39:27+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4805,18 +4805,17 @@ msgstr ""
 msgid "Out of stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1118
-#: templates/single-product/rating.php:26
+#: includes/abstracts/abstract-wc-product.php:1105
+#: templates/single-product/rating.php:27
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1120
-#: templates/single-product/rating.php:28
+#: includes/abstracts/abstract-wc-product.php:1107
 #: templates/single-product/review.php:30
 msgid "out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1470
+#: includes/abstracts/abstract-wc-product.php:1485
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -6027,7 +6026,7 @@ msgid "Please select a rating"
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:236
-#: includes/wc-template-functions.php:1579
+#: includes/wc-template-functions.php:1564
 msgid "required"
 msgstr ""
 
@@ -6973,7 +6972,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:75
 #: includes/gateways/paypal/includes/settings-paypal.php:25
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:199
-#: includes/wc-template-functions.php:949
+#: includes/wc-template-functions.php:934
 msgid "Description"
 msgstr ""
 
@@ -8431,90 +8430,90 @@ msgstr ""
 msgid "Variable product"
 msgstr ""
 
-#: includes/wc-template-functions.php:135
+#: includes/wc-template-functions.php:120
 msgid "New products"
 msgstr ""
 
-#: includes/wc-template-functions.php:143
+#: includes/wc-template-functions.php:128
 msgid "New products added to %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:151
+#: includes/wc-template-functions.php:136
 msgid "New products tagged %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:387
+#: includes/wc-template-functions.php:372
 msgid ""
 "This is a demo store for testing purposes &mdash; no orders shall be "
 "fulfilled."
 msgstr ""
 
-#: includes/wc-template-functions.php:406
+#: includes/wc-template-functions.php:391
 msgid "Search Results: &ldquo;%s&rdquo;"
 msgstr ""
 
-#: includes/wc-template-functions.php:409
+#: includes/wc-template-functions.php:394
 msgid "&nbsp;&ndash; Page %s"
 msgstr ""
 
-#: includes/wc-template-functions.php:640
+#: includes/wc-template-functions.php:625
 msgid "Default sorting"
 msgstr ""
 
-#: includes/wc-template-functions.php:641
+#: includes/wc-template-functions.php:626
 msgid "Sort by popularity"
 msgstr ""
 
-#: includes/wc-template-functions.php:642
+#: includes/wc-template-functions.php:627
 msgid "Sort by average rating"
 msgstr ""
 
-#: includes/wc-template-functions.php:643
+#: includes/wc-template-functions.php:628
 msgid "Sort by newness"
 msgstr ""
 
-#: includes/wc-template-functions.php:644
+#: includes/wc-template-functions.php:629
 msgid "Sort by price: low to high"
 msgstr ""
 
-#: includes/wc-template-functions.php:645
+#: includes/wc-template-functions.php:630
 msgid "Sort by price: high to low"
 msgstr ""
 
-#: includes/wc-template-functions.php:958
+#: includes/wc-template-functions.php:943
 #: templates/checkout/form-shipping.php:58
 #: templates/single-product/tabs/additional-information.php:16
 msgid "Additional Information"
 msgstr ""
 
-#: includes/wc-template-functions.php:967
+#: includes/wc-template-functions.php:952
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1051
+#: includes/wc-template-functions.php:1036
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
 msgstr ""
 
-#: includes/wc-template-functions.php:1147
+#: includes/wc-template-functions.php:1132
 msgid "Proceed to Checkout"
 msgstr ""
 
-#: includes/wc-template-functions.php:1266
+#: includes/wc-template-functions.php:1251
 msgid "Place order"
 msgstr ""
 
-#: includes/wc-template-functions.php:1637
+#: includes/wc-template-functions.php:1622
 #: templates/cart/shipping-calculator.php:30
 msgid "Select a country&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1645
+#: includes/wc-template-functions.php:1630
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:1685
+#: includes/wc-template-functions.php:1670
 #: templates/cart/shipping-calculator.php:54
 msgid "Select a state&hellip;"
 msgstr ""
@@ -9586,7 +9585,17 @@ msgstr ""
 msgid "Dimensions"
 msgstr ""
 
-#: templates/single-product/rating.php:31
+#: templates/single-product/rating.php:29
+msgid "out of %s5%s"
+msgstr ""
+
+#: templates/single-product/rating.php:30
+msgid "based on %s customer rating"
+msgid_plural "based on %s customer ratings"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/single-product/rating.php:33
 msgid "%s customer review"
 msgid_plural "%s customer reviews"
 msgstr[0] ""
@@ -9980,7 +9989,7 @@ msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr ""
 
-#: includes/wc-template-functions.php:1221
+#: includes/wc-template-functions.php:1206
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
