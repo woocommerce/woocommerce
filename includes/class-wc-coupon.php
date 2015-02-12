@@ -124,7 +124,7 @@ class WC_Coupon {
 		if ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code ) ) {
 			$this->populate( $coupon );
 			return true;
-		} elseif ( ( $this->id = $this->get_coupon_id_from_code( $code ) ) && $this->code === get_the_title( $this->id ) ) {
+		} elseif ( ( $this->id = $this->get_coupon_id_from_code( $code ) ) && $this->code === apply_filters( 'woocommerce_coupon_code', get_the_title( $this->id ) ) ) {
 			$this->populate();
 			return true;
 		}

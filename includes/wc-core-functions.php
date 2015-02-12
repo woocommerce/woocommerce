@@ -29,6 +29,7 @@ include( 'wc-attribute-functions.php' );
 /**
  * Filters on data used in admin and frontend
  */
+add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
 add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensitive by default
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default
