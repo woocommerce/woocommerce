@@ -144,6 +144,7 @@ class WC_Admin_Notices {
 
 		foreach ( $notices as $notice ) {
 			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+			wp_enqueue_script( 'wc-admin-notices' );
 			add_action( 'admin_notices', array( $this, $this->notices[ $notice ] ) );
 		}
 	}
