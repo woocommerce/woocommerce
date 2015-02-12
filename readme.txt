@@ -145,6 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - When updating shipping in cart, keep shipping calculator in DOM.
 * Fix - WC_TEMPLATE_DEBUG_MODE in admin.
 * Fix - Average product rating when ratings are not required.
+* Fix - attribute_public option.
 
 = 2.3.1 - 11/02/2015 =
 * Fix - When the geolocation database cannot download, ensure the correct method is used to log the error.
