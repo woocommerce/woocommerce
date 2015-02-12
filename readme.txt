@@ -139,6 +139,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 * Fix - Potential notice with preg_match wildcard search, if used incorrectly.
+* Fix - Typo in get_from_name method.
 * Tweak - Only run the uninstaller if the "Uninstall on Delete" option is checked in system status.
 
 = 2.3.2 - 12/02/2015 =
