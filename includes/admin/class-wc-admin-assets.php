@@ -89,6 +89,7 @@ class WC_Admin_Assets {
 		wp_register_script( 'wc-admin-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'accounting', 'round', 'wc-enhanced-select', 'plupload-all', 'stupidtable' ), WC_VERSION );
 		wp_register_script( 'qrcode', WC()->plugin_url() . '/assets/js/admin/jquery.qrcode.min.js', array( 'jquery' ), WC_VERSION );
 		wp_register_script( 'stupidtable', WC()->plugin_url() . '/assets/js/stupidtable/stupidtable' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
+		wp_register_script( 'woocommerce_admin_notices', WC()->plugin_url() . '/assets/js/admin/woocommerce_notices' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 
 		// Chosen is @deprecated (2.3) in favour of select2, but is registered for backwards compat
 		wp_register_script( 'ajax-chosen', WC()->plugin_url() . '/assets/js/chosen/ajax-chosen.jquery' . $suffix . '.js', array( 'jquery', 'chosen' ), WC_VERSION );
@@ -121,6 +122,9 @@ class WC_Admin_Assets {
 		wp_localize_script( 'accounting', 'accounting_params', array(
 			'mon_decimal_point' => wc_get_price_decimal_separator()
 		) );
+
+		// WooCommerce admin notices script should be included on all pages as notices show on any admin page.
+		wp_enqueue_script( 'woocommerce_admin_notices' );
 
 		// WooCommerce admin pages
 		if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
