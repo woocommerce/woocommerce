@@ -251,8 +251,20 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 					</td>
 				</tr>
 				<?php
-			}
-		?>
+			} ?>
+		<tr>
+			<td data-export-label="Is .htaccess writeable"><?php _e( 'Is .htaccess writeable', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site has a .htaccess and is it writeable?', 'woocommerce'  ) . '">[?]</a>'; ?></td>
+			<td>
+			<?php
+				if ( is_writable( untrailingslashit( get_home_path() ) . '/.htaccess' ) ) {
+					echo '<mark class="yes">&#10004</mark>';
+				} else {
+					echo '<mark class="error">&#10005 - ' . __( 'Your <code>.htaccess</code> file is not writeable or does not exist. The permalinks will not work properly.', 'woocommerce' ) . '</mark>' ;
+				}
+			?>
+			</td>
+		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
@@ -475,7 +487,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 
 				}
 
-				if ( ! $error ) echo '<mark class="yes">#' . absint( $page_id ) . ' - ' . str_replace( home_url(), '', get_permalink( $page_id ) ) . '</mark>';
+				if ( ! $error ) echo '<mark class="yes">#' . absint( $page_id ) . ' - ' . sprintf( '<a href="%s" target="_blank" title="%s">%s</a>', get_permalink( $page_id ), __( 'Visit this page', 'woocommerce' ), str_replace( home_url(), '', get_permalink( $page_id ) ) ) . '</mark>';
 
 				echo '</td></tr>';
 			}
