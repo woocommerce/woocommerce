@@ -25,13 +25,13 @@ class WC_Autoloader {
 	 * The Constructor
 	 */
 	public function __construct() {
-		$this->include_path = untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) ) . '/includes/';
-
 		if ( function_exists( "__autoload" ) ) {
 			spl_autoload_register( "__autoload" );
 		}
 
 		spl_autoload_register( array( $this, 'autoload' ) );
+
+		$this->include_path = untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) ) . '/includes/';
 	}
 
 	/**
@@ -62,10 +62,9 @@ class WC_Autoloader {
 	 * @param string $class
 	 */
 	public function autoload( $class ) {
-		$class   = strtolower( $class );
-		$file    = $this->get_file_name_from_class( $class );
-		$path    = '';
-		$success = false;
+		$class = strtolower( $class );
+		$file  = $this->get_file_name_from_class( $class );
+		$path  = '';
 
 		if ( strpos( $class, 'wc_addons_gateway_' ) === 0 ) {
 			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class ), 18 ) . '/';
@@ -81,11 +80,7 @@ class WC_Autoloader {
 			$path = $this->include_path . 'admin/';
 		}
 
-		if ( $path ) {
-			$success = $this->load_file( $path . $file );
-		}
-
-		if ( ! $success && strpos( $class, 'wc_' ) === 0 ) {
+		if ( empty( $path ) || ( ! $this->load_file( $path . $file ) && strpos( $class, 'wc_' ) === 0 ) ) {
 			$this->load_file( $this->include_path . $file );
 		}
 	}
