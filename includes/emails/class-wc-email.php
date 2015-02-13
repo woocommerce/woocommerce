@@ -1,9 +1,4 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Email Class
  *
@@ -14,6 +9,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package     WooCommerce/Classes/Emails
  * @author      WooThemes
  * @extends     WC_Settings_API
+ */
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( class_exists( 'WC_Email' ) ) {
+	return;
+}
+
+/**
+ * WC_Email
  */
 class WC_Email extends WC_Settings_API {
 
