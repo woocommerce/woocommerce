@@ -249,7 +249,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				if ( is_writable( untrailingslashit( get_home_path() ) . '/.htaccess' ) ) {
 					echo '<mark class="yes">&#10004</mark>';
 				} else {
-					echo '<mark class="error">&#10005 - ' . __( 'Your <code>.htaccess</code> file is not writable or does not exist. The permalinks will not work properly.', 'woocommerce' ) . '</mark>' ;
+					echo '<mark class="error">&#10005 - ' . __( 'Your <code>.htaccess</code> file is not writeable or does not exist. The permalinks will not work properly.', 'woocommerce' ) . '</mark>' ;
 				}
 			?>
 			</td>
