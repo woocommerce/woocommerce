@@ -17,7 +17,7 @@ if ( current_user_can( 'install_plugins' ) ) {
 ?>
 
 <div id="message" class="updated woocommerce-message wc-connect">
-	<p><?php _e( '<strong>The Frontend Styles options is deprecated</strong> &#8211; If you want to continue editing the colors of your store is recommended that you install the replacement WooCommerce Colors plugin from WordPress.org.', 'woocommerce' ); ?></p>
+	<p><?php _e( '<strong>The Frontend Style options are deprecated</strong> &#8211; If you want to continue editing the colors of your store we recommended that you install the replacement WooCommerce Colors plugin from WordPress.org.', 'woocommerce' ); ?></p>
 
 	<p class="submit"><a href="<?php echo esc_url( $url ); ?>" class="wc-update-now button-primary"><?php _e( 'Install the new WooCommerce Colors plugin', 'woocommerce' ); ?></a> <a class="skip button" href="<?php echo esc_url( add_query_arg( 'wc-hide-notice', 'frontend_colors' ) ); ?>"><?php _e( 'Hide this notice', 'woocommerce' ); ?></a></p>
 </div>
