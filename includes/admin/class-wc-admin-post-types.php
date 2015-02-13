@@ -502,7 +502,7 @@ class WC_Admin_Post_Types {
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
 							<td class="name">
 								<?php  if ( $_product ) : ?>
-									<?php echo ( wc_product_sku_enabled() && $_product->get_sku() ) ? $_product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $_product->product_id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?></a>
+									<?php echo ( wc_product_sku_enabled() && $_product->get_sku() ) ? $_product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $_product->id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?></a>
 								<?php else : ?>
 									<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>
 								<?php endif; ?>
