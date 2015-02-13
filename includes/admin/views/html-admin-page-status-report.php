@@ -193,7 +193,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				$posting['dom_document']['success'] = true;
 			} else {
 				$posting['dom_document']['success'] = false;
-				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the <a href="%s">DOMDocument</a> class enabled - HTML and Muntipart emails will not work and some shipping plugins which use DOMDocument may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.domdocument.php' ) . '</mark>';
+				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the <a href="%s">DOMDocument</a> class enabled - HTML and Multipart emails will not work and some shipping plugins which use DOMDocument may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.domdocument.php' ) . '</mark>';
 			}
 
 			// WP Remote Post Check
