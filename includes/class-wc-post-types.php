@@ -184,7 +184,7 @@ class WC_Post_types {
 								'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label )
 							),
 						'show_ui'           => false,
-						'query_var'         => false,
+						'query_var'         => 1 === $tax->attribute_public,
 						'rewrite'           => false,
 						'sort'              => false,
 						'public'            => 1 === $tax->attribute_public,
