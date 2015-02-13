@@ -3642,6 +3642,11 @@ img.ui-datepicker-trigger {
 					font-weight: normal;
 					display: block;
 					font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
+
+					del {
+						color: #e74c3c;
+						font-weight: normal;
+					}
 				}
 
 				&:hover {
