@@ -49,7 +49,7 @@ class WC_Tracker {
 				return;
 			}
 		} else {
-			// Make sure there is at least a 10 minute delay between override sends, we dont want duplicate calls due to double clicking links.
+			// Make sure there is at least a 1 hour delay between override sends, we dont want duplicate calls due to double clicking links.
 			$last_send = self::get_last_send_time();
 			if ( $last_send && $last_send > strtotime( '-1 hours' ) ) {
 				return;
