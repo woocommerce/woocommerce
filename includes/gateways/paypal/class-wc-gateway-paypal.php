@@ -104,9 +104,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/webapps/mpp/paypal-popup';
 			break;
 		}
+
 		return $link;
-
-
 	}
 
 	/**
