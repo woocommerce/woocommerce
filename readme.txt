@@ -142,6 +142,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Run coupon codes through html_entity_decode.
 * Fix - Tax by code report for refunds.
 * Fix - Auto-generation of slug when adding new attribute.
+* Fix - Prevented errors when `DOMDocument` is not found (used for your HTML/Multipart emails).
+* Tweak - Added DOMDocument item in the System Status as a requirement.
 * Tweak - Simplify default mode should be 'standard'.
 * Tweak - Set attribte 'query_var' true when public.
 * Tweak - Improvements to refund handling in Taxes by code/date, and sales by date reports. Gross/net excludes refunds.
