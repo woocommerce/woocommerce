@@ -302,7 +302,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_email_type() {
-		return $this->email_type && class_exists( 'Emogrifier' ) ? $this->email_type : 'plain';
+		return $this->email_type && $this->has_inline_css_parser() ? $this->email_type : 'plain';
 	}
 
 	/**
@@ -378,7 +378,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function style_inline( $content ) {
 		// make sure we only inline CSS for html emails
-		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ) ) && class_exists( 'Emogrifier' ) ) {
+		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ) ) && $this->has_inline_css_parser() ) {
 
 			// get CSS styles
 			ob_start();
@@ -497,7 +497,7 @@ class WC_Email extends WC_Settings_API {
 			'plain' => __( 'Plain text', 'woocommerce' )
 		);
 
-		if ( class_exists( 'Emogrifier' ) ) {
+		if ( $this->has_inline_css_parser() ) {
 			$types['html'] = __( 'HTML', 'woocommerce' );
 			$types['multipart'] = __( 'Multipart', 'woocommerce' );
 		}
@@ -828,5 +828,14 @@ class WC_Email extends WC_Settings_API {
 				});
 			" );
 		}
+	}
+
+	/**
+	 * Test with have an inline css parser.
+	 *
+	 * @return bool
+	 */
+	public function has_inline_css_parser() {
+		return class_exists( 'Emogrifier' ) && class_exists( 'DOMDocument' );
 	}
 }
