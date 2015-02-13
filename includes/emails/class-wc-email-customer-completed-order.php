@@ -131,14 +131,14 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 		return ob_get_clean();
 	}
 
-    /**
-     * Initialise Settings Form Fields
-     *
-     * @access public
-     * @return void
-     */
-    function init_form_fields() {
-    	$this->form_fields = array(
+	/**
+	 * Initialise Settings Form Fields
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function init_form_fields() {
+		$this->form_fields = array(
 			'enabled' => array(
 				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
 				'type' 			=> 'checkbox',
@@ -179,14 +179,10 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 				'description' 	=> __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default' 		=> 'html',
 				'class'			=> 'email_type wc-enhanced-select',
-				'options'		=> array(
-					'plain'	 	=> __( 'Plain text', 'woocommerce' ),
-					'html' 			=> __( 'HTML', 'woocommerce' ),
-					'multipart' 	=> __( 'Multipart', 'woocommerce' ),
-				)
+				'options'		=> $this->get_email_type_options()
 			)
 		);
-    }
+	}
 }
 
 endif;

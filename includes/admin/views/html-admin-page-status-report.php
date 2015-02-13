@@ -185,6 +185,17 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				$posting['soap_client']['note']    = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
 			}
 
+			// DOMDocument
+			$posting['dom_document']['name'] = 'DOMDocument';
+			$posting['dom_document']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'HTML/Multipart emails use DOMDocument to generate inline CSS in templates.', 'woocommerce'  ) . '">[?]</a>';
+
+			if ( class_exists( 'DOMDocument' ) ) {
+				$posting['dom_document']['success'] = true;
+			} else {
+				$posting['dom_document']['success'] = false;
+				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the <a href="%s">DOMDocument</a> class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), 'http://php.net/manual/en/class.domdocument.php' ) . '</mark>';
+			}
+
 			// WP Remote Post Check
 			$posting['wp_remote_post']['name'] = __( 'Remote Post', 'woocommerce');
 			$posting['wp_remote_post']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce'  ) . '">[?]</a>';
