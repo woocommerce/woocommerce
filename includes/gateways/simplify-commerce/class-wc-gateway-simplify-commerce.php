@@ -207,7 +207,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				'label'       => __( 'Enable Hosted Payments', 'woocommerce' ),
 				'type'        => 'select',
 				'description' => sprintf( __( 'Standard will display the credit card fields on your store (SSL required). %1$s Hosted Payments will display a Simplify Commerce modal dialog on your store (if SSL) or will redirect the customer to Simplify Commerce hosted page (if not SSL). %1$s Note: Hosted Payments need a new API Key pair with the hosted payments flag selected. %2$sFor more details check the Simplify Commerce docs%3$s.', 'woocommerce' ), '<br />', '<a href="https://simplify.desk.com/customer/portal/articles/1792405-how-do-i-enable-hosted-payments" target="_blank">', '</a>' ),
-				'default'     => 'hosted',
+				'default'     => 'standard',
 				'options'     => array(
 					'standard' => __( 'Standard', 'woocommerce' ),
 					'hosted'   => __( 'Hosted Payments', 'woocommerce' )
