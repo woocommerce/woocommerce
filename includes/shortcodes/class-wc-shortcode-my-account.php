@@ -244,7 +244,7 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		if ( is_multisite() && ! is_user_member_of_blog( $user_data->id, get_current_blog_id() ) ) {
+		if ( is_multisite() && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
 			wc_add_notice( __( 'Invalid username or e-mail.', 'woocommerce' ), 'error' );
 			return false;
 		}
