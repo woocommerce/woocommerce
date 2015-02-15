@@ -1238,17 +1238,26 @@ if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
 	 * @subpackage	Checkout
 	 */
 	function woocommerce_checkout_payment() {
+		$order_button_text = __( 'Place order', 'woocommerce' );
+
 		if ( WC()->cart->needs_payment() ) {
 			$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 			WC()->payment_gateways()->set_current_gateway( $available_gateways );
+
+			// set gateway specific order button text
+			foreach( $available_gateways as $gateway ) {
+				if ( $gateway->chosen && isset( $gateway->order_button_text ) ) {
+					$order_button_text = $gateway->order_button_text;
+				}
+			}
 		} else {
 			$available_gateways = array();
 		}
 
 		wc_get_template( 'checkout/payment.php', array(
 			'checkout'           => WC()->checkout(),
-			'available_gateways' => WC()->payment_gateways()->get_available_payment_gateways(),
-			'order_button_text'  => apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) )
+			'available_gateways' => $available_gateways,
+			'order_button_text'  => apply_filters( 'woocommerce_order_button_text', $order_button_text )
 		) );
 	}
 }
