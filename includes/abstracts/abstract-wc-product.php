@@ -1296,11 +1296,14 @@ class WC_Product {
 			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
 		}
 
-		$query['orderby']  = " ORDER BY RAND()";
 		$query['limits']   = " LIMIT " . absint( $limit ) . " ";
 
 		// Get the posts
 		$related_posts = $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id ) ) );
+		
+		if ( apply_filters( 'woocommerce_product_related_posts_randomize', true, $query, $this->id ) ) {
+			shuffle( $related_posts );
+		}
 
 		return $related_posts;
 	}
