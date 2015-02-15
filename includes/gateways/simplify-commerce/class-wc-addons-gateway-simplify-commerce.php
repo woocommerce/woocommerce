@@ -427,7 +427,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		@ob_clean();
 		header( 'HTTP/1.1 200 OK' );
 
-		$redirect_url = get_permalink( wc_get_page_id( 'cart' ) );
+		$redirect_url = wc_get_page_permalink( 'cart' );
 
 		if ( isset( $_REQUEST['reference'] ) && isset( $_REQUEST['amount'] ) ) {
 			$cart_token  = $_REQUEST['cardToken'];

@@ -99,7 +99,7 @@ class WC_Admin {
 		$prevent_access = apply_filters( 'woocommerce_prevent_admin_access', $prevent_access );
 
 		if ( $prevent_access ) {
-			wp_safe_redirect( get_permalink( wc_get_page_id( 'myaccount' ) ) );
+			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
 		}
 	}

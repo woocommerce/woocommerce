@@ -1889,7 +1889,7 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_checkout_payment_url( $on_checkout = false ) {
 
-		$pay_url = wc_get_endpoint_url( 'order-pay', $this->id, get_permalink( wc_get_page_id( 'checkout' ) ) );
+		$pay_url = wc_get_endpoint_url( 'order-pay', $this->id, wc_get_page_permalink( 'checkout' ) );
 
 		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
 			$pay_url = str_replace( 'http:', 'https:', $pay_url );
@@ -1912,7 +1912,7 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_checkout_order_received_url() {
 
-		$order_received_url = wc_get_endpoint_url( 'order-received', $this->id, get_permalink( wc_get_page_id( 'checkout' ) ) );
+		$order_received_url = wc_get_endpoint_url( 'order-received', $this->id, wc_get_page_permalink( 'checkout' ) );
 
 		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
 			$order_received_url = str_replace( 'http:', 'https:', $order_received_url );
@@ -1932,7 +1932,7 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
-		$cancel_endpoint = get_permalink( wc_get_page_id( 'cart' ) );
+		$cancel_endpoint = wc_get_page_permalink( 'cart' );
 		if ( ! $cancel_endpoint ) {
 			$cancel_endpoint = home_url();
 		}
@@ -1951,7 +1951,7 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_view_order_url() {
 
-		$view_order_url = wc_get_endpoint_url( 'view-order', $this->id, get_permalink( wc_get_page_id( 'myaccount' ) ) );
+		$view_order_url = wc_get_endpoint_url( 'view-order', $this->id, wc_get_page_permalink( 'myaccount' ) );
 
 		return apply_filters( 'woocommerce_get_view_order_url', $view_order_url, $this );
 	}

@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p><?php _e( 'If this was a mistake, just ignore this email and nothing will happen.', 'woocommerce' ); ?></p>
 <p><?php _e( 'To reset your password, visit the following address:', 'woocommerce' ); ?></p>
 <p>
-    <a href="<?php echo esc_url( add_query_arg( array( 'key' => $reset_key, 'login' => rawurlencode( $user_login ) ), wc_get_endpoint_url( 'lost-password', '', get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) ); ?>">
+    <a href="<?php echo esc_url( add_query_arg( array( 'key' => $reset_key, 'login' => rawurlencode( $user_login ) ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) ) ); ?>">
 			<?php _e( 'Click here to reset your password', 'woocommerce' ); ?></a>
 </p>
 <p></p>

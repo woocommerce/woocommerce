@@ -30,13 +30,13 @@ function wc_template_redirect() {
 
 	// When on the checkout with an empty cart, redirect to cart page
 	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && sizeof( WC()->cart->get_cart() ) == 0 && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
-		wp_redirect( get_permalink( wc_get_page_id( 'cart' ) ) );
+		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
 	}
 
 	// Logout
 	elseif ( isset( $wp->query_vars['customer-logout'] ) ) {
-		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) ) );
+		wp_redirect( str_replace( '&amp;', '&', wp_logout_url( wc_get_page_permalink( 'myaccount' ) ) ) );
 		exit;
 	}
 
