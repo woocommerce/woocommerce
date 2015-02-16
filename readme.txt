@@ -145,12 +145,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Auto-generation of slug when adding new attribute.
 * Fix - Prevented errors when `DOMDocument` is not found (used for your HTML/Multipart emails).
 * Fix - Load WC css on user edit screen.
+* Fix - DB error when showing reports by product without selecting a product.
 * Tweak - Added DOMDocument item in the System Status as a requirement.
 * Tweak - Simplify default mode should be 'standard'.
 * Tweak - Set attribte 'query_var' true when public.
 * Tweak - Use wc_get_page_permalink() to get page permalinks.
 * Tweak - Register shop_order post statuses earlier to ensure statuses are registered for cron.
 * Tweak - Improvements to refund handling in Taxes by code/date, and sales by date reports. Gross/net excludes refunds.
+* Tweak - Share data between Sales by Date report and API.
 
 = 2.3.3 - 12/02/2015 =
 * Fix - Potential notice with preg_match wildcard search, if used incorrectly.
