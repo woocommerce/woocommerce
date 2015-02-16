@@ -243,6 +243,7 @@ class WC_Product {
 
 			// Clear caches
 			wp_cache_delete( $this->id, 'post_meta' );
+			unset( $this->stock );
 
 			// Stock status
 			$this->check_stock_status();
@@ -292,6 +293,7 @@ class WC_Product {
 		}
 
 		if ( update_post_meta( $this->id, '_stock_status', $status ) ) {
+			$this->stock_status = $status;
 			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
 		}
 	}

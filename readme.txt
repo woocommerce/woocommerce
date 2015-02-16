@@ -146,6 +146,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Prevented errors when `DOMDocument` is not found (used for your HTML/Multipart emails).
 * Fix - Load WC css on user edit screen.
 * Fix - DB error when showing reports by product without selecting a product.
+* Fix - Stock status when updating out of stock product.
 * Tweak - Added DOMDocument item in the System Status as a requirement.
 * Tweak - Simplify default mode should be 'standard'.
 * Tweak - Set attribte 'query_var' true when public.
