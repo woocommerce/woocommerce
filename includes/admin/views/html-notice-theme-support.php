@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<p><?php printf( __( '<strong>Your theme does not declare WooCommerce support</strong> &#8211; Please read our integration guide or check out our %sStorefront%s theme which is totally free to download and designed specifically for use with WooCommerce :)', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'theme-install.php?theme=storefront' ) ) . '">', '</a>' ); ?></p>
 	<p class="submit">
 		<a href="http://www.woothemes.com/storefront/?utm_source=wpadmin&utm_medium=notice&utm_campaign=Storefront" class="button-primary" target="_blank"><?php _e( 'Find out more about Storefront', 'woocommerce' ); ?></a>
-		<a href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/third-party-custom-theme-compatibility/', 'theme-compatibility' ) ); ?>" class="button"><?php _e( 'Theme integration guide', 'woocommerce' ); ?></a>
+		<a href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/third-party-custom-theme-compatibility/', 'theme-compatibility' ) ); ?>" class="button" target="_blank"><?php _e( 'Theme integration guide', 'woocommerce' ); ?></a>
 		<a class="skip button" href="<?php echo esc_url( add_query_arg( 'wc-hide-notice', 'theme_support' ) ); ?>"><?php _e( 'Hide this notice', 'woocommerce' ); ?></a>
 	</p>
 </div>
