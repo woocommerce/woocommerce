@@ -149,6 +149,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Stock status when updating out of stock product.
 * Fix - Fix place order button text on init.
 * Fix - When duplicating products, handle entities.
+* Fix - Double shop page in breadcrumb and white space issues.
 * Tweak - Added DOMDocument item in the System Status as a requirement.
 * Tweak - Simplify default mode should be 'standard'.
 * Tweak - Set attribte 'query_var' true when public.

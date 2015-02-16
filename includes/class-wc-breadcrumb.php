@@ -221,7 +221,6 @@ class WC_Breadcrumb {
 			$_name = $product_post_type->labels->singular_name;
 		}
 
-		$this->prepend_shop_page();
 		$this->add_crumb( $_name, get_post_type_archive_link( 'product' ) );
 	}
 
