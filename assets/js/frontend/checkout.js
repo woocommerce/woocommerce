@@ -166,6 +166,10 @@ jQuery( function( $ ) {
 				wc_checkout_form.xhr.abort();
 			}
 
+			if ( $( 'form.checkout' ).size() === 0 ) {
+				return;
+			}
+
 			var shipping_methods = [];
 
 			$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function( index, input ) {
