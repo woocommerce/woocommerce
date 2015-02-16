@@ -185,7 +185,7 @@ class WC_API_Reports extends WC_API_Resource {
 			'average_sales'     => $report_data->average_sales,
 			'total_orders'      => $report_data->total_orders,
 			'total_items'       => $report_data->total_items,
-			'total_tax'         => $report_data->total_tax,
+			'total_tax'         => wc_format_decimal( $report_data->total_tax + $report_data->total_shipping_tax, 2 ),
 			'total_shipping'    => $report_data->total_shipping,
 			'total_discount'    => $report_data->total_coupons,
 			'totals_grouped_by' => $this->report->chart_groupby,
