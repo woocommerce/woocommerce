@@ -372,32 +372,30 @@ class WC_Form_Handler {
 
 		// Remove Coupon Codes
 		elseif ( isset( $_GET['remove_coupon'] ) ) {
-
 			WC()->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
-
 		}
 
 		// Remove from cart
 		elseif ( ! empty( $_GET['remove_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+			$cart_item_key = sanitize_text_field( $_GET['remove_item'] );
 
-			$cart_item_key = $_GET['remove_item'];
-			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
-			$product       = wc_get_product( $cart_item['product_id'] );
+			if ( $cart_item = WC()->cart->get_cart_item( $cart_item_key ) ) {
+				WC()->cart->remove_cart_item( $cart_item_key );
 
-			WC()->cart->remove_cart_item( $cart_item_key );
+				$product = wc_get_product( $cart_item['product_id'] );
+				$undo    = WC()->cart->get_undo_url( $cart_item_key );
 
-			$undo = WC()->cart->get_undo_url( $cart_item_key );
+				wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $product ? $product->get_title() : __( 'Item', 'woocommerce' ), '<a href="' . esc_url( $undo ) . '">', '</a>' ) );
+			}
 
-			wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $product->get_title(), '<a href="' . $undo . '">', '</a>' ) );
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : WC()->cart->get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
-
 		}
 
 		// Undo Cart Item
 		elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
-			$cart_item_key = $_GET['undo_item'];
+			$cart_item_key = sanitize_text_field( $_GET['undo_item'] );
 
 			WC()->cart->restore_cart_item( $cart_item_key );
 
