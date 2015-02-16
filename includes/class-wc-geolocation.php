@@ -38,7 +38,6 @@ class WC_Geolocation {
 	private static $geoip_apis = array(
 		'freegeoip'        => 'https://freegeoip.net/json/%s',
 		'telize'           => 'http://www.telize.com/geoip/%s',
-		'ip-api'           => 'http://ip-api.com/json/%s',
 		'geoip-api.meteor' => 'http://geoip-api.meteor.com/lookup/%s'
 	);
 
@@ -202,10 +201,6 @@ class WC_Geolocation {
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					switch ( $service_name ) {
-						case 'ip-api' :
-							$data         = json_decode( $response['body'] );
-							$country_code = isset( $data->countryCode ) ? $data->countryCode : '';
-						break;
 						case 'geoip-api.meteor' :
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->country ) ? $data->country : '';
