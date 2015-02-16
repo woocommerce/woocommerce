@@ -1223,7 +1223,7 @@ class WC_Meta_Box_Product_Data {
 
 			if ( isset( $_POST['_wc_file_urls'] ) ) {
 				$file_names    = isset( $_POST['_wc_file_names'] ) ? array_map( 'wc_clean', $_POST['_wc_file_names'] ) : array();
-				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'wc_clean', $_POST['_wc_file_urls'] ) : array();
+				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'esc_url_raw', $_POST['_wc_file_urls'] ) : array();
 				$file_url_size = sizeof( $file_urls );
 
 				for ( $i = 0; $i < $file_url_size; $i ++ ) {
