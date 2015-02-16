@@ -133,14 +133,6 @@ class WC_Admin_Duplicate_Product {
 			$suffix             = ' ' . __( '(Copy)', 'woocommerce' );
 		}
 
-		$new_post_type          = $post->post_type;
-		$post_content           = str_replace( "'", "''", $post->post_content );
-		$post_content_filtered  = str_replace( "'", "''", $post->post_content_filtered );
-		$post_excerpt           = str_replace( "'", "''", $post->post_excerpt );
-		$post_title             = str_replace( "'", "''", $post->post_title ) . $suffix;
-		$comment_status         = str_replace( "'", "''", $post->comment_status );
-		$ping_status            = str_replace( "'", "''", $post->ping_status );
-
 		// Insert the new template in the post table
 		$wpdb->insert(
 			$wpdb->posts,
@@ -148,14 +140,14 @@ class WC_Admin_Duplicate_Product {
 				'post_author'               => $new_post_author->ID,
 				'post_date'                 => $new_post_date,
 				'post_date_gmt'             => $new_post_date_gmt,
-				'post_content'              => $post_content,
-				'post_content_filtered'     => $post_content_filtered,
-				'post_title'                => $post_title,
-				'post_excerpt'              => $post_excerpt,
+				'post_content'              => $post->post_content,
+				'post_content_filtered'     => $post->post_content_filtered,
+				'post_title'                => $post->post_title . $suffix,
+				'post_excerpt'              => $post->post_excerpt,
 				'post_status'               => $post_status,
-				'post_type'                 => $new_post_type,
-				'comment_status'            => $comment_status,
-				'ping_status'               => $ping_status,
+				'post_type'                 => $post->post_type,
+				'comment_status'            => $post->comment_status,
+				'ping_status'               => $post->ping_status,
 				'post_password'             => $post->post_password,
 				'to_ping'                   => $post->to_ping,
 				'pinged'                    => $post->pinged,
