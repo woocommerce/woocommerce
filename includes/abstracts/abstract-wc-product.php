@@ -1300,6 +1300,8 @@ class WC_Product {
 			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
 		}
 
+		$query = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
+
 		// How many rows total?
 		$max_related_posts_transient_name = 'wc_max_related_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
@@ -1315,7 +1317,7 @@ class WC_Product {
 		$query['limits'] = " LIMIT {$offset}, {$limit} ";
 
 		// Get the posts
-		$related_posts = $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id ) ) );
+		$related_posts = $wpdb->get_col( implode( ' ', $query ) );
 
 		return $related_posts;
 	}
