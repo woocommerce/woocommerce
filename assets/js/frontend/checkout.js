@@ -126,7 +126,7 @@ jQuery( function( $ ) {
 			if ( $( this ).data( 'order_button_text' ) ) {
 				$( '#place_order' ).val( $( this ).data( 'order_button_text' ) );
 			} else {
-				$( '#place_order' ).val( $( '#place_order' ).data( 'value' ) );
+				$( '#place_order' ).val( wc_checkout_params.default_order_button_text );
 			}
 	    },
 	    reset_update_checkout_timer: function() {
