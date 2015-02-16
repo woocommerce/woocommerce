@@ -463,7 +463,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			}
 		}
 
-		wp_redirect( get_permalink( wc_get_page_id( 'cart' ) ) );
+		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit();
 	}
 

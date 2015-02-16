@@ -130,7 +130,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
-			wp_safe_redirect( get_permalink( wc_get_page_id('myaccount') ) );
+			wp_safe_redirect( wc_get_page_permalink( 'myaccount') );
 			exit;
 		}
 	}
@@ -226,7 +226,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_save_account_details', $user->ID );
 
-			wp_safe_redirect( get_permalink( wc_get_page_id( 'myaccount' ) ) );
+			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
 		}
 	}
@@ -238,7 +238,7 @@ class WC_Form_Handler {
 		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) {
 
 			if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
-				wp_redirect( get_permalink( wc_get_page_id( 'cart' ) ) );
+				wp_redirect( wc_get_page_permalink( 'cart' ) );
 				exit;
 			}
 
@@ -803,7 +803,7 @@ class WC_Form_Handler {
 					} elseif ( wp_get_referer() ) {
 						$redirect = wp_get_referer();
 					} else {
-						$redirect = get_permalink( wc_get_page_id( 'myaccount' ) );
+						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
 					// Feedback
@@ -907,7 +907,7 @@ class WC_Form_Handler {
 					wc_set_customer_auth_cookie( $new_customer );
 				}
 
-				wp_safe_redirect( apply_filters( 'woocommerce_registration_redirect', wp_get_referer() ? wp_get_referer() : get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
+				wp_safe_redirect( apply_filters( 'woocommerce_registration_redirect', wp_get_referer() ? wp_get_referer() : wc_get_page_permalink( 'myaccount' ) ) );
 				exit;
 
 			} catch ( Exception $e ) {
