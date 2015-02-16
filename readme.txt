@@ -156,6 +156,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Improvements to refund handling in Taxes by code/date, and sales by date reports. Gross/net excludes refunds.
 * Tweak - Share data between Sales by Date report and API.
 * Tweak - Related posts - replace ORDER BY RAND() with random offset.
+* Tweak - Run item meta label through wc_attribute_label() in admin order page.
 
 = 2.3.3 - 12/02/2015 =
 * Fix - Potential notice with preg_match wildcard search, if used incorrectly.
