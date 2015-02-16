@@ -19,7 +19,7 @@ jQuery( function( $ ) {
 			$( 'body' ).bind( 'init_checkout', this.init_checkout );
 
 			// Payment methods
-			this.$order_review.on( 'click', '.payment_methods input.input-radio', this.payment_method_selected );
+			this.$order_review.on( 'click', 'input[name=payment_method]', this.payment_method_selected );
 
 			// Form submission
 			this.$checkout_form.on( 'submit', this.submit );
@@ -37,7 +37,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
 
 			// Trigger events
-			this.$order_review.find( 'input[name=payment_method]:checked' ).triggerHandler( 'click' );
+			this.$order_review.find( 'input[name=payment_method]:checked' ).trigger( 'click' );
 			this.$checkout_form.find( '#ship-to-different-address input' ).change();
 
 			// Update on page load
@@ -273,7 +273,7 @@ jQuery( function( $ ) {
 					}
 
 					// Trigger click e on selected payment method
-					$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).triggerHandler( 'click' );
+					$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).trigger( 'click' );
 
 					// Fire updated_checkout e
 					$( 'body' ).trigger( 'updated_checkout' );

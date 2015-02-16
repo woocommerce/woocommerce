@@ -147,6 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Load WC css on user edit screen.
 * Fix - DB error when showing reports by product without selecting a product.
 * Fix - Stock status when updating out of stock product.
+* Fix - Fix place order button text on init.
 * Tweak - Added DOMDocument item in the System Status as a requirement.
 * Tweak - Simplify default mode should be 'standard'.
 * Tweak - Set attribte 'query_var' true when public.
