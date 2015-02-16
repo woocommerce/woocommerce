@@ -25,45 +25,6 @@ checks:
 tools:
   external_code_coverage:
     timeout: 600
-
-coding_style:
-    php:
-        indentation:
-            general:
-                use_tabs: true
-        spaces:
-            around_operators:
-                negation: true
-            within:
-                brackets: true
-                array_initializer: true
-                grouping: true
-                function_call: true
-                function_declaration: true
-                if: true
-                for: true
-                while: true
-                switch: true
-                catch: true
-        braces:
-            classes_functions:
-                class: end-of-line
-                function: end-of-line
-                closure: end-of-line
-            if:
-                opening: end-of-line
-            for:
-                opening: end-of-line
-            while:
-                opening: end-of-line
-            do_while:
-                opening: end-of-line
-            switch:
-                opening: end-of-line
-            try:
-                opening: end-of-line
-        upper_lower_casing:
-            keywords:
-                general: lower
-            constants:
-                true_false_null: upper
+    php_code_sniffer:
+        config:
+            standard: "WordPress"
