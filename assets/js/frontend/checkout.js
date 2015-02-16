@@ -161,7 +161,12 @@ jQuery( function( $ ) {
 				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field' ).addClass( 'woocommerce-validated' );
 			}
 		},
-	    update_checkout: function() {
+		update_checkout: function() {
+			// Small timeout to prevent multiple requests when several fields update at the same time
+			wc_checkout_form.reset_update_checkout_timer();
+			wc_checkout_form.updateTimer = setTimeout( wc_checkout_form.update_checkout_action, '5' );
+		},
+	    update_checkout_action: function() {
 	    	if ( wc_checkout_form.xhr ) {
 				wc_checkout_form.xhr.abort();
 			}
