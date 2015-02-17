@@ -227,16 +227,17 @@ function wc_register_order_type( $type, $args = array() ) {
  * @param string $download_id file identifier
  * @param int $product_id product identifier
  * @param WC_Order $order the order
+ * @param  int $qty purchased
  * @return int|bool insert id or false on failure
  */
-function wc_downloadable_file_permission( $download_id, $product_id, $order ) {
+function wc_downloadable_file_permission( $download_id, $product_id, $order, $qty = 1 ) {
 	global $wpdb;
 
 	$user_email = sanitize_email( $order->billing_email );
 	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );
 	$expiry     = trim( get_post_meta( $product_id, '_download_expiry', true ) );
 
-	$limit      = empty( $limit ) ? '' : absint( $limit );
+	$limit      = empty( $limit ) ? '' : absint( $limit ) * $qty;
 
 	// Default value is NULL in the table schema
 	$expiry     = empty( $expiry ) ? null : absint( $expiry );
@@ -312,7 +313,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 				$downloads = $_product->get_files();
 
 				foreach ( array_keys( $downloads ) as $download_id ) {
-					wc_downloadable_file_permission( $download_id, $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'], $order );
+					wc_downloadable_file_permission( $download_id, $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'], $order, $item['qty'] );
 				}
 			}
 		}
