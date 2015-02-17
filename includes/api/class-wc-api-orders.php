@@ -300,7 +300,7 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Get the total number of orders
 	 *
-	 * @since 2.1
+	 * @since 2.4
 	 * @param string $status
 	 * @param array $filter
 	 * @return array
@@ -313,12 +313,28 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			if ( ! empty( $status ) ) {
-				$filter['status'] = $status;
+
+				if ( $status == 'any' ) {
+
+					$order_statuses = array();
+
+					foreach ( wc_get_order_statuses() as $slug => $name ) {
+						$filter['status'] = str_replace( 'wc-', '', $slug );
+						$query = $this->query_orders( $filter );
+						$order_statuses[ str_replace( 'wc-', '', $slug ) ] = (int) $query->found_posts;
+					}
+
+					return array( 'count' => $order_statuses );
+
+				} else {
+					$filter['status'] = $status;
+				}
 			}
 
 			$query = $this->query_orders( $filter );
 
 			return array( 'count' => (int) $query->found_posts );
+
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
