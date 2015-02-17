@@ -1878,20 +1878,6 @@ class WC_AJAX {
 			}
 			foreach ( $line_item_qtys as $item_id => $qty ) {
 				$line_items[ $item_id ]['qty'] = max( $qty, 0 );
-
-				if ( $restock_refunded_items && $qty && isset( $order_items[ $item_id ] ) ) {
-					$order_item = $order_items[ $item_id ];
-					$_product   = $order->get_product_from_item( $order_item );
-
-					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
-						$old_stock    = $_product->stock;
-						$new_quantity = $_product->increase_stock( $qty );
-
-						$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
-
-						do_action( 'woocommerce_restock_refunded_item', $_product->id, $old_stock, $new_quantity, $order );
-					}
-				}
 			}
 			foreach ( $line_item_totals as $item_id => $total ) {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );
@@ -1926,6 +1912,23 @@ class WC_AJAX {
 						throw new Exception( $result->get_error_message() );
 					} elseif ( ! $result ) {
 						throw new Exception( __( 'Refund failed', 'woocommerce' ) );
+					}
+				}
+			}
+
+			// restock items
+			foreach ( $line_item_qtys as $item_id => $qty ) {
+				if ( $restock_refunded_items && $qty && isset( $order_items[ $item_id ] ) ) {
+					$order_item = $order_items[ $item_id ];
+					$_product   = $order->get_product_from_item( $order_item );
+
+					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
+						$old_stock    = wc_stock_amount( $_product->stock );
+						$new_quantity = $_product->increase_stock( $qty );
+
+						$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
+
+						do_action( 'woocommerce_restock_refunded_item', $_product->id, $old_stock, $new_quantity, $order );
 					}
 				}
 			}
