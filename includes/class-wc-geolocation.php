@@ -139,6 +139,8 @@ class WC_Geolocation {
 	 * Update geoip database. Adapted from https://wordpress.org/plugins/geoip-detect/.
 	 */
 	public static function update_database() {
+		$logger = new WC_Logger();
+
 		if ( ! is_callable( 'gzopen' ) ) {
 			$logger->add( 'geolocation', 'Server does not support gzopen' );
 			return;
@@ -147,7 +149,6 @@ class WC_Geolocation {
 		require_once( ABSPATH . 'wp-admin/includes/file.php' );
 
 		$tmp_database = download_url( self::GEOLITE_DB );
-		$logger       = new WC_Logger();
 
 		if ( ! is_wp_error( $tmp_database ) ) {
 			$gzhandle = @gzopen( $tmp_database, 'r' );
