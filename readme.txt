@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Run File URLs through esc_url_raw instead of wc_clean to preserve spaces.
 * Tweak - Small timeout on checkout update action to prevent several triggering at once.
 * Tweak - Restock items AFTER refund, not before.
+* Tweak - If logged in, populate customer data from user meta.
 
 = 2.3.3 - 12/02/2015 =
 * Fix - Potential notice with preg_match wildcard search, if used incorrectly.
