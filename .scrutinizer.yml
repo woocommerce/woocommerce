@@ -13,8 +13,6 @@ checks:
   php:
     code_rating: true
     duplication: true
-    code_rating: true
-    duplication: true
     psr2_switch_declaration: false
     psr2_control_structure_declaration: false
     psr2_class_declaration: false
