@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - When duplicating products, handle entities.
 * Fix - Double shop page in breadcrumb and white space issues.
 * Fix - When purchasing multiple downloadable products (same item), multiply download limit by qty purchased.
+* Fix - Added checks for gzopen to prevent activation errors.
 * Tweak - Added DOMDocument item in the System Status as a requirement.
 * Tweak - Simplify default mode should be 'standard'.
 * Tweak - Set attribte 'query_var' true when public.
@@ -162,6 +163,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Run item meta label through wc_attribute_label() in admin order page.
 * Tweak - Run File URLs through esc_url_raw instead of wc_clean to preserve spaces.
 * Tweak - Small timeout on checkout update action to prevent several triggering at once.
+* Tweak - Restock items AFTER refund, not before.
+* Tweak - If logged in, populate customer data from user meta.
 
 = 2.3.3 - 12/02/2015 =
 * Fix - Potential notice with preg_match wildcard search, if used incorrectly.

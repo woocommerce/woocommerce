@@ -124,7 +124,9 @@ class WC_Install {
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		// Redirect to welcome screen
-		set_transient( '_wc_activation_redirect', 1, HOUR_IN_SECONDS );
+		if ( ! is_network_admin() && ! isset( $_GET['activate-multi'] ) ) {
+			set_transient( '_wc_activation_redirect', 1, 30 );
+		}
 
 		// Trigger action
 		do_action( 'woocommerce_installed' );
