@@ -13,8 +13,6 @@ checks:
   php:
     code_rating: true
     duplication: true
-    code_rating: true
-    duplication: true
     psr2_switch_declaration: false
     psr2_control_structure_declaration: false
     psr2_class_declaration: false
@@ -23,8 +21,8 @@ checks:
     require_php_tag_first: false
 
 tools:
+  php_code_sniffer:
+      config:
+          standard: "WordPress"
   external_code_coverage:
     timeout: 600
-    php_code_sniffer:
-        config:
-            standard: "WordPress"
