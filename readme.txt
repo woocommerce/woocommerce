@@ -139,6 +139,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 * Tweak - Improve category coupon message.
+* Tweak - Don't download GeoIP Database until geolocation option is enabled in settings.
 
 = 2.3.4 - 17/02/2015 =
 * Fix - limit_usage_to_x_items option in coupons.
