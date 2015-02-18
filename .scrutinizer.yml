@@ -23,11 +23,6 @@ checks:
     no_exit: false
     avoid_superglobals: false
     avoid_closing_tag: false
-    upper_lower_casing:
-      keywords:
-        general: lower
-      constants:
-        true_false_null: lower
 
 tools:
   sensiolabs_security_checker: true
@@ -36,3 +31,11 @@ tools:
       standard: "WordPress"
   external_code_coverage:
     timeout: 600
+
+coding_style:
+  php:
+    upper_lower_casing:
+      keywords:
+        general: lower
+      constants:
+        true_false_null: lower
