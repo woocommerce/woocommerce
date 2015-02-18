@@ -151,8 +151,10 @@ class WC_Admin {
 		$wc_pages       = wc_get_screen_ids();
 
 		// Set only wc pages
+		$wc_pages = array_flip( $wc_pages );
 		unset( $wc_pages['profile'] );
 		unset( $wc_pages['user-edit'] );
+		$wc_pages = array_flip( $wc_pages );
 
 		// Add the dashboard pages
 		$wc_pages[] = 'dashboard_page_wc-about';
