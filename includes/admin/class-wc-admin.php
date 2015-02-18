@@ -148,9 +148,19 @@ class WC_Admin {
 	 */
 	public function admin_footer_text( $footer_text ) {
 		$current_screen = get_current_screen();
+		$wc_pages       = wc_get_screen_ids();
+
+		// Set only wc pages
+		unset( $wc_pages['profile'] );
+		unset( $wc_pages['user-edit'] );
+
+		// Add the dashboard pages
+		$wc_pages[] = 'dashboard_page_wc-about';
+		$wc_pages[] = 'dashboard_page_wc-credits';
+		$wc_pages[] = 'dashboard_page_wc-translators';
 
 		// Check to make sure we're on a WooCommerce admin page
-		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, wc_get_screen_ids() ) ) ) {
+		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
 			// Change the footer text
 			$footer_text = sprintf( __( 'If you like <strong>WooCommerce</strong> please leave us a <a href="%1$s" target="_blank">&#9733;&#9733;&#9733;&#9733;&#9733;</a> rating on <a href="%1$s" target="_blank">WordPress.org</a>. A huge thank you from WooThemes in advance!', 'woocommerce' ), 'https://wordpress.org/support/view/plugin-reviews/woocommerce?filter=5#postform' );
 		}

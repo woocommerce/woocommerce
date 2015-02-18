@@ -388,10 +388,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
 	$results = $wpdb->get_results( $wpdb->prepare( "
 		SELECT permissions.*
 		FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
-		LEFT JOIN {$wpdb->posts} as posts ON permissions.order_id = posts.ID
 		WHERE user_id = %d
 		AND permissions.order_id > 0
-		AND posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
 		AND
 			(
 				permissions.downloads_remaining > 0
@@ -414,6 +412,11 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				// new order
 				$order    = wc_get_order( $result->order_id );
 				$_product = null;
+			}
+
+			// Make sure the order exists for this download
+			if ( ! $order ) {
+				continue;
 			}
 
 			// Downloads permitted?

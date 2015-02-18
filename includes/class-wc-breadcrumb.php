@@ -62,10 +62,10 @@ class WC_Breadcrumb {
 			'is_404',
 			'is_attachment',
 			'is_single',
-			'is_page',
 			'is_product_category',
 			'is_product_tag',
 			'is_shop',
+			'is_page',
 			'is_post_type_archive',
 			'is_category',
 			'is_tag',
@@ -214,6 +214,10 @@ class WC_Breadcrumb {
 	 * Shop breadcrumb
 	 */
 	private function add_crumbs_shop() {
+		if ( get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) {
+			return;
+		}
+
 		$_name = wc_get_page_id( 'shop' ) ? get_the_title( wc_get_page_id( 'shop' ) ) : '';
 
 		if ( ! $_name ) {
