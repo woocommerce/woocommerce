@@ -111,7 +111,7 @@ class Emogrifier {
 	 *
 	 * @var boolean
 	 */
-	public $preserveEncoding = FALSE;
+	public $preserveEncoding = false;
 
 	public static $_media = '';
 
@@ -178,7 +178,7 @@ class Emogrifier {
 	 */
 	private function clearCache($key) {
 		$allowedCacheKeys = array(self::CACHE_KEY_CSS, self::CACHE_KEY_SELECTOR, self::CACHE_KEY_XPATH, self::CACHE_KEY_CSS_DECLARATION_BLOCK);
-		if (!in_array($key, $allowedCacheKeys, TRUE)) {
+		if (!in_array($key, $allowedCacheKeys, true)) {
 			throw new InvalidArgumentException('Invalid cache key: ' . $key, 1391822035);
 		}
 
@@ -219,8 +219,8 @@ class Emogrifier {
 	 * @return void
 	 */
 	public function removeUnprocessableHtmlTag($tagName) {
-		$key = array_search($tagName, $this->unprocessableHtmlTags, TRUE);
-		if ($key !== FALSE) {
+		$key = array_search($tagName, $this->unprocessableHtmlTags, true);
+		if ($key !== false) {
 			unset($this->unprocessableHtmlTags[$key]);
 		}
 	}
@@ -249,7 +249,7 @@ class Emogrifier {
 		$this->purgeVisitedNodes();
 
 		$nodesWithStyleAttributes = $xpath->query('//*[@style]');
-		if ($nodesWithStyleAttributes !== FALSE) {
+		if ($nodesWithStyleAttributes !== false) {
 			/** @var $nodeWithStyleAttribute DOMNode */
 			foreach ($nodesWithStyleAttributes as $node) {
 				$normalizedOriginalStyle = preg_replace_callback( '/[A-z\\-]+(?=\\:)/S', array( $this, 'strtolower' ), $node->getAttribute('style') );
@@ -290,7 +290,7 @@ class Emogrifier {
 				$selectors = explode(',', $selectorString[1]);
 				foreach ($selectors as $selector) {
 					// don't process pseudo-elements and behavioral (dynamic) pseudo-classes; ONLY allow structural pseudo-classes
-					if (strpos($selector, ':') !== FALSE && !preg_match('/:\\S+\\-(child|type)\\(/i', $selector)) {
+					if (strpos($selector, ':') !== false && !preg_match('/:\\S+\\-(child|type)\\(/i', $selector)) {
 						continue;
 					}
 
@@ -408,7 +408,7 @@ class Emogrifier {
 	private function getCssFromAllStyleNodes(DOMXPath $xpath) {
 		$styleNodes = $xpath->query('//style');
 
-		if ($styleNodes === FALSE) {
+		if ($styleNodes === false) {
 			return '';
 		}
 
@@ -448,7 +448,7 @@ class Emogrifier {
 	private function getOrCreateHeadElement(DOMDocument $document) {
 		$head = $document->getElementsByTagName('head')->item(0);
 
-		if ($head === NULL) {
+		if ($head === null) {
 			$head = $document->createElement('head');
 			$html = $document->getElementsByTagName('html')->item(0);
 			$html->insertBefore($head, $document->getElementsByTagName('body')->item(0));
@@ -514,9 +514,9 @@ class Emogrifier {
 	private function createXmlDocument() {
 		$xmlDocument = new DOMDocument;
 		$xmlDocument->encoding = self::ENCODING;
-		$xmlDocument->strictErrorChecking = FALSE;
-		$xmlDocument->formatOutput = TRUE;
-		$libXmlState = libxml_use_internal_errors(TRUE);
+		$xmlDocument->strictErrorChecking = false;
+		$xmlDocument->formatOutput = true;
+		$libXmlState = libxml_use_internal_errors(true);
 		$xmlDocument->loadHTML($this->getUnifiedHtml());
 		libxml_clear_errors();
 		libxml_use_internal_errors($libXmlState);
@@ -732,7 +732,7 @@ class Emogrifier {
 		if (in_array(strtolower($match[2]), array('even','odd'))) {
 			$index = strtolower($match[2]) == 'even' ? 0 : 1;
 			return array(self::MULTIPLIER => 2, self::INDEX => $index);
-		} elseif (stripos($match[2], 'n') === FALSE) {
+		} elseif (stripos($match[2], 'n') === false) {
 			// if there is a multiplier
 			$index = intval(str_replace(' ', '', $match[2]));
 			return array(self::INDEX => $index);

@@ -536,7 +536,7 @@ class WC_Email extends WC_Settings_API {
 
 				$f = fopen( $file, 'w+' );
 
-				if ( $f !== FALSE ) {
+				if ( $f !== false ) {
 					fwrite( $f, $code );
 					fclose( $f );
 					$saved = true;
@@ -560,7 +560,7 @@ class WC_Email extends WC_Settings_API {
 
 				$f = fopen( $file, 'w+' );
 
-				if ( $f !== FALSE ) {
+				if ( $f !== false ) {
 					fwrite( $f, $code );
 					fclose( $f );
 					$saved = true;
