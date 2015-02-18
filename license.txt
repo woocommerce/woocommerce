@@ -28,7 +28,7 @@ and
 
   WooCommerce - eCommerce for WordPress
 
-  Copyright 2015 by the contributors
+  WooCommerce is Copyright (c) 2015 WooThemes
 
   WooCommerce is released under the GPL
 
