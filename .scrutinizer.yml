@@ -29,8 +29,6 @@ tools:
   php_code_sniffer:
     config:
       standard: "WordPress"
-  external_code_coverage:
-    timeout: 600
 
 coding_style:
   php:
