@@ -26,14 +26,3 @@ checks:
 
 tools:
   sensiolabs_security_checker: true
-  php_code_sniffer:
-    config:
-      standard: "WordPress"
-
-coding_style:
-  php:
-    upper_lower_casing:
-      keywords:
-        general: lower
-      constants:
-        true_false_null: lower
