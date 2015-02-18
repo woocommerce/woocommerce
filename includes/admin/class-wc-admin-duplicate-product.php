@@ -217,7 +217,7 @@ class WC_Admin_Duplicate_Product {
 	 */
 	private function duplicate_post_taxonomies( $id, $new_id, $post_type ) {
 
-		$taxonomies = get_object_taxonomies( $post_type ); //array("category", "post_tag");
+		$taxonomies = get_object_taxonomies( $post_type );
 
 		foreach ( $taxonomies as $taxonomy ) {
 

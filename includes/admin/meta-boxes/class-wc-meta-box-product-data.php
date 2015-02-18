@@ -421,9 +421,10 @@ class WC_Meta_Box_Product_Data {
 
 						// Output All Set Attributes
 						if ( ! empty( $attributes ) ) {
-							$attribute_keys = array_keys( $attributes );
+							$attribute_keys  = array_keys( $attributes );
+							$attribute_total = sizeof( $attribute_keys );
 
-							for ( $i = 0; $i < sizeof( $attribute_keys ); $i ++ ) {
+							for ( $i = 0; $i < $attribute_total; $i ++ ) {
 								$attribute     = $attributes[ $attribute_keys[ $i ] ];
 								$position      = empty( $attribute['position'] ) ? 0 : absint( $attribute['position'] );
 								$taxonomy      = '';
