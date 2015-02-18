@@ -326,7 +326,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			$payment = Simplify_Payment::createPayment( array(
 				'amount'              => $order->order_total * 100, // In cents
 				'token'               => $cart_token,
-				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name' ) ), $order->get_order_number() ),
+				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
 				'reference'           => $order->id,
 				'card.addressCity'    => $order->billing_city,
@@ -408,7 +408,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'sc-key'       => $this->public_key,
 			'amount'       => $order->order_total * 100,
 			'reference'    => $order->id,
-			'name'         => esc_html( get_bloginfo( 'name' ) ),
+			'name'         => esc_html( get_bloginfo( 'name', 'display' ) ),
 			'description'  => sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ),
 			'receipt'      => 'false',
 			'color'        => $this->modal_color,

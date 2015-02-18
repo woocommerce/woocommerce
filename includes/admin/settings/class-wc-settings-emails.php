@@ -75,7 +75,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'id'       => 'woocommerce_email_from_name',
 				'type'     => 'text',
 				'css'      => 'min-width:300px;',
-				'default'  => esc_attr(get_bloginfo('title')),
+				'default'  => esc_attr(get_bloginfo('title', 'display')),
 				'autoload' => false
 			),
 
@@ -112,7 +112,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'id'       => 'woocommerce_email_footer_text',
 				'css'      => 'width:100%; height: 75px;',
 				'type'     => 'textarea',
-				'default'  => get_bloginfo('title') . ' - ' . __( 'Powered by WooCommerce', 'woocommerce' ),
+				'default'  => get_bloginfo('title', 'display') . ' - ' . __( 'Powered by WooCommerce', 'woocommerce' ),
 				'autoload' => false
 			),
 

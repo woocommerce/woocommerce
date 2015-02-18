@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 echo $email_heading . "\n\n";
 
 if ( $order->has_status( 'pending' ) )
-	echo sprintf( __( 'An order has been created for you on %s. To pay for this order please use the following link: %s', 'woocommerce' ), get_bloginfo( 'name' ), $order->get_checkout_payment_url() ) . "\n\n";
+	echo sprintf( __( 'An order has been created for you on %s. To pay for this order please use the following link: %s', 'woocommerce' ), get_bloginfo( 'name', 'display' ), $order->get_checkout_payment_url() ) . "\n\n";
 
 echo "****************************************************\n\n";
 
