@@ -481,7 +481,7 @@ class WC_Meta_Box_Product_Data {
 
 					foreach ( $product_ids as $product_id ) {
 						$product = wc_get_product( $product_id );
-						$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+						$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
 					}
 
 					echo esc_attr( json_encode( $json_ids ) );
@@ -494,7 +494,7 @@ class WC_Meta_Box_Product_Data {
 
 					foreach ( $product_ids as $product_id ) {
 						$product = wc_get_product( $product_id );
-						$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+						$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
 					}
 
 					echo esc_attr( json_encode( $json_ids ) );
