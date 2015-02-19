@@ -2,9 +2,9 @@
 Contributors: woothemes, mikejolley, jameskoster, claudiosanches, barrykooij
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
-Requires at least: 3.8
+Requires at least: 4.0
 Tested up to: 4.1
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -138,10 +138,36 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Tweak - Improve category coupon message.
+* Tweak - Don't download GeoIP Database until geolocation option is enabled in settings.
+
+= 2.3.4 - 17/02/2015 =
 * Fix - limit_usage_to_x_items option in coupons.
 * Fix - Run coupon codes through html_entity_decode.
 * Fix - Tax by code report for refunds.
 * Fix - Auto-generation of slug when adding new attribute.
+* Fix - Prevented errors when `DOMDocument` is not found (used for your HTML/Multipart emails).
+* Fix - Load WC css on user edit screen.
+* Fix - DB error when showing reports by product without selecting a product.
+* Fix - Stock status when updating out of stock product.
+* Fix - Fix place order button text on init.
+* Fix - When duplicating products, handle entities.
+* Fix - Double shop page in breadcrumb and white space issues.
+* Fix - When purchasing multiple downloadable products (same item), multiply download limit by qty purchased.
+* Fix - Added checks for gzopen to prevent activation errors.
+* Tweak - Added DOMDocument item in the System Status as a requirement.
+* Tweak - Simplify default mode should be 'standard'.
+* Tweak - Set attribte 'query_var' true when public.
+* Tweak - Use wc_get_page_permalink() to get page permalinks.
+* Tweak - Register shop_order post statuses earlier to ensure statuses are registered for cron.
+* Tweak - Improvements to refund handling in Taxes by code/date, and sales by date reports. Gross/net excludes refunds.
+* Tweak - Share data between Sales by Date report and API.
+* Tweak - Related posts - replace ORDER BY RAND() with random offset.
+* Tweak - Run item meta label through wc_attribute_label() in admin order page.
+* Tweak - Run File URLs through esc_url_raw instead of wc_clean to preserve spaces.
+* Tweak - Small timeout on checkout update action to prevent several triggering at once.
+* Tweak - Restock items AFTER refund, not before.
+* Tweak - If logged in, populate customer data from user meta.
 
 = 2.3.3 - 12/02/2015 =
 * Fix - Potential notice with preg_match wildcard search, if used incorrectly.
@@ -1246,5 +1272,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 2.3.3 =
+= 2.3.4 =
 2.3.0 is a major update so it is important that you make backups, test extensions and your theme prior to updating, and ensure extensions are 2.3 compatible. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.

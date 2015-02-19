@@ -65,53 +65,87 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 	 * @return string
 	 */
 	public function get_main_chart() {
-
-		$tax_rows = $this->get_order_report_data( array(
-			'data' => array(
-				'_order_tax' => array(
-					'type'            => 'meta',
-					'function'        => 'SUM',
-					'name'            => 'tax_amount'
-				),
-				'_order_shipping_tax' => array(
-					'type'            => 'meta',
-					'function'        => 'SUM',
-					'name'            => 'shipping_tax_amount'
-				),
-				'_order_total' => array(
-					'type'     => 'meta',
-					'function' => 'SUM',
-					'name'     => 'total_sales'
-				),
-				'_order_shipping' => array(
-					'type'     => 'meta',
-					'function' => 'SUM',
-					'name'     => 'total_shipping'
-				),
-				'ID' => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders',
-					'distinct' => true,
-				),
-				'post_date' => array(
-					'type'     => 'post_data',
-					'function' => '',
-					'name'     => 'post_date'
-				),
+		$query_data = array(
+			'_order_tax' => array(
+				'type'            => 'meta',
+				'function'        => 'SUM',
+				'name'            => 'tax_amount'
 			),
+			'_order_shipping_tax' => array(
+				'type'            => 'meta',
+				'function'        => 'SUM',
+				'name'            => 'shipping_tax_amount'
+			),
+			'_order_total' => array(
+				'type'     => 'meta',
+				'function' => 'SUM',
+				'name'     => 'total_sales'
+			),
+			'_order_shipping' => array(
+				'type'     => 'meta',
+				'function' => 'SUM',
+				'name'     => 'total_shipping'
+			),
+			'ID' => array(
+				'type'     => 'post_data',
+				'function' => 'COUNT',
+				'name'     => 'total_orders',
+				'distinct' => true,
+			),
+			'post_date' => array(
+				'type'     => 'post_data',
+				'function' => '',
+				'name'     => 'post_date'
+			),
+		);
+
+		$tax_rows_orders = $this->get_order_report_data( array(
+			'data'         => $query_data,
 			'group_by'     => $this->group_by_query,
 			'order_by'     => 'post_date ASC',
 			'query_type'   => 'get_results',
 			'filter_range' => true,
-			'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' )
+			'order_types'  => wc_get_order_types( 'sales-reports' ),
+			'order_status' => array( 'completed', 'processing', 'on-hold' )
 		) );
+
+		$tax_rows_partial_refunds = $this->get_order_report_data( array(
+			'data'                => $query_data,
+			'group_by'            => $this->group_by_query,
+			'order_by'            => 'post_date ASC',
+			'query_type'          => 'get_results',
+			'filter_range'        => true,
+			'order_types'         => array( 'shop_order_refund' ),
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ) // Partial refunds inside refunded orders should be ignored
+		) );
+
+		// Merge
+		$tax_rows = array();
+
+		foreach ( $tax_rows_orders as $tax_row ) {
+			$key                                   = date( $this->chart_groupby == 'month' ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
+			$tax_rows[ $key ]                      = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_sales' => 0, 'total_shipping' => 0, 'total_orders' => 0 );
+			$tax_rows[ $key ]->tax_amount          += $tax_row->tax_amount;
+			$tax_rows[ $key ]->shipping_tax_amount += $tax_row->shipping_tax_amount;
+			$tax_rows[ $key ]->total_sales         += $tax_row->total_sales;
+			$tax_rows[ $key ]->total_shipping      += $tax_row->total_shipping;
+			$tax_rows[ $key ]->total_orders        += $tax_row->total_orders;
+		}
+
+		foreach ( $tax_rows_partial_refunds as $tax_row ) {
+			$key                                   = date( $this->chart_groupby == 'month' ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
+			$tax_rows[ $key ]                      = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_sales' => 0, 'total_shipping' => 0, 'total_orders' => 0 );
+			$tax_rows[ $key ]->tax_amount          += $tax_row->tax_amount;
+			$tax_rows[ $key ]->shipping_tax_amount += $tax_row->shipping_tax_amount;
+			$tax_rows[ $key ]->total_sales         += $tax_row->total_sales;
+			$tax_rows[ $key ]->total_shipping      += $tax_row->total_shipping;
+		}
 		?>
 		<table class="widefat">
 			<thead>
 				<tr>
 					<th><?php _e( 'Period', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Orders/refunds', 'woocommerce' ); ?></th>
+					<th class="total_row"><?php _e( 'Number of Orders', 'woocommerce' ); ?></th>
 					<th class="total_row"><?php _e( 'Total Sales', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Order Total' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
 					<th class="total_row"><?php _e( 'Total Shipping', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Shipping Total' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
 					<th class="total_row"><?php _e( 'Total Tax', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ); ?>" href="#">[?]</a></th>
@@ -121,16 +155,16 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 			<?php if ( $tax_rows ) : ?>
 				<tbody>
 					<?php
-					foreach ( $tax_rows as $tax_row ) {
+					foreach ( $tax_rows as $date => $tax_row ) {
 						$gross     = $tax_row->total_sales - $tax_row->total_shipping;
 						$total_tax = $tax_row->tax_amount + $tax_row->shipping_tax_amount;
 						?>
 						<tr>
 							<th scope="row"><?php
 								if ( $this->chart_groupby == 'month' )
-									echo date_i18n( 'F', strtotime( $tax_row->post_date ) );
+									echo date_i18n( 'F', strtotime( $date . '01' ) );
 								else
-									echo date_i18n( get_option( 'date_format' ), strtotime( $tax_row->post_date ) );
+									echo date_i18n( get_option( 'date_format' ), strtotime( $date ) );
 							?></th>
 							<td class="total_row"><?php echo $tax_row->total_orders; ?></td>
 							<td class="total_row"><?php echo wc_price( $gross ); ?></td>

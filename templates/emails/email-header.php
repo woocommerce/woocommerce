@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title><?php echo get_bloginfo( 'name' ); ?></title>
+        <title><?php echo get_bloginfo( 'name', 'display' ); ?></title>
 	</head>
     <body <?php echo is_rtl() ? 'rightmargin' : 'leftmargin'; ?>="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
     	<div id="wrapper">
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<div id="template_header_image">
 	                		<?php
 	                			if ( $img = get_option( 'woocommerce_email_header_image' ) ) {
-	                				echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . get_bloginfo( 'name' ) . '" /></p>';
+	                				echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . get_bloginfo( 'name', 'display' ) . '" /></p>';
 	                			}
 	                		?>
 						</div>

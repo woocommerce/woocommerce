@@ -755,13 +755,11 @@ class WC_Coupon {
 								$cat = get_term( $cat_id, 'product_cat' );
 								$categories[] = $cat->name;
 							}
-
-
 						}
 					}
 				}
 
-				$err = sprintf( __( 'Sorry, this coupon is not applicable to the categories: %s.', 'woocommerce' ), implode( ', ', $categories ) );
+				$err = sprintf( __( 'Sorry, this coupon is not applicable to the categories: %s.', 'woocommerce' ), implode( ', ', array_unique( $categories ) ) );
 				break;
 			case self::E_WC_COUPON_NOT_VALID_SALE_ITEMS:
 				$err = __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' );

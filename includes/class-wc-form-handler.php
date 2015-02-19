@@ -130,7 +130,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
-			wp_safe_redirect( get_permalink( wc_get_page_id('myaccount') ) );
+			wp_safe_redirect( wc_get_page_permalink( 'myaccount') );
 			exit;
 		}
 	}
@@ -226,7 +226,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_save_account_details', $user->ID );
 
-			wp_safe_redirect( get_permalink( wc_get_page_id( 'myaccount' ) ) );
+			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
 		}
 	}
@@ -238,7 +238,7 @@ class WC_Form_Handler {
 		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) {
 
 			if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
-				wp_redirect( get_permalink( wc_get_page_id( 'cart' ) ) );
+				wp_redirect( wc_get_page_permalink( 'cart' ) );
 				exit;
 			}
 
@@ -372,32 +372,30 @@ class WC_Form_Handler {
 
 		// Remove Coupon Codes
 		elseif ( isset( $_GET['remove_coupon'] ) ) {
-
 			WC()->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
-
 		}
 
 		// Remove from cart
 		elseif ( ! empty( $_GET['remove_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+			$cart_item_key = sanitize_text_field( $_GET['remove_item'] );
 
-			$cart_item_key = $_GET['remove_item'];
-			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
-			$product       = wc_get_product( $cart_item['product_id'] );
+			if ( $cart_item = WC()->cart->get_cart_item( $cart_item_key ) ) {
+				WC()->cart->remove_cart_item( $cart_item_key );
 
-			WC()->cart->remove_cart_item( $cart_item_key );
+				$product = wc_get_product( $cart_item['product_id'] );
+				$undo    = WC()->cart->get_undo_url( $cart_item_key );
 
-			$undo = WC()->cart->get_undo_url( $cart_item_key );
+				wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $product ? $product->get_title() : __( 'Item', 'woocommerce' ), '<a href="' . esc_url( $undo ) . '">', '</a>' ) );
+			}
 
-			wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $product->get_title(), '<a href="' . $undo . '">', '</a>' ) );
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : WC()->cart->get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
-
 		}
 
 		// Undo Cart Item
 		elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
-			$cart_item_key = $_GET['undo_item'];
+			$cart_item_key = sanitize_text_field( $_GET['undo_item'] );
 
 			WC()->cart->restore_cart_item( $cart_item_key );
 
@@ -803,7 +801,7 @@ class WC_Form_Handler {
 					} elseif ( wp_get_referer() ) {
 						$redirect = wp_get_referer();
 					} else {
-						$redirect = get_permalink( wc_get_page_id( 'myaccount' ) );
+						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
 					// Feedback
@@ -907,7 +905,7 @@ class WC_Form_Handler {
 					wc_set_customer_auth_cookie( $new_customer );
 				}
 
-				wp_safe_redirect( apply_filters( 'woocommerce_registration_redirect', wp_get_referer() ? wp_get_referer() : get_permalink( wc_get_page_id( 'myaccount' ) ) ) );
+				wp_safe_redirect( apply_filters( 'woocommerce_registration_redirect', wp_get_referer() ? wp_get_referer() : wc_get_page_permalink( 'myaccount' ) ) );
 				exit;
 
 			} catch ( Exception $e ) {

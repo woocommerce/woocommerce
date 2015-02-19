@@ -97,12 +97,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	private function get_icon_url( $country ) {
 		switch ( $country ) {
 			case 'MX' :
-				$link = 'https://www.paypal.com/mx/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
+			case 'ZA' :
+				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
 			break;
 			default :
 				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/webapps/mpp/paypal-popup';
 			break;
 		}
+
 		return $link;
 	}
 

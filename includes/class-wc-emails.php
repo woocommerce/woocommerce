@@ -131,7 +131,7 @@ class WC_Emails {
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
 
 		// include css inliner
-		if ( ! class_exists( 'Emogrifier' ) ) {
+		if ( ! class_exists( 'Emogrifier' ) && class_exists( 'DOMDocument' ) ) {
 			include_once( 'libraries/class-emogrifier.php' );
 		}
 	}

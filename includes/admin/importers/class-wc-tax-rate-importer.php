@@ -106,13 +106,13 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 
 		$loop = 0;
 
-		if ( ( $handle = fopen( $file, "r" ) ) !== FALSE ) {
+		if ( ( $handle = fopen( $file, "r" ) ) !== false ) {
 
 			$header = fgetcsv( $handle, 0, $this->delimiter );
 
 			if ( 10 === sizeof( $header ) ) {
 
-				while ( ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) !== FALSE ) {
+				while ( ( $row = fgetcsv( $handle, 0, $this->delimiter ) ) !== false ) {
 
 					list( $country, $state, $postcode, $city, $rate, $name, $priority, $compound, $shipping, $class ) = $row;
 

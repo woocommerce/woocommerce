@@ -243,6 +243,7 @@ class WC_Product {
 
 			// Clear caches
 			wp_cache_delete( $this->id, 'post_meta' );
+			unset( $this->stock );
 
 			// Stock status
 			$this->check_stock_status();
@@ -292,6 +293,7 @@ class WC_Product {
 		}
 
 		if ( update_post_meta( $this->id, '_stock_status', $status ) ) {
+			$this->stock_status = $status;
 			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
 		}
 	}
@@ -1235,6 +1237,8 @@ class WC_Product {
 	public function get_related( $limit = 5 ) {
 		global $wpdb;
 
+		$limit = absint( $limit );
+
 		// Related products are found from category and tag
 		$tags_array = array(0);
 		$cats_array = array(0);
@@ -1296,11 +1300,24 @@ class WC_Product {
 			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
 		}
 
-		$query['orderby']  = " ORDER BY RAND()";
-		$query['limits']   = " LIMIT " . absint( $limit ) . " ";
+		$query = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
+
+		// How many rows total?
+		$max_related_posts_transient_name = 'wc_max_related_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+
+		if ( false === ( $max_related_posts = get_transient( $max_related_posts_transient_name ) ) ) {
+			$max_related_posts_query           = $query;
+			$max_related_posts_query['fields'] = "SELECT COUNT(DISTINCT ID) FROM {$wpdb->posts} p";
+			$max_related_posts                 = absint( $wpdb->get_var( implode( ' ', apply_filters( 'woocommerce_product_max_related_posts_query', $max_related_posts_query, $this->id ) ) ) );
+			set_transient( $max_related_posts_transient_name, $max_related_posts, YEAR_IN_SECONDS );
+		}
+
+		// Generate limit
+		$offset          = absint( rand( 0, $max_related_posts - $limit ) );
+		$query['limits'] = " LIMIT {$offset}, {$limit} ";
 
 		// Get the posts
-		$related_posts = $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id ) ) );
+		$related_posts = $wpdb->get_col( implode( ' ', $query ) );
 
 		return $related_posts;
 	}

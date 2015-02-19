@@ -37,6 +37,11 @@ class WC_Tracker {
 	 * @return void
 	 */
 	public static function send_tracking_data( $override = false ) {
+		// Dont trigger this on AJAX Requests
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			return;
+		}
+
 		if ( ! apply_filters( 'woocommerce_tracker_send_override', $override ) ) {
 			// Send a maximum of once per week by default.
 			$last_send = self::get_last_send_time();
@@ -44,12 +49,15 @@ class WC_Tracker {
 				return;
 			}
 		} else {
-			// Make sure there is at least a 10 minute delay between override sends, we dont want duplicate calls due to double clicking links.
+			// Make sure there is at least a 1 hour delay between override sends, we dont want duplicate calls due to double clicking links.
 			$last_send = self::get_last_send_time();
-			if ( $last_send && $last_send > strtotime( '-10 minutes' ) ) {
+			if ( $last_send && $last_send > strtotime( '-1 hours' ) ) {
 				return;
 			}
 		}
+
+		// Update time first before sending to ensure it is set
+		update_option( 'woocommerce_tracker_last_send', time() );
 
 		$params   = self::get_tracking_data();
 		$response = wp_remote_post( self::$api_url, array(
@@ -57,15 +65,12 @@ class WC_Tracker {
 				'timeout'     => 45,
 				'redirection' => 5,
 				'httpversion' => '1.0',
-				'blocking'    => true,
+				'blocking'    => false,
 				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url( home_url( '/' ) ) ) . ';' ),
 				'body'        => json_encode( $params ),
 				'cookies'     => array()
 			)
 		);
-		if ( ! is_wp_error( $response ) && '200' == wp_remote_retrieve_response_code( $response ) ) {
-			update_option( 'woocommerce_tracker_last_send', time() );
-		}
 	}
 
 	/**

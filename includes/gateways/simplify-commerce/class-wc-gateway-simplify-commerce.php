@@ -207,7 +207,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				'label'       => __( 'Enable Hosted Payments', 'woocommerce' ),
 				'type'        => 'select',
 				'description' => sprintf( __( 'Standard will display the credit card fields on your store (SSL required). %1$s Hosted Payments will display a Simplify Commerce modal dialog on your store (if SSL) or will redirect the customer to Simplify Commerce hosted page (if not SSL). %1$s Note: Hosted Payments need a new API Key pair with the hosted payments flag selected. %2$sFor more details check the Simplify Commerce docs%3$s.', 'woocommerce' ), '<br />', '<a href="https://simplify.desk.com/customer/portal/articles/1792405-how-do-i-enable-hosted-payments" target="_blank">', '</a>' ),
-				'default'     => 'hosted',
+				'default'     => 'standard',
 				'options'     => array(
 					'standard' => __( 'Standard', 'woocommerce' ),
 					'hosted'   => __( 'Hosted Payments', 'woocommerce' )
@@ -326,7 +326,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			$payment = Simplify_Payment::createPayment( array(
 				'amount'              => $order->order_total * 100, // In cents
 				'token'               => $cart_token,
-				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name' ) ), $order->get_order_number() ),
+				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
 				'reference'           => $order->id,
 				'card.addressCity'    => $order->billing_city,
@@ -408,7 +408,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'sc-key'       => $this->public_key,
 			'amount'       => $order->order_total * 100,
 			'reference'    => $order->id,
-			'name'         => esc_html( get_bloginfo( 'name' ) ),
+			'name'         => esc_html( get_bloginfo( 'name', 'display' ) ),
 			'description'  => sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ),
 			'receipt'      => 'false',
 			'color'        => $this->modal_color,
@@ -463,7 +463,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			}
 		}
 
-		wp_redirect( get_permalink( wc_get_page_id( 'cart' ) ) );
+		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit();
 	}
 

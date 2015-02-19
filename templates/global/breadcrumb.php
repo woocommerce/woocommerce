@@ -11,30 +11,29 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-?>
 
-<?php if ( $breadcrumb ) : ?>
+if ( $breadcrumb ) {
 
-	<?php echo $wrap_before; ?>
+	echo $wrap_before;
 
-	<?php foreach ( $breadcrumb as $key => $crumb ) : ?>
+	foreach ( $breadcrumb as $key => $crumb ) {
 
-		<?php echo $before; ?>
+		echo $before;
 
-		<?php if ( ! empty( $crumb[1] ) && sizeof( $breadcrumb ) !== $key + 1 ) : ?>
-			<?php echo '<a href="' . esc_url( $crumb[1] ) . '">' . esc_html( $crumb[0] ) . '</a>'; ?>
-		<?php else : ?>
-			<?php echo esc_html( $crumb[0] ); ?>
-		<?php endif; ?>
+		if ( ! empty( $crumb[1] ) && sizeof( $breadcrumb ) !== $key + 1 ) {
+			echo '<a href="' . esc_url( $crumb[1] ) . '">' . esc_html( $crumb[0] ) . '</a>';
+		} else {
+			echo esc_html( $crumb[0] );
+		}
 
-		<?php echo $after; ?>
+		echo $after;
 
-		<?php if ( sizeof( $breadcrumb ) !== $key + 1 ) : ?>
-			<?php echo $delimiter; ?>
-		<?php endif; ?>
+		if ( sizeof( $breadcrumb ) !== $key + 1 ) {
+			echo $delimiter;
+		}
 
-	<?php endforeach; ?>
+	}
 
-	<?php echo $wrap_after; ?>
+	echo $wrap_after;
 
-<?php endif; ?>
+}

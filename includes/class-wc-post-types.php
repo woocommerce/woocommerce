@@ -26,7 +26,7 @@ class WC_Post_types {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_post_types' ), 5 );
-		add_action( 'init', array( __CLASS__, 'register_post_status' ), 10 );
+		add_action( 'init', array( __CLASS__, 'register_post_status' ), 9 );
 		add_action( 'init', array( __CLASS__, 'support_jetpack_omnisearch' ) );
 	}
 
@@ -184,7 +184,7 @@ class WC_Post_types {
 								'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label )
 							),
 						'show_ui'           => false,
-						'query_var'         => false,
+						'query_var'         => 1 === $tax->attribute_public,
 						'rewrite'           => false,
 						'sort'              => false,
 						'public'            => 1 === $tax->attribute_public,

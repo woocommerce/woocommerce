@@ -161,7 +161,7 @@ class WC_Admin_Report {
 
 		if ( ! empty( $parent_order_status ) ) {
 			$query['where'] .= "
-				AND 	parent.post_status 	IN ( 'wc-" . implode( "','wc-", $parent_order_status ) . "')
+				AND ( parent.post_status IN ( 'wc-" . implode( "','wc-", $parent_order_status ) . "') OR parent.ID IS NULL )
 			";
 		}
 

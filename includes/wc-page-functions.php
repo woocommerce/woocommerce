@@ -51,6 +51,18 @@ function wc_get_page_id( $page ) {
 }
 
 /**
+ * Retrieve page permalink
+ *
+ * @param string $page
+ * @return string
+ */
+function wc_get_page_permalink( $page ) {
+	$permalink = get_permalink( wc_get_page_id( $page ) );
+	
+	return apply_filters( 'woocommerce_get_' . $page . '_page_permalink', $permalink );	
+}
+
+/**
  * Get endpoint URL
  *
  * Gets the URL for an endpoint, which varies depending on permalink settings.
@@ -112,7 +124,7 @@ function wc_edit_address_i18n( $id, $flip = false ) {
  * @return string
  */
 function wc_lostpassword_url() {
-    return wc_get_endpoint_url( 'lost-password', '', get_permalink( wc_get_page_id( 'myaccount' ) ) );
+    return wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) );
 }
 add_filter( 'lostpassword_url',  'wc_lostpassword_url', 10, 0 );
 
@@ -123,7 +135,7 @@ add_filter( 'lostpassword_url',  'wc_lostpassword_url', 10, 0 );
  * @return string
  */
 function wc_customer_edit_account_url() {
-	$edit_account_url = wc_get_endpoint_url( 'edit-account', '', get_permalink( wc_get_page_id( 'myaccount' ) ) );
+	$edit_account_url = wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) );
 
 	return apply_filters( 'woocommerce_customer_edit_account_url', $edit_account_url );
 }

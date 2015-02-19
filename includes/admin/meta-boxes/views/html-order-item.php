@@ -83,20 +83,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						// Get attribute data
 						if ( taxonomy_exists( wc_sanitize_taxonomy_name( $meta['meta_key'] ) ) ) {
-							$term           = get_term_by( 'slug', $meta['meta_value'], wc_sanitize_taxonomy_name( $meta['meta_key'] ) );
-							$attribute_name = str_replace( 'pa_', '', wc_sanitize_taxonomy_name( $meta['meta_key'] ) );
-							$attribute      = $wpdb->get_var(
-								$wpdb->prepare( "
-										SELECT attribute_label
-										FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
-										WHERE attribute_name = %s;
-									",
-									$attribute_name
-								)
-							);
-
-							$meta['meta_key']   = ( ! is_wp_error( $attribute ) && $attribute ) ? $attribute : $attribute_name;
-							$meta['meta_value'] = ( isset( $term->name ) ) ? $term->name : $meta['meta_value'];
+							$term               = get_term_by( 'slug', $meta['meta_value'], wc_sanitize_taxonomy_name( $meta['meta_key'] ) );
+							$meta['meta_key']   = wc_attribute_label( wc_sanitize_taxonomy_name( $meta['meta_key'] ) );
+							$meta['meta_value'] = isset( $term->name ) ? $term->name : $meta['meta_value'];
+						} else {
+							$meta['meta_key']   = apply_filters( 'woocommerce_attribute_label', $meta['meta_key'], $meta['meta_key'] );
 						}
 
 						echo '<tr><th>' . wp_kses_post( rawurldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( make_clickable( rawurldecode( $meta['meta_value'] ) ) ) ) . '</td></tr>';

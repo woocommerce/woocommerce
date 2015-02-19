@@ -17,11 +17,10 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 * Constructor
 	 */
 	public function __construct() {
-
 		if ( isset( $_GET['product_ids'] ) && is_array( $_GET['product_ids'] ) ) {
-			$this->product_ids = array_map( 'absint', $_GET['product_ids'] );
+			$this->product_ids = array_filter( array_map( 'absint', $_GET['product_ids'] ) );
 		} elseif ( isset( $_GET['product_ids'] ) ) {
-			$this->product_ids = array( absint( $_GET['product_ids'] ) );
+			$this->product_ids = array_filter( array( absint( $_GET['product_ids'] ) ) );
 		}
 	}
 
