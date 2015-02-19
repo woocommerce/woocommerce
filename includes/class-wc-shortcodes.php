@@ -182,6 +182,8 @@ class WC_Shortcodes {
 
 			<?php woocommerce_product_loop_end(); ?>
 
+			<?php do_action( 'woocommerce_product_category_shortcode_after_loop' ); ?>
+
 		<?php endif;
 
 		woocommerce_reset_loop();
