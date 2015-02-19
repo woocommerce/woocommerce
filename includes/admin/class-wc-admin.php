@@ -174,7 +174,7 @@ class WC_Admin {
 			}
 		}
 
-		return $footer_text;
+		return apply_filters( 'woocommerce_admin_footer_text', '<span id="footer-thankyou">' . $footer_text . '</span>' );
 	}
 }
 
