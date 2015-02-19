@@ -21,6 +21,7 @@ function wc_page_endpoint_title( $title ) {
 		if ( $endpoint_title = WC()->query->get_endpoint_title( $endpoint ) ) {
 			$title = $endpoint_title;
 		}
+		remove_filter( 'the_title', 'wc_page_endpoint_title' );
 	}
 	return $title;
 }
@@ -58,8 +59,8 @@ function wc_get_page_id( $page ) {
  */
 function wc_get_page_permalink( $page ) {
 	$permalink = get_permalink( wc_get_page_id( $page ) );
-	
-	return apply_filters( 'woocommerce_get_' . $page . '_page_permalink', $permalink );	
+
+	return apply_filters( 'woocommerce_get_' . $page . '_page_permalink', $permalink );
 }
 
 /**
