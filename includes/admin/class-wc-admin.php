@@ -164,7 +164,17 @@ class WC_Admin {
 		// Check to make sure we're on a WooCommerce admin page
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
 			// Change the footer text
-			$footer_text = sprintf( __( 'If you like <strong>WooCommerce</strong> please leave us a <a href="%1$s" target="_blank">&#9733;&#9733;&#9733;&#9733;&#9733;</a> rating on <a href="%1$s" target="_blank">WordPress.org</a>. A huge thank you from WooThemes in advance!', 'woocommerce' ), 'https://wordpress.org/support/view/plugin-reviews/woocommerce?filter=5#postform' );
+			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {
+				$footer_text = sprintf( __( 'If you like <strong>WooCommerce</strong> please leave us a %s&#9733;&#9733;&#9733;&#9733;&#9733;%s rating. A huge thank you from WooThemes in advance!', 'woocommerce' ), '<a href="https://wordpress.org/support/view/plugin-reviews/woocommerce?filter=5#postform" target="_blank" class="wc-rating-link" data-rated="' . __( 'Thanks :)', 'woocommerce' ) . '">', '</a>' );
+				wc_enqueue_js( "
+					jQuery('a.wc-rating-link').click(function() {
+						jQuery.post( '" . WC()->ajax_url() . "', { action: 'woocommerce_rated' } );
+						jQuery(this).parent().text( jQuery(this).data( 'rated' ) );
+					});
+				" );
+			} else {
+				$footer_text = __( 'Thank you for selling with WooCommerce.', 'woocommerce' );
+			}
 		}
 
 		return $footer_text;

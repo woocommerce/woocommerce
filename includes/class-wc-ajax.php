@@ -65,7 +65,8 @@ class WC_AJAX {
 			'term_ordering'                                    => false,
 			'product_ordering'                                 => false,
 			'refund_line_items'                                => false,
-			'delete_refund'                                    => false
+			'delete_refund'                                    => false,
+			'rated'                                            => false
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -1967,6 +1968,14 @@ class WC_AJAX {
 			wp_delete_post( $refund_id );
 		}
 
+		die();
+	}
+
+	/**
+	 * Triggered when clicking the rating footer.
+	 */
+	public static function rated() {
+		update_option( 'woocommerce_admin_footer_text_rated', 1 );
 		die();
 	}
 }
