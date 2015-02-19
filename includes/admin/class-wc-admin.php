@@ -10,11 +10,11 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
- * WC_Admin class.
+ * WC_Admin Class
  */
 class WC_Admin {
 
@@ -63,10 +63,9 @@ class WC_Admin {
 	}
 
 	/**
-	 * Include admin files conditionally
+	 * Include admin files conditionally.
 	 */
 	public function conditonal_includes() {
-
 		$screen = get_current_screen();
 
 		switch ( $screen->id ) {
@@ -86,7 +85,7 @@ class WC_Admin {
 	}
 
 	/**
-	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin
+	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin.
 	 */
 	public function prevent_admin_access() {
 
@@ -106,7 +105,6 @@ class WC_Admin {
 
 	/**
 	 * Preview email template
-	 *
 	 * @return string
 	 */
 	public function preview_emails() {
@@ -141,7 +139,6 @@ class WC_Admin {
 
 	/**
 	 * Change the admin footer text on WooCommerce admin pages
-	 *
 	 * @since  2.3
 	 * @param  string $footer_text
 	 * @return string
@@ -177,9 +174,8 @@ class WC_Admin {
 			}
 		}
 
-		return $footer_text;
+		return apply_filters( 'woocommerce_admin_footer_text', '<span id="footer-thankyou">' . $footer_text . '</span>' );
 	}
-
 }
 
 return new WC_Admin();
