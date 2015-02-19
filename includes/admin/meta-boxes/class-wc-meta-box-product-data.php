@@ -1223,15 +1223,18 @@ class WC_Meta_Box_Product_Data {
 			$files = array();
 
 			if ( isset( $_POST['_wc_file_urls'] ) ) {
-				$file_names    = isset( $_POST['_wc_file_names'] ) ? array_map( 'wc_clean', $_POST['_wc_file_names'] ) : array();
-				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'esc_url_raw', $_POST['_wc_file_urls'] ) : array();
+				$file_names    = isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array();
+				$file_urls     = isset( $_POST['_wc_file_urls'] )  ? array_map( 'trim', $_POST['_wc_file_urls'] ) : array();
 				$file_url_size = sizeof( $file_urls );
 
 				for ( $i = 0; $i < $file_url_size; $i ++ ) {
 					if ( ! empty( $file_urls[ $i ] ) ) {
-						$files[ md5( $file_urls[ $i ] ) ] = array(
-							'name' => $file_names[ $i ],
-							'file' => $file_urls[ $i ]
+						$file_url            = 0 === strpos( $file_urls[ $i ], '[' ) ? wc_clean( $file_urls[ $i ] ) : esc_url_raw( $file_urls[ $i ] );
+						$file_name           = wc_clean( $file_names[ $i ] );
+						$file_hash           = md5( $file_url );
+						$files[ $file_hash ] = array(
+							'name' => $file_name,
+							'file' => $file_url
 						);
 					}
 				}
