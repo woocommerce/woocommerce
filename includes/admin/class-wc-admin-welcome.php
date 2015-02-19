@@ -186,6 +186,15 @@ class WC_Admin_Welcome {
 
 		// Drop minor version if 0
 		$major_version = substr( WC()->version, 0, 3 );
+
+		// Random tweet - must be kept to 102 chars to "fit"
+		$tweets        = array(
+			'WooCommerce kickstarts online stores. It\'s free and has been downloaded over 6 million times.',
+			'Building an online store? WooCommerce is the leading #eCommerce plugin for WordPress (and it\'s free).',
+			'WooCommerce is a free #eCommerce plugin for #WordPress for selling #allthethings online, beautifully.',
+			'Ready to ship your idea? WooCommerce is the fastest growing #eCommerce plugin for WordPress on the web'
+		);
+		shuffle( $tweets );
 		?>
 		<h1><?php printf( __( 'Welcome to WooCommerce %s', 'woocommerce' ), $major_version ); ?></h1>
 
@@ -208,7 +217,7 @@ class WC_Admin_Welcome {
 		<p class="woocommerce-actions">
 			<a href="<?php echo admin_url('admin.php?page=wc-settings'); ?>" class="button button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a>
 			<a href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'woocommerce' ) ); ?>" class="docs button button-primary"><?php _e( 'Docs', 'woocommerce' ); ?></a>
-			<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
+			<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
 			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 		</p>
 
