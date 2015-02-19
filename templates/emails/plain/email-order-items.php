@@ -29,7 +29,7 @@ foreach ( $items as $item_id => $item ) :
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
 		// Variation
-		echo $item_meta->meta ? "\n" . $item_meta->display( true, true ) : '';
+		echo ( $item_meta_content = $item_meta->display( true, true ) ) ? "\n" . $item_meta_content : '';
 
 		// Quantity
 		echo "\n" . sprintf( __( 'Quantity: %s', 'woocommerce' ), $item['qty'] );
