@@ -143,6 +143,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Unhook wc_page_endpoint_title after it is ran once (main page title).
 * Fix - Taxes save issue when page is paginated.
 * Fix - Cross/up-sells should not search variations.
+* Tweak - Round report values.
 * Tweak - Text in plain text emails.
 * Tweak - Improve category coupon message.
 * Tweak - Don't download GeoIP Database until geolocation option is enabled in settings.
