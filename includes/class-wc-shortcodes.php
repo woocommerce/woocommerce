@@ -172,6 +172,8 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
+			<?php do_action( 'woocommerce_shortcode_before_product_cat_loop' ); ?>
+
 			<?php woocommerce_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
@@ -182,7 +184,7 @@ class WC_Shortcodes {
 
 			<?php woocommerce_product_loop_end(); ?>
 
-			<?php do_action( 'woocommerce_product_category_shortcode_after_loop' ); ?>
+			<?php do_action( 'woocommerce_shortcode_after_product_cat_loop' ); ?>
 
 		<?php endif;
 
