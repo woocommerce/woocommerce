@@ -1313,7 +1313,7 @@ class WC_Product {
 		}
 
 		// Generate limit
-		$offset          = absint( rand( 0, $max_related_posts - $limit ) );
+		$offset          = $max_related_posts < $limit ? 0 : absint( rand( 0, $max_related_posts - $limit ) );
 		$query['limits'] = " LIMIT {$offset}, {$limit} ";
 
 		// Get the posts
