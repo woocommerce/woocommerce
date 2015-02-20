@@ -382,6 +382,19 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
+	 * Round our totals correctly
+	 * @param  string $amount
+	 * @return string
+	 */
+	private function round_chart_totals( $amount ) {
+		if ( is_array( $amount ) ) {
+			return array_map( array( $this, 'round_chart_totals' ), $amount );
+		} else {
+			return wc_format_decimal( $amount, wc_get_price_decimals() );
+		}
+	}
+
+	/**
 	 * Get the main chart
 	 *
 	 * @return string
@@ -410,11 +423,11 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$chart_data = json_encode( array(
 			'order_counts'      => array_values( $order_counts ),
 			'order_item_counts' => array_values( $order_item_counts ),
-			'order_amounts'     => array_values( $order_amounts ),
-			'net_order_amounts' => array_values( $net_order_amounts ),
-			'shipping_amounts'  => array_values( $shipping_amounts ),
-			'coupon_amounts'    => array_values( $coupon_amounts ),
-			'refund_amounts'    => array_values( $refund_amounts )
+			'order_amounts'     => array_map( array( $this, 'round_chart_totals' ), array_values( $order_amounts ) ),
+			'net_order_amounts' => array_map( array( $this, 'round_chart_totals' ), array_values( $net_order_amounts ) ),
+			'shipping_amounts'  => array_map( array( $this, 'round_chart_totals' ), array_values( $shipping_amounts ) ),
+			'coupon_amounts'    => array_map( array( $this, 'round_chart_totals' ), array_values( $coupon_amounts ) ),
+			'refund_amounts'    => array_map( array( $this, 'round_chart_totals' ), array_values( $refund_amounts ) )
 		) );
 		?>
 		<div class="chart-container">
