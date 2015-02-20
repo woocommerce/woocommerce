@@ -461,8 +461,14 @@ class WC_Shortcodes {
 		<?php endif;
 
 		wp_reset_postdata();
+		
+		$css_class = 'woocommerce';
 
-		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
+		if ( isset( $atts['css_class'] ) ) {
+
+			$css_class .= ' ' .  $atts['css_class'];
+		}
+		return '<div class="' . $css_class . '">' . ob_get_clean() . '</div>';
 	}
 
 	/**
