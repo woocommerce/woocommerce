@@ -174,6 +174,8 @@ class WC_Session_Handler extends WC_Session {
 	    	} else {
 		    	update_option( $session_option, $this->_data );
 	    	}
+	    	// Mark session clean after saving
+	    	$this->_dirty = false;
 	    }
     }
 
