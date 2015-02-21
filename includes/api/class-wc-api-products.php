@@ -1231,11 +1231,11 @@ class WC_API_Products extends WC_API_Resource {
 			$this->save_product_shipping_data( $variation_id, $variation );
 
 			// Stock handling
-			if ( isset( $variation['manage_stock'] ) ) {
-				$manage_stock = ( true === $variation['manage_stock'] ) ? 'yes' : 'no';
-				update_post_meta( $variation_id, '_manage_stock', $manage_stock );
+			if ( isset( $variation['managing_stock'] ) ) {
+				$managing_stock = ( true === $variation['managing_stock'] ) ? 'yes' : 'no';
+				update_post_meta( $variation_id, '_manage_stock', $managing_stock );
 			} else {
-				$manage_stock = get_post_meta( $variation_id, '_manage_stock', true );
+				$managing_stock = get_post_meta( $variation_id, '_manage_stock', true );
 			}
 
 			// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
@@ -1244,7 +1244,7 @@ class WC_API_Products extends WC_API_Resource {
 				wc_update_product_stock_status( $variation_id, $stock_status );
 			}
 
-			if ( 'yes' === $manage_stock ) {
+			if ( 'yes' === $managing_stock ) {
 				if ( isset( $variation['backorders'] ) ) {
 					if ( 'notify' == $variation['backorders'] ) {
 						$backorders = 'notify';
