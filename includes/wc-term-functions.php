@@ -589,7 +589,7 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 
 	// Update transient
 	if ( $term_counts != $o_term_counts ) {
-		set_transient( 'wc_term_counts', $term_counts, YEAR_IN_SECONDS );
+		set_transient( 'wc_term_counts', $term_counts, WC_EXPIRE_YEAR_IN_SECONDS );
 	}
 
 	return $terms;
