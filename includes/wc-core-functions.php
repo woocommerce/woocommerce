@@ -317,6 +317,9 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'AED' :
 			$currency_symbol = 'د.إ';
 			break;
+		case 'ANG' :
+			$currency_symbol = 'ƒ';
+			break;
 		case 'AUD' :
 		case 'CAD' :
 		case 'CLP' :
