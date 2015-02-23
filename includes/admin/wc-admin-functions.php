@@ -210,8 +210,8 @@ function wc_save_order_items( $order_id, $items ) {
 			$taxes['items'][] = $line_taxes;
 
 			// Total up
-			$subtotal     += wc_format_decimal( $line_subtotal[ $item_id ] ) + array_sum( $line_subtotal_taxes );
-			$total        += wc_format_decimal( $line_total[ $item_id ] ) + array_sum( $line_taxes );
+			$subtotal     += wc_format_decimal( $line_subtotal[ $item_id ] );
+			$total        += wc_format_decimal( $line_total[ $item_id ] );
 			$subtotal_tax += array_sum( $line_subtotal_taxes );
 			$total_tax    += array_sum( $line_taxes );
 

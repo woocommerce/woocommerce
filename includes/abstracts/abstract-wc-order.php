@@ -786,7 +786,7 @@ abstract class WC_Abstract_Order {
 			$fee_total += $item['line_total'];
 		}
 
-		$this->set_total( $cart_subtotal + $cart_subtotal_tax - $cart_total - $cart_total_tax, 'cart_discount' );
+		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
 		$this->set_total( $cart_subtotal_tax - $cart_total_tax, 'cart_discount_tax' );
 
 		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
@@ -1267,9 +1267,9 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_total_discount( $ex_tax = true ) {
 		if ( $ex_tax ) {
-			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount - (double) $this->cart_discount_tax, $this );
-		} else {
 			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount, $this );
+		} else {
+			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount + (double) $this->cart_discount_tax, $this );
 		}
 	}
 
@@ -1668,7 +1668,7 @@ abstract class WC_Abstract_Order {
 		if ( ! $tax_display ) {
 			$tax_display = $this->tax_display_cart;
 		}
-		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( $tax_display === 'excl' ), array( 'currency' => $this->get_order_currency() ) ), $this );
+		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( $tax_display === 'excl' && $this->display_totals_ex_tax ), array( 'currency' => $this->get_order_currency() ) ), $this );
 	}
 
 	/**

@@ -1726,10 +1726,20 @@ class WC_Cart {
 		 * @return float discount amount
 		 */
 		public function get_coupon_discount_amount( $code, $ex_tax = true ) {
+			$discount_amount = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
+
 			if ( $ex_tax ) {
-				return isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] - $this->get_coupon_discount_tax_amount( $code ) : 0;
+				if ( $this->prices_include_tax ) {
+					return $discount_amount - $this->get_coupon_discount_tax_amount( $code );
+				} else {
+					return $discount_amount;
+				}
 			} else {
-				return isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
+				if ( $this->prices_include_tax ) {
+					return $discount_amount;
+				} else {
+					return $discount_amount + $this->get_coupon_discount_tax_amount( $code );
+				}
 			}
 		}
 
@@ -1802,9 +1812,9 @@ class WC_Cart {
 							$total_discount     = $discount_amount * $values['quantity'];
 							$total_discount_tax = 0;
 
-							if ( $this->prices_include_tax ) {
+							if ( $this->prices_include_tax || $this->tax_display_cart === 'incl' ) {
 								$tax_rates           = WC_Tax::get_rates( $product->get_tax_class() );
-								$taxes               = WC_Tax::calc_tax( $discount_amount, $tax_rates, true );
+								$taxes               = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
 								$total_discount_tax  = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
 							}
 
