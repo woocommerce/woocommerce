@@ -1540,17 +1540,25 @@ class WC_AJAX {
 			die();
 		}
 
+		$args = array(
+			'post_type'      => $post_types,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			's'              => $term,
+			'fields'         => 'ids'
+		);
+
 		if ( is_numeric( $term ) ) {
 
-			$args = array(
+			$args2 = array(
 				'post_type'      => $post_types,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
-				'post__in'       => array(0, $term),
+				'post__in'       => array( 0, $term ),
 				'fields'         => 'ids'
 			);
 
-			$args2 = array(
+			$args3 = array(
 				'post_type'      => $post_types,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
@@ -1558,7 +1566,7 @@ class WC_AJAX {
 				'fields'         => 'ids'
 			);
 
-			$args3 = array(
+			$args4 = array(
 				'post_type'      => $post_types,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
@@ -1572,17 +1580,9 @@ class WC_AJAX {
 				'fields'         => 'ids'
 			);
 
-			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ) ) );
+			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ), get_posts( $args4 ) ) );
 
 		} else {
-
-			$args = array(
-				'post_type'      => $post_types,
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				's'              => $term,
-				'fields'         => 'ids'
-			);
 
 			$args2 = array(
 				'post_type'      => $post_types,
