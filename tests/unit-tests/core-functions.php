@@ -26,6 +26,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 		$expected_currencies = array(
 			'AED' => __( 'United Arab Emirates Dirham', 'woocommerce' ),
+			'ANG' => __( 'Antilliaanse Gulden', 'woocommerce' ),
 			'AUD' => __( 'Australian Dollars', 'woocommerce' ),
 			'BDT' => __( 'Bangladeshi Taka', 'woocommerce' ),
 			'BRL' => __( 'Brazilian Real', 'woocommerce' ),
