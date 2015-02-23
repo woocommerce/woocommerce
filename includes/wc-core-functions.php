@@ -318,7 +318,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = 'د.إ';
 			break;
 		case 'ANG' :
-			$currency_symbol = 'ƒ';
+			$currency_symbol = '&#402;';
 			break;
 		case 'AUD' :
 		case 'CAD' :
