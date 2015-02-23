@@ -1281,5 +1281,5 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 2.3.5 =
+= 2.3.0 =
 2.3.0 is a major update so it is important that you make backups, test extensions and your theme prior to updating, and ensure extensions are 2.3 compatible. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.
