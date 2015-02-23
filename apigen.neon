@@ -50,4 +50,4 @@ deprecated: true
 todo: true
 
 # add link to ZIP archive of documentation
-download: true
+download: false
