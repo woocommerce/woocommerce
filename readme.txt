@@ -138,6 +138,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Saving an order needs to save the discount amount ex. tax like the cart.
+* Tweak - Show discounts inc. tax when showing order totals inc. tax.
+
 = 2.3.5 - 20/02/2015 =
 * Fix - Plain text address formatting.
 * Fix - Detect shortcodes when saving URLs.
