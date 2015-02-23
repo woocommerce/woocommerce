@@ -208,6 +208,62 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
+  /**
+   * Test compound tax amounts
+   */
+  public function test_calc_compound_tax() {
+    global $wpdb;
+
+    $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+    $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+    $tax_rate_1 = array(
+      'tax_rate_country'  => 'US',
+      'tax_rate_state'    => '',
+      'tax_rate'          => '10.0000',
+      'tax_rate_name'     => 'US',
+      'tax_rate_priority' => '1',
+      'tax_rate_compound' => '1',
+      'tax_rate_shipping' => '1',
+      'tax_rate_order'    => '1',
+      'tax_rate_class'    => ''
+    );
+
+    $tax_rate_2 = array(
+      'tax_rate_country'  => 'US',
+      'tax_rate_state'    => 'AL',
+      'tax_rate'          => '2.0000',
+      'tax_rate_name'     => 'US AL',
+      'tax_rate_priority' => '2',
+      'tax_rate_compound' => '1',
+      'tax_rate_shipping' => '1',
+      'tax_rate_order'    => '2',
+      'tax_rate_class'    => ''
+    );
+
+    $tax_rate_1_id = WC_Tax::_insert_tax_rate( $tax_rate_1 );
+    $tax_rate_2_id = WC_Tax::_insert_tax_rate( $tax_rate_2 );
+
+    $tax_rates = WC_Tax::find_rates( array(
+      'country'   => 'US',
+      'state'     => 'AL',
+      'postcode'  => '12345',
+      'city'      => '',
+      'tax_class' => ''
+    ) );
+
+    // prices exclusive of tax
+    $calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, false, false );
+    $this->assertEquals( $calced_tax, array( $tax_rate_1_id => '0.999', $tax_rate_2_id => '0.2198' ) );
+
+    // prices inclusive of tax
+    $calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, true, false );
+    $this->assertEquals( $calced_tax, array( $tax_rate_1_id => '0.8904', $tax_rate_2_id => '0.1959' ) );
+
+    WC_Tax::_delete_tax_rate( $tax_rate_1_id );
+    WC_Tax::_delete_tax_rate( $tax_rate_2_id );
+  }
+
 	/**
 	 * Shipping tax amounts
 	 */
