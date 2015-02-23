@@ -208,61 +208,73 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
-  /**
-   * Test compound tax amounts
-   */
-  public function test_calc_compound_tax() {
-    global $wpdb;
+	/**
+	* Test compound tax amounts
+	*/
+	public function test_calc_compound_tax() {
+		global $wpdb;
 
-    $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-    $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
-    $tax_rate_1 = array(
-      'tax_rate_country'  => 'US',
-      'tax_rate_state'    => '',
-      'tax_rate'          => '10.0000',
-      'tax_rate_name'     => 'US',
-      'tax_rate_priority' => '1',
-      'tax_rate_compound' => '1',
-      'tax_rate_shipping' => '1',
-      'tax_rate_order'    => '1',
-      'tax_rate_class'    => ''
-    );
+		update_option( 'woocommerce_default_country', 'CA' );
+		update_option( 'woocommerce_default_state', 'QC' );
 
-    $tax_rate_2 = array(
-      'tax_rate_country'  => 'US',
-      'tax_rate_state'    => 'AL',
-      'tax_rate'          => '2.0000',
-      'tax_rate_name'     => 'US AL',
-      'tax_rate_priority' => '2',
-      'tax_rate_compound' => '1',
-      'tax_rate_shipping' => '1',
-      'tax_rate_order'    => '2',
-      'tax_rate_class'    => ''
-    );
+		$tax_rate_1 = array(
+		  'tax_rate_country'  => 'CA',
+		  'tax_rate_state'    => '',
+		  'tax_rate'          => '5.0000',
+		  'tax_rate_name'     => 'GST',
+		  'tax_rate_priority' => '1',
+		  'tax_rate_compound' => '0',
+		  'tax_rate_shipping' => '1',
+		  'tax_rate_order'    => '1',
+		  'tax_rate_class'    => ''
+		);
 
-    $tax_rate_1_id = WC_Tax::_insert_tax_rate( $tax_rate_1 );
-    $tax_rate_2_id = WC_Tax::_insert_tax_rate( $tax_rate_2 );
+		$tax_rate_2 = array(
+		  'tax_rate_country'  => 'CA',
+		  'tax_rate_state'    => 'QC',
+		  'tax_rate'          => '8.5000',
+		  'tax_rate_name'     => 'PST',
+		  'tax_rate_priority' => '2',
+		  'tax_rate_compound' => '1',
+		  'tax_rate_shipping' => '1',
+		  'tax_rate_order'    => '2',
+		  'tax_rate_class'    => ''
+		);
 
-    $tax_rates = WC_Tax::find_rates( array(
-      'country'   => 'US',
-      'state'     => 'AL',
-      'postcode'  => '12345',
-      'city'      => '',
-      'tax_class' => ''
-    ) );
+		$tax_rate_1_id = WC_Tax::_insert_tax_rate( $tax_rate_1 );
+		$tax_rate_2_id = WC_Tax::_insert_tax_rate( $tax_rate_2 );
 
-    // prices exclusive of tax
-    $calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, false, false );
-    $this->assertEquals( $calced_tax, array( $tax_rate_1_id => '0.999', $tax_rate_2_id => '0.2198' ) );
+		$tax_rates = WC_Tax::find_rates( array(
+		  'country'   => 'CA',
+		  'state'     => 'QC',
+		  'postcode'  => '12345',
+		  'city'      => '',
+		  'tax_class' => ''
+		) );
 
-    // prices inclusive of tax
-    $calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, true, false );
-    $this->assertEquals( $calced_tax, array( $tax_rate_1_id => '0.8904', $tax_rate_2_id => '0.1959' ) );
+		// prices exclusive of tax
+		$calced_tax = WC_Tax::calc_tax( '100', $tax_rates, false, false );
+		$this->assertEquals( $calced_tax, array( $tax_rate_1_id => '5.0000', $tax_rate_2_id => '8.925' ) );
 
-    WC_Tax::_delete_tax_rate( $tax_rate_1_id );
-    WC_Tax::_delete_tax_rate( $tax_rate_2_id );
-  }
+		// prices inclusive of tax
+		$calced_tax = WC_Tax::calc_tax( '100', $tax_rates, true, false );
+		/**
+		 * 100 is inclusive of all taxes.
+		 *
+		 * Compound would be 100 - ( 100 / 1.085 ) = 7.8341
+		 * Next tax would be calced on 100 - 7.8341 = 92.1659
+		 * 92.1659 - ( 92.1659 / 1.05 ) = 4.38885
+		 */
+		$this->assertEquals( $calced_tax, array( $tax_rate_1_id => 4.3889, $tax_rate_2_id => 7.8341 ) );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_1_id );
+		WC_Tax::_delete_tax_rate( $tax_rate_2_id );
+		update_option( 'woocommerce_default_country', 'GB' );
+		update_option( 'woocommerce_default_state', '' );
+	}
 
 	/**
 	 * Shipping tax amounts
