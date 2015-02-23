@@ -690,6 +690,8 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 	</tbody>
 </table>
 
+<?php do_action( 'woocommerce_system_status_report' ); ?>
+
 <script type="text/javascript">
 
 	jQuery( 'a.help_tip' ).click( function() {
