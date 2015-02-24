@@ -21,6 +21,7 @@ class WC_Cache_Helper {
 	public static function init() {
 		add_action( 'before_woocommerce_init', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
+        add_action( 'woocommerce_loaded', array( __CLASS__, 'define_caching_constants' ) );
 	}
 
 	/**
@@ -134,6 +135,64 @@ class WC_Cache_Helper {
 			<?php
 		}
 	}
+
+    /**
+     * Define WC caching expires to deal with object cache quirks
+     *
+     * @access public
+     * @return void
+     */
+    public static function define_caching_constants() {
+
+        if ( !defined( 'WC_EXPIRE_YEAR_IN_SECONDS' ) ) {
+
+            $expire_year = self::is_memcached_patch_needed() ? time() + YEAR_IN_SECONDS : YEAR_IN_SECONDS;
+
+            define( 'WC_EXPIRE_YEAR_IN_SECONDS', $expire_year );
+
+        }
+
+    }
+
+    /**
+     * Check if Memcached 'expire' patch is needed
+     *
+     * @global WP_Object_Cache $wp_object_cache
+     * @access private
+     * @return boolean
+     */
+    private static function is_memcached_patch_needed() {
+
+        global $wp_object_cache;
+
+        // Are we on Memcached?
+        if ( !wp_using_ext_object_cache() || !isset( $wp_object_cache->mc ) )
+            return false;
+
+        $group = 'woocommerce';
+        $key   = 'is_memcached_ok';
+
+        // Did we run this test before and pass?
+        if ( 'yes' === wp_cache_get( $key, $group ) )
+            return false;
+
+        // Attempt to set a value a year in the future
+        wp_cache_set( $key, 'yes', $group, YEAR_IN_SECONDS );
+
+        // Get the Memcache(d) object
+        $mc = $wp_object_cache->get_mc( $group );
+
+        //Just making sure that we are dealing with Memcached
+        if ( !is_a( $mc, 'Memcache' ) && !is_a( $mc, 'Memcached' ) )
+            return false;
+
+        // Check the cache directly
+        $is_memcache_ok = $mc->get( $wp_object_cache->key( $key, $group ) );
+
+        // If 'yes' got stored, Memcached must be working correctly
+        return 'yes' !== $is_memcache_ok;
+
+    }
 }
 
 WC_Cache_Helper::init();
