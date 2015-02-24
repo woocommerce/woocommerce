@@ -1337,7 +1337,7 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 			}
 		}
 
-		set_transient( $transient_name, $products_will_display, YEAR_IN_SECONDS );
+		set_transient( $transient_name, $products_will_display, DAY_IN_SECONDS * 30 );
 
 		return $products_will_display;
 	}

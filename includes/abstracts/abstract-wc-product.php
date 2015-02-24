@@ -1050,7 +1050,7 @@ class WC_Product {
 				$average_rating = number_format( $ratings / $count, 2 );
 			}
 
-			set_transient( $transient_name, $average_rating, YEAR_IN_SECONDS );
+			set_transient( $transient_name, $average_rating, DAY_IN_SECONDS * 30 );
 		}
 
 		return $average_rating;
@@ -1082,7 +1082,7 @@ class WC_Product {
 				AND comment_approved = '1'
 			", $this->id ) . $where_meta_value );
 
-			set_transient( $transient_name, $count, YEAR_IN_SECONDS );
+			set_transient( $transient_name, $count, DAY_IN_SECONDS * 30 );
 		}
 
 		return $count;
@@ -1136,7 +1136,7 @@ class WC_Product {
 				AND comment_approved = '1'
 			", $this->id ) );
 
-			set_transient( $transient_name, $count, YEAR_IN_SECONDS );
+			set_transient( $transient_name, $count, DAY_IN_SECONDS * 30 );
 		}
 
 		return apply_filters( 'woocommerce_product_review_count', $count, $this );
@@ -1309,7 +1309,7 @@ class WC_Product {
 			$max_related_posts_query           = $query;
 			$max_related_posts_query['fields'] = "SELECT COUNT(DISTINCT ID) FROM {$wpdb->posts} p";
 			$max_related_posts                 = absint( $wpdb->get_var( implode( ' ', apply_filters( 'woocommerce_product_max_related_posts_query', $max_related_posts_query, $this->id ) ) ) );
-			set_transient( $max_related_posts_transient_name, $max_related_posts, YEAR_IN_SECONDS );
+			set_transient( $max_related_posts_transient_name, $max_related_posts, DAY_IN_SECONDS * 30 );
 		}
 
 		// Generate limit

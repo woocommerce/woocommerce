@@ -71,7 +71,7 @@ class WC_Product_Grouped extends WC_Product {
 					}
 				}
 
-				set_transient( $transient_name, $this->total_stock, YEAR_IN_SECONDS );
+				set_transient( $transient_name, $this->total_stock, DAY_IN_SECONDS * 30 );
 			}
 		}
 
@@ -103,7 +103,7 @@ class WC_Product_Grouped extends WC_Product {
 
 		        $this->children = get_posts( $args );
 
-				set_transient( $transient_name, $this->children, YEAR_IN_SECONDS );
+				set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
 			}
 		}
 		return (array) $this->children;

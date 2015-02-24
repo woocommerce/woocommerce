@@ -518,7 +518,7 @@ class WC_Query {
 				)
 			);
 
-			set_transient( $transient_name, $unfiltered_product_ids, YEAR_IN_SECONDS );
+			set_transient( $transient_name, $unfiltered_product_ids, DAY_IN_SECONDS * 30 );
 		}
 
 		// Store the variable
