@@ -63,7 +63,11 @@ class WC_Admin_Menus {
 	 * Add menu item
 	 */
 	public function reports_menu() {
-		add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
+		if ( current_user_can( 'manage_woocommerce' ) ) {
+			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
+		} else {
+			add_menu_page( __( 'Sales Reports', 'woocommerce' ),  __( 'Sales Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), null, '55.6' );
+		}
 	}
 
 	/**

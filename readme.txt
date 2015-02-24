@@ -142,6 +142,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Saving an order needs to save the discount amount ex. tax like the cart.
 * Tweak - Show discounts inc. tax when showing order totals inc. tax.
 * Tweak - Use 30 days instead of year for transients to avoid bugs in memcache plugins.
+* Tweak - Add reports menu item if user can access reports but not the main WC section.
 
 = 2.3.5 - 20/02/2015 =
 * Fix - Plain text address formatting.

@@ -26,6 +26,7 @@ function wc_get_screen_ids() {
 		$wc_screen_id . '_page_wc-settings',
 		$wc_screen_id . '_page_wc-status',
 		$wc_screen_id . '_page_wc-addons',
+		'toplevel_page_wc-reports',
 		'product_page_product_attributes',
 		'edit-product',
 		'product',
