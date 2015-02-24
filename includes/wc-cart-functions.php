@@ -231,7 +231,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
  * @return void
  */
 function wc_cart_totals_order_total_html() {
-	echo '<strong>' . WC()->cart->get_total() . '</strong> ';
+	$value = '<strong>' . WC()->cart->get_total() . '</strong> ';
 
 	// If prices are tax inclusive, show taxes here
 	if ( wc_tax_enabled() && WC()->cart->tax_display_cart == 'incl' ) {
@@ -244,9 +244,12 @@ function wc_cart_totals_order_total_html() {
 			$tax_string_array[] = sprintf( '%s %s', wc_price( WC()->cart->get_taxes_total( true, true ) ), WC()->countries->tax_or_vat() );
 		}
 
-		if ( ! empty( $tax_string_array ) )
-			echo '<small class="includes_tax">' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
+		if ( ! empty( $tax_string_array ) ) {
+			$value .= '<small class="includes_tax">' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
+		}
 	}
+
+	echo apply_filters( 'woocommerce_cart_totals_order_total_html', $value );
 }
 
 /**
