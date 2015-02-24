@@ -138,6 +138,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Settings API - allow multiselect fields to be emptied.
 * Fix - Saving an order needs to save the discount amount ex. tax like the cart.
 * Tweak - Show discounts inc. tax when showing order totals inc. tax.
 * Tweak - Use 30 days instead of year for transients to avoid bugs in memcache plugins.

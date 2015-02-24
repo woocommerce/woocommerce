@@ -922,10 +922,10 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_multiselect_field( $key ) {
 
-		$value = $this->get_option( $key );
-
 		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
 			$value = array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
+		} else {
+			$value = '';
 		}
 
 		return $value;
