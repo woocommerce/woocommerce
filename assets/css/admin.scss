@@ -1553,7 +1553,7 @@ ul.order_notes {
 			color: $red
 		}
 
-		.note_content: after {
+		.note_content:after {
 		  content: "";
 		  display: block;
 		  position: absolute;
@@ -1572,7 +1572,7 @@ ul.order_notes {
 			background: #d7cad2;
 		}
 
-		.note_content: after {
+		.note_content:after {
 			border-color: #d7cad2 transparent;
 		}
 	}
