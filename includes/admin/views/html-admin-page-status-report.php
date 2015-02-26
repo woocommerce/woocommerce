@@ -224,7 +224,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				$posting['wp_remote_post']['success'] = true;
 			} else {
 				$posting['wp_remote_post']['note']    = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider.', 'woocommerce' );
-				if ( $response->get_error_message() ) {
+				if ( is_object( $response ) && $response->get_error_message() ) {
 					$posting['wp_remote_post']['note'] .= ' ' . sprintf( __( 'Error: %s', 'woocommerce' ), wc_clean( $response->get_error_message() ) );
 				}
 				$posting['wp_remote_post']['success'] = false;
@@ -240,7 +240,7 @@ If enabled on your server, Suhosin may need to be configured to increase its dat
 				$posting['wp_remote_get']['success'] = true;
 			} else {
 				$posting['wp_remote_get']['note']    = __( 'wp_remote_get() failed. The WooCommerce plugin updater won\'t work with your server. Contact your hosting provider.', 'woocommerce' );
-				if ( $response->get_error_message() ) {
+				if ( is_object( $response ) && $response->get_error_message() ) {
 					$posting['wp_remote_get']['note'] .= ' ' . sprintf( __( 'Error: %s', 'woocommerce' ), wc_clean( $response->get_error_message() ) );
 				}
 				$posting['wp_remote_get']['success'] = false;
