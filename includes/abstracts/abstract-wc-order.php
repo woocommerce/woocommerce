@@ -32,8 +32,6 @@
  * @property    string $shipping_country The country of the shipping address
  * @property    string $cart_discount Total amount of discount
  * @property    string $cart_discount_tax Total amount of discount applied to taxes
- * @property    string $order_shipping Total amoount of shipping
- * @property    string $order_shipping_tax Total amoount of shipping tax
  * @property    string $shipping_method_title < 2.1 was used for shipping method title. Now @deprecated.
  * @property    int $customer_user User ID who the order belongs to. 0 for guests.
  * @property    string $order_key Random key/password unqique to each order.
