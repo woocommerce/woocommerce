@@ -131,7 +131,7 @@ a {
 }
 
 img {
-    border: non;
+    border: none;
     display: inline;
     font-size: 14px;
     font-weight: bold;

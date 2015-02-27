@@ -89,6 +89,6 @@ class WC_Product_Factory {
 			$the_product = false;
 		}
 
-		return $the_product;
+		return apply_filters( 'woocommerce_product_object', $the_product );
 	}
 }
