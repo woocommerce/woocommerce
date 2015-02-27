@@ -61,7 +61,7 @@ function wc_attribute_label( $name ) {
 			$label = $name;
 		}
 	} else {
-		$label = str_replace( '-', ' ', $name ) );
+		$label = str_replace( '-', ' ', $name );
 	}
 
 	return apply_filters( 'woocommerce_attribute_label', $label, $name );
