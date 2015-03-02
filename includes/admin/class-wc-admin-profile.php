@@ -247,7 +247,7 @@ class WC_Admin_Profile {
 									<div class="api-keys-get-qr">
 										<div id="qrcode_small"></div>
 									</div>
-									<div class="clear">
+									<div class="clear"></div>
 									<strong><?php _e( 'Permissions:', 'woocommerce' ); ?>&nbsp;</strong><span id="woocommerce_api_key_permissions"><select name="woocommerce_api_key_permissions" id="woocommerce_api_key_permissions"><?php
 										foreach ( $permissions as $permission_key => $permission_name ) { echo '<option value="' . esc_attr( $permission_key ) . '" '.selected($permission_key, $user->woocommerce_api_key_permissions, false).'>'.esc_html( $permission_name ) . '</option>';} ?>
 									</select></span><br/>
