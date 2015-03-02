@@ -1779,7 +1779,7 @@ abstract class WC_Abstract_Order {
 			}
 		}
 
-		if ( $this->get_total() > 0 ) {
+		if ( $this->get_total() > 0 && $this->payment_method_title ) {
 			$total_rows['payment_method'] = array(
 				'label' => __( 'Payment Method:', 'woocommerce' ),
 				'value' => $this->payment_method_title
