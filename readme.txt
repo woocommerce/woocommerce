@@ -138,6 +138,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Removal of coupons containing spaces.
+* Fix - Unclosed div in profile page.
 * Fix - Export report CSV.
 * Fix - Settings API - allow multiselect fields to be emptied.
 * Fix - Saving an order needs to save the discount amount ex. tax like the cart.
