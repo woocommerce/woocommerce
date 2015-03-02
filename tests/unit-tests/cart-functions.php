@@ -23,5 +23,8 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 
 		// Check if the cart is empty
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
+
+		// Delete the previously created product
+		WC_Helper_Product::delete_product( $product->id );
 	}
 }
