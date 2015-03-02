@@ -271,9 +271,7 @@ final class WooCommerce {
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
 	 */
 	public function include_template_functions() {
-		if ( $this->is_request( 'frontend' ) ) {
-			include_once( 'includes/wc-template-functions.php' );
-		}
+		include_once( 'includes/wc-template-functions.php' );
 	}
 
 	/**
