@@ -509,7 +509,6 @@ function woocommerce_list_pages( $pages ) {
 global $wc_map_deprecated_filters;
 
 $wc_map_deprecated_filters = array(
-	'pre_get_product_search_form'       => 'get_product_search_form',
 	'woocommerce_add_to_cart_fragments' => 'add_to_cart_fragments',
 	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect'
 );

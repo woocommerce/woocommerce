@@ -104,7 +104,7 @@ jQuery( function( $ ) {
 					});
 
 					// Trigger event so themes can refresh other areas
-					$( 'body' ).trigger( 'added_to_cart', [ fragments, cart_hash ] );
+					$( 'body' ).trigger( 'added_to_cart', [ fragments, cart_hash, $thisbutton ] );
 				}
 			});
 

@@ -344,7 +344,7 @@ class WC_Form_Handler {
 			$available_gateways[ $payment_method ]->validate_fields();
 
 			// Process
-			if ( wc_error_count() == 0 ) {
+			if ( wc_notice_count( 'wc_errors' ) == 0 ) {
 				$result = $available_gateways[ $payment_method ]->add_payment_method();
 
 				// Redirect to success/confirmation/payment page

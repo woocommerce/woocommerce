@@ -172,6 +172,8 @@ class WC_Shortcodes {
 
 		if ( $products->have_posts() ) : ?>
 
+			<?php do_action( 'woocommerce_shortcode_before_product_cat_loop' ); ?>
+
 			<?php woocommerce_product_loop_start(); ?>
 
 				<?php while ( $products->have_posts() ) : $products->the_post(); ?>
@@ -181,6 +183,8 @@ class WC_Shortcodes {
 				<?php endwhile; // end of the loop. ?>
 
 			<?php woocommerce_product_loop_end(); ?>
+
+			<?php do_action( 'woocommerce_shortcode_after_product_cat_loop' ); ?>
 
 		<?php endif;
 
@@ -462,7 +466,14 @@ class WC_Shortcodes {
 
 		wp_reset_postdata();
 
-		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
+		$css_class = 'woocommerce';
+
+		if ( isset( $atts['class'] ) ) {
+
+			$css_class .= ' ' . $atts['class'];
+		}
+
+		return '<div class="' . esc_attr( $css_class ) . '">' . ob_get_clean() . '</div>';
 	}
 
 	/**

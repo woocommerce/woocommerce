@@ -559,15 +559,16 @@ jQuery( function( $ ){
 				attachment = attachment.toJSON();
 
 				if ( attachment.id ) {
-				attachment_ids = attachment_ids ? attachment_ids + "," + attachment.id : attachment.id;
+					attachment_ids   = attachment_ids ? attachment_ids + "," + attachment.id : attachment.id;
+					attachment_image = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
-				$product_images.append('\
-					<li class="image" data-attachment_id="' + attachment.id + '">\
-						<img src="' + attachment.sizes.thumbnail.url + '" />\
-						<ul class="actions">\
-							<li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li>\
-						</ul>\
-					</li>');
+					$product_images.append('\
+						<li class="image" data-attachment_id="' + attachment.id + '">\
+							<img src="' + attachment_image + '" />\
+							<ul class="actions">\
+								<li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li>\
+							</ul>\
+						</li>');
 				}
 
 			});

@@ -536,8 +536,7 @@ class WC_Admin_Post_Types {
 				if ( $post->comment_count ) {
 
 					// check the status of the post
-					( $post->post_status !== 'trash' ) ? $status = '' : $status = 'post-trashed';
-
+					$status       = ( 'trash' !== $post->post_status ) ? '' : 'post-trashed';
 					$latest_notes = get_comments( array(
 						'post_id'   => $post->ID,
 						'number'    => 1,

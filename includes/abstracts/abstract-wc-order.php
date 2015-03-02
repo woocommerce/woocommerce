@@ -32,8 +32,6 @@
  * @property    string $shipping_country The country of the shipping address
  * @property    string $cart_discount Total amount of discount
  * @property    string $cart_discount_tax Total amount of discount applied to taxes
- * @property    string $order_shipping Total amoount of shipping
- * @property    string $order_shipping_tax Total amoount of shipping tax
  * @property    string $shipping_method_title < 2.1 was used for shipping method title. Now @deprecated.
  * @property    int $customer_user User ID who the order belongs to. 0 for guests.
  * @property    string $order_key Random key/password unqique to each order.
@@ -786,7 +784,7 @@ abstract class WC_Abstract_Order {
 			$fee_total += $item['line_total'];
 		}
 
-		$this->set_total( $cart_subtotal + $cart_subtotal_tax - $cart_total - $cart_total_tax, 'cart_discount' );
+		$this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
 		$this->set_total( $cart_subtotal_tax - $cart_total_tax, 'cart_discount_tax' );
 
 		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
@@ -1267,9 +1265,9 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_total_discount( $ex_tax = true ) {
 		if ( $ex_tax ) {
-			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount - (double) $this->cart_discount_tax, $this );
-		} else {
 			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount, $this );
+		} else {
+			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount + (double) $this->cart_discount_tax, $this );
 		}
 	}
 
@@ -1668,7 +1666,7 @@ abstract class WC_Abstract_Order {
 		if ( ! $tax_display ) {
 			$tax_display = $this->tax_display_cart;
 		}
-		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( $tax_display === 'excl' ), array( 'currency' => $this->get_order_currency() ) ), $this );
+		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( $tax_display === 'excl' && $this->display_totals_ex_tax ), array( 'currency' => $this->get_order_currency() ) ), $this );
 	}
 
 	/**
@@ -1781,7 +1779,7 @@ abstract class WC_Abstract_Order {
 			}
 		}
 
-		if ( $this->get_total() > 0 ) {
+		if ( $this->get_total() > 0 && $this->payment_method_title ) {
 			$total_rows['payment_method'] = array(
 				'label' => __( 'Payment Method:', 'woocommerce' ),
 				'value' => $this->payment_method_title

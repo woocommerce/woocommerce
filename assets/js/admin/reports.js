@@ -214,8 +214,10 @@ jQuery(function($) {
                 for ( var d = 0; d < value.length; ++d ) {
                     val = value[d];
 
-                    if( Math.round( val ) != val )
+                    if( Math.round( val ) != val ) {
+                        val = parseFloat( val );
                         val = val.toFixed(2);
+                    }
 
                     csv_data += val + ',';
                 }

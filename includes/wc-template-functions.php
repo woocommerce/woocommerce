@@ -1337,7 +1337,7 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 			}
 		}
 
-		set_transient( $transient_name, $products_will_display, YEAR_IN_SECONDS );
+		set_transient( $transient_name, $products_will_display, DAY_IN_SECONDS * 30 );
 
 		return $products_will_display;
 	}
@@ -1527,7 +1527,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * Outputs a checkout/address form field.
 	 *
 	 * @subpackage	Forms
-	 * @param mixed $key
+	 * @param string $key
 	 * @param mixed $args
 	 * @param string $value (default: null)
 	 * @todo This function needs to be broken up in smaller pieces
@@ -1552,6 +1552,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		);
 
 		$args = wp_parse_args( $args, $defaults );
+		$args = apply_filters( 'woocommerce_form_field_args', $args, $key, $value );
 
 		if ( ( ! empty( $args['clear'] ) ) ) {
 			$after = '<div class="clear"></div>';
@@ -1810,10 +1811,12 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				break;
 			default :
 
-				$field = apply_filters( 'woocommerce_form_field_' . $args['type'], '', $key, $args, $value );
+				$field = '';
 
 				break;
 		}
+
+		$field = apply_filters( 'woocommerce_form_field_' . $args['type'], $field, $key, $args, $value );
 
 		if ( $args['return'] ) {
 			return $field;

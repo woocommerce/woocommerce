@@ -475,26 +475,30 @@ class WC_Meta_Box_Product_Data {
 				<div class="options_group">
 
 				<p class="form-field"><label for="upsell_ids"><?php _e( 'Up-Sells', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" style="width: 50%;" id="upsell_ids" name="upsell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-multiple="true" data-selected="<?php
+				<input type="hidden" class="wc-product-search" style="width: 50%;" id="upsell_ids" name="upsell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-selected="<?php
 					$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_upsell_ids', true ) ) );
 					$json_ids    = array();
 
 					foreach ( $product_ids as $product_id ) {
 						$product = wc_get_product( $product_id );
-						$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+						if ( is_object( $product ) ) {
+							$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
+						}
 					}
 
 					echo esc_attr( json_encode( $json_ids ) );
 				?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
 
 				<p class="form-field"><label for="crosssell_ids"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" style="width: 50%;" id="crosssell_ids" name="crosssell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-multiple="true" data-selected="<?php
+				<input type="hidden" class="wc-product-search" style="width: 50%;" id="crosssell_ids" name="crosssell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-selected="<?php
 					$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_crosssell_ids', true ) ) );
 					$json_ids    = array();
 
 					foreach ( $product_ids as $product_id ) {
 						$product = wc_get_product( $product_id );
-						$json_ids[ $product_id ] = wp_kses_post( $product->get_formatted_name() );
+						if ( is_object( $product ) ) {
+							$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
+						}
 					}
 
 					echo esc_attr( json_encode( $json_ids ) );
@@ -1223,15 +1227,18 @@ class WC_Meta_Box_Product_Data {
 			$files = array();
 
 			if ( isset( $_POST['_wc_file_urls'] ) ) {
-				$file_names    = isset( $_POST['_wc_file_names'] ) ? array_map( 'wc_clean', $_POST['_wc_file_names'] ) : array();
-				$file_urls     = isset( $_POST['_wc_file_urls'] ) ? array_map( 'esc_url_raw', $_POST['_wc_file_urls'] ) : array();
+				$file_names    = isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array();
+				$file_urls     = isset( $_POST['_wc_file_urls'] )  ? array_map( 'trim', $_POST['_wc_file_urls'] ) : array();
 				$file_url_size = sizeof( $file_urls );
 
 				for ( $i = 0; $i < $file_url_size; $i ++ ) {
 					if ( ! empty( $file_urls[ $i ] ) ) {
-						$files[ md5( $file_urls[ $i ] ) ] = array(
-							'name' => $file_names[ $i ],
-							'file' => $file_urls[ $i ]
+						$file_url            = 0 === strpos( $file_urls[ $i ], '[' ) ? wc_clean( $file_urls[ $i ] ) : esc_url_raw( $file_urls[ $i ] );
+						$file_name           = wc_clean( $file_names[ $i ] );
+						$file_hash           = md5( $file_url );
+						$files[ $file_hash ] = array(
+							'name' => $file_name,
+							'file' => $file_url
 						);
 					}
 				}

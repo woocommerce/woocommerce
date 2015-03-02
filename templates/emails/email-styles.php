@@ -33,7 +33,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 #template_container {
     box-shadow: 0 1px 4px rgba(0,0,0,0.1) !important;
     background-color: <?php echo esc_attr( $body ); ?>;
-    border: 1px solid $bg_darker_10;
+    border: 1px solid <?php echo $bg_darker_10; ?>;
     border-radius: 3px !important;
 }
 
@@ -131,7 +131,7 @@ a {
 }
 
 img {
-    border: non;
+    border: none;
     display: inline;
     font-size: 14px;
     font-weight: bold;

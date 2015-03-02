@@ -218,8 +218,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
     // get rid of empty array elements
     $value = array_filter( $value );
-
-	$value = implode( ', ', $value ) . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', $coupon->code, defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->code ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	$value = implode( ', ', $value ) . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', urlencode( $coupon->code ), defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->code ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
 }
@@ -231,7 +230,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
  * @return void
  */
 function wc_cart_totals_order_total_html() {
-	echo '<strong>' . WC()->cart->get_total() . '</strong> ';
+	$value = '<strong>' . WC()->cart->get_total() . '</strong> ';
 
 	// If prices are tax inclusive, show taxes here
 	if ( wc_tax_enabled() && WC()->cart->tax_display_cart == 'incl' ) {
@@ -244,9 +243,12 @@ function wc_cart_totals_order_total_html() {
 			$tax_string_array[] = sprintf( '%s %s', wc_price( WC()->cart->get_taxes_total( true, true ) ), WC()->countries->tax_or_vat() );
 		}
 
-		if ( ! empty( $tax_string_array ) )
-			echo '<small class="includes_tax">' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
+		if ( ! empty( $tax_string_array ) ) {
+			$value .= '<small class="includes_tax">' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
+		}
 	}
+
+	echo apply_filters( 'woocommerce_cart_totals_order_total_html', $value );
 }
 
 /**

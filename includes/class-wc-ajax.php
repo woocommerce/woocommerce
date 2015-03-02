@@ -65,7 +65,8 @@ class WC_AJAX {
 			'term_ordering'                                    => false,
 			'product_ordering'                                 => false,
 			'refund_line_items'                                => false,
-			'delete_refund'                                    => false
+			'delete_refund'                                    => false,
+			'rated'                                            => false
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -424,7 +425,7 @@ class WC_AJAX {
 		$attribute     = array(
 			'name'         => $taxonomy,
 			'value'        => '',
-			'is_visible'   => 1,
+			'is_visible'   => apply_filters( 'woocommerce_attribute_default_visibility', 1 ),
 			'is_variation' => 0,
 			'is_taxonomy'  => $taxonomy ? 1 : 0
 		);
@@ -1528,7 +1529,7 @@ class WC_AJAX {
 	 * @param string $x (default: '')
 	 * @param string $post_types (default: array('product'))
 	 */
-	public static function json_search_products( $x = '', $post_types = array('product') ) {
+	public static function json_search_products( $x = '', $post_types = array( 'product' ) ) {
 		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
@@ -1539,17 +1540,25 @@ class WC_AJAX {
 			die();
 		}
 
+		$args = array(
+			'post_type'      => $post_types,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			's'              => $term,
+			'fields'         => 'ids'
+		);
+
 		if ( is_numeric( $term ) ) {
 
-			$args = array(
+			$args2 = array(
 				'post_type'      => $post_types,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
-				'post__in'       => array(0, $term),
+				'post__in'       => array( 0, $term ),
 				'fields'         => 'ids'
 			);
 
-			$args2 = array(
+			$args3 = array(
 				'post_type'      => $post_types,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
@@ -1557,7 +1566,7 @@ class WC_AJAX {
 				'fields'         => 'ids'
 			);
 
-			$args3 = array(
+			$args4 = array(
 				'post_type'      => $post_types,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
@@ -1571,17 +1580,9 @@ class WC_AJAX {
 				'fields'         => 'ids'
 			);
 
-			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ) ) );
+			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ), get_posts( $args4 ) ) );
 
 		} else {
-
-			$args = array(
-				'post_type'      => $post_types,
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				's'              => $term,
-				'fields'         => 'ids'
-			);
 
 			$args2 = array(
 				'post_type'      => $post_types,
@@ -1607,7 +1608,7 @@ class WC_AJAX {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post );
 
-				$found_products[ $post ] = $product->get_formatted_name();
+				$found_products[ $post ] = rawurldecode( $product->get_formatted_name() );
 			}
 		}
 
@@ -1625,7 +1626,7 @@ class WC_AJAX {
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public static function json_search_products_and_variations() {
-		self::json_search_products( '', array('product', 'product_variation') );
+		self::json_search_products( '', array( 'product', 'product_variation' ) );
 	}
 
 	/**
@@ -1863,7 +1864,7 @@ class WC_AJAX {
 			// Validate that the refund can occur
 			$order       = wc_get_order( $order_id );
 			$order_items = $order->get_items();
-			$max_refund  = $order->get_total() - $order->get_total_refunded();
+			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
 
 			if ( ! $refund_amount || $max_refund < $refund_amount ) {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
@@ -1967,6 +1968,14 @@ class WC_AJAX {
 			wp_delete_post( $refund_id );
 		}
 
+		die();
+	}
+
+	/**
+	 * Triggered when clicking the rating footer.
+	 */
+	public static function rated() {
+		update_option( 'woocommerce_admin_footer_text_rated', 1 );
 		die();
 	}
 }

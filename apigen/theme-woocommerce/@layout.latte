@@ -135,13 +135,16 @@
 		</ul>
 		<ul>
 			<li n:class="'tree' === $active ? active" n:if="$config->tree">
-				<a n:tag-if="'tree' !== $active" href="tree.html" title="Tree view of classes, interfaces, traits and exceptions"><span>Tree</span></a>
+				<a href="tree.html" title="Tree view of classes, interfaces, traits and exceptions"><span>Tree</span></a>
 			</li>
 			<li n:class="'deprecated' === $active ? active" n:if="$config->deprecated">
-				<a n:tag-if="'deprecated' !== $active" href="deprecated.html" title="List of deprecated elements"><span>Deprecated</span></a>
+				<a href="deprecated.html" title="List of deprecated elements"><span>Deprecated</span></a>
 			</li>
 			<li n:class="'todo' === $active ? active" n:if="$config->todo">
-				<a n:tag-if="'todo' !== $active" href="todo.html" title="Todo list"><span>Todo</span></a>
+				<a href="todo.html" title="Todo list"><span>Todo</span></a>
+			</li>
+			<li class="hooks">
+				<a href="hook-docs.html" title="Hooks"><span>Hook Reference</span></a>
 			</li>
 		</ul>
 		<ul>

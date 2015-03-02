@@ -291,6 +291,10 @@ code a b {
 	padding: 0;
 }
 
+#navigation ul li.active a {
+	color: #fff;
+}
+
 #navigation ul li span {
 	float: left;
 	padding: 0 3px;
