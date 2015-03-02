@@ -259,8 +259,6 @@ class WC_Admin_Assets {
 				'rounding_precision'            => WC_ROUNDING_PRECISION,
 				'tax_rounding_mode'             => WC_TAX_ROUNDING_MODE,
 				'product_types'                 => array_map( 'sanitize_title', get_terms( 'product_type', array( 'hide_empty' => false, 'fields' => 'names' ) ) ),
-				'default_attribute_visibility'  => apply_filters( 'default_attribute_visibility', false ),
-				'default_attribute_variation'   => apply_filters( 'default_attribute_variation', false ),
 				'i18n_download_permission_fail' => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
 				'i18n_permission_revoke'        => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 				'i18n_tax_rate_already_exists'  => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
