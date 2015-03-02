@@ -72,9 +72,14 @@ class WC_Language_Pack_Upgrader {
 	 * @return bool
 	 */
 	public function has_available_update() {
-		$version = get_option( 'woocommerce_language_pack_version', array( '0', get_locale() ) );
+		$locale  = get_locale();
+		$version = get_option( 'woocommerce_language_pack_version', array( '0', $locale ) );
 
-		if ( 'en_US' !== get_locale() && ( ! is_array( $version ) || version_compare( $version[0], WC_VERSION, '<' ) || $version[1] !== get_locale() ) ) {
+		if ( 'en_US' !== $locale ) {
+			return false;
+		}
+
+		if ( ! is_array( $version ) || version_compare( $version[0], WC_VERSION, '<' ) || $version[1] !== $locale ) {
 			if ( $this->check_if_language_pack_exists() ) {
 				$this->configure_woocommerce_upgrade_notice();
 
