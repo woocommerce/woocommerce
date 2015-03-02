@@ -1244,13 +1244,13 @@ class WC_Product {
 		$cats_array = array(0);
 
 		// Get tags
-		$terms = wp_get_post_terms( $this->id, 'product_tag' );
+		$terms = apply_filters( 'woocommerce_get_related_product_tag_terms', wp_get_post_terms( $this->id, 'product_tag' ), $this->id );
 		foreach ( $terms as $term ) {
 			$tags_array[] = $term->term_id;
 		}
 
 		// Get categories
-		$terms = wp_get_post_terms( $this->id, 'product_cat' );
+		$terms = apply_filters( 'woocommerce_get_related_product_cat_terms', wp_get_post_terms( $this->id, 'product_cat' ), $this->id );
 		foreach ( $terms as $term ) {
 			$cats_array[] = $term->term_id;
 		}
