@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
 ?>
-<li itemprop="reviews" itemscope itemtype="http://schema.org/Review" <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
+<li itemprop="review" itemscope itemtype="http://schema.org/Review" <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
 
 	<div id="comment-<?php comment_ID(); ?>" class="comment_container">
 
