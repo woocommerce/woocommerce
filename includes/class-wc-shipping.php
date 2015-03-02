@@ -384,7 +384,7 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public  function get_packages() {
-		return $this->packages;
+		return apply_filters( 'woocommerce_available_shipping_methods', $this->packages );
 	}
 
 
