@@ -1770,8 +1770,16 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$options = $field = '';
 
 				if ( ! empty( $args['options'] ) ) {
-					foreach ( $args['options'] as $option_key => $option_text )
+					foreach ( $args['options'] as $option_key => $option_text ) {
+						if ( "" === $option_key ) {
+							// If we have a blank option, select2 needs a placeholder
+							if ( empty( $args['placeholder'] ) ) {
+								$args['placeholder'] = $option_text ? $option_text : __( 'Choose an option', 'woocommerce' );
+							}
+							$custom_attributes[] = 'data-allow_clear="true"';
+						}
 						$options .= '<option value="' . esc_attr( $option_key ) . '" '. selected( $value, $option_key, false ) . '>' . esc_attr( $option_text ) .'</option>';
+					}
 
 					$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $args['id'] ) . '_field">';
 
@@ -1779,7 +1787,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 						$field .= '<label for="' . esc_attr( $args['id'] ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) .'">' . $args['label']. $required . '</label>';
 					}
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select '.esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . '>
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select '.esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '">
 							' . $options . '
 						</select>';
 
