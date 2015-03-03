@@ -98,7 +98,7 @@ class WC_Admin_Assets {
 		// Select2 is the replacement for chosen
 		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.2' );
 		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
-		wp_localize_script( 'select2', 'wc_select_params', array(
+		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
 			'i18n_matches_1'            => _x( 'One result is available, press enter to select it.', 'enhanced select', 'woocommerce' ),
 			'i18n_matches_n'            => _x( '%qty% results are available, use up and down arrow keys to navigate.', 'enhanced select', 'woocommerce' ),
 			'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
@@ -111,11 +111,9 @@ class WC_Admin_Assets {
 			'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
 			'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
 			'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
-		) );
-		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
-			'ajax_url'                         => admin_url( 'admin-ajax.php' ),
-			'search_products_nonce'            => wp_create_nonce( 'search-products' ),
-			'search_customers_nonce'           => wp_create_nonce( 'search-customers' )
+			'ajax_url'                  => admin_url( 'admin-ajax.php' ),
+			'search_products_nonce'     => wp_create_nonce( 'search-products' ),
+			'search_customers_nonce'    => wp_create_nonce( 'search-customers' )
 		) );
 
 		// Accounting

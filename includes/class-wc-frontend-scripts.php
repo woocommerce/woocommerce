@@ -116,20 +116,6 @@ class WC_Frontend_Scripts {
 		// Chosen is @deprecated as of 2.3 in favour of 2.3. Here for backwards compatibility.
 		self::register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
 		self::register_script( 'select2', $assets_path . 'js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.2' );
-		wp_localize_script( 'select2', 'wc_select_params', array(
-			'i18n_matches_1'            => _x( 'One result is available, press enter to select it.', 'enhanced select', 'woocommerce' ),
-			'i18n_matches_n'            => _x( '%qty% results are available, use up and down arrow keys to navigate.', 'enhanced select', 'woocommerce' ),
-			'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
-			'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
-			'i18n_input_too_short_1'    => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce' ),
-			'i18n_input_too_short_n'    => _x( 'Please enter %qty% or more characters', 'enhanced select', 'woocommerce' ),
-			'i18n_input_too_long_1'     => _x( 'Please delete 1 character', 'enhanced select', 'woocommerce' ),
-			'i18n_input_too_long_n'     => _x( 'Please delete %qty% characters', 'enhanced select', 'woocommerce' ),
-			'i18n_selection_too_long_1' => _x( 'You can only select 1 item', 'enhanced select', 'woocommerce' ),
-			'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
-			'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
-			'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
-		) );
 
 		// Register any scripts for later use, or used as dependencies
 		self::register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.60' );
@@ -267,6 +253,18 @@ class WC_Frontend_Scripts {
 				return array(
 					'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
 					'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
+					'i18n_matches_1'            => _x( 'One result is available, press enter to select it.', 'enhanced select', 'woocommerce' ),
+					'i18n_matches_n'            => _x( '%qty% results are available, use up and down arrow keys to navigate.', 'enhanced select', 'woocommerce' ),
+					'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
+					'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
+					'i18n_input_too_short_1'    => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce' ),
+					'i18n_input_too_short_n'    => _x( 'Please enter %qty% or more characters', 'enhanced select', 'woocommerce' ),
+					'i18n_input_too_long_1'     => _x( 'Please delete 1 character', 'enhanced select', 'woocommerce' ),
+					'i18n_input_too_long_n'     => _x( 'Please delete %qty% characters', 'enhanced select', 'woocommerce' ),
+					'i18n_selection_too_long_1' => _x( 'You can only select 1 item', 'enhanced select', 'woocommerce' ),
+					'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
+					'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
+					'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
 				);
 			break;
 		}
