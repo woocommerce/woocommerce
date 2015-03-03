@@ -1170,7 +1170,7 @@ jQuery( function ( $ ) {
 
 			return false;
 		},
-	}
+	};
 
 	/**
 	 * Order Downloads Panel
@@ -1259,7 +1259,7 @@ jQuery( function ( $ ) {
 			}
 			return false;
 		}
-	}
+	};
 
 	wc_meta_boxes_order.init();
 	wc_meta_boxes_order_items.init();
