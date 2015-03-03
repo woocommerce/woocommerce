@@ -542,4 +542,16 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( '1-610-385-0000', wc_format_phone_number( '1.610.385.0000' ) );
 	}
 
+	/**
+	 * Test wc_trim_string()
+	 *
+	 * @since 2.2
+	 */
+	public function test_wc_trim_string() {
+
+		$this->assertEquals( 'string', wc_trim_string( 'string' ) );
+		$this->assertEquals( 's...',   wc_trim_string( 'string', 4 ) );
+		$this->assertEquals( 'st.',    wc_trim_string( 'string', 3, '.' ) );
+	}
+
 }
