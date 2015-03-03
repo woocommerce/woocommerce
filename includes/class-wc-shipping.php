@@ -372,7 +372,7 @@ class WC_Shipping {
 
 		} else {
 
-			$package['rates'] = $stored_rates;
+			$package['rates'] = apply_filters( 'woocommerce_package_rates', $stored_rates, $package );
 
 		}
 
