@@ -35,4 +35,25 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEquals( false, wc_prices_include_tax() );
 	}
+
+	/**
+	 * Test wc_is_valid_url()
+	 *
+	 * @since 2.3.0
+	 */
+	public function test_wc_is_valid_url() {
+
+		// Test some invalid URLs
+		$this->assertEquals( false, wc_is_valid_url( 'google.com' ) );
+		$this->assertEquals( false, wc_is_valid_url( 'ftp://google.com' ) );
+		$this->assertEquals( false, wc_is_valid_url( 'sftp://google.com' ) );
+		$this->assertEquals( false, wc_is_valid_url( 'https://google.com/test invalid' ) );
+
+		// Test some valid URLs
+		$this->assertEquals( true,  wc_is_valid_url( 'http://google.com' ) );
+		$this->assertEquals( true,  wc_is_valid_url( 'https://google.com' ) );
+		$this->assertEquals( true,  wc_is_valid_url( 'https://google.com/test%20valid' ) );
+		$this->assertEquals( true,  wc_is_valid_url( 'https://google.com/test-valid/?query=test' ) );
+		$this->assertEquals( true,  wc_is_valid_url( 'https://google.com/test-valid/#hash' ) );
+	}
 }
