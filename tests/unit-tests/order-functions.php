@@ -57,12 +57,12 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$default = get_option( 'woocommerce_ship_to_destination' );
 
-		update_option( 'woocommerce_shop_to_destination', 'shipping' );
+		update_option( 'woocommerce_ship_to_destination', 'shipping' );
 		$this->assertEquals( false, wc_ship_to_billing_address_only() );
 
-		update_option( 'woocommerce_shop_to_destination', 'billing_only' );
-		$this->assertEquals( false, wc_ship_to_billing_address_only() );
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+		$this->assertEquals( true, wc_ship_to_billing_address_only() );
 
-		update_option( 'woocommerce_shop_to_destination', $default );
+		update_option( 'woocommerce_ship_to_destination', $default );
 	}
 }
