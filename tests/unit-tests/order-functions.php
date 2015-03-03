@@ -44,8 +44,8 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order_status_name() {
 
-		$this->assertEquals( 'Pending Payment', wc_get_order_status_name( 'wc-pending' ) );
-		$this->assertEquals( 'Pending Payment', wc_get_order_status_name( 'pending' ) );
+		$this->assertEquals( _x( 'Pending Payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'wc-pending' ) );
+		$this->assertEquals( _x( 'Pending Payment', 'Order status', 'woocommerce' ), wc_get_order_status_name( 'pending' ) );
 	}
 
 	/**
