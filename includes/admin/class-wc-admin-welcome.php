@@ -9,7 +9,7 @@
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @version     2.3.0
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -260,7 +260,7 @@ class WC_Admin_Welcome {
 						</div>
 						<div class="last-feature">
 							<h4><?php _e( 'Webhooks UI', 'woocommerce' ); ?></h4>
-						<p><?php printf( __( 'As part of the API, we\'ve introduced a UI for the Webhook system in 2.3. This makes it easier for 3rd party apps to integrate with WooCommerce. Read more in our %sdocs%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/webhooks/">', '</a>' ); ?></p>
+						<p><?php printf( __( 'As part of the API, we\'ve introduced a UI for the Webhook system in WooCommerce 2.3. This makes it easier for 3rd party apps to integrate with WooCommerce. Read more in our %sdocs%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/webhooks/">', '</a>' ); ?></p>
 						</div>
 					</div>
 				</div>
