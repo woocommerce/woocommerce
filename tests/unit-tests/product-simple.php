@@ -41,7 +41,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 	public function tearDown() {
 
 		remove_all_filters( 'woocommerce_product_add_to_cart_text' );
-		WC()->session->set( 'wc_notices', null );
 	}
 
 	/**
