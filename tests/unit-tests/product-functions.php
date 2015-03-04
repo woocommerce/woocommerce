@@ -2,7 +2,7 @@
 /**
  * Test WC product functions
  *
- * @since 2.3.0
+ * @since 2.3
  */
 class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
@@ -14,7 +14,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Helper method to get a product
 	 *
-	 * @since 2.3.0
+	 * @since 2.3
 	 * @access private
 	 */
 	private function _get_product() {
@@ -24,7 +24,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Helper method to delete a product
 	 *
-	 * @since 2.3.0
+	 * @since 2.3
 	 * @access private
 	 */
 	private function _delete_product() {
@@ -36,7 +36,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_product()
 	 *
-	 * @since 2.3.0
+	 * @since 2.3
 	 */
 	public function test_wc_get_product() {
 		$this->_get_product();
@@ -50,7 +50,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_update_product_stock()
 	 *
-	 * @since 2.3.0
+	 * @since 2.3
 	 */
 	public function test_wc_update_product_stock() {
 		$this->_get_product();
@@ -66,7 +66,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_product_types()
 	 *
-	 * @since 2.3.0
+	 * @since 2.3
 	 */
 	public function test_wc_get_product_types() {
 		$product_types = (array) apply_filters( 'product_type_selector', array(
@@ -82,7 +82,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_product_has_unique_sku()
 	 *
-	 * @since 2.3.0
+	 * @since 2.3
 	 */
 	public function test_wc_product_has_unique_sku() {
 		$product_1 = WC_Helper_Product::create_simple_product();
@@ -102,7 +102,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_product_id_by_sku()
 	 *
-	 * @since 2.3.0
+	 * @since 2.3
 	 */
 	public function test_wc_get_product_id_by_sku() {
 		$this->_get_product();
