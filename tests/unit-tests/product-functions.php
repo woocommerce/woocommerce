@@ -31,6 +31,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		wc_update_product_stock( $product->id, 5 );
 		$this->assertEquals( 5, $product->stock );
 
-		update_post_meta( $product, '_manage_stock', 'no' );
+		update_post_meta( $product->id, '_manage_stock', 'no' );
 	}
 }
