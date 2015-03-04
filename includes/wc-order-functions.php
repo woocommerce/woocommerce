@@ -509,6 +509,25 @@ function wc_cancel_unpaid_orders() {
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
 
+/**
+ * Return the count of pending orders.
+ *
+ * @access public
+ * @return int
+ */
+function wc_pending_order_count() {
+	return wc_order_count( 'pending' );
+}
+
+/**
+ * Return the count of on-hold orders.
+ *
+ * @access public
+ * @return int
+ */
+function wc_onhold_order_count() {
+	return wc_orders_count( 'on-hold' );
+}
 
 /**
  * Return the count of processing orders.
@@ -517,11 +536,67 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
  * @return int
  */
 function wc_processing_order_count() {
+	return wc_orders_count( 'processing' );
+}
+
+/**
+ * Return the count of completed orders.
+ *
+ * @access public
+ * @return int
+ */
+function wc_completed_order_count() {
+	return wc_orders_count( 'completed' );
+}
+
+/**
+ * Return the count of cancelled orders.
+ *
+ * @access public
+ * @return int
+ */
+function wc_cancelled_order_count() {
+	return wc_orders_count( 'cancelled' );
+}
+
+/**
+ * Return the count of refunded orders.
+ *
+ * @access public
+ * @return int
+ */
+function wc_refunded_order_count() {
+	return wc_orders_count( 'refunded' );
+}
+
+/**
+ * Return the count of failed orders.
+ *
+ * @access public
+ * @return int
+ */
+function wc_failed_order_count() {
+	return wc_orders_count( 'failed' );
+}
+
+/**
+ * Return the orders count of a specific order status.
+ *
+ * @access public
+ * @return int
+ */
+function wc_orders_count( $status ) {
 	$count = 0;
 
+	$order_statuses = array_keys( wc_get_order_statuses() );
+
+	if ( ! in_array( 'wc-' . $status, $order_statuses ) ) {
+		return 0;
+	}
+
 	foreach ( wc_get_order_types( 'order-count' ) as $type ) {
-		$this_count = wp_count_posts( $type, 'readable' );
-		$count      += isset( $this_count->{'wc-processing'} ) ? $this_count->{'wc-processing'} : 0;
+		$this_count  = wp_count_posts( $type, 'readable' );
+		$count      += isset( $this_count->{'wc-' . $status} ) ? $this_count->{'wc-' . $status} : 0;
 	}
 
 	return $count;
