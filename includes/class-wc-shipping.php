@@ -234,8 +234,9 @@ class WC_Shipping {
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
 	 */
 	public function calculate_shipping( $packages = array() ) {
-		if ( ! $this->enabled || empty( $packages ) )
+		if ( ! $this->enabled || empty( $packages ) ) {
 			return;
+		}
 
 		$this->shipping_total 	= null;
 		$this->shipping_taxes 	= array();
@@ -245,8 +246,9 @@ class WC_Shipping {
 		$package_keys 		= array_keys( $packages );
 		$package_keys_size 	= sizeof( $package_keys );
 
-		for ( $i = 0; $i < $package_keys_size; $i ++ )
+		for ( $i = 0; $i < $package_keys_size; $i ++ ) {
 			$this->packages[ $package_keys[ $i ] ] = $this->calculate_shipping_for_package( $packages[ $package_keys[ $i ] ] );
+		}
 
 		// Get all chosen methods
 		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
@@ -260,11 +262,13 @@ class WC_Shipping {
 			$chosen_method    = false;
 			$method_count     = false;
 
-			if ( ! empty( $chosen_methods[ $i ] ) )
+			if ( ! empty( $chosen_methods[ $i ] ) ) {
 				$chosen_method = $chosen_methods[ $i ];
+			}
 
-			if ( ! empty( $method_counts[ $i ] ) )
+			if ( ! empty( $method_counts[ $i ] ) ) {
 				$method_count = $method_counts[ $i ];
+			}
 
 			// Get available methods for package
 			$_available_methods = $package['rates'];
