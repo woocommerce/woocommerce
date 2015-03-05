@@ -216,6 +216,36 @@ add_action( 'init', 'wc_taxonomy_metadata_wpdbfix', 0 );
 add_action( 'switch_blog', 'wc_taxonomy_metadata_wpdbfix', 0 );
 
 /**
+ * When a term is split, ensure meta data maintained.
+ * @param  int $old_term_id
+ * @param  int $new_term_id
+ * @param  string $term_taxonomy_id
+ * @param  string $taxonomy
+ */
+function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new_term_id, $term_taxonomy_id, $taxonomy ) {
+	global $wpdb;
+
+	if ( 'product_cat' === $taxonomy || taxonomy_is_product_attribute( $taxonomy ) ) {
+		$old_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_termmeta WHERE woocommerce_term_id = %d;", $old_term_id ) );
+
+		// Copy across to split term
+		if ( $old_meta_data ) {
+			foreach ( $old_meta_data as $meta_data ) {
+				$wpdb->insert(
+					"{$wpdb->prefix}woocommerce_termmeta",
+					array(
+						'woocommerce_term_id' => $new_term_id,
+						'meta_key'            => $meta_data->meta_key,
+						'meta_value'          => $meta_data->meta_value
+					)
+				);
+			}
+		}
+	}
+}
+add_action( 'split_shared_term', 'wc_taxonomy_metadata_update_content_for_split_terms', 10, 4 );
+
+/**
  * WooCommerce Term Meta API - Update term meta
  *
  * @param mixed $term_id
