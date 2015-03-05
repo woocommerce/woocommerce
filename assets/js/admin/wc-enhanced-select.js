@@ -1,3 +1,4 @@
+/*global wc_enhanced_select_params */
 jQuery( function( $ ) {
 
 	function getEnhancedSelectFormatString() {
@@ -19,7 +20,7 @@ jQuery( function( $ ) {
 				var number = min - input.length;
 
 				if ( 1 === number ) {
-					return wc_enhanced_select_params.i18n_input_too_short_1
+					return wc_enhanced_select_params.i18n_input_too_short_1;
 				}
 
 				return wc_enhanced_select_params.i18n_input_too_short_n.replace( '%qty%', number );
@@ -28,7 +29,7 @@ jQuery( function( $ ) {
 				var number = input.length - max;
 
 				if ( 1 === number ) {
-					return wc_enhanced_select_params.i18n_input_too_long_1
+					return wc_enhanced_select_params.i18n_input_too_long_1;
 				}
 
 				return wc_enhanced_select_params.i18n_input_too_long_n.replace( '%qty%', number );
@@ -38,7 +39,7 @@ jQuery( function( $ ) {
 					return wc_enhanced_select_params.i18n_selection_too_long_1;
 				}
 
-				return wc_enhanced_select_params.i18n_selection_too_long_n.replace( '%qty%', number );
+				return wc_enhanced_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
 			},
 			formatLoadMore: function( pageNumber ) {
 				return wc_enhanced_select_params.i18n_load_more;
@@ -174,7 +175,7 @@ jQuery( function( $ ) {
 						var data     = $.parseJSON( element.attr( 'data-selected' ) );
 						var selected = [];
 
-						$( element.val().split( "," ) ).each( function( i, val ) {
+						$( element.val().split( ',' ) ).each( function( i, val ) {
 							selected.push( { id: val, text: data[ val ] } );
 						});
 						return callback( selected );

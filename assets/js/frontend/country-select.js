@@ -1,3 +1,4 @@
+/*global wc_country_select_params */
 jQuery( function( $ ) {
 
 	// wc_country_select_params is required to continue, ensure the object exists
@@ -24,7 +25,7 @@ jQuery( function( $ ) {
 				var number = min - input.length;
 
 				if ( 1 === number ) {
-					return wc_country_select_params.i18n_input_too_short_1
+					return wc_country_select_params.i18n_input_too_short_1;
 				}
 
 				return wc_country_select_params.i18n_input_too_short_n.replace( '%qty%', number );
@@ -33,7 +34,7 @@ jQuery( function( $ ) {
 				var number = input.length - max;
 
 				if ( 1 === number ) {
-					return wc_country_select_params.i18n_input_too_long_1
+					return wc_country_select_params.i18n_input_too_long_1;
 				}
 
 				return wc_country_select_params.i18n_input_too_long_n.replace( '%qty%', number );
@@ -43,7 +44,7 @@ jQuery( function( $ ) {
 					return wc_country_select_params.i18n_selection_too_long_1;
 				}
 
-				return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', number );
+				return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
 			},
 			formatLoadMore: function( pageNumber ) {
 				return wc_country_select_params.i18n_load_more;
@@ -64,7 +65,7 @@ jQuery( function( $ ) {
 					minimumResultsForSearch: 10,
 					placeholder: $( this ).attr( 'placeholder' ),
 					placeholderOption: 'first',
-					width: '100%',
+					width: '100%'
 				}, getEnhancedSelectFormatString() );
 
 				$( this ).select2( select2_args );
