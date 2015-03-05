@@ -18,6 +18,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @access private
 	 */
 	private function _get_product() {
+		if ( ! is_null( $this->_product ) ) {
+			$this->_delete_product();
+		}
+
 		$this->_product = WC_Helper_Product::create_simple_product();
 	}
 
