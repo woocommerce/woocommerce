@@ -1213,6 +1213,9 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 		}
 
 		$args['breadcrumb'] = $breadcrumbs->generate();
+		
+		$args['breadcrumb'] = apply_filters( 'woocommerce_breadcrumbs', $args['breadcrumb'] );
+
 
 		wc_get_template( 'global/breadcrumb.php', $args );
 	}
