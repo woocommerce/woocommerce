@@ -25,6 +25,8 @@ class WC_Meta_Box_Order_Notes {
 
 		$args = array(
 			'post_id'   => $post->ID,
+			'orderby'   => 'comment_ID',
+			'order'     => 'DESC',
 			'approve'   => 'approve',
 			'type'      => 'order_note'
 		);
