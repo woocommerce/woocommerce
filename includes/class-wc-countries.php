@@ -393,6 +393,21 @@ class WC_Countries {
 
 		$args = array_map( 'trim', $args );
 
+		$default = array (
+			'first_name' => '',
+			'last_name' => '',
+			'company' => '',
+			'address_1' => '',
+			'address_2' => '',
+			'city' => '',
+			'state' => '',
+			'postcode' => '',
+			'country' => ''
+		);
+		
+		// Add missing fields
+		$args = array_merge($default, $args);
+
 		extract( $args );
 
 		// Get all formats
