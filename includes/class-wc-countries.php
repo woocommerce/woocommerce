@@ -390,23 +390,19 @@ class WC_Countries {
 	 * @return string address
 	 */
 	public function get_formatted_address( $args = array() ) {
-
-		$args = array_map( 'trim', $args );
-
-		$default = array (
+		$default = array(
 			'first_name' => '',
-			'last_name' => '',
-			'company' => '',
-			'address_1' => '',
-			'address_2' => '',
-			'city' => '',
-			'state' => '',
-			'postcode' => '',
-			'country' => ''
+			'last_name'  => '',
+			'company'    => '',
+			'address_1'  => '',
+			'address_2'  => '',
+			'city'       => '',
+			'state'      => '',
+			'postcode'   => '',
+			'country'    => ''
 		);
-		
-		// Add missing fields
-		$args = array_merge($default, $args);
+
+		$args = array_map( 'trim', wp_parse_args( $args, $default_args ) );
 
 		extract( $args );
 
@@ -420,11 +416,12 @@ class WC_Countries {
 		$full_country 	= ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
 
 		// Country is not needed if the same as base
-		if ( $country == $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', false ) )
+		if ( $country == $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', false ) ) {
 			$format = str_replace( '{country}', '', $format );
+		}
 
 		// Handle full state name
-		$full_state		= ( $country && $state && isset( $this->states[ $country ][ $state ] ) ) ? $this->states[ $country ][ $state ] : $state;
+		$full_state = ( $country && $state && isset( $this->states[ $country ][ $state ] ) ) ? $this->states[ $country ][ $state ] : $state;
 
 		// Substitute address parts into the string
 		$replace = array_map( 'esc_html', apply_filters( 'woocommerce_formatted_address_replacements', array(
