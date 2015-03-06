@@ -659,7 +659,7 @@ class WC_Coupon {
 	 */
 	public function add_coupon_message( $msg_code ) {
 
-		$msg = $this->get_coupon_error( $msg_code );
+		$msg = $msg_code < 200 ? $this->get_coupon_error( $msg_code ) : $this->get_coupon_message( $msg_code );
 
 		if ( ! $msg ) {
 			return;
