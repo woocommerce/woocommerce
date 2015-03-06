@@ -1878,7 +1878,6 @@ abstract class WC_Abstract_Order {
 		return $has_downloadable_item;
 	}
 
-
 	/**
 	 * Generates a URL so that a customer can pay for their (unpaid - pending) order. Pass 'true' for the checkout version which doesn't offer gateway choices.
 	 *
@@ -1902,7 +1901,6 @@ abstract class WC_Abstract_Order {
 		return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this );
 	}
 
-
 	/**
 	 * Generates a URL for the thanks page (order received)
 	 *
@@ -1921,7 +1919,6 @@ abstract class WC_Abstract_Order {
 		return apply_filters( 'woocommerce_get_checkout_order_received_url', $order_received_url, $this );
 	}
 
-
 	/**
 	 * Generates a URL so that a customer can cancel their (unpaid - pending) order.
 	 *
@@ -1931,11 +1928,16 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
 
+		// Get cancel endpoint
 		$cancel_endpoint = $this->get_cancel_endpoint();
 
-		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array( 'cancel_order' => 'true', 'order' => $this->order_key, 'order_id' => $this->id, 'redirect' => $redirect ), $cancel_endpoint ), 'woocommerce-cancel_order' ) );
+		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
+			'cancel_order' => 'true',
+			'order'        => $this->order_key,
+			'order_id'     => $this->id,
+			'redirect'     => $redirect
+		), $cancel_endpoint ), 'woocommerce-cancel_order' ) );
 	}
-
 
 	/**
 	 * Generates a raw (unescaped) cancel-order URL for use by payment gateways
@@ -1946,14 +1948,21 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
 
+		// Get cancel endpoint
 		$cancel_endpoint = $this->get_cancel_endpoint();
 
-		return apply_filters( 'woocommerce_get_cancel_order_url_raw', add_query_arg( array( 'cancel_order' => 'true', 'order' => $this->order_key, 'order_id' => $this->id, 'redirect' => $redirect, '_wpnonce' => wp_create_nonce( 'woocommerce-cancel_order' ) ), $cancel_endpoint ) );
+		return apply_filters( 'woocommerce_get_cancel_order_url_raw', add_query_arg( array(
+			'cancel_order' => 'true',
+			'order'        => $this->order_key,
+			'order_id'     => $this->id,
+			'redirect'     => $redirect,
+			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' )
+		), $cancel_endpoint ) );
 	}
 
 
 	/**
-	 * Helper methof to return the cancel endpoint
+	 * Helper method to return the cancel endpoint
 	 *
 	 * @return string the cancel endpoint; either the cart page or the home page
 	 */
