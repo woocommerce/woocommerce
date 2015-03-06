@@ -160,6 +160,21 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		} else {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( $wp->request ) );
 		}
+		
+		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
+		$tax_prices_include_tax      = get_option( 'woocommerce_prices_include_tax' );
+		//add first tax to prices
+		if($tax_display_mode=='incl' && $tax_prices_include_tax=='no') {
+			$_tax  = new WC_Tax();
+			$tax_rates= $_tax->get_rates(new WC_Product());
+			foreach($tax_rates as $tax) { 
+				$my_tax = $tax;
+				break;
+			}
+			
+			$min = floor(($min) * (($my_tax['rate']+100)/100));
+			$max = ceil($max * (($my_tax['rate']+100)/100))+1;
+		}
 
 		echo '<form method="get" action="' . esc_url( $form_action ) . '">
 			<div class="price_slider_wrapper">
