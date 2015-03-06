@@ -470,7 +470,7 @@ function wc_get_image_size( $image_size ) {
 		$width  = isset( $image_size[0] ) ? $image_size[0] : '300';
 		$height = isset( $image_size[1] ) ? $image_size[1] : '300';
 		$crop   = isset( $image_size[2] ) ? $image_size[2] : 1;
-		
+
 		$size = array(
 			'width'  => $width,
 			'height' => $height,

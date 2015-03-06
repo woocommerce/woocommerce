@@ -43,21 +43,6 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'    => __( 'Default Customer Address:', 'woocommerce' ),
-		'id'       => 'woocommerce_default_customer_address',
-		'desc_tip' =>  __( 'This option determines the customers default address (before they input their details).', 'woocommerce' ),
-		'desc'     =>  sprintf( __( 'Note: If you choose to Geolocate the user address, the %sMaxMind GeoLite Database%s will be periodically downloaded and stored in your wp-content directory.', 'woocommerce' ), '<a href="http://dev.maxmind.com/geoip/legacy/geolite/">', '</a>' ),
-		'default'  => 'geolocation',
-		'type'     => 'select',
-		'class'    => 'wc-enhanced-select',
-		'options'  => array(
-			''            => __( 'No address', 'woocommerce' ),
-			'base'        => __( 'Shop base address', 'woocommerce' ),
-			'geolocation' => __( 'Geolocate address', 'woocommerce' ),
-		),
-	),
-
-	array(
 		'title'    => __( 'Shipping Tax Class:', 'woocommerce' ),
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',

@@ -84,6 +84,21 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
+				'title'    => __( 'Default Customer Address', 'woocommerce' ),
+				'id'       => 'woocommerce_default_customer_address',
+				'desc_tip' =>  __( 'This option determines the customers default address (before they input their details).', 'woocommerce' ),
+				'desc'     =>  sprintf( __( 'Note: If you choose to Geolocate the user address, the %sMaxMind GeoLite Database%s will be periodically downloaded and stored in your wp-content directory.', 'woocommerce' ), '<a href="http://dev.maxmind.com/geoip/legacy/geolite/">', '</a>' ),
+				'default'  => 'geolocation',
+				'type'     => 'select',
+				'class'    => 'wc-enhanced-select',
+				'options'  => array(
+					''            => __( 'No address', 'woocommerce' ),
+					'base'        => __( 'Shop base address', 'woocommerce' ),
+					'geolocation' => __( 'Geolocate address', 'woocommerce' ),
+				),
+			),
+
+			array(
 				'title'   => __( 'Store Notice', 'woocommerce' ),
 				'desc'    => __( 'Enable site-wide store notice text', 'woocommerce' ),
 				'id'      => 'woocommerce_demo_store',
