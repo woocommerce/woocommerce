@@ -1930,6 +1930,35 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
+
+		$cancel_endpoint = $this->get_cancel_endpoint();
+
+		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array( 'cancel_order' => 'true', 'order' => $this->order_key, 'order_id' => $this->id, 'redirect' => $redirect ), $cancel_endpoint ), 'woocommerce-cancel_order' ) );
+	}
+
+
+	/**
+	 * Generates a raw (unescaped) cancel-order URL for use by payment gateways
+	 *
+	 * @param string $redirect
+	 *
+	 * @return string The unescaped cancel-order URL
+	 */
+	public function get_cancel_order_url_raw( $redirect = '' ) {
+
+		$cancel_endpoint = $this->get_cancel_endpoint();
+
+		return apply_filters( 'woocommerce_get_cancel_order_url_raw', add_query_arg( array( 'cancel_order' => 'true', 'order' => $this->order_key, 'order_id' => $this->id, 'redirect' => $redirect, '_wpnonce' => wp_create_nonce( 'woocommerce-cancel_order' ) ), $cancel_endpoint ) );
+	}
+
+
+	/**
+	 * Helper methof to return the cancel endpoint
+	 *
+	 * @return string the cancel endpoint; either the cart page or the home page
+	 */
+	public function get_cancel_endpoint() {
+
 		$cancel_endpoint = wc_get_page_permalink( 'cart' );
 		if ( ! $cancel_endpoint ) {
 			$cancel_endpoint = home_url();
@@ -1939,8 +1968,9 @@ abstract class WC_Abstract_Order {
 			$cancel_endpoint = trailingslashit( $cancel_endpoint );
 		}
 
-		return apply_filters('woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array( 'cancel_order' => 'true', 'order' => $this->order_key, 'order_id' => $this->id, 'redirect' => $redirect ), $cancel_endpoint ), 'woocommerce-cancel_order' ) );
+		return $cancel_endpoint;
 	}
+
 
 	/**
 	 * Generates a URL to view an order from the my account page
