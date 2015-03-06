@@ -101,6 +101,9 @@ p.demo_store {
 
 		.button {
 			float: right;
+            &:nth-of-type(n+2) {
+                margin-right: 15px;
+            }
 		}
 
 		li {
