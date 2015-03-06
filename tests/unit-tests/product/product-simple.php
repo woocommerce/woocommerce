@@ -1,10 +1,13 @@
 <?php
+
+namespace WooCommerce\Tests\Product;
+
 /**
- * Test WC product simple class
- *
+ * Class Product_Simple
+ * @package WooCommerce\Tests\Product
  * @since 2.3
  */
-class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
+class Product_Simple extends \WC_Unit_Test_Case {
 	/**
 	 * @var object
 	 * @access private
@@ -18,7 +21,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 	 * @access private
 	 */
 	private function _get_product() {
-		$this->_product = WC_Helper_Product::create_simple_product();
+		$this->_product = \WC_Helper_Product::create_simple_product();
 	}
 
 	/**
@@ -29,7 +32,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 	 */
 	private function _delete_product() {
 		// Delete the previously created product
-		WC_Helper_Product::delete_product( $this->_product->id );
+		\WC_Helper_Product::delete_product( $this->_product->id );
 		$this->_product = null;
 	}
 

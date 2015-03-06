@@ -1,10 +1,13 @@
 <?php
+
+namespace WooCommerce\Tests\Util;
+
 /**
-* Test WC notice functions
-*
-* @since 2.2
-*/
-class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
+ * Class Notice_Functions
+ * @package WooCommerce\Tests\Util
+ * @since 2.2
+ */
+class Notice_Functions extends \WC_Unit_Test_Case {
 
 	/**
 	 * Clear out notices after each test

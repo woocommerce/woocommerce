@@ -1,10 +1,12 @@
 <?php
+
+namespace WooCommerce\Tests\Util;
+
 /**
- * Test WooCommerce class
- *
- * @since 2.2
+ * Class Main_Class
+ * @package WooCommerce\Tests\Util
  */
-class WC_Tests_WooCommerce extends WC_Unit_Test_Case {
+class Main_Class extends \WC_Unit_Test_Case {
 
 	/** @var \WooCommerce instance */
 	protected $wc;
@@ -42,12 +44,12 @@ class WC_Tests_WooCommerce extends WC_Unit_Test_Case {
 	 */
 	public function test_constants() {
 
-		$this->assertEquals( str_replace( 'tests/unit-tests/', '', plugin_dir_path( __FILE__ ) ) . 'woocommerce.php', WC_PLUGIN_FILE );
+		$this->assertEquals( str_replace( 'tests/unit-tests/util/', '', plugin_dir_path( __FILE__ ) ) . 'woocommerce.php', WC_PLUGIN_FILE );
 
 		$this->assertEquals( $this->wc->version, WC_VERSION );
 		$this->assertEquals( WC_VERSION, WOOCOMMERCE_VERSION );
 		$this->assertEquals( 4, WC_ROUNDING_PRECISION );
-		$this->assertContains( WC_TAX_ROUNDING_MODE, array ( 2, 1 ) );
+		$this->assertContains( WC_TAX_ROUNDING_MODE, array( 2, 1 ) );
 		$this->assertEquals( '|', WC_DELIMITER );
 		$this->assertNotEquals( WC_LOG_DIR, '' );
 	}

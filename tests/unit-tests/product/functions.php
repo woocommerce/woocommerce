@@ -1,10 +1,13 @@
 <?php
+
+namespace WooCommerce\Tests\Product;
+
 /**
- * Test WC product functions
- *
+ * Class Functions
+ * @package WooCommerce\Tests\Product
  * @since 2.3
  */
-class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
+class Functions extends \WC_Unit_Test_Case {
 	/**
 	 * @var object
 	 * @access private
@@ -22,7 +25,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			$this->_delete_product();
 		}
 
-		$this->_product = WC_Helper_Product::create_simple_product();
+		$this->_product = \WC_Helper_Product::create_simple_product();
 	}
 
 	/**
@@ -33,7 +36,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	private function _delete_product() {
 		// Delete the previously created product
-		WC_Helper_Product::delete_product( $this->_product->id );
+		\WC_Helper_Product::delete_product( $this->_product->id );
 		$this->_product = null;
 	}
 
@@ -89,18 +92,18 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_product_has_unique_sku() {
-		$product_1 = WC_Helper_Product::create_simple_product();
+		$product_1 = \WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( true, wc_product_has_unique_sku( $product_1->id, $product_1->sku ) );
 
-		$product_2 = WC_Helper_Product::create_simple_product();
+		$product_2 = \WC_Helper_Product::create_simple_product();
 		$this->assertEquals( false, wc_product_has_unique_sku( $product_2->id, $product_2->sku ) );
 
-		WC_Helper_Product::delete_product( $product_1->id );
+		\WC_Helper_Product::delete_product( $product_1->id );
 
 		$this->assertEquals( true, wc_product_has_unique_sku( $product_2->id, $product_2->sku ) );
 
-		WC_Helper_Product::delete_product( $product_2->id );
+		\WC_Helper_Product::delete_product( $product_2->id );
 	}
 
 	/**

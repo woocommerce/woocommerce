@@ -1,10 +1,13 @@
 <?php
+
+namespace WooCommerce\Tests\Order;
+
 /**
- * Test WC order functions
- *
- * @since 2.3.0
+ * Class Functions
+ * @package WooCommerce\Tests\Order
+ * @since 2.3
  */
-class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
+class Functions extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_get_order_statuses()

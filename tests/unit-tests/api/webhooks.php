@@ -1,11 +1,13 @@
 <?php
 
+namespace WooCommerce\Tests\API;
+
 /**
- * Test the WC API /webhooks endpoint
- *
+ * Class Webhooks
+ * @package WooCommerce\Tests\API
  * @since 2.2
  */
-class WC_Tests_Webhooks extends WC_API_Unit_Test_Case {
+class Webhooks extends \WC_API_Unit_Test_Case {
 
 	/** @var \WC_API_Webhooks instance */
 	protected $endpoint;
@@ -444,7 +446,7 @@ class WC_Tests_Webhooks extends WC_API_Unit_Test_Case {
 		$this->assertNotWPError( $response );
 		$this->assertArrayHasKey( 'webhook', $response );
 
-		$this->check_get_webhook_response( $response['webhook'], new WC_Webhook( $response['webhook']['id'] ) );
+		$this->check_get_webhook_response( $response['webhook'], new \WC_Webhook( $response['webhook']['id'] ) );
 	}
 
 	/**
@@ -458,7 +460,7 @@ class WC_Tests_Webhooks extends WC_API_Unit_Test_Case {
 		$this->assertNotWPError( $response );
 		$this->assertArrayHasKey( 'webhook', $response );
 
-		$this->check_get_webhook_response( $response['webhook'], new WC_Webhook( $response['webhook']['id'] ) );
+		$this->check_get_webhook_response( $response['webhook'], new \WC_Webhook( $response['webhook']['id'] ) );
 	}
 
 	/**
