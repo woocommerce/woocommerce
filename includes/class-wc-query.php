@@ -867,7 +867,9 @@ class WC_Query {
 			$max              = floatval( $_GET['max_price'] );
 			
 		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
-		if($tax_display_mode=='incl') {
+		$tax_prices_include_tax      = get_option( 'woocommerce_prices_include_tax' );
+		//check if tax are include and display mode
+		if($tax_display_mode=='incl' && $tax_prices_include_tax=='no') {
 			$_tax  = new WC_Tax();
 			$tax_rates= $_tax->get_rates(new WC_Product());
 			foreach($tax_rates as $tax) { 
