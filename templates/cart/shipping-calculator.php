@@ -25,7 +25,7 @@ if ( get_option( 'woocommerce_enable_shipping_calc' ) === 'no' || ! WC()->cart->
 
 	<section class="shipping-calculator-form" style="display:none;">
 
-		<p class="form-row form-row-wide">
+		<p class="form-row form-row-wide" id="calc_shipping_country_field">
 			<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state" rel="calc_shipping_state">
 				<option value=""><?php _e( 'Select a country&hellip;', 'woocommerce' ); ?></option>
 				<?php
@@ -35,7 +35,7 @@ if ( get_option( 'woocommerce_enable_shipping_calc' ) === 'no' || ! WC()->cart->
 			</select>
 		</p>
 
-		<p class="form-row form-row-wide">
+		<p class="form-row form-row-wide" id="calc_shipping_state_field">
 			<?php
 				$current_cc = WC()->customer->get_shipping_country();
 				$current_r  = WC()->customer->get_shipping_state();
@@ -70,7 +70,7 @@ if ( get_option( 'woocommerce_enable_shipping_calc' ) === 'no' || ! WC()->cart->
 
 		<?php if ( apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ) : ?>
 
-			<p class="form-row form-row-wide">
+			<p class="form-row form-row-wide" id="calc_shipping_city_field">
 				<input type="text" class="input-text" value="<?php echo esc_attr( WC()->customer->get_shipping_city() ); ?>" placeholder="<?php _e( 'City', 'woocommerce' ); ?>" name="calc_shipping_city" id="calc_shipping_city" />
 			</p>
 
@@ -78,7 +78,7 @@ if ( get_option( 'woocommerce_enable_shipping_calc' ) === 'no' || ! WC()->cart->
 
 		<?php if ( apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ) : ?>
 
-			<p class="form-row form-row-wide">
+			<p class="form-row form-row-wide" id="calc_shipping_postcode_field">
 				<input type="text" class="input-text" value="<?php echo esc_attr( WC()->customer->get_shipping_postcode() ); ?>" placeholder="<?php _e( 'Postcode / Zip', 'woocommerce' ); ?>" name="calc_shipping_postcode" id="calc_shipping_postcode" />
 			</p>
 

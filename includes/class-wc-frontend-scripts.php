@@ -132,7 +132,7 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-add-to-cart', $frontend_script_path . 'add-to-cart' . $suffix . '.js' );
 		}
 		if ( is_cart() ) {
-			self::enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select' ) );
+			self::enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select', 'wc-address-i18n' ) );
 		}
 		if ( is_checkout() || is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) {
 			self::enqueue_script( 'select2' );

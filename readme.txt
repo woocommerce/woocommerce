@@ -149,6 +149,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Improve grouped product quantity inputs.
 * Tweak - Load the persistant cart if cart is empty.
 * Tweak - Prevent cart being cleared when accessing the login page.
+* Tweak - Shipping calculator - Made state/postcode respect country locale like checkout.
 
 = 2.3.5 - 20/02/2015 =
 * Fix - Plain text address formatting.
