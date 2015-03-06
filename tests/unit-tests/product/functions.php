@@ -8,37 +8,6 @@ namespace WooCommerce\Tests\Product;
  * @since 2.3
  */
 class Functions extends \WC_Unit_Test_Case {
-	/**
-	 * @var object
-	 * @access private
-	 */
-	private $_product = null;
-
-	/**
-	 * Helper method to get a product
-	 *
-	 * @since 2.3
-	 * @access private
-	 */
-	private function _get_product() {
-		if ( ! is_null( $this->_product ) ) {
-			$this->_delete_product();
-		}
-
-		$this->_product = \WC_Helper_Product::create_simple_product();
-	}
-
-	/**
-	 * Helper method to delete a product
-	 *
-	 * @since 2.3
-	 * @access private
-	 */
-	private function _delete_product() {
-		// Delete the previously created product
-		\WC_Helper_Product::delete_product( $this->_product->id );
-		$this->_product = null;
-	}
 
 	/**
 	 * Test wc_get_product()
@@ -46,12 +15,16 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product() {
-		$this->_get_product();
-		$product_copy = wc_get_product( $this->_product->id );
 
-		$this->assertEquals( $this->_product->id, $product_copy->id );
+		// Create product
+		$product = \WC_Helper_Product::create_simple_product();
 
-		$this->_delete_product();
+		$product_copy = wc_get_product( $product->id );
+
+		$this->assertEquals( $product->id, $product_copy->id );
+
+		// Delete Product
+		\WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -60,14 +33,16 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_update_product_stock() {
-		$this->_get_product();
+		// Create product 
+		$product = \WC_Helper_Product::create_simple_product();
 
-		update_post_meta( $this->_product->id, '_manage_stock', 'yes' );
+		update_post_meta( $product->id, '_manage_stock', 'yes' );
 
-		wc_update_product_stock( $this->_product->id, 5 );
-		$this->assertEquals( 5, $this->_product->stock );
+		wc_update_product_stock( $product->id, 5 );
+		$this->assertEquals( 5, $product->stock );
 
-		$this->_delete_product();
+		// Delete Product
+		\WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -112,10 +87,12 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product_id_by_sku() {
-		$this->_get_product();
+		// Create product 
+		$product = \WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals( $this->_product->id, wc_get_product_id_by_sku( $this->_product->sku ) );
+		$this->assertEquals( $product->id, wc_get_product_id_by_sku( $product->sku ) );
 
-		$this->_delete_product();
+		// Delete Product
+		\WC_Helper_Product::delete_product( $product->id );
 	}
 }
