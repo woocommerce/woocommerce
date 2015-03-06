@@ -45,6 +45,8 @@ class WC_Widget_Products extends WC_Widget {
 					''         => __( 'All Products', 'woocommerce' ),
 					'featured' => __( 'Featured Products', 'woocommerce' ),
 					'onsale'   => __( 'On-sale Products', 'woocommerce' ),
+					'related'   => __( 'Related Products', 'woocommerce' )
+
 				)
 			),
 			'orderby' => array(
@@ -131,6 +133,10 @@ class WC_Widget_Products extends WC_Widget {
 				$product_ids_on_sale    = wc_get_product_ids_on_sale();
 				$product_ids_on_sale[]  = 0;
 				$query_args['post__in'] = $product_ids_on_sale;
+				break;
+			case 'related' :
+				$related = wc_get_product_related($number);
+				$query_args['post__in'] = $related;
 				break;
 		}
 
