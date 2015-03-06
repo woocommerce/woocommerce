@@ -154,7 +154,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 
 		} else {
 
-			if ( is_array( $this->countries ) && in_array( $package['destination']['country'], $this->countries ) ) {
+			if ( is_array( $this->countries ) && ( in_array( $package['destination']['country'], $this->countries ) || ! $package['destination']['country'] ) ) {
 				return false;
 			}
 
