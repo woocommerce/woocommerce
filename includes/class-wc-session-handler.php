@@ -67,7 +67,7 @@ class WC_Session_Handler extends WC_Session {
     	add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
     	add_action( 'woocommerce_cleanup_sessions', array( $this, 'cleanup_sessions' ), 10 );
     	add_action( 'shutdown', array( $this, 'save_data' ), 20 );
-    	add_action( 'clear_auth_cookie', array( $this, 'destroy_session' ) );
+    	add_action( 'wp_logout', array( $this, 'destroy_session' ) );
     	if ( ! is_user_logged_in() ) {
     		add_action( 'woocommerce_thankyou', array( $this, 'destroy_session' ) );
     	}

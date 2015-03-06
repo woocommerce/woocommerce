@@ -202,19 +202,26 @@ class WC_Cart {
 		 * Get the cart data from the PHP session and store it in class variables.
 		 */
 		public function get_cart_from_session() {
-
 			// Load cart session data from session
 			foreach ( $this->cart_session_data as $key => $default ) {
 				$this->$key = WC()->session->get( $key, $default );
 			}
 
+			$update_cart_session         = false;
 			$this->removed_cart_contents = array_filter( WC()->session->get( 'removed_cart_contents', array() ) );
 			$this->applied_coupons       = array_filter( WC()->session->get( 'applied_coupons', array() ) );
 
-			// Load the cart
-			$cart = WC()->session->get( 'cart', array() );
+			/**
+			 * Load the cart object. This defaults to the persistant cart if null.
+			 */
+			$cart = WC()->session->get( 'cart', null );
 
-			$update_cart_session = false;
+			if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', true ) ) ) {
+				$cart                = $saved_cart['cart'];
+				$update_cart_session = true;
+			} elseif ( is_null( $cart ) ) {
+				$cart = array();
+			}
 
 			if ( is_array( $cart ) ) {
 				foreach ( $cart as $key => $values ) {
@@ -304,7 +311,7 @@ class WC_Cart {
 		 */
 		public function persistent_cart_update() {
 			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
-				'cart' => WC()->session->cart,
+				'cart' => WC()->session->get( 'cart' )
 			) );
 		}
 

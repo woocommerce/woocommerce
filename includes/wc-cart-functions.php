@@ -32,8 +32,6 @@ add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_c
 
 /**
  * Clears the cart session when called
- *
- * @return void
  */
 function wc_empty_cart() {
 	if ( ! isset( WC()->cart ) || WC()->cart == '' ) {
@@ -43,34 +41,27 @@ function wc_empty_cart() {
 }
 
 /**
- * Load the cart upon login
+ * Load the persistent cart
  *
  * @param string $user_login
  * @param WP_User $user
+ * @deprecated 2.3
  */
 function wc_load_persistent_cart( $user_login, $user ) {
-
-	if ( ! $user ) {
+	if ( ! $user || ! ( $saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true ) ) ) {
 		return;
 	}
 
-	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true );
-
-	if ( $saved_cart ) {
-		if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) == 0 ) {
-			WC()->session->cart = $saved_cart['cart'];
-		}
+	if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) === 0 ) {
+		WC()->session->cart = $saved_cart['cart'];
 	}
 }
-add_action( 'wp_login', 'wc_load_persistent_cart', 1, 2 );
-
 
 /**
  * Add to cart messages.
  *
  * @access public
  * @param int|array $product_id
- * @return void
  */
 function wc_add_to_cart_message( $product_id ) {
 
