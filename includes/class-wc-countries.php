@@ -390,7 +390,7 @@ class WC_Countries {
 	 * @return string address
 	 */
 	public function get_formatted_address( $args = array() ) {
-		$default = array(
+		$default_args = array(
 			'first_name' => '',
 			'last_name'  => '',
 			'company'    => '',
@@ -407,13 +407,13 @@ class WC_Countries {
 		extract( $args );
 
 		// Get all formats
-		$formats 		= $this->get_address_formats();
+		$formats = $this->get_address_formats();
 
 		// Get format for the address' country
-		$format			= ( $country && isset( $formats[ $country ] ) ) ? $formats[ $country ] : $formats['default'];
+		$format = ( $country && isset( $formats[ $country ] ) ) ? $formats[ $country ] : $formats['default'];
 
 		// Handle full country name
-		$full_country 	= ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
+		$full_country = ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
 
 		// Country is not needed if the same as base
 		if ( $country == $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', false ) ) {
