@@ -12,15 +12,9 @@
  * Styling begins
  */
 .woocommerce-message {
+	overflow: hidden;
 	position: relative;
 	border-left-color: #cc99c2 !important;
-	overflow: hidden;
-
-	.twitter-share-button {
-		margin-top: -3px;
-		margin-left: 3px;
-		vertical-align: middle;
-	}
 }
 
 p.woocommerce-actions,
@@ -31,7 +25,6 @@ p.woocommerce-actions,
 		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		color: #fff;
-		text-decoration: none !important;
 
 		&:hover {
 			background: #bb77ae;
@@ -56,6 +49,11 @@ p.woocommerce-actions,
 		}
 	}
 
+	a.button-primary,
+	a.button-secondary {
+		text-decoration: none !important;
+	}
+
 	.twitter-share-button {
 		margin-top: -3px;
 		margin-left: 3px;
@@ -63,10 +61,7 @@ p.woocommerce-actions,
 	}
 }
 
-p.woocommerce-actions {
-	margin-bottom: 1em !important;
-}
-
+p.woocommerce-actions,
 .woocommerce-about-text {
 	margin-bottom: 1em !important;
 }
