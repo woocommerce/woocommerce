@@ -1374,7 +1374,7 @@ abstract class WC_Abstract_Order {
 		if ( $inc_tax ) {
 			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] ) / max( 1, $item['qty'] );
 		} else {
-			$price = ( $item['line_subtotal'] / $item['qty'] );
+			$price = ( $item['line_subtotal'] / max( 1, $item['qty'] ) );
 		}
 
 		$price = $round ? number_format( (float) $price, 2, '.', '' ) : $price;
@@ -1418,7 +1418,7 @@ abstract class WC_Abstract_Order {
 		if ( $inc_tax ) {
 			$price = ( $item['line_total'] + $item['line_tax'] ) / max( 1, $qty );
 		} else {
-			$price = $item['line_total'] / $qty;
+			$price = $item['line_total'] / max( 1, $qty );
 		}
 
 		$price = $round ? round( $price, 2 ) : $price;
