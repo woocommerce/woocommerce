@@ -393,9 +393,18 @@ class WC_Email extends WC_Settings_API {
 			wc_get_template( 'emails/email-styles.php' );
 			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean() );
 
-			// apply CSS styles inline for picky email clients
-			$emogrifier = new Emogrifier( $content, $css );
-			$content = $emogrifier->emogrify();
+			try {
+
+				// apply CSS styles inline for picky email clients
+				$emogrifier = new Emogrifier( $content, $css );
+				$content = $emogrifier->emogrify();
+
+			} catch ( Exception $e ) {
+
+				$logger = new WC_Logger();
+
+				$logger->add( 'emogrifier', $e->getMessage() );
+			}
 		}
 
 		return $content;
