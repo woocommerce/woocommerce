@@ -130,14 +130,6 @@ class WC_Order_Item_Meta {
 					if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
 						$meta_value = $term->name;
 					}
-
-				// If we have a product, and its not a term, try to find its non-sanitized name
-				} elseif ( $this->product ) {
-					$product_attributes = $this->product->get_attributes();
-
-					if ( isset( $product_attributes[ $attribute_key ] ) ) {
-						$meta_key = wc_attribute_label( $product_attributes[ $attribute_key ]['name'] );
-					}
 				}
 
 				// Unique key required
@@ -149,7 +141,7 @@ class WC_Order_Item_Meta {
 				}
 
 				$formatted_meta[ $formatted_meta_key ] = array(
-					'label'     => wc_attribute_label( $attribute_key ),
+					'label'     => wc_attribute_label( $attribute_key, $this->product ),
 					'value'     => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ),
 				);
 			}

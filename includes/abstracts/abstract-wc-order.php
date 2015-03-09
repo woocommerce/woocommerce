@@ -222,7 +222,6 @@ abstract class WC_Abstract_Order {
 
 		// Add variation meta
 		if ( ! empty( $args['variation'] ) ) {
-
 			foreach ( $args['variation'] as $key => $value ) {
 				wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
 			}

@@ -153,6 +153,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Move default customer location to general settings tab.
 * Tweak - Only run save_category_fields for product_cat taxonomy.
 * Tweak - Improved message when variation attributes are missing.
+* Tweak - Allow wc_attribute_label to support product-level attribute names.
 
 = 2.3.5 - 20/02/2015 =
 * Fix - Plain text address formatting.
