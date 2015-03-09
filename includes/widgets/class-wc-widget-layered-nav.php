@@ -396,7 +396,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					echo ( $count > 0 || $option_is_set ) ? '</a>' : '</span>';
 
-					echo ' <small class="count">' . $count . '</small></li>';
+					echo ' <span class="count">(' . $count . ')</span></li>';
 
 				}
 
