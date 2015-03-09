@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Shipping calculator - Made state/postcode respect country locale like checkout.
 * Tweak - Move default customer location to general settings tab.
 * Tweak - Only run save_category_fields for product_cat taxonomy.
+* Tweak - Improved message when variation attributes are missing.
 
 = 2.3.5 - 20/02/2015 =
 * Fix - Plain text address formatting.

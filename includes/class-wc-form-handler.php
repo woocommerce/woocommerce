@@ -593,17 +593,10 @@ class WC_Form_Handler {
 
 			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
 			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
-			$all_variations_set = true;
+			$missing_attributes = array();
 			$variations         = array();
-
-			// Only allow integer variation ID - if its not set, redirect to the product page
-			if ( empty( $variation_id ) ) {
-				wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
-				return;
-			}
-
-			$attributes = $adding_to_cart->get_attributes();
-			$variation  = wc_get_product( $variation_id );
+			$attributes         = $adding_to_cart->get_attributes();
+			$variation          = wc_get_product( $variation_id );
 
 			// Verify all attributes
 			foreach ( $attributes as $attribute ) {
@@ -641,12 +634,18 @@ class WC_Form_Handler {
 						continue;
 					}
 
+				} else {
+					$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 				}
-
-				$all_variations_set = false;
 			}
 
-			if ( $all_variations_set ) {
+			if ( $missing_attributes ) {
+				wc_add_notice( sprintf( _n( '%s is a required field', '%s are required fields', sizeof( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ), 'error' );
+				return;
+			} elseif ( empty( $variation_id ) ) {
+				wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
+				return;
+			} else {
 				// Add to cart validation
 				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
@@ -657,9 +656,6 @@ class WC_Form_Handler {
 						$added_to_cart[] = $product_id;
 					}
 				}
-			} else {
-				wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
-				return;
 			}
 
 		// Grouped Products

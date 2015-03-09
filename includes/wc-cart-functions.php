@@ -73,7 +73,7 @@ function wc_add_to_cart_message( $product_id ) {
 			$titles[] = get_the_title( $id );
 		}
 
-		$added_text = sprintf( __( 'Added &quot;%s&quot; to your cart.', 'woocommerce' ), join( __( '&quot; and &quot;', 'woocommerce' ), array_filter( array_merge( array( join( '&quot;, &quot;', array_slice( $titles, 0, -1 ) ) ), array_slice( $titles, -1 ) ) ) ) );
+		$added_text = sprintf( __( 'Added %s to your cart.', 'woocommerce' ), wc_format_list_of_items( $titles ) );
 
 	} else {
 		$added_text = sprintf( __( '&quot;%s&quot; was successfully added to your cart.', 'woocommerce' ), get_the_title( $product_id ) );
@@ -93,6 +93,15 @@ function wc_add_to_cart_message( $product_id ) {
 	endif;
 
 	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
+}
+
+/**
+ * Comma separate a list of item names, and replace final comma with 'and'
+ * @param  array $items
+ * @return string
+ */
+function wc_format_list_of_items( $items ) {
+	return '&quot;' . join( __( '&quot; and &quot;', 'woocommerce' ), array_filter( array_merge( array( implode( '&quot;, &quot;', array_slice( $items, 0, -1 ) ) ), array_slice( $items, -1 ) ) ) ) . '&quot;';
 }
 
 /**
