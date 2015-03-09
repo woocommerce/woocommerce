@@ -243,6 +243,8 @@ class WC_Product {
 
 			// Clear caches
 			wp_cache_delete( $this->id, 'post_meta' );
+			delete_transient( 'wc_low_stock_count' );
+			delete_transient( 'wc_outofstock_count' );
 			unset( $this->stock );
 
 			// Stock status

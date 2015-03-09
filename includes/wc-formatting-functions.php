@@ -647,9 +647,9 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
  * Format content to display shortcodes
  *
  * @since  2.3.0
- * @param  string $string
+ * @param  string $raw_string
  * @return string
  */
-function wc_format_content( $string ) {
-	return do_shortcode( shortcode_unautop( wpautop( $string ) ) );
+function wc_format_content( $raw_string ) {
+	return apply_filters( 'woocommerce_format_content', do_shortcode( shortcode_unautop( wpautop( $raw_string ) ) ), $raw_string );
 }
