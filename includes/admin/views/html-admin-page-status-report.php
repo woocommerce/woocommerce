@@ -107,7 +107,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="PHP Version"><?php _e( 'PHP Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of PHP installed on your hosting server.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php if ( function_exists( 'phpversion' ) ) echo esc_html( phpversion() ); ?></td>
+			<td><?php
+				// Check if phpversion function exists
+				if ( function_exists( 'phpversion' ) ) {
+					$php_version = phpversion();
+
+					if ( version_compare( $php_version, '5.4', '<' ) ) {
+						echo '<mark class="error">' . sprintf( __( '%s - We recommend a minimum PHP version of 5.4. See: <a href="%s" target="_blank">How to update your PHP version</a>', 'woocommerce' ), esc_html( $php_version ), ' http://docs.woothemes.com/document/how-to-update-your-php-version/' ) . '</mark>';
+					} else {
+						echo '<mark class="yes">' . esc_html( $php_version ) . '</mark>';
+					}
+				} else {
+					_e( "Couldn't determine PHP version because phpversion() doesn't exist.", 'woocommerce' );
+				}
+				?></td>
 		</tr>
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
