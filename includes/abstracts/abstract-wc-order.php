@@ -1436,10 +1436,10 @@ abstract class WC_Abstract_Order {
 	public function get_line_total( $item, $inc_tax = false, $round = true ) {
 
 		// Check if we need to add line tax to the line total
-		$line_total = $inc_tax ? $item['line_total'] + $item['line_tax']: $item['line_total'];
+		$line_total = $inc_tax ? $item['line_total'] + $item['line_tax'] : $item['line_total'];
 
 		// Check if we need to round
-		$line_total = $round ? number_format( (float) $line_total, 2, '.', '' ) : $line_total;
+		$line_total = $round ? round( $line_total, 2 ) : $line_total;
 
 		return apply_filters( 'woocommerce_order_amount_line_total', $line_total, $this );
 	}
