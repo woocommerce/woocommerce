@@ -623,7 +623,8 @@ class WC_Coupon {
 				$discount_percent = 0;
 
 				if ( WC()->cart->subtotal_ex_tax ) {
-					$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item['quantity'] ) / WC()->cart->subtotal_ex_tax;
+					// Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669
+					$discount_percent = ( $cart_item['data']->get_price() * $cart_item['quantity'] ) / ( wc_prices_include_tax() ? WC()->cart->subtotal : WC()->cart->subtotal_ex_tax );
 				}
 
 				$discount = min( ( $this->coupon_amount * $discount_percent ) / $cart_item['quantity'], $discounting_amount );

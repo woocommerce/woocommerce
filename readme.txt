@@ -156,6 +156,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Improved message when variation attributes are missing.
 * Tweak - Allow wc_attribute_label to support product-level attribute names.
 * Tweak - Added the option to not round the line total.
+* Tweak - Improved coupon percent calculation for fixed discounts.
 * Dev - API - reports/sales now also returns total refunds.
 
 = 2.3.5 - 20/02/2015 =
