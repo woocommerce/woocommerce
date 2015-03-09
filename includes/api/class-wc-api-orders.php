@@ -143,6 +143,9 @@ class WC_API_Orders extends WC_API_Resource {
 			return $id;
 		}
 
+		// Get the decimal precession
+		$dp = ( isset( $filter['dp'] ) ? $filter['dp'] : 2 );
+
 		$order = wc_get_order( $id );
 
 		$order_post = get_post( $id );
@@ -234,11 +237,11 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_data['line_items'][] = array(
 				'id'           => $item_id,
-				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
-				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], 2 ),
-				'total'        => wc_format_decimal( $order->get_line_total( $item ), 2 ),
+				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
+				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
+				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
 				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
-				'price'        => wc_format_decimal( $order->get_item_total( $item ), 2 ),
+				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
 				'quantity'     => (int) $item['qty'],
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
 				'name'         => $item['name'],
