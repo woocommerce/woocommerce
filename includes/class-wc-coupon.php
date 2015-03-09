@@ -656,13 +656,19 @@ class WC_Coupon {
 	 * displays the message/error.
 	 *
 	 * @param int $msg_code Message/error code.
-	 * @return void
 	 */
 	public function add_coupon_message( $msg_code ) {
+
+		$msg = $msg_code < 200 ? $this->get_coupon_error( $msg_code ) : $this->get_coupon_message( $msg_code );
+
+		if ( ! $msg ) {
+			return;
+		}
+
 		if ( $msg_code < 200 ) {
-			wc_add_notice( $this->get_coupon_error( $msg_code ), 'error' );
+			wc_add_notice( $msg, 'error' );
 		} else {
-			wc_add_notice( $this->get_coupon_message( $msg_code ) );
+			wc_add_notice( $msg );
 		}
 	}
 
