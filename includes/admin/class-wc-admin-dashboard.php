@@ -96,30 +96,47 @@ class WC_Admin_Dashboard {
 		$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 		$nostock = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
 
-		$query_from = apply_filters( 'woocommerce_report_low_in_stock_query_from', "FROM {$wpdb->posts} as posts
-			INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-			INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
-			WHERE 1=1
-			AND posts.post_type IN ( 'product', 'product_variation' )
-			AND posts.post_status = 'publish'
-			AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
-			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
-			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$nostock}'
-		" );
+		if ( $wc_dashboard_use_transients = apply_filters( 'woocommerce_dashboard_status_use_caching', false ) ) {
+			$lowinstock_count = get_transient( 'woocommerce_lowinstock_count' );
+			$outofstock_count = get_transient( 'woocommerce_outofstock_count' );
+			$wc_dashboard_transients_duration = apply_filters( 'woocommerce_dashboard_status_transient_duration', 6 * HOUR_IN_SECONDS );
+		}
 
-		$lowinstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
+		if ( ! isset( $lowinstock_count ) ) {
 
-		$query_from = apply_filters( 'woocommerce_report_out_of_stock_query_from', "FROM {$wpdb->posts} as posts
-			INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-			INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
-			WHERE 1=1
-			AND posts.post_type IN ( 'product', 'product_variation' )
-			AND posts.post_status = 'publish'
-			AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
-			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$nostock}'
-		" );
+			$query_from = apply_filters( 'woocommerce_report_low_in_stock_query_from', "FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+				INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
+				WHERE 1=1
+				AND posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status = 'publish'
+				AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
+				AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
+				AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$nostock}'
+			" );
 
-		$outofstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
+			$lowinstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
+
+			if ( $wc_dashboard_use_transients ) set_transient( 'woocommerce_lowinstock_count', $lowinstock_count, $wc_dashboard_transients_duration );
+		}
+
+		if ( ! isset( $outofstock_count ) ) {
+
+			$query_from = apply_filters( 'woocommerce_report_out_of_stock_query_from', "FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+				INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
+				WHERE 1=1
+				AND posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status = 'publish'
+				AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
+				AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$nostock}'
+			" );
+
+			$outofstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
+
+			if ( $wc_dashboard_use_transients ) set_transient( 'woocommerce_outofstock_count', $outofstock_count, $wc_dashboard_transients_duration );
+		}
+
 		?>
 		<ul class="wc_status_list">
 			<li class="sales-this-month">
