@@ -93,33 +93,40 @@ class WC_Admin_Dashboard {
 		}
 
 		// Get products using a query - this is too advanced for get_posts :(
-		$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-		$nostock = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
+		$stock          = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
+		$nostock        = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
+		$transient_name = 'wc_low_stock_count';
 
-		$query_from = apply_filters( 'woocommerce_report_low_in_stock_query_from', "FROM {$wpdb->posts} as posts
-			INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-			INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
-			WHERE 1=1
-			AND posts.post_type IN ( 'product', 'product_variation' )
-			AND posts.post_status = 'publish'
-			AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
-			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
-			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$nostock}'
-		" );
+		if ( false === ( $lowinstock_count = get_transient( $transient_name ) ) ) {
+			$query_from = apply_filters( 'woocommerce_report_low_in_stock_query_from', "FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+				INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
+				WHERE 1=1
+				AND posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status = 'publish'
+				AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
+				AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
+				AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$nostock}'
+			" );
+			$lowinstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
+			set_transient( $transient_name, $lowinstock_count, DAY_IN_SECONDS * 30 );
+		}
 
-		$lowinstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
+		$transient_name = 'wc_outofstock_count';
 
-		$query_from = apply_filters( 'woocommerce_report_out_of_stock_query_from', "FROM {$wpdb->posts} as posts
-			INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-			INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
-			WHERE 1=1
-			AND posts.post_type IN ( 'product', 'product_variation' )
-			AND posts.post_status = 'publish'
-			AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
-			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$nostock}'
-		" );
-
-		$outofstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
+		if ( false === ( $outofstock_count = get_transient( $transient_name ) ) ) {
+			$query_from = apply_filters( 'woocommerce_report_out_of_stock_query_from', "FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+				INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
+				WHERE 1=1
+				AND posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status = 'publish'
+				AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
+				AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$nostock}'
+			" );
+			$outofstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
+			set_transient( $transient_name, $outofstock_count, DAY_IN_SECONDS * 30 );
+		}
 		?>
 		<ul class="wc_status_list">
 			<li class="sales-this-month">

@@ -79,7 +79,9 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	// Core transients
 	$transients_to_clear = array(
 		'wc_products_onsale',
-		'wc_featured_products'
+		'wc_featured_products',
+		'wc_outofstock_count',
+		'wc_low_stock_count'
 	);
 
 	// Transients that include an ID
