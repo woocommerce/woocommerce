@@ -30,8 +30,8 @@ class WC_Admin_Taxonomies {
 		// Add form
 		add_action( 'product_cat_add_form_fields', array( $this, 'add_category_fields' ) );
 		add_action( 'product_cat_edit_form_fields', array( $this, 'edit_category_fields' ), 10 );
-		add_action( 'created_term', array( $this, 'save_category_fields' ), 10 );
-		add_action( 'edit_term', array( $this, 'save_category_fields' ), 10 );
+		add_action( 'created_term', array( $this, 'save_category_fields' ), 10, 3 );
+		add_action( 'edit_term', array( $this, 'save_category_fields' ), 10, 3 );
 
 		// Add columns
 		add_filter( 'manage_edit-product_cat_columns', array( $this, 'product_cat_columns' ) );
@@ -249,12 +249,11 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param mixed $term_id Term ID being saved
 	 */
-	public function save_category_fields( $term_id ) {
-		if ( isset( $_POST['display_type'] ) ) {
+	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
+		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) {
 			update_woocommerce_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) );
 		}
-
-		if ( isset( $_POST['product_cat_thumbnail_id'] ) ) {
+		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) {
 			update_woocommerce_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
 		}
 	}
