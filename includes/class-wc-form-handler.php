@@ -505,7 +505,7 @@ class WC_Form_Handler {
 			foreach ( $item['item_meta'] as $meta_name => $meta_value ) {
 				if ( taxonomy_is_product_attribute( $meta_name ) ) {
 					$variations[ $meta_name ] = $meta_value[0];
-				} elseif ( meta_is_product_attribute( $meta_name, $meta_value, $product_id ) ) {
+				} elseif ( meta_is_product_attribute( $meta_name, $meta_value[0], $product_id ) ) {
 					$variations[ $meta_name ] = $meta_value[0];
 				}
 			}
