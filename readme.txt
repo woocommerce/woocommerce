@@ -157,6 +157,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Allow wc_attribute_label to support product-level attribute names.
 * Tweak - Added the option to not round the line total.
 * Tweak - Improved coupon percent calculation for fixed discounts.
+* Tweak - Show calculate total when shipping is needed, but shipping is hidden.
+* Tweak - Cart total labels.
 * Dev - API - reports/sales now also returns total refunds.
 
 = 2.3.5 - 20/02/2015 =

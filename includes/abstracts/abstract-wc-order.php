@@ -1718,7 +1718,7 @@ abstract class WC_Abstract_Order {
 
 		if ( $subtotal = $this->get_subtotal_to_display( false, $tax_display ) ) {
 			$total_rows['cart_subtotal'] = array(
-				'label' => __( 'Cart Subtotal:', 'woocommerce' ),
+				'label' => __( 'Subtotal:', 'woocommerce' ),
 				'value'	=> $subtotal
 			);
 		}
@@ -1791,7 +1791,7 @@ abstract class WC_Abstract_Order {
 		}
 
 		$total_rows['order_total'] = array(
-			'label' => __( 'Order Total:', 'woocommerce' ),
+			'label' => __( 'Total:', 'woocommerce' ),
 			'value'	=> $this->get_formatted_order_total()
 		);
 
