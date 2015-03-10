@@ -433,12 +433,12 @@
 					$variation_form.find( '.single_variation' ).html( '<p>' + wc_add_to_cart_variation_params.i18n_unavailable_text + '</p>' );
 				}
 
-				if ( variation.min_qty )
+				if ( variation.min_qty !== '' )
 					$single_variation_wrap.find( '.quantity input.qty' ).attr( 'min', variation.min_qty ).val( variation.min_qty );
 				else
 					$single_variation_wrap.find( '.quantity input.qty' ).removeAttr( 'min' );
 
-				if ( variation.max_qty )
+				if ( variation.max_qty !== '' )
 					$single_variation_wrap.find( '.quantity input.qty' ).attr( 'max', variation.max_qty );
 				else
 					$single_variation_wrap.find( '.quantity input.qty' ).removeAttr( 'max' );
