@@ -73,7 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php if ( is_cart() ) : ?>
 
 				<?php echo apply_filters( 'woocommerce_cart_no_shipping_available_html',
-					'<div class="woocommerce-info"><p>' . __( 'There are no shipping methods available. Please double check your address, or contact us if you need any help.', 'woocommerce' ) . '</p></div>'
+					'<p>' . __( 'There are no shipping methods available. Please double check your address, or contact us if you need any help.', 'woocommerce' ) . '</p>'
 				); ?>
 
 			<?php else : ?>
