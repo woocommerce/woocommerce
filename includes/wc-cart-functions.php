@@ -157,38 +157,13 @@ function wc_cart_totals_subtotal_html() {
  * @return void
  */
 function wc_cart_totals_shipping_html() {
+	$packages = WC()->shipping->get_packages();
 
-	$packages = WC()->shipping->get_packages(); ?>
+	foreach ( $packages as $i => $package ) {
+		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 
-	<tr class="shipping">
-
-		<th>
-			<?php _e( 'Shipping and Handling', 'woocommerce' ); ?>
-		</th>
-
-		<td>
-			<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) {
-
-				do_action( 'woocommerce_cart_totals_before_shipping' );
-
-				foreach ( $packages as $i => $package ) {
-					$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
-
-					wc_get_template( 'cart/cart-shipping.php', array( 'package' => $package, 'available_methods' => $package['rates'], 'show_package_details' => ( sizeof( $packages ) > 1 ), 'index' => $i, 'chosen_method' => $chosen_method ) );
-				}
-
-				do_action( 'woocommerce_cart_totals_after_shipping' );
-
-			}
-
-			if ( is_cart() ) {
-				woocommerce_shipping_calculator();
-			} ?>
-		</td>
-
-	</tr>
-	<?php
-
+		wc_get_template( 'cart/cart-shipping.php', array( 'package' => $package, 'available_methods' => $package['rates'], 'show_package_details' => ( sizeof( $packages ) > 1 ), 'index' => $i, 'chosen_method' => $chosen_method ) );
+	}
 }
 
 /**
