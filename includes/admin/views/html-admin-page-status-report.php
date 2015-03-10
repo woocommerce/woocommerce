@@ -81,7 +81,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="WP Debug Mode"><?php _e( 'WP Debug Mode', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . '&#10004;' . '</mark>'; else echo '<mark class="no">' . '&ndash;' . '</mark>'; ?></td>
+			<td><?php if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) echo '<mark class="yes">' . '&#10004;' . '</mark>'; else echo '<mark class="no">' . '&ndash;' . '</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="WP Script Debug"><?php _e( 'WP Script Debug', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not WordPress load non-minified assets.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td><?php if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) echo '<mark class="yes">' . '&#10004;' . '</mark>'; else echo '<mark class="no">' . '&ndash;' . '</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Language"><?php _e( 'Language', 'woocommerce' ); ?>:</td>
