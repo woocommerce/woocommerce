@@ -112,10 +112,10 @@ function wc_get_weight( $weight, $to_unit ) {
 				$weight *= 0.001;
 			break;
 			case 'lbs':
-				$weight *= 0.4536;
+				$weight *= 0.453592;
 			break;
 			case 'oz':
-				$weight *= 0.0283;
+				$weight *= 0.0283495;
 			break;
 		}
 
@@ -125,7 +125,7 @@ function wc_get_weight( $weight, $to_unit ) {
 				$weight *= 1000;
 			break;
 			case 'lbs':
-				$weight *= 2.2046;
+				$weight *= 2.20462;
 			break;
 			case 'oz':
 				$weight *= 35.274;
