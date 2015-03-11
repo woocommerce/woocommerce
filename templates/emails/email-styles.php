@@ -40,7 +40,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 #template_header {
     background-color: <?php echo esc_attr( $base ); ?>;
     border-radius: 3px 3px 0 0 !important;
-    color: <?php echo $base_text; ?>;
+    color: <?php echo esc_attr( $base_text ); ?>;
     border-bottom: 0;
     font-weight: bold;
     line-height: 100%;
@@ -49,7 +49,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 
 #template_header h1 {
-    color: <?php echo $base_text; ?>;
+    color: <?php echo esc_attr( $base_text ); ?>;
 }
 
 #template_footer td {
@@ -81,7 +81,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 
 #body_content_inner {
-    color: <?php echo $text_lighter_20;?>;
+    color: <?php echo esc_attr( $text_lighter_20 ); ?>;
     font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
     font-size: 14px;
     line-height: 150%;
@@ -98,7 +98,7 @@ h1 {
     margin: 0;
     padding: 36px 48px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
-    text-shadow: 0 1px 0 <?php echo $base_lighter_20; ?>;
+    text-shadow: 0 1px 0 <?php echo esc_attr( $base_lighter_20 ); ?>;
     -webkit-font-smoothing: antialiased;
 }
 
