@@ -18,6 +18,7 @@ $text            = get_option( 'woocommerce_email_text_color' );
 
 $bg_darker_10    = wc_hex_darker( $bg, 10 );
 $base_lighter_20 = wc_hex_lighter( $base, 20 );
+$base_lighter_40 = wc_hex_lighter( $base, 40 );
 $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 // !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
@@ -54,9 +55,16 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 #template_footer td {
     padding: 0;
+    -webkit-border-radius: 6px;
 }
 
 #template_footer #credit {
+    border:0;
+    color: <?php echo esc_attr( $base_lighter_40 ); ?>;
+    font-family: Arial;
+    font-size:12px;
+    line-height:125%;
+    text-align:center;
     padding: 0 48px 48px 48px;
 }
 
