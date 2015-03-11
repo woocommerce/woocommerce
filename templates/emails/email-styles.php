@@ -42,10 +42,10 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     border-radius: 3px 3px 0 0 !important;
     color: <?php echo $base_text; ?>;
     border-bottom: 0;
-    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
     font-weight: bold;
     line-height: 100%;
     vertical-align: middle;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
 }
 
 #template_header h1 {
