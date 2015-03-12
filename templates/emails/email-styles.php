@@ -18,6 +18,7 @@ $text            = get_option( 'woocommerce_email_text_color' );
 
 $bg_darker_10    = wc_hex_darker( $bg, 10 );
 $base_lighter_20 = wc_hex_lighter( $base, 20 );
+$base_lighter_40 = wc_hex_lighter( $base, 40 );
 $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 // !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
@@ -33,30 +34,37 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 #template_container {
     box-shadow: 0 1px 4px rgba(0,0,0,0.1) !important;
     background-color: <?php echo esc_attr( $body ); ?>;
-    border: 1px solid <?php echo $bg_darker_10; ?>;
+    border: 1px solid <?php echo esc_attr( $bg_darker_10 ); ?>;
     border-radius: 3px !important;
 }
 
 #template_header {
     background-color: <?php echo esc_attr( $base ); ?>;
     border-radius: 3px 3px 0 0 !important;
-    color: <?php echo $base_text; ?>;
+    color: <?php echo esc_attr( $base_text ); ?>;
     border-bottom: 0;
-    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
     font-weight: bold;
     line-height: 100%;
     vertical-align: middle;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
 }
 
 #template_header h1 {
-    color: <?php echo $base_text; ?>;
+    color: <?php echo esc_attr( $base_text ); ?>;
 }
 
 #template_footer td {
     padding: 0;
+    -webkit-border-radius: 6px;
 }
 
 #template_footer #credit {
+    border:0;
+    color: <?php echo esc_attr( $base_lighter_40 ); ?>;
+    font-family: Arial;
+    font-size:12px;
+    line-height:125%;
+    text-align:center;
     padding: 0 48px 48px 48px;
 }
 
@@ -81,7 +89,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 
 #body_content_inner {
-    color: <?php echo $text_lighter_20;?>;
+    color: <?php echo esc_attr( $text_lighter_20 ); ?>;
     font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
     font-size: 14px;
     line-height: 150%;
@@ -98,7 +106,7 @@ h1 {
     margin: 0;
     padding: 36px 48px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
-    text-shadow: 0 1px 0 <?php echo $base_lighter_20; ?>;
+    text-shadow: 0 1px 0 <?php echo esc_attr( $base_lighter_20 ); ?>;
     -webkit-font-smoothing: antialiased;
 }
 
