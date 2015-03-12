@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <?php do_action( 'woocommerce_email_header', $email_heading ); ?>
 
-<p><?php printf( __( 'The order #%d from %s has been cancelled. The order was as follows:', 'woocommerce' ), $order->id, $order->billing_first_name . ' ' . $order->billing_last_name ); ?></p>
+<p><?php printf( __( 'The order #%d from %s has been cancelled. The order was as follows:', 'woocommerce' ), $order->get_order_number(), $order->billing_first_name . ' ' . $order->billing_last_name ); ?></p>
 
 <?php do_action( 'woocommerce_email_before_order_table', $order, true, false ); ?>
 
