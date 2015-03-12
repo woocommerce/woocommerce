@@ -539,7 +539,13 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 function wc_get_product_id_by_sku( $sku ) {
 	global $wpdb;
 
-	$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $sku ) );
+	$product_id = $wpdb->get_var( $wpdb->prepare("
+	    SELECT $wpdb->posts.ID
+	    FROM $wpdb->posts
+	    LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
+	    WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
+	    AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
+	    LIMIT 1", $sku));
 
 	return ( $product_id ) ? intval( $product_id ) : 0;
 }
