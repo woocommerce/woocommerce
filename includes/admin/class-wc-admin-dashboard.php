@@ -163,6 +163,8 @@ class WC_Admin_Dashboard {
 					<?php printf( _n( "<strong>%s product</strong> out of stock", "<strong>%s products</strong> out of stock", $outofstock_count, 'woocommerce' ), $outofstock_count ); ?>
 				</a>
 			</li>
+			
+			<?php do_action( 'woocommerce_after_dashboard_status_widget', $reports ); ?>
 		</ul>
 		<?php
 	}
