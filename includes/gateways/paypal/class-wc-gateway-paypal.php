@@ -36,12 +36,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables
-		$this->title                        = $this->get_option( 'title' );
-		$this->description                  = $this->get_option( 'description' );
-		$this->testmode                     = 'yes' === $this->get_option( 'testmode', 'no' );
-		$this->email                        = $this->get_option( 'email' );
-		$this->receiver_email               = $this->get_option( 'receiver_email', $this->email );
-		$this->identity_token               = $this->get_option( 'identity_token' );
+		$this->title          = $this->get_option( 'title' );
+		$this->description    = $this->get_option( 'description' );
+		$this->testmode       = 'yes' === $this->get_option( 'testmode', 'no' );
+		$this->debug          = 'yes' === $this->get_option( 'debug', 'no' );
+		$this->email          = $this->get_option( 'email' );
+		$this->receiver_email = $this->get_option( 'receiver_email', $this->email );
+		$this->identity_token = $this->get_option( 'identity_token' );
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
@@ -63,7 +64,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param  string $message
 	 */
 	public function log( $message ) {
-		if ( $this->testmode ) {
+		if ( $this->debug ) {
 			if ( empty( $this->log ) ) {
 				$this->log = new WC_Logger();
 			}
