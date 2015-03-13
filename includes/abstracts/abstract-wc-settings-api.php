@@ -243,7 +243,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_tooltip_html( $data ) {
-
 		if ( $data['desc_tip'] === true ) {
 			$tip = $data['description'];
 		} elseif ( ! empty( $data['desc_tip'] ) ) {
@@ -252,7 +251,7 @@ abstract class WC_Settings_API {
 			$tip = '';
 		}
 
-		return $tip ? '<img class="help_tip" data-tip="' . esc_attr( $tip ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />' : '';
+		return $tip ? '<img class="help_tip" data-tip="' . esc_attr( wc_sanitize_tooltip( $tip ) ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />' : '';
 	}
 
 	/**

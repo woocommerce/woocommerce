@@ -478,7 +478,7 @@ class WC_Admin_Post_Types {
 			break;
 			case 'customer_message' :
 				if ( $the_order->customer_message ) {
-					echo '<span class="note-on tips" data-tip="' . esc_attr( strip_tags( html_entity_decode( $the_order->customer_message ) ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="note-on tips" data-tip="' . esc_attr( wc_sanitize_tooltip( $the_order->customer_message ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
 					echo '<span class="na">&ndash;</span>';
 				}
@@ -535,7 +535,7 @@ class WC_Admin_Post_Types {
 				if ( $post->comment_count ) {
 
 					// check the status of the post
-					( $post->post_status !== 'trash' ) ? $status = '' : $status = 'post-trashed';
+					$status = ( 'trash' !== $post->post_status ) ? '' : 'post-trashed';
 
 					$latest_notes = get_comments( array(
 						'post_id'   => $post->ID,
@@ -546,9 +546,9 @@ class WC_Admin_Post_Types {
 					$latest_note = current( $latest_notes );
 
 					if ( $post->comment_count == 1 ) {
-						echo '<span class="note-on tips" data-tip="' . esc_attr( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+						echo '<span class="note-on tips" data-tip="' . esc_attr( wc_sanitize_tooltip( $latest_note->comment_content ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} else {
-						$note_tip = isset( $latest_note->comment_content ) ? esc_attr( $latest_note->comment_content . '<small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), ( $post->comment_count - 1 ) ) . '</small>' ) : sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count );
+						$note_tip = isset( $latest_note->comment_content ) ? esc_attr( wc_sanitize_tooltip( $latest_note->comment_content ) . '<small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), ( $post->comment_count - 1 ) ) . '</small>' ) : sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count );
 
 						echo '<span class="note-on tips" data-tip="' . $note_tip . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					}
@@ -581,7 +581,7 @@ class WC_Admin_Post_Types {
 					$customer_tip .= __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
 				}
 
-				echo '<div class="tips" data-tip="' . esc_attr( $customer_tip ) . '">';
+				echo '<div class="tips" data-tip="' . esc_attr( wc_sanitize_tooltip( $customer_tip ) ) . '">';
 
 				if ( $the_order->user_id ) {
 					$user_info = get_userdata( $the_order->user_id );
