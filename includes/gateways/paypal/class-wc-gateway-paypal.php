@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Provides a PayPal Standard Payment Gateway.
  *
- * @class 		WC_Paypal
- * @extends		WC_Gateway_Paypal
+ * @class 		WC_Gateway_Paypal
+ * @extends		WC_Payment_Gateway
  * @version		2.3.0
  * @package		WooCommerce/Classes/Payment
  * @author 		WooThemes
@@ -238,7 +238,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Can the order be refunded via paypal?
+	 * Can the order be refunded via PayPal?
 	 * @param  WC_Order $order
 	 * @return bool
 	 */

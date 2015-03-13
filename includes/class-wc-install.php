@@ -108,11 +108,13 @@ class WC_Install {
 		if ( version_compare( $current_db_version, '2.3.0', '<' ) && null !== $current_db_version ) {
 			WC_Admin_Notices::add_notice( 'update' );
 		} else {
-			update_option( 'woocommerce_db_version', WC()->version );
+			delete_option( 'woocommerce_db_version' );
+			add_option( 'woocommerce_db_version', WC()->version );
 		}
 
 		// Update version
-		update_option( 'woocommerce_version', WC()->version );
+		delete_option( 'woocommerce_version' );
+		add_option( 'woocommerce_version', WC()->version );
 
 		// Check if pages are needed
 		if ( wc_get_page_id( 'shop' ) < 1 ) {
@@ -148,11 +150,13 @@ class WC_Install {
 		foreach ( $db_updates as $version => $updater ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				include( $updater );
-				update_option( 'woocommerce_db_version', $version );
+				delete_option( 'woocommerce_db_version' );
+				add_option( 'woocommerce_db_version', $version );
 			}
 		}
 
-		update_option( 'woocommerce_db_version', WC()->version );
+		delete_option( 'woocommerce_db_version' );
+		add_option( 'woocommerce_db_version', WC()->version );
 	}
 
 	/**

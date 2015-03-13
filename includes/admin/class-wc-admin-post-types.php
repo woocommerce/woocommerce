@@ -477,9 +477,8 @@ class WC_Admin_Post_Types {
 
 			break;
 			case 'customer_message' :
-
 				if ( $the_order->customer_message ) {
-					echo '<span class="note-on tips" data-tip="' . esc_attr( $the_order->customer_message ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="note-on tips" data-tip="' . esc_attr( strip_tags( html_entity_decode( $the_order->customer_message ) ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
 					echo '<span class="na">&ndash;</span>';
 				}
@@ -536,7 +535,8 @@ class WC_Admin_Post_Types {
 				if ( $post->comment_count ) {
 
 					// check the status of the post
-					$status       = ( 'trash' !== $post->post_status ) ? '' : 'post-trashed';
+					( $post->post_status !== 'trash' ) ? $status = '' : $status = 'post-trashed';
+
 					$latest_notes = get_comments( array(
 						'post_id'   => $post->ID,
 						'number'    => 1,

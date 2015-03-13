@@ -128,28 +128,28 @@ class Functions extends \WC_Unit_Test_Case {
 		// kg (default unit)
 		$this->assertEquals( 10, wc_get_weight( 10, 'kg' ) );
 		$this->assertEquals( 10000, wc_get_weight( 10, 'g' ) );
-		$this->assertEquals( 22.046, wc_get_weight( 10, 'lbs' ) );
+		$this->assertEquals( 22.0462, wc_get_weight( 10, 'lbs' ) );
 		$this->assertEquals( 352.74, wc_get_weight( 10, 'oz' ) );
 
 		// g
 		update_option( 'woocommerce_weight_unit', 'g' );
 		$this->assertEquals( 0.01, wc_get_weight( 10, 'kg' ) );
 		$this->assertEquals( 10, wc_get_weight( 10, 'g' ) );
-		$this->assertEquals( 0.022046, wc_get_weight( 10, 'lbs' ) );
+		$this->assertEquals( 0.0220462, wc_get_weight( 10, 'lbs' ) );
 		$this->assertEquals( 0.35274, wc_get_weight( 10, 'oz' ) );
 
 		// lbs
 		update_option( 'woocommerce_weight_unit', 'lbs' );
-		$this->assertEquals( 4.536, wc_get_weight( 10, 'kg' ) );
-		$this->assertEquals( 4536, wc_get_weight( 10, 'g' ) );
+		$this->assertEquals( 4.53592, wc_get_weight( 10, 'kg' ) );
+		$this->assertEquals( 4535.92, wc_get_weight( 10, 'g' ) );
 		$this->assertEquals( 10, wc_get_weight( 10, 'lbs' ) );
-		$this->assertEquals( 160.002864, wc_get_weight( 10, 'oz' ) );
+		$this->assertEquals( 160.00004208, wc_get_weight( 10, 'oz' ) );
 
 		// oz
 		update_option( 'woocommerce_weight_unit', 'oz' );
-		$this->assertEquals( 0.283, wc_get_weight( 10, 'kg' ) );
-		$this->assertEquals( 283, wc_get_weight( 10, 'g' ) );
-		$this->assertEquals( 0.6239018, wc_get_weight( 10, 'lbs' ) );
+		$this->assertEquals( 0.283495, wc_get_weight( 10, 'kg' ) );
+		$this->assertEquals( 283.495, wc_get_weight( 10, 'g' ) );
+		$this->assertEquals( 0.6249987469, wc_get_weight( 10, 'lbs' ) );
 		$this->assertEquals( 10, wc_get_weight( 10, 'oz' ) );
 
 		// negative
