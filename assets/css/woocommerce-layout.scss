@@ -309,7 +309,7 @@
 			}
 
 			.input-text {
-				@include box-sizing(border-box);
+				@include borderbox();
 				width: 100%;
 			}
 		}
