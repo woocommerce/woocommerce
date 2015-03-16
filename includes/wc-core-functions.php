@@ -111,6 +111,8 @@ function wc_create_order( $args = array() ) {
 		update_post_meta( $order_id, '_customer_user', $args['customer_id'] );
 	}
 
+	update_post_meta( $order_id, '_order_version', WC_VERSION );
+
 	return new WC_Order( $order_id );
 }
 

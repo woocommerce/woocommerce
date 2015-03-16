@@ -341,6 +341,9 @@ function wc_save_order_items( $order_id, $items ) {
 	// Set the currency
 	add_post_meta( $order_id, '_order_currency', get_woocommerce_currency(), true );
 
+	// Update version after saving
+	update_post_meta( $order_id, '_order_version', WC_VERSION );
+
 	// inform other plugins that the items have been saved
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
 }
