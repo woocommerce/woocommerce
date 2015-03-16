@@ -1256,7 +1256,10 @@ class WC_API_Products extends WC_API_Resource {
 				}
 
 				update_post_meta( $variation_id, '_backorders', $backorders );
-				wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
+
+				if ( isset( $variation['stock_quantity'] ) ) {
+					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
+				}
 			} else {
 				delete_post_meta( $variation_id, '_backorders' );
 				delete_post_meta( $variation_id, '_stock' );
