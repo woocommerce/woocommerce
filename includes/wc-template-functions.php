@@ -168,12 +168,6 @@ function wc_body_class( $classes ) {
 	if ( is_woocommerce() ) {
 		$classes[] = 'woocommerce';
 		$classes[] = 'woocommerce-page';
-		
-		foreach ( WC()->query->query_vars as $key => $value ) {
- 			if ( is_wc_endpoint_url( $key ) ) {
-				$classes[] = "woocommerce-{$key}";
-			}
-		}
 	}
 
 	elseif ( is_checkout() ) {
@@ -193,6 +187,12 @@ function wc_body_class( $classes ) {
 
 	if ( is_store_notice_showing() ) {
 		$classes[] = 'woocommerce-demo-store';
+	}
+	
+	foreach ( WC()->query->query_vars as $key => $value ) {
+		if ( is_wc_endpoint_url( $key ) ) {
+			$classes[] = "woocommerce-{$key}";
+		}
 	}
 
 	return array_unique( $classes );
