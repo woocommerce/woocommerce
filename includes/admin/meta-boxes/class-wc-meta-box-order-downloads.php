@@ -109,12 +109,10 @@ class WC_Meta_Box_Order_Downloads {
 
 				$format = array( '%d', '%s', '%s' );
 
-				$expiry  = ( array_key_exists( $i, $access_expires ) && $access_expires[ $i ] != '' ) ? date_i18n( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
+				$expiry  = ( array_key_exists( $i, $access_expires ) && '' != $access_expires[ $i ] ) ? date_i18n( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
 
-				if ( ! is_null( $expiry ) ) {
-					$data['access_expires'] = $expiry;
-					$format[]               = '%s';
-				}
+				$data['access_expires'] = $expiry;
+				$format[]               = '%s';
 
 				$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",
 					$data,
