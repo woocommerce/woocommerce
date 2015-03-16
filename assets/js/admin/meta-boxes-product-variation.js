@@ -304,6 +304,12 @@ jQuery( function ( $ ) {
 					$('.woocommerce_variable_attributes .cancel_sale_schedule').click();
 				}
 			break;
+			case 'variable_set_image' :
+				bulk_images_update();
+				break;
+			case 'variable_remove_image' :
+				bulk_images_remove();
+				break;
 			default:
 				$( 'select#field_to_edit' ).trigger( bulk_edit );
 			break;
@@ -348,6 +354,61 @@ jQuery( function ( $ ) {
 		$( '.woocommerce_variations .woocommerce_variation' ).each( function ( index, el ) {
 			$( '.variation_menu_order', el ).val( parseInt( $( el ).index( '.woocommerce_variations .woocommerce_variation' ), 10 ) );
 		});
+	}
+
+	// bulk images remove
+	function bulk_images_remove() {
+		$('.upload_image_button').each(function() {
+			var setting_variation_image    = $(this).closest( '.upload_image' );
+			setting_variation_image.find( '.upload_image_id' ).val( '' );
+			setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', woocommerce_admin_meta_boxes_variations.woocommerce_placeholder_img_src );
+			setting_variation_image.find( '.upload_image_button' ).removeClass( 'remove' );
+		});
+	}
+	// bulk images update
+	function bulk_images_update() {
+		var variable_image_frame;
+		var setting_variation_image_id;
+		var setting_variation_image;
+		var wp_media_post_id = wp.media.model.settings.post.id;
+
+		wp.media.model.settings.post.id = setting_variation_image_id;
+
+		// Create the media frame.
+		variable_image_frame = wp.media.frames.variable_image = wp.media({
+			// Set the title of the modal.
+			title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
+			button: {
+				text: woocommerce_admin_meta_boxes_variations.i18n_set_image
+			},
+			states : [
+				new wp.media.controller.Library({
+					title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
+					filterable :	'all'
+				})
+			]
+		});
+
+		// When an image is selected, run a callback.
+		variable_image_frame.on( 'select', function () {
+
+			$('.upload_image_button').each(function() {
+				var setting_variation_image    = $(this).closest( '.upload_image' );
+					setting_variation_image_id = $(this).attr('rel');
+
+				var attachment = variable_image_frame.state().get( 'selection' ).first().toJSON(),
+					url = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+
+				setting_variation_image.find( '.upload_image_id' ).val( attachment.id );
+				setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
+				setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', url );
+	
+				wp.media.model.settings.post.id = wp_media_post_id;
+			});
+		});
+
+		// Finally, open the modal.
+		variable_image_frame.open();
 	}
 
 	// Uploader
