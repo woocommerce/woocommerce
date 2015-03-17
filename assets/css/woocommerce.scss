@@ -889,7 +889,7 @@ p.demo_store {
 			}
 
 			textarea {
-				@include box-sizing(border-box);
+				@include borderbox();
 				width: 100%;
 			}
 		}
@@ -1277,7 +1277,7 @@ p.demo_store {
 
 			input.input-text,
 			textarea {
-				@include box-sizing(border-box);
+				@include borderbox();
 				width: 100%;
 				margin: 0;
 				outline: 0;
