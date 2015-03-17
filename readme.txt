@@ -138,6 +138,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Allow saving of empty download expiry date on orders.
 * Fix - get_total_discount() function with certain tax setups.
 * Tweak - Revised how discounts/discount taxes are stored for consistency. Always store ex. tax to make data retrieval easier, and to ensure totals are correct after settings changes. Backwards compatibility maintained through use of order versioning.
 
