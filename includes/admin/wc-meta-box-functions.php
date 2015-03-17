@@ -180,6 +180,7 @@ function woocommerce_wp_select( $field ) {
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
 	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 
 	// Custom attribute handling
 	$custom_attributes = array();

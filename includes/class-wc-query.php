@@ -859,11 +859,11 @@ class WC_Query {
 	public function price_filter( $filtered_posts = array() ) {
 	    global $wpdb;
 
-	    if ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) {
+	    if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
 
 			$matched_products = array();
-			$min              = floatval( $_GET['min_price'] );
-			$max              = floatval( $_GET['max_price'] );
+			$min              = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
+			$max              = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
 
 	        $matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( '
 	        	SELECT DISTINCT ID, post_parent, post_type FROM %1$s
