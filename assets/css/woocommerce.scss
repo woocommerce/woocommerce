@@ -1474,6 +1474,8 @@ p.demo_store {
 		.ui-slider {
 			position: relative;
 			text-align: left;
+			margin-left: .5em;
+			margin-right: .5em;
 		}
 
 		.ui-slider .ui-slider-handle {
@@ -1487,9 +1489,9 @@ p.demo_store {
 			outline: none;
 			top: -.3em;
 
-			&:last-child {
-				margin-left: -.8em;
-			}
+			//&:last-child {
+				margin-left: -.5em;
+			//}
 		}
 
 		.ui-slider .ui-slider-range {
