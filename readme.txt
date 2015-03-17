@@ -142,7 +142,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - get_total_discount() function with certain tax setups.
 * Fix - Price filter styling.
 * Fix - Support price filter min or max only.
+* Fix - stock management for variations for Products API.
 * Tweak - Revised how discounts/discount taxes are stored for consistency. Always store ex. tax to make data retrieval easier, and to ensure totals are correct after settings changes. Backwards compatibility maintained through use of order versioning.
+* Tweak - Delete product attachments when the Products API fails.
 
 = 2.3.6 - 13/03/2015 =
 * Fix - Removal of coupons containing spaces.

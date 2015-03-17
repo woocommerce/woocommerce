@@ -264,7 +264,7 @@ class WC_API_Products extends WC_API_Resource {
 			return $this->get_product( $id );
 		} catch ( WC_API_Exception $e ) {
 			// Remove the product when fails
-			wp_delete_post( $id, true );
+			$this->clear_product( $id );
 
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1256,7 +1256,10 @@ class WC_API_Products extends WC_API_Resource {
 				}
 
 				update_post_meta( $variation_id, '_backorders', $backorders );
-				wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
+
+				if ( isset( $variation['stock_quantity'] ) ) {
+					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
+				}
 			} else {
 				delete_post_meta( $variation_id, '_backorders' );
 				delete_post_meta( $variation_id, '_stock' );
@@ -1870,4 +1873,26 @@ class WC_API_Products extends WC_API_Resource {
 		}
 	}
 
+	/**
+	 * Clear product
+	 */
+	protected function clear_product( $product_id ) {
+		if ( 0 >= $product_id ) {
+			return;
+		}
+
+		// Delete product attachments
+		$attachments = get_children( array(
+			'post_parent' => $product_id,
+			'post_status' => 'any',
+			'post_type'   => 'attachment',
+		) );
+
+		foreach ( (array) $attachments as $attachment ) {
+			wp_delete_attachment( $attachment->ID, true );
+		}
+
+		// Delete product
+		wp_delete_post( $product_id, true );
+	}
 }
