@@ -4036,9 +4036,7 @@ table.bar_chart {
  */
 .wc-backbone-modal {
 	* {
-		-webkit-box-sizing: content-box;
-		-moz-box-sizing: content-box;
-		box-sizing: content-box;
+		@include borderbox();
 	}
 
 	.wc-backbone-modal-content {
