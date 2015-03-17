@@ -245,7 +245,7 @@ div.pp_woocommerce {
 	div.pp_woocommerce {
 		left: 5% !important;
 		right: 5% !important;
-		@include box-sizing(border-box);
+		box-sizing: border-box;
 		width: 90% !important;
 
 		.pp_gallery,

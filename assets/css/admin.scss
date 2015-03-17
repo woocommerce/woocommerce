@@ -306,7 +306,7 @@ table.wc_status_table {
 	}
 
 	.text {
-		@include box-sizing(border-box);
+		box-sizing: border-box;
 		width: 99%;
 		float: left;
 		margin: 1px 1% 1px 1px;
@@ -345,7 +345,7 @@ table.wc_status_table {
 	.weight,
 	.stock,
 	.length {
-		@include box-sizing(border-box);
+		box-sizing: border-box;
 		width: 100%;
 		margin-left: 4.4em;
 	}
@@ -353,7 +353,7 @@ table.wc_status_table {
 	.length,
 	.width,
 	.height {
-		@include box-sizing(border-box);
+		box-sizing: border-box;
 		width: 25%;
 	}
 }
@@ -674,13 +674,13 @@ ul.wc_coupon_list_block {
 
 			.button {
 				width: 24px;
-				@include box-sizing(border-box);
+				box-sizing: border-box;
 				float: right;
 			}
 
 			select {
 				width: 225px;
-				@include box-sizing(border-box);
+				box-sizing: border-box;
 				float: left;
 			}
 		}
@@ -780,7 +780,7 @@ ul.wc_coupon_list_block {
 			font-size: 1em !important;
 			width: 10em;
 			margin: 0 0 0 .5em;
-			@include box-sizing(border-box);
+			box-sizing: border-box;
 
 			input[type="text"] {
 				width: 96%;
@@ -958,7 +958,7 @@ ul.wc_coupon_list_block {
 
 				input {
 					width: 100%;
-					@include box-sizing(border-box);
+					box-sizing: border-box;
 					border: 0;
 					box-shadow: none;
 					margin: 0;
@@ -1248,7 +1248,7 @@ ul.wc_coupon_list_block {
 		ul.order_actions {
 			li {
 				padding: 6px 10px;
-				@include box-sizing(border-box);
+				box-sizing: border-box;
 
 				&:last-child {
 					border-bottom: 0;
@@ -2121,7 +2121,7 @@ img.help_tip {
 				width: 100%;
 				margin: 0;
 				font-family: monospace;
-				@include box-sizing(border-box);
+				box-sizing: border-box;
 			}
 
 			.iris-picker {
@@ -2225,7 +2225,7 @@ img.help_tip {
 					background: #f7f7f7;
 					@include border-radius(2px);
 					position: relative;
-					@include box-sizing(border-box);
+					box-sizing: border-box;
 
 					img {
 						width: 100%;
@@ -2431,7 +2431,7 @@ img.help_tip {
 		padding: 0 0 10px;
 		background-color: #fafafa;
 		border-right: 1px solid #eee;
-		@include box-sizing(border-box);
+		box-sizing: border-box;
 
 		&:after {
 			content: "";
@@ -2702,7 +2702,7 @@ img.help_tip {
 }
 
 .woocommerce_options_panel {
-	@include box-sizing(border-box);
+	box-sizing: border-box;
 
 	.downloadable_files {
 		padding: 0 9px 0 162px;
@@ -3670,7 +3670,7 @@ img.ui-datepicker-trigger {
 				padding: 6px 0 0 0;
 				border-top: 4px solid #999;
 				text-align: center;
-				@include box-sizing(border-box);
+				box-sizing: border-box;
 				width: 50%;
 			}
 		}
@@ -4036,7 +4036,7 @@ table.bar_chart {
  */
 .wc-backbone-modal {
 	* {
-		@include box-sizing(content-box);
+		box-sizing: border-box;
 	}
 
 	.wc-backbone-modal-content {

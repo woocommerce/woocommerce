@@ -27,7 +27,7 @@ ul.woocommerce_stats {
 		border-left: 1px solid #fff;
 		border-right: 1px solid #ececec;
 		text-align: center;
-		@include box-sizing(border-box);
+		box-sizing: border-box;
 	}
 
 	li:first-child {
@@ -62,7 +62,7 @@ ul.woocommerce_stats {
 			width: 50%;
 			float: left;
 			padding: 0;
-			@include box-sizing(border-box);
+			box-sizing: border-box;
 			margin: 0;
 			border-top: 1px solid #ececec;
 			color: #aaa;
