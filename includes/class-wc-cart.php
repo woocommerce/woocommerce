@@ -1736,17 +1736,9 @@ class WC_Cart {
 			$discount_amount = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
 
 			if ( $ex_tax ) {
-				if ( $this->prices_include_tax ) {
-					return $discount_amount - $this->get_coupon_discount_tax_amount( $code );
-				} else {
-					return $discount_amount;
-				}
+				return $discount_amount;
 			} else {
-				if ( $this->prices_include_tax ) {
-					return $discount_amount;
-				} else {
-					return $discount_amount + $this->get_coupon_discount_tax_amount( $code );
-				}
+				return $discount_amount + $this->get_coupon_discount_tax_amount( $code );
 			}
 		}
 
@@ -1819,11 +1811,11 @@ class WC_Cart {
 							$total_discount     = $discount_amount * $values['quantity'];
 							$total_discount_tax = 0;
 
-							if ( $this->prices_include_tax || $this->tax_display_cart === 'incl' ) {
-								$tax_rates           = WC_Tax::get_rates( $product->get_tax_class() );
-								$taxes               = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
-								$total_discount_tax  = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
-							}
+							// Calc discounted tax
+							$tax_rates           = WC_Tax::get_rates( $product->get_tax_class() );
+							$taxes               = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
+							$total_discount_tax  = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
+							$total_discount      = $this->prices_include_tax ? $total_discount - $total_discount_tax : $total_discount;
 
 							$this->discount_cart     += $total_discount;
 							$this->discount_cart_tax += $total_discount_tax;
@@ -2175,7 +2167,6 @@ class WC_Cart {
 			}
 			return apply_filters( 'woocommerce_cart_total_discount', $total_discount, $this );
 		}
-
 
 		/**
 		 * Gets the total (product) discount amount - these are applied before tax.
