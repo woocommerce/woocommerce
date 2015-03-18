@@ -862,8 +862,8 @@ class WC_API_Orders extends WC_API_Resource {
 		$creating = ( 'create' === $action );
 
 		// product is always required
-		if ( ! isset( $item['product_id'] ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_product_id', __( 'Product ID is required', 'woocommerce' ), 400 );
+		if ( ! isset( $item['product_id'] ) && ! isset( $item['sku'] ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product_id', __( 'Product ID or SKU is required', 'woocommerce' ), 400 );
 		}
 
 		// when updating, ensure product ID provided matches
@@ -877,7 +877,11 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 		}
 
-		$product = wc_get_product( $item['product_id'] );
+		if ( isset( $item['product_id'] ) ) {
+			$product = wc_get_product( $item['product_id'] );
+		} elseif ( isset( $item['sku'] ) ) {
+			$product = wc_get_product_by_sku( $item['sku'] );
+		}
 
 		// must be a valid WC_Product
 		if ( ! is_object( $product ) ) {
