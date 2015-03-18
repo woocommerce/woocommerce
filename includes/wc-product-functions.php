@@ -522,7 +522,7 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 		AND $wpdb->postmeta.post_id <> %d LIMIT 1
 	 ", $sku, $product_id ) );
 
-	if ( $sku_found ) {
+	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
 	} else {
 		return true;
