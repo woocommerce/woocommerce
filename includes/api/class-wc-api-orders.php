@@ -880,7 +880,8 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( isset( $item['product_id'] ) ) {
 			$product = wc_get_product( $item['product_id'] );
 		} elseif ( isset( $item['sku'] ) ) {
-			$product = wc_get_product_by_sku( $item['sku'] );
+			$product_id = wc_get_product_id_by_sku( $item['sku'] );
+			$product = wc_get_product( $product_id );
 		}
 
 		// must be a valid WC_Product
