@@ -452,7 +452,7 @@ class WC_AJAX {
 		check_ajax_referer( 'add-attribute', 'security' );
 
 		$taxonomy = esc_attr( $_POST['taxonomy'] );
-		$term     = stripslashes( $_POST['term'] );
+		$term     = wc_clean( $_POST['term'] );
 
 		if ( taxonomy_exists( $taxonomy ) ) {
 
@@ -463,10 +463,11 @@ class WC_AJAX {
 					'error' => $result->get_error_message()
 				) );
 			} else {
+				$term = get_term_by( 'id', $result['term_id'], $taxonomy );
 				wp_send_json( array(
-					'term_id' => $result['term_id'],
-					'name'    => $term,
-					'slug'    => sanitize_title( $term ),
+					'term_id' => $term->term_id,
+					'name'    => $term->name,
+					'slug'    => $term->slug
 				) );
 			}
 		}

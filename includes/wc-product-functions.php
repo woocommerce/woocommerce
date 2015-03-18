@@ -4,10 +4,10 @@
  *
  * Functions for product specific things.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Core
+ * @package  WooCommerce/Functions
+ * @version  2.3.0
  */
 
 /**
@@ -563,7 +563,14 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 function wc_get_product_id_by_sku( $sku ) {
 	global $wpdb;
 
-	$product_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $sku ) );
+	$product_id = $wpdb->get_var( $wpdb->prepare( "
+		SELECT posts.ID
+		FROM $wpdb->posts AS posts
+		LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
+		WHERE posts.post_type IN ( 'product', 'product_variation' )
+		AND postmeta.meta_key = '_sku' AND postmeta.meta_value = '%s'
+		LIMIT 1
+	 ", $sku ) );
 
 	return ( $product_id ) ? intval( $product_id ) : 0;
 }

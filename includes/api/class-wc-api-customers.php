@@ -366,7 +366,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 			// Checks for an error in the customer creation.
 			if ( is_wp_error( $id ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_cannot_create_customer', $id->get_error_message(), 400 );
+				throw new WC_API_Exception( $id->get_error_code(), $id->get_error_message(), 400 );
 			}
 
 			// Added customer data.

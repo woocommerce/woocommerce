@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
 Tested up to: 4.1
-Stable tag: 2.3.5
+Stable tag: 2.3.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -138,12 +138,25 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Allow saving of empty download expiry date on orders.
+* Fix - get_total_discount() function with certain tax setups.
+* Fix - Price filter styling.
+* Fix - Support price filter min or max only.
+* Fix - stock management for variations for Products API.
+* Tweak - Revised how discounts/discount taxes are stored for consistency. Always store ex. tax to make data retrieval easier, and to ensure totals are correct after settings changes. Backwards compatibility maintained through use of order versioning.
+* Tweak - Delete product attachments when the Products API fails.
+
+= 2.3.6 - 13/03/2015 =
 * Fix - Removal of coupons containing spaces.
 * Fix - Unclosed div in profile page.
 * Fix - Export report CSV.
 * Fix - Settings API - allow multiselect fields to be emptied.
 * Fix - Saving an order needs to save the discount amount ex. tax like the cart.
 * Fix - Order again with custom attributes.
+* Fix - Prevent potential XSS within tooltips (discovered by FortiGuard Labs).
+* Fix - Paypal debug option.
+* Fix - Removed $q->query['wc_query'] = 'product_query' which broke redirects (#7703). Use $q->get('wc_query') instead.
+* Fix - Sanitize tax_rate_id when saving taxes in the backend to prevent potential SQL injection (discovered by WordFence).
 * Tweak - Show discounts inc. tax when showing order totals inc. tax.
 * Tweak - Use 30 days instead of year for transients to avoid bugs in memcache plugins.
 * Tweak - Add reports menu item if user can access reports but not the main WC section.

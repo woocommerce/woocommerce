@@ -232,11 +232,20 @@ div.pp_woocommerce {
 	}
 }
 
+// RTL support
+.rtl {
+	div.pp_woocommerce {
+		.pp_content_container {
+			text-align: right;
+		}
+	}
+}
+
 @media only screen and (max-width: 768px) {
 	div.pp_woocommerce {
 		left: 5% !important;
 		right: 5% !important;
-		@include box-sizing(border-box);
+		box-sizing: border-box;
 		width: 90% !important;
 
 		.pp_gallery,

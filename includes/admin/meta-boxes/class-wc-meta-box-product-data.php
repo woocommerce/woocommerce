@@ -660,7 +660,7 @@ class WC_Meta_Box_Product_Data {
 				<div id="message" class="inline woocommerce-message">
 					<p><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
 
-					<p class="submit"><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/product-variations', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
+					<p class="submit"><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
 				</div>
 
 			<?php else : ?>
@@ -1233,7 +1233,7 @@ class WC_Meta_Box_Product_Data {
 
 				for ( $i = 0; $i < $file_url_size; $i ++ ) {
 					if ( ! empty( $file_urls[ $i ] ) ) {
-						$file_url            = 0 === strpos( $file_urls[ $i ], '[' ) ? wc_clean( $file_urls[ $i ] ) : esc_url_raw( $file_urls[ $i ] );
+						$file_url            = ( 0 === strpos( $file_urls[ $i ], '[' ) && 0 !== strpos( $file_urls[ $i ], 'http' ) ) ? wc_clean( $file_urls[ $i ] ) : esc_url_raw( $file_urls[ $i ] );
 						$file_name           = wc_clean( $file_names[ $i ] );
 						$file_hash           = md5( $file_url );
 						$files[ $file_hash ] = array(

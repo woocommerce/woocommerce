@@ -793,6 +793,8 @@ class WC_Tax {
 	private static function _update_tax_rate_locations( $tax_rate_id, $values, $type ) {
 		global $wpdb;
 
+		$tax_rate_id = absint( $tax_rate_id );
+
 		$wpdb->query(
 			$wpdb->prepare( "
 				DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d AND location_type = %s;

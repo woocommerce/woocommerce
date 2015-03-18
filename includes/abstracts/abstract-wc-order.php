@@ -828,10 +828,13 @@ abstract class WC_Abstract_Order {
 		$this->customer_note       = $result->post_excerpt;
 		$this->post_status         = $result->post_status;
 
-		// Billing email cam default to user if set
+		// Billing email can default to user if set
 		if ( empty( $this->billing_email ) && ! empty( $this->customer_user ) && ( $user = get_user_by( 'id', $this->customer_user ) ) ) {
 			$this->billing_email = $user->user_email;
 		}
+
+		// Orders store the state of prices including tax when created
+		$this->prices_include_tax = metadata_exists( 'post', $this->id, '_prices_include_tax' ) ? get_post_meta( $this->id, '_prices_include_tax', true ) : $this->prices_include_tax;
 	}
 
 	/**
@@ -1263,11 +1266,30 @@ abstract class WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_discount( $ex_tax = true ) {
-		if ( $ex_tax ) {
-			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount, $this );
+		if ( ! $this->order_version || version_compare( $this->order_version, '2.3.7', '<' ) ) {
+			// Backwards compatible total calculation - totals were not stored consistently in old versions.
+			if ( $ex_tax ) {
+				if ( $this->prices_include_tax ) {
+					$total_discount = (double) $this->cart_discount - (double) $this->cart_discount_tax;
+				} else {
+					$total_discount = (double) $this->cart_discount;
+				}
+			} else {
+				if ( $this->prices_include_tax ) {
+					$total_discount = (double) $this->cart_discount;
+				} else {
+					$total_discount = (double) $this->cart_discount + (double) $this->cart_discount_tax;
+				}
+			}
+		// New logic - totals are always stored exclusive of tax, tax total is stored in cart_discount_tax
 		} else {
-			return apply_filters( 'woocommerce_order_amount_total_discount', (double) $this->cart_discount + (double) $this->cart_discount_tax, $this );
+			if ( $ex_tax ) {
+				$total_discount = (double) $this->cart_discount;
+			} else {
+				$total_discount = (double) $this->cart_discount + (double) $this->cart_discount_tax;
+			}
 		}
+		return apply_filters( 'woocommerce_order_amount_total_discount', $total_discount, $this );
 	}
 
 	/**
@@ -1378,7 +1400,7 @@ abstract class WC_Abstract_Order {
 
 		$price = $round ? number_format( (float) $price, 2, '.', '' ) : $price;
 
-		return apply_filters( 'woocommerce_order_amount_item_subtotal', $price, $this, $item );
+		return apply_filters( 'woocommerce_order_amount_item_subtotal', $price, $this, $item, $inc_tax, $round );
 	}
 
 	/**
@@ -1399,7 +1421,7 @@ abstract class WC_Abstract_Order {
 
 		$price = $round ? round( $price, 2 ) : $price;
 
-		return apply_filters( 'woocommerce_order_amount_line_subtotal', $price, $this, $item );
+		return apply_filters( 'woocommerce_order_amount_line_subtotal', $price, $this, $item, $inc_tax, $round );
 	}
 
 	/**
@@ -1422,7 +1444,7 @@ abstract class WC_Abstract_Order {
 
 		$price = $round ? round( $price, 2 ) : $price;
 
-		return apply_filters( 'woocommerce_order_amount_item_total', $price, $this );
+		return apply_filters( 'woocommerce_order_amount_item_total', $price, $this, $item, $inc_tax, $round );
 	}
 
 	/**
@@ -1441,7 +1463,7 @@ abstract class WC_Abstract_Order {
 		// Check if we need to round
 		$line_total = $round ? round( $line_total, 2 ) : $line_total;
 
-		return apply_filters( 'woocommerce_order_amount_line_total', $line_total, $this );
+		return apply_filters( 'woocommerce_order_amount_line_total', $line_total, $this, $item, $inc_tax, $round );
 	}
 
 	/**

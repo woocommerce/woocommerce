@@ -176,21 +176,22 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 		// get the order position of the first tax rate id
 		$tax_rate_order = absint( $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_order FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $first_tax_rate_id ) ) );
-		
+
 		$index = isset( $tax_rate_order ) ? $tax_rate_order : 0;
 
 		// Loop posted fields
 		foreach ( $_POST['tax_rate_country'] as $key => $value ) {
-			$mode     = 0 === strpos( $key, 'new-' ) ? 'insert' : 'update';
-			$tax_rate = $this->get_posted_tax_rate( $key, $index ++, $current_class );
+			$mode        = 0 === strpos( $key, 'new-' ) ? 'insert' : 'update';
+			$tax_rate    = $this->get_posted_tax_rate( $key, $index ++, $current_class );
 
 			if ( 'insert' === $mode ) {
 				$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 			} elseif ( 1 == $_POST['remove_tax_rate'][ $key ] ) {
-				WC_Tax::_delete_tax_rate( $key );
+				$tax_rate_id = absint( $key );
+				WC_Tax::_delete_tax_rate( $tax_rate_id );
 				continue;
 			} else {
-				$tax_rate_id = $key;
+				$tax_rate_id = absint( $key );
 				WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
 			}
 

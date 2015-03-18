@@ -113,7 +113,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$php_version = phpversion();
 
 					if ( version_compare( $php_version, '5.4', '<' ) ) {
-						echo '<mark class="error">' . sprintf( __( '%s - We recommend a minimum PHP version of 5.4. See: <a href="%s" target="_blank">How to update your PHP version</a>', 'woocommerce' ), esc_html( $php_version ), ' http://docs.woothemes.com/document/how-to-update-your-php-version/' ) . '</mark>';
+						echo '<mark class="error">' . sprintf( __( '%s - We recommend a minimum PHP version of 5.4. See: <a href="%s" target="_blank">How to update your PHP version</a>', 'woocommerce' ), esc_html( $php_version ), 'http://docs.woothemes.com/document/how-to-update-your-php-version/' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . esc_html( $php_version ) . '</mark>';
 					}

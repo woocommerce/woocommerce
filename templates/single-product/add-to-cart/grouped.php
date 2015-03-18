@@ -23,6 +23,11 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			<?php
 				foreach ( $grouped_products as $product_id ) :
 					$product = wc_get_product( $product_id );
+
+					if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $product->is_in_stock() ) {
+						continue;
+					}
+
 					$post    = $product->post;
 					setup_postdata( $post );
 					?>

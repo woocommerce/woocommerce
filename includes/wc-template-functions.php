@@ -189,6 +189,12 @@ function wc_body_class( $classes ) {
 		$classes[] = 'woocommerce-demo-store';
 	}
 
+	foreach ( WC()->query->query_vars as $key => $value ) {
+		if ( is_wc_endpoint_url( $key ) ) {
+			$classes[] = 'woocommerce-' . sanitize_html_class( $key );
+		}
+	}
+
 	return array_unique( $classes );
 }
 
