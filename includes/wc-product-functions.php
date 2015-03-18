@@ -22,30 +22,6 @@ function wc_get_product( $the_product = false, $args = array() ) {
 }
 
 /**
- * Return a product object by SKU
- *
- * @param string $sku 
- * @return WC_Product
- */
-function wc_get_product_by_sku( $sku = "" ) {
-	global $wpdb;
-	
-	$product_id = $wpdb->get_var( $wpdb->prepare( "
-		SELECT $wpdb->posts.ID
-		FROM $wpdb->posts
-		LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
-		WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
-		AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s' LIMIT 1
-	 ", $sku ) );
-
-	if ($product_id) {
-		return wc_get_product($product_id);
-	} else {
-		return false;
-	}
-}
-
-/**
  * Update a product's stock amount
  *
  * @param  int $product_id
