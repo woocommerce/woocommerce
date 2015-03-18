@@ -811,22 +811,59 @@ class WC_Shortcodes {
 		if ( isset( $atts['sku'] ) ) {
 			$args['meta_query'][] = array(
 				'key'     => '_sku',
-				'value'   => $atts['sku'],
+				'value'   => sanitize_text_field( $atts['sku'] ),
 				'compare' => '='
 			);
+
+			$args['post_type'] = array( 'product', 'product_variation' );
 		}
 
 		if ( isset( $atts['id'] ) ) {
-			$args['p'] = $atts['id'];
+			$args['p'] = absint( $atts['id'] );
 		}
 
 		$single_product = new WP_Query( $args );
 
+		$preselected_id = '0';
+
+		// check if sku is a variation
+		if ( isset( $atts['sku'] ) && $single_product->have_posts() && $single_product->post->post_type === 'product_variation' ) {
+			
+			$variation = new WC_Product_Variation( $single_product->post->ID );
+			$attributes = $variation->get_variation_attributes();
+
+			// set preselected id to be used by JS to provide context
+			$preselected_id = $single_product->post->ID;
+
+			// get the parent product object
+			$args = array(
+				'posts_per_page'      => 1,
+				'post_type'           => 'product',
+				'post_status'         => 'publish',
+				'ignore_sticky_posts' => 1,
+				'no_found_rows'       => 1,
+				'p'                   => $single_product->post->post_parent
+			);
+
+			$single_product = new WP_Query( $args );
+		?>
+			<script type="text/javascript">
+				jQuery( document ).ready( function( $ ) {
+					var $variations_form = $( '[data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>"]' ).find( 'form.variations_form' );
+
+					<?php foreach( $attributes as $attr => $value ) { ?>
+						$variations_form.find( 'select[name="<?php echo esc_attr( $attr ); ?>"]' ).val( '<?php echo $value; ?>' );
+					<?php } ?>
+				});
+			</script>
+		<?php
+		}
+		
 		ob_start();
 
 		while ( $single_product->have_posts() ) : $single_product->the_post(); wp_enqueue_script( 'wc-single-product' ); ?>
 
-			<div class="single-product">
+			<div class="single-product" data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>">
 
 				<?php wc_get_template_part( 'content', 'single-product' ); ?>
 
@@ -838,7 +875,6 @@ class WC_Shortcodes {
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
-
 
 	/**
 	 * Show messages
