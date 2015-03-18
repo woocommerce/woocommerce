@@ -59,14 +59,13 @@ function wc_attribute_label( $name, $product = '' ) {
 		$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 
 		if ( ! $label ) {
-			$label = ucfirst( $name );
+			$label = $name;
 		}
 	} elseif ( $product && ( $attributes = $product->get_attributes() ) && isset( $attributes[ sanitize_title( $name ) ]['name'] ) ) {
 		// Attempt to get label from product, as entered by the user
 		$label = $attributes[ sanitize_title( $name ) ]['name'];
 	} else {
-		// Just format as best as we can
-		$label = ucwords( str_replace( '-', ' ', $name ) );
+		$label = str_replace( '-', ' ', $name );
 	}
 
 	return apply_filters( 'woocommerce_attribute_label', $label, $name, $product );
