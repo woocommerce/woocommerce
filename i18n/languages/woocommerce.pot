@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.3.6 Frontend\n"
+"Project-Id-Version: WooCommerce 2.3.7 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-03-13 10:46:13+00:00\n"
+"POT-Creation-Date: 2015-03-18 12:39:44+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4675,11 +4675,11 @@ msgstr ""
 msgid "Backordered"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1653
+#: includes/abstracts/abstract-wc-order.php:1675
 msgid "&nbsp;<small>%svia %s</small>"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1658
+#: includes/abstracts/abstract-wc-order.php:1680
 #: includes/abstracts/abstract-wc-product.php:968
 #: includes/abstracts/abstract-wc-product.php:974
 #: includes/class-wc-cart.php:1534 includes/class-wc-product-variable.php:322
@@ -4687,31 +4687,31 @@ msgstr ""
 msgid "Free!"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1721
+#: includes/abstracts/abstract-wc-order.php:1743
 msgid "Subtotal:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1728
+#: includes/abstracts/abstract-wc-order.php:1750
 msgid "Discount:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1735
+#: includes/abstracts/abstract-wc-order.php:1757
 msgid "Shipping:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1788
+#: includes/abstracts/abstract-wc-order.php:1810
 #: includes/shortcodes/class-wc-shortcode-checkout.php:144
 #: templates/checkout/thankyou.php:53
 msgid "Payment Method:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1794
+#: includes/abstracts/abstract-wc-order.php:1816
 #: includes/shortcodes/class-wc-shortcode-checkout.php:139
 #: templates/checkout/thankyou.php:48
 msgid "Total:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:1814
+#: includes/abstracts/abstract-wc-order.php:1836
 #: includes/wc-cart-functions.php:247 templates/order/order-details.php:126
 #: templates/order/order-details.php:130
 msgid "(Includes %s)"
@@ -4721,20 +4721,20 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2113
+#: includes/abstracts/abstract-wc-order.php:2135
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2375
+#: includes/abstracts/abstract-wc-order.php:2397
 msgid "Item's #%s variation #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2377
+#: includes/abstracts/abstract-wc-order.php:2399
 #: includes/class-wc-ajax.php:1201 includes/class-wc-ajax.php:1202
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2389
+#: includes/abstracts/abstract-wc-order.php:2411
 msgid "Order item stock reduced successfully."
 msgstr ""
 
@@ -5203,8 +5203,8 @@ msgstr ""
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1614
-#: includes/api/class-wc-api-products.php:1615
+#: includes/api/class-wc-api-products.php:1617
+#: includes/api/class-wc-api-products.php:1618
 #: includes/api/v1/class-wc-api-products.php:461
 #: includes/api/v1/class-wc-api-products.php:462
 #: includes/wc-product-functions.php:272
@@ -5212,19 +5212,19 @@ msgstr ""
 msgid "Placeholder"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1689
+#: includes/api/class-wc-api-products.php:1692
 msgid "Invalid URL %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1701
+#: includes/api/class-wc-api-products.php:1704
 msgid "Error getting remote image %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1730
+#: includes/api/class-wc-api-products.php:1733
 msgid "Zero size file downloaded"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1864
+#: includes/api/class-wc-api-products.php:1867
 msgid "Invalid product SKU"
 msgstr ""
 
@@ -5661,8 +5661,12 @@ msgstr ""
 msgid "Town / City"
 msgstr ""
 
-#: includes/class-wc-countries.php:522 includes/class-wc-countries.php:523
+#: includes/class-wc-countries.php:522
 msgid "State / County"
+msgstr ""
+
+#: includes/class-wc-countries.php:523
+msgid "Make a selection"
 msgstr ""
 
 #: includes/class-wc-countries.php:529 includes/class-wc-countries.php:530
@@ -5670,43 +5674,36 @@ msgstr ""
 msgid "Postcode / Zip"
 msgstr ""
 
-#: includes/class-wc-countries.php:584 includes/class-wc-countries.php:585
+#: includes/class-wc-countries.php:585 includes/class-wc-countries.php:586
 msgid "Suburb"
 msgstr ""
 
-#: includes/class-wc-countries.php:588 includes/class-wc-countries.php:589
+#: includes/class-wc-countries.php:589 includes/class-wc-countries.php:590
 #: includes/class-wc-countries.php:866 includes/class-wc-countries.php:867
 msgid "Postcode"
 msgstr ""
 
-#: includes/class-wc-countries.php:592 includes/class-wc-countries.php:593
-#: includes/class-wc-countries.php:860 includes/class-wc-countries.php:861
+#: includes/class-wc-countries.php:593 includes/class-wc-countries.php:860
 msgid "State"
 msgstr ""
 
-#: includes/class-wc-countries.php:601 includes/class-wc-countries.php:602
-#: includes/class-wc-countries.php:780 includes/class-wc-countries.php:781
+#: includes/class-wc-countries.php:602 includes/class-wc-countries.php:780
 msgid "District"
 msgstr ""
 
-#: includes/class-wc-countries.php:609 includes/class-wc-countries.php:610
-#: includes/class-wc-countries.php:632 includes/class-wc-countries.php:633
-#: includes/class-wc-countries.php:659 includes/class-wc-countries.php:660
-#: includes/class-wc-countries.php:724 includes/class-wc-countries.php:725
-#: includes/class-wc-countries.php:744 includes/class-wc-countries.php:745
-#: includes/class-wc-countries.php:762 includes/class-wc-countries.php:763
-#: includes/class-wc-countries.php:824 includes/class-wc-countries.php:825
-#: includes/class-wc-countries.php:850 includes/class-wc-countries.php:851
-#: includes/class-wc-countries.php:897 includes/class-wc-countries.php:898
+#: includes/class-wc-countries.php:610 includes/class-wc-countries.php:633
+#: includes/class-wc-countries.php:659 includes/class-wc-countries.php:724
+#: includes/class-wc-countries.php:744 includes/class-wc-countries.php:762
+#: includes/class-wc-countries.php:824 includes/class-wc-countries.php:850
+#: includes/class-wc-countries.php:897
 msgid "Province"
 msgstr ""
 
-#: includes/class-wc-countries.php:639 includes/class-wc-countries.php:640
+#: includes/class-wc-countries.php:640
 msgid "Canton"
 msgstr ""
 
-#: includes/class-wc-countries.php:653 includes/class-wc-countries.php:654
-#: includes/class-wc-countries.php:712 includes/class-wc-countries.php:713
+#: includes/class-wc-countries.php:653 includes/class-wc-countries.php:712
 msgid "Region"
 msgstr ""
 
@@ -5714,8 +5711,7 @@ msgstr ""
 msgid "Town / District"
 msgstr ""
 
-#: includes/class-wc-countries.php:718 includes/class-wc-countries.php:719
-#: includes/class-wc-countries.php:870 includes/class-wc-countries.php:871
+#: includes/class-wc-countries.php:718 includes/class-wc-countries.php:870
 msgid "County"
 msgstr ""
 
@@ -5723,7 +5719,7 @@ msgstr ""
 msgid "Prefecture"
 msgstr ""
 
-#: includes/class-wc-countries.php:831 includes/class-wc-countries.php:832
+#: includes/class-wc-countries.php:831
 msgid "Municipality"
 msgstr ""
 
@@ -8191,191 +8187,191 @@ msgstr ""
 msgid "Invalid order status"
 msgstr ""
 
-#: includes/wc-core-functions.php:124
+#: includes/wc-core-functions.php:126
 msgid "Invalid order ID"
 msgstr ""
 
-#: includes/wc-core-functions.php:254
+#: includes/wc-core-functions.php:256
 msgid "United Arab Emirates Dirham"
 msgstr ""
 
-#: includes/wc-core-functions.php:255
+#: includes/wc-core-functions.php:257
 msgid "Australian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:256
+#: includes/wc-core-functions.php:258
 msgid "Bangladeshi Taka"
 msgstr ""
 
-#: includes/wc-core-functions.php:257
+#: includes/wc-core-functions.php:259
 msgid "Brazilian Real"
 msgstr ""
 
-#: includes/wc-core-functions.php:258
+#: includes/wc-core-functions.php:260
 msgid "Bulgarian Lev"
 msgstr ""
 
-#: includes/wc-core-functions.php:259
+#: includes/wc-core-functions.php:261
 msgid "Canadian Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:260
+#: includes/wc-core-functions.php:262
 msgid "Chilean Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:261
+#: includes/wc-core-functions.php:263
 msgid "Chinese Yuan"
 msgstr ""
 
-#: includes/wc-core-functions.php:262
+#: includes/wc-core-functions.php:264
 msgid "Colombian Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:263
+#: includes/wc-core-functions.php:265
 msgid "Czech Koruna"
 msgstr ""
 
-#: includes/wc-core-functions.php:264
+#: includes/wc-core-functions.php:266
 msgid "Danish Krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:265
+#: includes/wc-core-functions.php:267
 msgid "Dominican Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:266
+#: includes/wc-core-functions.php:268
 msgid "Euros"
 msgstr ""
 
-#: includes/wc-core-functions.php:267
+#: includes/wc-core-functions.php:269
 msgid "Hong Kong Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:268
+#: includes/wc-core-functions.php:270
 msgid "Croatia kuna"
 msgstr ""
 
-#: includes/wc-core-functions.php:269
+#: includes/wc-core-functions.php:271
 msgid "Hungarian Forint"
 msgstr ""
 
-#: includes/wc-core-functions.php:270
+#: includes/wc-core-functions.php:272
 msgid "Icelandic krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:271
+#: includes/wc-core-functions.php:273
 msgid "Indonesia Rupiah"
 msgstr ""
 
-#: includes/wc-core-functions.php:272
+#: includes/wc-core-functions.php:274
 msgid "Indian Rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:273
+#: includes/wc-core-functions.php:275
 msgid "Nepali Rupee"
 msgstr ""
 
-#: includes/wc-core-functions.php:274
+#: includes/wc-core-functions.php:276
 msgid "Israeli Shekel"
 msgstr ""
 
-#: includes/wc-core-functions.php:275
+#: includes/wc-core-functions.php:277
 msgid "Japanese Yen"
 msgstr ""
 
-#: includes/wc-core-functions.php:276
+#: includes/wc-core-functions.php:278
 msgid "Lao Kip"
 msgstr ""
 
-#: includes/wc-core-functions.php:277
+#: includes/wc-core-functions.php:279
 msgid "South Korean Won"
 msgstr ""
 
-#: includes/wc-core-functions.php:278
+#: includes/wc-core-functions.php:280
 msgid "Malaysian Ringgits"
 msgstr ""
 
-#: includes/wc-core-functions.php:279
+#: includes/wc-core-functions.php:281
 msgid "Mexican Peso"
 msgstr ""
 
-#: includes/wc-core-functions.php:280
+#: includes/wc-core-functions.php:282
 msgid "Nigerian Naira"
 msgstr ""
 
-#: includes/wc-core-functions.php:281
+#: includes/wc-core-functions.php:283
 msgid "Norwegian Krone"
 msgstr ""
 
-#: includes/wc-core-functions.php:282
+#: includes/wc-core-functions.php:284
 msgid "New Zealand Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:283
+#: includes/wc-core-functions.php:285
 msgid "Paraguayan Guaraní"
 msgstr ""
 
-#: includes/wc-core-functions.php:284
+#: includes/wc-core-functions.php:286
 msgid "Philippine Pesos"
 msgstr ""
 
-#: includes/wc-core-functions.php:285
+#: includes/wc-core-functions.php:287
 msgid "Polish Zloty"
 msgstr ""
 
-#: includes/wc-core-functions.php:286
+#: includes/wc-core-functions.php:288
 msgid "Pounds Sterling"
 msgstr ""
 
-#: includes/wc-core-functions.php:287
+#: includes/wc-core-functions.php:289
 msgid "Romanian Leu"
 msgstr ""
 
-#: includes/wc-core-functions.php:288
+#: includes/wc-core-functions.php:290
 msgid "Russian Ruble"
 msgstr ""
 
-#: includes/wc-core-functions.php:289
+#: includes/wc-core-functions.php:291
 msgid "Singapore Dollar"
 msgstr ""
 
-#: includes/wc-core-functions.php:290
+#: includes/wc-core-functions.php:292
 msgid "South African rand"
 msgstr ""
 
-#: includes/wc-core-functions.php:291
+#: includes/wc-core-functions.php:293
 msgid "Swedish Krona"
 msgstr ""
 
-#: includes/wc-core-functions.php:292
+#: includes/wc-core-functions.php:294
 msgid "Swiss Franc"
 msgstr ""
 
-#: includes/wc-core-functions.php:293
+#: includes/wc-core-functions.php:295
 msgid "Taiwan New Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:294
+#: includes/wc-core-functions.php:296
 msgid "Thai Baht"
 msgstr ""
 
-#: includes/wc-core-functions.php:295
+#: includes/wc-core-functions.php:297
 msgid "Turkish Lira"
 msgstr ""
 
-#: includes/wc-core-functions.php:296
+#: includes/wc-core-functions.php:298
 msgid "Ukrainian Hryvnia"
 msgstr ""
 
-#: includes/wc-core-functions.php:297
+#: includes/wc-core-functions.php:299
 msgid "US Dollars"
 msgstr ""
 
-#: includes/wc-core-functions.php:298
+#: includes/wc-core-functions.php:300
 msgid "Vietnamese Dong"
 msgstr ""
 
-#: includes/wc-core-functions.php:299
+#: includes/wc-core-functions.php:301
 msgid "Egyptian Pound"
 msgstr ""
 
@@ -9898,7 +9894,7 @@ msgstr ""
 
 #: includes/class-wc-post-types.php:227
 #: includes/updates/woocommerce-update-2.0.php:55
-#: includes/wc-core-functions.php:606 includes/wc-core-functions.php:641
+#: includes/wc-core-functions.php:608 includes/wc-core-functions.php:643
 msgctxt "slug"
 msgid "product"
 msgstr ""
