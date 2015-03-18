@@ -7,7 +7,7 @@
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce/Admin/Meta Boxes
- * @version     2.1.0
+ * @version     2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -874,6 +874,7 @@ class WC_Meta_Box_Product_Data {
 
 		// Add any default post meta
 		add_post_meta( $post_id, 'total_sales', '0', true );
+		add_post_meta( $post_id, 'total_sales_volume', '0', true );
 
 		// Get types
 		$product_type    = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
