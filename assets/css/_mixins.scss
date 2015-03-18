@@ -227,10 +227,8 @@
 		margin-left: -.5em;
 		margin-top: -.5em;
 		display: block;
-		-webkit-animation: spin 1s ease-in-out infinite;
-		-moz-animation: spin 1s ease-in-out infinite;
-		animation: spin 1s ease-in-out infinite;
 		content: "";
+		@include animation( spin 1s ease-in-out infinite );
 		background: url(../images/icons/loader.svg) center center;
 		background-size: cover;
 		line-height: 1;
