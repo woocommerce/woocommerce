@@ -303,7 +303,7 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Get the total number of orders
 	 *
-	 * @since 2.1
+	 * @since 2.4
 	 * @param string $status
 	 * @param array $filter
 	 * @return array
@@ -316,12 +316,28 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			if ( ! empty( $status ) ) {
-				$filter['status'] = $status;
+
+				if ( $status == 'any' ) {
+
+					$order_statuses = array();
+
+					foreach ( wc_get_order_statuses() as $slug => $name ) {
+						$filter['status'] = str_replace( 'wc-', '', $slug );
+						$query = $this->query_orders( $filter );
+						$order_statuses[ str_replace( 'wc-', '', $slug ) ] = (int) $query->found_posts;
+					}
+
+					return array( 'count' => $order_statuses );
+
+				} else {
+					$filter['status'] = $status;
+				}
 			}
 
 			$query = $this->query_orders( $filter );
 
 			return array( 'count' => (int) $query->found_posts );
+
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -846,8 +862,8 @@ class WC_API_Orders extends WC_API_Resource {
 		$creating = ( 'create' === $action );
 
 		// product is always required
-		if ( ! isset( $item['product_id'] ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_product_id', __( 'Product ID is required', 'woocommerce' ), 400 );
+		if ( ! isset( $item['product_id'] ) && ! isset( $item['sku'] ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product_id', __( 'Product ID or SKU is required', 'woocommerce' ), 400 );
 		}
 
 		// when updating, ensure product ID provided matches
@@ -861,7 +877,12 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 		}
 
-		$product = wc_get_product( $item['product_id'] );
+		if ( isset( $item['product_id'] ) ) {
+			$product = wc_get_product( $item['product_id'] );
+		} elseif ( isset( $item['sku'] ) ) {
+			$product_id = wc_get_product_id_by_sku( $item['sku'] );
+			$product = wc_get_product( $product_id );
+		}
 
 		// must be a valid WC_Product
 		if ( ! is_object( $product ) ) {

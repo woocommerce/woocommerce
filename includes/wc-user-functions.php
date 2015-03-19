@@ -45,11 +45,11 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 
 	// Check the e-mail address
 	if ( empty( $email ) || ! is_email( $email ) ) {
-		return new WP_Error( 'registration-error', __( 'Please provide a valid email address.', 'woocommerce' ) );
+		return new WP_Error( 'registration-error-invalid-email', __( 'Please provide a valid email address.', 'woocommerce' ) );
 	}
 
 	if ( email_exists( $email ) ) {
-		return new WP_Error( 'registration-error', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
+		return new WP_Error( 'registration-error-email-exists', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
 	}
 
 	// Handle username creation
@@ -58,11 +58,11 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 		$username = sanitize_user( $username );
 
 		if ( empty( $username ) || ! validate_username( $username ) ) {
-			return new WP_Error( 'registration-error', __( 'Please enter a valid account username.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error-invalid-username', __( 'Please enter a valid account username.', 'woocommerce' ) );
 		}
 
 		if ( username_exists( $username ) )
-			return new WP_Error( 'registration-error', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error-username-exists', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
 	} else {
 
 		$username = sanitize_user( current( explode( '@', $email ) ), true );
@@ -83,7 +83,7 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 		$password_generated = true;
 
 	} elseif ( empty( $password ) ) {
-		return new WP_Error( 'registration-error', __( 'Please enter an account password.', 'woocommerce' ) );
+		return new WP_Error( 'registration-error-missing-password', __( 'Please enter an account password.', 'woocommerce' ) );
 
 	} else {
 		$password_generated = false;

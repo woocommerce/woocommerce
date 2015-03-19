@@ -889,7 +889,7 @@ p.demo_store {
 			}
 
 			textarea {
-				@include box-sizing(border-box);
+				box-sizing: border-box;
 				width: 100%;
 			}
 		}
@@ -1277,7 +1277,7 @@ p.demo_store {
 
 			input.input-text,
 			textarea {
-				@include box-sizing(border-box);
+				box-sizing: border-box;
 				width: 100%;
 				margin: 0;
 				outline: 0;
@@ -1474,6 +1474,8 @@ p.demo_store {
 		.ui-slider {
 			position: relative;
 			text-align: left;
+			margin-left: .5em;
+			margin-right: .5em;
 		}
 
 		.ui-slider .ui-slider-handle {
@@ -1487,9 +1489,9 @@ p.demo_store {
 			outline: none;
 			top: -.3em;
 
-			&:last-child {
-				margin-left: -.8em;
-			}
+			//&:last-child {
+				margin-left: -.5em;
+			//}
 		}
 
 		.ui-slider .ui-slider-range {

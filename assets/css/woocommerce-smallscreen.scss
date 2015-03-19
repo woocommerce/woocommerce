@@ -134,7 +134,7 @@
 			.button,
 			.input-text {
 				width: 48%;
-				@include box-sizing(border-box);
+				box-sizing: border-box;
 			}
 
 			.input-text + .button,
@@ -175,7 +175,7 @@
 		#place_order {
 			float: none;
 			width: 100%;
-			@include box-sizing(border-box);
+			box-sizing: border-box;
 			margin-bottom: 1em;
 		}
 	}
