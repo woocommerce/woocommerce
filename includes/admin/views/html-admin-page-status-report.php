@@ -8,7 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-
 <div class="updated woocommerce-message">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a>
@@ -72,7 +71,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php
 				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
-
 				if ( $memory < 67108864 ) {
 					echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s" target="_blank">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
 				} else {
@@ -111,7 +109,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				// Check if phpversion function exists
 				if ( function_exists( 'phpversion' ) ) {
 					$php_version = phpversion();
-
 					if ( version_compare( $php_version, '5.4', '<' ) ) {
 						echo '<mark class="error">' . sprintf( __( '%s - We recommend a minimum PHP version of 5.4. See: <a href="%s" target="_blank">How to update your PHP version</a>', 'woocommerce' ), esc_html( $php_version ), 'http://docs.woothemes.com/document/how-to-update-your-php-version/' ) . '</mark>';
 					} else {
@@ -120,7 +117,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				} else {
 					_e( "Couldn't determine PHP version because phpversion() doesn't exist.", 'woocommerce' );
 				}
-				?></td>
+			?></td>
 		</tr>
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
@@ -147,13 +144,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="MySQL Version"><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td>
-				<?php
+			<td><?php
 				/** @global wpdb $wpdb */
 				global $wpdb;
 				echo $wpdb->db_version();
-				?>
-			</td>
+			?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Max Upload Size"><?php _e( 'Max Upload Size', 'woocommerce' ); ?>:</td>
@@ -169,8 +164,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo '<mark class="error">' . '&#10005; ' . sprintf( __( 'Default timezone is %s - it should be UTC', 'woocommerce' ), $default_timezone ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . '&#10004;' . '</mark>';
-				} ?>
-			</td>
+				}
+			?></td>
 		</tr>
 		<?php
 			$posting = array();
@@ -593,7 +588,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?></td>
 		</tr>
 		<?php
-		if( is_child_theme() ) :
+		if ( is_child_theme() ) :
 			$parent_theme = wp_get_theme( $active_theme->Template );
 		?>
 		<tr>
