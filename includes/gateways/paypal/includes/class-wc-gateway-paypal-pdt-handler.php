@@ -12,7 +12,7 @@ include_once( 'class-wc-gateway-paypal-response.php' );
 class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 	/** @var string identity_token for PDT support */
-	private $identity_token;
+	protected $identity_token;
 
 	/**
 	 * Constructor
@@ -29,7 +29,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	 * @param  string $transaction
 	 * @return bool
 	 */
-	private function validate_transaction( $transaction ) {
+	protected function validate_transaction( $transaction ) {
 		$pdt = array(
 			'body' 			=> array(
 				'cmd' => '_notify-synch',

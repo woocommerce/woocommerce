@@ -95,7 +95,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param  string $country
 	 * @return string
 	 */
-	private function get_icon_url( $country ) {
+	protected function get_icon_url( $country ) {
 		switch ( $country ) {
 			case 'MX' :
 			case 'ZA' :
@@ -114,7 +114,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param  string $country
 	 * @return array of image URLs
 	 */
-	private function get_icon_image( $country ) {
+	protected function get_icon_image( $country ) {
 		switch ( $country ) {
 			case 'US' :
 			case 'NZ' :
