@@ -118,6 +118,14 @@
 	transform: scale($ratio);
 }
 
+/**
+ * Deprecated
+ * Use bourbon mixin instead `@include box-sizing(border-box);`
+ */
+@mixin borderbox() {
+	box-sizing: border-box;
+}
+
 @mixin darkorlighttextshadow($a, $opacity: .8) {
 	@if lightness($a) >= 65% {
 		@include text_shadow(0, -1px, 0, rgba(0, 0, 0, $opacity));
