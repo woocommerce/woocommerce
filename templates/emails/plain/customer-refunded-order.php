@@ -2,9 +2,9 @@
 /**
  * Customer refunded order email (plain text)
  *
- * @author		WooThemes
- * @package		WooCommerce/Templates/Emails/Plain
- * @version		2.0.0
+ * @author   WooThemes
+ * @package  WooCommerce/Templates/Emails/Plain
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
