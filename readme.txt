@@ -138,11 +138,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.3.7 - 18/03/2015 =
 * Fix - Allow saving of empty download expiry date on orders.
 * Fix - get_total_discount() function with certain tax setups.
+* Fix - stock management for variations for Products API.
 * Fix - Price filter styling.
 * Fix - Support price filter min or max only.
-* Fix - stock management for variations for Products API.
+* Fix - Allowed paths for file url.
+* Tweak - Chile address format.
 * Tweak - Revised how discounts/discount taxes are stored for consistency. Always store ex. tax to make data retrieval easier, and to ensure totals are correct after settings changes. Backwards compatibility maintained through use of order versioning.
 * Tweak - Delete product attachments when the Products API fails.
 
