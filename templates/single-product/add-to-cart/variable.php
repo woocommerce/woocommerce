@@ -75,7 +75,10 @@ global $product, $post;
 			<div class="single_variation"></div>
 
 			<div class="variations_button">
-				<?php woocommerce_quantity_input(); ?>
+            <?php
+                if ( ! $product->is_sold_individually() )
+                    woocommerce_quantity_input();
+            ?>
 				<button type="submit" class="single_add_to_cart_button button alt"><?php echo $product->single_add_to_cart_text(); ?></button>
 			</div>
 
