@@ -11,11 +11,11 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
  *
  * Order refunded emails are sent to the customer when the order is marked refunded.
  *
- * @class 		WC_Email_Customer_Refunded_Order
- * @version		2.0.0
- * @package		WooCommerce/Classes/Emails
- * @author 		WooThemes
- * @extends 	WC_Email
+ * @class    WC_Email_Customer_Refunded_Order
+ * @version  2.0.0
+ * @package  WooCommerce/Classes/Emails
+ * @author 	 WooThemes
+ * @extends  WC_Email
  */
 class WC_Email_Customer_Refunded_Order extends WC_Email {
 
@@ -24,15 +24,15 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 */
 	function __construct() {
 
-		$this->id 				= 'customer_refunded_order';
-		$this->title 			= __( 'Refunded order', 'woocommerce' );
-		$this->description		= __( 'Order refunded emails are sent to customers when their orders are marked refunded.', 'woocommerce' );
+		$this->id             = 'customer_refunded_order';
+		$this->title          = __( 'Refunded order', 'woocommerce' );
+		$this->description    = __( 'Order refunded emails are sent to customers when their orders are marked refunded.', 'woocommerce' );
 
-		$this->heading 			= __( 'Your order has been refunded', 'woocommerce' );
-		$this->subject      	= __( 'Your {site_title} order from {order_date} has been refunded', 'woocommerce' );
+		$this->heading        = __( 'Your order has been refunded', 'woocommerce' );
+		$this->subject        = __( 'Your {site_title} order from {order_date} has been refunded', 'woocommerce' );
 
-		$this->template_html 	= 'emails/customer-refunded-order.php';
-		$this->template_plain 	= 'emails/plain/customer-refunded-order.php';
+		$this->template_html  = 'emails/customer-refunded-order.php';
+		$this->template_plain = 'emails/plain/customer-refunded-order.php';
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_refunded_notification', array( $this, 'trigger' ) );
@@ -50,8 +50,8 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	function trigger( $order_id ) {
 
 		if ( $order_id ) {
-			$this->object 		= wc_get_order( $order_id );
-			$this->recipient	= $this->object->billing_email;
+			$this->object    = wc_get_order( $order_id );
+			$this->recipient = $this->object->billing_email;
 
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
@@ -102,7 +102,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	function get_content_html() {
 		ob_start();
 		wc_get_template( $this->template_html, array(
-			'order' 		=> $this->object,
+			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => false
@@ -119,7 +119,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	function get_content_plain() {
 		ob_start();
 		wc_get_template( $this->template_plain, array(
-			'order' 		=> $this->object,
+			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => true
@@ -136,32 +136,32 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
-				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable this email notification', 'woocommerce' ),
-				'default' 		=> 'yes'
+				'title'   => __( 'Enable/Disable', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable this email notification', 'woocommerce' ),
+				'default' => 'yes'
 			),
 			'subject' => array(
-				'title' 		=> __( 'Subject', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
-				'placeholder' 	=> '',
-				'default' 		=> ''
+				'title'       => __( 'Subject', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
+				'placeholder' => '',
+				'default'     => ''
 			),
 			'heading' => array(
-				'title' 		=> __( 'Email Heading', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
-				'placeholder' 	=> '',
-				'default' 		=> ''
+				'title'       => __( 'Email Heading', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
+				'placeholder' => '',
+				'default'     => ''
 			),
 			'email_type' => array(
-				'title' 		=> __( 'Email type', 'woocommerce' ),
-				'type' 			=> 'select',
-				'description' 	=> __( 'Choose which format of email to send.', 'woocommerce' ),
-				'default' 		=> 'html',
-				'class'			=> 'email_type wc-enhanced-select',
-				'options'		=> $this->get_email_type_options()
+				'title'       => __( 'Email type', 'woocommerce' ),
+				'type'        => 'select',
+				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
+				'default'     => 'html',
+				'class'       => 'email_type wc-enhanced-select',
+				'options'     => $this->get_email_type_options()
 			)
 		);
 	}
