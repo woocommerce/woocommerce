@@ -55,7 +55,7 @@ class WC_AJAX {
 		} elseif ( get_option( 'permalink_structure' ) ) {
 			$endpoint = trailingslashit( home_url( '/wc-ajax/' . $request, $scheme ) );
 		} else {
-			$endpoint = add_query_arg( 'wc-ajax', $request, trailingslashit( home_url( '', $scheme ) ) );
+			$endpoint = add_query_arg( 'wc-ajax=', $request, trailingslashit( home_url( '', $scheme ) ) );
 		}
 
 		return esc_url_raw( $endpoint );
@@ -66,6 +66,10 @@ class WC_AJAX {
 	 */
 	public static function do_wc_ajax() {
 		global $wp_query;
+
+		if ( ! empty( $_GET['wc-ajax'] ) ) {
+			 $wp_query->set( 'wc-ajax', sanitize_text_field( $_GET['wc-ajax'] ) );
+		}
 
    		if ( $action = $wp_query->get( 'wc-ajax' ) ) {
    			if ( ! defined( 'DOING_AJAX' ) ) {
