@@ -16,9 +16,8 @@ jQuery( function( $ ) {
 	}
 
 	$fragment_refresh = {
-		url: wc_cart_fragments_params.ajax_url,
+		url: wc_cart_fragments_params.wc_ajax_url + 'get_refreshed_fragments',
 		type: 'POST',
-		data: { action: 'woocommerce_get_refreshed_fragments' },
 		success: function( data ) {
 			if ( data && data.fragments ) {
 

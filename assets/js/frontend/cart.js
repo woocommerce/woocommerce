@@ -27,12 +27,11 @@ jQuery( function( $ ) {
 		});
 
 		var data = {
-			action: 'woocommerce_update_shipping_method',
 			security: wc_cart_params.update_shipping_method_nonce,
 			shipping_method: shipping_methods
 		};
 
-		$.post( wc_cart_params.ajax_url, data, function( response ) {
+		$.post( wc_cart_params.wc_ajax_url + 'update_shipping_method', data, function( response ) {
 
 			$( 'div.cart_totals' ).replaceWith( response );
 			$( 'body' ).trigger( 'updated_shipping_method' );
