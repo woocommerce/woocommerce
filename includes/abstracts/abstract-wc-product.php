@@ -604,7 +604,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function has_enough_stock( $quantity ) {
-		return ! $this->managing_stock() || $this->backorders_allowed() || $this->stock >= $quantity ? true : false;
+		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity ? true : false;
 	}
 
 	/**
