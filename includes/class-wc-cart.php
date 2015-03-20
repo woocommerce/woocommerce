@@ -88,6 +88,7 @@ class WC_Cart {
 		'taxes'                       => array(),
 		'shipping_taxes'              => array(),
 		'discount_cart'               => 0,
+		'discount_cart_tax'           => 0,
 		'shipping_total'              => 0,
 		'shipping_tax_total'          => 0,
 		'coupon_discount_amounts'     => array(),
