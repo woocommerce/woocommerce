@@ -215,6 +215,8 @@
 				} else {
 
 					$reset_variations.css( 'visibility', 'hidden' );
+					$sku = $( this ).closest( '.product' ).find( '.sku' );
+					$sku.text( $sku.attr( 'data-o_sku' ) );
 
 				}
 
