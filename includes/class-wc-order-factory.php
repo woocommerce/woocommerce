@@ -41,7 +41,7 @@ class WC_Order_Factory {
 		}
 
 		// Filter classname so that the class can be overridden if extended.
-		$classname = apply_filters( 'woocommerce_order_class', $classname, $post_type, $order_id );
+		$classname = apply_filters( 'woocommerce_order_class', $classname, $post_type, $order_id, $the_order );
 
 		if ( ! class_exists( $classname ) ) {
 			$classname = 'WC_Order';
