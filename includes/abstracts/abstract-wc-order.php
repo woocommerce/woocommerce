@@ -834,7 +834,7 @@ abstract class WC_Abstract_Order {
 		}
 
 		// Orders store the state of prices including tax when created
-		$this->prices_include_tax = metadata_exists( 'post', $this->id, '_prices_include_tax' ) ? get_post_meta( $this->id, '_prices_include_tax', true ) : $this->prices_include_tax;
+		$this->prices_include_tax = metadata_exists( 'post', $this->id, '_prices_include_tax' ) ? get_post_meta( $this->id, '_prices_include_tax', true ) === 'yes' : $this->prices_include_tax;
 	}
 
 	/**
