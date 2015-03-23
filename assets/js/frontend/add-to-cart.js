@@ -18,9 +18,7 @@ jQuery( function( $ ) {
 			$thisbutton.removeClass( 'added' );
 			$thisbutton.addClass( 'loading' );
 
-			var data = {
-				action: 'woocommerce_add_to_cart',
-			};
+			var data = {};
 
 			$.each( $thisbutton.data(), function( key, value ) {
 				data[key] = value;
@@ -30,7 +28,7 @@ jQuery( function( $ ) {
 			$( 'body' ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
 
 			// Ajax action
-			$.post( wc_add_to_cart_params.ajax_url, data, function( response ) {
+			$.post( wc_add_to_cart_params.wc_ajax_url + 'add_to_cart', data, function( response ) {
 
 				if ( ! response )
 					return;

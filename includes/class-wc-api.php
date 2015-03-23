@@ -73,7 +73,7 @@ class WC_API {
 	 * @since 2.0
 	 * @return void
 	 */
-	public function add_endpoint() {
+	public static function add_endpoint() {
 
 		// REST API
 		add_rewrite_rule( '^wc-api/v([1-2]{1})/?$', 'index.php?wc-api-version=$matches[1]&wc-api-route=/', 'top' );

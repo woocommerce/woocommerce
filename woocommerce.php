@@ -207,13 +207,10 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-download-handler.php' );
 		include_once( 'includes/class-wc-comments.php' );
 		include_once( 'includes/class-wc-post-data.php' );
+		include_once( 'includes/class-wc-ajax.php' );
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once( 'includes/admin/class-wc-admin.php' );
-		}
-
-		if ( $this->is_request( 'ajax' ) ) {
-			$this->ajax_includes();
 		}
 
 		if ( $this->is_request( 'frontend' ) ) {
@@ -239,13 +236,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
 		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
-	}
-
-	/**
-	 * Include required ajax files.
-	 */
-	public function ajax_includes() {
-		include_once( 'includes/class-wc-ajax.php' );                           // Ajax functions for admin and the front-end
 	}
 
 	/**

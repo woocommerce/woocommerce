@@ -97,6 +97,8 @@ class WC_Install {
 		// Also register endpoints - this needs to be done prior to rewrite rule flush
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
+		WC_API::add_endpoint();
+		WC_AJAX::add_endpoint();
 
 		self::create_terms();
 		self::create_cron_jobs();
