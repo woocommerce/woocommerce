@@ -519,17 +519,18 @@ class WC_API_Products extends WC_API_Resource {
 		if ( ! empty( $args['category'] ) ) {
 			$query_args['product_cat'] = $args['category'];
 		}
-		
-		// filter by specific sku
-		if( ! empty( $args['sku'] ) ) {
-		    if(!is_array($query_args['meta_query']))    {
-		        $query_args['meta_query'] = array();
-		    }
-		    $query_args['meta_query'][] = array(
-		        'key'     => '_sku',
-		        'value'   => $args['sku'],
-		        'compare' => "="
-		    );
+
+		// Filter by specific sku
+		if ( ! empty( $args['sku'] ) ) {
+			if ( ! is_array( $query_args['meta_query'] ) ) {
+				$query_args['meta_query'] = array();
+			}
+
+			$query_args['meta_query'][] = array(
+				'key'     => '_sku',
+				'value'   => $args['sku'],
+				'compare' => '='
+			);
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );
