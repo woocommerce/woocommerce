@@ -1437,10 +1437,9 @@ class WC_Product {
 			if ( ! empty( $this->dimensions ) ) {
 				$this->dimensions .= ' ' . get_option( 'woocommerce_dimension_unit' );
 			}
-
 		}
 
-		return $this->dimensions;
+		return apply_filters( 'woocommerce_get_dimensions', $this->dimensions, $this->length, $this->width, $this->height, get_option( 'woocommerce_dimension_unit' ) );
 	}
 
 	/**
