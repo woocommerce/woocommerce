@@ -1797,13 +1797,15 @@ class WC_Cart {
 				return $price;
 			}
 
-			if ( ! empty( $this->coupons ) ) {
+			$undiscounted_price = $price;
 
+			if ( ! empty( $this->coupons ) ) {
 				$product = $values['data'];
 
 				foreach ( $this->coupons as $code => $coupon ) {
 					if ( $coupon->is_valid() && ( $coupon->is_valid_for_product( $product, $values ) || $coupon->is_valid_for_cart() ) ) {
-						$discount_amount = $coupon->get_discount_amount( $price, $values, $single = true );
+						$discount_amount = $coupon->get_discount_amount( $undiscounted_price, $values, $single = true );
+						$discount_amount = min( $price, $discount_amount );
 						$price           = max( $price - $discount_amount, 0 );
 
 						// Store the totals for DISPLAY in the cart
