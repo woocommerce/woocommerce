@@ -17,7 +17,7 @@ foreach ( $items as $item_id => $item ) :
 
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 		?>
-		<tr>
+		<tr class="<?php echo esc_attr( apply_filters( 'woocoomerce_order_item_class', 'order_item', $item, $order ) ); ?>">
 			<td style="text-align:left; vertical-align:middle; border: 1px solid #eee; word-wrap:break-word;"><?php
 
 				// Show title/image etc
