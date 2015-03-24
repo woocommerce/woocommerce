@@ -387,14 +387,8 @@ class WC_API_Products extends WC_API_Resource {
 			return $id;
 		}
 
-		$args = array(
-			'post_id' => $id,
-			'approve' => 'approve',
-		);
-
-		$comments = get_comments( $args );
-
-		$reviews = array();
+		$comments = get_approved_comments( $id );
+		$reviews  = array();
 
 		foreach ( $comments as $comment ) {
 
