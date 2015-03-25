@@ -589,13 +589,6 @@ class WC_Product_Variable extends WC_Product {
 				update_post_meta( $product_id, $meta_key, ( true === $all_variations_yes ) ? 'yes' : 'no' );
 			}
 
-			// Were multiple tax classes defined?
-			if ( sizeof( $found_tax_classes ) > 1 ) {
-				update_post_meta( $product_id, '_has_multiple_variation_tax_rates', true );
-			} else {
-				delete_post_meta( $product_id, '_has_multiple_variation_tax_rates' );
-			}
-
 			// Main active prices
 			$min_price            = null;
 			$max_price            = null;
