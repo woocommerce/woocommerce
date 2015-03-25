@@ -91,6 +91,51 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 	return $terms;
 }
 
+/**
+ * Wrapper for has_term function.
+ *
+ * @param  string     $term
+ * @param  int|object $product
+ * @param  string     $tax
+ * @return bool
+ */
+function wc_product_in_term( $term, $product, $tax ) {
+	if ( empty( $term ) || empty( $product ) || empty( $tax ) ) {
+		return false;
+	}
+
+	if ( is_object( $product ) && isset( $product->id ) ) {
+		$product = $product->id;
+	}
+
+	$term     = sanitize_title( $term );
+	$product  = absint( $product );
+	$tax      = ! in_array( $tax, array( 'product_cat', 'product_tag' ) );
+
+	return has_term( $term, $tax, $product );
+}
+
+/**
+ * Wrapper for wc_product_in_term for product categories
+ *
+ * @param  string     $category
+ * @param  int|object $product
+ * @return bool
+ */
+function wc_product_in_category( $category, $product ) {
+	return wc_in_term( $category, $product, 'product_cat' );
+}
+
+/**
+ * Wrapper for wc_product_in_term for product tags
+ *
+ * @param  string     $category
+ * @param  int|object $product
+ * @return bool
+ */
+function wc_product_in_tag( $tag, $product ) {
+	return wc_in_term( $tag, $product, 'product_tag' );
+}
 
 /**
  * Sort by name (numeric)
