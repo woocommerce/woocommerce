@@ -110,7 +110,7 @@ function wc_product_in_term( $term, $product, $tax ) {
 
 	$term     = sanitize_title( $term );
 	$product  = absint( $product );
-	$tax      = ! in_array( $tax, array( 'product_cat', 'product_tag' ) );
+	$tax      = ! in_array( $tax, array( 'product_cat', 'product_tag' ) ) ? '' : $tax;
 
 	return has_term( $term, $tax, $product );
 }
