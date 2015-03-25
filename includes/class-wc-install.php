@@ -146,7 +146,8 @@ class WC_Install {
 			'2.0.9' => 'updates/woocommerce-update-2.0.9.php',
 			'2.1.0' => 'updates/woocommerce-update-2.1.php',
 			'2.2.0' => 'updates/woocommerce-update-2.2.php',
-			'2.3.0' => 'updates/woocommerce-update-2.3.php'
+			'2.3.0' => 'updates/woocommerce-update-2.3.php',
+			'2.4.0' => 'updates/woocommerce-update-2.4.php'
 		);
 
 		foreach ( $db_updates as $version => $updater ) {
