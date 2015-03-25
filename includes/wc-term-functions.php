@@ -123,7 +123,7 @@ function wc_product_in_term( $term, $product, $tax ) {
  * @return bool
  */
 function wc_product_in_category( $category, $product ) {
-	return wc_in_term( $category, $product, 'product_cat' );
+	return wc_product_in_term( $category, $product, 'product_cat' );
 }
 
 /**
@@ -134,7 +134,7 @@ function wc_product_in_category( $category, $product ) {
  * @return bool
  */
 function wc_product_in_tag( $tag, $product ) {
-	return wc_in_term( $tag, $product, 'product_tag' );
+	return wc_product_in_term( $tag, $product, 'product_tag' );
 }
 
 /**
