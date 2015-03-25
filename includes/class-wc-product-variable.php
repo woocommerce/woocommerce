@@ -248,7 +248,10 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array()
 	 */
 	public function get_variation_prices( $display = false ) {
-		$cache_key = 'var_prices_' . md5( apply_filters( 'woocommerce_get_variation_prices_hash', ( $display ? json_encode( WC_Tax::get_rates() ) : '' ) . WC_Cache_Helper::get_transient_version( 'product' ), $this, $display ) );
+		$cache_key = 'var_prices_' . md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array(
+			$display ? WC_Tax::get_rates() : '',
+			WC_Cache_Helper::get_transient_version( 'product' )
+		), $this, $display ) ) );
 
 		if ( false === ( $prices_array = get_transient( $cache_key ) ) ) {
 			$prices            = array();
