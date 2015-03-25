@@ -301,7 +301,7 @@ class WC_Product_Variable extends WC_Product {
 			set_transient( $cache_key, $prices_array, DAY_IN_SECONDS * 30 );
 		}
 
-		return $prices_array;
+		return apply_filters( 'woocommerce_variation_prices', $prices_array, $this, $display );
 	}
 
 	/**
