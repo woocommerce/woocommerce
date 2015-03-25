@@ -278,8 +278,9 @@ class WC_Product_Variable extends WC_Product {
 
 				// If we are getting prices for display, we need to account for taxes
 				if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
-					$price      = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
-					$sale_price = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price );
+					$price         = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
+					$regular_price = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $regular_price ) : $variation->get_price_excluding_tax( 1, $regular_price );
+					$sale_price    = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price );
 				}
 
 				$prices[]         = $price;
@@ -314,24 +315,23 @@ class WC_Product_Variable extends WC_Product {
 		if ( $this->get_price() === '' ) {
 			$price = apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
 		} else {
-			$prices         = $this->get_variation_prices( true );
-			$min_price      = current( $prices['price'] );
-			$max_price      = end( $prices['price'] );
-			$min_sale_price = current( $prices['sale_price'] );
-			$max_sale_price = end( $prices['sale_price'] );
-			$free           = $min_sale_price == 0 && $max_sale_price == 0;
-			$price          = $min_price !== $max_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_price ), wc_price( $max_price ) ) : wc_price( $min_price );
-			$saleprice      = $min_sale_price !== $max_sale_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_sale_price ), wc_price( $max_sale_price ) ) : wc_price( $min_sale_price );
+			$prices    = $this->get_variation_prices( true );
+			$min_price = current( $prices['price'] );
+			$max_price = end( $prices['price'] );
+			$price     = $min_price !== $max_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_price ), wc_price( $max_price ) ) : wc_price( $min_price );
+			$is_free   = $min_price == 0 && $max_price == 0;
 
-			if ( $price !== $saleprice ) {
-				$price = apply_filters( 'woocommerce_variable_sale_price_html', $this->get_price_html_from_to( $saleprice, $price ) . $this->get_price_suffix(), $this );
-			} elseif ( $free ) {
+			if ( $this->is_on_sale() ) {
+				$min_regular_price = current( $prices['regular_price'] );
+				$max_regular_price = end( $prices['regular_price'] );
+				$regular_price     = $min_regular_price !== $max_regular_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_regular_price ), wc_price( $max_regular_price ) ) : wc_price( $min_regular_price );
+				$price             = apply_filters( 'woocommerce_variable_sale_price_html', $this->get_price_html_from_to( $regular_price, $price ) . $this->get_price_suffix(), $this );
+			} elseif ( $is_free ) {
 				$price = apply_filters( 'woocommerce_variable_free_price_html', __( 'Free!', 'woocommerce' ), $this );
 			} else {
 				$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
 			}
 		}
-
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
 
